@@ -716,15 +716,27 @@ def _tag_dd_version(version_number: str, message: str) -> None:
         from imas_codex.graph import GraphClient
 
         with GraphClient() as client:
+            # Split into individual SETs for resilience against GPFS storage
+            # corruption on individual property entries.
             client.query(
                 """
                 MATCH (d:DDVersion {is_current: true})
-                SET d.release_version = $version,
-                    d.release_message = $message,
-                    d.release_at = datetime()
+                SET d.release_version = $version
                 """,
                 version=version_number,
+            )
+            client.query(
+                """
+                MATCH (d:DDVersion {is_current: true})
+                SET d.release_note = $message
+                """,
                 message=message,
+            )
+            client.query(
+                """
+                MATCH (d:DDVersion {is_current: true})
+                SET d.release_at = datetime()
+                """
             )
             click.echo(f"  ✓ DDVersion tagged: release_version={version_number}")
     except Exception as e:
