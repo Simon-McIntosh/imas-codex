@@ -65,8 +65,10 @@ stop_neo4j() {{
 }}
 
 start_neo4j() {{
-    # Delegate to imas-codex graph start which handles SLURM submission
-    cd "$HOME/Code/imas-codex" 2>/dev/null && uv run imas-codex graph start 2>&1 || true
+    # Delegate to imas-codex graph start which handles SLURM submission.
+    # Redirect stdin from /dev/null to prevent uv/python from consuming
+    # the parent script's stdin when run inside bash -s or piped scripts.
+    cd "$HOME/Code/imas-codex" 2>/dev/null && uv run imas-codex graph start </dev/null 2>&1 || true
 }}
 """
     # Default: systemd
