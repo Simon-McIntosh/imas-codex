@@ -29,6 +29,62 @@ REMOTE_STORE = f"{REMOTE_BASE}/.neo4j"
 REMOTE_LINK = f"{REMOTE_BASE}/neo4j"
 REMOTE_EXPORTS = f"{REMOTE_BASE}/exports"
 
+# SLURM job name for Neo4j (must match cli/services.py:_NEO4J_JOB)
+_SLURM_NEO4J_JOB = "codex-neo4j"
+
+
+def _neo4j_lifecycle_bash(
+    service_var: str = "$SERVICE",
+    scheduler: str = "none",
+) -> str:
+    """Generate bash stop_neo4j/start_neo4j functions.
+
+    When ``scheduler="slurm"``, uses ``scancel``/``squeue`` to manage the
+    SLURM job.  Falls back to ``systemctl --user`` for systemd-managed
+    hosts.  Both paths wait for the service to fully stop before returning.
+    """
+    if scheduler == "slurm":
+        return f"""\
+_SLURM_JOB="{_SLURM_NEO4J_JOB}"
+
+stop_neo4j() {{
+    # Cancel SLURM job
+    JOB_ID=$(squeue -n "$_SLURM_JOB" -u "$USER" -h -o "%i" 2>/dev/null | head -1)
+    if [ -n "$JOB_ID" ]; then
+        scancel "$JOB_ID" 2>/dev/null || true
+    fi
+    # Also kill any orphaned neo4j processes
+    pkill -u "$USER" -f "neo4j.*{service_var}" 2>/dev/null || true
+    pkill -u "$USER" -f "java.*neo4j" 2>/dev/null || true
+    # Wait for process to exit
+    for i in $(seq 1 36); do
+        JOB_ID=$(squeue -n "$_SLURM_JOB" -u "$USER" -h -o "%i" 2>/dev/null | head -1)
+        [ -z "$JOB_ID" ] && break
+        sleep 5
+    done
+}}
+
+start_neo4j() {{
+    # Delegate to imas-codex graph start which handles SLURM submission
+    cd "$HOME/Code/imas-codex" 2>/dev/null && uv run imas-codex graph start 2>&1 || true
+}}
+"""
+    # Default: systemd
+    return f"""\
+stop_neo4j() {{
+    systemctl --user stop {service_var} 2>/dev/null || true
+    for i in $(seq 1 18); do
+        state=$(systemctl --user is-active {service_var} 2>/dev/null || echo inactive)
+        [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
+        sleep 5
+    done
+}}
+
+start_neo4j() {{
+    systemctl --user start {service_var} 2>/dev/null || true
+}}
+"""
+
 
 def _neo4j_image_shell() -> str:
     """Shell-expandable Neo4j SIF path (uses ``$HOME``)."""
@@ -427,6 +483,7 @@ def remote_load_archive(
     ssh_host: str,
     *,
     password: str | None = None,
+    scheduler: str = "none",
 ) -> str:
     """Load a graph archive on a remote host.
 
@@ -441,6 +498,7 @@ def remote_load_archive(
         ssh_host: SSH host alias.
         password: Neo4j password to set after load.  Defaults to
             the configured password from ``.env``.
+        scheduler: ``"slurm"`` or ``"none"`` (systemd).
 
     Returns:
         Command output.
@@ -452,6 +510,7 @@ def remote_load_archive(
 
     from imas_codex.remote.executor import run_script_via_stdin
 
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
     script = f"""\
 set -e
 ARCHIVE="{archive_remote_path}"
@@ -459,15 +518,8 @@ DATA_DIR="{REMOTE_LINK}"
 SERVICE="imas-codex-neo4j-{graph_name}"
 IMAGE="{_neo4j_image_shell()}"
 
-# Stop Neo4j — let systemd handle the full shutdown lifecycle.
-# Do NOT pkill separately; that races with ExecStop and causes SIGSEGV.
-systemctl --user stop "$SERVICE" 2>/dev/null || true
-# Wait until fully inactive (up to 90s for large graphs)
-for i in $(seq 1 18); do
-    state=$(systemctl --user is-active "$SERVICE" 2>/dev/null || echo inactive)
-    [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
-    sleep 5
-done
+{lifecycle}
+stop_neo4j
 
 # Extract archive
 TMPDIR=$(mktemp -d)
@@ -505,7 +557,7 @@ apptainer exec \
     neo4j-admin dbms set-initial-password "{password}" 2>/dev/null || true
 
 # Restart Neo4j
-systemctl --user start "$SERVICE" 2>/dev/null || true
+start_neo4j
 
 echo "LOAD_COMPLETE"
 """
@@ -515,6 +567,7 @@ echo "LOAD_COMPLETE"
 def remote_export_graph(
     graph_name: str,
     ssh_host: str,
+    scheduler: str = "none",
 ) -> str:
     """Export (dump) the active graph on a remote host.
 
@@ -527,12 +580,14 @@ def remote_export_graph(
     Args:
         graph_name: Active graph name (for service naming).
         ssh_host: SSH host alias.
+        scheduler: ``"slurm"`` or ``"none"`` (systemd).
 
     Returns:
         Remote path to the ``.tar.gz`` archive.
     """
     from imas_codex.remote.executor import run_script_via_stdin
 
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
     script = f"""\
 set -e
 DATA_DIR="{REMOTE_LINK}"
@@ -542,22 +597,7 @@ IMAGE="{_neo4j_image_shell()}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
 ARCHIVE="$EXPORTS/imas-codex-graph-export-$$.tar.gz"
 
-stop_neo4j() {{
-    # Use systemctl stop and wait for it to fully complete.
-    # Do NOT pkill separately — that races with systemd's ExecStop
-    # and can cause SIGSEGV on large databases that need time to flush.
-    systemctl --user stop "$SERVICE" 2>/dev/null || true
-    # Wait until the service is fully inactive (up to 90s for large graphs)
-    for i in $(seq 1 18); do
-        state=$(systemctl --user is-active "$SERVICE" 2>/dev/null || echo inactive)
-        [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
-        sleep 5
-    done
-}}
-
-start_neo4j() {{
-    systemctl --user start "$SERVICE" 2>/dev/null || true
-}}
+{lifecycle}
 
 wait_neo4j_ready() {{
     # Wait for Neo4j to be fully started (up to 60s for large graphs)
@@ -788,7 +828,7 @@ chmod 700 "$EXPORTS"
 # Pull to temp dir then find archive
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
-oras pull "{artifact_ref}" -o "$TMPDIR"
+oras pull "{artifact_ref}" -o "$TMPDIR" --allow-path-traversal
 
 # Move archive to exports dir
 ARCHIVE=$(find "$TMPDIR" -name '*.tar.gz' | head -1)
@@ -844,7 +884,7 @@ echo "PROGRESS:LOGIN"
 echo "PROGRESS:PULLING"
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
-oras pull "{artifact_ref}" -o "$TMPDIR" 2>&1
+oras pull "{artifact_ref}" -o "$TMPDIR" --allow-path-traversal 2>&1
 
 echo "PROGRESS:MOVING"
 ARCHIVE=$(find "$TMPDIR" -name '*.tar.gz' | head -1)
@@ -867,11 +907,13 @@ def build_remote_load_script(
     archive_remote_path: str,
     graph_name: str,
     password: str,
+    scheduler: str = "none",
 ) -> str:
     """Build a bash script for streaming remote graph load.
 
     Emits ``PROGRESS:`` markers for phase tracking.
     """
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
     return f"""\
 set -e
 ARCHIVE="{archive_remote_path}"
@@ -879,13 +921,9 @@ DATA_DIR="{REMOTE_LINK}"
 SERVICE="imas-codex-neo4j-{graph_name}"
 IMAGE="{_neo4j_image_shell()}"
 
+{lifecycle}
 echo "PROGRESS:STOPPING"
-systemctl --user stop "$SERVICE" 2>/dev/null || true
-for i in $(seq 1 18); do
-    state=$(systemctl --user is-active "$SERVICE" 2>/dev/null || echo inactive)
-    [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
-    sleep 5
-done
+stop_neo4j
 
 echo "PROGRESS:EXTRACTING"
 TMPDIR=$(mktemp -d)
@@ -923,7 +961,7 @@ apptainer exec \
     neo4j-admin dbms set-initial-password "{password}" 2>/dev/null || true
 
 echo "PROGRESS:STARTING"
-systemctl --user start "$SERVICE" 2>/dev/null || true
+start_neo4j
 
 rm -rf "$TMPDIR"
 echo "PROGRESS:COMPLETE"
@@ -931,11 +969,15 @@ echo "LOAD_COMPLETE"
 """
 
 
-def build_remote_export_script(graph_name: str) -> str:
+def build_remote_export_script(
+    graph_name: str,
+    scheduler: str = "none",
+) -> str:
     """Build a bash script for streaming remote graph export.
 
     Emits ``PROGRESS:`` markers for phase tracking.
     """
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
     return f"""\
 set -e
 DATA_DIR="{REMOTE_LINK}"
@@ -945,18 +987,7 @@ IMAGE="{_neo4j_image_shell()}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
 ARCHIVE="$EXPORTS/imas-codex-graph-export-$$.tar.gz"
 
-stop_neo4j() {{
-    systemctl --user stop "$SERVICE" 2>/dev/null || true
-    for i in $(seq 1 18); do
-        state=$(systemctl --user is-active "$SERVICE" 2>/dev/null || echo inactive)
-        [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
-        sleep 5
-    done
-}}
-
-start_neo4j() {{
-    systemctl --user start "$SERVICE" 2>/dev/null || true
-}}
+{lifecycle}
 
 wait_neo4j_ready() {{
     for i in $(seq 1 12); do
@@ -1025,6 +1056,7 @@ def _build_remote_dd_only_push_script(
     annotation_args: str,
     tag_latest_block: str,
     codex_cli_path: str,
+    scheduler: str = "none",  # unused — imas-codex CLI handles lifecycle
 ) -> str:
     """Build a push script that delegates to ``imas-codex graph export --dd-only``.
 
@@ -1076,6 +1108,7 @@ def build_remote_push_script(
     is_dev: bool = False,
     dd_only: bool = False,
     codex_cli_path: str | None = None,
+    scheduler: str = "none",
 ) -> str:
     """Build a bash script for remote graph export + ORAS push.
 
@@ -1119,7 +1152,10 @@ oras tag "{artifact_ref}" latest 2>&1
             annotation_args=annotation_args,
             tag_latest_block=tag_latest_block,
             codex_cli_path=codex_cli_path or "imas-codex",
+            scheduler=scheduler,
         )
+
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
 
     return f"""\
 set -e
@@ -1130,18 +1166,7 @@ IMAGE="{_neo4j_image_shell()}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
 ARCHIVE="$EXPORTS/imas-codex-graph-push-$$.tar.gz"
 
-stop_neo4j() {{
-    systemctl --user stop "$SERVICE" 2>/dev/null || true
-    for i in $(seq 1 18); do
-        state=$(systemctl --user is-active "$SERVICE" 2>/dev/null || echo inactive)
-        [ "$state" = "inactive" ] || [ "$state" = "failed" ] && break
-        sleep 5
-    done
-}}
-
-start_neo4j() {{
-    systemctl --user start "$SERVICE" 2>/dev/null || true
-}}
+{lifecycle}
 
 wait_neo4j_ready() {{
     for i in $(seq 1 12); do
