@@ -714,29 +714,34 @@ def _tag_dd_version(version_number: str, message: str) -> None:
     """Tag the current DDVersion node with release metadata."""
     try:
         from imas_codex.graph import GraphClient
+        from imas_codex.settings import get_dd_version
 
+        dd_version = get_dd_version()
         with GraphClient() as client:
-            # Split into individual SETs for resilience against GPFS storage
-            # corruption on individual property entries.
+            # Match by id rather than is_current to avoid GPFS property
+            # filter corruption. Split into individual SETs for resilience.
             client.query(
                 """
-                MATCH (d:DDVersion {is_current: true})
+                MATCH (d:DDVersion {id: $dd_id})
                 SET d.release_version = $version
                 """,
+                dd_id=dd_version,
                 version=version_number,
             )
             client.query(
                 """
-                MATCH (d:DDVersion {is_current: true})
+                MATCH (d:DDVersion {id: $dd_id})
                 SET d.release_note = $message
                 """,
+                dd_id=dd_version,
                 message=message,
             )
             client.query(
                 """
-                MATCH (d:DDVersion {is_current: true})
+                MATCH (d:DDVersion {id: $dd_id})
                 SET d.release_at = datetime()
-                """
+                """,
+                dd_id=dd_version,
             )
             click.echo(f"  ✓ DDVersion tagged: release_version={version_number}")
     except Exception as e:
