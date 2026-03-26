@@ -56,12 +56,26 @@ stop_neo4j() {{
     # Also kill any orphaned neo4j processes
     pkill -u "$USER" -f "neo4j.*{service_var}" 2>/dev/null || true
     pkill -u "$USER" -f "java.*neo4j" 2>/dev/null || true
-    # Wait for process to exit
+    # Wait for SLURM job to exit
     for i in $(seq 1 36); do
         JOB_ID=$(squeue -n "$_SLURM_JOB" -u "$USER" -h -o "%i" 2>/dev/null | head -1)
         [ -z "$JOB_ID" ] && break
         sleep 5
     done
+    # Wait for GPFS database lock to be released.  Stale POSIX locks
+    # can persist after process exit on shared filesystems.  Check with
+    # fuser and also verify no java processes remain.
+    DB_LOCK="{REMOTE_LINK}/data/databases/neo4j/database_lock"
+    if [ -f "$DB_LOCK" ]; then
+        for i in $(seq 1 24); do
+            if ! fuser "$DB_LOCK" >/dev/null 2>&1 && \
+               ! pgrep -u "$USER" -f "java.*neo4j" >/dev/null 2>&1; then
+                break
+            fi
+            echo "Waiting for database lock release (${{i}}/24)..."
+            sleep 5
+        done
+    fi
 }}
 
 start_neo4j() {{
