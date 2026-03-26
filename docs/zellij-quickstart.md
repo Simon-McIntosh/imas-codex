@@ -16,13 +16,15 @@ All sessions run on the **same iter login node**. The `cx` command handles SSH +
 
 ## Session Types
 
-### Project Sessions (multi-agent coordination)
+### Project Sessions
 
-| Session        | Layout         | Tabs                                      | Use Case                    |
-|----------------|----------------|-------------------------------------------|-----------------------------|
-| `imas-codex`   | imas-codex.kdl | `agent-1`, `agent-2`, `shell`, `mcp`, `git` | Multi-agent codex development |
-| `efitpp`       | efitpp.kdl     | `agent`, `build`, `run`, `shell`          | EFIT++ development          |
-| `codex`        | codex.kdl      | `tunnel`, `graph`, `llm`, `embed`         | Infrastructure services     |
+| Session        | Layout       | Use Case                    |
+|----------------|--------------|-----------------------------|
+| `imas-codex`   | project.kdl  | Codex development           |
+| `efitpp`       | project.kdl  | EFIT++ development          |
+| `codex`        | codex.kdl    | Infrastructure services     |
+
+Project sessions start with a single shell tab. Add tabs as needed — they persist across reconnects via `session_serialization`.
 
 ### Facility Sessions (discovery pipelines)
 
@@ -36,9 +38,9 @@ All sessions run on the **same iter login node**. The `cx` command handles SSH +
 
 The `cx` script auto-selects layouts:
 
-1. **Exact match:** `~/.config/zellij/layouts/$SESSION.kdl` (e.g., `imas-codex.kdl`)
+1. **Exact match:** `~/.config/zellij/layouts/$SESSION.kdl` (e.g., `codex.kdl`)
 2. **Known facility:** `facility.kdl` for tcv, jet, jt-60sa, iter
-3. **Generic fallback:** `project.kdl` (agent + shell tabs)
+3. **Generic fallback:** `project.kdl` (single shell tab, add more as needed)
 
 ## Install & Sync
 
@@ -70,9 +72,11 @@ In the `codex` session tabs:
 
 ```bash
 # Each command opens a separate SSH + zellij session
-cx iter imas-codex     # Multi-agent development
+cx iter imas-codex     # Codex development
 cx iter efitpp         # EFIT++ work
 ```
+
+First launch creates a single shell tab. Add tabs (`Alt+t` → `n`) as your workflow grows — they persist across SSH drops and reconnects.
 
 ### 3. Open facility discovery sessions
 
