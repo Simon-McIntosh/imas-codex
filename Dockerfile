@@ -263,7 +263,9 @@ ENV PYTHONPATH="/app" \
     HF_HOME=/app/.cache/huggingface
 
 # Expose MCP server port (Neo4j ports are internal only)
+# PORT env var tells Azure App Service / Cloud Run which port to probe
 EXPOSE 8000
+ENV PORT=8000
 
 # Health check verifies both Neo4j and MCP server
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
@@ -272,4 +274,4 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
 
 ## Entrypoint starts Neo4j then MCP server
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["serve", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["serve", "--read-only", "--host", "0.0.0.0", "--port", "8000"]
