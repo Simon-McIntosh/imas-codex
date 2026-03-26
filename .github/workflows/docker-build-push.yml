@@ -18,9 +18,11 @@ env:
   ACR_REGISTRY: crcommonallfrc.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
   IMAS_DD_VERSION: "4.1.0"
-  # Graph OCI artifacts always live in the upstream org registry,
-  # even when building from a fork.
-  GRAPH_REGISTRY: ghcr.io/iterorganization
+  # Graph OCI artifacts: try the repo owner's registry first (where
+  # `imas-codex release` pushes them), fall back to the upstream org
+  # registry for forks that haven't pushed their own graph yet.
+  GRAPH_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  GRAPH_REGISTRY_FALLBACK: ghcr.io/iterorganization
 
 jobs:
   graph-quality:
@@ -30,6 +32,7 @@ jobs:
     timeout-minutes: 30
     outputs:
       graph-tag-imas: ${{ steps.graph-tag.outputs.imas-tag }}
+      graph-registry: ${{ steps.graph-tag.outputs.graph-registry }}
 
     services:
       neo4j:
@@ -68,21 +71,42 @@ jobs:
       - name: Resolve graph tag
         id: graph-tag
         run: |
-          REGISTRY="${{ env.GRAPH_REGISTRY }}"
-
-          # Resolve IMAS-only graph tag
           IMAS_PACKAGE="imas-codex-graph-dd"
-          IMAS_TAGS=$(oras repo tags "${REGISTRY}/${IMAS_PACKAGE}" 2>&1) || true
-          IMAS_CLEAN=$(echo "$IMAS_TAGS" | grep -E '^[0-9v]' || true)
-          if echo "$IMAS_CLEAN" | grep -qx "latest"; then
-            echo "imas-tag=latest" >> $GITHUB_OUTPUT
-          elif [ -n "$IMAS_CLEAN" ]; then
-            BEST=$(echo "$IMAS_CLEAN" | sort -V | tail -1)
-            echo "No 'latest' tag for imas-codex-graph-dd. Using most recent: $BEST"
-            echo "imas-tag=${BEST}" >> $GITHUB_OUTPUT
+          OWNER_REGISTRY=$(echo "${{ env.GRAPH_REGISTRY }}" | tr '[:upper:]' '[:lower:]')
+          FALLBACK_REGISTRY="${{ env.GRAPH_REGISTRY_FALLBACK }}"
+
+          # Try the repo owner's registry first (where release CLI pushes)
+          resolve_tag() {
+            local REGISTRY="$1"
+            local TAGS
+            TAGS=$(oras repo tags "${REGISTRY}/${IMAS_PACKAGE}" 2>&1) || true
+            local CLEAN
+            CLEAN=$(echo "$TAGS" | grep -E '^[0-9v]' || true)
+            if echo "$CLEAN" | grep -qx "latest"; then
+              echo "latest"
+            elif [ -n "$CLEAN" ]; then
+              echo "$CLEAN" | sort -V | tail -1
+            fi
+          }
+
+          TAG=$(resolve_tag "$OWNER_REGISTRY")
+          USED_REGISTRY="$OWNER_REGISTRY"
+
+          # Fall back to upstream if fork has no graph artifacts
+          if [ -z "$TAG" ] && [ "$OWNER_REGISTRY" != "$FALLBACK_REGISTRY" ]; then
+            echo "No graph at ${OWNER_REGISTRY}/${IMAS_PACKAGE}, trying upstream fallback..."
+            TAG=$(resolve_tag "$FALLBACK_REGISTRY")
+            USED_REGISTRY="$FALLBACK_REGISTRY"
+          fi
+
+          if [ -n "$TAG" ]; then
+            echo "Resolved graph tag: ${TAG} from ${USED_REGISTRY}"
+            echo "imas-tag=${TAG}" >> $GITHUB_OUTPUT
+            echo "graph-registry=${USED_REGISTRY}" >> $GITHUB_OUTPUT
           else
-            echo "::warning::No graph package found at ${REGISTRY}/${IMAS_PACKAGE} — skipping graph quality tests"
+            echo "::warning::No graph package found at either registry — skipping graph quality tests"
             echo "imas-tag=none" >> $GITHUB_OUTPUT
+            echo "graph-registry=none" >> $GITHUB_OUTPUT
           fi
 
       - name: Skip notice
@@ -93,7 +117,7 @@ jobs:
       - name: Pull graph dump from GHCR
         if: steps.graph-tag.outputs.imas-tag != 'none'
         run: |
-          REGISTRY="${{ env.GRAPH_REGISTRY }}"
+          REGISTRY="${{ steps.graph-tag.outputs.graph-registry }}"
           ARTIFACT="${REGISTRY}/imas-codex-graph-dd:${{ steps.graph-tag.outputs.imas-tag }}"
           echo "Pulling: ${ARTIFACT}"
           mkdir -p /tmp/graph-dump
@@ -286,7 +310,7 @@ jobs:
           build-args: |
             GRAPH_TAG=${{ needs.graph-quality.outputs.graph-tag-imas }}
             GRAPH_PACKAGE=imas-codex-graph-dd
-            GHCR_REGISTRY=${{ env.GRAPH_REGISTRY }}
+            GHCR_REGISTRY=${{ needs.graph-quality.outputs.graph-registry }}
           secrets: |
             GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}
           no-cache: true
@@ -511,7 +535,7 @@ jobs:
           build-args: |
             IDS_FILTER=
             IMAS_DD_VERSION=${{ env.IMAS_DD_VERSION }}
-            GHCR_REGISTRY=${{ env.GRAPH_REGISTRY }}
+            GHCR_REGISTRY=${{ needs.graph-quality.outputs.graph-registry }}
             GRAPH_TAG=${{ steps.variant.outputs.graph-tag }}
             GRAPH_PACKAGE=${{ matrix.graph_variant.package }}
             GIT_SHA=${{ github.sha }}
@@ -539,7 +563,7 @@ jobs:
           build-args: |
             IDS_FILTER=
             IMAS_DD_VERSION=${{ env.IMAS_DD_VERSION }}
-            GHCR_REGISTRY=${{ env.GRAPH_REGISTRY }}
+            GHCR_REGISTRY=${{ needs.graph-quality.outputs.graph-registry }}
             GRAPH_TAG=${{ steps.variant.outputs.graph-tag }}
             GRAPH_PACKAGE=${{ matrix.graph_variant.package }}
             GIT_SHA=${{ github.sha }}
