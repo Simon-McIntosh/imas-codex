@@ -47,6 +47,16 @@ def _resolve_scheduler(profile) -> str:
         return "none"
 
 
+def _resolve_partition(profile) -> str | None:
+    """Resolve the SLURM partition for a Neo4j profile's location."""
+    try:
+        from imas_codex.remote.locations import resolve_location
+
+        return resolve_location(profile.location).partition
+    except Exception:
+        return None
+
+
 @click.command()
 @click.option("--dev", is_flag=True, help="Push as dev-{commit} tag")
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
@@ -210,6 +220,7 @@ def graph_push(
                 dd_only=dd_only,
                 codex_cli_path=codex_cli_path,
                 scheduler=_resolve_scheduler(profile),
+                partition=_resolve_partition(profile),
             )
 
             try:

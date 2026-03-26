@@ -1056,14 +1056,47 @@ def _build_remote_dd_only_push_script(
     annotation_args: str,
     tag_latest_block: str,
     codex_cli_path: str,
-    scheduler: str = "none",  # unused — imas-codex CLI handles lifecycle
+    scheduler: str = "none",
+    partition: str | None = None,
 ) -> str:
     """Build a push script that delegates to ``imas-codex graph export --dd-only``.
 
     Instead of reimplementing temp-Neo4j filtering in bash, this calls
     the installed ``imas-codex`` CLI on the remote host which already
     handles the full export + filtering pipeline.
+
+    When ``scheduler="slurm"``, the export runs via ``srun`` on the
+    compute partition to avoid OOM kills on the login node.  Uses
+    ``--immediate`` to fail fast if no resources are available rather
+    than queueing indefinitely.
     """
+    # The export command spins up a temp Neo4j instance (~5 GB RAM).
+    # On SLURM hosts, dispatch to a compute node via srun.
+    # --immediate: fail instantly if resources unavailable (never queue)
+    # --overlap: allow co-scheduling with existing jobs on the node
+    if scheduler == "slurm" and partition:
+        srun_flags = (
+            f"srun --immediate --overlap --partition={partition} "
+            f"--time=00:30:00 --mem=8G --cpus-per-task=4 "
+            f"--job-name=codex-export"
+        )
+        # $ARCHIVE is expanded by the outer bash before srun sees it.
+        # Paths are on shared GPFS so the compute node can access them.
+        export_block = f"""\
+if {srun_flags} {codex_cli_path} graph export --dd-only -o "$ARCHIVE"; then
+    echo "  Export completed on compute node"
+else
+    RC=$?
+    if [ $RC -eq 1 ]; then
+        echo "ERROR: No SLURM resources available for DD-only export." >&2
+        echo "  The compute partition '{partition}' may be fully allocated." >&2
+        echo "  Free resources by stopping services or try again later." >&2
+    fi
+    exit $RC
+fi"""
+    else:
+        export_block = f'"{codex_cli_path}" graph export --dd-only -o "$ARCHIVE"'
+
     return f"""\
 set -e
 EXPORTS="{REMOTE_EXPORTS}"
@@ -1076,7 +1109,7 @@ cleanup() {{
 trap cleanup EXIT
 
 echo "PROGRESS:EXPORTING"
-"{codex_cli_path}" graph export --dd-only -o "$ARCHIVE"
+{export_block}
 
 SIZE=$(du -h "$ARCHIVE" | cut -f1)
 
@@ -1109,6 +1142,7 @@ def build_remote_push_script(
     dd_only: bool = False,
     codex_cli_path: str | None = None,
     scheduler: str = "none",
+    partition: str | None = None,
 ) -> str:
     """Build a bash script for remote graph export + ORAS push.
 
@@ -1153,6 +1187,7 @@ oras tag "{artifact_ref}" latest 2>&1
             tag_latest_block=tag_latest_block,
             codex_cli_path=codex_cli_path or "imas-codex",
             scheduler=scheduler,
+            partition=partition,
         )
 
     lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)

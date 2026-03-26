@@ -856,16 +856,24 @@ def _create_shared_dump() -> str | None:
 
 
 def _push_all_graph_variants(
-    message: str, remote: str, dry_run: bool, git_tag: str | None = None
+    message: str,
+    remote: str,
+    dry_run: bool,
+    git_tag: str | None = None,
+    is_rc: bool = False,
 ) -> None:
-    """Push all graph variants: dd-only, full, and per-facility.
+    """Push graph variants to GHCR.
+
+    RC releases push only the full graph and DD-only variant — these are
+    the only two needed for CI validation and container builds.
+    Per-facility variants are deferred to final releases where they serve
+    as production deployment artifacts.
 
     When the graph is local, dumps once and reuses the dump for filtered
-    variants to avoid 5× Neo4j stop/start cycles.
+    variants to avoid repeated Neo4j stop/start cycles.
 
     When the graph is remote (e.g. running on ITER, accessed via tunnel),
-    each variant push delegates independently to the remote host via SSH
-    — the shared dump optimization is handled server-side by graph_push.
+    each variant push delegates independently to the remote host via SSH.
 
     Raises click.ClickException if any variant push fails.
     """
@@ -951,19 +959,24 @@ def _push_all_graph_variants(
     ):
         failed.append("dd-only")
 
-    # Per-facility graphs (filtered from cached dump)
-    for fac in facilities:
-        variant += 1
-        click.echo(f"\n  Variant {variant}: {fac} + IMAS DD")
-        if not _push_graph_variant(
-            facility=fac,
-            message=message,
-            registry=registry,
-            version_tag=git_tag,
-            source_dump=cached_dump,
-            dry_run=dry_run,
-        ):
-            failed.append(fac)
+    # Per-facility graphs — only for final releases (skip for RC)
+    if is_rc:
+        click.echo(
+            f"\n  Skipping {len(facilities)} per-facility variant(s) (RC release)."
+        )
+    else:
+        for fac in facilities:
+            variant += 1
+            click.echo(f"\n  Variant {variant}: {fac} + IMAS DD")
+            if not _push_graph_variant(
+                facility=fac,
+                message=message,
+                registry=registry,
+                version_tag=git_tag,
+                source_dump=cached_dump,
+                dry_run=dry_run,
+            ):
+                failed.append(fac)
 
     # Clean up cached dump
     if cached_dump:
@@ -1253,7 +1266,7 @@ def release(
     # Step: Push all graph variants
     step += 1
     click.echo(f"\nStep {step}: Pushing graph variants to GHCR...")
-    _push_all_graph_variants(message, remote, dry_run, git_tag=git_tag)
+    _push_all_graph_variants(message, remote, dry_run, git_tag=git_tag, is_rc=is_rc)
 
     # Step: Push git tag to remote (triggers CI)
     if not skip_git:
