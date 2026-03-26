@@ -865,6 +865,17 @@ def _create_shared_dump() -> str | None:
         return None
 
 
+def _resolve_scheduler_for_release(profile) -> str:
+    """Resolve scheduler type from Neo4j profile for release operations."""
+    from imas_codex.remote.locations import resolve_location
+
+    try:
+        loc = resolve_location(profile.host)
+        return loc.scheduler or "none"
+    except Exception:
+        return "none"
+
+
 def _push_all_graph_variants(
     message: str,
     remote: str,
@@ -906,7 +917,6 @@ def _push_all_graph_variants(
         pass
 
     facilities = _get_graph_facilities()
-    failed: list[str] = []
 
     if not facilities:
         # No facilities — just push dd-only (the only meaningful variant)
@@ -923,23 +933,141 @@ def _push_all_graph_variants(
             )
         return
 
-    # When remote, skip local shared dump — each graph_push call
-    # delegates to the remote host which handles dump/push independently.
-    cached_dump = None
-    if not is_remote:
-        click.echo("\n  Creating shared graph dump (stops Neo4j once)...")
-        if dry_run:
-            cached_dump = None
-        else:
-            cached_dump = _create_shared_dump()
-            if not cached_dump:
-                raise click.ClickException(
-                    "Failed to create shared graph dump.\n"
-                    "  Is Neo4j running? Check: imas-codex graph status"
-                )
-    else:
-        click.echo("\n  Remote graph — each variant will be pushed from the server.")
+    # ── Unified remote push — single SSH session, single dump ───────────
+    if is_remote:
+        from imas_codex.cli.graph_progress import (
+            GraphProgress,
+            remote_operation_streaming,
+        )
+        from imas_codex.graph.ghcr import get_package_name
+        from imas_codex.graph.remote import (
+            build_remote_release_push_script,
+            remote_check_imas_codex,
+            remote_check_oras,
+        )
 
+        if not remote_check_oras(profile.host):
+            raise click.ClickException(
+                f"oras not found on {profile.host}. "
+                "Install with: imas-codex tools install"
+            )
+
+        codex_cli_path = remote_check_imas_codex(profile.host)
+        if not codex_cli_path:
+            raise click.ClickException(
+                f"imas-codex CLI not found on {profile.host}. "
+                "Install with: cd ~/Code/imas-codex && uv sync"
+            )
+
+        # Build artifact refs for each variant
+        from imas_codex.graph.ghcr import get_git_info
+
+        git_info = get_git_info()
+        full_pkg = get_package_name()
+        full_ref = f"{registry}/{full_pkg}:{git_tag}"
+
+        dd_pkg = get_package_name(dd_only=True)
+        dd_ref = f"{registry}/{dd_pkg}:{git_tag}"
+
+        facility_refs = None
+        if not is_rc and facilities:
+            facility_refs = {}
+            for fac in facilities:
+                fac_pkg = get_package_name(facilities=[fac])
+                facility_refs[fac] = f"{registry}/{fac_pkg}:{git_tag}"
+
+        if dry_run:
+            click.echo(f"\n  [DRY RUN] Would push from {profile.host}:")
+            click.echo(f"    Full: {full_ref}")
+            click.echo(f"    DD-only: {dd_ref}")
+            if facility_refs:
+                for fac, fac_ref in facility_refs.items():
+                    click.echo(f"    {fac}: {fac_ref}")
+            return
+
+        script = build_remote_release_push_script(
+            profile.name,
+            full_ref,
+            dd_artifact_ref=dd_ref,
+            facility_artifact_refs=facility_refs,
+            version_tag=git_tag,
+            git_commit=git_info["commit"],
+            message=message,
+            token=None,  # Use cached GHCR creds on remote
+            is_dev=False,
+            codex_cli_path=codex_cli_path,
+            scheduler=_resolve_scheduler_for_release(profile),
+        )
+
+        _remote_markers = {
+            "STOPPING": f"Stopping Neo4j on {profile.host}",
+            "DUMPING": "Dumping graph database",
+            "RECOVERY": "Recovery cycle (clean start/stop)",
+            "ARCHIVING_FULL": "Creating full graph archive",
+            "PUSHING_FULL": "Pushing full graph to GHCR",
+            "FILTERING_DD": "Filtering to IMAS DD nodes only",
+            "PUSHING_DD": "Pushing DD-only graph to GHCR",
+            "STARTING": f"Starting Neo4j on {profile.host}",
+            "TAGGING": "Tagging as latest",
+            "COMPLETE": "All variants pushed",
+        }
+        if facility_refs:
+            for fac in facility_refs:
+                _remote_markers[f"FILTERING_FAC_{fac.upper()}"] = f"Filtering for {fac}"
+                _remote_markers[f"PUSHING_FAC_{fac.upper()}"] = f"Pushing {fac} graph"
+
+        with GraphProgress("push") as gp:
+            gp.set_total_phases(1)
+            gp.start_phase(f"Pushing all variants from {profile.host}")
+
+            try:
+                output = remote_operation_streaming(
+                    script,
+                    profile.host,
+                    progress=gp,
+                    progress_markers=_remote_markers,
+                    timeout=1800,  # 30min for all variants
+                )
+            except Exception as e:
+                gp.fail_phase(str(e))
+                raise click.ClickException(
+                    f"Remote release push on {profile.host} failed: {e}"
+                ) from e
+
+            sizes = {}
+            for line in output.strip().splitlines():
+                if line.startswith("SIZE_FULL="):
+                    sizes["full"] = line.split("=", 1)[1].strip()
+                elif line.startswith("SIZE_DD="):
+                    sizes["dd"] = line.split("=", 1)[1].strip()
+
+            size_summary = ", ".join(f"{k}: {v}" for k, v in sizes.items())
+            gp.complete_phase(size_summary or None)
+
+        click.echo("  ✓ All graph variants pushed")
+        for k, v in sizes.items():
+            click.echo(f"    {k}: {v}")
+
+        # Dispatch graph-quality CI check
+        from imas_codex.graph.ghcr import dispatch_graph_quality
+
+        dispatch_graph_quality(git_info, git_tag, registry)
+        return
+
+    # ── Local push path — dump once, reuse for filtered variants ────────
+    cached_dump = None
+    click.echo("\n  Creating shared graph dump (stops Neo4j once)...")
+    if dry_run:
+        cached_dump = None
+    else:
+        cached_dump = _create_shared_dump()
+        if not cached_dump:
+            raise click.ClickException(
+                "Failed to create shared graph dump.\n"
+                "  Is Neo4j running? Check: imas-codex graph status"
+            )
+
+    failed: list[str] = []
     variant = 0
 
     # Push full graph (all facilities)
@@ -997,18 +1125,11 @@ def _push_all_graph_variants(
             pass
 
     if failed:
-        msg = (
+        raise click.ClickException(
             f"Graph push failed for {len(failed)} variant(s): "
             f"{', '.join(failed)}.\n"
             "  Check: GHCR_TOKEN set, Neo4j running, network access."
         )
-        if is_rc:
-            # For RC releases, variant push failures are warnings — the git
-            # tag must still be pushed so CI can trigger.  CI falls back to
-            # upstream or prior tags for missing graph variants.
-            click.echo(f"\n  ⚠ {msg}", err=True)
-        else:
-            raise click.ClickException(msg)
 
 
 # ============================================================================

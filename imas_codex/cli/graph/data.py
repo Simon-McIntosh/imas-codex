@@ -313,7 +313,7 @@ def graph_export(
     # ── Remote dispatch ──────────────────────────────────────────────────
     from imas_codex.graph.remote import is_remote_location
 
-    if is_remote_location(profile.host):
+    if is_remote_location(profile.host) and not source_dump:
         from imas_codex.cli.graph_progress import (
             GraphProgress,
             remote_operation_streaming,

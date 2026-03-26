@@ -1281,11 +1281,203 @@ echo "PUSH_COMPLETE"
 """
 
 
+def build_remote_release_push_script(
+    graph_name: str,
+    full_artifact_ref: str,
+    *,
+    dd_artifact_ref: str | None = None,
+    facility_artifact_refs: dict[str, str] | None = None,
+    version_tag: str,
+    git_commit: str,
+    message: str | None = None,
+    token: str | None = None,
+    is_dev: bool = False,
+    codex_cli_path: str | None = None,
+    scheduler: str = "none",
+) -> str:
+    """Build a unified bash script for releasing all graph variants.
+
+    Generates a SINGLE script that stops Neo4j once, dumps once, and
+    derives all variant archives (full, DD-only, per-facility) from the
+    shared dump.  This eliminates redundant Neo4j stop/start cycles and
+    fixes OOM kills during DD-only export on constrained hosts.
+
+    Emits ``PROGRESS:`` markers for phase tracking.
+    """
+    codex_cli = codex_cli_path or "imas-codex"
+
+    login_cmd = ""
+    if token:
+        login_cmd = f'echo "{token}" | oras login ghcr.io -u token --password-stdin'
+
+    annotations = [
+        f'--annotation "org.opencontainers.image.version={version_tag}"',
+        f'--annotation "io.imas-codex.git-commit={git_commit}"',
+    ]
+    if message:
+        safe_msg = message.replace('"', '\\"')
+        annotations.append(
+            f'--annotation "org.opencontainers.image.description={safe_msg}"'
+        )
+    annotation_args = " \\\n    ".join(annotations)
+
+    tag_latest_cmds: list[str] = []
+    if not is_dev:
+        tag_latest_cmds.append(f'oras tag "{full_artifact_ref}" latest 2>&1')
+        if dd_artifact_ref:
+            tag_latest_cmds.append(f'oras tag "{dd_artifact_ref}" latest 2>&1')
+        if facility_artifact_refs:
+            for _fac, fac_ref in sorted(facility_artifact_refs.items()):
+                tag_latest_cmds.append(f'oras tag "{fac_ref}" latest 2>&1')
+    tag_latest_block = "\n".join(tag_latest_cmds)
+
+    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
+
+    # DD-only export + push block
+    dd_block = ""
+    if dd_artifact_ref:
+        dd_block = f"""
+echo "PROGRESS:FILTERING_DD"
+"$CODEX_CLI" graph export --dd-only --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
+    -o "$DD_ARCHIVE" </dev/null 2>&1
+
+SIZE_DD=$(du -h "$DD_ARCHIVE" | cut -f1)
+
+echo "PROGRESS:PUSHING_DD"
+DD_ARCHIVE_NAME=$(basename "$DD_ARCHIVE")
+cd "$(dirname "$DD_ARCHIVE")"
+oras push "{dd_artifact_ref}" \\
+    "$DD_ARCHIVE_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+echo "SIZE_DD=$SIZE_DD"
+"""
+
+    # Per-facility export + push blocks
+    facility_block = ""
+    if facility_artifact_refs:
+        for fac, fac_ref in sorted(facility_artifact_refs.items()):
+            fac_upper = fac.upper()
+            facility_block += f"""
+echo "PROGRESS:FILTERING_FAC_{fac_upper}"
+FAC_ARCHIVE_{fac_upper}="$EXPORTS/imas-codex-graph-{fac}-push-$$.tar.gz"
+"$CODEX_CLI" graph export --facility {fac} \\
+    --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
+    -o "$FAC_ARCHIVE_{fac_upper}" </dev/null 2>&1
+
+echo "PROGRESS:PUSHING_FAC_{fac_upper}"
+FAC_NAME=$(basename "$FAC_ARCHIVE_{fac_upper}")
+cd "$(dirname "$FAC_ARCHIVE_{fac_upper}")"
+oras push "{fac_ref}" \\
+    "$FAC_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+rm -f "$FAC_ARCHIVE_{fac_upper}"
+"""
+
+    dd_archive_init = ""
+    if dd_artifact_ref:
+        dd_archive_init = 'DD_ARCHIVE="$EXPORTS/imas-codex-graph-dd-push-$$.tar.gz"'
+
+    return f"""\
+set -e
+DATA_DIR="{REMOTE_LINK}"
+EXPORTS="{REMOTE_EXPORTS}"
+SERVICE="imas-codex-neo4j-{graph_name}"
+IMAGE="{_neo4j_image_shell()}"
+CODEX_CLI="{codex_cli}"
+mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
+FULL_ARCHIVE="$EXPORTS/imas-codex-graph-push-$$.tar.gz"
+{dd_archive_init}
+
+{lifecycle}
+
+wait_neo4j_ready() {{
+    for i in $(seq 1 12); do
+        if curl -sf http://localhost:7474 >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 5
+    done
+    echo "Warning: Neo4j did not become ready within 60s" >&2
+}}
+
+do_dump() {{
+    mkdir -p "$DATA_DIR/dumps"
+    apptainer exec \\
+        --bind "$DATA_DIR/data:/data" \\
+        --bind "$DATA_DIR/dumps:/dumps" \\
+        --writable-tmpfs \\
+        "$IMAGE" \\
+        neo4j-admin database dump neo4j \\
+            --to-path=/dumps \\
+            --overwrite-destination=true \\
+            --verbose
+}}
+
+cleanup() {{
+    rm -f "$FULL_ARCHIVE"
+    [ -n "${{DD_ARCHIVE:-}}" ] && rm -f "$DD_ARCHIVE"
+    [ -n "${{TMPDIR:-}}" ] && rm -rf "$TMPDIR"
+}}
+trap cleanup EXIT
+
+echo "PROGRESS:STOPPING"
+stop_neo4j
+
+echo "PROGRESS:DUMPING"
+if ! do_dump; then
+    echo "PROGRESS:RECOVERY"
+    start_neo4j
+    wait_neo4j_ready
+    stop_neo4j
+    do_dump
+fi
+
+echo "PROGRESS:ARCHIVING_FULL"
+TMPDIR=$(mktemp -d)
+ARCHIVE_DIR="$TMPDIR/imas-codex-graph-push"
+mkdir -p "$ARCHIVE_DIR"
+cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
+
+DATE=$(date -Iseconds)
+cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
+{{"version": "remote-push", "timestamp": "$DATE"}}
+MANIFEST_EOF
+
+tar czf "$FULL_ARCHIVE" -C "$TMPDIR" "imas-codex-graph-push"
+rm -rf "$TMPDIR"
+TMPDIR=""
+SIZE_FULL=$(du -h "$FULL_ARCHIVE" | cut -f1)
+
+{login_cmd}
+
+echo "PROGRESS:PUSHING_FULL"
+FULL_ARCHIVE_NAME=$(basename "$FULL_ARCHIVE")
+cd "$(dirname "$FULL_ARCHIVE")"
+oras push "{full_artifact_ref}" \\
+    "$FULL_ARCHIVE_NAME:application/gzip" \\
+    {annotation_args} \\
+    2>&1
+echo "SIZE_FULL=$SIZE_FULL"
+{dd_block}{facility_block}
+echo "PROGRESS:STARTING"
+start_neo4j
+
+echo "PROGRESS:TAGGING"
+{tag_latest_block}
+
+echo "PROGRESS:COMPLETE"
+echo "PUSH_COMPLETE"
+"""
+
+
 __all__ = [
     "build_remote_export_script",
     "build_remote_fetch_script",
     "build_remote_load_script",
     "build_remote_push_script",
+    "build_remote_release_push_script",
     "is_remote_location",
     "remote_backup",
     "remote_check_oras",
