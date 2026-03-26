@@ -1079,7 +1079,7 @@ def _build_remote_dd_only_push_script(
     if scheduler == "slurm" and partition:
         srun_flags = (
             f"srun --immediate --overlap --partition={partition} "
-            f"--time=00:30:00 --mem=16G --cpus-per-task=4 "
+            f"--time=00:30:00 --mem=32G --cpus-per-task=4 "
             f"--job-name=codex-export"
         )
         # $ARCHIVE is expanded by the outer bash before srun sees it.

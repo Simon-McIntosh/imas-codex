@@ -997,11 +997,18 @@ def _push_all_graph_variants(
             pass
 
     if failed:
-        raise click.ClickException(
+        msg = (
             f"Graph push failed for {len(failed)} variant(s): "
             f"{', '.join(failed)}.\n"
             "  Check: GHCR_TOKEN set, Neo4j running, network access."
         )
+        if is_rc:
+            # For RC releases, variant push failures are warnings — the git
+            # tag must still be pushed so CI can trigger.  CI falls back to
+            # upstream or prior tags for missing graph variants.
+            click.echo(f"\n  ⚠ {msg}", err=True)
+        else:
+            raise click.ClickException(msg)
 
 
 # ============================================================================
