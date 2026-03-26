@@ -802,6 +802,16 @@ def _push_graph_variant(
         click.echo(f"  ✗ Failed to push {pkg_name}: {result.stderr.strip()}", err=True)
         return False
 
+    # Verify push completed — check for PUSH_COMPLETE marker in output
+    if "PUSH_COMPLETE" not in result.stdout and "pushed" not in result.stdout.lower():
+        click.echo(
+            "  ⚠ Push may have failed silently (no completion marker).", err=True
+        )
+        if result.stdout.strip():
+            click.echo(f"  stdout: {result.stdout.strip()[-500:]}", err=True)
+        if result.stderr.strip():
+            click.echo(f"  stderr: {result.stderr.strip()[-500:]}", err=True)
+
     click.echo(f"  ✓ Pushed {pkg_name}")
     return True
 
