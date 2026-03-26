@@ -1409,6 +1409,7 @@ class GraphPathContextTool:
         self,
         path: str,
         relationship_types: str = "all",
+        max_results: int = 20,
         dd_version: int | None = None,
         ctx: Context | None = None,
     ) -> dict[str, Any]:
@@ -1427,8 +1428,10 @@ class GraphPathContextTool:
                 RETURN cl.label AS cluster, sibling.id AS path,
                        sibling.ids AS ids, sibling.documentation AS doc
                 ORDER BY cl.label, sibling.ids
+                LIMIT $limit
                 """,
                 **dd_params,
+                limit=max_results,
             )
             if cluster_siblings:
                 sections["cluster_siblings"] = cluster_siblings
@@ -1443,8 +1446,10 @@ class GraphPathContextTool:
                 RETURN coord.id AS coordinate, sibling.id AS path,
                        sibling.ids AS ids, sibling.data_type AS data_type
                 ORDER BY coord.id, sibling.ids
+                LIMIT $limit
                 """,
                 **dd_params,
+                limit=max_results,
             )
             if coord_partners:
                 sections["coordinate_partners"] = coord_partners
@@ -1460,9 +1465,10 @@ class GraphPathContextTool:
                 RETURN u.id AS unit, sibling.id AS path,
                        sibling.ids AS ids, sibling.documentation AS doc
                 ORDER BY u.id, sibling.ids
-                LIMIT 30
+                LIMIT $limit
                 """,
                 **dd_params,
+                limit=max_results,
             )
             if unit_companions:
                 sections["unit_companions"] = unit_companions
@@ -1477,8 +1483,10 @@ class GraphPathContextTool:
                 RETURN s.name AS schema, sibling.id AS path,
                        sibling.ids AS ids
                 ORDER BY s.name
+                LIMIT $limit
                 """,
                 **dd_params,
+                limit=max_results,
             )
             if ident_links:
                 sections["identifier_links"] = ident_links
