@@ -598,9 +598,12 @@ def _push_all_graph_variants(
 ) -> None:
     """Push all graph variants: dd-only, full, and per-facility.
 
-    Dumps the graph once and reuses the dump for filtered variants to avoid
-    5× Neo4j stop/start cycles. The full graph push creates the dump, then
-    dd-only and per-facility pushes filter from it via --source-dump.
+    When the graph is local, dumps once and reuses the dump for filtered
+    variants to avoid 5× Neo4j stop/start cycles.
+
+    When the graph is remote (e.g. running on ITER, accessed via tunnel),
+    each variant push delegates independently to the remote host via SSH
+    — the shared dump optimization is handled server-side by graph_push.
 
     Raises click.ClickException if any variant push fails.
     """
@@ -608,6 +611,19 @@ def _push_all_graph_variants(
     registry = _resolve_target_registry(remote)
     if registry:
         click.echo(f"  Target registry: {registry}")
+
+    # Detect whether the graph is remote (e.g. ITER via SSH tunnel)
+    is_remote = False
+    try:
+        from imas_codex.graph.profiles import resolve_neo4j
+        from imas_codex.graph.remote import is_remote_location
+
+        profile = resolve_neo4j()
+        is_remote = is_remote_location(profile.host)
+        if is_remote:
+            click.echo(f"  Graph location: {profile.host} (remote)")
+    except Exception:
+        pass
 
     facilities = _get_graph_facilities()
     failed: list[str] = []
@@ -627,18 +643,22 @@ def _push_all_graph_variants(
             )
         return
 
-    # Dump once, reuse for all variants.
-    click.echo("\n  Creating shared graph dump (stops Neo4j once)...")
-
-    if dry_run:
-        cached_dump = None
+    # When remote, skip local shared dump — each graph_push call
+    # delegates to the remote host which handles dump/push independently.
+    cached_dump = None
+    if not is_remote:
+        click.echo("\n  Creating shared graph dump (stops Neo4j once)...")
+        if dry_run:
+            cached_dump = None
+        else:
+            cached_dump = _create_shared_dump()
+            if not cached_dump:
+                raise click.ClickException(
+                    "Failed to create shared graph dump.\n"
+                    "  Is Neo4j running? Check: imas-codex graph status"
+                )
     else:
-        cached_dump = _create_shared_dump()
-        if not cached_dump:
-            raise click.ClickException(
-                "Failed to create shared graph dump.\n"
-                "  Is Neo4j running? Check: imas-codex graph status"
-            )
+        click.echo("\n  Remote graph — each variant will be pushed from the server.")
 
     variant = 0
 
