@@ -1451,9 +1451,9 @@ do_dump() {{
 }}
 
 cleanup() {{
-    rm -f "$FULL_ARCHIVE"
-    [ -n "${{DD_ARCHIVE:-}}" ] && rm -f "$DD_ARCHIVE"
-    [ -n "${{TMPDIR:-}}" ] && rm -rf "$TMPDIR"
+    rm -f "$FULL_ARCHIVE" 2>/dev/null || true
+    rm -f "${{DD_ARCHIVE:-}}" 2>/dev/null || true
+    [ -n "${{TMPDIR:-}}" ] && rm -rf "$TMPDIR" 2>/dev/null || true
 }}
 trap cleanup EXIT
 
