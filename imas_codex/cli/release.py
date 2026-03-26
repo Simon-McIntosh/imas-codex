@@ -393,6 +393,282 @@ def _check_synced(remote: str, dry_run: bool) -> None:
         click.echo(f"  ✓ Synced with {remote}/main")
 
 
+def _get_remote_owner(remote: str) -> str | None:
+    """Extract the GitHub owner from a git remote URL.
+
+    Handles both SSH (git@github.com:owner/repo.git) and HTTPS
+    (https://github.com/owner/repo.git) URL formats.
+    """
+    result = subprocess.run(
+        ["git", "remote", "get-url", remote],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+
+    url = result.stdout.strip()
+    if "github.com" in url:
+        if url.startswith("git@"):
+            parts = url.split(":")[-1].replace(".git", "").split("/")
+        else:
+            parts = url.replace(".git", "").split("/")
+        if len(parts) >= 2:
+            return parts[-2].lower()
+    return None
+
+
+def _check_final_targets_upstream(remote: str) -> None:
+    """Verify that final releases target the upstream (iterorganization) repo.
+
+    RC releases are allowed on any remote (forks), but final/stable releases
+    must be pushed to the canonical upstream repository.
+    """
+    owner = _get_remote_owner(remote)
+    if owner is None:
+        click.echo(
+            "  ⚠ Could not determine remote owner — skipping upstream check",
+            err=True,
+        )
+        return
+
+    if owner != "iterorganization":
+        raise click.ClickException(
+            f"Final releases must target upstream (iterorganization). "
+            f"Remote '{remote}' points to '{owner}'. "
+            f"Use --remote upstream"
+        )
+    click.echo("  ✓ Final release targets upstream (iterorganization)")
+
+
+def _check_ci_passed(remote: str, dry_run: bool) -> None:
+    """Verify that CI checks have passed for the HEAD commit.
+
+    Uses the GitHub CLI (gh) to query commit status. Gracefully degrades
+    if gh is not available. For --dry-run, downgrades failures to warnings.
+    """
+    import json as _json
+
+    if not shutil.which("gh"):
+        click.echo("  ⚠ gh CLI not found — skipping CI status check", err=True)
+        return
+
+    owner = _get_remote_owner(remote)
+    if owner is None:
+        click.echo(
+            "  ⚠ Could not determine remote owner — skipping CI check",
+            err=True,
+        )
+        return
+
+    result = subprocess.run(
+        ["git", "remote", "get-url", remote],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        click.echo("  ⚠ Could not read remote URL — skipping CI check", err=True)
+        return
+
+    url = result.stdout.strip()
+    if url.startswith("git@"):
+        repo = url.split(":")[-1].replace(".git", "").split("/")[-1]
+    else:
+        repo = url.replace(".git", "").split("/")[-1]
+
+    sha_result = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+    )
+    if sha_result.returncode != 0:
+        click.echo("  ⚠ Could not determine HEAD SHA — skipping CI check", err=True)
+        return
+    sha = sha_result.stdout.strip()
+
+    api_result = subprocess.run(
+        ["gh", "api", f"repos/{owner}/{repo}/commits/{sha}/check-runs"],
+        capture_output=True,
+        text=True,
+    )
+    if api_result.returncode != 0:
+        click.echo("  ⚠ Could not query CI status — skipping CI check", err=True)
+        return
+
+    try:
+        data = _json.loads(api_result.stdout)
+    except _json.JSONDecodeError:
+        click.echo("  ⚠ Could not parse CI response — skipping CI check", err=True)
+        return
+
+    check_runs = data.get("check_runs", [])
+    if not check_runs:
+        click.echo(f"  ⚠ No CI check runs found for {sha[:8]}", err=True)
+        return
+
+    pending = [cr["name"] for cr in check_runs if cr.get("status") != "completed"]
+    failed = [
+        cr["name"]
+        for cr in check_runs
+        if cr.get("status") == "completed"
+        and cr.get("conclusion") not in ("success", "skipped", "neutral")
+    ]
+
+    if not pending and not failed:
+        click.echo(f"  ✓ CI checks passed for {sha[:8]}")
+        return
+
+    details = []
+    if failed:
+        names = ", ".join(failed[:3])
+        if len(failed) > 3:
+            names += f" (+{len(failed) - 3} more)"
+        details.append(f"failed: {names}")
+    if pending:
+        names = ", ".join(pending[:3])
+        if len(pending) > 3:
+            names += f" (+{len(pending) - 3} more)"
+        details.append(f"pending: {names}")
+
+    msg = (
+        f"CI checks not passed for {sha[:8]}. "
+        f"{'; '.join(details)}. "
+        "Push and wait for CI before finalizing."
+    )
+    if dry_run:
+        click.echo(f"  ⚠ {msg}", err=True)
+    else:
+        raise click.ClickException(msg)
+
+
+# ============================================================================
+# Changelog generation
+# ============================================================================
+
+_COMMIT_TYPE_RE = re.compile(
+    r"^(feat|fix|refactor|docs|test|chore|perf|ci)(?:\(.+\))?!?:\s*(.+)$"
+)
+
+_TYPE_HEADINGS: dict[str, str] = {
+    "feat": "Features",
+    "fix": "Bug Fixes",
+    "refactor": "Refactoring",
+    "docs": "Documentation",
+    "perf": "Performance",
+    "ci": "CI / Build",
+    "test": "Tests",
+    "chore": "Maintenance",
+}
+
+
+def _generate_changelog(
+    from_tag: str,
+    to_ref: str = "HEAD",
+    *,
+    version: str = "",
+    message: str = "",
+) -> str:
+    """Generate a changelog from commits and PRs since a previous tag.
+
+    Groups commits by conventional commit type and optionally enriches
+    with merged PR metadata from the GitHub CLI.
+    """
+    # Get commits since last tag
+    result = subprocess.run(
+        ["git", "log", f"{from_tag}..{to_ref}", "--oneline", "--no-decorate"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return f"## {version}\n\nNo changes since {from_tag}.\n"
+
+    lines = result.stdout.strip().splitlines()
+
+    # Parse conventional commits
+    grouped: dict[str, list[str]] = {}
+    other: list[str] = []
+    for line in lines:
+        # Strip SHA prefix
+        parts = line.split(" ", 1)
+        if len(parts) < 2:
+            continue
+        _, msg = parts[0], parts[1]
+        m = _COMMIT_TYPE_RE.match(msg)
+        if m:
+            ctype, desc = m.group(1), m.group(2)
+            grouped.setdefault(ctype, []).append(desc.strip())
+        else:
+            other.append(msg)
+
+    # Try to get merged PRs for contributor info
+    contributors: set[str] = set()
+    pr_map: dict[str, str] = {}  # title → #number
+    try:
+        import json as _json
+
+        pr_result = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "list",
+                "--state",
+                "merged",
+                "--base",
+                "main",
+                "--limit",
+                "50",
+                "--json",
+                "number,title,author",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if pr_result.returncode == 0:
+            prs = _json.loads(pr_result.stdout)
+            for pr in prs:
+                login = pr.get("author", {}).get("login", "")
+                if login:
+                    contributors.add(f"@{login}")
+                title = pr.get("title", "")
+                number = pr.get("number", "")
+                if title and number:
+                    pr_map[title.lower()] = f"#{number}"
+    except (subprocess.TimeoutExpired, Exception):
+        pass
+
+    # Build markdown
+    parts: list[str] = []
+    heading = f"## {version}" if version else "## Changelog"
+    if message:
+        heading += f" — {message}"
+    parts.append(heading)
+    parts.append("")
+
+    for ctype in ("feat", "fix", "refactor", "perf", "docs", "ci", "test", "chore"):
+        items = grouped.get(ctype, [])
+        if not items:
+            continue
+        parts.append(f"### {_TYPE_HEADINGS[ctype]}")
+        for item in items:
+            pr_ref = pr_map.get(f"{ctype}: {item}".lower(), "")
+            suffix = f" ({pr_ref})" if pr_ref else ""
+            parts.append(f"- {item}{suffix}")
+        parts.append("")
+
+    if other:
+        parts.append("### Other Changes")
+        for item in other:
+            parts.append(f"- {item}")
+        parts.append("")
+
+    if contributors:
+        parts.append("### Contributors")
+        parts.append(", ".join(sorted(contributors)))
+        parts.append("")
+
+    parts.append(f"**Full diff:** `{from_tag}..{to_ref}`")
+    return "\n".join(parts)
+
+
 # ============================================================================
 # Graph operations
 # ============================================================================
@@ -537,23 +813,9 @@ def _resolve_target_registry(remote: str) -> str | None:
     (ghcr.io/iterorganization) regardless of what the origin remote is.
     Returns None to use the default (origin-based) registry.
     """
-    result = subprocess.run(
-        ["git", "remote", "get-url", remote],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        return None
-
-    url = result.stdout.strip()
-    if "github.com" in url:
-        if url.startswith("git@"):
-            parts = url.split(":")[-1].replace(".git", "").split("/")
-        else:
-            parts = url.replace(".git", "").split("/")
-        if len(parts) >= 2:
-            owner = parts[-2].lower()
-            return f"ghcr.io/{owner}"
+    owner = _get_remote_owner(remote)
+    if owner:
+        return f"ghcr.io/{owner}"
     return None
 
 
@@ -812,6 +1074,17 @@ def _push_tag(tag: str, remote: str, dry_run: bool) -> None:
     is_flag=True,
     help="Show what would be done without making changes.",
 )
+@click.option(
+    "--changelog/--no-changelog",
+    default=None,
+    help="Generate changelog from commits since last tag. Default: on for --final.",
+)
+@click.option(
+    "--changelog-file",
+    type=click.Path(),
+    default=None,
+    help="Write changelog markdown to a file.",
+)
 def release(
     action: str | None,
     bump: str | None,
@@ -821,6 +1094,8 @@ def release(
     remote: str,
     skip_git: bool,
     dry_run: bool,
+    changelog: bool | None,
+    changelog_file: str | None,
 ) -> None:
     """State-machine release: semantic version bumps, graph publishing, tagging.
 
@@ -927,7 +1202,27 @@ def release(
     _check_remote_exists(remote)
     _check_clean_tree(dry_run)
     _check_synced(remote, dry_run)
+    if final:
+        _check_final_targets_upstream(remote)
+        _check_ci_passed(remote, dry_run)
     click.echo()
+
+    # Changelog generation (before tag creation so it can be reviewed)
+    generate_changelog = changelog if changelog is not None else final
+    if generate_changelog:
+        click.echo("Generating changelog...")
+        cl_text = _generate_changelog(
+            from_tag=latest or "HEAD~10",
+            version=git_tag,
+            message=message,
+        )
+        click.echo(cl_text)
+        if changelog_file:
+            Path(changelog_file).write_text(cl_text)
+            click.echo(f"  Changelog written to {changelog_file}")
+        if final:
+            click.echo("  ℹ Include this changelog in your GitHub Release notes.")
+        click.echo()
 
     step = 0
 
