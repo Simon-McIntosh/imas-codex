@@ -475,6 +475,18 @@ jobs:
           flavor: |
             latest=false
 
+      - name: Extract metadata for GHCR (RC builds)
+        id: meta-ghcr-rc
+        if: github.event_name != 'pull_request' && contains(github.ref, '-rc')
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern=v{{version}}${{ matrix.graph_variant.suffix }}
+            type=raw,value=latest-rc${{ matrix.graph_variant.suffix }}
+          flavor: |
+            latest=false
+
       - name: Extract metadata for ACR
         id: meta-acr
         uses: docker/metadata-action@v5
@@ -489,7 +501,7 @@ jobs:
           flavor: |
             latest=false
 
-      - name: Build and push Docker image (RC builds - ACR only)
+      - name: Build and push Docker image (RC builds - both registries)
         id: build-rc
         if: github.event_name != 'pull_request' && contains(github.ref, '-rc')
         uses: docker/build-push-action@v6
@@ -497,8 +509,12 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta-acr.outputs.tags }}
-          labels: ${{ steps.meta-acr.outputs.labels }}
+          tags: |
+            ${{ steps.meta-acr.outputs.tags }}
+            ${{ steps.meta-ghcr-rc.outputs.tags }}
+          labels: |
+            ${{ steps.meta-acr.outputs.labels }}
+            ${{ steps.meta-ghcr-rc.outputs.labels }}
           build-args: |
             IDS_FILTER=
             IMAS_DD_VERSION=${{ env.IMAS_DD_VERSION }}
