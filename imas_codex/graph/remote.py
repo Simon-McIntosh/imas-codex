@@ -1346,8 +1346,20 @@ def build_remote_release_push_script(
     if dd_artifact_ref:
         dd_block = f"""
 echo "PROGRESS:FILTERING_DD"
+# Run DD-only export with periodic keepalive to prevent SSH timeout
 "$CODEX_CLI" graph export --dd-only --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
-    -o "$DD_ARCHIVE" </dev/null 2>&1
+    -o "$DD_ARCHIVE" </dev/null 2>&1 &
+EXPORT_PID=$!
+while kill -0 "$EXPORT_PID" 2>/dev/null; do
+    echo "PROGRESS:FILTERING_DD"
+    sleep 30
+done
+wait "$EXPORT_PID"
+EXPORT_RC=$?
+if [ "$EXPORT_RC" -ne 0 ]; then
+    echo "DD-only export failed with exit code $EXPORT_RC" >&2
+    exit 1
+fi
 
 SIZE_DD=$(du -h "$DD_ARCHIVE" | cut -f1)
 
