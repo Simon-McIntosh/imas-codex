@@ -18,6 +18,9 @@ env:
   ACR_REGISTRY: crcommonallfrc.azurecr.io
   IMAGE_NAME: ${{ github.repository }}
   IMAS_DD_VERSION: "4.1.0"
+  # Graph OCI artifacts always live in the upstream org registry,
+  # even when building from a fork.
+  GRAPH_REGISTRY: ghcr.io/iterorganization
 
 jobs:
   graph-quality:
@@ -50,11 +53,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set lowercase registry
-        id: registry
-        run: |
-          echo "ghcr=${{ env.GHCR_REGISTRY }}/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-
       - name: Install oras CLI
         run: |
           ORAS_VERSION="1.2.0"
@@ -70,7 +68,7 @@ jobs:
       - name: Resolve graph tag
         id: graph-tag
         run: |
-          REGISTRY="${{ steps.registry.outputs.ghcr }}"
+          REGISTRY="${{ env.GRAPH_REGISTRY }}"
 
           # Resolve IMAS-only graph tag
           IMAS_PACKAGE="imas-codex-graph-dd"
@@ -95,7 +93,7 @@ jobs:
       - name: Pull graph dump from GHCR
         if: steps.graph-tag.outputs.imas-tag != 'none'
         run: |
-          REGISTRY="${{ steps.registry.outputs.ghcr }}"
+          REGISTRY="${{ env.GRAPH_REGISTRY }}"
           ARTIFACT="${REGISTRY}/imas-codex-graph-dd:${{ steps.graph-tag.outputs.imas-tag }}"
           echo "Pulling: ${ARTIFACT}"
           mkdir -p /tmp/graph-dump
@@ -276,11 +274,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Set lowercase registry
-        id: registry
-        run: |
-          echo "ghcr=${{ env.GHCR_REGISTRY }}/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-
       - name: Login to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
@@ -293,7 +286,7 @@ jobs:
           build-args: |
             GRAPH_TAG=${{ needs.graph-quality.outputs.graph-tag-imas }}
             GRAPH_PACKAGE=imas-codex-graph-dd
-            GHCR_REGISTRY=${{ steps.registry.outputs.ghcr }}
+            GHCR_REGISTRY=${{ env.GRAPH_REGISTRY }}
           secrets: |
             GHCR_TOKEN=${{ secrets.GHCR_TOKEN }}
           no-cache: true
@@ -518,7 +511,7 @@ jobs:
           build-args: |
             IDS_FILTER=
             IMAS_DD_VERSION=${{ env.IMAS_DD_VERSION }}
-            GHCR_REGISTRY=${{ steps.registry.outputs.ghcr }}
+            GHCR_REGISTRY=${{ env.GRAPH_REGISTRY }}
             GRAPH_TAG=${{ steps.variant.outputs.graph-tag }}
             GRAPH_PACKAGE=${{ matrix.graph_variant.package }}
             GIT_SHA=${{ github.sha }}
@@ -546,7 +539,7 @@ jobs:
           build-args: |
             IDS_FILTER=
             IMAS_DD_VERSION=${{ env.IMAS_DD_VERSION }}
-            GHCR_REGISTRY=${{ steps.registry.outputs.ghcr }}
+            GHCR_REGISTRY=${{ env.GRAPH_REGISTRY }}
             GRAPH_TAG=${{ steps.variant.outputs.graph-tag }}
             GRAPH_PACKAGE=${{ matrix.graph_variant.package }}
             GIT_SHA=${{ github.sha }}
