@@ -1315,9 +1315,8 @@ def build_remote_release_push_script(
     """
     codex_cli = codex_cli_path or "imas-codex"
 
-    login_cmd = ""
-    if token:
-        login_cmd = f'echo "{token}" | oras login ghcr.io -u token --password-stdin'
+    # Token is passed into the script via _do_ghcr_login argument
+    token_arg = f'"{token}"' if token else ""
 
     annotations = [
         f'--annotation "org.opencontainers.image.version={version_tag}"',
@@ -1399,6 +1398,21 @@ mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
 FULL_ARCHIVE="$EXPORTS/imas-codex-graph-push-$$.tar.gz"
 {dd_archive_init}
 
+# Authenticate with GHCR — use provided token or load from remote .env
+_do_ghcr_login() {{
+    local token="${{1:-}}"
+    if [ -z "$token" ]; then
+        local env_file="$HOME/Code/imas-codex/.env"
+        [ -f "$env_file" ] && token=$(grep "^GHCR_TOKEN=" "$env_file" | cut -d= -f2-)
+    fi
+    if [ -n "$token" ]; then
+        echo "$token" | oras login ghcr.io -u token --password-stdin 2>&1
+    else
+        echo "Warning: no GHCR token found, oras push may fail" >&2
+    fi
+}}
+_do_ghcr_login {token_arg}
+
 {lifecycle}
 
 wait_neo4j_ready() {{
@@ -1458,8 +1472,6 @@ tar czf "$FULL_ARCHIVE" -C "$TMPDIR" "imas-codex-graph-push"
 rm -rf "$TMPDIR"
 TMPDIR=""
 SIZE_FULL=$(du -h "$FULL_ARCHIVE" | cut -f1)
-
-{login_cmd}
 
 echo "PROGRESS:PUSHING_FULL"
 FULL_ARCHIVE_NAME=$(basename "$FULL_ARCHIVE")
