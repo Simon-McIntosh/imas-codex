@@ -386,12 +386,13 @@ jobs:
             echo "⚠️ No graph loaded (GRAPH_TAG=none), skipping graph verification"
             exit 0
           fi
-          NODE_COUNT=$(docker exec smoke-test bash -c '
-            /opt/neo4j/bin/cypher-shell -u neo4j -p neo4j \
-              "MATCH (n) RETURN count(n) AS node_count" 2>/dev/null | tail -1
-          ')
+          # Use the health endpoint (already verified working) instead of cypher-shell
+          # which fails with Neo4j 2026 auth-disabled + explicit credentials
+          HEALTH=$(docker exec smoke-test curl -sf http://127.0.0.1:8000/health)
+          echo "Health response: ${HEALTH}"
+          NODE_COUNT=$(echo "$HEALTH" | python3 -c "import sys,json; print(json.load(sys.stdin).get('graph',{}).get('node_count',0))")
           echo "Node count: ${NODE_COUNT}"
-          if [ -z "$NODE_COUNT" ] || [ "$NODE_COUNT" = "0" ]; then
+          if [ -z "$NODE_COUNT" ] || [ "$NODE_COUNT" = "0" ] || [ "$NODE_COUNT" = "None" ]; then
             echo "❌ Graph is empty (node_count=${NODE_COUNT}) despite GRAPH_TAG=${GRAPH_TAG}"
             docker logs smoke-test
             exit 1
