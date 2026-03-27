@@ -2378,40 +2378,58 @@ class AgentsServer:
                 Formatted report with IMAS paths, clusters, facility
                 cross-references, and version context.
             """
+            from concurrent.futures import ThreadPoolExecutor
+
             from imas_codex.llm.search_formatters import format_search_imas_report
             from imas_codex.models.error_models import ToolError
 
             tools = _get_imas_tools()
-            result = _run_async(
-                tools.search_imas_paths(
-                    query=query,
-                    ids_filter=ids_filter,
-                    max_results=k,
-                    facility=facility,
-                    include_version_context=include_version_context,
-                    dd_version=dd_version,
-                )
-            )
-            if isinstance(result, ToolError):
-                return format_search_imas_report(result)
 
-            # Also search clusters for cross-domain context
-            cluster_result = None
-            try:
-                cluster_result = _run_async(
-                    tools.clusters_tool.search_imas_clusters(
+            # Run path search and cluster search in parallel — they are
+            # independent operations sharing the same encoder singleton.
+            def _path_search():
+                return _run_async(
+                    tools.search_imas_paths(
                         query=query,
                         ids_filter=ids_filter,
+                        max_results=k,
+                        facility=facility,
+                        include_version_context=include_version_context,
                         dd_version=dd_version,
                     )
                 )
-                if isinstance(cluster_result, ToolError):
-                    logger.debug(
-                        "Cluster search returned ToolError, omitting optional cluster context"
+
+            def _cluster_search():
+                try:
+                    cr = _run_async(
+                        tools.clusters_tool.search_imas_clusters(
+                            query=query,
+                            ids_filter=ids_filter,
+                            dd_version=dd_version,
+                        )
                     )
-                    cluster_result = None
-            except Exception:
-                logger.debug("Cluster search failed, continuing without", exc_info=True)
+                    if isinstance(cr, ToolError):
+                        logger.debug(
+                            "Cluster search returned ToolError, "
+                            "omitting optional cluster context"
+                        )
+                        return None
+                    return cr
+                except Exception:
+                    logger.debug(
+                        "Cluster search failed, continuing without",
+                        exc_info=True,
+                    )
+                    return None
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                path_future = executor.submit(_path_search)
+                cluster_future = executor.submit(_cluster_search)
+                result = path_future.result()
+                cluster_result = cluster_future.result()
+
+            if isinstance(result, ToolError):
+                return format_search_imas_report(result)
 
             return format_search_imas_report(result, cluster_result)
 

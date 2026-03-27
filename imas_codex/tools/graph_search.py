@@ -1070,7 +1070,7 @@ class GraphClustersTool:
             WHERE p.ids IN $ids_filter
             {dd_clause}
             {scope_filter}
-            WITH c, collect(DISTINCT p.id) AS section_paths,
+            WITH c, collect(DISTINCT p.id)[..50] AS section_paths,
                  collect(DISTINCT p.ids) AS ids_covered
             {section_filter}
             RETURN c.id AS id, c.label AS label, c.description AS description,
@@ -1109,7 +1109,7 @@ class GraphClustersTool:
             {scope_filter}
             OPTIONAL MATCH (member:IMASNode)-[:IN_CLUSTER]->(c)
             WHERE true {dd_clause}
-            WITH c, collect(DISTINCT member.id) AS paths
+            WITH c, collect(DISTINCT member.id)[..50] AS paths
             RETURN c.id AS id, c.label AS label, c.description AS description,
                    c.scope AS scope, c.cross_ids AS cross_ids,
                    c.ids_names AS ids_names, c.similarity_score AS similarity,
@@ -1160,7 +1160,7 @@ class GraphClustersTool:
             {scope_filter}
             {ids_filter_clause}
             OPTIONAL MATCH (member:IMASNode)-[:IN_CLUSTER]->(cluster)
-            WITH cluster, score, collect(DISTINCT member.id) AS paths
+            WITH cluster, score, collect(DISTINCT member.id)[..50] AS paths
             RETURN cluster.id AS id, cluster.label AS label,
                    cluster.description AS description,
                    cluster.scope AS scope, cluster.cross_ids AS cross_ids,
@@ -1813,7 +1813,9 @@ def _text_search_imas_paths(
     query_words = [w for w in query_lower.split() if len(w) > 2]
 
     where_parts = ["NOT (p)-[:DEPRECATED_IN]->(:DDVersion)", "p.node_category = 'data'"]
-    params: dict[str, Any] = {"query_lower": query_lower, "limit": limit}
+    # Cap CONTAINS fallback to avoid full scans on large graphs
+    contains_limit = min(limit, 100)
+    params: dict[str, Any] = {"query_lower": query_lower, "limit": contains_limit}
 
     dd_clause = _dd_version_clause("p", dd_version, params)
     if dd_clause:
