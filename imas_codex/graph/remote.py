@@ -1364,6 +1364,8 @@ fi
 SIZE_DD=$(du -h "$DD_ARCHIVE" | cut -f1)
 
 echo "PROGRESS:PUSHING_DD"
+# Re-authenticate — GHCR bearer tokens expire during long DD filtering
+_do_ghcr_login {token_arg}
 DD_ARCHIVE_NAME=$(basename "$DD_ARCHIVE")
 cd "$(dirname "$DD_ARCHIVE")"
 oras push "{dd_artifact_ref}" \\
@@ -1386,6 +1388,7 @@ FAC_ARCHIVE_{fac_upper}="$EXPORTS/imas-codex-graph-{fac}-push-$$.tar.gz"
     -o "$FAC_ARCHIVE_{fac_upper}" </dev/null 2>&1
 
 echo "PROGRESS:PUSHING_FAC_{fac_upper}"
+_do_ghcr_login {token_arg}
 FAC_NAME=$(basename "$FAC_ARCHIVE_{fac_upper}")
 cd "$(dirname "$FAC_ARCHIVE_{fac_upper}")"
 oras push "{fac_ref}" \\
