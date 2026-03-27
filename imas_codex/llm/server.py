@@ -1554,6 +1554,18 @@ class AgentsServer:
             f"MCP server ready ({mode}) with {tool_count} tools and {len(self._prompts)} prompts"
         )
 
+        # Pre-warm the embedding model in a background thread so the first
+        # search_imas call doesn't pay the 30s+ cold-start penalty.
+        # This does not block server startup.
+        import threading
+
+        def _warmup():
+            from imas_codex.tools.graph_search import warmup_encoder
+
+            warmup_encoder()
+
+        threading.Thread(target=_warmup, daemon=True, name="encoder-warmup").start()
+
     @staticmethod
     def _detect_dd_only() -> bool:
         """Detect DD-only mode by checking for Facility nodes in the graph."""

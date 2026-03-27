@@ -35,6 +35,41 @@ from imas_codex.tools.utils import normalize_ids_filter, validate_query
 
 logger = logging.getLogger(__name__)
 
+# Module-level encoder singleton — avoids re-loading the model per query
+_encoder: Any = None
+_encoder_lock: Any = None
+
+
+def _get_encoder():
+    """Get or create the module-level Encoder singleton."""
+    global _encoder, _encoder_lock
+    import threading
+
+    if _encoder_lock is None:
+        _encoder_lock = threading.Lock()
+
+    if _encoder is None:
+        with _encoder_lock:
+            if _encoder is None:
+                from imas_codex.embeddings.encoder import Encoder
+
+                _encoder = Encoder()
+    return _encoder
+
+
+def warmup_encoder():
+    """Pre-warm the encoder by loading the model.
+
+    Call from a background thread at server startup so the first
+    search_imas call doesn't pay the cold-start penalty.
+    """
+    try:
+        encoder = _get_encoder()
+        encoder.embed_texts(["warmup"])
+        logger.info("Encoder warmup complete")
+    except Exception as e:
+        logger.warning(f"Encoder warmup failed (will retry on first query): {e}")
+
 
 def _dd_version_clause(
     alias: str = "p",
@@ -310,10 +345,8 @@ class GraphSearchTool:
         )
 
     def _embed_query(self, query: str) -> list[float]:
-        """Embed query text using the Encoder."""
-        from imas_codex.embeddings.encoder import Encoder
-
-        encoder = Encoder()
+        """Embed query text using the module-level Encoder singleton."""
+        encoder = _get_encoder()
         return encoder.embed_texts([query])[0].tolist()
 
 
@@ -1210,10 +1243,8 @@ class GraphClustersTool:
         return clusters
 
     def _embed_query(self, query: str) -> list[float]:
-        """Embed query text using the Encoder."""
-        from imas_codex.embeddings.encoder import Encoder
-
-        encoder = Encoder()
+        """Embed query text using the module-level Encoder singleton."""
+        encoder = _get_encoder()
         return encoder.embed_texts([query])[0].tolist()
 
 
