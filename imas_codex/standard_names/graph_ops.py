@@ -7233,6 +7233,50 @@ def claim_refine_name_batch(
 
 
 # =============================================================================
+# Shared embedding helper for individual StandardName nodes
+# =============================================================================
+
+
+def _embed_single_standard_name(sn_id: str, description: str | None) -> None:
+    """Compute and persist embedding for a single StandardName node.
+
+    Uses the same "name — description" format as
+    :func:`persist_generated_name_batch`.  Failures are logged but never
+    propagated — the SN is still usable without an embedding.
+    """
+    try:
+        from imas_codex.embeddings.description import embed_descriptions_batch
+
+        embed_text = f"{sn_id} — {description}" if description else sn_id
+        items: list[dict[str, Any]] = [{"id": sn_id, "_embed_text": embed_text}]
+        embed_descriptions_batch(items, text_field="_embed_text")
+        vec = items[0].get("embedding")
+        if vec is not None:
+            with GraphClient() as gc:
+                gc.query(
+                    """
+                    MATCH (sn:StandardName {id: $id})
+                    SET sn.embedding    = $embedding,
+                        sn.embedded_at  = datetime()
+                    """,
+                    id=sn_id,
+                    embedding=vec,
+                )
+            logger.debug("_embed_single_standard_name: embedded %s", sn_id)
+        else:
+            logger.warning(
+                "_embed_single_standard_name: embedding returned None for %s",
+                sn_id,
+            )
+    except Exception:
+        logger.warning(
+            "Failed to embed StandardName %s — will retry later",
+            sn_id,
+            exc_info=True,
+        )
+
+
+# =============================================================================
 # Persist — refine_name (Option B: new node + REFINED_FROM + edge migration)
 # =============================================================================
 
@@ -7386,6 +7430,10 @@ def persist_refined_name(
             new_name,
             new_chain_length,
         )
+
+        # --- Embed the new refined name ---
+        _embed_single_standard_name(new_name, description)
+
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
         return row
@@ -8026,6 +8074,10 @@ def persist_generated_docs(
     new_stage: str = result[0]["docs_stage"]
     logger.debug("persist_generated_docs: %s → docs_stage=%s", sn_id, new_stage)
 
+    # Re-embed: docs generation sets/refines description, so the embedding
+    # should reflect the latest "name — description" text.
+    _embed_single_standard_name(sn_id, description)
+
     # Async counter bump — live progress visibility for ``sn status``
     bump_sn_run_counter(run_id, "names_enriched")
 
@@ -8326,6 +8378,11 @@ def persist_refined_docs(
             row["docs_chain_length"],
             row["revision_id"],
         )
+
+        # Re-embed: refined docs change the description, so update the
+        # embedding to reflect the latest "name — description" text.
+        _embed_single_standard_name(sn_id, description)
+
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
         return row
