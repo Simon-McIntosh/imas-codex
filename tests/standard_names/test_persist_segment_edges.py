@@ -245,8 +245,8 @@ class TestSegmentEdgeIdempotency:
 class TestSegmentEdgeParseFailure:
     """Test graceful handling when parse_standard_name fails."""
 
-    def test_parse_failure_still_persists_sn_node(self, mock_gc: MagicMock) -> None:
-        """If grammar parse fails, the SN node should still be written."""
+    def test_parse_failure_rejects_sn_node(self, mock_gc: MagicMock) -> None:
+        """If grammar parse fails, the SN node is rejected by the grammar gate."""
         mock_gc.query.return_value = []
 
         names = [
@@ -263,16 +263,8 @@ class TestSegmentEdgeParseFailure:
         ):
             result = _call_write(names, mock_gc)
 
-        # SN node should still be written
-        assert result == 1
-
-        # The MERGE StandardName call should exist
-        merge_calls = [
-            c
-            for c in mock_gc.query.call_args_list
-            if "MERGE (sn:StandardName" in str(c)
-        ]
-        assert len(merge_calls) >= 1
+        # Grammar gate rejects unparseable names — nothing written
+        assert result == 0
 
     def test_parse_failure_skips_segment_edges(self, mock_gc: MagicMock) -> None:
         """If grammar parse fails, no HAS_SEGMENT edges should be written."""

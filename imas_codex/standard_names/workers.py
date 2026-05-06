@@ -741,8 +741,11 @@ def _hybrid_search_neighbours_batch(
     if unique_texts:
         try:
             embeddings = embed_query_texts(unique_texts)
-            for text, emb in zip(unique_texts, embeddings, strict=True):
-                embed_cache[text] = emb
+            # Map by index — handle length mismatch gracefully (server may
+            # deduplicate or batch differently)
+            for i, emb in enumerate(embeddings):
+                if i < len(unique_texts):
+                    embed_cache[unique_texts[i]] = emb
         except Exception:
             logger.warning(
                 "Batch query embedding failed; falling back to text-only search",

@@ -1616,6 +1616,36 @@ def write_standard_names(
     if not names:
         return 0
 
+    # Grammar parse gate — reject names that ISN cannot parse.
+    # This is a hard invariant: if a name fails grammar round-trip, it is
+    # invalid by definition and must not enter the graph.
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+    except ImportError:
+        parse_standard_name = None  # type: ignore[assignment]
+
+    if parse_standard_name is not None:
+        valid_names: list[dict[str, Any]] = []
+        for n in names:
+            try:
+                parse_standard_name(n["id"])
+                valid_names.append(n)
+            except Exception as exc:
+                logger.warning(
+                    "write_standard_names: rejecting '%s' — grammar parse failed: %s",
+                    n["id"],
+                    str(exc)[:120],
+                )
+        if len(valid_names) < len(names):
+            logger.info(
+                "Grammar gate: %d/%d names passed parse validation",
+                len(valid_names),
+                len(names),
+            )
+        names = valid_names
+        if not names:
+            return 0
+
     # Guard: warn when cocos_transformation_type is set but cocos integer is missing
     for n in names:
         if n.get("cocos_transformation_type") and n.get("cocos") is None:
@@ -3275,11 +3305,12 @@ def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any
     token = str(uuid.uuid4())
     with GraphClient() as gc:
         # Step 1: claim with random ordering and unique token
+        # Gate: any StandardName with a description that hasn't been validated.
+        # No pipeline_status filter — legacy names with NULL status must also be validated.
         gc.query(
             """
             MATCH (sn:StandardName)
-            WHERE sn.pipeline_status IN ['named', 'drafted']
-              AND sn.generated_at IS NOT NULL
+            WHERE sn.description IS NOT NULL
               AND sn.validated_at IS NULL
               AND (sn.claimed_at IS NULL
                    OR sn.claimed_at < datetime() - duration($timeout))
