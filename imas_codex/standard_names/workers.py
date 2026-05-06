@@ -972,6 +972,20 @@ def _enrich_batch_items(items: list[dict]) -> None:
                 if unit_from_rel:
                     item["unit"] = unit_from_rel
 
+            # Apply unit overrides AFTER re-injecting the DD unit.
+            # The override engine corrects upstream DD defects (e.g.,
+            # unit vectors tagged 'm' instead of dimensionless '1').
+            # Without this, the BUG 9 re-injection above would bypass
+            # overrides that were applied during extraction.
+            if item.get("unit") and path:
+                from imas_codex.standard_names.unit_overrides import resolve_unit
+
+                resolved, meta = resolve_unit(path, item["unit"])
+                if meta and meta.get("rule") == "override":
+                    item["unit"] = resolved
+                elif meta and meta.get("rule") == "skip":
+                    item["unit"] = None  # will be caught by compose safety
+
             # Coordinate context
             coords = []
             for key in ("coordinate1", "coordinate2", "coordinate3"):
