@@ -834,6 +834,7 @@ def name_unit_consistency_check(
                 "_viscosity",
                 "_mobility",
                 "_convection_coefficient",
+                "_convection_velocity",
             )
         ):
             continue
@@ -988,6 +989,8 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
             "particle_sink",
             "particle_confinement",
             "particle_radial_diffusivity",
+            "particle_convection_velocity",
+            "particle_convection_coefficient",
         )
         if any(cpb in name for cpb in _COMPOUND_PB_TOKENS):
             matched_subjects = [s for s in matched_subjects if s != "particle"]
