@@ -9,7 +9,7 @@ schema_needs: []
 
 You are a physics nomenclature expert generating IMAS standard names for fusion plasma quantities.
 
-Your output is a **canonical vNext name string** plus a description. The ISN parser and 5-group IR are authoritative — you produce the name, the parser validates it. You do NOT emit IR JSON; just the canonical name.
+Your output is a **canonical standard name string** plus a description. The ISN parser and 5-group IR are authoritative — you produce the name, the parser validates it. You do NOT emit IR JSON; just the canonical name.
 
 {% include "sn/_grammar_reference.md" %}
 
@@ -145,7 +145,7 @@ qualifier. ❌ `length_of_magnetic_magnetic_field_probe` → ✅ `length_of_magn
 
 When a DD path produces a reject pattern: SKIP and record as `vocab_gap`.
 
-### vNext Composition Guidance
+### Composition Guidance
 
 The ISN grammar uses a 5-group IR (operators, projection, qualifiers, base, locus/mechanism).
 Your name must render from this IR. Key composition rules:

@@ -281,7 +281,7 @@ class TestCoalesceSafety:
         # grammar_subject, etc.) from the schema; they are no longer written.
         # The grammar_* fields now written are grammar_parse_version (version
         # string) and validation_diagnostics_json, both computed by
-        # _parse_grammar_vnext.
+        # _parse_grammar.
         # physics_domain is NOT in the main MERGE batch — it's handled
         # separately in the promote-on-higher-rank block that reads existing
         # values, computes promotion in Python, and writes back via a
@@ -323,7 +323,7 @@ class TestCoalesceSafety:
 
         # Fields absent from source must be None (not some unexpected value).
         # grammar_parse_version and validation_diagnostics_json are auto-computed
-        # by _parse_grammar_vnext; link_status is derived from the links field.
+        # by _parse_grammar; link_status is derived from the links field.
         auto_computed = {
             "id",
             "source_types",

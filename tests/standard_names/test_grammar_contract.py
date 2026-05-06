@@ -92,9 +92,9 @@ def test_build_compose_context_has_isn_keys():
 
 def test_extract_segments_physical_vector_component():
     """Verify extraction of component + physical_base from a vector projection."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+    from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    result = _parse_grammar_vnext("toroidal_component_of_magnetic_field")
+    result = _parse_grammar("toroidal_component_of_magnetic_field")
     assert result["grammar_physical_base"] == "magnetic_field"
     assert result["grammar_component"] == "toroidal"
     assert result["grammar_coordinate"] is None
@@ -104,9 +104,9 @@ def test_extract_segments_physical_vector_component():
 
 def test_extract_segments_scalar_quantity():
     """Verify extraction of physical_base for a plain scalar."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+    from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    result = _parse_grammar_vnext("pressure")
+    result = _parse_grammar("pressure")
     assert result["grammar_physical_base"] == "pressure"
     assert result["grammar_component"] is None
     assert result["grammar_coordinate"] is None
@@ -114,9 +114,9 @@ def test_extract_segments_scalar_quantity():
 
 def test_extract_segments_unparseable_name():
     """Unparseable names get version but null segment fields."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+    from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    result = _parse_grammar_vnext("electron_temperature")
+    result = _parse_grammar("electron_temperature")
     assert result["grammar_parse_version"] is not None
     assert result["grammar_physical_base"] is None
     assert result["grammar_component"] is None
@@ -125,9 +125,9 @@ def test_extract_segments_unparseable_name():
 
 def test_extract_segments_all_keys_present():
     """All grammar_* keys must be present even on parse failure."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+    from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    result = _parse_grammar_vnext("nonexistent_gibberish_xyzzy")
+    result = _parse_grammar("nonexistent_gibberish_xyzzy")
     expected_keys = {
         "grammar_parse_version",
         "validation_diagnostics_json",

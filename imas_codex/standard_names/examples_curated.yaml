@@ -377,7 +377,7 @@ good:
   physics_domain:
   - transport
   - edge_plasma_physics
-  reviewer_comments_name: 'Grammar: Fully compliant vNext decomposition with correctly placed projection prefix, qualifier,
+  reviewer_comments_name: 'Grammar: Fully compliant ISN decomposition with correctly placed projection prefix, qualifier,
     and well-formed base token. Semantic: Accurately captures parallel ion momentum flux with unit consistency. Convention:
     Canonical ordering, no abbreviations or model identifiers. Completeness: All necessary segments present; minor kind metadata
     mismatch is not a naming issue.'

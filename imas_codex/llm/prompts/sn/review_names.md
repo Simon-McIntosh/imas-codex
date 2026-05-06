@@ -50,7 +50,7 @@ genuine quality problems or false positives. Factor genuine issues into your
 grammar and convention scores.
 
 ### 1. Grammar Correctness (0-20)
-**0**: Would fail vNext grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), or prefix/postfix operator confusion. (Note: novel but well-formed `physical_base` tokens are tracked as VocabGaps and are NOT a grammar defect.)
+**0**: Would fail ISN grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), or prefix/postfix operator confusion. (Note: novel but well-formed `physical_base` tokens are tracked as VocabGaps and are NOT a grammar defect.)
 **20**: Perfect 5-group IR decomposition with correct operator form and in-vocabulary base.
 
 - Is the `physical_base` token well-formed? (Open vocabulary — novel

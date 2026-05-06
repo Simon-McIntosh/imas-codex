@@ -37,7 +37,7 @@ Rate each dimension from 0 to 20. The total score is the sum (0-80).
 ### 3. Completeness (0-20)
 - Are all required doc-side fields populated (description, documentation)?
 - Are DD aliases (e.g. `gm1`–`gm9`) mentioned when the quantity has abbreviated DD forms?
-- Does the text cite at least one relevant IMAS path or source when appropriate?
+- Does the text avoid citing raw DD paths or IDS names as storage context? Source provenance is tracked externally — documentation should describe the physics quantity without referencing specific data structures.
 - Are typical value ranges or measurement units given when meaningful?
 
 ### 4. Physics Accuracy (0-20)

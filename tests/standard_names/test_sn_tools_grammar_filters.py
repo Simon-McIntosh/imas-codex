@@ -1,6 +1,6 @@
 """Unit tests for ``_list_grammar_vocabulary`` and ``_search_standard_names`` MCP tools.
 
-Verifies (vNext grammar — plan 38 W4a):
+Verifies:
 
 - ``_search_standard_names`` accepts no ``grammar_*`` kwargs (removed); kind/tags/cocos
   post-filters still work.
@@ -35,7 +35,7 @@ def mock_gc() -> MagicMock:
 
 
 class TestSearchNoGrammarArgs:
-    """``_search_standard_names`` has no grammar_* kwargs in vNext."""
+    """``_search_standard_names`` has no grammar_* kwargs."""
 
     def _make_rows(self) -> list[dict]:
         return [

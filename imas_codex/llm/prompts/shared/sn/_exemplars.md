@@ -1,4 +1,4 @@
-## vNext Exemplars
+## ISN Exemplars
 
 Study the **reasoning**, not just the names. The canonical form often surprises.
 

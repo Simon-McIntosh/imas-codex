@@ -205,7 +205,7 @@ class TestSearchStandardNames:
         assert mock_gc.query.call_args.kwargs.get("pd") is None
 
     def test_result_format_no_grammar_fields(self):
-        """Result format no longer includes grammar_* fields (vNext)."""
+        """Result format no longer includes grammar_* fields."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
         mock_gc = MagicMock()

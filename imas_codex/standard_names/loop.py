@@ -61,7 +61,7 @@ def _count_eligible_domains(
     cypher = """
         MATCH (n:IMASNode)
         WHERE n.node_category IN $categories
-          AND n.node_type IN ['dynamic', 'constant']
+          AND NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
           AND trim(coalesce(n.description, '')) <> ''
           AND NOT EXISTS {
               MATCH (sns:StandardNameSource {source_id: n.id, source_type: 'dd'})

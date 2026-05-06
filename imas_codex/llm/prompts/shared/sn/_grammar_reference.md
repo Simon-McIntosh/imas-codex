@@ -1,4 +1,4 @@
-## Standard Name Grammar (vNext — rc21)
+## Standard Name Grammar Reference
 
 ### Core Axioms
 
@@ -34,7 +34,7 @@ Every standard name decomposes into five groups:
 
 ### `_of_` Disambiguation
 
-After vNext, `_of_` appears in exactly three structural roles:
+In the ISN grammar, `_of_` appears in exactly three structural roles:
 
 | Role | Template | Disambiguator |
 |------|----------|---------------|
@@ -57,7 +57,7 @@ After vNext, `_of_` appears in exactly three structural roles:
 
 ### Rejected rc20 Forms
 
-| ❌ rc20 form (now invalid) | ✅ vNext canonical | Reason |
+| ❌ rc20 form (now invalid) | ✅ ISN canonical | Reason |
 |----------------------------|--------------------|----|
 | `real_part_of_X` | `X_real_part` | Postfix operator, not prefix |
 | `amplitude_of_X` | `X_amplitude` | Postfix operator, not prefix |

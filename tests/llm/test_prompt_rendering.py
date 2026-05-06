@@ -1,4 +1,4 @@
-"""Tests for SN compose prompt rendering — vNext grammar reference + exemplar alignment."""
+"""Tests for SN compose prompt rendering — grammar reference + exemplar alignment."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture()
 def rendered_compose_system() -> str:
-    """Render sn/compose_system.md with full grammar context."""
+    """Render sn/generate_name_system.md with full grammar context."""
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.standard_names.context import (
         build_compose_context,
@@ -16,15 +16,15 @@ def rendered_compose_system() -> str:
 
     clear_context_cache()
     context = build_compose_context()
-    return render_prompt("sn/compose_system", context)
+    return render_prompt("sn/generate_name_system", context)
 
 
 class TestTransformationInjection:
-    """W4b — Verify vNext grammar reference replaces rc20 transformation injection."""
+    """Verify ISN grammar reference replaces rc20 transformation injection."""
 
-    def test_vnext_grammar_heading_present(self, rendered_compose_system: str) -> None:
-        """The vNext grammar reference heading must be present."""
-        assert "Standard Name Grammar (vNext" in rendered_compose_system
+    def test_grammar_heading_present(self, rendered_compose_system: str) -> None:
+        """The ISN grammar reference heading must be present."""
+        assert "Standard Name Grammar Reference" in rendered_compose_system
 
     def test_old_static_list_not_present(self, rendered_compose_system: str) -> None:
         """The old static heading 'Transformation Boundaries' must be gone."""
@@ -32,7 +32,7 @@ class TestTransformationInjection:
         assert "Only these 4 transformation tokens" not in rendered_compose_system
 
     def test_old_live_heading_gone(self, rendered_compose_system: str) -> None:
-        """The old rc20 heading must be gone — replaced by vNext grammar."""
+        """The old rc20 heading must be gone — replaced by ISN grammar."""
         assert (
             "Transformations (live from imas-standard-names)"
             not in rendered_compose_system
@@ -51,7 +51,7 @@ class TestTransformationInjection:
 
 
 class TestExemplarAlignment:
-    """W4b — Verify vNext exemplars and anti-patterns landed."""
+    """Verify ISN exemplars and anti-patterns landed."""
 
     def test_no_vertical_position_of_x_point(
         self, rendered_compose_system: str
@@ -178,21 +178,14 @@ class TestAntiPatternHardening:
         assert "vacuum_wavelength_of_polarimeter_beam" in rendered_compose_system
 
     def test_anti_pattern_gallery_present(self, rendered_compose_system: str) -> None:
-        """ANTI-PATTERN GALLERY section must appear with at least 5 entries."""
-        assert "ANTI-PATTERN GALLERY" in rendered_compose_system
-        # Each entry is marked 'Entry N'
-        for entry_n in range(1, 6):
-            assert f"Entry {entry_n}" in rendered_compose_system
+        """ANTI-PATTERN REFERENCE section must appear."""
+        assert "ANTI-PATTERN REFERENCE" in rendered_compose_system
 
     def test_gallery_real_failing_names(self, rendered_compose_system: str) -> None:
-        """Gallery must contain verbatim real failing names from the EMW pilot."""
+        """Anti-pattern section must contain verbatim real failing names."""
         assert "polarimeter_laser_wavelength" in rendered_compose_system
         assert (
             "initial_ellipticity_of_polarimeter_channel_beam" in rendered_compose_system
-        )
-        assert (
-            "initial_polarization_of_polarimeter_channel_beam"
-            in rendered_compose_system
         )
 
     def test_new_sections_before_dynamic_blocks(

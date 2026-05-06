@@ -246,9 +246,9 @@ implementation. Never mention:
 
 - Grid types or mesh topology: ❌ "on the GGD edge grid", "stored on a triangular mesh"
 - Data layout or array shape: ❌ "stored as a 2D array indexed by (rho, theta)"
-- Specific IDS section names as context: ❌ "in the edge_profiles IDS" — cite the
-  full DD path verbatim (e.g. `edge_profiles/ggd/electrons/temperature/values`)
-  when referencing the source, but do not describe the IDS as a storage container
+- Specific IDS section names as storage context: ❌ "in the edge_profiles IDS" — do
+  not describe IDS structures as storage containers. Source provenance is tracked
+  externally via graph edges, not in documentation prose
 - Specific simulation codes: ❌ "as computed by JINTRAC" — measurement or
   computation methods are fine in general terms (e.g. "from Thomson scattering"),
   but not code-specific

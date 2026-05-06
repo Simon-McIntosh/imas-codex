@@ -1944,3 +1944,61 @@ class TestNormalizedQuantityBypass:
             )
             == []
         )
+
+
+class TestGgdImplementationLeakageCheck:
+    """Tests for ggd_implementation_leakage_check."""
+
+    def test_flag_on_the_ggd(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "Temperature on the GGD edge grid"}
+        )
+        assert len(issues) == 1
+        assert "ggd_leakage" in issues[0]
+
+    def test_flag_ggd_mesh(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"documentation": "Defined on a GGD mesh element for edge transport"}
+        )
+        assert len(issues) == 1
+        assert "ggd_leakage" in issues[0]
+
+    def test_flag_unstructured_ggd(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "Stored on an unstructured GGD representation"}
+        )
+        assert len(issues) == 1
+
+    def test_pass_bare_ggd_reference(self):
+        """Bare 'GGD' without implementation pattern should pass."""
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "General grid description (GGD) based quantity"}
+        )
+        assert issues == []
+
+    def test_pass_no_ggd(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "Electron temperature on the plasma edge"}
+        )
+        assert issues == []
+
+    def test_both_fields_flagged(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {
+                "description": "Density on the GGD edge grid",
+                "documentation": "Values stored on a GGD mesh",
+            }
+        )
+        assert len(issues) == 2

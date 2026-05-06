@@ -163,8 +163,8 @@ def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
     return segments
 
 
-def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
-    """Parse ``name`` with the vNext ISN grammar API.
+def _parse_grammar(name: str) -> dict[str, str | None]:
+    """Parse ``name`` with the ISN grammar API.
 
     Returns a dict with ``grammar_parse_version`` (ISN package version string),
     ``validation_diagnostics_json`` (JSON array of diagnostic objects), and
@@ -207,12 +207,12 @@ def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
         segments = _extract_grammar_segments(result.ir)
     except ParseError:
         logger.debug(
-            "vNext grammar parse rejected '%s' — storing empty diagnostics", name
+            "ISN grammar parse rejected '%s' — storing empty diagnostics", name
         )
         diags = "[]"
     except Exception:
         logger.debug(
-            "vNext grammar parse failed for '%s' — storing empty diagnostics", name
+            "ISN grammar parse failed for '%s' — storing empty diagnostics", name
         )
         diags = "[]"
 
@@ -1302,7 +1302,7 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     """Attempt ISN parse on a parent name to extract grammar fields.
 
     Returns a dict with grammar_* keys. On parse failure, all values are None.
-    Uses the same ``_extract_grammar_segments`` as ``_parse_grammar_vnext``.
+    Uses the same ``_extract_grammar_segments`` as ``_parse_grammar``.
     """
     try:
         from imas_standard_names.grammar.parser import ParseError, parse
@@ -1761,7 +1761,7 @@ def write_standard_names(
                     "llm_tokens_cached_read": n.get("llm_tokens_cached_read"),
                     "llm_tokens_cached_write": n.get("llm_tokens_cached_write"),
                     "regen_increment": n.get("regen_increment"),
-                    **_parse_grammar_vnext(n["id"]),
+                    **_parse_grammar(n["id"]),
                 }
                 for n in names
             ],

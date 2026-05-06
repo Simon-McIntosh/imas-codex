@@ -1004,14 +1004,14 @@ classes:
           Reviewer comments that triggered the last refinement cycle.
           Captured from ``reviewer_comments_name`` at refine time so the
           reason survives subsequent review overwrites.
-      # --- Grammar parse provenance (vNext — imas-standard-names >= 0.7.0rc21) ---
+      # --- Grammar parse provenance (imas-standard-names >= 0.7.0rc21) ---
       grammar_parse_version:
         description: >-
-          Version of ``imas-standard-names`` used when the vNext parser
+          Version of ``imas-standard-names`` used when the ISN parser
           last processed this name (e.g. ``"0.7.0rc21"``). Stamped at
           write time with ``imas_standard_names.__version__``. Enables
           staleness checks when the grammar parser is upgraded.
-          ``null`` means parse has not been run with the vNext API.
+          ``null`` means parse has not been run.
         range: string
       grammar_parse_fallback:
         description: >-
@@ -1025,11 +1025,11 @@ classes:
         required: false
       validation_diagnostics_json:
         description: >-
-          JSON-serialised list of parser diagnostics from the last vNext
+          JSON-serialised list of parser diagnostics from the last ISN
           parse, one object per diagnostic with keys: ``category``,
           ``layer``, ``message``, ``suggestion``, ``severity``.
           An empty JSON array (``"[]"``) means no diagnostics were
-          emitted; ``null`` means the vNext parse has not run yet.
+          emitted; ``null`` means the ISN parse has not run yet.
           Grammar decomposition is derived on demand via
           ``imas_standard_names.grammar.parser.parse()``; per-segment
           properties are no longer stored on the node.

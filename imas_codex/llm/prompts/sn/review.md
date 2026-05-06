@@ -29,7 +29,7 @@ genuine quality problems or false positives. Factor genuine issues into your
 grammar and convention scores.
 
 ### 1. Grammar Correctness (0-20)
-- Does the name parse correctly under the vNext 5-group IR?
+- Does the name parse correctly under the ISN 5-group IR?
 - Is the `physical_base` token in the closed vocabulary?
 - Are prefix operators scoped with `_of_` (`gradient_of_X`, not `gradient_X`)?
 - Are postfix operators correctly suffixed (`X_magnitude`, not `magnitude_of_X`)?
@@ -55,9 +55,9 @@ grammar and convention scores.
   the absorbed tokens in the `issues` field as
   `decomposition: <token>(<group>) absorbed into physical_base`.
 
-**20**: Perfect parse under vNext IR, valid closed-vocab base, correct operator scoping, consistent decomposition.
+**20**: Perfect parse under ISN IR, valid closed-vocab base, correct operator scoping, consistent decomposition.
 **10**: Parses correctly but uses legacy concatenation forms (e.g. missing `_of_` on prefix operator).
-**0**: Would fail vNext grammar validation, uses unknown physical_base token, or prefix/postfix operator confusion.
+**0**: Would fail ISN grammar validation, uses unknown physical_base token, or prefix/postfix operator confusion.
 
 ### 2. Semantic Accuracy (0-20)
 - Does the name correctly describe the physics quantity from the source?

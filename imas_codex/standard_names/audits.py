@@ -2419,6 +2419,39 @@ def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag GGD implementation details leaking into description or documentation.
+
+    Detects patterns like "on the GGD edge grid", "GGD mesh", "GGD subgrid"
+    that describe storage implementation rather than physics. Bare "GGD" in
+    valid physics context (e.g. "general grid description") is NOT flagged.
+
+    Non-critical audit — adds to validation_issues as a warning so the
+    review/refine cycle can address it.
+    """
+    issues: list[str] = []
+    _patterns = [
+        r"\bon\s+(?:the|a|an)\s+GGD\b",
+        r"\bGGD\s+(?:grid|mesh|element|subgrid|surface|cell|edge|node)\b",
+        r"\bunstructured\s+GGD\b",
+        r"\bGGD\s+(?:data\s+)?structure\b",
+    ]
+    _compiled = [re.compile(p, re.IGNORECASE) for p in _patterns]
+
+    for field in ("description", "documentation"):
+        text = candidate.get(field) or ""
+        for pat in _compiled:
+            m = pat.search(text)
+            if m:
+                issues.append(
+                    f"audit:ggd_leakage: {field} contains GGD implementation "
+                    f"detail '{m.group()}'. Descriptions and documentation "
+                    f"should describe physics, not storage implementation."
+                )
+                break  # one issue per field is sufficient
+    return issues
+
+
 def run_audits(
     candidate: dict[str, Any],
     existing_sns_in_domain: list[dict[str, Any]] | None = None,
@@ -2484,6 +2517,7 @@ def run_audits(
     all_issues.extend(position_redundancy_check(candidate))
     all_issues.extend(process_qualifier_check(candidate))
     all_issues.extend(decomposition_audit_check(candidate))
+    all_issues.extend(ggd_implementation_leakage_check(candidate))
 
     return all_issues
 
