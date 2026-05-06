@@ -2821,9 +2821,8 @@ def persist_generated_name_batch(
         ):
             entry["cocos_transformation_type"] = "one_like"
 
-    # --- Embedding deferred to dedicated embed worker pool ---
-    # Clear embed_text_hash so the embed pool picks these up.
-    # No inline embedding — the embed_name pool handles it asynchronously.
+    # --- Embedding deferred to shared discovery embed_description_worker ---
+    # Clear embedding so the background embed worker picks these up.
     for entry in candidates:
         entry["embedding"] = None
         entry["embed_text_hash"] = None

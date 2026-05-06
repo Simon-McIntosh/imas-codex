@@ -51,17 +51,15 @@ POOL_ORDER: tuple[str, ...] = (
     "generate_docs",
     "review_docs",
     "refine_docs",
-    "embed_name",
 )
 
 #: Display rows — each maps to one or more internal pools.
-#: The display merges 7 pools into 5 visual rows.
+#: The display merges 6 pools into 4 visual rows.
 DISPLAY_ROWS: tuple[str, ...] = (
     "generate_name",  # merges generate_name + refine_name
     "review_name",  # review_name only
     "generate_docs",  # merges generate_docs + refine_docs
     "review_docs",  # review_docs only
-    "embed_name",  # embed_name only
 )
 
 #: Mapping: display row → internal pools that feed it.
@@ -70,25 +68,22 @@ DISPLAY_POOL_MAP: dict[str, tuple[str, ...]] = {
     "review_name": ("review_name",),
     "generate_docs": ("generate_docs", "refine_docs"),
     "review_docs": ("review_docs",),
-    "embed_name": ("embed_name",),
 }
 
-#: Display labels for the 5 merged rows.
+#: Display labels for the 4 merged rows.
 DISPLAY_LABELS: dict[str, str] = {
     "generate_name": "GENERATE NAME",
     "review_name": "REVIEW NAME",
     "generate_docs": "GENERATE DOCS",
     "review_docs": "REVIEW DOCS",
-    "embed_name": "EMBED",
 }
 
-#: Rich styles for the 5 display rows.
+#: Rich styles for the 4 display rows.
 DISPLAY_STYLES: dict[str, str] = {
     "generate_name": "bold magenta",
     "review_name": "bold yellow",
     "generate_docs": "bold cyan",
     "review_docs": "bold yellow",
-    "embed_name": "bold green",
 }
 
 #: Display labels — short labels that fit the canonical LABEL_WIDTH (12).
@@ -99,7 +94,6 @@ POOL_LABELS: dict[str, str] = {
     "generate_docs": "DRAFT DOCS",
     "review_docs": "REVIEW DOCS",
     "refine_docs": "REFINE DOCS",
-    "embed_name": "EMBED",
 }
 
 #: Legacy long labels (upper-case, underscore-separated).
@@ -111,7 +105,6 @@ _LEGACY_POOL_LABELS: dict[str, str] = {
     "generate_docs": "GENERATE_DOCS",
     "review_docs": "REVIEW_DOCS",
     "refine_docs": "REFINE_DOCS",
-    "embed_name": "EMBED_NAME",
 }
 
 #: Rich styles per pool.
@@ -122,7 +115,6 @@ POOL_STYLES: dict[str, str] = {
     "generate_docs": "bold cyan",
     "review_docs": "bold yellow",
     "refine_docs": "cyan",
-    "embed_name": "bold green",
 }
 
 #: Maximum streamed items kept per pool (legacy compat).
@@ -227,7 +219,6 @@ _EVENT_MAPPERS: dict[str, Any] = {
     "generate_docs": _map_generate_docs,
     "review_docs": _map_review_docs,
     "refine_docs": _map_refine_docs,
-    "embed_name": _map_embed_name,
 }
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -344,7 +335,6 @@ ITEM_FORMATTERS: dict[str, Any] = {
     "generate_docs": format_item_generate_docs,
     "review_docs": format_item_review_docs,
     "refine_docs": format_item_refine_docs,
-    "embed_name": format_item_embed_name,
 }
 
 
@@ -985,7 +975,6 @@ __all__ = [
     "STREAM_MAXLEN",
     "compute_eta",
     "compute_etc",
-    "format_item_embed_name",
     "format_item_generate_docs",
     "format_item_generate_name",
     "format_item_refine_docs",

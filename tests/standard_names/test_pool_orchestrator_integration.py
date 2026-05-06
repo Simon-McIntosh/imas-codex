@@ -242,7 +242,7 @@ class TestPhysicsDomainPassthrough:
         stop = asyncio.Event()
         specs = _build_pool_specs(mgr, stop, min_score=0.6)
 
-        assert len(specs) == 7
+        assert len(specs) == 6
         pool_names = {s.name for s in specs}
         assert pool_names == {
             "generate_name",
@@ -251,7 +251,6 @@ class TestPhysicsDomainPassthrough:
             "generate_docs",
             "review_docs",
             "refine_docs",
-            "embed_name",
         }
 
         # Verify that run_sn_pools signature accepts only_domain

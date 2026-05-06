@@ -32,7 +32,6 @@ _ALL_POOL_KEYS = frozenset(
         "generate_docs",
         "review_docs",
         "refine_docs",
-        "embed_name",
     }
 )
 
@@ -50,7 +49,7 @@ def _make_gc(row: dict | None) -> MagicMock:
 
 
 class TestReturnShape:
-    """The function always returns a dict with exactly the 7 pool keys."""
+    """The function always returns a dict with exactly the 6 pool keys."""
 
     def test_keys_are_complete(self) -> None:
         row = dict.fromkeys(_ALL_POOL_KEYS, 0)
@@ -86,7 +85,6 @@ class TestCountsPassthrough:
             "generate_docs": 4,
             "review_docs": 5,
             "refine_docs": 6,
-            "embed_name": 7,
         }
         result = _compute_pool_pending(
             _make_gc(expected), domains=None, rotation_cap=3, min_score=0.75

@@ -192,11 +192,11 @@ def test_display_rows_cover_all_pools():
 
 
 def test_display_rows_count():
-    """5 display rows, 7 internal pools."""
+    """4 display rows, 6 internal pools."""
     from imas_codex.standard_names.display import DISPLAY_ROWS, POOL_ORDER
 
-    assert len(DISPLAY_ROWS) == 5
-    assert len(POOL_ORDER) == 7
+    assert len(DISPLAY_ROWS) == 4
+    assert len(POOL_ORDER) == 6
 
 
 def test_pool_weights_sum_to_one():
@@ -205,4 +205,5 @@ def test_pool_weights_sum_to_one():
 
     total = sum(POOL_WEIGHTS.values())
     assert abs(total - 1.0) < 0.01, f"Weights sum to {total}, expected ~1.0"
-    assert "embed_name" in POOL_WEIGHTS
+    # embed_name removed — embedding handled by discovery embed worker
+    assert "embed_name" not in POOL_WEIGHTS

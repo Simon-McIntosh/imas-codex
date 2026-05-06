@@ -640,14 +640,12 @@ def _build_pool_specs(
         REVIEW_NAME_BACKLOG_CAP,
     )
     from imas_codex.standard_names.graph_ops import (
-        claim_embed_batch,
         claim_generate_docs_batch,
         claim_generate_name_batch,
         claim_refine_docs_batch,
         claim_refine_name_batch,
         claim_review_docs_batch,
         claim_review_name_batch,
-        release_embed_claims,
         release_generate_docs_claims,
         release_generate_name_claims,
         release_refine_docs_claims,
@@ -657,7 +655,6 @@ def _build_pool_specs(
     )
     from imas_codex.standard_names.pools import PoolSpec
     from imas_codex.standard_names.workers import (
-        process_embed_batch,
         process_generate_docs_batch,
         process_generate_name_batch,
         process_refine_docs_batch,
@@ -826,12 +823,6 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_refine_docs_claims, ids_kwarg="sn_ids"
             ),
-        ),
-        PoolSpec(
-            name="embed_name",
-            claim=_make_claim_adapter(claim_embed_batch),
-            process=_make_process_adapter(process_embed_batch),
-            release=_make_release_adapter(release_embed_claims, ids_kwarg="sn_ids"),
         ),
     ]
 
@@ -1226,6 +1217,33 @@ async def run_sn_pools(
             name="orphan_sweep",
         )
 
+        # ── Embedding worker (reuses discovery infrastructure) ─────
+        # Runs the shared embed_description_worker targeting StandardName
+        # nodes.  It handles health gating, exponential backoff, and
+        # batch persistence — no custom embed pool needed.
+        from imas_codex.discovery.base.embed_worker import (
+            embed_description_worker,
+        )
+
+        class _EmbedState:
+            """Minimal state adapter for embed_description_worker."""
+
+            stop_requested = False
+
+            def should_stop(self) -> bool:
+                return stop_event.is_set()
+
+        embed_state = _EmbedState()
+        embed_task = asyncio.create_task(
+            embed_description_worker(
+                embed_state,
+                labels=["StandardName"],
+                facility=None,
+                batch_size=100,
+            ),
+            name="embed_sn",
+        )
+
         # Periodic ``SNRun.cost_spent`` sync so ``imas-codex sn status``
         # reflects real spend even when the run is interrupted or crashes
         # before ``finalize_sn_run`` runs.
@@ -1272,7 +1290,11 @@ async def run_sn_pools(
                 sweep_task.cancel()
             if not cost_sync_task.done():
                 cost_sync_task.cancel()
-            await asyncio.gather(sweep_task, cost_sync_task, return_exceptions=True)
+            if not embed_task.done():
+                embed_task.cancel()
+            await asyncio.gather(
+                sweep_task, cost_sync_task, embed_task, return_exceptions=True
+            )
         logger.info("run_sn_pools: all pools exited — %s", health_map)
 
         # ── A3: per-pool cost observability ────────────────────────

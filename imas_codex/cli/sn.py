@@ -106,7 +106,7 @@ def _compute_pool_pending(
     """Return per-pool pending counts mirroring ``claim_*_batch`` predicates.
 
     Keys: ``generate_name``, ``review_name``, ``refine_name``,
-    ``generate_docs``, ``review_docs``, ``refine_docs``, ``embed_name``.
+    ``generate_docs``, ``review_docs``, ``refine_docs``.
 
     Parameters
     ----------
@@ -173,16 +173,8 @@ def _compute_pool_pending(
         {domain_filter_sn}
       RETURN count(sn) AS refine_docs
     }}
-    CALL {{
-      MATCH (sn:StandardName)
-      WHERE (sn.embedding IS NULL OR sn.embed_text_hash IS NULL)
-        AND (sn.embed_claimed_at IS NULL
-             OR sn.embed_claimed_at < datetime() - duration('PT5M'))
-      RETURN count(sn) AS embed_name
-    }}
     RETURN generate_name, review_name, refine_name,
-           generate_docs, review_docs, refine_docs,
-           embed_name
+           generate_docs, review_docs, refine_docs
     """
     params: dict[str, object] = {
         "rotation_cap": rotation_cap,
@@ -199,7 +191,6 @@ def _compute_pool_pending(
             "generate_docs": 0,
             "review_docs": 0,
             "refine_docs": 0,
-            "embed_name": 0,
         }
     r = rows[0]
     return {
@@ -211,7 +202,6 @@ def _compute_pool_pending(
             "generate_docs",
             "review_docs",
             "refine_docs",
-            "embed_name",
         )
     }
 

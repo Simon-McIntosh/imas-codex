@@ -4,7 +4,7 @@ Replaces the per-domain serial ``run_sn_loop`` with N persistent async
 tasks that pull work from the graph independently and share a single
 :class:`BudgetManager` for cost coordination.
 
-Seven pools run under a single ``asyncio.gather``:
+Six pools run under a single ``asyncio.gather``:
 
 * ``generate_name``  — composes new ``StandardName`` rows from
                        ``StandardNameSource(status='extracted')``.
@@ -13,7 +13,9 @@ Seven pools run under a single ``asyncio.gather``:
 * ``generate_docs``  — adds description+documentation to accepted names.
 * ``review_docs``    — scores description+documentation.
 * ``refine_docs``    — refines docs below the review threshold.
-* ``embed_name``     — batch-embeds StandardName descriptions (no LLM cost).
+
+Embedding is handled by the shared discovery ``embed_description_worker``
+(async background task launched alongside the pools, not a pool itself).
 
 Each pool follows a cooperative shutdown contract:
 
@@ -62,15 +64,15 @@ logger = logging.getLogger(__name__)
 # ~$0.02 for generation.  Equal generate/review weights caused a >100-
 # name review backlog after $15 spend.  Weights now favour review pools
 # so names and docs flow through the pipeline at roughly equal rates.
-# embed_name has low weight — embedding is cheap and fast.
+# Embedding is handled by the shared discovery embed_description_worker
+# (async background task, not a pool).
 POOL_WEIGHTS: dict[str, float] = {
-    "generate_name": 0.14,
-    "review_name": 0.24,
+    "generate_name": 0.15,
+    "review_name": 0.25,
     "refine_name": 0.10,
-    "generate_docs": 0.14,
-    "review_docs": 0.24,
+    "generate_docs": 0.15,
+    "review_docs": 0.25,
     "refine_docs": 0.10,
-    "embed_name": 0.04,
 }
 
 POOL_NAMES: tuple[str, ...] = tuple(POOL_WEIGHTS.keys())
