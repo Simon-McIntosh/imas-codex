@@ -640,14 +640,10 @@ class SN6PoolDisplay(BaseProgressDisplay):
     def refresh_pending(self) -> None:
         """Refresh pool totals from the pending-count callback.
 
-        Mapping from pending-fn keys to pool names:
-
-        - ``generate_name`` ← ``draft`` (pending) + ``draft_done`` (baseline)
-        - ``review_name``   ← ``review_names`` + ``review_names_done``
-        - ``refine_name``   ← ``revise``
-        - ``generate_docs`` ← ``enrich`` + ``enrich_done``
-        - ``review_docs``   ← ``review_docs`` + ``review_docs_done``
-        - ``refine_docs``   — no direct graph query; total stays at 0.
+        The pending-count function returns a dict keyed by pool name
+        (``generate_name``, ``review_name``, etc.) with current pending
+        counts.  Total for each pool is ``completed + pending`` where
+        ``completed`` is tracked locally via :meth:`on_event`.
         """
         if self._pending_fn is None:
             return
@@ -660,22 +656,11 @@ class SN6PoolDisplay(BaseProgressDisplay):
         if isinstance(counts, list):
             counts = dict(counts)
 
-        _MAP: dict[str, tuple[str, str | None]] = {
-            "generate_name": ("draft", "draft_done"),
-            "review_name": ("review_names", "review_names_done"),
-            "refine_name": ("revise", None),
-            "generate_docs": ("enrich", "enrich_done"),
-            "review_docs": ("review_docs", "review_docs_done"),
-        }
-        for pool_name, (pending_key, done_key) in _MAP.items():
+        for pool_name in POOL_ORDER:
             state = self.pools.get(pool_name)
             if state is None:
                 continue
-            pending = int(counts.get(pending_key, 0))
-            if done_key is not None:
-                done = int(counts.get(done_key, 0))
-                if done > state.completed:
-                    state.completed = done
+            pending = int(counts.get(pool_name, 0))
             new_total = state.completed + pending
             if new_total > state.total:
                 state.total = new_total

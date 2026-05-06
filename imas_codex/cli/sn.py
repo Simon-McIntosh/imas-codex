@@ -22,6 +22,40 @@ from imas_codex.standard_names.defaults import (
 logger = logging.getLogger(__name__)
 console = Console()
 
+
+def _check_llm_direct() -> tuple[bool, str]:
+    """Check direct OpenRouter connectivity for the SN pipeline.
+
+    The SN pipeline bypasses the LiteLLM proxy and calls OpenRouter
+    directly when ``OPENROUTER_API_KEY_IMAS_CODEX`` is set.  This check
+    verifies the key is available and the configured model is reachable.
+    """
+    import os
+
+    from imas_codex.settings import get_model
+
+    model = get_model("language")
+    key = os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
+    if not key:
+        return False, "no API key"
+
+    # Quick probe: verify the OpenRouter API responds (auth endpoint).
+    try:
+        import urllib.request
+
+        req = urllib.request.Request(
+            "https://openrouter.ai/api/v1/auth/key",
+            headers={"Authorization": f"Bearer {key}"},
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            if resp.status == 200:
+                short_model = model.split("/")[-1] if "/" in model else model
+                return True, f"direct ({short_model})"
+    except Exception:
+        pass
+    return False, "unreachable"
+
+
 _PHYSICS_DOMAIN_CHOICE = click.Choice(
     [d.value for d in PhysicsDomain], case_sensitive=False
 )
@@ -217,15 +251,18 @@ def _run_sn_loop_cmd(
     run_id = str(_uuid.uuid4())
     use_rich = not quiet and not dry_run and use_rich_output()
 
-    # Pre-suppress noisy SN loggers BEFORE any heavy imports/inits so
-    # rich-mode startup is silent. Only raise console *handler* levels —
-    # logger levels stay at default so file handlers still receive all
-    # messages. Repeated by run_discovery() after display attach (defense
-    # in depth).
+    # Pre-suppress console output BEFORE any heavy imports/inits so
+    # rich-mode startup is silent. Most loggers inherit from root, so
+    # suppressing root's console handlers is the effective fix. Named
+    # logger suppression is defense-in-depth (run_discovery() repeats it).
     if use_rich:
         import logging as _logging
 
-        for mod in (
+        # Suppress root logger console handlers — this catches ALL loggers
+        # that inherit from root (which is most of them).
+        for lg_name in (
+            "",  # root logger — critical for catching inherited output
+            "imas_codex",
             "imas_codex.standard_names",
             "imas_codex.graph",
             "imas_codex.embeddings",
@@ -240,12 +277,15 @@ def _run_sn_loop_cmd(
             "urllib3",
             "neo4j",
         ):
-            lg = _logging.getLogger(mod)
-            for handler in lg.handlers:
+            lg = _logging.getLogger(lg_name)
+            for handler in list(lg.handlers):
                 if isinstance(handler, _logging.StreamHandler) and not isinstance(
                     handler, _logging.FileHandler
                 ):
-                    handler.setLevel(_logging.ERROR)
+                    if lg_name in ("", "imas_codex"):
+                        lg.removeHandler(handler)
+                    else:
+                        handler.setLevel(_logging.ERROR)
 
     # Build Rich display or fall back to plain logging
     display = None
@@ -328,7 +368,9 @@ def _run_sn_loop_cmd(
                 f"{', dry-run' if dry_run else ''})"
             )
 
-    # Build harness config — SN loop wants graph + model status at top
+    # Build harness config — SN loop wants graph + model status at top.
+    # SN pipeline bypasses the LiteLLM proxy (uses direct OpenRouter), so
+    # we skip the proxy health check and add a direct-routing check instead.
     disc_config = DiscoveryConfig(
         domain="standard-names",
         facility="sn",
@@ -338,7 +380,7 @@ def _run_sn_loop_cmd(
         check_embed=False,
         check_ssh=False,
         check_auth=False,
-        check_model=not dry_run,
+        check_model=False,  # proxy check is misleading — SN uses direct bypass
         verbose=verbose,
         suppress_loggers=[
             "imas_codex.standard_names",
@@ -356,6 +398,15 @@ def _run_sn_loop_cmd(
             "neo4j",
         ]
         if use_rich
+        else [],
+        extra_service_checks=[
+            (
+                "llm",
+                _check_llm_direct,
+                {"poll_interval": 60.0, "critical": False},
+            ),
+        ]
+        if use_rich and not dry_run
         else [],
     )
 
