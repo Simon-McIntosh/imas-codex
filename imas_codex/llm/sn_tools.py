@@ -3,11 +3,8 @@
 Functions are prefixed with ``_`` — they are registered as MCP tools
 in ``server.py`` via ``@self.mcp.tool()``.
 
-Plan 40 Phase 3 — wrappers delegate to the backing functions in
-:mod:`imas_codex.standard_names.search` (single source of truth). Old
-private function names (``_segment_filter_search_sn``, ``_vector_search_sn``,
-``_keyword_search_sn``) are retained as aliases for one release; new
-canonical names are ``_*_search_standard_names``.
+Search delegates to :mod:`imas_codex.standard_names.search` which performs
+3-stream RRF fusion (vector + keyword + tiered grammar matching).
 """
 
 from __future__ import annotations
@@ -16,11 +13,11 @@ import logging
 
 from neo4j.exceptions import ServiceUnavailable
 
-from imas_codex.embeddings.encoder import EmbeddingBackendError, Encoder
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.search import (
     check_names as _check_names_backing,
     find_related as _find_related_backing,
+    search_standard_names as _search_sn_backing,
     summarise_family as _summarise_family_backing,
 )
 
@@ -68,16 +65,15 @@ def _search_standard_names(
 ) -> str:
     """Search standard names by physics concept.
 
-    Hybrid search (vector + keyword) over StandardName descriptions.
-    Falls back to keyword-only if no embeddings present.
+    Delegates to :func:`~imas_codex.standard_names.search.search_standard_names`
+    which performs 3-stream RRF fusion (vector + keyword + tiered grammar).
+    Quarantined, exhausted, and superseded names are excluded automatically.
 
-    When any grammar-segment filter is provided (``physical_base``,
-    ``subject``, ``transformation``, etc.), the search is routed through a
-    bare-name-column query (Plan 40 §5).  Open-vocabulary segments that
-    never have typed edges populated still match because the bare-name
-    columns are the post-Phase-1 source of truth.
+    When grammar-segment filters are provided (``physical_base``,
+    ``subject``, etc.), results are filtered via ``sn.<segment>`` property
+    matching — the canonical source of truth for both open- and closed-
+    vocabulary segments.
     """
-    # Empty queries with no filters produce embedding-noise hits; refuse early.
     has_filters = any(
         v is not None
         for v in (
@@ -113,7 +109,6 @@ def _search_standard_names(
     except Exception as e:
         return f"Error connecting to graph: {e}"
 
-    # Collect segment filter kwargs for graph-native filtering
     segment_filters: dict[str, str] = {}
     _seg_map = {
         "physical_base": physical_base,
@@ -131,52 +126,35 @@ def _search_standard_names(
         if val is not None:
             segment_filters[seg] = val
 
-    # Try to get embedding for vector search
-    has_embedding = False
-    embedding: list[float] = []
     try:
-        from imas_codex.embeddings.config import EncoderConfig
-
-        encoder = Encoder(EncoderConfig())
-        result = encoder.embed_texts([query])[0]
-        embedding = result.tolist() if hasattr(result, "tolist") else list(result)
-        has_embedding = True
-    except (EmbeddingBackendError, Exception):
-        pass
-
-    try:
-        if segment_filters:
-            rows = _segment_filter_search_standard_names(
-                gc, query, k, segment_filters, physics_domain=physics_domain
-            )
-        elif has_embedding:
-            rows = _vector_search_standard_names(
-                gc, embedding, k, physics_domain=physics_domain
-            )
-        else:
-            rows = _keyword_search_standard_names(
-                gc, query, k, physics_domain=physics_domain
-            )
+        rows = _search_sn_backing(
+            query or "",
+            k=k,
+            segment_filters=segment_filters or None,
+            kind=kind,
+            pipeline_status=pipeline_status,
+            cocos_type=cocos_type,
+            gc=gc,
+        )
     except ServiceUnavailable:
         return NEO4J_NOT_RUNNING_MSG
     except Exception as e:
         return f"Search failed: {_neo4j_error_message(e)}"
 
-    # Post-filter
-    if kind:
-        rows = [r for r in rows if (r.get("kind") or "").lower() == kind.lower()]
-    if pipeline_status:
+    # physics_domain post-filter (not handled by backing function)
+    if physics_domain:
+        pd_lower = physics_domain.lower()
         rows = [
             r
             for r in rows
-            if (r.get("pipeline_status") or "").lower() == pipeline_status.lower()
-        ]
-    if cocos_type:
-        rows = [
-            r for r in rows if (r.get("cocos_transformation_type") or "") == cocos_type
+            if (r.get("physics_domain") or "").lower() == pd_lower
+            or pd_lower
+            in [
+                s.lower() for s in (r.get("source_domains") or []) if isinstance(s, str)
+            ]
         ]
 
-    return _format_search_report(query, rows)
+    return _format_search_report(query or "", rows)
 
 
 def _segment_filter_search_standard_names(
@@ -234,7 +212,7 @@ def _segment_filter_search_standard_names(
     if not where:
         return []
 
-    # Plan-MCP: physics_domain filter pushed into Cypher (covers promoted
+    # physics_domain filter pushed into Cypher (covers promoted
     # scalar and source list).  $pd=null short-circuits to true.
     where.append(
         "($pd IS NULL OR sn.physics_domain = $pd OR $pd IN coalesce(sn.source_domains, []))"
@@ -260,75 +238,6 @@ LIMIT $k
 """
     )
     return gc.query(cypher, **params)
-
-
-def _vector_search_standard_names(
-    gc: GraphClient,
-    embedding: list[float],
-    k: int,
-    *,
-    physics_domain: str | None = None,
-) -> list[dict]:
-    """Run vector search on StandardName nodes."""
-    cypher = """
-CALL db.index.vector.queryNodes('standard_name_desc_embedding', $k, $embedding)
-YIELD node AS sn, score
-WHERE sn.id IS NOT NULL
-  AND coalesce(sn.name_stage, '') <> 'superseded'
-  AND ($pd IS NULL OR sn.physics_domain = $pd
-       OR $pd IN coalesce(sn.source_domains, []))
-OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-RETURN sn.id AS name, sn.description AS description,
-       sn.kind AS kind, coalesce(u.id, sn.unit) AS unit,
-       sn.pipeline_status AS pipeline_status,
-       sn.documentation AS documentation,
-       sn.cocos_transformation_type AS cocos_transformation_type,
-       sn.cocos AS cocos,
-       sn.physics_domain AS physics_domain,
-       score
-ORDER BY score DESC
-"""
-    return gc.query(cypher, embedding=embedding, k=k, pd=physics_domain)
-
-
-def _keyword_search_standard_names(
-    gc: GraphClient,
-    query: str,
-    k: int,
-    *,
-    physics_domain: str | None = None,
-) -> list[dict]:
-    """Run keyword search on StandardName nodes."""
-    cypher = """
-MATCH (sn:StandardName)
-WHERE (toLower(sn.id) CONTAINS toLower($keyword)
-       OR toLower(sn.description) CONTAINS toLower($keyword)
-       OR toLower(coalesce(sn.documentation, '')) CONTAINS toLower($keyword))
-  AND coalesce(sn.name_stage, '') <> 'superseded'
-  AND ($pd IS NULL OR sn.physics_domain = $pd
-       OR $pd IN coalesce(sn.source_domains, []))
-OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-RETURN sn.id AS name, sn.description AS description,
-       sn.kind AS kind, coalesce(u.id, sn.unit) AS unit,
-       sn.pipeline_status AS pipeline_status,
-       sn.documentation AS documentation,
-       sn.cocos_transformation_type AS cocos_transformation_type,
-       sn.cocos AS cocos,
-       sn.physics_domain AS physics_domain,
-       1.0 AS score
-LIMIT $k
-"""
-    return gc.query(cypher, keyword=query, k=k, pd=physics_domain)
-
-
-# ---------------------------------------------------------------------------
-# Plan 40 §17 — back-compat private aliases for the old SN-suffix names.
-# Removed in the release after Phase 4.
-# ---------------------------------------------------------------------------
-
-_segment_filter_search_sn = _segment_filter_search_standard_names
-_vector_search_sn = _vector_search_standard_names
-_keyword_search_sn = _keyword_search_standard_names
 
 
 def _format_search_report(query: str, rows: list[dict]) -> str:
@@ -418,7 +327,7 @@ RETURN sn.id AS name, sn.description AS description,
        sn.source_paths AS source_paths, sn.constraints AS constraints,
        sn.validity_domain AS validity_domain,
        sn.pipeline_status AS pipeline_status,
-       sn.confidence AS confidence, sn.model AS model,
+       sn.model AS model,
        sn.cocos_transformation_type AS cocos_transformation_type,
        sn.cocos AS cocos,
        sn.dd_version AS dd_version,
@@ -461,7 +370,6 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
         constraints = row.get("constraints") or []
         validity_domain = row.get("validity_domain") or ""
         pipeline_status = row.get("pipeline_status") or ""
-        confidence = row.get("confidence")
         model = row.get("model") or ""
         cocos_transformation_type = row.get("cocos_transformation_type") or ""
         cocos = row.get("cocos")
@@ -481,8 +389,6 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
             lines.append(f"- **Unit:** {unit}")
         if pipeline_status:
             lines.append(f"- **Review Status:** {pipeline_status}")
-        if confidence is not None:
-            lines.append(f"- **Confidence:** {confidence:.2f}")
         if model:
             lines.append(f"- **Model:** {model}")
         if cocos_transformation_type:
@@ -718,7 +624,7 @@ def _list_grammar_vocabulary(
 
 
 # ---------------------------------------------------------------------------
-# _find_related_standard_names (plan 40 §7.2.3)
+# _find_related_standard_names
 # ---------------------------------------------------------------------------
 
 
@@ -738,7 +644,7 @@ def _find_related_standard_names(
         max_results: Maximum results per bucket.
 
     Returns:
-        Bucketed markdown report (plan 40 §7.2.3). Empty buckets suppressed;
+        Bucketed markdown report. Empty buckets suppressed;
         deterministic order via ``RELATED_BUCKET_ORDER``.
     """
     try:
@@ -802,7 +708,7 @@ def _find_related_standard_names(
 
 
 # ---------------------------------------------------------------------------
-# _check_standard_names (plan 40 §7.2.6)
+# _check_standard_names
 # ---------------------------------------------------------------------------
 
 
@@ -860,7 +766,7 @@ def _check_standard_names(
 
 
 # ---------------------------------------------------------------------------
-# _get_standard_name_summary (plan 40 §7.2.7)
+# _get_standard_name_summary
 # ---------------------------------------------------------------------------
 
 
