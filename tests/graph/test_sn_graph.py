@@ -1,17 +1,18 @@
-"""Standard name health gate tests for post-rotation quality checks.
+"""Standard name graph quality tests.
 
-Runs against a live, populated Neo4j graph. NOT part of default CI;
-invoke with:
+Runs against a live Neo4j graph alongside other ``tests/graph/`` tests.
+Invoke with:
 
-    uv run pytest -m sn_health -v
+    uv run pytest tests/graph/test_sn_graph.py -v
+    uv run pytest -m graph -v          # all graph tests including these
 
 All metrics are scoped to terminal-state names only:
 - name_stage='accepted' for name-axis metrics
 - docs_stage='accepted' for documentation-axis metrics
 - name_stage IN ('accepted', 'exhausted') for quarantine/exclusion checks
 
-If the graph is unreachable or contains fewer than 10 accepted
-StandardName nodes, all tests are skipped.
+If the graph contains fewer than 10 accepted StandardName nodes,
+tests are skipped (graph connectivity is handled by the conftest).
 """
 
 from __future__ import annotations
@@ -38,15 +39,12 @@ def _connect_and_count_accepted():
 
 @pytest.fixture(scope="module")
 def gc():
-    """Module-scoped GraphClient; skip the entire module if unavailable."""
-    try:
-        client, count = _connect_and_count_accepted()
-    except Exception as exc:
-        pytest.skip(f"Neo4j graph unreachable: {exc}")
+    """Module-scoped GraphClient; skip if too few accepted names."""
+    client, count = _connect_and_count_accepted()
     if count < 10:
         pytest.skip(
             f"Graph has only {count} accepted StandardName nodes (<10); "
-            "populate via `sn run` before running sn_health tests."
+            "populate via `sn run` before running SN graph tests."
         )
     yield client
 
@@ -134,8 +132,7 @@ LIMIT 10
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.sn_health
-class TestStandardNameHealth:
+class TestStandardNameGraph:
     """Quantitative gates for a post-rotation standard name corpus.
 
     All metrics are scoped to terminal-state names — names still in

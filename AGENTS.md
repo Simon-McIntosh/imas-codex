@@ -1584,7 +1584,7 @@ rg "ERROR|WARNING" ~/.local/share/imas-codex/logs/     # Find errors
 
 ```bash
 uv sync --extra test          # Required in worktrees
-uv run pytest                 # Default markers: excludes slow, sn_health, graph
+uv run pytest                 # Default markers: excludes slow, graph
 uv run pytest tests/standard_names/ -q  # SN tests (~3300 tests, ~90s)
 uv run pytest tests/path/to/test.py::test_function  # Specific test
 uv run pytest --cov=imas_codex  # With coverage
@@ -1597,12 +1597,14 @@ Tests are tiered by runtime cost. Default `addopts` excludes expensive markers:
 | Marker | Tests | Requires | Default |
 |--------|-------|----------|---------|
 | *(none)* | ~3300 | Nothing (mocks) | ✅ Included |
-| `@pytest.mark.graph` | ~435 | Live Neo4j | ❌ Excluded |
+| `@pytest.mark.graph` | ~445 | Live Neo4j | ❌ Excluded |
 | `@pytest.mark.slow` | ~31 | GPU/live endpoints | ❌ Excluded |
-| `@pytest.mark.sn_health` | ~10 | Populated Neo4j | ❌ Excluded |
+
+SN graph quality tests (`tests/graph/test_sn_graph.py`) are included in the `graph` marker — they auto-skip if <10 accepted StandardName nodes exist.
 
 ```bash
-uv run pytest -m graph               # Run graph tests only
+uv run pytest -m graph               # Run all graph tests (including SN quality)
+uv run pytest tests/graph/test_sn_graph.py -v  # SN quality tests only
 uv run pytest -m "slow or graph"     # Run slow + graph tests
 ```
 
