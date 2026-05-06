@@ -766,7 +766,7 @@ def _write_manifest(
         "domains_included": sorted(domains_included or []),
         "catalog_commit_sha": source_commit_sha,
         "exported_at": datetime.now(UTC).isoformat(),
-        "edge_model_version": "plan_39_v1",
+        "edge_model_version": "v1",
     }
 
     # Validate via ISN manifest model

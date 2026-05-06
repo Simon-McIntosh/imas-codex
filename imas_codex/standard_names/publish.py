@@ -30,7 +30,7 @@ from filelock import FileLock
 logger = logging.getLogger(__name__)
 
 #: Required edge model version — publish refuses incompatible manifests.
-_REQUIRED_EDGE_MODEL_VERSION = "plan_39_v1"
+_REQUIRED_EDGE_MODEL_VERSION = "v1"
 
 
 # =============================================================================

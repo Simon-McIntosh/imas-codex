@@ -115,25 +115,47 @@ def keyword_stream(
 ) -> list[dict]:
     """Substring-match ranked SN ids over name + description + documentation.
 
-    Cheap proxy for BM25; Neo4j core does not ship FTS5. Results are not
-    score-ordered (pure existence filter); rank order is row order.
+    Generates multiple query variants to handle the space/underscore mismatch
+    between natural language queries and underscore-joined StandardName ids.
     """
     if not query or not query.strip():
         return []
+
+    q = query.strip()
+    # Generate query variants to handle space/underscore/hyphen forms
+    variants: set[str] = {q}
+    underscore_form = q.replace(" ", "_").replace("-", "_")
+    if underscore_form != q:
+        variants.add(underscore_form)
+    space_form = q.replace("_", " ").replace("-", " ")
+    if space_form != q:
+        variants.add(space_form)
+
+    # Build OR conditions for each variant
+    or_conditions = []
+    params: dict[str, Any] = {"k": k_candidates}
+    for i, variant in enumerate(sorted(variants)):
+        pkey = f"kw{i}"
+        params[pkey] = variant
+        or_conditions.append(
+            f"(toLower(sn.id) CONTAINS toLower(${pkey})"
+            f" OR toLower(coalesce(sn.description, '')) CONTAINS toLower(${pkey})"
+            f" OR toLower(coalesce(sn.documentation, '')) CONTAINS toLower(${pkey}))"
+        )
+
+    where_clause = " OR ".join(or_conditions)
+
     rows = (
         gc.query(
-            """
+            f"""
             MATCH (sn:StandardName)
-            WHERE toLower(sn.id) CONTAINS toLower($keyword)
-               OR toLower(coalesce(sn.description, '')) CONTAINS toLower($keyword)
-               OR toLower(coalesce(sn.documentation, '')) CONTAINS toLower($keyword)
+            WHERE {where_clause}
             WITH sn
             WHERE coalesce(sn.name_stage, '') <> 'superseded'
             RETURN sn.id AS id
             LIMIT $k
             """,
-            keyword=query,
-            k=k_candidates,
+            **params,
         )
         or []
     )
@@ -530,7 +552,8 @@ def fetch_standard_names(
             OPTIONAL MATCH (src)-[:IN_IDS]->(ids:IDS)
             RETURN {", ".join(select)},
                    collect(DISTINCT src.id) AS source_ids,
-                   collect(DISTINCT ids.id) AS source_ids_names
+                   collect(DISTINCT ids.id) AS source_ids_names,
+                   CASE WHEN sn.description IS NULL THEN true ELSE false END AS is_placeholder
             """
         rows = [dict(r) for r in (gc.query(cypher, names=names) or [])]
 

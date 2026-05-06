@@ -484,7 +484,7 @@ class TestPartialExportPublishSafety:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "full",
             "domains_included": ["transport", "magnetics"],
-            "edge_model_version": "plan_39_v1",
+            "edge_model_version": "v1",
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
@@ -512,7 +512,7 @@ class TestPartialExportPublishSafety:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "domain_subset",
             "domains_included": ["transport"],
-            "edge_model_version": "plan_39_v1",
+            "edge_model_version": "v1",
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
@@ -639,7 +639,7 @@ class TestEdgeModelVersionGuard:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "full",
             "domains_included": ["kinetics"],
-            "edge_model_version": "plan_39_v0",
+            "edge_model_version": "v0",
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
