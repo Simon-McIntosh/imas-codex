@@ -101,15 +101,91 @@ def normalize_name_id(name: str) -> str:
     return name.lower()
 
 
+def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
+    """Extract grammar segment fields from a parsed ISN IR object.
+
+    Maps ISN IR structure to the ``grammar_*`` properties on StandardName:
+    - ``base.token`` → ``grammar_physical_base`` (quantity) or
+      ``grammar_geometric_base`` (carrier)
+    - ``projection.axis`` → ``grammar_component`` (component shape) or
+      ``grammar_coordinate`` (coordinate shape)
+    - Qualifiers by category → ``grammar_subject``, ``grammar_position``,
+      ``grammar_process``, ``grammar_device``, ``grammar_region``
+    - First unary_prefix operator → ``grammar_transformation``
+    """
+    segments: dict[str, str | None] = {
+        "grammar_physical_base": None,
+        "grammar_geometric_base": None,
+        "grammar_subject": None,
+        "grammar_component": None,
+        "grammar_coordinate": None,
+        "grammar_transformation": None,
+        "grammar_position": None,
+        "grammar_process": None,
+        "grammar_device": None,
+        "grammar_region": None,
+    }
+
+    if ir.base:
+        kind = getattr(ir.base.kind, "value", str(ir.base.kind))
+        if kind == "carrier":
+            segments["grammar_geometric_base"] = ir.base.token
+        else:
+            segments["grammar_physical_base"] = ir.base.token
+
+    if ir.projection:
+        shape = getattr(ir.projection.shape, "value", str(ir.projection.shape))
+        if shape == "coordinate":
+            segments["grammar_coordinate"] = ir.projection.axis
+        else:
+            segments["grammar_component"] = ir.projection.axis
+
+    # Map qualifiers by category
+    category_to_field = {
+        "subject": "grammar_subject",
+        "position": "grammar_position",
+        "process": "grammar_process",
+        "device": "grammar_device",
+        "region": "grammar_region",
+    }
+    for qual in ir.qualifiers or []:
+        cat = qual.category
+        if cat and cat in category_to_field:
+            segments[category_to_field[cat]] = qual.token
+
+    # First unary_prefix operator → transformation
+    for op in ir.operators or []:
+        kind = getattr(op.kind, "value", str(op.kind))
+        if kind == "unary_prefix" and op.op:
+            segments["grammar_transformation"] = op.op
+            break
+
+    return segments
+
+
 def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
     """Parse ``name`` with the vNext ISN grammar API.
 
-    Returns a dict with ``grammar_parse_version`` (ISN package version string)
-    and ``validation_diagnostics_json`` (JSON array of diagnostic objects).
+    Returns a dict with ``grammar_parse_version`` (ISN package version string),
+    ``validation_diagnostics_json`` (JSON array of diagnostic objects), and
+    all ``grammar_*`` segment fields extracted from the ISN IR.
     The parse version is always set when ISN is available; diagnostics default
     to ``"[]"`` on parse failure so the field is never ``null`` after the first
     successful stamp.
     """
+    segment_defaults: dict[str, str | None] = {
+        "grammar_physical_base": None,
+        "grammar_geometric_base": None,
+        "grammar_subject": None,
+        "grammar_component": None,
+        "grammar_coordinate": None,
+        "grammar_transformation": None,
+        "grammar_position": None,
+        "grammar_process": None,
+        "grammar_device": None,
+        "grammar_region": None,
+    }
+
     try:
         import dataclasses
 
@@ -118,11 +194,17 @@ def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
 
         version: str = imas_standard_names.__version__
     except ImportError:
-        return {"grammar_parse_version": None, "validation_diagnostics_json": None}
+        return {
+            "grammar_parse_version": None,
+            "validation_diagnostics_json": None,
+            **segment_defaults,
+        }
 
+    segments = dict(segment_defaults)
     try:
         result = parse(name)
         diags = json.dumps([dataclasses.asdict(d) for d in result.diagnostics])
+        segments = _extract_grammar_segments(result.ir)
     except ParseError:
         logger.debug(
             "vNext grammar parse rejected '%s' — storing empty diagnostics", name
@@ -134,7 +216,11 @@ def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
         )
         diags = "[]"
 
-    return {"grammar_parse_version": version, "validation_diagnostics_json": diags}
+    return {
+        "grammar_parse_version": version,
+        "validation_diagnostics_json": diags,
+        **segments,
+    }
 
 
 def _compute_link_status(links: list[str] | None) -> str | None:
@@ -1216,25 +1302,29 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     """Attempt ISN parse on a parent name to extract grammar fields.
 
     Returns a dict with grammar_* keys. On parse failure, all values are None.
+    Uses the same ``_extract_grammar_segments`` as ``_parse_grammar_vnext``.
     """
-    fields: dict[str, str | None] = {
-        "grammar_physical_base": None,
-        "grammar_subject": None,
-        "grammar_transformation": None,
-        "grammar_component": None,
-    }
     try:
-        from imas_standard_names import parse_standard_name
+        from imas_standard_names.grammar.parser import ParseError, parse
 
-        parsed = parse_standard_name(name_id)
-        if parsed:
-            fields["grammar_physical_base"] = getattr(parsed, "physical_base", None)
-            fields["grammar_subject"] = getattr(parsed, "subject", None)
-            fields["grammar_transformation"] = getattr(parsed, "transformation", None)
-            fields["grammar_component"] = getattr(parsed, "component", None)
-    except Exception:  # noqa: BLE001
+        result = parse(name_id)
+        return _extract_grammar_segments(result.ir)
+    except (ImportError, ParseError):
         logger.debug("ISN parse failed for parent %s", name_id)
-    return fields
+    except Exception:  # noqa: BLE001
+        logger.debug("ISN parse error for parent %s", name_id)
+    return {
+        "grammar_physical_base": None,
+        "grammar_geometric_base": None,
+        "grammar_subject": None,
+        "grammar_component": None,
+        "grammar_coordinate": None,
+        "grammar_transformation": None,
+        "grammar_position": None,
+        "grammar_process": None,
+        "grammar_device": None,
+        "grammar_region": None,
+    }
 
 
 def seed_parent_sources(gc: Any | None = None) -> int:

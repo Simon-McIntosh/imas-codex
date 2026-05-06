@@ -85,3 +85,61 @@ def test_build_compose_context_has_isn_keys():
     assert "applicability" in ctx
     assert "exclusive_pairs" in ctx
     clear_context_cache()
+
+
+# ── Grammar segment extraction tests ──
+
+
+def test_extract_segments_physical_vector_component():
+    """Verify extraction of component + physical_base from a vector projection."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+
+    result = _parse_grammar_vnext("toroidal_component_of_magnetic_field")
+    assert result["grammar_physical_base"] == "magnetic_field"
+    assert result["grammar_component"] == "toroidal"
+    assert result["grammar_coordinate"] is None
+    assert result["grammar_geometric_base"] is None
+    assert result["grammar_parse_version"] is not None
+
+
+def test_extract_segments_scalar_quantity():
+    """Verify extraction of physical_base for a plain scalar."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+
+    result = _parse_grammar_vnext("pressure")
+    assert result["grammar_physical_base"] == "pressure"
+    assert result["grammar_component"] is None
+    assert result["grammar_coordinate"] is None
+
+
+def test_extract_segments_unparseable_name():
+    """Unparseable names get version but null segment fields."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+
+    result = _parse_grammar_vnext("electron_temperature")
+    assert result["grammar_parse_version"] is not None
+    assert result["grammar_physical_base"] is None
+    assert result["grammar_component"] is None
+    assert result["validation_diagnostics_json"] == "[]"
+
+
+def test_extract_segments_all_keys_present():
+    """All grammar_* keys must be present even on parse failure."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+
+    result = _parse_grammar_vnext("nonexistent_gibberish_xyzzy")
+    expected_keys = {
+        "grammar_parse_version",
+        "validation_diagnostics_json",
+        "grammar_physical_base",
+        "grammar_geometric_base",
+        "grammar_subject",
+        "grammar_component",
+        "grammar_coordinate",
+        "grammar_transformation",
+        "grammar_position",
+        "grammar_process",
+        "grammar_device",
+        "grammar_region",
+    }
+    assert expected_keys <= set(result.keys())

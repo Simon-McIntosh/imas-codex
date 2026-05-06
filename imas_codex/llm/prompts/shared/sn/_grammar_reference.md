@@ -135,4 +135,20 @@ This checklist directly addresses the dominant failure mode surfaced by
 expert reviewers: closed-vocab tokens (toroidal, parallel, thermal,
 e_cross_b_drift, normalized, fast_ion, …) crammed into `physical_base`
 instead of placed in their correct grammar slot.
+
+### Top Absorption Failures — Concrete Examples
+
+These are the MOST FREQUENTLY absorbed tokens (observed in 73% of reviewed
+names). Study each example — if you see any of these patterns in your
+output, restructure immediately:
+
+| ❌ Wrong (absorbed into physical_base) | ✅ Correct (decomposed) | Absorbed Token → Correct Segment |
+|-----------------------------------------|-------------------------|----------------------------------|
+| `toroidal_angle_of_position` | `toroidal_angle` (coord=toroidal, geom_base=angle) | `toroidal` → coordinate |
+| `parallel_current_density` | `parallel_component_of_current_density` | `parallel` → component |
+| `toroidal_torque` | `toroidal_component_of_torque` | `toroidal` → component |
+| `radial_electric_field` | `radial_component_of_electric_field` | `radial` → component |
+| `beam_position_variation` | report as `vocab_gap` (variation is not a registered token) | context-dependent |
+| `thermal_electron_energy` | subject=`thermal_electron`, base=`energy` | `thermal_electron` → subject |
+| `normalized_poloidal_flux` | `normalized_of_poloidal_magnetic_flux` | `normalized` → transformation |
 {% endif %}

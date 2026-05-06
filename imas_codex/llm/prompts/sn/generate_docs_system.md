@@ -92,7 +92,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 ### Field constraints
 
 - `standard_name` — MUST exactly match the input name (hard requirement for result matching).
-- `description` — **≤2 concise sentences**. Must add information beyond what the name tokens encode. Use American spelling (e.g., "ionization", "behavior").
+- `description` — **1 concise sentence strongly preferred, 2 max (≤250 characters)**. The first sentence must be a self-contained definition. Add ONLY information beyond what the name tokens already encode. Do NOT start with trailing participles ("Representing...", "Characterizing...", "Quantifying..."). Use American spelling (e.g., "ionization", "behavior").
 - `documentation` — ≥3 sentences. Must cover physical meaning, measurement context, and related quantities. American spelling throughout.
 - `links` — MUST use the `name:foo_bar` prefix (e.g., `name:electron_temperature`). Each link must name an existing standard name (will be validated; non-existent links cause rejection). URLs (https://…) are permitted for external references.
 - `validity_domain` — optional but encouraged. Physical region or regime where the quantity is meaningful.
@@ -239,3 +239,16 @@ Descriptions must not introduce physical content not encoded in the SN's grammar
 | No normalization segment in grammar | Must NOT mention normalization |
 | `subject=element` | Must NOT use "molecular" or "compound ion" (higher-level concepts) |
 | No handedness/COCOS segment in grammar | Must NOT introduce sign conventions ("counter-clockwise", "viewed from above") |
+
+### PR-8 Implementation leakage ban
+Descriptions and documentation must describe **physics**, not storage or
+implementation. Never mention:
+
+- Grid types or mesh topology: ❌ "on the GGD edge grid", "stored on a triangular mesh"
+- Data layout or array shape: ❌ "stored as a 2D array indexed by (rho, theta)"
+- Specific IDS section names as context: ❌ "in the edge_profiles IDS" — cite the
+  full DD path verbatim (e.g. `edge_profiles/ggd/electrons/temperature/values`)
+  when referencing the source, but do not describe the IDS as a storage container
+- Specific simulation codes: ❌ "as computed by JINTRAC" — measurement or
+  computation methods are fine in general terms (e.g. "from Thomson scattering"),
+  but not code-specific

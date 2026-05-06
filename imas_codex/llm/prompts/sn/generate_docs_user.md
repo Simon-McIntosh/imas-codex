@@ -110,10 +110,12 @@ Related derivatives (same denominator):
 {% endif %}
 
 {% if item.source_paths %}
-## IMAS DD Paths
+## IMAS DD Paths (MANDATORY citation)
 
 This standard name is sourced from the following IMAS Data Dictionary paths.
-Cite at least one verbatim in the documentation prose.
+You MUST cite at least one path verbatim in the documentation prose using
+backtick formatting (e.g. `equilibrium/time_slice/profiles_1d/psi`).
+Reviewers will reject documentation that omits DD path citations.
 
 {% for p in item.source_paths %}- `{{ p }}`
 {% endfor %}{% endif %}
