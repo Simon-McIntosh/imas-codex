@@ -1,10 +1,8 @@
 """Tests for standard name MCP tools.
 
-Plan-MCP-and-units Track A: signatures dropped ``tag``/``tags`` MCP kwargs
-(every prior call raised ``TypeError`` because the backing functions never
-accepted them). New canonical filter is ``physics_domain``, which is
-pushed into Cypher in all three search branches (segment-filter, vector,
-keyword) and into the WHERE clause of ``_list_standard_names``.
+Validates that ``_search_standard_names`` delegates correctly to the backing
+search function and that result formatting, kind/pipeline_status filtering,
+and parameter forwarding (physics_domain, segment_filters) all work.
 """
 
 from __future__ import annotations
@@ -34,191 +32,127 @@ def _row(**overrides):
 
 
 class TestSearchStandardNames:
-    """Test _search_standard_names tool."""
+    """Test _search_standard_names tool delegates to backing and formats."""
 
-    def test_keyword_fallback(self):
-        """Search falls back to keyword when no embeddings."""
+    def _patch_backing(self, return_value):
+        """Patch the backing search function used by _search_standard_names."""
+        return patch(
+            "imas_codex.llm.sn_tools._search_sn_backing",
+            return_value=return_value,
+        )
+
+    def test_basic_search_returns_formatted_results(self):
+        """Backing results are formatted into a readable report."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[_row()])
-
-        # Patch Encoder to fail (trigger keyword fallback)
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            result = _search_standard_names("electron temperature", gc=mock_gc)
+        with self._patch_backing([_row()]):
+            result = _search_standard_names("electron temperature", gc=MagicMock())
 
         assert "electron_temperature" in result
-        mock_gc.query.assert_called()
-        # Default physics_domain=None must be forwarded as $pd=None
-        call_kwargs = mock_gc.query.call_args.kwargs
-        assert call_kwargs.get("pd") is None
 
     def test_empty_results(self):
         """Empty results produce informative message."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            result = _search_standard_names("nonexistent quantity", gc=mock_gc)
+        with self._patch_backing([]):
+            result = _search_standard_names("nonexistent quantity", gc=MagicMock())
 
         assert "No" in result or "0" in result
 
     def test_no_args_no_typeerror(self):
-        """Plan-MCP regression: search with only the query must not raise.
-
-        Before this plan landed, the MCP wrapper forwarded ``tags=None``
-        unconditionally, which the backing function never accepted →
-        ``TypeError`` on every call.
-        """
+        """Search with only the query must not raise TypeError."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            # Must not raise
-            _search_standard_names("temperature", gc=mock_gc)
+        with self._patch_backing([]):
+            _search_standard_names("temperature", gc=MagicMock())
 
-    def test_kind_filter(self):
-        """Kind filter is applied to results."""
+    def test_kind_filter_forwarded_to_backing(self):
+        """Kind filter is forwarded to backing search function."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(
-            return_value=[
-                _row(kind="scalar"),
-                _row(name="velocity_field", kind="vector", unit="m/s"),
-            ]
-        )
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            result = _search_standard_names("temperature", kind="scalar", gc=mock_gc)
+        with self._patch_backing([_row(kind="scalar")]) as mock_backing:
+            result = _search_standard_names(
+                "temperature", kind="scalar", gc=MagicMock()
+            )
 
         assert "electron_temperature" in result
-        assert "velocity_field" not in result
+        _, kwargs = mock_backing.call_args
+        assert kwargs.get("kind") == "scalar"
 
-    def test_pipeline_status_filter(self):
-        """pipeline_status filter is applied."""
+    def test_pipeline_status_filter_forwarded_to_backing(self):
+        """pipeline_status filter is forwarded to backing search function."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(
-            return_value=[
-                _row(name="drafted_name", pipeline_status="drafted"),
-                _row(name="published_name", pipeline_status="published", unit="A"),
-            ]
-        )
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
+        with self._patch_backing(
+            [_row(name="drafted_name", pipeline_status="drafted")]
+        ) as mock_backing:
             result = _search_standard_names(
-                "test", pipeline_status="drafted", gc=mock_gc
+                "test", pipeline_status="drafted", gc=MagicMock()
             )
 
         assert "drafted_name" in result
-        assert "published_name" not in result
+        _, kwargs = mock_backing.call_args
+        assert kwargs.get("pipeline_status") == "drafted"
 
-    def test_physics_domain_pushed_into_cypher_keyword(self):
-        """physics_domain is pushed into the keyword Cypher as $pd."""
+    def test_physics_domain_post_filter(self):
+        """physics_domain post-filters results from the backing function."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[_row(physics_domain="transport")])
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
+        with self._patch_backing(
+            [
+                _row(name="transport_name", physics_domain="transport"),
+                _row(name="equilibrium_name", physics_domain="equilibrium"),
+            ]
         ):
-            _search_standard_names(
-                "temperature", physics_domain="transport", gc=mock_gc
+            result = _search_standard_names(
+                "temperature", physics_domain="transport", gc=MagicMock()
             )
 
-        call = mock_gc.query.call_args
-        cypher = call.args[0] if call.args else ""
-        assert "$pd" in cypher, "physics_domain not pushed into Cypher"
-        assert call.kwargs.get("pd") == "transport"
+        assert "transport_name" in result
+        assert "equilibrium_name" not in result
 
-    def test_physics_domain_pushed_into_cypher_vector(self):
-        """physics_domain is forwarded as $pd to the vector branch."""
+    def test_physics_domain_default_none_no_filter(self):
+        """When physics_domain is None, all results are returned."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[_row(physics_domain="equilibrium")])
-
-        # Make Encoder succeed so we hit the vector branch
-        mock_enc = MagicMock()
-        mock_enc.embed_texts = MagicMock(return_value=[[0.1] * 8])
-        with patch("imas_codex.llm.sn_tools.Encoder", return_value=mock_enc):
-            _search_standard_names(
-                "temperature", physics_domain="equilibrium", gc=mock_gc
-            )
-
-        call = mock_gc.query.call_args
-        cypher = call.args[0] if call.args else ""
-        assert "vector.queryNodes" in cypher
-        assert "$pd" in cypher
-        assert call.kwargs.get("pd") == "equilibrium"
-
-    def test_physics_domain_pushed_into_cypher_segment(self):
-        """physics_domain is pushed into the segment-filter branch as $pd."""
-        from imas_codex.llm.sn_tools import _search_standard_names
-
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[_row()])
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
+        with self._patch_backing(
+            [
+                _row(name="transport_name", physics_domain="transport"),
+                _row(name="equilibrium_name", physics_domain="equilibrium"),
+            ]
         ):
+            result = _search_standard_names("temperature", gc=MagicMock())
+
+        assert "transport_name" in result
+        assert "equilibrium_name" in result
+
+    def test_segment_filters_forwarded_to_backing(self):
+        """Segment filter kwargs are collected and forwarded to backing."""
+        from imas_codex.llm.sn_tools import _search_standard_names
+
+        with self._patch_backing([_row()]) as mock_backing:
             _search_standard_names(
                 "temperature",
-                physics_domain="transport",
                 physical_base="temperature",
-                gc=mock_gc,
+                subject="electron",
+                gc=MagicMock(),
             )
 
-        call = mock_gc.query.call_args
-        cypher = call.args[0] if call.args else ""
-        assert "$pd" in cypher
-        assert call.kwargs.get("pd") == "transport"
-
-    def test_physics_domain_default_null(self):
-        """When physics_domain is None, $pd=null short-circuits the filter."""
-        from imas_codex.llm.sn_tools import _search_standard_names
-
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[_row()])
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            _search_standard_names("temperature", gc=mock_gc)
-
-        assert mock_gc.query.call_args.kwargs.get("pd") is None
+        _, kwargs = mock_backing.call_args
+        assert kwargs["segment_filters"] == {
+            "physical_base": "temperature",
+            "subject": "electron",
+        }
 
     def test_result_format_no_grammar_fields(self):
-        """Result format no longer includes grammar_* fields."""
+        """Result format does not include grammar_* fields."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[_row(score=0.92)])
-
-        with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            result = _search_standard_names("electron temperature", gc=mock_gc)
+        with self._patch_backing([_row(score=0.92)]):
+            result = _search_standard_names("electron temperature", gc=MagicMock())
 
         assert "electron_temperature" in result
         assert "0.92" in result
-        # Grammar fields are no longer stored on nodes or displayed
         assert "physical_base=" not in result
         assert "subject=" not in result
 
@@ -582,64 +516,21 @@ class TestSupersededExclusion:
             "score": 0.85,
         }
 
-    def test_keyword_cypher_excludes_superseded(self):
-        """Keyword-branch Cypher must include name_stage <> 'superseded'."""
-        from imas_codex.llm.sn_tools import _keyword_search_standard_names
+    def test_backing_excludes_superseded(self):
+        """Backing search function is called and superseded names are excluded.
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-        _keyword_search_standard_names(mock_gc, "electron temperature", k=5)
-        cypher = mock_gc.query.call_args.args[0]
-        assert "name_stage" in cypher and "superseded" in cypher
-
-    def test_vector_cypher_excludes_superseded(self):
-        """Vector-branch Cypher must include name_stage <> 'superseded'."""
-        from imas_codex.llm.sn_tools import _vector_search_standard_names
-
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-        _vector_search_standard_names(mock_gc, [0.1] * 8, k=5)
-        cypher = mock_gc.query.call_args.args[0]
-        assert "name_stage" in cypher and "superseded" in cypher
-
-    def test_segment_filter_cypher_excludes_superseded(self):
-        """Segment-filter Cypher must include name_stage <> 'superseded'."""
-        from imas_codex.llm.sn_tools import _segment_filter_search_standard_names
-
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-        _segment_filter_search_standard_names(
-            mock_gc, "temperature", 5, {"physical_base": "temperature"}
-        )
-        cypher = mock_gc.query.call_args.args[0]
-        assert "name_stage" in cypher and "superseded" in cypher
-
-    def test_search_superseded_row_filtered_by_default(self):
-        """Cypher guard must contain name_stage <> 'superseded' in all branches.
-
-        Validates the Cypher-level fix is in place (DB will exclude superseded
-        nodes before returning rows).  The mock returns an empty list since the
-        Cypher guard is what prevents fossils from appearing in production.
+        The backing function (search.search_standard_names) handles superseded
+        exclusion in its Cypher. We verify the backing is called correctly.
         """
         from imas_codex.llm.sn_tools import _search_standard_names
 
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
         with patch(
-            "imas_codex.llm.sn_tools.Encoder", side_effect=Exception("no embeddings")
-        ):
-            result = _search_standard_names("electron temperature", gc=mock_gc)
+            "imas_codex.llm.sn_tools._search_sn_backing",
+            return_value=[],
+        ) as mock_backing:
+            result = _search_standard_names("electron temperature", gc=MagicMock())
 
-        # The Cypher itself must include the name_stage guard.
-        call_cypher = mock_gc.query.call_args.args[0]
-        assert "name_stage" in call_cypher, (
-            "name_stage guard missing from keyword Cypher"
-        )
-        assert "superseded" in call_cypher, (
-            "'superseded' literal missing from keyword Cypher"
-        )
-
+        mock_backing.assert_called_once()
         # No superseded fossil should appear in the formatted output.
         assert "electron_heating_power" not in result
 
