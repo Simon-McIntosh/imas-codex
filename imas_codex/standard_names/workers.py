@@ -6017,3 +6017,67 @@ async def process_refine_docs_batch(
                     pass
 
     return processed
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Embed worker — batch-embed StandardName nodes
+# ═══════════════════════════════════════════════════════════════════════
+
+
+async def process_embed_batch(
+    items: list[dict[str, Any]],
+    mgr: Any,
+    stop_event: asyncio.Event,
+    *,
+    on_event: Callable | None = None,
+) -> int:
+    """Batch-embed StandardName nodes.
+
+    No LLM cost — uses embedding server only.  Does not charge budget.
+    """
+    from imas_codex.embeddings.description import embed_descriptions_batch
+    from imas_codex.standard_names.graph_ops import (
+        _compute_embed_hash,
+        persist_embed_batch,
+    )
+
+    if stop_event.is_set():
+        return 0
+
+    # Build embed texts
+    for item in items:
+        desc = item.get("description")
+        sn_id = item["id"]
+        item["_embed_text"] = f"{sn_id} — {desc}" if desc else sn_id
+        item["embed_text_hash"] = _compute_embed_hash(sn_id, desc)
+
+    # Batch embed (no LLM cost — uses embedding server)
+    await asyncio.to_thread(embed_descriptions_batch, items, text_field="_embed_text")
+
+    # Filter to those that got embeddings
+    to_persist = [
+        {
+            "id": it["id"],
+            "embedding": it["embedding"],
+            "embed_text_hash": it["embed_text_hash"],
+        }
+        for it in items
+        if it.get("embedding") is not None
+    ]
+
+    if to_persist:
+        written = await asyncio.to_thread(persist_embed_batch, to_persist)
+    else:
+        written = 0
+
+    # Emit events for display
+    if on_event:
+        for it in to_persist:
+            on_event(
+                {
+                    "pool": "embed_name",
+                    "name": it["id"],
+                }
+            )
+
+    return written

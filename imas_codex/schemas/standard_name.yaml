@@ -454,6 +454,20 @@ classes:
       embed_failed_at:
         description: When the most recent embedding attempt failed; cleared on success
         range: datetime
+      embed_claimed_at:
+        description: >-
+          Timestamp when an embed worker claimed this name for embedding.
+          Independent of the main claimed_at used for stage transitions.
+          Stale claims (>5min) are automatically reclaimed.
+        range: datetime
+      embed_claim_token:
+        description: UUID token for atomic embed work claiming
+      embed_text_hash:
+        description: >-
+          SHA-256 hex digest (truncated to 16 chars) of the text used to
+          compute the current embedding (format: "name — description").
+          Used to detect stale embeddings after description updates.
+          Cleared by persist functions when description changes.
       documentation:
         description: >-
           Rich documentation with LaTeX equations, governing physics,

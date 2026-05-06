@@ -43,7 +43,7 @@ from imas_codex.discovery.base.progress import (
 # Constants
 # ═══════════════════════════════════════════════════════════════════════
 
-#: Pool names in display order.
+#: Pool names in display order (all 7 internal pools).
 POOL_ORDER: tuple[str, ...] = (
     "generate_name",
     "review_name",
@@ -51,7 +51,45 @@ POOL_ORDER: tuple[str, ...] = (
     "generate_docs",
     "review_docs",
     "refine_docs",
+    "embed_name",
 )
+
+#: Display rows — each maps to one or more internal pools.
+#: The display merges 7 pools into 5 visual rows.
+DISPLAY_ROWS: tuple[str, ...] = (
+    "generate_name",  # merges generate_name + refine_name
+    "review_name",  # review_name only
+    "generate_docs",  # merges generate_docs + refine_docs
+    "review_docs",  # review_docs only
+    "embed_name",  # embed_name only
+)
+
+#: Mapping: display row → internal pools that feed it.
+DISPLAY_POOL_MAP: dict[str, tuple[str, ...]] = {
+    "generate_name": ("generate_name", "refine_name"),
+    "review_name": ("review_name",),
+    "generate_docs": ("generate_docs", "refine_docs"),
+    "review_docs": ("review_docs",),
+    "embed_name": ("embed_name",),
+}
+
+#: Display labels for the 5 merged rows.
+DISPLAY_LABELS: dict[str, str] = {
+    "generate_name": "GENERATE NAME",
+    "review_name": "REVIEW NAME",
+    "generate_docs": "GENERATE DOCS",
+    "review_docs": "REVIEW DOCS",
+    "embed_name": "EMBED",
+}
+
+#: Rich styles for the 5 display rows.
+DISPLAY_STYLES: dict[str, str] = {
+    "generate_name": "bold magenta",
+    "review_name": "bold yellow",
+    "generate_docs": "bold cyan",
+    "review_docs": "bold yellow",
+    "embed_name": "bold green",
+}
 
 #: Display labels — short labels that fit the canonical LABEL_WIDTH (12).
 POOL_LABELS: dict[str, str] = {
@@ -61,6 +99,7 @@ POOL_LABELS: dict[str, str] = {
     "generate_docs": "DRAFT DOCS",
     "review_docs": "REVIEW DOCS",
     "refine_docs": "REFINE DOCS",
+    "embed_name": "EMBED",
 }
 
 #: Legacy long labels (upper-case, underscore-separated).
@@ -72,6 +111,7 @@ _LEGACY_POOL_LABELS: dict[str, str] = {
     "generate_docs": "GENERATE_DOCS",
     "review_docs": "REVIEW_DOCS",
     "refine_docs": "REFINE_DOCS",
+    "embed_name": "EMBED_NAME",
 }
 
 #: Rich styles per pool.
@@ -82,6 +122,7 @@ POOL_STYLES: dict[str, str] = {
     "generate_docs": "bold cyan",
     "review_docs": "bold yellow",
     "refine_docs": "cyan",
+    "embed_name": "bold green",
 }
 
 #: Maximum streamed items kept per pool (legacy compat).
@@ -168,6 +209,16 @@ def _map_refine_docs(ev: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _map_embed_name(ev: dict[str, Any]) -> dict[str, Any]:
+    """Map an embed_name event to PipelineRowConfig stream fields."""
+    name = str(ev.get("name", ""))
+    return {
+        "primary_text": name,
+        "primary_text_style": "green",
+        "description": "✓ embedded",
+    }
+
+
 #: Registry mapping pool name → event-to-stream-fields mapper.
 _EVENT_MAPPERS: dict[str, Any] = {
     "generate_name": _map_generate_name,
@@ -176,6 +227,7 @@ _EVENT_MAPPERS: dict[str, Any] = {
     "generate_docs": _map_generate_docs,
     "review_docs": _map_review_docs,
     "refine_docs": _map_refine_docs,
+    "embed_name": _map_embed_name,
 }
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -275,6 +327,15 @@ def format_item_refine_docs(item: dict[str, Any]) -> Text:
     return line
 
 
+def format_item_embed_name(item: dict[str, Any]) -> Text:
+    """Render an EMBED_NAME per-item line."""
+    name = str(item.get("name", ""))
+    line = Text("    ")
+    line.append(_clip(name, 40), style="green")
+    line.append("  ✓ embedded", style="dim")
+    return line
+
+
 #: Registry of per-item formatters by pool name (legacy).
 ITEM_FORMATTERS: dict[str, Any] = {
     "generate_name": format_item_generate_name,
@@ -283,6 +344,7 @@ ITEM_FORMATTERS: dict[str, Any] = {
     "generate_docs": format_item_generate_docs,
     "review_docs": format_item_review_docs,
     "refine_docs": format_item_refine_docs,
+    "embed_name": format_item_embed_name,
 }
 
 
@@ -552,12 +614,11 @@ def render_full_display(
 
 
 class SN6PoolDisplay(BaseProgressDisplay):
-    """Full-width 6-pool display using the canonical ``BaseProgressDisplay``.
+    """Full-width 7-pool display using the canonical ``BaseProgressDisplay``.
 
-    Renders 6 pipeline rows (one per pool) with per-worker streaming
-    via ``PipelineRowConfig``, plus TIME/COST resource gauges.  Inherits
-    full-width panel, service-monitor SERVERS section, and shutdown
-    handling from ``BaseProgressDisplay``.
+    Internally tracks 7 pools (generate_name, review_name, refine_name,
+    generate_docs, review_docs, refine_docs, embed_name) but renders
+    only 5 display rows by merging generate+refine into combined rows.
 
     Usage::
 
@@ -590,7 +651,7 @@ class SN6PoolDisplay(BaseProgressDisplay):
         self._pending_fn = pending_fn
         self._accumulated_cost_fn = accumulated_cost_fn
 
-        # Per-pool observable state (6 pools).
+        # Per-pool observable state (7 pools).
         # PoolDisplayState tracks completed/total/cost; WorkerStats drives
         # the canonical streaming display via stream_queue.
         self.pools: dict[str, PoolDisplayState] = {
@@ -675,30 +736,47 @@ class SN6PoolDisplay(BaseProgressDisplay):
     # ── Canonical display methods (override BaseProgressDisplay) ──────
 
     def _build_pipeline_section(self) -> Text:
-        """Build pipeline section using canonical PipelineRowConfig."""
+        """Build pipeline section using canonical PipelineRowConfig.
+
+        Renders 5 display rows by aggregating sub-pools according to
+        :data:`DISPLAY_POOL_MAP`.
+        """
         rows: list[PipelineRowConfig] = []
-        for pool_name in POOL_ORDER:
-            state = self.pools[pool_name]
-            ws = self._pool_stats[pool_name]
-            label = POOL_LABELS[pool_name]
-            style = POOL_STYLES[pool_name]
+        for display_row in DISPLAY_ROWS:
+            sub_pools = DISPLAY_POOL_MAP[display_row]
+            label = DISPLAY_LABELS[display_row]
+            style = DISPLAY_STYLES[display_row]
 
-            completed = state.completed
-            total = max(state.total, completed, 1)
+            # Aggregate stats from sub-pools.
+            completed = sum(self.pools[p].completed for p in sub_pools)
+            total_raw = sum(self.pools[p].total for p in sub_pools)
+            total = max(total_raw, completed, 1)
+            cost = sum(self.pools[p].cost for p in sub_pools)
 
-            # Stream item from WorkerStats queue.
+            # Combined rate from sub-pools.
+            rates = [
+                self.pools[p].rate for p in sub_pools if self.pools[p].rate is not None
+            ]
+            rate = sum(rates) if rates else None
+
+            events_this_run = sum(self.pools[p]._events_this_run for p in sub_pools)
+
+            # Stream item: pick from first sub-pool that has one.
             primary_text = ""
             primary_text_style = "white"
             description = ""
             score_value: float | None = None
-            si = ws._current_stream_item
-            if si:
-                primary_text = si.get("primary_text", "")
-                primary_text_style = si.get("primary_text_style", "white")
-                description = si.get("description", "")
-                _sv = si.get("score_value")
-                if isinstance(_sv, int | float):
-                    score_value = float(_sv)
+            for p in sub_pools:
+                ws = self._pool_stats[p]
+                si = ws._current_stream_item
+                if si:
+                    primary_text = si.get("primary_text", "")
+                    primary_text_style = si.get("primary_text_style", "white")
+                    description = si.get("description", "")
+                    _sv = si.get("score_value")
+                    if isinstance(_sv, int | float):
+                        score_value = float(_sv)
+                    break
 
             rows.append(
                 PipelineRowConfig(
@@ -706,16 +784,14 @@ class SN6PoolDisplay(BaseProgressDisplay):
                     style=style,
                     completed=completed,
                     total=total,
-                    rate=state.rate,
-                    cost=state.cost if state.cost > 0 else None,
+                    rate=rate,
+                    cost=cost if cost > 0 else None,
                     primary_text=primary_text,
                     primary_text_style=primary_text_style,
                     description=description,
                     score_value=score_value,
                     is_processing=(
-                        state._events_this_run > 0
-                        and completed > 0
-                        and completed < total
+                        events_this_run > 0 and completed > 0 and completed < total
                     ),
                     is_complete=completed > 0 and completed >= total,
                 )
@@ -893,6 +969,10 @@ class SN6PoolDisplay(BaseProgressDisplay):
 
 __all__ = [
     "BAR_WIDTH",
+    "DISPLAY_LABELS",
+    "DISPLAY_POOL_MAP",
+    "DISPLAY_ROWS",
+    "DISPLAY_STYLES",
     "ITEM_FORMATTERS",
     "LABEL_COL",
     "POOL_LABELS",
@@ -905,6 +985,7 @@ __all__ = [
     "STREAM_MAXLEN",
     "compute_eta",
     "compute_etc",
+    "format_item_embed_name",
     "format_item_generate_docs",
     "format_item_generate_name",
     "format_item_refine_docs",

@@ -45,8 +45,8 @@ def _build_specs(min_score: float = 0.75) -> list:
 # =====================================================================
 
 
-class TestAllSixPoolsRegistered:
-    def test_all_six_pools_registered(self) -> None:
+class TestAllSevenPoolsRegistered:
+    def test_all_seven_pools_registered(self) -> None:
         specs = _build_specs()
         names = {s.name for s in specs}
         assert names == {
@@ -56,11 +56,12 @@ class TestAllSixPoolsRegistered:
             "generate_docs",
             "review_docs",
             "refine_docs",
+            "embed_name",
         }
 
-    def test_pool_count_is_six(self) -> None:
+    def test_pool_count_is_seven(self) -> None:
         specs = _build_specs()
-        assert len(specs) == 6
+        assert len(specs) == 7
 
 
 # =====================================================================
@@ -481,7 +482,7 @@ class TestPoolStateIncludesPendingCounts:
         for spec in specs:
             mock_state.set_pool_health(spec.name, spec.health)
 
-        assert mock_state.set_pool_health.call_count == 6
+        assert mock_state.set_pool_health.call_count == 7
         called_names = {c[0][0] for c in mock_state.set_pool_health.call_args_list}
         assert called_names == {
             "generate_name",
@@ -490,4 +491,5 @@ class TestPoolStateIncludesPendingCounts:
             "generate_docs",
             "review_docs",
             "refine_docs",
+            "embed_name",
         }

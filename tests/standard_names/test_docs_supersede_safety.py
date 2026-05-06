@@ -174,7 +174,7 @@ class TestPersistGuardsNameStage:
                 model="test/model",
             )
 
-        cypher = gc.query.call_args.args[0]
+        cypher = gc.query.call_args_list[0].args[0]
         assert "name_stage = 'accepted'" in cypher
 
     def test_persist_reviewed_name_rejects_superseded(self):

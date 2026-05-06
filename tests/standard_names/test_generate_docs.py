@@ -268,7 +268,7 @@ def test_persist_writes_docs_fields():
 
     assert stage == "drafted"
 
-    cypher: str = gc.query.call_args[0][0]
+    cypher: str = gc.query.call_args_list[0][0][0]
     assert "docs_stage" in cypher
     assert "'drafted'" in cypher
     assert "docs_chain_length" in cypher
@@ -277,7 +277,7 @@ def test_persist_writes_docs_fields():
     assert "claim_token" in cypher
     assert "claimed_at" in cypher
 
-    kwargs = gc.query.call_args[1]
+    kwargs = gc.query.call_args_list[0][1]
     assert kwargs["description"] == "The electron kinetic temperature."
     assert kwargs["documentation"] == "Full documentation text here."
     assert kwargs["model"] == "test-model"

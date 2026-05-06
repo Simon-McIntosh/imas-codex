@@ -10,6 +10,7 @@ Relationship direction: entity → concept
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -2820,39 +2821,12 @@ def persist_generated_name_batch(
         ):
             entry["cocos_transformation_type"] = "one_like"
 
-    # --- Batch-embed standard-name strings ---
-    # Prefer "name — description" for richer embedding basis when
-    # description is available; fall back to name-only for candidates
-    # without one (backward-compatible with existing name-only embeddings).
+    # --- Embedding deferred to dedicated embed worker pool ---
+    # Clear embed_text_hash so the embed pool picks these up.
+    # No inline embedding — the embed_name pool handles it asynchronously.
     for entry in candidates:
-        name = entry.get("id") or ""
-        desc = entry.get("description") or ""
-        entry["_embed_text"] = f"{name} — {desc}" if desc else name
-
-    try:
-        from imas_codex.embeddings.description import embed_descriptions_batch
-
-        embed_descriptions_batch(candidates, text_field="_embed_text")
-    except Exception:
-        logger.warning(
-            "Embedding server unavailable — all %d candidates will be marked for retry",
-            len(candidates),
-            exc_info=True,
-        )
-        # Total failure — mark embedding as missing for retry tracking
-        for entry in candidates:
-            entry["embedding"] = None
-
-    # Clean up transient field
-    for entry in candidates:
-        entry.pop("_embed_text", None)
-
-    # Set embedded_at for successful embeddings; mark failures for retry
-    for entry in candidates:
-        if entry.get("embedding"):
-            entry["embedded_at"] = now
-        else:
-            entry["embed_failed_at"] = now
+        entry["embedding"] = None
+        entry["embed_text_hash"] = None
 
     written = write_standard_names(candidates)
 
@@ -7277,6 +7251,119 @@ def _embed_single_standard_name(sn_id: str, description: str | None) -> None:
 
 
 # =============================================================================
+# Embed worker — claim / release / persist for dedicated embed pool
+# =============================================================================
+
+
+def _compute_embed_hash(sn_id: str, description: str | None) -> str:
+    """Compute truncated SHA-256 hash of the embed text.
+
+    Format: ``"name — description"`` when description is available,
+    otherwise just the name.  Truncated to 16 hex chars.
+    """
+    text = f"{sn_id} — {description}" if description else sn_id
+    return hashlib.sha256(text.encode()).hexdigest()[:16]
+
+
+@retry_on_deadlock()
+def claim_embed_batch(limit: int = 50) -> list[dict[str, Any]]:
+    """Claim StandardName nodes needing (re-)embedding.
+
+    Targets nodes where:
+    - ``embedding IS NULL`` or ``embed_text_hash IS NULL``
+    - Not already claimed for embedding (or claim is stale >5min)
+
+    Uses ``embed_claimed_at`` / ``embed_claim_token`` which are
+    independent of the main ``claimed_at`` / ``claim_token`` used
+    for stage transitions.
+    """
+    token = str(uuid.uuid4())
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE (sn.embedding IS NULL OR sn.embed_text_hash IS NULL)
+              AND (sn.embed_claimed_at IS NULL
+                   OR sn.embed_claimed_at < datetime() - duration('PT5M'))
+            WITH sn ORDER BY rand() LIMIT $limit
+            SET sn.embed_claimed_at = datetime(),
+                sn.embed_claim_token = $token
+            """,
+            limit=limit,
+            token=token,
+        )
+        return list(
+            gc.query(
+                """
+                MATCH (sn:StandardName {embed_claim_token: $token})
+                RETURN sn.id AS id,
+                       sn.description AS description,
+                       $token AS claim_token
+                """,
+                token=token,
+            )
+        )
+
+
+def release_embed_claims(
+    sn_ids: list[str],
+    claim_token: str,
+) -> int:
+    """Release embed claims IFF token matches.
+
+    Called on error to unlock nodes for other embed workers.
+    """
+    if not sn_ids:
+        return 0
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sn:StandardName {id: sid, embed_claim_token: $token})
+            SET sn.embed_claimed_at = null,
+                sn.embed_claim_token = null
+            RETURN count(sn) AS released
+            """,
+            ids=sn_ids,
+            token=claim_token,
+        )
+        return result[0]["released"] if result else 0
+
+
+def persist_embed_batch(items: list[dict[str, Any]]) -> int:
+    """Write embedding vectors and metadata for a batch of StandardNames.
+
+    Each item must have ``id``, ``embedding``, and ``embed_text_hash``.
+    Clears embed claim fields on success.
+    """
+    if not items:
+        return 0
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            UNWIND $items AS item
+            MATCH (sn:StandardName {id: item.id})
+            SET sn.embedding = item.embedding,
+                sn.embedded_at = datetime(),
+                sn.embed_text_hash = item.embed_text_hash,
+                sn.embed_failed_at = null,
+                sn.embed_claimed_at = null,
+                sn.embed_claim_token = null
+            RETURN count(sn) AS written
+            """,
+            items=[
+                {
+                    "id": it["id"],
+                    "embedding": it["embedding"],
+                    "embed_text_hash": it["embed_text_hash"],
+                }
+                for it in items
+            ],
+        )
+        return result[0]["written"] if result else 0
+
+
+# =============================================================================
 # Persist — refine_name (Option B: new node + REFINED_FROM + edge migration)
 # =============================================================================
 
@@ -7432,7 +7519,15 @@ def persist_refined_name(
         )
 
         # --- Embed the new refined name ---
-        _embed_single_standard_name(new_name, description)
+        # Clear embed_text_hash so the dedicated embed worker picks it up.
+        with GraphClient() as gc:
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})
+                SET sn.embed_text_hash = null
+                """,
+                id=new_name,
+            )
 
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
@@ -8076,7 +8171,15 @@ def persist_generated_docs(
 
     # Re-embed: docs generation sets/refines description, so the embedding
     # should reflect the latest "name — description" text.
-    _embed_single_standard_name(sn_id, description)
+    # Clear embed_text_hash so the dedicated embed worker picks it up.
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            SET sn.embed_text_hash = null
+            """,
+            id=sn_id,
+        )
 
     # Async counter bump — live progress visibility for ``sn status``
     bump_sn_run_counter(run_id, "names_enriched")
@@ -8381,7 +8484,15 @@ def persist_refined_docs(
 
         # Re-embed: refined docs change the description, so update the
         # embedding to reflect the latest "name — description" text.
-        _embed_single_standard_name(sn_id, description)
+        # Clear embed_text_hash so the dedicated embed worker picks it up.
+        with GraphClient() as gc:
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})
+                SET sn.embed_text_hash = null
+                """,
+                id=sn_id,
+            )
 
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")

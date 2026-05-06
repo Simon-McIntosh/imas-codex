@@ -618,7 +618,7 @@ def _build_pool_specs(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
 ) -> list[Any]:
-    """Construct 6 :class:`PoolSpec` objects wiring claims → batch processors.
+    """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
     Each pool gets two adapter closures:
 
@@ -640,12 +640,14 @@ def _build_pool_specs(
         REVIEW_NAME_BACKLOG_CAP,
     )
     from imas_codex.standard_names.graph_ops import (
+        claim_embed_batch,
         claim_generate_docs_batch,
         claim_generate_name_batch,
         claim_refine_docs_batch,
         claim_refine_name_batch,
         claim_review_docs_batch,
         claim_review_name_batch,
+        release_embed_claims,
         release_generate_docs_claims,
         release_generate_name_claims,
         release_refine_docs_claims,
@@ -655,6 +657,7 @@ def _build_pool_specs(
     )
     from imas_codex.standard_names.pools import PoolSpec
     from imas_codex.standard_names.workers import (
+        process_embed_batch,
         process_generate_docs_batch,
         process_generate_name_batch,
         process_refine_docs_batch,
@@ -823,6 +826,12 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_refine_docs_claims, ids_kwarg="sn_ids"
             ),
+        ),
+        PoolSpec(
+            name="embed_name",
+            claim=_make_claim_adapter(claim_embed_batch),
+            process=_make_process_adapter(process_embed_batch),
+            release=_make_release_adapter(release_embed_claims, ids_kwarg="sn_ids"),
         ),
     ]
 
