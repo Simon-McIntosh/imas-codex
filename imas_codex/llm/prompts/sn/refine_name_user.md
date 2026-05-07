@@ -76,6 +76,30 @@ _(no prior refinement history — this is the first refine attempt)_
 {% endif %}
 
 {% endif %}
+{% if vocab_gap_detail %}
+
+---
+
+## ⚠️ Vocabulary Gap — Previous attempt rejected
+
+The previous name was rejected because it used a token not in the closed vocabulary:
+
+- **Segment:** {{ vocab_gap_detail.segment }}
+- **Needed token:** `{{ vocab_gap_detail.needed_token }}`
+- **Reason:** {{ vocab_gap_detail.reason }}
+
+**Fix:** Route this concept to the correct grammar segment. Check the segment routing table in the system prompt. If the concept genuinely belongs in `physical_base` (open vocabulary), compose it as a compound there.
+{% endif %}
+{% if validation_issues %}
+
+---
+
+## Validation Issues
+
+{% for issue in validation_issues %}
+- {{ issue }}
+{% endfor %}
+{% endif %}
 {% if fanout_evidence %}
 
 ---

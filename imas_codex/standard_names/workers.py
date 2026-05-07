@@ -4086,6 +4086,24 @@ async def process_refine_name_batch(
                 )
                 compose_scored_examples = []
 
+            # ── Parse vocab_gap_detail from JSON string (best-effort) ─────
+            raw_vgd = item.get("vocab_gap_detail")
+            vocab_gap_detail: dict | None = None
+            if raw_vgd:
+                try:
+                    import json as _json
+
+                    vocab_gap_detail = (
+                        _json.loads(raw_vgd) if isinstance(raw_vgd, str) else raw_vgd
+                    )
+                except (ValueError, TypeError):
+                    logger.debug(
+                        "refine_name: could not parse vocab_gap_detail for %s", sn_id
+                    )
+
+            # validation_issues is stored as a list on the node directly
+            validation_issues: list[str] | None = item.get("validation_issues") or None
+
             prompt_context: dict[str, Any] = {
                 "item": item,
                 "chain_history": chain_history,
@@ -4093,6 +4111,8 @@ async def process_refine_name_batch(
                 "hybrid_neighbours": [],
                 "fanout_evidence": "",
                 "compose_scored_examples": compose_scored_examples,
+                "vocab_gap_detail": vocab_gap_detail,
+                "validation_issues": validation_issues,
             }
 
             # Attempt hybrid neighbour search (best-effort).  Uses the

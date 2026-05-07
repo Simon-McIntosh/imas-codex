@@ -7208,6 +7208,8 @@ def claim_refine_name_batch(
             ", sn.name_stage AS name_stage"
             ", sn.source_paths AS source_paths"
             ", sn.tags AS tags"
+            ", sn.vocab_gap_detail AS vocab_gap_detail"
+            ", sn.validation_issues AS validation_issues"
         ),
         stage_field="name_stage",
         to_stage="refining",
