@@ -430,14 +430,6 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
         "links": list(node.get("links") or []),
     }
 
-    # Conditionally include sparse fields only when populated
-    constraints = list(node.get("constraints") or [])
-    if constraints:
-        entry["constraints"] = constraints
-    validity_domain = node.get("validity_domain") or ""
-    if validity_domain:
-        entry["validity_domain"] = validity_domain
-
     # Optional lifecycle fields
     if node.get("deprecates"):
         entry["deprecates"] = node["deprecates"]
