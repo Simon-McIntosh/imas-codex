@@ -158,7 +158,14 @@ For consistency, compare your documentation style and cross-references against t
 accepted names in the same physics domain.
 
 {% for n in nearby_existing_names %}- **{{ n.id }}**: {{ n.description | default('', true) }} ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }})
-{% endfor %}{% endif %}
+{% endfor %}
+
+**Authoritative cross-reference list:** The names listed above (plus those in "Nearest Peer
+Standard Names" if present) are the **only** standard names you may link to using
+`[label](name:bare_id)` inline links or `name:bare_id` entries in the `links` array.
+Do NOT invent or guess other name IDs — links to non-existent names are rejected by
+the validation pipeline and cause the entire batch item to fail.
+{% endif %}
 
 ## Output schema
 

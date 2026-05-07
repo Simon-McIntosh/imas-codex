@@ -72,6 +72,23 @@ For each name, the documentation field should cover (where applicable):
 - Kind (scalar / vector / metadata).
 - Unit (authoritative from the Data Dictionary).
 
+## Length and Quality Targets
+
+| Field | Target | Hard Limits |
+|---|---|---|
+| `description` | 15–30 words, 1 sentence | Min 10 words, max 50 words, max 250 chars |
+| `documentation` | 80–200 words, ≥3 sentences | Min 50 words, max 300 words |
+| `documentation_excerpt` | 10–25 words | Max 160 chars |
+
+### Quality Checklist (run before emitting each item)
+
+1. **Description self-sufficiency** — can a physicist understand the quantity from the description alone, without seeing the name? If not, add context.
+2. **No circular definitions** — ❌ "The electron temperature is the temperature of electrons." ✅ "Kinetic energy per degree of freedom of the electron population, expressed in energy units."
+3. **LaTeX in documentation** — at least one equation or mathematical relation in `documentation` for any quantity with a governing equation. Use `$...$` for inline and `$$...$$` for display.
+4. **Cross-references** — include at least 1 `links` entry for related SNs. Use `name:bare_id` format. Only link to names that exist (check the nearby_names list provided).
+5. **No trailing whitespace or empty lines** in description field.
+6. **Sign convention** — if the quantity has a `cocos_label`, the documentation MUST contain a `Sign convention: Positive when ...` paragraph.
+
 ## Output Schema
 
 Return a JSON object with an `items` array. Each item conforms to:
