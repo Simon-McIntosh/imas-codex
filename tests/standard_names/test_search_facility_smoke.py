@@ -183,6 +183,7 @@ def _graph_available() -> bool:
         return False
 
 
+@pytest.mark.integration
 @pytest.mark.skipif(not _graph_available(), reason="no live graph with StandardNames")
 class TestLiveGraphSmoke:
     def test_segment_filter_returns_results_on_live_graph(self):
