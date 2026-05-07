@@ -1246,6 +1246,24 @@ ISN owns grammar, vocabulary, and validation. Codex owns the pipeline, evaluatio
 
 **Rules:** Never import from ISN private modules. Never hardcode grammar rules — get them from `get_grammar_context()`. Review criteria and scoring live in codex (`sn_review_criteria.yaml`).
 
+### Grammar Vocabulary (Plan 41)
+
+The ISN grammar uses a closed-vocabulary system for physical bases and qualifiers:
+
+- **Physical bases** (~78 entries): Irreducible dimensional quantities only. CI-gated.
+- **Qualifiers** (~92 entries): Prefix modifiers stripped recursively by the parser.
+- **Processes** (~90 entries): Appear only via `_due_to_{token}` suffix template.
+
+**Composition order:** `{subject}_{qualifier1}_{qualifier2}_{physical_base}_{due_to_process}`
+
+**Rules for vocabulary updates:**
+1. Never add compounds to physical_bases — use qualifiers instead
+2. Qualifier order is insertion-order (not alphabetical) — preserved through round-trip
+3. Subjects win over qualifiers (parser Stage 3 before Stage 5)
+4. Process tokens as prefixes are qualifiers, not processes (D3 rule)
+
+**When a rotation surfaces vocab gaps:** Add missing tokens to the appropriate vocabulary file in ISN, cut an RC release, bump the dep in codex. Never hardcode vocabulary tokens in Python code.
+
 ### Vocabulary Rotation: ISN Fork RC Workflow
 
 When rotations surface novel `physical_base` tokens or other grammar segment candidates that are
