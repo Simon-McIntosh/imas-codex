@@ -90,7 +90,7 @@ class TestClosedVocabFull:
         from imas_codex.standard_names.context import _load_closed_vocab_full
 
         seg_names = {entry["segment"] for entry in _load_closed_vocab_full()}
-        assert "physical_base" not in seg_names
+        assert "physical_base" in seg_names
 
     def test_tokens_sorted_alphabetically(self):
         from imas_codex.standard_names.context import _load_closed_vocab_full

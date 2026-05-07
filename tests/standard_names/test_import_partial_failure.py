@@ -23,8 +23,6 @@ _ENTRY1 = {
     "description": "Electron temperature",
     "documentation": "The electron temperature Te.",
     "links": [],
-    "constraints": [],
-    "validity_domain": "",
     "status": "draft",
 }
 
@@ -35,8 +33,6 @@ _ENTRY2 = {
     "description": "Plasma current",
     "documentation": "Total toroidal plasma current.",
     "links": [],
-    "constraints": [],
-    "validity_domain": "",
     "status": "draft",
 }
 

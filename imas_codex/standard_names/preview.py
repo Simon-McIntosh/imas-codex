@@ -74,47 +74,17 @@ def _generate_preview_site(
     Number of standard names found.
     """
     from imas_standard_names.cli.catalog_site import (
-        CATALOG_CSS,
         MKDOCS_SERVE_TEMPLATE,
+        _generate_site_content,
     )
-    from imas_standard_names.rendering.catalog import CatalogRenderer
 
-    renderer = CatalogRenderer(catalog_path)
-    stats = renderer.get_stats()
-
-    # Create docs structure
-    docs_content_dir = docs_dir / "docs"
-    docs_content_dir.mkdir(exist_ok=True)
-    stylesheets_dir = docs_content_dir / "stylesheets"
-    stylesheets_dir.mkdir(exist_ok=True)
-
-    # Generate mkdocs.yml
-    mkdocs_config = MKDOCS_SERVE_TEMPLATE.format(
+    return _generate_site_content(
+        catalog_path=catalog_path,
+        docs_dir=docs_dir,
         site_name=site_name,
+        mkdocs_template=MKDOCS_SERVE_TEMPLATE,
         site_url=site_url,
     )
-    (docs_dir / "mkdocs.yml").write_text(mkdocs_config)
-
-    # Generate CSS
-    (stylesheets_dir / "catalog.css").write_text(CATALOG_CSS)
-
-    # Generate index.md
-    readme_path = catalog_path / "README.md"
-    if readme_path.exists():
-        index_content = readme_path.read_text(encoding="utf-8")
-    else:
-        index_content = f"# {site_name}\n\n"
-        index_content += renderer.render_overview(link_prefix="catalog.md")
-    (docs_content_dir / "index.md").write_text(index_content)
-
-    # Generate catalog.md
-    catalog_content = "# Standard Names Catalog\n\n"
-    catalog_content += renderer.render_overview()
-    catalog_content += "\n---\n\n"
-    catalog_content += renderer.render_catalog()
-    (docs_content_dir / "catalog.md").write_text(catalog_content)
-
-    return stats["total_names"]
 
 
 def run_preview(

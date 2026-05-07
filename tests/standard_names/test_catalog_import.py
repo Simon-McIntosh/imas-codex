@@ -25,8 +25,6 @@ SAMPLE_CATALOG_ENTRY = {
     "kind": "scalar",
     "unit": "eV",
     "links": [],
-    "validity_domain": "core plasma",
-    "constraints": ["T_e > 0"],
     "physics_domain": "core_plasma_physics",
     "status": "active",
 }
@@ -38,8 +36,6 @@ SAMPLE_CATALOG_ENTRY_MINIMAL = {
     "kind": "scalar",
     "unit": "A",
     "links": [],
-    "validity_domain": "",
-    "constraints": [],
     "physics_domain": "equilibrium",
     "status": "active",
 }

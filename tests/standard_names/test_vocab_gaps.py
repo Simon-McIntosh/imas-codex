@@ -664,12 +664,12 @@ class TestOpenSegmentFilter:
     def test_open_segments_includes_physical_base(self):
         from imas_codex.standard_names.segments import open_segments
 
-        assert "physical_base" in open_segments()
+        assert "physical_base" not in open_segments()
 
     def test_is_open_segment_predicate(self):
         from imas_codex.standard_names.segments import is_open_segment
 
-        assert is_open_segment("physical_base") is True
+        assert is_open_segment("physical_base") is False
         assert is_open_segment("grammar_ambiguity") is True
         # Closed segments must not be flagged as open
         assert is_open_segment("transformation") is False
@@ -699,8 +699,8 @@ class TestOpenSegmentFilter:
         kept, dropped = filter_closed_segment_gaps(gaps)
         kept_segs = {g["segment"] for g in kept}
         drop_segs = {g["segment"] for g in dropped}
-        assert kept_segs == {"transformation", "subject"}
-        assert drop_segs == {"physical_base", "grammar_ambiguity"}
+        assert kept_segs == {"transformation", "subject", "physical_base"}
+        assert drop_segs == {"grammar_ambiguity"}
 
     def test_write_vocab_gaps_skips_open_segments(self):
         """write_vocab_gaps must not emit MERGE for open/pseudo segments."""
@@ -712,7 +712,7 @@ class TestOpenSegmentFilter:
                 "source_id": "equilibrium/time_slice/profiles_1d/psi",
                 "segment": "physical_base",
                 "needed_token": "toroidal_torque",
-                "reason": "open-segment compound — should be filtered",
+                "reason": "closed segment — should be persisted",
             },
             {
                 "source_id": "core_profiles/ions/velocity",
@@ -729,27 +729,26 @@ class TestOpenSegmentFilter:
 
             written = write_vocab_gaps(gaps, source_type="dd")
 
-        # Nothing persisted
-        assert written == 0
-        # And crucially no MERGE (vg:VocabGap ...) query fired
+        # Only the physical_base gap (now closed) persisted; grammar_ambiguity filtered
+        assert written == 1
         merge_calls = [
             c for c in mock_gc.query.call_args_list if "MERGE (vg:VocabGap" in c[0][0]
         ]
-        assert merge_calls == [], (
-            "Open-segment gaps must never reach the VocabGap MERGE query"
+        assert len(merge_calls) == 1, (
+            "grammar_ambiguity gaps must never reach the VocabGap MERGE query"
         )
 
     def test_write_vocab_gaps_mixed_batch_only_persists_closed(self):
-        """Mixed batch: open-segment entry filtered, closed-segment kept."""
+        """Mixed batch: pseudo segment filtered, closed segments kept."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
         gaps = [
             {
                 "source_id": "path/a",
-                "segment": "physical_base",  # open — filter out
+                "segment": "physical_base",  # closed — keep
                 "needed_token": "toroidal_torque",
-                "reason": "noise",
+                "reason": "real gap",
             },
             {
                 "source_id": "path/b",
@@ -766,12 +765,12 @@ class TestOpenSegmentFilter:
 
             written = write_vocab_gaps(gaps, source_type="dd")
 
-        assert written == 1  # only the closed-segment gap materialised
+        assert written == 2  # both closed-segment gaps materialised
         merge_calls = [
             c for c in mock_gc.query.call_args_list if "MERGE (vg:VocabGap" in c[0][0]
         ]
         assert len(merge_calls) == 1
         batch = merge_calls[0][1]["batch"]
-        assert len(batch) == 1
-        assert batch[0]["segment"] == "transformation"
-        assert batch[0]["needed_token"] == "curl_of"
+        assert len(batch) == 2
+        batch_segs = {item["segment"] for item in batch}
+        assert batch_segs == {"physical_base", "transformation"}
