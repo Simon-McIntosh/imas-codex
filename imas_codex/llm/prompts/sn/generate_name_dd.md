@@ -84,6 +84,39 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_component_of_halo_energy` | **W38-A2 suffix-form for component** — component / transformation / reducer tokens come BEFORE the base via `<modifier>_of_<base>`. Compare ★0.95 `parallel_component_of_fast_electron_pressure` |
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_component_of_direction_unit_vector` | **W38-A3 compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
 
+## Segment Routing — Common Confusions
+
+The following tokens are frequently misrouted to the wrong grammar segment.
+Study this table before composing — it eliminates the most common vocab-gap rejections.
+
+| Token/Concept | ❌ Wrong Segment | ✅ Correct Segment | Correct Usage |
+|---|---|---|---|
+| `langmuir_probe`, `bolometer`, `interferometer` | position | device or object | Use as `_of_<device>` suffix |
+| `r`, `major_radius_direction` | component | — | Use `radial` (closed component vocab) |
+| `perpendicular`, `vertical`, `poloidal` | physical_base | component | These are direction tokens — use component segment |
+| `unit_vector_*_component` | geometric_base | — | Decompose: component=`x`/`y`/`z` + geometric_base=`unit_vector` |
+| `perturbed_*_field`, `electrostatic_potential` | process | physical_base | These are quantities, not mechanisms |
+| `separatrix_average`, `flux_surface_average` | position | — | Split: position=`separatrix` + transformation (or physical_base compound) |
+| `measurement_position` | position (as token) | — | Already exists in position vocab — use it correctly as a locus |
+| `derivative_with_respect_to_*` | operators | transformation | Use transformation segment for derivatives |
+| `diffusion_coefficient`, `convection_velocity` | process | physical_base | Transport coefficients are quantities, not processes |
+| `parallel_viscosity`, `heat_viscosity` | process | physical_base | Viscosity is a quantity — process would be `viscous_diffusion` |
+
+### Process vs Physical_base Decision Rule
+
+The `process` segment is for mechanisms that MODIFY a quantity — they appear via `_due_to_<process>`.
+
+- **Process (via `due_to_`):** conduction, convection, diffusion, neoclassical, turbulent, ohmic, radiation, recombination
+- **Physical_base (the quantity itself):** temperature, pressure, flux, field, potential, coefficient, viscosity, diffusivity
+
+**Test:** Can you say "X due_to Y"? If Y is a mechanism causing X, then Y is a process.
+If Y is itself measurable, it's a physical_base.
+
+✅ `energy_due_to_recombination` — recombination is a mechanism → process
+✅ `current_due_to_ohmic` — ohmic heating is a mechanism → process  
+❌ `energy_due_to_diffusion_coefficient` — a coefficient is not a mechanism
+❌ `temperature_due_to_magnetic_field` — magnetic field is a quantity, not a mechanism
+
 ## Description Quality Rules
 
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "scalar", "array",
