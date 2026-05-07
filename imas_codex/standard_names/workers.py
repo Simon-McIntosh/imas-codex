@@ -355,44 +355,32 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
             )
             return batches
 
-        # Source-level skip for resumability (not in targeted mode)
+        # Source-level skip for resumability
         named_ids: set[str] = set()
-        if not state.force and not state.paths_list:
+        if not state.force:
             named_ids = get_named_source_ids()
             if named_ids:
                 wlog.info("Skipping %d already-named sources", len(named_ids))
 
         if state.source == "dd":
-            if state.paths_list:
-                # Targeted mode: bypass graph query + classifier
-                from imas_codex.standard_names.sources.dd import (
-                    extract_specific_paths,
-                )
+            from imas_codex.standard_names.batching import (
+                get_generate_batch_config,
+            )
 
-                batches = extract_specific_paths(
-                    paths=state.paths_list,
-                    existing_names=existing,
-                    on_status=_on_status,
-                )
-            else:
-                from imas_codex.standard_names.batching import (
-                    get_generate_batch_config,
-                )
-
-                batch_cfg = get_generate_batch_config()
-                batches = extract_dd_candidates(
-                    ids_filter=state.ids_filter,
-                    domain_filter=state.domain_filter,
-                    limit=state.limit,
-                    existing_names=existing,
-                    on_status=_on_status,
-                    from_model=state.from_model,
-                    force=state.force,
-                    name_only=state.name_only,
-                    name_only_batch_size=state.name_only_batch_size,
-                    max_batch_size=batch_cfg["batch_size"],
-                    max_tokens=batch_cfg["max_tokens"],
-                )
+            batch_cfg = get_generate_batch_config()
+            batches = extract_dd_candidates(
+                ids_filter=state.ids_filter,
+                domain_filter=state.domain_filter,
+                limit=state.limit,
+                existing_names=existing,
+                on_status=_on_status,
+                from_model=state.from_model,
+                force=state.force,
+                name_only=state.name_only,
+                name_only_batch_size=state.name_only_batch_size,
+                max_batch_size=batch_cfg["batch_size"],
+                max_tokens=batch_cfg["max_tokens"],
+            )
         else:
             wlog.error("Unknown source: %s", state.source)
             return []
@@ -415,7 +403,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
     # Inject previous name context for --force regeneration
     if state.force:
         # --paths mode gets rich metadata (full docs, links, linked DD paths)
-        use_rich = bool(state.paths_list)
+        use_rich = False
 
         def _get_mapping():
             from imas_codex.standard_names.graph_ops import get_source_name_mapping

@@ -3,7 +3,7 @@
 Covers:
 
 * Reconcile-once-at-startup (B2): reconcile completes before any claim.
-* CLI routing: default → run_sn_pools; --paths → run_turn.
+* CLI routing: default → run_sn_pools.
 * Physics-domain passthrough to extract_phase only.
 * Stale claim clearing on restart (via reconcile).
 * SNRun finalization with correct stop-reason.
@@ -197,30 +197,6 @@ class TestCLIRouting:
                 "CLI default mode should call run_sn_pools, "
                 f"but async_main source is:\n{source}"
             )
-
-    # ------------------------------------------------------------------
-    # 3. CLI --paths routes to single-pass (not loop)
-    # ------------------------------------------------------------------
-
-    def test_cli_paths_routes_to_single_pass(self) -> None:
-        """When --paths is set, use_loop must be False (skipping _run_sn_loop_cmd).
-
-        Verifies the routing condition rather than invoking the full CLI
-        (the single-pass path makes real LLM calls which would time out).
-        """
-        # The routing logic at cli/sn.py line ~964:
-        #   use_loop = not single_pass and not paths_list and source == "dd"
-        # With paths_list set, use_loop is False → _run_sn_loop_cmd skipped.
-        paths_list = ("equilibrium/time_slice/profiles_1d/psi",)
-        single_pass = False
-        source = "dd"
-
-        use_loop = not single_pass and not paths_list and source == "dd"
-        assert not use_loop, "--paths should set use_loop=False"
-
-        # Also verify without paths → use_loop=True
-        use_loop_no_paths = not single_pass and not () and source == "dd"
-        assert use_loop_no_paths, "without --paths, use_loop should be True"
 
 
 # =====================================================================

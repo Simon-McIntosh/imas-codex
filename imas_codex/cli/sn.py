@@ -23,6 +23,23 @@ logger = logging.getLogger(__name__)
 console = Console()
 
 
+class _SpaceSplitMultiple(click.Option):
+    """Click option that accepts both repeated flags and space-separated values.
+
+    ``--focus "a b c" --focus d`` produces ``('a', 'b', 'c', 'd')``.
+    Each flag invocation may contain whitespace-separated tokens that are
+    flattened into the final tuple.
+    """
+
+    def type_cast_value(self, ctx: click.Context, value: Any) -> tuple[str, ...]:
+        if not value:
+            return ()
+        flat: list[str] = []
+        for v in value:
+            flat.extend(v.split())
+        return tuple(flat)
+
+
 def _check_llm_direct() -> tuple[bool, str]:
     """Check direct OpenRouter connectivity for the SN pipeline.
 
@@ -617,29 +634,17 @@ def _check_pipeline_clear_gate() -> None:
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
 @click.option("-q", "--quiet", is_flag=True, help="Suppress non-error output")
 @click.option(
-    "--paths",
-    "paths_list",
-    type=str,
-    multiple=True,
-    help=(
-        "DD paths to process directly. Accepts multiple --paths flags or "
-        "space-separated paths within each flag (e.g., "
-        "'--paths eq/.../psi eq/.../q' or '--paths eq/.../psi --paths eq/.../q'). "
-        "Bypasses graph query, classifier, and already-named check. "
-        "Overrides --domain, --limit, and implies --force."
-    ),
-)
-@click.option(
     "--focus",
     "focus_paths",
     multiple=True,
+    cls=_SpaceSplitMultiple,
     default=(),
     help=(
         "Focus on specific DD paths for full-pipeline processing. "
         "Runs the complete 6-pool pipeline (generate → review → refine → docs) "
         "scoped to only these items via run_id filtering. "
-        "Accepts space-separated values and/or multiple --focus flags. "
-        "Mutually exclusive with --paths."
+        "Accepts multiple --focus flags and/or quoted space-separated values "
+        '(e.g., --focus "path/a path/b" --focus path/c).'
     ),
 )
 @click.option(
@@ -799,16 +804,6 @@ def _check_pipeline_clear_gate() -> None:
     help="Skip the review phase (6-dimensional scoring).",
 )
 @click.option(
-    "--single-pass",
-    is_flag=True,
-    default=False,
-    help=(
-        "Force the single-pass extract → compose pipeline instead of "
-        "the default domain-iterating completion loop. Useful for CI "
-        "and regression tests."
-    ),
-)
-@click.option(
     "--only",
     "only_phase",
     type=click.Choice(
@@ -880,7 +875,6 @@ def sn_run(
     compose_model: str | None,
     verbose: bool,
     quiet: bool,
-    paths_list: tuple[str, ...],
     focus_paths: tuple[str, ...],
     reset_to: str | None,
     from_model: str | None,
@@ -899,7 +893,6 @@ def sn_run(
     review_name_backlog_cap: int,
     review_docs_backlog_cap: int,
     skip_review: bool,
-    single_pass: bool,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -909,9 +902,8 @@ def sn_run(
 
     \b
     Scope routing:
-      - With --paths: single-pass pipeline (explicit paths too narrow for looping)
-      - Without --paths: all-pool completion loop (default, all 6 pools concurrent)
-      - With --single-pass: always single-pass pipeline
+      - Default: all-pool completion loop (all 6 pools concurrent)
+      - With --focus: full 6-pool pipeline scoped to specific DD paths
 
     \b
     Examples:
@@ -920,8 +912,8 @@ def sn_run(
       imas-codex sn run --domain equilibrium --domain transport  # two domains
       imas-codex sn run --domain "equilibrium transport" --dry-run  # same, space-sep
       imas-codex sn run --source signals --facility tcv --domain magnetics
-      imas-codex sn run --paths equilibrium/time_slice/profiles_1d/psi --paths equilibrium/time_slice/profiles_1d/q
-      imas-codex sn run --single-pass --paths equilibrium/time_slice/profiles_1d/psi -c 1  # single compose pass on explicit paths
+      imas-codex sn run --focus equilibrium/time_slice/profiles_1d/psi  # debug single path
+      imas-codex sn run --focus eq/.../psi --focus eq/.../q   # debug multiple paths
       imas-codex sn run --reset-to drafted --reset-only
       imas-codex sn run --reset-to drafted --below-score 0.6 --reset-only
       imas-codex sn run --only link                   # resolve links only
@@ -960,12 +952,8 @@ def sn_run(
     else:
         skip_generate_from_only = False
 
-    # Flatten --focus values (split by whitespace, same as --paths).
-    flat_focus = " ".join(focus_paths).split() if focus_paths else []
-
-    # Mutual exclusion: --focus and --paths cannot be used together.
-    if flat_focus and paths_list:
-        raise click.UsageError("--focus and --paths are mutually exclusive")
+    # Flatten --focus values (handled by _SpaceSplitMultiple.type_cast_value).
+    flat_focus = list(focus_paths)
 
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
@@ -1062,12 +1050,12 @@ def sn_run(
         )
         return
 
-    # Scope-routing: --paths → single-pass; else → all-pool loop (unless --single-pass).
+    # Scope-routing: default (DD source) → all-pool loop.
     # The loop runs all 6 pools concurrently, sampling globally from the available
     # pool of StandardNameSource / StandardName nodes (no per-domain looping).
     # --domain is forwarded to scope the extract_phase seeding only;
     # the pools themselves are domain-agnostic.
-    use_loop = not single_pass and not paths_list and source == "dd"
+    use_loop = source == "dd"
 
     if use_loop:
         _run_sn_loop_cmd(
@@ -1101,86 +1089,6 @@ def sn_run(
     # Validate: signals source requires facility
     if source == "signals" and not facility:
         raise click.UsageError("--facility is required when --source is signals")
-
-    # --paths implies DD source, force, and overrides filters
-    # Flatten multiple --paths args and space-separated paths within each arg
-    flat_paths = " ".join(paths_list).split() if paths_list else []
-    if flat_paths:
-        source = "dd"
-        domain_filter = None
-        limit = None
-        force = True  # Targeted paths always regenerate
-
-        # Resolve wildcard patterns (e.g., "*/profiles_1d/q" or "equilibrium/*/data")
-        raw_paths = flat_paths
-        resolved_paths = []
-        has_wildcards = any("*" in p for p in raw_paths)
-
-        if has_wildcards:
-            import re
-
-            from imas_codex.graph.client import GraphClient
-
-            _MAX_WILDCARD_MATCHES = 50
-
-            with GraphClient() as gc:
-                for pattern in raw_paths:
-                    if "*" in pattern:
-                        # Escape regex metacharacters except *, then convert * to [^/]+
-                        escaped = re.escape(pattern).replace(r"\*", "[^/]+")
-                        regex = f"^{escaped}$"
-                        matches = list(
-                            gc.query(
-                                """
-                                MATCH (n:IMASNode)
-                                WHERE n.id =~ $regex
-                                  AND NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
-                                RETURN n.id AS path
-                                ORDER BY n.id
-                                LIMIT $max_matches
-                                """,
-                                regex=regex,
-                                max_matches=_MAX_WILDCARD_MATCHES,
-                            )
-                        )
-                        found = [r["path"] for r in matches]
-                        if found:
-                            console.print(
-                                f"  [dim]{pattern}[/dim] → {len(found)} paths"
-                            )
-                            resolved_paths.extend(found)
-                        else:
-                            console.print(
-                                f"  [yellow]⚠ {pattern}[/yellow] — no matches"
-                            )
-                    else:
-                        resolved_paths.append(pattern)
-
-            # Deduplicate preserving order
-            seen: set[str] = set()
-            unique_paths = []
-            for p in resolved_paths:
-                if p not in seen:
-                    seen.add(p)
-                    unique_paths.append(p)
-            resolved_paths = unique_paths
-
-            console.print(
-                f"  Resolved {len(resolved_paths)} unique paths from "
-                f"{len(raw_paths)} patterns"
-            )
-            resolved_paths_final = resolved_paths
-        else:
-            # No wildcards — just use raw paths, still deduplicate
-            seen_paths: set[str] = set()
-            unique = []
-            for p in raw_paths:
-                if p not in seen_paths:
-                    seen_paths.add(p)
-                    unique.append(p)
-            resolved_paths_final = unique
-    else:
-        resolved_paths_final = None
 
     # --from-model implies --force (selecting by model only makes sense for regeneration)
     if from_model:
@@ -1301,8 +1209,6 @@ def sn_run(
 
     log_print("\n[bold]Standard Name Build[/bold]")
     log_print(f"  Source: {source}")
-    if resolved_paths_final:
-        log_print(f"  Targeted paths: {len(resolved_paths_final)} paths")
     if domain_filter:
         log_print(f"  Domain filter: {domain_filter}")
     if facility:
@@ -1340,8 +1246,6 @@ def sn_run(
             logger.debug("Could not create progress display", exc_info=True)
 
     # Resolve name-only batch size from pyproject default when unspecified.
-    # In the Option B architecture, single-pass always runs in full mode
-    # (name_only=False); the name-only pass is no longer exposed via --target.
     name_only: bool = False
     name_only_batch_size: int = 50
     try:
@@ -1359,7 +1263,6 @@ def sn_run(
         ids_filter=ids_filter,
         domain_filter=domain_filter,
         facility_filter=facility,
-        paths_list=resolved_paths_final,
         cost_limit=cost_limit,
         dry_run=dry_run,
         force=force,

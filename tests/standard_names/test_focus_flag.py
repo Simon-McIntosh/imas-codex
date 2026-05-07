@@ -116,26 +116,6 @@ def _invoke_focus(*focus_args: str, extra_args: list[str] | None = None):
 class TestFocusFlagCliValidation:
     """CLI-level validation for the --focus flag."""
 
-    def test_focus_and_paths_mutually_exclusive(self):
-        """Providing both --focus and --paths must exit with code 2."""
-        runner = CliRunner()
-        result = runner.invoke(
-            sn,
-            [
-                "run",
-                "--skip-clear-gate",
-                "--dry-run",
-                "--focus",
-                "equilibrium/time_slice/profiles_1d/psi",
-                "--paths",
-                "equilibrium/time_slice/profiles_1d/q",
-            ],
-        )
-        assert result.exit_code == 2, (
-            f"Expected exit_code=2, got {result.exit_code}. Output: {result.output}"
-        )
-        assert "--focus and --paths are mutually exclusive" in (result.output or "")
-
     def test_focus_single_flag_accepted(self):
         """A single --focus flag is accepted; scope_run_id is passed to the loop."""
         result, kwargs, _ = _invoke_focus(
@@ -567,32 +547,6 @@ class TestBackwardCompatNoFocus:
                 f"Expected scope_run_id=None without --focus, "
                 f"got {captured.get('scope_run_id')!r}"
             )
-
-    def test_paths_flag_does_not_set_scope_run_id(self):
-        """Using --paths (not --focus) does not set scope_run_id."""
-        runner = CliRunner()
-        captured: dict = {}
-
-        def _fake_loop_cmd(**kwargs):
-            captured.update(kwargs)
-
-        with patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=_fake_loop_cmd):
-            result = runner.invoke(
-                sn,
-                [
-                    "run",
-                    "--skip-clear-gate",
-                    "--dry-run",
-                    "--paths",
-                    "equilibrium/time_slice/profiles_1d/psi",
-                ],
-                catch_exceptions=False,
-            )
-
-        # --paths triggers single-pass routing, not the loop, so captured may be empty.
-        assert result.exit_code == 0, f"CLI error: {result.output}"
-        if captured:
-            assert captured.get("scope_run_id") is None
 
     def test_claim_sn_atomic_no_scope_default(self):
         """_claim_sn_atomic defaults to scope_run_id=None — no run_id filter."""
