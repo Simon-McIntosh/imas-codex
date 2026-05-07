@@ -617,6 +617,7 @@ def _build_pool_specs(
     review_docs_backlog_cap: int | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -751,12 +752,18 @@ def _build_pool_specs(
 
     # ── PoolSpec construction ─────────────────────────────────────────
 
+    # Optional scope_run_id kwargs for --focus mode.
+    _scope_kwargs: dict[str, Any] = {}
+    if scope_run_id:
+        _scope_kwargs["scope_run_id"] = scope_run_id
+
     specs = [
         PoolSpec(
             name="generate_name",
             claim=_make_claim_adapter(
                 claim_generate_name_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_generate_name_batch),
             release=_make_release_adapter(
@@ -768,6 +775,7 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_review_name_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_review_name_batch),
             release=_make_release_adapter(
@@ -782,6 +790,7 @@ def _build_pool_specs(
                 min_score=regen_score,
                 **_rotation_cap_kwargs,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_refine_name_batch),
             release=_make_release_adapter(
@@ -793,6 +802,7 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_generate_docs_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_generate_docs_batch),
             release=_make_release_adapter(
@@ -804,6 +814,7 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_review_docs_batch),
             release=_make_release_adapter(
@@ -818,6 +829,7 @@ def _build_pool_specs(
                 min_score=regen_score,
                 **_rotation_cap_kwargs,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_refine_docs_batch),
             release=_make_release_adapter(
@@ -1010,6 +1022,7 @@ async def run_sn_pools(
     loop_state: Any | None = None,
     pending_fn: Callable[[], dict[str, int]] | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
+    scope_run_id: str | None = None,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator (Phase 8).
 
@@ -1157,23 +1170,31 @@ async def run_sn_pools(
         )
 
         # ── B3: Domain extract (auto-seed) ────────────────────────
-        # Merge deprecated only_domain into domains for backward compat.
-        _domains = domains
-        if only_domain and not _domains:
-            _domains = (only_domain,)
-
-        if _domains:
-            seeded = 0
-            for d in _domains:
-                seeded += await _seed_domain_sources(
-                    domain=d, source=source, stop_event=stop_event
-                )
+        # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
+        if scope_run_id:
             logger.info(
-                "Auto-seeded %d sources from %d domain(s)", seeded, len(_domains)
+                "run_sn_pools: focus mode (run_id=%s…) — skipping auto-seed",
+                scope_run_id[:8],
             )
+            _domains = domains
         else:
-            seeded = await _seed_all_domains(source=source, max_sources=max_sources)
-            logger.info("Auto-seeded %d sources from all eligible domains", seeded)
+            # Merge deprecated only_domain into domains for backward compat.
+            _domains = domains
+            if only_domain and not _domains:
+                _domains = (only_domain,)
+
+            if _domains:
+                seeded = 0
+                for d in _domains:
+                    seeded += await _seed_domain_sources(
+                        domain=d, source=source, stop_event=stop_event
+                    )
+                logger.info(
+                    "Auto-seeded %d sources from %d domain(s)", seeded, len(_domains)
+                )
+            else:
+                seeded = await _seed_all_domains(source=source, max_sources=max_sources)
+                logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
         # ── B3b: Seed parent component sources ────────────────────
         from imas_codex.standard_names.graph_ops import seed_parent_sources
@@ -1194,6 +1215,7 @@ async def run_sn_pools(
             review_docs_backlog_cap=review_docs_backlog_cap,
             on_event=on_event,
             only_domain=_only_domain_for_pools,
+            scope_run_id=scope_run_id,
         )
 
         # ── Wire pool health into display state ───────────────────

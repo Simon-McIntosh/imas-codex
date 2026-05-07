@@ -2987,7 +2987,8 @@ def _finalize_generated_name_stage(
                         sns.claimed_at   = null,
                         sns.status       = 'composed',
                         sns.composed_at  = datetime(),
-                        sns.produced_sn_id = sn.id
+                        sns.produced_sn_id = sn.id,
+                        sn.run_id        = coalesce(sns.run_id, sn.run_id)
                     MERGE (sns)-[:PRODUCED_NAME]->(sn)
                     """,
                     batch=batch,
@@ -6095,6 +6096,7 @@ def _claim_sn_atomic(
     stage_field: str | None = None,
     to_stage: str | None = None,
     domain: str | None = None,
+    scope_run_id: str | None = None,
     seed_extra_where: str = "",
     seed_with_extras: str = "",
     seed_order_by: str = "rand()",
@@ -6176,6 +6178,12 @@ def _claim_sn_atomic(
         domain_where = " AND sn.physics_domain = $domain"
         params["domain"] = domain
 
+    # Optional run-id scope for --focus mode.
+    scope_where = ""
+    if scope_run_id:
+        scope_where = " AND sn.run_id = $scope_run_id"
+        params["scope_run_id"] = scope_run_id
+
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
@@ -6190,6 +6198,7 @@ def _claim_sn_atomic(
                                OR sn.claimed_at < datetime()
                                     - duration($cutoff))
                           {domain_where}
+                          {scope_where}
                           {seed_extra_where}
                         WITH sn{seed_with_extras}
                         ORDER BY {seed_order_by} LIMIT 1
@@ -6232,6 +6241,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                             MATCH (sn)-[:IN_CLUSTER]
                                 ->(:IMASSemanticCluster
                                     {{id: $cluster_id}})
@@ -6251,6 +6261,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                             MATCH (sn)-[:IN_CLUSTER]
                                 ->(:IMASSemanticCluster
                                     {{id: $cluster_id}})
@@ -6268,6 +6279,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                               AND sn.physics_domain = $fallback_domain
                             MATCH (sn)-[:HAS_UNIT]
                                 ->(:Unit {{id: $unit}})
@@ -6285,6 +6297,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                               AND sn.physics_domain = $fallback_domain
                             WITH sn LIMIT $expand_limit
                             SET sn.claimed_at = datetime(),
@@ -6344,6 +6357,7 @@ def claim_generate_name_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardNameSource nodes (status='extracted') for name generation.
 
@@ -6405,6 +6419,12 @@ def claim_generate_name_batch(
         )
         extra_params["domain"] = domain
 
+    # Optional run-id scope for --focus mode (StandardNameSource).
+    scope_sns_where = ""
+    if scope_run_id:
+        scope_sns_where = "AND sns.run_id = $scope_run_id"
+        extra_params["scope_run_id"] = scope_run_id
+
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
@@ -6420,6 +6440,7 @@ def claim_generate_name_batch(
                                     - duration($cutoff))
                           {facility_where}
                           {domain_where}
+                          {scope_sns_where}
                         WITH sns ORDER BY rand() LIMIT 1
                         SET sns.claimed_at = datetime(),
                             sns.claim_token = $token
@@ -6471,6 +6492,7 @@ def claim_generate_name_batch(
                             WHERE sns.status = 'extracted'
                               AND sns.claimed_at IS NULL
                               {facility_where}
+                              {scope_sns_where}
                             MATCH (sns)-[:FROM_DD_PATH]
                                 ->(imas:IMASNode)
                             MATCH (imas)-[:IN_CLUSTER]
@@ -6498,6 +6520,7 @@ def claim_generate_name_batch(
                             WHERE sns.status = 'extracted'
                               AND sns.claimed_at IS NULL
                               {facility_where}
+                              {scope_sns_where}
                             MATCH (sns)-[:FROM_DD_PATH]
                                 ->(imas:IMASNode)
                             WHERE imas.physics_domain
@@ -6525,6 +6548,7 @@ def claim_generate_name_batch(
                               AND sns.claimed_at IS NULL
                               AND sns.batch_key = $batch_key
                               {facility_where}
+                              {scope_sns_where}
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token
@@ -6642,6 +6666,7 @@ def claim_review_name_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name review (Phase 8.1 stage machine).
 
@@ -6678,6 +6703,7 @@ def claim_review_name_batch(
             ", sn.name_stage AS name_stage"
         ),
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
 
@@ -6912,6 +6938,7 @@ def claim_review_docs_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs review (Phase 8.1 stage machine).
 
@@ -6948,6 +6975,7 @@ def claim_review_docs_batch(
             ", sn.docs_stage AS docs_stage"
         ),
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
 
@@ -7172,6 +7200,7 @@ def claim_refine_name_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name refinement (Option B chain creation).
 
@@ -7214,6 +7243,7 @@ def claim_refine_name_batch(
         stage_field="name_stage",
         to_stage="refining",
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
     # Enrich each claimed item with its REFINED_FROM chain history and build
@@ -7298,7 +7328,9 @@ def _compute_embed_hash(sn_id: str, description: str | None) -> str:
 
 
 @retry_on_deadlock()
-def claim_embed_batch(limit: int = 50) -> list[dict[str, Any]]:
+def claim_embed_batch(
+    limit: int = 50, scope_run_id: str | None = None
+) -> list[dict[str, Any]]:
     """Claim StandardName nodes needing (re-)embedding.
 
     Targets nodes where:
@@ -7310,19 +7342,26 @@ def claim_embed_batch(limit: int = 50) -> list[dict[str, Any]]:
     for stage transitions.
     """
     token = str(uuid.uuid4())
+    scope_where = ""
+    scope_params: dict[str, Any] = {}
+    if scope_run_id:
+        scope_where = "AND sn.run_id = $scope_run_id"
+        scope_params["scope_run_id"] = scope_run_id
     with GraphClient() as gc:
         gc.query(
-            """
+            f"""
             MATCH (sn:StandardName)
             WHERE (sn.embedding IS NULL OR sn.embed_text_hash IS NULL)
               AND (sn.embed_claimed_at IS NULL
                    OR sn.embed_claimed_at < datetime() - duration('PT5M'))
+              {scope_where}
             WITH sn ORDER BY rand() LIMIT $limit
             SET sn.embed_claimed_at = datetime(),
                 sn.embed_claim_token = $token
             """,
             limit=limit,
             token=token,
+            **scope_params,
         )
         return list(
             gc.query(
@@ -8052,6 +8091,7 @@ def claim_generate_docs_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes ready for generate_docs.
 
@@ -8095,6 +8135,7 @@ def claim_generate_docs_batch(
         ),
         # stage_field=None → claim only, no stage transition
         domain=domain,
+        scope_run_id=scope_run_id,
         # Parent-first ordering: nodes that have incoming COMPONENT_OF edges
         # (i.e. nodes which are parents) receive priority 0 so they are
         # documented before their children.
@@ -8317,6 +8358,7 @@ def claim_refine_docs_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs refinement.
 
@@ -8364,6 +8406,7 @@ def claim_refine_docs_batch(
         stage_field="docs_stage",
         to_stage="refining",
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
     # Enrich each claimed item with its DOCS_REVISION_OF chain history and build

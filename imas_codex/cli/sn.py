@@ -225,6 +225,7 @@ def _run_sn_loop_cmd(
     override_edits: list[str] | None = None,
     only: str | None = None,
     max_sources: int | None = None,
+    scope_run_id: str | None = None,
 ) -> None:
     """Execute the DD completion loop with Rich progress display.
 
@@ -424,6 +425,7 @@ def _run_sn_loop_cmd(
             stop_event=stop_event,
             pending_fn=_pool_pending_fn,
             on_event=_on_event,
+            scope_run_id=scope_run_id,
         )
         return {"summary": summary}
 
@@ -625,6 +627,19 @@ def _check_pipeline_clear_gate() -> None:
         "'--paths eq/.../psi eq/.../q' or '--paths eq/.../psi --paths eq/.../q'). "
         "Bypasses graph query, classifier, and already-named check. "
         "Overrides --domain, --limit, and implies --force."
+    ),
+)
+@click.option(
+    "--focus",
+    "focus_paths",
+    multiple=True,
+    default=(),
+    help=(
+        "Focus on specific DD paths for full-pipeline processing. "
+        "Runs the complete 6-pool pipeline (generate → review → refine → docs) "
+        "scoped to only these items via run_id filtering. "
+        "Accepts space-separated values and/or multiple --focus flags. "
+        "Mutually exclusive with --paths."
     ),
 )
 @click.option(
@@ -866,6 +881,7 @@ def sn_run(
     verbose: bool,
     quiet: bool,
     paths_list: tuple[str, ...],
+    focus_paths: tuple[str, ...],
     reset_to: str | None,
     from_model: str | None,
     revalidate: bool,
@@ -944,15 +960,114 @@ def sn_run(
     else:
         skip_generate_from_only = False
 
+    # Flatten --focus values (split by whitespace, same as --paths).
+    flat_focus = " ".join(focus_paths).split() if focus_paths else []
+
+    # Mutual exclusion: --focus and --paths cannot be used together.
+    if flat_focus and paths_list:
+        raise click.UsageError("--focus and --paths are mutually exclusive")
+
+    # Coerce override_edits tuple to list for downstream
+    _override_edits = list(override_edits) if override_edits else None
+
+    # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
+    if flat_focus:
+        import uuid as _uuid
+
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        scope_run_id = str(_uuid.uuid4())
+
+        # 1. Clear stale run_ids from previous focused runs.
+        with GraphClient() as gc:
+            gc.query(
+                "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
+                "SET sn.run_id = NULL"
+            )
+            gc.query(
+                "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
+                "SET sns.run_id = NULL"
+            )
+
+        # 2. Seed StandardNameSource nodes for each focused path.
+        sources = []
+        for path in flat_focus:
+            sources.append(
+                {
+                    "id": f"dd:{path}",
+                    "source_type": "dd",
+                    "source_id": path,
+                    "dd_path": path,
+                    "batch_key": "focus",
+                    "status": "extracted",
+                    "description": "",
+                }
+            )
+        written = merge_standard_name_sources(sources, force=True)
+        if not quiet:
+            click.echo(f"Seeded {written} focus source(s) (run_id={scope_run_id[:8]}…)")
+
+        # 3. Post-stamp run_id on the seeded SNS nodes.
+        sns_ids = [f"dd:{p}" for p in flat_focus]
+        with GraphClient() as gc:
+            gc.query(
+                "UNWIND $ids AS sid "
+                "MATCH (sns:StandardNameSource {id: sid}) "
+                "SET sns.run_id = $run_id",
+                ids=sns_ids,
+                run_id=scope_run_id,
+            )
+
+        # 4. Force-reset any existing StandardNames for these paths.
+        with GraphClient() as gc:
+            gc.query(
+                """
+                UNWIND $ids AS sid
+                MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
+                SET sn.name_stage = 'pending',
+                    sn.docs_stage = 'pending',
+                    sn.run_id = $run_id,
+                    sn.reviewed_name_at = null,
+                    sn.reviewed_docs_at = null,
+                    sn.reviewer_score_name = null,
+                    sn.reviewer_score_docs = null,
+                    sn.claim_token = null,
+                    sn.claimed_at = null
+                """,
+                ids=sns_ids,
+                run_id=scope_run_id,
+            )
+
+        # 5. Route through the full loop with scope_run_id.
+        _run_sn_loop_cmd(
+            cost_limit=cost_limit,
+            per_domain_limit=limit,
+            dry_run=dry_run,
+            quiet=quiet,
+            domains=domains,
+            verbose=verbose,
+            min_score=min_score,
+            rotation_cap=rotation_cap,
+            escalation_model=escalation_model,
+            review_name_backlog_cap=review_name_backlog_cap,
+            review_docs_backlog_cap=review_docs_backlog_cap,
+            skip_generate=skip_generate_from_only,
+            skip_review=skip_review,
+            source=source,
+            override_edits=_override_edits,
+            only=only_phase,
+            max_sources=max_sources,
+            scope_run_id=scope_run_id,
+        )
+        return
+
     # Scope-routing: --paths → single-pass; else → all-pool loop (unless --single-pass).
     # The loop runs all 6 pools concurrently, sampling globally from the available
     # pool of StandardNameSource / StandardName nodes (no per-domain looping).
     # --domain is forwarded to scope the extract_phase seeding only;
     # the pools themselves are domain-agnostic.
     use_loop = not single_pass and not paths_list and source == "dd"
-
-    # Coerce override_edits tuple to list for downstream
-    _override_edits = list(override_edits) if override_edits else None
 
     if use_loop:
         _run_sn_loop_cmd(
