@@ -164,6 +164,44 @@ def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
     return segments
 
 
+def _enrich_segments_from_pydantic(
+    name: str, segments: dict[str, str | None]
+) -> dict[str, str | None]:
+    """Fill ``None`` segment slots using ISN's Pydantic model.
+
+    The IR parser is vocabulary-agnostic — qualifiers like ``electron``
+    get ``category=None``. The Pydantic ``parse_standard_name`` layer
+    categorises them (``subject=electron``). This function backfills
+    any slots the IR left empty.
+    """
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+
+        sn = parse_standard_name(name)
+    except Exception:
+        return segments
+
+    field_map = {
+        "grammar_physical_base": "physical_base",
+        "grammar_geometric_base": "geometric_base",
+        "grammar_subject": "subject",
+        "grammar_component": "component",
+        "grammar_coordinate": "coordinate",
+        "grammar_transformation": "transformation",
+        "grammar_position": "position",
+        "grammar_process": "process",
+        "grammar_device": "device",
+        "grammar_region": "region",
+    }
+    for graph_key, sn_attr in field_map.items():
+        if segments.get(graph_key) is None:
+            val = getattr(sn, sn_attr, None)
+            if val is not None:
+                segments[graph_key] = val.value if hasattr(val, "value") else str(val)
+
+    return segments
+
+
 def _parse_grammar(name: str) -> dict[str, str | None]:
     """Parse ``name`` with the ISN grammar API.
 
@@ -206,6 +244,8 @@ def _parse_grammar(name: str) -> dict[str, str | None]:
         result = parse(name)
         diags = json.dumps([dataclasses.asdict(d) for d in result.diagnostics])
         segments = _extract_grammar_segments(result.ir)
+        # Pydantic model provides richer categorisation (e.g. subject)
+        segments = _enrich_segments_from_pydantic(name, segments)
     except ParseError:
         logger.debug(
             "ISN grammar parse rejected '%s' — storing empty diagnostics", name

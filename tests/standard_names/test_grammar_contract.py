@@ -116,11 +116,21 @@ def test_extract_segments_unparseable_name():
     """Unparseable names get version but null segment fields."""
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    result = _parse_grammar("electron_temperature")
+    result = _parse_grammar("nonexistent_gibberish_xyzzy")
     assert result["grammar_parse_version"] is not None
     assert result["grammar_physical_base"] is None
     assert result["grammar_component"] is None
     assert result["validation_diagnostics_json"] == "[]"
+
+
+def test_extract_segments_parseable_compound():
+    """Parseable compound names extract subject + physical_base via Pydantic enrichment."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("electron_temperature")
+    assert result["grammar_physical_base"] == "temperature"
+    assert result["grammar_subject"] == "electron"
+    assert result["grammar_component"] is None
 
 
 def test_extract_segments_all_keys_present():
