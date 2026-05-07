@@ -7,7 +7,7 @@
 3. **Postfix locus** — spatial qualifiers (`_of_`, `_at_`, `_over_`) and mechanism (`_due_to_`) always follow the base quantity.
 4. **Prefix projection** — axis projections (`radial_component_of_`) precede the base.
 5. **Explicit operator scope** — prefix operators carry `_of_` as a scope marker (`gradient_of_X`); postfix operators concatenate directly (`X_magnitude`).
-6. **Closed vocabularies** — operators, subjects, components, coordinates, processes, objects, geometry/positions, regions, and geometric_bases are CLOSED. Only `physical_base` is open. If no token in a closed segment fits, emit `vocab_gap`; never invent and **never absorb a closed token into `physical_base`**.
+6. **Closed vocabularies** — ALL segments are CLOSED: operators, subjects, qualifiers, components, coordinates, processes, physical_bases, objects, geometry/positions, regions, and geometric_bases each have a fixed token list. If no registered token fits a segment, emit `vocab_gap`; never invent tokens.
 
 ### 5-Group Internal Representation
 
@@ -18,7 +18,7 @@ Every standard name decomposes into five groups:
 | **operators** | Math ops, applied outer→inner | prefix: `time_derivative`, `gradient`, `normalized`, `per_toroidal_mode`, `per_poloidal_mode`, `cumulative_inside_flux_surface`; postfix: `magnitude`, `real_part`, `fourier_coefficient` |
 | **projection** | Axis decomposition of vector/tensor | `radial_component_of_`, `toroidal_component_of_`, `parallel_component_of_` |
 | **qualifiers** | Species or population prefix | `electron`, `ion`, `deuterium`, `fast_ion`, `thermal_electron` |
-| **base** | Physical quantity (the ONE open slot — every other slot is closed) | `temperature`, `pressure`, `density`, `magnetic_field`, `safety_factor` |
+| **base** | Physical quantity (CLOSED — 79 irreducible dimensional tokens) | `temperature`, `pressure`, `density`, `magnetic_field`, `safety_factor` |
 | **locus + mechanism** | Where (postfix) + process (postfix) | `_of_plasma_boundary`, `_at_magnetic_axis`, `_over_core_region`, `_due_to_bootstrap` |
 
 ### Canonical Rendering
@@ -26,6 +26,30 @@ Every standard name decomposes into five groups:
 ```
 [operators] [projection_component_of_] [qualifiers] base [_of/_at/_over locus] [_due_to process]
 ```
+
+### Segment Composition Order
+
+Names are assembled from segments in this fixed order:
+
+```
+[operator_of_] [component_component_of_] [qualifier]* [subject_] physical_base [_at_position | _of_object | _over_region] [_due_to_process]
+```
+
+| Segment | Required? | Cardinality | Source |
+|---------|-----------|-------------|--------|
+| `operator` | optional | 0..N (nested) | operators registry |
+| `component` | optional | 0..1 | component/coordinate registry |
+| `qualifier` | optional | 0..N (ordered) | qualifier registry (103 tokens) |
+| `subject` | optional | 0..1 | subject registry |
+| `physical_base` | **REQUIRED** | exactly 1 | base registry (79 tokens) |
+| `geometric_base` | alternative to physical_base | exactly 1 | geometric_base registry |
+| `position` | optional | 0..1 via `_at_` | geometry/position registry |
+| `object` | optional | 0..1 via `_of_` | device/object registry |
+| `region` | optional | 0..1 via `_over_` | region registry |
+| `process` | optional | 0..1 via `_due_to_` | process registry |
+
+**Qualifier stacking:** Multiple qualifiers combine left-to-right before the base:
+`trapped_fast_particle_collisional_power_density` = qualifiers=[trapped, fast_particle, collisional] + base=power_density
 
 **Operator templates:**
 - **Unary prefix**: `op_of_` + inner → `time_derivative_of_electron_temperature`
@@ -44,10 +68,9 @@ In the ISN grammar, `_of_` appears in exactly three structural roles:
 
 ### Key Rules
 
-- **`physical_base` is the SINGLE open slot** — every other segment is closed.
-  When no registered token fits a closed segment, report as `vocab_gap`. Never
-  invent a new token, use a free-form string, **or absorb the missing token
-  into `physical_base`**.
+- **ALL segments are closed** — `physical_base` has exactly 79 irreducible dimensional tokens,
+  `qualifier` has 103 modifier tokens. When no registered token fits ANY segment,
+  report as `vocab_gap`. Never invent a new token or use a free-form string.
 - **Generic bases require qualification** — tokens like `temperature`, `current`, `pressure`, `density` must have at least one qualifier (species, component, or locus).
 - **Process attribution** uses `_due_to_` + a Process vocabulary noun: `plasma_current_due_to_bootstrap`, never `bootstrap_current`.
 - **DD path independence** — names describe physics, not DD location. Never include IDS names or DD section prefixes.
@@ -72,12 +95,12 @@ In the ISN grammar, `_of_` appears in exactly three structural roles:
 ### Closed-Vocabulary Token Registry — EVERY closed segment, EVERY token
 
 The following lists are the complete, authoritative closed vocabulary for
-each segment.  **Any token that appears below is a CLOSED-segment token and
-must be placed in its declared segment slot — never in `physical_base`.**
+each segment.  **Every token below MUST be placed in its declared segment slot.**
+`physical_base` is also closed — only the 79 listed bases are valid.
 
-If you find yourself writing a `physical_base` value that contains one of
-these tokens as an underscore-separated substring, STOP and re-decompose:
-the token belongs in its closed segment.  Examples of the failure mode this
+If a candidate name contains tokens from multiple segments, decompose:
+each token belongs in its declared segment. Check ALL segments including
+`physical_base` and `qualifier` — no segment accepts invented tokens.  Examples of the failure mode this
 prevents:
 
 - `toroidal_torque` → `toroidal` is in `component`; the correct decomposition
@@ -125,11 +148,11 @@ before emitting:
      its own slot.
    - `<base>_<region>` → `<base>_over_<region>` with the region in its own slot.
 5. **Re-render the name** from the corrected `grammar_fields` and confirm the
-   `physical_base` slot contains ONLY tokens that do not appear in any closed
-   vocabulary above.
-6. **If a needed token is missing from a closed registry**, emit a
-   `vocab_gap` against that segment — DO NOT invent a token and DO NOT
-   absorb it into `physical_base`.
+   `physical_base` slot contains ONLY one of the 79 registered base tokens.
+   If the intended base is not in the registry, emit a `vocab_gap` for `physical_base`.
+6. **If a needed token is missing from ANY closed registry** (including
+   `physical_base` and `qualifier`), emit a `vocab_gap` against that
+   segment — DO NOT invent tokens for any segment.
 
 This checklist directly addresses the dominant failure mode surfaced by
 expert reviewers: closed-vocab tokens (toroidal, parallel, thermal,

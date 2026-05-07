@@ -52,8 +52,9 @@ class TestLoadKnownPhysicalBases:
 
     def test_non_empty(self) -> None:
         result = _load_known_physical_bases()
-        assert len(result) > 100, (
-            f"Expected >100 registered physical bases, got {len(result)}"
+        # physical_base is now a closed vocabulary with exactly 79 tokens (ISN v0.7.0rc46+)
+        assert len(result) >= 70, (
+            f"Expected >=70 registered physical bases, got {len(result)}"
         )
 
     def test_contains_temperature(self) -> None:
