@@ -1266,11 +1266,23 @@ to a git tag via `git+https://` URL, not a PyPI version.
 
 1. **Harvest** candidate tokens from rotation evidence — diff `VocabGap` nodes or
    `_load_known_physical_bases()` against the current ISN vocabulary.
-2. **Rubber-duck review** each addition:
+2. **Rubber-duck review** each addition against the **vocabulary design rules**:
    - Single-word base preferred; physical-quantity semantics only
    - No overlap with existing tokens
    - Not a unit name, geometry primitive already covered, or domain-specific compound
      expressible via existing components
+   - **No compound tokens that subsume open-vocabulary words** — a closed segment (subject,
+     component, etc.) must NEVER contain tokens that include words belonging to `physical_base`.
+     Example: `trapped_particle` as subject greedily consumes "particle", breaking grouping
+     of `particle_density` names. Use `trapped` alone.
+   - **Prefer atomic qualifiers** — orbit class (`trapped`, `co_passing`) and species
+     (`fast_particle`, `electron`) are independent axes. Never combine into single tokens.
+   - **Test grouping invariant** — all orbit/species variants of the same physical quantity
+     MUST parse to the same `physical_base`. If they don't, the token is wrong.
+   - **Verify round-trip** for ALL existing names containing the candidate string:
+     ```python
+     p = parse_standard_name(name); assert compose_standard_name(p) == name
+     ```
    - Document in YAML with description + dimensions if applicable
 3. **Apply** changes on a feature branch in `~/Code/imas-standard-names`:
    ```bash
