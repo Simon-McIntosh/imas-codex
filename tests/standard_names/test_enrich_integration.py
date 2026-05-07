@@ -720,6 +720,7 @@ class TestDryRunIntegration:
             facility="dd",
             cost_limit=0.10,
             dry_run=True,
+            domain=[_TEST_PHYSICS_DOMAIN],
         )
 
         await run_sn_enrich_engine(state)
