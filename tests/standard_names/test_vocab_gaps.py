@@ -774,3 +774,27 @@ class TestOpenSegmentFilter:
         assert len(batch) == 2
         batch_segs = {item["segment"] for item in batch}
         assert batch_segs == {"physical_base", "transformation"}
+
+
+class TestLoadKnownPhysicalBases:
+    """Verify _load_known_physical_bases returns expected tokens."""
+
+    def test_returns_nonempty_frozenset(self):
+        from imas_codex.standard_names.workers import _load_known_physical_bases
+
+        bases = _load_known_physical_bases()
+        assert isinstance(bases, frozenset)
+        assert len(bases) > 0, "expected non-empty frozenset of physical bases"
+
+    @pytest.mark.parametrize(
+        "token",
+        ["pressure", "density", "velocity", "temperature", "current", "wavelength"],
+    )
+    def test_contains_key_tokens(self, token):
+        from imas_codex.standard_names.workers import _load_known_physical_bases
+
+        bases = _load_known_physical_bases()
+        assert token in bases, (
+            f"expected physical_base token {token!r} missing from "
+            f"_load_known_physical_bases() result ({len(bases)} tokens)"
+        )

@@ -70,7 +70,7 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
    tokens when no registered base fits the underlying physics. The grammar
    accepts any well-formed identifier in this slot. Auto-tracking will surface
    novel bases as VocabGap entries for ISN review — you do NOT need to emit a
-   separate `vocab_gap` for `physical_base`. Prefer the registered ~250 tokens
+   separate `vocab_gap` for `physical_base`. Prefer the registered ~80 tokens
    when one fits cleanly, but do not force-fit a wrong base. **All other
    segments remain CLOSED** — for subject, position, component, coordinate,
    etc., you must still emit `vocab_gap` when no registered token applies.
@@ -150,7 +150,7 @@ When a DD path produces a reject pattern: SKIP and record as `vocab_gap`.
 The ISN grammar uses a 5-group IR (operators, projection, qualifiers, base, locus/mechanism).
 Your name must render from this IR. Key composition rules:
 
-- **`physical_base` is OPEN vocabulary** (~250 registered tokens, but new tokens allowed).
+- **`physical_base` is OPEN vocabulary** (~80 registered tokens, but new tokens allowed).
   Prefer a registered base when one fits. If no registered base fits the physics, propose a
   well-formed identifier — auto-tracking surfaces novel bases for ISN review. Do NOT emit a
   separate `vocab_gap` exit for `physical_base`. **All other segments are closed.**

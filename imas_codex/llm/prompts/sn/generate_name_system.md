@@ -42,7 +42,7 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
    `reconstructed_` (already in REJECT), `measured_` (already in REJECT).
    Standard names describe what is measured, not when or how.
 5. **No invented physical bases.** The `physical_base` vocabulary is closed
-   (~250 tokens). If no registered base fits, emit `vocab_gap` — never
+   (~80 tokens). If no registered base fits, emit `vocab_gap` — never
    fabricate a novel base token.
 6. **No abbreviations, acronyms, or alphanumerics.** Names must be
    spelled-out English words joined by `_`. Reject any candidate containing
@@ -182,7 +182,7 @@ For χ² weights and Maxwellian-pressure definitions:
 The ISN grammar uses a 5-group IR (operators, projection, qualifiers, base, locus/mechanism).
 Your name must render from this IR. Key composition rules:
 
-- **physical_base is closed vocabulary** (~250 tokens). If no registered base fits, emit a
+- **physical_base is closed vocabulary** (~80 tokens). If no registered base fits, emit a
   `vocab_gap` with the needed token. Do NOT invent a base or use a free-form string.
 - **Operators require explicit `_of_` scope**: `time_derivative_of_X`, `gradient_of_X`,
   `volume_averaged_of_X`. Never bare-concatenate a prefix operator to the base.

@@ -5,7 +5,7 @@ Study the **reasoning**, not just the names. The canonical form often surprises.
 ### ✅ Positive Exemplars — produce names like these
 
 **E1. Zero-operator base** — `electron_temperature`
-Qualifier `electron` + base `temperature`. No operators, no locus. The simplest valid form.
+Subject `electron` + base `temperature`. No operators, no locus. The simplest valid form.
 
 **E2. Unary prefix operator** — `gradient_of_electron_pressure`
 Operator `gradient` wraps the inner name `electron_pressure` with explicit `_of_` scope.

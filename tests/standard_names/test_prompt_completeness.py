@@ -185,3 +185,68 @@ class TestStaleGuidanceStripped:
             "stale 'physical_base is open vocabulary' wording must be removed "
             "from the L6 retry helper"
         )
+
+
+class TestClosedVocabFullSegments:
+    """Verify closed_vocab_full includes ALL expected segments with tokens."""
+
+    def test_all_expected_segments_present(self):
+        from imas_codex.standard_names.context import _load_closed_vocab_full
+
+        data = _load_closed_vocab_full()
+        seg_names = {entry["segment"] for entry in data}
+        # Must include at least these canonical segments
+        for expected in (
+            "physical_base",
+            "qualifier",
+            "component",
+            "subject",
+            "device",
+            "geometry",
+            "region",
+            "process",
+        ):
+            assert expected in seg_names, (
+                f"expected segment {expected!r} missing from closed_vocab_full"
+            )
+
+    def test_all_segments_have_nonzero_tokens(self):
+        from imas_codex.standard_names.context import _load_closed_vocab_full
+
+        for entry in _load_closed_vocab_full():
+            assert len(entry["tokens"]) > 0, (
+                f"segment {entry['segment']!r} has zero tokens — "
+                "every closed segment must have at least one token"
+            )
+
+
+class TestRenderedPromptDecomposition:
+    """Verify rendered prompt contains decomposition instructions and no stale counts."""
+
+    def test_decomposition_rule_section_present(self, rendered_system_prompt):
+        """The DECOMPOSITION RULE section must be present."""
+        assert "DECOMPOSITION RULE" in rendered_system_prompt
+
+    def test_anti_pattern_examples_present(self, rendered_system_prompt):
+        """Key decomposition anti-patterns must appear in the prompt."""
+        for pattern in (
+            "momentum_diffusivity",
+            "convection_velocity",
+            "thermal_pressure",
+        ):
+            assert pattern in rendered_system_prompt, (
+                f"decomposition anti-pattern {pattern!r} missing from prompt"
+            )
+
+    def test_no_stale_250_token_count(self, rendered_system_prompt):
+        """No stale ~250 token counts should remain in the rendered prompt."""
+        assert "~250" not in rendered_system_prompt, (
+            "stale '~250' token count found in rendered prompt — "
+            "physical_base has ~80 tokens, not ~250"
+        )
+
+    def test_no_stale_79_base_count(self, rendered_system_prompt):
+        """The old 79-token count should not appear (now 80)."""
+        assert "79 irreducible" not in rendered_system_prompt
+        assert "79 listed" not in rendered_system_prompt
+        assert "79 registered" not in rendered_system_prompt
