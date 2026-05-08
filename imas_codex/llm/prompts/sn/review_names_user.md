@@ -70,6 +70,10 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - {{ issue }}
 {% endfor %}
 {% endif %}
+{% if item.semantic_warning %}
+
+{{ item.semantic_warning }}
+{% endif %}
 
 {% endfor %}
 

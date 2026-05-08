@@ -59,8 +59,9 @@ If ISN validation issues are present, judge whether each is a real defect or fal
   Allow genuine lexicalised atoms (`poloidal_flux`, `minor_radius`, `cross_sectional_area`, `safety_factor`). For real defects: dock **4 points per defect, cumulative cap −8**. Record each as `decomposition: <token>(<segment>) absorbed into physical_base` in the `issues` field.
 
 ### 2. Semantic Accuracy (0–20)
-**Cross-name consistency + provenance + physical correctness.** This is the third-party-critic dimension.
+**Cross-name consistency + self-descriptiveness + provenance + physical correctness.** This is the third-party-critic dimension.
 
+- **Self-descriptiveness** (CRITICAL): Can someone reading ONLY the name determine what quantity is being measured? The name must be semantically complete — it should identify both the measured property AND the subject/system. Score **≤ 5** if the name is ambiguous (e.g. `co_passing_density` — density of WHAT? `trapped_pressure` — pressure of WHAT?). A name must stand alone without consulting the description. Good examples: `electron_density` (what + subject), `radial_component_of_magnetic_field` (what + context), `ion_temperature_at_magnetic_axis` (what + subject + location).
 - **Cross-name consistency**: do `vector_neighbours` and `same_base_neighbours` show a different decomposition for the same physical concept? If yes, dock and cite the conflicting sibling by `id`.
 - **Physics sanity**: does the `physical_base` match what the unit and physics domain imply? E.g., a magnetic-field unit (T) should not produce a `temperature`-base name.
 - **Unit ↔ name match**: does the unit on the candidate match what the name implies? (T → magnetic field; eV/K → temperature; m^-3 → density; …)

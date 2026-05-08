@@ -64,6 +64,14 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
     are forbidden in names: `obtained_from`, `stored_in`, `derived_from`,
     `referenced_by`, `defined_in`, `used_for`. Standard names describe
     physics, not data provenance or storage.
+11. **Self-describing names — semantic completeness.** Every name MUST be
+    unambiguous when read in isolation. A reader must be able to determine
+    the measured quantity from the name alone, without consulting the
+    description or source context. ✗ `co_passing_density` (density of
+    what?), ✗ `trapped_pressure` (pressure of what?), ✗ `beam_fraction`
+    (fraction of what?). ✓ `co_passing_particle_density` (subject is
+    explicit), ✓ `trapped_electron_pressure` (subject is explicit),
+    ✓ `beam_ion_fraction` (both subject and base are clear).
 
 ### REJECT — Forbidden Name Tokens
 

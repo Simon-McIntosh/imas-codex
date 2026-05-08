@@ -4843,6 +4843,122 @@ async def process_review_name_batch(
                 )
             continue
 
+        # ── Semantic similarity gate (pre-LLM) ────────────────────────
+        # Compute cosine similarity between name-as-text and description.
+        # Names below the critical threshold are semantically ambiguous
+        # (e.g. "co_passing_density" — density of what?).  Skip the
+        # expensive LLM review and persist a synthetic low score that
+        # routes the name to the refine_name pool.
+        from imas_codex.standard_names.audits import semantic_similarity_check
+        from imas_codex.standard_names.defaults import (
+            SEMANTIC_SIM_CRITICAL,
+            SEMANTIC_SIM_SYNTHETIC_SCORE,
+            SEMANTIC_SIM_WARNING,
+        )
+
+        sem_sim: float | None = None
+        sem_issues: list[str] = []
+        try:
+            sem_sim, sem_issues = await _asyncio.to_thread(
+                semantic_similarity_check,
+                sn_id,
+                item.get("description") or "",
+            )
+        except Exception:
+            logger.debug(
+                "review_name: semantic_similarity_check failed for %s",
+                sn_id,
+                exc_info=True,
+            )
+
+        # Persist semantic_sim on the node regardless of outcome
+        if sem_sim is not None:
+            try:
+                from imas_codex.graph.client import GraphClient as _GC
+
+                def _store_sim(_id=sn_id, _sim=sem_sim) -> None:
+                    with _GC() as gc:
+                        gc.query(
+                            "MATCH (sn:StandardName {id: $id}) "
+                            "SET sn.semantic_sim = $sim",
+                            id=_id,
+                            sim=_sim,
+                        )
+
+                await _asyncio.to_thread(_store_sim)
+            except Exception:
+                pass  # best-effort
+
+        # Critical: skip LLM review, force into refine pipeline
+        if sem_sim is not None and sem_sim < SEMANTIC_SIM_CRITICAL:
+            logger.info(
+                "review_name: semantic gate FAILED for %s (sim=%.3f < %.2f) — "
+                "routing to refine",
+                sn_id,
+                sem_sim,
+                SEMANTIC_SIM_CRITICAL,
+            )
+            try:
+                persist_reviewed_name(
+                    sn_id=sn_id,
+                    claim_token=claim_token,
+                    score=SEMANTIC_SIM_SYNTHETIC_SCORE,
+                    scores={
+                        "grammar": 15.0 / 20.0,
+                        "semantic": 2.0 / 20.0,
+                        "convention": 15.0 / 20.0,
+                        "completeness": 5.0 / 20.0,
+                    },
+                    comments=(
+                        f"semantic_similarity_gate: sim={sem_sim:.3f} below "
+                        f"critical {SEMANTIC_SIM_CRITICAL:.2f}. Name is "
+                        f"semantically ambiguous — a reader cannot determine "
+                        f"the measured quantity from the name alone."
+                    ),
+                    comments_per_dim={
+                        "semantic": (
+                            f"Name-to-description embedding similarity is "
+                            f"{sem_sim:.3f}, well below the {SEMANTIC_SIM_CRITICAL:.2f} "
+                            f"threshold. The name does not stand alone."
+                        ),
+                    },
+                    model="(semantic_similarity_gate)",
+                    llm_cost=0.0,
+                    llm_tokens_in=0,
+                    llm_tokens_out=0,
+                    llm_tokens_cached_read=0,
+                    llm_tokens_cached_write=0,
+                    llm_service="standard-names",
+                    run_id=mgr.run_id,
+                )
+                processed += 1
+                if on_event:
+                    on_event(
+                        {
+                            "type": "review_name_semantic_gate_failed",
+                            "sn_id": sn_id,
+                            "semantic_sim": sem_sim,
+                        }
+                    )
+            except Exception:
+                logger.debug(
+                    "review_name: persist failed for semantic-gated %s",
+                    sn_id,
+                    exc_info=True,
+                )
+            continue
+
+        # Inject warning into item context for the reviewer
+        if sem_sim is not None and sem_sim < SEMANTIC_SIM_WARNING:
+            sem_warning_note = (
+                f"⚠️ SEMANTIC AMBIGUITY WARNING: Name-to-description "
+                f"embedding similarity is {sem_sim:.3f} (threshold "
+                f"{SEMANTIC_SIM_WARNING:.2f}). Verify that the name is "
+                f"self-describing — can someone determine the measured "
+                f"quantity from the name alone?"
+            )
+            item["semantic_warning"] = sem_warning_note
+
         # ── Build prompt context ───────────────────────────────────────
         from imas_codex.standard_names.context import (
             _build_enum_lists,

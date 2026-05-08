@@ -74,6 +74,7 @@ CRITICAL_CHECKS = frozenset(
         "pulse_schedule_reference_check",
         "ratio_binary_operator_check",
         "adjacent_duplicate_token_check",
+        "semantic_similarity_check",
     }
 )
 
@@ -2560,3 +2561,97 @@ def has_critical_audit_failure(issues: list[str]) -> bool:
             if f"audit:{check}:" in issue:
                 return True
     return False
+
+
+# =============================================================================
+# Semantic similarity gate (post-embed)
+# =============================================================================
+
+
+def semantic_similarity_check(
+    name: str,
+    description: str | None,
+    *,
+    critical_threshold: float | None = None,
+    warning_threshold: float | None = None,
+) -> tuple[float | None, list[str]]:
+    """Compute cosine similarity between name-as-text and description.
+
+    This check catches semantically ambiguous names where the name alone
+    does not convey what is being measured (e.g. ``co_passing_density`` —
+    density of what?).
+
+    Both embeddings are computed fresh from the raw text fields using the
+    project embedding server.  The stored ``sn.embedding`` is NOT used
+    because its format (``"name — description"``) conflates name and
+    description semantics.
+
+    Args:
+        name: The standard name string (e.g. ``"co_passing_density"``).
+        description: The short description text.
+        critical_threshold: Override for quarantine threshold.
+        warning_threshold: Override for advisory threshold.
+
+    Returns:
+        ``(similarity, issues)`` — similarity is None on embed failure.
+        Issues are tagged strings for ``validation_issues``.
+    """
+    from imas_codex.standard_names.defaults import (
+        SEMANTIC_SIM_CRITICAL,
+        SEMANTIC_SIM_WARNING,
+    )
+
+    crit = (
+        critical_threshold if critical_threshold is not None else SEMANTIC_SIM_CRITICAL
+    )
+    warn = warning_threshold if warning_threshold is not None else SEMANTIC_SIM_WARNING
+
+    if not description or not description.strip():
+        return None, []
+
+    name_text = name.replace("_", " ")
+    desc_text = description[:500]
+
+    try:
+        from imas_codex.embeddings.description import embed_descriptions_batch
+
+        items = [
+            {"id": "name", "_text": name_text},
+            {"id": "desc", "_text": desc_text},
+        ]
+        embed_descriptions_batch(items, text_field="_text")
+        name_emb = items[0].get("embedding")
+        desc_emb = items[1].get("embedding")
+        if name_emb is None or desc_emb is None:
+            logger.debug("semantic_similarity_check: embed returned None for %s", name)
+            return None, []
+    except Exception:
+        logger.debug(
+            "semantic_similarity_check: embed failed for %s", name, exc_info=True
+        )
+        return None, []
+
+    name_vec = np.asarray(name_emb, dtype=np.float32)
+    desc_vec = np.asarray(desc_emb, dtype=np.float32)
+    norm_n = np.linalg.norm(name_vec)
+    norm_d = np.linalg.norm(desc_vec)
+    if norm_n < 1e-8 or norm_d < 1e-8:
+        return None, []
+
+    sim = float(np.dot(name_vec, desc_vec) / (norm_n * norm_d))
+
+    issues: list[str] = []
+    if sim < crit:
+        issues.append(
+            f"audit:semantic_similarity_check: "
+            f"sim={sim:.3f} below critical threshold {crit:.2f} — "
+            f"name is semantically ambiguous"
+        )
+    elif sim < warn:
+        issues.append(
+            f"audit:semantic_similarity_check_warning: "
+            f"sim={sim:.3f} below warning threshold {warn:.2f} — "
+            f"name may be semantically ambiguous"
+        )
+
+    return sim, issues

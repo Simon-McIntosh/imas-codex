@@ -2075,3 +2075,203 @@ class TestGgdImplementationLeakageCheck:
             }
         )
         assert len(issues) == 2
+
+
+# =========================================================================
+# Semantic similarity gate
+# =========================================================================
+
+
+class TestSemanticSimilarityCheck:
+    """Tests for the embedding-based semantic similarity gate."""
+
+    def test_good_name_high_similarity(self):
+        """A self-describing name should score above warning threshold."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Mock embed to return controlled vectors
+        # name = "electron temperature" → [1, 0, 0, ...]
+        # desc = "Temperature of electrons" → [0.9, 0.1, 0, ...]
+        good_name_emb = [1.0, 0.0, 0.0, 0.0]
+        good_desc_emb = [0.9, 0.1, 0.0, 0.0]
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = good_name_emb
+                else:
+                    item["embedding"] = good_desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "electron_temperature",
+                "Temperature of electrons in the plasma",
+            )
+
+        assert sim is not None
+        assert sim > 0.65  # above warning
+        assert issues == []
+
+    def test_ambiguous_name_critical(self):
+        """An ambiguous name should fail critical threshold."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Orthogonal vectors → sim ≈ 0
+        ambig_name_emb = [1.0, 0.0, 0.0, 0.0]
+        ambig_desc_emb = [0.0, 1.0, 0.0, 0.0]
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = ambig_name_emb
+                else:
+                    item["embedding"] = ambig_desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "co_passing_density",
+                "Number density of co-passing particles in velocity space",
+            )
+
+        assert sim is not None
+        assert sim < 0.55  # below critical
+        assert len(issues) == 1
+        assert "semantic_similarity_check:" in issues[0]
+        assert "critical" in issues[0]
+
+    def test_warning_zone(self):
+        """A name in the warning zone should get advisory issue."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Vectors with ~0.6 cosine similarity
+        name_emb = [1.0, 0.0, 0.0, 0.0]
+        desc_emb = [0.6, 0.8, 0.0, 0.0]  # cos ≈ 0.6
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = name_emb
+                else:
+                    item["embedding"] = desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "electric_field",
+                "Magnitude of the electric field in a tokamak plasma",
+            )
+
+        assert sim is not None
+        assert sim < 0.65
+        assert sim > 0.55
+        assert len(issues) == 1
+        assert "warning" in issues[0]
+
+    def test_empty_description_returns_none(self):
+        """Empty description should return None, no issues."""
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        sim, issues = semantic_similarity_check("electron_temperature", "")
+        assert sim is None
+        assert issues == []
+
+    def test_none_description_returns_none(self):
+        """None description should return None, no issues."""
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        sim, issues = semantic_similarity_check("electron_temperature", None)
+        assert sim is None
+        assert issues == []
+
+    def test_embed_failure_returns_none(self):
+        """If embed server is down, should return None gracefully."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=ConnectionError("embed server down"),
+        ):
+            sim, issues = semantic_similarity_check(
+                "electron_temperature",
+                "Temperature of electrons",
+            )
+
+        assert sim is None
+        assert issues == []
+
+    def test_custom_thresholds(self):
+        """Custom thresholds should be respected."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Use ~0.7 similarity (normally above warning 0.65, but set warning to 0.8)
+        name_emb = [1.0, 0.0, 0.0, 0.0]
+        desc_emb = [0.7, 0.71, 0.0, 0.0]
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = name_emb
+                else:
+                    item["embedding"] = desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "electron_temperature",
+                "Temperature of electrons",
+                critical_threshold=0.3,
+                warning_threshold=0.8,
+            )
+
+        assert sim is not None
+        # sim ~0.7 is below custom warning 0.8 but above custom critical 0.3
+        assert len(issues) == 1
+        assert "warning" in issues[0]
+
+    def test_critical_check_in_critical_checks(self):
+        """semantic_similarity_check should be in CRITICAL_CHECKS."""
+        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+
+        assert "semantic_similarity_check" in CRITICAL_CHECKS
+
+    def test_has_critical_failure_with_semantic(self):
+        """has_critical_audit_failure should detect semantic issues."""
+        from imas_codex.standard_names.audits import has_critical_audit_failure
+
+        issues = [
+            "audit:semantic_similarity_check: sim=0.400 below critical threshold 0.55"
+        ]
+        assert has_critical_audit_failure(issues) is True
+
+    def test_warning_not_critical(self):
+        """Warning issues should NOT count as critical failures."""
+        from imas_codex.standard_names.audits import has_critical_audit_failure
+
+        issues = [
+            "audit:semantic_similarity_check_warning: sim=0.600 below warning 0.65"
+        ]
+        assert has_critical_audit_failure(issues) is False
