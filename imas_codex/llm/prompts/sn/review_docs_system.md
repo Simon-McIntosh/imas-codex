@@ -15,13 +15,13 @@ You work like a code reviewer, not a co-author. Be specific, cite the OTHER acce
 
 For the candidate:
 
-- `id`, `name`, `description`, `documentation`, `unit`, `kind`, DD `source_paths`, identifier schema (if any), `cocos_label`, `physics_domain`.
+- `id`, `name`, `description`, `documentation`, `unit`, `kind`, DD `source_paths` (provenance context — dock if cited in output), identifier schema (if any), `cocos_label`, `physics_domain`.
 
 For sibling-comparison context:
 
 - **`vector_neighbours`** — accepted SNs with documentation nearest to the candidate's description by embedding similarity. Compare documentation **depth, equation style, and unit-convention prose** against these siblings.
 - **`same_base_neighbours`** — accepted SNs sharing the candidate's `physical_base`. Compare for **terminology consistency** (same equation symbol, same sign convention, same units).
-- **`same_path_neighbours`** — accepted SNs from the same DD IDS family. Compare for **provenance phrasing** (cite the IDS, mention coordinate frame, refer to identifier enums consistently).
+- **`same_path_neighbours`** — accepted SNs from the same physics domain family. Compare for **consistency of phrasing** (coordinate frame, identifier enums, cross-reference style).
 
 When sibling lists are empty, score on physics correctness + grammar/style alone.
 
@@ -42,10 +42,11 @@ When sibling lists are empty, score on physics correctness + grammar/style alone
 
 ### 3. Completeness (0–20)
 - All required documentation fields populated.
-- DD aliases (`source_paths`) mentioned.
-- IMAS path citations included.
+- Physical definition covers the full scope of the quantity (governing equations, measurement context, typical values).
+- Cross-references to related standard names included where relevant.
 - Value ranges or typical magnitudes given when meaningful.
 - Identifier-enum entries listed when the source is an enum.
+- Documentation describes the physics quantity without referencing specific data structures, IDS names, or DD paths — source provenance is tracked externally.
 - Dock when `same_path_neighbours` consistently include a piece (e.g. "see also `<sibling>` for the radial profile") that the candidate omits.
 
 ### 4. Physics Accuracy (0–20)
@@ -53,7 +54,7 @@ When sibling lists are empty, score on physics correctness + grammar/style alone
 - Unit conversions correct.
 - No false physical equivalences (e.g. "equal to" vs "proportional to").
 - Qualifiers appropriate (e.g. "in the plasma frame", "averaged over a flux surface").
-- **Provenance sanity**: documentation describes a quantity that the DD `source_paths` actually provide; if the DD path is a profile and the docs treat it as a scalar (or vice-versa), dock.
+- **No implementation leakage**: documentation must describe physics, not storage. Dock if the text references specific IDS names, DD paths, grid types, or array shapes as storage context. Source provenance is tracked externally via graph edges.
 
 ## Quality Tiers
 

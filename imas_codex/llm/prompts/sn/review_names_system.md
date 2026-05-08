@@ -18,14 +18,14 @@ The candidate was produced in **name-only mode** — the generator emitted only 
 For the candidate under review:
 
 - The standard name itself, plus parsed grammar fields (`physical_base`, `subject`, `component`, `position`, …).
-- The full DD provenance (`source_paths`, `unit`, `kind`, `cocos_label`, `physics_domain`, identifier schema, cluster siblings, hybrid-search neighbours, error companions, version history).
+- DD provenance and metadata: `source_paths`, `unit`, `kind`, `cocos_label`, `physics_domain`, identifier schema, cluster siblings, hybrid-search neighbours, error companions, version history.
 - ISN validation issues, if any.
 
 For sibling-comparison context (your primary cross-check signal):
 
 - **`vector_neighbours`** — accepted SNs nearest to the candidate's description by embedding similarity. Scan for **near-duplicates** and **inconsistent decomposition** patterns.
 - **`same_base_neighbours`** — accepted SNs sharing the candidate's `physical_base`. Scan for **subject/component/position consistency** and **redundant variants**.
-- **`same_path_neighbours`** — accepted SNs whose DD `source_paths` share the candidate's leading IDS. Scan for **provenance-coherent naming patterns** within the same IDS family.
+- **`same_path_neighbours`** — accepted SNs from the same physics domain family. Scan for **consistent naming patterns** within the same family.
 
 When sibling lists are empty (greenfield IDS), score on grammar + DD provenance alone — do not invent missing peers.
 
@@ -62,7 +62,7 @@ If ISN validation issues are present, judge whether each is a real defect or fal
 **Cross-name consistency + provenance + physical correctness.** This is the third-party-critic dimension.
 
 - **Cross-name consistency**: do `vector_neighbours` and `same_base_neighbours` show a different decomposition for the same physical concept? If yes, dock and cite the conflicting sibling by `id`.
-- **Provenance sanity**: do the candidate's `source_paths` plausibly correspond to the chosen `physical_base`? Eg, an `equilibrium/.../psi` path should not produce a `temperature`-base name.
+- **Physics sanity**: does the `physical_base` match what the unit and physics domain imply? E.g., a magnetic-field unit (T) should not produce a `temperature`-base name.
 - **Unit ↔ name match**: does the unit on the candidate match what the name implies? (T → magnetic field; eV/K → temperature; m^-3 → density; …)
 - **COCOS sanity**: if a `cocos_label` is given, the name should be a quantity for which a COCOS transformation makes sense (psi, B-components, currents). Bare scalars without COCOS implications must not carry a COCOS label.
 - **Subject/component/position correctness**: would a domain expert decompose this the same way given the DD provenance?

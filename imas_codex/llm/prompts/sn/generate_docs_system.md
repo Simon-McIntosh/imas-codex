@@ -159,16 +159,16 @@ flag any non-empty DD unit as a known DD inconsistency. Boilerplate:
 docs review. The PR-1 boilerplate is too thin. Use the **exact fill-in template** below —
 do not paraphrase it. Length MUST be between 30 and 60 words.
 
-**Mandatory template** (fill in `<X>` and `<dd_path>`):
+**Mandatory template** (fill in `<X>`):
 
-> "Dimensionless integer index identifying the uncertainty source for `<X>`. (DD field
-> `<dd_path>` declares unit `m` but the data is integer-valued — known DD inconsistency.)
+> "Dimensionless integer index identifying the uncertainty source for `<X>`. The source
+> field declares unit `m` but the data is integer-valued — known inconsistency.
 > Use this index together with the corresponding uncertainty-table SN to interpret error
 > bars on `<X>`."
 
 Rules:
 - `<X>` = the bare standard name of the parent quantity (e.g. `electron_temperature`).
-- `<dd_path>` = the IMAS DD path of the `_error_index` node (from the `source_id` field).
+- Do NOT cite specific IMAS DD paths — source provenance is tracked externally via graph edges.
 - Do NOT add physics context, governing equations, or measurement methods — the index is
   a pure integer pointer and has no independent physical meaning.
 - Do NOT use the word "typically".

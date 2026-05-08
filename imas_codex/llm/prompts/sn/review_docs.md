@@ -36,7 +36,6 @@ Rate each dimension from 0 to 20. The total score is the sum (0-80).
 
 ### 3. Completeness (0-20)
 - Are all required doc-side fields populated (description, documentation)?
-- Are DD aliases (e.g. `gm1`–`gm9`) mentioned when the quantity has abbreviated DD forms?
 - Does the text avoid citing raw DD paths or IDS names as storage context? Source provenance is tracked externally — documentation should describe the physics quantity without referencing specific data structures.
 - Are typical value ranges or measurement units given when meaningful?
 
@@ -107,19 +106,20 @@ These names already exist in the catalog. Compare docs for consistency and cross
 - **Description**: {{ item.description | default('(missing)', true) }}
 - **Documentation**:
 {{ item.documentation | default('(missing)', true) }}
-{% if item.source_paths %}
-- **IMAS Paths**: {{ item.source_paths | join(', ') }}
-{% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues:**
 {% for issue in item.validation_issues %}
 - {{ issue }}
 {% endfor %}
 {% endif %}
+{% if item.source_paths %}
+- **Source paths** (provenance context — dock if cited in output): {{ item.source_paths | join(', ') }}
+{% endif %}
 {% if item.dd_source_docs %}
-**Source DD paths** (compare description clarity against DD definitions):
+**Source DD definitions** (physics reference — dock if verbatim-copied into output):
 {% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
 {% endfor %}{% endif %}
+
 {% if item.parent_path %}**Parent path:** `{{ item.parent_path }}`{% if item.parent_description %} — {{ item.parent_description }}{% endif %}
 {% endif %}
 {% if item.nearest_peers %}

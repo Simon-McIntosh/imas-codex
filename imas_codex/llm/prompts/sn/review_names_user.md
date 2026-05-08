@@ -34,14 +34,14 @@ Use these accepted, in-catalog names as your **third-party reference set**. They
 {% endif %}
 
 {% if same_path_neighbours %}
-### Same DD IDS source family
+### Same physics domain family
 {% for n in same_path_neighbours %}
 - **`{{ n.id }}`** ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }}) — {{ n.description | default('', true) }}
 {% endfor %}
 {% endif %}
 
 {% if not vector_neighbours and not same_base_neighbours and not same_path_neighbours %}
-*No accepted siblings found — score on grammar + DD provenance alone.*
+*No accepted siblings found — score on grammar + physics correctness alone.*
 {% endif %}
 
 {% if nearby_existing_names %}
@@ -62,8 +62,7 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
 - **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
-{% if item.source_paths %}
-- **IMAS Paths**: {{ item.source_paths | join(', ') }}
+{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues:**

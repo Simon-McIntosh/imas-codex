@@ -160,16 +160,17 @@ real defects, not phantom ones.
 - **Unit**: {{ item.unit | default('N/A', true) }} *(authoritative)*
 - **Kind**: {{ item.kind | default('N/A', true) }}
 - **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
-{% if item.source_paths %}- **IMAS Paths**: {{ item.source_paths | join(', ') }}
+{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues** (treat as candidate defects — verify each):
 {% for issue in item.validation_issues %}- {{ issue }}
 {% endfor %}{% endif %}
 {% if item.dd_source_docs %}
-- **Source DD paths**:
+**Source DD definitions** (physics reference for semantic accuracy):
 {% for p in item.dd_source_docs %}  - `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
 {% endfor %}{% endif %}
+
 {% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}
 {% if item.node_type %}- **Node type:** {{ item.node_type }}{% endif %}
 {% if item.physics_domain %}- **Physics domain:** {{ item.physics_domain }}{% endif %}

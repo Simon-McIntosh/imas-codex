@@ -195,7 +195,7 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - **Kind**: {{ item.kind | default('N/A', true) }}
 - **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
 {% if item.source_paths %}
-- **IMAS Paths**: {{ item.source_paths | join(', ') }}
+- **Source paths** (provenance context — dock if cited in output): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues:**
@@ -204,7 +204,7 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 {% endfor %}
 {% endif %}
 {% if item.dd_source_docs %}
-**Source DD paths** (primary truth for semantic accuracy):
+**Source DD definitions** (physics reference — dock if verbatim-copied into output):
 {% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
 {% endfor %}{% endif %}
 {% if item.nearest_peers %}

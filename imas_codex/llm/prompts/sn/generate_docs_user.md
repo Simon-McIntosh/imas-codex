@@ -110,26 +110,27 @@ Related derivatives (same denominator):
 {% endif %}
 
 {% if item.source_paths %}
-## Source Context (reference only — do NOT cite in documentation)
+## Source Context (PRIVATE — do NOT cite in output)
 
-The following IMAS Data Dictionary paths are linked to this standard name
-as source provenance. Source tracking is handled externally via graph edges;
-do NOT embed these paths in the description or documentation text.
+These source paths are provided for physics context ONLY. They help you understand
+what this quantity represents. NEVER mention these paths, IDS names, or DD references
+in the description or documentation — source provenance is tracked externally.
 
 {% for p in item.source_paths %}- `{{ p }}`
 {% endfor %}{% endif %}
 
 {% if item.dd_source_docs %}
-## DD Source Documentation
+## Physics Reference Material (PRIVATE — do NOT cite in output)
 
-Reference material from the Data Dictionary nodes linked to this standard name.
-Use these definitions to anchor descriptions; do NOT copy them verbatim.
+Use these physics definitions to ground your documentation in correct physics.
+Extract the PHYSICS MEANING, not the source identity. NEVER copy path identifiers,
+IDS names, or DD-specific language into the output text.
 
 {% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation }}
 {% endfor %}{% endif %}
 
 {% if item.dd_aliases %}
-## DD Aliases (context only — do NOT cite in documentation)
+## Aliases (PRIVATE — do NOT cite in output)
 
 {{ item.dd_aliases | join(', ') }}
 {% endif %}
@@ -144,9 +145,9 @@ Use these for inline cross-references `[label](name:bare_id)` where naturally re
 {% endfor %}{% endif %}
 
 {% if item.related_neighbours %}
-## DD-Related Paths
+## Related Physics Quantities
 
-Cross-IDS related paths sharing cluster membership, coordinates, or units.
+Cross-domain related quantities sharing cluster membership, coordinates, or units.
 
 {% for r in item.related_neighbours %}- `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
 {% endfor %}{% endif %}

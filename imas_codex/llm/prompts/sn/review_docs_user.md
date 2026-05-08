@@ -14,7 +14,7 @@ Apply the rubric (provided in the system prompt) to the candidate below.
 - **Standard name**: {{ item.id }}
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
-{% if item.source_paths %}- **DD source paths**: {{ item.source_paths | join(', ') }}
+{% if item.source_paths %}- **Source paths** (provenance context — dock if cited in output): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.cocos_label %}- **COCOS label**: `{{ item.cocos_label }}`
 {% endif %}
@@ -47,7 +47,7 @@ They are NOT to be re-reviewed. Compare the candidate's documentation
 {% endif %}
 
 {% if same_path_neighbours %}
-### Same DD IDS source family (provenance phrasing)
+### Same physics domain family (phrasing consistency)
 {% for n in same_path_neighbours %}
 - **`{{ n.id }}`** ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }}) — {{ n.description | default('', true) }}
 {% endfor %}
