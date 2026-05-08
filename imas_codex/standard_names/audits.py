@@ -97,7 +97,7 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     # Voltage implies V.
     "voltage": {"V", "kV", "mV"},
     # Angle / rotation implies rad.
-    "angle": {"rad", "deg"},
+    "angle": {"rad", "deg", "sr"},
     # Mass implies kg or u.
     "mass": {"kg", "u"},
     # Frequency implies Hz.
@@ -1558,6 +1558,10 @@ def implicit_field_check(candidate: dict[str, Any]) -> list[str]:
     # Most are filtered by the extract-deny gate (W19A), but any that
     # survive should not be penalised for the constraint target's phrasing.
     if name.startswith("use_exact_"):
+        return []
+    # ``field_of_view`` is an optics term (viewing cone), not a physics
+    # field.  Skip names containing this compound.
+    if "field_of_view" in name:
         return []
     tokens = name.split("_")
     issues: list[str] = []

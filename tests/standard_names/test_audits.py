@@ -1423,6 +1423,38 @@ class TestImplicitFieldUseExactExemption:
         issues = implicit_field_check({"id": "poloidal_field_strength"})
         assert issues and "implicit_field_check" in issues[0]
 
+    def test_pass_field_of_view(self):
+        """``field_of_view`` is an optics term, not a physics field."""
+        from imas_codex.standard_names.audits import implicit_field_check
+
+        assert (
+            implicit_field_check({"id": "solid_angle_of_detector_field_of_view"}) == []
+        )
+
+
+class TestAngleSolidUnitExpectation:
+    """Solid angles use steradians (sr), not radians."""
+
+    def test_pass_solid_angle_sr(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "solid_angle_of_detector_field_of_view", "unit": "sr"}
+        )
+        assert issues == [], f"False positive: {issues}"
+
+    def test_pass_angle_rad(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "rad"})
+        assert issues == []
+
+    def test_fail_angle_wrong_unit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "m"})
+        assert issues and "name_unit_consistency_check" in issues[0]
+
 
 class TestCausalDueToSuggestedFix:
     """Tests for suggested_fix in causal_due_to_check adjective map."""
