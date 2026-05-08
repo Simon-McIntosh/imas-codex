@@ -6437,11 +6437,18 @@ def claim_generate_name_batch(
 
     # Optional facility filter (only applies to signal sources).
     facility_where = ""
+    facility_where_sns2 = ""
     extra_params: dict[str, Any] = {}
     if facility:
         facility_where = (
             "AND (sns.source_type = 'dd' OR EXISTS {"
             "  MATCH (sns)-[:FROM_SIGNAL]->(:FacilitySignal)"
+            "    -[:AT_FACILITY]->(:Facility {id: $facility})"
+            "})"
+        )
+        facility_where_sns2 = (
+            "AND (sns2.source_type = 'dd' OR EXISTS {"
+            "  MATCH (sns2)-[:FROM_SIGNAL]->(:FacilitySignal)"
             "    -[:AT_FACILITY]->(:Facility {id: $facility})"
             "})"
         )
@@ -6461,8 +6468,10 @@ def claim_generate_name_batch(
 
     # Optional run-id scope for --focus mode (StandardNameSource).
     scope_sns_where = ""
+    scope_sns2_where = ""
     if scope_run_id:
         scope_sns_where = "AND sns.run_id = $scope_run_id"
+        scope_sns2_where = "AND sns2.run_id = $scope_run_id"
         extra_params["scope_run_id"] = scope_run_id
 
     with GraphClient() as gc:
@@ -6498,8 +6507,8 @@ def claim_generate_name_batch(
                                OR sns2.claimed_at < datetime()
                                     - duration($cutoff))
                           AND imas2.physics_domain = pd
-                          {facility_where}
-                          {scope_sns_where}
+                          {facility_where_sns2}
+                          {scope_sns2_where}
                         WITH sns2 ORDER BY rand() LIMIT 1
                         SET sns2.claimed_at = datetime(),
                             sns2.claim_token = $token
