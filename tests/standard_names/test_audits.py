@@ -1259,6 +1259,47 @@ class TestMultiSubjectCheckGreedy:
 
         assert multi_subject_check({"id": "ion_electron_equivalent"}) == []
 
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "trapped_fast_density",
+            "co_passing_fast_pressure",
+            "counter_passing_fast_density",
+            "total_rejected_thermal_power",
+            "total_supplied_thermal_power",
+        ],
+    )
+    def test_pass_all_modifier_subjects(self, name):
+        """When ALL matched subjects are modifiers, no dual-subject conflict."""
+        from imas_codex.standard_names.audits import multi_subject_check
+
+        issues = multi_subject_check({"id": name})
+        assert issues == [], f"False positive on '{name}': {issues}"
+
+    def test_pass_runaway_modifier(self):
+        """Runaway is a modifier subject, not a dual subject with electrons."""
+        from imas_codex.standard_names.audits import multi_subject_check
+
+        assert (
+            multi_subject_check({"id": "critical_electric_field_for_runaway_electrons"})
+            == []
+        )
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "toroidal_component_of_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
+            "toroidal_component_of_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+            "toroidal_component_of_co_passing_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
+        ],
+    )
+    def test_pass_collisional_with_target(self, name):
+        """Collision target after _with_ is exempt from multi-subject check."""
+        from imas_codex.standard_names.audits import multi_subject_check
+
+        issues = multi_subject_check({"id": name})
+        assert issues == [], f"False positive on '{name}': {issues}"
+
 
 # =========================================================================
 # C.3: density_unit_consistency_check — constraint-metadata suffix skip

@@ -874,6 +874,16 @@ def name_unit_consistency_check(
         # Rise/fall time, amplitude, etc. have time or voltage units.
         if f"{token}_sensor" in name or f"{token}_probe" in name:
             continue
+        # ``mass_spectrometer`` is an instrument name — ``mass`` classifies
+        # the spectrometer type (mass vs optical), not a mass quantity.
+        if token == "mass" and "mass_spectrometer" in name:
+            continue
+        # ``energy_transport`` is a compound transport concept. The head noun
+        # is the transport quantity, and ``energy`` classifies what is being
+        # transported. Unit is a transport velocity (m/s) or diffusivity
+        # (m^2/s), not energy.
+        if token == "energy" and "energy_transport" in name:
+            continue
 
         if dimensionless:
             issues.append(
@@ -1010,14 +1020,20 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
                 "fast",
                 "thermal",
                 "total",
+                "runaway",
             }
         )
         modifier_count = sum(1 for s in matched_subjects if s in _MODIFIER_SUBJECTS)
-        if modifier_count > 0 and len(matched_subjects) - modifier_count >= 1:
-            # Keep only the non-modifier subjects (the species they qualify)
-            matched_subjects = [
-                s for s in matched_subjects if s not in _MODIFIER_SUBJECTS
-            ]
+        if modifier_count > 0:
+            if len(matched_subjects) - modifier_count >= 1:
+                # Keep only the non-modifier subjects (the species they qualify)
+                matched_subjects = [
+                    s for s in matched_subjects if s not in _MODIFIER_SUBJECTS
+                ]
+            else:
+                # ALL matched subjects are modifiers (e.g. trapped + fast) —
+                # no true species subject present, so no dual-subject conflict
+                matched_subjects = []
 
         # Exempt ``_to_{subject}_particles`` target descriptors in
         # collisional power transfer names. The ``_to_`` connector
@@ -1025,6 +1041,17 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
         # the source subject counts.
         if "_to_" in name and "particles" in matched_subjects:
             matched_subjects = [s for s in matched_subjects if s != "particles"]
+
+        # Exempt collisional target patterns: ``_with_{subject}``
+        # E.g. ``torque_density_due_to_coulomb_collisions_with_ion``
+        # has source species (fast_particle) and target species (ion).
+        # The ``_with_`` connector marks the collision partner, not a
+        # second primary subject.
+        with_match = re.search(r"_with_(\w+)$", name)
+        if with_match:
+            target = with_match.group(1)
+            # Remove the collision target from matched subjects
+            matched_subjects = [s for s in matched_subjects if s != target]
 
         if len(matched_subjects) >= 2:
             issues.append(
