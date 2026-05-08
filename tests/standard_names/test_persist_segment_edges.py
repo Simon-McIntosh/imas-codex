@@ -34,6 +34,33 @@ def _mock_version_resolver():
         yield
 
 
+@pytest.fixture(autouse=True)
+def _mock_synced_segments():
+    """Return all grammar segments as synced so token-miss detection fires
+    for all segments in tests.  Without this, the extra gc.query call for
+    ``_resolve_synced_segments`` would consume mock side_effect entries."""
+    _all_segments = frozenset(
+        {
+            "component",
+            "coordinate",
+            "subject",
+            "device",
+            "geometric_base",
+            "physical_base",
+            "object",
+            "geometry",
+            "position",
+            "region",
+            "process",
+        }
+    )
+    with patch(
+        "imas_codex.standard_names.graph_ops._resolve_synced_segments",
+        return_value=_all_segments,
+    ):
+        yield
+
+
 @pytest.fixture()
 def mock_gc():
     """A mock GraphClient that records query calls."""

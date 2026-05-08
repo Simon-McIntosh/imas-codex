@@ -615,10 +615,29 @@ class TestWriteSegmentEdgesVersionFallback:
             return_value=[{"token": "electron", "segment": "subject", "matched": True}]
         )
 
+        _all_segs = frozenset(
+            {
+                "component",
+                "coordinate",
+                "subject",
+                "device",
+                "geometric_base",
+                "physical_base",
+                "object",
+                "geometry",
+                "position",
+                "region",
+                "process",
+            }
+        )
         with (
             patch(
                 "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
                 return_value="0.7.0rc14",
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._resolve_synced_segments",
+                return_value=_all_segs,
             ),
             patch("imas_standard_names.grammar.parse_standard_name") as mock_parse,
             patch("imas_standard_names.graph.spec.segment_edge_specs") as mock_specs,

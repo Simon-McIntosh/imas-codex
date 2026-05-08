@@ -6,7 +6,7 @@ file.
 """
 
 # Reviewer-score thresholds
-DEFAULT_MIN_SCORE: float = 0.75
+DEFAULT_MIN_SCORE: float = 0.80
 """Minimum reviewer score (0-1) for a name or docs revision to be marked accepted."""
 
 # ── Semantic similarity gate ──────────────────────────────────────────

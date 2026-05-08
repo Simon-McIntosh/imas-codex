@@ -317,7 +317,7 @@ def _run_sn_loop_cmd(
 
     _domains_list: list[str] | None = list(domains) if domains else None
     _rc = rotation_cap if rotation_cap is not None else 3
-    _ms = min_score if min_score is not None else 0.75
+    _ms = min_score if min_score is not None else DEFAULT_MIN_SCORE
 
     def _pool_pending_fn() -> dict[str, int]:
         try:
@@ -748,7 +748,7 @@ def _check_pipeline_clear_gate() -> None:
     help=(
         "Reviewer-score threshold for the refine pools.  Names / docs with a "
         "score below this value are routed to refine_name / refine_docs.  "
-        "Sourced from ``defaults.DEFAULT_MIN_SCORE`` (0.75) when not provided."
+        "Sourced from ``defaults.DEFAULT_MIN_SCORE`` (0.80) when not provided."
     ),
 )
 @click.option(

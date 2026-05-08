@@ -2550,6 +2550,30 @@ def _coerce_segment_value(value: Any) -> str | None:
     return str(val)
 
 
+def _resolve_synced_segments(
+    gc: GraphClient, token_version: str | None
+) -> frozenset[str]:
+    """Return grammar segments that have GrammarToken nodes in the graph.
+
+    Segments with zero synced tokens (e.g. ``physical_base`` when the ISN
+    graph spec excludes it) generate ``segment_edge_specs`` entries from
+    the ISN parser but can never match a GrammarToken node. Filtering
+    these out prevents false-positive token-miss warnings and VocabGap
+    nodes.
+    """
+    if token_version is None:
+        return frozenset()
+
+    rows = list(
+        gc.query(
+            "MATCH (t:GrammarToken {version: $v}) RETURN DISTINCT t.segment AS seg",
+            v=token_version,
+        )
+        or []
+    )
+    return frozenset(r["seg"] for r in rows)
+
+
 def _write_grammar_decomposition(
     gc: GraphClient, name_ids: list[str]
 ) -> list[dict[str, str]]:
@@ -2587,6 +2611,11 @@ def _write_grammar_decomposition(
     # Token version is required for typed-edge writing only; column-write
     # path runs even when no GrammarToken nodes exist.
     token_version = _resolve_grammar_token_version(gc, isn_version)
+
+    # Discover which segments actually have GrammarToken nodes in the graph.
+    # Segments with 0 synced tokens (e.g. physical_base) generate edge specs
+    # from ISN but can never match — exclude them from token-miss detection.
+    synced_segments = _resolve_synced_segments(gc, token_version)
 
     # Constant column-clear template — used both on parse error and as the
     # idempotent reset before re-applying segment values.
@@ -2744,10 +2773,14 @@ def _write_grammar_decomposition(
             or []
         )
 
+        # Only report token misses for segments that have GrammarToken
+        # nodes in the graph.  Segments like physical_base are intentionally
+        # excluded from the graph sync and would always produce false
+        # positives.
         missing = [
             f"{r['segment']}:{r['token']}"
             for r in results
-            if not r.get("matched", True)
+            if not r.get("matched", True) and r.get("segment") in synced_segments
         ]
         if missing:
             logger.warning(
@@ -2758,7 +2791,7 @@ def _write_grammar_decomposition(
                 token_version,
             )
             for r in results:
-                if not r.get("matched", True):
+                if not r.get("matched", True) and r.get("segment") in synced_segments:
                     all_gaps.append(
                         {
                             "sn_id": sn_id,
