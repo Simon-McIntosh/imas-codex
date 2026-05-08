@@ -358,17 +358,20 @@ ORDER BY ids.id, n.id
 {limit_clause}
 WITH n, ids
 OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+WITH n, ids, collect(DISTINCT u.id) AS unit_rels
 OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
 OPTIONAL MATCH (n)-[:HAS_COORDINATE]->(coord:IMASNode)
 OPTIONAL MATCH (coord)-[:HAS_UNIT]->(cu:Unit)
 OPTIONAL MATCH (n)-[:HAS_ERROR]->(err:IMASNode)
-WITH n, ids, u, c, parent, coord, cu, collect(DISTINCT err.id) AS error_node_ids
+WITH n, ids, unit_rels, c, parent, coord, cu, collect(DISTINCT err.id) AS error_node_ids
 RETURN n.id AS path,
        n.description AS description,
        n.documentation AS documentation,
        n.unit AS unit,
-       u.id AS unit_from_rel,
+       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
+            WHEN size(unit_rels) > 1 THEN coalesce(n.units, unit_rels[0])
+            ELSE null END AS unit_from_rel,
        n.data_type AS data_type,
        n.node_type AS node_type,
        n.physics_domain AS physics_domain,
@@ -805,6 +808,7 @@ def extract_dd_candidates(
 _TARGETED_PATH_QUERY = """
 MATCH (n:IMASNode {id: $path})-[:IN_IDS]->(ids:IDS)
 OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+WITH n, ids, collect(DISTINCT u.id) AS unit_rels
 OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
 OPTIONAL MATCH (n)-[:HAS_COORDINATE]->(coord:IMASNode)
@@ -813,7 +817,9 @@ RETURN n.id AS path,
        n.description AS description,
        n.documentation AS documentation,
        n.unit AS unit,
-       u.id AS unit_from_rel,
+       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
+            WHEN size(unit_rels) > 1 THEN coalesce(n.units, unit_rels[0])
+            ELSE null END AS unit_from_rel,
        n.data_type AS data_type,
        n.physics_domain AS physics_domain,
        n.keywords AS keywords,
