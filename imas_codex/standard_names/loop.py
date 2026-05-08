@@ -844,39 +844,44 @@ def _build_pool_specs(
     # adapter to return None (skip) when the downstream pool's
     # PoolHealth.pending_count is over cap, causing the pool to enter
     # its normal exponential backoff.  No blocking, no special yield.
-    specs_by_name = {s.name: s for s in specs}
+    #
+    # In focus mode (scope_run_id set), skip throttle entirely — the
+    # focused set is 1-5 items and should never be blocked by global
+    # review backlog.
+    if not scope_run_id:
+        specs_by_name = {s.name: s for s in specs}
 
-    throttle_rules: list[tuple[str, str, int]] = [
-        ("generate_name", "review_name", _review_name_cap),
-        ("refine_name", "review_name", _review_name_cap),
-        ("generate_docs", "review_docs", _review_docs_cap),
-        ("refine_docs", "review_docs", _review_docs_cap),
-    ]
+        throttle_rules: list[tuple[str, str, int]] = [
+            ("generate_name", "review_name", _review_name_cap),
+            ("refine_name", "review_name", _review_name_cap),
+            ("generate_docs", "review_docs", _review_docs_cap),
+            ("refine_docs", "review_docs", _review_docs_cap),
+        ]
 
-    for upstream, downstream, cap in throttle_rules:
-        spec = specs_by_name[upstream]
-        downstream_health = specs_by_name[downstream].health
-        original_claim = spec.claim
+        for upstream, downstream, cap in throttle_rules:
+            spec = specs_by_name[upstream]
+            downstream_health = specs_by_name[downstream].health
+            original_claim = spec.claim
 
-        async def _throttled_claim(
-            _orig: Callable[[], Awaitable[dict[str, Any] | None]] = original_claim,
-            _health: Any = downstream_health,
-            _cap: int = cap,
-            _up: str = upstream,
-            _down: str = downstream,
-        ) -> dict[str, Any] | None:
-            if _health.pending_count > _cap:
-                logger.debug(
-                    "throttle: %s paused — %s backlog %d > cap %d",
-                    _up,
-                    _down,
-                    _health.pending_count,
-                    _cap,
-                )
-                return None
-            return await _orig()
+            async def _throttled_claim(
+                _orig: Callable[[], Awaitable[dict[str, Any] | None]] = original_claim,
+                _health: Any = downstream_health,
+                _cap: int = cap,
+                _up: str = upstream,
+                _down: str = downstream,
+            ) -> dict[str, Any] | None:
+                if _health.pending_count > _cap:
+                    logger.debug(
+                        "throttle: %s paused — %s backlog %d > cap %d",
+                        _up,
+                        _down,
+                        _health.pending_count,
+                        _cap,
+                    )
+                    return None
+                return await _orig()
 
-        spec.claim = _throttled_claim
+            spec.claim = _throttled_claim
 
     return specs
 

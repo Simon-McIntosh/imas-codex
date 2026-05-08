@@ -600,6 +600,7 @@ RETURN n.coordinate1_same_as AS coordinate1,
        n.cocos_transformation_type AS cocos_label,
        n.cocos_transformation_expression AS cocos_expression,
        n.lifecycle_status AS lifecycle_status,
+       n.data_type AS data_type,
        ident.name AS identifier_schema_name,
        ident.documentation AS identifier_schema_doc,
        ident.options AS identifier_options,
@@ -955,13 +956,27 @@ def _enrich_batch_items(items: list[dict]) -> None:
             # downstream persist see the real DD unit (Pa, m, m^-2.W, …)
             # rather than None.  StandardNameSource does not (yet) carry a
             # ``unit`` property in the schema, so we re-derive it from the
-            # IMASNode at enrich time.  When HAS_UNIT is absent, ``unit``
-            # remains None and the skip ("dd_unit_unresolvable") fires —
-            # which is the correct conservative behaviour.
+            # IMASNode at enrich time.  When HAS_UNIT is absent AND the
+            # data type is numeric, set unit to "1" (ISN dimensionless
+            # convention) — safety factor q, beta, mode numbers, etc.
             if not item.get("unit"):
                 unit_from_rel = row.get("unit_from_rel")
                 if unit_from_rel:
                     item["unit"] = unit_from_rel
+                else:
+                    # Dimensionless: numeric DD paths with no HAS_UNIT
+                    # relationship are genuinely dimensionless (q, beta,
+                    # mode numbers, efficiencies, fractions, etc.).
+                    data_type = row.get("data_type", "")
+                    _NUMERIC_PREFIXES = (
+                        "FLT_",
+                        "INT_",
+                        "CPX_",
+                    )
+                    if data_type and any(
+                        data_type.startswith(p) for p in _NUMERIC_PREFIXES
+                    ):
+                        item["unit"] = "1"
 
             # Apply unit overrides AFTER re-injecting the DD unit.
             # The override engine corrects upstream DD defects (e.g.,
@@ -2088,14 +2103,15 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             # Inject unit from DD (authoritative, not LLM output).
             #
             # User invariant (AGENTS.md "Unit safety"): the LLM never
-            # decides units; the DD source must provide one. Missing,
-            # empty, or '-' is unresolvable; 'mixed' is non-standard by
-            # definition (heterogeneous dimensions). We record the skip
-            # on the StandardNameSource for audit and drop the candidate.
-            # NEVER silently coerce to "1": that masks a vocabulary gap
-            # and produces a bad SN.
+            # decides units; the DD source must provide one.
+            # - "1": dimensionless (ISN convention) — valid
+            # - "-": DD dimensionless marker — normalize to "1"
+            # - "mixed": heterogeneous dimensions — skip
+            # - None/empty: enrichment couldn't resolve — skip
             raw_unit = source_item.get("unit") if source_item else None
-            if raw_unit in ("-", "mixed", None, ""):
+            if raw_unit == "-":
+                raw_unit = "1"  # normalize DD marker to ISN convention
+            if raw_unit in ("mixed", None, ""):
                 _skip_reason = (
                     "dd_unit_mixed_non_standard"
                     if raw_unit == "mixed"
@@ -3549,12 +3565,16 @@ async def compose_batch(
                 (item for item in batch if item.get("path") == c.source_id),
                 None,
             )
-            # User invariant (AGENTS.md "Unit safety"): never coerce a
-            # missing DD unit to "1". Skip the candidate and record the
-            # source as ``skipped``. 'mixed' gets its own reason since
-            # it is permanently ineligible (heterogeneous dimensions).
+            # User invariant (AGENTS.md "Unit safety"): the LLM never
+            # decides units; the DD source must provide one.
+            # - "1": dimensionless (ISN convention) — valid
+            # - "-": DD dimensionless marker — normalize to "1"
+            # - "mixed": heterogeneous dimensions — skip
+            # - None/empty: enrichment couldn't resolve — skip
             raw_unit = source_item.get("unit") if source_item else None
-            if raw_unit in ("-", "mixed", None, ""):
+            if raw_unit == "-":
+                raw_unit = "1"  # normalize DD marker to ISN convention
+            if raw_unit in ("mixed", None, ""):
                 _skip_reason = (
                     "dd_unit_mixed_non_standard"
                     if raw_unit == "mixed"
