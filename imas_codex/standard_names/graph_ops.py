@@ -6469,7 +6469,13 @@ def claim_generate_name_batch(
         with gc.session() as session:
             tx = session.begin_transaction()
             try:
-                # ── Step 1: Seed ─────────────────────────────────
+                # ── Step 1: Seed (domain-uniform sampling) ───────
+                # Two-level random selection: pick a random domain
+                # first, then a random source within it.  This
+                # prevents large domains (e.g. transport ~28% of
+                # all sources) from dominating early batches.
+                # When --domain is set, this collapses to a single-
+                # domain rand() which is the desired behaviour.
                 seed_result = list(
                     tx.run(
                         f"""
@@ -6481,10 +6487,23 @@ def claim_generate_name_batch(
                           {facility_where}
                           {domain_where}
                           {scope_sns_where}
-                        WITH sns ORDER BY rand() LIMIT 1
-                        SET sns.claimed_at = datetime(),
-                            sns.claim_token = $token
-                        WITH sns
+                        MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)
+                        WITH DISTINCT imas0.physics_domain AS pd
+                        WHERE pd IS NOT NULL
+                        WITH pd ORDER BY rand() LIMIT 1
+                        MATCH (sns2:StandardNameSource)
+                              -[:FROM_DD_PATH]->(imas2:IMASNode)
+                        WHERE sns2.status = 'extracted'
+                          AND (sns2.claimed_at IS NULL
+                               OR sns2.claimed_at < datetime()
+                                    - duration($cutoff))
+                          AND imas2.physics_domain = pd
+                          {facility_where}
+                          {scope_sns_where}
+                        WITH sns2 ORDER BY rand() LIMIT 1
+                        SET sns2.claimed_at = datetime(),
+                            sns2.claim_token = $token
+                        WITH sns2 AS sns
                         OPTIONAL MATCH (sns)-[:FROM_DD_PATH]
                             ->(imas:IMASNode)
                         OPTIONAL MATCH (imas)-[:IN_CLUSTER]

@@ -1027,7 +1027,7 @@ def _enrich_batch_items(items: list[dict]) -> None:
                                     "index": opt.get("index", 0),
                                     "description": opt.get("description", ""),
                                 }
-                                for opt in parsed[:20]
+                                for opt in parsed
                                 if opt.get("name")
                             ]
                     except (json.JSONDecodeError, TypeError):
