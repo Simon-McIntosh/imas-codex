@@ -6821,12 +6821,16 @@ def persist_reviewed_name(
     import json as _json
 
     # Read current chain_length — needed for exhaustion check.
+    # Relax claim_token guard: accept token match OR cleared token (orphan
+    # sweep may have nullified claim_token while the RD-quorum review was
+    # still in flight).  The name_stage='drafted' check is the real CAS
+    # guard — a name can only transition OUT of drafted once.
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'drafted'
+            WHERE sn.name_stage = 'drafted'
+              AND (sn.claim_token = $token OR sn.claim_token IS NULL)
             RETURN coalesce(sn.chain_length, 0) AS chain_length
             """,
             id=sn_id,
@@ -6835,7 +6839,7 @@ def persist_reviewed_name(
 
     if not rows:
         logger.debug(
-            "persist_reviewed_name: token mismatch for %s (token=%s) — no-op",
+            "persist_reviewed_name: stage/token mismatch for %s (token=%s) — no-op",
             sn_id,
             claim_token[:8],
         )
@@ -6866,8 +6870,8 @@ def persist_reviewed_name(
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'drafted'
+            WHERE sn.name_stage = 'drafted'
+              AND (sn.claim_token = $token OR sn.claim_token IS NULL)
             SET sn.reviewer_score_name        = $score,
                 sn.reviewer_scores_name       = $scores_json,
                 sn.reviewer_comments_name     = $comments,
@@ -7093,11 +7097,12 @@ def persist_reviewed_docs(
     import json as _json
 
     # Read current docs_chain_length — needed for exhaustion check.
+    # Relax claim_token guard (same rationale as persist_reviewed_name).
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
+            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.docs_stage = 'drafted'
               AND sn.name_stage = 'accepted'
             RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length
@@ -7108,7 +7113,7 @@ def persist_reviewed_docs(
 
     if not rows:
         logger.debug(
-            "persist_reviewed_docs: token mismatch for %s (token=%s) — no-op",
+            "persist_reviewed_docs: stage/token mismatch for %s (token=%s) — no-op",
             sn_id,
             claim_token[:8],
         )
@@ -7135,7 +7140,7 @@ def persist_reviewed_docs(
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
+            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.name_stage = 'accepted'
             SET sn.reviewer_score_docs        = $score,
                 sn.reviewer_scores_docs       = $scores_json,

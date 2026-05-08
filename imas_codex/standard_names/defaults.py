@@ -21,8 +21,13 @@ DEFAULT_ESCALATION_MODEL: str = "openrouter/anthropic/claude-opus-4.6"
 DEFAULT_ORPHAN_SWEEP_INTERVAL_S: int = 30
 """How often the orphan sweep coroutine runs (seconds)."""
 
-DEFAULT_ORPHAN_SWEEP_TIMEOUT_S: int = 300
-"""How long a *_stage='refining' claim may sit before being reverted (seconds)."""
+DEFAULT_ORPHAN_SWEEP_TIMEOUT_S: int = 600
+"""How long a claim may sit before the orphan sweep clears it (seconds).
+
+RD-quorum reviews run 3 LLM cycles per item (primary, secondary,
+optional escalator). With sequential batch processing, items later
+in the batch can easily exceed 5 minutes. 600 s gives enough headroom
+while still recovering genuinely orphaned claims within 10 minutes."""
 
 # ── Backlog throttle caps ─────────────────────────────────────────────
 # Upstream generators pause when downstream review queues exceed these
