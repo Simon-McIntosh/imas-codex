@@ -180,8 +180,10 @@ Return a JSON object with exactly these two fields:
 ```
 
 ### description requirements
-- 1–3 sentences maximum, ≤ 500 characters
-- Physics-meaningful: add information beyond what the name tokens alone encode
+- 1 sentence strongly preferred, 2 max — ≤ 250 characters (NOT 500)
+- First sentence = self-contained definition
+- Add ONLY information beyond what the name tokens encode
+- NO trailing clauses starting with "Representing", "Characterizing", "Quantifying"
 - American spelling (ionization, behavior, center, etc.)
 - No LaTeX; no inline units (unit is shown separately)
 - No trailing "See also:" blocks
