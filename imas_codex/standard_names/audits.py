@@ -971,12 +971,6 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
         if name.endswith("_electron_equivalent"):
             matched_subjects = [s for s in matched_subjects if s != "electron"]
 
-        # Exempt ratio/comparison patterns: ``{species1}_to_{species2}_…``
-        # uses ``_to_`` as a conventional connector between numerator and
-        # denominator species (e.g. tritium_to_deuterium_density_ratio).
-        if "_to_" in name and len(matched_subjects) == 2:
-            matched_subjects = []
-
         # Exempt metadata/flag descriptors — names ending in ``_flag``,
         # ``_index``, or containing ``_state_`` reference classification
         # attributes rather than two physical subjects. E.g.
@@ -1043,6 +1037,12 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
         if "_to_" in name and "particles" in matched_subjects:
             matched_subjects = [s for s in matched_subjects if s != "particles"]
 
+        # Exempt ``state`` in transfer patterns — it describes charge/
+        # quantum state of the target species, not a separate subject.
+        # E.g. ``…_to_thermal_ion_state`` has state=ion charge state.
+        if "_to_" in name and "state" in matched_subjects:
+            matched_subjects = [s for s in matched_subjects if s != "state"]
+
         # Exempt collisional target patterns: ``_with_{subject}``
         # E.g. ``torque_density_due_to_coulomb_collisions_with_ion``
         # has source species (fast_particle) and target species (ion).
@@ -1053,6 +1053,15 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
             target = with_match.group(1)
             # Remove the collision target from matched subjects
             matched_subjects = [s for s in matched_subjects if s != target]
+
+        # Exempt ratio/comparison/transfer patterns:
+        # ``{species1}_to_{species2}_…`` uses ``_to_`` as a conventional
+        # connector between source and target species.  This check runs
+        # AFTER modifier removal so that compound subjects like
+        # ``fast_particle … _to_thermal_ion`` correctly reduce to 2
+        # non-modifier subjects (particle, ion) and get exempted.
+        if "_to_" in name and len(matched_subjects) == 2:
+            matched_subjects = []
 
         if len(matched_subjects) >= 2:
             issues.append(
