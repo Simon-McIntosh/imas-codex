@@ -1762,6 +1762,16 @@ def write_standard_names(
                 sn.embedded_at = coalesce(b.embedded_at, sn.embedded_at),
                 sn.grammar_parse_version = coalesce(b.grammar_parse_version, sn.grammar_parse_version),
                 sn.validation_diagnostics_json = coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json),
+                sn.grammar_physical_base = coalesce(b.grammar_physical_base, sn.grammar_physical_base),
+                sn.grammar_geometric_base = coalesce(b.grammar_geometric_base, sn.grammar_geometric_base),
+                sn.grammar_subject = coalesce(b.grammar_subject, sn.grammar_subject),
+                sn.grammar_component = coalesce(b.grammar_component, sn.grammar_component),
+                sn.grammar_coordinate = coalesce(b.grammar_coordinate, sn.grammar_coordinate),
+                sn.grammar_transformation = coalesce(b.grammar_transformation, sn.grammar_transformation),
+                sn.grammar_position = coalesce(b.grammar_position, sn.grammar_position),
+                sn.grammar_process = coalesce(b.grammar_process, sn.grammar_process),
+                sn.grammar_device = coalesce(b.grammar_device, sn.grammar_device),
+                sn.grammar_region = coalesce(b.grammar_region, sn.grammar_region),
                 sn.llm_cost_refine_name = CASE WHEN sn.generate_name_count IS NOT NULL
                                              AND sn.generate_name_count > 0
                                              AND b.llm_cost IS NOT NULL
