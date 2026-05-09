@@ -579,6 +579,36 @@ query("""
 
 For large migrations (>10K nodes), batch in a loop with `LIMIT` to avoid transaction timeouts. Always verify counts before and after.
 
+### LLMCost Node Properties
+
+`LLMCost` nodes track per-call LLM spend. **All properties are prefixed with `llm_`** — do not use bare names like `cost`, `model`, or `service`.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `llm_cost` | float | Dollar cost of the call |
+| `llm_model` | string | Model identifier |
+| `llm_service` | string | Service tag |
+| `llm_tokens_in` | int | Input tokens |
+| `llm_tokens_out` | int | Output tokens |
+| `llm_tokens_cached_read` | int | Prompt cache hit tokens |
+| `llm_tokens_cached_write` | int | Prompt cache write tokens |
+| `llm_at` | datetime | When the call was made |
+| `pool` | string | Pipeline pool (`generate_name`, `review_name`, etc.) |
+| `for_run` | string | `SNRun` ID this cost belongs to |
+
+**Common queries:**
+
+```cypher
+// Total spend
+MATCH (c:LLMCost) RETURN sum(c.llm_cost) AS total
+
+// Per-pool breakdown
+MATCH (c:LLMCost) RETURN c.pool, sum(c.llm_cost) AS cost ORDER BY cost DESC
+
+// Spend for a specific run
+MATCH (c:LLMCost {for_run: $run_id}) RETURN sum(c.llm_cost) AS total
+```
+
 ### Neo4j Lock Files — CRITICAL
 
 Neo4j uses several lock file types. Mishandling them **causes data loss**.
