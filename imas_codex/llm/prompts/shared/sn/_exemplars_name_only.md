@@ -221,3 +221,41 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
    a diagnostic pipeline, or a trivially-defined constant)?
 6. Does the description use American spelling and correctly define every
    `$...$` symbol it introduces?
+7. **Self-descriptiveness**: Can someone reading ONLY the name string deduce
+   what physical quantity it refers to, without consulting the description?
+   If not, revise — a name like `trapped_pressure` fails because "pressure
+   of what?" is unanswered; `trapped_particle_pressure` succeeds.
+
+### Semantic Similarity Calibration — name↔description agreement
+
+The name must be **semantically aligned** with the description. We measure this
+via cosine similarity between the embedded name (with `_` → space) and the
+description embedding. This gate is applied post-generation — names whose
+cosine similarity falls below 0.55 are quarantined.
+
+| Score Range | Verdict | Name → Description Pattern |
+|-------------|---------|----------------------------|
+| ≥ 0.85 | ✅ Excellent | Name tokens closely predict the description — ideal |
+| 0.70–0.84 | ✅ Good | Name is self-describing; description adds precision |
+| 0.55–0.69 | ⚠️ Warning | Ambiguous — name may omit critical context |
+| < 0.55 | ❌ Quarantine | Name and description are misaligned — revise name |
+
+**Concrete calibration examples:**
+
+✅ `electron_temperature` → "Temperature of the electron species" (sim ≈ 0.89)
+- Name tokens (electron, temperature) directly predict the description. Excellent.
+
+✅ `toroidal_component_of_magnetic_field` → "Toroidal projection of the magnetic field vector" (sim ≈ 0.86)
+- All key physics terms present in both. Very good.
+
+⚠️ `trapped_pressure` → "Pressure contribution from trapped particles" (sim ≈ 0.52)
+- Missing "particle" in name — reader can't tell pressure OF WHAT. Fails gate.
+- Fix: `trapped_particle_pressure` (sim ≈ 0.84)
+
+⚠️ `co_passing_density` → "Number density of co-passing particles" (sim ≈ 0.49)
+- Missing "particle" — density of what? Fails gate.
+- Fix: `co_passing_particle_density` (sim ≈ 0.82)
+
+✅ `safety_factor` → "Inverse of the rotational transform" (sim ≈ 0.72)
+- Physics-conventional name; description adds the formal definition. Acceptable —
+  `safety_factor` is a well-known term that doesn't need `rotational_transform_inverse`.

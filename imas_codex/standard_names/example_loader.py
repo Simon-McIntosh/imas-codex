@@ -73,6 +73,18 @@ def _axis_projection(axis: Axis) -> dict[str, str]:
     }
 
 
+_GRAMMAR_RETURN = """,
+                   sn.physical_base AS physical_base,
+                   sn.subject AS subject,
+                   sn.component AS component,
+                   sn.coordinate AS coordinate,
+                   sn.transformation AS transformation,
+                   sn.position AS position,
+                   sn.process AS process,
+                   sn.geometric_base AS geometric_base,
+                   sn.semantic_sim AS semantic_sim"""
+
+
 def _query_examples_for_target(
     gc: GraphClient,
     target: float,
@@ -84,13 +96,16 @@ def _query_examples_for_target(
     """Query reviewed StandardName nodes closest to a single target score.
 
     Tries domain-scoped query first; falls back to all domains when
-    the scoped query returns zero rows.
+    the scoped query returns zero rows.  Filters to ``name_stage='accepted'``
+    to avoid superseded/exhausted names leaking into examples.
     """
     proj = _axis_projection(axis)
     score_expr = proj["score"]
     scores_expr = proj["scores"]
     cpd_expr = proj["comments_per_dim"]
     comments_expr = proj["comments"]
+
+    stage_filter = "AND sn.name_stage = 'accepted'"
 
     # --- Domain-scoped query ---
     if physics_domains:
@@ -100,6 +115,7 @@ def _query_examples_for_target(
             WHERE {score_expr} IS NOT NULL
               AND sn.physics_domain IN $domains
               AND abs({score_expr} - $target) <= $tolerance
+              {stage_filter}
             RETURN sn.id AS id,
                    sn.description AS description,
                    sn.documentation AS documentation,
@@ -109,7 +125,7 @@ def _query_examples_for_target(
                    {scores_expr} AS reviewer_scores_json,
                    {cpd_expr} AS reviewer_comments_per_dim_json,
                    {comments_expr} AS reviewer_comments,
-                   sn.physics_domain AS physics_domain
+                   sn.physics_domain AS physics_domain{_GRAMMAR_RETURN}
             ORDER BY abs({score_expr} - $target) ASC, sn.id ASC
             LIMIT $per_bucket
             """,
@@ -127,6 +143,7 @@ def _query_examples_for_target(
         MATCH (sn:StandardName)
         WHERE {score_expr} IS NOT NULL
           AND abs({score_expr} - $target) <= $tolerance
+          {stage_filter}
         RETURN sn.id AS id,
                sn.description AS description,
                sn.documentation AS documentation,
@@ -136,7 +153,7 @@ def _query_examples_for_target(
                {scores_expr} AS reviewer_scores_json,
                {cpd_expr} AS reviewer_comments_per_dim_json,
                {comments_expr} AS reviewer_comments,
-               sn.physics_domain AS physics_domain
+               sn.physics_domain AS physics_domain{_GRAMMAR_RETURN}
         ORDER BY abs({score_expr} - $target) ASC, sn.id ASC
         LIMIT $per_bucket
         """,
@@ -158,6 +175,8 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
       - reviewer_comments (str)
       - physics_domain (str)
       - target_score (float — the bucket this example was selected for)
+      - grammar_fields (dict — parsed segment decomposition, empty if unavailable)
+      - semantic_sim (float | None — name↔description cosine similarity)
 
     Template aliases (backwards-compat with existing template variables):
       - score → reviewer_score
@@ -166,6 +185,22 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
     """
     scores = _parse_json_field(row.get("reviewer_scores_json"))
     comments = _parse_json_field(row.get("reviewer_comments_per_dim_json"))
+
+    # Build grammar decomposition dict — only populated fields
+    grammar_fields: dict[str, str] = {}
+    for seg in (
+        "physical_base",
+        "subject",
+        "component",
+        "coordinate",
+        "transformation",
+        "position",
+        "process",
+        "geometric_base",
+    ):
+        val = row.get(seg)
+        if val:
+            grammar_fields[seg] = val
 
     return {
         # Core fields
@@ -181,6 +216,9 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
         "reviewer_comments": row.get("reviewer_comments", ""),
         "physics_domain": row.get("physics_domain", ""),
         "target_score": target,
+        # Grammar decomposition
+        "grammar_fields": grammar_fields,
+        "semantic_sim": row.get("semantic_sim"),
         # Template aliases
         "score": row.get("reviewer_score"),
         "domain": row.get("physics_domain", ""),
