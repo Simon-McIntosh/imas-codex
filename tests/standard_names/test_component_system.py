@@ -249,7 +249,37 @@ def test_docs_enrich_child_context():
     assert items[0]["child_components"][0]["name"] == "magnetic_field_toroidal"
 
 
-# ── Tests: prompt rendering ────────────────────────────────────────────
+def test_docs_enrich_child_components_axis_ordered():
+    """Child components sorted by right-handed axis convention (R, φ, Z)."""
+    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+
+    # Return children in WRONG order: vertical before toroidal
+    children = [
+        {
+            "name": "vertical_component_of_B",
+            "description": "Vertical comp",
+            "axis": "vertical",
+        },
+        {
+            "name": "toroidal_component_of_B",
+            "description": "Toroidal comp",
+            "axis": "toroidal",
+        },
+        {
+            "name": "radial_component_of_B",
+            "description": "Radial comp",
+            "axis": "radial",
+        },
+    ]
+    gc = _make_gc_for_enrichment(children=children)
+    items = [{"id": "magnetic_field"}]
+    _enrich_for_docs_gen(gc, items)
+
+    assert "child_components" in items[0]
+    axes = [c["axis"] for c in items[0]["child_components"]]
+    assert axes == ["radial", "toroidal", "vertical"], (
+        f"Expected R, φ, Z ordering but got {axes}"
+    )
 
 
 def test_docs_prompt_renders_parent_section():

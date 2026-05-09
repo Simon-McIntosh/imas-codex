@@ -5367,7 +5367,9 @@ def _enrich_for_docs_gen(
                 )
             )
             if child_rows:
-                item["child_components"] = [
+                from imas_codex.standard_names.families import sort_by_axis_convention
+
+                child_dicts = [
                     {
                         "name": c["name"],
                         "description": c.get("description") or "",
@@ -5375,6 +5377,7 @@ def _enrich_for_docs_gen(
                     }
                     for c in child_rows
                 ]
+                item["child_components"] = sort_by_axis_convention(child_dicts)
         except Exception:
             logger.debug(
                 "_enrich_for_docs_gen: component context failed for %s",
