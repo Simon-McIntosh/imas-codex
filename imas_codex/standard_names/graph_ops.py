@@ -6796,6 +6796,9 @@ def claim_review_name_batch(
     where = (
         "sn.name_stage = 'drafted'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # Gate: require description embedding before review so the
+        # semantic_similarity_check in the review worker can run.
+        " AND sn.description IS NOT NULL"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"

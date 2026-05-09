@@ -80,6 +80,10 @@ grammar and convention scores.
 - Is the chosen `physical_base` or `geometric_base` appropriate?
 - Are `subject`, `component`, and `position` assignments physically correct?
 - Would a domain expert pick the same decomposition?
+- **Self-descriptiveness**: Can someone reading ONLY the name determine what is measured?
+  A name must be unambiguous in isolation. Score ≤ 5 if the name is semantically
+  incomplete — e.g. `co_passing_density` (density of what?), `trapped_pressure`
+  (pressure of what species/component?), `beam_fraction` (fraction of what?).
 
 ### 3. Naming Convention Adherence (0-20)
 - Does the name avoid ambiguous or overloaded terms?
