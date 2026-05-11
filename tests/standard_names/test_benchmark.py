@@ -742,7 +742,7 @@ class TestCLICommand:
     def test_command_exists(self):
         from imas_codex.cli.sn import sn
 
-        cmd = sn.get_command(None, "benchmark")
+        cmd = sn.get_command(None, "bench")
         assert cmd is not None, "benchmark command should be registered"
 
     def test_command_help(self):
@@ -751,7 +751,7 @@ class TestCLICommand:
         from imas_codex.cli.sn import sn
 
         runner = CliRunner()
-        result = runner.invoke(sn, ["benchmark", "--help"])
+        result = runner.invoke(sn, ["bench", "--help"])
         assert result.exit_code == 0
         assert "--models" in result.output
         assert "--max-candidates" in result.output
@@ -982,7 +982,7 @@ class TestReviewerModelCLI:
         from imas_codex.cli.sn import sn
 
         runner = CliRunner()
-        result = runner.invoke(sn, ["benchmark", "--help"])
+        result = runner.invoke(sn, ["bench", "--help"])
         assert result.exit_code == 0
         assert "--reviewer-model" in result.output
 

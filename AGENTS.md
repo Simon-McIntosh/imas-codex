@@ -881,13 +881,13 @@ The LLM never provides the unit field.
 | `sn clear` | Unconditional full-subsystem wipe (all SN nodes + grammar tree) with auto grammar re-seed from installed ISN package | `--dry-run`, `--force`, `--no-reseed` |
 | `sn prune` | Scoped delete of StandardName nodes (diagnostic tool, relationship-first safety) | `--status`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn sync-grammar` | Seed/refresh ISN grammar vocabulary (ISNGrammarVersion + GrammarSegment + GrammarToken + GrammarTemplate) in the graph | `--dry-run` |
-| `sn benchmark` | Benchmark LLM models on standard name generation quality | `--models`, `--ids`, `--reviewer-model`, `--max-candidates` |
+| `sn bench` | Benchmark LLM models on standard name generation quality | `--models`, `--ids`, `--reviewer-model`, `--max-candidates` |
 
 **`sn run` scope routing:** By default, `sn run` runs the 6-pool completion loop across all eligible work — all pools run concurrently. `--only <phase>` runs a single phase in isolation (e.g. `--only reconcile` to mark stale sources). `--focus <path>` routes specific DD paths through the full 6-pool production pipeline, scoped by a UUID `scope_run_id` — use for iterative prompt development and quality investigation on individual paths without a full rotation. Accepts multiple values and space-separated inputs (`--focus p1 p2` or `--focus p1 --focus p2`).
 
 ### Benchmark
 
-`sn benchmark` uses the same prompt pipeline as `sn run` (system/user message split via
+`sn bench` uses the same prompt pipeline as `sn run` (system/user message split via
 `build_compose_context()`). Model lists default from `[tool.imas-codex.sn.benchmark]` in
 pyproject.toml. Output table includes a **Cache %** column showing the prompt-cache
 hit rate per model (provider-side via OpenRouter — not something we implement). Scoring is

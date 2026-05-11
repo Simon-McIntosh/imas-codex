@@ -53,13 +53,6 @@ class BenchmarkConfig:
     temperature: float = 0.0  # pinned for reproducibility
     reviewer_model: str | None = None  # frontier model for quality scoring
     force: bool = False  # re-run over already-processed paths
-    # Rubric target for reviewer scoring. "names" → 4-dimensional
-    # sn/review_names (grammar, semantic, convention, completeness) —
-    # matches names compose output. "full" → 6-dimensional sn/review
-    # with documentation and compliance dimensions (only meaningful when
-    # compose output includes rich documentation, which the current
-    # StandardNameCandidate schema does not).
-    review_target: str = "names"
 
 
 @dataclass
@@ -451,7 +444,7 @@ async def run_benchmark(
                 reviews = await score_with_reviewer(
                     result.candidates,
                     config.reviewer_model,
-                    target=config.review_target,
+                    target="names",
                 )
                 result.quality_scores = reviews
                 # Compute distribution

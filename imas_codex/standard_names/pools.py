@@ -1,8 +1,7 @@
-"""Concurrent worker-pool orchestrator for ``sn run`` (Phase 8).
+"""Concurrent worker-pool orchestrator for ``sn run``.
 
-Replaces the per-domain serial ``run_sn_loop`` with N persistent async
-tasks that pull work from the graph independently and share a single
-:class:`BudgetManager` for cost coordination.
+Uses N persistent async tasks that pull work from the graph independently
+and share a single :class:`BudgetManager` for cost coordination.
 
 Six pools run under a single ``asyncio.gather``:
 

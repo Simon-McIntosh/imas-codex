@@ -33,30 +33,6 @@ class TestBudgetReservationBlocked:
             "_process_batch must track budget_reservation_blocked in state.stats"
         )
 
-    def test_review_names_invariant_checks_budget_blocked(self) -> None:
-        """_run_review_names_phase invariant must check budget_reservation_blocked."""
-        from imas_codex.standard_names import turn
-
-        src = inspect.getsource(turn._run_review_names_phase)
-        assert "budget_reservation_blocked" in src, (
-            "review_names invariant must be gated on budget_reservation_blocked"
-        )
-        assert "budget_blocked" in src, (
-            "review_names should use budget_blocked local variable"
-        )
-
-    def test_review_docs_invariant_checks_budget_blocked(self) -> None:
-        """_run_review_docs_phase invariant must check budget_reservation_blocked."""
-        from imas_codex.standard_names import turn
-
-        src = inspect.getsource(turn._run_review_docs_phase)
-        assert "budget_reservation_blocked" in src, (
-            "review_docs invariant must be gated on budget_reservation_blocked"
-        )
-        assert "budget_blocked" in src, (
-            "review_docs should use budget_blocked local variable"
-        )
-
 
 class TestBudgetReservationBlockedUnit:
     """Unit-level tests that the invariant logic is correct."""

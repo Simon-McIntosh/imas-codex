@@ -5771,7 +5771,7 @@ def create_sn_run_open(
 ) -> None:
     """Pre-create an ``SNRun`` node with ``status='started'``.
 
-    Called at the START of ``run_sn_loop`` so that ``(LLMCost)-[:FOR_RUN]->
+    Called at the START of ``run_sn_pools`` so that ``(LLMCost)-[:FOR_RUN]->
     (SNRun)`` edges have a target from the first LLM call onward.
 
     Uses MERGE so repeated calls (e.g. after a retry) are safe.

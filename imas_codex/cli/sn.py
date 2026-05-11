@@ -99,7 +99,7 @@ def sn() -> None:
 
     \b
     Housekeeping:
-      sn clear | sn prune | sn gaps | sn sync-grammar | sn benchmark
+      sn clear | sn prune | sn gaps | sn sync-grammar | sn bench
     """
     pass
 
@@ -1332,7 +1332,7 @@ def sn_run(
             log_print("(dry run — no LLM calls or graph writes)")
 
 
-@sn.command("benchmark")
+@sn.command("bench")
 @click.option(
     "--source",
     type=click.Choice(["dd"]),
@@ -1406,16 +1406,6 @@ def sn_run(
         "DD catalog in mature deployments)."
     ),
 )
-@click.option(
-    "--review-target",
-    type=click.Choice(["names"]),
-    default="names",
-    show_default=True,
-    help=(
-        "Reviewer rubric. 'names' uses the 4-dim name rubric "
-        "(sn/review_names, 0-80) matching the compose-stage output."
-    ),
-)
 def sn_benchmark(
     source: str,
     ids_filter: str | None,
@@ -1429,7 +1419,6 @@ def sn_benchmark(
     verbose: bool,
     reviewer_model: str | None,
     force: bool,
-    review_target: str,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -1441,10 +1430,10 @@ def sn_benchmark(
 
     \b
     Examples:
-      imas-codex sn benchmark --ids equilibrium
-      imas-codex sn benchmark --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
-      imas-codex sn benchmark --max-candidates 20 -v
-      imas-codex sn benchmark --reviewer-model anthropic/claude-opus-4.6
+      imas-codex sn bench --ids equilibrium
+      imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
+      imas-codex sn bench --max-candidates 20 -v
+      imas-codex sn bench --reviewer-model anthropic/claude-opus-4.6
     """
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -1489,7 +1478,7 @@ def sn_benchmark(
         temperature=temperature,
         reviewer_model=reviewer_model,
         force=force,
-        review_target=review_target,
+        review_target="names",
     )
 
     console.print("[bold]SN Benchmark[/bold]")
