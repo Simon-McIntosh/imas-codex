@@ -3288,11 +3288,16 @@ def write_vocab_gaps(
                     category = "wrong_slot_placement"
                 actual_segments = segments_found
             else:
-                # Token is in the reported segment — should not normally
-                # happen (not a gap at all), but classify as absent
-                # defensively to preserve existing behaviour.
-                category = "absent"
-                actual_segments = []
+                # Token IS in the reported segment — not actually a gap.
+                # Skip: the LLM reported a false positive.
+                logger.debug(
+                    "write_vocab_gaps: skipping false-positive gap %s "
+                    "(token '%s' already exists in segment '%s')",
+                    gap_id,
+                    needed_token,
+                    segment,
+                )
+                continue
 
             gap_nodes[gap_id] = {
                 "id": gap_id,

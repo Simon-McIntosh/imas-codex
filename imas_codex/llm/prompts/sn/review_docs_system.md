@@ -40,8 +40,7 @@ When sibling lists are empty, score on physics correctness + grammar/style alone
 ### 2. Documentation Quality (0–20)
 - Defining equation(s) present where applicable, in correct LaTeX.
 - All variables defined with units.
-- Sign conventions stated (especially for fluxes, currents, fields).
-- COCOS frame stated when `cocos_label` is set.
+- Sign conventions stated in prose (especially for fluxes, currents, fields). State direction without citing COCOS numbers — the COCOS convention is structured metadata on the node.
 - **Cross-name consistency**: equation symbols match siblings (don't introduce a new symbol when an accepted sibling uses another).
 
 ### 3. Completeness (0–20)

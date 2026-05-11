@@ -164,13 +164,13 @@ class TestWriteVocabGaps:
             {
                 "source_id": "path/a",
                 "segment": "transformation",
-                "needed_token": "derivative_of",
+                "needed_token": "novel_transform_xyz",
                 "reason": "reason A",
             },
             {
                 "source_id": "path/b",
                 "segment": "process",
-                "needed_token": "fusion",
+                "needed_token": "novel_process_xyz",
                 "reason": "reason B",
             },
         ]

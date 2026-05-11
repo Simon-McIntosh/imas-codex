@@ -30,7 +30,7 @@ Rate each dimension from 0 to 20. The total score is the sum (0-80).
 ### 2. Documentation Quality (0-20)
 - Does the long-form ``documentation`` provide a clear defining equation where applicable?
 - Are all variables in equations defined with units immediately after they appear?
-- Are sign conventions explicit for COCOS-dependent quantities (with specific COCOS version reference)?
+- Are sign conventions explicit for COCOS-dependent quantities? State direction using prose (e.g. "positive when counter-clockwise viewed from above") — NEVER cite a COCOS number (COCOS-11, COCOS-17, etc.) in prose. The COCOS convention is structured metadata on the node.
 - Is LaTeX properly escaped (literal block scalar, no corrupted backslashes)?
 - Are references to other standard names rendered as inline links (`[name](#name)`)?
 

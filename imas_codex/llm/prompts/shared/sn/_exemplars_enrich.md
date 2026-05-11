@@ -29,13 +29,13 @@ exemplars use American spelling (NC-17) in every prose field.
 - ✅ *Documentation:* `The toroidal component $B_\phi = \mathbf{B} \cdot \hat{\phi}$
   dominates the total field magnitude in tokamak configurations and sets the
   ion gyrofrequency $\Omega_{ci} = Z_i e B_\phi / m_i$. Positive when $B_\phi$
-  is in the $+\phi$ direction under COCOS-11 (counter-clockwise viewed from
-  above). Measured by fibre-optic polarimetry or inferred from equilibrium
-  reconstruction; typical on-axis values 1–6 T for current tokamaks. See also
-  `poloidal_component_of_magnetic_field`, `magnetic_field_magnitude`.`
+  points in the direction of increasing toroidal angle $\phi$ (counter-clockwise
+  viewed from above). Measured by fibre-optic polarimetry or inferred from
+  equilibrium reconstruction; typical on-axis values 1–6 T for current tokamaks.
+  See also `poloidal_component_of_magnetic_field`, `magnetic_field_magnitude`.`
 - *Why good:* sign-convention sentence begins literally with "Positive when"
-  (satisfies the sanitizer); COCOS number is explicit; unit `T` is consistent
-  with described physics; cross-refs target existing siblings.
+  (satisfies the sanitizer); direction stated in prose without COCOS number;
+  unit `T` is consistent with described physics; cross-refs target existing siblings.
 
 #### E3. Constraint / measurement-weight path
 

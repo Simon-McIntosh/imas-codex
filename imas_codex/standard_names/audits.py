@@ -1906,22 +1906,24 @@ def diamagnetic_component_check(candidate: dict[str, Any]) -> list[str]:
 def amplitude_of_prefix_check(candidate: dict[str, Any]) -> list[str]:
     """Flag ``amplitude_of_<X>`` / ``phase_of_<X>`` / ``magnitude_of_<X>`` prefix forms.
 
-    For the amplitude, phase, magnitude, real part or imaginary part of a
-    quantity ``<X>``, the canonical ISN form is the noun-suffix construction
-    ``<X>_amplitude``, ``<X>_phase``, ``<X>_magnitude``, ``<X>_real_part``,
-    ``<X>_imaginary_part``. The prefix form ``amplitude_of_<X>`` and
-    siblings break the grammar when ``<X>`` contains a ``_of_`` or
+    For the amplitude, phase, and magnitude of a quantity ``<X>``, the
+    canonical ISN form is the noun-suffix construction ``<X>_amplitude``,
+    ``<X>_phase``, ``<X>_magnitude``. The prefix form ``amplitude_of_<X>``
+    and siblings break the grammar when ``<X>`` contains a ``_of_`` or
     ``component_of_`` chain (e.g. ``amplitude_of_parallel_component_of_*``
     fails the vocabulary consistency check because ``amplitude_of_parallel``
     is not a Component token). Use the noun-suffix form consistently.
+
+    ``real_part_of_`` and ``imaginary_part_of_`` are NOT flagged here —
+    ISN grammar parses them correctly as ``transformation=real_part`` /
+    ``transformation=imaginary_part`` prefix operators, producing proper
+    COMPONENT_OF derivation edges to the parent complex quantity.
     """
     name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
     prefixes = (
         "amplitude_of_",
         "phase_of_",
         "magnitude_of_",
-        "real_part_of_",
-        "imaginary_part_of_",
         "modulus_of_",
     )
     for prefix in prefixes:

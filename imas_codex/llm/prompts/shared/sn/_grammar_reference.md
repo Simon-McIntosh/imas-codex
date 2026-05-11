@@ -119,11 +119,13 @@ In the ISN grammar, `_of_` appears in exactly three structural roles:
 
 The following lists are the complete, authoritative closed vocabulary for
 each segment.  **Every token below MUST be placed in its declared segment slot.**
-`physical_base` is also closed — only the 80 listed bases are valid.
+`physical_base` is the **only open-vocabulary segment** — any lowercase
+snake_case token is admissible there if the full name round-trips through
+`parse → compose`. All OTHER segments are closed.
 
 If a candidate name contains tokens from multiple segments, decompose:
-each token belongs in its declared segment. Check ALL segments including
-`physical_base` and `qualifier` — no segment accepts invented tokens.  Examples of the failure mode this
+each token belongs in its declared segment. Check ALL closed segments —
+no closed segment accepts invented tokens.  Examples of the failure mode this
 prevents:
 
 - `toroidal_torque` → `toroidal` is in `component`; the correct decomposition

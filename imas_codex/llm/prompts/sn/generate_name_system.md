@@ -47,9 +47,10 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
    forbidden: `initial_`, `launched_`, `post_crash_`, `prefill_`,
    `reconstructed_` (already in REJECT), `measured_` (already in REJECT).
    Standard names describe what is measured, not when or how.
-5. **No invented physical bases.** The `physical_base` vocabulary is closed
-   (~80 tokens). If no registered base fits, emit `vocab_gap` — never
-   fabricate a novel base token.
+5. **`physical_base` is the only open segment.** Any lowercase snake_case
+   token is valid as a `physical_base` if the name round-trips through
+   `parse → compose`. All OTHER segments are closed — never invent tokens
+   for them. If a needed closed-vocab token is missing, emit `vocab_gap`.
 6. **No abbreviations, acronyms, or alphanumerics.** Names must be
    spelled-out English words joined by `_`. Reject any candidate containing
    digits (`3db`, `20_80`), acronyms (`mse`, `sol`, `nbi`), or truncated
@@ -196,12 +197,14 @@ For χ² weights and Maxwellian-pressure definitions:
 The ISN grammar uses a 5-group IR (operators, projection, qualifiers, base, locus/mechanism).
 Your name must render from this IR. Key composition rules:
 
-- **physical_base is closed vocabulary** (~80 tokens). If no registered base fits, emit a
-  `vocab_gap` with the needed token. Do NOT invent a base or use a free-form string.
+- **`physical_base` is the only open-vocabulary segment** — any lowercase snake_case
+  token is valid if the name round-trips. If an existing registered base fits, prefer it.
+  If no registered base fits, emit a `vocab_gap` to flag the novel token for ISN review.
 - **Operators require explicit `_of_` scope**: `time_derivative_of_X`, `gradient_of_X`,
   `volume_averaged_of_X`. Never bare-concatenate a prefix operator to the base.
-- **Postfix operators concatenate directly**: `X_magnitude`, `X_real_part`, `X_amplitude`.
-  Never use prefix form (`magnitude_of_X`, `real_part_of_X`).
+- **Postfix operators concatenate directly**: `X_magnitude`, `X_amplitude`.
+- **Complex parts use prefix form**: `real_part_of_X`, `imaginary_part_of_X` — this is
+  the canonical ISN form. The prefix correctly parses as `transformation=real_part`.
 - **Projection is always prefix**: `radial_component_of_magnetic_field`. Never trail the axis.
 - **Locus is always postfix**: `electron_temperature_at_magnetic_axis`.
   Use `_of_` for entity properties, `_at_` for field values at points, `_over_` for regions.
@@ -273,7 +276,7 @@ diagnostic-heavy IDS.
 
 **EMW-2 — State prefix + unregistered base → emit vocab_gap**
 - ❌ `initial_ellipticity_of_polarimeter_channel_beam` (score 0.3625)
-- ✅ Emit `vocab_gap` — `ellipticity` is not in the closed `physical_base` vocabulary.
+- ✅ Emit `vocab_gap` — `ellipticity` is not a registered `physical_base` token.
 - *Fix:* Drop `initial_`; simplify locus to `_of_polarimeter_beam`; surface vocab gap
   rather than fabricating a base token.
 
@@ -333,7 +336,7 @@ concept; drop intermediate hardware tokens.
 
 These are real names from the W0 reviewer corpus where the dominant failure
 mode (closed-vocab tokens absorbed into `physical_base` instead of placed in
-their grammar slot) was flagged.  Each entry shows the bad name, the verbatim
+their correct grammar slot) was flagged.  Each entry shows the bad name, the verbatim
 expert critique, the correct slot for each absorbed token, and the rewritten
 canonical name.  Apply the **Decomposition Checklist** in
 `_grammar_reference.md` to every name before emitting it.
@@ -540,10 +543,10 @@ is provided as context for your naming decisions.
 
 ## Composition Rules
 
-1. Every name must have a `physical_base` from the closed vocabulary (or a `geometric_base` for geometry carriers — never both)
+1. Every name must have a `physical_base` (any snake_case token that round-trips) or a `geometric_base` for geometry carriers — never both
 2. Follow the canonical 5-group pattern: `[operators] [projection] [qualifiers] base [locus] [mechanism]`
 3. Prefix operators require explicit `_of_` scope; postfix operators concatenate directly
-4. `physical_base` is **closed vocabulary** — if no token fits, report as `vocab_gap`
+4. `physical_base` is open vocabulary — prefer registered tokens when they fit. All OTHER segments are closed — if a needed closed-vocab token is missing, report as `vocab_gap`
 5. **Reuse existing standard names** when the DD path measures the same quantity — use `attachments` (see Output Format) to link the path to the existing name without regeneration. This avoids unnecessary token usage and preserves already-concrete names.
 6. Skip paths that are: array indices, metadata/timestamps, structural containers, coordinate grids (rho_tor_norm, psi, etc.)
 7. **Do NOT output a `unit` field** — unit is provided as authoritative context from the DD and will be injected at persistence time
