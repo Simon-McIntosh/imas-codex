@@ -210,8 +210,14 @@ def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:
             else str(parsed.geometric_base)
         )
     elif parsed.physical_base is not None:
-        # Edge case: toroidal_angle has physical_base='angle', no geometric_base
-        inner_name = str(parsed.physical_base)
+        # Edge case: toroidal_angle has physical_base='angle', no geometric_base.
+        # Guard: reject compound physical_base containing '_of_' — this signals
+        # the parser failed to decompose a compound (e.g. a removed locus token
+        # absorbed into physical_base).
+        pb = str(parsed.physical_base)
+        if "_of_" in pb:
+            return []
+        inner_name = pb
 
     if not inner_name:
         return []
