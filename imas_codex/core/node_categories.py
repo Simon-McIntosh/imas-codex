@@ -21,8 +21,11 @@ SEARCHABLE_CATEGORIES: frozenset[str] = (
 )
 
 # Nodes eligible for standard-name extraction.
-# Includes 'coordinate' because normalized flux coordinates, grid axes, and
-# similar scalar leaves are first-class namable quantities — not mere bookkeeping.
+# Includes geometry because hardware/diagnostic geometry paths (coil cross-sections,
+# detector positions) can yield valid tokamak-universal names when composed with
+# sufficient context (e.g., "radial_centroid_of_poloidal_field_coil_cross_section").
+# The compose prompt and deny list handle quality — not the category gate.
+# 'coordinate' is included for normalized flux coordinates, grid axes, etc.
 # The leaf invariant (data_type NOT IN STRUCTURE/STRUCT_ARRAY) gates containers.
 SN_SOURCE_CATEGORIES: frozenset[str] = QUANTITY_CATEGORIES | {"coordinate"}
 

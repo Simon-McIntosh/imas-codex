@@ -52,27 +52,49 @@ class TestConstantNodeTypeExtraction:
             "get_extraction_candidates_dd must include 'constant' in node_type filter"
         )
 
-    def test_gyrokinetics_constant_paths_classified_as_quantity(self):
-        """Gyrokinetics paths (constant node_type) pass the classifier."""
-        from imas_codex.standard_names.classifier import classify_path
+    def test_gyrokinetics_constant_paths_qualify_as_eligible(self):
+        """Gyrokinetics paths (constant node_type) pass the DD qualifier."""
+        from imas_codex.standard_names.sources.base import SourceCandidate
+        from imas_codex.standard_names.sources.dd_qualifier import qualify_dd
 
         gyro_paths = [
             {
                 "path": "gyrokinetics/model/time_interval_norm",
                 "data_type": "FLT_0D",
+                "description": "Normalised time interval",
+                "unit": "-",
+                "node_category": "quantity",
             },
             {
                 "path": "gyrokinetics/species_all/beta_reference",
                 "data_type": "FLT_0D",
+                "description": "Reference beta",
+                "unit": "-",
+                "node_category": "quantity",
             },
             {
                 "path": "gyrokinetics/wavevector/eigenmode/frequency_norm",
                 "data_type": "FLT_0D",
+                "description": "Normalised frequency",
+                "unit": "-",
+                "node_category": "quantity",
             },
         ]
-        for node in gyro_paths:
-            assert classify_path(node) == "quantity", (
-                f"Gyrokinetics path {node['path']} should classify as 'quantity'"
+        for row in gyro_paths:
+            candidate = SourceCandidate(
+                source_id=row["path"],
+                source_kind="dd",
+                description=row.get("description", ""),
+                unit=row.get("unit", ""),
+                value_type=row["data_type"],
+                hierarchy=tuple(row["path"].split("/")),
+                metadata={"node_category": row.get("node_category", "quantity")},
+                raw=row,
+            )
+            q = qualify_dd(candidate)
+            assert q.eligible, (
+                f"Gyrokinetics path {row['path']} should be eligible, "
+                f"got skip reason: {q.reason}"
             )
 
     def test_mock_extraction_returns_gyrokinetics(self):

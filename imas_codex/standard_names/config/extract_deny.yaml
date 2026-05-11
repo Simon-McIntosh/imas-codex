@@ -1,15 +1,16 @@
 # Extract-phase deny rules: DD paths excluded from standard name generation.
 #
 # These paths pass the SN_SOURCE_CATEGORIES gate (their node_category is
-# quantity or geometry) and the leaf invariant, but they are NOT meaningful
-# standard-name candidates.  Instead of inflating the compose/review budget
-# on names that reviewers will score 0.2–0.4, we filter them at extraction
-# time and record a StandardNameSource with status='skipped'.
+# quantity, geometry, or coordinate) and the leaf invariant, but they are
+# NOT meaningful standard-name candidates.  Instead of inflating the
+# compose/review budget on names that reviewers will score 0.2–0.4, we
+# filter them at extraction time and record a StandardNameSource with
+# status='skipped'.
 #
-# Architecture choice: Option B from W19A plan.  The DD classifier's
-# node_category is correct (these ARE geometry/quantity leaves), but the
-# standard-name pipeline needs a finer gate.  A DD rebuild (Option A/C)
-# would be the cleanest long-term fix, but it's a separate massive operation.
+# Note: geometry paths ARE admitted at the category level because some
+# (e.g., coil centroid coordinates) yield valid tokamak-universal names.
+# This deny list handles the specific geometry subtypes that produce
+# overly generic names like "radius_of_annulus" or "alpha_of_oblique".
 #
 # Path pattern syntax: glob-style (same as unit_overrides.yaml).
 #   "*"  matches a single path segment (no "/")
@@ -46,135 +47,73 @@ rules:
       match the DD path (ending in /exact), not the generated name.
 
   # -------------------------------------------------------------------------
-  # Class 2 — Engineering coil geometry
+  # Class 2 — Generic cross-section geometry primitives
   #
-  # Cross-section geometry dimensions in pf_active/pf_passive IDSs.
-  # Engineering design parameters of the machine, not physics quantities.
-  # W18B/W20B showed these comprise ~30-40% of magnetic_field_systems
-  # low-score names.
+  # Cross-section geometry subtypes (oblique, rectangle, annulus,
+  # arcs_of_circle, thick_line) exist across ~35 IDSs (pf_active,
+  # pf_passive, ferritic, ic_antennas, coils_non_axisymmetric, etc.)
+  # and produce overly generic names like "radius_of_annulus" or
+  # "alpha_of_oblique".  These are engineering design parameters of
+  # specific machine components — not tokamak-universal physics quantities.
   #
-  # W21 reconnaissance revealed TWO structural levels, both without the
-  # extra segment that the original (broken) patterns assumed:
-  #   Element-level:  pf_active/coil/element/geometry/oblique/alpha
-  #   Coil-level:     pf_active/coil/geometry/oblique/alpha
-  # Original patterns (pf_active/*/element/*/geometry/*) required a
-  # non-existent segment between element and geometry — 0 paths matched.
+  # W38 reconnaissance: 134 leaf paths across these subtypes, ALL under
+  # node_category='geometry'.  Broad ** patterns replace the original 24
+  # per-IDS rules (pf_active/pf_passive only).
   #
-  # Geometry subtypes found in DD (W21 recon):
-  #   oblique, arcs_of_circle, outline, rectangle, annulus, thick_line
-  # thick_line is nested (first_point/r|z), so uses ** at the leaf level.
+  # Local coordinate frame unit vectors (x1/x2/x3_unit_vector) are also
+  # excluded — these are abstract reference frame definitions, not
+  # measurable quantities.  279 leaf paths across diagnostic IDSs.
   # -------------------------------------------------------------------------
 
-  # --- pf_active element-level geometry (6 subtypes) ---
-  - path_pattern: "pf_active/*/element/geometry/oblique/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/geometry/oblique/*"
+    skip_reason: "generic_cross_section_geometry"
     reason: >-
-      Oblique cross-section geometry of PF active coil elements — engineering
-      design parameter, not a measurable physics quantity.
+      Oblique cross-section geometry parameters (angles, dimensions) —
+      generic geometric primitives that produce names like "alpha_of_oblique"
+      without tokamak-universal meaning.
 
-  - path_pattern: "pf_active/*/element/geometry/arcs_of_circle/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/geometry/rectangle/*"
+    skip_reason: "generic_cross_section_geometry"
     reason: >-
-      Arcs-of-circle cross-section geometry of PF active coil elements —
-      engineering design parameter.
+      Rectangle cross-section geometry (height, width) — generic primitives
+      that need hardware context to be meaningful.
 
-  - path_pattern: "pf_active/*/element/geometry/outline/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/geometry/annulus/*"
+    skip_reason: "generic_cross_section_geometry"
     reason: >-
-      Outline cross-section geometry of PF active coil elements —
-      engineering design parameter.
+      Annulus cross-section geometry (inner/outer radius) — produces names
+      like "radius_of_annulus" without identifying the component.
 
-  - path_pattern: "pf_active/*/element/geometry/rectangle/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/geometry/arcs_of_circle/*"
+    skip_reason: "generic_cross_section_geometry"
     reason: >-
-      Rectangle cross-section geometry of PF active coil elements —
-      engineering design parameter.
+      Arc-of-circle cross-section geometry (radius, curvature) — generic
+      geometric primitive, not a standalone physics quantity.
 
-  - path_pattern: "pf_active/*/element/geometry/annulus/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/geometry/thick_line/**"
+    skip_reason: "generic_cross_section_geometry"
     reason: >-
-      Annulus cross-section geometry of PF active coil elements —
-      engineering design parameter.
+      Thick-line cross-section geometry (first_point/r, first_point/z,
+      second_point/r, etc.) — engineering design parameter describing
+      a line segment's endpoints and thickness.
 
-  - path_pattern: "pf_active/*/element/geometry/thick_line/**"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/x1_unit_vector/*"
+    skip_reason: "local_coordinate_frame"
     reason: >-
-      Thick-line cross-section geometry of PF active coil elements
-      (nested: first_point/r, first_point/z, etc.) — engineering parameter.
+      Local coordinate frame unit vector component — abstract reference
+      frame definition, not a measurable physics or geometry quantity.
 
-  # --- pf_active coil-level geometry (no element layer, 6 subtypes) ---
-  - path_pattern: "pf_active/*/geometry/oblique/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/x2_unit_vector/*"
+    skip_reason: "local_coordinate_frame"
     reason: >-
-      Oblique cross-section geometry at pf_active coil level — engineering
-      design parameter.
+      Local coordinate frame unit vector component — abstract reference
+      frame definition, not a measurable physics or geometry quantity.
 
-  - path_pattern: "pf_active/*/geometry/arcs_of_circle/*"
-    skip_reason: "engineering_coil_geometry"
+  - path_pattern: "**/x3_unit_vector/*"
+    skip_reason: "local_coordinate_frame"
     reason: >-
-      Arcs-of-circle cross-section geometry at pf_active coil level —
-      engineering design parameter.
-
-  - path_pattern: "pf_active/*/geometry/outline/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Outline cross-section geometry at pf_active coil level —
-      engineering design parameter.
-
-  - path_pattern: "pf_active/*/geometry/rectangle/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Rectangle cross-section geometry at pf_active coil level —
-      engineering design parameter.
-
-  - path_pattern: "pf_active/*/geometry/annulus/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Annulus cross-section geometry at pf_active coil level —
-      engineering design parameter.
-
-  - path_pattern: "pf_active/*/geometry/thick_line/**"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Thick-line cross-section geometry at pf_active coil level
-      (nested: first_point/r, first_point/z, etc.) — engineering parameter.
-
-  # --- pf_passive element-level geometry (6 subtypes) ---
-  - path_pattern: "pf_passive/*/element/geometry/oblique/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Oblique cross-section geometry of PF passive loop elements —
-      engineering design parameter.
-
-  - path_pattern: "pf_passive/*/element/geometry/arcs_of_circle/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Arcs-of-circle cross-section geometry of PF passive loop elements —
-      engineering design parameter.
-
-  - path_pattern: "pf_passive/*/element/geometry/outline/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Outline cross-section geometry of PF passive loop elements —
-      engineering design parameter.
-
-  - path_pattern: "pf_passive/*/element/geometry/rectangle/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Rectangle cross-section geometry of PF passive loop elements —
-      engineering design parameter.
-
-  - path_pattern: "pf_passive/*/element/geometry/annulus/*"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Annulus cross-section geometry of PF passive loop elements —
-      engineering design parameter.
-
-  - path_pattern: "pf_passive/*/element/geometry/thick_line/**"
-    skip_reason: "engineering_coil_geometry"
-    reason: >-
-      Thick-line cross-section geometry of PF passive loop elements
-      (nested: first_point/r, first_point/z, etc.) — engineering parameter.
+      Local coordinate frame unit vector component — abstract reference
+      frame definition, not a measurable physics or geometry quantity.
 
   # -------------------------------------------------------------------------
   # Class 3 — Force/weight combination matrices
@@ -233,7 +172,7 @@ rules:
   # Class 6 — Temporal coordinate arrays
   #
   # DD /time paths have node_category=coordinate, which IS included in
-  # SN_SOURCE_CATEGORIES (coordinate, geometry, quantity).  This means all
+  # SN_SOURCE_CATEGORIES (quantity, geometry, coordinate).  This means all
   # 578+ time coordinate arrays in the DD are extracted as SN candidates.
   #
   # W20B: 36 MFS /time paths produced 9 spurious time_of_* names (score

@@ -26,7 +26,7 @@ PIPELINE_PROMPTS: list[Path] = [
 
 # Core pipeline code that affects generated names
 PIPELINE_CODE: list[Path] = [
-    Path("imas_codex/standard_names/classifier.py"),
+    Path("imas_codex/standard_names/sources/dd_qualifier.py"),
     Path("imas_codex/standard_names/enrichment.py"),
     Path("imas_codex/standard_names/consolidation.py"),
     Path("imas_codex/standard_names/vocab_token_filter.py"),

@@ -56,42 +56,42 @@ class TestGlobMatch:
             "equilibrium/time_slice/constraints/iron_core_segment/magnetisation_r/exact",
         )
 
-    def test_pf_active_element_geometry(self) -> None:
-        """Element-level geometry: no extra segment between element and geometry."""
-        pattern = "pf_active/*/element/geometry/oblique/*"
-        # Actual DD path — no index segment between element and geometry
+    def test_broad_geometry_oblique(self) -> None:
+        """Broad ** pattern matches oblique geometry in ANY IDS."""
+        pattern = "**/geometry/oblique/*"
         assert _glob_match(pattern, "pf_active/coil/element/geometry/oblique/alpha")
+        assert _glob_match(pattern, "pf_passive/loop/element/geometry/oblique/beta")
+        assert _glob_match(
+            pattern, "ic_antennas/antenna/module/strap/geometry/oblique/r"
+        )
         assert not _glob_match(
             pattern, "pf_active/coil/element/geometry/rectangle/width"
         )
 
-    def test_pf_active_coil_geometry(self) -> None:
-        """Coil-level geometry (no element layer)."""
-        pattern = "pf_active/*/geometry/oblique/*"
-        assert _glob_match(pattern, "pf_active/coil/geometry/oblique/alpha")
-
-    def test_pf_passive_element_geometry(self) -> None:
-        pattern = "pf_passive/*/element/geometry/outline/*"
-        assert _glob_match(pattern, "pf_passive/loop/element/geometry/outline/r")
-
-    def test_thick_line_nested(self) -> None:
-        """thick_line has nested subfields — must use ** at leaf level."""
-        pattern = "pf_active/*/element/geometry/thick_line/**"
+    def test_broad_geometry_thick_line(self) -> None:
+        """Broad ** pattern matches thick_line nested subfields in ANY IDS."""
+        pattern = "**/geometry/thick_line/**"
         assert _glob_match(
             pattern, "pf_active/coil/element/geometry/thick_line/first_point/r"
         )
         assert _glob_match(
-            pattern, "pf_active/coil/element/geometry/thick_line/first_point/z"
+            pattern, "pf_passive/loop/element/geometry/thick_line/first_point/z"
+        )
+        assert _glob_match(
+            pattern, "ferritic/element/geometry/thick_line/second_point/r"
         )
 
-    def test_old_broken_pattern_does_not_match_actual_paths(self) -> None:
-        """Confirm the W20B-broken pattern (*element/*/geometry/*) no longer fires."""
-        broken_pattern = "pf_active/*/element/*/geometry/oblique/*"
-        # This pattern requires an extra segment (e.g. '0') between element and
-        # geometry which does NOT exist in the actual DD.
-        assert not _glob_match(
-            broken_pattern, "pf_active/coil/element/geometry/oblique/alpha"
-        )
+    def test_unit_vector_patterns(self) -> None:
+        """Unit vector patterns match x1/x2/x3_unit_vector in ANY IDS."""
+        for axis in ("x1", "x2", "x3"):
+            pattern = f"**/{axis}_unit_vector/*"
+            assert _glob_match(
+                pattern, f"bolometer/channel/line_of_sight/{axis}_unit_vector/r"
+            )
+            assert _glob_match(
+                pattern,
+                f"spectrometer_x_ray_crystal/channel/line_of_sight/{axis}_unit_vector/z",
+            )
 
 
 class TestDenyRuleMatching:
@@ -120,11 +120,12 @@ class TestLoadRules:
             assert rule.skip_reason, f"Rule missing skip_reason: {rule}"
             assert rule.reason, f"Rule missing reason: {rule}"
 
-    def test_has_five_deny_classes(self) -> None:
+    def test_has_deny_classes(self) -> None:
         """All core skip_reason classes must be present in the config."""
         reasons = {r.skip_reason for r in _load_rules()}
         assert "boolean_constraint_selector" in reasons
-        assert "engineering_coil_geometry" in reasons
+        assert "generic_cross_section_geometry" in reasons
+        assert "local_coordinate_frame" in reasons
         assert "control_system_parameter" in reasons
         assert "metadata_uncertainty_index" in reasons
         assert "ggd_structural_geometry" in reasons
@@ -174,98 +175,93 @@ class TestMatchDenyRule:
         assert rule is not None
         assert rule.skip_reason == "boolean_constraint_selector"
 
-    # --- Class 2: Engineering coil geometry (actual DD paths) ---
+    # --- Class 2: Generic cross-section geometry (broad patterns, all IDSs) ---
 
-    # pf_active element-level
+    # pf_active element-level (still matched by broad **/geometry/oblique/* etc.)
     def test_pf_active_element_oblique_alpha_denied(self) -> None:
-        """Actual DD path (no index segment): pf_active/coil/element/geometry/oblique/alpha."""
+        """pf_active paths still matched by broad ** patterns."""
         rule = match_deny_rule("pf_active/coil/element/geometry/oblique/alpha")
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
-
-    def test_pf_active_element_oblique_beta_denied(self) -> None:
-        rule = match_deny_rule("pf_active/coil/element/geometry/oblique/beta")
-        assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
     def test_pf_active_element_arcs_r_denied(self) -> None:
         rule = match_deny_rule(
             "pf_active/coil/element/geometry/arcs_of_circle/curvature_radii"
         )
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
-
-    def test_pf_active_element_outline_r_denied(self) -> None:
-        rule = match_deny_rule("pf_active/coil/element/geometry/outline/r")
-        assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
     def test_pf_active_element_rectangle_height_denied(self) -> None:
         rule = match_deny_rule("pf_active/coil/element/geometry/rectangle/height")
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
     def test_pf_active_element_annulus_radius_inner_denied(self) -> None:
         rule = match_deny_rule("pf_active/coil/element/geometry/annulus/radius_inner")
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
     def test_pf_active_element_thick_line_first_point_r_denied(self) -> None:
-        """thick_line has nested subfields — pf_active element level."""
         rule = match_deny_rule(
             "pf_active/coil/element/geometry/thick_line/first_point/r"
         )
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
-    # pf_active coil-level (no element layer)
-    def test_pf_active_coil_oblique_alpha_denied(self) -> None:
-        """Coil-level geometry path (no element layer)."""
-        rule = match_deny_rule("pf_active/coil/geometry/oblique/alpha")
+    # Cross-IDS coverage — broad patterns match beyond pf_active/pf_passive
+    def test_ic_antennas_geometry_oblique_denied(self) -> None:
+        """ic_antennas paths now matched by **/geometry/oblique/*."""
+        rule = match_deny_rule(
+            "ic_antennas/antenna/module/strap/geometry/oblique/alpha"
+        )
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
-    def test_pf_active_coil_annulus_r_denied(self) -> None:
-        rule = match_deny_rule("pf_active/coil/geometry/annulus/r")
+    def test_ferritic_geometry_thick_line_denied(self) -> None:
+        """ferritic paths now matched by **/geometry/thick_line/**."""
+        rule = match_deny_rule("ferritic/element/geometry/thick_line/first_point/r")
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
-    def test_pf_active_coil_thick_line_denied(self) -> None:
-        rule = match_deny_rule("pf_active/coil/geometry/thick_line/first_point/r")
+    def test_coils_non_axisymmetric_geometry_annulus_denied(self) -> None:
+        rule = match_deny_rule(
+            "coils_non_axisymmetric/coil/element/geometry/annulus/radius_inner"
+        )
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
     # pf_passive element-level
     def test_pf_passive_element_oblique_denied(self) -> None:
         rule = match_deny_rule("pf_passive/loop/element/geometry/oblique/alpha")
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
-
-    def test_pf_passive_element_outline_r_denied(self) -> None:
-        rule = match_deny_rule("pf_passive/loop/element/geometry/outline/r")
-        assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
-
-    def test_pf_passive_element_annulus_z_denied(self) -> None:
-        rule = match_deny_rule("pf_passive/loop/element/geometry/annulus/z")
-        assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
     def test_pf_passive_element_thick_line_denied(self) -> None:
         rule = match_deny_rule(
             "pf_passive/loop/element/geometry/thick_line/first_point/r"
         )
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "generic_cross_section_geometry"
 
-    # Confirm the previously broken pattern (element/*/geometry) WOULD NOT match
-    def test_broken_pattern_path_still_denied_via_corrected_rule(self) -> None:
-        """The old test path had an extra '0' segment; verify actual path is denied."""
-        # Old broken test used: pf_active/coil/element/0/geometry/oblique/alpha
-        # Real DD path is:      pf_active/coil/element/geometry/oblique/alpha
-        rule = match_deny_rule("pf_active/coil/element/geometry/oblique/alpha")
+    # --- Class 2b: Local coordinate frame unit vectors ---
+
+    def test_x1_unit_vector_denied(self) -> None:
+        """x1_unit_vector paths denied as local coordinate frame definitions."""
+        rule = match_deny_rule("bolometer/channel/line_of_sight/x1_unit_vector/r")
         assert rule is not None
-        assert rule.skip_reason == "engineering_coil_geometry"
+        assert rule.skip_reason == "local_coordinate_frame"
+
+    def test_x2_unit_vector_denied(self) -> None:
+        rule = match_deny_rule(
+            "spectrometer_x_ray_crystal/channel/line_of_sight/x2_unit_vector/z"
+        )
+        assert rule is not None
+        assert rule.skip_reason == "local_coordinate_frame"
+
+    def test_x3_unit_vector_denied(self) -> None:
+        rule = match_deny_rule("camera_visible/channel/detector/x3_unit_vector/phi")
+        assert rule is not None
+        assert rule.skip_reason == "local_coordinate_frame"
 
     # --- Class 3: Control-system parameters ---
 
@@ -464,49 +460,38 @@ class TestActualDDPathsDenied:
         "equilibrium/time_slice/constraints/x_point/exact",
     ]
 
-    PF_ACTIVE_ELEMENT_GEOMETRY = [
+    CROSS_SECTION_GEOMETRY = [
+        # pf_active element-level
         "pf_active/coil/element/geometry/oblique/alpha",
         "pf_active/coil/element/geometry/oblique/beta",
         "pf_active/coil/element/geometry/oblique/r",
-        "pf_active/coil/element/geometry/oblique/z",
-        "pf_active/coil/element/geometry/oblique/thickness",
-        "pf_active/coil/element/geometry/oblique/length_alpha",
-        "pf_active/coil/element/geometry/oblique/length_beta",
         "pf_active/coil/element/geometry/arcs_of_circle/r",
-        "pf_active/coil/element/geometry/arcs_of_circle/z",
         "pf_active/coil/element/geometry/arcs_of_circle/curvature_radii",
-        "pf_active/coil/element/geometry/outline/r",
-        "pf_active/coil/element/geometry/outline/z",
         "pf_active/coil/element/geometry/rectangle/height",
-        "pf_active/coil/element/geometry/annulus/r",
-        "pf_active/coil/element/geometry/annulus/z",
         "pf_active/coil/element/geometry/annulus/radius_inner",
         "pf_active/coil/element/geometry/annulus/radius_outer",
         "pf_active/coil/element/geometry/thick_line/first_point/r",
-        "pf_active/coil/element/geometry/thick_line/first_point/z",
-    ]
-
-    PF_ACTIVE_COIL_GEOMETRY = [
+        # pf_active coil-level
         "pf_active/coil/geometry/oblique/alpha",
-        "pf_active/coil/geometry/oblique/beta",
-        "pf_active/coil/geometry/arcs_of_circle/r",
-        "pf_active/coil/geometry/arcs_of_circle/curvature_radii",
-        "pf_active/coil/geometry/outline/r",
-        "pf_active/coil/geometry/rectangle/height",
         "pf_active/coil/geometry/annulus/r",
-        "pf_active/coil/geometry/annulus/radius_inner",
         "pf_active/coil/geometry/thick_line/first_point/r",
-    ]
-
-    PF_PASSIVE_ELEMENT_GEOMETRY = [
+        # pf_passive element-level
         "pf_passive/loop/element/geometry/oblique/alpha",
-        "pf_passive/loop/element/geometry/oblique/beta",
-        "pf_passive/loop/element/geometry/arcs_of_circle/r",
-        "pf_passive/loop/element/geometry/outline/r",
-        "pf_passive/loop/element/geometry/rectangle/height",
-        "pf_passive/loop/element/geometry/annulus/r",
         "pf_passive/loop/element/geometry/annulus/radius_inner",
         "pf_passive/loop/element/geometry/thick_line/first_point/r",
+        # Cross-IDS: ic_antennas, ferritic, coils_non_axisymmetric
+        "ic_antennas/antenna/module/strap/geometry/oblique/alpha",
+        "ferritic/element/geometry/thick_line/first_point/r",
+        "coils_non_axisymmetric/coil/element/geometry/annulus/radius_inner",
+        "coils_non_axisymmetric/coil/element/geometry/rectangle/height",
+    ]
+
+    UNIT_VECTOR_PATHS = [
+        "bolometer/channel/line_of_sight/x1_unit_vector/r",
+        "bolometer/channel/line_of_sight/x2_unit_vector/z",
+        "bolometer/channel/line_of_sight/x3_unit_vector/phi",
+        "spectrometer_x_ray_crystal/channel/line_of_sight/x1_unit_vector/r",
+        "camera_visible/channel/detector/x3_unit_vector/phi",
     ]
 
     def test_all_eq_constraint_exact_denied(self) -> None:
@@ -517,27 +502,21 @@ class TestActualDDPathsDenied:
                 f"Wrong reason for {path}: {rule.skip_reason}"
             )
 
-    def test_all_pf_active_element_geometry_denied(self) -> None:
-        for path in self.PF_ACTIVE_ELEMENT_GEOMETRY:
+    def test_all_cross_section_geometry_denied(self) -> None:
+        """Broad ** patterns catch cross-section geometry in all IDSs."""
+        for path in self.CROSS_SECTION_GEOMETRY:
             rule = match_deny_rule(path)
             assert rule is not None, f"Not denied: {path}"
-            assert rule.skip_reason == "engineering_coil_geometry", (
+            assert rule.skip_reason == "generic_cross_section_geometry", (
                 f"Wrong reason for {path}: {rule.skip_reason}"
             )
 
-    def test_all_pf_active_coil_geometry_denied(self) -> None:
-        for path in self.PF_ACTIVE_COIL_GEOMETRY:
+    def test_all_unit_vector_paths_denied(self) -> None:
+        """Unit vector coordinate frame definitions denied across IDSs."""
+        for path in self.UNIT_VECTOR_PATHS:
             rule = match_deny_rule(path)
             assert rule is not None, f"Not denied: {path}"
-            assert rule.skip_reason == "engineering_coil_geometry", (
-                f"Wrong reason for {path}: {rule.skip_reason}"
-            )
-
-    def test_all_pf_passive_element_geometry_denied(self) -> None:
-        for path in self.PF_PASSIVE_ELEMENT_GEOMETRY:
-            rule = match_deny_rule(path)
-            assert rule is not None, f"Not denied: {path}"
-            assert rule.skip_reason == "engineering_coil_geometry", (
+            assert rule.skip_reason == "local_coordinate_frame", (
                 f"Wrong reason for {path}: {rule.skip_reason}"
             )
 
@@ -650,45 +629,6 @@ class TestGGDSubgridMetadataDenied:
                 )
 
 
-class TestApplyExtractDeny:
-    """Verify the pipeline integration function."""
-
-    def test_filters_denied_paths(self) -> None:
-        from imas_codex.standard_names.sources.dd import _apply_extract_deny
-
-        rows = [
-            {
-                "path": "equilibrium/time_slice/constraints/flux_loop/exact",
-                "description": "flag",
-            },
-            {
-                "path": "core_profiles/profiles_1d/electrons/temperature",
-                "description": "Te",
-            },
-            {
-                "path": "pf_active/coil/element/geometry/oblique/alpha",
-                "description": "angle",
-            },
-        ]
-        kept = _apply_extract_deny(rows, write_skipped=False)
-        paths = [r["path"] for r in kept]
-        assert len(kept) == 1
-        assert "core_profiles/profiles_1d/electrons/temperature" in paths
-
-    def test_empty_input(self) -> None:
-        from imas_codex.standard_names.sources.dd import _apply_extract_deny
-
-        assert _apply_extract_deny([], write_skipped=False) == []
-
-    def test_all_kept_when_no_matches(self) -> None:
-        from imas_codex.standard_names.sources.dd import _apply_extract_deny
-
-        rows = [
-            {"path": "equilibrium/time_slice/profiles_1d/psi", "description": "psi"},
-            {
-                "path": "core_profiles/profiles_1d/electrons/density",
-                "description": "ne",
-            },
-        ]
-        kept = _apply_extract_deny(rows, write_skipped=False)
-        assert len(kept) == 2
+# TestApplyExtractDeny removed — _apply_extract_deny was consolidated into
+# dd_qualifier.qualify_dd(). See tests/standard_names/test_dd_qualifier.py
+# for deny-rule integration coverage.

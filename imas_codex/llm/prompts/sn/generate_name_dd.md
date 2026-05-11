@@ -84,6 +84,39 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_component_of_halo_energy` | **W38-A2 suffix-form for component** — component / transformation / reducer tokens come BEFORE the base via `<modifier>_of_<base>`. Compare ★0.95 `parallel_component_of_fast_electron_pressure` |
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_component_of_direction_unit_vector` | **W38-A3 compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
 
+## Hardware & Diagnostic Geometry — Specificity Required
+
+Many DD paths describe hardware geometry (coil cross-sections, detector outlines,
+aperture positions). These CAN yield valid standard names, but ONLY when the name
+is **tokamak-universal** — meaningful across different fusion devices.
+
+**The rule:** geometry names must include enough context to identify WHAT hardware
+component is being described. Generic geometric primitives alone are useless.
+
+| ❌ Too generic (SKIP these) | ✅ Specific enough | Why |
+|-----------------------------|-------------------|-----|
+| `radius_of_annulus` | `inner_radius_of_poloidal_field_coil_cross_section` | Names which annular geometry |
+| `alpha_of_oblique` | `oblique_angle_of_poloidal_field_coil_element` | Names the engineering context |
+| `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
+| `height_of_rectangle` | `height_of_poloidal_field_coil_cross_section` | Rectangle alone is meaningless |
+| `outline_r` | `radial_coordinate_of_detector_outline` | Names what the outline belongs to |
+| `first_point_r` | `radial_position_of_line_of_sight_first_point` | Full geometric context |
+
+**When to SKIP geometry paths entirely:**
+
+- The DD path describes a generic geometric primitive with no physics or engineering context
+  (e.g., `*/geometry/arcs_of_circle/radius` — "radius of arc of circle" is a math concept, not a tokamak quantity)
+- The quantity is purely local to one specific machine design and has no cross-device meaning
+- The path describes coordinate bookkeeping (index arrays, grid connectivity)
+
+**When to NAME geometry paths:**
+
+- The quantity describes a recognizable hardware component that exists across tokamaks
+  (coil centroids, detector positions, antenna dimensions, wall coordinates)
+- The name includes the hardware context: `_of_poloidal_field_coil`, `_of_detector_aperture`,
+  `_of_antenna_strap`, `_of_first_wall`
+- Multiple tokamaks would use the same term for the same concept
+
 ## Segment Routing — Common Confusions
 
 The following tokens are frequently misrouted to the wrong grammar segment.
