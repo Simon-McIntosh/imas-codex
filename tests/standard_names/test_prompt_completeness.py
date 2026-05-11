@@ -166,13 +166,14 @@ class TestStaleGuidanceStripped:
     """The legacy 'physical_base is OPEN — no decomposition' wording must be gone."""
 
     def test_review_names_no_stale_open_section(self):
-        """``review_names.md`` no longer has the stale 'OPEN vocabulary' header."""
+        """``review_names.md`` must not contain stale 'OPEN vocabulary' claims."""
         from imas_codex.llm.prompt_loader import PROMPTS_DIR
 
         text = (PROMPTS_DIR / "sn" / "review_names.md").read_text(encoding="utf-8")
         assert "## `physical_base` is OPEN vocabulary" not in text
-        # New replacement section must be present
-        assert "SINGLE open grammar segment" in text
+        assert "SINGLE open grammar segment" not in text
+        # New token vocabulary section must be present
+        assert "Token vocabulary" in text
 
     def test_l6_retry_no_open_vocab_phrasing(self):
         """L6 grammar-retry helper no longer claims physical_base is open."""

@@ -15,31 +15,27 @@ Do **not** penalise entries for missing or terse `description`/`documentation`. 
 
 {% include "sn/_exemplars.md" %}
 
-## `physical_base` is the SINGLE open grammar segment — every OTHER segment is closed
+## Token vocabulary
 
-`physical_base` is the only open segment of the grammar. New `physical_base`
-tokens are tracked automatically as VocabGap entries for ISN review — a
-well-formed novel `physical_base` token is **not** a grammar defect on its
-own. Dock grammar points only when the token is malformed (mixed casing,
-digits, unparseable).
+Every segment has a defined token list. A name that uses an unregistered
+token (e.g. `bounce_height`, `detector_sensitivity`, `townsend_position`) is
+a grammar defect — dock grammar and completeness points. The correct action
+is a `vocab_gap` report, not a novel token.
 
-**Critical:** because `physical_base` is open, the dominant failure mode is
-LLMs **absorbing closed-vocabulary tokens into `physical_base`** rather than
-placing them in their correct closed segment (e.g. `toroidal_torque` instead
-of decomposing as `component=toroidal` + `physical_base=torque`). Apply the
-**[I4.6] Decomposition audit** below aggressively — this is the single
-highest-leverage check in the rubric.
+**Critical:** the dominant failure mode is LLMs **absorbing registered tokens
+into `physical_base`** rather than placing them in their correct segment
+(e.g. `toroidal_torque` instead of decomposing as `component=toroidal` +
+`physical_base=torque`). Apply the **[I4.6] Decomposition audit** below
+aggressively — this is the single highest-leverage check in the rubric.
 
 Compound `physical_base` tokens like `poloidal_flux`, `minor_radius`,
 `cross_sectional_area`, `safety_factor`, `polarization_angle`,
 `internal_inductance` are valid lexicalised atomic physics terms; treat them
-as single entries even if a substring resembles a closed-vocab token.
+as single entries even if a substring resembles a registered token.
 
-All OTHER segments (subject, component, position, coordinate, geometry,
-device, region, process, transformation, geometric_base) remain CLOSED. Flag
-`vocab_gap` and dock points whenever those segments would require an
+Flag `vocab_gap` and dock points whenever any segment would require an
 unregistered token, and **never** allow such tokens to migrate into
-`physical_base` to "escape" the closed registry.
+`physical_base` to bypass the registry.
 
 ## Scoring Dimensions
 
@@ -53,9 +49,9 @@ grammar and convention scores.
 **0**: Would fail ISN grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), or prefix/postfix operator confusion. (Note: novel but well-formed `physical_base` tokens are tracked as VocabGaps and are NOT a grammar defect.)
 **20**: Perfect 5-group IR decomposition with correct operator form and in-vocabulary base.
 
-- Is the `physical_base` token well-formed? (Open vocabulary — novel
-  but well-formed tokens are not defects; only malformed ones are.)
-- For all OTHER segments, is the token in its closed registry?
+- Is the `physical_base` token in the registry? (Novel but well-formed
+  tokens are tracked as VocabGaps — not grammar defects, but dock completeness.)
+- For all segments, is the token in its registry?
 - Are prefix operators written with explicit `_of_` scope marker?
 - Are postfix operators (`_magnitude`, `_real_part`, etc.) correctly appended (not prefix `_of_` form)?
 - Is locus correctly expressed with `_of_`/`_at_`/`_over_` prepositions?

@@ -1530,9 +1530,8 @@ async def _grammar_retry(
         f"  {parse_error}\n\n"
         "Revise ONLY the name to pass the grammar round-trip. Rules:\n"
         "- Pattern: [subject_][physical_base|geometric_base][_component][_position][_process][_object]\n"
-        "- physical_base is the ONLY open grammar slot; every other segment\n"
-        "  (subject, component, coordinate, geometry, position, device, region,\n"
-        "  process, transformation, geometric_base) is CLOSED.\n"
+        "- ALL segments are CLOSED including physical_base (80 registered tokens).\n"
+        "  Only use tokens from the registries. If no token fits, emit a vocab_gap.\n"
         "- Closed-vocabulary tokens (e.g. toroidal, parallel, thermal,\n"
         "  e_cross_b_drift, normalized, fast_ion, volume_averaged) MUST be\n"
         "  placed in their closed segment slot. Never absorb them into\n"
@@ -1787,13 +1786,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         wlog.debug("NC rules YAML not found — skipping injection")
         context["composition_rules"] = []
 
-    from imas_codex.settings import get_compose_lean
-
-    compose_lean = get_compose_lean()
-    _generate_name_system_template = (
-        "sn/generate_name_system_lean" if compose_lean else "sn/generate_name_system"
-    )
-    system_prompt = render_prompt(_generate_name_system_template, context)
+    system_prompt = render_prompt("sn/generate_name_system", context)
 
     wlog.info(
         "Composing standard names for %d items in %d batches (model=%s)",
@@ -1903,9 +1896,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             "items": batch.items,
             "ids_name": batch.group_key,
             "ids_contexts": ids_contexts,
-            "existing_names": sorted(batch.existing_names)[
-                : 50 if compose_lean else 200
-            ],
+            "existing_names": sorted(batch.existing_names)[:200],
             "cluster_context": batch.context,
             "nearby_existing_names": nearby,
             "reference_exemplars": reference_exemplars,
@@ -3253,7 +3244,7 @@ async def compose_batch(
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_compose_lean, get_model
+    from imas_codex.settings import get_model
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import StandardNameComposeBatch
@@ -3263,7 +3254,6 @@ async def compose_batch(
 
     model = get_model("sn-run")
     context = build_compose_context()
-    compose_lean = get_compose_lean()
 
     # ── H5: batch-scope domain context ─────────────────────────────────
     def _scalar_domain(d: object) -> str | None:
@@ -3313,10 +3303,7 @@ async def compose_batch(
     context["compose_scored_examples"] = compose_scored_examples
 
     # ── System prompt (cached per pool lifetime) ───────────────────────
-    _generate_name_system_template = (
-        "sn/generate_name_system_lean" if compose_lean else "sn/generate_name_system"
-    )
-    system_prompt = render_prompt(_generate_name_system_template, context)
+    system_prompt = render_prompt("sn/generate_name_system", context)
 
     # ── Enrich items with DD context ───────────────────────────────────
     def _enrich():
@@ -3407,7 +3394,7 @@ async def compose_batch(
             existing_names_set.update(cluster_names)
     except Exception:
         logger.debug("Cluster-aware existing_names lookup failed", exc_info=True)
-    existing_names = sorted(existing_names_set)[: 50 if compose_lean else 200]
+    existing_names = sorted(existing_names_set)[:200]
 
     # ── Render user prompt ─────────────────────────────────────────────
     user_context = {

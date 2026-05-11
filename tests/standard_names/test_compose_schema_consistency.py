@@ -79,14 +79,3 @@ class TestCandidateSchemaMatchesPromptSpec:
             f"  In prompt but not model: {prompt_fields - self.model_fields}\n"
             f"  In model but not prompt: {self.model_fields - prompt_fields}"
         )
-
-    def test_lean_prompt_also_matches(self) -> None:
-        """Lean prompt schema must also match the model."""
-        lean_path = PROMPTS_DIR / "sn" / "generate_name_system_lean.md"
-        lean_raw = lean_path.read_text(encoding="utf-8")
-        prompt_fields = _extract_candidate_schema_fields(lean_raw)
-        assert prompt_fields == self.model_fields, (
-            f"Lean prompt schema drift!\n"
-            f"  In prompt but not model: {prompt_fields - self.model_fields}\n"
-            f"  In model but not prompt: {self.model_fields - prompt_fields}"
-        )

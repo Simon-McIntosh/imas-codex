@@ -69,7 +69,7 @@ class TestHardPreEmitChecksPresence:
         assert "post_crash_" in self.raw
 
     def test_check_5_invented_bases(self) -> None:
-        assert "physical_base" in self.raw and "open" in self.raw.lower()
+        assert "physical_base" in self.raw and "closed" in self.raw.lower()
 
     def test_check_6_abbreviations(self) -> None:
         assert "No abbreviations, acronyms, or alphanumerics" in self.raw

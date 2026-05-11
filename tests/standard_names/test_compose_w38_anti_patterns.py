@@ -2,8 +2,8 @@
 
 Verifies that the three W38 anti-patterns (instrument prefix carry-over,
 suffix-form for component, compound hardware identifiers) are present in
-both the system prompts (generate_name_system.md, generate_name_system_lean.md) and
-the user prompts (generate_name_dd.md, generate_name_dd_names.md).
+the system prompt (generate_name_system.md) and the user prompts
+(generate_name_dd.md, generate_name_dd_names.md).
 
 These are content/structural assertions — they do not call the LLM.
 """
@@ -33,9 +33,7 @@ W38_GOOD_EXAMPLES = (
 W38_HARDWARE_PROPERTY_EXEMPLAR = "cross_sectional_area_of_rogowski_coil"
 
 
-@pytest.mark.parametrize(
-    "filename", ["generate_name_system.md", "generate_name_system_lean.md"]
-)
+@pytest.mark.parametrize("filename", ["generate_name_system.md"])
 class TestSystemPromptW38Gallery:
     """The W38 anti-pattern entries must appear in both system prompts."""
 
@@ -137,9 +135,3 @@ class TestSystemPromptRendersWithDefaultContext:
             assert bad in rendered
         for good in W38_GOOD_EXAMPLES:
             assert good in rendered
-
-    def test_compose_system_lean_renders(self, context: dict) -> None:
-        rendered = render_prompt("sn/generate_name_system_lean", context)
-        assert "W38 ANTI-PATTERN GALLERY" in rendered
-        for bad in W38_BAD_EXAMPLES:
-            assert bad in rendered

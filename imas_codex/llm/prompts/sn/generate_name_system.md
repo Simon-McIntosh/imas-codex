@@ -49,10 +49,9 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
    forbidden: `initial_`, `launched_`, `post_crash_`, `prefill_`,
    `reconstructed_` (already in REJECT), `measured_` (already in REJECT).
    Standard names describe what is measured, not when or how.
-5. **`physical_base` is the only open segment.** Any lowercase snake_case
-   token is valid as a `physical_base` if the name round-trips through
-   `parse → compose`. All OTHER segments are closed — never invent tokens
-   for them. If a needed closed-vocab token is missing, emit `vocab_gap`.
+5. **Use only registered tokens.** Every segment has a defined token list
+   (see Token Registry below). If no registered token fits, emit a
+   `vocab_gap` — do NOT invent novel tokens.
 6. **No abbreviations, acronyms, or alphanumerics.** Names must be
    spelled-out English words joined by `_`. Reject any candidate containing
    digits (`3db`, `20_80`), acronyms (`mse`, `sol`, `nbi`), or truncated
@@ -199,9 +198,10 @@ For χ² weights and Maxwellian-pressure definitions:
 The ISN grammar uses a 5-group IR (operators, projection, qualifiers, base, locus/mechanism).
 Your name must render from this IR. Key composition rules:
 
-- **`physical_base` is the only open-vocabulary segment** — any lowercase snake_case
-  token is valid if the name round-trips. If an existing registered base fits, prefer it.
-  If no registered base fits, emit a `vocab_gap` to flag the novel token for ISN review.
+- **Use only registered tokens** — every segment has a defined token list.
+  If no token fits, emit a `vocab_gap`. Do NOT invent compounds like
+  `bounce_height` or `detector_sensitivity` — these are not registered and
+  will be rejected.
 - **Operators require explicit `_of_` scope**: `time_derivative_of_X`, `gradient_of_X`,
   `volume_averaged_of_X`. Never bare-concatenate a prefix operator to the base.
 - **Postfix operators concatenate directly**: `X_magnitude`, `X_amplitude`.
@@ -334,10 +334,10 @@ concept; drop intermediate hardware tokens.
   `winding_number`, `electrode_voltage`).
 
 {% if decomposition_anti_patterns %}
-### W2 DECOMPOSITION-FAILURE GALLERY — closed-vocab tokens absorbed into `physical_base`
+### W2 DECOMPOSITION-FAILURE GALLERY — registered tokens absorbed into `physical_base`
 
 These are real names from the W0 reviewer corpus where the dominant failure
-mode (closed-vocab tokens absorbed into `physical_base` instead of placed in
+mode (registered tokens absorbed into `physical_base` instead of placed in
 their correct grammar slot) was flagged.  Each entry shows the bad name, the verbatim
 expert critique, the correct slot for each absorbed token, and the rewritten
 canonical name.  Apply the **Decomposition Checklist** in
@@ -548,7 +548,7 @@ is provided as context for your naming decisions.
 1. Every name must have a `physical_base` (any snake_case token that round-trips) or a `geometric_base` for geometry carriers — never both
 2. Follow the canonical 5-group pattern: `[operators] [projection] [qualifiers] base [locus] [mechanism]`
 3. Prefix operators require explicit `_of_` scope; postfix operators concatenate directly
-4. `physical_base` is open vocabulary — prefer registered tokens when they fit. All OTHER segments are closed — if a needed closed-vocab token is missing, report as `vocab_gap`
+4. Use only registered tokens for every segment including `physical_base`. If no registered token fits, report as `vocab_gap`
 5. **Reuse existing standard names** when the DD path measures the same quantity — use `attachments` (see Output Format) to link the path to the existing name without regeneration. This avoids unnecessary token usage and preserves already-concrete names.
 6. Skip paths that are: array indices, metadata/timestamps, structural containers, coordinate grids (rho_tor_norm, psi, etc.)
 7. **Do NOT output a `unit` field** — unit is provided as authoritative context from the DD and will be injected at persistence time

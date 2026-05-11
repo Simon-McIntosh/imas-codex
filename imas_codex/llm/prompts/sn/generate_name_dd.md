@@ -370,8 +370,8 @@ component, basis, position, reducer, reference, statistic
 - `minor_radius_of_plasma_boundary` →
   `{"physical_base": "minor_radius", "position": "plasma_boundary"}`
 - `distance_between_plasma_boundary_and_closest_wall_point` →
-  `{"physical_base": "distance_between_plasma_boundary_and_closest_wall_point"}`
-  (open-vocabulary compound; whole name is the physical_base.)
+  Emit a `vocab_gap` — this compound is not in the `physical_base` registry.
+  Consider using `gap` (registered) with appropriate position qualifiers instead.
 
 If you cannot decompose the name, the name is wrong — revise it rather than
 emit an empty `grammar_fields`.

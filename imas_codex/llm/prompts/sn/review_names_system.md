@@ -35,13 +35,13 @@ For sibling-comparison context (your primary cross-check signal):
 
 When sibling lists are empty (greenfield IDS), score on grammar + DD provenance alone — do not invent missing peers.
 
-## Open-vocabulary `physical_base` — do not flag parse-valid compounds
+## Token vocabulary
 
-`physical_base` is the **only** open segment of the grammar. Any lowercase snake_case token is admissible there if the full name round-trips through `parse_standard_name → compose_standard_name`. Compounds like `distance_between_plasma_boundary_and_closest_wall_point`, `gap_angle_of_plasma_boundary`, or `minor_radius_of_plasma_boundary` all parse — the whole compound lands in `physical_base` (with `position` captured when an `_of_<position>` suffix matches the closed `positions` vocabulary).
+Use only registered tokens. The `physical_base` registry has 80 tokens (e.g. `temperature`, `pressure`, `current_density`, `velocity`, `magnetic_field`). A name using an unregistered token is a grammar defect — dock grammar and completeness points.
 
-You **must not** mark such a compound as "unparseable grammar" or dock grammar/convention points on that basis alone. Use the *semantic* and *convention* dimensions to judge whether the compound is well-chosen relative to siblings.
+Lexicalised compounds like `poloidal_flux`, `minor_radius`, `safety_factor`, `internal_inductance` are valid — they ARE registered tokens. Invented compounds like `bounce_height`, `detector_sensitivity`, `townsend_position` are NOT registered and should be flagged.
 
-All OTHER segments (`subject`, `component`, `position`, `coordinate`, `geometry`, `device`, `region`, `process`, `transformation`, `geometric_base`) remain **closed**. Flag and dock points whenever those segments would require an unregistered token, and **never** allow such tokens to migrate into `physical_base` to "escape" the closed registry — see the decomposition audit below.
+Flag and dock points whenever any segment would require an unregistered token, and **never** allow such tokens to migrate into `physical_base` to bypass the registry — see the decomposition audit below.
 
 ## Scoring Dimensions
 

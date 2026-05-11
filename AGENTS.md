@@ -704,6 +704,47 @@ pre-filtering requires properties registered as additional vector index properti
 
 **Token cost:** Always project specific properties in Cypher (`RETURN n.id, n.name`), never return full nodes. Use Cypher aggregations instead of Python post-processing.
 
+### LLM Cost Queries
+
+**CRITICAL: The cost field is `llm_cost`, NOT `cost`.** No node in the graph has a plain `cost` property. All LLM cost tracking uses the `LLMOperation` mixin which prefixes every field with `llm_`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `llm_cost` | float | Cost in USD |
+| `llm_model` | string | Model identifier |
+| `llm_service` | string | Service tag (e.g. `standard-names`) |
+| `llm_tokens_in` | integer | Input tokens |
+| `llm_tokens_out` | integer | Output tokens |
+| `llm_tokens_cached_read` | integer | Prompt cache hits |
+
+**Canonical cost queries:**
+
+```cypher
+-- Total LLM spend
+MATCH (c:LLMCost) RETURN round(sum(c.llm_cost)*100)/100 AS total_usd
+
+-- Cost breakdown by pipeline pool
+MATCH (c:LLMCost)
+RETURN c.pool AS pool, count(c) AS calls,
+       round(sum(c.llm_cost)*100)/100 AS cost_usd
+ORDER BY cost_usd DESC
+
+-- Cost breakdown by model
+MATCH (c:LLMCost)
+RETURN c.llm_model AS model, count(c) AS calls,
+       round(sum(c.llm_cost)*100)/100 AS cost_usd
+ORDER BY cost_usd DESC
+
+-- SNRun budget tracking (uses cost_spent, not llm_cost)
+MATCH (r:SNRun)
+RETURN r.cost_spent AS spent, r.cost_limit AS budget, r.stop_reason
+ORDER BY r.started_at DESC LIMIT 1
+```
+
+**Other cost-related fields on `SNRun`:** `cost_spent` (actual USD spent), `cost_limit` (budget cap), `cost_total` (total including overhead). These are aggregates — `llm_cost` on `LLMCost` nodes are the per-call source of truth.
+
+**Embedding costs are always zero** — the embedding server runs locally. Only LLM API calls via OpenRouter incur cost.
+
 ### Batch Operations
 
 Use `UNWIND` for batch graph writes:
@@ -1173,20 +1214,18 @@ sn export → sn preview → sn release -m "msg" → GitHub Pages / PR review �
 The grammar-segment filters (`physical_base`, `subject`, …) on
 `search_standard_names` filter the result set by exact match against the
 parsed `sn.<segment>` property. Use `list_grammar_vocabulary` to discover
-valid tokens before filtering — especially for the open `physical_base`
-slot, where the vocabulary is not a closed enum. The `physics_domain`
+valid tokens before filtering. Use `list_grammar_vocabulary` to discover
+valid tokens for any segment. The `physics_domain`
 filter (canonical scalar + `source_domains` list) is pushed into Cypher
 in all three search branches (segment-filter, vector, keyword) so it does
 not lose results below `LIMIT $k`.
 
-**Open vs closed grammar segments.** Only `physical_base` is
-open-vocabulary by design (the ISN v0.7 `SEGMENT_TOKEN_MAP` exposes an
-empty token tuple for it). All other segments are closed against the
-ISN token lists. VocabGap reports on open segments and on the pseudo
-`grammar_ambiguity` segment are filtered out at write time
-(`imas_codex.standard_names.segments.filter_closed_segment_gaps`).
-Reviewers audit the `physical_base` slot separately via the
-decomposition rule (see `sn_review_criteria.yaml` I4.6).
+**All grammar segments are closed.** All segments including `physical_base`
+(80 tokens) have a closed vocabulary defined in ISN's `SEGMENT_TOKEN_MAP`.
+VocabGap reports on pseudo segments like `grammar_ambiguity` are filtered
+out at write time (`imas_codex.standard_names.segments.filter_closed_segment_gaps`).
+Reviewers audit the `physical_base` slot via the decomposition rule
+(see `sn_review_criteria.yaml` I4.6).
 
 ### Schema
 

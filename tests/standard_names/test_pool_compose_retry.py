@@ -123,7 +123,6 @@ def _patch_compose_deps():
             "imas_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.settings.get_compose_lean", return_value=False),
         patch("imas_codex.settings.get_model", return_value="test-model"),
         # Prompt rendering
         patch(

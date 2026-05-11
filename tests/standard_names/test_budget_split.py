@@ -1,11 +1,10 @@
-"""Tests for Phase-B budget-split rebalancing and per-phase hard caps.
+"""Tests for budget-split and per-phase hard caps.
 
 Covers:
-  - TURN_SPLIT_LEGACY and TURN_SPLIT_LEAN constant values
-  - TurnConfig.compose_lean flag activates the correct split
+  - TURN_SPLIT constant values
   - BudgetManager per-phase cap rejects over-budget reservations
   - Per-phase caps are independent (compose cap does not block review)
-  - Both split tuples sum exactly to 1.0
+  - Split tuple sums exactly to 1.0
 """
 
 from __future__ import annotations
@@ -14,8 +13,7 @@ import pytest
 
 from imas_codex.standard_names.budget import BudgetManager
 from imas_codex.standard_names.turn import (
-    TURN_SPLIT_LEAN,
-    TURN_SPLIT_LEGACY,
+    TURN_SPLIT,
     TurnConfig,
 )
 
@@ -23,40 +21,20 @@ from imas_codex.standard_names.turn import (
 
 
 def test_split_sum_invariant():
-    """Both legacy and lean splits must sum to exactly 1.0."""
-    assert abs(sum(TURN_SPLIT_LEGACY) - 1.0) < 1e-9, (
-        f"TURN_SPLIT_LEGACY sums to {sum(TURN_SPLIT_LEGACY)}, expected 1.0"
-    )
-    assert abs(sum(TURN_SPLIT_LEAN) - 1.0) < 1e-9, (
-        f"TURN_SPLIT_LEAN sums to {sum(TURN_SPLIT_LEAN)}, expected 1.0"
+    """Split must sum to exactly 1.0."""
+    assert abs(sum(TURN_SPLIT) - 1.0) < 1e-9, (
+        f"TURN_SPLIT sums to {sum(TURN_SPLIT)}, expected 1.0"
     )
 
 
-# ── TurnConfig.compose_lean flag ─────────────────────────────────────────────
+# ── TurnConfig default ──────────────────────────────────────────────────────
 
 
-def test_legacy_split_unchanged():
-    """compose_lean=False (default) preserves the legacy 30/25/15/15/15 split."""
-    cfg = TurnConfig(domain="magnetics", compose_lean=False)
-    assert cfg.split == TURN_SPLIT_LEGACY
+def test_default_split():
+    """TurnConfig default uses the 30/25/15/15/15 split."""
+    cfg = TurnConfig(domain="magnetics")
+    assert cfg.split == TURN_SPLIT
     assert cfg.split == (0.30, 0.25, 0.15, 0.15, 0.15)
-
-
-def test_lean_split_review_60pct():
-    """compose_lean=True activates the lean split where review phases get 60%."""
-    cfg = TurnConfig(domain="magnetics", compose_lean=True)
-    assert cfg.split == TURN_SPLIT_LEAN
-    # review_names (index 2) + review_docs (index 3) must total 60%
-    names_plus_docs = cfg.split[2] + cfg.split[3]
-    assert abs(names_plus_docs - 0.60) < 1e-9, (
-        f"review_names + review_docs = {names_plus_docs:.4f}, expected 0.60"
-    )
-
-
-def test_default_is_legacy():
-    """TurnConfig default (no compose_lean kwarg) must use the legacy split."""
-    cfg = TurnConfig(domain="equilibrium")
-    assert cfg.split == TURN_SPLIT_LEGACY
 
 
 # ── BudgetManager per-phase caps ─────────────────────────────────────────────

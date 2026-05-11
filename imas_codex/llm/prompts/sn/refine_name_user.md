@@ -102,13 +102,13 @@ _(no prior refinement history — this is the first refine attempt)_
 
 ## ⚠️ Vocabulary Gap — Previous attempt rejected
 
-The previous name was rejected because it used a token not in the closed vocabulary:
+The previous name was rejected because it used a token not in the registered vocabulary:
 
 - **Segment:** {{ vocab_gap_detail.segment }}
 - **Needed token:** `{{ vocab_gap_detail.needed_token }}`
 - **Reason:** {{ vocab_gap_detail.reason }}
 
-**Fix:** Route this concept to the correct grammar segment. Check the segment routing table in the system prompt. If the concept genuinely belongs in `physical_base` (open vocabulary), compose it as a compound there.
+**Fix:** Route this concept to the correct grammar segment. Check the segment routing table in the system prompt. If no registered token fits, emit a `vocab_gap`.
 {% endif %}
 {% if validation_issues %}
 
