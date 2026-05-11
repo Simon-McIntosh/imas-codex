@@ -50,7 +50,7 @@ Rate each dimension from 0 to 20. The total score is the sum (0–80).
 If ISN validation issues are present, judge whether each is a real defect or false positive; cite the issue when you dock points.
 
 ### 1. Grammar Correctness (0–20)
-**Round-trip + decomposition audit.** Open-vocab compound `physical_base` is **not** a defect if it parses.
+**Round-trip + decomposition audit.** A compound `physical_base` that is not in the closed registry is a grammar defect — the composer should have emitted a `vocab_gap`.
 
 - Does the name round-trip: `parse(name) → compose() == name`?
 - For all closed segments, is the token in its registry?

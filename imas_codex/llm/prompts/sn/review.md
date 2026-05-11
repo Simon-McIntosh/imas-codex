@@ -13,13 +13,6 @@ You are a quality reviewer for IMAS standard name entries in fusion plasma physi
 
 {% include "sn/_exemplars.md" %}
 
-## Closed `physical_base` Vocabulary
-
-`physical_base` is a **closed vocabulary** (~80 tokens). If a candidate name
-uses a `physical_base` token not in the registry, it is a grammar defect —
-the composer should have flagged it as a `vocab_gap`. Penalise unknown base
-tokens in the grammar dimension. Do NOT treat the base as open-vocabulary.
-
 ## Scoring Dimensions
 
 Rate each dimension from 0 to 20. The total score is the sum (0-120).
