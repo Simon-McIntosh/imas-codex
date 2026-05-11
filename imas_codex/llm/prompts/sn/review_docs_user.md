@@ -20,6 +20,14 @@ Apply the rubric (provided in the system prompt) to the candidate below.
 {% endif %}
 {% if item.physics_domain %}- **Physics domain**: {{ item.physics_domain }}
 {% endif %}
+{% if item.dd_clusters %}- **Semantic clusters:**
+{% for cl in item.dd_clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+{% if item.dd_version_history %}- **DD version history:**
+{% for vh in item.dd_version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
+{% if item.dd_keywords %}- **Keywords:** {{ item.dd_keywords | join(', ') }}
+{% endif %}
 - **Description**: {{ item.description | default('(missing)', true) }}
 - **Documentation**:
 

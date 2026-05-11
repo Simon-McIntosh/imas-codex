@@ -4144,6 +4144,17 @@ async def process_refine_name_batch(
             except Exception:
                 logger.debug("Hybrid neighbour search failed for %s", sn_id)
 
+            # ── DD path context (keywords, clusters, version history) ─
+            if path:
+                try:
+                    _enrich_dd_path_context(gc, item, path)
+                except Exception:
+                    logger.debug(
+                        "refine_name: dd_path_context failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
+
             # ── Fan-out trigger gate (plan 39 §5.1) ──────────────────
             # Plumb reviewer_comments_per_dim_name from the claim batch
             # through the trigger predicate.  Gate on ALL of:
@@ -5027,6 +5038,30 @@ async def process_review_name_batch(
             )
             review_scored_examples = []
 
+        # ── DD path context for reviewer (keywords, clusters, version history) ─
+        _source_paths = item.get("source_paths") or []
+        if _source_paths:
+            _first_src = (
+                _source_paths[0] if isinstance(_source_paths, list) else _source_paths
+            )
+            if isinstance(_first_src, str):
+                _first_src = strip_dd_prefix(_first_src)
+            if _first_src:
+                try:
+                    from imas_codex.graph.client import GraphClient as _GCDD
+
+                    def _do_dd_ctx(_p=_first_src, _it=item) -> None:
+                        with _GCDD() as _gc:
+                            _enrich_dd_path_context(_gc, _it, _p)
+
+                    await _asyncio.to_thread(_do_dd_ctx)
+                except Exception:
+                    logger.debug(
+                        "review_name: dd_path_context failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
+
         prompt_context: dict[str, Any] = {
             "items": [item],
             **neighbours,
@@ -5186,6 +5221,27 @@ async def process_review_name_batch(
 # DD context enrichment for generate_docs
 # =============================================================================
 
+_DD_PATH_CONTEXT_QUERY = """
+MATCH (n:IMASNode {id: $path})
+OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
+WHERE c.scope IN ['global', 'domain']
+WITH n, collect(DISTINCT {
+    label: c.label, description: c.description, scope: c.scope
+})[0..3] AS clusters
+OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
+OPTIONAL MATCH (vc:IMASNodeChange)-[:FOR_IMAS_PATH]->(n)
+WHERE vc.change_type IN [
+    'path_added', 'cocos_transformation_type', 'sign_convention',
+    'units', 'path_renamed', 'definition_clarification'
+]
+WITH n, clusters, parent,
+     collect(DISTINCT {change_id: vc.id, change_type: vc.change_type}) AS changes
+RETURN n.keywords AS keywords,
+       parent.description AS parent_description,
+       clusters,
+       changes
+"""
+
 _DOCS_GEN_ENRICH_QUERY = """
 MATCH (sn:StandardName {id: $sn_id})
 OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(imas:IMASNode)
@@ -5212,6 +5268,71 @@ RETURN sn.id AS id,
        coalesce(u.id, sn.unit) AS unit
 LIMIT 20
 """
+
+
+def _enrich_dd_path_context(gc: Any, item: dict, source_path: str) -> None:
+    """Enrich an item dict with DD path context (keywords, clusters, version history).
+
+    Fetches lightweight context from the IMASNode for *source_path* and populates:
+
+    - ``dd_keywords``: list of keyword strings from the IMASNode.
+    - ``dd_clusters``: list of ``{label, description, scope}`` dicts.
+    - ``dd_version_history``: list of ``{version, change_type}`` dicts.
+    - ``dd_parent_description``: description of the parent structure node.
+
+    Best-effort — failures are debug-logged and the item is left without
+    the missing key.  Modifies *item* in-place.
+    """
+    try:
+        rows = list(gc.query(_DD_PATH_CONTEXT_QUERY, path=source_path))
+    except Exception:
+        logger.debug(
+            "_enrich_dd_path_context: query failed for %s", source_path, exc_info=True
+        )
+        return
+    if not rows:
+        return
+    row = rows[0]
+
+    # Keywords
+    kw = row.get("keywords")
+    if kw:
+        if isinstance(kw, str):
+            kw = [k.strip() for k in kw.split(",") if k.strip()]
+        if kw:
+            item["dd_keywords"] = kw
+
+    # Parent description
+    parent_desc = row.get("parent_description")
+    if parent_desc:
+        item["dd_parent_description"] = parent_desc
+
+    # Clusters
+    clusters_raw = row.get("clusters") or []
+    clusters = [
+        {
+            "label": c["label"],
+            "description": c.get("description") or "",
+            "scope": c.get("scope") or "",
+        }
+        for c in clusters_raw
+        if c.get("label")
+    ]
+    if clusters:
+        item["dd_clusters"] = clusters
+
+    # Version history
+    changes = row.get("changes") or []
+    version_history = []
+    for ch in changes:
+        change_id = ch.get("change_id") or ""
+        change_type = ch.get("change_type") or ""
+        parts = change_id.rsplit(":", 1)
+        version = parts[-1] if len(parts) >= 2 else ""
+        if version and change_type:
+            version_history.append({"version": version, "change_type": change_type})
+    if version_history:
+        item["dd_version_history"] = version_history
 
 
 def _enrich_for_docs_gen(
@@ -5310,6 +5431,17 @@ def _enrich_for_docs_gen(
             except Exception:
                 logger.debug(
                     "_enrich_for_docs_gen: related_neighbours failed for %s",
+                    sn_id,
+                    exc_info=True,
+                )
+
+        # ── 2b. DD path context (keywords, clusters, version history) ─
+        if source_paths:
+            try:
+                _enrich_dd_path_context(gc, item, source_paths[0])
+            except Exception:
+                logger.debug(
+                    "_enrich_for_docs_gen: dd_path_context failed for %s",
                     sn_id,
                     exc_info=True,
                 )
@@ -5829,6 +5961,30 @@ async def process_review_docs_batch(
                 "review_docs: scored-example load failed for %s", sn_id, exc_info=True
             )
             review_scored_examples = []
+
+        # ── DD path context for docs reviewer ──────────────────────────
+        _source_paths = item.get("source_paths") or []
+        if _source_paths:
+            _first_src = (
+                _source_paths[0] if isinstance(_source_paths, list) else _source_paths
+            )
+            if isinstance(_first_src, str):
+                _first_src = strip_dd_prefix(_first_src)
+            if _first_src:
+                try:
+                    from imas_codex.graph.client import GraphClient as _GCDD
+
+                    def _do_dd_ctx(_p=_first_src, _it=item) -> None:
+                        with _GCDD() as _gc:
+                            _enrich_dd_path_context(_gc, _it, _p)
+
+                    await _asyncio.to_thread(_do_dd_ctx)
+                except Exception:
+                    logger.debug(
+                        "review_docs: dd_path_context failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
 
         prompt_context: dict[str, Any] = {
             "item": item,

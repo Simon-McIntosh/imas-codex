@@ -149,8 +149,34 @@ Use these for inline cross-references `[label](name:bare_id)` where naturally re
 
 Cross-domain related quantities sharing cluster membership, coordinates, or units.
 
-{% for r in item.related_neighbours %}- `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
+{% for r in item.related_neighbours %}- `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}{% if r.physics_domain %} [{{ r.physics_domain }}]{% endif %}{% if r.doc %}: {{ r.doc }}{% endif %}
 {% endfor %}{% endif %}
+
+{% if item.dd_clusters %}
+## Semantic Clusters
+
+{% for cl in item.dd_clusters %}- **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+
+{% if item.dd_version_history %}
+## DD Version History
+
+Notable changes to this path across Data Dictionary versions:
+
+{% for vh in item.dd_version_history %}- {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
+
+{% if item.dd_keywords %}
+## Keywords
+
+{{ item.dd_keywords | join(', ') }}
+{% endif %}
+
+{% if item.dd_parent_description %}
+## Parent Structure
+
+{{ item.dd_parent_description }}
+{% endif %}
 
 {% if nearby_existing_names %}
 ## Nearby Existing Names (same physics domain)

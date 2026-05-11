@@ -74,6 +74,14 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 
 {{ item.semantic_warning }}
 {% endif %}
+{% if item.dd_clusters %}
+- **Semantic clusters:**
+{% for cl in item.dd_clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+{% if item.dd_version_history %}
+- **DD version history:**
+{% for vh in item.dd_version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
 
 {% endfor %}
 

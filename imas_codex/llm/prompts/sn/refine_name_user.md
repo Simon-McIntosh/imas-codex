@@ -36,6 +36,26 @@ produce an improved name that materially addresses the reviewer's concerns.
 _(none available)_
 {% endif %}
 
+{% if item.dd_clusters %}
+## Semantic Clusters
+
+{% for cl in item.dd_clusters %}- **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}
+{% endif %}
+
+{% if item.dd_version_history %}
+## DD Version History
+
+{% for vh in item.dd_version_history %}- {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}
+{% endif %}
+
+{% if item.dd_keywords %}
+## Keywords
+
+{{ item.dd_keywords | join(', ') }}
+{% endif %}
+
 ---
 
 ## Refinement history (oldest first; chain length so far: {{ chain_length }})

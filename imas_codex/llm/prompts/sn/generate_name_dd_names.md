@@ -196,7 +196,7 @@ Use them as quality benchmarks for naming style and field usage:
 {% if item.lifecycle_status %}- **Lifecycle:** {{ item.lifecycle_status }} ⚠️{% endif %}
 {% if item.keywords %}- **Keywords:** {{ item.keywords | join(', ') if item.keywords is iterable and item.keywords is not string else item.keywords }}{% endif %}
 {% if item.cocos_label %}- **COCOS transformation type:** `{{ item.cocos_label }}` — include a brief sign-convention sentence in documentation.{% endif %}
-{% if item.parent_path %}- **Parent:** {{ item.parent_path }}{% if item.parent_description %} — {{ item.parent_description }}{% endif %}{% endif %}
+{% if item.parent_path %}- **Parent:** {{ item.parent_path }}{% endif %}
 {% if item.previous_name %}- **⟳ Previous generation:** `{{ item.previous_name.name }}`{% if item.previous_name.pipeline_status %} ({{ item.previous_name.pipeline_status }}){% endif %}{% endif %}
 {% if item.identifier_schema %}- **Identifier schema:** {{ item.identifier_schema }}{% if item.identifier_schema_doc %} — {{ item.identifier_schema_doc }}{% endif %}{% endif %}
 {% if item.identifier_values %}
@@ -213,22 +213,18 @@ Use them as quality benchmarks for naming style and field usage:
 {% endfor %}{% endif %}
 {% if item.hybrid_neighbours %}
 - **Hybrid-search neighbours** (physics-concept + structural cousins):
-{% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}{% if n.node_type %}, {{ n.node_type }}{% endif %}{% if n.lifecycle and n.lifecycle != 'active' %}, ⚠️{{ n.lifecycle }}{% endif %}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
+{% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
 {% endfor %}  → Reuse a name above when your source measures the same quantity.
 {% endif %}
 {% if item.related_neighbours %}
 - **Graph-relationship neighbours** (cluster / coordinate / unit / identifier / COCOS edges):
-{% for r in item.related_neighbours %}  - `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}{% if r.physics_domain %} [{{ r.physics_domain }}]{% endif %}{% if r.doc %}: {{ r.doc }}{% endif %}
+{% for r in item.related_neighbours %}  - `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
 {% endfor %}{% endif %}
 {% if item.error_fields %}
 - **DD error companions:**
 {% for ef in item.error_fields %}  - `{{ ef }}`
 {% endfor %}  → Error companions are minted deterministically — do NOT produce `*_uncertainty` variants. SKIP if this path IS an error field (`_error_upper`/`_error_lower`/`_error_index`).
 {% endif %}
-{% if item.version_history %}
-- **Version history** (notable DD changes — consider naming stability):
-{% for vh in item.version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
-{% endfor %}{% endif %}
 {% if item.sibling_fields %}
 - **Sibling fields** (same parent — for cross-reference):
 {% for sib in item.sibling_fields %}  - `{{ sib.path }}`: {{ sib.description or 'no description' }} ({{ sib.data_type or '?' }})
