@@ -1174,6 +1174,25 @@ async def run_sn_pools(
             recon_result,
         )
 
+        # ── B2b: Reconcile VocabGap nodes against current ISN vocab ───
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        vg_result = await asyncio.to_thread(reconcile_vocab_gaps)
+        if vg_result.get("checked", 0) > 0:
+            deleted = (
+                vg_result.get("deleted_false_positive", 0)
+                + vg_result.get("deleted_invalid_segment", 0)
+                + vg_result.get("deleted_open_segment", 0)
+            )
+            logger.info(
+                "run_sn_pools: VocabGap reconcile — %d checked, %d deleted, "
+                "%d reclassified, %d remaining",
+                vg_result.get("checked", 0),
+                deleted,
+                vg_result.get("reclassified", 0),
+                vg_result.get("remaining", 0),
+            )
+
         # ── B3: Domain extract (auto-seed) ────────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
         if scope_run_id:

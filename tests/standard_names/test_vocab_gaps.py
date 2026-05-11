@@ -141,14 +141,14 @@ class TestWriteVocabGaps:
         gaps = [
             {
                 "source_id": "path/a",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason A",
             },
             {
                 "source_id": "path/b",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason B",
             },
         ]
@@ -163,8 +163,8 @@ class TestWriteVocabGaps:
         gaps = [
             {
                 "source_id": "path/a",
-                "segment": "transformation",
-                "needed_token": "novel_transform_xyz",
+                "segment": "component",
+                "needed_token": "novel_component_xyz",
                 "reason": "reason A",
             },
             {
@@ -185,20 +185,20 @@ class TestWriteVocabGaps:
         gaps = [
             {
                 "source_id": "path/a",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason A",
             },
             {
                 "source_id": "path/b",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason B",
             },
             {
                 "source_id": "path/c",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason C",
             },
         ]
@@ -225,8 +225,8 @@ class TestWriteVocabGaps:
         gaps = [
             {
                 "source_id": "equilibrium/time_slice/profiles_1d/psi",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "needs derivative",
             }
         ]
@@ -281,14 +281,14 @@ class TestWriteVocabGaps:
         gaps = [
             {
                 "source_id": "path/a",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason for A",
             },
             {
                 "source_id": "path/b",
-                "segment": "transformation",
-                "needed_token": "derivative_of",
+                "segment": "process",
+                "needed_token": "novel_process_zzz",
                 "reason": "reason for B",
             },
         ]
@@ -691,7 +691,7 @@ class TestOpenSegmentFilter:
         assert is_open_segment("physical_base") is False
         assert is_open_segment("grammar_ambiguity") is True
         # Closed segments must not be flagged as open
-        assert is_open_segment("transformation") is False
+        assert is_open_segment("qualifier") is False
         assert is_open_segment("subject") is False
         assert is_open_segment("position") is False
         assert is_open_segment("component") is False
@@ -702,7 +702,7 @@ class TestOpenSegmentFilter:
         from imas_codex.standard_names.segments import filter_closed_segment_gaps
 
         gaps = [
-            {"source_id": "a", "segment": "transformation", "needed_token": "curl_of"},
+            {"source_id": "a", "segment": "component", "needed_token": "curl_of"},
             {
                 "source_id": "b",
                 "segment": "physical_base",
@@ -718,7 +718,7 @@ class TestOpenSegmentFilter:
         kept, dropped = filter_closed_segment_gaps(gaps)
         kept_segs = {g["segment"] for g in kept}
         drop_segs = {g["segment"] for g in dropped}
-        assert kept_segs == {"transformation", "subject", "physical_base"}
+        assert kept_segs == {"component", "subject", "physical_base"}
         assert drop_segs == {"grammar_ambiguity"}
 
     def test_write_vocab_gaps_skips_open_segments(self):
@@ -771,8 +771,8 @@ class TestOpenSegmentFilter:
             },
             {
                 "source_id": "path/b",
-                "segment": "transformation",  # closed — keep
-                "needed_token": "curl_of",
+                "segment": "component",  # closed — keep
+                "needed_token": "novel_component_zzz",
                 "reason": "real gap",
             },
         ]
@@ -792,7 +792,7 @@ class TestOpenSegmentFilter:
         batch = merge_calls[0][1]["batch"]
         assert len(batch) == 2
         batch_segs = {item["segment"] for item in batch}
-        assert batch_segs == {"physical_base", "transformation"}
+        assert batch_segs == {"physical_base", "component"}
 
 
 class TestLoadKnownPhysicalBases:
@@ -817,3 +817,273 @@ class TestLoadKnownPhysicalBases:
             f"expected physical_base token {token!r} missing from "
             f"_load_known_physical_bases() result ({len(bases)} tokens)"
         )
+
+
+# ---------------------------------------------------------------------------
+# ISN-backed segment classification and reconciliation
+# ---------------------------------------------------------------------------
+
+
+class TestKnownSegments:
+    """known_segments() returns ISN grammar segment names."""
+
+    def test_returns_frozenset(self):
+        from imas_codex.standard_names.segments import known_segments
+
+        segs = known_segments()
+        assert segs is not None, "ISN must be installed for tests"
+        assert isinstance(segs, frozenset)
+
+    def test_contains_core_segments(self):
+        from imas_codex.standard_names.segments import known_segments
+
+        segs = known_segments()
+        assert segs is not None
+        for expected in ("component", "coordinate", "subject", "process", "position"):
+            assert expected in segs, f"Missing segment {expected!r}"
+
+    def test_is_valid_segment_real(self):
+        from imas_codex.standard_names.segments import is_valid_segment
+
+        assert is_valid_segment("component") is True
+        assert is_valid_segment("position") is True
+        assert is_valid_segment("qualifier") is True
+
+    def test_is_valid_segment_pseudo(self):
+        from imas_codex.standard_names.segments import is_valid_segment
+
+        assert is_valid_segment("grammar_ambiguity") is True
+
+    def test_is_valid_segment_bogus(self):
+        from imas_codex.standard_names.segments import is_valid_segment
+
+        assert is_valid_segment("foobar_nonexistent") is False
+        assert is_valid_segment("transformation_xyz") is False
+
+    def test_is_valid_segment_none_empty(self):
+        from imas_codex.standard_names.segments import is_valid_segment
+
+        assert is_valid_segment(None) is False
+        assert is_valid_segment("") is False
+
+    def test_isn_unavailable_returns_true_conservatively(self):
+        """When ISN is not importable, is_valid_segment returns True."""
+        from imas_codex.standard_names.segments import is_valid_segment
+
+        with patch(
+            "imas_codex.standard_names.segments._load_segment_token_map",
+            return_value=None,
+        ):
+            # Clear caches
+            from imas_codex.standard_names.segments import known_segments
+
+            known_segments.cache_clear()
+            try:
+                assert is_valid_segment("anything") is True
+            finally:
+                known_segments.cache_clear()
+
+
+class TestClassifyGap:
+    """classify_gap() returns correct (category, actual_segments) tuples."""
+
+    def test_absent_token(self):
+        from imas_codex.standard_names.segments import classify_gap
+
+        cat, actual = classify_gap("position", "zzz_nonexistent_token_xyzzy")
+        assert cat == "absent"
+        assert actual == []
+
+    def test_false_positive(self):
+        """Token exists in the reported segment → false_positive."""
+        from imas_codex.standard_names.segments import classify_gap, is_known_token
+
+        # Find a token that exists in 'qualifier' segment
+        segs = is_known_token("maximum")
+        assert "qualifier" in segs, "maximum should be in qualifier"
+
+        cat, actual = classify_gap("qualifier", "maximum")
+        assert cat == "false_positive"
+        assert "qualifier" in actual
+
+    def test_wrong_slot_placement(self):
+        """Token exists in a different segment than reported."""
+        from imas_codex.standard_names.segments import classify_gap
+
+        # 'electron' is a subject token — report it as 'position' → wrong_slot
+        cat, actual = classify_gap("position", "electron")
+        assert cat == "wrong_slot_placement"
+        assert "subject" in actual
+
+    def test_invalid_segment(self):
+        from imas_codex.standard_names.segments import classify_gap
+
+        cat, actual = classify_gap("nonexistent_segment_xyz", "some_token")
+        assert cat == "invalid_segment"
+        assert actual == []
+
+    def test_open_segment(self):
+        from imas_codex.standard_names.segments import classify_gap, open_segments
+
+        open_segs = open_segments()
+        if not open_segs:
+            pytest.skip("No open segments in current ISN version")
+        seg = next(iter(open_segs))
+        cat, actual = classify_gap(seg, "any_token")
+        assert cat == "open_segment"
+
+
+class TestWriteVocabGapsInvalidSegment:
+    """write_vocab_gaps rejects gaps with invalid ISN segment names."""
+
+    def test_invalid_segment_skipped(self):
+        """Gaps with a bogus segment name should not be written."""
+        from imas_codex.standard_names.graph_ops import write_vocab_gaps
+
+        gaps = [
+            {
+                "segment": "foobar_nonexistent",
+                "needed_token": "test_token",
+                "source_id": "dd:equilibrium/test",
+                "reason": "test",
+            }
+        ]
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+            written = write_vocab_gaps(gaps, source_type="dd")
+            assert written == 0
+
+    def test_false_positive_skipped(self):
+        """Gaps where token exists in reported segment should be skipped."""
+        from imas_codex.standard_names.graph_ops import write_vocab_gaps
+
+        gaps = [
+            {
+                "segment": "qualifier",
+                "needed_token": "maximum",
+                "source_id": "dd:equilibrium/test",
+                "reason": "test",
+            }
+        ]
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+
+            written = write_vocab_gaps(gaps, source_type="dd")
+            assert written == 0
+
+
+class TestReconcileVocabGaps:
+    """reconcile_vocab_gaps() scrubs stale VocabGap nodes against ISN."""
+
+    def test_deletes_false_positive(self):
+        """Gap where token now exists in reported segment → deleted."""
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        fake_gaps = [
+            {
+                "id": "vocab_gap:qualifier:maximum",
+                "segment": "qualifier",
+                "token": "maximum",
+                "category": "absent",
+            }
+        ]
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+            mock_gc.query.side_effect = [
+                fake_gaps,  # SELECT all gaps
+                None,  # DELETE
+            ]
+
+            stats = reconcile_vocab_gaps()
+
+        assert stats["deleted_false_positive"] == 1
+        assert stats["remaining"] == 0
+
+    def test_preserves_genuine_absent_gap(self):
+        """Genuinely absent token → preserved."""
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        fake_gaps = [
+            {
+                "id": "vocab_gap:position:zzz_nonexistent_xyzzy",
+                "segment": "position",
+                "token": "zzz_nonexistent_xyzzy",
+                "category": "absent",
+            }
+        ]
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+            mock_gc.query.return_value = fake_gaps
+
+            stats = reconcile_vocab_gaps()
+
+        assert stats["remaining"] == 1
+        assert stats["deleted_false_positive"] == 0
+
+    def test_reclassifies_wrong_slot(self):
+        """Token that appeared in a different segment → reclassified."""
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        fake_gaps = [
+            {
+                "id": "vocab_gap:position:electron",
+                "segment": "position",
+                "token": "electron",
+                "category": "absent",  # was absent, should be wrong_slot
+            }
+        ]
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+            mock_gc.query.side_effect = [
+                fake_gaps,  # SELECT all gaps
+                None,  # UPDATE
+            ]
+
+            stats = reconcile_vocab_gaps()
+
+        assert stats["reclassified"] == 1
+        assert stats["remaining"] == 1
+
+    def test_isn_unavailable_skips(self):
+        """When ISN is unavailable, reconcile skips gracefully."""
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        with patch(
+            "imas_codex.standard_names.segments._load_segment_token_map",
+            return_value=None,
+        ):
+            from imas_codex.standard_names.segments import known_segments
+
+            known_segments.cache_clear()
+            try:
+                stats = reconcile_vocab_gaps()
+                assert stats.get("skipped") is True
+                assert stats["checked"] == 0
+            finally:
+                known_segments.cache_clear()
+
+    def test_empty_graph(self):
+        """No VocabGap nodes → quick return."""
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+            mock_gc.query.return_value = []
+
+            stats = reconcile_vocab_gaps()
+
+        assert stats["checked"] == 0
+        assert stats["remaining"] == 0

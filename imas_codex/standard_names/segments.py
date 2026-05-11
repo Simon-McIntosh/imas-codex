@@ -35,6 +35,52 @@ _FALLBACK_OPEN_SEGMENTS: frozenset[str] = frozenset()
 # "open" for VocabGap filtering purposes.
 PSEUDO_SEGMENTS: frozenset[str] = frozenset({"grammar_ambiguity"})
 
+# Sentinel indicating ISN is not available — distinct from an empty set.
+_ISN_UNAVAILABLE: frozenset[str] | None = None
+
+
+def _load_segment_token_map() -> dict[str, tuple[str, ...]] | None:
+    """Load the ISN SEGMENT_TOKEN_MAP, returning None if ISN is unavailable."""
+    try:
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+        return SEGMENT_TOKEN_MAP
+    except ImportError:
+        return None
+
+
+@lru_cache(maxsize=1)
+def known_segments() -> frozenset[str] | None:
+    """Return all valid ISN grammar segment names, or None if ISN unavailable.
+
+    Includes both open and closed segments.  Use ``is_valid_segment()`` for
+    per-segment checks.  Returns ``None`` when the ISN package cannot be
+    imported — callers must handle this case conservatively.
+    """
+    stm = _load_segment_token_map()
+    if stm is None:
+        return _ISN_UNAVAILABLE
+    try:
+        return frozenset(stm.keys())
+    except Exception:  # pragma: no cover — defensive
+        return _ISN_UNAVAILABLE
+
+
+def is_valid_segment(segment: str | None) -> bool:
+    """Return True if *segment* is a recognized ISN grammar or pseudo segment.
+
+    When ISN is unavailable, returns ``True`` conservatively so gaps are
+    preserved rather than silently dropped.
+    """
+    if not segment:
+        return False
+    if segment in PSEUDO_SEGMENTS:
+        return True
+    segs = known_segments()
+    if segs is None:
+        return True  # ISN unavailable — assume valid to avoid data loss
+    return segment in segs
+
 
 @lru_cache(maxsize=1)
 def open_segments() -> frozenset[str]:
@@ -48,13 +94,12 @@ def open_segments() -> frozenset[str]:
     Results are memoised across the process lifetime because
     ``SEGMENT_TOKEN_MAP`` is immutable and cheap-but-not-free to introspect.
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-    except ImportError:
+    stm = _load_segment_token_map()
+    if stm is None:
         return _FALLBACK_OPEN_SEGMENTS
 
     try:
-        return frozenset(seg for seg, tokens in SEGMENT_TOKEN_MAP.items() if not tokens)
+        return frozenset(seg for seg, tokens in stm.items() if not tokens)
     except Exception:  # pragma: no cover — defensive
         return _FALLBACK_OPEN_SEGMENTS
 
@@ -81,14 +126,13 @@ def _segment_token_index() -> dict[str, list[str]]:
     ``SEGMENT_TOKEN_MAP``) are indexed.  Open segments are excluded
     because every token is admissible there by definition.
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-    except ImportError:
+    stm = _load_segment_token_map()
+    if stm is None:
         return {}
 
     index: dict[str, list[str]] = {}
     try:
-        for seg, tokens in SEGMENT_TOKEN_MAP.items():
+        for seg, tokens in stm.items():
             if not tokens:
                 continue  # open-vocabulary segment
             for tok in tokens:
@@ -111,6 +155,38 @@ def is_known_token(token: str) -> list[str]:
     qualifier overlap).
     """
     return list(_segment_token_index().get(token, []))
+
+
+def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
+    """Classify a single vocabulary gap against the current ISN installation.
+
+    Returns ``(category, actual_segments)`` where:
+
+    - ``"false_positive"`` — token exists in the reported segment
+    - ``"invalid_segment"`` — reported segment is not in ISN grammar
+    - ``"open_segment"`` — reported segment has open vocabulary
+    - ``"wrong_slot_placement"`` — token exists in exactly one other segment
+    - ``"ambiguous_known_token"`` — token exists in multiple other segments
+    - ``"absent"`` — token is not in any closed segment (genuine gap)
+    """
+    if not is_valid_segment(segment):
+        return "invalid_segment", []
+
+    if is_open_segment(segment):
+        return "open_segment", []
+
+    segments_found = is_known_token(token)
+
+    if segment in segments_found:
+        return "false_positive", segments_found
+
+    if not segments_found:
+        return "absent", []
+
+    if len(segments_found) > 1:
+        return "ambiguous_known_token", segments_found
+
+    return "wrong_slot_placement", segments_found
 
 
 def filter_closed_segment_gaps(
@@ -136,8 +212,11 @@ def filter_closed_segment_gaps(
 
 __all__ = [
     "PSEUDO_SEGMENTS",
+    "classify_gap",
     "filter_closed_segment_gaps",
     "is_known_token",
     "is_open_segment",
+    "is_valid_segment",
+    "known_segments",
     "open_segments",
 ]

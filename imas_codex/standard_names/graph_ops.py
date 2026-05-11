@@ -3263,8 +3263,8 @@ def write_vocab_gaps(
 
     now = datetime.now(UTC).isoformat()
 
-    # Classify gaps using the ISN segment-token index
-    from imas_codex.standard_names.segments import is_known_token
+    # Classify gaps using the ISN-backed classify_gap() function
+    from imas_codex.standard_names.segments import classify_gap, is_valid_segment
 
     # Build deduplicated gap nodes and relationship batch
     gap_nodes: dict[str, dict] = {}
@@ -3276,23 +3276,22 @@ def write_vocab_gaps(
         gap_id = f"vocab_gap:{segment}:{needed_token}"
 
         if gap_id not in gap_nodes:
-            # Classify this gap
-            segments_found = is_known_token(needed_token)
-            if not segments_found:
-                category = "absent"
-                actual_segments: list[str] = []
-            elif segment not in segments_found:
-                if len(segments_found) > 1:
-                    category = "ambiguous_known_token"
-                else:
-                    category = "wrong_slot_placement"
-                actual_segments = segments_found
-            else:
-                # Token IS in the reported segment — not actually a gap.
-                # Skip: the LLM reported a false positive.
+            # Validate segment exists in ISN grammar
+            if not is_valid_segment(segment):
+                logger.warning(
+                    "write_vocab_gaps: skipping gap with unknown segment "
+                    "'%s' for token '%s'",
+                    segment,
+                    needed_token,
+                )
+                continue
+
+            category, actual_segments = classify_gap(segment, needed_token)
+
+            if category in ("false_positive", "open_segment"):
                 logger.debug(
-                    "write_vocab_gaps: skipping false-positive gap %s "
-                    "(token '%s' already exists in segment '%s')",
+                    "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
+                    category,
                     gap_id,
                     needed_token,
                     segment,
@@ -5379,6 +5378,117 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
         "revived": revived_count,
         "relinked": relinked_count,
     }
+
+
+def reconcile_vocab_gaps() -> dict[str, int]:
+    """Re-validate all VocabGap nodes against the current ISN vocabulary.
+
+    Performs three passes on every VocabGap node:
+
+    1. **Delete false positives** — token now exists in the reported segment
+       (ISN was upgraded since the gap was written).
+    2. **Delete invalid-segment gaps** — segment name is not in ISN grammar.
+    3. **Reclassify surviving gaps** — recompute ``category`` and
+       ``actual_segments`` against the current ISN installation.  A gap
+       previously ``absent`` may become ``wrong_slot_placement`` if ISN added
+       the token in a different segment.
+
+    Returns dict with counts:
+        checked, deleted_false_positive, deleted_invalid_segment,
+        deleted_open_segment, reclassified, remaining.
+    """
+    from imas_codex.standard_names.segments import (
+        classify_gap,
+        known_segments,
+    )
+
+    segs = known_segments()
+    if segs is None:
+        logger.warning(
+            "reconcile_vocab_gaps: ISN unavailable — skipping reconciliation"
+        )
+        return {"checked": 0, "skipped": True}
+
+    with GraphClient() as gc:
+        all_gaps = list(
+            gc.query(
+                """
+                MATCH (vg:VocabGap)
+                RETURN vg.id AS id, vg.segment AS segment,
+                       vg.needed_token AS token, vg.category AS category
+                """
+            )
+        )
+
+    if not all_gaps:
+        return {"checked": 0, "remaining": 0}
+
+    to_delete: list[str] = []
+    to_update: list[dict] = []
+    stats: dict[str, int] = {
+        "checked": len(all_gaps),
+        "deleted_false_positive": 0,
+        "deleted_invalid_segment": 0,
+        "deleted_open_segment": 0,
+        "reclassified": 0,
+    }
+
+    for gap in all_gaps:
+        segment, token = gap["segment"], gap["token"]
+        new_category, new_actual = classify_gap(segment, token)
+
+        if new_category == "false_positive":
+            to_delete.append(gap["id"])
+            stats["deleted_false_positive"] += 1
+        elif new_category == "invalid_segment":
+            to_delete.append(gap["id"])
+            stats["deleted_invalid_segment"] += 1
+        elif new_category == "open_segment":
+            to_delete.append(gap["id"])
+            stats["deleted_open_segment"] += 1
+        elif new_category != gap.get("category"):
+            to_update.append(
+                {
+                    "id": gap["id"],
+                    "category": new_category,
+                    "actual_segments": new_actual,
+                }
+            )
+            stats["reclassified"] += 1
+
+    with GraphClient() as gc:
+        if to_delete:
+            gc.query(
+                """
+                UNWIND $ids AS gap_id
+                MATCH (vg:VocabGap {id: gap_id})
+                DETACH DELETE vg
+                """,
+                ids=to_delete,
+            )
+            logger.info(
+                "reconcile_vocab_gaps: deleted %d false-positive/invalid gaps",
+                len(to_delete),
+            )
+
+        if to_update:
+            gc.query(
+                """
+                UNWIND $batch AS b
+                MATCH (vg:VocabGap {id: b.id})
+                SET vg.category = b.category,
+                    vg.actual_segments = b.actual_segments,
+                    vg.reconciled_at = datetime()
+                """,
+                batch=to_update,
+            )
+            logger.info(
+                "reconcile_vocab_gaps: reclassified %d gaps",
+                len(to_update),
+            )
+
+    stats["remaining"] = stats["checked"] - len(to_delete)
+    return stats
 
 
 def reconcile_error_siblings() -> dict[str, int]:
