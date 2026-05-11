@@ -670,7 +670,13 @@ class TestE2ERoundTrip:
         mock_ctx.__enter__ = MagicMock(return_value=mock_gc)
         mock_ctx.__exit__ = MagicMock(return_value=False)
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with (
+            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+            patch(
+                "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+                return_value=set(),
+            ),
+        ):
             MockGC.return_value = mock_ctx
             write_standard_names([_RICH_SN_RECORD])
 

@@ -17,7 +17,13 @@ class TestWriteStandardNames:
 
     def _call_write(self, names: list[dict], mock_gc: MagicMock) -> int:
         """Call write_standard_names with a mocked GraphClient."""
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with (
+            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+            patch(
+                "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+                return_value=set(),
+            ),
+        ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             from imas_codex.standard_names.graph_ops import write_standard_names
