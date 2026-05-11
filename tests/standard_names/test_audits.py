@@ -2275,3 +2275,65 @@ class TestSemanticSimilarityCheck:
             "audit:semantic_similarity_check_warning: sim=0.600 below warning 0.65"
         ]
         assert has_critical_audit_failure(issues) is False
+
+
+class TestPrepositionPhysicalBaseCheck:
+    """Names whose ISN-parsed physical_base starts with a preposition are broken."""
+
+    def test_normalized_of_particle_temperature_flagged(self):
+        """``normalized_of_particle_temperature`` has physical_base='of_particle_temperature'."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        issues = preposition_physical_base_check(
+            {"id": "normalized_of_particle_temperature"}
+        )
+        assert len(issues) == 1
+        assert "preposition_physical_base_check" in issues[0]
+        assert "of_particle_temperature" in issues[0]
+
+    def test_normalized_of_particle_mass_flagged(self):
+        """Another ``normalized_of_`` variant caught."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        issues = preposition_physical_base_check({"id": "normalized_of_particle_mass"})
+        assert len(issues) == 1
+        assert "preposition_physical_base_check" in issues[0]
+
+    def test_clean_name_passes(self):
+        """A well-formed name has no preposition prefix on physical_base."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        assert preposition_physical_base_check({"id": "electron_temperature"}) == []
+
+    def test_normalized_without_of_passes(self):
+        """``normalized_particle_temperature`` is the correct form."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        assert (
+            preposition_physical_base_check({"id": "normalized_particle_temperature"})
+            == []
+        )
+
+    def test_empty_name_passes(self):
+        """Empty or missing name is a no-op."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        assert preposition_physical_base_check({"id": ""}) == []
+        assert preposition_physical_base_check({}) == []
+
+    def test_is_critical_check(self):
+        """preposition_physical_base_check must be in CRITICAL_CHECKS."""
+        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+
+        assert "preposition_physical_base_check" in CRITICAL_CHECKS
+
+    def test_has_critical_failure(self):
+        """has_critical_audit_failure detects preposition_physical_base_check issues."""
+        from imas_codex.standard_names.audits import has_critical_audit_failure
+
+        issues = [
+            "audit:preposition_physical_base_check: ISN parse of "
+            "'normalized_of_particle_temperature' yields "
+            "physical_base='of_particle_temperature'"
+        ]
+        assert has_critical_audit_failure(issues) is True

@@ -75,6 +75,7 @@ CRITICAL_CHECKS = frozenset(
         "ratio_binary_operator_check",
         "adjacent_duplicate_token_check",
         "semantic_similarity_check",
+        "preposition_physical_base_check",
     }
 )
 
@@ -2387,6 +2388,45 @@ def process_qualifier_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag names whose ISN parse produces a ``physical_base`` starting with a preposition.
+
+    When ISN grammar parses a name like ``normalized_of_particle_temperature``,
+    it places ``normalized`` in the ``transformation`` slot and dumps
+    ``of_particle_temperature`` into ``physical_base``.  A ``physical_base``
+    starting with ``of_``, ``at_``, or ``due_to_`` is *always* a grammar
+    defect — the preposition is a scope connector that leaked into the base
+    because the name was mal-formed.  The correct form drops the preposition
+    (e.g. ``normalized_particle_temperature``).
+
+    Severity: critical — quarantines the candidate.
+    """
+    name = (candidate.get("id") or candidate.get("name") or "").strip()
+    if not name:
+        return []
+
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+
+        parsed = parse_standard_name(name)
+    except Exception:
+        # Parse failure is handled by other checks
+        return []
+
+    pb = getattr(parsed, "physical_base", None) or ""
+    _BAD_PREFIXES = ("of_", "at_", "due_to_")
+    for prefix in _BAD_PREFIXES:
+        if pb.startswith(prefix):
+            clean = pb[len(prefix) :]
+            return [
+                f"audit:preposition_physical_base_check: ISN parse of "
+                f"'{name}' yields physical_base='{pb}' — a base must "
+                f"never start with a preposition. The correct base is "
+                f"'{clean}' (drop the '{prefix}' connector)."
+            ]
+    return []
+
+
 def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
     """Detect closed-vocabulary tokens absorbed into the candidate name.
 
@@ -2559,6 +2599,7 @@ def run_audits(
     all_issues.extend(instrument_stokes_bind_check(candidate))
     all_issues.extend(position_redundancy_check(candidate))
     all_issues.extend(process_qualifier_check(candidate))
+    all_issues.extend(preposition_physical_base_check(candidate))
     all_issues.extend(decomposition_audit_check(candidate))
     all_issues.extend(ggd_implementation_leakage_check(candidate))
 
