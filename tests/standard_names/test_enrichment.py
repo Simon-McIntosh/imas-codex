@@ -168,13 +168,14 @@ class TestEnrichPaths:
         assert result == []
 
     def test_filters_out_temporal_coordinate_paths(self):
-        """Depth-2+ 'time' leaves are rejected by the DD qualifier as
-        temporal coordinates (deny rule ``*/*/time``)."""
+        """Depth-3+ 'time' leaves with coordinate category are rejected by
+        the DD qualifier as temporal coordinates (S7)."""
         rows = [
             _make_row(
                 path="core_profiles/profiles_1d/time",
                 data_type="FLT_0D",
                 description="Time",
+                node_category="coordinate",
             )
         ]
         result = enrich_paths(rows)
