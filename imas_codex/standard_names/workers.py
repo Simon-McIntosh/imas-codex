@@ -827,7 +827,7 @@ def _hybrid_search_neighbours_batch(
         for h in sorted_hits:
             sn_id = sn_map.get(h.path)
             tag = f"name:{sn_id}" if sn_id else f"dd:{h.path}"
-            doc = (h.documentation or h.description or "")[:120]
+            doc = (h.documentation or h.description or "")[:300]
             neighbours.append(
                 {
                     "tag": tag,
@@ -837,6 +837,8 @@ def _hybrid_search_neighbours_batch(
                     "physics_domain": h.physics_domain or "",
                     "doc_short": doc,
                     "cocos_label": h.cocos_transformation_type or "",
+                    "lifecycle": h.lifecycle_status or "",
+                    "node_type": h.node_type or "",
                     "score": float(h.score) if h.score is not None else None,
                 }
             )
@@ -918,14 +920,17 @@ def _related_path_neighbours(
 
     neighbours: list[dict] = []
     for hit in result.hits:
-        neighbours.append(
-            {
-                "path": hit.path,
-                "ids": hit.ids,
-                "relationship_type": hit.relationship_type,
-                "via": hit.via,
-            }
-        )
+        entry: dict[str, Any] = {
+            "path": hit.path,
+            "ids": hit.ids,
+            "relationship_type": hit.relationship_type,
+            "via": hit.via,
+        }
+        if hit.doc:
+            entry["doc"] = hit.doc
+        if hit.physics_domain:
+            entry["physics_domain"] = hit.physics_domain
+        neighbours.append(entry)
 
     return neighbours
 
@@ -1017,6 +1022,11 @@ def _enrich_batch_items(items: list[dict]) -> None:
             lifecycle = row.get("lifecycle_status")
             if lifecycle and lifecycle != "active":
                 item["lifecycle_status"] = lifecycle
+
+            # Parent description (complements parent_path from extraction)
+            parent_desc = row.get("parent_description")
+            if parent_desc and not item.get("parent_description"):
+                item["parent_description"] = parent_desc
 
             # Identifier schema
             ident_name = row.get("identifier_schema_name")
@@ -5522,6 +5532,7 @@ async def process_generate_docs_batch(
 
     # ── Enrich batch with DD context (source paths, docs, peers) ──────────
     nearby_existing_names: list[dict] = []
+    compose_scored_examples: list[dict] = []
     try:
 
         def _do_enrich() -> list[dict]:
@@ -5555,6 +5566,37 @@ async def process_generate_docs_batch(
     except Exception:
         logger.debug("process_generate_docs_batch: enrichment failed", exc_info=True)
 
+    # ── Load scored examples for docs generation ──────────────────────
+    try:
+        from imas_codex.standard_names.example_loader import load_compose_examples
+
+        batch_domains = list(
+            {
+                item.get("physics_domain", "")
+                for item in batch
+                if item.get("physics_domain")
+            }
+        )
+
+        def _load_docs_scored_examples() -> list[dict]:
+            with GraphClient() as gc:
+                return load_compose_examples(
+                    gc, physics_domains=batch_domains, axis="docs"
+                )
+
+        compose_scored_examples = await _asyncio.to_thread(_load_docs_scored_examples)
+        if compose_scored_examples:
+            logger.info(
+                "generate_docs: Loaded %d scored examples (domains=%s)",
+                len(compose_scored_examples),
+                batch_domains or "all",
+            )
+    except Exception:
+        logger.debug(
+            "process_generate_docs_batch: scored examples load failed",
+            exc_info=True,
+        )
+
     for item in batch:
         if stop_event.is_set():
             break
@@ -5568,6 +5610,7 @@ async def process_generate_docs_batch(
             "item": item,
             "chain_history": chain_history,
             "nearby_existing_names": nearby_existing_names,
+            "compose_scored_examples": compose_scored_examples,
         }
 
         try:

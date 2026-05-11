@@ -11,6 +11,8 @@ Name the **physical or geometric quantities** represented by the following
 IMAS Data Dictionary paths. Each standard name describes the underlying
 physics — NOT the DD path, IDS section, or measurement instrument.
 
+> **Standard Names are standalone, self-describing metadata labels.** Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+
 **Subject–base separation rule:** Species and entity qualifiers (electron,
 ion, neutral, fast_ion) go in the `subject` segment, NOT fused into
 `physical_base`. Example: subject=electron + physical_base=temperature →
@@ -106,6 +108,15 @@ path measures the same quantity — do not invent a synonym.
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_component_of_halo_energy` | **W38-A2** component/transformation tokens come BEFORE the base via `<modifier>_of_<base>` — never as suffixes |
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_component_of_direction_unit_vector` | **W38-A3** drop stacked hardware tokens; a unit-vector field's Z is a projection, not a coordinate |
 
+## Locus Preposition Rules (`_at_` vs `_of_`)
+
+The ISN grammar enforces strict preposition rules for locus qualifiers:
+
+- **`_at_` for spatial/geometric locus** (WHERE something is measured/evaluated): `at_core`, `at_pedestal_top`, `at_lcfs`
+- **`_of_` for entity/object association** (WHAT thing the quantity belongs to or is located at): `of_separatrix`, `of_magnetic_axis`, `of_plasma_boundary`, `of_langmuir_probe`, `of_coil`, `of_antenna`, `of_rogowski_coil`
+
+Named geometric entities (separatrix, magnetic_axis, x_point, plasma_boundary) and hardware objects (probe, coil, antenna) use `_of_`. Abstract spatial regions from the position vocabulary (core, pedestal_top, lcfs) use `_at_`.
+
 ## Description Quality Rules
 
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "scalar", "array",
@@ -185,7 +196,7 @@ Use them as quality benchmarks for naming style and field usage:
 {% if item.lifecycle_status %}- **Lifecycle:** {{ item.lifecycle_status }} ⚠️{% endif %}
 {% if item.keywords %}- **Keywords:** {{ item.keywords | join(', ') if item.keywords is iterable and item.keywords is not string else item.keywords }}{% endif %}
 {% if item.cocos_label %}- **COCOS transformation type:** `{{ item.cocos_label }}` — include a brief sign-convention sentence in documentation.{% endif %}
-{% if item.parent_path %}- **Parent:** {{ item.parent_path }}{% endif %}
+{% if item.parent_path %}- **Parent:** {{ item.parent_path }}{% if item.parent_description %} — {{ item.parent_description }}{% endif %}{% endif %}
 {% if item.previous_name %}- **⟳ Previous generation:** `{{ item.previous_name.name }}`{% if item.previous_name.pipeline_status %} ({{ item.previous_name.pipeline_status }}){% endif %}{% endif %}
 {% if item.identifier_schema %}- **Identifier schema:** {{ item.identifier_schema }}{% if item.identifier_schema_doc %} — {{ item.identifier_schema_doc }}{% endif %}{% endif %}
 {% if item.identifier_values %}
@@ -202,18 +213,22 @@ Use them as quality benchmarks for naming style and field usage:
 {% endfor %}{% endif %}
 {% if item.hybrid_neighbours %}
 - **Hybrid-search neighbours** (physics-concept + structural cousins):
-{% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
+{% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}{% if n.node_type %}, {{ n.node_type }}{% endif %}{% if n.lifecycle and n.lifecycle != 'active' %}, ⚠️{{ n.lifecycle }}{% endif %}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
 {% endfor %}  → Reuse a name above when your source measures the same quantity.
 {% endif %}
 {% if item.related_neighbours %}
 - **Graph-relationship neighbours** (cluster / coordinate / unit / identifier / COCOS edges):
-{% for r in item.related_neighbours %}  - `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
+{% for r in item.related_neighbours %}  - `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}{% if r.physics_domain %} [{{ r.physics_domain }}]{% endif %}{% if r.doc %}: {{ r.doc }}{% endif %}
 {% endfor %}{% endif %}
 {% if item.error_fields %}
 - **DD error companions:**
 {% for ef in item.error_fields %}  - `{{ ef }}`
 {% endfor %}  → Error companions are minted deterministically — do NOT produce `*_uncertainty` variants. SKIP if this path IS an error field (`_error_upper`/`_error_lower`/`_error_index`).
 {% endif %}
+{% if item.version_history %}
+- **Version history** (notable DD changes — consider naming stability):
+{% for vh in item.version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
 {% if item.sibling_fields %}
 - **Sibling fields** (same parent — for cross-reference):
 {% for sib in item.sibling_fields %}  - `{{ sib.path }}`: {{ sib.description or 'no description' }} ({{ sib.data_type or '?' }})

@@ -122,6 +122,10 @@ Rules:
 - Follow the standard name grammar: `snake_case`, physical_base last (or with
   qualified suffix), no abbreviations, no instrument prefixes for generic
   observables.
+- **Locus prepositions:** Named geometric entities (separatrix, magnetic_axis,
+  plasma_boundary, x_point) and hardware objects (probe, coil, antenna) use
+  `_of_`. Abstract spatial regions from the position vocabulary (core,
+  pedestal_top, lcfs) use `_at_`.
 - Provide a short `description` (≤ 120 chars, one sentence, no LaTeX).
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "profile", "array"
   in descriptions. Describe the *physics*, not data layout.

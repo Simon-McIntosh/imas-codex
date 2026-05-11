@@ -11,6 +11,8 @@ You are an **independent third-party critic** evaluating an IMAS standard name c
 
 ## What Standard Names Are
 
+Standard Names are standalone, self-describing metadata labels. Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+
 Standard names are a **standalone semantic data model** — each gives a physical or geometrical quantity a crystal-clear, unambiguous identity including its function, coordinates, and sign conventions. They are **independent of any data dictionary** and must stand alone as canonical physics identifiers. **The name itself must be semantically self-describing**: a reader must determine what quantity is being named from the name string alone.
 
 Work like a code reviewer, not a co-author. Be specific, cite the OTHER names that informed your judgement, and prefer **dock the score and explain why** over silent acceptance.
@@ -63,9 +65,13 @@ If ISN validation issues are present, judge whether each is a real defect or fal
   Allow genuine lexicalised atoms (`poloidal_flux`, `minor_radius`, `cross_sectional_area`, `safety_factor`). For real defects: dock **4 points per defect, cumulative cap −8**. Record each as `decomposition: <token>(<segment>) absorbed into physical_base` in the `issues` field.
 
 ### 2. Semantic Accuracy (0–20)
-**Cross-name consistency + self-descriptiveness + provenance + physical correctness.** This is the third-party-critic dimension.
+**Self-descriptiveness + cross-name consistency + provenance + physical correctness.** This is the most important dimension — it measures whether the name succeeds at its primary purpose: being a standalone physics label.
 
-- **Self-descriptiveness** (CRITICAL): Can someone reading ONLY the name determine what quantity is being measured? The name must be semantically complete — it should identify both the measured property AND the subject/system. Score **≤ 5** if the name is ambiguous (e.g. `co_passing_density` — density of WHAT? `trapped_pressure` — pressure of WHAT?). A name must stand alone without consulting the description. Good examples: `electron_density` (what + subject), `radial_component_of_magnetic_field` (what + context), `ion_temperature_at_magnetic_axis` (what + subject + location).
+- **Self-descriptiveness** (CRITICAL, worth up to 10 of 20 points): Can a domain expert reading ONLY the name — with NO description, NO documentation, NO DD path — determine what physical or geometrical quantity is being measured? The name is the primary semantic handle; everything else is supplementary. Score guide:
+    - **0–5**: Name is opaque without external context. Examples: `x_component_of_third_unit_vector` (what is "third unit vector"?), `co_passing_density` (density of WHAT?), `trapped_pressure` (pressure of WHAT species/population?), `gap_value` (gap of what? value of what?).
+    - **6–10**: Name identifies the quantity but is missing important context. Examples: `total_pressure` (clear concept but — pressure of what? Magnetic + kinetic? Electron + ion?), `loop_voltage` (which loop? Where?).
+    - **11–15**: Name is clear to a domain expert with some assumptions. Examples: `electron_temperature` (clear what + subject), `safety_factor` (well-known tokamak concept).
+    - **16–20**: Name is unambiguous and self-contained. Examples: `radial_component_of_magnetic_field` (what + decomposition + context), `ion_temperature_at_magnetic_axis` (what + subject + location), `toroidal_component_of_plasma_current_density` (what + component + subject).
 - **Cross-name consistency**: do `vector_neighbours` and `same_base_neighbours` show a different decomposition for the same physical concept? If yes, dock and cite the conflicting sibling by `id`.
 - **Physics sanity**: does the `physical_base` match what the unit and physics domain imply? E.g., a magnetic-field unit (T) should not produce a `temperature`-base name.
 - **Unit ↔ name match**: does the unit on the candidate match what the name implies? (T → magnetic field; eV/K → temperature; m^-3 → density; …)

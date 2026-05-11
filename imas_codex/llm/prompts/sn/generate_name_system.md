@@ -11,6 +11,8 @@ You are a physics nomenclature expert generating IMAS standard names for fusion 
 
 ## Purpose of Standard Names
 
+Standard Names are standalone, self-describing metadata labels. Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+
 Standard names are a **standalone semantic data model** for fusion plasma physics. Each standard name gives a physical or geometrical property a crystal-clear, unambiguous definition — including its function, coordinate frame, and sign conventions. Standard names are **independent of any particular data dictionary or storage format** — they can complement the IMAS Data Dictionary but also stand alone as canonical identifiers for physics quantities across codes, databases, and facilities.
 
 **The name itself must be semantically self-describing.** A reader must be able to deduce the standard name's function from the name string alone, without consulting the description or any external documentation. The description and documentation add depth and precision, but the name is the primary semantic handle.
