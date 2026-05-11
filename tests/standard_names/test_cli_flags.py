@@ -10,7 +10,7 @@ Verifies that:
 - Without ``--pool`` filter, all 6 pools start (default behaviour).
 - ``--physics-domain`` is forwarded.
 
-No graph or LLM access — ``_run_sn_loop_cmd`` is patched to capture kwargs.
+No graph or LLM access — ``_run_sn_cmd`` is patched to capture kwargs.
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ def _invoke(*extra_args: str) -> tuple[object, dict | None]:
     """Invoke ``sn run`` with *extra_args* appended to _MINIMAL_ARGS.
 
     Returns ``(result, captured_kwargs)`` where *captured_kwargs* is the
-    kwargs dict passed to ``_run_sn_loop_cmd`` (or ``None`` if not reached).
+    kwargs dict passed to ``_run_sn_cmd`` (or ``None`` if not reached).
     """
     runner = CliRunner()
     captured: dict = {}
@@ -52,7 +52,7 @@ def _invoke(*extra_args: str) -> tuple[object, dict | None]:
     def _fake_loop_cmd(**kwargs):
         captured.update(kwargs)
 
-    with patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=_fake_loop_cmd):
+    with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
         result = runner.invoke(
             sn, _MINIMAL_ARGS + list(extra_args), catch_exceptions=False
         )
@@ -68,7 +68,7 @@ def _invoke(*extra_args: str) -> tuple[object, dict | None]:
 def test_default_min_score():
     """Without --min-score the default comes from DEFAULT_MIN_SCORE."""
     _, kwargs = _invoke()
-    assert kwargs is not None, "_run_sn_loop_cmd was not called"
+    assert kwargs is not None, "_run_sn_cmd was not called"
     assert kwargs["min_score"] == DEFAULT_MIN_SCORE, (
         f"Expected DEFAULT_MIN_SCORE={DEFAULT_MIN_SCORE}, got {kwargs['min_score']}"
     )
@@ -80,7 +80,7 @@ def test_default_min_score():
 
 
 def test_min_score_override():
-    """--min-score 0.85 is forwarded to _run_sn_loop_cmd."""
+    """--min-score 0.85 is forwarded to _run_sn_cmd."""
     _, kwargs = _invoke("--min-score", "0.85")
     assert kwargs is not None
     assert abs(kwargs["min_score"] - 0.85) < 1e-9, (
@@ -201,7 +201,7 @@ def test_no_obsolete_flags(obsolete_flag: str):
     # Provide a dummy value to avoid "option requires an argument" masking the
     # "no such option" error for flags that take a value.
     args = _MINIMAL_ARGS + [obsolete_flag, "dummy"]
-    with patch("imas_codex.cli.sn._run_sn_loop_cmd"):
+    with patch("imas_codex.cli.sn._run_sn_cmd"):
         result = runner.invoke(sn, args, catch_exceptions=True)
     assert result.exit_code != 0, (
         f"Obsolete flag {obsolete_flag!r} should have caused a non-zero exit"
@@ -218,7 +218,7 @@ def test_no_obsolete_flags(obsolete_flag: str):
 
 
 def test_default_targets_all_six_pools():
-    """Without a pool filter, _run_sn_loop_cmd is called (all 6 pools start).
+    """Without a pool filter, _run_sn_cmd is called (all 6 pools start).
 
     Verifies:
     - ``skip_generate`` is False (generate_name + refine_name active)
@@ -226,7 +226,7 @@ def test_default_targets_all_six_pools():
     - generate_docs and refine_docs pools are always active in loop mode
     """
     _, kwargs = _invoke()
-    assert kwargs is not None, "_run_sn_loop_cmd was not called"
+    assert kwargs is not None, "_run_sn_cmd was not called"
     # No pool-skipping flags were provided, so all pools are enabled
     assert not kwargs.get("skip_generate", True), (
         "generate_name pool should be active by default"
@@ -242,7 +242,7 @@ def test_default_targets_all_six_pools():
 
 
 def test_physics_domain_filter():
-    """--domain is forwarded as domains to _run_sn_loop_cmd."""
+    """--domain is forwarded as domains to _run_sn_cmd."""
     _, kwargs = _invoke("--domain", "equilibrium")
     assert kwargs is not None
     assert "equilibrium" in kwargs.get("domains", ()), (

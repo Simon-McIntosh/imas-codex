@@ -223,7 +223,7 @@ def _compute_pool_pending(
     }
 
 
-def _run_sn_loop_cmd(
+def _run_sn_cmd(
     *,
     cost_limit: float,
     per_domain_limit: int | None,
@@ -244,7 +244,7 @@ def _run_sn_loop_cmd(
     max_sources: int | None = None,
     scope_run_id: str | None = None,
 ) -> None:
-    """Execute the DD completion loop with Rich progress display.
+    """Execute the pool-based SN orchestrator with Rich progress display.
 
     Uses the ``run_discovery()`` harness for 3-press shutdown,
     periodic ticker, graph-refresh, and service monitoring.
@@ -380,13 +380,13 @@ def _run_sn_loop_cmd(
         cli_console = Console(quiet=quiet)
         if not quiet:
             cli_console.print(
-                f"[bold]DD completion loop[/bold] "
+                f"[bold]SN pipeline[/bold] "
                 f"(budget=${cost_limit:.2f}"
                 f"{f', min_score={min_score}' if min_score is not None else ''}"
                 f"{', dry-run' if dry_run else ''})"
             )
 
-    # Build harness config — SN loop wants graph + model status at top.
+    # Build harness config — SN pipeline wants graph + model status at top.
     # SN pipeline bypasses the LiteLLM proxy (uses direct OpenRouter), so
     # we skip the proxy health check and add a direct-routing check instead.
     disc_config = DiscoveryConfig(
@@ -908,7 +908,7 @@ def sn_run(
     \b
     Examples:
       imas-codex sn run -c 50                                 # all 6 pools, full run
-      imas-codex sn run --domain equilibrium -c 5             # loop, one domain
+      imas-codex sn run --domain equilibrium -c 5             # scoped to one domain
       imas-codex sn run --domain equilibrium --domain transport  # two domains
       imas-codex sn run --domain "equilibrium transport" --dry-run  # same, space-sep
       imas-codex sn run --source signals --facility tcv --domain magnetics
@@ -1027,8 +1027,8 @@ def sn_run(
                 run_id=scope_run_id,
             )
 
-        # 5. Route through the full loop with scope_run_id.
-        _run_sn_loop_cmd(
+        # 5. Route through the pool orchestrator with scope_run_id.
+        _run_sn_cmd(
             cost_limit=cost_limit,
             per_domain_limit=limit,
             dry_run=dry_run,
@@ -1050,15 +1050,15 @@ def sn_run(
         )
         return
 
-    # Scope-routing: default (DD source) → all-pool loop.
-    # The loop runs all 6 pools concurrently, sampling globally from the available
-    # pool of StandardNameSource / StandardName nodes (no per-domain looping).
+    # Scope-routing: default (DD source) → pool orchestrator.
+    # Runs all 6 pools concurrently, sampling globally from the available
+    # pool of StandardNameSource / StandardName nodes.
     # --domain is forwarded to scope the extract_phase seeding only;
     # the pools themselves are domain-agnostic.
-    use_loop = source == "dd"
+    use_pools = source == "dd"
 
-    if use_loop:
-        _run_sn_loop_cmd(
+    if use_pools:
+        _run_sn_cmd(
             cost_limit=cost_limit,
             per_domain_limit=limit,
             dry_run=dry_run,
@@ -1406,7 +1406,7 @@ def sn_run(
         "DD catalog in mature deployments)."
     ),
 )
-def sn_benchmark(
+def sn_bench(
     source: str,
     ids_filter: str | None,
     domain_filter: str | None,

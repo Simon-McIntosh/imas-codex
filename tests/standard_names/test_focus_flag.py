@@ -77,7 +77,7 @@ def _make_cli_gc_mock():
 def _invoke_focus(*focus_args: str, extra_args: list[str] | None = None):
     """Invoke ``sn run`` with ``--focus`` args and return ``(result, captured_kwargs)``.
 
-    Patches ``_run_sn_loop_cmd``, ``GraphClient`` (at its source module), and
+    Patches ``_run_sn_cmd``, ``GraphClient`` (at its source module), and
     ``merge_standard_name_sources`` so no graph connection is attempted.
     """
     runner = CliRunner()
@@ -96,7 +96,7 @@ def _invoke_focus(*focus_args: str, extra_args: list[str] | None = None):
     cmd_args = ["run", "--skip-clear-gate"] + list(focus_args) + (extra_args or [])
 
     with (
-        patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=_fake_loop_cmd),
+        patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd),
         patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
         patch(
             "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
@@ -122,7 +122,7 @@ class TestFocusFlagCliValidation:
             "--focus", "equilibrium/time_slice/profiles_1d/psi"
         )
         assert result.exit_code == 0, f"CLI error: {result.output}"
-        assert kwargs is not None, "_run_sn_loop_cmd was not called"
+        assert kwargs is not None, "_run_sn_cmd was not called"
         assert kwargs.get("scope_run_id") is not None, (
             "scope_run_id should be a UUID string, not None"
         )
@@ -158,7 +158,7 @@ class TestFocusFlagCliValidation:
         def _fake_loop_cmd(**kwargs):
             captured.update(kwargs)
 
-        with patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=_fake_loop_cmd):
+        with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
             result = runner.invoke(
                 sn,
                 ["run", "--skip-clear-gate", "--dry-run"],
@@ -379,7 +379,7 @@ class TestFocusRoutingSeedsAndStamps:
         )
 
         with (
-            patch("imas_codex.cli.sn._run_sn_loop_cmd"),
+            patch("imas_codex.cli.sn._run_sn_cmd"),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
                 "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
@@ -418,7 +418,7 @@ class TestFocusRoutingSeedsAndStamps:
             return len(sources)
 
         with (
-            patch("imas_codex.cli.sn._run_sn_loop_cmd"),
+            patch("imas_codex.cli.sn._run_sn_cmd"),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
                 "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
@@ -462,7 +462,7 @@ class TestFocusRoutingSeedsAndStamps:
             captured_loop.update(kwargs)
 
         with (
-            patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=_fake_loop_cmd),
+            patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
                 "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
@@ -505,7 +505,7 @@ class TestFocusRoutingSeedsAndStamps:
         )
 
     def test_scope_run_id_forwarded_to_loop(self):
-        """Step 5: _run_sn_loop_cmd is called with a non-None scope_run_id."""
+        """Step 5: _run_sn_cmd is called with a non-None scope_run_id."""
         result, kwargs, _ = _invoke_focus(
             "--focus", "equilibrium/time_slice/profiles_1d/psi"
         )
@@ -527,14 +527,14 @@ class TestBackwardCompatNoFocus:
     """Without --focus, scope_run_id is None and the normal loop path is used."""
 
     def test_scope_run_id_is_none_without_focus(self):
-        """_run_sn_loop_cmd receives scope_run_id=None when --focus is absent."""
+        """_run_sn_cmd receives scope_run_id=None when --focus is absent."""
         runner = CliRunner()
         captured: dict = {}
 
         def _fake_loop_cmd(**kwargs):
             captured.update(kwargs)
 
-        with patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=_fake_loop_cmd):
+        with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd):
             result = runner.invoke(
                 sn,
                 ["run", "--skip-clear-gate", "--dry-run"],

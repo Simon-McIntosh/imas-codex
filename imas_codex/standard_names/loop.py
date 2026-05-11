@@ -688,7 +688,7 @@ async def run_sn_pools(
             )
             _domains = domains
         else:
-            # Merge deprecated only_domain into domains for backward compat.
+            # Merge only_domain into domains tuple.
             _domains = domains
             if only_domain and not _domains:
                 _domains = (only_domain,)

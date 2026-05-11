@@ -141,10 +141,10 @@ class TestReconcileRunsBeforePools:
 
 class TestCLIRouting:
     def test_cli_default_routes_to_run_sn_pools(self) -> None:
-        """Invoke _run_sn_loop_cmd with no --paths; assert run_sn_pools is called.
+        """Invoke _run_sn_cmd with no --paths; assert run_sn_pools is called.
 
         run_discovery and summary_table are deferred imports inside
-        _run_sn_loop_cmd, so patch at their source modules.
+        _run_sn_cmd, so patch at their source modules.
         """
         with (
             patch(
@@ -173,9 +173,9 @@ class TestCLIRouting:
             ),
             patch("imas_codex.cli.discover.common.setup_logging"),
         ):
-            from imas_codex.cli.sn import _run_sn_loop_cmd
+            from imas_codex.cli.sn import _run_sn_cmd
 
-            _run_sn_loop_cmd(
+            _run_sn_cmd(
                 cost_limit=5.0,
                 per_domain_limit=None,
                 dry_run=False,

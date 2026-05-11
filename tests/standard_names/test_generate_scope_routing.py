@@ -22,7 +22,7 @@ def runner():
 
 
 # Patch target for the rotator entrypoint in the CLI module.
-_ROTATOR = "imas_codex.cli.sn._run_sn_loop_cmd"
+_ROTATOR = "imas_codex.cli.sn._run_sn_cmd"
 # The single-pass path reaches ``run_explicit_paths`` via a local import
 # inside the CLI function.  Patching the source module blocks it
 # effectively because the import resolves each invocation.
