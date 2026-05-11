@@ -1667,9 +1667,9 @@ classes:
       segment:
         description: >-
           Grammar segment the token belongs to (e.g. ``physical_base``,
-          ``subject``). For V1 this is always ``physical_base`` since it
-          is the only open segment, but the field accommodates future
-          segments.
+          ``subject``). All segments are closed vocabulary — candidates
+          represent tokens used by the LLM that are not yet in the
+          installed ISN vocabulary.
         required: true
       token:
         description: The candidate vocabulary token

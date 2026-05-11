@@ -381,8 +381,7 @@ def search_standard_names(
 
 
 #: Public segments accepted by ``segment_filters``. Bare-name columns are
-#: the post-Phase-1 source of truth; typed edges may be unpopulated for
-#: open-vocab segments (``physical_base``, ``subject``).
+#: the source of truth for segment-filter search.
 _SEGMENT_FILTER_COLUMNS: tuple[str, ...] = (
     "physical_base",
     "subject",
@@ -408,15 +407,9 @@ def _segment_filter_search(
     pipeline_status: str | None,
     cocos_type: str | None,
 ) -> list[dict]:
-    """Bare-name column segment-filter search (Plan 40 §5).
+    """Bare-name column segment-filter search.
 
-    Pre-v3.2 implementations matched typed grammar edges
-    (``(sn)-[:HAS_PHYSICAL_BASE]->(:GrammarToken {value: ...})``).
-    Open-vocabulary segments (``physical_base``, ``subject``) never have
-    typed edges populated, so the typed-edge path silently returned []
-    even when the bare-name column was set. We now match the
-    ``sn.<segment>`` column directly, which is the post-Phase-1 source of
-    truth.
+    Matches ``sn.<segment>`` columns directly for all grammar segments.
     """
     params: dict[str, Any] = {"k": k}
     where: list[str] = []

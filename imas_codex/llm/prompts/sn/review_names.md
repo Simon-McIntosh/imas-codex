@@ -46,11 +46,10 @@ genuine quality problems or false positives. Factor genuine issues into your
 grammar and convention scores.
 
 ### 1. Grammar Correctness (0-20)
-**0**: Would fail ISN grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), or prefix/postfix operator confusion. (Note: novel but well-formed `physical_base` tokens are tracked as VocabGaps and are NOT a grammar defect.)
-**20**: Perfect 5-group IR decomposition with correct operator form and in-vocabulary base.
+**0**: Would fail ISN grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), prefix/postfix operator confusion, or uses a token NOT in any closed vocabulary segment.
+**20**: Perfect 5-group IR decomposition with correct operator form and all tokens from their respective closed vocabularies.
 
-- Is the `physical_base` token in the registry? (Novel but well-formed
-  tokens are tracked as VocabGaps — not grammar defects, but dock completeness.)
+- Is the `physical_base` token in the registry? **All vocabulary segments are closed — a novel token in ANY segment is a grammar defect.**
 - For all segments, is the token in its registry?
 - Are prefix operators written with explicit `_of_` scope marker?
 - Are postfix operators (`_magnitude`, `_real_part`, etc.) correctly appended (not prefix `_of_` form)?

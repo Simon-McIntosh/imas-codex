@@ -167,11 +167,7 @@ def _segment_filter_search_standard_names(
 ) -> list[dict]:
     """Bare-name column segment-filter search.
 
-    Open-vocabulary segments (``physical_base``, ``subject``) do not have
-    typed grammar edges populated, so prior implementations using
-    ``(sn)-[:HAS_PHYSICAL_BASE]->(:GrammarToken)`` silently returned
-    empty results.  We now match the ``sn.<segment>`` bare-name column
-    directly — the post-Phase-1 source of truth.
+    Matches the ``sn.<segment>`` bare-name column directly.
 
     Args:
         gc: Open GraphClient.
@@ -576,10 +572,8 @@ def _list_grammar_vocabulary(
 
     Queries ``imas_standard_names.grammar.constants.SEGMENT_TOKEN_MAP``
     to return the ISN-defined token list for the requested segment.
-    Segments with an empty token list (open vocabulary) are reported as
-    such.  This replaces the old per-node ``grammar_<segment>`` property
-    query; grammar decomposition is now derived on demand via
-    ``imas_standard_names.grammar.parser.parse()``.
+    All vocabulary segments are closed — every token must come from the
+    installed ISN vocabulary.
 
     Args:
         segment: Segment name (e.g. ``"physical_base"``, ``"component"``,
@@ -587,8 +581,7 @@ def _list_grammar_vocabulary(
             installed ISN package's ``SEGMENT_TOKEN_MAP`` keys.
 
     Returns:
-        Markdown table of tokens in closed-vocabulary segments, or a
-        description message for open-vocabulary segments.
+        Markdown table of tokens for the requested segment.
     """
     try:
         from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
@@ -605,8 +598,8 @@ def _list_grammar_vocabulary(
     if not tokens:
         return (
             f"## Grammar Vocabulary: `{seg_lc}`\n\n"
-            f"Segment `{seg_lc}` has open vocabulary — any token is admissible by "
-            f"design. No closed token list is defined in the installed ISN package."
+            f"Segment `{seg_lc}` has no tokens defined in the installed ISN "
+            f"package. This may indicate a packaging issue."
         )
 
     sorted_tokens = sorted(tokens)

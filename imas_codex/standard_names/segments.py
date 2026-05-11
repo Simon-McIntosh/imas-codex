@@ -84,15 +84,11 @@ def is_valid_segment(segment: str | None) -> bool:
 
 @lru_cache(maxsize=1)
 def open_segments() -> frozenset[str]:
-    """Return the set of ISN grammar segments with open vocabulary.
+    """Return the set of ISN grammar segments with no registered tokens.
 
-    A segment is considered *open* when its closed-vocabulary token list is
-    empty — any token is admissible by design (``physical_base`` is the
-    canonical example).  Emitting a :class:`VocabGap` for such a segment is
-    nonsensical.
-
-    Results are memoised across the process lifetime because
-    ``SEGMENT_TOKEN_MAP`` is immutable and cheap-but-not-free to introspect.
+    With ISN rc53+ all segments are closed (have registered tokens), so
+    this should return an empty frozenset.  Retained as a runtime check
+    against ISN regressions.
     """
     stm = _load_segment_token_map()
     if stm is None:
@@ -105,11 +101,11 @@ def open_segments() -> frozenset[str]:
 
 
 def is_open_segment(segment: str | None) -> bool:
-    """Return ``True`` if ``segment`` is open-vocab or a pseudo segment.
+    """Return ``True`` if ``segment`` has no registered tokens or is a pseudo segment.
 
-    Gaps reported against open or pseudo segments should never materialise as
-    :class:`VocabGap` nodes: they do not indicate a missing closed-vocabulary
-    token.
+    Gaps reported against such segments should never materialise as
+    :class:`VocabGap` nodes. With ISN rc53+ all real segments are closed,
+    so only pseudo segments (``grammar_ambiguity``) return True.
     """
     if not segment:
         return False

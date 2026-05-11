@@ -2042,8 +2042,8 @@ def _emit_yaml_output(
     show_default=True,
     help=(
         "Which vocabulary gaps to report. 'missing' = tokens the LLM wanted "
-        "but ISN lacks. 'saturated' = open-segment tokens reused enough to "
-        "propose as new ISN anchors. 'both' shows the full ISN-PR picture."
+        "but ISN lacks. 'saturated' = tokens reused enough to propose as "
+        "new ISN vocabulary entries. 'both' shows the full ISN-PR picture."
     ),
 )
 @click.option(
@@ -2059,11 +2059,9 @@ def _emit_yaml_output(
     "include_open",
     default=False,
     help=(
-        "Include missing-direction gaps on open-vocabulary segments "
-        "(e.g. physical_base) and pseudo segments (grammar_ambiguity). "
-        "Hidden by default because physical_base admits any compound "
-        "token by design — use --direction saturated instead to propose "
-        "common bases as ISN anchors."
+        "Include gaps reported against pseudo segments "
+        "(e.g. grammar_ambiguity). Hidden by default because pseudo "
+        "segments are structural findings, not missing tokens."
     ),
 )
 @click.option(
@@ -2124,9 +2122,9 @@ def sn_gaps(
     Reports two complementary ISN-boundary flows:
 
     * ``missing`` — VocabGap nodes recording tokens the LLM wanted but
-      ISN lacks (closed-segment gaps by default).
-    * ``saturated`` — open-segment tokens (``physical_base``) reused on
-      enough high-quality StandardNames to propose as new ISN anchors.
+      ISN lacks.
+    * ``saturated`` — tokens reused on enough high-quality StandardNames
+      to propose as new ISN vocabulary entries.
 
     The default ``--direction both`` shows both: one table for missing
     tokens to add, one for saturated tokens ready for promotion. Both
@@ -2148,7 +2146,7 @@ def sn_gaps(
     yaml_sections: list[str] = []
 
     # ------------------------------------------------------------------
-    # Saturated direction — promotion candidates for open segments
+    # Saturated direction — promotion candidates
     # ------------------------------------------------------------------
     if direction in ("saturated", "both"):
         from imas_codex.standard_names.vocab_promotion import (

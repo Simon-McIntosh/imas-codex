@@ -2661,7 +2661,7 @@ def _write_grammar_decomposition(
             )
             continue
 
-        # ---- Always-on column write (open-vocab capture) ------------------
+        # ---- Always-on column write ------------------
         column_values = {**null_columns}
         parsed_dump = (
             parsed.model_dump() if hasattr(parsed, "model_dump") else dict(parsed)
@@ -3231,9 +3231,8 @@ def write_vocab_gaps(
     Args:
         gaps: List of gap dicts.
         source_type: Source type ('dd' or 'signals').
-        skip_segment_filter: When ``True``, bypass the open-segment filter.
-            Used by auto-VocabGap detection for ``physical_base`` — the
-            segment is open (any token is valid) but we still want to
+        skip_segment_filter: When ``True``, bypass the segment filter.
+            Used by auto-VocabGap detection — we still want to
             track novel tokens for ISN review.
 
     Returns the number of VocabGap nodes written.
@@ -3246,15 +3245,14 @@ def write_vocab_gaps(
     if not skip_segment_filter:
         from imas_codex.standard_names.segments import filter_closed_segment_gaps
 
-        # Drop gaps reported against open-vocabulary segments (e.g. physical_base)
-        # and pseudo segments (grammar_ambiguity) — they are not missing tokens.
+        # Drop gaps on pseudo segments (grammar_ambiguity) — not missing tokens.
         gaps, dropped = filter_closed_segment_gaps(gaps)
         if dropped:
             from collections import Counter
 
             drop_hist = Counter(g.get("segment") for g in dropped)
             logger.info(
-                "write_vocab_gaps: skipped %d gaps on open/pseudo segments (%s)",
+                "write_vocab_gaps: skipped %d gaps on pseudo segments (%s)",
                 len(dropped),
                 ", ".join(f"{seg}={n}" for seg, n in drop_hist.most_common()),
             )

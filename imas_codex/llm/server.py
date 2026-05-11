@@ -3226,9 +3226,7 @@ class AgentsServer:
 
                 Queries the installed ISN package's ``SEGMENT_TOKEN_MAP``
                 to return the defined token list for the requested segment.
-                Segments with open vocabulary (empty token list) are reported
-                as such. Grammar decomposition is derived on demand via
-                ``parse()``; per-node grammar properties are no longer stored.
+                All vocabulary segments are closed.
 
                 Args:
                     segment: Segment name (case-insensitive). Valid values are
@@ -3238,8 +3236,7 @@ class AgentsServer:
                         position, region, process).
 
                 Returns:
-                    Markdown table of tokens for closed-vocabulary segments,
-                    or an informational message for open-vocabulary segments.
+                    Markdown table of tokens for the requested segment.
                 """
                 from imas_codex.llm.sn_tools import (
                     _list_grammar_vocabulary as _lgv,
