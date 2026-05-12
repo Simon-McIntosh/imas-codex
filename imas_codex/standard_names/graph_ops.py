@@ -2106,6 +2106,9 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
     ``llm_tokens_in`` (int), ``llm_tokens_out`` (int),
     ``llm_model`` (str), ``llm_at`` (str), ``llm_service`` (str).
 
+    Version provenance (auto-injected if not provided):
+    ``codex_version`` (str), ``isn_version`` (str).
+
     MERGE-by-``id`` semantics make re-runs idempotent when the same
     model reviews the same name at the same timestamp.
 
@@ -2127,6 +2130,24 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
     valid = [r for r in records if r.get("id") and r.get("standard_name_id")]
     if not valid:
         return 0
+
+    # Auto-inject codex and ISN versions (same pattern as persist_generated_name_batch)
+    try:
+        import imas_standard_names
+
+        _isn_ver = imas_standard_names.__version__
+    except (ImportError, AttributeError):
+        _isn_ver = None
+    try:
+        import importlib.metadata
+
+        _codex_ver = importlib.metadata.version("imas-codex")
+    except Exception:
+        _codex_ver = None
+    for r in valid:
+        r.setdefault("isn_version", _isn_ver)
+        r.setdefault("codex_version", _codex_ver)
+
     with GraphClient() as gc:
         gc.query(
             """
@@ -2157,7 +2178,9 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                 r.llm_tokens_cached_read = b.llm_tokens_cached_read,
                 r.llm_tokens_cached_write = b.llm_tokens_cached_write,
                 r.llm_at = b.llm_at,
-                r.llm_service = b.llm_service
+                r.llm_service = b.llm_service,
+                r.codex_version = b.codex_version,
+                r.isn_version = b.isn_version
             WITH r, b
             MATCH (sn:StandardName {id: b.standard_name_id})
             MERGE (sn)-[:HAS_REVIEW]->(r)
@@ -2206,6 +2229,8 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                     else 0,
                     "llm_at": r.get("llm_at"),
                     "llm_service": r.get("llm_service"),
+                    "codex_version": r.get("codex_version"),
+                    "isn_version": r.get("isn_version"),
                 }
                 for r in valid
             ],

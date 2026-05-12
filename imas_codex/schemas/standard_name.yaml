@@ -1647,6 +1647,18 @@ classes:
       reviewed_at:
         description: ISO 8601 timestamp when the review completed
         range: datetime
+      codex_version:
+        description: >-
+          imas-codex package version at review time (e.g. "4.1.0").
+          Records which review prompts, rubric, and pipeline logic
+          produced this review.
+        range: string
+      isn_version:
+        description: >-
+          ISN (imas-standard-names) package version at review time
+          (e.g. "0.7.0rc56"). Records which grammar and validation
+          rules were used during review.
+        range: string
 
   PromotionCandidate:
     description: >-

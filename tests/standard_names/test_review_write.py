@@ -197,3 +197,51 @@ class TestBuildReviewRecordIncludesNewFields:
         rec = self._build()
         assert rec.get("reviewer_model") is not None
         assert rec["reviewer_model"] != ""
+
+
+class TestReviewVersionTracking:
+    """codex_version and isn_version must be auto-injected on Review nodes."""
+
+    def test_versions_auto_injected(self) -> None:
+        """write_reviews auto-injects codex_version and isn_version."""
+        record = _make_record()
+        # Don't set versions — they should be auto-injected
+        record.pop("codex_version", None)
+        record.pop("isn_version", None)
+
+        _, calls = _call_write_reviews([record])
+        batch = _extract_batch(calls)
+        row = batch[0]
+
+        # Should be non-None (auto-detected from installed packages)
+        assert row.get("codex_version") is not None, "codex_version not auto-injected"
+        assert row.get("isn_version") is not None, "isn_version not auto-injected"
+
+    def test_versions_in_cypher_set(self) -> None:
+        """Cypher MERGE must SET both version fields."""
+        record = _make_record()
+        _, calls = _call_write_reviews([record])
+
+        merge_cypher = None
+        for c in calls:
+            args = c.args
+            if args and "MERGE (r:StandardNameReview" in args[0]:
+                merge_cypher = args[0]
+                break
+
+        assert merge_cypher is not None
+        assert "r.codex_version = b.codex_version" in merge_cypher
+        assert "r.isn_version = b.isn_version" in merge_cypher
+
+    def test_explicit_versions_preserved(self) -> None:
+        """Explicitly provided versions are not overwritten by auto-injection."""
+        record = _make_record()
+        record["codex_version"] = "99.0.0"
+        record["isn_version"] = "99.0.0rc1"
+
+        _, calls = _call_write_reviews([record])
+        batch = _extract_batch(calls)
+        row = batch[0]
+
+        assert row["codex_version"] == "99.0.0"
+        assert row["isn_version"] == "99.0.0rc1"
