@@ -16,15 +16,6 @@ from datetime import UTC, datetime
 from typing import Any
 
 from imas_standard_names.grammar import (
-    BinaryOperator,
-    Component,
-    GeometricBase,
-    Object,
-    Position,
-    Process,
-    StandardName,
-    Subject,
-    Transformation,
     compose_standard_name,
     parse_standard_name,
 )
@@ -180,40 +171,18 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
             from imas_standard_names.grammar.render import compose
 
             base_kind = candidate.get("base_kind", "quantity")
-            ir = StandardNameIR(
-                base=QuantityOrCarrier(token=base_token, kind=BaseKind(base_kind)),
-            )
+            base = QuantityOrCarrier(token=base_token, kind=BaseKind(base_kind))
+
+            qualifiers = None
+            qualifiers_raw = candidate.get("qualifiers") or []
+            if qualifiers_raw:
+                from imas_standard_names.grammar.ir import Qualifier
+
+                qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
+
+            ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
             from_ir = compose(ir)
             fields_consistent = from_ir == normalized
-        else:
-            # Legacy dict format — try grammar_* properties from graph
-            sn_fields: dict[str, Any] = {}
-            for k, v in candidate.get("grammar_fields", {}).items():
-                if k == "physical_base":
-                    sn_fields[k] = v
-                elif k == "geometric_base":
-                    sn_fields[k] = GeometricBase(v)
-                elif k == "subject":
-                    sn_fields[k] = Subject(v)
-                elif k == "component":
-                    sn_fields[k] = Component(v)
-                elif k == "coordinate":
-                    sn_fields[k] = Component(v)
-                elif k == "position":
-                    sn_fields[k] = Position(v)
-                elif k == "process":
-                    sn_fields[k] = Process(v)
-                elif k == "transformation":
-                    sn_fields[k] = Transformation(v)
-                elif k == "object":
-                    sn_fields[k] = Object(v)
-                elif k == "binary_operator":
-                    sn_fields[k] = BinaryOperator(v)
-
-            if sn_fields:
-                sn = StandardName(**sn_fields)
-                from_fields = compose_standard_name(sn)
-                fields_consistent = from_fields == normalized
     except Exception:
         pass
 

@@ -145,8 +145,8 @@ def test_fetch_review_neighbours_skips_lookups_for_missing_fields():
     )
 
 
-def test_fetch_review_neighbours_grammar_fields_fallback():
-    """``physical_base`` from grammar_fields is honoured when top-level is absent."""
+def test_fetch_review_neighbours_grammar_segments_fallback():
+    """``physical_base`` from grammar_segments is honoured when top-level is absent."""
     gc = _FakeGC(base_rows=[], path_rows=[])
     with patch(
         "imas_codex.standard_names.search.search_standard_names_vector",
@@ -156,7 +156,7 @@ def test_fetch_review_neighbours_grammar_fields_fallback():
             {
                 "id": "x",
                 "description": "y",
-                "grammar_fields": {"physical_base": "torque"},
+                "grammar_segments": {"physical_base": "torque"},
             },
             gc=gc,
         )

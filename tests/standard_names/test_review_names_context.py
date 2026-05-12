@@ -33,7 +33,8 @@ def _full_review_item() -> dict:
         "standard_name": "electron_temperature",
         "unit": "eV",
         "kind": "scalar",
-        "grammar_fields": {"physical_base": "temperature", "subject": "electron"},
+        "physical_base": "temperature",
+        "subject": "electron",
         "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
         "validation_issues": [],
         # Compose-parity context channels
@@ -209,7 +210,6 @@ def test_review_prompt_minimal_item_no_orphan_headers() -> None:
         "standard_name": "time",
         "unit": "s",
         "kind": "scalar",
-        "grammar_fields": {},
         "source_paths": [],
         "validation_issues": [],
     }

@@ -57,7 +57,6 @@ class _RefinedName:
         self.name = name
         self.description = "refined description"
         self.kind = "scalar"
-        self.grammar_fields = {}
         self.reason = "fixes ambiguity"
 
 

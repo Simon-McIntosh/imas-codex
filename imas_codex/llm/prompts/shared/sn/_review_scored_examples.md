@@ -10,7 +10,7 @@ scores are included to calibrate your grammar and self-descriptiveness checks.
 ### Aggregate score {{ "%.2f"|format(ex.reviewer_score) }}
 
 **`{{ ex.id }}`** [{{ ex.unit or 'dimensionless' }}, kind={{ ex.kind }}]
-{% if ex.grammar_fields is defined and ex.grammar_fields %}IR segments: {% for seg, val in ex.grammar_fields.items() %}`{{ seg }}`=`{{ val }}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+{% if ex.grammar_segments is defined and ex.grammar_segments %}IR segments: {% for seg, val in ex.grammar_segments.items() %}`{{ seg }}`=`{{ val }}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
 {% if ex.semantic_sim is defined and ex.semantic_sim is not none %}Semantic similarity (name↔description): {{ "%.3f"|format(ex.semantic_sim) }}{% if ex.semantic_sim >= 0.85 %} ✅{% elif ex.semantic_sim >= 0.70 %} ⚠️{% else %} ❌{% endif %}{% endif %}
 Description: {{ ex.description }}
 {% if ex.documentation %}Documentation: {{ ex.documentation }}{% endif %}

@@ -216,10 +216,8 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
         "reviewer_comments": row.get("reviewer_comments", ""),
         "physics_domain": row.get("physics_domain", ""),
         "target_score": target,
-        # Grammar decomposition (graph properties, not model grammar_fields)
+        # Grammar decomposition (graph properties)
         "grammar_segments": grammar_segments,
-        # Backwards-compat: keep grammar_fields as alias
-        "grammar_fields": grammar_segments,
         "semantic_sim": row.get("semantic_sim"),
         # Template aliases
         "score": row.get("reviewer_score"),

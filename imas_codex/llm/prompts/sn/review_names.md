@@ -158,7 +158,7 @@ real defects, not phantom ones.
 - **Source ID**: {{ item.source_id }}
 - **Unit**: {{ item.unit | default('N/A', true) }} *(authoritative)*
 - **Kind**: {{ item.kind | default('N/A', true) }}
-- **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
+- **Grammar Fields**: {% if item.physical_base %}physical_base={{ item.physical_base }}{% endif %}{% if item.subject %}, subject={{ item.subject }}{% endif %}{% if item.component %}, component={{ item.component }}{% endif %}{% if item.coordinate %}, coordinate={{ item.coordinate }}{% endif %}{% if item.position %}, position={{ item.position }}{% endif %}{% if item.process %}, process={{ item.process }}{% endif %}
 {% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}

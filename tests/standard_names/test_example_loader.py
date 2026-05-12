@@ -355,7 +355,7 @@ class TestReviewExamplesMatchesCompose:
             "score",
             "domain",
             "issues",
-            "grammar_fields",
+            "grammar_segments",
             "semantic_sim",
         }
         assert required_keys.issubset(set(result[0].keys()))
@@ -364,7 +364,7 @@ class TestReviewExamplesMatchesCompose:
 class TestGrammarFieldProjection:
     """Grammar decomposition fields are projected from graph into examples."""
 
-    def test_grammar_fields_populated(self) -> None:
+    def test_grammar_segments_populated(self) -> None:
         row = _sn_row(
             name_id="electron_temperature",
             score=1.0,
@@ -380,7 +380,7 @@ class TestGrammarFieldProjection:
             target_scores=(1.0,),
         )
         assert len(result) == 1
-        gf = result[0]["grammar_fields"]
+        gf = result[0]["grammar_segments"]
         assert gf["physical_base"] == "temperature"
         assert gf["subject"] == "electron"
         # Fields not set should be absent
@@ -405,14 +405,14 @@ class TestGrammarFieldProjection:
             tolerance=0.10,
         )
         assert len(result) == 1
-        gf = result[0]["grammar_fields"]
+        gf = result[0]["grammar_segments"]
         assert gf["physical_base"] == "magnetic_field"
         assert gf["component"] == "radial"
         assert gf["position"] == "separatrix"
         assert "subject" not in gf
 
-    def test_empty_grammar_fields_when_none(self) -> None:
-        """If no grammar segments populated, grammar_fields is empty dict."""
+    def test_empty_grammar_segments_when_none(self) -> None:
+        """If no grammar segments populated, grammar_segments is empty dict."""
         row = _sn_row(score=0.80)
         responses: list[list[dict]] = [[], [row]]
         gc = _make_gc(responses)
@@ -423,7 +423,7 @@ class TestGrammarFieldProjection:
             target_scores=(0.80,),
         )
         assert len(result) == 1
-        assert result[0]["grammar_fields"] == {}
+        assert result[0]["grammar_segments"] == {}
 
 
 class TestSemanticSimProjection:
