@@ -33,11 +33,15 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
 1. **No adjacent duplicate tokens.** Reject any name containing two identical
    consecutive tokens separated by `_` (e.g. ❌ `magnetic_magnetic_field`,
    ❌ `beam_beam_power`, ❌ `ion_ion_collision_frequency`).
-2. **Entity-locus preposition is `_of_`, never `_at_`.** When the tail names
-   a geometric entity — `separatrix`, `magnetic_axis`, `plasma_boundary`,
-   `x_point`, `pedestal`, `limiter`, `last_closed_flux_surface`, `o_point`,
-   `strike_point` — the connector MUST be `_of_`, not `_at_`. ✓
-   `electron_temperature_of_magnetic_axis`; ✗ `electron_temperature_at_magnetic_axis`.
+2. **Locus preposition encodes the physical relationship.**
+   - `_of_` for **intrinsic geometric properties** — quantities that define the
+     entity itself: ✓ `major_radius_of_magnetic_axis`, ✓ `elongation_of_plasma_boundary`.
+   - `_at_` for **field values evaluated at a location** — quantities that exist
+     everywhere but are sampled at a specific point: ✓ `electron_temperature_at_magnetic_axis`,
+     ✓ `safety_factor_at_normalized_poloidal_flux`, ✓ `toroidal_magnetic_field_at_magnetic_axis`.
+   - `_over_` for **integrals over a region**: ✓ `line_integrated_electron_density_over_chord`.
+   **Test:** ask "does the entity *have* this quantity as a defining attribute?"
+   If yes → `_of_`; if no (the quantity is a field sampled there) → `_at_`.
 3. **Hardware tokens are position qualifiers, never bases or prefixes.**
    Tokens naming diagnostic hardware — `probe`, `sensor`, `antenna`,
    `channel`, `injector`, `aperture`, `coil`, `mirror`, `launcher` — may
