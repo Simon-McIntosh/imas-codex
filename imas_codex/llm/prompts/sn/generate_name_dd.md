@@ -378,36 +378,38 @@ description is used for embedding, search, and human review. Examples:
 Do NOT repeat the standard name verbatim — add context that helps a reader
 understand what the quantity represents physically.
 
-## Grammar Fields — MANDATORY
+## IR Segment Fields — MANDATORY
 
-For **every** candidate you emit, populate the `grammar_fields` map with the
-grammar-segment decomposition of `standard_name`. This is not optional — it
-is how downstream tooling validates the round-trip
-`parse(name) → compose() == name`.
+**You do NOT output a `standard_name` string.** You fill individual IR segment
+fields. Code assembles the canonical name via ISN's `compose()` function.
 
-Use only these keys (omit keys whose segment is absent from the name):
+For **every** candidate you emit, populate the IR segment fields. This is not
+optional — it is how downstream tooling assembles and validates the name.
 
-```
-subject, process, physical_base, geometric_base,
-component, basis, position, reducer, reference, statistic
-```
+**Required fields:**
+- `base_token`: the irreducible base quantity from the registry (e.g., `"temperature"`, `"magnetic_field"`)
+- `base_kind`: `"quantity"` or `"geometry"`
+
+**Optional segment fields** (omit or set null when not applicable):
+- `projection_axis` + `projection_shape`: for vector/coordinate projections
+- `qualifiers`: list of species/population/modifier tokens
+- `locus_token` + `locus_relation` + `locus_type`: for postfix locus
+- `process_token`: for `_due_to_` mechanism
+- `operator_token` + `operator_kind`: for mathematical operators
 
 **Examples:**
 
 - `electron_temperature` →
-  `{"subject": "electron", "physical_base": "temperature"}`
-- `electron_temperature_core` →
-  `{"subject": "electron", "physical_base": "temperature", "position": "core"}`
+  `base_token="temperature"`, `base_kind="quantity"`, `qualifiers=["electron"]`
 - `radial_magnetic_field` →
-  `{"component": "radial", "physical_base": "magnetic_field"}`
+  `base_token="magnetic_field"`, `base_kind="quantity"`, `projection_axis="radial"`, `projection_shape="component"`
 - `minor_radius_of_plasma_boundary` →
-  `{"physical_base": "minor_radius", "position": "plasma_boundary"}`
-- `distance_between_plasma_boundary_and_closest_wall_point` →
-  Emit a `vocab_gap` — this compound is not in the `physical_base` registry.
-  Consider using `gap` (registered) with appropriate position qualifiers instead.
+  `base_token="minor_radius"`, `base_kind="geometry"`, `locus_token="plasma_boundary"`, `locus_relation="of"`, `locus_type="geometry"`
+- `time_derivative_of_electron_density` →
+  `base_token="density"`, `base_kind="quantity"`, `qualifiers=["electron"]`, `operator_token="time_derivative"`, `operator_kind="unary_prefix"`
 
-If you cannot decompose the name, the name is wrong — revise it rather than
-emit an empty `grammar_fields`.
+If you cannot decompose into valid IR segments, the concept is wrong — revise
+rather than emit empty segments.
 
 ## Vocabulary Gaps
 

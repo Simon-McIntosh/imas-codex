@@ -137,40 +137,40 @@ Examples:
 
 {% endfor %}
 
-### Decomposition Checklist — apply BEFORE you commit a name
+### Decomposition Checklist — apply BEFORE you commit your IR segments
 
-For every candidate name, run these checks IN ORDER. If any fires, restructure
-before emitting:
+For every candidate, run these checks IN ORDER. If any fires, fix the
+IR segment fields before emitting:
 
-1. **Tokenise the candidate on `_`.**  Walk the resulting tokens left-to-right.
+1. **Tokenise the candidate `base_token` on `_`.**  Walk the resulting tokens left-to-right.
 2. **For each token (and 2-token / 3-token compound), look it up in the
    registry above.**  If the token appears in any segment, it MUST occupy
-   that segment slot in `grammar_fields`, not be absorbed into `physical_base`.
+   that segment's IR field, not be absorbed into `base_token`.
 3. **Whitelist genuine atomic compounds** that share a prefix with a
    registered token but are NOT decomposable: `poloidal_flux`, `minor_radius`,
    `cross_sectional_area`, `safety_factor`, `polarization_angle`,
    `ellipticity_angle`, `loop_voltage`, `internal_inductance`. These are
    single, lexicalised physics terms.
 4. **If a registered token is present but no atomic compound rule exempts
-   it**, restructure:
-   - `<component>_<base>` → place `<component>` in the `component` slot of
-     `grammar_fields`; the canonical rendering is `<component>_<base>` (short form).
-   - `<subject>_<base>` → keep `<subject>` in the `subject` slot; never let
-     it leak into `physical_base`.
-   - `<transformation>_<base>` → `<transformation>_of_<base>` with the
-     transformation in its own slot.
-   - `<base>_<process>` → `<base>_due_to_<process>` with the process in
-     its own slot.
-   - `<base>_<region>` → `<base>_over_<region>` with the region in its own slot.
-5. **Re-render the name** from the corrected `grammar_fields` and confirm the
-   `physical_base` slot contains ONLY one of the registered base tokens.
-   If the intended base is not in the registry, emit a `vocab_gap` for `physical_base`.
+   it**, place it in the correct IR segment field:
+   - `<component>_<base>` → set `projection_axis` to the component token;
+     `base_token` is the base only.
+   - `<subject>_<base>` → put the subject in `qualifiers`; never let
+     it leak into `base_token`.
+   - `<transformation>_<base>` → set `operator_token` to the transformation,
+     `operator_kind` to `"unary_prefix"`.
+   - `<base>_<process>` → set `process_token` to the process token.
+   - `<base>_<region>` → set `locus_token` to the region, `locus_relation`
+     to `"over"`, `locus_type` to `"region"`.
+5. **Verify** the `base_token` field contains ONLY one of the registered base
+   tokens. If the intended base is not in the registry, emit a `vocab_gap`
+   for that segment.
 6. **If a needed token is missing from ANY registry**, emit a `vocab_gap`
    against that segment — DO NOT invent tokens.
 
 This checklist addresses the dominant failure mode: registered tokens
 (toroidal, parallel, thermal, e_cross_b_drift, normalized, fast_ion, …)
-absorbed into `physical_base` instead of placed in their correct grammar slot.
+absorbed into `base_token` instead of placed in their correct IR segment field.
 
 ### Top Absorption Failures — Concrete Examples
 
@@ -178,7 +178,7 @@ These are the MOST FREQUENTLY absorbed tokens (observed in 73% of reviewed
 names). Study each example — if you see any of these patterns in your
 output, restructure immediately:
 
-| ❌ Wrong (absorbed into physical_base) | ✅ Correct (decomposed) | Absorbed Token → Correct Segment |
+| ❌ Wrong (absorbed into base_token) | ✅ Correct (decomposed into IR) | Absorbed Token → Correct IR Field |
 |-----------------------------------------|-------------------------|----------------------------------|
 | `toroidal_angle_of_position` | `toroidal_angle` (coord=toroidal, geom_base=angle) | `toroidal` → coordinate |
 | `parallel_current_density` | `parallel_current_density` (component=parallel, base=current_density) | `parallel` → component |
@@ -206,10 +206,11 @@ adding ANY entry to `vocab_gaps`, run these checks in order:
    underscores and check if each part is a registered token in any segment.
    If ALL parts map to existing tokens, decompose instead of reporting a gap.
    - ❌ `vocab_gap(segment="physical_base", needed_token="plasma_pressure")` —
-     `plasma` is a qualifier, `pressure` is a physical_base → use
-     subject=`total_plasma` + base=`pressure`
+     `plasma` is a qualifier, `pressure` is a base → use
+     `qualifiers=["total_plasma"]` + `base_token="pressure"`
    - ❌ `vocab_gap(segment="physical_base", needed_token="poloidal_magnetic_flux")` —
-     `poloidal` is a component, `magnetic_flux` is a physical_base → decompose
+     `poloidal` is a component, `magnetic_flux` is a base → set
+     `projection_axis="poloidal"`, `projection_shape="component"`, `base_token="magnetic_flux"`
    - ❌ `vocab_gap(segment="physical_base", needed_token="crushing_force")` —
      if the concept can be expressed as qualifier + base, do that
 

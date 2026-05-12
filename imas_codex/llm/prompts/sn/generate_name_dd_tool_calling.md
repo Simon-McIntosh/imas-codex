@@ -45,8 +45,18 @@ directly if the context is obvious.
 
 ## Output
 
-Return a JSON array of `{path, standard_name, rationale}` objects. The
-`rationale` must be one sentence citing the physical quantity and any
-tool call evidence you used.
+**You do NOT output a `standard_name` string.** You fill individual IR segment
+fields. Code assembles the canonical name via ISN's `compose()` function.
+
+Return a JSON array of objects. Each object includes:
+- `path`: the DD path
+- `base_token`: irreducible base quantity from the registry
+- `base_kind`: `"quantity"` or `"geometry"`
+- `projection_axis`, `projection_shape`: for vector/coordinate projections (null if none)
+- `qualifiers`: list of qualifier tokens (empty list if none)
+- `locus_token`, `locus_relation`, `locus_type`: for postfix locus (null if none)
+- `process_token`: for `_due_to_` (null if none)
+- `operator_token`, `operator_kind`: for operators (null if none)
+- `rationale`: one sentence citing the physical quantity and any tool call evidence
 
 {{ paths_block }}

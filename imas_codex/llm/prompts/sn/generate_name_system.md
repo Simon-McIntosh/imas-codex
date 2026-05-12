@@ -17,7 +17,9 @@ Standard names are a **standalone semantic data model** for fusion plasma physic
 
 **The name itself must be semantically self-describing.** A reader must be able to deduce the standard name's function from the name string alone, without consulting the description or any external documentation. The description and documentation add depth and precision, but the name is the primary semantic handle.
 
-Your output is a **canonical standard name string** plus a description. The ISN parser and 5-group IR are authoritative — you produce the name, the parser validates it. You do NOT emit IR JSON; just the canonical name.
+**You do NOT compose a name string.** You fill individual IR (Intermediate Representation) segment fields. Code will compose the canonical name from your segments via ISN's `compose()` function. Each segment field has a closed vocabulary — use only registered tokens.
+
+Your output is a set of **IR segment fields** (base_token, base_kind, projection_axis, qualifiers, locus_token, etc.) plus a description. The ISN composer and parser are authoritative — you produce the segments, the composer assembles the canonical name string.
 
 {% include "sn/_grammar_reference.md" %}
 
@@ -653,23 +655,173 @@ Return **only** a JSON object — no prose, no markdown code fences, no commenta
 The response must be valid JSON matching the schema below.
 
 Top-level keys:
-- `candidates`: array of standard name compositions (see schema below)
+- `candidates`: array of standard name compositions (see Candidate Schema below)
 - `attachments`: array of `{source_id, standard_name, reason}` for DD paths that map to an **existing** standard name without needing regeneration. Use this when an existing name from the "Existing Standard Names" or "Nearby Existing Standard Names" list is a perfect match for the DD path — this avoids regenerating documentation for already-concrete names.
 - `skipped`: array of source_ids that are not distinct physics quantities
 
-### Candidate Schema
+### Candidate Schema — IR Segment Fields
 
 <!-- KEEP IN SYNC WITH StandardNameCandidate in imas_codex/standard_names/models.py.
      Drift is caught at CI time by tests/standard_names/test_compose_schema_consistency.py. -->
 
-Each candidate MUST include:
-- `source_id`: full DD path (e.g., "equilibrium/time_slice/profiles_1d/psi")
-- `standard_name`: the composed name in snake_case
-- `description`: one-sentence summary, **under 120 characters** (e.g., "Electron temperature profile on the poloidal flux grid")
+**You do NOT output a `standard_name` string.** You fill individual IR segment
+fields. Code assembles the canonical name via ISN's `compose()` function.
+
+Each candidate MUST include these fields:
+
+**IR segment fields (the name is assembled from these):**
+- `source_id`: full DD path (e.g., `"equilibrium/time_slice/profiles_1d/psi"`)
+- `base_token` (**required**): the irreducible physical or geometric quantity from the closed base registry (e.g., `"temperature"`, `"magnetic_flux"`, `"position"`)
+- `base_kind` (**required**): `"quantity"` for physical quantities, `"geometry"` for geometric carriers
+- `projection_axis`: axis projection prefix — one of the registered component/coordinate tokens (e.g., `"radial"`, `"toroidal"`, `"poloidal"`, `"parallel"`). Null if no projection.
+- `projection_shape`: `"component"` (vector component) or `"coordinate"` (coordinate system). Required when `projection_axis` is set; null otherwise.
+- `qualifiers`: ordered list of qualifier tokens (species, population, modifiers) from the qualifier + subject registries (e.g., `["electron"]`, `["thermal", "ion"]`, `["absorbed"]`). Empty list `[]` if none.
+- `locus_token`: the entity, position, or region token for the postfix locus (e.g., `"magnetic_axis"`, `"flux_loop"`, `"plasma_boundary"`). Null if no locus.
+- `locus_relation`: preposition for the locus — `"of"` (entity property), `"at"` (field value at point), or `"over"` (region integral). Required when `locus_token` is set; null otherwise.
+- `locus_type`: semantic type of the locus — `"entity"` (device/object), `"position"` (spatial point), `"region"` (spatial region), or `"geometry"` (geometric feature). Required when `locus_token` is set; null otherwise.
+- `process_token`: process/mechanism token for `_due_to_` suffix (e.g., `"bootstrap"`, `"collisions"`). Null if no process attribution.
+- `operator_token`: mathematical operator token (e.g., `"time_derivative"`, `"gradient"`, `"normalized"`, `"magnitude"`). Null if no operator.
+- `operator_kind`: `"unary_prefix"` (wraps with `_of_` scope) or `"unary_postfix"` (appends directly). Required when `operator_token` is set; null otherwise.
+
+**Non-IR fields (metadata about the candidate):**
+- `description`: one-sentence summary, **under 120 characters** (e.g., `"Electron temperature on the poloidal flux grid"`)
 - `kind`: one of `"scalar"`, `"vector"`, `"metadata"` — see classification rules
 - `dd_paths`: array of IMAS DD paths this name maps to (include the source_id at minimum)
-- `grammar_fields`: dict of grammar fields used (only non-null fields)
-- `reason`: brief justification (≤25 words — list grammar tokens used; do not restate description)
+- `reason`: brief justification (≤25 words — list the IR segments used; do not restate description)
+
+### IR Segment Worked Examples
+
+**Bare quantity:**
+```json
+{
+  "source_id": "core_profiles/profiles_1d/electrons/temperature",
+  "base_token": "temperature",
+  "base_kind": "quantity",
+  "qualifiers": ["electron"],
+  "reason": "qualifier=electron, base=temperature"
+}
+```
+→ Composed name: `electron_temperature`
+
+**Projection + base (poloidal magnetic flux):**
+```json
+{
+  "source_id": "equilibrium/time_slice/profiles_1d/psi",
+  "base_token": "magnetic_flux",
+  "base_kind": "quantity",
+  "projection_axis": "poloidal",
+  "projection_shape": "component",
+  "qualifiers": [],
+  "description": "Poloidal magnetic flux on the 1D radial grid",
+  "kind": "scalar",
+  "dd_paths": ["equilibrium/time_slice/profiles_1d/psi"],
+  "reason": "projection=poloidal component, base=magnetic_flux"
+}
+```
+→ Composed name: `poloidal_magnetic_flux`
+
+**Locus with `_at_` (field value at a point):**
+```json
+{
+  "source_id": "core_profiles/global_quantities/electrons/n_e_at_axis",
+  "base_token": "density",
+  "base_kind": "quantity",
+  "qualifiers": ["electron"],
+  "locus_token": "magnetic_axis",
+  "locus_relation": "at",
+  "locus_type": "position",
+  "description": "Electron density evaluated at the magnetic axis",
+  "kind": "scalar",
+  "dd_paths": ["core_profiles/global_quantities/electrons/n_e_at_axis"],
+  "reason": "qualifier=electron, base=density, locus=at magnetic_axis"
+}
+```
+→ Composed name: `electron_density_at_magnetic_axis`
+
+**Locus with `_of_` (entity property):**
+```json
+{
+  "source_id": "magnetics/flux_loop/position/r",
+  "base_token": "position",
+  "base_kind": "geometry",
+  "projection_axis": "radial",
+  "projection_shape": "coordinate",
+  "qualifiers": [],
+  "locus_token": "flux_loop",
+  "locus_relation": "of",
+  "locus_type": "entity",
+  "description": "Radial position of the flux loop",
+  "kind": "scalar",
+  "dd_paths": ["magnetics/flux_loop/position/r"],
+  "reason": "projection=radial coordinate, base=position, locus=of flux_loop"
+}
+```
+→ Composed name: `radial_position_of_flux_loop`
+
+**Prefix operator (time derivative):**
+```json
+{
+  "source_id": "core_profiles/profiles_1d/electrons/temperature_dot",
+  "base_token": "temperature",
+  "base_kind": "quantity",
+  "qualifiers": ["electron"],
+  "operator_token": "time_derivative",
+  "operator_kind": "unary_prefix",
+  "description": "Time derivative of the electron temperature",
+  "kind": "scalar",
+  "dd_paths": ["core_profiles/profiles_1d/electrons/temperature_dot"],
+  "reason": "operator=time_derivative prefix, qualifier=electron, base=temperature"
+}
+```
+→ Composed name: `time_derivative_of_electron_temperature`
+
+**Process suffix (`_due_to_`):**
+```json
+{
+  "source_id": "core_transport/model/profiles_1d/ion/energy/flux_due_to_collisions",
+  "base_token": "energy",
+  "base_kind": "quantity",
+  "qualifiers": ["ion"],
+  "process_token": "collisions",
+  "description": "Ion energy flux due to collisional processes",
+  "kind": "scalar",
+  "dd_paths": ["core_transport/model/profiles_1d/ion/energy/flux_due_to_collisions"],
+  "reason": "qualifier=ion, base=energy, process=collisions"
+}
+```
+→ Composed name: `ion_energy_due_to_collisions`
+
+**Multi-qualifier:**
+```json
+{
+  "source_id": "core_profiles/profiles_1d/pressure_total",
+  "base_token": "pressure",
+  "base_kind": "quantity",
+  "qualifiers": ["total_plasma"],
+  "description": "Total plasma pressure including all species",
+  "kind": "scalar",
+  "dd_paths": ["core_profiles/profiles_1d/pressure_total"],
+  "reason": "qualifier=total_plasma, base=pressure"
+}
+```
+→ Composed name: `total_plasma_pressure`
+
+**Postfix operator:**
+```json
+{
+  "source_id": "equilibrium/time_slice/profiles_1d/b_field_mag",
+  "base_token": "magnetic_field",
+  "base_kind": "quantity",
+  "qualifiers": [],
+  "operator_token": "magnitude",
+  "operator_kind": "unary_postfix",
+  "description": "Magnitude of the total magnetic field",
+  "kind": "scalar",
+  "dd_paths": ["equilibrium/time_slice/profiles_1d/b_field_mag"],
+  "reason": "base=magnetic_field, operator=magnitude postfix"
+}
+```
+→ Composed name: `magnetic_field_magnitude`
 
 {% if kind_definitions %}
 ### Kind Classification Rules

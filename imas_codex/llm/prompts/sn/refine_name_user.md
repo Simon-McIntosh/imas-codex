@@ -139,18 +139,21 @@ identified in the history above.
 Rules:
 - Do **not** repeat any name that appears in the refinement history.
 - Do **not** include unit or physics_domain — those are injected post-LLM.
-- Follow the standard name grammar: `snake_case`, physical_base last (or with
-  qualified suffix), no abbreviations, no instrument prefixes for generic
-  observables.
+- Follow the standard name grammar: fill IR segment fields (`base_token`,
+  `base_kind`, `projection_axis`, `qualifiers`, etc.), no abbreviations,
+  no instrument prefixes for generic observables.
 - **Locus prepositions:** Named geometric entities (separatrix, magnetic_axis,
   plasma_boundary, x_point) and hardware objects (probe, coil, antenna) use
-  `_of_`. Abstract spatial regions from the position vocabulary (core,
-  pedestal_top, lcfs) use `_at_`.
+  `locus_relation="of"`. Abstract spatial regions from the position vocabulary
+  (core, pedestal_top, lcfs) use `locus_relation="at"`.
 - Provide a short `description` (≤ 120 chars, one sentence, no LaTeX).
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "profile", "array"
   in descriptions. Describe the *physics*, not data layout.
 - **American English only** — "center" not "centre", "meter" not "metre".
-- Provide `grammar_fields` decomposing the name into grammar segments.
+- Provide all applicable IR segment fields — `base_token`, `base_kind`,
+  `projection_axis`, `projection_shape`, `qualifiers`, `locus_token`,
+  `locus_relation`, `locus_type`, `process_token`, `operator_token`,
+  `operator_kind`.
 - Provide a brief `reason` explaining how this attempt addresses the reviewer's
   specific concerns from the history above.
 
