@@ -3,7 +3,7 @@
 Pure logic module — no graph access, no I/O.  Given a single
 StandardName id string, ``derive_edges`` peels the outermost ISN
 grammar operator/projection and returns the corresponding
-``COMPONENT_OF`` or ``HAS_ERROR`` edge descriptor.
+``COMPONENT_OF``, ``HAS_ERROR``, or ``HAS_GEOMETRY`` edge descriptor.
 
 Recursion is structural: when the inner StandardName is itself written
 to the graph, *its* derivation runs and emits *its* own edge.  We never
@@ -31,7 +31,7 @@ _UNCERTAINTY_OPS: dict[str, str] = {
 class DerivedEdge:
     """A single derived structural edge between two StandardName ids."""
 
-    edge_type: str  # "COMPONENT_OF" or "HAS_ERROR"
+    edge_type: str  # "COMPONENT_OF", "HAS_ERROR", or "HAS_GEOMETRY"
     from_name: str  # source StandardName id
     to_name: str  # target StandardName id
     props: dict  # edge properties (operator, operator_kind, …)
@@ -61,6 +61,13 @@ def derive_edges(name: str) -> list[DerivedEdge]:
     Pure function.  The ISN parser is the sole source of structural truth.
     Names the parser cannot parse produce no edges (leaf treatment).
 
+    Edge types produced:
+
+    - ``COMPONENT_OF``: projection / operator / coordinate decomposition.
+    - ``HAS_ERROR``: uncertainty siblings.
+    - ``HAS_GEOMETRY``: locus grouping — names sharing the same ISN
+      ``geometry`` slot (e.g. ``magnetic_axis``, ``plasma_boundary``).
+
     Parameters
     ----------
     name:
@@ -69,15 +76,24 @@ def derive_edges(name: str) -> list[DerivedEdge]:
     Returns
     -------
     list[DerivedEdge]
-        Zero, one, or two edges depending on the outermost IR shape.
-        Returns ``[]`` for unparseable names and leaf names.
+        Zero or more edges depending on the outermost IR shape and
+        locus qualification.  Returns ``[]`` for unparseable names
+        and leaf names with no geometry slot.
     """
     try:
         result = parser.parse(name)
     except Exception:
-        return _regex_fallback(name)
+        edges = _regex_fallback(name)
+        return edges + _locus_check(name)
 
     ir = result.ir
+    structural = _derive_structural(name, ir)
+    locus = _locus_check(name)
+    return structural + locus
+
+
+def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge]:
+    """Derive COMPONENT_OF / HAS_ERROR edges from the IR parse tree."""
 
     # --- Outermost operator ---
     if ir.operators:
@@ -214,6 +230,50 @@ def derive_edges(name: str) -> list[DerivedEdge]:
 
     # Leaf: no operator, no projection — try geometric coordinate
     return _geometric_coordinate_check(name)
+
+
+def _locus_check(name: str) -> list[DerivedEdge]:
+    """Detect locus-qualified names and emit HAS_GEOMETRY grouping edges.
+
+    ISN grammar's ``geometry`` slot captures the locus qualifier in names
+    like ``major_radius_of_magnetic_axis`` (geometry=magnetic_axis) or
+    ``elongation_of_plasma_boundary`` (geometry=plasma_boundary).
+
+    Names sharing the same ``geometry`` form a **locus family** — they
+    describe different physical quantities measured at the same geometric
+    location.  The ``HAS_GEOMETRY`` edge groups them by linking each name
+    to a shared locus node (e.g. ``magnetic_axis``, ``plasma_boundary``).
+
+    Returns ``[]`` when the name has no geometry slot.
+    """
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+
+        parsed = parse_standard_name(name)
+    except Exception:
+        return []
+
+    if parsed is None:
+        return []
+
+    geometry = getattr(parsed, "geometry", None)
+    if geometry is None:
+        return []
+
+    geometry_value = (
+        str(geometry.value) if hasattr(geometry, "value") else str(geometry)
+    )
+    if not geometry_value:
+        return []
+
+    return [
+        DerivedEdge(
+            "HAS_GEOMETRY",
+            name,
+            geometry_value,
+            {"geometry": geometry_value},
+        )
+    ]
 
 
 def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:

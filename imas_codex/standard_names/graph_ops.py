@@ -1177,6 +1177,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
 
     co_batch: list[dict[str, Any]] = []  # COMPONENT_OF
     he_batch: list[dict[str, Any]] = []  # HAS_ERROR
+    geo_batch: list[dict[str, Any]] = []  # HAS_GEOMETRY
 
     for n in names:
         name_id = n.get("id")
@@ -1202,6 +1203,13 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
                         "from_name": edge.from_name,
                         "to_name": edge.to_name,
                         "error_type": edge.props.get("error_type"),
+                    }
+                )
+            elif edge.edge_type == "HAS_GEOMETRY":
+                geo_batch.append(
+                    {
+                        "from_name": edge.from_name,
+                        "geometry": edge.props.get("geometry"),
                     }
                 )
 
@@ -1236,6 +1244,18 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
             SET r.error_type = b.error_type
             """,
             batch=he_batch,
+        )
+
+    if geo_batch:
+        gc.query(
+            """
+            UNWIND $batch AS b
+            MERGE (src:StandardName {id: b.from_name})
+            MERGE (geo:Geometry {id: b.geometry})
+            MERGE (src)-[r:HAS_GEOMETRY]->(geo)
+            SET r.geometry = b.geometry
+            """,
+            batch=geo_batch,
         )
 
     # --- HAS_PREDECESSOR / HAS_SUCCESSOR ---

@@ -248,9 +248,13 @@ def test_d13_maximum_of_temperature_at_plasma_boundary():
 
 
 def test_d14_elongation_of_plasma_boundary():
-    """elongation_of_plasma_boundary is a leaf — locus only, no operator."""
+    """elongation_of_plasma_boundary — locus only, no COMPONENT_OF, but HAS_GEOMETRY."""
     edges = derive_edges("elongation_of_plasma_boundary")
-    assert edges == []
+    co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+    geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+    assert co == []
+    assert len(geo) == 1
+    assert geo[0].to_name == "plasma_boundary"
 
 
 # ---------------------------------------------------------------------------
@@ -362,14 +366,16 @@ class TestGeometricCoordinateDerivation:
         edges = derive_edges("vertical_coordinate_of_first_point_of_line_of_sight")
         assert edges == []
 
-    def test_compound_coordinate_measurement_position_no_edge(self):
-        """vertical_coordinate_of_measurement_position → no edge.
+    def test_compound_coordinate_measurement_position_no_component_edge(self):
+        """vertical_coordinate_of_measurement_position → no COMPONENT_OF edge.
 
         Without the fix, this would create a COMPONENT_OF edge to
         'coordinate', grouping unrelated positions together.
+        May produce a HAS_GEOMETRY edge to measurement_position.
         """
         edges = derive_edges("vertical_coordinate_of_measurement_position")
-        assert edges == []
+        co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+        assert co == []
 
     def test_toroidal_angle_of_qualified_no_edge(self):
         """toroidal_angle_of_first_point_of_line_of_sight → no edge.
@@ -378,3 +384,58 @@ class TestGeometricCoordinateDerivation:
         """
         edges = derive_edges("toroidal_angle_of_first_point_of_line_of_sight")
         assert edges == []
+
+
+# ---------------------------------------------------------------------------
+# D17-D22 — HAS_GEOMETRY locus family edges
+# ---------------------------------------------------------------------------
+
+
+class TestLocusGeometry:
+    """Locus-qualified names emit HAS_GEOMETRY edges for family grouping."""
+
+    def test_d17_major_radius_of_magnetic_axis(self):
+        """major_radius_of_magnetic_axis → HAS_GEOMETRY to magnetic_axis."""
+        edges = derive_edges("major_radius_of_magnetic_axis")
+        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+        assert len(geo) == 1
+        assert geo[0].from_name == "major_radius_of_magnetic_axis"
+        assert geo[0].to_name == "magnetic_axis"
+        assert geo[0].props["geometry"] == "magnetic_axis"
+
+    def test_d18_vertical_coordinate_of_magnetic_axis(self):
+        """vertical_coordinate_of_magnetic_axis → HAS_GEOMETRY to magnetic_axis."""
+        edges = derive_edges("vertical_coordinate_of_magnetic_axis")
+        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+        assert len(geo) == 1
+        assert geo[0].to_name == "magnetic_axis"
+
+    def test_d19_elongation_of_plasma_boundary(self):
+        """elongation_of_plasma_boundary → HAS_GEOMETRY to plasma_boundary."""
+        edges = derive_edges("elongation_of_plasma_boundary")
+        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+        assert len(geo) == 1
+        assert geo[0].from_name == "elongation_of_plasma_boundary"
+        assert geo[0].to_name == "plasma_boundary"
+
+    def test_d20_locus_family_same_target(self):
+        """Names sharing the same geometry slot point to the same target."""
+        edges_r = derive_edges("major_radius_of_magnetic_axis")
+        edges_z = derive_edges("vertical_coordinate_of_magnetic_axis")
+        geo_r = [e for e in edges_r if e.edge_type == "HAS_GEOMETRY"]
+        geo_z = [e for e in edges_z if e.edge_type == "HAS_GEOMETRY"]
+        assert len(geo_r) == 1
+        assert len(geo_z) == 1
+        assert geo_r[0].to_name == geo_z[0].to_name == "magnetic_axis"
+
+    def test_d21_no_geometry_for_plain_leaf(self):
+        """Leaf names with no geometry slot produce no HAS_GEOMETRY edges."""
+        edges = derive_edges("temperature")
+        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+        assert geo == []
+
+    def test_d22_no_geometry_for_operator(self):
+        """Operator names without geometry produce no HAS_GEOMETRY edges."""
+        edges = derive_edges("maximum_of_temperature")
+        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+        assert geo == []
