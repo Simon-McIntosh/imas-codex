@@ -24,7 +24,7 @@ console = Console()
 
 
 class _SpaceSplitMultiple(click.Option):
-    """Click option that accepts both repeated flags and space-separated values.
+    """Click option that splits quoted space-separated values.
 
     ``--focus "a b c" --focus d`` produces ``('a', 'b', 'c', 'd')``.
     Each flag invocation may contain whitespace-separated tokens that are
@@ -875,6 +875,7 @@ def _check_pipeline_clear_gate() -> None:
         "Also read from IMAS_CODEX_SN_REVIEW_PROFILE env var."
     ),
 )
+@click.argument("paths", nargs=-1)
 def sn_run(
     source: str,
     domains: tuple[str, ...],
@@ -888,6 +889,7 @@ def sn_run(
     verbose: bool,
     quiet: bool,
     focus_paths: tuple[str, ...],
+    paths: tuple[str, ...],
     reset_to: str | None,
     from_model: str | None,
     revalidate: bool,
@@ -919,13 +921,19 @@ def sn_run(
       - With --focus: full 6-pool pipeline scoped to specific DD paths
 
     \b
+    Focus paths can be provided as trailing arguments or via --focus:
+      imas-codex sn run eq/path/a eq/path/b eq/path/c       # positional (simplest)
+      imas-codex sn run --focus "path/a path/b" --focus c    # quoted space-sep
+      imas-codex sn run --focus path/a --focus path/b        # repeated flags
+
+    \b
     Examples:
       imas-codex sn run -c 50                                 # all 6 pools, full run
       imas-codex sn run --domain equilibrium -c 5             # scoped to one domain
       imas-codex sn run --domain equilibrium --domain transport  # two domains
       imas-codex sn run --domain "equilibrium transport" --dry-run  # same, space-sep
       imas-codex sn run --source signals --facility tcv --domain magnetics
-      imas-codex sn run --focus equilibrium/time_slice/profiles_1d/psi  # debug single path
+      imas-codex sn run --names-only -c 5 eq/time_slice/profiles_1d/psi eq/time_slice/profiles_1d/q
       imas-codex sn run --focus eq/.../psi --focus eq/.../q   # debug multiple paths
       imas-codex sn run --reset-to drafted --reset-only
       imas-codex sn run --reset-to drafted --below-score 0.6 --reset-only
@@ -966,7 +974,8 @@ def sn_run(
         skip_generate_from_only = False
 
     # Flatten --focus values (handled by _SpaceSplitMultiple.type_cast_value).
-    flat_focus = list(focus_paths)
+    # Merge with trailing positional paths argument.
+    flat_focus = list(focus_paths) + list(paths)
 
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
