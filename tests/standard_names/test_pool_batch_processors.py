@@ -102,14 +102,17 @@ def _mock_compose_llm_result(items: list[dict]) -> Any:
     for item in items:
         path = item.get("path", f"unknown/{len(candidates)}")
         cand = SimpleNamespace(
-            standard_name=f"test_name_{len(candidates)}",
+            base_token=f"test_base_{len(candidates)}",
+            base_kind="quantity",
+            qualifiers=[],
             source_id=path,
             description=f"Test description for {path}",
             kind="scalar",
             dd_paths=[path],
-            grammar_fields={},
             reason="test",
         )
+        # Add compose_name method
+        cand.compose_name = lambda c=cand: f"{c.base_token}"
         candidates.append(cand)
     result = SimpleNamespace(
         candidates=candidates,

@@ -212,7 +212,7 @@ def _load_known_physical_bases() -> frozenset[str]:
 
 
 def _auto_detect_physical_base_gaps(
-    candidates: list,  # StandardNameCandidate instances
+    candidates: list,  # StandardNameCandidate instances or dicts
     known_bases: frozenset[str] | None = None,
 ) -> list[dict]:
     """Parse each candidate name and surface novel ``physical_base`` tokens.
@@ -222,7 +222,7 @@ def _auto_detect_physical_base_gaps(
     explicit ``vocab_gap`` exits for ``physical_base``.
 
     Args:
-        candidates: Parsed ``StandardNameCandidate`` objects from the LLM.
+        candidates: Parsed ``StandardNameCandidate`` objects or dicts.
         known_bases: Pre-loaded set of registered physical_base tokens.
             Defaults to ``_load_known_physical_bases()`` if not provided.
     """
@@ -232,27 +232,39 @@ def _auto_detect_physical_base_gaps(
     gaps: list[dict] = []
     seen: set[tuple[str, str]] = set()  # (source_id, base) dedup
 
-    try:
-        from imas_standard_names.grammar import parse_standard_name
-    except ImportError:
-        return gaps  # ISN not installed — skip detection
-
     for c in candidates:
         try:
-            parsed = parse_standard_name(c.standard_name)
-            base = parsed.physical_base
-            if base and base not in known_bases:
-                key = (c.source_id, base)
+            # Handle both model instances and dicts
+            if hasattr(c, "base_token"):
+                base = c.base_token
+                source_id = c.source_id
+                base_kind = getattr(c, "base_kind", "quantity")
+            elif isinstance(c, dict):
+                base = c.get("id", "")  # dict candidates use 'id' for name
+                source_id = c.get("source_id", "")
+                # For dicts, parse the name to extract base
+                try:
+                    from imas_standard_names.grammar import parse_standard_name
+
+                    parsed = parse_standard_name(base)
+                    base = parsed.physical_base
+                    base_kind = "quantity"
+                except Exception:
+                    continue
+            else:
+                continue
+
+            if base_kind == "quantity" and base and base not in known_bases:
+                key = (source_id, base)
                 if key not in seen:
                     seen.add(key)
                     gaps.append(
                         {
-                            "source_id": c.source_id,
+                            "source_id": source_id,
                             "segment": "physical_base",
                             "needed_token": base,
                             "reason": (
-                                f"Novel physical_base proposed by compose: "
-                                f"{base!r} (from name {c.standard_name!r})"
+                                f"Novel physical_base proposed by compose: {base!r}"
                             ),
                         }
                     )
@@ -1962,7 +1974,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         getattr(llm_out, "cache_creation_tokens", 0) or 0
                     ),
                     sn_ids=tuple(
-                        c.standard_name for c in (result.candidates if result else [])
+                        c.compose_name() for c in (result.candidates if result else [])
                     ),
                     batch_id=batch.group_key,
                     phase=getattr(state, "budget_phase_tag", "") or "generate_name",
@@ -1976,26 +1988,27 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     # rotate through with grammar composition.
                     _items: list[dict[str, Any]] = []
                     for _cand in result.candidates[:50]:
-                        _gf = _cand.grammar_fields or {}
                         _segs = []
-                        for _k in (
-                            "physical_base",
-                            "subject",
-                            "component",
-                            "position",
-                            "process",
-                            "geometry",
-                            "transformation",
-                        ):
-                            _v = _gf.get(_k)
-                            if _v:
-                                _segs.append(f"{_k}={_v}")
+                        if _cand.base_token:
+                            _segs.append(f"base={_cand.base_token}")
+                        for _q in _cand.qualifiers:
+                            _segs.append(f"qualifier={_q}")
+                        if _cand.projection_axis:
+                            _segs.append(f"projection={_cand.projection_axis}")
+                        if _cand.process_token:
+                            _segs.append(f"process={_cand.process_token}")
+                        if _cand.operator_token:
+                            _segs.append(f"operator={_cand.operator_token}")
                         _desc = (
                             "  ".join(_segs) if _segs else ((_cand.reason or "")[:80])
                         )
+                        try:
+                            _composed = _cand.compose_name()
+                        except Exception:
+                            _composed = f"[IR error] base={_cand.base_token}"
                         _items.append(
                             {
-                                "primary_text": _cand.standard_name,
+                                "primary_text": _composed,
                                 "primary_text_style": "white",
                                 "description": _desc,
                             }
@@ -2029,9 +2042,13 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
                 for c in result.candidates:
                     try:
-                        parse_standard_name(c.standard_name)
+                        _name = c.compose_name()
+                        parse_standard_name(_name)
                     except Exception:
-                        _grammar_failures.append(c.standard_name)
+                        try:
+                            _grammar_failures.append(c.compose_name())
+                        except Exception:
+                            _grammar_failures.append(c.source_id)
             except ImportError:
                 pass  # ISN not installed — skip check
 
@@ -2164,7 +2181,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
             # Normalize name via grammar round-trip BEFORE persist
             # to avoid duplicate nodes if validate would rename
-            name_id = normalize_spelling(c.standard_name)
+            name_id = normalize_spelling(c.compose_name())
 
             # W4b: Pre-validation gate — reject malformed LLM output
             # before it reaches MERGE.
@@ -2260,7 +2277,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         state.grammar_retries_succeeded += 1
                         wlog.info(
                             "L6: Grammar retry succeeded: %r → %r",
-                            c.standard_name,
+                            c.compose_name(),
                             name_id,
                         )
                 except Exception:
@@ -2278,7 +2295,6 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         )
                         for p in (c.dd_paths or [])
                     ],
-                    "fields": c.grammar_fields,
                     "reason": c.reason,
                     "unit": unit,
                     "physics_domain": physics_domain,
@@ -3469,7 +3485,7 @@ async def compose_batch(
                     tokens_cached_read=_attempt_cache_r,
                     tokens_cached_write=_attempt_cache_w,
                     sn_ids=tuple(
-                        c.standard_name for c in (result.candidates if result else [])
+                        c.compose_name() for c in (result.candidates if result else [])
                     ),
                     batch_id=group_key,
                     phase=phase_tag,
@@ -3484,9 +3500,13 @@ async def compose_batch(
 
                 for c in result.candidates:
                     try:
-                        parse_standard_name(c.standard_name)
+                        _name = c.compose_name()
+                        parse_standard_name(_name)
                     except Exception:
-                        _grammar_failures.append(c.standard_name)
+                        try:
+                            _grammar_failures.append(c.compose_name())
+                        except Exception:
+                            _grammar_failures.append(c.source_id)
             except ImportError:
                 pass  # ISN not installed — skip check
 
@@ -3619,7 +3639,7 @@ async def compose_batch(
             # B1/W4b: Pre-validation gate — reject malformed LLM output
             # before MERGE.  Mark the source as 'failed' so it is not
             # re-claimed forever.
-            name_id = normalize_spelling(c.standard_name)
+            name_id = normalize_spelling(c.compose_name())
             _well_formed, _reject_reason = is_well_formed_candidate(name_id)
             if not _well_formed:
                 wlog.warning(
@@ -3689,7 +3709,7 @@ async def compose_batch(
                             wlog.info(
                                 "Pool %s: B2 grammar retry succeeded %r → %r",
                                 phase_tag,
-                                c.standard_name,
+                                c.compose_name(),
                                 name_id,
                             )
                         except Exception:
@@ -3713,7 +3733,6 @@ async def compose_batch(
                 "source_paths": [
                     encode_source_path(source_kind, p) for p in (c.dd_paths or [])
                 ],
-                "fields": c.grammar_fields,
                 "reason": c.reason,
                 "unit": unit,
                 "physics_domain": physics_domain,
@@ -4366,7 +4385,6 @@ async def process_refine_name_batch(
                     ),
                     old_chain_length=chain_length,
                     model=model,
-                    grammar_fields=result_obj.grammar_fields,
                     reason=result_obj.reason,
                     escalated=escalate,
                     run_id=mgr.run_id,

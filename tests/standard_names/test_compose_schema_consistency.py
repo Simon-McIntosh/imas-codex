@@ -47,7 +47,7 @@ def _extract_candidate_schema_fields(prompt_text: str) -> set[str]:
 
     # Extract field names: lines matching ``- `field_name`:``
     fields: set[str] = set()
-    for m in re.finditer(r"^-\s+`([a-z_]+)`\s*:", block, re.MULTILINE):
+    for m in re.finditer(r"^-\s+`([a-z_]+)`[^:]*:", block, re.MULTILINE):
         fields.add(m.group(1))
 
     if not fields:

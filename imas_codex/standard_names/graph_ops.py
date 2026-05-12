@@ -7764,7 +7764,6 @@ def persist_refined_name(
     tags: list[str] | None = None,
     old_chain_length: int = 0,
     model: str = "unknown",
-    grammar_fields: dict[str, str] | None = None,
     reason: str = "",
     escalated: bool = False,
     run_id: str | None = None,
@@ -7785,10 +7784,7 @@ def persist_refined_name(
 
     Returns ``{"new_name": <new_id>, "old_name": <old_id>}``.
     """
-    import json as _json
-
     new_chain_length = old_chain_length + 1
-    grammar_json = _json.dumps(grammar_fields) if grammar_fields else None
 
     escalation_set = ""
     if escalated:
@@ -7819,7 +7815,6 @@ def persist_refined_name(
                           new.model             = $model,
                           new.created_at        = datetime(),
                           new.generated_at      = datetime(),
-                          new.grammar_fields    = $grammar_json,
                           new.refine_reason     = $reason,
                           new.run_id            = $run_id
                           {escalation_set}
@@ -7883,7 +7878,6 @@ def persist_refined_name(
                         or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
-                        grammar_json=grammar_json,
                         reason=reason,
                         run_id=run_id,
                     )

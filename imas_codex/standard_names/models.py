@@ -4,18 +4,77 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class StandardNameCandidate(BaseModel):
-    """A single standard name candidate from LLM composition.
+    """A single standard name candidate — LLM fills individual grammar segments.
 
-    Name-only: compose produces naming and grammar fields only.
+    Name-only: compose produces naming via IR segment fields only.
     Documentation (description, links, etc.) is added by ``sn enrich``.
     """
 
     source_id: str = Field(description="Source entity ID (DD path or signal ID)")
-    standard_name: str = Field(description="Composed standard name in snake_case")
+
+    # --- IR segment fields (LLM output target) ---
+    base_token: str = Field(
+        description=(
+            "Physical quantity or geometry carrier token, "
+            "e.g. 'temperature', 'position'"
+        )
+    )
+    base_kind: Literal["quantity", "geometry"] = Field(
+        description="'quantity' for physical_base, 'geometry' for geometric_base"
+    )
+
+    projection_axis: str | None = Field(
+        default=None,
+        description=(
+            "Axis token for component/coordinate projection, e.g. 'radial', 'toroidal'"
+        ),
+    )
+    projection_shape: Literal["component", "coordinate"] | None = Field(
+        default=None,
+        description=(
+            "'component' for physical quantities, 'coordinate' for geometric bases"
+        ),
+    )
+
+    qualifiers: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Species or source-entity qualifier tokens, "
+            "e.g. ['electron'] or ['thermal', 'ion']"
+        ),
+    )
+
+    locus_token: str | None = Field(
+        default=None,
+        description="Location reference token, e.g. 'magnetic_axis', 'flux_loop'",
+    )
+    locus_relation: Literal["of", "at", "over"] | None = Field(
+        default=None, description="Locus preposition"
+    )
+    locus_type: Literal["entity", "position", "region", "geometry"] | None = Field(
+        default=None, description="Locus classification"
+    )
+
+    process_token: str | None = Field(
+        default=None,
+        description=("Causal process token for due_to_ suffix, e.g. 'collisions'"),
+    )
+
+    operator_token: str | None = Field(
+        default=None,
+        description=(
+            "Unary operator token, e.g. 'time_derivative', 'tendency', 'magnitude'"
+        ),
+    )
+    operator_kind: Literal["unary_prefix", "unary_postfix"] | None = Field(
+        default=None, description="Operator position"
+    )
+
+    # --- Non-IR fields ---
     description: str = Field(
         default="",
         description="1-line ≤120 char summary of the physical quantity",
@@ -26,10 +85,153 @@ class StandardNameCandidate(BaseModel):
     dd_paths: list[str] = Field(
         default_factory=list, description="Mapped IMAS DD paths"
     )
-    grammar_fields: dict[str, str] = Field(
-        default_factory=dict, description="Grammar fields used"
-    )
-    reason: str = Field(description="Brief justification")
+    reason: str = Field(description="Brief justification (≤25 words)")
+
+    @model_validator(mode="after")
+    def _validate_base_token(self) -> StandardNameCandidate:
+        """Validate base_token is a registered physical_base or geometric_base."""
+        try:
+            from imas_standard_names import get_grammar_context
+        except ImportError:
+            return self  # ISN not installed — skip validation
+
+        ctx = get_grammar_context()
+        vocab = ctx.get("vocabulary_sections", [])
+
+        if self.base_kind == "quantity":
+            pb_section = next(
+                (s for s in vocab if s["segment"] == "physical_base"), None
+            )
+            tokens = pb_section.get("tokens", []) if pb_section else []
+            if tokens and self.base_token not in tokens:
+                raise ValueError(
+                    f"base_token '{self.base_token}' is not a registered "
+                    f"physical_base. Use a vocab_gap entry instead."
+                )
+        elif self.base_kind == "geometry":
+            gb_section = next(
+                (s for s in vocab if s["segment"] == "geometric_base"), None
+            )
+            tokens = gb_section.get("tokens", []) if gb_section else []
+            if tokens and self.base_token not in tokens:
+                raise ValueError(
+                    f"base_token '{self.base_token}' is not a registered "
+                    f"geometric_base."
+                )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_projection_axis(self) -> StandardNameCandidate:
+        """Validate projection_axis against closed component/coordinate vocab."""
+        if self.projection_axis is None:
+            return self
+        try:
+            from imas_standard_names import get_grammar_context
+        except ImportError:
+            return self
+
+        ctx = get_grammar_context()
+        vocab = ctx.get("vocabulary_sections", [])
+
+        segment = "component" if self.projection_shape == "component" else "coordinate"
+        section = next((s for s in vocab if s["segment"] == segment), None)
+        tokens = section.get("tokens", []) if section else []
+        if tokens and self.projection_axis not in tokens:
+            raise ValueError(
+                f"projection_axis '{self.projection_axis}' is not a registered "
+                f"{segment} token."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_qualifiers(self) -> StandardNameCandidate:
+        """Validate qualifier tokens against closed subject vocabulary."""
+        if not self.qualifiers:
+            return self
+        try:
+            from imas_standard_names import get_grammar_context
+        except ImportError:
+            return self
+
+        ctx = get_grammar_context()
+        vocab = ctx.get("vocabulary_sections", [])
+        subj_section = next((s for s in vocab if s["segment"] == "subject"), None)
+        tokens = subj_section.get("tokens", []) if subj_section else []
+        if tokens:
+            for q in self.qualifiers:
+                if q not in tokens:
+                    raise ValueError(
+                        f"qualifier '{q}' is not a registered subject token."
+                    )
+        return self
+
+    def to_ir(self) -> Any:
+        """Build ISN StandardNameIR from segment fields."""
+        from imas_standard_names.grammar.ir import (
+            AxisProjection,
+            BaseKind,
+            LocusRef,
+            LocusRelation,
+            LocusType,
+            OperatorApplication,
+            OperatorKind,
+            Process,
+            ProjectionShape,
+            Qualifier,
+            QuantityOrCarrier,
+            StandardNameIR,
+        )
+
+        base = QuantityOrCarrier(token=self.base_token, kind=BaseKind(self.base_kind))
+
+        projection = None
+        if self.projection_axis is not None and self.projection_shape is not None:
+            projection = AxisProjection(
+                axis=self.projection_axis,
+                shape=ProjectionShape(self.projection_shape),
+            )
+
+        qualifiers = [Qualifier(token=q) for q in self.qualifiers]
+
+        locus = None
+        if (
+            self.locus_token is not None
+            and self.locus_relation is not None
+            and self.locus_type is not None
+        ):
+            locus = LocusRef(
+                relation=LocusRelation(self.locus_relation),
+                token=self.locus_token,
+                type=LocusType(self.locus_type),
+            )
+
+        mechanism = None
+        if self.process_token is not None:
+            mechanism = Process(token=self.process_token)
+
+        operators: list[OperatorApplication] = []
+        if self.operator_token is not None and self.operator_kind is not None:
+            operators = [
+                OperatorApplication(
+                    kind=OperatorKind(self.operator_kind),
+                    op=self.operator_token,
+                )
+            ]
+
+        return StandardNameIR(
+            operators=operators,
+            projection=projection,
+            qualifiers=qualifiers,
+            base=base,
+            locus=locus,
+            mechanism=mechanism,
+        )
+
+    def compose_name(self) -> str:
+        """Build canonical standard name string via ISN compose()."""
+        from imas_standard_names.grammar.render import compose
+
+        return compose(self.to_ir())
 
 
 class StandardNameVocabGap(BaseModel):
@@ -513,24 +715,59 @@ class StandardNameEnrichBatch(BaseModel):
 class RefinedName(BaseModel):
     """LLM response model for a single refine_name call.
 
-    Mirrors ``StandardNameCandidate`` but is targeted at single-path refine
-    calls rather than batched composition.  The ``confidence`` field is
+    Uses IR-aligned segment fields (same as ``StandardNameCandidate``)
+    rather than free-form name composition.  The ``confidence`` field is
     intentionally absent — it was removed in Phase 8.1.
     """
 
-    name: str = Field(
-        ...,
-        description="The refined standard name in snake_case",
-        alias="standard_name",
+    # --- IR segment fields (same as StandardNameCandidate) ---
+    base_token: str = Field(
+        description=(
+            "Physical quantity or geometry carrier token, "
+            "e.g. 'temperature', 'position'"
+        )
     )
+    base_kind: Literal["quantity", "geometry"] = Field(
+        description="'quantity' for physical_base, 'geometry' for geometric_base"
+    )
+
+    projection_axis: str | None = Field(
+        default=None,
+        description="Axis token for component/coordinate projection",
+    )
+    projection_shape: Literal["component", "coordinate"] | None = Field(
+        default=None,
+        description="'component' or 'coordinate'",
+    )
+
+    qualifiers: list[str] = Field(
+        default_factory=list,
+        description="Species or source-entity qualifier tokens",
+    )
+
+    locus_token: str | None = Field(
+        default=None, description="Location reference token"
+    )
+    locus_relation: Literal["of", "at", "over"] | None = Field(
+        default=None, description="Locus preposition"
+    )
+    locus_type: Literal["entity", "position", "region", "geometry"] | None = Field(
+        default=None, description="Locus classification"
+    )
+
+    process_token: str | None = Field(default=None, description="Causal process token")
+
+    operator_token: str | None = Field(default=None, description="Unary operator token")
+    operator_kind: Literal["unary_prefix", "unary_postfix"] | None = Field(
+        default=None, description="Operator position"
+    )
+
+    # --- Non-IR fields ---
     description: str = Field(
         ..., description="One-sentence physics definition (≤ 120 chars, no LaTeX)"
     )
     kind: Literal["scalar", "vector", "metadata"] = Field(
         default="scalar", description="Entry kind"
-    )
-    grammar_fields: dict[str, str] = Field(
-        default_factory=dict, description="Grammar segment decomposition"
     )
     reason: str = Field(
         default="",
@@ -538,6 +775,79 @@ class RefinedName(BaseModel):
     )
 
     model_config = {"extra": "ignore", "populate_by_name": True}
+
+    def to_ir(self) -> Any:
+        """Build ISN StandardNameIR from segment fields."""
+        from imas_standard_names.grammar.ir import (
+            AxisProjection,
+            BaseKind,
+            LocusRef,
+            LocusRelation,
+            LocusType,
+            OperatorApplication,
+            OperatorKind,
+            Process,
+            ProjectionShape,
+            Qualifier,
+            QuantityOrCarrier,
+            StandardNameIR,
+        )
+
+        base = QuantityOrCarrier(token=self.base_token, kind=BaseKind(self.base_kind))
+
+        projection = None
+        if self.projection_axis is not None and self.projection_shape is not None:
+            projection = AxisProjection(
+                axis=self.projection_axis,
+                shape=ProjectionShape(self.projection_shape),
+            )
+
+        qualifiers = [Qualifier(token=q) for q in self.qualifiers]
+
+        locus = None
+        if (
+            self.locus_token is not None
+            and self.locus_relation is not None
+            and self.locus_type is not None
+        ):
+            locus = LocusRef(
+                relation=LocusRelation(self.locus_relation),
+                token=self.locus_token,
+                type=LocusType(self.locus_type),
+            )
+
+        mechanism = None
+        if self.process_token is not None:
+            mechanism = Process(token=self.process_token)
+
+        operators: list[OperatorApplication] = []
+        if self.operator_token is not None and self.operator_kind is not None:
+            operators = [
+                OperatorApplication(
+                    kind=OperatorKind(self.operator_kind),
+                    op=self.operator_token,
+                )
+            ]
+
+        return StandardNameIR(
+            operators=operators,
+            projection=projection,
+            qualifiers=qualifiers,
+            base=base,
+            locus=locus,
+            mechanism=mechanism,
+        )
+
+    def compose_name(self) -> str:
+        """Build canonical standard name string via ISN compose()."""
+        from imas_standard_names.grammar.render import compose
+
+        return compose(self.to_ir())
+
+    @property
+    def name(self) -> str:
+        """Backwards-compatible name property using IR compose."""
+        return self.compose_name()
 
 
 class RefinedDocs(BaseModel):

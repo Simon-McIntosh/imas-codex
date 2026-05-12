@@ -127,11 +127,35 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     Returns:
         (grammar_valid, fields_consistent) tuple.
         grammar_valid: True if the name parses and round-trips.
-        fields_consistent: True if composing from reported fields
-            produces the same name (after normalization).
+        fields_consistent: True if IR compose produces the same name.
     """
-    name = candidate.get("standard_name", "")
-    fields = candidate.get("grammar_fields", {})
+    name = candidate.get("standard_name", "") or candidate.get("id", "")
+
+    # If no explicit name, try composing from IR fields
+    if not name and candidate.get("base_token"):
+        try:
+            from imas_standard_names.grammar.ir import (
+                BaseKind,
+                QuantityOrCarrier,
+                StandardNameIR,
+            )
+            from imas_standard_names.grammar.render import compose
+
+            base = QuantityOrCarrier(
+                token=candidate["base_token"],
+                kind=BaseKind(candidate.get("base_kind", "quantity")),
+            )
+            qualifiers_raw = candidate.get("qualifiers") or []
+            qualifiers = None
+            if qualifiers_raw:
+                from imas_standard_names.grammar.ir import Qualifier
+
+                qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
+
+            ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
+            name = compose(ir)
+        except Exception:
+            pass
 
     grammar_valid = False
     fields_consistent = False
@@ -144,36 +168,52 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     except Exception:
         return False, False
 
-    # Check fields consistency: compose from reported fields
+    # Check IR consistency: if candidate has IR fields, compose and compare
     try:
-        # Convert string field values to enum instances
-        sn_fields: dict[str, Any] = {}
-        for k, v in fields.items():
-            if k == "physical_base":
-                sn_fields[k] = v
-            elif k == "geometric_base":
-                sn_fields[k] = GeometricBase(v)
-            elif k == "subject":
-                sn_fields[k] = Subject(v)
-            elif k == "component":
-                sn_fields[k] = Component(v)
-            elif k == "coordinate":
-                sn_fields[k] = Component(v)
-            elif k == "position":
-                sn_fields[k] = Position(v)
-            elif k == "process":
-                sn_fields[k] = Process(v)
-            elif k == "transformation":
-                sn_fields[k] = Transformation(v)
-            elif k == "object":
-                sn_fields[k] = Object(v)
-            elif k == "binary_operator":
-                sn_fields[k] = BinaryOperator(v)
+        base_token = candidate.get("base_token")
+        if base_token:
+            from imas_standard_names.grammar.ir import (
+                BaseKind,
+                QuantityOrCarrier,
+                StandardNameIR,
+            )
+            from imas_standard_names.grammar.render import compose
 
-        if sn_fields:
-            sn = StandardName(**sn_fields)
-            from_fields = compose_standard_name(sn)
-            fields_consistent = from_fields == normalized
+            base_kind = candidate.get("base_kind", "quantity")
+            ir = StandardNameIR(
+                base=QuantityOrCarrier(token=base_token, kind=BaseKind(base_kind)),
+            )
+            from_ir = compose(ir)
+            fields_consistent = from_ir == normalized
+        else:
+            # Legacy dict format — try grammar_* properties from graph
+            sn_fields: dict[str, Any] = {}
+            for k, v in candidate.get("grammar_fields", {}).items():
+                if k == "physical_base":
+                    sn_fields[k] = v
+                elif k == "geometric_base":
+                    sn_fields[k] = GeometricBase(v)
+                elif k == "subject":
+                    sn_fields[k] = Subject(v)
+                elif k == "component":
+                    sn_fields[k] = Component(v)
+                elif k == "coordinate":
+                    sn_fields[k] = Component(v)
+                elif k == "position":
+                    sn_fields[k] = Position(v)
+                elif k == "process":
+                    sn_fields[k] = Process(v)
+                elif k == "transformation":
+                    sn_fields[k] = Transformation(v)
+                elif k == "object":
+                    sn_fields[k] = Object(v)
+                elif k == "binary_operator":
+                    sn_fields[k] = BinaryOperator(v)
+
+            if sn_fields:
+                sn = StandardName(**sn_fields)
+                from_fields = compose_standard_name(sn)
+                fields_consistent = from_fields == normalized
     except Exception:
         pass
 
@@ -319,13 +359,12 @@ async def score_with_reviewer(
         for c in batch:
             batch_items.append(
                 {
-                    "standard_name": c.get("standard_name", ""),
+                    "standard_name": c.get("standard_name", "") or c.get("id", ""),
                     "source_id": c.get("source_id", ""),
                     "description": c.get("description", "") or "",
                     "documentation": (c.get("documentation", "") or "")[:500],
                     "unit": c.get("unit", "N/A"),
                     "kind": c.get("kind", "N/A"),
-                    "grammar_fields": c.get("grammar_fields", {}),
                     "source_paths": c.get("source_paths", []),
                 }
             )
@@ -465,19 +504,29 @@ async def run_benchmark(
                 )
 
                 all_fields = {
-                    "physical_base",
-                    "subject",
-                    "component",
-                    "coordinate",
-                    "position",
-                    "process",
+                    "base_token",
+                    "qualifiers",
+                    "projection_axis",
+                    "locus_token",
+                    "process_token",
+                    "operator_token",
                 }
                 field_counts = []
                 for c in result.candidates:
-                    fields = c.get("grammar_fields", {})
-                    field_counts.append(
-                        len(set(fields.keys()) & all_fields) / len(all_fields)
-                    )
+                    populated = 0
+                    if c.get("base_token"):
+                        populated += 1
+                    if c.get("qualifiers"):
+                        populated += 1
+                    if c.get("projection_axis"):
+                        populated += 1
+                    if c.get("locus_token"):
+                        populated += 1
+                    if c.get("process_token"):
+                        populated += 1
+                    if c.get("operator_token"):
+                        populated += 1
+                    field_counts.append(populated / len(all_fields))
                 result.avg_fields_populated = (
                     sum(field_counts) / len(field_counts) if field_counts else 0.0
                 )

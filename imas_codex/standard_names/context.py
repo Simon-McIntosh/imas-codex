@@ -518,8 +518,12 @@ def fetch_review_neighbours(
     """
     sn_id = sn.get("id") or sn.get("name") or ""
     desc = sn.get("description") or sn.get("name") or sn.get("id") or ""
-    physical_base = sn.get("physical_base") or (
-        (sn.get("grammar_fields") or {}).get("physical_base")
+    physical_base = (
+        sn.get("physical_base")
+        or sn.get("base_token")
+        or (sn.get("grammar_segments") or sn.get("grammar_fields") or {}).get(
+            "physical_base"
+        )
     )
     source_paths = sn.get("source_paths") or []
     ids_prefix = next(

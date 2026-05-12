@@ -38,13 +38,19 @@ class _FakeCandidate:
     """Mimics a StandardNameComposeBatch candidate."""
 
     def __init__(self, name: str, source_id: str, **kw):
-        self.standard_name = name
         self.source_id = source_id
         self.description = kw.get("description", "desc")
         self.kind = kw.get("kind", "scalar")
         self.dd_paths = kw.get("dd_paths", [source_id])
-        self.grammar_fields = kw.get("grammar_fields", {})
         self.reason = kw.get("reason", "")
+        # IR fields
+        self.base_token = kw.get("base_token", name)
+        self.base_kind = kw.get("base_kind", "quantity")
+        self.qualifiers = kw.get("qualifiers", [])
+        self._name = name
+
+    def compose_name(self) -> str:
+        return self._name
 
 
 class _FakeBatchResult:

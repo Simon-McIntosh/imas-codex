@@ -33,9 +33,29 @@ from imas_codex.standard_names.workers import (
 def _make_candidate(
     source_id: str = "core_profiles/profiles_1d/electrons/temperature",
     standard_name: str = "electron_temperature",
+    base_token: str | None = None,
+    base_kind: str = "quantity",
 ) -> SimpleNamespace:
-    """Create a minimal candidate-like object with source_id and standard_name."""
-    return SimpleNamespace(source_id=source_id, standard_name=standard_name)
+    """Create a minimal candidate-like object with IR segment fields.
+
+    If ``base_token`` is not given, it is derived by parsing ``standard_name``
+    through the ISN grammar.
+    """
+    if base_token is None:
+        # Parse to extract base_token from legacy name string
+        try:
+            from imas_standard_names.grammar import parse_standard_name
+
+            parsed = parse_standard_name(standard_name)
+            base_token = parsed.physical_base or ""
+            base_kind = "quantity"
+        except Exception:
+            base_token = ""
+    return SimpleNamespace(
+        source_id=source_id,
+        base_token=base_token,
+        base_kind=base_kind,
+    )
 
 
 # ---------------------------------------------------------------------------

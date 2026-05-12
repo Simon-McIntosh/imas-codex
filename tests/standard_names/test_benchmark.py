@@ -592,14 +592,15 @@ class TestBenchmarkRunner:
             candidates=[
                 StandardNameCandidate(
                     source_id="equilibrium/time_slice/profiles_1d/safety_factor",
-                    standard_name="safety_factor",
-                    fields={"physical_base": "safety_factor"},
+                    base_token="safety_factor",
+                    base_kind="quantity",
                     reason="Safety factor profile",
                 ),
                 StandardNameCandidate(
                     source_id="core_profiles/profiles_1d/electrons/temperature",
-                    standard_name="electron_temperature",
-                    fields={"physical_base": "temperature", "subject": "electron"},
+                    base_token="temperature",
+                    base_kind="quantity",
+                    qualifiers=["electron"],
                     reason="Electron temperature",
                 ),
             ],
@@ -660,8 +661,8 @@ class TestBenchmarkRunner:
             candidates=[
                 StandardNameCandidate(
                     source_id="equilibrium/time_slice/profiles_1d/elongation",
-                    standard_name="elongation",
-                    fields={"physical_base": "elongation"},
+                    base_token="elongation",
+                    base_kind="quantity",
                     reason="Plasma elongation",
                 ),
             ],

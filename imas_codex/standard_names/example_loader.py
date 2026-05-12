@@ -175,7 +175,7 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
       - reviewer_comments (str)
       - physics_domain (str)
       - target_score (float — the bucket this example was selected for)
-      - grammar_fields (dict — parsed segment decomposition, empty if unavailable)
+      - grammar_segments (dict — parsed segment decomposition from graph properties)
       - semantic_sim (float | None — name↔description cosine similarity)
 
     Template aliases (backwards-compat with existing template variables):
@@ -186,8 +186,8 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
     scores = _parse_json_field(row.get("reviewer_scores_json"))
     comments = _parse_json_field(row.get("reviewer_comments_per_dim_json"))
 
-    # Build grammar decomposition dict — only populated fields
-    grammar_fields: dict[str, str] = {}
+    # Build grammar decomposition dict from graph properties — only populated fields
+    grammar_segments: dict[str, str] = {}
     for seg in (
         "physical_base",
         "subject",
@@ -200,7 +200,7 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
     ):
         val = row.get(seg)
         if val:
-            grammar_fields[seg] = val
+            grammar_segments[seg] = val
 
     return {
         # Core fields
@@ -216,8 +216,10 @@ def _project_example(row: dict[str, Any], target: float) -> dict[str, Any]:
         "reviewer_comments": row.get("reviewer_comments", ""),
         "physics_domain": row.get("physics_domain", ""),
         "target_score": target,
-        # Grammar decomposition
-        "grammar_fields": grammar_fields,
+        # Grammar decomposition (graph properties, not model grammar_fields)
+        "grammar_segments": grammar_segments,
+        # Backwards-compat: keep grammar_fields as alias
+        "grammar_fields": grammar_segments,
         "semantic_sim": row.get("semantic_sim"),
         # Template aliases
         "score": row.get("reviewer_score"),
