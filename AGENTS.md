@@ -1221,7 +1221,7 @@ in all three search branches (segment-filter, vector, keyword) so it does
 not lose results below `LIMIT $k`.
 
 **All grammar segments are closed.** All segments including `physical_base`
-(80 tokens) have a closed vocabulary defined in ISN's `SEGMENT_TOKEN_MAP`.
+(100 tokens) have a closed vocabulary defined in ISN's `SEGMENT_TOKEN_MAP`.
 VocabGap reports on pseudo segments like `grammar_ambiguity` are filtered
 out at write time (`imas_codex.standard_names.segments.filter_closed_segment_gaps`).
 Reviewers audit the `physical_base` slot via the decomposition rule
@@ -1358,7 +1358,7 @@ to a git tag via `git+https://` URL, not a PyPI version.
    - No overlap with existing tokens
    - Not a unit name, geometry primitive already covered, or domain-specific compound
      expressible via existing components
-   - **No compound tokens that subsume open-vocabulary words** — a closed segment (subject,
+   - **No compound tokens that subsume `physical_base` words** — a closed segment (subject,
      component, etc.) must NEVER contain tokens that include words belonging to `physical_base`.
      Example: `trapped_particle` as subject greedily consumes "particle", breaking grouping
      of `particle_density` names. Use `trapped` alone.
