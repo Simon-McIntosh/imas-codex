@@ -47,6 +47,11 @@ GATE_D = "divergence_detection"
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
 
+# Fields not yet accepted by ISN models — strip from export output.
+# ``constraints`` is tracked internally but ISN's StandardNameScalarEntry
+# raises ``Extra inputs are not permitted`` if it appears in the YAML.
+_ISN_UNSUPPORTED_FIELDS = frozenset({"constraints"})
+
 
 # =============================================================================
 # Report models
@@ -711,8 +716,12 @@ def _write_domain_yaml(
     clean_entries: list[dict[str, Any]] = []
     for entry_dict in entries:
         canon = canonicalise_entry(entry_dict)
-        # Remove None values for clean YAML output
-        clean = {k: v for k, v in canon.items() if v is not None}
+        # Remove None values and ISN-unsupported fields for clean YAML output
+        clean = {
+            k: v
+            for k, v in canon.items()
+            if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
+        }
         ordered = reorder_entry_dict(clean)
         clean_entries.append(ordered)
 

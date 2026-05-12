@@ -323,7 +323,6 @@ class TestRoundTripByteStability:
                 "unit": "eV",
                 "physics_domain": "kinetics",
                 "links": [],
-                "constraints": [],
             },
         ]
 
@@ -342,11 +341,17 @@ class TestRoundTripByteStability:
         parsed = yaml.safe_load(yaml_text)
         assert isinstance(parsed, list)
 
-        # Re-emit through canonical pipeline
+        # Re-emit through canonical pipeline (matching export logic)
+        from imas_codex.standard_names.export import _ISN_UNSUPPORTED_FIELDS
+
         re_emitted = []
         for entry in parsed:
             canon = canonicalise_entry(entry)
-            clean = {k: v for k, v in canon.items() if v is not None}
+            clean = {
+                k: v
+                for k, v in canon.items()
+                if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
+            }
             ordered = reorder_entry_dict(clean)
             re_emitted.append(ordered)
 
