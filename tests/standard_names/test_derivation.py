@@ -1,4 +1,4 @@
-"""Unit tests for imas_codex.standard_names.derivation (D1–D16).
+"""Unit tests for imas_codex.standard_names.derivation (D1–D22).
 
 Pure logic tests — no graph, no I/O.  All ISN bases used here are
 confirmed parseable by rc25: temperature, pressure, current_density.
@@ -231,15 +231,19 @@ def test_d12_uncertainty_index_of_temperature():
 
 
 def test_d13_maximum_of_temperature_at_plasma_boundary():
-    """Locus is preserved: inner is temperature_at_plasma_boundary."""
+    """Locus is preserved: inner is temperature_at_plasma_boundary, plus HAS_LOCUS."""
     edges = derive_edges("maximum_of_temperature_at_plasma_boundary")
-    assert len(edges) == 1
-    e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
-    assert e.from_name == "maximum_of_temperature_at_plasma_boundary"
-    assert e.to_name == "temperature_at_plasma_boundary"
-    assert e.props["operator"] == "maximum"
-    assert e.props["operator_kind"] == "unary_prefix"
+    co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+    locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+    assert len(co) == 1
+    assert co[0].from_name == "maximum_of_temperature_at_plasma_boundary"
+    assert co[0].to_name == "temperature_at_plasma_boundary"
+    assert co[0].props["operator"] == "maximum"
+    assert co[0].props["operator_kind"] == "unary_prefix"
+    # HAS_LOCUS edge also emitted for the _at_ locus
+    assert len(locus) == 1
+    assert locus[0].to_name == "plasma_boundary"
+    assert locus[0].props["locus_relation"] == "at"
 
 
 # ---------------------------------------------------------------------------
@@ -248,10 +252,10 @@ def test_d13_maximum_of_temperature_at_plasma_boundary():
 
 
 def test_d14_elongation_of_plasma_boundary():
-    """elongation_of_plasma_boundary — locus only, no COMPONENT_OF, but HAS_GEOMETRY."""
+    """elongation_of_plasma_boundary — locus only, no COMPONENT_OF, but HAS_LOCUS."""
     edges = derive_edges("elongation_of_plasma_boundary")
     co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
-    geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
+    geo = [e for e in edges if e.edge_type == "HAS_LOCUS"]
     assert co == []
     assert len(geo) == 1
     assert geo[0].to_name == "plasma_boundary"
@@ -371,7 +375,7 @@ class TestGeometricCoordinateDerivation:
 
         Without the fix, this would create a COMPONENT_OF edge to
         'coordinate', grouping unrelated positions together.
-        May produce a HAS_GEOMETRY edge to measurement_position.
+        May produce a HAS_LOCUS edge to measurement_position.
         """
         edges = derive_edges("vertical_coordinate_of_measurement_position")
         co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
@@ -387,55 +391,85 @@ class TestGeometricCoordinateDerivation:
 
 
 # ---------------------------------------------------------------------------
-# D17-D22 — HAS_GEOMETRY locus family edges
+# D17-D25 — HAS_LOCUS locus family edges
 # ---------------------------------------------------------------------------
 
 
-class TestLocusGeometry:
-    """Locus-qualified names emit HAS_GEOMETRY edges for family grouping."""
+class TestLocusFamily:
+    """Locus-qualified names emit HAS_LOCUS edges for family grouping."""
 
     def test_d17_major_radius_of_magnetic_axis(self):
-        """major_radius_of_magnetic_axis → HAS_GEOMETRY to magnetic_axis."""
+        """major_radius_of_magnetic_axis → HAS_LOCUS to magnetic_axis."""
         edges = derive_edges("major_radius_of_magnetic_axis")
-        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
-        assert len(geo) == 1
-        assert geo[0].from_name == "major_radius_of_magnetic_axis"
-        assert geo[0].to_name == "magnetic_axis"
-        assert geo[0].props["geometry"] == "magnetic_axis"
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert len(locus) == 1
+        assert locus[0].from_name == "major_radius_of_magnetic_axis"
+        assert locus[0].to_name == "magnetic_axis"
+        assert locus[0].props["locus_token"] == "magnetic_axis"
+        assert locus[0].props["locus_relation"] == "of"
 
     def test_d18_vertical_coordinate_of_magnetic_axis(self):
-        """vertical_coordinate_of_magnetic_axis → HAS_GEOMETRY to magnetic_axis."""
+        """vertical_coordinate_of_magnetic_axis → HAS_LOCUS to magnetic_axis."""
         edges = derive_edges("vertical_coordinate_of_magnetic_axis")
-        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
-        assert len(geo) == 1
-        assert geo[0].to_name == "magnetic_axis"
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert len(locus) == 1
+        assert locus[0].to_name == "magnetic_axis"
+        assert locus[0].props["locus_relation"] == "of"
 
     def test_d19_elongation_of_plasma_boundary(self):
-        """elongation_of_plasma_boundary → HAS_GEOMETRY to plasma_boundary."""
+        """elongation_of_plasma_boundary → HAS_LOCUS to plasma_boundary."""
         edges = derive_edges("elongation_of_plasma_boundary")
-        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
-        assert len(geo) == 1
-        assert geo[0].from_name == "elongation_of_plasma_boundary"
-        assert geo[0].to_name == "plasma_boundary"
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert len(locus) == 1
+        assert locus[0].from_name == "elongation_of_plasma_boundary"
+        assert locus[0].to_name == "plasma_boundary"
 
     def test_d20_locus_family_same_target(self):
-        """Names sharing the same geometry slot point to the same target."""
+        """Names sharing the same locus token point to the same target."""
         edges_r = derive_edges("major_radius_of_magnetic_axis")
         edges_z = derive_edges("vertical_coordinate_of_magnetic_axis")
-        geo_r = [e for e in edges_r if e.edge_type == "HAS_GEOMETRY"]
-        geo_z = [e for e in edges_z if e.edge_type == "HAS_GEOMETRY"]
-        assert len(geo_r) == 1
-        assert len(geo_z) == 1
-        assert geo_r[0].to_name == geo_z[0].to_name == "magnetic_axis"
+        locus_r = [e for e in edges_r if e.edge_type == "HAS_LOCUS"]
+        locus_z = [e for e in edges_z if e.edge_type == "HAS_LOCUS"]
+        assert len(locus_r) == 1
+        assert len(locus_z) == 1
+        assert locus_r[0].to_name == locus_z[0].to_name == "magnetic_axis"
 
-    def test_d21_no_geometry_for_plain_leaf(self):
-        """Leaf names with no geometry slot produce no HAS_GEOMETRY edges."""
+    def test_d21_no_locus_for_plain_leaf(self):
+        """Leaf names with no locus produce no HAS_LOCUS edges."""
         edges = derive_edges("temperature")
-        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
-        assert geo == []
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert locus == []
 
-    def test_d22_no_geometry_for_operator(self):
-        """Operator names without geometry produce no HAS_GEOMETRY edges."""
+    def test_d22_no_locus_for_operator(self):
+        """Operator names without locus produce no HAS_LOCUS edges."""
         edges = derive_edges("maximum_of_temperature")
-        geo = [e for e in edges if e.edge_type == "HAS_GEOMETRY"]
-        assert geo == []
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert locus == []
+
+    def test_d23_at_locus_safety_factor(self):
+        """safety_factor_at_normalized_poloidal_flux → HAS_LOCUS with relation=at."""
+        edges = derive_edges("safety_factor_at_normalized_poloidal_flux")
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert len(locus) == 1
+        assert locus[0].from_name == "safety_factor_at_normalized_poloidal_flux"
+        assert locus[0].to_name == "normalized_poloidal_flux"
+        assert locus[0].props["locus_token"] == "normalized_poloidal_flux"
+        assert locus[0].props["locus_relation"] == "at"
+
+    def test_d24_at_locus_magnetic_axis(self):
+        """toroidal_magnetic_field_at_magnetic_axis → HAS_LOCUS with relation=at."""
+        edges = derive_edges("toroidal_magnetic_field_at_magnetic_axis")
+        locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
+        assert len(locus) == 1
+        assert locus[0].to_name == "magnetic_axis"
+        assert locus[0].props["locus_relation"] == "at"
+
+    def test_d25_same_locus_different_relation(self):
+        """_of_ and _at_ with same locus token share the same target node."""
+        edges_of = derive_edges("major_radius_of_magnetic_axis")
+        edges_at = derive_edges("toroidal_magnetic_field_at_magnetic_axis")
+        locus_of = [e for e in edges_of if e.edge_type == "HAS_LOCUS"]
+        locus_at = [e for e in edges_at if e.edge_type == "HAS_LOCUS"]
+        assert locus_of[0].to_name == locus_at[0].to_name == "magnetic_axis"
+        assert locus_of[0].props["locus_relation"] == "of"
+        assert locus_at[0].props["locus_relation"] == "at"

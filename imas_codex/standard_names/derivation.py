@@ -3,7 +3,7 @@
 Pure logic module — no graph access, no I/O.  Given a single
 StandardName id string, ``derive_edges`` peels the outermost ISN
 grammar operator/projection and returns the corresponding
-``COMPONENT_OF``, ``HAS_ERROR``, or ``HAS_GEOMETRY`` edge descriptor.
+``COMPONENT_OF``, ``HAS_ERROR``, or ``HAS_LOCUS`` edge descriptor.
 
 Recursion is structural: when the inner StandardName is itself written
 to the graph, *its* derivation runs and emits *its* own edge.  We never
@@ -31,7 +31,7 @@ _UNCERTAINTY_OPS: dict[str, str] = {
 class DerivedEdge:
     """A single derived structural edge between two StandardName ids."""
 
-    edge_type: str  # "COMPONENT_OF", "HAS_ERROR", or "HAS_GEOMETRY"
+    edge_type: str  # "COMPONENT_OF", "HAS_ERROR", or "HAS_LOCUS"
     from_name: str  # source StandardName id
     to_name: str  # target StandardName id
     props: dict  # edge properties (operator, operator_kind, …)
@@ -65,8 +65,8 @@ def derive_edges(name: str) -> list[DerivedEdge]:
 
     - ``COMPONENT_OF``: projection / operator / coordinate decomposition.
     - ``HAS_ERROR``: uncertainty siblings.
-    - ``HAS_GEOMETRY``: locus grouping — names sharing the same ISN
-      ``geometry`` slot (e.g. ``magnetic_axis``, ``plasma_boundary``).
+    - ``HAS_LOCUS``: locus grouping — names sharing the same ISN
+      locus token (e.g. ``magnetic_axis``, ``plasma_boundary``).
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ def derive_edges(name: str) -> list[DerivedEdge]:
     list[DerivedEdge]
         Zero or more edges depending on the outermost IR shape and
         locus qualification.  Returns ``[]`` for unparseable names
-        and leaf names with no geometry slot.
+        and leaf names with no locus qualifier.
     """
     try:
         result = parser.parse(name)
@@ -233,45 +233,41 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
 
 
 def _locus_check(name: str) -> list[DerivedEdge]:
-    """Detect locus-qualified names and emit HAS_GEOMETRY grouping edges.
+    """Detect locus-qualified names and emit HAS_LOCUS grouping edges.
 
-    ISN grammar's ``geometry`` slot captures the locus qualifier in names
-    like ``major_radius_of_magnetic_axis`` (geometry=magnetic_axis) or
-    ``elongation_of_plasma_boundary`` (geometry=plasma_boundary).
+    Uses the structured IR parser to extract locus information from names
+    like ``major_radius_of_magnetic_axis`` (locus=magnetic_axis, relation=of)
+    or ``safety_factor_at_normalized_poloidal_flux`` (locus=normalized_poloidal_flux,
+    relation=at).
 
-    Names sharing the same ``geometry`` form a **locus family** — they
-    describe different physical quantities measured at the same geometric
-    location.  The ``HAS_GEOMETRY`` edge groups them by linking each name
-    to a shared locus node (e.g. ``magnetic_axis``, ``plasma_boundary``).
+    Names sharing the same locus token form a **locus family** — they
+    describe different physical quantities measured at the same location.
+    The ``HAS_LOCUS`` edge groups them by linking each name to a shared
+    ``Locus`` node (e.g. ``magnetic_axis``, ``plasma_boundary``).
 
-    Returns ``[]`` when the name has no geometry slot.
+    Returns ``[]`` when the name has no locus qualifier.
     """
     try:
-        from imas_standard_names.grammar import parse_standard_name
-
-        parsed = parse_standard_name(name)
+        result = parser.parse(name)
     except Exception:
         return []
 
-    if parsed is None:
+    if result is None or result.ir is None:
         return []
 
-    geometry = getattr(parsed, "geometry", None)
-    if geometry is None:
-        return []
-
-    geometry_value = (
-        str(geometry.value) if hasattr(geometry, "value") else str(geometry)
-    )
-    if not geometry_value:
+    locus = result.ir.locus
+    if locus is None or not locus.token:
         return []
 
     return [
         DerivedEdge(
-            "HAS_GEOMETRY",
+            "HAS_LOCUS",
             name,
-            geometry_value,
-            {"geometry": geometry_value},
+            locus.token,
+            {
+                "locus_token": locus.token,
+                "locus_relation": str(locus.relation.value),
+            },
         )
     ]
 

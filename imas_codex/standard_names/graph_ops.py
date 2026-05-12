@@ -1177,7 +1177,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
 
     co_batch: list[dict[str, Any]] = []  # COMPONENT_OF
     he_batch: list[dict[str, Any]] = []  # HAS_ERROR
-    geo_batch: list[dict[str, Any]] = []  # HAS_GEOMETRY
+    geo_batch: list[dict[str, Any]] = []  # HAS_LOCUS
 
     for n in names:
         name_id = n.get("id")
@@ -1205,11 +1205,12 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
                         "error_type": edge.props.get("error_type"),
                     }
                 )
-            elif edge.edge_type == "HAS_GEOMETRY":
+            elif edge.edge_type == "HAS_LOCUS":
                 geo_batch.append(
                     {
                         "from_name": edge.from_name,
-                        "geometry": edge.props.get("geometry"),
+                        "locus_token": edge.props.get("locus_token"),
+                        "locus_relation": edge.props.get("locus_relation"),
                     }
                 )
 
@@ -1251,9 +1252,10 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
             """
             UNWIND $batch AS b
             MERGE (src:StandardName {id: b.from_name})
-            MERGE (geo:Geometry {id: b.geometry})
-            MERGE (src)-[r:HAS_GEOMETRY]->(geo)
-            SET r.geometry = b.geometry
+            MERGE (loc:Locus {id: b.locus_token})
+            MERGE (src)-[r:HAS_LOCUS]->(loc)
+            SET r.locus_token = b.locus_token,
+                r.locus_relation = b.locus_relation
             """,
             batch=geo_batch,
         )
