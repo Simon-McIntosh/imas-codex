@@ -264,9 +264,9 @@ class TestTypedEdgeSegmentGuards:
         assert merge_calls
         edges_param = merge_calls[0][1].get("edges", [])
         segments = {e["segment"] for e in edges_param}
-        # ISN grammar: poloidal→coordinate, electron→subject, temperature→physical_base
-        assert "coordinate" in segments, (
-            f"poloidal_electron_temperature must have a coordinate segment; got: {segments}"
+        # ISN strict grammar: poloidal→component, electron→subject, temperature→physical_base
+        assert "component" in segments, (
+            f"poloidal_electron_temperature must have a component segment; got: {segments}"
         )
         assert "subject" in segments
         assert "physical_base" in segments

@@ -238,6 +238,7 @@ def _run_sn_cmd(
     review_docs_backlog_cap: int | None = None,
     skip_generate: bool = False,
     skip_review: bool = False,
+    names_only: bool = False,
     source: str = "dd",
     override_edits: list[str] | None = None,
     only: str | None = None,
@@ -443,6 +444,7 @@ def _run_sn_cmd(
             pending_fn=_pool_pending_fn,
             on_event=_on_event,
             scope_run_id=scope_run_id,
+            names_only=names_only,
         )
         return {"summary": summary}
 
@@ -804,6 +806,16 @@ def _check_pipeline_clear_gate() -> None:
     help="Skip the review phase (6-dimensional scoring).",
 )
 @click.option(
+    "--names-only",
+    "names_only",
+    is_flag=True,
+    default=False,
+    help=(
+        "Skip all docs pools (generate_docs, review_docs, refine_docs). "
+        "Use for faster name-only iteration cycles at lower cost."
+    ),
+)
+@click.option(
     "--only",
     "only_phase",
     type=click.Choice(
@@ -893,6 +905,7 @@ def sn_run(
     review_name_backlog_cap: int,
     review_docs_backlog_cap: int,
     skip_review: bool,
+    names_only: bool,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -1042,6 +1055,7 @@ def sn_run(
             review_docs_backlog_cap=review_docs_backlog_cap,
             skip_generate=skip_generate_from_only,
             skip_review=skip_review,
+            names_only=names_only,
             source=source,
             override_edits=_override_edits,
             only=only_phase,
@@ -1072,6 +1086,7 @@ def sn_run(
             review_docs_backlog_cap=review_docs_backlog_cap,
             skip_generate=skip_generate_from_only,
             skip_review=skip_review,
+            names_only=names_only,
             source=source,
             override_edits=_override_edits,
             only=only_phase,
@@ -2341,6 +2356,12 @@ def sn_gaps(
     show_default=True,
     help="Populate sources field in each entry with graph provenance (debug aid)",
 )
+@click.option(
+    "--names-only",
+    "names_only",
+    is_flag=True,
+    help="Export names without requiring accepted docs (skip docs_stage gate)",
+)
 def sn_export(
     staging: str | None,
     min_score: float,
@@ -2353,6 +2374,7 @@ def sn_export(
     domain: str | None,
     override_edits: tuple[str, ...],
     include_sources: bool,
+    names_only: bool,
 ) -> None:
     """Export validated standard names from graph to a staging directory.
 
@@ -2409,6 +2431,7 @@ def sn_export(
             gate_scope=gate_scope,
             override_edits=edits_list,
             include_sources=include_sources,
+            names_only=names_only,
         )
     except FileExistsError as exc:
         console.print(f"[red]Precondition failure:[/red] {exc}")

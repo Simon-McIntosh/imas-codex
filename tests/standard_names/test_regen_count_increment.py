@@ -41,7 +41,7 @@ class TestRegenCountIncrement:
         self._call_write(
             [
                 {
-                    "id": "test_regen_name",
+                    "id": "electron_density",
                     "source_types": ["dd"],
                     "source_id": "test/path",
                     "regen_increment": True,
@@ -65,7 +65,7 @@ class TestRegenCountIncrement:
         self._call_write(
             [
                 {
-                    "id": "test_regen_name",
+                    "id": "electron_density",
                     "source_types": ["dd"],
                     "source_id": "test/path",
                     "regen_increment": True,
@@ -87,7 +87,7 @@ class TestRegenCountIncrement:
         self._call_write(
             [
                 {
-                    "id": "test_fresh_name",
+                    "id": "ion_temperature",
                     "source_types": ["dd"],
                     "source_id": "test/path",
                 }
@@ -114,7 +114,7 @@ class TestRegenCountIncrement:
         self._call_write(
             [
                 {
-                    "id": "test_regen_name",
+                    "id": "electron_density",
                     "source_types": ["dd"],
                     "source_id": "test/path",
                     "regen_increment": True,

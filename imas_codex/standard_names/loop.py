@@ -105,6 +105,7 @@ def _build_pool_specs(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
     scope_run_id: str | None = None,
+    names_only: bool = False,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -325,6 +326,11 @@ def _build_pool_specs(
         ),
     ]
 
+    # ── Names-only filtering ─────────────────────────────────────────
+    _DOCS_POOLS = {"generate_docs", "review_docs", "refine_docs"}
+    if names_only:
+        specs = [s for s in specs if s.name not in _DOCS_POOLS]
+
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
     # queue exceeds the configured cap.  The throttle wraps the claim
@@ -515,11 +521,16 @@ async def run_sn_pools(
     pending_fn: Callable[[], dict[str, int]] | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
     scope_run_id: str | None = None,
+    names_only: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
     Uses six concurrent worker pools that pull work from the graph
     independently and share a single :class:`BudgetManager`.
+
+    When *names_only* is ``True``, the three docs pools
+    (generate_docs, review_docs, refine_docs) are excluded so
+    only name generation / review / refinement run.
 
     Startup sequence:
 
@@ -726,6 +737,7 @@ async def run_sn_pools(
             on_event=on_event,
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
+            names_only=names_only,
         )
 
         # ── Wire pool health into display state ───────────────────

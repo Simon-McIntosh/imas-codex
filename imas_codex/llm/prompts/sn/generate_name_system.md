@@ -207,7 +207,7 @@ Your name must render from this IR. Key composition rules:
 - **Postfix operators concatenate directly**: `X_magnitude`, `X_amplitude`.
 - **Complex parts use prefix form**: `real_part_of_X`, `imaginary_part_of_X` — this is
   the canonical ISN form. The prefix correctly parses as `transformation=real_part`.
-- **Projection is always prefix**: `radial_component_of_magnetic_field`. Never trail the axis.
+- **Projection is always a leading qualifier**: `radial_magnetic_field`. Never trail the axis.
 - **Locus is always postfix**: `electron_temperature_at_magnetic_axis`.
   Use `_of_` for entity properties, `_at_` for field values at points, `_over_` for regions.
 - **Mechanism is always postfix**: `plasma_current_due_to_bootstrap`.
@@ -306,14 +306,14 @@ qualifier) places the component (`parallel`, `perpendicular`, `poloidal`, `toroi
 `imaginary_part_of`) BEFORE the base via `<modifier>_of_<base>`. Suffix forms collapse
 component, transformation, and reducer tokens into `physical_base`, breaking the parser.
 - ❌ `halo_region_parallel_energy_due_to_heat_flux`
-- ✅ `parallel_component_of_halo_energy`
+- ✅ `parallel_halo_energy`
 - ❌ `vertical_coordinate_of_geometric_axis_radial_derivative_wrt_minor_radius`
 - ✅ `derivative_with_respect_to_minor_radius_of_vertical_coordinate_of_geometric_axis`
 - ❌ `gyroaveraged_parallel_velocity_moment_imaginary_part_normalized`
-- ✅ Restructure as `<component>_component_of_<base>` chain, or skip + emit
+- ✅ Restructure as `<axis>_<base>` (leading qualifier prefix), or skip + emit
   `vocab_gap` if the chain exceeds the two-`_of_` nesting limit (HARD PRE-EMIT #9).
-- *Top-scoring W37 exemplars:* `parallel_component_of_runaway_electron_current_density`
-  (★0.95), `parallel_component_of_fast_electron_pressure` (★0.95).
+- *Top-scoring exemplars:* `parallel_runaway_electron_current_density`
+  (★0.95), `parallel_fast_electron_pressure` (★0.95).
 - *Decision rule:* Component, transformation, and reducer tokens always come BEFORE
   the base via `_of_`. Never trail them as suffixes. Cross-check with NC-20 (real_part /
   imaginary_part / amplitude / phase are the only sanctioned SUFFIX modifiers).
@@ -325,7 +325,7 @@ name body (`sensor_direction_unit_vector`) duplicates the leakage warned against
 HARD PRE-EMIT CHECK #3 and INSTRUMENT HANDLING. Extract the most general physical
 concept; drop intermediate hardware tokens.
 - ❌ `z_coordinate_of_sensor_direction_unit_vector`
-- ✅ `z_component_of_direction_unit_vector` (a unit vector field's Z-component
+- ✅ `z_direction_unit_vector` (a unit vector field's Z-component
   is a vector projection, not a coordinate of a point)
 - *Decision rule:* If the DD path stacks ≥2 hardware tokens (`sensor/direction`,
   `coil/turn/winding`, `probe/tip/electrode`), keep at most ONE hardware token, and
@@ -572,9 +572,9 @@ is provided as context for your naming decisions.
     - Paths whose name contains `_dot`, ends in `_tendency`, or sits under an IDS explicitly named for time derivatives (e.g. `*_evolution`) → use `tendency_of_<base>` or `time_derivative_of_<base>`.
     - Be **consistent across a batch**: if you choose `change_in_` for one path under `core_instant_changes/`, use `change_in_` for **every** path under that same IDS in the batch. Mixing `change_in_` and `tendency_of_` for sibling paths is an anti-pattern.
 15. **Component–tense ordering — Component MUST be outside the tense prefix** (ISN grammar requirement):
-    - Correct: `poloidal_component_of_change_in_ion_velocity` (Component=poloidal, base=`change_in_ion_velocity`).
-    - Correct: `toroidal_component_of_tendency_of_current_density`.
-    - **Incorrect**: `change_in_poloidal_component_of_ion_velocity` (parser collapses everything into `physical_base`, Component is lost).
+    - Correct: `poloidal_change_in_ion_velocity` (Component=poloidal, base=`change_in_ion_velocity`).
+    - Correct: `toroidal_tendency_of_current_density`.
+    - **Incorrect**: `change_in_poloidal_ion_velocity` (parser collapses everything into `physical_base`, Component is lost).
     - Rule of thumb: directional/projection prefixes (parallel/poloidal/toroidal/radial/normal/tangential) wrap the entire base — including any tense — never the other way round.
 16. **`_density` suffix MUST agree with declared unit** (dimensional anti-pattern): A name ending in `_density` claims a quantity per unit volume / area / length. The DD-supplied unit must contain `m^-3` (volumetric), `m^-2` (areal), or `m^-1` (linear). If the unit is a bare extensive quantity (e.g. `kg.m.s^-1` for momentum, `J` for energy without `m^-3`), **drop `_density`** or rename to reflect the actual quantity. Example: ❌ `toroidal_angular_momentum_density` with unit `kg.m.s^-1` → ✅ `toroidal_momentum_per_unit_radius` or simply `toroidal_momentum_profile` (no `_density` claim).
 {% include "sn/_coordinate_conventions.md" %}
@@ -584,17 +584,17 @@ is provided as context for your naming decisions.
     - Toroidal angle / cylindrical φ coordinate → `toroidal_angle_of_<X>` ✓ (NEVER `toroidal_position_of_<X>` ✗).
     - Vertical / Z coordinate → `vertical_coordinate_of_<X>` ✓ (NEVER `vertical_position_of_<X>` ✗).
     - For an unspecified 3-vector position with no directional qualifier, plain `position_of_<X>` is acceptable.
-    - For a *component* of a vector field (not a coordinate of a point), use `<axis>_component_of_<vector>` — e.g. `vertical_component_of_surface_normal_vector` (NOT `vertical_coordinate_of_surface_normal_vector` — surface normal is a vector field, you take its Z-component, not its Z-coordinate).
+    - For a *component* of a vector field (not a coordinate of a point), use `<axis>_<vector>` — e.g. `vertical_surface_normal_vector` (NOT `vertical_coordinate_of_surface_normal_vector` — surface normal is a vector field, you take its Z-component, not its Z-coordinate).
     - This rule is unconditional and overrides any apparent symmetry with sibling names.
 18. **Preposition discipline for plasma-boundary / separatrix / wall properties — use `_of_` not `_at_`**: When a scalar property is evaluated AT a geometric feature that itself has a name (plasma boundary, separatrix, magnetic axis, x-point), prefer the possessive `_of_` form, NOT `_at_`. This prevents synonym pairs.
     - ✓ `poloidal_magnetic_flux_of_plasma_boundary`, `normalized_poloidal_magnetic_flux_of_plasma_boundary`
     - ✗ `poloidal_magnetic_flux_at_plasma_boundary`, `normalized_poloidal_magnetic_flux_at_plasma_boundary`
     - Exception: when "at" carries a clearly directional / temporal meaning that "of" cannot (rare), keep `_at_`. Default is `_of_`.
-19. **Projection is a prefix — use `<axis>_component_of_<quantity>` form** (ISN IR requirement): Axis projections (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`) MUST appear as a `<axis>_component_of_<quantity>` prefix or a leading qualifier. A trailing `_<component>` suffix violates the canonical rendering.
-    - ✓ `toroidal_component_of_ion_rotation_frequency` (projection prefix).
-    - ✓ `toroidal_ion_rotation_frequency` (leading qualifier prefix).
+19. **Projection is a leading qualifier prefix — use `<axis>_<quantity>` form** (ISN IR requirement): Axis projections (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`) MUST appear as a leading qualifier prefix `<axis>_<quantity>`. The `_component_of_` connector is REJECTED by the grammar. A trailing `_<component>` suffix also violates the canonical rendering.
+    - ✓ `toroidal_ion_rotation_frequency` (axis as leading qualifier).
+    - ✗ `toroidal_component_of_ion_rotation_frequency` (REJECTED by grammar).
     - ✗ `ion_rotation_frequency_toroidal` (trailing suffix — parser misassigns).
-    - ✗ `heat_flux_poloidal` — use `poloidal_component_of_heat_flux`.
+    - ✗ `heat_flux_poloidal` — use `poloidal_heat_flux`.
 20. **Prefix operators carry `_of_` scope — NEVER trail** (ISN operator model): Prefix operators (`volume_averaged`, `flux_surface_averaged`, `line_averaged`, `time_derivative`, `gradient`, `normalized`, etc.) wrap the inner name with `_of_` scope. They MUST appear as a leading prefix with explicit `_of_`, never as a trailing suffix or bare concatenation.
     - ✓ `volume_averaged_of_electron_temperature`, `line_averaged_of_electron_density`, `flux_surface_averaged_of_current_density`.
     - ✗ `ion_temperature_volume_averaged`, `current_density_flux_surface_averaged`, `electron_density_line_averaged`.
@@ -602,30 +602,30 @@ is provided as context for your naming decisions.
 21. **Named-feature preposition — use `_of_` for magnetic axis, x-point, strike point, LCFS** (extension of Rule 18): All named geometric features take the possessive `_of_` form, not `_at_`. The vocabulary includes: `magnetic_axis`, `plasma_boundary`, `last_closed_flux_surface`, `separatrix`, `x_point`, `o_point`, `strike_point`, `inner_strike_point`, `outer_strike_point`, `stagnation_point`.
     - ✓ `poloidal_magnetic_flux_of_magnetic_axis`, `loop_voltage_of_last_closed_flux_surface`, `poloidal_magnetic_flux_of_x_point`.
     - ✗ `poloidal_magnetic_flux_at_magnetic_axis`, `loop_voltage_at_last_closed_flux_surface`, `poloidal_magnetic_flux_at_x_point`.
-22. **`diamagnetic` is a drift, NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation — this is not informational): Unlike `toroidal`, `poloidal`, `radial`, or `parallel`, `diamagnetic` does NOT label a spatial projection axis. The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` is itself a specific drift — it is not a component of another velocity along a diamagnetic axis. Therefore `diamagnetic_component_of_<X>` is **physically wrong and always rejected**. CRITICAL: when a DD path contains a sibling or subfield literally named `diamagnetic` (very common on transport / edge paths — e.g. `current_density/diamagnetic`, `electric_field/diamagnetic`, `velocity/diamagnetic`), DO NOT translate the label directly. The DD label is a shorthand for "the part due to the diamagnetic drift" — you must rename using `_due_to_diamagnetic_drift` (for currents/fluxes) or pick the correct drift-velocity name.
+22. **`diamagnetic` is a drift, NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation — this is not informational): Unlike `toroidal`, `poloidal`, `radial`, or `parallel`, `diamagnetic` does NOT label a spatial projection axis. The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` is itself a specific drift — it is not a component of another velocity along a diamagnetic axis. Therefore `diamagnetic_<X>` used as a projection is **physically wrong and always rejected**. CRITICAL: when a DD path contains a sibling or subfield literally named `diamagnetic` (very common on transport / edge paths — e.g. `current_density/diamagnetic`, `electric_field/diamagnetic`, `velocity/diamagnetic`), DO NOT translate the label directly. The DD label is a shorthand for "the part due to the diamagnetic drift" — you must rename using `_due_to_diamagnetic_drift` (for currents/fluxes) or pick the correct drift-velocity name.
     - ✓ `diamagnetic_drift_velocity` (the drift itself).
     - ✓ `ion_diamagnetic_drift_velocity`, `electron_diamagnetic_drift_velocity`.
     - ✓ `<base>_due_to_diamagnetic_drift` (a flux/current driven by the drift).
-    - ✗ `diamagnetic_component_of_electric_field` — makes no physical sense; an electric field does not have a "diamagnetic component."
-    - ✗ `diamagnetic_component_of_ion_velocity` — the diamagnetic drift IS a velocity; it is not a component of the ion bulk velocity.
+    - ✗ `diamagnetic_electric_field` — makes no physical sense; an electric field does not have a "diamagnetic" projection.
+    - ✗ `diamagnetic_ion_velocity` — the diamagnetic drift IS a velocity; it is not a projection of the ion bulk velocity.
     - Use `toroidal`, `poloidal`, `parallel`, `perpendicular`, `radial` for projection axes; reserve `diamagnetic` for the drift-velocity concept itself.
-23. **`real_part` / `imaginary_part` are suffixes, NEVER prefixes — HARD PROHIBITION** (the `amplitude_of_prefix_check` audit quarantines every violation): For complex-valued perturbation quantities (common in MHD, linear-stability, wave-tool outputs), the canonical ISN form places `_real_part` / `_imaginary_part` / `_amplitude` / `_phase` at the **end** of the name, after the full component-axis + subject chain. Prefix forms `real_part_of_<X>` and `imaginary_part_of_<X>` break grammar when `<X>` already contains `_of_` or `_component_of_` (nested prepositions create parse ambiguity).
+23. **`real_part` / `imaginary_part` are suffixes, NEVER prefixes — HARD PROHIBITION** (the `amplitude_of_prefix_check` audit quarantines every violation): For complex-valued perturbation quantities (common in MHD, linear-stability, wave-tool outputs), the canonical ISN form places `_real_part` / `_imaginary_part` / `_amplitude` / `_phase` at the **end** of the name, after the full component-axis + subject chain. Prefix forms `real_part_of_<X>` and `imaginary_part_of_<X>` break grammar when `<X>` already contains `_of_` (nested prepositions create parse ambiguity).
     - ✓ `perturbed_electrostatic_potential_real_part`, `perturbed_mass_density_imaginary_part`.
-    - ✓ `radial_component_of_perturbed_magnetic_field_real_part`.
-    - ✓ `poloidal_component_of_perturbed_plasma_velocity_imaginary_part`.
+    - ✓ `radial_perturbed_magnetic_field_real_part`.
+    - ✓ `poloidal_perturbed_plasma_velocity_imaginary_part`.
     - ✓ `reynolds_stress_tensor_real_part`, `maxwell_stress_tensor_perturbation_imaginary_part`.
     - ✗ `real_part_of_perturbed_electrostatic_potential` — prefix form, rejected.
-    - ✗ `imaginary_part_of_radial_component_of_perturbed_magnetic_field` — nested `_of_` breaks the parser.
+    - ✗ `imaginary_part_of_radial_perturbed_magnetic_field` — nested `_of_` breaks the parser.
     - ✗ `real_part_of_reynolds_stress_tensor` — use the suffix form instead.
     - Same rule applies to `_amplitude` and `_phase` for Fourier-component quantities.
 24. **Do not re-quantity a location — `center_of_mass` is a reference point, not a mass quantity**: Place-name tokens that happen to include physical-quantity words are single grammatical location tokens. `center_of_mass` is a reference point (the barycentre), not a quantity with units of mass. When naming a quantity **at** the barycentre, treat `center_of_mass` as a location qualifier.
-    - ✓ `center_of_mass_velocity`, `radial_component_of_center_of_mass_velocity`.
+    - ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`.
     - ✓ `center_of_mass_position`.
     - ✗ `mass_velocity` or `mass_of_center_velocity` (both nonsensical).
     - Apply the same principle to: `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
-25. **Projection prefix — same as Rule 19** (the `segment_order_check` audit enforces this): See Rule 19. Axis projections always use the `<axis>_component_of_<quantity>` form or a leading qualifier prefix. Never trail.
-    - ✓ `toroidal_component_of_ion_rotation_frequency` or `toroidal_ion_rotation_frequency`.
-    - ✓ `poloidal_component_of_electron_diffusivity` or `poloidal_electron_diffusivity`.
+25. **Projection prefix — same as Rule 19** (the `segment_order_check` audit enforces this): See Rule 19. Axis projections always use the `<axis>_<quantity>` leading qualifier form. The `_component_of_` connector is REJECTED by ISN grammar. Never trail.
+    - ✓ `toroidal_ion_rotation_frequency`.
+    - ✓ `poloidal_electron_diffusivity`.
     - ✗ `ion_rotation_frequency_toroidal`, `electron_diffusivity_poloidal`.
 26. **Ratios use `ratio_of_<A>_to_<B>` — not `<A>_to_<B>_ratio`** (the `ratio_binary_operator_check` audit enforces this): The canonical form places `ratio_of_` as a leading prefix, with `_to_` joining the two operands.
     - ✓ `ratio_of_ion_to_electron_density`, `ratio_of_poloidal_to_toroidal_magnetic_field`.

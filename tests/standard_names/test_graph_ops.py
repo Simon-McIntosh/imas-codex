@@ -189,7 +189,7 @@ class TestWriteStandardNames:
 
         names = [
             {
-                "id": "test_name",
+                "id": "electron_temperature",
                 "source_types": ["dd"],
                 "source_id": "some/path",
                 "links": [],
@@ -222,8 +222,8 @@ class TestWriteStandardNames:
                 "description": "Electron temperature",
             },
             {
-                # Invalid: component must precede subject in ISN grammar
-                "id": "ion_toroidal_momentum_diffusivity",
+                # Invalid: not a valid ISN grammar construction
+                "id": "completely_bogus_nonsense_value",
                 "source_types": ["dd"],
                 "source_id": "some/path",
                 "description": "Invalid name",
@@ -243,7 +243,7 @@ class TestWriteStandardNames:
 
         names = [
             {
-                "id": "ion_toroidal_momentum_diffusivity",
+                "id": "completely_bogus_nonsense_value",
                 "source_types": ["dd"],
                 "source_id": "some/path",
                 "description": "Invalid",

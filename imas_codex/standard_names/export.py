@@ -132,37 +132,34 @@ def _fetch_candidates(
     *,
     include_unreviewed: bool = False,
     domain: str | None = None,
+    names_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Fetch StandardName nodes eligible for export from the graph.
 
     Returns dicts with all catalog-relevant properties plus ``origin``,
     ``cocos``, ``reviewer_score_name``.
 
-    Only nodes that have completed **both** the name and docs pipelines
-    and passed validation are returned.  Specifically the query requires:
+    Only nodes that have completed the name pipeline and passed
+    validation are returned.  Specifically the query requires:
 
     - ``name_stage = 'accepted'`` — excludes superseded, exhausted, drafted,
       reviewed, and refining nodes.
     - ``docs_stage = 'accepted'`` — excludes nodes whose documentation has
-      not yet passed the docs review loop.
+      not yet passed the docs review loop (skipped when *names_only*).
     - ``validation_status = 'valid'`` — excludes quarantined nodes.
 
-    The legacy ``pipeline_status`` field is **not** used as a gate because
-    it is not updated when a predecessor node is marked superseded; only
-    ``name_stage`` is authoritative for that lifecycle transition.
+    When *names_only* is True, the ``docs_stage`` gate is dropped so
+    names can be exported before documentation is generated.
     """
     from imas_codex.graph.client import GraphClient
 
-    # Export only fully-accepted, validated nodes.
-    # name_stage='accepted' already excludes superseded/exhausted by construction
-    # (persist_refined_name_batch sets old.name_stage='superseded' on refine),
-    # but is spelled out explicitly for clarity.
     cypher = """
     MATCH (sn:StandardName)
     WHERE sn.name_stage = 'accepted'
-      AND sn.docs_stage = 'accepted'
       AND sn.validation_status = 'valid'
     """
+    if not names_only:
+        cypher += "  AND sn.docs_stage = 'accepted'\n"
     params: dict[str, Any] = {}
 
     if domain:
@@ -827,6 +824,7 @@ def run_export(
     override_edits: list[str] | None = None,
     cocos_convention: int = _DEFAULT_COCOS_CONVENTION,
     include_sources: bool = True,
+    names_only: bool = False,
 ) -> ExportReport:
     """Export standard names from the graph to a staging directory.
 
@@ -872,6 +870,7 @@ def run_export(
     candidates = _fetch_candidates(
         include_unreviewed=include_unreviewed,
         domain=domain,
+        names_only=names_only,
     )
     report.total_candidates = len(candidates)
     logger.info("Found %d candidate(s)", len(candidates))

@@ -81,8 +81,8 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `photon_energy_lower_bound` | **W38-A1 instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `first_coordinate_of_detector_outline` | **W38-A4 local-coordinate naming** — DD `x1`/`x2`/`x3` are abstract local-coordinate indices, NOT Cartesian x/y/z. Name as `first_coordinate`, `second_coordinate`, `third_coordinate`. The standard name describes the geometric concept (outline coordinate), not the DD field label |
 | `x2_width_of_bolometer_detector_aperture` | `second_coordinate_width_of_detector_aperture` | Same rule — `x2` maps to `second_coordinate`, not `x2`. The detector type is context, not part of the name |
-| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_component_of_halo_energy` | **W38-A2 suffix-form for component** — component / transformation / reducer tokens come BEFORE the base via `<modifier>_of_<base>`. Compare ★0.95 `parallel_component_of_fast_electron_pressure` |
-| `z_coordinate_of_sensor_direction_unit_vector` | `z_component_of_direction_unit_vector` | **W38-A3 compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
+| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **W38-A2 suffix-form for component** — component / transformation / reducer tokens come BEFORE the base as a leading qualifier prefix. Compare ★0.95 `parallel_fast_electron_pressure` |
+| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **W38-A3 compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
 
 ## Hardware & Diagnostic Geometry — Specificity Required
 
@@ -233,13 +233,13 @@ These names already exist in the catalog. Reuse them if they match your source, 
 > vector component, the orientation token (`parallel`, `perpendicular`,
 > `poloidal`, `toroidal`, `radial`, `diamagnetic`) MUST be placed OUTSIDE
 > the rate marker, wrapping the rate phrase:
->   ✅ `parallel_component_of_change_in_fast_electron_pressure`
->   ✅ `poloidal_component_of_tendency_of_electron_velocity`
->   ❌ `change_in_parallel_component_of_fast_electron_pressure` (grammar rejects)
->   ❌ `change_in_poloidal_component_of_electron_velocity` (grammar rejects)
-> The grammar parses `{orientation}_component_of_X` as a unit — the rate
+>   ✅ `parallel_change_in_fast_electron_pressure`
+>   ✅ `poloidal_tendency_of_electron_velocity`
+>   ❌ `change_in_parallel_fast_electron_pressure` (grammar rejects)
+>   ❌ `change_in_poloidal_electron_velocity` (grammar rejects)
+> The grammar parses `{orientation}_X` as a unit — the rate
 > marker must modify the base quantity X, not intrude between orientation
-> and `component_of`.
+> and the base.
 {% endif %}
 {% if item.species_context %}- **⚠️ Species context:** `{{ item.species_context }}` — this quantity is specific to **{{ item.species_context }}** species. The standard name MUST include the species in the `subject` segment (e.g., `{{ item.species_context }}_temperature`, not just `temperature`).
 {% endif %}- **Description:** {{ item.description }}
@@ -347,14 +347,14 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.family_type == "physical_vector" %}  - This path is the **{{ item.family_axis }}** component of a vector quantity.
   - **Sibling components:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
-  - **ISN naming convention:** Each component should be named `{axis}_component_of_{parent}` where `{parent}` is the shared vector name (e.g., `toroidal_component_of_current_density`).
+  - **ISN naming convention:** Each component should be named `{axis}_{parent}` where `{parent}` is the shared vector name (e.g., `toroidal_current_density`). The `_component_of_` connector is REJECTED by the grammar — use the short leading-qualifier form.
   - All siblings MUST share the same `physical_base` — only the `component` segment differs.
 {% elif item.family_type == "geometric_coordinate" %}  - This path is the **{{ item.family_axis }}** coordinate of a geometric position.
   - **Sibling coordinates:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
 {% if item.family_parent_name %}  - **Geometric base:** `{{ item.family_parent_name }}`{% endif %}
 
-  - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` for coordinates.
+  - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
   - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
   - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
@@ -398,7 +398,7 @@ component, basis, position, reducer, reference, statistic
   `{"subject": "electron", "physical_base": "temperature"}`
 - `electron_temperature_core` →
   `{"subject": "electron", "physical_base": "temperature", "position": "core"}`
-- `radial_component_of_magnetic_field` →
+- `radial_magnetic_field` →
   `{"component": "radial", "physical_base": "magnetic_field"}`
 - `minor_radius_of_plasma_boundary` →
   `{"physical_base": "minor_radius", "position": "plasma_boundary"}`

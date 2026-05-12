@@ -1369,7 +1369,7 @@ def name_description_consistency_check(candidate: dict[str, Any]) -> list[str]:
 
     Specifically detects the case where the description describes a
     Fourier/spectral decomposition but the name is simply the underlying
-    quantity (e.g. ``normal_component_of_magnetic_field`` described as
+    quantity (e.g. ``normal_magnetic_field`` described as
     "Fourier coefficients of the normal component ..."). Either the name
     must mark the decomposition explicitly, or the description must be
     rewritten to describe the underlying quantity.
@@ -1660,17 +1660,17 @@ def density_unit_consistency_check(candidate: dict[str, Any]) -> list[str]:
 
 
 def vector_field_component_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag ``_coordinate_of_<vector_field>`` and recommend ``_component_of_<vector_field>``.
+    """Flag ``_coordinate_of_<vector_field>`` and recommend short-form ``<axis>_<vector_field>``.
 
     The cylindrical-coordinate vocabulary (``radial``, ``vertical``, ``toroidal``,
     ``major_radius``, ``z_coordinate``) describes a *point in space*. When the
     target ``X`` is itself a vector field (surface normal, magnetic field vector,
-    velocity vector), the correct usage is ``<axis>_component_of_<X>`` — you
+    velocity vector), the correct usage is ``<axis>_<X>`` — you
     project the vector onto an axis, you do not extract a coordinate.
 
     Caught from equilibrium iteration:
     ``vertical_coordinate_of_surface_normal`` should be
-    ``vertical_component_of_surface_normal``.
+    ``vertical_surface_normal``.
     """
     name = candidate.get("id", "")
     if not name:
@@ -1693,7 +1693,7 @@ def vector_field_component_check(candidate: dict[str, Any]) -> list[str]:
                 issues.append(
                     f"audit:vector_field_component_check: name '{name}' applies "
                     f"'_coordinate_of_' to vector field '{tail}'; rename to "
-                    f"'{axis}_component_of_{tail}' (vectors have components, "
+                    f"'{axis}_{tail}' (vectors have components, "
                     f"points have coordinates)."
                 )
     return issues
@@ -1743,12 +1743,11 @@ def segment_order_check(candidate: dict[str, Any]) -> list[str]:
 
     ISN grammar places Component segments (``toroidal``, ``poloidal``, ``radial``,
     ``parallel``, ``perpendicular``, ``vertical``, ``diamagnetic``) either as a
-    leading prefix or via the ``<axis>_component_of_<quantity>`` preposition. A
+    leading prefix or via the ``<axis>_<quantity>`` short form. A
     trailing ``_<component>`` suffix after the quantity reverses segment order.
 
     Caught from transport iteration:
-    ``ion_rotation_frequency_toroidal`` → ``toroidal_ion_rotation_frequency`` or
-    ``toroidal_component_of_ion_rotation_frequency``.
+    ``ion_rotation_frequency_toroidal`` → ``toroidal_ion_rotation_frequency``.
     """
     name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
     if not name:
@@ -1777,8 +1776,8 @@ def segment_order_check(candidate: dict[str, Any]) -> list[str]:
         issues.append(
             f"audit:segment_order_check: name '{name}' ends with component "
             f"token '_{comp}'; Component segments must precede the Subject or "
-            f"use '<axis>_component_of_<quantity>'. Rename to "
-            f"'{comp}_{stem}' or '{comp}_component_of_{stem}'."
+            f"use '<axis>_<quantity>' short form. Rename to "
+            f"'{comp}_{stem}'."
         )
     return issues
 
@@ -1874,20 +1873,20 @@ _DIAMAGNETIC_COMPONENT_PATTERN = "diamagnetic_component_of_"
 
 
 def diamagnetic_component_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag ``diamagnetic_component_of_*`` — diamagnetic is a drift, not a component.
+    """Flag ``diamagnetic_component_of_*`` and ``diamagnetic_<X>`` used as projection — diamagnetic is a drift, not a component.
 
     ``diamagnetic`` labels a specific drift velocity ``v_dia = B × ∇p / (qnB²)``,
     not a spatial projection axis like ``toroidal`` or ``poloidal``. Using
-    ``diamagnetic_component_of_<X>`` therefore either:
+    ``diamagnetic_component_of_<X>`` or ``diamagnetic_<X>`` as a projection therefore either:
 
     - Makes no physical sense for scalars and projected fields (e.g.
-      ``diamagnetic_component_of_electric_field``), or
+      ``diamagnetic_electric_field``), or
     - Is redundant for a drift velocity (``v_dia`` IS the diamagnetic drift,
       not a component of something else).
 
     Canonical constructions:
     - For the drift velocity itself → ``diamagnetic_drift_velocity`` (no
-      ``_component_of_``).
+      projection).
     - For a flux driven by the diamagnetic drift → ``diamagnetic_<base>`` or
       ``<base>_due_to_diamagnetic_drift``.
     """
@@ -1911,7 +1910,7 @@ def amplitude_of_prefix_check(candidate: dict[str, Any]) -> list[str]:
     canonical ISN form is the noun-suffix construction ``<X>_amplitude``,
     ``<X>_phase``, ``<X>_magnitude``. The prefix form ``amplitude_of_<X>``
     and siblings break the grammar when ``<X>`` contains a ``_of_`` or
-    ``component_of_`` chain (e.g. ``amplitude_of_parallel_component_of_*``
+    ``component_of_`` chain (e.g. ``amplitude_of_parallel_*``
     fails the vocabulary consistency check because ``amplitude_of_parallel``
     is not a Component token). Use the noun-suffix form consistently.
 
@@ -1935,7 +1934,7 @@ def amplitude_of_prefix_check(candidate: dict[str, Any]) -> list[str]:
                 f"audit:amplitude_of_prefix_check: name '{name}' uses "
                 f"'{prefix}<X>' prefix — canonical ISN form is the "
                 f"noun-suffix '{tail}_{noun}'. Prefix forms break grammar "
-                f"when <X> contains '_of_' or 'component_of_' chains."
+                f"when <X> contains '_of_' chains."
             ]
     return []
 

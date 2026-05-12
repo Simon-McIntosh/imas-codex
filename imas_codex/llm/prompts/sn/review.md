@@ -26,7 +26,7 @@ grammar and convention scores.
 - Is the `physical_base` token in the closed vocabulary?
 - Are prefix operators scoped with `_of_` (`gradient_of_X`, not `gradient_X`)?
 - Are postfix operators correctly suffixed (`X_magnitude`, not `magnitude_of_X`)?
-- Is the projection prefix in canonical form (`radial_component_of_X`)?
+- Is the projection prefix in canonical short form (`radial_X`, not `radial_component_of_X`)?
 - Is the locus postfix (`_of_entity`, `_at_position`, `_over_region`)?
 - Does the name round-trip: `parse(name) → compose() == name`?
 - Are all `_of_` usages structurally disambiguated (operator scope, binary separator, or locus)?
