@@ -112,6 +112,58 @@ class BenchmarkReport:
 # ---------------------------------------------------------------------------
 
 
+def _get_segment_fields(candidate: dict) -> dict:
+    """Extract segment fields from a candidate dict.
+
+    Handles both nested format (``{segments: {base_token: ...}}``)
+    and legacy flat format (``{base_token: ...}``).
+    """
+    segs = candidate.get("segments")
+    if isinstance(segs, dict):
+        return segs
+    return candidate
+
+
+def _resolve_name(candidate: dict) -> str:
+    """Resolve the composed standard name from a candidate dict.
+
+    Tries ``standard_name`` key first (legacy), then composes from
+    IR segment fields via ISN.
+    """
+    name = candidate.get("standard_name", "") or candidate.get("id", "")
+    if name:
+        return name
+
+    segs = _get_segment_fields(candidate)
+    base_token = segs.get("base_token")
+    if not base_token:
+        return ""
+
+    try:
+        from imas_standard_names.grammar.ir import (
+            BaseKind,
+            QuantityOrCarrier,
+            StandardNameIR,
+        )
+        from imas_standard_names.grammar.render import compose
+
+        base = QuantityOrCarrier(
+            token=base_token,
+            kind=BaseKind(segs.get("base_kind", "quantity")),
+        )
+        qualifiers_raw = segs.get("qualifiers") or []
+        qualifiers = None
+        if qualifiers_raw:
+            from imas_standard_names.grammar.ir import Qualifier
+
+            qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
+
+        ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
+        return compose(ir)
+    except Exception:
+        return ""
+
+
 def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     """Validate a single candidate via grammar round-trip.
 
@@ -120,33 +172,8 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
         grammar_valid: True if the name parses and round-trips.
         fields_consistent: True if IR compose produces the same name.
     """
-    name = candidate.get("standard_name", "") or candidate.get("id", "")
-
-    # If no explicit name, try composing from IR fields
-    if not name and candidate.get("base_token"):
-        try:
-            from imas_standard_names.grammar.ir import (
-                BaseKind,
-                QuantityOrCarrier,
-                StandardNameIR,
-            )
-            from imas_standard_names.grammar.render import compose
-
-            base = QuantityOrCarrier(
-                token=candidate["base_token"],
-                kind=BaseKind(candidate.get("base_kind", "quantity")),
-            )
-            qualifiers_raw = candidate.get("qualifiers") or []
-            qualifiers = None
-            if qualifiers_raw:
-                from imas_standard_names.grammar.ir import Qualifier
-
-                qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
-
-            ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
-            name = compose(ir)
-        except Exception:
-            pass
+    segs = _get_segment_fields(candidate)
+    name = _resolve_name(candidate)
 
     grammar_valid = False
     fields_consistent = False
@@ -161,7 +188,7 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
 
     # Check IR consistency: if candidate has IR fields, compose and compare
     try:
-        base_token = candidate.get("base_token")
+        base_token = segs.get("base_token")
         if base_token:
             from imas_standard_names.grammar.ir import (
                 BaseKind,
@@ -170,11 +197,11 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
             )
             from imas_standard_names.grammar.render import compose
 
-            base_kind = candidate.get("base_kind", "quantity")
+            base_kind = segs.get("base_kind", "quantity")
             base = QuantityOrCarrier(token=base_token, kind=BaseKind(base_kind))
 
             qualifiers = None
-            qualifiers_raw = candidate.get("qualifiers") or []
+            qualifiers_raw = segs.get("qualifiers") or []
             if qualifiers_raw:
                 from imas_standard_names.grammar.ir import Qualifier
 
@@ -215,7 +242,7 @@ def compare_to_reference(
     generated = {}
     for c in candidates:
         sid = c.get("source_id", "")
-        generated[sid] = c.get("standard_name", "")
+        generated[sid] = _resolve_name(c)
 
     overlap = 0
     ref_total = len(reference)
@@ -328,7 +355,7 @@ async def score_with_reviewer(
         for c in batch:
             batch_items.append(
                 {
-                    "standard_name": c.get("standard_name", "") or c.get("id", ""),
+                    "standard_name": _resolve_name(c),
                     "source_id": c.get("source_id", ""),
                     "description": c.get("description", "") or "",
                     "documentation": (c.get("documentation", "") or "")[:500],

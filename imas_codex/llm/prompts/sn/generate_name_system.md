@@ -665,12 +665,19 @@ Top-level keys:
      Drift is caught at CI time by tests/standard_names/test_compose_schema_consistency.py. -->
 
 **You do NOT output a `standard_name` string.** You fill individual IR segment
-fields. Code assembles the canonical name via ISN's `compose()` function.
+fields inside a `segments` object. Code assembles the canonical name via ISN's `compose()` function.
 
 Each candidate MUST include these fields:
 
-**IR segment fields (the name is assembled from these):**
+**Top-level fields:**
 - `source_id`: full DD path (e.g., `"equilibrium/time_slice/profiles_1d/psi"`)
+- `segments`: object containing the IR grammar segment fields (see below)
+- `description`: one-sentence summary, **under 120 characters** (e.g., `"Electron temperature on the poloidal flux grid"`)
+- `kind`: one of `"scalar"`, `"vector"`, `"metadata"` — see classification rules
+- `dd_paths`: array of IMAS DD paths this name maps to (include the source_id at minimum)
+- `reason`: brief justification (≤25 words — list the IR segments used; do not restate description)
+
+**IR segment fields (inside `segments` — the name is assembled from these):**
 - `base_token` (**required**): the irreducible physical or geometric quantity from the closed base registry (e.g., `"temperature"`, `"magnetic_flux"`, `"position"`)
 - `base_kind` (**required**): `"quantity"` for physical quantities, `"geometry"` for geometric carriers
 - `projection_axis`: axis projection prefix — one of the registered component/coordinate tokens (e.g., `"radial"`, `"toroidal"`, `"poloidal"`, `"parallel"`). Null if no projection.
@@ -683,21 +690,17 @@ Each candidate MUST include these fields:
 - `operator_token`: mathematical operator token (e.g., `"time_derivative"`, `"gradient"`, `"normalized"`, `"magnitude"`). Null if no operator.
 - `operator_kind`: `"unary_prefix"` (wraps with `_of_` scope) or `"unary_postfix"` (appends directly). Required when `operator_token` is set; null otherwise.
 
-**Non-IR fields (metadata about the candidate):**
-- `description`: one-sentence summary, **under 120 characters** (e.g., `"Electron temperature on the poloidal flux grid"`)
-- `kind`: one of `"scalar"`, `"vector"`, `"metadata"` — see classification rules
-- `dd_paths`: array of IMAS DD paths this name maps to (include the source_id at minimum)
-- `reason`: brief justification (≤25 words — list the IR segments used; do not restate description)
-
 ### IR Segment Worked Examples
 
 **Bare quantity:**
 ```json
 {
   "source_id": "core_profiles/profiles_1d/electrons/temperature",
-  "base_token": "temperature",
-  "base_kind": "quantity",
-  "qualifiers": ["electron"],
+  "segments": {
+    "base_token": "temperature",
+    "base_kind": "quantity",
+    "qualifiers": ["electron"]
+  },
   "reason": "qualifier=electron, base=temperature"
 }
 ```
@@ -707,11 +710,13 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "equilibrium/time_slice/profiles_1d/psi",
-  "base_token": "magnetic_flux",
-  "base_kind": "quantity",
-  "projection_axis": "poloidal",
-  "projection_shape": "component",
-  "qualifiers": [],
+  "segments": {
+    "base_token": "magnetic_flux",
+    "base_kind": "quantity",
+    "projection_axis": "poloidal",
+    "projection_shape": "component",
+    "qualifiers": []
+  },
   "description": "Poloidal magnetic flux on the 1D radial grid",
   "kind": "scalar",
   "dd_paths": ["equilibrium/time_slice/profiles_1d/psi"],
@@ -724,12 +729,14 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "core_profiles/global_quantities/electrons/n_e_at_axis",
-  "base_token": "density",
-  "base_kind": "quantity",
-  "qualifiers": ["electron"],
-  "locus_token": "magnetic_axis",
-  "locus_relation": "at",
-  "locus_type": "position",
+  "segments": {
+    "base_token": "density",
+    "base_kind": "quantity",
+    "qualifiers": ["electron"],
+    "locus_token": "magnetic_axis",
+    "locus_relation": "at",
+    "locus_type": "position"
+  },
   "description": "Electron density evaluated at the magnetic axis",
   "kind": "scalar",
   "dd_paths": ["core_profiles/global_quantities/electrons/n_e_at_axis"],
@@ -742,14 +749,16 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "magnetics/flux_loop/position/r",
-  "base_token": "position",
-  "base_kind": "geometry",
-  "projection_axis": "radial",
-  "projection_shape": "coordinate",
-  "qualifiers": [],
-  "locus_token": "flux_loop",
-  "locus_relation": "of",
-  "locus_type": "entity",
+  "segments": {
+    "base_token": "position",
+    "base_kind": "geometry",
+    "projection_axis": "radial",
+    "projection_shape": "coordinate",
+    "qualifiers": [],
+    "locus_token": "flux_loop",
+    "locus_relation": "of",
+    "locus_type": "entity"
+  },
   "description": "Radial position of the flux loop",
   "kind": "scalar",
   "dd_paths": ["magnetics/flux_loop/position/r"],
@@ -762,11 +771,13 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "core_profiles/profiles_1d/electrons/temperature_dot",
-  "base_token": "temperature",
-  "base_kind": "quantity",
-  "qualifiers": ["electron"],
-  "operator_token": "time_derivative",
-  "operator_kind": "unary_prefix",
+  "segments": {
+    "base_token": "temperature",
+    "base_kind": "quantity",
+    "qualifiers": ["electron"],
+    "operator_token": "time_derivative",
+    "operator_kind": "unary_prefix"
+  },
   "description": "Time derivative of the electron temperature",
   "kind": "scalar",
   "dd_paths": ["core_profiles/profiles_1d/electrons/temperature_dot"],
@@ -779,10 +790,12 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "core_transport/model/profiles_1d/ion/energy/flux_due_to_collisions",
-  "base_token": "energy",
-  "base_kind": "quantity",
-  "qualifiers": ["ion"],
-  "process_token": "collisions",
+  "segments": {
+    "base_token": "energy",
+    "base_kind": "quantity",
+    "qualifiers": ["ion"],
+    "process_token": "collisions"
+  },
   "description": "Ion energy flux due to collisional processes",
   "kind": "scalar",
   "dd_paths": ["core_transport/model/profiles_1d/ion/energy/flux_due_to_collisions"],
@@ -795,9 +808,11 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "core_profiles/profiles_1d/pressure_total",
-  "base_token": "pressure",
-  "base_kind": "quantity",
-  "qualifiers": ["total_plasma"],
+  "segments": {
+    "base_token": "pressure",
+    "base_kind": "quantity",
+    "qualifiers": ["total_plasma"]
+  },
   "description": "Total plasma pressure including all species",
   "kind": "scalar",
   "dd_paths": ["core_profiles/profiles_1d/pressure_total"],
@@ -810,11 +825,13 @@ Each candidate MUST include these fields:
 ```json
 {
   "source_id": "equilibrium/time_slice/profiles_1d/b_field_mag",
-  "base_token": "magnetic_field",
-  "base_kind": "quantity",
-  "qualifiers": [],
-  "operator_token": "magnitude",
-  "operator_kind": "unary_postfix",
+  "segments": {
+    "base_token": "magnetic_field",
+    "base_kind": "quantity",
+    "qualifiers": [],
+    "operator_token": "magnitude",
+    "operator_kind": "unary_postfix"
+  },
   "description": "Magnitude of the total magnetic field",
   "kind": "scalar",
   "dd_paths": ["equilibrium/time_slice/profiles_1d/b_field_mag"],

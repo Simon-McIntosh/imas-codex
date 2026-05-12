@@ -2,28 +2,37 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
+# Valid enum values for IR segment fields.  Plain ``str`` is used on the
+# Pydantic model (instead of ``Literal``) because Anthropic/OpenRouter
+# rejects ``anyOf: [{enum: [...]}, {type: null}]`` patterns in structured
+# output schemas.  Validators below enforce the allowed values.
+_BASE_KINDS = {"quantity", "geometry"}
+_PROJECTION_SHAPES = {"component", "coordinate"}
+_LOCUS_RELATIONS = {"of", "at", "over"}
+_LOCUS_TYPES = {"entity", "position", "region", "geometry"}
+_OPERATOR_KINDS = {"unary_prefix", "unary_postfix"}
+_ENTRY_KINDS = {"scalar", "vector", "metadata"}
 
-class StandardNameCandidate(BaseModel):
-    """A single standard name candidate — LLM fills individual grammar segments.
 
-    Name-only: compose produces naming via IR segment fields only.
-    Documentation (description, links, etc.) is added by ``sn enrich``.
+class GrammarSegments(BaseModel):
+    """IR grammar segment fields — the LLM's output target.
+
+    Separated into its own sub-model to keep the per-object property
+    count under Anthropic/OpenRouter's undocumented structured-output
+    schema limit (~13 properties per ``$defs`` item).
     """
 
-    source_id: str = Field(description="Source entity ID (DD path or signal ID)")
-
-    # --- IR segment fields (LLM output target) ---
     base_token: str = Field(
         description=(
             "Physical quantity or geometry carrier token, "
             "e.g. 'temperature', 'position'"
         )
     )
-    base_kind: Literal["quantity", "geometry"] = Field(
+    base_kind: str = Field(
         description="'quantity' for physical_base, 'geometry' for geometric_base"
     )
 
@@ -33,7 +42,7 @@ class StandardNameCandidate(BaseModel):
             "Axis token for component/coordinate projection, e.g. 'radial', 'toroidal'"
         ),
     )
-    projection_shape: Literal["component", "coordinate"] | None = Field(
+    projection_shape: str | None = Field(
         default=None,
         description=(
             "'component' for physical quantities, 'coordinate' for geometric bases"
@@ -52,16 +61,17 @@ class StandardNameCandidate(BaseModel):
         default=None,
         description="Location reference token, e.g. 'magnetic_axis', 'flux_loop'",
     )
-    locus_relation: Literal["of", "at", "over"] | None = Field(
-        default=None, description="Locus preposition"
+    locus_relation: str | None = Field(
+        default=None, description="Locus preposition: 'of', 'at', or 'over'"
     )
-    locus_type: Literal["entity", "position", "region", "geometry"] | None = Field(
-        default=None, description="Locus classification"
+    locus_type: str | None = Field(
+        default=None,
+        description="Locus classification: 'entity', 'position', 'region', or 'geometry'",
     )
 
     process_token: str | None = Field(
         default=None,
-        description=("Causal process token for due_to_ suffix, e.g. 'collisions'"),
+        description="Causal process token for due_to_ suffix, e.g. 'collisions'",
     )
 
     operator_token: str | None = Field(
@@ -70,30 +80,52 @@ class StandardNameCandidate(BaseModel):
             "Unary operator token, e.g. 'time_derivative', 'tendency', 'magnitude'"
         ),
     )
-    operator_kind: Literal["unary_prefix", "unary_postfix"] | None = Field(
-        default=None, description="Operator position"
+    operator_kind: str | None = Field(
+        default=None,
+        description="Operator position: 'unary_prefix' or 'unary_postfix'",
     )
-
-    # --- Non-IR fields ---
-    description: str = Field(
-        default="",
-        description="1-line ≤120 char summary of the physical quantity",
-    )
-    kind: Literal["scalar", "vector", "metadata"] = Field(
-        default="scalar", description="Entry kind"
-    )
-    dd_paths: list[str] = Field(
-        default_factory=list, description="Mapped IMAS DD paths"
-    )
-    reason: str = Field(description="Brief justification (≤25 words)")
 
     @model_validator(mode="after")
-    def _validate_base_token(self) -> StandardNameCandidate:
+    def _validate_enum_fields(self) -> GrammarSegments:
+        """Enforce allowed values for enum-like str fields."""
+        if self.base_kind not in _BASE_KINDS:
+            raise ValueError(
+                f"base_kind must be one of {_BASE_KINDS}, got '{self.base_kind}'"
+            )
+        if (
+            self.projection_shape is not None
+            and self.projection_shape not in _PROJECTION_SHAPES
+        ):
+            raise ValueError(
+                f"projection_shape must be one of {_PROJECTION_SHAPES}, "
+                f"got '{self.projection_shape}'"
+            )
+        if (
+            self.locus_relation is not None
+            and self.locus_relation not in _LOCUS_RELATIONS
+        ):
+            raise ValueError(
+                f"locus_relation must be one of {_LOCUS_RELATIONS}, "
+                f"got '{self.locus_relation}'"
+            )
+        if self.locus_type is not None and self.locus_type not in _LOCUS_TYPES:
+            raise ValueError(
+                f"locus_type must be one of {_LOCUS_TYPES}, got '{self.locus_type}'"
+            )
+        if self.operator_kind is not None and self.operator_kind not in _OPERATOR_KINDS:
+            raise ValueError(
+                f"operator_kind must be one of {_OPERATOR_KINDS}, "
+                f"got '{self.operator_kind}'"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_base_token(self) -> GrammarSegments:
         """Validate base_token is a registered physical_base or geometric_base."""
         try:
             from imas_standard_names import get_grammar_context
         except ImportError:
-            return self  # ISN not installed — skip validation
+            return self
 
         ctx = get_grammar_context()
         vocab = ctx.get("vocabulary_sections", [])
@@ -121,7 +153,7 @@ class StandardNameCandidate(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _validate_projection_axis(self) -> StandardNameCandidate:
+    def _validate_projection_axis(self) -> GrammarSegments:
         """Validate projection_axis against closed component/coordinate vocab."""
         if self.projection_axis is None:
             return self
@@ -144,7 +176,7 @@ class StandardNameCandidate(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _validate_qualifiers(self) -> StandardNameCandidate:
+    def _validate_qualifiers(self) -> GrammarSegments:
         """Validate qualifier tokens against closed subject vocabulary."""
         if not self.qualifiers:
             return self
@@ -232,6 +264,111 @@ class StandardNameCandidate(BaseModel):
         from imas_standard_names.grammar.render import compose
 
         return compose(self.to_ir())
+
+
+# Module-level constant: segment field names used by flat-wrap validators.
+_GRAMMAR_SEGMENT_FIELDS = frozenset(GrammarSegments.model_fields)
+
+
+class StandardNameCandidate(BaseModel):
+    """A single standard name candidate — LLM fills grammar segments.
+
+    The ``segments`` sub-model contains all IR grammar fields. This
+    split keeps each JSON schema ``$defs`` item under Anthropic's
+    ~13-property limit for structured output.
+    """
+
+    source_id: str = Field(description="Source entity ID (DD path or signal ID)")
+    segments: GrammarSegments = Field(description="ISN grammar segment fields")
+
+    # --- Non-IR fields ---
+    description: str = Field(
+        default="",
+        description="1-line ≤120 char summary of the physical quantity",
+    )
+    kind: str = Field(default="scalar", description="Entry kind")
+    dd_paths: list[str] = Field(
+        default_factory=list, description="Mapped IMAS DD paths"
+    )
+    reason: str = Field(description="Brief justification (≤25 words)")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _wrap_flat_segments(cls, data: Any) -> Any:
+        """Auto-wrap flat segment fields into a ``segments`` sub-dict.
+
+        Allows callers to pass ``base_token='temperature'`` at the top
+        level instead of ``segments={'base_token': 'temperature', ...}``.
+        """
+        if not isinstance(data, dict):
+            return data
+        if "segments" in data:
+            return data
+        seg_keys = _GRAMMAR_SEGMENT_FIELDS & data.keys()
+        if seg_keys:
+            segments = {k: data.pop(k) for k in seg_keys}
+            data["segments"] = segments
+        return data
+
+    @model_validator(mode="after")
+    def _validate_kind(self) -> StandardNameCandidate:
+        if self.kind not in _ENTRY_KINDS:
+            raise ValueError(f"kind must be one of {_ENTRY_KINDS}, got '{self.kind}'")
+        return self
+
+    # --- Convenience accessors delegating to segments ---
+
+    @property
+    def base_token(self) -> str:
+        return self.segments.base_token
+
+    @property
+    def base_kind(self) -> str:
+        return self.segments.base_kind
+
+    @property
+    def projection_axis(self) -> str | None:
+        return self.segments.projection_axis
+
+    @property
+    def projection_shape(self) -> str | None:
+        return self.segments.projection_shape
+
+    @property
+    def qualifiers(self) -> list[str]:
+        return self.segments.qualifiers
+
+    @property
+    def locus_token(self) -> str | None:
+        return self.segments.locus_token
+
+    @property
+    def locus_relation(self) -> str | None:
+        return self.segments.locus_relation
+
+    @property
+    def locus_type(self) -> str | None:
+        return self.segments.locus_type
+
+    @property
+    def process_token(self) -> str | None:
+        return self.segments.process_token
+
+    @property
+    def operator_token(self) -> str | None:
+        return self.segments.operator_token
+
+    @property
+    def operator_kind(self) -> str | None:
+        return self.segments.operator_kind
+
+    def to_ir(self) -> Any:
+        """Delegate to segments."""
+        return self.segments.to_ir()
+
+    def compose_name(self) -> str:
+        """Delegate to segments."""
+        return self.segments.compose_name()
 
 
 class StandardNameVocabGap(BaseModel):
@@ -715,60 +852,17 @@ class StandardNameEnrichBatch(BaseModel):
 class RefinedName(BaseModel):
     """LLM response model for a single refine_name call.
 
-    Uses IR-aligned segment fields (same as ``StandardNameCandidate``)
-    rather than free-form name composition.  The ``confidence`` field is
-    intentionally absent — it was removed in Phase 8.1.
+    Uses ``GrammarSegments`` sub-model (same as ``StandardNameCandidate``).
+    The ``confidence`` field is intentionally absent — removed in Phase 8.1.
     """
 
-    # --- IR segment fields (same as StandardNameCandidate) ---
-    base_token: str = Field(
-        description=(
-            "Physical quantity or geometry carrier token, "
-            "e.g. 'temperature', 'position'"
-        )
-    )
-    base_kind: Literal["quantity", "geometry"] = Field(
-        description="'quantity' for physical_base, 'geometry' for geometric_base"
-    )
-
-    projection_axis: str | None = Field(
-        default=None,
-        description="Axis token for component/coordinate projection",
-    )
-    projection_shape: Literal["component", "coordinate"] | None = Field(
-        default=None,
-        description="'component' or 'coordinate'",
-    )
-
-    qualifiers: list[str] = Field(
-        default_factory=list,
-        description="Species or source-entity qualifier tokens",
-    )
-
-    locus_token: str | None = Field(
-        default=None, description="Location reference token"
-    )
-    locus_relation: Literal["of", "at", "over"] | None = Field(
-        default=None, description="Locus preposition"
-    )
-    locus_type: Literal["entity", "position", "region", "geometry"] | None = Field(
-        default=None, description="Locus classification"
-    )
-
-    process_token: str | None = Field(default=None, description="Causal process token")
-
-    operator_token: str | None = Field(default=None, description="Unary operator token")
-    operator_kind: Literal["unary_prefix", "unary_postfix"] | None = Field(
-        default=None, description="Operator position"
-    )
+    segments: GrammarSegments = Field(description="ISN grammar segment fields")
 
     # --- Non-IR fields ---
     description: str = Field(
         ..., description="One-sentence physics definition (≤ 120 chars, no LaTeX)"
     )
-    kind: Literal["scalar", "vector", "metadata"] = Field(
-        default="scalar", description="Entry kind"
-    )
+    kind: str = Field(default="scalar", description="Entry kind")
     reason: str = Field(
         default="",
         description="Brief justification for how this addresses reviewer concerns",
@@ -776,73 +870,79 @@ class RefinedName(BaseModel):
 
     model_config = {"extra": "ignore", "populate_by_name": True}
 
+    @model_validator(mode="before")
+    @classmethod
+    def _wrap_flat_segments(cls, data: Any) -> Any:
+        """Auto-wrap flat segment fields into ``segments`` sub-dict."""
+        if not isinstance(data, dict):
+            return data
+        if "segments" in data:
+            return data
+        seg_keys = _GRAMMAR_SEGMENT_FIELDS & data.keys()
+        if seg_keys:
+            segments = {k: data.pop(k) for k in seg_keys}
+            data["segments"] = segments
+        return data
+
+    @model_validator(mode="after")
+    def _validate_kind(self) -> RefinedName:
+        if self.kind not in _ENTRY_KINDS:
+            raise ValueError(f"kind must be one of {_ENTRY_KINDS}, got '{self.kind}'")
+        return self
+
+    # --- Convenience accessors delegating to segments ---
+
+    @property
+    def base_token(self) -> str:
+        return self.segments.base_token
+
+    @property
+    def base_kind(self) -> str:
+        return self.segments.base_kind
+
+    @property
+    def projection_axis(self) -> str | None:
+        return self.segments.projection_axis
+
+    @property
+    def projection_shape(self) -> str | None:
+        return self.segments.projection_shape
+
+    @property
+    def qualifiers(self) -> list[str]:
+        return self.segments.qualifiers
+
+    @property
+    def locus_token(self) -> str | None:
+        return self.segments.locus_token
+
+    @property
+    def locus_relation(self) -> str | None:
+        return self.segments.locus_relation
+
+    @property
+    def locus_type(self) -> str | None:
+        return self.segments.locus_type
+
+    @property
+    def process_token(self) -> str | None:
+        return self.segments.process_token
+
+    @property
+    def operator_token(self) -> str | None:
+        return self.segments.operator_token
+
+    @property
+    def operator_kind(self) -> str | None:
+        return self.segments.operator_kind
+
     def to_ir(self) -> Any:
-        """Build ISN StandardNameIR from segment fields."""
-        from imas_standard_names.grammar.ir import (
-            AxisProjection,
-            BaseKind,
-            LocusRef,
-            LocusRelation,
-            LocusType,
-            OperatorApplication,
-            OperatorKind,
-            Process,
-            ProjectionShape,
-            Qualifier,
-            QuantityOrCarrier,
-            StandardNameIR,
-        )
-
-        base = QuantityOrCarrier(token=self.base_token, kind=BaseKind(self.base_kind))
-
-        projection = None
-        if self.projection_axis is not None and self.projection_shape is not None:
-            projection = AxisProjection(
-                axis=self.projection_axis,
-                shape=ProjectionShape(self.projection_shape),
-            )
-
-        qualifiers = [Qualifier(token=q) for q in self.qualifiers]
-
-        locus = None
-        if (
-            self.locus_token is not None
-            and self.locus_relation is not None
-            and self.locus_type is not None
-        ):
-            locus = LocusRef(
-                relation=LocusRelation(self.locus_relation),
-                token=self.locus_token,
-                type=LocusType(self.locus_type),
-            )
-
-        mechanism = None
-        if self.process_token is not None:
-            mechanism = Process(token=self.process_token)
-
-        operators: list[OperatorApplication] = []
-        if self.operator_token is not None and self.operator_kind is not None:
-            operators = [
-                OperatorApplication(
-                    kind=OperatorKind(self.operator_kind),
-                    op=self.operator_token,
-                )
-            ]
-
-        return StandardNameIR(
-            operators=operators,
-            projection=projection,
-            qualifiers=qualifiers,
-            base=base,
-            locus=locus,
-            mechanism=mechanism,
-        )
+        """Delegate to segments."""
+        return self.segments.to_ir()
 
     def compose_name(self) -> str:
-        """Build canonical standard name string via ISN compose()."""
-        from imas_standard_names.grammar.render import compose
-
-        return compose(self.to_ir())
+        """Delegate to segments."""
+        return self.segments.compose_name()
 
     @property
     def name(self) -> str:

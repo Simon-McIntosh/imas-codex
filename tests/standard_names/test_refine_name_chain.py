@@ -739,7 +739,7 @@ class TestPromptRendering:
         item = _make_refine_item()
 
         refined = RefinedName(
-            base_token="new_name",
+            base_token="temperature",
             base_kind="quantity",
             description="d",
             kind="scalar",

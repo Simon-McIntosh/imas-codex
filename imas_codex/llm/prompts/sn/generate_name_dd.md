@@ -383,10 +383,10 @@ understand what the quantity represents physically.
 **You do NOT output a `standard_name` string.** You fill individual IR segment
 fields. Code assembles the canonical name via ISN's `compose()` function.
 
-For **every** candidate you emit, populate the IR segment fields. This is not
-optional — it is how downstream tooling assembles and validates the name.
+For **every** candidate you emit, populate the IR segment fields inside a `segments` object.
+This is not optional — it is how downstream tooling assembles and validates the name.
 
-**Required fields:**
+**Required fields inside `segments`:**
 - `base_token`: the irreducible base quantity from the registry (e.g., `"temperature"`, `"magnetic_field"`)
 - `base_kind`: `"quantity"` or `"geometry"`
 
@@ -400,13 +400,13 @@ optional — it is how downstream tooling assembles and validates the name.
 **Examples:**
 
 - `electron_temperature` →
-  `base_token="temperature"`, `base_kind="quantity"`, `qualifiers=["electron"]`
+  `segments: {base_token: "temperature", base_kind: "quantity", qualifiers: ["electron"]}`
 - `radial_magnetic_field` →
-  `base_token="magnetic_field"`, `base_kind="quantity"`, `projection_axis="radial"`, `projection_shape="component"`
+  `segments: {base_token: "magnetic_field", base_kind: "quantity", projection_axis: "radial", projection_shape: "component"}`
 - `minor_radius_of_plasma_boundary` →
-  `base_token="minor_radius"`, `base_kind="geometry"`, `locus_token="plasma_boundary"`, `locus_relation="of"`, `locus_type="geometry"`
+  `segments: {base_token: "minor_radius", base_kind: "geometry", locus_token: "plasma_boundary", locus_relation: "of", locus_type: "geometry"}`
 - `time_derivative_of_electron_density` →
-  `base_token="density"`, `base_kind="quantity"`, `qualifiers=["electron"]`, `operator_token="time_derivative"`, `operator_kind="unary_prefix"`
+  `segments: {base_token: "density", base_kind: "quantity", qualifiers: ["electron"], operator_token: "time_derivative", operator_kind: "unary_prefix"}`
 
 If you cannot decompose into valid IR segments, the concept is wrong — revise
 rather than emit empty segments.
