@@ -119,6 +119,7 @@ def _compute_pool_pending(
     domains: list[str] | None,
     rotation_cap: int,
     min_score: float,
+    scope_run_id: str | None = None,
 ) -> dict[str, int]:
     """Return per-pool pending counts mirroring ``claim_*_batch`` predicates.
 
@@ -137,15 +138,24 @@ def _compute_pool_pending(
         Maximum chain depth — mirrors ``claim_refine_name_batch``.
     min_score:
         Reviewer threshold — mirrors ``claim_refine_name_batch``.
+    scope_run_id:
+        When set (``--focus`` mode), restrict counts to sources/names
+        with ``run_id = $scope_run_id``.  Without this filter the
+        pending count can see stale sources from previous runs that
+        the scoped claim query will never pick up, causing the exit
+        watchdog to spin forever.
     """
     domain_filter_sn = "AND sn.physics_domain IN $domains" if domains else ""
     domain_filter_src = "AND s.physics_domain IN $domains" if domains else ""
+    scope_filter_src = "AND s.run_id = $scope_run_id" if scope_run_id else ""
+    scope_filter_sn = "AND sn.run_id = $scope_run_id" if scope_run_id else ""
 
     query = f"""
     CALL {{
       MATCH (s:StandardNameSource {{status: 'extracted'}})
       WHERE NOT (s)-[:PRODUCED_NAME]->(:StandardName)
         {domain_filter_src}
+        {scope_filter_src}
       RETURN count(s) AS generate_name
     }}
     CALL {{
@@ -153,6 +163,7 @@ def _compute_pool_pending(
       WHERE sn.name_stage = 'drafted'
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS review_name
     }}
     CALL {{
@@ -163,6 +174,7 @@ def _compute_pool_pending(
         AND coalesce(sn.chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS refine_name
     }}
     CALL {{
@@ -171,6 +183,7 @@ def _compute_pool_pending(
         AND sn.docs_stage = 'pending'
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS generate_docs
     }}
     CALL {{
@@ -178,6 +191,7 @@ def _compute_pool_pending(
       WHERE sn.docs_stage = 'drafted'
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS review_docs
     }}
     CALL {{
@@ -188,6 +202,7 @@ def _compute_pool_pending(
         AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS refine_docs
     }}
     RETURN generate_name, review_name, refine_name,
@@ -199,6 +214,8 @@ def _compute_pool_pending(
     }
     if domains:
         params["domains"] = list(domains)
+    if scope_run_id:
+        params["scope_run_id"] = scope_run_id
     rows = list(gc.query(query, **params))  # type: ignore[attr-defined]
     if not rows:
         return {
@@ -319,12 +336,17 @@ def _run_sn_cmd(
     _domains_list: list[str] | None = list(domains) if domains else None
     _rc = rotation_cap if rotation_cap is not None else 3
     _ms = min_score if min_score is not None else DEFAULT_MIN_SCORE
+    _scope_run_id = scope_run_id
 
     def _pool_pending_fn() -> dict[str, int]:
         try:
             with _GC() as gc:
                 return _compute_pool_pending(
-                    gc, domains=_domains_list, rotation_cap=_rc, min_score=_ms
+                    gc,
+                    domains=_domains_list,
+                    rotation_cap=_rc,
+                    min_score=_ms,
+                    scope_run_id=_scope_run_id,
                 )
         except Exception:
             return {

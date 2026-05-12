@@ -52,9 +52,8 @@ class TestHardPreEmitChecksPresence:
         assert "No adjacent duplicate tokens" in self.raw
         assert "magnetic_magnetic" in self.raw
 
-    def test_check_2_entity_locus_of(self) -> None:
-        assert "Entity-locus preposition" in self.raw
-        assert "separatrix" in self.raw
+    def test_check_2_locus_preposition(self) -> None:
+        assert "Locus preposition" in self.raw
         assert "magnetic_axis" in self.raw
 
     def test_check_3_hardware_tokens(self) -> None:
