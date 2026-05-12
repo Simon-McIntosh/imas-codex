@@ -539,6 +539,18 @@ classes:
           and documentation at generation time. Null for non-DD-sourced
           names. Plain string, not a graph relationship.
         range: string
+      isn_version:
+        description: >-
+          ISN (imas-standard-names) package version at generation time
+          (e.g. "0.7.0rc56"). Records which grammar, vocabulary, and
+          validation rules were in effect when the name was composed.
+        range: string
+      codex_version:
+        description: >-
+          imas-codex package version at generation time (e.g. "4.1.0").
+          Records which pipeline, prompts, and enrichment logic produced
+          this name.
+        range: string
       imported_at:
         description: >-
           ISO 8601 timestamp when this entry was imported from the catalog.
@@ -1336,6 +1348,12 @@ classes:
         description: >-
           Human-readable detail for the skip (e.g. the raw DD unit string,
           the conflicting parent/child units). Set when status='skipped'.
+      dd_version:
+        description: >-
+          DD version at extraction time. Records which DD snapshot was
+          queried for paths, units, and documentation when this source
+          was first extracted. Plain string provenance, not a relationship.
+        range: string
 
   SNRun:
     description: >-

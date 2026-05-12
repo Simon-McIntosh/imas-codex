@@ -484,8 +484,10 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
     # Write StandardNameSource nodes for crash-resilient tracking
     if not state.dry_run and batches:
+        from imas_codex.settings import get_dd_version
         from imas_codex.standard_names.graph_ops import merge_standard_name_sources
 
+        _dd_ver = get_dd_version()
         sources = []
         source_type = "dd" if state.source == "dd" else "signals"
         for batch in batches:
@@ -501,6 +503,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         "dd_path": path if source_type == "dd" else None,
                         "batch_key": batch.group_key,
                         "status": "extracted",
+                        "dd_version": _dd_ver,
                         "description": item.get("description")
                         or item.get("documentation")
                         or "",

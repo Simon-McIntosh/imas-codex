@@ -1626,6 +1626,7 @@ def write_standard_names(
     ``review_tier``,
     ``vocab_gap_detail``, ``validation_issues``,
     ``validation_layer_summary``, ``cocos_transformation_type``, ``dd_version``,
+    ``isn_version``, ``codex_version``,
     ``review_input_hash``.
 
     Parameters
@@ -1748,6 +1749,8 @@ def write_standard_names(
                 sn.cocos_transformation_type = coalesce(b.cocos_transformation_type, sn.cocos_transformation_type),
                 sn.cocos = coalesce(b.cocos, sn.cocos),
                 sn.dd_version = coalesce(b.dd_version, sn.dd_version),
+                sn.isn_version = coalesce(b.isn_version, sn.isn_version),
+                sn.codex_version = coalesce(b.codex_version, sn.codex_version),
                 sn.model = coalesce(b.model, sn.model),
                 sn.pipeline_status = coalesce(b.pipeline_status, sn.pipeline_status),
                 sn.generated_at = coalesce(b.generated_at, sn.generated_at),
@@ -1818,6 +1821,8 @@ def write_standard_names(
                     "cocos_transformation_type": n.get("cocos_transformation_type"),
                     "cocos": n.get("cocos"),
                     "dd_version": n.get("dd_version"),
+                    "isn_version": n.get("isn_version"),
+                    "codex_version": n.get("codex_version"),
                     "model": n.get("model"),
                     "pipeline_status": n.get("pipeline_status")
                     or n.get("review_status"),
@@ -2901,9 +2906,26 @@ def persist_generated_name_batch(
     now = datetime.now(UTC).isoformat()
     from imas_codex.standard_names.kind_derivation import derive_kind
 
+    # Inject tool version provenance
+    try:
+        import imas_standard_names
+
+        _isn_ver = imas_standard_names.__version__
+    except (ImportError, AttributeError):
+        _isn_ver = None
+    try:
+        import importlib.metadata
+
+        _codex_ver = importlib.metadata.version("imas-codex")
+    except Exception:
+        _codex_ver = None
+
     for entry in candidates:
         entry.setdefault("model", compose_model)
         entry.setdefault("pipeline_status", "named")
+        entry.setdefault("dd_version", dd_version)
+        entry.setdefault("isn_version", _isn_ver)
+        entry.setdefault("codex_version", _codex_ver)
         # validation_status is set upstream by audit logic (run_audits +
         # _is_quarantined) in the pool path or validate_worker in the
         # legacy linear path.  When neither has run (e.g. dry-run paths
@@ -4572,11 +4594,13 @@ def merge_standard_name_sources(
                 sns.status = src.status,
                 sns.description = src.description,
                 sns.physics_domain = src.physics_domain,
+                sns.dd_version = src.dd_version,
                 sns.attempt_count = 0
             ON MATCH SET
                 sns.batch_key = src.batch_key,
                 sns.description = coalesce(src.description, sns.description),
                 sns.physics_domain = coalesce(src.physics_domain, sns.physics_domain),
+                sns.dd_version = coalesce(src.dd_version, sns.dd_version),
                 sns.status = CASE
                     WHEN $force THEN 'extracted'
                     WHEN sns.status = 'stale' THEN 'extracted'
