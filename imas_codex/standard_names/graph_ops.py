@@ -8387,6 +8387,37 @@ def release_refine_name_failed_claims(
     return result[0]["released"] if result else 0
 
 
+def _mark_refine_vocab_gap_exhausted(
+    *,
+    sn_id: str,
+    token: str,
+    error_msg: str,
+) -> None:
+    """Mark a name exhausted when refine fails on a vocab gap.
+
+    Vocab-gap errors are deterministic — the LLM keeps producing the same
+    unregistered token. Instead of reverting to 'reviewed' (infinite loop),
+    move to 'exhausted' and record the vocab gap reason.
+    """
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $sn_id})
+            WHERE sn.claim_token = $token
+              AND sn.name_stage = 'refining'
+            SET sn.name_stage = 'exhausted',
+                sn.claim_token = null,
+                sn.claimed_at = null,
+                sn.reviewer_comments_name =
+                    coalesce(sn.reviewer_comments_name, '')
+                    + ' [vocab_gap_exhaust] ' + $error_msg
+            """,
+            sn_id=sn_id,
+            token=token,
+            error_msg=error_msg[:300],
+        )
+
+
 # =============================================================================
 # generate_docs — claim / persist / release
 # =============================================================================

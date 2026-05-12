@@ -4052,6 +4052,7 @@ async def process_refine_name_batch(
         should_trigger_fanout,
     )
     from imas_codex.standard_names.graph_ops import (
+        _mark_refine_vocab_gap_exhausted,
         persist_refined_name,
         release_refine_name_failed_claims,
     )
@@ -4415,19 +4416,31 @@ async def process_refine_name_batch(
                         }
                     )
 
-            except Exception:
+            except Exception as exc:
                 logger.exception("refine_name failed for %s", sn_id)
-                # Release claim — revert to 'reviewed'
                 token = item.get("claim_token") or ""
+                # Vocab-gap errors are deterministic — the LLM will keep
+                # producing the same unregistered token.  Mark exhausted
+                # instead of reverting to 'reviewed' (which re-enters the
+                # refine loop infinitely).
+                is_vocab_gap = "not a registered" in str(exc)
                 try:
-                    await _asyncio.to_thread(
-                        release_refine_name_failed_claims,
-                        sn_ids=[sn_id],
-                        token=token,
-                    )
+                    if is_vocab_gap:
+                        await _asyncio.to_thread(
+                            _mark_refine_vocab_gap_exhausted,
+                            sn_id=sn_id,
+                            token=token,
+                            error_msg=str(exc)[:500],
+                        )
+                    else:
+                        await _asyncio.to_thread(
+                            release_refine_name_failed_claims,
+                            sn_ids=[sn_id],
+                            token=token,
+                        )
                 except Exception:
                     logger.debug(
-                        "release_refine_name_failed_claims also failed for %s",
+                        "release/exhaust also failed for %s",
                         sn_id,
                     )
             finally:

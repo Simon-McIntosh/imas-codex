@@ -204,6 +204,15 @@ RETRYABLE_PATTERNS = frozenset(
     }
 )
 
+# Errors that should NOT be retried even though they match a retryable
+# pattern (e.g. "validation").  Vocab-gap errors are deterministic — the LLM
+# will keep selecting the same unregistered token on every attempt.
+NON_RETRYABLE_PATTERNS = frozenset(
+    {
+        "not a registered",  # IR segment vocab-gap validation
+    }
+)
+
 # ---------------------------------------------------------------------------
 # Model-aware token limits
 # ---------------------------------------------------------------------------
@@ -499,8 +508,14 @@ def _to_json_schema_format(model_cls: type) -> dict:
 
 
 def _is_retryable(error_msg: str) -> bool:
-    """Check if an error message indicates a retryable condition."""
+    """Check if an error message indicates a retryable condition.
+
+    Non-retryable patterns (e.g. vocab-gap validation) take priority over
+    retryable patterns so that deterministic failures short-circuit early.
+    """
     msg_lower = error_msg.lower()
+    if any(pattern in msg_lower for pattern in NON_RETRYABLE_PATTERNS):
+        return False
     return any(pattern in msg_lower for pattern in RETRYABLE_PATTERNS)
 
 
