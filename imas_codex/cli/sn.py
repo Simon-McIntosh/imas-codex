@@ -2685,6 +2685,12 @@ def sn_preview(
     is_flag=True,
     help="Validate and report without making changes",
 )
+@click.option(
+    "--names-only",
+    "names_only",
+    is_flag=True,
+    help="Export names without requiring accepted docs (skip docs_stage gate)",
+)
 def sn_release(
     action: str | None,
     message: str | None,
@@ -2696,6 +2702,7 @@ def sn_release(
     skip_export: bool,
     skip_gate: bool,
     dry_run: bool,
+    names_only: bool,
 ) -> None:
     """Release standard names to the ISNC catalog.
 
@@ -2803,6 +2810,8 @@ def sn_release(
         console.print("  Mode: [green]final release[/green]")
     if skip_export:
         console.print("  Export: [yellow]skipped[/yellow]")
+    if names_only:
+        console.print("  Export: [cyan]names-only (skip docs gate)[/cyan]")
     if dry_run:
         console.print("  Mode: [yellow]dry run[/yellow]")
     console.print("")
@@ -2814,6 +2823,8 @@ def sn_release(
         export_kwargs = {}
         if skip_gate:
             export_kwargs["skip_gate"] = True
+        if names_only:
+            export_kwargs["names_only"] = True
 
         report = run_release(
             isnc_path=isnc_path,
