@@ -352,6 +352,8 @@ def _build_pool_specs(
         ]
 
         for upstream, downstream, cap in throttle_rules:
+            if upstream not in specs_by_name or downstream not in specs_by_name:
+                continue
             spec = specs_by_name[upstream]
             downstream_health = specs_by_name[downstream].health
             original_claim = spec.claim

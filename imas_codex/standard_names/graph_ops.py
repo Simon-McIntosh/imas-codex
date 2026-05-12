@@ -7789,7 +7789,8 @@ def persist_refined_name(
                           new.created_at        = datetime(),
                           new.generated_at      = datetime(),
                           new.grammar_fields    = $grammar_json,
-                          new.refine_reason     = $reason
+                          new.refine_reason     = $reason,
+                          new.run_id            = $run_id
                           {escalation_set}
 
                         // 2. Link to predecessor
@@ -7853,6 +7854,7 @@ def persist_refined_name(
                         model=model,
                         grammar_json=grammar_json,
                         reason=reason,
+                        run_id=run_id,
                     )
                 )
                 tx.commit()
