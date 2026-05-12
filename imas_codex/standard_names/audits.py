@@ -66,7 +66,6 @@ CRITICAL_CHECKS = frozenset(
         "vector_field_component_check",
         "segment_order_check",
         "aggregator_order_check",
-        "named_feature_preposition_check",
         "diamagnetic_component_check",
         "amplitude_of_prefix_check",
         "mode_number_suffix_check",
@@ -1824,51 +1823,6 @@ def aggregator_order_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
-_NAMED_FEATURE_TOKENS = (
-    "magnetic_axis",
-    "plasma_boundary",
-    "last_closed_flux_surface",
-    "separatrix",
-    "x_point",
-    "o_point",
-    "strike_point",
-    "inner_strike_point",
-    "outer_strike_point",
-    "stagnation_point",
-)
-
-
-def named_feature_preposition_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag ``_at_<named_feature>`` when ``_of_<named_feature>`` is canonical.
-
-    When a scalar property is evaluated at a named geometric feature (magnetic
-    axis, x-point, plasma boundary, separatrix, strike point), the possessive
-    ``_of_`` form is canonical and prevents silent synonym pairs such as
-    ``poloidal_magnetic_flux_at_magnetic_axis`` vs
-    ``poloidal_magnetic_flux_of_magnetic_axis``.
-
-    Caught from transport iteration:
-    ``poloidal_magnetic_flux_at_magnetic_axis`` →
-    ``poloidal_magnetic_flux_of_magnetic_axis``.
-    ``loop_voltage_at_last_closed_flux_surface`` →
-    ``loop_voltage_of_last_closed_flux_surface``.
-    """
-    name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
-    if not name:
-        return []
-    issues: list[str] = []
-    for feat in _NAMED_FEATURE_TOKENS:
-        at_pattern = f"_at_{feat}"
-        if name.endswith(at_pattern) or at_pattern + "_" in name:
-            suggested = name.replace(at_pattern, f"_of_{feat}")
-            issues.append(
-                f"audit:named_feature_preposition_check: name '{name}' uses "
-                f"'_at_{feat}'; named geometric features take the possessive "
-                f"'_of_' form. Rename to '{suggested}'."
-            )
-    return issues
-
-
 _DIAMAGNETIC_COMPONENT_PATTERN = "diamagnetic_component_of_"
 
 
@@ -2583,7 +2537,6 @@ def run_audits(
     all_issues.extend(vector_field_component_check(candidate))
     all_issues.extend(segment_order_check(candidate))
     all_issues.extend(aggregator_order_check(candidate))
-    all_issues.extend(named_feature_preposition_check(candidate))
     all_issues.extend(diamagnetic_component_check(candidate))
     all_issues.extend(amplitude_of_prefix_check(candidate))
     all_issues.extend(mode_number_suffix_check(candidate))

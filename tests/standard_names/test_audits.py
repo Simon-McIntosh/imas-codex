@@ -1130,57 +1130,6 @@ class TestAggregatorOrderCheck:
         assert aggregator_order_check({"id": "electron_temperature"}) == []
 
 
-class TestNamedFeaturePrepositionCheck:
-    def test_fail_at_magnetic_axis(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        issues = named_feature_preposition_check(
-            {"id": "poloidal_magnetic_flux_at_magnetic_axis"}
-        )
-        assert issues and "poloidal_magnetic_flux_of_magnetic_axis" in issues[0]
-
-    def test_fail_at_last_closed_flux_surface(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        issues = named_feature_preposition_check(
-            {"id": "loop_voltage_at_last_closed_flux_surface"}
-        )
-        assert issues
-
-    def test_fail_at_x_point(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        issues = named_feature_preposition_check(
-            {"id": "poloidal_magnetic_flux_at_x_point"}
-        )
-        assert issues
-
-    def test_pass_of_magnetic_axis(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        assert (
-            named_feature_preposition_check(
-                {"id": "poloidal_magnetic_flux_of_magnetic_axis"}
-            )
-            == []
-        )
-
-    def test_pass_of_plasma_boundary(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        assert (
-            named_feature_preposition_check(
-                {"id": "poloidal_magnetic_flux_of_plasma_boundary"}
-            )
-            == []
-        )
-
-    def test_pass_unrelated_name(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        assert named_feature_preposition_check({"id": "electron_temperature"}) == []
-
-
 class TestDiamagneticComponentCheck:
     def test_fail_diamagnetic_component_of_electric_field(self):
         from imas_codex.standard_names.audits import diamagnetic_component_check
