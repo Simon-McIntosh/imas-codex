@@ -30,8 +30,8 @@ _SPLIT_RE = re.compile(r"[^a-z0-9]+")
 def tokenise_query(query: str) -> list[str]:
     """Lower-case, snake-split, drop ISN connector stopwords.
 
-    >>> tokenise_query("x_component_of_magnetic_field")
-    ['x', 'component', 'magnetic', 'field']
+    >>> tokenise_query("x_magnetic_field")
+    ['x', 'magnetic', 'field']
     >>> tokenise_query("electron_temperature_at_outboard_midplane")
     ['electron', 'temperature', 'outboard', 'midplane']
     >>> tokenise_query("")

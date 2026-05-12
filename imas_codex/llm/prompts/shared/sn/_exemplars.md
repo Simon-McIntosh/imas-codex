@@ -16,8 +16,8 @@ Operator `magnitude` appends directly to the base. Postfix operators never use `
 **E4. Binary operator** — `ratio_of_electron_to_ion_temperature`
 Binary `ratio` uses `_of_` scope + `_to_` separator between the two operands.
 
-**E5. Axis projection** — `radial_component_of_ion_velocity`
-Projection `radial_component_of_` precedes the qualified base. The projection is always a prefix.
+**E5. Axis projection** — `radial_ion_velocity`
+Projection prefix `radial_` precedes the qualified base (short form). The `_component_of_` connector is REJECTED by grammar.
 
 **E6. Postfix locus (_at_)** — `electron_density_at_magnetic_axis`
 The locus `_at_magnetic_axis` follows the base. `_at_` marks a field value sampled at a point.
@@ -28,7 +28,7 @@ The process `bootstrap` is attached via `_due_to_` after the base quantity.
 **E8. Prefix operator with scope** — `line_averaged_of_electron_density`
 The operator `line_averaged` applies `_of_` scope to the full inner name. Operators always carry explicit scope.
 
-**E9. Projection + locus combo** — `radial_component_of_magnetic_field_at_separatrix`
+**E9. Projection + locus combo** — `radial_magnetic_field_at_separatrix`
 Projection prefix + locus postfix coexist cleanly: `[projection] base [locus]`.
 
 **E10. Nested operators** — `time_derivative_of_volume_averaged_of_electron_density`
@@ -44,8 +44,8 @@ Prefix operator `per_toroidal_mode` applied to base `wave_absorbed_power`. Indic
 ✅ Use: `perturbed_electrostatic_potential_real_part`
 
 **N2.** ❌ `amplitude_of_parallel_component_of_wave_electric_field`
-*Rejected:* `amplitude` is postfix. Prefix form with nested `_of_` chains is unparseable.
-✅ Use: `parallel_component_of_wave_electric_field_amplitude`
+*Rejected:* `amplitude` is postfix. Prefix form with nested `_of_` chains is unparseable. Also `_component_of_` is REJECTED.
+✅ Use: `parallel_wave_electric_field_amplitude`
 
 **N3.** ❌ `volume_averaged_electron_density` (bare concatenation)
 *Rejected:* Prefix operators require `_of_` scope marker. Bare concatenation is the old transformation-segment form.
@@ -61,7 +61,7 @@ Prefix operator `per_toroidal_mode` applied to base `wave_absorbed_power`. Indic
 
 **N6.** ❌ `ion_rotation_frequency_toroidal`
 *Rejected:* Trailing component suffix violates the canonical projection-prefix pattern.
-✅ Use: `toroidal_component_of_ion_rotation_frequency`
+✅ Use: `toroidal_ion_rotation_frequency`
 
 **N7.** ❌ `electron_thermal_pressure`
 *Rejected:* Population qualifier `thermal` must precede species `electron`. Species is a qualifier; population class is also a qualifier — they compose as `[population]_[species]`.

@@ -48,7 +48,7 @@ def _make_gc_for_enrichment(
 # ── Tests: Component tagging ───────────────────────────────────────────
 
 
-def test_component_of_tags_parent():
+def test_component_tags_parent():
     """_write_standard_name_edges sets needs_composition on bare parents."""
     from imas_codex.standard_names.derivation import derive_edges
 
@@ -89,14 +89,14 @@ def test_seed_parent_sources_creates_source():
                     "parent_id": "magnetic_field",
                     "child_data": [
                         {
-                            "id": "toroidal_component_of_magnetic_field",
+                            "id": "toroidal_magnetic_field",
                             "unit": "T",
                             "cocos": "b0_like",
                             "physics_domain": "magnetics",
                             "kind": "scalar",
                         },
                         {
-                            "id": "poloidal_component_of_magnetic_field",
+                            "id": "poloidal_magnetic_field",
                             "unit": "T",
                             "cocos": "b0_like",
                             "physics_domain": "magnetics",
@@ -256,17 +256,17 @@ def test_docs_enrich_child_components_axis_ordered():
     # Return children in WRONG order: vertical before toroidal
     children = [
         {
-            "name": "vertical_component_of_B",
+            "name": "vertical_B",
             "description": "Vertical comp",
             "axis": "vertical",
         },
         {
-            "name": "toroidal_component_of_B",
+            "name": "toroidal_B",
             "description": "Toroidal comp",
             "axis": "toroidal",
         },
         {
-            "name": "radial_component_of_B",
+            "name": "radial_B",
             "description": "Radial comp",
             "axis": "radial",
         },

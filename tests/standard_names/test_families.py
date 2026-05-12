@@ -16,9 +16,9 @@ class TestAxisOrdering:
     def test_cylindrical_right_handed_ordering(self):
         """T17: Children ordered R, φ, Z (right-handed cylindrical)."""
         children = [
-            {"name": "vertical_component_of_B", "axis": "vertical"},
-            {"name": "toroidal_component_of_B", "axis": "toroidal"},
-            {"name": "radial_component_of_B", "axis": "radial"},
+            {"name": "vertical_B", "axis": "vertical"},
+            {"name": "toroidal_B", "axis": "toroidal"},
+            {"name": "radial_B", "axis": "radial"},
         ]
         ordered = sort_by_axis_convention(children)
         assert [c["axis"] for c in ordered] == ["radial", "toroidal", "vertical"]
@@ -36,8 +36,8 @@ class TestAxisOrdering:
     def test_field_aligned_ordering(self):
         """T19: Field-aligned ordering: parallel before perpendicular."""
         children = [
-            {"name": "perpendicular_component_of_v", "axis": "perpendicular"},
-            {"name": "parallel_component_of_v", "axis": "parallel"},
+            {"name": "perpendicular_v", "axis": "perpendicular"},
+            {"name": "parallel_v", "axis": "parallel"},
         ]
         ordered = sort_by_axis_convention(children)
         assert [c["axis"] for c in ordered] == ["parallel", "perpendicular"]

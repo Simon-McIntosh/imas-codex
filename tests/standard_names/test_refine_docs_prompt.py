@@ -28,7 +28,7 @@ from imas_codex.llm.prompt_loader import render_prompt
 # Context builders
 # ---------------------------------------------------------------------------
 
-_SN_ID = "toroidal_component_of_pfirsch_schlueter_current_density"
+_SN_ID = "toroidal_pfirsch_schlueter_current_density"
 _HISTORY_ENTRY = {
     "documentation": "The Pfirsch-Schlüter current density toroidal component.",
     "model": "gpt-4o",

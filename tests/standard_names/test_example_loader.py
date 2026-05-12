@@ -389,7 +389,7 @@ class TestGrammarFieldProjection:
 
     def test_all_grammar_segments(self) -> None:
         row = _sn_row(
-            name_id="radial_component_of_magnetic_field",
+            name_id="radial_magnetic_field",
             score=0.95,
             physical_base="magnetic_field",
             component="radial",

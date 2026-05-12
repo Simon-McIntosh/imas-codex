@@ -44,9 +44,9 @@ class TestOperatorFallback:
         "name, op, inner",
         [
             (
-                "time_derivative_of_poloidal_component_of_electron_velocity",
+                "time_derivative_of_poloidal_electron_velocity",
                 "time_derivative",
-                "poloidal_component_of_electron_velocity",
+                "poloidal_electron_velocity",
             ),
             ("gradient_of_pressure", "gradient", "pressure"),
             ("maximum_of_temperature", "maximum", "temperature"),

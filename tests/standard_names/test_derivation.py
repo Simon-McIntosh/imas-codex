@@ -329,7 +329,7 @@ class TestGeometricCoordinateDerivation:
         """T11: Physical vector components get projection edges (short form).
 
         ISN v0.8.0rc1 uses short form: 'radial_magnetic_field' (not
-        'radial_component_of_magnetic_field').
+        'radial_magnetic_field').
         """
         edges = derive_edges("radial_magnetic_field")
         assert len(edges) == 1

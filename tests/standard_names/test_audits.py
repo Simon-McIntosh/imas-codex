@@ -548,7 +548,7 @@ class TestNameDescriptionConsistencyCheck:
 
         issues = name_description_consistency_check(
             {
-                "id": "normal_component_of_magnetic_field",
+                "id": "normal_magnetic_field",
                 "description": "Fourier coefficients of the normal component of the field.",
             }
         )
@@ -896,14 +896,11 @@ class TestVectorFieldComponentCheck:
             == []
         )
 
-    def test_passes_vertical_component_of_surface_normal(self):
+    def test_passes_vertical_surface_normal(self):
         from imas_codex.standard_names.audits import vector_field_component_check
 
         # The canonical form is not flagged.
-        assert (
-            vector_field_component_check({"id": "vertical_component_of_surface_normal"})
-            == []
-        )
+        assert vector_field_component_check({"id": "vertical_surface_normal"}) == []
 
     def test_passes_unrelated_name(self):
         from imas_codex.standard_names.audits import vector_field_component_check
@@ -929,13 +926,10 @@ class TestSegmentOrderCheck:
 
         assert segment_order_check({"id": "toroidal_ion_rotation_frequency"}) == []
 
-    def test_pass_component_of_preposition(self):
+    def test_pass_short_form_component_prefix(self):
         from imas_codex.standard_names.audits import segment_order_check
 
-        assert (
-            segment_order_check({"id": "toroidal_component_of_ion_rotation_frequency"})
-            == []
-        )
+        assert segment_order_check({"id": "toroidal_ion_rotation_frequency"}) == []
 
     def test_pass_no_component_token(self):
         from imas_codex.standard_names.audits import segment_order_check
@@ -1217,10 +1211,7 @@ class TestDiamagneticComponentCheck:
     def test_pass_toroidal_component(self):
         from imas_codex.standard_names.audits import diamagnetic_component_check
 
-        assert (
-            diamagnetic_component_check({"id": "toroidal_component_of_electric_field"})
-            == []
-        )
+        assert diamagnetic_component_check({"id": "toroidal_electric_field"}) == []
 
 
 # =========================================================================
@@ -1289,9 +1280,9 @@ class TestMultiSubjectCheckGreedy:
     @pytest.mark.parametrize(
         "name",
         [
-            "toroidal_component_of_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
-            "toroidal_component_of_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
-            "toroidal_component_of_co_passing_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
+            "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
+            "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+            "toroidal_co_passing_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
         ],
     )
     def test_pass_collisional_with_target(self, name):

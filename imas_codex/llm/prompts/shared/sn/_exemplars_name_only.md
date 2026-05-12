@@ -8,13 +8,13 @@ American spelling (NC-17).
 
 #### P1. Component decomposition (scalar from vector)
 
-- ✅ `radial_component_of_magnetic_field` — scalar, unit `T`
+- ✅ `radial_magnetic_field` — scalar, unit `T`
   - *Why good:* `{component}_of_{vector_base}` is the canonical decomposition.
     The decomposed scalar has the same unit as the parent vector. Never use
     `_r_`, `_rad_`, or `_radial_magnetic_field` (the last is ambiguous
     between "radial component of B" and "B in the radial direction").
-- ✅ `poloidal_component_of_plasma_velocity`
-- ✅ `perpendicular_component_of_electron_pressure_gradient`
+- ✅ `poloidal_plasma_velocity`
+- ✅ `perpendicular_electron_pressure_gradient`
   - *Why good:* perpendicular/parallel are first-class components; chain
     them through gradients and fluxes naturally.
 
@@ -159,11 +159,11 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 
 #### A8. Spectral name/description mismatch
 
-- ❌ Name `normal_component_of_magnetic_field` with description
+- ❌ Name `normal_magnetic_field` with description
   "Fourier coefficients of the normal component..."
   - *Why bad:* the name promises a scalar field; the description
     describes a spectral coefficient. They disagree.
-  - *Fix:* either rename to `fourier_coefficient_of_normal_component_of_magnetic_field`
+  - *Fix:* either rename to `fourier_coefficient_of_normal_magnetic_field`
     or rewrite the description to describe the underlying field.
 
 #### A9. Trivial surface-of-definition names
@@ -199,11 +199,11 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 4. `_reference_waveform`, `_reference` on pulse_schedule paths —
    controller setpoints. Classifier excludes; LLM must never propose.
 
-5. `diamagnetic_component_of_<vector>` — the diamagnetic drift is a
+5. `diamagnetic_<vector>` — the diamagnetic drift is a
    vector quantity (`v_dia = (B × ∇p) / (q n B²)`), not a spatial axis.
    If you need its projection, first name the drift:
    `ion_diamagnetic_drift_velocity`; then project:
-   `radial_component_of_ion_diamagnetic_drift_velocity`.
+   `radial_ion_diamagnetic_drift_velocity`.
 
 6. Duplicate-subject splitting on compound species.
    BAD: `deuterium_tritium_*` interpreted as two subjects.
@@ -245,7 +245,7 @@ cosine similarity falls below 0.55 are quarantined.
 ✅ `electron_temperature` → "Temperature of the electron species" (sim ≈ 0.89)
 - Name tokens (electron, temperature) directly predict the description. Excellent.
 
-✅ `toroidal_component_of_magnetic_field` → "Toroidal projection of the magnetic field vector" (sim ≈ 0.86)
+✅ `toroidal_magnetic_field` → "Toroidal projection of the magnetic field vector" (sim ≈ 0.86)
 - All key physics terms present in both. Very good.
 
 ⚠️ `trapped_pressure` → "Pressure contribution from trapped particles" (sim ≈ 0.52)

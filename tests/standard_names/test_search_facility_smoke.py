@@ -146,9 +146,8 @@ class TestFindRelatedMissingAnchor:
 def test_tokenise_query_drops_punctuation_and_stopwords():
     from imas_codex.standard_names.grammar_query import tokenise_query
 
-    assert tokenise_query("x_component_of_magnetic_field") == [
+    assert tokenise_query("x_magnetic_field") == [
         "x",
-        "component",
         "magnetic",
         "field",
     ]

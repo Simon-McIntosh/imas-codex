@@ -338,8 +338,8 @@ class TestW24UncertaintyIndexLeak:
     extract_deny gate (which only applies to DD path extraction).  For
     dimensional parents like current density (A.m^-2), the previous gate
     allowed the sibling.  W24 confirmed 5 leaks:
-      - uncertainty_index_of_vertical_component_of_inertial_current_density
-      - uncertainty_index_of_radial_component_of_diamagnetic_current_density
+      - uncertainty_index_of_vertical_inertial_current_density
+      - uncertainty_index_of_radial_diamagnetic_current_density
       (and 3 similar forms)
 
     Fix: Rule 6 in _parent_supports_uncertainty_index always returns False,
@@ -365,7 +365,7 @@ class TestW24UncertaintyIndexLeak:
             ),
         ):
             siblings = mint_error_siblings(
-                "vertical_component_of_inertial_current_density",
+                "vertical_inertial_current_density",
                 error_node_ids=[
                     "edge_profiles/ggd/j_inertial/z_error_index",
                 ],
@@ -378,7 +378,7 @@ class TestW24UncertaintyIndexLeak:
 
         ids = [s["id"] for s in siblings]
         assert not any("uncertainty_index" in sid for sid in ids), (
-            f"W24 regression: uncertainty_index_of_vertical_component_of_inertial_"
+            f"W24 regression: uncertainty_index_of_vertical_inertial_"
             f"current_density must not be generated, got: {ids}"
         )
 
@@ -401,7 +401,7 @@ class TestW24UncertaintyIndexLeak:
             ),
         ):
             siblings = mint_error_siblings(
-                "radial_component_of_diamagnetic_current_density",
+                "radial_diamagnetic_current_density",
                 error_node_ids=[
                     "edge_profiles/ggd/j_diamagnetic/radial_error_index",
                 ],
@@ -414,7 +414,7 @@ class TestW24UncertaintyIndexLeak:
 
         ids = [s["id"] for s in siblings]
         assert not any("uncertainty_index" in sid for sid in ids), (
-            f"W24 regression: uncertainty_index_of_radial_component_of_diamagnetic_"
+            f"W24 regression: uncertainty_index_of_radial_diamagnetic_"
             f"current_density must not be generated, got: {ids}"
         )
 

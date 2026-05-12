@@ -251,7 +251,7 @@ class TestDecompositionAuditCheck:
         from imas_codex.standard_names.audits import decomposition_audit_check
 
         issues = decomposition_audit_check(
-            {"id": "poloidal_component_of_pfirsch_schlueter_current_density"}
+            {"id": "poloidal_pfirsch_schlueter_current_density"}
         )
         joined = " | ".join(issues)
         assert "pfirsch_schlueter" in joined

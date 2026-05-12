@@ -74,24 +74,24 @@ class TestOrderingProjection:
         )
 
         entries = [
-            {"name": "z_component_of_magnetic_field"},
+            {"name": "z_magnetic_field"},
             {"name": "magnetic_field"},
-            {"name": "x_component_of_magnetic_field"},
-            {"name": "y_component_of_magnetic_field"},
+            {"name": "x_magnetic_field"},
+            {"name": "y_magnetic_field"},
         ]
         edges = [
-            ("x_component_of_magnetic_field", "magnetic_field", "COMPONENT_OF"),
-            ("y_component_of_magnetic_field", "magnetic_field", "COMPONENT_OF"),
-            ("z_component_of_magnetic_field", "magnetic_field", "COMPONENT_OF"),
+            ("x_magnetic_field", "magnetic_field", "COMPONENT_OF"),
+            ("y_magnetic_field", "magnetic_field", "COMPONENT_OF"),
+            ("z_magnetic_field", "magnetic_field", "COMPONENT_OF"),
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
         names = [e["name"] for e in result]
         assert names == [
             "magnetic_field",
-            "x_component_of_magnetic_field",
-            "y_component_of_magnetic_field",
-            "z_component_of_magnetic_field",
+            "x_magnetic_field",
+            "y_magnetic_field",
+            "z_magnetic_field",
         ]
 
 
@@ -180,13 +180,13 @@ class TestOrderingMixed:
 
         entries = [
             {"name": "upper_uncertainty_of_temperature"},
-            {"name": "x_component_of_temperature"},
+            {"name": "x_temperature"},
             {"name": "temperature"},
             {"name": "maximum_of_temperature"},
         ]
         edges = [
             ("temperature", "upper_uncertainty_of_temperature", "HAS_ERROR"),
-            ("x_component_of_temperature", "temperature", "COMPONENT_OF"),
+            ("x_temperature", "temperature", "COMPONENT_OF"),
             ("maximum_of_temperature", "temperature", "COMPONENT_OF"),
         ]
 
@@ -198,7 +198,7 @@ class TestOrderingMixed:
         assert set(names[1:]) == {
             "maximum_of_temperature",
             "upper_uncertainty_of_temperature",
-            "x_component_of_temperature",
+            "x_temperature",
         }
         # Alpha-sorted among children
         assert names[1:] == sorted(names[1:])
