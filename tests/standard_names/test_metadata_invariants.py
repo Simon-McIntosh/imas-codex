@@ -153,7 +153,7 @@ class TestWriteCypherInvariants:
 
         names = [
             {
-                "id": "test_cocos_guard",
+                "id": "plasma_current",
                 "source_types": ["dd"],
                 "source_id": "test/path",
                 "unit": "A",

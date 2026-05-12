@@ -27,8 +27,8 @@ W38_BAD_EXAMPLES = (
 )
 W38_GOOD_EXAMPLES = (
     "photon_energy_lower_bound",
-    "parallel_component_of_halo_energy",
-    "z_component_of_direction_unit_vector",
+    "parallel_halo_energy",
+    "z_direction_unit_vector",
 )
 W38_HARDWARE_PROPERTY_EXEMPLAR = "cross_sectional_area_of_rogowski_coil"
 

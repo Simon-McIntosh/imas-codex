@@ -155,6 +155,49 @@ def derive_edges(name: str) -> list[DerivedEdge]:
         except Exception as exc:
             logger.debug("derive_edges compose failed for %r: %s", name, exc)
             return []
+
+        # Round-trip guard: verify that the inner name is a genuine
+        # standalone name, not a compound fragment.  ISN v0.8.0rc1
+        # projection branch can produce nonsensical inner names from
+        # compound qualifier structures.
+        #
+        # We check two things:
+        # 1. The inner name must round-trip through the IR parser.
+        # 2. The inner name must be a simple base (no locus qualifier),
+        #    because a locus like "of_measurement_position" attached to a
+        #    geometric base produces edges to generic parents that group
+        #    unrelated names together.
+        try:
+            inner_parsed = parser.parse(inner)
+            inner_rt = parser.compose(inner_parsed.ir)
+            if inner_rt != inner:
+                logger.debug(
+                    "derive_edges projection round-trip mismatch for %r: "
+                    "inner=%r → rt=%r",
+                    name,
+                    inner,
+                    inner_rt,
+                )
+                return []
+            # Reject if inner has a locus (qualifier) — the edge would
+            # point to a compound parent like "coordinate_of_measurement_position"
+            if inner_parsed.ir.locus is not None:
+                logger.debug(
+                    "derive_edges rejecting projection edge for %r: "
+                    "inner=%r has locus qualifier",
+                    name,
+                    inner,
+                )
+                return []
+        except Exception:
+            # Inner name doesn't round-trip — spurious projection
+            logger.debug(
+                "derive_edges projection inner parse failed for %r: inner=%r",
+                name,
+                inner,
+            )
+            return []
+
         return [
             DerivedEdge(
                 "COMPONENT_OF",
@@ -176,10 +219,10 @@ def derive_edges(name: str) -> list[DerivedEdge]:
 def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:
     """Detect geometric coordinate names via the model-level ISN parser.
 
-    ISN grammar distinguishes two axis forms:
+    ISN grammar uses strict short form for axis projections:
 
-    * **Physical vector**: ``{axis}_component_of_{base}`` →
-      ``component`` slot populated, handled by the projection branch.
+    * **Physical vector**: ``{axis}_{base}`` (e.g. ``toroidal_magnetic_field``)
+      → ``component`` slot populated, handled by the projection branch.
     * **Geometric coordinate**: ``{axis}_{geometric_base}`` →
       ``coordinate`` slot populated (e.g. ``radial_position``).
 
@@ -258,38 +301,63 @@ def _regex_fallback(name: str) -> list[DerivedEdge]:
 
     Handles two patterns:
 
-    1. ``{axis}_component_of_{inner}`` → COMPONENT_OF (projection)
+    1. ``{axis}_{inner}`` → COMPONENT_OF (projection, short form)
     2. ``{operator}_of_{inner}`` → COMPONENT_OF (unary operator)
 
     Returns ``[]`` if no pattern matches (leaf treatment).
     """
-    import re
 
-    # Pattern 1: Component projection
-    # e.g., "parallel_component_of_convection_velocity"
-    #        "toroidal_component_of_ion_velocity"
-    #        "radial_component_of_heat_flux"
-    m = re.match(
-        r"^(radial|toroidal|poloidal|parallel|perpendicular|normal|tangential|"
-        r"vertical|horizontal|binormal|diamagnetic|x|y|z|r|phi)"
-        r"_component_of_(.+)$",
-        name,
+    # Pattern 1: Axis projection (short form)
+    # e.g., "toroidal_magnetic_field" → axis=toroidal, inner=magnetic_field
+    #        "radial_electron_heat_flux" → axis=radial, inner=electron_heat_flux
+    _AXIS_TOKENS = (
+        "radial",
+        "toroidal",
+        "poloidal",
+        "parallel",
+        "perpendicular",
+        "normal",
+        "tangential",
+        "vertical",
+        "horizontal",
+        "binormal",
+        "x",
+        "y",
+        "z",
+        "r",
+        "phi",
     )
-    if m:
-        axis, inner = m.group(1), m.group(2)
-        return [
-            DerivedEdge(
-                "COMPONENT_OF",
-                name,
-                inner,
-                {
-                    "operator": "component",
-                    "operator_kind": "projection",
-                    "axis": axis,
-                    "shape": "component",
-                },
-            )
-        ]
+    for axis in _AXIS_TOKENS:
+        prefix = f"{axis}_"
+        if name.startswith(prefix):
+            inner = name[len(prefix) :]
+            if inner:
+                # Guard: verify inner name is a genuine standalone name.
+                # Compound fragments like "coordinate_of_first_point_of_line_of_sight"
+                # are not meaningful parent names.
+                try:
+                    inner_parsed = parser.parse(inner)
+                    inner_rt = parser.compose(inner_parsed.ir)
+                    if inner_rt != inner:
+                        continue  # try next axis or fall through
+                    if inner_parsed.ir.locus is not None:
+                        continue  # inner has qualifier — skip
+                except Exception:
+                    continue  # unparseable inner — skip
+
+                return [
+                    DerivedEdge(
+                        "COMPONENT_OF",
+                        name,
+                        inner,
+                        {
+                            "operator": "component",
+                            "operator_kind": "projection",
+                            "axis": axis,
+                            "shape": "component",
+                        },
+                    )
+                ]
 
     # Pattern 2: Unary operators
     # e.g., "time_derivative_of_poloidal_flux"

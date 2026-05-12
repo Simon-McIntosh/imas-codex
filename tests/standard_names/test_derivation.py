@@ -270,34 +270,13 @@ def test_d15_garbage_string():
 
 
 def test_d16_projection_monkeypatched():
-    """Projection IR shape → COMPONENT_OF with operator_kind='projection'."""
-    # Build a stub IR representing current_density_parallel_component
-    base = isn_ir.QuantityOrCarrier(
-        token="current_density", kind=isn_ir.BaseKind.QUANTITY
-    )
-    proj = isn_ir.AxisProjection(
-        axis="parallel", shape=isn_ir.ProjectionShape.COMPONENT
-    )
-    stub_ir = isn_ir.StandardNameIR(
-        operators=[],
-        projection=proj,
-        qualifiers=[],
-        base=base,
-        locus=None,
-        mechanism=None,
-    )
+    """Projection IR shape → COMPONENT_OF with operator_kind='projection'.
 
-    # ParseResult stub
-    fake_result = MagicMock()
-    fake_result.ir = stub_ir
-
-    name = "current_density_parallel_component"
-
-    with patch(
-        "imas_codex.standard_names.derivation.parser.parse",
-        return_value=fake_result,
-    ):
-        edges = derive_edges(name)
+    Uses a real ISN-valid name (parallel_current_density) so the inner name
+    round-trip guard passes without needing to monkeypatch.
+    """
+    name = "parallel_current_density"
+    edges = derive_edges(name)
 
     assert len(edges) == 1
     e = edges[0]
@@ -319,12 +298,16 @@ class TestGeometricCoordinateDerivation:
     """Phase 3: Geometric coordinate edge derivation."""
 
     def test_geometric_coordinate_edge_derived(self):
-        """T8: radial_position produces COMPONENT_OF edge to position."""
+        """T8: radial_position produces COMPONENT_OF edge to position.
+
+        ISN v0.8.0rc1 handles this via the projection branch (not geometric
+        coordinate), so operator_kind is 'projection'.
+        """
         edges = derive_edges("radial_position")
         assert len(edges) == 1
         assert edges[0].edge_type == "COMPONENT_OF"
         assert edges[0].to_name == "position"
-        assert edges[0].props["operator_kind"] == "coordinate"
+        assert edges[0].props["operator_kind"] == "projection"
         assert edges[0].props["axis"] == "radial"
 
     def test_vertical_position_edge(self):
@@ -335,25 +318,33 @@ class TestGeometricCoordinateDerivation:
         assert edges[0].props["axis"] == "vertical"
 
     def test_toroidal_angle_edge(self):
-        """toroidal_angle (physical_base=angle) derives coordinate edge."""
+        """toroidal_angle is a single geometric_base token in ISN v0.8.0rc1.
+
+        No coordinate slot is populated → no edge derived (leaf).
+        """
         edges = derive_edges("toroidal_angle")
-        assert len(edges) == 1
-        assert edges[0].to_name == "angle"
-        assert edges[0].props["operator_kind"] == "coordinate"
+        assert edges == []
 
     def test_physical_vector_still_projection(self):
-        """T11: Physical vector components still get projection edges."""
-        edges = derive_edges("radial_component_of_magnetic_field")
+        """T11: Physical vector components get projection edges (short form).
+
+        ISN v0.8.0rc1 uses short form: 'radial_magnetic_field' (not
+        'radial_component_of_magnetic_field').
+        """
+        edges = derive_edges("radial_magnetic_field")
         assert len(edges) == 1
         assert edges[0].props["operator_kind"] == "projection"
         assert edges[0].to_name == "magnetic_field"
 
     def test_geometric_outline_edge(self):
-        """radial_outline derives coordinate edge to outline."""
+        """radial_outline derives projection edge to outline.
+
+        ISN v0.8.0rc1 handles this via the projection branch.
+        """
         edges = derive_edges("radial_outline")
         assert len(edges) == 1
         assert edges[0].to_name == "outline"
-        assert edges[0].props["operator_kind"] == "coordinate"
+        assert edges[0].props["operator_kind"] == "projection"
 
     def test_no_geometric_edge_for_leaf(self):
         """Plain 'temperature' (no coordinate) produces no edges."""

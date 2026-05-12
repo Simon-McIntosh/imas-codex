@@ -872,7 +872,8 @@ class TestVectorFieldComponentCheck:
         )
         assert len(issues) == 1
         assert "vector_field_component_check" in issues[0]
-        assert "vertical_component_of_surface_normal" in issues[0]
+        # Production code recommends short-form: '{axis}_{vector}'
+        assert "vertical_surface_normal" in issues[0]
 
     def test_flags_radial_coordinate_of_magnetic_field_vector(self):
         from imas_codex.standard_names.audits import vector_field_component_check
@@ -881,7 +882,7 @@ class TestVectorFieldComponentCheck:
             {"id": "radial_coordinate_of_magnetic_field_vector"}
         )
         assert len(issues) == 1
-        assert "radial_component_of_magnetic_field_vector" in issues[0]
+        assert "radial_magnetic_field_vector" in issues[0]
 
     def test_passes_vertical_coordinate_of_plasma_boundary(self):
         from imas_codex.standard_names.audits import vector_field_component_check
@@ -2280,24 +2281,25 @@ class TestSemanticSimilarityCheck:
 class TestPrepositionPhysicalBaseCheck:
     """Names whose ISN-parsed physical_base starts with a preposition are broken."""
 
-    def test_normalized_of_particle_temperature_flagged(self):
-        """``normalized_of_particle_temperature`` has physical_base='of_particle_temperature'."""
+    def test_normalized_of_particle_temperature_not_flagged(self):
+        """ISN v0.8.0rc1 parses ``normalized_of_particle_temperature`` correctly:
+        transformation=normalized, subject=particle, physical_base=temperature.
+        The ``_of_`` connector is absorbed by the parser, so physical_base is
+        clean — no preposition leak."""
         from imas_codex.standard_names.audits import preposition_physical_base_check
 
         issues = preposition_physical_base_check(
             {"id": "normalized_of_particle_temperature"}
         )
-        assert len(issues) == 1
-        assert "preposition_physical_base_check" in issues[0]
-        assert "of_particle_temperature" in issues[0]
+        assert len(issues) == 0
 
-    def test_normalized_of_particle_mass_flagged(self):
-        """Another ``normalized_of_`` variant caught."""
+    def test_normalized_of_particle_mass_not_flagged(self):
+        """ISN v0.8.0rc1 correctly parses ``normalized_of_particle_mass`` —
+        physical_base is 'mass', not 'of_particle_mass'."""
         from imas_codex.standard_names.audits import preposition_physical_base_check
 
         issues = preposition_physical_base_check({"id": "normalized_of_particle_mass"})
-        assert len(issues) == 1
-        assert "preposition_physical_base_check" in issues[0]
+        assert len(issues) == 0
 
     def test_clean_name_passes(self):
         """A well-formed name has no preposition prefix on physical_base."""

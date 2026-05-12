@@ -11,20 +11,12 @@ class TestComponentFallback:
     @pytest.mark.parametrize(
         "name, axis, inner",
         [
-            (
-                "parallel_component_of_convection_velocity",
-                "parallel",
-                "convection_velocity",
-            ),
-            ("toroidal_component_of_ion_velocity", "toroidal", "ion_velocity"),
-            ("radial_component_of_heat_flux", "radial", "heat_flux"),
-            (
-                "poloidal_component_of_electron_velocity",
-                "poloidal",
-                "electron_velocity",
-            ),
-            ("vertical_component_of_magnetic_field", "vertical", "magnetic_field"),
-            ("perpendicular_component_of_viscosity", "perpendicular", "viscosity"),
+            ("parallel_convection_velocity", "parallel", "convection_velocity"),
+            ("toroidal_ion_velocity", "toroidal", "ion_velocity"),
+            ("radial_heat_flux", "radial", "heat_flux"),
+            ("poloidal_electron_velocity", "poloidal", "electron_velocity"),
+            ("vertical_magnetic_field", "vertical", "magnetic_field"),
+            ("perpendicular_diffusivity", "perpendicular", "diffusivity"),
         ],
     )
     def test_component_produces_has_argument(self, name, axis, inner):
@@ -38,8 +30,8 @@ class TestComponentFallback:
         assert edge.props["axis"] == axis
 
     def test_radial_component_uses_ir_parser(self):
-        """radial_component_of_magnetic_field should parse via IR (not fallback)."""
-        edges = derive_edges("radial_component_of_magnetic_field")
+        """radial_magnetic_field should parse via IR (short form, not fallback)."""
+        edges = derive_edges("radial_magnetic_field")
         assert len(edges) == 1
         assert edges[0].to_name == "magnetic_field"
         # Should still produce correct result regardless of path

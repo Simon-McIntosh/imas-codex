@@ -114,7 +114,11 @@ REFERENCE_NAMES: dict[str, dict] = {
         {"physical_base": "poloidal_magnetic_flux", "object": Object.DIAMAGNETIC_LOOP}
     ),
     "core_profiles/profiles_1d/rotation_frequency_tor_sonic": _ref(
-        {"physical_base": "rotation_frequency", "component": Component.TOROIDAL}
+        {
+            "physical_base": "velocity",
+            "component": Component.TOROIDAL,
+            "subject": Subject.ION,
+        }
     ),
     # --- Additional core_profiles entries ---
     "core_profiles/profiles_1d/e_field/parallel": _ref(
@@ -180,10 +184,10 @@ REFERENCE_NAMES: dict[str, dict] = {
     "equilibrium/time_slice/global_quantities/energy_mhd": _ref(
         {"physical_base": "stored_energy"}
     ),
-    "summary/global_quantities/v_loop/value": _ref({"physical_base": "loop_voltage"}),
-    "summary/global_quantities/li/value": _ref(
-        {"physical_base": "internal_inductance"}
+    "summary/global_quantities/v_loop/value": _ref(
+        {"physical_base": "voltage", "object": Object.FLUX_LOOP}
     ),
+    "summary/global_quantities/li/value": _ref({"physical_base": "li"}),
     # --- Additional summary entries ---
     "summary/global_quantities/beta_tor/value": _ref({"physical_base": "beta"}),
     "summary/global_quantities/tau_energy/value": _ref(
@@ -223,7 +227,7 @@ REFERENCE_NAMES: dict[str, dict] = {
         {"physical_base": "growth_rate"}
     ),
     "mhd_linear/time_slice/toroidal_mode/frequency": _ref(
-        {"physical_base": "mhd_frequency"}
+        {"physical_base": "frequency", "subject": Subject.ELECTRON}
     ),
     # --- nbi ---
     "nbi/unit/power_launched/data": _ref(

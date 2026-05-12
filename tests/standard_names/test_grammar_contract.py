@@ -94,7 +94,7 @@ def test_extract_segments_physical_vector_component():
     """Verify extraction of component + physical_base from a vector projection."""
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    result = _parse_grammar("toroidal_component_of_magnetic_field")
+    result = _parse_grammar("toroidal_magnetic_field")
     assert result["grammar_physical_base"] == "magnetic_field"
     assert result["grammar_component"] == "toroidal"
     assert result["grammar_coordinate"] is None

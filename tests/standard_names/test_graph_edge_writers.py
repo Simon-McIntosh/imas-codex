@@ -415,7 +415,7 @@ class TestG8:
     def test_has_successor_edge_pipeline(self) -> None:
         names = [
             {
-                "id": "temperature_of_electrons",
+                "id": "ion_temperature",
                 "unit": "eV",
                 "superseded_by": "electron_temperature",
             }
@@ -428,7 +428,7 @@ class TestG8:
     def test_has_successor_batch_pipeline(self) -> None:
         names = [
             {
-                "id": "temperature_of_electrons",
+                "id": "ion_temperature",
                 "unit": "eV",
                 "superseded_by": "electron_temperature",
             }
@@ -439,7 +439,7 @@ class TestG8:
         batch = _batch_for(mock_gc, "HAS_SUCCESSOR")
         assert batch is not None
         assert any(
-            b["from_name"] == "temperature_of_electrons"
+            b["from_name"] == "ion_temperature"
             and b["to_name"] == "electron_temperature"
             for b in batch
         )
@@ -447,7 +447,7 @@ class TestG8:
     def test_has_successor_edge_catalog(self) -> None:
         entries = [
             {
-                "id": "temperature_of_electrons",
+                "id": "ion_temperature",
                 "unit": "eV",
                 "superseded_by": "electron_temperature",
             }
