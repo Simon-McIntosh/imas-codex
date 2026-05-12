@@ -252,3 +252,8 @@ an invalid name. Instead, add the path to the `vocab_gaps` list with:
 - `segment`: which grammar segment is missing a token
 - `needed_token`: the token value you would need
 - `reason`: why this token is needed
+
+**⚠️ CRITICAL: Most vocab gaps are false positives.** Before emitting:
+1. Search the token in ALL segment registries — it may exist in another segment
+2. For compound tokens, check if each part exists as a registered token — decompose instead
+3. Verify no existing token already covers the concept

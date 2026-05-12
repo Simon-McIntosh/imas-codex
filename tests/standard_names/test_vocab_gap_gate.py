@@ -1,7 +1,8 @@
-"""Tests for the VocabGap 3-way classifier gate in write_vocab_gaps.
+"""Tests for the VocabGap classifier gate in write_vocab_gaps.
 
-Verifies that VocabGap nodes are classified as absent, wrong_slot_placement,
-or ambiguous_known_token based on the ISN segment-token index.
+Verifies that VocabGap nodes are classified correctly and that only
+'absent' gaps are persisted — wrong_slot_placement, ambiguous_known_token,
+and decomposable categories are filtered out at the persistence layer.
 """
 
 from __future__ import annotations
@@ -100,7 +101,7 @@ class TestVocabGapClassification:
         assert nodes[gap_id]["actual_segments"] == []
 
     def test_wrong_slot_placement(self):
-        """Token exists in one segment but reported on another → 'wrong_slot_placement'."""
+        """Token in another segment → classified as wrong_slot_placement, NOT persisted."""
         stm = {
             "subject": ("electron", "ion", "particle"),
             "process": ("heating", "cooling"),
@@ -115,13 +116,11 @@ class TestVocabGapClassification:
             }
         ]
         nodes = self._run_write_vocab_gaps(gaps, stm)
-        gap_id = "vocab_gap:process:ion"
-        assert gap_id in nodes
-        assert nodes[gap_id]["category"] == "wrong_slot_placement"
-        assert nodes[gap_id]["actual_segments"] == ["subject"]
+        # wrong_slot_placement gaps are filtered out — NOT persisted
+        assert len(nodes) == 0
 
     def test_ambiguous_known_token(self):
-        """Token in multiple segments, reported on none of them → 'ambiguous_known_token'."""
+        """Token in multiple segments, reported on none → filtered out, NOT persisted."""
         stm = {
             "subject": ("parallel", "radial"),
             "orientation": ("parallel", "toroidal"),
@@ -137,13 +136,11 @@ class TestVocabGapClassification:
             }
         ]
         nodes = self._run_write_vocab_gaps(gaps, stm)
-        gap_id = "vocab_gap:process:parallel"
-        assert gap_id in nodes
-        assert nodes[gap_id]["category"] == "ambiguous_known_token"
-        assert set(nodes[gap_id]["actual_segments"]) == {"subject", "orientation"}
+        # ambiguous_known_token gaps are filtered out — NOT persisted
+        assert len(nodes) == 0
 
     def test_mixed_batch(self):
-        """A batch with all three categories produces correct per-gap classifications."""
+        """A batch with all categories: only 'absent' gaps persist."""
         stm = {
             "subject": ("electron", "ion"),
             "orientation": ("parallel", "radial"),
@@ -152,21 +149,21 @@ class TestVocabGapClassification:
             "physical_base": (),
         }
         gaps = [
-            # absent
+            # absent — should persist
             {
                 "source_id": "a",
                 "segment": "process",
                 "needed_token": "turbulating",
                 "reason": "test",
             },
-            # wrong_slot (ion in subject, reported on process)
+            # wrong_slot (ion in subject, reported on process) — filtered
             {
                 "source_id": "b",
                 "segment": "process",
                 "needed_token": "ion",
                 "reason": "test",
             },
-            # ambiguous (parallel in orientation+qualifier, reported on process)
+            # ambiguous (parallel in orientation+qualifier, reported on process) — filtered
             {
                 "source_id": "c",
                 "segment": "process",
@@ -176,8 +173,6 @@ class TestVocabGapClassification:
         ]
         nodes = self._run_write_vocab_gaps(gaps, stm)
 
+        # Only the truly absent token should be persisted
+        assert len(nodes) == 1
         assert nodes["vocab_gap:process:turbulating"]["category"] == "absent"
-        assert nodes["vocab_gap:process:ion"]["category"] == "wrong_slot_placement"
-        assert (
-            nodes["vocab_gap:process:parallel"]["category"] == "ambiguous_known_token"
-        )

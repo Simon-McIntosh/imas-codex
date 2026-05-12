@@ -730,7 +730,7 @@ class TestOpenSegmentFilter:
             {
                 "source_id": "equilibrium/time_slice/profiles_1d/psi",
                 "segment": "physical_base",
-                "needed_token": "toroidal_torque",
+                "needed_token": "frobnicating_zorch",
                 "reason": "closed segment — should be persisted",
             },
             {
@@ -748,7 +748,7 @@ class TestOpenSegmentFilter:
 
             written = write_vocab_gaps(gaps, source_type="dd")
 
-        # Only the physical_base gap (now closed) persisted; grammar_ambiguity filtered
+        # Only the physical_base gap persisted; grammar_ambiguity filtered
         assert written == 1
         merge_calls = [
             c for c in mock_gc.query.call_args_list if "MERGE (vg:VocabGap" in c[0][0]
@@ -758,20 +758,20 @@ class TestOpenSegmentFilter:
         )
 
     def test_write_vocab_gaps_mixed_batch_only_persists_closed(self):
-        """Mixed batch: pseudo segment filtered, closed segments kept."""
+        """Mixed batch: pseudo segment filtered, decomposable filtered, absent kept."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
         gaps = [
             {
                 "source_id": "path/a",
-                "segment": "physical_base",  # closed — keep
-                "needed_token": "toroidal_torque",
+                "segment": "physical_base",  # closed — keep (truly absent token)
+                "needed_token": "frobnicating_zorch",
                 "reason": "real gap",
             },
             {
                 "source_id": "path/b",
-                "segment": "component",  # closed — keep
+                "segment": "component",  # closed — keep (truly absent token)
                 "needed_token": "novel_component_zzz",
                 "reason": "real gap",
             },
@@ -931,6 +931,61 @@ class TestClassifyGap:
         seg = next(iter(open_segs))
         cat, actual = classify_gap(seg, "any_token")
         assert cat == "open_segment"
+
+    def test_decomposable_compound(self):
+        """Compound token whose parts are all registered → decomposable."""
+        from imas_codex.standard_names.segments import classify_gap, is_known_token
+
+        # Verify prerequisites: 'thermal' in qualifier/subject, 'pressure' in physical_base
+        segs_thermal = is_known_token("thermal")
+        segs_pressure = is_known_token("pressure")
+        if not segs_thermal or not segs_pressure:
+            pytest.skip("Need thermal+pressure as registered tokens")
+
+        cat, actual = classify_gap("physical_base", "thermal_pressure")
+        assert cat == "decomposable"
+        assert len(actual) >= 2  # parts found in ≥2 segments
+
+    def test_decomposable_cross_segment(self):
+        """Compound where parts span different segments."""
+        from imas_codex.standard_names.segments import classify_gap, is_known_token
+
+        # 'poloidal' should be in component/coordinate
+        segs_pol = is_known_token("poloidal")
+        if not segs_pol:
+            pytest.skip("Need poloidal as registered token")
+
+        # 'magnetic_flux' should be in physical_base
+        segs_mf = is_known_token("magnetic_flux")
+        if not segs_mf:
+            pytest.skip("Need magnetic_flux as registered token")
+
+        cat, actual = classify_gap("physical_base", "poloidal_magnetic_flux")
+        # This is an ATOMIC_COMPOUND — should be absent (preserved)
+        assert cat == "absent"
+
+    def test_atomic_compound_not_decomposed(self):
+        """Atomic compounds in whitelist must NOT be classified as decomposable."""
+        from imas_codex.standard_names.segments import (
+            ATOMIC_COMPOUNDS,
+            classify_gap,
+        )
+
+        for compound in ["magnetic_field", "current_density", "safety_factor"]:
+            if compound not in ATOMIC_COMPOUNDS:
+                continue
+            cat, _ = classify_gap("physical_base", compound)
+            assert cat != "decomposable", (
+                f"{compound} is in ATOMIC_COMPOUNDS but was classified as decomposable"
+            )
+
+    def test_single_token_not_decomposable(self):
+        """Single-word tokens with no underscores cannot be decomposable."""
+        from imas_codex.standard_names.segments import classify_gap
+
+        cat, actual = classify_gap("qualifier", "zzz_truly_unique_xyzzy")
+        assert cat == "absent"
+        assert actual == []
 
 
 class TestWriteVocabGapsInvalidSegment:

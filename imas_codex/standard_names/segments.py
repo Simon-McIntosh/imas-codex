@@ -163,6 +163,7 @@ def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
     - ``"open_segment"`` — reported segment has open vocabulary
     - ``"wrong_slot_placement"`` — token exists in exactly one other segment
     - ``"ambiguous_known_token"`` — token exists in multiple other segments
+    - ``"decomposable"`` — compound token whose parts exist in other segments
     - ``"absent"`` — token is not in any closed segment (genuine gap)
     """
     if not is_valid_segment(segment):
@@ -177,12 +178,101 @@ def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
         return "false_positive", segments_found
 
     if not segments_found:
+        # Before declaring absent, check if compound can be decomposed
+        decomp_segs = _check_decomposable(token)
+        if decomp_segs:
+            return "decomposable", decomp_segs
         return "absent", []
 
     if len(segments_found) > 1:
         return "ambiguous_known_token", segments_found
 
     return "wrong_slot_placement", segments_found
+
+
+# Lexicalized physics compounds that must NOT be decomposed even though
+# their prefixes match registered tokens.  These are single, irreducible
+# physical concepts in the ISN physical_base registry.
+ATOMIC_COMPOUNDS: frozenset[str] = frozenset(
+    {
+        "poloidal_flux",
+        "poloidal_magnetic_flux",
+        "magnetic_flux",
+        "minor_radius",
+        "major_radius",
+        "cross_sectional_area",
+        "safety_factor",
+        "polarization_angle",
+        "ellipticity_angle",
+        "loop_voltage",
+        "internal_inductance",
+        "magnetic_field",
+        "electric_field",
+        "current_density",
+        "power_density",
+        "energy_density",
+        "particle_flux",
+        "heat_flux",
+        "rotation_frequency",
+        "magnetic_shear",
+        "torque_density",
+        "collisionality",
+        "bootstrap_current",
+    }
+)
+
+
+def _check_decomposable(token: str) -> list[str]:
+    """Check if a compound token can be decomposed into existing vocabulary.
+
+    Uses bounded left-to-right longest-prefix matching against all segment
+    registries.  Returns the list of segments where parts were found, or
+    empty list if the token cannot be decomposed.
+
+    Skips tokens in :data:`ATOMIC_COMPOUNDS` to avoid false negatives on
+    lexicalized physics terms.
+    """
+    if token in ATOMIC_COMPOUNDS:
+        return []
+
+    if "_" not in token:
+        return []
+
+    parts = token.split("_")
+    if len(parts) < 2:
+        return []
+
+    index = _segment_token_index()
+    if not index:
+        return []
+
+    # Try to cover ALL parts with registered tokens (greedy longest-prefix)
+    matched_segments: list[str] = []
+    i = 0
+    while i < len(parts):
+        found = False
+        # Try longest prefix first (3-token, 2-token, 1-token)
+        for width in range(min(3, len(parts) - i), 0, -1):
+            candidate = "_".join(parts[i : i + width])
+            segs = index.get(candidate, [])
+            if segs:
+                matched_segments.extend(segs)
+                i += width
+                found = True
+                break
+        if not found:
+            return []  # Uncovered part — not fully decomposable
+
+    # Only report decomposable if we matched tokens from ≥2 segments
+    unique_segs = list(dict.fromkeys(matched_segments))
+    if len(set(unique_segs)) >= 2:
+        return unique_segs
+    # Single-segment decomposition (e.g. two qualifiers) — still decomposable
+    # if the compound doesn't exist as a registered token itself
+    if unique_segs:
+        return unique_segs
+
+    return []
 
 
 def filter_closed_segment_gaps(
@@ -207,6 +297,7 @@ def filter_closed_segment_gaps(
 
 
 __all__ = [
+    "ATOMIC_COMPOUNDS",
     "PSEUDO_SEGMENTS",
     "classify_gap",
     "filter_closed_segment_gaps",

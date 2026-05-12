@@ -187,4 +187,38 @@ output, restructure immediately:
 | `beam_position_variation` | report as `vocab_gap` (variation is not a registered token) | context-dependent |
 | `thermal_electron_energy` | subject=`thermal_electron`, base=`energy` | `thermal_electron` → subject |
 | `normalized_poloidal_flux` | `normalized_of_poloidal_magnetic_flux` | `normalized` → transformation |
+
+### ⚠️ Vocab Gap Validation — check BEFORE emitting any `vocab_gap`
+
+The most common pipeline error is reporting false vocabulary gaps. Before
+adding ANY entry to `vocab_gaps`, run these checks in order:
+
+1. **Cross-segment check:** Search the token in ALL segment registries above,
+   not just the intended segment. If the token exists anywhere, use it in the
+   correct segment — do NOT report a gap.
+   - ❌ `vocab_gap(segment="qualifier", needed_token="poloidal")` — `poloidal`
+     exists in component and coordinate
+   - ❌ `vocab_gap(segment="qualifier", needed_token="total_ion")` — `total_ion`
+     exists in subject
+   - ✅ Instead: decompose and place the token in its registered segment
+
+2. **Decomposition check:** For compound tokens (with `_`), split on
+   underscores and check if each part is a registered token in any segment.
+   If ALL parts map to existing tokens, decompose instead of reporting a gap.
+   - ❌ `vocab_gap(segment="physical_base", needed_token="plasma_pressure")` —
+     `plasma` is a qualifier, `pressure` is a physical_base → use
+     subject=`total_plasma` + base=`pressure`
+   - ❌ `vocab_gap(segment="physical_base", needed_token="poloidal_magnetic_flux")` —
+     `poloidal` is a component, `magnetic_flux` is a physical_base → decompose
+   - ❌ `vocab_gap(segment="physical_base", needed_token="crushing_force")` —
+     if the concept can be expressed as qualifier + base, do that
+
+3. **Semantic coverage check:** Before reporting a gap, verify no existing
+   token in the target segment already covers the same concept with a
+   different name.
+   - ❌ `vocab_gap(segment="position", needed_token="inner_midplane_intersection")` —
+     `inner_midplane` already exists
+
+**Only report a `vocab_gap` when the concept genuinely cannot be expressed
+using any combination of existing registered tokens.**
 {% endif %}

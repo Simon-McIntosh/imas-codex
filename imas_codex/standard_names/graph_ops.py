@@ -3355,7 +3355,16 @@ def write_vocab_gaps(
 
             category, actual_segments = classify_gap(segment, needed_token)
 
-            if category in ("false_positive", "open_segment"):
+            # Filter non-actionable gaps — these are not genuine vocabulary
+            # deficiencies but LLM mis-classifications or decomposable compounds
+            _NON_ACTIONABLE = {
+                "false_positive",
+                "open_segment",
+                "wrong_slot_placement",
+                "ambiguous_known_token",
+                "decomposable",
+            }
+            if category in _NON_ACTIONABLE:
                 logger.debug(
                     "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
                     category,
