@@ -6733,8 +6733,7 @@ def claim_generate_name_batch(
                           {domain_where}
                           {scope_sns_where}
                         MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)
-                        WITH DISTINCT imas0.physics_domain AS pd
-                        WHERE pd IS NOT NULL
+                        WITH DISTINCT coalesce(imas0.physics_domain, 'general') AS pd
                         WITH pd ORDER BY rand() LIMIT 1
                         MATCH (sns2:StandardNameSource)
                               -[:FROM_DD_PATH]->(imas2:IMASNode)
@@ -6742,7 +6741,7 @@ def claim_generate_name_batch(
                           AND (sns2.claimed_at IS NULL
                                OR sns2.claimed_at < datetime()
                                     - duration($cutoff))
-                          AND imas2.physics_domain = pd
+                          AND coalesce(imas2.physics_domain, 'general') = pd
                           {facility_where_sns2}
                           {scope_sns2_where}
                         WITH sns2 ORDER BY rand() LIMIT 1
