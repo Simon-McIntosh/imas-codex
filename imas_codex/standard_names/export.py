@@ -564,38 +564,6 @@ def _derive_error_variants_for_entry(
     return {k: variants[k] for k in _ERROR_VARIANT_KEY_ORDER if k in variants}
 
 
-def _derive_locus_for_entry(
-    gc: Any,
-    name: str,
-) -> dict[str, str] | None:
-    """Query graph for the outgoing HAS_LOCUS edge and return locus dict.
-
-    Returns a dict ``{"token": "<locus_token>", "relation": "at"|"of"|"over"}``
-    or ``None`` if no locus edge exists.
-    """
-    rows = gc.query(
-        """
-        MATCH (s:StandardName {id: $name})-[e:HAS_LOCUS]->(loc:Locus)
-        RETURN loc.id AS token, e.locus_relation AS relation
-        LIMIT 1
-        """,
-        name=name,
-    )
-    if not rows:
-        return None
-
-    row = rows[0]
-    token = row.get("token")
-    relation = row.get("relation")
-    if not token:
-        return None
-
-    result: dict[str, str] = {"token": token}
-    if relation:
-        result["relation"] = relation
-    return result
-
-
 def _fetch_sources_for_entry(
     gc: Any,
     name: str,
@@ -1037,9 +1005,9 @@ def run_export(
             error_variants = _derive_error_variants_for_entry(gc, entry_name)
             if error_variants:
                 entry_dict["error_variants"] = error_variants
-            locus = _derive_locus_for_entry(gc, entry_name)
-            if locus:
-                entry_dict["locus"] = locus
+            # Note: locus is graph-only (HAS_LOCUS edge) — not exported
+            # to YAML because ISN models use extra="forbid" and don't
+            # define a locus field on StandardNameEntryBase.
 
             # Optionally attach source provenance for debug rendering
             if include_sources:

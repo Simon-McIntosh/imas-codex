@@ -67,7 +67,6 @@ CANONICAL_KEY_ORDER: tuple[str, ...] = (
     "links",
     "validity_domain",
     "constraints",
-    "locus",
     "arguments",
     "error_variants",
     "deprecates",
