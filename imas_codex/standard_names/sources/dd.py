@@ -406,6 +406,7 @@ def extract_dd_candidates(
     name_only_batch_size: int = 50,
     max_batch_size: int = 25,
     max_tokens: int | None = None,
+    write_skipped: bool = True,
 ) -> list[ExtractionBatch]:
     """Extract candidate quantities from IMAS DD paths with enriched context.
 
@@ -434,6 +435,9 @@ def extract_dd_candidates(
         max_batch_size: Maximum items per batch in full compose mode.
         max_tokens: When set, apply a pre-flight token check that
             binary-splits any batch exceeding this estimated token count.
+        write_skipped: When True (default), write disqualified/skipped
+            sources to the graph as StandardNameSource nodes. Set False
+            for benchmark runs to avoid graph side effects.
 
     Returns:
         List of ExtractionBatch objects grouped by (primary_cluster, unit)
@@ -554,7 +558,9 @@ def extract_dd_candidates(
         # Apply DD unit override/skip config — fixes upstream defects and
         # records unresolvable paths as skipped StandardNameSource records.
         # This is data normalization: it both fixes units AND skips unparseable ones.
-        results = _apply_unit_overrides(results, source_type="dd")
+        results = _apply_unit_overrides(
+            results, source_type="dd", write_skipped=write_skipped
+        )
         if not results:
             logger.info("No DD paths remain after unit override filtering")
             return []
@@ -562,7 +568,9 @@ def extract_dd_candidates(
         # Unified source qualification: replaces the former stacked chain of
         # mixed-unit filter, skip-by-design, and extract-deny. Each path is
         # converted to a SourceCandidate and evaluated by qualify_dd().
-        results = _qualify_sources(results, source_type="dd")
+        results = _qualify_sources(
+            results, source_type="dd", write_skipped=write_skipped
+        )
         if not results:
             logger.info("No DD paths remain after source qualification")
             return []

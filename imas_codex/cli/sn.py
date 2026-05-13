@@ -1542,7 +1542,6 @@ def sn_bench(
         temperature=temperature,
         reviewer_model=reviewer_model,
         force=force,
-        review_target="names",
     )
 
     console.print("[bold]SN Benchmark[/bold]")

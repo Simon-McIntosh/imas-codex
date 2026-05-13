@@ -1052,7 +1052,9 @@ _SN_BENCHMARK_DEFAULTS = {
         "openai/gpt-5.4-mini",
         "google/gemini-3.1-pro-preview",
         "google/gemini-3-flash-preview",
-        "google/gemini-3.1-flash-lite-preview",
+        "moonshotai/kimi-k2.6",
+        "deepseek/deepseek-v4",
+        "deepseek/deepseek-v4-flash",
     ],
     "reviewer-model": "anthropic/claude-opus-4.6",
 }

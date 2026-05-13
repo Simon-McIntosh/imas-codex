@@ -73,6 +73,11 @@ class ModelResult:
     avg_quality_score: float = 0.0
     avg_doc_length: float = 0.0
     avg_fields_populated: float = 0.0
+    # Per-dimension score averages
+    avg_grammar_score: float = 0.0
+    avg_semantic_score: float = 0.0
+    avg_convention_score: float = 0.0
+    avg_completeness_score: float = 0.0
     # Prompt-cache statistics
     cache_read_tokens: int = 0
     cache_creation_tokens: int = 0
@@ -283,25 +288,28 @@ async def score_with_reviewer(
     reviewer_model: str,
     target: str = "names",
 ) -> list[dict]:
-    """Score candidates using the rubric matching the compose output fidelity.
+    """Score candidates using the production-fidelity review pipeline.
+
+    Uses the split system/user prompt pair (``sn/review_names_system`` +
+    ``sn/review_names_user``) with full graph context: K3 scored calibration
+    examples, vector/same-base/same-path neighbour comparators, and grammar
+    vocabulary.
 
     target="names" (default) — uses the 4-dimensional ``sn/review_names``
         rubric (grammar, semantic, convention, completeness; 0-80 total,
-        normalised to 0-1). Appropriate for name-only compose output, which is
-        what :class:`StandardNameCandidate` produces today.
-    target="full" — uses the 6-dimensional ``sn/review`` rubric (adds
-        documentation and compliance dimensions, 0-120 total). Only
-        meaningful when compose output carries rich documentation (i.e.
-        post-enrich cycles, not the default benchmark).
+        normalised to 0-1).
 
     Returns list of dicts with: name, quality_tier, score, and per-dimension
-    scores keyed ``<dim>_score``. Dimensions not present in the chosen rubric
-    are left unset (so downstream averaging skips them rather than counting
-    a spurious zero).
+    scores keyed ``<dim>_score``.
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import build_compose_context
+    from imas_codex.standard_names.context import (
+        build_compose_context,
+        fetch_review_neighbours,
+    )
+    from imas_codex.standard_names.example_loader import load_review_examples
     from imas_codex.standard_names.models import (
         StandardNameQualityReviewNameOnlyBatch,
     )
@@ -309,75 +317,96 @@ async def score_with_reviewer(
     if target != "names":
         raise ValueError(f"Unknown review target {target!r}; expected 'names'.")
 
-    prompt_name = "sn/review_names"
     response_model: type = StandardNameQualityReviewNameOnlyBatch
 
-    # Get compose context (includes grammar enums + shared include variables)
+    # Get compose context (grammar enums + shared include variables)
     compose_ctx = build_compose_context()
-    grammar_enums = {
-        k: compose_ctx[k]
-        for k in (
-            "subjects",
-            "components",
-            "coordinates",
-            "positions",
-            "processes",
-            "transformations",
-            "geometric_bases",
-            "objects",
-            "binary_operators",
-        )
-        if k in compose_ctx
-    }
 
-    # System prompt: rubric (cached across batches)
-    system_prompt = render_prompt(
-        prompt_name,
-        {
-            **compose_ctx,
-            "review_scored_examples": [],
-            "items": [],
-            "existing_names": [],
-            "batch_context": "",
-            "nearby_existing_names": [],
-            "audit_findings": [],
-            **grammar_enums,
-        },
-    )
+    # Load K3 scored calibration examples from graph
+    review_scored_examples: list[dict] = []
+    try:
+        with GraphClient() as gc:
+            review_scored_examples = load_review_examples(
+                gc, physics_domains=[], axis="name"
+            )
+    except Exception as exc:
+        logger.debug("Could not load review examples: %s", exc)
+
+    # Build system prompt (static, cached across batches)
+    system_context = {
+        **compose_ctx,
+        "review_scored_examples": review_scored_examples,
+    }
+    system_prompt = render_prompt("sn/review_names_system", system_context)
 
     # Process in batches of 10
     all_reviews: list[dict] = []
     for i in range(0, len(candidates), 10):
         batch = candidates[i : i + 10]
 
-        # Build per-batch user prompt with candidate details
+        # Build per-candidate items with neighbour context
         batch_items = []
         for c in batch:
-            batch_items.append(
-                {
-                    "standard_name": _resolve_name(c),
-                    "source_id": c.get("source_id", ""),
-                    "description": c.get("description", "") or "",
-                    "documentation": (c.get("documentation", "") or "")[:500],
-                    "unit": c.get("unit", "N/A"),
-                    "kind": c.get("kind", "N/A"),
-                    "source_paths": c.get("source_paths", []),
-                }
-            )
+            name = _resolve_name(c)
+            item: dict[str, Any] = {
+                "standard_name": name,
+                "source_id": c.get("source_id", ""),
+                "description": c.get("description", "") or "",
+                "documentation": (c.get("documentation", "") or "")[:500],
+                "unit": c.get("unit", "N/A"),
+                "kind": c.get("kind", "N/A"),
+                "source_paths": c.get("source_paths", []),
+            }
 
-        user_prompt = render_prompt(
-            prompt_name,
-            {
-                **compose_ctx,
-                "review_scored_examples": [],
-                "items": batch_items,
-                "existing_names": [],
-                "batch_context": "",
-                "nearby_existing_names": [],
-                "audit_findings": [],
-                **grammar_enums,
-            },
-        )
+            # Fetch review neighbours from live graph
+            try:
+                neighbours = fetch_review_neighbours(
+                    {
+                        "id": name,
+                        "name": name,
+                        "description": c.get("description", ""),
+                        "physical_base": (
+                            c.get("base_token")
+                            or (c.get("segments") or {}).get("base_token")
+                        ),
+                        "source_paths": c.get("source_paths", []),
+                    }
+                )
+                item.update(neighbours)
+            except Exception:
+                item["vector_neighbours"] = []
+                item["same_base_neighbours"] = []
+                item["same_path_neighbours"] = []
+
+            batch_items.append(item)
+
+        # Build user prompt with full context
+        user_context = {
+            **compose_ctx,
+            "review_scored_examples": review_scored_examples,
+            "items": batch_items,
+            "existing_names": [],
+            "batch_context": "",
+            "nearby_existing_names": [],
+            "audit_findings": [],
+            # Flatten neighbour lists for template — production injects
+            # these at the batch level from the first item's context
+            "vector_neighbours": batch_items[0].get("vector_neighbours", [])
+            if batch_items
+            else [],
+            "same_base_neighbours": batch_items[0].get("same_base_neighbours", [])
+            if batch_items
+            else [],
+            "same_path_neighbours": batch_items[0].get("same_path_neighbours", [])
+            if batch_items
+            else [],
+        }
+
+        try:
+            user_prompt = render_prompt("sn/review_names_user", user_context)
+        except Exception as exc:
+            logger.warning("Failed to render review user prompt: %s", exc)
+            continue
 
         messages = [
             {"role": "system", "content": system_prompt},
@@ -493,6 +522,22 @@ async def run_benchmark(
                         r.get("score", 0) for r in reviews
                     ) / len(reviews)
 
+                    # Per-dimension averages
+                    for dim in (
+                        "grammar",
+                        "semantic",
+                        "convention",
+                        "completeness",
+                    ):
+                        key = f"{dim}_score"
+                        vals = [r[key] for r in reviews if key in r and r[key] > 0]
+                        if vals:
+                            setattr(
+                                result,
+                                f"avg_{key}",
+                                sum(vals) / len(vals),
+                            )
+
                 # Compute doc length and field coverage metrics
                 docs = [c.get("documentation", "") or "" for c in result.candidates]
                 result.avg_doc_length = (
@@ -550,6 +595,7 @@ def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
         domain_filter=config.domain_filter,
         limit=config.max_candidates,
         force=config.force,
+        write_skipped=False,
     )
 
     # Convert ExtractionBatch to plain dicts
@@ -756,8 +802,10 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     table.add_column("Errors", justify="right")
     if has_quality:
         table.add_column("Avg Quality", justify="right")
-        table.add_column("Avg Doc Len", justify="right")
-        table.add_column("Fields Pop%", justify="right")
+        table.add_column("Gram", justify="right")
+        table.add_column("Sem", justify="right")
+        table.add_column("Conv", justify="right")
+        table.add_column("Compl", justify="right")
 
     for r in report.results:
         n = len(r.candidates)
@@ -792,9 +840,11 @@ def render_comparison_table(report: BenchmarkReport) -> None:
 
         if has_quality:
             qual_str = f"{r.avg_quality_score:.2f}" if r.quality_scores else "—"
-            doc_str = f"{r.avg_doc_length:.0f}" if r.quality_scores else "—"
-            fp_str = f"{r.avg_fields_populated * 100:.0f}%" if r.quality_scores else "—"
-            row_data.extend([qual_str, doc_str, fp_str])
+            gram_str = f"{r.avg_grammar_score:.1f}" if r.quality_scores else "—"
+            sem_str = f"{r.avg_semantic_score:.1f}" if r.quality_scores else "—"
+            conv_str = f"{r.avg_convention_score:.1f}" if r.quality_scores else "—"
+            compl_str = f"{r.avg_completeness_score:.1f}" if r.quality_scores else "—"
+            row_data.extend([qual_str, gram_str, sem_str, conv_str, compl_str])
 
         table.add_row(*row_data)
 
@@ -811,7 +861,7 @@ def render_comparison_table(report: BenchmarkReport) -> None:
         qual_table.add_column("Model", style="bold")
         qual_table.add_column("Outstanding", justify="right")
         qual_table.add_column("Good", justify="right")
-        qual_table.add_column("Adequate", justify="right")
+        qual_table.add_column("Inadequate", justify="right")
         qual_table.add_column("Poor", justify="right")
 
         for r in report.results:

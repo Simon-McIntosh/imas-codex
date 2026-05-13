@@ -94,6 +94,25 @@ model_list:
     model_info:
       health_check_max_tokens: 16
 
+  # ── Open-weight models (OpenAI-compatible /api/v1) ─────
+  - model_name: openrouter/moonshotai/kimi-k2.6
+    litellm_params:
+      model: openai/moonshotai/kimi-k2.6
+      litellm_credential_name: codex
+      extra_headers: *cx_hdr
+
+  - model_name: openrouter/deepseek/deepseek-v4
+    litellm_params:
+      model: openai/deepseek/deepseek-v4
+      litellm_credential_name: codex
+      extra_headers: *cx_hdr
+
+  - model_name: openrouter/deepseek/deepseek-v4-flash
+    litellm_params:
+      model: openai/deepseek/deepseek-v4-flash
+      litellm_credential_name: codex
+      extra_headers: *cx_hdr
+
   # ── Claude Code (separate billing, Anthropic only) ─────
   # Claude Code only uses Anthropic models. Virtual key → team
   # model_aliases remap: opus → cc:opus, sonnet → cc:sonnet, etc.
