@@ -87,6 +87,8 @@ All graph node types, relationships, and properties are defined in LinkML schema
 
 **NodeCategory enum** (`imas_dd.yaml`): DD node classification — 9 values: `quantity`, `geometry`, `coordinate`, `metadata`, `error`, `structural`, `identifier`, `fit_artifact`, `representation`. Classifier lives in `imas_codex/core/node_classifier.py` (two-pass: Pass 1 attribute-only, Pass 2 graph-relational). Category sets for pipeline participation in `imas_codex/core/node_categories.py`.
 
+**IMASNodeStatus lifecycle** (`imas_dd.yaml`): Tracks DD build pipeline progress — `built → enriched → refined → embedded → classified`. Seven workers: EXTRACT → BUILD → ENRICH → REFINE → EMBED → CLASSIFY → CLUSTER. CLASSIFY runs after EMBED, before CLUSTER, using `get_model("language")` (service tag: `"data-dictionary"`). Three-tier domain assignment: Tier 1 = LLM classification for physics paths; Tier 2 = inheritance for error paths (via `HAS_ERROR`) and metadata (via `HAS_PARENT`); Tier 3 = none for infrastructure metadata (`ids_properties/*`, `code/*`). Paths initially assigned `"general"` are retried with expanded cluster context. `--reset-to embedded` clears domain classifications and re-classifies only (~$2.60, the cheapest domain fix).
+
 Always import enums and classes from generated models. Never hardcode status values:
 
 ```python
@@ -444,7 +446,7 @@ All LLM calls are tagged with a `service` parameter for spend visibility. The ta
 |-------------|-------------|------------|
 | `facility-discovery` | Facility path/wiki/signal/code discovery | `discovery/paths/*`, `discovery/wiki/*`, `discovery/signals/*`, `discovery/base/image.py`, `discovery/code/*`, `discovery/static/*` |
 | `standard-names` | Standard name generation, review, enrichment | `standard_names/workers.py`, `benchmark.py`, `review/pipeline.py`, `cli/sn.py` |
-| `data-dictionary` | DD enrichment and cluster labeling | `graph/dd_enrichment.py`, `dd_ids_enrichment.py`, `dd_identifier_enrichment.py`, `dd_workers.py`, `clusters/labeler.py` |
+| `data-dictionary` | DD enrichment, domain classification, and cluster labeling | `graph/dd_enrichment.py`, `dd_ids_enrichment.py`, `dd_identifier_enrichment.py`, `dd_workers.py`, `clusters/labeler.py` |
 | `imas-mapping` | IMAS signal-to-path mapping | `ids/mapping.py`, `ids/metadata.py` |
 | `embedding` | Text embedding (direct OpenRouter) | `embeddings/openrouter_embed.py`, `openrouter_client.py` |
 | `untagged` | Default — surfaces missed call sites | Any call without explicit `service=` |

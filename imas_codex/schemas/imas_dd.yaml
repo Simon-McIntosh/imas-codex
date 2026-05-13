@@ -615,7 +615,7 @@ classes:
       status:
         description: >-
           Pipeline lifecycle status tracking progress through the DD build
-          pipeline: built → enriched → refined → embedded.  Workers claim
+          pipeline: built → enriched → refined → embedded → classified.  Workers claim
           paths by setting claimed_at, then advance the status on completion.
         range: IMASNodeStatus
         required: true
