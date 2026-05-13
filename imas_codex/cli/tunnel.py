@@ -55,6 +55,35 @@ def _discover_compute_node(host: str) -> str | None:
     return discover_compute_node(host)
 
 
+def _discover_vllm_node(host: str) -> str | None:
+    """Discover the SLURM node running an ambix-serve vLLM job.
+
+    SSHes to *host* and queries ``squeue`` for running ``ambix-serve-*``
+    jobs, returning the first compute node found.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "ssh",
+                host,
+                "-o",
+                "ConnectTimeout=10",
+                'squeue -u "$USER" -t R -o "%N %j" --noheader 2>/dev/null'
+                " | grep 'ambix-serve-' | head -1 | awk '{print $1}'",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        if result.returncode == 0:
+            node = result.stdout.strip()
+            if node:
+                return node
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    return None
+
+
 def _resolve_host(host: str | None) -> str:
     """Resolve HOST from argument, graph profile, or fail."""
     if host:
@@ -80,6 +109,7 @@ def _get_tunnel_ports(
     neo4j: bool,
     embed: bool,
     llm: bool = False,
+    vllm: bool = False,
     *,
     emit_status: bool = True,
 ) -> list[tuple[int, int, str, str]]:
@@ -94,7 +124,7 @@ def _get_tunnel_ports(
     from imas_codex.remote.tunnel import TUNNEL_OFFSET
 
     ports: list[tuple[int, int, str, str]] = []
-    all_services = not neo4j and not embed and not llm
+    all_services = not neo4j and not embed and not llm and not vllm
 
     # Discover SLURM compute node if any service uses a compute location.
     # All services share the same allocation, so one lookup suffices.
@@ -173,6 +203,20 @@ def _get_tunnel_ports(
         # LLM proxy runs on login node (needs outbound internet)
         ports.append((llm_port, llm_port, "llm", "127.0.0.1"))
 
+    if vllm or all_services:
+        from imas_codex.settings import get_vllm_port
+
+        vllm_port = get_vllm_port()
+        vllm_node = _discover_vllm_node(host)
+        if vllm_node:
+            ports.append((vllm_port, vllm_port, "vllm", vllm_node))
+        elif vllm and not all_services:
+            # Explicit --vllm with no running job — fail clearly
+            click.echo(
+                "⚠ No running ambix-serve SLURM job found. "
+                "Start one with: ambix agent serve"
+            )
+
     return ports
 
 
@@ -192,9 +236,10 @@ def _requested_services(
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool,
+    vllm_only: bool = False,
 ) -> set[str]:
-    if not neo4j_only and not embed_only and not llm_only:
-        return {"neo4j", "embed", "llm"}
+    if not neo4j_only and not embed_only and not llm_only and not vllm_only:
+        return {"neo4j", "embed", "llm", "vllm"}
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
@@ -202,6 +247,8 @@ def _requested_services(
         selected.add("embed")
     if llm_only:
         selected.add("llm")
+    if vllm_only:
+        selected.add("vllm")
     return selected
 
 
@@ -212,10 +259,11 @@ def _service_selected_services(service_text: str) -> set[str]:
             ("--neo4j", "neo4j"),
             ("--embed", "embed"),
             ("--llm", "llm"),
+            ("--vllm", "vllm"),
         )
         if flag in service_text
     }
-    return selected or {"neo4j", "embed", "llm"}
+    return selected or {"neo4j", "embed", "llm", "vllm"}
 
 
 def _installed_service_supports_request(
@@ -223,6 +271,7 @@ def _installed_service_supports_request(
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool,
+    vllm_only: bool = False,
 ) -> bool:
     service_file = _service_file(host)
     if not service_file.exists():
@@ -231,7 +280,7 @@ def _installed_service_supports_request(
         service_text = service_file.read_text()
     except OSError:
         return False
-    requested = _requested_services(neo4j_only, embed_only, llm_only)
+    requested = _requested_services(neo4j_only, embed_only, llm_only, vllm_only)
     installed = _service_selected_services(service_text)
     return requested.issubset(installed)
 
@@ -299,6 +348,7 @@ def _run_service_supervisor(
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool,
+    vllm_only: bool = False,
 ) -> None:
     stop_requested = False
     child: subprocess.Popen | None = None
@@ -318,6 +368,7 @@ def _run_service_supervisor(
                 neo4j_only,
                 embed_only,
                 llm_only,
+                vllm_only,
                 emit_status=False,
             )
             if not ports:
@@ -360,6 +411,7 @@ def _run_service_supervisor(
                     neo4j_only,
                     embed_only,
                     llm_only,
+                    vllm_only,
                     emit_status=False,
                 )
                 latest_signature = tuple(
@@ -377,6 +429,7 @@ def _build_systemd_service_content(
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool,
+    vllm_only: bool = False,
 ) -> str:
     uv = shutil.which("uv")
     if not uv:
@@ -389,6 +442,8 @@ def _build_systemd_service_content(
         flag_args.append("--embed")
     if llm_only:
         flag_args.append("--llm")
+    if vllm_only:
+        flag_args.append("--vllm")
     flags = " ".join(flag_args)
 
     log_dir = Path.home() / ".local" / "share" / "imas-codex" / "logs"
@@ -616,6 +671,7 @@ def tunnel() -> None:
       imas-codex tunnel start HOST --neo4j   Just graph ports
       imas-codex tunnel start HOST --embed   Just embedding port
       imas-codex tunnel start HOST --llm     Just LLM proxy port
+      imas-codex tunnel start HOST --vllm    Just vLLM inference port
       imas-codex tunnel start HOST --keyring D-Bus socket for keyring
       imas-codex tunnel stop [HOST]          Stop tunnels
       imas-codex tunnel status               Show active tunnels
@@ -631,6 +687,9 @@ def tunnel() -> None:
 @click.option("--embed", "embed_only", is_flag=True, help="Tunnel embedding port only")
 @click.option("--llm", "llm_only", is_flag=True, help="Tunnel LLM proxy port only")
 @click.option(
+    "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
+)
+@click.option(
     "--keyring",
     "keyring_only",
     is_flag=True,
@@ -641,6 +700,7 @@ def tunnel_start(
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool = False,
+    vllm_only: bool = False,
     keyring_only: bool = False,
 ) -> None:
     """Start SSH tunnels to remote services.
@@ -659,6 +719,7 @@ def tunnel_start(
       imas-codex tunnel start iter --neo4j   # Just graph
       imas-codex tunnel start iter --embed   # Just embedding
       imas-codex tunnel start iter --llm     # Just LLM proxy
+      imas-codex tunnel start iter --vllm    # Just vLLM inference
       imas-codex tunnel start iter --keyring # D-Bus for keyring
     """
     target = _resolve_host(host)
@@ -669,6 +730,7 @@ def tunnel_start(
             neo4j_only,
             embed_only,
             llm_only,
+            vllm_only,
         )
         and not keyring_only
     ):
@@ -691,7 +753,7 @@ def tunnel_start(
             f"Starting tunnels to {target} (ssh — install autossh for auto-reconnect):"
         )
 
-    ports = _get_tunnel_ports(target, neo4j_only, embed_only, llm_only)
+    ports = _get_tunnel_ports(target, neo4j_only, embed_only, llm_only, vllm_only)
     ok = _start_tunnels(target, ports, use_autossh)
 
     if ok == len(ports):
@@ -771,10 +833,15 @@ def tunnel_status() -> None:
     are labeled accordingly.
     """
     from imas_codex.remote.tunnel import TUNNEL_OFFSET, is_tunnel_active
-    from imas_codex.settings import get_embed_server_port, get_llm_proxy_port
+    from imas_codex.settings import (
+        get_embed_server_port,
+        get_llm_proxy_port,
+        get_vllm_port,
+    )
 
     embed_port = get_embed_server_port()
     llm_port = get_llm_proxy_port()
+    vllm_port = get_vllm_port()
 
     # Build port→label map using the same resolution as tunnel_start
     # so that labels match (graph name "codex", not location "iter").
@@ -801,6 +868,7 @@ def tunnel_status() -> None:
         known_ports[HTTP_BASE_PORT + TUNNEL_OFFSET] = "neo4j-http (tunneled)"
     known_ports[embed_port] = "embed"
     known_ports[llm_port] = "llm"
+    known_ports[vllm_port] = "vllm"
 
     # Build port→location map for SSH-forwarded ports so we can show
     # "iter" (or whichever host) instead of a generic "(ssh)" marker.
@@ -872,17 +940,21 @@ def tunnel_status() -> None:
 @click.option("--neo4j", "neo4j_only", is_flag=True, help="Tunnel Neo4j ports only")
 @click.option("--embed", "embed_only", is_flag=True, help="Tunnel embedding port only")
 @click.option("--llm", "llm_only", is_flag=True, help="Tunnel LLM proxy port only")
+@click.option(
+    "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
+)
 def tunnel_service(
     action: str,
     host: str | None,
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool = False,
+    vllm_only: bool = False,
 ) -> None:
     """Manage persistent SSH tunnels via systemd + autossh.
 
     Installs a systemd user service that maintains reconnecting SSH
-    tunnels to the specified HOST for Neo4j, embedding, and/or LLM services.
+    tunnels to the specified HOST for Neo4j, embedding, LLM, and/or vLLM services.
 
     \b
     Examples:
@@ -890,6 +962,7 @@ def tunnel_service(
       imas-codex tunnel service install iter --neo4j # Just graph
       imas-codex tunnel service install iter --embed # Just embedding
       imas-codex tunnel service install iter --llm   # Just LLM proxy
+      imas-codex tunnel service install iter --vllm  # Just vLLM inference
       imas-codex tunnel service start iter
       imas-codex tunnel service status iter
       imas-codex tunnel service logs iter
@@ -912,7 +985,7 @@ def tunnel_service(
                 "autossh not found. Install with: sudo apt install autossh"
             )
 
-        ports = _get_tunnel_ports(target, neo4j_only, embed_only, llm_only)
+        ports = _get_tunnel_ports(target, neo4j_only, embed_only, llm_only, vllm_only)
         if not ports:
             raise click.ClickException("No services selected for tunneling.")
         log_dir = Path.home() / ".local" / "share" / "imas-codex" / "logs"
@@ -922,6 +995,7 @@ def tunnel_service(
             neo4j_only,
             embed_only,
             llm_only,
+            vllm_only,
         )
         service_dir.mkdir(parents=True, exist_ok=True)
         service_file.write_text(service_content)
@@ -1003,12 +1077,16 @@ def tunnel_service(
 @click.option("--neo4j", "neo4j_only", is_flag=True, help="Tunnel Neo4j ports only")
 @click.option("--embed", "embed_only", is_flag=True, help="Tunnel embedding port only")
 @click.option("--llm", "llm_only", is_flag=True, help="Tunnel LLM proxy port only")
+@click.option(
+    "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
+)
 def tunnel_service_run(
     host: str | None,
     neo4j_only: bool,
     embed_only: bool,
     llm_only: bool,
+    vllm_only: bool = False,
 ) -> None:
     """Run the persistent systemd tunnel supervisor in the foreground."""
     target = _resolve_host(host)
-    _run_service_supervisor(target, neo4j_only, embed_only, llm_only)
+    _run_service_supervisor(target, neo4j_only, embed_only, llm_only, vllm_only)

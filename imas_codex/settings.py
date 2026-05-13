@@ -323,6 +323,20 @@ def _embed_host_from_facility() -> str | None:
 LLM_BASE_PORT = 18400
 POSTGRES_BASE_PORT = 18450
 
+# ─── vLLM inference server settings ────────────────────────────────────────
+
+VLLM_PORT = 18800
+
+
+def get_vllm_port() -> int:
+    """Get the vLLM inference server port (imas-ambix).
+
+    Override: ``IMAS_CODEX_VLLM_PORT`` env var.
+    """
+    if env := os.getenv("IMAS_CODEX_VLLM_PORT"):
+        return int(env)
+    return VLLM_PORT
+
 
 def get_llm_proxy_port() -> int:
     """Get the LLM proxy (LiteLLM) port.
