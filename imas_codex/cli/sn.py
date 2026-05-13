@@ -256,6 +256,7 @@ def _run_sn_cmd(
     skip_generate: bool = False,
     skip_review: bool = False,
     names_only: bool = False,
+    flush: bool = False,
     source: str = "dd",
     override_edits: list[str] | None = None,
     only: str | None = None,
@@ -467,6 +468,7 @@ def _run_sn_cmd(
             on_event=_on_event,
             scope_run_id=scope_run_id,
             names_only=names_only,
+            flush=flush,
         )
         return {"summary": summary}
 
@@ -838,6 +840,16 @@ def _check_pipeline_clear_gate() -> None:
     ),
 )
 @click.option(
+    "--flush",
+    is_flag=True,
+    default=False,
+    help=(
+        "Drain existing work without composing new names. "
+        "Skips auto-seeding and the generate_name pool; only review, "
+        "refine, and docs pools run. Incompatible with --focus."
+    ),
+)
+@click.option(
     "--only",
     "only_phase",
     type=click.Choice(
@@ -930,6 +942,7 @@ def sn_run(
     review_docs_backlog_cap: int,
     skip_review: bool,
     names_only: bool,
+    flush: bool,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -1001,6 +1014,10 @@ def sn_run(
 
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
+
+    # ── Validate --flush constraints ──────────────────────────────────
+    if flush and flat_focus:
+        raise click.UsageError("--flush and --focus are mutually exclusive")
 
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
@@ -1118,6 +1135,7 @@ def sn_run(
             skip_generate=skip_generate_from_only,
             skip_review=skip_review,
             names_only=names_only,
+            flush=flush,
             source=source,
             override_edits=_override_edits,
             only=only_phase,

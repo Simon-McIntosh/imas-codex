@@ -106,6 +106,7 @@ def _build_pool_specs(
     only_domain: str | None = None,
     scope_run_id: str | None = None,
     names_only: bool = False,
+    flush: bool = False,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -331,6 +332,12 @@ def _build_pool_specs(
     if names_only:
         specs = [s for s in specs if s.name not in _DOCS_POOLS]
 
+    # ── Flush filtering ──────────────────────────────────────────────
+    # Flush mode drains existing work without generating new names.
+    # Excludes generate_name so only review/refine pools run.
+    if flush:
+        specs = [s for s in specs if s.name != "generate_name"]
+
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
     # queue exceeds the configured cap.  The throttle wraps the claim
@@ -524,6 +531,7 @@ async def run_sn_pools(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     scope_run_id: str | None = None,
     names_only: bool = False,
+    flush: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -533,6 +541,10 @@ async def run_sn_pools(
     When *names_only* is ``True``, the three docs pools
     (generate_docs, review_docs, refine_docs) are excluded so
     only name generation / review / refinement run.
+
+    When *flush* is ``True``, the generate_name pool is excluded
+    and auto-seeding is skipped.  Only review / refine / docs
+    pools run, draining existing work without composing new names.
 
     Startup sequence:
 
@@ -694,11 +706,15 @@ async def run_sn_pools(
 
         # ── B3: Domain extract (auto-seed) ────────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
+        # Skip auto-seeding in flush mode — only drain existing work.
         if scope_run_id:
             logger.info(
                 "run_sn_pools: focus mode (run_id=%s…) — skipping auto-seed",
                 scope_run_id[:8],
             )
+            _domains = domains
+        elif flush:
+            logger.info("run_sn_pools: flush mode — skipping auto-seed")
             _domains = domains
         else:
             # Merge only_domain into domains tuple.
@@ -720,11 +736,12 @@ async def run_sn_pools(
                 logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
         # ── B3b: Seed parent component sources ────────────────────
-        from imas_codex.standard_names.graph_ops import seed_parent_sources
+        if not flush:
+            from imas_codex.standard_names.graph_ops import seed_parent_sources
 
-        parent_count = await asyncio.to_thread(seed_parent_sources)
-        if parent_count:
-            logger.info("Seeded %d parent component sources", parent_count)
+            parent_count = await asyncio.to_thread(seed_parent_sources)
+            if parent_count:
+                logger.info("Seeded %d parent component sources", parent_count)
 
         # ── Build pool specs ──────────────────────────────────────
         _only_domain_for_pools = _domains[0] if len(_domains) == 1 else None
@@ -740,6 +757,7 @@ async def run_sn_pools(
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
             names_only=names_only,
+            flush=flush,
         )
 
         # ── Wire pool health into display state ───────────────────
