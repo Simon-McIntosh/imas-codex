@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
+
+logger = logging.getLogger(__name__)
 
 # Valid enum values for IR segment fields.  Plain ``str`` is used on the
 # Pydantic model (instead of ``Literal``) because Anthropic/OpenRouter
@@ -417,6 +420,111 @@ class StandardNameComposeBatch(BaseModel):
         default_factory=list,
         description="Paths where naming requires vocabulary expansion in imas-standard-names",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _rescue_failed_candidates(cls, data: Any) -> Any:
+        """Validate candidates individually; move vocab-gap failures to vocab_gaps.
+
+        Without this, a single candidate with an unregistered grammar token
+        fails Pydantic validation for the entire batch, marking ALL sources
+        as vocab_gap.  This validator catches per-candidate errors and
+        converts them to explicit vocab_gap entries, preserving valid
+        candidates in the same batch.
+        """
+        if not isinstance(data, dict):
+            return data
+        raw_candidates = data.get("candidates")
+        if not raw_candidates or not isinstance(raw_candidates, list):
+            return data
+
+        valid: list[dict] = []
+        rescued_gaps: list[dict] = []
+
+        for raw in raw_candidates:
+            if not isinstance(raw, dict):
+                valid.append(raw)
+                continue
+            try:
+                StandardNameCandidate.model_validate(raw)
+                valid.append(raw)
+            except (ValidationError, ValueError) as exc:
+                exc_str = str(exc)
+                if "not a registered" not in exc_str:
+                    # Non-vocab-gap error — keep for normal batch failure
+                    valid.append(raw)
+                    continue
+                # Extract source_id and failed token info from the error
+                source_id = raw.get("source_id", "unknown")
+                segments = raw.get("segments", raw)
+                segment, token = _extract_gap_from_error(exc_str, segments)
+                rescued_gaps.append(
+                    {
+                        "source_id": source_id,
+                        "segment": segment,
+                        "needed_token": token,
+                        "reason": f"LLM proposed unregistered {segment} token",
+                    }
+                )
+                logger.info(
+                    "Rescued candidate %s from batch failure: %s '%s' not registered",
+                    source_id,
+                    segment,
+                    token,
+                )
+
+        if rescued_gaps:
+            data["candidates"] = valid
+            existing_gaps = data.get("vocab_gaps", [])
+            if isinstance(existing_gaps, list):
+                data["vocab_gaps"] = existing_gaps + rescued_gaps
+            else:
+                data["vocab_gaps"] = rescued_gaps
+            logger.warning(
+                "Batch rescue: %d candidates → vocab_gap, %d valid preserved",
+                len(rescued_gaps),
+                len(valid),
+            )
+
+        return data
+
+
+def _extract_gap_from_error(exc_str: str, segments: dict[str, Any]) -> tuple[str, str]:
+    """Extract (segment_name, token_value) from a vocab-gap validation error.
+
+    Parses error messages like:
+      "qualifier 'cumulative' is not a registered grammar token."
+      "base_token 'foo' is not a registered physical_base."
+      "projection_axis 'bar' is not a registered component token."
+    """
+    import re
+
+    # Pattern: "<field_or_segment> '<token>' is not a registered"
+    m = re.search(r"(\w+)\s+'([^']+)'\s+is not a registered", exc_str)
+    if m:
+        field_name = m.group(1)
+        token = m.group(2)
+        # Map field names to grammar segments
+        segment_map = {
+            "base_token": "physical_base",
+            "projection_axis": "component",
+            "qualifier": "qualifier",
+            "locus_token": "geometry",
+            "process_token": "process",
+            "operator_token": "qualifier",
+        }
+        return segment_map.get(field_name, field_name), token
+
+    # Fallback: find the first unknown token from segments
+    for field in ["base_token", "qualifiers", "projection_axis", "locus_token"]:
+        val = segments.get(field)
+        if isinstance(val, str) and val:
+            return field, val
+        if isinstance(val, list):
+            for v in val:
+                if isinstance(v, str):
+                    return field, v
+    return "unknown", "unknown"
 
 
 # =============================================================================

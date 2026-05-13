@@ -1142,3 +1142,191 @@ class TestReconcileVocabGaps:
 
         assert stats["checked"] == 0
         assert stats["remaining"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Test: Batch rescue validator (per-candidate vocab gap isolation)
+# ---------------------------------------------------------------------------
+
+
+class TestBatchRescueValidator:
+    """StandardNameComposeBatch._rescue_failed_candidates isolates per-candidate
+    vocab-gap failures instead of failing the entire batch."""
+
+    def _valid_candidate(self, source_id: str = "path/a") -> dict:
+        """Build a minimal valid candidate dict."""
+        return {
+            "source_id": source_id,
+            "segments": {
+                "base_token": "temperature",
+                "base_kind": "quantity",
+            },
+            "description": "Test temperature",
+            "reason": "test",
+        }
+
+    def _bad_qualifier_candidate(self, source_id: str = "path/b") -> dict:
+        """Build a candidate with an unregistered qualifier token."""
+        return {
+            "source_id": source_id,
+            "segments": {
+                "base_token": "torque",
+                "base_kind": "quantity",
+                "qualifiers": ["cumulative"],
+            },
+            "description": "Cumulative torque",
+            "reason": "test",
+        }
+
+    def test_all_valid_candidates_preserved(self):
+        """When all candidates are valid, none are rescued."""
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        batch = StandardNameComposeBatch(
+            candidates=[self._valid_candidate("p/a"), self._valid_candidate("p/b")]
+        )
+        assert len(batch.candidates) == 2
+        assert len(batch.vocab_gaps) == 0
+
+    def test_bad_candidate_rescued_to_vocab_gap(self):
+        """A candidate with an unregistered qualifier is rescued to vocab_gaps."""
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        data = {
+            "candidates": [
+                self._valid_candidate("p/a"),
+                self._bad_qualifier_candidate("p/b"),
+            ],
+        }
+        batch = StandardNameComposeBatch(**data)
+        assert len(batch.candidates) == 1
+        assert batch.candidates[0].segments.base_token == "temperature"
+        assert len(batch.vocab_gaps) == 1
+        assert batch.vocab_gaps[0].source_id == "p/b"
+        assert batch.vocab_gaps[0].needed_token == "cumulative"
+
+    def test_multiple_bad_candidates_all_rescued(self):
+        """Multiple bad candidates are individually rescued."""
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        bad_1 = {
+            "source_id": "p/x",
+            "segments": {
+                "base_token": "magnetic_field",
+                "base_kind": "quantity",
+                "qualifiers": ["linear"],
+            },
+            "description": "Linear field",
+            "reason": "test",
+        }
+        bad_2 = self._bad_qualifier_candidate("p/y")
+        data = {
+            "candidates": [self._valid_candidate("p/a"), bad_1, bad_2],
+        }
+        batch = StandardNameComposeBatch(**data)
+        assert len(batch.candidates) == 1
+        assert len(batch.vocab_gaps) == 2
+        gap_sources = {g.source_id for g in batch.vocab_gaps}
+        assert gap_sources == {"p/x", "p/y"}
+
+    def test_existing_vocab_gaps_preserved(self):
+        """Rescued gaps are appended to existing LLM-reported vocab_gaps."""
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        data = {
+            "candidates": [self._bad_qualifier_candidate("p/b")],
+            "vocab_gaps": [
+                {
+                    "source_id": "p/c",
+                    "segment": "process",
+                    "needed_token": "fusion",
+                    "reason": "LLM reported",
+                }
+            ],
+        }
+        batch = StandardNameComposeBatch(**data)
+        assert len(batch.candidates) == 0
+        assert len(batch.vocab_gaps) == 2
+        gap_sources = {g.source_id for g in batch.vocab_gaps}
+        assert gap_sources == {"p/b", "p/c"}
+
+    def test_non_vocab_errors_not_rescued(self):
+        """Candidates with non-vocab validation errors stay in candidates list."""
+        from pydantic import ValidationError
+
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        # Bad base_kind is not a vocab gap — it's an enum error
+        bad_enum = {
+            "source_id": "p/z",
+            "segments": {
+                "base_token": "temperature",
+                "base_kind": "invalid_kind",
+            },
+            "description": "Bad kind",
+            "reason": "test",
+        }
+        data = {
+            "candidates": [self._valid_candidate("p/a"), bad_enum],
+        }
+        # The bad enum candidate stays in the list and fails normal validation
+        with pytest.raises(ValidationError):
+            StandardNameComposeBatch(**data)
+
+    def test_all_bad_produces_empty_candidates(self):
+        """When all candidates have vocab gaps, candidates list is empty."""
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        data = {
+            "candidates": [
+                self._bad_qualifier_candidate("p/a"),
+                self._bad_qualifier_candidate("p/b"),
+            ],
+        }
+        batch = StandardNameComposeBatch(**data)
+        assert len(batch.candidates) == 0
+        assert len(batch.vocab_gaps) == 2
+
+
+class TestExtractGapFromError:
+    """_extract_gap_from_error parses vocab-gap validation error messages."""
+
+    def test_qualifier_error(self):
+        from imas_codex.standard_names.models import _extract_gap_from_error
+
+        segment, token = _extract_gap_from_error(
+            "qualifier 'cumulative' is not a registered grammar token.",
+            {"base_token": "torque"},
+        )
+        assert segment == "qualifier"
+        assert token == "cumulative"
+
+    def test_base_token_error(self):
+        from imas_codex.standard_names.models import _extract_gap_from_error
+
+        segment, token = _extract_gap_from_error(
+            "base_token 'exotic_flux' is not a registered physical_base.",
+            {"base_token": "exotic_flux"},
+        )
+        assert segment == "physical_base"
+        assert token == "exotic_flux"
+
+    def test_projection_axis_error(self):
+        from imas_codex.standard_names.models import _extract_gap_from_error
+
+        segment, token = _extract_gap_from_error(
+            "projection_axis 'spiral' is not a registered component token.",
+            {"projection_axis": "spiral"},
+        )
+        assert segment == "component"
+        assert token == "spiral"
+
+    def test_fallback_extracts_from_segments(self):
+        from imas_codex.standard_names.models import _extract_gap_from_error
+
+        segment, token = _extract_gap_from_error(
+            "some unexpected error format",
+            {"base_token": "fallback_value"},
+        )
+        assert segment == "base_token"
+        assert token == "fallback_value"
