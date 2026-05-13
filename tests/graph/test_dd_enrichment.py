@@ -124,21 +124,18 @@ class TestPydanticModels:
             path_index=1,
             description="Poloidal flux profile from equilibrium reconstruction.",
             keywords=["flux", "equilibrium", "radial"],
-            physics_domain=None,
         )
         assert result.path_index == 1
         assert len(result.keywords) == 3
-        assert result.physics_domain is None
 
     def test_enrichment_result_with_domain(self) -> None:
-        """Test enrichment result with physics_domain override."""
+        """Test enrichment result does not accept physics_domain (removed)."""
         result = IMASPathEnrichmentResult(
             path_index=1,
             description="ECE channel measurement.",
             keywords=["ece", "temperature"],
-            physics_domain="electromagnetic_wave_diagnostics",
         )
-        assert result.physics_domain == "electromagnetic_wave_diagnostics"
+        assert not hasattr(result, "physics_domain")
 
     def test_enrichment_batch(self) -> None:
         """Test batch model validation."""

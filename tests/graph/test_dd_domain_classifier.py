@@ -30,6 +30,7 @@ from imas_codex.graph.dd_domain_classifier import (
     DomainClassification,
     _format_batch_user_prompt,
     _ids_filter_clause,
+    _ids_filter_params,
     batch_by_subtree,
     classify_domains,
     classify_tier2_inherit,
@@ -312,13 +313,12 @@ class TestIdsFilterClause:
 
     def test_single_ids_produces_where_fragment(self):
         result = _ids_filter_clause({"equilibrium"}, "n")
-        assert "equilibrium" in result
+        assert "$ids_filter_list" in result
         assert "n.id" in result
 
     def test_multiple_ids_included(self):
         result = _ids_filter_clause({"equilibrium", "core_profiles"}, "n")
-        assert "equilibrium" in result
-        assert "core_profiles" in result
+        assert "$ids_filter_list" in result
 
     def test_uses_specified_node_var(self):
         result = _ids_filter_clause({"magnetics"}, "parent")
@@ -363,7 +363,10 @@ class TestClassifyTier3None:
         mock_gc.query.return_value = [{"updated": 1}]
         classify_tier3_none(mock_gc, ids_filter={"equilibrium"})
         cypher = mock_gc.query.call_args[0][0]
-        assert "equilibrium" in cypher
+        assert "$ids_filter_list" in cypher
+        # Verify the parameter was passed
+        kwargs = mock_gc.query.call_args[1]
+        assert kwargs["ids_filter_list"] == ["equilibrium"]
 
     def test_targets_ids_properties_and_code_subtrees(self, mock_gc):
         mock_gc.query.return_value = [{"updated": 0}]

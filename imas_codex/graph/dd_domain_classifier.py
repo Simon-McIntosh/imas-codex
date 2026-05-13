@@ -186,6 +186,7 @@ def classify_tier3_none(
         Count of nodes updated.
     """
     ids_clause = _ids_filter_clause(ids_filter, "n")
+    params = _ids_filter_params(ids_filter)
 
     if dry_run:
         cypher = f"""
@@ -195,7 +196,7 @@ def classify_tier3_none(
           {ids_clause}
         RETURN count(n) AS cnt
         """
-        result = gc.query(cypher)
+        result = gc.query(cypher, **params)
         return result[0]["cnt"] if result else 0
 
     cypher = f"""
@@ -209,7 +210,7 @@ def classify_tier3_none(
         n.status = 'classified'
     RETURN count(n) AS updated
     """
-    result = gc.query(cypher)
+    result = gc.query(cypher, **params)
     return result[0]["updated"] if result else 0
 
 
@@ -253,6 +254,7 @@ def _inherit_from_error_parent(
 ) -> int:
     """Error paths inherit domain from their parent via HAS_ERROR."""
     ids_clause = _ids_filter_clause(ids_filter, "parent")
+    params = _ids_filter_params(ids_filter)
     needs_clause = (
         "AND (err.physics_domain IS NULL OR err.physics_domain = 'general')"
         if not force
@@ -268,7 +270,7 @@ def _inherit_from_error_parent(
           {ids_clause}
         RETURN count(err) AS cnt
         """
-        result = gc.query(cypher)
+        result = gc.query(cypher, **params)
         return result[0]["cnt"] if result else 0
 
     cypher = f"""
@@ -283,7 +285,7 @@ def _inherit_from_error_parent(
         err.status = 'classified'
     RETURN count(err) AS updated
     """
-    result = gc.query(cypher)
+    result = gc.query(cypher, **params)
     return result[0]["updated"] if result else 0
 
 
@@ -296,6 +298,7 @@ def _inherit_from_metadata_parent(
 ) -> int:
     """Non-infrastructure metadata inherits domain from HAS_PARENT ancestor."""
     ids_clause = _ids_filter_clause(ids_filter, "n")
+    params = _ids_filter_params(ids_filter)
     needs_clause = (
         "AND (n.physics_domain IS NULL OR n.physics_domain = 'general')"
         if not force
@@ -312,7 +315,7 @@ def _inherit_from_metadata_parent(
           {ids_clause}
         RETURN count(n) AS cnt
         """
-        result = gc.query(cypher)
+        result = gc.query(cypher, **params)
         return result[0]["cnt"] if result else 0
 
     cypher = f"""
@@ -328,7 +331,7 @@ def _inherit_from_metadata_parent(
         n.status = 'classified'
     RETURN count(n) AS updated
     """
-    result = gc.query(cypher)
+    result = gc.query(cypher, **params)
     return result[0]["updated"] if result else 0
 
 
@@ -734,9 +737,9 @@ def _query_unclassified_paths(
     - Have not been classified yet (or force=True)
     """
     ids_clause = _ids_filter_clause(ids_filter, "n")
+    params: dict[str, Any] = {"categories": list(CLASSIFIABLE_CATEGORIES)}
+    params.update(_ids_filter_params(ids_filter))
     needs_clause = "AND n.domain_source IS NULL" if not force else ""
-
-    categories = list(CLASSIFIABLE_CATEGORIES)
 
     cypher = f"""
     MATCH (n:IMASNode)
@@ -747,7 +750,7 @@ def _query_unclassified_paths(
     RETURN n.id AS id, n.node_category AS node_category,
            n.description AS description, n.units AS units
     """
-    return gc.query(cypher, categories=categories)
+    return gc.query(cypher, **params)
 
 
 def _write_tier1_results(gc: GraphClient, results: list[dict[str, Any]]) -> None:
@@ -785,10 +788,19 @@ def _ids_filter_clause(ids_filter: set[str] | None, node_var: str) -> str:
     """Build a WHERE clause fragment for IDS filtering.
 
     Uses the convention that the first path segment is the IDS name.
+    Callers must pass ``ids_filter_list=list(ids_filter)`` as a query parameter.
     """
     if not ids_filter:
         return ""
-    # Filter by first segment of the path ID
-    ids_list = list(ids_filter)
-    # Use ANY() to check first segment membership
-    return f"AND split({node_var}.id, '/')[0] IN {ids_list!r}"
+    return f"AND split({node_var}.id, '/')[0] IN $ids_filter_list"
+
+
+def _ids_filter_params(ids_filter: set[str] | None) -> dict[str, Any]:
+    """Return query parameters for IDS filtering.
+
+    Companion to ``_ids_filter_clause`` — provides the ``ids_filter_list``
+    parameter expected by the Cypher clause.
+    """
+    if not ids_filter:
+        return {}
+    return {"ids_filter_list": list(ids_filter)}
