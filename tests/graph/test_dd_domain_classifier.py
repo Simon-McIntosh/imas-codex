@@ -25,12 +25,19 @@ import pytest
 from imas_codex.graph.dd_domain_classifier import (
     CLASSIFIABLE_CATEGORIES,
     DEFAULT_BATCH_SIZE,
+    INHERIT_CATEGORIES,
     SERVICE_TAG,
     DomainBatchResult,
     DomainClassification,
+    _count_residual_unclassified,
     _format_batch_user_prompt,
     _ids_filter_clause,
     _ids_filter_params,
+    _inherit_from_error_parent,
+    _inherit_from_parent_by_category,
+    _inherit_remaining_unclassified,
+    _needs_classification_clause,
+    _parent_is_classified_clause,
     batch_by_subtree,
     classify_domains,
     classify_tier2_inherit,
@@ -111,17 +118,35 @@ class TestClassifiableCategories:
             "structural",
             "representation",
             "geometry",
-            "coordinate",
             "fit_artifact",
-            "identifier",
         ],
     )
     def test_expected_categories_present(self, category):
         assert category in CLASSIFIABLE_CATEGORIES
 
+    def test_coordinate_not_classifiable(self):
+        """Coordinates inherit from parent (Tier 2), not LLM-classified."""
+        assert "coordinate" not in CLASSIFIABLE_CATEGORIES
+
+    def test_identifier_not_classifiable(self):
+        """Identifiers inherit from parent (Tier 2), not LLM-classified."""
+        assert "identifier" not in CLASSIFIABLE_CATEGORIES
+
     def test_metadata_not_classifiable(self):
         """'metadata' goes through Tier 2 (inheritance) not Tier 1 LLM."""
         assert "metadata" not in CLASSIFIABLE_CATEGORIES
+
+    def test_error_not_classifiable(self):
+        """'error' goes through Tier 2 (inheritance) not Tier 1 LLM."""
+        assert "error" not in CLASSIFIABLE_CATEGORIES
+
+    def test_inherit_categories_constant(self):
+        """INHERIT_CATEGORIES must contain error, coordinate, identifier."""
+        assert INHERIT_CATEGORIES == frozenset({"error", "coordinate", "identifier"})
+
+    def test_no_overlap_classifiable_inherit(self):
+        """Classifiable and inherit categories must be disjoint."""
+        assert not CLASSIFIABLE_CATEGORIES & INHERIT_CATEGORIES
 
     def test_service_tag_constant(self):
         assert SERVICE_TAG == "data-dictionary"
@@ -388,13 +413,19 @@ class TestClassifyTier3None:
 
 
 class TestClassifyTier2Inherit:
-    """Tier 2: error paths and non-infrastructure metadata inherit from parent."""
+    """Tier 2: error, coordinate, identifier, and remaining paths inherit."""
 
-    def test_returns_sum_of_two_passes(self, mock_gc):
-        # Two query calls: error parent + metadata parent — each returns a list
-        mock_gc.query.side_effect = [[{"updated": 10}], [{"updated": 5}]]
+    def test_returns_sum_of_all_passes(self, mock_gc):
+        # Five passes: error + coordinate + identifier + remaining + metadata
+        mock_gc.query.side_effect = [
+            [{"updated": 10}],  # error
+            [{"updated": 3}],  # coordinate
+            [{"updated": 2}],  # identifier
+            [{"updated": 4}],  # remaining
+            [{"updated": 1}],  # metadata
+        ]
         total = classify_tier2_inherit(mock_gc)
-        assert total == 15
+        assert total == 20
 
     def test_empty_results_return_zero(self, mock_gc):
         mock_gc.query.return_value = []
@@ -406,11 +437,17 @@ class TestClassifyTier2Inherit:
         calls = [str(c) for c in mock_gc.query.call_args_list]
         assert any("HAS_ERROR" in c for c in calls)
 
-    def test_metadata_path_query_uses_has_parent_relation(self, mock_gc):
+    def test_coordinate_paths_use_has_parent_relation(self, mock_gc):
         mock_gc.query.return_value = [{"updated": 0}]
         classify_tier2_inherit(mock_gc)
         calls = [str(c) for c in mock_gc.query.call_args_list]
-        assert any("HAS_PARENT" in c for c in calls)
+        assert any("HAS_PARENT" in c and "coordinate" in c for c in calls)
+
+    def test_identifier_paths_use_has_parent_relation(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 0}]
+        classify_tier2_inherit(mock_gc)
+        calls = [str(c) for c in mock_gc.query.call_args_list]
+        assert any("HAS_PARENT" in c and "identifier" in c for c in calls)
 
     def test_dry_run_does_not_use_set(self, mock_gc):
         mock_gc.query.return_value = [{"cnt": 3}]
@@ -419,20 +456,21 @@ class TestClassifyTier2Inherit:
             cypher = call[0][0]
             assert "SET" not in cypher
 
-    def test_force_skips_domain_check(self, mock_gc):
+    def test_force_skips_domain_source_check(self, mock_gc):
         mock_gc.query.return_value = [{"updated": 0}]
         classify_tier2_inherit(mock_gc, force=True)
         calls = [str(c) for c in mock_gc.query.call_args_list]
-        # When force=True the "needs_clause" (which mentions 'general') is omitted
+        # When force=True, domain_source IS NULL check is omitted
         for c in calls:
-            assert "physics_domain IS NULL" not in c
+            # force removes the needs_clause entirely
+            assert "domain_source IS NULL" not in c or "ancestor" in c
 
-    def test_no_force_filters_already_classified(self, mock_gc):
+    def test_no_force_filters_by_domain_source(self, mock_gc):
         mock_gc.query.return_value = [{"updated": 0}]
         classify_tier2_inherit(mock_gc, force=False)
         calls = [str(c) for c in mock_gc.query.call_args_list]
-        # At least one query should check for unclassified nodes
-        assert any("physics_domain IS NULL" in c or "general" in c for c in calls)
+        # At least one query should check domain_source IS NULL
+        assert any("domain_source IS NULL" in c for c in calls)
 
     def test_inherited_domain_source_label(self, mock_gc):
         mock_gc.query.return_value = [{"updated": 5}]
@@ -445,6 +483,26 @@ class TestClassifyTier2Inherit:
         mock_gc.query.return_value = []
         result = classify_tier2_inherit(mock_gc)
         assert result == 0
+
+    def test_requires_parent_domain_source_not_null(self, mock_gc):
+        """Tier 2 must only inherit from parents that have been classified
+        (domain_source IS NOT NULL), not from stale IDS-level domains."""
+        mock_gc.query.return_value = [{"updated": 0}]
+        classify_tier2_inherit(mock_gc)
+        calls = [str(c) for c in mock_gc.query.call_args_list]
+        # Error pass: parent must be classified
+        error_calls = [c for c in calls if "HAS_ERROR" in c]
+        assert error_calls, "No HAS_ERROR query found"
+        for c in error_calls:
+            assert "domain_source IS NOT NULL" in c
+
+    def test_multi_hop_inheritance_for_remaining(self, mock_gc):
+        """Remaining unclassified paths should use multi-hop traversal."""
+        mock_gc.query.return_value = [{"updated": 0}]
+        classify_tier2_inherit(mock_gc)
+        calls = [str(c) for c in mock_gc.query.call_args_list]
+        # At least one query should use variable-length path
+        assert any("HAS_PARENT*" in c for c in calls)
 
 
 # ===========================================================================
@@ -762,20 +820,25 @@ class TestClassifyDomains:
                 return_value=10,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    return_value=20,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=20,
                     ):
-                        stats = await classify_domains(mock_gc)
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            stats = await classify_domains(mock_gc)
 
         assert "tier3_none" in stats
-        assert "tier2_inherited" in stats
         assert "tier1_llm" in stats
         assert "tier1_general" in stats
         assert "tier1_retried" in stats
+        assert "tier2_inherited" in stats
+        assert "tier2_residual" in stats
         assert "total_cost" in stats
         assert "model" in stats
 
@@ -787,17 +850,55 @@ class TestClassifyDomains:
                 return_value=7,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    return_value=13,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=13,
                     ):
-                        stats = await classify_domains(mock_gc)
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            stats = await classify_domains(mock_gc)
 
         assert stats["tier3_none"] == 7
         assert stats["tier2_inherited"] == 13
+
+    @pytest.mark.asyncio
+    async def test_tier1_runs_before_tier2(self, mock_gc):
+        """Tier 1 (LLM) must run before Tier 2 (inherit) so parents are classified."""
+        call_order = []
+
+        def track_tier1(*args, **kwargs):
+            call_order.append("tier1_query")
+            return []
+
+        def track_tier2(*args, **kwargs):
+            call_order.append("tier2")
+            return 0
+
+        with self._patch_settings():
+            with patch(
+                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                return_value=0,
+            ):
+                with patch(
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    side_effect=track_tier1,
+                ):
+                    with patch(
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        side_effect=track_tier2,
+                    ):
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            await classify_domains(mock_gc)
+
+        assert call_order.index("tier1_query") < call_order.index("tier2")
 
     @pytest.mark.asyncio
     async def test_dry_run_does_not_call_tier1_llm(self, mock_gc):
@@ -808,21 +909,24 @@ class TestClassifyDomains:
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    return_value=0,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[{"id": "eq/psi", "node_category": "quantity"}],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[{"id": "eq/psi", "node_category": "quantity"}],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=0,
                     ):
-                        llm_mock = AsyncMock()
                         with patch(
-                            "imas_codex.graph.dd_domain_classifier.classify_tier1_llm",
-                            llm_mock,
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
                         ):
-                            await classify_domains(mock_gc, dry_run=True)
+                            llm_mock = AsyncMock()
+                            with patch(
+                                "imas_codex.graph.dd_domain_classifier.classify_tier1_llm",
+                                llm_mock,
+                            ):
+                                await classify_domains(mock_gc, dry_run=True)
 
-        # When dry_run=True and paths exist, LLM should NOT be called
         llm_mock.assert_not_called()
 
     @pytest.mark.asyncio
@@ -836,14 +940,18 @@ class TestClassifyDomains:
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    return_value=0,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=0,
                     ):
-                        stats = await classify_domains(mock_gc)
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            stats = await classify_domains(mock_gc)
 
         mock_get.assert_called_once_with("language")
         assert stats["model"] == "settings-model"
@@ -856,14 +964,20 @@ class TestClassifyDomains:
                 return_value=0,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    return_value=0,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=0,
                     ):
-                        stats = await classify_domains(mock_gc, model="custom-model")
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            stats = await classify_domains(
+                                mock_gc, model="custom-model"
+                            )
 
         mock_get.assert_not_called()
         assert stats["model"] == "custom-model"
@@ -877,18 +991,21 @@ class TestClassifyDomains:
                 return_value=3,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    return_value=5,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=5,
                     ):
-                        await classify_domains(mock_gc, on_items=counts.append)
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            await classify_domains(mock_gc, on_items=counts.append)
 
-        assert counts  # At least one call
-        # Final call reports tier3 + tier2 + tier1
-        assert 8 in counts  # 3 + 5 + 0
+        assert counts
+        assert 8 in counts  # 3 + 0 + 5
 
     @pytest.mark.asyncio
     async def test_force_passed_to_tier2(self, mock_gc):
@@ -898,16 +1015,20 @@ class TestClassifyDomains:
                 "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
                 return_value=0,
             ):
-                tier2_mock = MagicMock(return_value=0)
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    tier2_mock,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
                 ):
+                    tier2_mock = MagicMock(return_value=0)
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        return_value=[],
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        tier2_mock,
                     ):
-                        await classify_domains(mock_gc, force=True)
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=0,
+                        ):
+                            await classify_domains(mock_gc, force=True)
 
         call_kwargs = tier2_mock.call_args[1]
         assert call_kwargs.get("force") is True
@@ -919,23 +1040,52 @@ class TestClassifyDomains:
             tier3_mock = MagicMock(return_value=0)
             tier2_mock = MagicMock(return_value=0)
             query_mock = MagicMock(return_value=[])
+            residual_mock = MagicMock(return_value=0)
             with patch(
                 "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
                 tier3_mock,
             ):
                 with patch(
-                    "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
-                    tier2_mock,
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    query_mock,
                 ):
                     with patch(
-                        "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
-                        query_mock,
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        tier2_mock,
                     ):
-                        await classify_domains(mock_gc, ids_filter={"equilibrium"})
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            residual_mock,
+                        ):
+                            await classify_domains(mock_gc, ids_filter={"equilibrium"})
 
         assert tier3_mock.call_args[1]["ids_filter"] == {"equilibrium"}
         assert tier2_mock.call_args[1]["ids_filter"] == {"equilibrium"}
         assert query_mock.call_args[1]["ids_filter"] == {"equilibrium"}
+
+    @pytest.mark.asyncio
+    async def test_residual_count_in_stats(self, mock_gc):
+        """Residual unclassified count must appear in stats."""
+        with self._patch_settings():
+            with patch(
+                "imas_codex.graph.dd_domain_classifier.classify_tier3_none",
+                return_value=0,
+            ):
+                with patch(
+                    "imas_codex.graph.dd_domain_classifier._query_unclassified_paths",
+                    return_value=[],
+                ):
+                    with patch(
+                        "imas_codex.graph.dd_domain_classifier.classify_tier2_inherit",
+                        return_value=0,
+                    ):
+                        with patch(
+                            "imas_codex.graph.dd_domain_classifier._count_residual_unclassified",
+                            return_value=42,
+                        ):
+                            stats = await classify_domains(mock_gc)
+
+        assert stats["tier2_residual"] == 42
 
 
 # ===========================================================================
@@ -1046,3 +1196,110 @@ class TestGoldSet:
         by_path = {e["path"]: e["expected_domain"] for e in gold_set}
         assert path_prefix in by_path, f"Path {path_prefix!r} not in gold set"
         assert by_path[path_prefix] == expected_domain
+
+
+# ===========================================================================
+# 13. Helper functions
+# ===========================================================================
+
+
+class TestNeedsClassificationClause:
+    """_needs_classification_clause uses domain_source, not physics_domain."""
+
+    def test_force_false_checks_domain_source(self):
+        clause = _needs_classification_clause(force=False)
+        assert "domain_source IS NULL" in clause
+
+    def test_force_true_returns_empty(self):
+        clause = _needs_classification_clause(force=True)
+        assert clause == ""
+
+    def test_custom_node_var(self):
+        clause = _needs_classification_clause(force=False, node_var="err")
+        assert "err.domain_source IS NULL" in clause
+
+
+class TestParentIsClassifiedClause:
+    """_parent_is_classified_clause ensures inheritance from classified parents."""
+
+    def test_checks_domain_source_not_null(self):
+        clause = _parent_is_classified_clause()
+        assert "domain_source IS NOT NULL" in clause
+        assert "physics_domain IS NOT NULL" in clause
+
+    def test_custom_parent_var(self):
+        clause = _parent_is_classified_clause("ancestor")
+        assert "ancestor.domain_source IS NOT NULL" in clause
+
+
+class TestInheritFromErrorParent:
+    """_inherit_from_error_parent inherits via HAS_ERROR."""
+
+    def test_requires_parent_classified(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 5}]
+        _inherit_from_error_parent(mock_gc)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "domain_source IS NOT NULL" in cypher
+
+    def test_checks_child_domain_source(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 0}]
+        _inherit_from_error_parent(mock_gc, force=False)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "err.domain_source IS NULL" in cypher
+
+
+class TestInheritFromParentByCategory:
+    """_inherit_from_parent_by_category uses multi-hop traversal."""
+
+    def test_uses_variable_length_path(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 3}]
+        _inherit_from_parent_by_category(mock_gc, categories=["coordinate"])
+        cypher = mock_gc.query.call_args[0][0]
+        assert "HAS_PARENT*" in cypher
+
+    def test_passes_categories_as_param(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 0}]
+        _inherit_from_parent_by_category(mock_gc, categories=["identifier"])
+        kwargs = mock_gc.query.call_args[1]
+        assert kwargs["categories"] == ["identifier"]
+
+
+class TestInheritRemainingUnclassified:
+    """_inherit_remaining_unclassified catches desc-less structural etc."""
+
+    def test_excludes_infrastructure(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 0}]
+        _inherit_remaining_unclassified(mock_gc)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "ids_properties" in cypher
+        assert "/code/" in cypher
+
+    def test_excludes_error_category(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 0}]
+        _inherit_remaining_unclassified(mock_gc)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "error" in cypher
+
+    def test_uses_multi_hop_traversal(self, mock_gc):
+        mock_gc.query.return_value = [{"updated": 0}]
+        _inherit_remaining_unclassified(mock_gc)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "HAS_PARENT*" in cypher
+
+
+class TestCountResidualUnclassified:
+    """_count_residual_unclassified reports leftover paths."""
+
+    def test_returns_count(self, mock_gc):
+        mock_gc.query.return_value = [{"cnt": 42}]
+        assert _count_residual_unclassified(mock_gc) == 42
+
+    def test_excludes_infrastructure(self, mock_gc):
+        mock_gc.query.return_value = [{"cnt": 0}]
+        _count_residual_unclassified(mock_gc)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "ids_properties" in cypher
+
+    def test_empty_result_returns_zero(self, mock_gc):
+        mock_gc.query.return_value = []
+        assert _count_residual_unclassified(mock_gc) == 0

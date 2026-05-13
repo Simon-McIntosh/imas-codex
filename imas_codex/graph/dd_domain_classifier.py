@@ -1,10 +1,13 @@
 """Physics domain classifier for IMAS Data Dictionary paths.
 
-Three-tier classification:
-- Tier 1: LLM classification for physics-relevant paths (19K paths)
-- Tier 2: Inheritance for error paths (from HAS_ERROR parent) and
-  non-infrastructure metadata (from HAS_PARENT ancestor)
+Three-tier classification (executed in order):
 - Tier 3: None for infrastructure metadata (ids_properties/*, code/*)
+- Tier 1: LLM classification for physics paths with descriptions
+- Tier 2: Inheritance from nearest classified ancestor for remaining paths
+  (errors via HAS_ERROR, coordinates, identifiers, description-less structural)
+
+Ordering is critical: Tier 1 must run before Tier 2 so that parents
+are LLM-classified before children inherit from them.
 
 Integrated as the CLASSIFY phase in the DD build pipeline, running after EMBED.
 """
@@ -28,15 +31,23 @@ logger = logging.getLogger(__name__)
 # Constants
 # =============================================================================
 
-#: Categories eligible for Tier 1 LLM classification
+#: Categories eligible for Tier 1 LLM classification.
+#: Coordinates and identifiers are excluded — they inherit from parent.
 CLASSIFIABLE_CATEGORIES = frozenset(
     {
         "quantity",
         "structural",
         "representation",
         "geometry",
-        "coordinate",
         "fit_artifact",
+    }
+)
+
+#: Categories that always inherit from their parent (Tier 2).
+INHERIT_CATEGORIES = frozenset(
+    {
+        "error",
+        "coordinate",
         "identifier",
     }
 )
@@ -84,8 +95,9 @@ async def classify_domains(
 ) -> dict[str, Any]:
     """Run full three-tier domain classification.
 
-    Runs Tier 3 first (infrastructure → None), Tier 2 (inheritance),
-    then Tier 1 (LLM) for remaining classifiable paths.
+    Execution order: Tier 3 → Tier 1 → Tier 2.
+    Parents must be LLM-classified (Tier 1) before children can
+    inherit (Tier 2).
 
     Args:
         gc: GraphClient instance.
@@ -106,10 +118,11 @@ async def classify_domains(
 
     stats: dict[str, Any] = {
         "tier3_none": 0,
-        "tier2_inherited": 0,
         "tier1_llm": 0,
         "tier1_general": 0,
         "tier1_retried": 0,
+        "tier2_inherited": 0,
+        "tier2_residual": 0,
         "total_cost": 0.0,
         "model": model,
     }
@@ -122,14 +135,7 @@ async def classify_domains(
     stats["tier3_none"] = tier3_count
     logger.info("Tier 3 (none/metadata): %d paths", tier3_count)
 
-    # --- Tier 2: inherit from parent ---
-    tier2_count = classify_tier2_inherit(
-        gc, ids_filter=ids_filter, force=force, dry_run=dry_run
-    )
-    stats["tier2_inherited"] = tier2_count
-    logger.info("Tier 2 (inherited): %d paths", tier2_count)
-
-    # --- Tier 1: LLM classification for remaining paths ---
+    # --- Tier 1: LLM classification for paths WITH descriptions ---
     paths = _query_unclassified_paths(gc, ids_filter=ids_filter, force=force)
     logger.info("Tier 1 candidates: %d paths", len(paths))
 
@@ -143,7 +149,6 @@ async def classify_domains(
             on_items=on_items,
         )
 
-        # Write results to graph
         classified = 0
         general_count = 0
         for r in results:
@@ -160,8 +165,23 @@ async def classify_domains(
             "Tier 1 (LLM): %d classified (%d general)", classified, general_count
         )
 
+    # --- Tier 2: inherit from classified parents (AFTER Tier 1) ---
+    tier2_count = classify_tier2_inherit(
+        gc, ids_filter=ids_filter, force=force, dry_run=dry_run
+    )
+    stats["tier2_inherited"] = tier2_count
+    logger.info("Tier 2 (inherited): %d paths", tier2_count)
+
+    # --- Residual check ---
+    residual = _count_residual_unclassified(gc, ids_filter=ids_filter)
+    stats["tier2_residual"] = residual
+    if residual > 0:
+        logger.warning(
+            "Tier 2 residual: %d paths remain without domain_source", residual
+        )
+
     if on_items:
-        on_items(tier3_count + tier2_count + stats["tier1_llm"])
+        on_items(tier3_count + stats["tier1_llm"] + tier2_count)
 
     return stats
 
@@ -226,11 +246,22 @@ def classify_tier2_inherit(
     force: bool = False,
     dry_run: bool = False,
 ) -> int:
-    """Inherit physics_domain from parent for error and metadata paths.
+    """Inherit physics_domain from classified ancestors.
 
-    Two passes:
-      a. Error paths: (parent)-[:HAS_ERROR]->(err) → err gets parent's domain
-      b. Non-infra metadata: walk up HAS_PARENT to nearest classified ancestor
+    Runs AFTER Tier 1 so parents have been LLM-classified. Five passes:
+      a. Error paths via HAS_ERROR
+      b. Coordinates via HAS_PARENT
+      c. Identifiers via HAS_PARENT
+      d. Remaining unclassified (description-less structural, etc.) via HAS_PARENT
+      e. Non-infrastructure metadata via HAS_PARENT
+
+    Uses domain_source IS NULL to find unprocessed paths (not physics_domain
+    checks), so paths with stale IDS-level domains are correctly caught.
+    Requires the source parent to have domain_source IS NOT NULL (i.e.,
+    classified in this or a prior run) to avoid inheriting stale data.
+
+    Multi-hop: passes d and e use variable-length HAS_PARENT traversal
+    to reach the nearest classified ancestor.
 
     Returns:
         Total count of nodes updated.
@@ -239,10 +270,51 @@ def classify_tier2_inherit(
     total += _inherit_from_error_parent(
         gc, ids_filter=ids_filter, force=force, dry_run=dry_run
     )
+    total += _inherit_from_parent_by_category(
+        gc,
+        categories=["coordinate"],
+        ids_filter=ids_filter,
+        force=force,
+        dry_run=dry_run,
+    )
+    total += _inherit_from_parent_by_category(
+        gc,
+        categories=["identifier"],
+        ids_filter=ids_filter,
+        force=force,
+        dry_run=dry_run,
+    )
+    total += _inherit_remaining_unclassified(
+        gc, ids_filter=ids_filter, force=force, dry_run=dry_run
+    )
     total += _inherit_from_metadata_parent(
         gc, ids_filter=ids_filter, force=force, dry_run=dry_run
     )
     return total
+
+
+def _needs_classification_clause(force: bool, node_var: str = "n") -> str:
+    """WHERE fragment selecting nodes that need classification.
+
+    Uses domain_source IS NULL (not physics_domain checks) to catch
+    paths with stale IDS-level domains.
+    """
+    if force:
+        return ""
+    return f"AND {node_var}.domain_source IS NULL"
+
+
+def _parent_is_classified_clause(parent_var: str = "parent") -> str:
+    """WHERE fragment requiring the source parent to be classified.
+
+    Only inherits from parents that have been through the classifier
+    (domain_source IS NOT NULL), preventing inheritance of stale
+    IDS-level domains.
+    """
+    return (
+        f"AND {parent_var}.domain_source IS NOT NULL "
+        f"AND {parent_var}.physics_domain IS NOT NULL"
+    )
 
 
 def _inherit_from_error_parent(
@@ -255,17 +327,14 @@ def _inherit_from_error_parent(
     """Error paths inherit domain from their parent via HAS_ERROR."""
     ids_clause = _ids_filter_clause(ids_filter, "parent")
     params = _ids_filter_params(ids_filter)
-    needs_clause = (
-        "AND (err.physics_domain IS NULL OR err.physics_domain = 'general')"
-        if not force
-        else ""
-    )
+    needs_clause = _needs_classification_clause(force, "err")
+    parent_clause = _parent_is_classified_clause("parent")
 
     if dry_run:
         cypher = f"""
         MATCH (parent:IMASNode)-[:HAS_ERROR]->(err:IMASNode)
-        WHERE parent.physics_domain IS NOT NULL
-          AND parent.physics_domain <> 'general'
+        WHERE true
+          {parent_clause}
           {needs_clause}
           {ids_clause}
         RETURN count(err) AS cnt
@@ -275,8 +344,8 @@ def _inherit_from_error_parent(
 
     cypher = f"""
     MATCH (parent:IMASNode)-[:HAS_ERROR]->(err:IMASNode)
-    WHERE parent.physics_domain IS NOT NULL
-      AND parent.physics_domain <> 'general'
+    WHERE true
+      {parent_clause}
       {needs_clause}
       {ids_clause}
     SET err.physics_domain = parent.physics_domain,
@@ -286,7 +355,136 @@ def _inherit_from_error_parent(
     RETURN count(err) AS updated
     """
     result = gc.query(cypher, **params)
-    return result[0]["updated"] if result else 0
+    count = result[0]["updated"] if result else 0
+    if count:
+        logger.info("  error paths inherited: %d", count)
+    return count
+
+
+def _inherit_from_parent_by_category(
+    gc: GraphClient,
+    *,
+    categories: list[str],
+    ids_filter: set[str] | None = None,
+    force: bool = False,
+    dry_run: bool = False,
+) -> int:
+    """Paths of given categories inherit from nearest classified ancestor.
+
+    Uses variable-length HAS_PARENT traversal (up to 5 hops) to handle
+    structural chains where intermediate nodes lack descriptions.
+    """
+    ids_clause = _ids_filter_clause(ids_filter, "n")
+    params: dict[str, Any] = {"categories": categories}
+    params.update(_ids_filter_params(ids_filter))
+    needs_clause = _needs_classification_clause(force, "n")
+
+    if dry_run:
+        cypher = f"""
+        MATCH (n:IMASNode)-[:HAS_PARENT*1..5]->(ancestor:IMASNode)
+        WHERE n.node_category IN $categories
+          AND ancestor.domain_source IS NOT NULL
+          AND ancestor.physics_domain IS NOT NULL
+          {needs_clause}
+          {ids_clause}
+        WITH n, ancestor
+        ORDER BY size(
+            shortestPath((n)-[:HAS_PARENT*]->(ancestor))
+        ) ASC
+        WITH n, head(collect(ancestor)) AS nearest
+        WHERE nearest IS NOT NULL
+        RETURN count(n) AS cnt
+        """
+        result = gc.query(cypher, **params)
+        return result[0]["cnt"] if result else 0
+
+    # Use shortestPath-based approach for nearest ancestor
+    cypher = f"""
+    MATCH (n:IMASNode)
+    WHERE n.node_category IN $categories
+      {needs_clause}
+      {ids_clause}
+    CALL {{
+        WITH n
+        MATCH path = (n)-[:HAS_PARENT*1..5]->(ancestor:IMASNode)
+        WHERE ancestor.domain_source IS NOT NULL
+          AND ancestor.physics_domain IS NOT NULL
+        WITH ancestor, length(path) AS dist
+        ORDER BY dist ASC
+        LIMIT 1
+        RETURN ancestor.physics_domain AS inherited_domain
+    }}
+    SET n.physics_domain = inherited_domain,
+        n.domain_source = 'inherited_from_parent',
+        n.domain_classified_at = datetime(),
+        n.status = 'classified'
+    RETURN count(n) AS updated
+    """
+    result = gc.query(cypher, **params)
+    count = result[0]["updated"] if result else 0
+    if count:
+        logger.info("  %s paths inherited: %d", categories, count)
+    return count
+
+
+def _inherit_remaining_unclassified(
+    gc: GraphClient,
+    *,
+    ids_filter: set[str] | None = None,
+    force: bool = False,
+    dry_run: bool = False,
+) -> int:
+    """Catch-all: remaining unclassified non-infrastructure paths inherit
+    from nearest classified ancestor via multi-hop HAS_PARENT traversal.
+
+    Catches description-less structural paths, any other categories
+    that fell through Tier 1 (e.g. quantity/representation without desc).
+    """
+    ids_clause = _ids_filter_clause(ids_filter, "n")
+    params = _ids_filter_params(ids_filter)
+    needs_clause = _needs_classification_clause(force, "n")
+
+    if dry_run:
+        cypher = f"""
+        MATCH (n:IMASNode)
+        WHERE n.domain_source IS NULL
+          AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+          AND n.node_category <> 'error'
+          {needs_clause}
+          {ids_clause}
+        RETURN count(n) AS cnt
+        """
+        result = gc.query(cypher, **params)
+        return result[0]["cnt"] if result else 0
+
+    cypher = f"""
+    MATCH (n:IMASNode)
+    WHERE n.domain_source IS NULL
+      AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+      AND n.node_category <> 'error'
+      {needs_clause}
+      {ids_clause}
+    CALL {{
+        WITH n
+        MATCH path = (n)-[:HAS_PARENT*1..10]->(ancestor:IMASNode)
+        WHERE ancestor.domain_source IS NOT NULL
+          AND ancestor.physics_domain IS NOT NULL
+        WITH ancestor, length(path) AS dist
+        ORDER BY dist ASC
+        LIMIT 1
+        RETURN ancestor.physics_domain AS inherited_domain
+    }}
+    SET n.physics_domain = inherited_domain,
+        n.domain_source = 'inherited_from_parent',
+        n.domain_classified_at = datetime(),
+        n.status = 'classified'
+    RETURN count(n) AS updated
+    """
+    result = gc.query(cypher, **params)
+    count = result[0]["updated"] if result else 0
+    if count:
+        logger.info("  remaining unclassified paths inherited: %d", count)
+    return count
 
 
 def _inherit_from_metadata_parent(
@@ -296,21 +494,15 @@ def _inherit_from_metadata_parent(
     force: bool = False,
     dry_run: bool = False,
 ) -> int:
-    """Non-infrastructure metadata inherits domain from HAS_PARENT ancestor."""
+    """Non-infrastructure metadata inherits domain from classified ancestor."""
     ids_clause = _ids_filter_clause(ids_filter, "n")
     params = _ids_filter_params(ids_filter)
-    needs_clause = (
-        "AND (n.physics_domain IS NULL OR n.physics_domain = 'general')"
-        if not force
-        else ""
-    )
+    needs_clause = _needs_classification_clause(force, "n")
 
     if dry_run:
         cypher = f"""
-        MATCH (n:IMASNode {{node_category: 'metadata'}})-[:HAS_PARENT]->(parent:IMASNode)
+        MATCH (n:IMASNode {{node_category: 'metadata'}})
         WHERE NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
-          AND parent.physics_domain IS NOT NULL
-          AND parent.physics_domain <> 'general'
           {needs_clause}
           {ids_clause}
         RETURN count(n) AS cnt
@@ -319,20 +511,31 @@ def _inherit_from_metadata_parent(
         return result[0]["cnt"] if result else 0
 
     cypher = f"""
-    MATCH (n:IMASNode {{node_category: 'metadata'}})-[:HAS_PARENT]->(parent:IMASNode)
+    MATCH (n:IMASNode {{node_category: 'metadata'}})
     WHERE NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
-      AND parent.physics_domain IS NOT NULL
-      AND parent.physics_domain <> 'general'
       {needs_clause}
       {ids_clause}
-    SET n.physics_domain = parent.physics_domain,
+    CALL {{
+        WITH n
+        MATCH path = (n)-[:HAS_PARENT*1..10]->(ancestor:IMASNode)
+        WHERE ancestor.domain_source IS NOT NULL
+          AND ancestor.physics_domain IS NOT NULL
+        WITH ancestor, length(path) AS dist
+        ORDER BY dist ASC
+        LIMIT 1
+        RETURN ancestor.physics_domain AS inherited_domain
+    }}
+    SET n.physics_domain = inherited_domain,
         n.domain_source = 'inherited_from_parent',
         n.domain_classified_at = datetime(),
         n.status = 'classified'
     RETURN count(n) AS updated
     """
     result = gc.query(cypher, **params)
-    return result[0]["updated"] if result else 0
+    count = result[0]["updated"] if result else 0
+    if count:
+        logger.info("  metadata paths inherited: %d", count)
+    return count
 
 
 # =============================================================================
@@ -732,8 +935,10 @@ def _query_unclassified_paths(
     """Query paths needing Tier 1 LLM classification.
 
     Returns paths that:
-    - Have a classifiable node_category
+    - Have a classifiable node_category (not coordinate/identifier/error)
     - Are not in infrastructure subtrees
+    - Have a description (structural paths without descriptions fall
+      through to Tier 2 inheritance instead)
     - Have not been classified yet (or force=True)
     """
     ids_clause = _ids_filter_clause(ids_filter, "n")
@@ -741,16 +946,46 @@ def _query_unclassified_paths(
     params.update(_ids_filter_params(ids_filter))
     needs_clause = "AND n.domain_source IS NULL" if not force else ""
 
+    # Require description for structural paths — description-less structural
+    # nodes inherit from parent in Tier 2. Other categories (quantity,
+    # geometry, representation, fit_artifact) still benefit from LLM
+    # classification even with minimal descriptions via path/units/parent context.
     cypher = f"""
     MATCH (n:IMASNode)
     WHERE n.node_category IN $categories
       AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+      AND (n.node_category <> 'structural'
+           OR (n.description IS NOT NULL AND trim(n.description) <> ''))
       {needs_clause}
       {ids_clause}
     RETURN n.id AS id, n.node_category AS node_category,
            n.description AS description, n.units AS units
     """
     return gc.query(cypher, **params)
+
+
+def _count_residual_unclassified(
+    gc: GraphClient,
+    *,
+    ids_filter: set[str] | None = None,
+) -> int:
+    """Count paths that remain unclassified after all tiers.
+
+    These are paths with domain_source IS NULL that are not
+    infrastructure metadata. Used for monitoring/alerting.
+    """
+    ids_clause = _ids_filter_clause(ids_filter, "n")
+    params = _ids_filter_params(ids_filter)
+
+    cypher = f"""
+    MATCH (n:IMASNode)
+    WHERE n.domain_source IS NULL
+      AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+      {ids_clause}
+    RETURN count(n) AS cnt
+    """
+    result = gc.query(cypher, **params)
+    return result[0]["cnt"] if result else 0
 
 
 def _write_tier1_results(gc: GraphClient, results: list[dict[str, Any]]) -> None:
