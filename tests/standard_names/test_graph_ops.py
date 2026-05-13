@@ -17,7 +17,13 @@ class TestWriteStandardNames:
 
     def _call_write(self, names: list[dict], mock_gc: MagicMock) -> int:
         """Call write_standard_names with a mocked GraphClient."""
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with (
+            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+            patch(
+                "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+                return_value=set(),
+            ),
+        ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             from imas_codex.standard_names.graph_ops import write_standard_names
@@ -183,7 +189,7 @@ class TestWriteStandardNames:
 
         names = [
             {
-                "id": "test_name",
+                "id": "electron_temperature",
                 "source_types": ["dd"],
                 "source_id": "some/path",
                 "links": [],
@@ -201,6 +207,50 @@ class TestWriteStandardNames:
         assert first["links"] is None
         assert first["source_paths"] is None
         assert first["constraints"] is None
+
+    def test_grammar_gate_rejects_unparseable_names(self) -> None:
+        """Names that fail ISN grammar parse must be rejected at write time."""
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(return_value=[])
+
+        # Mix valid and invalid names
+        names = [
+            {
+                "id": "electron_temperature",
+                "source_types": ["dd"],
+                "source_id": "core_profiles/profiles_1d/electrons/temperature",
+                "description": "Electron temperature",
+            },
+            {
+                # Invalid: not a valid ISN grammar construction
+                "id": "completely_bogus_nonsense_value",
+                "source_types": ["dd"],
+                "source_id": "some/path",
+                "description": "Invalid name",
+            },
+        ]
+        self._call_write(names, mock_gc)
+
+        # Only the valid name should reach the MERGE query
+        merge_call = self._find_merge_call(mock_gc)
+        batch = merge_call[1]["batch"]
+        assert len(batch) == 1
+        assert batch[0]["id"] == "electron_temperature"
+
+    def test_grammar_gate_all_invalid_returns_zero(self) -> None:
+        """If all names fail parse, write_standard_names returns 0."""
+        from imas_codex.standard_names.graph_ops import write_standard_names
+
+        names = [
+            {
+                "id": "completely_bogus_nonsense_value",
+                "source_types": ["dd"],
+                "source_id": "some/path",
+                "description": "Invalid",
+            },
+        ]
+        result = write_standard_names(names)
+        assert result == 0
 
 
 class TestGetValidatedStandardNames:

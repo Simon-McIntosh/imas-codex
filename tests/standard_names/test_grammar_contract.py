@@ -85,3 +85,166 @@ def test_build_compose_context_has_isn_keys():
     assert "applicability" in ctx
     assert "exclusive_pairs" in ctx
     clear_context_cache()
+
+
+# ── Grammar segment extraction tests ──
+
+
+def test_extract_segments_physical_vector_component():
+    """Verify extraction of component + physical_base from a vector projection."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("toroidal_magnetic_field")
+    assert result["grammar_physical_base"] == "magnetic_field"
+    assert result["grammar_component"] == "toroidal"
+    assert result["grammar_coordinate"] is None
+    assert result["grammar_geometric_base"] is None
+    assert result["grammar_parse_version"] is not None
+
+
+def test_extract_segments_scalar_quantity():
+    """Verify extraction of physical_base for a plain scalar."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("pressure")
+    assert result["grammar_physical_base"] == "pressure"
+    assert result["grammar_component"] is None
+    assert result["grammar_coordinate"] is None
+
+
+def test_extract_segments_unparseable_name():
+    """Unparseable names get version but null segment fields."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("nonexistent_gibberish_xyzzy")
+    assert result["grammar_parse_version"] is not None
+    assert result["grammar_physical_base"] is None
+    assert result["grammar_component"] is None
+    assert result["validation_diagnostics_json"] == "[]"
+
+
+def test_extract_segments_parseable_compound():
+    """Parseable compound names extract subject + physical_base via Pydantic enrichment."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("electron_temperature")
+    assert result["grammar_physical_base"] == "temperature"
+    assert result["grammar_subject"] == "electron"
+    assert result["grammar_component"] is None
+
+
+def test_extract_segments_all_keys_present():
+    """All grammar_* keys must be present even on parse failure."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("nonexistent_gibberish_xyzzy")
+    expected_keys = {
+        "grammar_parse_version",
+        "validation_diagnostics_json",
+        "grammar_physical_base",
+        "grammar_geometric_base",
+        "grammar_subject",
+        "grammar_component",
+        "grammar_coordinate",
+        "grammar_transformation",
+        "grammar_position",
+        "grammar_process",
+        "grammar_device",
+        "grammar_region",
+    }
+    assert expected_keys <= set(result.keys())
+
+
+# ── Grammar field persistence tests (P1) ──
+
+
+def test_write_standard_names_persists_grammar_segments():
+    """write_standard_names MERGE Cypher must SET all grammar_* segment fields."""
+    from unittest.mock import MagicMock, patch
+
+    mock_gc = MagicMock()
+    mock_gc.query = MagicMock(return_value=[])
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        MockGC.return_value.__exit__ = MagicMock(return_value=False)
+        from imas_codex.standard_names.graph_ops import write_standard_names
+
+        write_standard_names(
+            [
+                {
+                    "id": "electron_temperature",
+                    "source_types": ["dd"],
+                    "source_id": "core_profiles/profiles_1d/electrons/temperature",
+                }
+            ]
+        )
+
+    # Find the MERGE StandardName Cypher
+    merge_cypher = None
+    for c in mock_gc.query.call_args_list:
+        cypher = c[0][0]
+        if "MERGE (sn:StandardName" in cypher:
+            merge_cypher = cypher
+            break
+    assert merge_cypher is not None, "No MERGE StandardName query found"
+
+    # All grammar segment fields must appear in the SET clause with coalesce
+    grammar_fields = [
+        "grammar_physical_base",
+        "grammar_geometric_base",
+        "grammar_subject",
+        "grammar_component",
+        "grammar_coordinate",
+        "grammar_transformation",
+        "grammar_position",
+        "grammar_process",
+        "grammar_device",
+        "grammar_region",
+    ]
+    for field in grammar_fields:
+        assert f"sn.{field}" in merge_cypher, f"MERGE Cypher must SET sn.{field}"
+        assert f"coalesce(b.{field}" in merge_cypher, (
+            f"MERGE Cypher must use coalesce for {field}"
+        )
+
+
+def test_write_standard_names_batch_includes_grammar_segments():
+    """write_standard_names batch dict must include grammar segment values."""
+    from unittest.mock import MagicMock, patch
+
+    mock_gc = MagicMock()
+    mock_gc.query = MagicMock(return_value=[])
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        MockGC.return_value.__exit__ = MagicMock(return_value=False)
+        from imas_codex.standard_names.graph_ops import write_standard_names
+
+        write_standard_names(
+            [
+                {
+                    "id": "electron_temperature",
+                    "source_types": ["dd"],
+                    "source_id": "core_profiles/profiles_1d/electrons/temperature",
+                }
+            ]
+        )
+
+    # Find batch from MERGE call
+    batch = None
+    for c in mock_gc.query.call_args_list:
+        cypher = c[0][0]
+        if "MERGE (sn:StandardName" in cypher:
+            batch = c[1]["batch"]
+            break
+    assert batch is not None
+    entry = batch[0]
+
+    # electron_temperature → physical_base=temperature, subject=electron
+    assert entry["grammar_physical_base"] == "temperature", (
+        "grammar_physical_base should be 'temperature' for electron_temperature"
+    )
+    assert entry["grammar_subject"] == "electron", (
+        "grammar_subject should be 'electron' for electron_temperature"
+    )

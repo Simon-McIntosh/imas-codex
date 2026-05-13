@@ -22,6 +22,57 @@ from imas_codex.standard_names.defaults import (
 logger = logging.getLogger(__name__)
 console = Console()
 
+
+class _SpaceSplitMultiple(click.Option):
+    """Click option that splits quoted space-separated values.
+
+    ``--focus "a b c" --focus d`` produces ``('a', 'b', 'c', 'd')``.
+    Each flag invocation may contain whitespace-separated tokens that are
+    flattened into the final tuple.
+    """
+
+    def type_cast_value(self, ctx: click.Context, value: Any) -> tuple[str, ...]:
+        if not value:
+            return ()
+        flat: list[str] = []
+        for v in value:
+            flat.extend(v.split())
+        return tuple(flat)
+
+
+def _check_llm_direct() -> tuple[bool, str]:
+    """Check direct OpenRouter connectivity for the SN pipeline.
+
+    The SN pipeline bypasses the LiteLLM proxy and calls OpenRouter
+    directly when ``OPENROUTER_API_KEY_IMAS_CODEX`` is set.  This check
+    verifies the key is available and the configured model is reachable.
+    """
+    import os
+
+    from imas_codex.settings import get_model
+
+    model = get_model("language")
+    key = os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
+    if not key:
+        return False, "no API key"
+
+    # Quick probe: verify the OpenRouter API responds (auth endpoint).
+    try:
+        import urllib.request
+
+        req = urllib.request.Request(
+            "https://openrouter.ai/api/v1/auth/key",
+            headers={"Authorization": f"Bearer {key}"},
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            if resp.status == 200:
+                short_model = model.split("/")[-1] if "/" in model else model
+                return True, f"direct ({short_model})"
+    except Exception:
+        pass
+    return False, "unreachable"
+
+
 _PHYSICS_DOMAIN_CHOICE = click.Choice(
     [d.value for d in PhysicsDomain], case_sensitive=False
 )
@@ -48,7 +99,7 @@ def sn() -> None:
 
     \b
     Housekeeping:
-      sn clear | sn prune | sn gaps | sn sync-grammar | sn benchmark
+      sn clear | sn prune | sn gaps | sn sync-grammar | sn bench
     """
     pass
 
@@ -68,6 +119,7 @@ def _compute_pool_pending(
     domains: list[str] | None,
     rotation_cap: int,
     min_score: float,
+    scope_run_id: str | None = None,
 ) -> dict[str, int]:
     """Return per-pool pending counts mirroring ``claim_*_batch`` predicates.
 
@@ -86,15 +138,24 @@ def _compute_pool_pending(
         Maximum chain depth — mirrors ``claim_refine_name_batch``.
     min_score:
         Reviewer threshold — mirrors ``claim_refine_name_batch``.
+    scope_run_id:
+        When set (``--focus`` mode), restrict counts to sources/names
+        with ``run_id = $scope_run_id``.  Without this filter the
+        pending count can see stale sources from previous runs that
+        the scoped claim query will never pick up, causing the exit
+        watchdog to spin forever.
     """
     domain_filter_sn = "AND sn.physics_domain IN $domains" if domains else ""
     domain_filter_src = "AND s.physics_domain IN $domains" if domains else ""
+    scope_filter_src = "AND s.run_id = $scope_run_id" if scope_run_id else ""
+    scope_filter_sn = "AND sn.run_id = $scope_run_id" if scope_run_id else ""
 
     query = f"""
     CALL {{
       MATCH (s:StandardNameSource {{status: 'extracted'}})
       WHERE NOT (s)-[:PRODUCED_NAME]->(:StandardName)
         {domain_filter_src}
+        {scope_filter_src}
       RETURN count(s) AS generate_name
     }}
     CALL {{
@@ -102,6 +163,7 @@ def _compute_pool_pending(
       WHERE sn.name_stage = 'drafted'
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS review_name
     }}
     CALL {{
@@ -112,6 +174,7 @@ def _compute_pool_pending(
         AND coalesce(sn.chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS refine_name
     }}
     CALL {{
@@ -120,6 +183,7 @@ def _compute_pool_pending(
         AND sn.docs_stage = 'pending'
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS generate_docs
     }}
     CALL {{
@@ -127,6 +191,7 @@ def _compute_pool_pending(
       WHERE sn.docs_stage = 'drafted'
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS review_docs
     }}
     CALL {{
@@ -137,6 +202,7 @@ def _compute_pool_pending(
         AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
         {domain_filter_sn}
+        {scope_filter_sn}
       RETURN count(sn) AS refine_docs
     }}
     RETURN generate_name, review_name, refine_name,
@@ -148,6 +214,8 @@ def _compute_pool_pending(
     }
     if domains:
         params["domains"] = list(domains)
+    if scope_run_id:
+        params["scope_run_id"] = scope_run_id
     rows = list(gc.query(query, **params))  # type: ignore[attr-defined]
     if not rows:
         return {
@@ -172,7 +240,7 @@ def _compute_pool_pending(
     }
 
 
-def _run_sn_loop_cmd(
+def _run_sn_cmd(
     *,
     cost_limit: float,
     per_domain_limit: int | None,
@@ -187,12 +255,15 @@ def _run_sn_loop_cmd(
     review_docs_backlog_cap: int | None = None,
     skip_generate: bool = False,
     skip_review: bool = False,
+    names_only: bool = False,
+    flush: bool = False,
     source: str = "dd",
     override_edits: list[str] | None = None,
     only: str | None = None,
     max_sources: int | None = None,
+    scope_run_id: str | None = None,
 ) -> None:
-    """Execute the DD completion loop with Rich progress display.
+    """Execute the pool-based SN orchestrator with Rich progress display.
 
     Uses the ``run_discovery()`` harness for 3-press shutdown,
     periodic ticker, graph-refresh, and service monitoring.
@@ -217,15 +288,18 @@ def _run_sn_loop_cmd(
     run_id = str(_uuid.uuid4())
     use_rich = not quiet and not dry_run and use_rich_output()
 
-    # Pre-suppress noisy SN loggers BEFORE any heavy imports/inits so
-    # rich-mode startup is silent. Only raise console *handler* levels —
-    # logger levels stay at default so file handlers still receive all
-    # messages. Repeated by run_discovery() after display attach (defense
-    # in depth).
+    # Pre-suppress console output BEFORE any heavy imports/inits so
+    # rich-mode startup is silent. Most loggers inherit from root, so
+    # suppressing root's console handlers is the effective fix. Named
+    # logger suppression is defense-in-depth (run_discovery() repeats it).
     if use_rich:
         import logging as _logging
 
-        for mod in (
+        # Suppress root logger console handlers — this catches ALL loggers
+        # that inherit from root (which is most of them).
+        for lg_name in (
+            "",  # root logger — critical for catching inherited output
+            "imas_codex",
             "imas_codex.standard_names",
             "imas_codex.graph",
             "imas_codex.embeddings",
@@ -240,12 +314,15 @@ def _run_sn_loop_cmd(
             "urllib3",
             "neo4j",
         ):
-            lg = _logging.getLogger(mod)
-            for handler in lg.handlers:
+            lg = _logging.getLogger(lg_name)
+            for handler in list(lg.handlers):
                 if isinstance(handler, _logging.StreamHandler) and not isinstance(
                     handler, _logging.FileHandler
                 ):
-                    handler.setLevel(_logging.ERROR)
+                    if lg_name in ("", "imas_codex"):
+                        lg.removeHandler(handler)
+                    else:
+                        handler.setLevel(_logging.ERROR)
 
     # Build Rich display or fall back to plain logging
     display = None
@@ -259,13 +336,18 @@ def _run_sn_loop_cmd(
 
     _domains_list: list[str] | None = list(domains) if domains else None
     _rc = rotation_cap if rotation_cap is not None else 3
-    _ms = min_score if min_score is not None else 0.75
+    _ms = min_score if min_score is not None else DEFAULT_MIN_SCORE
+    _scope_run_id = scope_run_id
 
     def _pool_pending_fn() -> dict[str, int]:
         try:
             with _GC() as gc:
                 return _compute_pool_pending(
-                    gc, domains=_domains_list, rotation_cap=_rc, min_score=_ms
+                    gc,
+                    domains=_domains_list,
+                    rotation_cap=_rc,
+                    min_score=_ms,
+                    scope_run_id=_scope_run_id,
                 )
         except Exception:
             return {
@@ -322,13 +404,15 @@ def _run_sn_loop_cmd(
         cli_console = Console(quiet=quiet)
         if not quiet:
             cli_console.print(
-                f"[bold]DD completion loop[/bold] "
+                f"[bold]SN pipeline[/bold] "
                 f"(budget=${cost_limit:.2f}"
                 f"{f', min_score={min_score}' if min_score is not None else ''}"
                 f"{', dry-run' if dry_run else ''})"
             )
 
-    # Build harness config — SN loop wants graph + model status at top
+    # Build harness config — SN pipeline wants graph + model status at top.
+    # SN pipeline bypasses the LiteLLM proxy (uses direct OpenRouter), so
+    # we skip the proxy health check and add a direct-routing check instead.
     disc_config = DiscoveryConfig(
         domain="standard-names",
         facility="sn",
@@ -338,7 +422,7 @@ def _run_sn_loop_cmd(
         check_embed=False,
         check_ssh=False,
         check_auth=False,
-        check_model=not dry_run,
+        check_model=False,  # proxy check is misleading — SN uses direct bypass
         verbose=verbose,
         suppress_loggers=[
             "imas_codex.standard_names",
@@ -357,6 +441,15 @@ def _run_sn_loop_cmd(
         ]
         if use_rich
         else [],
+        extra_service_checks=[
+            (
+                "llm",
+                _check_llm_direct,
+                {"poll_interval": 60.0, "critical": False},
+            ),
+        ]
+        if use_rich and not dry_run
+        else [],
     )
 
     async def async_main(stop_event, service_monitor):
@@ -373,6 +466,9 @@ def _run_sn_loop_cmd(
             stop_event=stop_event,
             pending_fn=_pool_pending_fn,
             on_event=_on_event,
+            scope_run_id=scope_run_id,
+            names_only=names_only,
+            flush=flush,
         )
         return {"summary": summary}
 
@@ -564,16 +660,17 @@ def _check_pipeline_clear_gate() -> None:
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
 @click.option("-q", "--quiet", is_flag=True, help="Suppress non-error output")
 @click.option(
-    "--paths",
-    "paths_list",
-    type=str,
+    "--focus",
+    "focus_paths",
     multiple=True,
+    cls=_SpaceSplitMultiple,
+    default=(),
     help=(
-        "DD paths to process directly. Accepts multiple --paths flags or "
-        "space-separated paths within each flag (e.g., "
-        "'--paths eq/.../psi eq/.../q' or '--paths eq/.../psi --paths eq/.../q'). "
-        "Bypasses graph query, classifier, and already-named check. "
-        "Overrides --domain, --limit, and implies --force."
+        "Focus on specific DD paths for full-pipeline processing. "
+        "Runs the complete 6-pool pipeline (generate → review → refine → docs) "
+        "scoped to only these items via run_id filtering. "
+        "Accepts multiple --focus flags and/or quoted space-separated values "
+        '(e.g., --focus "path/a path/b" --focus path/c).'
     ),
 )
 @click.option(
@@ -677,7 +774,7 @@ def _check_pipeline_clear_gate() -> None:
     help=(
         "Reviewer-score threshold for the refine pools.  Names / docs with a "
         "score below this value are routed to refine_name / refine_docs.  "
-        "Sourced from ``defaults.DEFAULT_MIN_SCORE`` (0.75) when not provided."
+        "Sourced from ``defaults.DEFAULT_MIN_SCORE`` (0.80) when not provided."
     ),
 )
 @click.option(
@@ -733,13 +830,23 @@ def _check_pipeline_clear_gate() -> None:
     help="Skip the review phase (6-dimensional scoring).",
 )
 @click.option(
-    "--single-pass",
+    "--names-only",
+    "names_only",
     is_flag=True,
     default=False,
     help=(
-        "Force the single-pass extract → compose pipeline instead of "
-        "the default domain-iterating completion loop. Useful for CI "
-        "and regression tests."
+        "Skip all docs pools (generate_docs, review_docs, refine_docs). "
+        "Use for faster name-only iteration cycles at lower cost."
+    ),
+)
+@click.option(
+    "--flush",
+    is_flag=True,
+    default=False,
+    help=(
+        "Drain existing work without composing new names. "
+        "Skips auto-seeding and the generate_name pool; only review, "
+        "refine, and docs pools run. Incompatible with --focus."
     ),
 )
 @click.option(
@@ -802,6 +909,7 @@ def _check_pipeline_clear_gate() -> None:
         "Also read from IMAS_CODEX_SN_REVIEW_PROFILE env var."
     ),
 )
+@click.argument("paths", nargs=-1)
 def sn_run(
     source: str,
     domains: tuple[str, ...],
@@ -814,7 +922,8 @@ def sn_run(
     compose_model: str | None,
     verbose: bool,
     quiet: bool,
-    paths_list: tuple[str, ...],
+    focus_paths: tuple[str, ...],
+    paths: tuple[str, ...],
     reset_to: str | None,
     from_model: str | None,
     revalidate: bool,
@@ -832,7 +941,8 @@ def sn_run(
     review_name_backlog_cap: int,
     review_docs_backlog_cap: int,
     skip_review: bool,
-    single_pass: bool,
+    names_only: bool,
+    flush: bool,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -842,19 +952,24 @@ def sn_run(
 
     \b
     Scope routing:
-      - With --paths: single-pass pipeline (explicit paths too narrow for looping)
-      - Without --paths: all-pool completion loop (default, all 6 pools concurrent)
-      - With --single-pass: always single-pass pipeline
+      - Default: all-pool completion loop (all 6 pools concurrent)
+      - With --focus: full 6-pool pipeline scoped to specific DD paths
+
+    \b
+    Focus paths can be provided as trailing arguments or via --focus:
+      imas-codex sn run eq/path/a eq/path/b eq/path/c       # positional (simplest)
+      imas-codex sn run --focus "path/a path/b" --focus c    # quoted space-sep
+      imas-codex sn run --focus path/a --focus path/b        # repeated flags
 
     \b
     Examples:
       imas-codex sn run -c 50                                 # all 6 pools, full run
-      imas-codex sn run --domain equilibrium -c 5             # loop, one domain
+      imas-codex sn run --domain equilibrium -c 5             # scoped to one domain
       imas-codex sn run --domain equilibrium --domain transport  # two domains
       imas-codex sn run --domain "equilibrium transport" --dry-run  # same, space-sep
       imas-codex sn run --source signals --facility tcv --domain magnetics
-      imas-codex sn run --paths equilibrium/time_slice/profiles_1d/psi --paths equilibrium/time_slice/profiles_1d/q
-      imas-codex sn run --single-pass --paths equilibrium/time_slice/profiles_1d/psi -c 1  # single compose pass on explicit paths
+      imas-codex sn run --names-only -c 5 eq/time_slice/profiles_1d/psi eq/time_slice/profiles_1d/q
+      imas-codex sn run --focus eq/.../psi --focus eq/.../q   # debug multiple paths
       imas-codex sn run --reset-to drafted --reset-only
       imas-codex sn run --reset-to drafted --below-score 0.6 --reset-only
       imas-codex sn run --only link                   # resolve links only
@@ -893,18 +1008,88 @@ def sn_run(
     else:
         skip_generate_from_only = False
 
-    # Scope-routing: --paths → single-pass; else → all-pool loop (unless --single-pass).
-    # The loop runs all 6 pools concurrently, sampling globally from the available
-    # pool of StandardNameSource / StandardName nodes (no per-domain looping).
-    # --domain is forwarded to scope the extract_phase seeding only;
-    # the pools themselves are domain-agnostic.
-    use_loop = not single_pass and not paths_list and source == "dd"
+    # Flatten --focus values (handled by _SpaceSplitMultiple.type_cast_value).
+    # Merge with trailing positional paths argument.
+    flat_focus = list(focus_paths) + list(paths)
 
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
 
-    if use_loop:
-        _run_sn_loop_cmd(
+    # ── Validate --flush constraints ──────────────────────────────────
+    if flush and flat_focus:
+        raise click.UsageError("--flush and --focus are mutually exclusive")
+
+    # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
+    if flat_focus:
+        import uuid as _uuid
+
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        scope_run_id = str(_uuid.uuid4())
+
+        # 1. Clear stale run_ids from previous focused runs.
+        with GraphClient() as gc:
+            gc.query(
+                "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
+                "SET sn.run_id = NULL"
+            )
+            gc.query(
+                "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
+                "SET sns.run_id = NULL"
+            )
+
+        # 2. Seed StandardNameSource nodes for each focused path.
+        sources = []
+        for path in flat_focus:
+            sources.append(
+                {
+                    "id": f"dd:{path}",
+                    "source_type": "dd",
+                    "source_id": path,
+                    "dd_path": path,
+                    "batch_key": "focus",
+                    "status": "extracted",
+                    "description": "",
+                }
+            )
+        written = merge_standard_name_sources(sources, force=True)
+        if not quiet:
+            click.echo(f"Seeded {written} focus source(s) (run_id={scope_run_id[:8]}…)")
+
+        # 3. Post-stamp run_id on the seeded SNS nodes.
+        sns_ids = [f"dd:{p}" for p in flat_focus]
+        with GraphClient() as gc:
+            gc.query(
+                "UNWIND $ids AS sid "
+                "MATCH (sns:StandardNameSource {id: sid}) "
+                "SET sns.run_id = $run_id",
+                ids=sns_ids,
+                run_id=scope_run_id,
+            )
+
+        # 4. Force-reset any existing StandardNames for these paths.
+        with GraphClient() as gc:
+            gc.query(
+                """
+                UNWIND $ids AS sid
+                MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
+                SET sn.name_stage = 'pending',
+                    sn.docs_stage = 'pending',
+                    sn.run_id = $run_id,
+                    sn.reviewed_name_at = null,
+                    sn.reviewed_docs_at = null,
+                    sn.reviewer_score_name = null,
+                    sn.reviewer_score_docs = null,
+                    sn.claim_token = null,
+                    sn.claimed_at = null
+                """,
+                ids=sns_ids,
+                run_id=scope_run_id,
+            )
+
+        # 5. Route through the pool orchestrator with scope_run_id.
+        _run_sn_cmd(
             cost_limit=cost_limit,
             per_domain_limit=limit,
             dry_run=dry_run,
@@ -918,6 +1103,39 @@ def sn_run(
             review_docs_backlog_cap=review_docs_backlog_cap,
             skip_generate=skip_generate_from_only,
             skip_review=skip_review,
+            names_only=names_only,
+            source=source,
+            override_edits=_override_edits,
+            only=only_phase,
+            max_sources=max_sources,
+            scope_run_id=scope_run_id,
+        )
+        return
+
+    # Scope-routing: default (DD source) → pool orchestrator.
+    # Runs all 6 pools concurrently, sampling globally from the available
+    # pool of StandardNameSource / StandardName nodes.
+    # --domain is forwarded to scope the extract_phase seeding only;
+    # the pools themselves are domain-agnostic.
+    use_pools = source == "dd"
+
+    if use_pools:
+        _run_sn_cmd(
+            cost_limit=cost_limit,
+            per_domain_limit=limit,
+            dry_run=dry_run,
+            quiet=quiet,
+            domains=domains,
+            verbose=verbose,
+            min_score=min_score,
+            rotation_cap=rotation_cap,
+            escalation_model=escalation_model,
+            review_name_backlog_cap=review_name_backlog_cap,
+            review_docs_backlog_cap=review_docs_backlog_cap,
+            skip_generate=skip_generate_from_only,
+            skip_review=skip_review,
+            names_only=names_only,
+            flush=flush,
             source=source,
             override_edits=_override_edits,
             only=only_phase,
@@ -935,86 +1153,6 @@ def sn_run(
     # Validate: signals source requires facility
     if source == "signals" and not facility:
         raise click.UsageError("--facility is required when --source is signals")
-
-    # --paths implies DD source, force, and overrides filters
-    # Flatten multiple --paths args and space-separated paths within each arg
-    flat_paths = " ".join(paths_list).split() if paths_list else []
-    if flat_paths:
-        source = "dd"
-        domain_filter = None
-        limit = None
-        force = True  # Targeted paths always regenerate
-
-        # Resolve wildcard patterns (e.g., "*/profiles_1d/q" or "equilibrium/*/data")
-        raw_paths = flat_paths
-        resolved_paths = []
-        has_wildcards = any("*" in p for p in raw_paths)
-
-        if has_wildcards:
-            import re
-
-            from imas_codex.graph.client import GraphClient
-
-            _MAX_WILDCARD_MATCHES = 50
-
-            with GraphClient() as gc:
-                for pattern in raw_paths:
-                    if "*" in pattern:
-                        # Escape regex metacharacters except *, then convert * to [^/]+
-                        escaped = re.escape(pattern).replace(r"\*", "[^/]+")
-                        regex = f"^{escaped}$"
-                        matches = list(
-                            gc.query(
-                                """
-                                MATCH (n:IMASNode)
-                                WHERE n.id =~ $regex
-                                  AND NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
-                                RETURN n.id AS path
-                                ORDER BY n.id
-                                LIMIT $max_matches
-                                """,
-                                regex=regex,
-                                max_matches=_MAX_WILDCARD_MATCHES,
-                            )
-                        )
-                        found = [r["path"] for r in matches]
-                        if found:
-                            console.print(
-                                f"  [dim]{pattern}[/dim] → {len(found)} paths"
-                            )
-                            resolved_paths.extend(found)
-                        else:
-                            console.print(
-                                f"  [yellow]⚠ {pattern}[/yellow] — no matches"
-                            )
-                    else:
-                        resolved_paths.append(pattern)
-
-            # Deduplicate preserving order
-            seen: set[str] = set()
-            unique_paths = []
-            for p in resolved_paths:
-                if p not in seen:
-                    seen.add(p)
-                    unique_paths.append(p)
-            resolved_paths = unique_paths
-
-            console.print(
-                f"  Resolved {len(resolved_paths)} unique paths from "
-                f"{len(raw_paths)} patterns"
-            )
-            resolved_paths_final = resolved_paths
-        else:
-            # No wildcards — just use raw paths, still deduplicate
-            seen_paths: set[str] = set()
-            unique = []
-            for p in raw_paths:
-                if p not in seen_paths:
-                    seen_paths.add(p)
-                    unique.append(p)
-            resolved_paths_final = unique
-    else:
-        resolved_paths_final = None
 
     # --from-model implies --force (selecting by model only makes sense for regeneration)
     if from_model:
@@ -1135,8 +1273,6 @@ def sn_run(
 
     log_print("\n[bold]Standard Name Build[/bold]")
     log_print(f"  Source: {source}")
-    if resolved_paths_final:
-        log_print(f"  Targeted paths: {len(resolved_paths_final)} paths")
     if domain_filter:
         log_print(f"  Domain filter: {domain_filter}")
     if facility:
@@ -1174,8 +1310,6 @@ def sn_run(
             logger.debug("Could not create progress display", exc_info=True)
 
     # Resolve name-only batch size from pyproject default when unspecified.
-    # In the Option B architecture, single-pass always runs in full mode
-    # (name_only=False); the name-only pass is no longer exposed via --target.
     name_only: bool = False
     name_only_batch_size: int = 50
     try:
@@ -1193,7 +1327,6 @@ def sn_run(
         ids_filter=ids_filter,
         domain_filter=domain_filter,
         facility_filter=facility,
-        paths_list=resolved_paths_final,
         cost_limit=cost_limit,
         dry_run=dry_run,
         force=force,
@@ -1263,7 +1396,7 @@ def sn_run(
             log_print("(dry run — no LLM calls or graph writes)")
 
 
-@sn.command("benchmark")
+@sn.command("bench")
 @click.option(
     "--source",
     type=click.Choice(["dd"]),
@@ -1337,17 +1470,7 @@ def sn_run(
         "DD catalog in mature deployments)."
     ),
 )
-@click.option(
-    "--review-target",
-    type=click.Choice(["names"]),
-    default="names",
-    show_default=True,
-    help=(
-        "Reviewer rubric. 'names' uses the 4-dim name rubric "
-        "(sn/review_names, 0-80) matching the compose-stage output."
-    ),
-)
-def sn_benchmark(
+def sn_bench(
     source: str,
     ids_filter: str | None,
     domain_filter: str | None,
@@ -1360,7 +1483,6 @@ def sn_benchmark(
     verbose: bool,
     reviewer_model: str | None,
     force: bool,
-    review_target: str,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -1372,10 +1494,10 @@ def sn_benchmark(
 
     \b
     Examples:
-      imas-codex sn benchmark --ids equilibrium
-      imas-codex sn benchmark --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
-      imas-codex sn benchmark --max-candidates 20 -v
-      imas-codex sn benchmark --reviewer-model anthropic/claude-opus-4.6
+      imas-codex sn bench --ids equilibrium
+      imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
+      imas-codex sn bench --max-candidates 20 -v
+      imas-codex sn bench --reviewer-model anthropic/claude-opus-4.6
     """
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -1420,7 +1542,7 @@ def sn_benchmark(
         temperature=temperature,
         reviewer_model=reviewer_model,
         force=force,
-        review_target=review_target,
+        review_target="names",
     )
 
     console.print("[bold]SN Benchmark[/bold]")
@@ -1984,8 +2106,8 @@ def _emit_yaml_output(
     show_default=True,
     help=(
         "Which vocabulary gaps to report. 'missing' = tokens the LLM wanted "
-        "but ISN lacks. 'saturated' = open-segment tokens reused enough to "
-        "propose as new ISN anchors. 'both' shows the full ISN-PR picture."
+        "but ISN lacks. 'saturated' = tokens reused enough to propose as "
+        "new ISN vocabulary entries. 'both' shows the full ISN-PR picture."
     ),
 )
 @click.option(
@@ -2001,11 +2123,9 @@ def _emit_yaml_output(
     "include_open",
     default=False,
     help=(
-        "Include missing-direction gaps on open-vocabulary segments "
-        "(e.g. physical_base) and pseudo segments (grammar_ambiguity). "
-        "Hidden by default because physical_base admits any compound "
-        "token by design — use --direction saturated instead to propose "
-        "common bases as ISN anchors."
+        "Include gaps reported against pseudo segments "
+        "(e.g. grammar_ambiguity). Hidden by default because pseudo "
+        "segments are structural findings, not missing tokens."
     ),
 )
 @click.option(
@@ -2066,9 +2186,9 @@ def sn_gaps(
     Reports two complementary ISN-boundary flows:
 
     * ``missing`` — VocabGap nodes recording tokens the LLM wanted but
-      ISN lacks (closed-segment gaps by default).
-    * ``saturated`` — open-segment tokens (``physical_base``) reused on
-      enough high-quality StandardNames to propose as new ISN anchors.
+      ISN lacks.
+    * ``saturated`` — tokens reused on enough high-quality StandardNames
+      to propose as new ISN vocabulary entries.
 
     The default ``--direction both`` shows both: one table for missing
     tokens to add, one for saturated tokens ready for promotion. Both
@@ -2090,7 +2210,7 @@ def sn_gaps(
     yaml_sections: list[str] = []
 
     # ------------------------------------------------------------------
-    # Saturated direction — promotion candidates for open segments
+    # Saturated direction — promotion candidates
     # ------------------------------------------------------------------
     if direction in ("saturated", "both"):
         from imas_codex.standard_names.vocab_promotion import (
@@ -2285,6 +2405,12 @@ def sn_gaps(
     show_default=True,
     help="Populate sources field in each entry with graph provenance (debug aid)",
 )
+@click.option(
+    "--names-only",
+    "names_only",
+    is_flag=True,
+    help="Export names without requiring accepted docs (skip docs_stage gate)",
+)
 def sn_export(
     staging: str | None,
     min_score: float,
@@ -2297,6 +2423,7 @@ def sn_export(
     domain: str | None,
     override_edits: tuple[str, ...],
     include_sources: bool,
+    names_only: bool,
 ) -> None:
     """Export validated standard names from graph to a staging directory.
 
@@ -2353,6 +2480,7 @@ def sn_export(
             gate_scope=gate_scope,
             override_edits=edits_list,
             include_sources=include_sources,
+            names_only=names_only,
         )
     except FileExistsError as exc:
         console.print(f"[red]Precondition failure:[/red] {exc}")
@@ -2575,6 +2703,12 @@ def sn_preview(
     is_flag=True,
     help="Validate and report without making changes",
 )
+@click.option(
+    "--names-only",
+    "names_only",
+    is_flag=True,
+    help="Export names without requiring accepted docs (skip docs_stage gate)",
+)
 def sn_release(
     action: str | None,
     message: str | None,
@@ -2586,6 +2720,7 @@ def sn_release(
     skip_export: bool,
     skip_gate: bool,
     dry_run: bool,
+    names_only: bool,
 ) -> None:
     """Release standard names to the ISNC catalog.
 
@@ -2693,6 +2828,8 @@ def sn_release(
         console.print("  Mode: [green]final release[/green]")
     if skip_export:
         console.print("  Export: [yellow]skipped[/yellow]")
+    if names_only:
+        console.print("  Export: [cyan]names-only (skip docs gate)[/cyan]")
     if dry_run:
         console.print("  Mode: [yellow]dry run[/yellow]")
     console.print("")
@@ -2704,6 +2841,8 @@ def sn_release(
         export_kwargs = {}
         if skip_gate:
             export_kwargs["skip_gate"] = True
+        if names_only:
+            export_kwargs["names_only"] = True
 
         report = run_release(
             isnc_path=isnc_path,

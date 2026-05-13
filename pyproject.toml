@@ -15,7 +15,7 @@ requires = [
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
     "neo4j>=5.28.0,<6.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.7.0rc37",
+    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc6",
 ]
 build-backend = "hatchling.build"
 
@@ -55,7 +55,7 @@ dependencies = [
     "pint>=0.24.4,<0.25.0",
     "nest-asyncio>=1.5.0,<2.0.0",
     "click>=8.0.0,<9.0.0",
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=1.2.2",     # CVE-2026-28684
     "PyYAML>=6.0,<7.0",
     "numpy>=2.3.1",
     "cachetools>=5.3.0,<6.0.0",
@@ -71,15 +71,24 @@ dependencies = [
     # Security: CVE fix requires lxml>=6.1.0 (indirect via python-pptx/python-docx)
     "lxml>=6.1.0",
     "breame>=0.1.2",
+    # Security floor constraints for transitive dependencies
+    "urllib3>=2.7.0",            # CVE-2026-44432, CVE-2026-44431
+    "python-multipart>=0.0.27", # CVE-2026-42561, CVE-2026-40347
+    "authlib>=1.6.11",          # CVE-2026-27962, CVE-2026-28498, CVE-2026-28490, CVE-2026-41425
+    "aiohttp>=3.13.4",          # CVE-2026-34525 + 10 more aiohttp CVEs
+    "tornado>=6.5.5",           # CVE-2026-35536, CVE-2026-31958
+    "cryptography>=46.0.7",     # CVE-2026-39892, CVE-2026-34073
+    "PyJWT>=2.12.0",            # CVE-2026-32597
+    "Pygments>=2.20.0",         # CVE-2026-4539
 ]
 
 [project.optional-dependencies]
 test = [
     "torch",
     "sentence-transformers>=5.0.0",
-    "pytest>=8.3.5,<9.0.0",
+    "pytest>=9.0.3,<10.0.0",    # CVE-2025-71176
     "pytest-cov>=6.1.1,<7.0.0",
-    "pytest-asyncio>=0.21.0,<1.0.0",
+    "pytest-asyncio>=1.0.0,<2.0.0",
     "pytest-xdist>=3.0.0,<4.0.0",
     "pytest-benchmark>=4.0.0,<5.0.0",
     "pytest-timeout>=2.1.0,<3.0.0",
@@ -121,7 +130,7 @@ dev = [
     "ipykernel>=6.29.5",
     # --- Standard Names catalog (install manually: uv pip install -e ../imas-standard-names) ---
     # --- LLM & Discovery ---
-    "litellm>=1.81.0",
+    "litellm>=1.83.10",         # CVE-2026-40217, CVE-2026-42271, CVE-2026-42203, CVE-2026-35030, CVE-2026-35029
     # --- Graph build & schema ---
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
@@ -131,7 +140,7 @@ dev = [
     "hdbscan>=0.8.41",
     # --- Wiki & document parsing ---
     "beautifulsoup4>=4.14.3",
-    "Pillow>=11.0.0",
+    "Pillow>=12.2.0",           # CVE-2026-42311, CVE-2026-40192 + 3 more
     "python-docx>=1.1.2",
     "python-pptx>=1.0.2",
     "openpyxl>=3.1.5",
@@ -152,8 +161,8 @@ dev = [
     "tree-sitter-language-pack>=0.13.0",
     "tree-sitter-gdl>=0.2.0",
     # --- Testing ---
-    "pytest>=8.4.2",
-    "pytest-asyncio>=0.26.0",
+    "pytest>=9.0.3",            # CVE-2025-71176
+    "pytest-asyncio>=1.0.0",
     "pytest-cov>=6.1.1",
     "pytest-timeout>=2.1.0",
     "xlwt>=1.3.0",
@@ -163,7 +172,7 @@ dev = [
     # --- Catalog preview (mkdocs-driven via 'standard-names serve') ---
     "mkdocs>=1.6.1,<2.0.0",
     "mkdocs-material>=9.6.5,<10.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.7.0rc37",
+    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc6",
 ]
 
 [project.urls]
@@ -527,7 +536,7 @@ location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 
 [tool.hatch.envs.test]
 dependencies = [
-    "pytest>=8.3.5,<9.0.0",
+    "pytest>=9.0.3,<10.0.0",   # CVE-2025-71176
     "pytest-cov>=6.1.1,<7.0.0",
     "coverage>=7.0.0",
 ]
@@ -576,7 +585,7 @@ addopts = [
     "--no-header",
     "-q",
     "--durations=10",
-    "-m", "not slow and not sn_health and not graph",
+    "-m", "not slow and not graph",
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
@@ -591,7 +600,6 @@ markers = [
     "graph: marks tests requiring a live Neo4j connection (auto-skipped when unavailable)",
     "graph_mcp: marks graph-native MCP tests requiring Neo4j with fixture data",
     "fixture_only: marks tests that require fixture data and should be skipped on production graphs",
-    "sn_health: marks standard name health gate tests requiring a populated Neo4j graph (run with -m sn_health)",
     "requires_graph: marks tests requiring a live Neo4j connection with DD content",
 ]
 filterwarnings = [

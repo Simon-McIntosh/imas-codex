@@ -16,15 +16,6 @@ from datetime import UTC, datetime
 from typing import Any
 
 from imas_standard_names.grammar import (
-    BinaryOperator,
-    Component,
-    GeometricBase,
-    Object,
-    Position,
-    Process,
-    StandardName,
-    Subject,
-    Transformation,
     compose_standard_name,
     parse_standard_name,
 )
@@ -53,13 +44,6 @@ class BenchmarkConfig:
     temperature: float = 0.0  # pinned for reproducibility
     reviewer_model: str | None = None  # frontier model for quality scoring
     force: bool = False  # re-run over already-processed paths
-    # Rubric target for reviewer scoring. "names" → 4-dimensional
-    # sn/review_names (grammar, semantic, convention, completeness) —
-    # matches names compose output. "full" → 6-dimensional sn/review
-    # with documentation and compliance dimensions (only meaningful when
-    # compose output includes rich documentation, which the current
-    # StandardNameCandidate schema does not).
-    review_target: str = "names"
 
 
 @dataclass
@@ -128,17 +112,68 @@ class BenchmarkReport:
 # ---------------------------------------------------------------------------
 
 
+def _get_segment_fields(candidate: dict) -> dict:
+    """Extract segment fields from a candidate dict.
+
+    Handles both nested format (``{segments: {base_token: ...}}``)
+    and legacy flat format (``{base_token: ...}``).
+    """
+    segs = candidate.get("segments")
+    if isinstance(segs, dict):
+        return segs
+    return candidate
+
+
+def _resolve_name(candidate: dict) -> str:
+    """Resolve the composed standard name from a candidate dict.
+
+    Tries ``standard_name`` key first (legacy), then composes from
+    IR segment fields via ISN.
+    """
+    name = candidate.get("standard_name", "") or candidate.get("id", "")
+    if name:
+        return name
+
+    segs = _get_segment_fields(candidate)
+    base_token = segs.get("base_token")
+    if not base_token:
+        return ""
+
+    try:
+        from imas_standard_names.grammar.ir import (
+            BaseKind,
+            QuantityOrCarrier,
+            StandardNameIR,
+        )
+        from imas_standard_names.grammar.render import compose
+
+        base = QuantityOrCarrier(
+            token=base_token,
+            kind=BaseKind(segs.get("base_kind", "quantity")),
+        )
+        qualifiers_raw = segs.get("qualifiers") or []
+        qualifiers = None
+        if qualifiers_raw:
+            from imas_standard_names.grammar.ir import Qualifier
+
+            qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
+
+        ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
+        return compose(ir)
+    except Exception:
+        return ""
+
+
 def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     """Validate a single candidate via grammar round-trip.
 
     Returns:
         (grammar_valid, fields_consistent) tuple.
         grammar_valid: True if the name parses and round-trips.
-        fields_consistent: True if composing from reported fields
-            produces the same name (after normalization).
+        fields_consistent: True if IR compose produces the same name.
     """
-    name = candidate.get("standard_name", "")
-    fields = candidate.get("grammar_fields", {})
+    segs = _get_segment_fields(candidate)
+    name = _resolve_name(candidate)
 
     grammar_valid = False
     fields_consistent = False
@@ -151,36 +186,30 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     except Exception:
         return False, False
 
-    # Check fields consistency: compose from reported fields
+    # Check IR consistency: if candidate has IR fields, compose and compare
     try:
-        # Convert string field values to enum instances
-        sn_fields: dict[str, Any] = {}
-        for k, v in fields.items():
-            if k == "physical_base":
-                sn_fields[k] = v
-            elif k == "geometric_base":
-                sn_fields[k] = GeometricBase(v)
-            elif k == "subject":
-                sn_fields[k] = Subject(v)
-            elif k == "component":
-                sn_fields[k] = Component(v)
-            elif k == "coordinate":
-                sn_fields[k] = Component(v)
-            elif k == "position":
-                sn_fields[k] = Position(v)
-            elif k == "process":
-                sn_fields[k] = Process(v)
-            elif k == "transformation":
-                sn_fields[k] = Transformation(v)
-            elif k == "object":
-                sn_fields[k] = Object(v)
-            elif k == "binary_operator":
-                sn_fields[k] = BinaryOperator(v)
+        base_token = segs.get("base_token")
+        if base_token:
+            from imas_standard_names.grammar.ir import (
+                BaseKind,
+                QuantityOrCarrier,
+                StandardNameIR,
+            )
+            from imas_standard_names.grammar.render import compose
 
-        if sn_fields:
-            sn = StandardName(**sn_fields)
-            from_fields = compose_standard_name(sn)
-            fields_consistent = from_fields == normalized
+            base_kind = segs.get("base_kind", "quantity")
+            base = QuantityOrCarrier(token=base_token, kind=BaseKind(base_kind))
+
+            qualifiers = None
+            qualifiers_raw = segs.get("qualifiers") or []
+            if qualifiers_raw:
+                from imas_standard_names.grammar.ir import Qualifier
+
+                qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
+
+            ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
+            from_ir = compose(ir)
+            fields_consistent = from_ir == normalized
     except Exception:
         pass
 
@@ -213,7 +242,7 @@ def compare_to_reference(
     generated = {}
     for c in candidates:
         sid = c.get("source_id", "")
-        generated[sid] = c.get("standard_name", "")
+        generated[sid] = _resolve_name(c)
 
     overlap = 0
     ref_total = len(reference)
@@ -326,13 +355,12 @@ async def score_with_reviewer(
         for c in batch:
             batch_items.append(
                 {
-                    "standard_name": c.get("standard_name", ""),
+                    "standard_name": _resolve_name(c),
                     "source_id": c.get("source_id", ""),
                     "description": c.get("description", "") or "",
                     "documentation": (c.get("documentation", "") or "")[:500],
                     "unit": c.get("unit", "N/A"),
                     "kind": c.get("kind", "N/A"),
-                    "grammar_fields": c.get("grammar_fields", {}),
                     "source_paths": c.get("source_paths", []),
                 }
             )
@@ -451,7 +479,7 @@ async def run_benchmark(
                 reviews = await score_with_reviewer(
                     result.candidates,
                     config.reviewer_model,
-                    target=config.review_target,
+                    target="names",
                 )
                 result.quality_scores = reviews
                 # Compute distribution
@@ -472,19 +500,29 @@ async def run_benchmark(
                 )
 
                 all_fields = {
-                    "physical_base",
-                    "subject",
-                    "component",
-                    "coordinate",
-                    "position",
-                    "process",
+                    "base_token",
+                    "qualifiers",
+                    "projection_axis",
+                    "locus_token",
+                    "process_token",
+                    "operator_token",
                 }
                 field_counts = []
                 for c in result.candidates:
-                    fields = c.get("grammar_fields", {})
-                    field_counts.append(
-                        len(set(fields.keys()) & all_fields) / len(all_fields)
-                    )
+                    populated = 0
+                    if c.get("base_token"):
+                        populated += 1
+                    if c.get("qualifiers"):
+                        populated += 1
+                    if c.get("projection_axis"):
+                        populated += 1
+                    if c.get("locus_token"):
+                        populated += 1
+                    if c.get("process_token"):
+                        populated += 1
+                    if c.get("operator_token"):
+                        populated += 1
+                    field_counts.append(populated / len(all_fields))
                 result.avg_fields_populated = (
                     sum(field_counts) / len(field_counts) if field_counts else 0.0
                 )

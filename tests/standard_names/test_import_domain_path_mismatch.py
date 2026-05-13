@@ -20,8 +20,6 @@ _ENTRY_KINETICS = {
     "description": "Electron temperature",
     "documentation": "The electron temperature Te.",
     "links": [],
-    "constraints": [],
-    "validity_domain": "",
     "status": "draft",
 }
 

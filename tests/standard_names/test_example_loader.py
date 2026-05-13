@@ -43,6 +43,15 @@ def _sn_row(
     domain: str = "transport",
     scores: dict | None = None,
     comments_per_dim: dict | None = None,
+    physical_base: str | None = None,
+    subject: str | None = None,
+    component: str | None = None,
+    coordinate: str | None = None,
+    transformation: str | None = None,
+    position: str | None = None,
+    process: str | None = None,
+    geometric_base: str | None = None,
+    semantic_sim: float | None = None,
 ) -> dict:
     """Build a dict mimicking a StandardName graph row."""
     return {
@@ -58,6 +67,15 @@ def _sn_row(
         ),
         "reviewer_comments": "Overall good quality",
         "physics_domain": domain,
+        "physical_base": physical_base,
+        "subject": subject,
+        "component": component,
+        "coordinate": coordinate,
+        "transformation": transformation,
+        "position": position,
+        "process": process,
+        "geometric_base": geometric_base,
+        "semantic_sim": semantic_sim,
     }
 
 
@@ -337,5 +355,121 @@ class TestReviewExamplesMatchesCompose:
             "score",
             "domain",
             "issues",
+            "grammar_segments",
+            "semantic_sim",
         }
         assert required_keys.issubset(set(result[0].keys()))
+
+
+class TestGrammarFieldProjection:
+    """Grammar decomposition fields are projected from graph into examples."""
+
+    def test_grammar_segments_populated(self) -> None:
+        row = _sn_row(
+            name_id="electron_temperature",
+            score=1.0,
+            physical_base="temperature",
+            subject="electron",
+        )
+        responses: list[list[dict]] = [[row]]
+        gc = _make_gc(responses)
+        result = load_compose_examples(
+            gc,
+            physics_domains=["transport"],
+            axis="name",
+            target_scores=(1.0,),
+        )
+        assert len(result) == 1
+        gf = result[0]["grammar_segments"]
+        assert gf["physical_base"] == "temperature"
+        assert gf["subject"] == "electron"
+        # Fields not set should be absent
+        assert "component" not in gf
+        assert "coordinate" not in gf
+
+    def test_all_grammar_segments(self) -> None:
+        row = _sn_row(
+            name_id="radial_magnetic_field",
+            score=0.95,
+            physical_base="magnetic_field",
+            component="radial",
+            position="separatrix",
+        )
+        responses: list[list[dict]] = [[row]]
+        gc = _make_gc(responses)
+        result = load_compose_examples(
+            gc,
+            physics_domains=[],
+            axis="name",
+            target_scores=(0.95,),
+            tolerance=0.10,
+        )
+        assert len(result) == 1
+        gf = result[0]["grammar_segments"]
+        assert gf["physical_base"] == "magnetic_field"
+        assert gf["component"] == "radial"
+        assert gf["position"] == "separatrix"
+        assert "subject" not in gf
+
+    def test_empty_grammar_segments_when_none(self) -> None:
+        """If no grammar segments populated, grammar_segments is empty dict."""
+        row = _sn_row(score=0.80)
+        responses: list[list[dict]] = [[], [row]]
+        gc = _make_gc(responses)
+        result = load_compose_examples(
+            gc,
+            physics_domains=["transport"],
+            axis="name",
+            target_scores=(0.80,),
+        )
+        assert len(result) == 1
+        assert result[0]["grammar_segments"] == {}
+
+
+class TestSemanticSimProjection:
+    """Semantic similarity is projected from graph into examples."""
+
+    def test_semantic_sim_present(self) -> None:
+        row = _sn_row(score=1.0, semantic_sim=0.89)
+        responses: list[list[dict]] = [[row]]
+        gc = _make_gc(responses)
+        result = load_compose_examples(
+            gc,
+            physics_domains=["transport"],
+            axis="name",
+            target_scores=(1.0,),
+        )
+        assert len(result) == 1
+        assert result[0]["semantic_sim"] == 0.89
+
+    def test_semantic_sim_none_when_missing(self) -> None:
+        row = _sn_row(score=0.65)
+        responses: list[list[dict]] = [[], [row]]
+        gc = _make_gc(responses)
+        result = load_compose_examples(
+            gc,
+            physics_domains=["transport"],
+            axis="name",
+            target_scores=(0.65,),
+        )
+        assert len(result) == 1
+        assert result[0]["semantic_sim"] is None
+
+
+class TestNameStageFiltering:
+    """Only accepted names should appear in examples (Cypher WHERE clause)."""
+
+    def test_query_includes_name_stage_filter(self) -> None:
+        """Verify the Cypher query sent to Neo4j includes name_stage filter."""
+        gc = _make_gc([])
+        load_compose_examples(
+            gc,
+            physics_domains=["transport"],
+            axis="name",
+            target_scores=(1.0,),
+        )
+        # Inspect the Cypher queries sent
+        assert gc.query.call_count >= 1
+        first_call_cypher = gc.query.call_args_list[0][0][0]
+        assert "name_stage" in first_call_cypher
+        assert "'accepted'" in first_call_cypher

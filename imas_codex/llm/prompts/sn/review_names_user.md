@@ -34,14 +34,14 @@ Use these accepted, in-catalog names as your **third-party reference set**. They
 {% endif %}
 
 {% if same_path_neighbours %}
-### Same DD IDS source family
+### Same physics domain family
 {% for n in same_path_neighbours %}
 - **`{{ n.id }}`** ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }}) — {{ n.description | default('', true) }}
 {% endfor %}
 {% endif %}
 
 {% if not vector_neighbours and not same_base_neighbours and not same_path_neighbours %}
-*No accepted siblings found — score on grammar + DD provenance alone.*
+*No accepted siblings found — score on grammar + physics correctness alone.*
 {% endif %}
 
 {% if nearby_existing_names %}
@@ -61,9 +61,8 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - **Source ID**: {{ item.source_id }}
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
-- **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
-{% if item.source_paths %}
-- **IMAS Paths**: {{ item.source_paths | join(', ') }}
+- **Grammar Fields**: {% if item.physical_base %}physical_base={{ item.physical_base }}{% endif %}{% if item.subject %}, subject={{ item.subject }}{% endif %}{% if item.component %}, component={{ item.component }}{% endif %}{% if item.coordinate %}, coordinate={{ item.coordinate }}{% endif %}{% if item.position %}, position={{ item.position }}{% endif %}{% if item.process %}, process={{ item.process }}{% endif %}
+{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues:**
@@ -71,6 +70,18 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - {{ issue }}
 {% endfor %}
 {% endif %}
+{% if item.semantic_warning %}
+
+{{ item.semantic_warning }}
+{% endif %}
+{% if item.dd_clusters %}
+- **Semantic clusters:**
+{% for cl in item.dd_clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+{% if item.dd_version_history %}
+- **DD version history:**
+{% for vh in item.dd_version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
 
 {% endfor %}
 

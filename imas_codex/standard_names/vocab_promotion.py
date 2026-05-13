@@ -39,55 +39,25 @@ logger = logging.getLogger(__name__)
 # Existing-vocabulary lookup (ISN is the source of truth)
 # ---------------------------------------------------------------------------
 
-# Map from codex-side segment name to the ISN vocabulary_sections segment
-# name. For physical_base the ISN vocabulary is *open* (no authoritative
-# token list), but ``generic_physical_bases`` and ``geometric_bases`` both
-# inform which tokens are already formally known.
 _SEGMENT_VOCAB_CACHE: dict[str, set[str]] | None = None
 
 
 def _load_isn_segment_vocab() -> dict[str, set[str]]:
-    """Return {segment: {known_tokens}} from the installed ISN package.
+    """Return ``{segment: {known_tokens}}`` from the installed ISN package.
 
-    For ``physical_base``, this merges ``generic_physical_bases`` (tokens
-    the grammar already calls out as needing qualification) with
-    ``geometric_bases``; any additional tokens seen in the graph beyond
-    these are "emergent" and candidates for promotion.
+    Uses ``SEGMENT_TOKEN_MAP`` directly — the single source of truth for all
+    grammar segment vocabularies. All segments are closed (no legacy
+    workarounds or YAML augmentation needed).
     """
     global _SEGMENT_VOCAB_CACHE
     if _SEGMENT_VOCAB_CACHE is not None:
         return _SEGMENT_VOCAB_CACHE
 
-    from imas_standard_names.grammar import get_grammar_context
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
 
-    ctx = get_grammar_context()
-    by_segment: dict[str, set[str]] = {}
-    for section in ctx.get("vocabulary_sections", []) or []:
-        seg = section.get("segment")
-        tokens = section.get("tokens") or []
-        if seg:
-            by_segment.setdefault(seg, set()).update(tokens)
-
-    # Augment ``physical_base`` with already-formalised base lists. The ISN
-    # ``vocabulary_sections`` entry for physical_base, if present, is usually
-    # empty because the segment is open; we use the supporting YAML lists
-    # to detect tokens that are already on ISN's radar.
-    try:
-        import importlib.resources as ir
-
-        pkg = ir.files("imas_standard_names") / "grammar" / "vocabularies"
-        for fname in ("generic_physical_bases.yml", "geometric_bases.yml"):
-            fpath = pkg / fname
-            if fpath.is_file():
-                import yaml
-
-                data = yaml.safe_load(fpath.read_text()) or []
-                if isinstance(data, list):
-                    by_segment.setdefault("physical_base", set()).update(
-                        str(t) for t in data
-                    )
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Could not augment physical_base vocab from ISN: %s", exc)
+    by_segment: dict[str, set[str]] = {
+        seg: set(tokens) for seg, tokens in SEGMENT_TOKEN_MAP.items()
+    }
 
     _SEGMENT_VOCAB_CACHE = by_segment
     return by_segment
@@ -276,13 +246,10 @@ def format_isn_pr_snippet(
 ) -> str:
     """Render a PR-ready snippet for ISN's ``grammar/vocabularies/`` files.
 
-    The ``physical_base`` vocabulary is open in ISN, but promoted tokens
-    would be added to a curated list (e.g. ``preferred_physical_bases.yml``
-    — to be created on the ISN side). Format mirrors the existing
-    vocabulary files: a header comment block explaining the source of the
-    list, followed by a flat ``- token`` list. We also emit a short
-    evidence table in a separate comment block so ISN maintainers can
-    audit each entry.
+    All vocabulary segments are closed in ISN. Promotion candidates are
+    tokens mined from the codex graph that are not yet in the installed
+    vocabulary. The snippet is formatted as a YAML list matching the
+    layout of ISN's ``grammar/vocabularies/*.yml`` files.
     """
     if not candidates:
         return (

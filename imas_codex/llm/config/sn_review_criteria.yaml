@@ -6,7 +6,7 @@
 dimensions:
   grammar:
     max_score: 20
-    description: "vNext 5-group IR compliance: operator scope markers, closed physical_base, projection prefix, postfix locus, _of_ disambiguation"
+    description: "ISN 5-group IR compliance: operator scope markers, closed physical_base, projection prefix, postfix locus, _of_ disambiguation"
   semantic:
     max_score: 20
     description: "Name accurately describes the physical quantity"
@@ -246,7 +246,7 @@ common_issues:
       description: >-
         Closed-vocabulary tokens (qualifiers, operators, projection axes,
         locus, process) absorbed into the ``physical_base`` compound
-        instead of being expressed through the vNext 5-group IR. A
+        instead of being expressed through the ISN 5-group IR. A
         parse-valid compound is not grammar-wrong — but a compound that
         hides structure in ``physical_base`` defeats operator/projection
         search and grammatical composition.

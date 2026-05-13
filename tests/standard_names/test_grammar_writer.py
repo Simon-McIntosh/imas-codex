@@ -66,9 +66,7 @@ def test_columns_cleared_when_parser_narrowed() -> None:
         return_value="0.7.0",
     ):
         # First call: name with `component=x`
-        _write_grammar_decomposition(
-            gc, ["x_component_of_magnetic_field_at_outboard_midplane"]
-        )
+        _write_grammar_decomposition(gc, ["x_magnetic_field_at_outboard_midplane"])
         # Second call: simpler name with no component
         _write_grammar_decomposition(gc, ["electron_temperature"])
 

@@ -520,7 +520,7 @@ composition_rules:
       - "deuterium and tritium treated as two separate subjects"
     affects:
       - "name"
-      - "grammar_fields"
+      - "grammar_segments"
 
   - id: "NC-28"
     title: "The suffix `_reference_waveform` denotes a controller setpoint, not a physics quantity"

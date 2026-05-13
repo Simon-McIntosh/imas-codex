@@ -1,8 +1,7 @@
-"""Concurrent worker-pool orchestrator for ``sn run`` (Phase 8).
+"""Concurrent worker-pool orchestrator for ``sn run``.
 
-Replaces the per-domain serial ``run_sn_loop`` with N persistent async
-tasks that pull work from the graph independently and share a single
-:class:`BudgetManager` for cost coordination.
+Uses N persistent async tasks that pull work from the graph independently
+and share a single :class:`BudgetManager` for cost coordination.
 
 Six pools run under a single ``asyncio.gather``:
 
@@ -13,6 +12,9 @@ Six pools run under a single ``asyncio.gather``:
 * ``generate_docs``  — adds description+documentation to accepted names.
 * ``review_docs``    — scores description+documentation.
 * ``refine_docs``    — refines docs below the review threshold.
+
+Embedding is handled by the shared discovery ``embed_description_worker``
+(async background task launched alongside the pools, not a pool itself).
 
 Each pool follows a cooperative shutdown contract:
 
@@ -54,13 +56,15 @@ logger = logging.getLogger(__name__)
 
 
 # Default per-pool weights for soft-fairness admission control.
-# Sum to 1.0.  Six pools per Phase 8.1 refine pipeline.
+# Sum to 1.0.  Seven pools per Phase 8.1 refine pipeline.
 #
 # Rationale (2026-05-05): Review is the throughput bottleneck — each
 # review costs ~$0.09 (2× blind LLM calls + optional escalator) vs
 # ~$0.02 for generation.  Equal generate/review weights caused a >100-
 # name review backlog after $15 spend.  Weights now favour review pools
 # so names and docs flow through the pipeline at roughly equal rates.
+# Embedding is handled by the shared discovery embed_description_worker
+# (async background task, not a pool).
 POOL_WEIGHTS: dict[str, float] = {
     "generate_name": 0.15,
     "review_name": 0.25,

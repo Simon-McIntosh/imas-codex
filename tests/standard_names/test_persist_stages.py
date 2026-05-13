@@ -321,7 +321,7 @@ class TestGenerateDocsPendingToDrafted:
         """Returns 'drafted' when the token + name_stage='accepted' gate passes."""
         from imas_codex.standard_names.graph_ops import persist_generated_docs
 
-        gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}]])
+        gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}], None])
         with _patch_gc(gc):
             result = persist_generated_docs(
                 sn_id="test_sn",
@@ -337,7 +337,7 @@ class TestGenerateDocsPendingToDrafted:
         """WHERE clause in Cypher requires name_stage = 'accepted' (cross-pipeline gate)."""
         from imas_codex.standard_names.graph_ops import persist_generated_docs
 
-        gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}]])
+        gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}], None])
         with _patch_gc(gc):
             persist_generated_docs(
                 sn_id="test_sn",
@@ -347,14 +347,14 @@ class TestGenerateDocsPendingToDrafted:
                 model="test/model",
             )
 
-        cypher: str = gc.query.call_args.args[0]
+        cypher: str = gc.query.call_args_list[0].args[0]
         assert "name_stage" in cypher and "'accepted'" in cypher
 
     def test_cypher_sets_docs_stage_drafted(self) -> None:
         """Cypher SET includes docs_stage = 'drafted'."""
         from imas_codex.standard_names.graph_ops import persist_generated_docs
 
-        gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}]])
+        gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}], None])
         with _patch_gc(gc):
             persist_generated_docs(
                 sn_id="test_sn",
@@ -364,7 +364,7 @@ class TestGenerateDocsPendingToDrafted:
                 model="test/model",
             )
 
-        cypher: str = gc.query.call_args.args[0]
+        cypher: str = gc.query.call_args_list[0].args[0]
         assert "docs_stage" in cypher and "'drafted'" in cypher
 
     def test_raises_when_node_not_found(self) -> None:

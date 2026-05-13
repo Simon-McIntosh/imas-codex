@@ -200,10 +200,8 @@ def _load_closed_vocab_full() -> list[dict[str, Any]]:
           ...
         ]
 
-    Tokens within a segment are sorted alphabetically.  Open segments
-    (``physical_base`` and any other segment with an empty token list) are
-    omitted because their content is by-design free-form — listing them
-    would mislead the LLM into treating them as closed.
+    Tokens within a segment are sorted alphabetically.  Segments with
+    empty token lists (if any) are omitted.
 
     The data source is :data:`imas_standard_names.grammar.constants.SEGMENT_TOKEN_MAP`
     which is the single source of truth used by the parser, the
@@ -230,7 +228,7 @@ def _load_closed_vocab_full() -> list[dict[str, Any]]:
     for segment in sorted(canonical_to_aliases):
         tokens = SEGMENT_TOKEN_MAP.get(segment) or ()
         if not tokens:
-            continue  # skip open segments
+            continue  # skip segments with no tokens
         out.append(
             {
                 "segment": segment,
@@ -520,8 +518,10 @@ def fetch_review_neighbours(
     """
     sn_id = sn.get("id") or sn.get("name") or ""
     desc = sn.get("description") or sn.get("name") or sn.get("id") or ""
-    physical_base = sn.get("physical_base") or (
-        (sn.get("grammar_fields") or {}).get("physical_base")
+    physical_base = (
+        sn.get("physical_base")
+        or sn.get("base_token")
+        or (sn.get("grammar_segments") or {}).get("physical_base")
     )
     source_paths = sn.get("source_paths") or []
     ids_prefix = next(

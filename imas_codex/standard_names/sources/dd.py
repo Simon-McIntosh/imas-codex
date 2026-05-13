@@ -38,7 +38,7 @@ def _is_unparseable_dd_unit(unit: str) -> bool:
     # Dimensionless sentinels are valid.
     # NOTE: "mixed" is NOT included — paths with DD unit 'mixed' are
     # non-standard by definition and must be rejected at source extraction
-    # (see _apply_mixed_unit_filter).
+    # (see dd_qualifier.py S5).
     if unit in ("1", "dimensionless", "-", "none"):
         return False
     # C1: whitespace in unit string
@@ -53,42 +53,43 @@ def _is_unparseable_dd_unit(unit: str) -> bool:
     return normalize_unit_symbol(unit) is None
 
 
-def _apply_mixed_unit_filter(
+def _qualify_sources(
     results: list[dict],
     *,
     source_type: str = "dd",
     write_skipped: bool = True,
 ) -> list[dict]:
-    """Hard-reject DD paths whose authoritative unit is ``'mixed'``.
+    """Qualify DD paths for standard name generation.
 
-    IMAS paths with ``unit='mixed'`` carry heterogeneous physical dimensions
-    (e.g. metric-tensor components ``g11_covariant`` whose unit depends on
-    the coordinate system).  By definition these are non-standard and **can
-    never** have a standard name.
+    Replaces the former stacked filter chain (mixed-unit filter,
+    skip-by-design, extract-deny) with a single pass through the
+    DD source qualifier. Each path is converted to a
+    :class:`SourceCandidate` and evaluated by :func:`qualify_dd`.
 
-    This filter runs *before* ``_apply_unit_overrides`` so that ``'mixed'``
-    sources are caught at the earliest possible point.  Matching sources are
-    recorded as ``StandardNameSource(status='skipped',
-    skip_reason='dd_unit_mixed_non_standard')`` for audit traceability.
+    Ineligible paths are recorded as ``StandardNameSource`` nodes
+    with the qualifier's reason codes for audit traceability.
 
-    Returns the filtered list of kept rows (mixed-unit ones removed).
+    Returns the filtered list of kept rows (ineligible ones removed).
     """
+    from imas_codex.standard_names.sources.base import SourceCandidate
+    from imas_codex.standard_names.sources.dd_qualifier import qualify_dd
+
     kept: list[dict] = []
     skip_records: list[dict] = []
 
     for row in results:
-        unit = row.get("unit")
-        if unit == "mixed":
+        candidate = SourceCandidate.from_dd_row(row)
+        qualification = qualify_dd(candidate)
+
+        if not qualification.eligible:
             skip_records.append(
                 {
                     "source_type": source_type,
-                    "source_id": row.get("path") or "",
-                    "skip_reason": "dd_unit_mixed_non_standard",
-                    "skip_reason_detail": (
-                        "DD unit is 'mixed' — heterogeneous dimensions "
-                        "are non-standard and ineligible for standard names"
-                    ),
-                    "description": row.get("description") or "",
+                    "source_id": candidate.source_id,
+                    "skip_reason": qualification.reason_code,
+                    "skip_reason_detail": qualification.reason_detail,
+                    "description": candidate.description,
+                    "status": qualification.status.value,
                 }
             )
             continue
@@ -96,7 +97,7 @@ def _apply_mixed_unit_filter(
 
     if skip_records:
         logger.info(
-            "Mixed-unit filter rejected %d paths (%d kept)",
+            "Source qualifier filtered %d paths (%d kept)",
             len(skip_records),
             len(kept),
         )
@@ -106,13 +107,10 @@ def _apply_mixed_unit_filter(
             from imas_codex.standard_names.graph_ops import write_skipped_sources
 
             written = write_skipped_sources(skip_records)
-            logger.info(
-                "Recorded %d skipped DD sources (dd_unit_mixed_non_standard)",
-                written,
-            )
+            logger.info("Recorded %d disqualified DD sources", written)
         except Exception as exc:  # pragma: no cover
             logger.warning(
-                "Failed to write mixed-unit DD sources to graph: %s (%d records)",
+                "Failed to write disqualified DD sources to graph: %s (%d records)",
                 exc,
                 len(skip_records),
             )
@@ -212,140 +210,6 @@ def _apply_unit_overrides(
     return kept
 
 
-# Path segments indicating "configurable meaning" blocks where the concrete
-# physical quantity depends on runtime identifier selection (e.g., a generic
-# slot inside a /process/ array-of-structures that could hold radiation,
-# transport, or source terms depending on the identifier). These are poor
-# Standard Name candidates because the semantic label is set by sibling
-# identifier.index, not by the DD path itself. Skipped as 'configurable_meaning'.
-_CONFIGURABLE_PATH_SEGMENTS = ("/process/",)
-
-
-def _apply_skip_by_design(
-    results: list[dict],
-    *,
-    source_type: str = "dd",
-    write_skipped: bool = True,
-) -> list[dict]:
-    """Filter out paths that are semantically indeterminate by design.
-
-    Counterpart to :func:`_apply_unit_overrides` but for path-structure
-    based skips (not unit-config based). Writes StandardNameSource rows
-    with ``status='skipped'`` and ``skip_reason='configurable_meaning'``
-    so the audit layer can distinguish "we chose not to name" from
-    "we tried and failed".
-    """
-    kept: list[dict] = []
-    skip_records: list[dict] = []
-
-    for row in results:
-        path = row.get("path") or ""
-        if any(seg in path for seg in _CONFIGURABLE_PATH_SEGMENTS):
-            skip_records.append(
-                {
-                    "source_type": source_type,
-                    "source_id": path,
-                    "skip_reason": "configurable_meaning",
-                    "skip_reason_detail": (
-                        "Path inside a /process/ array-of-structures; "
-                        "concrete quantity is determined by sibling "
-                        "identifier.index at runtime, not by the DD path."
-                    ),
-                    "description": row.get("description") or "",
-                }
-            )
-            continue
-        kept.append(row)
-
-    if write_skipped and skip_records:
-        try:
-            from imas_codex.standard_names.graph_ops import write_skipped_sources
-
-            written = write_skipped_sources(skip_records)
-            logger.info(
-                "Recorded %d skip-by-design DD sources (configurable_meaning)",
-                written,
-            )
-        except Exception as exc:  # pragma: no cover
-            logger.warning(
-                "Failed to write skip-by-design DD sources to graph: %s (%d records)",
-                exc,
-                len(skip_records),
-            )
-
-    return kept
-
-
-def _apply_extract_deny(
-    results: list[dict],
-    *,
-    source_type: str = "dd",
-    write_skipped: bool = True,
-) -> list[dict]:
-    """Filter out paths matched by the extract-deny YAML config.
-
-    Counterpart to :func:`_apply_skip_by_design` but driven by the
-    ``config/extract_deny.yaml`` rule set. Catches paths that pass the
-    ``SN_SOURCE_CATEGORIES`` gate (correct ``node_category``) but are
-    poor standard-name candidates: boolean constraint selectors,
-    engineering coil geometry, control-system parameters, etc.
-
-    Writes ``StandardNameSource`` rows with ``status='skipped'`` so the
-    audit layer can account for denied paths.
-
-    Returns the filtered list of kept rows (denied ones removed).
-    """
-    from imas_codex.standard_names.extract_deny import match_deny_rule
-
-    kept: list[dict] = []
-    skip_records: list[dict] = []
-
-    for row in results:
-        path = row.get("path") or ""
-        # Build node_attrs for attribute-predicate rules
-        node_attrs = {
-            "data_type": row.get("data_type"),
-            "units": row.get("unit") or row.get("unit_from_rel"),
-            "documentation": row.get("documentation"),
-        }
-        rule = match_deny_rule(path, node_attrs=node_attrs)
-        if rule is not None:
-            skip_records.append(
-                {
-                    "source_type": source_type,
-                    "source_id": path,
-                    "skip_reason": rule.skip_reason,
-                    "skip_reason_detail": rule.reason,
-                    "description": row.get("description") or "",
-                    "status": rule.status,
-                }
-            )
-            continue
-        kept.append(row)
-
-    if skip_records:
-        logger.info(
-            "Extract deny gate filtered %d paths (%d kept)",
-            len(skip_records),
-            len(kept),
-        )
-
-    if write_skipped and skip_records:
-        try:
-            from imas_codex.standard_names.graph_ops import write_skipped_sources
-
-            written = write_skipped_sources(skip_records)
-            logger.info("Recorded %d extract-deny DD sources", written)
-        except Exception as exc:  # pragma: no cover
-            logger.warning(
-                "Failed to write extract-deny DD sources to graph: %s (%d records)",
-                exc,
-                len(skip_records),
-            )
-
-    return kept
-
-
 # Enriched extraction query — single Cypher surfacing all context.
 # LIMIT is applied on DISTINCT (n, ids) pairs first, then clusters/coords
 # are joined.  This guarantees $limit unique paths regardless of how many
@@ -358,17 +222,20 @@ ORDER BY ids.id, n.id
 {limit_clause}
 WITH n, ids
 OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+WITH n, ids, collect(DISTINCT u.id) AS unit_rels
 OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
 OPTIONAL MATCH (n)-[:HAS_COORDINATE]->(coord:IMASNode)
 OPTIONAL MATCH (coord)-[:HAS_UNIT]->(cu:Unit)
 OPTIONAL MATCH (n)-[:HAS_ERROR]->(err:IMASNode)
-WITH n, ids, u, c, parent, coord, cu, collect(DISTINCT err.id) AS error_node_ids
+WITH n, ids, unit_rels, c, parent, coord, cu, collect(DISTINCT err.id) AS error_node_ids
 RETURN n.id AS path,
        n.description AS description,
        n.documentation AS documentation,
        n.unit AS unit,
-       u.id AS unit_from_rel,
+       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
+            WHEN size(unit_rels) > 1 THEN coalesce(n.units, unit_rels[0])
+            ELSE null END AS unit_from_rel,
        n.data_type AS data_type,
        n.node_type AS node_type,
        n.physics_domain AS physics_domain,
@@ -684,35 +551,20 @@ def extract_dd_candidates(
         for row in results:
             row["unit"] = row.get("unit_from_rel") or row.get("unit") or None
 
-        # Hard-reject paths with DD unit 'mixed' — heterogeneous dimensions
-        # are non-standard by definition and ineligible for standard names.
-        results = _apply_mixed_unit_filter(results, source_type="dd")
-        if not results:
-            logger.info("No DD paths remain after mixed-unit filtering")
-            return []
-
         # Apply DD unit override/skip config — fixes upstream defects and
         # records unresolvable paths as skipped StandardNameSource records.
+        # This is data normalization: it both fixes units AND skips unparseable ones.
         results = _apply_unit_overrides(results, source_type="dd")
         if not results:
             logger.info("No DD paths remain after unit override filtering")
             return []
 
-        # Skip paths that are semantically indeterminate by design
-        # (e.g., /process/ slots where the concrete quantity is selected
-        # at runtime by a sibling identifier.index).
-        results = _apply_skip_by_design(results, source_type="dd")
+        # Unified source qualification: replaces the former stacked chain of
+        # mixed-unit filter, skip-by-design, and extract-deny. Each path is
+        # converted to a SourceCandidate and evaluated by qualify_dd().
+        results = _qualify_sources(results, source_type="dd")
         if not results:
-            logger.info("No DD paths remain after skip-by-design filtering")
-            return []
-
-        # Extract-phase deny gate (W19A): skip paths that pass the
-        # SN_SOURCE_CATEGORIES gate but should not receive standard names.
-        # Examples: boolean constraint selectors (use_exact_*), engineering
-        # coil geometry, control-system force matrices.
-        results = _apply_extract_deny(results, source_type="dd")
-        if not results:
-            logger.info("No DD paths remain after extract deny filtering")
+            logger.info("No DD paths remain after source qualification")
             return []
 
         # Collect cluster IDs for sibling lookup
@@ -805,6 +657,7 @@ def extract_dd_candidates(
 _TARGETED_PATH_QUERY = """
 MATCH (n:IMASNode {id: $path})-[:IN_IDS]->(ids:IDS)
 OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+WITH n, ids, collect(DISTINCT u.id) AS unit_rels
 OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
 OPTIONAL MATCH (n)-[:HAS_COORDINATE]->(coord:IMASNode)
@@ -813,7 +666,9 @@ RETURN n.id AS path,
        n.description AS description,
        n.documentation AS documentation,
        n.unit AS unit,
-       u.id AS unit_from_rel,
+       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
+            WHEN size(unit_rels) > 1 THEN coalesce(n.units, unit_rels[0])
+            ELSE null END AS unit_from_rel,
        n.data_type AS data_type,
        n.physics_domain AS physics_domain,
        n.keywords AS keywords,
@@ -904,16 +759,11 @@ def extract_specific_paths(
     for row in results:
         row["unit"] = row.get("unit_from_rel") or row.get("unit") or None
 
-    results = _apply_mixed_unit_filter(results, source_type="dd")
-    if not results:
-        logger.info("No targeted DD paths remain after mixed-unit filtering")
-        return []
-
     results = _apply_unit_overrides(results, source_type="dd")
 
-    results = _apply_skip_by_design(results, source_type="dd")
+    results = _qualify_sources(results, source_type="dd")
     if not results:
-        logger.info("No targeted DD paths remain after skip-by-design filtering")
+        logger.info("No targeted DD paths remain after source qualification")
         return []
 
     # Deduplicate rows (multi-cluster → multiple rows per path)

@@ -1,9 +1,6 @@
-"""SN loop — drives ``sn run`` via concurrent worker pools or legacy
-domain rotation.
+"""SN loop — drives ``sn run`` via concurrent worker pools.
 
-Primary entry point: :func:`run_sn_pools` (Phase 8 pool-based
-orchestrator).  Legacy :func:`run_sn_loop` is retained for backward
-compatibility and existing tests.
+Primary entry point: :func:`run_sn_pools` (6-pool concurrent orchestrator).
 """
 
 from __future__ import annotations
@@ -17,15 +14,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
 logger = logging.getLogger(__name__)
-
-# Estimated cost of one minimal unit of LLM work (a single compose or
-# review API call).  The loop continues scheduling turns while the
-# remaining budget exceeds this estimate — no fixed dollar floor.
-EST_UNIT_COST: float = 0.05
 
 
 @dataclass
@@ -52,153 +43,6 @@ class RunSummary:
     review_cost: float = 0.0
 
 
-def _count_eligible_domains(
-    only_domain: str | None = None,
-) -> list[dict[str, Any]]:
-    """Return domains with extract-eligible DD paths, ordered by backlog size."""
-    from imas_codex.graph.client import GraphClient
-
-    cypher = """
-        MATCH (n:IMASNode)
-        WHERE n.node_category IN $categories
-          AND n.node_type IN ['dynamic', 'constant']
-          AND trim(coalesce(n.description, '')) <> ''
-          AND NOT EXISTS {
-              MATCH (sns:StandardNameSource {source_id: n.id, source_type: 'dd'})
-              WHERE NOT (sns.status IN ['stale', 'failed', 'extracted'])
-          }
-        RETURN coalesce(n.physics_domain, 'unclassified') AS domain,
-               count(*) AS remaining
-        ORDER BY remaining DESC
-    """
-    with GraphClient() as gc:
-        rows = list(gc.query(cypher, categories=list(SN_SOURCE_CATEGORIES)))
-    filtered = [r for r in rows if r["domain"] and r["domain"] != "unclassified"]
-    if only_domain:
-        filtered = [r for r in filtered if r["domain"] == only_domain]
-    return filtered
-
-
-def _existing_domain_targets(
-    only_domain: str | None = None,
-) -> list[dict[str, Any]]:
-    """Return domains that have un-enriched / un-reviewed names.
-
-    Fallback when no extract-eligible paths remain, or when
-    ``--skip-generate`` is set. Returns domains with at least one
-    StandardName in an incomplete state.
-    """
-    from imas_codex.graph.client import GraphClient
-
-    cypher = """
-        MATCH (sn:StandardName)
-        WHERE sn.physics_domain IS NOT NULL
-          AND (
-               sn.pipeline_status IN ['named', 'drafted']
-            OR sn.reviewer_score_name IS NULL
-          )
-        UNWIND sn.physics_domain AS domain
-        RETURN domain, count(*) AS remaining
-        ORDER BY remaining DESC
-    """
-    with GraphClient() as gc:
-        rows = list(gc.query(cypher))
-    filtered = [r for r in rows if r["domain"]]
-    if only_domain:
-        filtered = [r for r in filtered if r["domain"] == only_domain]
-    return filtered
-
-
-def _pick_stalest_domain(candidates: list[dict[str, Any]]) -> dict[str, Any]:
-    """From eligible domains, pick the one whose last SNRun is oldest.
-
-    Queries the graph for the most recent ``SNRun.stopped_at`` per candidate
-    domain (via ``domains_touched``).  Returns the candidate with the
-    oldest last run.  Tiebreak: domain with more remaining work wins.
-    Domains never previously run (no matching SNRun) sort first.
-    """
-    if len(candidates) == 1:
-        return candidates[0]
-
-    from imas_codex.graph.client import GraphClient
-
-    domain_names = [c["domain"] for c in candidates]
-
-    cypher = """
-        UNWIND $domains AS dom
-        OPTIONAL MATCH (rr:SNRun)
-          WHERE dom IN rr.domains_touched
-            AND rr.stopped_at IS NOT NULL
-        WITH dom, max(rr.stopped_at) AS last_run
-        RETURN dom AS domain, last_run
-    """
-    with GraphClient() as gc:
-        rows = list(gc.query(cypher, domains=domain_names))
-
-    if not rows:
-        return candidates[0]
-
-    last_run_map = {r["domain"]: r["last_run"] for r in rows}
-
-    # Sort: null last_run (never run) first, then oldest, then most remaining.
-    epoch = datetime(1970, 1, 1, tzinfo=UTC)
-
-    def sort_key(entry: dict[str, Any]) -> tuple[int, datetime, int]:
-        lr = last_run_map.get(entry["domain"])
-        return (
-            0 if lr is None else 1,
-            lr if lr is not None else epoch,
-            -entry["remaining"],
-        )
-
-    candidates_sorted = sorted(candidates, key=sort_key)
-    winner = candidates_sorted[0]
-    logger.debug(
-        "Stale-first rotation: picked %s (last_run=%s, remaining=%d)",
-        winner["domain"],
-        last_run_map.get(winner["domain"]),
-        winner["remaining"],
-    )
-    return winner
-
-
-def select_next_domain(
-    *,
-    skip_generate: bool = False,
-    only_domain: str | None = None,
-) -> dict[str, Any] | None:
-    """Select the next domain for a turn via stale-first rotation.
-
-    Returns ``{"domain": str, "remaining": int}`` for the winning
-    domain, or ``None`` if no domain has eligible work.
-
-    When *only_domain* is set, rotation is bypassed — the explicit
-    user choice always wins (provided it has work).
-    """
-    if only_domain:
-        # Explicit user choice bypasses rotation
-        if skip_generate:
-            candidates = _existing_domain_targets(only_domain=only_domain)
-        else:
-            candidates = _count_eligible_domains(only_domain=only_domain)
-            if not candidates:
-                candidates = _existing_domain_targets(only_domain=only_domain)
-        return candidates[0] if candidates else None
-
-    # Find all eligible domains
-    if skip_generate:
-        candidates = _existing_domain_targets()
-    else:
-        candidates = _count_eligible_domains()
-        if not candidates:
-            candidates = _existing_domain_targets()
-
-    if not candidates:
-        return None
-
-    return _pick_stalest_domain(candidates)
-
-
 # ── Status mapping ────────────────────────────────────────────────────
 # Map RunSummary.stop_reason to SNRun.status lifecycle values.
 _STOP_TO_STATUS: dict[str, str] = {
@@ -213,363 +57,6 @@ _STOP_TO_STATUS: dict[str, str] = {
     "failed": "failed",
     "degraded": "degraded",
 }
-
-
-async def run_sn_loop(
-    cost_limit: float,
-    *,
-    turn_number: int = 1,
-    min_score: float | None = None,
-    per_domain_limit: int | None = None,
-    concurrency: int = 8,
-    dry_run: bool = False,
-    only_domain: str | None = None,
-    skip_generate: bool = False,
-    skip_enrich: bool = False,
-    skip_review: bool = False,
-    skip_regen: bool = False,
-    source: str = "dd",
-    override_edits: list[str] | None = None,
-    only: str | None = None,
-    loop_state: Any | None = None,
-    stop_event: Any | None = None,
-) -> RunSummary:
-    """Drive the ``sn run`` loop with one-domain-per-turn rotation.
-
-    Each iteration picks ONE domain via stale-first rotation (oldest
-    ``SNRun.stopped_at`` wins, eligible-source count as tiebreak) and
-    runs a full turn on it with the entire remaining budget.  The loop
-    stops when the remaining budget can no longer fund a single unit of
-    work (< :data:`EST_UNIT_COST`) or no domain has eligible work.
-
-    Soft-limit semantics: the loop continues scheduling new turns while
-    ``remaining > EST_UNIT_COST``.  In-flight leases always settle
-    naturally — no truncation mid-LLM-call.
-
-    When *only_domain* is set the rotation is bypassed — the explicit
-    user choice is used every iteration until budget runs out or the
-    domain has no remaining work.
-
-    Args:
-        loop_state: Optional :class:`SNLoopState` whose :class:`WorkerStats`
-            fields are updated by workers for live progress display.
-            When ``None``, progress is logged via the standard logger
-            (plain mode).
-        stop_event: Optional :class:`asyncio.Event` set by the shutdown
-            harness.  Checked between turns for soft shutdown.
-    """
-    from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.turn import TurnConfig, run_turn
-
-    started = datetime.now(UTC)
-    summary = RunSummary(
-        run_id=str(uuid.uuid4()),
-        turn_number=turn_number,
-        started_at=started,
-        cost_limit=cost_limit,
-        min_score=min_score,
-    )
-
-    if dry_run:
-        domains = _count_eligible_domains(only_domain=only_domain)
-        summary.pass_records.append(
-            {
-                "dry_run": True,
-                "eligible_domains": [
-                    {"domain": d["domain"], "remaining": d["remaining"]}
-                    for d in domains
-                ],
-            }
-        )
-        summary.stopped_at = datetime.now(UTC)
-        summary.stop_reason = "dry_run"
-        return summary
-
-    # Single shared BudgetManager for the entire run.  All phases (compose,
-    # review_names, review_docs, regen) draw from the same pool so the total
-    # spend across every phase is gated by the user-specified cost_limit.
-    shared_mgr = BudgetManager(cost_limit, run_id=summary.run_id)
-    await shared_mgr.start()
-
-    # Pre-create the SNRun node so LLMCost → FOR_RUN edges have a target
-    # from the very first LLM call.
-    from imas_codex.standard_names.graph_ops import create_sn_run_open
-
-    create_sn_run_open(
-        summary.run_id,
-        started_at=summary.started_at,
-        cost_limit=cost_limit,
-        min_score=min_score,
-    )
-
-    # Per-domain stall detection: track (last_remaining, stall_count).
-    # If a domain is selected with the same `remaining` count as its previous
-    # turn AND the turn made no forward progress (compose/review/regen), we
-    # count it as a stall.  Two consecutive stalls → stop to avoid infinite
-    # turn loops that burn $0.05/turn in extract/enrich overhead.
-    MAX_STALLS = 2
-    domain_stalls: dict[str, tuple[int, int]] = {}
-
-    # Domain rotation tracking removed from SNLoopState — pending counts
-    # now come from graph queries via pending_fn (see cli/sn.py).
-
-    try:
-        while True:
-            # ── Soft shutdown check ───────────────────────────────
-            if stop_event is not None and stop_event.is_set():
-                summary.stop_reason = "interrupted"
-                logger.info("Stop event set — exiting loop.")
-                break
-
-            # ── Budget gate (soft limit) ──────────────────────────
-            # Continue while we can afford at least one more LLM call.
-            # Use summary.cost_spent (which accumulates via max(mgr.spent,
-            # cost_spent + phase_sum)) so tests that mock run_turn work too.
-            remaining_budget = cost_limit - summary.cost_spent
-            if remaining_budget < EST_UNIT_COST:
-                summary.stop_reason = "budget_exhausted"
-                logger.info(
-                    "Budget exhausted: $%.4f remaining < est unit cost $%.2f",
-                    remaining_budget,
-                    EST_UNIT_COST,
-                )
-                break
-
-            # ── Domain selection (stale-first rotation) ───────────
-            entry = select_next_domain(
-                skip_generate=skip_generate,
-                only_domain=only_domain,
-            )
-            if entry is None:
-                summary.stop_reason = "completed"
-                logger.info("No eligible domains; nothing to do.")
-                break
-
-            dom = entry["domain"]
-            logger.info(
-                "Turn %d → domain %s (remaining=%d, budget=$%.2f)",
-                turn_number,
-                dom,
-                entry["remaining"],
-                remaining_budget,
-            )
-
-            # Domain breadcrumb removed; row pending counts come from graph.
-
-            # Snapshot forward-progress counters before the turn so we can
-            # detect whether the turn actually advanced anything.
-            prev_progress = (
-                summary.names_composed
-                + summary.names_reviewed
-                + summary.names_regenerated
-            )
-            spent_before = shared_mgr.spent
-
-            # ── Run turn with full remaining budget ───────────────
-            cfg = TurnConfig(
-                domain=dom,
-                cost_limit=remaining_budget,
-                limit=per_domain_limit,
-                concurrency=concurrency,
-                dry_run=False,
-                run_id=summary.run_id,
-                turn_number=turn_number,
-                min_score=min_score,
-                skip_generate=skip_generate,
-                skip_enrich=skip_enrich,
-                skip_review=skip_review,
-                skip_regen=skip_regen or min_score is None,
-                source=source,
-                override_edits=override_edits,
-                only=only,
-                shared_budget=shared_mgr,
-                loop_state=loop_state,
-                stop_event=stop_event,
-            )
-            results = await run_turn(cfg)
-
-            # Measure turn cost: prefer the shared manager's actual spend delta
-            # (which captures all LLM calls including L7 Opus revisions) but
-            # fall back to summing PhaseResult.cost values for backwards
-            # compatibility with tests that mock run_turn without touching the
-            # shared BudgetManager.
-            mgr_delta = shared_mgr.spent - spent_before
-            phase_sum = sum(r.cost for r in results)
-            turn_cost = max(mgr_delta, phase_sum)
-
-            # ── Accumulate counters ───────────────────────────────
-            for phase in results:
-                if phase.name == "generate":
-                    summary.names_composed += phase.count
-                elif phase.name == "generate_docs":
-                    summary.names_enriched += phase.count
-                elif phase.name in ("review_names", "review_docs"):
-                    summary.names_reviewed += phase.count
-                elif phase.name == "refine_name":
-                    summary.names_regenerated += phase.count
-                elif phase.name == "reconcile":
-                    summary.sources_reconciled += phase.count
-                elif phase.name == "link":
-                    summary.links_resolved += phase.count
-
-            summary.cost_spent = max(shared_mgr.spent, summary.cost_spent + phase_sum)
-            summary.domains_touched.add(dom)
-
-            # Persist periodic cost_spent snapshot so ``imas-codex sn status``
-            # reflects real spend even if the run is interrupted before
-            # ``finalize_sn_run`` runs.
-            try:
-                from imas_codex.standard_names.graph_ops import (
-                    update_sn_run_progress,
-                )
-
-                update_sn_run_progress(
-                    summary.run_id,
-                    cost_spent=summary.cost_spent,
-                    cost_total=summary.cost_spent,
-                    events_total=shared_mgr.batch_count,
-                )
-            except Exception:  # noqa: BLE001 — never poison the loop
-                pass
-
-            # done_domains counter removed — graph pending counts replace it.
-
-            # Update phase-level cost breakdowns from shared manager.
-            phase_spent = shared_mgr.phase_spent
-            summary.compose_cost = phase_spent.get("generate", 0.0) + phase_spent.get(
-                "refine_name", 0.0
-            )
-            summary.review_cost = phase_spent.get(
-                "review_names", 0.0
-            ) + phase_spent.get("review_docs", 0.0)
-
-            summary.pass_records.append(
-                {
-                    "domain": dom,
-                    "remaining_before": entry["remaining"],
-                    "budget": remaining_budget,
-                    "phases": [
-                        {
-                            "name": r.name,
-                            "count": r.count,
-                            "cost": r.cost,
-                            "skipped": r.skipped,
-                            "error": r.error,
-                        }
-                        for r in results
-                    ],
-                }
-            )
-
-            # If zero cost was incurred, the domain had no actionable
-            # work — avoid an infinite loop by stopping.
-            if turn_cost <= 0.0:
-                logger.info(
-                    "Turn on %s produced zero cost; stopping to avoid loop.", dom
-                )
-                summary.stop_reason = "completed"
-                break
-
-            # ── Per-domain stall detection ────────────────────────
-            # Forward-progress check: if compose/review/regen didn't advance
-            # AND `remaining` is unchanged vs this domain's previous turn,
-            # record a stall.  Two consecutive stalls → stop to prevent
-            # budget drain on unrecoverable items (vocab gaps, invariant
-            # violations).
-            cur_progress = (
-                summary.names_composed
-                + summary.names_reviewed
-                + summary.names_regenerated
-            )
-            made_progress = cur_progress > prev_progress
-            prev_remaining, prev_stalls = domain_stalls.get(dom, (-1, 0))
-            if not made_progress and entry["remaining"] == prev_remaining:
-                prev_stalls += 1
-                domain_stalls[dom] = (entry["remaining"], prev_stalls)
-                logger.warning(
-                    "Domain %s stalled (remaining=%d unchanged, no progress) "
-                    "— stall %d/%d",
-                    dom,
-                    entry["remaining"],
-                    prev_stalls,
-                    MAX_STALLS,
-                )
-                if prev_stalls >= MAX_STALLS:
-                    logger.info(
-                        "Domain %s hit %d consecutive stalls — "
-                        "stopping to preserve budget ($%.2f remaining).",
-                        dom,
-                        MAX_STALLS,
-                        remaining_budget,
-                    )
-                    summary.stop_reason = "stalled"
-                    break
-            else:
-                domain_stalls[dom] = (entry["remaining"], 0)
-
-    except KeyboardInterrupt:
-        summary.stop_reason = "interrupted"
-        logger.warning("sn run interrupted by user")
-    finally:
-        summary.stopped_at = datetime.now(UTC)
-
-        # Drain pending LLMCost graph writes.
-        cost_is_exact = await shared_mgr.drain_pending()
-        if not cost_is_exact and summary.stop_reason not in (
-            "interrupted",
-            "failed",
-        ):
-            summary.stop_reason = "degraded"
-
-        # Refresh final cost from graph (includes all drained writes).
-        # Use max() to preserve in-loop accumulation for tests that mock
-        # run_turn without calling charge_event (where _spent stays 0).
-        summary.cost_spent = max(
-            summary.cost_spent,
-            await shared_mgr.get_total_spent(force_refresh=True),
-        )
-
-        # Compute pipeline hash — best-effort, never block finalization.
-        _pipeline_hash: str | None = None
-        _pipeline_hash_detail: str | None = None
-        try:
-            from imas_codex.standard_names.pipeline_version import (
-                compute_pipeline_hash,
-            )
-
-            ph = compute_pipeline_hash()
-            _pipeline_hash = ph["_composite"]
-            _pipeline_hash_detail = _json.dumps(
-                {k: v for k, v in ph.items() if k != "_composite"}
-            )
-        except Exception:  # noqa: BLE001
-            pass
-
-        # Finalize the SNRun node (MATCH + SET on the pre-created node).
-        from imas_codex.standard_names.graph_ops import finalize_sn_run
-
-        finalize_sn_run(
-            summary.run_id,
-            status=_STOP_TO_STATUS.get(summary.stop_reason, "completed"),
-            cost_spent=summary.cost_spent,
-            cost_is_exact=cost_is_exact,
-            stopped_at=summary.stopped_at,
-            elapsed_s=(summary.stopped_at - summary.started_at).total_seconds(),
-            cost_limit=round(summary.cost_limit, 6),
-            compose_cost=round(summary.compose_cost, 6),
-            review_cost=round(summary.review_cost, 6),
-            min_score=summary.min_score,
-            names_composed=summary.names_composed,
-            names_enriched=summary.names_enriched,
-            names_reviewed=summary.names_reviewed,
-            names_regenerated=summary.names_regenerated,
-            domains_touched=sorted(summary.domains_touched),
-            stop_reason=summary.stop_reason,
-            pipeline_hash=_pipeline_hash,
-            pipeline_hash_detail=_pipeline_hash_detail,
-        )
-
-    return summary
 
 
 def summary_table(summary: RunSummary) -> dict[str, Any]:
@@ -617,8 +104,11 @@ def _build_pool_specs(
     review_docs_backlog_cap: int | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
+    scope_run_id: str | None = None,
+    names_only: bool = False,
+    flush: bool = False,
 ) -> list[Any]:
-    """Construct 6 :class:`PoolSpec` objects wiring claims → batch processors.
+    """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
     Each pool gets two adapter closures:
 
@@ -751,12 +241,18 @@ def _build_pool_specs(
 
     # ── PoolSpec construction ─────────────────────────────────────────
 
+    # Optional scope_run_id kwargs for --focus mode.
+    _scope_kwargs: dict[str, Any] = {}
+    if scope_run_id:
+        _scope_kwargs["scope_run_id"] = scope_run_id
+
     specs = [
         PoolSpec(
             name="generate_name",
             claim=_make_claim_adapter(
                 claim_generate_name_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_generate_name_batch),
             release=_make_release_adapter(
@@ -768,6 +264,7 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_review_name_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_review_name_batch),
             release=_make_release_adapter(
@@ -782,6 +279,7 @@ def _build_pool_specs(
                 min_score=regen_score,
                 **_rotation_cap_kwargs,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_refine_name_batch),
             release=_make_release_adapter(
@@ -793,6 +291,7 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_generate_docs_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_generate_docs_batch),
             release=_make_release_adapter(
@@ -804,6 +303,7 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_review_docs_batch),
             release=_make_release_adapter(
@@ -818,6 +318,7 @@ def _build_pool_specs(
                 min_score=regen_score,
                 **_rotation_cap_kwargs,
                 **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
             ),
             process=_make_process_adapter(process_refine_docs_batch),
             release=_make_release_adapter(
@@ -826,45 +327,63 @@ def _build_pool_specs(
         ),
     ]
 
+    # ── Names-only filtering ─────────────────────────────────────────
+    _DOCS_POOLS = {"generate_docs", "review_docs", "refine_docs"}
+    if names_only:
+        specs = [s for s in specs if s.name not in _DOCS_POOLS]
+
+    # ── Flush filtering ──────────────────────────────────────────────
+    # Flush mode drains existing work without generating new names.
+    # Excludes generate_name so only review/refine pools run.
+    if flush:
+        specs = [s for s in specs if s.name != "generate_name"]
+
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
     # queue exceeds the configured cap.  The throttle wraps the claim
     # adapter to return None (skip) when the downstream pool's
     # PoolHealth.pending_count is over cap, causing the pool to enter
     # its normal exponential backoff.  No blocking, no special yield.
-    specs_by_name = {s.name: s for s in specs}
+    #
+    # In focus mode (scope_run_id set), skip throttle entirely — the
+    # focused set is 1-5 items and should never be blocked by global
+    # review backlog.
+    if not scope_run_id:
+        specs_by_name = {s.name: s for s in specs}
 
-    throttle_rules: list[tuple[str, str, int]] = [
-        ("generate_name", "review_name", _review_name_cap),
-        ("refine_name", "review_name", _review_name_cap),
-        ("generate_docs", "review_docs", _review_docs_cap),
-        ("refine_docs", "review_docs", _review_docs_cap),
-    ]
+        throttle_rules: list[tuple[str, str, int]] = [
+            ("generate_name", "review_name", _review_name_cap),
+            ("refine_name", "review_name", _review_name_cap),
+            ("generate_docs", "review_docs", _review_docs_cap),
+            ("refine_docs", "review_docs", _review_docs_cap),
+        ]
 
-    for upstream, downstream, cap in throttle_rules:
-        spec = specs_by_name[upstream]
-        downstream_health = specs_by_name[downstream].health
-        original_claim = spec.claim
+        for upstream, downstream, cap in throttle_rules:
+            if upstream not in specs_by_name or downstream not in specs_by_name:
+                continue
+            spec = specs_by_name[upstream]
+            downstream_health = specs_by_name[downstream].health
+            original_claim = spec.claim
 
-        async def _throttled_claim(
-            _orig: Callable[[], Awaitable[dict[str, Any] | None]] = original_claim,
-            _health: Any = downstream_health,
-            _cap: int = cap,
-            _up: str = upstream,
-            _down: str = downstream,
-        ) -> dict[str, Any] | None:
-            if _health.pending_count > _cap:
-                logger.debug(
-                    "throttle: %s paused — %s backlog %d > cap %d",
-                    _up,
-                    _down,
-                    _health.pending_count,
-                    _cap,
-                )
-                return None
-            return await _orig()
+            async def _throttled_claim(
+                _orig: Callable[[], Awaitable[dict[str, Any] | None]] = original_claim,
+                _health: Any = downstream_health,
+                _cap: int = cap,
+                _up: str = upstream,
+                _down: str = downstream,
+            ) -> dict[str, Any] | None:
+                if _health.pending_count > _cap:
+                    logger.debug(
+                        "throttle: %s paused — %s backlog %d > cap %d",
+                        _up,
+                        _down,
+                        _health.pending_count,
+                        _cap,
+                    )
+                    return None
+                return await _orig()
 
-        spec.claim = _throttled_claim
+            spec.claim = _throttled_claim
 
     return specs
 
@@ -1010,12 +529,22 @@ async def run_sn_pools(
     loop_state: Any | None = None,
     pending_fn: Callable[[], dict[str, int]] | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
+    scope_run_id: str | None = None,
+    names_only: bool = False,
+    flush: bool = False,
 ) -> RunSummary:
-    """Run the pool-based ``sn run`` orchestrator (Phase 8).
+    """Run the pool-based ``sn run`` orchestrator.
 
-    Replaces the per-domain serial :func:`run_sn_loop` with six
-    concurrent worker pools that pull work from the graph
+    Uses six concurrent worker pools that pull work from the graph
     independently and share a single :class:`BudgetManager`.
+
+    When *names_only* is ``True``, the three docs pools
+    (generate_docs, review_docs, refine_docs) are excluded so
+    only name generation / review / refinement run.
+
+    When *flush* is ``True``, the generate_name pool is excluded
+    and auto-seeding is skipped.  Only review / refine / docs
+    pools run, draining existing work without composing new names.
 
     Startup sequence:
 
@@ -1156,31 +685,63 @@ async def run_sn_pools(
             recon_result,
         )
 
-        # ── B3: Domain extract (auto-seed) ────────────────────────
-        # Merge deprecated only_domain into domains for backward compat.
-        _domains = domains
-        if only_domain and not _domains:
-            _domains = (only_domain,)
+        # ── B2b: Reconcile VocabGap nodes against current ISN vocab ───
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
 
-        if _domains:
-            seeded = 0
-            for d in _domains:
-                seeded += await _seed_domain_sources(
-                    domain=d, source=source, stop_event=stop_event
-                )
-            logger.info(
-                "Auto-seeded %d sources from %d domain(s)", seeded, len(_domains)
+        vg_result = await asyncio.to_thread(reconcile_vocab_gaps)
+        if vg_result.get("checked", 0) > 0:
+            deleted = (
+                vg_result.get("deleted_false_positive", 0)
+                + vg_result.get("deleted_invalid_segment", 0)
+                + vg_result.get("deleted_open_segment", 0)
             )
+            logger.info(
+                "run_sn_pools: VocabGap reconcile — %d checked, %d deleted, "
+                "%d reclassified, %d remaining",
+                vg_result.get("checked", 0),
+                deleted,
+                vg_result.get("reclassified", 0),
+                vg_result.get("remaining", 0),
+            )
+
+        # ── B3: Domain extract (auto-seed) ────────────────────────
+        # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
+        # Skip auto-seeding in flush mode — only drain existing work.
+        if scope_run_id:
+            logger.info(
+                "run_sn_pools: focus mode (run_id=%s…) — skipping auto-seed",
+                scope_run_id[:8],
+            )
+            _domains = domains
+        elif flush:
+            logger.info("run_sn_pools: flush mode — skipping auto-seed")
+            _domains = domains
         else:
-            seeded = await _seed_all_domains(source=source, max_sources=max_sources)
-            logger.info("Auto-seeded %d sources from all eligible domains", seeded)
+            # Merge only_domain into domains tuple.
+            _domains = domains
+            if only_domain and not _domains:
+                _domains = (only_domain,)
+
+            if _domains:
+                seeded = 0
+                for d in _domains:
+                    seeded += await _seed_domain_sources(
+                        domain=d, source=source, stop_event=stop_event
+                    )
+                logger.info(
+                    "Auto-seeded %d sources from %d domain(s)", seeded, len(_domains)
+                )
+            else:
+                seeded = await _seed_all_domains(source=source, max_sources=max_sources)
+                logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
         # ── B3b: Seed parent component sources ────────────────────
-        from imas_codex.standard_names.graph_ops import seed_parent_sources
+        if not flush:
+            from imas_codex.standard_names.graph_ops import seed_parent_sources
 
-        parent_count = await asyncio.to_thread(seed_parent_sources)
-        if parent_count:
-            logger.info("Seeded %d parent component sources", parent_count)
+            parent_count = await asyncio.to_thread(seed_parent_sources)
+            if parent_count:
+                logger.info("Seeded %d parent component sources", parent_count)
 
         # ── Build pool specs ──────────────────────────────────────
         _only_domain_for_pools = _domains[0] if len(_domains) == 1 else None
@@ -1194,6 +755,9 @@ async def run_sn_pools(
             review_docs_backlog_cap=review_docs_backlog_cap,
             on_event=on_event,
             only_domain=_only_domain_for_pools,
+            scope_run_id=scope_run_id,
+            names_only=names_only,
+            flush=flush,
         )
 
         # ── Wire pool health into display state ───────────────────
@@ -1215,6 +779,33 @@ async def run_sn_pools(
                 stop_event=stop_event,
             ),
             name="orphan_sweep",
+        )
+
+        # ── Embedding worker (reuses discovery infrastructure) ─────
+        # Runs the shared embed_description_worker targeting StandardName
+        # nodes.  It handles health gating, exponential backoff, and
+        # batch persistence — no custom embed pool needed.
+        from imas_codex.discovery.base.embed_worker import (
+            embed_description_worker,
+        )
+
+        class _EmbedState:
+            """Minimal state adapter for embed_description_worker."""
+
+            stop_requested = False
+
+            def should_stop(self) -> bool:
+                return stop_event.is_set()
+
+        embed_state = _EmbedState()
+        embed_task = asyncio.create_task(
+            embed_description_worker(
+                embed_state,
+                labels=["StandardName"],
+                facility=None,
+                batch_size=100,
+            ),
+            name="embed_sn",
         )
 
         # Periodic ``SNRun.cost_spent`` sync so ``imas-codex sn status``
@@ -1263,7 +854,11 @@ async def run_sn_pools(
                 sweep_task.cancel()
             if not cost_sync_task.done():
                 cost_sync_task.cancel()
-            await asyncio.gather(sweep_task, cost_sync_task, return_exceptions=True)
+            if not embed_task.done():
+                embed_task.cancel()
+            await asyncio.gather(
+                sweep_task, cost_sync_task, embed_task, return_exceptions=True
+            )
         logger.info("run_sn_pools: all pools exited — %s", health_map)
 
         # ── A3: per-pool cost observability ────────────────────────

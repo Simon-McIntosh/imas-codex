@@ -48,7 +48,7 @@ def _make_gc_for_enrichment(
 # ── Tests: Component tagging ───────────────────────────────────────────
 
 
-def test_component_of_tags_parent():
+def test_component_tags_parent():
     """_write_standard_name_edges sets needs_composition on bare parents."""
     from imas_codex.standard_names.derivation import derive_edges
 
@@ -89,14 +89,14 @@ def test_seed_parent_sources_creates_source():
                     "parent_id": "magnetic_field",
                     "child_data": [
                         {
-                            "id": "toroidal_component_of_magnetic_field",
+                            "id": "toroidal_magnetic_field",
                             "unit": "T",
                             "cocos": "b0_like",
                             "physics_domain": "magnetics",
                             "kind": "scalar",
                         },
                         {
-                            "id": "poloidal_component_of_magnetic_field",
+                            "id": "poloidal_magnetic_field",
                             "unit": "T",
                             "cocos": "b0_like",
                             "physics_domain": "magnetics",
@@ -249,7 +249,37 @@ def test_docs_enrich_child_context():
     assert items[0]["child_components"][0]["name"] == "magnetic_field_toroidal"
 
 
-# ── Tests: prompt rendering ────────────────────────────────────────────
+def test_docs_enrich_child_components_axis_ordered():
+    """Child components sorted by right-handed axis convention (R, φ, Z)."""
+    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+
+    # Return children in WRONG order: vertical before toroidal
+    children = [
+        {
+            "name": "vertical_B",
+            "description": "Vertical comp",
+            "axis": "vertical",
+        },
+        {
+            "name": "toroidal_B",
+            "description": "Toroidal comp",
+            "axis": "toroidal",
+        },
+        {
+            "name": "radial_B",
+            "description": "Radial comp",
+            "axis": "radial",
+        },
+    ]
+    gc = _make_gc_for_enrichment(children=children)
+    items = [{"id": "magnetic_field"}]
+    _enrich_for_docs_gen(gc, items)
+
+    assert "child_components" in items[0]
+    axes = [c["axis"] for c in items[0]["child_components"]]
+    assert axes == ["radial", "toroidal", "vertical"], (
+        f"Expected R, φ, Z ordering but got {axes}"
+    )
 
 
 def test_docs_prompt_renders_parent_section():

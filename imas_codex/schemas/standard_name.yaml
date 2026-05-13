@@ -454,6 +454,20 @@ classes:
       embed_failed_at:
         description: When the most recent embedding attempt failed; cleared on success
         range: datetime
+      embed_claimed_at:
+        description: >-
+          Timestamp when an embed worker claimed this name for embedding.
+          Independent of the main claimed_at used for stage transitions.
+          Stale claims (>5min) are automatically reclaimed.
+        range: datetime
+      embed_claim_token:
+        description: UUID token for atomic embed work claiming
+      embed_text_hash:
+        description: >-
+          SHA-256 hex digest (truncated to 16 chars) of the text used to
+          compute the current embedding (format: "name — description").
+          Used to detect stale embeddings after description updates.
+          Cleared by persist functions when description changes.
       documentation:
         description: >-
           Rich documentation with LaTeX equations, governing physics,
@@ -524,6 +538,18 @@ classes:
           provenance — records which DD snapshot provided paths, units,
           and documentation at generation time. Null for non-DD-sourced
           names. Plain string, not a graph relationship.
+        range: string
+      isn_version:
+        description: >-
+          ISN (imas-standard-names) package version at generation time
+          (e.g. "0.7.0rc56"). Records which grammar, vocabulary, and
+          validation rules were in effect when the name was composed.
+        range: string
+      codex_version:
+        description: >-
+          imas-codex package version at generation time (e.g. "4.1.0").
+          Records which pipeline, prompts, and enrichment logic produced
+          this name.
         range: string
       imported_at:
         description: >-
@@ -1004,14 +1030,14 @@ classes:
           Reviewer comments that triggered the last refinement cycle.
           Captured from ``reviewer_comments_name`` at refine time so the
           reason survives subsequent review overwrites.
-      # --- Grammar parse provenance (vNext — imas-standard-names >= 0.7.0rc21) ---
+      # --- Grammar parse provenance (imas-standard-names >= 0.7.0rc21) ---
       grammar_parse_version:
         description: >-
-          Version of ``imas-standard-names`` used when the vNext parser
+          Version of ``imas-standard-names`` used when the ISN parser
           last processed this name (e.g. ``"0.7.0rc21"``). Stamped at
           write time with ``imas_standard_names.__version__``. Enables
           staleness checks when the grammar parser is upgraded.
-          ``null`` means parse has not been run with the vNext API.
+          ``null`` means parse has not been run.
         range: string
       grammar_parse_fallback:
         description: >-
@@ -1025,11 +1051,11 @@ classes:
         required: false
       validation_diagnostics_json:
         description: >-
-          JSON-serialised list of parser diagnostics from the last vNext
+          JSON-serialised list of parser diagnostics from the last ISN
           parse, one object per diagnostic with keys: ``category``,
           ``layer``, ``message``, ``suggestion``, ``severity``.
           An empty JSON array (``"[]"``) means no diagnostics were
-          emitted; ``null`` means the vNext parse has not run yet.
+          emitted; ``null`` means the ISN parse has not run yet.
           Grammar decomposition is derived on demand via
           ``imas_standard_names.grammar.parser.parse()``; per-segment
           properties are no longer stored on the node.
@@ -1322,6 +1348,12 @@ classes:
         description: >-
           Human-readable detail for the skip (e.g. the raw DD unit string,
           the conflicting parent/child units). Set when status='skipped'.
+      dd_version:
+        description: >-
+          DD version at extraction time. Records which DD snapshot was
+          queried for paths, units, and documentation when this source
+          was first extracted. Plain string provenance, not a relationship.
+        range: string
 
   SNRun:
     description: >-
@@ -1615,6 +1647,18 @@ classes:
       reviewed_at:
         description: ISO 8601 timestamp when the review completed
         range: datetime
+      codex_version:
+        description: >-
+          imas-codex package version at review time (e.g. "4.1.0").
+          Records which review prompts, rubric, and pipeline logic
+          produced this review.
+        range: string
+      isn_version:
+        description: >-
+          ISN (imas-standard-names) package version at review time
+          (e.g. "0.7.0rc56"). Records which grammar and validation
+          rules were used during review.
+        range: string
 
   PromotionCandidate:
     description: >-
@@ -1653,9 +1697,9 @@ classes:
       segment:
         description: >-
           Grammar segment the token belongs to (e.g. ``physical_base``,
-          ``subject``). For V1 this is always ``physical_base`` since it
-          is the only open segment, but the field accommodates future
-          segments.
+          ``subject``). All segments are closed vocabulary — candidates
+          represent tokens used by the LLM that are not yet in the
+          installed ISN vocabulary.
         required: true
       token:
         description: The candidate vocabulary token

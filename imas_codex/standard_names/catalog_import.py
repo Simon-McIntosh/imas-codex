@@ -136,9 +136,9 @@ def _derive_domain_from_path(yaml_path: Path) -> str | None:
 
 def _grammar_decomposition(name: str) -> dict[str, str | None]:
     """Parse name via ISN grammar, returning grammar_* fields."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+    from imas_codex.standard_names.graph_ops import _parse_grammar
 
-    return _parse_grammar_vnext(name)
+    return _parse_grammar(name)
 
 
 # ---------------------------------------------------------------------------
@@ -191,7 +191,8 @@ def _entry_to_graph_dict(
     grammar = _grammar_decomposition(entry.name)
 
     links = [str(lnk) for lnk in entry.links] if entry.links else []
-    constraints = list(entry.constraints) if entry.constraints else []
+    raw_constraints = getattr(entry, "constraints", None)
+    constraints = list(raw_constraints) if raw_constraints else []
 
     if isinstance(physics_domain, list):
         source_domains = list(physics_domain)
@@ -210,7 +211,7 @@ def _entry_to_graph_dict(
         "kind": str(entry.kind) if hasattr(entry, "kind") and entry.kind else None,
         "unit": str(entry.unit) if hasattr(entry, "unit") and entry.unit else None,
         "links": links or None,
-        "validity_domain": entry.validity_domain or None,
+        "validity_domain": getattr(entry, "validity_domain", None) or None,
         "constraints": constraints or None,
         "physics_domain": primary_domain,
         "source_domains": source_domains,
@@ -563,7 +564,9 @@ def run_import(
                 # Strip graph-only fields before ISN validation
                 # (physics_domain is used later but ISN rejects it)
                 isn_data = {
-                    k: v for k, v in entry_data.items() if k not in _GRAPH_ONLY_FIELDS
+                    k: v
+                    for k, v in entry_data.items()
+                    if k not in _GRAPH_ONLY_FIELDS | _ISN_REMOVED_FIELDS
                 }
 
                 # Validate against ISN model
@@ -718,6 +721,11 @@ _GRAPH_ONLY_FIELDS = {
     "cocos",
 }
 
+# Fields removed from the ISN Pydantic model in v0.7.0rc46.
+# Strip before model validation to avoid ``extra_forbidden`` errors;
+# read back with ``getattr`` + default to avoid AttributeError.
+_ISN_REMOVED_FIELDS: frozenset[str] = frozenset({"constraints", "validity_domain"})
+
 
 def check_catalog(
     catalog_dir: Path,
@@ -795,7 +803,9 @@ def check_catalog(
                 model_data = {
                     k: v
                     for k, v in entry_data.items()
-                    if k not in _GRAPH_ONLY_FIELDS and k not in COMPUTED_FIELDS
+                    if k not in _GRAPH_ONLY_FIELDS
+                    and k not in COMPUTED_FIELDS
+                    and k not in _ISN_REMOVED_FIELDS
                 }
                 entry = ta.validate_python(model_data)
 

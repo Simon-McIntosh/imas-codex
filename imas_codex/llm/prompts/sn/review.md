@@ -13,13 +13,6 @@ You are a quality reviewer for IMAS standard name entries in fusion plasma physi
 
 {% include "sn/_exemplars.md" %}
 
-## Closed `physical_base` Vocabulary
-
-`physical_base` is a **closed vocabulary** (~250 tokens). If a candidate name
-uses a `physical_base` token not in the registry, it is a grammar defect —
-the composer should have flagged it as a `vocab_gap`. Penalise unknown base
-tokens in the grammar dimension. Do NOT treat the base as open-vocabulary.
-
 ## Scoring Dimensions
 
 Rate each dimension from 0 to 20. The total score is the sum (0-120).
@@ -29,11 +22,11 @@ genuine quality problems or false positives. Factor genuine issues into your
 grammar and convention scores.
 
 ### 1. Grammar Correctness (0-20)
-- Does the name parse correctly under the vNext 5-group IR?
+- Does the name parse correctly under the ISN 5-group IR?
 - Is the `physical_base` token in the closed vocabulary?
 - Are prefix operators scoped with `_of_` (`gradient_of_X`, not `gradient_X`)?
 - Are postfix operators correctly suffixed (`X_magnitude`, not `magnitude_of_X`)?
-- Is the projection prefix in canonical form (`radial_component_of_X`)?
+- Is the projection prefix in canonical short form (`radial_X`, not `radial_component_of_X`)?
 - Is the locus postfix (`_of_entity`, `_at_position`, `_over_region`)?
 - Does the name round-trip: `parse(name) → compose() == name`?
 - Are all `_of_` usages structurally disambiguated (operator scope, binary separator, or locus)?
@@ -55,9 +48,9 @@ grammar and convention scores.
   the absorbed tokens in the `issues` field as
   `decomposition: <token>(<group>) absorbed into physical_base`.
 
-**20**: Perfect parse under vNext IR, valid closed-vocab base, correct operator scoping, consistent decomposition.
+**20**: Perfect parse under ISN IR, valid closed-vocab base, correct operator scoping, consistent decomposition.
 **10**: Parses correctly but uses legacy concatenation forms (e.g. missing `_of_` on prefix operator).
-**0**: Would fail vNext grammar validation, uses unknown physical_base token, or prefix/postfix operator confusion.
+**0**: Would fail ISN grammar validation, uses unknown physical_base token, or prefix/postfix operator confusion.
 
 ### 2. Semantic Accuracy (0-20)
 - Does the name correctly describe the physics quantity from the source?
@@ -193,9 +186,9 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - **Documentation**: {{ item.documentation | default('N/A', true) }}
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
-- **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
+- **Grammar Fields**: {% if item.physical_base %}physical_base={{ item.physical_base }}{% endif %}{% if item.subject %}, subject={{ item.subject }}{% endif %}{% if item.component %}, component={{ item.component }}{% endif %}{% if item.coordinate %}, coordinate={{ item.coordinate }}{% endif %}{% if item.position %}, position={{ item.position }}{% endif %}{% if item.process %}, process={{ item.process }}{% endif %}
 {% if item.source_paths %}
-- **IMAS Paths**: {{ item.source_paths | join(', ') }}
+- **Source paths** (provenance context — dock if cited in output): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues:**
@@ -204,7 +197,7 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 {% endfor %}
 {% endif %}
 {% if item.dd_source_docs %}
-**Source DD paths** (primary truth for semantic accuracy):
+**Source DD definitions** (physics reference — dock if verbatim-copied into output):
 {% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
 {% endfor %}{% endif %}
 {% if item.nearest_peers %}

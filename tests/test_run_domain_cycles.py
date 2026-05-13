@@ -355,18 +355,6 @@ class TestFormatHelpers:
 class TestBuildSnRunCmd:
     """Test the subprocess command construction."""
 
-    def test_single_pass_always_present(self):
-        cmd = _mod._build_sn_run_cmd(
-            domain="equilibrium",
-            source="dd",
-            target="names",
-            cost_limit=5.0,
-            turn_number=1,
-            min_score=None,
-            dry_run=False,
-        )
-        assert "--single-pass" in cmd
-
     def test_min_score_omitted_when_none(self):
         cmd = _mod._build_sn_run_cmd(
             domain="equilibrium",

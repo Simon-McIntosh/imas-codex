@@ -36,6 +36,26 @@ produce an improved name that materially addresses the reviewer's concerns.
 _(none available)_
 {% endif %}
 
+{% if item.dd_clusters %}
+## Semantic Clusters
+
+{% for cl in item.dd_clusters %}- **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}
+{% endif %}
+
+{% if item.dd_version_history %}
+## DD Version History
+
+{% for vh in item.dd_version_history %}- {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}
+{% endif %}
+
+{% if item.dd_keywords %}
+## Keywords
+
+{{ item.dd_keywords | join(', ') }}
+{% endif %}
+
 ---
 
 ## Refinement history (oldest first; chain length so far: {{ chain_length }})
@@ -76,6 +96,30 @@ _(no prior refinement history — this is the first refine attempt)_
 {% endif %}
 
 {% endif %}
+{% if vocab_gap_detail %}
+
+---
+
+## ⚠️ Vocabulary Gap — Previous attempt rejected
+
+The previous name was rejected because it used a token not in the registered vocabulary:
+
+- **Segment:** {{ vocab_gap_detail.segment }}
+- **Needed token:** `{{ vocab_gap_detail.needed_token }}`
+- **Reason:** {{ vocab_gap_detail.reason }}
+
+**Fix:** Route this concept to the correct grammar segment. Check the segment routing table in the system prompt. If no registered token fits, emit a `vocab_gap`.
+{% endif %}
+{% if validation_issues %}
+
+---
+
+## Validation Issues
+
+{% for issue in validation_issues %}
+- {{ issue }}
+{% endfor %}
+{% endif %}
 {% if fanout_evidence %}
 
 ---
@@ -95,14 +139,21 @@ identified in the history above.
 Rules:
 - Do **not** repeat any name that appears in the refinement history.
 - Do **not** include unit or physics_domain — those are injected post-LLM.
-- Follow the standard name grammar: `snake_case`, physical_base last (or with
-  qualified suffix), no abbreviations, no instrument prefixes for generic
-  observables.
+- Follow the standard name grammar: fill IR segment fields inside the `segments`
+  object (`base_token`, `base_kind`, `projection_axis`, `qualifiers`, etc.),
+  no abbreviations, no instrument prefixes for generic observables.
+- **Locus prepositions:** Named geometric entities (separatrix, magnetic_axis,
+  plasma_boundary, x_point) and hardware objects (probe, coil, antenna) use
+  `locus_relation="of"`. Abstract spatial regions from the position vocabulary
+  (core, pedestal_top, lcfs) use `locus_relation="at"`.
 - Provide a short `description` (≤ 120 chars, one sentence, no LaTeX).
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "profile", "array"
   in descriptions. Describe the *physics*, not data layout.
 - **American English only** — "center" not "centre", "meter" not "metre".
-- Provide `grammar_fields` decomposing the name into grammar segments.
+- Provide all applicable IR segment fields inside `segments` — `base_token`,
+  `base_kind`, `projection_axis`, `projection_shape`, `qualifiers`,
+  `locus_token`, `locus_relation`, `locus_type`, `process_token`,
+  `operator_token`, `operator_kind`.
 - Provide a brief `reason` explaining how this attempt addresses the reviewer's
   specific concerns from the history above.
 

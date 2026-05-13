@@ -5,7 +5,7 @@ pattern from ``imas_codex.discovery.base.claims``.
 
 IMASNode lifecycle::
 
-    built → enriched → refined → embedded
+    built → enriched → refined → embedded → classified
 
 DDVersion lifecycle::
 
@@ -476,6 +476,50 @@ def has_pending_embedding() -> bool:
 
 
 # =============================================================================
+# IMASNode — classification (embedded → classified)
+# =============================================================================
+
+
+def has_pending_classification(*, ids_filter: set[str] | None = None) -> bool:
+    """Check if there are embedded IMASNodes awaiting classification."""
+    ids_clause = "AND split(p.id, '/')[0] IN $ids_filter" if ids_filter else ""
+    params: dict = {"status": "embedded"}
+    if ids_filter:
+        params["ids_filter"] = list(ids_filter)
+
+    with GraphClient() as gc:
+        result = gc.query(
+            f"""
+            MATCH (p:IMASNode)
+            WHERE p.status = $status
+              {ids_clause}
+            RETURN count(p) > 0 AS pending
+            """,
+            **params,
+        )
+        return result[0]["pending"] if result else False
+
+
+def mark_paths_classified(gc: GraphClient, path_ids: list[str]) -> int:
+    """Mark classified paths: set status=classified, clear claimed_at."""
+    if not path_ids:
+        return 0
+
+    result = gc.query(
+        """
+        UNWIND $ids AS pid
+        MATCH (p:IMASNode {id: pid})
+        SET p.status = 'classified',
+            p.claimed_at = null,
+            p.claim_token = null
+        RETURN count(p) AS updated
+        """,
+        ids=path_ids,
+    )
+    return result[0]["updated"] if result else 0
+
+
+# =============================================================================
 # Orphan recovery
 # =============================================================================
 
@@ -522,6 +566,10 @@ _RESET_CLEAR_FIELDS: dict[str, list[str]] = {
         "embedding_hash",
         "embedded_at",
         "physics_domain",
+        "domain_source",
+        "domain_model",
+        "domain_classified_at",
+        "domain_input_hash",
     ],
     "enriched": [
         "refinement_hash",
@@ -530,19 +578,35 @@ _RESET_CLEAR_FIELDS: dict[str, list[str]] = {
         "embedding",
         "embedding_hash",
         "embedded_at",
+        "domain_source",
+        "domain_model",
+        "domain_classified_at",
+        "domain_input_hash",
     ],
     "refined": [
         "embedding",
         "embedding_hash",
         "embedded_at",
+        "domain_source",
+        "domain_model",
+        "domain_classified_at",
+        "domain_input_hash",
+    ],
+    "embedded": [
+        "physics_domain",
+        "domain_source",
+        "domain_model",
+        "domain_classified_at",
+        "domain_input_hash",
     ],
 }
 
 # Statuses eligible for reset to each target
 _RESET_SOURCE_STATUSES: dict[str, list[str]] = {
-    "built": ["enriched", "refined", "embedded"],
-    "enriched": ["refined", "embedded"],
-    "refined": ["embedded"],
+    "built": ["enriched", "refined", "embedded", "classified"],
+    "enriched": ["refined", "embedded", "classified"],
+    "refined": ["embedded", "classified"],
+    "embedded": ["classified"],
 }
 
 

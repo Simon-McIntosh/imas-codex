@@ -225,13 +225,13 @@ def mint_error_siblings(
         operator = ERROR_SUFFIX_TO_OPERATOR[suffix]
         sibling_name = f"{operator}_of_{parent_name}"
 
-        # Validate via ISN vNext grammar round-trip (strict)
+        # Validate via ISN grammar round-trip (strict)
         try:
-            from imas_standard_names.grammar.parser import parse as vnext_parse
-            from imas_standard_names.grammar.render import compose as vnext_compose
+            from imas_standard_names.grammar.parser import parse as isn_parse
+            from imas_standard_names.grammar.render import compose as isn_compose
 
-            result = vnext_parse(sibling_name)
-            normalized = vnext_compose(result.ir)
+            result = isn_parse(sibling_name)
+            normalized = isn_compose(result.ir)
             sibling_name = normalized
         except Exception as exc:
             logger.warning(

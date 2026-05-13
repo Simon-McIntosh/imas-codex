@@ -270,7 +270,7 @@ class TestReconcileRunsAtTurnStart:
         """The turn phases list must begin with 'reconcile'."""
         # We don't need to execute the turn — just inspect the phase
         # ordering by checking that TURN_PHASES starts with 'reconcile'.
-        from imas_codex.standard_names.turn import TURN_PHASES, run_turn
+        from imas_codex.standard_names.turn import TURN_PHASES
 
         assert TURN_PHASES[0] == "reconcile", (
             f"TURN_PHASES must start with 'reconcile', got {TURN_PHASES[0]!r}"

@@ -174,7 +174,7 @@ CONCEPT_QUERIES = [
     ),
     pytest.param(
         "Current density parallel to the magnetic field",
-        ("parallel_current", "parallel_component_of_current"),
+        ("parallel_current", "parallel_current_density"),
         id="parallel_current_density",
     ),
     pytest.param(

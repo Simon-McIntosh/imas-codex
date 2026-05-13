@@ -10,6 +10,7 @@ Relationship direction: entity → concept
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -101,15 +102,129 @@ def normalize_name_id(name: str) -> str:
     return name.lower()
 
 
-def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
-    """Parse ``name`` with the vNext ISN grammar API.
+def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
+    """Extract grammar segment fields from a parsed ISN IR object.
 
-    Returns a dict with ``grammar_parse_version`` (ISN package version string)
-    and ``validation_diagnostics_json`` (JSON array of diagnostic objects).
+    Maps ISN IR structure to the ``grammar_*`` properties on StandardName:
+    - ``base.token`` → ``grammar_physical_base`` (quantity) or
+      ``grammar_geometric_base`` (carrier)
+    - ``projection.axis`` → ``grammar_component`` (component shape) or
+      ``grammar_coordinate`` (coordinate shape)
+    - Qualifiers by category → ``grammar_subject``, ``grammar_position``,
+      ``grammar_process``, ``grammar_device``, ``grammar_region``
+    - First unary_prefix operator → ``grammar_transformation``
+    """
+    segments: dict[str, str | None] = {
+        "grammar_physical_base": None,
+        "grammar_geometric_base": None,
+        "grammar_subject": None,
+        "grammar_component": None,
+        "grammar_coordinate": None,
+        "grammar_transformation": None,
+        "grammar_position": None,
+        "grammar_process": None,
+        "grammar_device": None,
+        "grammar_region": None,
+    }
+
+    if ir.base:
+        kind = getattr(ir.base.kind, "value", str(ir.base.kind))
+        if kind == "carrier":
+            segments["grammar_geometric_base"] = ir.base.token
+        else:
+            segments["grammar_physical_base"] = ir.base.token
+
+    if ir.projection:
+        shape = getattr(ir.projection.shape, "value", str(ir.projection.shape))
+        if shape == "coordinate":
+            segments["grammar_coordinate"] = ir.projection.axis
+        else:
+            segments["grammar_component"] = ir.projection.axis
+
+    # Map qualifiers by category
+    category_to_field = {
+        "subject": "grammar_subject",
+        "position": "grammar_position",
+        "process": "grammar_process",
+        "device": "grammar_device",
+        "region": "grammar_region",
+    }
+    for qual in ir.qualifiers or []:
+        cat = qual.category
+        if cat and cat in category_to_field:
+            segments[category_to_field[cat]] = qual.token
+
+    # First unary_prefix operator → transformation
+    for op in ir.operators or []:
+        kind = getattr(op.kind, "value", str(op.kind))
+        if kind == "unary_prefix" and op.op:
+            segments["grammar_transformation"] = op.op
+            break
+
+    return segments
+
+
+def _enrich_segments_from_pydantic(
+    name: str, segments: dict[str, str | None]
+) -> dict[str, str | None]:
+    """Fill ``None`` segment slots using ISN's Pydantic model.
+
+    The IR parser is vocabulary-agnostic — qualifiers like ``electron``
+    get ``category=None``. The Pydantic ``parse_standard_name`` layer
+    categorises them (``subject=electron``). This function backfills
+    any slots the IR left empty.
+    """
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+
+        sn = parse_standard_name(name)
+    except Exception:
+        return segments
+
+    field_map = {
+        "grammar_physical_base": "physical_base",
+        "grammar_geometric_base": "geometric_base",
+        "grammar_subject": "subject",
+        "grammar_component": "component",
+        "grammar_coordinate": "coordinate",
+        "grammar_transformation": "transformation",
+        "grammar_position": "position",
+        "grammar_process": "process",
+        "grammar_device": "device",
+        "grammar_region": "region",
+    }
+    for graph_key, sn_attr in field_map.items():
+        if segments.get(graph_key) is None:
+            val = getattr(sn, sn_attr, None)
+            if val is not None:
+                segments[graph_key] = val.value if hasattr(val, "value") else str(val)
+
+    return segments
+
+
+def _parse_grammar(name: str) -> dict[str, str | None]:
+    """Parse ``name`` with the ISN grammar API.
+
+    Returns a dict with ``grammar_parse_version`` (ISN package version string),
+    ``validation_diagnostics_json`` (JSON array of diagnostic objects), and
+    all ``grammar_*`` segment fields extracted from the ISN IR.
     The parse version is always set when ISN is available; diagnostics default
     to ``"[]"`` on parse failure so the field is never ``null`` after the first
     successful stamp.
     """
+    segment_defaults: dict[str, str | None] = {
+        "grammar_physical_base": None,
+        "grammar_geometric_base": None,
+        "grammar_subject": None,
+        "grammar_component": None,
+        "grammar_coordinate": None,
+        "grammar_transformation": None,
+        "grammar_position": None,
+        "grammar_process": None,
+        "grammar_device": None,
+        "grammar_region": None,
+    }
+
     try:
         import dataclasses
 
@@ -118,23 +233,35 @@ def _parse_grammar_vnext(name: str) -> dict[str, str | None]:
 
         version: str = imas_standard_names.__version__
     except ImportError:
-        return {"grammar_parse_version": None, "validation_diagnostics_json": None}
+        return {
+            "grammar_parse_version": None,
+            "validation_diagnostics_json": None,
+            **segment_defaults,
+        }
 
+    segments = dict(segment_defaults)
     try:
         result = parse(name)
         diags = json.dumps([dataclasses.asdict(d) for d in result.diagnostics])
+        segments = _extract_grammar_segments(result.ir)
+        # Pydantic model provides richer categorisation (e.g. subject)
+        segments = _enrich_segments_from_pydantic(name, segments)
     except ParseError:
         logger.debug(
-            "vNext grammar parse rejected '%s' — storing empty diagnostics", name
+            "ISN grammar parse rejected '%s' — storing empty diagnostics", name
         )
         diags = "[]"
     except Exception:
         logger.debug(
-            "vNext grammar parse failed for '%s' — storing empty diagnostics", name
+            "ISN grammar parse failed for '%s' — storing empty diagnostics", name
         )
         diags = "[]"
 
-    return {"grammar_parse_version": version, "validation_diagnostics_json": diags}
+    return {
+        "grammar_parse_version": version,
+        "validation_diagnostics_json": diags,
+        **segments,
+    }
 
 
 def _compute_link_status(links: list[str] | None) -> str | None:
@@ -1050,6 +1177,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
 
     co_batch: list[dict[str, Any]] = []  # COMPONENT_OF
     he_batch: list[dict[str, Any]] = []  # HAS_ERROR
+    geo_batch: list[dict[str, Any]] = []  # HAS_LOCUS
 
     for n in names:
         name_id = n.get("id")
@@ -1075,6 +1203,14 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
                         "from_name": edge.from_name,
                         "to_name": edge.to_name,
                         "error_type": edge.props.get("error_type"),
+                    }
+                )
+            elif edge.edge_type == "HAS_LOCUS":
+                geo_batch.append(
+                    {
+                        "from_name": edge.from_name,
+                        "locus_token": edge.props.get("locus_token"),
+                        "locus_relation": edge.props.get("locus_relation"),
                     }
                 )
 
@@ -1109,6 +1245,19 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
             SET r.error_type = b.error_type
             """,
             batch=he_batch,
+        )
+
+    if geo_batch:
+        gc.query(
+            """
+            UNWIND $batch AS b
+            MERGE (src:StandardName {id: b.from_name})
+            MERGE (loc:Locus {id: b.locus_token})
+            MERGE (src)-[r:HAS_LOCUS]->(loc)
+            SET r.locus_token = b.locus_token,
+                r.locus_relation = b.locus_relation
+            """,
+            batch=geo_batch,
         )
 
     # --- HAS_PREDECESSOR / HAS_SUCCESSOR ---
@@ -1216,25 +1365,29 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     """Attempt ISN parse on a parent name to extract grammar fields.
 
     Returns a dict with grammar_* keys. On parse failure, all values are None.
+    Uses the same ``_extract_grammar_segments`` as ``_parse_grammar``.
     """
-    fields: dict[str, str | None] = {
-        "grammar_physical_base": None,
-        "grammar_subject": None,
-        "grammar_transformation": None,
-        "grammar_component": None,
-    }
     try:
-        from imas_standard_names import parse_standard_name
+        from imas_standard_names.grammar.parser import ParseError, parse
 
-        parsed = parse_standard_name(name_id)
-        if parsed:
-            fields["grammar_physical_base"] = getattr(parsed, "physical_base", None)
-            fields["grammar_subject"] = getattr(parsed, "subject", None)
-            fields["grammar_transformation"] = getattr(parsed, "transformation", None)
-            fields["grammar_component"] = getattr(parsed, "component", None)
-    except Exception:  # noqa: BLE001
+        result = parse(name_id)
+        return _extract_grammar_segments(result.ir)
+    except (ImportError, ParseError):
         logger.debug("ISN parse failed for parent %s", name_id)
-    return fields
+    except Exception:  # noqa: BLE001
+        logger.debug("ISN parse error for parent %s", name_id)
+    return {
+        "grammar_physical_base": None,
+        "grammar_geometric_base": None,
+        "grammar_subject": None,
+        "grammar_component": None,
+        "grammar_coordinate": None,
+        "grammar_transformation": None,
+        "grammar_position": None,
+        "grammar_process": None,
+        "grammar_device": None,
+        "grammar_region": None,
+    }
 
 
 def seed_parent_sources(gc: Any | None = None) -> int:
@@ -1495,6 +1648,7 @@ def write_standard_names(
     ``review_tier``,
     ``vocab_gap_detail``, ``validation_issues``,
     ``validation_layer_summary``, ``cocos_transformation_type``, ``dd_version``,
+    ``isn_version``, ``codex_version``,
     ``review_input_hash``.
 
     Parameters
@@ -1524,6 +1678,36 @@ def write_standard_names(
         )
     if not names:
         return 0
+
+    # Grammar parse gate — reject names that ISN cannot parse.
+    # This is a hard invariant: if a name fails grammar round-trip, it is
+    # invalid by definition and must not enter the graph.
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+    except ImportError:
+        parse_standard_name = None  # type: ignore[assignment]
+
+    if parse_standard_name is not None:
+        valid_names: list[dict[str, Any]] = []
+        for n in names:
+            try:
+                parse_standard_name(n["id"])
+                valid_names.append(n)
+            except Exception as exc:
+                logger.warning(
+                    "write_standard_names: rejecting '%s' — grammar parse failed: %s",
+                    n["id"],
+                    str(exc)[:120],
+                )
+        if len(valid_names) < len(names):
+            logger.info(
+                "Grammar gate: %d/%d names passed parse validation",
+                len(valid_names),
+                len(names),
+            )
+        names = valid_names
+        if not names:
+            return 0
 
     # Guard: warn when cocos_transformation_type is set but cocos integer is missing
     for n in names:
@@ -1587,6 +1771,8 @@ def write_standard_names(
                 sn.cocos_transformation_type = coalesce(b.cocos_transformation_type, sn.cocos_transformation_type),
                 sn.cocos = coalesce(b.cocos, sn.cocos),
                 sn.dd_version = coalesce(b.dd_version, sn.dd_version),
+                sn.isn_version = coalesce(b.isn_version, sn.isn_version),
+                sn.codex_version = coalesce(b.codex_version, sn.codex_version),
                 sn.model = coalesce(b.model, sn.model),
                 sn.pipeline_status = coalesce(b.pipeline_status, sn.pipeline_status),
                 sn.generated_at = coalesce(b.generated_at, sn.generated_at),
@@ -1601,6 +1787,16 @@ def write_standard_names(
                 sn.embedded_at = coalesce(b.embedded_at, sn.embedded_at),
                 sn.grammar_parse_version = coalesce(b.grammar_parse_version, sn.grammar_parse_version),
                 sn.validation_diagnostics_json = coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json),
+                sn.grammar_physical_base = coalesce(b.grammar_physical_base, sn.grammar_physical_base),
+                sn.grammar_geometric_base = coalesce(b.grammar_geometric_base, sn.grammar_geometric_base),
+                sn.grammar_subject = coalesce(b.grammar_subject, sn.grammar_subject),
+                sn.grammar_component = coalesce(b.grammar_component, sn.grammar_component),
+                sn.grammar_coordinate = coalesce(b.grammar_coordinate, sn.grammar_coordinate),
+                sn.grammar_transformation = coalesce(b.grammar_transformation, sn.grammar_transformation),
+                sn.grammar_position = coalesce(b.grammar_position, sn.grammar_position),
+                sn.grammar_process = coalesce(b.grammar_process, sn.grammar_process),
+                sn.grammar_device = coalesce(b.grammar_device, sn.grammar_device),
+                sn.grammar_region = coalesce(b.grammar_region, sn.grammar_region),
                 sn.llm_cost_refine_name = CASE WHEN sn.generate_name_count IS NOT NULL
                                              AND sn.generate_name_count > 0
                                              AND b.llm_cost IS NOT NULL
@@ -1647,6 +1843,8 @@ def write_standard_names(
                     "cocos_transformation_type": n.get("cocos_transformation_type"),
                     "cocos": n.get("cocos"),
                     "dd_version": n.get("dd_version"),
+                    "isn_version": n.get("isn_version"),
+                    "codex_version": n.get("codex_version"),
                     "model": n.get("model"),
                     "pipeline_status": n.get("pipeline_status")
                     or n.get("review_status"),
@@ -1671,7 +1869,7 @@ def write_standard_names(
                     "llm_tokens_cached_read": n.get("llm_tokens_cached_read"),
                     "llm_tokens_cached_write": n.get("llm_tokens_cached_write"),
                     "regen_increment": n.get("regen_increment"),
-                    **_parse_grammar_vnext(n["id"]),
+                    **_parse_grammar(n["id"]),
                 }
                 for n in names
             ],
@@ -1930,6 +2128,9 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
     ``llm_tokens_in`` (int), ``llm_tokens_out`` (int),
     ``llm_model`` (str), ``llm_at`` (str), ``llm_service`` (str).
 
+    Version provenance (auto-injected if not provided):
+    ``codex_version`` (str), ``isn_version`` (str).
+
     MERGE-by-``id`` semantics make re-runs idempotent when the same
     model reviews the same name at the same timestamp.
 
@@ -1951,6 +2152,24 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
     valid = [r for r in records if r.get("id") and r.get("standard_name_id")]
     if not valid:
         return 0
+
+    # Auto-inject codex and ISN versions (same pattern as persist_generated_name_batch)
+    try:
+        import imas_standard_names
+
+        _isn_ver = imas_standard_names.__version__
+    except (ImportError, AttributeError):
+        _isn_ver = None
+    try:
+        import importlib.metadata
+
+        _codex_ver = importlib.metadata.version("imas-codex")
+    except Exception:
+        _codex_ver = None
+    for r in valid:
+        r.setdefault("isn_version", _isn_ver)
+        r.setdefault("codex_version", _codex_ver)
+
     with GraphClient() as gc:
         gc.query(
             """
@@ -1981,7 +2200,9 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                 r.llm_tokens_cached_read = b.llm_tokens_cached_read,
                 r.llm_tokens_cached_write = b.llm_tokens_cached_write,
                 r.llm_at = b.llm_at,
-                r.llm_service = b.llm_service
+                r.llm_service = b.llm_service,
+                r.codex_version = b.codex_version,
+                r.isn_version = b.isn_version
             WITH r, b
             MATCH (sn:StandardName {id: b.standard_name_id})
             MERGE (sn)-[:HAS_REVIEW]->(r)
@@ -2030,6 +2251,8 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                     else 0,
                     "llm_at": r.get("llm_at"),
                     "llm_service": r.get("llm_service"),
+                    "codex_version": r.get("codex_version"),
+                    "isn_version": r.get("isn_version"),
                 }
                 for r in valid
             ],
@@ -2389,6 +2612,30 @@ def _coerce_segment_value(value: Any) -> str | None:
     return str(val)
 
 
+def _resolve_synced_segments(
+    gc: GraphClient, token_version: str | None
+) -> frozenset[str]:
+    """Return grammar segments that have GrammarToken nodes in the graph.
+
+    Segments with zero synced tokens (e.g. ``physical_base`` when the ISN
+    graph spec excludes it) generate ``segment_edge_specs`` entries from
+    the ISN parser but can never match a GrammarToken node. Filtering
+    these out prevents false-positive token-miss warnings and VocabGap
+    nodes.
+    """
+    if token_version is None:
+        return frozenset()
+
+    rows = list(
+        gc.query(
+            "MATCH (t:GrammarToken {version: $v}) RETURN DISTINCT t.segment AS seg",
+            v=token_version,
+        )
+        or []
+    )
+    return frozenset(r["seg"] for r in rows)
+
+
 def _write_grammar_decomposition(
     gc: GraphClient, name_ids: list[str]
 ) -> list[dict[str, str]]:
@@ -2427,6 +2674,11 @@ def _write_grammar_decomposition(
     # path runs even when no GrammarToken nodes exist.
     token_version = _resolve_grammar_token_version(gc, isn_version)
 
+    # Discover which segments actually have GrammarToken nodes in the graph.
+    # Segments with 0 synced tokens (e.g. physical_base) generate edge specs
+    # from ISN but can never match — exclude them from token-miss detection.
+    synced_segments = _resolve_synced_segments(gc, token_version)
+
     # Constant column-clear template — used both on parse error and as the
     # idempotent reset before re-applying segment values.
     null_columns = dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
@@ -2461,7 +2713,7 @@ def _write_grammar_decomposition(
             )
             continue
 
-        # ---- Always-on column write (open-vocab capture) ------------------
+        # ---- Always-on column write ------------------
         column_values = {**null_columns}
         parsed_dump = (
             parsed.model_dump() if hasattr(parsed, "model_dump") else dict(parsed)
@@ -2583,10 +2835,14 @@ def _write_grammar_decomposition(
             or []
         )
 
+        # Only report token misses for segments that have GrammarToken
+        # nodes in the graph.  Segments like physical_base are intentionally
+        # excluded from the graph sync and would always produce false
+        # positives.
         missing = [
             f"{r['segment']}:{r['token']}"
             for r in results
-            if not r.get("matched", True)
+            if not r.get("matched", True) and r.get("segment") in synced_segments
         ]
         if missing:
             logger.warning(
@@ -2597,7 +2853,7 @@ def _write_grammar_decomposition(
                 token_version,
             )
             for r in results:
-                if not r.get("matched", True):
+                if not r.get("matched", True) and r.get("segment") in synced_segments:
                     all_gaps.append(
                         {
                             "sn_id": sn_id,
@@ -2697,9 +2953,26 @@ def persist_generated_name_batch(
     now = datetime.now(UTC).isoformat()
     from imas_codex.standard_names.kind_derivation import derive_kind
 
+    # Inject tool version provenance
+    try:
+        import imas_standard_names
+
+        _isn_ver = imas_standard_names.__version__
+    except (ImportError, AttributeError):
+        _isn_ver = None
+    try:
+        import importlib.metadata
+
+        _codex_ver = importlib.metadata.version("imas-codex")
+    except Exception:
+        _codex_ver = None
+
     for entry in candidates:
         entry.setdefault("model", compose_model)
         entry.setdefault("pipeline_status", "named")
+        entry.setdefault("dd_version", dd_version)
+        entry.setdefault("isn_version", _isn_ver)
+        entry.setdefault("codex_version", _codex_ver)
         # validation_status is set upstream by audit logic (run_audits +
         # _is_quarantined) in the pool path or validate_worker in the
         # legacy linear path.  When neither has run (e.g. dry-run paths
@@ -2730,39 +3003,11 @@ def persist_generated_name_batch(
         ):
             entry["cocos_transformation_type"] = "one_like"
 
-    # --- Batch-embed standard-name strings ---
-    # Prefer "name — description" for richer embedding basis when
-    # description is available; fall back to name-only for candidates
-    # without one (backward-compatible with existing name-only embeddings).
+    # --- Embedding deferred to shared discovery embed_description_worker ---
+    # Clear embedding so the background embed worker picks these up.
     for entry in candidates:
-        name = entry.get("id") or ""
-        desc = entry.get("description") or ""
-        entry["_embed_text"] = f"{name} — {desc}" if desc else name
-
-    try:
-        from imas_codex.embeddings.description import embed_descriptions_batch
-
-        embed_descriptions_batch(candidates, text_field="_embed_text")
-    except Exception:
-        logger.warning(
-            "Embedding server unavailable — all %d candidates will be marked for retry",
-            len(candidates),
-            exc_info=True,
-        )
-        # Total failure — mark embedding as missing for retry tracking
-        for entry in candidates:
-            entry["embedding"] = None
-
-    # Clean up transient field
-    for entry in candidates:
-        entry.pop("_embed_text", None)
-
-    # Set embedded_at for successful embeddings; mark failures for retry
-    for entry in candidates:
-        if entry.get("embedding"):
-            entry["embedded_at"] = now
-        else:
-            entry["embed_failed_at"] = now
+        entry["embedding"] = None
+        entry["embed_text_hash"] = None
 
     written = write_standard_names(candidates)
 
@@ -2894,7 +3139,8 @@ def _finalize_generated_name_stage(
                         sns.claimed_at   = null,
                         sns.status       = 'composed',
                         sns.composed_at  = datetime(),
-                        sns.produced_sn_id = sn.id
+                        sns.produced_sn_id = sn.id,
+                        sn.run_id        = coalesce(sns.run_id, sn.run_id)
                     MERGE (sns)-[:PRODUCED_NAME]->(sn)
                     """,
                     batch=batch,
@@ -3054,9 +3300,8 @@ def write_vocab_gaps(
     Args:
         gaps: List of gap dicts.
         source_type: Source type ('dd' or 'signals').
-        skip_segment_filter: When ``True``, bypass the open-segment filter.
-            Used by auto-VocabGap detection for ``physical_base`` — the
-            segment is open (any token is valid) but we still want to
+        skip_segment_filter: When ``True``, bypass the segment filter.
+            Used by auto-VocabGap detection — we still want to
             track novel tokens for ISN review.
 
     Returns the number of VocabGap nodes written.
@@ -3069,15 +3314,14 @@ def write_vocab_gaps(
     if not skip_segment_filter:
         from imas_codex.standard_names.segments import filter_closed_segment_gaps
 
-        # Drop gaps reported against open-vocabulary segments (e.g. physical_base)
-        # and pseudo segments (grammar_ambiguity) — they are not missing tokens.
+        # Drop gaps on pseudo segments (grammar_ambiguity) — not missing tokens.
         gaps, dropped = filter_closed_segment_gaps(gaps)
         if dropped:
             from collections import Counter
 
             drop_hist = Counter(g.get("segment") for g in dropped)
             logger.info(
-                "write_vocab_gaps: skipped %d gaps on open/pseudo segments (%s)",
+                "write_vocab_gaps: skipped %d gaps on pseudo segments (%s)",
                 len(dropped),
                 ", ".join(f"{seg}={n}" for seg, n in drop_hist.most_common()),
             )
@@ -3086,8 +3330,8 @@ def write_vocab_gaps(
 
     now = datetime.now(UTC).isoformat()
 
-    # Classify gaps using the ISN segment-token index
-    from imas_codex.standard_names.segments import is_known_token
+    # Classify gaps using the ISN-backed classify_gap() function
+    from imas_codex.standard_names.segments import classify_gap, is_valid_segment
 
     # Build deduplicated gap nodes and relationship batch
     gap_nodes: dict[str, dict] = {}
@@ -3099,23 +3343,36 @@ def write_vocab_gaps(
         gap_id = f"vocab_gap:{segment}:{needed_token}"
 
         if gap_id not in gap_nodes:
-            # Classify this gap
-            segments_found = is_known_token(needed_token)
-            if not segments_found:
-                category = "absent"
-                actual_segments: list[str] = []
-            elif segment not in segments_found:
-                if len(segments_found) > 1:
-                    category = "ambiguous_known_token"
-                else:
-                    category = "wrong_slot_placement"
-                actual_segments = segments_found
-            else:
-                # Token is in the reported segment — should not normally
-                # happen (not a gap at all), but classify as absent
-                # defensively to preserve existing behaviour.
-                category = "absent"
-                actual_segments = []
+            # Validate segment exists in ISN grammar
+            if not is_valid_segment(segment):
+                logger.warning(
+                    "write_vocab_gaps: skipping gap with unknown segment "
+                    "'%s' for token '%s'",
+                    segment,
+                    needed_token,
+                )
+                continue
+
+            category, actual_segments = classify_gap(segment, needed_token)
+
+            # Filter non-actionable gaps — these are not genuine vocabulary
+            # deficiencies but LLM mis-classifications or decomposable compounds
+            _NON_ACTIONABLE = {
+                "false_positive",
+                "open_segment",
+                "wrong_slot_placement",
+                "ambiguous_known_token",
+                "decomposable",
+            }
+            if category in _NON_ACTIONABLE:
+                logger.debug(
+                    "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
+                    category,
+                    gap_id,
+                    needed_token,
+                    segment,
+                )
+                continue
 
             gap_nodes[gap_id] = {
                 "id": gap_id,
@@ -3212,11 +3469,12 @@ def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any
     token = str(uuid.uuid4())
     with GraphClient() as gc:
         # Step 1: claim with random ordering and unique token
+        # Gate: any StandardName with a description that hasn't been validated.
+        # No pipeline_status filter — legacy names with NULL status must also be validated.
         gc.query(
             """
             MATCH (sn:StandardName)
-            WHERE sn.pipeline_status IN ['named', 'drafted']
-              AND sn.generated_at IS NOT NULL
+            WHERE sn.description IS NOT NULL
               AND sn.validated_at IS NULL
               AND (sn.claimed_at IS NULL
                    OR sn.claimed_at < datetime() - duration($timeout))
@@ -4392,11 +4650,13 @@ def merge_standard_name_sources(
                 sns.status = src.status,
                 sns.description = src.description,
                 sns.physics_domain = src.physics_domain,
+                sns.dd_version = src.dd_version,
                 sns.attempt_count = 0
             ON MATCH SET
                 sns.batch_key = src.batch_key,
                 sns.description = coalesce(src.description, sns.description),
                 sns.physics_domain = coalesce(src.physics_domain, sns.physics_domain),
+                sns.dd_version = coalesce(src.dd_version, sns.dd_version),
                 sns.status = CASE
                     WHEN $force THEN 'extracted'
                     WHEN sns.status = 'stale' THEN 'extracted'
@@ -5198,6 +5458,117 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     }
 
 
+def reconcile_vocab_gaps() -> dict[str, int]:
+    """Re-validate all VocabGap nodes against the current ISN vocabulary.
+
+    Performs three passes on every VocabGap node:
+
+    1. **Delete false positives** — token now exists in the reported segment
+       (ISN was upgraded since the gap was written).
+    2. **Delete invalid-segment gaps** — segment name is not in ISN grammar.
+    3. **Reclassify surviving gaps** — recompute ``category`` and
+       ``actual_segments`` against the current ISN installation.  A gap
+       previously ``absent`` may become ``wrong_slot_placement`` if ISN added
+       the token in a different segment.
+
+    Returns dict with counts:
+        checked, deleted_false_positive, deleted_invalid_segment,
+        deleted_open_segment, reclassified, remaining.
+    """
+    from imas_codex.standard_names.segments import (
+        classify_gap,
+        known_segments,
+    )
+
+    segs = known_segments()
+    if segs is None:
+        logger.warning(
+            "reconcile_vocab_gaps: ISN unavailable — skipping reconciliation"
+        )
+        return {"checked": 0, "skipped": True}
+
+    with GraphClient() as gc:
+        all_gaps = list(
+            gc.query(
+                """
+                MATCH (vg:VocabGap)
+                RETURN vg.id AS id, vg.segment AS segment,
+                       vg.needed_token AS token, vg.category AS category
+                """
+            )
+        )
+
+    if not all_gaps:
+        return {"checked": 0, "remaining": 0}
+
+    to_delete: list[str] = []
+    to_update: list[dict] = []
+    stats: dict[str, int] = {
+        "checked": len(all_gaps),
+        "deleted_false_positive": 0,
+        "deleted_invalid_segment": 0,
+        "deleted_open_segment": 0,
+        "reclassified": 0,
+    }
+
+    for gap in all_gaps:
+        segment, token = gap["segment"], gap["token"]
+        new_category, new_actual = classify_gap(segment, token)
+
+        if new_category == "false_positive":
+            to_delete.append(gap["id"])
+            stats["deleted_false_positive"] += 1
+        elif new_category == "invalid_segment":
+            to_delete.append(gap["id"])
+            stats["deleted_invalid_segment"] += 1
+        elif new_category == "open_segment":
+            to_delete.append(gap["id"])
+            stats["deleted_open_segment"] += 1
+        elif new_category != gap.get("category"):
+            to_update.append(
+                {
+                    "id": gap["id"],
+                    "category": new_category,
+                    "actual_segments": new_actual,
+                }
+            )
+            stats["reclassified"] += 1
+
+    with GraphClient() as gc:
+        if to_delete:
+            gc.query(
+                """
+                UNWIND $ids AS gap_id
+                MATCH (vg:VocabGap {id: gap_id})
+                DETACH DELETE vg
+                """,
+                ids=to_delete,
+            )
+            logger.info(
+                "reconcile_vocab_gaps: deleted %d false-positive/invalid gaps",
+                len(to_delete),
+            )
+
+        if to_update:
+            gc.query(
+                """
+                UNWIND $batch AS b
+                MATCH (vg:VocabGap {id: b.id})
+                SET vg.category = b.category,
+                    vg.actual_segments = b.actual_segments,
+                    vg.reconciled_at = datetime()
+                """,
+                batch=to_update,
+            )
+            logger.info(
+                "reconcile_vocab_gaps: reclassified %d gaps",
+                len(to_update),
+            )
+
+    stats["remaining"] = stats["checked"] - len(to_delete)
+    return stats
+
+
 def reconcile_error_siblings() -> dict[str, int]:
     """Detect and mark stale error-sibling StandardNames.
 
@@ -5478,7 +5849,7 @@ def create_sn_run_open(
 ) -> None:
     """Pre-create an ``SNRun`` node with ``status='started'``.
 
-    Called at the START of ``run_sn_loop`` so that ``(LLMCost)-[:FOR_RUN]->
+    Called at the START of ``run_sn_pools`` so that ``(LLMCost)-[:FOR_RUN]->
     (SNRun)`` edges have a target from the first LLM call onward.
 
     Uses MERGE so repeated calls (e.g. after a retry) are safe.
@@ -6001,6 +6372,7 @@ def _claim_sn_atomic(
     stage_field: str | None = None,
     to_stage: str | None = None,
     domain: str | None = None,
+    scope_run_id: str | None = None,
     seed_extra_where: str = "",
     seed_with_extras: str = "",
     seed_order_by: str = "rand()",
@@ -6082,6 +6454,12 @@ def _claim_sn_atomic(
         domain_where = " AND sn.physics_domain = $domain"
         params["domain"] = domain
 
+    # Optional run-id scope for --focus mode.
+    scope_where = ""
+    if scope_run_id:
+        scope_where = " AND sn.run_id = $scope_run_id"
+        params["scope_run_id"] = scope_run_id
+
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
@@ -6096,6 +6474,7 @@ def _claim_sn_atomic(
                                OR sn.claimed_at < datetime()
                                     - duration($cutoff))
                           {domain_where}
+                          {scope_where}
                           {seed_extra_where}
                         WITH sn{seed_with_extras}
                         ORDER BY {seed_order_by} LIMIT 1
@@ -6138,6 +6517,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                             MATCH (sn)-[:IN_CLUSTER]
                                 ->(:IMASSemanticCluster
                                     {{id: $cluster_id}})
@@ -6157,6 +6537,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                             MATCH (sn)-[:IN_CLUSTER]
                                 ->(:IMASSemanticCluster
                                     {{id: $cluster_id}})
@@ -6174,6 +6555,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                               AND sn.physics_domain = $fallback_domain
                             MATCH (sn)-[:HAS_UNIT]
                                 ->(:Unit {{id: $unit}})
@@ -6191,6 +6573,7 @@ def _claim_sn_atomic(
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
                               AND sn.claimed_at IS NULL
+                              {scope_where}
                               AND sn.physics_domain = $fallback_domain
                             WITH sn LIMIT $expand_limit
                             SET sn.claimed_at = datetime(),
@@ -6250,6 +6633,7 @@ def claim_generate_name_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardNameSource nodes (status='extracted') for name generation.
 
@@ -6289,11 +6673,18 @@ def claim_generate_name_batch(
 
     # Optional facility filter (only applies to signal sources).
     facility_where = ""
+    facility_where_sns2 = ""
     extra_params: dict[str, Any] = {}
     if facility:
         facility_where = (
             "AND (sns.source_type = 'dd' OR EXISTS {"
             "  MATCH (sns)-[:FROM_SIGNAL]->(:FacilitySignal)"
+            "    -[:AT_FACILITY]->(:Facility {id: $facility})"
+            "})"
+        )
+        facility_where_sns2 = (
+            "AND (sns2.source_type = 'dd' OR EXISTS {"
+            "  MATCH (sns2)-[:FROM_SIGNAL]->(:FacilitySignal)"
             "    -[:AT_FACILITY]->(:Facility {id: $facility})"
             "})"
         )
@@ -6311,11 +6702,25 @@ def claim_generate_name_batch(
         )
         extra_params["domain"] = domain
 
+    # Optional run-id scope for --focus mode (StandardNameSource).
+    scope_sns_where = ""
+    scope_sns2_where = ""
+    if scope_run_id:
+        scope_sns_where = "AND sns.run_id = $scope_run_id"
+        scope_sns2_where = "AND sns2.run_id = $scope_run_id"
+        extra_params["scope_run_id"] = scope_run_id
+
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
             try:
-                # ── Step 1: Seed ─────────────────────────────────
+                # ── Step 1: Seed (domain-uniform sampling) ───────
+                # Two-level random selection: pick a random domain
+                # first, then a random source within it.  This
+                # prevents large domains (e.g. transport ~28% of
+                # all sources) from dominating early batches.
+                # When --domain is set, this collapses to a single-
+                # domain rand() which is the desired behaviour.
                 seed_result = list(
                     tx.run(
                         f"""
@@ -6326,10 +6731,23 @@ def claim_generate_name_batch(
                                     - duration($cutoff))
                           {facility_where}
                           {domain_where}
-                        WITH sns ORDER BY rand() LIMIT 1
-                        SET sns.claimed_at = datetime(),
-                            sns.claim_token = $token
-                        WITH sns
+                          {scope_sns_where}
+                        MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)
+                        WITH DISTINCT coalesce(imas0.physics_domain, 'general') AS pd
+                        WITH pd ORDER BY rand() LIMIT 1
+                        MATCH (sns2:StandardNameSource)
+                              -[:FROM_DD_PATH]->(imas2:IMASNode)
+                        WHERE sns2.status = 'extracted'
+                          AND (sns2.claimed_at IS NULL
+                               OR sns2.claimed_at < datetime()
+                                    - duration($cutoff))
+                          AND coalesce(imas2.physics_domain, 'general') = pd
+                          {facility_where_sns2}
+                          {scope_sns2_where}
+                        WITH sns2 ORDER BY rand() LIMIT 1
+                        SET sns2.claimed_at = datetime(),
+                            sns2.claim_token = $token
+                        WITH sns2 AS sns
                         OPTIONAL MATCH (sns)-[:FROM_DD_PATH]
                             ->(imas:IMASNode)
                         OPTIONAL MATCH (imas)-[:IN_CLUSTER]
@@ -6377,6 +6795,7 @@ def claim_generate_name_batch(
                             WHERE sns.status = 'extracted'
                               AND sns.claimed_at IS NULL
                               {facility_where}
+                              {scope_sns_where}
                             MATCH (sns)-[:FROM_DD_PATH]
                                 ->(imas:IMASNode)
                             MATCH (imas)-[:IN_CLUSTER]
@@ -6404,6 +6823,7 @@ def claim_generate_name_batch(
                             WHERE sns.status = 'extracted'
                               AND sns.claimed_at IS NULL
                               {facility_where}
+                              {scope_sns_where}
                             MATCH (sns)-[:FROM_DD_PATH]
                                 ->(imas:IMASNode)
                             WHERE imas.physics_domain
@@ -6431,6 +6851,7 @@ def claim_generate_name_batch(
                               AND sns.claimed_at IS NULL
                               AND sns.batch_key = $batch_key
                               {facility_where}
+                              {scope_sns_where}
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token
@@ -6548,6 +6969,7 @@ def claim_review_name_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name review (Phase 8.1 stage machine).
 
@@ -6566,6 +6988,9 @@ def claim_review_name_batch(
     where = (
         "sn.name_stage = 'drafted'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # Gate: require description embedding before review so the
+        # semantic_similarity_check in the review worker can run.
+        " AND sn.description IS NOT NULL"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -6584,6 +7009,7 @@ def claim_review_name_batch(
             ", sn.name_stage AS name_stage"
         ),
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
 
@@ -6661,12 +7087,16 @@ def persist_reviewed_name(
     import json as _json
 
     # Read current chain_length — needed for exhaustion check.
+    # Relax claim_token guard: accept token match OR cleared token (orphan
+    # sweep may have nullified claim_token while the RD-quorum review was
+    # still in flight).  The name_stage='drafted' check is the real CAS
+    # guard — a name can only transition OUT of drafted once.
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'drafted'
+            WHERE sn.name_stage = 'drafted'
+              AND (sn.claim_token = $token OR sn.claim_token IS NULL)
             RETURN coalesce(sn.chain_length, 0) AS chain_length
             """,
             id=sn_id,
@@ -6675,7 +7105,7 @@ def persist_reviewed_name(
 
     if not rows:
         logger.debug(
-            "persist_reviewed_name: token mismatch for %s (token=%s) — no-op",
+            "persist_reviewed_name: stage/token mismatch for %s (token=%s) — no-op",
             sn_id,
             claim_token[:8],
         )
@@ -6706,8 +7136,8 @@ def persist_reviewed_name(
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'drafted'
+            WHERE sn.name_stage = 'drafted'
+              AND (sn.claim_token = $token OR sn.claim_token IS NULL)
             SET sn.reviewer_score_name        = $score,
                 sn.reviewer_scores_name       = $scores_json,
                 sn.reviewer_comments_name     = $comments,
@@ -6818,6 +7248,7 @@ def claim_review_docs_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs review (Phase 8.1 stage machine).
 
@@ -6854,6 +7285,7 @@ def claim_review_docs_batch(
             ", sn.docs_stage AS docs_stage"
         ),
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
 
@@ -6931,11 +7363,12 @@ def persist_reviewed_docs(
     import json as _json
 
     # Read current docs_chain_length — needed for exhaustion check.
+    # Relax claim_token guard (same rationale as persist_reviewed_name).
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
+            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.docs_stage = 'drafted'
               AND sn.name_stage = 'accepted'
             RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length
@@ -6946,7 +7379,7 @@ def persist_reviewed_docs(
 
     if not rows:
         logger.debug(
-            "persist_reviewed_docs: token mismatch for %s (token=%s) — no-op",
+            "persist_reviewed_docs: stage/token mismatch for %s (token=%s) — no-op",
             sn_id,
             claim_token[:8],
         )
@@ -6973,7 +7406,7 @@ def persist_reviewed_docs(
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.claim_token = $token
+            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.name_stage = 'accepted'
             SET sn.reviewer_score_docs        = $score,
                 sn.reviewer_scores_docs       = $scores_json,
@@ -7078,6 +7511,7 @@ def claim_refine_name_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name refinement (Option B chain creation).
 
@@ -7114,10 +7548,13 @@ def claim_refine_name_batch(
             ", sn.name_stage AS name_stage"
             ", sn.source_paths AS source_paths"
             ", sn.tags AS tags"
+            ", sn.vocab_gap_detail AS vocab_gap_detail"
+            ", sn.validation_issues AS validation_issues"
         ),
         stage_field="name_stage",
         to_stage="refining",
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
     # Enrich each claimed item with its REFINED_FROM chain history and build
@@ -7143,6 +7580,172 @@ def claim_refine_name_batch(
 
 
 # =============================================================================
+# Shared embedding helper for individual StandardName nodes
+# =============================================================================
+
+
+def _embed_single_standard_name(sn_id: str, description: str | None) -> None:
+    """Compute and persist embedding for a single StandardName node.
+
+    Uses the same "name — description" format as
+    :func:`persist_generated_name_batch`.  Failures are logged but never
+    propagated — the SN is still usable without an embedding.
+    """
+    try:
+        from imas_codex.embeddings.description import embed_descriptions_batch
+
+        embed_text = f"{sn_id} — {description}" if description else sn_id
+        items: list[dict[str, Any]] = [{"id": sn_id, "_embed_text": embed_text}]
+        embed_descriptions_batch(items, text_field="_embed_text")
+        vec = items[0].get("embedding")
+        if vec is not None:
+            with GraphClient() as gc:
+                gc.query(
+                    """
+                    MATCH (sn:StandardName {id: $id})
+                    SET sn.embedding    = $embedding,
+                        sn.embedded_at  = datetime()
+                    """,
+                    id=sn_id,
+                    embedding=vec,
+                )
+            logger.debug("_embed_single_standard_name: embedded %s", sn_id)
+        else:
+            logger.warning(
+                "_embed_single_standard_name: embedding returned None for %s",
+                sn_id,
+            )
+    except Exception:
+        logger.warning(
+            "Failed to embed StandardName %s — will retry later",
+            sn_id,
+            exc_info=True,
+        )
+
+
+# =============================================================================
+# Embed worker — claim / release / persist for dedicated embed pool
+# =============================================================================
+
+
+def _compute_embed_hash(sn_id: str, description: str | None) -> str:
+    """Compute truncated SHA-256 hash of the embed text.
+
+    Format: ``"name — description"`` when description is available,
+    otherwise just the name.  Truncated to 16 hex chars.
+    """
+    text = f"{sn_id} — {description}" if description else sn_id
+    return hashlib.sha256(text.encode()).hexdigest()[:16]
+
+
+@retry_on_deadlock()
+def claim_embed_batch(
+    limit: int = 50, scope_run_id: str | None = None
+) -> list[dict[str, Any]]:
+    """Claim StandardName nodes needing (re-)embedding.
+
+    Targets nodes where:
+    - ``embedding IS NULL`` or ``embed_text_hash IS NULL``
+    - Not already claimed for embedding (or claim is stale >5min)
+
+    Uses ``embed_claimed_at`` / ``embed_claim_token`` which are
+    independent of the main ``claimed_at`` / ``claim_token`` used
+    for stage transitions.
+    """
+    token = str(uuid.uuid4())
+    scope_where = ""
+    scope_params: dict[str, Any] = {}
+    if scope_run_id:
+        scope_where = "AND sn.run_id = $scope_run_id"
+        scope_params["scope_run_id"] = scope_run_id
+    with GraphClient() as gc:
+        gc.query(
+            f"""
+            MATCH (sn:StandardName)
+            WHERE (sn.embedding IS NULL OR sn.embed_text_hash IS NULL)
+              AND (sn.embed_claimed_at IS NULL
+                   OR sn.embed_claimed_at < datetime() - duration('PT5M'))
+              {scope_where}
+            WITH sn ORDER BY rand() LIMIT $limit
+            SET sn.embed_claimed_at = datetime(),
+                sn.embed_claim_token = $token
+            """,
+            limit=limit,
+            token=token,
+            **scope_params,
+        )
+        return list(
+            gc.query(
+                """
+                MATCH (sn:StandardName {embed_claim_token: $token})
+                RETURN sn.id AS id,
+                       sn.description AS description,
+                       $token AS claim_token
+                """,
+                token=token,
+            )
+        )
+
+
+def release_embed_claims(
+    sn_ids: list[str],
+    claim_token: str,
+) -> int:
+    """Release embed claims IFF token matches.
+
+    Called on error to unlock nodes for other embed workers.
+    """
+    if not sn_ids:
+        return 0
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sn:StandardName {id: sid, embed_claim_token: $token})
+            SET sn.embed_claimed_at = null,
+                sn.embed_claim_token = null
+            RETURN count(sn) AS released
+            """,
+            ids=sn_ids,
+            token=claim_token,
+        )
+        return result[0]["released"] if result else 0
+
+
+def persist_embed_batch(items: list[dict[str, Any]]) -> int:
+    """Write embedding vectors and metadata for a batch of StandardNames.
+
+    Each item must have ``id``, ``embedding``, and ``embed_text_hash``.
+    Clears embed claim fields on success.
+    """
+    if not items:
+        return 0
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            UNWIND $items AS item
+            MATCH (sn:StandardName {id: item.id})
+            SET sn.embedding = item.embedding,
+                sn.embedded_at = datetime(),
+                sn.embed_text_hash = item.embed_text_hash,
+                sn.embed_failed_at = null,
+                sn.embed_claimed_at = null,
+                sn.embed_claim_token = null
+            RETURN count(sn) AS written
+            """,
+            items=[
+                {
+                    "id": it["id"],
+                    "embedding": it["embedding"],
+                    "embed_text_hash": it["embed_text_hash"],
+                }
+                for it in items
+            ],
+        )
+        return result[0]["written"] if result else 0
+
+
+# =============================================================================
 # Persist — refine_name (Option B: new node + REFINED_FROM + edge migration)
 # =============================================================================
 
@@ -7160,7 +7763,6 @@ def persist_refined_name(
     tags: list[str] | None = None,
     old_chain_length: int = 0,
     model: str = "unknown",
-    grammar_fields: dict[str, str] | None = None,
     reason: str = "",
     escalated: bool = False,
     run_id: str | None = None,
@@ -7180,11 +7782,16 @@ def persist_refined_name(
        new SN.
 
     Returns ``{"new_name": <new_id>, "old_name": <old_id>}``.
-    """
-    import json as _json
 
+    Raises ``ValueError`` if ``new_name == old_name`` — self-referential
+    refinement would create a ``REFINED_FROM`` self-loop.
+    """
+    if new_name == old_name:
+        raise ValueError(
+            f"Refine produced identical name '{new_name}' — "
+            f"cannot create self-referential REFINED_FROM edge"
+        )
     new_chain_length = old_chain_length + 1
-    grammar_json = _json.dumps(grammar_fields) if grammar_fields else None
 
     escalation_set = ""
     if escalated:
@@ -7215,8 +7822,8 @@ def persist_refined_name(
                           new.model             = $model,
                           new.created_at        = datetime(),
                           new.generated_at      = datetime(),
-                          new.grammar_fields    = $grammar_json,
-                          new.refine_reason     = $reason
+                          new.refine_reason     = $reason,
+                          new.run_id            = $run_id
                           {escalation_set}
 
                         // 2. Link to predecessor
@@ -7278,8 +7885,8 @@ def persist_refined_name(
                         or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
-                        grammar_json=grammar_json,
                         reason=reason,
+                        run_id=run_id,
                     )
                 )
                 tx.commit()
@@ -7296,6 +7903,18 @@ def persist_refined_name(
             new_name,
             new_chain_length,
         )
+
+        # --- Embed the new refined name ---
+        # Clear embed_text_hash so the dedicated embed worker picks it up.
+        with GraphClient() as gc:
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})
+                SET sn.embed_text_hash = null
+                """,
+                id=new_name,
+            )
+
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
         return row
@@ -7775,6 +8394,37 @@ def release_refine_name_failed_claims(
     return result[0]["released"] if result else 0
 
 
+def _mark_refine_vocab_gap_exhausted(
+    *,
+    sn_id: str,
+    token: str,
+    error_msg: str,
+) -> None:
+    """Mark a name exhausted when refine fails on a vocab gap.
+
+    Vocab-gap errors are deterministic — the LLM keeps producing the same
+    unregistered token. Instead of reverting to 'reviewed' (infinite loop),
+    move to 'exhausted' and record the vocab gap reason.
+    """
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $sn_id})
+            WHERE sn.claim_token = $token
+              AND sn.name_stage = 'refining'
+            SET sn.name_stage = 'exhausted',
+                sn.claim_token = null,
+                sn.claimed_at = null,
+                sn.reviewer_comments_name =
+                    coalesce(sn.reviewer_comments_name, '')
+                    + ' [vocab_gap_exhaust] ' + $error_msg
+            """,
+            sn_id=sn_id,
+            token=token,
+            error_msg=error_msg[:300],
+        )
+
+
 # =============================================================================
 # generate_docs — claim / persist / release
 # =============================================================================
@@ -7787,6 +8437,7 @@ def claim_generate_docs_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes ready for generate_docs.
 
@@ -7830,6 +8481,7 @@ def claim_generate_docs_batch(
         ),
         # stage_field=None → claim only, no stage transition
         domain=domain,
+        scope_run_id=scope_run_id,
         # Parent-first ordering: nodes that have incoming COMPONENT_OF edges
         # (i.e. nodes which are parents) receive priority 0 so they are
         # documented before their children.
@@ -7936,6 +8588,18 @@ def persist_generated_docs(
     new_stage: str = result[0]["docs_stage"]
     logger.debug("persist_generated_docs: %s → docs_stage=%s", sn_id, new_stage)
 
+    # Re-embed: docs generation sets/refines description, so the embedding
+    # should reflect the latest "name — description" text.
+    # Clear embed_text_hash so the dedicated embed worker picks it up.
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            SET sn.embed_text_hash = null
+            """,
+            id=sn_id,
+        )
+
     # Async counter bump — live progress visibility for ``sn status``
     bump_sn_run_counter(run_id, "names_enriched")
 
@@ -8040,6 +8704,7 @@ def claim_refine_docs_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
+    scope_run_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs refinement.
 
@@ -8087,6 +8752,7 @@ def claim_refine_docs_batch(
         stage_field="docs_stage",
         to_stage="refining",
         domain=domain,
+        scope_run_id=scope_run_id,
     )
 
     # Enrich each claimed item with its DOCS_REVISION_OF chain history and build
@@ -8236,6 +8902,19 @@ def persist_refined_docs(
             row["docs_chain_length"],
             row["revision_id"],
         )
+
+        # Re-embed: refined docs change the description, so update the
+        # embedding to reflect the latest "name — description" text.
+        # Clear embed_text_hash so the dedicated embed worker picks it up.
+        with GraphClient() as gc:
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})
+                SET sn.embed_text_hash = null
+                """,
+                id=sn_id,
+            )
+
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
         return row

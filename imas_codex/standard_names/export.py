@@ -47,6 +47,11 @@ GATE_D = "divergence_detection"
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
 
+# Fields not yet accepted by ISN models — strip from export output.
+# ``constraints`` is tracked internally but ISN's StandardNameScalarEntry
+# raises ``Extra inputs are not permitted`` if it appears in the YAML.
+_ISN_UNSUPPORTED_FIELDS = frozenset({"constraints"})
+
 
 # =============================================================================
 # Report models
@@ -132,37 +137,34 @@ def _fetch_candidates(
     *,
     include_unreviewed: bool = False,
     domain: str | None = None,
+    names_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Fetch StandardName nodes eligible for export from the graph.
 
     Returns dicts with all catalog-relevant properties plus ``origin``,
     ``cocos``, ``reviewer_score_name``.
 
-    Only nodes that have completed **both** the name and docs pipelines
-    and passed validation are returned.  Specifically the query requires:
+    Only nodes that have completed the name pipeline and passed
+    validation are returned.  Specifically the query requires:
 
     - ``name_stage = 'accepted'`` — excludes superseded, exhausted, drafted,
       reviewed, and refining nodes.
     - ``docs_stage = 'accepted'`` — excludes nodes whose documentation has
-      not yet passed the docs review loop.
+      not yet passed the docs review loop (skipped when *names_only*).
     - ``validation_status = 'valid'`` — excludes quarantined nodes.
 
-    The legacy ``pipeline_status`` field is **not** used as a gate because
-    it is not updated when a predecessor node is marked superseded; only
-    ``name_stage`` is authoritative for that lifecycle transition.
+    When *names_only* is True, the ``docs_stage`` gate is dropped so
+    names can be exported before documentation is generated.
     """
     from imas_codex.graph.client import GraphClient
 
-    # Export only fully-accepted, validated nodes.
-    # name_stage='accepted' already excludes superseded/exhausted by construction
-    # (persist_refined_name_batch sets old.name_stage='superseded' on refine),
-    # but is spelled out explicitly for clarity.
     cypher = """
     MATCH (sn:StandardName)
     WHERE sn.name_stage = 'accepted'
-      AND sn.docs_stage = 'accepted'
       AND sn.validation_status = 'valid'
     """
+    if not names_only:
+        cypher += "  AND sn.docs_stage = 'accepted'\n"
     params: dict[str, Any] = {}
 
     if domain:
@@ -428,8 +430,6 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
         "unit": node.get("unit") or "",
         "status": node.get("status") or "draft",
         "links": list(node.get("links") or []),
-        "constraints": list(node.get("constraints") or []),
-        "validity_domain": node.get("validity_domain") or "",
     }
 
     # Optional lifecycle fields
@@ -562,6 +562,38 @@ def _derive_error_variants_for_entry(
 
     # Emit in fixed key order
     return {k: variants[k] for k in _ERROR_VARIANT_KEY_ORDER if k in variants}
+
+
+def _derive_locus_for_entry(
+    gc: Any,
+    name: str,
+) -> dict[str, str] | None:
+    """Query graph for the outgoing HAS_LOCUS edge and return locus dict.
+
+    Returns a dict ``{"token": "<locus_token>", "relation": "at"|"of"|"over"}``
+    or ``None`` if no locus edge exists.
+    """
+    rows = gc.query(
+        """
+        MATCH (s:StandardName {id: $name})-[e:HAS_LOCUS]->(loc:Locus)
+        RETURN loc.id AS token, e.locus_relation AS relation
+        LIMIT 1
+        """,
+        name=name,
+    )
+    if not rows:
+        return None
+
+    row = rows[0]
+    token = row.get("token")
+    relation = row.get("relation")
+    if not token:
+        return None
+
+    result: dict[str, str] = {"token": token}
+    if relation:
+        result["relation"] = relation
+    return result
 
 
 def _fetch_sources_for_entry(
@@ -716,8 +748,12 @@ def _write_domain_yaml(
     clean_entries: list[dict[str, Any]] = []
     for entry_dict in entries:
         canon = canonicalise_entry(entry_dict)
-        # Remove None values for clean YAML output
-        clean = {k: v for k, v in canon.items() if v is not None}
+        # Remove None values and ISN-unsupported fields for clean YAML output
+        clean = {
+            k: v
+            for k, v in canon.items()
+            if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
+        }
         ordered = reorder_entry_dict(clean)
         clean_entries.append(ordered)
 
@@ -766,7 +802,7 @@ def _write_manifest(
         "domains_included": sorted(domains_included or []),
         "catalog_commit_sha": source_commit_sha,
         "exported_at": datetime.now(UTC).isoformat(),
-        "edge_model_version": "plan_39_v1",
+        "edge_model_version": "v1",
     }
 
     # Validate via ISN manifest model
@@ -829,6 +865,7 @@ def run_export(
     override_edits: list[str] | None = None,
     cocos_convention: int = _DEFAULT_COCOS_CONVENTION,
     include_sources: bool = True,
+    names_only: bool = False,
 ) -> ExportReport:
     """Export standard names from the graph to a staging directory.
 
@@ -874,6 +911,7 @@ def run_export(
     candidates = _fetch_candidates(
         include_unreviewed=include_unreviewed,
         domain=domain,
+        names_only=names_only,
     )
     report.total_candidates = len(candidates)
     logger.info("Found %d candidate(s)", len(candidates))
@@ -999,6 +1037,9 @@ def run_export(
             error_variants = _derive_error_variants_for_entry(gc, entry_name)
             if error_variants:
                 entry_dict["error_variants"] = error_variants
+            locus = _derive_locus_for_entry(gc, entry_name)
+            if locus:
+                entry_dict["locus"] = locus
 
             # Optionally attach source provenance for debug rendering
             if include_sources:

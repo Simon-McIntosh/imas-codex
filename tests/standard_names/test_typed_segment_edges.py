@@ -28,6 +28,31 @@ def _mock_version_resolver():
         yield
 
 
+@pytest.fixture(autouse=True)
+def _mock_synced_segments():
+    """Return all segments as synced so token-miss detection fires for all."""
+    _all_segments = frozenset(
+        {
+            "component",
+            "coordinate",
+            "subject",
+            "device",
+            "geometric_base",
+            "physical_base",
+            "object",
+            "geometry",
+            "position",
+            "region",
+            "process",
+        }
+    )
+    with patch(
+        "imas_codex.standard_names.graph_ops._resolve_synced_segments",
+        return_value=_all_segments,
+    ):
+        yield
+
+
 @pytest.fixture()
 def mock_gc():
     """Mock GraphClient that records query calls."""
@@ -239,9 +264,9 @@ class TestTypedEdgeSegmentGuards:
         assert merge_calls
         edges_param = merge_calls[0][1].get("edges", [])
         segments = {e["segment"] for e in edges_param}
-        # ISN grammar: poloidal→coordinate, electron→subject, temperature→physical_base
-        assert "coordinate" in segments, (
-            f"poloidal_electron_temperature must have a coordinate segment; got: {segments}"
+        # ISN strict grammar: poloidal→component, electron→subject, temperature→physical_base
+        assert "component" in segments, (
+            f"poloidal_electron_temperature must have a component segment; got: {segments}"
         )
         assert "subject" in segments
         assert "physical_base" in segments

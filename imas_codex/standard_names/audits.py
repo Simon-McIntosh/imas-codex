@@ -66,7 +66,6 @@ CRITICAL_CHECKS = frozenset(
         "vector_field_component_check",
         "segment_order_check",
         "aggregator_order_check",
-        "named_feature_preposition_check",
         "diamagnetic_component_check",
         "amplitude_of_prefix_check",
         "mode_number_suffix_check",
@@ -74,6 +73,8 @@ CRITICAL_CHECKS = frozenset(
         "pulse_schedule_reference_check",
         "ratio_binary_operator_check",
         "adjacent_duplicate_token_check",
+        "semantic_similarity_check",
+        "preposition_physical_base_check",
     }
 )
 
@@ -97,7 +98,7 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     # Voltage implies V.
     "voltage": {"V", "kV", "mV"},
     # Angle / rotation implies rad.
-    "angle": {"rad", "deg"},
+    "angle": {"rad", "deg", "sr"},
     # Mass implies kg or u.
     "mass": {"kg", "u"},
     # Frequency implies Hz.
@@ -834,6 +835,7 @@ def name_unit_consistency_check(
                 "_viscosity",
                 "_mobility",
                 "_convection_coefficient",
+                "_convection_velocity",
             )
         ):
             continue
@@ -872,6 +874,16 @@ def name_unit_consistency_check(
         # ``temperature`` classifies the sensor type, not the unit.
         # Rise/fall time, amplitude, etc. have time or voltage units.
         if f"{token}_sensor" in name or f"{token}_probe" in name:
+            continue
+        # ``mass_spectrometer`` is an instrument name — ``mass`` classifies
+        # the spectrometer type (mass vs optical), not a mass quantity.
+        if token == "mass" and "mass_spectrometer" in name:
+            continue
+        # ``energy_transport`` is a compound transport concept. The head noun
+        # is the transport quantity, and ``energy`` classifies what is being
+        # transported. Unit is a transport velocity (m/s) or diffusivity
+        # (m^2/s), not energy.
+        if token == "energy" and "energy_transport" in name:
             continue
 
         if dimensionless:
@@ -959,12 +971,6 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
         if name.endswith("_electron_equivalent"):
             matched_subjects = [s for s in matched_subjects if s != "electron"]
 
-        # Exempt ratio/comparison patterns: ``{species1}_to_{species2}_…``
-        # uses ``_to_`` as a conventional connector between numerator and
-        # denominator species (e.g. tritium_to_deuterium_density_ratio).
-        if "_to_" in name and len(matched_subjects) == 2:
-            matched_subjects = []
-
         # Exempt metadata/flag descriptors — names ending in ``_flag``,
         # ``_index``, or containing ``_state_`` reference classification
         # attributes rather than two physical subjects. E.g.
@@ -988,6 +994,8 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
             "particle_sink",
             "particle_confinement",
             "particle_radial_diffusivity",
+            "particle_convection_velocity",
+            "particle_convection_coefficient",
         )
         if any(cpb in name for cpb in _COMPOUND_PB_TOKENS):
             matched_subjects = [s for s in matched_subjects if s != "particle"]
@@ -1007,14 +1015,20 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
                 "fast",
                 "thermal",
                 "total",
+                "runaway",
             }
         )
         modifier_count = sum(1 for s in matched_subjects if s in _MODIFIER_SUBJECTS)
-        if modifier_count > 0 and len(matched_subjects) - modifier_count >= 1:
-            # Keep only the non-modifier subjects (the species they qualify)
-            matched_subjects = [
-                s for s in matched_subjects if s not in _MODIFIER_SUBJECTS
-            ]
+        if modifier_count > 0:
+            if len(matched_subjects) - modifier_count >= 1:
+                # Keep only the non-modifier subjects (the species they qualify)
+                matched_subjects = [
+                    s for s in matched_subjects if s not in _MODIFIER_SUBJECTS
+                ]
+            else:
+                # ALL matched subjects are modifiers (e.g. trapped + fast) —
+                # no true species subject present, so no dual-subject conflict
+                matched_subjects = []
 
         # Exempt ``_to_{subject}_particles`` target descriptors in
         # collisional power transfer names. The ``_to_`` connector
@@ -1022,6 +1036,32 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
         # the source subject counts.
         if "_to_" in name and "particles" in matched_subjects:
             matched_subjects = [s for s in matched_subjects if s != "particles"]
+
+        # Exempt ``state`` in transfer patterns — it describes charge/
+        # quantum state of the target species, not a separate subject.
+        # E.g. ``…_to_thermal_ion_state`` has state=ion charge state.
+        if "_to_" in name and "state" in matched_subjects:
+            matched_subjects = [s for s in matched_subjects if s != "state"]
+
+        # Exempt collisional target patterns: ``_with_{subject}``
+        # E.g. ``torque_density_due_to_coulomb_collisions_with_ion``
+        # has source species (fast_particle) and target species (ion).
+        # The ``_with_`` connector marks the collision partner, not a
+        # second primary subject.
+        with_match = re.search(r"_with_(\w+)$", name)
+        if with_match:
+            target = with_match.group(1)
+            # Remove the collision target from matched subjects
+            matched_subjects = [s for s in matched_subjects if s != target]
+
+        # Exempt ratio/comparison/transfer patterns:
+        # ``{species1}_to_{species2}_…`` uses ``_to_`` as a conventional
+        # connector between source and target species.  This check runs
+        # AFTER modifier removal so that compound subjects like
+        # ``fast_particle … _to_thermal_ion`` correctly reduce to 2
+        # non-modifier subjects (particle, ion) and get exempted.
+        if "_to_" in name and len(matched_subjects) == 2:
+            matched_subjects = []
 
         if len(matched_subjects) >= 2:
             issues.append(
@@ -1328,7 +1368,7 @@ def name_description_consistency_check(candidate: dict[str, Any]) -> list[str]:
 
     Specifically detects the case where the description describes a
     Fourier/spectral decomposition but the name is simply the underlying
-    quantity (e.g. ``normal_component_of_magnetic_field`` described as
+    quantity (e.g. ``normal_magnetic_field`` described as
     "Fourier coefficients of the normal component ..."). Either the name
     must mark the decomposition explicitly, or the description must be
     rewritten to describe the underlying quantity.
@@ -1529,6 +1569,10 @@ def implicit_field_check(candidate: dict[str, Any]) -> list[str]:
     # survive should not be penalised for the constraint target's phrasing.
     if name.startswith("use_exact_"):
         return []
+    # ``field_of_view`` is an optics term (viewing cone), not a physics
+    # field.  Skip names containing this compound.
+    if "field_of_view" in name:
+        return []
     tokens = name.split("_")
     issues: list[str] = []
     for i, tok in enumerate(tokens):
@@ -1615,17 +1659,17 @@ def density_unit_consistency_check(candidate: dict[str, Any]) -> list[str]:
 
 
 def vector_field_component_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag ``_coordinate_of_<vector_field>`` and recommend ``_component_of_<vector_field>``.
+    """Flag ``_coordinate_of_<vector_field>`` and recommend short-form ``<axis>_<vector_field>``.
 
     The cylindrical-coordinate vocabulary (``radial``, ``vertical``, ``toroidal``,
     ``major_radius``, ``z_coordinate``) describes a *point in space*. When the
     target ``X`` is itself a vector field (surface normal, magnetic field vector,
-    velocity vector), the correct usage is ``<axis>_component_of_<X>`` — you
+    velocity vector), the correct usage is ``<axis>_<X>`` — you
     project the vector onto an axis, you do not extract a coordinate.
 
     Caught from equilibrium iteration:
     ``vertical_coordinate_of_surface_normal`` should be
-    ``vertical_component_of_surface_normal``.
+    ``vertical_surface_normal``.
     """
     name = candidate.get("id", "")
     if not name:
@@ -1648,7 +1692,7 @@ def vector_field_component_check(candidate: dict[str, Any]) -> list[str]:
                 issues.append(
                     f"audit:vector_field_component_check: name '{name}' applies "
                     f"'_coordinate_of_' to vector field '{tail}'; rename to "
-                    f"'{axis}_component_of_{tail}' (vectors have components, "
+                    f"'{axis}_{tail}' (vectors have components, "
                     f"points have coordinates)."
                 )
     return issues
@@ -1698,12 +1742,11 @@ def segment_order_check(candidate: dict[str, Any]) -> list[str]:
 
     ISN grammar places Component segments (``toroidal``, ``poloidal``, ``radial``,
     ``parallel``, ``perpendicular``, ``vertical``, ``diamagnetic``) either as a
-    leading prefix or via the ``<axis>_component_of_<quantity>`` preposition. A
+    leading prefix or via the ``<axis>_<quantity>`` short form. A
     trailing ``_<component>`` suffix after the quantity reverses segment order.
 
     Caught from transport iteration:
-    ``ion_rotation_frequency_toroidal`` → ``toroidal_ion_rotation_frequency`` or
-    ``toroidal_component_of_ion_rotation_frequency``.
+    ``ion_rotation_frequency_toroidal`` → ``toroidal_ion_rotation_frequency``.
     """
     name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
     if not name:
@@ -1732,8 +1775,8 @@ def segment_order_check(candidate: dict[str, Any]) -> list[str]:
         issues.append(
             f"audit:segment_order_check: name '{name}' ends with component "
             f"token '_{comp}'; Component segments must precede the Subject or "
-            f"use '<axis>_component_of_<quantity>'. Rename to "
-            f"'{comp}_{stem}' or '{comp}_component_of_{stem}'."
+            f"use '<axis>_<quantity>' short form. Rename to "
+            f"'{comp}_{stem}'."
         )
     return issues
 
@@ -1780,69 +1823,24 @@ def aggregator_order_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
-_NAMED_FEATURE_TOKENS = (
-    "magnetic_axis",
-    "plasma_boundary",
-    "last_closed_flux_surface",
-    "separatrix",
-    "x_point",
-    "o_point",
-    "strike_point",
-    "inner_strike_point",
-    "outer_strike_point",
-    "stagnation_point",
-)
-
-
-def named_feature_preposition_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag ``_at_<named_feature>`` when ``_of_<named_feature>`` is canonical.
-
-    When a scalar property is evaluated at a named geometric feature (magnetic
-    axis, x-point, plasma boundary, separatrix, strike point), the possessive
-    ``_of_`` form is canonical and prevents silent synonym pairs such as
-    ``poloidal_magnetic_flux_at_magnetic_axis`` vs
-    ``poloidal_magnetic_flux_of_magnetic_axis``.
-
-    Caught from transport iteration:
-    ``poloidal_magnetic_flux_at_magnetic_axis`` →
-    ``poloidal_magnetic_flux_of_magnetic_axis``.
-    ``loop_voltage_at_last_closed_flux_surface`` →
-    ``loop_voltage_of_last_closed_flux_surface``.
-    """
-    name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
-    if not name:
-        return []
-    issues: list[str] = []
-    for feat in _NAMED_FEATURE_TOKENS:
-        at_pattern = f"_at_{feat}"
-        if name.endswith(at_pattern) or at_pattern + "_" in name:
-            suggested = name.replace(at_pattern, f"_of_{feat}")
-            issues.append(
-                f"audit:named_feature_preposition_check: name '{name}' uses "
-                f"'_at_{feat}'; named geometric features take the possessive "
-                f"'_of_' form. Rename to '{suggested}'."
-            )
-    return issues
-
-
 _DIAMAGNETIC_COMPONENT_PATTERN = "diamagnetic_component_of_"
 
 
 def diamagnetic_component_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag ``diamagnetic_component_of_*`` — diamagnetic is a drift, not a component.
+    """Flag ``diamagnetic_component_of_*`` and ``diamagnetic_<X>`` used as projection — diamagnetic is a drift, not a component.
 
     ``diamagnetic`` labels a specific drift velocity ``v_dia = B × ∇p / (qnB²)``,
     not a spatial projection axis like ``toroidal`` or ``poloidal``. Using
-    ``diamagnetic_component_of_<X>`` therefore either:
+    ``diamagnetic_component_of_<X>`` or ``diamagnetic_<X>`` as a projection therefore either:
 
     - Makes no physical sense for scalars and projected fields (e.g.
-      ``diamagnetic_component_of_electric_field``), or
+      ``diamagnetic_electric_field``), or
     - Is redundant for a drift velocity (``v_dia`` IS the diamagnetic drift,
       not a component of something else).
 
     Canonical constructions:
     - For the drift velocity itself → ``diamagnetic_drift_velocity`` (no
-      ``_component_of_``).
+      projection).
     - For a flux driven by the diamagnetic drift → ``diamagnetic_<base>`` or
       ``<base>_due_to_diamagnetic_drift``.
     """
@@ -1862,22 +1860,24 @@ def diamagnetic_component_check(candidate: dict[str, Any]) -> list[str]:
 def amplitude_of_prefix_check(candidate: dict[str, Any]) -> list[str]:
     """Flag ``amplitude_of_<X>`` / ``phase_of_<X>`` / ``magnitude_of_<X>`` prefix forms.
 
-    For the amplitude, phase, magnitude, real part or imaginary part of a
-    quantity ``<X>``, the canonical ISN form is the noun-suffix construction
-    ``<X>_amplitude``, ``<X>_phase``, ``<X>_magnitude``, ``<X>_real_part``,
-    ``<X>_imaginary_part``. The prefix form ``amplitude_of_<X>`` and
-    siblings break the grammar when ``<X>`` contains a ``_of_`` or
-    ``component_of_`` chain (e.g. ``amplitude_of_parallel_component_of_*``
+    For the amplitude, phase, and magnitude of a quantity ``<X>``, the
+    canonical ISN form is the noun-suffix construction ``<X>_amplitude``,
+    ``<X>_phase``, ``<X>_magnitude``. The prefix form ``amplitude_of_<X>``
+    and siblings break the grammar when ``<X>`` contains a ``_of_`` or
+    ``component_of_`` chain (e.g. ``amplitude_of_parallel_*``
     fails the vocabulary consistency check because ``amplitude_of_parallel``
     is not a Component token). Use the noun-suffix form consistently.
+
+    ``real_part_of_`` and ``imaginary_part_of_`` are NOT flagged here —
+    ISN grammar parses them correctly as ``transformation=real_part`` /
+    ``transformation=imaginary_part`` prefix operators, producing proper
+    COMPONENT_OF derivation edges to the parent complex quantity.
     """
     name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
     prefixes = (
         "amplitude_of_",
         "phase_of_",
         "magnitude_of_",
-        "real_part_of_",
-        "imaginary_part_of_",
         "modulus_of_",
     )
     for prefix in prefixes:
@@ -1888,7 +1888,7 @@ def amplitude_of_prefix_check(candidate: dict[str, Any]) -> list[str]:
                 f"audit:amplitude_of_prefix_check: name '{name}' uses "
                 f"'{prefix}<X>' prefix — canonical ISN form is the "
                 f"noun-suffix '{tail}_{noun}'. Prefix forms break grammar "
-                f"when <X> contains '_of_' or 'component_of_' chains."
+                f"when <X> contains '_of_' chains."
             ]
     return []
 
@@ -2341,6 +2341,45 @@ def process_qualifier_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag names whose ISN parse produces a ``physical_base`` starting with a preposition.
+
+    When ISN grammar parses a name like ``normalized_of_particle_temperature``,
+    it places ``normalized`` in the ``transformation`` slot and dumps
+    ``of_particle_temperature`` into ``physical_base``.  A ``physical_base``
+    starting with ``of_``, ``at_``, or ``due_to_`` is *always* a grammar
+    defect — the preposition is a scope connector that leaked into the base
+    because the name was mal-formed.  The correct form drops the preposition
+    (e.g. ``normalized_particle_temperature``).
+
+    Severity: critical — quarantines the candidate.
+    """
+    name = (candidate.get("id") or candidate.get("name") or "").strip()
+    if not name:
+        return []
+
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+
+        parsed = parse_standard_name(name)
+    except Exception:
+        # Parse failure is handled by other checks
+        return []
+
+    pb = getattr(parsed, "physical_base", None) or ""
+    _BAD_PREFIXES = ("of_", "at_", "due_to_")
+    for prefix in _BAD_PREFIXES:
+        if pb.startswith(prefix):
+            clean = pb[len(prefix) :]
+            return [
+                f"audit:preposition_physical_base_check: ISN parse of "
+                f"'{name}' yields physical_base='{pb}' — a base must "
+                f"never start with a preposition. The correct base is "
+                f"'{clean}' (drop the '{prefix}' connector)."
+            ]
+    return []
+
+
 def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
     """Detect closed-vocabulary tokens absorbed into the candidate name.
 
@@ -2416,6 +2455,39 @@ def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag GGD implementation details leaking into description or documentation.
+
+    Detects patterns like "on the GGD edge grid", "GGD mesh", "GGD subgrid"
+    that describe storage implementation rather than physics. Bare "GGD" in
+    valid physics context (e.g. "general grid description") is NOT flagged.
+
+    Non-critical audit — adds to validation_issues as a warning so the
+    review/refine cycle can address it.
+    """
+    issues: list[str] = []
+    _patterns = [
+        r"\bon\s+(?:the|a|an)\s+GGD\b",
+        r"\bGGD\s+(?:grid|mesh|element|subgrid|surface|cell|edge|node)\b",
+        r"\bunstructured\s+GGD\b",
+        r"\bGGD\s+(?:data\s+)?structure\b",
+    ]
+    _compiled = [re.compile(p, re.IGNORECASE) for p in _patterns]
+
+    for field in ("description", "documentation"):
+        text = candidate.get(field) or ""
+        for pat in _compiled:
+            m = pat.search(text)
+            if m:
+                issues.append(
+                    f"audit:ggd_leakage: {field} contains GGD implementation "
+                    f"detail '{m.group()}'. Descriptions and documentation "
+                    f"should describe physics, not storage implementation."
+                )
+                break  # one issue per field is sufficient
+    return issues
+
+
 def run_audits(
     candidate: dict[str, Any],
     existing_sns_in_domain: list[dict[str, Any]] | None = None,
@@ -2465,7 +2537,6 @@ def run_audits(
     all_issues.extend(vector_field_component_check(candidate))
     all_issues.extend(segment_order_check(candidate))
     all_issues.extend(aggregator_order_check(candidate))
-    all_issues.extend(named_feature_preposition_check(candidate))
     all_issues.extend(diamagnetic_component_check(candidate))
     all_issues.extend(amplitude_of_prefix_check(candidate))
     all_issues.extend(mode_number_suffix_check(candidate))
@@ -2480,7 +2551,9 @@ def run_audits(
     all_issues.extend(instrument_stokes_bind_check(candidate))
     all_issues.extend(position_redundancy_check(candidate))
     all_issues.extend(process_qualifier_check(candidate))
+    all_issues.extend(preposition_physical_base_check(candidate))
     all_issues.extend(decomposition_audit_check(candidate))
+    all_issues.extend(ggd_implementation_leakage_check(candidate))
 
     return all_issues
 
@@ -2492,3 +2565,97 @@ def has_critical_audit_failure(issues: list[str]) -> bool:
             if f"audit:{check}:" in issue:
                 return True
     return False
+
+
+# =============================================================================
+# Semantic similarity gate (post-embed)
+# =============================================================================
+
+
+def semantic_similarity_check(
+    name: str,
+    description: str | None,
+    *,
+    critical_threshold: float | None = None,
+    warning_threshold: float | None = None,
+) -> tuple[float | None, list[str]]:
+    """Compute cosine similarity between name-as-text and description.
+
+    This check catches semantically ambiguous names where the name alone
+    does not convey what is being measured (e.g. ``co_passing_density`` —
+    density of what?).
+
+    Both embeddings are computed fresh from the raw text fields using the
+    project embedding server.  The stored ``sn.embedding`` is NOT used
+    because its format (``"name — description"``) conflates name and
+    description semantics.
+
+    Args:
+        name: The standard name string (e.g. ``"co_passing_density"``).
+        description: The short description text.
+        critical_threshold: Override for quarantine threshold.
+        warning_threshold: Override for advisory threshold.
+
+    Returns:
+        ``(similarity, issues)`` — similarity is None on embed failure.
+        Issues are tagged strings for ``validation_issues``.
+    """
+    from imas_codex.standard_names.defaults import (
+        SEMANTIC_SIM_CRITICAL,
+        SEMANTIC_SIM_WARNING,
+    )
+
+    crit = (
+        critical_threshold if critical_threshold is not None else SEMANTIC_SIM_CRITICAL
+    )
+    warn = warning_threshold if warning_threshold is not None else SEMANTIC_SIM_WARNING
+
+    if not description or not description.strip():
+        return None, []
+
+    name_text = name.replace("_", " ")
+    desc_text = description[:500]
+
+    try:
+        from imas_codex.embeddings.description import embed_descriptions_batch
+
+        items = [
+            {"id": "name", "_text": name_text},
+            {"id": "desc", "_text": desc_text},
+        ]
+        embed_descriptions_batch(items, text_field="_text")
+        name_emb = items[0].get("embedding")
+        desc_emb = items[1].get("embedding")
+        if name_emb is None or desc_emb is None:
+            logger.debug("semantic_similarity_check: embed returned None for %s", name)
+            return None, []
+    except Exception:
+        logger.debug(
+            "semantic_similarity_check: embed failed for %s", name, exc_info=True
+        )
+        return None, []
+
+    name_vec = np.asarray(name_emb, dtype=np.float32)
+    desc_vec = np.asarray(desc_emb, dtype=np.float32)
+    norm_n = np.linalg.norm(name_vec)
+    norm_d = np.linalg.norm(desc_vec)
+    if norm_n < 1e-8 or norm_d < 1e-8:
+        return None, []
+
+    sim = float(np.dot(name_vec, desc_vec) / (norm_n * norm_d))
+
+    issues: list[str] = []
+    if sim < crit:
+        issues.append(
+            f"audit:semantic_similarity_check: "
+            f"sim={sim:.3f} below critical threshold {crit:.2f} — "
+            f"name is semantically ambiguous"
+        )
+    elif sim < warn:
+        issues.append(
+            f"audit:semantic_similarity_check_warning: "
+            f"sim={sim:.3f} below warning threshold {warn:.2f} — "
+            f"name may be semantically ambiguous"
+        )
+
+    return sim, issues

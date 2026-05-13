@@ -69,7 +69,7 @@ imas.add_command(map_cmd, "map")
 @click.option(
     "--reset-to",
     type=click.Choice(
-        ["extracted", "built", "enriched", "refined"], case_sensitive=False
+        ["extracted", "built", "enriched", "refined", "embedded"], case_sensitive=False
     ),
     default=None,
     help=(
@@ -77,7 +77,8 @@ imas.add_command(map_cmd, "map")
         "extracted: delete all nodes and rebuild from DD XML. "
         "built: clear enrichments and re-enrich all nodes. "
         "enriched: clear refinements and re-refine all nodes. "
-        "refined: clear embeddings and re-embed all nodes."
+        "refined: clear embeddings and re-embed all nodes. "
+        "embedded: clear domain classifications and re-classify."
     ),
 )
 @click.option(
@@ -144,6 +145,7 @@ def imas_build(
         imas-codex imas dd build --reset-to built      # Re-enrich (prompt/model change)
         imas-codex imas dd build --reset-to enriched   # Re-refine only
         imas-codex imas dd build --reset-to refined    # Re-embed (embedding model change)
+        imas-codex imas dd build --reset-to embedded   # Re-classify domains (cheapest fix)
         imas-codex imas dd build --model openrouter/anthropic/claude-sonnet-4.6  # Override model
         imas-codex imas dd build --dry-run -v     # Preview without writing
         imas-codex imas dd build --ids-filter "core_profiles equilibrium"  # Test subset

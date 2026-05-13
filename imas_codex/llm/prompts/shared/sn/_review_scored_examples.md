@@ -3,13 +3,15 @@
 
 Previously reviewed standard names spanning the full score range. Each
 example shows the per-dimension score you must produce and the reasoning
-tied to each dimension. Use these to anchor your own scores to a consistent
-absolute scale across batches.
+tied to each dimension. Grammar decomposition and semantic similarity
+scores are included to calibrate your grammar and self-descriptiveness checks.
 
 {% for ex in review_scored_examples %}
 ### Aggregate score {{ "%.2f"|format(ex.reviewer_score) }}
 
 **`{{ ex.id }}`** [{{ ex.unit or 'dimensionless' }}, kind={{ ex.kind }}]
+{% if ex.grammar_segments is defined and ex.grammar_segments %}IR segments: {% for seg, val in ex.grammar_segments.items() %}`{{ seg }}`=`{{ val }}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+{% if ex.semantic_sim is defined and ex.semantic_sim is not none %}Semantic similarity (name↔description): {{ "%.3f"|format(ex.semantic_sim) }}{% if ex.semantic_sim >= 0.85 %} ✅{% elif ex.semantic_sim >= 0.70 %} ⚠️{% else %} ❌{% endif %}{% endif %}
 Description: {{ ex.description }}
 {% if ex.documentation %}Documentation: {{ ex.documentation }}{% endif %}
 

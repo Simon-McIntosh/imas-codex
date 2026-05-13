@@ -11,7 +11,7 @@ import pytest
 
 @pytest.fixture()
 def rendered_compose_system() -> str:
-    """Render sn/compose_system with full grammar context."""
+    """Render sn/generate_name_system with full grammar context."""
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.standard_names.context import (
         build_compose_context,
@@ -20,15 +20,15 @@ def rendered_compose_system() -> str:
 
     clear_context_cache()
     context = build_compose_context()
-    return render_prompt("sn/compose_system", context)
+    return render_prompt("sn/generate_name_system", context)
 
 
 @pytest.fixture()
 def rendered_enrich_system() -> str:
-    """Render sn/enrich_system (static — no dynamic context needed)."""
+    """Render sn/generate_docs_system (static — no dynamic context needed)."""
     from imas_codex.llm.prompt_loader import render_prompt
 
-    return render_prompt("sn/enrich_system", {})
+    return render_prompt("sn/generate_docs_system", {})
 
 
 class TestCoordinateGuidanceInComposeSystem:

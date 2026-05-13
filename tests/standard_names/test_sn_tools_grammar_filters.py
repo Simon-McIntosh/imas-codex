@@ -1,6 +1,6 @@
 """Unit tests for ``_list_grammar_vocabulary`` and ``_search_standard_names`` MCP tools.
 
-Verifies (vNext grammar — plan 38 W4a):
+Verifies:
 
 - ``_search_standard_names`` accepts no ``grammar_*`` kwargs (removed); kind/tags/cocos
   post-filters still work.
@@ -35,7 +35,7 @@ def mock_gc() -> MagicMock:
 
 
 class TestSearchNoGrammarArgs:
-    """``_search_standard_names`` has no grammar_* kwargs in vNext."""
+    """``_search_standard_names`` has no grammar_* kwargs."""
 
     def _make_rows(self) -> list[dict]:
         return [
@@ -56,32 +56,27 @@ class TestSearchNoGrammarArgs:
     def test_returns_all_without_filters(self, mock_gc, monkeypatch):
         rows = self._make_rows()
         monkeypatch.setattr(
-            "imas_codex.llm.sn_tools._keyword_search_standard_names",
+            "imas_codex.llm.sn_tools._search_sn_backing",
             lambda *a, **kw: rows,
-        )
-        monkeypatch.setattr(
-            "imas_codex.embeddings.encoder.Encoder.embed_texts",
-            lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("no embed")),
         )
         out = _search_standard_names("temperature", gc=mock_gc)
         assert "electron_temperature" in out
         assert "ion_temperature" in out
 
-    def test_kind_filter_still_works(self, mock_gc, monkeypatch):
-        rows = self._make_rows()
-        rows[0]["kind"] = "scalar"
-        rows[1]["kind"] = "vector"
+    def test_kind_filter_forwarded(self, mock_gc, monkeypatch):
+        """kind filter is forwarded to backing search function."""
+        captured = {}
+
+        def mock_backing(*a, **kw):
+            captured.update(kw)
+            return self._make_rows()[:1]
+
         monkeypatch.setattr(
-            "imas_codex.llm.sn_tools._keyword_search_standard_names",
-            lambda *a, **kw: rows,
+            "imas_codex.llm.sn_tools._search_sn_backing",
+            mock_backing,
         )
-        monkeypatch.setattr(
-            "imas_codex.embeddings.encoder.Encoder.embed_texts",
-            lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("no embed")),
-        )
-        out = _search_standard_names("temperature", kind="vector", gc=mock_gc)
-        assert "ion_temperature" in out
-        assert "electron_temperature" not in out
+        _search_standard_names("temperature", kind="vector", gc=mock_gc)
+        assert captured.get("kind") == "vector"
 
     def test_no_grammar_kwargs_accepted(self):
         """Signature must not have grammar_* parameters."""

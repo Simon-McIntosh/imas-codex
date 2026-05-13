@@ -7,7 +7,7 @@ The flag must support three formats:
 
 All three cases are validated at two levels:
 - The ``_split_whitespace`` callback that normalises Click values (pure unit test).
-- The Click runner (invocation-level), using mocked ``_run_sn_loop_cmd`` so the
+- The Click runner (invocation-level), using mocked ``_run_sn_cmd`` so the
   pipeline never actually executes.
 """
 
@@ -76,7 +76,7 @@ def runner() -> CliRunner:
 
 def _invoke_run(runner: CliRunner, extra_args: list[str]) -> tuple[int, list[str]]:
     """Invoke ``sn run`` with *extra_args*, capturing the ``domains`` tuple that
-    would have been forwarded to ``_run_sn_loop_cmd``.
+    would have been forwarded to ``_run_sn_cmd``.
 
     Returns ``(exit_code, domains_list)``.
     """
@@ -85,7 +85,7 @@ def _invoke_run(runner: CliRunner, extra_args: list[str]) -> tuple[int, list[str
     def fake_run_loop(**kwargs):
         captured.append(list(kwargs.get("domains", ())))
 
-    with patch("imas_codex.cli.sn._run_sn_loop_cmd", side_effect=fake_run_loop):
+    with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=fake_run_loop):
         # Also silence the pipeline-version clear-gate check
         with patch("imas_codex.cli.sn._check_pipeline_clear_gate"):
             result = runner.invoke(

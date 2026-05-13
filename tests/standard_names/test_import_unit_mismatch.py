@@ -22,8 +22,6 @@ _ENTRY = {
     "description": "Electron temperature",
     "documentation": "The electron temperature Te.",
     "links": [],
-    "constraints": [],
-    "validity_domain": "",
     "status": "draft",
 }
 

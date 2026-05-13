@@ -14,11 +14,19 @@ Apply the rubric (provided in the system prompt) to the candidate below.
 - **Standard name**: {{ item.id }}
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
-{% if item.source_paths %}- **DD source paths**: {{ item.source_paths | join(', ') }}
+{% if item.source_paths %}- **Source paths** (provenance context — dock if cited in output): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.cocos_label %}- **COCOS label**: `{{ item.cocos_label }}`
 {% endif %}
 {% if item.physics_domain %}- **Physics domain**: {{ item.physics_domain }}
+{% endif %}
+{% if item.dd_clusters %}- **Semantic clusters:**
+{% for cl in item.dd_clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+{% if item.dd_version_history %}- **DD version history:**
+{% for vh in item.dd_version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
+{% if item.dd_keywords %}- **Keywords:** {{ item.dd_keywords | join(', ') }}
 {% endif %}
 - **Description**: {{ item.description | default('(missing)', true) }}
 - **Documentation**:
@@ -47,7 +55,7 @@ They are NOT to be re-reviewed. Compare the candidate's documentation
 {% endif %}
 
 {% if same_path_neighbours %}
-### Same DD IDS source family (provenance phrasing)
+### Same physics domain family (phrasing consistency)
 {% for n in same_path_neighbours %}
 - **`{{ n.id }}`** ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }}) — {{ n.description | default('', true) }}
 {% endfor %}

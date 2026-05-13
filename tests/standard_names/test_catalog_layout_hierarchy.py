@@ -74,24 +74,24 @@ class TestOrderingProjection:
         )
 
         entries = [
-            {"name": "z_component_of_magnetic_field"},
+            {"name": "z_magnetic_field"},
             {"name": "magnetic_field"},
-            {"name": "x_component_of_magnetic_field"},
-            {"name": "y_component_of_magnetic_field"},
+            {"name": "x_magnetic_field"},
+            {"name": "y_magnetic_field"},
         ]
         edges = [
-            ("x_component_of_magnetic_field", "magnetic_field", "COMPONENT_OF"),
-            ("y_component_of_magnetic_field", "magnetic_field", "COMPONENT_OF"),
-            ("z_component_of_magnetic_field", "magnetic_field", "COMPONENT_OF"),
+            ("x_magnetic_field", "magnetic_field", "COMPONENT_OF"),
+            ("y_magnetic_field", "magnetic_field", "COMPONENT_OF"),
+            ("z_magnetic_field", "magnetic_field", "COMPONENT_OF"),
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
         names = [e["name"] for e in result]
         assert names == [
             "magnetic_field",
-            "x_component_of_magnetic_field",
-            "y_component_of_magnetic_field",
-            "z_component_of_magnetic_field",
+            "x_magnetic_field",
+            "y_magnetic_field",
+            "z_magnetic_field",
         ]
 
 
@@ -180,13 +180,13 @@ class TestOrderingMixed:
 
         entries = [
             {"name": "upper_uncertainty_of_temperature"},
-            {"name": "x_component_of_temperature"},
+            {"name": "x_temperature"},
             {"name": "temperature"},
             {"name": "maximum_of_temperature"},
         ]
         edges = [
             ("temperature", "upper_uncertainty_of_temperature", "HAS_ERROR"),
-            ("x_component_of_temperature", "temperature", "COMPONENT_OF"),
+            ("x_temperature", "temperature", "COMPONENT_OF"),
             ("maximum_of_temperature", "temperature", "COMPONENT_OF"),
         ]
 
@@ -198,7 +198,7 @@ class TestOrderingMixed:
         assert set(names[1:]) == {
             "maximum_of_temperature",
             "upper_uncertainty_of_temperature",
-            "x_component_of_temperature",
+            "x_temperature",
         }
         # Alpha-sorted among children
         assert names[1:] == sorted(names[1:])
@@ -323,7 +323,6 @@ class TestRoundTripByteStability:
                 "unit": "eV",
                 "physics_domain": "kinetics",
                 "links": [],
-                "constraints": [],
             },
         ]
 
@@ -342,11 +341,17 @@ class TestRoundTripByteStability:
         parsed = yaml.safe_load(yaml_text)
         assert isinstance(parsed, list)
 
-        # Re-emit through canonical pipeline
+        # Re-emit through canonical pipeline (matching export logic)
+        from imas_codex.standard_names.export import _ISN_UNSUPPORTED_FIELDS
+
         re_emitted = []
         for entry in parsed:
             canon = canonicalise_entry(entry)
-            clean = {k: v for k, v in canon.items() if v is not None}
+            clean = {
+                k: v
+                for k, v in canon.items()
+                if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
+            }
             ordered = reorder_entry_dict(clean)
             re_emitted.append(ordered)
 
@@ -484,7 +489,7 @@ class TestPartialExportPublishSafety:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "full",
             "domains_included": ["transport", "magnetics"],
-            "edge_model_version": "plan_39_v1",
+            "edge_model_version": "v1",
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
@@ -512,7 +517,7 @@ class TestPartialExportPublishSafety:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "domain_subset",
             "domains_included": ["transport"],
-            "edge_model_version": "plan_39_v1",
+            "edge_model_version": "v1",
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
@@ -639,7 +644,7 @@ class TestEdgeModelVersionGuard:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "full",
             "domains_included": ["kinetics"],
-            "edge_model_version": "plan_39_v0",
+            "edge_model_version": "v0",
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 

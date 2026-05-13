@@ -8,10 +8,8 @@ from imas_codex.standard_names.graph_ops import normalize_name_id
 class TestNormalizeNameId:
     def test_exb_expansion(self):
         assert (
-            normalize_name_id(
-                "poloidal_component_of_neutral_particle_ExB_drift_velocity"
-            )
-            == "poloidal_component_of_neutral_particle_e_cross_b_drift_velocity"
+            normalize_name_id("poloidal_neutral_particle_ExB_drift_velocity")
+            == "poloidal_neutral_particle_e_cross_b_drift_velocity"
         )
 
     def test_bxgradb_expansion(self):

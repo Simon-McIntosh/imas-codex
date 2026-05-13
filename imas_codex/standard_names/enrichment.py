@@ -18,9 +18,9 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 
-from imas_codex.standard_names.classifier import classify_path
 from imas_codex.standard_names.families import VectorFamily, detect_families
-from imas_codex.standard_names.sources.base import ExtractionBatch
+from imas_codex.standard_names.sources.base import ExtractionBatch, SourceCandidate
+from imas_codex.standard_names.sources.dd_qualifier import qualify_dd
 
 logger = logging.getLogger(__name__)
 
@@ -212,12 +212,12 @@ def enrich_paths(paths: list[dict]) -> list[dict]:
 
     1. Deduplicates rows to one entry per unique path.
     2. Collects all cluster memberships for each path.
-    3. Classifies each path via :func:`classify_path` (quantity / skip).
+    3. Qualifies each path via :func:`qualify_dd` (eligible / skip).
     4. Selects primary cluster from multi-cluster memberships.
     5. Attaches enrichment metadata.
 
     Returns:
-        Only ``"quantity"`` paths, each with ``primary_cluster_id``,
+        Only eligible paths, each with ``primary_cluster_id``,
         ``primary_cluster_label``, ``primary_cluster_description``, and
         ``all_clusters`` attached.
     """
@@ -253,14 +253,15 @@ def enrich_paths(paths: list[dict]) -> list[dict]:
                     }
                 )
 
-    # --- Step 3+4+5: classify, select primary cluster, attach enrichment ----
+    # --- Step 3+4+5: qualify, select primary cluster, attach enrichment ----
     enriched: list[dict] = []
     skip_count = 0
 
     for path, base_row in path_base.items():
-        scope = classify_path(base_row)
+        candidate = SourceCandidate.from_dd_row(base_row)
+        qualification = qualify_dd(candidate)
 
-        if scope == "skip":
+        if not qualification.eligible:
             skip_count += 1
             continue
 

@@ -806,26 +806,6 @@ def get_sn_isnc_dir() -> Path | None:
     return None
 
 
-def get_compose_lean() -> bool:
-    """Whether to use the lean compose system prompt (≤8K tokens).
-
-    When True, workers.compose_worker selects ``sn/generate_name_system_lean``
-    instead of the full 39K-token ``sn/generate_name_system`` template, and caps
-    ``existing_names`` at 50 (vs 200).  Reduces per-batch cost ~4× (Phase A
-    of plan 43 — see plans/features/standard-names/43-pipeline-rd-fix.md).
-
-    Default: False — the legacy 39K prompt is preserved for production until
-    Phase B (budget rebalance) and Phase E (probe loop) confirm the lean
-    prompt meets quality thresholds.
-
-    Priority: IMAS_CODEX_SN_COMPOSE_LEAN env (``1``/``true`` → True)
-              → [sn-compose].lean-prompt (bool) → False.
-    """
-    if env := os.getenv("IMAS_CODEX_SN_COMPOSE_LEAN"):
-        return env.lower() in ("1", "true", "yes")
-    return bool(_get_section("sn-compose").get("lean-prompt", False))
-
-
 def get_compose_concurrency() -> int:
     """Maximum concurrent LLM requests for the SN compose worker.
 

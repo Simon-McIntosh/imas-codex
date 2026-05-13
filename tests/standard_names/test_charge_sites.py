@@ -83,7 +83,9 @@ class TestComposeChargeEvent:
             dd_paths: list[str] = Field(default_factory=lambda: ["eq/te"])
             kind: str = "scalar"
             reason: str = "test"
-            grammar_fields: dict = Field(default_factory=dict)
+            base_token: str = "temperature"
+            base_kind: str = "quantity"
+            qualifiers: list[str] = Field(default_factory=lambda: ["electron"])
             unit: str = "eV"
 
         class _ComposeBatch(BaseModel):

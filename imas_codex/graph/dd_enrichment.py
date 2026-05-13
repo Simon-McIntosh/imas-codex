@@ -1,8 +1,8 @@
 """LLM enrichment for IMAS Data Dictionary paths.
 
-Generates physics-aware descriptions, keywords, and physics_domain updates
-for IMASNode paths to improve semantic search quality. Uses batch LLM calls
-with tree hierarchy context to produce rich descriptions.
+Generates physics-aware descriptions and keywords for IMASNode paths to
+improve semantic search quality. Uses batch LLM calls with tree hierarchy
+context to produce rich descriptions.
 
 Follows the idempotent pattern: paths are only enriched once unless the
 context or model changes (tracked via enrichment_hash).
@@ -57,16 +57,6 @@ class IMASPathEnrichmentResult(BaseModel):
             "Searchable keywords (up to 8) — physics abbreviations/symbols, "
             "concepts, measurement types, diagnostic names, and related "
             "terms not already in the description or path name"
-        ),
-    )
-    physics_domain: str | None = Field(
-        default=None,
-        description=(
-            "Primary physics domain for this path. Use ONLY if the path clearly "
-            "belongs to a domain different from the IDS-level physics_domain. "
-            "Leave null to inherit from IDS — EXCEPT for cross-cutting IDSs "
-            "(summary, amns_data, temporary, dataset_description) where the "
-            "IDS-level domain is 'general'. For those, ALWAYS emit a specific domain."
         ),
     )
 
@@ -893,7 +883,6 @@ def enrich_imas_paths(
     1. Gather rich context (hierarchy, siblings, metadata)
     2. Call LLM to generate description, keywords
     3. Update graph with enrichment fields
-    4. Optionally propagate physics_domain back to graph
 
     Boilerplate paths (error/validity fields) get template descriptions
     without LLM calls.
@@ -923,7 +912,6 @@ def enrich_imas_paths(
         "enrichment_cached": 0,
         "enrichment_cost": 0.0,
         "enrichment_tokens": 0,
-        "physics_domains_updated": 0,
     }
 
     monitor = create_build_monitor(use_rich=use_rich, logger=logger)
@@ -1121,11 +1109,6 @@ def enrich_imas_paths(
                             "enrichment_source": "llm",
                         }
 
-                        # Handle physics_domain update if provided
-                        if enrichment.physics_domain:
-                            update["physics_domain"] = enrichment.physics_domain
-                            stats["physics_domains_updated"] += 1
-
                         updates.append(update)
 
                     # Batch update graph
@@ -1138,7 +1121,6 @@ def enrich_imas_paths(
                             {
                                 "primary_text": u["id"],
                                 "description": u.get("description", ""),
-                                "physics_domain": u.get("physics_domain", ""),
                             }
                             for u in updates
                         ]
@@ -1167,7 +1149,7 @@ def _batch_update_enrichments(
     """Batch update enrichment fields on IMASNode nodes.
 
     Updates: description, keywords, enrichment_hash,
-    enrichment_model, enrichment_source, and optionally physics_domain.
+    enrichment_model, and enrichment_source.
     """
     for i in range(0, len(updates), batch_size):
         batch = updates[i : i + batch_size]
@@ -1183,9 +1165,6 @@ def _batch_update_enrichments(
                 p.status = 'enriched',
                 p.claimed_at = null,
                 p.claim_token = null
-            WITH p, u
-            WHERE u.physics_domain IS NOT NULL
-            SET p.physics_domain = u.physics_domain
             """,
             updates=batch,
         )

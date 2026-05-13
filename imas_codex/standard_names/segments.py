@@ -17,8 +17,8 @@ segment ``grammar_ambiguity`` — these are grammar findings, not missing
 tokens, and are likewise filtered.
 
 When the ISN package is unavailable at import time we fall back to a
-conservative empty set so all real-segment gaps are preserved.  In vNext
-(rc21+) ``physical_base`` is intended to be a closed vocabulary; it is
+conservative empty set so all real-segment gaps are preserved.  Since
+ISN rc21+, ``physical_base`` is intended to be a closed vocabulary; it is
 therefore no longer in the fallback.
 """
 
@@ -27,7 +27,7 @@ from __future__ import annotations
 from functools import lru_cache
 
 # Hard fallback (used when imas-standard-names is unavailable at import time).
-# vNext (rc21+) closes ``physical_base``; no segment is guaranteed open by default.
+# ISN rc21+ closes ``physical_base``; no segment is guaranteed open by default.
 _FALLBACK_OPEN_SEGMENTS: frozenset[str] = frozenset()
 
 # Pseudo segments reported by the composer but that are not real grammar
@@ -35,36 +35,77 @@ _FALLBACK_OPEN_SEGMENTS: frozenset[str] = frozenset()
 # "open" for VocabGap filtering purposes.
 PSEUDO_SEGMENTS: frozenset[str] = frozenset({"grammar_ambiguity"})
 
+# Sentinel indicating ISN is not available — distinct from an empty set.
+_ISN_UNAVAILABLE: frozenset[str] | None = None
+
+
+def _load_segment_token_map() -> dict[str, tuple[str, ...]] | None:
+    """Load the ISN SEGMENT_TOKEN_MAP, returning None if ISN is unavailable."""
+    try:
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+        return SEGMENT_TOKEN_MAP
+    except ImportError:
+        return None
+
+
+@lru_cache(maxsize=1)
+def known_segments() -> frozenset[str] | None:
+    """Return all valid ISN grammar segment names, or None if ISN unavailable.
+
+    Includes both open and closed segments.  Use ``is_valid_segment()`` for
+    per-segment checks.  Returns ``None`` when the ISN package cannot be
+    imported — callers must handle this case conservatively.
+    """
+    stm = _load_segment_token_map()
+    if stm is None:
+        return _ISN_UNAVAILABLE
+    try:
+        return frozenset(stm.keys())
+    except Exception:  # pragma: no cover — defensive
+        return _ISN_UNAVAILABLE
+
+
+def is_valid_segment(segment: str | None) -> bool:
+    """Return True if *segment* is a recognized ISN grammar or pseudo segment.
+
+    When ISN is unavailable, returns ``True`` conservatively so gaps are
+    preserved rather than silently dropped.
+    """
+    if not segment:
+        return False
+    if segment in PSEUDO_SEGMENTS:
+        return True
+    segs = known_segments()
+    if segs is None:
+        return True  # ISN unavailable — assume valid to avoid data loss
+    return segment in segs
+
 
 @lru_cache(maxsize=1)
 def open_segments() -> frozenset[str]:
-    """Return the set of ISN grammar segments with open vocabulary.
+    """Return the set of ISN grammar segments with no registered tokens.
 
-    A segment is considered *open* when its closed-vocabulary token list is
-    empty — any token is admissible by design (``physical_base`` is the
-    canonical example).  Emitting a :class:`VocabGap` for such a segment is
-    nonsensical.
-
-    Results are memoised across the process lifetime because
-    ``SEGMENT_TOKEN_MAP`` is immutable and cheap-but-not-free to introspect.
+    With ISN rc53+ all segments are closed (have registered tokens), so
+    this should return an empty frozenset.  Retained as a runtime check
+    against ISN regressions.
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-    except ImportError:
+    stm = _load_segment_token_map()
+    if stm is None:
         return _FALLBACK_OPEN_SEGMENTS
 
     try:
-        return frozenset(seg for seg, tokens in SEGMENT_TOKEN_MAP.items() if not tokens)
+        return frozenset(seg for seg, tokens in stm.items() if not tokens)
     except Exception:  # pragma: no cover — defensive
         return _FALLBACK_OPEN_SEGMENTS
 
 
 def is_open_segment(segment: str | None) -> bool:
-    """Return ``True`` if ``segment`` is open-vocab or a pseudo segment.
+    """Return ``True`` if ``segment`` has no registered tokens or is a pseudo segment.
 
-    Gaps reported against open or pseudo segments should never materialise as
-    :class:`VocabGap` nodes: they do not indicate a missing closed-vocabulary
-    token.
+    Gaps reported against such segments should never materialise as
+    :class:`VocabGap` nodes. With ISN rc53+ all real segments are closed,
+    so only pseudo segments (``grammar_ambiguity``) return True.
     """
     if not segment:
         return False
@@ -81,14 +122,13 @@ def _segment_token_index() -> dict[str, list[str]]:
     ``SEGMENT_TOKEN_MAP``) are indexed.  Open segments are excluded
     because every token is admissible there by definition.
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-    except ImportError:
+    stm = _load_segment_token_map()
+    if stm is None:
         return {}
 
     index: dict[str, list[str]] = {}
     try:
-        for seg, tokens in SEGMENT_TOKEN_MAP.items():
+        for seg, tokens in stm.items():
             if not tokens:
                 continue  # open-vocabulary segment
             for tok in tokens:
@@ -113,6 +153,128 @@ def is_known_token(token: str) -> list[str]:
     return list(_segment_token_index().get(token, []))
 
 
+def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
+    """Classify a single vocabulary gap against the current ISN installation.
+
+    Returns ``(category, actual_segments)`` where:
+
+    - ``"false_positive"`` — token exists in the reported segment
+    - ``"invalid_segment"`` — reported segment is not in ISN grammar
+    - ``"open_segment"`` — reported segment has open vocabulary
+    - ``"wrong_slot_placement"`` — token exists in exactly one other segment
+    - ``"ambiguous_known_token"`` — token exists in multiple other segments
+    - ``"decomposable"`` — compound token whose parts exist in other segments
+    - ``"absent"`` — token is not in any closed segment (genuine gap)
+    """
+    if not is_valid_segment(segment):
+        return "invalid_segment", []
+
+    if is_open_segment(segment):
+        return "open_segment", []
+
+    segments_found = is_known_token(token)
+
+    if segment in segments_found:
+        return "false_positive", segments_found
+
+    if not segments_found:
+        # Before declaring absent, check if compound can be decomposed
+        decomp_segs = _check_decomposable(token)
+        if decomp_segs:
+            return "decomposable", decomp_segs
+        return "absent", []
+
+    if len(segments_found) > 1:
+        return "ambiguous_known_token", segments_found
+
+    return "wrong_slot_placement", segments_found
+
+
+# Lexicalized physics compounds that must NOT be decomposed even though
+# their prefixes match registered tokens.  These are single, irreducible
+# physical concepts in the ISN physical_base registry.
+ATOMIC_COMPOUNDS: frozenset[str] = frozenset(
+    {
+        "poloidal_flux",
+        "poloidal_magnetic_flux",
+        "magnetic_flux",
+        "minor_radius",
+        "major_radius",
+        "cross_sectional_area",
+        "safety_factor",
+        "polarization_angle",
+        "ellipticity_angle",
+        "loop_voltage",
+        "internal_inductance",
+        "magnetic_field",
+        "electric_field",
+        "current_density",
+        "power_density",
+        "energy_density",
+        "particle_flux",
+        "heat_flux",
+        "rotation_frequency",
+        "magnetic_shear",
+        "torque_density",
+        "collisionality",
+        "bootstrap_current",
+    }
+)
+
+
+def _check_decomposable(token: str) -> list[str]:
+    """Check if a compound token can be decomposed into existing vocabulary.
+
+    Uses bounded left-to-right longest-prefix matching against all segment
+    registries.  Returns the list of segments where parts were found, or
+    empty list if the token cannot be decomposed.
+
+    Skips tokens in :data:`ATOMIC_COMPOUNDS` to avoid false negatives on
+    lexicalized physics terms.
+    """
+    if token in ATOMIC_COMPOUNDS:
+        return []
+
+    if "_" not in token:
+        return []
+
+    parts = token.split("_")
+    if len(parts) < 2:
+        return []
+
+    index = _segment_token_index()
+    if not index:
+        return []
+
+    # Try to cover ALL parts with registered tokens (greedy longest-prefix)
+    matched_segments: list[str] = []
+    i = 0
+    while i < len(parts):
+        found = False
+        # Try longest prefix first (3-token, 2-token, 1-token)
+        for width in range(min(3, len(parts) - i), 0, -1):
+            candidate = "_".join(parts[i : i + width])
+            segs = index.get(candidate, [])
+            if segs:
+                matched_segments.extend(segs)
+                i += width
+                found = True
+                break
+        if not found:
+            return []  # Uncovered part — not fully decomposable
+
+    # Only report decomposable if we matched tokens from ≥2 segments
+    unique_segs = list(dict.fromkeys(matched_segments))
+    if len(set(unique_segs)) >= 2:
+        return unique_segs
+    # Single-segment decomposition (e.g. two qualifiers) — still decomposable
+    # if the compound doesn't exist as a registered token itself
+    if unique_segs:
+        return unique_segs
+
+    return []
+
+
 def filter_closed_segment_gaps(
     gaps: list[dict],
     *,
@@ -135,9 +297,13 @@ def filter_closed_segment_gaps(
 
 
 __all__ = [
+    "ATOMIC_COMPOUNDS",
     "PSEUDO_SEGMENTS",
+    "classify_gap",
     "filter_closed_segment_gaps",
     "is_known_token",
     "is_open_segment",
+    "is_valid_segment",
+    "known_segments",
     "open_segments",
 ]

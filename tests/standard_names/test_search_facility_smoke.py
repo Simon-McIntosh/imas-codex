@@ -146,9 +146,8 @@ class TestFindRelatedMissingAnchor:
 def test_tokenise_query_drops_punctuation_and_stopwords():
     from imas_codex.standard_names.grammar_query import tokenise_query
 
-    assert tokenise_query("x_component_of_magnetic_field") == [
+    assert tokenise_query("x_magnetic_field") == [
         "x",
-        "component",
         "magnetic",
         "field",
     ]
@@ -183,6 +182,7 @@ def _graph_available() -> bool:
         return False
 
 
+@pytest.mark.integration
 @pytest.mark.skipif(not _graph_available(), reason="no live graph with StandardNames")
 class TestLiveGraphSmoke:
     def test_segment_filter_returns_results_on_live_graph(self):

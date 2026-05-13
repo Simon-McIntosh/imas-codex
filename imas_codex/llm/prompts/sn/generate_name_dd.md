@@ -81,8 +81,74 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `photon_energy_lower_bound` | **W38-A1 instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `first_coordinate_of_detector_outline` | **W38-A4 local-coordinate naming** — DD `x1`/`x2`/`x3` are abstract local-coordinate indices, NOT Cartesian x/y/z. Name as `first_coordinate`, `second_coordinate`, `third_coordinate`. The standard name describes the geometric concept (outline coordinate), not the DD field label |
 | `x2_width_of_bolometer_detector_aperture` | `second_coordinate_width_of_detector_aperture` | Same rule — `x2` maps to `second_coordinate`, not `x2`. The detector type is context, not part of the name |
-| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_component_of_halo_energy` | **W38-A2 suffix-form for component** — component / transformation / reducer tokens come BEFORE the base via `<modifier>_of_<base>`. Compare ★0.95 `parallel_component_of_fast_electron_pressure` |
-| `z_coordinate_of_sensor_direction_unit_vector` | `z_component_of_direction_unit_vector` | **W38-A3 compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
+| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **W38-A2 suffix-form for component** — component / transformation / reducer tokens come BEFORE the base as a leading qualifier prefix. Compare ★0.95 `parallel_fast_electron_pressure` |
+| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **W38-A3 compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
+
+## Hardware & Diagnostic Geometry — Specificity Required
+
+Many DD paths describe hardware geometry (coil cross-sections, detector outlines,
+aperture positions). These CAN yield valid standard names, but ONLY when the name
+is **tokamak-universal** — meaningful across different fusion devices.
+
+**The rule:** geometry names must include enough context to identify WHAT hardware
+component is being described. Generic geometric primitives alone are useless.
+
+| ❌ Too generic (SKIP these) | ✅ Specific enough | Why |
+|-----------------------------|-------------------|-----|
+| `radius_of_annulus` | `inner_radius_of_poloidal_field_coil_cross_section` | Names which annular geometry |
+| `alpha_of_oblique` | `oblique_angle_of_poloidal_field_coil_element` | Names the engineering context |
+| `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
+| `height_of_rectangle` | `height_of_poloidal_field_coil_cross_section` | Rectangle alone is meaningless |
+| `outline_r` | `radial_coordinate_of_detector_outline` | Names what the outline belongs to |
+| `first_point_r` | `radial_position_of_line_of_sight_first_point` | Full geometric context |
+
+**When to SKIP geometry paths entirely:**
+
+- The DD path describes a generic geometric primitive with no physics or engineering context
+  (e.g., `*/geometry/arcs_of_circle/radius` — "radius of arc of circle" is a math concept, not a tokamak quantity)
+- The quantity is purely local to one specific machine design and has no cross-device meaning
+- The path describes coordinate bookkeeping (index arrays, grid connectivity)
+
+**When to NAME geometry paths:**
+
+- The quantity describes a recognizable hardware component that exists across tokamaks
+  (coil centroids, detector positions, antenna dimensions, wall coordinates)
+- The name includes the hardware context: `_of_poloidal_field_coil`, `_of_detector_aperture`,
+  `_of_antenna_strap`, `_of_first_wall`
+- Multiple tokamaks would use the same term for the same concept
+
+## Segment Routing — Common Confusions
+
+The following tokens are frequently misrouted to the wrong grammar segment.
+Study this table before composing — it eliminates the most common vocab-gap rejections.
+
+| Token/Concept | ❌ Wrong Segment | ✅ Correct Segment | Correct Usage |
+|---|---|---|---|
+| `langmuir_probe`, `bolometer`, `interferometer` | position | device or object | Use as `_of_<device>` suffix |
+| `r`, `major_radius_direction` | component | — | Use `radial` (closed component vocab) |
+| `perpendicular`, `vertical`, `poloidal` | physical_base | component | These are direction tokens — use component segment |
+| `unit_vector_*_component` | geometric_base | — | Decompose: component=`x`/`y`/`z` + geometric_base=`unit_vector` |
+| `perturbed_*_field`, `electrostatic_potential` | process | physical_base | These are quantities, not mechanisms |
+| `separatrix_average`, `flux_surface_average` | position | — | Split: position=`separatrix` + transformation (or physical_base compound) |
+| `measurement_position` | position (as token) | — | Already exists in position vocab — use it correctly as a locus |
+| `derivative_with_respect_to_*` | operators | transformation | Use transformation segment for derivatives |
+| `diffusion_coefficient`, `convection_velocity` | process | physical_base | Transport coefficients are quantities, not processes |
+| `parallel_viscosity`, `heat_viscosity` | process | physical_base | Viscosity is a quantity — process would be `viscous_diffusion` |
+
+### Process vs Physical_base Decision Rule
+
+The `process` segment is for mechanisms that MODIFY a quantity — they appear via `_due_to_<process>`.
+
+- **Process (via `due_to_`):** conduction, convection, diffusion, neoclassical, turbulent, ohmic, radiation, recombination
+- **Physical_base (the quantity itself):** temperature, pressure, flux, field, potential, coefficient, viscosity, diffusivity
+
+**Test:** Can you say "X due_to Y"? If Y is a mechanism causing X, then Y is a process.
+If Y is itself measurable, it's a physical_base.
+
+✅ `energy_due_to_recombination` — recombination is a mechanism → process
+✅ `current_due_to_ohmic` — ohmic heating is a mechanism → process  
+❌ `energy_due_to_diffusion_coefficient` — a coefficient is not a mechanism
+❌ `temperature_due_to_magnetic_field` — magnetic field is a quantity, not a mechanism
 
 ## Description Quality Rules
 
@@ -167,13 +233,13 @@ These names already exist in the catalog. Reuse them if they match your source, 
 > vector component, the orientation token (`parallel`, `perpendicular`,
 > `poloidal`, `toroidal`, `radial`, `diamagnetic`) MUST be placed OUTSIDE
 > the rate marker, wrapping the rate phrase:
->   ✅ `parallel_component_of_change_in_fast_electron_pressure`
->   ✅ `poloidal_component_of_tendency_of_electron_velocity`
->   ❌ `change_in_parallel_component_of_fast_electron_pressure` (grammar rejects)
->   ❌ `change_in_poloidal_component_of_electron_velocity` (grammar rejects)
-> The grammar parses `{orientation}_component_of_X` as a unit — the rate
+>   ✅ `parallel_change_in_fast_electron_pressure`
+>   ✅ `poloidal_tendency_of_electron_velocity`
+>   ❌ `change_in_parallel_fast_electron_pressure` (grammar rejects)
+>   ❌ `change_in_poloidal_electron_velocity` (grammar rejects)
+> The grammar parses `{orientation}_X` as a unit — the rate
 > marker must modify the base quantity X, not intrude between orientation
-> and `component_of`.
+> and the base.
 {% endif %}
 {% if item.species_context %}- **⚠️ Species context:** `{{ item.species_context }}` — this quantity is specific to **{{ item.species_context }}** species. The standard name MUST include the species in the `subject` segment (e.g., `{{ item.species_context }}_temperature`, not just `temperature`).
 {% endif %}- **Description:** {{ item.description }}
@@ -281,14 +347,14 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.family_type == "physical_vector" %}  - This path is the **{{ item.family_axis }}** component of a vector quantity.
   - **Sibling components:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
-  - **ISN naming convention:** Each component should be named `{axis}_component_of_{parent}` where `{parent}` is the shared vector name (e.g., `toroidal_component_of_current_density`).
+  - **ISN naming convention:** Each component should be named `{axis}_{parent}` where `{parent}` is the shared vector name (e.g., `toroidal_current_density`). The `_component_of_` connector is REJECTED by the grammar — use the short leading-qualifier form.
   - All siblings MUST share the same `physical_base` — only the `component` segment differs.
 {% elif item.family_type == "geometric_coordinate" %}  - This path is the **{{ item.family_axis }}** coordinate of a geometric position.
   - **Sibling coordinates:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
 {% if item.family_parent_name %}  - **Geometric base:** `{{ item.family_parent_name }}`{% endif %}
 
-  - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` for coordinates.
+  - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
   - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
   - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
@@ -312,36 +378,38 @@ description is used for embedding, search, and human review. Examples:
 Do NOT repeat the standard name verbatim — add context that helps a reader
 understand what the quantity represents physically.
 
-## Grammar Fields — MANDATORY
+## IR Segment Fields — MANDATORY
 
-For **every** candidate you emit, populate the `grammar_fields` map with the
-grammar-segment decomposition of `standard_name`. This is not optional — it
-is how downstream tooling validates the round-trip
-`parse(name) → compose() == name`.
+**You do NOT output a `standard_name` string.** You fill individual IR segment
+fields. Code assembles the canonical name via ISN's `compose()` function.
 
-Use only these keys (omit keys whose segment is absent from the name):
+For **every** candidate you emit, populate the IR segment fields inside a `segments` object.
+This is not optional — it is how downstream tooling assembles and validates the name.
 
-```
-subject, process, physical_base, geometric_base,
-component, basis, position, reducer, reference, statistic
-```
+**Required fields inside `segments`:**
+- `base_token`: the irreducible base quantity from the registry (e.g., `"temperature"`, `"magnetic_field"`)
+- `base_kind`: `"quantity"` or `"geometry"`
+
+**Optional segment fields** (omit or set null when not applicable):
+- `projection_axis` + `projection_shape`: for vector/coordinate projections
+- `qualifiers`: list of species/population/modifier tokens
+- `locus_token` + `locus_relation` + `locus_type`: for postfix locus
+- `process_token`: for `_due_to_` mechanism
+- `operator_token` + `operator_kind`: for mathematical operators
 
 **Examples:**
 
 - `electron_temperature` →
-  `{"subject": "electron", "physical_base": "temperature"}`
-- `electron_temperature_core` →
-  `{"subject": "electron", "physical_base": "temperature", "position": "core"}`
-- `radial_component_of_magnetic_field` →
-  `{"component": "radial", "physical_base": "magnetic_field"}`
+  `segments: {base_token: "temperature", base_kind: "quantity", qualifiers: ["electron"]}`
+- `radial_magnetic_field` →
+  `segments: {base_token: "magnetic_field", base_kind: "quantity", projection_axis: "radial", projection_shape: "component"}`
 - `minor_radius_of_plasma_boundary` →
-  `{"physical_base": "minor_radius", "position": "plasma_boundary"}`
-- `distance_between_plasma_boundary_and_closest_wall_point` →
-  `{"physical_base": "distance_between_plasma_boundary_and_closest_wall_point"}`
-  (open-vocabulary compound; whole name is the physical_base.)
+  `segments: {base_token: "minor_radius", base_kind: "geometry", locus_token: "plasma_boundary", locus_relation: "of", locus_type: "geometry"}`
+- `time_derivative_of_electron_density` →
+  `segments: {base_token: "density", base_kind: "quantity", qualifiers: ["electron"], operator_token: "time_derivative", operator_kind: "unary_prefix"}`
 
-If you cannot decompose the name, the name is wrong — revise it rather than
-emit an empty `grammar_fields`.
+If you cannot decompose into valid IR segments, the concept is wrong — revise
+rather than emit empty segments.
 
 ## Vocabulary Gaps
 
@@ -352,3 +420,8 @@ Instead, add the path to the `vocab_gaps` list in your response with:
 - `segment`: which grammar segment is missing a token
 - `needed_token`: the token value you would need
 - `reason`: why this token is needed
+
+**⚠️ CRITICAL: Most vocab gaps are false positives.** Before emitting:
+1. Search the token in ALL segment registries — it may exist in another segment
+2. For compound tokens, check if each part exists as a registered token — decompose instead
+3. Verify no existing token already covers the concept

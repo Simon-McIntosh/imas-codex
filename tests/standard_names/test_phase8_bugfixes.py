@@ -596,7 +596,7 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def _make_minimal_name(self) -> dict:
         return {
-            "id": "test_quantity",
+            "id": "electron_pressure",
             "description": "A test quantity",
             "documentation": None,
             "kind": "scalar",

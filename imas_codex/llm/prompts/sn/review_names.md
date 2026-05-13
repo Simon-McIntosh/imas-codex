@@ -15,31 +15,27 @@ Do **not** penalise entries for missing or terse `description`/`documentation`. 
 
 {% include "sn/_exemplars.md" %}
 
-## `physical_base` is the SINGLE open grammar segment — every OTHER segment is closed
+## Token vocabulary
 
-`physical_base` is the only open segment of the grammar. New `physical_base`
-tokens are tracked automatically as VocabGap entries for ISN review — a
-well-formed novel `physical_base` token is **not** a grammar defect on its
-own. Dock grammar points only when the token is malformed (mixed casing,
-digits, unparseable).
+Every segment has a defined token list. A name that uses an unregistered
+token (e.g. `bounce_height`, `detector_sensitivity`, `townsend_position`) is
+a grammar defect — dock grammar and completeness points. The correct action
+is a `vocab_gap` report, not a novel token.
 
-**Critical:** because `physical_base` is open, the dominant failure mode is
-LLMs **absorbing closed-vocabulary tokens into `physical_base`** rather than
-placing them in their correct closed segment (e.g. `toroidal_torque` instead
-of decomposing as `component=toroidal` + `physical_base=torque`). Apply the
-**[I4.6] Decomposition audit** below aggressively — this is the single
-highest-leverage check in the rubric.
+**Critical:** the dominant failure mode is LLMs **absorbing registered tokens
+into `physical_base`** rather than placing them in their correct segment
+(e.g. `toroidal_torque` instead of decomposing as `component=toroidal` +
+`physical_base=torque`). Apply the **[I4.6] Decomposition audit** below
+aggressively — this is the single highest-leverage check in the rubric.
 
 Compound `physical_base` tokens like `poloidal_flux`, `minor_radius`,
 `cross_sectional_area`, `safety_factor`, `polarization_angle`,
 `internal_inductance` are valid lexicalised atomic physics terms; treat them
-as single entries even if a substring resembles a closed-vocab token.
+as single entries even if a substring resembles a registered token.
 
-All OTHER segments (subject, component, position, coordinate, geometry,
-device, region, process, transformation, geometric_base) remain CLOSED. Flag
-`vocab_gap` and dock points whenever those segments would require an
+Flag `vocab_gap` and dock points whenever any segment would require an
 unregistered token, and **never** allow such tokens to migrate into
-`physical_base` to "escape" the closed registry.
+`physical_base` to bypass the registry.
 
 ## Scoring Dimensions
 
@@ -50,12 +46,11 @@ genuine quality problems or false positives. Factor genuine issues into your
 grammar and convention scores.
 
 ### 1. Grammar Correctness (0-20)
-**0**: Would fail vNext grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), or prefix/postfix operator confusion. (Note: novel but well-formed `physical_base` tokens are tracked as VocabGaps and are NOT a grammar defect.)
-**20**: Perfect 5-group IR decomposition with correct operator form and in-vocabulary base.
+**0**: Would fail ISN grammar validation, malformed `physical_base` token (mixed casing/digits/unparseable), prefix/postfix operator confusion, or uses a token NOT in any closed vocabulary segment.
+**20**: Perfect 5-group IR decomposition with correct operator form and all tokens from their respective closed vocabularies.
 
-- Is the `physical_base` token well-formed? (Open vocabulary — novel
-  but well-formed tokens are not defects; only malformed ones are.)
-- For all OTHER segments, is the token in its closed registry?
+- Is the `physical_base` token in the registry? **All vocabulary segments are closed — a novel token in ANY segment is a grammar defect.**
+- For all segments, is the token in its registry?
 - Are prefix operators written with explicit `_of_` scope marker?
 - Are postfix operators (`_magnitude`, `_real_part`, etc.) correctly appended (not prefix `_of_` form)?
 - Is locus correctly expressed with `_of_`/`_at_`/`_over_` prepositions?
@@ -80,6 +75,10 @@ grammar and convention scores.
 - Is the chosen `physical_base` or `geometric_base` appropriate?
 - Are `subject`, `component`, and `position` assignments physically correct?
 - Would a domain expert pick the same decomposition?
+- **Self-descriptiveness**: Can someone reading ONLY the name determine what is measured?
+  A name must be unambiguous in isolation. Score ≤ 5 if the name is semantically
+  incomplete — e.g. `co_passing_density` (density of what?), `trapped_pressure`
+  (pressure of what species/component?), `beam_fraction` (fraction of what?).
 
 ### 3. Naming Convention Adherence (0-20)
 - Does the name avoid ambiguous or overloaded terms?
@@ -159,17 +158,18 @@ real defects, not phantom ones.
 - **Source ID**: {{ item.source_id }}
 - **Unit**: {{ item.unit | default('N/A', true) }} *(authoritative)*
 - **Kind**: {{ item.kind | default('N/A', true) }}
-- **Grammar Fields**: {{ item.grammar_fields or item.fields | default({}, true) }}
-{% if item.source_paths %}- **IMAS Paths**: {{ item.source_paths | join(', ') }}
+- **Grammar Fields**: {% if item.physical_base %}physical_base={{ item.physical_base }}{% endif %}{% if item.subject %}, subject={{ item.subject }}{% endif %}{% if item.component %}, component={{ item.component }}{% endif %}{% if item.coordinate %}, coordinate={{ item.coordinate }}{% endif %}{% if item.position %}, position={{ item.position }}{% endif %}{% if item.process %}, process={{ item.process }}{% endif %}
+{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues** (treat as candidate defects — verify each):
 {% for issue in item.validation_issues %}- {{ issue }}
 {% endfor %}{% endif %}
 {% if item.dd_source_docs %}
-- **Source DD paths**:
+**Source DD definitions** (physics reference for semantic accuracy):
 {% for p in item.dd_source_docs %}  - `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
 {% endfor %}{% endif %}
+
 {% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}
 {% if item.node_type %}- **Node type:** {{ item.node_type }}{% endif %}
 {% if item.physics_domain %}- **Physics domain:** {{ item.physics_domain }}{% endif %}

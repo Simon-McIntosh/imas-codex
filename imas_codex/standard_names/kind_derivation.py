@@ -55,8 +55,10 @@ def derive_kind(name: str) -> str:
 
     Pattern rules (evaluated in order — first match wins):
 
-    1. ``_component_of_`` → ``scalar`` (a component is a scalar projection
-       of the parent vector, not the vector itself)
+    1. Leading axis qualifier for vector projection → ``scalar`` (a component
+       is a scalar projection of the parent vector, not the vector itself).
+       Detected via ISN grammar parse when available, with regex fallback
+       for names starting with axis tokens like ``radial_``, ``toroidal_``, etc.
     2. ``_tensor`` token (e.g. ``metric_tensor``, ``stress_tensor``) →
        ``tensor``
     3. ``_eigenfunction`` → ``eigenfunction``
@@ -67,10 +69,44 @@ def derive_kind(name: str) -> str:
     valid = _load_valid_kinds()
     name_lower = name.lower()
 
-    # 1. Component of a vector — the component itself is a scalar projection
-    if "_component_of_" in name_lower:
-        if "scalar" in valid:
-            return "scalar"
+    # 1. Component of a vector — the component itself is a scalar projection.
+    # Short form: axis qualifier prefix like `toroidal_magnetic_field`.
+    _AXIS_TOKENS = {
+        "radial",
+        "toroidal",
+        "poloidal",
+        "parallel",
+        "perpendicular",
+        "normal",
+        "tangential",
+        "vertical",
+        "horizontal",
+        "binormal",
+        "x",
+        "y",
+        "z",
+        "r",
+        "phi",
+    }
+    _VECTOR_BASES = {
+        "magnetic_field",
+        "electric_field",
+        "velocity",
+        "current_density",
+        "heat_flux",
+        "momentum_flux",
+        "force",
+        "surface_normal",
+        "acceleration",
+        "displacement",
+        "rotation_frequency",
+    }
+    first_token = name_lower.split("_", 1)[0]
+    if first_token in _AXIS_TOKENS and "scalar" in valid:
+        rest = name_lower[len(first_token) + 1 :]
+        for vb in _VECTOR_BASES:
+            if rest == vb or rest.endswith(f"_{vb}"):
+                return "scalar"
 
     # 2. Tensor
     # Match tokens like _tensor_, _tensor (end of name), but NOT

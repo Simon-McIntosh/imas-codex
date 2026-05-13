@@ -8,13 +8,13 @@ American spelling (NC-17).
 
 #### P1. Component decomposition (scalar from vector)
 
-- ✅ `radial_component_of_magnetic_field` — scalar, unit `T`
+- ✅ `radial_magnetic_field` — scalar, unit `T`
   - *Why good:* `{component}_of_{vector_base}` is the canonical decomposition.
     The decomposed scalar has the same unit as the parent vector. Never use
     `_r_`, `_rad_`, or `_radial_magnetic_field` (the last is ambiguous
     between "radial component of B" and "B in the radial direction").
-- ✅ `poloidal_component_of_plasma_velocity`
-- ✅ `perpendicular_component_of_electron_pressure_gradient`
+- ✅ `poloidal_plasma_velocity`
+- ✅ `perpendicular_electron_pressure_gradient`
   - *Why good:* perpendicular/parallel are first-class components; chain
     them through gradients and fluxes naturally.
 
@@ -159,11 +159,11 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 
 #### A8. Spectral name/description mismatch
 
-- ❌ Name `normal_component_of_magnetic_field` with description
+- ❌ Name `normal_magnetic_field` with description
   "Fourier coefficients of the normal component..."
   - *Why bad:* the name promises a scalar field; the description
     describes a spectral coefficient. They disagree.
-  - *Fix:* either rename to `fourier_coefficient_of_normal_component_of_magnetic_field`
+  - *Fix:* either rename to `fourier_coefficient_of_normal_magnetic_field`
     or rewrite the description to describe the underlying field.
 
 #### A9. Trivial surface-of-definition names
@@ -199,11 +199,11 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 4. `_reference_waveform`, `_reference` on pulse_schedule paths —
    controller setpoints. Classifier excludes; LLM must never propose.
 
-5. `diamagnetic_component_of_<vector>` — the diamagnetic drift is a
+5. `diamagnetic_<vector>` — the diamagnetic drift is a
    vector quantity (`v_dia = (B × ∇p) / (q n B²)`), not a spatial axis.
    If you need its projection, first name the drift:
    `ion_diamagnetic_drift_velocity`; then project:
-   `radial_component_of_ion_diamagnetic_drift_velocity`.
+   `radial_ion_diamagnetic_drift_velocity`.
 
 6. Duplicate-subject splitting on compound species.
    BAD: `deuterium_tritium_*` interpreted as two subjects.
@@ -221,3 +221,41 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
    a diagnostic pipeline, or a trivially-defined constant)?
 6. Does the description use American spelling and correctly define every
    `$...$` symbol it introduces?
+7. **Self-descriptiveness**: Can someone reading ONLY the name string deduce
+   what physical quantity it refers to, without consulting the description?
+   If not, revise — a name like `trapped_pressure` fails because "pressure
+   of what?" is unanswered; `trapped_particle_pressure` succeeds.
+
+### Semantic Similarity Calibration — name↔description agreement
+
+The name must be **semantically aligned** with the description. We measure this
+via cosine similarity between the embedded name (with `_` → space) and the
+description embedding. This gate is applied post-generation — names whose
+cosine similarity falls below 0.55 are quarantined.
+
+| Score Range | Verdict | Name → Description Pattern |
+|-------------|---------|----------------------------|
+| ≥ 0.85 | ✅ Excellent | Name tokens closely predict the description — ideal |
+| 0.70–0.84 | ✅ Good | Name is self-describing; description adds precision |
+| 0.55–0.69 | ⚠️ Warning | Ambiguous — name may omit critical context |
+| < 0.55 | ❌ Quarantine | Name and description are misaligned — revise name |
+
+**Concrete calibration examples:**
+
+✅ `electron_temperature` → "Temperature of the electron species" (sim ≈ 0.89)
+- Name tokens (electron, temperature) directly predict the description. Excellent.
+
+✅ `toroidal_magnetic_field` → "Toroidal projection of the magnetic field vector" (sim ≈ 0.86)
+- All key physics terms present in both. Very good.
+
+⚠️ `trapped_pressure` → "Pressure contribution from trapped particles" (sim ≈ 0.52)
+- Missing "particle" in name — reader can't tell pressure OF WHAT. Fails gate.
+- Fix: `trapped_particle_pressure` (sim ≈ 0.84)
+
+⚠️ `co_passing_density` → "Number density of co-passing particles" (sim ≈ 0.49)
+- Missing "particle" — density of what? Fails gate.
+- Fix: `co_passing_particle_density` (sim ≈ 0.82)
+
+✅ `safety_factor` → "Inverse of the rotational transform" (sim ≈ 0.72)
+- Physics-conventional name; description adds the formal definition. Acceptable —
+  `safety_factor` is a well-known term that doesn't need `rotational_transform_inverse`.

@@ -4,19 +4,19 @@ Polling workers using the standard discovery engine pattern with
 graph-backed status tracking and ``has_work_fn`` phase wiring.
 
 Architecture:
-- Six workers: extract, build, enrich, refine, embed, cluster
+- Seven workers: extract, build, enrich, refine, embed, classify, cluster
 - extract/build run once (extract XML, write nodes with status=built)
 - enrich/refine/embed are polling loops that claim batches from the graph
-- cluster waits until embed phase is fully done
+- classify processes all embedded paths via the domain classifier
+- cluster waits until classify phase is fully done
 
 IMASNode lifecycle::
 
-    built → enriched → refined → embedded
+    built → enriched → refined → embedded → classified
 
 Pipeline flow::
 
-    EXTRACT → BUILD → ENRICH → REFINE → CLUSTER
-                                 └→ EMBED ──↗
+    EXTRACT → BUILD → ENRICH → REFINE → EMBED → CLASSIFY → CLUSTER
 
 Build writes nodes with status=built.  As soon as the first batch
 lands, enrich workers can start claiming work.
@@ -24,7 +24,9 @@ Enrich claims built paths, enriches them, sets status=enriched.
 Refine claims enriched paths (with sibling-readiness barrier),
 refines them, sets status=refined.
 Embed claims refined paths, embeds them, sets status=embedded.
-Cluster requires all embedding to complete.
+Classify processes embedded paths, assigns physics domains,
+sets status=classified.
+Cluster requires all classification to complete.
 """
 
 from __future__ import annotations
@@ -87,7 +89,23 @@ class DDBuildState(DiscoveryStateBase):
     @property
     def skip_embedding_hash(self) -> bool:
         """Bypass per-path embedding hash check (re-embed all)."""
-        return self.force or self.reset_to is not None
+        return self.force or self.reset_to in (
+            "extracted",
+            "built",
+            "enriched",
+            "refined",
+        )
+
+    @property
+    def skip_classification_hash(self) -> bool:
+        """Bypass per-path classification hash check (re-classify all)."""
+        return self.force or self.reset_to in (
+            "extracted",
+            "built",
+            "enriched",
+            "refined",
+            "embedded",
+        )
 
     # Shared data (extract → build/embed)
     version_data: dict[str, dict] = field(default_factory=dict)
@@ -115,6 +133,7 @@ class DDBuildState(DiscoveryStateBase):
     enrich_stats: WorkerStats = field(default_factory=WorkerStats)
     refine_stats: WorkerStats = field(default_factory=WorkerStats)
     embed_stats: WorkerStats = field(default_factory=WorkerStats)
+    classify_stats: WorkerStats = field(default_factory=WorkerStats)
     cluster_stats: WorkerStats = field(default_factory=WorkerStats)
 
     # Pipeline phases
@@ -123,6 +142,7 @@ class DDBuildState(DiscoveryStateBase):
     enrich_phase: PipelinePhase = field(init=False)
     refine_phase: PipelinePhase = field(init=False)
     embed_phase: PipelinePhase = field(init=False)
+    classify_phase: PipelinePhase = field(init=False)
     cluster_phase: PipelinePhase = field(init=False)
 
     def __post_init__(self) -> None:
@@ -131,11 +151,14 @@ class DDBuildState(DiscoveryStateBase):
         self.enrich_phase = PipelinePhase("enrich")
         self.refine_phase = PipelinePhase("refine")
         self.embed_phase = PipelinePhase("embed")
+        self.classify_phase = PipelinePhase("classify")
         self.cluster_phase = PipelinePhase("cluster")
 
     @property
     def total_cost(self) -> float:
-        return self.enrich_stats.cost + self.refine_stats.cost
+        return (
+            self.enrich_stats.cost + self.refine_stats.cost + self.classify_stats.cost
+        )
 
 
 def _style_stream_items(items: list[dict], primary_text_style: str) -> list[dict]:
@@ -690,6 +713,53 @@ async def embed_worker(state: DDBuildState, **_kwargs) -> None:
         state.stats.get("embeddings_updated", 0),
     )
     state.embed_stats.freeze_rate()
+
+
+async def classify_worker(state: DDBuildState, **_kwargs) -> None:
+    """Classify physics domains for embedded paths.
+
+    Three-tier classification:
+    - Tier 1: LLM classification for physics paths
+    - Tier 2: Inheritance for error/metadata paths
+    - Tier 3: None for infrastructure metadata
+    """
+    from imas_codex.cli.logging import WorkerLogAdapter
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.graph.dd_domain_classifier import classify_domains
+
+    wlog = WorkerLogAdapter(logger, worker_name="classify_worker")
+    wlog.info("Starting domain classification")
+
+    def on_cost(cost: float) -> None:
+        state.classify_stats.cost += cost
+
+    def on_items(count: int) -> None:
+        state.classify_stats.processed += count
+
+    with GraphClient() as gc:
+        stats = await classify_domains(
+            gc,
+            ids_filter=state.ids_filter,
+            force=state.skip_classification_hash,
+            dry_run=state.dry_run,
+            model=state.model,
+            on_cost=on_cost,
+            on_items=on_items,
+        )
+
+    total = (
+        stats.get("tier3_none", 0)
+        + stats.get("tier2_inherited", 0)
+        + stats.get("tier1_llm", 0)
+    )
+    state.classify_stats.total = total
+    state.classify_stats.processed = total
+    wlog.info(
+        "Classification complete: %d LLM, %d inherited, %d none",
+        stats.get("tier1_llm", 0),
+        stats.get("tier2_inherited", 0),
+        stats.get("tier3_none", 0),
+    )
 
 
 async def cluster_worker(state: DDBuildState, **_kwargs) -> None:
@@ -1370,12 +1440,11 @@ async def run_dd_build_engine(
     as their upstream phase produces work — no blocking on full phase
     completion.  Build writes nodes with ``status=built``, enrich polls
     for built paths, refine polls for enriched paths, embed polls for
-    refined paths.
+    refined paths, classify processes embedded paths.
 
     Pipeline::
 
-        EXTRACT → BUILD → ENRICH → REFINE → CLUSTER
-                                     └→ EMBED ──↗
+        EXTRACT → BUILD → ENRICH → REFINE → EMBED → CLASSIFY → CLUSTER
     """
     from imas_codex.discovery.base.engine import OrphanRecoverySpec
     from imas_codex.graph import dd_graph_ops
@@ -1395,6 +1464,12 @@ async def run_dd_build_engine(
     )
     state.embed_phase.set_has_work_fn(
         lambda: dd_graph_ops.has_pending_embedding() or not state.refine_phase.done
+    )
+    state.classify_phase.set_has_work_fn(
+        lambda: (
+            dd_graph_ops.has_pending_classification(ids_filter=state.ids_filter)
+            or not state.embed_phase.done
+        )
     )
 
     workers = [
@@ -1429,10 +1504,16 @@ async def run_dd_build_engine(
             depends_on=["refine_phase"],
         ),
         WorkerSpec(
+            "classify",
+            "classify_phase",
+            classify_worker,
+            depends_on=["embed_phase"],
+        ),
+        WorkerSpec(
             "cluster",
             "cluster_phase",
             cluster_worker,
-            depends_on=["refine_phase", "embed_phase"],
+            depends_on=["classify_phase"],
         ),
     ]
 

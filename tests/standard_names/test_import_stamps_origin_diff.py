@@ -29,8 +29,6 @@ _ENTRY_BASE = {
     "description": "Electron temperature",
     "documentation": "The electron temperature Te.",
     "links": [],
-    "constraints": ["T_e > 0"],
-    "validity_domain": "core plasma",
     "status": "draft",
 }
 
@@ -108,8 +106,6 @@ class TestOriginNoOp:
                 "status": "draft",
                 "deprecates": None,
                 "superseded_by": None,
-                "validity_domain": "core plasma",
-                "constraints": ["T_e > 0"],
                 "origin": "pipeline",
             }
         }
@@ -148,8 +144,6 @@ class TestOriginFlip:
                 "status": "draft",
                 "deprecates": None,
                 "superseded_by": None,
-                "validity_domain": "core plasma",
-                "constraints": ["T_e > 0"],
                 "origin": "pipeline",
             }
         }

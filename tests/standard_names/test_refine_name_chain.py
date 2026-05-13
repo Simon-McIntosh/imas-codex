@@ -331,26 +331,19 @@ class TestPersistCypherContent:
             or "old.name_stage = 'superseded'" in cypher
         )
 
-    def test_grammar_fields_serialized(self):
+    def test_grammar_fields_removed(self):
+        """grammar_fields parameter was removed in IR segment migration."""
         from imas_codex.standard_names.graph_ops import persist_refined_name
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
 
+        # Verify grammar_fields is no longer accepted
         with patch(_GC_PATH, return_value=gc):
-            persist_refined_name(
-                old_name="old",
-                new_name="new",
-                description="d",
-                old_chain_length=0,
-                grammar_fields={"subject": "electron", "property": "temperature"},
-            )
+            import inspect
 
-        kwargs = tx.run.call_args.kwargs
-        import json
-
-        parsed = json.loads(kwargs["grammar_json"])
-        assert parsed["subject"] == "electron"
+            sig = inspect.signature(persist_refined_name)
+            assert "grammar_fields" not in sig.parameters
 
     def test_persist_idempotent_merge(self):
         """MERGE semantics mean re-calling persist doesn't fail."""
@@ -502,10 +495,11 @@ class TestProcessCallsEscalationModel:
         item = _make_refine_item(chain_length=2)  # cap=3, so cap-1=2 → escalate
 
         refined = RefinedName(
-            standard_name="electron_temperature_core",
+            base_token="temperature",
+            base_kind="quantity",
+            qualifiers=["electron"],
             description="Electron temperature at the plasma core",
             kind="scalar",
-            grammar_fields={"subject": "electron_temperature", "modifier": "core"},
             reason="Better specificity",
         )
 
@@ -554,10 +548,11 @@ class TestProcessCallsEscalationModel:
         item = _make_refine_item(chain_length=0)  # Below cap-1 → no escalation
 
         refined = RefinedName(
-            standard_name="electron_temperature_v2",
+            base_token="temperature",
+            base_kind="quantity",
+            qualifiers=["electron"],
             description="Refined electron temperature",
             kind="scalar",
-            grammar_fields={},
             reason="Better naming",
         )
 
@@ -744,10 +739,10 @@ class TestPromptRendering:
         item = _make_refine_item()
 
         refined = RefinedName(
-            standard_name="new_name",
+            base_token="temperature",
+            base_kind="quantity",
             description="d",
             kind="scalar",
-            grammar_fields={},
             reason="better",
         )
 

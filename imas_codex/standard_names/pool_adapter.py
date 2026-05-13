@@ -1,4 +1,4 @@
-"""Adapter to route --paths / --single-pass / --source signals through the pool path.
+"""Adapter to route --source signals through the pool path.
 
 Replaces the linear 5-stage DAG (:mod:`pipeline.py`) with a thin adapter
 that:
@@ -7,8 +7,7 @@ that:
 2. Builds batch items matching the shape expected by :func:`compose_batch`.
 3. Calls :func:`compose_batch` directly for a one-shot compose pass.
 
-The user-facing CLI surface (``--paths``, ``--single-pass``, ``--source``)
-is unchanged.
+The user-facing CLI surface (``--source``) is unchanged.
 """
 
 from __future__ import annotations
@@ -28,9 +27,8 @@ async def run_explicit_paths(
 ) -> None:
     """Pool-routed replacement for ``run_sn_pipeline``.
 
-    Accepts a :class:`StandardNameBuildState` and processes its
-    ``paths_list`` (or the full DD source scope) through the pool
-    compose path.
+    Accepts a :class:`StandardNameBuildState` and processes the full DD
+    source scope through the pool compose path.
 
     Steps:
 
@@ -48,7 +46,7 @@ async def run_explicit_paths(
     from imas_codex.standard_names.budget import BudgetManager
     from imas_codex.standard_names.workers import compose_batch
 
-    paths = state.paths_list or []
+    paths = []
     if not paths and not state.source:
         logger.info("No paths or source specified — nothing to do")
         return
@@ -180,9 +178,8 @@ async def _seed_explicit_paths(
 
 
 async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
-    """Seed items from DD source scan (non-targeted mode).
+    """Seed items from DD source scan.
 
-    Used when ``--single-pass`` is set without ``--paths``.
     Runs the extract logic to discover DD paths, creates SNS nodes,
     and returns enriched batch items.
     """

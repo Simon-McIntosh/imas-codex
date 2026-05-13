@@ -102,14 +102,17 @@ def _mock_compose_llm_result(items: list[dict]) -> Any:
     for item in items:
         path = item.get("path", f"unknown/{len(candidates)}")
         cand = SimpleNamespace(
-            standard_name=f"test_name_{len(candidates)}",
+            base_token=f"test_base_{len(candidates)}",
+            base_kind="quantity",
+            qualifiers=[],
             source_id=path,
             description=f"Test description for {path}",
             kind="scalar",
             dd_paths=[path],
-            grammar_fields={},
             reason="test",
         )
+        # Add compose_name method
+        cand.compose_name = lambda c=cand: f"{c.base_token}"
         candidates.append(cand)
     result = SimpleNamespace(
         candidates=candidates,
@@ -192,7 +195,6 @@ def _mock_review_llm_result(items: list[dict]) -> Any:
 # The set of patches shared across compose/regen tests.
 _COMPOSE_PATCHES = {
     "imas_codex.standard_names.context.build_compose_context": lambda: {},
-    "imas_codex.settings.get_compose_lean": lambda: False,
     "imas_codex.standard_names.workers._enrich_batch_items": lambda items: None,
     "imas_codex.standard_names.workers._search_nearby_names": lambda *a, **k: [],
     "imas_codex.standard_names.workers._enrich_ids_context": lambda *a, **k: None,
@@ -239,10 +241,6 @@ class TestComposeDomainContextFromBatch:
             patch(
                 "imas_codex.standard_names.context.build_compose_context",
                 return_value={},
-            ),
-            patch(
-                "imas_codex.settings.get_compose_lean",
-                return_value=False,
             ),
             patch(
                 "imas_codex.standard_names.workers._enrich_batch_items",
@@ -326,10 +324,6 @@ class TestComposeStopEvent:
             patch(
                 "imas_codex.standard_names.context.build_compose_context",
                 return_value={},
-            ),
-            patch(
-                "imas_codex.settings.get_compose_lean",
-                return_value=False,
             ),
             patch(
                 "imas_codex.standard_names.workers._enrich_batch_items",
@@ -638,10 +632,6 @@ class TestBatchProcessorReleasesClaimsOnException:
             patch(
                 "imas_codex.standard_names.context.build_compose_context",
                 return_value={},
-            ),
-            patch(
-                "imas_codex.settings.get_compose_lean",
-                return_value=False,
             ),
             patch(
                 "imas_codex.standard_names.workers._enrich_batch_items",

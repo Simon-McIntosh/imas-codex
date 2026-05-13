@@ -11,6 +11,8 @@ Name the **physical or geometric quantities** represented by the following
 IMAS Data Dictionary paths. Each standard name describes the underlying
 physics — NOT the DD path, IDS section, or measurement instrument.
 
+> **Standard Names are standalone, self-describing metadata labels.** Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+
 **Subject–base separation rule:** Species and entity qualifiers (electron,
 ion, neutral, fast_ion) go in the `subject` segment, NOT fused into
 `physical_base`. Example: subject=electron + physical_base=temperature →
@@ -103,8 +105,17 @@ path measures the same quantity — do not invent a synonym.
 | `reconstructed_faraday_rotation_angle` | `faraday_rotation_angle` | Processing method is metadata |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking in |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `photon_energy_lower_bound` | **W38-A1** drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `cross_sectional_area_of_rogowski_coil`) |
-| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_component_of_halo_energy` | **W38-A2** component/transformation tokens come BEFORE the base via `<modifier>_of_<base>` — never as suffixes |
-| `z_coordinate_of_sensor_direction_unit_vector` | `z_component_of_direction_unit_vector` | **W38-A3** drop stacked hardware tokens; a unit-vector field's Z is a projection, not a coordinate |
+| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **W38-A2** component/transformation tokens come BEFORE the base as a leading qualifier prefix — never as suffixes |
+| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **W38-A3** drop stacked hardware tokens; a unit-vector field's Z is a projection, not a coordinate |
+
+## Locus Preposition Rules (`_at_` vs `_of_`)
+
+The ISN grammar enforces strict preposition rules for locus qualifiers:
+
+- **`_at_` for spatial/geometric locus** (WHERE something is measured/evaluated): `at_core`, `at_pedestal_top`, `at_lcfs`
+- **`_of_` for entity/object association** (WHAT thing the quantity belongs to or is located at): `of_separatrix`, `of_magnetic_axis`, `of_plasma_boundary`, `of_langmuir_probe`, `of_coil`, `of_antenna`, `of_rogowski_coil`
+
+Named geometric entities (separatrix, magnetic_axis, x_point, plasma_boundary) and hardware objects (probe, coil, antenna) use `_of_`. Abstract spatial regions from the position vocabulary (core, pedestal_top, lcfs) use `_at_`.
 
 ## Description Quality Rules
 
@@ -173,8 +184,8 @@ Use them as quality benchmarks for naming style and field usage:
 > Name MUST start with `tendency_of_`, `change_in_`, or `rate_of_change_of_`.
 > Description must be consistent with the rate-marker prefix.
 > Orientation tokens wrap the rate phrase:
->   ✅ `parallel_component_of_change_in_fast_electron_pressure`
->   ❌ `change_in_parallel_component_of_fast_electron_pressure`
+>   ✅ `parallel_change_in_fast_electron_pressure`
+>   ❌ `change_in_parallel_fast_electron_pressure`
 {% endif %}
 - **Description:** {{ item.description }}
 - **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative — do NOT output)*
@@ -241,3 +252,8 @@ an invalid name. Instead, add the path to the `vocab_gaps` list with:
 - `segment`: which grammar segment is missing a token
 - `needed_token`: the token value you would need
 - `reason`: why this token is needed
+
+**⚠️ CRITICAL: Most vocab gaps are false positives.** Before emitting:
+1. Search the token in ALL segment registries — it may exist in another segment
+2. For compound tokens, check if each part exists as a registered token — decompose instead
+3. Verify no existing token already covers the concept

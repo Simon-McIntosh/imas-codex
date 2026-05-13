@@ -55,7 +55,7 @@ def staging_dir(tmp_path: Path) -> Path:
         "published_count": 1,
         "excluded_below_score_count": 0,
         "excluded_unreviewed_count": 0,
-        "edge_model_version": "plan_39_v1",
+        "edge_model_version": "v1",
         "domains_included": ["equilibrium"],
     }
     (staging / "catalog.yml").write_text(yaml.safe_dump(manifest), encoding="utf-8")

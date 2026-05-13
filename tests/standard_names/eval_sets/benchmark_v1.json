@@ -117,15 +117,15 @@
     {
       "dd_path": "tf/field_map/b_field_tor/values",
       "physics_domain": "magnetic_field_diagnostics",
-      "expected_name": "toroidal_component_of_magnetic_field",
+      "expected_name": "toroidal_magnetic_field",
       "expected_unit": "T",
       "source": "isn_catalog",
-      "rationale": "ISN published — component_of template. Tests component-prefix order."
+      "rationale": "ISN published — short-form component prefix. Tests component-prefix order."
     },
     {
       "dd_path": "tf/field_map/b_field_r/values",
       "physics_domain": "magnetic_field_diagnostics",
-      "expected_name": "radial_component_of_magnetic_field",
+      "expected_name": "radial_magnetic_field",
       "expected_unit": "T",
       "source": "isn_catalog",
       "rationale": "ISN published — radial component; paired vector decomposition."
@@ -133,7 +133,7 @@
     {
       "dd_path": "tf/field_map/b_field_z/values",
       "physics_domain": "magnetic_field_diagnostics",
-      "expected_name": "vertical_component_of_magnetic_field",
+      "expected_name": "vertical_magnetic_field",
       "expected_unit": "T",
       "source": "isn_catalog",
       "rationale": "ISN published — vertical component; completes the RφZ triple."
@@ -231,14 +231,14 @@
       "dd_path": "edge_transport/model/ggd/ion/particles/d_pol/values",
       "physics_domain": "edge_plasma_physics",
       "anti_pattern_category": "component_prefix_order",
-      "rejection_reason": "Component token '_poloidal' in suffix position; grammar requires '<axis>_component_of_<quantity>' or 'poloidal_electron_diffusivity'."
+      "rejection_reason": "Component token '_poloidal' in suffix position; grammar requires 'poloidal_electron_diffusivity' (short-form prefix)."
     },
     {
       "candidate_name": "ion_rotation_frequency_toroidal",
       "dd_path": "core_profiles/profiles_1d/ion/rotation_frequency_tor",
       "physics_domain": "transport",
       "anti_pattern_category": "component_prefix_order",
-      "rejection_reason": "Component token '_toroidal' misplaced — expected 'toroidal_ion_rotation_frequency' or 'toroidal_component_of_ion_rotation_frequency'."
+      "rejection_reason": "Component token '_toroidal' misplaced — expected 'toroidal_ion_rotation_frequency' (short-form prefix)."
     },
     {
       "candidate_name": "vertical_coordinate_of_outline_point",
@@ -262,7 +262,7 @@
       "rejection_reason": "'cumulative_' prefix misuse — DD '_inside' quantities must use suffix 'inside_flux_surface' after the quantity, not a 'cumulative_' prefix on the base."
     },
     {
-      "candidate_name": "diamagnetic_component_of_ion_e_cross_b_drift_velocity",
+      "candidate_name": "diamagnetic_ion_e_cross_b_drift_velocity",
       "dd_path": "plasma_profiles/ggd/ion/state/velocity_exb/diamagnetic",
       "physics_domain": "transport",
       "anti_pattern_category": "wrong_transformation",

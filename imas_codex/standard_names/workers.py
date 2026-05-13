@@ -212,7 +212,7 @@ def _load_known_physical_bases() -> frozenset[str]:
 
 
 def _auto_detect_physical_base_gaps(
-    candidates: list,  # StandardNameCandidate instances
+    candidates: list,  # StandardNameCandidate instances or dicts
     known_bases: frozenset[str] | None = None,
 ) -> list[dict]:
     """Parse each candidate name and surface novel ``physical_base`` tokens.
@@ -222,7 +222,7 @@ def _auto_detect_physical_base_gaps(
     explicit ``vocab_gap`` exits for ``physical_base``.
 
     Args:
-        candidates: Parsed ``StandardNameCandidate`` objects from the LLM.
+        candidates: Parsed ``StandardNameCandidate`` objects or dicts.
         known_bases: Pre-loaded set of registered physical_base tokens.
             Defaults to ``_load_known_physical_bases()`` if not provided.
     """
@@ -232,27 +232,39 @@ def _auto_detect_physical_base_gaps(
     gaps: list[dict] = []
     seen: set[tuple[str, str]] = set()  # (source_id, base) dedup
 
-    try:
-        from imas_standard_names.grammar import parse_standard_name
-    except ImportError:
-        return gaps  # ISN not installed — skip detection
-
     for c in candidates:
         try:
-            parsed = parse_standard_name(c.standard_name)
-            base = parsed.physical_base
-            if base and base not in known_bases:
-                key = (c.source_id, base)
+            # Handle both model instances and dicts
+            if hasattr(c, "base_token"):
+                base = c.base_token
+                source_id = c.source_id
+                base_kind = getattr(c, "base_kind", "quantity")
+            elif isinstance(c, dict):
+                base = c.get("id", "")  # dict candidates use 'id' for name
+                source_id = c.get("source_id", "")
+                # For dicts, parse the name to extract base
+                try:
+                    from imas_standard_names.grammar import parse_standard_name
+
+                    parsed = parse_standard_name(base)
+                    base = parsed.physical_base
+                    base_kind = "quantity"
+                except Exception:
+                    continue
+            else:
+                continue
+
+            if base_kind == "quantity" and base and base not in known_bases:
+                key = (source_id, base)
                 if key not in seen:
                     seen.add(key)
                     gaps.append(
                         {
-                            "source_id": c.source_id,
+                            "source_id": source_id,
                             "segment": "physical_base",
                             "needed_token": base,
                             "reason": (
-                                f"Novel physical_base proposed by compose: "
-                                f"{base!r} (from name {c.standard_name!r})"
+                                f"Novel physical_base proposed by compose: {base!r}"
                             ),
                         }
                     )
@@ -355,44 +367,32 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
             )
             return batches
 
-        # Source-level skip for resumability (not in targeted mode)
+        # Source-level skip for resumability
         named_ids: set[str] = set()
-        if not state.force and not state.paths_list:
+        if not state.force:
             named_ids = get_named_source_ids()
             if named_ids:
                 wlog.info("Skipping %d already-named sources", len(named_ids))
 
         if state.source == "dd":
-            if state.paths_list:
-                # Targeted mode: bypass graph query + classifier
-                from imas_codex.standard_names.sources.dd import (
-                    extract_specific_paths,
-                )
+            from imas_codex.standard_names.batching import (
+                get_generate_batch_config,
+            )
 
-                batches = extract_specific_paths(
-                    paths=state.paths_list,
-                    existing_names=existing,
-                    on_status=_on_status,
-                )
-            else:
-                from imas_codex.standard_names.batching import (
-                    get_generate_batch_config,
-                )
-
-                batch_cfg = get_generate_batch_config()
-                batches = extract_dd_candidates(
-                    ids_filter=state.ids_filter,
-                    domain_filter=state.domain_filter,
-                    limit=state.limit,
-                    existing_names=existing,
-                    on_status=_on_status,
-                    from_model=state.from_model,
-                    force=state.force,
-                    name_only=state.name_only,
-                    name_only_batch_size=state.name_only_batch_size,
-                    max_batch_size=batch_cfg["batch_size"],
-                    max_tokens=batch_cfg["max_tokens"],
-                )
+            batch_cfg = get_generate_batch_config()
+            batches = extract_dd_candidates(
+                ids_filter=state.ids_filter,
+                domain_filter=state.domain_filter,
+                limit=state.limit,
+                existing_names=existing,
+                on_status=_on_status,
+                from_model=state.from_model,
+                force=state.force,
+                name_only=state.name_only,
+                name_only_batch_size=state.name_only_batch_size,
+                max_batch_size=batch_cfg["batch_size"],
+                max_tokens=batch_cfg["max_tokens"],
+            )
         else:
             wlog.error("Unknown source: %s", state.source)
             return []
@@ -415,7 +415,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
     # Inject previous name context for --force regeneration
     if state.force:
         # --paths mode gets rich metadata (full docs, links, linked DD paths)
-        use_rich = bool(state.paths_list)
+        use_rich = False
 
         def _get_mapping():
             from imas_codex.standard_names.graph_ops import get_source_name_mapping
@@ -496,8 +496,10 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
     # Write StandardNameSource nodes for crash-resilient tracking
     if not state.dry_run and batches:
+        from imas_codex.settings import get_dd_version
         from imas_codex.standard_names.graph_ops import merge_standard_name_sources
 
+        _dd_ver = get_dd_version()
         sources = []
         source_type = "dd" if state.source == "dd" else "signals"
         for batch in batches:
@@ -513,6 +515,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         "dd_path": path if source_type == "dd" else None,
                         "batch_key": batch.group_key,
                         "status": "extracted",
+                        "dd_version": _dd_ver,
                         "description": item.get("description")
                         or item.get("documentation")
                         or "",
@@ -612,6 +615,7 @@ RETURN n.coordinate1_same_as AS coordinate1,
        n.cocos_transformation_type AS cocos_label,
        n.cocos_transformation_expression AS cocos_expression,
        n.lifecycle_status AS lifecycle_status,
+       n.data_type AS data_type,
        ident.name AS identifier_schema_name,
        ident.documentation AS identifier_schema_doc,
        ident.options AS identifier_options,
@@ -741,8 +745,11 @@ def _hybrid_search_neighbours_batch(
     if unique_texts:
         try:
             embeddings = embed_query_texts(unique_texts)
-            for text, emb in zip(unique_texts, embeddings, strict=True):
-                embed_cache[text] = emb
+            # Map by index — handle length mismatch gracefully (server may
+            # deduplicate or batch differently)
+            for i, emb in enumerate(embeddings):
+                if i < len(unique_texts):
+                    embed_cache[unique_texts[i]] = emb
         except Exception:
             logger.warning(
                 "Batch query embedding failed; falling back to text-only search",
@@ -835,7 +842,7 @@ def _hybrid_search_neighbours_batch(
         for h in sorted_hits:
             sn_id = sn_map.get(h.path)
             tag = f"name:{sn_id}" if sn_id else f"dd:{h.path}"
-            doc = (h.documentation or h.description or "")[:120]
+            doc = (h.documentation or h.description or "")[:300]
             neighbours.append(
                 {
                     "tag": tag,
@@ -845,6 +852,8 @@ def _hybrid_search_neighbours_batch(
                     "physics_domain": h.physics_domain or "",
                     "doc_short": doc,
                     "cocos_label": h.cocos_transformation_type or "",
+                    "lifecycle": h.lifecycle_status or "",
+                    "node_type": h.node_type or "",
                     "score": float(h.score) if h.score is not None else None,
                 }
             )
@@ -895,6 +904,36 @@ def _retry_k_expansion() -> int:
     return get_sn_retry_k_expansion()
 
 
+def _mark_vocab_gap_sources(
+    batch: list[dict],
+    error_detail: str,
+    source_kind: str,
+) -> None:
+    """Mark all sources in a batch as vocab_gap after a deterministic failure.
+
+    Called when ``acall_llm_structured`` raises a non-retryable validation
+    error (e.g. ``"not a registered"``).  Prevents the pool loop from
+    re-claiming the same sources and entering an infinite retry cycle.
+    """
+    try:
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.graph_ops import mark_source_skipped
+
+        with GraphClient() as gc:
+            for item in batch:
+                sid = item.get("source_id") or item.get("id", "")
+                if sid:
+                    mark_source_skipped(
+                        gc,
+                        sid,
+                        reason="vocab_gap_compose",
+                        detail=error_detail[:300],
+                        source_type=source_kind,
+                    )
+    except Exception as exc:
+        logger.debug("Failed to mark sources as vocab_gap: %s", exc)
+
+
 def _related_path_neighbours(
     gc: Any,
     path: str,
@@ -926,14 +965,17 @@ def _related_path_neighbours(
 
     neighbours: list[dict] = []
     for hit in result.hits:
-        neighbours.append(
-            {
-                "path": hit.path,
-                "ids": hit.ids,
-                "relationship_type": hit.relationship_type,
-                "via": hit.via,
-            }
-        )
+        entry: dict[str, Any] = {
+            "path": hit.path,
+            "ids": hit.ids,
+            "relationship_type": hit.relationship_type,
+            "via": hit.via,
+        }
+        if hit.doc:
+            entry["doc"] = hit.doc
+        if hit.physics_domain:
+            entry["physics_domain"] = hit.physics_domain
+        neighbours.append(entry)
 
     return neighbours
 
@@ -964,13 +1006,27 @@ def _enrich_batch_items(items: list[dict]) -> None:
             # downstream persist see the real DD unit (Pa, m, m^-2.W, …)
             # rather than None.  StandardNameSource does not (yet) carry a
             # ``unit`` property in the schema, so we re-derive it from the
-            # IMASNode at enrich time.  When HAS_UNIT is absent, ``unit``
-            # remains None and the skip ("dd_unit_unresolvable") fires —
-            # which is the correct conservative behaviour.
+            # IMASNode at enrich time.  When HAS_UNIT is absent AND the
+            # data type is numeric, set unit to "1" (ISN dimensionless
+            # convention) — safety factor q, beta, mode numbers, etc.
             if not item.get("unit"):
                 unit_from_rel = row.get("unit_from_rel")
                 if unit_from_rel:
                     item["unit"] = unit_from_rel
+                else:
+                    # Dimensionless: numeric DD paths with no HAS_UNIT
+                    # relationship are genuinely dimensionless (q, beta,
+                    # mode numbers, efficiencies, fractions, etc.).
+                    data_type = row.get("data_type", "")
+                    _NUMERIC_PREFIXES = (
+                        "FLT_",
+                        "INT_",
+                        "CPX_",
+                    )
+                    if data_type and any(
+                        data_type.startswith(p) for p in _NUMERIC_PREFIXES
+                    ):
+                        item["unit"] = "1"
 
             # Apply unit overrides AFTER re-injecting the DD unit.
             # The override engine corrects upstream DD defects (e.g.,
@@ -1012,6 +1068,11 @@ def _enrich_batch_items(items: list[dict]) -> None:
             if lifecycle and lifecycle != "active":
                 item["lifecycle_status"] = lifecycle
 
+            # Parent description (complements parent_path from extraction)
+            parent_desc = row.get("parent_description")
+            if parent_desc and not item.get("parent_description"):
+                item["parent_description"] = parent_desc
+
             # Identifier schema
             ident_name = row.get("identifier_schema_name")
             if ident_name:
@@ -1036,7 +1097,7 @@ def _enrich_batch_items(items: list[dict]) -> None:
                                     "index": opt.get("index", 0),
                                     "description": opt.get("description", ""),
                                 }
-                                for opt in parsed[:20]
+                                for opt in parsed
                                 if opt.get("name")
                             ]
                     except (json.JSONDecodeError, TypeError):
@@ -1357,28 +1418,28 @@ def _update_sources_after_vocab_gap(
 ) -> None:
     """Update StandardNameSource nodes to 'vocab_gap' status.
 
-    Gaps reported on open/pseudo segments (e.g. ``physical_base``,
-    ``grammar_ambiguity``) are ignored — they are not real vocabulary gaps
-    and must not retire the source from future composition attempts.
+    Gaps reported on pseudo segments (e.g. ``grammar_ambiguity``) are
+    ignored — they are not real vocabulary gaps and must not retire
+    the source from future composition attempts.
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.segments import is_open_segment
 
     source_type = "dd" if source == "dd" else "signals"
     source_ids = []
-    skipped_open = 0
+    skipped_pseudo = 0
     for vg in vocab_gaps:
         if is_open_segment(vg.get("segment")):
-            skipped_open += 1
+            skipped_pseudo += 1
             continue
         sid = vg.get("source_id")
         if sid:
             source_ids.append(f"{source_type}:{sid}")
 
-    if skipped_open:
+    if skipped_pseudo:
         wlog.debug(
-            "Skipped vocab_gap status update for %d open-segment gaps",
-            skipped_open,
+            "Skipped vocab_gap status update for %d pseudo-segment gaps",
+            skipped_pseudo,
         )
 
     if not source_ids:
@@ -1514,9 +1575,8 @@ async def _grammar_retry(
         f"  {parse_error}\n\n"
         "Revise ONLY the name to pass the grammar round-trip. Rules:\n"
         "- Pattern: [subject_][physical_base|geometric_base][_component][_position][_process][_object]\n"
-        "- physical_base is the ONLY open grammar slot; every other segment\n"
-        "  (subject, component, coordinate, geometry, position, device, region,\n"
-        "  process, transformation, geometric_base) is CLOSED.\n"
+        "- ALL segments are CLOSED including physical_base (80 registered tokens).\n"
+        "  Only use tokens from the registries. If no token fits, emit a vocab_gap.\n"
         "- Closed-vocabulary tokens (e.g. toroidal, parallel, thermal,\n"
         "  e_cross_b_drift, normalized, fast_ion, volume_averaged) MUST be\n"
         "  placed in their closed segment slot. Never absorb them into\n"
@@ -1771,13 +1831,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         wlog.debug("NC rules YAML not found — skipping injection")
         context["composition_rules"] = []
 
-    from imas_codex.settings import get_compose_lean
-
-    compose_lean = get_compose_lean()
-    _generate_name_system_template = (
-        "sn/generate_name_system_lean" if compose_lean else "sn/generate_name_system"
-    )
-    system_prompt = render_prompt(_generate_name_system_template, context)
+    system_prompt = render_prompt("sn/generate_name_system", context)
 
     wlog.info(
         "Composing standard names for %d items in %d batches (model=%s)",
@@ -1887,9 +1941,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             "items": batch.items,
             "ids_name": batch.group_key,
             "ids_contexts": ids_contexts,
-            "existing_names": sorted(batch.existing_names)[
-                : 50 if compose_lean else 200
-            ],
+            "existing_names": sorted(batch.existing_names)[:200],
             "cluster_context": batch.context,
             "nearby_existing_names": nearby,
             "reference_exemplars": reference_exemplars,
@@ -1926,12 +1978,25 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         _total_cache_creation = 0
         _max_retries = _retry_attempts()
         for _compose_attempt in range(_max_retries + 1):
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=messages,
-                response_model=StandardNameComposeBatch,
-                service="standard-names",
-            )
+            try:
+                llm_out = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=StandardNameComposeBatch,
+                    service="standard-names",
+                )
+            except (ValueError, Exception) as compose_exc:
+                _exc_str = str(compose_exc)
+                if "not a registered" in _exc_str:
+                    logger.warning(
+                        "Compose: vocab gap validation error — marking "
+                        "%d sources as vocab_gap: %s",
+                        len(batch),
+                        _exc_str[:200],
+                    )
+                    _mark_vocab_gap_sources(batch.items, _exc_str, "dd")
+                    return []
+                raise
             result, cost, tokens = llm_out
             _total_compose_cost += cost
             _total_tokens_in += getattr(llm_out, "input_tokens", 0) or 0
@@ -1952,7 +2017,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         getattr(llm_out, "cache_creation_tokens", 0) or 0
                     ),
                     sn_ids=tuple(
-                        c.standard_name for c in (result.candidates if result else [])
+                        c.compose_name() for c in (result.candidates if result else [])
                     ),
                     batch_id=batch.group_key,
                     phase=getattr(state, "budget_phase_tag", "") or "generate_name",
@@ -1966,26 +2031,27 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     # rotate through with grammar composition.
                     _items: list[dict[str, Any]] = []
                     for _cand in result.candidates[:50]:
-                        _gf = _cand.grammar_fields or {}
                         _segs = []
-                        for _k in (
-                            "physical_base",
-                            "subject",
-                            "component",
-                            "position",
-                            "process",
-                            "geometry",
-                            "transformation",
-                        ):
-                            _v = _gf.get(_k)
-                            if _v:
-                                _segs.append(f"{_k}={_v}")
+                        if _cand.base_token:
+                            _segs.append(f"base={_cand.base_token}")
+                        for _q in _cand.qualifiers:
+                            _segs.append(f"qualifier={_q}")
+                        if _cand.projection_axis:
+                            _segs.append(f"projection={_cand.projection_axis}")
+                        if _cand.process_token:
+                            _segs.append(f"process={_cand.process_token}")
+                        if _cand.operator_token:
+                            _segs.append(f"operator={_cand.operator_token}")
                         _desc = (
                             "  ".join(_segs) if _segs else ((_cand.reason or "")[:80])
                         )
+                        try:
+                            _composed = _cand.compose_name()
+                        except Exception:
+                            _composed = f"[IR error] base={_cand.base_token}"
                         _items.append(
                             {
-                                "primary_text": _cand.standard_name,
+                                "primary_text": _composed,
                                 "primary_text_style": "white",
                                 "description": _desc,
                             }
@@ -2019,9 +2085,13 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
                 for c in result.candidates:
                     try:
-                        parse_standard_name(c.standard_name)
+                        _name = c.compose_name()
+                        parse_standard_name(_name)
                     except Exception:
-                        _grammar_failures.append(c.standard_name)
+                        try:
+                            _grammar_failures.append(c.compose_name())
+                        except Exception:
+                            _grammar_failures.append(c.source_id)
             except ImportError:
                 pass  # ISN not installed — skip check
 
@@ -2097,14 +2167,15 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             # Inject unit from DD (authoritative, not LLM output).
             #
             # User invariant (AGENTS.md "Unit safety"): the LLM never
-            # decides units; the DD source must provide one. Missing,
-            # empty, or '-' is unresolvable; 'mixed' is non-standard by
-            # definition (heterogeneous dimensions). We record the skip
-            # on the StandardNameSource for audit and drop the candidate.
-            # NEVER silently coerce to "1": that masks a vocabulary gap
-            # and produces a bad SN.
+            # decides units; the DD source must provide one.
+            # - "1": dimensionless (ISN convention) — valid
+            # - "-": DD dimensionless marker — normalize to "1"
+            # - "mixed": heterogeneous dimensions — skip
+            # - None/empty: enrichment couldn't resolve — skip
             raw_unit = source_item.get("unit") if source_item else None
-            if raw_unit in ("-", "mixed", None, ""):
+            if raw_unit == "-":
+                raw_unit = "1"  # normalize DD marker to ISN convention
+            if raw_unit in ("mixed", None, ""):
                 _skip_reason = (
                     "dd_unit_mixed_non_standard"
                     if raw_unit == "mixed"
@@ -2153,7 +2224,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
             # Normalize name via grammar round-trip BEFORE persist
             # to avoid duplicate nodes if validate would rename
-            name_id = normalize_spelling(c.standard_name)
+            name_id = normalize_spelling(c.compose_name())
 
             # W4b: Pre-validation gate — reject malformed LLM output
             # before it reaches MERGE.
@@ -2249,7 +2320,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         state.grammar_retries_succeeded += 1
                         wlog.info(
                             "L6: Grammar retry succeeded: %r → %r",
-                            c.standard_name,
+                            c.compose_name(),
                             name_id,
                         )
                 except Exception:
@@ -2267,7 +2338,6 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         )
                         for p in (c.dd_paths or [])
                     ],
-                    "fields": c.grammar_fields,
                     "reason": c.reason,
                     "unit": unit,
                     "physics_domain": physics_domain,
@@ -3236,7 +3306,7 @@ async def compose_batch(
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_compose_lean, get_model
+    from imas_codex.settings import get_model
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import StandardNameComposeBatch
@@ -3246,7 +3316,6 @@ async def compose_batch(
 
     model = get_model("sn-run")
     context = build_compose_context()
-    compose_lean = get_compose_lean()
 
     # ── H5: batch-scope domain context ─────────────────────────────────
     def _scalar_domain(d: object) -> str | None:
@@ -3296,10 +3365,7 @@ async def compose_batch(
     context["compose_scored_examples"] = compose_scored_examples
 
     # ── System prompt (cached per pool lifetime) ───────────────────────
-    _generate_name_system_template = (
-        "sn/generate_name_system_lean" if compose_lean else "sn/generate_name_system"
-    )
-    system_prompt = render_prompt(_generate_name_system_template, context)
+    system_prompt = render_prompt("sn/generate_name_system", context)
 
     # ── Enrich items with DD context ───────────────────────────────────
     def _enrich():
@@ -3390,7 +3456,7 @@ async def compose_batch(
             existing_names_set.update(cluster_names)
     except Exception:
         logger.debug("Cluster-aware existing_names lookup failed", exc_info=True)
-    existing_names = sorted(existing_names_set)[: 50 if compose_lean else 200]
+    existing_names = sorted(existing_names_set)[:200]
 
     # ── Render user prompt ─────────────────────────────────────────────
     user_context = {
@@ -3434,12 +3500,26 @@ async def compose_batch(
         _total_cache_creation = 0
 
         for _compose_attempt in range(_max_retries + 1):
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=messages,
-                response_model=StandardNameComposeBatch,
-                service="standard-names",
-            )
+            try:
+                llm_out = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=StandardNameComposeBatch,
+                    service="standard-names",
+                )
+            except (ValueError, Exception) as compose_exc:
+                _exc_str = str(compose_exc)
+                if "not a registered" in _exc_str:
+                    logger.warning(
+                        "Pool %s: vocab gap validation error — marking "
+                        "%d sources as vocab_gap: %s",
+                        phase_tag,
+                        len(batch),
+                        _exc_str[:200],
+                    )
+                    _mark_vocab_gap_sources(batch, _exc_str, "dd")
+                    return 0
+                raise
             result, cost, tokens = llm_out
 
             # Accumulate token/cost totals across retries
@@ -3455,15 +3535,23 @@ async def compose_batch(
 
             # Charge this attempt's cost immediately
             if lease:
+
+                def _safe_sn_ids(_r=result) -> tuple[str, ...]:
+                    ids: list[str] = []
+                    for c in _r.candidates if _r else []:
+                        try:
+                            ids.append(c.compose_name())
+                        except Exception:
+                            ids.append(f"<compose-error:{c.segments.base_token}>")
+                    return tuple(ids)
+
                 _event = LLMCostEvent(
                     model=model,
                     tokens_in=_attempt_tokens_in,
                     tokens_out=_attempt_tokens_out,
                     tokens_cached_read=_attempt_cache_r,
                     tokens_cached_write=_attempt_cache_w,
-                    sn_ids=tuple(
-                        c.standard_name for c in (result.candidates if result else [])
-                    ),
+                    sn_ids=_safe_sn_ids(),
                     batch_id=group_key,
                     phase=phase_tag,
                     service="standard-names",
@@ -3477,9 +3565,13 @@ async def compose_batch(
 
                 for c in result.candidates:
                     try:
-                        parse_standard_name(c.standard_name)
+                        _name = c.compose_name()
+                        parse_standard_name(_name)
                     except Exception:
-                        _grammar_failures.append(c.standard_name)
+                        try:
+                            _grammar_failures.append(c.compose_name())
+                        except Exception:
+                            _grammar_failures.append(c.source_id)
             except ImportError:
                 pass  # ISN not installed — skip check
 
@@ -3558,12 +3650,16 @@ async def compose_batch(
                 (item for item in batch if item.get("path") == c.source_id),
                 None,
             )
-            # User invariant (AGENTS.md "Unit safety"): never coerce a
-            # missing DD unit to "1". Skip the candidate and record the
-            # source as ``skipped``. 'mixed' gets its own reason since
-            # it is permanently ineligible (heterogeneous dimensions).
+            # User invariant (AGENTS.md "Unit safety"): the LLM never
+            # decides units; the DD source must provide one.
+            # - "1": dimensionless (ISN convention) — valid
+            # - "-": DD dimensionless marker — normalize to "1"
+            # - "mixed": heterogeneous dimensions — skip
+            # - None/empty: enrichment couldn't resolve — skip
             raw_unit = source_item.get("unit") if source_item else None
-            if raw_unit in ("-", "mixed", None, ""):
+            if raw_unit == "-":
+                raw_unit = "1"  # normalize DD marker to ISN convention
+            if raw_unit in ("mixed", None, ""):
                 _skip_reason = (
                     "dd_unit_mixed_non_standard"
                     if raw_unit == "mixed"
@@ -3608,7 +3704,7 @@ async def compose_batch(
             # B1/W4b: Pre-validation gate — reject malformed LLM output
             # before MERGE.  Mark the source as 'failed' so it is not
             # re-claimed forever.
-            name_id = normalize_spelling(c.standard_name)
+            name_id = normalize_spelling(c.compose_name())
             _well_formed, _reject_reason = is_well_formed_candidate(name_id)
             if not _well_formed:
                 wlog.warning(
@@ -3678,7 +3774,7 @@ async def compose_batch(
                             wlog.info(
                                 "Pool %s: B2 grammar retry succeeded %r → %r",
                                 phase_tag,
-                                c.standard_name,
+                                c.compose_name(),
                                 name_id,
                             )
                         except Exception:
@@ -3702,7 +3798,6 @@ async def compose_batch(
                 "source_paths": [
                     encode_source_path(source_kind, p) for p in (c.dd_paths or [])
                 ],
-                "fields": c.grammar_fields,
                 "reason": c.reason,
                 "unit": unit,
                 "physics_domain": physics_domain,
@@ -4022,6 +4117,7 @@ async def process_refine_name_batch(
         should_trigger_fanout,
     )
     from imas_codex.standard_names.graph_ops import (
+        _mark_refine_vocab_gap_exhausted,
         persist_refined_name,
         release_refine_name_failed_claims,
     )
@@ -4083,6 +4179,24 @@ async def process_refine_name_batch(
                 )
                 compose_scored_examples = []
 
+            # ── Parse vocab_gap_detail from JSON string (best-effort) ─────
+            raw_vgd = item.get("vocab_gap_detail")
+            vocab_gap_detail: dict | None = None
+            if raw_vgd:
+                try:
+                    import json as _json
+
+                    vocab_gap_detail = (
+                        _json.loads(raw_vgd) if isinstance(raw_vgd, str) else raw_vgd
+                    )
+                except (ValueError, TypeError):
+                    logger.debug(
+                        "refine_name: could not parse vocab_gap_detail for %s", sn_id
+                    )
+
+            # validation_issues is stored as a list on the node directly
+            validation_issues: list[str] | None = item.get("validation_issues") or None
+
             prompt_context: dict[str, Any] = {
                 "item": item,
                 "chain_history": chain_history,
@@ -4090,6 +4204,8 @@ async def process_refine_name_batch(
                 "hybrid_neighbours": [],
                 "fanout_evidence": "",
                 "compose_scored_examples": compose_scored_examples,
+                "vocab_gap_detail": vocab_gap_detail,
+                "validation_issues": validation_issues,
             }
 
             # Attempt hybrid neighbour search (best-effort).  Uses the
@@ -4102,6 +4218,17 @@ async def process_refine_name_batch(
                 ]
             except Exception:
                 logger.debug("Hybrid neighbour search failed for %s", sn_id)
+
+            # ── DD path context (keywords, clusters, version history) ─
+            if path:
+                try:
+                    _enrich_dd_path_context(gc, item, path)
+                except Exception:
+                    logger.debug(
+                        "refine_name: dd_path_context failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
 
             # ── Fan-out trigger gate (plan 39 §5.1) ──────────────────
             # Plumb reviewer_comments_per_dim_name from the claim batch
@@ -4324,7 +4451,6 @@ async def process_refine_name_batch(
                     ),
                     old_chain_length=chain_length,
                     model=model,
-                    grammar_fields=result_obj.grammar_fields,
                     reason=result_obj.reason,
                     escalated=escalate,
                     run_id=mgr.run_id,
@@ -4355,19 +4481,35 @@ async def process_refine_name_batch(
                         }
                     )
 
-            except Exception:
+            except Exception as exc:
                 logger.exception("refine_name failed for %s", sn_id)
-                # Release claim — revert to 'reviewed'
                 token = item.get("claim_token") or ""
+                # Vocab-gap errors and self-referential refines are
+                # deterministic — the LLM will keep producing the same
+                # output.  Mark exhausted instead of reverting to
+                # 'reviewed' (which re-enters the refine loop).
+                _exc_str = str(exc)
+                is_terminal = (
+                    "not a registered" in _exc_str
+                    or "self-referential REFINED_FROM" in _exc_str
+                )
                 try:
-                    await _asyncio.to_thread(
-                        release_refine_name_failed_claims,
-                        sn_ids=[sn_id],
-                        token=token,
-                    )
+                    if is_terminal:
+                        await _asyncio.to_thread(
+                            _mark_refine_vocab_gap_exhausted,
+                            sn_id=sn_id,
+                            token=token,
+                            error_msg=str(exc)[:500],
+                        )
+                    else:
+                        await _asyncio.to_thread(
+                            release_refine_name_failed_claims,
+                            sn_ids=[sn_id],
+                            token=token,
+                        )
                 except Exception:
                     logger.debug(
-                        "release_refine_name_failed_claims also failed for %s",
+                        "release/exhaust also failed for %s",
                         sn_id,
                     )
             finally:
@@ -4832,6 +4974,122 @@ async def process_review_name_batch(
                 )
             continue
 
+        # ── Semantic similarity gate (pre-LLM) ────────────────────────
+        # Compute cosine similarity between name-as-text and description.
+        # Names below the critical threshold are semantically ambiguous
+        # (e.g. "co_passing_density" — density of what?).  Skip the
+        # expensive LLM review and persist a synthetic low score that
+        # routes the name to the refine_name pool.
+        from imas_codex.standard_names.audits import semantic_similarity_check
+        from imas_codex.standard_names.defaults import (
+            SEMANTIC_SIM_CRITICAL,
+            SEMANTIC_SIM_SYNTHETIC_SCORE,
+            SEMANTIC_SIM_WARNING,
+        )
+
+        sem_sim: float | None = None
+        sem_issues: list[str] = []
+        try:
+            sem_sim, sem_issues = await _asyncio.to_thread(
+                semantic_similarity_check,
+                sn_id,
+                item.get("description") or "",
+            )
+        except Exception:
+            logger.debug(
+                "review_name: semantic_similarity_check failed for %s",
+                sn_id,
+                exc_info=True,
+            )
+
+        # Persist semantic_sim on the node regardless of outcome
+        if sem_sim is not None:
+            try:
+                from imas_codex.graph.client import GraphClient as _GC
+
+                def _store_sim(_id=sn_id, _sim=sem_sim) -> None:
+                    with _GC() as gc:
+                        gc.query(
+                            "MATCH (sn:StandardName {id: $id}) "
+                            "SET sn.semantic_sim = $sim",
+                            id=_id,
+                            sim=_sim,
+                        )
+
+                await _asyncio.to_thread(_store_sim)
+            except Exception:
+                pass  # best-effort
+
+        # Critical: skip LLM review, force into refine pipeline
+        if sem_sim is not None and sem_sim < SEMANTIC_SIM_CRITICAL:
+            logger.info(
+                "review_name: semantic gate FAILED for %s (sim=%.3f < %.2f) — "
+                "routing to refine",
+                sn_id,
+                sem_sim,
+                SEMANTIC_SIM_CRITICAL,
+            )
+            try:
+                persist_reviewed_name(
+                    sn_id=sn_id,
+                    claim_token=claim_token,
+                    score=SEMANTIC_SIM_SYNTHETIC_SCORE,
+                    scores={
+                        "grammar": 15.0 / 20.0,
+                        "semantic": 2.0 / 20.0,
+                        "convention": 15.0 / 20.0,
+                        "completeness": 5.0 / 20.0,
+                    },
+                    comments=(
+                        f"semantic_similarity_gate: sim={sem_sim:.3f} below "
+                        f"critical {SEMANTIC_SIM_CRITICAL:.2f}. Name is "
+                        f"semantically ambiguous — a reader cannot determine "
+                        f"the measured quantity from the name alone."
+                    ),
+                    comments_per_dim={
+                        "semantic": (
+                            f"Name-to-description embedding similarity is "
+                            f"{sem_sim:.3f}, well below the {SEMANTIC_SIM_CRITICAL:.2f} "
+                            f"threshold. The name does not stand alone."
+                        ),
+                    },
+                    model="(semantic_similarity_gate)",
+                    llm_cost=0.0,
+                    llm_tokens_in=0,
+                    llm_tokens_out=0,
+                    llm_tokens_cached_read=0,
+                    llm_tokens_cached_write=0,
+                    llm_service="standard-names",
+                    run_id=mgr.run_id,
+                )
+                processed += 1
+                if on_event:
+                    on_event(
+                        {
+                            "type": "review_name_semantic_gate_failed",
+                            "sn_id": sn_id,
+                            "semantic_sim": sem_sim,
+                        }
+                    )
+            except Exception:
+                logger.debug(
+                    "review_name: persist failed for semantic-gated %s",
+                    sn_id,
+                    exc_info=True,
+                )
+            continue
+
+        # Inject warning into item context for the reviewer
+        if sem_sim is not None and sem_sim < SEMANTIC_SIM_WARNING:
+            sem_warning_note = (
+                f"⚠️ SEMANTIC AMBIGUITY WARNING: Name-to-description "
+                f"embedding similarity is {sem_sim:.3f} (threshold "
+                f"{SEMANTIC_SIM_WARNING:.2f}). Verify that the name is "
+                f"self-describing — can someone determine the measured "
+                f"quantity from the name alone?"
+            )
+            item["semantic_warning"] = sem_warning_note
+
         # ── Build prompt context ───────────────────────────────────────
         from imas_codex.standard_names.context import (
             _build_enum_lists,
@@ -4869,6 +5127,30 @@ async def process_review_name_batch(
                 "review_name: scored-example load failed for %s", sn_id, exc_info=True
             )
             review_scored_examples = []
+
+        # ── DD path context for reviewer (keywords, clusters, version history) ─
+        _source_paths = item.get("source_paths") or []
+        if _source_paths:
+            _first_src = (
+                _source_paths[0] if isinstance(_source_paths, list) else _source_paths
+            )
+            if isinstance(_first_src, str):
+                _first_src = strip_dd_prefix(_first_src)
+            if _first_src:
+                try:
+                    from imas_codex.graph.client import GraphClient as _GCDD
+
+                    def _do_dd_ctx(_p=_first_src, _it=item) -> None:
+                        with _GCDD() as _gc:
+                            _enrich_dd_path_context(_gc, _it, _p)
+
+                    await _asyncio.to_thread(_do_dd_ctx)
+                except Exception:
+                    logger.debug(
+                        "review_name: dd_path_context failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
 
         prompt_context: dict[str, Any] = {
             "items": [item],
@@ -5029,6 +5311,27 @@ async def process_review_name_batch(
 # DD context enrichment for generate_docs
 # =============================================================================
 
+_DD_PATH_CONTEXT_QUERY = """
+MATCH (n:IMASNode {id: $path})
+OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
+WHERE c.scope IN ['global', 'domain']
+WITH n, collect(DISTINCT {
+    label: c.label, description: c.description, scope: c.scope
+})[0..3] AS clusters
+OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
+OPTIONAL MATCH (vc:IMASNodeChange)-[:FOR_IMAS_PATH]->(n)
+WHERE vc.change_type IN [
+    'path_added', 'cocos_transformation_type', 'sign_convention',
+    'units', 'path_renamed', 'definition_clarification'
+]
+WITH n, clusters, parent,
+     collect(DISTINCT {change_id: vc.id, change_type: vc.change_type}) AS changes
+RETURN n.keywords AS keywords,
+       parent.description AS parent_description,
+       clusters,
+       changes
+"""
+
 _DOCS_GEN_ENRICH_QUERY = """
 MATCH (sn:StandardName {id: $sn_id})
 OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(imas:IMASNode)
@@ -5055,6 +5358,71 @@ RETURN sn.id AS id,
        coalesce(u.id, sn.unit) AS unit
 LIMIT 20
 """
+
+
+def _enrich_dd_path_context(gc: Any, item: dict, source_path: str) -> None:
+    """Enrich an item dict with DD path context (keywords, clusters, version history).
+
+    Fetches lightweight context from the IMASNode for *source_path* and populates:
+
+    - ``dd_keywords``: list of keyword strings from the IMASNode.
+    - ``dd_clusters``: list of ``{label, description, scope}`` dicts.
+    - ``dd_version_history``: list of ``{version, change_type}`` dicts.
+    - ``dd_parent_description``: description of the parent structure node.
+
+    Best-effort — failures are debug-logged and the item is left without
+    the missing key.  Modifies *item* in-place.
+    """
+    try:
+        rows = list(gc.query(_DD_PATH_CONTEXT_QUERY, path=source_path))
+    except Exception:
+        logger.debug(
+            "_enrich_dd_path_context: query failed for %s", source_path, exc_info=True
+        )
+        return
+    if not rows:
+        return
+    row = rows[0]
+
+    # Keywords
+    kw = row.get("keywords")
+    if kw:
+        if isinstance(kw, str):
+            kw = [k.strip() for k in kw.split(",") if k.strip()]
+        if kw:
+            item["dd_keywords"] = kw
+
+    # Parent description
+    parent_desc = row.get("parent_description")
+    if parent_desc:
+        item["dd_parent_description"] = parent_desc
+
+    # Clusters
+    clusters_raw = row.get("clusters") or []
+    clusters = [
+        {
+            "label": c["label"],
+            "description": c.get("description") or "",
+            "scope": c.get("scope") or "",
+        }
+        for c in clusters_raw
+        if c.get("label")
+    ]
+    if clusters:
+        item["dd_clusters"] = clusters
+
+    # Version history
+    changes = row.get("changes") or []
+    version_history = []
+    for ch in changes:
+        change_id = ch.get("change_id") or ""
+        change_type = ch.get("change_type") or ""
+        parts = change_id.rsplit(":", 1)
+        version = parts[-1] if len(parts) >= 2 else ""
+        if version and change_type:
+            version_history.append({"version": version, "change_type": change_type})
+    if version_history:
+        item["dd_version_history"] = version_history
 
 
 def _enrich_for_docs_gen(
@@ -5157,6 +5525,17 @@ def _enrich_for_docs_gen(
                     exc_info=True,
                 )
 
+        # ── 2b. DD path context (keywords, clusters, version history) ─
+        if source_paths:
+            try:
+                _enrich_dd_path_context(gc, item, source_paths[0])
+            except Exception:
+                logger.debug(
+                    "_enrich_for_docs_gen: dd_path_context failed for %s",
+                    sn_id,
+                    exc_info=True,
+                )
+
         # ── 3. Vector-similar SN neighbours ───────────────────────────
         description = item.get("description") or sn_id.replace("_", " ")
         try:
@@ -5220,7 +5599,9 @@ def _enrich_for_docs_gen(
                 )
             )
             if child_rows:
-                item["child_components"] = [
+                from imas_codex.standard_names.families import sort_by_axis_convention
+
+                child_dicts = [
                     {
                         "name": c["name"],
                         "description": c.get("description") or "",
@@ -5228,6 +5609,7 @@ def _enrich_for_docs_gen(
                     }
                     for c in child_rows
                 ]
+                item["child_components"] = sort_by_axis_convention(child_dicts)
         except Exception:
             logger.debug(
                 "_enrich_for_docs_gen: component context failed for %s",
@@ -5372,6 +5754,7 @@ async def process_generate_docs_batch(
 
     # ── Enrich batch with DD context (source paths, docs, peers) ──────────
     nearby_existing_names: list[dict] = []
+    compose_scored_examples: list[dict] = []
     try:
 
         def _do_enrich() -> list[dict]:
@@ -5405,6 +5788,37 @@ async def process_generate_docs_batch(
     except Exception:
         logger.debug("process_generate_docs_batch: enrichment failed", exc_info=True)
 
+    # ── Load scored examples for docs generation ──────────────────────
+    try:
+        from imas_codex.standard_names.example_loader import load_compose_examples
+
+        batch_domains = list(
+            {
+                item.get("physics_domain", "")
+                for item in batch
+                if item.get("physics_domain")
+            }
+        )
+
+        def _load_docs_scored_examples() -> list[dict]:
+            with GraphClient() as gc:
+                return load_compose_examples(
+                    gc, physics_domains=batch_domains, axis="docs"
+                )
+
+        compose_scored_examples = await _asyncio.to_thread(_load_docs_scored_examples)
+        if compose_scored_examples:
+            logger.info(
+                "generate_docs: Loaded %d scored examples (domains=%s)",
+                len(compose_scored_examples),
+                batch_domains or "all",
+            )
+    except Exception:
+        logger.debug(
+            "process_generate_docs_batch: scored examples load failed",
+            exc_info=True,
+        )
+
     for item in batch:
         if stop_event.is_set():
             break
@@ -5418,6 +5832,7 @@ async def process_generate_docs_batch(
             "item": item,
             "chain_history": chain_history,
             "nearby_existing_names": nearby_existing_names,
+            "compose_scored_examples": compose_scored_examples,
         }
 
         try:
@@ -5636,6 +6051,30 @@ async def process_review_docs_batch(
                 "review_docs: scored-example load failed for %s", sn_id, exc_info=True
             )
             review_scored_examples = []
+
+        # ── DD path context for docs reviewer ──────────────────────────
+        _source_paths = item.get("source_paths") or []
+        if _source_paths:
+            _first_src = (
+                _source_paths[0] if isinstance(_source_paths, list) else _source_paths
+            )
+            if isinstance(_first_src, str):
+                _first_src = strip_dd_prefix(_first_src)
+            if _first_src:
+                try:
+                    from imas_codex.graph.client import GraphClient as _GCDD
+
+                    def _do_dd_ctx(_p=_first_src, _it=item) -> None:
+                        with _GCDD() as _gc:
+                            _enrich_dd_path_context(_gc, _it, _p)
+
+                    await _asyncio.to_thread(_do_dd_ctx)
+                except Exception:
+                    logger.debug(
+                        "review_docs: dd_path_context failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
 
         prompt_context: dict[str, Any] = {
             "item": item,
@@ -6017,3 +6456,67 @@ async def process_refine_docs_batch(
                     pass
 
     return processed
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Embed worker — batch-embed StandardName nodes
+# ═══════════════════════════════════════════════════════════════════════
+
+
+async def process_embed_batch(
+    items: list[dict[str, Any]],
+    mgr: Any,
+    stop_event: asyncio.Event,
+    *,
+    on_event: Callable | None = None,
+) -> int:
+    """Batch-embed StandardName nodes.
+
+    No LLM cost — uses embedding server only.  Does not charge budget.
+    """
+    from imas_codex.embeddings.description import embed_descriptions_batch
+    from imas_codex.standard_names.graph_ops import (
+        _compute_embed_hash,
+        persist_embed_batch,
+    )
+
+    if stop_event.is_set():
+        return 0
+
+    # Build embed texts
+    for item in items:
+        desc = item.get("description")
+        sn_id = item["id"]
+        item["_embed_text"] = f"{sn_id} — {desc}" if desc else sn_id
+        item["embed_text_hash"] = _compute_embed_hash(sn_id, desc)
+
+    # Batch embed (no LLM cost — uses embedding server)
+    await asyncio.to_thread(embed_descriptions_batch, items, text_field="_embed_text")
+
+    # Filter to those that got embeddings
+    to_persist = [
+        {
+            "id": it["id"],
+            "embedding": it["embedding"],
+            "embed_text_hash": it["embed_text_hash"],
+        }
+        for it in items
+        if it.get("embedding") is not None
+    ]
+
+    if to_persist:
+        written = await asyncio.to_thread(persist_embed_batch, to_persist)
+    else:
+        written = 0
+
+    # Emit events for display
+    if on_event:
+        for it in to_persist:
+            on_event(
+                {
+                    "pool": "embed_name",
+                    "name": it["id"],
+                }
+            )
+
+    return written

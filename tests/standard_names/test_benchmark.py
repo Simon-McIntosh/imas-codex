@@ -287,7 +287,9 @@ class TestValidation:
 
         candidate = {
             "standard_name": "electron_temperature",
-            "grammar_fields": {"physical_base": "temperature", "subject": "electron"},
+            "base_token": "temperature",
+            "base_kind": "quantity",
+            "qualifiers": ["electron"],
         }
         g_valid, f_consistent = validate_candidate(candidate)
         assert g_valid is True
@@ -298,7 +300,8 @@ class TestValidation:
 
         candidate = {
             "standard_name": "this_is_not_valid_!!!",
-            "grammar_fields": {"physical_base": "nonsense"},
+            "base_token": "nonsense",
+            "base_kind": "quantity",
         }
         g_valid, f_consistent = validate_candidate(candidate)
         assert g_valid is False
@@ -309,7 +312,9 @@ class TestValidation:
 
         candidate = {
             "standard_name": "electron_temperature",
-            "grammar_fields": {"physical_base": "density", "subject": "ion"},
+            "base_token": "density",
+            "base_kind": "quantity",
+            "qualifiers": ["ion"],
         }
         g_valid, f_consistent = validate_candidate(candidate)
         assert g_valid is True
@@ -592,14 +597,15 @@ class TestBenchmarkRunner:
             candidates=[
                 StandardNameCandidate(
                     source_id="equilibrium/time_slice/profiles_1d/safety_factor",
-                    standard_name="safety_factor",
-                    fields={"physical_base": "safety_factor"},
+                    base_token="safety_factor",
+                    base_kind="quantity",
                     reason="Safety factor profile",
                 ),
                 StandardNameCandidate(
                     source_id="core_profiles/profiles_1d/electrons/temperature",
-                    standard_name="electron_temperature",
-                    fields={"physical_base": "temperature", "subject": "electron"},
+                    base_token="temperature",
+                    base_kind="quantity",
+                    qualifiers=["electron"],
                     reason="Electron temperature",
                 ),
             ],
@@ -660,8 +666,8 @@ class TestBenchmarkRunner:
             candidates=[
                 StandardNameCandidate(
                     source_id="equilibrium/time_slice/profiles_1d/elongation",
-                    standard_name="elongation",
-                    fields={"physical_base": "elongation"},
+                    base_token="elongation",
+                    base_kind="quantity",
                     reason="Plasma elongation",
                 ),
             ],
@@ -742,7 +748,7 @@ class TestCLICommand:
     def test_command_exists(self):
         from imas_codex.cli.sn import sn
 
-        cmd = sn.get_command(None, "benchmark")
+        cmd = sn.get_command(None, "bench")
         assert cmd is not None, "benchmark command should be registered"
 
     def test_command_help(self):
@@ -751,7 +757,7 @@ class TestCLICommand:
         from imas_codex.cli.sn import sn
 
         runner = CliRunner()
-        result = runner.invoke(sn, ["benchmark", "--help"])
+        result = runner.invoke(sn, ["bench", "--help"])
         assert result.exit_code == 0
         assert "--models" in result.output
         assert "--max-candidates" in result.output
@@ -982,7 +988,7 @@ class TestReviewerModelCLI:
         from imas_codex.cli.sn import sn
 
         runner = CliRunner()
-        result = runner.invoke(sn, ["benchmark", "--help"])
+        result = runner.invoke(sn, ["bench", "--help"])
         assert result.exit_code == 0
         assert "--reviewer-model" in result.output
 
@@ -1173,10 +1179,8 @@ class TestReviewerTemplate:
                         "documentation": "A test doc",
                         "unit": "eV",
                         "kind": "scalar",
-                        "grammar_fields": {
-                            "physical_base": "temperature",
-                            "subject": "electron",
-                        },
+                        "physical_base": "temperature",
+                        "subject": "electron",
                     }
                 ],
                 "existing_names": [],

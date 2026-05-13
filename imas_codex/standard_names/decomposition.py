@@ -1,10 +1,8 @@
 """Decomposition audit for standard names.
 
-Detects closed-vocabulary tokens (``subject``, ``component``,
-``transformation``, ``position``, ``coordinate``, ``object``, ``geometry``,
-``process``, ``device``, ``geometric_base``, ``region``) that were absorbed
-into an open-vocabulary ``physical_base`` compound instead of being promoted
-to their own grammar segment.
+Detects tokens from other closed-vocabulary segments that were absorbed
+into the ``physical_base`` compound instead of being placed in their own
+grammar segment.
 
 Motivating examples:
 

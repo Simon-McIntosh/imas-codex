@@ -35,7 +35,6 @@ class StandardNameBuildState(DiscoveryStateBase):
     ids_filter: str | None = None  # For DD source: restrict to a single IDS
     domain_filter: str | None = None  # Physics domain filter
     facility_filter: str | None = None  # For signals source: facility to query
-    paths_list: list[str] | None = None  # Explicit DD paths (bypass query+classifier)
     dry_run: bool = False
     force: bool = False  # Bypass source-level skip
     # Regeneration mode. When True, extraction targets existing reviewed
@@ -147,14 +146,12 @@ class StandardNameBuildState(DiscoveryStateBase):
     def is_regen_mode(self) -> bool:
         """Return True when extraction should target reviewed names below ``min_score``.
 
-        Triggered by ``--min-score F`` (or by the loop's regen phase). An
-        explicit ``paths_list`` or ``from_model`` short-circuits to those
-        narrower sources instead. ``--domain`` / ``--limit`` act as
-        narrowing filters within regen mode, not overrides.
+        Triggered by ``--min-score F`` (or by the loop's regen phase). A
+        ``from_model`` filter short-circuits to that narrower source instead.
+        ``--domain`` / ``--limit`` act as narrowing filters within regen mode,
+        not overrides.
         """
         if not self.regen:
-            return False
-        if self.paths_list:
             return False
         if self.from_model:
             return False

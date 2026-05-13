@@ -183,19 +183,16 @@ class TestMultiPoolAccumulation:
 
 
 class TestRefreshPendingBaseline:
-    """refresh_pending seeds completed counts from *_done keys."""
+    """refresh_pending reads pending counts keyed by pool name."""
 
-    def test_seeds_from_done_counts(self) -> None:
+    def test_pending_counts_by_pool_name(self) -> None:
         pending = {
-            "draft": 10,
-            "draft_done": 50,
-            "review_names": 5,
-            "review_names_done": 30,
-            "enrich": 3,
-            "enrich_done": 20,
+            "generate_name": 10,
+            "review_name": 5,
+            "refine_name": 4,
+            "generate_docs": 3,
             "review_docs": 2,
-            "review_docs_done": 15,
-            "revise": 4,
+            "refine_docs": 1,
         }
         display = SN6PoolDisplay(
             cost_limit=5.0,
@@ -203,36 +200,41 @@ class TestRefreshPendingBaseline:
         )
         display.refresh_pending()
 
-        # Baselines seeded from *_done keys
-        assert display.pools["generate_name"].completed == 50
-        assert display.pools["generate_name"].total == 60  # 50 + 10
+        # total = completed (0) + pending
+        assert display.pools["generate_name"].completed == 0
+        assert display.pools["generate_name"].total == 10
 
-        assert display.pools["review_name"].completed == 30
-        assert display.pools["review_name"].total == 35  # 30 + 5
+        assert display.pools["review_name"].completed == 0
+        assert display.pools["review_name"].total == 5
 
-        assert display.pools["generate_docs"].completed == 20
-        assert display.pools["generate_docs"].total == 23  # 20 + 3
-
-        assert display.pools["review_docs"].completed == 15
-        assert display.pools["review_docs"].total == 17  # 15 + 2
-
-        # refine_name has no done key — stays at 0 completed but total = pending
         assert display.pools["refine_name"].completed == 0
         assert display.pools["refine_name"].total == 4
 
-    def test_on_event_after_baseline_seed(self) -> None:
-        """on_event adds to completed count on top of seeded baseline."""
-        pending = {"draft": 5, "draft_done": 10}
+        assert display.pools["generate_docs"].completed == 0
+        assert display.pools["generate_docs"].total == 3
+
+        assert display.pools["review_docs"].completed == 0
+        assert display.pools["review_docs"].total == 2
+
+        assert display.pools["refine_docs"].completed == 0
+        assert display.pools["refine_docs"].total == 1
+
+    def test_on_event_then_refresh(self) -> None:
+        """on_event increments completed; refresh_pending adds pending on top."""
+        pending = {"generate_name": 5}
         display = SN6PoolDisplay(
             cost_limit=5.0,
             pending_fn=lambda: pending,
         )
-        display.refresh_pending()
-        assert display.pools["generate_name"].completed == 10
 
-        # Worker completes an item
-        display.on_event({"pool": "generate_name", "name": "foo", "cost": 0.001})
-        assert display.pools["generate_name"].completed == 11
+        # Worker completes 3 items
+        for i in range(3):
+            display.on_event({"pool": "generate_name", "name": f"n{i}", "cost": 0.001})
+        assert display.pools["generate_name"].completed == 3
+
+        # Refresh adds pending on top of completed
+        display.refresh_pending()
+        assert display.pools["generate_name"].total == 8  # 3 + 5
 
     def test_pending_fn_exception_swallowed(self) -> None:
         """refresh_pending does not crash if pending_fn raises."""
@@ -297,21 +299,25 @@ class TestEventsThisRun:
         assert display.pools["generate_name"]._events_this_run == 2
 
     def test_events_this_run_not_affected_by_baseline(self) -> None:
-        """Graph baseline via refresh_pending does NOT inflate _events_this_run."""
-        pending = {"draft": 5, "draft_done": 100}
+        """Graph pending via refresh_pending does NOT inflate _events_this_run."""
+        pending = {"generate_name": 5}
         display = SN6PoolDisplay(cost_limit=5.0, pending_fn=lambda: pending)
         display.refresh_pending()
 
         state = display.pools["generate_name"]
-        # Baseline seeded completed, but _events_this_run untouched
-        assert state.completed == 100
+        # Pending count set total, but _events_this_run untouched
+        assert state.total == 5
         assert state._events_this_run == 0
 
     def test_rate_uses_events_this_run(self) -> None:
         """Rate is computed from _events_this_run, not completed (baseline)."""
-        pending = {"draft": 5, "draft_done": 1000}
+        pending = {"generate_name": 5}
         display = SN6PoolDisplay(cost_limit=5.0, pending_fn=lambda: pending)
         display.refresh_pending()
+
+        state = display.pools["generate_name"]
+        # Before any event, rate is None
+        assert state.rate is None
 
         state = display.pools["generate_name"]
         # Before any event, rate is None (not 1000 / elapsed)

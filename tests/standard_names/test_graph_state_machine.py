@@ -123,103 +123,48 @@ class TestPersistGeneratedNameBatch:
 
     @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
     @patch("imas_codex.standard_names.graph_ops.write_standard_names")
-    @patch("imas_codex.embeddings.description.embed_descriptions_batch")
-    def test_embeds_name_string(
-        self, mock_embed, mock_write, mock_finalize, sample_candidates
-    ):
-        """persist_generated_name_batch embeds the name (id) field, not description."""
+    def test_embeds_name_string(self, mock_write, mock_finalize, sample_candidates):
+        """persist_generated_name_batch defers embedding to embed worker pool.
+
+        Embedding is no longer done inline — the embed_text_hash is cleared
+        so the dedicated embed pool picks it up.
+        """
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
-        def _embed_side_effect(
-            items, text_field="description", embedding_field="embedding"
-        ):
-            for item in items:
-                item[embedding_field] = [0.1, 0.2, 0.3]
-            return items
-
-        mock_embed.side_effect = _embed_side_effect
-        mock_write.return_value = 2
-        persist_generated_name_batch(sample_candidates, compose_model="test")
-
-        # Must embed using text_field="_embed_text" (post-A1: name — description basis)
-        mock_embed.assert_called_once()
-        call_kwargs = mock_embed.call_args
-        assert (
-            call_kwargs[1].get("text_field") == "_embed_text"
-            or call_kwargs[0][0] is sample_candidates
-        )
-        # Verify text_field kwarg is "_embed_text"
-        _, kwargs = mock_embed.call_args
-        assert kwargs.get("text_field") == "_embed_text"
-
-    @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
-    @patch("imas_codex.standard_names.graph_ops.write_standard_names")
-    @patch("imas_codex.embeddings.description.embed_descriptions_batch")
-    def test_writes_embedding_and_embedded_at(
-        self, mock_embed, mock_write, mock_finalize, sample_candidates
-    ):
-        """Each persisted SN has embedding + embedded_at when embedding succeeds."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
-
-        def _embed_side_effect(
-            items, text_field="description", embedding_field="embedding"
-        ):
-            for item in items:
-                item[embedding_field] = [0.4, 0.5, 0.6]
-            return items
-
-        mock_embed.side_effect = _embed_side_effect
         mock_write.return_value = 2
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
         for entry in written:
-            assert entry["embedding"] == [0.4, 0.5, 0.6]
-            assert entry["embedded_at"] is not None
+            # Embedding deferred — both should be None
+            assert entry.get("embedding") is None
+            assert entry.get("embed_text_hash") is None
+
+    @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
+    @patch("imas_codex.standard_names.graph_ops.write_standard_names")
+    def test_writes_embedding_and_embedded_at(
+        self, mock_write, mock_finalize, sample_candidates
+    ):
+        """Embedding is deferred — persist sets embedding=None and
+        embed_text_hash=None for the embed worker to pick up."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        mock_write.return_value = 2
+        persist_generated_name_batch(sample_candidates, compose_model="test")
+
+        written = mock_write.call_args[0][0]
+        for entry in written:
+            assert entry["embedding"] is None
+            assert entry["embed_text_hash"] is None
             assert entry["pipeline_status"] == "named"
             assert entry["validation_status"] != "quarantined"
 
     @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
     @patch("imas_codex.standard_names.graph_ops.write_standard_names")
-    @patch("imas_codex.embeddings.description.embed_descriptions_batch")
     def test_embed_failure_marks_retry_not_quarantine(
-        self, mock_embed, mock_write, mock_finalize, sample_candidates
+        self, mock_write, mock_finalize, sample_candidates
     ):
-        """Candidates with failed embeddings get embed_failed_at, not quarantined."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
-
-        # Simulate partial failure — first succeeds, second fails
-        def _embed_side_effect(
-            items, text_field="description", embedding_field="embedding"
-        ):
-            items[0][embedding_field] = [0.1, 0.2]
-            items[1][embedding_field] = None  # failed
-            return items
-
-        mock_embed.side_effect = _embed_side_effect
-        mock_write.return_value = 2
-        persist_generated_name_batch(sample_candidates, compose_model="test")
-
-        written = mock_write.call_args[0][0]
-        # First candidate: embedded successfully
-        assert written[0]["embedding"] == [0.1, 0.2]
-        assert written[0]["validation_status"] != "quarantined"
-        assert "embedded_at" in written[0]
-        # Second candidate: NOT quarantined, marked for retry
-        assert written[1]["embedding"] is None
-        assert written[1].get("validation_status") != "quarantined"
-        assert "embed_failed_at" in written[1]
-
-    @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
-    @patch("imas_codex.standard_names.graph_ops.write_standard_names")
-    @patch(
-        "imas_codex.embeddings.description.embed_descriptions_batch",
-        side_effect=ConnectionError("embed server down"),
-    )
-    def test_records_embed_failure_timestamp_on_total_embed_failure(
-        self, mock_embed, mock_write, mock_finalize, sample_candidates
-    ):
-        """When embed server is down, candidates get embed_failed_at timestamp."""
+        """Embedding is deferred — no embed failure possible inline."""
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         mock_write.return_value = 2
@@ -227,29 +172,32 @@ class TestPersistGeneratedNameBatch:
 
         written = mock_write.call_args[0][0]
         for entry in written:
-            # F1 change: embed failure no longer quarantines — sets timestamp
-            assert entry.get("embed_failed_at") is not None
+            assert entry["embedding"] is None
+            assert entry.get("validation_status") != "quarantined"
+
+    @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
+    @patch("imas_codex.standard_names.graph_ops.write_standard_names")
+    def test_records_embed_failure_timestamp_on_total_embed_failure(
+        self, mock_write, mock_finalize, sample_candidates
+    ):
+        """Embedding is deferred — no embed_failed_at set inline."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        mock_write.return_value = 2
+        persist_generated_name_batch(sample_candidates, compose_model="test")
+
+        written = mock_write.call_args[0][0]
+        for entry in written:
             assert entry.get("embedding") is None
 
     @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
     @patch("imas_codex.standard_names.graph_ops.write_standard_names")
-    @patch("imas_codex.embeddings.description.embed_descriptions_batch")
-    def test_idempotent_rerun(
-        self, mock_embed, mock_write, mock_finalize, sample_candidates
-    ):
+    def test_idempotent_rerun(self, mock_write, mock_finalize, sample_candidates):
         """Re-running persist on the same batch produces same result."""
         from copy import deepcopy
 
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
-        def _embed_side_effect(
-            items, text_field="description", embedding_field="embedding"
-        ):
-            for item in items:
-                item[embedding_field] = [0.1, 0.2, 0.3]
-            return items
-
-        mock_embed.side_effect = _embed_side_effect
         mock_write.return_value = 2
 
         batch1 = deepcopy(sample_candidates)
@@ -261,7 +209,7 @@ class TestPersistGeneratedNameBatch:
         persist_generated_name_batch(batch2, compose_model="test")
         second_written = mock_write.call_args[0][0]
 
-        # Same embeddings, same pipeline_status, same structure
+        # Same embeddings (None — deferred), same pipeline_status, same structure
         for a, b in zip(first_written, second_written, strict=True):
             assert a["embedding"] == b["embedding"]
             assert a["pipeline_status"] == b["pipeline_status"]

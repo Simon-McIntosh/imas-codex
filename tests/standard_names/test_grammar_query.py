@@ -17,9 +17,8 @@ from imas_codex.standard_names.grammar_query import (
 
 def test_tokenise_query_snake_case() -> None:
     """T1 — snake-cased queries split on underscores; stopwords dropped."""
-    assert tokenise_query("x_component_of_magnetic_field") == [
+    assert tokenise_query("x_magnetic_field") == [
         "x",
-        "component",
         "magnetic",
         "field",
     ]

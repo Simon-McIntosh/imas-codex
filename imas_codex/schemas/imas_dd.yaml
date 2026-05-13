@@ -227,7 +227,7 @@ enums:
   IMASNodeStatus:
     description: >-
       Pipeline lifecycle status for IMASNode paths during DD build.
-      Tracks progress through the build → enrich → refine → embed pipeline.
+      Tracks progress through the build → enrich → refine → embed → classify pipeline.
       Worker coordination uses claimed_at timestamps, not status values.
     permissible_values:
       built:
@@ -238,6 +238,8 @@ enums:
         description: Pass 2 description refined with sibling and peer context
       embedded:
         description: Vector embedding generated from refined description
+      classified:
+        description: Physics domain classified via LLM or inheritance
 
   NodeCategory:
     description: >-
@@ -613,7 +615,7 @@ classes:
       status:
         description: >-
           Pipeline lifecycle status tracking progress through the DD build
-          pipeline: built → enriched → refined → embedded.  Workers claim
+          pipeline: built → enriched → refined → embedded → classified.  Workers claim
           paths by setting claimed_at, then advance the status on completion.
         range: IMASNodeStatus
         required: true
@@ -644,6 +646,19 @@ classes:
       physics_domain:
         description: Physics domain (derived from path/IDS)
         range: string
+      domain_source:
+        description: >-
+          How the physics_domain was determined. 'llm_classified' = LLM per-path
+          classification, 'inherited_from_parent' = copied from HAS_ERROR or
+          HAS_PARENT parent, 'ids_level' = inherited from IDS-level static map,
+          'none_metadata' = infrastructure metadata with no physics domain.
+      domain_model:
+        description: LLM model used for classification (null for inherited/none)
+      domain_classified_at:
+        description: When the domain was last classified
+        range: datetime
+      domain_input_hash:
+        description: Hash of classification inputs for idempotency
       maxoccur:
         description: Maximum occurrences (for struct arrays)
         range: integer

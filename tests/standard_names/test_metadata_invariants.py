@@ -153,7 +153,7 @@ class TestWriteCypherInvariants:
 
         names = [
             {
-                "id": "test_cocos_guard",
+                "id": "plasma_current",
                 "source_types": ["dd"],
                 "source_id": "test/path",
                 "unit": "A",
@@ -209,38 +209,40 @@ class TestWriteCypherInvariants:
 
 
 # ---------------------------------------------------------------------------
-# Grammar vNext invariants
+# Grammar parsing invariants
 # ---------------------------------------------------------------------------
 
 
-class TestGrammarVNext:
-    """Verify _parse_grammar_vnext returns the expected keys.
+class TestGrammarParsing:
+    """Verify _parse_grammar returns the expected keys.
 
-    Plan 38 W4a removed individual grammar_* slots (grammar_physical_base,
-    grammar_subject, etc.) from the StandardName schema and replaced them with
+    Individual grammar_* segment fields (grammar_physical_base,
+    grammar_subject, etc.) are extracted from the ISN parser along with
     ``grammar_parse_version`` (ISN version string) and
-    ``validation_diagnostics_json`` (JSON array).  Tests for the old
-    ``_GRAMMAR_DECOMPOSITION_FIELDS`` constant and ``_grammar_decomposition``
-    helper were deleted because those symbols no longer exist.
+    ``validation_diagnostics_json`` (JSON array).
     """
 
-    def test_parse_grammar_vnext_keys(self) -> None:
-        """_parse_grammar_vnext always returns grammar_parse_version and validation_diagnostics_json."""
-        from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+    def test_parse_grammar_keys(self) -> None:
+        """_parse_grammar returns grammar_parse_version, validation_diagnostics_json, and grammar segment fields."""
+        from imas_codex.standard_names.graph_ops import _parse_grammar
 
-        result = _parse_grammar_vnext("electron_temperature")
+        result = _parse_grammar("electron_temperature")
         assert "grammar_parse_version" in result
         assert "validation_diagnostics_json" in result
-        assert len(result) == 2
+        # 10 grammar_* segment fields
+        assert "grammar_physical_base" in result
+        assert "grammar_subject" in result
+        assert "grammar_component" in result
+        assert len(result) == 12
 
-    def test_parse_grammar_vnext_graceful_on_missing_package(self) -> None:
+    def test_parse_grammar_graceful_on_missing_package(self) -> None:
         """When imas_standard_names is unavailable, both fields are None."""
         import unittest.mock
 
-        from imas_codex.standard_names.graph_ops import _parse_grammar_vnext
+        from imas_codex.standard_names.graph_ops import _parse_grammar
 
         with unittest.mock.patch.dict("sys.modules", {"imas_standard_names": None}):
-            result = _parse_grammar_vnext("electron_temperature")
+            result = _parse_grammar("electron_temperature")
         # Values may be None or valid depending on whether ISN is installed,
         # but the keys must always be present.
         assert "grammar_parse_version" in result

@@ -110,25 +110,27 @@ Related derivatives (same denominator):
 {% endif %}
 
 {% if item.source_paths %}
-## IMAS DD Paths
+## Source Context (PRIVATE — do NOT cite in output)
 
-This standard name is sourced from the following IMAS Data Dictionary paths.
-Cite at least one verbatim in the documentation prose.
+These source paths are provided for physics context ONLY. They help you understand
+what this quantity represents. NEVER mention these paths, IDS names, or DD references
+in the description or documentation — source provenance is tracked externally.
 
 {% for p in item.source_paths %}- `{{ p }}`
 {% endfor %}{% endif %}
 
 {% if item.dd_source_docs %}
-## DD Source Documentation
+## Physics Reference Material (PRIVATE — do NOT cite in output)
 
-Reference material from the Data Dictionary nodes linked to this standard name.
-Use these definitions to anchor descriptions; do NOT copy them verbatim.
+Use these physics definitions to ground your documentation in correct physics.
+Extract the PHYSICS MEANING, not the source identity. NEVER copy path identifiers,
+IDS names, or DD-specific language into the output text.
 
 {% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation }}
 {% endfor %}{% endif %}
 
 {% if item.dd_aliases %}
-## DD Aliases (context only — do NOT cite in documentation)
+## Aliases (PRIVATE — do NOT cite in output)
 
 {{ item.dd_aliases | join(', ') }}
 {% endif %}
@@ -143,12 +145,38 @@ Use these for inline cross-references `[label](name:bare_id)` where naturally re
 {% endfor %}{% endif %}
 
 {% if item.related_neighbours %}
-## DD-Related Paths
+## Related Physics Quantities
 
-Cross-IDS related paths sharing cluster membership, coordinates, or units.
+Cross-domain related quantities sharing cluster membership, coordinates, or units.
 
-{% for r in item.related_neighbours %}- `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
+{% for r in item.related_neighbours %}- `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}{% if r.physics_domain %} [{{ r.physics_domain }}]{% endif %}{% if r.doc %}: {{ r.doc }}{% endif %}
 {% endfor %}{% endif %}
+
+{% if item.dd_clusters %}
+## Semantic Clusters
+
+{% for cl in item.dd_clusters %}- **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
+{% endfor %}{% endif %}
+
+{% if item.dd_version_history %}
+## DD Version History
+
+Notable changes to this path across Data Dictionary versions:
+
+{% for vh in item.dd_version_history %}- {{ vh.change_type }} (v{{ vh.version }})
+{% endfor %}{% endif %}
+
+{% if item.dd_keywords %}
+## Keywords
+
+{{ item.dd_keywords | join(', ') }}
+{% endif %}
+
+{% if item.dd_parent_description %}
+## Parent Structure
+
+{{ item.dd_parent_description }}
+{% endif %}
 
 {% if nearby_existing_names %}
 ## Nearby Existing Names (same physics domain)
@@ -157,7 +185,14 @@ For consistency, compare your documentation style and cross-references against t
 accepted names in the same physics domain.
 
 {% for n in nearby_existing_names %}- **{{ n.id }}**: {{ n.description | default('', true) }} ({{ n.kind | default('scalar', true) }}, {{ n.unit | default('dimensionless', true) }})
-{% endfor %}{% endif %}
+{% endfor %}
+
+**Authoritative cross-reference list:** The names listed above (plus those in "Nearest Peer
+Standard Names" if present) are the **only** standard names you may link to using
+`[label](name:bare_id)` inline links or `name:bare_id` entries in the `links` array.
+Do NOT invent or guess other name IDs — links to non-existent names are rejected by
+the validation pipeline and cause the entire batch item to fail.
+{% endif %}
 
 ## Output schema
 
@@ -171,8 +206,10 @@ Return a JSON object with exactly these two fields:
 ```
 
 ### description requirements
-- 1–3 sentences maximum, ≤ 500 characters
-- Physics-meaningful: add information beyond what the name tokens alone encode
+- 1 sentence strongly preferred, 2 max — ≤ 250 characters (NOT 500)
+- First sentence = self-contained definition
+- Add ONLY information beyond what the name tokens encode
+- NO trailing clauses starting with "Representing", "Characterizing", "Quantifying"
 - American spelling (ionization, behavior, center, etc.)
 - No LaTeX; no inline units (unit is shown separately)
 - No trailing "See also:" blocks

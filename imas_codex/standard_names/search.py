@@ -115,25 +115,47 @@ def keyword_stream(
 ) -> list[dict]:
     """Substring-match ranked SN ids over name + description + documentation.
 
-    Cheap proxy for BM25; Neo4j core does not ship FTS5. Results are not
-    score-ordered (pure existence filter); rank order is row order.
+    Generates multiple query variants to handle the space/underscore mismatch
+    between natural language queries and underscore-joined StandardName ids.
     """
     if not query or not query.strip():
         return []
+
+    q = query.strip()
+    # Generate query variants to handle space/underscore/hyphen forms
+    variants: set[str] = {q}
+    underscore_form = q.replace(" ", "_").replace("-", "_")
+    if underscore_form != q:
+        variants.add(underscore_form)
+    space_form = q.replace("_", " ").replace("-", " ")
+    if space_form != q:
+        variants.add(space_form)
+
+    # Build OR conditions for each variant
+    or_conditions = []
+    params: dict[str, Any] = {"k": k_candidates}
+    for i, variant in enumerate(sorted(variants)):
+        pkey = f"kw{i}"
+        params[pkey] = variant
+        or_conditions.append(
+            f"(toLower(sn.id) CONTAINS toLower(${pkey})"
+            f" OR toLower(coalesce(sn.description, '')) CONTAINS toLower(${pkey})"
+            f" OR toLower(coalesce(sn.documentation, '')) CONTAINS toLower(${pkey}))"
+        )
+
+    where_clause = " OR ".join(or_conditions)
+
     rows = (
         gc.query(
-            """
+            f"""
             MATCH (sn:StandardName)
-            WHERE toLower(sn.id) CONTAINS toLower($keyword)
-               OR toLower(coalesce(sn.description, '')) CONTAINS toLower($keyword)
-               OR toLower(coalesce(sn.documentation, '')) CONTAINS toLower($keyword)
+            WHERE {where_clause}
             WITH sn
             WHERE coalesce(sn.name_stage, '') <> 'superseded'
             RETURN sn.id AS id
             LIMIT $k
             """,
-            keyword=query,
-            k=k_candidates,
+            **params,
         )
         or []
     )
@@ -359,8 +381,7 @@ def search_standard_names(
 
 
 #: Public segments accepted by ``segment_filters``. Bare-name columns are
-#: the post-Phase-1 source of truth; typed edges may be unpopulated for
-#: open-vocab segments (``physical_base``, ``subject``).
+#: the source of truth for segment-filter search.
 _SEGMENT_FILTER_COLUMNS: tuple[str, ...] = (
     "physical_base",
     "subject",
@@ -386,15 +407,9 @@ def _segment_filter_search(
     pipeline_status: str | None,
     cocos_type: str | None,
 ) -> list[dict]:
-    """Bare-name column segment-filter search (Plan 40 §5).
+    """Bare-name column segment-filter search.
 
-    Pre-v3.2 implementations matched typed grammar edges
-    (``(sn)-[:HAS_PHYSICAL_BASE]->(:GrammarToken {value: ...})``).
-    Open-vocabulary segments (``physical_base``, ``subject``) never have
-    typed edges populated, so the typed-edge path silently returned []
-    even when the bare-name column was set. We now match the
-    ``sn.<segment>`` column directly, which is the post-Phase-1 source of
-    truth.
+    Matches ``sn.<segment>`` columns directly for all grammar segments.
     """
     params: dict[str, Any] = {"k": k}
     where: list[str] = []
@@ -530,7 +545,8 @@ def fetch_standard_names(
             OPTIONAL MATCH (src)-[:IN_IDS]->(ids:IDS)
             RETURN {", ".join(select)},
                    collect(DISTINCT src.id) AS source_ids,
-                   collect(DISTINCT ids.id) AS source_ids_names
+                   collect(DISTINCT ids.id) AS source_ids_names,
+                   CASE WHEN sn.description IS NULL THEN true ELSE false END AS is_placeholder
             """
         rows = [dict(r) for r in (gc.query(cypher, names=names) or [])]
 

@@ -188,25 +188,23 @@ class TestUnitSanity:
     def test_wave_b_field_tesla_passes(self):
         from imas_codex.standard_names.unit_audit import check_unit_sanity
 
-        assert check_unit_sanity("binormal_component_of_wave_magnetic_field", "T") == []
+        assert check_unit_sanity("binormal_wave_magnetic_field", "T") == []
 
     def test_wave_b_field_wrong_unit_fails(self):
         from imas_codex.standard_names.unit_audit import check_unit_sanity
 
-        issues = check_unit_sanity(
-            "binormal_component_of_wave_magnetic_field", "m^-1.V"
-        )
+        issues = check_unit_sanity("binormal_wave_magnetic_field", "m^-1.V")
         assert "unit_mismatch:wave_b_field_must_be_tesla" in issues
 
     def test_wave_vector_per_metre_passes(self):
         from imas_codex.standard_names.unit_audit import check_unit_sanity
 
-        assert check_unit_sanity("perpendicular_component_of_wave_vector", "m^-1") == []
+        assert check_unit_sanity("perpendicular_wave_vector", "m^-1") == []
 
     def test_wave_vector_wrong_unit_fails(self):
         from imas_codex.standard_names.unit_audit import check_unit_sanity
 
-        issues = check_unit_sanity("perpendicular_component_of_wave_vector", "V.m")
+        issues = check_unit_sanity("perpendicular_wave_vector", "V.m")
         assert "unit_mismatch:wave_vector_must_be_per_metre" in issues
 
     def test_spectrum_per_hz_passes(self):
@@ -238,7 +236,7 @@ class TestUnitSanity:
 
         assert (
             check_unit_sanity(
-                "radial_component_of_ion_velocity_per_magnetic_field_strength",
+                "radial_ion_velocity_per_magnetic_field_strength",
                 "m.s^-1.T^-1",
             )
             == []
@@ -248,7 +246,7 @@ class TestUnitSanity:
         from imas_codex.standard_names.unit_audit import check_unit_sanity
 
         issues = check_unit_sanity(
-            "radial_component_of_ion_velocity_per_magnetic_field_strength",
+            "radial_ion_velocity_per_magnetic_field_strength",
             "m.s^-1",
         )
         assert "unit_mismatch:per_b_must_include_inverse_tesla" in issues
@@ -257,7 +255,7 @@ class TestUnitSanity:
         from imas_codex.standard_names.unit_audit import check_unit_sanity
 
         issues = check_unit_sanity(
-            "radial_component_of_ion_velocity_over_magnetic_field_strength",
+            "radial_ion_velocity_over_magnetic_field_strength",
             "m.s^-1",
         )
         assert "unit_mismatch:per_b_must_include_inverse_tesla" in issues
@@ -298,12 +296,12 @@ class TestUnitSanity:
 class TestKindDerivation:
     """derive_kind deterministically assigns kind from name tokens."""
 
-    def test_component_of_returns_scalar(self):
+    def test_component_returns_scalar(self):
         from imas_codex.standard_names.kind_derivation import derive_kind
 
         # A component extracts one axis — it is a scalar projection of the
         # parent vector, not a vector itself.
-        assert derive_kind("binormal_component_of_wave_electric_field") == "scalar"
+        assert derive_kind("binormal_wave_electric_field") == "scalar"
 
     def test_tensor_returns_tensor(self):
         from imas_codex.standard_names.kind_derivation import derive_kind
@@ -358,7 +356,7 @@ class TestKindDerivation:
         from imas_codex.standard_names.enrich_workers import enrich_validate_worker
 
         item = _make_item(
-            "binormal_component_of_wave_electric_field",
+            "binormal_wave_electric_field",
             kind="scalar",
             unit="V.m^-1",
             enriched_description="Binormal component of wave E-field.",
@@ -368,7 +366,7 @@ class TestKindDerivation:
 
         with patch(
             "imas_codex.standard_names.enrich_workers._check_links_batch",
-            return_value={"binormal_component_of_wave_electric_field": []},
+            return_value={"binormal_wave_electric_field": []},
         ):
             await enrich_validate_worker(state)
 

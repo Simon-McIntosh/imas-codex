@@ -167,20 +167,19 @@ class TestEnrichPaths:
         result = enrich_paths(rows)
         assert result == []
 
-    def test_filters_out_metadata_paths(self):
-        """'time' leaf is DD-filtered (time_reference); if it reaches the SN
-        pipeline, the SN classifier now trusts the DD and lets it through."""
+    def test_filters_out_temporal_coordinate_paths(self):
+        """Depth-3+ 'time' leaves with coordinate category are rejected by
+        the DD qualifier as temporal coordinates (S7)."""
         rows = [
             _make_row(
                 path="core_profiles/profiles_1d/time",
                 data_type="FLT_0D",
                 description="Time",
+                node_category="coordinate",
             )
         ]
         result = enrich_paths(rows)
-        # Post Plan-30: SN classifier no longer filters metadata —
-        # that responsibility moved to the DD node_category extractor.
-        assert len(result) == 1
+        assert len(result) == 0
 
     def test_quantity_path_passes_through(self):
         rows = [_make_row()]

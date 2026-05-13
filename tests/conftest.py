@@ -64,7 +64,11 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
         return
     skip_marker = pytest.mark.skip(reason="Neo4j not available")
     for item in items:
-        if item.get_closest_marker("graph") or item.get_closest_marker("integration"):
+        if (
+            item.get_closest_marker("graph")
+            or item.get_closest_marker("integration")
+            or item.get_closest_marker("requires_graph")
+        ):
             item.add_marker(skip_marker)
 
 

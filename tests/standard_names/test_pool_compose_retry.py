@@ -38,13 +38,19 @@ class _FakeCandidate:
     """Mimics a StandardNameComposeBatch candidate."""
 
     def __init__(self, name: str, source_id: str, **kw):
-        self.standard_name = name
         self.source_id = source_id
         self.description = kw.get("description", "desc")
         self.kind = kw.get("kind", "scalar")
         self.dd_paths = kw.get("dd_paths", [source_id])
-        self.grammar_fields = kw.get("grammar_fields", {})
         self.reason = kw.get("reason", "")
+        # IR fields
+        self.base_token = kw.get("base_token", name)
+        self.base_kind = kw.get("base_kind", "quantity")
+        self.qualifiers = kw.get("qualifiers", [])
+        self._name = name
+
+    def compose_name(self) -> str:
+        return self._name
 
 
 class _FakeBatchResult:
@@ -123,7 +129,6 @@ def _patch_compose_deps():
             "imas_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.settings.get_compose_lean", return_value=False),
         patch("imas_codex.settings.get_model", return_value="test-model"),
         # Prompt rendering
         patch(

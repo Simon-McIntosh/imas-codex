@@ -152,6 +152,13 @@ class DiscoveryConfig:
     force_exit_on_complete: bool = False
     """Force a hard process exit after summary output is flushed."""
 
+    extra_service_checks: list[tuple[str, Callable, dict]] = field(default_factory=list)
+    """Additional service checks to register on the monitor.
+
+    Each entry is ``(name, check_fn, kwargs)`` passed to
+    ``monitor.add_check(name, check_fn, **kwargs)``.
+    """
+
 
 def make_log_print(domain: str, console: Any | None = None) -> Callable[[str], None]:
     """Create a log_print closure for a discovery domain.
@@ -254,6 +261,10 @@ def run_discovery(
         check_model=config.check_model,
         model_section=config.model_section,
     )
+
+    # Register any extra service checks from the caller.
+    for name, check_fn, kwargs in config.extra_service_checks:
+        service_monitor.add_check(name, check_fn, **kwargs)
 
     # Suppress noisy loggers during rich display: raise console handler
     # levels to ERROR so chatty WARNING-level messages don't leak past the

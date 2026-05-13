@@ -548,7 +548,7 @@ class TestNameDescriptionConsistencyCheck:
 
         issues = name_description_consistency_check(
             {
-                "id": "normal_component_of_magnetic_field",
+                "id": "normal_magnetic_field",
                 "description": "Fourier coefficients of the normal component of the field.",
             }
         )
@@ -872,7 +872,8 @@ class TestVectorFieldComponentCheck:
         )
         assert len(issues) == 1
         assert "vector_field_component_check" in issues[0]
-        assert "vertical_component_of_surface_normal" in issues[0]
+        # Production code recommends short-form: '{axis}_{vector}'
+        assert "vertical_surface_normal" in issues[0]
 
     def test_flags_radial_coordinate_of_magnetic_field_vector(self):
         from imas_codex.standard_names.audits import vector_field_component_check
@@ -881,7 +882,7 @@ class TestVectorFieldComponentCheck:
             {"id": "radial_coordinate_of_magnetic_field_vector"}
         )
         assert len(issues) == 1
-        assert "radial_component_of_magnetic_field_vector" in issues[0]
+        assert "radial_magnetic_field_vector" in issues[0]
 
     def test_passes_vertical_coordinate_of_plasma_boundary(self):
         from imas_codex.standard_names.audits import vector_field_component_check
@@ -895,14 +896,11 @@ class TestVectorFieldComponentCheck:
             == []
         )
 
-    def test_passes_vertical_component_of_surface_normal(self):
+    def test_passes_vertical_surface_normal(self):
         from imas_codex.standard_names.audits import vector_field_component_check
 
         # The canonical form is not flagged.
-        assert (
-            vector_field_component_check({"id": "vertical_component_of_surface_normal"})
-            == []
-        )
+        assert vector_field_component_check({"id": "vertical_surface_normal"}) == []
 
     def test_passes_unrelated_name(self):
         from imas_codex.standard_names.audits import vector_field_component_check
@@ -928,13 +926,10 @@ class TestSegmentOrderCheck:
 
         assert segment_order_check({"id": "toroidal_ion_rotation_frequency"}) == []
 
-    def test_pass_component_of_preposition(self):
+    def test_pass_short_form_component_prefix(self):
         from imas_codex.standard_names.audits import segment_order_check
 
-        assert (
-            segment_order_check({"id": "toroidal_component_of_ion_rotation_frequency"})
-            == []
-        )
+        assert segment_order_check({"id": "toroidal_ion_rotation_frequency"}) == []
 
     def test_pass_no_component_token(self):
         from imas_codex.standard_names.audits import segment_order_check
@@ -1135,57 +1130,6 @@ class TestAggregatorOrderCheck:
         assert aggregator_order_check({"id": "electron_temperature"}) == []
 
 
-class TestNamedFeaturePrepositionCheck:
-    def test_fail_at_magnetic_axis(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        issues = named_feature_preposition_check(
-            {"id": "poloidal_magnetic_flux_at_magnetic_axis"}
-        )
-        assert issues and "poloidal_magnetic_flux_of_magnetic_axis" in issues[0]
-
-    def test_fail_at_last_closed_flux_surface(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        issues = named_feature_preposition_check(
-            {"id": "loop_voltage_at_last_closed_flux_surface"}
-        )
-        assert issues
-
-    def test_fail_at_x_point(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        issues = named_feature_preposition_check(
-            {"id": "poloidal_magnetic_flux_at_x_point"}
-        )
-        assert issues
-
-    def test_pass_of_magnetic_axis(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        assert (
-            named_feature_preposition_check(
-                {"id": "poloidal_magnetic_flux_of_magnetic_axis"}
-            )
-            == []
-        )
-
-    def test_pass_of_plasma_boundary(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        assert (
-            named_feature_preposition_check(
-                {"id": "poloidal_magnetic_flux_of_plasma_boundary"}
-            )
-            == []
-        )
-
-    def test_pass_unrelated_name(self):
-        from imas_codex.standard_names.audits import named_feature_preposition_check
-
-        assert named_feature_preposition_check({"id": "electron_temperature"}) == []
-
-
 class TestDiamagneticComponentCheck:
     def test_fail_diamagnetic_component_of_electric_field(self):
         from imas_codex.standard_names.audits import diamagnetic_component_check
@@ -1216,10 +1160,7 @@ class TestDiamagneticComponentCheck:
     def test_pass_toroidal_component(self):
         from imas_codex.standard_names.audits import diamagnetic_component_check
 
-        assert (
-            diamagnetic_component_check({"id": "toroidal_component_of_electric_field"})
-            == []
-        )
+        assert diamagnetic_component_check({"id": "toroidal_electric_field"}) == []
 
 
 # =========================================================================
@@ -1258,6 +1199,47 @@ class TestMultiSubjectCheckGreedy:
         from imas_codex.standard_names.audits import multi_subject_check
 
         assert multi_subject_check({"id": "ion_electron_equivalent"}) == []
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "trapped_fast_density",
+            "co_passing_fast_pressure",
+            "counter_passing_fast_density",
+            "total_rejected_thermal_power",
+            "total_supplied_thermal_power",
+        ],
+    )
+    def test_pass_all_modifier_subjects(self, name):
+        """When ALL matched subjects are modifiers, no dual-subject conflict."""
+        from imas_codex.standard_names.audits import multi_subject_check
+
+        issues = multi_subject_check({"id": name})
+        assert issues == [], f"False positive on '{name}': {issues}"
+
+    def test_pass_runaway_modifier(self):
+        """Runaway is a modifier subject, not a dual subject with electrons."""
+        from imas_codex.standard_names.audits import multi_subject_check
+
+        assert (
+            multi_subject_check({"id": "critical_electric_field_for_runaway_electrons"})
+            == []
+        )
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
+            "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+            "toroidal_co_passing_fast_particle_torque_density_due_to_coulomb_collisions_with_ion",
+        ],
+    )
+    def test_pass_collisional_with_target(self, name):
+        """Collision target after _with_ is exempt from multi-subject check."""
+        from imas_codex.standard_names.audits import multi_subject_check
+
+        issues = multi_subject_check({"id": name})
+        assert issues == [], f"False positive on '{name}': {issues}"
 
 
 # =========================================================================
@@ -1381,6 +1363,38 @@ class TestImplicitFieldUseExactExemption:
 
         issues = implicit_field_check({"id": "poloidal_field_strength"})
         assert issues and "implicit_field_check" in issues[0]
+
+    def test_pass_field_of_view(self):
+        """``field_of_view`` is an optics term, not a physics field."""
+        from imas_codex.standard_names.audits import implicit_field_check
+
+        assert (
+            implicit_field_check({"id": "solid_angle_of_detector_field_of_view"}) == []
+        )
+
+
+class TestAngleSolidUnitExpectation:
+    """Solid angles use steradians (sr), not radians."""
+
+    def test_pass_solid_angle_sr(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "solid_angle_of_detector_field_of_view", "unit": "sr"}
+        )
+        assert issues == [], f"False positive: {issues}"
+
+    def test_pass_angle_rad(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "rad"})
+        assert issues == []
+
+    def test_fail_angle_wrong_unit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "m"})
+        assert issues and "name_unit_consistency_check" in issues[0]
 
 
 class TestCausalDueToSuggestedFix:
@@ -1944,3 +1958,324 @@ class TestNormalizedQuantityBypass:
             )
             == []
         )
+
+
+class TestGgdImplementationLeakageCheck:
+    """Tests for ggd_implementation_leakage_check."""
+
+    def test_flag_on_the_ggd(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "Temperature on the GGD edge grid"}
+        )
+        assert len(issues) == 1
+        assert "ggd_leakage" in issues[0]
+
+    def test_flag_ggd_mesh(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"documentation": "Defined on a GGD mesh element for edge transport"}
+        )
+        assert len(issues) == 1
+        assert "ggd_leakage" in issues[0]
+
+    def test_flag_unstructured_ggd(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "Stored on an unstructured GGD representation"}
+        )
+        assert len(issues) == 1
+
+    def test_pass_bare_ggd_reference(self):
+        """Bare 'GGD' without implementation pattern should pass."""
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "General grid description (GGD) based quantity"}
+        )
+        assert issues == []
+
+    def test_pass_no_ggd(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {"description": "Electron temperature on the plasma edge"}
+        )
+        assert issues == []
+
+    def test_both_fields_flagged(self):
+        from imas_codex.standard_names.audits import ggd_implementation_leakage_check
+
+        issues = ggd_implementation_leakage_check(
+            {
+                "description": "Density on the GGD edge grid",
+                "documentation": "Values stored on a GGD mesh",
+            }
+        )
+        assert len(issues) == 2
+
+
+# =========================================================================
+# Semantic similarity gate
+# =========================================================================
+
+
+class TestSemanticSimilarityCheck:
+    """Tests for the embedding-based semantic similarity gate."""
+
+    def test_good_name_high_similarity(self):
+        """A self-describing name should score above warning threshold."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Mock embed to return controlled vectors
+        # name = "electron temperature" → [1, 0, 0, ...]
+        # desc = "Temperature of electrons" → [0.9, 0.1, 0, ...]
+        good_name_emb = [1.0, 0.0, 0.0, 0.0]
+        good_desc_emb = [0.9, 0.1, 0.0, 0.0]
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = good_name_emb
+                else:
+                    item["embedding"] = good_desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "electron_temperature",
+                "Temperature of electrons in the plasma",
+            )
+
+        assert sim is not None
+        assert sim > 0.65  # above warning
+        assert issues == []
+
+    def test_ambiguous_name_critical(self):
+        """An ambiguous name should fail critical threshold."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Orthogonal vectors → sim ≈ 0
+        ambig_name_emb = [1.0, 0.0, 0.0, 0.0]
+        ambig_desc_emb = [0.0, 1.0, 0.0, 0.0]
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = ambig_name_emb
+                else:
+                    item["embedding"] = ambig_desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "co_passing_density",
+                "Number density of co-passing particles in velocity space",
+            )
+
+        assert sim is not None
+        assert sim < 0.55  # below critical
+        assert len(issues) == 1
+        assert "semantic_similarity_check:" in issues[0]
+        assert "critical" in issues[0]
+
+    def test_warning_zone(self):
+        """A name in the warning zone should get advisory issue."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Vectors with ~0.6 cosine similarity
+        name_emb = [1.0, 0.0, 0.0, 0.0]
+        desc_emb = [0.6, 0.8, 0.0, 0.0]  # cos ≈ 0.6
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = name_emb
+                else:
+                    item["embedding"] = desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "electric_field",
+                "Magnitude of the electric field in a tokamak plasma",
+            )
+
+        assert sim is not None
+        assert sim < 0.65
+        assert sim > 0.55
+        assert len(issues) == 1
+        assert "warning" in issues[0]
+
+    def test_empty_description_returns_none(self):
+        """Empty description should return None, no issues."""
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        sim, issues = semantic_similarity_check("electron_temperature", "")
+        assert sim is None
+        assert issues == []
+
+    def test_none_description_returns_none(self):
+        """None description should return None, no issues."""
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        sim, issues = semantic_similarity_check("electron_temperature", None)
+        assert sim is None
+        assert issues == []
+
+    def test_embed_failure_returns_none(self):
+        """If embed server is down, should return None gracefully."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=ConnectionError("embed server down"),
+        ):
+            sim, issues = semantic_similarity_check(
+                "electron_temperature",
+                "Temperature of electrons",
+            )
+
+        assert sim is None
+        assert issues == []
+
+    def test_custom_thresholds(self):
+        """Custom thresholds should be respected."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.audits import semantic_similarity_check
+
+        # Use ~0.7 similarity (normally above warning 0.65, but set warning to 0.8)
+        name_emb = [1.0, 0.0, 0.0, 0.0]
+        desc_emb = [0.7, 0.71, 0.0, 0.0]
+
+        def mock_embed(items, text_field="_text", embedding_field="embedding"):
+            for item in items:
+                if item["id"] == "name":
+                    item["embedding"] = name_emb
+                else:
+                    item["embedding"] = desc_emb
+            return items
+
+        with patch(
+            "imas_codex.embeddings.description.embed_descriptions_batch",
+            side_effect=mock_embed,
+        ):
+            sim, issues = semantic_similarity_check(
+                "electron_temperature",
+                "Temperature of electrons",
+                critical_threshold=0.3,
+                warning_threshold=0.8,
+            )
+
+        assert sim is not None
+        # sim ~0.7 is below custom warning 0.8 but above custom critical 0.3
+        assert len(issues) == 1
+        assert "warning" in issues[0]
+
+    def test_critical_check_in_critical_checks(self):
+        """semantic_similarity_check should be in CRITICAL_CHECKS."""
+        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+
+        assert "semantic_similarity_check" in CRITICAL_CHECKS
+
+    def test_has_critical_failure_with_semantic(self):
+        """has_critical_audit_failure should detect semantic issues."""
+        from imas_codex.standard_names.audits import has_critical_audit_failure
+
+        issues = [
+            "audit:semantic_similarity_check: sim=0.400 below critical threshold 0.55"
+        ]
+        assert has_critical_audit_failure(issues) is True
+
+    def test_warning_not_critical(self):
+        """Warning issues should NOT count as critical failures."""
+        from imas_codex.standard_names.audits import has_critical_audit_failure
+
+        issues = [
+            "audit:semantic_similarity_check_warning: sim=0.600 below warning 0.65"
+        ]
+        assert has_critical_audit_failure(issues) is False
+
+
+class TestPrepositionPhysicalBaseCheck:
+    """Names whose ISN-parsed physical_base starts with a preposition are broken."""
+
+    def test_normalized_of_particle_temperature_not_flagged(self):
+        """ISN v0.8.0rc1 parses ``normalized_of_particle_temperature`` correctly:
+        transformation=normalized, subject=particle, physical_base=temperature.
+        The ``_of_`` connector is absorbed by the parser, so physical_base is
+        clean — no preposition leak."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        issues = preposition_physical_base_check(
+            {"id": "normalized_of_particle_temperature"}
+        )
+        assert len(issues) == 0
+
+    def test_normalized_of_particle_mass_not_flagged(self):
+        """ISN v0.8.0rc1 correctly parses ``normalized_of_particle_mass`` —
+        physical_base is 'mass', not 'of_particle_mass'."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        issues = preposition_physical_base_check({"id": "normalized_of_particle_mass"})
+        assert len(issues) == 0
+
+    def test_clean_name_passes(self):
+        """A well-formed name has no preposition prefix on physical_base."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        assert preposition_physical_base_check({"id": "electron_temperature"}) == []
+
+    def test_normalized_without_of_passes(self):
+        """``normalized_particle_temperature`` is the correct form."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        assert (
+            preposition_physical_base_check({"id": "normalized_particle_temperature"})
+            == []
+        )
+
+    def test_empty_name_passes(self):
+        """Empty or missing name is a no-op."""
+        from imas_codex.standard_names.audits import preposition_physical_base_check
+
+        assert preposition_physical_base_check({"id": ""}) == []
+        assert preposition_physical_base_check({}) == []
+
+    def test_is_critical_check(self):
+        """preposition_physical_base_check must be in CRITICAL_CHECKS."""
+        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+
+        assert "preposition_physical_base_check" in CRITICAL_CHECKS
+
+    def test_has_critical_failure(self):
+        """has_critical_audit_failure detects preposition_physical_base_check issues."""
+        from imas_codex.standard_names.audits import has_critical_audit_failure
+
+        issues = [
+            "audit:preposition_physical_base_check: ISN parse of "
+            "'normalized_of_particle_temperature' yields "
+            "physical_base='of_particle_temperature'"
+        ]
+        assert has_critical_audit_failure(issues) is True

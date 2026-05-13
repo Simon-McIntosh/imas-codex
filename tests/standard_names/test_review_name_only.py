@@ -163,7 +163,6 @@ def test_name_only_prompt_omits_documentation_and_compliance() -> None:
                     "source_id": "x",
                     "unit": "eV",
                     "kind": "scalar",
-                    "grammar_fields": {},
                 }
             ],
             "batch_context": "",
@@ -224,7 +223,6 @@ def test_review_name_only_renders_candidate() -> None:
         "source_id": "core_profiles/profiles_1d/electrons/temperature",
         "unit": "eV",
         "kind": "scalar",
-        "grammar_fields": {},
         "validation_issues": [],
     }
 

@@ -12,7 +12,8 @@ class TestStandardNameCandidateDescription:
         """Description defaults to empty string when not provided."""
         c = StandardNameCandidate(
             source_id="eq/time_slice/profiles_1d/psi",
-            standard_name="poloidal_magnetic_flux",
+            base_token="magnetic_flux",
+            base_kind="quantity",
             reason="test",
         )
         assert c.description == ""
@@ -21,7 +22,8 @@ class TestStandardNameCandidateDescription:
         """Description is stored when provided."""
         c = StandardNameCandidate(
             source_id="eq/time_slice/profiles_1d/psi",
-            standard_name="poloidal_magnetic_flux",
+            base_token="magnetic_flux",
+            base_kind="quantity",
             description="Poloidal magnetic flux on the 1D grid",
             reason="test",
         )
@@ -31,7 +33,8 @@ class TestStandardNameCandidateDescription:
         """Description appears in model_dump output."""
         c = StandardNameCandidate(
             source_id="eq/time_slice/profiles_1d/psi",
-            standard_name="poloidal_magnetic_flux",
+            base_token="magnetic_flux",
+            base_kind="quantity",
             description="Poloidal magnetic flux on the 1D grid",
             reason="test",
         )
@@ -42,7 +45,8 @@ class TestStandardNameCandidateDescription:
         """Description is parsed from dict input."""
         data = {
             "source_id": "eq/time_slice/profiles_1d/psi",
-            "standard_name": "poloidal_magnetic_flux",
+            "base_token": "magnetic_flux",
+            "base_kind": "quantity",
             "description": "Poloidal magnetic flux",
             "reason": "test",
         }
@@ -53,19 +57,18 @@ class TestStandardNameCandidateDescription:
         """Adding description does not break existing field access."""
         c = StandardNameCandidate(
             source_id="path",
-            standard_name="electron_temperature",
+            base_token="temperature",
+            base_kind="quantity",
+            qualifiers=["electron"],
             description="Temperature of electrons",
             kind="scalar",
             dd_paths=["core_profiles/profiles_1d/electrons/temperature"],
-            grammar_fields={"subject": "electron", "physical_base": "temperature"},
             reason="test",
         )
         assert c.source_id == "path"
-        assert c.standard_name == "electron_temperature"
+        assert c.compose_name() == "electron_temperature"
         assert c.kind == "scalar"
         assert c.dd_paths == ["core_profiles/profiles_1d/electrons/temperature"]
-        assert c.grammar_fields == {
-            "subject": "electron",
-            "physical_base": "temperature",
-        }
+        assert c.base_token == "temperature"
+        assert c.qualifiers == ["electron"]
         assert c.reason == "test"

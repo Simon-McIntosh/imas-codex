@@ -86,7 +86,8 @@ class TestEmbedFailureDoesNotQuarantine:
     """Embed failure sets embed_failed_at; never sets quarantine status."""
 
     def test_embed_failure_does_not_quarantine(self) -> None:
-        """When embed fails, validation_status is not 'quarantined'."""
+        """When inline embedding is skipped (deferred to embed worker),
+        validation_status is not 'quarantined' and embed_text_hash is None."""
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         candidate = {
@@ -103,18 +104,9 @@ class TestEmbedFailureDoesNotQuarantine:
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
 
-        def _failing_embed(*args, **kwargs) -> None:
-            raise ConnectionError("Embedding server down")
-
-        with (
-            patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
-                return_value=mock_gc,
-            ),
-            patch(
-                "imas_codex.embeddings.description.embed_descriptions_batch",
-                side_effect=_failing_embed,
-            ),
+        with patch(
+            "imas_codex.standard_names.graph_ops.GraphClient",
+            return_value=mock_gc,
         ):
             persist_generated_name_batch(
                 [candidate],
@@ -123,11 +115,14 @@ class TestEmbedFailureDoesNotQuarantine:
 
         # Should NOT be quarantined
         assert candidate.get("validation_status") != "quarantined"
-        # embed_failed_at should be set
-        assert candidate.get("embed_failed_at") is not None
+        # Embedding is deferred — embed_text_hash should be None
+        assert candidate.get("embed_text_hash") is None
+        # embedding should be None (deferred to embed worker)
+        assert candidate.get("embedding") is None
 
     def test_embed_success_sets_embedded_at(self) -> None:
-        """When embed succeeds, embedded_at is set and embed_failed_at is absent."""
+        """Embedding is deferred — embedded_at is NOT set inline.
+        The embed worker pool handles it asynchronously."""
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         candidate = {
@@ -144,34 +139,19 @@ class TestEmbedFailureDoesNotQuarantine:
         mock_gc.__enter__ = MagicMock(return_value=mock_gc)
         mock_gc.__exit__ = MagicMock(return_value=False)
 
-        def _successful_embed(*args, **kwargs) -> None:
-            # embed_descriptions_batch signature: (candidates, text_field, ...)
-            # It writes the embedding back into items in-place
-            for arg in args:
-                if isinstance(arg, list):
-                    for item in arg:
-                        if isinstance(item, dict):
-                            item["embedding"] = [0.1] * 384
-
-        with (
-            patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
-                return_value=mock_gc,
-            ),
-            patch(
-                "imas_codex.embeddings.description.embed_descriptions_batch",
-                side_effect=_successful_embed,
-            ),
+        with patch(
+            "imas_codex.standard_names.graph_ops.GraphClient",
+            return_value=mock_gc,
         ):
             persist_generated_name_batch(
                 [candidate],
                 compose_model="test-model",
             )
 
-        # embedded_at should be set on success
-        assert candidate.get("embedded_at") is not None
-        # embed_failed_at should NOT be set
-        assert candidate.get("embed_failed_at") is None
+        # Embedding is deferred — embedded_at is NOT set inline
+        assert candidate.get("embedded_at") is None
+        # embed_text_hash is cleared so embed worker picks it up
+        assert candidate.get("embed_text_hash") is None
 
 
 # ---------------------------------------------------------------------------

@@ -30,7 +30,7 @@ from filelock import FileLock
 logger = logging.getLogger(__name__)
 
 #: Required edge model version — publish refuses incompatible manifests.
-_REQUIRED_EDGE_MODEL_VERSION = "plan_39_v1"
+_REQUIRED_EDGE_MODEL_VERSION = "v1"
 
 
 # =============================================================================
@@ -380,7 +380,11 @@ def run_publish(
 
 
 def _fetch_expected_domains() -> set[str] | None:
-    """Fetch expected domain set from graph for full-scope validation."""
+    """Fetch expected domain set from graph for full-scope validation.
+
+    Returns the set of physics domains that have at least one valid
+    StandardName node in the graph (any pipeline_status).
+    """
     try:
         from imas_codex.graph.client import GraphClient
 
@@ -388,10 +392,7 @@ def _fetch_expected_domains() -> set[str] | None:
             rows = gc.query(
                 """
                 MATCH (sn:StandardName)
-                WHERE sn.pipeline_status IN ['published', 'accepted', 'reviewed', 'enriched']
-                // Post-refactor: source_domains is the multi-valued field.
-                // Fall back to scalar physics_domain wrapped in a list for
-                // legacy nodes that have not been re-persisted yet.
+                WHERE sn.validation_status = 'valid'
                 WITH sn,
                      CASE
                        WHEN sn.source_domains IS NOT NULL

@@ -202,8 +202,8 @@ class TestFormatPrYaml:
 
     def test_open_segment_flagged(self):
         doc = self._parse(SAMPLE_RECORDS)
-        # physical_base has no tokens → open segment
-        assert doc["gaps_by_segment"]["physical_base"]["segment_type"] == "open"
+        # physical_base now has tokens in ISN → closed segment
+        assert doc["gaps_by_segment"]["physical_base"]["segment_type"] == "closed"
 
     def test_example_paths_included_when_present(self):
         doc = self._parse(SAMPLE_RECORDS)

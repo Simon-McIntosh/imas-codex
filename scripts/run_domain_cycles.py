@@ -426,7 +426,6 @@ def _build_sn_run_cmd(
         str(cost_limit),
         "--turn-number",
         str(turn_number),
-        "--single-pass",
     ]
     if min_score is not None and min_score > 0.0:
         cmd += ["--min-score", str(min_score)]
