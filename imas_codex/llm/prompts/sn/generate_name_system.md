@@ -690,6 +690,25 @@ Each candidate MUST include these fields:
 - `operator_token`: mathematical operator token (e.g., `"time_derivative"`, `"gradient"`, `"normalized"`, `"magnitude"`). Null if no operator.
 - `operator_kind`: `"unary_prefix"` (wraps with `_of_` scope) or `"unary_postfix"` (appends directly). Required when `operator_token` is set; null otherwise.
 
+### CRITICAL: base_token MUST be a single registered token
+
+The `base_token` field accepts ONLY tokens from the physical_base or geometry_carrier registries.
+**Compound tokens are FORBIDDEN as base_token.** If a concept requires multiple tokens, decompose
+into qualifier + base:
+
+| Wrong (compound base_token) | Correct decomposition |
+|-----------------------------|----------------------|
+| `base_token: "major_radius"` | `qualifiers: ["major"]`, `base_token: "radius"` |
+| `base_token: "minor_radius"` | `qualifiers: ["minor"]`, `base_token: "radius"` |
+| `base_token: "electron_temperature"` | `qualifiers: ["electron"]`, `base_token: "temperature"` |
+| `base_token: "mhd_energy"` | `qualifiers: ["mhd"]` → **vocab_gap** (`mhd` not registered) |
+| `base_token: "fast_energy"` | `qualifiers: ["fast_particle"]`, `base_token: "energy"` |
+| `base_token: "vertical_coordinate"` | `projection_axis: "vertical"`, `projection_shape: "coordinate"`, `base_token: "coordinate"`, `base_kind: "geometry"` |
+
+The Pydantic validator will reject any `base_token` that is not registered. When in doubt,
+check the Token Registry tables above — if your intended base_token is not listed, decompose
+it or report a `vocab_gap`.
+
 ### IR Segment Worked Examples
 
 **Bare quantity:**
@@ -745,27 +764,69 @@ Each candidate MUST include these fields:
 ```
 → Composed name: `electron_density_at_magnetic_axis`
 
-**Locus with `_of_` (entity property):**
+**Locus with `_of_` — major radius (cylindrical R coordinate):**
 ```json
 {
   "source_id": "magnetics/flux_loop/position/r",
   "segments": {
-    "base_token": "position",
+    "base_token": "radius",
+    "base_kind": "quantity",
+    "qualifiers": ["major"],
+    "locus_token": "flux_loop",
+    "locus_relation": "of",
+    "locus_type": "entity"
+  },
+  "description": "Major radius (cylindrical R coordinate) of the flux loop",
+  "kind": "scalar",
+  "dd_paths": ["magnetics/flux_loop/position/r"],
+  "reason": "qualifier=major, base=radius, locus=of flux_loop (Rule 17: major_radius_of_X not radial_position_of_X)"
+}
+```
+→ Composed name: `major_radius_of_flux_loop`
+
+**Locus with `_of_` — vertical coordinate (cylindrical Z coordinate):**
+```json
+{
+  "source_id": "magnetics/flux_loop/position/z",
+  "segments": {
+    "base_token": "coordinate",
     "base_kind": "geometry",
-    "projection_axis": "radial",
+    "projection_axis": "vertical",
     "projection_shape": "coordinate",
     "qualifiers": [],
     "locus_token": "flux_loop",
     "locus_relation": "of",
     "locus_type": "entity"
   },
-  "description": "Radial position of the flux loop",
+  "description": "Vertical coordinate (cylindrical Z) of the flux loop",
   "kind": "scalar",
-  "dd_paths": ["magnetics/flux_loop/position/r"],
-  "reason": "projection=radial coordinate, base=position, locus=of flux_loop"
+  "dd_paths": ["magnetics/flux_loop/position/z"],
+  "reason": "projection=vertical coordinate, base=coordinate (geometry), locus=of flux_loop (Rule 17: vertical_coordinate_of_X not vertical_position_of_X)"
 }
 ```
-→ Composed name: `radial_position_of_flux_loop`
+→ Composed name: `vertical_coordinate_of_flux_loop`
+
+**Locus with `_at_` — field value at a position:**
+```json
+{
+  "source_id": "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor",
+  "segments": {
+    "base_token": "magnetic_field",
+    "base_kind": "quantity",
+    "projection_axis": "toroidal",
+    "projection_shape": "component",
+    "qualifiers": [],
+    "locus_token": "magnetic_axis",
+    "locus_relation": "at",
+    "locus_type": "position"
+  },
+  "description": "Toroidal component of the magnetic field evaluated at the magnetic axis",
+  "kind": "scalar",
+  "dd_paths": ["equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor"],
+  "reason": "projection=toroidal component, base=magnetic_field, locus=at magnetic_axis (field value AT a point, not property OF)"
+}
+```
+→ Composed name: `toroidal_magnetic_field_at_magnetic_axis`
 
 **Prefix operator (time derivative):**
 ```json
