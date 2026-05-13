@@ -52,6 +52,19 @@ INHERIT_CATEGORIES = frozenset(
     }
 )
 
+#: Cypher fragment matching infrastructure metadata paths.
+_IS_INFRASTRUCTURE = (
+    "("
+    "  n.id CONTAINS '/ids_properties/'"
+    "  OR n.id CONTAINS '/code/'"
+    "  OR n.id ENDS WITH '/ids_properties'"
+    "  OR n.id ENDS WITH '/code'"
+    ")"
+)
+
+#: Cypher fragment excluding infrastructure metadata from classification.
+_NOT_INFRASTRUCTURE = f"NOT {_IS_INFRASTRUCTURE}"
+
 #: Default batch size for LLM classification
 DEFAULT_BATCH_SIZE = 30
 
@@ -211,7 +224,7 @@ def classify_tier3_none(
     if dry_run:
         cypher = f"""
         MATCH (n:IMASNode)
-        WHERE (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+        WHERE {_IS_INFRASTRUCTURE}
           AND n.domain_source IS NULL
           {ids_clause}
         RETURN count(n) AS cnt
@@ -221,7 +234,7 @@ def classify_tier3_none(
 
     cypher = f"""
     MATCH (n:IMASNode)
-    WHERE (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+    WHERE {_IS_INFRASTRUCTURE}
       AND n.domain_source IS NULL
       {ids_clause}
     SET n.physics_domain = null,
@@ -448,7 +461,7 @@ def _inherit_remaining_unclassified(
         cypher = f"""
         MATCH (n:IMASNode)
         WHERE n.domain_source IS NULL
-          AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+          AND {_NOT_INFRASTRUCTURE}
           AND n.node_category <> 'error'
           {needs_clause}
           {ids_clause}
@@ -460,7 +473,7 @@ def _inherit_remaining_unclassified(
     cypher = f"""
     MATCH (n:IMASNode)
     WHERE n.domain_source IS NULL
-      AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+      AND {_NOT_INFRASTRUCTURE}
       AND n.node_category <> 'error'
       {needs_clause}
       {ids_clause}
@@ -502,7 +515,7 @@ def _inherit_from_metadata_parent(
     if dry_run:
         cypher = f"""
         MATCH (n:IMASNode {{node_category: 'metadata'}})
-        WHERE NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+        WHERE {_NOT_INFRASTRUCTURE}
           {needs_clause}
           {ids_clause}
         RETURN count(n) AS cnt
@@ -512,7 +525,7 @@ def _inherit_from_metadata_parent(
 
     cypher = f"""
     MATCH (n:IMASNode {{node_category: 'metadata'}})
-    WHERE NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+    WHERE {_NOT_INFRASTRUCTURE}
       {needs_clause}
       {ids_clause}
     CALL {{
@@ -953,7 +966,7 @@ def _query_unclassified_paths(
     cypher = f"""
     MATCH (n:IMASNode)
     WHERE n.node_category IN $categories
-      AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+      AND {_NOT_INFRASTRUCTURE}
       AND (n.node_category <> 'structural'
            OR (n.description IS NOT NULL AND trim(n.description) <> ''))
       {needs_clause}
@@ -980,7 +993,7 @@ def _count_residual_unclassified(
     cypher = f"""
     MATCH (n:IMASNode)
     WHERE n.domain_source IS NULL
-      AND NOT (n.id CONTAINS '/ids_properties/' OR n.id CONTAINS '/code/')
+      AND {_NOT_INFRASTRUCTURE}
       {ids_clause}
     RETURN count(n) AS cnt
     """
