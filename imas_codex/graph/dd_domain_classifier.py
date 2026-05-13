@@ -205,7 +205,8 @@ def classify_tier3_none(
       {ids_clause}
     SET n.physics_domain = null,
         n.domain_source = 'none_metadata',
-        n.domain_classified_at = datetime()
+        n.domain_classified_at = datetime(),
+        n.status = 'classified'
     RETURN count(n) AS updated
     """
     result = gc.query(cypher)
@@ -278,7 +279,8 @@ def _inherit_from_error_parent(
       {ids_clause}
     SET err.physics_domain = parent.physics_domain,
         err.domain_source = 'inherited_from_parent',
-        err.domain_classified_at = datetime()
+        err.domain_classified_at = datetime(),
+        err.status = 'classified'
     RETURN count(err) AS updated
     """
     result = gc.query(cypher)
@@ -322,7 +324,8 @@ def _inherit_from_metadata_parent(
       {ids_clause}
     SET n.physics_domain = parent.physics_domain,
         n.domain_source = 'inherited_from_parent',
-        n.domain_classified_at = datetime()
+        n.domain_classified_at = datetime(),
+        n.status = 'classified'
     RETURN count(n) AS updated
     """
     result = gc.query(cypher)
@@ -758,7 +761,8 @@ def _write_tier1_results(gc: GraphClient, results: list[dict[str, Any]]) -> None
     SET n.physics_domain = item.physics_domain,
         n.domain_source = item.domain_source,
         n.domain_model = item.domain_model,
-        n.domain_classified_at = datetime()
+        n.domain_classified_at = datetime(),
+        n.status = 'classified'
     """
     # Batch writes in chunks of 500
     for i in range(0, len(results), 500):
