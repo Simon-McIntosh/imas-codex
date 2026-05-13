@@ -177,7 +177,7 @@ class GrammarSegments(BaseModel):
 
     @model_validator(mode="after")
     def _validate_qualifiers(self) -> GrammarSegments:
-        """Validate qualifier tokens against closed subject vocabulary."""
+        """Validate qualifier tokens against subject + qualifier vocabularies."""
         if not self.qualifiers:
             return self
         try:
@@ -187,13 +187,17 @@ class GrammarSegments(BaseModel):
 
         ctx = get_grammar_context()
         vocab = ctx.get("vocabulary_sections", [])
-        subj_section = next((s for s in vocab if s["segment"] == "subject"), None)
-        tokens = subj_section.get("tokens", []) if subj_section else []
-        if tokens:
+        # Accept tokens from both subject and qualifier registries
+        allowed: set[str] = set()
+        for section in vocab:
+            if section["segment"] in ("subject", "qualifier"):
+                allowed.update(section.get("tokens", []))
+        if allowed:
             for q in self.qualifiers:
-                if q not in tokens:
+                if q not in allowed:
                     raise ValueError(
-                        f"qualifier '{q}' is not a registered subject token."
+                        f"qualifier '{q}' is not a registered subject or "
+                        f"qualifier token."
                     )
         return self
 
