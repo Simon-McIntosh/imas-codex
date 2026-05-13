@@ -15,7 +15,7 @@ requires = [
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
     "neo4j>=5.28.0,<6.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc6",
+    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc7",
 ]
 build-backend = "hatchling.build"
 
@@ -172,7 +172,7 @@ dev = [
     # --- Catalog preview (mkdocs-driven via 'standard-names serve') ---
     "mkdocs>=1.6.1,<2.0.0",
     "mkdocs-material>=9.6.5,<10.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc6",
+    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc7",
 ]
 
 [project.urls]
@@ -471,15 +471,19 @@ disagreement-threshold = 0.20
 # Each is benchmarked independently; results are compared side-by-side.
 # Format: OpenRouter model IDs (provider/model-slug).
 compose-models = [
+    "anthropic/claude-opus-4.7",
     "anthropic/claude-sonnet-4.6",
     "anthropic/claude-haiku-4.5",
-    "openai/gpt-5.4",
+    "openai/gpt-5.5",
     "openai/gpt-5.4-mini",
     "google/gemini-3.1-pro-preview",
     "google/gemini-3-flash-preview",
+    "google/gemini-3.1-flash-lite-preview",
     "moonshotai/kimi-k2.6",
     "deepseek/deepseek-v4",
     "deepseek/deepseek-v4-flash",
+    "qwen/qwen3-235b-a22b",
+    "meta-llama/llama-4-maverick",
 ]
 # Frontier model used as independent judge for quality scoring.
 # Must be a strong reasoning model — evaluates 5 dimensions (0-100).
