@@ -684,7 +684,13 @@ Each candidate MUST include these fields:
 - `projection_shape`: `"component"` (vector component) or `"coordinate"` (coordinate system). Required when `projection_axis` is set; null otherwise.
 - `qualifiers`: ordered list of qualifier tokens (species, population, modifiers) from the qualifier + subject registries (e.g., `["electron"]`, `["thermal", "ion"]`, `["absorbed"]`). Empty list `[]` if none.
 - `locus_token`: the entity, position, or region token for the postfix locus (e.g., `"magnetic_axis"`, `"flux_loop"`, `"plasma_boundary"`). Null if no locus.
-- `locus_relation`: preposition for the locus — `"of"` (entity property), `"at"` (field value at point), or `"over"` (region integral). Required when `locus_token` is set; null otherwise.
+- `locus_relation`: preposition for the locus. Required when `locus_token` is set; null otherwise. **Valid combinations with `locus_type`:**
+  - `"of"` + `"entity"` — properties OF named objects (e.g., `resistance_of_rogowski_coil`)
+  - `"of"` + `"position"` — properties OF spatial points (e.g., `major_radius_of_magnetic_axis`)
+  - `"of"` + `"geometry"` — properties OF geometric features (e.g., `elongation_of_flux_surface`)
+  - `"at"` + `"position"` — field values AT spatial points (e.g., `toroidal_magnetic_field_at_magnetic_axis`)
+  - `"over"` + `"region"` — integrals OVER regions (e.g., `radiated_power_over_plasma_volume`)
+  - ⛔ Other combinations (e.g., `"at"` + `"geometry"`, `"over"` + `"entity"`) are **invalid** and will fail validation.
 - `locus_type`: semantic type of the locus — `"entity"` (device/object), `"position"` (spatial point), `"region"` (spatial region), or `"geometry"` (geometric feature). Required when `locus_token` is set; null otherwise.
 - `process_token`: process/mechanism token for `_due_to_` suffix (e.g., `"bootstrap"`, `"collisions"`). Null if no process attribution.
 - `operator_token`: mathematical operator token (e.g., `"time_derivative"`, `"gradient"`, `"normalized"`, `"magnitude"`). Null if no operator.

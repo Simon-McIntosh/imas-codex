@@ -3535,15 +3535,23 @@ async def compose_batch(
 
             # Charge this attempt's cost immediately
             if lease:
+
+                def _safe_sn_ids(_r=result) -> tuple[str, ...]:
+                    ids: list[str] = []
+                    for c in _r.candidates if _r else []:
+                        try:
+                            ids.append(c.compose_name())
+                        except Exception:
+                            ids.append(f"<compose-error:{c.segments.base_token}>")
+                    return tuple(ids)
+
                 _event = LLMCostEvent(
                     model=model,
                     tokens_in=_attempt_tokens_in,
                     tokens_out=_attempt_tokens_out,
                     tokens_cached_read=_attempt_cache_r,
                     tokens_cached_write=_attempt_cache_w,
-                    sn_ids=tuple(
-                        c.compose_name() for c in (result.candidates if result else [])
-                    ),
+                    sn_ids=_safe_sn_ids(),
                     batch_id=group_key,
                     phase=phase_tag,
                     service="standard-names",

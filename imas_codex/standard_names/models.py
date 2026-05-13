@@ -241,10 +241,24 @@ class GrammarSegments(BaseModel):
             and self.locus_relation is not None
             and self.locus_type is not None
         ):
+            # Auto-correct invalid relation+type combos per ISN rules:
+            # entity→of, position→at|of, region→over, geometry→of
+            _VALID_RELATIONS: dict[str, list[str]] = {
+                "entity": ["of"],
+                "position": ["at", "of"],
+                "region": ["over"],
+                "geometry": ["of"],
+            }
+            rel = self.locus_relation
+            lt = self.locus_type
+            allowed = _VALID_RELATIONS.get(lt, ["of"])
+            if rel not in allowed:
+                rel = allowed[0]
+
             locus = LocusRef(
-                relation=LocusRelation(self.locus_relation),
+                relation=LocusRelation(rel),
                 token=self.locus_token,
-                type=LocusType(self.locus_type),
+                type=LocusType(lt),
             )
 
         mechanism = None
