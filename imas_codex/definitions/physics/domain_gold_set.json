@@ -1,0 +1,1256 @@
+[
+  {
+    "path": "summary/boundary/elongation",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Elongation is a plasma shape parameter from equilibrium reconstruction"
+  },
+  {
+    "path": "summary/boundary/geometric_axis_r",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Geometric axis R position is a core equilibrium quantity"
+  },
+  {
+    "path": "summary/boundary/geometric_axis_z",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Geometric axis Z position is a core equilibrium quantity"
+  },
+  {
+    "path": "summary/boundary/magnetic_axis_r",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Magnetic axis R comes from equilibrium reconstruction"
+  },
+  {
+    "path": "summary/boundary/magnetic_axis_z",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Magnetic axis Z comes from equilibrium reconstruction"
+  },
+  {
+    "path": "summary/boundary/minor_radius",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Minor radius is a plasma shape parameter from equilibrium"
+  },
+  {
+    "path": "summary/boundary/distance_inner_outer_separatrices",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Separatrix geometry is determined by equilibrium reconstruction"
+  },
+  {
+    "path": "summary/boundary/gap_limiter_wall",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Gap between separatrix and wall is an equilibrium shape quantity"
+  },
+  {
+    "path": "summary/global_quantities/ip",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Total plasma current is a fundamental equilibrium quantity (not magnetics diagnostic)"
+  },
+  {
+    "path": "summary/global_quantities/beta_pol",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Poloidal beta is the ratio of kinetic to magnetic pressure, a core equilibrium parameter"
+  },
+  {
+    "path": "summary/global_quantities/beta_tor",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Toroidal beta is a fundamental equilibrium/stability parameter"
+  },
+  {
+    "path": "summary/global_quantities/beta_tor_norm",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Normalized beta is a key MHD stability/equilibrium parameter"
+  },
+  {
+    "path": "summary/global_quantities/li_3",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Internal inductance characterizes the current profile shape from equilibrium"
+  },
+  {
+    "path": "summary/global_quantities/q_95",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Safety factor at 95% flux surface is a key equilibrium quantity"
+  },
+  {
+    "path": "summary/global_quantities/v_loop",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Loop voltage at the LCFS is an equilibrium/ohmic quantity"
+  },
+  {
+    "path": "summary/global_quantities/volume",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Confined plasma volume is derived from equilibrium reconstruction"
+  },
+  {
+    "path": "summary/global_quantities/r0",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Reference major radius is a geometric equilibrium parameter"
+  },
+  {
+    "path": "summary/global_quantities/psi_external_average",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "External poloidal flux is a direct equilibrium magnetic quantity"
+  },
+  {
+    "path": "summary/global_quantities/energy_thermal",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Thermal stored energy is a transport/confinement quantity"
+  },
+  {
+    "path": "summary/global_quantities/tau_energy",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Energy confinement time is the fundamental transport quantity"
+  },
+  {
+    "path": "summary/global_quantities/tau_energy_98",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "IPB98(y,2) confinement time is a transport scaling quantity"
+  },
+  {
+    "path": "summary/global_quantities/h_98",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "H-factor is the confinement enhancement factor relative to transport scaling"
+  },
+  {
+    "path": "summary/global_quantities/energy_electrons_thermal",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Electron thermal energy content is a transport/confinement quantity"
+  },
+  {
+    "path": "summary/global_quantities/energy_ion_total_thermal",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Ion thermal energy content is a transport/confinement quantity"
+  },
+  {
+    "path": "summary/global_quantities/power_loss",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Power loss through LCFS is the key quantity in transport power balance"
+  },
+  {
+    "path": "summary/global_quantities/greenwald_fraction",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Greenwald fraction relates density to the density limit, a transport quantity"
+  },
+  {
+    "path": "summary/global_quantities/power_ohm",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Ohmic heating power is a plasma heating source term"
+  },
+  {
+    "path": "summary/global_quantities/power_radiated",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Total radiated power is a key loss channel in transport power balance"
+  },
+  {
+    "path": "summary/global_quantities/power_radiated_inside_lcfs",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Core radiated power is a transport loss channel inside the LCFS"
+  },
+  {
+    "path": "summary/global_quantities/power_bremsstrahlung",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Bremsstrahlung power is a radiation loss in the transport power balance"
+  },
+  {
+    "path": "summary/global_quantities/power_synchrotron",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Synchrotron radiation is a power loss channel in the energy balance"
+  },
+  {
+    "path": "summary/global_quantities/power_line",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Line radiation power is a loss channel in the transport power balance"
+  },
+  {
+    "path": "summary/global_quantities/b0",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Vacuum toroidal field at reference radius is a fundamental equilibrium parameter"
+  },
+  {
+    "path": "summary/global_quantities/current_bootstrap",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Bootstrap current is driven by pressure gradients, a neoclassical transport quantity"
+  },
+  {
+    "path": "summary/global_quantities/current_non_inductive",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Non-inductive current fraction relates to steady-state transport scenarios"
+  },
+  {
+    "path": "summary/global_quantities/current_ohm",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Ohmic current is the inductive component of total plasma current"
+  },
+  {
+    "path": "summary/global_quantities/resistance",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Plasma resistance depends on temperature profile, a transport-derived quantity"
+  },
+  {
+    "path": "summary/global_quantities/tau_resistive",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Resistive timescale depends on plasma resistivity from transport profiles"
+  },
+  {
+    "path": "summary/global_quantities/fusion_gain",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Q factor is the ratio of fusion power to input, a key performance/transport metric"
+  },
+  {
+    "path": "summary/global_quantities/energy_diamagnetic",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Diamagnetic energy is a measure of stored energy from confinement"
+  },
+  {
+    "path": "summary/global_quantities/energy_b_field_pol",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Poloidal field energy is a magnetic/equilibrium quantity"
+  },
+  {
+    "path": "summary/global_quantities/energy_fast_perpendicular",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Fast particle energy is created by auxiliary heating systems"
+  },
+  {
+    "path": "summary/global_quantities/power_steady",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Steady-state coupled power is total input from heating systems"
+  },
+  {
+    "path": "summary/heating_current_drive/ec/power",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Electron cyclotron deposited power is an auxiliary heating quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/ec/power_launched",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "EC launched power is an auxiliary heating system quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/ec/current",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "EC driven current is a current drive quantity from auxiliary heating"
+  },
+  {
+    "path": "summary/heating_current_drive/ec/frequency",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "EC frequency is a heating system parameter"
+  },
+  {
+    "path": "summary/heating_current_drive/ic/power",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Ion cyclotron deposited power is an auxiliary heating quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/ic/power_launched",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "IC launched power is an auxiliary heating system quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/lh/power",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Lower hybrid deposited power is an auxiliary heating quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/lh/current",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "LH driven current is a current drive quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/nbi/power",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI deposited power is an auxiliary heating quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/nbi/power_launched",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI launched power is an auxiliary heating system quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/nbi/energy",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI beam energy is an auxiliary heating system parameter"
+  },
+  {
+    "path": "summary/heating_current_drive/nbi/tangency_radius",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI tangency radius is a heating system geometry parameter"
+  },
+  {
+    "path": "summary/heating_current_drive/power_additional",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Total additional heating power is a summary of all auxiliary heating"
+  },
+  {
+    "path": "summary/heating_current_drive/power_ec",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Total EC power is an auxiliary heating quantity"
+  },
+  {
+    "path": "summary/heating_current_drive/power_nbi",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Total NBI power is an auxiliary heating quantity"
+  },
+  {
+    "path": "summary/disruption/time",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Disruption onset time is an MHD event characterization"
+  },
+  {
+    "path": "summary/disruption/time_half_ip",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Time for current to halve during disruption is an MHD quantity"
+  },
+  {
+    "path": "summary/disruption/decay_times/ip/exponential",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Current decay time during disruption is an MHD quantity"
+  },
+  {
+    "path": "summary/disruption/decay_times/ip/linear_20_80",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Current quench rate is an MHD disruption characterization"
+  },
+  {
+    "path": "summary/disruption/decay_times/energy_thermal/exponential",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Thermal quench timescale is an MHD disruption quantity"
+  },
+  {
+    "path": "summary/disruption/halo_current/fraction_pol_max",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Halo current fraction is a disruption MHD quantity"
+  },
+  {
+    "path": "summary/disruption/vertical_displacement",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Vertical displacement event time is an MHD stability quantity"
+  },
+  {
+    "path": "summary/disruption/time_radiated_power_max",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Time of peak radiation during disruption is an MHD event characterization"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/t_e",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal electron temperature is an edge/pedestal physics quantity"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/n_e",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal electron density is an edge/pedestal physics quantity"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/pressure_electron",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal electron pressure is an edge/pedestal physics quantity"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/n_e/pedestal_width",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal width characterizes the edge transport barrier"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/n_e/pedestal_position",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal position characterizes the edge transport barrier location"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/nustar_pedestal_top_electron",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Collisionality at pedestal top is an edge physics dimensionless parameter"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/beta_pol_pedestal_top_electron_average",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal top beta is an edge MHD stability parameter"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/energy_thermal_pedestal_electron",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Pedestal thermal energy characterizes edge confinement"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/volume_inside_pedestal",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Volume inside pedestal defines the edge region geometry"
+  },
+  {
+    "path": "summary/local/separatrix/n_e",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Electron density at separatrix is an edge plasma quantity"
+  },
+  {
+    "path": "summary/local/separatrix/t_e",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Electron temperature at separatrix is an edge plasma quantity"
+  },
+  {
+    "path": "summary/local/separatrix/t_i_average",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Ion temperature at separatrix is an edge plasma quantity"
+  },
+  {
+    "path": "summary/local/separatrix/q",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Safety factor at separatrix characterizes edge magnetic topology"
+  },
+  {
+    "path": "summary/local/separatrix/magnetic_shear",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Magnetic shear at separatrix is an edge stability parameter"
+  },
+  {
+    "path": "summary/local/divertor_plate/t_e",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Divertor plate electron temperature is a divertor physics quantity"
+  },
+  {
+    "path": "summary/local/divertor_plate/n_e",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Divertor plate electron density is a divertor physics quantity"
+  },
+  {
+    "path": "summary/local/divertor_plate/power_flux_peak",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Peak heat flux on divertor plate is a key divertor physics quantity"
+  },
+  {
+    "path": "summary/local/divertor_target/t_e",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Divertor target electron temperature is a divertor physics quantity"
+  },
+  {
+    "path": "summary/local/divertor_target/flux_expansion",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Flux expansion at divertor target is a divertor geometry/physics quantity"
+  },
+  {
+    "path": "summary/local/divertor_target/power_flux_peak",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Peak power flux on divertor target is a key divertor physics quantity"
+  },
+  {
+    "path": "summary/scrape_off_layer/heat_flux_e_decay_length",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "SOL heat flux decay length characterizes edge/SOL transport"
+  },
+  {
+    "path": "summary/scrape_off_layer/n_e_decay_length",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "SOL density decay length characterizes edge/SOL transport"
+  },
+  {
+    "path": "summary/scrape_off_layer/power_radiated",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "SOL radiated power is an edge/divertor radiation quantity"
+  },
+  {
+    "path": "summary/line_average/n_e",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Line-averaged electron density is a key transport/confinement quantity"
+  },
+  {
+    "path": "summary/line_average/n_i",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Line-averaged ion density is a transport quantity"
+  },
+  {
+    "path": "summary/line_average/t_e",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Line-averaged electron temperature is a transport quantity"
+  },
+  {
+    "path": "summary/line_average/zeff",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Line-averaged Zeff characterizes impurity transport"
+  },
+  {
+    "path": "summary/volume_average/n_e",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Volume-averaged electron density is a transport/confinement quantity"
+  },
+  {
+    "path": "summary/volume_average/t_e",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Volume-averaged electron temperature is a transport quantity"
+  },
+  {
+    "path": "summary/volume_average/t_i_average",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Volume-averaged ion temperature is a transport quantity"
+  },
+  {
+    "path": "summary/fusion/neutron_fluxes/dt/total",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "DT neutron rate depends on ion temperature and density profiles from transport"
+  },
+  {
+    "path": "summary/fusion/neutron_fluxes/dd/total",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "DD neutron rate depends on ion temperature and density from transport"
+  },
+  {
+    "path": "summary/fusion/current",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Fusion-born alpha current depends on confinement of fusion products"
+  },
+  {
+    "path": "summary/runaways/current",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Runaway electron current is associated with disruptions and MHD events"
+  },
+  {
+    "path": "summary/elms/frequency",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "ELM frequency is an MHD instability characterization"
+  },
+  {
+    "path": "summary/gas_injection_prefill",
+    "ids": "summary",
+    "expected_domain": "plant_systems",
+    "rationale": "Gas injection prefill is a fueling/plant system operation quantity"
+  },
+  {
+    "path": "summary/gas_injection_rates",
+    "ids": "summary",
+    "expected_domain": "plant_systems",
+    "rationale": "Gas injection rate is a fueling/plant system quantity"
+  },
+  {
+    "path": "summary/gas_injection_accumulated",
+    "ids": "summary",
+    "expected_domain": "plant_systems",
+    "rationale": "Accumulated gas injection is a fueling/plant system quantity"
+  },
+  {
+    "path": "summary/plasma_duration",
+    "ids": "summary",
+    "expected_domain": "machine_operations",
+    "rationale": "Plasma duration is an operational/machine parameter"
+  },
+  {
+    "path": "summary/time_breakdown",
+    "ids": "summary",
+    "expected_domain": "machine_operations",
+    "rationale": "Breakdown time is an operational/machine event timing"
+  },
+  {
+    "path": "summary/kicks/occurrence",
+    "ids": "summary",
+    "expected_domain": "plasma_control",
+    "rationale": "Vertical kicks are a plasma control technique"
+  },
+  {
+    "path": "summary/pellets/occurrence",
+    "ids": "summary",
+    "expected_domain": "plant_systems",
+    "rationale": "Pellet injection is a fueling plant system"
+  },
+  {
+    "path": "summary/rmps/occurrence",
+    "ids": "summary",
+    "expected_domain": "plasma_control",
+    "rationale": "Resonant magnetic perturbations are a plasma control technique for ELM suppression"
+  },
+  {
+    "path": "summary/simulation/time_begin",
+    "ids": "summary",
+    "expected_domain": "computational_workflow",
+    "rationale": "Simulation start time is a computational workflow parameter"
+  },
+  {
+    "path": "summary/simulation/time_end",
+    "ids": "summary",
+    "expected_domain": "computational_workflow",
+    "rationale": "Simulation end time is a computational workflow parameter"
+  },
+  {
+    "path": "summary/simulation/time_step",
+    "ids": "summary",
+    "expected_domain": "computational_workflow",
+    "rationale": "Simulation time step is a computational workflow parameter"
+  },
+  {
+    "path": "summary/local/itb/n_e",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Density at internal transport barrier is a core transport quantity"
+  },
+  {
+    "path": "summary/local/itb/t_e",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Temperature at ITB is a core transport barrier quantity"
+  },
+  {
+    "path": "summary/local/itb/magnetic_shear",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Magnetic shear at ITB location relates to transport barrier physics"
+  },
+  {
+    "path": "summary/composition",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Plasma composition (impurity fractions) affects transport and radiation"
+  },
+  {
+    "path": "summary/local/separatrix/zeff",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Zeff at separatrix characterizes edge impurity content"
+  },
+  {
+    "path": "summary/global_quantities/denergy_thermal_dt",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Rate of change of thermal energy is a power balance/transport quantity"
+  },
+  {
+    "path": "dataset_description/data_entry/machine",
+    "ids": "dataset_description",
+    "expected_domain": "data_management",
+    "rationale": "Machine identifier in dataset description is data management metadata"
+  },
+  {
+    "path": "dataset_description/data_entry/pulse",
+    "ids": "dataset_description",
+    "expected_domain": "data_management",
+    "rationale": "Pulse number in dataset description is data management metadata"
+  },
+  {
+    "path": "dataset_description/imas_version",
+    "ids": "dataset_description",
+    "expected_domain": "data_management",
+    "rationale": "IMAS version is data management metadata"
+  },
+  {
+    "path": "dataset_description/dd_version",
+    "ids": "dataset_description",
+    "expected_domain": "data_management",
+    "rationale": "Data dictionary version is data management metadata"
+  },
+  {
+    "path": "dataset_description/data_entry/run",
+    "ids": "dataset_description",
+    "expected_domain": "data_management",
+    "rationale": "Run number is data management metadata"
+  },
+  {
+    "path": "amns_data/a",
+    "ids": "amns_data",
+    "expected_domain": "transport",
+    "rationale": "Atomic mass number is used in transport calculations for species"
+  },
+  {
+    "path": "amns_data/process/charge_state/table_1d",
+    "ids": "amns_data",
+    "expected_domain": "transport",
+    "rationale": "Atomic rate coefficient tables are used in transport impurity modeling"
+  },
+  {
+    "path": "amns_data/process/charge_state/z_min",
+    "ids": "amns_data",
+    "expected_domain": "transport",
+    "rationale": "Charge state range for atomic processes used in transport modeling"
+  },
+  {
+    "path": "amns_data/process/products/charge",
+    "ids": "amns_data",
+    "expected_domain": "transport",
+    "rationale": "Reaction product charge state is atomic data for transport modeling"
+  },
+  {
+    "path": "amns_data/process/products/element/a",
+    "ids": "amns_data",
+    "expected_domain": "transport",
+    "rationale": "Product atomic mass is atomic data for transport modeling"
+  },
+  {
+    "path": "amns_data/coordinate_system/coordinate/values",
+    "ids": "amns_data",
+    "expected_domain": "transport",
+    "rationale": "Coordinate values for atomic data tables used in transport"
+  },
+  {
+    "path": "temporary/constant_float0d",
+    "ids": "temporary",
+    "expected_domain": "computational_workflow",
+    "rationale": "Generic temporary storage containers are computational workflow artifacts"
+  },
+  {
+    "path": "temporary/time_float1d",
+    "ids": "temporary",
+    "expected_domain": "computational_workflow",
+    "rationale": "Temporary time-dependent data storage is a computational workflow container"
+  },
+  {
+    "path": "equilibrium/time_slice/profiles_1d/psi",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "Poloidal flux profile is the fundamental equilibrium quantity"
+  },
+  {
+    "path": "equilibrium/time_slice/profiles_1d/geometric_axis/r",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "Geometric axis R profile is an equilibrium geometry quantity"
+  },
+  {
+    "path": "equilibrium/time_slice/global_quantities/beta_pol",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "Poloidal beta from equilibrium reconstruction"
+  },
+  {
+    "path": "equilibrium/time_slice/boundary/squareness_upper_outer",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "Boundary squareness is a shape descriptor from equilibrium"
+  },
+  {
+    "path": "equilibrium/time_slice/profiles_1d/psi_norm",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "Normalized poloidal flux coordinate is an equilibrium quantity"
+  },
+  {
+    "path": "equilibrium/time_slice/boundary_separatrix/dr_dz_zero_point/z",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "X-point Z position is an equilibrium boundary quantity"
+  },
+  {
+    "path": "equilibrium/time_slice/constraints/pressure_rotational/measured",
+    "ids": "equilibrium",
+    "expected_domain": "equilibrium",
+    "rationale": "Equilibrium constraints are inputs to equilibrium reconstruction"
+  },
+  {
+    "path": "core_profiles/profiles_1d/electrons/density_fast",
+    "ids": "core_profiles",
+    "expected_domain": "transport",
+    "rationale": "Electron density profile is a core transport quantity"
+  },
+  {
+    "path": "core_profiles/profiles_1d/j_phi",
+    "ids": "core_profiles",
+    "expected_domain": "transport",
+    "rationale": "Toroidal current density profile is a transport-evolved quantity"
+  },
+  {
+    "path": "core_profiles/profiles_1d/momentum_tor",
+    "ids": "core_profiles",
+    "expected_domain": "transport",
+    "rationale": "Toroidal momentum profile is a transport quantity"
+  },
+  {
+    "path": "core_profiles/global_quantities/li_3",
+    "ids": "core_profiles",
+    "expected_domain": "transport",
+    "rationale": "Internal inductance from profiles is a transport-derived global quantity"
+  },
+  {
+    "path": "core_profiles/profiles_1d/neutral/density_thermal",
+    "ids": "core_profiles",
+    "expected_domain": "transport",
+    "rationale": "Neutral density profile is a particle transport quantity"
+  },
+  {
+    "path": "magnetics/flux_loop/flux/data",
+    "ids": "magnetics",
+    "expected_domain": "magnetic_field_diagnostics",
+    "rationale": "Flux loop measurement is a magnetic field diagnostic"
+  },
+  {
+    "path": "magnetics/bpol_probe/non_linear_response/b_field_linear",
+    "ids": "magnetics",
+    "expected_domain": "magnetic_field_diagnostics",
+    "rationale": "Bpol probe response is a magnetic field diagnostic quantity"
+  },
+  {
+    "path": "magnetics/ip",
+    "ids": "magnetics",
+    "expected_domain": "magnetic_field_diagnostics",
+    "rationale": "Plasma current measured by magnetics is a diagnostic measurement"
+  },
+  {
+    "path": "magnetics/rogowski_coil/turns_per_metre",
+    "ids": "magnetics",
+    "expected_domain": "magnetic_field_diagnostics",
+    "rationale": "Rogowski coil parameter is a magnetic diagnostic hardware property"
+  },
+  {
+    "path": "magnetics/b_field_pol_probe/poloidal_angle",
+    "ids": "magnetics",
+    "expected_domain": "magnetic_field_diagnostics",
+    "rationale": "Probe angular position is a magnetic diagnostic geometry quantity"
+  },
+  {
+    "path": "pf_active/coil/current",
+    "ids": "pf_active",
+    "expected_domain": "magnetic_field_systems",
+    "rationale": "PF coil current is a magnetic field system actuator quantity"
+  },
+  {
+    "path": "pf_active/coil/temperature",
+    "ids": "pf_active",
+    "expected_domain": "magnetic_field_systems",
+    "rationale": "PF coil temperature is a magnetic field system engineering quantity"
+  },
+  {
+    "path": "pf_active/supply/resistance",
+    "ids": "pf_active",
+    "expected_domain": "magnetic_field_systems",
+    "rationale": "Power supply resistance is a magnetic field system parameter"
+  },
+  {
+    "path": "pf_active/coil/force_vertical",
+    "ids": "pf_active",
+    "expected_domain": "magnetic_field_systems",
+    "rationale": "Vertical force on PF coil is a magnetic field system engineering quantity"
+  },
+  {
+    "path": "nbi/unit/energy",
+    "ids": "nbi",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI beam energy is an auxiliary heating system parameter"
+  },
+  {
+    "path": "nbi/unit/beamlets_group/angle",
+    "ids": "nbi",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI beamlet angle is an auxiliary heating system geometry parameter"
+  },
+  {
+    "path": "nbi/unit/beamlets_group/divergence_component/particles_fraction",
+    "ids": "nbi",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI beam divergence is an auxiliary heating system parameter"
+  },
+  {
+    "path": "ic_antennas/antenna/module/power_launched",
+    "ids": "ic_antennas",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "IC antenna launched power is an auxiliary heating system quantity"
+  },
+  {
+    "path": "ic_antennas/power_launched",
+    "ids": "ic_antennas",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "Total IC launched power is an auxiliary heating quantity"
+  },
+  {
+    "path": "mhd_linear/time_slice/toroidal_mode/frequency",
+    "ids": "mhd_linear",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "MHD mode frequency is a magnetohydrodynamics quantity"
+  },
+  {
+    "path": "mhd_linear/time_slice/toroidal_mode/plasma/pressure_perturbed/real",
+    "ids": "mhd_linear",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Perturbed pressure from MHD mode is a magnetohydrodynamics quantity"
+  },
+  {
+    "path": "mhd_linear/time_slice/toroidal_mode/plasma/temperature_perturbed/real",
+    "ids": "mhd_linear",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Temperature perturbation from MHD mode is a magnetohydrodynamics quantity"
+  },
+  {
+    "path": "edge_profiles/ggd/electrons/pressure",
+    "ids": "edge_profiles",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Edge electron pressure profile is an edge plasma physics quantity"
+  },
+  {
+    "path": "edge_profiles/ggd/neutral/state/pressure_fast_parallel",
+    "ids": "edge_profiles",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Neutral pressure in edge region is an edge plasma physics quantity"
+  },
+  {
+    "path": "edge_profiles/profiles_1d/grid/psi",
+    "ids": "edge_profiles",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Edge radial grid in psi is an edge plasma physics coordinate"
+  },
+  {
+    "path": "wall/global_quantities/power_density_outer_target_max",
+    "ids": "wall",
+    "expected_domain": "plasma_wall_interactions",
+    "rationale": "Peak power density on wall target is a plasma-wall interaction quantity"
+  },
+  {
+    "path": "wall/global_quantities/electrons/power_inner_target",
+    "ids": "wall",
+    "expected_domain": "plasma_wall_interactions",
+    "rationale": "Electron power to inner target is a plasma-wall interaction quantity"
+  },
+  {
+    "path": "wall/description_ggd/ggd/particle_fluxes/ion/incident",
+    "ids": "wall",
+    "expected_domain": "plasma_wall_interactions",
+    "rationale": "Ion particle flux incident on wall is a plasma-wall interaction quantity"
+  },
+  {
+    "path": "gyrokinetics/wavevector/eigenmode/growth_rate_norm",
+    "ids": "gyrokinetics",
+    "expected_domain": "turbulence",
+    "rationale": "Gyrokinetic mode growth rate is a turbulence quantity"
+  },
+  {
+    "path": "gyrokinetics/wavevector/binormal_component_norm",
+    "ids": "gyrokinetics",
+    "expected_domain": "turbulence",
+    "rationale": "Binormal wavenumber component is a turbulence quantity"
+  },
+  {
+    "path": "gyrokinetics/normalizing_quantities/t_e",
+    "ids": "gyrokinetics",
+    "expected_domain": "turbulence",
+    "rationale": "Normalizing temperature for gyrokinetic simulations is a turbulence context"
+  },
+  {
+    "path": "thomson_scattering/channel/distance_separatrix_midplane",
+    "ids": "thomson_scattering",
+    "expected_domain": "electromagnetic_wave_diagnostics",
+    "rationale": "Thomson scattering channel position is a diagnostic geometry quantity"
+  },
+  {
+    "path": "thomson_scattering/laser/start_point/r",
+    "ids": "thomson_scattering",
+    "expected_domain": "electromagnetic_wave_diagnostics",
+    "rationale": "Thomson scattering laser geometry is a diagnostic hardware parameter"
+  },
+  {
+    "path": "interferometer/channel/n_e_line_average",
+    "ids": "interferometer",
+    "expected_domain": "electromagnetic_wave_diagnostics",
+    "rationale": "Interferometer line-averaged density is an EM wave diagnostic measurement"
+  },
+  {
+    "path": "interferometer/channel/wavelength/phase_corrected",
+    "ids": "interferometer",
+    "expected_domain": "electromagnetic_wave_diagnostics",
+    "rationale": "Interferometer phase measurement is an EM wave diagnostic quantity"
+  },
+  {
+    "path": "pulse_schedule/ec/launcher/frequency",
+    "ids": "pulse_schedule",
+    "expected_domain": "plasma_control",
+    "rationale": "EC launcher frequency in pulse schedule is a plasma control setting"
+  },
+  {
+    "path": "pulse_schedule/position_control/x_point/r",
+    "ids": "pulse_schedule",
+    "expected_domain": "plasma_control",
+    "rationale": "X-point position target in pulse schedule is a plasma control reference"
+  },
+  {
+    "path": "pulse_schedule/position_control/gap/value",
+    "ids": "pulse_schedule",
+    "expected_domain": "plasma_control",
+    "rationale": "Gap reference in pulse schedule is a plasma control target"
+  },
+  {
+    "path": "controllers/linear_controller/pid/tau",
+    "ids": "controllers",
+    "expected_domain": "plasma_control",
+    "rationale": "PID time constant is a plasma control system parameter"
+  },
+  {
+    "path": "controllers/linear_controller/statespace/deltat",
+    "ids": "controllers",
+    "expected_domain": "plasma_control",
+    "rationale": "State-space sampling interval is a control system parameter"
+  },
+  {
+    "path": "summary/global_quantities/beta_pol_mhd",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Beta poloidal from MHD equilibrium is an equilibrium quantity"
+  },
+  {
+    "path": "summary/global_quantities/beta_tor_mhd",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Beta toroidal from MHD equilibrium is an equilibrium quantity"
+  },
+  {
+    "path": "summary/global_quantities/li_3_mhd",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Internal inductance from MHD equilibrium is an equilibrium quantity"
+  },
+  {
+    "path": "summary/global_quantities/energy_mhd",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "MHD stored energy is derived from equilibrium pressure profile"
+  },
+  {
+    "path": "summary/global_quantities/current_alignment",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Current profile alignment is a transport scenario quality metric"
+  },
+  {
+    "path": "summary/global_quantities/tau_helium",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Helium confinement time is a particle transport quantity"
+  },
+  {
+    "path": "summary/global_quantities/ratio_tau_helium_fuel",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Ratio of He to fuel confinement is a particle transport quantity"
+  },
+  {
+    "path": "summary/global_quantities/fusion_fluence",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Fusion fluence integrates power production over time, a performance metric"
+  },
+  {
+    "path": "summary/local/separatrix/velocity_tor",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Toroidal rotation at separatrix is an edge plasma quantity"
+  },
+  {
+    "path": "summary/local/separatrix/e_field_parallel",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Parallel electric field at separatrix is an edge plasma quantity"
+  },
+  {
+    "path": "summary/local/itb/position/rho_tor_norm",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "ITB position in normalized rho is a transport barrier location"
+  },
+  {
+    "path": "summary/local/divertor_target/zeff",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Zeff at divertor target characterizes divertor impurity content"
+  },
+  {
+    "path": "summary/time_width",
+    "ids": "summary",
+    "expected_domain": "data_management",
+    "rationale": "Time-averaging window width is a data processing parameter"
+  },
+  {
+    "path": "summary/fusion/neutron_fluxes/dt/beam_thermal",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Beam-thermal neutron rate depends on fast ion slowing and thermal profiles"
+  },
+  {
+    "path": "summary/fusion/neutron_fluxes/thermal",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Thermal neutron rate depends on core temperature and density profiles"
+  },
+  {
+    "path": "summary/disruption/time_predisruption",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Pre-disruption time characterizes the MHD precursor phase"
+  },
+  {
+    "path": "summary/disruption/decay_times/t_e_magnetic_axis/exponential",
+    "ids": "summary",
+    "expected_domain": "magnetohydrodynamics",
+    "rationale": "Central Te decay during disruption is an MHD thermal quench quantity"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/t_e/pedestal_width",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Temperature pedestal width characterizes the edge transport barrier"
+  },
+  {
+    "path": "summary/pedestal_fits/linear/coulomb_factor_pedestal_top",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Coulomb factor at pedestal top is an edge collisionality parameter"
+  },
+  {
+    "path": "summary/heating_current_drive/ic/frequency",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "IC frequency is an auxiliary heating system parameter"
+  },
+  {
+    "path": "summary/heating_current_drive/lh/n_parallel",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "LH parallel refractive index is a heating/current drive parameter"
+  },
+  {
+    "path": "summary/heating_current_drive/nbi/beam_power_fraction",
+    "ids": "summary",
+    "expected_domain": "auxiliary_heating",
+    "rationale": "NBI beam power fraction by species is an auxiliary heating parameter"
+  },
+  {
+    "path": "summary/local/separatrix/n_i_total",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Total ion density at separatrix is an edge plasma quantity"
+  },
+  {
+    "path": "summary/local/divertor_plate/t_i_average",
+    "ids": "summary",
+    "expected_domain": "divertor_physics",
+    "rationale": "Average ion temperature at divertor plate is a divertor physics quantity"
+  },
+  {
+    "path": "summary/global_quantities/beta_tor_thermal_norm",
+    "ids": "summary",
+    "expected_domain": "equilibrium",
+    "rationale": "Normalized thermal beta is an equilibrium/confinement parameter"
+  },
+  {
+    "path": "summary/global_quantities/power_radiated_outside_lcfs",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Power radiated outside LCFS is an edge/SOL radiation quantity"
+  },
+  {
+    "path": "summary/scrape_off_layer/heat_flux_i_decay_length",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Ion heat flux SOL decay length characterizes edge transport"
+  },
+  {
+    "path": "summary/scrape_off_layer/n_i_total_decay_length",
+    "ids": "summary",
+    "expected_domain": "edge_plasma_physics",
+    "rationale": "Ion density SOL decay length characterizes edge particle transport"
+  },
+  {
+    "path": "summary/line_average/dn_e_dt",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Density rate of change is a particle transport quantity"
+  },
+  {
+    "path": "summary/volume_average/dn_e_dt",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Volume-averaged density derivative is a particle transport quantity"
+  },
+  {
+    "path": "summary/line_average/meff_hydrogenic",
+    "ids": "summary",
+    "expected_domain": "transport",
+    "rationale": "Effective hydrogenic mass relates to isotope mix from particle transport"
+  }
+]
