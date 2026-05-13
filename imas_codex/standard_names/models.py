@@ -177,7 +177,13 @@ class GrammarSegments(BaseModel):
 
     @model_validator(mode="after")
     def _validate_qualifiers(self) -> GrammarSegments:
-        """Validate qualifier tokens against subject + qualifier vocabularies."""
+        """Validate qualifier tokens against all grammar vocabularies.
+
+        The ``qualifiers`` field can hold tokens from subject, qualifier,
+        component, or coordinate segments — the ISN compose step validates
+        actual grammar compatibility.  We only reject tokens that appear
+        in *no* grammar section at all.
+        """
         if not self.qualifiers:
             return self
         try:
@@ -187,17 +193,14 @@ class GrammarSegments(BaseModel):
 
         ctx = get_grammar_context()
         vocab = ctx.get("vocabulary_sections", [])
-        # Accept tokens from both subject and qualifier registries
         allowed: set[str] = set()
         for section in vocab:
-            if section["segment"] in ("subject", "qualifier"):
-                allowed.update(section.get("tokens", []))
+            allowed.update(section.get("tokens", []))
         if allowed:
             for q in self.qualifiers:
                 if q not in allowed:
                     raise ValueError(
-                        f"qualifier '{q}' is not a registered subject or "
-                        f"qualifier token."
+                        f"qualifier '{q}' is not a registered grammar token."
                     )
         return self
 
