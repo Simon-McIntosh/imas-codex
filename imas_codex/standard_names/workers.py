@@ -904,6 +904,36 @@ def _retry_k_expansion() -> int:
     return get_sn_retry_k_expansion()
 
 
+def _mark_vocab_gap_sources(
+    batch: list[dict],
+    error_detail: str,
+    source_kind: str,
+) -> None:
+    """Mark all sources in a batch as vocab_gap after a deterministic failure.
+
+    Called when ``acall_llm_structured`` raises a non-retryable validation
+    error (e.g. ``"not a registered"``).  Prevents the pool loop from
+    re-claiming the same sources and entering an infinite retry cycle.
+    """
+    try:
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.graph_ops import mark_source_skipped
+
+        with GraphClient() as gc:
+            for item in batch:
+                sid = item.get("source_id") or item.get("id", "")
+                if sid:
+                    mark_source_skipped(
+                        gc,
+                        sid,
+                        reason="vocab_gap_compose",
+                        detail=error_detail[:300],
+                        source_type=source_kind,
+                    )
+    except Exception as exc:
+        logger.debug("Failed to mark sources as vocab_gap: %s", exc)
+
+
 def _related_path_neighbours(
     gc: Any,
     path: str,
@@ -1948,12 +1978,25 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         _total_cache_creation = 0
         _max_retries = _retry_attempts()
         for _compose_attempt in range(_max_retries + 1):
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=messages,
-                response_model=StandardNameComposeBatch,
-                service="standard-names",
-            )
+            try:
+                llm_out = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=StandardNameComposeBatch,
+                    service="standard-names",
+                )
+            except (ValueError, Exception) as compose_exc:
+                _exc_str = str(compose_exc)
+                if "not a registered" in _exc_str:
+                    logger.warning(
+                        "Compose: vocab gap validation error — marking "
+                        "%d sources as vocab_gap: %s",
+                        len(batch),
+                        _exc_str[:200],
+                    )
+                    _mark_vocab_gap_sources(batch.items, _exc_str, "dd")
+                    return []
+                raise
             result, cost, tokens = llm_out
             _total_compose_cost += cost
             _total_tokens_in += getattr(llm_out, "input_tokens", 0) or 0
@@ -3457,12 +3500,26 @@ async def compose_batch(
         _total_cache_creation = 0
 
         for _compose_attempt in range(_max_retries + 1):
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=messages,
-                response_model=StandardNameComposeBatch,
-                service="standard-names",
-            )
+            try:
+                llm_out = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=StandardNameComposeBatch,
+                    service="standard-names",
+                )
+            except (ValueError, Exception) as compose_exc:
+                _exc_str = str(compose_exc)
+                if "not a registered" in _exc_str:
+                    logger.warning(
+                        "Pool %s: vocab gap validation error — marking "
+                        "%d sources as vocab_gap: %s",
+                        phase_tag,
+                        len(batch),
+                        _exc_str[:200],
+                    )
+                    _mark_vocab_gap_sources(batch, _exc_str, "dd")
+                    return 0
+                raise
             result, cost, tokens = llm_out
 
             # Accumulate token/cost totals across retries
@@ -4419,13 +4476,17 @@ async def process_refine_name_batch(
             except Exception as exc:
                 logger.exception("refine_name failed for %s", sn_id)
                 token = item.get("claim_token") or ""
-                # Vocab-gap errors are deterministic — the LLM will keep
-                # producing the same unregistered token.  Mark exhausted
-                # instead of reverting to 'reviewed' (which re-enters the
-                # refine loop infinitely).
-                is_vocab_gap = "not a registered" in str(exc)
+                # Vocab-gap errors and self-referential refines are
+                # deterministic — the LLM will keep producing the same
+                # output.  Mark exhausted instead of reverting to
+                # 'reviewed' (which re-enters the refine loop).
+                _exc_str = str(exc)
+                is_terminal = (
+                    "not a registered" in _exc_str
+                    or "self-referential REFINED_FROM" in _exc_str
+                )
                 try:
-                    if is_vocab_gap:
+                    if is_terminal:
                         await _asyncio.to_thread(
                             _mark_refine_vocab_gap_exhausted,
                             sn_id=sn_id,

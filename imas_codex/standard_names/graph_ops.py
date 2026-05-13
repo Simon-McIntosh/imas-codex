@@ -7783,7 +7783,15 @@ def persist_refined_name(
        new SN.
 
     Returns ``{"new_name": <new_id>, "old_name": <old_id>}``.
+
+    Raises ``ValueError`` if ``new_name == old_name`` — self-referential
+    refinement would create a ``REFINED_FROM`` self-loop.
     """
+    if new_name == old_name:
+        raise ValueError(
+            f"Refine produced identical name '{new_name}' — "
+            f"cannot create self-referential REFINED_FROM edge"
+        )
     new_chain_length = old_chain_length + 1
 
     escalation_set = ""
