@@ -1046,15 +1046,19 @@ def get_sn_review_disagreement_threshold() -> float:
 
 _SN_BENCHMARK_DEFAULTS = {
     "compose-models": [
+        "anthropic/claude-opus-4.7",
         "anthropic/claude-sonnet-4.6",
         "anthropic/claude-haiku-4.5",
-        "openai/gpt-5.4",
+        "openai/gpt-5.5",
         "openai/gpt-5.4-mini",
         "google/gemini-3.1-pro-preview",
         "google/gemini-3-flash-preview",
+        "google/gemini-3.1-flash-lite-preview",
         "moonshotai/kimi-k2.6",
-        "deepseek/deepseek-v4",
+        "deepseek/deepseek-v4-pro",
         "deepseek/deepseek-v4-flash",
+        "qwen/qwen3.6-max-preview",
+        "meta-llama/llama-4-maverick",
     ],
     "reviewer-model": "anthropic/claude-opus-4.6",
 }

@@ -480,9 +480,9 @@ compose-models = [
     "google/gemini-3-flash-preview",
     "google/gemini-3.1-flash-lite-preview",
     "moonshotai/kimi-k2.6",
-    "deepseek/deepseek-v4",
+    "deepseek/deepseek-v4-pro",
     "deepseek/deepseek-v4-flash",
-    "qwen/qwen3-235b-a22b",
+    "qwen/qwen3.6-max-preview",
     "meta-llama/llama-4-maverick",
 ]
 # Frontier model used as independent judge for quality scoring.
