@@ -1426,8 +1426,9 @@ def sn_run(
 @click.option(
     "--models",
     type=str,
-    default=None,
-    help="Comma-separated model list. Defaults to [sn.benchmark].compose-models.",
+    multiple=True,
+    help="Model(s) to benchmark. Repeat for multiple or use commas. "
+    "Defaults to [sn.benchmark].compose-models.",
 )
 @click.option(
     "--max-candidates",
@@ -1492,7 +1493,7 @@ def sn_bench(
     ids_filter: str | None,
     domain_filter: str | None,
     facility: str | None,
-    models: str | None,
+    models: tuple[str, ...],
     max_candidates: int,
     runs: int,
     temperature: float,
@@ -1514,9 +1515,10 @@ def sn_bench(
     \b
     Examples:
       imas-codex sn bench --ids equilibrium
+      imas-codex sn bench --models anthropic/claude-sonnet-4.6 --models openai/gpt-5.4
       imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
       imas-codex sn bench --max-candidates 20 -v
-      imas-codex sn bench --reviewer-model anthropic/claude-opus-4.6
+      imas-codex sn bench --include-docs
     """
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -1530,7 +1532,10 @@ def sn_bench(
 
     # Resolve model list: CLI flag → pyproject.toml → built-in defaults
     if models:
-        model_list = [m.strip() for m in models.split(",") if m.strip()]
+        # Support both --models a,b and --models a --models b
+        model_list = []
+        for m in models:
+            model_list.extend(part.strip() for part in m.split(",") if part.strip())
     else:
         model_list = get_sn_benchmark_compose_models()
 

@@ -432,60 +432,106 @@ async def score_with_reviewer(
 
             batch_items.append(item)
 
-        # Build user prompt with full context
-        user_context = {
-            **compose_ctx,
-            "review_scored_examples": review_scored_examples,
-            "items": batch_items,
-            "existing_names": [],
-            "batch_context": "",
-            "nearby_existing_names": [],
-            "audit_findings": [],
-            # Flatten neighbour lists for template — production injects
-            # these at the batch level from the first item's context
-            "vector_neighbours": batch_items[0].get("vector_neighbours", [])
-            if batch_items
-            else [],
-            "same_base_neighbours": batch_items[0].get("same_base_neighbours", [])
-            if batch_items
-            else [],
-            "same_path_neighbours": batch_items[0].get("same_path_neighbours", [])
-            if batch_items
-            else [],
-        }
-
-        try:
-            user_prompt = render_prompt(user_template, user_context)
-        except Exception as exc:
-            logger.warning("Failed to render review user prompt: %s", exc)
-            continue
-
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-
-        try:
-            result, cost, _ = await acall_llm_structured(
-                model=reviewer_model,
-                messages=messages,
-                response_model=response_model,
-                service="standard-names",
-            )
-            total_reviewer_cost += cost
-            for r in result.reviews:
-                review_dict: dict[str, Any] = {
-                    "name": r.standard_name,
-                    "quality_tier": r.scores.tier,
-                    "score": r.scores.score,
+        # Build user prompt — docs template expects single `item`, names
+        # template iterates over `items` list.
+        if target == "docs":
+            # Single-item template: render and call per candidate
+            for item_ctx in batch_items:
+                user_context = {
+                    **compose_ctx,
+                    "review_scored_examples": review_scored_examples,
+                    "item": item_ctx,
                 }
-                for dim in dim_keys:
-                    review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
-                if hasattr(r, "reasoning"):
-                    review_dict["reasoning"] = r.reasoning
-                all_reviews.append(review_dict)
-        except Exception as e:
-            logger.warning("Reviewer scoring failed for batch: %s", e)
+                try:
+                    user_prompt = render_prompt(user_template, user_context)
+                except Exception as exc:
+                    logger.warning(
+                        "Failed to render docs review prompt for %s: %s",
+                        item_ctx.get("id", "?"),
+                        exc,
+                    )
+                    continue
+
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ]
+                try:
+                    result, cost, _ = await acall_llm_structured(
+                        model=reviewer_model,
+                        messages=messages,
+                        response_model=response_model,
+                        service="standard-names",
+                    )
+                    total_reviewer_cost += cost
+                    for r in result.reviews:
+                        review_dict: dict[str, Any] = {
+                            "name": r.standard_name,
+                            "quality_tier": r.scores.tier,
+                            "score": r.scores.score,
+                        }
+                        for dim in dim_keys:
+                            review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                        if hasattr(r, "reasoning"):
+                            review_dict["reasoning"] = r.reasoning
+                        all_reviews.append(review_dict)
+                except Exception as e:
+                    logger.warning(
+                        "Docs review failed for %s: %s", item_ctx.get("id", "?"), e
+                    )
+        else:
+            # Batch template: render with items list
+            user_context = {
+                **compose_ctx,
+                "review_scored_examples": review_scored_examples,
+                "items": batch_items,
+                "existing_names": [],
+                "batch_context": "",
+                "nearby_existing_names": [],
+                "audit_findings": [],
+                "vector_neighbours": batch_items[0].get("vector_neighbours", [])
+                if batch_items
+                else [],
+                "same_base_neighbours": batch_items[0].get("same_base_neighbours", [])
+                if batch_items
+                else [],
+                "same_path_neighbours": batch_items[0].get("same_path_neighbours", [])
+                if batch_items
+                else [],
+            }
+
+            try:
+                user_prompt = render_prompt(user_template, user_context)
+            except Exception as exc:
+                logger.warning("Failed to render review user prompt: %s", exc)
+                continue
+
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+
+            try:
+                result, cost, _ = await acall_llm_structured(
+                    model=reviewer_model,
+                    messages=messages,
+                    response_model=response_model,
+                    service="standard-names",
+                )
+                total_reviewer_cost += cost
+                for r in result.reviews:
+                    review_dict: dict[str, Any] = {
+                        "name": r.standard_name,
+                        "quality_tier": r.scores.tier,
+                        "score": r.scores.score,
+                    }
+                    for dim in dim_keys:
+                        review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                    if hasattr(r, "reasoning"):
+                        review_dict["reasoning"] = r.reasoning
+                    all_reviews.append(review_dict)
+            except Exception as e:
+                logger.warning("Reviewer scoring failed for batch: %s", e)
 
     return all_reviews, total_reviewer_cost
 
