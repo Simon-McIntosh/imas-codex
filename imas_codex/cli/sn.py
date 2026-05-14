@@ -1471,10 +1471,14 @@ def sn_run(
     ),
 )
 @click.option(
-    "--skip-review",
+    "--names-only",
+    "names_only",
     is_flag=True,
-    default=False,
-    help="Skip reviewer scoring (names-only mode). Useful for cost-limited runs.",
+    default=True,
+    help=(
+        "Benchmark name generation only (skip documentation benchmarking). "
+        "Currently the default mode; docs benchmarking is not yet implemented."
+    ),
 )
 def sn_bench(
     source: str,
@@ -1489,7 +1493,7 @@ def sn_bench(
     verbose: bool,
     reviewer_model: str | None,
     force: bool,
-    skip_review: bool,
+    names_only: bool,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -1529,9 +1533,8 @@ def sn_bench(
         )
 
     # Resolve reviewer model: CLI flag → pyproject.toml → built-in default
-    if skip_review:
-        reviewer_model = None
-    elif reviewer_model is None:
+    # Reviewer is mandatory — it provides the benchmark quality scores
+    if reviewer_model is None:
         reviewer_model = get_sn_benchmark_reviewer_model()
 
     from imas_codex.standard_names.benchmark import (
@@ -1551,6 +1554,7 @@ def sn_bench(
         temperature=temperature,
         reviewer_model=reviewer_model,
         force=force,
+        names_only=names_only,
     )
 
     console.print("[bold]SN Benchmark[/bold]")
@@ -1564,6 +1568,7 @@ def sn_bench(
     console.print(f"  Runs per model: {runs}")
     console.print(f"  Temperature: {temperature}")
     console.print(f"  Reviewer (judge): {reviewer_model}")
+    console.print(f"  Mode: {'names-only' if names_only else 'names + docs'}")
     console.print()
 
     from imas_codex.cli.utils import run_async

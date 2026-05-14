@@ -44,6 +44,7 @@ class BenchmarkConfig:
     temperature: float = 0.0  # pinned for reproducibility
     reviewer_model: str | None = None  # frontier model for quality scoring
     force: bool = False  # re-run over already-processed paths
+    names_only: bool = True  # docs benchmarking not yet implemented
 
 
 @dataclass
@@ -508,81 +509,96 @@ async def run_benchmark(
         model_result.compose_elapsed_seconds = model_result.elapsed_seconds
         results.append(model_result)
 
-    # --- 2b. Reviewer scoring (optional) ---
-    if config.reviewer_model:
-        for result in results:
-            if result.candidates:
-                t_review_start = time.monotonic()
-                reviews, reviewer_cost = await score_with_reviewer(
-                    result.candidates,
-                    config.reviewer_model,
-                    target="names",
-                )
-                result.review_elapsed_seconds = round(
-                    time.monotonic() - t_review_start, 2
-                )
-                result.reviewer_cost = reviewer_cost
-                result.quality_scores = reviews
-                # Compute distribution
-                for r in reviews:
-                    tier = r.get("quality_tier", "unknown")
-                    result.quality_distribution[tier] = (
-                        result.quality_distribution.get(tier, 0) + 1
+    # --- 2b. Reviewer scoring (mandatory — scores ARE the benchmark) ---
+    if not config.reviewer_model:
+        raise ValueError(
+            "reviewer_model is required for benchmarking. "
+            "Reviewer scores are the quality metric."
+        )
+
+    for result in results:
+        if not result.candidates:
+            continue
+        t_review_start = time.monotonic()
+        reviews, reviewer_cost = await score_with_reviewer(
+            result.candidates,
+            config.reviewer_model,
+            target="names",
+        )
+        result.review_elapsed_seconds = round(time.monotonic() - t_review_start, 2)
+        result.reviewer_cost = reviewer_cost
+        result.quality_scores = reviews
+
+        # Review completeness check
+        n_candidates = len(result.candidates)
+        n_reviews = len(reviews)
+        if n_reviews < n_candidates:
+            logger.warning(
+                "Model %s: only %d/%d candidates reviewed "
+                "(partial reviews may bias scores)",
+                result.model,
+                n_reviews,
+                n_candidates,
+            )
+
+        # Compute distribution
+        for r in reviews:
+            tier = r.get("quality_tier", "unknown")
+            result.quality_distribution[tier] = (
+                result.quality_distribution.get(tier, 0) + 1
+            )
+        if reviews:
+            result.avg_quality_score = sum(r.get("score", 0) for r in reviews) / len(
+                reviews
+            )
+
+            # Per-dimension averages
+            for dim in (
+                "grammar",
+                "semantic",
+                "convention",
+                "completeness",
+            ):
+                key = f"{dim}_score"
+                vals = [r[key] for r in reviews if key in r and r[key] > 0]
+                if vals:
+                    setattr(
+                        result,
+                        f"avg_{key}",
+                        sum(vals) / len(vals),
                     )
-                if reviews:
-                    result.avg_quality_score = sum(
-                        r.get("score", 0) for r in reviews
-                    ) / len(reviews)
 
-                    # Per-dimension averages
-                    for dim in (
-                        "grammar",
-                        "semantic",
-                        "convention",
-                        "completeness",
-                    ):
-                        key = f"{dim}_score"
-                        vals = [r[key] for r in reviews if key in r and r[key] > 0]
-                        if vals:
-                            setattr(
-                                result,
-                                f"avg_{key}",
-                                sum(vals) / len(vals),
-                            )
+        # Compute doc length and field coverage metrics
+        docs = [c.get("documentation", "") or "" for c in result.candidates]
+        result.avg_doc_length = sum(len(d) for d in docs) / len(docs) if docs else 0.0
 
-                # Compute doc length and field coverage metrics
-                docs = [c.get("documentation", "") or "" for c in result.candidates]
-                result.avg_doc_length = (
-                    sum(len(d) for d in docs) / len(docs) if docs else 0.0
-                )
-
-                all_fields = {
-                    "base_token",
-                    "qualifiers",
-                    "projection_axis",
-                    "locus_token",
-                    "process_token",
-                    "operator_token",
-                }
-                field_counts = []
-                for c in result.candidates:
-                    populated = 0
-                    if c.get("base_token"):
-                        populated += 1
-                    if c.get("qualifiers"):
-                        populated += 1
-                    if c.get("projection_axis"):
-                        populated += 1
-                    if c.get("locus_token"):
-                        populated += 1
-                    if c.get("process_token"):
-                        populated += 1
-                    if c.get("operator_token"):
-                        populated += 1
-                    field_counts.append(populated / len(all_fields))
-                result.avg_fields_populated = (
-                    sum(field_counts) / len(field_counts) if field_counts else 0.0
-                )
+        all_fields = {
+            "base_token",
+            "qualifiers",
+            "projection_axis",
+            "locus_token",
+            "process_token",
+            "operator_token",
+        }
+        field_counts = []
+        for c in result.candidates:
+            populated = 0
+            if c.get("base_token"):
+                populated += 1
+            if c.get("qualifiers"):
+                populated += 1
+            if c.get("projection_axis"):
+                populated += 1
+            if c.get("locus_token"):
+                populated += 1
+            if c.get("process_token"):
+                populated += 1
+            if c.get("operator_token"):
+                populated += 1
+            field_counts.append(populated / len(all_fields))
+        result.avg_fields_populated = (
+            sum(field_counts) / len(field_counts) if field_counts else 0.0
+        )
 
     # --- 3. Build report ---
     report = BenchmarkReport(
@@ -911,13 +927,20 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     total_compose_cost = sum(r.total_cost for r in report.results)
     total_reviewer_cost = sum(r.reviewer_cost for r in report.results)
     total_cost = total_compose_cost + total_reviewer_cost
-    total_elapsed = sum(r.elapsed_seconds for r in report.results)
+    total_compose_elapsed = sum(r.compose_elapsed_seconds for r in report.results)
+    total_review_elapsed = sum(r.review_elapsed_seconds for r in report.results)
+    total_elapsed = total_compose_elapsed + total_review_elapsed
 
     console.print("\n[bold]Cost Summary[/bold]")
     console.print(f"  Compose cost:  ${total_compose_cost:.4f}")
-    if total_reviewer_cost > 0:
-        console.print(f"  Reviewer cost: ${total_reviewer_cost:.4f}")
+    console.print(f"  Reviewer cost: ${total_reviewer_cost:.4f}")
     console.print(f"  [bold]Total cost:  ${total_cost:.4f}[/bold]")
+    console.print(
+        f"  Compose time:  {total_compose_elapsed:.1f}s ({total_compose_elapsed / 60:.1f}min)"
+    )
+    console.print(
+        f"  Review time:   {total_review_elapsed:.1f}s ({total_review_elapsed / 60:.1f}min)"
+    )
     console.print(
         f"  Total wall-clock: {total_elapsed:.1f}s ({total_elapsed / 60:.1f}min)"
     )

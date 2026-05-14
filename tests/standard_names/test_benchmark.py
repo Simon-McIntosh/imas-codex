@@ -566,6 +566,7 @@ class TestBenchmarkRunner:
         config = BenchmarkConfig(
             models=["mock-model-a"],
             max_candidates=5,
+            reviewer_model="mock-reviewer",
         )
 
         # Fake extraction batches
@@ -612,6 +613,11 @@ class TestBenchmarkRunner:
             skipped=[],
         )
 
+        mock_reviews = [
+            {"name": "safety_factor", "total_score": 0.8},
+            {"name": "electron_temperature", "total_score": 0.7},
+        ]
+
         with (
             patch(
                 "imas_codex.discovery.base.llm.acall_llm_structured",
@@ -621,6 +627,11 @@ class TestBenchmarkRunner:
             patch(
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="mocked prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                new_callable=AsyncMock,
+                return_value=(mock_reviews, 0.02),
             ),
         ):
             report = await run_benchmark(config, extraction_batches=fake_batches)
@@ -634,6 +645,8 @@ class TestBenchmarkRunner:
         assert r.total_cost == 0.01
         assert r.total_tokens == 200
         assert r.elapsed_seconds >= 0
+        assert r.reviewer_cost == 0.02
+        assert len(r.quality_scores) == 2
 
     @pytest.mark.asyncio
     async def test_run_benchmark_multiple_models(self):
@@ -644,7 +657,9 @@ class TestBenchmarkRunner:
             StandardNameComposeBatch,
         )
 
-        config = BenchmarkConfig(models=["model-a", "model-b"], max_candidates=2)
+        config = BenchmarkConfig(
+            models=["model-a", "model-b"], max_candidates=2, reviewer_model="mock-rev"
+        )
 
         fake_batches = [
             {
@@ -684,6 +699,11 @@ class TestBenchmarkRunner:
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
+            patch(
+                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                new_callable=AsyncMock,
+                return_value=([{"name": "elongation", "total_score": 0.75}], 0.01),
+            ),
         ):
             report = await run_benchmark(config, extraction_batches=fake_batches)
 
@@ -700,7 +720,9 @@ class TestBenchmarkRunner:
         """LLM call failure should be recorded, not crash."""
         from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
 
-        config = BenchmarkConfig(models=["fail-model"], max_candidates=2)
+        config = BenchmarkConfig(
+            models=["fail-model"], max_candidates=2, reviewer_model="mock-rev"
+        )
 
         fake_batches = [
             {
@@ -727,6 +749,11 @@ class TestBenchmarkRunner:
             patch(
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
+            ),
+            patch(
+                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                new_callable=AsyncMock,
+                return_value=([], 0.0),
             ),
         ):
             report = await run_benchmark(config, extraction_batches=fake_batches)
@@ -1287,15 +1314,9 @@ class TestReviewerCostAndTiming:
         assert restored.results[0].review_elapsed_seconds == 5.0
 
     @pytest.mark.asyncio
-    async def test_run_benchmark_no_reviewer_no_quality_scores(self):
-        """BenchmarkConfig with reviewer_model=None produces no quality scores."""
-        from unittest.mock import AsyncMock, patch
-
+    async def test_run_benchmark_no_reviewer_raises(self):
+        """BenchmarkConfig with reviewer_model=None raises ValueError."""
         from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
-        from imas_codex.standard_names.models import (
-            StandardNameCandidate,
-            StandardNameComposeBatch,
-        )
 
         config = BenchmarkConfig(
             models=["mock-model"],
@@ -1303,54 +1324,8 @@ class TestReviewerCostAndTiming:
             reviewer_model=None,
         )
 
-        fake_batches = [
-            {
-                "group_key": "test",
-                "items": [
-                    {
-                        "path": "test/path",
-                        "description": "Test",
-                        "units": "eV",
-                        "data_type": "FLT_1D",
-                        "cluster_label": None,
-                    }
-                ],
-                "existing_names": [],
-            }
-        ]
-
-        mock_response = StandardNameComposeBatch(
-            candidates=[
-                StandardNameCandidate(
-                    source_id="test/path",
-                    base_token="temperature",
-                    base_kind="quantity",
-                    qualifiers=["electron"],
-                    reason="Test",
-                ),
-            ],
-            skipped=[],
-        )
-
-        with (
-            patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
-                new_callable=AsyncMock,
-                return_value=(mock_response, 0.01, 100),
-            ),
-            patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
-                return_value="prompt",
-            ),
-        ):
-            report = await run_benchmark(config, extraction_batches=fake_batches)
-
-        assert len(report.results) == 1
-        r = report.results[0]
-        # No quality scores when reviewer_model is None
-        assert r.quality_scores == []
-        assert r.reviewer_cost == 0.0
-        assert r.review_elapsed_seconds == 0.0
+        with pytest.raises(ValueError, match="reviewer_model is required"):
+            await run_benchmark(config, extraction_batches=[])
 
     @pytest.mark.asyncio
     async def test_run_benchmark_compose_elapsed_populated(self):
@@ -1363,7 +1338,7 @@ class TestReviewerCostAndTiming:
         config = BenchmarkConfig(
             models=["mock-model"],
             max_candidates=5,
-            reviewer_model=None,
+            reviewer_model="mock-reviewer",
         )
 
         fake_batches = [
@@ -1394,19 +1369,23 @@ class TestReviewerCostAndTiming:
                 "imas_codex.llm.prompt_loader.render_prompt",
                 return_value="prompt",
             ),
+            patch(
+                "imas_codex.standard_names.benchmark.score_with_reviewer",
+                new_callable=AsyncMock,
+                return_value=([], 0.0),
+            ),
         ):
             report = await run_benchmark(config, extraction_batches=fake_batches)
 
         r = report.results[0]
-        # compose_elapsed_seconds should match elapsed_seconds
         assert r.compose_elapsed_seconds == r.elapsed_seconds
         assert r.compose_elapsed_seconds >= 0.0
 
 
-class TestSkipReviewCLI:
-    """Test --skip-review CLI flag."""
+class TestNamesOnlyCLI:
+    """Test --names-only CLI flag and reviewer-mandatory invariant."""
 
-    def test_skip_review_in_help(self):
+    def test_names_only_in_help(self):
         from click.testing import CliRunner
 
         from imas_codex.cli.sn import sn
@@ -1414,41 +1393,28 @@ class TestSkipReviewCLI:
         runner = CliRunner()
         result = runner.invoke(sn, ["bench", "--help"])
         assert result.exit_code == 0
-        assert "--skip-review" in result.output
+        assert "--names-only" in result.output
+        assert "--skip-review" not in result.output
 
-    def test_skip_review_forces_reviewer_none(self):
-        """When --skip-review is set, reviewer_model is forced to None."""
+    def test_reviewer_always_resolves(self):
+        """Reviewer model is always resolved — never None at runtime."""
         from imas_codex.standard_names.benchmark import BenchmarkConfig
 
-        # Simulate the CLI logic: skip_review=True → reviewer_model=None
-        skip_review = True
-        reviewer_model_from_cli = None
-        reviewer_model_from_config = "some/model"
-
-        if skip_review:
-            reviewer_model = None
-        elif reviewer_model_from_cli is None:
-            reviewer_model = reviewer_model_from_config
-        else:
-            reviewer_model = reviewer_model_from_cli
-
-        config = BenchmarkConfig(models=["test"], reviewer_model=reviewer_model)
-        assert config.reviewer_model is None
-
-    def test_no_skip_review_uses_config_model(self):
-        """When --skip-review is not set, reviewer_model uses configured value."""
-        from imas_codex.standard_names.benchmark import BenchmarkConfig
-
-        skip_review = False
+        # Simulate CLI logic: reviewer always resolved from config
         reviewer_model_from_cli = None
         reviewer_model_from_config = "some/reviewer"
 
-        if skip_review:
-            reviewer_model = None
-        elif reviewer_model_from_cli is None:
+        if reviewer_model_from_cli is None:
             reviewer_model = reviewer_model_from_config
         else:
             reviewer_model = reviewer_model_from_cli
 
         config = BenchmarkConfig(models=["test"], reviewer_model=reviewer_model)
         assert config.reviewer_model == "some/reviewer"
+
+    def test_names_only_default_true(self):
+        """names_only defaults to True on BenchmarkConfig."""
+        from imas_codex.standard_names.benchmark import BenchmarkConfig
+
+        config = BenchmarkConfig(models=["test"], reviewer_model="r")
+        assert config.names_only is True
