@@ -338,10 +338,27 @@ def _show_processes(
 # ── Remote node discovery and querying ───────────────────────────────────
 
 
-def _discover_login_nodes(ssh_host: str, timeout: int = 10) -> list[str]:
-    """Discover available login nodes by reading /etc/hosts on the facility.
+class DiscoveryResult:
+    """Result of login node discovery with provenance metadata."""
 
-    Returns list of short hostnames (e.g. ["98dci4-srv-1001", ...]).
+    __slots__ = ("nodes", "method", "complete")
+
+    def __init__(
+        self,
+        nodes: list[str],
+        method: str,
+        complete: bool,
+    ):
+        self.nodes = nodes
+        self.method = method  # "dynamic", "gateway_dynamic", "fallback"
+        self.complete = complete  # True if discovered from /etc/hosts
+
+
+def _discover_login_nodes_direct(ssh_host: str, timeout: int = 10) -> list[str]:
+    """Discover login nodes by reading /etc/hosts via the primary SSH alias.
+
+    Returns list of short hostnames (e.g. ["98dci4-srv-1001", ...]),
+    or empty list on failure.
     """
     try:
         result = subprocess.run(
@@ -361,16 +378,110 @@ def _discover_login_nodes(ssh_host: str, timeout: int = 10) -> list[str]:
         if result.returncode != 0:
             return []
 
-        nodes = []
-        for line in result.stdout.strip().splitlines():
-            fqdn = line.strip()
-            if fqdn and "srv" in fqdn and "gpu" not in fqdn:
-                short = fqdn.split(".")[0]
-                if short not in nodes:
-                    nodes.append(short)
-        return sorted(nodes)
+        return _parse_etc_hosts(result.stdout)
     except Exception:
         return []
+
+
+def _parse_etc_hosts(output: str) -> list[str]:
+    """Parse /etc/hosts output into sorted short hostnames."""
+    nodes = []
+    for line in output.strip().splitlines():
+        fqdn = line.strip()
+        if fqdn and "srv" in fqdn and "gpu" not in fqdn:
+            short = fqdn.split(".")[0]
+            if short not in nodes:
+                nodes.append(short)
+    return sorted(nodes)
+
+
+def _discover_via_gateway(
+    gateway: str,
+    user: str,
+    known_nodes: list[str],
+    timeout: int = 10,
+) -> list[str]:
+    """Discover login nodes by probing known nodes via the gateway.
+
+    Tries each known node in parallel via ProxyJump through the gateway.
+    Returns /etc/hosts-discovered nodes from the first node that responds,
+    or empty list if all fail.
+    """
+
+    def _probe_node(node: str) -> list[str] | None:
+        fqdn = f"{node}.iter.org"
+        ssh_cmd = [
+            "ssh",
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            f"ConnectTimeout={timeout}",
+            "-o",
+            "StrictHostKeyChecking=accept-new",
+            "-J",
+            gateway,
+        ]
+        target = f"{user}@{fqdn}" if user else fqdn
+        ssh_cmd.append(target)
+        ssh_cmd.append("grep '98dci4-srv-' /etc/hosts | awk '{print $2}'")
+        try:
+            result = subprocess.run(
+                ssh_cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout + 5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return _parse_etc_hosts(result.stdout)
+        except Exception:
+            pass
+        return None
+
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=min(len(known_nodes), 6)
+    ) as pool:
+        futures = {pool.submit(_probe_node, node): node for node in known_nodes}
+        for future in concurrent.futures.as_completed(futures):
+            result = future.result()
+            if result:
+                # Cancel remaining futures — we have our answer
+                for f in futures:
+                    f.cancel()
+                return result
+
+    return []
+
+
+def _discover_login_nodes(
+    ssh_host: str,
+    gateway: str,
+    user: str,
+    known_nodes: list[str] | None = None,
+    timeout: int = 10,
+) -> DiscoveryResult:
+    """Discover login nodes with two-tier fallback.
+
+    1. Try dynamic discovery via primary ssh_host (fast path)
+    2. If that fails, try discovery via gateway + known_nodes
+    3. If all discovery fails, return known_nodes directly as best-effort
+
+    Returns DiscoveryResult with provenance metadata.
+    """
+    # Tier 1: Direct SSH to primary host
+    nodes = _discover_login_nodes_direct(ssh_host, timeout)
+    if nodes:
+        return DiscoveryResult(nodes, method="dynamic", complete=True)
+
+    # Tier 2: Probe known nodes via gateway
+    if known_nodes:
+        nodes = _discover_via_gateway(gateway, user, known_nodes, timeout)
+        if nodes:
+            return DiscoveryResult(nodes, method="gateway_dynamic", complete=True)
+
+        # Tier 3: Return known nodes as static fallback
+        return DiscoveryResult(sorted(known_nodes), method="fallback", complete=False)
+
+    return DiscoveryResult([], method="dynamic", complete=False)
 
 
 def _query_node(
@@ -1109,20 +1220,52 @@ def host_survey(
 
     gateway = config.get("ssh_gateway", "sdcc-login.iter.org")
     user = config.get("ssh_user", "")
+    known_nodes = config.get("known_login_nodes", [])
 
     def _discover_and_survey():
         """Discover nodes, query them, display results. Return results dict."""
         click.echo(f"Discovering login nodes on {click.style(facility, fg='cyan')}…")
-        nodes = _discover_login_nodes(ssh_host, timeout=timeout)
-        if not nodes:
+        discovery = _discover_login_nodes(
+            ssh_host, gateway, user, known_nodes, timeout=timeout
+        )
+        if not discovery.nodes:
             raise click.ClickException(
                 f"Could not discover login nodes for '{facility}'. "
-                f"Ensure SSH access to '{ssh_host}' is working."
+                f"Ensure SSH access to '{ssh_host}' is working"
+                + (" and known_login_nodes is configured." if not known_nodes else ".")
             )
 
-        click.echo(f"Found {len(nodes)} login nodes, querying…\n")
-        results = _gather_survey_data(nodes, gateway, user, timeout)
+        if discovery.method == "gateway_dynamic":
+            console.print(
+                f"[yellow]⚠ Primary SSH target ({ssh_host}) unreachable "
+                f"— discovered nodes via gateway[/yellow]"
+            )
+        elif discovery.method == "fallback":
+            console.print(
+                "[yellow]⚠ Dynamic discovery failed — using "
+                "known_login_nodes from config (may be incomplete)[/yellow]"
+            )
+
+        click.echo(f"Found {len(discovery.nodes)} login nodes, querying…\n")
+        results = _gather_survey_data(discovery.nodes, gateway, user, timeout)
         current_target = _get_ssh_hostname(facility)
+
+        # Warn if discovered nodes differ from config
+        if known_nodes and discovery.complete:
+            config_set = set(known_nodes)
+            live_set = set(discovery.nodes)
+            if config_set != live_set:
+                added = live_set - config_set
+                removed = config_set - live_set
+                parts_diff = []
+                if added:
+                    parts_diff.append(f"new: {', '.join(sorted(added))}")
+                if removed:
+                    parts_diff.append(f"gone: {', '.join(sorted(removed))}")
+                console.print(
+                    f"[dim]ℹ known_login_nodes config differs from live "
+                    f"({'; '.join(parts_diff)})[/dim]"
+                )
 
         parts, _, _ = _build_survey_display(results, facility, current_target)
         for part in parts:
@@ -1130,7 +1273,7 @@ def host_survey(
                 console.print(part)
         click.echo()
 
-        return results, nodes
+        return results, discovery.nodes
 
     if set_default is not None:
         results, nodes = _discover_and_survey()
@@ -1267,12 +1410,20 @@ def host_survey(
         from rich.live import Live
 
         click.echo(f"Discovering login nodes on {click.style(facility, fg='cyan')}…")
-        nodes = _discover_login_nodes(ssh_host, timeout=timeout)
-        if not nodes:
+        discovery = _discover_login_nodes(
+            ssh_host, gateway, user, known_nodes, timeout=timeout
+        )
+        if not discovery.nodes:
             raise click.ClickException(
                 f"Could not discover login nodes for '{facility}'. "
                 f"Ensure SSH access to '{ssh_host}' is working."
             )
+        if discovery.method != "dynamic":
+            console.print(
+                f"[yellow]⚠ Using {'gateway' if discovery.method == 'gateway_dynamic' else 'fallback'} "
+                f"discovery (primary SSH target unreachable)[/yellow]"
+            )
+        nodes = discovery.nodes
         click.echo(
             f"Found {len(nodes)} login nodes. Live monitoring… (Ctrl+C to stop)\n"
         )
@@ -1505,6 +1656,7 @@ def host_kill(
 
     gateway = config.get("ssh_gateway", "sdcc-login.iter.org")
     user = config.get("ssh_user", "")
+    known_nodes = config.get("known_login_nodes", [])
 
     # Parse --older-than duration to seconds
     min_age_seconds = None
@@ -1520,9 +1672,19 @@ def host_kill(
         min_age_seconds = val * {"s": 1, "m": 60, "h": 3600, "d": 86400}[unit]
 
     click.echo(f"Discovering login nodes on {click.style(facility, fg='cyan')}…")
-    nodes = _discover_login_nodes(ssh_host, timeout=timeout)
-    if not nodes:
+    discovery = _discover_login_nodes(
+        ssh_host, gateway, user, known_nodes, timeout=timeout
+    )
+    if not discovery.nodes:
         raise click.ClickException(f"Could not discover login nodes for '{facility}'.")
+
+    if not discovery.complete:
+        console.print(
+            "[yellow]⚠ Using static fallback node list — "
+            "some nodes may be missing from results[/yellow]"
+        )
+
+    nodes = discovery.nodes
 
     # Filter to specific node if requested
     if target_node:
