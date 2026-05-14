@@ -1354,7 +1354,7 @@ class TestReviewerCostAndTiming:
             reviewer_model=None,
         )
 
-        with pytest.raises(ValueError, match="reviewer_model is required"):
+        with pytest.raises(ValueError, match="reviewer_models is required"):
             await run_benchmark(config, extraction_batches=[])
 
     @pytest.mark.asyncio

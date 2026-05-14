@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
@@ -39,7 +40,7 @@ class BenchmarkConfig:
     max_candidates: int = 54
     runs_per_model: int = 1
     temperature: float = 0.0
-    reviewer_model: str | None = None
+    reviewer_models: list[str] = field(default_factory=list)
     names_only: bool = True
     output_path: str | None = None
     # Legacy fields kept for backward-compatible deserialization
@@ -48,6 +49,24 @@ class BenchmarkConfig:
     domain_filter: str | None = None
     facility: str | None = None
     force: bool = True
+    reviewer_model: str | None = None  # legacy single-reviewer compat
+
+
+@dataclass
+class ReviewerScores:
+    """Scores from a single reviewer model for one compose model's output."""
+
+    reviewer_model: str
+    target: str = "names"  # "names" or "docs"
+    scores: list[dict] = field(default_factory=list)
+    avg_score: float = 0.0
+    distribution: dict[str, int] = field(default_factory=dict)
+    cost: float = 0.0
+    elapsed_seconds: float = 0.0
+    error: str = ""
+    # Per-dimension averages (names: grammar/semantic/convention/completeness)
+    # (docs: description_quality/documentation_quality/completeness/physics_accuracy)
+    dim_averages: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -78,7 +97,10 @@ class ModelResult:
     reference_total: int = 0
     reference_precision: float = 0.0
     reference_recall: float = 0.0
-    # Quality scoring (reviewer model)
+    # Multi-reviewer results (new — matrix evaluation)
+    name_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    docs_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    # Legacy single-reviewer fields (populated from first reviewer for compat)
     quality_scores: list[dict] = field(default_factory=list)
     quality_distribution: dict[str, int] = field(default_factory=dict)
     avg_quality_score: float = 0.0
@@ -186,7 +208,6 @@ class BenchmarkReport:
 
         Crash-safe: a partial write never corrupts the previous version.
         """
-        import os
         import tempfile
         from pathlib import Path
 
@@ -218,7 +239,25 @@ class BenchmarkReport:
         }
         config_data = {k: v for k, v in raw["config"].items() if k in known_config_keys}
         config = BenchmarkConfig(**config_data)
-        results = [ModelResult(**r) for r in raw["results"]]
+
+        results = []
+        known_result_keys = {f.name for f in ModelResult.__dataclass_fields__.values()}
+        for r in raw["results"]:
+            # Deserialize nested ReviewerScores lists
+            name_revs = [
+                ReviewerScores(**rs) for rs in r.pop("name_reviewer_results", [])
+            ]
+            docs_revs = [
+                ReviewerScores(**rs) for rs in r.pop("docs_reviewer_results", [])
+            ]
+            filtered = {k: v for k, v in r.items() if k in known_result_keys}
+            mr = ModelResult(
+                **filtered,
+                name_reviewer_results=name_revs,
+                docs_reviewer_results=docs_revs,
+            )
+            results.append(mr)
+
         prov_data = raw.get("provenance", {})
         provenance = (
             BenchmarkProvenance(**prov_data) if prov_data else BenchmarkProvenance()
@@ -746,12 +785,17 @@ async def run_benchmark(
     """
     from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
-    # --- Fail-fast: reviewer model is mandatory ---
-    if not config.reviewer_model:
-        raise ValueError(
-            "reviewer_model is required for benchmarking. "
-            "Reviewer scores are the quality metric."
-        )
+    # --- Fail-fast: at least one reviewer model is required ---
+    reviewer_models = config.reviewer_models
+    if not reviewer_models:
+        # Backward compat: single reviewer_model → list of one
+        if config.reviewer_model:
+            reviewer_models = [config.reviewer_model]
+        else:
+            raise ValueError(
+                "reviewer_models is required for benchmarking. "
+                "Reviewer scores are the quality metric."
+            )
 
     # --- 1. Extract candidates (same for all models) ---
     if extraction_batches is None:
@@ -853,26 +897,49 @@ async def run_benchmark(
             _save_incremental(results)
             continue
 
-        # --- 2b. Review names phase ---
-        try:
-            if model_result.candidates:
-                t_review_start = time.monotonic()
-                reviews, reviewer_cost = await score_with_reviewer(
-                    model_result.candidates,
-                    config.reviewer_model,
-                    target="names",
+        # --- 2b. Review names phase (all reviewer models) ---
+        if model_result.candidates:
+            for rev_model in reviewer_models:
+                rev_scores = ReviewerScores(reviewer_model=rev_model, target="names")
+                try:
+                    t_review_start = time.monotonic()
+                    reviews, reviewer_cost = await score_with_reviewer(
+                        model_result.candidates,
+                        rev_model,
+                        target="names",
+                    )
+                    rev_scores.elapsed_seconds = round(
+                        time.monotonic() - t_review_start, 2
+                    )
+                    rev_scores.cost = reviewer_cost
+                    rev_scores.scores = reviews
+                    _apply_reviewer_scores_metrics(rev_scores, reviews, "names")
+                except Exception as exc:
+                    logger.error(
+                        "Model %s name review by %s failed: %s",
+                        model,
+                        rev_model,
+                        exc,
+                    )
+                    rev_scores.error = str(exc)
+                model_result.name_reviewer_results.append(rev_scores)
+
+            # Populate legacy single-reviewer fields from first successful reviewer
+            first_ok = next(
+                (r for r in model_result.name_reviewer_results if not r.error), None
+            )
+            if first_ok:
+                model_result.quality_scores = first_ok.scores
+                model_result.reviewer_cost = sum(
+                    r.cost for r in model_result.name_reviewer_results
                 )
-                model_result.review_elapsed_seconds = round(
-                    time.monotonic() - t_review_start, 2
+                model_result.review_elapsed_seconds = sum(
+                    r.elapsed_seconds for r in model_result.name_reviewer_results
                 )
-                model_result.reviewer_cost = reviewer_cost
-                model_result.quality_scores = reviews
-                _apply_review_metrics(model_result, reviews)
+                _apply_review_metrics(model_result, first_ok.scores)
                 model_result.status = "reviewed"
-        except Exception as exc:
-            logger.error("Model %s name review failed: %s", model, exc)
-            model_result.review_error = str(exc)
-            # Keep compose results — they're still valuable
+            else:
+                model_result.review_error = "All reviewer models failed for names"
 
         # --- 2c. Docs phase (when not names-only) ---
         if not config.names_only:
@@ -881,24 +948,56 @@ async def run_benchmark(
                     c for c in model_result.candidates if validate_candidate(c)[0]
                 ]
                 if valid_candidates:
-                    # Generate docs
+                    # Generate docs (once per compose model — shared across reviewers)
                     _, docs_cost, docs_elapsed = await generate_docs_for_candidates(
                         valid_candidates, model, context
                     )
                     model_result.docs_compose_cost = docs_cost
                     model_result.docs_compose_elapsed_seconds = docs_elapsed
 
-                    # Review docs
-                    t_docs_review = time.monotonic()
-                    docs_reviews, docs_rev_cost = await score_with_reviewer(
-                        valid_candidates, config.reviewer_model, target="docs"
+                    # Review docs with all reviewer models
+                    for rev_model in reviewer_models:
+                        rev_scores = ReviewerScores(
+                            reviewer_model=rev_model, target="docs"
+                        )
+                        try:
+                            t_docs_review = time.monotonic()
+                            docs_reviews, docs_rev_cost = await score_with_reviewer(
+                                valid_candidates, rev_model, target="docs"
+                            )
+                            rev_scores.elapsed_seconds = round(
+                                time.monotonic() - t_docs_review, 2
+                            )
+                            rev_scores.cost = docs_rev_cost
+                            rev_scores.scores = docs_reviews
+                            _apply_reviewer_scores_metrics(
+                                rev_scores, docs_reviews, "docs"
+                            )
+                        except Exception as exc:
+                            logger.error(
+                                "Model %s docs review by %s failed: %s",
+                                model,
+                                rev_model,
+                                exc,
+                            )
+                            rev_scores.error = str(exc)
+                        model_result.docs_reviewer_results.append(rev_scores)
+
+                    # Populate legacy fields from first successful reviewer
+                    first_docs_ok = next(
+                        (r for r in model_result.docs_reviewer_results if not r.error),
+                        None,
                     )
-                    model_result.docs_review_elapsed_seconds = round(
-                        time.monotonic() - t_docs_review, 2
-                    )
-                    model_result.docs_reviewer_cost = docs_rev_cost
-                    model_result.docs_quality_scores = docs_reviews
-                    _apply_docs_review_metrics(model_result, docs_reviews)
+                    if first_docs_ok:
+                        model_result.docs_quality_scores = first_docs_ok.scores
+                        model_result.docs_reviewer_cost = sum(
+                            r.cost for r in model_result.docs_reviewer_results
+                        )
+                        model_result.docs_review_elapsed_seconds = sum(
+                            r.elapsed_seconds
+                            for r in model_result.docs_reviewer_results
+                        )
+                        _apply_docs_review_metrics(model_result, first_docs_ok.scores)
             except Exception as exc:
                 logger.error("Model %s docs phase failed: %s", model, exc)
                 model_result.docs_error = str(exc)
@@ -921,6 +1020,38 @@ async def run_benchmark(
         _save_incremental(results)
 
     return _build_partial_report(results)
+
+
+def _apply_reviewer_scores_metrics(
+    rev: ReviewerScores, reviews: list[dict], target: str
+) -> None:
+    """Compute and set metrics on a ReviewerScores instance in-place."""
+    if not reviews:
+        return
+
+    # Average score
+    rev.avg_score = sum(r.get("score", 0) for r in reviews) / len(reviews)
+
+    # Tier distribution
+    for r in reviews:
+        tier = r.get("quality_tier", "unknown")
+        rev.distribution[tier] = rev.distribution.get(tier, 0) + 1
+
+    # Per-dimension averages
+    if target == "names":
+        dims = ("grammar", "semantic", "convention", "completeness")
+    else:
+        dims = (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        )
+    for dim in dims:
+        key = f"{dim}_score"
+        vals = [r[key] for r in reviews if key in r and r[key] > 0]
+        if vals:
+            rev.dim_averages[dim] = round(sum(vals) / len(vals), 2)
 
 
 def _apply_review_metrics(result: ModelResult, reviews: list[dict]) -> None:
@@ -1232,17 +1363,22 @@ async def _run_model(
 
 
 def render_comparison_table(report: BenchmarkReport) -> None:
-    """Render a Rich comparison table to stdout."""
+    """Render Rich comparison tables to stdout.
+
+    Shows compose metrics, quality scores per reviewer (matrix when
+    multiple reviewers), and cost/timing summary.
+    """
     from rich.console import Console
     from rich.table import Table
 
     console = Console()
 
-    # Check if any result has quality scores
+    # --- Compose metrics table ---
     has_quality = any(r.quality_scores for r in report.results)
+    has_multi_rev = any(len(r.name_reviewer_results) > 1 for r in report.results)
 
     table = Table(
-        title="SN Benchmark Results",
+        title="SN Benchmark — Compose Results",
         show_header=True,
         header_style="bold cyan",
     )
@@ -1259,7 +1395,8 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     table.add_column("$/name", justify="right")
     table.add_column("Cache %", justify="right")
     table.add_column("Errors", justify="right")
-    if has_quality:
+    if has_quality and not has_multi_rev:
+        # Single-reviewer: inline scores in compose table
         table.add_column("Avg Quality", justify="right")
         table.add_column("Gram", justify="right")
         table.add_column("Sem", justify="right")
@@ -1268,7 +1405,6 @@ def render_comparison_table(report: BenchmarkReport) -> None:
 
     for r in report.results:
         n = len(r.candidates)
-        # Status with colour
         status_colours = {
             "completed": "green",
             "composed": "yellow",
@@ -1278,10 +1414,7 @@ def render_comparison_table(report: BenchmarkReport) -> None:
         }
         colour = status_colours.get(r.status, "white")
         status_str = f"[{colour}]{r.status}[/{colour}]"
-
-        # Source accounting: skipped / attachments / vocab_gaps
         sag_str = f"{r.skipped_count}/{r.attachment_count}/{r.vocab_gap_count}"
-
         valid_pct = f"{r.grammar_valid_count / n * 100:.0f}%" if n else "—"
         fields_pct = f"{r.fields_consistent_count / n * 100:.0f}%" if n else "—"
         ref_match = (
@@ -1313,7 +1446,7 @@ def render_comparison_table(report: BenchmarkReport) -> None:
             err_str,
         ]
 
-        if has_quality:
+        if has_quality and not has_multi_rev:
             qual_str = f"{r.avg_quality_score:.2f}" if r.quality_scores else "—"
             gram_str = f"{r.avg_grammar_score:.1f}" if r.quality_scores else "—"
             sem_str = f"{r.avg_semantic_score:.1f}" if r.quality_scores else "—"
@@ -1326,87 +1459,275 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     console.print()
     console.print(table)
 
-    # Quality distribution table (when reviewer was used)
-    if has_quality:
-        qual_table = Table(
-            title="Quality Distribution",
-            show_header=True,
-            header_style="bold magenta",
-        )
-        qual_table.add_column("Model", style="bold")
-        qual_table.add_column("Outstanding", justify="right")
-        qual_table.add_column("Good", justify="right")
-        qual_table.add_column("Inadequate", justify="right")
-        qual_table.add_column("Poor", justify="right")
+    # --- Multi-reviewer names quality matrix ---
+    if has_multi_rev:
+        _render_reviewer_matrix(console, report, "names")
 
-        for r in report.results:
-            if r.quality_scores:
-                dist = r.quality_distribution
-                n_reviews = len(r.quality_scores)
+    # --- Single-reviewer quality distribution (legacy) ---
+    elif has_quality:
+        _render_quality_distribution(console, report)
 
-                qual_table.add_row(
-                    r.model,
-                    f"{dist.get('outstanding', 0)} ({dist.get('outstanding', 0) / n_reviews * 100:.0f}%)"
-                    if n_reviews
-                    else "—",
-                    f"{dist.get('good', 0)} ({dist.get('good', 0) / n_reviews * 100:.0f}%)"
-                    if n_reviews
-                    else "—",
-                    f"{dist.get('inadequate', 0)} ({dist.get('inadequate', 0) / n_reviews * 100:.0f}%)"
-                    if n_reviews
-                    else "—",
-                    f"{dist.get('poor', 0)} ({dist.get('poor', 0) / n_reviews * 100:.0f}%)"
-                    if n_reviews
-                    else "—",
-                )
-
-        console.print()
-        console.print(qual_table)
-
-    # Docs quality table (when docs were benchmarked)
+    # --- Docs quality ---
     has_docs = any(r.docs_quality_scores for r in report.results)
-    if has_docs:
-        docs_table = Table(
-            title="Docs Quality Results",
-            show_header=True,
-            header_style="bold green",
+    has_multi_docs_rev = any(len(r.docs_reviewer_results) > 1 for r in report.results)
+    if has_multi_docs_rev:
+        _render_reviewer_matrix(console, report, "docs")
+    elif has_docs:
+        _render_docs_table(console, report)
+
+    # --- Reviewer agreement (when multiple reviewers) ---
+    if has_multi_rev:
+        _render_reviewer_agreement(console, report, "names")
+    if has_multi_docs_rev:
+        _render_reviewer_agreement(console, report, "docs")
+
+    # --- Cost summary ---
+    _render_cost_summary(console, report)
+
+
+def _render_reviewer_matrix(console: Any, report: BenchmarkReport, target: str) -> None:
+    """Render a compose_model × reviewer_model quality matrix."""
+    from rich.table import Table
+
+    title = "Names" if target == "names" else "Docs"
+    results_attr = (
+        "name_reviewer_results" if target == "names" else "docs_reviewer_results"
+    )
+
+    # Collect all reviewer models across all results
+    all_reviewers: list[str] = []
+    seen: set[str] = set()
+    for r in report.results:
+        for rv in getattr(r, results_attr, []):
+            if rv.reviewer_model not in seen:
+                all_reviewers.append(rv.reviewer_model)
+                seen.add(rv.reviewer_model)
+
+    if not all_reviewers:
+        return
+
+    dims = (
+        ("grammar", "semantic", "convention", "completeness")
+        if target == "names"
+        else (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
         )
-        docs_table.add_column("Model", style="bold")
-        docs_table.add_column("Docs Scored", justify="right")
-        docs_table.add_column("Avg Docs Q", justify="right")
-        docs_table.add_column("Desc", justify="right")
-        docs_table.add_column("Docs", justify="right")
-        docs_table.add_column("Compl", justify="right")
-        docs_table.add_column("Physics", justify="right")
-        docs_table.add_column("Docs Cost", justify="right")
+    )
+    dim_short = {
+        "grammar": "Gr",
+        "semantic": "Se",
+        "convention": "Cv",
+        "completeness": "Cp",
+        "description_quality": "Desc",
+        "documentation_quality": "Doc",
+        "physics_accuracy": "Phys",
+    }
 
-        for r in report.results:
-            if r.docs_quality_scores:
-                n_docs = len(r.docs_quality_scores)
-                docs_table.add_row(
-                    r.model,
-                    str(n_docs),
-                    f"{r.avg_docs_quality_score:.2f}",
-                    f"{r.avg_description_quality_score:.1f}",
-                    f"{r.avg_documentation_quality_score:.1f}",
-                    f"{r.avg_docs_completeness_score:.1f}",
-                    f"{r.avg_physics_accuracy_score:.1f}",
-                    f"${r.docs_compose_cost + r.docs_reviewer_cost:.4f}",
-                )
+    table = Table(
+        title=f"{title} Quality Matrix (compose × reviewer)",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Compose Model", style="bold")
+    for rev in all_reviewers:
+        short_rev = rev.split("/")[-1]
+        table.add_column(f"{short_rev}\nAvg", justify="right")
+        for d in dims:
+            table.add_column(dim_short.get(d, d[:4]), justify="right")
+        table.add_column("Cost", justify="right")
+
+    for r in report.results:
+        rev_map = {rv.reviewer_model: rv for rv in getattr(r, results_attr, [])}
+        row: list[str] = [r.model]
+        for rev in all_reviewers:
+            rv = rev_map.get(rev)
+            if rv and not rv.error:
+                row.append(f"{rv.avg_score:.3f}")
+                for d in dims:
+                    val = rv.dim_averages.get(d, 0)
+                    row.append(f"{val:.1f}" if val else "—")
+                row.append(f"${rv.cost:.3f}")
             else:
-                docs_table.add_row(r.model, "—", "—", "—", "—", "—", "—", "—")
+                error_str = rv.error[:20] if rv and rv.error else "—"
+                row.extend([error_str] + ["—"] * len(dims) + ["—"])
+        table.add_row(*row)
 
-        console.print()
-        console.print(docs_table)
+    console.print()
+    console.print(table)
 
-    # Summary line
+
+def _render_reviewer_agreement(
+    console: Any, report: BenchmarkReport, target: str
+) -> None:
+    """Show pairwise rank correlation between reviewers."""
+    from rich.table import Table
+
+    results_attr = (
+        "name_reviewer_results" if target == "names" else "docs_reviewer_results"
+    )
+    title = "Names" if target == "names" else "Docs"
+
+    # Build reviewer → compose_model → avg_score mapping
+    reviewer_scores: dict[str, dict[str, float]] = {}
+    for r in report.results:
+        for rv in getattr(r, results_attr, []):
+            if rv.error:
+                continue
+            reviewer_scores.setdefault(rv.reviewer_model, {})[r.model] = rv.avg_score
+
+    reviewers = list(reviewer_scores.keys())
+    if len(reviewers) < 2:
+        return
+
+    # Compute Spearman rank correlation for each pair
+    table = Table(
+        title=f"{title} Reviewer Agreement (Spearman ρ)",
+        show_header=True,
+        header_style="bold yellow",
+    )
+    table.add_column("Reviewer", style="bold")
+    for rev in reviewers:
+        table.add_column(rev.split("/")[-1], justify="right")
+
+    for rev_a in reviewers:
+        row = [rev_a.split("/")[-1]]
+        for rev_b in reviewers:
+            if rev_a == rev_b:
+                row.append("1.000")
+                continue
+            # Find shared compose models
+            shared = sorted(set(reviewer_scores[rev_a]) & set(reviewer_scores[rev_b]))
+            if len(shared) < 3:
+                row.append("—")
+                continue
+            # Spearman rank correlation
+            scores_a = [reviewer_scores[rev_a][m] for m in shared]
+            scores_b = [reviewer_scores[rev_b][m] for m in shared]
+            rho = _spearman_rho(scores_a, scores_b)
+            row.append(f"{rho:.3f}")
+        table.add_row(*row)
+
+    console.print()
+    console.print(table)
+
+
+def _spearman_rho(x: list[float], y: list[float]) -> float:
+    """Compute Spearman rank correlation coefficient."""
+    n = len(x)
+    if n < 2:
+        return 0.0
+
+    def _rank(vals: list[float]) -> list[float]:
+        indexed = sorted(enumerate(vals), key=lambda iv: iv[1])
+        ranks = [0.0] * n
+        i = 0
+        while i < n:
+            j = i
+            while j < n - 1 and indexed[j + 1][1] == indexed[j][1]:
+                j += 1
+            avg_rank = (i + j) / 2.0 + 1.0
+            for k in range(i, j + 1):
+                ranks[indexed[k][0]] = avg_rank
+            i = j + 1
+        return ranks
+
+    rx = _rank(x)
+    ry = _rank(y)
+    d_sq = sum((a - b) ** 2 for a, b in zip(rx, ry, strict=True))
+    return 1.0 - 6.0 * d_sq / (n * (n * n - 1))
+
+
+def _render_quality_distribution(console: Any, report: BenchmarkReport) -> None:
+    """Render single-reviewer quality distribution table."""
+    from rich.table import Table
+
+    qual_table = Table(
+        title="Quality Distribution",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    qual_table.add_column("Model", style="bold")
+    qual_table.add_column("Outstanding", justify="right")
+    qual_table.add_column("Good", justify="right")
+    qual_table.add_column("Inadequate", justify="right")
+    qual_table.add_column("Poor", justify="right")
+
+    for r in report.results:
+        if r.quality_scores:
+            dist = r.quality_distribution
+            n_reviews = len(r.quality_scores)
+            qual_table.add_row(
+                r.model,
+                _dist_cell(dist, "outstanding", n_reviews),
+                _dist_cell(dist, "good", n_reviews),
+                _dist_cell(dist, "inadequate", n_reviews),
+                _dist_cell(dist, "poor", n_reviews),
+            )
+
+    console.print()
+    console.print(qual_table)
+
+
+def _dist_cell(dist: dict[str, int], tier: str, total: int) -> str:
+    count = dist.get(tier, 0)
+    if total <= 0:
+        return "—"
+    return f"{count} ({count / total * 100:.0f}%)"
+
+
+def _render_docs_table(console: Any, report: BenchmarkReport) -> None:
+    """Render single-reviewer docs quality table."""
+    from rich.table import Table
+
+    docs_table = Table(
+        title="Docs Quality Results",
+        show_header=True,
+        header_style="bold green",
+    )
+    docs_table.add_column("Model", style="bold")
+    docs_table.add_column("Docs Scored", justify="right")
+    docs_table.add_column("Avg Docs Q", justify="right")
+    docs_table.add_column("Desc", justify="right")
+    docs_table.add_column("Docs", justify="right")
+    docs_table.add_column("Compl", justify="right")
+    docs_table.add_column("Physics", justify="right")
+    docs_table.add_column("Docs Cost", justify="right")
+
+    for r in report.results:
+        if r.docs_quality_scores:
+            n_docs = len(r.docs_quality_scores)
+            docs_table.add_row(
+                r.model,
+                str(n_docs),
+                f"{r.avg_docs_quality_score:.2f}",
+                f"{r.avg_description_quality_score:.1f}",
+                f"{r.avg_documentation_quality_score:.1f}",
+                f"{r.avg_docs_completeness_score:.1f}",
+                f"{r.avg_physics_accuracy_score:.1f}",
+                f"${r.docs_compose_cost + r.docs_reviewer_cost:.4f}",
+            )
+        else:
+            docs_table.add_row(r.model, "—", "—", "—", "—", "—", "—", "—")
+
+    console.print()
+    console.print(docs_table)
+
+
+def _render_cost_summary(console: Any, report: BenchmarkReport) -> None:
+    """Render cost and timing summary."""
+    # Determine reviewer label
+    reviewer_models = report.config.reviewer_models
+    if not reviewer_models and report.config.reviewer_model:
+        reviewer_models = [report.config.reviewer_model]
     reviewer_str = (
-        f" | Reviewer: {report.config.reviewer_model}"
-        if report.config.reviewer_model
+        f" | Reviewers: {', '.join(m.split('/')[-1] for m in reviewer_models)}"
+        if reviewer_models
         else ""
     )
 
-    # Cost summary
     total_compose_cost = sum(r.total_cost for r in report.results)
     total_reviewer_cost = sum(r.reviewer_cost for r in report.results)
     total_docs_compose_cost = sum(r.docs_compose_cost for r in report.results)
@@ -1431,6 +1752,8 @@ def render_comparison_table(report: BenchmarkReport) -> None:
         + total_docs_compose_elapsed
         + total_docs_review_elapsed
     )
+
+    has_docs = any(r.docs_quality_scores for r in report.results)
 
     console.print("\n[bold]Cost Summary[/bold]")
     console.print(f"  Compose cost:  ${total_compose_cost:.4f}")

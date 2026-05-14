@@ -489,6 +489,13 @@ compose-models = [
 # Frontier model used as independent judge for quality scoring.
 # Must be a strong reasoning model — evaluates 5 dimensions (0-100).
 reviewer-model = "openrouter/anthropic/claude-opus-4.6"
+# Multiple reviewer models for multi-reviewer matrix benchmark.
+# Each reviewer scores independently; pairwise agreement is computed.
+reviewer-models = [
+    "openrouter/anthropic/claude-opus-4.6",
+    "openrouter/anthropic/claude-sonnet-4.6",
+    "openrouter/openai/gpt-5.4",
+]
 
 [tool.imas-codex.sn.fanout]
 # Plan 39 — Structured fan-out for the SN compose pipeline.

@@ -1434,7 +1434,15 @@ def sn_run(
     "--reviewer-model",
     type=str,
     default=None,
-    help="Judge model for quality scoring. Defaults to [sn.benchmark].reviewer-model.",
+    help="Single judge model for quality scoring (backward compat). "
+    "Defaults to [sn.benchmark].reviewer-model.",
+)
+@click.option(
+    "--reviewer-models",
+    type=str,
+    multiple=True,
+    help="Reviewer model(s) for multi-reviewer matrix. Repeat or use commas. "
+    "Defaults to [sn.benchmark].reviewer-models.",
 )
 @click.option(
     "--include-docs/--names-only",
@@ -1451,6 +1459,7 @@ def sn_bench(
     output: str | None,
     verbose: bool,
     reviewer_model: str | None,
+    reviewer_models: tuple[str, ...],
     include_docs: bool,
 ) -> None:
     """Benchmark LLM models on standard name generation.
@@ -1478,6 +1487,7 @@ def sn_bench(
     from imas_codex.settings import (
         get_sn_benchmark_compose_models,
         get_sn_benchmark_reviewer_model,
+        get_sn_benchmark_reviewer_models,
     )
 
     # Resolve model list: CLI flag → pyproject.toml → built-in defaults
@@ -1495,10 +1505,18 @@ def sn_bench(
             "[tool.imas-codex.sn.benchmark].compose-models in pyproject.toml."
         )
 
-    # Resolve reviewer model: CLI flag → pyproject.toml → built-in default
-    # Reviewer is mandatory — it provides the benchmark quality scores
-    if reviewer_model is None:
-        reviewer_model = get_sn_benchmark_reviewer_model()
+    # Resolve reviewer models: --reviewer-models → --reviewer-model → pyproject
+    if reviewer_models:
+        rev_list = []
+        for m in reviewer_models:
+            rev_list.extend(part.strip() for part in m.split(",") if part.strip())
+    elif reviewer_model:
+        rev_list = [reviewer_model]
+    else:
+        rev_list = get_sn_benchmark_reviewer_models()
+
+    # Keep backward-compat reviewer_model as first in list
+    rev_model_single = rev_list[0] if rev_list else get_sn_benchmark_reviewer_model()
 
     from imas_codex.standard_names.benchmark import (
         BenchmarkConfig,
@@ -1527,18 +1545,20 @@ def sn_bench(
         max_candidates=effective_max,
         runs_per_model=runs,
         temperature=temperature,
-        reviewer_model=reviewer_model,
+        reviewer_model=rev_model_single,
+        reviewer_models=rev_list,
         names_only=names_only,
         output_path=str(out_path),
     )
 
     mode_str = "names + docs" if include_docs else "names-only"
+    rev_display = ", ".join(m.split("/")[-1] for m in rev_list)
     console.print("[bold]SN Benchmark[/bold]")
     console.print(f"  Models: {', '.join(model_list)}")
     console.print(f"  Reference paths: {min(effective_max, total_ref)}/{total_ref}")
     console.print(f"  Runs per model: {runs}")
     console.print(f"  Temperature: {temperature}")
-    console.print(f"  Reviewer (judge): {reviewer_model}")
+    console.print(f"  Reviewer(s): {rev_display}")
     console.print(f"  Mode: {mode_str}")
     console.print(f"  Output: {out_path}")
     console.print()

@@ -1050,6 +1050,7 @@ _SN_BENCHMARK_DEFAULTS = {
         "anthropic/claude-sonnet-4.6",
         "anthropic/claude-haiku-4.5",
         "openai/gpt-5.5",
+        "openai/gpt-5.4",
         "openai/gpt-5.4-mini",
         "google/gemini-3.1-pro-preview",
         "google/gemini-3-flash-preview",
@@ -1057,10 +1058,15 @@ _SN_BENCHMARK_DEFAULTS = {
         "moonshotai/kimi-k2.6",
         "deepseek/deepseek-v4-pro",
         "deepseek/deepseek-v4-flash",
-        "qwen/qwen3.6-max-preview",
+        "qwen/qwen3.6-plus",
         "meta-llama/llama-4-maverick",
     ],
     "reviewer-model": "anthropic/claude-opus-4.6",
+    "reviewer-models": [
+        "anthropic/claude-opus-4.6",
+        "anthropic/claude-sonnet-4.6",
+        "openai/gpt-5.4",
+    ],
 }
 
 
@@ -1090,3 +1096,12 @@ def get_sn_benchmark_reviewer_model() -> str:
     except (ValueError, IndexError):
         fallback = _SN_BENCHMARK_DEFAULTS["reviewer-model"]
     return section.get("reviewer-model", fallback)
+
+
+def get_sn_benchmark_reviewer_models() -> list[str]:
+    """Reviewer model list for SN benchmark multi-reviewer matrix.
+
+    Priority: ``[sn.benchmark].reviewer-models`` → defaults.
+    """
+    section = _get_section("sn").get("benchmark", {})
+    return section.get("reviewer-models", _SN_BENCHMARK_DEFAULTS["reviewer-models"])
