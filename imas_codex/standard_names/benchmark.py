@@ -41,6 +41,7 @@ class BenchmarkConfig:
     temperature: float = 0.0
     reviewer_model: str | None = None
     names_only: bool = True
+    output_path: str | None = None
     # Legacy fields kept for backward-compatible deserialization
     source: str = "dd"
     ids_filter: str | None = None
@@ -54,6 +55,11 @@ class ModelResult:
     """Results from running one model."""
 
     model: str
+    status: str = "pending"  # pending | composed | reviewed | completed | failed
+    error: str = ""
+    compose_error: str = ""
+    review_error: str = ""
+    docs_error: str = ""
     candidates: list[dict] = field(default_factory=list)
     grammar_valid_count: int = 0
     grammar_invalid_count: int = 0
@@ -64,6 +70,8 @@ class ModelResult:
     names_per_minute: float = 0.0
     cost_per_name: float = 0.0
     skipped_count: int = 0
+    attachment_count: int = 0
+    vocab_gap_count: int = 0
     batch_errors: int = 0
     # Quality against reference set
     reference_overlap: int = 0
@@ -172,6 +180,33 @@ class BenchmarkReport:
     def to_json(self) -> str:
         """Serialize to JSON string."""
         return json.dumps(asdict(self), indent=2, default=str)
+
+    def save_atomic(self, path: str) -> None:
+        """Write report to *path* atomically (tmp + os.replace).
+
+        Crash-safe: a partial write never corrupts the previous version.
+        """
+        import os
+        import tempfile
+        from pathlib import Path
+
+        dest = Path(path)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp = tempfile.mkstemp(
+            dir=str(dest.parent), suffix=".tmp", prefix=dest.stem
+        )
+        try:
+            with os.fdopen(fd, "w") as fh:
+                fh.write(self.to_json())
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(tmp, str(dest))
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
 
     @classmethod
     def from_json(cls, data: str) -> BenchmarkReport:
@@ -696,6 +731,11 @@ async def run_benchmark(
 ) -> BenchmarkReport:
     """Run the benchmark across all configured models.
 
+    Each model is processed as a complete unit (compose → review → optional
+    docs) before moving to the next.  After each model completes (or fails),
+    an incremental report is saved to ``config.output_path``.  If the
+    process is killed, the report contains all fully-processed models.
+
     Args:
         config: Benchmark configuration.
         extraction_batches: Pre-extracted candidate batches (list of dicts
@@ -705,6 +745,13 @@ async def run_benchmark(
         BenchmarkReport with per-model results.
     """
     from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+
+    # --- Fail-fast: reviewer model is mandatory ---
+    if not config.reviewer_model:
+        raise ValueError(
+            "reviewer_model is required for benchmarking. "
+            "Reviewer scores are the quality metric."
+        )
 
     # --- 1. Extract candidates (same for all models) ---
     if extraction_batches is None:
@@ -718,7 +765,6 @@ async def run_benchmark(
     # Limit to max_candidates
     if len(all_items) > config.max_candidates:
         all_items = all_items[: config.max_candidates]
-        # Rebuild batches with limited items
         extraction_batches = _rebuild_batches(extraction_batches, config.max_candidates)
 
     logger.info(
@@ -737,8 +783,7 @@ async def run_benchmark(
         "\n".join(sorted(extraction_source_ids)).encode()
     ).hexdigest()[:16]
 
-    # --- 2. Run each model ---
-    results: list[ModelResult] = []
+    # --- Pre-build shared prompt context (reused across models) ---
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.standard_names.context import build_compose_context
 
@@ -746,177 +791,210 @@ async def run_benchmark(
     context["compose_scored_examples"] = []
     system_prompt = render_prompt("sn/generate_name_system", context)
 
-    for model in config.models:
-        logger.info("Benchmarking model: %s", model)
-        model_result = await _run_model(
-            model=model,
-            extraction_batches=extraction_batches,
-            config=config,
-            reference=REFERENCE_NAMES,
-            system_prompt=system_prompt,
-            context=context,
-        )
-        model_result.compose_elapsed_seconds = model_result.elapsed_seconds
-        results.append(model_result)
-
-    # --- 2b. Reviewer scoring (mandatory — scores ARE the benchmark) ---
-    if not config.reviewer_model:
-        raise ValueError(
-            "reviewer_model is required for benchmarking. "
-            "Reviewer scores are the quality metric."
-        )
-
-    for result in results:
-        if not result.candidates:
-            continue
-        t_review_start = time.monotonic()
-        reviews, reviewer_cost = await score_with_reviewer(
-            result.candidates,
-            config.reviewer_model,
-            target="names",
-        )
-        result.review_elapsed_seconds = round(time.monotonic() - t_review_start, 2)
-        result.reviewer_cost = reviewer_cost
-        result.quality_scores = reviews
-
-        # Review completeness check
-        n_candidates = len(result.candidates)
-        n_reviews = len(reviews)
-        if n_reviews < n_candidates:
-            logger.warning(
-                "Model %s: only %d/%d candidates reviewed "
-                "(partial reviews may bias scores)",
-                result.model,
-                n_reviews,
-                n_candidates,
-            )
-
-        # Compute distribution
-        for r in reviews:
-            tier = r.get("quality_tier", "unknown")
-            result.quality_distribution[tier] = (
-                result.quality_distribution.get(tier, 0) + 1
-            )
-        if reviews:
-            result.avg_quality_score = sum(r.get("score", 0) for r in reviews) / len(
-                reviews
-            )
-
-            # Per-dimension averages
-            for dim in (
-                "grammar",
-                "semantic",
-                "convention",
-                "completeness",
-            ):
-                key = f"{dim}_score"
-                vals = [r[key] for r in reviews if key in r and r[key] > 0]
-                if vals:
-                    setattr(
-                        result,
-                        f"avg_{key}",
-                        sum(vals) / len(vals),
-                    )
-
-        # Compute doc length and field coverage metrics
-        docs = [c.get("documentation", "") or "" for c in result.candidates]
-        result.avg_doc_length = sum(len(d) for d in docs) / len(docs) if docs else 0.0
-
-        all_fields = {
-            "base_token",
-            "qualifiers",
-            "projection_axis",
-            "locus_token",
-            "process_token",
-            "operator_token",
-        }
-        field_counts = []
-        for c in result.candidates:
-            populated = 0
-            if c.get("base_token"):
-                populated += 1
-            if c.get("qualifiers"):
-                populated += 1
-            if c.get("projection_axis"):
-                populated += 1
-            if c.get("locus_token"):
-                populated += 1
-            if c.get("process_token"):
-                populated += 1
-            if c.get("operator_token"):
-                populated += 1
-            field_counts.append(populated / len(all_fields))
-        result.avg_fields_populated = (
-            sum(field_counts) / len(field_counts) if field_counts else 0.0
-        )
-
-    # --- 2c. Docs generation + review (when not names-only) ---
-    if not config.names_only:
-        for result in results:
-            valid_candidates = [
-                c for c in result.candidates if validate_candidate(c)[0]
-            ]
-            if not valid_candidates:
-                continue
-
-            # Generate docs using the compose model
-            _, docs_cost, docs_elapsed = await generate_docs_for_candidates(
-                valid_candidates,
-                result.model,
-                context,
-            )
-            result.docs_compose_cost = docs_cost
-            result.docs_compose_elapsed_seconds = docs_elapsed
-
-            # Review docs with reviewer model
-            t_docs_review_start = time.monotonic()
-            docs_reviews, docs_reviewer_cost = await score_with_reviewer(
-                valid_candidates,
-                config.reviewer_model,
-                target="docs",
-            )
-            result.docs_review_elapsed_seconds = round(
-                time.monotonic() - t_docs_review_start, 2
-            )
-            result.docs_reviewer_cost = docs_reviewer_cost
-            result.docs_quality_scores = docs_reviews
-
-            # Compute docs distribution
-            for r in docs_reviews:
-                tier = r.get("quality_tier", "unknown")
-                result.docs_quality_distribution[tier] = (
-                    result.docs_quality_distribution.get(tier, 0) + 1
-                )
-            if docs_reviews:
-                result.avg_docs_quality_score = sum(
-                    r.get("score", 0) for r in docs_reviews
-                ) / len(docs_reviews)
-
-                # Per-dimension averages for docs
-                for dim in (
-                    "description_quality",
-                    "documentation_quality",
-                    "completeness",
-                    "physics_accuracy",
-                ):
-                    key = f"{dim}_score"
-                    vals = [r[key] for r in docs_reviews if key in r and r[key] > 0]
-                    if vals:
-                        setattr(result, f"avg_{key}", sum(vals) / len(vals))
-
-    # --- 3. Build report ---
     provenance = BenchmarkProvenance.capture()
-    report = BenchmarkReport(
-        config=config,
-        results=results,
-        reference_names=list(REFERENCE_NAMES.keys()),
-        extraction_count=len(all_items),
-        extraction_source_ids=extraction_source_ids,
-        dataset_hash=dataset_hash,
-        timestamp=datetime.now(tz=UTC).isoformat(),
-        provenance=provenance,
+    reference_names_list = list(REFERENCE_NAMES.keys())
+
+    def _build_partial_report(results_so_far: list[ModelResult]) -> BenchmarkReport:
+        return BenchmarkReport(
+            config=config,
+            results=results_so_far,
+            reference_names=reference_names_list,
+            extraction_count=len(all_items),
+            extraction_source_ids=extraction_source_ids,
+            dataset_hash=dataset_hash,
+            timestamp=datetime.now(tz=UTC).isoformat(),
+            provenance=provenance,
+        )
+
+    def _save_incremental(results_so_far: list[ModelResult]) -> None:
+        if not config.output_path:
+            return
+        try:
+            report = _build_partial_report(results_so_far)
+            report.save_atomic(config.output_path)
+            logger.info(
+                "Incremental save: %d/%d models → %s",
+                len(results_so_far),
+                len(config.models),
+                config.output_path,
+            )
+        except Exception as exc:
+            logger.error("Failed to save incremental report: %s", exc)
+
+    # --- 2. Per-model loop: compose → review → (docs) → save ---
+    results: list[ModelResult] = []
+
+    for model_idx, model in enumerate(config.models):
+        logger.info(
+            "Benchmarking model %d/%d: %s",
+            model_idx + 1,
+            len(config.models),
+            model,
+        )
+
+        # --- 2a. Compose phase ---
+        try:
+            model_result = await _run_model(
+                model=model,
+                extraction_batches=extraction_batches,
+                config=config,
+                reference=REFERENCE_NAMES,
+                system_prompt=system_prompt,
+                context=context,
+            )
+            model_result.compose_elapsed_seconds = model_result.elapsed_seconds
+            model_result.status = "composed"
+        except Exception as exc:
+            logger.error("Model %s compose failed: %s", model, exc)
+            model_result = ModelResult(
+                model=model, status="failed", compose_error=str(exc), error=str(exc)
+            )
+            results.append(model_result)
+            _save_incremental(results)
+            continue
+
+        # --- 2b. Review names phase ---
+        try:
+            if model_result.candidates:
+                t_review_start = time.monotonic()
+                reviews, reviewer_cost = await score_with_reviewer(
+                    model_result.candidates,
+                    config.reviewer_model,
+                    target="names",
+                )
+                model_result.review_elapsed_seconds = round(
+                    time.monotonic() - t_review_start, 2
+                )
+                model_result.reviewer_cost = reviewer_cost
+                model_result.quality_scores = reviews
+                _apply_review_metrics(model_result, reviews)
+                model_result.status = "reviewed"
+        except Exception as exc:
+            logger.error("Model %s name review failed: %s", model, exc)
+            model_result.review_error = str(exc)
+            # Keep compose results — they're still valuable
+
+        # --- 2c. Docs phase (when not names-only) ---
+        if not config.names_only:
+            try:
+                valid_candidates = [
+                    c for c in model_result.candidates if validate_candidate(c)[0]
+                ]
+                if valid_candidates:
+                    # Generate docs
+                    _, docs_cost, docs_elapsed = await generate_docs_for_candidates(
+                        valid_candidates, model, context
+                    )
+                    model_result.docs_compose_cost = docs_cost
+                    model_result.docs_compose_elapsed_seconds = docs_elapsed
+
+                    # Review docs
+                    t_docs_review = time.monotonic()
+                    docs_reviews, docs_rev_cost = await score_with_reviewer(
+                        valid_candidates, config.reviewer_model, target="docs"
+                    )
+                    model_result.docs_review_elapsed_seconds = round(
+                        time.monotonic() - t_docs_review, 2
+                    )
+                    model_result.docs_reviewer_cost = docs_rev_cost
+                    model_result.docs_quality_scores = docs_reviews
+                    _apply_docs_review_metrics(model_result, docs_reviews)
+            except Exception as exc:
+                logger.error("Model %s docs phase failed: %s", model, exc)
+                model_result.docs_error = str(exc)
+
+        # Mark final status
+        if not model_result.compose_error:
+            model_result.status = "completed"
+        model_result.error = " | ".join(
+            filter(
+                None,
+                [
+                    model_result.compose_error,
+                    model_result.review_error,
+                    model_result.docs_error,
+                ],
+            )
+        )
+
+        results.append(model_result)
+        _save_incremental(results)
+
+    return _build_partial_report(results)
+
+
+def _apply_review_metrics(result: ModelResult, reviews: list[dict]) -> None:
+    """Compute and set name-review metrics on *result* in-place."""
+    n_candidates = len(result.candidates)
+    n_reviews = len(reviews)
+    if n_reviews < n_candidates:
+        logger.warning(
+            "Model %s: only %d/%d candidates reviewed "
+            "(partial reviews may bias scores)",
+            result.model,
+            n_reviews,
+            n_candidates,
+        )
+
+    # Tier distribution
+    for r in reviews:
+        tier = r.get("quality_tier", "unknown")
+        result.quality_distribution[tier] = result.quality_distribution.get(tier, 0) + 1
+
+    if reviews:
+        result.avg_quality_score = sum(r.get("score", 0) for r in reviews) / len(
+            reviews
+        )
+        for dim in ("grammar", "semantic", "convention", "completeness"):
+            key = f"{dim}_score"
+            vals = [r[key] for r in reviews if key in r and r[key] > 0]
+            if vals:
+                setattr(result, f"avg_{key}", sum(vals) / len(vals))
+
+    # Doc-length and field-coverage (name-phase metadata)
+    docs = [c.get("documentation", "") or "" for c in result.candidates]
+    result.avg_doc_length = sum(len(d) for d in docs) / len(docs) if docs else 0.0
+
+    all_fields = {
+        "base_token",
+        "qualifiers",
+        "projection_axis",
+        "locus_token",
+        "process_token",
+        "operator_token",
+    }
+    field_counts = []
+    for c in result.candidates:
+        populated = sum(
+            1 for f in all_fields if c.get(f) or (c.get("segments") or {}).get(f)
+        )
+        field_counts.append(populated / len(all_fields))
+    result.avg_fields_populated = (
+        sum(field_counts) / len(field_counts) if field_counts else 0.0
     )
-    return report
+
+
+def _apply_docs_review_metrics(result: ModelResult, docs_reviews: list[dict]) -> None:
+    """Compute and set docs-review metrics on *result* in-place."""
+    for r in docs_reviews:
+        tier = r.get("quality_tier", "unknown")
+        result.docs_quality_distribution[tier] = (
+            result.docs_quality_distribution.get(tier, 0) + 1
+        )
+    if docs_reviews:
+        result.avg_docs_quality_score = sum(
+            r.get("score", 0) for r in docs_reviews
+        ) / len(docs_reviews)
+        for dim in (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        ):
+            key = f"{dim}_score"
+            vals = [r[key] for r in docs_reviews if key in r and r[key] > 0]
+            if vals:
+                setattr(result, f"avg_{key}", sum(vals) / len(vals))
 
 
 def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
@@ -1086,6 +1164,8 @@ async def _run_model(
                                 candidate[key] = src[key]
                     all_candidates.append(candidate)
                 result.skipped_count += len(llm_result.skipped)
+                result.attachment_count += len(llm_result.attachments)
+                result.vocab_gap_count += len(getattr(llm_result, "vocab_gaps", []))
 
             except Exception as exc:
                 logger.warning(
@@ -1168,7 +1248,9 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     )
 
     table.add_column("Model", style="bold")
+    table.add_column("Status", justify="center")
     table.add_column("Names", justify="right")
+    table.add_column("Skip/Att/Gap", justify="right")
     table.add_column("Valid %", justify="right")
     table.add_column("Fields %", justify="right")
     table.add_column("Ref Match", justify="right")
@@ -1186,6 +1268,20 @@ def render_comparison_table(report: BenchmarkReport) -> None:
 
     for r in report.results:
         n = len(r.candidates)
+        # Status with colour
+        status_colours = {
+            "completed": "green",
+            "composed": "yellow",
+            "reviewed": "cyan",
+            "failed": "red",
+            "pending": "dim",
+        }
+        colour = status_colours.get(r.status, "white")
+        status_str = f"[{colour}]{r.status}[/{colour}]"
+
+        # Source accounting: skipped / attachments / vocab_gaps
+        sag_str = f"{r.skipped_count}/{r.attachment_count}/{r.vocab_gap_count}"
+
         valid_pct = f"{r.grammar_valid_count / n * 100:.0f}%" if n else "—"
         fields_pct = f"{r.fields_consistent_count / n * 100:.0f}%" if n else "—"
         ref_match = (
@@ -1204,7 +1300,9 @@ def render_comparison_table(report: BenchmarkReport) -> None:
 
         row_data = [
             r.model,
+            status_str,
             str(n),
+            sag_str,
             valid_pct,
             fields_pct,
             ref_match,
@@ -1358,6 +1456,15 @@ def render_comparison_table(report: BenchmarkReport) -> None:
         f"  Total wall-clock: {total_elapsed:.1f}s ({total_elapsed / 60:.1f}min)"
     )
     console.print(f"  Models evaluated: {len(report.results)}")
+    completed = sum(1 for r in report.results if r.status == "completed")
+    failed = sum(1 for r in report.results if r.status == "failed")
+    partial = len(report.results) - completed - failed
+    parts = [f"{completed} completed"]
+    if partial:
+        parts.append(f"{partial} partial")
+    if failed:
+        parts.append(f"{failed} failed")
+    console.print(f"  Status: {', '.join(parts)}")
 
     prov = report.provenance
     prov_str = ""

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Any
 
 import click
@@ -1510,6 +1511,17 @@ def sn_bench(
     total_ref = len(REFERENCE_NAMES)
     effective_max = max_candidates if max_candidates else total_ref
 
+    # Resolve output path early so run_benchmark can save incrementally
+    from pathlib import Path
+
+    if output is None:
+        bench_dir = Path.home() / ".local" / "share" / "imas-codex" / "benchmarks"
+        bench_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%S")
+        out_path = bench_dir / f"sn_benchmark_{ts}.json"
+    else:
+        out_path = Path(output)
+
     config = BenchmarkConfig(
         models=model_list,
         max_candidates=effective_max,
@@ -1517,6 +1529,7 @@ def sn_bench(
         temperature=temperature,
         reviewer_model=reviewer_model,
         names_only=names_only,
+        output_path=str(out_path),
     )
 
     mode_str = "names + docs" if include_docs else "names-only"
@@ -1527,6 +1540,7 @@ def sn_bench(
     console.print(f"  Temperature: {temperature}")
     console.print(f"  Reviewer (judge): {reviewer_model}")
     console.print(f"  Mode: {mode_str}")
+    console.print(f"  Output: {out_path}")
     console.print()
 
     from imas_codex.cli.utils import run_async
@@ -1551,18 +1565,8 @@ def sn_bench(
         + ("…" if len(report.extraction_source_ids) > 5 else "")
     )
 
-    # Save JSON report to ~/.local/share/imas-codex/benchmarks/
-    from pathlib import Path
-
-    if output is None:
-        bench_dir = Path.home() / ".local" / "share" / "imas-codex" / "benchmarks"
-        bench_dir.mkdir(parents=True, exist_ok=True)
-        ts = report.timestamp.replace(":", "").replace("-", "")[:15]
-        out_path = bench_dir / f"sn_benchmark_{ts}.json"
-    else:
-        out_path = Path(output)
-
-    out_path.write_text(report.to_json())
+    # Final atomic save (run_benchmark already saved incrementally)
+    report.save_atomic(str(out_path))
     console.print(f"\n[green]Report saved:[/green] {out_path}")
 
 
