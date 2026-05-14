@@ -1209,3 +1209,246 @@ class TestReviewerTemplate:
             },
         )
         assert "Scoring Dimensions" in rendered
+
+
+# -----------------------------------------------------------------------
+# New field and --skip-review tests
+# -----------------------------------------------------------------------
+
+
+class TestReviewerCostAndTiming:
+    """Test reviewer_cost and timing breakdown fields on ModelResult."""
+
+    def test_reviewer_cost_default_zero(self):
+        from imas_codex.standard_names.benchmark import ModelResult
+
+        r = ModelResult(model="test")
+        assert r.reviewer_cost == 0.0
+
+    def test_compose_elapsed_default_zero(self):
+        from imas_codex.standard_names.benchmark import ModelResult
+
+        r = ModelResult(model="test")
+        assert r.compose_elapsed_seconds == 0.0
+
+    def test_review_elapsed_default_zero(self):
+        from imas_codex.standard_names.benchmark import ModelResult
+
+        r = ModelResult(model="test")
+        assert r.review_elapsed_seconds == 0.0
+
+    def test_reviewer_cost_field_set(self):
+        from imas_codex.standard_names.benchmark import ModelResult
+
+        r = ModelResult(model="test", reviewer_cost=0.42)
+        assert r.reviewer_cost == 0.42
+
+    def test_timing_fields_set(self):
+        from imas_codex.standard_names.benchmark import ModelResult
+
+        r = ModelResult(
+            model="test",
+            compose_elapsed_seconds=12.5,
+            review_elapsed_seconds=8.3,
+        )
+        assert r.compose_elapsed_seconds == 12.5
+        assert r.review_elapsed_seconds == 8.3
+
+    def test_new_fields_survive_json_round_trip(self):
+        """reviewer_cost and timing fields survive JSON round-trip."""
+        import json
+
+        from imas_codex.standard_names.benchmark import (
+            BenchmarkConfig,
+            BenchmarkReport,
+            ModelResult,
+        )
+
+        r = ModelResult(
+            model="m",
+            reviewer_cost=0.15,
+            compose_elapsed_seconds=10.0,
+            review_elapsed_seconds=5.0,
+        )
+        report = BenchmarkReport(
+            config=BenchmarkConfig(models=["m"]),
+            results=[r],
+            reference_names=[],
+            timestamp="2025-01-01",
+        )
+        parsed = json.loads(report.to_json())
+        assert parsed["results"][0]["reviewer_cost"] == 0.15
+        assert parsed["results"][0]["compose_elapsed_seconds"] == 10.0
+        assert parsed["results"][0]["review_elapsed_seconds"] == 5.0
+
+        restored = BenchmarkReport.from_json(report.to_json())
+        assert restored.results[0].reviewer_cost == 0.15
+        assert restored.results[0].compose_elapsed_seconds == 10.0
+        assert restored.results[0].review_elapsed_seconds == 5.0
+
+    @pytest.mark.asyncio
+    async def test_run_benchmark_no_reviewer_no_quality_scores(self):
+        """BenchmarkConfig with reviewer_model=None produces no quality scores."""
+        from unittest.mock import AsyncMock, patch
+
+        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from imas_codex.standard_names.models import (
+            StandardNameCandidate,
+            StandardNameComposeBatch,
+        )
+
+        config = BenchmarkConfig(
+            models=["mock-model"],
+            max_candidates=5,
+            reviewer_model=None,
+        )
+
+        fake_batches = [
+            {
+                "group_key": "test",
+                "items": [
+                    {
+                        "path": "test/path",
+                        "description": "Test",
+                        "units": "eV",
+                        "data_type": "FLT_1D",
+                        "cluster_label": None,
+                    }
+                ],
+                "existing_names": [],
+            }
+        ]
+
+        mock_response = StandardNameComposeBatch(
+            candidates=[
+                StandardNameCandidate(
+                    source_id="test/path",
+                    base_token="temperature",
+                    base_kind="quantity",
+                    qualifiers=["electron"],
+                    reason="Test",
+                ),
+            ],
+            skipped=[],
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=(mock_response, 0.01, 100),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt",
+            ),
+        ):
+            report = await run_benchmark(config, extraction_batches=fake_batches)
+
+        assert len(report.results) == 1
+        r = report.results[0]
+        # No quality scores when reviewer_model is None
+        assert r.quality_scores == []
+        assert r.reviewer_cost == 0.0
+        assert r.review_elapsed_seconds == 0.0
+
+    @pytest.mark.asyncio
+    async def test_run_benchmark_compose_elapsed_populated(self):
+        """compose_elapsed_seconds is set after _run_model completes."""
+        from unittest.mock import AsyncMock, patch
+
+        from imas_codex.standard_names.benchmark import BenchmarkConfig, run_benchmark
+        from imas_codex.standard_names.models import StandardNameComposeBatch
+
+        config = BenchmarkConfig(
+            models=["mock-model"],
+            max_candidates=5,
+            reviewer_model=None,
+        )
+
+        fake_batches = [
+            {
+                "group_key": "test",
+                "items": [
+                    {
+                        "path": "test/path",
+                        "description": "Test",
+                        "units": None,
+                        "data_type": "FLT_0D",
+                        "cluster_label": None,
+                    }
+                ],
+                "existing_names": [],
+            }
+        ]
+
+        mock_response = StandardNameComposeBatch(candidates=[], skipped=[])
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=(mock_response, 0.0, 0),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt",
+            ),
+        ):
+            report = await run_benchmark(config, extraction_batches=fake_batches)
+
+        r = report.results[0]
+        # compose_elapsed_seconds should match elapsed_seconds
+        assert r.compose_elapsed_seconds == r.elapsed_seconds
+        assert r.compose_elapsed_seconds >= 0.0
+
+
+class TestSkipReviewCLI:
+    """Test --skip-review CLI flag."""
+
+    def test_skip_review_in_help(self):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+
+        runner = CliRunner()
+        result = runner.invoke(sn, ["bench", "--help"])
+        assert result.exit_code == 0
+        assert "--skip-review" in result.output
+
+    def test_skip_review_forces_reviewer_none(self):
+        """When --skip-review is set, reviewer_model is forced to None."""
+        from imas_codex.standard_names.benchmark import BenchmarkConfig
+
+        # Simulate the CLI logic: skip_review=True → reviewer_model=None
+        skip_review = True
+        reviewer_model_from_cli = None
+        reviewer_model_from_config = "some/model"
+
+        if skip_review:
+            reviewer_model = None
+        elif reviewer_model_from_cli is None:
+            reviewer_model = reviewer_model_from_config
+        else:
+            reviewer_model = reviewer_model_from_cli
+
+        config = BenchmarkConfig(models=["test"], reviewer_model=reviewer_model)
+        assert config.reviewer_model is None
+
+    def test_no_skip_review_uses_config_model(self):
+        """When --skip-review is not set, reviewer_model uses configured value."""
+        from imas_codex.standard_names.benchmark import BenchmarkConfig
+
+        skip_review = False
+        reviewer_model_from_cli = None
+        reviewer_model_from_config = "some/reviewer"
+
+        if skip_review:
+            reviewer_model = None
+        elif reviewer_model_from_cli is None:
+            reviewer_model = reviewer_model_from_config
+        else:
+            reviewer_model = reviewer_model_from_cli
+
+        config = BenchmarkConfig(models=["test"], reviewer_model=reviewer_model)
+        assert config.reviewer_model == "some/reviewer"

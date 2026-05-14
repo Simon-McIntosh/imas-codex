@@ -81,6 +81,10 @@ class ModelResult:
     # Prompt-cache statistics
     cache_read_tokens: int = 0
     cache_creation_tokens: int = 0
+    # Reviewer cost and timing breakdown
+    reviewer_cost: float = 0.0
+    compose_elapsed_seconds: float = 0.0
+    review_elapsed_seconds: float = 0.0
 
 
 @dataclass
@@ -287,7 +291,7 @@ async def score_with_reviewer(
     candidates: list[dict],
     reviewer_model: str,
     target: str = "names",
-) -> list[dict]:
+) -> tuple[list[dict], float]:
     """Score candidates using the production-fidelity review pipeline.
 
     Uses the split system/user prompt pair (``sn/review_names_system`` +
@@ -299,8 +303,8 @@ async def score_with_reviewer(
         rubric (grammar, semantic, convention, completeness; 0-80 total,
         normalised to 0-1).
 
-    Returns list of dicts with: name, quality_tier, score, and per-dimension
-    scores keyed ``<dim>_score``.
+    Returns (reviews, total_cost) where reviews is a list of dicts with:
+    name, quality_tier, score, and per-dimension scores keyed ``<dim>_score``.
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.graph.client import GraphClient
@@ -341,6 +345,7 @@ async def score_with_reviewer(
 
     # Process in batches of 10
     all_reviews: list[dict] = []
+    total_reviewer_cost: float = 0.0
     for i in range(0, len(candidates), 10):
         batch = candidates[i : i + 10]
 
@@ -414,12 +419,13 @@ async def score_with_reviewer(
         ]
 
         try:
-            result, _, _ = await acall_llm_structured(
+            result, cost, _ = await acall_llm_structured(
                 model=reviewer_model,
                 messages=messages,
                 response_model=response_model,
                 service="standard-names",
             )
+            total_reviewer_cost += cost
             for r in result.reviews:
                 review_dict: dict[str, Any] = {
                     "name": r.standard_name,
@@ -435,7 +441,7 @@ async def score_with_reviewer(
         except Exception as e:
             logger.warning("Reviewer scoring failed for batch: %s", e)
 
-    return all_reviews
+    return all_reviews, total_reviewer_cost
 
 
 # ---------------------------------------------------------------------------
@@ -499,17 +505,23 @@ async def run_benchmark(
             system_prompt=system_prompt,
             context=context,
         )
+        model_result.compose_elapsed_seconds = model_result.elapsed_seconds
         results.append(model_result)
 
     # --- 2b. Reviewer scoring (optional) ---
     if config.reviewer_model:
         for result in results:
             if result.candidates:
-                reviews = await score_with_reviewer(
+                t_review_start = time.monotonic()
+                reviews, reviewer_cost = await score_with_reviewer(
                     result.candidates,
                     config.reviewer_model,
                     target="names",
                 )
+                result.review_elapsed_seconds = round(
+                    time.monotonic() - t_review_start, 2
+                )
+                result.reviewer_cost = reviewer_cost
                 result.quality_scores = reviews
                 # Compute distribution
                 for r in reviews:
@@ -894,6 +906,23 @@ def render_comparison_table(report: BenchmarkReport) -> None:
         if report.config.reviewer_model
         else ""
     )
+
+    # Cost summary
+    total_compose_cost = sum(r.total_cost for r in report.results)
+    total_reviewer_cost = sum(r.reviewer_cost for r in report.results)
+    total_cost = total_compose_cost + total_reviewer_cost
+    total_elapsed = sum(r.elapsed_seconds for r in report.results)
+
+    console.print("\n[bold]Cost Summary[/bold]")
+    console.print(f"  Compose cost:  ${total_compose_cost:.4f}")
+    if total_reviewer_cost > 0:
+        console.print(f"  Reviewer cost: ${total_reviewer_cost:.4f}")
+    console.print(f"  [bold]Total cost:  ${total_cost:.4f}[/bold]")
+    console.print(
+        f"  Total wall-clock: {total_elapsed:.1f}s ({total_elapsed / 60:.1f}min)"
+    )
+    console.print(f"  Models evaluated: {len(report.results)}")
+
     console.print(
         f"\n[dim]Extraction: {report.extraction_count} items | "
         f"Temperature: {report.config.temperature}{reviewer_str} | "

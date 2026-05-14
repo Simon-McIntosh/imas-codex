@@ -1470,6 +1470,12 @@ def sn_run(
         "DD catalog in mature deployments)."
     ),
 )
+@click.option(
+    "--skip-review",
+    is_flag=True,
+    default=False,
+    help="Skip reviewer scoring (names-only mode). Useful for cost-limited runs.",
+)
 def sn_bench(
     source: str,
     ids_filter: str | None,
@@ -1483,6 +1489,7 @@ def sn_bench(
     verbose: bool,
     reviewer_model: str | None,
     force: bool,
+    skip_review: bool,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -1522,7 +1529,9 @@ def sn_bench(
         )
 
     # Resolve reviewer model: CLI flag → pyproject.toml → built-in default
-    if reviewer_model is None:
+    if skip_review:
+        reviewer_model = None
+    elif reviewer_model is None:
         reviewer_model = get_sn_benchmark_reviewer_model()
 
     from imas_codex.standard_names.benchmark import (
