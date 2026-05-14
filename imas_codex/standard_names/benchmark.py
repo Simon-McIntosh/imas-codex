@@ -103,6 +103,58 @@ class ModelResult:
 
 
 @dataclass
+class BenchmarkProvenance:
+    """Version provenance for reproducibility."""
+
+    codex_version: str = ""
+    codex_commit: str = ""
+    isn_version: str = ""
+    dd_version: str = ""
+
+    @classmethod
+    def capture(cls) -> BenchmarkProvenance:
+        """Capture current versions from installed packages and config."""
+        codex_ver = codex_commit = isn_ver = dd_ver = ""
+        try:
+            from importlib.metadata import version
+
+            codex_ver = version("imas-codex")
+        except Exception:
+            pass
+        try:
+            import subprocess
+
+            result = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                codex_commit = result.stdout.strip()
+        except Exception:
+            pass
+        try:
+            from importlib.metadata import version
+
+            isn_ver = version("imas-standard-names")
+        except Exception:
+            pass
+        try:
+            from imas_codex.settings import get_dd_version
+
+            dd_ver = get_dd_version()
+        except Exception:
+            pass
+        return cls(
+            codex_version=codex_ver,
+            codex_commit=codex_commit,
+            isn_version=isn_ver,
+            dd_version=dd_ver,
+        )
+
+
+@dataclass
 class BenchmarkReport:
     """Full benchmark report."""
 
@@ -111,6 +163,7 @@ class BenchmarkReport:
     reference_names: list[str]
     extraction_count: int = 0
     timestamp: str = ""
+    provenance: BenchmarkProvenance = field(default_factory=BenchmarkProvenance)
 
     def to_json(self) -> str:
         """Serialize to JSON string."""
@@ -122,12 +175,17 @@ class BenchmarkReport:
         raw = json.loads(data)
         config = BenchmarkConfig(**raw["config"])
         results = [ModelResult(**r) for r in raw["results"]]
+        prov_data = raw.get("provenance", {})
+        provenance = (
+            BenchmarkProvenance(**prov_data) if prov_data else BenchmarkProvenance()
+        )
         return cls(
             config=config,
             results=results,
             reference_names=raw["reference_names"],
             extraction_count=raw.get("extraction_count", 0),
             timestamp=raw.get("timestamp", ""),
+            provenance=provenance,
         )
 
 
@@ -826,12 +884,14 @@ async def run_benchmark(
                         setattr(result, f"avg_{key}", sum(vals) / len(vals))
 
     # --- 3. Build report ---
+    provenance = BenchmarkProvenance.capture()
     report = BenchmarkReport(
         config=config,
         results=results,
         reference_names=list(REFERENCE_NAMES.keys()),
         extraction_count=len(all_items),
         timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance=provenance,
     )
     return report
 
@@ -1242,8 +1302,16 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     )
     console.print(f"  Models evaluated: {len(report.results)}")
 
+    prov = report.provenance
+    prov_str = ""
+    if prov.codex_version or prov.codex_commit:
+        prov_str = (
+            f" | codex={prov.codex_version}@{prov.codex_commit}"
+            f" ISN={prov.isn_version} DD={prov.dd_version}"
+        )
+
     console.print(
         f"\n[dim]Extraction: {report.extraction_count} items | "
         f"Temperature: {report.config.temperature}{reviewer_str} | "
-        f"Timestamp: {report.timestamp}[/dim]"
+        f"Timestamp: {report.timestamp}{prov_str}[/dim]"
     )

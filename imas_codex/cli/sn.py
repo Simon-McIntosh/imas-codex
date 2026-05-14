@@ -1596,14 +1596,25 @@ def sn_bench(
     # Display comparison table
     render_comparison_table(report)
 
-    # Save JSON report
-    if output is None:
-        ts = report.timestamp.replace(":", "").replace("-", "")[:15]
-        output = f"sn_benchmark_{ts}.json"
+    # Display provenance
+    prov = report.provenance
+    if prov.codex_version or prov.codex_commit:
+        console.print(
+            f"\nProvenance: codex={prov.codex_version} ({prov.codex_commit}), "
+            f"ISN={prov.isn_version}, DD={prov.dd_version}"
+        )
 
+    # Save JSON report to ~/.local/share/imas-codex/benchmarks/
     from pathlib import Path
 
-    out_path = Path(output)
+    if output is None:
+        bench_dir = Path.home() / ".local" / "share" / "imas-codex" / "benchmarks"
+        bench_dir.mkdir(parents=True, exist_ok=True)
+        ts = report.timestamp.replace(":", "").replace("-", "")[:15]
+        out_path = bench_dir / f"sn_benchmark_{ts}.json"
+    else:
+        out_path = Path(output)
+
     out_path.write_text(report.to_json())
     console.print(f"\n[green]Report saved:[/green] {out_path}")
 

@@ -447,18 +447,26 @@ class TestJsonSerialization:
     def test_from_json(self):
         from imas_codex.standard_names.benchmark import (
             BenchmarkConfig,
+            BenchmarkProvenance,
             BenchmarkReport,
             ModelResult,
         )
 
         cfg = BenchmarkConfig(models=["m1"])
         r = ModelResult(model="m1", grammar_valid_count=3)
+        prov = BenchmarkProvenance(
+            codex_version="1.2.3",
+            codex_commit="abc1234",
+            isn_version="0.7.0rc5",
+            dd_version="4.0.0",
+        )
         original = BenchmarkReport(
             config=cfg,
             results=[r],
             reference_names=["a"],
             extraction_count=5,
             timestamp="2025-01-01",
+            provenance=prov,
         )
 
         json_str = original.to_json()
@@ -469,6 +477,28 @@ class TestJsonSerialization:
         assert restored.results[0].grammar_valid_count == 3
         assert restored.extraction_count == 5
         assert restored.timestamp == "2025-01-01"
+        assert restored.provenance.codex_version == "1.2.3"
+        assert restored.provenance.codex_commit == "abc1234"
+        assert restored.provenance.isn_version == "0.7.0rc5"
+        assert restored.provenance.dd_version == "4.0.0"
+
+    def test_from_json_missing_provenance(self):
+        """Legacy reports without provenance deserialize cleanly."""
+        from imas_codex.standard_names.benchmark import (
+            BenchmarkConfig,
+            BenchmarkReport,
+            ModelResult,
+        )
+
+        cfg = BenchmarkConfig(models=["m1"])
+        r = ModelResult(model="m1")
+        report = BenchmarkReport(
+            config=cfg, results=[r], reference_names=[], timestamp="t"
+        )
+        raw = json.loads(report.to_json())
+        del raw["provenance"]
+        restored = BenchmarkReport.from_json(json.dumps(raw))
+        assert restored.provenance.codex_version == ""
 
 
 # -----------------------------------------------------------------------
