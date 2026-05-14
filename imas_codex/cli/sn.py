@@ -1472,21 +1472,11 @@ def sn_run(
     ),
 )
 @click.option(
-    "--names-only",
-    "names_only",
-    is_flag=True,
-    default=True,
-    help=(
-        "Benchmark name generation only (skip documentation benchmarking). "
-        "Currently the default mode; docs benchmarking is not yet implemented."
-    ),
-)
-@click.option(
-    "--include-docs",
-    is_flag=True,
+    "--include-docs/--names-only",
+    "include_docs",
     default=False,
-    help="Include documentation generation and review in the benchmark. "
-    "Without this flag, only name generation quality is benchmarked.",
+    help="--include-docs: benchmark names + docs. "
+    "--names-only: benchmark name generation only (default).",
 )
 def sn_bench(
     source: str,
@@ -1501,7 +1491,6 @@ def sn_bench(
     verbose: bool,
     reviewer_model: str | None,
     force: bool,
-    names_only: bool,
     include_docs: bool,
 ) -> None:
     """Benchmark LLM models on standard name generation.
@@ -1556,9 +1545,7 @@ def sn_bench(
         run_benchmark,
     )
 
-    # --include-docs overrides names_only
-    if include_docs:
-        names_only = False
+    names_only = not include_docs
 
     config = BenchmarkConfig(
         models=model_list,
