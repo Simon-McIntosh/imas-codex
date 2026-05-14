@@ -8,6 +8,7 @@ for Rich table display and JSON export.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import time
@@ -35,16 +36,17 @@ class BenchmarkConfig:
     """Configuration for a benchmark run."""
 
     models: list[str]
+    max_candidates: int = 54
+    runs_per_model: int = 1
+    temperature: float = 0.0
+    reviewer_model: str | None = None
+    names_only: bool = True
+    # Legacy fields kept for backward-compatible deserialization
     source: str = "dd"
     ids_filter: str | None = None
     domain_filter: str | None = None
     facility: str | None = None
-    max_candidates: int = 50
-    runs_per_model: int = 1
-    temperature: float = 0.0  # pinned for reproducibility
-    reviewer_model: str | None = None  # frontier model for quality scoring
-    force: bool = False  # re-run over already-processed paths
-    names_only: bool = True  # docs benchmarking not yet implemented
+    force: bool = True
 
 
 @dataclass
@@ -163,6 +165,7 @@ class BenchmarkReport:
     reference_names: list[str]
     extraction_count: int = 0
     extraction_source_ids: list[str] = field(default_factory=list)
+    dataset_hash: str = ""
     timestamp: str = ""
     provenance: BenchmarkProvenance = field(default_factory=BenchmarkProvenance)
 
@@ -174,7 +177,12 @@ class BenchmarkReport:
     def from_json(cls, data: str) -> BenchmarkReport:
         """Deserialize from JSON string."""
         raw = json.loads(data)
-        config = BenchmarkConfig(**raw["config"])
+        # Filter unknown config keys for backward compatibility
+        known_config_keys = {
+            f.name for f in BenchmarkConfig.__dataclass_fields__.values()
+        }
+        config_data = {k: v for k, v in raw["config"].items() if k in known_config_keys}
+        config = BenchmarkConfig(**config_data)
         results = [ModelResult(**r) for r in raw["results"]]
         prov_data = raw.get("provenance", {})
         provenance = (
@@ -186,6 +194,7 @@ class BenchmarkReport:
             reference_names=raw["reference_names"],
             extraction_count=raw.get("extraction_count", 0),
             extraction_source_ids=raw.get("extraction_source_ids", []),
+            dataset_hash=raw.get("dataset_hash", ""),
             timestamp=raw.get("timestamp", ""),
             provenance=provenance,
         )
@@ -723,6 +732,11 @@ async def run_benchmark(
         item.get("source_id", item.get("id", "")) for item in all_items
     ]
 
+    # Compute deterministic dataset hash from ordered source IDs
+    dataset_hash = hashlib.sha256(
+        "\n".join(sorted(extraction_source_ids)).encode()
+    ).hexdigest()[:16]
+
     # --- 2. Run each model ---
     results: list[ModelResult] = []
     from imas_codex.llm.prompt_loader import render_prompt
@@ -898,6 +912,7 @@ async def run_benchmark(
         reference_names=list(REFERENCE_NAMES.keys()),
         extraction_count=len(all_items),
         extraction_source_ids=extraction_source_ids,
+        dataset_hash=dataset_hash,
         timestamp=datetime.now(tz=UTC).isoformat(),
         provenance=provenance,
     )
@@ -905,19 +920,47 @@ async def run_benchmark(
 
 
 def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
-    """Extract candidates from the graph DB.
+    """Extract candidates using the fixed reference dataset.
+
+    Uses REFERENCE_NAMES paths as explicit inputs, enriched through the
+    same production pipeline (graph context, clustering, batching).
+    This ensures benchmark reproducibility — same paths every run.
 
     Returns list of batch dicts with keys: group_key, items, existing_names, context.
     """
+    from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
     from imas_codex.standard_names.sources.dd import extract_dd_candidates
 
-    batches = extract_dd_candidates(
-        ids_filter=config.ids_filter,
-        domain_filter=config.domain_filter,
-        limit=config.max_candidates,
-        force=config.force,
-        write_skipped=False,
+    # Select reference paths, capped by max_candidates
+    reference_paths = list(REFERENCE_NAMES.keys())
+    if config.max_candidates and len(reference_paths) > config.max_candidates:
+        reference_paths = reference_paths[: config.max_candidates]
+
+    logger.info(
+        "Benchmark extraction: %d/%d reference paths",
+        len(reference_paths),
+        len(REFERENCE_NAMES),
     )
+
+    batches = extract_dd_candidates(
+        explicit_paths=reference_paths,
+        force=True,  # always force — benchmark paths are pre-curated
+        write_skipped=False,  # no graph side effects
+    )
+
+    # Fail fast if paths are missing from the graph
+    extracted_paths = set()
+    for batch in batches:
+        for item in batch.items:
+            extracted_paths.add(item.get("path", item.get("source_id", "")))
+    missing = set(reference_paths) - extracted_paths
+    if missing:
+        logger.warning(
+            "Benchmark: %d/%d reference paths missing from graph: %s",
+            len(missing),
+            len(reference_paths),
+            sorted(missing)[:5],
+        )
 
     # Convert ExtractionBatch to plain dicts
     result = []

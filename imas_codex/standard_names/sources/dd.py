@@ -407,6 +407,7 @@ def extract_dd_candidates(
     max_batch_size: int = 25,
     max_tokens: int | None = None,
     write_skipped: bool = True,
+    explicit_paths: list[str] | None = None,
 ) -> list[ExtractionBatch]:
     """Extract candidate quantities from IMAS DD paths with enriched context.
 
@@ -438,6 +439,10 @@ def extract_dd_candidates(
         write_skipped: When True (default), write disqualified/skipped
             sources to the graph as StandardNameSource nodes. Set False
             for benchmark runs to avoid graph side effects.
+        explicit_paths: When provided, extract only these specific DD paths
+            instead of querying the graph with filters. Used by ``sn bench``
+            for reproducible benchmarks with a fixed reference dataset.
+            Overrides ids_filter, domain_filter, from_model, force, and limit.
 
     Returns:
         List of ExtractionBatch objects grouped by (primary_cluster, unit)
@@ -490,53 +495,67 @@ def extract_dd_candidates(
         cocos_version = dv_row["cocos_version"] if dv_row else None
         cocos_params = dv_row["cocos_params"] if dv_row else None
 
-        params: dict = {"sn_categories": list(SN_SOURCE_CATEGORIES)}
-        if limit is not None:
-            params["limit"] = limit
-        where_parts = [
-            # node_category is the authoritative namability taxonomy; node_type
-            # (dynamic/static/constant) is orthogonal and must NOT gate extraction.
-            "n.node_category IN $sn_categories",
-            "n.description IS NOT NULL",
-            "n.description <> ''",
-            # Leaf invariant: exclude container nodes (STRUCTURE/STRUCT_ARRAY).
-            # A STRUCTURE wraps sub-fields; it has no physics value itself.
-            # This replaces the old node_type=['dynamic','constant'] gate — it
-            # correctly admits static/geometry and coordinate leaves while
-            # blocking wrappers like summary/global_quantities/q_95{value,source}.
-            "NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])",
-            # S1 equivalent at query level: core_instant_changes is a whole-IDS
-            # dedup policy (duplicates core_profiles with "change in X" prefix).
-            # Push into Cypher so LIMIT/ORDER BY pagination doesn't fill a batch
-            # entirely with paths the classifier will reject.
-            "ids.id <> 'core_instant_changes'",
-        ]
-        if ids_filter:
-            where_parts.append("ids.id = $ids_filter")
-            params["ids_filter"] = ids_filter
-        if domain_filter:
-            where_parts.append("n.physics_domain = $domain_filter")
-            params["domain_filter"] = domain_filter
-        if from_model:
-            where_parts.append(
-                "EXISTS { MATCH (n)-[:HAS_STANDARD_NAME]->(sn:StandardName) "
-                "WHERE sn.model CONTAINS $from_model }"
+        if explicit_paths:
+            # Fixed-path mode: bypass all dynamic filters, use exact path list.
+            # Used by sn bench for reproducible benchmarks.
+            where_clause = "n.id IN $explicit_paths"
+            params = {"explicit_paths": explicit_paths}
+            limit_clause = ""
+            query = _ENRICHED_QUERY_TPL.format(
+                where_clause=where_clause, limit_clause=limit_clause
             )
-            params["from_model"] = from_model
-        if not force:
-            where_parts.append(
-                "NOT EXISTS { MATCH (sns:StandardNameSource {source_id: n.id, source_type: 'dd'}) "
-                "WHERE NOT (sns.status IN ['stale', 'failed', 'extracted']) }"
+            _status(f"fetching {len(explicit_paths)} explicit paths…")
+            results = list(gc.query(query, **params))
+        else:
+            params: dict = {"sn_categories": list(SN_SOURCE_CATEGORIES)}
+            if limit is not None:
+                params["limit"] = limit
+            where_parts = [
+                # node_category is the authoritative namability taxonomy; node_type
+                # (dynamic/static/constant) is orthogonal and must NOT gate extraction.
+                "n.node_category IN $sn_categories",
+                "n.description IS NOT NULL",
+                "n.description <> ''",
+                # Leaf invariant: exclude container nodes (STRUCTURE/STRUCT_ARRAY).
+                # A STRUCTURE wraps sub-fields; it has no physics value itself.
+                # This replaces the old node_type=['dynamic','constant'] gate — it
+                # correctly admits static/geometry and coordinate leaves while
+                # blocking wrappers like summary/global_quantities/q_95{value,source}.
+                "NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])",
+                # S1 equivalent at query level: core_instant_changes is a whole-IDS
+                # dedup policy (duplicates core_profiles with "change in X" prefix).
+                # Push into Cypher so LIMIT/ORDER BY pagination doesn't fill a batch
+                # entirely with paths the classifier will reject.
+                "ids.id <> 'core_instant_changes'",
+            ]
+            if ids_filter:
+                where_parts.append("ids.id = $ids_filter")
+                params["ids_filter"] = ids_filter
+            if domain_filter:
+                where_parts.append("n.physics_domain = $domain_filter")
+                params["domain_filter"] = domain_filter
+            if from_model:
+                where_parts.append(
+                    "EXISTS { MATCH (n)-[:HAS_STANDARD_NAME]->(sn:StandardName) "
+                    "WHERE sn.model CONTAINS $from_model }"
+                )
+                params["from_model"] = from_model
+            if not force:
+                where_parts.append(
+                    "NOT EXISTS { MATCH (sns:StandardNameSource {source_id: n.id, source_type: 'dd'}) "
+                    "WHERE NOT (sns.status IN ['stale', 'failed', 'extracted']) }"
+                )
+
+            where_clause = " AND ".join(where_parts)
+            limit_clause = "LIMIT $limit" if limit is not None else ""
+            query = _ENRICHED_QUERY_TPL.format(
+                where_clause=where_clause, limit_clause=limit_clause
             )
 
-        where_clause = " AND ".join(where_parts)
-        limit_clause = "LIMIT $limit" if limit is not None else ""
-        query = _ENRICHED_QUERY_TPL.format(
-            where_clause=where_clause, limit_clause=limit_clause
-        )
-
-        _status(f"running enriched query (limit={'∞' if limit is None else limit})…")
-        results = list(gc.query(query, **params))
+            _status(
+                f"running enriched query (limit={'∞' if limit is None else limit})…"
+            )
+            results = list(gc.query(query, **params))
 
         if not results:
             logger.info("No DD paths found matching filters")

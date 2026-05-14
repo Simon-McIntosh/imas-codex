@@ -1398,32 +1398,6 @@ def sn_run(
 
 @sn.command("bench")
 @click.option(
-    "--source",
-    type=click.Choice(["dd"]),
-    default="dd",
-    help="Source to extract candidates from",
-)
-@click.option(
-    "--ids",
-    "ids_filter",
-    type=str,
-    default=None,
-    help="Filter to specific IDS (for DD source)",
-)
-@click.option(
-    "--physics-domain",
-    "domain_filter",
-    type=_PHYSICS_DOMAIN_CHOICE,
-    default=None,
-    help="Filter to physics domain.",
-)
-@click.option(
-    "--facility",
-    type=str,
-    default=None,
-    help="Facility ID (reserved for future signals source)",
-)
-@click.option(
     "--models",
     type=str,
     multiple=True,
@@ -1433,8 +1407,8 @@ def sn_run(
 @click.option(
     "--max-candidates",
     type=int,
-    default=50,
-    help="Maximum extraction candidates",
+    default=None,
+    help="Limit to first N reference paths (default: all 54)",
 )
 @click.option(
     "--runs",
@@ -1462,16 +1436,6 @@ def sn_run(
     help="Judge model for quality scoring. Defaults to [sn.benchmark].reviewer-model.",
 )
 @click.option(
-    "--force",
-    is_flag=True,
-    default=False,
-    help=(
-        "Re-run against DD paths that already have a StandardNameSource. "
-        "Required when the target IDS has been fully processed (most of the "
-        "DD catalog in mature deployments)."
-    ),
-)
-@click.option(
     "--include-docs/--names-only",
     "include_docs",
     default=False,
@@ -1479,34 +1443,30 @@ def sn_run(
     "--names-only: benchmark name generation only (default).",
 )
 def sn_bench(
-    source: str,
-    ids_filter: str | None,
-    domain_filter: str | None,
-    facility: str | None,
     models: tuple[str, ...],
-    max_candidates: int,
+    max_candidates: int | None,
     runs: int,
     temperature: float,
     output: str | None,
     verbose: bool,
     reviewer_model: str | None,
-    force: bool,
     include_docs: bool,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
-    Runs a fixed dataset through multiple models and compares results
-    on grammar validity, reference overlap, cost, and speed.
+    Uses a fixed reference dataset of 54 curated DD paths for reproducible
+    cross-model comparison. Results include grammar validity, reference
+    overlap, reviewer quality scores, cost, and speed.
 
     When --models is omitted, loads the model list from
     [tool.imas-codex.sn.benchmark].compose-models in pyproject.toml.
 
     \b
     Examples:
-      imas-codex sn bench --ids equilibrium
+      imas-codex sn bench
+      imas-codex sn bench --max-candidates 5
       imas-codex sn bench --models anthropic/claude-sonnet-4.6 --models openai/gpt-5.4
       imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
-      imas-codex sn bench --max-candidates 20 -v
       imas-codex sn bench --include-docs
     """
     if verbose:
@@ -1544,32 +1504,25 @@ def sn_bench(
         render_comparison_table,
         run_benchmark,
     )
+    from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
     names_only = not include_docs
+    total_ref = len(REFERENCE_NAMES)
+    effective_max = max_candidates if max_candidates else total_ref
 
     config = BenchmarkConfig(
         models=model_list,
-        source=source,
-        ids_filter=ids_filter,
-        domain_filter=domain_filter,
-        facility=facility,
-        max_candidates=max_candidates,
+        max_candidates=effective_max,
         runs_per_model=runs,
         temperature=temperature,
         reviewer_model=reviewer_model,
-        force=force,
         names_only=names_only,
     )
 
     mode_str = "names + docs" if include_docs else "names-only"
     console.print("[bold]SN Benchmark[/bold]")
     console.print(f"  Models: {', '.join(model_list)}")
-    console.print(f"  Source: {source}")
-    if ids_filter:
-        console.print(f"  IDS filter: {ids_filter}")
-    if domain_filter:
-        console.print(f"  Domain filter: {domain_filter}")
-    console.print(f"  Max candidates: {max_candidates}")
+    console.print(f"  Reference paths: {min(effective_max, total_ref)}/{total_ref}")
     console.print(f"  Runs per model: {runs}")
     console.print(f"  Temperature: {temperature}")
     console.print(f"  Reviewer (judge): {reviewer_model}")
@@ -1590,6 +1543,13 @@ def sn_bench(
             f"\nProvenance: codex={prov.codex_version} ({prov.codex_commit}), "
             f"ISN={prov.isn_version}, DD={prov.dd_version}"
         )
+    if report.dataset_hash:
+        console.print(f"Dataset hash: {report.dataset_hash}")
+    console.print(
+        f"Source paths ({report.extraction_count}): "
+        + ", ".join(report.extraction_source_ids[:5])
+        + ("…" if len(report.extraction_source_ids) > 5 else "")
+    )
 
     # Save JSON report to ~/.local/share/imas-codex/benchmarks/
     from pathlib import Path

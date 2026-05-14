@@ -84,7 +84,7 @@ class TestDataclasses:
 
         cfg = BenchmarkConfig(models=["model-a", "model-b"])
         assert cfg.source == "dd"
-        assert cfg.max_candidates == 50
+        assert cfg.max_candidates == 54
         assert cfg.runs_per_model == 1
         assert cfg.temperature == 0.0
         assert cfg.ids_filter is None
