@@ -86,6 +86,20 @@ class ModelResult:
     reviewer_cost: float = 0.0
     compose_elapsed_seconds: float = 0.0
     review_elapsed_seconds: float = 0.0
+    # Docs quality scoring
+    docs_quality_scores: list[dict] = field(default_factory=list)
+    docs_quality_distribution: dict[str, int] = field(default_factory=dict)
+    avg_docs_quality_score: float = 0.0
+    # Docs per-dimension averages
+    avg_description_quality_score: float = 0.0
+    avg_documentation_quality_score: float = 0.0
+    avg_docs_completeness_score: float = 0.0
+    avg_physics_accuracy_score: float = 0.0
+    # Docs cost/timing
+    docs_compose_cost: float = 0.0
+    docs_compose_elapsed_seconds: float = 0.0
+    docs_review_elapsed_seconds: float = 0.0
+    docs_reviewer_cost: float = 0.0
 
 
 @dataclass
@@ -315,24 +329,45 @@ async def score_with_reviewer(
         fetch_review_neighbours,
     )
     from imas_codex.standard_names.example_loader import load_review_examples
-    from imas_codex.standard_names.models import (
-        StandardNameQualityReviewNameOnlyBatch,
-    )
 
-    if target != "names":
-        raise ValueError(f"Unknown review target {target!r}; expected 'names'.")
+    if target == "names":
+        from imas_codex.standard_names.models import (
+            StandardNameQualityReviewNameOnlyBatch,
+        )
 
-    response_model: type = StandardNameQualityReviewNameOnlyBatch
+        response_model: type = StandardNameQualityReviewNameOnlyBatch
+        system_template = "sn/review_names_system"
+        user_template = "sn/review_names_user"
+        dim_keys = ("grammar", "semantic", "convention", "completeness")
+    elif target == "docs":
+        from imas_codex.standard_names.models import (
+            StandardNameQualityReviewDocsBatch,
+        )
+
+        response_model = StandardNameQualityReviewDocsBatch
+        system_template = "sn/review_docs_system"
+        user_template = "sn/review_docs_user"
+        dim_keys = (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        )
+    else:
+        raise ValueError(
+            f"Unknown review target {target!r}; expected 'names' or 'docs'."
+        )
 
     # Get compose context (grammar enums + shared include variables)
     compose_ctx = build_compose_context()
 
     # Load K3 scored calibration examples from graph
     review_scored_examples: list[dict] = []
+    review_axis = "name" if target == "names" else "docs"
     try:
         with GraphClient() as gc:
             review_scored_examples = load_review_examples(
-                gc, physics_domains=[], axis="name"
+                gc, physics_domains=[], axis=review_axis
             )
     except Exception as exc:
         logger.debug("Could not load review examples: %s", exc)
@@ -342,7 +377,7 @@ async def score_with_reviewer(
         **compose_ctx,
         "review_scored_examples": review_scored_examples,
     }
-    system_prompt = render_prompt("sn/review_names_system", system_context)
+    system_prompt = render_prompt(system_template, system_context)
 
     # Process in batches of 10
     all_reviews: list[dict] = []
@@ -354,15 +389,26 @@ async def score_with_reviewer(
         batch_items = []
         for c in batch:
             name = _resolve_name(c)
-            item: dict[str, Any] = {
-                "standard_name": name,
-                "source_id": c.get("source_id", ""),
-                "description": c.get("description", "") or "",
-                "documentation": (c.get("documentation", "") or "")[:500],
-                "unit": c.get("unit", "N/A"),
-                "kind": c.get("kind", "N/A"),
-                "source_paths": c.get("source_paths", []),
-            }
+            if target == "docs":
+                item: dict[str, Any] = {
+                    "id": name,
+                    "standard_name": name,
+                    "description": c.get("docs_description", c.get("description", "")),
+                    "documentation": c.get("documentation", ""),
+                    "unit": c.get("unit", "N/A"),
+                    "kind": c.get("kind", "N/A"),
+                    "source_paths": c.get("source_paths", []),
+                }
+            else:
+                item = {
+                    "standard_name": name,
+                    "source_id": c.get("source_id", ""),
+                    "description": c.get("description", "") or "",
+                    "documentation": (c.get("documentation", "") or "")[:500],
+                    "unit": c.get("unit", "N/A"),
+                    "kind": c.get("kind", "N/A"),
+                    "source_paths": c.get("source_paths", []),
+                }
 
             # Fetch review neighbours from live graph
             try:
@@ -409,7 +455,7 @@ async def score_with_reviewer(
         }
 
         try:
-            user_prompt = render_prompt("sn/review_names_user", user_context)
+            user_prompt = render_prompt(user_template, user_context)
         except Exception as exc:
             logger.warning("Failed to render review user prompt: %s", exc)
             continue
@@ -432,17 +478,96 @@ async def score_with_reviewer(
                     "name": r.standard_name,
                     "quality_tier": r.scores.tier,
                     "score": r.scores.score,
-                    "grammar_score": r.scores.grammar,
-                    "semantic_score": r.scores.semantic,
-                    "convention_score": r.scores.convention,
-                    "completeness_score": r.scores.completeness,
-                    "reasoning": r.reasoning,
                 }
+                for dim in dim_keys:
+                    review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                if hasattr(r, "reasoning"):
+                    review_dict["reasoning"] = r.reasoning
                 all_reviews.append(review_dict)
         except Exception as e:
             logger.warning("Reviewer scoring failed for batch: %s", e)
 
     return all_reviews, total_reviewer_cost
+
+
+# ---------------------------------------------------------------------------
+# Docs generation for benchmark
+# ---------------------------------------------------------------------------
+
+
+async def generate_docs_for_candidates(
+    candidates: list[dict],
+    model: str,
+    context: dict[str, Any],
+) -> tuple[list[dict], float, float]:
+    """Generate documentation for benchmark candidates.
+
+    Returns (updated_candidates, total_cost, elapsed_seconds).
+    Each candidate dict is updated with 'docs_description' and 'documentation' keys.
+    """
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.standard_names.models import GeneratedDocs
+
+    system_prompt = render_prompt("sn/generate_docs_system", context)
+    total_cost = 0.0
+    t0 = time.monotonic()
+
+    for c in candidates:
+        name = _resolve_name(c)
+
+        # Build item context for the docs generation prompt
+        item = {
+            "name": name,
+            "unit": c.get("unit", ""),
+            "kind": c.get("kind", "scalar"),
+            "physics_domain": c.get("physics_domain", ""),
+            "description": c.get("description", ""),
+            "source_paths": c.get("source_paths", []),
+            # Minimal context — no enrichment for benchmark simplicity
+            "reviewer_score_name": None,
+            "reviewer_comments_name": "",
+            "chain_history": [],
+        }
+
+        try:
+            user_prompt = render_prompt(
+                "sn/generate_docs_user", {**context, "item": item}
+            )
+        except Exception as exc:
+            logger.warning("Failed to render docs prompt for %s: %s", name, exc)
+            continue
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        # GPT-5.x models don't support temperature=0.0
+        temp = 0.0
+        if "gpt-5" in model:
+            temp = None  # type: ignore[assignment]
+
+        try:
+            result, cost, _ = await acall_llm_structured(
+                model=model,
+                messages=messages,
+                response_model=GeneratedDocs,
+                temperature=temp,
+                service="standard-names",
+            )
+            total_cost += cost
+            c["docs_description"] = result.description
+            c["documentation"] = result.documentation
+        except Exception as exc:
+            logger.warning(
+                "Docs generation failed for %s with %s: %s", name, model, exc
+            )
+            c["docs_description"] = ""
+            c["documentation"] = ""
+
+    elapsed = time.monotonic() - t0
+    return candidates, total_cost, round(elapsed, 2)
 
 
 # ---------------------------------------------------------------------------
@@ -600,6 +725,60 @@ async def run_benchmark(
             sum(field_counts) / len(field_counts) if field_counts else 0.0
         )
 
+    # --- 2c. Docs generation + review (when not names-only) ---
+    if not config.names_only:
+        for result in results:
+            valid_candidates = [
+                c for c in result.candidates if validate_candidate(c)[0]
+            ]
+            if not valid_candidates:
+                continue
+
+            # Generate docs using the compose model
+            _, docs_cost, docs_elapsed = await generate_docs_for_candidates(
+                valid_candidates,
+                result.model,
+                context,
+            )
+            result.docs_compose_cost = docs_cost
+            result.docs_compose_elapsed_seconds = docs_elapsed
+
+            # Review docs with reviewer model
+            t_docs_review_start = time.monotonic()
+            docs_reviews, docs_reviewer_cost = await score_with_reviewer(
+                valid_candidates,
+                config.reviewer_model,
+                target="docs",
+            )
+            result.docs_review_elapsed_seconds = round(
+                time.monotonic() - t_docs_review_start, 2
+            )
+            result.docs_reviewer_cost = docs_reviewer_cost
+            result.docs_quality_scores = docs_reviews
+
+            # Compute docs distribution
+            for r in docs_reviews:
+                tier = r.get("quality_tier", "unknown")
+                result.docs_quality_distribution[tier] = (
+                    result.docs_quality_distribution.get(tier, 0) + 1
+                )
+            if docs_reviews:
+                result.avg_docs_quality_score = sum(
+                    r.get("score", 0) for r in docs_reviews
+                ) / len(docs_reviews)
+
+                # Per-dimension averages for docs
+                for dim in (
+                    "description_quality",
+                    "documentation_quality",
+                    "completeness",
+                    "physics_accuracy",
+                ):
+                    key = f"{dim}_score"
+                    vals = [r[key] for r in docs_reviews if key in r and r[key] > 0]
+                    if vals:
+                        setattr(result, f"avg_{key}", sum(vals) / len(vals))
+
     # --- 3. Build report ---
     report = BenchmarkReport(
         config=config,
@@ -733,9 +912,16 @@ async def _run_model(
                     tokens,
                 )
 
-                # Collect candidates
-                for c in llm_result.candidates:
-                    all_candidates.append(c.model_dump())
+                # Collect candidates — merge extraction context
+                for c_idx, c in enumerate(llm_result.candidates):
+                    candidate = c.model_dump()
+                    # Carry forward extraction context for docs generation
+                    if c_idx < len(items):
+                        src = items[c_idx]
+                        for key in ("source_paths", "physics_domain", "unit"):
+                            if key in src and key not in candidate:
+                                candidate[key] = src[key]
+                    all_candidates.append(candidate)
                 result.skipped_count += len(llm_result.skipped)
 
             except Exception as exc:
@@ -916,6 +1102,42 @@ def render_comparison_table(report: BenchmarkReport) -> None:
         console.print()
         console.print(qual_table)
 
+    # Docs quality table (when docs were benchmarked)
+    has_docs = any(r.docs_quality_scores for r in report.results)
+    if has_docs:
+        docs_table = Table(
+            title="Docs Quality Results",
+            show_header=True,
+            header_style="bold green",
+        )
+        docs_table.add_column("Model", style="bold")
+        docs_table.add_column("Docs Scored", justify="right")
+        docs_table.add_column("Avg Docs Q", justify="right")
+        docs_table.add_column("Desc", justify="right")
+        docs_table.add_column("Docs", justify="right")
+        docs_table.add_column("Compl", justify="right")
+        docs_table.add_column("Physics", justify="right")
+        docs_table.add_column("Docs Cost", justify="right")
+
+        for r in report.results:
+            if r.docs_quality_scores:
+                n_docs = len(r.docs_quality_scores)
+                docs_table.add_row(
+                    r.model,
+                    str(n_docs),
+                    f"{r.avg_docs_quality_score:.2f}",
+                    f"{r.avg_description_quality_score:.1f}",
+                    f"{r.avg_documentation_quality_score:.1f}",
+                    f"{r.avg_docs_completeness_score:.1f}",
+                    f"{r.avg_physics_accuracy_score:.1f}",
+                    f"${r.docs_compose_cost + r.docs_reviewer_cost:.4f}",
+                )
+            else:
+                docs_table.add_row(r.model, "—", "—", "—", "—", "—", "—", "—")
+
+        console.print()
+        console.print(docs_table)
+
     # Summary line
     reviewer_str = (
         f" | Reviewer: {report.config.reviewer_model}"
@@ -926,14 +1148,35 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     # Cost summary
     total_compose_cost = sum(r.total_cost for r in report.results)
     total_reviewer_cost = sum(r.reviewer_cost for r in report.results)
-    total_cost = total_compose_cost + total_reviewer_cost
+    total_docs_compose_cost = sum(r.docs_compose_cost for r in report.results)
+    total_docs_reviewer_cost = sum(r.docs_reviewer_cost for r in report.results)
+    total_cost = (
+        total_compose_cost
+        + total_reviewer_cost
+        + total_docs_compose_cost
+        + total_docs_reviewer_cost
+    )
     total_compose_elapsed = sum(r.compose_elapsed_seconds for r in report.results)
     total_review_elapsed = sum(r.review_elapsed_seconds for r in report.results)
-    total_elapsed = total_compose_elapsed + total_review_elapsed
+    total_docs_compose_elapsed = sum(
+        r.docs_compose_elapsed_seconds for r in report.results
+    )
+    total_docs_review_elapsed = sum(
+        r.docs_review_elapsed_seconds for r in report.results
+    )
+    total_elapsed = (
+        total_compose_elapsed
+        + total_review_elapsed
+        + total_docs_compose_elapsed
+        + total_docs_review_elapsed
+    )
 
     console.print("\n[bold]Cost Summary[/bold]")
     console.print(f"  Compose cost:  ${total_compose_cost:.4f}")
     console.print(f"  Reviewer cost: ${total_reviewer_cost:.4f}")
+    if has_docs:
+        console.print(f"  Docs compose cost:  ${total_docs_compose_cost:.4f}")
+        console.print(f"  Docs reviewer cost: ${total_docs_reviewer_cost:.4f}")
     console.print(f"  [bold]Total cost:  ${total_cost:.4f}[/bold]")
     console.print(
         f"  Compose time:  {total_compose_elapsed:.1f}s ({total_compose_elapsed / 60:.1f}min)"
@@ -941,6 +1184,13 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     console.print(
         f"  Review time:   {total_review_elapsed:.1f}s ({total_review_elapsed / 60:.1f}min)"
     )
+    if has_docs:
+        console.print(
+            f"  Docs compose time:  {total_docs_compose_elapsed:.1f}s ({total_docs_compose_elapsed / 60:.1f}min)"
+        )
+        console.print(
+            f"  Docs review time:   {total_docs_review_elapsed:.1f}s ({total_docs_review_elapsed / 60:.1f}min)"
+        )
     console.print(
         f"  Total wall-clock: {total_elapsed:.1f}s ({total_elapsed / 60:.1f}min)"
     )

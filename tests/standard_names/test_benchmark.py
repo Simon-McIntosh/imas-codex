@@ -1418,3 +1418,205 @@ class TestNamesOnlyCLI:
 
         config = BenchmarkConfig(models=["test"], reviewer_model="r")
         assert config.names_only is True
+
+
+# -----------------------------------------------------------------------
+# Docs benchmarking tests
+# -----------------------------------------------------------------------
+
+
+class TestIncludeDocsCLI:
+    """Test --include-docs CLI flag."""
+
+    def test_include_docs_in_help(self):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+
+        runner = CliRunner()
+        result = runner.invoke(sn, ["bench", "--help"])
+        assert result.exit_code == 0
+        assert "--include-docs" in result.output
+
+
+class TestDocsFields:
+    """Test docs fields on ModelResult."""
+
+    def test_model_result_docs_fields_default(self):
+        from imas_codex.standard_names.benchmark import ModelResult
+
+        r = ModelResult(model="test")
+        assert r.docs_quality_scores == []
+        assert r.docs_quality_distribution == {}
+        assert r.avg_docs_quality_score == 0.0
+        assert r.avg_description_quality_score == 0.0
+        assert r.avg_documentation_quality_score == 0.0
+        assert r.avg_docs_completeness_score == 0.0
+        assert r.avg_physics_accuracy_score == 0.0
+        assert r.docs_compose_cost == 0.0
+        assert r.docs_compose_elapsed_seconds == 0.0
+        assert r.docs_review_elapsed_seconds == 0.0
+        assert r.docs_reviewer_cost == 0.0
+
+
+class TestScoreWithReviewerDocs:
+    """Test score_with_reviewer with target='docs'."""
+
+    @pytest.mark.asyncio
+    async def test_score_with_reviewer_docs_target(self):
+        """Verify docs review uses correct dimensions."""
+        from unittest.mock import MagicMock
+
+        from imas_codex.standard_names.benchmark import score_with_reviewer
+
+        # Build a mock docs review response
+        mock_scores = MagicMock()
+        mock_scores.tier = "good"
+        mock_scores.score = 0.72
+        mock_scores.description_quality = 16
+        mock_scores.documentation_quality = 14
+        mock_scores.completeness = 15
+        mock_scores.physics_accuracy = 12
+
+        mock_review = MagicMock()
+        mock_review.standard_name = "electron_temperature"
+        mock_review.scores = mock_scores
+        mock_review.reasoning = "Good docs"
+
+        mock_batch = MagicMock()
+        mock_batch.reviews = [mock_review]
+
+        candidates = [
+            {
+                "standard_name": "electron_temperature",
+                "docs_description": "Temperature of electrons",
+                "documentation": "Detailed docs here",
+                "unit": "eV",
+                "kind": "scalar",
+                "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
+            }
+        ]
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=(mock_batch, 0.01, 500),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt",
+            ),
+            patch(
+                "imas_codex.standard_names.context.build_compose_context",
+                return_value={},
+            ),
+            patch(
+                "imas_codex.standard_names.context.fetch_review_neighbours",
+                return_value={
+                    "vector_neighbours": [],
+                    "same_base_neighbours": [],
+                    "same_path_neighbours": [],
+                },
+            ),
+            patch(
+                "imas_codex.standard_names.example_loader.load_review_examples",
+                return_value=[],
+            ),
+            patch(
+                "imas_codex.graph.client.GraphClient",
+            ),
+        ):
+            reviews, cost = await score_with_reviewer(
+                candidates, "test/model", target="docs"
+            )
+
+        assert len(reviews) == 1
+        r = reviews[0]
+        assert r["name"] == "electron_temperature"
+        assert "description_quality_score" in r
+        assert "documentation_quality_score" in r
+        assert "completeness_score" in r
+        assert "physics_accuracy_score" in r
+        # Should NOT have names-only dimensions
+        assert "grammar_score" not in r
+        assert "semantic_score" not in r
+
+    @pytest.mark.asyncio
+    async def test_score_with_reviewer_invalid_target(self):
+        """Unknown target raises ValueError."""
+        from imas_codex.standard_names.benchmark import score_with_reviewer
+
+        with pytest.raises(ValueError, match="Unknown review target"):
+            await score_with_reviewer([], "model", target="invalid")
+
+
+class TestGenerateDocsForCandidates:
+    """Test generate_docs_for_candidates function."""
+
+    @pytest.mark.asyncio
+    async def test_generate_docs_updates_candidates(self):
+        from imas_codex.standard_names.benchmark import generate_docs_for_candidates
+
+        mock_result = MagicMock()
+        mock_result.description = "Generated description"
+        mock_result.documentation = "Generated documentation body"
+
+        candidates = [
+            {
+                "standard_name": "electron_temperature",
+                "unit": "eV",
+                "kind": "scalar",
+            }
+        ]
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=(mock_result, 0.005, 300),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt",
+            ),
+        ):
+            updated, cost, elapsed = await generate_docs_for_candidates(
+                candidates, "test/model", context={}
+            )
+
+        assert len(updated) == 1
+        assert updated[0]["docs_description"] == "Generated description"
+        assert updated[0]["documentation"] == "Generated documentation body"
+        assert cost == 0.005
+        assert elapsed >= 0.0
+
+    @pytest.mark.asyncio
+    async def test_generate_docs_handles_failure(self):
+        from imas_codex.standard_names.benchmark import generate_docs_for_candidates
+
+        candidates = [
+            {
+                "standard_name": "electron_temperature",
+                "unit": "eV",
+            }
+        ]
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                side_effect=RuntimeError("LLM down"),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt",
+            ),
+        ):
+            updated, cost, elapsed = await generate_docs_for_candidates(
+                candidates, "test/model", context={}
+            )
+
+        assert updated[0]["docs_description"] == ""
+        assert updated[0]["documentation"] == ""
+        assert cost == 0.0

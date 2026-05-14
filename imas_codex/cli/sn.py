@@ -1480,6 +1480,13 @@ def sn_run(
         "Currently the default mode; docs benchmarking is not yet implemented."
     ),
 )
+@click.option(
+    "--include-docs",
+    is_flag=True,
+    default=False,
+    help="Include documentation generation and review in the benchmark. "
+    "Without this flag, only name generation quality is benchmarked.",
+)
 def sn_bench(
     source: str,
     ids_filter: str | None,
@@ -1494,6 +1501,7 @@ def sn_bench(
     reviewer_model: str | None,
     force: bool,
     names_only: bool,
+    include_docs: bool,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -1543,6 +1551,10 @@ def sn_bench(
         run_benchmark,
     )
 
+    # --include-docs overrides names_only
+    if include_docs:
+        names_only = False
+
     config = BenchmarkConfig(
         models=model_list,
         source=source,
@@ -1557,6 +1569,7 @@ def sn_bench(
         names_only=names_only,
     )
 
+    mode_str = "names + docs" if include_docs else "names-only"
     console.print("[bold]SN Benchmark[/bold]")
     console.print(f"  Models: {', '.join(model_list)}")
     console.print(f"  Source: {source}")
@@ -1568,7 +1581,7 @@ def sn_bench(
     console.print(f"  Runs per model: {runs}")
     console.print(f"  Temperature: {temperature}")
     console.print(f"  Reviewer (judge): {reviewer_model}")
-    console.print(f"  Mode: {'names-only' if names_only else 'names + docs'}")
+    console.print(f"  Mode: {mode_str}")
     console.print()
 
     from imas_codex.cli.utils import run_async
