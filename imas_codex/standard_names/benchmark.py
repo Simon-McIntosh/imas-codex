@@ -162,6 +162,7 @@ class BenchmarkReport:
     results: list[ModelResult]
     reference_names: list[str]
     extraction_count: int = 0
+    extraction_source_ids: list[str] = field(default_factory=list)
     timestamp: str = ""
     provenance: BenchmarkProvenance = field(default_factory=BenchmarkProvenance)
 
@@ -184,6 +185,7 @@ class BenchmarkReport:
             results=results,
             reference_names=raw["reference_names"],
             extraction_count=raw.get("extraction_count", 0),
+            extraction_source_ids=raw.get("extraction_source_ids", []),
             timestamp=raw.get("timestamp", ""),
             provenance=provenance,
         )
@@ -716,6 +718,11 @@ async def run_benchmark(
         len(extraction_batches),
     )
 
+    # Record source IDs for cross-model identity assertion
+    extraction_source_ids = [
+        item.get("source_id", item.get("id", "")) for item in all_items
+    ]
+
     # --- 2. Run each model ---
     results: list[ModelResult] = []
     from imas_codex.llm.prompt_loader import render_prompt
@@ -890,6 +897,7 @@ async def run_benchmark(
         results=results,
         reference_names=list(REFERENCE_NAMES.keys()),
         extraction_count=len(all_items),
+        extraction_source_ids=extraction_source_ids,
         timestamp=datetime.now(tz=UTC).isoformat(),
         provenance=provenance,
     )
@@ -1021,6 +1029,12 @@ async def _run_model(
                 # Collect candidates — merge extraction context
                 for c_idx, c in enumerate(llm_result.candidates):
                     candidate = c.model_dump()
+                    # Compose the standard name from segments
+                    try:
+                        segs = _get_segment_fields(candidate)
+                        candidate["standard_name"] = compose_standard_name(segs)
+                    except Exception:
+                        candidate["standard_name"] = ""
                     # Carry forward extraction context for docs generation
                     if c_idx < len(items):
                         src = items[c_idx]
