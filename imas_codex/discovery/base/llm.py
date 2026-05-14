@@ -845,10 +845,26 @@ def _build_kwargs(
     # Decide routing: proxy vs direct.
     # The LiteLLM proxy strips cache_control blocks and response_cost from
     # responses, breaking prompt caching and actual cost reporting.  When
-    # the model supports caching and a direct API key is available, bypass
-    # the proxy to preserve both.
+    # a direct API key is available and the model is an OpenRouter model,
+    # bypass the proxy entirely — this also avoids connection errors when
+    # the proxy is not running.  Cache support is irrelevant for routing;
+    # it only controls whether cache_control blocks are injected.
     use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
-    bypass_proxy = supports_cache and bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
+    has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
+    is_openrouter_model = "openrouter/" in model.lower() or any(
+        p in model.lower()
+        for p in (
+            "anthropic/",
+            "google/",
+            "openai/",
+            "deepseek/",
+            "meta-llama/",
+            "moonshotai/",
+            "qwen/",
+            "mistralai/",
+        )
+    )
+    bypass_proxy = has_direct_key and is_openrouter_model
 
     if use_proxy and not bypass_proxy:
         proxy_url = get_llm_proxy_url()
