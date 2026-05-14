@@ -184,6 +184,23 @@ classes:
         description: Geographic location
       ssh_host:
         description: SSH host alias for connection (configured in ~/.ssh/config)
+      ssh_gateway:
+        description: >-
+          SSH gateway/bastion host for ProxyJump connections to facility
+          login nodes. Used by the host CLI for node discovery and querying
+          when the primary ssh_host is unreachable.
+      ssh_user:
+        description: >-
+          SSH username for facility connections. Defaults to the current
+          user if not specified.
+      known_login_nodes:
+        description: >-
+          Known login node short hostnames for this facility. Used as
+          fallback when dynamic discovery via /etc/hosts fails (e.g.,
+          when the current SSH target node is down). The host CLI tries
+          dynamic discovery first, then falls back to probing these nodes
+          via the ssh_gateway. Short hostnames without domain suffix.
+        multivalued: true
 
       # --- Nested config sections ---
       discovery_roots:

@@ -12,6 +12,18 @@ location: Cadarache, France
 # SSH host alias - auto-detected as local when running on SDCC
 # (hostname contains 'iter' so run() executes locally without SSH)
 ssh_host: iter
+ssh_gateway: sdcc-login.iter.org
+
+# Known login nodes — fallback for dynamic discovery when the current
+# SSH target is down.  Updated manually; `host iter` warns when the
+# live node list differs from this config.
+known_login_nodes:
+  - 98dci4-srv-1001
+  - 98dci4-srv-1002
+  - 98dci4-srv-1003
+  - 98dci4-srv-1004
+  - 98dci4-srv-1005
+  - 98dci4-srv-1006
 
 # Login node FQDN patterns for is_local_host() detection.
 # When the current machine's FQDN matches any pattern, the local_hosts
