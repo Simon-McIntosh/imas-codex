@@ -282,21 +282,20 @@ location = "iter"
 # refine_name and refine_docs were peeled off into [tool.imas-codex.sn-refine]
 # on 2026-05-03 after E3 telemetry showed flash-lite refines accept at
 # ~5% vs ~42% for Sonnet-4.6 compose.
-# 2026-05-14 (benchmark sn_benchmark_20260514T205139): GPT-5.4 scored
-# docs=0.847 (rank 2/14) vs Sonnet 4.6 docs=0.776 (rank 9/14). Switched
-# to GPT-5.4 for +9% docs quality at comparable cost.
-model = "openrouter/openai/gpt-5.4"
+# 2026-05-15 (benchmark sn_benchmark_20260514T205139): GPT-5.5 scored
+# docs=0.852 (rank 1/14) vs GPT-5.4 docs=0.847 (rank 2/14). Both
+# significantly outperform Sonnet 4.6 docs=0.776 (rank 9/14).
+model = "openrouter/openai/gpt-5.5"
 batch-size = 50
 
 [tool.imas-codex.sn-refine]
 # openrouter/ prefix — see [language] note above.
 # Powers process_refine_name_batch and process_refine_docs_batch.
-# 2026-05-14: Aligned with [sn-compose] compose model (GPT-5.4) per
-# benchmark results. Refine passes benefit from the same model that
-# composes well — refined names inherit the model's grammar/semantic
-# strengths. Kept as a separate section so the refine tier can diverge
-# from compose later (e.g. always-on Opus) without affecting compose.
-model = "openrouter/openai/gpt-5.4"
+# 2026-05-15: Upgraded to GPT-5.5 per benchmark (combined=0.797, rank 1/14).
+# GPT-5.5 outperforms GPT-5.4 (0.774) on both names (+0.040) and docs (+0.005).
+# Refine is the highest-leverage stage — the model that scores best at
+# initial composition also produces the strongest corrections.
+model = "openrouter/openai/gpt-5.5"
 
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
@@ -328,11 +327,13 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 # See docs/ops/openrouter-rate-ceilings.md for probe details.
 max-concurrency = 96
 # openrouter/ prefix — see [dd-enrichment] note above.
-# 2026-05-14 (benchmark sn_benchmark_20260514T205139): GPT-5.4 scored
-# combined=0.774 (rank 2/14) — names=0.702, docs=0.847. Sonnet 4.6
-# scored combined=0.719 (rank 9/14). GPT-5.4 offers +8% quality at
-# comparable compose cost ($0.07/batch vs $0.15 for Sonnet).
-model = "openrouter/openai/gpt-5.4"
+# 2026-05-15 (benchmark sn_benchmark_20260514T205139): GPT-5.5 scored
+# combined=0.797 (rank 1/14) — names=0.742, docs=0.852. Previous default
+# GPT-5.4 scored 0.774 (rank 2/14). GPT-5.5 is +3% quality at ~38% higher
+# compose cost ($1,404 vs $1,016 projected for 10K sources). Review cost
+# dominates total spend (~5:1 ratio), so compose cost increase is marginal
+# on total pipeline cost.
+model = "openrouter/openai/gpt-5.5"
 batch-size = 25
 # Batch size used when ``sn generate --name-only`` groups paths by
 # ``(physics_domain × unit)`` rather than ``(cluster × unit)``.  The
