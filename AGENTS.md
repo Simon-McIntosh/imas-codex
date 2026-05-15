@@ -697,14 +697,27 @@ Scoring criteria are defined in `imas_codex/llm/config/sn_review_criteria.yaml`.
 
 | Role | Model | Avg Quality | Notes |
 |------|-------|-------------|-------|
-| **Compose (recommended)** | `anthropic/claude-sonnet-4.6` | 76.5 | 32% Outstanding, best grammar + documentation |
+| **Compose (recommended)** | `openai/gpt-5.5` | 78.2 | Best overall, strong grammar + docs |
+| **Compose (alt)** | `anthropic/claude-sonnet-4.6` | 76.5 | 32% Outstanding, best grammar + documentation |
 | **Compose (budget)** | `google/gemini-3.1-pro-preview` | 74.6 | Near-top quality, good consistency |
 | **Compose (light)** | `anthropic/claude-haiku-4.5` | 61.2 | Adequate for bulk generation |
-| **Review/scoring** | `anthropic/claude-opus-4.6` | — | Reviewer (6-dimensional rubric judge) |
 
-**GPT-5.4 compatibility:** GPT-5.x models require `strict: false` JSON schema wrapping
+**Reviewer models** (7-model benchmark, GPT-5.5 compose, 4 items, 2026-05-15):
+
+| Role | Model | Names Avg | Docs Avg | Cost/run | Notes |
+|------|-------|-----------|----------|----------|-------|
+| **Cycle 0 primary** | `deepseek/deepseek-v4-flash` | 0.756 | 0.992 | $0.002 | Cheapest, negative rank-corr (−0.5) maximises escalator |
+| **Cycle 1 secondary** | `openai/gpt-5.4` | 0.672 | 0.881 | $0.033 | Fastest (31s), cross-vendor |
+| **Cycle 2 escalator** | `google/gemini-3.1-pro-preview` | 0.884 | 1.000 | $0.469 | Highest quality, authoritative |
+| Eliminated | `anthropic/claude-sonnet-4.6` | 0.581 | 0.875 | $0.079 | Lowest commercial names score |
+| Eliminated | `deepseek/deepseek-v4-pro` | 0.519 | 0.931 | $0.040 | Lowest names, very slow (259s) |
+| Eliminated | `moonshot/kimi-k2.6` | 0.694 | 0.966 | $0.066 | Adequate but no advantage |
+| Failed | `alibaba/qwen3.6-plus` | 0.703 | 0.000 | — | 100% docs review structured output failure |
+
+Projected cost at 10K sources: $659 (vs prior Sonnet→GPT→Opus: $2,578, **−83%**).
+
+**GPT-5.x compatibility:** GPT-5.x models require `strict: false` JSON schema wrapping
 (handled automatically in `llm.py`) and cannot use `temperature=0.0` (handled in benchmark).
-Quality is adequate (68.9 avg) but not top-tier for standard name generation.
 
 ### RD-Quorum Review
 
@@ -713,6 +726,15 @@ Quality is adequate (68.9 avg) but not top-tier for standard name generation.
 **`resolution_method` values on Review nodes:** `quorum_consensus` (cycles 0+1 agreed; final = mean) / `authoritative_escalation` (cycle 2 wins for disputed items) / `max_cycles_reached` (disagreement, no escalator) / `retry_item` / `single_review`. `update_review_aggregates` picks the most-recent winning group and mirrors final scores onto SN axis slots.
 
 **Configuration:** `[tool.imas-codex.sn-review]` (`disagreement-threshold`, `max-cycles`, `active-profile`) + `[tool.imas-codex.sn-review.{names,docs}]` (`models = [cycle0, cycle1, cycle2]`). Profiles in `[tool.imas-codex.sn-review.names.profiles.*]`. Accessors: `get_sn_review_{names,docs}_models()`, `get_sn_review_max_cycles()`, `get_sn_review_disagreement_threshold()`, `get_sn_review_active_profile()`.
+
+```toml
+[tool.imas-codex.sn-review.names]
+models = [
+  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
+  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
+  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (highest quality)
+]
+```
 
 **Budget:** `review_pipeline` reserves `batch_cost × num_models × 1.3` upfront via `BudgetLease.reserve()`, then charges per cycle — prevents secondary-cost leaks on mid-cycle crashes.
 
