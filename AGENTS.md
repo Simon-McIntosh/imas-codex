@@ -38,15 +38,16 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 | `[graph]` | Neo4j connection, graph name/location | `get_graph_uri()`, `get_graph_username()`, `get_graph_password()`, `resolve_graph()` |
 | `[embedding]` | Embedding model, dimension, location, scheduler | `get_model("embedding")`, `get_embedding_location()` |
 | `[language]` | Structured output (scoring, discovery, labeling), batch-size | `get_model("language")` |
-| `[refine]` | SN refine_name + refine_docs tier (Sonnet 4.6 default) | `get_model("refine")` |
+| `[sn-compose]` | SN name composition model, batch sizes, max-concurrency | `get_model("sn-compose")` |
+| `[sn-refine]` | SN refine_name + refine_docs tier | `get_model("sn-refine")` |
 | `[vision]` | Image/document tasks | `get_model("vision")` |
 | `[reasoning]` | Complex structured output (IMAS mapping, multi-step reasoning) | `get_model("reasoning")` |
 | `[discovery]` | Discovery threshold for high-value processing | `get_discovery_threshold()` |
 | `[data-dictionary]` | DD version, include-ggd, include-error-fields | `get_dd_version()` |
-| `[sn.review]` | Shared RD-quorum settings (disagreement threshold, max cycles) | `get_sn_review_disagreement_threshold()`, `get_sn_review_max_cycles()` |
-| `[sn.review.names]` | Reviewer model chain for the names axis (1–3 models) | `get_sn_review_names_models()` |
-| `[sn.review.docs]` | Reviewer model chain for the docs axis (1–3 models) | `get_sn_review_docs_models()` |
-| `[sn.benchmark]` | SN benchmark compose-models list and reviewer-model | `get_sn_benchmark_compose_models()`, `get_sn_benchmark_reviewer_model()` |
+| `[sn-review]` | Shared RD-quorum settings (disagreement threshold, max cycles) | `get_sn_review_disagreement_threshold()`, `get_sn_review_max_cycles()` |
+| `[sn-review.names]` | Reviewer model chain for the names axis (1–3 models) | `get_sn_review_names_models()` |
+| `[sn-review.docs]` | Reviewer model chain for the docs axis (1–3 models) | `get_sn_review_docs_models()` |
+| `[sn-benchmark]` | SN benchmark compose-models list and reviewer-model | `get_sn_benchmark_compose_models()`, `get_sn_benchmark_reviewer_model()` |
 
 **Model access:** `get_model(section)` is the single entry point for all model lookups. Pass the pyproject.toml section name directly: `"language"`, `"vision"`, `"reasoning"`, or `"embedding"`. Priority: section env var → pyproject.toml config → default.
 
@@ -890,7 +891,7 @@ The LLM never provides the unit field.
 ### Benchmark
 
 `sn bench` uses the same prompt pipeline as `sn run` (system/user message split via
-`build_compose_context()`). Model lists default from `[tool.imas-codex.sn.benchmark]` in
+`build_compose_context()`). Model lists default from `[tool.imas-codex.sn-benchmark]` in
 pyproject.toml. Output table includes a **Cache %** column showing the prompt-cache
 hit rate per model (provider-side via OpenRouter — not something we implement). Scoring is
 **6-dimensional**: grammar, semantic, documentation, convention, completeness, and compliance
@@ -951,22 +952,22 @@ the StandardName axis slots (`reviewer_score_name` / `reviewer_score_docs`, etc.
 
 **Configuration** (`pyproject.toml`):
 ```toml
-[tool.imas-codex.sn.review]
+[tool.imas-codex.sn-review]
 disagreement-threshold = 0.15   # per-dimension tolerance (normalised 0-1)
 max-cycles = 3                  # 1=primary only, 2=blind pair, 3=full quorum
 
-[tool.imas-codex.sn.review.names]
+[tool.imas-codex.sn-review.names]
 models = [
-  "openrouter/anthropic/claude-opus-4.6",    # cycle 0 primary (blind)
-  "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind)
-  "openrouter/anthropic/claude-sonnet-4.6",  # cycle 2 escalator (sees both)
+  "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind, cache-enabled)
+  "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
+  "openrouter/anthropic/claude-opus-4.6",    # cycle 2 escalator (disputes only)
 ]
 
-[tool.imas-codex.sn.review.docs]
+[tool.imas-codex.sn-review.docs]
 models = [
-  "openrouter/anthropic/claude-opus-4.6",
   "openrouter/anthropic/claude-sonnet-4.6",
   "openrouter/openai/gpt-5.4",
+  "openrouter/anthropic/claude-opus-4.6",
 ]
 ```
 
@@ -986,7 +987,7 @@ bounds enforced at parse time); a pure-Python executor runs the plan in
 parallel via `asyncio.to_thread`; the call-site's existing LLM call ingests
 the rendered evidence block. No agentic loop, no runtime function generation.
 
-- **Default off**: `enabled=False` in `[tool.imas-codex.sn.fanout]` makes
+- **Default off**: `enabled=False` in `[tool.imas-codex.sn-fanout]` makes
   `run_fanout()` a true no-op — returns `""`, writes no `Fanout` graph node,
   emits no metrics, never calls the Proposer LLM.
 - **One `GraphClient` per refine cycle**: the worker passes its `gc` into
