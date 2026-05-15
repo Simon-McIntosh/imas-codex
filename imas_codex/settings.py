@@ -10,10 +10,10 @@ Configuration is organized into subsections:
   [tool.imas-codex.vision]         — vision models for image/document tasks
   [tool.imas-codex.agent]          — agent models for planning/exploration tasks
   [tool.imas-codex.compaction]     — compaction models for summarization tasks
-  [tool.imas-codex.sn.review]       — shared disagreement threshold and max-cycles
-  [tool.imas-codex.sn.review.names] — name-axis reviewer model chain (primary/secondary/escalator)
-  [tool.imas-codex.sn.review.docs]  — docs-axis reviewer model chain (primary/secondary/escalator)
-  [tool.imas-codex.sn.benchmark]   — SN benchmark compose-models and reviewer-model
+  [tool.imas-codex.sn-review]       — shared disagreement threshold and max-cycles
+  [tool.imas-codex.sn-review.names] — name-axis reviewer model chain (primary/secondary/escalator)
+  [tool.imas-codex.sn-review.docs]  — docs-axis reviewer model chain (primary/secondary/escalator)
+  [tool.imas-codex.sn-benchmark]   — SN benchmark compose-models and reviewer-model
 
 All settings support environment variable overrides (IMAS_CODEX_* prefix / NEO4J_*).
 """
@@ -87,9 +87,9 @@ MODEL_SECTIONS = frozenset(
         "compaction",
         "reasoning",
         "dd-enrichment",
-        "sn-run",
+        "sn-compose",
         "sn-enrich",
-        "refine",
+        "sn-refine",
     }
 )
 
@@ -102,13 +102,13 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "compaction": "openrouter/anthropic/claude-haiku-4.5",
     "reasoning": "openrouter/anthropic/claude-sonnet-4.6",
     "dd-enrichment": "openrouter/anthropic/claude-sonnet-4.6",
-    "sn-run": "openrouter/anthropic/claude-sonnet-4.6",
+    "sn-compose": "openrouter/anthropic/claude-sonnet-4.6",
     "sn-enrich": "openrouter/anthropic/claude-opus-4.6",
     # Refine pass for SN names + docs.  E3 telemetry showed flash-lite
     # could not lift critiqued names (cl=0 accepted at ~42%, cl=1+ at
     # ~5%).  Sonnet 4.6 matches compose tier so the refine pass is
     # capable enough to recover from reviewer feedback.
-    "refine": "openrouter/anthropic/claude-sonnet-4.6",
+    "sn-refine": "openrouter/anthropic/claude-sonnet-4.6",
 }
 
 # Environment variable names per section
@@ -120,9 +120,9 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "compaction": "IMAS_CODEX_COMPACTION_MODEL",
     "reasoning": "IMAS_CODEX_REASONING_MODEL",
     "dd-enrichment": "IMAS_CODEX_DD_ENRICHMENT_MODEL",
-    "sn-run": "IMAS_CODEX_SN_RUN_MODEL",
+    "sn-compose": "IMAS_CODEX_SN_COMPOSE_MODEL",
     "sn-enrich": "IMAS_CODEX_SN_ENRICH_MODEL",
-    "refine": "IMAS_CODEX_REFINE_MODEL",
+    "sn-refine": "IMAS_CODEX_SN_REFINE_MODEL",
 }
 
 
@@ -849,24 +849,24 @@ def _validate_review_models(models: list[str], axis: str) -> list[str]:
 
     if len(models) == 0:
         raise ValueError(
-            f"[sn.review.{axis}].models must have at least 1 entry; got 0. "
+            f"[sn-review.{axis}].models must have at least 1 entry; got 0. "
             f"Set 1 model to disable quorum, 2 for blind pair, 3 for full RD-quorum."
         )
     if len(models) > 3:
         raise ValueError(
-            f"[sn.review.{axis}].models accepts at most 3 entries "
+            f"[sn-review.{axis}].models accepts at most 3 entries "
             f"(primary, secondary, escalator); got {len(models)}."
         )
     validated: list[str] = []
     for m in models:
         if not isinstance(m, str) or not m.strip():
             raise ValueError(
-                f"[sn.review.{axis}].models entries must be non-empty strings; "
+                f"[sn-review.{axis}].models entries must be non-empty strings; "
                 f"got {m!r}."
             )
         if not m.startswith("openrouter/"):
             _logging.getLogger(__name__).warning(
-                "[sn.review.%s].models entry %r does not have the 'openrouter/' prefix; "
+                "[sn-review.%s].models entry %r does not have the 'openrouter/' prefix; "
                 "prompt caching will not be available for this model.",
                 axis,
                 m,
@@ -902,8 +902,8 @@ def get_sn_review_active_profile() -> str:
 def get_sn_review_profile_models(profile: str) -> list[str]:
     """Return the ordered reviewer-model chain for *profile*.
 
-    Reads from ``[tool.imas-codex.sn.review.names.profiles.<profile>].models``.
-    For ``"default"``, falls back to the top-level ``[sn.review.names].models``
+    Reads from ``[tool.imas-codex.sn-review.names.profiles.<profile>].models``.
+    For ``"default"``, falls back to the top-level ``[sn-review.names].models``
     key when no ``profiles`` section is present (backward-compat).
 
     Length semantics (same as :func:`get_sn_review_names_models`):
@@ -920,7 +920,7 @@ def get_sn_review_profile_models(profile: str) -> list[str]:
         ValueError: If *profile* is not in :data:`_VALID_REVIEWER_PROFILES`
             or the model list fails validation.
     """
-    names_section = _get_section("sn").get("review", {}).get("names", {})
+    names_section = _get_section("sn-review").get("names", {})
     profiles = names_section.get("profiles", {})
 
     if profile in profiles:
@@ -935,7 +935,7 @@ def get_sn_review_profile_models(profile: str) -> list[str]:
     raise ValueError(
         f"Unknown reviewer profile {profile!r}. "
         f"Valid profiles: {sorted(_VALID_REVIEWER_PROFILES)}. "
-        f"Configure under [tool.imas-codex.sn.review.names.profiles]."
+        f"Configure under [tool.imas-codex.sn-review.names.profiles]."
     )
 
 
@@ -943,8 +943,8 @@ def get_sn_review_profile_threshold(profile: str) -> float:
     """Return the disagreement threshold for *profile*.
 
     Reads from
-    ``[tool.imas-codex.sn.review.names.profiles.<profile>].disagreement-threshold``.
-    For ``"default"``, falls back to ``[sn.review].disagreement-threshold``
+    ``[tool.imas-codex.sn-review.names.profiles.<profile>].disagreement-threshold``.
+    For ``"default"``, falls back to ``[sn-review].disagreement-threshold``
     when no ``profiles`` section is present (backward-compat).
 
     Args:
@@ -953,9 +953,9 @@ def get_sn_review_profile_threshold(profile: str) -> float:
     Raises:
         ValueError: If *profile* is not in :data:`_VALID_REVIEWER_PROFILES`.
     """
-    names_section = _get_section("sn").get("review", {}).get("names", {})
+    names_section = _get_section("sn-review").get("names", {})
     profiles = names_section.get("profiles", {})
-    review_section = _get_section("sn").get("review", {})
+    review_section = _get_section("sn-review")
 
     if profile in profiles:
         return float(
@@ -984,7 +984,7 @@ def get_sn_review_names_models() -> list[str]:
     Delegates to :func:`get_sn_review_profile_models` using the active
     profile (see :func:`get_sn_review_active_profile`).  When no profile
     is active and no ``profiles`` section exists in config, falls back to
-    the top-level ``[sn.review.names].models`` key (backward-compat).
+    the top-level ``[sn-review.names].models`` key (backward-compat).
 
     Length semantics:
       * 1 model  → quorum disabled (single reviewer, mirrors legacy behaviour)
@@ -1003,16 +1003,16 @@ def get_sn_review_docs_models() -> list[str]:
     """Return the ordered reviewer-model chain for the docs review axis.
 
     Same length semantics as :func:`get_sn_review_names_models`.
-    Reads from ``[sn.review.docs].models`` (docs axis has no profile system;
+    Reads from ``[sn-review.docs].models`` (docs axis has no profile system;
     use ``--models`` CLI override for ad-hoc docs model changes).
 
-    Priority: ``[sn.review.docs].models`` in pyproject.toml → default
+    Priority: ``[sn-review.docs].models`` in pyproject.toml → default
     (a single canonical model).
 
     Raises:
         ValueError: If list is empty or has more than 3 entries.
     """
-    section = _get_section("sn").get("review", {}).get("docs", {})
+    section = _get_section("sn-review").get("docs", {})
     raw = section.get("models", _SN_REVIEW_DEFAULTS["docs-models"])
     return _validate_review_models([str(m) for m in raw if m], "docs")
 
@@ -1022,9 +1022,9 @@ def get_sn_review_max_cycles() -> int:
 
     1 → primary only, 2 → blind pair (no escalator), 3 → full quorum.
 
-    Priority: ``[sn.review].max-cycles`` → ``3``.
+    Priority: ``[sn-review].max-cycles`` → ``3``.
     """
-    section = _get_section("sn").get("review", {})
+    section = _get_section("sn-review")
     return int(section.get("max-cycles", _SN_REVIEW_DEFAULTS["max-cycles"]))
 
 
@@ -1033,7 +1033,7 @@ def get_sn_review_disagreement_threshold() -> float:
 
     Delegates to :func:`get_sn_review_profile_threshold` using the active
     profile (see :func:`get_sn_review_active_profile`).  Falls back to the
-    top-level ``[sn.review].disagreement-threshold`` key when no profile is
+    top-level ``[sn-review].disagreement-threshold`` key when no profile is
     active (backward-compat).
 
     When N >= 2 reviewers are configured, ``review_disagreement`` is
@@ -1073,19 +1073,19 @@ _SN_BENCHMARK_DEFAULTS = {
 def get_sn_benchmark_compose_models() -> list[str]:
     """Get list of models for SN benchmark composition.
 
-    Priority: [sn.benchmark].compose-models in pyproject.toml → defaults.
+    Priority: [sn-benchmark].compose-models in pyproject.toml → defaults.
     """
-    section = _get_section("sn").get("benchmark", {})
+    section = _get_section("sn-benchmark")
     return section.get("compose-models", _SN_BENCHMARK_DEFAULTS["compose-models"])
 
 
 def get_sn_benchmark_reviewer_model() -> str:
     """Reviewer model for SN benchmark scoring.
 
-    Priority: ``[sn.benchmark].reviewer-model`` →
-    ``[sn.review.names].models[0]`` → default.
+    Priority: ``[sn-benchmark].reviewer-model`` →
+    ``[sn-review.names].models[0]`` → default.
     """
-    section = _get_section("sn").get("benchmark", {})
+    section = _get_section("sn-benchmark")
     try:
         review_models = get_sn_review_names_models()
         fallback = (
@@ -1101,7 +1101,7 @@ def get_sn_benchmark_reviewer_model() -> str:
 def get_sn_benchmark_reviewer_models() -> list[str]:
     """Reviewer model list for SN benchmark multi-reviewer matrix.
 
-    Priority: ``[sn.benchmark].reviewer-models`` → defaults.
+    Priority: ``[sn-benchmark].reviewer-models`` → defaults.
     """
-    section = _get_section("sn").get("benchmark", {})
+    section = _get_section("sn-benchmark")
     return section.get("reviewer-models", _SN_BENCHMARK_DEFAULTS["reviewer-models"])

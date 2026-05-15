@@ -1703,7 +1703,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import StandardNameComposeBatch
 
-    model = state.compose_model or get_model("sn-run")
+    model = state.compose_model or get_model("sn-compose")
     context = build_compose_context()
 
     # Enrich batch items with rich DD context (coordinate specs, COCOS, siblings,
@@ -3314,7 +3314,7 @@ async def compose_batch(
     if not batch:
         return 0
 
-    model = get_model("sn-run")
+    model = get_model("sn-compose")
     context = build_compose_context()
 
     # ── H5: batch-scope domain context ─────────────────────────────────
@@ -4151,7 +4151,7 @@ async def process_refine_name_batch(
                 # [language] on 2026-05-03 after E3 acceptance audit
                 # showed flash-lite refines lifted critiqued names at
                 # ~5% vs ~42% for Sonnet compose.
-                model = get_model("refine")
+                model = get_model("sn-refine")
 
             # ── Build prompt context ──────────────────────────────────
             path = item.get("source_paths", [""])[0] if item.get("source_paths") else ""
@@ -6001,7 +6001,7 @@ async def process_review_docs_batch(
             review_models = []
     if not review_models:
         # Refine tier (Sonnet 4.6) — defensive fallback only.
-        review_models = [get_model("refine")]
+        review_models = [get_model("sn-refine")]
 
     try:
         disagreement_threshold = get_sn_review_disagreement_threshold()
@@ -6288,7 +6288,7 @@ async def process_refine_docs_batch(
         else:
             # Refine tier (Sonnet 4.6 by default) — see refine_name
             # comment + 2026-05-03 E3 acceptance audit.
-            model = get_model("refine")
+            model = get_model("sn-refine")
 
         # ── Build prompt context ──────────────────────────────────
         prompt_context: dict[str, Any] = {

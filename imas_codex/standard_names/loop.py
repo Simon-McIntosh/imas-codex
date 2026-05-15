@@ -652,7 +652,7 @@ async def run_sn_pools(
     from imas_codex.discovery.base.llm import _supports_cache_control
     from imas_codex.settings import get_model
 
-    _a3_model = get_model("sn-run")
+    _a3_model = get_model("sn-compose")
     _a3_cache = _supports_cache_control(_a3_model)
     _a3_or_key = os.environ.get("OPENROUTER_API_KEY_STANDARD_NAMES") or ""
     _a3_or_key_src = "OPENROUTER_API_KEY_STANDARD_NAMES"

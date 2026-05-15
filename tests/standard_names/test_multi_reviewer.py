@@ -2,7 +2,7 @@
 
 Covers:
 - Settings accessor get_sn_review_names_models() / get_sn_review_docs_models()
-  read [sn.review.names/docs].models correctly
+  read [sn-review.names/docs].models correctly
 - StandardNameReviewState has new fields (review_models, review_records,
   canonical_review_model) and backward-compat secondary_models alias
 - Pipeline helpers (_model_slug, _derive_model_family, _build_review_record)
@@ -35,12 +35,12 @@ def test_get_sn_review_names_models_default():
 
 
 def test_get_sn_review_names_models_override(monkeypatch):
-    """get_sn_review_names_models() reads from [sn.review.names].models override."""
+    """get_sn_review_names_models() reads from [sn-review.names].models override."""
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
-        if name == "sn":
-            return {"review": {"names": {"models": ["a", "b", "c"]}}}
+        if name == "sn-review":
+            return {"names": {"models": ["a", "b", "c"]}}
         return {}
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
@@ -50,12 +50,12 @@ def test_get_sn_review_names_models_override(monkeypatch):
 
 
 def test_get_sn_review_docs_models_override(monkeypatch):
-    """get_sn_review_docs_models() reads from [sn.review.docs].models override."""
+    """get_sn_review_docs_models() reads from [sn-review.docs].models override."""
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
-        if name == "sn":
-            return {"review": {"docs": {"models": ["x", "y"]}}}
+        if name == "sn-review":
+            return {"docs": {"models": ["x", "y"]}}
         return {}
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)

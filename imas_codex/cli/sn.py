@@ -362,7 +362,7 @@ def _run_sn_cmd(
 
     if use_rich:
         cli_console = Console()
-        setup_logging("sn", "sn-run", use_rich=True, verbose=verbose)
+        setup_logging("sn", "sn-compose", use_rich=True, verbose=verbose)
 
         # Cost gauge: graph-backed when available, else returns 0.0
         try:
@@ -401,7 +401,7 @@ def _run_sn_cmd(
         )
         _on_event = display.on_event
     else:
-        setup_logging("sn", "sn-run", use_rich=False, verbose=verbose)
+        setup_logging("sn", "sn-compose", use_rich=False, verbose=verbose)
         cli_console = Console(quiet=quiet)
         if not quiet:
             cli_console.print(
@@ -1317,7 +1317,7 @@ def sn_run(
         from imas_codex.settings import _get_section
 
         name_only_batch_size = int(
-            _get_section("sn-run").get("name-only-batch-size", 50)
+            _get_section("sn-compose").get("name-only-batch-size", 50)
         )
     except Exception:
         pass
@@ -1364,7 +1364,7 @@ def sn_run(
         check_ssh=False,
         check_auth=source != "dd",  # signals source might need auth
         check_model=not dry_run,
-        model_section="sn-run",
+        model_section="sn-compose",
         suppress_loggers=[
             "imas_codex.standard_names",
         ],
@@ -1403,7 +1403,7 @@ def sn_run(
     type=str,
     multiple=True,
     help="Model(s) to benchmark. Repeat for multiple or use commas. "
-    "Defaults to [sn.benchmark].compose-models.",
+    "Defaults to [sn-benchmark].compose-models.",
 )
 @click.option(
     "--max-candidates",
@@ -1435,14 +1435,14 @@ def sn_run(
     type=str,
     default=None,
     help="Single judge model for quality scoring (backward compat). "
-    "Defaults to [sn.benchmark].reviewer-model.",
+    "Defaults to [sn-benchmark].reviewer-model.",
 )
 @click.option(
     "--reviewer-models",
     type=str,
     multiple=True,
     help="Reviewer model(s) for multi-reviewer matrix. Repeat or use commas. "
-    "Defaults to [sn.benchmark].reviewer-models.",
+    "Defaults to [sn-benchmark].reviewer-models.",
 )
 @click.option(
     "--include-docs/--names-only",
@@ -1469,7 +1469,7 @@ def sn_bench(
     overlap, reviewer quality scores, cost, and speed.
 
     When --models is omitted, loads the model list from
-    [tool.imas-codex.sn.benchmark].compose-models in pyproject.toml.
+    [tool.imas-codex.sn-benchmark].compose-models in pyproject.toml.
 
     \b
     Examples:
@@ -1502,7 +1502,7 @@ def sn_bench(
     if not model_list:
         raise click.UsageError(
             "No models configured. Pass --models or set "
-            "[tool.imas-codex.sn.benchmark].compose-models in pyproject.toml."
+            "[tool.imas-codex.sn-benchmark].compose-models in pyproject.toml."
         )
 
     # Resolve reviewer models: --reviewer-models → --reviewer-model → pyproject
@@ -4227,7 +4227,7 @@ def _run_sn_docs_generation(
     if batch_size is None:
         from imas_codex.settings import _get_section
 
-        sn_generate_cfg = _get_section("sn-run")
+        sn_generate_cfg = _get_section("sn-compose")
         sn_enrich_cfg = _get_section("sn-enrich")
         batch_size = int(
             sn_generate_cfg.get("docs-batch-size", sn_enrich_cfg.get("batch-size", 8))

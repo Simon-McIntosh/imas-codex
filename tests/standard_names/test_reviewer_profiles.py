@@ -19,12 +19,12 @@ import pytest
 
 
 def _patch_profiles(monkeypatch, profiles_dict: dict) -> None:
-    """Monkeypatch _get_section so sn.review.names.profiles = *profiles_dict*."""
+    """Monkeypatch _get_section so sn-review.names.profiles = *profiles_dict*."""
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
-        if name == "sn":
-            return {"review": {"names": {"profiles": profiles_dict}}}
+        if name == "sn-review":
+            return {"names": {"profiles": profiles_dict}}
         return {}
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
@@ -36,8 +36,8 @@ def _patch_toplevel(monkeypatch, names_section: dict) -> None:
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
-        if name == "sn":
-            return {"review": {"names": names_section}}
+        if name == "sn-review":
+            return {"names": names_section}
         return {}
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
@@ -252,8 +252,8 @@ def test_legacy_threshold_still_works_no_profiles_section(monkeypatch):
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
-        if name == "sn":
-            return {"review": {"disagreement-threshold": 0.25}}
+        if name == "sn-review":
+            return {"disagreement-threshold": 0.25}
         return {}
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)

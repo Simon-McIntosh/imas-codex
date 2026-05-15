@@ -1,6 +1,6 @@
 """Configuration for structured fan-out (plan 39 §9).
 
-Reads ``[tool.imas-codex.sn.fanout]`` from ``pyproject.toml`` into a
+Reads ``[tool.imas-codex.sn-fanout]`` from ``pyproject.toml`` into a
 :class:`FanoutSettings` Pydantic model and exposes :data:`CATALOG_VERSION`
 — a sha256 over the **fully rendered proposer prompt body** (plan 39
 §6.1, I4) — for the literal ``catalog_version=<hex>`` line at the top
@@ -43,7 +43,7 @@ class FanoutSettings(BaseModel):
     """Pydantic-validated settings for structured fan-out.
 
     All fields default to their plan-§9 values so an empty
-    ``[tool.imas-codex.sn.fanout]`` block yields a fully usable
+    ``[tool.imas-codex.sn-fanout]`` block yields a fully usable
     (default-disabled) config.
     """
 
@@ -131,7 +131,7 @@ class FanoutSettings(BaseModel):
 
     sites: dict[str, bool] = Field(
         default_factory=lambda: {"refine_name": False},
-        description="Per-site enable flags (under [tool.imas-codex.sn.fanout.sites]).",
+        description="Per-site enable flags (under [tool.imas-codex.sn-fanout.sites]).",
     )
 
     def cap_for_charge(self, *, escalate: bool) -> float:
@@ -170,14 +170,14 @@ def _kebab_to_snake(key: str) -> str:
 
 
 def load_settings() -> FanoutSettings:
-    """Load :class:`FanoutSettings` from ``[tool.imas-codex.sn.fanout]``.
+    """Load :class:`FanoutSettings` from ``[tool.imas-codex.sn-fanout]``.
 
     Missing or empty section -> all defaults (fan-out disabled).  Unknown
     keys are silently ignored so plan revisions can add new fields
     without breaking older configs.
     """
     raw = _load_pyproject_settings()
-    section = raw.get("sn", {}).get("fanout", {})
+    section = raw.get("sn-fanout", {})
     if not isinstance(section, dict):
         return FanoutSettings()
 

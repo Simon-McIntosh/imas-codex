@@ -18,12 +18,12 @@ import pytest
 
 
 def _patch_sn_review(monkeypatch, review_dict: dict):
-    """Monkeypatch _get_section so sn.review returns *review_dict*."""
+    """Monkeypatch _get_section so sn-review returns *review_dict*."""
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
-        if name == "sn":
-            return {"review": review_dict}
+        if name == "sn-review":
+            return review_dict
         return {}
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)

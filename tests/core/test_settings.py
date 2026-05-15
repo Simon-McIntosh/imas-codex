@@ -94,7 +94,7 @@ class TestSettingsFunctions:
 
     @pytest.mark.parametrize(
         "section",
-        ["reasoning", "dd-enrichment", "sn-run", "sn-enrich", "refine"],
+        ["reasoning", "dd-enrichment", "sn-compose", "sn-enrich", "sn-refine"],
     )
     def test_openrouter_prefix_present(self, monkeypatch, section):
         """OpenRouter-billed sections must carry the 'openrouter/' prefix.

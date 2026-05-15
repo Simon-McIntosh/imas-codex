@@ -279,7 +279,7 @@ location = "iter"
 # and response_cost. Without it, calls silently route through the proxy,
 # stripping cache discounts (often 80%+) and zeroing cost telemetry.
 # Powers generate_docs (and any other bulk-content non-refine fanouts).
-# refine_name and refine_docs were peeled off into [tool.imas-codex.refine]
+# refine_name and refine_docs were peeled off into [tool.imas-codex.sn-refine]
 # on 2026-05-03 after E3 telemetry showed flash-lite refines accept at
 # ~5% vs ~42% for Sonnet-4.6 compose.
 # 2026-05-14 (benchmark sn_benchmark_20260514T205139): GPT-5.4 scored
@@ -288,10 +288,10 @@ location = "iter"
 model = "openrouter/openai/gpt-5.4"
 batch-size = 50
 
-[tool.imas-codex.refine]
+[tool.imas-codex.sn-refine]
 # openrouter/ prefix — see [language] note above.
 # Powers process_refine_name_batch and process_refine_docs_batch.
-# 2026-05-14: Aligned with [sn-run] compose model (GPT-5.4) per
+# 2026-05-14: Aligned with [sn-compose] compose model (GPT-5.4) per
 # benchmark results. Refine passes benefit from the same model that
 # composes well — refined names inherit the model's grammar/semantic
 # strengths. Kept as a separate section so the refine tier can diverge
@@ -311,7 +311,7 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 # doc-ingestion paths). It is NOT used in the SN compose/review/refine
 # pipeline. Flash-lite is adequate for OCR-quality transcription and
 # keeps image-processing costs minimal. Any SN-pipeline model must go
-# through [sn-run], [sn-enrich], [refine], or [sn.review.*] — never vision.
+# through [sn-compose], [sn-enrich], [sn-refine], or [sn-review.*] — never vision.
 model = "openrouter/google/gemini-3.1-flash-lite-preview"
 
 [tool.imas-codex.reasoning]
@@ -327,8 +327,6 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 #   Case A applied: single global semaphore sufficient (variance <2× across models).
 # See docs/ops/openrouter-rate-ceilings.md for probe details.
 max-concurrency = 96
-
-[tool.imas-codex.sn-run]
 # openrouter/ prefix — see [dd-enrichment] note above.
 # 2026-05-14 (benchmark sn_benchmark_20260514T205139): GPT-5.4 scored
 # combined=0.774 (rank 2/14) — names=0.702, docs=0.847. Sonnet 4.6
@@ -360,7 +358,7 @@ model = "openrouter/anthropic/claude-opus-4.6"
 # Enrich packs ~800–1200 tokens per name (docs, exemplars, DD context)
 # so batches should be smaller than generate batches.
 batch-size = 12
-# Pre-flight token budget guard (same semantics as sn-run).
+# Pre-flight token budget guard (same semantics as sn-compose).
 max-tokens = 150000
 
 [tool.imas-codex.sn]
@@ -381,14 +379,14 @@ staging-dir = "~/.cache/imas-codex/staging"
 # Path to ISNC git checkout. Empty = auto-discover from sibling dirs.
 isnc-dir = ""
 
-[tool.imas-codex.sn.review]
+[tool.imas-codex.sn-review]
 # Shared review settings (apply to both axes).
 # Disagreement detection: true iff N>=2 AND max(score) - min(score) >= threshold.
 disagreement-threshold = 0.20
 # Maximum RD-quorum cycles (1 = primary only, 2 = blind pair, 3 = full quorum).
 max-cycles = 3
 
-[tool.imas-codex.sn.review.names]
+[tool.imas-codex.sn-review.names]
 # Reviewer model chain for the name-quality axis (grammar/semantic/convention/completeness).
 # Length semantics:
 #   1 model  → quorum disabled (single reviewer, mirrors legacy behaviour)
@@ -425,9 +423,9 @@ disagreement-threshold = 0.20
 # the --reviewer-profile CLI flag on `sn run` / `sn review`.
 # ---------------------------------------------------------------------------
 
-[tool.imas-codex.sn.review.names.profiles.default]
+[tool.imas-codex.sn-review.names.profiles.default]
 # Mirror of the top-level [sn.review.names] keys; used when no profile is set.
-# See top-level [sn.review.names] for rationale on Sonnet-primary ordering.
+# See top-level [sn-review.names] for rationale on Sonnet-primary ordering.
 models = [
   "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind, cache-enabled)
   "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
@@ -435,7 +433,7 @@ models = [
 ]
 disagreement-threshold = 0.20
 
-[tool.imas-codex.sn.review.names.profiles.quality-cost-balanced]
+[tool.imas-codex.sn-review.names.profiles.quality-cost-balanced]
 # Quality-preserving cost reduction: Sonnet 4.6 primary + GPT-5.4 secondary
 # (cross-vendor) + Opus 4.6 arbiter (disputes only, authoritative).
 # Rationale: Sonnet 4.6 benchmarked at 76.5 avg compose quality vs Opus
@@ -452,15 +450,15 @@ models = [
 ]
 disagreement-threshold = 0.20
 
-[tool.imas-codex.sn.review.names.profiles.opus-only]
+[tool.imas-codex.sn-review.names.profiles.opus-only]
 # Single-model mode: no quorum, no escalator. Maximum quality, maximum cost.
 models = ["openrouter/anthropic/claude-opus-4.6"]
 disagreement-threshold = 1.0  # never escalate (single-model)
 
-[tool.imas-codex.sn.review.docs]
+[tool.imas-codex.sn-review.docs]
 # Reviewer model chain for the documentation-quality axis.
-# Same length semantics as [sn.review.names]. Sonnet primary for cache discount —
-# see [sn.review.names] block for rationale.
+# Same length semantics as [sn-review.names]. Sonnet primary for cache discount —
+# see [sn-review.names] block for rationale.
 models = [
   "openrouter/anthropic/claude-sonnet-4.6",
   "openrouter/openai/gpt-5.4",
@@ -468,7 +466,7 @@ models = [
 ]
 disagreement-threshold = 0.20
 
-[tool.imas-codex.sn.benchmark]
+[tool.imas-codex.sn-benchmark]
 # Models to evaluate for standard name composition.
 # Each is benchmarked independently; results are compared side-by-side.
 # Format: OpenRouter model IDs (provider/model-slug).
@@ -499,7 +497,7 @@ reviewer-models = [
     "openrouter/openai/gpt-5.4",
 ]
 
-[tool.imas-codex.sn.fanout]
+[tool.imas-codex.sn-fanout]
 # Plan 39 — Structured fan-out for the SN compose pipeline.
 # Master switch.  Phase 1B shipped at 6f0bb52b; enabled for smoke + rotation.
 enabled = true
@@ -540,7 +538,7 @@ refine-trigger-comment-dims = ["grammar", "semantic"]
 # Comment excerpt total length cap (plan §5.1 S3).
 refine-trigger-comment-chars = 800
 
-[tool.imas-codex.sn.fanout.sites]
+[tool.imas-codex.sn-fanout.sites]
 # Per-site enable flags.  Phase 1 flips refine_name to true after 1B
 # wires the worker; the master `enabled` switch above gates everything.
 refine_name = true

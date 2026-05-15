@@ -13,7 +13,7 @@ DD context for the ``refine_name`` worker:
    with the rendered evidence block injected into its prompt.
 
 No agentic loop, no runtime function generation.  Default off; when
-``[tool.imas-codex.sn.fanout].enabled`` is ``False`` (the default),
+``[tool.imas-codex.sn-fanout].enabled`` is ``False`` (the default),
 :func:`run_fanout` is a true no-op that returns ``""`` and writes
 nothing to the graph.
 
