@@ -4,28 +4,17 @@
 > compute infrastructure, commit discipline) live in `~/.agents/AGENTS.md`.
 > This file covers **repo-specific** domain knowledge only.
 
-Use terminal for direct operations (`rg`, `fd`, `git`), MCP `repl()` for chained processing and graph queries, `uv run` for git/tests/CLI. Conventional commits. **CRITICAL: Always commit and push when files have been modified — no confirmation, no asking, just do it. This is non-negotiable. Every response that modifies files MUST end with `git add`, `git commit`, and `git push`.** **Never use `vscode_askQuestions` or any interactive VS Code popup/dialog tools — present all questions inline in the chat response so the user can answer them in one message.**
+Use terminal for direct ops (`rg`, `fd`, `git`), MCP `repl()` for chained processing + graph queries, `uv run` for tests/CLI. Conventional commits. **Always commit and push after every file modification — no confirmation, no asking.** Never use `vscode_askQuestions` or other interactive VS Code dialogs — put questions inline in the chat response.
 
-**Git sync discipline (fork-based workflow):** All development happens on the fork's `main` branch. Always **merge** on pull — never rebase. Never use feature branches — they break the release CLI which requires `main`. See `~/.agents/AGENTS.md` for clone setup, banned commands, and stash ban.
-1. **Session start:** `git pull origin main` before any work.
-2. **Before push:** `git pull origin main && git push origin main` — push to `origin` (fork), **never directly to `upstream`**.
-3. **Always work on `main`** — the release CLI requires `main` branch.
-4. **Dirty worktree:** Commit your own files before pulling.
-5. **Conflict resolution:** If merge conflicts, resolve and commit. Never force-push.
+**Git sync (fork-based):** All work on the fork's `main` branch. Merge on pull — never rebase, never use feature branches (the release CLI requires `main`). Pull before work and before push: `git pull origin main && git push origin main`. Push to `origin`, **never directly to `upstream`** — final releases go via the release CLI. Commit your own files before pulling a dirty worktree. See `~/.agents/AGENTS.md` for clone setup, banned commands, and stash ban. Release workflow detail in [Release Workflow](#release-workflow).
 
 ## Project Philosophy
 
-Greenfield project under active development. No backwards compatibility.
+Greenfield project, no backwards compatibility. Remove deprecated code decisively, update all usages when patterns change, prefer explicit over clever, prefer good names over "enhanced/new/refactored". Exploration notes belong in facility YAML; `docs/` is for mature infrastructure only.
 
-- Breaking changes are expected - remove deprecated code decisively
-- Avoid "enhanced", "new", "refactored" in names - just use the good name
-- When patterns change, update all usages - don't leave old patterns alongside new
-- **Stale context kills** — if your session is more than a few hours old, your memory of file contents may be wrong. Before modifying any file, re-read it from disk (`view` / `cat`) to verify your assumptions match reality. Never write code from memory alone.
-- Prefer explicit over clever - future agents will read this code
-- Exploration notes go in facility YAML, not markdown files
-- `docs/` is for mature infrastructure only
-- **Build on common infrastructure** — before implementing functionality, search for existing utilities that solve the same problem. Remote SSH execution, graph queries, file parsing, and LLM calls all have canonical patterns in the codebase. New features must compose from these shared primitives rather than reimplementing them. When a pattern is needed by multiple modules, extract it to a shared location (`imas_codex/remote/`, `imas_codex/graph/`, etc.) and have all consumers import from there. Never inline SSH subprocess calls — use `run_python_script()` / `async_run_python_script()` from `imas_codex.remote.executor` with scripts in `imas_codex/remote/scripts/`.
-- **Don't repeat yourself across domains** — the `files` and `wiki` discovery pipelines share the same worker architecture (`discovery/base/`). When adding a feature (filtering, scoring heuristics, worker naming), apply it consistently across all domains that use the same pattern. If data is already available in the graph (e.g., public repo detection via `SoftwareRepo` nodes), don't reimplement the check locally. One source of truth, one implementation.
+- **Stale context kills.** If your session is more than a few hours old, your memory of file contents may be wrong. Re-read every file from disk before modifying — never write code from memory.
+- **Build on common infrastructure.** Search for existing utilities (remote SSH execution, graph queries, file parsing, LLM calls all have canonical patterns) before implementing. Extract shared patterns to `imas_codex/remote/` or `imas_codex/graph/`. Never inline SSH subprocess calls — use `run_python_script()` / `async_run_python_script()` from `imas_codex.remote.executor` with scripts in `imas_codex/remote/scripts/`.
+- **One source of truth.** When a feature applies across domains (e.g. `files` and `wiki` discovery share `discovery/base/`), implement it once. If data is already in the graph (public repos via `SoftwareRepo` nodes, etc.), query the graph — don't re-derive locally.
 
 ## Model & Tool Configuration
 
@@ -122,137 +111,46 @@ add_to_graph("SourceFile", [sf.model_dump()])
 
 ### Schema Design Guidelines
 
-Follow these conventions when adding new classes, properties, or relationships to LinkML schemas. Consistency here is critical — the build pipeline, `create_nodes()`, and query builder all depend on predictable schema structure.
+Conventions when adding classes, properties, or relationships. The build pipeline, `create_nodes()`, and query builder depend on predictable schema structure.
 
-#### Dual Property + Relationship Model
+**Dual property + relationship.** Every slot with a class range produces **both** a node property (fast `WHERE` filtering) AND a Neo4j relationship (graph traversal). `create_nodes()` in `client.py` does `SET n += item` then `MERGE (n)-[:REL]->(t:Target {id: item.slot})`. Never remove one side of the dual model.
 
-Every slot that references another class produces **both** a node property AND a Neo4j relationship. This is intentional — it supports multiple search and traversal patterns:
+**Relationship type names.** If the slot has a `relationship_type` annotation, that's used; otherwise the slot name is uppercased (`has_chunk` → `HAS_CHUNK`). Add an explicit annotation when the auto-derived name is unclear. **All `facility_id` slots MUST have `range: Facility` + `annotations: { relationship_type: AT_FACILITY }`** — no exceptions. Prefer verb-based names (`SOURCE_PATH`, `BELONGS_TO_DIAGNOSTIC`).
 
-- **Property** (`n.facility_id = 'tcv'`): Fast `WHERE` filtering without relationship traversal. Enables simple queries and aggregation grouping.
-- **Relationship** (`(n)-[:AT_FACILITY]->(f:Facility)`): Graph traversal, multi-hop queries, path-finding. Enables joining across node types.
-
-`create_nodes()` in `client.py` implements this: `SET n += item` stores all properties on the node first, then for each slot with a class range it creates relationships via `MERGE (n)-[:REL_TYPE]->(t:TargetClass {id: item.slot_name})`.
-
-**Never remove one side of the dual model.** Both the property and the relationship must exist for every class-ranged slot.
-
-#### Relationship Type Annotations
-
-When a slot has `range: SomeClass`, the Cypher relationship type is derived as follows:
-
-1. **Explicit annotation (preferred for clarity)**:
-   ```yaml
-   facility_id:
-     range: Facility
-     annotations:
-       relationship_type: AT_FACILITY
-   ```
-   Use explicit annotations when the auto-derived name would be unclear (e.g., `FACILITY_ID` is less readable than `AT_FACILITY`).
-
-2. **Auto-derived fallback**: If no `relationship_type` annotation, the slot name is uppercased: `signal` → `SIGNAL`, `data_access` → `DATA_ACCESS`, `has_chunk` → `HAS_CHUNK`.
-
-**Rules for new relationships:**
-- Use `relationship_type: AT_FACILITY` for all `facility_id` slots — this is the standard pattern across the entire schema.
-- Prefer verb-based names: `SOURCE_PATH`, `TARGET_PATH`, `BELONGS_TO_DIAGNOSTIC`, `DOCUMENTED_BY`.
-- If the auto-derived name is clear enough (e.g., `has_chunk` → `HAS_CHUNK`), omit the annotation.
-- All `facility_id` slots MUST have `range: Facility` and `annotations: { relationship_type: AT_FACILITY }`. No exceptions.
-
-#### Class Structure Template
-
-Every concrete class should follow this structure:
+**Class template:**
 
 ```yaml
 MyNewNode:
   description: >-
-    What this node represents. Include example Cypher queries
-    that agents would use to query this node type.
+    What this node represents. Include example Cypher queries.
   class_uri: facility:MyNewNode
   attributes:
-    id:
-      identifier: true
-      description: Composite key format (e.g., "facility:unique_part")
-      required: true
+    id: { identifier: true, required: true, description: "Composite key (e.g., 'tcv:unique_part')" }
     facility_id:
-      description: Parent facility ID
       required: true
       range: Facility
-      annotations:
-        relationship_type: AT_FACILITY
-    # ... domain-specific properties ...
-    status:
-      description: Lifecycle status
-      range: MyNewNodeStatus  # Define enum in same schema
-      required: true
-    description:
-      description: Human-readable description
-    embedding:
-      description: Vector embedding of description for semantic search
-      multivalued: true
-      range: float
-    embedded_at:
-      description: When the embedding was last computed
-      range: datetime
+      annotations: { relationship_type: AT_FACILITY }
+    status: { range: MyNewNodeStatus, required: true }
+    description: { description: "Human-readable, drives semantic search" }
+    embedding: { multivalued: true, range: float }
+    embedded_at: { range: datetime }
 ```
 
-#### ID Conventions
-
-- Use `identifier: true` on exactly one slot per class (always `id` unless there's a domain reason).
-- Composite IDs use colon separator: `facility_id:unique_part` (e.g., `"tcv:/home/codes/liuqe.py"`, `"tcv:ip/measured"`).
-- IDs must be globally unique across all facilities.
-
-#### Vector Indexes
-
-Nodes with `embedding` + `description` slots automatically get a vector index named `{snake_case_label}_desc_embedding` (e.g., `FacilitySignal` → `facility_signal_desc_embedding`).
-
-For non-standard embedding slots, use the `vector_index_name` annotation:
-
-```yaml
-embedding:
-  multivalued: true
-  range: float
-  annotations:
-    vector_index_name: cluster_embedding
-```
-
-The build pipeline validates all vector indexes and generates them into `schema_context_data.py`.
-
-#### Status Enums and Lifecycles
-
-Define status enums in the same schema file as the class. Statuses must represent **durable states only** — no transient states like `scanning` or `processing`. Worker coordination uses `claimed_at` timestamps, not status values.
-
-#### Private Fields
-
-Slots annotated with `is_private: true` are excluded from the graph — they exist only in facility YAML configs.
-
-#### What NOT to Do in Schemas
-
-- **Don't hardcode enum values in Python** — import from generated models.
-- **Don't create a `facility_id` slot as plain `string`** — always use `range: Facility` + `relationship_type: AT_FACILITY` so both the property and relationship are created.
-- **Don't add transient states to status enums** — use `claimed_at` for worker coordination.
-- **Don't define the same relationship type with different semantics** — `AT_FACILITY` always means "belongs to this facility".
-- **Don't skip the `description` field** — it enables semantic search via embeddings.
-- **Don't use `multivalued: true` on relationship slots** unless the relationship is genuinely many-to-many. Cardinality affects query patterns.
+**Rules:**
+- Use `identifier: true` on exactly one slot per class (always `id`).
+- Composite IDs use colon separator: `facility_id:unique_part`. Must be globally unique.
+- Nodes with `embedding` + `description` auto-get a vector index `{snake_case_label}_desc_embedding`. Override with `vector_index_name` annotation if needed.
+- Status enums live in the same schema file. **Durable states only** — never `scanning`/`processing`. Worker coordination via `claimed_at` timestamps.
+- `is_private: true` excludes a slot from the graph (config-only).
+- Never hardcode enum values in Python — import from generated models.
+- Never skip the `description` field — it drives semantic search.
+- Don't use `multivalued: true` on relationship slots unless genuinely many-to-many.
 
 ### Schema-Driven Testing
 
-Tests in `tests/graph/` are **parametrized from the schema** — they do not hardcode node labels, relationship types, or enum values. This creates a closed loop:
+Tests in `tests/graph/` are **parametrized from the schema** — they validate graph data against LinkML declarations. Key modules: `test_schema_compliance.py` (node labels/properties/enums), `test_referential_integrity.py` (relationship types with correct `relationship_type` annotation), `test_data_quality.py` (embedding coverage).
 
-1. Declare types, relationships, and enums in LinkML YAML
-2. `uv run build-models --force` generates models + schema context
-3. Code writes data to the graph using generated models
-4. Schema-driven tests validate **all** graph data against schema declarations
-
-**Key test modules:**
-- `test_schema_compliance.py` — every node label, property, and enum value must be declared in the schema
-- `test_referential_integrity.py` — every relationship type must be declared as a slot with the correct `relationship_type` annotation
-- `test_data_quality.py` — embedding coverage and data consistency checks
-
-**When a schema compliance test fails, investigate root cause before touching the schema.** A failing test means data in the graph doesn't match schema declarations. The correct response depends on *why*:
-
-1. **You are building a new capability** that genuinely requires a new relationship type, enum value, or node label → declare it in the LinkML YAML, rebuild models, then write the code that uses it. Schema first, code second.
-2. **Existing code is writing non-compliant data** (bug) → fix the code that produces the bad data, or fix the data directly in the graph. Do not expand the schema to accommodate a bug.
-3. **Stale data from a previous schema version** → migrate or remove the data. Do not re-add removed schema elements to pass tests.
-
-Do not add schema declarations solely to make tests green. The schema defines what *should* exist — tests verify the graph matches that intent.
+**On test failure, fix the root cause, not the schema.** Three cases: (a) building a new capability → declare in LinkML first, then write code; (b) code writing non-compliant data → fix the code or the bad data; (c) stale data from a prior schema version → migrate/remove the data. Never add schema declarations just to make tests green.
 
 ## Facility Configuration
 
@@ -480,16 +378,7 @@ export OPENROUTER_API_KEY_FACILITY_DISCOVERY=sk-or-v1-...
 
 ### Prompt Structure and Caching
 
-All LLM calls route through the LiteLLM proxy → OpenRouter. Use `call_llm_structured()` / `acall_llm_structured()` from `imas_codex.discovery.base.llm` for all structured output calls — never call `litellm.completion()` directly.
-
-All prompts follow a **static-first ordering** to maximize prompt cache hit rates via OpenRouter's prompt caching:
-
-1. **System prompt** (static/quasi-static): Schema definitions, enum values, classification rules, output format. These change rarely and are shared across all LLM calls of the same type. `inject_cache_control()` sets a `cache_control: {"type": "ephemeral"}` breakpoint at the end of the system message.
-2. **User prompt** (dynamic): Per-batch signal data, context chunks, and specific instructions. This varies per LLM call.
-
-The `openrouter/` prefix is required on model identifiers — it preserves `cache_control` blocks in message content. The `openai/` prefix strips them, silently disabling prompt caching.
-
-When building prompts, ensure that `{% include %}` blocks for schema definitions and static rules appear **before** dynamic Jinja2 template variables. This maximizes the cacheable prefix length.
+Static-first ordering maximises OpenRouter prompt-cache hit rates. **System prompt** (schema, enums, rules, output format) is static and shared — `inject_cache_control()` sets a `cache_control: {"type": "ephemeral"}` breakpoint at its end. **User prompt** is per-call dynamic. In Jinja templates, place `{% include %}` schema/rules blocks BEFORE dynamic variables to maximise the cacheable prefix.
 
 ## Exploration
 
@@ -524,33 +413,7 @@ When a command times out, **persist the constraint immediately** via `update_inf
 
 ### Cypher Compatibility — Neo4j 2026
 
-We run **Neo4j 2026.01.x** with `db.query.default_language: CYPHER_5`. Most Cypher syntax works normally, with one critical exception:
-
-```cypher
--- WRONG (syntax error in Cypher 5):
-WHERE n.type NOT IN ['A', 'B']
-
--- RIGHT:
-WHERE NOT (n.type IN ['A', 'B'])
-```
-
-**`x NOT IN [list]` is removed in Cypher 5.** Always use `NOT (x IN [list])` instead. This is the **only** breaking syntax change that affects this codebase.
-
-**`CASE WHEN` works fine** — use it freely for conditional logic, counting, SET, ORDER BY, FOREACH, etc. Do not replace `CASE WHEN` with `nullIf()` hacks unless there is a measured performance benefit.
-
-**Preferred patterns for conditional SET (update-if-non-empty):**
-```cypher
--- Use coalesce/nullIf for "keep old value if new is empty" — cleaner than CASE WHEN:
-SET s.diagnostic = coalesce(nullIf(sig.diagnostic, ''), s.diagnostic)
--- Instead of:
-SET s.diagnostic = CASE WHEN sig.diagnostic <> '' THEN sig.diagnostic ELSE s.diagnostic END
-```
-
-**Rules:**
-- Never use `x NOT IN [...]` — syntax error. Use `NOT (x IN [...])`
-- `CASE WHEN` is supported — do not gratuitously replace it
-- `coalesce(nullIf(new_val, ''), old_val)` is preferred for conditional SET updates
-- Test new Cypher against the live graph before committing
+We run **Neo4j 2026.01.x** with `db.query.default_language: CYPHER_5`. The only breaking syntax change that affects this codebase: `x NOT IN [list]` is removed — write `NOT (x IN [list])` instead. `CASE WHEN` is fully supported — use it freely. For "keep old value if new is empty," prefer `SET s.f = coalesce(nullIf(new, ''), old)` over `CASE WHEN`. Test new Cypher against the live graph before committing.
 
 ### Neo4j Management
 
@@ -582,50 +445,45 @@ Never use `DETACH DELETE` on production data without user confirmation. For re-e
 
 ### Graph Migrations
 
-**Run migrations as inline Cypher, never as scripts.** Migrations are one-off operations — do not create `scripts/migrate_*.py` or `scripts/repair_*.py` files. Instead, run the migration Cypher directly via `uv run imas-codex graph shell` or the MCP `repl()` REPL with `query()`. This keeps the `scripts/` directory clean for reusable tooling only.
-
-```python
-# Example: backfill a new property on existing nodes
-query("""
-    MATCH (cc:CodeChunk)
-    WHERE cc.embedding IS NOT NULL AND cc.embedded_at IS NULL
-    WITH cc LIMIT 1000
-    SET cc.embedded_at = datetime()
-    RETURN count(cc) AS updated
-""")
-```
-
-For large migrations (>10K nodes), batch in a loop with `LIMIT` to avoid transaction timeouts. Always verify counts before and after.
+Run migrations as inline Cypher via `imas-codex graph shell` or the MCP `repl()` (`query()`). Never create `scripts/migrate_*.py` or `repair_*.py`. For >10K-node migrations, batch with `LIMIT` to avoid transaction timeouts; verify counts before and after.
 
 ### LLMCost Node Properties
 
-`LLMCost` nodes track per-call LLM spend. **All properties are prefixed with `llm_`** — do not use bare names like `cost`, `model`, or `service`.
+`LLMCost` nodes track per-call LLM spend. **All `LLMOperation`-mixin fields are prefixed with `llm_`** — never use bare `cost`, `model`, or `service`.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `llm_cost` | float | Dollar cost of the call |
+| `llm_cost` | float | Dollar cost of the call (USD) |
 | `llm_model` | string | Model identifier |
-| `llm_service` | string | Service tag |
-| `llm_tokens_in` | int | Input tokens |
-| `llm_tokens_out` | int | Output tokens |
-| `llm_tokens_cached_read` | int | Prompt cache hit tokens |
-| `llm_tokens_cached_write` | int | Prompt cache write tokens |
+| `llm_service` | string | Service tag (e.g. `standard-names`) |
+| `llm_tokens_in` / `llm_tokens_out` | int | Input/output tokens |
+| `llm_tokens_cached_read` / `llm_tokens_cached_write` | int | Prompt-cache hit/write tokens |
 | `llm_at` | datetime | When the call was made |
-| `pool` | string | Pipeline pool (`generate_name`, `review_name`, etc.) |
+| `run_id` (required), `phase` (required), `cycle`, `pool`, `batch_id` | string/int | Pipeline grouping |
+| `sn_ids` | string[] | SNs touched by this call |
+| `event_type`, `overspend` | string/bool | Charge classification |
 | `for_run` | string | `SNRun` ID this cost belongs to |
 
-**Common queries:**
+**Canonical cost queries:**
 
 ```cypher
-// Total spend
-MATCH (c:LLMCost) RETURN sum(c.llm_cost) AS total
+-- Total LLM spend
+MATCH (c:LLMCost) RETURN round(sum(c.llm_cost)*100)/100 AS total_usd
 
-// Per-pool breakdown
-MATCH (c:LLMCost) RETURN c.pool, sum(c.llm_cost) AS cost ORDER BY cost DESC
+-- Per-pool / per-model breakdown
+MATCH (c:LLMCost)
+RETURN c.pool AS pool, count(c) AS calls, round(sum(c.llm_cost)*100)/100 AS usd
+ORDER BY usd DESC
 
-// Spend for a specific run
+-- Spend for a specific run
 MATCH (c:LLMCost {for_run: $run_id}) RETURN sum(c.llm_cost) AS total
+
+-- SNRun budget tracking
+MATCH (r:SNRun) RETURN r.cost_spent AS spent, r.cost_limit AS budget, r.stop_reason
+ORDER BY r.started_at DESC LIMIT 1
 ```
+
+`SNRun.cost_spent` / `cost_limit` / `cost_total` are aggregates; `LLMCost.llm_cost` is the per-call source of truth. Embedding costs are always zero — only OpenRouter LLM calls incur cost.
 
 ### Neo4j Lock Files — CRITICAL
 
@@ -722,47 +580,6 @@ pre-filtering requires properties registered as additional vector index properti
 
 **Token cost:** Always project specific properties in Cypher (`RETURN n.id, n.name`), never return full nodes. Use Cypher aggregations instead of Python post-processing.
 
-### LLM Cost Queries
-
-**CRITICAL: The cost field is `llm_cost`, NOT `cost`.** No node in the graph has a plain `cost` property. All LLM cost tracking uses the `LLMOperation` mixin which prefixes every field with `llm_`:
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `llm_cost` | float | Cost in USD |
-| `llm_model` | string | Model identifier |
-| `llm_service` | string | Service tag (e.g. `standard-names`) |
-| `llm_tokens_in` | integer | Input tokens |
-| `llm_tokens_out` | integer | Output tokens |
-| `llm_tokens_cached_read` | integer | Prompt cache hits |
-
-**Canonical cost queries:**
-
-```cypher
--- Total LLM spend
-MATCH (c:LLMCost) RETURN round(sum(c.llm_cost)*100)/100 AS total_usd
-
--- Cost breakdown by pipeline pool
-MATCH (c:LLMCost)
-RETURN c.pool AS pool, count(c) AS calls,
-       round(sum(c.llm_cost)*100)/100 AS cost_usd
-ORDER BY cost_usd DESC
-
--- Cost breakdown by model
-MATCH (c:LLMCost)
-RETURN c.llm_model AS model, count(c) AS calls,
-       round(sum(c.llm_cost)*100)/100 AS cost_usd
-ORDER BY cost_usd DESC
-
--- SNRun budget tracking (uses cost_spent, not llm_cost)
-MATCH (r:SNRun)
-RETURN r.cost_spent AS spent, r.cost_limit AS budget, r.stop_reason
-ORDER BY r.started_at DESC LIMIT 1
-```
-
-**Other cost-related fields on `SNRun`:** `cost_spent` (actual USD spent), `cost_limit` (budget cap), `cost_total` (total including overhead). These are aggregates — `llm_cost` on `LLMCost` nodes are the per-call source of truth.
-
-**Embedding costs are always zero** — the embedding server runs locally. Only LLM API calls via OpenRouter incur cost.
-
 ### Batch Operations
 
 Use `UNWIND` for batch graph writes:
@@ -780,66 +597,22 @@ query('''
 
 ### Release Workflow
 
-The release CLI is state-machine driven. State is derived from the latest git tag:
-
-- **Stable** (`vX.Y.Z`) — on a release
-- **RC mode** (`vX.Y.Z-rcN`) — testing a release candidate
-
-**Remote defaults:** RC releases target `origin` (fork), final releases target `upstream` (iterorganization). Override with `--remote`.
-
-**Dirty worktree policy:** RC releases allow dirty worktrees (warning only) since parallel agents often modify files concurrently. Final releases (`--final`) require a clean worktree — commit first (never stash — see "Parallel Agents" section).
+The release CLI is state-machine driven from the latest git tag. **Stable** = `vX.Y.Z`, **RC** = `vX.Y.Z-rcN`. RCs target `origin` (fork); finals target `upstream` (iterorganization) — override with `--remote`. RC releases tolerate dirty worktrees; `--final` requires clean.
 
 ```bash
-# Check current state and permitted commands
-uv run imas-codex release status
+uv run imas-codex release status                     # current state + permitted bumps
 
-# From stable (e.g., v5.0.0):
-uv run imas-codex release --bump major -m 'IMAS DD 4.1.0 support'    # → v6.0.0-rc1 (origin)
-uv run imas-codex release --bump minor -m 'New discovery features'    # → v5.1.0-rc1 (origin)
-uv run imas-codex release --bump patch -m 'Bug fixes'                 # → v5.0.1-rc1 (origin)
-uv run imas-codex release --bump major --final -m 'Direct release'    # → v6.0.0 (upstream)
-
-# From RC mode (e.g., v5.0.0-rc1):
-uv run imas-codex release -m 'Fix CI issues'                          # → v5.0.0-rc2 (origin)
-uv run imas-codex release --final -m 'Production release'             # → v5.0.0 (upstream)
-uv run imas-codex release --bump patch -m 'Abandon RC, new patch'     # → v5.0.1-rc1 (origin)
-
-# Options: --remote origin|upstream, --skip-git, --dry-run, --version
+# From stable: bump major/minor/patch → vN.Y.Z-rc1 (origin); add --final for direct upstream
+uv run imas-codex release --bump minor -m '<msg>'
+# From RC mode: re-run iterates rc → rc2/rc3...; --final cuts the stable to upstream
+uv run imas-codex release -m '<msg>'
+uv run imas-codex release --final -m '<msg>'
+# Options: --remote, --skip-git, --dry-run, --version
 ```
 
-**What the release CLI does (no manual steps needed):**
+**The CLI does it all:** computes the next version, validates no private fields in the graph, tags DDVersion, pushes graph variants to GHCR (dd-only + full for RC; + per-facility for final), pushes the git tag → triggers CI. CI runs `graph-quality`, `smoke-test`, `build-and-push` to ACR. Azure Web App continuously deploys from ACR (5–15 min lag).
 
-1. Computes the next version from the latest git tag (state machine)
-2. Creates a local git tag
-3. Validates no private fields in graph
-4. Tags DDVersion node with release metadata
-5. Pushes graph variants to GHCR (dd-only + full for RC; + per-facility for final)
-6. Pushes git tag to the target remote → triggers CI
-
-**What CI does (automatically triggered by the tag push):**
-
-1. `graph-quality` — pulls dd-only graph from GHCR, runs `tests/graph/` against it
-2. `smoke-test` — builds container, starts it, verifies health endpoint
-3. `build-and-push` — pushes container image to Azure Container Registry (ACR)
-
-**How Azure deploys (automatic, no webhook needed):**
-
-Azure Web App has continuous deployment enabled on ACR. When a new image appears, Azure pulls and restarts the container automatically. There is no webhook — deployment is triggered by ACR image push. Allow 5–15 minutes for the new version to appear on the test URL.
-
-**Fork-based development workflow:**
-
-1. **All work on fork's `main`** — no feature branches. Multiple agents use the same `main` branch with merge discipline.
-2. **RC releases → fork CI → Azure test** — `imas-codex release -m "..."` pushes graph + tag to origin. Fork CI builds and pushes to ACR (hardcoded `iterorganization/` path). Azure auto-deploys the `latest-rc` tag.
-3. **Verify RC** — exercise tools on test deployment at `https://app-imas-mcp-server-test-frc.azurewebsites.net/health`. Run A/B tests against all MCP tools.
-4. **PR to upstream** — when RC is confirmed working, PR fork/main → upstream/main.
-5. **Final release → upstream** — after PR merges: `imas-codex release --final -m "..."` tags upstream, production CI deploys with `latest-stable` tag.
-
-**Rules:**
-- **Never push directly to `upstream/main`** — always PR. Use `git push origin main` for day-to-day work.
-- **Never push the same tag to both origin and upstream** — RC tags go to origin only, final tags to upstream only. Duplicate tags cause ACR race conditions.
-- RC tags on fork are disposable — iterate freely
-- Graph push runs from the ITER machine where Neo4j runs — CI cannot build graph data
-- The release CLI handles everything — do not manually push graphs or tags separately
+**Workflow:** RC on fork → verify on Azure test (`https://app-imas-mcp-server-test-frc.azurewebsites.net/health`) → PR fork/main → upstream/main → `release --final` from upstream. **Never** push the same tag to both remotes (causes ACR race conditions). RC tags on fork are disposable.
 
 ## Standard Names
 
@@ -848,7 +621,7 @@ Azure Web App has continuous deployment enabled on ACR. When a new image appears
 
 ### Pipeline
 
-**Six-pool concurrent run loop** (Phase 8.1 Option B):
+**Six-pool concurrent run loop:**
 
 | Pool | Label | Stage gate | Key operation |
 |------|-------|------------|---------------|
@@ -935,164 +708,35 @@ Quality is adequate (68.9 avg) but not top-tier for standard name generation.
 
 ### RD-Quorum Review
 
-The `sn review` pipeline uses a **Rational-Disagreement (RD) quorum** to produce
-high-confidence axis scores while controlling cost.
+`sn review` uses a **Rational-Disagreement quorum** for high-confidence axis scores. Per batch: **Cycle 0** (primary, blind) scores with `models[0]`; **Cycle 1** (secondary, blind) re-scores with `models[1]` — blindness enforced (no `prior_reviews` block). For each item, any per-dimension diff > `disagreement-threshold` (default 0.15) marks it disputed. **Cycle 2** (escalator, context-aware) runs only if there are disputed items AND `len(models) == 3`; uses both prior critiques and is authoritative for those items. Reviews persist immediately after each cycle (crash-safety). Partial-failure ladder: both missing → retry → `retry_item` (quarantine); one missing → `single_review`.
 
-**Flow (per batch):**
+**`resolution_method` values on Review nodes:** `quorum_consensus` (cycles 0+1 agreed; final = mean) / `authoritative_escalation` (cycle 2 wins for disputed items) / `max_cycles_reached` (disagreement, no escalator) / `retry_item` / `single_review`. `update_review_aggregates` picks the most-recent winning group and mirrors final scores onto SN axis slots.
 
-1. **Cycle 0 — primary (BLIND):** Scores the batch with no prior context. Uses
-   `models[0]` from the axis chain. Review nodes written to graph before cycle 1
-   starts (crash-safety).
-2. **Cycle 1 — secondary (BLIND):** Scores the same batch independently using
-   `models[1]`. Blindness is enforced — the prompt's `{% if prior_reviews %}`
-   block is omitted. Written immediately.
-3. **Per-dimension disagreement check:** For each item, if any dimension differs
-   by > `disagreement-threshold` (default 0.15, normalised 0–1), the item is
-   "disputed".
-4. **Cycle 2 — escalator (CONTEXT-AWARE):** Runs only if disputed items exist AND
-   `len(models) == 3`. Takes a per-item mini-batch of disputed items; receives
-   both prior critiques via `prior_reviews`. Its result is authoritative for
-   those items.
+**Configuration:** `[tool.imas-codex.sn-review]` (`disagreement-threshold`, `max-cycles`, `active-profile`) + `[tool.imas-codex.sn-review.{names,docs}]` (`models = [cycle0, cycle1, cycle2]`). Profiles in `[tool.imas-codex.sn-review.names.profiles.*]`. Accessors: `get_sn_review_{names,docs}_models()`, `get_sn_review_max_cycles()`, `get_sn_review_disagreement_threshold()`, `get_sn_review_active_profile()`.
 
-**Partial-failure ladder:** both cycles missing → retry; second failure →
-`retry_item` (quarantine); one cycle missing → `single_review`.
+**Budget:** `review_pipeline` reserves `batch_cost × num_models × 1.3` upfront via `BudgetLease.reserve()`, then charges per cycle — prevents secondary-cost leaks on mid-cycle crashes.
 
-**`resolution_method` values on Review nodes:**
+### Structured fan-out
 
-| Value | Meaning |
-|-------|---------|
-| `quorum_consensus` | Cycles 0+1 agreed within tolerance; final = mean |
-| `authoritative_escalation` | Cycle 2 ran and is authoritative for disputed items |
-| `max_cycles_reached` | Cycles 0+1 disagreed; no escalator configured (len(models) < 3); final = mean with disagreement flag |
-| `retry_item` | Both cycles failed; item quarantined |
-| `single_review` | Only one cycle produced a score |
+`imas_codex/standard_names/fanout/` runs bounded Proposer → Executor → Synthesizer fan-out for `refine_name`. The Proposer emits a closed-catalog `FanoutPlan` (Pydantic discriminated union on `fn_id`, all bounds enforced at parse time); a pure-Python executor runs it in parallel via `asyncio.to_thread`; the call-site's LLM call ingests the rendered evidence block. No agentic loop, no runtime function generation.
 
-**Winning-group selection:** `update_review_aggregates` picks the most-recent
-Review group whose `resolution_method` ∈ {`quorum_consensus`,
-`authoritative_escalation`, `single_review`} and mirrors the final scores onto
-the StandardName axis slots (`reviewer_score_name` / `reviewer_score_docs`, etc.).
-
-**Configuration** (`pyproject.toml`):
-```toml
-[tool.imas-codex.sn-review]
-disagreement-threshold = 0.15   # per-dimension tolerance (normalised 0-1)
-max-cycles = 3                  # 1=primary only, 2=blind pair, 3=full quorum
-
-[tool.imas-codex.sn-review.names]
-models = [
-  "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind, cache-enabled)
-  "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
-  "openrouter/anthropic/claude-opus-4.6",    # cycle 2 escalator (disputes only)
-]
-
-[tool.imas-codex.sn-review.docs]
-models = [
-  "openrouter/anthropic/claude-sonnet-4.6",
-  "openrouter/openai/gpt-5.4",
-  "openrouter/anthropic/claude-opus-4.6",
-]
-```
-
-**Settings accessors:** `get_sn_review_names_models()`, `get_sn_review_docs_models()`,
-`get_sn_review_max_cycles()`, `get_sn_review_disagreement_threshold()`.
-
-**Budget:** `review_pipeline` reserves `batch_cost × num_models × 1.3` upfront via
-`BudgetLease.reserve()`, then charges per cycle. This prevents secondary-cost leaks
-even when mid-cycle crashes occur.
-
-### Structured fan-out (plan 39)
-
-`imas_codex/standard_names/fanout/` implements bounded Proposer → Executor →
-Synthesizer fan-out for the `refine_name` worker. The Proposer LLM emits a
-closed-catalog `FanoutPlan` (Pydantic discriminated union on `fn_id`, all
-bounds enforced at parse time); a pure-Python executor runs the plan in
-parallel via `asyncio.to_thread`; the call-site's existing LLM call ingests
-the rendered evidence block. No agentic loop, no runtime function generation.
-
-- **Default off**: `enabled=False` in `[tool.imas-codex.sn-fanout]` makes
-  `run_fanout()` a true no-op — returns `""`, writes no `Fanout` graph node,
-  emits no metrics, never calls the Proposer LLM.
-- **One `GraphClient` per refine cycle**: the worker passes its `gc` into
-  `run_fanout(..., gc=gc, ...)` and the dispatcher propagates it to every
-  catalog runner. Runners must never instantiate their own client.
-- **Cost ownership**: the Proposer call is charged to the caller's
-  `BudgetLease` as a sub-event with `batch_id=fanout_run_id`. Callers stamp
-  the same id onto their Synthesizer charge so the `Fanout` ↔ `LLMCost`
-  graph join works (plan 39 §8.3).
-- **Telemetry-only `Fanout` node**: written runtime-only (like `LLMCost`),
-  exempt from LinkML schema management — see plan 39 §8.2.
-- **Phase-2 gate**: future fan-out expansion plans must cite
-  `plans/features/standard-names/39-fanout-phase1-telemetry.md` (CI-enforced).
+- **Default off** (`enabled=False` in `[tool.imas-codex.sn-fanout]`): `run_fanout()` is a true no-op.
+- **One `GraphClient` per refine cycle** — worker passes its `gc` in; runners never instantiate their own.
+- **Cost ownership:** Proposer call is charged to the caller's `BudgetLease` as a sub-event with `batch_id=fanout_run_id`; callers stamp the same id on the Synthesizer charge so the `Fanout` ↔ `LLMCost` graph join works.
+- **`Fanout` node** is telemetry-only, runtime-written (like `LLMCost`); exempt from LinkML schema management.
 
 ### StandardName Lifecycle
 
-Three lifecycle axes tracked on each `StandardName` node:
+Four lifecycle axes on each `StandardName`:
 
-**`name_stage`** and **`docs_stage`** (Phase 8.1 pool state machines):
+| Axis | States | Set by | Notes |
+|---|---|---|---|
+| `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | Pool workers | Cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`. `refining` reverts to `reviewed` after `DEFAULT_ORPHAN_SWEEP_TIMEOUT_S` (600 s). `chain_length` / `docs_chain_length` track refinement depth (root = 0). `superseded` = predecessor in `REFINED_FROM` chain; source edges migrate to the latest. |
+| `pipeline_status` | `drafted → published → accepted` | `sn run` → `sn export` → `sn import` | Catalog round-trip state. |
+| `status` | `draft → published → deprecated` | Catalog import | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
+| `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn export`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings persist in `validation_issues` but stay `valid`. **Review never demotes** — low-scoring names stay `valid` and route to refine pools. |
 
-```
-name_stage:  pending → drafted → reviewed ─┬─→ accepted   (terminal; rsn ≥ min_score)
-                         ↑                 ├─→ refining → (new SN created at 'drafted'; old → superseded)
-                         │                 └─→ exhausted  (terminal; chain_length = cap after Opus rotation)
-                         └── superseded (predecessor in REFINED_FROM chain; not the latest)
-```
-
-`docs_stage` uses the same states (`superseded` unused — docs refine never creates a new SN node). The cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`.
-
-- **pending** → not yet generated
-- **drafted** → LLM output written; awaiting review
-- **reviewed** → scored by reviewer; rsn below threshold; eligible for refine
-- **accepted** → reviewer score met or exceeded `min_score` threshold (terminal — good)
-- **refining** → claim held by a refine worker; orphan sweep reverts to `reviewed` after `DEFAULT_ORPHAN_SWEEP_TIMEOUT_S` (600 s) timeout
-- **exhausted** → refine chain hit cap and Opus escalation still scored below threshold (terminal — bad)
-- **superseded** → predecessor SN in a REFINED_FROM chain; source edges migrated to the latest
-
-`chain_length` (name) and `docs_chain_length` (docs) track depth in the refinement chain (root = 0).
-
-**`pipeline_status`** (catalog round-trip state, renamed from `review_status` in schema v2):
-
-```
-drafted → published → accepted
-```
-
-- **drafted**: Generated by `sn run` (LLM pipeline). All names are persisted with quality scores — low-scoring names can be regenerated via `--focus`
-- **published**: Exported by `sn export` to YAML staging for catalog review
-- **accepted**: Imported by `sn import` from reviewed catalog (catalog-authoritative)
-
-**`status`** (ISN vocabulary lifecycle, catalog-authoritative):
-
-```
-draft → published → deprecated
-```
-
-Set by catalog import; pipeline defaults to `draft`. Distinct from `pipeline_status` which tracks the internal pipeline state machine. Deprecated names link to their replacement via `superseded_by`; the replacing name links back via `deprecates`.
-
-**`origin`** (provenance of most recent editorial edit):
-
-- **`pipeline`**: Content generated by the LLM pipeline (default)
-- **`catalog_edit`**: Content imported from a catalog PR where a human edited protected fields. On subsequent pipeline runs, `filter_protected()` skips PROTECTED_FIELDS on `catalog_edit` names unless explicitly overridden via `sn run --override-edits <name>`
-
-**PR provenance tracking:** `catalog_pr_number`, `catalog_pr_url`, `catalog_commit_sha` record which catalog PR last touched this entry. `exported_at` and `imported_at` track round-trip timestamps.
-
-### StandardName Validation Status
-
-A separate `validation_status` field gates names before they participate in review, consolidation, and export:
-
-```
-pending → valid | quarantined
-```
-
-- **pending**: Default state when a name is first drafted
-- **valid**: Passed all critical validation checks — eligible for `sn review`, consolidation, and `sn export`
-- **quarantined**: Failed one or more critical checks — excluded from downstream pipeline stages
-
-**Critical failures (→ quarantine):** grammar round-trip failure, Pydantic construction error, detected ambiguity.
-
-**Non-critical issues (→ valid):** semantic warnings, description quality hints — persisted as `validation_issues` but do not gate the name.
-
-**Review does not demote.** The `sn review` pipeline writes axis-specific scores (`reviewer_score_name` / `reviewer_score_docs`, etc.) only — it never mutates `validation_status`. Low-scoring names remain `valid` and are routed to the `REFINE_NAME` / `REFINE_DOCS` pools via `name_stage='reviewed'` / `docs_stage='reviewed'`. Prior reviewer feedback is always injected into the refine prompt — there is no toggle.
-
-Only `valid` names participate in `sn export`.
+**`origin`:** `pipeline` (LLM-generated) or `catalog_edit` (human-edited via catalog PR). `filter_protected()` skips `PROTECTED_FIELDS` on `catalog_edit` names unless overridden via `sn run --override-edits <name>`. PR provenance fields: `catalog_pr_number`, `catalog_pr_url`, `catalog_commit_sha`; round-trip timestamps: `exported_at`, `imported_at`.
 
 ### StandardNameSource Lifecycle
 
@@ -1115,67 +759,26 @@ extracted → composed | attached | vocab_gap | failed | stale
 
 ### Reset and Clear Semantics
 
-**`sn run --reset-to`** — Re-processes existing nodes without deleting them (when using
-`--reset-to drafted`) or clears matching SN nodes for a full re-run (`--reset-to extracted`).
-Clears transient fields (embedding, model, generated_at) and removes
-HAS_STANDARD_NAME and HAS_UNIT relationships. Scoped to the same `--source` filter. Accepts
-additional filter flags: `--since`, `--before`, `--below-score`, `--tier`,
-`--retry-quarantined` to narrow which nodes are reset.
+- **`sn run --reset-to {drafted|extracted}`** — Re-processes existing nodes (`drafted`) or clears matching SN nodes for a full re-run (`extracted`). Clears transient fields (embedding, model, generated_at) and removes `HAS_STANDARD_NAME`/`HAS_UNIT` edges. Scoped to `--source`; narrow further with `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`.
+- **`sn run --reset-only`** — Performs the `--reset-to` cleanup then exits. Requires `--reset-to`.
+- **`sn run --from-model <substring>`** — Provenance-based filter; re-generates names produced by a specific model.
+- **`sn clear`** — Full-subsystem wipe (SN + Review + StandardNameSource + VocabGap + SNRun + grammar tree) with auto re-seed from ISN. No scoping — use `sn prune` for targeted deletes.
+- **`sn prune`** — Relationship-first safe delete. Requires `--status` or `--all`; `--include-sources` to also drop StandardNameSource nodes.
+- **`sn sync-grammar`** — Idempotent grammar re-sync; auto-run by `sn clear`, manual after ISN version bumps.
 
-**`sn run --reset-only`** — Performs the `--reset-to` cleanup then exits without running
-the generation pipeline. Requires `--reset-to`. Useful for housekeeping without recomposing.
+**Chain history is permanent.** `--reset-to` leaves `REFINED_FROM` chains and `DocsRevision` snapshots in place. **Safety guard:** `--reset-to` and `sn prune` require `--include-accepted` to touch `pipeline_status=accepted` names (catalog-authoritative). `sn clear` has no such guard.
 
-**`sn clear`** — Unconditional full-subsystem wipe. Deletes all StandardName, Review,
-StandardNameSource, VocabGap, SNRun, GrammarToken, GrammarTemplate, GrammarSegment, and
-ISNGrammarVersion nodes in one pass. By default re-seeds the ISN grammar vocabulary from
-the installed `imas-standard-names` package so the grammar is always available after a
-clear. Flags: `--dry-run` (preview), `--force` (skip confirmation), `--no-reseed` (skip
-grammar re-sync — tests/debugging only). There is intentionally no scoping — use `sn prune`
-for targeted deletes.
+**Loop semantics.** Pools run concurrently weighted by `POOL_WEIGHTS` (see [Pipeline](#pipeline)). Stops on zero eligible work, `--cost-limit` exhausted, or per-pool admission threshold. `--min-score F` routes below-threshold names/docs to refine pools; `--rotation-cap N` (default 3) caps chain depth; `--escalation-model` fires on the final rotation attempt. `--cost-limit` is a **single shared budget pool** across all six pools — per-category spend reported on the `SNRun` node. On `Ctrl-C`, writes an audit `SNRun` (`cost`, pool counters, `min_score`, `rotation_cap`, `stop_reason`); `sn status` surfaces the most recent run.
 
-**`sn prune`** — Scoped delete tool for StandardName nodes. Uses a relationship-first
-safety model: HAS_STANDARD_NAME edges are removed before deleting nodes, and scoped
-deletes only remove orphaned nodes. Requires either `--status <value>` or `--all`. Pass
-`--include-sources` to also delete associated `StandardNameSource` nodes.
-
-**`sn sync-grammar`** — Seeds/refreshes the ISN grammar vocabulary (`ISNGrammarVersion`
-+ `GrammarSegment` + `GrammarToken` + `GrammarTemplate`) into the graph from the
-installed `imas-standard-names` package. Idempotent — uses MERGE throughout. Normally
-run automatically by `sn clear`; use this command to refresh after an ISN version bump
-without wiping standard names.
-
-**Chain history is preserved across resets.** `sn run --reset-to` resets the *current* SN's stage fields but does not delete `REFINED_FROM` chain nodes or `DocsRevision` snapshots — refinement history accumulates permanently in the graph.
-
-**Safety guard:** `sn run --reset-to` and `sn prune` require `--include-accepted` to touch
-names with `pipeline_status=accepted`. Accepted names are catalog-authoritative and should rarely be
-deleted from the graph. (`sn clear` has no such guard — it is a total wipe by design.)
-
-**`sn run --reset-to`** — Runs a reset before minting, scoped to the same `--source`
-filter. Accepts `extracted` or `drafted` as the target status. Useful for a clean re-run on a
-specific IDS without touching the rest of the graph.
-
-**`sn run --from-model`** — Provenance-based regeneration filter. Selects only nodes whose
-`model` field contains the given substring (e.g. `--from-model gemini`). Useful for re-generating
-names produced by a specific model after benchmarking reveals a better alternative.
-
-**`sn review` fidelity rank** is no longer applicable — the `--target` axis selector was removed in Phase 8.1. All six pools run within `sn run`; `sn review` remains a standalone scoring command.
-
-**Loop (default)** — `sn run` runs the 6-pool completion loop. All pools run concurrently, weighted by `POOL_WEIGHTS` (generate_name 0.15, review_name 0.25, refine_name 0.10, generate_docs 0.15, review_docs 0.25, refine_docs 0.10) defined in `imas_codex/standard_names/pools.py`. Stops when every pool reports zero eligible work, when `--cost-limit` is exhausted, or when the remaining budget drops below the per-pool admission threshold.
-**`sn run --min-score F`** routes names/docs with scores below `F` to the `REFINE_NAME` / `REFINE_DOCS` pools. `--rotation-cap N` sets the chain depth cap (default 3). Escalation to `--escalation-model` fires on the final rotation attempt. `--domain` restricts seeding to specific domain(s) (repeatable, space-separated). `--max-sources N` caps total sources seeded across all domains. `--skip-review` disables the review phase.
-`--cost-limit` sets a **single shared budget pool** across all six pools — not independent per-pool limits. Partial-phase spend is reported per category on the `SNRun` node. On `Ctrl-C`, writes an `SNRun` audit node capturing cost, pool counters, `min_score`, `rotation_cap`, and `stop_reason`; `sn status` surfaces the most recent run.
-**Cost is graph-backed via `LLMCost` nodes written by `BudgetManager` (async).** `SNRun.status` lifecycle: `started → completed | interrupted | failed | degraded` (degraded when pending events can't be flushed). `lease.charge_event(cost, event)` is the only charge API — soft semantics, never raises. `BudgetManager` must be started with `await shared_mgr.start()` before use. Use `drain_pending()` + `get_total_spent()` in a `finally` block to finalize each run.
+**Cost is graph-backed** via `LLMCost` nodes written async by `BudgetManager`. `SNRun.status`: `started → completed | interrupted | failed | degraded`. The only charge API is `lease.charge_event(cost, event)` (soft, never raises). Start `BudgetManager` with `await shared_mgr.start()`; finalize each run with `drain_pending()` + `get_total_spent()` in a `finally` block.
 
 ### Write Semantics
 
-Two distinct write paths with different semantics:
+- **`write_standard_names()` (build path):** `coalesce(b.field, sn.field)` for all fields — passing `None` preserves existing data. Also persists `validation_issues` and `validation_layer_summary`.
+- **`_write_catalog_entries()` (import path):** Catalog fields SET directly (catalog is authoritative). Graph-only fields (embedding, model, generated_at) preserved via coalesce.
+- **Review write path:** Each RD-quorum cycle persists its `Review` nodes immediately. After all cycles, `update_review_aggregates` mirrors final axis scores onto SN slots (`reviewer_score_name`/`reviewer_score_docs`).
 
-- **`write_standard_names()` (build path)**: Uses `coalesce(b.field, sn.field)` for ALL fields — passing None preserves existing graph data. Safe to re-run without erasing imported data. Also persists `validation_issues` (list of tagged strings from ISN 3-layer validation) and `validation_layer_summary` (JSON with per-layer pass/fail counts).
-- **`_write_catalog_entries()` (import path)**: Catalog fields SET directly (overwrite) — catalog is authoritative. Graph-only fields (embedding, model, generated_at) preserved via coalesce. Tolerates legacy `confidence:` field by silent ignore.
-- **Review write path**: Each RD-quorum cycle's `Review` nodes are persisted to graph immediately (before the next cycle starts). After all cycles complete, `update_review_aggregates` selects the winning group (most-recent group with `resolution_method` ∈ {`quorum_consensus`, `authoritative_escalation`, `single_review`}) and mirrors the final scores onto the StandardName axis slots (`reviewer_score_name` / `reviewer_score_docs`, etc.).
-
-Both `write_standard_names()` and `_write_import_entries()` call the shared
-`_write_standard_name_edges(gc, names)` tail-pass helper (defined in `graph_ops.py`)
-after all nodes in the batch exist, ensuring pipeline parity between build and import paths.
+Both build and import paths call shared `_write_standard_name_edges(gc, names)` (in `graph_ops.py`) as a tail pass after node MERGE.
 
 ### StandardName Graph Edges
 
@@ -1196,15 +799,7 @@ Forward-reference targets are MERGEd as bare placeholder nodes.
 | `REFINED_FROM` | new `StandardName` | predecessor `StandardName` | Set by `persist_refined_name`; marks the chain. Source edges (`PRODUCED_NAME`, `HAS_STANDARD_NAME`) migrate to the new SN in the same transaction |
 | `DOCS_REVISION_OF` | `StandardName` | `DocsRevision` | Set by `persist_refined_docs`; snapshots prior docs+reviewer state before in-place rewrite |
 
-`HAS_ARGUMENT` / `HAS_ERROR` derivation is driven by the ISN parser in
-`imas_codex/standard_names/derivation.py` (pure logic, no graph access).
-Each name is peeled one layer only; the inner name, when itself written to the
-graph, runs its own derivation.  Names the parser cannot parse silently produce
-no derived edges.
-
-**Derivation module:** `imas_codex/standard_names/derivation.py` — exports
-`derive_edges(name: str) -> list[DerivedEdge]`.  Tests: `tests/standard_names/test_derivation.py`
-(D1–D16) and `tests/standard_names/test_graph_edge_writers.py` (G1–G10).
+`HAS_ARGUMENT`/`HAS_ERROR` derivation lives in `imas_codex/standard_names/derivation.py` — exports `derive_edges(name) -> list[DerivedEdge]` (pure logic). Each name is peeled one layer only; the inner name runs its own derivation when written. Unparseable names silently produce no derived edges.
 
 ### PR-driven round-trip
 
@@ -1236,12 +831,7 @@ sn export → sn preview → sn release -m "msg" → GitHub Pages / PR review �
 | `list_standard_names` | List with optional filters | `physics_domain`, `kind`, `pipeline_status`, `cocos_type` |
 | `list_grammar_vocabulary` | Distinct tokens + usage counts for a grammar segment | `segment` (one of: `physical_base`, `subject`, `component`, `coordinate`, `position`, `process`, `geometry`, `object`, `geometric_base`, `device`, `region`, `qualifier`) |
 
-The grammar-segment filters (`physical_base`, `subject`, …) on
-`search_standard_names` filter the result set by exact match against the
-parsed `sn.<segment>` property. Use `list_grammar_vocabulary` to discover
-valid tokens before filtering. The `physics_domain` filter (canonical scalar
-+ `source_domains` list) is pushed into Cypher in all three search branches
-(segment-filter, vector, keyword) so it does not lose results below `LIMIT $k`.
+Grammar-segment filters (`physical_base`, `subject`, …) on `search_standard_names` match exactly against the parsed `sn.<segment>` property. Use `list_grammar_vocabulary` to discover valid tokens before filtering. The `physics_domain` filter (canonical scalar + `source_domains` list) is pushed into Cypher in all three search branches (segment-filter, vector, keyword), so it does not lose results below `LIMIT $k`.
 
 **All grammar segments are closed.** All segments including `physical_base`
 (100 tokens) have a closed vocabulary defined in ISN's `SEGMENT_TOKEN_MAP`.
@@ -1261,213 +851,68 @@ StandardName and StandardNameSource nodes defined in `imas_codex/schemas/standar
 - `(StandardNameSource)-[:FROM_DD_PATH]->(IMASNode)` — DD-sourced extraction tracking
 - `(StandardNameSource)-[:FROM_SIGNAL]->(FacilitySignal)` — signal-sourced extraction tracking
 - `(StandardNameSource)-[:PRODUCED_NAME]->(StandardName)` — links source to result
-- `(StandardName)-[:REFINED_FROM]->(StandardName)` — predecessor in name refinement chain (Phase 8.1)
-- `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)` — prior docs snapshot before in-place rewrite (Phase 8.1)
+- `(StandardName)-[:REFINED_FROM]->(StandardName)` — predecessor in name refinement chain
+- `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)` — prior docs snapshot before in-place rewrite
 
-**Phase 8.1 schema changes:**
+**COCOS / physics_domain / units (DD-authoritative, injected post-LLM):** `unit` flows from the DD `HAS_UNIT` relationship; `cocos` (int → COCOS singleton) and `cocos_transformation_type` (e.g. `psi_like`, `ip_like`) record convention behaviour; `dd_version` records the DD snapshot. `physics_domain` comes directly from `IMASNode.physics_domain` (falls back to `"general"` if absent). The LLM never fills any of these.
 
-- `confidence` field **removed** (LLM self-confidence is not actionable signal). Catalog import tolerates legacy YAML with `confidence:` via silent ignore.
-- `regen_count` **renamed** to `chain_length` (position in `REFINED_FROM` chain; root = 0).
-- **New fields:** `name_stage` (`NameStage` enum), `docs_stage` (`DocsStage` enum), `docs_chain_length` (int), `refine_name_escalated_at` (datetime?), `refine_docs_escalated_at` (datetime?).
-- **New node:** `DocsRevision` — snapshots `documentation`, `links`, reviewer scores/comments, `model`, `created_at` before a refine_docs rewrite. Linked via `DOCS_REVISION_OF` from the SN.
-- Reviewer fields are axis-split: `reviewer_model_name` vs `reviewer_model_docs` (see axis-split table below).
+**Axis-split review storage:** name and docs reviews persist to independent column families so a docs pass cannot clobber name-only data and vice-versa. Each axis has paired slots: `reviewer_score_{axis}`, `reviewer_scores_{axis}` (per-dim JSON), `reviewer_comments_{axis}`, `reviewer_comments_per_dim_{axis}`, `reviewer_model_{axis}`. Same-axis re-review requires `--force`; guard is `_axis_overwrite_blocked` in `review/pipeline.py`.
 
-**COCOS provenance:** `cocos_transformation_type` (string, e.g. `psi_like`, `ip_like`) records
-how a quantity transforms under COCOS convention changes. `cocos` (integer) links directly to
-the COCOS singleton node whose convention applies — works for any source (DD, signals, manual).
-`dd_version` (string) is optional provenance recording which DD snapshot was used for DD-sourced names.
-Both `cocos` and `cocos_transformation_type` are injected post-LLM (like `unit`) — never generated
-by the model.
+**Score-canonical policy:** the rubric-driven numeric `score` (0–1) is the sole accept/refine signal. No separate `verdict` field exists — the reviewer LLM produces scores plus optional `revised_name` / `suggested_name`.
 
-**`physics_domain`:** Taken directly from the DD `IMASNode.physics_domain` field — DD-authoritative only. The LLM never fills this field. For ISN validation purposes, falls back to `"general"` when a name's `physics_domain` is absent or unrecognised.
+**RD-quorum fields on `Review`:** `review_axis`, `cycle_index` (0/1/2), `review_group_id` (UUID), `resolution_role` (primary/secondary/escalator), `resolution_method` (see [RD-Quorum Review](#rd-quorum-review)). `id` format: `{sn_id}:{axis}:{review_group_id}:{cycle_index}`.
 
-**Provenance fields** (v0.5.0+): `vocab_gap_detail` (JSON: segment/needed_token/reason),
-`validation_issues` (list of tagged strings), `validation_layer_summary` (JSON).
+**Provenance / catalog / pool fields:** `vocab_gap_detail`, `validation_issues`, `validation_layer_summary` (JSON); catalog round-trip: `pipeline_status`, `status`, `origin`, `deprecates`, `superseded_by`, `catalog_pr_number`, `catalog_pr_url`, `catalog_commit_sha`, `exported_at`, `imported_at`; pool state: `name_stage`, `docs_stage`, `chain_length`, `docs_chain_length`, `refine_name_escalated_at`, `refine_docs_escalated_at`.
 
-**Axis-split review storage** (rc22 C3): name-axis and docs-axis reviews persist to
-independent column families so a docs-only pass cannot clobber a prior name-only review's
-per-dimension JSON (and vice-versa). Axis-specific reviews write to five paired slots per axis:
-
-| Axis | Scalar | Per-dim JSON | Comments | Per-dim comments | Model |
-|------|--------|--------------|----------|-----------------|-------|
-| name | `reviewer_score_name` | `reviewer_scores_name` | `reviewer_comments_name` | `reviewer_comments_per_dim_name` | `reviewer_model_name` |
-| docs | `reviewer_score_docs` | `reviewer_scores_docs` | `reviewer_comments_docs` | `reviewer_comments_per_dim_docs` | `reviewer_model_docs` |
-
-**Score-canonical policy:** the rubric-driven numeric ``score`` (0–1) is the
-sole accept/refine signal. There is no separate ``verdict`` field on
-``StandardName`` or ``Review`` — empirical evidence (commit ``09443def``)
-showed reviewer verdicts disagreed with score frequently and stranded
-high-score names in ``reviewed``. The reviewer LLM is asked for scores plus
-optional ``revised_name`` / ``suggested_name`` only.
-
-Reader queries use `coalesce(axis_col, shared_col)` so any pre-axis-split rows still surface
-on the name axis. Same-axis re-review requires `--force` to overwrite — guard helper is
-`imas_codex.standard_names.review.pipeline._axis_overwrite_blocked`.
-
-**RD-quorum fields (p39-4)** on `Review` nodes: `review_axis` (names/docs),
-`cycle_index` (0=primary, 1=secondary, 2=escalator), `review_group_id` (UUID per quorum session),
-`resolution_role` (primary/secondary/escalator), `resolution_method` (quorum_consensus /
-authoritative_escalation / max_cycles_reached / retry_item / single_review).
-Review `id` format: `{sn_id}:{axis}:{review_group_id}:{cycle_index}`.
-
-**Schema v2 fields** (catalog round-trip): `pipeline_status` (renamed from `review_status`),
-`status` (ISN vocabulary lifecycle: draft/published/deprecated), `origin` (pipeline/catalog_edit),
-`deprecates`, `superseded_by` (vocabulary lifecycle links), `catalog_pr_number`, `catalog_pr_url`,
-`catalog_commit_sha` (PR provenance), `exported_at`, `imported_at` (round-trip timestamps).
-
-**Phase 8.1 fields** (pool state machines): `name_stage`, `docs_stage` (NameStage/DocsStage enum), `chain_length`, `docs_chain_length` (rename from `regen_count`), `refine_name_escalated_at`, `refine_docs_escalated_at`. Field `confidence` removed.
-
-**VocabGap nodes** record missing grammar tokens identified during composition when a needed
-vocabulary token does not exist in the ISN grammar. Linked via `HAS_SN_VOCAB_GAP` from IMASNode
-and FacilitySignal to the VocabGap node. Each VocabGap captures the segment type, needed token,
-and reason. Use `sn gaps` to view gaps as a table and `sn gaps --export yaml` to produce
-YAML suitable for ISN vocabulary issue filing.
+**VocabGap nodes** record missing grammar tokens from composition. Linked via `HAS_SN_VOCAB_GAP` from `IMASNode`/`FacilitySignal`; carry segment, needed token, and reason. Use `sn gaps` for a table view or `sn gaps --export yaml` to produce vocabulary issues for ISN.
 
 ### Architecture Boundary
 
-> Full details: `docs/architecture/boundary.md`
+ISN owns grammar, vocabulary, and validation. Codex owns the pipeline, evaluation, and graph persistence. Full details in `docs/architecture/boundary.md`.
 
-ISN owns grammar, vocabulary, and validation. Codex owns the pipeline, evaluation, and graph persistence.
+**Import boundary** (ISN ≥0.8.0rc7): `get_grammar_context()` (single entry point, 19 keys), `create_standard_name_entry()` (Pydantic, 18 validators), `run_semantic_checks()` (9 checks), `validate_description()`, `parse_standard_name()` / `compose_standard_name()` (round-trip). Never import from ISN private modules. Never hardcode grammar rules — pull from `get_grammar_context()`. Review criteria live in codex (`sn_review_criteria.yaml`).
 
-**Import boundary** (ISN ≥0.8.0rc7):
-- `get_grammar_context()` — single entry point for all grammar data (19 keys)
-- `create_standard_name_entry()` — Pydantic model construction (18 validators)
-- `run_semantic_checks()` — 9 semantic grammar checks
-- `validate_description()` — description quality checks
-- `parse_standard_name()` / `compose_standard_name()` — grammar round-trip
+### Grammar Vocabulary
 
-**Rules:** Never import from ISN private modules. Never hardcode grammar rules — get them from `get_grammar_context()`. Review criteria and scoring live in codex (`sn_review_criteria.yaml`).
-
-### Grammar Vocabulary (Plan 41)
-
-The ISN grammar uses a closed-vocabulary system for physical bases and qualifiers:
-
-- **Physical bases** (~78 entries): Irreducible dimensional quantities only. CI-gated.
-- **Qualifiers** (~92 entries): Prefix modifiers stripped recursively by the parser.
-- **Processes** (~90 entries): Appear only via `_due_to_{token}` suffix template.
+Closed-vocabulary system: **physical bases** (~78, irreducible dimensional quantities, CI-gated), **qualifiers** (~92, prefix modifiers stripped recursively by the parser), **processes** (~90, suffix-only via `_due_to_{token}`).
 
 **Composition order:** `{subject}_{qualifier1}_{qualifier2}_{physical_base}_{due_to_process}`
 
-**Rules for vocabulary updates:**
-1. Never add compounds to physical_bases — use qualifiers instead
-2. Qualifier order is insertion-order (not alphabetical) — preserved through round-trip
-3. Subjects win over qualifiers (parser Stage 3 before Stage 5)
-4. Process tokens as prefixes are qualifiers, not processes (D3 rule)
-
-**When a rotation surfaces vocab gaps:** Add missing tokens to the appropriate vocabulary file in ISN, cut an RC release, bump the dep in codex. Never hardcode vocabulary tokens in Python code.
+**Update rules:** (1) Never add compounds to `physical_bases` — use qualifiers. (2) Qualifier order is insertion-order, preserved through round-trip. (3) Subjects win over qualifiers (parser stage 3 before stage 5). (4) Process tokens as prefixes are qualifiers, not processes. When rotations surface gaps, follow [Vocabulary Rotation](#vocabulary-rotation-isn-fork-rc-workflow). Never hardcode vocabulary tokens in Python.
 
 ### Vocabulary Rotation: ISN Fork RC Workflow
 
-When rotations surface novel `physical_base` tokens or other grammar segment candidates that are
-blocked by the current ISN vocabulary, follow this workflow to unblock naming without waiting for
-upstream editorial review.
+When rotations surface `VocabGap` nodes blocked by the current ISN vocabulary, add tokens on the fork (`~/Code/imas-standard-names` → `Simon-McIntosh/IMAS-Standard-Names`) and cut an RC release. Upstream is `iterorganization/IMAS-Standard-Names`; the dep in imas-codex pins to a git tag on the fork, so RC tags on origin are sufficient.
 
-**When to use:**
-- Any rotation surfaces legitimate novel `physical_base` or other grammar segment candidates
-- An existing closed grammar segment is blocking high-value names
-- Auto-detected `VocabGap` nodes exist (check via `sn gaps`)
+**Vocab-addition rules** (apply BEFORE editing YAML):
 
-**Vocab addition policy:** Every legitimate physics quantity deserves a grammar token regardless
-of how frequently it appears. Do NOT gate additions on frequency — `ejima_coefficient` is as
-valid as `temperature`. The only criteria are: (a) the token is a genuine atomic physics concept,
-(b) it does not overlap with existing tokens, (c) it is not a compound expressible via existing
-segments. Always classify each VocabGap before adding: TRUE_GAP (add), COMPOSE_ERROR (LLM
-should have used existing tokens — fix prompt), or REJECT (not a valid grammar concept).
+- Every legitimate physics quantity deserves a token regardless of frequency — `ejima_coefficient` is as valid as `temperature`. Classify each VocabGap first: TRUE_GAP (add), COMPOSE_ERROR (fix the prompt instead), REJECT (not a valid grammar concept).
+- Single-word base preferred; physical-quantity semantics only; no overlap with existing tokens; not a unit or geometry primitive.
+- **No compound tokens that subsume `physical_base` words.** `trapped_particle` as a subject greedily consumes "particle" and breaks grouping with `particle_density`. Use `trapped` alone.
+- **Prefer atomic qualifiers.** Orbit class (`trapped`, `co_passing`) and species (`fast_particle`, `electron`) are independent axes — never combine into one token.
+- **Grouping invariant:** all orbit/species variants of the same physical quantity MUST parse to the same `physical_base`. If they don't, the token is wrong.
+- **Round-trip every existing name** containing the candidate string: `assert compose_standard_name(parse_standard_name(name)) == name`.
 
-**The fork:** `~/Code/imas-standard-names` is `Simon-McIntosh/IMAS-Standard-Names` (origin).
-Upstream is `iterorganization/IMAS-Standard-Names`. The fork uses `hatch-vcs` for versioning
-(git tag-based) and GitHub Actions for CI + GitHub Releases. The dep in imas-codex is pinned
-to a git tag via `git+https://` URL, not a PyPI version.
+**Release procedure:**
 
-**Steps:**
+```bash
+cd ~/Code/imas-standard-names
+# Edit vocabulary YAML, run tests, commit to main:
+uv run pytest && git push origin main
 
-1. **Harvest** candidate tokens from rotation evidence — diff `VocabGap` nodes or
-   `_load_known_physical_bases()` against the current ISN vocabulary.
-2. **Rubber-duck review** each addition against the **vocabulary design rules**:
-   - Single-word base preferred; physical-quantity semantics only
-   - No overlap with existing tokens
-   - Not a unit name, geometry primitive already covered, or domain-specific compound
-     expressible via existing components
-   - **No compound tokens that subsume `physical_base` words** — a closed segment (subject,
-     component, etc.) must NEVER contain tokens that include words belonging to `physical_base`.
-     Example: `trapped_particle` as subject greedily consumes "particle", breaking grouping
-     of `particle_density` names. Use `trapped` alone.
-   - **Prefer atomic qualifiers** — orbit class (`trapped`, `co_passing`) and species
-     (`fast_particle`, `electron`) are independent axes. Never combine into single tokens.
-   - **Test grouping invariant** — all orbit/species variants of the same physical quantity
-     MUST parse to the same `physical_base`. If they don't, the token is wrong.
-   - **Verify round-trip** for ALL existing names containing the candidate string:
-     ```python
-     p = parse_standard_name(name); assert compose_standard_name(p) == name
-     ```
-   - Document in YAML with description + dimensions if applicable
-3. **Apply** changes on a feature branch in `~/Code/imas-standard-names`:
-   ```bash
-   cd ~/Code/imas-standard-names
-   git checkout -b w<XX>-vocab-<topic>
-   # Edit vocabulary files, commit
-   ```
-4. **Run ISN test suite:**
-   ```bash
-   cd ~/Code/imas-standard-names && uv run pytest
-   ```
-5. **Merge to main** and **cut an RC release using the ISN release CLI** (NEVER tag manually).
-   The release CLI is state-machine driven: it auto-computes the next version from the latest
-   git tag and routes RCs to `origin` (fork) or finals to `upstream` (iterorganization). The
-   dep in imas-codex pins to a git tag on the fork, so RC tags on origin are sufficient — no
-   PyPI publish required.
+# Cut an RC via the state-machine CLI (NEVER tag manually):
+uv run standard-names release status            # inspect state
+uv run standard-names release -m "feat: ..."    # increment RC (e.g. v0.8.0rc7 → v0.8.0rc8)
+# Or --bump minor/major to start a new series; --final to finalize to upstream.
 
-   ```bash
-   cd ~/Code/imas-standard-names
-   git checkout main && git merge w<XX>-vocab-<topic>
-   git push origin main          # always push main BEFORE the release CLI
+# In imas-codex: bump dep (appears twice in pyproject.toml), sync, test, push
+cd ~/Code/imas-codex
+sed -i 's|@v0\.8\.0rc[0-9]\+|@v0.8.0rc<NN>|g' pyproject.toml
+uv sync && uv run pytest tests/standard_names/ -x -q
+git commit -am "deps: bump imas-standard-names to v0.8.0rc<NN>" && git push origin main
+```
 
-   # Inspect current state and what the next bump would do:
-   uv run standard-names release status
-
-   # Cut a new RC. Pick ONE of:
-   #   - First RC of a new minor/major series (e.g. v0.7.0 → v0.8.0rc1):
-   uv run standard-names release --bump minor -m "feat: <topic> vocab additions"
-   #   - Increment within an existing RC series (e.g. v0.7.0rc30 → v0.7.0rc31):
-   uv run standard-names release -m "feat: <topic> vocab additions"
-   #   - Dry-run first to verify the computed version & remote:
-   uv run standard-names release --bump minor -m "..." --dry-run
-   ```
-
-   The CLI runs pre-flight checks (clean tree, on `main`, synced with origin), creates the
-   annotated tag, and pushes to the correct remote. Fork CI publishes a GitHub Release. **Do
-   not** run `git tag` or `git push --tags` manually — bypassing the CLI loses the state-
-   machine guarantees and risks pushing RC tags to upstream by accident.
-
-   To finalize an RC to a stable release (push to upstream → PyPI publish), use
-   `--final -m "..."` — this is rare during bootstrap; coordinate with maintainers first.
-
-6. **Bump** `imas-standard-names` rev in imas-codex `pyproject.toml` to the new RC tag.
-   The dep appears **twice** in `pyproject.toml` (main `dependencies` block + `[dependency-groups]`).
-   Update both occurrences:
-   ```bash
-   cd ~/Code/imas-codex
-   sed -i 's|@v0\.7\.0rc[0-9]\+|@v0.7.0rc<NN>|g' pyproject.toml
-   grep "imas-standard-names @" pyproject.toml   # verify both bumped
-   ```
-7. **Sync** imas-codex: `uv sync` — verify with
-   `uv run python -c "import imas_standard_names; print(imas_standard_names.__version__)"`
-8. **Run SN tests** in imas-codex:
-   ```bash
-   uv run pytest tests/standard_names/ -x -q
-   ```
-9. **Commit + push** the dep bump:
-   ```bash
-   uv run git commit -am "deps: bump imas-standard-names to v0.7.0rc<NN>"
-   git pull --no-rebase origin main && git push origin main
-   ```
-10. **Re-rotate** vocab-bound domains to measure lift; commit results separately.
-
-**Editorial review** on iterorganization upstream PRs proceeds in parallel.
-Once merged upstream, bump the dep to the official commit in a follow-up.
-
-**Multi-RC chain is normal:** Rotate ISN vocabulary as many times as needed during
-bootstrap. Each RC unblocks a batch of vocab-gapped names.
+**Multi-RC chains are normal during bootstrap.** Re-rotate vocab-bound domains after each bump to measure lift.
 
 ### Prompt Context Injection
 
@@ -1499,29 +944,6 @@ and `review_docs.md` (4-dim rubric: description_quality/documentation_quality/co
 Both share a `{% if prior_reviews %}...{% endif %}` block that is only rendered for the cycle-2
 escalator (context-aware). Cycles 0 and 1 never receive this block (blindness enforced).
 
-### Migration from Pre-Wave-2 Catalogs
-
-Wave 2 added per-dimension review properties to `StandardName` nodes. Pre-p39-2 graphs may
-still have the now-removed **shared** slots (`reviewer_score`, `reviewer_scores`,
-`reviewer_comments`, `reviewer_comments_per_dim`, `reviewer_model`,
-`reviewed_at`, `review_mode`) on existing nodes. The `reviewer_verdict_*` family
-of slots was also removed (score-canonical policy). These fields are no longer
-written by any pipeline code path but **will not cause errors** — they simply
-become stale orphan properties until the node is re-reviewed or manually
-cleaned up.
-
-Reader queries use `coalesce(sn.reviewer_score_name, sn.reviewer_score)` for backward
-compatibility; pre-migration nodes surface correctly on the name axis until backfilled.
-
-**Backfill procedure:** Run `sn review --force` to re-review all valid names. This populates
-the axis-specific slots on existing nodes without changing `pipeline_status` or
-`validation_status`. The `--force` flag bypasses the "already reviewed" skip logic.
-
-The tier rename (`adequate` → `inadequate`) was applied at the schema level;
-existing `review_tier = 'adequate'` values in the graph will persist until
-re-reviewed but are functionally equivalent — both map to the same score band
-(0.40–0.65).
-
 ## Remote Tools
 
 Prefer these Rust-based CLI tools over standard Unix commands. Defined in `imas_codex/config/remote_tools.yaml`.
@@ -1538,46 +960,18 @@ Install on any facility: `uv run imas-codex tools install <facility>`
 
 **Critical:** `fd` requires a path argument on large filesystems to avoid hanging: `fd -e py /path`
 
-**Remote Python — Two-interpreter architecture:**
+**Remote Python — two-interpreter architecture:**
 
-| Executor | Interpreter | Min Python | When Used |
-|----------|-------------|------------|----------|
-| `run_python_script()` / `async_run_python_script()` | Venv `python3` via `_REMOTE_PATH_PREFIX` | 3.12+ | Individual script calls, MDSplus enumeration, TDI extraction |
-| `SSHWorkerPool` / `pooled_run_python_script()` | `/usr/bin/python3` (hardcoded) | 3.9+ | Batch discovery operations (scan, enrich, signal check) |
+- `run_python_script()` / `async_run_python_script()` — venv `python3` (3.12+) via `_REMOTE_PATH_PREFIX`. Modern syntax OK (`X | Y`, `match`).
+- `SSHWorkerPool` / `pooled_run_python_script()` — hardcoded `/usr/bin/python3` (3.9+, stdlib-only) to avoid 60–100s NFS venv startup. **No 3.10+ syntax** in pool scripts. Each script declares its Python version in a docstring header. Ruff skips type-hint modernization for `imas_codex/remote/scripts/*` (see per-file ignores).
 
-- **Venv path**: Scripts dispatched via `run_python_script()` get the venv Python (3.12+) because `_REMOTE_PATH_PREFIX` puts `~/.local/share/imas-codex/venv/bin` first in PATH. These scripts may use modern syntax (`X | Y` unions, `match`, `isinstance(x, int | float)`).
-- **System path**: The `SSHWorkerPool` hardcodes `/usr/bin/python3` to avoid 60-100s NFS venv startup penalty. Scripts dispatched through the pool `exec()` inside system Python and **must be Python 3.9+ compatible** with stdlib-only imports. Do **not** use 3.10+ syntax (`match`, `X | Y` type unions) in these scripts.
-- If a venv-path script fails with a syntax error, verify the venv: `uv run imas-codex tools status <facility>`.
-- Remote scripts declare their Python version in a docstring header (`Python 3.8+` or `Python 3.12+`). Always check before adding modern syntax.
-- Ruff skips type-hint modernization for `imas_codex/remote/scripts/*` — see `pyproject.toml` per-file ignores.
-
-**Remote zombie prevention:** All remote SSH commands are wrapped with `timeout <seconds>` on the server side. When a local `subprocess.run()` times out, it kills the SSH client process but the remote process keeps running indefinitely as a zombie. The server-side `timeout` (set to local timeout + 5s) ensures the remote process self-terminates independently. This is enforced in `executor.py` for `run_command()`, `run_script_via_stdin()`, `run_python_script()`, and `async_run_python_script()`. Never bypass this by constructing raw SSH commands — always use the executor functions.
+**Remote zombie prevention:** every executor function wraps the SSH command with server-side `timeout <local_timeout + 5s>` so the remote process self-terminates when the local SSH client is killed. Never construct raw SSH calls — always use the executor functions.
 
 ## Commit Workflow
 
-Pre-commit hooks are check-only (see `~/.agents/AGENTS.md`). Format and fix before staging:
+Follow the Pre-Commit Hook Policy in `~/.agents/AGENTS.md` (ruff `--fix` + `format` before staging, conventional commits, no `git add -A`). Breaking changes use `BREAKING CHANGE:` footer, not `type!:` suffix.
 
-```bash
-uv run ruff check --fix .           # Lint + autofix (explicit, pre-stage)
-uv run ruff format .                # Format (explicit, pre-stage)
-git add <file1> <file2> ...         # Stage specific files (never git add -A)
-git commit -m "type: concise summary"  # Conventional format
-git pull --no-rebase origin main
-git push origin main
-```
-
-**Never stage:** auto-generated files (models.py, dd_models.py, schema_context_data.py), gitignored files, `*_private.yaml` files.
-
-| Type | Purpose |
-|------|---------|
-| feat | New feature |
-| fix | Bug fix |
-| refactor | Code restructuring |
-| docs | Documentation |
-| test | Test changes |
-| chore | Maintenance |
-
-Breaking changes use `BREAKING CHANGE:` footer, not `type!:` suffix.
+**Never stage in this repo:** auto-generated files (`models.py`, `dd_models.py`, `config/models.py`, `agents/schema-reference.md`, `schema_context_data.py`), `*_private.yaml`, anything in `.gitignore`.
 
 ### Worktrees
 
@@ -1600,86 +994,27 @@ Model selection follows `~/.agents/AGENTS.md` (3-tier: Opus 4.6 top, Sonnet 4.6 
 
 ### Parallel Agents
 
-Multiple agents may be working on this repository simultaneously on the same `main` branch. Assume another agent could be editing files or committing right now.
+Multiple agents may edit this repo simultaneously on `main`. Assume another agent is doing so right now.
 
-#### Verify Before Modifying
+**Verify before modifying:** re-read files from disk (your in-memory view may be hours old); check `git log --oneline -5 -- <file>` for unfamiliar commits. If you see unfamiliar names/imports, assume they are correct — don't revert.
 
-- **Re-read files before editing** — your in-memory view of a file may be hours or days old. Another agent may have renamed functions, added features, or restructured code since you last read it. Always `view` or `cat` the current file from disk before making changes.
-- **Check recent git history** before modifying shared files: `git log --oneline -5 -- <file>`. If there are commits you don't recognize, read the file fresh before editing.
-- **If you see unfamiliar method names, imports, or patterns**, assume they are correct and intentional. Another agent renamed them. Do not revert unfamiliar changes.
+**Banned destructive commands:** see `~/.agents/AGENTS.md` for the table and stash ban. Auto-generated files (`models.py`, `dd_models.py`, `schema_context_data.py`) are gitignored but make the worktree look dirty — never stage and never `git restore` them (which is also why merge, not rebase, is the pull policy).
 
-#### Banned Destructive Commands
+**Pre-existing test failures:** stash-free verification via `git log --since="1 day ago" -- <test>` and `git show HEAD:<test>`; trust the failure timestamp. File a blocker todo and scope your work around it.
 
-See `~/.agents/AGENTS.md` for the full banned-command table and stash ban.
+**Dispatch preamble:** use the one in `~/.agents/AGENTS.md` with `{BRANCH}=main`.
 
-**Note on auto-generated files:** `uv sync` regenerates model files (models.py, dd_models.py, schema_context_data.py) that are gitignored. Their presence makes the worktree look dirty — never stage them, and never `git restore` them. This is another reason merge (not rebase) is the correct pull policy.
+**Session hygiene:** close sessions when done (`ctrl+d`/`/exit`); audit `ps aux | grep copilot` and kill stale processes — idle agents with old context are the #1 cause of regressions.
 
-#### Verifying Pre-Existing Test Failures
-
-Use stash-free alternatives to verify whether a test failure pre-dates your session:
-
-1. **Read git history** — `git log --since="1 day ago" -- tests/path/test.py` and `git show HEAD:tests/path/test.py`.
-2. **Run the test on a peer commit** — `git show <sha>:tests/path/test.py | uv run python -` or use a separate worktree.
-3. **Trust the failure timestamp** — if a test was failing before you touched any code in that area, your changes did not cause it.
-4. **File a blocker todo** — record the pre-existing failure, scope your work around it, and surface it in your final report.
-
-#### Sub-Agent Dispatch Preamble
-
-Use the dispatch preamble from `~/.agents/AGENTS.md` with `{BRANCH}=main`.
-
-#### Session Hygiene
-
-- **Close sessions when done** — `ctrl+d`, `/exit`, or `/quit`. Idle `copilot` processes with stale context are the #1 cause of regressions.
-- **Audit periodically:** `ps aux | grep copilot` — kill any process older than your current session.
-- **Avoid long-lived `--yolo` sessions** — auto-approve + stale context is the most dangerous combination. Start fresh sessions for new tasks.
-
-### Session Completion
-
-**MANDATORY** after any file modifications: commit and push before responding to the user.
-
-End every response that modifies files with the **full commit message** and a brief summary.
+**Session completion is mandatory:** every response that modifies files MUST end with `git add` → `git commit` → `git push` plus a brief summary of the commit.
 
 ## Feature Plan Documentation
 
-Plans live in `plans/features/`. Delete when fully implemented — the code is the documentation.
+Plans live in `plans/features/`. Lifecycle: `features/<name>.md` (active) → `features/pending/<name>.md` (partially implemented, gaps documented) → **DELETE** (fully implemented — the code is the documentation). Gap docs (`gaps-*.md`) consolidate remaining work across related pending plans.
 
-**Every feature plan must include a documentation phase** as its final step. Before a plan is considered complete, the implementing agent must update all affected documentation to maintain self-consistency across the project. This is not optional — undocumented features create drift between what the code does and what agents/users expect.
+**Every plan must have a "Documentation Updates" section** listing which targets need updates: `AGENTS.md` (new CLI/MCP/config/workflows), `README.md` (user-facing), `plans/README.md` (status), `.claude/skills/*.md`, `.claude/agents/*.md`, `docs/` (mature architecture), prompt templates, schema reference (auto via `uv run build-models`).
 
-### Required documentation checklist
-
-Each plan must include a section titled "Documentation Updates" listing which of these apply:
-
-| Target | When to update |
-|--------|----------------|
-| `AGENTS.md` | New CLI commands, MCP tools, config sections, workflows, or conventions |
-| `README.md` | User-facing features, installation changes, quick-start examples |
-| `plans/README.md` | Plan added, completed, or moved to pending |
-| `.claude/skills/*.md` | New reusable workflows agents should know |
-| `.claude/agents/*.md` | New agent capabilities or tool access changes |
-| `docs/` | Mature architecture documentation for implemented systems |
-| Prompt templates | New or changed LLM prompts referenced by the feature |
-| Schema reference | Handled automatically by `uv run build-models` — but verify after schema changes |
-
-### Plan lifecycle
-
-```
-plans/features/<name>.md          → Active plan (unstarted or in-progress)
-plans/features/pending/<name>.md  → Partially implemented, gaps documented
-DELETE                            → Fully implemented (code is the documentation)
-```
-
-- **Gap documents** (`gaps-*.md`) consolidate remaining work from multiple related pending plans. These are the canonical handoff documents for agents.
-- **Pending plans** are reference material for gap documents — not direct work items.
-- **Unstarted plans** remain in `features/` until work begins or they are superseded.
-
-### Self-consistency rule
-
-When implementing a feature, check whether your changes contradict or extend existing documentation. A feature is not done until:
-
-1. All code changes are committed and tested
-2. Every documentation target in the checklist above is reviewed and updated if affected
-3. `plans/README.md` is updated to reflect the plan's new status
-4. The plan file itself is deleted (fully implemented) or moved to `pending/` (gaps remain)
+**Self-consistency rule:** a feature is not done until code is committed + tested, every applicable doc target is updated, `plans/README.md` reflects the new status, and the plan file is deleted or moved to `pending/`.
 
 ## Code Style
 
@@ -1708,7 +1043,7 @@ tail -f ~/.local/share/imas-codex/logs/paths_tcv.log  # Follow live
 rg "ERROR|WARNING" ~/.local/share/imas-codex/logs/     # Find errors
 ```
 
-**NEVER pipe, tee, or redirect CLI output.** Piping blocks auto-approval in agentic contexts. The logging infrastructure already captures everything to disk — run commands directly and read the log file afterwards.
+(The no-pipe rule from [Command Execution](#command-execution) applies here too — logs are already on disk; never redirect CLI output.)
 
 ## Testing
 
@@ -1738,60 +1073,19 @@ uv run pytest tests/graph/test_sn_graph.py -v  # SN quality tests only
 uv run pytest -m "slow or graph"     # Run slow + graph tests
 ```
 
-### Agent Best Practices for Test Execution
+### Repo-specific notes
 
-**CRITICAL: Never pipe pytest output.** Piping (`|`), teeing (`tee`), or redirecting prevents auto-approval. The default `addopts` uses `-q --tb=short --no-header` which produces compact output (~200-300 lines for the full SN suite). Run directly:
+Test execution follows `~/.agents/AGENTS.md` Test Execution Protocol (no piping pytest, decision tree for direct/file/task-agent). Repo-specific facts:
 
-```bash
-# GOOD — compact output, auto-approval works
-uv run pytest tests/standard_names/ -q
-
-# GOOD — specific test with detail
-uv run pytest tests/standard_names/test_foo.py::test_bar -v
-
-# BAD — piping stalls agentic workflows
-uv run pytest tests/standard_names/ -q 2>&1 | tail -20
-
-# BAD — tee stalls agentic workflows
-uv run pytest tests/standard_names/ 2>&1 | tee /tmp/out.txt
-```
-
-If you need to capture test output for analysis, run to a file then read separately:
-
-```bash
-uv run pytest tests/standard_names/ -q > /tmp/sn_tests.txt 2>&1
-echo "EXIT=$?"
-tail -10 /tmp/sn_tests.txt
-```
-
-**Timeout:** Default test timeout is 30s. If a test legitimately needs more, use `@pytest.mark.timeout(60)` on the test function. `faulthandler_timeout = 60` will dump thread stacks on true hangs.
-
-### Exit Watchdog
-
-The `_start_exit_watchdog()` function in `imas_codex/cli/shutdown.py` spawns a daemon thread that calls `os._exit()` after a grace period. It is only used in the signal handler path (second Ctrl-C during interactive CLI use). It is **not** called during normal `safe_asyncio_run()` completion — the cleanup chain (`_cancel_remaining_tasks` → `shutdown_default_executor` → `_force_kill_ssh_pools`) handles thread cleanup without needing a kill timer. This design is safe for test environments where `CliRunner.invoke()` exercises CLI commands.
+- Default `addopts`: `-q --tb=short --no-header` — full SN suite (~3300 tests, ~90s) is ~200-300 lines, manageable in one direct run.
+- Per-test timeout: 30s default (`@pytest.mark.timeout(60)` to override). `faulthandler_timeout = 60` dumps thread stacks on hangs.
+- `_start_exit_watchdog()` in `imas_codex/cli/shutdown.py` is only used in the signal-handler path (second Ctrl-C), not during normal `safe_asyncio_run()` completion — so `CliRunner.invoke()` test environments are safe.
 
 ## Python REPL
 
-The `repl()` MCP tool provides a persistent REPL for custom queries not covered by the search tools. Prefer `search_signals`, `search_docs`, `search_code`, and `search_dd_paths` for common lookups — they perform multi-index vector search with graph enrichment and return formatted reports in one call.
+`repl()` is a persistent MCP REPL for custom queries not covered by the search tools. **Prefer `search_signals`/`search_docs`/`search_code`/`search_dd_paths` first** — they handle embeddings, multi-index fan-out, enrichment, and formatting in one call.
 
-### REPL Workflow
-
-1. **Use search_* MCP tools first** for signal, documentation, code, and IMAS lookups. They handle embeddings, multi-index fan-out, enrichment, and formatting automatically.
-2. **Use repl() for custom queries** — signal→IMAS mapping, facility overviews, flexible graph_search(), raw Cypher, or chaining multiple domain functions.
-3. **Chain operations** in a single `repl()` call to minimize round-trips. Each call has overhead.
-4. **For raw Cypher** (only when no domain function fits), call `schema_for(task='wiki')` first to get node labels, properties, relationships, and enums derived from the LinkML schemas. Never guess property names — they are code-generated.
-5. **Format output** with `as_table(pick(results, 'col1', 'col2'))` for structured results.
-
-### Schema-First Queries
-
-All graph node types, properties, enums, and relationships are derived from LinkML schemas. The REPL exposes this via:
-
-- `schema_for(task='signals')` — schema context for a domain (signals, wiki, imas, code, facility, trees)
-- `schema_for('WikiChunk', 'WikiPage')` — schema for specific node labels
-- `get_schema()` — full `GraphSchema` object with `node_labels`, `get_model()`, `get_properties()`
-- `repl_help()` — auto-generated API reference with all function signatures
-
-**Never hardcode property names.** Before writing raw Cypher, call `schema_for(task='wiki')` to verify property names. Use `repl_help()` for the full API reference.
+Use `repl()` for: signal→IMAS mapping, facility overviews, flexible `graph_search()`, raw Cypher, or chaining domain functions. Chain operations in a single call — each call has overhead. Before raw Cypher, call `schema_for(task='wiki')` to get node labels/properties/relationships/enums from the LinkML schemas (`get_schema()` for the full object; `repl_help()` for the API reference). **Never guess property names.** Format structured results with `as_table(pick(results, 'col1', 'col2'))`.
 
 ## Quick Reference
 
@@ -1821,26 +1115,18 @@ All graph node types, properties, enums, and relationships are derived from Link
 
 Chain multiple operations in a single `repl()` call to minimize round-trips.
 
-## Embedding Server
+## Services
 
-Config lives in `pyproject.toml` under `[tool.imas-codex.embedding]`. Key accessor: `get_embedding_location()` returns the facility name or `"local"`. Port derived from position in shared `locations` list: `18765 + offset`.
+**Neo4j graph and the embedding server are always running** as SLURM jobs on all dev machines (ITER, WSL). Assume both are available. If a service is down, restart it — don't work around it. Always connect via the Python client methods (`GraphClient`, `Encoder`) — never raw HTTP/bolt; they handle SLURM node discovery, tunnel setup, auth from `.env`, and retries.
 
-### CRITICAL — SLURM Only
+**SLURM-only rule.** Both services MUST run as SLURM jobs — never bypass with `nohup`, `ssh … &`, `screen`, `tmux`, or anything else. SLURM provides cgroup isolation, clean lifecycle (`scancel`), accounting, and drain cleanup. Rogue processes cause "Duplicate jobid" errors that drain nodes for all users. If SLURM won't schedule, get the node resumed (`scontrol update NodeName=<node> State=RESUME`) — don't work around it.
 
-**All services (embed, Neo4j) MUST run as SLURM jobs.** Never bypass SLURM with `nohup`, `ssh … &`, `screen`, `tmux`, or any other manual process management on compute nodes. SLURM provides:
-- cgroup resource isolation (GPU, memory, CPU)
-- clean lifecycle management (`scancel` = graceful stop)
-- accurate resource accounting via `squeue`/`sacct`
-- automatic cleanup on node drain/failure
+### Embedding server
 
-**Never start services directly on compute nodes via SSH.** If SLURM won't schedule (node draining/down), the fix is to get the node resumed — not to work around SLURM. Rogue processes outside SLURM cause "Duplicate jobid" errors that drain nodes for all users.
-
-### Commands
+Config: `[tool.imas-codex.embedding]`. `get_embedding_location()` returns the facility or `"local"`. Port = `18765 + offset` in the shared `locations` list.
 
 ```bash
-imas-codex embed start           # Start per config (SLURM or systemd)
-imas-codex embed start -g 2      # Start with 2 GPUs
-imas-codex embed start -f        # Foreground only (debugging, or inside SLURM batch)
+imas-codex embed start [-g 2]    # Start (optionally with N GPUs)
 imas-codex embed status          # Health + SLURM job + node state
 imas-codex embed restart -g 8    # Restart with 8 GPUs (~18s cycle)
 imas-codex embed stop            # Stop SLURM job + cleanup rogue processes
@@ -1848,15 +1134,18 @@ imas-codex embed logs            # View SLURM logs
 imas-codex embed service install # Install systemd service (login node only)
 ```
 
-### Troubleshooting
+Troubleshooting: `embed status` shows node state. Common: node draining → ask admin to RESUME; rogue process → `embed stop` kills it; package issue → check `embed logs` and `uv sync` on node; timeouts → check tunnel (`lsof -i :18765`).
 
-| Symptom | Diagnosis | Fix |
-|---------|-----------|-----|
-| `embed status` shows "⚠ Node draining" | SLURM won't schedule new jobs | Ask admin: `scontrol update NodeName=<node> State=RESUME` |
-| PENDING job never starts | Node may be draining or at resource limit | `imas-codex embed status` shows node state |
-| Server healthy but no SLURM job | Rogue process running outside SLURM | `imas-codex embed stop` kills rogues automatically |
-| Rapid FAILED jobs in `sacct` | Package/env issue on compute node | Check `imas-codex embed logs`, run `uv sync` on node |
-| Embedding calls timeout | Tunnel not active or server down | `lsof -i :18765` then `imas-codex embed status` |
+### Neo4j connection
+
+On ITER login/compute nodes, `GraphClient()` (no args) discovers the SLURM compute node and connects directly — never hardcode `bolt://localhost:7687`:
+
+```python
+from imas_codex.graph.client import GraphClient
+gc = GraphClient()    # handles SLURM, tunnels, env overrides
+```
+
+From WSL/remote, start a tunnel first: `imas-codex tunnel start iter` then `tunnel status`. The profile system auto-tunnels for remote hosts. Override with `export IMAS_CODEX_TUNNEL_BOLT_ITER=17687` if needed.
 
 ## Domain Workflows
 
@@ -1873,47 +1162,14 @@ Extended examples and edge cases for each domain: [agents/](agents/)
 
 ## AI Tooling Configuration
 
-This project supports multiple AI coding tools (Claude Code, VS Code Copilot, Cursor, etc.) from **canonical sources** — no duplication.
+Multiple tools (Claude Code, VS Code Copilot) share canonical sources — no instruction duplication.
 
-### Canonical Sources
-
-| What | Canonical File | Read By |
-|------|---------------|---------|
-| **Project instructions** | `AGENTS.md` | Claude Code (via `CLAUDE.md` → `@AGENTS.md`), VS Code Copilot (native `AGENTS.md` support) |
-| **MCP servers** | `.mcp.json` + `.vscode/mcp.json` | Claude Code (`.mcp.json`, `mcpServers` key), VS Code (`.vscode/mcp.json`, `servers` key) |
-| **Custom agents** | `.claude/agents/*.md` | Claude Code (native) |
-| **Skills/commands** | `.claude/skills/*.md` | Claude Code (native) |
-| **Tool-specific settings** | `.claude/settings.json`, `.vscode/settings.json` | Their respective tools (not shared) |
-
-### Architecture
-
-```
-AGENTS.md                    ← canonical project instructions (all tools)
-CLAUDE.md                    ← Claude Code entry point (@AGENTS.md import)
-.mcp.json                    ← MCP config for Claude Code (mcpServers key)
-.vscode/mcp.json             ← MCP config for VS Code (servers key)
-.claude/
-├── agents/                  ← Claude Code custom agents
-│   ├── facility-explorer.md
-│   └── graph-querier.md
-├── skills/                  ← Claude Code skills (reusable prompts)
-│   ├── facility-access.md
-│   ├── graph-queries.md
-│   ├── schema-summary.md
-│   └── mapping-workflow.md
-└── settings.json            ← Claude Code permissions & env
-.vscode/
-├── settings.json            ← VS Code/Copilot settings
-├── toolsets.jsonc            ← VS Code agent toolset definitions
-└── instructions.json         ← VS Code instruction file patterns
-```
-
-### Rules
-
-1. **Never duplicate instructions** — `AGENTS.md` is the single source of truth for all project guidelines. `CLAUDE.md` imports it via `@AGENTS.md`. For other tools, configure their instruction path to read `AGENTS.md`.
-2. **MCP servers defined in two files** — `.mcp.json` (Claude Code, `mcpServers` key) and `.vscode/mcp.json` (VS Code, `servers` key). Both are tracked in git. VS Code only reads `.vscode/mcp.json`; Claude Code only reads `.mcp.json`.
-3. **Tool-specific config stays tool-specific** — permissions, env vars, and model preferences differ per tool and belong in their respective settings files.
-4. **When adding an MCP server**, add it to both `.mcp.json` (`mcpServers`) and `.vscode/mcp.json` (`servers`).
+| Canonical file(s) | Purpose | Consumers |
+|---|---|---|
+| `AGENTS.md` | Project instructions (single source of truth) | Claude Code via `CLAUDE.md` → `@AGENTS.md`; VS Code Copilot (native) |
+| `.mcp.json` (Claude Code, `mcpServers` key) + `.vscode/mcp.json` (VS Code, `servers` key) | MCP server configs | Both must be updated together when adding a server |
+| `.claude/agents/*.md`, `.claude/skills/*.md` | Custom agents and skills | Claude Code (native) |
+| `.claude/settings.json`, `.vscode/settings.json` | Tool-specific permissions/env | Their respective tools (never shared) |
 
 ## MCP Server Deployment
 
@@ -1939,44 +1195,6 @@ uv run imas-codex serve --transport stdio
 | DD-only container | `imas-codex serve --dd-only` | DD search and read only |
 | Public / read-only | `imas-codex serve --read-only` | Search and read only |
 | MCP STDIO client | `imas-codex serve --transport stdio` | All (inside the calling process) |
-
-## Service Availability
-
-**The Neo4j graph and embedding server are always running.** Both services run as SLURM jobs and should be assumed available at all times on all development machines (ITER, WSL). If a service is down, restart it — do not work around it.
-
-### Connecting from ITER
-
-On ITER login/compute nodes, connections resolve automatically via the graph profile system. `GraphClient()` (no arguments) discovers the SLURM compute node running Neo4j and connects directly. Never hardcode `bolt://localhost:7687` — use the profile-aware accessors:
-
-```python
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri, get_graph_username, get_graph_password
-
-# Preferred: uses profile resolution (handles SLURM, tunnels, env overrides)
-gc = GraphClient()
-
-# Explicit (still profile-aware):
-gc = GraphClient(uri=get_graph_uri(), username=get_graph_username(), password=get_graph_password())
-```
-
-### Connecting from WSL / remote machines
-
-From machines outside the ITER network, start an SSH tunnel first:
-
-```bash
-uv run imas-codex tunnel start iter    # Tunnel Neo4j bolt port to localhost
-uv run imas-codex tunnel status        # Verify tunnel is active
-```
-
-The profile system auto-detects remote hosts and creates tunnels on demand. If auto-tunneling fails, set the tunnel port explicitly:
-
-```bash
-export IMAS_CODEX_TUNNEL_BOLT_ITER=17687
-```
-
-### Authentication
-
-**Always use the Python client methods for graph and embedding connections** — never call Neo4j or the embedding server directly via raw HTTP/bolt. The Python methods (`GraphClient`, `get_graph_uri()`, `Encoder`) handle authentication, SLURM node discovery, tunnel setup, and retry logic automatically. The `.env` file provides credentials that raw connections would miss.
 
 ## Fallback: MCP Server Not Running
 
