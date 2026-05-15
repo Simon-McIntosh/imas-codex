@@ -437,7 +437,7 @@ def test_worker_renders_reviewer_feedback():
 
 @pytest.mark.asyncio
 async def test_worker_uses_language_model():
-    """process_generate_docs_batch uses get_model('language'), not a reasoning model."""
+    """process_generate_docs_batch uses get_model('sn-docs'), not a reasoning model."""
     from imas_codex.standard_names.models import GeneratedDocs
     from imas_codex.standard_names.workers import process_generate_docs_batch
 
@@ -479,7 +479,7 @@ async def test_worker_uses_language_model():
     ):
         processed = await process_generate_docs_batch([item], mgr, stop)
 
-    mock_get_model.assert_called_with("language")
+    mock_get_model.assert_called_with("sn-docs")
     assert processed == 1
 
 

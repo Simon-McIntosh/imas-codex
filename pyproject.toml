@@ -278,15 +278,22 @@ location = "iter"
 # openrouter/ prefix required so direct-path bypass preserves cache_control
 # and response_cost. Without it, calls silently route through the proxy,
 # stripping cache discounts (often 80%+) and zeroing cost telemetry.
-# Powers generate_docs (and any other bulk-content non-refine fanouts).
-# refine_name and refine_docs were peeled off into [tool.imas-codex.sn-refine]
-# on 2026-05-03 after E3 telemetry showed flash-lite refines accept at
-# ~5% vs ~42% for Sonnet-4.6 compose.
+# SHARED by 15+ non-SN consumers: discovery (paths, wiki, signals, code),
+# DD enrichment (dd_enrichment.py), IMAS mapping (ids/mapping.py), cluster
+# labeling, static discovery. SN docs generation was moved to [sn-docs]
+# on 2026-05-15 to decouple SN model selection from facility discovery.
+model = "openrouter/openai/gpt-5.4"
+batch-size = 50
+
+[tool.imas-codex.sn-docs]
+# openrouter/ prefix — see [language] note above.
+# Powers process_generate_docs_batch (SN documentation generation only).
+# Decoupled from [language] on 2026-05-15 so SN docs model selection is
+# independent of facility discovery and DD enrichment.
 # 2026-05-15 (benchmark sn_benchmark_20260514T205139): GPT-5.5 scored
 # docs=0.852 (rank 1/14) vs GPT-5.4 docs=0.847 (rank 2/14). Both
 # significantly outperform Sonnet 4.6 docs=0.776 (rank 9/14).
 model = "openrouter/openai/gpt-5.5"
-batch-size = 50
 
 [tool.imas-codex.sn-refine]
 # openrouter/ prefix — see [language] note above.

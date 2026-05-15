@@ -88,6 +88,7 @@ MODEL_SECTIONS = frozenset(
         "reasoning",
         "dd-enrichment",
         "sn-compose",
+        "sn-docs",
         "sn-enrich",
         "sn-refine",
     }
@@ -103,6 +104,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "reasoning": "openrouter/anthropic/claude-sonnet-4.6",
     "dd-enrichment": "openrouter/anthropic/claude-sonnet-4.6",
     "sn-compose": "openrouter/anthropic/claude-sonnet-4.6",
+    "sn-docs": "openrouter/openai/gpt-5.5",
     "sn-enrich": "openrouter/anthropic/claude-opus-4.6",
     # Refine pass for SN names + docs.  E3 telemetry showed flash-lite
     # could not lift critiqued names (cl=0 accepted at ~42%, cl=1+ at
@@ -121,6 +123,7 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "reasoning": "IMAS_CODEX_REASONING_MODEL",
     "dd-enrichment": "IMAS_CODEX_DD_ENRICHMENT_MODEL",
     "sn-compose": "IMAS_CODEX_SN_COMPOSE_MODEL",
+    "sn-docs": "IMAS_CODEX_SN_DOCS_MODEL",
     "sn-enrich": "IMAS_CODEX_SN_ENRICH_MODEL",
     "sn-refine": "IMAS_CODEX_SN_REFINE_MODEL",
 }

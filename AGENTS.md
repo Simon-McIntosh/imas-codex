@@ -39,6 +39,7 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 | `[embedding]` | Embedding model, dimension, location, scheduler | `get_model("embedding")`, `get_embedding_location()` |
 | `[language]` | Structured output (scoring, discovery, labeling), batch-size | `get_model("language")` |
 | `[sn-compose]` | SN name composition model, batch sizes, max-concurrency | `get_model("sn-compose")` |
+| `[sn-docs]` | SN documentation generation model | `get_model("sn-docs")` |
 | `[sn-refine]` | SN refine_name + refine_docs tier | `get_model("sn-refine")` |
 | `[vision]` | Image/document tasks | `get_model("vision")` |
 | `[reasoning]` | Complex structured output (IMAS mapping, multi-step reasoning) | `get_model("reasoning")` |

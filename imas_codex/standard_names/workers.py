@@ -5726,7 +5726,7 @@ async def process_generate_docs_batch(
     2. Render prompt via ``render_prompt("sn/generate_docs_user", {...})`` with
        reviewer feedback (reviewer_score_name, reviewer_comments_name),
        chain history, and the new DD context as context.
-    3. Use ``get_model("language")`` — bulk content generation model.
+    3. Use ``get_model("sn-docs")`` — docs generation model.
     4. Call ``acall_llm_structured`` with ``service="standard-names"`` and
        response_model=``GeneratedDocs``.
     5. Reserve budget and charge ``LLMCostEvent``.
@@ -5749,7 +5749,7 @@ async def process_generate_docs_batch(
     )
     from imas_codex.standard_names.models import GeneratedDocs
 
-    model = get_model("language")
+    model = get_model("sn-docs")
     processed = 0
 
     # ── Enrich batch with DD context (source paths, docs, peers) ──────────
