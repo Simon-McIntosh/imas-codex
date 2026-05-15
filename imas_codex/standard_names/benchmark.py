@@ -8,6 +8,7 @@ for Rich table display and JSON export.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -897,32 +898,45 @@ async def run_benchmark(
             _save_incremental(results)
             continue
 
-        # --- 2b. Review names phase (all reviewer models) ---
+        # --- 2b. Review names phase (all reviewer models in parallel) ---
         if model_result.candidates:
-            for rev_model in reviewer_models:
-                rev_scores = ReviewerScores(reviewer_model=rev_model, target="names")
+
+            async def _review_names(
+                rev_model: str,
+                _candidates: list = model_result.candidates,
+                _model: str = model,
+            ) -> ReviewerScores:
+                rs = ReviewerScores(reviewer_model=rev_model, target="names")
                 try:
-                    t_review_start = time.monotonic()
-                    reviews, reviewer_cost = await score_with_reviewer(
-                        model_result.candidates,
-                        rev_model,
-                        target="names",
+                    t0 = time.monotonic()
+                    revs, cost = await score_with_reviewer(
+                        _candidates, rev_model, target="names"
                     )
-                    rev_scores.elapsed_seconds = round(
-                        time.monotonic() - t_review_start, 2
+                    rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                    rs.cost = cost
+                    rs.scores = revs
+                    _apply_reviewer_scores_metrics(rs, revs, "names")
+                    logger.info(
+                        "  ✓ names review by %s: avg=%.3f, $%.4f, %.1fs",
+                        rev_model.split("/")[-1],
+                        rs.avg_score,
+                        cost,
+                        rs.elapsed_seconds,
                     )
-                    rev_scores.cost = reviewer_cost
-                    rev_scores.scores = reviews
-                    _apply_reviewer_scores_metrics(rev_scores, reviews, "names")
                 except Exception as exc:
                     logger.error(
                         "Model %s name review by %s failed: %s",
-                        model,
+                        _model,
                         rev_model,
                         exc,
                     )
-                    rev_scores.error = str(exc)
-                model_result.name_reviewer_results.append(rev_scores)
+                    rs.error = str(exc)
+                return rs
+
+            name_review_tasks = [_review_names(rm) for rm in reviewer_models]
+            model_result.name_reviewer_results = list(
+                await asyncio.gather(*name_review_tasks)
+            )
 
             # Populate legacy single-reviewer fields from first successful reviewer
             first_ok = next(
@@ -955,33 +969,43 @@ async def run_benchmark(
                     model_result.docs_compose_cost = docs_cost
                     model_result.docs_compose_elapsed_seconds = docs_elapsed
 
-                    # Review docs with all reviewer models
-                    for rev_model in reviewer_models:
-                        rev_scores = ReviewerScores(
-                            reviewer_model=rev_model, target="docs"
-                        )
+                    # Review docs with all reviewer models in parallel
+                    async def _review_docs(
+                        rev_model: str,
+                        _candidates: list = valid_candidates,
+                        _model: str = model,
+                    ) -> ReviewerScores:
+                        rs = ReviewerScores(reviewer_model=rev_model, target="docs")
                         try:
-                            t_docs_review = time.monotonic()
-                            docs_reviews, docs_rev_cost = await score_with_reviewer(
-                                valid_candidates, rev_model, target="docs"
+                            t0 = time.monotonic()
+                            dr, dc = await score_with_reviewer(
+                                _candidates, rev_model, target="docs"
                             )
-                            rev_scores.elapsed_seconds = round(
-                                time.monotonic() - t_docs_review, 2
-                            )
-                            rev_scores.cost = docs_rev_cost
-                            rev_scores.scores = docs_reviews
-                            _apply_reviewer_scores_metrics(
-                                rev_scores, docs_reviews, "docs"
+                            rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                            rs.cost = dc
+                            rs.scores = dr
+                            _apply_reviewer_scores_metrics(rs, dr, "docs")
+                            logger.info(
+                                "  ✓ docs review by %s: avg=%.3f, $%.4f, %.1fs",
+                                rev_model.split("/")[-1],
+                                rs.avg_score,
+                                dc,
+                                rs.elapsed_seconds,
                             )
                         except Exception as exc:
                             logger.error(
                                 "Model %s docs review by %s failed: %s",
-                                model,
+                                _model,
                                 rev_model,
                                 exc,
                             )
-                            rev_scores.error = str(exc)
-                        model_result.docs_reviewer_results.append(rev_scores)
+                            rs.error = str(exc)
+                        return rs
+
+                    docs_review_tasks = [_review_docs(rm) for rm in reviewer_models]
+                    model_result.docs_reviewer_results = list(
+                        await asyncio.gather(*docs_review_tasks)
+                    )
 
                     # Populate legacy fields from first successful reviewer
                     first_docs_ok = next(
