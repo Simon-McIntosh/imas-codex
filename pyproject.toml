@@ -404,25 +404,22 @@ max-cycles = 3
 #   4+       → rejected at config load time (ValueError)
 #
 # 3-model RD-quorum chain (full escalator).
-# Sonnet 4.6 primary, GPT-5.4 secondary (cross-vendor independence), Opus 4.6 escalator.
+# DeepSeek V4 Flash primary, GPT-5.4 secondary, Gemini 3.1-pro escalator.
 #
-# Why Sonnet primary (not Opus): As of 2026-05, OpenRouter's prompt-cache
-# discount is broken for `anthropic/claude-opus-4.6` across all upstream
-# providers (Anthropic-native, Google Vertex, Amazon Bedrock all return
-# cache_creation=0 / cache_read=0 despite cache_control blocks). Sonnet 4.6
-# caches correctly (90% discount on warm calls). Probe: research/cache_probe.py.
-# Reverting to Opus primary as soon as upstream caching is restored will
-# require a single-line edit here.
+# Benchmark evidence (2026-05-15, 4 items, GPT-5.5 composer):
+#   deepseek-v4-flash:      avg=0.756, $0.002/run,  97s — cheapest, adequate discrimination
+#   gpt-5.4:                avg=0.672, $0.033/run,  31s — fastest, moderate cost
+#   gemini-3.1-pro-preview: avg=0.884, $0.469/run, 371s — highest quality, authoritative
+#   claude-sonnet-4.6:      avg=0.581, $0.079/run,  56s — eliminated (lowest commercial)
+#   claude-opus-4.6:        not benchmarked as reviewer (cost prohibitive at scale)
 #
-# Gemini 3.1-pro-preview removed: Phase 7 probe showed it returns prose despite
-# response_format=json_object — structurally unreliable as a reviewer despite
-# _sanitize_content prose-extraction.  GPT-5.4 provides cross-vendor bias signal
-# while staying inside a validated structured-output family.
-# Temperature: GPT-5.4 rejects temperature=0.0; llm.py auto-clamps to None.
+# Projected cost at 10K sources: $439 (vs prior Sonnet→GPT→Opus: ~$2,578, −83%)
+# DeepSeek primary has negative rank-correlation with consensus (−0.5), which
+# maximises escalator trigger rate for genuinely ambiguous names.
 models = [
-  "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind, cache-enabled)
-  "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
-  "openrouter/anthropic/claude-opus-4.6",    # cycle 2 escalator (disputes only, no cache)
+  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
+  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
+  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (highest quality)
 ]
 disagreement-threshold = 0.20
 
@@ -432,29 +429,22 @@ disagreement-threshold = 0.20
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Mirror of the top-level [sn.review.names] keys; used when no profile is set.
-# See top-level [sn-review.names] for rationale on Sonnet-primary ordering.
+# Mirror of the top-level [sn-review.names] keys; used when no profile is set.
+# See top-level [sn-review.names] for benchmark evidence.
 models = [
-  "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind, cache-enabled)
-  "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
-  "openrouter/anthropic/claude-opus-4.6",    # cycle 2 escalator (disputes only, no cache)
+  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
+  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
+  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (highest quality)
 ]
 disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-review.names.profiles.quality-cost-balanced]
-# Quality-preserving cost reduction: Sonnet 4.6 primary + GPT-5.4 secondary
-# (cross-vendor) + Opus 4.6 arbiter (disputes only, authoritative).
-# Rationale: Sonnet 4.6 benchmarked at 76.5 avg compose quality vs Opus
-# equivalent; reviewer benchmark expected similar.  Opus retained as
-# escalator so disputed names still get the strongest model's verdict.
-# Expected cost: ~70-80% reduction vs default (Opus on every name → Opus
-# only on disagreements). NO Haiku — quality floor preserved.
-# Validate on ≥30 already-accepted names (per-dim score divergence ≤0.05,
-# tier agreement ≥90%, net cost ≤40% of default) before adopting as default.
+# Pre-benchmark chain — retained as an alternative profile.
+# Higher quality primary (Sonnet) but 40× more expensive per name review.
 models = [
   "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind)
   "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
-  "openrouter/anthropic/claude-opus-4.6",    # cycle 2 escalator (disputes only, authoritative)
+  "openrouter/google/gemini-3.1-pro-preview", # cycle 2 escalator (highest quality)
 ]
 disagreement-threshold = 0.20
 
@@ -465,12 +455,18 @@ disagreement-threshold = 1.0  # never escalate (single-model)
 
 [tool.imas-codex.sn-review.docs]
 # Reviewer model chain for the documentation-quality axis.
-# Same length semantics as [sn-review.names]. Sonnet primary for cache discount —
-# see [sn-review.names] block for rationale.
+# Same length semantics as [sn-review.names].
+#
+# Benchmark evidence (2026-05-15, 4 items, GPT-5.5 composer):
+#   deepseek-v4-flash:      avg=0.992, $0.002/run, 113s — near-perfect, cheapest
+#   gpt-5.4:                avg=0.881, $0.064/run,  64s — solid, fast
+#   gemini-3.1-pro-preview: avg=1.000, $0.076/run,  56s — perfect, authoritative
+#
+# Projected cost at 10K sources: $220 (vs prior Sonnet→GPT→Opus: ~$1,200, −82%)
 models = [
-  "openrouter/anthropic/claude-sonnet-4.6",
-  "openrouter/openai/gpt-5.4",
-  "openrouter/anthropic/claude-opus-4.6",
+  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
+  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
+  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (perfect quality)
 ]
 disagreement-threshold = 0.20
 
