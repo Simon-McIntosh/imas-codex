@@ -127,6 +127,7 @@ def _build_pool_specs(
     """
     from collections.abc import Awaitable
 
+    from imas_codex.settings import get_compose_concurrency
     from imas_codex.standard_names.defaults import (
         REVIEW_DOCS_BACKLOG_CAP,
         REVIEW_NAME_BACKLOG_CAP,
@@ -154,6 +155,8 @@ def _build_pool_specs(
         process_review_docs_batch,
         process_review_name_batch,
     )
+
+    compose_replicas = get_compose_concurrency()
 
     regen_score = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _rotation_cap_kwargs: dict[str, Any] = {}
@@ -248,6 +251,15 @@ def _build_pool_specs(
     if scope_run_id:
         _scope_kwargs["scope_run_id"] = scope_run_id
 
+    # Replica counts derived from GPU stress testing (4×H200, DeepSeek V4 Flash):
+    # - Peak throughput at 48 concurrent requests (18.6 paths/s with batch=25)
+    # - Linear scaling up to 64 concurrent (20.1 paths/s) but diminishing returns
+    # - Generate pools are the primary GPU consumer (large output)
+    # - Review/refine pools have shorter output, need fewer replicas
+    _gen_replicas = compose_replicas  # 64 from [sn-compose].max-concurrency
+    _review_replicas = max(compose_replicas // 2, 16)
+    _refine_replicas = max(compose_replicas // 4, 8)
+
     specs = [
         PoolSpec(
             name="generate_name",
@@ -260,6 +272,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_generate_name_claims, ids_kwarg="source_ids"
             ),
+            replicas=_gen_replicas,
         ),
         PoolSpec(
             name="review_name",
@@ -272,7 +285,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_review_names_claims, ids_kwarg="sn_ids"
             ),
-            replicas=8,
+            replicas=_review_replicas,
         ),
         PoolSpec(
             name="refine_name",
@@ -287,6 +300,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_refine_name_claims, ids_kwarg="sn_ids"
             ),
+            replicas=_refine_replicas,
         ),
         PoolSpec(
             name="generate_docs",
@@ -299,6 +313,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_generate_docs_claims, ids_kwarg="sn_ids"
             ),
+            replicas=_gen_replicas,
         ),
         PoolSpec(
             name="review_docs",
@@ -311,7 +326,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_review_docs_claims, ids_kwarg="sn_ids"
             ),
-            replicas=8,
+            replicas=_review_replicas,
         ),
         PoolSpec(
             name="refine_docs",
@@ -326,6 +341,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_refine_docs_claims, ids_kwarg="sn_ids"
             ),
+            replicas=_refine_replicas,
         ),
     ]
 
