@@ -625,7 +625,9 @@ async def run_sn_pools(
     time_limit_event = asyncio.Event()
 
     # Shared BudgetManager — all six pools draw from the same pot.
-    shared_mgr = BudgetManager(cost_limit, run_id=run_id)
+    # Treat cost_limit <= 0 as unlimited (local GPU = zero cost).
+    effective_budget = cost_limit if cost_limit > 0 else 1e9
+    shared_mgr = BudgetManager(effective_budget, run_id=run_id)
     await shared_mgr.start()
 
     # Pre-create the SNRun node so LLMCost → FOR_RUN edges have a target.
