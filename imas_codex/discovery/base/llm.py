@@ -519,19 +519,32 @@ def _is_retryable(error_msg: str) -> bool:
     return any(pattern in msg_lower for pattern in RETRYABLE_PATTERNS)
 
 
-def extract_cost(response: Any) -> float:
+def _is_local_model(model_id: str) -> bool:
+    """Return True if the model is served locally (zero cost)."""
+    return any(model_id.startswith(p) for p in _LOCAL_MODEL_PREFIXES)
+
+
+def extract_cost(response: Any, *, model: str | None = None) -> float:
     """Extract actual LLM cost from a LiteLLM response.
 
     Priority:
-    1. OpenRouter response_cost from _hidden_params (most accurate)
-    2. Fallback: Claude Sonnet rates ($3/$15 per 1M tokens)
+    1. Local models (hosted_vllm/, ollama/) → always 0.0
+    2. OpenRouter response_cost from _hidden_params (most accurate)
+    3. Fallback: Claude Sonnet rates ($3/$15 per 1M tokens)
 
     Args:
         response: LiteLLM completion response object
+        model: Model identifier used in the request.  When provided,
+            local models short-circuit to zero cost.
 
     Returns:
         Cost in USD.
     """
+    # Local/self-hosted models are free at point of use.
+    resp_model = model or getattr(response, "model", "") or ""
+    if _is_local_model(resp_model):
+        return 0.0
+
     if hasattr(response, "_hidden_params"):
         cost = response._hidden_params.get("response_cost")
         if cost is not None:
@@ -579,7 +592,7 @@ def _log_cache_metrics(response: Any, model: str) -> None:
     cached, cache_write = _extract_cache_fields(ptd)
     prompt = getattr(usage, "prompt_tokens", 0) or 0
     completion = getattr(usage, "completion_tokens", 0) or 0
-    cost = extract_cost(response)
+    cost = extract_cost(response, model=model)
 
     if cached > 0:
         pct = cached / prompt * 100 if prompt > 0 else 0
@@ -1022,7 +1035,7 @@ def call_llm_structured(
     for attempt in range(max_retries):
         try:
             response = litellm.completion(**kwargs)
-            total_cost += extract_cost(response)
+            total_cost += extract_cost(response, model=model)
             _log_cache_metrics(response, model)
 
             # Parse response content through Pydantic
@@ -1139,7 +1152,7 @@ async def acall_llm_structured(
     for attempt in range(max_retries):
         try:
             response = await litellm.acompletion(**kwargs)
-            total_cost += extract_cost(response)
+            total_cost += extract_cost(response, model=model)
             _log_cache_metrics(response, model)
 
             # Parse response content through Pydantic
@@ -1257,7 +1270,7 @@ def call_llm(
     for attempt in range(max_retries):
         try:
             response = litellm.completion(**kwargs)
-            cost = extract_cost(response)
+            cost = extract_cost(response, model=model)
             _log_cache_metrics(response, model)
             return response, cost
         except Exception as e:
@@ -1344,7 +1357,7 @@ async def acall_llm(
     for attempt in range(max_retries):
         try:
             response = await litellm.acompletion(**kwargs)
-            cost = extract_cost(response)
+            cost = extract_cost(response, model=model)
             _log_cache_metrics(response, model)
             return response, cost
         except Exception as e:

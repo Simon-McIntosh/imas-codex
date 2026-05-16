@@ -286,23 +286,18 @@ model = "openrouter/openai/gpt-5.4"
 batch-size = 50
 
 [tool.imas-codex.sn-docs]
-# openrouter/ prefix — see [language] note above.
-# Powers process_generate_docs_batch (SN documentation generation only).
-# Decoupled from [language] on 2026-05-15 so SN docs model selection is
-# independent of facility discovery and DD enrichment.
-# 2026-05-15 (benchmark sn_benchmark_20260514T205139): GPT-5.5 scored
-# docs=0.852 (rank 1/14) vs GPT-5.4 docs=0.847 (rank 2/14). Both
-# significantly outperform Sonnet 4.6 docs=0.776 (rank 9/14).
-model = "openrouter/openai/gpt-5.5"
+# Local DeepSeek V4 Flash via vLLM on SLURM GPU node.
+# Zero cost at point of use — see [sn-compose] for endpoint details.
+model = "hosted_vllm/deepseek-v4-flash"
+api-base = "http://98dci4-gpu-0003:18800/v1"
+api-key-env = "AMBIX_API_KEY"
 
 [tool.imas-codex.sn-refine]
-# openrouter/ prefix — see [language] note above.
-# Powers process_refine_name_batch and process_refine_docs_batch.
-# 2026-05-15: Upgraded to GPT-5.5 per benchmark (combined=0.797, rank 1/14).
-# GPT-5.5 outperforms GPT-5.4 (0.774) on both names (+0.040) and docs (+0.005).
-# Refine is the highest-leverage stage — the model that scores best at
-# initial composition also produces the strongest corrections.
-model = "openrouter/openai/gpt-5.5"
+# Local DeepSeek V4 Flash via vLLM on SLURM GPU node.
+# Zero cost at point of use — see [sn-compose] for endpoint details.
+model = "hosted_vllm/deepseek-v4-flash"
+api-base = "http://98dci4-gpu-0003:18800/v1"
+api-key-env = "AMBIX_API_KEY"
 
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
@@ -326,21 +321,13 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 
 [tool.imas-codex.sn-compose]
 # Maximum concurrent LLM requests issued by the compose worker.
-# Derived from the 2026-04-24 extended OpenRouter rate-limit probe (Wave 3):
-#   All four working models (Haiku 4.5, Sonnet 4.6, Opus 4.6, GPT-5.4)
-#   cleared N=128 with zero 429s.  True ceiling is ≥128 per account tier.
-#   75% of lowest measured clean level (128): floor(0.75 * 128) = 96.
-#   Case A applied: single global semaphore sufficient (variance <2× across models).
-# See docs/ops/openrouter-rate-ceilings.md for probe details.
 max-concurrency = 96
-# openrouter/ prefix — see [dd-enrichment] note above.
-# 2026-05-15 (benchmark sn_benchmark_20260514T205139): GPT-5.5 scored
-# combined=0.797 (rank 1/14) — names=0.742, docs=0.852. Previous default
-# GPT-5.4 scored 0.774 (rank 2/14). GPT-5.5 is +3% quality at ~38% higher
-# compose cost ($1,404 vs $1,016 projected for 10K sources). Review cost
-# dominates total spend (~5:1 ratio), so compose cost increase is marginal
-# on total pipeline cost.
-model = "openrouter/openai/gpt-5.5"
+# Local DeepSeek V4 Flash (284B MoE, 13B activated) via vLLM on SLURM GPU node.
+# Zero cost at point of use — local H200×4 deployment.
+# Endpoint may change on SLURM reschedule — override with IMAS_CODEX_SN_COMPOSE_API_BASE.
+model = "hosted_vllm/deepseek-v4-flash"
+api-base = "http://98dci4-gpu-0003:18800/v1"
+api-key-env = "AMBIX_API_KEY"
 batch-size = 25
 # Batch size used when ``sn generate --name-only`` groups paths by
 # ``(physics_domain × unit)`` rather than ``(cluster × unit)``.  The
@@ -362,7 +349,11 @@ docs-batch-size = 12
 max-tokens = 150000
 
 [tool.imas-codex.sn-enrich]
-model = "openrouter/anthropic/claude-opus-4.6"
+# Local DeepSeek V4 Flash via vLLM on SLURM GPU node.
+# Zero cost at point of use — see [sn-compose] for endpoint details.
+model = "hosted_vllm/deepseek-v4-flash"
+api-base = "http://98dci4-gpu-0003:18800/v1"
+api-key-env = "AMBIX_API_KEY"
 # Enrich packs ~800–1200 tokens per name (docs, exemplars, DD context)
 # so batches should be smaller than generate batches.
 batch-size = 12
@@ -395,33 +386,14 @@ disagreement-threshold = 0.20
 max-cycles = 3
 
 [tool.imas-codex.sn-review.names]
-# Reviewer model chain for the name-quality axis (grammar/semantic/convention/completeness).
-# Length semantics:
-#   1 model  → quorum disabled (single reviewer, mirrors legacy behaviour)
-#   2 models → blind primary + blind secondary, no escalator
-#   3 models → full RD-quorum: models[0] primary (blind), models[1] secondary (blind),
-#              models[2] escalator (sees both, authoritative)
-#   4+       → rejected at config load time (ValueError)
-#
-# 3-model RD-quorum chain (full escalator).
-# DeepSeek V4 Flash primary, GPT-5.4 secondary, Gemini 3.1-pro escalator.
-#
-# Benchmark evidence (2026-05-15, 4 items, GPT-5.5 composer):
-#   deepseek-v4-flash:      avg=0.756, $0.002/run,  97s — cheapest, adequate discrimination
-#   gpt-5.4:                avg=0.672, $0.033/run,  31s — fastest, moderate cost
-#   gemini-3.1-pro-preview: avg=0.884, $0.469/run, 371s — highest quality, authoritative
-#   claude-sonnet-4.6:      avg=0.581, $0.079/run,  56s — eliminated (lowest commercial)
-#   claude-opus-4.6:        not benchmarked as reviewer (cost prohibitive at scale)
-#
-# Projected cost at 10K sources: $439 (vs prior Sonnet→GPT→Opus: ~$2,578, −83%)
-# DeepSeek primary has negative rank-correlation with consensus (−0.5), which
-# maximises escalator trigger rate for genuinely ambiguous names.
+# Single-model local review: DeepSeek V4 Flash via vLLM.
+# Zero cost at point of use. No quorum — single reviewer.
 models = [
-  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
-  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
-  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (highest quality)
+  "hosted_vllm/deepseek-v4-flash",
 ]
-disagreement-threshold = 0.20
+disagreement-threshold = 1.0
+api-base = "http://98dci4-gpu-0003:18800/v1"
+api-key-env = "AMBIX_API_KEY"
 
 # ---------------------------------------------------------------------------
 # Reviewer profiles — select with IMAS_CODEX_SN_REVIEW_PROFILE env var or
@@ -429,46 +401,34 @@ disagreement-threshold = 0.20
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Mirror of the top-level [sn-review.names] keys; used when no profile is set.
-# See top-level [sn-review.names] for benchmark evidence.
 models = [
-  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
-  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
-  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (highest quality)
+  "hosted_vllm/deepseek-v4-flash",
 ]
-disagreement-threshold = 0.20
+disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.names.profiles.quality-cost-balanced]
-# Pre-benchmark chain — retained as an alternative profile.
-# Higher quality primary (Sonnet) but 40× more expensive per name review.
+# Pre-benchmark chain — retained as an alternative profile (requires OpenRouter credits).
 models = [
-  "openrouter/anthropic/claude-sonnet-4.6",  # cycle 0 primary (blind)
-  "openrouter/openai/gpt-5.4",               # cycle 1 secondary (blind, cross-vendor)
-  "openrouter/google/gemini-3.1-pro-preview", # cycle 2 escalator (highest quality)
+  "openrouter/anthropic/claude-sonnet-4.6",
+  "openrouter/openai/gpt-5.4",
+  "openrouter/google/gemini-3.1-pro-preview",
 ]
 disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-review.names.profiles.opus-only]
-# Single-model mode: no quorum, no escalator. Maximum quality, maximum cost.
+# Single-model mode: maximum quality, maximum cost (requires OpenRouter credits).
 models = ["openrouter/anthropic/claude-opus-4.6"]
-disagreement-threshold = 1.0  # never escalate (single-model)
+disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
-# Reviewer model chain for the documentation-quality axis.
-# Same length semantics as [sn-review.names].
-#
-# Benchmark evidence (2026-05-15, 4 items, GPT-5.5 composer):
-#   deepseek-v4-flash:      avg=0.992, $0.002/run, 113s — near-perfect, cheapest
-#   gpt-5.4:                avg=0.881, $0.064/run,  64s — solid, fast
-#   gemini-3.1-pro-preview: avg=1.000, $0.076/run,  56s — perfect, authoritative
-#
-# Projected cost at 10K sources: $220 (vs prior Sonnet→GPT→Opus: ~$1,200, −82%)
+# Single-model local review: DeepSeek V4 Flash via vLLM.
+# Zero cost at point of use. No quorum — single reviewer.
 models = [
-  "openrouter/deepseek/deepseek-v4-flash",           # cycle 0 primary (blind, cheapest)
-  "openrouter/openai/gpt-5.4",                        # cycle 1 secondary (blind, fast)
-  "openrouter/google/gemini-3.1-pro-preview",         # cycle 2 escalator (perfect quality)
+  "hosted_vllm/deepseek-v4-flash",
 ]
-disagreement-threshold = 0.20
+disagreement-threshold = 1.0
+api-base = "http://98dci4-gpu-0003:18800/v1"
+api-key-env = "AMBIX_API_KEY"
 
 [tool.imas-codex.sn-benchmark]
 # Models to evaluate for standard name composition.

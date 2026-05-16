@@ -672,9 +672,7 @@ The LLM never provides the unit field.
 | `sn import` | Import reviewed YAML from ISNC back into graph. Diff-based origin tracking flips edited names to `origin=catalog_edit`. | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
 | `sn status` | Show StandardName and StandardNameSource pipeline statistics | — |
 | `sn coverage` | Report DD/signal coverage by domain, cluster, and IDS | `--domain`, `--ids`, `--format` |
-| `sn themes` | Extract recurring reviewer themes via n-gram analysis over graph comments | `--physics-domain`, `--source {graph,reviews}`, `--limit`, `--since` |
 | `sn gaps` | List grammar vocabulary gaps from composition | `--segment`, `--export {table,yaml}` |
-| `sn reset-domain` | Reset all StandardNames for one or more domains; helper for domain re-rotation | `--domain` (multi), `--force` |
 | `sn clear` | Unconditional full-subsystem wipe with auto grammar re-seed | `--dry-run`, `--force`, `--no-reseed` |
 | `sn prune` | Scoped delete of StandardName nodes; relationship-first safety | `--status`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn sync-grammar` | Seed/refresh ISN grammar vocabulary in the graph | `--dry-run` |
