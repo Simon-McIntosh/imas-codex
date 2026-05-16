@@ -29,6 +29,7 @@ class RunSummary:
     stopped_at: datetime | None = None
     cost_spent: float = 0.0
     cost_limit: float = 0.0
+    time_limit_s: float | None = None
     min_score: float | None = None
     names_composed: int = 0
     names_enriched: int = 0
@@ -49,6 +50,7 @@ _STOP_TO_STATUS: dict[str, str] = {
     "completed": "completed",
     "budget_exhausted": "completed",
     "budget_saturated": "completed",
+    "time_limit_reached": "completed",
     "stalled": "completed",
     "no_work": "completed",
     "no_eligible_work": "completed",
@@ -516,6 +518,7 @@ async def run_sn_pools(
     cost_limit: float,
     *,
     turn_number: int = 1,
+    time_limit_s: float | None = None,
     min_score: float | None = None,
     rotation_cap: int | None = None,
     escalation_model: str | None = None,
@@ -563,6 +566,10 @@ async def run_sn_pools(
 
     Args:
         cost_limit: Maximum LLM spend in USD.
+        time_limit_s: Maximum wall-clock time in seconds.  When set,
+            a background timer fires ``stop_event`` after this duration
+            for a graceful shutdown.  ``None`` (default) means no time
+            limit — only ``cost_limit`` and manual Ctrl-C stop the run.
         min_score: Review threshold.  Names with
             ``reviewer_score_name < min_score`` are routed to the
             refine_name pool; those above are eligible for review.
@@ -601,6 +608,7 @@ async def run_sn_pools(
         turn_number=turn_number,
         started_at=started,
         cost_limit=cost_limit,
+        time_limit_s=time_limit_s,
         min_score=min_score,
     )
 
@@ -613,6 +621,8 @@ async def run_sn_pools(
     # Set when the budget-saturation watchdog detects all pools have
     # consecutively failed to reserve budget SATURATION_THRESHOLD times.
     budget_saturated_event = asyncio.Event()
+    # Set when the wall-clock deadline (--time-limit) fires.
+    time_limit_event = asyncio.Event()
 
     # Shared BudgetManager — all six pools draw from the same pot.
     shared_mgr = BudgetManager(cost_limit, run_id=run_id)
@@ -840,6 +850,24 @@ async def run_sn_pools(
         cost_sync_task = asyncio.create_task(
             _cost_spent_sync_loop(), name="cost_spent_sync"
         )
+
+        # ── Deadline timer (--time-limit) ─────────────────────────
+        deadline_task: asyncio.Task[None] | None = None
+        if time_limit_s is not None and time_limit_s > 0:
+
+            async def _deadline_timer() -> None:
+                await asyncio.sleep(time_limit_s)
+                logger.info(
+                    "run_sn_pools: time limit reached (%.0fs) — requesting shutdown",
+                    time_limit_s,
+                )
+                time_limit_event.set()
+                stop_event.set()
+
+            deadline_task = asyncio.create_task(
+                _deadline_timer(), name="deadline_timer"
+            )
+
         try:
             health_map = await run_pools(
                 specs,
@@ -856,9 +884,12 @@ async def run_sn_pools(
                 cost_sync_task.cancel()
             if not embed_task.done():
                 embed_task.cancel()
-            await asyncio.gather(
-                sweep_task, cost_sync_task, embed_task, return_exceptions=True
-            )
+            if deadline_task is not None and not deadline_task.done():
+                deadline_task.cancel()
+            _gather_tasks = [sweep_task, cost_sync_task, embed_task]
+            if deadline_task is not None:
+                _gather_tasks.append(deadline_task)
+            await asyncio.gather(*_gather_tasks, return_exceptions=True)
         logger.info("run_sn_pools: all pools exited — %s", health_map)
 
         # ── A3: per-pool cost observability ────────────────────────
@@ -953,6 +984,8 @@ async def run_sn_pools(
             summary.stop_reason = "budget_exhausted"
         elif budget_saturated_event.is_set():
             summary.stop_reason = "budget_saturated"
+        elif time_limit_event.is_set():
+            summary.stop_reason = "time_limit_reached"
         elif idle_exhausted_event.is_set():
             summary.stop_reason = "no_eligible_work"
         elif stop_event.is_set():

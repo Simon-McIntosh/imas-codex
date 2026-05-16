@@ -283,6 +283,7 @@ def _compute_pool_pending(
 def _run_sn_cmd(
     *,
     cost_limit: float,
+    time_limit: float | None = None,
     per_domain_limit: int | None,
     dry_run: bool,
     quiet: bool,
@@ -416,6 +417,7 @@ def _run_sn_cmd(
             cli_console.print(
                 f"[bold]SN pipeline[/bold] "
                 f"(budget=${cost_limit:.2f}"
+                f"{f', time={time_limit:.0f}m' if time_limit else ''}"
                 f"{f', min_score={min_score}' if min_score is not None else ''}"
                 f"{', dry-run' if dry_run else ''})"
             )
@@ -465,6 +467,7 @@ def _run_sn_cmd(
     async def async_main(stop_event, service_monitor):
         summary = await run_sn_pools(
             cost_limit=cost_limit,
+            time_limit_s=time_limit * 60 if time_limit else None,
             min_score=min_score,
             rotation_cap=rotation_cap,
             escalation_model=escalation_model,
@@ -630,6 +633,14 @@ def _check_pipeline_clear_gate() -> None:
     type=float,
     default=5.0,
     help="Maximum LLM cost in USD",
+)
+@click.option(
+    "-t",
+    "--time",
+    "time_limit",
+    type=float,
+    default=None,
+    help="Maximum runtime in minutes (e.g., 5). Pipeline shuts down gracefully when time expires.",
 )
 @click.option("--dry-run", is_flag=True, help="Preview extraction without LLM calls")
 @click.option(
@@ -925,6 +936,7 @@ def sn_run(
     domains: tuple[str, ...],
     facility: str | None,
     cost_limit: float,
+    time_limit: float | None,
     dry_run: bool,
     force: bool,
     limit: int | None,
@@ -1148,6 +1160,7 @@ def sn_run(
         # 5. Route through the pool orchestrator with scope_run_id.
         _run_sn_cmd(
             cost_limit=cost_limit,
+            time_limit=time_limit,
             per_domain_limit=limit,
             dry_run=dry_run,
             quiet=quiet,
@@ -1179,6 +1192,7 @@ def sn_run(
     if use_pools:
         _run_sn_cmd(
             cost_limit=cost_limit,
+            time_limit=time_limit,
             per_domain_limit=limit,
             dry_run=dry_run,
             quiet=quiet,
