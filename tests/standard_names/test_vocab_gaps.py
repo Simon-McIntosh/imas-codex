@@ -1214,9 +1214,9 @@ class TestBatchRescueValidator:
             "segments": {
                 "base_token": "magnetic_field",
                 "base_kind": "quantity",
-                "qualifiers": ["linear"],
+                "qualifiers": ["hypothetical"],
             },
-            "description": "Linear field",
+            "description": "Hypothetical field",
             "reason": "test",
         }
         bad_2 = self._bad_qualifier_candidate("p/y")
