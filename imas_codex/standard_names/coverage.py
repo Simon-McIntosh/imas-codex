@@ -141,7 +141,14 @@ WHERE n.node_category IN $sn_categories
 RETURN count(n) AS cnt
 """
 
-# SNRun telemetry: avg cost_per_name from completed/budget_exhausted runs
+# SNRun telemetry: cost per source from completed/budget_exhausted runs.
+# Uses names_composed as a proxy for sources processed — the compose
+# pool processes batches of ~5 sources per name, and cost_spent includes
+# ALL stages (compose + review + docs).  Dividing by names_composed gives
+# cost-per-composed-name, which is the appropriate unit because each
+# composed name consumes ~1 compose + ~1 review + ~1 docs cycle.
+# The estimated cost multiplies this by expected_unique_names (not
+# remaining sources), since many sources map to the same name.
 _SNRUN_COST_QUERY = """
 MATCH (rr:SNRun)
 WHERE rr.names_composed IS NOT NULL
@@ -298,9 +305,17 @@ def compute_coverage(physics_domain: str | None = None) -> CoverageReport:
         if total_names > 0:
             cost_per_name = total_cost / total_names
 
+    # Estimate remaining cost.  ``to_compose`` counts eligible DD *paths*
+    # (sources), but many sources map to the same StandardName.  Observed
+    # ratios from rotation runs: ~5 sources per composed name, ~7 sources
+    # per accepted name.  Use the sources-per-name ratio to project the
+    # expected number of unique names from remaining sources.
     estimated_compose_cost: float | None = None
     if cost_per_name is not None and to_compose > 0:
-        estimated_compose_cost = cost_per_name * to_compose
+        # Estimate unique names from remaining sources using observed ratio
+        sources_per_name = 5.0  # conservative: 50 sources → ~10 unique names
+        expected_unique_names = to_compose / sources_per_name
+        estimated_compose_cost = cost_per_name * expected_unique_names
 
     return CoverageReport(
         eligible_total=eligible_total,

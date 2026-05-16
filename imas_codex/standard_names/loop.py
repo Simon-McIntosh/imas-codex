@@ -925,7 +925,7 @@ async def run_sn_pools(
                     if _async_counters[k] != _auth_counters[k]
                 }
                 if _drifts:
-                    logger.warning(
+                    logger.debug(
                         "run_sn_pools: async counter drift detected — "
                         "overwriting with authoritative pool counts: %s",
                         ", ".join(

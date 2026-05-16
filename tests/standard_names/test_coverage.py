@@ -286,8 +286,11 @@ class TestComputeCoverageCostEstimate:
 
         expected_cost_per_name = 15.0 / 150  # 0.1
         assert report.cost_per_name == pytest.approx(expected_cost_per_name)
+        # estimated_compose_cost = cost_per_name × (to_compose / sources_per_name)
+        # where sources_per_name = 5.0 (conservative ratio)
+        expected_unique_names = 500 / 5.0  # 100 expected unique names
         assert report.estimated_compose_cost == pytest.approx(
-            expected_cost_per_name * 500
+            expected_cost_per_name * expected_unique_names
         )
 
     def test_no_runs_cost_is_none(self):

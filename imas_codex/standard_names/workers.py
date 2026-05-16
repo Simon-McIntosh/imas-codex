@@ -909,29 +909,53 @@ def _mark_vocab_gap_sources(
     error_detail: str,
     source_kind: str,
 ) -> None:
-    """Mark all sources in a batch as vocab_gap after a deterministic failure.
+    """Mark sources after a vocab-gap validation failure.
 
-    Called when ``acall_llm_structured`` raises a non-retryable validation
-    error (e.g. ``"not a registered"``).  Prevents the pool loop from
-    re-claiming the same sources and entering an infinite retry cycle.
+    When batch_size == 1 the offending source is known, so it is marked
+    ``vocab_gap_compose`` (terminal — won't be reclaimed).  When
+    batch_size > 1 we cannot identify which source triggered the failure,
+    so all sources are marked ``failed`` with a retry-friendly reason —
+    they will be reclaimed on the next ``sn run`` and retried in a
+    different (possibly smaller) batch.
     """
     try:
         from imas_codex.graph.client import GraphClient
         from imas_codex.standard_names.graph_ops import mark_source_skipped
 
+        single_source = len(batch) == 1
+        reason = "vocab_gap_compose" if single_source else "vocab_gap_batch"
+
         with GraphClient() as gc:
             for item in batch:
                 sid = item.get("source_id") or item.get("id", "")
-                if sid:
+                if not sid:
+                    continue
+                if single_source:
                     mark_source_skipped(
                         gc,
                         sid,
-                        reason="vocab_gap_compose",
+                        reason=reason,
                         detail=error_detail[:300],
                         source_type=source_kind,
                     )
+                else:
+                    # Reset to extracted so the source is reclaimed next run
+                    sns_id = f"{source_kind}:{sid}"
+                    gc.query(
+                        """
+                        MATCH (sns:StandardNameSource {id: $sns_id})
+                        SET sns.status = 'extracted',
+                            sns.claimed_at = null,
+                            sns.claim_token = null,
+                            sns.skip_reason = $reason,
+                            sns.skip_reason_detail = $detail
+                        """,
+                        sns_id=sns_id,
+                        reason=reason,
+                        detail=error_detail[:300],
+                    )
     except Exception as exc:
-        logger.debug("Failed to mark sources as vocab_gap: %s", exc)
+        logger.debug("Failed to mark sources after vocab gap: %s", exc)
 
 
 def _related_path_neighbours(
