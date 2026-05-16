@@ -1874,7 +1874,15 @@ class BaseProgressDisplay(ABC):
             console=self.console, show_path=False, show_time=False
         )
         self._rich_handler.setLevel(logging.WARNING)
-        logging.getLogger("imas_codex").addHandler(self._rich_handler)
+        ic_logger = logging.getLogger("imas_codex")
+        ic_logger.addHandler(self._rich_handler)
+
+        # Sever imas_codex → root propagation so DEBUG/INFO messages
+        # only reach the RotatingFileHandler (directly on imas_codex)
+        # and NOT any StreamHandler on root (which may be re-added by
+        # lazy imports calling logging.basicConfig() after the sweep).
+        self._ic_propagate_saved = ic_logger.propagate
+        ic_logger.propagate = False
 
         # Prevent noisy third-party loggers from propagating to root —
         # this works even when handlers are registered lazily after this
@@ -1896,9 +1904,14 @@ class BaseProgressDisplay(ABC):
             lg.propagate = True
             lg.setLevel(logging.NOTSET)
 
+        # Restore imas_codex propagation
+        ic_logger = logging.getLogger("imas_codex")
+        if hasattr(self, "_ic_propagate_saved"):
+            ic_logger.propagate = self._ic_propagate_saved
+
         # Remove our RichHandler
         if hasattr(self, "_rich_handler"):
-            logging.getLogger("imas_codex").removeHandler(self._rich_handler)
+            ic_logger.removeHandler(self._rich_handler)
 
         if self._live:
             self._live.__exit__(*args)

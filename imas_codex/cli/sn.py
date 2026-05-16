@@ -66,22 +66,38 @@ class _SpaceSplitMultiple(click.Option):
 
 
 def _check_llm_direct() -> tuple[bool, str]:
-    """Check direct OpenRouter connectivity for the SN pipeline.
+    """Check LLM endpoint health for the SN compose pipeline.
 
-    The SN pipeline bypasses the LiteLLM proxy and calls OpenRouter
-    directly when ``OPENROUTER_API_KEY_IMAS_CODEX`` is set.  This check
-    verifies the key is available and the configured model is reachable.
+    Probes the configured compose model endpoint — either a local vLLM
+    server (via ``api-base``) or OpenRouter (via API key).
     """
     import os
 
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model_config
 
-    model = get_model("language")
+    cfg = get_model_config("sn-compose")
+    model = cfg["model"]
+    api_base = cfg.get("api_base")
+    short_model = model.split("/")[-1] if "/" in model else model
+
+    if api_base:
+        # Local/self-hosted endpoint — probe /v1/models or /health
+        try:
+            import urllib.request
+
+            url = api_base.rstrip("/")
+            req = urllib.request.Request(f"{url}/models", method="GET")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                if resp.status == 200:
+                    return True, f"local ({short_model})"
+        except Exception:
+            pass
+        return False, f"unreachable ({short_model})"
+
+    # OpenRouter path
     key = os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
     if not key:
         return False, "no API key"
-
-    # Quick probe: verify the OpenRouter API responds (auth endpoint).
     try:
         import urllib.request
 
@@ -91,7 +107,6 @@ def _check_llm_direct() -> tuple[bool, str]:
         )
         with urllib.request.urlopen(req, timeout=5) as resp:
             if resp.status == 200:
-                short_model = model.split("/")[-1] if "/" in model else model
                 return True, f"direct ({short_model})"
     except Exception:
         pass

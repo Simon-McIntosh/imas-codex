@@ -266,15 +266,15 @@ def run_discovery(
     for name, check_fn, kwargs in config.extra_service_checks:
         service_monitor.add_check(name, check_fn, **kwargs)
 
-    # Suppress noisy loggers during rich display.  Sweep ALL registered
-    # loggers to catch CamelCase LiteLLM names and any third-party leaks.
+    # Suppress noisy loggers during rich display.  Set propagate=False
+    # so DEBUG/INFO messages don't reach root's StreamHandler.  The
+    # old approach (raising handler levels) was a no-op because these
+    # loggers have no directly-attached handlers.
+    _suppressed: list[tuple[logging.Logger, bool]] = []
     for mod in config.suppress_loggers:
         lg = logging.getLogger(mod)
-        for handler in lg.handlers:
-            if isinstance(handler, logging.StreamHandler) and not isinstance(
-                handler, logging.FileHandler
-            ):
-                handler.setLevel(logging.ERROR)
+        _suppressed.append((lg, lg.propagate))
+        lg.propagate = False
 
     # Sweep every registered logger — remove StreamHandlers (not FileHandlers).
     for name in list(logging.Logger.manager.loggerDict):
@@ -375,6 +375,10 @@ def run_discovery(
 
         if hasattr(display, "print_summary"):
             display.print_summary()
+
+    # Restore logger propagation after display exits.
+    for lg, saved_propagate in _suppressed:
+        lg.propagate = saved_propagate
 
     # Record session wall-clock time to the graph for accumulated display
     _record_session_time(config, result)
