@@ -253,10 +253,11 @@ def _build_pool_specs(
 
     # Replica counts derived from GPU stress testing (4×H200, DeepSeek V4 Flash):
     # - Peak throughput at 48 concurrent requests (18.6 paths/s with batch=25)
-    # - Linear scaling up to 64 concurrent (20.1 paths/s) but diminishing returns
+    # - 64 concurrent causes connection timeouts under real workload
     # - Generate pools are the primary GPU consumer (large output)
     # - Review/refine pools have shorter output, need fewer replicas
-    _gen_replicas = compose_replicas  # 64 from [sn-compose].max-concurrency
+    # Cap generate at 48 to stay below the timeout threshold
+    _gen_replicas = min(compose_replicas, 48)
     _review_replicas = max(compose_replicas // 2, 16)
     _refine_replicas = max(compose_replicas // 4, 8)
 

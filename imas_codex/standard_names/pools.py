@@ -260,6 +260,16 @@ async def pool_loop(
     )
     backoff = spec._replica_backoffs[replica_idx]
     logger.info("%s starting", tag)
+
+    # Stagger replica startup to avoid thundering-herd on the LLM endpoint.
+    # Each replica waits (replica_idx * 0.1s) before entering the main loop,
+    # spreading 64 replicas over ~6.4 seconds.
+    if replica_idx > 0:
+        import random
+
+        jitter = replica_idx * 0.1 + random.uniform(0, 0.05)
+        await asyncio.sleep(jitter)
+
     while not stop_event.is_set():
         # ── Admission gate ────────────────────────────────────────
         if not mgr.pool_admit(spec.name, weights, active_pools_fn()):

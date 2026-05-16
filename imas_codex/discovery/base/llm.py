@@ -231,6 +231,10 @@ MODEL_TOKEN_LIMITS: dict[str, dict[str, int]] = {
         "max_tokens": 32000,
         "timeout": 120,
     },
+    "hosted_vllm": {
+        "max_tokens": 32000,
+        "timeout": 300,  # 5 min — local GPU with high concurrency needs headroom
+    },
     "default": {
         "max_tokens": 32000,
         "timeout": 120,
