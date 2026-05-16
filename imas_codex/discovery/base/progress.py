@@ -30,6 +30,7 @@ Usage:
 
 from __future__ import annotations
 
+import logging
 import re
 import time
 from abc import ABC, abstractmethod
@@ -1840,6 +1841,20 @@ class BaseProgressDisplay(ABC):
 
     # ── Lifecycle ──
 
+    # Loggers that register StreamHandlers lazily (on first API call)
+    # and must be silenced to prevent them from bypassing Rich Live.
+    _NOISY_LOGGERS: tuple[str, ...] = (
+        "litellm",
+        "LiteLLM",
+        "LiteLLM Proxy",
+        "LiteLLM Router",
+        "openai",
+        "httpx",
+        "httpcore",
+        "urllib3",
+        "neo4j",
+    )
+
     def __enter__(self) -> BaseProgressDisplay:
         """Start live display."""
         self._live = Live(
@@ -1849,10 +1864,42 @@ class BaseProgressDisplay(ABC):
             vertical_overflow="visible",
         )
         self._live.__enter__()
+
+        # Route imas_codex log output through the Live-aware console so
+        # WARNING+ messages appear cleanly within the panel, not as raw
+        # stderr writes that corrupt the display.
+        from rich.logging import RichHandler
+
+        self._rich_handler = RichHandler(
+            console=self.console, show_path=False, show_time=False
+        )
+        self._rich_handler.setLevel(logging.WARNING)
+        logging.getLogger("imas_codex").addHandler(self._rich_handler)
+
+        # Prevent noisy third-party loggers from propagating to root —
+        # this works even when handlers are registered lazily after this
+        # point because propagate is checked at emit time, not at
+        # handler-registration time.
+        self._silenced_loggers: list[logging.Logger] = []
+        for name in self._NOISY_LOGGERS:
+            lg = logging.getLogger(name)
+            lg.propagate = False
+            lg.setLevel(logging.ERROR)
+            self._silenced_loggers.append(lg)
+
         return self
 
     def __exit__(self, *args) -> None:
-        """Stop live display."""
+        """Stop live display and restore logging state."""
+        # Restore silenced loggers
+        for lg in getattr(self, "_silenced_loggers", []):
+            lg.propagate = True
+            lg.setLevel(logging.NOTSET)
+
+        # Remove our RichHandler
+        if hasattr(self, "_rich_handler"):
+            logging.getLogger("imas_codex").removeHandler(self._rich_handler)
+
         if self._live:
             self._live.__exit__(*args)
 

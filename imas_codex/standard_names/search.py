@@ -42,7 +42,7 @@ from imas_codex.standard_names.grammar_query import (
 logger = logging.getLogger(__name__)
 
 # Shared executor (§5.7) — module-scoped to avoid per-call thread churn.
-_STREAM_POOL = ThreadPoolExecutor(max_workers=4, thread_name_prefix="sn-search")
+_STREAM_POOL = ThreadPoolExecutor(max_workers=8, thread_name_prefix="sn-search")
 
 #: Default RRF damping constant (Cormack et al. 2009; plan 40 §5.3).
 RRF_K: int = 60

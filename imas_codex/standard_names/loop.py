@@ -270,7 +270,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_review_names_claims, ids_kwarg="sn_ids"
             ),
-            replicas=4,
+            replicas=8,
         ),
         PoolSpec(
             name="refine_name",
@@ -309,7 +309,7 @@ def _build_pool_specs(
             release=_make_release_adapter(
                 release_review_docs_claims, ids_kwarg="sn_ids"
             ),
-            replicas=4,
+            replicas=8,
         ),
         PoolSpec(
             name="refine_docs",

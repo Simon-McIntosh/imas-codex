@@ -321,7 +321,7 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 
 [tool.imas-codex.sn-compose]
 # Maximum concurrent LLM requests issued by the compose worker.
-max-concurrency = 96
+max-concurrency = 64
 # Local DeepSeek V4 Flash (284B MoE, 13B activated) via vLLM on SLURM GPU node.
 # Zero cost at point of use — local H200×4 deployment.
 # Endpoint may change on SLURM reschedule — override with IMAS_CODEX_SN_COMPOSE_API_BASE.
