@@ -157,6 +157,79 @@ def get_model(section: str) -> str:
     return _get_section(section).get("model", _MODEL_DEFAULTS[section])
 
 
+def get_model_config(section: str) -> dict[str, str | None]:
+    """Get full model configuration including optional endpoint overrides.
+
+    Returns a dict with keys ``model``, ``api_base``, and ``api_key_env``.
+    When ``api-base`` and/or ``api-key-env`` are set in the pyproject.toml
+    section, they override the default OpenRouter routing — enabling
+    local or self-hosted model endpoints.
+
+    Example pyproject.toml::
+
+        [tool.imas-codex.sn-compose]
+        model = "hosted_vllm/deepseek-v4-flash"
+        api-base = "http://gpu-node:18800/v1"
+        api-key-env = "AMBIX_API_KEY"
+
+    Environment variable overrides (highest priority):
+        - ``IMAS_CODEX_{SECTION}_API_BASE``  (e.g. ``IMAS_CODEX_SN_COMPOSE_API_BASE``)
+        - ``IMAS_CODEX_{SECTION}_API_KEY_ENV`` (rarely needed — set the key env directly)
+    """
+    model = get_model(section)
+    cfg = _get_section(section)
+
+    # api-base: env override → pyproject → None
+    env_key = f"IMAS_CODEX_{section.upper().replace('-', '_')}_API_BASE"
+    api_base = os.getenv(env_key) or cfg.get("api-base") or None
+
+    # api-key-env: env override → pyproject → None
+    api_key_env = cfg.get("api-key-env") or None
+
+    return {"model": model, "api_base": api_base, "api_key_env": api_key_env}
+
+
+# ─── Model endpoint registry ──────────────────────────────────────────────
+# Maps model identifiers to their endpoint overrides.  Populated by
+# ``register_model_endpoints()`` at startup; queried by ``_build_kwargs()``
+# in the LLM layer to route calls to local/self-hosted endpoints.
+
+_MODEL_ENDPOINTS: dict[str, dict[str, str | None]] = {}
+
+
+def register_model_endpoints() -> None:
+    """Scan all model sections and register endpoint overrides.
+
+    Called once at import time.  Sections with ``api-base`` configured
+    get their model→endpoint mapping cached so that ``_build_kwargs()``
+    can resolve them without knowing which section a model came from.
+    """
+    for section in MODEL_SECTIONS:
+        try:
+            cfg = get_model_config(section)
+        except ValueError:
+            continue
+        if cfg.get("api_base"):
+            model_id = cfg["model"]
+            _MODEL_ENDPOINTS[model_id] = {
+                "api_base": cfg["api_base"],
+                "api_key_env": cfg.get("api_key_env"),
+            }
+
+
+def get_model_endpoint(model: str) -> dict[str, str | None] | None:
+    """Look up endpoint overrides for a model identifier.
+
+    Returns ``None`` if the model has no per-section endpoint override
+    (i.e. it should use the default OpenRouter/proxy routing).
+    """
+    return _MODEL_ENDPOINTS.get(model)
+
+
+# Populate at import time
+register_model_endpoints()
+
+
 # ─── Embedding settings ────────────────────────────────────────────────────
 
 EMBED_BASE_PORT = 18765

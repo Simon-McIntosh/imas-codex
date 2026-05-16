@@ -23,6 +23,31 @@ logger = logging.getLogger(__name__)
 console = Console()
 
 
+def _suppress_console_handlers() -> None:
+    """Remove or silence all console StreamHandlers across all loggers.
+
+    LiteLLM registers loggers with CamelCase names (``LiteLLM``,
+    ``LiteLLM Proxy``, ``LiteLLM Router``) that leak DEBUG messages
+    to stderr.  A targeted name list can't keep up with third-party
+    loggers, so this sweeps **every** registered logger.
+    """
+    for name in list(logging.Logger.manager.loggerDict):
+        lg = logging.getLogger(name)
+        for handler in list(lg.handlers):
+            if isinstance(handler, logging.StreamHandler) and not isinstance(
+                handler, logging.FileHandler
+            ):
+                lg.removeHandler(handler)
+
+    # Root logger — remove any StreamHandler that isn't a FileHandler
+    root = logging.getLogger()
+    for handler in list(root.handlers):
+        if isinstance(handler, logging.StreamHandler) and not isinstance(
+            handler, logging.FileHandler
+        ):
+            root.removeHandler(handler)
+
+
 class _SpaceSplitMultiple(click.Option):
     """Click option that splits quoted space-separated values.
 
@@ -289,40 +314,10 @@ def _run_sn_cmd(
     use_rich = not quiet and not dry_run and use_rich_output()
 
     # Pre-suppress console output BEFORE any heavy imports/inits so
-    # rich-mode startup is silent. Most loggers inherit from root, so
-    # suppressing root's console handlers is the effective fix. Named
-    # logger suppression is defense-in-depth (run_discovery() repeats it).
+    # rich-mode startup is silent.  Sweeps ALL registered loggers to
+    # catch CamelCase LiteLLM names and any other third-party leaks.
     if use_rich:
-        import logging as _logging
-
-        # Suppress root logger console handlers — this catches ALL loggers
-        # that inherit from root (which is most of them).
-        for lg_name in (
-            "",  # root logger — critical for catching inherited output
-            "imas_codex",
-            "imas_codex.standard_names",
-            "imas_codex.graph",
-            "imas_codex.embeddings",
-            "imas_codex.discovery",
-            "imas_codex.llm",
-            "imas_codex.remote",
-            "imas_codex.cli",
-            "litellm",
-            "httpx",
-            "httpcore",
-            "openai",
-            "urllib3",
-            "neo4j",
-        ):
-            lg = _logging.getLogger(lg_name)
-            for handler in list(lg.handlers):
-                if isinstance(handler, _logging.StreamHandler) and not isinstance(
-                    handler, _logging.FileHandler
-                ):
-                    if lg_name in ("", "imas_codex"):
-                        lg.removeHandler(handler)
-                    else:
-                        handler.setLevel(_logging.ERROR)
+        _suppress_console_handlers()
 
     # Build Rich display or fall back to plain logging
     display = None
@@ -1019,6 +1014,53 @@ def sn_run(
     if flush and flat_focus:
         raise click.UsageError("--flush and --focus are mutually exclusive")
 
+    # ── --reset-only: execute reset then exit (all source types) ──────
+    if reset_only:
+        if reset_to is None:
+            raise click.UsageError("--reset-only requires --reset-to")
+        if not dry_run:
+            source_arg = "dd" if source == "dd" else "signals"
+            ids_filter: str | None = None
+            _tiers = [t.strip() for t in tier.split(",")] if tier else None
+            _validation_status: str | None = None
+            if retry_quarantined:
+                _validation_status = "quarantined"
+            _reset_filter_kwargs: dict[str, Any] = {
+                "since": since,
+                "before": before,
+                "below_score": below_score,
+                "tiers": _tiers,
+                "validation_status": _validation_status,
+            }
+            from imas_codex.standard_names.graph_ops import (
+                clear_standard_names,
+                reset_standard_names,
+            )
+
+            if reset_to == "extracted":
+                n = clear_standard_names(
+                    source_filter=source_arg,
+                    ids_filter=ids_filter,
+                    **_reset_filter_kwargs,
+                )
+                console.print(
+                    f"[yellow]--reset-to extracted:[/yellow] cleared {n} SN nodes"
+                )
+            elif reset_to == "drafted":
+                n = reset_standard_names(
+                    from_status="drafted",
+                    source_filter=source_arg,
+                    ids_filter=ids_filter,
+                    **_reset_filter_kwargs,
+                )
+                console.print(
+                    f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes"
+                )
+        console.print(
+            "[green]--reset-only:[/green] reset complete, exiting without generation"
+        )
+        return
+
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
         import uuid as _uuid
@@ -1145,7 +1187,7 @@ def sn_run(
 
     # --ids has been removed from this command; scope narrowing is domain-based
     # so it works uniformly across DD and facility-signals sources.
-    ids_filter: str | None = None
+    ids_filter_sp: str | None = None
 
     # Single-pass path uses a scalar domain_filter; derive from --domain tuple.
     domain_filter: str | None = domains[0] if len(domains) == 1 else None
@@ -1158,11 +1200,7 @@ def sn_run(
     if from_model:
         force = True
 
-    # Validate --reset-only
-    if reset_only and reset_to is None:
-        raise click.UsageError("--reset-only requires --reset-to")
-
-    # Build filter kwargs for reset/clear functions.
+    # Build filter kwargs for reset/clear functions (single-pass --reset-to without --reset-only).
     _tiers = [t.strip() for t in tier.split(",")] if tier else None
     _validation_status: str | None = None
     if retry_quarantined:
@@ -1175,7 +1213,7 @@ def sn_run(
         "validation_status": _validation_status,
     }
 
-    # Handle --reset-to before the main pipeline
+    # Handle --reset-to before the main pipeline (reset + continue generating)
     if reset_to is not None and not dry_run:
         source_arg = "dd" if source == "dd" else "signals"
         from imas_codex.standard_names.graph_ops import (
@@ -1186,7 +1224,7 @@ def sn_run(
         if reset_to == "extracted":
             n = clear_standard_names(
                 source_filter=source_arg,
-                ids_filter=ids_filter,
+                ids_filter=ids_filter_sp,
                 **_reset_filter_kwargs,
             )
             console.print(
@@ -1196,16 +1234,10 @@ def sn_run(
             n = reset_standard_names(
                 from_status="drafted",
                 source_filter=source_arg,
-                ids_filter=ids_filter,
+                ids_filter=ids_filter_sp,
                 **_reset_filter_kwargs,
             )
             console.print(f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes")
-
-    if reset_only:
-        console.print(
-            "[green]--reset-only:[/green] reset complete, exiting without generation"
-        )
-        return
 
     # Log Phase B/C flags that are pending wire-up
     if retry_skipped:
@@ -1324,7 +1356,7 @@ def sn_run(
     state = StandardNameBuildState(
         facility=effective_facility,
         source=source,
-        ids_filter=ids_filter,
+        ids_filter=ids_filter_sp,
         domain_filter=domain_filter,
         facility_filter=facility,
         cost_limit=cost_limit,
@@ -3102,104 +3134,6 @@ def sn_clear(dry_run: bool, force: bool, no_comment_export: bool) -> None:
         raise SystemExit(1) from e
 
 
-@sn.command("reset-domain")
-@click.option(
-    "--domain",
-    "physics_domain",
-    required=True,
-    type=_PHYSICS_DOMAIN_CHOICE,
-    help="Physics domain whose StandardNameSource nodes should be reset.",
-)
-@click.option(
-    "--hard",
-    is_flag=True,
-    default=False,
-    help="DETACH DELETE the SNS nodes entirely (recreated on next sn run extract).",
-)
-@click.option("--dry-run", is_flag=True, help="Report counts only — no writes.")
-def sn_reset_domain(physics_domain: str, hard: bool, dry_run: bool) -> None:
-    """Reset stuck StandardNameSource nodes for a physics domain.
-
-    Default (soft reset): clears ``claimed_at`` / ``claim_token`` and
-    resets ``status`` to ``extracted`` so abandoned nodes can be reclaimed
-    on the next ``sn run``.
-
-    ``--hard``: DETACH DELETE the SNS nodes entirely.  They will be
-    re-created automatically when ``sn run`` next extracts that domain.
-
-    ``--dry-run``: print the affected count only; no graph writes.
-
-    \b
-    Examples:
-      imas-codex sn reset-domain --domain magnetics --dry-run
-      imas-codex sn reset-domain --domain magnetics
-      imas-codex sn reset-domain --domain equilibrium --hard
-    """
-    from imas_codex.graph.client import GraphClient
-
-    try:
-        with GraphClient() as gc:
-            # Count affected nodes
-            count_rows = gc.query(
-                """
-                MATCH (sns:StandardNameSource)
-                WHERE (sns)-[:FROM_DD_PATH]->(:IMASNode {physics_domain: $domain})
-                   OR sns.physics_domain = $domain
-                RETURN count(sns) AS n
-                """,
-                domain=physics_domain,
-            )
-            affected = count_rows[0]["n"] if count_rows else 0
-
-            if affected == 0:
-                console.print(
-                    f"No StandardNameSource nodes found for domain [bold]{physics_domain}[/bold]."
-                )
-                return
-
-            action = "DETACH DELETE" if hard else "soft reset (clear claims)"
-            console.print(
-                f"[bold]{affected}[/bold] SNS node(s) for domain "
-                f"[bold]{physics_domain}[/bold] would be affected ({action})."
-            )
-
-            if dry_run:
-                return
-
-            if hard:
-                gc.query(
-                    """
-                    MATCH (sns:StandardNameSource)
-                    WHERE (sns)-[:FROM_DD_PATH]->(:IMASNode {physics_domain: $domain})
-                       OR sns.physics_domain = $domain
-                    DETACH DELETE sns
-                    """,
-                    domain=physics_domain,
-                )
-                console.print(
-                    f"[green]Deleted {affected} SNS node(s) for domain {physics_domain}.[/green]"
-                )
-            else:
-                gc.query(
-                    """
-                    MATCH (sns:StandardNameSource)
-                    WHERE (sns)-[:FROM_DD_PATH]->(:IMASNode {physics_domain: $domain})
-                       OR sns.physics_domain = $domain
-                    SET sns.status = 'extracted',
-                        sns.claimed_at = null,
-                        sns.claim_token = null
-                    """,
-                    domain=physics_domain,
-                )
-                console.print(
-                    f"[green]Reset {affected} SNS node(s) for domain {physics_domain} "
-                    f"to extracted status.[/green]"
-                )
-    except Exception as e:
-        console.print(f"[red]reset-domain error:[/red] {e}")
-        raise SystemExit(1) from e
-
-
 @sn.command("prune")
 @click.option(
     "--status",
@@ -3375,121 +3309,6 @@ def _run_sync_grammar(*, dry_run: bool, verbose: bool) -> None:
         f"[green]✓ Active grammar version → {report.finalise_report.get('target_version')}"
         f" (applied={report.finalise_report.get('applied')})[/green]"
     )
-
-
-@sn.command("themes")
-@click.option(
-    "--physics-domain",
-    "domain",
-    type=_PHYSICS_DOMAIN_CHOICE,
-    default=None,
-    help="Filter by physics domain.",
-)
-@click.option(
-    "--source",
-    type=click.Choice(["graph", "reviews"], case_sensitive=False),
-    default="graph",
-    show_default=True,
-    help=(
-        "Theme source. 'graph' queries StandardName reviewer comments, "
-        "'reviews' queries StandardNameReview nodes directly."
-    ),
-)
-@click.option("--limit", type=int, default=50, help="Max comments to sample.")
-@click.option(
-    "--since",
-    default=None,
-    help="Only reviews after this ISO date (e.g. 2025-01-01).",
-)
-def sn_themes(
-    domain: str | None,
-    source: str,
-    limit: int,
-    since: str | None,
-) -> None:
-    """Extract and display recurring reviewer themes.
-
-    Runs n-gram frequency analysis over reviewer comments to surface
-    the most common criticisms.  Useful for understanding what the
-    reviewer fleet consistently flags so compose prompts can be tuned.
-
-    \b
-    Examples:
-      imas-codex sn themes --physics-domain equilibrium
-      imas-codex sn themes --source reviews --limit 100
-      imas-codex sn themes --since 2025-06-01
-    """
-    from rich.table import Table
-
-    if source == "reviews" or since:
-        # Query Review nodes directly for richer filtering
-        try:
-            from imas_codex.graph.client import GraphClient
-
-            where_clauses: list[str] = ["r.comments IS NOT NULL"]
-            params: dict[str, Any] = {"limit": limit}
-            if domain:
-                where_clauses.append("sn.physics_domain = $domain")
-                params["domain"] = domain
-            if since:
-                where_clauses.append("r.reviewed_at >= $since")
-                params["since"] = since
-
-            where = " AND ".join(where_clauses)
-            cypher = f"""
-                MATCH (sn:StandardName)-[:HAS_REVIEW]->(r:StandardNameReview)
-                WHERE {where}
-                RETURN r.comments AS comments
-                ORDER BY r.reviewed_at DESC
-                LIMIT $limit
-            """
-            with GraphClient() as gc:
-                rows = gc.query(cypher, **params)
-
-            if not rows:
-                console.print("[yellow]No review comments found.[/yellow]")
-                return
-
-            comments = [r["comments"] for r in rows if r.get("comments")]
-            if not comments:
-                console.print("[yellow]No non-empty comments found.[/yellow]")
-                return
-
-            from imas_codex.standard_names.review.themes import (
-                _extract_themes_from_texts,
-            )
-
-            themes = _extract_themes_from_texts(comments)
-        except Exception as exc:
-            console.print(f"[red]Error querying graph: {exc}[/red]")
-            return
-    else:
-        # Use the existing domain-scoped helper
-        from imas_codex.standard_names.review.themes import extract_reviewer_themes
-
-        if not domain:
-            console.print(
-                "[yellow]--physics-domain is required for 'graph' source. "
-                "Use --source reviews to query all domains.[/yellow]"
-            )
-            return
-        themes = extract_reviewer_themes(domain=domain, limit=limit)
-
-    if not themes:
-        console.print("[yellow]No recurring themes found.[/yellow]")
-        return
-
-    table = Table(title="Recurring Reviewer Themes", show_lines=True)
-    table.add_column("#", style="dim", width=3)
-    table.add_column("Theme", style="bold")
-    table.add_column("Source", style="dim")
-
-    source_label = f"domain={domain}" if domain else "all domains"
-    for i, theme in enumerate(themes, 1):
-        table.add_row(str(i), theme, source_label)
-
-    console.print(table)
-    console.print(f"\n[dim]{len(themes)} themes extracted from ≤{limit} comments[/dim]")
 
 
 @sn.command("sync-grammar")

@@ -811,101 +811,115 @@ def _build_kwargs(
     timeout: int | None,
     *,
     service: str = "untagged",
+    api_base: str | None = None,
+    api_key_override: str | None = None,
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
+    When *api_base* is provided (from ``get_model_config()``), the call
+    is routed directly to that endpoint — bypassing both the LiteLLM
+    proxy and OpenRouter.  This enables local/self-hosted models.
+
     When max_tokens or timeout are not explicitly set, uses
     model-family defaults from MODEL_TOKEN_LIMITS.
-
-    Routes through the LiteLLM proxy when ``[llm].location`` is configured
-    or ``LITELLM_PROXY_URL`` is set (essential on air-gapped clusters where
-    direct outbound HTTPS is unavailable).  The proxy handles model routing
-    via its own ``model_list`` configuration.
-
-    For models with caching support (per ``config/prompt_caching.yaml``),
-    ``cache_control`` breakpoints are injected on the system prompt to
-    enable prompt caching via OpenRouter.
     """
-    from imas_codex.settings import get_llm_location, get_llm_proxy_url
+    from imas_codex.settings import (
+        get_llm_location,
+        get_llm_proxy_url,
+        get_model_endpoint,
+    )
 
     _warn_if_missing_openrouter_prefix(model)
 
     limits = get_model_limits(model)
 
-    # Route through LiteLLM proxy when configured (location != "local" or env override)
-    llm_location = get_llm_location()
+    # Auto-resolve endpoint from the model registry if not explicitly passed
+    if not api_base:
+        endpoint = get_model_endpoint(model)
+        if endpoint:
+            api_base = endpoint["api_base"]
+            if not api_key_override and endpoint.get("api_key_env"):
+                api_key_override = os.getenv(endpoint["api_key_env"])
 
-    # Inject cache_control for models that support explicit breakpoints.
-    # This must happen before building kwargs so both proxy and direct
-    # paths benefit from prompt caching.
-    supports_cache = _supports_cache_control(model)
-    if supports_cache:
-        messages = inject_cache_control(messages)
-
-    # Decide routing: proxy vs direct.
-    # The LiteLLM proxy strips cache_control blocks and response_cost from
-    # responses, breaking prompt caching and actual cost reporting.  When
-    # a direct API key is available and the model is an OpenRouter model,
-    # bypass the proxy entirely — this also avoids connection errors when
-    # the proxy is not running.  Cache support is irrelevant for routing;
-    # it only controls whether cache_control blocks are injected.
-    use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
-    has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
-    is_openrouter_model = "openrouter/" in model.lower() or any(
-        p in model.lower()
-        for p in (
-            "anthropic/",
-            "google/",
-            "openai/",
-            "deepseek/",
-            "meta-llama/",
-            "moonshotai/",
-            "qwen/",
-            "mistralai/",
-        )
-    )
-    bypass_proxy = has_direct_key and is_openrouter_model
-
-    if use_proxy and not bypass_proxy:
-        proxy_url = get_llm_proxy_url()
-        # The proxy model names use the openrouter/ prefix (e.g.
-        # openrouter/google/gemini-3.1-flash-lite-preview).  When calling
-        # the proxy, wrap in openai/ so the *client* litellm treats the
-        # proxy as an OpenAI-compatible endpoint and sends the model name
-        # verbatim instead of interpreting the openrouter/ prefix as a
-        # provider hint and bypassing the proxy.
-        model_id = f"openai/{ensure_model_prefix(model)}"
-        proxy_key = os.getenv("LITELLM_API_KEY") or os.getenv(
-            "LITELLM_MASTER_KEY", api_key
-        )
+    # ── Per-section endpoint override (local/self-hosted models) ──────
+    if api_base:
+        # Direct call to a custom endpoint — no proxy, no OpenRouter.
+        effective_key = api_key_override or api_key
         kwargs: dict[str, Any] = {
-            "model": model_id,
-            "api_key": proxy_key,
-            "api_base": proxy_url,
+            "model": model,
+            "api_key": effective_key,
+            "api_base": api_base,
             "max_tokens": max_tokens
             if max_tokens is not None
             else limits["max_tokens"],
             "timeout": timeout if timeout is not None else limits["timeout"],
             "messages": messages,
         }
+        logger.debug(
+            "Direct endpoint for %s → %s (proxy/OpenRouter bypassed)",
+            model,
+            api_base,
+        )
     else:
-        model_id = ensure_model_prefix(model)
-        # When bypassing the proxy, always use the OpenRouter API key
-        # (not the proxy key that might have been passed in).
-        direct_key = get_api_key_for_service(service) if bypass_proxy else api_key
+        # ── Standard routing: proxy vs OpenRouter direct ─────────────
+        llm_location = get_llm_location()
 
-        kwargs = {
-            "model": model_id,
-            "api_key": direct_key,
-            "max_tokens": max_tokens
-            if max_tokens is not None
-            else limits["max_tokens"],
-            "timeout": timeout if timeout is not None else limits["timeout"],
-            "messages": messages,
-        }
+        # Inject cache_control for models that support explicit breakpoints.
+        supports_cache = _supports_cache_control(model)
+        if supports_cache:
+            messages = inject_cache_control(messages)
 
-        if bypass_proxy:
-            logger.debug("Bypassing proxy for %s (cache_control preserved)", model_id)
+        use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
+        has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
+        is_openrouter_model = "openrouter/" in model.lower() or any(
+            p in model.lower()
+            for p in (
+                "anthropic/",
+                "google/",
+                "openai/",
+                "deepseek/",
+                "meta-llama/",
+                "moonshotai/",
+                "qwen/",
+                "mistralai/",
+            )
+        )
+        bypass_proxy = has_direct_key and is_openrouter_model
+
+        if use_proxy and not bypass_proxy:
+            proxy_url = get_llm_proxy_url()
+            model_id = f"openai/{ensure_model_prefix(model)}"
+            proxy_key = os.getenv("LITELLM_API_KEY") or os.getenv(
+                "LITELLM_MASTER_KEY", api_key
+            )
+            kwargs = {
+                "model": model_id,
+                "api_key": proxy_key,
+                "api_base": proxy_url,
+                "max_tokens": max_tokens
+                if max_tokens is not None
+                else limits["max_tokens"],
+                "timeout": timeout if timeout is not None else limits["timeout"],
+                "messages": messages,
+            }
+        else:
+            model_id = ensure_model_prefix(model)
+            direct_key = get_api_key_for_service(service) if bypass_proxy else api_key
+
+            kwargs = {
+                "model": model_id,
+                "api_key": direct_key,
+                "max_tokens": max_tokens
+                if max_tokens is not None
+                else limits["max_tokens"],
+                "timeout": timeout if timeout is not None else limits["timeout"],
+                "messages": messages,
+            }
+
+            if bypass_proxy:
+                logger.debug(
+                    "Bypassing proxy for %s (cache_control preserved)", model_id
+                )
 
     if response_format is not None:
         # Always convert Pydantic models to explicit json_schema dicts.

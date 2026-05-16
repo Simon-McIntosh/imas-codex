@@ -266,11 +266,8 @@ def run_discovery(
     for name, check_fn, kwargs in config.extra_service_checks:
         service_monitor.add_check(name, check_fn, **kwargs)
 
-    # Suppress noisy loggers during rich display: raise console handler
-    # levels to ERROR so chatty WARNING-level messages don't leak past the
-    # rich-display canvas.  Logger levels are left unchanged so that file
-    # handlers (attached by configure_cli_logging()) continue to receive
-    # all messages.
+    # Suppress noisy loggers during rich display.  Sweep ALL registered
+    # loggers to catch CamelCase LiteLLM names and any third-party leaks.
     for mod in config.suppress_loggers:
         lg = logging.getLogger(mod)
         for handler in lg.handlers:
@@ -279,10 +276,17 @@ def run_discovery(
             ):
                 handler.setLevel(logging.ERROR)
 
-    # Detach any console StreamHandler attached to the root or imas_codex
-    # logger so that nothing prints to stderr while the rich display is live.
-    # Keeps RotatingFileHandler / FileHandler (file logging is preserved).
-    for logger_name in ("", "imas_codex"):
+    # Sweep every registered logger — remove StreamHandlers (not FileHandlers).
+    for name in list(logging.Logger.manager.loggerDict):
+        lg = logging.getLogger(name)
+        for handler in list(lg.handlers):
+            if isinstance(handler, logging.StreamHandler) and not isinstance(
+                handler, logging.FileHandler
+            ):
+                lg.removeHandler(handler)
+
+    # Root logger — same treatment.
+    for logger_name in ("",):
         lg = logging.getLogger(logger_name)
         for handler in list(lg.handlers):
             if isinstance(handler, logging.StreamHandler) and not isinstance(
