@@ -55,6 +55,15 @@ grammar and convention scores.
 - Are postfix operators (`_magnitude`, `_real_part`, etc.) correctly appended (not prefix `_of_` form)?
 - Is locus correctly expressed with `_of_`/`_at_`/`_over_` prepositions?
 - Is mechanism expressed with `_due_to_`?
+- **[I1.7] Field-at-region preposition (HARD)** — when the locus relation is `_of_<locus>` and the `locus_type` is `position` or `region`, check the physical base:
+    - If the base is an **evaluated field** (`temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `loop_voltage`, `electric_potential`), the preposition MUST be `_at_`. Dock `Grammar` to **≤ 5** for this defect alone.
+    - If the base is an **intrinsic geometric property** (`area`, `radius`, `major_radius`, `length`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `coordinate`), `_of_` is correct.
+    - Examples to refine: `poloidal_magnetic_flux_of_separatrix → poloidal_magnetic_flux_at_separatrix`; `electron_density_of_pedestal → electron_density_at_pedestal`.
+- **[I1.8] Canonical locus tokens (HARD)** — the catalog uses one canonical token per physical concept. If the name uses a synonym, dock `Convention` to **≤ 5** and propose the canonical rewrite:
+    - `plasma_boundary` / `last_closed_flux_surface` / `lcfs` → canonical **`separatrix`**.
+    - `divertor_plate` → canonical **`divertor_target`**.
+    - `wall_surface` / `first_wall_surface` / `vacuum_vessel_wall` → canonical **`wall`**.
+    - `pedestal_region` / `edge_pedestal` → canonical **`pedestal`**.
 - **[I4.6] Decomposition audit** — inspect the `physical_base` slot for
   potential group absorption. Flag any known group token (from operators,
   subjects, components, coordinates, locus, process registries) that

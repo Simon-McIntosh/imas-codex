@@ -270,21 +270,74 @@ composition_rules:
       - "description"
 
   - id: "NC-16"
-    title: "Prefer `_of_<entity>` over `_at_<entity>` for properties of a named entity"
+    title: "`_at_<locus>` for evaluated fields, `_of_<locus>` for intrinsic shape"
     category: "naming"
-    severity: "soft"
+    severity: "hard"
     rule: |
-      When the quantity is a property computed on/along a named entity (the
-      plasma boundary, the separatrix, the magnetic axis), use
-      `<quantity>_of_<entity>`. Reserve `_at_<location>` for values sampled at
-      a specific point/location that is not itself a physical entity of the
-      configuration. Do not emit both forms for the same quantity within a
-      batch — pick one. Trivial cases (e.g. normalized flux = 1 on the
-      boundary by construction) should simply be skipped, not named.
+      The locus preposition encodes the physical relationship between the
+      base quantity and the locus token:
+
+      - Use `_at_<locus>` when the base is an EVALUATED FIELD (a quantity
+        defined everywhere in the plasma that we read at a named position):
+        temperature, density, pressure, magnetic_field, electric_field,
+        magnetic_flux, current, current_density, voltage, velocity,
+        magnetic_shear, safety_factor, particle_flux, energy_flux,
+        momentum_flux, power, power_density, loop_voltage, electric_potential,
+        etc.
+
+      - Use `_of_<locus>` when the base is an INTRINSIC GEOMETRIC PROPERTY
+        of the named feature (its shape, size, or location coordinate):
+        area, surface_area, volume, radius, major_radius, minor_radius,
+        length, width, height, thickness, elongation, triangularity,
+        vertical_coordinate, toroidal_angle, position, coordinate,
+        unit_vector, angle, radius_of_curvature.
+
+      `_of_<entity>` (antennas, coils, mirrors, beams) remains correct for
+      structural objects regardless of base.
+
+      The rule is hard: if a field-base name uses `_of_<region>`, the LLM
+      has violated grammar; the candidate is quarantined and must be
+      refined with the correct preposition.
     examples_good:
-      - "poloidal_magnetic_flux_of_plasma_boundary"
+      - "poloidal_magnetic_flux_at_separatrix (field at named position)"
+      - "elongation_of_separatrix (intrinsic shape parameter)"
+      - "major_radius_of_magnetic_axis (coordinate of a point)"
+      - "electron_density_at_pedestal (field at named region)"
+      - "area_of_reflectometer_antenna (structural entity, of- is correct)"
     examples_bad:
-      - "poloidal_magnetic_flux_of_plasma_boundary and poloidal_magnetic_flux_at_plasma_boundary (both in same batch)"
+      - "poloidal_magnetic_flux_of_separatrix (flux is a field — use _at_)"
+      - "electron_density_of_pedestal (density is a field — use _at_)"
+      - "magnetic_shear_of_magnetic_axis (shear is field-derived — use _at_)"
+    affects:
+      - "name"
+
+  - id: "NC-16b"
+    title: "Canonical locus tokens — never use synonym variants"
+    category: "naming"
+    severity: "hard"
+    rule: |
+      The catalog uses one canonical token per physical concept. Generation
+      must pick the canonical form even when the DD path or signal name
+      uses an alias. Synonym pairs documented:
+
+      | Canonical | Forbidden synonyms |
+      |---|---|
+      | separatrix | plasma_boundary, last_closed_flux_surface, lcfs |
+      | divertor_target | divertor_plate |
+      | magnetic_axis | core_axis |
+      | wall | wall_surface, first_wall_surface, vacuum_vessel_wall |
+      | pedestal | pedestal_region, edge_pedestal |
+
+      Apply NC-16 *after* normalising. The combined rule for a flux quantity
+      at the LCFS is `poloidal_magnetic_flux_at_separatrix`, not
+      `_of_plasma_boundary`, `_of_last_closed_flux_surface`, or
+      `_at_plasma_boundary`.
+    examples_good:
+      - "poloidal_magnetic_flux_at_separatrix"
+      - "electron_density_at_divertor_target"
+    examples_bad:
+      - "poloidal_magnetic_flux_of_plasma_boundary (two errors: synonym + wrong preposition)"
+      - "electron_density_at_divertor_plate (synonym)"
     affects:
       - "name"
 

@@ -70,6 +70,19 @@ class PublishReport:
 def _validate_staging_dir(staging_dir: Path) -> list[str]:
     """Validate that the staging directory is well-formed.
 
+    Runs three layers of checks, all upstream from the ISNC release:
+
+    1. **Shape checks** — manifest exists, ``standard_names/`` populated.
+    2. **Structural checks** — ISN's ``YamlStore.load()`` parses every
+       entry and runs the catalog-level structural + semantic suite that
+       the ``Validate Catalog`` GitHub workflow runs on the published
+       repo. Surfacing the issues here means we catch broken names at
+       publish time, not at release time.
+    3. **Pipeline-specific checks** — canonical-locus and field-at-region
+       preposition violations (``_CANONICAL_LOCUS_SYNONYMS`` and
+       ``_FIELD_BASES`` in ``standard_names.workers``) applied across the
+       whole staging set.
+
     Returns a list of error strings (empty if valid).
     """
     errors: list[str] = []
@@ -94,10 +107,66 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
     sn_dir = staging_dir / "standard_names"
     if not sn_dir.is_dir():
         errors.append(f"Missing standard_names directory: {sn_dir}")
-    else:
-        yml_files = list(sn_dir.rglob("*.yml"))
-        if not yml_files:
-            errors.append("standard_names/ contains no .yml files")
+        return errors
+
+    yml_files = list(sn_dir.rglob("*.yml"))
+    if not yml_files:
+        errors.append("standard_names/ contains no .yml files")
+        return errors
+
+    # --- Layer 2: ISN structural + semantic catalog checks ---------------
+    try:
+        from imas_standard_names.services import validate_models
+        from imas_standard_names.yaml_store import YamlStore
+
+        store = YamlStore(sn_dir, permissive=True)
+        models = store.load()
+        catalog_issues = validate_models({m.name: m for m in models})
+
+        for issue in catalog_issues:
+            if " WARNING - " in issue or " INFO - " in issue:
+                logger.warning("staging-validate advisory: %s", issue)
+                continue
+            errors.append(f"structural: {issue}")
+
+        if store.validation_warnings:
+            for w in store.validation_warnings[:20]:
+                logger.warning("staging-validate yaml-store: %s", w)
+    except Exception as exc:
+        errors.append(f"structural check failed: {exc}")
+
+    # --- Layer 3: codex-side canonical / preposition checks --------------
+    try:
+        from imas_codex.standard_names.workers import (
+            _check_canonical_locus_and_preposition,
+        )
+
+        canonical_issues: list[str] = []
+        for yml in yml_files:
+            try:
+                doc = yaml.safe_load(yml.read_text(encoding="utf-8")) or []
+            except Exception as exc:
+                errors.append(f"{yml.name}: parse error: {exc}")
+                continue
+            entries = doc if isinstance(doc, list) else [doc]
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                name = entry.get("name")
+                if not name:
+                    continue
+                for issue in _check_canonical_locus_and_preposition(name):
+                    canonical_issues.append(f"{name}: {issue}")
+
+        if canonical_issues:
+            errors.append(
+                f"canonical-locus / preposition violations ({len(canonical_issues)}); "
+                "first 10 below:"
+            )
+            for issue in canonical_issues[:10]:
+                errors.append(f"  - {issue}")
+    except Exception as exc:
+        errors.append(f"canonical check failed: {exc}")
 
     return errors
 

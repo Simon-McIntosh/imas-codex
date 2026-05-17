@@ -104,8 +104,42 @@ common_issues:
 
     I1.3_inconsistent_boundary:
       description: "Mixed naming patterns for plasma boundary quantities"
-      rule: "Use consistent _of_plasma_boundary suffix"
+      rule: |
+        Use the canonical token ``separatrix`` for the LCFS in every name —
+        never the synonyms ``plasma_boundary``, ``last_closed_flux_surface``,
+        or ``lcfs``. Pair with the correct preposition: ``_at_`` for evaluated
+        fields, ``_of_`` for intrinsic shape parameters (see I1.7).
       affects: [convention]
+
+    I1.7_field_at_region_preposition:
+      description: "_of_<region> used where _at_<region> is required (evaluated field)"
+      example_bad: "poloidal_magnetic_flux_of_separatrix"
+      example_good: "poloidal_magnetic_flux_at_separatrix"
+      rule: |
+        When the locus token is a position or region and the physical base
+        is an evaluated field (flux, density, temperature, pressure, B, E,
+        current, velocity, magnetic_shear, etc.), the relation MUST be
+        ``_at_``. Use ``_of_`` only for intrinsic geometric properties of
+        the named feature (area, radius, length, elongation, triangularity,
+        vertical_coordinate, major_radius).
+      affects: [grammar]
+      score_override: "grammar <= 5 if a field-base name uses _of_<position|region>"
+
+    I1.8_locus_token_synonyms:
+      description: "Use of forbidden synonym for a canonical locus token"
+      example_bad: "electron_density_at_divertor_plate"
+      example_good: "electron_density_at_divertor_target"
+      rule: |
+        The catalog uses one canonical token per concept:
+          separatrix      replaces plasma_boundary, last_closed_flux_surface, lcfs
+          divertor_target replaces divertor_plate
+          wall            replaces wall_surface, first_wall_surface, vacuum_vessel_wall
+          pedestal        replaces pedestal_region, edge_pedestal
+          magnetic_axis   replaces core_axis
+        Reviewers must propose ``revised_name`` swapping the synonym for the
+        canonical form.
+      affects: [convention]
+      score_override: "convention <= 5 if a forbidden synonym is used"
 
     I1.4_scalar_vs_vector_position:
       description: "Both component and vector position names should coexist"

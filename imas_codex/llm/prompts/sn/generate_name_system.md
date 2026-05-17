@@ -592,10 +592,15 @@ is provided as context for your naming decisions.
     - For an unspecified 3-vector position with no directional qualifier, plain `position_of_<X>` is acceptable.
     - For a *component* of a vector field (not a coordinate of a point), use `<axis>_<vector>` — e.g. `vertical_surface_normal_vector` (NOT `vertical_coordinate_of_surface_normal_vector` — surface normal is a vector field, you take its Z-component, not its Z-coordinate).
     - This rule is unconditional and overrides any apparent symmetry with sibling names.
-18. **Preposition discipline for plasma-boundary / separatrix / wall properties — use `_of_` not `_at_`**: When a scalar property is evaluated AT a geometric feature that itself has a name (plasma boundary, separatrix, magnetic axis, x-point), prefer the possessive `_of_` form, NOT `_at_`. This prevents synonym pairs.
-    - ✓ `poloidal_magnetic_flux_of_plasma_boundary`, `normalized_poloidal_magnetic_flux_of_plasma_boundary`
-    - ✗ `poloidal_magnetic_flux_at_plasma_boundary`, `normalized_poloidal_magnetic_flux_at_plasma_boundary`
-    - Exception: when "at" carries a clearly directional / temporal meaning that "of" cannot (rare), keep `_at_`. Default is `_of_`.
+18. **Preposition discipline — `_at_` for evaluated fields, `_of_` for intrinsic shape**: A locus relation must reflect the physical relationship between the quantity and the locus token. Apply this test before choosing the preposition:
+    - **`_at_<locus>`** when the base is an **evaluated field** sampled at the locus — i.e. the quantity exists everywhere in the plasma and we are reading its value at one spatial point. Field bases that trigger `_at_`: `temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `velocity_magnitude`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `radiation_density`, `mass_density`, `loop_voltage`, `electric_potential`, `electrostatic_potential`, `kinetic_energy`, `internal_energy`, `enthalpy`, `entropy`. Treat as `_at_` whenever the base names a field, flux, or per-volume/area density of a field.
+    - **`_of_<locus>`** when the base is an **intrinsic geometric property** of the named feature itself — i.e. the quantity describes the shape, size, or location of the feature, and only makes sense for that feature. Intrinsic bases that trigger `_of_`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`.
+    - ✗ `poloidal_magnetic_flux_of_plasma_boundary` — flux is a field; the flux *value* at the boundary is read, the boundary does not *own* the flux.
+    - ✓ `poloidal_magnetic_flux_at_separatrix` — field sampled at a named position.
+    - ✓ `elongation_of_separatrix` — intrinsic shape parameter of the separatrix curve.
+    - ✓ `major_radius_of_magnetic_axis` — the magnetic axis IS a point in (R,Z); R is one of its coordinates.
+    - ✓ `electron_density_at_pedestal` — field value at the pedestal location.
+    - ✗ `electron_density_of_pedestal` — density is not an intrinsic property of the pedestal feature.
 19. **Projection is a leading qualifier prefix — use `<axis>_<quantity>` form** (ISN IR requirement): Axis projections (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`) MUST appear as a leading qualifier prefix `<axis>_<quantity>`. The `_component_of_` connector is REJECTED by the grammar. A trailing `_<component>` suffix also violates the canonical rendering.
     - ✓ `toroidal_ion_rotation_frequency` (axis as leading qualifier).
     - ✗ `toroidal_component_of_ion_rotation_frequency` (REJECTED by grammar).
@@ -605,9 +610,23 @@ is provided as context for your naming decisions.
     - ✓ `volume_averaged_of_electron_temperature`, `line_averaged_of_electron_density`, `flux_surface_averaged_of_current_density`.
     - ✗ `ion_temperature_volume_averaged`, `current_density_flux_surface_averaged`, `electron_density_line_averaged`.
     - ✗ `volume_averaged_electron_temperature` — missing `_of_` scope marker (legacy form; parser accepts with diagnostic but generator rejects).
-21. **Named-feature preposition — use `_of_` for magnetic axis, x-point, strike point, LCFS** (extension of Rule 18): All named geometric features take the possessive `_of_` form, not `_at_`. The vocabulary includes: `magnetic_axis`, `plasma_boundary`, `last_closed_flux_surface`, `separatrix`, `x_point`, `o_point`, `strike_point`, `inner_strike_point`, `outer_strike_point`, `stagnation_point`.
-    - ✓ `poloidal_magnetic_flux_of_magnetic_axis`, `loop_voltage_of_last_closed_flux_surface`, `poloidal_magnetic_flux_of_x_point`.
-    - ✗ `poloidal_magnetic_flux_at_magnetic_axis`, `loop_voltage_at_last_closed_flux_surface`, `poloidal_magnetic_flux_at_x_point`.
+21. **Canonical locus tokens — never invent synonyms** (HARD RULE): Several physical features have multiple names in the literature; the catalog uses exactly ONE canonical token per concept. Generation must use the canonical form even when the DD path or signal description uses an alias.
+
+    | Canonical locus | Forbidden synonyms |
+    |---|---|
+    | `separatrix` | `plasma_boundary`, `last_closed_flux_surface`, `lcfs` |
+    | `divertor_target` | `divertor_plate` |
+    | `magnetic_axis` | `core_axis`, `o_point_axis` (use `o_point` for the field-line topology point) |
+    | `wall` | `wall_surface`, `vacuum_vessel_wall`, `first_wall_surface` |
+    | `pedestal` | `pedestal_region`, `edge_pedestal` |
+
+    Apply Rule 18 *after* normalising the locus to its canonical form. Example: the DD path `equilibrium/.../plasma_boundary/psi` produces `poloidal_magnetic_flux_at_separatrix` — canonical token (separatrix, not plasma_boundary) + `_at_` (because flux is an evaluated field).
+
+    - ✓ `poloidal_magnetic_flux_at_separatrix` (flux + canonical position + `_at_`).
+    - ✓ `elongation_of_separatrix` (intrinsic shape + canonical position + `_of_`).
+    - ✓ `electron_density_at_divertor_target`.
+    - ✗ `poloidal_magnetic_flux_of_plasma_boundary` — *two* errors: synonym `plasma_boundary` and wrong preposition `_of_`.
+    - ✗ `electron_density_at_divertor_plate` — synonym `divertor_plate`; use `divertor_target`.
 22. **`diamagnetic` is a drift, NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation — this is not informational): Unlike `toroidal`, `poloidal`, `radial`, or `parallel`, `diamagnetic` does NOT label a spatial projection axis. The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` is itself a specific drift — it is not a component of another velocity along a diamagnetic axis. Therefore `diamagnetic_<X>` used as a projection is **physically wrong and always rejected**. CRITICAL: when a DD path contains a sibling or subfield literally named `diamagnetic` (very common on transport / edge paths — e.g. `current_density/diamagnetic`, `electric_field/diamagnetic`, `velocity/diamagnetic`), DO NOT translate the label directly. The DD label is a shorthand for "the part due to the diamagnetic drift" — you must rename using `_due_to_diamagnetic_drift` (for currents/fluxes) or pick the correct drift-velocity name.
     - ✓ `diamagnetic_drift_velocity` (the drift itself).
     - ✓ `ion_diamagnetic_drift_velocity`, `electron_diamagnetic_drift_velocity`.
