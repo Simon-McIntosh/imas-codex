@@ -68,8 +68,15 @@ class FanoutSettings(BaseModel):
     evidence_token_cap_escalation: int = 800
     """Total evidence-block token cap on Opus-escalation cycles."""
 
-    proposer_model: str = "openrouter/google/gemini-3.1-flash-lite-preview"
-    """Stage A LLM model identifier."""
+    proposer_model: str = "hosted_vllm/deepseek-v4-flash"
+    """Stage A LLM model identifier.
+
+    Defaults to the locally-hosted DeepSeek v4 flash endpoint so the
+    full SN pipeline stays zero-cost end to end.  Override per-run
+    via ``[tool.imas-codex.sn-fanout].proposer-model`` (e.g. set to
+    ``openrouter/google/gemini-3.1-flash-lite-preview`` when willing
+    to spend budget on a higher-capability planner).
+    """
 
     proposer_temperature: float = 0.1
     """Stage A sampling temperature (low for plan stability)."""

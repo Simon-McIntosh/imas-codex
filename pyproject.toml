@@ -513,12 +513,22 @@ result-hit-cap = 8
 evidence-token-cap-baseline = 2000
 evidence-token-cap-escalation = 800
 # Stage A LLM model + sampling.
-# NOTE: Anthropic's structured-output API rejects schemas with `oneOf`
-# (FanoutPlan uses a discriminated union over fn_id). Gemini and OpenAI
-# accept oneOf cleanly. Per 2026-05-03 user mandate (NO flash-lite in
-# pipeline), proposer is now on Gemini 3.1 Pro Preview which supports
-# oneOf and provides production-tier quality.
-proposer-model = "openrouter/google/gemini-3.1-pro-preview"
+#
+# Default: the locally-hosted DeepSeek v4 flash endpoint that the rest
+# of the SN pipeline uses — keeps the full run at zero LLM cost. The
+# proposer plan is a small structured object (parse-time bound by
+# ``max-fan-degree``), so the local 13B-active MoE has been adequate
+# in dev runs.
+#
+# Higher-capability alternatives (require OpenRouter credits, retain
+# for switch-back / A-B benchmarking):
+#   proposer-model = "openrouter/google/gemini-3.1-pro-preview"
+#   proposer-model = "openrouter/openai/gpt-5.5"
+#
+# Note: Anthropic's structured-output API rejects schemas with ``oneOf``
+# (``FanoutPlan`` is a discriminated union over ``fn_id``); Gemini and
+# OpenAI accept it cleanly, vLLM/DeepSeek with outlines is also fine.
+proposer-model = "hosted_vllm/deepseek-v4-flash"
 proposer-temperature = 0.1
 # Cost padding added to the parent lease at refine-cycle start (tiered, plan §7.3).
 fanout-cost-estimate-baseline = 0.005
