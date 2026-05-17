@@ -75,6 +75,7 @@ CRITICAL_CHECKS = frozenset(
         "adjacent_duplicate_token_check",
         "semantic_similarity_check",
         "preposition_physical_base_check",
+        "canonical_locus_check",
     }
 )
 
@@ -2380,6 +2381,137 @@ def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
     return []
 
 
+# =============================================================================
+# Canonical locus / field-at-region preposition checks
+# =============================================================================
+
+# Forbidden locus-token synonyms → canonical replacement.
+_CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
+    "plasma_boundary": "separatrix",
+    "last_closed_flux_surface": "separatrix",
+    "lcfs": "separatrix",
+    "divertor_plate": "divertor_target",
+    "wall_surface": "wall",
+    "first_wall_surface": "wall",
+    "vacuum_vessel_wall": "wall",
+    "pedestal_region": "pedestal",
+    "edge_pedestal": "pedestal",
+    "core_axis": "magnetic_axis",
+}
+
+# Bases that name an evaluated field (defined everywhere in the plasma
+# and READ at a locus). When paired with a position/region locus, the
+# relation MUST be ``_at_``. ``_of_`` is reserved for intrinsic
+# geometric properties (area, radius, elongation, …).
+_FIELD_BASES: frozenset[str] = frozenset(
+    {
+        "temperature",
+        "density",
+        "pressure",
+        "magnetic_field",
+        "electric_field",
+        "magnetic_flux",
+        "flux",
+        "current",
+        "current_density",
+        "voltage",
+        "loop_voltage",
+        "velocity",
+        "velocity_magnitude",
+        "magnetic_shear",
+        "safety_factor",
+        "particle_flux",
+        "energy_flux",
+        "momentum_flux",
+        "power",
+        "power_density",
+        "mass_density",
+        "electric_potential",
+        "electrostatic_potential",
+        "kinetic_energy",
+        "internal_energy",
+        "enthalpy",
+        "entropy",
+        "radiation_density",
+        "halo_current",
+        "heat_flux",
+    }
+)
+
+
+def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag canonical-locus violations on the candidate name.
+
+    Surfaces two anti-patterns that the compose prompt forbids but the
+    LLM occasionally produces anyway:
+
+    1. **Synonym locus token** — the candidate uses a deprecated
+       synonym (``plasma_boundary``, ``last_closed_flux_surface``,
+       ``divertor_plate``, ``wall_surface``, …) instead of the
+       canonical token (``separatrix``, ``divertor_target``, ``wall``,
+       …). The audit recommends the rewrite.
+    2. **Field-at-region preposition** — when the base is an evaluated
+       field (flux, density, temperature, …) paired with a position or
+       region locus, the relation MUST be ``_at_``. ``_of_<region>``
+       reserves only intrinsic geometric properties (area, radius,
+       elongation, …).
+
+    Severity: critical — quarantines the candidate so the refine pool
+    rewrites it under the same prompts.
+    """
+    name = (candidate.get("id") or candidate.get("name") or "").strip()
+    if not name:
+        return []
+
+    issues: list[str] = []
+    try:
+        from imas_standard_names.grammar.parser import parse as ir_parse
+
+        result = ir_parse(name)
+        ir = getattr(result, "ir", None)
+        if ir is None or ir.locus is None or ir.base is None:
+            return []
+
+        locus_token = ir.locus.token
+        relation = (
+            ir.locus.relation.value
+            if hasattr(ir.locus.relation, "value")
+            else str(ir.locus.relation)
+        )
+        locus_type = (
+            ir.locus.type.value
+            if hasattr(ir.locus.type, "value")
+            else str(ir.locus.type)
+        )
+        base_token = ir.base.token
+
+        canonical = _CANONICAL_LOCUS_SYNONYMS.get(locus_token)
+        if canonical:
+            issues.append(
+                f"audit:canonical_locus_check: name '{name}' uses synonym "
+                f"locus token '{locus_token}' — the canonical token is "
+                f"'{canonical}'. Rewrite as "
+                f"'{name.replace(locus_token, canonical)}'."
+            )
+
+        if (
+            relation == "of"
+            and locus_type in {"position", "region"}
+            and base_token in _FIELD_BASES
+        ):
+            corrected = name.replace(f"_of_{locus_token}", f"_at_{locus_token}")
+            issues.append(
+                f"audit:canonical_locus_check: field base '{base_token}' "
+                f"with '_of_{locus_token}' is the field-at-region "
+                f"anti-pattern — evaluated fields sample AT a position/"
+                f"region. Rewrite as '{corrected}'."
+            )
+    except Exception:
+        pass
+
+    return issues
+
+
 def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
     """Detect closed-vocabulary tokens absorbed into the candidate name.
 
@@ -2552,6 +2684,7 @@ def run_audits(
     all_issues.extend(position_redundancy_check(candidate))
     all_issues.extend(process_qualifier_check(candidate))
     all_issues.extend(preposition_physical_base_check(candidate))
+    all_issues.extend(canonical_locus_check(candidate))
     all_issues.extend(decomposition_audit_check(candidate))
     all_issues.extend(ggd_implementation_leakage_check(candidate))
 
