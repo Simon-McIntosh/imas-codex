@@ -30,9 +30,13 @@ Low enough to guarantee routing to the refine_name pool."""
 DEFAULT_REFINE_ROTATIONS: int = 3
 """Maximum REFINED_FROM (or DOCS_REVISION_OF) chain depth before exhaustion."""
 
-# Escalation model — used on the final refine attempt before exhaustion
-DEFAULT_ESCALATION_MODEL: str = "openrouter/anthropic/claude-opus-4.6"
-"""Higher-capability model used on the final refine attempt (chain_length == cap-1)."""
+# Escalation model — used on the final refine attempt before exhaustion.
+# Default to the same locally-hosted DeepSeek v4 flash endpoint used for
+# compose so the full pipeline runs at zero LLM cost. Override per-run via
+# ``sn run --escalation-model openrouter/anthropic/claude-opus-4.6`` when
+# willing to spend budget on a higher-capability final attempt.
+DEFAULT_ESCALATION_MODEL: str = "hosted_vllm/deepseek-v4-flash"
+"""Model used on the final refine attempt (chain_length == cap-1)."""
 
 # Orphan sweep timing
 DEFAULT_ORPHAN_SWEEP_INTERVAL_S: int = 30
