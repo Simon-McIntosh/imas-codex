@@ -383,12 +383,28 @@ max-tokens = 150000
 # Operators override individual pool replicas without recompile via
 # IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS env vars (e.g.
 # IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=64).
-generate-name-replicas = 48
-review-name-replicas = 32
-refine-name-replicas = 16
-generate-docs-replicas = 48
-review-docs-replicas = 32
-refine-docs-replicas = 16
+# Tuned 2026-05-17 with the local 4×H200 DeepSeek v4 flash endpoint
+# (ambix vLLM serve, ``--max-num-seqs 1024 --max-num-batched-tokens
+# 32768``). End-to-end throughput inflection lives between 96 and 128
+# generate replicas:
+#
+#   iter | gen/rev/ref | vLLM running | waiting | KV %  | rate (cpm)
+#   -----+-------------+--------------+---------+-------+-----------
+#   1    | 96 / 64 / 32 |     265      |   0     | 30 %  |  26.4   ← optimum
+#   2    | 192/128 / 64 |     359      |  76     | 43 %  |  14.2   ← deferred-queue regression
+#   3    | 128/ 96 / 48 |     344      |   0     | 26 %  |  20.0   ← codex-side coordination penalty
+#
+# Iter 1 is the local optimum: KV cache utilization of ~30 % (vLLM
+# scheduler headroom remains) but maximum end-to-end throughput.
+# Beyond ~100 generate replicas the codex side (Neo4j claim contention
+# + async pool coordination) becomes the bottleneck — adding GPU
+# concurrency hurts rather than helps until that's addressed.
+generate-name-replicas = 96
+review-name-replicas = 64
+refine-name-replicas = 32
+generate-docs-replicas = 96
+review-docs-replicas = 64
+refine-docs-replicas = 32
 
 [tool.imas-codex.sn]
 # Scored-example injection targets: score thresholds for selecting
