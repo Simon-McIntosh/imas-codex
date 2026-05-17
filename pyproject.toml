@@ -367,25 +367,28 @@ max-tokens = 150000
 # Concurrent replica counts for each of the six SN pools (see
 # imas_codex/standard_names/loop.py::_build_pool_specs). Each replica
 # is one cooperative ``pool_loop`` async task claiming and processing
-# batches against the graph. Higher values issue more concurrent LLM
-# requests against the configured endpoint; tune to saturate the
-# local GPU cluster without exhausting client-side connection pools.
+# batches against the graph.
 #
-# Live cluster sizing (4×H200, DeepSeek V4 Flash, vLLM):
-#   * num_requests_running ≤ 90 with num_requests_waiting = 0 → spare
-#   * prefix-cache hit-rate 76 % → wider concurrency keeps the cache warm
-#   * Generate pools issue the longest outputs; review pools are
-#     shorter and bounded by RD-quorum; refine is small backlog.
+# These defaults match the empirically-validated values from earlier
+# stress testing (4×H200, DeepSeek v4 flash via vLLM):
+#   * 48 generate replicas peaks at ~18 paths/s end-to-end
+#   * Beyond ~64 generate replicas the vLLM scheduler reports a fat
+#     ``deferred`` queue (LoRA budget / KV transfer / blocked) and
+#     per-call latency balloons so end-to-end throughput regresses
+#     ~5× (live test 2026-05-17: 22 calls/min → 4 calls/min at 256
+#     generate replicas)
+#   * Review pools run at 2/3 of generate (shorter outputs)
+#   * Refine pools at 1/3 of generate (small backlog)
 #
 # Operators override individual pool replicas without recompile via
 # IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS env vars (e.g.
-# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=128).
-generate-name-replicas = 256
-review-name-replicas = 128
-refine-name-replicas = 64
-generate-docs-replicas = 256
-review-docs-replicas = 128
-refine-docs-replicas = 64
+# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=64).
+generate-name-replicas = 48
+review-name-replicas = 32
+refine-name-replicas = 16
+generate-docs-replicas = 48
+review-docs-replicas = 32
+refine-docs-replicas = 16
 
 [tool.imas-codex.sn]
 # Scored-example injection targets: score thresholds for selecting
