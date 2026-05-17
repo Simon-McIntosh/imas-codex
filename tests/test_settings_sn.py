@@ -98,3 +98,64 @@ def test_retry_k_expansion_env(monkeypatch):
 
     importlib.reload(mod)
     assert mod.get_sn_retry_k_expansion() == 20
+
+
+# ── Per-pool replica settings ([tool.imas-codex.sn-pools]) ──────────────────
+
+
+def test_pool_replicas_default_from_pyproject():
+    """Per-pool replica counts come from ``[tool.imas-codex.sn-pools]``."""
+    from imas_codex.settings import get_pool_replicas
+
+    assert get_pool_replicas("generate_name") == 256
+    assert get_pool_replicas("review_name") == 128
+    assert get_pool_replicas("refine_name") == 64
+    assert get_pool_replicas("generate_docs") == 256
+    assert get_pool_replicas("review_docs") == 128
+    assert get_pool_replicas("refine_docs") == 64
+
+
+def test_pool_replicas_env_override(monkeypatch):
+    """``IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS`` overrides pyproject.toml."""
+    monkeypatch.setenv("IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS", "32")
+    import imas_codex.settings as mod
+
+    importlib.reload(mod)
+    assert mod.get_pool_replicas("generate_name") == 32
+    # Sibling pools unaffected.
+    assert mod.get_pool_replicas("review_name") == 128
+
+
+def test_pool_replicas_unknown_pool_raises():
+    """Calling with an unknown pool name surfaces a ``ValueError``."""
+    from imas_codex.settings import get_pool_replicas
+
+    with pytest.raises(ValueError, match="Unknown SN pool name"):
+        get_pool_replicas("nonexistent_pool")
+
+
+def test_pool_replicas_fallback_to_compose_concurrency(monkeypatch):
+    """When the ``[sn-pools]`` section is absent, replicas derive from
+    ``[sn-compose].max-concurrency``: ``generate_*`` matches compose
+    concurrency, ``review_*`` is half, ``refine_*`` is a quarter (each
+    with a small floor for tiny configurations)."""
+    import imas_codex.settings as mod
+
+    # Force-empty sn-pools by stubbing the section accessor.
+    monkeypatch.setattr(
+        mod,
+        "_get_section",
+        lambda name: {"max-concurrency": 80} if name == "sn-compose" else {},
+    )
+    assert mod.get_pool_replicas("generate_name") == 80
+    assert mod.get_pool_replicas("review_name") == 40
+    assert mod.get_pool_replicas("refine_name") == 20
+    # Tiny configurations clamp to the per-pool floor.
+    monkeypatch.setattr(
+        mod,
+        "_get_section",
+        lambda name: {"max-concurrency": 8} if name == "sn-compose" else {},
+    )
+    assert mod.get_pool_replicas("generate_name") == 8
+    assert mod.get_pool_replicas("review_name") == 16  # floor
+    assert mod.get_pool_replicas("refine_name") == 8  # floor

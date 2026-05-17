@@ -321,7 +321,10 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 
 [tool.imas-codex.sn-compose]
 # Maximum concurrent LLM requests issued by the compose worker.
-max-concurrency = 64
+# Retained as the historical single-knob default for the generate
+# pool; the per-pool overrides under ``[tool.imas-codex.sn-pools]``
+# take precedence when set.
+max-concurrency = 256
 # Local DeepSeek V4 Flash (284B MoE, 13B activated) via vLLM on SLURM GPU node.
 # Zero cost at point of use — local H200×4 deployment.
 # Endpoint may change on SLURM reschedule — override with IMAS_CODEX_SN_COMPOSE_API_BASE.
@@ -359,6 +362,30 @@ api-key-env = "AMBIX_API_KEY"
 batch-size = 12
 # Pre-flight token budget guard (same semantics as sn-compose).
 max-tokens = 150000
+
+[tool.imas-codex.sn-pools]
+# Concurrent replica counts for each of the six SN pools (see
+# imas_codex/standard_names/loop.py::_build_pool_specs). Each replica
+# is one cooperative ``pool_loop`` async task claiming and processing
+# batches against the graph. Higher values issue more concurrent LLM
+# requests against the configured endpoint; tune to saturate the
+# local GPU cluster without exhausting client-side connection pools.
+#
+# Live cluster sizing (4×H200, DeepSeek V4 Flash, vLLM):
+#   * num_requests_running ≤ 90 with num_requests_waiting = 0 → spare
+#   * prefix-cache hit-rate 76 % → wider concurrency keeps the cache warm
+#   * Generate pools issue the longest outputs; review pools are
+#     shorter and bounded by RD-quorum; refine is small backlog.
+#
+# Operators override individual pool replicas without recompile via
+# IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS env vars (e.g.
+# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=128).
+generate-name-replicas = 256
+review-name-replicas = 128
+refine-name-replicas = 64
+generate-docs-replicas = 256
+review-docs-replicas = 128
+refine-docs-replicas = 64
 
 [tool.imas-codex.sn]
 # Scored-example injection targets: score thresholds for selecting

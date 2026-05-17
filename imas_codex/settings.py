@@ -898,6 +898,54 @@ def get_compose_concurrency() -> int:
     return int(_get_section("sn-compose").get("max-concurrency", 24))
 
 
+# Map ``pool_name → (config-key, env-var-suffix)``. Six entries — one per
+# pool wired in ``imas_codex/standard_names/loop.py::_build_pool_specs``.
+_POOL_REPLICA_KEYS: dict[str, tuple[str, str]] = {
+    "generate_name": ("generate-name-replicas", "GENERATE_NAME"),
+    "review_name": ("review-name-replicas", "REVIEW_NAME"),
+    "refine_name": ("refine-name-replicas", "REFINE_NAME"),
+    "generate_docs": ("generate-docs-replicas", "GENERATE_DOCS"),
+    "review_docs": ("review-docs-replicas", "REVIEW_DOCS"),
+    "refine_docs": ("refine-docs-replicas", "REFINE_DOCS"),
+}
+
+
+def get_pool_replicas(pool_name: str) -> int:
+    """Concurrent replica count for one of the six SN pools.
+
+    Priority: IMAS_CODEX_SN_POOLS_<POOL>_REPLICAS env →
+              [sn-pools].<pool>-replicas → fallback formula.
+
+    The fallback formula derives sensible defaults from
+    ``[sn-compose].max-concurrency`` so legacy ``pyproject.toml``
+    files without a ``[sn-pools]`` section keep working:
+
+        generate_*  → compose_concurrency
+        review_*    → max(compose_concurrency // 2, 16)
+        refine_*    → max(compose_concurrency // 4, 8)
+    """
+    try:
+        key, env_suffix = _POOL_REPLICA_KEYS[pool_name]
+    except KeyError as exc:
+        raise ValueError(f"Unknown SN pool name: {pool_name!r}") from exc
+
+    env_var = f"IMAS_CODEX_SN_POOLS_{env_suffix}_REPLICAS"
+    if env := os.getenv(env_var):
+        return int(env)
+
+    section = _get_section("sn-pools")
+    if key in section:
+        return int(section[key])
+
+    # Backwards-compatible derivation from ``[sn-compose].max-concurrency``.
+    compose = get_compose_concurrency()
+    if pool_name.startswith("generate_"):
+        return compose
+    if pool_name.startswith("review_"):
+        return max(compose // 2, 16)
+    return max(compose // 4, 8)
+
+
 # ─── SN review settings ────────────────────────────────────────────────────
 
 _SN_REVIEW_DEFAULTS: dict[str, Any] = {
