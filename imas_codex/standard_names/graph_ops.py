@@ -1229,7 +1229,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
                 r.shape         = b.shape
             WITH tgt, b.operator_kind AS ok
             WHERE tgt.name_stage IS NULL
-              AND ok IN ['projection', 'coordinate']
+              AND ok IN ['projection', 'coordinate', 'unary_postfix']
             SET tgt.needs_composition = true
             """,
             batch=co_batch,
@@ -1464,17 +1464,22 @@ def seed_parent_sources(gc: Any | None = None) -> int:
             edge_kinds = row.get("edge_kinds") or []
             is_geometric = any(k == "coordinate" for k in edge_kinds)
 
-            # Only seed parents from projection/coordinate edges — unary
-            # prefix edges (time_derivative, gradient) link to an existing
-            # quantity, not a vector parent that needs seeding.
-            vector_edge_kinds = {"projection", "coordinate"}
-            if not any(k in vector_edge_kinds for k in edge_kinds):
+            # Only seed parents from projection/coordinate/magnitude edges.
+            # Unary prefix edges (time_derivative, gradient) link to an
+            # existing quantity, not a parent that needs seeding.
+            # Unary postfix edges (magnitude) link to the base form of the
+            # quantity — these DO need seeding as scalar parents.
+            seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
+            if not any(k in seedable_edge_kinds for k in edge_kinds):
                 logger.debug(
-                    "Parent %s has only non-vector edges (%s) — skipping",
+                    "Parent %s has only non-seedable edges (%s) — skipping",
                     parent_id,
                     edge_kinds,
                 )
                 continue
+
+            # Determine parent type from edge kinds
+            is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
 
             # Extract and validate unit uniformity
             child_units = {c["unit"] for c in child_data if c.get("unit")}
@@ -1505,12 +1510,22 @@ def seed_parent_sources(gc: Any | None = None) -> int:
                 next(iter(child_domains)) if len(child_domains) == 1 else None
             )
 
-            # Kind is always 'vector' for parent components
-            kind = "vector"
+            # Kind depends on parent type:
+            # - projection/coordinate parents are vectors
+            # - magnitude (unary_postfix) parents are scalars (base form)
+            if is_magnitude_parent:
+                kind = "scalar"
+            else:
+                kind = "vector"
 
             # Generate description from children
             child_ids = [c["id"] for c in child_data if c.get("id")]
-            if is_geometric:
+            if is_magnitude_parent:
+                description = (
+                    f"Base quantity from which {', '.join(sorted(child_ids))} "
+                    f"{'is' if len(child_ids) == 1 else 'are'} derived"
+                )
+            elif is_geometric:
                 description = (
                     f"Geometric coordinate with axes: {', '.join(sorted(child_ids))}"
                 )
@@ -4431,6 +4446,140 @@ def resolve_links_batch(
         "unresolved": still_unresolved,
         "failed": failed_count,
     }
+
+
+# =============================================================================
+# Documentation link resolution — post-drain cleanup
+# =============================================================================
+
+
+_NAME_LINK_RE = re.compile(r"\(name:([^)]+)\)")
+
+
+def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
+    """Rewrite stale (name:xxx) references in documentation text.
+
+    Scans accepted StandardName documentation for ``(name:xxx)`` markdown
+    links.  When a referenced name is superseded or exhausted:
+
+    1. **Superseded with accepted successor** (via ``REFINED_FROM`` chain):
+       rewrite the link to point to the accepted successor.
+    2. **Dead-end** (exhausted/superseded with no accepted successor):
+       remove the hyperlink, keeping the descriptive text intact.
+
+    Also updates the cached ``links`` list and ``link_status`` to match
+    the cleaned documentation.
+
+    Parameters
+    ----------
+    gc:
+        Optional active GraphClient.  A new one is opened if None.
+
+    Returns
+    -------
+    Dict with keys: ``resolved`` (rewritten to successor), ``removed``
+    (dead link stripped), ``unchanged`` (already valid).
+    """
+    _own_gc = gc is None
+    if _own_gc:
+        gc = GraphClient().__enter__()
+    try:
+        # Fetch all accepted names with documentation
+        rows = list(
+            gc.query(
+                """
+                MATCH (sn:StandardName)
+                WHERE sn.name_stage = 'accepted'
+                  AND sn.documentation IS NOT NULL
+                RETURN sn.id AS id, sn.documentation AS docs, sn.links AS links
+                """
+            )
+        )
+        if not rows:
+            return {"resolved": 0, "removed": 0, "unchanged": 0}
+
+        # Build the accepted name set
+        accepted_names = {r["id"] for r in rows}
+
+        # Build superseded→accepted resolution map via REFINED_FROM
+        superseded_ids: set[str] = set()
+        for row in rows:
+            docs = row.get("docs") or ""
+            for match in _NAME_LINK_RE.finditer(docs):
+                target = match.group(1)
+                if target not in accepted_names:
+                    superseded_ids.add(target)
+
+        if not superseded_ids:
+            return {"resolved": 0, "removed": 0, "unchanged": 0}
+
+        # Resolve each stale target to its accepted successor
+        resolution_map: dict[str, str | None] = {}
+        for target in superseded_ids:
+            successors = gc.query(
+                """
+                MATCH (new:StandardName)-[:REFINED_FROM*]->(old:StandardName {id: $target})
+                WHERE new.name_stage = 'accepted'
+                RETURN new.id AS successor
+                LIMIT 1
+                """,
+                target=target,
+            )
+            resolution_map[target] = successors[0]["successor"] if successors else None
+
+        # Rewrite documentation and update graph
+        resolved = 0
+        removed = 0
+        unchanged = 0
+
+        for row in rows:
+            docs = row.get("docs") or ""
+            original_docs = docs
+
+            def _replace_link(m: re.Match) -> str:
+                nonlocal resolved, removed
+                target = m.group(1)
+                if target in accepted_names:
+                    return m.group(0)  # valid link, keep as-is
+                successor = resolution_map.get(target)
+                if successor:
+                    resolved += 1
+                    return f"(name:{successor})"
+                else:
+                    removed += 1
+                    return ""  # remove dead link marker
+
+            new_docs = _NAME_LINK_RE.sub(_replace_link, docs)
+
+            if new_docs != original_docs:
+                # Extract updated links list from documentation
+                new_links = [
+                    f"name:{m.group(1)}" for m in _NAME_LINK_RE.finditer(new_docs)
+                ]
+                gc.query(
+                    """
+                    MATCH (sn:StandardName {id: $id})
+                    SET sn.documentation = $docs,
+                        sn.links = $links,
+                        sn.link_status = 'resolved'
+                    """,
+                    id=row["id"],
+                    docs=new_docs,
+                    links=new_links,
+                )
+            else:
+                unchanged += 1
+
+        logger.info(
+            "resolve_doc_links: resolved=%d rewritten, %d removed, %d unchanged",
+            resolved,
+            removed,
+            unchanged,
+        )
+        return {"resolved": resolved, "removed": removed, "unchanged": unchanged}
+    finally:
+        if _own_gc:
+            gc.__exit__(None, None, None)
 
 
 # =============================================================================

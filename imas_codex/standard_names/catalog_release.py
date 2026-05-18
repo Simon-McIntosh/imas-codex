@@ -511,6 +511,7 @@ def run_release(
         kwargs: dict[str, Any] = {
             "staging_dir": staging_dir,
             "force": True,  # Overwrite existing staging
+            "final": final,  # Strict gates for final releases
             **(export_kwargs or {}),
         }
 

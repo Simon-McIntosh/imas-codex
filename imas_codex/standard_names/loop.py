@@ -767,12 +767,11 @@ async def run_sn_pools(
                 logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
         # ── B3b: Seed parent component sources ────────────────────
-        if not flush:
-            from imas_codex.standard_names.graph_ops import seed_parent_sources
+        from imas_codex.standard_names.graph_ops import seed_parent_sources
 
-            parent_count = await asyncio.to_thread(seed_parent_sources)
-            if parent_count:
-                logger.info("Seeded %d parent component sources", parent_count)
+        parent_count = await asyncio.to_thread(seed_parent_sources)
+        if parent_count:
+            logger.info("Seeded %d parent component sources", parent_count)
 
         # ── Build pool specs ──────────────────────────────────────
         _only_domain_for_pools = _domains[0] if len(_domains) == 1 else None
@@ -1053,6 +1052,54 @@ async def run_sn_pools(
             logger.warning(
                 "run_sn_pools: orphan sweep failed (non-fatal): %s", _orphan_exc
             )
+
+        # ── Post-drain structural fixups ──────────────────────────
+        # Seed any parent placeholders whose children are now composed,
+        # then resolve stale documentation links.  Both are non-LLM
+        # graph operations — safe to run at shutdown.
+        FIXUP_TIMEOUT = 30.0
+        try:
+            from imas_codex.standard_names.graph_ops import seed_parent_sources
+
+            _post_parents = await asyncio.wait_for(
+                asyncio.to_thread(seed_parent_sources),
+                timeout=FIXUP_TIMEOUT,
+            )
+            if _post_parents:
+                logger.info(
+                    "run_sn_pools: post-drain seeded %d parent SNs", _post_parents
+                )
+        except TimeoutError:
+            logger.warning(
+                "run_sn_pools: post-drain seed_parent_sources timed out (non-fatal)"
+            )
+        except Exception as _seed_exc:  # noqa: BLE001
+            logger.warning(
+                "run_sn_pools: post-drain seed_parent_sources failed: %s", _seed_exc
+            )
+
+        try:
+            from imas_codex.standard_names.graph_ops import resolve_doc_links
+
+            _link_stats = await asyncio.wait_for(
+                asyncio.to_thread(resolve_doc_links),
+                timeout=FIXUP_TIMEOUT,
+            )
+            _total_fixed = _link_stats.get("resolved", 0) + _link_stats.get(
+                "removed", 0
+            )
+            if _total_fixed:
+                summary.links_resolved = _total_fixed
+                logger.info(
+                    "run_sn_pools: resolved %d doc links (%d rewritten, %d removed)",
+                    _total_fixed,
+                    _link_stats.get("resolved", 0),
+                    _link_stats.get("removed", 0),
+                )
+        except TimeoutError:
+            logger.warning("run_sn_pools: resolve_doc_links timed out (non-fatal)")
+        except Exception as _link_exc:  # noqa: BLE001
+            logger.warning("run_sn_pools: resolve_doc_links failed: %s", _link_exc)
 
         # Drain pending LLMCost graph writes.  Bounded by DRAIN_TIMEOUT
         # so a wedged writer cannot block finalize_sn_run.

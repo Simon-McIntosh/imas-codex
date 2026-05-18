@@ -65,6 +65,7 @@ class GateResult:
     gate: str
     passed: bool
     issues: list[dict[str, Any]] = field(default_factory=list)
+    advisories: list[dict[str, Any]] = field(default_factory=list)
     skipped: bool = False
 
     def to_dict(self) -> dict[str, Any]:
@@ -74,6 +75,8 @@ class GateResult:
             "skipped": self.skipped,
             "issue_count": len(self.issues),
             "issues": self.issues,
+            "advisory_count": len(self.advisories),
+            "advisories": self.advisories,
         }
 
 
@@ -240,14 +243,18 @@ def _run_gate_a() -> GateResult:
 def _run_gate_b(
     candidates: list[dict[str, Any]],
     cocos_convention: int,
+    *,
+    final: bool = False,
 ) -> GateResult:
     """Gate B: Cross-field consistency checks.
 
     - Every non-null ``cocos`` equals ``cocos_convention``.
     - Grammar version matches ISN package version.
     - All names parse via ISN grammar.
+    - Links resolve within the export set (advisory for RC, hard for final).
     """
     issues: list[dict[str, Any]] = []
+    advisories: list[dict[str, Any]] = []
 
     # B1: COCOS consistency
     for cand in candidates:
@@ -282,22 +289,32 @@ def _run_gate_b(
         logger.warning("ISN grammar not available — skipping parse gate")
 
     # B3: Links resolve to known names
+    # For RC releases (final=False): dangling links are advisory only.
+    # For final releases: dangling links block export.
     all_names = {c["id"] for c in candidates}
     for cand in candidates:
         for link in cand.get("links") or []:
             # Links can be "name:foo" format or plain "foo"
             link_target = link.split(":")[-1] if ":" in link else link
             if link_target not in all_names:
-                issues.append(
-                    {
-                        "type": "dangling_link",
-                        "name": cand["id"],
-                        "link_target": link_target,
-                    }
-                )
+                entry = {
+                    "type": "dangling_link",
+                    "name": cand["id"],
+                    "link_target": link_target,
+                }
+                if final:
+                    issues.append(entry)
+                else:
+                    advisories.append(entry)
+
+    if advisories:
+        logger.warning(
+            "Gate B: %d dangling doc links (advisory for RC release)",
+            len(advisories),
+        )
 
     passed = len(issues) == 0
-    return GateResult(gate=GATE_B, passed=passed, issues=issues)
+    return GateResult(gate=GATE_B, passed=passed, issues=issues, advisories=advisories)
 
 
 def _run_gate_c(
@@ -834,6 +851,7 @@ def run_export(
     cocos_convention: int = _DEFAULT_COCOS_CONVENTION,
     include_sources: bool = True,
     names_only: bool = False,
+    final: bool = False,
 ) -> ExportReport:
     """Export standard names from the graph to a staging directory.
 
@@ -866,6 +884,10 @@ def run_export(
         Populate ``sources`` field in each entry with the graph
         provenance (``StandardNameSource`` nodes). Default ``True``
         (useful debug info); set ``False`` for a clean catalog export.
+    final:
+        When True, applies strict quality gates (dangling links
+        block export).  When False (default, RC mode), dangling
+        documentation links are advisory only.
 
     Returns
     -------
@@ -902,7 +924,7 @@ def run_export(
         report.excluded_unreviewed = excluded_unrev
 
         # Gate B: Cross-field consistency (on filtered candidates)
-        gate_b = _run_gate_b(candidates, cocos_convention)
+        gate_b = _run_gate_b(candidates, cocos_convention, final=final)
         report.gate_results.append(gate_b)
 
         # Gate D: Divergence detection
@@ -965,6 +987,7 @@ def run_export(
     domain_entries: dict[str, list[dict[str, Any]]] = defaultdict(list)
     exported_names: list[str] = []
     validation_failures = 0
+    all_candidate_names = {c["id"] for c in candidates}
 
     with GraphClient() as gc:
         for cand in candidates:
@@ -1001,7 +1024,20 @@ def run_export(
             entry_name = entry_dict.get("name") or cand["id"]
             arguments = _derive_arguments_for_entry(gc, entry_name)
             if arguments:
-                entry_dict["arguments"] = arguments
+                if not final:
+                    # RC mode: suppress arguments referencing names outside
+                    # the export set.  ISN validate_models cross-checks
+                    # argument refs, so unresolvable refs block publish.
+                    # Drop the entire arguments block (atomic) if any ref
+                    # is outside the candidate set.
+                    if any(a["name"] not in all_candidate_names for a in arguments):
+                        logger.debug(
+                            "Suppressing arguments for %s (refs outside export set)",
+                            entry_name,
+                        )
+                        arguments = None
+                if arguments:
+                    entry_dict["arguments"] = arguments
             error_variants = _derive_error_variants_for_entry(gc, entry_name)
             if error_variants:
                 entry_dict["error_variants"] = error_variants

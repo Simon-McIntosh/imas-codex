@@ -76,10 +76,24 @@ class TestGateBDanglingLinks:
         assert len(link_issues) == 0
 
     def test_dangling_link_fails(self) -> None:
+        """Dangling links are hard failures in final mode."""
         candidates = [
-            _make_candidate("alpha", links=["nonexistent"]),
+            _make_candidate("electron_temperature", links=["nonexistent"]),
         ]
-        result = _run_gate_b(candidates, cocos_convention=17)
+        result = _run_gate_b(candidates, cocos_convention=17, final=True)
         link_issues = [i for i in result.issues if i["type"] == "dangling_link"]
         assert len(link_issues) == 1
         assert link_issues[0]["link_target"] == "nonexistent"
+        assert not result.passed
+
+    def test_dangling_link_advisory_for_rc(self) -> None:
+        """Dangling links are advisory (not blocking) in RC mode."""
+        candidates = [
+            _make_candidate("electron_temperature", links=["nonexistent"]),
+        ]
+        result = _run_gate_b(candidates, cocos_convention=17, final=False)
+        assert result.passed  # Does NOT fail for RC
+        assert len([i for i in result.issues if i["type"] == "dangling_link"]) == 0
+        advisory_links = [a for a in result.advisories if a["type"] == "dangling_link"]
+        assert len(advisory_links) == 1
+        assert advisory_links[0]["link_target"] == "nonexistent"
