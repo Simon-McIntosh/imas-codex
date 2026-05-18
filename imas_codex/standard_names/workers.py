@@ -262,7 +262,7 @@ def _auto_detect_physical_base_gaps(
                         {
                             "source_id": source_id,
                             "segment": "physical_base",
-                            "needed_token": base,
+                            "token": base,
                             "reason": (
                                 f"Novel physical_base proposed by compose: {base!r}"
                             ),
@@ -2416,7 +2416,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 gap_dict = {
                     "source_id": vg.source_id,
                     "segment": vg.segment,
-                    "needed_token": vg.needed_token,
+                    "token": vg.token,
                     "reason": vg.reason,
                 }
                 state.stats.setdefault("vocab_gaps", []).append(gap_dict)
@@ -2438,16 +2438,15 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         if candidates:
             auto_gaps = _auto_detect_physical_base_gaps(candidates)
             if auto_gaps:
-                # Dedupe against LLM-emitted gaps (by source_id+segment+needed_token)
+                # Dedupe against LLM-emitted gaps (by source_id+segment+token)
                 existing_keys = {
-                    (g["source_id"], g["segment"], g["needed_token"])
+                    (g["source_id"], g["segment"], g["token"])
                     for g in state.stats.get("vocab_gaps", [])
                 }
                 novel = [
                     g
                     for g in auto_gaps
-                    if (g["source_id"], g["segment"], g["needed_token"])
-                    not in existing_keys
+                    if (g["source_id"], g["segment"], g["token"]) not in existing_keys
                 ]
                 if novel:
                     from imas_codex.standard_names.graph_ops import write_vocab_gaps
@@ -4084,7 +4083,7 @@ async def compose_batch(
                 {
                     "source_id": vg.source_id,
                     "segment": vg.segment,
-                    "needed_token": vg.needed_token,
+                    "token": vg.token,
                     "reason": vg.reason,
                 }
                 for vg in result.vocab_gaps

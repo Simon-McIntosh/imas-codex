@@ -143,7 +143,7 @@ class TestAutoDetectNovelBases:
         gap = gaps[0]
         assert gap["source_id"] == "test/path"
         assert gap["segment"] == "physical_base"
-        assert gap["needed_token"] == "temperature"
+        assert gap["token"] == "temperature"
         assert "Novel physical_base" in gap["reason"]
 
     def test_novel_base_with_real_vocabulary(self) -> None:
@@ -159,7 +159,7 @@ class TestAutoDetectNovelBases:
             known_bases=frozenset(),  # empty = everything is novel
         )
         assert len(gaps) == 1
-        assert gaps[0]["needed_token"] == "temperature"
+        assert gaps[0]["token"] == "temperature"
 
 
 # ---------------------------------------------------------------------------

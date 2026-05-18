@@ -166,11 +166,11 @@ class TestBatchFilter:
         from imas_codex.standard_names.vocab_token_filter import filter_vocab_gaps
 
         gaps = [
-            {"needed_token": "runaway_electron", "segment": "subject"},
-            {"needed_token": "vsm_1", "segment": "component"},
-            {"needed_token": "midplane", "segment": "subject"},
-            {"needed_token": "channels", "segment": "component"},
-            {"needed_token": "ab", "segment": "subject"},
+            {"token": "runaway_electron", "segment": "subject"},
+            {"token": "vsm_1", "segment": "component"},
+            {"token": "midplane", "segment": "subject"},
+            {"token": "channels", "segment": "component"},
+            {"token": "ab", "segment": "subject"},
         ]
         existing = frozenset({"channel"})
 
@@ -179,20 +179,20 @@ class TestBatchFilter:
         )
 
         # runaway_electron → accepted
-        assert any(g["needed_token"] == "runaway_electron" for g in accepted)
+        assert any(g["token"] == "runaway_electron" for g in accepted)
         # vsm_1 → rejected (R4 digit or R1 hardware — either is fine)
-        assert any(g["needed_token"] == "vsm_1" for g in rejected)
+        assert any(g["token"] == "vsm_1" for g in rejected)
         # midplane → reclassified to position
-        assert any(g["needed_token"] == "midplane" for g in reclassified)
+        assert any(g["token"] == "midplane" for g in reclassified)
         # channels → rejected (R3 plural)
-        assert any(g["needed_token"] == "channels" for g in rejected)
+        assert any(g["token"] == "channels" for g in rejected)
         # ab → rejected (R4 short)
-        assert any(g["needed_token"] == "ab" for g in rejected)
+        assert any(g["token"] == "ab" for g in rejected)
 
     def test_reclassified_segment_updated(self):
         from imas_codex.standard_names.vocab_token_filter import filter_vocab_gaps
 
-        gaps = [{"needed_token": "divertor", "segment": "component"}]
+        gaps = [{"token": "divertor", "segment": "component"}]
         _, _, reclassified = filter_vocab_gaps(gaps, existing_tokens=frozenset())
         assert len(reclassified) == 1
         assert reclassified[0]["segment"] == "position"

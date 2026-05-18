@@ -21,7 +21,7 @@ import yaml
 SAMPLE_RECORDS = [
     {
         "segment": "process",
-        "needed_token": "time_derivative",
+        "token": "time_derivative",
         "occurrences": 8,
         "example_count": 8,
         "source_types": ["IMASNode"],
@@ -35,7 +35,7 @@ SAMPLE_RECORDS = [
     },
     {
         "segment": "process",
-        "needed_token": "radial_derivative",
+        "token": "radial_derivative",
         "occurrences": 5,
         "example_count": 5,
         "source_types": ["IMASNode"],
@@ -46,7 +46,7 @@ SAMPLE_RECORDS = [
     },
     {
         "segment": "coordinate",
-        "needed_token": "rho_pol_norm",
+        "token": "rho_pol_norm",
         "occurrences": 3,
         "example_count": 3,
         "source_types": ["IMASNode", "FacilitySignal"],
@@ -57,7 +57,7 @@ SAMPLE_RECORDS = [
     },
     {
         "segment": "physical_base",
-        "needed_token": "beta",
+        "token": "beta",
         "occurrences": 2,
         "example_count": 2,
         "source_types": ["FacilitySignal"],
@@ -88,7 +88,7 @@ class TestHarvestVocabGaps:
         raw = [
             {
                 "segment": "transformation",
-                "needed_token": "derivative_of",
+                "token": "derivative_of",
                 "example_count": 3,
                 "source_count": 3,
                 "source_types": ["IMASNode"],
@@ -103,7 +103,7 @@ class TestHarvestVocabGaps:
         assert len(records) == 1
         r = records[0]
         assert r["segment"] == "transformation"
-        assert r["needed_token"] == "derivative_of"
+        assert r["token"] == "derivative_of"
         assert r["occurrences"] == 3
         assert r["example_dd_paths"] == ["some/path"]
         assert r["example_reasons"] == ["reason A"]
@@ -114,7 +114,7 @@ class TestHarvestVocabGaps:
         raw = [
             {
                 "segment": "process",
-                "needed_token": "fusion",
+                "token": "fusion",
                 "example_count": 1,
                 "source_count": 1,
                 "source_types": ["IMASNode", None],
@@ -186,7 +186,7 @@ class TestFormatPrYaml:
         tokens = doc["gaps_by_segment"]["process"]["tokens"]
         assert len(tokens) == 2
         for token_entry in tokens:
-            assert "needed_token" in token_entry
+            assert "token" in token_entry
             assert "occurrences" in token_entry
 
     def test_occurrences_sorted_descending(self):

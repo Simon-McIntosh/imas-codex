@@ -402,9 +402,7 @@ class StandardNameVocabGap(BaseModel):
     segment: str = Field(
         description="Grammar segment missing a token (e.g., 'subject', 'position')"
     )
-    needed_token: str = Field(
-        description="Proposed token value for the grammar segment"
-    )
+    token: str = Field(description="Proposed token value for the grammar segment")
     reason: str = Field(description="Why this token is needed for naming this path")
 
 
@@ -476,7 +474,7 @@ class StandardNameComposeBatch(BaseModel):
                     {
                         "source_id": source_id,
                         "segment": segment,
-                        "needed_token": token,
+                        "token": token,
                         "reason": f"LLM proposed unregistered {segment} token",
                     }
                 )

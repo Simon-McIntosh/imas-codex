@@ -108,7 +108,7 @@ def harvest_vocab_gaps(
 
         {
             "segment": str,
-            "needed_token": str,
+            "token": str,
             "occurrences": int,          # source_count from graph
             "example_count": int | None, # stored on node (may differ)
             "source_types": list[str],   # "IMASNode", "FacilitySignal", …
@@ -159,7 +159,7 @@ def harvest_vocab_gaps(
                      WHEN rel.reason IS NOT NULL AND rel.reason <> '' THEN rel.reason ELSE null
                  END)[..{_MAX_REASONS}] AS example_reasons
             RETURN vg.segment AS segment,
-                   vg.needed_token AS needed_token,
+                   vg.token AS token,
                    vg.example_count AS example_count,
                    vg.category AS category,
                    vg.actual_segments AS actual_segments,
@@ -183,7 +183,7 @@ def harvest_vocab_gaps(
         records.append(
             {
                 "segment": r["segment"],
-                "needed_token": r["needed_token"],
+                "token": r["token"],
                 "occurrences": r["source_count"] or 0,
                 "example_count": r.get("example_count"),
                 "category": r.get("category"),
@@ -221,7 +221,7 @@ def format_pr_yaml(
           transformation:
             segment_type: closed
             tokens:
-              - needed_token: derivative_of
+              - token: derivative_of
                 occurrences: 5
                 example_dd_paths: [...]
                 example_reasons: [...]
@@ -252,7 +252,7 @@ def format_pr_yaml(
         tokens: list[dict[str, Any]] = []
         for r in sorted(seg_records, key=lambda x: x["occurrences"], reverse=True):
             entry: dict[str, Any] = {
-                "needed_token": r["needed_token"],
+                "token": r["token"],
                 "occurrences": r["occurrences"],
             }
             if r.get("example_dd_paths"):
@@ -267,7 +267,7 @@ def format_pr_yaml(
             "tokens": tokens,
         }
 
-    distinct_tokens = len({r["needed_token"] for r in records})
+    distinct_tokens = len({r["token"] for r in records})
 
     doc: dict[str, Any] = {
         "metadata": {
@@ -313,7 +313,7 @@ def format_pr_markdown(
     """
     closed = _closed_segments()
     total = len(records)
-    distinct = len({r["needed_token"] for r in records})
+    distinct = len({r["token"] for r in records})
     generated_at = datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     isn_v = isn_version or "unknown"
@@ -338,7 +338,7 @@ def format_pr_markdown(
     for seg in sorted(by_segment):
         seg_records = by_segment[seg]
         seg_type = "closed" if seg in closed else "open"
-        dt = len({r["needed_token"] for r in seg_records})
+        dt = len({r["token"] for r in seg_records})
         total_occ = sum(r["occurrences"] for r in seg_records)
         lines.append(f"| `{seg}` | {seg_type} | {dt} | {total_occ} |")
     lines.append("")
@@ -352,7 +352,7 @@ def format_pr_markdown(
     lines.append("|------|-------|---------|-------------|")
     for i, r in enumerate(top, 1):
         lines.append(
-            f"| {i} | `{r['needed_token']}` | `{r['segment']}` | {r['occurrences']} |"
+            f"| {i} | `{r['token']}` | `{r['segment']}` | {r['occurrences']} |"
         )
     lines.append("")
 
@@ -388,7 +388,7 @@ def format_pr_markdown(
     lines.append("## Changes")
     lines.append("")
     for seg in sorted(by_segment):
-        tokens = sorted({r["needed_token"] for r in by_segment[seg]})
+        tokens = sorted({r["token"] for r in by_segment[seg]})
         seg_type = "closed" if seg in closed else "open"
         lines.append(
             f"- **`{seg}`** ({seg_type}): {', '.join(f'`{t}`' for t in tokens)}"

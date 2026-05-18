@@ -26,12 +26,12 @@ class TestSNVocabGapModel:
         gap = StandardNameVocabGap(
             source_id="equilibrium/time_slice/profiles_1d/psi",
             segment="transformation",
-            needed_token="time_derivative_of",
+            token="time_derivative_of",
             reason="Need time derivative transformation",
         )
         assert gap.source_id == "equilibrium/time_slice/profiles_1d/psi"
         assert gap.segment == "transformation"
-        assert gap.needed_token == "time_derivative_of"
+        assert gap.token == "time_derivative_of"
         assert gap.reason == "Need time derivative transformation"
 
     def test_all_fields_required(self):
@@ -61,7 +61,7 @@ class TestSNComposeBatchVocabGaps:
                 {
                     "source_id": "equilibrium/time_slice/profiles_1d/dpsi_drho_tor",
                     "segment": "transformation",
-                    "needed_token": "derivative_of",
+                    "token": "derivative_of",
                     "reason": "Quantity is a derivative but no derivative transformation exists",
                 }
             ],
@@ -69,7 +69,7 @@ class TestSNComposeBatchVocabGaps:
         batch = StandardNameComposeBatch(**data)
         assert len(batch.vocab_gaps) == 1
         assert batch.vocab_gaps[0].segment == "transformation"
-        assert batch.vocab_gaps[0].needed_token == "derivative_of"
+        assert batch.vocab_gaps[0].token == "derivative_of"
         assert batch.vocab_gaps[0].source_id == (
             "equilibrium/time_slice/profiles_1d/dpsi_drho_tor"
         )
@@ -90,20 +90,20 @@ class TestSNComposeBatchVocabGaps:
                 {
                     "source_id": "path/a",
                     "segment": "transformation",
-                    "needed_token": "derivative_of",
+                    "token": "derivative_of",
                     "reason": "reason A",
                 },
                 {
                     "source_id": "path/b",
                     "segment": "process",
-                    "needed_token": "fusion",
+                    "token": "fusion",
                     "reason": "reason B",
                 },
             ],
         }
         batch = StandardNameComposeBatch(**data)
         assert len(batch.vocab_gaps) == 2
-        assert {g.needed_token for g in batch.vocab_gaps} == {
+        assert {g.token for g in batch.vocab_gaps} == {
             "derivative_of",
             "fusion",
         }
@@ -133,8 +133,8 @@ class TestWriteVocabGaps:
 
         assert write_vocab_gaps([]) == 0
 
-    def test_dedup_same_segment_needed_token(self):
-        """Two gaps with same segment:needed_token → 1 VocabGap node."""
+    def test_dedup_same_segment_token(self):
+        """Two gaps with same segment:token → 1 VocabGap node."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
@@ -142,13 +142,13 @@ class TestWriteVocabGaps:
             {
                 "source_id": "path/a",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason A",
             },
             {
                 "source_id": "path/b",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason B",
             },
         ]
@@ -156,7 +156,7 @@ class TestWriteVocabGaps:
         assert result == 1  # 1 unique VocabGap node
 
     def test_different_tokens_create_separate_nodes(self):
-        """Gaps with different segment:needed_token → separate VocabGap nodes."""
+        """Gaps with different segment:token → separate VocabGap nodes."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
@@ -164,13 +164,13 @@ class TestWriteVocabGaps:
             {
                 "source_id": "path/a",
                 "segment": "component",
-                "needed_token": "novel_component_xyz",
+                "token": "novel_component_xyz",
                 "reason": "reason A",
             },
             {
                 "source_id": "path/b",
                 "segment": "process",
-                "needed_token": "novel_process_xyz",
+                "token": "novel_process_xyz",
                 "reason": "reason B",
             },
         ]
@@ -178,7 +178,7 @@ class TestWriteVocabGaps:
         assert result == 2  # 2 unique VocabGap nodes
 
     def test_example_count_accumulates(self):
-        """Duplicate segment:needed_token accumulates example_count in batch."""
+        """Duplicate segment:token accumulates example_count in batch."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
@@ -186,19 +186,19 @@ class TestWriteVocabGaps:
             {
                 "source_id": "path/a",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason A",
             },
             {
                 "source_id": "path/b",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason B",
             },
             {
                 "source_id": "path/c",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason C",
             },
         ]
@@ -226,7 +226,7 @@ class TestWriteVocabGaps:
             {
                 "source_id": "equilibrium/time_slice/profiles_1d/psi",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "needs derivative",
             }
         ]
@@ -257,7 +257,7 @@ class TestWriteVocabGaps:
             {
                 "source_id": "tcv:ip/measured",
                 "segment": "subject",
-                "needed_token": "plasma_current_ip",
+                "token": "plasma_current_ip",
                 "reason": "missing subject token",
             }
         ]
@@ -282,13 +282,13 @@ class TestWriteVocabGaps:
             {
                 "source_id": "path/a",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason for A",
             },
             {
                 "source_id": "path/b",
                 "segment": "process",
-                "needed_token": "novel_process_zzz",
+                "token": "novel_process_zzz",
                 "reason": "reason for B",
             },
         ]
@@ -423,7 +423,7 @@ class TestPersistBatchTokenMissGaps:
             {
                 "sn_id": "electron_temperature",
                 "segment": "subject",
-                "needed_token": "exotic_particle",
+                "token": "exotic_particle",
             }
         ]
 
@@ -462,7 +462,7 @@ class TestPersistBatchTokenMissGaps:
             "core_profiles/profiles_1d/electrons/temperature"
         )
         assert gap_dicts[0]["segment"] == "subject"
-        assert gap_dicts[0]["needed_token"] == "exotic_particle"
+        assert gap_dicts[0]["token"] == "exotic_particle"
         assert call_args[1]["source_type"] == "dd"
 
     def test_no_token_miss_skips_write_vocab_gaps(self):
@@ -507,7 +507,7 @@ class TestPersistBatchTokenMissGaps:
             {
                 "sn_id": "plasma_current",
                 "segment": "process",
-                "needed_token": "novel_process",
+                "token": "novel_process",
             }
         ]
 
@@ -702,18 +702,18 @@ class TestOpenSegmentFilter:
         from imas_codex.standard_names.segments import filter_closed_segment_gaps
 
         gaps = [
-            {"source_id": "a", "segment": "component", "needed_token": "curl_of"},
+            {"source_id": "a", "segment": "component", "token": "curl_of"},
             {
                 "source_id": "b",
                 "segment": "physical_base",
-                "needed_token": "toroidal_torque",
+                "token": "toroidal_torque",
             },
             {
                 "source_id": "c",
                 "segment": "grammar_ambiguity",
-                "needed_token": "diamagnetic",
+                "token": "diamagnetic",
             },
-            {"source_id": "d", "segment": "subject", "needed_token": "pellet"},
+            {"source_id": "d", "segment": "subject", "token": "pellet"},
         ]
         kept, dropped = filter_closed_segment_gaps(gaps)
         kept_segs = {g["segment"] for g in kept}
@@ -730,13 +730,13 @@ class TestOpenSegmentFilter:
             {
                 "source_id": "equilibrium/time_slice/profiles_1d/psi",
                 "segment": "physical_base",
-                "needed_token": "frobnicating_zorch",
+                "token": "frobnicating_zorch",
                 "reason": "closed segment — should be persisted",
             },
             {
                 "source_id": "core_profiles/ions/velocity",
                 "segment": "grammar_ambiguity",
-                "needed_token": "diamagnetic",
+                "token": "diamagnetic",
                 "reason": "structural ambiguity — should be filtered",
             },
         ]
@@ -766,13 +766,13 @@ class TestOpenSegmentFilter:
             {
                 "source_id": "path/a",
                 "segment": "physical_base",  # closed — keep (truly absent token)
-                "needed_token": "frobnicating_zorch",
+                "token": "frobnicating_zorch",
                 "reason": "real gap",
             },
             {
                 "source_id": "path/b",
                 "segment": "component",  # closed — keep (truly absent token)
-                "needed_token": "novel_component_zzz",
+                "token": "novel_component_zzz",
                 "reason": "real gap",
             },
         ]
@@ -998,7 +998,7 @@ class TestWriteVocabGapsInvalidSegment:
         gaps = [
             {
                 "segment": "foobar_nonexistent",
-                "needed_token": "test_token",
+                "token": "test_token",
                 "source_id": "dd:equilibrium/test",
                 "reason": "test",
             }
@@ -1018,7 +1018,7 @@ class TestWriteVocabGapsInvalidSegment:
         gaps = [
             {
                 "segment": "qualifier",
-                "needed_token": "maximum",
+                "token": "maximum",
                 "source_id": "dd:equilibrium/test",
                 "reason": "test",
             }
@@ -1203,7 +1203,7 @@ class TestBatchRescueValidator:
         assert batch.candidates[0].segments.base_token == "temperature"
         assert len(batch.vocab_gaps) == 1
         assert batch.vocab_gaps[0].source_id == "p/b"
-        assert batch.vocab_gaps[0].needed_token == "cumulative"
+        assert batch.vocab_gaps[0].token == "cumulative"
 
     def test_multiple_bad_candidates_all_rescued(self):
         """Multiple bad candidates are individually rescued."""
@@ -1239,7 +1239,7 @@ class TestBatchRescueValidator:
                 {
                     "source_id": "p/c",
                     "segment": "process",
-                    "needed_token": "fusion",
+                    "token": "fusion",
                     "reason": "LLM reported",
                 }
             ],

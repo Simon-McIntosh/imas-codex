@@ -126,7 +126,7 @@ def classify_vocab_token(
     """Classify a proposed vocab-gap token.
 
     Args:
-        token: The ``needed_token`` string from the LLM composer.
+        token: The ``token`` string from the LLM composer.
         segment: The grammar segment the token was proposed for.
         existing_tokens: Optional set of tokens already in the grammar
             vocabulary (for plural-dedup checking).  When ``None``,
@@ -209,7 +209,7 @@ def filter_vocab_gaps(
         existing_tokens = _load_existing_tokens()
 
     for gap in gaps:
-        token = gap.get("needed_token", "")
+        token = gap.get("token", "")
         segment = gap.get("segment", "")
         verdict = classify_vocab_token(token, segment, existing_tokens=existing_tokens)
         if verdict.action == "accept":

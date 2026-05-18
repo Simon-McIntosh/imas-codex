@@ -90,7 +90,7 @@ class TestVocabGapClassification:
             {
                 "source_id": "eq/ts/p1d/psi",
                 "segment": "process",
-                "needed_token": "frobnicating",
+                "token": "frobnicating",
                 "reason": "test",
             }
         ]
@@ -111,7 +111,7 @@ class TestVocabGapClassification:
             {
                 "source_id": "eq/ts/p1d/psi",
                 "segment": "process",
-                "needed_token": "ion",
+                "token": "ion",
                 "reason": "LLM placed ion in process",
             }
         ]
@@ -131,7 +131,7 @@ class TestVocabGapClassification:
             {
                 "source_id": "eq/ts/p1d/psi",
                 "segment": "process",
-                "needed_token": "parallel",
+                "token": "parallel",
                 "reason": "LLM confused",
             }
         ]
@@ -153,21 +153,21 @@ class TestVocabGapClassification:
             {
                 "source_id": "a",
                 "segment": "process",
-                "needed_token": "turbulating",
+                "token": "turbulating",
                 "reason": "test",
             },
             # wrong_slot (ion in subject, reported on process) — filtered
             {
                 "source_id": "b",
                 "segment": "process",
-                "needed_token": "ion",
+                "token": "ion",
                 "reason": "test",
             },
             # ambiguous (parallel in orientation+qualifier, reported on process) — filtered
             {
                 "source_id": "c",
                 "segment": "process",
-                "needed_token": "parallel",
+                "token": "parallel",
                 "reason": "test",
             },
         ]

@@ -418,7 +418,7 @@ If a path requires a token that does **not** exist in a closed grammar segment
 Instead, add the path to the `vocab_gaps` list in your response with:
 - `source_id`: the DD path
 - `segment`: which grammar segment is missing a token
-- `needed_token`: the token value you would need
+- `token`: the token value you would need
 - `reason`: why this token is needed
 
 **⚠️ CRITICAL: Most vocab gaps are false positives.** Before emitting:

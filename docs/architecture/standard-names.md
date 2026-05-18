@@ -583,7 +583,7 @@ Each StandardName node carries a full audit trail:
 | `review_count` | Review worker | Number of Review nodes attached via REVIEWS |
 | `review_mean_score` | Review worker | Arithmetic mean of Review.score across all cycles |
 | `review_disagreement` | Review worker | True iff quorum cycles disagreed beyond threshold |
-| `vocab_gap_detail` | Compose worker | JSON: segment, needed_token, reason |
+| `vocab_gap_detail` | Compose worker | JSON: segment, token, reason |
 | `catalog_commit_sha` | Import | Git SHA of catalog source |
 
 ### Relationships

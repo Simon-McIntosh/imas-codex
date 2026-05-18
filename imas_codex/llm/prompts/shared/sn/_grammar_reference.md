@@ -196,28 +196,28 @@ adding ANY entry to `vocab_gaps`, run these checks in order:
 1. **Cross-segment check:** Search the token in ALL segment registries above,
    not just the intended segment. If the token exists anywhere, use it in the
    correct segment — do NOT report a gap.
-   - ❌ `vocab_gap(segment="qualifier", needed_token="poloidal")` — `poloidal`
+   - ❌ `vocab_gap(segment="qualifier", token="poloidal")` — `poloidal`
      exists in component and coordinate
-   - ❌ `vocab_gap(segment="qualifier", needed_token="total_ion")` — `total_ion`
+   - ❌ `vocab_gap(segment="qualifier", token="total_ion")` — `total_ion`
      exists in subject
    - ✅ Instead: decompose and place the token in its registered segment
 
 2. **Decomposition check:** For compound tokens (with `_`), split on
    underscores and check if each part is a registered token in any segment.
    If ALL parts map to existing tokens, decompose instead of reporting a gap.
-   - ❌ `vocab_gap(segment="physical_base", needed_token="plasma_pressure")` —
+   - ❌ `vocab_gap(segment="physical_base", token="plasma_pressure")` —
      `plasma` is a qualifier, `pressure` is a base → use
      `qualifiers=["total_plasma"]` + `base_token="pressure"`
-   - ❌ `vocab_gap(segment="physical_base", needed_token="poloidal_magnetic_flux")` —
+   - ❌ `vocab_gap(segment="physical_base", token="poloidal_magnetic_flux")` —
      `poloidal` is a component, `magnetic_flux` is a base → set
      `projection_axis="poloidal"`, `projection_shape="component"`, `base_token="magnetic_flux"`
-   - ❌ `vocab_gap(segment="physical_base", needed_token="crushing_force")` —
+   - ❌ `vocab_gap(segment="physical_base", token="crushing_force")` —
      if the concept can be expressed as qualifier + base, do that
 
 3. **Semantic coverage check:** Before reporting a gap, verify no existing
    token in the target segment already covers the same concept with a
    different name.
-   - ❌ `vocab_gap(segment="position", needed_token="inner_midplane_intersection")` —
+   - ❌ `vocab_gap(segment="position", token="inner_midplane_intersection")` —
      `inner_midplane` already exists
 
 **Only report a `vocab_gap` when the concept genuinely cannot be expressed

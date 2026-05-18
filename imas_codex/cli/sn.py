@@ -2396,7 +2396,7 @@ def sn_gaps(
                 cat = f"{cat} ({', '.join(actual)})"
             table.add_row(
                 r["segment"],
-                r["needed_token"],
+                r["token"],
                 cat,
                 str(r["occurrences"]),
                 str(r.get("example_count") or "—"),

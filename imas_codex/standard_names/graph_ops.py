@@ -2060,7 +2060,7 @@ def write_standard_names(
             gap_dict = {
                 "source_id": source_id,
                 "segment": gap["segment"],
-                "needed_token": gap["needed_token"],
+                "token": gap["token"],
                 "reason": f"Token-miss during grammar edge writing for '{gap['sn_id']}'",
             }
             if source_type == "dd":
@@ -2658,7 +2658,7 @@ def _write_grammar_decomposition(
 
     Returns:
         List of token-miss gaps detected against the closed vocabulary,
-        each a dict with keys ``sn_id``, ``segment``, ``needed_token``.
+        each a dict with keys ``sn_id``, ``segment``, ``token``.
     """
     all_gaps: list[dict[str, str]] = []
 
@@ -2858,7 +2858,7 @@ def _write_grammar_decomposition(
                         {
                             "sn_id": sn_id,
                             "segment": r["segment"],
-                            "needed_token": r["token"],
+                            "token": r["token"],
                         }
                     )
 
@@ -3291,9 +3291,9 @@ def write_vocab_gaps(
 ) -> int:
     """Persist VocabGap nodes and HAS_STANDARD_NAME_VOCAB_GAP relationships.
 
-    Each gap dict has: source_id, segment, needed_token, reason.
+    Each gap dict has: source_id, segment, token, reason.
 
-    Deduplicates VocabGap nodes by id (vocab_gap:{segment}:{needed_token}).
+    Deduplicates VocabGap nodes by id (vocab_gap:{segment}:{token}).
     Creates HAS_STANDARD_NAME_VOCAB_GAP relationships from source entities with
     per-source reason as a relationship property.
 
@@ -3339,8 +3339,8 @@ def write_vocab_gaps(
 
     for g in gaps:
         segment = g["segment"]
-        needed_token = g["needed_token"]
-        gap_id = f"vocab_gap:{segment}:{needed_token}"
+        token = g["token"]
+        gap_id = f"vocab_gap:{segment}:{token}"
 
         if gap_id not in gap_nodes:
             # Validate segment exists in ISN grammar
@@ -3349,11 +3349,11 @@ def write_vocab_gaps(
                     "write_vocab_gaps: skipping gap with unknown segment "
                     "'%s' for token '%s'",
                     segment,
-                    needed_token,
+                    token,
                 )
                 continue
 
-            category, actual_segments = classify_gap(segment, needed_token)
+            category, actual_segments = classify_gap(segment, token)
 
             # Filter non-actionable gaps — these are not genuine vocabulary
             # deficiencies but LLM mis-classifications or decomposable compounds
@@ -3369,7 +3369,7 @@ def write_vocab_gaps(
                     "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
                     category,
                     gap_id,
-                    needed_token,
+                    token,
                     segment,
                 )
                 continue
@@ -3377,7 +3377,7 @@ def write_vocab_gaps(
             gap_nodes[gap_id] = {
                 "id": gap_id,
                 "segment": segment,
-                "needed_token": needed_token,
+                "token": token,
                 "example_count": 0,
                 "category": category,
                 "actual_segments": actual_segments,
@@ -3400,7 +3400,7 @@ def write_vocab_gaps(
             UNWIND $batch AS b
             MERGE (vg:VocabGap {id: b.id})
             SET vg.segment = b.segment,
-                vg.needed_token = b.needed_token,
+                vg.token = b.token,
                 vg.example_count = coalesce(vg.example_count, 0) + b.example_count,
                 vg.category = b.category,
                 vg.actual_segments = b.actual_segments,
@@ -5493,7 +5493,7 @@ def reconcile_vocab_gaps() -> dict[str, int]:
                 """
                 MATCH (vg:VocabGap)
                 RETURN vg.id AS id, vg.segment AS segment,
-                       vg.needed_token AS token, vg.category AS category
+                       vg.token AS token, vg.category AS category
                 """
             )
         )
