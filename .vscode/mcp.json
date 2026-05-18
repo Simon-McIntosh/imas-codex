@@ -1,1 +1,9 @@
-../.mcp.json
+{
+  "servers": {
+    "imas-cx": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "imas-codex", "serve"]
+    }
+  }
+}
