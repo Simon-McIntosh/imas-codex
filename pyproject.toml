@@ -286,18 +286,20 @@ model = "openrouter/openai/gpt-5.4"
 batch-size = 50
 
 [tool.imas-codex.sn-docs]
-# Local DeepSeek V4 Flash via vLLM on SLURM GPU node.
-# Zero cost at point of use — see [sn-compose] for endpoint details.
-model = "hosted_vllm/deepseek-v4-flash"
-api-base = "http://98dci4-gpu-0003:18800/v1"
-api-key-env = "AMBIX_API_KEY"
+# Phase 1 (2026-05-18): switched from local DS4-flash to GPT-5.5 after
+# critical-quality regression (rsd=1.0 false positives on hallucinated
+# poloidal-flux docs). Docs require strong physics fidelity — DS4-flash
+# was producing plausible-but-wrong embellishment that the DS4 reviewer
+# blindly approved. Switch-back to local: model="hosted_vllm/deepseek-v4-flash"
+# with api-base="http://98dci4-gpu-0003:18800/v1", api-key-env="AMBIX_API_KEY".
+model = "openrouter/openai/gpt-5.5"
 
 [tool.imas-codex.sn-refine]
-# Local DeepSeek V4 Flash via vLLM on SLURM GPU node.
-# Zero cost at point of use — see [sn-compose] for endpoint details.
-model = "hosted_vllm/deepseek-v4-flash"
-api-base = "http://98dci4-gpu-0003:18800/v1"
-api-key-env = "AMBIX_API_KEY"
+# Phase 1 (2026-05-18): aligned with sn-docs/sn-compose; refine is where
+# bad names/docs get rewritten so it must use a strong model.
+# Switch-back to local: model="hosted_vllm/deepseek-v4-flash"
+# with api-base="http://98dci4-gpu-0003:18800/v1", api-key-env="AMBIX_API_KEY".
+model = "openrouter/openai/gpt-5.5"
 
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
@@ -325,12 +327,13 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 # pool; the per-pool overrides under ``[tool.imas-codex.sn-pools]``
 # take precedence when set.
 max-concurrency = 256
-# Local DeepSeek V4 Flash (284B MoE, 13B activated) via vLLM on SLURM GPU node.
-# Zero cost at point of use — local H200×4 deployment.
-# Endpoint may change on SLURM reschedule — override with IMAS_CODEX_SN_COMPOSE_API_BASE.
-model = "hosted_vllm/deepseek-v4-flash"
-api-base = "http://98dci4-gpu-0003:18800/v1"
-api-key-env = "AMBIX_API_KEY"
+# Phase 1 (2026-05-18): switched from local DS4-flash to GPT-5.5 after the
+# poloidal-flux docs regression. Compose has lower per-token criticality
+# than docs (names follow tight grammar) but co-located here for vendor
+# consistency and because compose is where docs context is built.
+# Switch-back to local: model="hosted_vllm/deepseek-v4-flash" with
+# api-base="http://98dci4-gpu-0003:18800/v1", api-key-env="AMBIX_API_KEY".
+model = "openrouter/openai/gpt-5.5"
 batch-size = 25
 # Batch size used when ``sn generate --name-only`` groups paths by
 # ``(physics_domain × unit)`` rather than ``(cluster × unit)``.  The
@@ -432,12 +435,20 @@ disagreement-threshold = 0.20
 max-cycles = 3
 
 [tool.imas-codex.sn-review.names]
-# Single-model local review: DeepSeek V4 Flash via vLLM.
-# Zero cost at point of use. No quorum — single reviewer.
+# Phase 1 (2026-05-18): mixed-vendor RD-quorum chain.
+# Cycle 0 (primary, blind): local DS4-flash — catches grammar/format/ISN
+# violations for free; OK at low-stakes pass/fail signal.
+# Cycle 1 (secondary, blind): Haiku 4.5 — cross-vendor cheap diversity,
+# breaks the same-family bias that caused the DS4 rsd=1.0 false positives.
+# Cycle 2 (escalator, context-aware): Sonnet 4.6 — authoritative on
+# disputed items where physics fidelity matters.
+# Switch-back to single-DS4: see profile.default below.
 models = [
   "hosted_vllm/deepseek-v4-flash",
+  "openrouter/anthropic/claude-haiku-4.5",
+  "openrouter/anthropic/claude-sonnet-4.6",
 ]
-disagreement-threshold = 1.0
+disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"
 api-key-env = "AMBIX_API_KEY"
 
@@ -447,6 +458,18 @@ api-key-env = "AMBIX_API_KEY"
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
+# Phase 1 default = the active 3-model chain (DS4 → Haiku → Sonnet).
+# For zero-cost local-only review, switch to the "local-only" profile.
+models = [
+  "hosted_vllm/deepseek-v4-flash",
+  "openrouter/anthropic/claude-haiku-4.5",
+  "openrouter/anthropic/claude-sonnet-4.6",
+]
+disagreement-threshold = 0.20
+
+[tool.imas-codex.sn-review.names.profiles.local-only]
+# Zero-cost local-only fallback (pre-Phase-1 behavior).
+# Single DS4-flash reviewer; no quorum.
 models = [
   "hosted_vllm/deepseek-v4-flash",
 ]
@@ -467,12 +490,16 @@ models = ["openrouter/anthropic/claude-opus-4.6"]
 disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
-# Single-model local review: DeepSeek V4 Flash via vLLM.
-# Zero cost at point of use. No quorum — single reviewer.
+# Phase 1 (2026-05-18): mirrors the names chain — same 3-model RD-quorum
+# (DS4 → Haiku → Sonnet). Docs review is where physics regressions must
+# be caught (the rsd=1.0 false positive that approved hallucinated
+# poloidal-flux docs would have been caught by Haiku/Sonnet disagreement).
 models = [
   "hosted_vllm/deepseek-v4-flash",
+  "openrouter/anthropic/claude-haiku-4.5",
+  "openrouter/anthropic/claude-sonnet-4.6",
 ]
-disagreement-threshold = 1.0
+disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"
 api-key-env = "AMBIX_API_KEY"
 
