@@ -4657,6 +4657,8 @@ async def process_refine_name_batch(
                 is_terminal = (
                     "not a registered" in _exc_str
                     or "self-referential REFINED_FROM" in _exc_str
+                    or "kind must be one of" in _exc_str
+                    or "validation error for RefinedName" in _exc_str
                 )
                 try:
                     if is_terminal:

@@ -210,6 +210,7 @@ RETRYABLE_PATTERNS = frozenset(
 NON_RETRYABLE_PATTERNS = frozenset(
     {
         "not a registered",  # IR segment vocab-gap validation
+        "kind must be one of",  # schema enum violation (deterministic)
     }
 )
 
