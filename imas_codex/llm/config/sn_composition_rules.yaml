@@ -299,13 +299,13 @@ composition_rules:
       has violated grammar; the candidate is quarantined and must be
       refined with the correct preposition.
     examples_good:
-      - "poloidal_magnetic_flux_at_separatrix (field at named position)"
-      - "elongation_of_separatrix (intrinsic shape parameter)"
+      - "poloidal_magnetic_flux_at_plasma_boundary (field at canonical LCFS locus)"
+      - "elongation_of_plasma_boundary (intrinsic shape parameter)"
       - "major_radius_of_magnetic_axis (coordinate of a point)"
       - "electron_density_at_pedestal (field at named region)"
       - "area_of_reflectometer_antenna (structural entity, of- is correct)"
     examples_bad:
-      - "poloidal_magnetic_flux_of_separatrix (flux is a field — use _at_)"
+      - "poloidal_magnetic_flux_of_plasma_boundary (flux is a field — use _at_)"
       - "electron_density_of_pedestal (density is a field — use _at_)"
       - "magnetic_shear_of_magnetic_axis (shear is field-derived — use _at_)"
     affects:
@@ -322,22 +322,23 @@ composition_rules:
 
       | Canonical | Forbidden synonyms |
       |---|---|
-      | separatrix | plasma_boundary, last_closed_flux_surface, lcfs |
+      | plasma_boundary | separatrix, last_closed_flux_surface, lcfs |
       | divertor_target | divertor_plate |
       | magnetic_axis | core_axis |
       | wall | wall_surface, first_wall_surface, vacuum_vessel_wall |
       | pedestal | pedestal_region, edge_pedestal |
 
       Apply NC-16 *after* normalising. The combined rule for a flux quantity
-      at the LCFS is `poloidal_magnetic_flux_at_separatrix`, not
-      `_of_plasma_boundary`, `_of_last_closed_flux_surface`, or
-      `_at_plasma_boundary`.
+      at the LCFS is `poloidal_magnetic_flux_at_plasma_boundary`, NOT
+      `_of_plasma_boundary`, `_at_separatrix`, or
+      `_at_last_closed_flux_surface`.
     examples_good:
-      - "poloidal_magnetic_flux_at_separatrix"
+      - "poloidal_magnetic_flux_at_plasma_boundary"
       - "electron_density_at_divertor_target"
     examples_bad:
-      - "poloidal_magnetic_flux_of_plasma_boundary (two errors: synonym + wrong preposition)"
-      - "electron_density_at_divertor_plate (synonym)"
+      - "poloidal_magnetic_flux_at_separatrix (synonym — use plasma_boundary)"
+      - "poloidal_magnetic_flux_of_plasma_boundary (wrong preposition for a field)"
+      - "electron_density_at_divertor_plate (synonym — use divertor_target)"
     affects:
       - "name"
 

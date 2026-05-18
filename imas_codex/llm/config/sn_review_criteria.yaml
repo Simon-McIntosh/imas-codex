@@ -105,16 +105,16 @@ common_issues:
     I1.3_inconsistent_boundary:
       description: "Mixed naming patterns for plasma boundary quantities"
       rule: |
-        Use the canonical token ``separatrix`` for the LCFS in every name —
-        never the synonyms ``plasma_boundary``, ``last_closed_flux_surface``,
+        Use the canonical token ``plasma_boundary`` for the LCFS in every
+        name — never the synonyms ``separatrix``, ``last_closed_flux_surface``,
         or ``lcfs``. Pair with the correct preposition: ``_at_`` for evaluated
         fields, ``_of_`` for intrinsic shape parameters (see I1.7).
       affects: [convention]
 
     I1.7_field_at_region_preposition:
       description: "_of_<region> used where _at_<region> is required (evaluated field)"
-      example_bad: "poloidal_magnetic_flux_of_separatrix"
-      example_good: "poloidal_magnetic_flux_at_separatrix"
+      example_bad: "poloidal_magnetic_flux_of_plasma_boundary"
+      example_good: "poloidal_magnetic_flux_at_plasma_boundary"
       rule: |
         When the locus token is a position or region and the physical base
         is an evaluated field (flux, density, temperature, pressure, B, E,
@@ -131,7 +131,7 @@ common_issues:
       example_good: "electron_density_at_divertor_target"
       rule: |
         The catalog uses one canonical token per concept:
-          separatrix      replaces plasma_boundary, last_closed_flux_surface, lcfs
+          plasma_boundary replaces separatrix, last_closed_flux_surface, lcfs
           divertor_target replaces divertor_plate
           wall            replaces wall_surface, first_wall_surface, vacuum_vessel_wall
           pedestal        replaces pedestal_region, edge_pedestal

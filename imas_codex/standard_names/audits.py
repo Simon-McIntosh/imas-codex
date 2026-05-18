@@ -2386,10 +2386,15 @@ def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
 # =============================================================================
 
 # Forbidden locus-token synonyms → canonical replacement.
+# Canonical for the last-closed-flux-surface concept is ``plasma_boundary``
+# (descriptive geometric noun rather than the physics-jargon ``separatrix``);
+# this matches the project's catalog convention. The earlier short-lived
+# inversion (which had ``separatrix`` canonical) was a regression and is
+# explicitly avoided here.
 _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
-    "plasma_boundary": "separatrix",
-    "last_closed_flux_surface": "separatrix",
-    "lcfs": "separatrix",
+    "separatrix": "plasma_boundary",
+    "last_closed_flux_surface": "plasma_boundary",
+    "lcfs": "plasma_boundary",
     "divertor_plate": "divertor_target",
     "wall_surface": "wall",
     "first_wall_surface": "wall",

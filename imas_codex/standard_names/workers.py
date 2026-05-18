@@ -2815,9 +2815,9 @@ def _validate_via_isn(
 # annotated as a canonical-token violation and routed through the refine
 # pool to be rewritten to the canonical form.
 _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
-    "plasma_boundary": "separatrix",
-    "last_closed_flux_surface": "separatrix",
-    "lcfs": "separatrix",
+    "separatrix": "plasma_boundary",
+    "last_closed_flux_surface": "plasma_boundary",
+    "lcfs": "plasma_boundary",
     "divertor_plate": "divertor_target",
     "wall_surface": "wall",
     "first_wall_surface": "wall",
