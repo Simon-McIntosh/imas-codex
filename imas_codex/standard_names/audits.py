@@ -2415,6 +2415,8 @@ def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
 # explicitly avoided here.
 _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
     "separatrix": "plasma_boundary",
+    "outboard_midplane_separatrix": "plasma_boundary",
+    "secondary_separatrix": "secondary_plasma_boundary",
     "last_closed_flux_surface": "plasma_boundary",
     "lcfs": "plasma_boundary",
     "divertor_plate": "divertor_target",
@@ -2424,6 +2426,16 @@ _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
     "pedestal_region": "pedestal",
     "edge_pedestal": "pedestal",
     "core_axis": "magnetic_axis",
+}
+
+# Substrings that, when found anywhere inside a compound locus token,
+# indicate a canonical-locus violation. The exact-match map above
+# handles known compounds; this scan catches future compounds the
+# LLM might invent (e.g. ``upper_separatrix``, ``inner_divertor_plate``).
+_CANONICAL_LOCUS_SUBSTRINGS: dict[str, str] = {
+    "_separatrix": "_plasma_boundary",
+    "_divertor_plate": "_divertor_target",
+    "_lcfs": "_plasma_boundary",
 }
 
 # Bases that name an evaluated field (defined everywhere in the plasma
@@ -2520,6 +2532,20 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
                 f"'{canonical}'. Rewrite as "
                 f"'{name.replace(locus_token, canonical)}'."
             )
+        else:
+            # Substring scan: catches compound forms the exact map misses.
+            # ``outboard_midplane_separatrix`` is exact-mapped above; this
+            # catches future compounds like ``upper_separatrix`` etc.
+            for bad, good in _CANONICAL_LOCUS_SUBSTRINGS.items():
+                if bad in locus_token:
+                    fixed_locus = locus_token.replace(bad, good)
+                    issues.append(
+                        f"audit:canonical_locus_check: name '{name}' has "
+                        f"locus token '{locus_token}' containing "
+                        f"non-canonical substring '{bad}' — rewrite the "
+                        f"locus as '{fixed_locus}'."
+                    )
+                    break
 
         if (
             relation == "of"
