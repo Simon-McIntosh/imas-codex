@@ -1429,7 +1429,7 @@ def seed_parent_sources(gc: Any | None = None) -> int:
                      count(CASE WHEN child.name_stage IS NOT NULL
                            THEN 1 END) AS composed_children
                 WHERE total_children = composed_children
-                  AND total_children >= 2
+                  AND total_children >= 1
                 UNWIND children AS child
                 WITH parent, edge_kinds, child
                 OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
@@ -7918,7 +7918,19 @@ def persist_refined_name(
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
         return row
-    return {"new_name": new_name, "old_name": old_name}
+
+    # Empty result means the ``MATCH (old) WHERE name_stage='refining'`` gate
+    # did not bind — typically because orphan_sweep reverted the claim back
+    # to 'reviewed' while the LLM call was in flight. Silently returning a
+    # bare row dict here was the root cause of the refine_name silent-bug
+    # (5 REFINED_FROM edges from 500+ claims observed 2026-05-18). Raise
+    # explicitly so the worker's exception handler either releases the
+    # claim cleanly or marks the SN exhausted.
+    raise RuntimeError(
+        f"persist_refined_name no-op: {old_name} → {new_name} — the old SN "
+        f"was not in name_stage='refining' at persist time (likely reverted "
+        f"by orphan_sweep). LLM call complete but no graph mutation occurred."
+    )
 
 
 # =============================================================================

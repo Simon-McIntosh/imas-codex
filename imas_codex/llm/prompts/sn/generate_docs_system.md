@@ -33,13 +33,15 @@ grammar fields, kind, or unit.
 
 {% include "sn/_compose_scored_examples.md" %}
 
+{% include "sn/_docs_format.md" %}
+
 ## Documentation Template
 
-For each name, the documentation field should cover (where applicable):
+For each name, the documentation field should cover (where applicable) — apply the canonical layout from the previous section:
 
 1. **Definition** — what this quantity physically represents in the context of tokamak / stellarator plasmas.
-2. **Governing physics** — key equations or relations (use LaTeX). Define all variables with units on first use.
-3. **Measurement methods** — how the quantity is typically measured or computed (diagnostics, reconstruction codes).
+2. **Governing physics** — the principal defining equation as a centred `$$...$$` display block, with variable definitions in flowing prose. **At most one display equation per entry.** Use `$...$` inline math for variable names elsewhere.
+3. **Measurement methods** — how the quantity is typically measured or computed (diagnostics, reconstruction methods — keep generic, no code names).
 4. **Typical values** — representative ranges for fusion-relevant plasmas, with units. Distinguish between plasma regimes where relevant.
 5. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
 
@@ -92,7 +94,7 @@ For each name, the documentation field should cover (where applicable):
 
 1. **Description self-sufficiency** — can a physicist understand the quantity from the description alone, without seeing the name? If not, add context.
 2. **No circular definitions** — ❌ "The electron temperature is the temperature of electrons." ✅ "Kinetic energy per degree of freedom of the electron population, expressed in energy units."
-3. **LaTeX in documentation** — at least one equation or mathematical relation in `documentation` for any quantity with a governing equation. Use `$...$` for inline and `$$...$$` for display.
+3. **LaTeX in documentation** — for any quantity with a defining equation, include exactly **one** centred display equation in `$$...$$` (the principal/defining one) per the canonical format above. Secondary relations stay inline as `$...$`. The display equation must have the `$$` delimiters on their own lines with blank lines before and after the block.
 4. **Cross-references** — include at least 1 `links` entry for related SNs. Use `name:bare_id` format. Only link to names that exist (check the nearby_names list provided).
 5. **No trailing whitespace or empty lines** in description field.
 6. **Sign convention** — if the quantity has a `cocos_label`, the documentation MUST contain a `Sign convention: Positive when ...` paragraph.

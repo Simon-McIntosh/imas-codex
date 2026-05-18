@@ -440,13 +440,13 @@ max-cycles = 3
 # violations for free; OK at low-stakes pass/fail signal.
 # Cycle 1 (secondary, blind): Haiku 4.5 — cross-vendor cheap diversity,
 # breaks the same-family bias that caused the DS4 rsd=1.0 false positives.
-# Cycle 2 (escalator, context-aware): Sonnet 4.6 — authoritative on
-# disputed items where physics fidelity matters.
-# Switch-back to single-DS4: see profile.default below.
+# Cycle 2 (escalator, context-aware): GPT-5.4 — fast, cheap, cross-vendor
+# authority on disputed items. Sonnet/Opus reserved for Phase 2 reviews.
+# Switch-back to single-DS4: see profile.local-only below.
 models = [
   "hosted_vllm/deepseek-v4-flash",
   "openrouter/anthropic/claude-haiku-4.5",
-  "openrouter/anthropic/claude-sonnet-4.6",
+  "openrouter/openai/gpt-5.4",
 ]
 disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"
@@ -458,12 +458,12 @@ api-key-env = "AMBIX_API_KEY"
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Phase 1 default = the active 3-model chain (DS4 → Haiku → Sonnet).
+# Phase 1 default = the active 3-model chain (DS4 → Haiku → GPT-5.4).
 # For zero-cost local-only review, switch to the "local-only" profile.
 models = [
   "hosted_vllm/deepseek-v4-flash",
   "openrouter/anthropic/claude-haiku-4.5",
-  "openrouter/anthropic/claude-sonnet-4.6",
+  "openrouter/openai/gpt-5.4",
 ]
 disagreement-threshold = 0.20
 
@@ -491,13 +491,13 @@ disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
 # Phase 1 (2026-05-18): mirrors the names chain — same 3-model RD-quorum
-# (DS4 → Haiku → Sonnet). Docs review is where physics regressions must
+# (DS4 → Haiku → GPT-5.4). Docs review is where physics regressions must
 # be caught (the rsd=1.0 false positive that approved hallucinated
-# poloidal-flux docs would have been caught by Haiku/Sonnet disagreement).
+# poloidal-flux docs would have been caught by Haiku/GPT-5.4 disagreement).
 models = [
   "hosted_vllm/deepseek-v4-flash",
   "openrouter/anthropic/claude-haiku-4.5",
-  "openrouter/anthropic/claude-sonnet-4.6",
+  "openrouter/openai/gpt-5.4",
 ]
 disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"

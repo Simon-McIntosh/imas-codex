@@ -771,6 +771,28 @@ def name_unit_consistency_check(
 
     name_tokens = set(re.findall(r"[a-z]+", name))
 
+    # Time-suffix compound names: the head noun is time, not the qualifier
+    # token. ``energy_confinement_time``, ``particle_confinement_time``,
+    # ``energy_decay_time``, ``current_diffusion_time`` etc. all have time
+    # as the dimensional subject; the leading token classifies WHICH
+    # characteristic time, not the unit. Unit should be seconds (or a time
+    # decoration).
+    _TIME_SUFFIX_MARKERS = (
+        "_confinement_time",
+        "_decay_time",
+        "_relaxation_time",
+        "_diffusion_time",
+        "_lifetime",
+        "_dwell_time",
+        "_rise_time",
+        "_fall_time",
+        "_pulse_duration",
+        "_pulse_length",
+        "_persistence_time",
+    )
+    if any(marker in name for marker in _TIME_SUFFIX_MARKERS):
+        return issues
+
     for token, expected_units in _NAME_TOKEN_UNIT_EXPECTATIONS.items():
         if token not in name_tokens:
             continue

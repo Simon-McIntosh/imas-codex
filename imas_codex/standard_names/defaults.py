@@ -42,13 +42,21 @@ DEFAULT_ESCALATION_MODEL: str = "hosted_vllm/deepseek-v4-flash"
 DEFAULT_ORPHAN_SWEEP_INTERVAL_S: int = 30
 """How often the orphan sweep coroutine runs (seconds)."""
 
-DEFAULT_ORPHAN_SWEEP_TIMEOUT_S: int = 600
+DEFAULT_ORPHAN_SWEEP_TIMEOUT_S: int = 1800
 """How long a claim may sit before the orphan sweep clears it (seconds).
 
-RD-quorum reviews run 3 LLM cycles per item (primary, secondary,
-optional escalator). With sequential batch processing, items later
-in the batch can easily exceed 5 minutes. 600 s gives enough headroom
-while still recovering genuinely orphaned claims within 10 minutes."""
+Bumped from 600 → 1800 s (2026-05-18) after the refine_name silent-bug
+root cause analysis: 500+ refine claims produced only 5 REFINED_FROM
+edges because long LLM calls (cross-vendor RD-quorum review + fan-out
+expansion + write-queue backpressure) frequently exceeded the prior
+10-minute window. The orphan sweep then reverted the 'refining' claim
+to 'reviewed' BEFORE persist_refined_name could run, and the WHERE
+clause in that persist silently failed (see graph_ops.py:7754).
+
+30 minutes covers RD-quorum (3 LLM cycles) + fan-out evidence build
++ persist round-trip even under write-queue backpressure. Genuinely
+orphaned claims (worker crashes) still recover, just on a longer
+cadence."""
 
 # ── Backlog throttle caps ─────────────────────────────────────────────
 # Upstream generators pause when downstream review queues exceed these
