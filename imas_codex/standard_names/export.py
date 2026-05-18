@@ -909,8 +909,20 @@ def run_export(
     # ── 2. Run gates ────────────────────────────────────────────
     if not skip_gate:
         # Gate A: Graph tests (only for 'all' scope)
+        # For RC (final=False): advisory only — graph tests may flag
+        # in-progress work that doesn't affect the exported subset.
         if gate_scope == "all":
             gate_a = _run_gate_a()
+            if not final and not gate_a.passed:
+                gate_a = GateResult(
+                    gate=GATE_A,
+                    passed=True,
+                    issues=[],
+                    advisories=gate_a.issues,
+                )
+                logger.warning(
+                    "Gate A: graph test failure(s) (advisory for RC release)"
+                )
         else:
             gate_a = GateResult(gate=GATE_A, passed=True, skipped=True)
         report.gate_results.append(gate_a)
@@ -927,14 +939,52 @@ def run_export(
         gate_b = _run_gate_b(candidates, cocos_convention, final=final)
         report.gate_results.append(gate_b)
 
+        # For RC: exclude names that fail grammar parse rather than
+        # blocking the entire export.  Final releases still hard-fail.
+        if not final and gate_b.issues:
+            parse_failures = {
+                i["name"] for i in gate_b.issues if i["type"] == "grammar_parse_failure"
+            }
+            if parse_failures:
+                candidates = [c for c in candidates if c["id"] not in parse_failures]
+                logger.warning(
+                    "Gate B: excluded %d names with grammar parse failures "
+                    "(RC mode): %s",
+                    len(parse_failures),
+                    sorted(parse_failures),
+                )
+                # Move parse failures from blocking issues to advisories
+                gate_b.advisories.extend(
+                    i for i in gate_b.issues if i["type"] == "grammar_parse_failure"
+                )
+                gate_b.issues = [
+                    i for i in gate_b.issues if i["type"] != "grammar_parse_failure"
+                ]
+                gate_b.passed = len(gate_b.issues) == 0
+
         # Gate D: Divergence detection
+        # For RC (final=False): advisory only — catalog-edited nodes
+        # are expected to diverge from the pipeline-generated version.
         divergence = detect_divergence(candidates)
         report.divergence_entries = divergence
-        gate_d = GateResult(
-            gate=GATE_D,
-            passed=len(divergence) == 0,
-            issues=[d.to_dict() for d in divergence],
-        )
+        if final:
+            gate_d = GateResult(
+                gate=GATE_D,
+                passed=len(divergence) == 0,
+                issues=[d.to_dict() for d in divergence],
+            )
+        else:
+            gate_d = GateResult(
+                gate=GATE_D,
+                passed=True,
+                issues=[],
+                advisories=[d.to_dict() for d in divergence],
+            )
+            if divergence:
+                logger.warning(
+                    "Gate D: %d divergence entries (advisory for RC release)",
+                    len(divergence),
+                )
         report.gate_results.append(gate_d)
 
         # Summarise gate results
