@@ -34,6 +34,29 @@ Every `documentation` field MUST follow this paragraph structure, separated by *
 
    See PR-3 below for the strict format rules. **One paragraph**, blank line before, no blank line after (it ends the documentation).
 
+### Sign-convention OMIT rule (STRICT)
+
+A sign-convention paragraph is REQUIRED for quantities whose physical sign depends on a coordinate-system, orientation, or COCOS convention — currents, magnetic fluxes, voltages, electric fields, magnetic fields, velocities, torques, signed angles, etc.
+
+A sign-convention paragraph is **FORBIDDEN** for sign-invariant quantities. The following inputs MUST produce documentation with **NO sign convention paragraph at all** — neither trivial nor non-trivial:
+
+- `unit = "1"` AND no `cocos_label` → dimensionless shape/ratio/count → **omit**
+- The quantity is intrinsically non-negative by physical definition: density, temperature, pressure magnitude, energy, power, count, area, volume, length, radius, distance, elongation, triangularity, squareness, frequency magnitude, lifetime, time interval, mass, opacity, transmissivity, emissivity, probability, fraction → **omit**
+- The quantity is a magnitude of a vector or modulus of a complex number (e.g. `velocity_magnitude`, `|B|`) → **omit**
+
+If you find yourself writing any of the following sign-convention phrasings, DELETE the paragraph entirely:
+
+- ❌ "Positive when the [length / radius / height / width / depth / extent / value / population / count / number ...] is positive"
+- ❌ "Positive when the quantity has a nonzero ..."
+- ❌ "Positive when the [shape parameter / dimensionless ratio / fraction] is positive"
+- ❌ "Positive by definition" / "Positive by construction" / "Inherently positive"
+
+These are all tautological — they convey no information. The reader already knows magnitudes are positive. Adding a sign-convention paragraph for sign-invariant quantities pollutes the catalog with noise and is a documentation defect.
+
+**Decision rule before emitting the sign-convention paragraph:**
+
+> Ask: "Could a competent physicist set up a coordinate frame in which this quantity comes out NEGATIVE under the same physical situation?" If yes (e.g. you can reverse current direction or flip the Z axis), include the sign convention. If no (e.g. it is a length, a count, a density), OMIT it.
+
 ### Layout example (poloidal flux — corrected)
 
 ```
