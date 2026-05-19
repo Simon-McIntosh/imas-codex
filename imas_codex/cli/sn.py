@@ -532,6 +532,81 @@ def _run_sn_cmd(
         raise SystemExit(4)
 
 
+def _execute_rename_cascade(
+    *,
+    rename_spec: str,
+    dry_run: bool,
+    override_edits: list[str],
+    include_accepted: bool,
+) -> None:
+    """Run the parent-rename cascade and exit.
+
+    Parses ``OLD:NEW``, invokes
+    :func:`imas_codex.standard_names.cascade.rename_cascade`, and reports
+    the plan (or applied changes) to the console.  Raises ``SystemExit``
+    on usage / cascade error.
+    """
+    if ":" not in rename_spec:
+        raise click.UsageError(
+            f"--rename expects 'OLD:NEW' (got --rename {rename_spec})"
+        )
+    old_name, _, new_name = rename_spec.partition(":")
+    old_name = old_name.strip()
+    new_name = new_name.strip()
+    if not old_name or not new_name:
+        raise click.UsageError("--rename: both OLD and NEW must be non-empty")
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.cascade import rename_cascade
+
+    # The override_edits flag in sn run is per-name; for the cascade
+    # operation we treat it as a boolean (override any catalog_edit).
+    override_flag = bool(override_edits)
+
+    with GraphClient() as gc:
+        result = rename_cascade(
+            gc,
+            old_name,
+            new_name,
+            dry_run=dry_run,
+            override_edits=override_flag,
+            include_accepted=include_accepted,
+        )
+
+    mode = (
+        "[bold yellow]DRY RUN[/bold yellow]"
+        if result.dry_run
+        else "[bold green]APPLIED[/bold green]"
+    )
+    console.print(
+        f"\n{mode} rename cascade: [cyan]{old_name}[/cyan] → [cyan]{new_name}[/cyan]"
+    )
+    console.print(f"  descendants discovered: {result.total_descendants}")
+    console.print(f"  planned renames:        {len(result.renamed)}")
+    console.print(f"  skipped (independent):  {len(result.skipped)}")
+    console.print(f"  conflicts:              {len(result.conflicts)}")
+
+    if result.conflicts:
+        console.print("\n[bold red]Conflicts (cascade aborted):[/bold red]")
+        for c in result.conflicts:
+            console.print(f"  - {c}")
+        raise SystemExit(2)
+
+    if result.renamed:
+        console.print("\n[bold]Renames:[/bold]")
+        for r in result.renamed[:50]:
+            console.print(f"  [dim]{r['from']}[/dim] → [green]{r['to']}[/green]")
+        if len(result.renamed) > 50:
+            console.print(f"  ... and {len(result.renamed) - 50} more")
+
+    if result.skipped:
+        console.print("\n[bold]Skipped (independent identity):[/bold]")
+        for s in result.skipped[:20]:
+            console.print(f"  [dim]{s['name']}[/dim] — {s['reason']}")
+        if len(result.skipped) > 20:
+            console.print(f"  ... and {len(result.skipped) - 20} more")
+
+
 def _check_pipeline_clear_gate() -> None:
     """Check whether the pipeline version has changed since the last SNRun.
 
@@ -947,6 +1022,29 @@ def _check_pipeline_clear_gate() -> None:
         "Also read from IMAS_CODEX_SN_REVIEW_PROFILE env var."
     ),
 )
+@click.option(
+    "--rename",
+    "rename_spec",
+    type=str,
+    default=None,
+    help=(
+        "Rename a StandardName and cascade through HAS_PARENT descendants. "
+        "Format: 'OLD:NEW' (e.g. 'elongation:elongation_of_closed_flux_surface'). "
+        "Short-circuits the normal pool loop — no LLM work is performed. "
+        "Use --dry-run to preview, --override-edits to override catalog-edited "
+        "descendants, and --include-accepted to override accepted descendants."
+    ),
+)
+@click.option(
+    "--include-accepted",
+    is_flag=True,
+    default=False,
+    help=(
+        "When used with --rename, allow renaming descendants whose "
+        "pipeline_status is 'accepted'. Without this flag, the cascade "
+        "refuses to touch catalog-authoritative names."
+    ),
+)
 @click.argument("paths", nargs=-1)
 def sn_run(
     source: str,
@@ -986,6 +1084,8 @@ def sn_run(
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
     reviewer_profile: str,
+    rename_spec: str | None,
+    include_accepted: bool,
 ) -> None:
     """Generate standard names from a source.
 
@@ -1017,6 +1117,18 @@ def sn_run(
       imas-codex sn run --min-score 0.85 --rotation-cap 5    # tighter thresholds
     """
     import os as _os
+
+    # --- Rename short-circuit ---
+    # When --rename OLD:NEW is provided, run the parent-rename cascade and
+    # exit immediately.  No LLM work is performed; the pool loop is bypassed.
+    if rename_spec is not None:
+        _execute_rename_cascade(
+            rename_spec=rename_spec,
+            dry_run=dry_run,
+            override_edits=list(override_edits),
+            include_accepted=include_accepted,
+        )
+        return
 
     # --- Reviewer profile: propagate via env var so the review pipeline picks
     # it up automatically wherever it reads get_sn_review_names_models() /
