@@ -493,6 +493,8 @@ def _run_sn_cmd(
     row = summary_table(summary)
 
     if quiet:
+        if row.get("stop_reason") == "provider_budget_exhausted":
+            raise SystemExit(4)
         return
 
     # Print summary table (in both rich and plain mode, after display exits)
@@ -513,6 +515,21 @@ def _run_sn_cmd(
         if key in row:
             table.add_row(key, str(row[key]))
     out_console.print(table)
+
+    # Surface provider-exhaustion as an actionable error and non-zero exit:
+    # this is an external (account-level) issue, not a code bug, but the
+    # operator needs to know the run did not complete its intended work.
+    if row.get("stop_reason") == "provider_budget_exhausted":
+        out_console.print(
+            "\n[red bold]Upstream LLM provider exhausted.[/red bold]\n"
+            "  The configured OpenRouter account has insufficient credits "
+            "for the docs / review models.\n"
+            "  Top up the account or raise the spending cap, then re-run "
+            "[bold]sn run[/bold] to resume the queued work.\n"
+            "  Existing partial progress is preserved in the graph; the "
+            "next run picks up where this one stopped."
+        )
+        raise SystemExit(4)
 
 
 def _check_pipeline_clear_gate() -> None:

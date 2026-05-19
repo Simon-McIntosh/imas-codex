@@ -209,6 +209,69 @@ class TestPoolLoop:
         assert spec.health.last_error is not None
         assert "boom" in spec.health.last_error
 
+    @pytest.mark.asyncio
+    async def test_provider_budget_exhausted_halts_pool(self) -> None:
+        """``ProviderBudgetExhausted`` from process() must:
+        - set ``provider_exhausted_event``
+        - set ``stop_event``
+        - release the claim (no work loss)
+        - exit the pool loop (no spinning on an exhausted account)
+        - NOT increment ``error_count`` (this is a stop signal, not a defect)
+        """
+        from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+
+        mgr = BudgetManager(total_budget=5.0)
+        stop = asyncio.Event()
+        provider_exhausted = asyncio.Event()
+        released = []
+
+        async def claim() -> dict:
+            return {"items": ["x"]}
+
+        async def process(batch: dict) -> int:
+            raise ProviderBudgetExhausted(
+                "openrouter credits depleted (test simulation)"
+            )
+
+        async def release(batch: dict) -> None:
+            released.append(batch)
+
+        spec = PoolSpec(
+            name="generate_name", claim=claim, process=process, release=release
+        )
+        spec.health.pending_count = 1
+        spec.backoff.base = 0.05
+        spec.backoff.cap = 0.1
+        spec.backoff.reset()
+
+        task = asyncio.create_task(
+            pool_loop(
+                spec,
+                mgr,
+                stop,
+                active_pools_fn=lambda: {"generate_name"},
+                admission_poll=0.05,
+                provider_exhausted_event=provider_exhausted,
+            )
+        )
+        # The pool must exit on its own — do not set stop_event externally.
+        await asyncio.wait_for(task, timeout=2.0)
+
+        assert provider_exhausted.is_set(), (
+            "ProviderBudgetExhausted must set provider_exhausted_event."
+        )
+        assert stop.is_set(), (
+            "ProviderBudgetExhausted must also set stop_event so other pools drain."
+        )
+        assert len(released) == 1, "Claim must be released before pool exits."
+        assert spec.health.error_count == 0, (
+            "Provider exhaustion is a stop signal, not a defect — error_count "
+            "must stay at 0."
+        )
+        assert spec.health.last_error is not None
+        assert "provider_budget_exhausted" in spec.health.last_error
+        assert spec.health.in_flight == 0
+
 
 # =====================================================================
 # run_pools orchestration

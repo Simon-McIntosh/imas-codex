@@ -49,6 +49,8 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
@@ -229,6 +231,7 @@ async def pool_loop(
     weights: dict[str, float] = POOL_WEIGHTS,
     admission_poll: float = 0.5,
     replica_idx: int = 0,
+    provider_exhausted_event: asyncio.Event | None = None,
 ) -> None:
     """Cooperative pool worker.
 
@@ -315,6 +318,30 @@ async def pool_loop(
         except asyncio.CancelledError:
             logger.info("%s cancelled mid-batch", tag)
             raise
+        except ProviderBudgetExhausted as exc:
+            # Peer to cost-limit / time-limit: an exhausted provider account
+            # cannot be retried against. Signal global shutdown so all pools
+            # drain rather than spinning on claim → exhausted → release.
+            spec.health.last_error = f"provider_budget_exhausted: {exc}"
+            logger.warning(
+                "%s provider budget exhausted — signalling shutdown: %s",
+                tag,
+                exc,
+            )
+            if provider_exhausted_event is not None:
+                provider_exhausted_event.set()
+            stop_event.set()
+            if spec.release is not None:
+                try:
+                    await spec.release(batch)
+                except Exception as rel_exc:  # noqa: BLE001
+                    logger.exception(
+                        "%s release failed (continuing): %s",
+                        tag,
+                        rel_exc,
+                    )
+            spec.health.in_flight = max(0, spec.health.in_flight - 1)
+            break
         except Exception as exc:  # noqa: BLE001
             spec.health.error_count += 1
             spec.health.last_error = f"process: {exc!r}"
@@ -539,6 +566,7 @@ async def run_pools(
     weights: dict[str, float] = POOL_WEIGHTS,
     idle_exhausted_event: asyncio.Event | None = None,
     budget_saturated_event: asyncio.Event | None = None,
+    provider_exhausted_event: asyncio.Event | None = None,
     idle_exhaustion_poll: float = 1.0,
     idle_exhaustion_polls: int = 30,
 ) -> dict[str, PoolHealth]:
@@ -625,6 +653,7 @@ async def run_pools(
                         active_pools_fn=active_pools_fn,
                         weights=weights,
                         replica_idx=replica_idx,
+                        provider_exhausted_event=provider_exhausted_event,
                     ),
                     name=f"pool[{p.name}#{replica_idx}]",
                 )

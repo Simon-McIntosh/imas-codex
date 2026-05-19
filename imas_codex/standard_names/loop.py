@@ -50,6 +50,7 @@ _STOP_TO_STATUS: dict[str, str] = {
     "completed": "completed",
     "budget_exhausted": "completed",
     "budget_saturated": "completed",
+    "provider_budget_exhausted": "degraded",
     "time_limit_reached": "completed",
     "stalled": "completed",
     "no_work": "completed",
@@ -642,6 +643,12 @@ async def run_sn_pools(
     budget_saturated_event = asyncio.Event()
     # Set when the wall-clock deadline (--time-limit) fires.
     time_limit_event = asyncio.Event()
+    # Set when any pool worker hits ``ProviderBudgetExhausted`` from the
+    # upstream LLM provider (e.g. OpenRouter credit limit). Treated as a
+    # peer stop signal — retrying against an exhausted account just
+    # spins. The pool loop catches the exception, sets this event, and
+    # propagates stop_event so all pools drain.
+    provider_exhausted_event = asyncio.Event()
 
     # Shared BudgetManager — all six pools draw from the same pot.
     # Treat cost_limit <= 0 as unlimited (local GPU = zero cost).
@@ -946,6 +953,7 @@ async def run_sn_pools(
                 pending_fn=pending_fn,
                 idle_exhausted_event=idle_exhausted_event,
                 budget_saturated_event=budget_saturated_event,
+                provider_exhausted_event=provider_exhausted_event,
             )
         finally:
             if not sweep_task.done():
@@ -1052,6 +1060,12 @@ async def run_sn_pools(
         # ``no_eligible_work`` rather than mistaken for a user interrupt.
         if shared_mgr.hard_exhausted():
             summary.stop_reason = "budget_exhausted"
+        elif provider_exhausted_event.is_set():
+            # Upstream LLM provider credits / billing limit hit — peer
+            # to local cost_limit. Run is degraded: some work may have
+            # completed before the failure, but the remaining queue is
+            # blocked until the account is topped up.
+            summary.stop_reason = "provider_budget_exhausted"
         elif budget_saturated_event.is_set():
             summary.stop_reason = "budget_saturated"
         elif time_limit_event.is_set():
