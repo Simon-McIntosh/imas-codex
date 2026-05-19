@@ -9594,6 +9594,82 @@ def release_refine_docs_failed_claims(
     return released
 
 
+# =============================================================================
+# Routing helper: desc-name similarity gate → REFINE_DOCS
+# =============================================================================
+
+
+@retry_on_deadlock()
+def mark_for_refine_docs(
+    sn_id: str,
+    *,
+    desc_name_similarity: float,
+    claim_token: str,
+    synthetic_score: float = 0.30,
+) -> bool:
+    """Route a derived parent to REFINE_DOCS by writing a synthetic docs-review score.
+
+    Called from the REVIEW_NAME pre-step when ``origin='derived'`` AND
+    ``desc_name_similarity < threshold``.  The node's description is
+    considered misaligned with the name; we skip name scoring and instead
+    push the item into the REFINE_DOCS pool.
+
+    Mechanics:
+
+    1. Verify ``claim_token`` so no other worker has claimed this node.
+    2. Transition ``name_stage`` back to the pre-review state that allows
+       the node to wait until ``name_stage='accepted'`` is later confirmed.
+       Because ``seed_parent_sources`` already set ``name_stage='accepted'``
+       for admitted parents, we restore that here so the node can still
+       reach ``GENERATE_DOCS``.
+    3. Set ``docs_stage='reviewed'`` with a synthetic ``reviewer_score_docs``
+       below ``min_score`` so ``claim_refine_docs_batch`` picks it up.
+    4. Store ``desc_name_similarity`` on the node for audit / reviewer context.
+    5. Clear the name-review claim token.
+
+    Returns ``True`` if the node was updated, ``False`` if the claim_token
+    no longer matches (race condition — caller should skip).
+
+    Args:
+        sn_id: StandardName node id.
+        desc_name_similarity: Cosine similarity value to store on the node.
+        claim_token: Token set by the REVIEW_NAME claim step; used to
+            confirm ownership before writing.
+        synthetic_score: ``reviewer_score_docs`` value written (default
+            ``0.30``, well below any ``min_score``).
+    """
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            WHERE sn.claim_token = $token
+            SET sn.desc_name_similarity  = $sim,
+                sn.docs_stage            = 'reviewed',
+                sn.reviewer_score_docs   = $synthetic_score,
+                sn.reviewer_model_docs   = '(desc_name_similarity_gate)',
+                sn.reviewer_comments_docs =
+                    '(desc-name similarity ' + toString($sim) +
+                    ' below threshold; routed to REFINE_DOCS)',
+                sn.name_stage            = 'accepted',
+                sn.claimed_at            = null,
+                sn.claim_token           = null
+            RETURN count(sn) AS updated
+            """,
+            id=sn_id,
+            token=claim_token,
+            sim=desc_name_similarity,
+            synthetic_score=synthetic_score,
+        )
+    updated = result[0]["updated"] if result else 0
+    logger.debug(
+        "mark_for_refine_docs: %s sim=%.3f updated=%d",
+        sn_id,
+        desc_name_similarity,
+        updated,
+    )
+    return bool(updated)
+
+
 @retry_on_deadlock()
 def release_all_orphan_claims() -> dict[str, int]:
     """Release all claimed-but-unreleased StandardName and StandardNameSource nodes.

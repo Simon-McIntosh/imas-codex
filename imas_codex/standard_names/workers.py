@@ -5167,12 +5167,79 @@ async def process_review_name_batch(
 
         sem_sim: float | None = None
         sem_issues: list[str] = []
-        if item.get("origin") in ("deterministic", "derived"):
-            logger.debug(
-                "review_name: skipping semantic-sim gate for derived "
-                "parent %s (description is placeholder until GENERATE_DOCS)",
-                sn_id,
+        is_derived = item.get("origin") in ("deterministic", "derived")
+        if is_derived:
+            # ── Phase 5: desc-name similarity gate for derived parents ────
+            # For derived parents, the description may have been seeded from
+            # a placeholder or a DD-derived string that doesn't align with
+            # the name.  Compute desc_name_similarity and, if below
+            # threshold, route to REFINE_DOCS instead of name scoring.
+            # This keeps description-quality failures off the name axis.
+            #
+            # Unlike the general semantic_similarity_check (which uses the
+            # quarantine-oriented SEMANTIC_SIM_CRITICAL threshold and routes
+            # to REFINE_NAME), this gate uses the dedicated
+            # desc_name_similarity_threshold and routes to REFINE_DOCS.
+            from imas_codex.standard_names.desc_name_sim import (
+                compute_desc_name_similarity,
+                should_route_to_refine_docs,
             )
+
+            desc_sim: float | None = None
+            try:
+                desc_sim = await _asyncio.to_thread(
+                    compute_desc_name_similarity,
+                    sn_id,
+                    item.get("description") or "",
+                )
+            except Exception:
+                logger.debug(
+                    "review_name: desc_name_similarity failed for derived %s",
+                    sn_id,
+                    exc_info=True,
+                )
+
+            if desc_sim is not None and should_route_to_refine_docs(desc_sim):
+                logger.info(
+                    "review_name: desc-name sim gate FIRED for derived %s "
+                    "(sim=%.3f) — routing to REFINE_DOCS",
+                    sn_id,
+                    desc_sim,
+                )
+                from imas_codex.standard_names.graph_ops import mark_for_refine_docs
+
+                try:
+                    mark_for_refine_docs(
+                        sn_id,
+                        desc_name_similarity=desc_sim,
+                        claim_token=claim_token,
+                    )
+                    processed += 1
+                    if on_event:
+                        on_event(
+                            {
+                                "type": "review_name_desc_sim_gate_routed_docs",
+                                "sn_id": sn_id,
+                                "desc_name_similarity": desc_sim,
+                            }
+                        )
+                except Exception:
+                    logger.debug(
+                        "review_name: mark_for_refine_docs failed for %s",
+                        sn_id,
+                        exc_info=True,
+                    )
+                continue
+
+            # Below threshold not triggered (sim is high enough, or embed
+            # failed — treat as "gate not applicable"). Log and fall through
+            # to normal name scoring.
+            if desc_sim is not None:
+                logger.debug(
+                    "review_name: derived %s desc-name sim=%.3f (gate clear)",
+                    sn_id,
+                    desc_sim,
+                )
         else:
             try:
                 sem_sim, sem_issues = await _asyncio.to_thread(

@@ -422,6 +422,11 @@ retry-attempts = 1
 # Hybrid-search k expansion factor used on retry.
 retry-k-expansion = 12
 
+# Desc-name similarity gate: cosine threshold below which a derived parent's
+# description is considered misaligned with the name, routing the item to
+# REFINE_DOCS instead of completing name review.  Calibrated in Phase 4.
+desc-name-similarity-threshold = 0.55
+
 # Default staging directory for export/preview/publish (ephemeral).
 staging-dir = "~/.cache/imas-codex/staging"
 # Path to ISNC git checkout. Empty = auto-discover from sibling dirs.

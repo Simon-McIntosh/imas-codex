@@ -819,6 +819,21 @@ def get_sn_retry_k_expansion() -> int:
     return int(section.get("retry-k-expansion", _SN_DEFAULTS["retry-k-expansion"]))
 
 
+def get_sn_desc_name_similarity_threshold() -> float:
+    """Cosine-similarity gate threshold for desc-name alignment on derived parents.
+
+    Below this value the item is routed to REFINE_DOCS instead of completing
+    name review — the description is considered misaligned with the name.
+
+    Priority: IMAS_CODEX_SN_DESC_NAME_SIM_THRESHOLD env
+              → [sn].desc-name-similarity-threshold → ``0.55``.
+    """
+    if env := os.getenv("IMAS_CODEX_SN_DESC_NAME_SIM_THRESHOLD"):
+        return float(env)
+    section = _get_section("sn")
+    return float(section.get("desc-name-similarity-threshold", 0.55))
+
+
 def get_sn_staging_dir() -> Path:
     """Default staging directory for sn export/preview/publish.
 
