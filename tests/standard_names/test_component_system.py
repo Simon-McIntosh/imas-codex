@@ -252,6 +252,166 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
     )
 
 
+def test_seed_parent_sources_drafts_with_deterministic_origin():
+    """Parents must enter the pipeline at ``name_stage='drafted'`` so they
+    flow through REVIEW_NAME. They must also be stamped
+    ``origin='deterministic'`` so REFINE_NAME knows to skip them.
+
+    Reproduces the audit finding on ``magnetic_field``: the prior
+    shortcut wrote ``name_stage='accepted'`` directly with no review
+    provenance — a "shortcut" the user explicitly rejected.
+    """
+    gc = MagicMock()
+    captured_sets: list[str] = []
+
+    def _query(cypher, **kwargs):
+        captured_sets.append(cypher)
+        if "name_stage IS NULL" in cypher and "COMPONENT_OF" in cypher:
+            return [
+                {
+                    "parent_id": "magnetic_field",
+                    "child_data": [
+                        {
+                            "id": "toroidal_magnetic_field",
+                            "unit": "T",
+                            "cocos": None,
+                            "physics_domain": "magnetics",
+                            "kind": "scalar",
+                        },
+                    ],
+                    "dd_paths": [],
+                    "edge_kinds": ["projection"],
+                }
+            ]
+        return []
+
+    gc.query = _query
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+
+    from imas_codex.standard_names.graph_ops import seed_parent_sources
+
+    assert seed_parent_sources(gc) == 1
+    # The write query must transition into REVIEW_NAME, not skip past it.
+    write_query = next(q for q in captured_sets if "SET parent.name_stage" in q)
+    assert "parent.name_stage = 'drafted'" in write_query, (
+        "seed_parent_sources must write name_stage='drafted', not "
+        "'accepted' — parents must flow through REVIEW_NAME like any "
+        "other name (audit: magnetic_field had reviewer_score_name=None)."
+    )
+    assert "parent.origin = 'deterministic'" in write_query, (
+        "Parents must be stamped origin='deterministic' so REFINE_NAME "
+        "knows to skip them (structurally fixed names have no refinement target)."
+    )
+
+
+def test_refine_name_claim_skips_deterministic_origin():
+    """The REFINE_NAME claim must exclude ``origin='deterministic'``.
+
+    Refining a structurally-derived parent is meaningless — the name
+    IS ``magnetic_field``, there's no alternative to propose. A
+    below-min review should leave the parent at ``reviewed`` so it
+    visibly fails the export quality gate, prompting manual review.
+    """
+    import inspect
+
+    from imas_codex.standard_names import graph_ops
+
+    src = inspect.getsource(graph_ops.claim_refine_name_batch)
+    assert "origin" in src and "deterministic" in src, (
+        "claim_refine_name_batch must filter out origin='deterministic'."
+    )
+    assert "coalesce(sn.origin, '') <> 'deterministic'" in src, (
+        "Use coalesce(sn.origin, '') <> 'deterministic' so legacy nodes "
+        "with no origin field are still claimable for refinement."
+    )
+
+
+def test_backfill_resets_shortcut_accepted_parents():
+    """``backfill_deterministic_parent_origin`` finds parents that were
+    accepted via the old shortcut and resets them to drafted+deterministic.
+
+    The selector must require:
+      - name_stage='accepted'
+      - reviewer_score_name IS NULL (no review provenance)
+      - review_name_count IS NULL
+      - origin IS NULL (not already marked)
+      - at least one inbound COMPONENT_OF edge (structural parent)
+    """
+    gc = MagicMock()
+    captured: list[str] = []
+
+    def _query(cypher, **kwargs):
+        captured.append(cypher)
+        return [{"reset": 17}]
+
+    gc.query = _query
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+
+    from imas_codex.standard_names.graph_ops import (
+        backfill_deterministic_parent_origin,
+    )
+
+    n = backfill_deterministic_parent_origin(gc)
+    assert n == 17
+    q = captured[0]
+    # All five gating conditions must be in the WHERE clause.
+    assert "name_stage = 'accepted'" in q
+    assert "reviewer_score_name IS NULL" in q
+    assert "review_name_count IS NULL" in q
+    assert "origin IS NULL" in q
+    assert "COMPONENT_OF" in q
+    # Output transition.
+    assert "name_stage = 'drafted'" in q
+    assert "origin = 'deterministic'" in q
+
+
+def test_persist_refined_name_migrates_component_of_edges():
+    """When a name is superseded by a refinement, any inbound
+    ``COMPONENT_OF`` edges must migrate to the successor so the SPA's
+    parent widget points at the live name, not a refined-away predecessor.
+    """
+    import inspect
+
+    from imas_codex.standard_names import graph_ops
+
+    src = inspect.getsource(graph_ops.persist_refined_name)
+    # The migration block must be present in the Cypher.
+    assert "COMPONENT_OF]->(old)" in src, (
+        "persist_refined_name Cypher must locate inbound COMPONENT_OF "
+        "edges pointing at the soon-to-be-superseded node."
+    )
+    assert "COMPONENT_OF]->(new)" in src, (
+        "persist_refined_name Cypher must MERGE the migrated edges onto "
+        "the new (successor) node."
+    )
+    # And edge properties must be preserved during the migration so axis /
+    # operator_kind / role survive supersede.
+    assert "properties(c_old)" in src, (
+        "Edge properties (operator_kind, axis, role, …) must be "
+        "preserved when migrating COMPONENT_OF to the successor."
+    )
+
+
+def test_rederive_structural_edges_migrates_off_superseded():
+    """``rederive_structural_edges`` exposes a ``migrated`` count and
+    walks the REFINED_FROM chain to find the live tip.
+    """
+    import inspect
+
+    from imas_codex.standard_names import graph_ops
+
+    src = inspect.getsource(graph_ops._migrate_component_of_off_superseded)
+    assert "REFINED_FROM" in src, (
+        "Migration must walk REFINED_FROM* to find the live successor."
+    )
+    assert "name_stage = 'superseded'" in src
+    assert "name_stage <> 'superseded'" in src, (
+        "The successor selector must require the tip is NOT also superseded."
+    )
+
+
 def test_seed_parent_sources_skips_heterogeneous_units():
     """seed_parent_sources skips parents with non-uniform child units."""
     gc = MagicMock()

@@ -1349,16 +1349,118 @@ def rederive_structural_edges() -> dict[str, int]:
     Reads all SN ids, runs ``derive_edges()`` on each, and writes any missing
     edges. Idempotent — uses MERGE so existing edges are not duplicated.
 
-    Returns counts of edges created per type.
+    Also migrates any inbound ``COMPONENT_OF`` edges that still point at a
+    superseded predecessor to the live successor (walking the
+    ``REFINED_FROM`` chain backwards). This keeps the SPA's parent widget
+    pointing at the active name rather than a refined-away predecessor.
+
+    Returns counts of edges created per type, plus ``migrated`` for the
+    number of COMPONENT_OF edges rewired.
     """
     with GraphClient() as gc:
         all_sns = gc.query("MATCH (sn:StandardName) RETURN sn.id AS id")
         names = [{"id": r["id"]} for r in all_sns if r.get("id")]
         if not names:
-            return {"COMPONENT_OF": 0, "HAS_ERROR": 0}
+            return {"COMPONENT_OF": 0, "HAS_ERROR": 0, "migrated": 0}
         _write_standard_name_edges(gc, names)
-    logger.info("rederive_structural_edges: processed %d names", len(names))
-    return {"processed": len(names)}
+        migrated = _migrate_component_of_off_superseded(gc)
+    logger.info(
+        "rederive_structural_edges: processed %d names, migrated %d COMPONENT_OF edges",
+        len(names),
+        migrated,
+    )
+    return {"processed": len(names), "migrated": migrated}
+
+
+def backfill_deterministic_parent_origin(gc: Any | None = None) -> int:
+    """Mark existing shortcut-accepted parent SNs for proper REVIEW_NAME.
+
+    Identifies parents that were accepted via the old ``seed_parent_sources``
+    shortcut path: ``name_stage='accepted'`` but no review provenance
+    (``reviewer_score_name IS NULL`` and ``review_name_count IS NULL``)
+    and at least one inbound ``COMPONENT_OF`` edge confirming structural
+    parenthood. Resets each to ``name_stage='drafted'`` and stamps
+    ``origin='deterministic'`` so the next ``sn run`` puts them through
+    the standard ``REVIEW_NAME`` pipeline. Docs (already reviewed) are
+    left untouched.
+
+    Idempotent — once a parent has a name-review score or its origin is
+    set, this function leaves it alone.
+
+    Returns the number of parents reset.
+    """
+    _own_gc = gc is None
+    if _own_gc:
+        gc = GraphClient().__enter__()
+    try:
+        result = list(
+            gc.query(
+                """
+                MATCH (parent:StandardName)
+                WHERE parent.name_stage = 'accepted'
+                  AND parent.reviewer_score_name IS NULL
+                  AND parent.review_name_count IS NULL
+                  AND parent.origin IS NULL
+                  AND EXISTS { (child)-[:COMPONENT_OF]->(parent) }
+                SET parent.name_stage = 'drafted',
+                    parent.origin = 'deterministic'
+                RETURN count(parent) AS reset
+                """
+            )
+        )
+        n = int(result[0].get("reset") or 0) if result else 0
+        if n:
+            logger.info(
+                "backfill_deterministic_parent_origin: reset %d shortcut-accepted parents",
+                n,
+            )
+        return n
+    finally:
+        if _own_gc:
+            gc.__exit__(None, None, None)
+
+
+def _migrate_component_of_off_superseded(gc: Any) -> int:
+    """Rewire COMPONENT_OF edges from superseded parents to their successors.
+
+    A name that supersedes another carries a ``REFINED_FROM`` edge back
+    to its predecessor. We walk the chain to find the live tip (the SN
+    at the head whose ``name_stage`` is not ``superseded``) and migrate
+    each inbound ``COMPONENT_OF`` edge to that tip, preserving edge
+    properties. If no live tip exists (every node on the chain is
+    superseded — should not happen in practice), the edge is left
+    alone so manual review can investigate.
+
+    Returns the number of COMPONENT_OF edges actually migrated.
+    """
+    # The live successor is the chain-head: the node reachable from
+    # ``old`` by following ``<-[:REFINED_FROM]-`` zero or more times,
+    # whose own ``name_stage`` is not 'superseded'. Cypher's variable-
+    # length pattern returns paths; we pick the longest hop count to
+    # land at the tip of the chain.
+    result = list(
+        gc.query(
+            """
+            MATCH (old:StandardName)
+            WHERE old.name_stage = 'superseded'
+              AND EXISTS { (child)-[:COMPONENT_OF]->(old) }
+            MATCH path = (tip:StandardName)-[:REFINED_FROM*1..]->(old)
+            WHERE tip.name_stage <> 'superseded'
+            WITH old, tip, length(path) AS hops
+            ORDER BY hops DESC
+            WITH old, head(collect(tip)) AS tip
+            MATCH (child)-[c:COMPONENT_OF]->(old)
+            WITH tip, child, properties(c) AS props, c
+            DELETE c
+            MERGE (child)-[c_new:COMPONENT_OF]->(tip)
+            SET c_new = props
+            RETURN count(c_new) AS migrated
+            """
+        )
+    )
+    if not result:
+        return 0
+    return int(result[0].get("migrated") or 0)
 
 
 def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
@@ -1406,16 +1508,26 @@ def seed_parent_sources(gc: Any | None = None) -> int:
     orphaned even though the pipeline now considers them seedable.
     Matching structurally lets the pipeline self-heal on every run.
 
-    Parent names are DETERMINISTIC — derived from children by stripping
-    the component suffix. This function:
+    Parent names are DETERMINISTIC — the name itself is grammar-derived
+    from the components' shared base (e.g. ``magnetic_field`` is the
+    only sensible parent of ``poloidal_magnetic_field`` /
+    ``toroidal_magnetic_field`` / …). Even so, we route them through
+    ``REVIEW_NAME`` like any LLM-composed name:
 
-    1. Waits until ALL children of a parent are composed (have ``name_stage``).
+    1. Waits until ALL children of a parent have a ``name_stage`` set.
     2. Copies unit and cocos from children (asserts uniformity).
-    3. Sets ``name_stage='accepted'`` (deterministic, no review needed).
-    4. Sets ``docs_stage='pending'`` so the parent enters generate_docs.
-    5. Creates a ``StandardNameSource`` with ``status='composed'`` for audit.
-    6. Runs ISN parse to populate grammar fields.
-    7. Clears ``needs_composition`` on the parent.
+    3. Sets ``name_stage='drafted'`` — REVIEW_NAME will score the
+       deterministic name against the standard rubric. A grammar-
+       derived parent should review well; if it doesn't, the failure
+       surfaces rather than being papered over.
+    4. Stamps ``origin='deterministic'`` so REFINE_NAME knows to skip
+       this node (structural names have no refinement target — the
+       parent label IS what it is).
+    5. Sets ``docs_stage='pending'`` so the parent enters generate_docs
+       once the name review passes.
+    6. Creates a ``StandardNameSource`` with ``status='composed'`` for audit.
+    7. Runs ISN parse to populate grammar fields.
+    8. Clears ``needs_composition`` on the parent.
 
     Returns the number of parents fully populated.
     """
@@ -1589,9 +1701,10 @@ def seed_parent_sources(gc: Any | None = None) -> int:
             gc.query(
                 """
                 MATCH (parent:StandardName {id: $parent_id})
-                SET parent.name_stage = 'accepted',
+                SET parent.name_stage = 'drafted',
                     parent.docs_stage = 'pending',
                     parent.validation_status = 'valid',
+                    parent.origin = 'deterministic',
                     parent.kind = $kind,
                     parent.unit = coalesce($unit, parent.unit),
                     parent.cocos_transformation_type =
@@ -7700,6 +7813,13 @@ def claim_refine_name_batch(
         " AND sn.reviewer_score_name < $min_score"
         " AND coalesce(sn.chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # Deterministic parents (seeded by ``seed_parent_sources``) have
+        # no refinement target — the name is structurally fixed. Skip
+        # them so they don't enter the refine loop and either stay at
+        # ``reviewed`` (visibly below the catalog export gate, prompting
+        # manual investigation) or get marked exhausted via a separate
+        # maintenance sweep.
+        " AND coalesce(sn.origin, '') <> 'deterministic'"
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
@@ -8022,6 +8142,26 @@ def persist_refined_name(
                         FOREACH (rel IN hsn_rels | DELETE rel)
                         WITH new, old, hsn_nodes
                         FOREACH (n IN hsn_nodes | MERGE (n)-[:HAS_STANDARD_NAME]->(new))
+
+                        // 5b. Migrate inbound COMPONENT_OF edges
+                        // (child)-[:COMPONENT_OF]->(old) → (child)-[:COMPONENT_OF]->(new)
+                        // Preserves edge properties so the SPA's parent
+                        // widget points at the live successor, not the
+                        // superseded predecessor.
+                        WITH DISTINCT new, old
+                        OPTIONAL MATCH (child)-[c_old:COMPONENT_OF]->(old)
+                        WITH new, old,
+                             collect({{
+                                 child: child,
+                                 props: properties(c_old),
+                                 rel:   c_old
+                             }}) AS comp_links
+                        FOREACH (link IN comp_links | DELETE link.rel)
+                        WITH new, old, comp_links
+                        FOREACH (link IN comp_links |
+                            MERGE (link.child)-[c_new:COMPONENT_OF]->(new)
+                            SET   c_new = link.props
+                        )
 
                         // 6. Inherit HAS_UNIT and IN_CLUSTER edges from the
                         // predecessor so that downstream claim-expand

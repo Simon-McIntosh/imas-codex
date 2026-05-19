@@ -779,6 +779,7 @@ async def run_sn_pools(
         # pipeline until the edges are re-derived. Idempotent (MERGE)
         # and fast (~1s for ~200 SNs) so safe to run on every loop.
         from imas_codex.standard_names.graph_ops import (
+            backfill_deterministic_parent_origin,
             rederive_structural_edges,
             seed_parent_sources,
         )
@@ -788,6 +789,21 @@ async def run_sn_pools(
             "rederive_structural_edges processed %d SN(s)",
             edge_result.get("processed", 0),
         )
+        if edge_result.get("migrated"):
+            logger.info(
+                "Migrated %d COMPONENT_OF edges off superseded parents",
+                edge_result["migrated"],
+            )
+
+        # One-shot-then-idempotent: pre-existing parents accepted via the
+        # old seed_parent_sources shortcut (no name review) are reset to
+        # 'drafted' so the standard REVIEW_NAME pool can score them.
+        backfilled = await asyncio.to_thread(backfill_deterministic_parent_origin)
+        if backfilled:
+            logger.info(
+                "Backfilled %d shortcut-accepted parents to drafted+deterministic",
+                backfilled,
+            )
 
         parent_count = await asyncio.to_thread(seed_parent_sources)
         if parent_count:
