@@ -766,8 +766,28 @@ async def run_sn_pools(
                 seeded = await _seed_all_domains(source=source, max_sources=max_sources)
                 logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
-        # ── B3b: Seed parent component sources ────────────────────
-        from imas_codex.standard_names.graph_ops import seed_parent_sources
+        # ── B3b: Rederive structural edges, then seed parent sources ─
+        # Backfill any missing COMPONENT_OF / HAS_ERROR edges first so
+        # ``seed_parent_sources`` can see every legitimate placeholder.
+        # This catches two failure modes:
+        #   1. Children written before ``_write_standard_name_edges``
+        #      existed (no edges ever derived).
+        #   2. ISN grammar revisions that newly derive COMPONENT_OF
+        #      edges absent at the original write time
+        #      (e.g. ``flux_surface_mean_*``, ``total_plasma_current``).
+        # Both classes leave parents structurally inaccessible to the
+        # pipeline until the edges are re-derived. Idempotent (MERGE)
+        # and fast (~1s for ~200 SNs) so safe to run on every loop.
+        from imas_codex.standard_names.graph_ops import (
+            rederive_structural_edges,
+            seed_parent_sources,
+        )
+
+        edge_result = await asyncio.to_thread(rederive_structural_edges)
+        logger.debug(
+            "rederive_structural_edges processed %d SN(s)",
+            edge_result.get("processed", 0),
+        )
 
         parent_count = await asyncio.to_thread(seed_parent_sources)
         if parent_count:
@@ -1054,13 +1074,22 @@ async def run_sn_pools(
             )
 
         # ── Post-drain structural fixups ──────────────────────────
-        # Seed any parent placeholders whose children are now composed,
-        # then resolve stale documentation links.  Both are non-LLM
-        # graph operations — safe to run at shutdown.
+        # Re-derive structural edges (catches any new COMPONENT_OF /
+        # HAS_ERROR derivations from names composed during this run),
+        # seed any parent placeholders whose children are now composed,
+        # then resolve stale documentation links.  All non-LLM graph
+        # operations — safe to run at shutdown.
         FIXUP_TIMEOUT = 30.0
         try:
-            from imas_codex.standard_names.graph_ops import seed_parent_sources
+            from imas_codex.standard_names.graph_ops import (
+                rederive_structural_edges,
+                seed_parent_sources,
+            )
 
+            await asyncio.wait_for(
+                asyncio.to_thread(rederive_structural_edges),
+                timeout=FIXUP_TIMEOUT,
+            )
             _post_parents = await asyncio.wait_for(
                 asyncio.to_thread(seed_parent_sources),
                 timeout=FIXUP_TIMEOUT,

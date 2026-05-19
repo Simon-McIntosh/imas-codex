@@ -160,6 +160,41 @@ def test_seed_parent_sources_skips_incomplete_children():
     assert count == 0
 
 
+def test_run_sn_pools_rederives_edges_before_seeding():
+    """``run_sn_pools`` must call ``rederive_structural_edges`` before
+    ``seed_parent_sources`` so newly-grammar-derived parent edges land
+    in the graph in time to be seeded on the same run.
+
+    Reproduces the production gap: names like
+    ``flux_surface_mean_magnetic_field_magnitude`` and
+    ``toroidal_total_plasma_current`` had no COMPONENT_OF edges at all
+    in the live graph, so their parents
+    (``flux_surface_mean_magnetic_field`` / ``total_plasma_current``)
+    were entirely absent rather than orphan placeholders — invisible
+    to ``seed_parent_sources`` no matter how robust its query is.
+    """
+    import inspect
+
+    from imas_codex.standard_names import loop
+
+    src = inspect.getsource(loop.run_sn_pools)
+    # Both helpers must be invoked (not just mentioned in comments) —
+    # check for ``asyncio.to_thread(<helper>)`` call sites.
+    assert "asyncio.to_thread(rederive_structural_edges)" in src, (
+        "run_sn_pools must invoke rederive_structural_edges to backfill "
+        "missing COMPONENT_OF edges before parent seeding."
+    )
+    assert "asyncio.to_thread(seed_parent_sources)" in src
+    # The rederive call must precede the seed call so newly-derived
+    # placeholders are visible to the same seed pass.
+    assert src.index("asyncio.to_thread(rederive_structural_edges)") < src.index(
+        "asyncio.to_thread(seed_parent_sources)"
+    ), (
+        "rederive_structural_edges must run before seed_parent_sources "
+        "in run_sn_pools (rederive creates the placeholder, seed fills it)."
+    )
+
+
 def test_seed_parent_sources_picks_up_placeholder_without_flag():
     """Regression: an orphan placeholder (name_stage NULL) must be seeded
     even if ``needs_composition`` is missing.
