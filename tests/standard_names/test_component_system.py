@@ -83,7 +83,7 @@ def test_seed_parent_sources_creates_source():
 
     def _query(cypher, **kwargs):
         call_log.append(cypher)
-        if "needs_composition: true" in cypher:
+        if "name_stage IS NULL" in cypher:
             return [
                 {
                     "parent_id": "magnetic_field",
@@ -160,6 +160,63 @@ def test_seed_parent_sources_skips_incomplete_children():
     assert count == 0
 
 
+def test_seed_parent_sources_picks_up_placeholder_without_flag():
+    """Regression: an orphan placeholder (name_stage NULL) must be seeded
+    even if ``needs_composition`` is missing.
+
+    Reproduces the bug where ``unary_postfix`` was added to the seedable
+    edge-kinds set after some placeholders had already been written.
+    The earlier write path never set ``needs_composition`` on those
+    placeholders, so the old ``seed_parent_sources`` (which keyed on
+    ``needs_composition: true``) left them orphaned forever — and
+    ``sn run --flush`` correctly reported "no eligible work" even
+    though structurally those parents were ready to seed.
+
+    The fix: select parents structurally by ``name_stage IS NULL`` plus
+    a seedable COMPONENT_OF edge — no flag required.
+    """
+    gc = MagicMock()
+    captured_cyphers: list[str] = []
+
+    def _query(cypher, **kwargs):
+        captured_cyphers.append(cypher)
+        # Match the new structural query; the mock returns a parent with
+        # NO ``needs_composition`` set (the orphan-placeholder shape).
+        if "name_stage IS NULL" in cypher and "COMPONENT_OF" in cypher:
+            return [
+                {
+                    "parent_id": "average_magnetic_field",
+                    "child_data": [
+                        {
+                            "id": "average_magnetic_field_magnitude",
+                            "unit": "T",
+                            "cocos": None,
+                            "physics_domain": "equilibrium",
+                            "kind": "scalar",
+                        },
+                    ],
+                    "dd_paths": [],
+                    "edge_kinds": ["unary_postfix"],
+                }
+            ]
+        return []
+
+    gc.query = _query
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+
+    from imas_codex.standard_names.graph_ops import seed_parent_sources
+
+    assert seed_parent_sources(gc) == 1
+    # The selection query MUST NOT depend on the needs_composition flag.
+    selection_query = captured_cyphers[0]
+    assert "needs_composition: true" not in selection_query, (
+        "seed_parent_sources must not key on needs_composition=true — "
+        "that flag is set at edge-write time and goes stale when the "
+        "seedable edge-kinds set grows."
+    )
+
+
 def test_seed_parent_sources_skips_heterogeneous_units():
     """seed_parent_sources skips parents with non-uniform child units."""
     gc = MagicMock()
@@ -167,7 +224,7 @@ def test_seed_parent_sources_skips_heterogeneous_units():
 
     def _query(cypher, **kwargs):
         call_log.append(cypher)
-        if "needs_composition: true" in cypher:
+        if "name_stage IS NULL" in cypher:
             return [
                 {
                     "parent_id": "some_vector",

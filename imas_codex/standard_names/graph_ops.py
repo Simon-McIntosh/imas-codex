@@ -1393,18 +1393,27 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
 def seed_parent_sources(gc: Any | None = None) -> int:
     """Fully populate parent StandardName nodes from their children.
 
-    Finds all StandardName nodes with ``needs_composition = true``
-    (bare placeholders created by ``_write_standard_name_edges`` when a
-    COMPONENT_OF target has no ``name_stage``).
+    Selects placeholder parents structurally: any ``StandardName`` node
+    with ``name_stage IS NULL`` that is the target of at least one
+    COMPONENT_OF edge whose ``operator_kind`` is seedable
+    (``projection``, ``coordinate``, ``unary_postfix``).
+
+    This deliberately does NOT require the ``needs_composition`` flag.
+    That flag is set by ``_write_standard_name_edges`` at edge-write
+    time, but the seedable-edge-kinds set has grown over time
+    (``unary_postfix`` was added later); placeholders created before
+    the set expanded were never flagged and would otherwise stay
+    orphaned even though the pipeline now considers them seedable.
+    Matching structurally lets the pipeline self-heal on every run.
 
     Parent names are DETERMINISTIC — derived from children by stripping
-    the component prefix. This function:
+    the component suffix. This function:
 
-    1. Waits until ALL children of a parent are composed (have name_stage).
+    1. Waits until ALL children of a parent are composed (have ``name_stage``).
     2. Copies unit and cocos from children (asserts uniformity).
-    3. Sets name_stage='accepted' (deterministic, no review needed).
-    4. Sets docs_stage='pending' so the parent enters generate_docs pool.
-    5. Creates a StandardNameSource with status='composed' for audit trail.
+    3. Sets ``name_stage='accepted'`` (deterministic, no review needed).
+    4. Sets ``docs_stage='pending'`` so the parent enters generate_docs.
+    5. Creates a ``StandardNameSource`` with ``status='composed'`` for audit.
     6. Runs ISN parse to populate grammar fields.
     7. Clears ``needs_composition`` on the parent.
 
@@ -1416,17 +1425,25 @@ def seed_parent_sources(gc: Any | None = None) -> int:
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
-        # Only seed parents where ALL children have been composed
+        # Structural selection: placeholder parent (no name_stage) with at
+        # least one COMPONENT_OF child whose edge_kind is seedable. The
+        # Python-side ``seedable_edge_kinds`` filter below re-verifies the
+        # edge mix per parent, so the query may over-select; that is OK.
         parents = list(
             gc.query(
                 """
-                MATCH (parent:StandardName {needs_composition: true})
+                MATCH (parent:StandardName)
+                WHERE parent.name_stage IS NULL
                 MATCH (child)-[comp:COMPONENT_OF]->(parent)
+                WHERE comp.operator_kind IN
+                      ['projection', 'coordinate', 'unary_postfix']
                 WITH parent,
-                     collect(child) AS children,
-                     collect(comp.operator_kind) AS edge_kinds,
-                     count(child) AS total_children,
-                     count(CASE WHEN child.name_stage IS NOT NULL
+                     collect(DISTINCT child) AS children
+                MATCH (any_child)-[any_comp:COMPONENT_OF]->(parent)
+                WITH parent, children,
+                     collect(any_comp.operator_kind) AS edge_kinds,
+                     count(any_child) AS total_children,
+                     count(CASE WHEN any_child.name_stage IS NOT NULL
                            THEN 1 END) AS composed_children
                 WHERE total_children = composed_children
                   AND total_children >= 1
