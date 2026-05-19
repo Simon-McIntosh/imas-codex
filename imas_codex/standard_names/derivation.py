@@ -79,17 +79,47 @@ def derive_edges(name: str) -> list[DerivedEdge]:
         Zero or more edges depending on the outermost IR shape and
         locus qualification.  Returns ``[]`` for unparseable names
         and leaf names with no locus qualifier.
+
+    Self-loop guard
+    ---------------
+    Edges where ``from_name == to_name`` are dropped unconditionally.
+    Such an edge can never be structurally meaningful — a name cannot
+    be its own argument / error / locus — and used to surface only as
+    a downstream symptom: ISNC `validate_catalog` raises
+    `graphlib.CycleError: nodes are in a cycle, ['x', 'x']` when the
+    catalog builder topologically sorts ``HAS_ARGUMENT`` edges, and
+    that crash is the only place we noticed. The defect is the ISN
+    parser/composer pair occasionally round-tripping to the same name
+    on a postfix operator (e.g. ``minimum_magnetic_field_magnitude``
+    → strip ``magnitude`` → compose → ``minimum_magnetic_field_magnitude``).
+    We catch it here so it cannot reach the graph regardless of which
+    upstream parser version is in use.
     """
     try:
         result = parser.parse(name)
     except Exception:
         edges = _regex_fallback(name)
-        return edges + _locus_check(name)
+        return _drop_self_loops(name, edges + _locus_check(name))
 
     ir = result.ir
     structural = _derive_structural(name, ir)
     locus = _locus_check(name)
-    return structural + locus
+    return _drop_self_loops(name, structural + locus)
+
+
+def _drop_self_loops(name: str, edges: list[DerivedEdge]) -> list[DerivedEdge]:
+    """Filter edges whose endpoint coincides with the source name."""
+    out: list[DerivedEdge] = []
+    for e in edges:
+        if e.from_name == e.to_name:
+            logger.debug(
+                "derive_edges dropping self-loop %s edge for %r",
+                e.edge_type,
+                name,
+            )
+            continue
+        out.append(e)
+    return out
 
 
 def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge]:

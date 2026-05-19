@@ -473,3 +473,53 @@ class TestLocusFamily:
         assert locus_of[0].to_name == locus_at[0].to_name == "magnetic_axis"
         assert locus_of[0].props["locus_relation"] == "of"
         assert locus_at[0].props["locus_relation"] == "at"
+
+
+# ---------------------------------------------------------------------------
+# D26 — self-loop guard
+# ---------------------------------------------------------------------------
+
+
+class TestSelfLoopGuard:
+    """Regression: rc8 ISNC validate_catalog raised
+    ``graphlib.CycleError: nodes are in a cycle, ['x', 'x']`` when an
+    entry's ``HAS_ARGUMENT`` edge pointed at itself. The defect lived
+    in the ISN parser/composer round-trip for some postfix operators;
+    we now reject any edge where source == target before it can reach
+    the graph."""
+
+    def test_self_loop_dropped_unconditionally(self):
+        # Direct injection through the public API — even if a parser
+        # version regresses tomorrow we must never emit a self-edge.
+        # Hand-roll an edge to exercise the filter without depending on
+        # which name happens to trigger the parser asymmetry today.
+        from imas_codex.standard_names.derivation import _drop_self_loops
+
+        edges = [
+            DerivedEdge("COMPONENT_OF", "foo", "foo", {"operator": "magnitude"}),
+            DerivedEdge("COMPONENT_OF", "foo", "bar", {"operator": "magnitude"}),
+            DerivedEdge("HAS_ERROR", "foo", "foo", {"error_type": "upper"}),
+        ]
+        out = _drop_self_loops("foo", edges)
+        assert len(out) == 1
+        assert out[0].from_name == "foo"
+        assert out[0].to_name == "bar"
+
+    def test_no_self_loops_in_observed_corpus(self):
+        # The set of names known to have triggered the parser round-trip
+        # regression at some point in the rc20-rc22 vocabulary churn.
+        # If ISN regresses again, this test will fail before it can hurt
+        # ISNC validate_catalog.
+        candidate_names = [
+            "minimum_magnetic_field_magnitude",
+            "maximum_magnetic_field_magnitude",
+            "minimum_safety_factor",
+            "plasma_stored_energy",
+        ]
+        for name in candidate_names:
+            for edge in derive_edges(name):
+                assert edge.from_name != edge.to_name, (
+                    f"{name}: {edge.edge_type} edge points at itself "
+                    f"(props={edge.props}) — this used to crash "
+                    f"validate_catalog topological sort"
+                )
