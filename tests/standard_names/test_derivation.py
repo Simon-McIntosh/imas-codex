@@ -247,16 +247,23 @@ def test_d13_maximum_of_temperature_at_plasma_boundary():
 
 
 # ---------------------------------------------------------------------------
-# D14 — leaf with locus only (no operator)
+# D14 — locus-only name peels its locus and also emits HAS_LOCUS
 # ---------------------------------------------------------------------------
 
 
 def test_d14_elongation_of_plasma_boundary():
-    """elongation_of_plasma_boundary — locus only, no COMPONENT_OF, but HAS_LOCUS."""
+    """elongation_of_plasma_boundary — peels locus (COMPONENT_OF → elongation)
+    AND emits HAS_LOCUS → plasma_boundary. The two edges encode different
+    relations: COMPONENT_OF is the structural parent SN; HAS_LOCUS is the
+    grouping edge to the shared Locus node. Updated from the rc8 layout
+    that asserted no COMPONENT_OF here — that gap let dataset.py's
+    `_parent_token` shortcut to the bare base from any layer."""
     edges = derive_edges("elongation_of_plasma_boundary")
     co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
     geo = [e for e in edges if e.edge_type == "HAS_LOCUS"]
-    assert co == []
+    assert len(co) == 1
+    assert co[0].to_name == "elongation"
+    assert co[0].props["operator_kind"] == "locus"
     assert len(geo) == 1
     assert geo[0].to_name == "plasma_boundary"
 
@@ -523,3 +530,149 @@ class TestSelfLoopGuard:
                     f"(props={edge.props}) — this used to crash "
                     f"validate_catalog topological sort"
                 )
+
+
+# ---------------------------------------------------------------------------
+# D27 — qualifier-layer parent
+# ---------------------------------------------------------------------------
+
+
+class TestQualifierLayerParent:
+    """Pin the qualifier-peel COMPONENT_OF edges.
+
+    Before this layer, names like `upper_elongation_of_plasma_boundary`
+    emitted zero COMPONENT_OF edges (operator+projection branches both
+    no-op'd, leaf returned []), so the SPA's `_parent_token` shortcut
+    to `ir.base.token` chose `elongation` — grouping upper/lower
+    boundary elongation with unrelated flux-surface elongation under
+    a generic root. The fix peels ONE qualifier per call; recursion
+    happens when the inner SN runs its own derivation.
+    """
+
+    def _component_of(self, name):
+        return [e for e in derive_edges(name) if e.edge_type == "COMPONENT_OF"]
+
+    def test_upper_elongation_of_plasma_boundary(self):
+        edges = self._component_of("upper_elongation_of_plasma_boundary")
+        assert len(edges) == 1
+        assert edges[0].to_name == "elongation_of_plasma_boundary"
+        assert edges[0].props == {
+            "operator": "upper",
+            "operator_kind": "qualifier",
+        }
+
+    def test_lower_elongation_of_plasma_boundary(self):
+        edges = self._component_of("lower_elongation_of_plasma_boundary")
+        assert len(edges) == 1
+        assert edges[0].to_name == "elongation_of_plasma_boundary"
+
+    def test_upper_elongation_no_locus(self):
+        edges = self._component_of("upper_elongation")
+        assert len(edges) == 1
+        assert edges[0].to_name == "elongation"
+        assert edges[0].props["operator_kind"] == "qualifier"
+
+    def test_two_qualifiers_peel_only_outermost(self):
+        # `upper_inner_squareness_of_plasma_boundary` has TWO qualifiers
+        # [upper, inner]. We peel exactly ONE (the outermost) per call;
+        # recursion through the inner SN's own derivation handles the rest.
+        edges = self._component_of("upper_inner_squareness_of_plasma_boundary")
+        assert len(edges) == 1
+        assert edges[0].to_name == "inner_squareness_of_plasma_boundary"
+        assert edges[0].props["operator"] == "upper"
+
+    def test_qualifier_only_no_locus(self):
+        # No locus — peel goes straight to the bare base.
+        edges = self._component_of("electron_temperature")
+        assert len(edges) == 1
+        assert edges[0].to_name == "temperature"
+
+    def test_multi_word_qualifier(self):
+        # `volume_averaged_ion_temperature` — qualifier=volume_averaged,
+        # next qualifier=ion, base=temperature. One peel removes
+        # volume_averaged, exposing ion_temperature.
+        edges = self._component_of("volume_averaged_ion_temperature")
+        assert len(edges) == 1
+        assert edges[0].to_name == "ion_temperature"
+
+
+# ---------------------------------------------------------------------------
+# D28 — locus-layer parent
+# ---------------------------------------------------------------------------
+
+
+class TestLocusLayerParent:
+    """Pin the locus-peel COMPONENT_OF edges.
+
+    For a name with no qualifiers / no operator / no projection but a
+    locus suffix (``_of_<locus>``, ``_at_<locus>``), the parent is the
+    bare base — the locus is the only structural layer to peel.
+
+    The existing HAS_LOCUS edge (to a Locus node) is preserved — it
+    groups same-locus quantities; the new COMPONENT_OF edge captures
+    the structural parent SN.
+    """
+
+    def _component_of(self, name):
+        return [e for e in derive_edges(name) if e.edge_type == "COMPONENT_OF"]
+
+    def _has_locus(self, name):
+        return [e for e in derive_edges(name) if e.edge_type == "HAS_LOCUS"]
+
+    def test_elongation_of_plasma_boundary(self):
+        # The natural parent of `upper_elongation_of_plasma_boundary`.
+        edges = self._component_of("elongation_of_plasma_boundary")
+        assert len(edges) == 1
+        assert edges[0].to_name == "elongation"
+        assert edges[0].props == {
+            "operator": "plasma_boundary",
+            "operator_kind": "locus",
+            "axis": "of",
+        }
+
+    def test_area_of_plasma_boundary(self):
+        edges = self._component_of("area_of_plasma_boundary")
+        assert len(edges) == 1
+        assert edges[0].to_name == "area"
+
+    def test_at_locus_safety_factor(self):
+        # Different relation (`at` vs `of`) — still a locus peel.
+        edges = self._component_of("safety_factor_at_magnetic_axis")
+        assert len(edges) == 1
+        assert edges[0].to_name == "safety_factor"
+        assert edges[0].props["axis"] == "at"
+
+    def test_locus_node_still_emitted(self):
+        # The locus-peel COMPONENT_OF must NOT replace the HAS_LOCUS
+        # grouping edge — both coexist.
+        name = "elongation_of_plasma_boundary"
+        assert len(self._component_of(name)) == 1
+        loci = self._has_locus(name)
+        assert len(loci) == 1
+        assert loci[0].to_name == "plasma_boundary"
+
+
+# ---------------------------------------------------------------------------
+# D29 — layer precedence (operator > projection > qualifier > locus)
+# ---------------------------------------------------------------------------
+
+
+class TestLayerPrecedence:
+    """Only one layer peels per call; recursion handles the rest."""
+
+    def _component_of(self, name):
+        return [e for e in derive_edges(name) if e.edge_type == "COMPONENT_OF"]
+
+    def test_operator_outranks_qualifier(self):
+        # `time_derivative_of_temperature` has a unary_prefix operator;
+        # the operator branch must win (not the qualifier branch).
+        edges = self._component_of("time_derivative_of_temperature")
+        assert len(edges) == 1
+        assert edges[0].to_name == "temperature"
+        assert edges[0].props["operator_kind"] == "unary_prefix"
+
+    def test_leaf_emits_nothing(self):
+        # Pure leaves (no operator, no projection, no qualifier, no locus)
+        # remain leaves.
+        for name in ("temperature", "elongation", "safety_factor"):
+            assert self._component_of(name) == []

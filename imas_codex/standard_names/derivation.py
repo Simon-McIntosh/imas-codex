@@ -258,7 +258,69 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
             )
         ]
 
-    # Leaf: no operator, no projection — try geometric coordinate
+    # --- Qualifier layer ---
+    # Peel the outermost qualifier and link to the residual. This is the
+    # natural structural parent for shape-asymmetry / role qualifiers that
+    # ISN does not model as operators: e.g.
+    #     upper_elongation_of_plasma_boundary
+    #         → COMPONENT_OF → elongation_of_plasma_boundary  (qualifier=upper)
+    #         and then that name's own derivation peels the locus →
+    #     elongation_of_plasma_boundary
+    #         → COMPONENT_OF → elongation                     (locus=plasma_boundary)
+    # The recursion is structural — we only ever peel ONE layer per call.
+    # Without this layer the parent shortcut in dataset.py jumped straight
+    # to `ir.base.token` (`elongation`), losing the boundary locus and
+    # grouping upper/lower boundary elongation with unrelated flux-surface
+    # elongation under a generic root.
+    if ir.qualifiers:
+        stripped = ir.model_copy(update={"qualifiers": ir.qualifiers[1:]})
+        try:
+            inner = parser.compose(stripped)
+        except Exception as exc:
+            logger.debug(
+                "derive_edges qualifier-peel compose failed for %r: %s", name, exc
+            )
+            return []
+        return [
+            DerivedEdge(
+                "COMPONENT_OF",
+                name,
+                inner,
+                {
+                    "operator": ir.qualifiers[0].token,
+                    "operator_kind": "qualifier",
+                },
+            )
+        ]
+
+    # --- Locus layer ---
+    # No qualifier, no operator, no projection — but the name carries a
+    # locus suffix (``_of_<locus>``, ``_at_<locus>``). Peel the locus and
+    # link to the residual base. This is what builds the
+    #     elongation_of_plasma_boundary → elongation
+    # leg of the chain.
+    if ir.locus is not None:
+        stripped = ir.model_copy(update={"locus": None})
+        try:
+            inner = parser.compose(stripped)
+        except Exception as exc:
+            logger.debug("derive_edges locus-peel compose failed for %r: %s", name, exc)
+            return []
+        return [
+            DerivedEdge(
+                "COMPONENT_OF",
+                name,
+                inner,
+                {
+                    "operator": ir.locus.token,
+                    "operator_kind": "locus",
+                    "axis": ir.locus.relation.value,
+                },
+            )
+        ]
+
+    # Leaf: no operator, no projection, no qualifier, no locus
+    # — try geometric coordinate as a last resort.
     return _geometric_coordinate_check(name)
 
 
