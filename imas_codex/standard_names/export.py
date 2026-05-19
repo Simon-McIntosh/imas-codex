@@ -1151,7 +1151,16 @@ def run_export(
                 if sources:
                     entry_dict["sources"] = sources
 
-            domain_entries[primary].append(entry_dict)
+            # Guard against the same SN landing in domain_entries twice —
+            # the candidate loop iterates per (cand × physics_domain) and
+            # the primary-domain choice can collide across iterations
+            # when an SN's domain priority list shifts. ``exported_names``
+            # de-dups at the end (see below); de-dup here too so each
+            # domain YAML has at most one entry per id.
+            if not any(
+                e.get("name") == entry_dict.get("name") for e in domain_entries[primary]
+            ):
+                domain_entries[primary].append(entry_dict)
             exported_names.append(cand["id"])
 
         # ── 5b. Order entries per domain and write files ────────
@@ -1169,6 +1178,19 @@ def run_export(
             )
             _write_domain_yaml(staging_path, d, ordered, codex_sha=codex_sha)
 
+    # Dedup: a candidate with multiple physics_domain values is enumerated
+    # by the candidate loop once per domain, but ``domain_entries[primary]``
+    # routes it to a single domain only. Without this dedup the manifest
+    # over-counts (e.g. ``electric_field`` would inflate the published
+    # tally by 1 for each extra physics_domain it carries).
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for nm in exported_names:
+        if nm in seen:
+            continue
+        seen.add(nm)
+        deduped.append(nm)
+    exported_names = deduped
     report.exported_count = len(exported_names)
     report.exported_names = exported_names
     report.validation_failures = validation_failures
