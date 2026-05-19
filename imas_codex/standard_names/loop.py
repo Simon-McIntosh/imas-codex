@@ -798,11 +798,18 @@ async def run_sn_pools(
         # One-shot-then-idempotent: pre-existing parents accepted via the
         # old seed_parent_sources shortcut (no name review) are reset to
         # 'drafted' so the standard REVIEW_NAME pool can score them.
+        # Stale description templates are also normalised to the canonical
+        # placeholder so the export guard can detect "docs pending".
         backfilled = await asyncio.to_thread(backfill_deterministic_parent_origin)
-        if backfilled:
+        if backfilled.get("origin_reset"):
             logger.info(
                 "Backfilled %d shortcut-accepted parents to drafted+deterministic",
-                backfilled,
+                backfilled["origin_reset"],
+            )
+        if backfilled.get("description_reset"):
+            logger.info(
+                "Reset %d stale description templates to placeholder",
+                backfilled["description_reset"],
             )
 
         parent_count = await asyncio.to_thread(seed_parent_sources)

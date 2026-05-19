@@ -67,3 +67,21 @@ REVIEW_NAME_BACKLOG_CAP: int = 200
 
 REVIEW_DOCS_BACKLOG_CAP: int = 200
 """Max review_docs pending items before generate_docs / refine_docs pause."""
+
+# ── Deterministic-parent placeholder ──────────────────────────────────
+# ``seed_parent_sources`` writes a structurally-derived parent SN
+# (e.g. ``magnetic_field``) into the graph as a placeholder before
+# ``GENERATE_DOCS`` produces an LLM-quality description. The placeholder
+# description carries this exact marker so:
+#   - it is obvious in the graph that the description is pending,
+#   - ``sn export`` can refuse to emit any node whose description still
+#     equals the placeholder (independent quality gate, defends against
+#     ``reviewer_score_docs`` being absent or stale),
+#   - tests + dashboards have one canonical string to detect "deterministic
+#     parent that never had GENERATE_DOCS complete".
+DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER: str = (
+    "(deterministic parent — description pending LLM enrichment)"
+)
+"""Sentinel description written by ``seed_parent_sources``. Any export
+that still sees this string for a parent SN signals that the docs
+pipeline never completed for that name."""

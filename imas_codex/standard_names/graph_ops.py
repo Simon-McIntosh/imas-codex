@@ -1372,28 +1372,41 @@ def rederive_structural_edges() -> dict[str, int]:
     return {"processed": len(names), "migrated": migrated}
 
 
-def backfill_deterministic_parent_origin(gc: Any | None = None) -> int:
+def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int]:
     """Mark existing shortcut-accepted parent SNs for proper REVIEW_NAME.
 
-    Identifies parents that were accepted via the old ``seed_parent_sources``
-    shortcut path: ``name_stage='accepted'`` but no review provenance
-    (``reviewer_score_name IS NULL`` and ``review_name_count IS NULL``)
-    and at least one inbound ``COMPONENT_OF`` edge confirming structural
-    parenthood. Resets each to ``name_stage='drafted'`` and stamps
-    ``origin='deterministic'`` so the next ``sn run`` puts them through
-    the standard ``REVIEW_NAME`` pipeline. Docs (already reviewed) are
-    left untouched.
+    Idempotent self-healing pass that performs two transformations:
 
-    Idempotent — once a parent has a name-review score or its origin is
-    set, this function leaves it alone.
+    1. **Origin reset.** Identifies parents that were accepted via the
+       old ``seed_parent_sources`` shortcut path: ``name_stage='accepted'``
+       but no review provenance (``reviewer_score_name IS NULL`` and
+       ``review_name_count IS NULL``) and at least one inbound
+       ``COMPONENT_OF`` edge confirming structural parenthood. Resets
+       each to ``name_stage='drafted'`` and stamps
+       ``origin='deterministic'`` so the next ``sn run`` puts them
+       through the standard ``REVIEW_NAME`` pipeline. Docs (already
+       reviewed) are left untouched.
 
-    Returns the number of parents reset.
+    2. **Description placeholder reset.** Any deterministic parent with
+       ``docs_stage IN ['pending', 'drafted']`` (i.e. ``GENERATE_DOCS``
+       has not finalised an LLM description) is reset to the honest
+       placeholder ``DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER`` so
+       the export-time guard can detect "pending docs" uniformly. The
+       previous template strings ("Vector quantity with components: …",
+       "Base quantity from which …", "Geometric coordinate with axes: …")
+       are flattened to the canonical placeholder.
+
+    Returns ``{"origin_reset": N, "description_reset": M}``.
     """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
     _own_gc = gc is None
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
-        result = list(
+        origin_result = list(
             gc.query(
                 """
                 MATCH (parent:StandardName)
@@ -1408,13 +1421,37 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> int:
                 """
             )
         )
-        n = int(result[0].get("reset") or 0) if result else 0
-        if n:
-            logger.info(
-                "backfill_deterministic_parent_origin: reset %d shortcut-accepted parents",
-                n,
+        n_origin = int(origin_result[0].get("reset") or 0) if origin_result else 0
+
+        desc_result = list(
+            gc.query(
+                """
+                MATCH (parent:StandardName)
+                WHERE parent.origin = 'deterministic'
+                  AND parent.docs_stage IN ['pending', 'drafted']
+                  AND parent.description IS NOT NULL
+                  AND parent.description <> $placeholder
+                  AND (
+                    parent.description STARTS WITH 'Vector quantity with components:'
+                    OR parent.description STARTS WITH 'Base quantity from which'
+                    OR parent.description STARTS WITH 'Geometric coordinate with axes:'
+                  )
+                SET parent.description = $placeholder
+                RETURN count(parent) AS reset
+                """,
+                placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
             )
-        return n
+        )
+        n_desc = int(desc_result[0].get("reset") or 0) if desc_result else 0
+
+        if n_origin or n_desc:
+            logger.info(
+                "backfill_deterministic_parent_origin: reset %d origins, "
+                "%d stale description templates → placeholder",
+                n_origin,
+                n_desc,
+            )
+        return {"origin_reset": n_origin, "description_reset": n_desc}
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
@@ -1647,21 +1684,18 @@ def seed_parent_sources(gc: Any | None = None) -> int:
             else:
                 kind = "vector"
 
-            # Generate description from children
-            child_ids = [c["id"] for c in child_data if c.get("id")]
-            if is_magnitude_parent:
-                description = (
-                    f"Base quantity from which {', '.join(sorted(child_ids))} "
-                    f"{'is' if len(child_ids) == 1 else 'are'} derived"
-                )
-            elif is_geometric:
-                description = (
-                    f"Geometric coordinate with axes: {', '.join(sorted(child_ids))}"
-                )
-            else:
-                description = (
-                    f"Vector quantity with components: {', '.join(sorted(child_ids))}"
-                )
+            # Stamp an honest placeholder. The deterministic name is the
+            # quality-bearing artifact at this stage; the description is
+            # written by ``GENERATE_DOCS`` (LLM, child/parent-aware) and
+            # then RD-quorum scored by ``REVIEW_DOCS``. Any node that
+            # exports while still carrying this exact placeholder string
+            # means the docs pipeline never ran or was interrupted —
+            # ``sn export`` rejects on that signature.
+            from imas_codex.standard_names.defaults import (
+                DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+            )
+
+            description = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
 
             # Attempt ISN parse for grammar fields
             grammar_fields = _parse_parent_grammar(parent_id)

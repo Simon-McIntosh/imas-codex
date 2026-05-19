@@ -343,7 +343,8 @@ def test_backfill_resets_shortcut_accepted_parents():
 
     def _query(cypher, **kwargs):
         captured.append(cypher)
-        return [{"reset": 17}]
+        # Two queries fire: origin reset, then description placeholder reset.
+        return [{"reset": 17 if "name_stage = 'accepted'" in cypher else 3}]
 
     gc.query = _query
     gc.__enter__ = MagicMock(return_value=gc)
@@ -353,18 +354,137 @@ def test_backfill_resets_shortcut_accepted_parents():
         backfill_deterministic_parent_origin,
     )
 
-    n = backfill_deterministic_parent_origin(gc)
-    assert n == 17
-    q = captured[0]
+    result = backfill_deterministic_parent_origin(gc)
+    assert result == {"origin_reset": 17, "description_reset": 3}
+    origin_q = captured[0]
     # All five gating conditions must be in the WHERE clause.
-    assert "name_stage = 'accepted'" in q
-    assert "reviewer_score_name IS NULL" in q
-    assert "review_name_count IS NULL" in q
-    assert "origin IS NULL" in q
-    assert "COMPONENT_OF" in q
+    assert "name_stage = 'accepted'" in origin_q
+    assert "reviewer_score_name IS NULL" in origin_q
+    assert "review_name_count IS NULL" in origin_q
+    assert "origin IS NULL" in origin_q
+    assert "COMPONENT_OF" in origin_q
     # Output transition.
-    assert "name_stage = 'drafted'" in q
-    assert "origin = 'deterministic'" in q
+    assert "name_stage = 'drafted'" in origin_q
+    assert "origin = 'deterministic'" in origin_q
+    # The description-reset pass normalises stale templates.
+    desc_q = captured[1]
+    assert "origin = 'deterministic'" in desc_q
+    assert "Vector quantity with components:" in desc_q
+    assert "Base quantity from which" in desc_q
+    assert "Geometric coordinate with axes:" in desc_q
+    assert "$placeholder" in desc_q
+
+
+def test_seed_parent_sources_writes_honest_placeholder_description():
+    """seed_parent_sources must write the canonical placeholder, not a
+    template string that could leak to the catalog if GENERATE_DOCS
+    fails to overwrite it.
+    """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    gc = MagicMock()
+    captured: list[tuple[str, dict]] = []
+
+    def _query(cypher, **kwargs):
+        captured.append((cypher, kwargs))
+        if "name_stage IS NULL" in cypher and "COMPONENT_OF" in cypher:
+            return [
+                {
+                    "parent_id": "magnetic_field",
+                    "child_data": [
+                        {
+                            "id": "toroidal_magnetic_field",
+                            "unit": "T",
+                            "cocos": None,
+                            "physics_domain": "magnetics",
+                            "kind": "scalar",
+                        },
+                    ],
+                    "dd_paths": [],
+                    "edge_kinds": ["projection"],
+                }
+            ]
+        return []
+
+    gc.query = _query
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+
+    from imas_codex.standard_names.graph_ops import seed_parent_sources
+
+    assert seed_parent_sources(gc) == 1
+    write = next(
+        (cypher, params)
+        for cypher, params in captured
+        if "SET parent.name_stage" in cypher
+    )
+    cypher, params = write
+    assert params["description"] == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER, (
+        "seed_parent_sources must write the canonical placeholder string "
+        "(not a 'Vector quantity with components: …' template) so the "
+        "export-time guard can detect pending docs uniformly."
+    )
+    # Old template strings must not appear anywhere in the call.
+    cypher_dump = repr(captured)
+    assert "Vector quantity with components" not in cypher_dump
+    assert "Base quantity from which" not in cypher_dump
+    assert "Geometric coordinate with axes" not in cypher_dump
+
+
+def test_export_gate_c_rejects_deterministic_placeholder():
+    """Gate C must reject any candidate whose description still equals
+    the deterministic-parent placeholder — even if it has a passing
+    reviewer_score_name. The placeholder means GENERATE_DOCS never
+    completed for that name.
+    """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+    from imas_codex.standard_names.export import _run_gate_c
+
+    candidates = [
+        # Real LLM description, passing score → keep.
+        {
+            "id": "good_parent",
+            "reviewer_score_name": 0.9,
+            "description": "Equilibrium magnetic-field vector …",
+        },
+        # Placeholder description, even with passing score → reject.
+        {
+            "id": "pending_parent",
+            "reviewer_score_name": 0.95,
+            "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        },
+        # Placeholder, no score → reject (placeholder beats unreviewed path).
+        {
+            "id": "pending_unreviewed",
+            "reviewer_score_name": None,
+            "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        },
+    ]
+    gate, filtered, excluded_below, excluded_unrev = _run_gate_c(
+        candidates,
+        min_score=0.65,
+        include_unreviewed=True,  # so the unreviewed path isn't what gates
+        min_description_score=None,
+    )
+    kept = {c["id"] for c in filtered}
+    assert kept == {"good_parent"}, (
+        f"Gate C must reject placeholder descriptions even when "
+        f"include_unreviewed=True and the score is high. Kept: {kept}"
+    )
+    placeholder_issues = [
+        i
+        for i in gate.issues
+        if i.get("type") == "deterministic_parent_description_placeholder"
+    ]
+    assert len(placeholder_issues) == 2
+    assert {i["name"] for i in placeholder_issues} == {
+        "pending_parent",
+        "pending_unreviewed",
+    }
 
 
 def test_persist_refined_name_migrates_component_of_edges():

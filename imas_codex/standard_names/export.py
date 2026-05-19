@@ -333,7 +333,31 @@ def _run_gate_c(
     excluded_below_score = 0
     excluded_unreviewed = 0
 
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
     for cand in candidates:
+        # Deterministic-parent guard: a node whose description is still
+        # the placeholder written by ``seed_parent_sources`` has not had
+        # ``GENERATE_DOCS`` complete. Refuse to publish it regardless of
+        # whether it has a score (the score field can be stale or absent
+        # while the description still references the placeholder).
+        if cand.get("description") == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER:
+            excluded_below_score += 1
+            issues.append(
+                {
+                    "type": "deterministic_parent_description_placeholder",
+                    "name": cand["id"],
+                    "detail": (
+                        "description still equals the deterministic-parent "
+                        "placeholder — GENERATE_DOCS did not produce an "
+                        "LLM-quality description for this name"
+                    ),
+                }
+            )
+            continue
+
         score = cand.get("reviewer_score_name")
 
         # Unreviewed check
