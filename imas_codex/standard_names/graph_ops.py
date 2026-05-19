@@ -294,23 +294,37 @@ _DD_LINK_RE = re.compile(
 )
 
 
-def _extract_links_from_docs(documentation: str | None) -> list[str] | None:
+def _extract_links_from_docs(
+    documentation: str | None,
+    *,
+    self_name: str | None = None,
+) -> list[str] | None:
     """Extract structured links from documentation markdown text.
 
     Looks for ``name:xxx`` and ``dd:path`` references in the documentation
-    and returns a deduplicated list of link strings suitable for the
-    ``links`` field on StandardName nodes.
+    and returns an order-preserving deduplicated list of link strings
+    suitable for the ``links`` field on StandardName nodes.
+
+    When ``self_name`` is set, a ``name:<self_name>`` reference is
+    dropped: prose may legitimately mention the current entry by name
+    in one or more paragraphs, but the structured ``links`` index is a
+    cross-reference list and a self-loop is meaningless. The ISNC
+    SQLite catalog enforces UNIQUE(name, link) and a self-reference
+    that survived deduplication used to crash ``validate_catalog``.
     """
     if not documentation:
         return None
 
     links: list[str] = []
     seen: set[str] = set()
+    self_link = f"name:{self_name}" if self_name else None
 
     for m in _LINK_RE.finditer(documentation):
         name_id = m.group(2) or m.group(3)
         if name_id:
             ref = f"name:{name_id}"
+            if ref == self_link:
+                continue
             if ref not in seen:
                 links.append(ref)
                 seen.add(ref)
@@ -4750,10 +4764,21 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
             new_docs = _NAME_LINK_RE.sub(_replace_link, docs)
 
             if new_docs != original_docs:
-                # Extract updated links list from documentation
-                new_links = [
-                    f"name:{m.group(1)}" for m in _NAME_LINK_RE.finditer(new_docs)
-                ]
+                # Extract updated links list from documentation. Order-
+                # preserving dedup, drop self-references — the ISNC
+                # SQLite UNIQUE(name, link) constraint trips on repeats
+                # (e.g. plasma_stored_energy referencing itself three
+                # times across separate paragraphs) and a self-link in
+                # the structured `links` index is meaningless.
+                self_link = f"name:{row['id']}"
+                seen: set[str] = set()
+                new_links: list[str] = []
+                for m in _NAME_LINK_RE.finditer(new_docs):
+                    ref = f"name:{m.group(1)}"
+                    if ref == self_link or ref in seen:
+                        continue
+                    seen.add(ref)
+                    new_links.append(ref)
                 gc.query(
                     """
                     MATCH (sn:StandardName {id: $id})
@@ -8946,8 +8971,10 @@ def persist_generated_docs(
     Raises :exc:`ValueError` if token verification fails (no matching node).
     """
     with GraphClient() as gc:
-        # Extract cross-references from documentation text
-        links = _extract_links_from_docs(documentation)
+        # Extract cross-references from documentation text. Pass the
+        # SN id so self-references in prose do not land in the
+        # structured `links` index.
+        links = _extract_links_from_docs(documentation, self_name=sn_id)
         link_status = _compute_link_status(links) if links else None
         result = gc.query(
             """

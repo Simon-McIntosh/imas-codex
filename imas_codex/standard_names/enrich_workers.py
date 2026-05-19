@@ -46,17 +46,28 @@ _LINK_PREFIXES = ("name:", "http://", "https://")
 
 
 def _sanitize_links(
-    raw: list[str] | None, *, valid_names: set[str] | None = None
+    raw: list[str] | None,
+    *,
+    valid_names: set[str] | None = None,
+    self_name: str | None = None,
 ) -> list[str]:
     """Coerce LLM link strings to ``name:xxx`` / URL format and drop unknowns.
 
     If ``valid_names`` is provided, ``name:foo_bar`` links whose target is not
     in that set are silently dropped (prevents ``link_not_found`` quarantine).
     URLs and other prefixes pass through unchanged.
+
+    The output is order-preserving and deduplicated by exact string match,
+    so an LLM that returns ``name:foo`` three times produces a single entry.
+    When ``self_name`` is set, a ``name:<self_name>`` link is also dropped:
+    an entry referencing itself is meaningless on the structured ``links``
+    side and used to crash the ISNC SQLite UNIQUE(name, link) constraint.
     """
     if not raw:
         return []
     out: list[str] = []
+    seen: set[str] = set()
+    self_link = f"name:{self_name}" if self_name else None
     for link in raw:
         if not isinstance(link, str):
             continue
@@ -68,6 +79,11 @@ def _sanitize_links(
                 target = s[len("name:") :].strip()
                 if target not in valid_names:
                     continue
+            if self_link is not None and s == self_link:
+                continue
+            if s in seen:
+                continue
+            seen.add(s)
             out.append(s)
             continue
         for junk in ("dd:", "standard_name:", "sn:", "#"):
@@ -78,8 +94,12 @@ def _sanitize_links(
             if valid_names is not None and s not in valid_names:
                 continue
             candidate = f"name:{s}"
-            if candidate not in out:
-                out.append(candidate)
+            if self_link is not None and candidate == self_link:
+                continue
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            out.append(candidate)
     return out
 
 
@@ -1154,7 +1174,7 @@ async def enrich_document_worker(state: StandardNameEnrichState, **_kwargs) -> N
                     enriched.documentation
                 )
                 item["enriched_links"] = _sanitize_links(
-                    enriched.links, valid_names=valid_names
+                    enriched.links, valid_names=valid_names, self_name=name
                 )
 
                 # Per-item cost for graph_ops.persist_enriched_batch
@@ -1979,7 +1999,7 @@ async def process_enrich_batch(
                 enriched.documentation
             )
             item["enriched_links"] = _sanitize_links(
-                enriched.links, valid_names=valid_names
+                enriched.links, valid_names=valid_names, self_name=name
             )
             item["enrich_cost_usd"] = per_item_cost
             if enriched.validity_domain is not None:
