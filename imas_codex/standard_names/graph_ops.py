@@ -1373,30 +1373,37 @@ def rederive_structural_edges() -> dict[str, int]:
 
 
 def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int]:
-    """Mark existing shortcut-accepted parent SNs for proper REVIEW_NAME.
+    """Bring every structural parent into the auto-accept policy.
 
-    Idempotent self-healing pass that performs two transformations:
+    Idempotent self-healing pass — safe to call on every ``sn run``
+    startup. Performs three transformations:
 
-    1. **Origin reset.** Identifies parents that were accepted via the
-       old ``seed_parent_sources`` shortcut path: ``name_stage='accepted'``
-       but no review provenance (``reviewer_score_name IS NULL`` and
-       ``review_name_count IS NULL``) and at least one inbound
-       ``COMPONENT_OF`` edge confirming structural parenthood. Resets
-       each to ``name_stage='drafted'`` and stamps
-       ``origin='deterministic'`` so the next ``sn run`` puts them
-       through the standard ``REVIEW_NAME`` pipeline. Docs (already
-       reviewed) are left untouched.
+    1. **Origin stamp.** Any parent that has at least one inbound
+       ``COMPONENT_OF`` edge but no ``origin`` set is stamped
+       ``origin='deterministic'`` and snapped to ``name_stage='accepted'``.
+       Covers (a) the legacy shortcut-accepted parents that had
+       ``name_stage='accepted'`` but no provenance, and (b) the
+       transitional state from when these parents were briefly routed
+       through REVIEW_NAME (``name_stage='reviewed'`` with synthetic
+       low scores from the placeholder semantic-sim gate).
 
-    2. **Description placeholder reset.** Any deterministic parent with
-       ``docs_stage IN ['pending', 'drafted']`` (i.e. ``GENERATE_DOCS``
-       has not finalised an LLM description) is reset to the honest
+    2. **Promotion from reviewed.** Any ``origin='deterministic'`` parent
+       still sitting at ``name_stage='reviewed'`` (left over from the
+       previous routing policy) is promoted to ``'accepted'`` so it can
+       reach ``GENERATE_DOCS``. The reviewer score is left in place as
+       historical context but no longer gates progression — the name
+       axis no longer applies to deterministic parents.
+
+    3. **Description placeholder reset.** Any deterministic parent with
+       ``docs_stage IN ['pending', 'drafted']`` (``GENERATE_DOCS`` has
+       not finalised an LLM description) is reset to the canonical
        placeholder ``DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER`` so
-       the export-time guard can detect "pending docs" uniformly. The
-       previous template strings ("Vector quantity with components: …",
-       "Base quantity from which …", "Geometric coordinate with axes: …")
-       are flattened to the canonical placeholder.
+       the export-time guard can detect "docs not finalised"
+       uniformly. The previous template strings ("Vector quantity with
+       components: …", "Base quantity from which …", "Geometric
+       coordinate with axes: …") are flattened to the placeholder.
 
-    Returns ``{"origin_reset": N, "description_reset": M}``.
+    Returns ``{"origin_stamped": N, "promoted_from_reviewed": M, "description_reset": K}``.
     """
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -1406,23 +1413,38 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
-        origin_result = list(
+        # (1) Stamp any unmarked structural parent and snap to accepted.
+        stamp_result = list(
             gc.query(
                 """
                 MATCH (parent:StandardName)
-                WHERE parent.name_stage = 'accepted'
-                  AND parent.reviewer_score_name IS NULL
-                  AND parent.review_name_count IS NULL
-                  AND parent.origin IS NULL
+                WHERE parent.origin IS NULL
                   AND EXISTS { (child)-[:COMPONENT_OF]->(parent) }
-                SET parent.name_stage = 'drafted',
-                    parent.origin = 'deterministic'
-                RETURN count(parent) AS reset
+                SET parent.name_stage = 'accepted',
+                    parent.origin     = 'deterministic'
+                RETURN count(parent) AS stamped
                 """
             )
         )
-        n_origin = int(origin_result[0].get("reset") or 0) if origin_result else 0
+        n_stamped = int(stamp_result[0].get("stamped") or 0) if stamp_result else 0
 
+        # (2) Promote any deterministic parent left at 'reviewed' to 'accepted'.
+        promote_result = list(
+            gc.query(
+                """
+                MATCH (parent:StandardName)
+                WHERE parent.origin = 'deterministic'
+                  AND parent.name_stage = 'reviewed'
+                SET parent.name_stage = 'accepted'
+                RETURN count(parent) AS promoted
+                """
+            )
+        )
+        n_promoted = (
+            int(promote_result[0].get("promoted") or 0) if promote_result else 0
+        )
+
+        # (3) Reset stale template descriptions to the canonical placeholder.
         desc_result = list(
             gc.query(
                 """
@@ -1444,14 +1466,19 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
         )
         n_desc = int(desc_result[0].get("reset") or 0) if desc_result else 0
 
-        if n_origin or n_desc:
+        if n_stamped or n_promoted or n_desc:
             logger.info(
-                "backfill_deterministic_parent_origin: reset %d origins, "
-                "%d stale description templates → placeholder",
-                n_origin,
+                "backfill_deterministic_parent_origin: stamped %d parents, "
+                "promoted %d from reviewed, reset %d stale templates",
+                n_stamped,
+                n_promoted,
                 n_desc,
             )
-        return {"origin_reset": n_origin, "description_reset": n_desc}
+        return {
+            "origin_stamped": n_stamped,
+            "promoted_from_reviewed": n_promoted,
+            "description_reset": n_desc,
+        }
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
@@ -1548,23 +1575,30 @@ def seed_parent_sources(gc: Any | None = None) -> int:
     Parent names are DETERMINISTIC — the name itself is grammar-derived
     from the components' shared base (e.g. ``magnetic_field`` is the
     only sensible parent of ``poloidal_magnetic_field`` /
-    ``toroidal_magnetic_field`` / …). Even so, we route them through
-    ``REVIEW_NAME`` like any LLM-composed name:
+    ``toroidal_magnetic_field`` / …). The name has no alternative to
+    refine to: REVIEW_NAME produces noise scores on the placeholder
+    description, REFINE_NAME has nothing to write. We therefore skip
+    the name-axis pipeline entirely for deterministic parents — the
+    quality-bearing work happens on the description+docs axis.
 
     1. Waits until ALL children of a parent have a ``name_stage`` set.
     2. Copies unit and cocos from children (asserts uniformity).
-    3. Sets ``name_stage='drafted'`` — REVIEW_NAME will score the
-       deterministic name against the standard rubric. A grammar-
-       derived parent should review well; if it doesn't, the failure
-       surfaces rather than being papered over.
-    4. Stamps ``origin='deterministic'`` so REFINE_NAME knows to skip
-       this node (structural names have no refinement target — the
-       parent label IS what it is).
-    5. Sets ``docs_stage='pending'`` so the parent enters generate_docs
-       once the name review passes.
-    6. Creates a ``StandardNameSource`` with ``status='composed'`` for audit.
-    7. Runs ISN parse to populate grammar fields.
-    8. Clears ``needs_composition`` on the parent.
+    3. Sets ``name_stage='accepted'`` directly. The children are
+       already REVIEW_NAME-validated standard names; their structural
+       parent inherits that validity by construction.
+    4. Stamps ``origin='deterministic'`` so the semantic-sim gate,
+       REFINE_NAME claim, and pool-pending counters all know to leave
+       this node alone on the name axis.
+    5. Sets ``description = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER``
+       so the export-time guard can refuse to publish until
+       ``GENERATE_DOCS`` rewrites it with LLM-quality content.
+    6. Sets ``docs_stage='pending'`` so the parent enters
+       ``GENERATE_DOCS`` → ``REVIEW_DOCS`` immediately. The
+       description+docs go through full RD-quorum review on the docs
+       axis — that is the quality gate for these names.
+    7. Creates a ``StandardNameSource`` with ``status='composed'`` for audit.
+    8. Runs ISN parse to populate grammar fields.
+    9. Clears ``needs_composition`` on the parent.
 
     Returns the number of parents fully populated.
     """
@@ -1735,7 +1769,7 @@ def seed_parent_sources(gc: Any | None = None) -> int:
             gc.query(
                 """
                 MATCH (parent:StandardName {id: $parent_id})
-                SET parent.name_stage = 'drafted',
+                SET parent.name_stage = 'accepted',
                     parent.docs_stage = 'pending',
                     parent.validation_status = 'valid',
                     parent.origin = 'deterministic',
@@ -7304,6 +7338,13 @@ def claim_review_name_batch(
         # Gate: require description embedding before review so the
         # semantic_similarity_check in the review worker can run.
         " AND sn.description IS NOT NULL"
+        # Deterministic parents auto-accept on the name axis — they are
+        # written straight to name_stage='accepted' by seed_parent_sources
+        # and never legitimately appear at 'drafted'. Belt-and-suspenders
+        # filter: if any does end up here (legacy data, schema drift),
+        # exclude it from review_name and let the parent-seed backfill
+        # promote it back to 'accepted'.
+        " AND coalesce(sn.origin, '') <> 'deterministic'"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -7320,6 +7361,7 @@ def claim_review_name_batch(
             ", sn.tags AS tags"
             ", coalesce(sn.chain_length, 0) AS chain_length"
             ", sn.name_stage AS name_stage"
+            ", sn.origin AS origin"
         ),
         domain=domain,
         scope_run_id=scope_run_id,

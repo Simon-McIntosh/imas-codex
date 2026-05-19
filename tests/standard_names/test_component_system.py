@@ -252,14 +252,12 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
     )
 
 
-def test_seed_parent_sources_drafts_with_deterministic_origin():
-    """Parents must enter the pipeline at ``name_stage='drafted'`` so they
-    flow through REVIEW_NAME. They must also be stamped
-    ``origin='deterministic'`` so REFINE_NAME knows to skip them.
-
-    Reproduces the audit finding on ``magnetic_field``: the prior
-    shortcut wrote ``name_stage='accepted'`` directly with no review
-    provenance — a "shortcut" the user explicitly rejected.
+def test_seed_parent_sources_auto_accepts_with_deterministic_origin():
+    """Parents auto-accept on the name axis (``name_stage='accepted'``)
+    and are stamped ``origin='deterministic'``. The quality bar is the
+    docs-axis review, not the name-axis — the name is structurally
+    derived from REVIEW_NAME-validated children and has no alternative
+    to refine to.
     """
     gc = MagicMock()
     captured_sets: list[str] = []
@@ -292,16 +290,18 @@ def test_seed_parent_sources_drafts_with_deterministic_origin():
     from imas_codex.standard_names.graph_ops import seed_parent_sources
 
     assert seed_parent_sources(gc) == 1
-    # The write query must transition into REVIEW_NAME, not skip past it.
     write_query = next(q for q in captured_sets if "SET parent.name_stage" in q)
-    assert "parent.name_stage = 'drafted'" in write_query, (
-        "seed_parent_sources must write name_stage='drafted', not "
-        "'accepted' — parents must flow through REVIEW_NAME like any "
-        "other name (audit: magnetic_field had reviewer_score_name=None)."
+    assert "parent.name_stage = 'accepted'" in write_query, (
+        "Deterministic parents must auto-accept on the name axis. The "
+        "name is structurally derived from REVIEW_NAME-validated "
+        "children and has no alternative to refine to; routing it "
+        "through REVIEW_NAME produces noise scores against a "
+        "placeholder description and forces it to limbo."
     )
     assert "parent.origin = 'deterministic'" in write_query, (
-        "Parents must be stamped origin='deterministic' so REFINE_NAME "
-        "knows to skip them (structurally fixed names have no refinement target)."
+        "Parents must be stamped origin='deterministic' so the "
+        "semantic-sim gate, REFINE_NAME claim, REVIEW_NAME claim, "
+        "and export Gate C can all branch on it correctly."
     )
 
 
@@ -327,24 +327,27 @@ def test_refine_name_claim_skips_deterministic_origin():
     )
 
 
-def test_backfill_resets_shortcut_accepted_parents():
-    """``backfill_deterministic_parent_origin`` finds parents that were
-    accepted via the old shortcut and resets them to drafted+deterministic.
+def test_backfill_stamps_and_promotes_parents():
+    """``backfill_deterministic_parent_origin`` performs three idempotent
+    transformations on the live graph:
 
-    The selector must require:
-      - name_stage='accepted'
-      - reviewer_score_name IS NULL (no review provenance)
-      - review_name_count IS NULL
-      - origin IS NULL (not already marked)
-      - at least one inbound COMPONENT_OF edge (structural parent)
+    1. Stamp any structural parent without an origin
+       (``origin IS NULL`` + has COMPONENT_OF child) →
+       ``origin='deterministic'`` + ``name_stage='accepted'``.
+    2. Promote any deterministic parent stuck at ``name_stage='reviewed'``
+       (left over from a prior policy) → ``'accepted'``.
+    3. Reset stale template descriptions to the canonical placeholder.
     """
     gc = MagicMock()
     captured: list[str] = []
 
     def _query(cypher, **kwargs):
         captured.append(cypher)
-        # Two queries fire: origin reset, then description placeholder reset.
-        return [{"reset": 17 if "name_stage = 'accepted'" in cypher else 3}]
+        if "origin IS NULL" in cypher and "COMPONENT_OF" in cypher:
+            return [{"stamped": 5}]
+        if "name_stage = 'reviewed'" in cypher and "deterministic" in cypher:
+            return [{"promoted": 17}]
+        return [{"reset": 3}]
 
     gc.query = _query
     gc.__enter__ = MagicMock(return_value=gc)
@@ -355,24 +358,120 @@ def test_backfill_resets_shortcut_accepted_parents():
     )
 
     result = backfill_deterministic_parent_origin(gc)
-    assert result == {"origin_reset": 17, "description_reset": 3}
-    origin_q = captured[0]
-    # All five gating conditions must be in the WHERE clause.
-    assert "name_stage = 'accepted'" in origin_q
-    assert "reviewer_score_name IS NULL" in origin_q
-    assert "review_name_count IS NULL" in origin_q
-    assert "origin IS NULL" in origin_q
-    assert "COMPONENT_OF" in origin_q
-    # Output transition.
-    assert "name_stage = 'drafted'" in origin_q
-    assert "origin = 'deterministic'" in origin_q
-    # The description-reset pass normalises stale templates.
-    desc_q = captured[1]
-    assert "origin = 'deterministic'" in desc_q
+    assert result == {
+        "origin_stamped": 5,
+        "promoted_from_reviewed": 17,
+        "description_reset": 3,
+    }
+
+    # (1) Stamp pass: must transition to accepted (auto-accept).
+    stamp_q = captured[0]
+    assert "origin IS NULL" in stamp_q
+    assert "COMPONENT_OF" in stamp_q
+    assert "name_stage = 'accepted'" in stamp_q
+    assert "origin     = 'deterministic'" in stamp_q
+
+    # (2) Promotion pass: lift reviewed deterministic parents to accepted.
+    promote_q = captured[1]
+    assert "origin = 'deterministic'" in promote_q
+    assert "name_stage = 'reviewed'" in promote_q
+    assert "SET parent.name_stage = 'accepted'" in promote_q
+
+    # (3) Description pass: still normalises legacy templates.
+    desc_q = captured[2]
     assert "Vector quantity with components:" in desc_q
     assert "Base quantity from which" in desc_q
     assert "Geometric coordinate with axes:" in desc_q
     assert "$placeholder" in desc_q
+
+
+def test_review_name_claim_skips_deterministic():
+    """The REVIEW_NAME claim must exclude ``origin='deterministic'``
+    as a belt-and-suspenders defence — these parents auto-accept and
+    should never appear at name_stage='drafted', but legacy / drifted
+    data must not get picked up by review_name.
+    """
+    import inspect
+
+    from imas_codex.standard_names import graph_ops
+
+    src = inspect.getsource(graph_ops.claim_review_name_batch)
+    assert "coalesce(sn.origin, '') <> 'deterministic'" in src, (
+        "claim_review_name_batch must filter out origin='deterministic' "
+        "so any drifted deterministic SN at 'drafted' is excluded."
+    )
+
+
+def test_review_name_worker_skips_semantic_sim_for_deterministic():
+    """The semantic-similarity pre-LLM gate must be skipped when the
+    claimed item has ``origin='deterministic'``. Cosine sim between a
+    registered base token and a generic placeholder description is
+    always low; firing the gate would synthesise a fake failure on
+    every deterministic parent that drifted into review.
+    """
+    import inspect
+
+    from imas_codex.standard_names import workers
+
+    src = inspect.getsource(workers.process_review_name_batch)
+    assert 'item.get("origin") == "deterministic"' in src, (
+        "review_name_pool_process must branch on origin='deterministic' "
+        "before computing semantic_similarity_check."
+    )
+    # The skip branch must wrap the actual similarity computation,
+    # not just appear after the import. Look for the to_thread(...)
+    # call site, which is what executes the gate.
+    branch_pos = src.index('item.get("origin") == "deterministic"')
+    sim_call_pos = src.index(
+        "to_thread(\n                    semantic_similarity_check"
+    )
+    assert branch_pos < sim_call_pos
+
+
+def test_export_gate_c_bypasses_name_score_for_deterministic():
+    """Deterministic parents have no name-axis review (auto-accept).
+    Gate C must NOT exclude them for missing or low
+    ``reviewer_score_name`` — the description placeholder guard plus
+    the optional docs-score threshold are their quality bar.
+    """
+    from imas_codex.standard_names.export import _run_gate_c
+
+    candidates = [
+        # Deterministic parent with no name score but real description: keep.
+        {
+            "id": "magnetic_field",
+            "origin": "deterministic",
+            "reviewer_score_name": None,
+            "description": "Equilibrium magnetic-field vector …",
+            "reviewer_description_score": 0.92,
+        },
+        # Deterministic parent below docs-score threshold: reject.
+        {
+            "id": "low_docs_parent",
+            "origin": "deterministic",
+            "reviewer_score_name": None,
+            "description": "A real but poorly-described parent",
+            "reviewer_description_score": 0.40,
+        },
+        # Non-deterministic without name score, include_unreviewed=False: reject.
+        {
+            "id": "regular_unreviewed",
+            "origin": "pipeline",
+            "reviewer_score_name": None,
+            "description": "Real description",
+        },
+    ]
+    gate, filtered, _, excluded_unrev = _run_gate_c(
+        candidates,
+        min_score=0.65,
+        include_unreviewed=False,
+        min_description_score=0.65,
+    )
+    kept = {c["id"] for c in filtered}
+    assert kept == {"magnetic_field"}
+    assert excluded_unrev == 1  # regular_unreviewed
+    docs_issues = [i for i in gate.issues if i.get("type") == "below_description_score"]
+    assert any(i.get("name") == "low_docs_parent" for i in docs_issues)
 
 
 def test_seed_parent_sources_writes_honest_placeholder_description():

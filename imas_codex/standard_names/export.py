@@ -358,6 +358,32 @@ def _run_gate_c(
             )
             continue
 
+        # Deterministic parents auto-accept on the name axis. Their
+        # quality bar is the docs-axis review (description+documentation
+        # RD-quorum score), not the name-axis review which would be
+        # noise against a structurally-fixed name. Skip the
+        # ``reviewer_score_name`` check; the placeholder guard above
+        # already refuses to publish before ``GENERATE_DOCS`` has run,
+        # and the ``min_description_score`` check further down still
+        # applies if the caller passes a docs threshold.
+        if cand.get("origin") == "deterministic":
+            if min_description_score is not None:
+                desc_score = cand.get("reviewer_description_score")
+                if desc_score is not None and desc_score < min_description_score:
+                    excluded_below_score += 1
+                    issues.append(
+                        {
+                            "type": "below_description_score",
+                            "name": cand["id"],
+                            "score": desc_score,
+                            "threshold": min_description_score,
+                            "origin": "deterministic",
+                        }
+                    )
+                    continue
+            filtered.append(cand)
+            continue
+
         score = cand.get("reviewer_score_name")
 
         # Unreviewed check

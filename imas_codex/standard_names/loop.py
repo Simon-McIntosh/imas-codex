@@ -795,16 +795,23 @@ async def run_sn_pools(
                 edge_result["migrated"],
             )
 
-        # One-shot-then-idempotent: pre-existing parents accepted via the
-        # old seed_parent_sources shortcut (no name review) are reset to
-        # 'drafted' so the standard REVIEW_NAME pool can score them.
-        # Stale description templates are also normalised to the canonical
-        # placeholder so the export guard can detect "docs pending".
+        # Idempotent self-healing: any structural parent without an
+        # origin gets stamped 'deterministic' + name_stage='accepted'
+        # (auto-accept on the name axis); any deterministic parent left
+        # at name_stage='reviewed' from a prior policy is promoted to
+        # 'accepted' so it reaches GENERATE_DOCS; legacy template
+        # descriptions are normalised to the canonical placeholder so
+        # the export guard can detect "docs not finalised" uniformly.
         backfilled = await asyncio.to_thread(backfill_deterministic_parent_origin)
-        if backfilled.get("origin_reset"):
+        if backfilled.get("origin_stamped"):
             logger.info(
-                "Backfilled %d shortcut-accepted parents to drafted+deterministic",
-                backfilled["origin_reset"],
+                "Stamped %d parents origin='deterministic' + name_stage='accepted'",
+                backfilled["origin_stamped"],
+            )
+        if backfilled.get("promoted_from_reviewed"):
+            logger.info(
+                "Promoted %d deterministic parents reviewed → accepted",
+                backfilled["promoted_from_reviewed"],
             )
         if backfilled.get("description_reset"):
             logger.info(

@@ -5147,6 +5147,17 @@ async def process_review_name_batch(
         # (e.g. "co_passing_density" — density of what?).  Skip the
         # expensive LLM review and persist a synthetic low score that
         # routes the name to the refine_name pool.
+        #
+        # EXCEPT for deterministic parents: their description is the
+        # canonical placeholder until ``GENERATE_DOCS`` runs, so the
+        # cosine similarity is meaningless. Cosine sim between a
+        # registered base token (``magnetic_field``) and a generic
+        # placeholder string is always low — the gate would fire on
+        # every deterministic parent that ever reached this point.
+        # Deterministic parents auto-accept on the name axis anyway
+        # (``seed_parent_sources`` writes ``name_stage='accepted'``);
+        # this skip is defensive in case any drift puts one at
+        # ``drafted``.
         from imas_codex.standard_names.audits import semantic_similarity_check
         from imas_codex.standard_names.defaults import (
             SEMANTIC_SIM_CRITICAL,
@@ -5156,18 +5167,25 @@ async def process_review_name_batch(
 
         sem_sim: float | None = None
         sem_issues: list[str] = []
-        try:
-            sem_sim, sem_issues = await _asyncio.to_thread(
-                semantic_similarity_check,
-                sn_id,
-                item.get("description") or "",
-            )
-        except Exception:
+        if item.get("origin") == "deterministic":
             logger.debug(
-                "review_name: semantic_similarity_check failed for %s",
+                "review_name: skipping semantic-sim gate for deterministic "
+                "parent %s (description is placeholder until GENERATE_DOCS)",
                 sn_id,
-                exc_info=True,
             )
+        else:
+            try:
+                sem_sim, sem_issues = await _asyncio.to_thread(
+                    semantic_similarity_check,
+                    sn_id,
+                    item.get("description") or "",
+                )
+            except Exception:
+                logger.debug(
+                    "review_name: semantic_similarity_check failed for %s",
+                    sn_id,
+                    exc_info=True,
+                )
 
         # Persist semantic_sim on the node regardless of outcome
         if sem_sim is not None:
