@@ -626,11 +626,13 @@ uv run imas-codex release --final -m '<msg>'
 | Pool | Label | Stage gate | Key operation |
 |------|-------|------------|---------------|
 | 1 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates name; new SN persisted at `name_stage='drafted'`. Unit injected from DD — never from LLM. |
-| 2 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted` |
+| 2 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents (Phase 4+): scores include a `specificity` dimension; `specificity < threshold` → `proposed_verdict='reject'`. |
 | 3 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | Creates NEW SN node; predecessor flipped to `superseded`; source edges migrated; `REFINED_FROM` edge added |
 | 4 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM generates documentation; `docs_stage → 'drafted'`. Cross-pipeline gate: fires only after name is accepted |
 | 5 | `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores docs; atomic transition → `accepted` / `reviewed` / `exhausted` |
 | 6 | `REFINE_DOCS` | `docs_stage='reviewed' AND rds<min AND docs_chain_length<cap` | Rewrites docs in-place; prior content snapshotted on a `DocsRevision` node via `DOCS_REVISION_OF`; `docs_stage → 'drafted'` |
+
+**Derived parents** (`origin='derived'`) flow through the same six-pool loop with two differences: (a) placeholder nodes are created at write time by `_write_standard_name_edges` only if they pass the deterministic admission gate in `imas_codex/standard_names/parents.py` (two-clause: IR specificity OR vector-like topology); (b) REVIEW_NAME includes a `specificity` dimension that fires only on derived parents. Failed-on-name parents are deleted with their `HAS_PARENT` edges (Phase 6). Description-quality failures route to `REFINE_DOCS`, not delete. No separate `sn parents` CLI — all parent handling is folded into `sn run`. The `apply_derived_parent_migration` idempotent self-healing pass runs on every `sn run` startup to migrate legacy `origin='deterministic'` entries to the new lifecycle.
 
 **Acceptance always overrides cap:** even at `chain_length == cap − 1`, a passing score wins (no forced exhaustion on a good result). **Escalation:** on the final refine attempt (`chain_length == cap − 1`), the pool switches to `DEFAULT_ESCALATION_MODEL` (default `openrouter/anthropic/claude-opus-4.6`). **Backlog throttle:** when refine_name backlog > 0.5 × generate_name backlog, `BudgetManager.pool_admit` dampens generate_name effective weight by 0.5×.
 
@@ -653,6 +655,7 @@ uv run imas-codex release --final -m '<msg>'
 | `imas_codex/standard_names/context.py` | Grammar context builder (vocabulary, examples, tokamak ranges) |
 | `imas_codex/standard_names/search.py` | Vector search for similar existing StandardName nodes (collision avoidance) |
 | `imas_codex/standard_names/orphan_sweep.py` | Periodic sweep that reverts stale `refining` claims after timeout |
+| `imas_codex/standard_names/parents.py` | Derived-parent admission gate (`is_admissible_parent_name`, `recompute_parent_kind`); two-clause deterministic check; callable without a live graph (stub `gc` for Clause B) |
 
 SN classification responsibilities are owned by DD `node_category` and pre-filtered via `SN_SOURCE_CATEGORIES` in `imas_codex/core/node_categories.py`.
 
@@ -755,7 +758,9 @@ Four lifecycle axes on each `StandardName`:
 | `status` | `draft → published → deprecated` | Catalog import | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
 | `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn export`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings persist in `validation_issues` but stay `valid`. **Review never demotes** — low-scoring names stay `valid` and route to refine pools. |
 
-**`origin`:** `pipeline` (LLM-generated) or `catalog_edit` (human-edited via catalog PR). `filter_protected()` skips `PROTECTED_FIELDS` on `catalog_edit` names unless overridden via `sn run --override-edits <name>`. PR provenance fields: `catalog_pr_number`, `catalog_pr_url`, `catalog_commit_sha`; round-trip timestamps: `exported_at`, `imported_at`.
+**`origin`:** `pipeline` (LLM-generated), `catalog_edit` (human-edited via catalog PR), or `derived` (deterministic structural parent created by the admission gate in `parents.py` — see Derived Parents below). `filter_protected()` skips `PROTECTED_FIELDS` on `catalog_edit` names unless overridden via `sn run --override-edits <name>`. PR provenance fields: `catalog_pr_number`, `catalog_pr_url`, `catalog_commit_sha`; round-trip timestamps: `exported_at`, `imported_at`.
+
+**Derived parent lifecycle.** Structural parent SNs inferred from the ISN grammar peel enter with `origin='derived'`, `name_stage='pending'`. They are only created when the two-clause admission gate passes: Clause A — the parsed IR has at least one qualifier, operator, projection, locus, or mechanism (filters bare-base scalars like `pressure`, `density`); Clause B — the name already has ≥2 distinct-axis `projection` children in the graph (admits true vectors like `magnetic_field`). Names that fail both clauses are never created; their children remain parentless and group via shared grammar fields (`physical_base`, `qualifier`) in Cypher queries. Once created, `origin='derived'` names flow through the standard `REVIEW_NAME → GENERATE_DOCS → REVIEW_DOCS` path. Phase 4+ adds a `specificity` scoring dimension (gated on `origin='derived'`) — a failing specificity score routes the name to delete (Phase 6), not refine. Advisory slots `proposed_verdict` (admit \| reject \| uncertain) and `specificity_score` (float) track the verdict before deletion is enabled.
 
 ### StandardNameSource Lifecycle
 
@@ -808,6 +813,8 @@ Forward-reference targets are MERGEd as bare placeholder nodes.
 | Edge | From | To | Source field / Derivation |
 |------|------|-----|--------------------------|
 | `HAS_ARGUMENT` | derived `StandardName` | parent `StandardName` | ISN parser: outermost unary prefix/postfix or projection layer; `{operator, operator_kind, [role, separator, axis, shape]}` |
+| `HAS_PARENT` | child `StandardName` | parent `StandardName` | ISN grammar peel: child belongs to a family headed by the parent. Direction child→parent, matching the `(IMASNode)-[:HAS_PARENT]->(IMASNode)` convention from `imas_dd.yaml`. Edge props: `{operator, operator_kind, [role, separator, axis, shape]}`. Only emitted when the parent passes the admission gate (`_filter_admissible_parents` in `graph_ops.py`). Renamed from `COMPONENT_OF` in Phase 7. |
+| `MAGNITUDE_OF` | magnitude `StandardName` | vector `StandardName` | Passive — emitted by `_emit_magnitude_of_edges` only when a DD/signal-sourced SN composes to `magnitude_of_<X>` AND `<X>` is an admitted `kind='vector'` parent. Never created speculatively. Algebraic-sibling relationship (not hierarchical like `HAS_PARENT`). |
 | `HAS_ERROR` | inner `StandardName` | uncertainty sibling | ISN parser: `upper_uncertainty` / `lower_uncertainty` / `uncertainty_index` prefix; direction inverted; `{error_type ∈ upper\|lower\|index}` |
 | `HAS_PREDECESSOR` | `StandardName` | predecessor | `predecessor` field (pipeline) or `deprecates` field (catalog import) |
 | `HAS_SUCCESSOR` | `StandardName` | successor | `successor` field (pipeline) or `superseded_by` field (catalog import) |
@@ -872,6 +879,8 @@ StandardName and StandardNameSource nodes defined in `imas_codex/schemas/standar
 - `(StandardNameSource)-[:PRODUCED_NAME]->(StandardName)` — links source to result
 - `(StandardName)-[:REFINED_FROM]->(StandardName)` — predecessor in name refinement chain
 - `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)` — prior docs snapshot before in-place rewrite
+- `(StandardName)-[:HAS_PARENT]->(StandardName)` — child belongs to a structural parent family; direction matches `(IMASNode)-[:HAS_PARENT]->(IMASNode)` convention; only created when parent passes admission gate
+- `(StandardName)-[:MAGNITUDE_OF]->(StandardName)` — scalar magnitude SN derived from a vector parent; passive (source-driven, never speculative)
 
 **COCOS / physics_domain / units (DD-authoritative, injected post-LLM):** `unit` flows from the DD `HAS_UNIT` relationship; `cocos` (int → COCOS singleton) and `cocos_transformation_type` (e.g. `psi_like`, `ip_like`) record convention behaviour; `dd_version` records the DD snapshot. `physics_domain` comes directly from `IMASNode.physics_domain` (falls back to `"general"` if absent). The LLM never fills any of these.
 

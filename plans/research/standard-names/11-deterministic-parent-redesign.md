@@ -1,5 +1,7 @@
 # Research: Deterministic-parent design in the sn run pipeline
 
+> **STATUS:** Implementation in progress as of 2026-05-19. See commits 091b1ece onwards. Phases 0/1/2/3/7 complete; Phases 4/5/6/8/9/11 in progress.
+
 **Status:** Research — early exploration, NOT ready for implementation
 **Date:** 2026-05-19
 **Pipeline version at write time:** ISNC `v0.2.0rc12`, ISN `v0.8.0rc24`, imas-codex `main @ 2b4ea3c4`

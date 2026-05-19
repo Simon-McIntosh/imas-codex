@@ -592,7 +592,53 @@ Each StandardName node carries a full audit trail:
 (IMASNode)-[:HAS_STANDARD_NAME]->(StandardName)
 (FacilitySignal)-[:HAS_STANDARD_NAME]->(StandardName)
 (StandardName)-[:HAS_UNIT]->(Unit)
+(StandardName)-[:HAS_PARENT]->(StandardName)
+(StandardName)-[:MAGNITUDE_OF]->(StandardName)
 ```
+
+## Structural Parents
+
+The `_write_standard_name_edges` function in `graph_ops.py` creates parent
+`StandardName` placeholder nodes when the ISN grammar peel produces a parent
+reference. These parents enter with `origin='derived'`, `name_stage='pending'`
+and must pass a **two-clause admission gate** before the placeholder is
+written to the graph (implementation: `imas_codex/standard_names/parents.py`).
+
+### Admission gate
+
+A derived parent is admitted if and only if at least one clause holds:
+
+- **Clause A — IR specificity**: `parse_standard_name(name).ir` has at
+  least one non-empty qualifier, operator, projection, locus, or mechanism.
+  This is what differentiates `elongation_of_plasma_boundary` (admitted) from
+  the bare base `pressure` (rejected).
+- **Clause B — vector-like topology**: the candidate already has ≥2 inbound
+  `HAS_PARENT` edges with `operator_kind='projection'` and distinct `axis`
+  values. This admits bare-base vectors like `magnetic_field` and
+  `electric_field` on topological grounds even though their name string has
+  no qualifying anchors.
+
+Names failing both clauses are never created. Their children remain parentless
+in the graph and group via shared `physical_base` / `qualifier` grammar
+properties using Cypher — no placeholder node is needed.
+
+### Why bare-base scalars are excluded
+
+Category labels like `pressure`, `density`, and `temperature` are **not**
+first-class catalog entries — they are the `physical_base` grammar segment
+itself. Creating parent nodes for them would mean the catalog contains entries
+with trivially generic names that carry no scientific identity beyond the
+category. The gate's Clause A rejects exactly these cases.
+
+### `MAGNITUDE_OF` edge
+
+When the pipeline composes a name of the form `magnitude_of_<X>` from an
+actual DD or signal source, and `<X>` is already an admitted `kind='vector'`
+parent, the write path emits `(magnitude_sn)-[:MAGNITUDE_OF]->(vector_sn)`.
+This is **passive** — no magnitude SN is created speculatively. If the
+magnitude SN exists but its vector parent is not yet admitted, the magnitude
+is a normal scalar with no special link. Implementation helper:
+`_emit_magnitude_of_edges` in `graph_ops.py`.
 
 ## Standard Name Lifecycle
 

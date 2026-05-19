@@ -82,6 +82,20 @@ all three layers in sequence and returns `(issues, layer_summary)`.
 `load_prompt_config("sn_review_criteria")` loads the YAML config with caching.
 `render_prompt()` handles `{% include %}` resolution from the `shared/` directory.
 
+## ISN Vocabulary Co-evolution (Phase 9 — pending)
+
+The admission gate in `imas_codex/standard_names/parents.py` surfaces bare-base
+parent names that fail Clause A (no IR anchors) and Clause B (no projection
+children). These are candidates for ISN-side mandatory-locus or mandatory-qualifier
+rules — e.g., a validator that requires `elongation` to appear only with an
+`of_<locus>` suffix. The codex side provides audit tooling to identify candidates
+and generate proposed ISN PR descriptions; vocabulary decisions remain user-driven
+per ISN's grammar-vocab process. Once an ISN RC is cut with the new rule, the
+codex rename cascade (Phase 8, `sn run --rename`) walks `HAS_PARENT` descendants
+and migrates existing graph entries to the agreed-locus form. This outer loop
+spans two repos and drives convergence toward a catalog where all parent SNs are
+first-class entries — no bare-base category labels.
+
 ## Rules
 
 1. **Never import from ISN private modules** — only `grammar`, `models`, `validation.*`

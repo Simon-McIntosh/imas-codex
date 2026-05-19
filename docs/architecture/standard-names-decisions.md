@@ -82,3 +82,60 @@ BLIND — no cross-contamination) while adding a genuine arbitration path:
   `batch_cost × num_models × 1.3` upfront guarantees worst-case cost is funded before any cycle
   begins. `BudgetLease.charge()` raises `BudgetExceeded` on overshoot — the invariant
   `pool + sum(reserved) + spent == total` holds at all times.
+
+## Decision 17 — Derived-parent admission gate
+
+**Context (commit 091b1ece onwards, Phases 0–3 complete as of 2026-05-19):**
+The pipeline creates structural parent `StandardName` nodes by peeling ISN
+grammar layers. Before this redesign, all 74 parents were auto-stamped
+`origin='deterministic'`, `name_stage='accepted'`, bypassing the LLM review
+gates. This introduced category labels (`pressure`, `density`, …) into the
+catalog alongside legitimate first-class names.
+
+**Decision: two-clause deterministic gate + origin='derived' lifecycle**
+
+A new admission gate (`imas_codex/standard_names/parents.py`) runs at write
+time before any parent placeholder is persisted. A name is admitted if Clause A
+(IR has a qualifier/operator/projection/locus/mechanism) OR Clause B (≥2
+distinct-axis projection children already in graph) holds. This replaces the
+old unconditional `backfill_deterministic_parent_origin` call with an
+idempotent `apply_derived_parent_migration` pass that runs on every `sn run`
+startup.
+
+**Why a two-clause gate instead of pure LLM or pure syntax?**
+Pure syntax misclassifies bare-base vectors (`magnetic_field`) — they have no
+qualifying anchors but carry real algebraic content (components + magnitude).
+Pure LLM wastes calls on the 30+ obvious bare scalars. The deterministic gate
+is the first line of defence ($0 cost); LLM specificity review (Phase 4, `sn
+run`'s REVIEW_NAME pool) is the second line for borderline cases like `beta`.
+
+**Why `HAS_PARENT` and not a typed set of relationships?**
+A single edge type with properties (`operator`, `operator_kind`, `axis`, …)
+preserves the existing single-edge model while correcting the misleading name
+`COMPONENT_OF` (which implies projection, but ~80% of edges are qualifier/locus/
+operator). The new name matches the `(IMASNode)-[:HAS_PARENT]->(IMASNode)`
+convention already used in the DD graph — uniform vocabulary, honest semantics
+(hierarchy, not derivation). No explosion into 5 typed relationships —
+diminishing returns vs migration cost.
+
+**Why `MAGNITUDE_OF` is a separate edge type?**
+The magnitude relationship is algebraic (scalar = |vector|), not hierarchical.
+The magnitude SN sits at the same abstraction level as the vector — it is not
+a child of it. Reusing `HAS_PARENT` for both hierarchy and algebraic-sibling
+would conflate two semantically distinct graphs. `MAGNITUDE_OF` is also
+passive — emitted only when a source-driven SN composes to `magnitude_of_<X>`
+with an admitted vector parent. No speculative creation; source-driven invariant
+preserved.
+
+**Why delete on name failure, not quarantine?**
+Quarantine with reversibility was explicitly rejected: deleted == removed,
+re-derivation on a fresh `sn run` is the recovery path. A quarantine state
+would require a separate UI affordance, lifecycle management, and expiry logic
+for a case that is trivially re-triggered. The delete path is gated behind a
+Phase 4 manual audit (≥85% LLM–human agreement) to prevent premature removals.
+
+**Why no `sn parents` CLI subcommand?**
+The user rejected a dedicated CLI. Migration (`apply_derived_parent_migration`)
+runs automatically on `sn run` startup. The rename cascade (Phase 8, in
+progress) exposes a `--rename` flag on `sn run`; audit utilities fold into
+`sn status` and `sn run --only reconcile`.
