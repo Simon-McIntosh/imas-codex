@@ -1509,7 +1509,20 @@ def _migrate_component_of_off_superseded(gc: Any) -> int:
     superseded — should not happen in practice), the edge is left
     alone so manual review can investigate.
 
-    Returns the number of COMPONENT_OF edges actually migrated.
+    Self-loop guard: if a refine step renamed the *child* into the same
+    name as its (now-superseded) parent — e.g. ``minimum_magnetic_field``
+    got refined into ``minimum_magnetic_field_magnitude`` while
+    ``minimum_magnetic_field_magnitude`` was already its COMPONENT_OF
+    parent — naive migration produces ``child -[COMPONENT_OF]-> child``,
+    a structural impossibility that crashes ISNC's
+    ``validate_catalog`` topological sort with
+    ``CycleError: nodes are in a cycle, ['x', 'x']``. In that case the
+    edge is deleted outright; the new structural parent (if any) will
+    be re-emitted next time ``derive_edges`` runs.
+
+    Returns the number of COMPONENT_OF edges actually migrated (delete-
+    only self-loops are reported under ``deleted_self_loops`` in the
+    logger but excluded from the migrated count).
     """
     # The live successor is the chain-head: the node reachable from
     # ``old`` by following ``<-[:REFINED_FROM]-`` zero or more times,
@@ -1530,6 +1543,11 @@ def _migrate_component_of_off_superseded(gc: Any) -> int:
             MATCH (child)-[c:COMPONENT_OF]->(old)
             WITH tip, child, properties(c) AS props, c
             DELETE c
+            // Drop the edge if migration would produce a self-loop;
+            // any legitimate structural parent for `child` will be
+            // re-emitted by the next derive_edges pass.
+            WITH tip, child, props
+            WHERE tip.id <> child.id
             MERGE (child)-[c_new:COMPONENT_OF]->(tip)
             SET c_new = props
             RETURN count(c_new) AS migrated
