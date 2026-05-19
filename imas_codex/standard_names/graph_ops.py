@@ -9439,6 +9439,7 @@ def pool_pending_counts(
     CALL { MATCH (sn:StandardName {name_stage: 'reviewed'})
            WHERE sn.reviewer_score_name < $min_score
              AND coalesce(sn.chain_length, 0) < $rotation_cap
+             AND coalesce(sn.origin, '') <> 'deterministic'
            RETURN count(sn) AS refine_name }
     CALL { MATCH (sn:StandardName {name_stage: 'accepted', docs_stage: 'pending'})
            RETURN count(sn) AS generate_docs }
