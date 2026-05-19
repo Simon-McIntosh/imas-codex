@@ -1,9 +1,11 @@
-"""Preview a staging directory via the ISN catalog renderer.
+"""Preview a staging directory via the ISN catalog-site server.
 
-Uses ISN's ``CatalogRenderer`` (public API) to generate a documentation
-site, then serves it locally with MkDocs. The rendering toolbox lives in
-ISN — codex imports and uses it directly (no subprocess delegation to the
-``standard-names`` CLI).
+ISN (≥ rc20) ships a Vite SPA and exposes ``standard-names serve`` to
+run it locally with hot-reload. ``run_preview`` is a thin wrapper that
+shells out to that subcommand against the staging directory's
+``standard_names/`` catalog. The previous MkDocs-based path
+(``MKDOCS_SERVE_TEMPLATE``, ``_generate_site_content``) was removed in
+ISN's Vite migration and no longer exists.
 
 Press Ctrl-C to stop the preview server.
 """
@@ -14,7 +16,6 @@ import logging
 import shutil
 import subprocess
 import sys
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,59 +45,16 @@ class PreviewHandle:
             self.temp_dir = None
 
 
-def _generate_preview_site(
-    catalog_path: Path,
-    docs_dir: Path,
-    *,
-    site_name: str = "Standard Names Preview",
-    site_url: str = "",
-) -> int:
-    """Generate MkDocs site content from catalog YAML using ISN's CatalogRenderer.
-
-    Uses ISN's public ``CatalogRenderer`` class for rendering and the
-    ``MKDOCS_SERVE_TEMPLATE`` / ``CATALOG_CSS`` constants for site
-    structure. This mirrors ISN's ``_generate_site_content()`` logic
-    using only public API.
-
-    Parameters
-    ----------
-    catalog_path:
-        Path to the ``standard_names/`` directory containing YAML files.
-    docs_dir:
-        Temporary directory to write the MkDocs project into.
-    site_name:
-        Title for the documentation site.
-    site_url:
-        Base URL for the site (used in mkdocs.yml).
-
-    Returns
-    -------
-    Number of standard names found.
-    """
-    from imas_standard_names.cli.catalog_site import (
-        MKDOCS_SERVE_TEMPLATE,
-        _generate_site_content,
-    )
-
-    return _generate_site_content(
-        catalog_path=catalog_path,
-        docs_dir=docs_dir,
-        site_name=site_name,
-        mkdocs_template=MKDOCS_SERVE_TEMPLATE,
-        site_url=site_url,
-    )
-
-
 def run_preview(
     staging_dir: str | Path,
     *,
     port: int | None = None,
     host: str | None = None,
 ) -> PreviewHandle:
-    """Launch a local MkDocs preview of a staging directory.
+    """Launch a local preview of a staging directory.
 
-    Uses ISN's ``CatalogRenderer`` to generate documentation, then
-    serves it with ``mkdocs serve``.
+    Delegates to ISN's ``standard-names serve`` command, which builds
+    the Vite SPA dataset and runs the dev server with hot-reload.
 
     Parameters
     ----------
@@ -116,9 +74,9 @@ def run_preview(
     Raises
     ------
     FileNotFoundError
-        If staging directory or catalog.yml is missing.
+        If the staging directory or ``catalog.yml`` is missing.
     ImportError
-        If imas-standard-names is not installed.
+        If the ``standard-names`` CLI is not available on PATH.
     """
     staging = Path(staging_dir)
     if not staging.is_dir():
@@ -132,58 +90,45 @@ def run_preview(
     if not sn_dir.is_dir():
         raise FileNotFoundError(f"No standard_names/ directory in staging: {staging}")
 
-    # Generate site content using ISN's CatalogRenderer
-    temp_dir = tempfile.mkdtemp(prefix="sn-preview-")
-    docs_dir = Path(temp_dir)
-
-    try:
-        total = _generate_preview_site(
-            catalog_path=sn_dir,
-            docs_dir=docs_dir,
-        )
-    except ImportError as exc:
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        raise ImportError(
-            "imas-standard-names is required for preview. "
-            "Install with: uv add imas-standard-names"
-        ) from exc
-    except Exception:
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        raise
-
     effective_port = port or 8000
     effective_host = host or "127.0.0.1"
     url = f"http://{effective_host}:{effective_port}"
 
-    logger.info("Generated preview site for %d standard names", total)
-    logger.info("Preview URL: %s", url)
-
-    # Run mkdocs serve (inherits active Python environment)
+    # Resolve the ``standard-names`` console script from the active
+    # interpreter's bin dir (``sys.executable`` is ``<venv>/bin/python``)
+    # so we use the same install codex is running under, regardless of
+    # PATH ordering. ISN's ``serve`` subcommand takes the catalog
+    # directory as a positional argument plus ``--port`` / ``--host``
+    # options matching our knobs.
+    cli = Path(sys.executable).parent / "standard-names"
     cmd = [
-        sys.executable,
-        "-m",
-        "mkdocs",
+        str(cli),
         "serve",
-        "--dev-addr",
-        f"{effective_host}:{effective_port}",
+        str(sn_dir),
+        "--port",
+        str(effective_port),
+        "--host",
+        effective_host,
     ]
 
     try:
         process = subprocess.Popen(
             cmd,
-            cwd=str(docs_dir),
+            cwd=str(staging),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
     except FileNotFoundError as exc:
-        shutil.rmtree(temp_dir, ignore_errors=True)
         raise ImportError(
-            "mkdocs is required for preview. Install with: uv add mkdocs-material"
+            "imas-standard-names is required for preview. "
+            "Install with: uv add imas-standard-names"
         ) from exc
+
+    logger.info("Preview server starting at %s (catalog: %s)", url, sn_dir)
 
     return PreviewHandle(
         process=process,
         url=url,
         staging_dir=str(staging),
-        temp_dir=temp_dir,
+        temp_dir=None,
     )
