@@ -298,7 +298,11 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     # locus suffix (``_of_<locus>``, ``_at_<locus>``). Peel the locus and
     # link to the residual base. This is what builds the
     #     elongation_of_plasma_boundary → elongation
-    # leg of the chain.
+    # leg of the chain. The locus relation (``of`` vs ``at``) is not
+    # carried on the edge — keeping the edge schema minimal lets ISN's
+    # ``ArgumentRef`` accept ``operator_kind="locus"`` without a per-
+    # relation field; the relation is recoverable from the source
+    # name's parse if anything ever needs it.
     if ir.locus is not None:
         stripped = ir.model_copy(update={"locus": None})
         try:
@@ -314,7 +318,6 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
                 {
                     "operator": ir.locus.token,
                     "operator_kind": "locus",
-                    "axis": ir.locus.relation.value,
                 },
             )
         ]

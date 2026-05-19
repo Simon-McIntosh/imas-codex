@@ -627,7 +627,6 @@ class TestLocusLayerParent:
         assert edges[0].props == {
             "operator": "plasma_boundary",
             "operator_kind": "locus",
-            "axis": "of",
         }
 
     def test_area_of_plasma_boundary(self):
@@ -636,11 +635,13 @@ class TestLocusLayerParent:
         assert edges[0].to_name == "area"
 
     def test_at_locus_safety_factor(self):
-        # Different relation (`at` vs `of`) — still a locus peel.
+        # Different relation (`at` vs `of`) — same locus peel; the
+        # relation isn't carried on the edge (it's implicit in the
+        # source name's parse), keeping the schema minimal.
         edges = self._component_of("safety_factor_at_magnetic_axis")
         assert len(edges) == 1
         assert edges[0].to_name == "safety_factor"
-        assert edges[0].props["axis"] == "at"
+        assert edges[0].props["operator_kind"] == "locus"
 
     def test_locus_node_still_emitted(self):
         # The locus-peel COMPONENT_OF must NOT replace the HAS_LOCUS
