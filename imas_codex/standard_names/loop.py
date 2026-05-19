@@ -786,7 +786,6 @@ async def run_sn_pools(
         # pipeline until the edges are re-derived. Idempotent (MERGE)
         # and fast (~1s for ~200 SNs) so safe to run on every loop.
         from imas_codex.standard_names.graph_ops import (
-            apply_derived_parent_migration,
             rederive_structural_edges,
             seed_parent_sources,
         )
@@ -800,28 +799,6 @@ async def run_sn_pools(
             logger.info(
                 "Migrated %d HAS_PARENT edges off superseded parents",
                 edge_result["migrated"],
-            )
-
-        # Idempotent self-healing for the derived-parent redesign:
-        # rename any remaining COMPONENT_OF → HAS_PARENT edges, rename
-        # legacy origin='deterministic' → 'derived', and normalise stale
-        # description templates to the canonical placeholder. Once the
-        # migration settles all three become no-ops.
-        migrated = await asyncio.to_thread(apply_derived_parent_migration)
-        if migrated.get("edges_renamed"):
-            logger.info(
-                "Renamed %d COMPONENT_OF edges → HAS_PARENT",
-                migrated["edges_renamed"],
-            )
-        if migrated.get("origins_renamed"):
-            logger.info(
-                "Renamed %d origins 'deterministic' → 'derived'",
-                migrated["origins_renamed"],
-            )
-        if migrated.get("description_reset"):
-            logger.info(
-                "Reset %d stale description templates to placeholder",
-                migrated["description_reset"],
             )
 
         parent_count = await asyncio.to_thread(seed_parent_sources)

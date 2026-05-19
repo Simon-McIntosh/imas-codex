@@ -358,16 +358,15 @@ def _run_gate_c(
             )
             continue
 
-        # Derived parents (legacy value 'deterministic' retained one
-        # cycle) auto-accept on the name axis. Their quality bar is
-        # the docs-axis review (description+documentation RD-quorum
-        # score), not the name-axis review which would be noise
-        # against a structurally-fixed name. Skip the
+        # Derived parents auto-accept on the name axis. Their quality
+        # bar is the docs-axis review (description+documentation
+        # RD-quorum score), not the name-axis review which would be
+        # noise against a structurally-fixed name. Skip the
         # ``reviewer_score_name`` check; the placeholder guard above
         # already refuses to publish before ``GENERATE_DOCS`` has run,
         # and the ``min_description_score`` check further down still
         # applies if the caller passes a docs threshold.
-        if cand.get("origin") in ("deterministic", "derived"):
+        if cand.get("origin") == "derived":
             if min_description_score is not None:
                 desc_score = cand.get("reviewer_description_score")
                 if desc_score is not None and desc_score < min_description_score:

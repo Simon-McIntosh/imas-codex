@@ -5167,7 +5167,7 @@ async def process_review_name_batch(
 
         sem_sim: float | None = None
         sem_issues: list[str] = []
-        is_derived = item.get("origin") in ("deterministic", "derived")
+        is_derived = item.get("origin") == "derived"
         if is_derived:
             # ── Phase 5: desc-name similarity gate for derived parents ────
             # For derived parents, the description may have been seeded from
