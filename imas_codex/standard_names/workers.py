@@ -5167,9 +5167,9 @@ async def process_review_name_batch(
 
         sem_sim: float | None = None
         sem_issues: list[str] = []
-        if item.get("origin") == "deterministic":
+        if item.get("origin") in ("deterministic", "derived"):
             logger.debug(
-                "review_name: skipping semantic-sim gate for deterministic "
+                "review_name: skipping semantic-sim gate for derived "
                 "parent %s (description is placeholder until GENERATE_DOCS)",
                 sn_id,
             )

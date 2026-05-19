@@ -292,21 +292,22 @@ def test_seed_parent_sources_auto_accepts_with_deterministic_origin():
     assert seed_parent_sources(gc) == 1
     write_query = next(q for q in captured_sets if "SET parent.name_stage" in q)
     assert "parent.name_stage = 'accepted'" in write_query, (
-        "Deterministic parents must auto-accept on the name axis. The "
-        "name is structurally derived from REVIEW_NAME-validated "
-        "children and has no alternative to refine to; routing it "
-        "through REVIEW_NAME produces noise scores against a "
-        "placeholder description and forces it to limbo."
+        "Derived parents currently auto-accept on the name axis (no "
+        "Phase 4 review budget yet). The name is structurally derived "
+        "from REVIEW_NAME-validated children and has no alternative to "
+        "refine to; routing it through REVIEW_NAME without the "
+        "specificity dimension produces noise scores."
     )
-    assert "parent.origin = 'deterministic'" in write_query, (
-        "Parents must be stamped origin='deterministic' so the "
-        "semantic-sim gate, REFINE_NAME claim, REVIEW_NAME claim, "
-        "and export Gate C can all branch on it correctly."
+    assert "parent.origin = 'derived'" in write_query, (
+        "Parents must be stamped origin='derived' (the redesign's "
+        "vocabulary — 'deterministic' retired). The semantic-sim gate, "
+        "REFINE_NAME claim, REVIEW_NAME claim, and export Gate C all "
+        "branch on this origin value."
     )
 
 
-def test_refine_name_claim_skips_deterministic_origin():
-    """The REFINE_NAME claim must exclude ``origin='deterministic'``.
+def test_refine_name_claim_skips_derived_origin():
+    """The REFINE_NAME claim must exclude derived/deterministic origins.
 
     Refining a structurally-derived parent is meaningless — the name
     IS ``magnetic_field``, there's no alternative to propose. A
@@ -318,35 +319,39 @@ def test_refine_name_claim_skips_deterministic_origin():
     from imas_codex.standard_names import graph_ops
 
     src = inspect.getsource(graph_ops.claim_refine_name_batch)
-    assert "origin" in src and "deterministic" in src, (
-        "claim_refine_name_batch must filter out origin='deterministic'."
+    assert "origin" in src and "derived" in src, (
+        "claim_refine_name_batch must filter out origin='derived'."
     )
-    assert "coalesce(sn.origin, '') <> 'deterministic'" in src, (
-        "Use coalesce(sn.origin, '') <> 'deterministic' so legacy nodes "
-        "with no origin field are still claimable for refinement."
+    assert "coalesce(sn.origin, '') NOT IN ['deterministic', 'derived']" in src, (
+        "Use NOT IN clause to exclude both the new 'derived' value "
+        "and the legacy 'deterministic' value (one-cycle back-compat)."
     )
 
 
-def test_backfill_stamps_and_promotes_parents():
-    """``backfill_deterministic_parent_origin`` performs three idempotent
-    transformations on the live graph:
+def test_apply_derived_parent_migration():
+    """``apply_derived_parent_migration`` is the redesign's idempotent
+    self-healing pass. Three transformations run on every sn run start:
 
-    1. Stamp any structural parent without an origin
-       (``origin IS NULL`` + has HAS_PARENT child) →
-       ``origin='deterministic'`` + ``name_stage='accepted'``.
-    2. Promote any deterministic parent stuck at ``name_stage='reviewed'``
-       (left over from a prior policy) → ``'accepted'``.
-    3. Reset stale template descriptions to the canonical placeholder.
+    1. Edge rename: any remaining ``COMPONENT_OF`` → ``HAS_PARENT``.
+    2. Origin rename: legacy ``'deterministic'`` → ``'derived'``.
+    3. Description placeholder reset for legacy template prose.
+
+    The OLD auto-stamping of unmarked parents to ``'deterministic'``
+    + ``name_stage='accepted'`` is retired — the write-time admission
+    gate (``_filter_admissible_parents``) handles new parents.
     """
     gc = MagicMock()
     captured: list[str] = []
 
     def _query(cypher, **kwargs):
         captured.append(cypher)
-        if "origin IS NULL" in cypher and "HAS_PARENT" in cypher:
-            return [{"stamped": 5}]
-        if "name_stage = 'reviewed'" in cypher and "deterministic" in cypher:
-            return [{"promoted": 17}]
+        if "COMPONENT_OF" in cypher and "MERGE" in cypher:
+            return [{"migrated": 7}]
+        if (
+            "origin = 'deterministic'" in cypher
+            and "SET sn.origin = 'derived'" in cypher
+        ):
+            return [{"renamed": 11}]
         return [{"reset": 3}]
 
     gc.query = _query
@@ -354,30 +359,30 @@ def test_backfill_stamps_and_promotes_parents():
     gc.__exit__ = MagicMock(return_value=False)
 
     from imas_codex.standard_names.graph_ops import (
-        backfill_deterministic_parent_origin,
+        apply_derived_parent_migration,
     )
 
-    result = backfill_deterministic_parent_origin(gc)
+    result = apply_derived_parent_migration(gc)
     assert result == {
-        "origin_stamped": 5,
-        "promoted_from_reviewed": 17,
+        "edges_renamed": 7,
+        "origins_renamed": 11,
         "description_reset": 3,
     }
 
-    # (1) Stamp pass: must transition to accepted (auto-accept).
-    stamp_q = captured[0]
-    assert "origin IS NULL" in stamp_q
-    assert "HAS_PARENT" in stamp_q
-    assert "name_stage = 'accepted'" in stamp_q
-    assert "origin     = 'deterministic'" in stamp_q
+    # (1) Edge rename: idempotent COMPONENT_OF → HAS_PARENT.
+    edge_q = captured[0]
+    assert "COMPONENT_OF" in edge_q
+    assert "HAS_PARENT" in edge_q
+    assert "MERGE" in edge_q
+    assert "properties(old)" in edge_q
+    assert "DELETE old" in edge_q
 
-    # (2) Promotion pass: lift reviewed deterministic parents to accepted.
-    promote_q = captured[1]
-    assert "origin = 'deterministic'" in promote_q
-    assert "name_stage = 'reviewed'" in promote_q
-    assert "SET parent.name_stage = 'accepted'" in promote_q
+    # (2) Origin rename: deterministic → derived.
+    origin_q = captured[1]
+    assert "origin = 'deterministic'" in origin_q
+    assert "SET sn.origin = 'derived'" in origin_q
 
-    # (3) Description pass: still normalises legacy templates.
+    # (3) Description normalisation still runs for legacy templates.
     desc_q = captured[2]
     assert "Vector quantity with components:" in desc_q
     assert "Base quantity from which" in desc_q
@@ -385,8 +390,18 @@ def test_backfill_stamps_and_promotes_parents():
     assert "$placeholder" in desc_q
 
 
-def test_review_name_claim_skips_deterministic():
-    """The REVIEW_NAME claim must exclude ``origin='deterministic'``
+def test_legacy_alias_remains():
+    """Old function name still imports for one cycle of back-compat."""
+    from imas_codex.standard_names.graph_ops import (
+        apply_derived_parent_migration,
+        backfill_deterministic_parent_origin,
+    )
+
+    assert backfill_deterministic_parent_origin is apply_derived_parent_migration
+
+
+def test_review_name_claim_skips_derived():
+    """The REVIEW_NAME claim must exclude derived/deterministic origins
     as a belt-and-suspenders defence — these parents auto-accept and
     should never appear at name_stage='drafted', but legacy / drifted
     data must not get picked up by review_name.
@@ -396,32 +411,33 @@ def test_review_name_claim_skips_deterministic():
     from imas_codex.standard_names import graph_ops
 
     src = inspect.getsource(graph_ops.claim_review_name_batch)
-    assert "coalesce(sn.origin, '') <> 'deterministic'" in src, (
-        "claim_review_name_batch must filter out origin='deterministic' "
-        "so any drifted deterministic SN at 'drafted' is excluded."
+    assert "coalesce(sn.origin, '') NOT IN ['deterministic', 'derived']" in src, (
+        "claim_review_name_batch must filter out origin in "
+        "('deterministic', 'derived') so any drifted derived SN at "
+        "'drafted' is excluded."
     )
 
 
-def test_review_name_worker_skips_semantic_sim_for_deterministic():
+def test_review_name_worker_skips_semantic_sim_for_derived():
     """The semantic-similarity pre-LLM gate must be skipped when the
-    claimed item has ``origin='deterministic'``. Cosine sim between a
-    registered base token and a generic placeholder description is
-    always low; firing the gate would synthesise a fake failure on
-    every deterministic parent that drifted into review.
+    claimed item has ``origin in ('deterministic', 'derived')``. Cosine
+    sim between a registered base token and a generic placeholder
+    description is always low; firing the gate would synthesise a fake
+    failure on every derived parent that drifted into review.
     """
     import inspect
 
     from imas_codex.standard_names import workers
 
     src = inspect.getsource(workers.process_review_name_batch)
-    assert 'item.get("origin") == "deterministic"' in src, (
-        "review_name_pool_process must branch on origin='deterministic' "
-        "before computing semantic_similarity_check."
+    assert 'item.get("origin") in ("deterministic", "derived")' in src, (
+        "review_name_pool_process must branch on the derived/deterministic "
+        "origin set before computing semantic_similarity_check."
     )
     # The skip branch must wrap the actual similarity computation,
     # not just appear after the import. Look for the to_thread(...)
     # call site, which is what executes the gate.
-    branch_pos = src.index('item.get("origin") == "deterministic"')
+    branch_pos = src.index('item.get("origin") in ("deterministic", "derived")')
     sim_call_pos = src.index(
         "to_thread(\n                    semantic_similarity_check"
     )

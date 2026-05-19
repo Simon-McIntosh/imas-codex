@@ -1533,38 +1533,32 @@ def rederive_structural_edges() -> dict[str, int]:
     return {"processed": len(names), "migrated": migrated}
 
 
-def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int]:
-    """Bring every structural parent into the auto-accept policy.
+def apply_derived_parent_migration(gc: Any | None = None) -> dict[str, int]:
+    """Idempotent self-healing migration for the derived-parent redesign.
 
-    Idempotent self-healing pass — safe to call on every ``sn run``
-    startup. Performs three transformations:
+    Runs on every ``sn run`` startup. Three transformations, all
+    no-ops once the migration has settled:
 
-    1. **Origin stamp.** Any parent that has at least one inbound
-       ``HAS_PARENT`` edge but no ``origin`` set is stamped
-       ``origin='deterministic'`` and snapped to ``name_stage='accepted'``.
-       Covers (a) the legacy shortcut-accepted parents that had
-       ``name_stage='accepted'`` but no provenance, and (b) the
-       transitional state from when these parents were briefly routed
-       through REVIEW_NAME (``name_stage='reviewed'`` with synthetic
-       low scores from the placeholder semantic-sim gate).
+    1. **Edge rename** ``COMPONENT_OF`` → ``HAS_PARENT``. Preserves all
+       edge properties via ``properties(old)``. ``MERGE`` makes the
+       rename idempotent — duplicates would collapse.
 
-    2. **Promotion from reviewed.** Any ``origin='deterministic'`` parent
-       still sitting at ``name_stage='reviewed'`` (left over from the
-       previous routing policy) is promoted to ``'accepted'`` so it can
-       reach ``GENERATE_DOCS``. The reviewer score is left in place as
-       historical context but no longer gates progression — the name
-       axis no longer applies to deterministic parents.
+    2. **Origin rename** ``deterministic`` → ``derived``. The legacy
+       enum value is retired in favour of the redesign's vocabulary
+       (matches the new ``StandardNameOrigin.derived`` slot).
 
-    3. **Description placeholder reset.** Any deterministic parent with
-       ``docs_stage IN ['pending', 'drafted']`` (``GENERATE_DOCS`` has
-       not finalised an LLM description) is reset to the canonical
-       placeholder ``DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER`` so
-       the export-time guard can detect "docs not finalised"
-       uniformly. The previous template strings ("Vector quantity with
-       components: …", "Base quantity from which …", "Geometric
-       coordinate with axes: …") are flattened to the placeholder.
+    3. **Description placeholder reset.** Any ``origin='derived'`` parent
+       with ``docs_stage IN ['pending', 'drafted']`` and a stale
+       template description (``"Vector quantity with components:"`` etc.)
+       is flattened to the canonical placeholder so the export-time
+       guard can detect "docs not finalised" uniformly.
 
-    Returns ``{"origin_stamped": N, "promoted_from_reviewed": M, "description_reset": K}``.
+    The write-time admission gate (``_filter_admissible_parents``) is
+    now responsible for preventing inadmissible bare-base placeholders
+    from being created. This function only migrates legacy state — it
+    does NOT stamp unmarked parents (no auto-accept).
+
+    Returns counts for the run log.
     """
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -1574,43 +1568,38 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
-        # (1) Stamp any unmarked structural parent and snap to accepted.
-        stamp_result = list(
+        # (1) Edge rename: COMPONENT_OF → HAS_PARENT. Idempotent.
+        edge_result = list(
             gc.query(
                 """
-                MATCH (parent:StandardName)
-                WHERE parent.origin IS NULL
-                  AND EXISTS { (child)-[:HAS_PARENT]->(parent) }
-                SET parent.name_stage = 'accepted',
-                    parent.origin     = 'deterministic'
-                RETURN count(parent) AS stamped
+                MATCH (c)-[old:COMPONENT_OF]->(p)
+                MERGE (c)-[new:HAS_PARENT]->(p)
+                SET new = properties(old)
+                DELETE old
+                RETURN count(old) AS migrated
                 """
             )
         )
-        n_stamped = int(stamp_result[0].get("stamped") or 0) if stamp_result else 0
+        n_edges = int(edge_result[0].get("migrated") or 0) if edge_result else 0
 
-        # (2) Promote any deterministic parent left at 'reviewed' to 'accepted'.
-        promote_result = list(
+        # (2) Origin rename: deterministic → derived. Idempotent.
+        origin_result = list(
             gc.query(
                 """
-                MATCH (parent:StandardName)
-                WHERE parent.origin = 'deterministic'
-                  AND parent.name_stage = 'reviewed'
-                SET parent.name_stage = 'accepted'
-                RETURN count(parent) AS promoted
+                MATCH (sn:StandardName) WHERE sn.origin = 'deterministic'
+                SET sn.origin = 'derived'
+                RETURN count(sn) AS renamed
                 """
             )
         )
-        n_promoted = (
-            int(promote_result[0].get("promoted") or 0) if promote_result else 0
-        )
+        n_origin = int(origin_result[0].get("renamed") or 0) if origin_result else 0
 
         # (3) Reset stale template descriptions to the canonical placeholder.
         desc_result = list(
             gc.query(
                 """
                 MATCH (parent:StandardName)
-                WHERE parent.origin = 'deterministic'
+                WHERE parent.origin = 'derived'
                   AND parent.docs_stage IN ['pending', 'drafted']
                   AND parent.description IS NOT NULL
                   AND parent.description <> $placeholder
@@ -1627,22 +1616,27 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
         )
         n_desc = int(desc_result[0].get("reset") or 0) if desc_result else 0
 
-        if n_stamped or n_promoted or n_desc:
+        if n_edges or n_origin or n_desc:
             logger.info(
-                "backfill_deterministic_parent_origin: stamped %d parents, "
-                "promoted %d from reviewed, reset %d stale templates",
-                n_stamped,
-                n_promoted,
+                "apply_derived_parent_migration: renamed %d edges (COMPONENT_OF → HAS_PARENT), "
+                "renamed %d origins (deterministic → derived), reset %d stale templates",
+                n_edges,
+                n_origin,
                 n_desc,
             )
         return {
-            "origin_stamped": n_stamped,
-            "promoted_from_reviewed": n_promoted,
+            "edges_renamed": n_edges,
+            "origins_renamed": n_origin,
             "description_reset": n_desc,
         }
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
+
+
+# Legacy alias for one-cycle backwards compatibility. Callers should
+# migrate to ``apply_derived_parent_migration``. Remove after Phase 11.
+backfill_deterministic_parent_origin = apply_derived_parent_migration
 
 
 def _migrate_component_of_off_superseded(gc: Any) -> int:
@@ -1951,7 +1945,7 @@ def seed_parent_sources(gc: Any | None = None) -> int:
                 SET parent.name_stage = 'accepted',
                     parent.docs_stage = 'pending',
                     parent.validation_status = 'valid',
-                    parent.origin = 'deterministic',
+                    parent.origin = 'derived',
                     parent.kind = $kind,
                     parent.unit = coalesce($unit, parent.unit),
                     parent.cocos_transformation_type =
@@ -7528,13 +7522,17 @@ def claim_review_name_batch(
         # Gate: require description embedding before review so the
         # semantic_similarity_check in the review worker can run.
         " AND sn.description IS NOT NULL"
-        # Deterministic parents auto-accept on the name axis — they are
-        # written straight to name_stage='accepted' by seed_parent_sources
-        # and never legitimately appear at 'drafted'. Belt-and-suspenders
-        # filter: if any does end up here (legacy data, schema drift),
-        # exclude it from review_name and let the parent-seed backfill
-        # promote it back to 'accepted'.
-        " AND coalesce(sn.origin, '') <> 'deterministic'"
+        # Derived parents (the redesign's new value; legacy
+        # 'deterministic' kept for one cycle) auto-accept on the name
+        # axis under current policy — they are written straight to
+        # name_stage='accepted' by seed_parent_sources and never
+        # legitimately appear at 'drafted'. Belt-and-suspenders filter:
+        # if any does end up here (legacy data, schema drift), exclude
+        # it from review_name and let the parent-seed backfill promote
+        # it back to 'accepted'. Phase 4 will route origin='derived'
+        # through REVIEW_NAME with the specificity dimension when
+        # budget is available.
+        " AND coalesce(sn.origin, '') NOT IN ['deterministic', 'derived']"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -8079,13 +8077,13 @@ def claim_refine_name_batch(
         " AND sn.reviewer_score_name < $min_score"
         " AND coalesce(sn.chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # Deterministic parents (seeded by ``seed_parent_sources``) have
-        # no refinement target — the name is structurally fixed. Skip
-        # them so they don't enter the refine loop and either stay at
-        # ``reviewed`` (visibly below the catalog export gate, prompting
-        # manual investigation) or get marked exhausted via a separate
-        # maintenance sweep.
-        " AND coalesce(sn.origin, '') <> 'deterministic'"
+        # Derived parents (seeded by ``seed_parent_sources``; legacy
+        # value 'deterministic' kept for one cycle) have no refinement
+        # target — the name is structurally fixed. Skip them so they
+        # don't enter the refine loop. The admission gate filters bad
+        # derived names at write time; Phase 6 will delete failed ones
+        # explicitly via the dead-link cascade.
+        " AND coalesce(sn.origin, '') NOT IN ['deterministic', 'derived']"
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
@@ -9673,7 +9671,7 @@ def pool_pending_counts(
     CALL { MATCH (sn:StandardName {name_stage: 'reviewed'})
            WHERE sn.reviewer_score_name < $min_score
              AND coalesce(sn.chain_length, 0) < $rotation_cap
-             AND coalesce(sn.origin, '') <> 'deterministic'
+             AND coalesce(sn.origin, '') NOT IN ['deterministic', 'derived']
            RETURN count(sn) AS refine_name }
     CALL { MATCH (sn:StandardName {name_stage: 'accepted', docs_stage: 'pending'})
            RETURN count(sn) AS generate_docs }

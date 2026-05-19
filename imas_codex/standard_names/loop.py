@@ -786,7 +786,7 @@ async def run_sn_pools(
         # pipeline until the edges are re-derived. Idempotent (MERGE)
         # and fast (~1s for ~200 SNs) so safe to run on every loop.
         from imas_codex.standard_names.graph_ops import (
-            backfill_deterministic_parent_origin,
+            apply_derived_parent_migration,
             rederive_structural_edges,
             seed_parent_sources,
         )
@@ -802,28 +802,26 @@ async def run_sn_pools(
                 edge_result["migrated"],
             )
 
-        # Idempotent self-healing: any structural parent without an
-        # origin gets stamped 'deterministic' + name_stage='accepted'
-        # (auto-accept on the name axis); any deterministic parent left
-        # at name_stage='reviewed' from a prior policy is promoted to
-        # 'accepted' so it reaches GENERATE_DOCS; legacy template
-        # descriptions are normalised to the canonical placeholder so
-        # the export guard can detect "docs not finalised" uniformly.
-        backfilled = await asyncio.to_thread(backfill_deterministic_parent_origin)
-        if backfilled.get("origin_stamped"):
+        # Idempotent self-healing for the derived-parent redesign:
+        # rename any remaining COMPONENT_OF → HAS_PARENT edges, rename
+        # legacy origin='deterministic' → 'derived', and normalise stale
+        # description templates to the canonical placeholder. Once the
+        # migration settles all three become no-ops.
+        migrated = await asyncio.to_thread(apply_derived_parent_migration)
+        if migrated.get("edges_renamed"):
             logger.info(
-                "Stamped %d parents origin='deterministic' + name_stage='accepted'",
-                backfilled["origin_stamped"],
+                "Renamed %d COMPONENT_OF edges → HAS_PARENT",
+                migrated["edges_renamed"],
             )
-        if backfilled.get("promoted_from_reviewed"):
+        if migrated.get("origins_renamed"):
             logger.info(
-                "Promoted %d deterministic parents reviewed → accepted",
-                backfilled["promoted_from_reviewed"],
+                "Renamed %d origins 'deterministic' → 'derived'",
+                migrated["origins_renamed"],
             )
-        if backfilled.get("description_reset"):
+        if migrated.get("description_reset"):
             logger.info(
                 "Reset %d stale description templates to placeholder",
-                backfilled["description_reset"],
+                migrated["description_reset"],
             )
 
         parent_count = await asyncio.to_thread(seed_parent_sources)
