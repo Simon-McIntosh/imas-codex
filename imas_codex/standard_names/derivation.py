@@ -3,7 +3,7 @@
 Pure logic module — no graph access, no I/O.  Given a single
 StandardName id string, ``derive_edges`` peels the outermost ISN
 grammar operator/projection and returns the corresponding
-``COMPONENT_OF``, ``HAS_ERROR``, or ``HAS_LOCUS`` edge descriptor.
+``HAS_PARENT``, ``HAS_ERROR``, or ``HAS_LOCUS`` edge descriptor.
 
 Recursion is structural: when the inner StandardName is itself written
 to the graph, *its* derivation runs and emits *its* own edge.  We never
@@ -31,7 +31,7 @@ _UNCERTAINTY_OPS: dict[str, str] = {
 class DerivedEdge:
     """A single derived structural edge between two StandardName ids."""
 
-    edge_type: str  # "COMPONENT_OF", "HAS_ERROR", or "HAS_LOCUS"
+    edge_type: str  # "HAS_PARENT", "HAS_ERROR", or "HAS_LOCUS"
     from_name: str  # source StandardName id
     to_name: str  # target StandardName id
     props: dict  # edge properties (operator, operator_kind, …)
@@ -63,7 +63,7 @@ def derive_edges(name: str) -> list[DerivedEdge]:
 
     Edge types produced:
 
-    - ``COMPONENT_OF``: projection / operator / coordinate decomposition.
+    - ``HAS_PARENT``: projection / operator / coordinate decomposition.
     - ``HAS_ERROR``: uncertainty siblings.
     - ``HAS_LOCUS``: locus grouping — names sharing the same ISN
       locus token (e.g. ``magnetic_axis``, ``plasma_boundary``).
@@ -123,14 +123,14 @@ def _drop_self_loops(name: str, edges: list[DerivedEdge]) -> list[DerivedEdge]:
 
 
 def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge]:
-    """Derive COMPONENT_OF / HAS_ERROR edges from the IR parse tree."""
+    """Derive HAS_PARENT / HAS_ERROR edges from the IR parse tree."""
 
     # --- Outermost operator ---
     if ir.operators:
         op = ir.operators[0]
 
         if op.kind == isn_ir.OperatorKind.BINARY:
-            # Binary: two COMPONENT_OF edges, one per argument
+            # Binary: two HAS_PARENT edges, one per argument
             try:
                 a = parser.compose(op.args[0])
                 b = parser.compose(op.args[1])
@@ -139,7 +139,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
                 return []
             return [
                 DerivedEdge(
-                    "COMPONENT_OF",
+                    "HAS_PARENT",
                     name,
                     a,
                     {
@@ -150,7 +150,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
                     },
                 ),
                 DerivedEdge(
-                    "COMPONENT_OF",
+                    "HAS_PARENT",
                     name,
                     b,
                     {
@@ -183,7 +183,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
 
         return [
             DerivedEdge(
-                "COMPONENT_OF",
+                "HAS_PARENT",
                 name,
                 inner,
                 {
@@ -246,7 +246,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
 
         return [
             DerivedEdge(
-                "COMPONENT_OF",
+                "HAS_PARENT",
                 name,
                 inner,
                 {
@@ -263,10 +263,10 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     # natural structural parent for shape-asymmetry / role qualifiers that
     # ISN does not model as operators: e.g.
     #     upper_elongation_of_plasma_boundary
-    #         → COMPONENT_OF → elongation_of_plasma_boundary  (qualifier=upper)
+    #         → HAS_PARENT → elongation_of_plasma_boundary  (qualifier=upper)
     #         and then that name's own derivation peels the locus →
     #     elongation_of_plasma_boundary
-    #         → COMPONENT_OF → elongation                     (locus=plasma_boundary)
+    #         → HAS_PARENT → elongation                     (locus=plasma_boundary)
     # The recursion is structural — we only ever peel ONE layer per call.
     # Without this layer the parent shortcut in dataset.py jumped straight
     # to `ir.base.token` (`elongation`), losing the boundary locus and
@@ -283,7 +283,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
             return []
         return [
             DerivedEdge(
-                "COMPONENT_OF",
+                "HAS_PARENT",
                 name,
                 inner,
                 {
@@ -312,7 +312,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
             return []
         return [
             DerivedEdge(
-                "COMPONENT_OF",
+                "HAS_PARENT",
                 name,
                 inner,
                 {
@@ -380,7 +380,7 @@ def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:
     The IR parser often cannot parse geometric coordinates
     (``radial_position`` raises ``ParseError``), but the model-level
     ``parse_standard_name`` succeeds.  This function uses the model
-    parser as a last-resort check and emits a ``COMPONENT_OF`` edge
+    parser as a last-resort check and emits a ``HAS_PARENT`` edge
     with ``operator_kind="coordinate"`` when a coordinate slot is found.
 
     Returns ``[]`` when the name is not a geometric coordinate (true leaf).
@@ -434,7 +434,7 @@ def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:
 
     return [
         DerivedEdge(
-            "COMPONENT_OF",
+            "HAS_PARENT",
             name,
             inner_name,
             {
@@ -452,8 +452,8 @@ def _regex_fallback(name: str) -> list[DerivedEdge]:
 
     Handles two patterns:
 
-    1. ``{axis}_{inner}`` → COMPONENT_OF (projection, short form)
-    2. ``{operator}_of_{inner}`` → COMPONENT_OF (unary operator)
+    1. ``{axis}_{inner}`` → HAS_PARENT (projection, short form)
+    2. ``{operator}_of_{inner}`` → HAS_PARENT (unary operator)
 
     Returns ``[]`` if no pattern matches (leaf treatment).
     """
@@ -498,7 +498,7 @@ def _regex_fallback(name: str) -> list[DerivedEdge]:
 
                 return [
                     DerivedEdge(
-                        "COMPONENT_OF",
+                        "HAS_PARENT",
                         name,
                         inner,
                         {
@@ -537,7 +537,7 @@ def _regex_fallback(name: str) -> list[DerivedEdge]:
             if inner:  # don't match empty inner
                 return [
                     DerivedEdge(
-                        "COMPONENT_OF",
+                        "HAS_PARENT",
                         name,
                         inner,
                         {

@@ -1894,7 +1894,7 @@ def amplitude_of_prefix_check(candidate: dict[str, Any]) -> list[str]:
     ``real_part_of_`` and ``imaginary_part_of_`` are NOT flagged here —
     ISN grammar parses them correctly as ``transformation=real_part`` /
     ``transformation=imaginary_part`` prefix operators, producing proper
-    COMPONENT_OF derivation edges to the parent complex quantity.
+    HAS_PARENT derivation edges to the parent complex quantity.
     """
     name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
     prefixes = (

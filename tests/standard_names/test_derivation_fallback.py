@@ -23,7 +23,7 @@ class TestComponentFallback:
         edges = derive_edges(name)
         assert len(edges) >= 1
         edge = edges[0]
-        assert edge.edge_type == "COMPONENT_OF"
+        assert edge.edge_type == "HAS_PARENT"
         assert edge.from_name == name
         assert edge.to_name == inner
         assert edge.props["operator"] == "component"
@@ -61,7 +61,7 @@ class TestOperatorFallback:
         edges = derive_edges(name)
         assert len(edges) >= 1
         edge = edges[0]
-        assert edge.edge_type == "COMPONENT_OF"
+        assert edge.edge_type == "HAS_PARENT"
         assert edge.from_name == name
         assert edge.to_name == inner
         assert edge.props["operator"] == op

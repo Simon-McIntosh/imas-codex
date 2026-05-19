@@ -6,7 +6,7 @@ Cypher queries with the expected batch parameters for every structural
 edge type.
 
 Edge types covered:
-  COMPONENT_OF   — derived from ISN parser (G1, G2, G4, G5)
+  HAS_PARENT   — derived from ISN parser (G1, G2, G4, G5)
   HAS_ERROR      — uncertainty siblings, inverted direction (G3)
   HAS_PREDECESSOR — from ``deprecates`` field (G7)
   HAS_SUCCESSOR   — from ``superseded_by`` field (G8)
@@ -70,56 +70,83 @@ def _cyphers(mock_gc: MagicMock) -> list[str]:
 
 
 def _batch_for(mock_gc: MagicMock, keyword: str) -> list[dict] | None:
-    """Return the ``batch`` kwarg from the first query matching *keyword*."""
+    """Return the ``batch`` kwarg from the first WRITE query matching *keyword*.
+
+    Skips topology-probe queries (which use ``names=`` rather than
+    ``batch=``) so admission-gate machinery doesn't shadow the writes.
+    """
     for c in mock_gc.query.call_args_list:
         cypher = c[0][0]
-        if keyword in cypher:
-            # batch may be positional or keyword
-            kw = c[1] if len(c) > 1 else {}
-            return kw.get("batch") or (c[0][1] if len(c[0]) > 1 else None)
+        if keyword not in cypher:
+            continue
+        kw = c[1] if len(c) > 1 else {}
+        if "batch" in kw:
+            return kw["batch"]
+        if len(c[0]) > 1 and isinstance(c[0][1], list):
+            return c[0][1]
     return None
 
 
+def _write_cyphers(mock_gc: MagicMock, keyword: str) -> list[str]:
+    """Return all cyphers containing *keyword* that include a ``batch`` kwarg.
+
+    Excludes admission-gate probe queries.
+    """
+    out: list[str] = []
+    for c in mock_gc.query.call_args_list:
+        cypher = c[0][0]
+        if keyword not in cypher:
+            continue
+        kw = c[1] if len(c) > 1 else {}
+        if "batch" in kw or (len(c[0]) > 1 and isinstance(c[0][1], list)):
+            out.append(cypher)
+    return out
+
+
 # ---------------------------------------------------------------------------
-# G1 — COMPONENT_OF: two names in one batch
+# G1 — HAS_PARENT: two names in one batch
 # ---------------------------------------------------------------------------
 
 
 class TestG1:
-    """G1: Write temperature and maximum_of_temperature in one batch.
+    """G1: Write electron_temperature and maximum_of_electron_temperature in one batch.
 
-    ``(maximum_of_temperature)-[:COMPONENT_OF {operator:'maximum'}]->(temperature)``
+    ``(maximum_of_electron_temperature)-[:HAS_PARENT {operator:'maximum'}]->(electron_temperature)``
+
+    Uses the qualified ``electron_temperature`` (admissible) — bare
+    ``temperature`` is rejected by both the ISN grammar validator and
+    the admission gate.
     """
+
+    PARENT = "electron_temperature"
+    CHILD = "maximum_of_electron_temperature"
 
     def test_has_argument_edge_emitted(self) -> None:
         names = [
-            {"id": "temperature", "unit": "eV"},
-            {"id": "maximum_of_temperature", "unit": "eV"},
+            {"id": self.PARENT, "unit": "eV"},
+            {"id": self.CHILD, "unit": "eV"},
         ]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        cyphers = _cyphers(mock_gc)
-        assert any("COMPONENT_OF" in c for c in cyphers), (
-            "No COMPONENT_OF Cypher found in queries"
-        )
+        write_cyphers = _write_cyphers(mock_gc, "HAS_PARENT")
+        assert write_cyphers, "No HAS_PARENT write cypher emitted"
 
     def test_has_argument_batch_contains_correct_edge(self) -> None:
         names = [
-            {"id": "temperature", "unit": "eV"},
-            {"id": "maximum_of_temperature", "unit": "eV"},
+            {"id": self.PARENT, "unit": "eV"},
+            {"id": self.CHILD, "unit": "eV"},
         ]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        batch = _batch_for(mock_gc, "COMPONENT_OF")
-        assert batch is not None, "No COMPONENT_OF batch found"
+        batch = _batch_for(mock_gc, "HAS_PARENT")
+        assert batch is not None, "No HAS_PARENT batch found"
         edge = next(
             (
                 b
                 for b in batch
-                if b["from_name"] == "maximum_of_temperature"
-                and b["to_name"] == "temperature"
+                if b["from_name"] == self.CHILD and b["to_name"] == self.PARENT
             ),
             None,
         )
@@ -129,20 +156,24 @@ class TestG1:
 
 
 # ---------------------------------------------------------------------------
-# G2 — COMPONENT_OF: forward reference (target written later)
+# G2 — HAS_PARENT: forward reference (target written later)
 # ---------------------------------------------------------------------------
 
 
 class TestG2:
-    """G2: Write maximum_of_temperature first, temperature in a later batch.
+    """G2: Write child first, admissible parent in a later batch.
 
     After the second batch the edge must still be present (MERGE idempotent
-    on re-run of the same name pair).
+    on re-run of the same name pair). Uses ``electron_temperature`` (an
+    admissible qualifier-bearing parent) so the gate allows the edge.
     """
 
+    PARENT = "electron_temperature"
+    CHILD = "maximum_of_electron_temperature"
+
     def test_forward_ref_edge_present_after_second_batch(self) -> None:
-        first_batch = [{"id": "maximum_of_temperature", "unit": "eV"}]
-        second_batch = [{"id": "temperature", "unit": "eV"}]
+        first_batch = [{"id": self.CHILD, "unit": "eV"}]
+        second_batch = [{"id": self.PARENT, "unit": "eV"}]
 
         gc1 = _make_mock_gc()
         _call_write(first_batch, gc1)
@@ -150,31 +181,35 @@ class TestG2:
         gc2 = _make_mock_gc()
         _call_write(second_batch, gc2)
 
-        # First batch: COMPONENT_OF should reference temperature as placeholder
-        batch1 = _batch_for(gc1, "COMPONENT_OF")
+        # First batch: HAS_PARENT should reference parent as placeholder
+        batch1 = _batch_for(gc1, "HAS_PARENT")
         assert batch1 is not None
-        assert any(b["to_name"] == "temperature" for b in batch1)
+        assert any(b["to_name"] == self.PARENT for b in batch1)
 
-        # Second batch: temperature is a leaf, no COMPONENT_OF emitted
-        cyphers2 = _cyphers(gc2)
-        # No COMPONENT_OF from temperature (it's a leaf)
-        ha_batches2 = [
-            _batch_for(gc2, "COMPONENT_OF") for c in cyphers2 if "COMPONENT_OF" in c
-        ]
-        # If COMPONENT_OF present, it must not have temperature as from_name
-        if ha_batches2 and ha_batches2[0]:
-            assert not any(b["from_name"] == "temperature" for b in ha_batches2[0])
+        # Second batch: parent's own peel (qualifier → 'temperature') is
+        # dropped by the admission gate, so no edge with parent as from_name.
+        batch2 = _batch_for(gc2, "HAS_PARENT")
+        if batch2:
+            assert not any(b["from_name"] == self.PARENT for b in batch2), (
+                "Bare-base parent should be dropped by the admission gate"
+            )
 
     def test_target_merged_via_merge_clause(self) -> None:
-        """The COMPONENT_OF Cypher must MERGE the target node (forward ref)."""
-        names = [{"id": "maximum_of_temperature", "unit": "eV"}]
+        """The HAS_PARENT write Cypher must MERGE the target node (forward ref).
+
+        Uses an admissible parent (``electron_temperature``) so the
+        admission gate keeps the edge. Bare-base parents like
+        ``temperature`` are dropped by the gate and would emit no write.
+        """
+        names = [{"id": "maximum_of_electron_temperature", "unit": "eV"}]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        for c in _cyphers(mock_gc):
-            if "COMPONENT_OF" in c:
-                assert "MERGE" in c, "Target must be MERGEd for forward-ref support"
-                break
+        write_cyphers = _write_cyphers(mock_gc, "HAS_PARENT")
+        assert write_cyphers, "No HAS_PARENT write cypher emitted"
+        assert any("MERGE" in c for c in write_cyphers), (
+            "Target must be MERGEd for forward-ref support"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -217,47 +252,45 @@ class TestG3:
 
 
 # ---------------------------------------------------------------------------
-# G4 — COMPONENT_OF: binary operator, two edges with role a/b
+# G4 — HAS_PARENT: binary operator, two edges with role a/b
 # ---------------------------------------------------------------------------
 
 
 class TestG4:
-    """G4: Write ratio_of_temperature_to_pressure.
+    """G4: Write ratio_of_electron_temperature_to_ion_temperature.
 
-    Two COMPONENT_OF edges: → temperature (role=a) and → pressure (role=b).
+    Two HAS_PARENT edges with role a/b — uses qualifier-bearing parents
+    so both pass the admission gate (bare ``temperature``/``pressure``
+    would be dropped).
     """
 
+    NAME = "ratio_of_electron_temperature_to_ion_temperature"
+
     def test_two_has_argument_edges(self) -> None:
-        names = [{"id": "ratio_of_temperature_to_pressure"}]
+        names = [{"id": self.NAME}]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        batch = _batch_for(mock_gc, "COMPONENT_OF")
+        batch = _batch_for(mock_gc, "HAS_PARENT")
         assert batch is not None
 
-        edges = [
-            b for b in batch if b["from_name"] == "ratio_of_temperature_to_pressure"
-        ]
+        edges = [b for b in batch if b["from_name"] == self.NAME]
         assert len(edges) == 2, f"Expected 2 edges, got {len(edges)}: {edges}"
 
         roles = {e["role"] for e in edges}
         assert roles == {"a", "b"}
 
     def test_binary_targets_correct(self) -> None:
-        names = [{"id": "ratio_of_temperature_to_pressure"}]
+        names = [{"id": self.NAME}]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        batch = _batch_for(mock_gc, "COMPONENT_OF")
+        batch = _batch_for(mock_gc, "HAS_PARENT")
         assert batch is not None
 
-        edges = {
-            e["role"]: e
-            for e in batch
-            if e["from_name"] == "ratio_of_temperature_to_pressure"
-        }
-        assert edges["a"]["to_name"] == "temperature"
-        assert edges["b"]["to_name"] == "pressure"
+        edges = {e["role"]: e for e in batch if e["from_name"] == self.NAME}
+        assert edges["a"]["to_name"] == "electron_temperature"
+        assert edges["b"]["to_name"] == "ion_temperature"
         assert edges["a"]["operator"] == "ratio"
         assert edges["a"]["operator_kind"] == "binary"
 
@@ -271,18 +304,17 @@ class TestG5:
     """G5: Write same batch twice → edge Cypher is MERGE-based (idempotent)."""
 
     def test_has_argument_cypher_uses_merge(self) -> None:
-        names = [{"id": "maximum_of_temperature", "unit": "eV"}]
+        names = [{"id": "maximum_of_electron_temperature", "unit": "eV"}]
 
         for _ in range(2):
             mock_gc = _make_mock_gc()
             _call_write(names, mock_gc)
 
-            for c in _cyphers(mock_gc):
-                if "COMPONENT_OF" in c:
-                    assert "MERGE" in c, (
-                        "COMPONENT_OF Cypher must use MERGE for idempotency"
-                    )
-                    break
+            write_cyphers = _write_cyphers(mock_gc, "HAS_PARENT")
+            assert write_cyphers, "No HAS_PARENT write cypher emitted"
+            assert any("MERGE" in c for c in write_cyphers), (
+                "HAS_PARENT Cypher must use MERGE for idempotency"
+            )
 
     def test_has_error_cypher_uses_merge(self) -> None:
         names = [{"id": "upper_uncertainty_of_temperature"}]
@@ -301,20 +333,25 @@ class TestG5:
 
 
 class TestG6:
-    """G6: Catalog import of a file containing the same names as G1.
+    """G6: Catalog import of a file with admissible parent names.
 
-    Same COMPONENT_OF edge as G1 — import path has pipeline parity.
+    Same HAS_PARENT edge shape as G1 — import path has pipeline parity.
+    Uses ``electron_temperature`` (qualifier-bearing) as the parent so
+    the admission gate keeps it; bare ``temperature`` would be dropped.
     """
+
+    PARENT = "electron_temperature"
+    CHILD = "maximum_of_electron_temperature"
 
     def test_catalog_import_emits_has_argument(self) -> None:
         entries = [
             {
-                "id": "temperature",
+                "id": self.PARENT,
                 "unit": "eV",
                 "physics_domain": "core_plasma_physics",
             },
             {
-                "id": "maximum_of_temperature",
+                "id": self.CHILD,
                 "unit": "eV",
                 "physics_domain": "core_plasma_physics",
             },
@@ -322,27 +359,26 @@ class TestG6:
         mock_gc = _make_mock_gc()
         _call_import_entries(entries, mock_gc)
 
-        cyphers = _cyphers(mock_gc)
-        assert any("COMPONENT_OF" in c for c in cyphers), (
-            "Catalog import must emit COMPONENT_OF edges (pipeline parity)"
+        write_cyphers = _write_cyphers(mock_gc, "HAS_PARENT")
+        assert write_cyphers, (
+            "Catalog import must emit HAS_PARENT writes (pipeline parity)"
         )
 
     def test_catalog_import_has_argument_batch(self) -> None:
         entries = [
-            {"id": "temperature", "unit": "eV"},
-            {"id": "maximum_of_temperature", "unit": "eV"},
+            {"id": self.PARENT, "unit": "eV"},
+            {"id": self.CHILD, "unit": "eV"},
         ]
         mock_gc = _make_mock_gc()
         _call_import_entries(entries, mock_gc)
 
-        batch = _batch_for(mock_gc, "COMPONENT_OF")
+        batch = _batch_for(mock_gc, "HAS_PARENT")
         assert batch is not None
         edge = next(
             (
                 b
                 for b in batch
-                if b["from_name"] == "maximum_of_temperature"
-                and b["to_name"] == "temperature"
+                if b["from_name"] == self.CHILD and b["to_name"] == self.PARENT
             ),
             None,
         )

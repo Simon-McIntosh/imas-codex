@@ -774,12 +774,12 @@ async def run_sn_pools(
                 logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
         # ── B3b: Rederive structural edges, then seed parent sources ─
-        # Backfill any missing COMPONENT_OF / HAS_ERROR edges first so
+        # Backfill any missing HAS_PARENT / HAS_ERROR edges first so
         # ``seed_parent_sources`` can see every legitimate placeholder.
         # This catches two failure modes:
         #   1. Children written before ``_write_standard_name_edges``
         #      existed (no edges ever derived).
-        #   2. ISN grammar revisions that newly derive COMPONENT_OF
+        #   2. ISN grammar revisions that newly derive HAS_PARENT
         #      edges absent at the original write time
         #      (e.g. ``flux_surface_mean_*``, ``total_plasma_current``).
         # Both classes leave parents structurally inaccessible to the
@@ -798,7 +798,7 @@ async def run_sn_pools(
         )
         if edge_result.get("migrated"):
             logger.info(
-                "Migrated %d COMPONENT_OF edges off superseded parents",
+                "Migrated %d HAS_PARENT edges off superseded parents",
                 edge_result["migrated"],
             )
 
@@ -1118,7 +1118,7 @@ async def run_sn_pools(
             )
 
         # ── Post-drain structural fixups ──────────────────────────
-        # Re-derive structural edges (catches any new COMPONENT_OF /
+        # Re-derive structural edges (catches any new HAS_PARENT /
         # HAS_ERROR derivations from names composed during this run),
         # seed any parent placeholders whose children are now composed,
         # then resolve stale documentation links.  All non-LLM graph

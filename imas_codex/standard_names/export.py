@@ -570,13 +570,13 @@ def _derive_arguments_for_entry(
     gc: Any,
     name: str,
 ) -> list[dict[str, Any]] | None:
-    """Query graph for outgoing COMPONENT_OF edges and return argument list.
+    """Query graph for outgoing HAS_PARENT edges and return argument list.
 
-    Returns ``None`` if no COMPONENT_OF edges exist for this node.
+    Returns ``None`` if no HAS_PARENT edges exist for this node.
     """
     rows = gc.query(
         """
-        MATCH (s:StandardName {id: $name})-[e:COMPONENT_OF]->(t:StandardName)
+        MATCH (s:StandardName {id: $name})-[e:HAS_PARENT]->(t:StandardName)
         RETURN t.id AS name, properties(e) AS props
         ORDER BY t.id
         """,
@@ -679,7 +679,7 @@ def _fetch_ordering_edges_for_domain(
     domain: str,
     entry_names: set[str],
 ) -> tuple[list[tuple[str, str, str]], set[str]]:
-    """Fetch COMPONENT_OF + HAS_ERROR edges for ordering within a domain.
+    """Fetch HAS_PARENT + HAS_ERROR edges for ordering within a domain.
 
     Returns
     -------
@@ -690,10 +690,10 @@ def _fetch_ordering_edges_for_domain(
         Set of entry names in *entry_names* that have an ordering-parent
         outside the domain (cross-domain orphans).
     """
-    # Fetch in-domain edges: COMPONENT_OF where both nodes in domain
+    # Fetch in-domain edges: HAS_PARENT where both nodes in domain
     arg_rows = gc.query(
         """
-        MATCH (s:StandardName)-[e:COMPONENT_OF]->(t:StandardName)
+        MATCH (s:StandardName)-[e:HAS_PARENT]->(t:StandardName)
         WHERE $domain IN s.physics_domain AND $domain IN t.physics_domain
         RETURN s.name AS src, t.name AS tgt
         """,
@@ -712,16 +712,16 @@ def _fetch_ordering_edges_for_domain(
     edges: list[tuple[str, str, str]] = []
     for row in arg_rows or []:
         if row["src"] in entry_names and row["tgt"] in entry_names:
-            edges.append((row["src"], row["tgt"], "COMPONENT_OF"))
+            edges.append((row["src"], row["tgt"], "HAS_PARENT"))
     for row in err_rows or []:
         if row["src"] in entry_names and row["tgt"] in entry_names:
             edges.append((row["src"], row["tgt"], "HAS_ERROR"))
 
     # Find cross-domain ordering-parents:
-    # Nodes whose COMPONENT_OF target is outside the domain
+    # Nodes whose HAS_PARENT target is outside the domain
     cross_arg_rows = gc.query(
         """
-        MATCH (s:StandardName)-[:COMPONENT_OF]->(t:StandardName)
+        MATCH (s:StandardName)-[:HAS_PARENT]->(t:StandardName)
         WHERE $domain IN s.physics_domain AND NOT ($domain IN t.physics_domain)
         RETURN DISTINCT s.name AS name
         """,
@@ -774,7 +774,7 @@ def _write_domain_yaml(
         f"# Catalog sha: {codex_sha or 'unknown'}",
         f"# Entries: {len(entries)}",
         "# Ordering: structural traversal",
-        "#   (COMPONENT_OF-incoming + HAS_ERROR-outgoing, Kahn topo sort,",
+        "#   (HAS_PARENT-incoming + HAS_ERROR-outgoing, Kahn topo sort,",
         "#    alphabetic tie-break)",
     ]
     header = "\n".join(header_lines) + "\n"

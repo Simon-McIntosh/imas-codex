@@ -1,7 +1,7 @@
 """Tests for parent-first docs ordering in ``claim_generate_docs_batch``.
 
 T15 — Parents are claimed before children: verifies that the seed Cypher
-      query contains priority ordering so nodes with incoming COMPONENT_OF
+      query contains priority ordering so nodes with incoming HAS_PARENT
       edges (parents) are claimed first.
 
 T16 — Children proceed when parent unclaimed: verifies the escape-hatch
@@ -57,7 +57,7 @@ def _patch_gc(mock_gc):
 
 
 class TestParentDocsPriority:
-    """T15 — Parents (nodes with incoming COMPONENT_OF) should be claimed first."""
+    """T15 — Parents (nodes with incoming HAS_PARENT) should be claimed first."""
 
     def test_seed_query_contains_priority_ordering(self):
         """The seed Cypher emitted by claim_generate_docs_batch must include
@@ -83,9 +83,9 @@ class TestParentDocsPriority:
         # Inspect the seed query (first tx.run call).
         seed_cypher = tx.run.call_args_list[0].args[0]
 
-        # Priority column: parents (nodes with incoming COMPONENT_OF) get 0.
-        assert "COMPONENT_OF" in seed_cypher, (
-            "Expected COMPONENT_OF reference for parent priority in seed query"
+        # Priority column: parents (nodes with incoming HAS_PARENT) get 0.
+        assert "HAS_PARENT" in seed_cypher, (
+            "Expected HAS_PARENT reference for parent priority in seed query"
         )
         # ORDER BY must include priority column before rand().
         assert "_docs_priority" in seed_cypher, (

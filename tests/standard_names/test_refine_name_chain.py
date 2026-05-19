@@ -369,21 +369,28 @@ class TestPersistCypherContent:
         assert result1["new_name"] == result2["new_name"]
 
     def test_persist_empty_result(self):
-        """When tx returns empty, persist still returns a dict."""
+        """Empty tx result means refining gate did not bind — raise loudly.
+
+        Was previously a silent no-op; that masked a 5-edge / 500+ claim
+        bug (see persist_refined_name commit d21aa428). The empty path
+        now raises RuntimeError so the worker can release the claim or
+        mark the SN exhausted explicitly.
+        """
+        import pytest
+
         from imas_codex.standard_names.graph_ops import persist_refined_name
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = []
 
         with patch(_GC_PATH, return_value=gc):
-            result = persist_refined_name(
-                old_name="old",
-                new_name="new",
-                description="d",
-                old_chain_length=0,
-            )
-
-        assert result == {"new_name": "new", "old_name": "old"}
+            with pytest.raises(RuntimeError, match="persist_refined_name no-op"):
+                persist_refined_name(
+                    old_name="old",
+                    new_name="new",
+                    description="d",
+                    old_chain_length=0,
+                )
 
 
 # =============================================================================

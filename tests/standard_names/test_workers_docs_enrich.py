@@ -1,7 +1,7 @@
 """Tests for derivative family context injection in _enrich_for_docs_gen.
 
 Covers:
-- T12: Base quantity dict populated when item has COMPONENT_OF parent edge
+- T12: Base quantity dict populated when item has HAS_PARENT parent edge
 - T13: Derivative siblings list populated when multiple derivatives share a parent
 - T14: DD_DERIVATIVE_MAP lookup for dpsi_drho_tor resolves correctly
 """
@@ -39,14 +39,14 @@ _NO_CHILDREN: list = []
 
 
 def test_t12_base_quantity_context_injection():
-    """When a StandardName has a COMPONENT_OF parent, base_quantity is injected."""
+    """When a StandardName has a HAS_PARENT parent, base_quantity is injected."""
     from imas_codex.standard_names.workers import _enrich_for_docs_gen
 
     gc = _make_gc(
         [
             # 1. _DOCS_GEN_ENRICH_QUERY
             _EMPTY_ENRICH,
-            # 2. Section 4: parent COMPONENT_OF query
+            # 2. Section 4: parent HAS_PARENT query
             [
                 {
                     "name": "pressure",
@@ -55,7 +55,7 @@ def test_t12_base_quantity_context_injection():
                     "axis": None,
                 }
             ],
-            # 3. Section 4: child COMPONENT_OF query
+            # 3. Section 4: child HAS_PARENT query
             _NO_CHILDREN,
             # 4. Section 5: parent unit + siblings
             [{"unit": "Pa", "siblings": []}],
@@ -74,7 +74,7 @@ def test_t12_base_quantity_context_injection():
 
 
 def test_t12_base_quantity_not_injected_without_parent():
-    """When there is no COMPONENT_OF parent, base_quantity is not added."""
+    """When there is no HAS_PARENT parent, base_quantity is not added."""
     from imas_codex.standard_names.workers import _enrich_for_docs_gen
 
     gc = _make_gc(
@@ -107,7 +107,7 @@ def test_t13_derivative_siblings_populated():
         [
             # 1. _DOCS_GEN_ENRICH_QUERY
             _EMPTY_ENRICH,
-            # 2. Section 4: parent COMPONENT_OF
+            # 2. Section 4: parent HAS_PARENT
             [
                 {
                     "name": "poloidal_magnetic_flux",

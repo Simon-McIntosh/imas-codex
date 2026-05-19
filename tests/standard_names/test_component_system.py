@@ -33,11 +33,11 @@ def _make_gc_for_enrichment(
                     "dd_nodes": [],
                 }
             ]
-        if "COMPONENT_OF]->(parent" in cypher:
+        if "HAS_PARENT]->(parent" in cypher:
             if parent:
                 return [parent]
             return []
-        if "COMPONENT_OF]->(sn:StandardName" in cypher:
+        if "HAS_PARENT]->(sn:StandardName" in cypher:
             return children or []
         return []
 
@@ -52,9 +52,9 @@ def test_component_tags_parent():
     """_write_standard_name_edges sets needs_composition on bare parents."""
     from imas_codex.standard_names.derivation import derive_edges
 
-    # A toroidal component should derive a COMPONENT_OF edge
+    # A toroidal component should derive a HAS_PARENT edge
     edges = derive_edges("current_density_toroidal")
-    co_edges = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+    co_edges = [e for e in edges if e.edge_type == "HAS_PARENT"]
 
     # If ISN parser finds a parent, it should be in the list
     # (depends on ISN grammar — may be empty if ISN doesn't parse this)
@@ -67,7 +67,7 @@ def test_derive_edges_projection():
     from imas_codex.standard_names.derivation import derive_edges
 
     edges = derive_edges("magnetic_field_toroidal")
-    co_edges = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+    co_edges = [e for e in edges if e.edge_type == "HAS_PARENT"]
     if co_edges:
         assert co_edges[0].to_name == "magnetic_field"
         assert co_edges[0].props.get("axis") in ("toroidal", None)
@@ -167,7 +167,7 @@ def test_run_sn_pools_rederives_edges_before_seeding():
 
     Reproduces the production gap: names like
     ``flux_surface_mean_magnetic_field_magnitude`` and
-    ``toroidal_total_plasma_current`` had no COMPONENT_OF edges at all
+    ``toroidal_total_plasma_current`` had no HAS_PARENT edges at all
     in the live graph, so their parents
     (``flux_surface_mean_magnetic_field`` / ``total_plasma_current``)
     were entirely absent rather than orphan placeholders — invisible
@@ -182,7 +182,7 @@ def test_run_sn_pools_rederives_edges_before_seeding():
     # check for ``asyncio.to_thread(<helper>)`` call sites.
     assert "asyncio.to_thread(rederive_structural_edges)" in src, (
         "run_sn_pools must invoke rederive_structural_edges to backfill "
-        "missing COMPONENT_OF edges before parent seeding."
+        "missing HAS_PARENT edges before parent seeding."
     )
     assert "asyncio.to_thread(seed_parent_sources)" in src
     # The rederive call must precede the seed call so newly-derived
@@ -208,7 +208,7 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
     though structurally those parents were ready to seed.
 
     The fix: select parents structurally by ``name_stage IS NULL`` plus
-    a seedable COMPONENT_OF edge — no flag required.
+    a seedable HAS_PARENT edge — no flag required.
     """
     gc = MagicMock()
     captured_cyphers: list[str] = []
@@ -217,7 +217,7 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
         captured_cyphers.append(cypher)
         # Match the new structural query; the mock returns a parent with
         # NO ``needs_composition`` set (the orphan-placeholder shape).
-        if "name_stage IS NULL" in cypher and "COMPONENT_OF" in cypher:
+        if "name_stage IS NULL" in cypher and "HAS_PARENT" in cypher:
             return [
                 {
                     "parent_id": "average_magnetic_field",
@@ -264,7 +264,7 @@ def test_seed_parent_sources_auto_accepts_with_deterministic_origin():
 
     def _query(cypher, **kwargs):
         captured_sets.append(cypher)
-        if "name_stage IS NULL" in cypher and "COMPONENT_OF" in cypher:
+        if "name_stage IS NULL" in cypher and "HAS_PARENT" in cypher:
             return [
                 {
                     "parent_id": "magnetic_field",
@@ -332,7 +332,7 @@ def test_backfill_stamps_and_promotes_parents():
     transformations on the live graph:
 
     1. Stamp any structural parent without an origin
-       (``origin IS NULL`` + has COMPONENT_OF child) →
+       (``origin IS NULL`` + has HAS_PARENT child) →
        ``origin='deterministic'`` + ``name_stage='accepted'``.
     2. Promote any deterministic parent stuck at ``name_stage='reviewed'``
        (left over from a prior policy) → ``'accepted'``.
@@ -343,7 +343,7 @@ def test_backfill_stamps_and_promotes_parents():
 
     def _query(cypher, **kwargs):
         captured.append(cypher)
-        if "origin IS NULL" in cypher and "COMPONENT_OF" in cypher:
+        if "origin IS NULL" in cypher and "HAS_PARENT" in cypher:
             return [{"stamped": 5}]
         if "name_stage = 'reviewed'" in cypher and "deterministic" in cypher:
             return [{"promoted": 17}]
@@ -367,7 +367,7 @@ def test_backfill_stamps_and_promotes_parents():
     # (1) Stamp pass: must transition to accepted (auto-accept).
     stamp_q = captured[0]
     assert "origin IS NULL" in stamp_q
-    assert "COMPONENT_OF" in stamp_q
+    assert "HAS_PARENT" in stamp_q
     assert "name_stage = 'accepted'" in stamp_q
     assert "origin     = 'deterministic'" in stamp_q
 
@@ -488,7 +488,7 @@ def test_seed_parent_sources_writes_honest_placeholder_description():
 
     def _query(cypher, **kwargs):
         captured.append((cypher, kwargs))
-        if "name_stage IS NULL" in cypher and "COMPONENT_OF" in cypher:
+        if "name_stage IS NULL" in cypher and "HAS_PARENT" in cypher:
             return [
                 {
                     "parent_id": "magnetic_field",
@@ -588,7 +588,7 @@ def test_export_gate_c_rejects_deterministic_placeholder():
 
 def test_persist_refined_name_migrates_component_of_edges():
     """When a name is superseded by a refinement, any inbound
-    ``COMPONENT_OF`` edges must migrate to the successor so the SPA's
+    ``HAS_PARENT`` edges must migrate to the successor so the SPA's
     parent widget points at the live name, not a refined-away predecessor.
     """
     import inspect
@@ -597,11 +597,11 @@ def test_persist_refined_name_migrates_component_of_edges():
 
     src = inspect.getsource(graph_ops.persist_refined_name)
     # The migration block must be present in the Cypher.
-    assert "COMPONENT_OF]->(old)" in src, (
-        "persist_refined_name Cypher must locate inbound COMPONENT_OF "
+    assert "HAS_PARENT]->(old)" in src, (
+        "persist_refined_name Cypher must locate inbound HAS_PARENT "
         "edges pointing at the soon-to-be-superseded node."
     )
-    assert "COMPONENT_OF]->(new)" in src, (
+    assert "HAS_PARENT]->(new)" in src, (
         "persist_refined_name Cypher must MERGE the migrated edges onto "
         "the new (successor) node."
     )
@@ -609,7 +609,7 @@ def test_persist_refined_name_migrates_component_of_edges():
     # operator_kind / role survive supersede.
     assert "properties(c_old)" in src, (
         "Edge properties (operator_kind, axis, role, …) must be "
-        "preserved when migrating COMPONENT_OF to the successor."
+        "preserved when migrating HAS_PARENT to the successor."
     )
 
 

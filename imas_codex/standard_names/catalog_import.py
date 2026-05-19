@@ -413,7 +413,7 @@ def _write_import_entries(
             batch=units_batch,
         )
 
-    # Emit structural edges: COMPONENT_OF, HAS_ERROR, HAS_PREDECESSOR,
+    # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
     # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
     # Tail pass — all nodes in the batch exist before edges are written.
     # 'deprecates' → HAS_PREDECESSOR, 'superseded_by' → HAS_SUCCESSOR.
@@ -786,13 +786,13 @@ def check_catalog(
                 for cf in COMPUTED_FIELDS:
                     if cf in entry_data:
                         warnings.append(
-                            f"{cf} is computed from COMPONENT_OF / HAS_ERROR "
+                            f"{cf} is computed from HAS_PARENT / HAS_ERROR "
                             f"graph edges and will be overwritten on next "
                             f"export — edit has no effect.  See plan 40 / "
                             f"COMPUTED_FIELDS."
                         )
                         logger.warning(
-                            "%s is computed from COMPONENT_OF / HAS_ERROR "
+                            "%s is computed from HAS_PARENT / HAS_ERROR "
                             "graph edges and will be overwritten on next "
                             "export — edit has no effect.  See plan 40 / "
                             "COMPUTED_FIELDS.",

@@ -77,12 +77,34 @@ enums:
       Provenance of the most recent editorial edit to a StandardName.
       pipeline = generated/enriched by the codex LLM pipeline.
       catalog_edit = imported from a catalog PR that modified editorial
-      fields. Used by filter_protected() to guard catalog-owned content.
+      fields. derived = structural parent node materialised by the
+      admission gate (see imas_codex/standard_names/parents.py). Used
+      by filter_protected() to guard catalog-owned content.
     permissible_values:
       pipeline:
         description: Generated or enriched by the codex LLM pipeline
       catalog_edit:
         description: Imported from a catalog PR with editorial changes
+      derived:
+        description: >-
+          Structural parent node created by the admission gate when a
+          composed child name has a parent that passes specificity or
+          vector-topology checks. Awaits specificity review before
+          accept/delete.
+
+  ParentAdmissionVerdict:
+    description: >-
+      Advisory verdict from the parent specificity review (D3/D4).
+      Written to StandardName.proposed_verdict during Phase 4 of the
+      deterministic-parent redesign. Removed in Phase 6 when delete is
+      enabled. Used only for the gate-quality validation window.
+    permissible_values:
+      admit:
+        description: Reviewer judged the name specific enough to remain
+      reject:
+        description: Reviewer judged the name too generic; queued for delete
+      uncertain:
+        description: Reviewer signal not strong enough; needs human review
 
   VocabGapCategory:
     description: >-
@@ -785,9 +807,34 @@ classes:
           parent (e.g. position) whose children have heterogeneous units
           (m for r/z, rad for phi). Distinguishes geometric parents from
           physical vector parents which have uniform units. Set by
-          seed_parent_sources when COMPONENT_OF edges carry
+          seed_parent_sources when HAS_PARENT edges carry
           operator_kind='coordinate'.
         range: boolean
+      proposed_verdict:
+        description: >-
+          Advisory verdict from the parent specificity review (Phase 4 of
+          the deterministic-parent redesign). Written by REVIEW_NAME for
+          ``origin='derived'`` items only. Acts as the gate signal for
+          Phase 6 delete enablement — never used as a hard policy until
+          the LLM signal is validated against manual judgment.
+        range: ParentAdmissionVerdict
+      desc_name_similarity:
+        description: >-
+          Cosine similarity between the grammar-expanded name embedding
+          and the description embedding. Populated by REVIEW_NAME
+          pre-step. Below ``desc_name_similarity_threshold`` (default
+          0.55) routes the item to REFINE_DOCS instead of failing the
+          name. Advisory; the reviewer also sees this in context.
+        range: float
+      specificity_score:
+        description: >-
+          The dedicated specificity dimension score (0-1) from
+          REVIEW_NAME, separated from the aggregate ``reviewer_score_name``
+          so the gate signal is not contaminated by description-quality
+          dimensions. Fires only when ``origin='derived'``; defaults to
+          1.0 for composed names (assume specific — the LLM had a chance
+          to qualify).
+        range: float
       grammar_tokens:
         description: >-
           GrammarToken nodes that make up this standard name, parsed
@@ -1072,19 +1119,42 @@ classes:
         annotations:
           relationship_type: REFERENCES
       # --- Derivation relationship slots ---
-      components:
+      parents:
         description: >-
-          StandardName nodes this name is structurally derived from (component,
-          projection, or transformation target). Emitted by derive_edges()
-          for every derivation layer (unary prefix, unary postfix, projection,
-          binary). Populated in the tail pass after all nodes in a batch are
-          written. Forward-referenced targets are MERGE'd as bare stubs.
-          Exported as ``arguments`` in the ISN catalog format.
+          StandardName parent nodes — names this entry belongs to as a
+          structural child via one ISN grammar layer (qualifier, locus,
+          projection, unary prefix/postfix, or binary operand). Direction:
+          (child)-[:HAS_PARENT]->(parent). Emitted by derive_edges() for
+          every derivation layer. Populated in the tail pass after all nodes
+          in a batch are written. Forward-referenced targets are subject to
+          the admission gate (see imas_codex/standard_names/parents.py) —
+          inadmissible parents (bare-base scalars like ``pressure``) are
+          NOT created as placeholder nodes; the edge is dropped.
+          Exported as ``arguments`` in the ISN catalog format. Reuses the
+          ``HAS_PARENT`` relationship convention from IMASNode hierarchy
+          (imas_dd.yaml::parent_path) — different node labels, same
+          semantic.
         multivalued: true
         range: StandardName
         inlined: false
         annotations:
-          relationship_type: COMPONENT_OF
+          relationship_type: HAS_PARENT
+      magnitudes:
+        description: >-
+          StandardName vector parents whose magnitude this entry expresses.
+          Materialised passively at write time when this name matches the
+          pattern ``magnitude_of_<X>`` AND ``X`` is an admitted vector
+          parent in the graph. Direction:
+          (magnitude_scalar)-[:MAGNITUDE_OF]->(vector_parent). Never
+          speculatively created — source-driven only (DD path or signal
+          must compose the magnitude name). Captures the algebraic
+          vector ⇔ magnitude relationship without auto-generating
+          companion SNs.
+        multivalued: true
+        range: StandardName
+        inlined: false
+        annotations:
+          relationship_type: MAGNITUDE_OF
       error_siblings:
         description: >-
           StandardName nodes that are uncertainty variants of this name

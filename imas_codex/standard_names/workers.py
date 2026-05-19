@@ -5751,7 +5751,7 @@ def _enrich_for_docs_gen(
             parent_rows = list(
                 gc.query(
                     """
-                    MATCH (sn:StandardName {id: $sn_id})-[r:COMPONENT_OF]->(parent:StandardName)
+                    MATCH (sn:StandardName {id: $sn_id})-[r:HAS_PARENT]->(parent:StandardName)
                     RETURN parent.id AS name,
                            parent.description AS description,
                            parent.documentation AS documentation,
@@ -5774,7 +5774,7 @@ def _enrich_for_docs_gen(
             child_rows = list(
                 gc.query(
                     """
-                    MATCH (child:StandardName)-[r:COMPONENT_OF]->(sn:StandardName {id: $sn_id})
+                    MATCH (child:StandardName)-[r:HAS_PARENT]->(sn:StandardName {id: $sn_id})
                     RETURN child.id AS name,
                            child.description AS description,
                            r.axis AS axis
@@ -5814,7 +5814,7 @@ def _enrich_for_docs_gen(
                     gc.query(
                         """
                         MATCH (parent:StandardName {id: $parent_name})
-                        OPTIONAL MATCH (sib:StandardName)-[:COMPONENT_OF]->(parent)
+                        OPTIONAL MATCH (sib:StandardName)-[:HAS_PARENT]->(parent)
                         WHERE sib.id <> $sn_id
                         WITH parent, collect(sib.id) AS siblings
                         RETURN parent.unit AS unit, siblings

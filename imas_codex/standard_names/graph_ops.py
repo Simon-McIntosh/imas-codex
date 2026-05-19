@@ -1158,6 +1158,139 @@ def fetch_docs_review_feedback_for_sns(
     return fetch_docs_review_feedback_for_standard_names(sn_ids)
 
 
+def _filter_admissible_parents(
+    co_batch: list[dict[str, Any]],
+    gc: Any,
+) -> list[dict[str, Any]]:
+    """Drop HAS_PARENT edges whose target fails the admission gate.
+
+    Two-clause gate (see parents.py D1):
+      A. IR specificity — keep if the target name has qualifiers, locus,
+         operators, projection, or mechanism in its ISN parse.
+      B. Vector-like topology — keep bare-base targets if they have or
+         will have ≥2 distinct-axis projection children. Considers
+         both already-in-graph projections and the current batch.
+
+    Skips legacy entries: if a parent has ``origin='catalog_edit'`` or
+    is already ``pipeline_status='accepted'``, the edge is preserved
+    regardless of admission verdict (catalog is authoritative).
+    """
+    from imas_codex.standard_names.parents import is_admissible_parent_name
+
+    if not co_batch:
+        return co_batch
+
+    targets = {e["to_name"] for e in co_batch}
+
+    # Count batch-level projection axes per target (for Clause B with batch info)
+    batch_axes: dict[str, set[str]] = {}
+    for e in co_batch:
+        if e.get("operator_kind") == "projection" and e.get("axis"):
+            batch_axes.setdefault(e["to_name"], set()).add(e["axis"])
+
+    # Bulk topology probe: pull existing graph state for all targets at once
+    graph_axes: dict[str, set[str]] = {t: set() for t in targets}
+    legacy_protected: set[str] = set()
+    try:
+        rows = list(
+            gc.query(
+                """
+                UNWIND $names AS nm
+                OPTIONAL MATCH (child:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: nm})
+                  WHERE r.operator_kind = 'projection' AND r.axis IS NOT NULL
+                WITH nm, collect(DISTINCT r.axis) AS axes
+                OPTIONAL MATCH (p2:StandardName {id: nm})
+                RETURN nm AS name, axes,
+                       p2.origin AS origin,
+                       p2.pipeline_status AS pipeline_status
+                """,
+                names=list(targets),
+            )
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("Parent-admission topology probe failed: %s; admitting all", exc)
+        return co_batch
+
+    for r in rows:
+        nm = r.get("name")
+        if not nm:
+            continue
+        graph_axes[nm] = set(r.get("axes") or [])
+        if r.get("origin") == "catalog_edit" or r.get("pipeline_status") == "accepted":
+            legacy_protected.add(nm)
+
+    def _admit(target: str) -> tuple[bool, str]:
+        # Legacy protection: don't disturb catalog-authoritative entries.
+        if target in legacy_protected:
+            return True, "legacy (catalog_edit or accepted)"
+        result = is_admissible_parent_name(target, gc=None)
+        if result.admit:
+            return True, f"clause A: {result.reason}"
+        # Clause B with batch + graph topology
+        combined = graph_axes.get(target, set()) | batch_axes.get(target, set())
+        if len(combined) >= 2:
+            return True, f"clause B: vector-like ({len(combined)} axes)"
+        return False, result.reason
+
+    kept: list[dict[str, Any]] = []
+    dropped_count = 0
+    dropped_targets: set[str] = set()
+    for e in co_batch:
+        admit, reason = _admit(e["to_name"])
+        if admit:
+            kept.append(e)
+        else:
+            dropped_count += 1
+            dropped_targets.add(e["to_name"])
+
+    if dropped_count:
+        logger.info(
+            "Parent admission gate: dropped %d HAS_PARENT edges to %d "
+            "inadmissible targets (sample: %s)",
+            dropped_count,
+            len(dropped_targets),
+            sorted(dropped_targets)[:5],
+        )
+
+    return kept
+
+
+def _emit_magnitude_of_edges(names: list[dict[str, Any]], gc: Any) -> None:
+    """Emit MAGNITUDE_OF edges for ``magnitude_of_<X>`` names.
+
+    Passive — only fires when:
+      1. The name being written matches the pattern ``magnitude_of_<X>``.
+      2. ``<X>`` already exists in the graph as a ``kind='vector'`` SN.
+      3. ``<X>`` is an admitted parent (not catalog-only metadata).
+
+    Never speculatively creates magnitude SNs; the magnitude must already
+    be sourced from a DD path or facility signal. See plan D5/D13.
+    """
+    candidates: list[dict[str, str]] = []
+    for n in names:
+        name_id = n.get("id")
+        if not name_id or not name_id.startswith("magnitude_of_"):
+            continue
+        vector = name_id[len("magnitude_of_") :]
+        if not vector:
+            continue
+        candidates.append({"magnitude": name_id, "vector": vector})
+
+    if not candidates:
+        return
+
+    gc.query(
+        """
+        UNWIND $rows AS r
+        MATCH (m:StandardName {id: r.magnitude})
+        MATCH (v:StandardName {id: r.vector})
+        WHERE v.kind = 'vector'
+        MERGE (m)-[:MAGNITUDE_OF]->(v)
+        """,
+        rows=candidates,
+    )
+
+
 def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
     """Emit all structural edges for a batch of StandardName nodes.
 
@@ -1169,7 +1302,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
 
     Handles the following edge types:
 
-    - ``COMPONENT_OF``: derived from the ISN grammar parser (one layer
+    - ``HAS_PARENT``: derived from the ISN grammar parser (one layer
       per call: unary prefix/postfix, binary, or projection).
     - ``HAS_ERROR``: uncertainty siblings — direction inverted relative to
       the derivation (inner → uncertainty form).
@@ -1189,7 +1322,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
     """
     from imas_codex.standard_names.derivation import derive_edges
 
-    co_batch: list[dict[str, Any]] = []  # COMPONENT_OF
+    co_batch: list[dict[str, Any]] = []  # HAS_PARENT
     he_batch: list[dict[str, Any]] = []  # HAS_ERROR
     geo_batch: list[dict[str, Any]] = []  # HAS_LOCUS
 
@@ -1198,7 +1331,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
         if not name_id:
             continue
         for edge in derive_edges(name_id):
-            if edge.edge_type == "COMPONENT_OF":
+            if edge.edge_type == "HAS_PARENT":
                 co_batch.append(
                     {
                         "from_name": edge.from_name,
@@ -1228,13 +1361,20 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
                     }
                 )
 
+    # Phase 1 admission gate: drop HAS_PARENT edges to inadmissible
+    # parents (bare-base category labels). See parents.py D1/D2 of the
+    # deterministic-parent redesign plan.
+    co_batch = _filter_admissible_parents(co_batch, gc)
+
     if co_batch:
         gc.query(
             """
             UNWIND $batch AS b
             MERGE (src:StandardName {id: b.from_name})
             MERGE (tgt:StandardName {id: b.to_name})
-            MERGE (src)-[r:COMPONENT_OF]->(tgt)
+            ON CREATE SET tgt.origin = 'derived',
+                          tgt.name_stage = 'pending'
+            MERGE (src)-[r:HAS_PARENT]->(tgt)
             SET r.operator      = b.operator,
                 r.operator_kind = b.operator_kind,
                 r.role          = b.role,
@@ -1242,12 +1382,19 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
                 r.axis          = b.axis,
                 r.shape         = b.shape
             WITH tgt, b.operator_kind AS ok
-            WHERE tgt.name_stage IS NULL
-              AND ok IN ['projection', 'coordinate', 'unary_postfix']
+            WHERE tgt.name_stage IS NULL OR tgt.name_stage = 'pending'
+            WITH tgt, ok
+            WHERE ok IN ['projection', 'coordinate', 'unary_postfix']
             SET tgt.needs_composition = true
             """,
             batch=co_batch,
         )
+
+        # Phase 3: MAGNITUDE_OF passive materialisation. When a written
+        # name matches "magnitude_of_<X>" and X is an admitted vector
+        # parent in the graph, emit (this)-[:MAGNITUDE_OF]->(X). Never
+        # create the magnitude node speculatively — only links existing.
+        _emit_magnitude_of_edges(names, gc)
 
     if he_batch:
         gc.query(
@@ -1358,28 +1505,28 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
 
 
 def rederive_structural_edges() -> dict[str, int]:
-    """Backfill COMPONENT_OF and HAS_ERROR edges for all existing StandardName nodes.
+    """Backfill HAS_PARENT and HAS_ERROR edges for all existing StandardName nodes.
 
     Reads all SN ids, runs ``derive_edges()`` on each, and writes any missing
     edges. Idempotent — uses MERGE so existing edges are not duplicated.
 
-    Also migrates any inbound ``COMPONENT_OF`` edges that still point at a
+    Also migrates any inbound ``HAS_PARENT`` edges that still point at a
     superseded predecessor to the live successor (walking the
     ``REFINED_FROM`` chain backwards). This keeps the SPA's parent widget
     pointing at the active name rather than a refined-away predecessor.
 
     Returns counts of edges created per type, plus ``migrated`` for the
-    number of COMPONENT_OF edges rewired.
+    number of HAS_PARENT edges rewired.
     """
     with GraphClient() as gc:
         all_sns = gc.query("MATCH (sn:StandardName) RETURN sn.id AS id")
         names = [{"id": r["id"]} for r in all_sns if r.get("id")]
         if not names:
-            return {"COMPONENT_OF": 0, "HAS_ERROR": 0, "migrated": 0}
+            return {"HAS_PARENT": 0, "HAS_ERROR": 0, "migrated": 0}
         _write_standard_name_edges(gc, names)
         migrated = _migrate_component_of_off_superseded(gc)
     logger.info(
-        "rederive_structural_edges: processed %d names, migrated %d COMPONENT_OF edges",
+        "rederive_structural_edges: processed %d names, migrated %d HAS_PARENT edges",
         len(names),
         migrated,
     )
@@ -1393,7 +1540,7 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
     startup. Performs three transformations:
 
     1. **Origin stamp.** Any parent that has at least one inbound
-       ``COMPONENT_OF`` edge but no ``origin`` set is stamped
+       ``HAS_PARENT`` edge but no ``origin`` set is stamped
        ``origin='deterministic'`` and snapped to ``name_stage='accepted'``.
        Covers (a) the legacy shortcut-accepted parents that had
        ``name_stage='accepted'`` but no provenance, and (b) the
@@ -1433,7 +1580,7 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
                 """
                 MATCH (parent:StandardName)
                 WHERE parent.origin IS NULL
-                  AND EXISTS { (child)-[:COMPONENT_OF]->(parent) }
+                  AND EXISTS { (child)-[:HAS_PARENT]->(parent) }
                 SET parent.name_stage = 'accepted',
                     parent.origin     = 'deterministic'
                 RETURN count(parent) AS stamped
@@ -1499,12 +1646,12 @@ def backfill_deterministic_parent_origin(gc: Any | None = None) -> dict[str, int
 
 
 def _migrate_component_of_off_superseded(gc: Any) -> int:
-    """Rewire COMPONENT_OF edges from superseded parents to their successors.
+    """Rewire HAS_PARENT edges from superseded parents to their successors.
 
     A name that supersedes another carries a ``REFINED_FROM`` edge back
     to its predecessor. We walk the chain to find the live tip (the SN
     at the head whose ``name_stage`` is not ``superseded``) and migrate
-    each inbound ``COMPONENT_OF`` edge to that tip, preserving edge
+    each inbound ``HAS_PARENT`` edge to that tip, preserving edge
     properties. If no live tip exists (every node on the chain is
     superseded — should not happen in practice), the edge is left
     alone so manual review can investigate.
@@ -1512,15 +1659,15 @@ def _migrate_component_of_off_superseded(gc: Any) -> int:
     Self-loop guard: if a refine step renamed the *child* into the same
     name as its (now-superseded) parent — e.g. ``minimum_magnetic_field``
     got refined into ``minimum_magnetic_field_magnitude`` while
-    ``minimum_magnetic_field_magnitude`` was already its COMPONENT_OF
-    parent — naive migration produces ``child -[COMPONENT_OF]-> child``,
+    ``minimum_magnetic_field_magnitude`` was already its HAS_PARENT
+    parent — naive migration produces ``child -[HAS_PARENT]-> child``,
     a structural impossibility that crashes ISNC's
     ``validate_catalog`` topological sort with
     ``CycleError: nodes are in a cycle, ['x', 'x']``. In that case the
     edge is deleted outright; the new structural parent (if any) will
     be re-emitted next time ``derive_edges`` runs.
 
-    Returns the number of COMPONENT_OF edges actually migrated (delete-
+    Returns the number of HAS_PARENT edges actually migrated (delete-
     only self-loops are reported under ``deleted_self_loops`` in the
     logger but excluded from the migrated count).
     """
@@ -1534,13 +1681,13 @@ def _migrate_component_of_off_superseded(gc: Any) -> int:
             """
             MATCH (old:StandardName)
             WHERE old.name_stage = 'superseded'
-              AND EXISTS { (child)-[:COMPONENT_OF]->(old) }
+              AND EXISTS { (child)-[:HAS_PARENT]->(old) }
             MATCH path = (tip:StandardName)-[:REFINED_FROM*1..]->(old)
             WHERE tip.name_stage <> 'superseded'
             WITH old, tip, length(path) AS hops
             ORDER BY hops DESC
             WITH old, head(collect(tip)) AS tip
-            MATCH (child)-[c:COMPONENT_OF]->(old)
+            MATCH (child)-[c:HAS_PARENT]->(old)
             WITH tip, child, properties(c) AS props, c
             DELETE c
             // Drop the edge if migration would produce a self-loop;
@@ -1548,7 +1695,7 @@ def _migrate_component_of_off_superseded(gc: Any) -> int:
             // re-emitted by the next derive_edges pass.
             WITH tip, child, props
             WHERE tip.id <> child.id
-            MERGE (child)-[c_new:COMPONENT_OF]->(tip)
+            MERGE (child)-[c_new:HAS_PARENT]->(tip)
             SET c_new = props
             RETURN count(c_new) AS migrated
             """
@@ -1593,7 +1740,7 @@ def seed_parent_sources(gc: Any | None = None) -> int:
 
     Selects placeholder parents structurally: any ``StandardName`` node
     with ``name_stage IS NULL`` that is the target of at least one
-    COMPONENT_OF edge whose ``operator_kind`` is seedable
+    HAS_PARENT edge whose ``operator_kind`` is seedable
     (``projection``, ``coordinate``, ``unary_postfix``).
 
     This deliberately does NOT require the ``needs_composition`` flag.
@@ -1641,7 +1788,7 @@ def seed_parent_sources(gc: Any | None = None) -> int:
         gc = GraphClient().__enter__()
     try:
         # Structural selection: placeholder parent (no name_stage) with at
-        # least one COMPONENT_OF child whose edge_kind is seedable. The
+        # least one HAS_PARENT child whose edge_kind is seedable. The
         # Python-side ``seedable_edge_kinds`` filter below re-verifies the
         # edge mix per parent, so the query may over-select; that is OK.
         parents = list(
@@ -1649,12 +1796,12 @@ def seed_parent_sources(gc: Any | None = None) -> int:
                 """
                 MATCH (parent:StandardName)
                 WHERE parent.name_stage IS NULL
-                MATCH (child)-[comp:COMPONENT_OF]->(parent)
+                MATCH (child)-[comp:HAS_PARENT]->(parent)
                 WHERE comp.operator_kind IN
                       ['projection', 'coordinate', 'unary_postfix']
                 WITH parent,
                      collect(DISTINCT child) AS children
-                MATCH (any_child)-[any_comp:COMPONENT_OF]->(parent)
+                MATCH (any_child)-[any_comp:HAS_PARENT]->(parent)
                 WITH parent, children,
                      collect(any_comp.operator_kind) AS edge_kinds,
                      count(any_child) AS total_children,
@@ -2277,7 +2424,7 @@ def write_standard_names(
         # Create grammar decomposition: typed edges + per-segment columns
         token_miss_gaps = _write_grammar_decomposition(gc, [n["id"] for n in names])
 
-        # Emit structural edges: COMPONENT_OF, HAS_ERROR, HAS_PREDECESSOR,
+        # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
         # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
         # Tail pass — all nodes in this batch exist before edges are written.
         _write_standard_name_edges(gc, names)
@@ -2319,7 +2466,7 @@ def write_standard_names(
             write_vocab_gaps(signal_gap_dicts, source_type="signals")
 
     # Sweep skeleton placeholders created by relationship-side MERGE on
-    # uncomposed targets (COMPONENT_OF, HAS_ERROR, HAS_PREDECESSOR,
+    # uncomposed targets (HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
     # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN). A real StandardName
     # always has at least a created_at OR generated_at timestamp; pure
     # skeletons (id-only) are detached and deleted.
@@ -2335,7 +2482,7 @@ def write_standard_names(
               AND sn.unit IS NULL
               AND sn.kind IS NULL
               AND sn.needs_composition IS NULL
-              AND NOT EXISTS { ()-[:COMPONENT_OF]->(sn) }
+              AND NOT EXISTS { ()-[:HAS_PARENT]->(sn) }
               AND NOT EXISTS { ()-[:HAS_ERROR]->(sn) }
             DETACH DELETE sn
             RETURN count(sn) AS swept
@@ -8262,13 +8409,13 @@ def persist_refined_name(
                         WITH new, old, hsn_nodes
                         FOREACH (n IN hsn_nodes | MERGE (n)-[:HAS_STANDARD_NAME]->(new))
 
-                        // 5b. Migrate inbound COMPONENT_OF edges
-                        // (child)-[:COMPONENT_OF]->(old) → (child)-[:COMPONENT_OF]->(new)
+                        // 5b. Migrate inbound HAS_PARENT edges
+                        // (child)-[:HAS_PARENT]->(old) → (child)-[:HAS_PARENT]->(new)
                         // Preserves edge properties so the SPA's parent
                         // widget points at the live successor, not the
                         // superseded predecessor.
                         WITH DISTINCT new, old
-                        OPTIONAL MATCH (child)-[c_old:COMPONENT_OF]->(old)
+                        OPTIONAL MATCH (child)-[c_old:HAS_PARENT]->(old)
                         WITH new, old,
                              collect({{
                                  child: child,
@@ -8278,7 +8425,7 @@ def persist_refined_name(
                         FOREACH (link IN comp_links | DELETE link.rel)
                         WITH new, old, comp_links
                         FOREACH (link IN comp_links |
-                            MERGE (link.child)-[c_new:COMPONENT_OF]->(new)
+                            MERGE (link.child)-[c_new:HAS_PARENT]->(new)
                             SET   c_new = link.props
                         )
 
@@ -8919,7 +9066,7 @@ def claim_generate_docs_batch(
         # stage_field=None → claim only, no stage transition
         domain=domain,
         scope_run_id=scope_run_id,
-        # Parent-first ordering: nodes that have incoming COMPONENT_OF edges
+        # Parent-first ordering: nodes that have incoming HAS_PARENT edges
         # (i.e. nodes which are parents) receive priority 0 so they are
         # documented before their children.
         #
@@ -8930,13 +9077,13 @@ def claim_generate_docs_batch(
         # (docs_stage='pending' AND claimed_at IS NOT NULL).
         seed_extra_where=(
             "AND NOT EXISTS {"
-            " MATCH (sn)-[:COMPONENT_OF]->(parent:StandardName)"
+            " MATCH (sn)-[:HAS_PARENT]->(parent:StandardName)"
             " WHERE parent.docs_stage = 'pending'"
             " AND parent.claimed_at IS NOT NULL"
             " }"
         ),
         seed_with_extras=(
-            ", CASE WHEN EXISTS { ()-[:COMPONENT_OF]->(sn) }"
+            ", CASE WHEN EXISTS { ()-[:HAS_PARENT]->(sn) }"
             " THEN 0 ELSE 1 END AS _docs_priority"
         ),
         seed_order_by="_docs_priority ASC, rand()",

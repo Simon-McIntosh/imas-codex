@@ -30,11 +30,11 @@ def test_d1_leaf_temperature():
 
 
 def test_d2_maximum_of_temperature():
-    """maximum_of_temperature → COMPONENT_OF to temperature."""
+    """maximum_of_temperature → HAS_PARENT to temperature."""
     edges = derive_edges("maximum_of_temperature")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "maximum_of_temperature"
     assert e.to_name == "temperature"
     assert e.props["operator"] == "maximum"
@@ -47,11 +47,11 @@ def test_d2_maximum_of_temperature():
 
 
 def test_d3_time_derivative_of_temperature():
-    """time_derivative_of_temperature → COMPONENT_OF to temperature."""
+    """time_derivative_of_temperature → HAS_PARENT to temperature."""
     edges = derive_edges("time_derivative_of_temperature")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "time_derivative_of_temperature"
     assert e.to_name == "temperature"
     assert e.props["operator"] == "time_derivative"
@@ -64,11 +64,11 @@ def test_d3_time_derivative_of_temperature():
 
 
 def test_d4_time_average_of_maximum_of_temperature():
-    """time_average_of_maximum_of_temperature → COMPONENT_OF to maximum_of_temperature."""
+    """time_average_of_maximum_of_temperature → HAS_PARENT to maximum_of_temperature."""
     edges = derive_edges("time_average_of_maximum_of_temperature")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "time_average_of_maximum_of_temperature"
     assert e.to_name == "maximum_of_temperature"
     assert e.props["operator"] == "time_average"
@@ -81,11 +81,11 @@ def test_d4_time_average_of_maximum_of_temperature():
 
 
 def test_d5_temperature_magnitude():
-    """temperature_magnitude → COMPONENT_OF to temperature."""
+    """temperature_magnitude → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_magnitude")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "temperature_magnitude"
     assert e.to_name == "temperature"
     assert e.props["operator"] == "magnitude"
@@ -98,11 +98,11 @@ def test_d5_temperature_magnitude():
 
 
 def test_d6_temperature_moment():
-    """temperature_moment → COMPONENT_OF to temperature."""
+    """temperature_moment → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_moment")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "temperature_moment"
     assert e.to_name == "temperature"
     assert e.props["operator"] == "moment"
@@ -115,11 +115,11 @@ def test_d6_temperature_moment():
 
 
 def test_d7_temperature_reference_waveform():
-    """temperature_reference_waveform → COMPONENT_OF to temperature."""
+    """temperature_reference_waveform → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_reference_waveform")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "temperature_reference_waveform"
     assert e.to_name == "temperature"
     assert e.props["operator"] == "reference_waveform"
@@ -132,11 +132,11 @@ def test_d7_temperature_reference_waveform():
 
 
 def test_d8_temperature_bessel_0():
-    """temperature_bessel_0 → COMPONENT_OF to temperature."""
+    """temperature_bessel_0 → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_bessel_0")
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == "temperature_bessel_0"
     assert e.to_name == "temperature"
     assert e.props["operator"] == "bessel_0"
@@ -149,7 +149,7 @@ def test_d8_temperature_bessel_0():
 
 
 def test_d9_ratio_of_temperature_to_pressure():
-    """ratio_of_temperature_to_pressure → two COMPONENT_OF edges."""
+    """ratio_of_temperature_to_pressure → two HAS_PARENT edges."""
     edges = derive_edges("ratio_of_temperature_to_pressure")
     assert len(edges) == 2
 
@@ -157,7 +157,7 @@ def test_d9_ratio_of_temperature_to_pressure():
     assert set(edge_by_role) == {"a", "b"}
 
     ea = edge_by_role["a"]
-    assert ea.edge_type == "COMPONENT_OF"
+    assert ea.edge_type == "HAS_PARENT"
     assert ea.from_name == "ratio_of_temperature_to_pressure"
     assert ea.to_name == "temperature"
     assert ea.props["operator"] == "ratio"
@@ -165,7 +165,7 @@ def test_d9_ratio_of_temperature_to_pressure():
     assert ea.props["separator"] == "to"
 
     eb = edge_by_role["b"]
-    assert eb.edge_type == "COMPONENT_OF"
+    assert eb.edge_type == "HAS_PARENT"
     assert eb.from_name == "ratio_of_temperature_to_pressure"
     assert eb.to_name == "pressure"
     assert eb.props["operator"] == "ratio"
@@ -188,8 +188,8 @@ def test_d10_upper_uncertainty_of_temperature():
     assert e.from_name == "temperature"
     assert e.to_name == "upper_uncertainty_of_temperature"
     assert e.props["error_type"] == "upper"
-    # No COMPONENT_OF
-    ha = [x for x in edges if x.edge_type == "COMPONENT_OF"]
+    # No HAS_PARENT
+    ha = [x for x in edges if x.edge_type == "HAS_PARENT"]
     assert ha == []
 
 
@@ -233,7 +233,7 @@ def test_d12_uncertainty_index_of_temperature():
 def test_d13_maximum_of_temperature_at_plasma_boundary():
     """Locus is preserved: inner is temperature_at_plasma_boundary, plus HAS_LOCUS."""
     edges = derive_edges("maximum_of_temperature_at_plasma_boundary")
-    co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+    co = [e for e in edges if e.edge_type == "HAS_PARENT"]
     locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
     assert len(co) == 1
     assert co[0].from_name == "maximum_of_temperature_at_plasma_boundary"
@@ -252,14 +252,14 @@ def test_d13_maximum_of_temperature_at_plasma_boundary():
 
 
 def test_d14_elongation_of_plasma_boundary():
-    """elongation_of_plasma_boundary — peels locus (COMPONENT_OF → elongation)
+    """elongation_of_plasma_boundary — peels locus (HAS_PARENT → elongation)
     AND emits HAS_LOCUS → plasma_boundary. The two edges encode different
-    relations: COMPONENT_OF is the structural parent SN; HAS_LOCUS is the
+    relations: HAS_PARENT is the structural parent SN; HAS_LOCUS is the
     grouping edge to the shared Locus node. Updated from the rc8 layout
-    that asserted no COMPONENT_OF here — that gap let dataset.py's
+    that asserted no HAS_PARENT here — that gap let dataset.py's
     `_parent_token` shortcut to the bare base from any layer."""
     edges = derive_edges("elongation_of_plasma_boundary")
-    co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+    co = [e for e in edges if e.edge_type == "HAS_PARENT"]
     geo = [e for e in edges if e.edge_type == "HAS_LOCUS"]
     assert len(co) == 1
     assert co[0].to_name == "elongation"
@@ -285,7 +285,7 @@ def test_d15_garbage_string():
 
 
 def test_d16_projection_monkeypatched():
-    """Projection IR shape → COMPONENT_OF with operator_kind='projection'.
+    """Projection IR shape → HAS_PARENT with operator_kind='projection'.
 
     Uses a real ISN-valid name (parallel_current_density) so the inner name
     round-trip guard passes without needing to monkeypatch.
@@ -295,7 +295,7 @@ def test_d16_projection_monkeypatched():
 
     assert len(edges) == 1
     e = edges[0]
-    assert e.edge_type == "COMPONENT_OF"
+    assert e.edge_type == "HAS_PARENT"
     assert e.from_name == name
     assert e.to_name == "current_density"
     assert e.props["operator"] == "component"
@@ -313,14 +313,14 @@ class TestGeometricCoordinateDerivation:
     """Phase 3: Geometric coordinate edge derivation."""
 
     def test_geometric_coordinate_edge_derived(self):
-        """T8: radial_position produces COMPONENT_OF edge to position.
+        """T8: radial_position produces HAS_PARENT edge to position.
 
         ISN v0.8.0rc1 handles this via the projection branch (not geometric
         coordinate), so operator_kind is 'projection'.
         """
         edges = derive_edges("radial_position")
         assert len(edges) == 1
-        assert edges[0].edge_type == "COMPONENT_OF"
+        assert edges[0].edge_type == "HAS_PARENT"
         assert edges[0].to_name == "position"
         assert edges[0].props["operator_kind"] == "projection"
         assert edges[0].props["axis"] == "radial"
@@ -378,14 +378,14 @@ class TestGeometricCoordinateDerivation:
         assert edges == []
 
     def test_compound_coordinate_measurement_position_no_component_edge(self):
-        """vertical_coordinate_of_measurement_position → no COMPONENT_OF edge.
+        """vertical_coordinate_of_measurement_position → no HAS_PARENT edge.
 
-        Without the fix, this would create a COMPONENT_OF edge to
+        Without the fix, this would create a HAS_PARENT edge to
         'coordinate', grouping unrelated positions together.
         May produce a HAS_LOCUS edge to measurement_position.
         """
         edges = derive_edges("vertical_coordinate_of_measurement_position")
-        co = [e for e in edges if e.edge_type == "COMPONENT_OF"]
+        co = [e for e in edges if e.edge_type == "HAS_PARENT"]
         assert co == []
 
     def test_toroidal_angle_of_qualified_no_edge(self):
@@ -503,8 +503,8 @@ class TestSelfLoopGuard:
         from imas_codex.standard_names.derivation import _drop_self_loops
 
         edges = [
-            DerivedEdge("COMPONENT_OF", "foo", "foo", {"operator": "magnitude"}),
-            DerivedEdge("COMPONENT_OF", "foo", "bar", {"operator": "magnitude"}),
+            DerivedEdge("HAS_PARENT", "foo", "foo", {"operator": "magnitude"}),
+            DerivedEdge("HAS_PARENT", "foo", "bar", {"operator": "magnitude"}),
             DerivedEdge("HAS_ERROR", "foo", "foo", {"error_type": "upper"}),
         ]
         out = _drop_self_loops("foo", edges)
@@ -538,10 +538,10 @@ class TestSelfLoopGuard:
 
 
 class TestQualifierLayerParent:
-    """Pin the qualifier-peel COMPONENT_OF edges.
+    """Pin the qualifier-peel HAS_PARENT edges.
 
     Before this layer, names like `upper_elongation_of_plasma_boundary`
-    emitted zero COMPONENT_OF edges (operator+projection branches both
+    emitted zero HAS_PARENT edges (operator+projection branches both
     no-op'd, leaf returned []), so the SPA's `_parent_token` shortcut
     to `ir.base.token` chose `elongation` — grouping upper/lower
     boundary elongation with unrelated flux-surface elongation under
@@ -550,7 +550,7 @@ class TestQualifierLayerParent:
     """
 
     def _component_of(self, name):
-        return [e for e in derive_edges(name) if e.edge_type == "COMPONENT_OF"]
+        return [e for e in derive_edges(name) if e.edge_type == "HAS_PARENT"]
 
     def test_upper_elongation_of_plasma_boundary(self):
         edges = self._component_of("upper_elongation_of_plasma_boundary")
@@ -602,19 +602,19 @@ class TestQualifierLayerParent:
 
 
 class TestLocusLayerParent:
-    """Pin the locus-peel COMPONENT_OF edges.
+    """Pin the locus-peel HAS_PARENT edges.
 
     For a name with no qualifiers / no operator / no projection but a
     locus suffix (``_of_<locus>``, ``_at_<locus>``), the parent is the
     bare base — the locus is the only structural layer to peel.
 
     The existing HAS_LOCUS edge (to a Locus node) is preserved — it
-    groups same-locus quantities; the new COMPONENT_OF edge captures
+    groups same-locus quantities; the new HAS_PARENT edge captures
     the structural parent SN.
     """
 
     def _component_of(self, name):
-        return [e for e in derive_edges(name) if e.edge_type == "COMPONENT_OF"]
+        return [e for e in derive_edges(name) if e.edge_type == "HAS_PARENT"]
 
     def _has_locus(self, name):
         return [e for e in derive_edges(name) if e.edge_type == "HAS_LOCUS"]
@@ -644,7 +644,7 @@ class TestLocusLayerParent:
         assert edges[0].props["operator_kind"] == "locus"
 
     def test_locus_node_still_emitted(self):
-        # The locus-peel COMPONENT_OF must NOT replace the HAS_LOCUS
+        # The locus-peel HAS_PARENT must NOT replace the HAS_LOCUS
         # grouping edge — both coexist.
         name = "elongation_of_plasma_boundary"
         assert len(self._component_of(name)) == 1
@@ -662,7 +662,7 @@ class TestLayerPrecedence:
     """Only one layer peels per call; recursion handles the rest."""
 
     def _component_of(self, name):
-        return [e for e in derive_edges(name) if e.edge_type == "COMPONENT_OF"]
+        return [e for e in derive_edges(name) if e.edge_type == "HAS_PARENT"]
 
     def test_operator_outranks_qualifier(self):
         # `time_derivative_of_temperature` has a unary_prefix operator;
