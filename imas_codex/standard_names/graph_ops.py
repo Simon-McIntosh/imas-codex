@@ -1524,7 +1524,7 @@ def rederive_structural_edges() -> dict[str, int]:
         if not names:
             return {"HAS_PARENT": 0, "HAS_ERROR": 0, "migrated": 0}
         _write_standard_name_edges(gc, names)
-        migrated = _migrate_component_of_off_superseded(gc)
+        migrated = _rewire_has_parent_off_superseded(gc)
     logger.info(
         "rederive_structural_edges: processed %d names, migrated %d HAS_PARENT edges",
         len(names),
@@ -1533,7 +1533,7 @@ def rederive_structural_edges() -> dict[str, int]:
     return {"processed": len(names), "migrated": migrated}
 
 
-def _migrate_component_of_off_superseded(gc: Any) -> int:
+def _rewire_has_parent_off_superseded(gc: Any) -> int:
     """Rewire HAS_PARENT edges from superseded parents to their successors.
 
     A name that supersedes another carries a ``REFINED_FROM`` edge back

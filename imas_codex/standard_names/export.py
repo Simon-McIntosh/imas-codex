@@ -695,7 +695,7 @@ def _fetch_ordering_edges_for_domain(
         """
         MATCH (s:StandardName)-[e:HAS_PARENT]->(t:StandardName)
         WHERE $domain IN s.physics_domain AND $domain IN t.physics_domain
-        RETURN s.name AS src, t.name AS tgt
+        RETURN s.id AS src, t.id AS tgt
         """,
         domain=domain,
     )
@@ -704,7 +704,7 @@ def _fetch_ordering_edges_for_domain(
         """
         MATCH (s:StandardName)-[e:HAS_ERROR]->(t:StandardName)
         WHERE $domain IN s.physics_domain AND $domain IN t.physics_domain
-        RETURN s.name AS src, t.name AS tgt
+        RETURN s.id AS src, t.id AS tgt
         """,
         domain=domain,
     )
@@ -723,7 +723,7 @@ def _fetch_ordering_edges_for_domain(
         """
         MATCH (s:StandardName)-[:HAS_PARENT]->(t:StandardName)
         WHERE $domain IN s.physics_domain AND NOT ($domain IN t.physics_domain)
-        RETURN DISTINCT s.name AS name
+        RETURN DISTINCT s.id AS name
         """,
         domain=domain,
     )
@@ -732,7 +732,7 @@ def _fetch_ordering_edges_for_domain(
         """
         MATCH (s:StandardName)-[:HAS_ERROR]->(t:StandardName)
         WHERE $domain IN t.physics_domain AND NOT ($domain IN s.physics_domain)
-        RETURN DISTINCT t.name AS name
+        RETURN DISTINCT t.id AS name
         """,
         domain=domain,
     )

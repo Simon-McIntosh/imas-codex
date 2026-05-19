@@ -563,7 +563,7 @@ def test_rederive_structural_edges_migrates_off_superseded():
 
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops._migrate_component_of_off_superseded)
+    src = inspect.getsource(graph_ops._rewire_has_parent_off_superseded)
     assert "REFINED_FROM" in src, (
         "Migration must walk REFINED_FROM* to find the live successor."
     )
