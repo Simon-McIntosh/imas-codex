@@ -270,7 +270,30 @@ def _requested_services(
     return selected
 
 
+# Inline manifest comment that lists the services a systemd unit forwards.
+# Written by _build_systemd_service_content; read by _service_selected_services.
+# Lets the CLI detect "supports request" precisely instead of inferring from
+# --X flag presence — older units (installed before a new service was added)
+# need explicit reinstall to claim the new service, so the CLI no longer
+# silently starts a stale unit when the user asks for a newly-added service.
+SERVICE_MANIFEST_PREFIX = "# tunnel-services: "
+
+# Service set tracked by units installed before SERVICE_MANIFEST_PREFIX
+# existed. New services added after this list ship MUST trigger a service
+# reinstall — they are intentionally absent from this frozen fallback so
+# `_installed_service_supports_request` returns False for them.
+_LEGACY_SERVICE_SET: frozenset[str] = frozenset({"neo4j", "embed", "llm", "vllm"})
+
+
 def _service_selected_services(service_text: str) -> set[str]:
+    # Prefer the manifest comment when present (units installed by current
+    # or future CLI versions).
+    for line in service_text.splitlines():
+        if line.startswith(SERVICE_MANIFEST_PREFIX):
+            return set(line[len(SERVICE_MANIFEST_PREFIX) :].split())
+    # Fallback for legacy units: detect explicit flags in ExecStart, or
+    # assume the pre-manifest service set if the unit was installed
+    # flagless ("all services as of install time").
     selected = {
         service
         for flag, service in (
@@ -282,7 +305,7 @@ def _service_selected_services(service_text: str) -> set[str]:
         )
         if flag in service_text
     }
-    return selected or {"neo4j", "embed", "llm", "vllm", "docs"}
+    return selected or set(_LEGACY_SERVICE_SET)
 
 
 def _installed_service_supports_request(
@@ -474,6 +497,11 @@ def _build_systemd_service_content(
         flag_args.append("--docs")
     flags = " ".join(flag_args)
 
+    services = _requested_services(
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only
+    )
+    manifest_line = SERVICE_MANIFEST_PREFIX + " ".join(sorted(services))
+
     log_dir = Path.home() / ".local" / "share" / "imas-codex" / "logs"
     autossh_log = log_dir / f"autossh-{host}.log"
 
@@ -483,6 +511,7 @@ def _build_systemd_service_content(
     )
 
     return f"""\
+{manifest_line}
 [Unit]
 Description=IMAS Codex SSH tunnels to {host}
 Documentation=https://github.com/iterorganization/imas-codex
@@ -777,6 +806,17 @@ def tunnel_start(
         _start_keyring_forward(target)
         return
 
+    # Warn if a stale systemd unit exists that doesn't cover this request —
+    # the user almost certainly wants to reinstall instead of running an
+    # ad-hoc tunnel alongside the persistent one.
+    if _service_file(target).exists():
+        click.echo(
+            f"  ⚠ Installed systemd service '{_service_name(target)}' does "
+            "not cover the requested service(s).\n"
+            "    Starting an ad-hoc tunnel in parallel — for persistent "
+            f"coverage rerun: imas-codex tunnel service install {target}"
+        )
+
     use_autossh = bool(shutil.which("autossh"))
 
     if use_autossh:
@@ -916,7 +956,11 @@ def tunnel_status() -> None:
         for p in known_ports:
             if p >= TUNNEL_OFFSET:
                 port_host[p] = host
-        port_host[embed_port] = host
+        # Same-port forwards (no TUNNEL_OFFSET offset) — embed, llm, vllm
+        # already land above TUNNEL_OFFSET (e.g. 18765, 18400), but docs
+        # lives at 8765 by default and would fall through to "(ssh)".
+        for p in (embed_port, llm_port, vllm_port, docs_port):
+            port_host[p] = host
     except Exception:
         pass
 
