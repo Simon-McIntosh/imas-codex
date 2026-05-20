@@ -4,6 +4,7 @@ from click.testing import CliRunner
 
 from imas_codex.cli.tunnel import (
     _build_systemd_service_content,
+    _get_tunnel_ports,
     _installed_service_supports_request,
     tunnel,
 )
@@ -68,6 +69,33 @@ class TestTunnelServiceHelpers:
                 neo4j_only=False,
                 embed_only=True,
                 llm_only=False,
+            )
+
+    def test_docs_only_emits_docs_server_port(self):
+        ports = _get_tunnel_ports(
+            "iter",
+            neo4j=False,
+            embed=False,
+            llm=False,
+            vllm=False,
+            docs=True,
+            emit_status=False,
+        )
+        assert ports == [(8765, 8765, "docs", "127.0.0.1")]
+
+    def test_installed_service_rejects_docs_when_absent(self, tmp_path):
+        service_file = tmp_path / "imas-codex-tunnel-iter.service"
+        service_file.write_text(
+            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter --llm\n"
+        )
+
+        with patch("imas_codex.cli.tunnel._service_file", return_value=service_file):
+            assert not _installed_service_supports_request(
+                "iter",
+                neo4j_only=False,
+                embed_only=False,
+                llm_only=False,
+                docs_only=True,
             )
 
 

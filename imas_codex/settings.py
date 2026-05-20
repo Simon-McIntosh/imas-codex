@@ -414,6 +414,43 @@ def get_vllm_port() -> int:
     return VLLM_PORT
 
 
+# ─── docs-server settings ──────────────────────────────────────────────────
+
+DOCS_SERVER_BASE_PORT = 8765
+
+
+def get_docs_server_location() -> str:
+    """Get the docs-server location — a facility name or ``"local"``.
+
+    The docs-server is a host-wide static HTML/JSON state server
+    (``~/docs-server/serve.py``) that fronts every project's
+    ``docs/plans-html/`` under one port and exposes ``/state/...`` endpoints
+    that humans (via browser) and agents (via filesystem) share.
+
+    Priority: IMAS_CODEX_DOCS_LOCATION env → [docs-server].location → 'iter'.
+    """
+    if env := os.getenv("IMAS_CODEX_DOCS_LOCATION"):
+        return env.lower()
+    location = _get_section("docs-server").get("location")
+    return str(location).lower() if location else "iter"
+
+
+def get_docs_server_port() -> int:
+    """Get the docs-server port.
+
+    Runs on the login node (no SLURM allocation, no facility offset);
+    forwarded same-port via ``imas-codex tunnel start <host> --docs``.
+
+    Priority: IMAS_CODEX_DOCS_PORT env → [docs-server].port → 8765.
+    """
+    if env := os.getenv("IMAS_CODEX_DOCS_PORT"):
+        return int(env)
+    port = _get_section("docs-server").get("port")
+    if port:
+        return int(port)
+    return DOCS_SERVER_BASE_PORT
+
+
 def get_llm_proxy_port() -> int:
     """Get the LLM proxy (LiteLLM) port.
 

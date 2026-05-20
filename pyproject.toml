@@ -607,6 +607,15 @@ refine_name = true
 # Runs on login node (needs outbound HTTPS for OpenRouter/Anthropic).
 location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 
+[tool.imas-codex.docs-server]
+# Host-wide HTML docs server (~/docs-server/serve.py): fronts every
+# project's docs/plans-html/ under a single URL prefix and exposes a
+# /state/<project>/<doc> JSON store shared by browser and agents.
+# Runs on the login node — same lifetime pattern as the LLM proxy.
+# Forwarded by `imas-codex tunnel start <host> --docs` (port 8765).
+location = "iter"
+port = 8765
+
 [tool.hatch.envs.test]
 dependencies = [
     "pytest>=9.0.3,<10.0.0",   # CVE-2025-71176
