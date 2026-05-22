@@ -451,6 +451,41 @@ def get_docs_server_port() -> int:
     return DOCS_SERVER_BASE_PORT
 
 
+# ─── ink display server settings ───────────────────────────────────────────
+
+INK_DISPLAY_BASE_PORT = 8766
+
+
+def get_ink_display_location() -> str:
+    """Get the ink display server location — a facility name or ``"local"``.
+
+    The ink display server (``uv run efit-ink serve``) runs on the login node
+    and serves the most recently pushed Altair chart at port 8766.
+
+    Priority: IMAS_CODEX_INK_PORT env → [ink-display].location → 'iter'.
+    """
+    if env := os.getenv("IMAS_CODEX_INK_LOCATION"):
+        return env.lower()
+    location = _get_section("ink-display").get("location")
+    return str(location).lower() if location else "iter"
+
+
+def get_ink_display_port() -> int:
+    """Get the ink display server port.
+
+    Runs on the login node; forwarded same-port via
+    ``imas-codex tunnel start <host> --ink``.
+
+    Priority: IMAS_CODEX_INK_PORT env → [ink-display].port → 8766.
+    """
+    if env := os.getenv("IMAS_CODEX_INK_PORT"):
+        return int(env)
+    port = _get_section("ink-display").get("port")
+    if port:
+        return int(port)
+    return INK_DISPLAY_BASE_PORT
+
+
 def get_llm_proxy_port() -> int:
     """Get the LLM proxy (LiteLLM) port.
 

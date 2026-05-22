@@ -112,6 +112,7 @@ def _get_tunnel_ports(
     llm: bool = False,
     vllm: bool = False,
     docs: bool = False,
+    ink: bool = False,
     *,
     emit_status: bool = True,
 ) -> list[tuple[int, int, str, str]]:
@@ -126,7 +127,9 @@ def _get_tunnel_ports(
     from imas_codex.remote.tunnel import TUNNEL_OFFSET
 
     ports: list[tuple[int, int, str, str]] = []
-    all_services = not neo4j and not embed and not llm and not vllm and not docs
+    all_services = (
+        not neo4j and not embed and not llm and not vllm and not docs and not ink
+    )
 
     # Discover SLURM compute node if any service uses a compute location.
     # All services share the same allocation, so one lookup suffices.
@@ -226,6 +229,13 @@ def _get_tunnel_ports(
         # docs-server runs on the login node (~/docs-server/serve.py)
         ports.append((docs_port, docs_port, "docs", "127.0.0.1"))
 
+    if ink or all_services:
+        from imas_codex.settings import get_ink_display_port
+
+        ink_port = get_ink_display_port()
+        # ink display server runs on the login node (uv run efit-ink)
+        ports.append((ink_port, ink_port, "ink", "127.0.0.1"))
+
     return ports
 
 
@@ -247,6 +257,7 @@ def _requested_services(
     llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
 ) -> set[str]:
     if (
         not neo4j_only
@@ -254,8 +265,9 @@ def _requested_services(
         and not llm_only
         and not vllm_only
         and not docs_only
+        and not ink_only
     ):
-        return {"neo4j", "embed", "llm", "vllm", "docs"}
+        return {"neo4j", "embed", "llm", "vllm", "docs", "ink"}
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
@@ -267,6 +279,8 @@ def _requested_services(
         selected.add("vllm")
     if docs_only:
         selected.add("docs")
+    if ink_only:
+        selected.add("ink")
     return selected
 
 
@@ -302,6 +316,7 @@ def _service_selected_services(service_text: str) -> set[str]:
             ("--llm", "llm"),
             ("--vllm", "vllm"),
             ("--docs", "docs"),
+            ("--ink", "ink"),
         )
         if flag in service_text
     }
@@ -315,6 +330,7 @@ def _installed_service_supports_request(
     llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
 ) -> bool:
     service_file = _service_file(host)
     if not service_file.exists():
@@ -324,7 +340,7 @@ def _installed_service_supports_request(
     except OSError:
         return False
     requested = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
     )
     installed = _service_selected_services(service_text)
     return requested.issubset(installed)
@@ -395,6 +411,7 @@ def _run_service_supervisor(
     llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
 ) -> None:
     stop_requested = False
     child: subprocess.Popen | None = None
@@ -416,6 +433,7 @@ def _run_service_supervisor(
                 llm_only,
                 vllm_only,
                 docs_only,
+                ink_only,
                 emit_status=False,
             )
             if not ports:
@@ -460,6 +478,7 @@ def _run_service_supervisor(
                     llm_only,
                     vllm_only,
                     docs_only,
+                    ink_only,
                     emit_status=False,
                 )
                 latest_signature = tuple(
@@ -479,6 +498,7 @@ def _build_systemd_service_content(
     llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
 ) -> str:
     uv = shutil.which("uv")
     if not uv:
@@ -495,10 +515,12 @@ def _build_systemd_service_content(
         flag_args.append("--vllm")
     if docs_only:
         flag_args.append("--docs")
+    if ink_only:
+        flag_args.append("--ink")
     flags = " ".join(flag_args)
 
     services = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
     )
     manifest_line = SERVICE_MANIFEST_PREFIX + " ".join(sorted(services))
 
@@ -730,6 +752,7 @@ def tunnel() -> None:
       imas-codex tunnel start HOST --llm     Just LLM proxy port
       imas-codex tunnel start HOST --vllm    Just vLLM inference port
       imas-codex tunnel start HOST --docs    Just docs-server port
+      imas-codex tunnel start HOST --ink     Just ink display port
       imas-codex tunnel start HOST --keyring D-Bus socket for keyring
       imas-codex tunnel stop [HOST]          Stop tunnels
       imas-codex tunnel status               Show active tunnels
@@ -748,6 +771,7 @@ def tunnel() -> None:
     "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
 )
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
+@click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 @click.option(
     "--keyring",
     "keyring_only",
@@ -761,6 +785,7 @@ def tunnel_start(
     llm_only: bool = False,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
     keyring_only: bool = False,
 ) -> None:
     """Start SSH tunnels to remote services.
@@ -781,6 +806,7 @@ def tunnel_start(
       imas-codex tunnel start iter --llm     # Just LLM proxy
       imas-codex tunnel start iter --vllm    # Just vLLM inference
       imas-codex tunnel start iter --docs    # Just docs-server
+      imas-codex tunnel start iter --ink     # Just ink display
       imas-codex tunnel start iter --keyring # D-Bus for keyring
     """
     target = _resolve_host(host)
@@ -793,6 +819,7 @@ def tunnel_start(
             llm_only,
             vllm_only,
             docs_only,
+            ink_only,
         )
         and not keyring_only
     ):
@@ -827,7 +854,7 @@ def tunnel_start(
         )
 
     ports = _get_tunnel_ports(
-        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only
+        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
     )
     ok = _start_tunnels(target, ports, use_autossh)
 
@@ -911,6 +938,7 @@ def tunnel_status() -> None:
     from imas_codex.settings import (
         get_docs_server_port,
         get_embed_server_port,
+        get_ink_display_port,
         get_llm_proxy_port,
         get_vllm_port,
     )
@@ -919,6 +947,7 @@ def tunnel_status() -> None:
     llm_port = get_llm_proxy_port()
     vllm_port = get_vllm_port()
     docs_port = get_docs_server_port()
+    ink_port = get_ink_display_port()
 
     # Build port→label map using the same resolution as tunnel_start
     # so that labels match (graph name "codex", not location "iter").
@@ -947,6 +976,7 @@ def tunnel_status() -> None:
     known_ports[llm_port] = "llm"
     known_ports[vllm_port] = "vllm"
     known_ports[docs_port] = "docs"
+    known_ports[ink_port] = "ink"
 
     # Build port→location map for SSH-forwarded ports so we can show
     # "iter" (or whichever host) instead of a generic "(ssh)" marker.
@@ -958,8 +988,8 @@ def tunnel_status() -> None:
                 port_host[p] = host
         # Same-port forwards (no TUNNEL_OFFSET offset) — embed, llm, vllm
         # already land above TUNNEL_OFFSET (e.g. 18765, 18400), but docs
-        # lives at 8765 by default and would fall through to "(ssh)".
-        for p in (embed_port, llm_port, vllm_port, docs_port):
+        # and ink live at 8765/8766 by default and would fall through to "(ssh)".
+        for p in (embed_port, llm_port, vllm_port, docs_port, ink_port):
             port_host[p] = host
     except Exception:
         pass
@@ -1026,6 +1056,7 @@ def tunnel_status() -> None:
     "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
 )
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
+@click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 def tunnel_service(
     action: str,
     host: str | None,
@@ -1034,6 +1065,7 @@ def tunnel_service(
     llm_only: bool = False,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
 ) -> None:
     """Manage persistent SSH tunnels via systemd + autossh.
 
@@ -1049,6 +1081,7 @@ def tunnel_service(
       imas-codex tunnel service install iter --llm   # Just LLM proxy
       imas-codex tunnel service install iter --vllm  # Just vLLM inference
       imas-codex tunnel service install iter --docs  # Just docs-server
+      imas-codex tunnel service install iter --ink   # Just ink display
       imas-codex tunnel service start iter
       imas-codex tunnel service status iter
       imas-codex tunnel service logs iter
@@ -1072,7 +1105,7 @@ def tunnel_service(
             )
 
         ports = _get_tunnel_ports(
-            target, neo4j_only, embed_only, llm_only, vllm_only, docs_only
+            target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
         )
         if not ports:
             raise click.ClickException("No services selected for tunneling.")
@@ -1085,6 +1118,7 @@ def tunnel_service(
             llm_only,
             vllm_only,
             docs_only,
+            ink_only,
         )
         service_dir.mkdir(parents=True, exist_ok=True)
         service_file.write_text(service_content)
@@ -1170,6 +1204,7 @@ def tunnel_service(
     "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
 )
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
+@click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 def tunnel_service_run(
     host: str | None,
     neo4j_only: bool,
@@ -1177,9 +1212,10 @@ def tunnel_service_run(
     llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
+    ink_only: bool = False,
 ) -> None:
     """Run the persistent systemd tunnel supervisor in the foreground."""
     target = _resolve_host(host)
     _run_service_supervisor(
-        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only
+        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
     )
