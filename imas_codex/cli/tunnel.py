@@ -105,7 +105,6 @@ def _resolve_host(host: str | None) -> str:
     )
 
 
-
 def _get_tunnel_ports(
     host: str,
     neo4j: bool,
@@ -114,7 +113,7 @@ def _get_tunnel_ports(
     vllm: bool = False,
     docs: bool = False,
     ink: bool = False,
-    lemonade: bool = False,
+    clipboard: bool = False,
     *,
     emit_status: bool = True,
 ) -> list[tuple[int, int, str, str, str]]:
@@ -138,7 +137,7 @@ def _get_tunnel_ports(
         and not vllm
         and not docs
         and not ink
-        and not lemonade
+        and not clipboard
     )
 
     # Discover SLURM compute node if any service uses a compute location.
@@ -250,18 +249,12 @@ def _get_tunnel_ports(
         # ink display server runs on the login node (uv run efit-ink)
         ports.append((ink_port, ink_port, "ink", "127.0.0.1", "L"))
 
-    if lemonade or all_services:
-        from imas_codex.settings import get_lemonade_port, get_wsl_clip_port
-
-        lemon_port = get_lemonade_port()
-        # lemonade: text clipboard relay (lemonade.exe server on Windows,
-        # accessible via WSL2 localhost forwarding).
-        ports.append((lemon_port, lemon_port, "lemonade", "localhost", "R"))
+    if clipboard or all_services:
+        from imas_codex.settings import get_wsl_clip_port
 
         clip_port = get_wsl_clip_port()
-        # wsl-clip-server: image + text clipboard HTTP relay running on WSL.
-        # Uses powershell.exe to read Windows clipboard so it handles binary
-        # image data that lemonade cannot.  paste-img on iter uses this port.
+        # wsl-clip-server: image + text clipboard HTTP relay on WSL.
+        # paste-img on iter POSTs the path back via /copy to return it to Windows clipboard.
         ports.append((clip_port, clip_port, "wsl-clip", "localhost", "R"))
 
     return ports
@@ -286,7 +279,7 @@ def _requested_services(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
 ) -> set[str]:
     if (
         not neo4j_only
@@ -295,9 +288,9 @@ def _requested_services(
         and not vllm_only
         and not docs_only
         and not ink_only
-        and not lemonade_only
+        and not clipboard_only
     ):
-        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "lemonade", "wsl-clip"}
+        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "wsl-clip"}
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
@@ -311,8 +304,8 @@ def _requested_services(
         selected.add("docs")
     if ink_only:
         selected.add("ink")
-    if lemonade_only:
-        selected.add("lemonade")
+    if clipboard_only:
+        selected.add("wsl-clip")
     return selected
 
 
@@ -349,7 +342,7 @@ def _service_selected_services(service_text: str) -> set[str]:
             ("--vllm", "vllm"),
             ("--docs", "docs"),
             ("--ink", "ink"),
-            ("--lemonade", "lemonade"),
+            ("--clipboard", "wsl-clip"),
         )
         if flag in service_text
     }
@@ -364,7 +357,7 @@ def _installed_service_supports_request(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
 ) -> bool:
     service_file = _service_file(host)
     if not service_file.exists():
@@ -374,7 +367,7 @@ def _installed_service_supports_request(
     except OSError:
         return False
     requested = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, clipboard_only
     )
     installed = _service_selected_services(service_text)
     return requested.issubset(installed)
@@ -452,7 +445,7 @@ def _run_service_supervisor(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
 ) -> None:
     stop_requested = False
     child: subprocess.Popen | None = None
@@ -475,7 +468,7 @@ def _run_service_supervisor(
                 vllm_only,
                 docs_only,
                 ink_only,
-                lemonade_only,
+                clipboard_only,
                 emit_status=False,
             )
             if not ports:
@@ -521,7 +514,7 @@ def _run_service_supervisor(
                     vllm_only,
                     docs_only,
                     ink_only,
-                    lemonade_only,
+                    clipboard_only,
                     emit_status=False,
                 )
                 latest_signature = tuple(
@@ -542,7 +535,7 @@ def _build_systemd_service_content(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
 ) -> str:
     uv = shutil.which("uv")
     if not uv:
@@ -561,12 +554,12 @@ def _build_systemd_service_content(
         flag_args.append("--docs")
     if ink_only:
         flag_args.append("--ink")
-    if lemonade_only:
-        flag_args.append("--lemonade")
+    if clipboard_only:
+        flag_args.append("--clipboard")
     flags = " ".join(flag_args)
 
     services = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, clipboard_only
     )
     manifest_line = SERVICE_MANIFEST_PREFIX + " ".join(sorted(services))
 
@@ -804,7 +797,7 @@ def tunnel() -> None:
       imas-codex tunnel start HOST --vllm      Just vLLM inference port
       imas-codex tunnel start HOST --docs      Just docs-server port
       imas-codex tunnel start HOST --ink       Just ink display port
-      imas-codex tunnel start HOST --lemonade  Reverse clipboard tunnel (WSL→Windows)
+      imas-codex tunnel start HOST --clipboard  Reverse clipboard tunnel (WSL→Windows)
       imas-codex tunnel start HOST --keyring   D-Bus socket for keyring
       imas-codex tunnel stop [HOST]            Stop tunnels
       imas-codex tunnel status                 Show active tunnels
@@ -825,10 +818,10 @@ def tunnel() -> None:
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
 @click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 @click.option(
-    "--lemonade",
-    "lemonade_only",
+    "--clipboard",
+    "clipboard_only",
     is_flag=True,
-    help="Reverse-tunnel clipboard port (WSL→Windows lemonade server)",
+    help="Reverse-tunnel clipboard port (wsl-clip-server on WSL → Windows)",
 )
 @click.option(
     "--keyring",
@@ -844,7 +837,7 @@ def tunnel_start(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
     keyring_only: bool = False,
 ) -> None:
     """Start SSH tunnels to remote services.
@@ -853,10 +846,10 @@ def tunnel_start(
     falls back to plain ssh.  HOST defaults to the active graph profile's
     configured host.
 
-    The --lemonade flag adds a reverse tunnel (-R 2489) so that
-    ``lemonade paste`` on the remote host reads from the Windows clipboard
-    via the lemonade server running on Windows.  Requires ``lemonade.exe
-    server`` to be running on Windows before SSH is established.
+    The --clipboard flag adds a reverse tunnel (-R 2490) so that
+    ``curl localhost:2490/paste`` on the remote host reads the Windows clipboard
+    via wsl-clip-server running on WSL.  Also supports POST /copy to write
+    text back to the Windows clipboard.
 
     The --keyring flag forwards the D-Bus socket from HOST to the local
     machine, enabling keyring access on SLURM compute nodes that lack
@@ -871,7 +864,7 @@ def tunnel_start(
       imas-codex tunnel start iter --vllm      # Just vLLM inference
       imas-codex tunnel start iter --docs      # Just docs-server
       imas-codex tunnel start iter --ink       # Just ink display
-      imas-codex tunnel start iter --lemonade  # Clipboard reverse tunnel
+      imas-codex tunnel start iter --clipboard # Clipboard reverse tunnel
       imas-codex tunnel start iter --keyring   # D-Bus for keyring
     """
     target = _resolve_host(host)
@@ -885,7 +878,7 @@ def tunnel_start(
             vllm_only,
             docs_only,
             ink_only,
-            lemonade_only,
+            clipboard_only,
         )
         and not keyring_only
     ):
@@ -920,7 +913,14 @@ def tunnel_start(
         )
 
     ports = _get_tunnel_ports(
-        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
+        target,
+        neo4j_only,
+        embed_only,
+        llm_only,
+        vllm_only,
+        docs_only,
+        ink_only,
+        clipboard_only,
     )
     ok = _start_tunnels(target, ports, use_autossh)
 
@@ -1005,9 +1005,9 @@ def tunnel_status() -> None:
         get_docs_server_port,
         get_embed_server_port,
         get_ink_display_port,
-        get_lemonade_port,
         get_llm_proxy_port,
         get_vllm_port,
+        get_wsl_clip_port,
     )
 
     embed_port = get_embed_server_port()
@@ -1015,7 +1015,7 @@ def tunnel_status() -> None:
     vllm_port = get_vllm_port()
     docs_port = get_docs_server_port()
     ink_port = get_ink_display_port()
-    lemonade_port = get_lemonade_port()
+    wsl_clip_port = get_wsl_clip_port()
 
     # Build port→label map using the same resolution as tunnel_start
     # so that labels match (graph name "codex", not location "iter").
@@ -1045,10 +1045,8 @@ def tunnel_status() -> None:
     known_ports[vllm_port] = "vllm"
     known_ports[docs_port] = "docs"
     known_ports[ink_port] = "ink"
-    # Lemonade is a reverse tunnel — bound on the remote (iter) side, not locally.
-    # We still surface it in the status map so the user sees it if it happens
-    # to be forwarded into the local namespace for any reason.
-    known_ports[lemonade_port] = "lemonade (reverse)"
+    # wsl-clip-server is a reverse tunnel — bound on the remote (iter) side.
+    known_ports[wsl_clip_port] = "wsl-clip (reverse)"
 
     # Build port→location map for SSH-forwarded ports so we can show
     # "iter" (or whichever host) instead of a generic "(ssh)" marker.
@@ -1061,7 +1059,7 @@ def tunnel_status() -> None:
         # Same-port forwards (no TUNNEL_OFFSET offset) — embed, llm, vllm
         # already land above TUNNEL_OFFSET (e.g. 18765, 18400), but docs
         # and ink live at 8765/8766 by default and would fall through to "(ssh)".
-        for p in (embed_port, llm_port, vllm_port, docs_port, ink_port, lemonade_port):
+        for p in (embed_port, llm_port, vllm_port, docs_port, ink_port, wsl_clip_port):
             port_host[p] = host
     except Exception:
         pass
@@ -1130,10 +1128,10 @@ def tunnel_status() -> None:
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
 @click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 @click.option(
-    "--lemonade",
-    "lemonade_only",
+    "--clipboard",
+    "clipboard_only",
     is_flag=True,
-    help="Reverse-tunnel clipboard port (WSL→Windows lemonade server)",
+    help="Reverse-tunnel clipboard port (wsl-clip-server on WSL → Windows)",
 )
 def tunnel_service(
     action: str,
@@ -1144,13 +1142,13 @@ def tunnel_service(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
 ) -> None:
     """Manage persistent SSH tunnels via systemd + autossh.
 
     Installs a systemd user service that maintains reconnecting SSH
     tunnels to the specified HOST for Neo4j, embedding, LLM, vLLM,
-    docs-server, and/or lemonade clipboard services.
+    docs-server, and/or wsl-clip-server clipboard services.
 
     \b
     Examples:
@@ -1161,7 +1159,7 @@ def tunnel_service(
       imas-codex tunnel service install iter --vllm    # Just vLLM inference
       imas-codex tunnel service install iter --docs    # Just docs-server
       imas-codex tunnel service install iter --ink     # Just ink display
-      imas-codex tunnel service install iter --lemonade # Clipboard reverse tunnel
+      imas-codex tunnel service install iter --clipboard # Clipboard reverse tunnel
       imas-codex tunnel service start iter
       imas-codex tunnel service status iter
       imas-codex tunnel service logs iter
@@ -1185,7 +1183,14 @@ def tunnel_service(
             )
 
         ports = _get_tunnel_ports(
-            target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
+            target,
+            neo4j_only,
+            embed_only,
+            llm_only,
+            vllm_only,
+            docs_only,
+            ink_only,
+            clipboard_only,
         )
         if not ports:
             raise click.ClickException("No services selected for tunneling.")
@@ -1199,7 +1204,7 @@ def tunnel_service(
             vllm_only,
             docs_only,
             ink_only,
-            lemonade_only,
+            clipboard_only,
         )
         service_dir.mkdir(parents=True, exist_ok=True)
         service_file.write_text(service_content)
@@ -1292,8 +1297,8 @@ def tunnel_service(
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
 @click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 @click.option(
-    "--lemonade",
-    "lemonade_only",
+    "--clipboard",
+    "clipboard_only",
     is_flag=True,
     help="Reverse-tunnel clipboard port",
 )
@@ -1305,10 +1310,17 @@ def tunnel_service_run(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
-    lemonade_only: bool = False,
+    clipboard_only: bool = False,
 ) -> None:
     """Run the persistent systemd tunnel supervisor in the foreground."""
     target = _resolve_host(host)
     _run_service_supervisor(
-        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
+        target,
+        neo4j_only,
+        embed_only,
+        llm_only,
+        vllm_only,
+        docs_only,
+        ink_only,
+        clipboard_only,
     )
