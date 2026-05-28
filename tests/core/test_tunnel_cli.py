@@ -83,7 +83,7 @@ class TestTunnelServiceHelpers:
             docs=True,
             emit_status=False,
         )
-        assert ports == [(8765, 8765, "docs", "127.0.0.1")]
+        assert ports == [(8765, 8765, "docs", "127.0.0.1", "L")]
 
     def test_installed_service_rejects_docs_when_absent(self, tmp_path):
         service_file = tmp_path / "imas-codex-tunnel-iter.service"
@@ -123,7 +123,7 @@ class TestTunnelServiceHelpers:
                 docs_only=True,
             )
 
-        assert SERVICE_MANIFEST_PREFIX + "docs embed llm neo4j vllm" in all_content
+        assert SERVICE_MANIFEST_PREFIX + "docs embed ink lemonade llm neo4j vllm" in all_content
         assert SERVICE_MANIFEST_PREFIX + "docs neo4j" in subset_content
 
     def test_service_selected_services_reads_manifest(self):

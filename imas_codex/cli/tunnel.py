@@ -105,6 +105,40 @@ def _resolve_host(host: str | None) -> str:
     )
 
 
+def _get_wsl_windows_host_ip() -> str:
+    """Detect the Windows host IP from inside WSL2.
+
+    In WSL2 (NAT mode) Windows is reachable via the default gateway.
+    Returns the gateway IP, or ``"localhost"`` when not running in WSL
+    or detection fails.
+    """
+    try:
+        version = Path("/proc/version").read_text()
+        if "microsoft" not in version.lower():
+            return "localhost"
+    except OSError:
+        return "localhost"
+
+    try:
+        result = subprocess.run(
+            ["ip", "route", "show", "default"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            for line in result.stdout.splitlines():
+                parts = line.split()
+                if "via" in parts:
+                    idx = parts.index("via")
+                    if idx + 1 < len(parts):
+                        return parts[idx + 1]
+    except Exception:
+        pass
+
+    return "localhost"
+
+
 def _get_tunnel_ports(
     host: str,
     neo4j: bool,
@@ -113,22 +147,31 @@ def _get_tunnel_ports(
     vllm: bool = False,
     docs: bool = False,
     ink: bool = False,
+    lemonade: bool = False,
     *,
     emit_status: bool = True,
-) -> list[tuple[int, int, str, str]]:
-    """Return list of (remote_port, local_port, label, remote_bind) for requested services.
+) -> list[tuple[int, int, str, str, str]]:
+    """Return list of (remote_port, local_port, label, bind_addr, direction) for requested services.
+
+    ``direction`` is ``"L"`` for a forward tunnel (``-L local:bind:remote``) or
+    ``"R"`` for a reverse tunnel (``-R remote:bind:local``).  For forward tunnels
+    ``bind_addr`` is the host on the remote side; for reverse tunnels it is the
+    address on the local (SSH-client) side that the remote port is forwarded to.
 
     When no service flag is given, returns all known ports.
-    ``remote_bind`` is the hostname to bind on the remote side of the tunnel
-    (default ``"127.0.0.1"``).  When services run on a SLURM compute node,
-    ``remote_bind`` is set to that node's hostname so the tunnel forwards
-    ``local_port → compute_node:remote_port`` through the SSH jump host.
+    For SLURM-backed services, ``bind_addr`` is set to the compute node hostname.
     """
     from imas_codex.remote.tunnel import TUNNEL_OFFSET
 
-    ports: list[tuple[int, int, str, str]] = []
+    ports: list[tuple[int, int, str, str, str]] = []
     all_services = (
-        not neo4j and not embed and not llm and not vllm and not docs and not ink
+        not neo4j
+        and not embed
+        and not llm
+        and not vllm
+        and not docs
+        and not ink
+        and not lemonade
     )
 
     # Discover SLURM compute node if any service uses a compute location.
@@ -159,6 +202,7 @@ def _get_tunnel_ports(
                     profile.bolt_port + TUNNEL_OFFSET,
                     f"neo4j-bolt ({profile.name})",
                     bind,
+                    "L",
                 )
             )
             ports.append(
@@ -167,6 +211,7 @@ def _get_tunnel_ports(
                     profile.http_port + TUNNEL_OFFSET,
                     f"neo4j-http ({profile.name})",
                     bind,
+                    "L",
                 )
             )
         except Exception:
@@ -180,6 +225,7 @@ def _get_tunnel_ports(
                     BOLT_BASE_PORT + TUNNEL_OFFSET,
                     "neo4j-bolt",
                     bind,
+                    "L",
                 )
             )
             ports.append(
@@ -188,6 +234,7 @@ def _get_tunnel_ports(
                     HTTP_BASE_PORT + TUNNEL_OFFSET,
                     "neo4j-http",
                     bind,
+                    "L",
                 )
             )
 
@@ -199,14 +246,14 @@ def _get_tunnel_ports(
         # Otherwise fall back to localhost (embed on login node).
         remote_bind = compute_node or "127.0.0.1"
         # Embed uses same-port forwarding (no offset)
-        ports.append((embed_port, embed_port, "embed", remote_bind))
+        ports.append((embed_port, embed_port, "embed", remote_bind, "L"))
 
     if llm or all_services:
         from imas_codex.settings import get_llm_proxy_port
 
         llm_port = get_llm_proxy_port()
         # LLM proxy runs on login node (needs outbound internet)
-        ports.append((llm_port, llm_port, "llm", "127.0.0.1"))
+        ports.append((llm_port, llm_port, "llm", "127.0.0.1", "L"))
 
     if vllm or all_services:
         from imas_codex.settings import get_vllm_port
@@ -214,7 +261,7 @@ def _get_tunnel_ports(
         vllm_port = get_vllm_port()
         vllm_node = _discover_vllm_node(host)
         if vllm_node:
-            ports.append((vllm_port, vllm_port, "vllm", vllm_node))
+            ports.append((vllm_port, vllm_port, "vllm", vllm_node, "L"))
         elif vllm and not all_services:
             # Explicit --vllm with no running job — fail clearly
             click.echo(
@@ -227,14 +274,24 @@ def _get_tunnel_ports(
 
         docs_port = get_docs_server_port()
         # docs-server runs on the login node (~/docs-server/serve.py)
-        ports.append((docs_port, docs_port, "docs", "127.0.0.1"))
+        ports.append((docs_port, docs_port, "docs", "127.0.0.1", "L"))
 
     if ink or all_services:
         from imas_codex.settings import get_ink_display_port
 
         ink_port = get_ink_display_port()
         # ink display server runs on the login node (uv run efit-ink)
-        ports.append((ink_port, ink_port, "ink", "127.0.0.1"))
+        ports.append((ink_port, ink_port, "ink", "127.0.0.1", "L"))
+
+    if lemonade or all_services:
+        from imas_codex.settings import get_lemonade_port
+
+        lemon_port = get_lemonade_port()
+        # Reverse tunnel: bind port on remote (iter), forward back to Windows.
+        # bind_addr here is the local (SSH-client-side) address where lemonade
+        # server is accessible — the Windows host reachable from WSL2.
+        windows_ip = _get_wsl_windows_host_ip()
+        ports.append((lemon_port, lemon_port, "lemonade", windows_ip, "R"))
 
     return ports
 
@@ -258,6 +315,7 @@ def _requested_services(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
 ) -> set[str]:
     if (
         not neo4j_only
@@ -266,8 +324,9 @@ def _requested_services(
         and not vllm_only
         and not docs_only
         and not ink_only
+        and not lemonade_only
     ):
-        return {"neo4j", "embed", "llm", "vllm", "docs", "ink"}
+        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "lemonade"}
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
@@ -281,6 +340,8 @@ def _requested_services(
         selected.add("docs")
     if ink_only:
         selected.add("ink")
+    if lemonade_only:
+        selected.add("lemonade")
     return selected
 
 
@@ -317,6 +378,7 @@ def _service_selected_services(service_text: str) -> set[str]:
             ("--vllm", "vllm"),
             ("--docs", "docs"),
             ("--ink", "ink"),
+            ("--lemonade", "lemonade"),
         )
         if flag in service_text
     }
@@ -331,6 +393,7 @@ def _installed_service_supports_request(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
 ) -> bool:
     service_file = _service_file(host)
     if not service_file.exists():
@@ -340,7 +403,7 @@ def _installed_service_supports_request(
     except OSError:
         return False
     requested = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
     )
     installed = _service_selected_services(service_text)
     return requested.issubset(installed)
@@ -359,7 +422,7 @@ def _run_systemctl_user(
 
 def _build_foreground_tunnel_command(
     host: str,
-    ports: list[tuple[int, int, str, str]],
+    ports: list[tuple[int, int, str, str, str]],
 ) -> tuple[list[str], dict[str, str]]:
     autossh = shutil.which("autossh")
     if not autossh:
@@ -370,8 +433,14 @@ def _build_foreground_tunnel_command(
     from imas_codex.remote.tunnel import SSH_TUNNEL_OPTS
 
     forward_args: list[str] = []
-    for remote_port, local_port, _label, remote_bind in ports:
-        forward_args.extend(["-L", f"{local_port}:{remote_bind}:{remote_port}"])
+    for remote_port, local_port, _label, bind_addr, direction in ports:
+        if direction == "R":
+            # Reverse tunnel: bind remote_port on the SSH server (iter),
+            # forward connections back to bind_addr:local_port on the client.
+            forward_args.extend(["-R", f"{remote_port}:{bind_addr}:{local_port}"])
+        else:
+            # Forward tunnel (default): expose remote service locally.
+            forward_args.extend(["-L", f"{local_port}:{bind_addr}:{remote_port}"])
 
     cmd = [
         autossh,
@@ -412,6 +481,7 @@ def _run_service_supervisor(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
 ) -> None:
     stop_requested = False
     child: subprocess.Popen | None = None
@@ -434,14 +504,15 @@ def _run_service_supervisor(
                 vllm_only,
                 docs_only,
                 ink_only,
+                lemonade_only,
                 emit_status=False,
             )
             if not ports:
                 raise click.ClickException("No services selected for tunneling.")
 
             signature = tuple(
-                (remote_port, local_port, remote_bind)
-                for remote_port, local_port, _label, remote_bind in ports
+                (remote_port, local_port, bind_addr)
+                for remote_port, local_port, _label, bind_addr, _dir in ports
             )
 
             if (
@@ -479,11 +550,12 @@ def _run_service_supervisor(
                     vllm_only,
                     docs_only,
                     ink_only,
+                    lemonade_only,
                     emit_status=False,
                 )
                 latest_signature = tuple(
-                    (remote_port, local_port, remote_bind)
-                    for remote_port, local_port, _label, remote_bind in latest_ports
+                    (remote_port, local_port, bind_addr)
+                    for remote_port, local_port, _label, bind_addr, _dir in latest_ports
                 )
                 if latest_signature != current_signature:
                     break
@@ -499,6 +571,7 @@ def _build_systemd_service_content(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
 ) -> str:
     uv = shutil.which("uv")
     if not uv:
@@ -517,10 +590,12 @@ def _build_systemd_service_content(
         flag_args.append("--docs")
     if ink_only:
         flag_args.append("--ink")
+    if lemonade_only:
+        flag_args.append("--lemonade")
     flags = " ".join(flag_args)
 
     services = _requested_services(
-        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
+        neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
     )
     manifest_line = SERVICE_MANIFEST_PREFIX + " ".join(sorted(services))
 
@@ -566,14 +641,15 @@ WantedBy=default.target
 
 def _start_tunnels(
     host: str,
-    ports: list[tuple[int, int, str, str]],
+    ports: list[tuple[int, int, str, str, str]],
     use_autossh: bool,
 ) -> int:
     """Start port-forward tunnels in a single SSH connection.
 
-    All requested forwards are passed as multiple ``-L`` flags to one
+    All requested forwards are passed as ``-L`` or ``-R`` flags to one
     ``autossh``/``ssh`` process so there is only one ProxyJump negotiation.
-    Ports that are already bound locally are skipped and reported.
+    Forward tunnels (``-L``) whose local port is already bound are skipped.
+    Reverse tunnels (``-R``) are always included (cannot check remote bind).
 
     Returns the number of active tunnels (including pre-existing ones).
     """
@@ -582,13 +658,13 @@ def _start_tunnels(
     from imas_codex.remote.tunnel import is_tunnel_active
 
     already_active: list[tuple[int, str]] = []
-    to_start: list[tuple[int, int, str, str]] = []
+    to_start: list[tuple[int, int, str, str, str]] = []
 
-    for remote_port, local_port, label, remote_bind in ports:
-        if is_tunnel_active(local_port):
+    for remote_port, local_port, label, bind_addr, direction in ports:
+        if direction == "L" and is_tunnel_active(local_port):
             already_active.append((local_port, label))
         else:
-            to_start.append((remote_port, local_port, label, remote_bind))
+            to_start.append((remote_port, local_port, label, bind_addr, direction))
 
     for local_port, label in already_active:
         click.echo(f"  {label}: already active (localhost:{local_port})")
@@ -596,10 +672,13 @@ def _start_tunnels(
     if not to_start:
         return len(already_active)
 
-    # Build -L flags for all ports that need tunneling
+    # Build -L / -R flags for all ports that need tunneling
     forward_args: list[str] = []
-    for remote_port, local_port, _label, remote_bind in to_start:
-        forward_args.extend(["-L", f"{local_port}:{remote_bind}:{remote_port}"])
+    for remote_port, local_port, _label, bind_addr, direction in to_start:
+        if direction == "R":
+            forward_args.extend(["-R", f"{remote_port}:{bind_addr}:{local_port}"])
+        else:
+            forward_args.extend(["-L", f"{local_port}:{bind_addr}:{remote_port}"])
 
     # Use shared SSH options from tunnel module (keepalives, no ControlMaster)
     from imas_codex.remote.tunnel import SSH_TUNNEL_OPTS
@@ -641,20 +720,17 @@ def _start_tunnels(
         return len(already_active)
 
     # Record the autossh/ssh PID for targeted cleanup later.
-    # autossh -f / ssh -f fork into the background, so we find the PID
-    # by matching our specific -L forward pattern.
     _record_tunnel_pid(host, to_start[0][1])
 
-    # Wait for the forked ssh to bind the ports.
-    # ssh -f forks AFTER connection + forwarding setup, so ports
-    # should be available quickly.  Retry to account for slow auth.
+    # Wait for forward tunnels to bind. Reverse tunnels bind on the remote
+    # side so we can't check them locally; count them as successful.
     time.sleep(0.5)
     new_ok = 0
     for _attempt in range(5):
         new_ok = 0
         all_up = True
-        for _remote_port, local_port, _label, _remote_bind in to_start:
-            if is_tunnel_active(local_port):
+        for _remote_port, local_port, _label, _bind_addr, direction in to_start:
+            if direction == "R" or is_tunnel_active(local_port):
                 new_ok += 1
             else:
                 all_up = False
@@ -662,10 +738,14 @@ def _start_tunnels(
             break
         time.sleep(1.0)
 
-    for remote_port, local_port, label, remote_bind in to_start:
-        if is_tunnel_active(local_port):
+    for remote_port, local_port, label, bind_addr, direction in to_start:
+        if direction == "R":
             click.echo(
-                f"  {label}: localhost:{local_port} → {host}→{remote_bind}:{remote_port}"
+                f"  {label}: {host}:{remote_port} ← {bind_addr}:{local_port} (reverse)"
+            )
+        elif is_tunnel_active(local_port):
+            click.echo(
+                f"  {label}: localhost:{local_port} → {host}→{bind_addr}:{remote_port}"
             )
         else:
             click.echo(f"  {label}: FAILED (port {local_port} not reachable)")
@@ -746,18 +826,19 @@ def tunnel() -> None:
     for transparent access from your workstation.
 
     \b
-      imas-codex tunnel start [HOST]         Start tunnels (all services)
-      imas-codex tunnel start HOST --neo4j   Just graph ports
-      imas-codex tunnel start HOST --embed   Just embedding port
-      imas-codex tunnel start HOST --llm     Just LLM proxy port
-      imas-codex tunnel start HOST --vllm    Just vLLM inference port
-      imas-codex tunnel start HOST --docs    Just docs-server port
-      imas-codex tunnel start HOST --ink     Just ink display port
-      imas-codex tunnel start HOST --keyring D-Bus socket for keyring
-      imas-codex tunnel stop [HOST]          Stop tunnels
-      imas-codex tunnel status               Show active tunnels
-      imas-codex tunnel keyring HOST         Forward keyring D-Bus socket
-      imas-codex tunnel service install      Persistent autossh via systemd
+      imas-codex tunnel start [HOST]           Start tunnels (all services)
+      imas-codex tunnel start HOST --neo4j     Just graph ports
+      imas-codex tunnel start HOST --embed     Just embedding port
+      imas-codex tunnel start HOST --llm       Just LLM proxy port
+      imas-codex tunnel start HOST --vllm      Just vLLM inference port
+      imas-codex tunnel start HOST --docs      Just docs-server port
+      imas-codex tunnel start HOST --ink       Just ink display port
+      imas-codex tunnel start HOST --lemonade  Reverse clipboard tunnel (WSL→Windows)
+      imas-codex tunnel start HOST --keyring   D-Bus socket for keyring
+      imas-codex tunnel stop [HOST]            Stop tunnels
+      imas-codex tunnel status                 Show active tunnels
+      imas-codex tunnel keyring HOST           Forward keyring D-Bus socket
+      imas-codex tunnel service install        Persistent autossh via systemd
     """
     pass
 
@@ -773,6 +854,12 @@ def tunnel() -> None:
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
 @click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
 @click.option(
+    "--lemonade",
+    "lemonade_only",
+    is_flag=True,
+    help="Reverse-tunnel clipboard port (WSL→Windows lemonade server)",
+)
+@click.option(
     "--keyring",
     "keyring_only",
     is_flag=True,
@@ -786,6 +873,7 @@ def tunnel_start(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
     keyring_only: bool = False,
 ) -> None:
     """Start SSH tunnels to remote services.
@@ -794,20 +882,26 @@ def tunnel_start(
     falls back to plain ssh.  HOST defaults to the active graph profile's
     configured host.
 
+    The --lemonade flag adds a reverse tunnel (-R 2489) so that
+    ``lemonade paste`` on the remote host reads from the Windows clipboard
+    via the lemonade server running on Windows.  Requires ``lemonade.exe
+    server`` to be running on Windows before SSH is established.
+
     The --keyring flag forwards the D-Bus socket from HOST to the local
     machine, enabling keyring access on SLURM compute nodes that lack
     their own SecretService daemon.
 
     \b
     Examples:
-      imas-codex tunnel start iter           # All services
-      imas-codex tunnel start iter --neo4j   # Just graph
-      imas-codex tunnel start iter --embed   # Just embedding
-      imas-codex tunnel start iter --llm     # Just LLM proxy
-      imas-codex tunnel start iter --vllm    # Just vLLM inference
-      imas-codex tunnel start iter --docs    # Just docs-server
-      imas-codex tunnel start iter --ink     # Just ink display
-      imas-codex tunnel start iter --keyring # D-Bus for keyring
+      imas-codex tunnel start iter             # All services
+      imas-codex tunnel start iter --neo4j     # Just graph
+      imas-codex tunnel start iter --embed     # Just embedding
+      imas-codex tunnel start iter --llm       # Just LLM proxy
+      imas-codex tunnel start iter --vllm      # Just vLLM inference
+      imas-codex tunnel start iter --docs      # Just docs-server
+      imas-codex tunnel start iter --ink       # Just ink display
+      imas-codex tunnel start iter --lemonade  # Clipboard reverse tunnel
+      imas-codex tunnel start iter --keyring   # D-Bus for keyring
     """
     target = _resolve_host(host)
 
@@ -820,6 +914,7 @@ def tunnel_start(
             vllm_only,
             docs_only,
             ink_only,
+            lemonade_only,
         )
         and not keyring_only
     ):
@@ -854,7 +949,7 @@ def tunnel_start(
         )
 
     ports = _get_tunnel_ports(
-        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
+        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
     )
     ok = _start_tunnels(target, ports, use_autossh)
 
@@ -939,6 +1034,7 @@ def tunnel_status() -> None:
         get_docs_server_port,
         get_embed_server_port,
         get_ink_display_port,
+        get_lemonade_port,
         get_llm_proxy_port,
         get_vllm_port,
     )
@@ -948,6 +1044,7 @@ def tunnel_status() -> None:
     vllm_port = get_vllm_port()
     docs_port = get_docs_server_port()
     ink_port = get_ink_display_port()
+    lemonade_port = get_lemonade_port()
 
     # Build port→label map using the same resolution as tunnel_start
     # so that labels match (graph name "codex", not location "iter").
@@ -977,6 +1074,10 @@ def tunnel_status() -> None:
     known_ports[vllm_port] = "vllm"
     known_ports[docs_port] = "docs"
     known_ports[ink_port] = "ink"
+    # Lemonade is a reverse tunnel — bound on the remote (iter) side, not locally.
+    # We still surface it in the status map so the user sees it if it happens
+    # to be forwarded into the local namespace for any reason.
+    known_ports[lemonade_port] = "lemonade (reverse)"
 
     # Build port→location map for SSH-forwarded ports so we can show
     # "iter" (or whichever host) instead of a generic "(ssh)" marker.
@@ -989,7 +1090,7 @@ def tunnel_status() -> None:
         # Same-port forwards (no TUNNEL_OFFSET offset) — embed, llm, vllm
         # already land above TUNNEL_OFFSET (e.g. 18765, 18400), but docs
         # and ink live at 8765/8766 by default and would fall through to "(ssh)".
-        for p in (embed_port, llm_port, vllm_port, docs_port, ink_port):
+        for p in (embed_port, llm_port, vllm_port, docs_port, ink_port, lemonade_port):
             port_host[p] = host
     except Exception:
         pass
@@ -1057,6 +1158,12 @@ def tunnel_status() -> None:
 )
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
 @click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
+@click.option(
+    "--lemonade",
+    "lemonade_only",
+    is_flag=True,
+    help="Reverse-tunnel clipboard port (WSL→Windows lemonade server)",
+)
 def tunnel_service(
     action: str,
     host: str | None,
@@ -1066,22 +1173,24 @@ def tunnel_service(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
 ) -> None:
     """Manage persistent SSH tunnels via systemd + autossh.
 
     Installs a systemd user service that maintains reconnecting SSH
     tunnels to the specified HOST for Neo4j, embedding, LLM, vLLM,
-    and/or docs-server services.
+    docs-server, and/or lemonade clipboard services.
 
     \b
     Examples:
-      imas-codex tunnel service install iter         # All services
-      imas-codex tunnel service install iter --neo4j # Just graph
-      imas-codex tunnel service install iter --embed # Just embedding
-      imas-codex tunnel service install iter --llm   # Just LLM proxy
-      imas-codex tunnel service install iter --vllm  # Just vLLM inference
-      imas-codex tunnel service install iter --docs  # Just docs-server
-      imas-codex tunnel service install iter --ink   # Just ink display
+      imas-codex tunnel service install iter           # All services
+      imas-codex tunnel service install iter --neo4j   # Just graph
+      imas-codex tunnel service install iter --embed   # Just embedding
+      imas-codex tunnel service install iter --llm     # Just LLM proxy
+      imas-codex tunnel service install iter --vllm    # Just vLLM inference
+      imas-codex tunnel service install iter --docs    # Just docs-server
+      imas-codex tunnel service install iter --ink     # Just ink display
+      imas-codex tunnel service install iter --lemonade # Clipboard reverse tunnel
       imas-codex tunnel service start iter
       imas-codex tunnel service status iter
       imas-codex tunnel service logs iter
@@ -1105,7 +1214,7 @@ def tunnel_service(
             )
 
         ports = _get_tunnel_ports(
-            target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
+            target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
         )
         if not ports:
             raise click.ClickException("No services selected for tunneling.")
@@ -1119,6 +1228,7 @@ def tunnel_service(
             vllm_only,
             docs_only,
             ink_only,
+            lemonade_only,
         )
         service_dir.mkdir(parents=True, exist_ok=True)
         service_file.write_text(service_content)
@@ -1128,10 +1238,15 @@ def tunnel_service(
         click.echo(f"✓ Tunnel service installed: {service_name}")
         click.echo(f"  Host: {target}")
         click.echo("  Ports:")
-        for remote_port, local_port, label, remote_bind in ports:
-            click.echo(
-                f"    {label}: localhost:{local_port} → {remote_bind}:{remote_port}"
-            )
+        for remote_port, local_port, label, bind_addr, direction in ports:
+            if direction == "R":
+                click.echo(
+                    f"    {label}: {target}:{remote_port} ← {bind_addr}:{local_port} (reverse)"
+                )
+            else:
+                click.echo(
+                    f"    {label}: localhost:{local_port} → {bind_addr}:{remote_port}"
+                )
         click.echo(f"  Log: {log_dir / f'autossh-{target}.log'}")
         click.echo(f"  Service started: imas-codex tunnel service logs {target}")
 
@@ -1205,6 +1320,12 @@ def tunnel_service(
 )
 @click.option("--docs", "docs_only", is_flag=True, help="Tunnel docs-server port only")
 @click.option("--ink", "ink_only", is_flag=True, help="Tunnel ink display port only")
+@click.option(
+    "--lemonade",
+    "lemonade_only",
+    is_flag=True,
+    help="Reverse-tunnel clipboard port",
+)
 def tunnel_service_run(
     host: str | None,
     neo4j_only: bool,
@@ -1213,9 +1334,10 @@ def tunnel_service_run(
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
+    lemonade_only: bool = False,
 ) -> None:
     """Run the persistent systemd tunnel supervisor in the foreground."""
     target = _resolve_host(host)
     _run_service_supervisor(
-        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only
+        target, neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, lemonade_only
     )

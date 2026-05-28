@@ -451,6 +451,29 @@ def get_docs_server_port() -> int:
     return DOCS_SERVER_BASE_PORT
 
 
+# ─── lemonade clipboard relay settings ────────────────────────────────────
+
+LEMONADE_BASE_PORT = 2489
+
+
+def get_lemonade_port() -> int:
+    """Get the lemonade clipboard relay port.
+
+    Lemonade bridges the Windows clipboard to Linux over a reverse SSH tunnel
+    (``-R 2489:<windows_host_ip>:2489``).  The server (``lemonade.exe server``)
+    runs on Windows; ``lemonade paste`` on the remote Linux host connects to
+    this port.
+
+    Priority: IMAS_CODEX_LEMONADE_PORT env → [lemonade].port → 2489.
+    """
+    if env := os.getenv("IMAS_CODEX_LEMONADE_PORT"):
+        return int(env)
+    port = _get_section("lemonade").get("port")
+    if port:
+        return int(port)
+    return LEMONADE_BASE_PORT
+
+
 # ─── ink display server settings ───────────────────────────────────────────
 
 INK_DISPLAY_BASE_PORT = 8766
