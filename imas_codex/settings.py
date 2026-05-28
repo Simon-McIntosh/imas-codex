@@ -451,18 +451,17 @@ def get_docs_server_port() -> int:
     return DOCS_SERVER_BASE_PORT
 
 
-# ─── lemonade clipboard relay settings ────────────────────────────────────
+# ─── clipboard relay settings ─────────────────────────────────────────────
+# wsl-clip-server: Python HTTP server on WSL that extracts Windows clipboard
+# content (image or text) via powershell.exe and serves it over a reverse SSH
+# tunnel so iter can call `curl localhost:2490/paste`.
 
 LEMONADE_BASE_PORT = 2489
+WSL_CLIP_BASE_PORT = 2490
 
 
 def get_lemonade_port() -> int:
-    """Get the lemonade clipboard relay port.
-
-    Lemonade bridges the Windows clipboard to Linux over a reverse SSH tunnel
-    (``-R 2489:<windows_host_ip>:2489``).  The server (``lemonade.exe server``)
-    runs on Windows; ``lemonade paste`` on the remote Linux host connects to
-    this port.
+    """Get the lemonade text clipboard relay port (legacy, text-only).
 
     Priority: IMAS_CODEX_LEMONADE_PORT env → [lemonade].port → 2489.
     """
@@ -472,6 +471,19 @@ def get_lemonade_port() -> int:
     if port:
         return int(port)
     return LEMONADE_BASE_PORT
+
+
+def get_wsl_clip_port() -> int:
+    """Get the wsl-clip-server port (image + text clipboard, via powershell.exe).
+
+    Priority: IMAS_CODEX_WSL_CLIP_PORT env → [lemonade].clip_port → 2490.
+    """
+    if env := os.getenv("IMAS_CODEX_WSL_CLIP_PORT"):
+        return int(env)
+    port = _get_section("lemonade").get("clip_port")
+    if port:
+        return int(port)
+    return WSL_CLIP_BASE_PORT
 
 
 # ─── ink display server settings ───────────────────────────────────────────

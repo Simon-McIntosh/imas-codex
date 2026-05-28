@@ -123,7 +123,7 @@ class TestTunnelServiceHelpers:
                 docs_only=True,
             )
 
-        assert SERVICE_MANIFEST_PREFIX + "docs embed ink lemonade llm neo4j vllm" in all_content
+        assert SERVICE_MANIFEST_PREFIX + "docs embed ink lemonade llm neo4j vllm wsl-clip" in all_content
         assert SERVICE_MANIFEST_PREFIX + "docs neo4j" in subset_content
 
     def test_service_selected_services_reads_manifest(self):

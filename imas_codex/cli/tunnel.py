@@ -251,13 +251,18 @@ def _get_tunnel_ports(
         ports.append((ink_port, ink_port, "ink", "127.0.0.1", "L"))
 
     if lemonade or all_services:
-        from imas_codex.settings import get_lemonade_port
+        from imas_codex.settings import get_lemonade_port, get_wsl_clip_port
 
         lemon_port = get_lemonade_port()
-        # Reverse tunnel: iter:2489 → WSL localhost:2489 (wsl-clip-server).
-        # The clipboard server runs on WSL where powershell.exe reaches Windows
-        # clipboard directly — no Windows Firewall rules needed.
+        # lemonade: text clipboard relay (lemonade.exe server on Windows,
+        # accessible via WSL2 localhost forwarding).
         ports.append((lemon_port, lemon_port, "lemonade", "localhost", "R"))
+
+        clip_port = get_wsl_clip_port()
+        # wsl-clip-server: image + text clipboard HTTP relay running on WSL.
+        # Uses powershell.exe to read Windows clipboard so it handles binary
+        # image data that lemonade cannot.  paste-img on iter uses this port.
+        ports.append((clip_port, clip_port, "wsl-clip", "localhost", "R"))
 
     return ports
 
@@ -292,7 +297,7 @@ def _requested_services(
         and not ink_only
         and not lemonade_only
     ):
-        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "lemonade"}
+        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "lemonade", "wsl-clip"}
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
