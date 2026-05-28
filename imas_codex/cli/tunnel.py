@@ -105,39 +105,6 @@ def _resolve_host(host: str | None) -> str:
     )
 
 
-def _get_wsl_windows_host_ip() -> str:
-    """Detect the Windows host IP from inside WSL2.
-
-    In WSL2 (NAT mode) Windows is reachable via the default gateway.
-    Returns the gateway IP, or ``"localhost"`` when not running in WSL
-    or detection fails.
-    """
-    try:
-        version = Path("/proc/version").read_text()
-        if "microsoft" not in version.lower():
-            return "localhost"
-    except OSError:
-        return "localhost"
-
-    try:
-        result = subprocess.run(
-            ["ip", "route", "show", "default"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            for line in result.stdout.splitlines():
-                parts = line.split()
-                if "via" in parts:
-                    idx = parts.index("via")
-                    if idx + 1 < len(parts):
-                        return parts[idx + 1]
-    except Exception:
-        pass
-
-    return "localhost"
-
 
 def _get_tunnel_ports(
     host: str,
@@ -287,11 +254,10 @@ def _get_tunnel_ports(
         from imas_codex.settings import get_lemonade_port
 
         lemon_port = get_lemonade_port()
-        # Reverse tunnel: bind port on remote (iter), forward back to Windows.
-        # bind_addr here is the local (SSH-client-side) address where lemonade
-        # server is accessible — the Windows host reachable from WSL2.
-        windows_ip = _get_wsl_windows_host_ip()
-        ports.append((lemon_port, lemon_port, "lemonade", windows_ip, "R"))
+        # Reverse tunnel: iter:2489 → WSL localhost:2489 (wsl-clip-server).
+        # The clipboard server runs on WSL where powershell.exe reaches Windows
+        # clipboard directly — no Windows Firewall rules needed.
+        ports.append((lemon_port, lemon_port, "lemonade", "localhost", "R"))
 
     return ports
 
