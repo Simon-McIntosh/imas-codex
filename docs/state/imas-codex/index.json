@@ -1,14 +1,131 @@
 {
-  "updated": "2026-06-05T06:33:50",
+  "updated": "2026-06-05T11:24:00",
   "project": "imas-codex",
   "doc": "project",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": null,
-    "sprints": [],
+    "active_sprint_id": "S1",
+    "sprints": [
+      {
+        "id": "S1",
+        "theme": "SN foundation unblockers",
+        "description": "Close the highest-ROI grammar, bootstrap, and vocabulary blockers before wider search, benchmark, and catalog work.",
+        "summary": "Active first sprint. This wave establishes the stable SN foundation: architectural pivot closure, bootstrap quality gates, and closed physical-base vocabulary.",
+        "starts": "2026-06-05",
+        "ends": "2026-06-12",
+        "status": "active",
+        "items": [
+          {
+            "slug": "sn-architectural-pivot",
+            "tier": "opus",
+            "why_now": "Highest-ROI upstream blocker; it explicitly blocks sn-quality-bootstrap-v2 and sets the grammar/graph architecture for the rest of the SN roadmap.",
+            "done_when": "Phase D clean-slate rotation is proven and Phase E grammar-as-graph tail is either landed or explicitly carved out of closure criteria."
+          },
+          {
+            "slug": "sn-quality-bootstrap-v2",
+            "tier": "opus",
+            "why_now": "Follows directly from sn-architectural-pivot and gates downstream compose, search, and quality work.",
+            "done_when": "WS-A through WS-G are closed, rc14-quality gates are green, and the bootstrap rotation yields low quarantine, strong docs coverage, and a fresh review dump."
+          },
+          {
+            "slug": "sn-closed-physical-base",
+            "tier": "opus",
+            "why_now": "Stabilizes the grammar and vocabulary before broader export, parity, and search work.",
+            "done_when": "The ISN redesign lands, codex bumps to the new RC, bounded rotations converge, and export/preview shows clean grouping."
+          }
+        ]
+      },
+      {
+        "id": "S2",
+        "theme": "Search and compose enablement",
+        "description": "Land the search surface and fan-out execution path once the foundation sprint settles.",
+        "summary": "Dependency-aware second sprint: search migration first, then structured fan-out on top of stabilized extraction and bootstrap work.",
+        "starts": "2026-06-12",
+        "ends": "2026-06-19",
+        "status": "planned",
+        "items": [
+          {
+            "slug": "sn-search-facility",
+            "tier": "opus",
+            "why_now": "Already more than half landed and it explicitly blocks sn-structured-fanout.",
+            "done_when": "Phase 4 call-site migration is complete, temporary aliases are removed on schedule, and the seven-tool surface is backed by unified functions."
+          },
+          {
+            "slug": "sn-structured-fanout",
+            "tier": "opus",
+            "why_now": "Depends on sn-quality-bootstrap-v2, sn-search-facility, and sn-extraction-prompt-overhaul; it should start only after those surfaces stabilize.",
+            "done_when": "Phase 0 helper extraction plus Phase 1 refine-name fan-out, telemetry, and tests all land while preserving the baseline no-op fallback."
+          }
+        ]
+      },
+      {
+        "id": "S3",
+        "theme": "Quality gates and catalog ship path",
+        "description": "Close benchmark, catalog, and parity loops after the grammar and search foundations are in place.",
+        "summary": "Third sprint focuses on release credibility: benchmark evolution before benchmark gating, then catalog-quality and parity closure on a stable pipeline.",
+        "starts": "2026-06-19",
+        "ends": "2026-06-26",
+        "status": "planned",
+        "items": [
+          {
+            "slug": "sn-benchmark-evolution",
+            "tier": "opus",
+            "why_now": "Explicit blocker for sn-benchmark-v1 and the path to meaningful production-quality benchmark gates.",
+            "done_when": "The production reviewer panel, expanded anchors, finer grammar scoring, and baseline storage policy are all locked."
+          },
+          {
+            "slug": "sn-benchmark-v1",
+            "tier": "opus",
+            "why_now": "Should follow sn-benchmark-evolution so the benchmark set and pass/fail gates are aligned with the actual reviewer stack.",
+            "done_when": "The full 50-positive and 20-negative set exists, consensus policy is resolved, and the gates are meaningful on production runs."
+          },
+          {
+            "slug": "sn-catalog-quality-refactor",
+            "tier": "opus",
+            "why_now": "High-ROI release blocker; derived-parent lifecycle, validation loop, and export safety remain open.",
+            "done_when": "Phase 4 validation runs on live graph data, derived-parent delete/rewire exists for real, and export/publish invariants are green."
+          },
+          {
+            "slug": "sn-quality-parity",
+            "tier": "opus",
+            "why_now": "Umbrella quality plan that should advance only once benchmarking and export/link lifecycle work are credible.",
+            "done_when": "Benchmark harness, richer DD context, docs template rewrite, async link resolution, and the A/B validation loop are all landed."
+          }
+        ]
+      },
+      {
+        "id": "S4",
+        "theme": "CLI and docs hygiene tail",
+        "description": "Finalize command-surface cleanup and documentation refresh after the core SN roadmap is stable.",
+        "summary": "Last sprint for repo hygiene: complete the deferred CLI harmonization items and align documentation with the landed code and migrated reckon plans.",
+        "starts": "2026-06-26",
+        "ends": "2026-07-03",
+        "status": "planned",
+        "items": [
+          {
+            "slug": "33-cli-harmonization",
+            "tier": "sonnet",
+            "why_now": "Mid-ROI cleanup that should follow stabilization of the SN command surface.",
+            "done_when": "Deferred sn generate renames, -f cleanup, discover-limit aliases, and subcommand consolidation/deprecation planning are complete."
+          },
+          {
+            "slug": "docs-refresh",
+            "tier": "sonnet",
+            "why_now": "This work is safest after the code and plan migration dust settles.",
+            "done_when": "README inventory, stale CLI/API references, service-port errors, and historical-doc disposition are all corrected."
+          }
+        ]
+      }
+    ],
     "milestones": [],
-    "timeline": [],
+    "timeline": [
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "S1-S4 sprint plan authored from the migrated reckon HTML plan inventory and explicit dependency graph."
+      }
+    ],
     "blockers": []
   }
 }
