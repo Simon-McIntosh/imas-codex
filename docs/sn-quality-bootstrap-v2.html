@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-quality-bootstrap-v2">
+  <meta name="plan-title" content="SN Quality Bootstrap v2">
+  <meta name="plan-summary" content="Captures the rc14 bootstrap program: classifier vetoes, prompt cleanup, audit fixes, ISN vocabulary additions, graph remediation, and verification gates from plan 31.">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-impl" content="0.12">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-architectural-pivot">
+  <meta name="plan-blocks" content="sn-extraction-prompt-overhaul">
+  <title>SN Quality Bootstrap v2 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Quality Bootstrap v2</h1>
+    <p>This migration preserves plan 31 as a dispatch-ready bootstrap plan rather than a completed implementation. The implementation fraction remains <strong>0.12</strong>: the workstreams were fully specified and dependency-ordered, but the bootstrap rotation and remediation tail were still outstanding.</p>
+
+    <h2 id="s1">§1 — Problem statement preserved</h2>
+    <p>The rc13 full-graph review left the corpus at <strong>17.2%</strong> quarantine, with most failures attributed to structural source-path and classifier defects rather than prompt quality alone. The plan targets an rc14 bootstrap with quarantine ≤ 5%, description coverage ≥ 90%, and reviewer score ≥ 0.80.</p>
+
+    <h2 id="s2">§2 — Open workstreams</h2>
+    <table>
+      <thead>
+        <tr><th>Workstream</th><th>Scope preserved from the markdown plan</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WS-A</td><td>Classifier and source-path exclusions for representation, reference-waveform, solver-artifact, and diamagnetic-axis paths.</td><td>Open</td></tr>
+        <tr><td>WS-B</td><td>Compose prompt / exemplar cleanup, live transformation injection, anti-pattern exemplars, and rule parity.</td><td>Open</td></tr>
+        <tr><td>WS-C</td><td>Audit fixes for compound subjects, representation suffixes, ratio handling, unit validity, and new pulse-schedule checks.</td><td>Open</td></tr>
+        <tr><td>WS-D</td><td>ISN rc14 vocabulary additions, possible coordinate-prefix split, and parser error improvements.</td><td>Open</td></tr>
+        <tr><td>WS-E</td><td>External DD filing briefs for upstream corrections.</td><td>Open</td></tr>
+        <tr><td>WS-F</td><td>Graph remediation, purge/recompose, family consolidation, and near-duplicate linkage.</td><td>Blocked on WS-A–D</td></tr>
+        <tr><td>WS-G</td><td>Corpus-health tests, rotation script, dashboard, and final review dump.</td><td>Blocked on WS-F</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Hard dependencies and blockers</h2>
+    <ul>
+      <li><strong>Plan 30 merged.</strong> The bootstrap classifier work assumes the expanded <code>NodeCategory</code> routing exists.</li>
+      <li><strong>Plan 29 merged.</strong> The quality bootstrap assumes the names-only generate split and standalone enrich pipeline.</li>
+      <li><strong>ISN rc14 pinned.</strong> Prompt and vocabulary workstream outputs depend on the rc14 grammar payload.</li>
+      <li><strong>Main blocker classes preserved from the source review.</strong> Representation coefficients, pulse-schedule references, solver boundary conditions, diamagnetic-axis misuse, and the prompt / vocab / audit residuals remain the quality blockers the plan is designed to remove.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Verification tail still open</h2>
+    <p>The plan is not complete until the remediation flow produces a fresh rc14 rotation with the health gates green: low quarantine, high description coverage, prompt contradiction cleanup, zero coordinate-prefix parser failures, and a dated review dump.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="solver-artifact-routing" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where should transport-solver boundary-condition and coefficient configuration paths be routed?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="broaden-fit-artifact">Fold them into <code>fit_artifact</code></button>
+          <button class="r-opt" data-value="new-node-category">Add a new dedicated category</button>
+        </p>
+        <p class="r-dec-rat">The markdown plan recommends broadening <code>fit_artifact</code>, but does not lock it.</p>
+      </div>
+      <div class="r-dec" data-key="coordinate-prefix-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should the coordinate-prefix grammar split land in rc14 or slip to rc15?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="land-in-rc14">Land it in rc14</button>
+          <button class="r-opt" data-value="defer-to-rc15">Defer it to rc15 and rely on the interim audit</button>
+        </p>
+        <p class="r-dec-rat">WS-D explicitly leaves this as a risk-managed decision point.</p>
+      </div>
+      <div class="r-dec" data-key="thermal-subject-tokens" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do <code>thermal_electron</code> and <code>thermal_ion</code> need new subject tokens?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="add-explicit-subjects">Add explicit tokens</button>
+          <button class="r-opt" data-value="reuse-thermal-qualifier">Reuse the existing thermal qualifier decomposition</button>
+        </p>
+        <p class="r-dec-rat">The rc14 vocabulary section says to verify this before locking the grammar change.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>

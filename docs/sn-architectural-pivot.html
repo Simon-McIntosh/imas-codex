@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-architectural-pivot">
+  <meta name="plan-title" content="SN Architectural Pivot">
+  <meta name="plan-summary" content="Tracks the generate/enrich split, lifecycle schema changes, clean-slate rotation, and the deferred grammar-as-graph tail from plan 29.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.60">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-quality-bootstrap-v2">
+  <meta name="plan-informs" content="sn-extraction-prompt-overhaul,sn-structured-fanout">
+  <title>SN Architectural Pivot | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Architectural Pivot</h1>
+    <p>This HTML migration preserves the state of plan 29 as a partially landed architectural pivot. The implementation fraction remains <strong>0.60</strong>: the generate/enrich split, lifecycle redesign, and most of the schema-contract work have landed conceptually, while the clean-slate rotation and grammar-graph tail are still open.</p>
+
+    <h2 id="s1">§1 — What this pivot locked in</h2>
+    <ul>
+      <li><strong>Generate/enrich split.</strong> <code>sn generate</code> became the names-only stage and <code>sn enrich</code> was established as the standalone documentation pass.</li>
+      <li><strong>Lifecycle separation.</strong> The plan replaced the overloaded <code>drafted</code> concept with the explicit <code>named → enriched → reviewable</code> path.</li>
+      <li><strong>Grammar upgrade direction.</strong> The plan fixed the <code>Transformation</code> enum drift, introduced decomposition and <code>over_</code> region handling, and deferred basis-frame / tensor / component-split follow-ons.</li>
+      <li><strong>Qualifier-axis policy.</strong> The wave-absorbed-power family moved from name proliferation toward structural qualifier fields on <code>StandardName</code>.</li>
+      <li><strong>Grammar-graph boundary.</strong> ISN remained the grammar source of truth and export surface, while imas-codex kept LinkML ownership for graph persistence.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Phase snapshot</h2>
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>State preserved from the markdown plan</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Phase A — ISN grammar fixes</td><td>Transformation enum regeneration, decomposition segment, and region-template work were the front-loaded grammar changes.</td><td>Largely landed</td></tr>
+        <tr><td>Phase B — schema and generate refactor</td><td>Names-only generation, new review states, and embed/name persistence were core migration tasks.</td><td>Largely landed</td></tr>
+        <tr><td>Phase C — standalone enrich</td><td>The enrich pipeline, prompts, and reference edges were part of the main architectural pivot.</td><td>Largely landed</td></tr>
+        <tr><td>Phase D — clean-slate rotation</td><td>Seven-domain regeneration, enrichment rotation, and senior review gates are still the major deployment tail.</td><td>Open</td></tr>
+        <tr><td>Phase E — grammar as graph</td><td>Sync CLI, grammar graph schema, and <code>HAS_SEGMENT</code> edges remain the long tail.</td><td>Open</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Blockers and active risks</h2>
+    <ul>
+      <li><strong>Embedding-null blocker.</strong> The nearby-standard-name enrichment surface collapses if name and description embeddings are not populated.</li>
+      <li><strong>Rotation not yet proven.</strong> The plan still expects the destructive clear, seven-domain generate/enrich rotations, and the reviewer sign-off cycle to happen before the pivot is truly closed.</li>
+      <li><strong>Grammar-graph coupling remains open.</strong> The sync path between ISN grammar exports and codex graph state is still the principal unresolved tail.</li>
+      <li><strong>Inter-repo release latency.</strong> The ISN release cadence still gates the codex phases that depend on a pinned grammar rc.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Dependency metadata</h2>
+    <p>Plan 29 is the architectural predecessor for the quality-bootstrap and prompt/fan-out plans. It directly <strong>blocks</strong> plan 31 and materially <strong>informs</strong> plans 32 and 39.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="pipeline-topology" data-choice="split-generate-enrich" data-by="plan-29" data-when="2026-04-18">
+        <p class="r-dec-q">How should the standard-name pipeline be split?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="split-generate-enrich">Separate <code>generate</code> and <code>enrich</code> stages</button>
+          <button class="r-opt" data-value="single-compose-pass">Keep one combined compose pass</button>
+        </p>
+        <p class="r-dec-rat">Locked by ADR-1: names-only generation and graph-aware enrichment are treated as separate budgeted passes.</p>
+      </div>
+      <div class="r-dec" data-key="lifecycle-states" data-choice="named-enriched-reviewable" data-by="plan-29" data-when="2026-04-18">
+        <p class="r-dec-q">Which review lifecycle should replace the old overloaded drafted state?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="named-enriched-reviewable"><code>named → enriched → reviewable</code></button>
+          <button class="r-opt" data-value="keep-drafted">Keep <code>drafted</code> as the main state</button>
+        </p>
+        <p class="r-dec-rat">Locked by ADR-2 to separate name generation from documentation readiness.</p>
+      </div>
+      <div class="r-dec" data-key="grammar-graph-boundary" data-choice="isn-spec-codex-linkml" data-by="plan-29" data-when="2026-04-18">
+        <p class="r-dec-q">Who owns the grammar-graph contract?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="isn-spec-codex-linkml">ISN exports the grammar spec; codex owns LinkML and graph persistence</button>
+          <button class="r-opt" data-value="isn-owns-linkml">ISN owns both the spec and LinkML</button>
+        </p>
+        <p class="r-dec-rat">Locked by ADR-8 after the boundary correction: no LinkML duplication inside the grammar package.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>

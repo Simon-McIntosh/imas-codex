@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-benchmark-evolution">
+  <meta name="plan-title" content="SN Benchmark Evolution Strategy">
+  <meta name="plan-summary" content="Preserves the research plan for multi-family benchmark review, calibration expansion, softer grammar scoring, and workflow integration from plan 33.">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-impl" content="0.05">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-benchmark-v1">
+  <meta name="plan-informs" content="sn-benchmark-v1">
+  <title>SN Benchmark Evolution Strategy | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Benchmark Evolution Strategy</h1>
+    <p>This HTML migration keeps plan 33 in design / research state. The implementation fraction remains <strong>0.05</strong>: the problem statement, phases, and acceptance criteria are explicit, but the code and benchmark integration work were still queued.</p>
+
+    <h2 id="s1">§1 — Why the plan exists</h2>
+    <p>The benchmark had converged into a narrow score band and still suffered from single-reviewer bias, sparse and biased anchors, coarse grammar docking, and isolation from the production workflow. Plan 33 exists to make the benchmark discriminate better, mirror production review policy, and become operationally useful.</p>
+
+    <h2 id="s2">§2 — Open phases</h2>
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Purpose</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Phase A</td><td>Use the production review panel as the benchmark reviewer and surface median / spread / contested rows.</td><td>Open</td></tr>
+        <tr><td>Phase B</td><td>Expand calibration anchors to domain-balanced coverage and automate proposal generation.</td><td>Open</td></tr>
+        <tr><td>Phase C</td><td>Split grammar scoring into sub-dimensions and add semantic-equivalence consensus lift.</td><td>Open</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Current blockers</h2>
+    <ul>
+      <li><strong>Reviewer bias persists.</strong> Single-model scoring still tilts the benchmark away from real disagreement patterns.</li>
+      <li><strong>Anchor sparsity persists.</strong> Most physics domains remain unrepresented in calibration anchors.</li>
+      <li><strong>Workflow integration is absent.</strong> The benchmark still lacks graph persistence, status visibility, grammar-sync hooks, and the planned regression gate.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Plan 34 dependency</h2>
+    <p>Plan 33 directly informs and partially blocks the benchmark-v1 build-out, especially where the eval set wants multi-reviewer consensus, grammar-equivalence scoring, and expanded anchor coverage.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="reviewer-panel-size" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What should the default benchmark reviewer panel size be?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="two-reviewers">Two reviewers</button>
+          <button class="r-opt" data-value="three-reviewers">Three reviewers</button>
+        </p>
+        <p class="r-dec-rat">The markdown plan leaves this open because it drives the steady-state CI cost floor.</p>
+      </div>
+      <div class="r-dec" data-key="consensus-lift-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should semantic-equivalence consensus lift apply within a batch or across an entire run?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="within-batch">Within a single batch only</button>
+          <button class="r-opt" data-value="entire-run">Across the entire run</button>
+        </p>
+        <p class="r-dec-rat">The stronger run-wide option may mask prompt-instability effects, so the scope remains open.</p>
+      </div>
+      <div class="r-dec" data-key="anchor-refresh-cadence" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How often should calibration anchors refresh?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="grammar-sync">At grammar-sync boundaries</button>
+          <button class="r-opt" data-value="every-benchmark">After every benchmark</button>
+          <button class="r-opt" data-value="quarterly">Quarterly</button>
+        </p>
+        <p class="r-dec-rat">The draft leans toward grammar-sync boundaries but explicitly keeps the cadence unresolved.</p>
+      </div>
+      <div class="r-dec" data-key="baseline-location" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where should the regression baseline live?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="repo-json">Committed JSON in the repo</button>
+          <button class="r-opt" data-value="nightly-artifact">Nightly-generated artifact outside the repo</button>
+        </p>
+        <p class="r-dec-rat">The markdown plan asks this explicitly because rubric evolution changes the maintenance burden.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-benchmark-v1">
+  <meta name="plan-title" content="Standard Name Benchmark Set v1">
+  <meta name="plan-summary" content="Tracks the fixed positive/negative benchmark set, runner, thresholds, and consensus dependencies from plan 34.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.35">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-benchmark-evolution">
+  <title>Standard Name Benchmark Set v1 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard Name Benchmark Set v1</h1>
+    <p>This migration preserves plan 34 as a partially landed benchmark scaffold. The implementation fraction remains <strong>0.35</strong>: the eval-set shape, runner contract, and dry-run scaffold are defined, but the full 50-positive / 20-negative, dual-reviewed release gate is still open.</p>
+
+    <h2 id="s1">§1 — Landed scaffold</h2>
+    <ul>
+      <li><strong>Plan filed.</strong> The benchmark shape is fixed around positives, negatives, reviewer scoring, and hard gating thresholds.</li>
+      <li><strong>Scaffold scope landed.</strong> The markdown plan says the initial target is at least 20 positives and 10 negatives with schema-valid dry-run support.</li>
+      <li><strong>Runner contract fixed.</strong> The benchmark stays script-level for v1 and emits JSON plus markdown summaries with per-domain breakdowns.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Open phases and blockers</h2>
+    <table>
+      <thead>
+        <tr><th>Area</th><th>What remains open</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Positive set</td><td>Expand from scaffold to 50 curated paths across 10 domains with no <code>TODO</code> stubs.</td><td>Open</td></tr>
+        <tr><td>Negative set</td><td>Expand to at least 20 anti-pattern negatives spanning every failure category.</td><td>Open</td></tr>
+        <tr><td>Consensus</td><td>Record two-reviewer agreement for every published item.</td><td>Blocked</td></tr>
+        <tr><td>Gate</td><td>Achieve pass@1 ≥ 0.80, mean score ≥ 0.75, and reject rate ≥ 0.90 on the production pipeline.</td><td>Open</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Preserved dependency metadata</h2>
+    <ul>
+      <li><strong><code>cycle-cross-family-review</code></strong> still blocks the publishable two-reviewer consensus path.</li>
+      <li><strong>ISN rc16 vocabulary work</strong> still blocks roughly ten stress-domain positives in waves, PWI, and RF-adjacent areas.</li>
+      <li><strong>Grammar persistence from plan 33</strong> still blocks the intended grammar-equivalent scoring path.</li>
+    </ul>
+
+    <h2 id="s4">§4 — v1 scope lock</h2>
+    <p>The plan explicitly keeps CLI integration out of v1 scope. The benchmark is script-level until the set is full and the gate is worth wiring into CI.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="v1-cli-surface" data-choice="script-only" data-by="plan-34" data-when="2026-04-21">
+        <p class="r-dec-q">How should benchmark-v1 ship operationally?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="script-only">Script only for v1</button>
+          <button class="r-opt" data-value="new-cli-command">Add a new CLI command immediately</button>
+        </p>
+        <p class="r-dec-rat">The markdown plan explicitly defers CLI wrapping until the benchmark is full and stable.</p>
+      </div>
+      <div class="r-dec" data-key="publish-threshold" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Can tentative examples without cross-family endorsement count as published benchmark items?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="published-requires-consensus">No, published items require two-reviewer consensus</button>
+          <button class="r-opt" data-value="allow-tentative-publish">Yes, tentative items may publish before consensus</button>
+        </p>
+        <p class="r-dec-rat">The body of the plan leans toward consensus-only publication, but the dependency is still open because the reviewer pool is blocked.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>

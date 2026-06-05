@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-extraction-prompt-overhaul">
+  <meta name="plan-title" content="Extraction Classifier Audit & Prompt Overhaul">
+  <meta name="plan-summary" content="Records the node-category audit, prompt A/B/C bake-off, winner implementation, and DD-completion endpoint outcome from plan 32.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="1.00">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-quality-bootstrap-v2">
+  <meta name="plan-informs" content="sn-structured-fanout">
+  <title>Extraction Classifier Audit &amp; Prompt Overhaul | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Extraction Classifier Audit &amp; Prompt Overhaul</h1>
+    <p>This migration preserves plan 32 as effectively complete. The implementation fraction is <strong>1.00</strong>: the audit, the prompt bake-off, the winner decision, and the completion-loop work all landed, with only small follow-on notes left for later plans.</p>
+
+    <h2 id="s1">§1 — Landed outcomes</h2>
+    <ul>
+      <li><strong>Phase 1 closed.</strong> The node-category audit sampled 105 paths and kept <code>SN_SOURCE_CATEGORIES = {quantity, geometry}</code>, with a measured false-negative rate of 1.2%.</li>
+      <li><strong>Phase 2 closed.</strong> The 20-path A/B/C benchmark established reviewer-score and cost comparisons across rich-static, lean-static, and tool-calling variants.</li>
+      <li><strong>Phase 3 closed.</strong> Variant A remained the default because neither B nor C cleared the stated cost gate under the measured baseline.</li>
+      <li><strong>Phase 4 shipped.</strong> The DD-completion endpoint landed first as <code>--until-complete</code> and then as the default rotating behaviour of <code>sn generate</code>.</li>
+    </ul>
+
+    <h2 id="s2">§2 — What remains open around the edges</h2>
+    <ul>
+      <li><strong>Quantity mis-labelling follow-up.</strong> The audit surfaced a separate tail of false positives inside the <code>quantity</code> class that still deserves its own cleanup ticket.</li>
+      <li><strong>Tool-calling revisit.</strong> The plan explicitly says to revisit variant C when <code>compose_worker</code> is next materially changed, because the production cache block changes the cost picture.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Preserved evidence</h2>
+    <p>The plan keeps the empirical results visible: Phase 1 cost roughly $0.18, Phase 2 cost roughly $0.24, mean reviewer scores A = 0.805, B = 0.755, C = 0.815, and pass@1 of 0.75 / 0.65 / 0.75 respectively. The winner decision is therefore preserved as a measured outcome, not a preference.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="source-categories" data-choice="retain-quantity-geometry" data-by="plan-32" data-when="2026-07-15">
+        <p class="r-dec-q">Which DD node categories remain SN-eligible after the audit?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="retain-quantity-geometry">Keep <code>{quantity, geometry}</code></button>
+          <button class="r-opt" data-value="expand-eligibility">Broaden eligibility</button>
+        </p>
+        <p class="r-dec-rat">Phase 1 stayed below the widening threshold, so the existing eligibility set was retained.</p>
+      </div>
+      <div class="r-dec" data-key="default-prompt-variant" data-choice="variant-a" data-by="plan-32" data-when="2026-07-15">
+        <p class="r-dec-q">Which compose-prompt architecture remains the default?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="variant-a">Variant A — rich static prompt</button>
+          <button class="r-opt" data-value="variant-b">Variant B — lean static prompt</button>
+          <button class="r-opt" data-value="variant-c">Variant C — tool-calling hybrid</button>
+        </p>
+        <p class="r-dec-rat">Phase 3 locked the status quo because B and C did not clear the plan’s cost gate under the harness baseline.</p>
+      </div>
+      <div class="r-dec" data-key="completion-loop-surface" data-choice="rotator-default" data-by="plan-32" data-when="2026-07-15">
+        <p class="r-dec-q">How should the DD-completion loop surface in the CLI?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="rotator-default">Make the rotating completion loop the default <code>sn generate</code> behaviour</button>
+          <button class="r-opt" data-value="flag-only">Keep it behind an opt-in flag</button>
+        </p>
+        <p class="r-dec-rat">The shipped outcome removes the temporary flag and keeps single-pass generation only as the explicit opt-out path.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>
