@@ -44,6 +44,19 @@ def _isn_process_tokens() -> frozenset[str]:
     return frozenset()
 
 
+@lru_cache(maxsize=1)
+def _isn_locus_tokens() -> frozenset[str]:
+    """Return the canonical set of locus tokens registered in installed ISN."""
+    try:
+        from imas_standard_names.grammar import vocab_loaders
+
+        registry = vocab_loaders.load_locus_registry()
+        return frozenset(registry.loci)
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("Could not load ISN locus registry: %s", exc)
+    return frozenset()
+
+
 # Checks whose failure demotes to quarantined
 CRITICAL_CHECKS = frozenset(
     {
@@ -2416,7 +2429,6 @@ def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
 _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
     "separatrix": "plasma_boundary",
     "outboard_midplane_separatrix": "plasma_boundary",
-    "secondary_separatrix": "secondary_plasma_boundary",
     "last_closed_flux_surface": "plasma_boundary",
     "lcfs": "plasma_boundary",
     "divertor_plate": "divertor_target",
@@ -2536,9 +2548,15 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
             # Substring scan: catches compound forms the exact map misses.
             # ``outboard_midplane_separatrix`` is exact-mapped above; this
             # catches future compounds like ``upper_separatrix`` etc.
+            registered_loci = _isn_locus_tokens()
             for bad, good in _CANONICAL_LOCUS_SUBSTRINGS.items():
                 if bad in locus_token:
                     fixed_locus = locus_token.replace(bad, good)
+                    # Only recommend rewrites that exist in the installed ISN
+                    # locus registry; otherwise we fabricate bogus compounds
+                    # such as ``secondary_plasma_boundary``.
+                    if fixed_locus not in registered_loci:
+                        continue
                     issues.append(
                         f"audit:canonical_locus_check: name '{name}' has "
                         f"locus token '{locus_token}' containing "

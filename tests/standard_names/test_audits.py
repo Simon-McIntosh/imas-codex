@@ -2279,3 +2279,30 @@ class TestPrepositionPhysicalBaseCheck:
             "physical_base='of_particle_temperature'"
         ]
         assert has_critical_audit_failure(issues) is True
+
+
+class TestCanonicalLocusCheck:
+    """Canonical-locus rewrites must stay inside the installed ISN registry."""
+
+    def test_flags_plain_separatrix_synonym(self):
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        issues = canonical_locus_check({"id": "electron_temperature_at_separatrix"})
+
+        assert any("plasma_boundary" in issue for issue in issues)
+
+    def test_flags_registered_compound_divertor_synonym(self):
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        issues = canonical_locus_check({"id": "heat_flux_at_inner_divertor_plate"})
+
+        assert any("inner_divertor_target" in issue for issue in issues)
+
+    def test_does_not_invent_secondary_plasma_boundary(self):
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        issues = canonical_locus_check(
+            {"id": "electron_temperature_at_secondary_separatrix"}
+        )
+
+        assert not any("secondary_plasma_boundary" in issue for issue in issues)
