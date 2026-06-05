@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-closed-physical-base">
+  <meta name="plan-title" content="SN Closed Physical Base Vocabulary">
+  <meta name="plan-summary" content="Reorganize physical_base vocabulary into dimensional bases plus closed qualifiers so StandardNames group cleanly without a larger architectural rewrite.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.50">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>SN Closed Physical Base Vocabulary | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem framing and settled design rules</h2>
+    <p>Plan 41 attacks the physical-base explosion directly: too many compound bases in ISN prevent qualifier extraction and fracture catalog grouping. The survey marks the plan at <strong>0.50</strong> because the governing grammar rules are already clear, but the rollout through ISN, codex, iterative bootstrap, and export is still open.</p>
+    <figure>
+      <img src="/imas-codex/figures/sn-plan-migration/sn-closed-physical-base.svg" alt="Status diagram for plan 41 showing design rules settled and rollout phases A to D still open.">
+      <figcaption>Plan 41 status: the grammar principles are agreed; the actual ISN redesign, codex bump, bootstrap loop, and catalog export are still active rollout work.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Insertion-order qualifiers are mandatory.</strong> Qualifiers must preserve parse order rather than being alphabetized during compose.</li>
+      <li><strong>Subjects win over qualifiers.</strong> Compound subject tokens stay atomic and qualifier stripping happens only after subject removal.</li>
+      <li><strong>Processes stay suffix-only.</strong> Process vocabulary is only a <code>_due_to_…</code> template; the same token used as a prefix is treated as a qualifier.</li>
+      <li><strong>Multi-word qualifiers remain atomic.</strong> Tokens such as <code>center_of_mass</code> must not be broken apart by the generic <code>_of_</code> operator logic.</li>
+      <li><strong>The base-count target is moderate, not extreme.</strong> The plan explicitly moved from an over-aggressive 45-base target to a validated 50–80 dimensional-base range.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Open rollout work</h2>
+    <ul>
+      <li><strong>Phase A — ISN grammar redesign.</strong> Create <code>qualifiers.yml</code>, reduce <code>physical_bases.yml</code> to dimensional quantities, add missing process tokens, load qualifiers from YAML in the parser, emit ordered qualifiers in compose, prove 100% round-trip success on the 479-name corpus, and cut an ISN RC release.</li>
+      <li><strong>Phase B — codex pipeline update.</strong> Bump the ISN dependency in both pyproject locations, refresh grammar context and prompts, clear the SN graph, and run the first bounded rotation with the new grammar.</li>
+      <li><strong>Phase C — iterative bootstrap.</strong> Run repeated low-cost rotations, inspect vocab gaps and parse errors, add qualifier/process tokens upstream, cut new RCs, and re-run until the grammar stops shedding obvious gaps.</li>
+      <li><strong>Phase D — catalog/export closure.</strong> Export validated names, preview grouping behaviour, and publish only after the new dimensional grouping reads cleanly in the renderer.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Risks and validation gates</h2>
+    <ul>
+      <li><strong>The offline gate is non-negotiable.</strong> Phase A requires a 100% round-trip result on the 479-name corpus before graph work proceeds.</li>
+      <li><strong>Subject/qualifier ambiguity remains the main semantic risk.</strong> The plan mitigates this by keeping subject parsing earlier and refusing to let the same token behave as both subject and qualifier inside one name.</li>
+      <li><strong>Wrong qualifier ordering is a regression risk.</strong> The plan treats ordering as a first-class round-trip property, not a formatting detail.</li>
+      <li><strong>Bootstrap cost is intentionally bounded.</strong> The iterative rotation design exists so vocab mistakes can be corrected cheaply between runs instead of after a full expensive regeneration.</li>
+      <li><strong>Documentation updates remain open.</strong> AGENTS guidance, ISN guidance, shared grammar references, and the auto-generated schema reference all need updates once the rollout actually lands.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Migration note</h2>
+    <p>The important thing to preserve from the markdown source is that plan 41 is <em>not</em> an architectural rewrite. It is a vocabulary reorganization that depends on disciplined grammar rules, corpus-level round-trip testing, and repeated RC bumps. The HTML plan therefore keeps it active and mid-rollout rather than presenting the design discussion as already shipped.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="180" viewBox="0 0 900 180" role="img" aria-labelledby="title desc">
+  <title id="title">Plan 41 migration status</title>
+  <desc id="desc">A high-contrast diagram showing settled grammar rules followed by open rollout phases A through D.</desc>
+  <rect width="900" height="180" fill="#ffffff"/>
+  <text x="24" y="28" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#111827">Closed physical-base vocabulary — rollout status</text>
+  <text x="24" y="48" font-family="system-ui, sans-serif" font-size="13" fill="#374151">The grammar rules are agreed; the remaining work is the staged rollout from ISN redesign through catalog export.</text>
+
+  <rect x="24" y="74" width="160" height="70" rx="8" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="38" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Design rules</text>
+  <text x="38" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">D1–D5 settled</text>
+
+  <rect x="212" y="74" width="140" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="226" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase A</text>
+  <text x="226" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">ISN redesign</text>
+
+  <rect x="380" y="74" width="140" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="394" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase B</text>
+  <text x="394" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Codex update</text>
+
+  <rect x="548" y="74" width="140" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="562" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase C</text>
+  <text x="562" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Bootstrap loop</text>
+
+  <rect x="716" y="74" width="140" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="730" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase D</text>
+  <text x="730" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Export</text>
+
+  <path d="M184 109 H212 M352 109 H380 M520 109 H548 M688 109 H716" stroke="#6b7280" stroke-width="2" fill="none"/>
+</svg>
