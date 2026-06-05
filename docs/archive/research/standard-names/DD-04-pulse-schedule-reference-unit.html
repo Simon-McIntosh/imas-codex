@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="DD-04-pulse-schedule-reference-unit">
+  <meta name="plan-title" content="DD-04 — `pulse_schedule/*/reference` nodes carry sentinel `unit=1` regardless of physical quantity">
+  <meta name="plan-summary" content="Affected IDS: pulseschedule (all controlled-quantity subtrees).">
+  <meta name="archive-source" content="plans/research/standard-names/dd-issues-rc14/DD-04-pulse-schedule-reference-unit.md">
+  <title>DD-04 — `pulse_schedule/*/reference` nodes carry sentinel `unit=1` regardless of physical quantity | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD-04 — `pulse_schedule/*/reference` nodes carry sentinel `unit=1` regardless of physical quantity</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/dd-issues-rc14/DD-04-pulse-schedule-reference-unit.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>RC14 data dictionary issue note</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/dd-issues-rc14/DD-04-pulse-schedule-reference-unit.md</dd></div>
+    </dl>
+    
+    <h2>DD path(s) / pattern</h2>
+<pre><code>pulse_schedule/*/reference
+pulse_schedule/*/reference/data
+pulse_schedule/*/reference_waveform/data
+</code></pre>
+<p>Affected IDS: <code>pulse_schedule</code> (all controlled-quantity subtrees).</p>
+<p>Concrete paths (sample):</p>
+<ul>
+<li><code>pulse_schedule/ec/beam/power_launched/reference/data</code> (unit: 1 — should be W)</li>
+<li><code>pulse_schedule/ec/beam/frequency/reference/data</code> (unit: 1 — should be Hz)</li>
+<li><code>pulse_schedule/ec/beam/steering_angle_pol/reference/data</code> (unit: 1 — should be rad)</li>
+<li><code>pulse_schedule/ic/antenna/power/reference/data</code> (unit: 1 — should be W)</li>
+<li><code>pulse_schedule/ic/antenna/frequency/reference/data</code> (unit: 1 — should be Hz)</li>
+<li><code>pulse_schedule/lh/antenna/power/reference/data</code> (unit: 1 — should be W)</li>
+<li><code>pulse_schedule/nbi/unit/power/reference/data</code> (unit: 1 — should be W)</li>
+<li><code>pulse_schedule/position_control/*/reference/data</code> (unit: 1 — should be m)</li>
+<li><code>pulse_schedule/flux_control/loop_voltage/reference/data</code> (unit: 1 — should be V)</li>
+</ul>
+<h2>Evidence</h2>
+<p>Rc13 standard names that quarantined because of this issue:</p>
+<ul>
+<li><code>electron_cyclotron_beam_frequency_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — name contains 'frequency' but unit is dimensionless; expected Hz</li>
+<li><code>electron_cyclotron_beam_launched_power_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — name contains 'power' but unit is dimensionless; expected W</li>
+<li><code>electron_cyclotron_beam_poloidal_steering_angle_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — name contains 'angle' but unit is dimensionless; expected rad</li>
+<li><code>electron_cyclotron_beam_toroidal_steering_angle_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>electron_cyclotron_launched_power_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>ion_cyclotron_heating_antenna_reference_frequency</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>ion_cyclotron_heating_antenna_reference_power</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>ion_cyclotron_heating_reference_power</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>loop_voltage_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — name contains 'voltage' but unit is dimensionless; expected V</li>
+<li><code>lower_hybrid_antenna_reference_power</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>neutral_beam_injection_power_reference</code> (audit: name_unit_consistency_check; unit: 1) — same</li>
+<li><code>neutral_beam_injection_unit_energy_reference_waveform</code> (audit: name_unit_consistency_check; unit: 1) — name contains 'energy' but unit is dimensionless; expected eV or J</li>
+<li><code>line_integrated_electron_density_reference_waveform</code> (audit: cumulative_prefix_check; unit: 1) — also caught by cumulative prefix check</li>
+<li><code>line_integrated_electron_density_inside_flux_surface_reference_waveform</code> (audit: cumulative_prefix_check; unit: 1) — same</li>
+<li><code>poloidal_field_coil_current_reference_waveform</code> (audit: implicit_field_check; unit: 1) — also caught by implicit field check</li>
+</ul>
+<p>Total: <strong>16 quarantined names</strong> (the largest single-issue cluster in rc13),
+plus an additional <strong>~5 valid names</strong> that escaped because they happen to be
+dimensionless quantities where <code>unit=1</code> is accidentally correct (e.g.,
+<code>effective_charge_reference_waveform</code>).</p>
+<p>This issue alone accounts for <strong>13% of all quarantines</strong> in the rc13 corpus.</p>
+<h2>Proposed fix</h2>
+<p>Option A (preferred): <strong>Publish the controlled quantity's unit.</strong> Each
+<code>reference/data</code> node should carry the same unit as the corresponding
+physics quantity. For example, <code>pulse_schedule/ec/beam/power_launched/reference/data</code>
+should have <code>unit=W</code>, mirroring the <code>power_launched</code> physics path.</p>
+<p>Option B: <strong>Add explicit documentation.</strong> Tag each <code>reference</code> subtree with
+<code>description: &quot;controller-reference waveform; dimensionless normalized&quot;</code>
+and add <code>lifecycle=alpha</code>. This allows codex to filter them at the classifier
+level, but does not fix the root cause.</p>
+<p>Option C: <strong>Add a <code>reference_unit</code> attribute</strong> that points to the controlled
+quantity's unit path, allowing tools to resolve the correct unit indirectly.</p>
+<h2>Downstream impact</h2>
+<ul>
+<li><strong>imas-codex SN extractor:</strong> unblocks 16 quarantined names — the single
+largest quarantine cluster. With correct units, these names pass the
+<code>name_unit_consistency_check</code> directly. Cuts <code>plasma_control</code> domain
+quarantine from ~51% to ≤10%.</li>
+<li><strong>pydantic audits:</strong> <code>name_unit_consistency_check</code> is correct and should
+remain — the bug is in the DD, not in the audit. No audit bypass needed
+after DD fix.</li>
+<li><strong>imas-standard-names:</strong> no vocab change needed.</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §0 (blocker B3)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §2.13 (row 5)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §4.3 (DD-03)</li>
+<li>Plan: plans/features/standard-names/31-quality-bootstrap-v2.md §7</li>
+</ul>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="DD-06-thermalisation-spelling">
+  <meta name="plan-title" content="DD-06 — Spelling inconsistency `thermalisation` vs `thermalization`">
+  <meta name="plan-summary" content="Both spellings coexist under distributions/distribution/:">
+  <meta name="archive-source" content="plans/research/standard-names/dd-issues-rc14/DD-06-thermalisation-spelling.md">
+  <title>DD-06 — Spelling inconsistency `thermalisation` vs `thermalization` | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD-06 — Spelling inconsistency `thermalisation` vs `thermalization`</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/dd-issues-rc14/DD-06-thermalisation-spelling.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>RC14 data dictionary issue note</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/dd-issues-rc14/DD-06-thermalisation-spelling.md</dd></div>
+    </dl>
+    
+    <h2>DD path(s) / pattern</h2>
+<p>Both spellings coexist under <code>distributions/distribution/</code>:</p>
+<pre><code>distributions/distribution/global_quantities/thermalisation/{particles,power,torque}
+distributions/distribution/profiles_1d/thermalisation/{energy,momentum_phi,momentum_tor,particles}
+
+distributions/distribution/global_quantities/thermalization/{particles,power,torque}
+distributions/distribution/profiles_1d/thermalization/{energy,momentum_phi,particles}
+</code></pre>
+<p>Affected IDS: <code>distributions</code>.</p>
+<p>Path counts: <strong>9 paths</strong> with <code>thermalisation</code>, <strong>8 paths</strong> with <code>thermalization</code>
+— both with identical structure and units, differing only in spelling.</p>
+<h2>Evidence</h2>
+<p>Rc13 standard names that quarantined because of this issue:</p>
+<ul>
+<li><code>heating_power_due_to_thermalization_of_fast_particles</code> (audit: pydantic:scalar.name; unit: W) — <code>thermalization_of_fast_particles</code> is not in the Process vocabulary</li>
+<li><code>thermal_particle_number_density_source_due_to_thermalization_of_fast_particles</code> (audit: pydantic:scalar.name; unit: m^-3.s^-1) — same grammar gap</li>
+</ul>
+<p>Total: <strong>2 quarantined names</strong> directly attributable to the vocabulary gap for
+<code>thermalization_of_fast_particles</code>. Two additional valid names use the same root
+but pass because they use a shorter form:</p>
+<ul>
+<li><code>thermal_energy_source_rate_density_due_to_thermalization</code> (unit: m^-3.W; vs: valid)</li>
+<li><code>toroidal_angular_momentum_source_rate_density_due_to_thermalization</code> (unit: m^-2.N; vs: valid)</li>
+</ul>
+<p>The spelling inconsistency complicates vocabulary work: should ISN add
+<code>thermalization</code> or <code>thermalisation</code> as the Process token? The DD should settle
+on one spelling so the grammar can match it.</p>
+<h2>Proposed fix</h2>
+<p><strong>Standardize on <code>thermalization</code></strong> (American English, -ize suffix). Rationale:</p>
+<ol>
+<li>IMAS uses American English conventions throughout (e.g., <code>ionization</code> not
+<code>ionisation</code>, <code>polarization</code> not <code>polarisation</code>).</li>
+<li>The IUPAC recommendation is <code>-ize</code> for technical terms derived from Greek
+(<code>-ίζειν</code>).</li>
+<li><code>thermalization</code> already appears in the standard names vocabulary and in
+physics textbooks (Spitzer, NRL Plasma Formulary).</li>
+</ol>
+<p>Actions:</p>
+<ol>
+<li>Rename all <code>thermalisation</code> paths to <code>thermalization</code> in the DD.</li>
+<li>Add <code>RENAMED_TO</code> records from the old paths to the new paths.</li>
+<li>Mark <code>thermalisation</code> paths as <code>obsolescent</code> for one DD version before
+removal.</li>
+</ol>
+<h2>Downstream impact</h2>
+<ul>
+<li><strong>imas-codex SN extractor:</strong> unblocks 2 quarantined names once
+<code>thermalization_of_fast_particles</code> is added to the ISN Process vocabulary
+(separate ISN issue). The DD spelling fix ensures only one spelling needs
+to be in the vocabulary.</li>
+<li><strong>pydantic audits:</strong> no audit changes needed — the grammar vocabulary gap
+is the root cause, not an audit bug.</li>
+<li><strong>imas-standard-names:</strong> can add <code>thermalization</code> (and
+<code>thermalization_of_fast_particles</code>) as a Process token without worrying
+about the British variant leaking through from the DD.</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §2.13 (row 10)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §4.3 (DD-05)</li>
+<li>Plan: plans/features/standard-names/31-quality-bootstrap-v2.md §7</li>
+</ul>
+
+  </main>
+</body>
+</html>

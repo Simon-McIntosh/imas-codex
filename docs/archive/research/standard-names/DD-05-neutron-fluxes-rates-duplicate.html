@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="DD-05-neutron-fluxes-rates-duplicate">
+  <meta name="plan-title" content="DD-05 — Duplicate `neutron_fluxes` / `neutron_rates` subtrees in `summary/fusion`">
+  <meta name="plan-summary" content="Affected IDS: summary.">
+  <meta name="archive-source" content="plans/research/standard-names/dd-issues-rc14/DD-05-neutron-fluxes-rates-duplicate.md">
+  <title>DD-05 — Duplicate `neutron_fluxes` / `neutron_rates` subtrees in `summary/fusion` | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD-05 — Duplicate `neutron_fluxes` / `neutron_rates` subtrees in `summary/fusion`</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/dd-issues-rc14/DD-05-neutron-fluxes-rates-duplicate.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>RC14 data dictionary issue note</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/dd-issues-rc14/DD-05-neutron-fluxes-rates-duplicate.md</dd></div>
+    </dl>
+    
+    <h2>DD path(s) / pattern</h2>
+<pre><code>summary/fusion/neutron_fluxes/dd/{thermal,beam_thermal,beam_beam,total}/value
+summary/fusion/neutron_rates/dd/{thermal,beam_thermal,beam_beam,total}/value
+summary/fusion/neutron_fluxes/dt/{thermal,beam_thermal,beam_beam,total}/value
+summary/fusion/neutron_rates/dt/{thermal,beam_thermal,beam_beam,total}/value
+summary/fusion/neutron_fluxes/tt/{thermal,beam_thermal,beam_beam,total}/value
+summary/fusion/neutron_rates/tt/{thermal,beam_thermal,beam_beam,total}/value
+</code></pre>
+<p>Affected IDS: <code>summary</code>.</p>
+<p>Both subtrees have <strong>identical structure</strong> and <strong>identical units</strong> (<code>Hz</code>).</p>
+<h2>Evidence</h2>
+<p>The SN extractor generates names from both subtrees, producing standard names
+that differ only in whether the source DD path says <code>neutron_fluxes</code> or
+<code>neutron_rates</code>. The rc13 corpus shows naming inconsistency:</p>
+<ul>
+<li><code>deuterium_deuterium_neutron_flux_due_to_thermal_fusion</code> (unit: Hz; vs: quarantined) — sourced from <code>neutron_fluxes/dd/thermal</code></li>
+<li><code>deuterium_tritium_neutron_flux_due_to_thermal_fusion</code> (unit: Hz; vs: quarantined) — from <code>neutron_fluxes/dt/thermal</code></li>
+<li><code>deuterium_tritium_total_neutron_flux</code> (unit: Hz; vs: quarantined) — from <code>neutron_fluxes/dt/total</code></li>
+<li><code>deuterium_tritium_neutron_flux_due_to_beam_beam_fusion</code> (unit: Hz; vs: quarantined) — from <code>neutron_fluxes/dt/beam_beam</code></li>
+<li><code>deuterium_tritium_neutron_flux_due_to_beam_thermal_fusion</code> (unit: Hz; vs: quarantined) — from <code>neutron_fluxes/dt/beam_thermal</code></li>
+<li><code>tritium_tritium_neutron_flux_due_to_thermal_fusion</code> (unit: Hz; vs: quarantined) — from <code>neutron_fluxes/tt/thermal</code></li>
+<li><code>tritium_tritium_beam_thermal_neutron_rate</code> (unit: Hz; vs: valid) — from <code>neutron_rates/tt/beam_thermal</code></li>
+<li><code>tritium_tritium_thermal_neutron_rate</code> (unit: Hz; vs: valid) — from <code>neutron_rates/tt/thermal</code></li>
+<li><code>tritium_tritium_total_neutron_rate</code> (unit: Hz; vs: valid) — from <code>neutron_rates/tt/total</code></li>
+</ul>
+<p>The quarantines on <code>neutron_flux</code> names are from other audit checks (e.g.,
+<code>thermalization</code>-related grammar gaps), but the <strong>duplication itself</strong> creates
+naming ambiguity: are DD and DT reaction products &quot;fluxes&quot; or &quot;rates&quot;? Both terms
+map to unit Hz (count per second). The SN vocabulary must pick one canonical term.</p>
+<p>Total: <strong>~6 quarantined</strong> and <strong>~12 valid</strong> names across the two subtrees; the
+duplication doubles the SN count for no additional physics content.</p>
+<h2>Proposed fix</h2>
+<p>Option A (preferred): <strong>Deprecate <code>neutron_rates</code> → mark as <code>obsolescent</code></strong> with
+a <code>RENAMED_TO</code> record pointing to <code>neutron_fluxes</code>. In nuclear/fusion physics,
+&quot;neutron flux&quot; (or &quot;neutron source rate&quot;) is the standard term for total neutron
+production rate in Hz. &quot;Rate&quot; without qualification is ambiguous (rate of what?).</p>
+<p>Option B: <strong>Deprecate <code>neutron_fluxes</code></strong> instead, if the DD committee prefers
+&quot;rate&quot; as the canonical term. Note that <code>neutron_fluxes</code> has broader adoption in
+existing tools and documentation.</p>
+<p>Option C: <strong>Distinguish semantics.</strong> If the two subtrees are meant to carry
+different quantities (e.g., <code>neutron_fluxes</code> = surface-integrated flux [n/m²/s],
+<code>neutron_rates</code> = total volumetric rate [n/s]), then change the units to reflect
+the distinction and add documentation. Currently both carry <code>unit=Hz</code>, making
+them indistinguishable.</p>
+<h2>Downstream impact</h2>
+<ul>
+<li><strong>imas-codex SN extractor:</strong> halves the number of neutron-related names from
+~18 to ~9 after deduplication. Eliminates the &quot;flux vs rate&quot; naming ambiguity
+that forces the LLM to choose inconsistently.</li>
+<li><strong>pydantic audits:</strong> no audit changes needed — the quarantines on these names
+are from unrelated checks (grammar gaps, <code>due_to_</code> vocabulary).</li>
+<li><strong>imas-standard-names:</strong> can standardize on either <code>neutron_flux</code> or
+<code>neutron_rate</code> as the canonical Subject/Object token; currently both exist
+in the vocabulary.</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §2.13 (row 6)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §4.3 (DD-04)</li>
+<li>Plan: plans/features/standard-names/31-quality-bootstrap-v2.md §7</li>
+</ul>
+
+  </main>
+</body>
+</html>

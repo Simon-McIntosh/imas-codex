@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="DD-01-diamagnetic-axis">
+  <meta name="plan-title" content="DD-01 — `/diamagnetic` used as spatial axis under vector containers">
+  <meta name="plan-summary" content="Affected IDSs: edgeprofiles, coreprofiles, coreinstantchanges,">
+  <meta name="archive-source" content="plans/research/standard-names/dd-issues-rc14/DD-01-diamagnetic-axis.md">
+  <title>DD-01 — `/diamagnetic` used as spatial axis under vector containers | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD-01 — `/diamagnetic` used as spatial axis under vector containers</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/dd-issues-rc14/DD-01-diamagnetic-axis.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>RC14 data dictionary issue note</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/dd-issues-rc14/DD-01-diamagnetic-axis.md</dd></div>
+    </dl>
+    
+    <h2>DD path(s) / pattern</h2>
+<pre><code>*/ggd/*/diamagnetic          (under a_field, b_field, e_field, j_tot)
+*/profiles_1d/*/velocity/diamagnetic
+*/profiles_1d/e_field/diamagnetic
+*/profiles_2d/*/velocity/diamagnetic
+</code></pre>
+<p>Affected IDSs: <code>edge_profiles</code>, <code>core_profiles</code>, <code>core_instant_changes</code>,
+<code>plasma_profiles</code>.</p>
+<p>Concrete paths (sample):</p>
+<ul>
+<li><code>edge_profiles/ggd/a_field/diamagnetic</code> (unit: T.m)</li>
+<li><code>edge_profiles/ggd/b_field/diamagnetic</code> (unit: T)</li>
+<li><code>edge_profiles/ggd/e_field/diamagnetic</code> (unit: V.m^-1)</li>
+<li><code>core_profiles/profiles_1d/electrons/velocity/diamagnetic</code> (unit: m.s^-1)</li>
+<li><code>core_profiles/profiles_1d/ion/velocity/diamagnetic</code> (unit: m.s^-1)</li>
+<li><code>core_profiles/profiles_1d/e_field/diamagnetic</code> (unit: V.m^-1)</li>
+</ul>
+<h2>Evidence</h2>
+<p>Rc13 standard names that quarantined because of this issue:</p>
+<ul>
+<li><code>diamagnetic_component_of_anomalous_current_density</code> (audit: diamagnetic_component_check, pydantic:scalar.name; unit: A.m^-2) — 'diamagnetic' is not a spatial projection axis; it labels a drift (v_dia = B × ∇p / (qnB²))</li>
+<li><code>diamagnetic_component_of_electric_field</code> (audit: diamagnetic_component_check, pydantic:scalar.name; unit: V.m^-1) — same: not a coordinate axis</li>
+<li><code>diamagnetic_component_of_ion_exb_drift_velocity</code> (audit: diamagnetic_component_check, pydantic:scalar.name; unit: m.s^-1) — same</li>
+<li><code>diamagnetic_component_of_ion_velocity_per_magnetic_field_magnitude</code> (audit: diamagnetic_component_check, pydantic:scalar.name; unit: m.s^-1) — same</li>
+<li><code>diamagnetic_component_of_magnetic_field</code> (audit: diamagnetic_component_check, pydantic:scalar.name; unit: T) — same</li>
+<li><code>diamagnetic_component_of_magnetic_vector_potential</code> (audit: diamagnetic_component_check, pydantic:scalar.name; unit: m.T) — same</li>
+</ul>
+<p>Total: <strong>6 quarantined names</strong>, all failing both <code>pydantic:scalar.name</code> (missing
+from Component vocabulary) and <code>diamagnetic_component_check</code>.</p>
+<h2>Proposed fix</h2>
+<p>Rename <code>/diamagnetic</code> leaf nodes in the DD:</p>
+<table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Current leaf</th>
+<th>Proposed rename</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*/velocity/</code></td>
+<td><code>diamagnetic</code></td>
+<td><code>diamagnetic_drift</code></td>
+</tr>
+<tr>
+<td><code>*/e_field/</code></td>
+<td><code>diamagnetic</code></td>
+<td><code>diamagnetic_drift</code></td>
+</tr>
+<tr>
+<td><code>*/a_field/</code></td>
+<td><code>diamagnetic</code></td>
+<td><code>diamagnetic_drift</code></td>
+</tr>
+<tr>
+<td><code>*/b_field/</code></td>
+<td><code>diamagnetic</code></td>
+<td><code>diamagnetic_drift</code></td>
+</tr>
+<tr>
+<td><code>*/j_tot/</code></td>
+<td><code>diamagnetic</code></td>
+<td><code>diamagnetic_drift</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>/radial</code>, <code>/poloidal</code>, <code>/toroidal</code> siblings are true coordinate axes.
+<code>/diamagnetic</code> is a drift mechanism — physically a vector quantity, not a spatial
+projection. Renaming to <code>diamagnetic_drift</code> clarifies that this is a drift-type
+contribution, consistent with the DD's existing <code>e_x_b</code> (ExB drift) siblings.</p>
+<p>Alternatively, if the DD prefers to keep the path name: add explicit documentation
+tagging these leaves as &quot;drift-type contribution projected onto the local radial
+direction&quot; rather than a coordinate axis.</p>
+<h2>Downstream impact</h2>
+<ul>
+<li><strong>imas-codex SN extractor:</strong> unblocks 6 quarantined paths; the LLM will
+generate <code>diamagnetic_drift_velocity</code> (or similar) instead of the invalid
+<code>diamagnetic_component_of_*</code> pattern.</li>
+<li><strong>pydantic audits:</strong> <code>diamagnetic_component_check</code> audit can be removed entirely
+— no more false-positive <code>_component_of_</code> construction.</li>
+<li><strong>imas-standard-names:</strong> no vocab change needed; <code>diamagnetic_drift</code> already
+exists as a Process token. If DD renames, codex produces valid names without
+grammar additions.</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §2.13 (row 1)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §4.3 (DD-01)</li>
+<li>Plan: plans/features/standard-names/31-quality-bootstrap-v2.md §7</li>
+</ul>
+
+  </main>
+</body>
+</html>

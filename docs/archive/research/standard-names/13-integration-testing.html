@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="13-integration-testing">
+  <meta name="plan-title" content="Feature 13: Integration Testing &amp; CI">
+  <meta name="plan-summary" content="The SN pipeline lacks end-to-end tests that exercise the full 8-phase flow.">
+  <meta name="archive-source" content="plans/research/standard-names/archived-v1/13-integration-testing.md">
+  <title>Feature 13: Integration Testing &amp; CI | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 13: Integration Testing &amp; CI</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-v1/13-integration-testing.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Archived v1 feature plan</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-v1/13-integration-testing.md</dd></div><div><dt>Status</dt><dd>Pending</dd></div><div><dt>Priority</dt><dd>Medium — validates all other plans work together</dd></div><div><dt>Depends on</dt><dd>All other plans (09-12, 14) — at least Phase 1 of each</dd></div><div><dt>Parallel with</dt><dd>None — this is the final validation layer</dd></div><div><dt>Estimated complexity</dt><dd>Medium</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="09-llm-compose-integration.html">Feature 09: LLM Compose Integration</a>, <a href="12-benchmark-enhancement.html">Feature 12: Quality Scoring &amp; Benchmark</a>, <a href="14-link-validation.html">Feature 14: Link Validation &amp; Graph Mirroring</a></p></section>
+    <h2>Problem</h2>
+<p>The SN pipeline lacks end-to-end tests that exercise the full 8-phase flow.
+Individual phases are tested in their respective plans (09-12, 14), but
+integration between phases — data flow, state transitions, error propagation,
+and the complete <code>sn build</code> CLI experience — is not covered.</p>
+<p>The existing test suite (<code>tests/sn/</code>) tests grammar, composition, and the
+MCP server, but nothing for the pipeline orchestration, graph persistence,
+link validation, or quality scoring.</p>
+<h2>Approach</h2>
+<p>Three test layers:</p>
+<ol>
+<li><strong>Pipeline integration tests</strong> — full 8-phase flow with mocked LLM</li>
+<li><strong>CLI integration tests</strong> — <code>sn build</code>, <code>sn link</code>, <code>sn score</code>, <code>sn status</code></li>
+<li><strong>CI workflow updates</strong> — ensure SN tests run in CI</li>
+</ol>
+<h3>Pipeline Architecture (8 phases)</h3>
+<pre><code>EXTRACT → COMPOSE → REVIEW → VALIDATE → DOCUMENT → PERSIST_NODES → LINK → SCORE
+</code></pre>
+<p>Each phase produces output consumed by the next. Integration tests verify
+the full chain without mocking intermediate state.</p>
+<hr />
+<h2>Phase 1: Pipeline Integration Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Create pipeline test fixtures</strong></p>
+<ul>
+<li>File: <code>tests/sn/conftest.py</code></li>
+<li><code>mock_dd_paths()</code> — fixture returning DD path metadata for EXTRACT</li>
+<li><code>mock_llm_compose()</code> — returns valid compose output (grammar fields)</li>
+<li><code>mock_llm_review()</code> — returns review verdicts (accept/revise/reject)</li>
+<li><code>mock_llm_document()</code> — returns rich documentation with cross-refs</li>
+<li><code>mock_llm_score()</code> — returns SNScoreFields</li>
+<li><code>mock_graph_client()</code> — in-memory graph stub for PERSIST/LINK/SCORE</li>
+<li>Each fixture returns data matching the exact Pydantic models used
+by workers</li>
+</ul>
+</li>
+<li>
+<p><strong>Test full pipeline flow</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_pipeline_integration.py</code></li>
+<li>Test: <code>test_full_pipeline_dd_source</code>
+<ul>
+<li>Input: 5 DD paths from equilibrium IDS</li>
+<li>Expected: all 8 phases execute in order</li>
+<li>Verify: state transitions (extracted→composed→reviewed→validated→
+documented→persisted→linked→scored)</li>
+<li>Verify: data flows between phases (compose output → review input)</li>
+<li>Verify: total_cost accumulates across LLM phases</li>
+<li>Mock: all LLM calls, graph client</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test phase skipping</strong></p>
+<ul>
+<li>Test: <code>test_skip_document_phase</code>
+<ul>
+<li><code>--skip-document</code> → pipeline skips DOCUMENT, PERSIST_NODES still runs
+(with empty docs)</li>
+</ul>
+</li>
+<li>Test: <code>test_skip_link_phase</code>
+<ul>
+<li><code>--skip-link</code> → pipeline skips LINK, SCORE still runs (score_link_quality=0)</li>
+</ul>
+</li>
+<li>Test: <code>test_skip_score_phase</code>
+<ul>
+<li><code>--skip-score</code> → pipeline skips SCORE, results still persisted</li>
+</ul>
+</li>
+<li>Test: <code>test_no_persist_mode</code>
+<ul>
+<li><code>--no-persist</code> → skips PERSIST_NODES, LINK, and SCORE</li>
+</ul>
+</li>
+<li>Test: <code>test_dry_run_mode</code>
+<ul>
+<li><code>--dry-run</code> → no LLM calls, no graph writes, shows plan only</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test error propagation</strong></p>
+<ul>
+<li>Test: <code>test_compose_failure_stops_pipeline</code>
+<ul>
+<li>LLM error in COMPOSE → pipeline reports error, no downstream phases run</li>
+</ul>
+</li>
+<li>Test: <code>test_review_rejection_reduces_count</code>
+<ul>
+<li>REVIEW rejects 2/5 names → VALIDATE receives 3 names</li>
+</ul>
+</li>
+<li>Test: <code>test_validate_failure_reduces_count</code>
+<ul>
+<li>VALIDATE fails 1/3 names → DOCUMENT receives 2 names</li>
+</ul>
+</li>
+<li>Test: <code>test_persist_failure_stops_link_score</code>
+<ul>
+<li>Graph error in PERSIST_NODES → LINK and SCORE don't run</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test pipeline phase dependencies</strong></p>
+<ul>
+<li>Test: <code>test_phase_ordering</code>
+<ul>
+<li>Verify WorkerSpec depends_on chain:
+compose→review→validate→document→persist→link→score</li>
+</ul>
+</li>
+<li>Test: <code>test_parallel_phases_are_independent</code>
+<ul>
+<li>Phases without dependencies can run concurrently (none currently, but
+architecture supports it)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Full pipeline test exercises all 8 phases end-to-end</li>
+<li>Phase skipping tested for all skip flags</li>
+<li>Error propagation verified for each phase boundary</li>
+<li>No graph or MCP dependency (all mocked)</li>
+</ul>
+<hr />
+<h2>Phase 2: CLI Integration Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Test <code>sn build</code> command</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_cli_integration.py</code></li>
+<li>Test: <code>test_sn_build_basic</code>
+<ul>
+<li><code>sn build --source dd --ids equilibrium --dry-run</code></li>
+<li>Verify: exits 0, shows pipeline plan</li>
+</ul>
+</li>
+<li>Test: <code>test_sn_build_with_all_flags</code>
+<ul>
+<li><code>sn build --source dd --ids equilibrium --compose-model X --skip-document --no-persist</code></li>
+<li>Verify: flags propagated to state correctly</li>
+</ul>
+</li>
+<li>Test: <code>test_sn_build_summary_output</code>
+<ul>
+<li>Verify: summary includes phase stats, costs, timing</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test <code>sn link</code> command</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_cli_integration.py</code></li>
+<li>Test: <code>test_sn_link_basic</code>
+<ul>
+<li><code>sn link</code> — re-links names with unresolved references</li>
+</ul>
+</li>
+<li>Test: <code>test_sn_link_all</code>
+<ul>
+<li><code>sn link --all</code> — re-validates all existing edges</li>
+</ul>
+</li>
+<li>Test: <code>test_sn_link_convergence</code>
+<ul>
+<li>Run link twice → fewer unresolved on second run</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test <code>sn score</code> command</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_cli_integration.py</code></li>
+<li>Test: <code>test_sn_score_basic</code>
+<ul>
+<li><code>sn score</code> — scores unscored names</li>
+</ul>
+</li>
+<li>Test: <code>test_sn_score_specific</code>
+<ul>
+<li><code>sn score --name electron_temperature</code> — scores one name</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test <code>sn status</code> command</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_cli_integration.py</code></li>
+<li>Test: <code>test_sn_status_includes_link_health</code>
+<ul>
+<li>Verify link health section in output</li>
+</ul>
+</li>
+<li>Test: <code>test_sn_status_includes_score_summary</code>
+<ul>
+<li>Verify score statistics in output</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test <code>sn benchmark</code> command</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_cli_integration.py</code></li>
+<li>Test: <code>test_sn_benchmark_uses_shared_scorer</code>
+<ul>
+<li>Verify benchmark imports from <code>sn/scorer.py</code></li>
+</ul>
+</li>
+<li>Test: <code>test_sn_benchmark_comparison</code>
+<ul>
+<li><code>sn benchmark --compare</code> shows model comparison table</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>All CLI commands exit cleanly</li>
+<li>Flag propagation verified</li>
+<li>Output format validated</li>
+</ul>
+<hr />
+<h2>Phase 3: Graph Integration Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Test StandardName graph round-trip</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_graph_integration.py</code></li>
+<li>Test: <code>test_persist_and_read_back</code>
+<ul>
+<li>Write StandardName → read back → verify all fields</li>
+</ul>
+</li>
+<li>Test: <code>test_cross_references_edge_creation</code>
+<ul>
+<li>Persist two names → create CROSS_REFERENCES edge → verify</li>
+</ul>
+</li>
+<li>Test: <code>test_depends_on_edge_creation</code>
+<ul>
+<li>Persist two names → create DEPENDS_ON edge → verify</li>
+</ul>
+</li>
+<li>Test: <code>test_degree_counter_accuracy</code>
+<ul>
+<li>Create multiple edges → verify ref_in_degree, ref_out_degree</li>
+</ul>
+</li>
+<li>Test: <code>test_unresolved_refs_property</code>
+<ul>
+<li>Persist name with unresolved → verify property stored</li>
+<li>Later persist target → re-link → verify edge created and property cleared</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Test catalog mirroring</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_graph_integration.py</code></li>
+<li>Test: <code>test_import_catalog_creates_nodes</code></li>
+<li>Test: <code>test_import_catalog_idempotent</code></li>
+<li>Test: <code>test_generated_vs_mirrored_provenance</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Test schema compliance</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_schema_compliance.py</code></li>
+<li>Verify StandardName nodes comply with LinkML schema</li>
+<li>Verify all relationship types are declared</li>
+<li>Verify score dimensions match schema declaration</li>
+<li>Verify StandardNameStatus enum values match code usage</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Graph round-trip preserves all data</li>
+<li>Edge creation is idempotent</li>
+<li>Degree counters accurate after edge modifications</li>
+<li>Schema compliance passes</li>
+</ul>
+<hr />
+<h2>Phase 4: CI Configuration</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Update test workflow</strong></p>
+<ul>
+<li>File: <code>.github/workflows/test.yml</code> (or equivalent)</li>
+<li>Ensure <code>tests/sn/</code> runs in CI</li>
+<li>SN tests should not require:
+<ul>
+<li>Live graph connection (use mocks/fixtures)</li>
+<li>MCP server running</li>
+<li>API keys (mock LLM calls)</li>
+</ul>
+</li>
+<li>SN tests may optionally test against graph (mark with <code>@pytest.mark.graph</code>)</li>
+</ul>
+</li>
+<li>
+<p><strong>Add SN benchmark CI job (optional)</strong></p>
+<ul>
+<li>Only on manual trigger or tag push</li>
+<li>Runs benchmark with reference set</li>
+<li>Reports scores in CI summary</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>SN tests run in CI without external dependencies</li>
+<li>Graph tests can be skipped with marker</li>
+<li>CI reports SN test results clearly</li>
+</ul>
+<hr />
+<h2>Phase 5: Test Coverage Targets</h2>
+<h3>Coverage Goals</h3>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Target</th>
+<th>What to Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sn/pipeline.py</code></td>
+<td>90%</td>
+<td>Phase ordering, skip logic, error propagation</td>
+</tr>
+<tr>
+<td><code>sn/workers.py</code></td>
+<td>85%</td>
+<td>All 8 workers with mocked deps</td>
+</tr>
+<tr>
+<td><code>sn/scorer.py</code></td>
+<td>95%</td>
+<td>Composite function, calibration, dimensions</td>
+</tr>
+<tr>
+<td><code>sn/linker.py</code></td>
+<td>95%</td>
+<td>Resolution engine, classification, cycles</td>
+</tr>
+<tr>
+<td><code>sn/graph_ops.py</code></td>
+<td>80%</td>
+<td>CRUD, relationships, degree counters</td>
+</tr>
+<tr>
+<td><code>sn/state.py</code></td>
+<td>90%</td>
+<td>State transitions, stats accumulation</td>
+</tr>
+<tr>
+<td><code>sn/models.py</code></td>
+<td>95%</td>
+<td>Pydantic validation, serialization</td>
+</tr>
+<tr>
+<td><code>cli/sn.py</code></td>
+<td>75%</td>
+<td>CLI flag parsing, output format</td>
+</tr>
+</tbody>
+</table>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>No module below 75% coverage</li>
+<li>Critical modules (scorer, linker, models) at 95%+</li>
+<li>Pipeline integration tests cover all 8 phases</li>
+</ul>
+<hr />
+<h2>Files Modified / Created</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tests/sn/conftest.py</code></td>
+<td>Pipeline fixtures, mock LLM/graph</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_pipeline_integration.py</code></td>
+<td>NEW: 8-phase pipeline tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_cli_integration.py</code></td>
+<td>NEW: CLI command tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_graph_integration.py</code></td>
+<td>NEW: graph round-trip tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_schema_compliance.py</code></td>
+<td>NEW: schema compliance tests</td>
+</tr>
+<tr>
+<td><code>.github/workflows/test.yml</code></td>
+<td>Add SN test job</td>
+</tr>
+</tbody>
+</table>
+<h2>Documentation Updates</h2>
+<ul>
+<li>No external doc changes — tests are self-documenting</li>
+</ul>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="03-grammar-extensions">
+  <meta name="plan-title" content="Feature Plan: Grammar Extensions">
+  <meta name="plan-summary" content="Maarten&#x27;s feedback (PR 2, Issues 4-8) identifies grammar patterns and standard name entries that the current system cannot represent. These include mathematical transformations of physical bases (squareofX), time derivatives (changeovertimeinX), binary operations (productofXandY,">
+  <meta name="archive-source" content="plans/research/standard-names/archived-implemented/03-grammar-extensions.md">
+  <title>Feature Plan: Grammar Extensions | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature Plan: Grammar Extensions</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-implemented/03-grammar-extensions.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Implemented feature archive</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-implemented/03-grammar-extensions.md</dd></div>
+    </dl>
+    
+    <h2>Problem</h2>
+<p>Maarten's feedback (PR #2, Issues #4-8) identifies grammar patterns and standard name entries that the current system cannot represent. These include mathematical transformations of physical bases (<code>square_of_X</code>), time derivatives (<code>change_over_time_in_X</code>), binary operations (<code>product_of_X_and_Y</code>, <code>ratio_of_X_to_Y</code>), and a validation gap between <code>None</code> and <code>dimensionless</code> units.</p>
+<p>Without these extensions, the batch generation pipeline cannot produce correct names for derived quantities in several IDS domains.</p>
+<h2>Approach</h2>
+<p>Extend the grammar in phases: unary transformations first (simpler, single-base), then binary operators (complex, requires two-base parsing), then validation rules and missing entries.</p>
+<h2>Deliverables</h2>
+<h3>Phase 1: Unary Transformations</h3>
+<p><strong>Owner</strong>: Agent A (grammar)
+<strong>Wave</strong>: 4 (parallel with pipeline polish)</p>
+<p>Add support for mathematical transformations that take a single physical base:</p>
+<table>
+<thead>
+<tr>
+<th>Transformation</th>
+<th>Pattern</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>square_of</code></td>
+<td><code>square_of_{physical_base}</code></td>
+<td><code>square_of_electron_temperature</code></td>
+</tr>
+<tr>
+<td><code>change_over_time_in</code></td>
+<td><code>change_over_time_in_{physical_base}</code></td>
+<td><code>change_over_time_in_magnetic_flux</code></td>
+</tr>
+<tr>
+<td><code>logarithm_of</code></td>
+<td><code>logarithm_of_{physical_base}</code></td>
+<td><code>logarithm_of_density</code></td>
+</tr>
+<tr>
+<td><code>inverse_of</code></td>
+<td><code>inverse_of_{physical_base}</code></td>
+<td><code>inverse_of_safety_factor</code></td>
+</tr>
+</tbody>
+</table>
+<p>Implementation:</p>
+<ol>
+<li>
+<p>Add <code>transformation</code> segment to grammar specification:</p>
+<pre><code class="language-yaml">transformation:
+  position: prefix  # Appears before physical_base
+  tokens:
+    - square_of
+    - change_over_time_in
+    - logarithm_of
+    - inverse_of
+  connector: null  # Directly prepended: &quot;square_of_electron_temperature&quot;
+</code></pre>
+</li>
+<li>
+<p>Update <code>grammar.constants</code>:</p>
+<ul>
+<li>Add <code>TRANSFORMATION_TOKENS</code> to <code>SEGMENT_TOKEN_MAP</code></li>
+<li>Update <code>SEGMENT_ORDER</code> to include transformation before physical_base</li>
+<li>Update <code>SEGMENT_RULES</code> with transformation constraints</li>
+</ul>
+</li>
+<li>
+<p>Update grammar parser:</p>
+<ul>
+<li>Extend <code>parse_standard_name()</code> to recognize transformation prefixes</li>
+<li>Extend <code>compose_standard_name()</code> to accept <code>transformation</code> parameter</li>
+</ul>
+</li>
+<li>
+<p>Update vocabulary:</p>
+<ul>
+<li>Add transformation tokens to vocabulary YAML</li>
+<li>Run codegen to regenerate constants</li>
+</ul>
+</li>
+<li>
+<p>Tests: <code>tests/grammar/test_transformations.py</code></p>
+<ul>
+<li>Test parsing of transformation names</li>
+<li>Test composition with transformation parameter</li>
+<li>Test that transformation + component is invalid (mutual exclusivity)</li>
+<li>Test round-trip: compose → parse → compose</li>
+</ul>
+</li>
+</ol>
+<p><strong>Dependencies</strong>: None (grammar is independent)
+<strong>Files</strong>: Grammar specification, <code>grammar/constants.py</code> (regenerated), parser updates</p>
+<h3>Phase 2: Binary Operators</h3>
+<p><strong>Owner</strong>: Agent A (grammar, continued)
+<strong>Wave</strong>: 4+ (may extend beyond Wave 4)</p>
+<p>Binary operators are a significant grammar extension. They require two physical base arguments, which the current single-base grammar cannot represent.</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Pattern</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>product_of_X_and_Y</code></td>
+<td><code>product_of_{base1}_and_{base2}</code></td>
+<td><code>product_of_density_and_temperature</code></td>
+</tr>
+<tr>
+<td><code>ratio_of_X_to_Y</code></td>
+<td><code>ratio_of_{base1}_to_{base2}</code></td>
+<td><code>ratio_of_electron_temperature_to_ion_temperature</code></td>
+</tr>
+<tr>
+<td><code>difference_of_X_and_Y</code></td>
+<td><code>difference_of_{base1}_and_{base2}</code></td>
+<td><code>difference_of_total_pressure_and_electron_pressure</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Design considerations</strong>:</p>
+<p>This is the most complex grammar extension. Key decisions:</p>
+<ol>
+<li>
+<p><strong>Two-base parsing</strong>: The parser must recognize <code>_and_</code> or <code>_to_</code> as separators between two physical bases. Since physical bases are open vocabulary (any snake_case string), the separator detection must be unambiguous.</p>
+</li>
+<li>
+<p><strong>Recursion depth</strong>: Can operands themselves be transformed? E.g., <code>ratio_of_square_of_X_to_Y</code>. Recommend limiting to depth 1 (no nested transformations) for initial implementation.</p>
+</li>
+<li>
+<p><strong>Connector words</strong>: <code>and</code> for symmetric operations (product), <code>to</code> for asymmetric (ratio). These must be reserved words that cannot appear in physical bases.</p>
+</li>
+<li>
+<p><strong>Compose API</strong>: The <code>compose_standard_name()</code> tool needs two base parameters:</p>
+<pre><code class="language-python">compose_standard_name(
+    binary_operator=&quot;ratio_of&quot;,
+    physical_base=&quot;electron_temperature&quot;,
+    secondary_base=&quot;ion_temperature&quot;,
+)
+</code></pre>
+</li>
+</ol>
+<p>Implementation:</p>
+<ol>
+<li>
+<p>Design the two-base grammar extension:</p>
+<ul>
+<li>Define <code>binary_operator</code> segment with tokens (<code>product_of</code>, <code>ratio_of</code>, <code>difference_of</code>)</li>
+<li>Define connector words (<code>and</code>, <code>to</code>) per operator</li>
+<li>Define <code>secondary_base</code> as a new segment following the connector</li>
+<li>Document mutual exclusivity: <code>binary_operator</code> is incompatible with <code>component</code>, <code>transformation</code></li>
+</ul>
+</li>
+<li>
+<p>Update grammar specification with binary operator rules</p>
+</li>
+<li>
+<p>Update parser:</p>
+<ul>
+<li>Detect binary operator prefix</li>
+<li>Split on connector word to extract both bases</li>
+<li>Validate both bases independently</li>
+</ul>
+</li>
+<li>
+<p>Update <code>compose_standard_name()</code>:</p>
+<ul>
+<li>Add <code>binary_operator</code> and <code>secondary_base</code> parameters</li>
+<li>Validate mutual exclusivity with other segments</li>
+</ul>
+</li>
+<li>
+<p>Tests: <code>tests/grammar/test_binary_operators.py</code></p>
+<ul>
+<li>Test parsing with various base combinations</li>
+<li>Test connector word detection (and vs to)</li>
+<li>Test mutual exclusivity constraints</li>
+<li>Test that bases with <code>and</code> or <code>to</code> substrings parse correctly</li>
+<li>Test error messages for ambiguous parses</li>
+</ul>
+</li>
+</ol>
+<p><strong>Dependencies</strong>: Phase 1 (builds on transformation infrastructure)
+<strong>Risk</strong>: High complexity. Recommend a design review (rubber-duck critique) before implementation.</p>
+<h3>Phase 3: Validation Enhancements</h3>
+<p><strong>Owner</strong>: Agent B (validation)
+<strong>Wave</strong>: 4</p>
+<ol>
+<li>
+<p><strong>Units: None vs dimensionless</strong></p>
+<p>Add validation rule enforcing the semantic distinction:</p>
+<ul>
+<li><code>unit: None</code> — valid only for entries where the quantity has no physical unit (identifiers, names, labels). Typically <code>kind: metadata</code>.</li>
+<li><code>unit: dimensionless</code> — valid for physical quantities that are pure ratios or numbers (safety factor, beta, normalized quantities).</li>
+</ul>
+<p>Implementation:</p>
+<ul>
+<li>Add validation rule to the validation pipeline</li>
+<li>If <code>unit</code> is <code>None</code> and <code>kind</code> is <code>scalar</code> or <code>vector</code>, warn (may be incorrect)</li>
+<li>If <code>unit</code> is <code>dimensionless</code>, ensure <code>kind</code> is <code>scalar</code> or <code>vector</code> (not metadata)</li>
+<li>Document the distinction in <code>docs/grammar-reference.md</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Audit existing entries</strong></p>
+<p>Check all current catalog entries for incorrect unit assignments:</p>
+<pre><code class="language-python"># Pseudo-code for audit
+for entry in catalog:
+    if entry.unit is None and entry.kind in (&quot;scalar&quot;, &quot;vector&quot;):
+        report_warning(f&quot;{entry.name}: unit=None with kind={entry.kind}&quot;)
+</code></pre>
+</li>
+<li>
+<p>Tests: <code>tests/validation/test_unit_rules.py</code></p>
+<ul>
+<li>Test None unit with metadata kind (valid)</li>
+<li>Test None unit with scalar kind (warning)</li>
+<li>Test dimensionless unit with scalar kind (valid)</li>
+<li>Test dimensionless unit with metadata kind (invalid)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Dependencies</strong>: None
+<strong>Files</strong>: Validation pipeline, <code>docs/grammar-reference.md</code></p>
+<h3>Phase 4: Missing Standard Name Entries</h3>
+<p><strong>Owner</strong>: Agent B (catalog)
+<strong>Wave</strong>: 4 (after grammar extensions land)</p>
+<p>Create the specific entries identified in Maarten's feedback:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Kind</th>
+<th>Unit</th>
+<th>Tags</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flux_loop_name</code></td>
+<td>metadata</td>
+<td>None</td>
+<td>[magnetics]</td>
+<td>Issues #4-8</td>
+</tr>
+<tr>
+<td><code>coil_current</code></td>
+<td>scalar</td>
+<td>A</td>
+<td>[magnetics]</td>
+<td>Issues #4-8</td>
+</tr>
+<tr>
+<td><code>passive_current</code></td>
+<td>scalar</td>
+<td>A</td>
+<td>[magnetics]</td>
+<td>Issues #4-8</td>
+</tr>
+</tbody>
+</table>
+<p>Implementation:</p>
+<ol>
+<li>Validate each name against grammar (including any new transformation rules)</li>
+<li>Check for vocabulary gaps — add tokens if needed via <code>manage_vocabulary</code></li>
+<li>Create entries using <code>create_standard_names</code> MCP tool</li>
+<li>Include provenance referencing the originating GitHub issue</li>
+<li>Persist using <code>write_standard_names</code> (with user approval)</li>
+</ol>
+<p><strong>Dependencies</strong>: Phases 1-3 (grammar must support any required patterns)
+<strong>Files</strong>: Catalog YAML entries (created via MCP tools)</p>
+<h2>Acceptance Criteria</h2>
+<ul>
+<li>☐ Unary transformations parse and compose correctly</li>
+<li>☐ Binary operators parse and compose correctly (if implemented)</li>
+<li>☐ <code>compose_standard_name</code> supports <code>transformation</code> parameter</li>
+<li>☐ <code>compose_standard_name</code> supports <code>binary_operator</code> and <code>secondary_base</code> parameters</li>
+<li>☐ None vs dimensionless validation enforced</li>
+<li>☐ Missing entries created with correct grammar and provenance</li>
+<li>☐ All grammar changes are backward compatible (existing names still parse)</li>
+<li>☐ Grammar reference documentation updated</li>
+<li>☐ 100% test coverage on code</li>
+</ul>
+<h2>Risk Assessment</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binary operator parsing ambiguity</td>
+<td>Medium</td>
+<td>High</td>
+<td>Design review before implementation; restrict to depth 1</td>
+</tr>
+<tr>
+<td><code>and</code>/<code>to</code> in physical base names</td>
+<td>Low</td>
+<td>High</td>
+<td>Reserved word list; validate bases don't contain connectors</td>
+</tr>
+<tr>
+<td>Backward compatibility break</td>
+<td>Low</td>
+<td>Critical</td>
+<td>Existing names must continue parsing; add, never remove</td>
+</tr>
+<tr>
+<td>Scope creep (more transformations)</td>
+<td>Medium</td>
+<td>Low</td>
+<td>Start with Maarten's list; extend later as needed</td>
+</tr>
+</tbody>
+</table>
+
+  </main>
+</body>
+</html>

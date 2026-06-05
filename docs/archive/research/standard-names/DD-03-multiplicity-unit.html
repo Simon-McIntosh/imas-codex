@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="DD-03-multiplicity-unit">
+  <meta name="plan-title" content="DD-03 — `atom_multiplicity_of_isotope` declared with invalid unit `Elementary Charge Unit`">
+  <meta name="plan-summary" content="Affected IDSs: coreprofiles, edgeprofiles, waves, wall, pellets,">
+  <meta name="archive-source" content="plans/research/standard-names/dd-issues-rc14/DD-03-multiplicity-unit.md">
+  <title>DD-03 — `atom_multiplicity_of_isotope` declared with invalid unit `Elementary Charge Unit` | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD-03 — `atom_multiplicity_of_isotope` declared with invalid unit `Elementary Charge Unit`</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/dd-issues-rc14/DD-03-multiplicity-unit.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>RC14 data dictionary issue note</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/dd-issues-rc14/DD-03-multiplicity-unit.md</dd></div>
+    </dl>
+    
+    <h2>DD path(s) / pattern</h2>
+<pre><code>*/element/multiplicity
+</code></pre>
+<p>Affected IDSs: <code>core_profiles</code>, <code>edge_profiles</code>, <code>waves</code>, <code>wall</code>, <code>pellets</code>,
+<code>turbulence</code>, and all IDSs containing <code>ion/element/multiplicity</code> or
+<code>neutral/element/multiplicity</code>.</p>
+<p>Concrete paths (sample):</p>
+<ul>
+<li><code>core_profiles/profiles_1d/ion/element/multiplicity</code> (unit: Elementary Charge Unit)</li>
+<li><code>edge_profiles/ggd/ion/element/multiplicity</code> (unit: Elementary Charge Unit)</li>
+<li><code>waves/coherent_wave/global_quantities/ion/element/multiplicity</code> (unit: Elementary Charge Unit)</li>
+<li><code>waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity</code> (unit: Elementary Charge Unit)</li>
+<li><code>wall/description_ggd/ggd/energy_fluxes/recombination/ion/element/multiplicity</code> (unit: Elementary Charge Unit)</li>
+<li><code>pellets/time_slice/pellet/propellant_gas/element/multiplicity</code> (unit: Elementary Charge Unit)</li>
+</ul>
+<h2>Evidence</h2>
+<p>Rc13 standard names that quarantined because of this issue:</p>
+<ul>
+<li><code>atom_multiplicity_of_isotope</code> (audit: pydantic:scalar.unit; unit: Elementary Charge Unit) — unit string contains whitespace, which is not a valid UDUNITS expression</li>
+</ul>
+<p>Total: <strong>1 quarantined name</strong>, failing <code>pydantic:scalar.unit</code> (&quot;Unit must not
+contain whitespace&quot;).</p>
+<p>Two issues compound here:</p>
+<ol>
+<li><strong>Invalid UDUNITS string:</strong> <code>Elementary Charge Unit</code> contains spaces — not
+parseable by any UDUNITS library. The correct UDUNITS symbol for elementary
+charge is <code>e</code>.</li>
+<li><strong>Semantically wrong unit:</strong> <code>multiplicity</code> is the number of atoms of a given
+element in a molecule/compound (e.g., 2 for O in H₂O). It is a dimensionless
+integer count, not a charge. The DD likely confused <code>multiplicity</code> with <code>z_n</code>
+(nuclear charge number), which correctly carries <code>unit=e</code> elsewhere (e.g.,
+<code>pellets/time_slice/pellet/species/z_n</code>).</li>
+</ol>
+<h2>Proposed fix</h2>
+<p>Option A (preferred — semantics fix): <strong>Change unit to <code>1</code> (dimensionless).</strong>
+Multiplicity is an integer count — it has no physical unit. The sibling field
+<code>z_n</code> already carries <code>unit=e</code> for charge-related quantities.</p>
+<p>Option B (UDUNITS fix only): <strong>Change unit to <code>e</code></strong> if the DD truly intends this
+field to represent a charge-like quantity. However, the field name <code>multiplicity</code>
+and the DD documentation (&quot;Multiplicity of the atom&quot;) strongly suggest
+dimensionless.</p>
+<p>In either case, the whitespace in the unit string must be fixed.</p>
+<h2>Downstream impact</h2>
+<ul>
+<li><strong>imas-codex SN extractor:</strong> unblocks 1 quarantined name; with correct unit the
+name <code>atom_multiplicity_of_isotope</code> (unit: 1) would pass validation.</li>
+<li><strong>pydantic audits:</strong> the <code>pydantic:scalar.unit</code> whitespace rejection is generic
+and correct — no audit changes needed.</li>
+<li><strong>imas-standard-names:</strong> no vocab change needed.</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §2.13 (row 3)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §4.3 (DD-02, grouped with grid_object_measure as unit sanitization)</li>
+<li>Plan: plans/features/standard-names/31-quality-bootstrap-v2.md §7</li>
+</ul>
+
+  </main>
+</body>
+</html>

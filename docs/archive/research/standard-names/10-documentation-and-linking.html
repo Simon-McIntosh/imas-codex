@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="10-documentation-and-linking">
+  <meta name="plan-title" content="Feature 10: Documentation Generation">
+  <meta name="plan-summary" content="The SN pipeline generates names with grammar fields and a short reason,">
+  <meta name="archive-source" content="plans/research/standard-names/archived-v1/10-documentation-and-linking.md">
+  <title>Feature 10: Documentation Generation | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 10: Documentation Generation</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-v1/10-documentation-and-linking.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Archived v1 feature plan</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-v1/10-documentation-and-linking.md</dd></div><div><dt>Status</dt><dd>Pending</dd></div><div><dt>Priority</dt><dd>High — names without documentation are low-value</dd></div><div><dt>Depends on</dt><dd>Feature 09 (LLM compose must be working)</dd></div><div><dt>Parallel with</dt><dd>12 (benchmark Phase 1)</dd></div><div><dt>Estimated complexity</dt><dd>Medium-high</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="09-llm-compose-integration.html">Feature 09: LLM Compose Integration</a></p><p><strong>Parallel with:</strong> <a href="12-benchmark-enhancement.html">Feature 12: Quality Scoring &amp; Benchmark</a></p></section>
+    <h2>Problem</h2>
+<p>The SN pipeline generates names with grammar fields and a short <code>reason</code>,
+but no rich documentation. The existing 309-entry catalog demonstrates the
+quality bar: entries like <code>electron_temperature</code> have 500+ word descriptions,
+LaTeX equations, governing physics, measurement methods, typical values, and
+cross-references to other standard names.</p>
+<p>Generated names without this documentation will be rejected during catalog
+review.</p>
+<h2>Approach</h2>
+<p>Add a DOCUMENT phase after VALIDATE that generates rich documentation via
+LLM. This is a <strong>separate concern from link validation</strong> (Plan 14) and
+<strong>separate from quality scoring</strong> (Plan 12). The revised pipeline:</p>
+<pre><code>EXTRACT → COMPOSE → REVIEW → VALIDATE → DOCUMENT → PERSIST_NODES → LINK → SCORE → PERSIST_GRAPH
+</code></pre>
+<p>DOCUMENT focuses solely on generating high-quality physics documentation
+for each validated name. Cross-reference mentions in the documentation are
+recorded as structured data but <strong>not validated here</strong> — that's the LINK
+phase's job (Plan 14) which runs after nodes are persisted to the graph.</p>
+<hr />
+<h2>Phase 1: DOCUMENT Phase — LLM Documentation Generation</h2>
+<h3>Design</h3>
+<p>A new <code>document_worker()</code> that takes validated names and generates rich
+documentation for each. This is a separate LLM call from compose because:</p>
+<ol>
+<li>Compose focuses on <em>naming accuracy</em> (grammar fields, name selection)</li>
+<li>Documentation focuses on <em>explanation quality</em> (physics context, equations,
+measurement methods, typical values, cross-references)</li>
+<li>Different prompt structure: compose needs batch context (many paths at once),
+document needs deep context per name (similar names, DD path details, units)</li>
+<li>Token budget: combining both would exceed context windows for complex names</li>
+</ol>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Create documentation prompt template</strong></p>
+<ul>
+<li>File: <code>imas_codex/llm/prompts/sn/document.md</code></li>
+<li>System message (static, cacheable):
+<ul>
+<li>Role definition: fusion physics documentation expert</li>
+<li>Documentation quality rubric (from review doc Section 5):
+<ul>
+<li>Outstanding: LaTeX equations, governing physics, measurement methods,
+typical values across devices (ITER/JET/DIII-D), sign conventions,
+cross-references</li>
+<li>Good: physics context, relevant equations, measurement approaches</li>
+<li>Adequate: definition, units, basic physics context</li>
+</ul>
+</li>
+<li>3-5 exemplar entries at Outstanding tier (full YAML)</li>
+<li>Grammar rules summary (for context, not for naming)</li>
+</ul>
+</li>
+<li>User message (dynamic):
+<ul>
+<li>The standard name and its grammar fields</li>
+<li>Source DD path description and metadata</li>
+<li>Related names from catalog (for cross-referencing)</li>
+<li>Units and data type</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Create Pydantic response models</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/models.py</code></li>
+</ul>
+<pre><code class="language-python">class SNDocumentation(BaseModel):
+    &quot;&quot;&quot;Rich documentation for a single standard name.&quot;&quot;&quot;
+    source_id: str
+    standard_name: str
+    kind: str  # physical, geometric, metadata
+    description: str  # Rich markdown with LaTeX
+    governing_equations: list[str]  # LaTeX equation strings
+    measurement_methods: list[str]  # How this quantity is measured
+    typical_values: dict[str, str]  # device → &quot;range (units)&quot;
+    cross_reference_mentions: list[str]  # Other SN IDs mentioned in docs
+    dependency_mentions: list[str]  # SNs this quantity functionally depends on
+    tags: list[str]  # Classification tags
+    sign_convention: str | None  # Sign convention notes
+</code></pre>
+<p><strong>Key distinction</strong>: <code>cross_reference_mentions</code> and <code>dependency_mentions</code>
+are <strong>unvalidated</strong> text extracted from the LLM output. They become
+graph relationships only after the LINK phase (Plan 14) validates them.</p>
+<pre><code class="language-python">class SNDocumentBatch(BaseModel):
+    &quot;&quot;&quot;LLM response for batch documentation generation.&quot;&quot;&quot;
+    entries: list[SNDocumentation]
+</code></pre>
+</li>
+<li>
+<p><strong>Implement <code>document_worker()</code></strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/workers.py</code></li>
+<li>Pattern: follows <code>review_worker()</code> structure</li>
+<li>Reads from <code>state.validated</code> (or <code>state.reviewed</code>)</li>
+<li>Batches: 3-5 names per LLM call (smaller batches than compose
+because documentation is verbose)</li>
+<li>Stores results in <code>state.documented: list[dict]</code></li>
+<li>Tracks cost in <code>state.document_stats</code></li>
+<li>Uses <code>get_model(&quot;reasoning&quot;)</code> by default (documentation requires
+deeper physics knowledge)</li>
+<li>CLI: <code>--document-model</code> and <code>--skip-document</code> flags</li>
+</ul>
+</li>
+<li>
+<p><strong>Add DOCUMENT phase to pipeline</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/pipeline.py</code></li>
+<li>New WorkerSpec between VALIDATE and PERSIST_NODES:<pre><code class="language-python">WorkerSpec(
+    &quot;document&quot;,
+    &quot;document_phase&quot;,
+    document_worker,
+    depends_on=[&quot;validate_phase&quot;],
+    enabled=not state.skip_document,
+),
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Add state fields</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/state.py</code></li>
+<li><code>documented: list[dict]</code> — documented names</li>
+<li><code>document_stats: WorkerStats</code> — phase tracking</li>
+<li><code>document_phase: PipelinePhase</code> — supervision</li>
+<li><code>skip_document: bool = False</code> — CLI control</li>
+<li><code>document_model: str | None = None</code> — model override</li>
+<li>Update <code>total_cost</code> property to include document phase</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>sn build --source dd --ids equilibrium</code> generates documentation for each name</li>
+<li>Documentation includes governing equations, measurement methods, typical values</li>
+<li>Cross-reference mentions are extracted but NOT validated in this phase</li>
+<li><code>--skip-document</code> flag bypasses the phase</li>
+<li>Cost tracking includes document phase</li>
+</ul>
+<hr />
+<h2>Phase 2: Progress Display Updates</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Add DOCUMENT stage to progress display</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/progress.py</code></li>
+<li>New <code>StageDisplaySpec</code> entry for document phase</li>
+<li>Shows cost (LLM), rate, current name being documented</li>
+</ul>
+</li>
+<li>
+<p><strong>Update pipeline summary</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>Summary table includes document stats</li>
+<li>Total cost includes compose + review + document phases</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Progress display shows DOCUMENT stage with cost tracking</li>
+<li>Resource section includes updated cost totals</li>
+</ul>
+<hr />
+<h2>Phase 3: Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Test document worker</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_document_worker.py</code></li>
+<li>Mock <code>acall_llm_structured</code> returning <code>SNDocumentBatch</code></li>
+<li>Verify documentation fields are populated</li>
+<li>Verify <code>cross_reference_mentions</code> and <code>dependency_mentions</code> extracted</li>
+<li>Verify cost tracking</li>
+<li>Test skip-document mode</li>
+<li>Test empty input handling</li>
+</ul>
+</li>
+<li>
+<p><strong>Test prompt template rendering</strong></p>
+<ul>
+<li>Verify <code>sn/document.md</code> renders without errors</li>
+<li>Verify exemplar entries are included</li>
+<li>Verify system/user message split for cache efficiency</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>All tests pass with mocked LLM</li>
+<li>No graph or MCP dependency in tests</li>
+</ul>
+<hr />
+<h2>Files Modified / Created</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code></td>
+<td>Add <code>document_worker()</code></td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/state.py</code></td>
+<td>Add documented, document_stats, document_phase</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/pipeline.py</code></td>
+<td>Add DOCUMENT WorkerSpec</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/models.py</code></td>
+<td>Add SNDocumentation, SNDocumentBatch</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/progress.py</code></td>
+<td>Add document stage display</td>
+</tr>
+<tr>
+<td><code>imas_codex/cli/sn.py</code></td>
+<td>Add --skip-document, --document-model</td>
+</tr>
+<tr>
+<td><code>imas_codex/llm/prompts/sn/document.md</code></td>
+<td>New prompt template</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_document_worker.py</code></td>
+<td>New test file</td>
+</tr>
+</tbody>
+</table>
+<h2>Documentation Updates</h2>
+<ul>
+<li>AGENTS.md: Document DOCUMENT phase and CLI flags</li>
+<li>Prompt templates: Self-documenting via frontmatter</li>
+</ul>
+
+  </main>
+</body>
+</html>

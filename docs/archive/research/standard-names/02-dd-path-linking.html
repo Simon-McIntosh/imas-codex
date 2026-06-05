@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="02-dd-path-linking">
+  <meta name="plan-title" content="Feature 02: DD Path Linking (Existing Entries)">
+  <meta name="plan-summary" content="Standard names have an idspaths field (liststr) but no entries populate it. The 309 existing catalog entries need DD path mappings to:">
+  <meta name="archive-source" content="plans/research/standard-names/archived-implemented/02-dd-path-linking.md">
+  <title>Feature 02: DD Path Linking (Existing Entries) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 02: DD Path Linking (Existing Entries)</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-implemented/02-dd-path-linking.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Implemented feature archive</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-implemented/02-dd-path-linking.md</dd></div><div><dt>Repository</dt><dd>imas-standard-names</dd></div><div><dt>Wave</dt><dd>1 (parallel with 01, 03)</dd></div><div><dt>Depends on</dt><dd>None</dd></div><div><dt>Enables</dt><dd>Codex generation pipeline (provides baseline mappings to avoid duplicates)</dd></div>
+    </dl>
+    
+    <h2>Problem</h2>
+<p>Standard names have an <code>ids_paths</code> field (<code>list[str]</code>) but no entries populate it. The 309 existing catalog entries need DD path mappings to:</p>
+<ol>
+<li>Connect standard names to the data they describe</li>
+<li>Provide baseline data for codex's generation pipeline (deduplication)</li>
+<li>Enable DD version migration tracking</li>
+</ol>
+<h2>Scope</h2>
+<p><strong>In scope:</strong> Phase 1 (data population) and Phase 4 (version tracking) only.<br />
+<strong>Out of scope:</strong> Phases 2-3 (DD context providers and full-DD generation) — these move to imas-codex as part of the build pipeline pivot.</p>
+<h2>Deliverables</h2>
+<h3>Phase 1: Populate <code>ids_paths</code> for Existing Entries</h3>
+<p><strong>Owner:</strong> Agent (data population)<br />
+<strong>Wave:</strong> 1 (no code dependencies — starts immediately)<br />
+<strong>Dependencies:</strong> None<br />
+<strong>Estimated effort:</strong> 2–3 days</p>
+<p>Populate <code>ids_paths</code> for the 309 existing catalog entries using cluster-based discovery via direct imports from <code>imas-codex</code> backing functions.</p>
+<h4>Workflow</h4>
+<ol>
+<li>For each existing standard name, call <code>search_dd_clusters()</code> backing function to find matching global clusters</li>
+<li>Extract cluster member paths as <code>ids_paths</code> candidates</li>
+<li>Supplement with <code>find_related_dd_paths()</code> for paths outside clusters</li>
+<li>Validate all candidate paths with <code>check_dd_paths()</code> against DD v4.1.0</li>
+<li>Apply path classification rules (exact equivalence only — exclude aggregations, fits, errors)</li>
+<li>Persist via <code>edit_standard_names</code> + <code>write_standard_names</code></li>
+</ol>
+<h4>Path Classification Rules</h4>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Action</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Same leaf name, different IDS</td>
+<td>Include</td>
+<td><code>core_profiles/.../electrons/temperature</code> ✓</td>
+</tr>
+<tr>
+<td>Aggregated/reduced variant</td>
+<td>Exclude (separate name)</td>
+<td><code>summary/volume_average/t_e</code> ✗</td>
+</tr>
+<tr>
+<td>Fit/reconstruction metadata</td>
+<td>Exclude</td>
+<td><code>*_fit</code>, <code>*_fit/measured</code> ✗</td>
+</tr>
+<tr>
+<td>Error/uncertainty companions</td>
+<td>Exclude</td>
+<td><code>*_error_upper</code>, <code>*_error_lower</code> ✗</td>
+</tr>
+<tr>
+<td>Grid/coordinate paths</td>
+<td>Evaluate case-by-case</td>
+<td><code>*/grid/psi</code> → may need separate name</td>
+</tr>
+</tbody>
+</table>
+<h4>Acceptance Criteria</h4>
+<ul>
+<li>☐ All 309 existing entries have <code>ids_paths</code> populated (where applicable — some names may have no DD equivalent)</li>
+<li>☐ All paths validated against DD v4.1.0 via <code>check_dd_paths</code></li>
+<li>☐ <code>fetch_standard_names</code> MCP tool returns <code>ids_paths</code> in output (fix if missing)</li>
+<li>☐ Public documentation renderers continue to exclude <code>ids_paths</code></li>
+<li>☐ Test coverage for path validation and classification logic</li>
+</ul>
+<hr />
+<h3>Phase 2-3: Superseded — Moved to imas-codex</h3>
+<p>DD context providers (Phase 2) and full-DD generation (Phase 3) are now part of the imas-codex SN Build Pipeline. See <code>plans/research/09-codex-pivot-analysis.md</code> for details.</p>
+<hr />
+<h3>Phase 4: DD Version Tracking and Migration</h3>
+<p><strong>Owner:</strong> Agent (infrastructure)<br />
+<strong>Wave:</strong> 1+ (parallel, no pipeline dependency)<br />
+<strong>Dependencies:</strong> None (Phase 1 data needed for meaningful testing)<br />
+<strong>Estimated effort:</strong> 3–4 days</p>
+<p>Automated DD version tracking and path migration when the DD is updated.</p>
+<h4>Components</h4>
+<h5>Mapping Manifest</h5>
+<p>Repository-level file tracking DD version and coverage:</p>
+<pre><code class="language-yaml"># catalog-root/dd_mapping_manifest.yml
+dd_version: &quot;4.1.0&quot;
+validated_at: &quot;2025-07-18&quot;
+validation_tool: &quot;check_dd_paths&quot;
+entry_count: 309
+mapped_count: 0  # entries with non-empty ids_paths
+coverage_stats:
+  total_dd_leaf_paths: 14700
+  mapped_paths: 0
+  unmapped_physics_paths: 9500
+</code></pre>
+<h5>Path Revalidation Pipeline</h5>
+<pre><code>1. Detect DD version change (compare manifest vs current)
+2. Batch-validate all ids_paths via check_dd_paths() backing function
+3. Identify broken paths (renamed, removed)
+4. For renamed paths:
+   a. Follow rename chains via get_dd_version_context(follow_rename_chains=True)
+   b. Auto-update ids_paths where rename chain provides clear target
+5. For removed paths:
+   a. Flag for human review
+   b. Search for replacement via find_related_dd_paths()
+6. For new paths (added in new version):
+   a. Discover via export_imas_domain() diff
+   b. Assign to existing standard names via cluster membership
+   c. Flag unmatched as candidates for new standard names
+7. Update manifest with new version and coverage stats
+</code></pre>
+<h5>Migration CLI Command</h5>
+<pre><code class="language-bash"># Validate current mappings against latest DD
+uv run standard-names dd-validate
+
+# Migrate paths to new DD version
+uv run standard-names dd-migrate --from 4.0.0 --to 4.1.0
+
+# Coverage report
+uv run standard-names dd-coverage
+</code></pre>
+<h4>Acceptance Criteria</h4>
+<ul>
+<li>☐ Mapping manifest created and maintained in catalog root</li>
+<li>☐ Revalidation pipeline detects broken paths on DD version change</li>
+<li>☐ Rename chain following auto-updates &gt;90% of renamed paths</li>
+<li>☐ CLI commands for validation, migration, and coverage reporting</li>
+<li>☐ Migration produces a diff report for human review</li>
+<li>☐ Test coverage for rename chain following and path revalidation</li>
+<li>☐ Integration test: simulate v3→v4 migration on a subset of paths</li>
+</ul>
+<hr />
+<h2>Privacy and Visibility</h2>
+<p><code>ids_paths</code> data follows the established privacy model:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th><code>ids_paths</code> Visible?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YAML files (source of truth)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>MCP tools (<code>fetch_standard_names</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Documentation site (mkdocs)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Graph database (generated edges)</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/research/standard-names/research/08-dd-linking-design.md">DD Linking Design</a> for detailed privacy architecture.</p>
+<hr />
+<h2>Dependencies on Other Features</h2>
+<pre><code>Feature 02: DD Path Linking
+├── Phase 1: No dependencies (data population via DD MCP tools)
+└── Phase 4: No dependencies (parallel infrastructure)
+
+Phases 2-3 → moved to imas-codex SN Build Pipeline
+</code></pre>
+<h2>Definition of Done</h2>
+<p>This feature is complete when:</p>
+<ol>
+<li>All existing 309 entries have <code>ids_paths</code> populated where applicable</li>
+<li>DD version migration is automated with &gt;90% auto-update rate for renames</li>
+<li>Coverage reporting shows current mapping state</li>
+<li>All code has 100% test coverage</li>
+<li>Documentation updated for DD integration workflow</li>
+</ol>
+
+  </main>
+</body>
+</html>

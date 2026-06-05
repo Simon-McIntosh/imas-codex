@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="11-schema-and-persistence">
+  <meta name="plan-title" content="Feature 11: StandardName Schema &amp; Graph Persistence">
+  <meta name="plan-summary" content="StandardName has a partial LinkML schema (8 fields in facility.yaml) but">
+  <meta name="archive-source" content="plans/research/standard-names/archived-v1/11-schema-and-persistence.md">
+  <title>Feature 11: StandardName Schema &amp; Graph Persistence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 11: StandardName Schema &amp; Graph Persistence</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-v1/11-schema-and-persistence.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Archived v1 feature plan</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-v1/11-schema-and-persistence.md</dd></div><div><dt>Status</dt><dd>Pending</dd></div><div><dt>Priority</dt><dd>High — schema compliance and data durability</dd></div><div><dt>Depends on</dt><dd>None (Phase 1 is independent); Phase 2 depends on 09/10</dd></div><div><dt>Parallel with</dt><dd>09 (LLM compose), 12 (benchmark) — Phase 1 only</dd></div><div><dt>Estimated complexity</dt><dd>Medium</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="09-llm-compose-integration.html">Feature 09: LLM Compose Integration</a>, <a href="10-documentation-and-linking.html">Feature 10: Documentation Generation</a></p><p><strong>Parallel with:</strong> <a href="09-llm-compose-integration.html">Feature 09: LLM Compose Integration</a>, <a href="12-benchmark-enhancement.html">Feature 12: Quality Scoring &amp; Benchmark</a></p></section>
+    <h2>Problem</h2>
+<p>StandardName has a partial LinkML schema (8 fields in <code>facility.yaml</code>) but
+<code>graph_ops.py</code> writes 9 additional properties not declared in the schema.
+This means: no generated Pydantic model, no schema compliance tests, no
+vector index management, ad-hoc Cypher. Additionally, the pipeline never
+calls <code>write_standard_names()</code> — generated names exist only in memory
+during the run and are lost when it completes.</p>
+<p>The catalog (309 entries) also needs to be mirrored into the graph for
+cross-referencing and dedup, but with provenance marking so they aren't
+confused with codex-generated names.</p>
+<h2>Approach</h2>
+<p>Split into three sub-features to maximize parallelism:</p>
+<ul>
+<li><strong>Phase 1 (Schema Alignment)</strong>: Finalize LinkML schema, rebuild models —
+independent of other plans</li>
+<li><strong>Phase 2 (Graph Persistence — PERSIST_NODES)</strong>: Persist validated names
+to graph <strong>before</strong> LINK and SCORE phases can operate on them</li>
+<li><strong>Phase 3 (Catalog Mirroring)</strong>: Mirror external catalog for
+cross-referencing, link validation, and dedup</li>
+</ul>
+<h3>Revised Pipeline Architecture</h3>
+<pre><code>EXTRACT → COMPOSE → REVIEW → VALIDATE → DOCUMENT → PERSIST_NODES → LINK → SCORE
+</code></pre>
+<p><strong>Critical ordering</strong>: PERSIST_NODES comes <strong>before</strong> LINK and SCORE because:</p>
+<ul>
+<li>LINK creates <code>CROSS_REFERENCES</code> and <code>DEPENDS_ON</code> edges between StandardName
+nodes — these nodes must exist in the graph first</li>
+<li>SCORE reads from and writes to graph nodes</li>
+<li>Without PERSIST_NODES first, both LINK and SCORE would have to work entirely
+in-memory with no graph access</li>
+</ul>
+<h3>Relationship Design</h3>
+<p>The StandardName schema uses <strong>explicit relationship-writing code</strong> for
+multivalued self-referential relationships, not the <code>create_nodes()</code>
+auto-relationship mechanism. This is because:</p>
+<ol>
+<li><code>create_nodes()</code> auto-relationships only match <strong>scalar</strong> slot values
+(one property → one target node). <code>cross_references</code> and <code>depends_on</code>
+are multivalued (one source → many targets).</li>
+<li>Self-referential edges need idempotency for LINK re-runs — the LINK
+worker uses explicit <code>MERGE</code> with relationship properties.</li>
+<li>Edge properties (link_type, created_at) require <code>create_relationship()</code>.</li>
+</ol>
+<p><strong>What <code>create_nodes()</code> handles</strong> (scalar slots):</p>
+<ul>
+<li><code>derived_from_dd → DERIVED_FROM → IMASNode</code> (scalar, auto works)</li>
+<li><code>derived_from_signal → DERIVED_FROM → FacilitySignal</code> (scalar, auto works)</li>
+<li><code>unit → HAS_UNIT → Unit</code> (scalar, auto works)</li>
+</ul>
+<p><strong>What requires explicit code</strong> (multivalued slots):</p>
+<ul>
+<li><code>cross_references → CROSS_REFERENCES → StandardName</code> (multivalued)</li>
+<li><code>depends_on → DEPENDS_ON → StandardName</code> (multivalued)</li>
+</ul>
+<hr />
+<h2>Phase 1: Schema Alignment</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Add StandardNameStatus enum</strong></p>
+<ul>
+<li>File: <code>imas_codex/schemas/common.yaml</code> (or <code>facility.yaml</code>)</li>
+</ul>
+<pre><code class="language-yaml">StandardNameStatus:
+  permissible_values:
+    composed:
+      description: Generated by LLM compose phase
+    reviewed:
+      description: Passed cross-model review
+    validated:
+      description: Passed grammar round-trip validation
+    documented:
+      description: Rich documentation generated
+    persisted:
+      description: Written to graph (PERSIST_NODES complete)
+    linked:
+      description: Cross-references validated and graph edges created
+    scored:
+      description: Quality scoring complete
+    published:
+      description: Published to external catalog
+    catalog_mirror:
+      description: Mirrored from external catalog (not generated)
+</code></pre>
+</li>
+<li>
+<p><strong>Complete StandardName class in LinkML</strong></p>
+<ul>
+<li>File: <code>imas_codex/schemas/facility.yaml</code></li>
+<li>Add all properties currently written by <code>graph_ops.py</code></li>
+<li>Add relationship slots with proper annotations</li>
+<li>Add vector index annotation</li>
+<li>Add fulltext index annotation</li>
+</ul>
+<pre><code class="language-yaml">StandardName:
+  description: &gt;-
+    A canonical physics quantity name following the IMAS Standard Names
+    grammar. Generated by the SN build pipeline or mirrored from the
+    external catalog. Linked to source DD paths or facility signals
+    via DERIVED_FROM relationships. Self-referential links via
+    CROSS_REFERENCES (navigational) and DEPENDS_ON (functional).
+  class_uri: facility:StandardName
+  annotations:
+    fulltext_index:
+      tag: fulltext_index
+      value: &quot;standard_name_text:id,description,keywords&quot;
+  attributes:
+    id:
+      identifier: true
+      description: The canonical standard name string (e.g., electron_temperature)
+      required: true
+    # --- Grammar decomposition ---
+    physical_base:
+      description: Root physics quantity (e.g., temperature, density)
+    geometric_base:
+      description: Geometric quantity when applicable (e.g., position, outline)
+    subject:
+      description: Species or population (e.g., electron, ion, deuterium)
+    component:
+      description: Vector/tensor component (e.g., toroidal, poloidal)
+    coordinate:
+      description: Coordinate system component
+    position:
+      description: Measurement location (e.g., magnetic_axis, plasma_boundary)
+    process:
+      description: Physical process (e.g., ohmic, bootstrap)
+    transformation:
+      description: Mathematical transformation (e.g., square_of, logarithm_of)
+    object:
+      description: Device component (e.g., flux_loop, rogowski_coil)
+    binary_operator:
+      description: Compound operator (e.g., ratio_of, product_of)
+    secondary_base:
+      description: Second quantity in binary operator compounds
+    # --- Metadata ---
+    kind:
+      description: &quot;Name kind: physical, geometric, or metadata&quot;
+      range: string
+    unit:
+      description: SI unit string (e.g., eV, m^-3, A)
+      range: Unit
+      annotations:
+        relationship_type: HAS_UNIT
+    description:
+      description: Rich documentation with LaTeX, equations, measurement methods
+    keywords:
+      description: Classification keywords for search
+      multivalued: true
+      range: string
+    tags:
+      description: Category tags (e.g., core_profiles, magnetics)
+      multivalued: true
+      range: string
+    # --- Provenance ---
+    source:
+      description: &quot;Source type: dd, signal, or catalog&quot;
+    source_path:
+      description: Originating DD path or signal ID
+    confidence:
+      description: Generation confidence (0.0-1.0)
+      range: float
+    provenance:
+      description: &quot;Origin marker: generated, catalog_mirror&quot;
+    # --- Status and lifecycle ---
+    status:
+      description: Pipeline lifecycle status
+      range: StandardNameStatus
+      required: true
+    claimed_at:
+      description: Worker coordination timestamp
+      range: datetime
+    claim_token:
+      description: Atomic claim verification token
+    # --- Vector search ---
+    embedding:
+      description: Vector embedding of description for semantic search
+      multivalued: true
+      range: float
+      annotations:
+        vector_index_name: standard_name_embedding
+    embedding_hash:
+      description: Hash of embedded text for change detection
+    embedded_at:
+      description: When embedding was last computed
+      range: datetime
+    # --- Temporal ---
+    created_at:
+      description: When the name was first created
+      range: datetime
+    documented_at:
+      description: When documentation was last generated
+      range: datetime
+    published_at:
+      description: When the name was published to catalog
+      range: datetime
+    # --- Relationships (scalar — auto-handled by create_nodes) ---
+    derived_from_dd:
+      description: Source DD path(s) this name was derived from
+      range: IMASNode
+      multivalued: true
+      annotations:
+        relationship_type: DERIVED_FROM
+    derived_from_signal:
+      description: Source signal(s) this name was derived from
+      range: FacilitySignal
+      multivalued: true
+      annotations:
+        relationship_type: DERIVED_FROM
+    # --- Relationships (multivalued self-ref — requires explicit code) ---
+    cross_references:
+      description: &gt;-
+        Other standard names referenced in documentation (navigational).
+        Populated by the LINK phase after validation. Only resolved
+        references become graph edges — forward/broken refs are stored
+        as node properties (unresolved_refs, forward_refs).
+        Requires explicit relationship-writing code (not create_nodes
+        auto-relationships) because this is multivalued.
+      range: StandardName
+      multivalued: true
+      inlined: false
+      annotations:
+        relationship_type: CROSS_REFERENCES
+    depends_on:
+      description: &gt;-
+        Standard names this quantity functionally depends on (definitional).
+        Distinct from cross_references: depends_on encodes physics
+        derivation (e.g., safety_factor depends_on plasma_current),
+        while cross_references are documentation links.
+        Requires explicit relationship-writing code (same reason).
+      range: StandardName
+      multivalued: true
+      inlined: false
+      annotations:
+        relationship_type: DEPENDS_ON
+    # --- Link resolution tracking ---
+    unresolved_refs:
+      description: &gt;-
+        Cross-reference mentions that could not be resolved to existing
+        StandardName nodes. Stored as node property (not graph edge)
+        because the target does not exist. Cleared when LINK phase
+        resolves them in a subsequent run.
+      multivalued: true
+      range: string
+    forward_refs:
+      description: &gt;-
+        Cross-reference mentions that resolve to names in the current
+        batch but not yet persisted. Converted to CROSS_REFERENCES
+        edges after PERSIST_NODES.
+      multivalued: true
+      range: string
+    ref_in_degree:
+      description: &gt;-
+        Number of other standard names that reference this name
+        (from CROSS_REFERENCES + DEPENDS_ON relationships).
+      range: integer
+    ref_out_degree:
+      description: &gt;-
+        Number of other standard names this name references
+        (from CROSS_REFERENCES + DEPENDS_ON relationships).
+      range: integer
+    # --- Score dimensions ---
+    score_semantic_accuracy:
+      description: &gt;-
+        How well the name captures the physics concept (0.0-1.0).
+        Gating dimension: if low, composite must be low regardless
+        of other dimensions.
+      range: float
+    score_catalog_convention:
+      description: &gt;-
+        Adherence to naming conventions established by the existing
+        309-entry catalog (0.0-1.0). Replaces score_grammar to avoid
+        duplicating the VALIDATE phase.
+      range: float
+    score_units_consistency:
+      description: &gt;-
+        Correctness of canonical units for the physics quantity
+        (0.0-1.0). Gating dimension alongside semantic_accuracy.
+      range: float
+    score_documentation_grounding:
+      description: &gt;-
+        Quality and accuracy of generated documentation (0.0-1.0).
+        Equations, measurement methods, typical values, physics context.
+      range: float
+    score_link_quality:
+      description: &gt;-
+        Quality of cross-references and dependency links (0.0-1.0).
+        Completeness, accuracy, degree of broken/unresolved refs.
+      range: float
+    score_composite:
+      description: &gt;-
+        Gated composite score. Computed as: if min(semantic, units) &lt; 0.3
+        then 0.0; else weighted_mean(all dimensions). Unlike discovery
+        scoring which uses max_composite(), SN scoring gates on
+        semantic+units because a well-documented wrong name is worthless.
+      range: float
+    scored_at:
+      description: When quality scoring was last performed
+      range: datetime
+</code></pre>
+<p><strong>Design notes:</strong></p>
+<ul>
+<li><code>CROSS_REFERENCES</code> vs <code>DEPENDS_ON</code> are separate relationship types
+(navigational vs functional dependency — different semantics)</li>
+<li>Both follow WikiPage <code>LINKS_TO</code> pattern with degree counters</li>
+<li><code>unresolved_refs</code> and <code>forward_refs</code> are node properties (not edges)
+because targets may not exist in the graph</li>
+<li>Score dimensions follow discovery patterns (CodeScoreFields,
+ContentScoreFields) but use gated composite instead of max_composite()</li>
+</ul>
+</li>
+<li>
+<p><strong>Rebuild generated models</strong></p>
+<ul>
+<li>Run: <code>uv run build-models --force</code></li>
+<li>Verify <code>imas_codex/graph/models.py</code> includes <code>StandardName</code> and <code>StandardNameStatus</code></li>
+<li>Verify <code>agents/schema-reference.md</code> includes StandardName</li>
+</ul>
+</li>
+<li>
+<p><strong>Update <code>graph_ops.py</code> to use generated model</strong></p>
+<ul>
+<li>Import <code>StandardName</code> from generated models</li>
+<li>Use model for validation before graph writes</li>
+<li>Align property names: <code>source_type</code> → <code>source</code>, <code>units</code> → <code>unit</code></li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>LinkML schema declares all StandardName properties and relationships</li>
+<li><code>uv run build-models --force</code> succeeds</li>
+<li>Generated Pydantic model includes all fields</li>
+<li>Schema compliance tests pass for StandardName nodes</li>
+</ul>
+<hr />
+<h2>Phase 2: Graph Persistence (PERSIST_NODES phase)</h2>
+<p><strong>Depends on:</strong> Plans 09 (compose output contract) and 10 (document output)</p>
+<h3>Design</h3>
+<p>PERSIST_NODES writes StandardName data to the graph <strong>before</strong> LINK and
+SCORE phases. This is a critical ordering change from earlier drafts that
+had PERSIST_GRAPH at the end.</p>
+<p><strong>What PERSIST_NODES writes:</strong></p>
+<ul>
+<li>StandardName node with all properties (grammar fields, metadata, docs)</li>
+<li>Scalar relationships via <code>create_nodes()</code>: DERIVED_FROM, HAS_UNIT</li>
+<li>Sets status to <code>persisted</code></li>
+</ul>
+<p><strong>What PERSIST_NODES does NOT write:</strong></p>
+<ul>
+<li><code>CROSS_REFERENCES</code> edges (that's LINK's job — Plan 14)</li>
+<li><code>DEPENDS_ON</code> edges (that's LINK's job — Plan 14)</li>
+<li>Score properties (that's SCORE's job — Plan 12)</li>
+</ul>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Implement <code>persist_nodes_worker()</code></strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/workers.py</code></li>
+<li>Reads from <code>state.documented</code> (output of DOCUMENT phase)</li>
+<li>Converts documented entries to <code>StandardName</code> model instances</li>
+<li>Calls <code>write_standard_names()</code> (refactored in Task 2)</li>
+<li>Sets status to <code>persisted</code></li>
+<li>Tracks written count in stats</li>
+<li>Pattern: claim→write→release (follows discovery worker pattern)</li>
+</ul>
+</li>
+<li>
+<p><strong>Refactor <code>write_standard_names()</code> to use <code>create_nodes()</code></strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/graph_ops.py</code></li>
+<li>Replace raw Cypher MERGE with <code>gc.create_nodes(&quot;StandardName&quot;, items)</code></li>
+<li>Scalar relationships auto-created by <code>create_nodes()</code>:
+<ul>
+<li><code>derived_from_dd</code> → DERIVED_FROM → IMASNode</li>
+<li><code>derived_from_signal</code> → DERIVED_FROM → FacilitySignal</li>
+<li><code>unit</code> → HAS_UNIT → Unit</li>
+</ul>
+</li>
+<li><strong>Exclude</strong> <code>cross_references</code> and <code>depends_on</code> from <code>create_nodes()</code>
+data — these are handled by LINK phase via explicit Cypher</li>
+<li>Handle batch sizes for large runs (50 nodes per batch)</li>
+</ul>
+</li>
+<li>
+<p><strong>Add explicit relationship-writing functions for LINK phase</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/graph_ops.py</code></li>
+<li><code>write_cross_references(source_id, target_ids)</code> — creates
+<code>CROSS_REFERENCES</code> edges using <code>MERGE</code> for idempotency</li>
+<li><code>write_depends_on(source_id, target_ids)</code> — creates <code>DEPENDS_ON</code> edges</li>
+<li><code>update_degree_counters(name_id)</code> — recalculates <code>ref_in_degree</code> and
+<code>ref_out_degree</code> from actual edge counts</li>
+<li><code>clear_unresolved_refs(name_id, resolved_ids)</code> — removes entries from
+<code>unresolved_refs</code> that are now resolved</li>
+<li>All functions use <code>MERGE</code> for idempotent re-runs</li>
+</ul>
+<pre><code class="language-python">def write_cross_references(
+    gc: GraphClient, source_id: str, target_ids: list[str]
+) -&gt; int:
+    &quot;&quot;&quot;Create CROSS_REFERENCES edges. Returns count of edges created.&quot;&quot;&quot;
+    return gc.query(&quot;&quot;&quot;
+        UNWIND $targets AS target_id
+        MATCH (src:StandardName {id: $source_id})
+        MATCH (tgt:StandardName {id: target_id})
+        MERGE (src)-[r:CROSS_REFERENCES]-&gt;(tgt)
+        ON CREATE SET r.created_at = datetime()
+        RETURN count(r) AS created
+    &quot;&quot;&quot;, source_id=source_id, targets=target_ids)
+</code></pre>
+</li>
+<li>
+<p><strong>Add PERSIST_NODES phase to pipeline</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/pipeline.py</code></li>
+<li>Between DOCUMENT and LINK:</li>
+</ul>
+<pre><code class="language-python">WorkerSpec(
+    &quot;persist_nodes&quot;,
+    &quot;persist_nodes_phase&quot;,
+    persist_nodes_worker,
+    depends_on=[&quot;document_phase&quot;],
+),
+</code></pre>
+</li>
+<li>
+<p><strong>Add <code>--no-persist</code> CLI flag</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>Skips graph write (for testing/dry-run scenarios)</li>
+<li>Dry-run mode already implies no persist</li>
+<li>Also skips LINK and SCORE (they need persisted nodes)</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Pipeline writes results to graph after DOCUMENT phase</li>
+<li>StandardName nodes have correct properties</li>
+<li>Scalar DERIVED_FROM edges link to IMASNode or FacilitySignal</li>
+<li>Multivalued relationships NOT created by PERSIST_NODES (LINK's job)</li>
+<li><code>--no-persist</code> flag prevents graph writes and skips LINK/SCORE</li>
+</ul>
+<hr />
+<h2>Phase 3: Catalog Mirroring</h2>
+<p>Mirror the external 309-entry catalog into the graph for cross-referencing,
+dedup, and link checking. Mark provenance clearly.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Add <code>sn import-catalog</code> CLI command</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>Loads catalog entries (via frozen snapshot or imas-sn API)</li>
+<li>Creates StandardName nodes with <code>provenance='catalog_mirror'</code>,
+<code>status='catalog_mirror'</code></li>
+<li>Idempotent: MERGE by name, don't overwrite generated entries</li>
+<li>Options: <code>--source {snapshot,api}</code>, <code>--dry-run</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Create catalog snapshot fixture</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/catalog_snapshot.py</code> (or JSON/YAML data file)</li>
+<li>Export: name, kind, unit, tags, description (summary only)</li>
+<li>Used for: tests, offline/CI, initial import</li>
+<li>Updated periodically from catalog repo</li>
+</ul>
+</li>
+<li>
+<p><strong>Update dedup queries</strong></p>
+<ul>
+<li><code>get_existing_standard_names()</code> should return both generated and
+mirrored names</li>
+<li>Review/link phases should distinguish provenance when reporting</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>sn import-catalog</code> imports 309 names into graph</li>
+<li>Mirrored entries have <code>provenance='catalog_mirror'</code></li>
+<li>Dedup works against both generated and mirrored names</li>
+<li>Publish phase excludes mirrored entries</li>
+</ul>
+<hr />
+<h2>Phase 4: Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Schema compliance tests</strong></p>
+<ul>
+<li>StandardName nodes match LinkML declaration</li>
+<li>All properties have correct types</li>
+<li>Relationships are properly annotated</li>
+<li>CROSS_REFERENCES and DEPENDS_ON declared with correct annotations</li>
+</ul>
+</li>
+<li>
+<p><strong>Persistence round-trip tests</strong></p>
+<ul>
+<li>Write → read → verify all fields preserved</li>
+<li>DERIVED_FROM relationships created correctly</li>
+<li>Verify CROSS_REFERENCES NOT created by persist_nodes_worker</li>
+</ul>
+</li>
+<li>
+<p><strong>Catalog mirror tests</strong></p>
+<ul>
+<li>Import creates correct nodes with provenance</li>
+<li>Idempotent reimport doesn't overwrite</li>
+</ul>
+</li>
+<li>
+<p><strong>Explicit relationship tests</strong></p>
+<ul>
+<li><code>write_cross_references()</code> creates edges correctly</li>
+<li><code>write_depends_on()</code> creates edges correctly</li>
+<li><code>update_degree_counters()</code> computes correct in/out degree</li>
+<li>Idempotent re-runs don't create duplicate edges</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>All schema compliance tests pass</li>
+<li>Graph round-trip preserves all data</li>
+<li>Relationship functions are idempotent</li>
+</ul>
+<hr />
+<h2>Files Modified / Created</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/schemas/facility.yaml</code></td>
+<td>Complete StandardName class with all relationships and score dimensions</td>
+</tr>
+<tr>
+<td><code>imas_codex/schemas/common.yaml</code></td>
+<td>Add StandardNameStatus enum (expanded with persisted/linked/scored)</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/graph_ops.py</code></td>
+<td>Refactor to use create_nodes(); add explicit relationship functions</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code></td>
+<td>Add persist_nodes_worker</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/pipeline.py</code></td>
+<td>Add PERSIST_NODES phase (before LINK/SCORE)</td>
+</tr>
+<tr>
+<td><code>imas_codex/cli/sn.py</code></td>
+<td>Add --no-persist, sn import-catalog</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/catalog_snapshot.py</code></td>
+<td>New: frozen catalog data</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_schema_compliance.py</code></td>
+<td>New: schema tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_persistence.py</code></td>
+<td>New: round-trip + relationship tests</td>
+</tr>
+</tbody>
+</table>
+<h2>Documentation Updates</h2>
+<ul>
+<li>AGENTS.md: Document <code>sn import-catalog</code> command and schema changes</li>
+<li>AGENTS.md: Document PERSIST_NODES ordering requirement</li>
+<li>Schema reference: auto-updated by <code>build-models</code></li>
+</ul>
+
+  </main>
+</body>
+</html>

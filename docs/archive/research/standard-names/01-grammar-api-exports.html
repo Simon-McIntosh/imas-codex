@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="01-grammar-api-exports">
+  <meta name="plan-title" content="Feature 01: Grammar API Exports">
+  <meta name="plan-summary" content="Ensure the grammar module is cleanly importable as a library by imas-codex. The grammar system already has zero external coupling — this feature audits and formalizes the public API.">
+  <meta name="archive-source" content="plans/research/standard-names/archived-implemented/01-grammar-api-exports.md">
+  <meta name="plan-informs" content="04-json-schema-contract,05-sn-build-pipeline">
+  <title>Feature 01: Grammar API Exports | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 01: Grammar API Exports</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-implemented/01-grammar-api-exports.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Implemented feature archive</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-implemented/01-grammar-api-exports.md</dd></div><div><dt>Repository</dt><dd>imas-standard-names</dd></div><div><dt>Wave</dt><dd>1 (parallel with 02, 03)</dd></div><div><dt>Enables</dt><dd>Feature 04 (JSON Schema Contract), Feature 05 (codex SN Build Pipeline)</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Informs:</strong> <a href="04-json-schema-contract.html">Feature 04: JSON Schema Contract</a>, <a href="05-sn-build-pipeline.html">Feature 05: SN Build Pipeline</a></p></section>
+    <h2>Goal</h2>
+<p>Ensure the grammar module is cleanly importable as a library by imas-codex. The grammar system already has zero external coupling — this feature audits and formalizes the public API.</p>
+<h2>Deliverables</h2>
+<h3>Phase 1: Audit and formalize <code>__all__</code> exports</h3>
+<ul>
+<li>Verify <code>grammar/__init__.py</code> exports all needed symbols</li>
+<li>Ensure all enums are accessible: <code>Component</code>, <code>Position</code>, <code>Subject</code>, <code>Object</code>, <code>GeometricBase</code>, <code>Process</code>, <code>GenericPhysicalBase</code></li>
+<li>Ensure core functions exported: <code>compose_standard_name</code>, <code>parse_standard_name</code>, <code>compose_name</code>, <code>parse_name</code></li>
+<li>Add <code>py.typed</code> marker file for type-checking support</li>
+</ul>
+<h3>Phase 2: Export validation functions</h3>
+<ul>
+<li>Make <code>services.validate_models()</code> a documented public API</li>
+<li>Ensure it can be called with just a <code>dict[str, StandardNameEntry]</code> — no catalog required</li>
+<li>Document the function signature and return type in docstring</li>
+</ul>
+<h3>Phase 3: Zero-side-effect import verification</h3>
+<ul>
+<li>Write a test that imports <code>imas_standard_names.grammar</code> in isolation</li>
+<li>Verify no file I/O, no network calls, no catalog loading on import</li>
+<li>Verify grammar module works without optional dependencies (spacy, proselint)</li>
+</ul>
+<h3>Phase 4: Package extras (optional)</h3>
+<ul>
+<li>Consider <code>imas-standard-names[grammar]</code> extra that installs only grammar deps</li>
+<li>This allows codex to depend on a minimal footprint</li>
+</ul>
+<h2>Acceptance Criteria</h2>
+<ul>
+<li><code>from imas_standard_names.grammar import compose_standard_name, parse_standard_name</code> works</li>
+<li>All enums importable</li>
+<li><code>validate_models()</code> callable without catalog</li>
+<li>No side effects on import</li>
+<li>100% test coverage on new/modified code</li>
+</ul>
+
+  </main>
+</body>
+</html>

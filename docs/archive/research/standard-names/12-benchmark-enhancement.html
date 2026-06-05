@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="12-benchmark-enhancement">
+  <meta name="plan-title" content="Feature 12: Quality Scoring &amp; Benchmark">
+  <meta name="plan-summary" content="Two interrelated gaps:">
+  <meta name="archive-source" content="plans/research/standard-names/archived-v1/12-benchmark-enhancement.md">
+  <title>Feature 12: Quality Scoring &amp; Benchmark | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 12: Quality Scoring &amp; Benchmark</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-v1/12-benchmark-enhancement.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Archived v1 feature plan</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-v1/12-benchmark-enhancement.md</dd></div><div><dt>Status</dt><dd>Pending</dd></div><div><dt>Priority</dt><dd>High — scoring grounds quality; benchmark drives model decisions</dd></div><div><dt>Depends on</dt><dd>Feature 11 Phase 2 (PERSIST_NODES), Feature 14 (LINK)</dd></div><div><dt>Parallel with</dt><dd>14 (linker Phase 1) — scorer and linker can be developed simultaneously</dd></div><div><dt>Estimated complexity</dt><dd>High</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="11-schema-and-persistence.html">Feature 11: StandardName Schema &amp; Graph Persistence</a>, <a href="14-link-validation.html">Feature 14: Link Validation &amp; Graph Mirroring</a></p><p><strong>Parallel with:</strong> <a href="14-link-validation.html">Feature 14: Link Validation &amp; Graph Mirroring</a></p></section>
+    <h2>Problem</h2>
+<p>Two interrelated gaps:</p>
+<ol>
+<li>
+<p><strong>No quality scoring in the build pipeline.</strong> Generated names are either
+accepted or rejected by the binary REVIEW phase, but there's no continuous
+quality metric. Discovery pipelines (code, wiki, path) all have rich
+scoring with calibrated dimensions — standard names need the same.</p>
+</li>
+<li>
+<p><strong>Benchmark is entangled with review.</strong> The current benchmark
+(<code>sn/benchmark.py</code>) contains a review worker that should be reusable
+independently. The benchmark should be a thin CLI that runs the build
+pipeline with different models and compares results — it should import
+the scoring module, not own it.</p>
+</li>
+</ol>
+<h2>Approach</h2>
+<p><strong>Two deliverables:</strong></p>
+<ul>
+<li><strong>Scorer module</strong> (<code>sn/scorer.py</code>): Reusable quality scoring for standard
+names, usable by both the build pipeline (as a SCORE phase) and the
+benchmark (for comparison). Follows discovery scoring patterns.</li>
+<li><strong>Benchmark CLI</strong> (<code>sn benchmark</code>): Thin orchestration that runs the build
+pipeline with different models, scores results, and compares. Imports
+from scorer — doesn't implement scoring itself.</li>
+</ul>
+<h3>Score Architecture (follows discovery patterns)</h3>
+<p>The discovery pipeline's scoring system provides the template:</p>
+<table>
+<thead>
+<tr>
+<th>Discovery Pattern</th>
+<th>SN Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CodeScoreFields(BaseModel)</code></td>
+<td><code>SNScoreFields(BaseModel)</code></td>
+</tr>
+<tr>
+<td><code>max_composite()</code></td>
+<td><code>gated_composite()</code> (semantic+units gate)</td>
+</tr>
+<tr>
+<td><code>sample_code_dimension_calibration()</code></td>
+<td><code>sample_sn_calibration()</code></td>
+</tr>
+<tr>
+<td><code>score_worker()</code> claim→score→persist</td>
+<td><code>score_worker()</code> claim→score→persist</td>
+</tr>
+<tr>
+<td><code>StageDisplaySpec</code> progress</td>
+<td><code>StageDisplaySpec</code> progress</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key difference from discovery scoring:</strong> Discovery uses <code>max_composite()</code>
+(composite = max of all dimensions). SN scoring uses a <strong>gated composite</strong>
+where <code>score_semantic_accuracy</code> and <code>score_units_consistency</code> are gate
+dimensions — if either is below threshold (0.3), the composite is forced
+to 0.0 regardless of how good documentation or conventions are. A
+well-documented wrong name is worthless.</p>
+<h3>Score Dimensions</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>What It Measures</th>
+<th>Gate?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>score_semantic_accuracy</code></td>
+<td>Does the name capture the physics concept?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>score_units_consistency</code></td>
+<td>Are the canonical units correct?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>score_catalog_convention</code></td>
+<td>Does naming match catalog patterns?</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>score_documentation_grounding</code></td>
+<td>Documentation quality and accuracy</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>score_link_quality</code></td>
+<td>Cross-reference completeness and accuracy</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><strong>NOT included:</strong> <code>score_grammar</code> — duplicates the VALIDATE phase which
+already does deterministic grammar round-trip validation.</p>
+<h3>Pipeline Position</h3>
+<pre><code>EXTRACT → COMPOSE → REVIEW → VALIDATE → DOCUMENT → PERSIST_NODES → LINK → SCORE
+</code></pre>
+<p>SCORE is the final phase, running after LINK because <code>score_link_quality</code>
+depends on link resolution results.</p>
+<hr />
+<h2>Phase 1: Score Model &amp; Composite Function</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Create <code>SNScoreFields</code> base model</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/scorer.py</code></li>
+</ul>
+<pre><code class="language-python">from pydantic import BaseModel, Field
+
+class SNScoreFields(BaseModel):
+    &quot;&quot;&quot;Score dimensions for standard name quality assessment.&quot;&quot;&quot;
+    score_semantic_accuracy: float = Field(
+        ge=0.0, le=1.0,
+        description=&quot;How well the name captures the physics concept&quot;
+    )
+    score_catalog_convention: float = Field(
+        ge=0.0, le=1.0,
+        description=&quot;Adherence to catalog naming conventions&quot;
+    )
+    score_units_consistency: float = Field(
+        ge=0.0, le=1.0,
+        description=&quot;Correctness of canonical units&quot;
+    )
+    score_documentation_grounding: float = Field(
+        ge=0.0, le=1.0,
+        description=&quot;Quality of generated documentation&quot;
+    )
+    score_link_quality: float = Field(
+        ge=0.0, le=1.0,
+        description=&quot;Cross-reference completeness and accuracy&quot;
+    )
+
+    def get_score_dict(self) -&gt; dict[str, float]:
+        &quot;&quot;&quot;Return dict of dimension_name → score for graph persistence.&quot;&quot;&quot;
+        return self.model_dump()
+</code></pre>
+</li>
+<li>
+<p><strong>Implement gated composite function</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/scorer.py</code></li>
+</ul>
+<pre><code class="language-python">GATE_DIMENSIONS = {&quot;score_semantic_accuracy&quot;, &quot;score_units_consistency&quot;}
+GATE_THRESHOLD = 0.3
+DIMENSION_WEIGHTS = {
+    &quot;score_semantic_accuracy&quot;: 0.30,
+    &quot;score_catalog_convention&quot;: 0.15,
+    &quot;score_units_consistency&quot;: 0.25,
+    &quot;score_documentation_grounding&quot;: 0.20,
+    &quot;score_link_quality&quot;: 0.10,
+}
+
+def gated_composite(scores: SNScoreFields) -&gt; float:
+    &quot;&quot;&quot;Compute gated composite score.
+
+    If any gate dimension is below threshold, composite is 0.0.
+    Otherwise, weighted mean of all dimensions.
+    &quot;&quot;&quot;
+    score_dict = scores.get_score_dict()
+    for gate_dim in GATE_DIMENSIONS:
+        if score_dict.get(gate_dim, 0.0) &lt; GATE_THRESHOLD:
+            return 0.0
+    return sum(
+        score_dict[dim] * weight
+        for dim, weight in DIMENSION_WEIGHTS.items()
+        if dim in score_dict
+    )
+</code></pre>
+</li>
+<li>
+<p><strong>Create scoring LLM prompt</strong></p>
+<ul>
+<li>File: <code>imas_codex/llm/prompts/sn/score.md</code></li>
+<li>System message (static, cacheable):
+<ul>
+<li>Role: fusion physics quality assessor</li>
+<li>Rubric for each dimension with examples at 5 levels (0.0, 0.25, 0.5, 0.75, 1.0)</li>
+<li>Calibration examples from catalog at each quality tier:
+<ul>
+<li>Outstanding (0.9+): <code>electron_temperature</code> — full LaTeX, typical values, measurement methods</li>
+<li>Good (0.7-0.9): <code>plasma_current</code> — solid physics context, equations</li>
+<li>Adequate (0.5-0.7): <code>toroidal_magnetic_field</code> — correct but sparse docs</li>
+<li>Poor (0.25-0.5): a name with wrong units or misleading semantics</li>
+<li>Failing (&lt;0.25): a name that doesn't match its physics concept</li>
+</ul>
+</li>
+<li>Gate rule explanation: semantic+units must be ≥0.3</li>
+</ul>
+</li>
+<li>User message (dynamic):
+<ul>
+<li>The standard name entry (all fields)</li>
+<li>Its documentation</li>
+<li>Its link resolution status (resolved/unresolved counts)</li>
+<li>Related catalog entries for comparison</li>
+</ul>
+</li>
+<li>Response model: <code>SNScoreFields</code></li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>SNScoreFields</code> validates all dimensions are 0.0-1.0</li>
+<li><code>gated_composite()</code> returns 0.0 when gates fail</li>
+<li><code>gated_composite()</code> returns weighted mean when gates pass</li>
+<li>Prompt includes calibration examples at 5 quality levels</li>
+</ul>
+<hr />
+<h2>Phase 2: Dynamic Calibration</h2>
+<h3>Design</h3>
+<p>Follow the discovery scoring calibration pattern: periodically sample
+already-scored StandardName nodes from the graph at 5 quality levels per
+dimension, inject these as few-shot examples into the scoring prompt.
+This keeps scoring consistent across runs and models.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Implement calibration sampling</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/scorer.py</code></li>
+</ul>
+<pre><code class="language-python">_calibration_cache: dict[str, Any] = {}
+_calibration_ttl: float = 300.0  # 5-minute TTL
+
+def sample_sn_calibration(gc: GraphClient) -&gt; dict[str, list[dict]]:
+    &quot;&quot;&quot;Sample scored StandardName nodes at 5 levels per dimension.
+
+    Returns: {dimension_name: [{name, score, snippet}, ...]}
+    Follows discovery/code/scorer.py pattern.
+    &quot;&quot;&quot;
+    now = time.time()
+    if _calibration_cache.get(&quot;timestamp&quot;, 0) + _calibration_ttl &gt; now:
+        return _calibration_cache.get(&quot;data&quot;, {})
+
+    calibration = {}
+    for dim in SNScoreFields.model_fields:
+        samples = gc.query(f&quot;&quot;&quot;
+            MATCH (sn:StandardName)
+            WHERE sn.{dim} IS NOT NULL
+            WITH sn, sn.{dim} AS score
+            ORDER BY score
+            WITH collect({{name: sn.id, score: score,
+                desc: substring(sn.description, 0, 200)}}) AS all_items
+            RETURN [
+                all_items[0],
+                all_items[toInteger(size(all_items)*0.25)],
+                all_items[toInteger(size(all_items)*0.5)],
+                all_items[toInteger(size(all_items)*0.75)],
+                all_items[size(all_items)-1]
+            ] AS levels
+        &quot;&quot;&quot;)
+        calibration[dim] = samples[0][&quot;levels&quot;] if samples else []
+
+    _calibration_cache[&quot;data&quot;] = calibration
+    _calibration_cache[&quot;timestamp&quot;] = now
+    return calibration
+</code></pre>
+</li>
+<li>
+<p><strong>Integrate calibration into prompt</strong></p>
+<ul>
+<li>Scoring prompt includes calibration examples when available</li>
+<li>Falls back to static examples for first run (no scored nodes yet)</li>
+<li>Calibration refreshed every 5 minutes (300s TTL)</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Calibration samples 5 levels per dimension</li>
+<li>TTL cache prevents excessive graph queries</li>
+<li>Graceful fallback when no scored nodes exist</li>
+</ul>
+<hr />
+<h2>Phase 3: SCORE Pipeline Worker</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Implement <code>score_worker()</code></strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/workers.py</code></li>
+<li>Pattern: claim→score→persist→release (follows discovery workers)</li>
+<li>Steps:
+<ol>
+<li>Claim batch of <code>status='linked'</code> (or <code>status='persisted'</code>) nodes</li>
+<li>Rebuild calibration examples (periodically, via TTL cache)</li>
+<li>For each name: build scoring prompt with calibration</li>
+<li>Call LLM for structured output → <code>SNScoreFields</code></li>
+<li>Compute <code>gated_composite()</code></li>
+<li>Persist scores to graph (SET all score dimensions + composite + scored_at)</li>
+<li>Update status to <code>scored</code></li>
+<li>Release claim</li>
+</ol>
+</li>
+<li>Batch size: 5-10 names per LLM call</li>
+<li>Uses <code>get_model(&quot;language&quot;)</code> (scoring is classification, not generation)</li>
+<li>Cost tracking in <code>state.score_stats</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Add SCORE phase to pipeline</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/pipeline.py</code></li>
+</ul>
+<pre><code class="language-python">WorkerSpec(
+    &quot;score&quot;,
+    &quot;score_phase&quot;,
+    score_worker,
+    depends_on=[&quot;link_phase&quot;],
+    enabled=not state.skip_score,
+),
+</code></pre>
+</li>
+<li>
+<p><strong>Add state fields</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/state.py</code></li>
+<li><code>score_stats: WorkerStats</code> — phase tracking</li>
+<li><code>score_phase: PipelinePhase</code> — supervision</li>
+<li><code>skip_score: bool = False</code> — CLI control</li>
+<li><code>score_model: str | None = None</code> — model override</li>
+</ul>
+</li>
+<li>
+<p><strong>Add progress display</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/progress.py</code></li>
+<li>SCORE stage: shows scored count, average composite, cost</li>
+<li>Shows gate failure count (how many names gated to 0.0)</li>
+</ul>
+</li>
+<li>
+<p><strong>Add CLI flags</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li><code>--skip-score</code> — bypass scoring phase</li>
+<li><code>--score-model</code> — override model for scoring</li>
+<li><code>sn build</code> summary includes score statistics:<pre><code>Scores: avg=0.72, gated=3/87, top=electron_temperature (0.95)
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>SCORE phase runs after LINK in <code>sn build</code></li>
+<li>Scores persisted to graph with all 5 dimensions + composite</li>
+<li>Gate failures produce composite=0.0</li>
+<li>Cost tracking included in pipeline summary</li>
+<li><code>--skip-score</code> bypasses the phase</li>
+</ul>
+<hr />
+<h2>Phase 4: Benchmark Enhancement</h2>
+<h3>Design</h3>
+<p>The benchmark becomes a thin orchestration CLI that:</p>
+<ol>
+<li>Runs <code>sn build</code> with different <code>--compose-model</code> values</li>
+<li>Scores results using the shared <code>sn/scorer.py</code> module</li>
+<li>Compares across models</li>
+<li>Reports which model produces the best names</li>
+</ol>
+<p>The benchmark does NOT implement its own scoring — it reuses the scorer.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Refactor benchmark to use shared scorer</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/benchmark.py</code></li>
+<li>Remove internal scoring logic</li>
+<li>Import <code>SNScoreFields</code>, <code>gated_composite</code>, <code>sample_sn_calibration</code>
+from <code>sn/scorer.py</code></li>
+<li><code>_run_model()</code> now:
+<ol>
+<li>Runs pipeline (compose + review + validate)</li>
+<li>Calls scorer for each result → <code>SNScoreFields</code></li>
+<li>Computes <code>gated_composite()</code> for each</li>
+<li>Returns model-level aggregate stats</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Add model comparison report</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/benchmark.py</code></li>
+<li>Compare models on:
+<ul>
+<li>Average composite score</li>
+<li>Gate failure rate</li>
+<li>Per-dimension breakdown</li>
+<li>Cost per name</li>
+</ul>
+</li>
+<li>Rich table output:<pre><code>Model Comparison (31 reference items):
+┌────────────────────────┬────────┬────────┬────────┬────────┐
+│ Model                  │ Avg    │ Gated  │ Cost   │ Sem.   │
+├────────────────────────┼────────┼────────┼────────┼────────┤
+│ openrouter/claude-4-so │  0.82  │  1/31  │ $0.45  │  0.89  │
+│ openrouter/gpt-4.1     │  0.76  │  3/31  │ $0.32  │  0.81  │
+│ openrouter/gemini-2.5  │  0.71  │  5/31  │ $0.28  │  0.75  │
+└────────────────────────┴────────┴────────┴────────┴────────┘
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Update reference set management</strong></p>
+<ul>
+<li>Keep the existing 31-entry reference set</li>
+<li>Add scored reference entries (name + expected score range)</li>
+<li>Benchmark validates that scorer produces consistent scores for
+reference entries across models</li>
+</ul>
+</li>
+<li>
+<p><strong>Update CLI</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li><code>sn benchmark</code> remains unchanged interface-wise</li>
+<li>Internally uses shared scorer instead of ad-hoc review</li>
+<li><code>sn benchmark --compare</code> shows side-by-side model comparison</li>
+<li><code>sn benchmark --score-only</code> scores existing results without re-running</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Benchmark imports all scoring from <code>sn/scorer.py</code></li>
+<li>No duplicate scoring logic in benchmark</li>
+<li>Model comparison report includes all 5 dimensions + composite</li>
+<li>Reference set includes score expectations</li>
+<li><code>sn benchmark</code> works independently of <code>sn build</code> pipeline</li>
+</ul>
+<hr />
+<h2>Phase 5: Standalone <code>sn score</code> Command</h2>
+<h3>Tasks</h3>
+<ol>
+<li><strong>Add <code>sn score</code> CLI command</strong>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>Score or re-score existing StandardName nodes in the graph</li>
+<li>Modes:
+<ul>
+<li><code>sn score</code> — score all unscored names</li>
+<li><code>sn score --all</code> — re-score everything</li>
+<li><code>sn score --name electron_temperature</code> — score specific name</li>
+</ul>
+</li>
+<li>Uses same scorer module as pipeline and benchmark</li>
+<li>Useful for: re-scoring after model changes, scoring catalog mirrors</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>sn score</code> scores unscored names</li>
+<li>Uses shared scorer module</li>
+<li>Results persisted to graph</li>
+</ul>
+<hr />
+<h2>Phase 6: Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Test score model and composite</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_scorer.py</code></li>
+<li>Test <code>SNScoreFields</code> validation</li>
+<li>Test <code>gated_composite()</code>:
+<ul>
+<li>Gates pass → weighted mean</li>
+<li>Semantic gate fails → 0.0</li>
+<li>Units gate fails → 0.0</li>
+<li>Both gates fail → 0.0</li>
+<li>Edge cases: exactly at threshold (0.3)</li>
+</ul>
+</li>
+<li>Test <code>get_score_dict()</code> output format</li>
+</ul>
+</li>
+<li>
+<p><strong>Test calibration</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_scorer.py</code></li>
+<li>Test <code>sample_sn_calibration()</code> with mocked graph</li>
+<li>Test TTL cache behavior</li>
+<li>Test fallback when no scored nodes exist</li>
+</ul>
+</li>
+<li>
+<p><strong>Test score worker</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_score_worker.py</code></li>
+<li>Mock LLM returning <code>SNScoreFields</code></li>
+<li>Verify scores persisted to graph</li>
+<li>Verify status transitions</li>
+<li>Test batch processing</li>
+</ul>
+</li>
+<li>
+<p><strong>Test benchmark model comparison</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_benchmark.py</code></li>
+<li>Test comparison report generation</li>
+<li>Test reference set scoring consistency</li>
+<li>Verify benchmark imports from shared scorer</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>All tests pass with mocked LLM and graph</li>
+<li>Gated composite tested for all gate combinations</li>
+<li>Calibration tested with TTL expiry</li>
+<li>Benchmark tested independently of build pipeline</li>
+</ul>
+<hr />
+<h2>Files Modified / Created</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/scorer.py</code></td>
+<td>NEW: SNScoreFields, gated_composite, calibration, score functions</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code></td>
+<td>Add score_worker()</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/pipeline.py</code></td>
+<td>Add SCORE WorkerSpec</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/state.py</code></td>
+<td>Add score_stats, score_phase, skip_score</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/progress.py</code></td>
+<td>Add score stage display</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/benchmark.py</code></td>
+<td>Refactor to use shared scorer</td>
+</tr>
+<tr>
+<td><code>imas_codex/cli/sn.py</code></td>
+<td>Add --skip-score, --score-model, sn score, sn benchmark --compare</td>
+</tr>
+<tr>
+<td><code>imas_codex/llm/prompts/sn/score.md</code></td>
+<td>NEW: scoring prompt template</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_scorer.py</code></td>
+<td>NEW: scorer unit tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_score_worker.py</code></td>
+<td>NEW: worker tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_benchmark.py</code></td>
+<td>Updated: uses shared scorer</td>
+</tr>
+</tbody>
+</table>
+<h2>Documentation Updates</h2>
+<ul>
+<li>AGENTS.md: Document SCORE phase, <code>sn score</code> command, scoring dimensions</li>
+<li>AGENTS.md: Document gated composite formula</li>
+<li>AGENTS.md: Document benchmark model comparison workflow</li>
+</ul>
+
+  </main>
+</body>
+</html>

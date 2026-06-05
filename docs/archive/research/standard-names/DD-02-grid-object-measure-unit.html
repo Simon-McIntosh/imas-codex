@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="DD-02-grid-object-measure-unit">
+  <meta name="plan-title" content="DD-02 — `grid_object_measure` carries placeholder unit `m^dimension`">
+  <meta name="plan-summary" content="Affected IDSs (every IDS with a GGD grid): equilibrium, edgeprofiles,">
+  <meta name="archive-source" content="plans/research/standard-names/dd-issues-rc14/DD-02-grid-object-measure-unit.md">
+  <title>DD-02 — `grid_object_measure` carries placeholder unit `m^dimension` | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD-02 — `grid_object_measure` carries placeholder unit `m^dimension`</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/dd-issues-rc14/DD-02-grid-object-measure-unit.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>RC14 data dictionary issue note</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/dd-issues-rc14/DD-02-grid-object-measure-unit.md</dd></div>
+    </dl>
+    
+    <h2>DD path(s) / pattern</h2>
+<pre><code>*/space/objects_per_dimension/object/measure
+</code></pre>
+<p>Affected IDSs (every IDS with a GGD grid): <code>equilibrium</code>, <code>edge_profiles</code>,
+<code>edge_sources</code>, <code>edge_transport</code>, <code>em_coupling</code>, <code>ferritic</code>, <code>mhd</code>, <code>tf</code>,
+<code>transport_solver_numerics</code>, <code>waves</code>, <code>distribution_sources</code>, <code>distributions</code>.</p>
+<p>Concrete paths (sample):</p>
+<ul>
+<li><code>equilibrium/time_slice/ggd/grid/space/objects_per_dimension/object/measure</code> (unit: m^dimension)</li>
+<li><code>edge_profiles/grid_ggd/space/objects_per_dimension/object/measure</code> (unit: m^dimension)</li>
+<li><code>mhd/grid_ggd/space/objects_per_dimension/object/measure</code> (unit: m^dimension)</li>
+<li><code>tf/field_map/grid/space/objects_per_dimension/object/measure</code> (unit: m^dimension)</li>
+<li><code>waves/coherent_wave/full_wave/grid/space/objects_per_dimension/object/measure</code> (unit: m^dimension)</li>
+<li><code>ferritic/grid_ggd/space/objects_per_dimension/object/measure</code> (unit: m^dimension)</li>
+</ul>
+<h2>Evidence</h2>
+<p>Rc13 standard names that quarantined because of this issue:</p>
+<ul>
+<li><code>grid_object_measure</code> (audit: pydantic:scalar.unit, unit_validity_check; unit: m^dimension) — unit string <code>m^dimension</code> is not a valid UDUNITS expression; the <code>^dimension</code> exponent is a compile-time placeholder that was never resolved</li>
+</ul>
+<p>Total: <strong>1 quarantined name</strong>, failing <code>pydantic:scalar.unit</code> (&quot;Invalid unit token
+'m^dimension'&quot;) and <code>unit_validity_check</code> (&quot;unit 'm^dimension' contains non-unit
+token 'dimension'&quot;).</p>
+<p>The issue affects <strong>12+ DD paths</strong> across all GGD-equipped IDSs, but the SN
+extractor correctly deduplicates them into one standard name.</p>
+<h2>Proposed fix</h2>
+<p>Option A (preferred): <strong>Split into dimension-specific leaves.</strong> Replace the single
+<code>measure</code> leaf with four concrete leaves:</p>
+<table>
+<thead>
+<tr>
+<th>Leaf</th>
+<th>Unit</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>measure_count</code> or <code>number_of_objects</code></td>
+<td><code>1</code></td>
+<td>Count of grid objects (0D)</td>
+</tr>
+<tr>
+<td><code>measure_length</code></td>
+<td><code>m</code></td>
+<td>Total length (1D objects)</td>
+</tr>
+<tr>
+<td><code>measure_area</code></td>
+<td><code>m^2</code></td>
+<td>Total area (2D objects)</td>
+</tr>
+<tr>
+<td><code>measure_volume</code></td>
+<td><code>m^3</code></td>
+<td>Total volume (3D objects)</td>
+</tr>
+</tbody>
+</table>
+<p>Each <code>objects_per_dimension</code> array element already carries a <code>dimension</code> integer
+(0–3), so the correct leaf is unambiguous at runtime.</p>
+<p>Option B: <strong>Parametric unit via <code>units_template</code>.</strong> Introduce a <code>units_template</code>
+attribute that resolves <code>m^{dimension}</code> at DD compile/validation time using the
+parent <code>dimension</code> value. This preserves the single-leaf structure but requires DD
+tooling support for template units.</p>
+<p>Option C (minimal): <strong>Document the unit as <code>mixed</code></strong> and add a <code>description</code> tag
+explaining the dimension dependency. This unblocks the SN extractor (which can
+skip <code>mixed</code>-unit paths) but does not fix the underlying ambiguity.</p>
+<h2>Downstream impact</h2>
+<ul>
+<li><strong>imas-codex SN extractor:</strong> unblocks 1 quarantined name; if split into
+per-dimension leaves, would produce 3–4 specific names (<code>grid_object_length</code>,
+<code>grid_object_area</code>, <code>grid_object_volume</code>) with correct units.</li>
+<li><strong>pydantic audits:</strong> <code>unit_validity_check</code> exception for <code>m^dimension</code> can be
+removed — the unit will be a real UDUNITS string.</li>
+<li><strong>imas-standard-names:</strong> no vocab change needed.</li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §2.13 (row 2)</li>
+<li>rc13 review: plans/research/standard-names/12-full-graph-review.md §4.3 (DD-02)</li>
+<li>Plan: plans/features/standard-names/31-quality-bootstrap-v2.md §7</li>
+</ul>
+
+  </main>
+</body>
+</html>

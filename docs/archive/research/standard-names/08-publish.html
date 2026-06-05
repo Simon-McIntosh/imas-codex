@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="08-publish">
+  <meta name="plan-title" content="Feature 08: Publish (YAML + PR)">
+  <meta name="plan-summary" content="Convert validated standard name candidates into catalog YAML files and create batched pull requests to the imas-standard-names-catalog repository.">
+  <meta name="archive-source" content="plans/research/standard-names/archived-implemented/08-publish.md">
+  <title>Feature 08: Publish (YAML + PR) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 08: Publish (YAML + PR)</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-implemented/08-publish.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Implemented feature archive</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-implemented/08-publish.md</dd></div><div><dt>Repository</dt><dd>imas-codex</dd></div><div><dt>Complexity</dt><dd>Medium</dd></div><div><dt>Depends on</dt><dd>05 (SN Build Pipeline), 06 (Cross-Model Review)</dd></div><div><dt>Wave</dt><dd>4</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="05-sn-build-pipeline.html">Feature 05: SN Build Pipeline</a>, <a href="06-cross-model-review.html">Feature 06: Cross-Model Review</a></p></section>
+    <h2>Overview</h2>
+<p>Convert validated standard name candidates into catalog YAML files and create batched pull requests to the imas-standard-names-catalog repository.</p>
+<h2>Design</h2>
+<h3>YAML Generation</h3>
+<ul>
+<li>Produce YAML files matching the <code>StandardNameEntry</code> JSON schema (Feature 04)</li>
+<li>One file per standard name (matching existing catalog convention)</li>
+<li>Include all fields: name, kind, unit, tags, status, description, provenance</li>
+</ul>
+<h3>Batched PR Strategy</h3>
+<ul>
+<li>Group names by IDS or physics domain</li>
+<li>Each PR contains a coherent batch (e.g., &quot;Add 47 equilibrium standard names&quot;)</li>
+<li>Include confidence tier summary in PR description</li>
+<li>High-confidence names in separate PRs from medium-confidence (easier review)</li>
+</ul>
+<h3>PR Content</h3>
+<ul>
+<li>YAML files in correct directory structure</li>
+<li>Summary table in PR description (name, unit, source, confidence)</li>
+<li>Link back to source DD paths / signals</li>
+<li>Automated validation check (CI runs standard-names validation)</li>
+</ul>
+<h3>Catalog Awareness</h3>
+<ul>
+<li>Check existing catalog before generating PR</li>
+<li>Skip names that already exist (exact match)</li>
+<li>Flag potential conflicts (similar names) in PR description</li>
+</ul>
+<h2>Deliverables</h2>
+<ul>
+<li>☐ YAML file generation from validated candidates</li>
+<li>☐ GitHub PR creation via <code>gh</code> CLI or API</li>
+<li>☐ Batching logic by IDS/domain</li>
+<li>☐ Confidence tier separation</li>
+<li>☐ Catalog dedup checking</li>
+<li>☐ PR description template with summary table</li>
+<li>☐ Dry-run mode: generate YAML locally without creating PR</li>
+</ul>
+
+  </main>
+</body>
+</html>

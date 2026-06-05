@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="09-llm-compose-integration">
+  <meta name="plan-title" content="Feature 09: LLM Compose Integration">
+  <meta name="plan-summary" content="The compose worker (workers.py:96–248) uses a 13-keyword heuristic">
+  <meta name="archive-source" content="plans/research/standard-names/archived-v1/09-llm-compose-integration.md">
+  <title>Feature 09: LLM Compose Integration | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 09: LLM Compose Integration</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-v1/09-llm-compose-integration.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Archived v1 feature plan</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-v1/09-llm-compose-integration.md</dd></div><div><dt>Status</dt><dd>Pending</dd></div><div><dt>Priority</dt><dd>CRITICAL — blocks all downstream phases</dd></div><div><dt>Depends on</dt><dd>Features 05 (pipeline exists), 01 (grammar API exports)</dd></div><div><dt>Parallel with</dt><dd>11a (schema alignment), 12 (benchmark enhancement)</dd></div><div><dt>Estimated complexity</dt><dd>Medium-high</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="05-sn-build-pipeline.html">Feature 05: SN Build Pipeline</a>, <a href="01-grammar-api-exports.html">Feature 01: Grammar API Exports</a></p><p><strong>Parallel with:</strong> <a href="11-schema-and-persistence.html">Feature 11: StandardName Schema &amp; Graph Persistence</a>, <a href="12-benchmark-enhancement.html">Feature 12: Quality Scoring &amp; Benchmark</a></p></section>
+    <h2>Problem</h2>
+<p>The compose worker (<code>workers.py:96–248</code>) uses a 13-keyword heuristic
+(<code>_extract_physical_base()</code>) instead of LLM calls. The compose prompt
+templates (<code>compose_dd.md</code>, <code>compose_signals.md</code>) exist and are well-designed
+but are <strong>not wired</strong> into the pipeline. The benchmark module (<code>_run_model()</code>)
+correctly uses <code>acall_llm_structured()</code> with the same prompts — proving the
+integration pattern works — but the build pipeline itself cannot produce
+quality names.</p>
+<h2>Approach</h2>
+<p>Replace the heuristic compose worker with batched async LLM calls following
+the proven <code>review_worker</code> pattern. Refactor the extract→compose data flow
+to use <code>ExtractionBatch</code> objects (already defined in <code>sn/sources/base.py</code>)
+instead of flat dicts.</p>
+<hr />
+<h2>Phase 1: Extract→Compose Data Contract</h2>
+<p>The extract worker currently stores flat <code>list[dict]</code> in <code>state.candidates</code>.
+The compose worker needs grouped batches with IDS/domain context for coherent
+LLM prompts.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Add <code>extraction_batches</code> field to <code>SNBuildState</code></strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/state.py</code></li>
+<li>Type: <code>list[ExtractionBatch]</code> (from <code>sn/sources/base.py</code>)</li>
+<li>Extract worker populates this instead of (or in addition to) <code>state.candidates</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Refactor <code>extract_worker</code> to use source modules</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/workers.py</code> (lines 34–88)</li>
+<li>DD source: call <code>extract_dd_candidates()</code> from <code>sn/sources/dd.py</code></li>
+<li>Signals source: call <code>extract_signal_candidates()</code> from <code>sn/sources/signals.py</code></li>
+<li>Store results as <code>state.extraction_batches</code></li>
+<li>Keep <code>state.candidates</code> as a flat view for progress tracking</li>
+</ul>
+</li>
+<li>
+<p><strong>Add compose model config</strong></p>
+<ul>
+<li>Add <code>compose_model</code> field to <code>SNBuildState</code></li>
+<li>CLI: <code>--compose-model</code> option in <code>sn build</code> (default: <code>get_model(&quot;language&quot;)</code>)</li>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Extract worker produces <code>ExtractionBatch</code> objects with group_key, items, existing_names</li>
+<li>State exposes both batched and flat views of candidates</li>
+<li>Compose model is configurable from CLI</li>
+</ul>
+<hr />
+<h2>Phase 2: Wire LLM into Compose Worker</h2>
+<p>Replace the heuristic with batched async LLM calls matching the benchmark's
+<code>_run_model()</code> pattern.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Rewrite <code>compose_worker()</code> for batched LLM</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/workers.py</code></li>
+<li>Remove <code>_compose_single()</code> and <code>_extract_physical_base()</code> entirely</li>
+<li>Add <code>_compose_batch()</code> async function following <code>_review_batch()</code> pattern:<pre><code class="language-python">async def _compose_batch(
+    batch: ExtractionBatch,
+    model: str,
+    grammar_enums: dict,
+    wlog: logging.LoggerAdapter,
+) -&gt; tuple[list[dict], int, float, int]:
+    &quot;&quot;&quot;Compose standard names for one extraction batch via LLM.&quot;&quot;&quot;
+    prompt_template = &quot;sn/compose_dd&quot; if batch.source == &quot;dd&quot; else &quot;sn/compose_signals&quot;
+    context = {
+        &quot;items&quot;: batch.items,
+        &quot;ids_name&quot;: batch.group_key,  # or facility/domain for signals
+        &quot;existing_names&quot;: sorted(batch.existing_names),
+        **grammar_enums,
+    }
+    # For signals source, add facility and domain context
+    if batch.source == &quot;signals&quot;:
+        context[&quot;facility&quot;] = batch.group_key.split(&quot;/&quot;)[0]  # or from state
+        context[&quot;domain&quot;] = batch.group_key
+    
+    prompt_text = render_prompt(prompt_template, context)
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt_text}]
+    
+    result, cost, tokens = await acall_llm_structured(
+        model=model,
+        messages=messages,
+        response_model=SNComposeBatch,
+    )
+    # Convert SNCandidate objects to pipeline dicts
+    composed = []
+    for c in result.candidates:
+        composed.append({
+            &quot;id&quot;: c.standard_name,
+            &quot;source_type&quot;: batch.source,
+            &quot;source_id&quot;: c.source_id,
+            **c.fields,
+            &quot;confidence&quot;: c.confidence,
+            &quot;reason&quot;: c.reason,
+            &quot;units&quot;: _find_units(batch.items, c.source_id),
+        })
+    return composed, len(result.skipped), cost, tokens
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Integrate batch loop into compose_worker()</strong></p>
+<ul>
+<li>Iterate over <code>state.extraction_batches</code></li>
+<li>Call <code>_compose_batch()</code> for each</li>
+<li>Track cost in <code>state.compose_stats.cost</code></li>
+<li>Track tokens for logging</li>
+<li>Respect <code>state.should_stop()</code> between batches</li>
+<li>Record batch progress every N batches</li>
+</ul>
+</li>
+<li>
+<p><strong>Reuse <code>_get_grammar_enums()</code></strong></p>
+<ul>
+<li>Already exists at line 258 — use it in compose worker too</li>
+<li>Consider moving to a shared location (e.g., <code>sn/grammar_context.py</code>)</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>sn build --source dd --ids equilibrium</code> produces LLM-generated names with subject, component, position qualifiers</li>
+<li>Cost and token tracking works in compose phase</li>
+<li><code>sn build --dry-run</code> still skips LLM calls</li>
+<li><code>sn build --source signals --facility tcv</code> works with signals prompt</li>
+</ul>
+<hr />
+<h2>Phase 3: Prompt Enhancement</h2>
+<p>The existing compose prompts generate name + fields + confidence + reason,
+but NOT rich documentation. Compose should produce a short <code>reason</code> only.
+Full documentation generation is deferred to Feature 10 (DOCUMENT phase).</p>
+<p>However, the prompts need minor improvements for quality:</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Add few-shot examples to compose prompts</strong></p>
+<ul>
+<li>File: <code>imas_codex/llm/prompts/sn/compose_dd.md</code></li>
+<li>Add 5-8 diverse examples covering all grammar patterns:
+<ul>
+<li>Subject-qualified: <code>electron_temperature</code></li>
+<li>Component-qualified: <code>toroidal_component_of_magnetic_field</code></li>
+<li>Position-qualified: <code>electron_temperature_at_magnetic_axis</code></li>
+<li>Process-qualified: <code>power_due_to_ohmic</code></li>
+<li>Device-qualified: <code>bolometer_radiated_power</code></li>
+<li>Geometric base: <code>position_of_magnetic_axis</code></li>
+</ul>
+</li>
+<li>Similarly for <code>compose_signals.md</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Add system/user message split for prompt caching</strong></p>
+<ul>
+<li>Current: single user message with everything</li>
+<li>Better: system message (grammar rules + enums + examples) + user message (batch items)</li>
+<li>System message is static → cacheable via <code>inject_cache_control()</code></li>
+<li>Modify <code>_compose_batch()</code> to use two-message format</li>
+</ul>
+</li>
+<li>
+<p><strong>Validate compose output against grammar</strong></p>
+<ul>
+<li>After LLM returns <code>SNComposeBatch</code>, run <code>parse_standard_name()</code> on each candidate</li>
+<li>Log warnings for grammar-invalid names but keep them for review phase</li>
+<li>Add <code>grammar_valid</code> field to pipeline dict</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>Compose prompts include diverse few-shot examples</li>
+<li>System/user message split enables prompt caching</li>
+<li>Grammar validation runs inline during compose</li>
+</ul>
+<hr />
+<h2>Phase 4: Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Unit tests for compose worker with mocked LLM</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_compose_worker.py</code></li>
+<li>Mock <code>acall_llm_structured</code> to return pre-built <code>SNComposeBatch</code></li>
+<li>Test: DD source produces expected pipeline dicts</li>
+<li>Test: Signals source uses correct prompt template</li>
+<li>Test: Dry-run mode skips LLM</li>
+<li>Test: Empty candidates handled gracefully</li>
+<li>Test: Cost tracking accumulates correctly</li>
+<li>Test: <code>should_stop()</code> interrupts batch loop</li>
+</ul>
+</li>
+<li>
+<p><strong>Integration test with extraction batches</strong></p>
+<ul>
+<li>Verify <code>extract_worker</code> → <code>compose_worker</code> data flow</li>
+<li>Verify <code>ExtractionBatch</code> → compose → validate chain</li>
+</ul>
+</li>
+<li>
+<p><strong>Test prompt rendering</strong></p>
+<ul>
+<li>Verify templates render without errors for DD and signals contexts</li>
+<li>Verify grammar enums are populated</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>All tests pass with mocked LLM</li>
+<li>Coverage ≥95% on new/modified code in workers.py</li>
+</ul>
+<hr />
+<h2>Files Modified</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code></td>
+<td>Rewrite compose_worker, delete heuristics</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/state.py</code></td>
+<td>Add extraction_batches, compose_model</td>
+</tr>
+<tr>
+<td><code>imas_codex/cli/sn.py</code></td>
+<td>Add --compose-model flag</td>
+</tr>
+<tr>
+<td><code>imas_codex/llm/prompts/sn/compose_dd.md</code></td>
+<td>Add few-shot examples</td>
+</tr>
+<tr>
+<td><code>imas_codex/llm/prompts/sn/compose_signals.md</code></td>
+<td>Add few-shot examples</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_compose_worker.py</code></td>
+<td>New test file</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_workers.py</code></td>
+<td>Update existing tests</td>
+</tr>
+</tbody>
+</table>
+<h2>Documentation Updates</h2>
+<ul>
+<li>AGENTS.md: Document <code>--compose-model</code> CLI option</li>
+<li>Prompt templates: Self-documenting via frontmatter</li>
+</ul>
+
+  </main>
+</body>
+</html>

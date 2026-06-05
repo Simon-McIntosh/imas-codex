@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="04-json-schema-contract">
+  <meta name="plan-title" content="Feature 04: JSON Schema Contract">
+  <meta name="plan-summary" content="Publish a versioned JSON schema that defines the contract between imas-codex (producer) and imas-standard-names (validator). Codex generates candidate names as structured data matching this schema; standard-names validates and persists them.">
+  <meta name="archive-source" content="plans/research/standard-names/archived-implemented/04-json-schema-contract.md">
+  <meta name="plan-informs" content="05-sn-build-pipeline">
+  <title>Feature 04: JSON Schema Contract | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 04: JSON Schema Contract</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-implemented/04-json-schema-contract.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Implemented feature archive</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-implemented/04-json-schema-contract.md</dd></div><div><dt>Repository</dt><dd>imas-standard-names</dd></div><div><dt>Wave</dt><dd>2 (after Feature 01)</dd></div><div><dt>Depends on</dt><dd>Feature 01 (Grammar API Exports)</dd></div><div><dt>Enables</dt><dd>Feature 05 (codex SN Build Pipeline — validation at mint boundary)</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Informs:</strong> <a href="05-sn-build-pipeline.html">Feature 05: SN Build Pipeline</a></p><p><strong>Depends on:</strong> <a href="01-grammar-api-exports.html">Feature 01: Grammar API Exports</a></p></section>
+    <h2>Goal</h2>
+<p>Publish a versioned JSON schema that defines the contract between imas-codex (producer) and imas-standard-names (validator). Codex generates candidate names as structured data matching this schema; standard-names validates and persists them.</p>
+<h2>Deliverables</h2>
+<h3>Phase 1: Extract and version the schema</h3>
+<ul>
+<li>Export <code>StandardNameEntry</code> Pydantic JSON schema as a static file</li>
+<li>Include all discriminated union variants (scalar, vector, metadata)</li>
+<li>Version the schema with semver, linked to grammar version</li>
+<li>Store at <code>imas_standard_names/schemas/entry_schema.json</code></li>
+</ul>
+<h3>Phase 2: Validation utility</h3>
+<ul>
+<li>Create <code>validate_against_schema(data: dict) -&gt; list[str]</code> utility</li>
+<li>Validates arbitrary JSON/YAML against the published schema</li>
+<li>Returns list of validation errors (empty = valid)</li>
+<li>Usable by codex's mint phase without importing full standard-names</li>
+</ul>
+<h3>Phase 3: YAML file format contract</h3>
+<ul>
+<li>Document the exact YAML structure codex must produce for minted names</li>
+<li>Include: required fields, tag ordering rules, provenance format</li>
+<li>Include: <code>ids_paths</code> population expectations</li>
+<li>Publish as part of the schema artifact</li>
+</ul>
+<h2>Acceptance Criteria</h2>
+<ul>
+<li>JSON schema file generated and included in package distribution</li>
+<li>Schema versioned and linked to grammar version</li>
+<li>Validation utility works standalone</li>
+<li>Contract documentation covers all edge cases</li>
+</ul>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="14-link-validation">
+  <meta name="plan-title" content="Feature 14: Link Validation &amp; Graph Mirroring">
+  <meta name="plan-summary" content="The SN pipeline generates documentation with cross-reference mentions">
+  <meta name="archive-source" content="plans/research/standard-names/archived-v1/14-link-validation.md">
+  <title>Feature 14: Link Validation &amp; Graph Mirroring | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 14: Link Validation &amp; Graph Mirroring</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-v1/14-link-validation.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Archived v1 feature plan</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-v1/14-link-validation.md</dd></div><div><dt>Status</dt><dd>Pending</dd></div><div><dt>Priority</dt><dd>High — links are what makes the catalog navigable</dd></div><div><dt>Depends on</dt><dd>Feature 11 Phase 2 (PERSIST_NODES must exist)</dd></div><div><dt>Parallel with</dt><dd>12 (scorer — can be developed simultaneously)</dd></div><div><dt>Estimated complexity</dt><dd>Medium</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="11-schema-and-persistence.html">Feature 11: StandardName Schema &amp; Graph Persistence</a></p><p><strong>Parallel with:</strong> <a href="12-benchmark-enhancement.html">Feature 12: Quality Scoring &amp; Benchmark</a></p></section>
+    <h2>Problem</h2>
+<p>The SN pipeline generates documentation with cross-reference mentions
+(&quot;see also electron_density&quot;) and dependency relationships (&quot;derived from
+plasma_current&quot;), but these are never validated or written to the graph.
+The existing catalog has 810 forward-reference warnings. Names without
+validated links have limited navigability and discoverability.</p>
+<p>Link validation is fundamentally different from documentation generation:</p>
+<ul>
+<li><strong>DOCUMENT</strong> (Plan 10) is LLM-based, expensive, generates text</li>
+<li><strong>LINK</strong> is pure Python, cheap, validates references and writes edges</li>
+<li><strong>LINK</strong> must run after PERSIST_NODES (Plan 11) because it creates
+graph edges between existing nodes</li>
+<li><strong>LINK</strong> needs multiple runs because forward references can only be
+resolved when both source and target names exist</li>
+</ul>
+<h2>Approach</h2>
+<p>A separate LINK worker in the build pipeline, plus a standalone <code>sn link</code>
+CLI command for iterative re-runs. The LINK phase:</p>
+<ol>
+<li>Reads <code>cross_reference_mentions</code> and <code>dependency_mentions</code> from
+documented names (output of DOCUMENT phase, persisted in graph)</li>
+<li>Resolves each mention against existing StandardName nodes in the graph</li>
+<li>For resolved refs: creates <code>CROSS_REFERENCES</code> or <code>DEPENDS_ON</code> edges</li>
+<li>For unresolved refs: stores as <code>unresolved_refs</code> node property</li>
+<li>Updates <code>ref_in_degree</code> and <code>ref_out_degree</code> counters</li>
+</ol>
+<h3>Pipeline Position</h3>
+<pre><code>EXTRACT → COMPOSE → REVIEW → VALIDATE → DOCUMENT → PERSIST_NODES → LINK → SCORE
+</code></pre>
+<p>LINK runs after PERSIST_NODES (nodes must exist to create edges) and before
+SCORE (score_link_quality depends on link resolution results).</p>
+<h3>Relationship Types</h3>
+<p>Two separate relationship types with different semantics:</p>
+<table>
+<thead>
+<tr>
+<th>Relationship</th>
+<th>Semantics</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CROSS_REFERENCES</code></td>
+<td>Navigational / &quot;see also&quot;</td>
+<td>electron_temperature → ion_temperature</td>
+</tr>
+<tr>
+<td><code>DEPENDS_ON</code></td>
+<td>Functional / physics dependency</td>
+<td>safety_factor → plasma_current</td>
+</tr>
+</tbody>
+</table>
+<p>Both are <code>(StandardName)-[:REL]-&gt;(StandardName)</code> self-referential edges.
+This follows the <code>WikiPage LINKS_TO WikiPage</code> pattern in <code>facility.yaml</code>.</p>
+<h3>Forward Reference Strategy</h3>
+<p>Forward references (names that reference other names not yet in the graph)
+cannot become graph edges because the target node doesn't exist. Strategy:</p>
+<ol>
+<li><strong>During <code>sn build</code></strong>: store unresolved mentions as <code>unresolved_refs</code>
+node property (string list)</li>
+<li><strong>During <code>sn link</code></strong> (standalone re-run): re-check <code>unresolved_refs</code>
+against current graph, convert resolved ones to edges</li>
+<li><strong>Convergence</strong>: after multiple <code>sn build</code> runs generating different
+name batches, <code>sn link</code> resolves accumulated forward refs</li>
+</ol>
+<p>This matches the user's requirement that LINK &quot;will likely require
+multiple runs as we can only link documents when the source and targets
+exist.&quot;</p>
+<hr />
+<h2>Phase 1: Link Resolution Engine</h2>
+<h3>Design</h3>
+<p>Pure Python module that resolves cross-reference mentions to graph edges.
+No LLM calls — this is deterministic string matching against the graph.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Create link resolution module</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/linker.py</code></li>
+<li>Core function: <code>resolve_references(mentions, known_names) -&gt; LinkResolution</code></li>
+</ul>
+<pre><code class="language-python">class LinkResolution(BaseModel):
+    &quot;&quot;&quot;Result of resolving a single name's references.&quot;&quot;&quot;
+    source_id: str
+    resolved_cross_refs: list[str]  # Matched to existing StandardName
+    resolved_dependencies: list[str]  # Matched to existing StandardName
+    unresolved: list[str]  # No match found
+    stale: list[str]  # Previously unresolved, now resolvable
+
+class LinkBatchResult(BaseModel):
+    &quot;&quot;&quot;Result of processing a batch of names.&quot;&quot;&quot;
+    total_mentions: int
+    resolved: int
+    unresolved: int
+    stale_resolved: int  # Previously unresolved, now resolved
+    edges_created: int
+    circular_refs: list[tuple[str, str]]  # (A→B, B→A) cycles
+    resolutions: list[LinkResolution]
+</code></pre>
+</li>
+<li>
+<p><strong>Implement reference classification</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/linker.py</code></li>
+<li>Classify each mention from DOCUMENT phase output:
+<ul>
+<li><code>cross_reference_mentions</code> → candidate <code>CROSS_REFERENCES</code> edges</li>
+<li><code>dependency_mentions</code> → candidate <code>DEPENDS_ON</code> edges</li>
+</ul>
+</li>
+<li>Resolution logic:
+<ol>
+<li>Load known names: <code>MATCH (sn:StandardName) RETURN sn.id</code></li>
+<li>For each mention, check if it exists in known names</li>
+<li>Resolved: queue for edge creation</li>
+<li>Unresolved: add to <code>unresolved_refs</code> property</li>
+</ol>
+</li>
+<li>Circular reference detection:
+<ul>
+<li>Build directed graph of resolved dependencies</li>
+<li>Detect cycles using DFS</li>
+<li>Log warnings for cycles (don't block — circular deps happen in physics)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Implement graph edge writing</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/graph_ops.py</code></li>
+<li>Uses explicit Cypher (not <code>create_nodes()</code>) because:
+<ul>
+<li>Multivalued self-referential edges</li>
+<li>Need <code>MERGE</code> for idempotent re-runs</li>
+<li>Need relationship timestamps</li>
+</ul>
+</li>
+<li>Functions (defined in Plan 11, implemented here):
+<ul>
+<li><code>write_cross_references(gc, source_id, target_ids)</code></li>
+<li><code>write_depends_on(gc, source_id, target_ids)</code></li>
+<li><code>update_degree_counters(gc, name_id)</code></li>
+<li><code>clear_resolved_refs(gc, name_id, resolved_ids)</code></li>
+<li><code>get_unresolved_names(gc, limit) -&gt; list[dict]</code> — for re-run mode</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-python">def get_unresolved_names(gc: GraphClient, limit: int = 100) -&gt; list[dict]:
+    &quot;&quot;&quot;Get names with unresolved references for re-linking.&quot;&quot;&quot;
+    return list(gc.query(&quot;&quot;&quot;
+        MATCH (sn:StandardName)
+        WHERE size(sn.unresolved_refs) &gt; 0
+        RETURN sn.id AS id, sn.unresolved_refs AS unresolved
+        ORDER BY size(sn.unresolved_refs) DESC
+        LIMIT $limit
+    &quot;&quot;&quot;, limit=limit))
+
+def update_degree_counters(gc: GraphClient, name_ids: list[str]) -&gt; int:
+    &quot;&quot;&quot;Recalculate ref_in_degree and ref_out_degree from actual edges.&quot;&quot;&quot;
+    return gc.query(&quot;&quot;&quot;
+        UNWIND $ids AS name_id
+        MATCH (sn:StandardName {id: name_id})
+        OPTIONAL MATCH (sn)-[out:CROSS_REFERENCES|DEPENDS_ON]-&gt;()
+        OPTIONAL MATCH ()-[inc:CROSS_REFERENCES|DEPENDS_ON]-&gt;(sn)
+        WITH sn, count(DISTINCT out) AS out_deg, count(DISTINCT inc) AS in_deg
+        SET sn.ref_out_degree = out_deg, sn.ref_in_degree = in_deg
+        RETURN count(sn) AS updated
+    &quot;&quot;&quot;, ids=name_ids)
+</code></pre>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>resolve_references()</code> correctly classifies mentions</li>
+<li>Resolved refs create graph edges</li>
+<li>Unresolved refs stored as node properties</li>
+<li>Circular references detected and logged</li>
+<li>All functions are idempotent for re-runs</li>
+</ul>
+<hr />
+<h2>Phase 2: LINK Pipeline Worker</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Implement <code>link_worker()</code></strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/workers.py</code></li>
+<li>Runs after PERSIST_NODES in the pipeline</li>
+<li>Pattern: claim→process→persist→release (follows discovery workers)</li>
+<li>Steps:
+<ol>
+<li>Load all known StandardName IDs from graph</li>
+<li>For each persisted name in current batch:
+a. Read <code>cross_reference_mentions</code> and <code>dependency_mentions</code>
+b. Resolve against known names
+c. Write resolved edges
+d. Store unresolved as node property
+e. Update degree counters</li>
+<li>Report statistics</li>
+</ol>
+</li>
+<li>No LLM calls — pure graph operations</li>
+<li>Fast: should process hundreds of names per second</li>
+</ul>
+</li>
+<li>
+<p><strong>Add LINK phase to pipeline</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/pipeline.py</code></li>
+</ul>
+<pre><code class="language-python">WorkerSpec(
+    &quot;link&quot;,
+    &quot;link_phase&quot;,
+    link_worker,
+    depends_on=[&quot;persist_nodes_phase&quot;],
+    enabled=not state.skip_link,
+),
+</code></pre>
+</li>
+<li>
+<p><strong>Add state fields</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/state.py</code></li>
+<li><code>link_stats: WorkerStats</code> — phase tracking</li>
+<li><code>link_phase: PipelinePhase</code> — supervision</li>
+<li><code>skip_link: bool = False</code> — CLI control</li>
+<li><code>link_resolution: LinkBatchResult | None</code> — results</li>
+</ul>
+</li>
+<li>
+<p><strong>Add progress display</strong></p>
+<ul>
+<li>File: <code>imas_codex/standard_names/progress.py</code></li>
+<li>LINK stage: shows processed count, resolved/unresolved ratio</li>
+<li>No cost display (pure Python, no LLM)</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>LINK phase runs after PERSIST_NODES in <code>sn build</code></li>
+<li>Cross-references and dependencies become graph edges</li>
+<li><code>--skip-link</code> flag bypasses the phase</li>
+</ul>
+<hr />
+<h2>Phase 3: Standalone <code>sn link</code> CLI Command</h2>
+<h3>Design</h3>
+<p>A standalone CLI command for iterative re-linking. This is the mechanism
+for resolving forward references that couldn't be resolved during <code>sn build</code>
+because the target names didn't exist yet.</p>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Add <code>sn link</code> CLI command</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>Modes:
+<ul>
+<li><code>sn link</code> — re-link all names with unresolved references</li>
+<li><code>sn link --all</code> — re-link all names (revalidate existing edges)</li>
+<li><code>sn link --name electron_temperature</code> — re-link specific name</li>
+</ul>
+</li>
+<li>Steps:
+<ol>
+<li>Query graph for names with <code>unresolved_refs</code> (or all names if --all)</li>
+<li>Load current known names</li>
+<li>For each name: resolve previously-unresolved mentions</li>
+<li>Create new edges for newly-resolved refs</li>
+<li>Update <code>unresolved_refs</code> to remove resolved entries</li>
+<li>Update degree counters</li>
+</ol>
+</li>
+<li>Report: &quot;Resolved X/Y previously-unresolved references&quot;</li>
+</ul>
+</li>
+<li>
+<p><strong>Add <code>sn status</code> link health section</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>Add to existing <code>sn status</code> output:<pre><code>Link Health:
+  Total edges:  1,234 (890 CROSS_REFERENCES + 344 DEPENDS_ON)
+  Unresolved:   45 names have unresolved references
+  Avg in-degree: 3.2
+  Avg out-degree: 2.8
+  Circular deps: 3 detected
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Add link summary to <code>sn build</code> output</strong></p>
+<ul>
+<li>File: <code>imas_codex/cli/sn.py</code></li>
+<li>After LINK phase completes, show summary:<pre><code>Links: 87 resolved, 12 unresolved (run `sn link` to retry)
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li><code>sn link</code> resolves previously-unresolved references</li>
+<li>Multiple <code>sn link</code> runs converge (fewer unresolved each time)</li>
+<li><code>sn status</code> shows link health metrics</li>
+<li><code>sn build</code> summary includes link statistics</li>
+</ul>
+<hr />
+<h2>Phase 4: Tests</h2>
+<h3>Tasks</h3>
+<ol>
+<li>
+<p><strong>Test link resolution engine</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_linker.py</code></li>
+<li>Test <code>resolve_references()</code> with:
+<ul>
+<li>All references resolved</li>
+<li>Some unresolved</li>
+<li>Circular references</li>
+<li>Empty mentions</li>
+<li>Mixed cross-references and dependencies</li>
+</ul>
+</li>
+<li>Deterministic fixtures, no graph dependency</li>
+</ul>
+</li>
+<li>
+<p><strong>Test graph edge operations</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_link_graph_ops.py</code></li>
+<li>Test <code>write_cross_references()</code> idempotency</li>
+<li>Test <code>write_depends_on()</code> idempotency</li>
+<li>Test <code>update_degree_counters()</code> accuracy</li>
+<li>Test <code>get_unresolved_names()</code> query</li>
+<li>These require graph fixtures (follow existing test patterns)</li>
+</ul>
+</li>
+<li>
+<p><strong>Test <code>sn link</code> CLI command</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_link_cli.py</code></li>
+<li>Test standalone re-linking mode</li>
+<li>Test convergence across multiple runs</li>
+<li>Mock graph operations</li>
+</ul>
+</li>
+<li>
+<p><strong>Test LINK pipeline phase integration</strong></p>
+<ul>
+<li>File: <code>tests/sn/test_pipeline_link.py</code></li>
+<li>Test LINK runs after PERSIST_NODES</li>
+<li>Test --skip-link flag</li>
+<li>Test pipeline with and without LINK enabled</li>
+</ul>
+</li>
+</ol>
+<h3>Acceptance Criteria</h3>
+<ul>
+<li>All tests pass</li>
+<li>Link resolution has 100% coverage for classification logic</li>
+<li>Graph operations tested for idempotency</li>
+<li>CLI tested for all modes</li>
+</ul>
+<hr />
+<h2>Files Modified / Created</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/linker.py</code></td>
+<td>NEW: Link resolution engine</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/graph_ops.py</code></td>
+<td>Add explicit relationship-writing functions</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code></td>
+<td>Add link_worker()</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/pipeline.py</code></td>
+<td>Add LINK WorkerSpec</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/state.py</code></td>
+<td>Add link_stats, link_phase, skip_link</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/progress.py</code></td>
+<td>Add link stage display</td>
+</tr>
+<tr>
+<td><code>imas_codex/cli/sn.py</code></td>
+<td>Add <code>sn link</code> command, --skip-link flag</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_linker.py</code></td>
+<td>NEW: resolution engine tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_link_graph_ops.py</code></td>
+<td>NEW: graph operation tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_link_cli.py</code></td>
+<td>NEW: CLI tests</td>
+</tr>
+<tr>
+<td><code>tests/sn/test_pipeline_link.py</code></td>
+<td>NEW: pipeline integration tests</td>
+</tr>
+</tbody>
+</table>
+<h2>Documentation Updates</h2>
+<ul>
+<li>AGENTS.md: Document <code>sn link</code> command and iterative re-linking workflow</li>
+<li>AGENTS.md: Document LINK phase position in pipeline</li>
+<li>AGENTS.md: Document CROSS_REFERENCES vs DEPENDS_ON relationship semantics</li>
+</ul>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="07-benchmarking">
+  <meta name="plan-title" content="Feature 07: Benchmarking">
+  <meta name="plan-summary" content="Comparative evaluation of different LLM models for standard name generation. Measures quality, cost, and speed to inform production model selection.">
+  <meta name="archive-source" content="plans/research/standard-names/archived-implemented/07-benchmarking.md">
+  <title>Feature 07: Benchmarking | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Feature 07: Benchmarking</h1>
+    <p>This archived Standard Names research document was migrated from markdown. The historical content below is preserved from the original note at <code>plans/research/standard-names/archived-implemented/07-benchmarking.md</code>.</p>
+    <dl>
+      <div><dt>Archive class</dt><dd>Implemented feature archive</dd></div><div><dt>Original path</dt><dd>plans/research/standard-names/archived-implemented/07-benchmarking.md</dd></div><div><dt>Repository</dt><dd>imas-codex</dd></div><div><dt>Complexity</dt><dd>Medium</dd></div><div><dt>Depends on</dt><dd>05 (SN Build Pipeline)</dd></div><div><dt>Wave</dt><dd>4</dd></div>
+    </dl>
+    <section aria-labelledby="historical-links"><h2 id="historical-links">Historical links</h2><p><strong>Depends on:</strong> <a href="05-sn-build-pipeline.html">Feature 05: SN Build Pipeline</a></p></section>
+    <h2>Overview</h2>
+<p>Comparative evaluation of different LLM models for standard name generation. Measures quality, cost, and speed to inform production model selection.</p>
+<h2>Design</h2>
+<h3>Benchmark Command</h3>
+<pre><code>imas-codex sn benchmark --source dd --ids equilibrium --models claude-sonnet,gpt-4o,gemini-pro
+</code></pre>
+<h3>Metrics</h3>
+<ul>
+<li><strong>Quality:</strong> Grammar validity rate, review acceptance rate, semantic accuracy score</li>
+<li><strong>Cost:</strong> USD per name generated, tokens per name</li>
+<li><strong>Speed:</strong> Names per minute, total pipeline time</li>
+<li><strong>Consistency:</strong> Same input → same output across runs (determinism check)</li>
+</ul>
+<h3>Benchmark Dataset</h3>
+<ul>
+<li>Fixed set of DD paths / signals as input (reproducible)</li>
+<li>Known-good reference names for overlap comparison</li>
+<li>Edge cases: complex names, binary operators, multi-component</li>
+</ul>
+<h3>Output</h3>
+<ul>
+<li>Comparison table (stdout via Rich)</li>
+<li>JSON report for programmatic consumption</li>
+<li>Per-model breakdown with confidence intervals</li>
+</ul>
+<h2>Deliverables</h2>
+<ul>
+<li>☐ <code>imas-codex sn benchmark</code> CLI command</li>
+<li>☐ Benchmark runner with multi-model support</li>
+<li>☐ Quality scoring against reference set</li>
+<li>☐ Rich comparison table output</li>
+<li>☐ JSON report export</li>
+<li>☐ Benchmark dataset (fixed DD paths + expected outputs)</li>
+</ul>
+
+  </main>
+</body>
+</html>
