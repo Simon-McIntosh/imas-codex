@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="180" viewBox="0 0 900 180" role="img" aria-labelledby="title desc">
+  <title id="title">Plan 23 migration status</title>
+  <desc id="desc">A plan status figure showing phases 0 through 5 open, with only the unit persistence fix resolved.</desc>
+  <rect width="900" height="180" fill="#ffffff"/>
+  <text x="24" y="28" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#111827">SN Quality Parity — open work map</text>
+  <text x="24" y="48" font-family="system-ui, sans-serif" font-size="13" fill="#374151">Only Phase 1A is resolved; the benchmark, enrichment, prompt, link, and validation phases remain open.</text>
+
+  <rect x="24" y="74" width="118" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="38" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 0</text>
+  <text x="38" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Benchmark</text>
+
+  <rect x="160" y="74" width="118" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="174" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 1</text>
+  <text x="174" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Foundation</text>
+  <rect x="188" y="84" width="62" height="20" rx="4" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="198" y="98" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#111827">1A done</text>
+
+  <rect x="296" y="74" width="118" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="310" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 2</text>
+  <text x="310" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">DD context</text>
+
+  <rect x="432" y="74" width="118" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="446" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 3</text>
+  <text x="446" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Prompt quality</text>
+
+  <rect x="568" y="74" width="118" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="582" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 4</text>
+  <text x="582" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Link resolution</text>
+
+  <rect x="704" y="74" width="118" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="718" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 5</text>
+  <text x="718" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">A/B validation</text>
+
+  <path d="M142 109 H160 M278 109 H296 M414 109 H432 M550 109 H568 M686 109 H704" stroke="#6b7280" stroke-width="2" fill="none"/>
+</svg>

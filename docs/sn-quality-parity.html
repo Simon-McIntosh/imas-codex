@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-quality-parity">
+  <meta name="plan-title" content="SN Quality Parity">
+  <meta name="plan-summary" content="Close the quality gap between automated StandardName output and the ISN catalog by landing benchmark, enrichment, prompt, link-resolution, and validation loops.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.12">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>SN Quality Parity | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem and current baseline</h2>
+    <p>Plan 23 remains a low-implementation, high-value backlog item: the survey pegs it at <strong>0.12</strong> because only one narrow fix is actually resolved today. Everything else is still a roadmap for bringing generated StandardNames up to catalog quality in content, links, and validation discipline.</p>
+    <figure>
+      <img src="/imas-codex/figures/sn-plan-migration/sn-quality-parity.svg" alt="Status diagram for plan 23 showing phases 0 to 5 largely open, with only unit persistence resolved.">
+      <figcaption>Plan 23 status: only the old unit-persistence concern is closed; benchmarking, enrichment, prompt hardening, link resolution, and validation are still open.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Resolved already:</strong> the old GAP-3 unit-persistence concern is closed. Units now persist as <code>unit</code> plus <code>HAS_UNIT</code>, so Phase 1A no longer requires code changes.</li>
+      <li><strong>Still open:</strong> the benchmark harness, targeted-path CLI, publish/tag cleanup, DD context amplification, COCOS-aware docs guidance, full documentation template rewrite, asynchronous link resolution, and A/B validation loop.</li>
+      <li><strong>Critical framing from the markdown source:</strong> quality parity is not a prompt-only problem. It depends on measurable benchmarking, better graph context, richer examples, and a link-resolution lifecycle that the catalog can trust.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Open implementation work in Phases 0–2</h2>
+    <ul>
+      <li><strong>Phase 0 — benchmark harness.</strong> Define a holdout set of DD paths with catalog counterparts, score generated output on length/equations/sign conventions/typical values/measurement sections/link hygiene/tags/validation/reviewer score, and keep the results in a repeatable script or tracked evaluation workflow. This is the required baseline before any other phase can claim improvement.</li>
+      <li><strong>Phase 1B — targeted <code>--paths</code> mode.</strong> Add a targeted-path route to the SN generator so specific DD paths can be processed without going through the full extract query, classifier, or already-named filters.</li>
+      <li><strong>Phase 1C — publish/tag migration.</strong> Update <code>publish.py</code> to group by <code>physics_domain</code> before stripping primary tags, then run the graph migration that prefixes bare links with <code>name:</code> and removes primary tags from existing names.</li>
+      <li><strong>Phase 2A — rich DD context.</strong> Extend the DD extraction query so compose gets fuller path documentation, COCOS behaviour, coordinates, related paths, and structure context via the library layer rather than a chat-formatted MCP surface.</li>
+      <li><strong>Phase 2B — COCOS injection.</strong> When a path is COCOS-dependent, the generated documentation must carry an explicit sign-convention paragraph rather than relying on the reviewer to infer it later.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Open implementation work in Phases 3–5</h2>
+    <ul>
+      <li><strong>Phase 3A — documentation template rewrite.</strong> Replace the short 200–500 character target with required content sections: definition, governing equation, variable definitions, significance, measurement/calculation, typical values, sign convention when needed, and cross-references. The source explicitly treats content gates as more important than a hard minimum character count.</li>
+      <li><strong>Phase 3B — full curated examples.</strong> Promote a small showcase set of complete catalog-quality examples while keeping a larger abbreviated vocabulary set for coverage. These examples must not overlap the holdout paths from Phase 0.</li>
+      <li><strong>Phase 4A–4C — async link resolution.</strong> Add schema fields for <code>link_status</code>, <code>link_checked_at</code>, <code>unresolved_links</code>, and <code>link_retry_count</code>; let compose emit plausible <code>name:</code> links beyond the known-list constraint; and add a separate <code>sn resolve-links</code> worker with retry/failure semantics and publish-time filtering of unresolved entries.</li>
+      <li><strong>Phase 5 — A/B validation.</strong> Re-run the holdout set after each major phase, then run a bulk generation sample (for example equilibrium) to compare the final quality profile against catalog baselines.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Constraints, dependencies, and documentation fallout</h2>
+    <ul>
+      <li><strong>Library-first context.</strong> The source explicitly rejects using the MCP server formatting layer for DD context enrichment; the implementation should call the shared library/query layer directly.</li>
+      <li><strong>Link resolution needs a terminal failure state.</strong> The plan is explicit that unresolved links cannot silently loop forever; <code>failed</code> is part of the intended lifecycle.</li>
+      <li><strong>Publish/export safety matters as much as generation quality.</strong> Unresolved links must not appear in published output.</li>
+      <li><strong>This plan still feeds later benchmark work.</strong> Plan 34 and the state-of-the-nation research already depend on Phase 0’s benchmark-harness concept, so the migration should preserve that relationship rather than bury it.</li>
+      <li><strong>Documentation updates remain open.</strong> AGENTS guidance, the research quality-gap analysis, schema references, and <code>publish.py</code> docstrings all need to move when this work lands.</li>
+    </ul>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>
