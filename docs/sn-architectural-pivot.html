@@ -65,6 +65,9 @@
     <p>Reality check from the live repo: phases A-C are already embodied in the current codebase, and enough of the former grammar-as-graph tail is present that the old “Phase E open” wording is now too coarse. This session also landed the legacy derived-parent lifecycle repair and removed the final invalid bare-base parent from the live graph, which brought the SN graph-quality suite back to green.</p>
     <p>The plan nevertheless stays <strong>active</strong>. The remaining honest closure work is operational rather than architectural: run and record the bounded clean-slate rotation evidence, then either explicitly carve any surviving grammar-as-graph tail out of this plan or close the pivot with dated proof.</p>
     <p>That means the bootstrap plan is no longer blocked on the derived-parent defect, but this pivot still is not honestly “done” until the rotation proof is written down.</p>
+    <h3>Bounded flush evidence</h3>
+    <p>On 2026-06-05, <code>uv run imas-codex sn run --flush -c 10 -t 20</code> completed with <code>stop_reason = no_eligible_work</code> after <strong>8m 13s</strong> at <strong>$9.7013 / $10.00</strong>. The run enriched <strong>54</strong> names, reviewed <strong>73</strong>, regenerated <strong>68</strong>, and left the accepted corpus at <strong>215 / 216</strong> docs-accepted with the SN graph test suite green.</p>
+    <p>This is good evidence that the post-pivot docs/review path is functioning on the live graph, but it is still <em>not</em> the original destructive clean-slate rotation that plan 29 called for. The closure followup therefore stays open until the pivot is either proven by that stronger run or explicitly narrowed to the architecture that is already landed.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

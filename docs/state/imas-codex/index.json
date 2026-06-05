@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-05T13:52:06",
+  "updated": "2026-06-05T14:13:36",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -129,9 +129,14 @@
         "when": "2026-06-05",
         "who": "gpt-5.4",
         "what": "Legacy derived-parent lifecycle repair landed on main, the invalid bare-base parent `inductance` was removed from the live graph after review, and `tests/graph/test_sn_graph.py` returned green. Sprint S1 remains active because the remaining work is evidence/rollout closure rather than core code repair."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "A clean `sn run --flush -c 10 -t 20` completed with `no_eligible_work` after 8m 13s at $9.7013 / $10.00, enriching 54 names, reviewing 73, regenerating 68, and lifting docs-accepted coverage from 154 to 215 while keeping the SN graph suite green."
       }
     ],
     "blockers": [],
-    "_version": 1
+    "_version": 2
   }
 }
