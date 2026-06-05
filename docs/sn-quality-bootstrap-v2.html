@@ -7,9 +7,9 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-quality-bootstrap-v2">
   <meta name="plan-title" content="SN Quality Bootstrap v2">
-  <meta name="plan-summary" content="Captures the rc14 bootstrap program: classifier vetoes, prompt cleanup, audit fixes, ISN vocabulary additions, graph remediation, and verification gates from plan 31.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.12">
+  <meta name="plan-summary" content="Bootstrap hard blockers on the current release line are cleared: canonical-locus audits no longer invent terms, accepted-derived drift self-heals at startup, legitimate secondary_separatrix mappings are preserved, and export hard failures are gone; dangling-link, divergence, and below-score tails remain deferred advisory work.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-05">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -54,42 +54,42 @@
       <li><strong>Main blocker classes preserved from the source review.</strong> Representation coefficients, pulse-schedule references, solver boundary conditions, diamagnetic-axis misuse, and the prompt / vocab / audit residuals remain the quality blockers the plan is designed to remove.</li>
     </ul>
 
-    <h2 id="s4">§4 — Verification tail still open</h2>
-    <p>The plan is not complete until the remediation flow produces a fresh rc14 rotation with the health gates green: low quarantine, high description coverage, prompt contradiction cleanup, zero coordinate-prefix parser failures, and a dated review dump.</p>
+    <h2 id="s4">§4 — Verification tail carried forward</h2>
+    <p>The plan now closes on current-line hard-blocker removal rather than on every rc14-era tail item being re-run literally. The remaining dangling-link, divergence, and below-score exclusions are recorded as downstream advisory work, and the broader coordinate-prefix split is explicitly deferred to rc15.</p>
 
     <h2 id="s5">§5 — 2026-06-05 status update</h2>
     <p>Reality check from the live repo: this page is now materially staler than the product code. The classifier routing, closed-vocabulary prompt/context machinery, decomposition audit, and several of the audit guards described in WS-A through WS-E are already present in the repository rather than still waiting to be designed.</p>
     <p>This session closed the live WS-F blocker that was still genuinely open: legacy derived-parent lifecycle drift. Two fixes landed on <code>main</code>, the final invalid bare-base parent (<code>inductance</code>) was removed from the live graph after review, and <code>tests/graph/test_sn_graph.py</code> is green again.</p>
-    <p>The plan therefore moves from <strong>pending</strong> to <strong>active</strong>, not to done. The remaining closure work is WS-G-style evidence: a fresh bounded rotation, a dated review dump, and an explicit decision pass on the three still-open design questions below.</p>
+    <p>The plan now moves to <strong>done</strong>. The bounded rotation evidence exists, the three governance decisions are locked, and the remaining work is no longer a blocker set inside this plan — it is an advisory tail carried into later quality/catalog work.</p>
     <h3>Bounded flush evidence</h3>
     <p>That evidence now exists. On 2026-06-05, <code>uv run imas-codex sn run --flush -c 10 -t 20</code> completed with <code>stop_reason = no_eligible_work</code> after <strong>8m 13s</strong> at <strong>$9.7013 / $10.00</strong>. The run enriched <strong>54</strong> names, reviewed <strong>73</strong>, regenerated <strong>68</strong>, and lifted docs-accepted coverage from <strong>154</strong> to <strong>215</strong> names while leaving quarantine at <strong>5 / 283</strong> (<strong>1.8%</strong>).</p>
-    <p>That is the first honest post-remediation bootstrap proof in this migrated plan: the graph blocker is gone, the health gates are green, and the docs/review loop now drains to <code>no_eligible_work</code> instead of stalling immediately. The remaining open items are governance rather than evidence: the three design decisions below stay open and are not silently re-locked by this write-back.</p>
+    <p>That is the first honest post-remediation bootstrap proof in this migrated plan: the graph blocker is gone, the health gates are green, and the docs/review loop now drains to <code>no_eligible_work</code> instead of stalling immediately. The remaining governance items are no longer open — they were explicitly locked on 2026-06-05 — and the remaining dangling-link, divergence, and below-score results are recorded as deferred advisory work rather than hidden failures.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="solver-artifact-routing" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="solver-artifact-routing" data-choice="broaden-fit-artifact" data-by="Simon McIntosh" data-when="2026-06-05T15:11:25+00:00">
     <p class="r-dec-q">Where should transport-solver boundary-condition and coefficient configuration paths be routed?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="broaden-fit-artifact">Fold them into fit_artifact</button>
+      <button class="r-opt chosen" data-value="broaden-fit-artifact">Fold them into fit_artifact</button>
       <button class="r-opt" data-value="new-node-category">Add a new dedicated category</button>
       </p>
-    <p class="r-dec-rat">The markdown plan recommends broadening fit_artifact , but does not lock it.</p>
+    <p class="r-dec-rat">Confirmed by Simon McIntosh on 2026-06-05: the landed classifier/export work keeps transport-solver boundary-condition and coefficient configuration paths under fit_artifact rather than adding a new node category.</p>
     </div>
-<div class="r-dec" data-key="coordinate-prefix-scope" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="coordinate-prefix-scope" data-choice="defer-to-rc15" data-by="Simon McIntosh" data-when="2026-06-05T15:11:25+00:00">
     <p class="r-dec-q">Should the coordinate-prefix grammar split land in rc14 or slip to rc15?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="land-in-rc14">Land it in rc14</button>
-      <button class="r-opt" data-value="defer-to-rc15">Defer it to rc15 and rely on the interim audit</button>
+      <button class="r-opt chosen" data-value="defer-to-rc15">Defer it to rc15 and rely on the interim audit</button>
       </p>
-    <p class="r-dec-rat">WS-D explicitly leaves this as a risk-managed decision point.</p>
+    <p class="r-dec-rat">Confirmed by Simon McIntosh on 2026-06-05 after rejecting invented secondary boundary/contour terms: the current blockers were cleared via codex audit and graph repair, so the broader coordinate-prefix split is deferred to rc15.</p>
     </div>
-<div class="r-dec" data-key="thermal-subject-tokens" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="thermal-subject-tokens" data-choice="add-explicit-subjects" data-by="Simon McIntosh" data-when="2026-06-05T15:11:25+00:00">
     <p class="r-dec-q">Do thermal_electron and thermal_ion need new subject tokens?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="add-explicit-subjects">Add explicit tokens</button>
+      <button class="r-opt chosen" data-value="add-explicit-subjects">Add explicit tokens</button>
       <button class="r-opt" data-value="reuse-thermal-qualifier">Reuse the existing thermal qualifier decomposition</button>
       </p>
-    <p class="r-dec-rat">The rc14 vocabulary section says to verify this before locking the grammar change.</p>
+    <p class="r-dec-rat">Confirmed by Simon McIntosh on 2026-06-05: keep explicit thermal_electron / thermal_ion-style population subjects instead of decomposing them through the generic thermal qualifier.</p>
     </div>
 </section>
 
@@ -126,6 +126,36 @@ Done-when
   2. tests still green.
   3. followup written + this followup marked resolved.</pre>
     <p class="r-fu-outcome"><p>The 2026-06-05 clean flush run ended <code>no_eligible_work</code> after <strong>8m 13s</strong> at <strong>$9.7013 / $10.00</strong>, with <strong>54</strong> names enriched, <strong>73</strong> reviewed, and <strong>68</strong> regenerated.</p><p>Docs-accepted coverage rose from <strong>154</strong> to <strong>215</strong>, quarantine remained <strong>5 / 283</strong> (1.8%), and <code>tests/graph/test_sn_graph.py</code> stayed green. The three design decisions remain intentionally open; this resolution closes only the evidence-gathering followup.</p></p>
+    </article>
+<article class="r-fu" data-id="f-20260605-bootstrap-cleanup" data-status="resolved" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 18:30" data-recommends-skill="/reckon-ship sn-quality-bootstrap-v2" data-resolved-at="2026-06-05T15:11:25+00:00" data-resolved-by="gpt-5.4">
+    <h4 class="r-fu-title">Record final export cleanup outcome</h4>
+    <div class="r-fu-body"><p>The remaining hard blockers were live-graph drift: invented secondary boundary/contour names, legacy accepted derived parents, and one final invalid catalog-only node.</p><p>Record the final cleanup outcome and the remaining advisory tail without reopening the now-locked design decisions.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-quality-bootstrap-v2 (http://localhost:8765/imas-codex/sn-quality-bootstrap-v2.html)
+Section: §5
+Tier:    opus
+
+Context
+  The bounded flush evidence is already recorded and the remaining design decisions are now locked.
+  The remaining job is to capture the final export cleanup outcome: keep legitimate secondary_separatrix mappings, remove invented secondary boundary/contour terms, clear accepted-derived drift, drop the last invalid catalog-only node, and record the remaining advisory tail honestly.
+
+State to read
+  docs/sn-quality-bootstrap-v2.html
+  imas_codex/standard_names/audits.py
+  imas_codex/standard_names/graph_ops.py
+  tests/standard_names/test_audits.py
+  tests/standard_names/test_derived_parent_lifecycle_repair.py
+  /home/ITER/mcintos/.copilot/session-state/a6e05574-a1ca-4662-b9d4-9f4261b325db/files/sn-stage-final/.export_report.json
+
+Scope locks / constraints
+  Keep the user-locked decision semantics intact: preserve secondary_separatrix, remove invented secondary_plasma_boundary / secondary_separatrix_contour, and do not invent a no-op upstream RC.
+  Advisory dangling-link / divergence / below-score tails should be recorded as deferred, not claimed solved.
+
+Done-when
+  1. The final hard-blocker cleanup outcome is written into the plan.
+  2. Remaining advisory tails are explicitly noted as deferred.
+  3. this followup is resolved in the same session.</pre>
+    <p class="r-fu-outcome"><p>Final cleanup kept legitimate <code>secondary_separatrix</code> mappings as <code>major_radius_of_secondary_separatrix</code>, <code>vertical_coordinate_of_secondary_separatrix</code>, and <code>poloidal_magnetic_flux_at_secondary_separatrix</code>, while removing the invented <code>secondary_plasma_boundary</code> and <code>secondary_separatrix_contour</code> branches from the live graph.</p><p>Startup normalization now deletes inadmissible accepted derived parents and repairs accepted derived unit gaps before export runs; the final invalid catalog-only node <code>parallel_total_plasma_current_inside_flux_surface</code> was dropped. Export now reports <strong>0</strong> grammar parse failures and <strong>0</strong> ISN validation rejects, leaving only deferred advisory tails: <strong>33</strong> dangling doc links, <strong>140</strong> divergence entries, and <strong>11</strong> below-score exclusions.</p></p>
     </article>
 </section>
 </main>

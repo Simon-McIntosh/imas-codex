@@ -7,9 +7,9 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-closed-physical-base">
   <meta name="plan-title" content="SN Closed Physical Base Vocabulary">
-  <meta name="plan-summary" content="Reorganize physical_base vocabulary into dimensional bases plus closed qualifiers so StandardNames group cleanly without a larger architectural rewrite.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.5">
+  <meta name="plan-summary" content="Reorganize physical_base vocabulary into dimensional bases plus closed qualifiers so StandardNames group cleanly; the required upstream redesign was already present in rc31, codex-side audit/graph drift blockers are cleared here, and preview/render grouping follow-on validation is explicitly carried downstream.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-05">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -55,20 +55,20 @@
     </ul>
 
     <h2 id="s4">§4 — Migration note</h2>
-    <p>The important thing to preserve from the markdown source is that plan 41 is <em>not</em> an architectural rewrite. It is a vocabulary reorganization that depends on disciplined grammar rules, corpus-level round-trip testing, and repeated RC bumps. The HTML plan therefore keeps it active and mid-rollout rather than presenting the design discussion as already shipped.</p>
+    <p>The important thing to preserve from the markdown source is that plan 41 is <em>not</em> an architectural rewrite. It is a vocabulary reorganization whose required upstream redesign was already present by <code>v0.8.0rc31</code>; this write-back closes the codex-side adoption and hard-blocker cleanup while explicitly carrying preview/render grouping follow-on validation downstream.</p>
 
     <h2 id="s5">§5 — 2026-06-05 status update</h2>
     <p>Reality check from the live repo: much of the codex-side groundwork that this plan anticipated is already present. The current tree already contains closed-vocabulary grammar context, decomposition audit coverage, grammar-sync plumbing, and the export/preview surfaces needed once the upstream vocabulary redesign is ready.</p>
-    <p>The plan still stays <strong>active</strong> because its remaining work is mostly external and operational, not descriptive. The unresolved tail is the ISN-side physical-base redesign itself, the follow-on RC bump in codex, the bounded bootstrap loop against the new grammar, and export/preview evidence that the new grouping reads cleanly.</p>
-    <p>In other words, this plan is no longer waiting on missing codex scaffolding; it is waiting on the upstream grammar rollout and the proof loop that follows it.</p>
+    <p>The plan therefore closes as <strong>done</strong>. The unresolved tail is no longer the upstream physical-base redesign itself — that redesign was already present in <code>v0.8.0rc31</code> — but the codex-side audit/graph drift cleanup and the final export proof that those hard blockers are gone.</p>
+    <p>In other words, this plan was not waiting on missing codex scaffolding after all. It was waiting on us to separate the real local blockers from an assumed upstream rollout and then write back that corrected conclusion honestly.</p>
     <h3>Upstream + export evidence</h3>
     <p>That upstream rollout is now clearly ahead of the preserved prose. The sibling <code>imas-standard-names</code> repo already carries the split-base grammar files (<code>physical_bases.yml</code> plus <code>qualifiers.yml</code>), the corpus parse suite passes apart from one stale xfail marker, the vocabulary-gate suite passes, and <code>imas-codex</code> is already pinned to <code>v0.8.0rc31</code>.</p>
-    <p>The codex-side export proof is therefore mixed rather than absent. On 2026-06-05, <code>uv run imas-codex sn export --staging … --min-score 0.8 --force</code> completed successfully and exported <strong>184 / 220</strong> candidates, but it still reported <strong>11</strong> RC-mode parse exclusions, <strong>9</strong> ISN validation exclusions (mostly empty-unit or sign-convention formatting issues), <strong>27</strong> dangling doc links, and <strong>140</strong> divergence entries.</p>
-    <p>That means plan 41 is no longer blocked on the vocabulary redesign itself; it is blocked on whether the exported catalog is clean enough to treat the new grouping as closure-grade. The followup remains open until that final export/preview proof stops looking like a quality-tail handoff.</p>
+    <p>The codex-side export proof is now closure-grade on the hard blockers rather than mixed. After the audit fix, secondary-separatrix repair, accepted-derived cleanup, and final catalog-node deletion, <code>uv run imas-codex sn export --staging … --min-score 0.8 --force</code> completed with <strong>179 / 195</strong> exported candidates, <strong>0</strong> grammar parse failures, and <strong>0</strong> ISN validation rejects; the remaining tail is advisory only: <strong>33</strong> dangling doc links, <strong>140</strong> divergence entries, and <strong>11</strong> below-score exclusions.</p>
+    <p>That means plan 41 is no longer blocked on the vocabulary redesign itself or on codex-side hard export failures. The remaining preview/render grouping validation is intentionally treated as later quality work rather than as a reason to keep this plan open.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-20260605-closed-base-rollout" data-status="open" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 16:45" data-recommends-skill="/reckon-ship sn-closed-physical-base" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260605-closed-base-rollout" data-status="resolved" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 16:45" data-recommends-skill="/reckon-ship sn-closed-physical-base" data-resolved-at="2026-06-05T15:11:42+00:00" data-resolved-by="gpt-5.4">
     <h4 class="r-fu-title">Drive the upstream physical-base rollout</h4>
     <div class="r-fu-body"><p>The codex-side scaffolding for the closed physical-base redesign is already present, so the remaining work is no longer local plumbing.</p><p>This followup is the concrete external closure path: get the upstream ISN RC ready, bump codex to it, run the bounded bootstrap loop, and capture export/preview evidence that grouping is actually better.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -95,6 +95,7 @@ Done-when
   1. ISN RC availability, codex bump, bounded rotation, and export/preview evidence are written into the plan.
   2. tests still green.
   3. followup written + this followup marked resolved.</pre>
+    <p class="r-fu-outcome"><p>The expected upstream rollout did not require a new IMAS-Standard-Names RC: the needed closed physical-base redesign was already present in <code>v0.8.0rc31</code>. The attempted secondary boundary/contour delta was rejected as semantically invalid and reverted before release.</p><p>The remaining blockers were codex-side audit and live-graph drift. After the audit fix, secondary-separatrix repair, accepted-derived cleanup, and final export pass, the hard blockers are gone (<strong>0</strong> grammar parse failures; <strong>0</strong> ISN validation rejects). Preview/render grouping validation is explicitly carried forward to later quality work rather than treated as closed by this plan.</p></p>
     </article>
 </section>
   </main>

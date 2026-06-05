@@ -1,38 +1,38 @@
 {
-  "updated": "2026-06-05T14:13:36",
+  "updated": "2026-06-05T17:11:55",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S1",
+    "active_sprint_id": null,
     "sprints": [
       {
         "id": "S1",
         "theme": "SN foundation unblockers",
         "description": "Close the highest-ROI grammar, bootstrap, and vocabulary blockers before wider search, benchmark, and catalog work.",
-        "summary": "Active first sprint. This wave establishes the stable SN foundation: architectural pivot closure, bootstrap quality gates, and closed physical-base vocabulary.",
+        "summary": "Completed first sprint. This wave established the stable SN foundation: the architectural pivot is closed with a bounded drain proof and explicit grammar-as-graph carve-out, bootstrap hard blockers on the current release line are cleared, and the closed physical-base rollout was confirmed to already be present upstream in rc31.",
         "starts": "2026-06-05",
         "ends": "2026-06-12",
-        "status": "active",
+        "status": "done",
         "items": [
           {
             "slug": "sn-architectural-pivot",
             "tier": "opus",
             "why_now": "Highest-ROI upstream blocker; it explicitly blocks sn-quality-bootstrap-v2 and sets the grammar/graph architecture for the rest of the SN roadmap.",
-            "done_when": "Phase D clean-slate rotation is proven and Phase E grammar-as-graph tail is either landed or explicitly carved out of closure criteria."
+            "done_when": "Generate/enrich split and lifecycle pivot are landed, bounded drain proof is recorded, and the grammar-as-graph tail is explicitly carved out of S1 closure."
           },
           {
             "slug": "sn-quality-bootstrap-v2",
             "tier": "opus",
             "why_now": "Follows directly from sn-architectural-pivot and gates downstream compose, search, and quality work.",
-            "done_when": "WS-A through WS-G are closed, rc14-quality gates are green, and the bootstrap rotation yields low quarantine, strong docs coverage, and a fresh review dump."
+            "done_when": "Bootstrap hard blockers on the current release line are cleared, the three governance decisions are locked, and export hard failures are gone with only advisory link/divergence/score tails deferred."
           },
           {
             "slug": "sn-closed-physical-base",
             "tier": "opus",
             "why_now": "Stabilizes the grammar and vocabulary before broader export, parity, and search work.",
-            "done_when": "The ISN redesign lands, codex bumps to the new RC, bounded rotations converge, and export/preview shows clean grouping."
+            "done_when": "The upstream closed physical-base redesign is confirmed present in rc31, codex-side audit/graph drift blockers are cleared, and preview/render grouping validation is explicitly handed to later quality work rather than blocking S1."
           }
         ]
       },
@@ -134,9 +134,14 @@
         "when": "2026-06-05",
         "who": "gpt-5.4",
         "what": "A clean `sn run --flush -c 10 -t 20` completed with `no_eligible_work` after 8m 13s at $9.7013 / $10.00, enriching 54 names, reviewing 73, regenerating 68, and lifting docs-accepted coverage from 154 to 215 while keeping the SN graph suite green."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "Sprint S1 closed after the final export cleanup: invented secondary boundary/contour names were removed, legitimate secondary_separatrix mappings were restored, startup normalization gained accepted-derived cleanup, export hard blockers fell to zero, and no new IMAS-Standard-Names RC was needed because rc31 already contained the redesign."
       }
     ],
     "blockers": [],
-    "_version": 2
+    "_version": 3
   }
 }
