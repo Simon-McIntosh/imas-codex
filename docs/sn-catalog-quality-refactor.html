@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-catalog-quality-refactor">
+  <meta name="plan-title" content="SN Catalog Quality Refactor">
+  <meta name="plan-summary" content="Catalog quality refactor covering postfix grammar unification, derived-parent lifecycle, catalog round-trip improvements, and Phase 6 deletion of failed derived parents.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.21">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>SN Catalog Quality Refactor | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What has landed so far</h2>
+    <p>This migration keeps the real state from plan 36 rather than its old “dispatch-ready” label. The surveyed implementation fraction is only <strong>0.21</strong>: most of the progress so far is in design closure, audit reconciliation, and prompt/schema scoping, not in the final deployment loop. The important thing that <em>has</em> landed is that Phases 0–3 now have a stable specification and a reconciled backlog.</p>
+    <figure>
+      <img src="/imas-codex/figures/sn-plan-migration/sn-catalog-quality-refactor.svg" alt="Status diagram for plan 36 showing phases 0 to 3 settled and phases 4 to 6 still open.">
+      <figcaption>Plan 36 status: grammar, schema, linking, and rubric scope are settled; the validation/export/documentation tail is still open.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Phase 0 settled the grammar direction.</strong> The plan now consistently targets postfix composition, a closed reserved suffix vocabulary, vector/complex parent-part unification, and the audit/prompt changes needed to consume that grammar.</li>
+      <li><strong>Phase 1 settled the catalog field cleanup.</strong> <code>validity_domain</code>, <code>constraints</code>, and catalog-facing <code>cocos_transformation_type</code> are designated for removal; <code>doc_resolution_status</code> is explicitly split from <code>link_status</code>; export exclusion rules for unresolved/internal links are defined.</li>
+      <li><strong>Phase 2 settled the linking rebuild scope.</strong> The 11-bug failure chain is documented, the graph-backed context amplification path is specified, and the Delta A–J prompt/context expansions now cover cluster peers, hybrid DD search, identifier values, version history, and signal parity.</li>
+      <li><strong>Phase 3 settled prompt and rubric hardening.</strong> Response-model cleanup, enrich-style-guide rewrites, range/unit validation, tokamak-example grounding, rubric recalibration, and the round-4 reconciliations (H-1, H-2, M-1, M-2, M-3, L-1) are all folded into the active plan.</li>
+    </ul>
+
+    <h2 id="s2">§2 — What is still open</h2>
+    <p>The remaining work is the deployment tail: proving the redesigned pipeline on live graph data, exporting only clean catalog entries, and closing the derived-parent lifecycle end to end.</p>
+    <ul>
+      <li><strong>Phase 4a–4c validation loop still has to run in reality.</strong> The plan requires a StandardName-only clear, a small equilibrium verifier run, structural gates for links/siblings/validators, and then domain-by-domain rotation under capped spend. None of that should be treated as already complete.</li>
+      <li><strong>Phase 4d derived-parent bootstrap is still the deployment-critical gap.</strong> The renamed <code>sn bootstrap-derived-parents</code> workflow is meant to unify vector and complex parent recovery under postfix form, but the current code audit says the delete-on-failed-derived-parent path is not actually implemented yet.</li>
+      <li><strong>Phase 5 export/publish remains open.</strong> The catalog handoff still has to prove zero exported <code>dd:</code> links, zero unresolved entries, satisfied parent/part invariants, and a clean ISN PR/rendering pass.</li>
+      <li><strong>Phase 6 documentation is still open.</strong> AGENTS guidance, architecture docs, and the plan ledger all still need the postfix/linking/derived-parent model documented after code lands.</li>
+    </ul>
+    <p><strong>Blocking note from the survey:</strong> Phase 6’s “delete failed derived parents” expectation is not merely paperwork. It is currently a release blocker because the implementation stub remains in the codebase while the plan assumes the lifecycle already exists.</p>
+
+    <h2 id="s3">§3 — Code gaps the HTML plan must keep visible</h2>
+    <ul>
+      <li><strong>Derived-parent deletion is still a stub.</strong> The prior audit flagged <code>imas_codex/standard_names/graph_ops.py:7975</code> as the Phase 6 placeholder instead of a finished delete/rewire path.</li>
+      <li><strong><code>proposed_verdict</code> and <code>specificity_score</code> are not wired through runtime.</strong> The schema fields exist in the plan/design layer, but the survey found they are never meaningfully set or consumed by the running code.</li>
+      <li><strong>Derived-parent specificity review is not actually active.</strong> The plan expects specificity-based rejection of weak derived parents; the runtime still lacks the corresponding review/persistence/deletion loop.</li>
+      <li><strong>Plan 36 therefore cannot be treated as “ready to dispatch” without qualification.</strong> It is ready as a design package, but not as a statement that later lifecycle phases have already landed.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Open decisions</h2>
+    <p>The markdown plan still leaves several implementation decisions unresolved. These should stay visible during the HTML migration so later workers do not mistake them for locked choices.</p>
+    <ul>
+      <li>Should <code>_amplitude</code> remain scoped to <code>kind=complex</code> only, or is there any legitimate vector use that should be allowed alongside <code>_magnitude</code>?</li>
+      <li>Should documentation placeholder resolution remain parallel to link resolution (<code>doc_resolution_status</code> + <code>link_status</code>), or be collapsed into one shared status field?</li>
+      <li>Should the Phase 4 verifier gate stay structural only, or also require a reviewer-score threshold before the domain rotation opens up?</li>
+      <li>Should link ordering preserve emission order for provenance, or be canonicalized for stable export diffs?</li>
+      <li>Should <code>complex-vector</code> / <code>complex-tensor</code> remain deferred until first real need, or be predeclared up front?</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="amplitude-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should <code>_amplitude</code> stay restricted to <code>kind=complex</code>?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="complex-only">Complex only</button>
+          <button class="r-opt" data-value="allow-vector-too">Allow vector use too</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="resolution-model" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should docs and links keep separate resolution status fields?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="parallel-fields">Parallel fields</button>
+          <button class="r-opt" data-value="unified-field">Unified resolution field</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="verifier-gate" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should Phase 4 gating include reviewer-score thresholds?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="structural-only">Structural checks only</button>
+          <button class="r-opt" data-value="structural-plus-score">Structural + reviewer score</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="link-ordering" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How should exported link order be normalized?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="preserve-emission-order">Preserve emission order</button>
+          <button class="r-opt" data-value="canonicalize-alpha">Canonicalize alphabetically</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>
