@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="extraction-batching-prompt-ab">
+  <meta name="plan-title" content="Extraction batching &amp; prompt architecture — research report">
+  <meta name="plan-summary" content="Research report on Standard Name batching throughput, rejection-audit findings, and prompt-architecture trade-offs.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="32-extraction-prompt-overhaul">
+  <meta name="plan-depends-on" content="31-quality-bootstrap-v2">
+  <title>Extraction batching &amp; prompt architecture — research report | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p>Research report on Standard Name batching throughput, rejection-audit findings, and prompt-architecture trade-offs.</p>
+      <dl>
+          <dt>Source markdown</dt><dd><code>plans/research/extraction-batching-prompt-ab.md</code></dd>
+          <dt>Migration note</dt><dd><code>Bulk HTML migration from markdown</code></dd>
+          <dt>Plan informs</dt><dd><code>32-extraction-prompt-overhaul</code></dd>
+          <dt>Dependencies</dt><dd><code>31-quality-bootstrap-v2</code></dd>
+      </dl>
+    </header>
+    <article>
+<h1>Extraction batching &amp; prompt architecture — research report</h1>
+<blockquote>
+<p><strong>Scope:</strong> Three-workstream investigation of SN generation pipeline
+architectural weaknesses, conducted against the current <code>main</code>
+(post plan 30 / plan 31 WS-A).
+<strong>Status:</strong> research-only. Workstream 2(a) is the recommended
+immediate implementation. Workstreams 1 and 3 are deferred to
+plan 32 (<code>plans/features/standard-names/32-extraction-prompt-overhaul.md</code>).</p>
+</blockquote>
+<hr>
+<h2>1. Executive summary</h2>
+<p>The SN generation pipeline is <strong>throughput-bound, not filter-bound</strong>.
+Empirical measurement against the live graph (682 valid SNs, 25.2%
+coverage, 6 385 eligible DD paths) shows:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pre-split concept groups (cluster × unit)</td>
+<td>1 523</td>
+</tr>
+<tr>
+<td>Current <code>ExtractionBatch</code> count (after chunking)</td>
+<td><strong>1 566</strong></td>
+</tr>
+<tr>
+<td>Single-item batches (payload size 1)</td>
+<td><strong>543 (34.7 %)</strong></td>
+</tr>
+<tr>
+<td>Mean batch size</td>
+<td><strong>4.08 items</strong></td>
+</tr>
+<tr>
+<td>Batches if grouped (physics_domain × unit) @ 50</td>
+<td><strong>475</strong></td>
+</tr>
+<tr>
+<td>Mean batch size (name-only)</td>
+<td><strong>13.4 items</strong></td>
+</tr>
+<tr>
+<td>LLM-call reduction vs. current</td>
+<td><strong>≈ 69.7 %</strong></td>
+</tr>
+<tr>
+<td>Unclustered eligible paths</td>
+<td>528 (8.3 %)</td>
+</tr>
+</tbody>
+</table>
+<p>At a cached-prompt cost of ~10 k system tokens per call, collapsing
+the long tail of singleton batches alone saves roughly <strong>one dollar
+per hundred paths</strong> even before prompt-caching hits. For a fresh
+bootstrap of the remaining ≈ 4 780 uncovered paths, this is roughly
+<strong>1 091 avoided LLM calls</strong>.</p>
+<p>Recommendation: <strong>implement Workstream 2(a)</strong> — a "name-only" batch
+mode that groups by <code>(physics_domain × unit)</code> in bins of 50, wired
+into <code>sn generate --name-only</code>. It is fully additive (no changes to
+the default pipeline), measurable in isolation, and unlocks the
+transport desert (1 489 extracted-but-not-composed paths) in hours
+rather than days. Workstreams 1 (rejection audit) and 3 (static vs.
+tool-calling prompt A/B) are lower ROI and should proceed as plan 32
+after 2(a) lands.</p>
+<hr>
+<h2>2. Workstream 1 — rejection audit (filter-bound hypothesis)</h2>
+<h3>2.1 Correction to the original brief</h3>
+<p>The brief framed WS-1 as "audit <code>classifier.py</code> rejection rules".
+Post plan 30, the classifier is <strong>minimal</strong>: only three deterministic
+skips remain (<code>STR_*</code> names, <code>core_instant_changes/*</code> IDS, <code>*_error_*</code>
+children). All substantive rejection has moved into
+<code>IMASNode.node_category</code>, assigned during DD enrichment.</p>
+<p>The eligibility filter is now:</p>
+<pre><code class="language-python"># imas_codex/core/node_categories.py
+SN_SOURCE_CATEGORIES = frozenset({&quot;quantity&quot;, &quot;geometry&quot;})
+</code></pre>
+<p>Five categories are currently <strong>rejected</strong> for SN extraction:</p>
+<table>
+<thead>
+<tr>
+<th>category</th>
+<th>count</th>
+<th>intent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>error</code></td>
+<td>27 577</td>
+<td><code>*_error_upper/lower/index</code> companions</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>8 824</td>
+<td><code>ids_properties/*</code>, <code>code/*</code>, timestamps</td>
+</tr>
+<tr>
+<td><code>structural</code></td>
+<td>3 243</td>
+<td>container/AoS nodes, not leaf data</td>
+</tr>
+<tr>
+<td><code>representation</code></td>
+<td>1 817</td>
+<td>FEM/GGD interpolation coefficients</td>
+</tr>
+<tr>
+<td><code>coordinate</code></td>
+<td>821</td>
+<td>axis arrays (<code>time</code>, <code>rho_tor_norm</code>, …)</td>
+</tr>
+<tr>
+<td><code>fit_artifact</code></td>
+<td>239</td>
+<td><code>*_fit/chi_squared</code>, <code>*_fit/time_*</code></td>
+</tr>
+</tbody>
+</table>
+<p>Sampled 20 random transport-domain rejections (see §2.2). All were
+correctly excluded.</p>
+<h3>2.2 Spot-audit of 20 random transport rejections</h3>
+<p>All 20 fall into two classes:</p>
+<ul>
+<li><strong><code>representation</code></strong> — GGD interpolation coefficient slots such as
+  <code>plasma_transport/model/ggd/neutral/momentum/flux/radial_coefficients</code>.
+  These describe a numerical representation of a quantity, not the
+  quantity itself, and are already modelled by the associated
+  <code>values</code> sibling node.</li>
+<li><strong><code>fit_artifact</code></strong> — <code>*_fit/chi_squared</code>, <code>*_fit/time_measurement_width</code>.
+  These are diagnostics of a fit procedure, not physics observables.</li>
+<li><strong><code>coordinate</code></strong> — <code>time</code>, <code>rho_tor_norm</code> axis arrays. These have
+  dedicated coordinate handling elsewhere.</li>
+</ul>
+<p><strong>Conclusion:</strong> no evidence of systematic over-rejection. The
+remaining transport-coverage gap (1 489 paths <code>status='extracted'</code>
+without an SN) is <strong>budget-bound</strong>, not filter-bound.</p>
+<h3>2.3 What a proper WS-1 audit looks like</h3>
+<p>If pursued in plan 32 Phase 1, it should:</p>
+<ol>
+<li>Sample 100 random paths across all rejected categories (not just
+   transport) and hand-classify each as correct or incorrect.</li>
+<li>Report false-negative rate per category.</li>
+<li>Produce a CSV of suspected-misclassified paths for DD review.</li>
+<li>Recommend category schema adjustments if &gt; 5 % false-negative.</li>
+</ol>
+<p>This is <strong>not</strong> blocking for rc14 generation.</p>
+<hr>
+<h2>3. Workstream 2 — batching strategy (RECOMMENDED)</h2>
+<h3>3.1 Empirical distribution (live graph, commit HEAD)</h3>
+<pre><code class="language-text">Eligible DD paths (quantity|geometry, non-STR)        6 385
+Pre-split groups (cluster × unit)                     1 523
+Post-split ExtractionBatch count                      1 566
+Singleton batches (size 1)                              543  (34.7 %)
+Mean batch size                                        4.08
+Median batch size                                         3
+Max batch size (capped)                                  25
+</code></pre>
+<p>The <code>max_batch_size=25</code> ceiling in
+<code>enrichment.group_by_concept_and_unit()</code> is essentially never binding:
+even the largest (cluster × unit) groups are dominated by 2–6 items.
+The singleton tail is driven by narrow clusters where a single unit
+occurs once (e.g., <code>rho_tor_norm</code> in a scalar context, or a solitary
+<code>T</code> toroidal-field variant).</p>
+<h3>3.2 Proposed "name-only" grouping</h3>
+<p>Group by <code>(physics_domain, unit)</code> instead of <code>(grouping_cluster, unit)</code>.
+Bin at <code>name_only_batch_size</code> (default <strong>50</strong>).</p>
+<p>Simulation against the same 6 385 paths:</p>
+<table>
+<thead>
+<tr>
+<th>grouping key</th>
+<th>batches</th>
+<th>mean</th>
+<th>singletons</th>
+<th>median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>(cluster, unit)</code> @25 (current)</td>
+<td>1 566</td>
+<td>4.08</td>
+<td>543</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>(physics_domain, unit)</code> @50 (new)</td>
+<td><strong>475</strong></td>
+<td>13.4</td>
+<td><strong>121</strong></td>
+<td>22</td>
+</tr>
+<tr>
+<td><code>(physics_domain, unit)</code> @100</td>
+<td>312</td>
+<td>20.5</td>
+<td>108</td>
+<td>38</td>
+</tr>
+<tr>
+<td><code>(ids_name, physics_domain, unit)</code></td>
+<td>731</td>
+<td>8.7</td>
+<td>234</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>At 50-bin, LLM calls drop <strong>69.7 %</strong> with only a modest loss in
+per-item cluster context (the prompt still receives the full
+per-item structural/unit/COCOS context; it just loses the
+sibling-path listing that was primarily useful for cross-IDS
+synonymy).</p>
+<h3>3.3 Why (physics_domain × unit) is the right key</h3>
+<ul>
+<li><strong>Coherence across IDSs.</strong> Domain is coarser than cluster; a batch
+  now contains, e.g., <em>all transport particle-flux quantities in
+  <code>m^-2.s^-1</code> across <code>plasma_profiles</code>, <code>plasma_transport</code>,
+  <code>core_transport</code></em>. The LLM naturally identifies the sub-grouping
+  (electron vs. ion vs. neutral, parallel vs. radial) and composes
+  consistent names, which is the primary review complaint in
+  <code>plans/research/standard-names/12-full-graph-review.md</code>.</li>
+<li><strong>Unit safety.</strong> Keying on unit preserves the invariant that every
+  batch candidate has the same SI unit, so the LLM never has to
+  reconcile e.g., <code>T</code> vs. <code>V.s/Wb</code>.</li>
+<li><strong>Cache friendliness.</strong> Domain+unit is a low-cardinality key
+  (~ 150 bins across the whole DD). Anthropic prompt-cache hit
+  rates improve because system+domain-context prefixes are stable
+  across sequential batches in the same bin.</li>
+<li><strong>Avoids the long tail.</strong> No (cluster × unit) group is ever
+  singleton-only anymore unless the <em>entire domain-unit</em> has one
+  member, which in practice applies to fewer than 30 domain-unit
+  pairs (mostly alpha-lifecycle paths).</li>
+</ul>
+<h3>3.4 Implementation sketch (WS-2a scope)</h3>
+<ol>
+<li><strong>Config:</strong> add <code>name-only-batch-size = 50</code> under
+   <code>[tool.imas-codex.sn-generate]</code> in <code>pyproject.toml</code>.</li>
+<li><strong>State:</strong> <code>StandardNameBuildState.name_only: bool = False</code>.</li>
+<li><strong>Grouping:</strong> new <code>group_for_name_only()</code> in
+   <code>imas_codex/standard_names/enrichment.py</code> keyed on
+   <code>(physics_domain, unit)</code>, producing <code>ExtractionBatch(mode="name_only", …)</code>.</li>
+<li><strong>Source plumbing:</strong> <code>extract_dd_candidates()</code> in
+   <code>imas_codex/standard_names/sources/dd.py</code> branches on <code>name_only</code>.</li>
+<li><strong>Prompt:</strong> new
+   <code>imas_codex/llm/prompts/sn/compose_dd_name_only.md</code> — lean user
+   prompt that omits per-item cluster siblings, COCOS block, and
+   reviewer-feedback themes; adds an explicit
+   "identify natural sub-groups before naming" instruction.</li>
+<li><strong>Worker branch:</strong> in <code>compose_worker</code> (line ≈ 1010), when
+   <code>state.name_only</code>, render the new user prompt and skip the L2
+   IDS-prefetch + L4 reviewer-feedback enrichment. Keep L6 grammar
+   retry and L7 opus revision — they're per-candidate and cheap.</li>
+<li><strong>CLI:</strong> <code>sn generate --name-only [--name-only-batch-size N]</code>.</li>
+<li><strong>Telemetry:</strong> aggregate <code>(batch_size, items, cost, tokens_in,
+   tokens_out)</code> per batch, print a summary at rotation end.</li>
+</ol>
+<p><strong>Non-goal:</strong> the default (non-<code>--name-only</code>) path is unchanged.
+Existing review/enrichment flows still apply; <code>--name-only</code> just
+gets a candidate named-and-classified faster, deferring the deep
+per-item enrichment to a subsequent review pass.</p>
+<h3>3.5 Risks and mitigations</h3>
+<table>
+<thead>
+<tr>
+<th>risk</th>
+<th>mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM truncates at N &gt; ~30 items</td>
+<td>Start at N = 50; fallback <code>chunk()</code> still caps the list.</td>
+</tr>
+<tr>
+<td>Lost cluster-sibling context degrades names</td>
+<td>L7 opus revision still sees cluster context per candidate.</td>
+</tr>
+<tr>
+<td>Name-only names pass review with weak description</td>
+<td>Flag <code>source_kind='dd_name_only'</code>; review gate checks it.</td>
+</tr>
+<tr>
+<td>Prompt-cache thrash from new user-prompt variant</td>
+<td>New prompt is static; cache still warm after first batch.</td>
+</tr>
+</tbody>
+</table>
+<h3>3.6 Measurement plan for post-merge validation</h3>
+<p>After implementation, run two back-to-back 15-minute rotations:
+one with <code>--name-only --budget 3.0</code>, one default <code>--budget 3.0</code>.
+Report:</p>
+<ul>
+<li><code>names_composed</code> per dollar.</li>
+<li><code>review_pass_rate</code> (quarantine %) for each cohort.</li>
+<li><code>median_batch_size</code>, <code>median_batch_latency_s</code>.</li>
+<li><code>cache_read_tokens / cache_write_tokens</code>.</li>
+</ul>
+<p>Success gate: name-only achieves ≥ 3× throughput at
+≤ 1.2× quarantine rate. If quarantine regresses further, raise
+<code>L6</code>/<code>L7</code> thresholds or fall back to default.</p>
+<hr>
+<h2>4. Workstream 3 — prompt architecture (static vs. tool-calling)</h2>
+<h3>4.1 Current architecture (static, cache-optimised)</h3>
+<ul>
+<li><strong>System prompt</strong> <code>sn/compose_system.md</code> (≈ 7 800 words ≈ 10 k
+  tokens) is sent verbatim on every call. Anthropic prompt caching
+  hits it after the first call in a rotation, dropping marginal
+  cost ~ 90 %.</li>
+<li><strong>User prompt</strong> <code>sn/compose_dd.md</code> (≈ 1 900 words base + ≈ 100
+  tokens per item) embeds batch-specific context: candidates,
+  cluster siblings, cross-IDS paths, reviewer feedback, rate hints,
+  COCOS guidance.</li>
+<li><strong>Partials</strong> under <code>imas_codex/llm/prompts/shared/sn/_*.md</code>
+  (~ 4 700 words total) encapsulate grammar, vocabulary, exemplars,
+  COCOS rules — re-rendered into every prompt via Jinja.</li>
+</ul>
+<h3>4.2 Tool-calling alternative (speculative)</h3>
+<p>The adjacent ISN package (<code>~/Code/imas-standard-names</code>) exposes
+MCP tools: <code>list_vocabulary</code>, <code>grammar_help</code>, <code>fetch_schema</code>,
+<code>search_standard_names</code>, <code>validate_name</code>, etc. An alternative
+compose architecture would:</p>
+<ol>
+<li>Send a <strong>short</strong> system prompt describing the task and
+   available tools (~1–2 k tokens).</li>
+<li>Let the LLM <strong>pull</strong> grammar, vocabulary, and exemplars on
+   demand via tool calls.</li>
+<li>Finalize with a structured <code>compose_standard_name</code> tool call.</li>
+</ol>
+<h3>4.3 Why tool-calling is NOT obviously a win here</h3>
+<ul>
+<li><strong>Cache defeat.</strong> Tool-calling inserts model-generated content
+  between system and final response, which breaks the prefix-cache
+  optimisation; marginal cost per batch goes <strong>up</strong> unless the
+  round-trip saves &gt; 10 k tokens on average (unlikely).</li>
+<li><strong>Latency.</strong> Each tool call adds a round trip; batch latency
+  doubles or triples.</li>
+<li><strong>Non-determinism.</strong> The LLM may pull different vocabulary slices
+  for semantically identical batches, reducing run-to-run
+  reproducibility — a regression for the current review workflow
+  which depends on stable regenerations.</li>
+<li><strong>Dev cost.</strong> Requires an MCP client inside <code>compose_worker</code>,
+  auth plumbing, and retry logic; meaningful engineering investment.</li>
+</ul>
+<h3>4.4 Hybrid variant</h3>
+<p>A middle ground that warrants evaluation: keep the static system
+prompt but trim by ~50 % (remove sections the LLM rarely cites),
+and add <strong>only one</strong> tool — <code>fetch_exemplar_by_physics_domain</code> —
+to pull the 3–5 most relevant exemplars on demand instead of
+statically embedding 15 per prompt. This preserves caching while
+reducing context bloat.</p>
+<h3>4.5 Proposed A/B harness (plan 32 Phase 2)</h3>
+<ul>
+<li><strong>Sample:</strong> 20 representative DD paths — 5 equilibrium, 5
+  magnetics, 5 transport, 5 core_profiles. Include 5 already-in-graph
+  SNs as regressions.</li>
+<li><strong>Arms:</strong>
+  1. <code>static</code> — current architecture.
+  2. <code>static-lean</code> — trimmed system prompt, single exemplar tool.
+  3. <code>tool-calling</code> — full MCP-driven composition.</li>
+<li><strong>Scoring:</strong> reviewer (opus) scores each candidate 0–1 on
+  correctness, grammar-compliance, and description quality. Track
+  wall-clock, cost, and cache-read ratio.</li>
+<li><strong>Success gate:</strong> <code>static-lean</code> or <code>tool-calling</code> wins on quality
+  <strong>and</strong> cost. If neither wins on both, keep <code>static</code>.</li>
+</ul>
+<h3>4.6 Recommendation</h3>
+<p>Ship Workstream 2(a) first. Only invest in prompt architecture
+experimentation (WS-3) if the name-only pass reveals a residual
+quality plateau that cannot be closed by L7 opus revision. In that
+case, start with the <code>static-lean</code> variant (low-risk trim) before
+considering tool-calling.</p>
+<hr>
+<h2>5. ROI summary</h2>
+<table>
+<thead>
+<tr>
+<th>workstream</th>
+<th>estimated effort</th>
+<th>estimated quality gain</th>
+<th>estimated cost savings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WS-2a name-only</strong></td>
+<td>1–2 days</td>
+<td>neutral (flagged)</td>
+<td>≈ 70 % of bootstrap</td>
+</tr>
+<tr>
+<td>WS-1 category audit</td>
+<td>1 day</td>
+<td>marginal</td>
+<td>zero</td>
+</tr>
+<tr>
+<td>WS-3 static-lean prompt</td>
+<td>2–3 days</td>
+<td>unknown</td>
+<td>10–30 %</td>
+</tr>
+<tr>
+<td>WS-3 tool-calling</td>
+<td>1–2 weeks</td>
+<td>unknown</td>
+<td>likely negative</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Go:</strong> WS-2a now. WS-1 + WS-3 defer to plan 32 pending results.</p>
+    </article>
+  </main>
+</body>
+</html>

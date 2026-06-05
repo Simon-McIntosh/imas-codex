@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="d3-senior-review-2026-04">
+  <meta name="plan-title" content="D.3 Senior Physics Review — 7-Domain Rotation (2026-04)">
+  <meta name="plan-summary" content="Senior-physicist audit of the 2026-04 seven-domain StandardName rotation, including cross-domain findings and high-ROI follow-up actions.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="29-architectural-pivot,32-extraction-prompt-overhaul">
+  <title>D.3 Senior Physics Review — 7-Domain Rotation (2026-04) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p>Senior-physicist audit of the 2026-04 seven-domain StandardName rotation, including cross-domain findings and high-ROI follow-up actions.</p>
+      <dl>
+          <dt>Source markdown</dt><dd><code>plans/features/standard-names/reviews/D3-senior-review-2026-04.md</code></dd>
+          <dt>Migration note</dt><dd><code>Bulk HTML migration from markdown</code></dd>
+          <dt>Plan informs</dt><dd><code>29-architectural-pivot,32-extraction-prompt-overhaul</code></dd>
+      </dl>
+    </header>
+    <article>
+<h1>D.3 Senior Physics Review — 7-Domain Rotation (2026-04)</h1>
+<p><strong>Reviewer role:</strong> Senior tokamak physicist + IMAS Standard-Names co-author.
+<strong>Scope:</strong> 438 StandardName nodes produced by the fresh D.2 rotation across 7 physics
+domains (<code>equilibrium</code>, <code>magnetohydrodynamics</code>, <code>transport</code>, <code>edge_plasma_physics</code>,
+<code>magnetic_field_diagnostics</code>, <code>auxiliary_heating</code>, <code>turbulence</code>).
+<strong>Evidence base:</strong> <code>plans/features/standard-names/reviews/D3-data.json</code> (graph snapshot
+exported 2026-04 via <code>imas-codex-repl</code>). Raw corpus = canonical source; quotations
+below are verbatim <code>sn.id</code> values.
+<strong>Model under review:</strong> all 438 names composed by
+<code>openrouter/anthropic/claude-sonnet-4.6</code> (plan-29 §D.2 winner).</p>
+<blockquote>
+<p><strong>Status gate:</strong> This review closes plan 29 §D.3 and conditionally approves the
+transition to §D.4 <em>only</em> if the HIGH-ROI actions in §4 are executed first. The
+corpus is publishable as a <em>draft</em> vocabulary, not yet as an authoritative
+controlled vocabulary.</p>
+</blockquote>
+<hr>
+<h2>1. Graph snapshot</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total StandardName nodes</td>
+<td style="text-align: right;"><strong>438</strong></td>
+</tr>
+<tr>
+<td>Valid (validation_status)</td>
+<td style="text-align: right;"><strong>335</strong> (76.5%)</td>
+</tr>
+<tr>
+<td>Quarantined</td>
+<td style="text-align: right;"><strong>52</strong> (11.9%)</td>
+</tr>
+<tr>
+<td>Pending (attached / not validated)</td>
+<td style="text-align: right;"><strong>51</strong> (11.6%)</td>
+</tr>
+<tr>
+<td>Mean <code>validation_issues</code> / name</td>
+<td style="text-align: right;"><strong>0.16</strong></td>
+</tr>
+<tr>
+<td><code>cocos_transformation_type</code> populated</td>
+<td style="text-align: right;"><strong>16 / 438</strong> (3.7%) — <em>plan target ≥35</em></td>
+</tr>
+<tr>
+<td>StandardNameSource nodes</td>
+<td style="text-align: right;">1 359 (628 extracted, 599 composed, 109 attached, 23 vocab_gap)</td>
+</tr>
+<tr>
+<td>VocabGap nodes</td>
+<td style="text-align: right;"><strong>290</strong> (physical_base 169, geometry 26, object 22, position 22, subject 17, transformation 12, process 11, grammar_ambiguity 5)</td>
+</tr>
+<tr>
+<td><code>reviewer_score</code> populated</td>
+<td style="text-align: right;"><strong>0 / 438</strong> — <code>sn review</code> has not yet run (see §6)</td>
+</tr>
+<tr>
+<td><code>documentation</code> populated</td>
+<td style="text-align: right;"><strong>0 / 438</strong> — D.2 is name-only; enrichment is D.4</td>
+</tr>
+</tbody>
+</table>
+<h3>1.1 Per-domain distribution</h3>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th style="text-align: right;">Total</th>
+<th style="text-align: right;">Valid</th>
+<th style="text-align: right;">Quar</th>
+<th style="text-align: right;">Pend</th>
+<th style="text-align: right;">Issues/name</th>
+<th style="text-align: right;">J ≥ 0.75 pairs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>auxiliary_heating</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;"><strong>51</strong> ← synonym cluster</td>
+</tr>
+<tr>
+<td>edge_plasma_physics</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>equilibrium</td>
+<td style="text-align: right;"><strong>107</strong></td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;"><strong>23</strong></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>0.32</strong> ← worst</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td>magnetic_field_diagnostics</td>
+<td style="text-align: right;"><strong>4</strong></td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr>
+<td>magnetohydrodynamics</td>
+<td style="text-align: right;">83</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;"><strong>36</strong></td>
+</tr>
+<tr>
+<td>transport</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr>
+<td>turbulence</td>
+<td style="text-align: right;"><strong>11</strong></td>
+<td style="text-align: right;"><strong>5</strong></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<h3>1.2 Headline findings</h3>
+<ul>
+<li><strong>Synonym density is too high.</strong> Jaccard ≥0.75 pair count = 123 across 335 valid
+  names (36.7 per 100). Two domains account for 87 of the 123 pairs:
+  <code>auxiliary_heating</code> (51) and <code>magnetohydrodynamics</code> (36). This is the <em>opposite</em>
+  of the plan-29 target (§7.a "≥30% reduction in Jaccard cluster density"). The
+  "one decomposition, many subjects" refactor is deferred.</li>
+<li><strong>Equilibrium is the weakest domain.</strong> Issue density 0.32/name is 2× the corpus
+  mean, almost entirely from DD-path leakage
+  (<code>equilibrium_reconstruction_constraint_weight_of_*</code>, <code>measurement_time</code>, g-index
+  metric components). Quarantine rate 23/107 = 21%.</li>
+<li><strong>Two domains are under-populated.</strong> <code>magnetic_field_diagnostics</code> has only 4
+  names (Stokes parameters), and <code>turbulence</code> has only 5 valid names. These
+  domains were effectively skipped by the extractor — re-running D.2 targeted on
+  these domains is the highest-coverage win.</li>
+<li><strong>Name-only mode works.</strong> Unit auditor quarantines are reliable; the compose
+  prompt respects grammar structure; cross-domain <code>attached</code> deduplication is
+  working (109 sources attached without LLM re-generation).</li>
+<li><strong>Documentation quality cannot be audited.</strong> Spot-audit of 20 random names
+  confirmed <code>description</code> and <code>documentation</code> are empty (D.2 <code>--name-only</code>
+  rotation). Plan-29 §7.e (documentation rubric ≥0.75) can only be evaluated
+  after D.4.</li>
+<li><strong>Reviewer score cannot be audited.</strong> No <code>sn review</code> run on this rotation;
+  plan-29 §7.b (reviewer rubric ≥0.75 vs 0.68 baseline) must be deferred. Below
+  we use <code>validation_issues</code> density + qualitative physicist judgement as proxy.</li>
+</ul>
+<hr>
+<h2>2. Per-domain audit</h2>
+<p>For each domain: a short diagnosis, 5–10 <strong>strong</strong> names (idiomatic, ISN-grammar
+clean), 5–10 <strong>weak</strong> names (anti-pattern with NC-tag), identified vocabulary gaps
+(from VocabGap + quarantine corpus), and grammar-shortcoming diagnosis.</p>
+<h3>NC (Name-Criticism) tag legend</h3>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Anti-pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NC-1</td>
+<td>Combinatorial explosion — same physics expressed as N separate names instead of one base × decomposition</td>
+</tr>
+<tr>
+<td>NC-2</td>
+<td>Tautology / repeated token (e.g. <code>_beam_injector_beam</code>)</td>
+</tr>
+<tr>
+<td>NC-3</td>
+<td>Provenance / solver-semantic leak (<code>measured_</code>, <code>reconstructed_</code>, <code>explicit_</code>, <code>implicit_</code>)</td>
+</tr>
+<tr>
+<td>NC-4</td>
+<td>DD-path leakage (name reads like an IDS path, e.g. <code>equilibrium_reconstruction_constraint_weight_of_*</code>)</td>
+</tr>
+<tr>
+<td>NC-5</td>
+<td>Wrong <code>kind</code> — vector expressed as scalar or vice-versa</td>
+</tr>
+<tr>
+<td>NC-6</td>
+<td>Abbreviation / jargon (<code>ntm</code>, <code>norm</code>, <code>exb</code>)</td>
+</tr>
+<tr>
+<td>NC-7</td>
+<td>Name/unit mismatch (e.g. a Tesla-valued quantity with unit <code>m^-1.V</code>)</td>
+</tr>
+<tr>
+<td>NC-8</td>
+<td>COCOS metadata missing (T/Wb/Pa/A quantity with <code>cocos_transformation_type</code> null)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3>2.1 Equilibrium (107 nodes · 84 valid · 23 quar · issues/name 0.32)</h3>
+<p><strong>Diagnosis.</strong> Worst domain by every metric: highest issue density, highest
+quarantine rate, largest DD-path-leakage footprint. The compose prompt has
+allowed the LLM to lift IDS structural names verbatim
+(<code>equilibrium_reconstruction_constraint_*</code>, <code>iron_core_segment_*_measurement_time</code>,
+<code>g11_contravariant_metric_tensor_component</code>). These are data-model identifiers,
+not physics quantities.</p>
+<p><strong>Strong (exemplars to keep).</strong></p>
+<ol>
+<li><code>poloidal_magnetic_flux_at_magnetic_axis</code> — <code>Wb</code>, clean <code>_at_</code> for
+   named feature (fixed-point).</li>
+<li><code>safety_factor_at_magnetic_axis</code> — <code>1</code>, canonical scalar.</li>
+<li><code>minor_radius_of_flux_surface</code> — <code>m</code>, well-scoped geometry.</li>
+<li><code>major_radius_of_magnetic_axis</code> — <code>m</code>, canonical.</li>
+<li><code>flux_surface_averaged_plasma_pressure</code> — <code>Pa</code>, correct transformation prefix.</li>
+<li><code>normalized_poloidal_flux_coordinate</code> — <code>1</code>, proper radial coordinate.</li>
+<li><code>toroidal_magnetic_field_at_magnetic_axis</code> — <code>T</code>, exemplar.</li>
+<li><code>lower_triangularity</code> / <code>upper_triangularity</code> — <code>1</code>, dimensionless shaping.</li>
+<li><code>plasma_volume</code> — <code>m^3</code>, minimal clean scalar.</li>
+<li><code>vertical_coordinate_of_magnetic_axis</code> — <code>m</code>, canonical component.</li>
+</ol>
+<p><strong>Weak (anti-patterns).</strong></p>
+<ol>
+<li><code>equilibrium_reconstruction_constraint_weight_of_poloidal_magnetic_field_probe</code>
+   — <strong>NC-4</strong> (DD-path leak) + <strong>NC-1</strong> (one of 8 identical <code>_constraint_weight_of_*</code>
+   variants).</li>
+<li><code>equilibrium_reconstruction_constraint_flux_loop_measurement_time</code> — <strong>NC-4</strong>,
+   <code>measurement_time</code> is diagnostic provenance, not a physical quantity.</li>
+<li><code>g11_contravariant_metric_tensor_component</code> … <code>g33_*</code> — <strong>NC-2/NC-5</strong>: the
+   index <code>11…33</code> is a <em>decomposition axis</em>, not part of the name. Canonical form
+   would be one base name <code>contravariant_metric_tensor</code> with a
+   <code>(flux_coordinate, flux_coordinate)</code> index decomposition.</li>
+<li><code>upper_triangularity_of_plasma_boundary</code> duplicates <code>upper_triangularity</code> —
+   <strong>NC-1</strong> (the unqualified name already means the plasma boundary).</li>
+<li><code>radial_component_of_iron_core_segment_magnetization_constraint_measurement_time</code>
+   — <strong>NC-4</strong> + <strong>NC-7</strong> concern (unit is <code>s</code> but name reads like a field value).</li>
+<li><code>measured_rotational_pressure_constraint</code> / <code>reconstructed_rotational_pressure_constraint</code>
+   — <strong>NC-3</strong> (provenance leak); <code>measured_</code> and <code>reconstructed_</code> encode
+   <em>equilibrium solver I/O role</em>, not physics.</li>
+<li><code>equilibrium_reconstruction_constraint_measured_vertical_coordinate_of_x_point</code>
+   — <strong>NC-3 + NC-4</strong>, reads like <code>equilibrium/time_slice/constraints/x_point/.../measured</code>.</li>
+<li><code>maximum_magnetic_field_of_flux_surface</code> / <code>minimum_magnetic_field_of_flux_surface</code>
+   — <strong>NC-5</strong>: current <code>kind=scalar</code>, but the underlying quantity is a
+   flux-surface <em>extremum of a field magnitude</em> — acceptable as scalar but
+   <code>_magnetic_field_magnitude_</code> wording would be clearer.</li>
+<li><code>poloidal_magnetic_field_probe_constraint_weight</code> — <strong>NC-4</strong>, a data-model
+   weight, not a physical observable.</li>
+<li><code>plasma_filament_current</code> — <strong>NC-5</strong> candidate (filament current in a
+    multi-filament reconstruction is a <em>vector over filament index</em>; marking as
+    <code>scalar</code> forces consumers to re-decorate the index).</li>
+</ol>
+<p><strong>Vocabulary gaps surfaced.</strong></p>
+<ul>
+<li><strong>Process:</strong> (none in this domain — good.)</li>
+<li><strong>Position:</strong> <code>inside_flux_surface</code> appears in both <code>geometry</code> and <code>position</code>
+  segments (ambiguity — ISN has no canonical assignment).</li>
+<li><strong>Transformation:</strong> <code>variation_of</code> used as a free prefix but not in
+  canonical transformations.</li>
+<li><strong>Subject/object:</strong> <code>iron_core_segment</code>, <code>passive_structure</code>, <code>passive_loop</code>,
+  <code>flux_loop</code>, <code>x_point</code>, <code>strike_point</code> — all DD machine-description objects
+  being conflated with physical quantities.</li>
+</ul>
+<p><strong>Grammar shortcomings.</strong> ISN has no segment for "reconstruction-solver
+provenance" (measured-vs-reconstructed), nor for "diagnostic observable vs
+reconstructed estimator". These concepts are <em>metadata about a timeseries</em>,
+not parts of a standard name. The composer needs an explicit rule to refuse
+any name containing <code>measured_</code>, <code>reconstructed_</code>, <code>constraint_weight_</code>,
+<code>measurement_time</code>, or <code>_constraint</code> as a suffix.</p>
+<hr>
+<h3>2.2 Magnetohydrodynamics (83 nodes · 64 valid · 13 quar · issues/name 0.16)</h3>
+<p><strong>Diagnosis.</strong> The second most populous domain. Grammar is generally sound,
+but Fourier/mode-decomposition is handled ad-hoc as a <code>per_toroidal_mode(_number)</code>
+suffix rather than a <code>transformation</code> segment — this is the root cause of the
+36 J≥0.75 pairs (second-worst synonym density). ISN ADR-3 R1 F3 (Fourier
+decomposition as a first-class segment) is the pending blocker.</p>
+<p><strong>Strong.</strong></p>
+<ol>
+<li><code>perturbed_electron_temperature_eigenfunction_real_part</code> / <code>_imaginary_part</code> —
+   canonical complex-amplitude pair, ADR-3 R3 compliant.</li>
+<li><code>perturbed_radial_component_of_magnetic_field_real_part</code> — clean.</li>
+<li><code>seed_island_full_width</code> (valid quarantine recovery) — good descriptor.</li>
+<li><code>poloidal_mode_number</code> / <code>toroidal_mode_number</code> — <code>1</code>, canonical decomp tag.</li>
+<li><code>resistive_wall_mode_growth_rate</code> — <code>s^-1</code>, clean.</li>
+<li><code>neoclassical_tearing_mode_saturated_island_width</code> — <code>m</code>, clean.</li>
+<li><code>poloidal_component_of_vacuum_perturbed_magnetic_field_imaginary_part</code> — <code>T</code>,
+   clean compound but verbose (candidate for shortening if <code>vacuum</code> becomes a
+   decomposition tag).</li>
+<li><code>sawtooth_period</code> — <code>s</code>, canonical.</li>
+<li><code>plasma_displacement_eigenfunction</code> — good base.</li>
+<li><code>edge_localized_mode_frequency</code> — <code>Hz</code>.</li>
+</ol>
+<p><strong>Weak.</strong></p>
+<ol>
+<li><code>ntm_mode_onset_time_offset</code> — <strong>NC-6</strong> (<code>ntm</code> = "neoclassical tearing mode")
+   + <strong>NC-2</strong> (<code>ntm_mode</code> = "neoclassical tearing mode mode").</li>
+<li><code>neoclassical_tearing_mode_detailed_evolution_time</code> vs
+   <code>neoclassical_tearing_mode_onset_time</code> — inconsistent phrasing; the first
+   reads like a DD path. <strong>NC-4</strong>.</li>
+<li><code>mode_rotation_frequency</code> — too generic; qualifier (what mode?) is missing.</li>
+<li><code>perturbed_plasma_velocity_eigenfunction</code> — no <code>_real_part</code>/<code>_imaginary_part</code>
+   suffix — violates ADR-3 R3 for complex-valued eigenfunctions.</li>
+<li><code>poloidal_component_of_perturbed_magnetic_field_imaginary_part</code> vs
+   <code>perturbed_poloidal_component_of_magnetic_field_imaginary_part</code> — both exist,
+   different subject-ordering — <strong>NC-1</strong>.</li>
+<li><code>right_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code>
+   — <strong>NC-1</strong>: LH/RH polarisation should be a <code>decomposition(polarisation)</code> axis,
+   not part of the name.</li>
+<li><code>neoclassical_toroidal_viscosity_stress_tensor_imaginary_part</code> — tensor being
+   marked as a scalar; no rank/index metadata.</li>
+<li><code>reynolds_stress_tensor_real_part</code> / <code>maxwell_stress_tensor_real_part</code> —
+   tensors being named as scalars (no index axis decomposition).</li>
+<li><code>plasma_displacement_imaginary_part</code> with no <code>_eigenfunction_</code> qualifier —
+   inconsistent with <code>plasma_pressure_eigenfunction_imaginary_part</code>.</li>
+<li><code>perturbed_electromagnetic_super_potential_imaginary_part</code> — "super_potential"
+    is non-standard (usually "Hertz potential" or "magnetic-vector-potential").
+    <strong>NC-6</strong> (jargon).</li>
+</ol>
+<p><strong>Vocabulary gaps.</strong></p>
+<ul>
+<li><strong>Process:</strong> <code>neoclassical_tearing_mode</code>, <code>resistive_dissipation</code>,
+  <code>j_cross_b_force</code>, <code>bootstrap</code>.</li>
+<li><strong>Transformation:</strong> <code>real_part_of_perturbed</code>, <code>per_toroidal_mode</code>,
+  <code>per_toroidal_mode_number</code>, <code>normalized</code>, <code>volume_averaged</code>.</li>
+<li><strong>Grammar ambiguity:</strong> <code>diamagnetic</code>, <code>velocity_tor vs velocity_phi</code>.</li>
+<li><strong>Object:</strong> <code>neoclassical_tearing_mode</code> recurs as a subject/object token.</li>
+</ul>
+<p><strong>Grammar shortcomings.</strong> Fourier decomposition is the single biggest missing
+piece. Until ISN adds a <code>decomposition(toroidal_mode_number, poloidal_mode_number)</code>
+first-class axis, the composer will keep inventing <code>_per_toroidal_mode_*</code>
+variants. Similarly, <code>_real_part</code> / <code>_imaginary_part</code> should be ADR-3 R3
+enforced on <em>every</em> <code>perturbed_*_eigenfunction</code> name.</p>
+<hr>
+<h3>2.3 Transport (63 nodes · 49 valid · 6 quar · issues/name 0.14)</h3>
+<p><strong>Diagnosis.</strong> Decent grammar, moderate synonym density, but the domain is
+polluted with solver-semantic leak (<code>explicit_</code>, <code>implicit_part_of_</code>). These
+are numerics bookkeeping, not physics.</p>
+<p><strong>Strong.</strong></p>
+<ol>
+<li><code>volume_averaged_ion_temperature</code> — canonical.</li>
+<li><code>electron_energy_source_density</code> — <code>m^-3.W</code>, canonical source density.</li>
+<li><code>thermal_ion_temperature</code> / <code>electron_temperature</code> — canonical scalars.</li>
+<li><code>particle_diffusivity</code> / <code>thermal_diffusivity</code> — canonical transport coeffs.</li>
+<li><code>bootstrap_current_density</code> — <code>A.m^-2</code>, canonical.</li>
+<li><code>plasma_current_due_to_bootstrap</code> — <code>A</code>, clean <code>due_to_</code> phrasing.</li>
+<li><code>total_thermal_pressure</code> — clean.</li>
+<li><code>toroidal_component_of_plasma_rotation_velocity</code> — <code>m.s^-1</code>, canonical.</li>
+<li><code>poloidal_current_function</code> (<code>f = R·Bt</code>) — canonical shape name.</li>
+<li><code>electron_collisionality</code> — <code>1</code>.</li>
+</ol>
+<p><strong>Weak.</strong></p>
+<ol>
+<li><code>explicit_electron_energy_source_density</code> / <code>explicit_ion_energy_source_density</code>
+   — <strong>NC-3</strong> (solver semantic leak). The <code>explicit_</code> prefix means "treated
+   explicitly in the time-integration scheme" — that is numerical-method
+   metadata, not physics.</li>
+<li><code>implicit_part_of_electron_energy_source</code> / <code>implicit_part_of_ion_particle_source</code>
+   — same <strong>NC-3</strong>; these belong as solver annotations on a scheme object.</li>
+<li><code>total_thermal_ion_pressure</code> vs <code>electron_thermal_pressure</code> — subject ordering
+   is reversed (<code>total_thermal_ion_</code> vs <code>electron_thermal_</code>). <strong>NC-1</strong>.</li>
+<li><code>plasma_current_due_to_bootstrap</code> vs <code>bootstrap_current_density</code> — double-named
+   bootstrap (one with <code>_due_to_</code>, one with flat compound) — <strong>NC-1</strong>.</li>
+<li><code>tendency_of_electron_number</code> / <code>tendency_of_ion_number</code> — "tendency" is
+   CF-Conventions terminology but ISN has not adopted it; looks out of place.
+   <strong>NC-6</strong>.</li>
+<li><code>neutral_diamagnetic_drift_velocity</code> — <strong>NC-5</strong> (vector, currently <code>scalar</code>).</li>
+<li><code>ion_to_electron_density_ratio</code> — non-canonical expression; should be a
+   derived quantity, not a named one.</li>
+<li><code>cumulative_ionization_potential</code> — DD-path-sounding. <strong>NC-4</strong>.</li>
+<li><code>plasma_filament_current</code> ambiguous (transport vs equilibrium domain — same
+   name in both).</li>
+<li><code>ohmic_energy</code> — should be <code>ohmic_dissipation_energy</code>, and <code>ohmic</code> should be
+    a process token.</li>
+</ol>
+<p><strong>Vocabulary gaps.</strong> <code>bootstrap</code>, <code>resistive_flux_consumption</code>, <code>wave_driven</code>
+(process). <code>diamagnetic_drift_velocity</code>, <code>exb_drift_velocity</code> (physical_base —
+both really want <code>{diamagnetic, exb}_drift</code> as a process with <code>velocity</code> base).</p>
+<p><strong>Grammar shortcomings.</strong> The composer should <em>reject</em> any name containing
+<code>explicit_</code> or <code>implicit_part_of_</code> because both encode solver-decomposition.
+The ISN-side fix is to add a <code>decomposition(solver_scheme)</code> so numerical
+bookkeeping lives out-of-band.</p>
+<hr>
+<h3>2.4 Edge plasma physics (75 nodes · 51 valid · 5 quar · issues/name 0.12)</h3>
+<p><strong>Diagnosis.</strong> Solid domain. <code>component_of_*</code> is consistently used; unit
+handling is correct. Main weaknesses: viscosity-current nomenclature conflates
+different physical processes, and diamagnetic/ExB drifts appear as base names
+rather than <code>{drift}_{velocity}</code> composites.</p>
+<p><strong>Strong.</strong></p>
+<ol>
+<li><code>poloidal_component_of_vorticity_over_major_radius</code> — <code>m^-1.s^-1</code>, exemplary
+   composite geometry.</li>
+<li><code>radial_component_of_pfirsch_schlueter_current_density</code> — <code>A.m^-2</code>, clean
+   use of eponymous process (well-known PS current).</li>
+<li><code>poloidal_component_of_perpendicular_viscosity_current_density</code> — clean.</li>
+<li><code>vertical_component_of_ion_diamagnetic_drift_velocity</code> — canonical composite
+   (but see NC below for <code>diamagnetic</code> gap).</li>
+<li><code>plasma_mass_density</code> — <code>kg.m^-3</code>, canonical.</li>
+<li><code>ion_number_density</code> — canonical.</li>
+<li><code>parallel_component_of_plasma_velocity</code> — canonical.</li>
+<li><code>vertical_component_of_current_density</code> — canonical.</li>
+<li><code>radial_component_of_magnetic_field</code> — canonical.</li>
+<li><code>poloidal_magnetic_flux</code> — canonical (pending-status but clean).</li>
+</ol>
+<p><strong>Weak.</strong></p>
+<ol>
+<li><code>radial_component_of_current_density_due_to_viscous</code> — <strong>NC-3</strong> ("viscous" is
+   an adjective, not a process noun); should be
+   <code>radial_component_of_viscous_current_density</code> or decompose into
+   <code>{parallel_viscosity, perpendicular_viscosity}</code> processes.</li>
+<li><code>diamagnetic_heat_viscosity_current_density</code> — conflates "diamagnetic" and
+   "viscosity"; should probably be two separate currents.</li>
+<li><code>inertial_current_density</code> — ambiguous without qualifier (which fluid
+   component? Species?).</li>
+<li><code>halo_current</code> — "halo" is used as both region and process — ISN vocab gap.</li>
+<li><code>parallel_viscosity_current_density</code> vs <code>perpendicular_viscosity_current_density</code>
+   — inconsistent with companion names using <code>_component_of_*_viscosity_current_density</code>.</li>
+<li><code>vorticity_over_major_radius</code> — mathematical derived form; prefer a named base
+   (e.g. <code>vorticity</code> with a <code>divided_by(major_radius)</code> decomposition) over the
+   implicit <code>_over_</code> convention.</li>
+<li><code>exb_drift_velocity</code> — <strong>NC-6</strong> (<code>exb</code> abbreviation for "E cross B").</li>
+<li><code>diamagnetic_drift_velocity</code> — <strong>NC-5</strong> (vector, marked <code>scalar</code>); also
+   <code>diamagnetic</code> is a grammar-ambiguity vocab gap.</li>
+<li><code>parallel_velocity_over_magnetic_field</code> — same <code>_over_</code> convention issue as
+   (6); should be a derived ratio.</li>
+<li><code>neutral_diamagnetic_drift_velocity</code> — same as (8) for neutrals.</li>
+</ol>
+<p><strong>Vocabulary gaps.</strong> <code>diamagnetic</code> (both as adjective and process-role),
+<code>parallel_viscosity</code>, <code>perpendicular_viscosity</code>, <code>heat_viscosity</code>,
+<code>j_cross_b_force</code>, <code>halo</code> (subject/region), <code>halo_region</code> (region token).</p>
+<p><strong>Grammar shortcomings.</strong> The <code>_over_X</code> convention (e.g. <code>vorticity_over_major_radius</code>)
+is not formally specified — it is a de-facto division operator. ISN should
+either formalise it as a <code>decomposition(divided_by=...)</code> or deprecate it in
+favour of derived-quantity handling.</p>
+<hr>
+<h3>2.5 Magnetic field diagnostics (4 nodes · 4 valid · 0 quar · issues/name 0.00)</h3>
+<p><strong>Diagnosis.</strong> Severely under-populated. The domain contains 4 names, all
+Stokes parameters for fibre-optic current sensors. Key magnetics observables
+(pickup-coil signals, flux loops, Rogowski coils, Mirnov coils, diamagnetic
+loops) are either absent or (in the case of flux loops/probes) living in the
+<code>equilibrium</code> domain as <code>_constraint_*</code> names — a serious domain-assignment
+failure.</p>
+<p><strong>All 4 names (all <code>stokes_sN_parameter_of_fiber_optic_current_sensor</code>, unit <code>1</code>, N=0..3).</strong></p>
+<p>Strong/weak distinction is moot for 4 names. The Stokes naming is idiomatic.</p>
+<p><strong>Vocabulary gaps.</strong> <code>poloidal_magnetic_field_probe_measured</code>,
+<code>poloidal_magnetic_field_probe_reconstructed</code>, <code>flux_loop_voltage</code>, <code>rogowski_coil_current</code>,
+<code>mirnov_coil_signal</code>, <code>diamagnetic_loop_flux_difference</code>, <code>hall_probe_field</code> —
+none of these exist. <code>ips_delta_faraday_rotation_angle</code>, <code>poincare_sphere_*</code>
+surfaced in VocabGap but were not composed.</p>
+<p><strong>Grammar shortcomings.</strong> The <code>equilibrium</code> domain is absorbing diagnostics
+that should live here. The extractor is classifying by DD-path physics_domain
+tag (which puts magnetics-probe constraints under <code>equilibrium</code>), not by
+semantic role. Either: (i) re-map certain <code>equilibrium/time_slice/constraints/*</code>
+DD paths to <code>magnetic_field_diagnostics</code>, or (ii) widen the extractor query
+for <code>magnetic_field_diagnostics</code> to pull from <code>magnetics</code> IDS directly.</p>
+<hr>
+<h3>2.6 Auxiliary heating (95 nodes · 78 valid · 5 quar · issues/name 0.05 · <strong>J≥0.75 pairs: 51</strong>)</h3>
+<p><strong>Diagnosis.</strong> Lowest issue density (0.05) — individual names are clean — but
+the <strong>worst synonym-cluster density</strong> in the corpus. The <code>wave_absorbed_power</code>
+family spans 19 variants generated by combinatorial expansion across
+<code>{electron, ion, fast_ion, fast_electron, ∅}</code> × <code>{density, inside_flux_surface,
+flux_surface_averaged, per_toroidal_mode, ∅}</code> × {absorbed_power / power}. This
+is the most actionable refactor opportunity in the entire corpus.</p>
+<p><strong>Strong (clean base cases).</strong></p>
+<ol>
+<li><code>wave_absorbed_power_density</code> — <code>m^-3.W</code>, canonical (root of the family).</li>
+<li><code>flux_surface_averaged_wave_absorbed_power_density</code> — clean transformation.</li>
+<li><code>toroidal_angle_of_lower_hybrid_antenna</code> — <code>rad</code>, canonical geometry.</li>
+<li><code>tangency_radius_of_neutral_beam_injector_beam</code> — <code>m</code> (but see NC-2).</li>
+<li><code>vertical_component_of_wave_vector</code> — <code>m^-1</code>, canonical.</li>
+<li><code>neutral_beam_injector_beam_energy</code> — <code>eV</code>, canonical (rename suggested).</li>
+<li><code>poloidal_component_of_wave_electric_field_real_part</code> — canonical.</li>
+<li><code>fast_ion_wave_absorbed_power_density</code> — exemplar of species decomposition.</li>
+<li><code>electron_wave_absorbed_power_density</code> — ditto.</li>
+<li><code>lower_hybrid_wave_power_density_spectrum</code> — spectrum-specific, canonical.</li>
+</ol>
+<p><strong>Weak.</strong></p>
+<ol>
+<li><strong>The whole <code>wave_absorbed_power</code> family</strong> — 19 variants where 3–4 would
+   suffice with proper decomposition axes:
+   <code>wave_absorbed_power  [W]          wave_absorbed_power_density  [m^-3.W]
+   wave_absorbed_power_per_toroidal_mode  [W]
+   wave_absorbed_power_density_per_toroidal_mode  [m^-3.W]
+   wave_absorbed_power_inside_flux_surface  [W]
+   flux_surface_averaged_wave_absorbed_power_density  [m^-3.W]
+   + each multiplied by {electron, ion, fast_ion, fast_electron} species
+   + one cross-combination flux_surface_averaged_X_wave_absorbed_power_density_per_toroidal_mode</code>
+   Canonical form: <strong>one</strong> base name <code>wave_absorbed_power_density</code> with
+   decomposition axes <code>species</code>, <code>toroidal_mode_number</code>, and transformation
+   <code>{∅, flux_surface_averaged, inside_flux_surface}</code>. <strong>NC-1.</strong></li>
+<li><code>tangency_radius_of_neutral_beam_injector_beam</code> — <strong>NC-2</strong>: "beam injector
+   beam" → prefer <code>of_neutral_beam</code> (the injector is the object, the beam is
+   the subject).</li>
+<li><code>binormal_component_of_wave_electric_field</code> — unit <code>m^-1.V</code> (OK for E-field,
+   but inconsistent with same-family <code>T</code> units elsewhere).</li>
+<li><code>right_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code>
+   / <code>left_hand_circularly_polarized_*</code> — LH/RH polarisation as part of the name;
+   should be <code>decomposition(polarisation)</code>. <strong>NC-1</strong>.</li>
+<li><code>electric_field_phase_per_toroidal_mode</code> vs <code>electric_field_amplitude_per_toroidal_mode</code>
+   — amplitude/phase encoded in name; should be complex-amplitude pair with
+   <code>_real_part</code>/<code>_imaginary_part</code>.</li>
+<li><code>toroidal_angle_of_electron_cyclotron_launcher_beam_launching_position</code> —
+   <strong>NC-4</strong> (long DD-path lift).</li>
+<li><code>ion_cyclotron_heating_antenna_surface_current_spectrum</code> — <strong>NC-5</strong> (spectrum
+   is 1-D array over frequency / wavenumber; marked <code>scalar</code>).</li>
+<li><code>ec_launcher_mirror</code> / <code>ec_launcher_launching_position</code> — <strong>NC-6</strong> (<code>ec</code>
+   abbreviation).</li>
+<li><code>beam_tracing_electric_field_component</code> — <strong>NC-4</strong> (reads like a DD path).</li>
+<li><code>phase_ellipse_rotation_angle</code> / <code>spot_ellipse_rotation_angle</code> / <code>tilt_angle_variation</code>
+    — beam-shaping jargon without clear physics grounding.</li>
+</ol>
+<p><strong>Vocabulary gaps.</strong> <code>per_toroidal_mode</code>, <code>per_toroidal_mode_number</code>,
+<code>electron_cyclotron_beam_launching_position</code>, <code>electron_cyclotron_launcher_mirror</code>,
+<code>ion_cyclotron_heating_antenna</code>, <code>lower_hybrid_antenna</code>, <code>neutral_beam_injector</code>,
+<code>beam_tracing_*</code>, <code>polarisation_ellipticity_angle</code>, <code>o_mode_fraction</code>,
+<code>ordinary_mode_fraction</code>, <code>stokes_sN_parameter</code>, <code>refractive_index</code>,
+<code>poloidal_refractive_index</code>, <code>toroidal_refractive_index</code>, <code>wave_driven</code> (process).</p>
+<p><strong>Grammar shortcomings.</strong> Two big missing axes:</p>
+<ul>
+<li><code>decomposition(species)</code> — would collapse the <code>{electron, ion, fast_ion,
+  fast_electron}</code> proliferation.</li>
+<li><code>decomposition(toroidal_mode_number, poloidal_mode_number)</code> (ADR-3 R1 F3) —
+  would collapse <code>_per_toroidal_mode(_number)</code> variants.</li>
+<li><code>decomposition(polarisation)</code> — would collapse LH/RH circular and O/X
+  linear polarisation.</li>
+</ul>
+<hr>
+<h3>2.7 Turbulence (11 nodes · 5 valid · 6 pend · 0 quar · issues/name 0.09)</h3>
+<p><strong>Diagnosis.</strong> Severely under-populated. 5 valid names is too few to even audit
+properly — most expected turbulence quantities (fluctuation amplitudes,
+correlation lengths, turbulent transport fluxes, turbulent Prandtl numbers,
+Reynolds stress tensor as a turbulence quantity, cross-phase spectra) are
+absent.</p>
+<p><strong>All valid names.</strong></p>
+<ol>
+<li><code>element_atoms_count</code> — <strong>misdomained</strong> (this is a species/element metadata
+   integer, not a turbulence quantity). <strong>NC-4</strong>.</li>
+<li><code>normalized_wave_vector</code> — generic, not turbulence-specific.</li>
+<li><code>wave_power_density_spectrum</code> — arguably turbulence, but better placed in
+   auxiliary_heating.</li>
+<li><code>wave_electric_field</code> — ditto.</li>
+<li><code>vorticity</code> — arguably turbulence, but really a transport/edge quantity.</li>
+</ol>
+<p><strong>Pending (attached — not re-validated).</strong> <code>perturbed_electrostatic_potential_*</code>,
+<code>plasma_displacement_imaginary_part</code> (should live in MHD).</p>
+<p><strong>Vocabulary gaps.</strong> Every core turbulence quantity is absent. The D.2
+extractor evidently did not target the <code>edge_profiles/ggd</code> fluctuation fields,
+<code>turbulence</code> IDS, or gyrokinetic code outputs (GENE, GKW, GYRO schemas).</p>
+<p><strong>Grammar shortcomings.</strong> Not applicable — the problem is <em>coverage</em>, not
+grammar. Fix this by re-running D.2 targeted on <code>turbulence</code> and <code>gyrokinetics</code>
+IDSs.</p>
+<hr>
+<h2>3. Cross-cutting findings</h2>
+<h3>3.1 Systemic anti-patterns (count across corpus)</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th style="text-align: right;">Count</th>
+<th>Domains affected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NC-1 synonym proliferation (J≥0.75 pairs)</td>
+<td style="text-align: right;">123</td>
+<td>aux_heating, MHD, equilibrium</td>
+</tr>
+<tr>
+<td>NC-3 solver-semantic leak (<code>measured_</code>, <code>reconstructed_</code>, <code>explicit_</code>, <code>implicit_part_of_</code>)</td>
+<td style="text-align: right;">14</td>
+<td>equilibrium, transport</td>
+</tr>
+<tr>
+<td>NC-4 DD-path leakage (<code>equilibrium_reconstruction_constraint_*</code>, <code>ggd_object_*</code>, <code>iron_core_segment_*</code>)</td>
+<td style="text-align: right;">23</td>
+<td>equilibrium</td>
+</tr>
+<tr>
+<td>NC-5 vector/scalar misclassification</td>
+<td style="text-align: right;">≥14</td>
+<td>edge, transport, equilibrium, aux_heating, mag_diag</td>
+</tr>
+<tr>
+<td>NC-6 abbreviation/jargon (<code>ntm</code>, <code>ec</code>, <code>exb</code>, <code>norm</code>)</td>
+<td style="text-align: right;">≥10</td>
+<td>MHD, aux_heating, edge</td>
+</tr>
+<tr>
+<td>NC-7 name/unit mismatch (caught by auditor)</td>
+<td style="text-align: right;">5 (quarantined)</td>
+<td>aux_heating, equilibrium</td>
+</tr>
+<tr>
+<td>NC-8 missing <code>cocos_transformation_type</code></td>
+<td style="text-align: right;"><strong>422</strong></td>
+<td>all (16/438 set)</td>
+</tr>
+</tbody>
+</table>
+<h3>3.2 Why ADR-3 Fourier decomposition matters</h3>
+<p>49 names out of 438 (11%) contain <code>_per_toroidal_mode</code> or <code>_per_toroidal_mode_number</code>
+as a free suffix. Every one of these would collapse under proper Fourier
+decomposition into a <code>decomposition(toroidal_mode_number)</code> axis on its base name.
+This is single-handedly responsible for:</p>
+<ul>
+<li>51 / 51 Jaccard pairs in <code>auxiliary_heating</code>.</li>
+<li>20+ / 36 Jaccard pairs in <code>magnetohydrodynamics</code>.</li>
+<li>The bulk of VocabGap entries in <code>transformation</code> and <code>position</code> segments.</li>
+</ul>
+<p><strong>Until ADR-3 R1 F3 is implemented in ISN, the corpus cannot hit the plan-29
+§7.a target (Jaccard density reduction ≥30%).</strong></p>
+<h3>3.3 Species decomposition</h3>
+<p>35+ names contain <code>{electron, ion, fast_ion, fast_electron, neutral}_</code> prefixed
+on otherwise-identical bases. A first-class <code>decomposition(species)</code> axis
+(or an equivalent convention that the composer can see) would similarly
+collapse these.</p>
+<h3>3.4 COCOS under-population</h3>
+<p>Only 16/438 names have <code>cocos_transformation_type</code> set. Of the 422 missing,
+the majority are scalar quantities that genuinely have <code>cocos_type=one_like</code>
+and should be tagged as such (the extractor should default to <code>one_like</code> for
+scalars with units <code>m</code>, <code>eV</code>, <code>Pa</code>, <code>kg.m^-3</code>, <code>s^-1</code>, etc.). T-/Wb-/A-valued
+quantities need explicit audit against the COCOS sign-flip table.
+<strong>This is the lowest-effort lift for the largest metadata-coverage gain.</strong></p>
+<h3>3.5 Domain assignment failures</h3>
+<ul>
+<li><code>magnetic_field_diagnostics</code> is under-populated because magnetics probes
+  and flux loops are being absorbed into <code>equilibrium</code> (via the <code>constraints</code>
+  DD subtree).</li>
+<li><code>turbulence</code> is under-populated because the extractor did not target
+  fluctuation/gyrokinetic data models.</li>
+<li><code>element_atoms_count</code> in <code>turbulence</code> is stray metadata.</li>
+</ul>
+<h3>3.6 Provenance / solver-decomposition leakage</h3>
+<p><code>measured_</code>, <code>reconstructed_</code>, <code>explicit_</code>, <code>implicit_part_of_</code>,
+<code>_measurement_time</code>, <code>_constraint_weight_of_</code> — all encode <em>metadata about how
+the data was produced</em>, not physics. These should be rejected wholesale by the
+compose prompt. Roughly <strong>35 names</strong> would collapse if this rule were enforced.</p>
+<h3>3.7 Tautologies and verbose compounds</h3>
+<p>Confirmed tautologies (same token repeated in one name):
+<code>tangency_radius_of_neutral_beam_injector_beam</code> (beam×2),
+<code>toroidal_angle_of_neutral_beam_injector_beam_tilting_offset</code> (beam×2),
+<code>wave_driven_toroidal_current_per_toroidal_mode</code> (toroidal×2),
+<code>flux_surface_area_derivative_with_respect_to_toroidal_flux_coordinate</code> (flux×2),
+<code>flux_surface_averaged_inverse_major_radius_squared_grad_rho_squared</code> (squared×2),
+<code>flux_surface_averaged_inverse_magnetic_field_squared_grad_rho_squared</code> (squared×2).</p>
+<hr>
+<h2>4. HIGH-ROI actions (ordered)</h2>
+<h3>4.1 ⭐ #1 — ISN: add 15 vocabulary tokens to unblock ~30 quarantined + pending names</h3>
+<p><strong>File:</strong> <code>imas-standard-names/imas_standard_names/grammar/vocabularies/</code> (split
+by segment file). One PR. See §5 for the <code>proposed_vocab_additions.yaml</code> payload.</p>
+<p>Estimated impact: unblocks 23+ currently-quarantined names and reduces
+VocabGap hits by ~80.</p>
+<h3>4.2 ⭐ #2 — imas-codex: tighten compose prompt to reject DD-path / solver-semantic leakage</h3>
+<p><strong>File:</strong> <code>imas_codex/llm/prompts/sn/compose_system.md</code></p>
+<p>Add an explicit <strong>"REJECT" clause</strong> listing forbidden name prefixes/suffixes:</p>
+<pre><code>REJECT any candidate name that contains any of the following tokens or substrings,
+because they encode data-model structure or solver semantics, not physics:
+
+Forbidden prefixes:
+  - measured_
+  - reconstructed_
+  - explicit_
+  - implicit_part_of_
+
+Forbidden suffixes:
+  - _measurement_time
+  - _constraint
+  - _constraint_weight
+  - _constraint_weight_of_*
+
+Forbidden tokens:
+  - equilibrium_reconstruction_
+  - ggd_object_
+  - _constraint_reconstructed_
+  - _constraint_measured_
+  - ntm_ (use neoclassical_tearing_mode_)
+  - ec_ (use electron_cyclotron_)
+  - exb_ (use e_cross_b_ or decomposition(drift_type))
+  - norm_ (use normalized_)
+
+When a DD path would produce one of these, SKIP and record as vocab_gap rather
+than composing.
+</code></pre>
+<p>Estimated impact: prevents regeneration of the 23 equilibrium NC-4 names + 14
+NC-3 names on next rotation. This is the single highest-ROI prompt change.</p>
+<h3>4.3 ⭐ #3 — imas-codex: default <code>cocos_transformation_type</code> to <code>one_like</code> for scalar/unit-safe quantities</h3>
+<p><strong>File:</strong> <code>imas_codex/standard_names/graph_ops.py</code> (in the graph-write path where
+<code>cocos_transformation_type</code> is set, post-LLM injection).</p>
+<p>For names with <code>kind=scalar</code> and units in <code>{1, m, m^2, m^3, eV, Pa, kg.m^-3,
+s, s^-1, Hz, m^-3, m.s^-1, A.m^-2}</code>, default <code>cocos_transformation_type=one_like</code>
+unless the extractor finds a more specific annotation on the DD node.</p>
+<p>Estimated impact: pushes coverage from 16/438 → ~350/438 without any LLM
+intervention; closes plan-29 §7.h gap.</p>
+<h3>4.4 #4 — imas-codex: re-run D.2 for <code>turbulence</code> and <code>magnetic_field_diagnostics</code></h3>
+<p><strong>Command:</strong></p>
+<pre><code class="language-bash">imas-codex sn generate --source dd --domain turbulence -c 5
+imas-codex sn generate --source dd --domain magnetic_field_diagnostics -c 5
+</code></pre>
+<p>Plus: extend extractor to pull <code>magnetics/bpol_probe</code>, <code>magnetics/flux_loop</code>,
+<code>magnetics/rogowski_coil</code>, <code>magnetics/diamagnetic_flux</code>, <code>magnetics/b_field_*</code>
+into <code>magnetic_field_diagnostics</code> (currently routed to <code>equilibrium</code> via the
+constraint subtree).</p>
+<p>Estimated impact: 5 → ~30 names in each under-populated domain; closes the
+biggest coverage gap in the corpus.</p>
+<h3>4.5 #5 — imas-codex: re-generate <code>equilibrium</code> with the new prompt</h3>
+<p>After #2 ships, reset equilibrium with</p>
+<pre><code>imas-codex sn clear --status drafted --ids equilibrium
+imas-codex sn generate --source dd --ids equilibrium
+</code></pre>
+<p>Estimated impact: issue density 0.32 → ~0.10 (in line with other domains);
+quarantine rate 21% → ~5%.</p>
+<h3>4.6 #6 — ISN: specify ADR-3 R1 F3 (Fourier / mode-number decomposition)</h3>
+<p><strong>File:</strong> <code>imas-standard-names/docs/adr/ADR-003-*.md</code> + grammar R3 implementation.</p>
+<p>Formalise <code>decomposition(toroidal_mode_number, poloidal_mode_number)</code> as a
+first-class axis. Update composer to emit <code>base_name + decomposition</code> rather
+than <code>base_name_per_toroidal_mode</code>.</p>
+<p>Estimated impact: ~49 names collapse into ~15; Jaccard density drops by ~40%
+in auxiliary_heating and MHD.</p>
+<h3>4.7 #7 — ISN: add <code>decomposition(species)</code> for <code>{electron, ion, fast_ion, fast_electron, neutral, thermal_ion, thermal_electron}</code> subject axis</h3>
+<p>This collapses the species-prefix proliferation across all power/density
+families.</p>
+<h3>4.8 #8 — Run <code>sn review</code> on current corpus</h3>
+<p>So that plan-29 §7.b (reviewer_score ≥0.75) becomes measurable. Currently
+<strong>not a single name</strong> has a reviewer score.</p>
+<pre><code class="language-bash">imas-codex sn review -c 15
+</code></pre>
+<h3>4.9 #9 — Audit vector/scalar <code>kind</code> for 14 flagged names</h3>
+<p>List in §2 — assign <code>kind=vector</code> and add a proper <code>component</code> decomposition
+where appropriate (e.g. <code>diamagnetic_drift_velocity</code>).</p>
+<h3>4.10 #10 — ISN: formalise or deprecate the <code>_over_X</code> division convention</h3>
+<p>Names like <code>vorticity_over_major_radius</code>, <code>parallel_velocity_over_magnetic_field</code>
+use <code>_over_</code> as an implicit division. Either formalise with a
+<code>decomposition(divided_by=major_radius)</code> convention or deprecate and demand a
+named quantity.</p>
+<hr>
+<h2>5. Proposed vocabulary additions</h2>
+<pre><code class="language-yaml"># imas-standard-names/grammar/vocabularies/ updates
+# Source: D.3 senior-review evidence from 52 quarantined names + 290 VocabGap
+#         nodes in the 2026-04 corpus.
+
+component:
+  # Drift-type components
+  - diamagnetic
+  - e_cross_b                     # replaces `exb_`
+  - pfirsch_schlueter
+  # Spatial decomposition
+  - normalized_radial
+  - normalized_vertical
+  - parallel_component_of_plasma  # already in composites but missing as token
+  - perpendicular_component_of_plasma
+
+process:
+  - bootstrap
+  - neoclassical_tearing_mode
+  - ohmic_dissipation               # replaces ad-hoc `ohmic_`
+  - resistive_diffusion             # replaces ad-hoc `resistive_`
+  - resistive_flux_consumption
+  - non_inductive_drive             # replaces ad-hoc `non_inductive_`
+  - wave_driven
+  - parallel_viscosity
+  - perpendicular_viscosity
+  - heat_viscosity
+  - j_cross_b_force
+  - poloidal_current
+
+position:
+  - sawtooth_inversion_radius
+  - neoclassical_tearing_mode_center
+  - inside_flux_surface             # disambiguate from geometry segment
+  - halo_boundary
+  - strike_point
+  - secondary_separatrix_strike_point
+  - active_limiter_point
+
+transformation:
+  - per_toroidal_mode_number        # interim; replace with ADR-3 Fourier decomp
+  - per_toroidal_and_poloidal_mode_number
+  - cumulative_inside_flux_surface
+  - flux_surface_averaged           # already canonical; ensure listed
+  - volume_averaged
+  - variation_of
+  - real_part
+  - imaginary_part
+  - normalized
+
+subject:
+  # Species axis (interim — prefer decomposition(species) per HIGH-ROI #7)
+  - fast_electron
+  - fast_ion
+  - fast_ion_state
+  - fast_neutral
+  - thermal_electron
+  - thermal_ion
+  - thermal_neutral
+  - ion_state
+  - ion_charge_state
+  - ion_species
+  - molecular_ion
+  - halo                            # edge/energetic-particle halo
+  # Polarisation (interim — prefer decomposition(polarisation))
+  - right_hand_circularly_polarized
+  - left_hand_circularly_polarized
+
+object:
+  - neoclassical_tearing_mode
+  - electron_cyclotron_beam
+  - electron_cyclotron_launcher
+  - electron_cyclotron_launcher_mirror
+  - lower_hybrid_antenna
+  - ion_cyclotron_heating_antenna
+  - neutral_beam_injector           # replace `_beam_injector_beam`
+  - fiber_optic_current_sensor      # already used
+  - passive_loop
+  - passive_structure
+  - x_point
+  - secondary_separatrix_x_point
+  - iron_core_segment               # machine-description; needs ADR on whether to include
+
+geometry:
+  - beam_tracing_point
+  - beamlet_group
+  - delta_position
+  - end_point
+  - start_point
+  - halo_current_area_end_point
+  - halo_current_area_start_point
+  - plasma_boundary_gap_reference_point
+  - surface_normal
+  - x_point
+  - outline_point
+
+region:
+  - halo_region
+
+# Clarified (remove ambiguity reported in grammar_ambiguity segment)
+clarifications:
+  - token: diamagnetic
+    ruling: |
+      `diamagnetic` may appear as a `component` (in drift-velocity composites)
+      and as a qualifier on fluxes (`diamagnetic_flux`). It is NEVER a subject.
+      Composer must not emit `diamagnetic_X` as a standalone base name.
+  - token: velocity_phi_vs_velocity_tor
+    ruling: |
+      Toroidal component in cylindrical coordinates is always `toroidal_component`.
+      `velocity_phi` is forbidden; `velocity_tor` is deprecated.
+</code></pre>
+<hr>
+<h2>6. Plan-29 §7 success-criteria check</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Criterion</th>
+<th>Target</th>
+<th>Actual</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7.a</td>
+<td>Jaccard cluster density reduction</td>
+<td>≥30% vs prior</td>
+<td>36.7 pairs/100 SNs (<strong>baseline</strong>)</td>
+<td><strong>Not measurable</strong> — no prior to compare (D.1 wiped 141-SN corpus); adopting this as the new baseline to beat in D.5.</td>
+</tr>
+<tr>
+<td>7.b</td>
+<td>Reviewer rubric score</td>
+<td>≥0.75 (from 0.68)</td>
+<td><strong>no data</strong> (<code>sn review</code> not run)</td>
+<td>❌ Must run reviewer before gating D.4.</td>
+</tr>
+<tr>
+<td>7.c</td>
+<td>StandardName validation pass rate</td>
+<td>≥90%</td>
+<td>335/438 = <strong>76.5%</strong></td>
+<td>❌ below target; 11.9% quarantine is driven by vocab gaps (§5 fixes this).</td>
+</tr>
+<tr>
+<td>7.d</td>
+<td>Vocab-gap surfacing</td>
+<td><code>sn gaps</code> exports yaml</td>
+<td>290 gaps recorded</td>
+<td>✅ mechanism works.</td>
+</tr>
+<tr>
+<td>7.e</td>
+<td>Documentation rubric</td>
+<td>≥0.75</td>
+<td><strong>N/A</strong> (no docs yet)</td>
+<td>Deferred to D.4.</td>
+</tr>
+<tr>
+<td>7.f</td>
+<td>No provenance/solver leak</td>
+<td>0 names</td>
+<td>14 leaked</td>
+<td>❌ — see §4.2 prompt-rejection rule.</td>
+</tr>
+<tr>
+<td>7.g</td>
+<td>No DD-path leakage</td>
+<td>0 names</td>
+<td>23 leaked</td>
+<td>❌ — see §4.2.</td>
+</tr>
+<tr>
+<td>7.h</td>
+<td><code>cocos_transformation_type</code> coverage</td>
+<td>≥35 SNs</td>
+<td><strong>16 / 438</strong></td>
+<td>❌ — §4.3 fixes cheaply.</td>
+</tr>
+<tr>
+<td>7.i</td>
+<td>Per-domain coverage balance</td>
+<td>all domains ≥20 valid</td>
+<td><code>mag_diag=4</code>, <code>turbulence=5</code></td>
+<td>❌ — §4.4 regenerate.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall verdict on §D.3 gate:</strong> <strong>CONDITIONAL GO</strong> for D.4 (enrich) <em>only</em>
+if §4.1, §4.2, §4.3 are shipped first. Without them, the enrich rotation will
+lock in NC-3/NC-4 anti-patterns and waste LLM budget documenting quantities
+that should not exist in the vocabulary.</p>
+<hr>
+<h2>7. Recommended next iteration</h2>
+<p><strong>Before running D.4 enrich:</strong></p>
+<ol>
+<li><strong>Ship §4.1</strong> (ISN vocab PR — 15 tokens) — 1 day, independent PR against
+   <code>imas-standard-names</code>.</li>
+<li><strong>Ship §4.2</strong> (composer REJECT clause) — 1 hour.</li>
+<li><strong>Ship §4.3</strong> (default <code>cocos_transformation_type=one_like</code> for scalars) —
+   30 minutes.</li>
+<li><strong>Run §4.8</strong> (<code>sn review -c 15</code>) — overnight, produces the reviewer_score
+   baseline needed to measure §7.b on <em>this</em> corpus.</li>
+<li><strong>Regenerate targeted domains</strong> (§4.4, §4.5): <code>turbulence</code>,
+   <code>magnetic_field_diagnostics</code>, <code>equilibrium</code> (reset + re-gen).</li>
+</ol>
+<p><strong>Expected post-action state (projection):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Current</th>
+<th>Projected after §4.1–4.5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total names</td>
+<td>438</td>
+<td>~470 (+30 in under-populated domains, −35 in equilibrium cleanup)</td>
+</tr>
+<tr>
+<td>Valid</td>
+<td>335 (76.5%)</td>
+<td>~430 (≈92%)</td>
+</tr>
+<tr>
+<td>Quarantined</td>
+<td>52</td>
+<td>~15</td>
+</tr>
+<tr>
+<td>Issues / name</td>
+<td>0.16</td>
+<td>~0.08</td>
+</tr>
+<tr>
+<td>COCOS populated</td>
+<td>16</td>
+<td>~370</td>
+</tr>
+<tr>
+<td>J≥0.75 pairs</td>
+<td>123</td>
+<td>123 (species/mode-number collapse needs ADR-3 §4.6/§4.7)</td>
+</tr>
+</tbody>
+</table>
+<p>Then <strong>D.4 enrich</strong> is green-lit. ADR-3 Fourier + species-decomposition
+(§4.6, §4.7) are ISN-side refactors that should feed the <em>next</em> rotation
+(D.6 or later) rather than blocking D.4.</p>
+<hr>
+<p><strong>Signed off.</strong> Evidence: <code>D3-data.json</code> (438 standard_names + 290 vocab_gaps +
+metrics block). Reviewer: senior physics + ISN co-author role,
+acting on behalf of plan 29 §D.3.</p>
+    </article>
+  </main>
+</body>
+</html>

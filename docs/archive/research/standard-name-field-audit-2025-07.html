@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="standard-name-field-audit-2025-07">
+  <meta name="plan-title" content="StandardName Field Audit Report — 2025-07">
+  <meta name="plan-summary" content="Phase-0 field audit for the StandardName catalog-schema redesign, covering drop/keep recommendations and migration notes.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="35-catalog-schema-redesign">
+  <title>StandardName Field Audit Report — 2025-07 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p>Phase-0 field audit for the StandardName catalog-schema redesign, covering drop/keep recommendations and migration notes.</p>
+      <dl>
+          <dt>Source markdown</dt><dd><code>plans/features/standard-names/artefacts/field-audit.md</code></dd>
+          <dt>Migration note</dt><dd><code>Bulk HTML migration from markdown</code></dd>
+          <dt>Plan informs</dt><dd><code>35-catalog-schema-redesign</code></dd>
+      </dl>
+    </header>
+    <article>
+<h1>Phase 0 — StandardName Field Audit Report</h1>
+<p><strong>Plan</strong>: <code>plans/features/standard-names/35-catalog-schema-redesign.md</code>
+<strong>Date</strong>: 2025-07-15
+<strong>Total StandardName nodes</strong>: 925
+<strong>Machine-readable companion</strong>: <code>field-audit.json</code></p>
+<hr>
+<h2>1. Potentially-Drop Fields (Legacy Grammar)</h2>
+<p>These are the six legacy grammar fields that predate the <code>grammar_*</code> slot
+system. The plan says: <em>"Drop from schema ONLY if 0/925 populated."</em></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Populated</th>
+<th>Superseded by</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>physical_base</code></td>
+<td>0/925 (0%)</td>
+<td><code>grammar_physical_base</code> (907/925)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>0/925 (0%)</td>
+<td><code>grammar_subject</code> (280/925)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>component</code></td>
+<td>0/925 (0%)</td>
+<td><code>grammar_component</code> (151/925)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>coordinate</code></td>
+<td>0/925 (0%)</td>
+<td><code>grammar_coordinate</code> (83/925)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>position</code></td>
+<td>0/925 (0%)</td>
+<td><code>grammar_position</code> (51/925)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>process</code></td>
+<td>0/925 (0%)</td>
+<td><code>grammar_process</code> (19/925)</td>
+<td><strong>DROP</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict: All six legacy grammar fields are 0/925 populated and fully
+superseded by their <code>grammar_*</code> counterparts. Safe to drop from schema in
+Phase 2.</strong></p>
+<hr>
+<h2>2. Dead-but-Retained Fields (Schema Contract)</h2>
+<p>The plan explicitly says these must be kept in the graph schema even though
+they are unpopulated today. They represent future extensibility for the
+standard-name grammar.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Populated</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>species</code></td>
+<td>0/925 (0%)</td>
+<td><strong>KEEP</strong> (plan mandate)</td>
+</tr>
+<tr>
+<td><code>population</code></td>
+<td>0/925 (0%)</td>
+<td><strong>KEEP</strong> (plan mandate)</td>
+</tr>
+<tr>
+<td><code>toroidal_mode</code></td>
+<td>0/925 (0%)</td>
+<td><strong>KEEP</strong> (plan mandate)</td>
+</tr>
+<tr>
+<td><code>flux_surface_average</code></td>
+<td>0/925 (0%)</td>
+<td><strong>KEEP</strong> (plan mandate)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>3. Deprecated Secondary Review Fields</h2>
+<p>These are already marked deprecated in the current schema. The plan lists
+them for drop.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Populated</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reviewer_model_secondary</code></td>
+<td>31/925 (3.4%)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>reviewer_score_secondary</code></td>
+<td>31/925 (3.4%)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>reviewer_scores_secondary</code></td>
+<td>31/925 (3.4%)</td>
+<td><strong>DROP</strong></td>
+</tr>
+<tr>
+<td><code>reviewer_disagreement</code></td>
+<td>31/925 (3.4%)</td>
+<td><strong>DROP</strong></td>
+</tr>
+</tbody>
+</table>
+<p>All four fields are present on exactly the same 31 nodes (100% overlap
+confirmed). The data is expendable secondary-review output from an early
+review pass. The primary review fields (<code>reviewer_score</code>, <code>reviewer_model</code>,
+<code>reviewer_scores</code>, <code>reviewer_comments</code>, <code>review_disagreement</code> — all at
+702/925) are unaffected.</p>
+<p><strong>Phase 2 migration Cypher</strong> should <code>REMOVE</code> these four properties from all
+nodes.</p>
+<hr>
+<h2>4. Status / Lifecycle Fields</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Populated</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>review_status</code></td>
+<td>925/925 (100%)</td>
+<td><strong>Rename → <code>pipeline_status</code></strong> in Phase 2. Values: enriched (688), named (236), drafted (1).</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>0/925 (0%)</td>
+<td><strong>New field</strong> — to be added in Phase 2, backfilled to <code>'draft'</code>.</td>
+</tr>
+<tr>
+<td><code>deprecates</code></td>
+<td>0/925 (0%)</td>
+<td><strong>New field</strong> — to be added in Phase 2.</td>
+</tr>
+<tr>
+<td><code>superseded_by</code></td>
+<td>0/925 (0%)</td>
+<td><strong>New field</strong> — to be added in Phase 2.</td>
+</tr>
+<tr>
+<td><code>origin</code></td>
+<td>0/925 (0%)</td>
+<td><strong>New field</strong> — to be added in Phase 2, backfilled to <code>'pipeline'</code>.</td>
+</tr>
+<tr>
+<td><code>cocos_transformation_type</code></td>
+<td>521/925 (56%)</td>
+<td><strong>Keep</strong>. Values: one_like (511), psi_like (4), b0_like (3), q_like (1), grid_type_tensor_contravariant_like (1), ip_like (1).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5. Graph-Only Provenance (Sanity Check)</h2>
+<p>The plan designates these as graph-only fields that should never appear in
+catalog YAML. Confirming they are populated:</p>
+<table>
+<thead>
+<tr>
+<th>Field / Relationship</th>
+<th>Populated</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_paths</code> (property)</td>
+<td>924/925 (99.9%)</td>
+<td>✅ PASS — 1 node missing (<code>toroidal_plasma_current_due_to_non_inductive_current_drive</code>)</td>
+</tr>
+<tr>
+<td><code>source_types</code> (property)</td>
+<td>925/925 (100%)</td>
+<td>✅ PASS — all values are <code>['dd']</code></td>
+</tr>
+<tr>
+<td><code>HAS_COCOS</code> (relationship)</td>
+<td>867/925 (93.7%)</td>
+<td>✅ PASS</td>
+</tr>
+<tr>
+<td><code>HAS_UNIT</code> (relationship)</td>
+<td>925/925 (100%)</td>
+<td>✅ PASS (note: <code>atomic_number</code> has 2 HAS_UNIT rels)</td>
+</tr>
+<tr>
+<td><code>SOURCE_DD_PATH</code> (relationship)</td>
+<td>0 rels</td>
+<td>ℹ️ INFO — not yet created; plan mentions as future provenance mechanism</td>
+</tr>
+<tr>
+<td><code>SOURCE_SIGNAL</code> (relationship)</td>
+<td>0 rels</td>
+<td>ℹ️ INFO — not yet created; no signal-sourced names yet</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>6. Relationship Census</h2>
+<table>
+<thead>
+<tr>
+<th>Direction</th>
+<th>Relationship</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Outgoing</td>
+<td><code>HAS_UNIT</code></td>
+<td>926</td>
+</tr>
+<tr>
+<td>Outgoing</td>
+<td><code>HAS_COCOS</code></td>
+<td>867</td>
+</tr>
+<tr>
+<td>Outgoing</td>
+<td><code>HAS_SEGMENT</code></td>
+<td>214</td>
+</tr>
+<tr>
+<td>Incoming</td>
+<td><code>PRODUCED_NAME</code> (from StandardNameSource)</td>
+<td>1,812</td>
+</tr>
+<tr>
+<td>Incoming</td>
+<td><code>HAS_STANDARD_NAME</code> (from IMASNode)</td>
+<td>1,738</td>
+</tr>
+<tr>
+<td>Incoming</td>
+<td><code>REVIEWS</code> (from Review)</td>
+<td>738</td>
+</tr>
+<tr>
+<td>Incoming</td>
+<td><code>EVIDENCED_BY</code> (from PromotionCandidate)</td>
+<td>57</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>7. Surprising Findings</h2>
+<ol>
+<li>
+<p><strong><code>atomic_number</code> has 2 <code>HAS_UNIT</code> relationships</strong> (926 rels for 925
+   nodes). This is a data quality issue to investigate separately — may be
+   a duplicate unit assignment.</p>
+</li>
+<li>
+<p><strong><code>review_tier</code> (702/925)</strong> appears in the graph but is not listed in
+   the plan's disposition table. It should receive an explicit keep/drop
+   decision before Phase 2 finalises the schema.</p>
+</li>
+<li>
+<p><strong><code>reviewer_disagreement</code> vs <code>review_disagreement</code></strong> — two similarly
+   named fields with very different semantics. <code>reviewer_disagreement</code>
+   (31/925) is secondary-review data slated for drop.
+   <code>review_disagreement</code> (702/925) is the primary QA metric and should be
+   kept. Phase 2 migration must be careful not to confuse these.</p>
+</li>
+<li>
+<p><strong>All <code>source_types</code> values are <code>['dd']</code></strong> — the graph contains no
+   signal-sourced names yet. The <code>SOURCE_DD_PATH</code> and <code>SOURCE_SIGNAL</code>
+   relationships mentioned in the plan do not exist yet; <code>source_paths</code>
+   (string list property) currently carries this provenance.</p>
+</li>
+<li>
+<p><strong><code>links</code> is 0/925</strong> — no standard names have link data yet. This is
+   expected (link resolution hasn't run) but worth noting since the plan
+   includes pipeline protection for the <code>links</code> field.</p>
+</li>
+</ol>
+<hr>
+<h2>8. Summary for Phase 2 Executor</h2>
+<h3>Fields to DROP from schema (and REMOVE from graph)</h3>
+<pre><code>physical_base
+subject
+component
+coordinate
+position
+process
+reviewer_model_secondary
+reviewer_score_secondary
+reviewer_scores_secondary
+reviewer_disagreement
+</code></pre>
+<p><strong>Total: 10 fields.</strong> The first 6 are legacy grammar (0/925). The last 4
+are deprecated secondary review (31/925 — expendable).</p>
+<h3>Fields to KEEP in schema despite 0/925 population</h3>
+<pre><code>species
+population
+toroidal_mode
+flux_surface_average
+</code></pre>
+<p>These are retained per explicit plan mandate as schema contract for future
+grammar extensibility.</p>
+<h3>Phase 2 migration Cypher (recommended)</h3>
+<pre><code class="language-cypher">// Drop legacy grammar fields (0/925 populated — no data loss)
+MATCH (sn:StandardName)
+REMOVE sn.physical_base, sn.subject, sn.component,
+       sn.coordinate, sn.position, sn.process
+
+// Drop deprecated secondary review fields (31/925 — expendable)
+MATCH (sn:StandardName)
+REMOVE sn.reviewer_model_secondary, sn.reviewer_score_secondary,
+       sn.reviewer_scores_secondary, sn.reviewer_disagreement
+</code></pre>
+<h3>Open questions for Phase 2</h3>
+<ol>
+<li>Should <code>review_tier</code> (702/925) be kept or dropped? Not in disposition
+   table.</li>
+<li>Should the duplicate <code>HAS_UNIT</code> on <code>atomic_number</code> be cleaned up?</li>
+<li>Should <code>enrich_batch_id</code>, <code>enrich_tokens</code>, <code>vocab_gap_detail</code> (all
+   0/925) be pruned from schema as never-used pipeline metadata?</li>
+</ol>
+    </article>
+  </main>
+</body>
+</html>

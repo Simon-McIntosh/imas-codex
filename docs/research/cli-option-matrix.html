@@ -1,0 +1,2412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="cli-option-matrix">
+  <meta name="plan-title" content="CLI Option Matrix — Audit, Canonical Vocabulary, Consolidation">
+  <meta name="plan-summary" content="Audit of CLI option surfaces, proposed canonical flag vocabulary, and Standard Name subcommand consolidation guidance.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="33-cli-harmonization">
+  <title>CLI Option Matrix — Audit, Canonical Vocabulary, Consolidation | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p>Audit of CLI option surfaces, proposed canonical flag vocabulary, and Standard Name subcommand consolidation guidance.</p>
+      <dl>
+          <dt>Source markdown</dt><dd><code>plans/research/cli-option-matrix.md</code></dd>
+          <dt>Migration note</dt><dd><code>Bulk HTML migration from markdown</code></dd>
+          <dt>Plan informs</dt><dd><code>33-cli-harmonization</code></dd>
+      </dl>
+    </header>
+    <article>
+<h1>CLI Option Matrix — Audit, Canonical Vocabulary, Consolidation</h1>
+<p><strong>Status:</strong> research artifact for the CLI harmonization work (feature plan <code>33-cli-harmonization</code>).</p>
+<p><strong>Scope:</strong> audit every click option across <code>imas_codex/cli/**/*.py</code> and propose a
+canonical vocabulary plus a consolidation plan for <code>sn</code> subcommands. Implementation
+is handled in a separate patch series — this document is the source of truth.</p>
+<blockquote>
+<p><strong>Coordination note.</strong> Another agent (<code>sn-extraction-batching-prompt</code>, opus-4.7) is
+concurrently modifying <code>sn generate</code>. This document captures <code>sn generate</code>'s current
+option surface for reference only; the harmonization of <code>sn generate</code> is explicitly
+<strong>deferred</strong> to a follow-up commit once that agent merges.</p>
+</blockquote>
+<hr>
+<h2>Part 1 — Per-command option inventory</h2>
+<p>Each table lists: long flag, short flag, help summary, default, and type. The "<strong>clash</strong>"
+column flags inconsistencies with the proposed canonical vocabulary (§3). Commented-in
+source line numbers are included for traceability.</p>
+<h3>1.1  <code>sn</code> subcommands  (<code>imas_codex/cli/sn.py</code>)</h3>
+<h4><code>sn generate</code>  (lines 35–571)  — <strong>frozen for this patch</strong></h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--source</code></td>
+<td>—</td>
+<td><code>dd</code> or <code>signals</code></td>
+<td><code>dd</code></td>
+<td>Choice</td>
+</tr>
+<tr>
+<td><code>--physics-domain</code> / <code>--domain</code></td>
+<td>—</td>
+<td>physics-domain scope</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--facility</code></td>
+<td>—</td>
+<td>facility id</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD cap</td>
+<td><code>5.0</code></td>
+<td>float</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview only</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>—</td>
+<td>re-generate already-named</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--revalidate</code></td>
+<td>—</td>
+<td>re-run ISN validation</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--limit</code></td>
+<td>—</td>
+<td>max DD paths</td>
+<td><code>None</code></td>
+<td>int</td>
+</tr>
+<tr>
+<td><code>--compose-model</code></td>
+<td>—</td>
+<td>override LLM</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--quiet</code></td>
+<td><code>-q</code></td>
+<td>suppress output</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--paths</code></td>
+<td>—</td>
+<td>explicit DD paths (multi)</td>
+<td><code>()</code></td>
+<td>multiple str</td>
+</tr>
+<tr>
+<td><code>--reset-to</code></td>
+<td>—</td>
+<td><code>extracted</code>|<code>drafted</code></td>
+<td><code>None</code></td>
+<td>Choice</td>
+</tr>
+<tr>
+<td><code>--from-model</code></td>
+<td>—</td>
+<td>substring-match prior model</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--reset-only</code></td>
+<td>—</td>
+<td>cleanup then exit</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--since</code></td>
+<td>—</td>
+<td>ISO <code>generated_at</code> lower bound</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--before</code></td>
+<td>—</td>
+<td>ISO <code>generated_at</code> upper bound</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--below-score</code></td>
+<td>—</td>
+<td><code>reviewer_score &lt;</code> threshold</td>
+<td><code>None</code></td>
+<td>float</td>
+</tr>
+<tr>
+<td><code>--tier</code></td>
+<td>—</td>
+<td>comma list of review tiers</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--retry-quarantined</code></td>
+<td>—</td>
+<td>target <code>validation_status=quarantined</code></td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--retry-skipped</code></td>
+<td>—</td>
+<td>include <code>status=skipped</code> sources</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--retry-vocab-gap</code></td>
+<td>—</td>
+<td>target vocab-gap names</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--regen-only</code></td>
+<td>—</td>
+<td>feed prior reviewer comments</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observations</strong> — <code>sn generate</code> uses <code>--physics-domain</code> (with <code>--domain</code> alias). Every
+other <code>sn</code> subcommand uses <code>--ids</code> or <code>--domain</code> bare. <code>-c</code> is cost-limit here, in line
+with the proposed vocabulary.</p>
+<h4><code>sn benchmark</code>  (lines 574–739)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--source</code></td>
+<td>—</td>
+<td><code>dd</code></td>
+<td><code>dd</code></td>
+<td>Choice</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--ids</code></td>
+<td>—</td>
+<td>IDS filter</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ vs <code>--physics-domain</code> canon</td>
+</tr>
+<tr>
+<td><code>--domain</code></td>
+<td>—</td>
+<td>physics-domain filter</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--facility</code></td>
+<td>—</td>
+<td>reserved</td>
+<td><code>None</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--models</code></td>
+<td>—</td>
+<td>comma list</td>
+<td><code>None</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--max-candidates</code></td>
+<td>—</td>
+<td>cap</td>
+<td><code>50</code></td>
+<td>int</td>
+<td>⚠ vs <code>--limit</code> canon</td>
+</tr>
+<tr>
+<td><code>--runs</code></td>
+<td>—</td>
+<td>runs/model</td>
+<td><code>1</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--temperature</code></td>
+<td>—</td>
+<td>LLM temp</td>
+<td><code>0.0</code></td>
+<td>float</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--output</code></td>
+<td>—</td>
+<td>JSON path</td>
+<td><code>None</code></td>
+<td>path</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reviewer-model</code></td>
+<td>—</td>
+<td>judge</td>
+<td><code>None</code></td>
+<td>str</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn status</code>  (lines 742–839)  — no options.</h4>
+<h4><code>sn gaps</code>  (lines 842–948)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--segment</code></td>
+<td>—</td>
+<td>grammar segment</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--export</code></td>
+<td>—</td>
+<td><code>table</code>|<code>yaml</code></td>
+<td><code>table</code></td>
+<td>Choice</td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn publish</code>  (lines 950–1156)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--ids</code></td>
+<td>—</td>
+<td>IDS filter</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--domain</code></td>
+<td>—</td>
+<td>domain filter (tags)</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--output-dir</code></td>
+<td>—</td>
+<td>YAML dir</td>
+<td><code>sn_catalog_output</code></td>
+<td>path</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--group-by</code></td>
+<td>—</td>
+<td><code>ids</code>|<code>domain</code>|<code>confidence</code></td>
+<td><code>ids</code></td>
+<td>Choice</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--confidence-min</code></td>
+<td>—</td>
+<td>floor</td>
+<td><code>0.0</code></td>
+<td>float</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--catalog-dir</code></td>
+<td>—</td>
+<td>existing catalog</td>
+<td><code>None</code></td>
+<td>path</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--create-pr</code></td>
+<td>—</td>
+<td>push PR</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--catalog-repo</code></td>
+<td>—</td>
+<td>upstream repo</td>
+<td>hard-coded</td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn import</code>  (lines 1158–1317)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--catalog-dir</code></td>
+<td>—</td>
+<td>required</td>
+<td>—</td>
+<td>path</td>
+</tr>
+<tr>
+<td><code>--tags</code></td>
+<td>—</td>
+<td>comma filter</td>
+<td><code>None</code></td>
+<td>str</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--check</code></td>
+<td>—</td>
+<td>compare catalog vs graph</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn clear</code>  (lines 1320–1464)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--status</code></td>
+<td>—</td>
+<td><code>review_status</code> filter</td>
+<td><code>None</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--all</code></td>
+<td>—</td>
+<td>everything</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--source</code></td>
+<td>—</td>
+<td><code>dd</code>|<code>signals</code></td>
+<td><code>None</code></td>
+<td>Choice</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--ids</code></td>
+<td>—</td>
+<td>IDS filter</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--include-accepted</code></td>
+<td>—</td>
+<td>also accepted</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td><code>-f</code></td>
+<td>skip prompt</td>
+<td>off</td>
+<td>flag</td>
+<td>⚠ <code>-f</code> should be <code>--facility</code> canon</td>
+</tr>
+<tr>
+<td><code>--include-sources</code></td>
+<td>—</td>
+<td>drop sources too</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn reconcile</code>  (lines 1466–1488)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--source-type</code></td>
+<td>—</td>
+<td><code>dd</code>|<code>signals</code></td>
+<td><code>dd</code></td>
+<td>Choice</td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn seed</code>  (lines 1491–1622)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--source</code></td>
+<td>—</td>
+<td><code>isn</code>|<code>west</code>|<code>all</code></td>
+<td><code>all</code></td>
+<td>Choice</td>
+</tr>
+<tr>
+<td><code>--west-dir</code></td>
+<td>—</td>
+<td>path</td>
+<td><code>None</code></td>
+<td>path</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn resolve-links</code>  (lines 1625–1714)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--limit</code></td>
+<td>—</td>
+<td>batch size/round</td>
+<td><code>50</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--rounds</code></td>
+<td>—</td>
+<td>n rounds</td>
+<td><code>3</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn review</code>  (lines 1717–2014)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--ids</code></td>
+<td>—</td>
+<td>IDS scope</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--domain</code></td>
+<td>—</td>
+<td>physics-domain scope</td>
+<td><code>None</code></td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--status</code></td>
+<td>—</td>
+<td>review_status filter</td>
+<td><code>drafted</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--unreviewed</code></td>
+<td>—</td>
+<td>only new/stale</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>—</td>
+<td>re-review</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--model</code></td>
+<td>—</td>
+<td>override review model</td>
+<td><code>None</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--batch-size</code></td>
+<td>—</td>
+<td>per-batch cap</td>
+<td><code>15</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--neighborhood</code></td>
+<td>—</td>
+<td>similar-name ctx</td>
+<td><code>10</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD</td>
+<td><code>5.0</code></td>
+<td>float</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--skip-audit</code></td>
+<td>—</td>
+<td>skip Layer 1</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--concurrency</code></td>
+<td>—</td>
+<td>parallel batches</td>
+<td><code>2</code></td>
+<td>int</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Missing:</strong> <code>--name-only</code> (D3 deliverable) — scores only grammar / semantic / convention /
+completeness; skips documentation + compliance.</p>
+<h4><code>sn enrich</code>  (lines 2017–2233)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--domain</code></td>
+<td>—</td>
+<td>physics-domain (multi)</td>
+<td><code>None</code></td>
+<td>multi str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--status</code></td>
+<td>—</td>
+<td>review_status filter(s)</td>
+<td><code>named</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD</td>
+<td><code>2.0</code></td>
+<td>float</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--limit</code></td>
+<td>—</td>
+<td>cap names</td>
+<td><code>None</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--batch-size</code></td>
+<td>—</td>
+<td>LLM batch</td>
+<td><code>8</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>preview</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>—</td>
+<td>re-enrich</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--model</code></td>
+<td>—</td>
+<td>override</td>
+<td><code>None</code></td>
+<td>str</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>verbose</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--quiet</code></td>
+<td><code>-q</code></td>
+<td>quiet</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>sn rotate</code>  (lines 2236–end)</h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>type</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--domain</code></td>
+<td>—</td>
+<td>physics-domain, required</td>
+<td>—</td>
+<td>str</td>
+<td>⚠ rename → <code>--physics-domain</code></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD total</td>
+<td><code>5.0</code></td>
+<td>float</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--limit</code></td>
+<td>—</td>
+<td>per-generate cap</td>
+<td><code>None</code></td>
+<td>int</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>plan only</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--fail-fast</code></td>
+<td>—</td>
+<td>abort on phase err</td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--skip-generate</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--skip-enrich</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--skip-review</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--skip-regen</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td>flag</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--concurrency</code></td>
+<td>—</td>
+<td>workers/phase</td>
+<td><code>2</code></td>
+<td>int</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3>1.2  <code>discover</code> subcommands  (<code>imas_codex/cli/discover/*.py</code>)</h3>
+<p><code>discover</code> takes <code>FACILITY</code> as a positional argument consistently. No <code>--facility</code>
+option exists in this group.</p>
+<h4><code>discover paths</code></h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--root</code></td>
+<td><code>-r</code></td>
+<td>restrict root paths (multi)</td>
+<td>—</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD</td>
+<td><code>10.0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--path-limit</code></td>
+<td><code>-l</code></td>
+<td>terminal-state cap</td>
+<td><code>None</code></td>
+<td>⚠ vs canonical <code>--limit</code></td>
+</tr>
+<tr>
+<td><code>--focus</code></td>
+<td><code>-f</code></td>
+<td>NL focus</td>
+<td><code>None</code></td>
+<td>⚠ <code>-f</code> reserved for <code>--facility</code> canon</td>
+</tr>
+<tr>
+<td><code>--threshold</code></td>
+<td><code>-t</code></td>
+<td>score floor</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--scan-workers</code></td>
+<td>—</td>
+<td>n scan workers</td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--triage-workers</code></td>
+<td>—</td>
+<td>n triage workers</td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--scan-only</code></td>
+<td>—</td>
+<td>skip LLM</td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--triage-only</code></td>
+<td>—</td>
+<td>skip SSH</td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--add-roots</code></td>
+<td>—</td>
+<td>add roots from config</td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--enrich-threshold</code></td>
+<td>—</td>
+<td>auto-enrich floor</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reset-to</code></td>
+<td>—</td>
+<td>Choice via <code>reset_to_option</code></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reset-scored</code></td>
+<td>—</td>
+<td>hidden deprecated</td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--time</code></td>
+<td>—</td>
+<td>minute cap</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--triage-batch-size</code></td>
+<td>—</td>
+<td>paths/LLM call</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>discover signals</code></h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD</td>
+<td><code>5.0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--signal-limit</code></td>
+<td><code>-n</code></td>
+<td>cap signals</td>
+<td><code>None</code></td>
+<td>⚠ vs canonical <code>--limit</code></td>
+</tr>
+<tr>
+<td><code>--scanners</code></td>
+<td><code>-s</code></td>
+<td>comma list</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--focus</code></td>
+<td><code>-f</code></td>
+<td>pattern focus</td>
+<td><code>None</code></td>
+<td>⚠ <code>-f</code></td>
+</tr>
+<tr>
+<td><code>--scan-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--enrich-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--enrich-workers</code></td>
+<td>—</td>
+<td>workers</td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--check-workers</code></td>
+<td>—</td>
+<td>workers</td>
+<td><code>4</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--time</code></td>
+<td>—</td>
+<td>minutes</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reference-shot</code></td>
+<td>—</td>
+<td>override shot</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--rescan</code></td>
+<td>—</td>
+<td>re-discover</td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reset-to</code></td>
+<td>—</td>
+<td>Choice</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reenrich</code></td>
+<td>—</td>
+<td>hidden deprecated</td>
+<td>off</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>discover code</code></h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--min-score</code></td>
+<td>—</td>
+<td>FP min</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--max-paths</code></td>
+<td>—</td>
+<td>scan cap</td>
+<td><code>100</code></td>
+<td>⚠ vs canonical <code>--limit</code></td>
+</tr>
+<tr>
+<td><code>--focus</code></td>
+<td><code>-f</code></td>
+<td></td>
+<td><code>None</code></td>
+<td>⚠ <code>-f</code></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td></td>
+<td><code>5.0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--scan-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--triage-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--enrich-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--score-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--code-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--scan-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--score-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--time</code></td>
+<td>—</td>
+<td>minutes</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--rescan</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--triage-batch-size</code></td>
+<td>—</td>
+<td></td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reset-to</code></td>
+<td>—</td>
+<td>Choice</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>discover wiki</code></h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--source</code></td>
+<td><code>-s</code></td>
+<td>wiki URL</td>
+<td>—</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td></td>
+<td><code>10.0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--max-pages</code></td>
+<td><code>-n</code></td>
+<td>cap</td>
+<td><code>None</code></td>
+<td>⚠ vs canonical <code>--limit</code></td>
+</tr>
+<tr>
+<td><code>--max-depth</code></td>
+<td>—</td>
+<td>link depth</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--focus</code></td>
+<td><code>-f</code></td>
+<td></td>
+<td>—</td>
+<td>⚠ <code>-f</code></td>
+</tr>
+<tr>
+<td><code>--scan-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--score-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--rescan</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--score-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--ingest-workers</code></td>
+<td>—</td>
+<td></td>
+<td><code>4</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--rescan-documents</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--time</code></td>
+<td>—</td>
+<td>minutes</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--store-images</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--min-score</code></td>
+<td>—</td>
+<td>composite floor</td>
+<td><code>0.5</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reset-to</code></td>
+<td>—</td>
+<td>Choice</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>discover documents</code></h4>
+<table>
+<thead>
+<tr>
+<th>long</th>
+<th>short</th>
+<th>meaning</th>
+<th>default</th>
+<th>clash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--min-score</code></td>
+<td>—</td>
+<td>FP floor</td>
+<td><code>0.5</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--max-paths</code></td>
+<td>—</td>
+<td>scan cap</td>
+<td><code>50</code></td>
+<td>⚠ vs canonical <code>--limit</code></td>
+</tr>
+<tr>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>USD</td>
+<td><code>2.0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--workers</code></td>
+<td>—</td>
+<td>fetchers</td>
+<td><code>2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--vlm-workers</code></td>
+<td>—</td>
+<td>VLM workers</td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--store-bytes</code></td>
+<td>—</td>
+<td>keep image bytes</td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--scan-only</code></td>
+<td>—</td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--focus</code></td>
+<td><code>-f</code></td>
+<td></td>
+<td><code>None</code></td>
+<td>⚠ <code>-f</code></td>
+</tr>
+<tr>
+<td><code>--time</code></td>
+<td>—</td>
+<td>minutes</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td></td>
+<td>off</td>
+<td></td>
+</tr>
+<tr>
+<td><code>--reset-to</code></td>
+<td>—</td>
+<td>Choice</td>
+<td><code>None</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4><code>discover status</code> / <code>discover clear</code> / <code>discover seed</code> / <code>discover inspect</code></h4>
+<table>
+<thead>
+<tr>
+<th>cmd</th>
+<th>options</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td><code>FACILITY</code> arg · <code>--json</code> · <code>--domain/-d</code></td>
+</tr>
+<tr>
+<td><code>clear</code></td>
+<td><code>FACILITY</code> arg · <code>--force/-f</code> · <code>--domain/-d</code></td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td><code>FACILITY</code> arg · <code>--path/-p</code> (multi)</td>
+</tr>
+<tr>
+<td><code>inspect</code></td>
+<td><code>FACILITY</code> arg · <code>--scanned N</code> · <code>--scored N</code> · <code>--json</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>--domain</code> here means <strong>discovery domain</strong> (<code>paths</code>/<code>wiki</code>/<code>signals</code>/<code>files</code>) — this is
+a <em>different</em> meaning from <code>--domain</code> inside <code>sn</code> (physics domain). The CLI group
+(<code>discover</code> vs <code>sn</code>) disambiguates, but it adds to the vocabulary churn.</p>
+<hr>
+<h3>1.3  Other top-level groups</h3>
+<h4><code>graph</code> — split into <code>server.py</code>, <code>data.py</code>, <code>registry.py</code>, <code>sync.py</code></h4>
+<p>Commands: <code>start</code>, <code>stop</code>, <code>status</code>, <code>shell</code>, <code>profiles</code>, <code>secure</code>, <code>export</code>, <code>load</code>,
+<code>list</code>, <code>switch</code>, <code>init</code>, <code>clear</code>, <code>push</code>, <code>fetch</code>, <code>pull</code>, <code>tags</code>, <code>prune</code>, <code>facility
+{list|add|remove}</code>, <code>repair cocos-labels</code>, <code>sync-isn-grammar</code>.</p>
+<p>Observed conventions that match the canon:</p>
+<ul>
+<li><code>--force</code> = skip confirmation (universally)</li>
+<li><code>--dry-run</code> = preview (<code>graph push</code>, <code>graph prune</code>, <code>sync-isn-grammar</code>)</li>
+</ul>
+<p>Clashes to resolve:
+| flag | command | current meaning | note |
+| --- | --- | --- | --- |
+| <code>--facility</code> | <code>graph push</code>, <code>graph tags</code>, <code>graph prune</code> | filter to facility variant | fine |
+| <code>-v</code> / <code>--version</code> | <code>graph fetch</code>, <code>graph pull</code> | <strong>version tag</strong> | collides with our canonical <code>-v</code> = verbose, but only inside <code>graph</code> where verbose-semantics aren't wired. Keep as-is. |
+| <code>--keep</code> / <code>--dev-only</code> | <code>graph prune</code> | | fine |</p>
+<h4><code>embed</code>  (<code>imas_codex/cli/embed.py</code>)</h4>
+<p>Commands: <code>start</code>, <code>status</code>, <code>service</code>, <code>stop</code>, <code>restart</code>, <code>logs</code>.</p>
+<p>Flag map:</p>
+<ul>
+<li><code>embed start</code>: <code>--foreground/-f</code>, <code>--no-slurm</code>, <code>--gpus/-g</code>, <code>--workers/-w</code>,
+  <code>--host</code>, <code>--port</code>, <code>--log-level</code>, <code>--gpu</code>, <code>--idle-timeout</code>, <code>--deploy-label</code>.</li>
+<li><code>embed status</code>: <code>--url</code>, <code>--local</code>.</li>
+<li><code>embed service</code>: <code>--gpu</code>, <code>--deploy-label</code> + <code>action</code> positional.</li>
+<li><code>embed restart</code>: <code>--gpus</code>, <code>--workers</code>, <code>--no-slurm</code>.</li>
+<li><code>embed logs</code>: <code>--follow/-f</code>, <code>--lines</code>.</li>
+</ul>
+<p><strong>Clash:</strong> <code>-f</code> = <code>--foreground</code> (start) and <code>-f</code> = <code>--follow</code> (logs). Neither matches
+the canonical <code>-f</code> = <code>--facility</code>. However <code>embed</code> has no facility concept, so the <code>-f</code>
+slot is locally meaningful. <strong>Decision:</strong> keep as-is; the canonical <code>-f</code> = facility
+applies only where a facility option exists.</p>
+<h4><code>llm</code>  (<code>imas_codex/cli/llm_cli.py</code>)</h4>
+<p>Commands: <code>start</code>, <code>status</code>, <code>service</code>, <code>stop</code>, <code>restart</code>, <code>logs</code>, plus <code>keys</code>
+(subgroup) and <code>teams</code> (subgroup), <code>spend</code>, <code>setup</code>, <code>security audit/harden</code>.</p>
+<p>Flag map (options only):</p>
+<ul>
+<li><code>llm start</code>: <code>--host</code>, <code>--port</code>, <code>--db-port</code>, <code>--foreground/-f</code>, <code>--env-file</code>.</li>
+<li><code>llm status</code>: <code>--url</code>, <code>--deep</code>.</li>
+<li><code>llm service</code>: <code>action</code> pos + <code>--port</code>.</li>
+<li><code>llm stop</code>: <code>--with-db</code>.</li>
+<li><code>llm logs</code>: <code>--follow/-f</code>, <code>--lines</code>.</li>
+<li><code>llm keys create</code>: <code>--team</code>, <code>--alias</code> (req), <code>--budget</code>, <code>--duration</code>.</li>
+<li><code>llm keys rotate</code>: <code>--key</code>.</li>
+<li><code>llm teams create</code>: <code>--alias</code>, <code>--budget</code>, <code>--duration</code>.</li>
+<li><code>llm spend</code>: <code>--team</code>.</li>
+<li><code>llm setup</code>: <code>--dry-run</code>, <code>--force</code>.</li>
+</ul>
+<p><strong>Clash:</strong> <code>--duration</code> (teams/keys) vs nowhere else. OK. <code>-f</code> in start/logs same as
+<code>embed</code> — local meaning.</p>
+<h4><code>tunnel</code>  (<code>imas_codex/cli/tunnel.py</code>)</h4>
+<p><code>start</code>, <code>stop</code>, <code>status</code>, <code>service</code>, hidden <code>service-run</code>.
+Flags: <code>--neo4j</code>, <code>--embed</code>, <code>--llm</code>, <code>--timeout</code>. <code>--all</code> on <code>stop</code>. No canonical
+conflicts.</p>
+<h4><code>config</code>  (<code>imas_codex/cli/config_cli.py</code>)</h4>
+<p><code>config private {push|pull|status}</code>, <code>config secrets {push|pull|status}</code>,
+<code>config local-hosts</code>.
+Flags use <code>--force</code>, <code>--dry-run</code> consistent with canon. <code>--gist-id</code>, <code>--url</code>,
+<code>--no-backup</code> are local.</p>
+<h4><code>serve</code>  (<code>imas_codex/cli/serve.py</code>)</h4>
+<p>Single command: <code>--transport</code>, <code>--host</code>, <code>--port</code>, <code>--tools-file</code>,
+<code>--mcp-tool-allowlist</code>, <code>--default-facility</code>, <code>--reload</code>. No conflicts.</p>
+<h4><code>release</code>  (<code>imas_codex/cli/release.py</code>)</h4>
+<p><code>release</code> single command + argument: <code>--dry-run</code>, <code>--force</code>, <code>--skip-ci</code>, <code>--push</code>,
+<code>--no-push</code>, <code>--message</code>, <code>--remote</code>, <code>--strict-clean</code>, <code>--allow-ci-pending</code>.
+<code>--dry-run</code> and <code>--force</code> match canon.</p>
+<h4><code>tools</code>  (<code>imas_codex/cli/tools.py</code>)</h4>
+<p><code>tools list</code>, <code>tools status HOST</code>, <code>tools install</code>, <code>tools update</code>. Flags are
+local (<code>--python-only</code>, <code>--tools-only</code>, <code>--slurm</code>, <code>--container</code>, <code>--force</code>).</p>
+<h4><code>imas</code> / <code>imas dd</code>  (<code>imas_codex/cli/imas_dd.py</code>)</h4>
+<p>Key flags: <code>--verbose/-v</code>, <code>--quiet/-q</code>, <code>--force/-f</code>, <code>--version/-v</code> (collision
+inside imas-dd — <code>v</code> means verbose on <code>build</code>, version on <code>search</code>/<code>version</code>).
+<code>--ids</code> (filter). <code>--epoch/-e</code>. <code>--limit/-n</code> on <code>search</code> (local <code>n</code> for count).</p>
+<p><strong>Clash:</strong> <code>-n</code> = <code>--limit</code> in <code>imas search</code> but <code>-n</code> = <code>--max-pages</code>/<code>--signal-limit</code>
+in <code>discover</code>. The canonical choice (below) is <code>-n</code> = <code>--limit</code>, which matches <code>imas
+search</code> and the intent of <code>--max-pages</code> / <code>--signal-limit</code>.</p>
+<hr>
+<h2>Part 2 — Inconsistencies in one glance</h2>
+<table>
+<thead>
+<tr>
+<th>concept</th>
+<th>seen names</th>
+<th>seen shorts</th>
+<th>collision?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>USD cost cap</td>
+<td><code>--cost-limit</code> (most)</td>
+<td><code>-c</code> (most)</td>
+<td>clean — keep.</td>
+</tr>
+<tr>
+<td>item cap</td>
+<td><code>--limit</code>, <code>--path-limit</code>, <code>--signal-limit</code>, <code>--max-pages</code>, <code>--max-paths</code>, <code>--max-candidates</code></td>
+<td><code>-l</code>, <code>-n</code>, —</td>
+<td>large drift</td>
+</tr>
+<tr>
+<td>batch size</td>
+<td><code>--batch-size</code>, <code>--triage-batch-size</code>, <code>--max-candidates</code></td>
+<td>—</td>
+<td>OK (batch-size is stable where present)</td>
+</tr>
+<tr>
+<td>facility</td>
+<td>positional <code>FACILITY</code> (discover, tools, most imas), <code>--facility</code> (sn, graph), <code>-f</code> on discover = focus</td>
+<td><code>-f</code> conflicts</td>
+<td></td>
+</tr>
+<tr>
+<td>physics-domain scope (sn)</td>
+<td><code>--physics-domain</code> (generate only), <code>--domain</code> (review/enrich/rotate/benchmark/publish), <code>--ids</code> (benchmark/publish/clear/review)</td>
+<td>—</td>
+<td>large drift</td>
+</tr>
+<tr>
+<td>dry-run</td>
+<td><code>--dry-run</code> everywhere</td>
+<td>—</td>
+<td>clean</td>
+</tr>
+<tr>
+<td>force</td>
+<td><code>--force</code> (most), <code>--force/-f</code> (sn clear, discover clear, imas clear, release, config pull)</td>
+<td><code>-f</code> contested</td>
+<td></td>
+</tr>
+<tr>
+<td>model override</td>
+<td><code>--model</code> (review, enrich, benchmark), <code>--compose-model</code> (generate), <code>--reviewer-model</code> (benchmark), <code>--from-model</code> (generate regen select)</td>
+<td>—</td>
+<td>mostly OK once we settle compose-model/reviewer-model as role-specific</td>
+</tr>
+<tr>
+<td>verbose</td>
+<td><code>-v/--verbose</code> uniformly on <code>sn</code>, <code>discover</code>, <code>imas</code></td>
+<td>—</td>
+<td>clean</td>
+</tr>
+<tr>
+<td>quiet</td>
+<td><code>-q/--quiet</code></td>
+<td>—</td>
+<td>clean (only a couple of places)</td>
+</tr>
+<tr>
+<td>status filter</td>
+<td><code>--status</code> (review, enrich, clear), <code>--review-status</code> (none), <code>--status-filter</code> (internal var)</td>
+<td>—</td>
+<td>unify on <code>--status</code></td>
+</tr>
+<tr>
+<td>output format</td>
+<td><code>--export table|yaml</code> (gaps), <code>--json</code> (discover inspect/status, tools status), <code>--output PATH</code> (benchmark)</td>
+<td>—</td>
+<td>messy but scope-limited</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Part 3 — Canonical option vocabulary (proposal)</h2>
+<p>For each canonical concept we pick <strong>one</strong> long name and optionally <strong>one</strong> short flag.
+Justification cites prevailing usage and readability.</p>
+<table>
+<thead>
+<tr>
+<th>concept</th>
+<th>canonical long</th>
+<th>canonical short</th>
+<th>rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM spend cap (USD)</td>
+<td><code>--cost-limit</code></td>
+<td><code>-c</code></td>
+<td>already used in every discover/sn pipeline command.</td>
+</tr>
+<tr>
+<td>upper bound on items processed</td>
+<td><code>--limit</code></td>
+<td><code>-n</code></td>
+<td><code>--limit</code> is the simplest; <code>-n</code> (for "count") is used in <code>imas search</code> and partially in discover. We consolidate <code>--path-limit</code>, <code>--signal-limit</code>, <code>--max-pages</code>, <code>--max-paths</code>, <code>--max-candidates</code> onto <code>--limit</code> (plus pipeline-specific <code>--max-candidates</code> in <code>sn benchmark</code> keeps its name because "candidates" has a distinct domain meaning). <code>-n</code> sits better than <code>-l</code> because <code>-l</code> is widely associated with <code>--log</code> or <code>--location</code>.</td>
+</tr>
+<tr>
+<td>LLM batch size (items/call)</td>
+<td><code>--batch-size</code></td>
+<td>—</td>
+<td>already used in <code>sn review</code>, <code>sn enrich</code>; migrate <code>--triage-batch-size</code> → stays distinct (it's a per-phase tuning knob in discover — keep prefixed) but <code>--max-candidates</code> in benchmark stays as semantic item cap.</td>
+</tr>
+<tr>
+<td>facility identifier</td>
+<td><code>--facility</code> / positional <code>FACILITY</code></td>
+<td><code>-f</code></td>
+<td>positional on discover/tools is <strong>kept</strong> (strong prevailing pattern); flag <code>--facility</code> with short <code>-f</code> applies where no positional exists (sn, graph push/tags/prune). Free <code>-f</code> everywhere by renaming <code>--focus -f</code> → <code>--focus</code> (no short) and <code>--foreground -f</code> in embed/llm → keep (no facility concept; local <code>-f</code> allowed). <code>-f</code> for <code>--force</code> in <code>sn clear</code>/<code>discover clear</code>/<code>imas clear</code> → drop the short (keep long).</td>
+</tr>
+<tr>
+<td>physics-domain scope (sn)</td>
+<td><code>--physics-domain</code></td>
+<td>—</td>
+<td>user directive; also the only flag name that reads naturally at <code>sn generate --physics-domain magnetics</code>. <code>--domain</code> and <code>--ids</code> become aliases, preserved through the current release.</td>
+</tr>
+<tr>
+<td>source type</td>
+<td><code>--source</code></td>
+<td>—</td>
+<td>stable across <code>generate</code>, <code>clear</code>, <code>benchmark</code>, <code>seed</code> (always <code>dd</code>/<code>signals</code> or similar). <code>sn reconcile</code> uses <code>--source-type</code> → rename to <code>--source</code>.</td>
+</tr>
+<tr>
+<td>preview without side-effects</td>
+<td><code>--dry-run</code></td>
+<td>—</td>
+<td>already uniform; no change.</td>
+</tr>
+<tr>
+<td>bypass safety checks or re-do</td>
+<td><code>--force</code></td>
+<td>—</td>
+<td>drop <code>-f</code> short (conflicts with facility/focus/foreground).</td>
+</tr>
+<tr>
+<td>LLM model override (role-agnostic)</td>
+<td><code>--model</code></td>
+<td>—</td>
+<td>keep. Role-specific overrides (<code>--compose-model</code>, <code>--reviewer-model</code>) remain where two models must coexist (generate, benchmark).</td>
+</tr>
+<tr>
+<td>output format</td>
+<td><code>--format</code> (Choice: <code>table</code>, <code>json</code>, <code>yaml</code>)</td>
+<td>—</td>
+<td>replace <code>--export table|yaml</code> on <code>sn gaps</code>, <code>--json</code> flags on <code>discover status</code>, <code>tools status</code>, <code>discover inspect</code> with a unified <code>--format</code> option (alias <code>--json</code> → <code>--format json</code>).</td>
+</tr>
+<tr>
+<td>review-status / state filter</td>
+<td><code>--status</code></td>
+<td>—</td>
+<td>keep the name; values differ by command but the flag is stable.</td>
+</tr>
+<tr>
+<td>verbose logging</td>
+<td><code>--verbose</code></td>
+<td><code>-v</code></td>
+<td>universal.</td>
+</tr>
+<tr>
+<td>quiet logging</td>
+<td><code>--quiet</code></td>
+<td><code>-q</code></td>
+<td>universal where present.</td>
+</tr>
+</tbody>
+</table>
+<h3>3.1  Freed short flags and what they become</h3>
+<table>
+<thead>
+<tr>
+<th>short</th>
+<th>old uses</th>
+<th>canonical meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-c</code></td>
+<td>cost-limit (most), nothing else</td>
+<td><strong>cost-limit</strong> — no change</td>
+</tr>
+<tr>
+<td><code>-f</code></td>
+<td>focus (discover), force (sn/imas clear), foreground (embed/llm)</td>
+<td><strong>facility</strong> wherever a facility selector exists; otherwise unbound (no alias). <code>--focus</code>, <code>--force</code>, <code>--foreground</code> keep their long forms with no short. Exception: in <code>embed</code>/<code>llm</code> which have no facility concept, <code>--foreground -f</code> and <code>--follow -f</code> keep the short because there is no conflict.</td>
+</tr>
+<tr>
+<td><code>-n</code></td>
+<td>signal-limit, max-pages, limit (imas search)</td>
+<td><strong>limit</strong></td>
+</tr>
+<tr>
+<td><code>-v</code></td>
+<td>verbose (most), version (graph fetch/pull/tags)</td>
+<td><strong>verbose</strong> — graph commands that use <code>-v</code> for <code>--version</code> are acceptable because there is no <code>--verbose</code> flag alongside in those specific commands. Flagged for future cleanup but no rename in this PR.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Part 4 — <code>sn</code> subcommand consolidation proposal</h2>
+<p>Target: ≤ 8 subcommands. Currently 14 (<code>generate</code>, <code>enrich</code>, <code>review</code>, <code>clear</code>,
+<code>publish</code>, <code>import</code>, <code>status</code>, <code>gaps</code>, <code>reset</code>-via-<code>generate</code>, <code>reconcile</code>,
+<code>resolve-links</code>, <code>rotate</code>, <code>seed</code>, <code>benchmark</code>). Core set we keep (per user
+directive): <code>generate</code>, <code>enrich</code>, <code>review</code>, <code>clear</code>, <code>publish</code>, <code>status</code>, <code>gaps</code>,
+<code>benchmark</code> — that is already 8.</p>
+<h3>4.1  <code>sn rotate</code> → fold into <code>sn generate</code>?</h3>
+<p><strong>Proposal: keep <code>rotate</code> separate.</strong> Rationale:</p>
+<ul>
+<li><code>rotate</code> chains four distinct pipelines (<code>generate → enrich → review → regen</code>). It
+  allocates budget across phases (40/20/20/20) and needs its own state (<code>RotationConfig</code>
+  with a rotation_id for provenance stamping). Wrapping <code>sn generate</code> with
+  <code>--also-enrich --also-review --also-regen</code> would need <code>generate</code> to import the
+  enrich + review entry points and track per-phase budgets — in effect, reproducing
+  <code>rotate</code> inside <code>generate</code>.</li>
+<li>Different required args: <code>rotate</code> <strong>requires</strong> <code>--domain</code>; <code>generate</code> does not.</li>
+<li>Tests: <code>test_sn_rotate_cli.py</code> + <code>standard_names/test_rotation_provenance.py</code> assert
+  rotation-specific provenance (RotatedFrom edges). Moving rotation into generate would
+  muddy provenance.</li>
+</ul>
+<p><strong>Conclusion:</strong> rotate stays. It's one of the 8 slots. <strong>Revised target set
+becomes: <code>generate</code>, <code>enrich</code>, <code>review</code>, <code>clear</code>, <code>publish</code>, <code>status</code>, <code>gaps</code>,
+<code>rotate</code></strong> (8) — drop <code>benchmark</code> from the "core" list? No — user directive pins
+benchmark as core.</p>
+<p>With rotate staying, we need to drop: <code>reset</code> (already done per commit history),
+<code>reconcile</code>, <code>resolve-links</code>, <code>seed</code>, <code>import</code>, <code>benchmark</code> — six candidates.
+User forbids dropping <code>benchmark</code> → five real candidates.</p>
+<h3>4.2  <code>sn reset</code> → already folded into <code>sn generate --reset-to</code> ✅</h3>
+<p>Confirmed: commit <code>2f996a82 refactor(sn): consolidate reset into generate</code> removed
+the <code>reset</code> subcommand, and <code>sn generate --reset-to {extracted|drafted}</code> plus <code>sn
+clear --status ...</code> cover the needs. <strong>No further action.</strong></p>
+<h3>4.3  <code>sn resolve-links</code> — merge into <code>sn generate</code>'s post-persist step?</h3>
+<p><code>sn resolve-links</code> runs an iterative rounds loop to promote <code>dd:</code> links to <code>name:</code>
+links once target names appear. It is stateful (each round may promote names the
+previous round couldn't) but the per-round work is small.</p>
+<p>Two viable routes:
+1. <strong>Internal post-persist step</strong>: after <code>generate</code> persists new names, trigger a
+   bounded round of <code>resolve_links_batch()</code> automatically. Still leave <code>sn
+   resolve-links</code> available as a manual catch-up for operators (rename to
+   <code>sn links</code> to shorten, or keep under a <code>sn tools</code> subgroup). The iterative
+   <code>--rounds</code> knob matters for bulk imports (e.g., after <code>sn import</code>), so the
+   command can't disappear entirely.
+2. <strong>Demote to hidden / tools subcommand</strong>: make <code>sn resolve-links</code> a
+   <code>hidden=True</code> command (still callable from scripts) and always invoke one round
+   at the end of <code>generate</code>, <code>enrich</code>, <code>import</code>, <code>seed</code>.</p>
+<p><strong>Recommendation:</strong> route 2. Add internal <code>resolve_links_after_persist()</code> hook fired
+from <code>sn generate</code> / <code>sn enrich</code> / <code>sn import</code> / <code>sn seed</code> persist phases, and mark
+<code>sn resolve-links</code> hidden (still works for CI/manual top-ups). This drops one
+visible subcommand.</p>
+<h3>4.4  <code>sn seed</code> + <code>sn import</code> → merge?</h3>
+<p>Both pull external YAML data into the graph. Differences:</p>
+<ul>
+<li><code>import</code>: <strong>canonical catalog</strong> (<code>imas-standard-names-catalog</code> upstream). Sets
+  <code>review_status='accepted'</code>. Has <code>--check</code> mode for sync diffing. Required arg
+  <code>--catalog-dir</code>.</li>
+<li><code>seed</code>: <strong>calibration anchors</strong> (42 ISN reference examples bundled with
+  <code>imas-standard-names</code>, plus WEST catalog with ~305 entries set to <code>drafted</code>). Does
+  its own physics_domain / tag cleanup before ISN validation. Optional arg
+  <code>--west-dir</code>.</li>
+</ul>
+<p>They share 80% of machinery (YAML → validated → graph MERGE) but differ in
+<strong>provenance / review_status defaults</strong> and <strong>cleanup passes</strong>. A natural merge is:</p>
+<pre><code>sn import [--catalog-dir PATH] [--source {catalog|isn|west|all}] [--tags ...]
+          [--check] [--dry-run]
+</code></pre>
+<p>where <code>--source catalog</code> (default) requires <code>--catalog-dir</code> and <code>--source isn|west</code>
+loads from bundled packages. <code>--check</code> stays meaningful only for <code>--source catalog</code>.</p>
+<p><strong>Recommendation:</strong> merge <code>seed</code> into <code>import</code> under <code>--source</code> flag. Keep backwards
+compatibility by making <code>sn seed</code> an alias (hidden) that forwards to <code>sn import
+--source {isn|west|all}</code>. This drops one visible subcommand.</p>
+<h3>4.5  <code>sn reconcile</code> → internal post-persist step?</h3>
+<p><code>sn reconcile</code> re-links <code>StandardNameSource</code> nodes to upstream entities after a DD
+or signals rebuild. It is already invoked:</p>
+<ul>
+<li>Manually by operators after an <code>imas dd build</code>.</li>
+<li>Not automatically by any pipeline.</li>
+</ul>
+<p>Two options:
+1. Auto-run at the start of <code>sn generate</code> when <code>--source</code> matches a recently-rebuilt
+   source (detected via <code>(:IDS)</code> node mtime).
+2. Move under <code>sn tools reconcile</code>, hidden from top-level help.</p>
+<p><strong>Recommendation:</strong> option 2 — reconcile is rare, operator-driven, and the
+auto-detection heuristic is fragile. Moving to <code>sn tools reconcile</code> (hidden) removes
+from the top-level surface but keeps it scriptable.</p>
+<h3>4.6  Final subcommand list</h3>
+<p>After proposals 4.1–4.5 land:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>subcommand</th>
+<th>status</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>sn generate</code></td>
+<td>core</td>
+<td>frozen in this PR</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>sn enrich</code></td>
+<td>core</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>sn review</code></td>
+<td>core</td>
+<td>gains <code>--names-only</code> this PR</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>sn clear</code></td>
+<td>core</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>sn publish</code></td>
+<td>core</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>sn status</code></td>
+<td>core</td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>sn gaps</code></td>
+<td>core</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>sn benchmark</code></td>
+<td>core</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>sn rotate</code></td>
+<td>core (kept, per 4.1)</td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>sn import</code></td>
+<td>consolidated (absorbs <code>seed</code>)</td>
+<td>default <code>--source=catalog</code></td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>sn seed</code></td>
+<td><strong>hidden alias</strong> → <code>sn import --source isn|west|all</code></td>
+<td></td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>sn resolve-links</code></td>
+<td><strong>hidden</strong> (scriptable catch-up)</td>
+<td></td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>sn reconcile</code></td>
+<td><strong>hidden</strong> (move to <code>sn tools reconcile</code> later)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Visible count: <strong>10</strong>. Above the ≤ 8 target but the user-pinned core set is already
+8; <code>rotate</code> and <code>import</code> are load-bearing. Without relaxing the pin on <code>benchmark</code>
+(a potentially once-a-year command), we cannot go below 10. Recommendation: ship at
+10 visible and revisit <code>benchmark</code> visibility later.</p>
+<hr>
+<h2>Part 5 — <code>sn generate</code> canonical form (deferred)</h2>
+<p>This section documents the target shape <code>sn generate</code> should adopt <strong>after</strong> the
+extraction-batching agent merges. No code changes in this patch.</p>
+<table>
+<thead>
+<tr>
+<th>current</th>
+<th>target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--physics-domain</code> / <code>--domain</code> (alias)</td>
+<td><code>--physics-domain</code> (primary, alias <code>--domain</code>, alias <code>--ids</code> for back-compat of consumers that still think in IDS-scope)</td>
+</tr>
+<tr>
+<td><code>--limit</code></td>
+<td><code>--limit</code> / <code>-n</code></td>
+</tr>
+<tr>
+<td><code>-c</code>, <code>--cost-limit</code></td>
+<td><code>-c</code>, <code>--cost-limit</code> ✓</td>
+</tr>
+<tr>
+<td><code>--facility</code></td>
+<td><code>--facility</code> / <code>-f</code></td>
+</tr>
+<tr>
+<td><code>--compose-model</code></td>
+<td><strong>keep</strong> — there is also no <code>--review-model</code> on generate, so <code>--compose-model</code> is the role-specific form. Do not merge with <code>--model</code>.</td>
+</tr>
+<tr>
+<td><code>--verbose</code>, <code>--quiet</code></td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>--dry-run</code>, <code>--force</code></td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>--retry-quarantined</code>, <code>--retry-skipped</code>, <code>--retry-vocab-gap</code></td>
+<td>consolidate into <code>--retry {quarantined,skipped,vocab-gap}</code> multi-value? Discuss separately.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Part 6 — Rename plan for this PR (applied to every non-generate command)</h2>
+<blockquote>
+<p><em>Implementation detail — D4 deliverable.</em> Each rename preserves the old name as an
+alias (no deprecation warning emitted at runtime, per AGENTS.md).</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>command</th>
+<th>old flag</th>
+<th>new flag</th>
+<th>alias kept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sn review</code></td>
+<td><code>--ids</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes (<code>--ids</code>, <code>--domain</code>)</td>
+</tr>
+<tr>
+<td><code>sn review</code></td>
+<td><code>--domain</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn enrich</code></td>
+<td><code>--domain</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn rotate</code></td>
+<td><code>--domain</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn benchmark</code></td>
+<td><code>--ids</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes (both become aliases, <code>--physics-domain</code> becomes new primary)</td>
+</tr>
+<tr>
+<td><code>sn benchmark</code></td>
+<td><code>--domain</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn benchmark</code></td>
+<td><code>--max-candidates</code></td>
+<td><code>--max-candidates</code> <strong>unchanged</strong> — semantic "candidates" is domain-specific here</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>sn publish</code></td>
+<td><code>--ids</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn publish</code></td>
+<td><code>--domain</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn clear</code></td>
+<td><code>--ids</code></td>
+<td><code>--physics-domain</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn clear</code></td>
+<td><code>--force/-f</code></td>
+<td><code>--force</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> as alias, since users may have scripts</td>
+</tr>
+<tr>
+<td><code>sn reconcile</code></td>
+<td><code>--source-type</code></td>
+<td><code>--source</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sn resolve-links</code></td>
+<td>unchanged</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>sn seed</code></td>
+<td>unchanged (hidden alias only)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>sn import</code></td>
+<td>unchanged</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>discover clear</code></td>
+<td><code>--force/-f</code></td>
+<td><code>--force</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> alias</td>
+</tr>
+<tr>
+<td><code>discover paths</code></td>
+<td><code>--focus -f</code></td>
+<td><code>--focus</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> alias</td>
+</tr>
+<tr>
+<td><code>discover signals</code></td>
+<td><code>--focus -f</code></td>
+<td><code>--focus</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> alias</td>
+</tr>
+<tr>
+<td><code>discover code</code></td>
+<td><code>--focus -f</code></td>
+<td><code>--focus</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> alias</td>
+</tr>
+<tr>
+<td><code>discover wiki</code></td>
+<td><code>--focus -f</code></td>
+<td><code>--focus</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> alias</td>
+</tr>
+<tr>
+<td><code>discover documents</code></td>
+<td><code>--focus -f</code></td>
+<td><code>--focus</code> (drop <code>-f</code>)</td>
+<td>keep <code>-f</code> alias</td>
+</tr>
+<tr>
+<td><code>discover paths</code></td>
+<td><code>--path-limit -l</code></td>
+<td><code>--limit -n</code></td>
+<td>keep <code>--path-limit</code>, <code>-l</code> aliases</td>
+</tr>
+<tr>
+<td><code>discover signals</code></td>
+<td><code>--signal-limit -n</code></td>
+<td><code>--limit -n</code></td>
+<td>keep <code>--signal-limit</code> alias</td>
+</tr>
+<tr>
+<td><code>discover wiki</code></td>
+<td><code>--max-pages -n</code></td>
+<td><code>--limit -n</code></td>
+<td>keep <code>--max-pages</code> alias</td>
+</tr>
+<tr>
+<td><code>discover code</code></td>
+<td><code>--max-paths</code></td>
+<td><code>--limit</code></td>
+<td>keep <code>--max-paths</code> alias</td>
+</tr>
+<tr>
+<td><code>discover documents</code></td>
+<td><code>--max-paths</code></td>
+<td><code>--limit</code></td>
+<td>keep <code>--max-paths</code> alias</td>
+</tr>
+</tbody>
+</table>
+<p>Short flags that become free after these renames: <code>-f</code> (facility), <code>-n</code> (limit).
+This PR does <strong>not</strong> introduce <code>-f = --facility</code> anywhere new — <code>discover</code>
+subcommands still take <code>FACILITY</code> positionally, and <code>sn</code> subcommands' new
+<code>--facility</code> usage (rare — only <code>generate</code> and future) does not need a short. The
+short-flag freeing is therefore <strong>defensive</strong>: it prevents future meaning-clash.</p>
+<hr>
+<h2>Part 7 — D3: <code>sn review --name-only</code> design</h2>
+<blockquote>
+<p><strong>Naming note.</strong> The parallel agent's <code>sn generate --name-only</code> already landed
+(singular). We adopt the same spelling — <code>--name-only</code> — on <code>sn review</code> so the
+two flags compose naturally (<code>sn generate --name-only</code> → <code>sn review
+--name-only</code>). The DB-level field <code>review_mode</code> likewise stores <code>name_only</code> /
+<code>full</code>, mirroring <code>ExtractionBatch.mode</code>.</p>
+</blockquote>
+<h3>7.1  Behaviour</h3>
+<pre><code>imas-codex sn review --name-only [other sn-review flags]
+</code></pre>
+<p>Scores only four dimensions — <strong>grammar</strong>, <strong>semantic</strong>, <strong>convention</strong>,
+<strong>completeness</strong> — and skips documentation + compliance (which require full
+description text). Persists a new <code>review_mode</code> field on <code>StandardName</code> ∈
+{<code>name_only</code>, <code>full</code>}.</p>
+<h3>7.2  Normalization</h3>
+<pre><code>reviewer_score_full   = sum(6 dims) / 120        # existing, 0-1
+reviewer_score_namesonly = sum(4 dims) /  80     # new, 0-1
+</code></pre>
+<p>Both go into the same <code>reviewer_score</code> column (0-1). The dimension-set is recorded
+via <code>review_mode</code> so downstream consumers (publish, enrich) can decide whether they
+trust the score.</p>
+<h3>7.3  Downgrade protection</h3>
+<p>A <code>--name-only</code> run <strong>must not overwrite</strong> an existing full review unless <code>--force</code>
+is given. Implemented as a WHERE-clause filter at target-selection time in
+<code>_select_review_targets()</code>:</p>
+<pre><code class="language-python">if state.review_mode == &quot;name_only&quot; and not state.force_review:
+    targets = [n for n in targets
+               if n.get(&quot;review_mode&quot;) != &quot;full&quot;
+               or n.get(&quot;reviewer_score&quot;) is None]
+</code></pre>
+<h3>7.4  Prompt</h3>
+<p>Create <code>imas_codex/llm/prompts/sn/review_name_only.md</code> that renders only the four
+dimension rubrics + calibration. Front-matter <code>dynamic: true</code>, <code>task: review</code>,
+<code>used_by: imas_codex.standard_names.review.pipeline._review_single_batch</code>. Uses the
+existing Jinja context (<code>items</code>, <code>calibration_entries</code>, <code>nearby_existing_names</code>,
+grammar enums) but omits <code>documentation</code> and <code>compliance</code> rubric sections and
+refers only to the four-dimension output schema.</p>
+<h3>7.5  Response model</h3>
+<p>New <code>StandardNameQualityScoreNameOnly</code> and matching batch model in
+<code>imas_codex/standard_names/models.py</code>:</p>
+<pre><code class="language-python">class StandardNameQualityScoreNameOnly(BaseModel):
+    grammar: int = Field(ge=0, le=20)
+    semantic: int = Field(ge=0, le=20)
+    convention: int = Field(ge=0, le=20)
+    completeness: int = Field(ge=0, le=20)
+
+    @property
+    def total(self) -&gt; int:
+        return self.grammar + self.semantic + self.convention + self.completeness
+
+    @property
+    def score(self) -&gt; float:
+        return self.total / 80.0
+
+    @property
+    def tier(self) -&gt; str:
+        s = self.score
+        if s &gt;= 0.85: return &quot;outstanding&quot;
+        if s &gt;= 0.60: return &quot;good&quot;
+        if s &gt;= 0.40: return &quot;adequate&quot;
+        return &quot;poor&quot;
+</code></pre>
+<p>Persist <code>review_mode</code> through <code>_match_reviews_to_entries()</code>:</p>
+<pre><code class="language-python">original[&quot;review_mode&quot;] = &quot;name_only&quot; if state.review_mode == &quot;name_only&quot; else &quot;full&quot;
+</code></pre>
+<h3>7.6  LinkML schema</h3>
+<p>Add to <code>imas_codex/schemas/standard_name.yaml</code>, under <code>StandardName.attributes</code>:</p>
+<pre><code class="language-yaml">      review_mode:
+        description: &gt;-
+          Which review rubric produced reviewer_score. 'full' uses all
+          six dimensions (grammar/semantic/documentation/convention/
+          completeness/compliance, score normalized over 120). 'name_only'
+          uses four dimensions (grammar/semantic/convention/completeness,
+          score normalized over 80) — use this for name-only rotation
+          cycles before description/documentation have been authored.
+        range: StandardNameReviewMode
+</code></pre>
+<p>…and add the enum:</p>
+<pre><code class="language-yaml">enums:
+  StandardNameReviewMode:
+    permissible_values:
+      full:
+        description: All six dimensions scored.
+      name_only:
+        description: Grammar/semantic/convention/completeness only.
+</code></pre>
+<p>Re-run <code>uv run build-models --force</code> locally (do <strong>not</strong> commit generated files).</p>
+<h3>7.7  Tests</h3>
+<p>Add to <code>tests/standard_names/</code>:</p>
+<ul>
+<li><code>test_review_name_only.py</code> — unit tests for <code>StandardNameQualityScoreNameOnly</code>
+  total/score/tier calculations, normalization boundaries, JSON round-trip.</li>
+<li>Extend <code>test_review_pipeline.py</code> — add a test that renders the name-only prompt
+  and asserts the prompt body does not contain the words "Documentation Quality"
+  or "Prompt Compliance".</li>
+<li>Downgrade guard test — <code>--name-only</code> on a name with <code>review_mode='full'</code> and
+  no <code>--force</code> must leave it untouched.</li>
+</ul>
+<h3>7.8  CLI surface</h3>
+<p><code>sn review</code> gains <strong>one</strong> new flag: <code>--name-only</code> (is_flag). No other review flags
+change this PR.</p>
+<hr>
+<h2>Part 8 — Sequenced implementation for this PR</h2>
+<p>Commits in order (5 expected):</p>
+<ol>
+<li><strong><code>refactor(sn): rename --ids/--domain → --physics-domain with aliases</code></strong> —
+   touches <code>sn/review</code>, <code>sn/enrich</code>, <code>sn/rotate</code>, <code>sn/benchmark</code>, <code>sn/publish</code>,
+   <code>sn/clear</code>, <code>sn/reconcile</code>.</li>
+<li><strong><code>refactor(cli): free -f short on non-facility commands</code></strong> — <code>discover
+   paths/signals/code/wiki/documents</code>, <code>discover clear</code>, <code>sn clear</code>.</li>
+<li><strong><code>refactor(discover): harmonize --limit / -n across discover subcommands</code></strong> —
+   rename <code>--path-limit</code>, <code>--signal-limit</code>, <code>--max-pages</code>, <code>--max-paths</code> to
+   <code>--limit</code> (aliases preserved).</li>
+<li><strong><code>feat(sn): add review_mode enum to standard name schema</code></strong> — LinkML only, no
+   runtime code yet.</li>
+<li><strong><code>feat(sn): sn review --name-only scores 4 dimensions</code></strong> — prompt, models,
+   pipeline wiring, CLI flag, tests.</li>
+</ol>
+<p><code>sn generate</code> is <strong>not touched</strong> — deferred to a follow-up after the
+extraction-batching agent merges. Sequencing documented in
+<code>plans/features/33-cli-harmonization.md</code>.</p>
+    </article>
+  </main>
+</body>
+</html>

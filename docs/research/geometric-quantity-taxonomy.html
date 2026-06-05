@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="geometric-quantity-taxonomy">
+  <meta name="plan-title" content="Research: Geometric Quantity Taxonomy">
+  <meta name="plan-summary" content="Research note on replacing geometric_quantity with a clearer hardware-geometry category for DD classification and Standard Name generation.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="dd-unified-classification,isn-standard-name-kind">
+  <title>Research: Geometric Quantity Taxonomy | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p>Research note on replacing geometric_quantity with a clearer hardware-geometry category for DD classification and Standard Name generation.</p>
+      <dl>
+          <dt>Source markdown</dt><dd><code>plans/research/geometric-quantity-taxonomy.md</code></dd>
+          <dt>Migration note</dt><dd><code>Bulk HTML migration from markdown</code></dd>
+          <dt>Plan informs</dt><dd><code>dd-unified-classification,isn-standard-name-kind</code></dd>
+      </dl>
+    </header>
+    <article>
+<h1>Research: Geometric Quantity Taxonomy</h1>
+<p><strong>Date:</strong> 2025-07-23, updated 2026-04-16
+<strong>Status:</strong> Complete — findings feed into <code>dd-unified-classification.md</code> plan update</p>
+<h2>Problem Statement</h2>
+<p>The <code>dd-unified-classification.md</code> plan splits <code>quantity</code> into <code>physical_quantity</code> + <code>geometric_quantity</code>, defining "geometric" via a 17-name leaf-name set (elongation, triangularity, minor_radius, etc.). This captures only 36 nodes (0.36% of quantities) and conflates plasma shape parameters (physics outputs) with machine geometry (engineering inputs).</p>
+<p>The user's instinct: "geometries in my mind means coil positions, vessel outlines, lines of sight of diagnostics." Is this too narrow, or is it actually the correct definition?</p>
+<h2>Findings</h2>
+<h3>Three Natural Groupings Within "quantity" Nodes</h3>
+<table>
+<thead>
+<tr>
+<th>Grouping</th>
+<th>Count</th>
+<th>Examples</th>
+<th>Nature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Physical quantity</td>
+<td>~9,090</td>
+<td>T_e, n_e, j_tor, β, q, B_tor, pressure</td>
+<td>Physics measurements and derived quantities</td>
+</tr>
+<tr>
+<td>Hardware geometry</td>
+<td>~870</td>
+<td>coil r/z, vessel outline, LoS, aperture, detector position</td>
+<td>Engineering inputs — machine and diagnostic structure</td>
+</tr>
+<tr>
+<td>Plasma shape descriptor</td>
+<td>~33</td>
+<td>elongation, triangularity, squareness, aspect_ratio</td>
+<td>Equilibrium-derived boundary coefficients</td>
+</tr>
+</tbody>
+</table>
+<h3>Plasma Shape Parameters Are Physics Outputs, Not Geometry</h3>
+<p>Elongation (κ), triangularity (δ), squareness, and tilt are <strong>computed by equilibrium reconstruction codes</strong> from magnetic measurements. They are:</p>
+<ul>
+<li>Dimensionless (unit = <code>-</code>)</li>
+<li>Derived from the separatrix contour (itself an equilibrium output)</li>
+<li>Key physics parameters affecting MHD stability and confinement</li>
+<li>Already assigned standard names via ISN's <code>physical_base</code> segment (e.g., <code>elongation_of_plasma_boundary</code>)</li>
+</ul>
+<p>Minor radius and major radius have unit <code>m</code> but are still equilibrium outputs — they describe the plasma, not the machine.</p>
+<p>These are <strong>physical quantities with geometric character</strong>, not geometry in the engineering/structural sense.</p>
+<h3>Hardware Geometry Is Structurally Identifiable</h3>
+<p>Hardware geometry nodes cluster under specific DD subtree patterns:</p>
+<table>
+<thead>
+<tr>
+<th>Path pattern</th>
+<th>Count</th>
+<th>What it captures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/geometry/</code></td>
+<td>~282</td>
+<td>Coil geometry, iron core, optical element shapes</td>
+</tr>
+<tr>
+<td><code>/outline/</code></td>
+<td>~75</td>
+<td>Wall, vessel, coil cross-sections</td>
+</tr>
+<tr>
+<td><code>/aperture/</code></td>
+<td>~150</td>
+<td>Diagnostic aperture positions and dimensions</td>
+</tr>
+<tr>
+<td><code>/line_of_sight/</code></td>
+<td>~80</td>
+<td>Diagnostic viewing geometry</td>
+</tr>
+<tr>
+<td><code>/position/</code></td>
+<td>~200</td>
+<td>Gauge, probe, channel positions</td>
+</tr>
+<tr>
+<td><code>/detector/</code></td>
+<td>~100</td>
+<td>Detector hardware dimensions</td>
+</tr>
+<tr>
+<td><code>/mirror/</code>, <code>/waveguide/</code>, <code>/launcher/</code>, <code>/antenna/</code></td>
+<td>~80</td>
+<td>Heating/current drive hardware geometry</td>
+</tr>
+</tbody>
+</table>
+<p>All require a spatial unit (<code>m</code>, <code>rad</code>, <code>m^2</code>, <code>m^-1</code>, <code>deg</code>) to avoid false positives.</p>
+<h3>IDS Distribution of Hardware Geometry</h3>
+<table>
+<thead>
+<tr>
+<th>IDS</th>
+<th>HW geometry nodes</th>
+<th>% of IDS quantities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bolometer</td>
+<td>88</td>
+<td>89%</td>
+</tr>
+<tr>
+<td>camera_visible</td>
+<td>58</td>
+<td>70%</td>
+</tr>
+<tr>
+<td>pf_active</td>
+<td>48</td>
+<td>55%</td>
+</tr>
+<tr>
+<td>soft_x_rays</td>
+<td>41</td>
+<td>56%</td>
+</tr>
+<tr>
+<td>hard_x_rays</td>
+<td>41</td>
+<td>53%</td>
+</tr>
+<tr>
+<td>spectrometer_uv</td>
+<td>41</td>
+<td>49%</td>
+</tr>
+<tr>
+<td>spectrometer_visible</td>
+<td>80</td>
+<td>45%</td>
+</tr>
+<tr>
+<td>neutron_diagnostic</td>
+<td>76</td>
+<td>42%</td>
+</tr>
+</tbody>
+</table>
+<p>Diagnostic IDS are dominated by hardware geometry — this is exactly the kind of structural information users need when setting up a diagnostic model.</p>
+<h3>Exclusion Rules (False Positive Prevention)</h3>
+<p>Not all <code>/outline/</code> or <code>/position/</code> paths are hardware:</p>
+<ul>
+<li><code>equilibrium/time_slice/boundary/outline/r</code> — plasma boundary contour (physics output, not hardware)</li>
+<li><code>equilibrium/time_slice/boundary_separatrix/outline/z</code> — separatrix shape (same)</li>
+<li><code>/grid/</code>, <code>/ggd/</code> paths — computational mesh (numerical artifact, not hardware)</li>
+</ul>
+<p>Exclusion: paths containing <code>boundary</code>, <code>separatrix</code>, <code>grid</code>, <code>ggd</code> are NOT hardware geometry.</p>
+<h3>"Other Length-Unit" Quantities</h3>
+<p>160 nodes have unit <code>m</code> but don't fit cleanly into hardware geometry:</p>
+<ul>
+<li>Curvature radii of optical elements (<code>x1_curvature</code>, <code>x2_curvature</code>)</li>
+<li>Reference major radius (<code>r0</code>) — a physics reference point</li>
+<li>Beam spot size, pixel size — instrument scale properties</li>
+<li>Debye length, skin depth — physics quantities with length units</li>
+</ul>
+<p>These remain <code>physical_quantity</code>. The length unit alone does NOT make something "geometry."</p>
+<h2>Recommendation</h2>
+<p><strong>Drop <code>geometric_quantity</code> entirely. Replace with <code>hardware_geometry</code>.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Plan's <code>geometric_quantity</code></th>
+<th>Recommended <code>hardware_geometry</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Definition</td>
+<td>17 leaf-name plasma shape params</td>
+<td>Machine/diagnostic structural positions</td>
+</tr>
+<tr>
+<td>Count</td>
+<td>36 nodes (0.36%)</td>
+<td>~870 nodes (8.7%)</td>
+</tr>
+<tr>
+<td>Detection</td>
+<td>Leaf name matching</td>
+<td>Structural path pattern + unit</td>
+</tr>
+<tr>
+<td>Semantic</td>
+<td>Ambiguous — "shape" vs "structure"</td>
+<td>Clear — "engineering inputs"</td>
+</tr>
+<tr>
+<td>SN grammar</td>
+<td>physical_base (already works)</td>
+<td>geometric_base (correct alignment)</td>
+</tr>
+<tr>
+<td>User value</td>
+<td>Low — niche equilibrium filter</td>
+<td>High — "show me machine setup"</td>
+</tr>
+</tbody>
+</table>
+<h3>Revised NodeCategory Enum (8 values)</h3>
+<pre><code>physical_quantity   (~9,090)  — Physics measurements and derived quantities
+hardware_geometry   (  ~870)  — Machine and diagnostic structural positions
+coordinate          ( 1,739)  — Independent variables / axes
+structural          ( 7,395)  — Container / grouping nodes
+identifier          (   243)  — Named type selectors
+error               (31,281)  — Uncertainty fields
+metadata            (10,715)  — Provenance, time references
+constant            (     ?)  — Fixed parameters (future, if needed)
+</code></pre>
+<h3>Classifier Rules for <code>hardware_geometry</code></h3>
+<pre><code class="language-python">HARDWARE_GEOMETRY_PARENTS = frozenset({
+    &quot;geometry&quot;, &quot;outline&quot;, &quot;aperture&quot;, &quot;line_of_sight&quot;,
+    &quot;sightline&quot;, &quot;position&quot;, &quot;detector&quot;, &quot;mirror&quot;,
+    &quot;waveguide&quot;, &quot;launcher&quot;, &quot;antenna&quot;,
+})
+
+HARDWARE_GEOMETRY_EXCLUDE = frozenset({
+    &quot;boundary&quot;, &quot;separatrix&quot;, &quot;grid&quot;, &quot;ggd&quot;,
+})
+
+SPATIAL_UNITS = frozenset({&quot;m&quot;, &quot;rad&quot;, &quot;m^2&quot;, &quot;m^-1&quot;, &quot;m^-2&quot;, &quot;m^3&quot;, &quot;deg&quot;})
+
+def is_hardware_geometry(path: str, unit: str, ancestors: list[str]) -&gt; bool:
+    if unit not in SPATIAL_UNITS:
+        return False
+    if any(excl in path for excl in HARDWARE_GEOMETRY_EXCLUDE):
+        return False
+    return any(parent in HARDWARE_GEOMETRY_PARENTS
+               for parent in ancestors)
+</code></pre>
+<p>This is a <strong>structural classification</strong> (parent path patterns), not a leaf-name classification. It's more robust because:</p>
+<ol>
+<li>New DD paths under <code>/geometry/</code> automatically get classified correctly</li>
+<li>No hardcoded name list to maintain</li>
+<li>Exclusions prevent false positives from plasma boundary and grid paths</li>
+</ol>
+<h3>Impact on Category Sets</h3>
+<pre><code class="language-python">EMBEDDABLE_CATEGORIES  = frozenset({&quot;physical_quantity&quot;, &quot;hardware_geometry&quot;})
+SEARCHABLE_CATEGORIES  = frozenset({&quot;physical_quantity&quot;, &quot;hardware_geometry&quot;, &quot;coordinate&quot;})
+SN_SOURCE_CATEGORIES   = frozenset({&quot;physical_quantity&quot;, &quot;hardware_geometry&quot;})
+ENRICHABLE_CATEGORIES  = frozenset({&quot;physical_quantity&quot;, &quot;hardware_geometry&quot;, &quot;coordinate&quot;})
+</code></pre>
+<h3>Impact on Standard Names</h3>
+<p>Both <code>physical_quantity</code> and <code>hardware_geometry</code> nodes are SN sources:</p>
+<ul>
+<li><code>physical_quantity</code> → ISN <code>physical_base</code> segment (electron_temperature, plasma_current)</li>
+<li><code>hardware_geometry</code> → ISN <code>geometric_base</code> segment (radial_position_of_pf_coil_outline)</li>
+</ul>
+<p>The compose prompt should include <code>node_category</code> so the LLM selects the appropriate grammar branch.</p>
+<h3>Impact on MCP Tools</h3>
+<p><code>node_category</code> filter in <code>search_dd_paths</code> and <code>list_dd_paths</code> enables:</p>
+<pre><code>&quot;Show me all hardware geometry in the bolometer IDS&quot;
+→ node_category=hardware_geometry, ids_filter=bolometer
+
+&quot;What physics quantities does equilibrium compute?&quot;
+→ node_category=physical_quantity, ids_filter=equilibrium
+</code></pre>
+<h2>Category Naming Analysis</h2>
+<h3>"Shift" Verification</h3>
+<p>The DD path <code>reflectometer_fluctuation/channel/doppler/shift</code> [Hz] is the <strong>only</strong> <code>shift</code> classified as <code>quantity</code>. It's a Doppler frequency shift — unambiguously a physical quantity. <code>charge_exchange/.../shift</code> [m] is classified as <code>structural</code> (container node). No <code>shafranov_shift</code> leaf name exists in the DD. <strong>Conclusion:</strong> <code>shift</code> is correctly classified as <code>physical_quantity</code> in all cases.</p>
+<h3>Naming Options for Machine/Diagnostic Structure Category</h3>
+<table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>geometry</code></td>
+<td>Shortest; ISN uses <code>geometric_base</code> for this concept</td>
+<td>Ambiguous — plasma boundary outline is also "geometry" but is a physics output; users may expect elongation here</td>
+</tr>
+<tr>
+<td><code>hardware_geometry</code></td>
+<td>Unambiguous; covers machine + diagnostics</td>
+<td>"hardware" is not native IMAS terminology</td>
+</tr>
+<tr>
+<td><code>machine_geometry</code></td>
+<td>Aligns with IMAS "machine_description" IDS convention</td>
+<td>Diagnostic LoS/apertures are not "machine" per se</td>
+</tr>
+<tr>
+<td><code>device_geometry</code></td>
+<td>Neutral term covering all hardware types</td>
+<td>Less common in IMAS literature</td>
+</tr>
+<tr>
+<td><code>static_geometry</code></td>
+<td>Captures key temporal semantic (pre-plasma)</td>
+<td>Divertor tilt can change; describes WHEN not WHAT</td>
+</tr>
+</tbody>
+</table>
+<h3>Recommendation</h3>
+<p><strong><code>geometry</code></strong> is the best name if — and only if — the definition is documented clearly as "spatial description of physical apparatus (machine structure, diagnostic hardware, heating systems)." The ambiguity risk with plasma boundary outlines is mitigated by the classifier's exclusion rules (boundary/separatrix/grid/ggd paths are excluded). The alignment with ISN's <code>geometric_base</code> grammar segment is a strong signal.</p>
+<p>If ambiguity is deemed too risky, <strong><code>device_geometry</code></strong> is the safe alternative.</p>
+<h2>ISN StandardNameKind Assessment</h2>
+<h3>kind=vector: Latent Value via Component Grouping</h3>
+<p><strong>0 vector standard names exist</strong> in the graph. All 20 "component_of" names use <code>kind=scalar</code> — which is correct. Each DD path stores one scalar component (B_r, B_z, B_phi), and each gets its own scalar name.</p>
+<p>However, <strong>standard names are source-independent naming concepts</strong> — they are not limited to DD paths. Facility signals, synthetic diagnostic outputs, and simulation codes all use standard names. This fundamentally changes the vector assessment.</p>
+<p>400 vector groups exist in the DD (1,593 component nodes). 117 scalar component standard names already exist across 37 core physics parent concepts:</p>
+<pre><code>magnetic_field (kind=vector, unit=T)          ← DOES NOT EXIST (gap)
+  ├── radial_component_of_magnetic_field      ← exists (scalar) → DD, TCV signals, JET signals
+  ├── toroidal_component_of_magnetic_field    ← exists (scalar) → DD, TCV Bt, JET magnetics
+  ├── poloidal_component_of_magnetic_field    ← exists (scalar) → DD, probes
+  ├── parallel_component_of_magnetic_field    ← exists (scalar) → DD core_profiles
+  ├── x_component_of_magnetic_field           ← future (Cartesian, no DD mapping yet)
+  └── y_component_of_magnetic_field           ← future (Cartesian, no DD mapping yet)
+</code></pre>
+<p>A vector SN like <code>magnetic_field</code> is the PHYSICS CONCEPT that groups its component children. It doesn't need to map to a single DD path — it represents the vector quantity itself, valid across all data sources and coordinate systems.</p>
+<p><strong>ISN already supports this fully (verified):</strong></p>
+<ul>
+<li><code>StandardNameVectorEntry(name="magnetic_field", kind="vector", ...)</code> — Pydantic validates ✓</li>
+<li>Grammar: <code>parse_standard_name("magnetic_field")</code> → <code>physical_base='magnetic_field'</code> ✓</li>
+<li>Round-trip: <code>compose_standard_name(parse_standard_name("magnetic_field"))</code> → <code>"magnetic_field"</code> ✓</li>
+<li>No ISN grammar or model changes required</li>
+</ul>
+<p><strong>37 core physics vector concepts</strong> implied by existing scalar SNs:</p>
+<table>
+<thead>
+<tr>
+<th>Vector concept</th>
+<th>Components</th>
+<th>Key physics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>magnetic_field</td>
+<td>3 (toroidal, poloidal, parallel)</td>
+<td>B-field</td>
+</tr>
+<tr>
+<td>electric_field</td>
+<td>5 (radial, toroidal, poloidal, parallel, diamagnetic)</td>
+<td>E-field</td>
+</tr>
+<tr>
+<td>ion_velocity</td>
+<td>3 (parallel, radial, toroidal)</td>
+<td>Ion flow</td>
+</tr>
+<tr>
+<td>electron_velocity</td>
+<td>3 (parallel, radial, toroidal)</td>
+<td>Electron flow</td>
+</tr>
+<tr>
+<td>neutral_velocity</td>
+<td>3 (parallel, radial, toroidal)</td>
+<td>Neutral flow</td>
+</tr>
+<tr>
+<td>current_density</td>
+<td>2 (diamagnetic, toroidal)</td>
+<td>j</td>
+</tr>
+<tr>
+<td>plasma_current_density</td>
+<td>3 (parallel, toroidal, vertical)</td>
+<td>j_plasma</td>
+</tr>
+<tr>
+<td>magnetic_vector_potential</td>
+<td>2 (radial, vertical)</td>
+<td>A</td>
+</tr>
+<tr>
+<td>exb_drift_velocity</td>
+<td>3 (diamagnetic, parallel, radial)</td>
+<td>v_ExB</td>
+</tr>
+<tr>
+<td>fast_ion_pressure</td>
+<td>2 (parallel, perpendicular)</td>
+<td>Anisotropic pressure</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>(27 more)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What vector SNs enable:</strong>
+1. <strong>Concept-level search:</strong> "find magnetic field" → returns vector parent AND all components with data sources
+2. <strong>Coordinate system awareness:</strong> vector groups components by coordinate basis
+3. <strong>Cross-source linking:</strong> same concept across DD paths, facility signals, simulation codes
+4. <strong>Completeness checking:</strong> "which magnetic field components are measured at TCV?"
+5. <strong>HAS_COMPONENT relationships:</strong> <code>(magnetic_field)-[:HAS_COMPONENT]-&gt;(toroidal_component_of_magnetic_field)</code></p>
+<p><strong>This is a PIPELINE change, not an ISN change:</strong></p>
+<ul>
+<li>ISN grammar already validates vector names</li>
+<li>ISN <code>kind=vector</code> already exists with correct semantics</li>
+<li>The gap is in imas-codex's compose pipeline — it processes individual DD paths → individual scalar names</li>
+<li>Fix: a dedicated grouping pass that identifies component siblings and creates vector parent names</li>
+</ul>
+<p><strong>Corrected assessment:</strong> <code>kind=vector</code> has <strong>concrete, near-term value</strong> for 37 core physics concepts. The previous "keep as-is" conclusion was wrong because it treated the DD as the only SN source. Creating vector parents is an imas-codex pipeline task — ISN needs no changes.</p>
+<h3>kind=metadata: Pipeline Gap</h3>
+<p><strong>The SN pipeline cannot currently produce <code>kind=metadata</code> names.</strong> <code>SN_SOURCE_CATEGORIES</code> only includes quantity nodes, and the LLM assigning <code>kind=metadata</code> to a quantity path is semantically wrong — quantities are measurable, metadata is not.</p>
+<p>Genuine metadata SN candidates exist in the DD (confinement mode labels, species identifiers, coordinate system types) but they live under <code>identifier</code> and <code>metadata</code> node categories, which are excluded from SN generation.</p>
+<p><strong>Options:</strong>
+1. Expand <code>SN_SOURCE_CATEGORIES</code> to include <code>identifier</code> (~243 nodes) — enables metadata SN generation but needs classifier filtering for generic names
+2. Dedicated metadata SN pass with curated identifier list — higher quality, more effort
+3. Accept the gap — metadata SNs are a future capability</p>
+<p><strong>Recommendation:</strong> Option 3 now (focus on physical_quantity + geometry quality), plan Option 1 as future increment.</p>
+<h3>Overall ISN Assessment</h3>
+<p>Keep <code>scalar/vector/metadata</code> enum — it is fit for purpose, but <code>vector</code> is underutilized.</p>
+<ul>
+<li><strong>scalar:</strong> Working correctly, produces all current names</li>
+<li><strong>vector:</strong> <strong>Concrete near-term value</strong> — 37 physics vector concepts ready to create via pipeline grouping pass. No ISN changes needed. ISN grammar validates these names today.</li>
+<li><strong>metadata:</strong> Pipeline gap documented, planned for future increment</li>
+<li><strong>Richer classification</strong> (physical/geometric/hardware) belongs in imas-codex's <code>node_category</code>, not ISN's <code>Kind</code> — separation of concerns is correct</li>
+</ul>
+<h2>Enrichment Model Benchmark</h2>
+<p>All current DD enrichment was done with <code>google/gemini-3.1-flash-lite-preview</code> (cheapest model).</p>
+<h3>5-Node Pilot Results</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Time</th>
+<th>Cost</th>
+<th>Quality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gemini-3.1-flash-lite</td>
+<td>2.6s</td>
+<td>$0.019</td>
+<td>Adequate — generic, thin descriptions</td>
+</tr>
+<tr>
+<td>claude-sonnet-4.6</td>
+<td>14.4s</td>
+<td>$0.021</td>
+<td>Excellent — precise physics context, practical</td>
+</tr>
+<tr>
+<td>claude-opus-4.6</td>
+<td>25.7s</td>
+<td>$0.021</td>
+<td>Excellent — most detailed, includes definitions</td>
+</tr>
+</tbody>
+</table>
+<h3>Quality Comparison: triangularity</h3>
+<ul>
+<li><strong>flash-lite:</strong> "measures the degree of plasma indentation" — vague</li>
+<li><strong>sonnet:</strong> "quantifying the D-shape asymmetry... key shaping parameter influencing MHD stability, confinement, and power exhaust" — precise</li>
+<li><strong>opus:</strong> "defined as the horizontal offset of the maximum vertical extent from the geometric axis normalized by the minor radius" — includes formula</li>
+</ul>
+<h3>Cost Projection</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Nodes</th>
+<th>Cost</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sonnet (all enrichable)</td>
+<td>11,699</td>
+<td>~$50</td>
+<td>~3 hours</td>
+</tr>
+<tr>
+<td>Flash-lite (all enrichable)</td>
+<td>11,699</td>
+<td>~$45</td>
+<td>~1 hour</td>
+</tr>
+<tr>
+<td>Marginal cost of sonnet</td>
+<td>—</td>
+<td>~$5</td>
+<td>~2 hours</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommendation:</strong> Switch to <code>claude-sonnet-4.6</code> for DD enrichment. The $5 marginal cost buys dramatically better descriptions that directly improve:</p>
+<ol>
+<li>Embedding quality (better descriptions → better vectors → better search)</li>
+<li>Standard name generation (enriched descriptions are compose prompt context)</li>
+<li>MCP tool responses (descriptions surfaced to users)</li>
+</ol>
+<p>Opus 4.6 produces marginally better descriptions but at 2× the latency. Not justified given the quality/cost of sonnet is already excellent.</p>
+    </article>
+  </main>
+</body>
+</html>
