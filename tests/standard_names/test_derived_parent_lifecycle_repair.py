@@ -102,6 +102,20 @@ class _StatefulDerivedParentGraph:
             )
         )
 
+    def _eligible_for_accepted_unit_repair(self, *, seedable: bool) -> bool:
+        has_seedable = any(
+            kind in {"projection", "coordinate", "unary_postfix"}
+            for kind in self.edge_kinds
+        )
+        return (
+            self.parent["origin"] == "derived"
+            and self.parent["name_stage"] == "accepted"
+            and self.parent["docs_stage"] == "accepted"
+            and self.parent["unit"] is None
+            and self.children_complete
+            and (has_seedable if seedable else not has_seedable)
+        )
+
     def _candidate_row(self) -> dict:
         child_data = []
         for idx, unit in enumerate(self.child_units):
@@ -123,6 +137,29 @@ class _StatefulDerivedParentGraph:
 
     def query(self, cypher: str, **kwargs):
         self.query_calls.append((cypher, kwargs))
+        if (
+            "AND parent.docs_stage = 'accepted'" in cypher
+            and "parent.unit IS NULL" in cypher
+            and "RETURN parent.id AS parent_id" in cypher
+        ):
+            if "seedable_edges = 0" in cypher:
+                return (
+                    [self._candidate_row()]
+                    if self._eligible_for_accepted_unit_repair(seedable=False)
+                    else []
+                )
+            return (
+                [self._candidate_row()]
+                if self._eligible_for_accepted_unit_repair(seedable=True)
+                else []
+            )
+
+        if (
+            "AND parent.docs_stage = 'accepted'" in cypher
+            and "RETURN DISTINCT parent.id AS parent_id" in cypher
+        ):
+            return []
+
         if "seedable_edges = 0" in cypher and "RETURN parent.id AS parent_id" in cypher:
             return [self._candidate_row()] if self._eligible_for_legacy_repair() else []
 
@@ -162,6 +199,9 @@ class _StatefulDerivedParentGraph:
         if "MERGE (sn)-[:HAS_UNIT]->(u)" in cypher:
             self.parent["unit"] = kwargs["unit"]
             return []
+
+        if "RETURN count(DISTINCT r.axis) AS n" in cypher:
+            return [{"n": 0}]
 
         raise AssertionError(f"Unexpected query: {cypher}")
 
@@ -398,11 +438,96 @@ def test_nonderived_or_already_normalized_nodes_are_untouched(
     assert graph.sources == {}
 
 
+def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+    from imas_codex.standard_names.parents import AdmissionResult
+
+    gc = MagicMock()
+
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_accepted_derived_parents_for_cleanup",
+            return_value=["pressure"],
+        ),
+        patch(
+            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            return_value=AdmissionResult(
+                admit=False,
+                reason="bare base — no qualifier, locus, projection, operator, or mechanism",
+                clause=None,
+            ),
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+            return_value=1,
+        ) as delete_nodes,
+    ):
+        repaired = normalize_derived_parent_lifecycle(gc)
+
+    assert repaired == 1
+    delete_nodes.assert_called_once_with(gc, ["pressure"])
+
+
+def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    gc = MagicMock()
+    candidate = {
+        "parent_id": "fraction_of_flux_surface",
+        "child_data": [
+            {
+                "id": "child_0",
+                "unit": "1",
+                "cocos": None,
+                "physics_domain": "equilibrium",
+                "kind": "scalar",
+            }
+        ],
+        "dd_paths": [],
+        "edge_kinds": ["qualifier"],
+    }
+
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=[[], [candidate]],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_accepted_derived_parents_for_cleanup",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._materialize_derived_parent_rows",
+            side_effect=[0, 0, 0, 1],
+        ) as materialize,
+    ):
+        repaired = normalize_derived_parent_lifecycle(gc)
+
+    assert repaired == 1
+    assert materialize.call_args_list[-1].args[1] == [candidate]
+    assert (
+        materialize.call_args_list[-1].kwargs["infer_kind_from_existing_topology"]
+        is True
+    )
+
+
 def test_run_sn_pools_normalizes_after_parent_seeding() -> None:
     from imas_codex.standard_names import loop
 
     src = inspect.getsource(loop.run_sn_pools)
     assert "repaired_parent_count = await asyncio.to_thread(" in src
-    assert src.index("parent_count = await asyncio.to_thread(seed_parent_sources)") < src.index(
-        "repaired_parent_count = await asyncio.to_thread("
-    )
+    assert src.index(
+        "parent_count = await asyncio.to_thread(seed_parent_sources)"
+    ) < src.index("repaired_parent_count = await asyncio.to_thread(")

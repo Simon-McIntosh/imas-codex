@@ -1715,6 +1715,64 @@ def _query_legacy_repairable_derived_parents(
     )
 
 
+def _query_accepted_derived_parents_for_cleanup(gc: Any) -> list[str]:
+    """Return accepted derived-parent ids that should be re-checked for admission.
+
+    These nodes predate the current admission gate and may have drifted into an
+    exportable state even though the gate would now reject them. Restrict to
+    ``origin='derived'`` so catalog-authoritative and pipeline-authored names
+    are never touched by this cleanup.
+    """
+    rows = gc.query(
+        """
+        MATCH (parent:StandardName)
+        WHERE parent.origin = 'derived'
+          AND parent.name_stage = 'accepted'
+          AND parent.docs_stage = 'accepted'
+        MATCH (:StandardName)-[:HAS_PARENT]->(parent)
+        RETURN DISTINCT parent.id AS parent_id
+        """
+    )
+    return [str(r["parent_id"]) for r in rows if r.get("parent_id")]
+
+
+def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
+    """Delete derived-parent nodes and their review/manual-source scaffolding."""
+    deleted = 0
+    for parent_id in parent_ids:
+        gc.query(
+            """
+            MATCH (sns:StandardNameSource {source_type: 'manual', source_id: $parent_id})
+            DETACH DELETE sns
+            """,
+            parent_id=parent_id,
+        )
+        gc.query(
+            """
+            MATCH (sns:StandardNameSource)
+            WHERE sns.produced_sn_id = $parent_id
+            SET sns.produced_sn_id = null
+            """,
+            parent_id=parent_id,
+        )
+        rows = list(
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $parent_id})
+                OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview)
+                WITH sn, collect(DISTINCT rv) AS reviews
+                FOREACH (r IN reviews | DETACH DELETE r)
+                DETACH DELETE sn
+                RETURN 1 AS deleted
+                """,
+                parent_id=parent_id,
+            )
+        )
+        if rows:
+            deleted += int(rows[0].get("deleted", 0))
+    return deleted
+
+
 def _derived_parent_source_metadata(
     parent_id: str,
     *,
@@ -1983,6 +2041,8 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
+        from imas_codex.standard_names.parents import is_admissible_parent_name
+
         state_where = (
             "parent.name_stage IS NULL "
             "OR parent.name_stage = 'pending' "
@@ -1996,19 +2056,62 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
             gc,
             state_where=state_where,
         )
-        if not seedable_parents and not legacy_parents:
-            return 0
+        accepted_unit_gap_where = (
+            "parent.origin = 'derived' "
+            "AND parent.name_stage = 'accepted' "
+            "AND parent.docs_stage = 'accepted' "
+            "AND parent.unit IS NULL"
+        )
+        accepted_seedable_unit_gaps = _query_seedable_derived_parents(
+            gc,
+            state_where=accepted_unit_gap_where,
+        )
+        accepted_legacy_unit_gaps = _query_legacy_repairable_derived_parents(
+            gc,
+            state_where=accepted_unit_gap_where,
+        )
+        cleanup_candidates = _query_accepted_derived_parents_for_cleanup(gc)
+        invalid_accepted = []
+        for parent_id in cleanup_candidates:
+            result = is_admissible_parent_name(parent_id, gc)
+            if not result.admit:
+                invalid_accepted.append(parent_id)
+
+        deleted = _delete_derived_parent_nodes(gc, invalid_accepted)
+        if deleted:
+            logger.info(
+                "normalize_derived_parent_lifecycle: deleted %d inadmissible "
+                "accepted derived parents",
+                deleted,
+            )
+
+        if (
+            not seedable_parents
+            and not legacy_parents
+            and not accepted_seedable_unit_gaps
+            and not accepted_legacy_unit_gaps
+        ):
+            return deleted
         repaired = _materialize_derived_parent_rows(gc, seedable_parents)
         repaired += _materialize_derived_parent_rows(
             gc,
             legacy_parents,
             infer_kind_from_existing_topology=True,
         )
+        repaired += _materialize_derived_parent_rows(
+            gc,
+            accepted_seedable_unit_gaps,
+        )
+        repaired += _materialize_derived_parent_rows(
+            gc,
+            accepted_legacy_unit_gaps,
+            infer_kind_from_existing_topology=True,
+        )
         logger.info(
             "normalize_derived_parent_lifecycle: repaired %d derived parent SNs",
             repaired,
         )
-        return repaired
+        return repaired + deleted
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
