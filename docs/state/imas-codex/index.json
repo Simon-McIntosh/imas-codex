@@ -1,11 +1,11 @@
 {
-  "updated": "2026-06-05T17:11:55",
+  "updated": "2026-06-05T17:32:11",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": null,
+    "active_sprint_id": "S2",
     "sprints": [
       {
         "id": "S1",
@@ -43,7 +43,7 @@
         "summary": "Dependency-aware second sprint: search migration first, then structured fan-out on top of stabilized extraction and bootstrap work.",
         "starts": "2026-06-12",
         "ends": "2026-06-19",
-        "status": "planned",
+        "status": "active",
         "items": [
           {
             "slug": "sn-search-facility",
@@ -139,9 +139,14 @@
         "when": "2026-06-05",
         "who": "gpt-5.4",
         "what": "Sprint S1 closed after the final export cleanup: invented secondary boundary/contour names were removed, legitimate secondary_separatrix mappings were restored, startup normalization gained accepted-derived cleanup, export hard blockers fell to zero, and no new IMAS-Standard-Names RC was needed because rc31 already contained the redesign."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "Sprint S2 launched after a full live-plan review. The sprint is now active with sn-search-facility leading and sn-structured-fanout queued behind its remaining migration work and the already-landed bootstrap/extraction prerequisites."
       }
     ],
     "blockers": [],
-    "_version": 3
+    "_version": 4
   }
 }

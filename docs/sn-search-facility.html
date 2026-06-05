@@ -18,6 +18,9 @@
   <title>SN Search Facility | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S2">
+<meta name="plan-modified" content="2026-06-05">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -59,44 +62,42 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="sn-tool-auto-detect" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should plan 40 implement true SN tool auto-detection now?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="defer-auto-detect">Defer it</button>
-          <button class="r-opt" data-value="implement-now">Implement now</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="rrf-tuning" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How should the initial tier weights and <code>k_rrf</code> be handled?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="keep-seeded-defaults">Keep seeded defaults</button>
-          <button class="r-opt" data-value="tune-held-out-set">Tune on a held-out set now</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="group-by-base-vector" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What should <code>group_by_base</code> do under <code>mode=&quot;vector&quot;</code>?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="raise-error">Raise an error</button>
-          <button class="r-opt" data-value="silent-noop">Silent no-op</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="return-fields-precedence" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which fetch argument should win when both whitelist and convenience flags are supplied?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="return-fields-final-whitelist">Whitelist wins</button>
-          <button class="r-opt" data-value="include-flags-override">Include flags override</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="sn-tool-auto-detect" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should plan 40 implement true SN tool auto-detection now?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="defer-auto-detect">Defer it</button>
+      <button class="r-opt" data-value="implement-now">Implement now</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="rrf-tuning" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should the initial tier weights and k_rrf be handled?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="keep-seeded-defaults">Keep seeded defaults</button>
+      <button class="r-opt" data-value="tune-held-out-set">Tune on a held-out set now</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="group-by-base-vector" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What should group_by_base do under mode=&quot;vector&quot; ?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="raise-error">Raise an error</button>
+      <button class="r-opt" data-value="silent-noop">Silent no-op</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="return-fields-precedence" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which fetch argument should win when both whitelist and convenience flags are supplied?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="return-fields-final-whitelist">Whitelist wins</button>
+      <button class="r-opt" data-value="include-flags-override">Include flags override</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
-    <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+    
   </main>
 </body>
 </html>

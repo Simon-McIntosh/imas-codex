@@ -18,6 +18,9 @@
   <title>Structured Fan-Out for SN Compose Pipeline | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S2">
+<meta name="plan-modified" content="2026-06-05">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -54,44 +57,42 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="fanout-shape" data-choice="bounded-non-agentic" data-by="plan-39" data-when="2026-04-30">
-        <p class="r-dec-q">What form should compose fan-out take?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="bounded-non-agentic">Bounded structured fan-out with a closed catalog</button>
-          <button class="r-opt" data-value="free-agentic-tools">Free agentic tool-calling</button>
-        </p>
-        <p class="r-dec-rat">Locked by the executive summary and non-goals: no open-ended tool loop is in scope.</p>
-      </div>
-      <div class="r-dec" data-key="telemetry-storage" data-choice="fanout-node-plus-batch-id" data-by="plan-39" data-when="2026-04-30">
-        <p class="r-dec-q">How should Phase 1 telemetry be persisted?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="fanout-node-plus-batch-id">Write a thin runtime <code>Fanout</code> node and join it to <code>LLMCost</code> by <code>batch_id</code></button>
-          <button class="r-opt" data-value="logs-only">Keep telemetry in logs only</button>
-        </p>
-        <p class="r-dec-rat">Locked by the v3 revision so the Phase 2 gate is queryable instead of log-grep based.</p>
-      </div>
-      <div class="r-dec" data-key="trigger-predicate-future" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should the trigger predicate stay keyword-based or move to structured reviewer signals?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="keyword-based">Keep the keyword-based trigger</button>
-          <button class="r-opt" data-value="structured-review-fields">Move to structured reviewer fields</button>
-        </p>
-        <p class="r-dec-rat">The plan leaves this open for future RD review after Phase 1 telemetry.</p>
-      </div>
-      <div class="r-dec" data-key="fanout-retention" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How should telemetry-only <code>Fanout</code> nodes age out?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="ttl-sweep">Delete them with a TTL sweep</button>
-          <button class="r-opt" data-value="keep-indefinitely">Keep them indefinitely</button>
-        </p>
-        <p class="r-dec-rat">The draft recommends a 30-day sweep but leaves retention as an open operational question.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fanout-shape" data-choice="bounded-non-agentic" data-by="plan-39" data-when="2026-04-30">
+    <p class="r-dec-q">What form should compose fan-out take?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="bounded-non-agentic">Bounded structured fan-out with a closed catalog</button>
+      <button class="r-opt" data-value="free-agentic-tools">Free agentic tool-calling</button>
+      </p>
+    <p class="r-dec-rat">Locked by the executive summary and non-goals: no open-ended tool loop is in scope.</p>
+    </div>
+<div class="r-dec" data-key="telemetry-storage" data-choice="fanout-node-plus-batch-id" data-by="plan-39" data-when="2026-04-30">
+    <p class="r-dec-q">How should Phase 1 telemetry be persisted?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fanout-node-plus-batch-id">Write a thin runtime Fanout node and join it to LLMCost by batch_id</button>
+      <button class="r-opt" data-value="logs-only">Keep telemetry in logs only</button>
+      </p>
+    <p class="r-dec-rat">Locked by the v3 revision so the Phase 2 gate is queryable instead of log-grep based.</p>
+    </div>
+<div class="r-dec" data-key="trigger-predicate-future" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should the trigger predicate stay keyword-based or move to structured reviewer signals?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="keyword-based">Keep the keyword-based trigger</button>
+      <button class="r-opt" data-value="structured-review-fields">Move to structured reviewer fields</button>
+      </p>
+    <p class="r-dec-rat">The plan leaves this open for future RD review after Phase 1 telemetry.</p>
+    </div>
+<div class="r-dec" data-key="fanout-retention" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should telemetry-only Fanout nodes age out?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="ttl-sweep">Delete them with a TTL sweep</button>
+      <button class="r-opt" data-value="keep-indefinitely">Keep them indefinitely</button>
+      </p>
+    <p class="r-dec-rat">The draft recommends a 30-day sweep but leaves retention as an open operational question.</p>
+    </div>
+</section>
 
-    <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+    
   </main>
 </body>
 </html>
