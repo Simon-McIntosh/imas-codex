@@ -179,6 +179,64 @@ def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
     return True, None
 
 
+def _coerce_llm_metric(value: Any) -> int:
+    """Best-effort int coercion for LLM telemetry fields."""
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _extract_llm_telemetry(
+    llm_out: Any,
+    *,
+    parsed_obj: Any = None,
+    tokens_fallback: Any = None,
+) -> tuple[int, int, int, int]:
+    """Normalize split token/cache telemetry across LLM return shapes."""
+
+    def _from_attrs(obj: Any) -> tuple[int, int, int, int]:
+        return (
+            _coerce_llm_metric(getattr(obj, "input_tokens", 0)),
+            _coerce_llm_metric(getattr(obj, "output_tokens", 0)),
+            _coerce_llm_metric(getattr(obj, "cache_read_tokens", 0)),
+            _coerce_llm_metric(getattr(obj, "cache_creation_tokens", 0)),
+        )
+
+    metrics = _from_attrs(llm_out)
+    if any(metrics):
+        return metrics
+
+    if parsed_obj is not None:
+        metrics = _from_attrs(parsed_obj)
+        if any(metrics):
+            return metrics
+
+    if isinstance(tokens_fallback, dict):
+        return (
+            _coerce_llm_metric(tokens_fallback.get("input_tokens", 0)),
+            _coerce_llm_metric(tokens_fallback.get("output_tokens", 0)),
+            _coerce_llm_metric(tokens_fallback.get("cache_read_tokens", 0)),
+            _coerce_llm_metric(
+                tokens_fallback.get(
+                    "cache_creation_tokens",
+                    tokens_fallback.get("cache_write_tokens", 0),
+                )
+            ),
+        )
+
+    if isinstance(tokens_fallback, tuple | list):
+        values = list(tokens_fallback)
+        return (
+            _coerce_llm_metric(values[0] if len(values) > 0 else 0),
+            _coerce_llm_metric(values[1] if len(values) > 1 else 0),
+            _coerce_llm_metric(values[2] if len(values) > 2 else 0),
+            _coerce_llm_metric(values[3] if len(values) > 3 else 0),
+        )
+
+    return (0, 0, 0, 0)
+
+
 # ---------------------------------------------------------------------------
 # Auto-VocabGap detection for physical_base (W29)
 # ---------------------------------------------------------------------------
@@ -4431,8 +4489,9 @@ async def process_refine_name_batch(
             # ── Optional fan-out (plan 39 Phase 1) ───────────────────
             fanout_evidence = ""
             fanout_run_id: str | None = None
+            fanout_arm: str | None = None
             if fanout_eligible and lease is not None:
-                arm = assign_arm(
+                fanout_arm = assign_arm(
                     sn_id,
                     chain_length,
                     arm_percent=fanout_settings.refine_fanout_arm_percent,
@@ -4465,7 +4524,7 @@ async def process_refine_name_batch(
                         gc=gc,
                         parent_lease=lease,
                         settings=fanout_settings,
-                        arm=arm,
+                        arm=fanout_arm,
                         escalate=escalate,
                         fanout_run_id=fanout_run_id,
                     )
@@ -4512,8 +4571,20 @@ async def process_refine_name_batch(
                     service="standard-names",
                 )
 
-                # acall_llm_structured returns (result, cost, tokens) tuple
+                # acall_llm_structured returns an LLMResult that still supports
+                # legacy tuple unpacking. Normalize telemetry from the real
+                # result object and fall back only for older tuple-shaped tests.
                 result_obj, cost, _tokens = llm_out
+                (
+                    llm_tokens_in,
+                    llm_tokens_out,
+                    llm_tokens_cached_read,
+                    llm_tokens_cached_write,
+                ) = _extract_llm_telemetry(
+                    llm_out,
+                    parsed_obj=result_obj,
+                    tokens_fallback=_tokens,
+                )
 
                 # Charge cost to lease.  Stamp ``batch_id`` with the
                 # ``fanout_run_id`` whenever fan-out fired so the
@@ -4522,14 +4593,10 @@ async def process_refine_name_batch(
                 if lease:
                     _event = LLMCostEvent(
                         model=model,
-                        tokens_in=getattr(llm_out, "input_tokens", 0) or 0,
-                        tokens_out=getattr(llm_out, "output_tokens", 0) or 0,
-                        tokens_cached_read=(
-                            getattr(llm_out, "cache_read_tokens", 0) or 0
-                        ),
-                        tokens_cached_write=(
-                            getattr(llm_out, "cache_creation_tokens", 0) or 0
-                        ),
+                        tokens_in=llm_tokens_in,
+                        tokens_out=llm_tokens_out,
+                        tokens_cached_read=llm_tokens_cached_read,
+                        tokens_cached_write=llm_tokens_cached_write,
                         sn_ids=(result_obj.name,),
                         phase=(
                             "refine_name+fanout" if fanout_run_id else "refine_name"
@@ -4641,8 +4708,12 @@ async def process_refine_name_batch(
                             "model": model,
                             "cost": cost,
                             "fanout_run_id": fanout_run_id,
-                            "fanout_arm": (None if fanout_run_id is None else "scored"),
+                            "fanout_arm": fanout_arm,
                             "original_reservation": original_reservation,
+                            "llm_tokens_in": llm_tokens_in,
+                            "llm_tokens_out": llm_tokens_out,
+                            "llm_tokens_cached_read": llm_tokens_cached_read,
+                            "llm_tokens_cached_write": llm_tokens_cached_write,
                         }
                     )
 

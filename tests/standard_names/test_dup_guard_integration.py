@@ -14,7 +14,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.budget import BudgetManager
+from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
+from imas_codex.standard_names.fanout.config import FanoutSettings
 from imas_codex.standard_names.workers import process_refine_name_batch
 
 
@@ -60,6 +61,28 @@ class _RefinedName:
         self.reason = "fixes ambiguity"
 
 
+class _FakeLLMResult:
+    def __init__(
+        self,
+        parsed: _RefinedName,
+        *,
+        cost: float = 0.001,
+        input_tokens: int = 10,
+        output_tokens: int = 5,
+        cache_read_tokens: int = 3,
+        cache_creation_tokens: int = 2,
+    ) -> None:
+        self.parsed = parsed
+        self.cost = cost
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.cache_read_tokens = cache_read_tokens
+        self.cache_creation_tokens = cache_creation_tokens
+
+    def __iter__(self):
+        return iter((self.parsed, self.cost, 0))
+
+
 @pytest.fixture
 def patched(monkeypatch: pytest.MonkeyPatch):
     """Patch GraphClient + LLM + persist + claim release."""
@@ -75,15 +98,7 @@ def patched(monkeypatch: pytest.MonkeyPatch):
 
     # LLM returns a fixed refined name.
     async def _fake_llm(**kwargs):
-        class _R:
-            parsed = _RefinedName("electron_temperature")
-            cost = 0.001
-            input_tokens = 10
-            output_tokens = 5
-
-        # The worker unpacks (result, cost, tokens) tuple style.
-        r = _R()
-        return (r.parsed, r.cost, (r.input_tokens, r.output_tokens))
+        return _FakeLLMResult(_RefinedName("electron_temperature"))
 
     monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", _fake_llm)
 
@@ -95,6 +110,7 @@ def patched(monkeypatch: pytest.MonkeyPatch):
 
     persist_calls: list[dict[str, Any]] = []
     release_calls: list[dict[str, Any]] = []
+    charge_events: list[tuple[float, LLMCostEvent]] = []
 
     def _persist(**kwargs):
         persist_calls.append(kwargs)
@@ -110,7 +126,16 @@ def patched(monkeypatch: pytest.MonkeyPatch):
         "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
         _release,
     )
-    return persist_calls, release_calls
+
+    def _charge_event(self, cost, event):
+        charge_events.append((cost, event))
+        return None
+
+    monkeypatch.setattr(
+        "imas_codex.standard_names.budget.BudgetLease.charge_event",
+        _charge_event,
+    )
+    return persist_calls, release_calls, charge_events
 
 
 async def test_dup_guard_drops_candidate(
@@ -119,7 +144,7 @@ async def test_dup_guard_drops_candidate(
     """When ``find_name_key_duplicate`` reports a hit, the worker must
     NOT call ``persist_refined_name`` and must surface ``dup_prevented``
     via ``on_event``."""
-    persist_calls, release_calls = patched
+    persist_calls, release_calls, _ = patched
 
     # Dup guard reports an existing duplicate.
     monkeypatch.setattr(
@@ -152,7 +177,7 @@ async def test_dup_guard_miss_proceeds_to_persist(
     monkeypatch: pytest.MonkeyPatch, patched
 ) -> None:
     """When the dup guard returns ``None`` the persist path is taken."""
-    persist_calls, _ = patched
+    persist_calls, _, _ = patched
 
     monkeypatch.setattr(
         "imas_codex.standard_names.canonical.find_name_key_duplicate",
@@ -176,7 +201,7 @@ async def test_dup_guard_failure_proceeds_to_persist(
     monkeypatch: pytest.MonkeyPatch, patched
 ) -> None:
     """Dup-guard exceptions must not block the refine path (best-effort)."""
-    persist_calls, _ = patched
+    persist_calls, _, _ = patched
 
     def _boom(*a, **kw):
         raise RuntimeError("graph unavailable")
@@ -194,3 +219,62 @@ async def test_dup_guard_failure_proceeds_to_persist(
     )
     assert processed == 1
     assert len(persist_calls) == 1
+
+
+async def test_refine_worker_records_fanout_telemetry(
+    monkeypatch: pytest.MonkeyPatch, patched
+) -> None:
+    """Fanout telemetry records the actual arm and LLM token/cache splits."""
+    persist_calls, _, charge_events = patched
+
+    monkeypatch.setattr(
+        "imas_codex.standard_names.canonical.find_name_key_duplicate",
+        lambda gc, name, *, exclude=None: None,
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.fanout.load_settings",
+        lambda: FanoutSettings(enabled=True, sites={"refine_name": True}),
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.fanout.should_trigger_fanout",
+        lambda **kwargs: (True, "score below threshold"),
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.fanout.assign_arm",
+        lambda *args, **kwargs: "off",
+    )
+
+    async def _fake_run_fanout(**kwargs):
+        return ""
+
+    monkeypatch.setattr("imas_codex.standard_names.fanout.run_fanout", _fake_run_fanout)
+
+    events: list[dict[str, Any]] = []
+    mgr = BudgetManager(total_budget=100.0, run_id="test-run")
+    stop = asyncio.Event()
+    processed = await process_refine_name_batch(
+        [_item("old_name")],
+        mgr=mgr,
+        stop_event=stop,
+        on_event=lambda e: events.append(e),
+    )
+
+    assert processed == 1
+    assert len(persist_calls) == 1
+    assert len(charge_events) == 1
+
+    charged_cost, cost_event = charge_events[0]
+    assert charged_cost == pytest.approx(0.001)
+    assert cost_event.phase == "refine_name+fanout"
+    assert cost_event.batch_id is not None
+    assert cost_event.tokens_in == 10
+    assert cost_event.tokens_out == 5
+    assert cost_event.tokens_cached_read == 3
+    assert cost_event.tokens_cached_write == 2
+
+    assert events[-1]["fanout_run_id"] == cost_event.batch_id
+    assert events[-1]["fanout_arm"] == "off"
+    assert events[-1]["llm_tokens_in"] == 10
+    assert events[-1]["llm_tokens_out"] == 5
+    assert events[-1]["llm_tokens_cached_read"] == 3
+    assert events[-1]["llm_tokens_cached_write"] == 2
