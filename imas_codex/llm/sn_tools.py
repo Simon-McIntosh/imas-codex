@@ -16,6 +16,7 @@ from neo4j.exceptions import ServiceUnavailable
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.search import (
     check_names as _check_names_backing,
+    fetch_standard_names as _fetch_sn_backing,
     find_related as _find_related_backing,
     search_standard_names as _search_sn_backing,
     summarise_family as _summarise_family_backing,
@@ -134,6 +135,7 @@ def _search_standard_names(
             kind=kind,
             pipeline_status=pipeline_status,
             cocos_type=cocos_type,
+            physics_domain=physics_domain,
             gc=gc,
         )
     except ServiceUnavailable:
@@ -141,99 +143,7 @@ def _search_standard_names(
     except Exception as e:
         return f"Search failed: {_neo4j_error_message(e)}"
 
-    # physics_domain post-filter (not handled by backing function)
-    if physics_domain:
-        pd_lower = physics_domain.lower()
-        rows = [
-            r
-            for r in rows
-            if (r.get("physics_domain") or "").lower() == pd_lower
-            or pd_lower
-            in [
-                s.lower() for s in (r.get("source_domains") or []) if isinstance(s, str)
-            ]
-        ]
-
     return _format_search_report(query or "", rows)
-
-
-def _segment_filter_search_standard_names(
-    gc: GraphClient,
-    query: str,
-    k: int,
-    segment_filters: dict[str, str],
-    *,
-    physics_domain: str | None = None,
-) -> list[dict]:
-    """Bare-name column segment-filter search.
-
-    Matches the ``sn.<segment>`` bare-name column directly.
-
-    Args:
-        gc: Open GraphClient.
-        query: Reserved (kept for signature stability with the keyword/vector
-            siblings).  Currently unused; segment matches are exact.
-        k: Maximum rows to return.
-        segment_filters: Mapping of segment name → value.
-
-    Returns:
-        List of dicts matching the column schema of
-        :func:`_keyword_search_standard_names`.
-    """
-    _segment_columns: tuple[str, ...] = (
-        "physical_base",
-        "subject",
-        "transformation",
-        "component",
-        "coordinate",
-        "process",
-        "position",
-        "region",
-        "device",
-        "geometric_base",
-        "object",
-        "geometry",
-    )
-
-    params: dict = {"k": k, "pd": physics_domain}
-    where: list[str] = []
-
-    for i, (segment, token_value) in enumerate(segment_filters.items()):
-        if segment not in _segment_columns:
-            continue  # unknown segment — skip silently
-        param_key = f"seg_val_{i}"
-        params[param_key] = token_value
-        where.append(f"sn.{segment} = ${param_key}")
-
-    if not where:
-        return []
-
-    # physics_domain filter pushed into Cypher (covers promoted
-    # scalar and source list).  $pd=null short-circuits to true.
-    where.append(
-        "($pd IS NULL OR sn.physics_domain = $pd OR $pd IN coalesce(sn.source_domains, []))"
-    )
-
-    # Always exclude superseded names from search results.
-    where.append("coalesce(sn.name_stage, '') <> 'superseded'")
-
-    cypher = (
-        "MATCH (sn:StandardName)\nWHERE "
-        + " AND ".join(where)
-        + """
-OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-RETURN sn.id AS name, sn.description AS description,
-       sn.kind AS kind, coalesce(u.id, sn.unit) AS unit,
-       sn.pipeline_status AS pipeline_status,
-       sn.documentation AS documentation,
-       sn.cocos_transformation_type AS cocos_transformation_type,
-       sn.cocos AS cocos,
-       sn.physics_domain AS physics_domain,
-       1.0 AS score
-LIMIT $k
-"""
-    )
-    return gc.query(cypher, **params)
 
 
 def _format_search_report(query: str, rows: list[dict]) -> str:
@@ -310,29 +220,13 @@ def _fetch_standard_names(
     if not name_list:
         return "No names provided."
 
-    cypher = """
-UNWIND $names AS name_id
-MATCH (sn:StandardName {id: name_id})
-OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(sn)
-OPTIONAL MATCH (src)-[:IN_IDS]->(ids:IDS)
-RETURN sn.id AS name, sn.description AS description,
-       sn.documentation AS documentation,
-       sn.kind AS kind, coalesce(u.id, sn.unit) AS unit,
-       sn.links AS links,
-       sn.source_paths AS source_paths, sn.constraints AS constraints,
-       sn.validity_domain AS validity_domain,
-       sn.pipeline_status AS pipeline_status,
-       sn.model AS model,
-       sn.cocos_transformation_type AS cocos_transformation_type,
-       sn.cocos AS cocos,
-       sn.dd_version AS dd_version,
-       collect(DISTINCT src.id) AS source_ids,
-       collect(DISTINCT ids.id) AS source_ids_names
-"""
-
     try:
-        rows = gc.query(cypher, names=name_list)
+        rows = _fetch_sn_backing(
+            name_list,
+            include_grammar=True,
+            include_documentation=True,
+            gc=gc,
+        )
     except ServiceUnavailable:
         return NEO4J_NOT_RUNNING_MSG
     except Exception as e:

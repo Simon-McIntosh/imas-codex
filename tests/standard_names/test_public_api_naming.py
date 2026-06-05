@@ -23,8 +23,6 @@ import pytest
 # release with a DeprecationWarning. They are NOT violations.
 ALIAS_BRIDGE_NAMES: frozenset[str] = frozenset(
     {
-        "search_similar_names",
-        "search_similar_sns_with_full_docs",
         "fetch_docs_review_feedback_for_sns",
         "_segment_filter_search_sn",
         "_vector_search_sn",

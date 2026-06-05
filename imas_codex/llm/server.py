@@ -3119,35 +3119,36 @@ class AgentsServer:
                     cocos_type: Filter by COCOS transformation type (e.g. "psi_like",
                         "ip_like", "b0_like"). Only returns names with that transformation.
                     physical_base: Filter by physical base token (e.g. "temperature",
-                        "pressure"). Uses typed HAS_PHYSICAL_BASE graph edges (W40).
+                        "pressure"). Matches the canonical ``sn.physical_base`` column.
                     subject: Filter by subject token (e.g. "electron", "ion").
-                        Uses typed HAS_SUBJECT graph edges (W40).
+                        Matches the canonical ``sn.subject`` column.
                     transformation: Filter by transformation token (e.g. "time_derivative").
-                        Uses typed HAS_TRANSFORMATION graph edges (W40).
+                        Matches the canonical ``sn.transformation`` column.
                     component: Filter by component token (e.g. "toroidal", "radial").
-                        Uses typed HAS_COMPONENT graph edges (W40).
+                        Matches the canonical ``sn.component`` column.
                     coordinate: Filter by coordinate token (e.g. "poloidal", "parallel").
-                        Uses typed HAS_COORDINATE graph edges (W40).
+                        Matches the canonical ``sn.coordinate`` column.
                     process: Filter by process token.
-                        Uses typed HAS_PROCESS graph edges (W40).
+                        Matches the canonical ``sn.process`` column.
                     position: Filter by position token.
-                        Uses typed HAS_POSITION graph edges (W40).
+                        Matches the canonical ``sn.position`` column.
                     region: Filter by region token.
-                        Uses typed HAS_REGION graph edges (W40).
+                        Matches the canonical ``sn.region`` column.
                     device: Filter by device token.
-                        Uses typed HAS_DEVICE graph edges (W40).
+                        Matches the canonical ``sn.device`` column.
                     geometric_base: Filter by geometric base token.
-                        Uses typed HAS_GEOMETRIC_BASE graph edges (W40).
+                        Matches the canonical ``sn.geometric_base`` column.
 
                 Returns:
                     Formatted text report with matched standard names, descriptions,
                     units, tags, and relevance scores.
 
                 Note:
-                    Grammar-segment filters (physical_base, subject, …) rely on typed
-                    edges written at persist time (W40 Phase 4). Names ingested before
-                    the W40 Phase 7 migration do not yet have typed edges and will not
-                    appear in filtered results. All segment filters are AND-combined.
+                    Grammar-segment filters (physical_base, subject, …) use the
+                    canonical ``sn.<segment>`` columns, so they work uniformly for
+                    every catalog entry. All segment filters are AND-combined, and
+                    ``physics_domain`` is applied in the backing Cypher path rather
+                    than as a post-filter.
                 """
                 from imas_codex.llm.sn_tools import _search_standard_names as _ssn
 

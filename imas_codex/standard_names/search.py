@@ -13,21 +13,12 @@ Public surface (plan 40 §5.1):
 - :func:`find_related` — bucketed cross-relation discovery.
 - :func:`check_names` — existence + Levenshtein suggestions.
 - :func:`summarise_family` — family overview keyed on physical_base.
-
-Plus 1-release deprecation aliases for plan 39's pipeline callers:
-
-- :func:`search_similar_names` — wraps :func:`search_standard_names_vector`.
-- :func:`search_similar_sns_with_full_docs` — wraps
-  :func:`search_standard_names_with_documentation`.
-
-Both emit ``DeprecationWarning`` and delegate to the canonical function.
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
-import warnings
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
@@ -79,6 +70,7 @@ def vector_stream(
     gc: Any,
     *,
     k_candidates: int = 100,
+    physics_domain: str | None = None,
 ) -> list[dict]:
     """Cosine-similarity ranked SN ids via Neo4j vector index.
 
@@ -92,6 +84,11 @@ def vector_stream(
             )
             YIELD node AS sn, score
             WHERE sn.id IS NOT NULL
+              AND (
+                $physics_domain IS NULL
+                OR sn.physics_domain = $physics_domain
+                OR $physics_domain IN coalesce(sn.source_domains, [])
+              )
               AND coalesce(sn.validation_status, '') <> 'quarantined'
               AND coalesce(sn.pipeline_status, '') <> 'superseded'
               AND coalesce(sn.name_stage, '') <> 'exhausted'
@@ -101,6 +98,7 @@ def vector_stream(
             """,
             embedding=embedding,
             k=k_candidates,
+            physics_domain=physics_domain,
         )
         or []
     )
@@ -112,6 +110,7 @@ def keyword_stream(
     gc: Any,
     *,
     k_candidates: int = 100,
+    physics_domain: str | None = None,
 ) -> list[dict]:
     """Substring-match ranked SN ids over name + description + documentation.
 
@@ -149,13 +148,19 @@ def keyword_stream(
         gc.query(
             f"""
             MATCH (sn:StandardName)
-            WHERE {where_clause}
+            WHERE ({where_clause})
+              AND (
+                $physics_domain IS NULL
+                OR sn.physics_domain = $physics_domain
+                OR $physics_domain IN coalesce(sn.source_domains, [])
+              )
             WITH sn
             WHERE coalesce(sn.name_stage, '') <> 'superseded'
             RETURN sn.id AS id
             LIMIT $k
             """,
             **params,
+            physics_domain=physics_domain,
         )
         or []
     )
@@ -168,6 +173,7 @@ def grammar_stream(
     *,
     vector_hits: set[str],
     keyword_hits: set[str],
+    physics_domain: str | None = None,
 ) -> list[dict]:
     """Tier-aware grammar segment matches (§5.4).
 
@@ -194,12 +200,18 @@ def grammar_stream(
                 f"""
                 MATCH (sn:StandardName)
                 WHERE sn.{seg} IN $tokens
+                  AND (
+                    $physics_domain IS NULL
+                    OR sn.physics_domain = $physics_domain
+                    OR $physics_domain IN coalesce(sn.source_domains, [])
+                  )
                   AND coalesce(sn.validation_status, '') <> 'quarantined'
                   AND coalesce(sn.pipeline_status, '') <> 'superseded'
                   AND coalesce(sn.name_stage, '') <> 'superseded'
                 RETURN sn.id AS id
                 """,
                 tokens=tokens,
+                physics_domain=physics_domain,
             )
             or []
         )
@@ -271,6 +283,8 @@ def _enrich_search_rows(
                    sn.pipeline_status AS pipeline_status,
                    sn.cocos_transformation_type AS cocos_transformation_type,
                    sn.cocos AS cocos,
+                   sn.physics_domain AS physics_domain,
+                   sn.source_domains AS source_domains,
                    sn.physical_base AS physical_base,
                    sn.subject AS subject
             """,
@@ -298,6 +312,7 @@ def search_standard_names(
     kind: str | None = None,
     pipeline_status: str | None = None,
     cocos_type: str | None = None,
+    physics_domain: str | None = None,
     gc: Any = None,
 ) -> list[dict]:
     """Hybrid (vector + keyword + tiered grammar) RRF search over StandardNames.
@@ -308,17 +323,26 @@ def search_standard_names(
         mode: ``"hybrid"`` (default) runs all three streams; ``"vector"``
             skips keyword and grammar streams.
         segment_filters: Optional dict of ``{segment: token}`` — short-circuits
-            into a graph-native typed-edge query (legacy behaviour).
-        kind / pipeline_status / cocos_type: Post-filter constraints.
+            into a graph-native ``sn.<segment>`` column filter.
+        kind / pipeline_status / cocos_type / physics_domain: Filter constraints.
         gc: Open :class:`GraphClient`. If ``None``, opens one for the duration
             of the call.
 
     Returns:
         List of result dicts with keys ``name, description, documentation,
         kind, unit, pipeline_status, cocos_transformation_type, cocos,
-        physical_base, subject, score``.
+        physics_domain, source_domains, physical_base, subject, score``.
     """
-    if not query or not query.strip():
+    normalized_query = (query or "").strip()
+    if not normalized_query and not any(
+        (
+            segment_filters,
+            kind,
+            pipeline_status,
+            cocos_type,
+            physics_domain,
+        )
+    ):
         return []
 
     own_gc = False
@@ -329,25 +353,48 @@ def search_standard_names(
         own_gc = True
     try:
         # ---- Segment-filter shortcut --------------------------------------
-        if segment_filters:
+        if segment_filters or not normalized_query:
             return _segment_filter_search(
-                gc, query, k, segment_filters, kind, pipeline_status, cocos_type
+                gc,
+                normalized_query,
+                k,
+                segment_filters or {},
+                kind,
+                pipeline_status,
+                cocos_type,
+                physics_domain,
             )
 
         # ---- Three-stream (or vector-only) RRF ----------------------------
-        embedding = _embed(query)
+        embedding = _embed(normalized_query)
         v_rows: list[dict] = []
         if embedding is not None:
-            v_rows = vector_stream(embedding, gc, k_candidates=5 * k)
+            v_rows = vector_stream(
+                embedding,
+                gc,
+                k_candidates=5 * k,
+                physics_domain=physics_domain,
+            )
 
         if mode == "vector":
             ranked = [(r["id"], r.get("score", 0.0)) for r in v_rows]
         else:
-            k_rows = keyword_stream(query, gc, k_candidates=5 * k)
-            tokens = tokenise_query(query)
+            k_rows = keyword_stream(
+                normalized_query,
+                gc,
+                k_candidates=5 * k,
+                physics_domain=physics_domain,
+            )
+            tokens = tokenise_query(normalized_query)
             v_set = {r["id"] for r in v_rows if r.get("id")}
             k_set = {r["id"] for r in k_rows if r.get("id")}
-            g_rows = grammar_stream(tokens, gc, vector_hits=v_set, keyword_hits=k_set)
+            g_rows = grammar_stream(
+                tokens,
+                gc,
+                vector_hits=v_set,
+                keyword_hits=k_set,
+                physics_domain=physics_domain,
+            )
             fused = rrf_fuse([v_rows, k_rows, g_rows], k=RRF_K)
             ranked = fused
 
@@ -406,6 +453,7 @@ def _segment_filter_search(
     kind: str | None,
     pipeline_status: str | None,
     cocos_type: str | None,
+    physics_domain: str | None = None,
 ) -> list[dict]:
     """Bare-name column segment-filter search.
 
@@ -419,10 +467,27 @@ def _segment_filter_search(
         param_key = f"seg_{i}"
         params[param_key] = val
         where.append(f"sn.{seg} = ${param_key}")
+    if physics_domain:
+        params["physics_domain"] = physics_domain
+        where.append(
+            "("
+            "sn.physics_domain = $physics_domain "
+            "OR $physics_domain IN coalesce(sn.source_domains, [])"
+            ")"
+        )
     if not where:
-        return []
+        where.append("true")
     # Always exclude superseded names.
     where.append("coalesce(sn.name_stage, '') <> 'superseded'")
+    if kind:
+        params["kind"] = kind
+        where.append("toLower(sn.kind) = toLower($kind)")
+    if pipeline_status:
+        params["pipeline_status"] = pipeline_status
+        where.append("toLower(sn.pipeline_status) = toLower($pipeline_status)")
+    if cocos_type:
+        params["cocos_type"] = cocos_type
+        where.append("sn.cocos_transformation_type = $cocos_type")
     cypher = (
         "MATCH (sn:StandardName)\nWHERE "
         + " AND ".join(where)
@@ -436,26 +501,15 @@ RETURN sn.id AS name,
        sn.pipeline_status AS pipeline_status,
        sn.cocos_transformation_type AS cocos_transformation_type,
        sn.cocos AS cocos,
+       sn.physics_domain AS physics_domain,
+       sn.source_domains AS source_domains,
        sn.physical_base AS physical_base,
        sn.subject AS subject,
        1.0 AS score
 LIMIT $k
 """
     )
-    rows = [dict(r) for r in (gc.query(cypher, **params) or [])]
-    if kind:
-        rows = [r for r in rows if (r.get("kind") or "").lower() == kind.lower()]
-    if pipeline_status:
-        rows = [
-            r
-            for r in rows
-            if (r.get("pipeline_status") or "").lower() == pipeline_status.lower()
-        ]
-    if cocos_type:
-        rows = [
-            r for r in rows if (r.get("cocos_transformation_type") or "") == cocos_type
-        ]
-    return rows
+    return [dict(r) for r in (gc.query(cypher, **params) or [])]
 
 
 # ---------------------------------------------------------------------------
@@ -499,43 +553,103 @@ def fetch_standard_names(
         gc = GraphClient()
         own_gc = True
     try:
-        # Build select clause based on include_* flags
-        select = [
-            "sn.id AS name",
-            "sn.kind AS kind",
-            "coalesce(u.id, sn.unit) AS unit",
-            "sn.pipeline_status AS pipeline_status",
-            "sn.cocos_transformation_type AS cocos_transformation_type",
-            "sn.cocos AS cocos",
-            "sn.dd_version AS dd_version",
-            "sn.links AS links",
-            "sn.source_paths AS source_paths",
-            "sn.constraints AS constraints",
-            "sn.validity_domain AS validity_domain",
-            "sn.confidence AS confidence",
-            "sn.model AS model",
-            "sn.description AS description",
+        field_projections = {
+            "name": "sn.id AS name",
+            "kind": "sn.kind AS kind",
+            "unit": "coalesce(u.id, sn.unit) AS unit",
+            "pipeline_status": "sn.pipeline_status AS pipeline_status",
+            "cocos_transformation_type": (
+                "sn.cocos_transformation_type AS cocos_transformation_type"
+            ),
+            "cocos": "sn.cocos AS cocos",
+            "dd_version": "sn.dd_version AS dd_version",
+            "links": "sn.links AS links",
+            "source_paths": "sn.source_paths AS source_paths",
+            "constraints": "sn.constraints AS constraints",
+            "validity_domain": "sn.validity_domain AS validity_domain",
+            "confidence": "sn.confidence AS confidence",
+            "model": "sn.model AS model",
+            "description": "sn.description AS description",
+            "documentation": "sn.documentation AS documentation",
+            "physics_domain": "sn.physics_domain AS physics_domain",
+            "source_domains": "sn.source_domains AS source_domains",
+            "physical_base": "sn.physical_base AS physical_base",
+            "subject": "sn.subject AS subject",
+            "transformation": "sn.transformation AS transformation",
+            "component": "sn.component AS component",
+            "coordinate": "sn.coordinate AS coordinate",
+            "position": "sn.position AS position",
+            "process": "sn.process AS process",
+            "region": "sn.region AS region",
+            "device": "sn.device AS device",
+            "geometric_base": "sn.geometric_base AS geometric_base",
+            "object": "sn.object AS object",
+            "geometry": "sn.geometry AS geometry",
+            "grammar_parse_fallback": (
+                "sn.grammar_parse_fallback AS grammar_parse_fallback"
+            ),
+            "source_ids": "collect(DISTINCT src.id) AS source_ids",
+            "source_ids_names": "collect(DISTINCT ids.id) AS source_ids_names",
+            "is_placeholder": (
+                "CASE WHEN sn.description IS NULL THEN true ELSE false END AS is_placeholder"
+            ),
+        }
+        default_fields = [
+            "name",
+            "kind",
+            "unit",
+            "pipeline_status",
+            "cocos_transformation_type",
+            "cocos",
+            "dd_version",
+            "links",
+            "source_paths",
+            "constraints",
+            "validity_domain",
+            "confidence",
+            "model",
+            "description",
+            "source_ids",
+            "source_ids_names",
+            "is_placeholder",
         ]
-        if include_documentation:
-            select.append("sn.documentation AS documentation")
-        if include_grammar:
-            select.extend(
-                [
-                    "sn.physical_base AS physical_base",
-                    "sn.subject AS subject",
-                    "sn.transformation AS transformation",
-                    "sn.component AS component",
-                    "sn.coordinate AS coordinate",
-                    "sn.position AS position",
-                    "sn.process AS process",
-                    "sn.region AS region",
-                    "sn.device AS device",
-                    "sn.geometric_base AS geometric_base",
-                    "sn.object AS object",
-                    "sn.geometry AS geometry",
-                    "sn.grammar_parse_fallback AS grammar_parse_fallback",
-                ]
-            )
+        grammar_fields = [
+            "physical_base",
+            "subject",
+            "transformation",
+            "component",
+            "coordinate",
+            "position",
+            "process",
+            "region",
+            "device",
+            "geometric_base",
+            "object",
+            "geometry",
+            "grammar_parse_fallback",
+        ]
+        requested_fields = (
+            list(dict.fromkeys(return_fields)) if return_fields is not None else None
+        )
+        if requested_fields is None:
+            effective_fields = list(default_fields)
+            if include_documentation:
+                effective_fields.append("documentation")
+            if include_grammar:
+                effective_fields.extend(grammar_fields)
+        else:
+            effective_fields = [
+                field for field in requested_fields if field in field_projections
+            ]
+        needs_neighbours = (
+            "neighbours" in effective_fields
+            if requested_fields is not None
+            else include_neighbours
+        )
+        query_fields = list(effective_fields)
+        if needs_neighbours and "name" not in query_fields:
+            query_fields.insert(0, "name")
+        select = [field_projections[field] for field in query_fields]
 
         cypher = f"""
             UNWIND $names AS name_id
@@ -543,20 +657,17 @@ def fetch_standard_names(
             OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
             OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(sn)
             OPTIONAL MATCH (src)-[:IN_IDS]->(ids:IDS)
-            RETURN {", ".join(select)},
-                   collect(DISTINCT src.id) AS source_ids,
-                   collect(DISTINCT ids.id) AS source_ids_names,
-                   CASE WHEN sn.description IS NULL THEN true ELSE false END AS is_placeholder
+            RETURN {", ".join(select)}
             """
         rows = [dict(r) for r in (gc.query(cypher, names=names) or [])]
 
-        if include_neighbours and rows:
+        if needs_neighbours and rows:
             neighbours = _fetch_neighbours(gc, [r["name"] for r in rows])
             for r in rows:
                 r["neighbours"] = neighbours.get(r["name"], {})
 
-        if return_fields is not None:
-            allowed = set(return_fields)
+        if requested_fields is not None:
+            allowed = set(requested_fields)
             rows = [{k: v for k, v in r.items() if k in allowed} for r in rows]
 
         return rows
@@ -1255,43 +1366,6 @@ def search_standard_names_with_documentation(
 
 
 # ---------------------------------------------------------------------------
-# Deprecation aliases (plan §15.1 — alias-bridge window, 1 release)
-# ---------------------------------------------------------------------------
-
-
-def search_similar_names(query: str, k: int = 5) -> list[dict[str, Any]]:
-    """DEPRECATED: use :func:`search_standard_names_vector`.
-
-    Plan 40 §15.1 alias-bridge window. Wrapper emits ``DeprecationWarning``
-    on first call and delegates to the canonical name. Removed in the
-    release after Phase 4.
-    """
-    warnings.warn(
-        "search_similar_names is deprecated; use search_standard_names_vector.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return search_standard_names_vector(query, k=k)
-
-
-def search_similar_sns_with_full_docs(
-    description_query: str,
-    k: int = 5,
-    exclude_ids: list[str] | None = None,
-) -> list[dict[str, Any]]:
-    """DEPRECATED: use :func:`search_standard_names_with_documentation`."""
-    warnings.warn(
-        "search_similar_sns_with_full_docs is deprecated; use "
-        "search_standard_names_with_documentation.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return search_standard_names_with_documentation(
-        description_query, k=k, exclude_ids=exclude_ids
-    )
-
-
-# ---------------------------------------------------------------------------
 # Async stream wrapper (plan §5.7) — exported for advanced callers
 # ---------------------------------------------------------------------------
 
@@ -1333,8 +1407,6 @@ __all__ = [
     "summarise_family",
     "search_standard_names_vector",
     "search_standard_names_with_documentation",
-    "search_similar_names",  # deprecated alias
-    "search_similar_sns_with_full_docs",  # deprecated alias
     "vector_stream",
     "keyword_stream",
     "grammar_stream",

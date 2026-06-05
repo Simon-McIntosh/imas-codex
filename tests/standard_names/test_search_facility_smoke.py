@@ -49,7 +49,7 @@ class TestSearchEmptyQueryEarlyReturn:
 # ---------------------------------------------------------------------------
 # Bug B: segment_filters used typed grammar edges (HAS_PHYSICAL_BASE,
 # HAS_SUBJECT) that are unpopulated for open-vocab segments. Now matches
-# bare-name columns directly.
+# canonical bare-name columns directly.
 # ---------------------------------------------------------------------------
 
 
@@ -75,12 +75,19 @@ class TestSegmentFilterUsesBareColumns:
         assert "sn.physical_base" in cypher
 
     def test_mcp_segment_filter_queries_bare_column(self):
-        from imas_codex.llm.sn_tools import _segment_filter_search_standard_names
+        from imas_codex.standard_names.search import _segment_filter_search
 
         gc = MagicMock()
         gc.query.return_value = []
-        _segment_filter_search_standard_names(
-            gc, query="x", k=5, segment_filters={"subject": "electron"}
+        _segment_filter_search(
+            gc,
+            query="x",
+            k=5,
+            segment_filters={"subject": "electron"},
+            kind=None,
+            pipeline_status=None,
+            cocos_type=None,
+            physics_domain=None,
         )
         cypher = gc.query.call_args.args[0]
         assert "HAS_SUBJECT" not in cypher
@@ -88,16 +95,54 @@ class TestSegmentFilterUsesBareColumns:
         assert "sn.subject" in cypher
 
     def test_unknown_segment_skipped(self):
-        from imas_codex.llm.sn_tools import _segment_filter_search_standard_names
+        from imas_codex.standard_names.search import _segment_filter_search
 
         gc = MagicMock()
         gc.query.return_value = []
-        # Only an unknown segment → no WHERE clause to build → empty list
-        result = _segment_filter_search_standard_names(
-            gc, query="x", k=5, segment_filters={"bogus": "v"}
+        result = _segment_filter_search(
+            gc,
+            query="x",
+            k=5,
+            segment_filters={"bogus": "v"},
+            kind=None,
+            pipeline_status=None,
+            cocos_type=None,
+            physics_domain=None,
         )
         assert result == []
-        gc.query.assert_not_called()
+        gc.query.assert_called_once()
+
+    def test_empty_query_segment_filter_hits_backing(self):
+        """Canonical backing accepts empty query when filters narrow the space."""
+        from imas_codex.standard_names.search import search_standard_names
+
+        gc = MagicMock()
+        gc.query.return_value = [
+            {
+                "name": "electron_temperature",
+                "description": "Te",
+                "documentation": "",
+                "kind": "scalar",
+                "unit": "eV",
+                "pipeline_status": "drafted",
+                "cocos_transformation_type": None,
+                "cocos": None,
+                "physics_domain": "transport",
+                "source_domains": ["transport"],
+                "physical_base": "temperature",
+                "subject": "electron",
+                "score": 1.0,
+            }
+        ]
+        result = search_standard_names(
+            "",
+            segment_filters={"physical_base": "temperature"},
+            physics_domain="transport",
+            gc=gc,
+        )
+        assert result and result[0]["name"] == "electron_temperature"
+        cypher = gc.query.call_args.args[0]
+        assert "source_domains" in cypher
 
 
 # ---------------------------------------------------------------------------

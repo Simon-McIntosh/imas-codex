@@ -95,7 +95,7 @@ class TestSearchStandardNames:
         assert kwargs.get("pipeline_status") == "drafted"
 
     def test_physics_domain_post_filter(self):
-        """physics_domain post-filters results from the backing function."""
+        """physics_domain is forwarded to the backing search implementation."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing(
@@ -103,13 +103,14 @@ class TestSearchStandardNames:
                 _row(name="transport_name", physics_domain="transport"),
                 _row(name="equilibrium_name", physics_domain="equilibrium"),
             ]
-        ):
+        ) as mock_backing:
             result = _search_standard_names(
                 "temperature", physics_domain="transport", gc=MagicMock()
             )
 
         assert "transport_name" in result
-        assert "equilibrium_name" not in result
+        _, kwargs = mock_backing.call_args
+        assert kwargs.get("physics_domain") == "transport"
 
     def test_physics_domain_default_none_no_filter(self):
         """When physics_domain is None, all results are returned."""
@@ -164,7 +165,8 @@ class TestFetchStandardNames:
         from imas_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
-        mock_gc.query = MagicMock(
+        with patch(
+            "imas_codex.llm.sn_tools._fetch_sn_backing",
             return_value=[
                 {
                     "name": "electron_temperature",
@@ -181,19 +183,21 @@ class TestFetchStandardNames:
                     "source_ids": ["core_profiles/profiles_1d/electrons/temperature"],
                     "source_ids_names": ["core_profiles"],
                 }
-            ]
-        )
+            ],
+        ) as mock_backing:
+            result = _fetch_standard_names("electron_temperature", gc=mock_gc)
 
-        result = _fetch_standard_names("electron_temperature", gc=mock_gc)
         assert "electron_temperature" in result
         assert "eV" in result
         assert "$T_e$" in result
+        mock_backing.assert_called_once()
 
     def test_fetch_multiple_comma_separated(self):
         from imas_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
-        mock_gc.query = MagicMock(
+        with patch(
+            "imas_codex.llm.sn_tools._fetch_sn_backing",
             return_value=[
                 {
                     "name": "electron_temperature",
@@ -225,12 +229,12 @@ class TestFetchStandardNames:
                     "source_ids": [],
                     "source_ids_names": [],
                 },
-            ]
-        )
+            ],
+        ):
+            result = _fetch_standard_names(
+                "electron_temperature,plasma_current", gc=mock_gc
+            )
 
-        result = _fetch_standard_names(
-            "electron_temperature,plasma_current", gc=mock_gc
-        )
         assert "electron_temperature" in result
         assert "plasma_current" in result
 
@@ -238,9 +242,8 @@ class TestFetchStandardNames:
         from imas_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
-        result = _fetch_standard_names("nonexistent_name", gc=mock_gc)
+        with patch("imas_codex.llm.sn_tools._fetch_sn_backing", return_value=[]):
+            result = _fetch_standard_names("nonexistent_name", gc=mock_gc)
         assert "not found" in result.lower() or "No" in result
 
     def test_fetch_partial_not_found(self):
@@ -248,7 +251,8 @@ class TestFetchStandardNames:
         from imas_codex.llm.sn_tools import _fetch_standard_names
 
         mock_gc = MagicMock()
-        mock_gc.query = MagicMock(
+        with patch(
+            "imas_codex.llm.sn_tools._fetch_sn_backing",
             return_value=[
                 {
                     "name": "electron_temperature",
@@ -265,10 +269,12 @@ class TestFetchStandardNames:
                     "source_ids": [],
                     "source_ids_names": [],
                 }
-            ]
-        )
+            ],
+        ):
+            result = _fetch_standard_names(
+                "electron_temperature missing_name", gc=mock_gc
+            )
 
-        result = _fetch_standard_names("electron_temperature missing_name", gc=mock_gc)
         assert "electron_temperature" in result
         assert "missing_name" in result
         assert "Not found" in result

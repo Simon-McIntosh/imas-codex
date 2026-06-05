@@ -223,34 +223,63 @@ def test_search_post_filter_kind() -> None:
     assert [r["name"] for r in out] == ["sn_b"]
 
 
-# ---------------------------------------------------------------------------
-# Deprecation aliases — emit DeprecationWarning
-# ---------------------------------------------------------------------------
-
-
-def test_search_similar_names_warns() -> None:
-    import warnings
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        with patch.object(
-            sn_search, "search_standard_names_vector", return_value=[]
-        ) as canon:
-            sn_search.search_similar_names("query", k=3)
-        canon.assert_called_once_with("query", k=3)
-    assert any(issubclass(w.category, DeprecationWarning) for w in caught), (
-        "DeprecationWarning not emitted"
+def test_search_empty_query_with_filters_uses_catalog_query() -> None:
+    """Empty query still works when filters narrow the catalog query path."""
+    gc = _stub_gc(
+        {
+            "MATCH (sn:StandardName)": [
+                {
+                    "name": "electron_temperature",
+                    "description": "x",
+                    "documentation": "",
+                    "kind": "scalar",
+                    "unit": "K",
+                    "pipeline_status": "active",
+                    "cocos_transformation_type": None,
+                    "cocos": None,
+                    "physics_domain": "transport",
+                    "source_domains": ["transport"],
+                    "physical_base": "temperature",
+                    "subject": "electron",
+                    "score": 1.0,
+                }
+            ]
+        }
     )
+    results = sn_search.search_standard_names(
+        "",
+        k=5,
+        segment_filters={"physical_base": "temperature"},
+        physics_domain="transport",
+        gc=gc,
+    )
+    assert results and results[0]["name"] == "electron_temperature"
 
 
-def test_search_similar_sns_with_full_docs_warns() -> None:
-    import warnings
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        with patch.object(
-            sn_search, "search_standard_names_with_documentation", return_value=[]
-        ) as canon:
-            sn_search.search_similar_sns_with_full_docs("query", k=3, exclude_ids=["x"])
-        canon.assert_called_once_with("query", k=3, exclude_ids=["x"])
-    assert any(issubclass(w.category, DeprecationWarning) for w in caught)
+def test_fetch_return_fields_override_include_flags() -> None:
+    """return_fields takes precedence over include_documentation/include_grammar flags."""
+    gc = _stub_gc(
+        {
+            "UNWIND $names": [
+                {
+                    "name": "electron_temperature",
+                    "documentation": "doc",
+                    "physical_base": "temperature",
+                }
+            ]
+        }
+    )
+    rows = sn_search.fetch_standard_names(
+        ["electron_temperature"],
+        include_documentation=False,
+        include_grammar=False,
+        return_fields=["name", "documentation", "physical_base"],
+        gc=gc,
+    )
+    assert rows == [
+        {
+            "name": "electron_temperature",
+            "documentation": "doc",
+            "physical_base": "temperature",
+        }
+    ]
