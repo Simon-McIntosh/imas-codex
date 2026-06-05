@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="plan-lifecycle-hygiene">
+  <meta name="plan-title"     content="Plan lifecycle hygiene — sync, status, archive at scale">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-impl"      content="0.0">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="M">
+  <title>Plan lifecycle hygiene | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Overview</h2>
+    <p>Plan lifecycle hygiene applies to this project. The canonical plan lives in the
+    <strong>reckon</strong> project: see
+    <a href="https://github.com/Simon-McIntosh/reckon/blob/main/docs/plan-lifecycle-hygiene.html">reckon/docs/plan-lifecycle-hygiene.html</a>.</p>
+    <p>This stub marks the plan as active in the imas-codex plan inventory so the dashboard
+    surfaces it. Implementation work (reckon server/CLI changes) happens in the reckon repo.</p>
+
+    <h2 id="s2">§2 — Current state in imas-codex</h2>
+    <p>imas-codex has ~111 markdown plan files under <code>plans/</code>. Migration to reckon
+    HTML plans is in progress. The lifecycle-hygiene mechanisms (write-time invariants,
+    audit cadence, archive waves) will apply once implemented in reckon.</p>
+
+    <h2 id="s3">§3 — Local actions</h2>
+    <ul>
+      <li>Migrate active SN plans from markdown to HTML docs (in progress)</li>
+      <li>Delete superseded markdown plans</li>
+      <li>Apply lifecycle hygiene once reckon mechanisms land</li>
+    </ul>
+  </main>
+</body>
+</html>
