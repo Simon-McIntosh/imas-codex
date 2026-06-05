@@ -113,6 +113,21 @@ def _check_llm_direct() -> tuple[bool, str]:
     return False, "unreachable"
 
 
+def _require_embed_ready(command_label: str) -> None:
+    """Raise a user-facing error when the embedding service is unavailable."""
+    from imas_codex.discovery.base.services import embed_health_check
+
+    healthy, detail = embed_health_check()
+    if healthy:
+        return
+    raise click.ClickException(
+        f"Embedding server is required for `{command_label}` but is unavailable"
+        f" ({detail or 'unknown error'}). "
+        "Run `uv run imas-codex embed status` and, if needed, "
+        "`uv run imas-codex embed start`."
+    )
+
+
 _PHYSICS_DOMAIN_CHOICE = click.Choice(
     [d.value for d in PhysicsDomain], case_sensitive=False
 )
@@ -421,6 +436,9 @@ def _run_sn_cmd(
                 f"{f', min_score={min_score}' if min_score is not None else ''}"
                 f"{', dry-run' if dry_run else ''})"
             )
+
+    if not dry_run:
+        _require_embed_ready("sn run")
 
     # Build harness config — SN pipeline wants graph + model status at top.
     # SN pipeline bypasses the LiteLLM proxy (uses direct OpenRouter), so
@@ -1216,6 +1234,9 @@ def sn_run(
             "[green]--reset-only:[/green] reset complete, exiting without generation"
         )
         return
+
+    if not dry_run:
+        _require_embed_ready("sn run")
 
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
