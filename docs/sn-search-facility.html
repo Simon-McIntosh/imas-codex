@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-search-facility">
+  <meta name="plan-title" content="SN Search Facility">
+  <meta name="plan-summary" content="Grammar-aware StandardName search and fetch facility covering writer decomposition, tiered retrieval, seven-tool MCP parity, and the remaining Phase 4 pipeline migration.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.55">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>SN Search Facility | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What is already in place</h2>
+    <p>Plan 40 is materially further along than plan 23 or plan 36, but the survey still marks it as only <strong>0.55</strong> implemented because the final call-site migration phase remains open. The HTML migration therefore preserves the real state: most of the design and public-tool surface are settled, but the pipeline has not fully moved to the new backing functions yet.</p>
+    <figure>
+      <img src="/imas-codex/figures/sn-plan-migration/sn-search-facility.svg" alt="Status diagram for plan 40 showing phases 1 to 3 largely landed and phase 4 migration still open.">
+      <figcaption>Plan 40 status: writer/search/MCP design is largely settled; the remaining work is the Phase 4 migration from legacy callers to the unified backing functions.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Phase 1 writer direction is clear.</strong> The plan fixes grammar decomposition by always populating per-segment columns, conditionally writing typed edges, and recording parser fallback explicitly.</li>
+      <li><strong>Phase 2 search design is fully specified.</strong> Hybrid search, tiered grammar weighting, RRF fusion, fetch scoping, related-name buckets, name checking, and family summaries are all laid out against real graph evidence.</li>
+      <li><strong>Phase 3 MCP palette parity is defined.</strong> The seven-tool StandardName surface mirrors the DD family, and the <code>include_standard_names=True</code> default is already treated as a verified precondition rather than future work.</li>
+    </ul>
+
+    <h2 id="s2">§2 — The work that is still open</h2>
+    <ul>
+      <li><strong>Phase 4 call-site migration is still open.</strong> The real remaining job is to replace legacy imports and helper names across <code>standard_names/workers.py</code>, <code>standard_names/review/audits.py</code>, <code>standard_names/review/enrichment.py</code>, and the nearby-search helper path in <code>enrich_workers.py</code>.</li>
+      <li><strong>The alias bridge is temporary, not the end state.</strong> The plan explicitly allows one release of deprecated aliases, but they should only delegate to the new backing functions and then disappear after the migration window closes.</li>
+      <li><strong>DD-only suppression is only solved at construction time.</strong> The plan documents that a background flip to <code>dd_only=True</code> can emit only a warning because FastMCP cannot unregister tools after startup. That limitation still exists until a larger follow-up lands.</li>
+      <li><strong>Documentation and public naming cleanup remain part of the tail.</strong> AGENTS guidance, README tool tables, and the final removal of public <code>_sn</code>/<code>_sns</code> suffixes all stay tied to the last migration pass.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Key technical content preserved from the markdown plan</h2>
+    <ul>
+      <li><strong>Empirical baseline:</strong> the source plan keeps the graph census, the writer root cause, the DD-tool parity table, and the naming inventory. Those details remain relevant because the HTML version should still explain <em>why</em> the search redesign exists.</li>
+      <li><strong>Tiered grammar policy:</strong> Tier 1 segments (<code>physical_base</code>, <code>subject</code>, <code>geometric_base</code>) dominate; Tier 2 needs a Tier-1 anchor plus vector/keyword co-occurrence; Tier 3 never carries a result alone. This is the core design guard against <code>x_component_of_*</code> floods.</li>
+      <li><strong>Seven-tool parity target:</strong> <code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>find_related_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, <code>check_standard_names</code>, and <code>get_standard_name_summary</code> remain the intended public family.</li>
+      <li><strong>Open acceptance work:</strong> A11–A14 are the practical checks that still matter: flood resistance, bucketed related-name output, AST-based naming enforcement, and the DD-only construction-time gate.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Open decisions and follow-on choices</h2>
+    <p>The source still leaves a small set of operational choices open even after the v3.2 review round.</p>
+    <ul>
+      <li>Should true auto-detection for SN registration be added now, or deferred until FastMCP can safely unregister tools after startup?</li>
+      <li>Should the seeded tier weights and <code>k_rrf=60</code> stay fixed until real traffic exists, or be tuned from a held-out query set immediately?</li>
+      <li>Should <code>group_by_base=True</code> under <code>mode=&quot;vector&quot;</code> raise an error or quietly no-op?</li>
+      <li>When both <code>return_fields</code> and the fetch convenience flags are supplied, should the explicit whitelist win?</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="sn-tool-auto-detect" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Should plan 40 implement true SN tool auto-detection now?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="defer-auto-detect">Defer it</button>
+          <button class="r-opt" data-value="implement-now">Implement now</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="rrf-tuning" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How should the initial tier weights and <code>k_rrf</code> be handled?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="keep-seeded-defaults">Keep seeded defaults</button>
+          <button class="r-opt" data-value="tune-held-out-set">Tune on a held-out set now</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="group-by-base-vector" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What should <code>group_by_base</code> do under <code>mode=&quot;vector&quot;</code>?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="raise-error">Raise an error</button>
+          <button class="r-opt" data-value="silent-noop">Silent no-op</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="return-fields-precedence" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which fetch argument should win when both whitelist and convenience flags are supplied?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="return-fields-final-whitelist">Whitelist wins</button>
+          <button class="r-opt" data-value="include-flags-override">Include flags override</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+    </section>
+  </main>
+</body>
+</html>

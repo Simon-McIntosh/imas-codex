@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="180" viewBox="0 0 900 180" role="img" aria-labelledby="title desc">
+  <title id="title">Plan 40 migration status</title>
+  <desc id="desc">A phase diagram showing phases 1 to 3 mostly settled and phase 4 migration still open.</desc>
+  <rect width="900" height="180" fill="#ffffff"/>
+  <text x="24" y="28" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#111827">SN Search &amp; Fetch Facility — delivery status</text>
+  <text x="24" y="48" font-family="system-ui, sans-serif" font-size="13" fill="#374151">Most design and tool-surface work is settled; the remaining gap is the pipeline migration to the unified backing functions.</text>
+
+  <rect x="24" y="74" width="140" height="70" rx="8" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="38" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 1</text>
+  <text x="38" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Writer fix</text>
+
+  <rect x="190" y="74" width="140" height="70" rx="8" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="204" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 2</text>
+  <text x="204" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Search redesign</text>
+
+  <rect x="356" y="74" width="140" height="70" rx="8" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="370" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 3</text>
+  <text x="370" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">MCP parity</text>
+
+  <rect x="522" y="74" width="160" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="536" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Phase 4</text>
+  <text x="536" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Caller migration</text>
+
+  <rect x="708" y="74" width="168" height="70" rx="8" fill="#fff7ed" stroke="#c2410c"/>
+  <text x="722" y="100" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">Tail work</text>
+  <text x="722" y="120" font-family="system-ui, sans-serif" font-size="13" fill="#111827">Docs + alias cleanup</text>
+
+  <path d="M164 109 H190 M330 109 H356 M496 109 H522 M682 109 H708" stroke="#6b7280" stroke-width="2" fill="none"/>
+</svg>
