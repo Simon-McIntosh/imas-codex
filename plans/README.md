@@ -18,6 +18,8 @@
 Refactored after rubber-duck review, docs audit, and live MCP tool testing (2026-04-14).
 Plans validated against 62 existing standard names, current scoring architecture, and docs/ state.
 
+Primary SN deployment plans are being migrated from markdown into HTML docs under <code>docs/</code>. Current HTML records: <a href="../docs/sn-catalog-quality-refactor.html">sn-catalog-quality-refactor</a>, <a href="../docs/sn-quality-parity.html">sn-quality-parity</a>, <a href="../docs/sn-search-facility.html">sn-search-facility</a>, and <a href="../docs/sn-closed-physical-base.html">sn-closed-physical-base</a>.
+
 | Priority | Plan | Scope | Status |
 |----------|------|-------|--------|
 > **See also**: [`features/README.md`](features/README.md) for active-plan
@@ -25,13 +27,13 @@ Plans validated against 62 existing standard names, current scoring architecture
 
 | Priority | Plan | Scope | Status |
 |----------|------|-------|--------|
-| **P1** | [features/standard-names/40-sn-search-facility.md](features/standard-names/40-sn-search-facility.md) | **NEW** Grammar-aware SN search & fetch facility: 7 MCP tools mirroring DD palette; tiered grammar streams (T1/T2/T3) preventing `x_component_of_*` floods; backing-function unification in `standard_names/search.py`; `_sn`/`_sns` → `_standard_names` rename audit. `include_standard_names=True` default already shipped. | RD-cleared at v3.2 (commit `31ec17ee`) — dispatch-ready |
-| **P1·b** | [features/standard-names/39-structured-fanout.md](features/standard-names/39-structured-fanout.md) | **NEW** Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer consumes targeted context. Depends on plan 40's `search_existing_names` runner. | RD-cleared (commit `5e4d3bbe`) — dispatch after plan 40 lands |
+| **P1** | [docs/sn-search-facility.html](../docs/sn-search-facility.html) | **NEW** Grammar-aware SN search & fetch facility: 7 MCP tools mirroring DD palette; tiered grammar streams (T1/T2/T3) preventing `x_component_of_*` floods; backing-function unification in `standard_names/search.py`; `_sn`/`_sns` → `_standard_names` rename audit. `include_standard_names=True` default already shipped. | Active HTML plan — Phase 4 pipeline migration still open |
+| **P1·b** | [features/standard-names/39-structured-fanout.md](features/standard-names/39-structured-fanout.md) | **NEW** Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer consumes targeted context. Depends on plan 40's `search_existing_names` runner. | Active — phases 2/3 deferred until plan 40 fully lands |
 | **P1·c** | [features/standard-names/29-architectural-pivot.md](features/standard-names/29-architectural-pivot.md) | Authoritative SN roadmap: generate/enrich split, ISN grammar upgrade, schema evolution. Supersedes plan 28. | Living — most structural items shipped |
 | **P1·d** | [features/standard-names/31-quality-bootstrap-v2.md](features/standard-names/31-quality-bootstrap-v2.md) | 7-workstream bootstrap loop; quarantine-rate + description-coverage + reviewer-score targets. | Active rotation |
 | **P1·e** | [features/standard-names/32-extraction-prompt-overhaul.md](features/standard-names/32-extraction-prompt-overhaul.md) | Extraction filter audit + compose-prompt A/B bake-off. | Phase 2 done (see `research/standard-names/prompt-ab-results.md`); Phase 4 deferred |
 | **P1·f** | [features/standard-names/34-benchmark-v1.md](features/standard-names/34-benchmark-v1.md) | SN quality benchmark v1: 50 positives × 10 domains + ≥20 negatives; two-reviewer consensus; gating at pass@1 ≥ 0.80. | Scaffolded (20 + 10 filled; runner + mock dry-run) |
-| **P1·g** | [features/standard-names/36-catalog-quality-refactor.md](features/standard-names/36-catalog-quality-refactor.md) | Catalog quality refactor v4+round4: graph-backed DD context amplification (Deltas A–J); target-anchored dynamic example library (Delta K); rubric unification (publish threshold = `good` floor = 0.65). | RD round-4 cleared — dispatch-ready |
+| **P1·g** | [docs/sn-catalog-quality-refactor.html](../docs/sn-catalog-quality-refactor.html) | Catalog quality refactor v4+round4: graph-backed DD context amplification (Deltas A–J); target-anchored dynamic example library (Delta K); rubric unification (publish threshold = `good` floor = 0.65). | Active HTML plan — phases 4–6 remain open; derived-parent lifecycle still blocking |
 | **P1·h** | [features/standard-names/33-benchmark-evolution.md](features/standard-names/33-benchmark-evolution.md) | SN benchmark evolution strategy. | Design / research |
 | ~~P1e~~ | ~~features/standard-names/39-graph-relationship-completeness.md~~ | ✅ Completed (DELETED — number reused) — structural edges wired into both write_standard_names + catalog import paths; D1–D16 + G1–G10 tests | — |
 | ~~P1f~~ | ~~features/standard-names/40-catalog-layout-hierarchy.md~~ | ✅ Completed (DELETED — number reused) — ISNC one-file-per-domain migration; `COMPUTED_FIELDS` round-trip; `edge_model_version: plan_39_v1`. | — |

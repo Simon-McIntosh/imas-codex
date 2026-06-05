@@ -19,7 +19,7 @@
 | Plan | Recommendation |
 |------|---------------|
 | `pending/20-consistency-and-prompt-enrichment.md` | **File as superseded.** Its DD-enrichment, unit-safety, and naming-scope workstreams are all implemented (unit flows from `HAS_UNIT`, not LLM; DD context injected; node_category gates scope). |
-| `pending/23-quality-parity.md` | **Keep as reference.** Phase 0 benchmark-harness concept still valid and partially in place (`scripts/prompt_ab_run.py`, `tests/standard_names/eval_sets/prompt_ab_v1.json`). Feeds §6 below. |
+| [`docs/sn-quality-parity.html`](../../../docs/sn-quality-parity.html) | **Keep as reference.** Phase 0 benchmark-harness concept still valid and partially in place (`scripts/prompt_ab_run.py`, `tests/standard_names/eval_sets/prompt_ab_v1.json`). Feeds §6 below. |
 
 ### Completed / superseded
 `completed/` (14 items) is clean. `completed/superseded/` holds plans 27 + 28 + early 9/10/11.
@@ -242,4 +242,4 @@ Ordered by leverage-per-effort:
 
 - `plans/README.md` is stale — references plan 28 as current (now superseded by 29). Updated alongside this doc.
 - `pending/20-consistency-and-prompt-enrichment.md` is fully implemented. Moved to `completed/superseded/`.
-- `pending/23-quality-parity.md` retained — its Phase 0 benchmark-harness design feeds plan 34.
+- [`docs/sn-quality-parity.html`](../../../docs/sn-quality-parity.html) retained as the HTML record — its Phase 0 benchmark-harness design feeds plan 34.

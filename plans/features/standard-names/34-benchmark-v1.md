@@ -1,7 +1,7 @@
 # Plan 34 — Standard Name Benchmark Set v1
 
 > **Origin:** `plans/research/standard-names/33-state-of-the-nation-2026-04-20.md` §6.
-> **Supersedes seed:** `plans/research/standard-names/pending/23-quality-parity.md` Phase 0.
+> **Supersedes seed:** [`docs/sn-quality-parity.html`](../../../docs/sn-quality-parity.html) §2 (the retained benchmark-harness seed from migrated plan 23).
 > **Status:** Scaffolding landed 2026-04-21.  Expansion to full 50 paths + consensus
 > reviewer gate pending (`cycle-cross-family-review` + subsequent fills).
 

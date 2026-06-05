@@ -37,14 +37,14 @@ DELETE                                   absorbed into code + docs
 
 ## Active plans (SN family)
 
-The standard-names family is the dominant active workstream. Two **new**
-plans landed at HEAD on 2026-04-30 and are ready for implementation
-dispatch:
+The standard-names family is the dominant active workstream. Two priority SN
+plans now live as HTML docs under <code>docs/</code>; both remain active and
+neither should be treated as fully dispatch-complete yet:
 
 | Order | Plan | Scope | Status |
 |-------|------|-------|--------|
-| 1 | [standard-names/40-sn-search-facility.md](standard-names/40-sn-search-facility.md) | Grammar-aware SN search & fetch facility: 7 MCP tools mirroring the DD palette (`search_standard_names`, `fetch_standard_names`, `list_standard_names`, `list_grammar_vocabulary`, `find_related_standard_names`, `check_standard_names`, `get_standard_name_summary`); tiered grammar streams (T1/T2/T3) preventing `x_component_of_*` floods; backing-function unification in `standard_names/search.py` mirroring `graph/dd_search.py`; `_sn`/`_sns` → `_standard_names` rename audit; `include_standard_names=True` default already shipped (commit `33514f2a`). | RD-cleared at v3.2 (commit `31ec17ee`, 943 lines) — **dispatch-ready** |
-| 2 | [standard-names/39-structured-fanout.md](standard-names/39-structured-fanout.md) | Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer LLM consumes targeted context. Underwritten by plan 40's unified search surface (`search_existing_names` runner). Replaces unbounded agentic-loop alternative with deterministic chains. | RD-cleared (commit `5e4d3bbe`, 1102 lines) — **dispatch after plan 40 lands** |
+| 1 | [../../docs/sn-search-facility.html](../../docs/sn-search-facility.html) | Grammar-aware SN search & fetch facility: 7 MCP tools mirroring the DD palette (`search_standard_names`, `fetch_standard_names`, `list_standard_names`, `list_grammar_vocabulary`, `find_related_standard_names`, `check_standard_names`, `get_standard_name_summary`); tiered grammar streams (T1/T2/T3) preventing `x_component_of_*` floods; backing-function unification in `standard_names/search.py` mirroring `graph/dd_search.py`; `_sn`/`_sns` → `_standard_names` rename audit; `include_standard_names=True` default already shipped (commit `33514f2a`). | Active HTML plan — Phase 4 pipeline migration still open |
+| 2 | [standard-names/39-structured-fanout.md](standard-names/39-structured-fanout.md) | Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer LLM consumes targeted context. Underwritten by plan 40's unified search surface (`search_existing_names` runner). Replaces unbounded agentic-loop alternative with deterministic chains. | Active — phases 2/3 deferred until plan 40 fully lands |
 
 ### Sequencing rationale
 
@@ -74,7 +74,9 @@ priority list. Status as of HEAD (2026-04-30):
 | [standard-names/32-extraction-prompt-overhaul.md](standard-names/32-extraction-prompt-overhaul.md) | Phase 2 done; later phases deferred |
 | [standard-names/33-benchmark-evolution.md](standard-names/33-benchmark-evolution.md) | Design / research |
 | [standard-names/34-benchmark-v1.md](standard-names/34-benchmark-v1.md) | Scaffolded; runner + mock dry-run in place |
-| [standard-names/36-catalog-quality-refactor.md](standard-names/36-catalog-quality-refactor.md) | RD round-4 cleared — dispatch-ready |
+| [../../docs/sn-catalog-quality-refactor.html](../../docs/sn-catalog-quality-refactor.html) | Active HTML plan — phases 4–6 remain open; derived-parent lifecycle still blocking |
+
+Additional migrated HTML records now live in <code>docs/</code>: <a href="../../docs/sn-quality-parity.html">sn-quality-parity</a> and <a href="../../docs/sn-closed-physical-base.html">sn-closed-physical-base</a>.
 
 ## Active plans (DD / search / docs)
 
