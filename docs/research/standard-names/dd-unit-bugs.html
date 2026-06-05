@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="dd-unit-bugs">
+  <meta name="plan-title" content="DD Unit Defect Catalog">
+  <meta name="plan-summary" content="This report catalogs 5 distinct defect classes affecting **1,403 IMAS Data Dictionary">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <title>DD Unit Defect Catalog | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD Unit Defect Catalog</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/dd-unit-bugs.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+      </ul>
+    </section>
+<p><strong>Status:</strong> Enumerated from graph (DD version 4.1.0) · 2026-04-19<br />
+<strong>Audience:</strong> IMAS DD maintainers / imas-standard-names team<br />
+<strong>Prepared by:</strong> imas-codex automated audit + graph query</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This report catalogs <strong>5 distinct defect classes</strong> affecting <strong>1,403 IMAS Data Dictionary paths</strong> in DD 4.1.0. Three classes involve invalid unit strings (unparseable by UDUNITS2 or semantically wrong), one involves a Jinja placeholder that was never resolved at DD generation time, and one is a sentinel-value issue in <code>pulse_schedule</code> reference nodes. All defects propagate into the <code>imas-codex</code> Standard Name (SN) pipeline, causing either direct SN quarantine (invalid unit fails pydantic audit) or incorrect unit inheritance by downstream SNs. Four SNs are currently flagged in the test allow-list as "known DD-side bugs" pending upstream fixes.</p>
+<hr />
+<h2 id="defect-table">Defect Table</h2>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Defect Class</th>
+<th>Affected paths</th>
+<th>Current (wrong) unit</th>
+<th>Suggested unit</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Unresolved Jinja placeholder</td>
+<td>57</td>
+<td><code>m^dimension</code></td>
+<td><code>m</code>, <code>m^2</code>, or <code>m^3</code> per object dimension</td>
+<td>The string <code>m^dimension</code> is a compile-time template variable that was never expanded; <code>measure</code> of a 0-D / 1-D / 2-D / 3-D GGD object has a concrete spatial unit determined by the <code>dimension</code> field</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Prose string instead of UDUNITS symbol</td>
+<td>511</td>
+<td><code>Elementary Charge Unit</code></td>
+<td><code>1</code> (multiplicity, z_n, vibrational level) / <code>eV</code> (ionisation_potential)</td>
+<td>Multi-word prose strings cannot be parsed by any UDUNITS library; the correct UDUNITS symbol for elementary charge is <code>e</code>, but most quantities using this string are actually dimensionless (counts or ratios)</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Prose string instead of UDUNITS symbol</td>
+<td>15</td>
+<td><code>Atomic Mass Unit</code></td>
+<td><code>u</code> (unified atomic mass unit, UDUNITS symbol)</td>
+<td>Same class of bug as #2; <code>u</code> is the correct UDUNITS2 symbol</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Wrong dimension on charge/state ratios</td>
+<td>805</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>Quantities like <code>z_ion</code> (average charge number), <code>z_average</code>, <code>z_square_average</code>, <code>z_max</code>, <code>z_min</code>, <code>z_n</code>, and <code>vibrational_level</code> are dimensionless ratios or integer quantum numbers; the elementary charge <code>e</code> is a physical constant, not the unit of a dimensionless quantity</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Sentinel <code>unit=1</code> on <code>pulse_schedule/*/reference</code> nodes</td>
+<td>~350 (est.)</td>
+<td><code>1</code></td>
+<td>Physical unit of parent quantity (e.g. <code>ohm</code>, <code>W</code>, <code>Hz</code>, <code>V</code>, <code>m</code>)</td>
+<td>All <code>reference</code> and <code>reference_waveform/data</code> nodes under <code>pulse_schedule</code> carry a hard-coded <code>unit=1</code> regardless of the physical quantity they reference; the correct unit should match the controlled quantity</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total affected paths (deduplicated): ≥ 1,403</strong><br />
+<em>(Defect 5 path count is estimated from DD-04 analysis; exact count not enumerated in graph because <code>pulse_schedule</code> reference nodes mostly lack <code>HAS_UNIT</code> edges in the current graph.)</em></p>
+<hr />
+<h2 id="per-defect-detail">Per-Defect Detail</h2>
+<h3 id="defect-1--unresolved-jinja-placeholder-mdimension-57-paths-18-idss">Defect 1 — Unresolved Jinja placeholder <code>m^dimension</code> (57 paths, 18 IDSs)</h3>
+<p><strong>Root cause.</strong> The GGD (Generic Grid Description) DD generator uses a Jinja-style template <code>m^{dimension}</code> to express that the <code>measure</code> field of a grid object has spatial units determined by the grid object's <code>dimension</code> integer (0 = point count, 1 = length, 2 = area, 3 = volume). This template variable was not resolved at DD compile time and was emitted verbatim into the <code>units</code> attribute of every <code>objects_per_dimension/object/measure</code> node. The string <code>m^dimension</code> is not a valid UDUNITS2 expression.</p>
+<p><strong>Affected IDSs (18):</strong><br />
+<code>distribution_sources</code>, <code>distributions</code>, <code>edge_profiles</code>, <code>edge_sources</code>, <code>edge_transport</code>, <code>em_coupling</code>, <code>equilibrium</code>, <code>ferritic</code>, <code>mhd</code>, <code>plasma_profiles</code>, <code>plasma_sources</code>, <code>plasma_transport</code>, <code>radiation</code>, <code>runaway_electrons</code>, <code>tf</code>, <code>transport_solver_numerics</code>, <code>wall</code>, <code>waves</code></p>
+<p><strong>Affected paths (all 3 variants per IDS):</strong></p>
+<pre><code>&lt;IDS&gt;/*/space/objects_per_dimension/object/measure
+&lt;IDS&gt;/*/space/objects_per_dimension/object/measure_error_lower
+&lt;IDS&gt;/*/space/objects_per_dimension/object/measure_error_upper</code></pre>
+<p>Full list of 57 paths:</p>
+<details>
+<summary>Expand all 57 paths</summary>
+
+<pre><code>distribution_sources/source/ggd/grid/space/objects_per_dimension/object/measure
+distribution_sources/source/ggd/grid/space/objects_per_dimension/object/measure_error_lower
+distribution_sources/source/ggd/grid/space/objects_per_dimension/object/measure_error_upper
+distributions/distribution/ggd/grid/space/objects_per_dimension/object/measure
+distributions/distribution/ggd/grid/space/objects_per_dimension/object/measure_error_lower
+distributions/distribution/ggd/grid/space/objects_per_dimension/object/measure_error_upper
+edge_profiles/grid_ggd/space/objects_per_dimension/object/measure
+edge_profiles/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+edge_profiles/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+edge_sources/grid_ggd/space/objects_per_dimension/object/measure
+edge_sources/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+edge_sources/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+edge_transport/grid_ggd/space/objects_per_dimension/object/measure
+edge_transport/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+edge_transport/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+em_coupling/grid_ggd/space/objects_per_dimension/object/measure
+em_coupling/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+em_coupling/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+equilibrium/grids_ggd/grid/space/objects_per_dimension/object/measure
+equilibrium/grids_ggd/grid/space/objects_per_dimension/object/measure_error_lower
+equilibrium/grids_ggd/grid/space/objects_per_dimension/object/measure_error_upper
+equilibrium/time_slice/ggd/grid/space/objects_per_dimension/object/measure
+equilibrium/time_slice/ggd/grid/space/objects_per_dimension/object/measure_error_lower
+equilibrium/time_slice/ggd/grid/space/objects_per_dimension/object/measure_error_upper
+ferritic/grid_ggd/space/objects_per_dimension/object/measure
+ferritic/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+ferritic/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+mhd/grid_ggd/space/objects_per_dimension/object/measure
+mhd/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+mhd/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+plasma_profiles/grid_ggd/space/objects_per_dimension/object/measure
+plasma_profiles/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+plasma_profiles/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+plasma_sources/grid_ggd/space/objects_per_dimension/object/measure
+plasma_sources/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+plasma_sources/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+plasma_transport/grid_ggd/space/objects_per_dimension/object/measure
+plasma_transport/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+plasma_transport/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+radiation/grid_ggd/space/objects_per_dimension/object/measure
+radiation/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+radiation/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+runaway_electrons/grid_ggd/space/objects_per_dimension/object/measure
+runaway_electrons/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+runaway_electrons/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+tf/field_map/grid/space/objects_per_dimension/object/measure
+tf/field_map/grid/space/objects_per_dimension/object/measure_error_lower
+tf/field_map/grid/space/objects_per_dimension/object/measure_error_upper
+transport_solver_numerics/boundary_conditions_ggd/grid/space/objects_per_dimension/object/measure
+transport_solver_numerics/boundary_conditions_ggd/grid/space/objects_per_dimension/object/measure_error_lower
+transport_solver_numerics/boundary_conditions_ggd/grid/space/objects_per_dimension/object/measure_error_upper
+wall/description_ggd/grid_ggd/space/objects_per_dimension/object/measure
+wall/description_ggd/grid_ggd/space/objects_per_dimension/object/measure_error_lower
+wall/description_ggd/grid_ggd/space/objects_per_dimension/object/measure_error_upper
+waves/coherent_wave/full_wave/grid/space/objects_per_dimension/object/measure
+waves/coherent_wave/full_wave/grid/space/objects_per_dimension/object/measure_error_lower
+waves/coherent_wave/full_wave/grid/space/objects_per_dimension/object/measure_error_upper</code></pre>
+</details>
+
+<p><strong>Recommended DD PR strategy.</strong><br />
+Three options in order of preference:</p>
+<ul>
+<li><p><strong>Option A (preferred — split leaves):</strong> Replace the single <code>measure</code> leaf with per-dimension concrete leaves: <code>measure_count</code> (<code>1</code>), <code>measure_length</code> (<code>m</code>), <code>measure_area</code> (<code>m^2</code>), <code>measure_volume</code> (<code>m^3</code>). Each element of <code>objects_per_dimension</code> already carries a <code>dimension</code> integer (0–3), so the correct leaf is unambiguous at read time. This also improves schema clarity for downstream readers.</p></li>
+<li><p><strong>Option B (template resolution):</strong> Introduce a <code>units_template</code> mechanism in the DD generator that resolves <code>m^{dimension}</code> at compile time by expanding the integer <code>dimension</code> into the concrete unit string. This preserves the single-leaf structure but requires tooling support.</p></li>
+<li><p><strong>Option C (minimal / unblocking):</strong> Set <code>units=mixed</code> and add a prose <code>description</code> tag explaining the dimension dependency. Allows imas-codex to skip the path as a non-standard-name candidate without fixing the ambiguity.</p></li>
+</ul>
+<hr />
+<h3 id="defect-2--prose-string-elementary-charge-unit-511-paths">Defect 2 — Prose string <code>Elementary Charge Unit</code> (511 paths)</h3>
+<p><strong>Root cause.</strong> The DD emits the English prose string <code>Elementary Charge Unit</code> for certain quantity types instead of a UDUNITS2-parseable symbol. This string contains whitespace and is not recognised by any UDUNITS library.</p>
+<p><strong>Affected quantity types:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th># paths</th>
+<th>DD unit</th>
+<th>Correct unit</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>element/multiplicity</code></td>
+<td>88</td>
+<td><code>Elementary Charge Unit</code></td>
+<td><code>1</code></td>
+<td>Atom count per molecule; dimensionless integer</td>
+</tr>
+<tr class="even">
+<td><code>element/z_n</code> (atomic number)</td>
+<td>198</td>
+<td><code>Elementary Charge Unit</code></td>
+<td><code>1</code></td>
+<td>Nuclear charge number Z; dimensionless integer</td>
+</tr>
+<tr class="odd">
+<td><code>ion/state/ionisation_potential</code></td>
+<td>13</td>
+<td><code>Elementary Charge Unit</code></td>
+<td><code>eV</code></td>
+<td>Energy; elementary charge × voltage = eV</td>
+</tr>
+<tr class="even">
+<td>Error fields of above</td>
+<td>212</td>
+<td><code>Elementary Charge Unit</code></td>
+<td>(same as parent)</td>
+<td>Error fields inherit incorrect parent unit</td>
+</tr>
+</tbody>
+</table>
+<p>Note: A sub-set of <code>ionisation_potential</code> nodes correctly carries <code>eV</code> (the US-spelling <code>ionization_potential</code> variant). The DD therefore has an <em>internal inconsistency</em> between UK/US spelling variants of the same field.</p>
+<p><strong>Recommended DD PR strategy.</strong><br />
+File one PR: <code>Fix prose 'Elementary Charge Unit' — use UDUNITS2 symbol or dimensionless</code>. In that PR:</p>
+<ol type="1">
+<li>Change all <code>element/multiplicity</code> and <code>element/z_n</code> units to <code>1</code> (they are dimensionless).</li>
+<li>Change all <code>ionisation_potential</code> units to <code>eV</code> (ionisation energy is always measured in electron-volts in plasma physics).</li>
+<li>Reconcile UK/US spelling (<code>ionisation</code> vs <code>ionization</code>) to a single canonical spelling.</li>
+</ol>
+<hr />
+<h3 id="defect-3--prose-string-atomic-mass-unit-15-paths">Defect 3 — Prose string <code>Atomic Mass Unit</code> (15 paths)</h3>
+<p><strong>Root cause.</strong> Same class of bug as Defect 2. The DD uses the prose string <code>Atomic Mass Unit</code> rather than the UDUNITS2 symbol <code>u</code> (unified atomic mass unit, also accepted as <code>amu</code>).</p>
+<p><strong>Affected paths (all <code>element/a</code> — atomic mass number):</strong><br />
+<code>gas_injection/*/element/a</code>, <code>spectrometer_mass/a</code>, and related error fields.</p>
+<p><strong>Recommended DD PR strategy.</strong><br />
+File one PR: <code>Fix prose 'Atomic Mass Unit' — use UDUNITS2 symbol u</code>. Change all instances of <code>Atomic Mass Unit</code> to <code>u</code>.</p>
+<hr />
+<h3 id="defect-4--dimensionless-chargestate-quantities-tagged-as-unit-e-805-paths">Defect 4 — Dimensionless charge/state quantities tagged as unit <code>e</code> (805 paths)</h3>
+<p><strong>Root cause.</strong> Several families of dimensionless quantities — ion charge numbers, charge bounds, average charges, and vibrational quantum numbers — have been assigned <code>unit=e</code> (elementary charge) in the DD. While the <em>scale</em> of these quantities is determined by the elementary charge, the values are pure ratios (charge-to-charge) or integer quantum numbers and therefore dimensionless (<code>unit=1</code>).</p>
+<p><strong>Affected quantity families:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th># paths</th>
+<th>DD unit</th>
+<th>Correct unit</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>vibrational_level</code></td>
+<td>198</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>Vibrational quantum number; pure integer</td>
+</tr>
+<tr class="even">
+<td><code>z_ion</code> (average ion charge)</td>
+<td>157</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>⟨Z⟩ is charge / elementary charge; dimensionless</td>
+</tr>
+<tr class="odd">
+<td><code>z_min</code> (minimum charge bound)</td>
+<td>126</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>Dimensionless integer charge state</td>
+</tr>
+<tr class="even">
+<td><code>z_max</code> (maximum charge bound)</td>
+<td>126</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>Dimensionless integer charge state</td>
+</tr>
+<tr class="odd">
+<td><code>z_n</code> (atomic number)</td>
+<td>114</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>Nuclear charge Z; dimensionless integer</td>
+</tr>
+<tr class="even">
+<td><code>z_square_average</code> (⟨Z²⟩)</td>
+<td>32</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>⟨Z²⟩ = ⟨(charge/e)²⟩; dimensionless</td>
+</tr>
+<tr class="odd">
+<td><code>z_average</code></td>
+<td>20</td>
+<td><code>e</code></td>
+<td><code>1</code></td>
+<td>Same as z_ion above</td>
+</tr>
+<tr class="even">
+<td><code>ionisation_potential</code> (edge_profiles GGD)</td>
+<td>14</td>
+<td><code>e</code></td>
+<td><code>eV</code></td>
+<td>Energy; should be <code>eV</code>, not <code>e</code></td>
+</tr>
+<tr class="odd">
+<td>Other</td>
+<td>18</td>
+<td><code>e</code></td>
+<td>(context-dependent)</td>
+<td><code>summary/*/z_n</code>, edge GGD ionisation</td>
+</tr>
+</tbody>
+</table>
+<p>Note: There is also an <em>internal DD inconsistency</em>: <code>z_ion_1d</code> (profile-averaged) correctly carries <code>unit=1</code> in some IDSs while the scalar <code>z_ion</code> carries <code>unit=e</code>. This inconsistency is what triggers the SN pipeline allow-list entry for <code>ion_average_charge_of_ion_state</code>.</p>
+<p><strong>Recommended DD PR strategy.</strong><br />
+File one PR: <code>Fix unit 'e' on dimensionless charge ratios and quantum numbers</code>.<br />
+Bulk-change all <code>z_ion</code>, <code>z_average</code>, <code>z_square_average</code>, <code>z_max</code>, <code>z_min</code>, <code>z_n</code>, and <code>vibrational_level</code> fields to <code>unit=1</code>. For <code>ionisation_potential</code> paths that currently carry <code>e</code>, change to <code>eV</code>.</p>
+<hr />
+<h3 id="defect-5--sentinel-unit1-on-pulse_schedulereference-nodes-350-paths">Defect 5 — Sentinel <code>unit=1</code> on <code>pulse_schedule/*/reference</code> nodes (~350 paths)</h3>
+<p><strong>Root cause.</strong> All <code>reference</code> and <code>reference_waveform/data</code> nodes under <code>pulse_schedule</code> carry a hard-coded <code>unit=1</code> sentinel value regardless of the physical quantity they represent. The sentinel appears to be a DD convention meaning "normalised / controller-internal", but it is not documented as such and is not valid physics.</p>
+<p><strong>Sample affected paths:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>DD path</th>
+<th>Current unit</th>
+<th>Correct unit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pulse_schedule/ec/beam/power_launched/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>W</code></td>
+</tr>
+<tr class="even">
+<td><code>pulse_schedule/ic/antenna/power/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>W</code></td>
+</tr>
+<tr class="odd">
+<td><code>pulse_schedule/lh/antenna/power/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>W</code></td>
+</tr>
+<tr class="even">
+<td><code>pulse_schedule/nbi/unit/power/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>W</code></td>
+</tr>
+<tr class="odd">
+<td><code>pulse_schedule/flux_control/loop_voltage/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>V</code></td>
+</tr>
+<tr class="even">
+<td><code>pulse_schedule/pf_active/coil/resistance_additional/reference</code></td>
+<td><code>1</code></td>
+<td><code>ohm</code></td>
+</tr>
+<tr class="odd">
+<td><code>pulse_schedule/ec/beam/frequency/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>Hz</code></td>
+</tr>
+<tr class="even">
+<td><code>pulse_schedule/position_control/*/reference/data</code></td>
+<td><code>1</code></td>
+<td><code>m</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommended DD PR strategy.</strong><br />
+File one PR: <code>Publish physical unit on pulse_schedule reference waveform nodes</code>. Each <code>reference/data</code> node should inherit or explicitly declare the unit of its parent controlled quantity. Where normalised waveforms are intended (e.g. a fractional power reference), the documentation should say so explicitly.</p>
+<hr />
+<h2 id="impact-on-the-sn-pipeline">Impact on the SN Pipeline</h2>
+<h3 id="quarantined-standard-names-unit-invalid-blocked-from-publication">Quarantined standard names (unit-invalid, blocked from publication)</h3>
+<p>These SNs fail the <code>pydantic:scalar.unit</code> audit because their source DD path has an invalid unit string:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Standard name</th>
+<th>Quarantine reason</th>
+<th>Blocking defect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>grid_object_measure</code></td>
+<td><code>m^dimension</code> not a valid UDUNITS expression</td>
+<td>Defect 1</td>
+</tr>
+<tr class="even">
+<td><code>atom_multiplicity_of_isotope</code></td>
+<td><code>Elementary Charge Unit</code> contains whitespace</td>
+<td>Defect 2</td>
+</tr>
+<tr class="odd">
+<td><code>atomic_mass_number_of_isotope</code></td>
+<td><code>Atomic Mass Unit</code> contains whitespace</td>
+<td>Defect 3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="valid-sns-with-wrong-unit-test-allow-list-entries">Valid SNs with wrong unit (test allow-list entries)</h3>
+<p>These SNs were generated with incorrect units inherited from DD defects, but are considered <em>valid</em> because the SN unit was corrected manually or the DD source path has an inconsistency that makes the SN unit technically correct for some paths:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Standard name</th>
+<th>SN unit</th>
+<th>DD unit on linked path</th>
+<th>Root defect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>electron_temperature_peaking_factor</code></td>
+<td><code>1</code> (correct)</td>
+<td><code>eV</code> (from <code>summary/t_e/value</code> — wrong source path)</td>
+<td>DD-side: <code>summary/*/t_e</code> is absolute temperature, not a peaking factor</td>
+</tr>
+<tr class="even">
+<td><code>ion_average_charge_of_ion_state</code></td>
+<td><code>1</code> (correct)</td>
+<td><code>e</code> (from <code>z_average</code> GGD path)</td>
+<td>Defect 4: DD inconsistency; <code>z_ion_1d</code> has <code>1</code>, <code>z_average</code> has <code>e</code></td>
+</tr>
+<tr class="odd">
+<td><code>ion_average_square_charge_of_ion_state</code></td>
+<td><code>1</code> (correct)</td>
+<td><code>e</code> (from <code>z_square_average</code> path)</td>
+<td>Defect 4: same</td>
+</tr>
+<tr class="even">
+<td><code>resistance_of_poloidal_field_coil</code></td>
+<td><code>1</code> (wrong — should be <code>ohm</code>)</td>
+<td><code>ohm</code> (from <code>pf_active/coil/resistance_additional</code>)</td>
+<td>Defect 5: SN unit was inherited from <code>pulse_schedule/reference</code> sentinel=1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sns-with-multiple-quarantine-causes-pulse_schedule-reference-cluster">SNs with multiple quarantine causes (pulse_schedule reference cluster)</h3>
+<p>The DD-04 <code>pulse_schedule/*/reference</code> sentinel bug alone accounts for <strong>~16 quarantined SNs</strong> (see <code>plans/research/standard-names/dd-issues-rc14/DD-04-pulse-schedule-reference-unit.md</code>), the largest single-issue quarantine cluster in the rc13/rc14 SN corpus.</p>
+<hr />
+<h2 id="suggested-pr-strategy">Suggested PR Strategy</h2>
+<p>File <strong>one PR per defect class</strong> (not one per path). Suggested titles:</p>
+<table>
+<thead>
+<tr class="header">
+<th>PR #</th>
+<th>Title</th>
+<th>Defect</th>
+<th>Paths</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>Fix unresolved m^dimension placeholder in GGD grid_object_measure</code></td>
+<td>Defect 1</td>
+<td>57</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>Fix prose 'Elementary Charge Unit' — use UDUNITS2 symbol or dimensionless</code></td>
+<td>Defect 2</td>
+<td>511</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>Fix prose 'Atomic Mass Unit' — use UDUNITS2 symbol u</code></td>
+<td>Defect 3</td>
+<td>15</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><code>Fix unit e on dimensionless charge ratios and vibrational quantum numbers</code></td>
+<td>Defect 4</td>
+<td>805</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><code>Publish physical unit on pulse_schedule reference waveform nodes</code></td>
+<td>Defect 5</td>
+<td>~350</td>
+</tr>
+</tbody>
+</table>
+<p>PRs 2 and 4 can be filed simultaneously since they address different quantity families. PR 5 is the highest-impact fix for the SN pipeline (16 quarantined names unblocked). PR 1 is the highest-impact fix for GGD users.</p>
+<hr />
+<h2 id="allow-list-reconciliation">Allow-List Reconciliation</h2>
+<p>The following allow-list entries are maintained in <code>tests/graph/test_sn_unit_integrity.py</code> to prevent CI failures until upstream DD fixes are applied. These should be removed when the corresponding DD PR is merged and the graph is rebuilt.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Path pattern (SN name)</th>
+<th>SN unit</th>
+<th>DD unit</th>
+<th>Root defect</th>
+<th>Remove when</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>electron_temperature_peaking_factor</code></td>
+<td><code>1</code></td>
+<td><code>eV</code> (via summary path)</td>
+<td>Source path mismatch: <code>summary/t_e</code> is absolute temperature</td>
+<td>DD fixes <code>t_e_peaking</code> source linkage or removes <code>summary</code> from SN source paths</td>
+</tr>
+<tr class="even">
+<td><code>ion_average_charge_of_ion_state</code></td>
+<td><code>1</code></td>
+<td><code>e</code> (via <code>z_average</code> path)</td>
+<td>Defect 4</td>
+<td>DD PR 4 fixes <code>z_average</code> to <code>1</code></td>
+</tr>
+<tr class="odd">
+<td><code>ion_average_square_charge_of_ion_state</code></td>
+<td><code>1</code></td>
+<td><code>e</code> (via <code>z_square_average</code> path)</td>
+<td>Defect 4</td>
+<td>DD PR 4 fixes <code>z_square_average</code> to <code>1</code></td>
+</tr>
+<tr class="even">
+<td><code>resistance_of_poloidal_field_coil</code></td>
+<td><code>1</code></td>
+<td><code>ohm</code> (correct)</td>
+<td>Defect 5: SN inherited sentinel=1 from <code>pulse_schedule/reference</code></td>
+<td>DD PR 5 fixes reference units AND SN is regenerated with <code>ohm</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li><code>plans/research/standard-names/dd-issues-rc14/DD-01-diamagnetic-axis.md</code></li>
+<li><code>plans/research/standard-names/dd-issues-rc14/DD-02-grid-object-measure-unit.md</code></li>
+<li><code>plans/research/standard-names/dd-issues-rc14/DD-03-multiplicity-unit.md</code></li>
+<li><code>plans/research/standard-names/dd-issues-rc14/DD-04-pulse-schedule-reference-unit.md</code></li>
+<li><code>plans/research/standard-names/dd-issues-rc14/DD-05-neutron-fluxes-rates-duplicate.md</code></li>
+<li><code>plans/research/standard-names/dd-issues-rc14/DD-06-thermalisation-spelling.md</code></li>
+<li><code>plans/research/standard-names/sn-unit-mismatches.json</code></li>
+<li><code>scripts/backfill_sn_unit_mismatches.py</code></li>
+<li><code>tests/graph/test_sn_unit_integrity.py</code></li>
+</ul>
+  </main>
+</body>
+</html>

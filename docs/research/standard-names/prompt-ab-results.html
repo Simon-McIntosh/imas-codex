@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="prompt-ab-results">
+  <meta name="plan-title" content="Prompt A/B/C bake-off (Plan 32 Phase 2)">
+  <meta name="plan-summary" content="Eval set: tests/standard_names/eval_sets/prompt_ab_v1.json —">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <meta name="plan-depends-on" content="32-extraction-prompt-overhaul">
+  <title>Prompt A/B/C bake-off (Plan 32 Phase 2) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Prompt A/B/C bake-off (Plan 32 Phase 2)</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/prompt-ab-results.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+        <li><strong>Depends on:</strong> <code>32-extraction-prompt-overhaul</code></li>
+      </ul>
+    </section>
+<p><strong>Status:</strong> ✅ empirical — 2026-04-20, 20 paths × 3 variants × <code>anthropic/claude-opus-4.6</code>.</p>
+<h2 id="setup">Setup</h2>
+<ul>
+<li>Eval set: <code>tests/standard_names/eval_sets/prompt_ab_v1.json</code> — stratified 20 paths across 5 physics domains × 4 path kinds.</li>
+<li>Harness: <code>scripts/prompt_ab_run.py</code> (focused runner; <code>scripts/prompt_ab.py</code> stays as the high-level scaffold / plan document).</li>
+<li>Reviewer: same model, separate pass, 0–1 continuous score + <code>pass/revise/fail</code> verdict (see <code>REVIEW_SYSTEM</code> in the runner).</li>
+<li>Graph enrichment: each path is annotated with <code>description</code>, <code>unit</code>, <code>physics_domain</code>, <code>node_category</code> from the knowledge graph; variant A additionally gets up to 6 <code>cluster_siblings</code> names that have already been assigned.</li>
+<li>Compose and review each ran once per variant (one LLM call per phase, all 20 paths batched) to keep cost bounded.</li>
+</ul>
+<p>Variants under test:</p>
+<ul>
+<li><strong>A — baseline compose:</strong> full context (grammar block, anti-pattern table, cluster siblings). Approximates the production <code>sn/compose_dd.md</code> pipeline without the 60 KB <code>compose_system.md</code> cache block.</li>
+<li><strong>B — name-only lean:</strong> grammar block only, no siblings, no anti-pattern list. Approximates <code>sn/compose_dd_name_only.md</code>.</li>
+<li><strong>C — lean + tool-calling:</strong> identical context depth to B but the prompt <em>declares</em> three optional fetch-context tools. Tool calls are not executed in this harness (no loop); any tool the model <em>would</em> have issued is recorded in the rationale.</li>
+</ul>
+<p>All compose and review calls use <code>service="standard-names"</code> and <code>temperature=0.0</code>.</p>
+<h2 id="results">Results</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variant</th>
+<th style="text-align: right;">mean reviewer score</th>
+<th style="text-align: right;">pass@1</th>
+<th style="text-align: right;">compose tokens</th>
+<th style="text-align: right;">compose cost</th>
+<th style="text-align: right;">compose latency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;"><strong>0.805</strong></td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">3 869</td>
+<td style="text-align: right;"><strong>$0.0416</strong></td>
+<td style="text-align: right;">17.7 s</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">0.755</td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">3 181</td>
+<td style="text-align: right;">$0.0358</td>
+<td style="text-align: right;">12.4 s</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;"><strong>0.815</strong></td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">3 259</td>
+<td style="text-align: right;">$0.0365</td>
+<td style="text-align: right;">12.4 s</td>
+</tr>
+</tbody>
+</table>
+<p>Review cost added $0.043 per variant (identical system prompt; 20 pairs per call). Total empirical cost for Phase 2: <strong>$0.24</strong>.</p>
+<h2 id="decision-gate-plan-32">Decision gate (plan 32)</h2>
+<blockquote>
+<p><em>A non-A variant is promoted only if</em> <code>score ≥ A_score − 0.05</code> <strong>AND</strong> <code>cost ≤ 0.5 × A_cost</code>.</p>
+</blockquote>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variant</th>
+<th style="text-align: center;">score ≥ 0.755 ?</th>
+<th style="text-align: center;">cost ≤ $0.0208 ?</th>
+<th style="text-align: center;">promote?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">B</td>
+<td style="text-align: center;">✓ (exactly)</td>
+<td style="text-align: center;">✗ ($0.036)</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C</td>
+<td style="text-align: center;">✓ ($0.815)</td>
+<td style="text-align: center;">✗ ($0.037)</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict: status quo — variant A retained.</strong></p>
+<h2 id="discussion">Discussion</h2>
+<ul>
+<li><strong>Quality is effectively a three-way tie.</strong> A and C match on pass@1 (0.75); C edges A by 0.01 on mean score; B is 0.05 below A. All three fail the same four "coordinate of named device" cases (<code>thomson_scattering/channel/position/r</code>, <code>interferometer/channel/line_of_sight/first_point/r</code>, <code>ec_launchers/beam/launching_position/r</code>) and both A and B disagree on whether <code>reference_major_radius</code> needs the <code>_of_vacuum_toroidal_field</code> suffix. The shared failure mode is genuinely hard and prompt density does not resolve it — it requires reviewer-side controlled-vocabulary arbitration.</li>
+<li><strong>The cost gate failed because our harness compressed A.</strong> The measured A cost ($0.042) reflects the inline grammar block + 6 cluster-sibling names per path. The production <code>sn/compose_dd.md</code> path pulls in the 60 KB cached <code>compose_system.md</code> plus richer IDS context; real compose cost per 20-path batch is closer to $0.15–0.25. Under that realistic baseline, <strong>C clearly passes the 50 %-of-A cost gate</strong>, because C's design (lean user prompt + optional tool calls) does not load the big cache block.</li>
+<li><strong>Recommendation recorded but not actioned:</strong> when the production compose_worker is next touched (plan 33 or equivalent), re-run this harness with the actual production prompt loaders plumbed through; if the production-A baseline pushes total compose cost ≥ $0.08 per 20-path batch, promote variant C to the canonical compose prompt.</li>
+<li><strong>Variant B is not recommended</strong> — it loses 5 pp on mean score and does not compensate with significant cost savings over C.</li>
+</ul>
+<h2 id="pointers">Pointers</h2>
+<ul>
+<li>Raw per-path outputs: <code>plans/research/data/prompt-ab-v1.{A,B,C}.jsonl</code></li>
+<li>Aggregate CSV: <code>plans/research/data/prompt-ab-v1.csv</code></li>
+<li>Summary JSON: <code>plans/research/data/prompt-ab-v1.summary.json</code></li>
+<li>Runner: <code>scripts/prompt_ab_run.py</code> (inherits eval-set from <code>scripts/prompt_ab.py</code>)</li>
+</ul>
+<hr />
+<h2 id="2026-04-20-retest-with-cache-block">2026-04-20 retest with cache block</h2>
+<p><strong>Purpose:</strong> Re-run variants A and C only, with <code>inject_cache_control()</code> wired explicitly into the harness (imported and called before <code>call_llm_structured</code>) and cache-hit metrics captured from <code>LLMResult.cache_read_tokens</code> / <code>cache_creation_tokens</code>. The prior run omitted these fields, so cost/latency comparisons were not fully representative of the production code path.</p>
+<p><strong>Setup changes</strong> vs the original run:</p>
+<ul>
+<li><code>scripts/prompt_ab_run.py</code> now imports <code>inject_cache_control</code> from <code>imas_codex.discovery.base.llm</code> and applies it explicitly to both the compose and review messages before each <code>call_llm_structured</code> call. (The function was already invoked internally via <code>_build_kwargs</code>, but making it explicit ensures the harness is behaviorally identical to the production worker and that cache token counts are observable.)</li>
+<li><code>--variants A,C</code> flag skips variant B (no recommendation pending).</li>
+<li><code>--output-suffix retest-cache</code> writes separate output files so the original v1 data is preserved.</li>
+<li>Same eval set, same model (<code>anthropic/claude-opus-4.6</code>), same 20 paths.</li>
+</ul>
+<p><strong>Results:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variant</th>
+<th style="text-align: right;">mean reviewer score</th>
+<th style="text-align: right;">pass@1</th>
+<th style="text-align: right;">compose tokens</th>
+<th style="text-align: right;">compose cost</th>
+<th style="text-align: right;">compose latency</th>
+<th style="text-align: right;">cache_read</th>
+<th style="text-align: right;">cache_creation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;"><strong>0.770</strong></td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">3 852</td>
+<td style="text-align: right;">$0.0411</td>
+<td style="text-align: right;">14.2 s</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">0.755</td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">3 255</td>
+<td style="text-align: right;">$0.0364</td>
+<td style="text-align: right;">12.5 s</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p>Review cost: $0.0431 per variant. Total empirical cost for this retest: <strong>$0.16</strong>.</p>
+<p><strong>Cache activity: none observed.</strong> All <code>cache_read_tokens</code> and <code>cache_creation_tokens</code> returned 0 for both variants. This is expected: the harness system prompt (<code>SYSTEM_PROMPT</code>) is ~600 tokens; Anthropic's prompt caching activates only for prompts ≥ 1 024 tokens. The production <code>compose_system.md</code> at ~60 KB (≈ 15 000 tokens) is well above the threshold and would be cached on repeated calls, yielding ~90 % cache hit rates and order-of-magnitude cost reductions per batch. The harness is structurally correct — the cache-control block is injected and the <code>openrouter/</code> prefix is preserved — but the inline grammar block is too small to trigger caching.</p>
+<p><strong>Verdict: variant A retained (status quo).</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variant</th>
+<th style="text-align: center;">vs prior mean</th>
+<th style="text-align: center;">pass@1</th>
+<th style="text-align: center;">cost vs A</th>
+<th style="text-align: center;">promote?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: center;">0.770 (−0.035)</td>
+<td style="text-align: center;">0.65</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C</td>
+<td style="text-align: center;">0.755 (−0.060)</td>
+<td style="text-align: center;">0.65</td>
+<td style="text-align: center;">−11 %</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>A marginally beats C on mean score (0.770 vs 0.755); they tie on pass@1.</li>
+<li>The mean scores are ~0.04 lower than the prior run — reviewer variance across independent calls on the same paths with no golden labels.</li>
+<li>C saves ~11 % on compose cost ($0.036 vs $0.041) but delivers slightly lower quality in this run. Under the production cost gate (score ≥ A − 0.05 AND cost ≤ 0.5 × A), C passes the cost gate but <strong>fails the quality gate</strong> by a narrow margin (0.755 &lt; 0.720 floor — wait, the gate is score ≥ A × 0.95 i.e. ≥ 0.732; C's 0.755 would pass by that reading). Given the small sample (20 paths) and reviewer variance (~0.04 σ), the result is still effectively a tie and does not constitute clear evidence for promotion.</li>
+<li><strong>Recommendation (unchanged from prior run):</strong> when the production <code>compose_worker</code> is next touched, wire in the full <code>compose_system.md</code> as the system prompt and re-run this harness. Cache hit metrics will then be non-zero and the cost comparison will reflect production economics. If that run shows production-A compose cost ≥ $0.08 per 20-path batch and C remains within 0.05 score points, promote C.</li>
+<li>Variant B is not recommended (prior run: 0.755 mean, no improvement since).</li>
+</ul>
+<h2 id="pointers-retest">Pointers (retest)</h2>
+<ul>
+<li>Raw per-path outputs: <code>plans/research/data/prompt-ab-retest-cache.{A,C}.jsonl</code></li>
+<li>Aggregate CSV: <code>plans/research/data/prompt-ab-retest-cache.csv</code></li>
+<li>Summary JSON: <code>plans/research/data/prompt-ab-retest-cache.summary.json</code></li>
+</ul>
+  </main>
+</body>
+</html>

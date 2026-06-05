@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="40-rc18-vocab-analysis">
+  <meta name="plan-title" content="rc18 VocabGap analysis">
+  <meta name="plan-summary" content="Date: 2026-04-21 (session snapshot)">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-closed-physical-base,sn-quality-parity">
+  <title>rc18 VocabGap analysis | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>rc18 VocabGap analysis</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/40-rc18-vocab-analysis.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-closed-physical-base</code>, <code>sn-quality-parity</code></li>
+      </ul>
+    </section>
+<p><strong>Date</strong>: 2026-04-21 (session snapshot) <strong>Source</strong>: <code>MATCH (vg:VocabGap) ...</code> on the codex graph, 999 rows total. <strong>Goal</strong>: classify every gap and drive an ISN rc18 release that closes the ones that can be closed with vocabulary additions.</p>
+<h2 id="summary-totals">Summary totals</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Classification</th>
+<th style="text-align: right;">Count</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>TRUE vocab gap (enumerated segments, needs ISN token)</td>
+<td style="text-align: right;">88</td>
+<td>Add to rc18 YAML</td>
+</tr>
+<tr class="even">
+<td>COMPOSITION OVERRUN (<code>physical_base</code> packs multiple segments)</td>
+<td style="text-align: right;">715</td>
+<td>Reviewer/composer-prompt concern, not ISN</td>
+</tr>
+<tr class="odd">
+<td>SYNC ISSUE (transformation tokens exist in YAML but not in graph)</td>
+<td style="text-align: right;">39</td>
+<td>Codex grammar-sync / SEGMENT_ORDER concern</td>
+</tr>
+<tr class="even">
+<td>GRAMMAR AMBIGUITY (<code>diamagnetic</code>, real/imag prefix chains)</td>
+<td style="text-align: right;">15</td>
+<td>Deferred — senior-review ruling pending</td>
+</tr>
+<tr class="odd">
+<td>BAD NAMING (speculative one-off compounds below signal threshold)</td>
+<td style="text-align: right;">142</td>
+<td>Classifier-exclusion / prompt tightening</td>
+</tr>
+<tr class="even">
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>999</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-physical_base-cannot-be-an-isn-gap">Why <code>physical_base</code> cannot be an ISN "gap"</h3>
+<p>ISN specification.yml explicitly defines <code>physical_base</code> as <strong>open-ended</strong> and controlled via catalog entries, not grammar vocabulary:</p>
+<blockquote>
+<p><code>physical_base</code>: Physical quantity, measurement, or hardware property (open-ended). … New physical base terms are defined through catalog entries, not the grammar.</p>
+</blockquote>
+<p><code>SEGMENT_TOKEN_MAP["physical_base"]</code> is <code>()</code> in <code>imas_standard_names/grammar/constants.py</code>. Consequently, the codex token-miss detector's <code>OPTIONAL MATCH (t:GrammarToken {segment:'physical_base'})</code> always misses, and every used physical_base token becomes a VocabGap node.</p>
+<p>The 715 physical_base rows fall into two qualitative buckets:</p>
+<ul>
+<li><p><strong>COMPOSITION OVERRUN</strong> (majority): the composer stuffed multiple grammar concepts into a single base term, e.g.</p>
+<ul>
+<li><code>wave_absorbed_power_per_toroidal_mode</code> → physical_base=<code>wave_absorbed_power</code>
+<ul>
+<li>transformation=<code>per_toroidal_mode</code></li>
+</ul></li>
+<li><code>wave_absorbed_power_density_per_toroidal_mode</code> → physical_base= <code>wave_absorbed_power_density</code> + transformation=<code>per_toroidal_mode</code></li>
+<li><code>right_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code> → component prefix + physical_base + transformation</li>
+<li><code>perturbed_magnetic_field_imaginary_part</code> → transformation=<code>imaginary_part_of</code>
+<ul>
+<li>physical_base=<code>perturbed_magnetic_field</code></li>
+</ul></li>
+<li><code>collisional_toroidal_torque_density</code> → OK as base, but torque_density already exists</li>
+<li><code>diamagnetic_drift_velocity</code>, <code>exb_drift_velocity</code>, <code>perturbed_plasma_velocity</code> → already expressible via component + base</li>
+</ul>
+<p>→ <strong>Fix side</strong>: tighten the R1/R2 reviewer prompts (imas-codex) to forbid transformation suffixes from being folded into physical_base.</p></li>
+<li><p><strong>LEGITIMATE SELF-CONTAINED BASES</strong> that the graph cannot recognise because physical_base has no token list. These are not ISN grammar gaps; they are catalog candidates. Top-20 examples:</p>
+<ul>
+<li><code>reference_waveform</code> (41) — metadata wrapper, not a physics quantity; reject as BAD NAMING.</li>
+<li><code>magnetic_flux</code> (30) — valid; already usable as a physical_base today.</li>
+<li><code>atomic_mass</code> (15) — valid base; not a grammar-vocabulary concern.</li>
+<li><code>halo_current</code> (9), <code>particle_source_rate</code> (7), <code>surface_current_spectrum</code> (7), <code>non_axisymmetric_magnetic_field</code> (7), <code>constraint_weight</code> (10), <code>transport_boundary_condition_value</code> (9), <code>accumulated_gas_injection</code> (8) — all acceptable physical bases the composer is free to use.</li>
+</ul></li>
+</ul>
+<h3 id="transformation-segment-39-rows-all-sync-issue">Transformation segment (39 rows, all SYNC ISSUE)</h3>
+<p>All 39 transformation gaps are tokens <strong>already present</strong> in <code>imas_standard_names/grammar/vocabularies/transformations.yml</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>needed_token</th>
+<th>present since</th>
+<th style="text-align: right;">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>per_toroidal_mode</code></td>
+<td>rc12</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="even">
+<td><code>per_toroidal_mode_number</code></td>
+<td>rc12</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="odd">
+<td><code>normalized</code></td>
+<td>pre-rc9</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td><code>second_derivative_of</code></td>
+<td>rc16</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td><code>cumulative_inside_flux_surface</code></td>
+<td>rc12</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td><code>real_part</code> / <code>imaginary_part</code></td>
+<td>(of-suffixed)</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="odd">
+<td><code>flux_surface_averaged</code></td>
+<td>pre-rc9</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td><code>derivative_with_respect_to_rho_tor</code></td>
+<td>rc16</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td><code>time_integrated</code>, <code>volume_averaged</code>, …</td>
+<td>pre-rc9</td>
+<td style="text-align: right;">5</td>
+</tr>
+</tbody>
+</table>
+<p>Root cause: <code>SEGMENT_ORDER</code> in <code>imas_standard_names/grammar/constants.py</code> does <strong>not</strong> include <code>transformation</code>. <code>get_grammar_graph_spec()</code> iterates only SEGMENT_ORDER, so <code>GrammarToken{segment:'transformation'}</code> nodes are never written to the graph. Every transformation a composer uses therefore registers as a token-miss even though the token is in canonical ISN vocabulary.</p>
+<p>→ <strong>Fix side</strong>: codex-side <code>sync_isn_grammar</code> (or ISN's <code>spec.py</code>) must opt <code>transformation</code> into the exported segment list. Out of scope for this rc18 cut; logged in this analysis for follow-up.</p>
+<h3 id="grammar-ambiguity-15-rows">Grammar ambiguity (15 rows)</h3>
+<p>All variants of <code>diamagnetic_*</code> plus a couple of velocity_tor / velocity_phi complaints. Senior review D.3 and D.5 both <strong>deferred</strong> the <code>diamagnetic</code> token pending parser refactoring (see header of <code>vocabularies/components.yml</code>). No action in rc18.</p>
+<h2 id="rc18-additions-true-vocab-gaps">rc18 additions (TRUE vocab gaps)</h2>
+<p>Selected from enumerated-segment gaps with <code>example_count ≥ 2</code> (and a small set of high-confidence singletons) where the token is clearly a physics-valid vocabulary extension, not composer noise.</p>
+<h3 id="subjectsyml-23-tokens">subjects.yml (+23 tokens)</h3>
+<p>Fast-ion / fast-particle orbital-class compositions that the composer consistently emits as atomic subjects (IMAS DD distribution_sources, distributions, core_fast_particles):</p>
+<ul>
+<li><code>ion_state</code>, <code>fast_ion_state</code>, <code>ion_charge_state</code>, <code>neutral_state</code></li>
+<li><code>trapped_fast_ion</code>, <code>co_passing_fast_ion</code>, <code>counter_passing_fast_ion</code></li>
+<li><code>trapped_fast_particle</code>, <code>co_passing_fast_particle</code>, <code>counter_passing_fast_particle</code></li>
+<li><code>trapped_particle</code></li>
+<li><code>gyrocenter</code></li>
+<li><code>halo</code>, <code>pellet</code></li>
+<li><code>shattered_pellet</code>, <code>shattered_pellet_fragment</code>, <code>shattered_pellet_species</code></li>
+<li><code>hard_xray</code></li>
+<li><code>bulk_plasma</code>, <code>total_plasma</code></li>
+<li><code>ammonia</code>, <code>silane</code> (recycling / diagnostic gas species)</li>
+<li><code>edge_localized_mode</code></li>
+</ul>
+<h3 id="processesyml-10-tokens">processes.yml (+10 tokens)</h3>
+<ul>
+<li><code>disruption_event</code></li>
+<li><code>wave_particle_interaction</code></li>
+<li><code>fast_particle_thermalization</code></li>
+<li><code>wave_driven_current_drive</code></li>
+<li><code>conductive_losses</code></li>
+<li><code>fast_particle_source</code></li>
+<li><code>distribution_function_driven</code></li>
+<li><code>radiation_emission</code></li>
+<li><code>recombination_emission</code></li>
+<li><code>fusion_born_alpha</code></li>
+</ul>
+<h3 id="positionsyml-25-tokens-shared-by-position--geometry-segments">positions.yml (+25 tokens; shared by position &amp; geometry segments)</h3>
+<ul>
+<li><code>halo_region</code>, <code>divertor_plate</code></li>
+<li><code>pellet_path</code>, <code>pellet_path_point</code>, <code>pellet_path_first_point</code>, <code>pellet_path_second_point</code>, <code>along_pellet_path</code>, <code>shattering_position</code></li>
+<li><code>ntm_onset</code>, <code>neoclassical_tearing_mode_onset</code></li>
+<li><code>beam_path</code>, <code>along_beam_path</code></li>
+<li><code>ece_channel</code>, <code>ece_channel_emission_position</code></li>
+<li><code>outboard_midplane_first_wall</code>, <code>outboard_midplane_separatrix</code>, <code>first_wall_midplane</code></li>
+<li><code>ggd_grid_point</code>, <code>ggd_grid_node</code>, <code>ggd_grid_subset</code>, <code>ggd_element</code>, <code>ggd_node</code></li>
+<li><code>inlet</code>, <code>outlet</code>, <code>cooling_circuit_inlet</code></li>
+</ul>
+<h3 id="objectsyml-14-tokens">objects.yml (+14 tokens)</h3>
+<ul>
+<li><code>breeder_blanket_module</code>, <code>breeder_blanket_layer</code>, <code>breeder_blanket_shield</code></li>
+<li><code>beamlet_group</code></li>
+<li><code>working_fluid</code>, <code>filter</code>, <code>temperature_sensor</code>, <code>optical_element</code></li>
+<li><code>mass_spectrometer</code>, <code>mass_spectrometer_channel</code>, <code>spectrometer_channel</code>, <code>neutron_detector_converter</code></li>
+<li><code>ec_launcher_mirror</code> (alias for <code>electron_cyclotron_launcher_mirror</code>)</li>
+<li><code>diagnostic_antenna</code></li>
+<li><code>port</code></li>
+</ul>
+<h3 id="geometric_basesyml-1-token">geometric_bases.yml (+1 token)</h3>
+<ul>
+<li><code>unit_vector</code></li>
+</ul>
+<p>Total: <strong>73 new tokens</strong> targeting <strong>~180 gap rows</strong> (~18% of all VocabGaps, ~78% of actionable enumerated-segment gaps).</p>
+<h2 id="out-of-scope-follow-ups-tracked-here-not-executed">Out-of-scope follow-ups (tracked here, not executed)</h2>
+<ol type="1">
+<li><p><strong>Transformation segment graph sync</strong> (39 gaps). Add <code>transformation</code> to <code>SEGMENT_ORDER</code> in ISN <code>grammar/constants.py</code>, regenerate <code>GrammarSpec</code>, teach codex's <code>sync-isn-grammar</code> to upload transformation tokens. Closes the rc16+ transformation-existing false-positives.</p></li>
+<li><p><strong>physical_base composition-overrun prompt fix</strong> (≈500 gaps). Update reviewer R1/R2 rubrics to REJECT physical_base tokens that contain known transformation suffixes (<code>_per_toroidal_mode</code>, <code>_real_part</code>, <code>_imaginary_part</code>, <code>_amplitude</code>, <code>_phase</code>, <code>_density_per_*</code>).</p></li>
+<li><p><strong>Classifier exclusion for container/metadata fields</strong> (<code>reference_waveform</code> × 41, <code>constraint_weight</code> × 10, <code>constraint_measurement_point</code>, <code>transport_boundary_condition_value</code>). These IMAS paths are scaffolding, not physics quantities, and should not emit standard names at all.</p></li>
+<li><p><strong>Senior review resume on <code>diamagnetic</code></strong> — grammar-ambiguity cluster.</p></li>
+</ol>
+  </main>
+</body>
+</html>

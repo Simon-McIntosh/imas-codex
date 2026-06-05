@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="45-rotation-v3-lowscore">
+  <meta name="plan-title" content="Rotation v3 — Low-Score Domain Rotation (rc18 Pipeline)">
+  <meta name="plan-summary" content="Date: 2025-07-26">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <title>Rotation v3 — Low-Score Domain Rotation (rc18 Pipeline) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Rotation v3 — Low-Score Domain Rotation (rc18 Pipeline)</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/45-rotation-v3-lowscore.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+      </ul>
+    </section>
+<p><strong>Date</strong>: 2025-07-26 <strong>ISN version</strong>: v0.7.0rc18 <strong>Pipeline features</strong>: Open-segment VocabGap filter, decomposition audit, grammar-slot search <strong>Budget cap</strong>: $12.00 <strong>Actual cost</strong>: $2.39</p>
+<h2 id="summary">Summary</h2>
+<p>Targeted the 4 lowest-scoring physics domains (by reviewed avg score) for a full rotation cycle (generate→enrich→review→regen). Used the rc18 pipeline with open-base VocabGap filtering and decomposition audit.</p>
+<h2 id="targets">Targets</h2>
+<p>Domains selected by lowest <code>avg(review_mean_score)</code> among domains with ≥10 names:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Rank</th>
+<th>Domain</th>
+<th>Avg Score</th>
+<th>Total</th>
+<th>Reviewed</th>
+<th>Below 0.70</th>
+<th>Unreviewed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>edge_plasma_physics</td>
+<td>0.666</td>
+<td>81</td>
+<td>67</td>
+<td>25</td>
+<td>14</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>computational_workflow</td>
+<td>0.683</td>
+<td>19</td>
+<td>17</td>
+<td>7</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>fast_particles</td>
+<td>0.748</td>
+<td>40</td>
+<td>27</td>
+<td>11</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>waves</td>
+<td>0.761</td>
+<td>14</td>
+<td>11</td>
+<td>3</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rotation-results">Rotation Results</h2>
+<h3 id="1-edge_plasma_physics">1. edge_plasma_physics</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Count</th>
+<th>Cost</th>
+<th>Elapsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>generate</td>
+<td>0</td>
+<td>$0.00</td>
+<td>22s</td>
+</tr>
+<tr class="even">
+<td>enrich</td>
+<td>4</td>
+<td>$0.19</td>
+<td>58s</td>
+</tr>
+<tr class="odd">
+<td>review</td>
+<td>0</td>
+<td>$0.00</td>
+<td>2s</td>
+</tr>
+<tr class="even">
+<td>regen</td>
+<td>10</td>
+<td>$0.81</td>
+<td>211s</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td><strong>14</strong></td>
+<td><strong>$0.99</strong></td>
+<td><strong>293s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key outcomes</strong>:</p>
+<ul>
+<li>4 names enriched with documentation</li>
+<li>10 names regenerated from <code>needs_revision</code> with reviewer feedback</li>
+<li>4 new replacement names created: <code>ion_particle_flux</code>, <code>ion_particle_convective_velocity</code>, <code>sobol_sensitivity_index_input_path_reference</code>, <code>radial_component_of_ion_convective_velocity</code></li>
+<li>VocabGaps surfaced: <code>anomalous_current_density</code>, <code>particle_convective_velocity</code>, <code>reference_major_radius</code>, <code>reference_major_radius_of_vacuum_toroidal_field</code></li>
+<li>Residual: 6 names still <code>needs_revision</code> (truncated <code>*_due_to_anomalous</code> pair persists)</li>
+</ul>
+<h3 id="2-computational_workflow">2. computational_workflow</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Count</th>
+<th>Cost</th>
+<th>Elapsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>generate</td>
+<td>0</td>
+<td>$0.00</td>
+<td>19s</td>
+</tr>
+<tr class="even">
+<td>enrich</td>
+<td>0</td>
+<td>$0.00</td>
+<td>2s</td>
+</tr>
+<tr class="odd">
+<td>review</td>
+<td>0</td>
+<td>$0.00</td>
+<td>2s</td>
+</tr>
+<tr class="even">
+<td>regen</td>
+<td>4</td>
+<td>$0.48</td>
+<td>148s</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td><strong>4</strong></td>
+<td><strong>$0.48</strong></td>
+<td><strong>171s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key outcomes</strong>:</p>
+<ul>
+<li>4 names regenerated; <code>needs_revision</code> reduced from 5 to 3</li>
+<li>2 new replacement names: <code>simulation_time_step</code>, <code>vacuum_toroidal_magnetic_field_at_reference_major_radius</code></li>
+<li>VocabGaps: <code>position_of_transport_solver_boundary_condition</code>, <code>relative_deviation_of_electron_energy_equation</code>, <code>energy_transport_boundary_condition_value</code>, <code>workflow_component_control_parameter</code></li>
+<li>Residual: solver metadata names (<code>workflow_component_control_float_parameter</code>, <code>normalized_radial_coordinate_of_transport_boundary_condition</code>) fundamentally don't fit ISN physics grammar — these are engineering parameters</li>
+</ul>
+<h3 id="3-fast_particles">3. fast_particles</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Count</th>
+<th>Cost</th>
+<th>Elapsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>generate</td>
+<td>0</td>
+<td>$0.00</td>
+<td>19s</td>
+</tr>
+<tr class="even">
+<td>enrich</td>
+<td>0</td>
+<td>$0.09</td>
+<td>30s</td>
+</tr>
+<tr class="odd">
+<td>review</td>
+<td>0</td>
+<td>$0.00</td>
+<td>2s</td>
+</tr>
+<tr class="even">
+<td>regen</td>
+<td>3</td>
+<td>$0.37</td>
+<td>228s</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td><strong>3</strong></td>
+<td><strong>$0.46</strong></td>
+<td><strong>279s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key outcomes</strong>:</p>
+<ul>
+<li>3 names regenerated; <code>needs_revision</code> reduced from 4 to 2</li>
+<li>VocabGaps: <code>current_density</code> (in <code>toroidal_component_of_fast_ion_current_density</code>), <code>current_density_co_passing</code></li>
+<li><code>toroidal_current_density_co_passing</code> and <code>toroidal_counter_passing_current_density</code> scored 0.45 adequate — co-passing/counter-passing particle current decomposition needs ISN tokens</li>
+</ul>
+<h3 id="4-waves">4. waves</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Count</th>
+<th>Cost</th>
+<th>Elapsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>generate</td>
+<td>0</td>
+<td>$0.00</td>
+<td>19s</td>
+</tr>
+<tr class="even">
+<td>enrich</td>
+<td>0</td>
+<td>$0.04</td>
+<td>24s</td>
+</tr>
+<tr class="odd">
+<td>review</td>
+<td>0</td>
+<td>$0.00</td>
+<td>2s</td>
+</tr>
+<tr class="even">
+<td>regen</td>
+<td>3</td>
+<td>$0.42</td>
+<td>108s</td>
+</tr>
+<tr class="odd">
+<td><strong>Total</strong></td>
+<td><strong>3</strong></td>
+<td><strong>$0.46</strong></td>
+<td><strong>153s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key outcomes</strong>:</p>
+<ul>
+<li>3 names regenerated; <code>needs_revision</code> reduced from 2 to 0</li>
+<li>All <code>needs_revision</code> names cleared from waves domain</li>
+<li>VocabGaps: <code>beam_tracing_wave_vector_varying_toroidal_mode_number_flag</code>, <code>wave_electric_field_phase_per_toroidal_mode</code></li>
+<li><code>beam_tracing_wave_vector_varying_toroidal_mode_number_flag</code> scored 0.0 — boolean flag name, fundamentally not a physics quantity</li>
+</ul>
+<h2 id="aggregate-summary">Aggregate Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>Before Mean</th>
+<th>After Mean</th>
+<th>Before N</th>
+<th>After N</th>
+<th>needs_rev Δ</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>edge_plasma_physics</td>
+<td>0.666</td>
+<td>0.666</td>
+<td>81</td>
+<td>83</td>
+<td>6→6</td>
+<td>$0.99</td>
+</tr>
+<tr class="even">
+<td>computational_workflow</td>
+<td>0.683</td>
+<td>0.695</td>
+<td>19</td>
+<td>21</td>
+<td>5→3</td>
+<td>$0.48</td>
+</tr>
+<tr class="odd">
+<td>fast_particles</td>
+<td>0.748</td>
+<td>0.748</td>
+<td>40</td>
+<td>41</td>
+<td>4→2</td>
+<td>$0.46</td>
+</tr>
+<tr class="even">
+<td>waves</td>
+<td>0.761</td>
+<td>0.761</td>
+<td>14</td>
+<td>14</td>
+<td>2→0</td>
+<td>$0.46</td>
+</tr>
+<tr class="odd">
+<td><strong>TOTAL</strong></td>
+<td>—</td>
+<td>—</td>
+<td><strong>154</strong></td>
+<td><strong>159</strong></td>
+<td><strong>17→11</strong></td>
+<td><strong>$2.39</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Notes on score stagnation</strong>: The reviewed avg scores didn't change because:</p>
+<ol type="1">
+<li>The regen phase creates replacement names with <code>pending</code> validation status</li>
+<li>These need a subsequent review pass to be scored</li>
+<li>The existing reviewed scores for old names persist</li>
+<li>Net effect is seen in <code>needs_revision</code> reduction (-6 names) and new name generation (+7)</li>
+</ol>
+<h3 id="global-state-change">Global State Change</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Total names</td>
+<td>918</td>
+<td>925</td>
+<td>+7</td>
+</tr>
+<tr class="even">
+<td>Reviewed</td>
+<td>702</td>
+<td>702</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>Unreviewed</td>
+<td>216</td>
+<td>223</td>
+<td>+7</td>
+</tr>
+<tr class="even">
+<td>Below 0.70</td>
+<td>130</td>
+<td>130</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>Avg reviewed score</td>
+<td>0.838</td>
+<td>0.838</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>needs_revision</td>
+<td>17</td>
+<td>11</td>
+<td>-6</td>
+</tr>
+<tr class="odd">
+<td>Total VocabGaps</td>
+<td>195</td>
+<td>195</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="anti-pattern-audit">Anti-Pattern Audit</h2>
+<p>Ran all anti-pattern queries from <code>41-rotation-v3-antipatterns.md</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Anti-pattern</th>
+<th>Count</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Duplicated tokens (<code>_word_word_</code>)</td>
+<td>0</td>
+<td>✓ Clean</td>
+</tr>
+<tr class="even">
+<td>Placeholder names (<code>constant_*_value</code>)</td>
+<td>0</td>
+<td>✓ Clean</td>
+</tr>
+<tr class="odd">
+<td>Model-specific suffixes (<code>*_hager_bootstrap</code> etc.)</td>
+<td>4</td>
+<td>Pre-existing (general domain)</td>
+</tr>
+<tr class="even">
+<td>Truncated names (<code>*_due_to_anomalous</code>)</td>
+<td>2</td>
+<td>Pre-existing (edge_plasma)</td>
+</tr>
+<tr class="odd">
+<td>Very long names (&gt;10 tokens)</td>
+<td>15</td>
+<td>Mostly transport 2nd-derivatives</td>
+</tr>
+<tr class="even">
+<td>Boolean flag names (<code>*_flag</code>)</td>
+<td>15</td>
+<td>Mixed quality (0.0–0.98)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>No new anti-patterns introduced by this rotation.</strong> The 4 model-suffix and 2 truncated names are residuals from prior cycles documented in plan 41.</p>
+<h2 id="vocabgaps-surfaced">VocabGaps Surfaced</h2>
+<p>Key missing ISN tokens from this rotation:</p>
+<h3 id="physical_base-open-segment">physical_base (open segment)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Token</th>
+<th>Domain</th>
+<th>Occurrences</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>anomalous_current_density</code></td>
+<td>edge_plasma_physics</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td><code>particle_convective_velocity</code></td>
+<td>edge_plasma_physics</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><code>reference_major_radius</code></td>
+<td>edge_plasma_physics</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>reference_major_radius_of_vacuum_toroidal_field</code></td>
+<td>edge_plasma_physics</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td><code>sobol_sensitivity_index_input_path_reference</code></td>
+<td>edge_plasma_physics</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>position_of_transport_solver_boundary_condition</code></td>
+<td>computational_workflow</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><code>relative_deviation_of_electron_energy_equation</code></td>
+<td>computational_workflow</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>energy_transport_boundary_condition_value</code></td>
+<td>computational_workflow</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><code>workflow_component_control_parameter</code></td>
+<td>computational_workflow</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>current_density</code> (fast_ion context)</td>
+<td>fast_particles</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>current_density_co_passing</code></td>
+<td>fast_particles</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>beam_tracing_wave_vector_varying_toroidal_mode_number_flag</code></td>
+<td>waves</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><code>wave_electric_field_phase_per_toroidal_mode</code></td>
+<td>waves</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="patterns">Patterns</h3>
+<ul>
+<li><strong>Engineering metadata</strong>: <code>workflow_component_control_parameter</code>, <code>position_of_transport_solver_boundary_condition</code> — inherently not physics quantities</li>
+<li><strong>Complex decompositions</strong>: <code>reference_major_radius_of_vacuum_toroidal_field</code> — long compound that could decompose into position + subject + base</li>
+<li><strong>Missing particle species modifiers</strong>: <code>anomalous_current_density</code>, <code>co_passing</code>, <code>counter_passing</code> — need ISN tokens for anomalous transport and passing-particle species</li>
+</ul>
+<h2 id="cost-breakdown">Cost Breakdown</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>Generate</th>
+<th>Enrich</th>
+<th>Review</th>
+<th>Regen</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>edge_plasma_physics</td>
+<td>$0.00</td>
+<td>$0.19</td>
+<td>$0.00</td>
+<td>$0.81</td>
+<td>$0.99</td>
+</tr>
+<tr class="even">
+<td>computational_workflow</td>
+<td>$0.00</td>
+<td>$0.00</td>
+<td>$0.00</td>
+<td>$0.48</td>
+<td>$0.48</td>
+</tr>
+<tr class="odd">
+<td>fast_particles</td>
+<td>$0.00</td>
+<td>$0.09</td>
+<td>$0.00</td>
+<td>$0.37</td>
+<td>$0.46</td>
+</tr>
+<tr class="even">
+<td>waves</td>
+<td>$0.00</td>
+<td>$0.04</td>
+<td>$0.00</td>
+<td>$0.42</td>
+<td>$0.46</td>
+</tr>
+<tr class="odd">
+<td><strong>TOTAL</strong></td>
+<td><strong>$0.00</strong></td>
+<td><strong>$0.32</strong></td>
+<td><strong>$0.00</strong></td>
+<td><strong>$2.07</strong></td>
+<td><strong>$2.39</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Observations</strong>:</p>
+<ul>
+<li>Generate phase found zero new paths across all domains — extraction is saturated</li>
+<li>Review phase had zero candidates — all existing names were already reviewed</li>
+<li>Cost dominated by regen phase ($2.07, 87%) — regenerating with reviewer feedback is the most expensive phase due to longer prompts with critique context</li>
+<li>Total cost $2.39 of $12.00 budget (20%) — significant underrun</li>
+</ul>
+<h2 id="recommendations-for-next-cycle">Recommendations for Next Cycle</h2>
+<ol type="1">
+<li><strong>Review the pending names</strong>: Run <code>sn review --domain &lt;domain&gt;</code> on all 4 domains to score the 7 newly created names and 10 regenerated names (now pending)</li>
+<li><strong>Model-suffix cleanup</strong>: The 4 <code>*_hager_bootstrap</code>/<code>*_sauter_bootstrap</code> names in <code>general</code> domain need targeted regeneration without model suffixes</li>
+<li><strong>Truncated name fix</strong>: <code>*_due_to_anomalous</code> names need ISN vocab for <code>anomalous_transport</code> as a physics process</li>
+<li><strong>Flag name policy</strong>: Decide whether boolean flags (<code>*_flag</code>) should be standard-named or classified as metadata and excluded from the physics grammar</li>
+<li><strong>Transport 2nd-derivatives</strong>: 15+ names with &gt;10 tokens — consider whether these need abbreviated naming conventions</li>
+</ol>
+  </main>
+</body>
+</html>

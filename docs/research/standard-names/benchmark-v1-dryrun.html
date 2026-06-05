@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="benchmark-v1-dryrun">
+  <meta name="plan-title" content="Benchmark v1 — scaffolding dry-run (2026-04-21)">
+  <meta name="plan-summary" content="Plan 34 scaffolding validation. This is a mock dry-run: no LLM">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <meta name="plan-depends-on" content="34-benchmark-v1">
+  <title>Benchmark v1 — scaffolding dry-run (2026-04-21) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Benchmark v1 — scaffolding dry-run (2026-04-21)</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/benchmark-v1-dryrun.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+        <li><strong>Depends on:</strong> <code>34-benchmark-v1</code></li>
+      </ul>
+    </section>
+<blockquote>
+<p>Plan 34 scaffolding validation. This is a <strong>mock</strong> dry-run: no LLM calls were made; the runner's canned mock returns <code>expected_name</code> verbatim for every positive and score 0.15/fail for every negative, so the reported gate pass rates here <strong>measure the harness plumbing, not model quality</strong>. A real (cost-capped) run comes after <code>cycle-cross-family-review</code> lands the reviewer pool.</p>
+</blockquote>
+<h2 id="command">Command</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python scripts/run_benchmark_v1.py <span class="at">--mock</span> <span class="at">--output</span> plans/research/data</span></code></pre></div>
+<h2 id="observations">Observations</h2>
+<ul>
+<li>Eval set loaded cleanly: <strong>20 filled positives + 10 negatives</strong>; 31 <code>TODO</code> stubs correctly skipped.</li>
+<li>Graph enrichment path exercised — cluster-sibling lookup + unit/ description fetch ran against live Neo4j without error.</li>
+<li>Compose + review batches produced valid <code>ComposeBatch</code> / <code>ReviewBatch</code> pydantic objects.</li>
+<li>Outputs written:
+<ul>
+<li><code>plans/research/data/benchmark-v1.positives.jsonl</code> (20 rows)</li>
+<li><code>plans/research/data/benchmark-v1.negatives.jsonl</code> (10 rows)</li>
+<li><code>plans/research/data/benchmark-v1.summary.json</code></li>
+<li><code>plans/research/data/benchmark-v1-summary.md</code></li>
+</ul></li>
+<li>Gating logic fires correctly: in mock mode all three gates report pass (expected — mock fabricates passing answers). Per-domain breakdown populates with the 5 seeded domains (<code>core_plasma_physics</code>, <code>edge_plasma_physics</code>, <code>equilibrium</code>, <code>magnetic_field_diagnostics</code>, <code>transport</code>). The five stress domains (<code>waves</code>, <code>fast_particles</code>, <code>turbulence</code>, <code>plasma_wall_interactions</code>, <code>gyrokinetics</code>) show n=0 because only <code>TODO</code> stubs are filed there — future-cycle work.</li>
+</ul>
+<h2 id="mock-run-summary">Mock-run summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Gate</th>
+<th style="text-align: right;">Actual</th>
+<th style="text-align: right;">Threshold</th>
+<th style="text-align: center;">Pass</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pass_at_1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr class="even">
+<td>mean_reviewer_score</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr class="odd">
+<td>negatives_rejection_rate</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: center;">✅</td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-domain-positives">Per-domain (positives)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">exact_rate</th>
+<th style="text-align: right;">mean_score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>core_plasma_physics</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+<tr class="even">
+<td>edge_plasma_physics</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+<tr class="odd">
+<td>equilibrium</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+<tr class="even">
+<td>magnetic_field_diagnostics</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+<tr class="odd">
+<td>transport</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-mock-did-not-prove">What the mock did NOT prove</h2>
+<ul>
+<li><strong>No model-quality signal.</strong> Real LLM calls are required to measure true pass@1 and reviewer score; the mock just validates wiring.</li>
+<li><strong>No cross-family consensus.</strong> Single-reviewer still — the reviewer-pool wiring belongs to <code>cycle-cross-family-review</code>.</li>
+<li><strong>No cost calibration.</strong> Compose + review are batched into two LLM calls total (mirroring <code>prompt_ab_run.py</code>); once live, a run over 20 positives + 10 negatives should cost ~$0.15–$0.30 on <code>opus-4.6</code> at current pricing.</li>
+</ul>
+<h2 id="next-step">Next step</h2>
+<p>Land <code>cycle-cross-family-review</code> (reviewer pool) and then (a) fill the 30 <code>TODO</code> stubs with one batch per stress domain and (b) execute the first live run with <code>--cost-cap 1.00</code>. Commit the live-run summary under <code>plans/research/data/benchmark-v1-live-&lt;date&gt;.md</code> at that point.</p>
+  </main>
+</body>
+</html>

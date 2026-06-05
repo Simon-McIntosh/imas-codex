@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="39-rotation-v2">
+  <meta name="plan-title" content="Standard Name Rotation v2 — rc17 Vocab + Batching + N-Reviewer">
+  <meta name="plan-summary" content="Date: 2026-04-21">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity,34-benchmark-v1">
+  <title>Standard Name Rotation v2 — rc17 Vocab + Batching + N-Reviewer | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard Name Rotation v2 — rc17 Vocab + Batching + N-Reviewer</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/39-rotation-v2.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code>, <code>34-benchmark-v1</code></li>
+      </ul>
+    </section>
+<p><strong>Date</strong>: 2026-04-21 <strong>Baseline commits</strong>: <code>ac761175</code> (VocabGap wiring fix), <code>73b22dbb</code> (N-reviewer schema), <code>787257d0</code> (token-aware batching), <code>b20ea830</code> (ISN v0.7.0rc17) <strong>Graph baseline</strong>: ~1,400 standard names, 924 VocabGap nodes, 763 Review nodes backfilled <strong>ISN version</strong>: v0.7.0rc17 (454 new grammar tokens vs rc16; 169 previously-stale VocabGaps cleaned by migration) <strong>Budget</strong>: $3/domain × 5 domains = $15 cap <strong>Actual cost</strong>: $8.82 total ($6.98 generate + $1.84 review)</p>
+<h2 id="methodology">Methodology</h2>
+<ol type="1">
+<li>Queried 5 physics domains with lowest average review scores (n≥5)</li>
+<li>Per domain: cleared non-accepted StandardName + StandardNameSource nodes via Cypher → regenerated with <code>sn generate --name-only -c 2</code> → reviewed with <code>sn review --status enriched --name-only --force -c 1</code></li>
+<li>Recorded before/after avg scores, name counts, notable improvements, residual issues</li>
+<li>Compared against prior cycle (#34) which used rc16 + non-batched pipeline</li>
+</ol>
+<p><strong>Note</strong>: The <code>sn clear</code> CLI does not support <code>--domain</code>. Domain-scoped clearing was performed via direct Cypher: delete HAS_STANDARD_NAME edges for the target domain → delete orphaned StandardName nodes → delete associated StandardNameSource nodes. The <code>sn review</code> CLI's <code>--status</code> defaults to <code>drafted</code>; newly generated names have status <code>named</code> or <code>enriched</code>, so <code>--status enriched --force</code> was required to review regenerated names.</p>
+<h2 id="baseline-summary">Baseline Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>N (scored)</th>
+<th>Avg Score</th>
+<th>Good (≥0.8)</th>
+<th>Poor (&lt;0.5)</th>
+<th>Status Mix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>plant_systems</td>
+<td>21</td>
+<td>0.461</td>
+<td>5</td>
+<td>14</td>
+<td>11 enriched, 15 named</td>
+</tr>
+<tr class="even">
+<td>plasma_wall_interactions</td>
+<td>22</td>
+<td>0.516</td>
+<td>4</td>
+<td>12</td>
+<td>12 enriched, 13 named</td>
+</tr>
+<tr class="odd">
+<td>computational_workflow</td>
+<td>38</td>
+<td>0.571</td>
+<td>18</td>
+<td>18</td>
+<td>14 drafted, 18 enriched, 43 named</td>
+</tr>
+<tr class="even">
+<td>radiation_measurement_diagnostics</td>
+<td>51</td>
+<td>0.696</td>
+<td>35</td>
+<td>16</td>
+<td>39 enriched, 21 named</td>
+</tr>
+<tr class="odd">
+<td>auxiliary_heating</td>
+<td>96</td>
+<td>0.712</td>
+<td>61</td>
+<td>30</td>
+<td>58 enriched, 60 named</td>
+</tr>
+</tbody>
+</table>
+<p>Prior cycle #34 baseline avg: 0.208 (7 domains, mean scores 0.083–0.367). This cycle baseline avg: 0.591 (5 domains, mean scores 0.461–0.712). These domains are better-scoring but still the weakest remaining after #34 improvements.</p>
+<hr />
+<h2 id="per-domain-results">Per-Domain Results</h2>
+<h3 id="1-plant_systems">1. plant_systems</h3>
+<p><strong>Baseline</strong>: n=21, mean=0.461, good=5, poor=14 <strong>Post-regen</strong>: n=16, mean=0.712, good=3, poor=2 <strong>Δ</strong>: −5 names, +0.251 mean score, −2 good, −12 poor</p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count</td>
+<td>21</td>
+<td>16</td>
+<td>−5</td>
+</tr>
+<tr class="even">
+<td>Mean score</td>
+<td>0.461</td>
+<td>0.712</td>
+<td><strong>+0.251</strong></td>
+</tr>
+<tr class="odd">
+<td>Good (≥0.8)</td>
+<td>5</td>
+<td>3</td>
+<td>−2</td>
+</tr>
+<tr class="even">
+<td>Poor (&lt;0.5)</td>
+<td>14</td>
+<td>2</td>
+<td>−12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.35, review=$0.68, total=$2.03 <strong>Names composed</strong>: 32 (21 enriched + 9 named after pipeline)</p>
+<p><strong>Top 5</strong>:</p>
+<ol type="1">
+<li><code>electron_temperature</code> — 1.000 (outstanding)</li>
+<li><code>atomic_number</code> — 1.000 (outstanding)</li>
+<li><code>major_radius_of_measurement_position</code> — 0.975 (outstanding)</li>
+<li><code>toroidal_angle_of_pellet_path_second_point</code> — 0.775 (good)</li>
+<li><code>shattered_pellet_injector_fragmentation_gas_flow_rate</code> — 0.750 (good)</li>
+</ol>
+<p><strong>Notes</strong>: Eliminated 12 of 14 poor-scored names. Domain covers balance-of-plant quantities (power, efficiency, heat loads) and pellet/SPI hardware. Major VocabGap: <code>shattered_pellet_*</code> family (SPI hardware tokens) and <code>thermal_power</code>, <code>mass_flow_rate</code>, <code>heat_load</code> bases.</p>
+<h3 id="2-plasma_wall_interactions">2. plasma_wall_interactions</h3>
+<p><strong>Baseline</strong>: n=22, mean=0.516, good=4, poor=12 <strong>Post-regen</strong>: n=5, mean=0.595, good=2, poor=3 <strong>Δ</strong>: −17 names, +0.079 mean score, −2 good, −9 poor</p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count</td>
+<td>22</td>
+<td>5</td>
+<td>−17</td>
+</tr>
+<tr class="even">
+<td>Mean score</td>
+<td>0.516</td>
+<td>0.595</td>
+<td><strong>+0.079</strong></td>
+</tr>
+<tr class="odd">
+<td>Good (≥0.8)</td>
+<td>4</td>
+<td>2</td>
+<td>−2</td>
+</tr>
+<tr class="even">
+<td>Poor (&lt;0.5)</td>
+<td>12</td>
+<td>3</td>
+<td>−9</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.90, review=$0.35, total=$2.25 <strong>Names composed</strong>: 28 (13 enriched + 6 named after pipeline)</p>
+<p><strong>Top 5</strong>:</p>
+<ol type="1">
+<li><code>vertical_component_of_magnetic_vector_potential</code> — 1.000 (outstanding)</li>
+<li><code>toroidal_component_of_electric_field</code> — 1.000 (outstanding)</li>
+<li><code>atomic_multiplicity_of_element</code> — 0.463 (adequate)</li>
+<li><code>sputtering_physical_coefficient_incident_energy_grid</code> — 0.263 (poor)</li>
+<li><code>atomic_mass</code> — 0.250 (poor)</li>
+</ol>
+<p><strong>Notes</strong>: Smallest improvement (+0.079). Root cause: domain is dominated by sputtering coefficients, BRDF parameters, and particle flux terms that lack ISN tokens. Most composed names (28) were not scored because review coverage was limited. The <code>sputtering_*</code> and <code>particle_flux_from_wall/plasma</code> families remain the primary VocabGap.</p>
+<h3 id="3-computational_workflow">3. computational_workflow</h3>
+<p><strong>Baseline</strong>: n=38, mean=0.571, good=18, poor=18 <strong>Post-regen</strong>: n=15, mean=0.684, good=8, poor=5 <strong>Δ</strong>: −23 names, +0.113 mean score, −10 good, −13 poor</p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count</td>
+<td>38</td>
+<td>15</td>
+<td>−23</td>
+</tr>
+<tr class="even">
+<td>Mean score</td>
+<td>0.571</td>
+<td>0.684</td>
+<td><strong>+0.113</strong></td>
+</tr>
+<tr class="odd">
+<td>Good (≥0.8)</td>
+<td>18</td>
+<td>8</td>
+<td>−10</td>
+</tr>
+<tr class="even">
+<td>Poor (&lt;0.5)</td>
+<td>18</td>
+<td>5</td>
+<td>−13</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.23, review=$0.28, total=$1.51 <strong>Names composed</strong>: 15 (11 enriched + 4 named after pipeline)</p>
+<p><strong>Top 5</strong>:</p>
+<ol type="1">
+<li><code>convergence_iteration_count</code> — 1.000 (outstanding)</li>
+<li><code>simulation_start_time</code> — 1.000 (outstanding)</li>
+<li><code>energy_equation_relative_deviation</code> — 0.438 (adequate)</li>
+<li><code>normalized_radial_coordinate_of_transport_boundary_condition</code> — 0.425 (adequate)</li>
+<li><code>electron_energy_transport_boundary_condition_value</code> — 0.338 (poor)</li>
+</ol>
+<p><strong>Notes</strong>: Eliminated 13 of 18 poor-scored names. Workflow/solver metadata quantities (<code>control_float</code>, boundary conditions) inherently score lower because they're engineering parameters not physics quantities — the ISN grammar is designed for physics quantities. The <code>workflow_component_control_float_parameter</code> name (score=0.263) reflects this fundamental mismatch.</p>
+<h3 id="4-radiation_measurement_diagnostics">4. radiation_measurement_diagnostics</h3>
+<p><strong>Baseline</strong>: n=51, mean=0.696, good=35, poor=16 <strong>Post-regen</strong>: n=7, mean=0.890, good=6, poor=1 <strong>Δ</strong>: −44 names, +0.194 mean score, −29 good, −15 poor</p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count</td>
+<td>51</td>
+<td>7</td>
+<td>−44</td>
+</tr>
+<tr class="even">
+<td>Mean score</td>
+<td>0.696</td>
+<td>0.890</td>
+<td><strong>+0.194</strong></td>
+</tr>
+<tr class="odd">
+<td>Good (≥0.8)</td>
+<td>35</td>
+<td>6</td>
+<td>−29</td>
+</tr>
+<tr class="even">
+<td>Poor (&lt;0.5)</td>
+<td>16</td>
+<td>1</td>
+<td>−15</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.17, review=$0.24, total=$1.41 <strong>Names composed</strong>: 15 (10 enriched + 5 named after pipeline)</p>
+<p><strong>Top 5</strong>:</p>
+<ol type="1">
+<li><code>atomic_number</code> — 1.000 (outstanding)</li>
+<li><code>total_radiated_power</code> — 1.000 (outstanding)</li>
+<li>(remaining 5 names all ≥0.75 good tier)</li>
+</ol>
+<p><strong>Notes</strong>: Best post-regen average (0.890). Large count reduction (51→7) reflects better deduplication and filtering of unnameable diagnostic hardware paths. Spectral filter wavelength bounds (<code>lower_wavelength_bound_of_spectral_filter</code>) and polychromator band tokens remain VocabGaps.</p>
+<h3 id="5-auxiliary_heating">5. auxiliary_heating</h3>
+<p><strong>Baseline</strong>: n=96, mean=0.712, good=61, poor=30 <strong>Post-regen</strong>: n=16, mean=0.914, good=15, poor=1 <strong>Δ</strong>: −80 names, +0.202 mean score, −46 good, −29 poor</p>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count</td>
+<td>96</td>
+<td>16</td>
+<td>−80</td>
+</tr>
+<tr class="even">
+<td>Mean score</td>
+<td>0.712</td>
+<td>0.914</td>
+<td><strong>+0.202</strong></td>
+</tr>
+<tr class="odd">
+<td>Good (≥0.8)</td>
+<td>61</td>
+<td>15</td>
+<td>−46</td>
+</tr>
+<tr class="even">
+<td>Poor (&lt;0.5)</td>
+<td>30</td>
+<td>1</td>
+<td>−29</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.33, review=$0.29, total=$1.62 <strong>Names composed</strong>: 23 (7 enriched + 16 named after pipeline)</p>
+<p><strong>Top 5</strong>:</p>
+<ol type="1">
+<li><code>wave_absorbed_power_per_toroidal_mode</code> — 1.000 (outstanding)</li>
+<li><code>right_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code> — 1.000 (outstanding)</li>
+<li><code>right_hand_circularly_polarized_electric_field_phase_per_toroidal_mode</code> — 1.000 (outstanding)</li>
+<li><code>left_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code> — 1.000 (outstanding)</li>
+<li><code>left_hand_circularly_polarized_electric_field_phase_per_toroidal_mode</code> — 1.000 (outstanding)</li>
+</ol>
+<p><strong>Notes</strong>: Best absolute improvement domain. Wave field decomposition names are clean and systematic. The <code>wave_absorbed_power_per_toroidal_mode</code> family still triggers VocabGaps but scores outstanding regardless, suggesting the reviewer values the physics decomposition. Only 1 poor-scoring name remains.</p>
+<hr />
+<h2 id="aggregate-summary">Aggregate Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>Before Mean</th>
+<th>After Mean</th>
+<th>Δ Mean</th>
+<th>Before N</th>
+<th>After N</th>
+<th>Gen $</th>
+<th>Rev $</th>
+<th>Total $</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>plant_systems</td>
+<td>0.461</td>
+<td>0.712</td>
+<td><strong>+0.251</strong></td>
+<td>21</td>
+<td>16</td>
+<td>1.35</td>
+<td>0.68</td>
+<td>2.03</td>
+</tr>
+<tr class="even">
+<td>plasma_wall_interactions</td>
+<td>0.516</td>
+<td>0.595</td>
+<td><strong>+0.079</strong></td>
+<td>22</td>
+<td>5</td>
+<td>1.90</td>
+<td>0.35</td>
+<td>2.25</td>
+</tr>
+<tr class="odd">
+<td>computational_workflow</td>
+<td>0.571</td>
+<td>0.684</td>
+<td><strong>+0.113</strong></td>
+<td>38</td>
+<td>15</td>
+<td>1.23</td>
+<td>0.28</td>
+<td>1.51</td>
+</tr>
+<tr class="even">
+<td>radiation_measurement_diagnostics</td>
+<td>0.696</td>
+<td>0.890</td>
+<td><strong>+0.194</strong></td>
+<td>51</td>
+<td>7</td>
+<td>1.17</td>
+<td>0.24</td>
+<td>1.41</td>
+</tr>
+<tr class="odd">
+<td>auxiliary_heating</td>
+<td>0.712</td>
+<td>0.914</td>
+<td><strong>+0.202</strong></td>
+<td>96</td>
+<td>16</td>
+<td>1.33</td>
+<td>0.29</td>
+<td>1.62</td>
+</tr>
+<tr class="even">
+<td><strong>TOTAL</strong></td>
+<td><strong>0.591</strong></td>
+<td><strong>0.759</strong></td>
+<td><strong>+0.168</strong></td>
+<td><strong>228</strong></td>
+<td><strong>59</strong></td>
+<td><strong>$6.98</strong></td>
+<td><strong>$1.84</strong></td>
+<td><strong>$8.82</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="comparison-with-cycle-34">Comparison with Cycle #34</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Cycle #34 (rc16)</th>
+<th>Cycle #39 (rc17)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Baseline avg</td>
+<td>0.208</td>
+<td>0.591</td>
+</tr>
+<tr class="even">
+<td>Post-regen avg</td>
+<td>0.805</td>
+<td>0.759</td>
+</tr>
+<tr class="odd">
+<td>Δ avg</td>
+<td>+0.597</td>
+<td>+0.168</td>
+</tr>
+<tr class="even">
+<td>Total cost</td>
+<td>$10.53</td>
+<td>$8.82</td>
+</tr>
+<tr class="odd">
+<td>Domains processed</td>
+<td>7</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>Cost per domain</td>
+<td>$1.50</td>
+<td>$1.76</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key insight</strong>: Cycle #34 saw massive improvement (+0.597) because it targeted the worst domains (0.08–0.37 avg). This cycle targeted mid-tier domains (0.46–0.71), so the headroom for improvement was smaller. The post-regen quality ceiling (~0.76) is somewhat lower than #34's (~0.81), likely because:</p>
+<ol type="1">
+<li>These domains have more engineering/infrastructure quantities (plant systems, workflow metadata) that don't decompose cleanly into ISN physics grammar</li>
+<li>Review coverage was lower due to the status filter mismatch (<code>--status enriched</code> caught most, but <code>--status named</code> names already had prior scores)</li>
+<li>The count reduction (228→59, 74%) was steeper, reflecting better classifier filtering of non-physics paths</li>
+</ol>
+<h2 id="exemplars-top-10">Exemplars (Top 10)</h2>
+<p>Names scored outstanding (1.0) with clear physics decomposition and correct ISN grammar:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Score</th>
+<th>Domain</th>
+<th>Key Strength</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>electron_temperature</code></td>
+<td>1.000</td>
+<td>plant_systems</td>
+<td>Universal physics quantity, clean decomposition</td>
+</tr>
+<tr class="even">
+<td><code>atomic_number</code></td>
+<td>1.000</td>
+<td>radiation_measurement_diagnostics</td>
+<td>Element-intrinsic, dimensionless, unambiguous</td>
+</tr>
+<tr class="odd">
+<td><code>vertical_component_of_magnetic_vector_potential</code></td>
+<td>1.000</td>
+<td>plasma_wall_interactions</td>
+<td>Correct cylindrical decomposition pattern</td>
+</tr>
+<tr class="even">
+<td><code>toroidal_component_of_electric_field</code></td>
+<td>1.000</td>
+<td>plasma_wall_interactions</td>
+<td>Standard vector component naming</td>
+</tr>
+<tr class="odd">
+<td><code>convergence_iteration_count</code></td>
+<td>1.000</td>
+<td>computational_workflow</td>
+<td>Clean solver metadata, integer-valued</td>
+</tr>
+<tr class="even">
+<td><code>simulation_start_time</code></td>
+<td>1.000</td>
+<td>computational_workflow</td>
+<td>Precise temporal metadata</td>
+</tr>
+<tr class="odd">
+<td><code>total_radiated_power</code></td>
+<td>1.000</td>
+<td>radiation_measurement_diagnostics</td>
+<td>Volume-integrated, well-defined observable</td>
+</tr>
+<tr class="even">
+<td><code>wave_absorbed_power_per_toroidal_mode</code></td>
+<td>1.000</td>
+<td>auxiliary_heating</td>
+<td>Toroidal decomposition, clear wave heating term</td>
+</tr>
+<tr class="odd">
+<td><code>right_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code></td>
+<td>1.000</td>
+<td>auxiliary_heating</td>
+<td>Correct polarization + mode decomposition</td>
+</tr>
+<tr class="even">
+<td><code>right_hand_circularly_polarized_electric_field_phase_per_toroidal_mode</code></td>
+<td>1.000</td>
+<td>auxiliary_heating</td>
+<td>Consistent with amplitude companion</td>
+</tr>
+</tbody>
+</table>
+<h2 id="residual-antipatterns-bottom-10">Residual Antipatterns (Bottom 10)</h2>
+<p>Names that scored poorly or inadequately — patterns that need ISN vocab or prompt improvements:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Score</th>
+<th>Domain</th>
+<th>Root Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>atomic_mass</code></td>
+<td>0.250</td>
+<td>computational_workflow</td>
+<td><code>atomic_mass</code> not an ISN physical_base token</td>
+</tr>
+<tr class="even">
+<td><code>workflow_component_control_float_parameter</code></td>
+<td>0.263</td>
+<td>computational_workflow</td>
+<td>Generic solver parameter, not physics quantity — inherently unnameable under ISN grammar</td>
+</tr>
+<tr class="odd">
+<td><code>sputtering_physical_coefficient_incident_energy_grid</code></td>
+<td>0.263</td>
+<td>plasma_wall_interactions</td>
+<td><code>sputtering_physical_coefficient</code> not in ISN; grid coordinate, not a physics base</td>
+</tr>
+<tr class="even">
+<td><code>electron_energy_transport_boundary_condition_value</code></td>
+<td>0.338</td>
+<td>computational_workflow</td>
+<td>Boundary condition values are solver config, not physics observables</td>
+</tr>
+<tr class="odd">
+<td><code>normalized_radial_coordinate_of_transport_boundary_condition</code></td>
+<td>0.425</td>
+<td>computational_workflow</td>
+<td>Same as above — solver coordinate, not a measurement</td>
+</tr>
+<tr class="even">
+<td><code>energy_equation_relative_deviation</code></td>
+<td>0.438</td>
+<td>computational_workflow</td>
+<td>Convergence diagnostic, not physics</td>
+</tr>
+<tr class="odd">
+<td><code>atomic_multiplicity_of_element</code></td>
+<td>0.463</td>
+<td>plasma_wall_interactions</td>
+<td><code>atomic_multiplicity_of_element</code> not in ISN grammar</td>
+</tr>
+<tr class="even">
+<td><code>rejected_thermal_power</code></td>
+<td>0.550</td>
+<td>plant_systems</td>
+<td><code>rejected_thermal_power</code> not a recognized ISN base</td>
+</tr>
+<tr class="odd">
+<td><code>shattered_pellet_injector_fragmentation_gas_temperature</code></td>
+<td>0.625</td>
+<td>plant_systems</td>
+<td>Long compound <code>shattered_pellet_injector_*</code> family needs ISN tokens</td>
+</tr>
+<tr class="even">
+<td><code>ion_state_is_neutral_flag</code></td>
+<td>0.592</td>
+<td>(edge case)</td>
+<td>Boolean flag, not a physics quantity</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Common antipattern themes</strong>:</p>
+<ol type="1">
+<li><strong>Engineering/solver metadata</strong> (boundary conditions, convergence metrics, workflow parameters) — fundamentally not physics quantities</li>
+<li><strong>Missing ISN bases</strong> (<code>atomic_mass</code>, <code>sputtering_coefficient</code>, <code>rejected_thermal_power</code>) — fixable by ISN rc18</li>
+<li><strong>Hardware-specific compound terms</strong> (<code>shattered_pellet_injector_*</code>) — requires ISN object modifiers for SPI hardware</li>
+</ol>
+<h2 id="new-vocabgaps-discovered">New VocabGaps Discovered</h2>
+<p>Key missing ISN tokens surfaced by Token-miss warnings during this cycle, grouped by segment:</p>
+<h3 id="physical_base-highest-impact">physical_base (highest impact)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Token</th>
+<th>Domains</th>
+<th>Occurrences</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>atomic_mass</code></td>
+<td>plant_systems, plasma_wall_interactions, computational_workflow</td>
+<td>15+</td>
+</tr>
+<tr class="even">
+<td><code>atomic_number</code></td>
+<td>plant_systems, radiation_measurement_diagnostics</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td><code>mass_flow_rate</code></td>
+<td>plant_systems</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td><code>thermal_power</code></td>
+<td>plant_systems</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>rejected_thermal_power</code></td>
+<td>plant_systems</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>electric_power</code></td>
+<td>plant_systems</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><code>sputtering_coefficient</code> (physical, chemical)</td>
+<td>plasma_wall_interactions</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td><code>particle_flux_from_wall</code> / <code>particle_flux_from_plasma</code></td>
+<td>plasma_wall_interactions</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td><code>magnetic_vector_potential</code></td>
+<td>plasma_wall_interactions</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>current_density</code></td>
+<td>plasma_wall_interactions</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>peak_power_flux_density</code></td>
+<td>plasma_wall_interactions</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td><code>pumping_speed</code> / <code>pumping_rate</code></td>
+<td>plasma_wall_interactions</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>gas_puff_rate</code></td>
+<td>plasma_wall_interactions</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>wave_absorbed_power_per_toroidal_mode</code></td>
+<td>auxiliary_heating</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td><code>wave_absorbed_power_inside_flux_surface</code></td>
+<td>auxiliary_heating</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="subject-modifiers">Subject modifiers</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Token</th>
+<th>Domains</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>shattered_pellet_injector_*</code> (family)</td>
+<td>plant_systems</td>
+</tr>
+<tr class="even">
+<td><code>bidirectional_reflectance_distribution_function</code></td>
+<td>plasma_wall_interactions</td>
+</tr>
+<tr class="odd">
+<td><code>polychromator_spectral_band</code></td>
+<td>radiation_measurement_diagnostics</td>
+</tr>
+</tbody>
+</table>
+<h3 id="position-modifiers">Position modifiers</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Token</th>
+<th>Domains</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>at_wall</code></td>
+<td>plasma_wall_interactions</td>
+</tr>
+<tr class="even">
+<td><code>at_inner_divertor_target</code> / <code>at_outer_divertor_target</code></td>
+<td>plasma_wall_interactions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="promptvocab-gaps-for-future-cycles">Prompt/Vocab Gaps for Future Cycles</h2>
+<h3 id="isn-rc18-priorities">ISN rc18 priorities</h3>
+<ol type="1">
+<li><p><strong>High-impact bases</strong> (cover ≥3 domains):</p>
+<ul>
+<li><code>atomic_mass</code>, <code>atomic_number</code>, <code>atomic_multiplicity</code> — used across plant, PWI, radiation, computational</li>
+<li><code>mass_flow_rate</code>, <code>thermal_power</code>, <code>electric_power</code> — plant systems</li>
+<li><code>particle_flux</code> with <code>from_wall</code>/<code>from_plasma</code> modifiers — PWI, edge</li>
+</ul></li>
+<li><p><strong>Domain-specific bases</strong> (reduce quarantined names):</p>
+<ul>
+<li><code>sputtering_coefficient</code> (physical + chemical variants) — PWI</li>
+<li><code>peak_power_flux_density</code> — PWI</li>
+<li><code>wave_absorbed_power</code> family — auxiliary heating</li>
+<li><code>rejected_thermal_power</code>, <code>heat_load</code> — plant systems</li>
+</ul></li>
+<li><p><strong>Object modifiers</strong>:</p>
+<ul>
+<li><code>shattered_pellet_injector</code> — SPI hardware (plant_systems)</li>
+<li><code>breeding_blanket_module</code> — structural components (from #34)</li>
+<li><code>spectral_filter</code>, <code>polychromator</code> — radiation diagnostics</li>
+</ul></li>
+</ol>
+<h3 id="pipeline-improvements-identified">Pipeline improvements identified</h3>
+<ol type="1">
+<li><strong><code>sn clear --domain</code></strong>: Add domain scoping to the CLI clear command to avoid manual Cypher</li>
+<li><strong>Review status alignment</strong>: Generation produces <code>named</code>/<code>enriched</code> status names, but review defaults to <code>--status drafted</code> — consider auto-detecting the correct status for newly generated names</li>
+<li><strong>VocabGap <code>created_at</code></strong>: VocabGap nodes lack <code>created_at</code> timestamps, making it impossible to filter "new this cycle" vs pre-existing gaps</li>
+<li><strong>Solver metadata handling</strong>: Computational workflow quantities (boundary conditions, convergence metrics) fundamentally don't fit the ISN physics grammar — consider a separate "metadata" kind or exclude from physics-domain scoring comparisons</li>
+</ol>
+<h3 id="estimated-impact-of-rc18">Estimated impact of rc18</h3>
+<p>With the ~15 high-impact tokens listed above added to ISN, approximately:</p>
+<ul>
+<li>10–15 currently quarantined names in plant_systems would validate</li>
+<li>8–12 in plasma_wall_interactions would validate</li>
+<li>3–5 in auxiliary_heating would validate</li>
+<li>Net improvement: ~25–30 names moved from quarantined to validated</li>
+</ul>
+  </main>
+</body>
+</html>

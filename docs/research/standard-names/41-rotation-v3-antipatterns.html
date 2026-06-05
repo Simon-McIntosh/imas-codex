@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="41-rotation-v3-antipatterns">
+  <meta name="plan-title" content="Rotation v3 — Anti-pattern Audit">
+  <meta name="plan-summary" content="Date: 2025-07-25">
+  <meta name="plan-status" content="active">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <title>Rotation v3 — Anti-pattern Audit | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Rotation v3 — Anti-pattern Audit</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/41-rotation-v3-antipatterns.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+      </ul>
+    </section>
+<p><strong>Date</strong>: 2025-07-25 <strong>Status</strong>: In progress</p>
+<h2 id="summary">Summary</h2>
+<p>Systematic audit of anti-patterns in the standard names corpus across under-reviewed physics domains. Identifies four anti-pattern classes, quantifies prevalence, applies fixes via classifier rules, graph corrections, and reviewer prompt updates.</p>
+<h2 id="anti-pattern-inventory">Anti-pattern Inventory</h2>
+<h3 id="1-duplicated-tokens-7-names">1. Duplicated Tokens (7 names)</h3>
+<p>Names containing repeated consecutive tokens (e.g. <code>_magnetic_magnetic_</code>):</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Domain</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>fall_time_of_magnetic_magnetic_field_probe</code></td>
+<td>neutronics</td>
+<td>enriched</td>
+</tr>
+<tr class="even">
+<td><code>fall_time_of_magnetic_magnetic_magnetic_field_probe</code></td>
+<td>particle_measurement_diagnostics</td>
+<td>enriched</td>
+</tr>
+<tr class="odd">
+<td><code>poloidal_component_of_magnetic_field_of_poloidal_magnetic_magnetic_field_probe</code></td>
+<td>equilibrium</td>
+<td>named</td>
+</tr>
+<tr class="even">
+<td><code>poloidal_component_of_magnetic_field_of_poloidal_magnetic_magnetic_magnetic_field_probe</code></td>
+<td>equilibrium</td>
+<td>enriched</td>
+</tr>
+<tr class="odd">
+<td><code>poloidal_magnetic_magnetic_field_probe_voltage</code></td>
+<td>equilibrium</td>
+<td>enriched</td>
+</tr>
+<tr class="even">
+<td><code>rise_time_of_magnetic_magnetic_field_probe</code></td>
+<td>neutronics</td>
+<td>enriched</td>
+</tr>
+<tr class="odd">
+<td><code>rise_time_of_magnetic_magnetic_magnetic_field_probe</code></td>
+<td>particle_measurement_diagnostics</td>
+<td>enriched</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Root cause</strong>: LLM composer stuttering on repeated <code>magnetic</code> when composing names for <code>b_field_sensor</code> paths inside magnetic probe contexts.</p>
+<p><strong>Fix</strong>: Delete and regenerate from source DD paths.</p>
+<h3 id="2-placeholder-names-2-names">2. Placeholder Names (2 names)</h3>
+<p>Names that describe data containers, not physical quantities:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Domain</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>constant_float_value</code></td>
+<td>general</td>
+<td>named</td>
+</tr>
+<tr class="even">
+<td><code>constant_integer_value</code></td>
+<td>general</td>
+<td>named</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Root cause</strong>: DD paths for generic constant storage (<code>summary/local/parameter/*/value</code>) passed through to extraction despite not representing physics.</p>
+<p><strong>Fix</strong>: Add classifier rule S3 to skip placeholder patterns.</p>
+<h3 id="3-wrong-domain--neutronics-5-names">3. Wrong Domain — Neutronics (5 names)</h3>
+<p>All 5 neutronics-domain names are detector timing or magnetic probe quantities that belong in <code>particle_measurement_diagnostics</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>IMAS Path</th>
+<th>IMAS Domain</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>fall_time_of_magnetic_magnetic_field_probe</code></td>
+<td>neutron_diagnostic/detector/b_field_sensor/fall_time</td>
+<td>particle_measurement_diagnostics</td>
+</tr>
+<tr class="even">
+<td><code>rise_time_of_magnetic_magnetic_field_probe</code></td>
+<td>neutron_diagnostic/detector/b_field_sensor/rise_time</td>
+<td>particle_measurement_diagnostics</td>
+</tr>
+<tr class="odd">
+<td><code>neutron_detector_data_acquisition_start_time</code></td>
+<td>neutron_diagnostic/detectors/start_time</td>
+<td>neutronics</td>
+</tr>
+<tr class="even">
+<td><code>neutron_detector_recording_end_time</code></td>
+<td>neutron_diagnostic/detectors/end_time</td>
+<td>neutronics</td>
+</tr>
+<tr class="odd">
+<td><code>neutron_detector_spectrum_sampling_time</code></td>
+<td>neutron_diagnostic/detectors/spectrum_sampling_time</td>
+<td>neutronics</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note</strong>: The first 2 are also duplicated-token names and will be deleted. The last 3 are legitimately from the <code>neutronics</code> IDS — their IMAS domain IS neutronics. No domain reassignment needed for these; they correctly describe neutron detector timing.</p>
+<h3 id="4-model-specific-suffixes-4-names">4. Model-Specific Suffixes (4 names)</h3>
+<p>Names containing author/model identifiers as suffixes:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Domain</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>critical_normalized_pressure_gradient_at_pedestal_hager_bootstrap</code></td>
+<td>general</td>
+</tr>
+<tr class="even">
+<td><code>critical_normalized_pressure_gradient_at_pedestal_sauter_bootstrap</code></td>
+<td>general</td>
+</tr>
+<tr class="odd">
+<td><code>ratio_of_critical_to_experimental_normalized_pressure_gradient_hager_bootstrap</code></td>
+<td>general</td>
+</tr>
+<tr class="even">
+<td><code>ratio_of_critical_to_experimental_normalized_pressure_gradient_sauter_bootstrap</code></td>
+<td>general</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Root cause</strong>: DD paths contain model author names (hager, sauter) that the composer preserved verbatim. Standard names should be model-agnostic.</p>
+<p><strong>Fix</strong>: Add anti-pattern guidance to reviewer prompt; add calibration examples.</p>
+<h2 id="review-coverage-pre-intervention">Review Coverage (pre-intervention)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>Total</th>
+<th>Enriched</th>
+<th>Named</th>
+<th>Review %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>neutronics</td>
+<td>5</td>
+<td>2</td>
+<td>3</td>
+<td>0%</td>
+</tr>
+<tr class="even">
+<td>plasma_measurement_diagnostics</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>0%</td>
+</tr>
+<tr class="odd">
+<td>magnetic_field_systems</td>
+<td>14</td>
+<td>8</td>
+<td>6</td>
+<td>0%</td>
+</tr>
+<tr class="even">
+<td>fast_particles</td>
+<td>29</td>
+<td>26</td>
+<td>3</td>
+<td>0%</td>
+</tr>
+<tr class="odd">
+<td>plasma_wall_interactions</td>
+<td>17</td>
+<td>13</td>
+<td>4</td>
+<td>0%</td>
+</tr>
+<tr class="even">
+<td>particle_measurement_diagnostics</td>
+<td>32</td>
+<td>18</td>
+<td>14</td>
+<td>0%</td>
+</tr>
+<tr class="odd">
+<td>edge_plasma_physics</td>
+<td>75</td>
+<td>46</td>
+<td>29</td>
+<td>0%</td>
+</tr>
+<tr class="even">
+<td>general</td>
+<td>142</td>
+<td>37</td>
+<td>97</td>
+<td>0%</td>
+</tr>
+<tr class="odd">
+<td>transport</td>
+<td>238</td>
+<td>180</td>
+<td>58</td>
+<td>0%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="fixes-applied">Fixes Applied</h2>
+<h3 id="classifier-rule-s3--placeholder-skip">Classifier Rule S3 — Placeholder Skip</h3>
+<p>Added rule to <code>classifier.py</code> skipping paths whose leaf segment matches <code>^constant_(float|integer|boolean)_value$</code> or similar non-physics container patterns.</p>
+<h3 id="reviewer-prompt--model-suffix-anti-pattern">Reviewer Prompt — Model Suffix Anti-pattern</h3>
+<p>Added guidance to the review prompt flagging names ending in known model author surnames as convention violations.</p>
+<h3 id="calibration--model-suffix-example">Calibration — Model Suffix Example</h3>
+<p>Added poor-tier calibration entry for model-suffix anti-pattern.</p>
+<h2 id="review-results">Review Results</h2>
+<h3 id="review-cost-summary">Review Cost Summary</h3>
+<p>Total LLM spend: <strong>$2.35</strong> (of $20 cap)</p>
+<h3 id="domains-reviewed">Domains Reviewed</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>Names Scored</th>
+<th>Tier Distribution</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>neutronics</td>
+<td>3</td>
+<td>3 good</td>
+<td>$0.08</td>
+</tr>
+<tr class="even">
+<td>plasma_measurement_diagnostics</td>
+<td>2+2=4</td>
+<td>1 outstanding, 3 good</td>
+<td>$0.14</td>
+</tr>
+<tr class="odd">
+<td>magnetic_field_systems</td>
+<td>6</td>
+<td>5 outstanding, 1 good</td>
+<td>$0.12</td>
+</tr>
+<tr class="even">
+<td>fast_particles</td>
+<td>18</td>
+<td>14 good, 4 adequate</td>
+<td>$0.30</td>
+</tr>
+<tr class="odd">
+<td>plasma_wall_interactions</td>
+<td>12</td>
+<td>1 outstanding, 10 good, 1 adequate</td>
+<td>$0.24</td>
+</tr>
+<tr class="even">
+<td>particle_measurement_diagnostics</td>
+<td>2</td>
+<td>2 good</td>
+<td>$0.07</td>
+</tr>
+<tr class="odd">
+<td>general</td>
+<td>92</td>
+<td>50 outstanding, 38 good, 3 adequate, 1 poor</td>
+<td>$1.03</td>
+</tr>
+<tr class="even">
+<td>edge_plasma_physics</td>
+<td>22</td>
+<td>7 outstanding, 10 good, 3 adequate, 2 poor</td>
+<td>$0.45</td>
+</tr>
+</tbody>
+</table>
+<h3 id="overall-post-review-state">Overall Post-Review State</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Domain</th>
+<th>Total</th>
+<th>Scored</th>
+<th>Avg%</th>
+<th>Outstanding</th>
+<th>Good</th>
+<th>Adequate</th>
+<th>Poor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>magnetic_field_systems</td>
+<td>14</td>
+<td>14</td>
+<td>88.4</td>
+<td>11</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>plasma_control</td>
+<td>25</td>
+<td>25</td>
+<td>93.6</td>
+<td>23</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>equilibrium</td>
+<td>60</td>
+<td>57</td>
+<td>78.3</td>
+<td>37</td>
+<td>5</td>
+<td>13</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>transport</td>
+<td>238</td>
+<td>183</td>
+<td>89.7</td>
+<td>159</td>
+<td>4</td>
+<td>5</td>
+<td>15</td>
+</tr>
+<tr class="odd">
+<td>general</td>
+<td>170</td>
+<td>130</td>
+<td>87.6</td>
+<td>86</td>
+<td>38</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>edge_plasma_physics</td>
+<td>81</td>
+<td>67</td>
+<td>66.3</td>
+<td>32</td>
+<td>10</td>
+<td>6</td>
+<td>19</td>
+</tr>
+<tr class="odd">
+<td>fast_particles</td>
+<td>40</td>
+<td>27</td>
+<td>74.8</td>
+<td>8</td>
+<td>15</td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>neutronics</td>
+<td>6</td>
+<td>3</td>
+<td>70.8</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>plasma_wall_interactions</td>
+<td>21</td>
+<td>16</td>
+<td>73.1</td>
+<td>3</td>
+<td>10</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>particle_measurement_diagnostics</td>
+<td>31</td>
+<td>17</td>
+<td>90.6</td>
+<td>12</td>
+<td>4</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>plasma_measurement_diagnostics</td>
+<td>4</td>
+<td>2</td>
+<td>84.4</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><strong>Totals</strong></td>
+<td><strong>920</strong></td>
+<td><strong>702</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall coverage: 76.3% scored (702/920)</strong></p>
+<h3 id="score-outliers-flagged-for-investigation">Score Outliers (flagged for investigation)</h3>
+<ul>
+<li><code>ratio_of_critical_to_experimental_normalized_pressure_gradient_at_pedestal</code>: 0.51 → regenerate</li>
+<li><code>poloidal_component_of_current_density_due_to_anomalous</code>: 0.39 → poor, investigate</li>
+<li><code>toroidal_component_of_current_density_due_to_anomalous</code>: 0.39 → poor, investigate</li>
+<li><code>vertical_component_of_momentum_flux_limiter</code>: 0.42 → regenerate</li>
+<li><code>pedestal_fit_coefficients</code>: 0.56 → investigate</li>
+<li><code>bidirectional_reflectance_distribution_function_coefficient_at_wall</code>: 0.57 → verbose</li>
+</ul>
+<h2 id="post-fix-counts">Post-fix Counts</h2>
+<h3 id="fixed">Fixed</h3>
+<ul>
+<li><strong>7 duplicate-token names</strong> deleted (all contained <code>_magnetic_magnetic_</code>)</li>
+<li><strong>2 placeholder names</strong> deleted (<code>constant_float_value</code>, <code>constant_integer_value</code>)</li>
+<li>Classifier rule S3 added to prevent future placeholder names</li>
+<li>Review prompt updated with [I1.7] model-suffix anti-pattern check</li>
+<li>Calibration entry added for model-suffix anti-pattern (poor tier)</li>
+</ul>
+<h3 id="residual-next-cycle">Residual (next cycle)</h3>
+<ul>
+<li><strong>4 model-suffix names</strong> remain (<code>*_hager_bootstrap</code>, <code>*_sauter_bootstrap</code>) — need regeneration without model suffixes</li>
+<li><strong>2 poor edge_plasma names</strong> (<code>*_due_to_anomalous</code>) truncated by LLM</li>
+<li><code>general</code> domain still acts as catch-all for 170 names (up from 142 after reviews revised and reclassified some names)</li>
+<li>edge_plasma_physics has highest poor-tier count (19) — many need revision</li>
+</ul>
+<h3 id="new-anti-patterns-discovered">New Anti-patterns Discovered</h3>
+<ol type="1">
+<li><strong>Truncated names</strong>: <code>poloidal_component_of_current_density_due_to_anomalous</code> and <code>toroidal_component_of_current_density_due_to_anomalous</code> — the LLM truncated <code>anomalous_transport</code> to just <code>anomalous</code></li>
+<li><strong>Grammar parse failures</strong>: <code>fast_ion_toroidal_current_density</code> fails grammar (component must precede subject) — needs rewrite to <code>toroidal_component_of_fast_ion_current_density</code></li>
+<li><strong>Verbose compounds</strong>: <code>bidirectional_reflectance_distribution_function_coefficient_at_wall</code> (10+ tokens) — too long even for an open-vocabulary physical_base</li>
+<li><strong>COCOS type=one_like without integer</strong>: Multiple names flagged with <code>cocos_transformation_type='one_like'</code> but no COCOS integer — graph edge creation skipped</li>
+</ol>
+  </main>
+</body>
+</html>

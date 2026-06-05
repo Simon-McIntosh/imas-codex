@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="46-linking-cost-fix">
+  <meta name="plan-title" content="46 — Standard-name linking &amp; review-cost integrity fixes">
+  <meta name="plan-summary" content="Two unrelated integrity gaps in the Standard Names subsystem surfaced together">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity,sn-catalog-quality-refactor">
+  <title>46 — Standard-name linking &amp; review-cost integrity fixes | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>46 — Standard-name linking &amp; review-cost integrity fixes</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/46-linking-cost-fix.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code>, <code>sn-catalog-quality-refactor</code></li>
+      </ul>
+    </section>
+<p><strong>Status:</strong> Implemented <strong>Date:</strong> 2026-04-21 <strong>Scope:</strong> graph integrity (source→SN links), observability (Review cost/tokens)</p>
+<h2 id="problem">Problem</h2>
+<p>Two unrelated integrity gaps in the Standard Names subsystem surfaced together during a <code>sn status</code> review:</p>
+<ol type="1">
+<li><p><strong>Missing <code>PRODUCED_NAME</code> edges.</strong> A growing population of <code>StandardNameSource</code> nodes carried <code>status='composed'</code> or <code>status='attached'</code> but had no edge to any <code>StandardName</code>. Consumers that walk <code>(sn:StandardName)&lt;-[:PRODUCED_NAME]-(src:StandardNameSource)</code> silently lost provenance for these nodes, yet the sources looked "done" from a pipeline-state perspective. A parallel population of 58 <code>StandardName</code> nodes existed without any producing source — unreachable via the same traversal.</p></li>
+<li><p><strong>NULL cost / tokens on every <code>Review</code> node.</strong> All 1019 <code>Review</code> nodes in the graph had <code>cost_usd IS NULL</code>, <code>tokens_in IS NULL</code>, <code>tokens_out IS NULL</code>, so no budget post-mortem was possible despite the spend being ~fully instrumented in the LLM client. <code>sn generate</code> rotations report per-rotation cost correctly, but per-review accounting had been dark.</p></li>
+</ol>
+<h2 id="root-cause">Root cause</h2>
+<h3 id="bug-1--set-before-match-in-source-linker">Bug 1 — SET-before-MATCH in source linker</h3>
+<p>The Cypher used by both <code>workers.py</code> (<code>_update_sources_after_compose</code>, <code>_update_sources_after_attach</code>) and <code>graph_ops.py</code> (<code>mark_sources_composed</code>, <code>mark_sources_attached</code>) had the shape:</p>
+<pre class="cypher"><code>MATCH (sns:StandardNameSource {id: $source_id})
+SET sns.status = $status, sns.composed_name = $name  // write committed here
+WITH sns
+MATCH (sn:StandardName {id: $sn_id})
+MERGE (sns)-[:PRODUCED_NAME]-&gt;(sn)</code></pre>
+<p>If the <code>StandardName</code> MATCH returned zero rows (target deleted mid-pipeline, missing due to an earlier failure, id mismatch), the row filters out of the <code>WITH</code> stream — but the <code>SET</code> has already committed in the previous clause. The source was left stamped <code>composed</code>/<code>attached</code> with no edge. The batch-level summary reported success because the writer compared <code>records returned after the second MATCH</code> against <code>rows actually written</code>, and Neo4j doesn't surface "partial" for a sequence of Cypher clauses separated by <code>WITH</code>.</p>
+<h3 id="bug-2--missing-kwargs-in-review-persistence">Bug 2 — Missing kwargs in review persistence</h3>
+<p><code>graph_ops.write_reviews</code> accepts and writes <code>cost_usd</code>, <code>tokens_in</code>, <code>tokens_out</code> in its Cypher (already correct), but the call chain that builds Review records was:</p>
+<pre><code>review_review_worker
+ └─&gt; _review_single_batch        # returned {_items, _cost, _tokens, ...}
+      └─&gt; acall_llm_structured   # returned (result, cost, tokens)
+ └─&gt; _build_review_record(...)   # defaulted cost_usd/tokens_in/tokens_out=None</code></pre>
+<p><code>_review_single_batch</code> discarded the prompt/completion split, and the amortisation step in <code>review_review_worker</code> never computed a per-item cost to pass down. <code>_build_review_record</code> therefore wrote <code>None</code> for every Review node.</p>
+<h2 id="fix">Fix</h2>
+<h3 id="cypher-restructure-all-four-writer-paths">Cypher restructure (all four writer paths)</h3>
+<p>Move the <code>StandardName</code> MATCH <em>before</em> the <code>SET</code>, so an absent target filters the whole row out before any mutation:</p>
+<pre class="cypher"><code>MATCH (sns:StandardNameSource {id: $source_id})
+MATCH (sn:StandardName {id: $sn_id})         // &lt;- before SET
+SET sns.status = $status,
+    sns.composed_name = $name,
+    sns.produced_sn_id = $sn_id              // &lt;- new scalar mirror for audit
+MERGE (sns)-[:PRODUCED_NAME]-&gt;(sn)</code></pre>
+<p>Callers now compare <code>linked_count</code> (rows returned) against the input batch size and emit a warning when they diverge. <code>produced_sn_id</code> is a new scalar property on <code>StandardNameSource</code> — the adjacent scalar makes orphan-edge detection one property scan instead of a MATCH, and makes the invariant "<code>status in {composed,attached}</code> ⇒ <code>produced_sn_id IS NOT NULL</code>" trivially checkable.</p>
+<p>Files: <code>imas_codex/standard_names/workers.py</code>, <code>imas_codex/standard_names/graph_ops.py</code>, <code>imas_codex/schemas/standard_name.yaml</code>.</p>
+<h3 id="costtoken-plumbing">Cost/token plumbing</h3>
+<ul>
+<li><code>LLMResult.__slots__</code> now carries <code>input_tokens</code> and <code>output_tokens</code> (prompt and completion tokens respectively, drawn from <code>response.usage.*</code>). Total <code>tokens</code> is unchanged so existing tuple-unpacking <code>result, cost, tokens = await acall_llm_structured(...)</code> remains compatible.</li>
+<li><code>_review_single_batch</code> returns <code>_input_tokens</code> / <code>_output_tokens</code> in its result dict alongside <code>_cost</code> / <code>_tokens</code>, and falls back via <code>getattr</code> so test mocks that return a plain tuple still work.</li>
+<li><code>review_review_worker</code> amortises batch cost/input/output tokens across the reviewed items (both the canonical reviewer and the secondary-model loop), and passes them to <code>_build_review_record</code>.</li>
+</ul>
+<p>Files: <code>imas_codex/discovery/base/llm.py</code>, <code>imas_codex/standard_names/review/pipeline.py</code>.</p>
+<h2 id="backfill">Backfill</h2>
+<p>Orphan composed/attached sources (249 total) were partitioned by whether a <code>StandardName</code> with a matching <code>source_paths</code> entry could be found:</p>
+<ul>
+<li><strong>51 orphan sources → 77 edges recovered</strong> via a source_paths heuristic: <code>(s:StandardNameSource)</code> where <code>s.id IN sn.source_paths</code> (both in <code>dd:&lt;path&gt;</code> form). 30 sources had a single SN match, 21 had multiple (all distinct semantic siblings, all edges written).</li>
+<li><strong>198 orphan sources rolled back</strong> to <code>status='extracted'</code> because no SN had them in <code>source_paths</code> — the SN was never produced (likely deleted by an abandoned compose cycle). These re-enter the normal compose queue.</li>
+<li><strong>58 orphan StandardNames remain</strong> — pre-existing legacy from the enrichment pipeline, acknowledged in doc 35 (<code>metadata-qa-report</code>). Out of scope here.</li>
+</ul>
+<p>Review cost/tokens are <strong>not</strong> backfillable: the LLM call history is not retained per-review, only the resulting <code>reviewer_scores</code> JSON. From 2026-04-21 forward, new reviews will populate correctly.</p>
+<h2 id="post-fix-graph-state">Post-fix graph state</h2>
+<pre><code>StandardNameSource    extracted=4563  composed=1296  attached=378  ready=80  skipped=19
+Orphan composed/attached sources: 0  (was 249)
+Orphan StandardName (no source edge): 58  (unchanged, legacy)
+Review nodes:         1019     with cost recorded: 0 (0.0%, will grow on next review cycle)</code></pre>
+<h2 id="observability">Observability</h2>
+<p><code>sn status</code> dashboard extended with three new tables, visible via <code>uv run imas-codex sn status</code>:</p>
+<ul>
+<li><strong>Linking Integrity</strong> — orphan SN count, orphan composed/attached source count. Both should stay at 0 (SN count excepted while the 58 legacy names remain).</li>
+<li><strong>Review Cost</strong> — total Review nodes, % with <code>cost_usd</code> populated, cumulative USD, cumulative input/output tokens.</li>
+<li><strong>Review Cost by Reviewer Model</strong> — per-model breakdown ordered by cost desc. Makes model-selection cost comparisons a single command.</li>
+</ul>
+<h2 id="tests">Tests</h2>
+<p>8 new tests total, all passing:</p>
+<ul>
+<li><code>tests/standard_names/test_source_linking.py</code> (5 tests):
+<ul>
+<li>Cypher emits the <code>MATCH sn</code>-before-<code>SET</code> ordering in all four writer paths.</li>
+<li><code>produced_sn_id</code> is written alongside the MERGE.</li>
+<li>Partial linking triggers a WARNING log.</li>
+</ul></li>
+<li><code>tests/standard_names/test_review_cost.py</code> (3 tests):
+<ul>
+<li><code>_build_review_record</code> forwards <code>cost_usd</code> / <code>tokens_in</code> / <code>tokens_out</code>.</li>
+<li><code>graph_ops.write_reviews</code> Cypher binds them to the Review node.</li>
+<li>Amortisation in <code>review_review_worker</code> distributes batch totals.</li>
+</ul></li>
+</ul>
+<p>Ran <code>uv run pytest tests/standard_names/test_review_pipeline.py tests/standard_names/test_review_rubrics.py tests/standard_names/test_source_linking.py tests/standard_names/test_review_cost.py</code> → 35/35 passing.</p>
+<p>Pre-existing unrelated failures not caused by this change: <code>test_benchmark.py::TestCalibrationDataset::test_calibration_loads</code> (dataset size drift), <code>test_graph_ops.py::TestCocosScalarDefaulting::test_vector_not_defaulted</code> (cocos default scalar/vector heuristic).</p>
+<h2 id="commits">Commits</h2>
+<ul>
+<li><code>75a7e1a7</code> fix(sn): gate source linking on StandardName match to prevent orphan edges</li>
+<li><code>bd246dba</code> test(sn): guardrail Cypher invariants for source→SN linking</li>
+<li><code>097fbf24</code> fix(sn): populate Review cost_usd and token counts</li>
+<li><code>66247232</code> feat(sn): surface linking integrity and review cost in sn status</li>
+<li><code>e573f3a0</code> fix(sn): tolerate tuple LLM returns in review batch token accounting</li>
+</ul>
+<h2 id="follow-ups-not-in-this-change">Follow-ups (not in this change)</h2>
+<ul>
+<li>58 legacy orphan StandardNames: defer to a targeted cleanup session. Need to decide whether to (a) delete them, (b) re-attach to a source via <code>source_paths</code> reverse search if any, or (c) keep them as curated nodes with a <code>provenance='manual'</code> marker. Doc 35 has the earlier analysis.</li>
+<li>Consider a <code>sn integrity</code> CLI command that asserts the two invariants (0 orphan sources, ≤N orphan SNs) and exits non-zero for CI use.</li>
+</ul>
+  </main>
+</body>
+</html>

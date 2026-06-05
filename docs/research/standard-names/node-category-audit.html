@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="node-category-audit">
+  <meta name="plan-title" content="Node-category false-negative audit (Plan 32 Phase 1)">
+  <meta name="plan-summary" content="Test whether SN_SOURCE_CATEGORIES = {quantity, geometry} in">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <meta name="plan-depends-on" content="32-extraction-prompt-overhaul">
+  <title>Node-category false-negative audit (Plan 32 Phase 1) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Node-category false-negative audit (Plan 32 Phase 1)</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/node-category-audit.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+        <li><strong>Depends on:</strong> <code>32-extraction-prompt-overhaul</code></li>
+      </ul>
+    </section>
+<p><strong>Status:</strong> ✅ empirical — 2026-04-20, 105 paths reviewed by <code>anthropic/claude-opus-4.6</code>.</p>
+<h2 id="goal">Goal</h2>
+<p>Test whether <code>SN_SOURCE_CATEGORIES = {quantity, geometry}</code> in <code>imas_codex/core/node_categories.py</code> is too restrictive, by sampling DD paths that are currently filtered out and asking a reviewer whether they <em>should</em> become Standard Name candidates.</p>
+<p><strong>Exit criterion (plan 32):</strong> if &gt; 2 % of paths in non-SN categories are flagged <code>keep</code>, widen <code>SN_SOURCE_CATEGORIES</code> and re-run the DD extract. Otherwise retain status quo.</p>
+<h2 id="harness">Harness</h2>
+<ul>
+<li><code>scripts/one_offs/sample_node_category_audit.py</code> — stratified random sample across 10 IDSs × 7 categories.</li>
+<li><code>scripts/one_offs/score_node_category_audit.py</code> — LLM reviewer pass (<code>anthropic/claude-opus-4.6</code>, <code>service="standard-names"</code>, temperature 0, batch of 20 paths per call).</li>
+<li>Samples: <code>plans/research/data/node-category-samples.json</code></li>
+<li>Scored: <code>plans/research/data/node-category-samples-scored.json</code></li>
+<li>Reviewer cost: <strong>$0.18</strong>.</li>
+</ul>
+<p>Identifier &amp; metadata strata were added cross-IDS after the initial stratified run (identifier has no <code>dynamic</code>/<code>constant</code> node-types and metadata fields carry no description, so both were under-sampled by the generic SELECT).</p>
+<h2 id="results--confusion-matrix">Results — confusion matrix</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">category</th>
+<th style="text-align: center;">in SN set</th>
+<th style="text-align: right;">N</th>
+<th style="text-align: right;">keep</th>
+<th style="text-align: right;">drop</th>
+<th style="text-align: right;">borderline</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">quantity</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">geometry</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">coordinate</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">identifier</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">metadata</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">representation</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fit_artifact</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="headline-rates">Headline rates</h3>
+<ul>
+<li><strong>False-negative rate</strong> (non-SN paths the reviewer flagged <code>keep</code>): <strong>1 / 81 = 1.2 %</strong> — below the 2 % widening threshold.</li>
+<li><strong>False-positive rate</strong> (SN paths the reviewer flagged <code>drop</code>): <strong>4 / 24 = 16.7 %</strong> — independent signal on over-inclusion within <code>quantity</code>/<code>geometry</code>.</li>
+<li><strong>Borderline rate</strong> on non-SN side: 4 / 81 = 4.9 %, all representation (metric-tensor components on GGD grids).</li>
+</ul>
+<h2 id="recommendation">Recommendation</h2>
+<h3 id="️-do-not-widen-sn_source_categories">✳️ Do not widen <code>SN_SOURCE_CATEGORIES</code></h3>
+<p>1.2 % FN is well below the 2 % trigger. The single <code>keep</code> call — the plasma-boundary outline <code>equilibrium/time_slice/boundary_separatrix/outline/r</code> — is already a well-understood geometric curve that <em>does</em> appear in the Standard Name draft set under other paths (e.g. LCFS / separatrix outline coordinates live in the <code>geometry</code> category for other IDSs). Its <code>coordinate</code> classification looks like an isolated mis-categorisation rather than a systematic gap.</p>
+<h3 id="️-open-follow-up-false-positive-cleanup-inside-quantity">✳️ Open follow-up: false-positive cleanup inside <code>quantity</code></h3>
+<p>4 of 24 sampled <code>quantity</code>/<code>geometry</code> paths do <strong>not</strong> look like true SN candidates:</p>
+<ol type="1">
+<li><code>equilibrium/.../ggd/grid/space/objects_per_dimension/object/geometry_2d</code> — GGD container node (mislabelled <code>quantity</code>).</li>
+<li><code>interferometer/channel/wavelength/fringe_jump_correction_times</code> — processing timestamps (provenance).</li>
+<li><code>thomson_scattering/equilibrium_id/data_entry/pulse</code> — shot number (provenance/identifier).</li>
+<li><code>wall/description_2d/mobile/unit/outline/z</code> — bare geometric coordinate (like <code>coordinate</code> paths).</li>
+</ol>
+<p>These are a separate problem — the DD <code>node_category</code> classifier has some mis-labels that let non-measurables into the SN candidate set. They are dropped downstream by the composition filter (or by the reviewer), but they waste LLM budget. Tracking: <strong>spawn plan-33-style item for <code>quantity</code> node-category clean-up, not in scope for plan 32</strong>.</p>
+<h3 id="️-representation--metric-tensor-borderlines">✳️ Representation / metric-tensor borderlines</h3>
+<p>Four GGD metric-tensor entries were flagged <code>borderline</code>. These are physically meaningful but computationally derived; excluding them is consistent with current DD conventions and they are recoverable at analysis time from the grid geometry. No action.</p>
+<h2 id="exit-status">Exit status</h2>
+<p>Plan 32 Phase 1 <strong>closed</strong> — retain existing <code>SN_SOURCE_CATEGORIES</code>. Follow-up ticket recommended for <code>quantity</code> false-positive cleanup.</p>
+  </main>
+</body>
+</html>

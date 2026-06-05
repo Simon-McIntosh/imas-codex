@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="44-open-physical-base-audit">
+  <meta name="plan-title" content="Open `physical_base` Audit — rc18 cleanup + decomposition rule">
+  <meta name="plan-summary" content="filters.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-closed-physical-base,sn-search-facility">
+  <title>Open `physical_base` Audit — rc18 cleanup + decomposition rule | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Open `physical_base` Audit — rc18 cleanup + decomposition rule</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/44-open-physical-base-audit.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-closed-physical-base</code>, <code>sn-search-facility</code></li>
+      </ul>
+    </section>
+<p><strong>Date:</strong> 2026-04-20 <strong>ISN version:</strong> v0.7.0rc18 <strong>Scope:</strong> VocabGap hygiene, reviewer decomposition rubric, MCP grammar filters.</p>
+<h2 id="1-problem">1. Problem</h2>
+<p>Running the Standard Names pipeline against rc18 left ~900 <code>VocabGap</code> nodes in the graph, mostly flagging the open-vocabulary <code>physical_base</code> slot with "missing token" reports. Those reports are noise: the ISN grammar defines <code>physical_base</code> as open — compounds like <code>flow_damping_coefficient</code> are legitimate, not a vocabulary hole. At the same time we had no mechanism to catch the reverse defect: closed grammar tokens (like <code>toroidal</code> in <code>toroidal_torque</code>) absorbed into <code>physical_base</code> instead of being lifted to their dedicated slot.</p>
+<h2 id="2-segment-openness-in-rc18">2. Segment openness in rc18</h2>
+<p>Introspected <code>imas_standard_names.grammar.constants.SEGMENT_TOKEN_MAP</code> on a fresh install. 11 segments; only <code>physical_base</code> has an empty token tuple. All others carry closed enum lists of the sizes below.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th style="text-align: right;">Tokens</th>
+<th>Open?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>physical_base</code></td>
+<td style="text-align: right;">0</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr class="even">
+<td><code>component</code></td>
+<td style="text-align: right;">18</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td><code>coordinate</code></td>
+<td style="text-align: right;">18</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td><code>subject</code></td>
+<td style="text-align: right;">73</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td><code>device</code></td>
+<td style="text-align: right;">82</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td><code>geometric_base</code></td>
+<td style="text-align: right;">13</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td><code>object</code></td>
+<td style="text-align: right;">82</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td><code>geometry</code></td>
+<td style="text-align: right;">98</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td><code>position</code></td>
+<td style="text-align: right;">98</td>
+<td>no</td>
+</tr>
+<tr class="even">
+<td><code>region</code></td>
+<td style="text-align: right;">6</td>
+<td>no</td>
+</tr>
+<tr class="odd">
+<td><code>process</code></td>
+<td style="text-align: right;">76</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p><code>transformation</code> is stored separately in <code>TRANSFORMATION_TOKENS</code> (37 tokens) and is not part of <code>SEGMENT_TOKEN_MAP</code>. The codex heuristic "empty token tuple ⇒ open" therefore correctly includes only <code>physical_base</code>.</p>
+<p>The prompt context also exposes a composer pseudo-segment, <code>grammar_ambiguity</code> (declared in <code>imas_codex/llm/prompts/shared/sn/_grammar_reference.md</code>), used when the composer flags structural ambiguity rather than a missing token. We treat it as a pseudo-open segment for gap filtering purposes.</p>
+<h3 id="recommendation-for-isn-rc19">Recommendation for ISN rc19</h3>
+<p>Relying on "empty token tuple ⇒ open" is fragile. We suggest ISN expose one of:</p>
+<ul>
+<li><code>SegmentSpec.is_open: bool</code> on each segment definition, or</li>
+<li>a module-level constant <code>OPEN_SEGMENTS: frozenset[str] = frozenset({"physical_base"})</code>.</li>
+</ul>
+<p>The codex <code>imas_codex.standard_names.segments.open_segments()</code> helper would then switch to the official accessor.</p>
+<h2 id="3-cleanup-results">3. Cleanup results</h2>
+<p>Before:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Segment</th>
+<th style="text-align: right;">VocabGaps</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>physical_base</code></td>
+<td style="text-align: right;">715</td>
+</tr>
+<tr class="even">
+<td><code>grammar_ambiguity</code></td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td><code>subject</code></td>
+<td style="text-align: right;">40</td>
+</tr>
+<tr class="even">
+<td><code>transformation</code></td>
+<td style="text-align: right;">39</td>
+</tr>
+<tr class="odd">
+<td><code>position</code></td>
+<td style="text-align: right;">39</td>
+</tr>
+<tr class="even">
+<td><code>object</code></td>
+<td style="text-align: right;">38</td>
+</tr>
+<tr class="odd">
+<td><code>geometry</code></td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="even">
+<td><code>process</code></td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td>other closed</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td><strong>total</strong></td>
+<td style="text-align: right;"><strong>922</strong></td>
+</tr>
+</tbody>
+</table>
+<p>After <code>MATCH (vg:VocabGap) WHERE vg.segment IN {"physical_base", "grammar_ambiguity"} DETACH DELETE vg</code>:</p>
+<ul>
+<li>730 nodes deleted (77% reduction).</li>
+<li>192 VocabGap nodes remain, all on genuinely closed segments. These are real vocabulary holes the reviewer + worker pipeline can still act on.</li>
+</ul>
+<p>The filter is now enforced at write time (<code>write_vocab_gaps</code> + <code>_update_sources_after_vocab_gap</code>) so regressions cannot reintroduce the noise.</p>
+<h2 id="4-decomposition-audit-reviewer-side">4. Decomposition audit (reviewer-side)</h2>
+<p>The replacement rubric for the "missing physical_base token" signal is an audit that runs on every candidate StandardName:</p>
+<blockquote>
+<p>For each candidate, scan the <code>physical_base</code> slot for underscore-delimited tokens that appear in the closed vocabularies (<code>subjects</code>, <code>components</code>, <code>coordinates</code>, <code>transformations</code>, <code>positions</code>, <code>processes</code>, <code>objects</code>, <code>geometries</code>, <code>geometric_bases</code>, <code>devices</code>). Any hit is a candidate decomposition defect unless the compound is a well-known lexicalised atomic quantity.</p>
+</blockquote>
+<p>Examples observed in the current corpus that the rule targets:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Hits</th>
+<th>Suggested decomposition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>toroidal_torque</code></td>
+<td><code>toroidal (component)</code></td>
+<td><code>component=toroidal, physical_base=torque</code></td>
+</tr>
+<tr class="even">
+<td><code>volume_averaged_electron_temperature</code></td>
+<td><code>volume_averaged (transformation), electron (subject)</code></td>
+<td><code>transformation=volume_averaged, subject=electron, physical_base=temperature</code></td>
+</tr>
+<tr class="odd">
+<td><code>flux_surface_cross_sectional_area</code></td>
+<td><code>flux_surface (position)</code></td>
+<td><code>position=flux_surface, physical_base=cross_sectional_area</code></td>
+</tr>
+</tbody>
+</table>
+<p>Allowed lexicalised atoms (do not flag): <code>poloidal_flux</code>, <code>minor_radius</code>, <code>cross_sectional_area</code>, <code>safety_factor</code>.</p>
+<p>Penalty is folded into the existing <strong>Grammar</strong> scoring dimension (cap at −8 per candidate), so the rubric totals stay invariant (name-only: 4×20=80; full: 6×20=120). A new schema dimension was deliberately avoided.</p>
+<p>Helper utility: <code>imas_codex.standard_names.decomposition.find_absorbed_closed_tokens(haystack, closed_vocab)</code> returns sorted <code>(token, segment)</code> tuples for a haystack string, using word-boundary substring matching. Covered by 14 unit tests.</p>
+<h2 id="5-new-mcp-surface">5. New MCP surface</h2>
+<h3 id="search_standard_names"><code>search_standard_names</code></h3>
+<p>Adds 11 optional kwargs for grammar-slot post-filtering:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>grammar_physical_base, grammar_subject, grammar_component,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>grammar_coordinate, grammar_transformation, grammar_position,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>grammar_process, grammar_object, grammar_geometry,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>grammar_geometric_base, grammar_device</span></code></pre></div>
+<p>Each filter is a case-insensitive exact match against the persisted <code>sn.grammar_&lt;segment&gt;</code> property. Filters are conjunctive — all provided constraints must hold.</p>
+<h3 id="list_grammar_vocabularysegment"><code>list_grammar_vocabulary(segment)</code></h3>
+<p>New tool. Aggregates <code>sn.grammar_&lt;segment&gt;</code> across all StandardName nodes and returns a markdown table of distinct tokens with their usage counts, ordered by count desc. Segment argument is validated against an allowlist so Cypher interpolation is safe.</p>
+<p>Example output for <code>component</code> in the current graph:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Token</th>
+<th style="text-align: right;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>radial</td>
+<td style="text-align: right;">37</td>
+</tr>
+<tr class="even">
+<td>parallel</td>
+<td style="text-align: right;">33</td>
+</tr>
+<tr class="odd">
+<td>toroidal</td>
+<td style="text-align: right;">32</td>
+</tr>
+<tr class="even">
+<td>poloidal</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr class="odd">
+<td>vertical</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="even">
+<td>diamagnetic</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="latent-bug-fixed-in-the-same-commit">Latent bug fixed in the same commit</h3>
+<p>The existing Cypher for <code>search_standard_names</code> and <code>fetch_standard_names</code> read <code>sn.physical_base</code>, <code>sn.subject</code>, <code>sn.component</code>, etc. Those properties are never set — the schema persists them under the <code>grammar_</code> prefix. The "Grammar:" line in the search report was silently empty. Fixed to read <code>sn.grammar_physical_base</code>, <code>sn.grammar_subject</code>, etc.</p>
+<h2 id="6-test-coverage-added">6. Test coverage added</h2>
+<ul>
+<li><code>tests/standard_names/test_vocab_gaps.py::TestOpenSegmentFilter</code> — 5 regression tests for <code>filter_closed_segment_gaps</code> and the <code>write_vocab_gaps</code> hook.</li>
+<li><code>tests/standard_names/test_decomposition_audit.py</code> — 14 tests over synthetic vocab, formatter, and real ISN vocabulary fixtures.</li>
+<li><code>tests/standard_names/test_sn_tools_grammar_filters.py</code> — 9 tests for <code>_search_standard_names</code> post-filtering and <code>_list_grammar_vocabulary</code>.</li>
+</ul>
+<h2 id="7-follow-ups">7. Follow-ups</h2>
+<ol type="1">
+<li><strong>ISN rc19 request:</strong> expose <code>SegmentSpec.is_open</code> or <code>OPEN_SEGMENTS</code> constant (see §2). Open a ticket upstream once rc18 is superseded.</li>
+<li><strong>Worker prompt hint:</strong> downstream consider surfacing <code>find_absorbed_closed_tokens</code> output as a hint in the composer prompt so compounds are lifted before reaching the reviewer. Not done in this change — keep change surface minimal.</li>
+<li><strong>Embedding refresh:</strong> the physical_base filter only works after StandardName nodes are reparsed. Existing 900 nodes already have <code>grammar_physical_base</code> set, so no backfill required.</li>
+</ol>
+  </main>
+</body>
+</html>

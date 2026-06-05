@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="43-vector-grouping-assertions">
+  <meta name="plan-title" content="43 — Vector grouping assertions for StandardName semantics">
+  <meta name="plan-summary" content="Investigates whether the three vector indexes that underpin Standard">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-search-facility">
+  <title>43 — Vector grouping assertions for StandardName semantics | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>43 — Vector grouping assertions for StandardName semantics</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/43-vector-grouping-assertions.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-search-facility</code></li>
+      </ul>
+    </section>
+<p>Investigates whether the three vector indexes that underpin Standard Name semantic search (<code>standard_name_desc_embedding</code>, <code>standard_name_source_desc_embedding</code>, <code>cluster_embedding</code> / <code>cluster_label_embedding</code>) return coherent, physics-grounded groupings.</p>
+<p>Implementation lives in <code>tests/standard_names/test_vector_semantics.py</code>.</p>
+<h2 id="graph-snapshot">Graph snapshot</h2>
+<p>Captured against the running <code>codex</code> graph on SLURM node <code>98dci4-clu-2001</code>.</p>
+<table>
+<thead>
+<tr class="header">
+<th>label</th>
+<th style="text-align: right;">nodes</th>
+<th style="text-align: right;">with embedding</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>StandardName</td>
+<td style="text-align: right;">872</td>
+<td style="text-align: right;">750</td>
+<td>122 in <code>review_status='named'</code>, no description yet</td>
+</tr>
+<tr class="even">
+<td>StandardNameSource</td>
+<td style="text-align: right;">6336</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td>property unpopulated despite ONLINE index</td>
+</tr>
+<tr class="odd">
+<td>IMASSemanticCluster</td>
+<td style="text-align: right;">2808</td>
+<td style="text-align: right;">2808</td>
+<td><code>embedding</code>, <code>description_embedding</code>, <code>label_embedding</code> all populated</td>
+</tr>
+</tbody>
+</table>
+<p>Cluster scopes: <code>ids=1408</code>, <code>global=796</code>, <code>domain=604</code>.</p>
+<p>Embedding model/dimensions: <strong>Qwen/Qwen3-Embedding-0.6B @ 256-d</strong> (from <code>pyproject.toml → [tool.imas-codex.embedding]</code>).</p>
+<h2 id="test-results-12-passed-1-skipped-1-xfailed">Test results (12 passed, 1 skipped, 1 xfailed)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Test</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A1</td>
+<td><code>test_sn_semantic_search_surfaces_expected_concept</code></td>
+<td>5/5 PASS</td>
+<td>top-10 contains the expected keyword for every concept</td>
+</tr>
+<tr class="even">
+<td>A2</td>
+<td><code>test_sn_semantic_search_domain_coherence</code></td>
+<td>4 PASS, 1 <strong>xfail</strong></td>
+<td><code>plasma_current</code> top-5 spans 5 distinct physics domains</td>
+</tr>
+<tr class="odd">
+<td>B</td>
+<td><code>test_cluster_membership_groups_sns_semantically</code></td>
+<td>PASS</td>
+<td>within-cluster mean 0.77 vs baseline 0.57</td>
+</tr>
+<tr class="even">
+<td>C</td>
+<td><code>test_standard_name_source_embeddings_group_by_producer</code></td>
+<td>SKIP</td>
+<td><code>StandardNameSource.embedding</code> is unpopulated</td>
+</tr>
+<tr class="odd">
+<td>D</td>
+<td><code>test_mcp_search_standard_names_returns_coherent_results</code></td>
+<td>PASS</td>
+<td><code>electron_density_at_separatrix</code> top-ranked; no unrelated magnetics result</td>
+</tr>
+<tr class="even">
+<td>E</td>
+<td><code>test_cluster_labels_match_member_sns</code></td>
+<td>PASS</td>
+<td>mean label↔︎member 0.72 across 30 sampled clusters</td>
+</tr>
+</tbody>
+</table>
+<h2 id="empirical-numbers">Empirical numbers</h2>
+<h3 id="within-cluster-vs-random-baseline-cosine-similarity">Within-cluster vs random baseline cosine similarity</h3>
+<p>Random baseline (500 pairs from 700 SN embeddings): <strong>0.574 ± 0.097</strong>.</p>
+<table>
+<thead>
+<tr class="header">
+<th>cluster id</th>
+<th>scope</th>
+<th style="text-align: right;">members</th>
+<th style="text-align: right;">mean</th>
+<th>min</th>
+<th>max</th>
+<th>label</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>bd8d2148</code></td>
+<td>ids</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">0.726</td>
+<td>0.395</td>
+<td>0.987</td>
+<td>Transport Solver Profile Derivatives</td>
+</tr>
+<tr class="even">
+<td><code>2f0dcab5</code></td>
+<td>ids</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">0.655</td>
+<td>0.392</td>
+<td>0.955</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td><code>86df219b</code></td>
+<td>ids</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.778</td>
+<td>0.481</td>
+<td>0.960</td>
+<td>Gyrokinetic Eigenmode Fluxes Moments</td>
+</tr>
+<tr class="even">
+<td><code>9fccb3b6</code></td>
+<td>ids</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.851</td>
+<td>0.685</td>
+<td>0.957</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td><code>1c3f9b21</code></td>
+<td>domain</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.851</td>
+<td>0.685</td>
+<td>0.957</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>a2a25e05</code></td>
+<td>domain</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.860</td>
+<td>0.701</td>
+<td>0.966</td>
+<td>Radiation Emissivity and Radiated Power Profiles</td>
+</tr>
+<tr class="odd">
+<td><code>55a449ab</code></td>
+<td>global</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.860</td>
+<td>0.701</td>
+<td>0.966</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>cf9e9745</code></td>
+<td>ids</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.860</td>
+<td>0.701</td>
+<td>0.966</td>
+<td>Plasma Radiation Emissivity and Power</td>
+</tr>
+<tr class="odd">
+<td><code>42561efc</code></td>
+<td>ids</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.843</td>
+<td>0.728</td>
+<td>0.966</td>
+<td>Edge Transport Radial Diffusion Coefficients GGD</td>
+</tr>
+<tr class="even">
+<td><code>2a088219</code></td>
+<td>global</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.843</td>
+<td>0.728</td>
+<td>0.966</td>
+<td>Radial Diffusivity GGD Values All Species</td>
+</tr>
+</tbody>
+</table>
+<p>Top-10 cluster overall mean: <strong>0.813</strong> — ≈ 2.5σ above baseline.</p>
+<h3 id="cluster-label--member-cosine-similarity-100-clusters-5-members-each">Cluster label ↔︎ member cosine similarity (100 clusters, ≤5 members each)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>stat</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mean</td>
+<td>0.720</td>
+</tr>
+<tr class="even">
+<td>min</td>
+<td>0.456</td>
+</tr>
+<tr class="odd">
+<td>max</td>
+<td>0.858</td>
+</tr>
+<tr class="even">
+<td>below 0.5</td>
+<td>3 / 100</td>
+</tr>
+<tr class="odd">
+<td>below 0.6</td>
+<td>10 / 100</td>
+</tr>
+</tbody>
+</table>
+<h3 id="per-concept-top-5-vector-search">Per-concept top-5 vector search</h3>
+<table>
+<thead>
+<tr class="header">
+<th>rank</th>
+<th>id</th>
+<th>physics domain</th>
+<th>score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Electron density</strong> — <code>electron_density_at_separatrix</code> [general], <code>electron_density_at_divertor_target</code> [divertor_physics], <code>electron_radiated_power_density</code> [transport], <code>radial_component_of_electron_energy_flux</code> [transport], <code>fast_electron_number_density</code> [transport]</td>
+<td></td>
+<td></td>
+<td>scores 0.889 – 0.873</td>
+</tr>
+<tr class="even">
+<td><strong>Safety factor</strong> — <code>safety_factor_at_magnetic_axis</code> [equilibrium] top (0.911), <code>normalized_poloidal_magnetic_flux_of_minimum_safety_factor</code> [equilibrium] (0.895), then three magnetic-field companions</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>Plasma current</strong> — <code>toroidal_plasma_current_due_to_non_inductive_current_drive</code> [current_drive] top (0.936), <code>plasma_current</code> [plasma_control] (0.921), three more current-family SNs (scores ≥ 0.914) spread over 5 domains</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>Parallel current density</strong> — <code>radial_component_of_diamagnetic_current_density</code> [transport] top (0.912); four <code>parallel_*</code> / conductivity neighbours</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>Magnetic axis</strong> — <code>radial_component_of_magnetic_field</code> [magnetic_field_systems] (0.910), <code>major_radius_of_x_point</code> (0.908), <code>major_radius_of_magnetic_axis</code> (0.895), then two more field components</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="anomalies--findings">Anomalies / findings</h2>
+<ol type="1">
+<li><strong>StandardNameSource embeddings are unpopulated.</strong> The <code>standard_name_source_desc_embedding</code> index is ONLINE at 100% (because zero nodes have the property — the index accepts the empty set as "fully populated"). All 6336 <code>StandardNameSource</code> nodes have <code>embedding IS NULL</code>. Any code path that relies on vector search over sources (e.g. retrieval of peer descriptions during compose) is currently a no-op. <strong>Recommend</strong>: add a CLI step / worker-pool task to embed <code>StandardNameSource.description</code>.</li>
+<li><strong>122 StandardNames without embeddings are all unenriched.</strong> Every one is in <code>review_status='named'</code> with both <code>description</code> and <code>documentation</code> NULL — embedding happens downstream in the enrich stage, so this is expected pipeline state, not a regression.</li>
+<li><strong><code>plasma_current</code> concept spans 5 physics domains</strong> in the top-5 search (current_drive, equilibrium, plasma_control, transport, waves). The vector search is semantically coherent (every hit is a plasma-current quantity) but the <code>physics_domain</code> taxonomy splits related current concepts very finely. Flagged as xfail with a pointer to this document.</li>
+<li><strong>Short queries are unstable.</strong> Bare keywords ("electron density", "safety factor") return different top-1 results than natural-language sentences — e.g. "electron density" ranks <code>shattered_pellet_species_number_density</code> top-1 while the sentence form correctly ranks <code>electron_density_at_separatrix</code> top-1. The tests standardise on the sentence form to reflect how the MCP tool is actually called.</li>
+<li><strong>No documentation-free SN surfaces in search.</strong> Because the indexed property is the embedding of <code>description</code> (absent on 122 named-only nodes), those SNs are invisible to vector search. Users searching for them by concept will get no result. Consider fallback keyword matching on <code>id</code> tokens, or embed early on <code>id</code> + grammar fields.</li>
+</ol>
+<h2 id="recommendations">Recommendations</h2>
+<ul>
+<li><strong>Embed StandardNameSource.description</strong> so Test C can run meaningfully and compose-time neighbour retrieval can function.</li>
+<li><strong>Consider embedding at <code>named</code> state</strong> using <code>id</code> tokens (they carry strong physics signal once run through the grammar decomposer) so unenriched SNs are at least partially searchable.</li>
+<li><strong>Revisit physics_domain granularity</strong> for current-family SNs — or add a coarser <code>physics_concept</code> tag — so concept-level coherence checks (Test A2) can be strengthened beyond the modal-domain relaxation.</li>
+<li>Keep the <code>integration</code>-marked suite opt-in for unit runs but wire it into the nightly / post-deploy CI job to catch regressions in embedding quality or index population.</li>
+</ul>
+<h2 id="test-commands">Test commands</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full vector-semantics suite (requires live graph + embedding server):</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run pytest tests/standard_names/test_vector_semantics.py <span class="at">-v</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Only when explicitly running integration tests:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run pytest tests/standard_names <span class="at">-m</span> integration</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Unit-only SN tests (default -m &quot;not slow&quot; still runs them):</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run pytest tests/standard_names</span></code></pre></div>
+  </main>
+</body>
+</html>

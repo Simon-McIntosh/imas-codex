@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="gyrokinetics-extraction-debug">
+  <meta name="plan-title" content="Gyrokinetics SN Extraction Debug">
+  <meta name="plan-summary" content="All 264 quantity-category IMASNodes in the gyrokinetics physics domain have">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <title>Gyrokinetics SN Extraction Debug | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Gyrokinetics SN Extraction Debug</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/gyrokinetics-extraction-debug.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+      </ul>
+    </section>
+<h2 id="diagnosis">Diagnosis</h2>
+<p>All 264 <code>quantity</code>-category IMASNodes in the <code>gyrokinetics</code> physics domain have <code>node_type = 'constant'</code> (not <code>'dynamic'</code>). The extraction query in <code>imas_codex/standard_names/sources/dd.py</code> filtered on <code>n.node_type = 'dynamic'</code>, unconditionally excluding every gyrokinetics path. The <code>turbulence</code> domain (316 constant quantities) was similarly affected.</p>
+<h2 id="fix">Fix</h2>
+<p>Relaxed the <code>node_type</code> filter from <code>= 'dynamic'</code> to <code>IN ['dynamic', 'constant']</code> in both <code>sources/dd.py</code> (primary extraction path) and <code>graph_ops.py</code> (legacy helper). <code>static</code> and <code>none</code> types are still excluded — they represent machine/hardware parameters and unclassified nodes respectively, which are less likely to be meaningful standard-name candidates.</p>
+  </main>
+</body>
+</html>

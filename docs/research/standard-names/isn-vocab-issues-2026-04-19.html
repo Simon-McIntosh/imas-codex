@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="isn-vocab-issues-2026-04-19">
+  <meta name="plan-title" content="ISN Vocabulary Gap Issues — 2026-04-19">
+  <meta name="plan-summary" content="Identified during quarantine triage of 15 StandardName nodes after enrichment rotation.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-closed-physical-base">
+  <title>ISN Vocabulary Gap Issues — 2026-04-19 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>ISN Vocabulary Gap Issues — 2026-04-19</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/isn-vocab-issues-2026-04-19.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-closed-physical-base</code></li>
+      </ul>
+    </section>
+<p>Identified during quarantine triage of 15 StandardName nodes after enrichment rotation. Each entry documents a vocabulary gap in <code>imas-standard-names</code> that prevents valid physics concepts from passing grammar validation.</p>
+<hr />
+<h2 id="1-process-token-diamagnetic_drift">1. Process token: <code>diamagnetic_drift</code></h2>
+<p><strong>Segment:</strong> <code>process</code> (used with <code>due_to_</code> template) <strong>Needed token:</strong> <code>diamagnetic_drift</code> <strong>Physics justification:</strong> The diamagnetic drift is a fundamental plasma drift arising from pressure gradients in a magnetized plasma: $v_{dia} = \frac{B \times \nabla p}{qnB^2}$. Transport and edge physics codes routinely attribute momentum fluxes and diffusivities to this drift. The DD has explicit <code>diamagnetic</code> subfields under transport model velocity, current_density, and energy flux structures. Three quarantined names need this token:</p>
+<ul>
+<li><code>ion_momentum_flux_due_to_diamagnetic_drift</code> (edge_plasma_physics)</li>
+<li><code>ion_momentum_diffusivity_due_to_diamagnetic_drift</code> (edge_plasma_physics)</li>
+<li><code>radial_component_of_ion_momentum_flux_due_to_diamagnetic_drift</code> (transport)</li>
+</ul>
+<p><strong>Example SN:</strong> <code>ion_momentum_flux_due_to_diamagnetic_drift</code> <strong>Current status:</strong> All three names fail with "Token 'diamagnetic_drift' used with 'due_to_' template is missing from Process vocabulary" <strong>Proposed ISN change:</strong> Add <code>diamagnetic_drift</code> to <code>processes.yml</code> alongside existing process tokens like <code>bootstrap</code>, <code>ohmic_dissipation</code>, <code>impurity_radiation</code>.</p>
+<hr />
+<h2 id="2-position-token-wall_outline_point">2. Position token: <code>wall_outline_point</code></h2>
+<p><strong>Segment:</strong> <code>position</code> (used with <code>of_</code> template for geometry) <strong>Needed token:</strong> <code>wall_outline_point</code> <strong>Physics justification:</strong> The wall outline (first-wall contour in the poloidal plane) is a fundamental geometry used in plasma-wall interaction studies. The DD exposes R/Z coordinates of wall outline points under <code>wall/description_2d/limiter/unit/outline/r</code> and <code>/z</code>. The ISN already has <code>plasma_boundary_outline_point</code> as a position token; <code>wall_outline_point</code> follows the same pattern for the wall contour.</p>
+<p><strong>Example SN:</strong> <code>vertical_coordinate_of_wall_outline_point</code> <strong>Current status:</strong> <code>vertical_coordinate_of_outline_point</code> was generated with unqualified <code>outline_point</code>. Even with correct qualification, <code>wall_outline_point</code> is not in the Position vocabulary. <strong>Proposed ISN change:</strong> Add <code>wall_outline_point</code> to <code>positions.yml</code>.</p>
+<hr />
+<h2 id="3-position-token-wall-verify-availability">3. Position token: <code>wall</code> (verify availability)</h2>
+<p><strong>Segment:</strong> <code>position</code> (used with <code>at_</code> template) <strong>Needed token:</strong> <code>wall</code> <strong>Physics justification:</strong> Five quarantined names used <code>at_wall_surface</code> when they should have used <code>at_wall</code>. This assumes <code>wall</code> is already a valid Position token. If it is not, it should be added — "at the wall" is the most common position qualifier in plasma-wall interaction physics. All SOL/divertor energy balance quantities reference fluxes arriving at or emitted from the wall.</p>
+<p><strong>Example SNs:</strong></p>
+<ul>
+<li><code>emitted_radiation_energy_flux_at_wall</code></li>
+<li><code>electron_emitted_kinetic_energy_flux_at_wall</code></li>
+<li><code>ion_emitted_kinetic_energy_flux_at_wall</code></li>
+<li><code>current_driven_emitted_energy_flux_at_wall</code></li>
+<li><code>ion_emitted_energy_flux_due_to_recombination_at_wall</code></li>
+</ul>
+<p><strong>Proposed ISN change:</strong> Verify <code>wall</code> exists in <code>positions.yml</code>; add if missing.</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Segment</th>
+<th>Token</th>
+<th style="text-align: center;">SNs affected</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>process</td>
+<td><code>diamagnetic_drift</code></td>
+<td style="text-align: center;">3</td>
+<td>High</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>position</td>
+<td><code>wall_outline_point</code></td>
+<td style="text-align: center;">1</td>
+<td>Medium</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>position</td>
+<td><code>wall</code></td>
+<td style="text-align: center;">5</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rc16-release--2026-04-20">rc16 Release — 2026-04-20</h2>
+<p>All three issues above were resolved in rc15 (2026-04-19). The rc16 release extends vocabulary coverage substantially, closing 56 additional VocabGap entries identified by querying the codex Neo4j graph:</p>
+<pre class="cypher"><code>MATCH (vg:VocabGap)
+RETURN vg.segment AS segment, vg.needed_token AS token, count(*) AS hits
+ORDER BY hits DESC</code></pre>
+<h3 id="tokens-added-per-category">Tokens added per category</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Category</th>
+<th style="text-align: center;">Count</th>
+<th>Key additions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Positions</td>
+<td style="text-align: center;">16</td>
+<td><code>geometric_axis</code>, <code>control_surface</code>, <code>separatrix</code>, <code>pedestal</code>, <code>pedestal_top</code>, <code>charge_state</code>, <code>ion_charge_state</code>, <code>along_line_of_sight</code>, <code>launching_position</code></td>
+</tr>
+<tr class="even">
+<td>Objects</td>
+<td style="text-align: center;">15</td>
+<td><code>wave_beam</code>, <code>beam_tracing_beam</code>, <code>beam_tracing_ray</code>, <code>coordinate_system</code>, <code>ferritic_insert</code>, <code>pellet</code>, <code>vacuum_vessel</code>, <code>diagnostic_aperture</code>, <code>plasma_facing_component</code></td>
+</tr>
+<tr class="odd">
+<td>Subjects</td>
+<td style="text-align: center;">13</td>
+<td><code>thermal_neutral</code>, <code>total_ion</code>, <code>molecular_ion</code>, <code>molecular_neutral</code>, <code>cold_neutral</code>, <code>hot_neutral</code>, <code>trapped</code>, <code>co_passing</code>, <code>counter_passing</code>, <code>fast_particle</code></td>
+</tr>
+<tr class="even">
+<td>Processes</td>
+<td style="text-align: center;">6</td>
+<td><code>resistive_dissipation</code>, <code>dreicer</code>, <code>coulomb_collisions</code>, <code>neutral_beam_shinethrough</code>, <code>surface_emission</code>, <code>halo_current</code></td>
+</tr>
+<tr class="odd">
+<td>Transformations</td>
+<td style="text-align: center;">6</td>
+<td><code>perturbed</code>, <code>spectral_density</code>, <code>second_derivative_of</code>, <code>per_poloidal_mode</code>, <code>derivative_with_respect_to_rho_tor</code>, <code>line_of_sight_projected</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ISN release</strong>: <code>v0.7.0rc16</code> (tag SHA: <code>6448c4e</code>) <strong>Codex bump</strong>: <code>pyproject.toml</code> updated from <code>v0.7.0rc15</code> → <code>v0.7.0rc16</code> <strong>VocabGap count</strong>: 1066 total (636 physical_base + 430 structured). Structured-segment gaps reduced: ~56 tokens directly match VocabGap entries; remaining gaps are mostly LLM grammar composition errors (compound terms placed in wrong segments) that require prompt engineering rather than vocabulary additions.</p>
+  </main>
+</body>
+</html>

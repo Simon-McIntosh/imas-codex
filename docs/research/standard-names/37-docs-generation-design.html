@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="37-docs-generation-design">
+  <meta name="plan-title" content="37 — `sn` target unification: consolidating generate, enrich, review">
+  <meta name="plan-summary" content="Related commits:">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <title>37 — `sn` target unification: consolidating generate, enrich, review | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>37 — `sn` target unification: consolidating generate, enrich, review</h1>
+    <p><strong>Source:</strong> Migrated from <code>plans/research/standard-names/37-docs-generation-design.md</code>.</p>
+    <section id="plan-relationships">
+      <h2>Plan relationships</h2>
+      <ul>
+        <li><strong>Informs:</strong> <code>sn-quality-parity</code></li>
+      </ul>
+    </section>
+<p><strong>Status:</strong> implemented 2026-04-20 <strong>Related commits:</strong></p>
+<ul>
+<li><code>4d2f96a6</code> + <code>c9acaaaf</code> — Phase 1: <code>sn generate --target {names,docs,full}</code> routing</li>
+<li><code>8c1e8185</code> — Phase 2: <code>sn review --target {names,docs,full}</code> with three-rubric dispatch</li>
+<li><code>7f32556b</code> — tests for the unified <code>--target</code> behaviour</li>
+</ul>
+<h2 id="problem">Problem</h2>
+<p>Before this change, standard-names generation had three overlapping entry points:</p>
+<ul>
+<li><code>sn generate --name-only</code> — a boolean flag that made compose skip documentation.</li>
+<li><code>sn enrich</code> — a separate subcommand that filled docs on already-named entries.</li>
+<li><code>sn review --name-only</code> — a boolean flag that swapped the review rubric from 6 dimensions (/120) to 4 name dimensions (/80).</li>
+</ul>
+<p>The surface area scaled poorly:</p>
+<ul>
+<li>Every new compose/review mode forced a new boolean and a new command.</li>
+<li>The existence of a standalone <code>sn enrich</code> command made the lifecycle (generate names → enrich docs → review) split across two top-level verbs with no shared option vocabulary.</li>
+<li>A future "review just the docs without re-scoring the name" rubric had no place to live — the name-only boolean was overloaded.</li>
+</ul>
+<h2 id="decision">Decision</h2>
+<p>Collapse all three axes behind a single <code>--target</code> choice with values <code>names</code>, <code>docs</code>, <code>full</code>.</p>
+<ul>
+<li><code>sn generate --target names</code> — compose name+grammar only (equivalent to the old <code>--name-only</code>).</li>
+<li><code>sn generate --target docs</code> — run the five-phase enrichment pipeline on already-named entries (equivalent to <code>sn enrich</code>).</li>
+<li><code>sn generate --target full</code> (default) — full compose+enrich pass.</li>
+<li><code>sn review --target {names,docs,full}</code> — pick the matching rubric.</li>
+</ul>
+<p><code>sn enrich</code> stays as a thin back-compat alias routing into <code>_run_sn_docs_generation</code>. The old <code>--name-only</code> flag is a back-compat alias for <code>--target names</code> on both generate and review. When both are present, <code>--target</code> wins.</p>
+<h2 id="three-rubric-review">Three-rubric review</h2>
+<p>Review gains a new third rubric <code>docs</code> alongside <code>names</code> and <code>full</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>target</th>
+<th>prompt</th>
+<th>response model</th>
+<th>dims</th>
+<th>max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>names</td>
+<td><code>sn/review_name_only</code></td>
+<td><code>StandardNameQualityReviewNameOnlyBatch</code></td>
+<td>4</td>
+<td>80</td>
+</tr>
+<tr class="even">
+<td>docs</td>
+<td><code>sn/review_docs</code> (new)</td>
+<td><code>StandardNameQualityReviewDocsBatch</code> (new)</td>
+<td>4</td>
+<td>80</td>
+</tr>
+<tr class="odd">
+<td>full</td>
+<td><code>sn/review</code></td>
+<td><code>StandardNameQualityReviewBatch</code></td>
+<td>6</td>
+<td>120</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>docs</code> rubric scores <code>description_quality</code>, <code>documentation_quality</code>, <code>completeness</code>, <code>physics_accuracy</code> — deliberately NOT including grammar, semantic accuracy of the name, or naming convention. Those were already reviewed in a prior <code>--target names</code> pass and should not be re-litigated when reviewing only new prose.</p>
+<h2 id="fidelity-rank-and-downgrade-guard">Fidelity rank and downgrade guard</h2>
+<p>Reviews are ranked by fidelity: <code>name_only</code> &lt; <code>docs</code> &lt; <code>full</code>.</p>
+<p>A lower-fidelity review run will NOT overwrite a higher-fidelity <code>review_mode</code> already stamped on a <code>StandardName</code> node unless <code>--force</code> is passed. This prevents a cheap sweep — e.g. a nightly <code>sn review --target names</code> — from clobbering a careful <code>--target full</code> review that took real LLM budget to produce.</p>
+<p>The enum <code>StandardNameReviewMode</code> on the <code>StandardName</code> schema class grows from two values (<code>full</code>, <code>name_only</code>) to three by adding <code>docs</code>.</p>
+<h2 id="docs-batch-size">Docs batch size</h2>
+<p>Docs generation tends to produce much longer LLM outputs per item than name generation. The hard name-batch-size of 25 is too large once documentation prose is involved; the enrich pipeline previously used <code>[tool.imas-codex.sn-enrich].batch-size = 12</code>.</p>
+<p>We surface this as a first-class pyproject setting under the unified command:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode toml"><code class="sourceCode toml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[</span><span class="dt">tool</span><span class="kw">.</span><span class="dt">imas-codex</span><span class="kw">.</span><span class="dt">sn-generate</span><span class="kw">]</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">docs-batch-size</span> <span class="op">=</span> <span class="dv">12</span>   <span class="co"># used by --target docs</span></span></code></pre></div>
+<p>Resolution order for <code>--target docs</code>:</p>
+<ol type="1">
+<li>Explicit <code>--docs-batch-size</code> CLI flag, if given.</li>
+<li><code>[tool.imas-codex.sn-generate].docs-batch-size</code> (default 12).</li>
+<li><code>[tool.imas-codex.sn-enrich].batch-size</code> (legacy fallback).</li>
+<li>Hardcoded default 8.</li>
+</ol>
+<h2 id="migration">Migration</h2>
+<p>No migration is required. All existing reviewer data with <code>review_mode ∈ {full, name_only}</code> remains valid; the new <code>docs</code> value only appears on records produced by <code>sn review --target docs</code>. The old <code>--name-only</code> flag continues to work as a back-compat alias.</p>
+  </main>
+</body>
+</html>
