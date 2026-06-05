@@ -773,7 +773,7 @@ async def run_sn_pools(
                 seeded = await _seed_all_domains(source=source, max_sources=max_sources)
                 logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
-        # ── B3b: Rederive structural edges, then seed parent sources ─
+        # ── B3b: Rederive structural edges, seed parents, repair legacy drift ─
         # Backfill any missing HAS_PARENT / HAS_ERROR edges first so
         # ``seed_parent_sources`` can see every legitimate placeholder.
         # This catches two failure modes:
@@ -786,6 +786,7 @@ async def run_sn_pools(
         # pipeline until the edges are re-derived. Idempotent (MERGE)
         # and fast (~1s for ~200 SNs) so safe to run on every loop.
         from imas_codex.standard_names.graph_ops import (
+            normalize_derived_parent_lifecycle,
             rederive_structural_edges,
             seed_parent_sources,
         )
@@ -804,6 +805,14 @@ async def run_sn_pools(
         parent_count = await asyncio.to_thread(seed_parent_sources)
         if parent_count:
             logger.info("Seeded %d parent component sources", parent_count)
+        repaired_parent_count = await asyncio.to_thread(
+            normalize_derived_parent_lifecycle
+        )
+        if repaired_parent_count:
+            logger.info(
+                "Normalized %d derived parent lifecycle nodes",
+                repaired_parent_count,
+            )
 
         # ── Build pool specs ──────────────────────────────────────
         _only_domain_for_pools = _domains[0] if len(_domains) == 1 else None

@@ -1623,6 +1623,242 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     }
 
 
+def _query_seedable_derived_parents(
+    gc: Any,
+    *,
+    state_where: str,
+) -> list[dict[str, Any]]:
+    """Return structurally seedable derived-parent candidates."""
+    return list(
+        gc.query(
+            f"""
+            MATCH (parent:StandardName)
+            WHERE (parent.origin IS NULL OR parent.origin = 'derived')
+              AND ({state_where})
+            MATCH (child)-[comp:HAS_PARENT]->(parent)
+            WHERE comp.operator_kind IN
+                  ['projection', 'coordinate', 'unary_postfix']
+            WITH parent,
+                 collect(DISTINCT child) AS children
+            MATCH (any_child)-[any_comp:HAS_PARENT]->(parent)
+            WITH parent, children,
+                 collect(any_comp.operator_kind) AS edge_kinds,
+                 count(any_child) AS total_children,
+                 count(CASE WHEN any_child.name_stage IS NOT NULL
+                       THEN 1 END) AS composed_children
+            WHERE total_children = composed_children
+              AND total_children >= 1
+            UNWIND children AS child
+            OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
+            OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
+            WITH parent, edge_kinds,
+                 collect(DISTINCT {{
+                     id: child.id,
+                     unit: child.unit,
+                     cocos: child.cocos_transformation_type,
+                     physics_domain: child.physics_domain,
+                     kind: child.kind
+                 }}) AS child_data,
+                 collect(DISTINCT imas.id) AS dd_paths
+            RETURN parent.id AS parent_id,
+                   child_data,
+                   dd_paths,
+                   edge_kinds
+            """
+        )
+    )
+
+
+def _derived_parent_source_metadata(
+    parent_id: str,
+    *,
+    parent_dd_path: str | None,
+) -> dict[str, str]:
+    """Build a valid StandardNameSource identity for a derived parent."""
+    if parent_dd_path:
+        return {
+            "source_node_id": f"dd:{parent_dd_path}",
+            "source_type": "dd",
+            "source_id": parent_dd_path,
+            "batch_key": "derived_parent",
+        }
+    return {
+        "source_node_id": f"manual:{parent_id}",
+        "source_type": "manual",
+        "source_id": parent_id,
+        "batch_key": "derived_parent",
+    }
+
+
+def _materialize_derived_parent_rows(
+    gc: Any,
+    parents: list[dict[str, Any]],
+) -> int:
+    """Materialize structurally eligible derived parents onto the docs lifecycle."""
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    seeded = 0
+    for row in parents:
+        parent_id = row["parent_id"]
+        child_data = row.get("child_data") or []
+        dd_paths = [p for p in (row.get("dd_paths") or []) if p]
+
+        edge_kinds = row.get("edge_kinds") or []
+        is_geometric = any(k == "coordinate" for k in edge_kinds)
+
+        seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
+        if not any(k in seedable_edge_kinds for k in edge_kinds):
+            logger.debug(
+                "Parent %s has only non-seedable edges (%s) — skipping",
+                parent_id,
+                edge_kinds,
+            )
+            continue
+
+        is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
+
+        child_units = {c["unit"] for c in child_data if c.get("unit")}
+        if is_geometric:
+            unit = None
+        elif len(child_units) > 1:
+            logger.warning(
+                "Parent %s has children with heterogeneous units: %s — "
+                "skipping (needs manual review)",
+                parent_id,
+                child_units,
+            )
+            continue
+        else:
+            unit = next(iter(child_units)) if child_units else None
+
+        child_cocos = {c["cocos"] for c in child_data if c.get("cocos")}
+        cocos = next(iter(child_cocos)) if len(child_cocos) == 1 else None
+
+        child_domains = {
+            c["physics_domain"] for c in child_data if c.get("physics_domain")
+        }
+        physics_domain = next(iter(child_domains)) if len(child_domains) == 1 else None
+
+        kind = "scalar" if is_magnitude_parent else "vector"
+        grammar_fields = _parse_parent_grammar(parent_id)
+
+        parent_dd_path = None
+        if dd_paths:
+            parts = [p.split("/") for p in dd_paths]
+            common = []
+            for segments in zip(*parts, strict=False):
+                if len(set(segments)) == 1:
+                    common.append(segments[0])
+                else:
+                    break
+            if common:
+                parent_dd_path = "/".join(common)
+
+        props: dict[str, Any] = {
+            "parent_id": parent_id,
+            "unit": unit,
+            "cocos_transformation_type": cocos,
+            "physics_domain": physics_domain,
+            "kind": kind,
+            "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+            "is_geometric_coordinate": is_geometric,
+            "dd_path": parent_dd_path,
+        }
+        props.update(grammar_fields)
+        props.update(
+            _derived_parent_source_metadata(
+                parent_id,
+                parent_dd_path=parent_dd_path,
+            )
+        )
+
+        gc.query(
+            """
+            MATCH (parent:StandardName {id: $parent_id})
+            SET parent.name_stage = 'accepted',
+                parent.docs_stage = coalesce(parent.docs_stage, 'pending'),
+                parent.validation_status = coalesce(parent.validation_status, 'valid'),
+                parent.origin = 'derived',
+                parent.kind = $kind,
+                parent.unit = coalesce($unit, parent.unit),
+                parent.cocos_transformation_type =
+                    coalesce($cocos_transformation_type,
+                             parent.cocos_transformation_type),
+                parent.physics_domain =
+                    coalesce($physics_domain, parent.physics_domain),
+                parent.description = CASE
+                    WHEN trim(coalesce(parent.description, '')) = ''
+                    THEN $description
+                    ELSE parent.description
+                END,
+                parent.needs_composition = null,
+                parent.chain_length = coalesce(parent.chain_length, 0),
+                parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),
+                parent.grammar_physical_base =
+                    coalesce($grammar_physical_base,
+                             parent.grammar_physical_base),
+                parent.grammar_subject =
+                    coalesce($grammar_subject, parent.grammar_subject),
+                parent.grammar_transformation =
+                    coalesce($grammar_transformation,
+                             parent.grammar_transformation),
+                parent.grammar_component =
+                    coalesce($grammar_component, parent.grammar_component),
+                parent.is_geometric_coordinate =
+                    coalesce(parent.is_geometric_coordinate,
+                             $is_geometric_coordinate)
+            WITH parent
+            MERGE (sns:StandardNameSource {id: $source_node_id})
+            ON CREATE SET sns.created_at = datetime(),
+                          sns.attempt_count = 0
+            SET sns.status = 'composed',
+                sns.source_type = $source_type,
+                sns.source_id = $source_id,
+                sns.batch_key = coalesce(sns.batch_key, $batch_key),
+                sns.description = CASE
+                    WHEN trim(coalesce(sns.description, '')) = ''
+                    THEN parent.description
+                    ELSE sns.description
+                END,
+                sns.physics_domain = coalesce(parent.physics_domain, sns.physics_domain),
+                sns.composed_at = coalesce(sns.composed_at, datetime()),
+                sns.produced_sn_id = parent.id,
+                sns.claimed_at = null,
+                sns.claim_token = null
+            MERGE (sns)-[:PRODUCED_NAME]->(parent)
+            """,
+            **props,
+        )
+
+        if parent_dd_path:
+            gc.query(
+                """
+                MATCH (sns:StandardNameSource {id: $source_node_id})
+                MATCH (imas:IMASNode {id: $dd_path})
+                MERGE (sns)-[:FROM_DD_PATH]->(imas)
+                """,
+                source_node_id=props["source_node_id"],
+                dd_path=parent_dd_path,
+            )
+
+        if unit:
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $parent_id})
+                MERGE (u:Unit {id: $unit})
+                MERGE (sn)-[:HAS_UNIT]->(u)
+                """,
+                parent_id=parent_id,
+                unit=unit,
+            )
+
+        seeded += 1
+
+    return seeded
+
+
 def seed_parent_sources(gc: Any | None = None) -> int:
     """Fully populate parent StandardName nodes from their children.
 
@@ -1669,237 +1905,48 @@ def seed_parent_sources(gc: Any | None = None) -> int:
 
     Returns the number of parents fully populated.
     """
-    from imas_codex.standard_names.source_paths import encode_source_path
-
     _own_gc = gc is None
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
-        # Structural selection: placeholder parent (no name_stage) with at
-        # least one HAS_PARENT child whose edge_kind is seedable. The
-        # Python-side ``seedable_edge_kinds`` filter below re-verifies the
-        # edge mix per parent, so the query may over-select; that is OK.
-        parents = list(
-            gc.query(
-                """
-                MATCH (parent:StandardName)
-                WHERE parent.name_stage IS NULL
-                MATCH (child)-[comp:HAS_PARENT]->(parent)
-                WHERE comp.operator_kind IN
-                      ['projection', 'coordinate', 'unary_postfix']
-                WITH parent,
-                     collect(DISTINCT child) AS children
-                MATCH (any_child)-[any_comp:HAS_PARENT]->(parent)
-                WITH parent, children,
-                     collect(any_comp.operator_kind) AS edge_kinds,
-                     count(any_child) AS total_children,
-                     count(CASE WHEN any_child.name_stage IS NOT NULL
-                           THEN 1 END) AS composed_children
-                WHERE total_children = composed_children
-                  AND total_children >= 1
-                UNWIND children AS child
-                WITH parent, edge_kinds, child
-                OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
-                OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
-                WITH parent, edge_kinds,
-                     collect(DISTINCT {
-                         id: child.id,
-                         unit: child.unit,
-                         cocos: child.cocos_transformation_type,
-                         physics_domain: child.physics_domain,
-                         kind: child.kind
-                     }) AS child_data,
-                     collect(DISTINCT imas.id) AS dd_paths
-                RETURN parent.id AS parent_id,
-                       child_data,
-                       dd_paths,
-                       edge_kinds
-                """
-            )
+        parents = _query_seedable_derived_parents(
+            gc,
+            state_where="parent.name_stage IS NULL",
         )
 
         if not parents:
             return 0
 
-        seeded = 0
-        for row in parents:
-            parent_id = row["parent_id"]
-            child_data = row.get("child_data") or []
-            dd_paths = [p for p in (row.get("dd_paths") or []) if p]
-
-            # Determine if this is a geometric coordinate parent
-            edge_kinds = row.get("edge_kinds") or []
-            is_geometric = any(k == "coordinate" for k in edge_kinds)
-
-            # Only seed parents from projection/coordinate/magnitude edges.
-            # Unary prefix edges (time_derivative, gradient) link to an
-            # existing quantity, not a parent that needs seeding.
-            # Unary postfix edges (magnitude) link to the base form of the
-            # quantity — these DO need seeding as scalar parents.
-            seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
-            if not any(k in seedable_edge_kinds for k in edge_kinds):
-                logger.debug(
-                    "Parent %s has only non-seedable edges (%s) — skipping",
-                    parent_id,
-                    edge_kinds,
-                )
-                continue
-
-            # Determine parent type from edge kinds
-            is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
-
-            # Extract and validate unit uniformity
-            child_units = {c["unit"] for c in child_data if c.get("unit")}
-            if is_geometric:
-                # Geometric parents (e.g. "position") have heterogeneous
-                # units (m for r/z, rad for phi) — skip unit uniformity
-                unit = None
-            elif len(child_units) > 1:
-                logger.warning(
-                    "Parent %s has children with heterogeneous units: %s — "
-                    "skipping (needs manual review)",
-                    parent_id,
-                    child_units,
-                )
-                continue
-            else:
-                unit = next(iter(child_units)) if child_units else None
-
-            # Extract COCOS (should be uniform across components)
-            child_cocos = {c["cocos"] for c in child_data if c.get("cocos")}
-            cocos = next(iter(child_cocos)) if len(child_cocos) == 1 else None
-
-            # Physics domain from children
-            child_domains = {
-                c["physics_domain"] for c in child_data if c.get("physics_domain")
-            }
-            physics_domain = (
-                next(iter(child_domains)) if len(child_domains) == 1 else None
-            )
-
-            # Kind depends on parent type:
-            # - projection/coordinate parents are vectors
-            # - magnitude (unary_postfix) parents are scalars (base form)
-            if is_magnitude_parent:
-                kind = "scalar"
-            else:
-                kind = "vector"
-
-            # Stamp an honest placeholder. The deterministic name is the
-            # quality-bearing artifact at this stage; the description is
-            # written by ``GENERATE_DOCS`` (LLM, child/parent-aware) and
-            # then RD-quorum scored by ``REVIEW_DOCS``. Any node that
-            # exports while still carrying this exact placeholder string
-            # means the docs pipeline never ran or was interrupted —
-            # ``sn export`` rejects on that signature.
-            from imas_codex.standard_names.defaults import (
-                DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-            )
-
-            description = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
-
-            # Attempt ISN parse for grammar fields
-            grammar_fields = _parse_parent_grammar(parent_id)
-
-            # Derive parent DD path from common prefix
-            parent_dd_path = None
-            if dd_paths:
-                parts = [p.split("/") for p in dd_paths]
-                common = []
-                for segments in zip(*parts, strict=False):
-                    if len(set(segments)) == 1:
-                        common.append(segments[0])
-                    else:
-                        break
-                if common:
-                    parent_dd_path = "/".join(common)
-
-            source_id = (
-                encode_source_path("dd", parent_dd_path)
-                if parent_dd_path
-                else f"sn:{parent_id}"
-            )
-
-            # Fully populate the parent SN and create audit source
-            props: dict[str, Any] = {
-                "parent_id": parent_id,
-                "source_id": source_id,
-                "unit": unit,
-                "cocos_transformation_type": cocos,
-                "physics_domain": physics_domain,
-                "kind": kind,
-                "description": description,
-                "is_geometric_coordinate": is_geometric,
-            }
-            props.update(grammar_fields)
-
-            gc.query(
-                """
-                MATCH (parent:StandardName {id: $parent_id})
-                SET parent.name_stage = 'accepted',
-                    parent.docs_stage = 'pending',
-                    parent.validation_status = 'valid',
-                    parent.origin = 'derived',
-                    parent.kind = $kind,
-                    parent.unit = coalesce($unit, parent.unit),
-                    parent.cocos_transformation_type =
-                        coalesce($cocos_transformation_type,
-                                 parent.cocos_transformation_type),
-                    parent.physics_domain =
-                        coalesce($physics_domain, parent.physics_domain),
-                    parent.description = $description,
-                    parent.needs_composition = null,
-                    parent.grammar_physical_base =
-                        coalesce($grammar_physical_base,
-                                 parent.grammar_physical_base),
-                    parent.grammar_subject =
-                        coalesce($grammar_subject, parent.grammar_subject),
-                    parent.grammar_transformation =
-                        coalesce($grammar_transformation,
-                                 parent.grammar_transformation),
-                    parent.grammar_component =
-                        coalesce($grammar_component,
-                                 parent.grammar_component),
-                    parent.is_geometric_coordinate = $is_geometric_coordinate
-                WITH parent
-                MERGE (sns:StandardNameSource {id: $source_id})
-                ON CREATE SET sns.status = 'composed',
-                              sns.created_at = datetime(),
-                              sns.source_type = 'parent_component'
-                ON MATCH SET sns.status = 'composed'
-                MERGE (sns)-[:PRODUCED_NAME]->(parent)
-                """,
-                **props,
-            )
-
-            # Link to DD structural node if found
-            if parent_dd_path:
-                gc.query(
-                    """
-                    MATCH (sns:StandardNameSource {id: $source_id})
-                    MATCH (imas:IMASNode {id: $dd_path})
-                    MERGE (sns)-[:FROM_DD_PATH]->(imas)
-                    """,
-                    source_id=source_id,
-                    dd_path=parent_dd_path,
-                )
-
-            # Link parent to Unit node
-            if unit:
-                gc.query(
-                    """
-                    MATCH (sn:StandardName {id: $parent_id})
-                    MERGE (u:Unit {id: $unit})
-                    MERGE (sn)-[:HAS_UNIT]->(u)
-                    """,
-                    parent_id=parent_id,
-                    unit=unit,
-                )
-
-            seeded += 1
-
+        seeded = _materialize_derived_parent_rows(gc, parents)
         logger.info("seed_parent_sources: populated %d parent SNs", seeded)
         return seeded
+    finally:
+        if _own_gc:
+            gc.__exit__(None, None, None)
+
+
+def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
+    """Repair eligible derived parents onto the docs lifecycle, idempotently."""
+    _own_gc = gc is None
+    if _own_gc:
+        gc = GraphClient().__enter__()
+    try:
+        parents = _query_seedable_derived_parents(
+            gc,
+            state_where=(
+                "parent.name_stage IS NULL "
+                "OR parent.name_stage = 'pending' "
+                "OR (parent.name_stage = 'accepted' AND parent.docs_stage IS NULL)"
+            ),
+        )
+        if not parents:
+            return 0
+        repaired = _materialize_derived_parent_rows(gc, parents)
+        logger.info(
+            "normalize_derived_parent_lifecycle: repaired %d derived parent SNs",
+            repaired,
+        )
+        return repaired
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
