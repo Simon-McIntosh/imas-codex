@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="container-neo4j-recovery">
+  <meta name="plan-title" content="Fix: Neo4j Database Unavailable in Container">
+  <meta name="plan-summary" content="Archived recovery plan for Azure container startup failures where Neo4j HTTP health passed while the user database remained offline.">
+  <meta name="plan-status" content="archived">
+  <title>Container Neo4j Recovery | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Fix: Neo4j Database Unavailable in Container</h1>
+    <p>This archive keeps the root-cause analysis for the container incident where Azure returned HTTP 200 from <code>/health</code> while all graph statistics were null. The preserved conclusion is that the DBMS came up before the <code>neo4j</code> database finished recovery, so the MCP server started against an offline database.</p>
+
+    <h2 id="s1">§1 — Root cause and evidence</h2>
+    <ul>
+      <li><strong>Readiness bug:</strong> the entrypoint checked only HTTP readiness, not Bolt queryability.</li>
+      <li><strong>Environment asymmetry:</strong> CI runners recovered the 1.9&nbsp;GB graph quickly on local SSD, while Azure’s slower storage and tighter memory budget made recovery take minutes or stall permanently.</li>
+      <li><strong>Non-causes preserved for future debugging:</strong> auth was not the issue, and the graph dump was already baked into the image correctly.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Preserved recovery design</h2>
+    <ol>
+      <li><strong>Build-time recovery:</strong> pre-start Neo4j in the graph-loader stage so WAL replay and <code>system</code>-database creation happen on the fast build host, not on slow Azure storage.</li>
+      <li><strong>Runtime Bolt gate:</strong> wait first for HTTP/DBMS readiness, then for a successful <code>cypher-shell &quot;RETURN 1&quot;</code> probe before starting the MCP server.</li>
+      <li><strong>Optional hardening:</strong> a modest heap increase and an explicit graph-status field in the health response.</li>
+    </ol>
+    <p>The important preserved operational rule is that container startup must verify database readiness, not just process liveness.</p>
+
+    <h2 id="s3">§3 — Validation target kept from the markdown</h2>
+    <p>The archived acceptance bar was straightforward: build succeeds, container startup exposes non-null graph stats within seconds, runtime logs no longer show fresh recovery work, and Azure health checks report populated graph metrics. Keep this file as the incident RCA and the rationale for any future entrypoint or image-startup changes.</p>
+  </main>
+</body>
+</html>

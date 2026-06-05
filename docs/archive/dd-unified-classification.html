@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-unified-classification">
+  <meta name="plan-title" content="DD Unified Classification &amp; Enrichment Pipeline">
+  <meta name="plan-summary" content="Archived architecture record for the quantity/geometry split, classifier repair, search recovery, sonnet enrichment upgrade, and the bridge to multi-pass DD refinement.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-informs" content="dd-multi-pass-enrichment,isn-standard-name-kind">
+  <title>DD Unified Classification | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD Unified Classification &amp; Enrichment Pipeline</h1>
+    <p>This archive keeps the broad design that unified several DD threads: category repair, quantity-versus-geometry semantics, search fallout from stale <code>'data'</code> filters, enrichment-model choice, and the bridge to multi-pass refinement.</p>
+
+    <h2 id="s1">§1 — Durable taxonomy decisions</h2>
+    <ul>
+      <li><strong><code>quantity</code> was split from <code>geometry</code>.</strong> Machine and diagnostic hardware geometry became a first-class searchable and embeddable category instead of being lumped into a monolithic quantity bucket.</li>
+      <li><strong>Geometry detection became structural.</strong> The plan replaced fragile leaf-name heuristics with path-pattern plus spatial-unit rules, while explicitly excluding plasma outputs such as boundary and separatrix data.</li>
+      <li><strong>Coordinate handling stayed separate.</strong> Coordinates remained enrichable and searchable but not embeddable or SN-extractable.</li>
+      <li><strong>The assessment of StandardNameKind stayed orthogonal.</strong> The plan preserved the boundary that DD category decisions belong in codex, while ISN grammar and <code>StandardNameKind</code> remain separate concerns; see <a href="isn-standard-name-kind.html">ISN StandardNameKind Assessment</a>.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Execution work the markdown preserved</h2>
+    <ul>
+      <li><strong>Dirty-worktree recovery was part of the plan.</strong> The source explicitly documented how reverted search changes had broken DD search by reintroducing hardcoded <code>'data'</code> filters.</li>
+      <li><strong>Classifier repair was specific.</strong> The archive keeps the path-aware fix for coordinate targets, the <code>HAS_PARENT</code> relationship correction, and the requirement to update tests before graph repair.</li>
+      <li><strong>MCP/search augmentation was bundled in.</strong> Category-aware filters, coordinate metadata display, and geometry-vs-physical shorthands were all treated as part of the same classification cleanup.</li>
+      <li><strong>Model choice was re-evaluated empirically.</strong> The markdown preserved the finding that current DD enrichment had been done with flash-lite and that moving to sonnet was a dramatic quality upgrade for only marginal extra cost.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Relationship to later refinement work</h2>
+    <p>The source explicitly introduced <a href="dd-multi-pass-enrichment.html">DD Multi-Pass Enrichment</a> as the follow-on design: first fix the category system and model threading, then add a second refinement pass with a new <code>refined</code> status. That dependency is preserved here because the refinement plan assumes the unified classifier, enrichable-category sets, and CLI model wiring from this plan.</p>
+  </main>
+</body>
+</html>

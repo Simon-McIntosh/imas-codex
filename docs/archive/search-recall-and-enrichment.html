@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="search-recall-and-enrichment">
+  <meta name="plan-title" content="Search Recall, Scoring, and Output Enrichment">
+  <meta name="plan-summary" content="Archived search-improvement plan covering hybrid scoring fixes, graph-native retrieval boosts, richer result formatting, and permanent evaluation infrastructure.">
+  <meta name="plan-status" content="archived">
+  <title>Search Recall, Scoring, and Output Enrichment | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Search Recall, Scoring, and Output Enrichment</h1>
+    <p>This archive preserves the search-improvement program that explained why the graph-backed DD search underperformed the older file-backed server on recall while already winning on some precision-oriented semantic queries. The key diagnosis was cumulative candidate loss across approximate vector search, aggressive filtering, and weak score mixing.</p>
+
+    <h2 id="s1">§1 — Foundation fixes worth keeping</h2>
+    <ul>
+      <li><strong>Remove the BM25 score floor.</strong> The markdown identified the <code>0.7</code> floor as a distortion that compressed text relevance and let weak text matches outrank better vector hits.</li>
+      <li><strong>Switch hybrid fusion to RRF.</strong> Reciprocal Rank Fusion replaced ad-hoc additive mixing and became the preserved ranking recommendation.</li>
+      <li><strong>Over-fetch more vector candidates.</strong> The plan argued for raising the vector candidate limit so broad physics queries do not lose most relevant paths before scoring starts.</li>
+      <li><strong>Relax the documentation filter.</strong> Once enriched descriptions existed, search should not exclude otherwise good nodes simply because raw DD documentation was short.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Graph-native capabilities the plan documented</h2>
+    <ul>
+      <li><strong>Lucene advanced queries:</strong> field boosting, fuzzy matching, phrase proximity, and prefix queries.</li>
+      <li><strong>Cluster and hierarchy signals:</strong> cluster-consensus boosts, sibling/parent proximity, and coordinate-based cross-IDS discovery.</li>
+      <li><strong>Agent-facing output enrichment:</strong> children previews, dual description/raw-DD display, provenance tags for search channels, and breadcrumb-style parent context.</li>
+    </ul>
+    <p>The source plan also preserved a useful architectural note: some items later moved into a successor search-cluster/output evaluation effort, but the rationale for graph-native retrieval and richer result formatting still belongs in the historical record.</p>
+
+    <h2 id="s3">§3 — Evaluation discipline preserved</h2>
+    <p>The markdown did not stop at ranking ideas; it specified a permanent evaluation loop. The archived record keeps the call for a larger ground-truth corpus, a parameterized harness, DoE-based tuning of hybrid weights and limits, and CI regression gates for future <code>graph_search.py</code> changes. It also keeps the verified-capabilities checklist showing that Lucene syntax, reverse <code>HAS_PARENT</code> traversal, cluster lookups, and coordinate-sharing queries were all already proven on the live Neo4j graph.</p>
+  </main>
+</body>
+</html>

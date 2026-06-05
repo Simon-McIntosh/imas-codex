@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-multi-pass-enrichment">
+  <meta name="plan-title" content="DD Multi-Pass Enrichment">
+  <meta name="plan-summary" content="Archived design for adding a refinement pass to DD enrichment so sibling, cluster, and cross-IDS descriptions can improve pass-1 text before embedding.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-depends-on" content="dd-unified-classification">
+  <title>DD Multi-Pass Enrichment | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD Multi-Pass Enrichment</h1>
+    <p>This archive preserves the second-pass DD enrichment design that was meant to sit on top of <a href="dd-unified-classification.html">DD Unified Classification &amp; Enrichment Pipeline</a>. The source plan argued that sonnet-quality pass-1 descriptions were already valuable, but that sibling and peer descriptions would make the next pass materially better.</p>
+
+    <h2 id="s1">§1 — Core design preserved</h2>
+    <ul>
+      <li><strong>New lifecycle step:</strong> <code>built → enriched → refined → embedded</code>.</li>
+      <li><strong>New worker:</strong> <code>refine_worker</code> between enrich and embed, with the embed worker updated to claim <code>refined</code> nodes instead of <code>enriched</code>.</li>
+      <li><strong>Natural sibling barrier:</strong> a node only becomes claimable for refinement once its enrichable siblings are all past <code>built</code>, avoiding a coarse global barrier.</li>
+      <li><strong>New context sources:</strong> sibling descriptions, same-cluster peer descriptions, cross-IDS duplicates, and the node’s own pass-1 description.</li>
+      <li><strong>Idempotency boundary:</strong> a dedicated <code>refinement_hash</code> keyed from pass-1 text, peer context, and model choice.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Why the plan mattered</h2>
+    <p>The durable idea is that DD descriptions become more consistent when they can see one another. The markdown source preserved three concrete failure modes in single-pass generation: ambiguous sibling families, cross-IDS wording drift, and inconsistent terminology among semantic-cluster peers. This archive keeps that reasoning and the explicit cost model: roughly two passes of sonnet enrichment, about $100 total, and about six hours for a full rebuild.</p>
+
+    <h2 id="s3">§3 — Dependencies and follow-on work</h2>
+    <p>The markdown source was explicit that this work depended on the classifier and status-machine changes from <a href="dd-unified-classification.html">DD Unified Classification</a>. It also preserved the later extensions that were intentionally left for follow-up: selective auto-promotion when no useful peer context exists, targeted re-refinement for bad descriptions, and a possible third summarization pass for structure nodes.</p>
+  </main>
+</body>
+</html>

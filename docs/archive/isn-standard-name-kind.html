@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="isn-standard-name-kind">
+  <meta name="plan-title" content="ISN StandardNameKind Assessment">
+  <meta name="plan-summary" content="Archived assessment concluding that StandardNameKind should remain unchanged while geometry-versus-physics classification stays on the DD side.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-informs" content="dd-unified-classification">
+  <title>ISN StandardNameKind Assessment | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>ISN StandardNameKind Assessment</h1>
+    <p>This archive preserves a boundary-setting decision rather than an implementation recipe. The markdown source concluded that <code>StandardNameKind</code> should stay as <code>scalar</code>, <code>vector</code>, and <code>metadata</code>; the new geometric-versus-physical distinction belongs in DD node classification, not in ISN’s grammar-level enum.</p>
+
+    <h2 id="s1">§1 — Main conclusion</h2>
+    <p><strong>Keep StandardNameKind unchanged.</strong> The source plan argued that the enum answers a different question from DD node categories: mathematical form and grammar validation, not pipeline participation or physical provenance. That conclusion remains the key historical outcome.</p>
+    <ul>
+      <li><strong>Why:</strong> the grammar already distinguishes structured geometric forms through its own branches, while many geometric quantities still use the open physical-base path.</li>
+      <li><strong>What not to do:</strong> do not denormalize DD geometry labels into a singular StandardName field unless a future search path proves the join too expensive.</li>
+      <li><strong>Optional escape hatch kept in the archive:</strong> if denormalization is ever required, it should be a recomputed multivalued source-category set, not a singular unstable flag.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Cross-reference preserved</h2>
+    <p>The file directly informed <a href="dd-unified-classification.html">DD Unified Classification &amp; Enrichment Pipeline</a> by clarifying that codex owns DD category semantics and ISN owns grammar and validation. The archived markdown also kept an important warning: compose prompts need category-aware hints so geometric quantities choose the correct grammar branch.</p>
+
+    <h2 id="s3">§3 — What was later superseded</h2>
+    <p>The source itself recorded that only part of its assessment remained fully current. The recommendation to keep <code>StandardNameKind</code> unchanged remained valid, while its old “vector kind is effectively unused” conclusion was superseded by later vector-hierarchy work in the Standard Names planning stream. This archive intentionally keeps both facts visible.</p>
+  </main>
+</body>
+</html>

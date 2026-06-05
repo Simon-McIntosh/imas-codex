@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-node-kind-classification">
+  <meta name="plan-title" content="DD Node Kind Classification — Audit &amp; Remaining Work">
+  <meta name="plan-summary" content="Archived audit of the first DD node-category migration, preserving the landed phases, the live graph mutation record, and the two critical classifier bugs that still needed cleanup.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-informs" content="dd-unified-classification">
+  <title>DD Node Kind Classification | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD Node Kind Classification — Audit &amp; Remaining Work</h1>
+    <p>This archive keeps the audit trail for the first large DD category migration. It is important because the markdown source recorded both what had already landed and the exact graph mutations that were applied before later plans absorbed the work.</p>
+
+    <h2 id="s1">§1 — Landed outcomes captured by the audit</h2>
+    <ul>
+      <li><strong>Schema and classifier work landed.</strong> The archive preserves the creation of <code>node_classifier.py</code>, <code>node_categories.py</code>, and the initial enum expansion beyond the old <code>data/error/metadata</code> split.</li>
+      <li><strong>Consumers were updated.</strong> The markdown recorded the wide import migration across build, search, CLI, and graph code.</li>
+      <li><strong>The live graph was actually migrated.</strong> The source documented the shadow-property classification, full coverage validation, atomic swap, and stale-embedding cleanup that left only true quantity nodes embedded.</li>
+      <li><strong>Resulting state was measured.</strong> The post-migration counts and the “zero non-quantity embeddings” invariant are preserved here as the historical checkpoint.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Critical defects that remained visible</h2>
+    <p>The audit mattered because it did not treat the migration as finished. It kept two high-confidence bugs front and center:</p>
+    <ol>
+      <li><strong>Wrong relationship direction in pass 2.</strong> <code>PARENT_OF</code> was queried even though the graph used <code>HAS_PARENT</code>, demoting about 1,703 structure-with-unit nodes that should have stayed data-bearing.</li>
+      <li><strong>Over-broad coordinate reclassification.</strong> Any <code>HAS_COORDINATE</code> target became <code>coordinate</code>, which incorrectly swallowed hundreds of grid-stored physics values such as <code>.../values</code>, <code>.../radial</code>, and <code>.../measured</code> paths.</li>
+    </ol>
+    <p>The source also preserved the important non-bug: the apparent identifier-count mismatch was explained by <code>ids_properties/occurrence_type</code> nodes that correctly remained metadata.</p>
+
+    <h2 id="s3">§3 — Why this file still matters</h2>
+    <p>The later <a href="dd-unified-classification.html">DD Unified Classification &amp; Enrichment Pipeline</a> plan absorbed this work at a broader architectural level, but this archived note remains the best record of the original graph repair, the measured category distribution, and the lessons learned about relationship direction, path-aware coordinate handling, and writing tests before applying graph one-offs.</p>
+  </main>
+</body>
+</html>

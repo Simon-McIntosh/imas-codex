@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="38-grammar-vnext">
+  <meta name="plan-title" content="Plan 38 — Grammar vNext (ISN rc21) + Codex Schema &amp; Prompt Overhaul">
+  <meta name="plan-summary" content="Archived design record for the rc21 grammar-vNext proposal, preserving the completed rc20 corpus tag, the 5-group IR redesign, and the derived-data argument for dropping persistent grammar_* fields.">
+  <meta name="plan-status" content="archived">
+  <title>Plan 38 — Grammar vNext | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Plan 38 — Grammar vNext (archived)</h1>
+    <p>This archive preserves the last markdown version of the proposed Standard Name grammar overhaul. The source document was not a landed implementation record: it was a design package assembled after two reviews rejected plan 37’s preposition-stripping direction and converged on a larger grammar reset.</p>
+
+    <h2 id="s1">§1 — What this plan settled</h2>
+    <ul>
+      <li><strong>Plan 37 was superseded.</strong> The archive keeps the explicit decision that identity markers and prepositions should remain visible rather than being stripped for clustering convenience.</li>
+      <li><strong>The rc20 corpus preservation step had already landed.</strong> The plan records <code>v0.2.0-rc20-corpus</code> as the frozen 479-name baseline used for later vocabulary mining and round-trip checks.</li>
+      <li><strong>The core grammar proposal was the 5-group IR.</strong> Operators, projection, qualifiers, base, locus, and mechanism were re-framed as typed derived structure rather than a loose collection of partially overlapping segments.</li>
+      <li><strong>Closed vocabularies became the governing rule.</strong> The archived design keeps the move toward typed coordinate axes, a typed locus registry, a closed <code>physical_base</code> vocabulary, and a unified operator registry.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Key codex-side insight worth preserving</h2>
+    <p>The most durable codex decision in the markdown plan was not a prompt tweak but a storage rule: if the grammar parser becomes round-trip safe, segment decomposition is <em>derived data</em>. The archive therefore keeps the rationale for dropping the 13 persisted <code>grammar_*</code> fields from StandardName nodes and replacing them with parser-version and diagnostics metadata.</p>
+    <ul>
+      <li><strong>Why drop the fields:</strong> duplicated truth, silent staleness when the parser changes, schema bloat, and sparse real usage.</li>
+      <li><strong>What replaces them:</strong> on-demand parsing for search/audit paths, a <code>grammar_parse_version</code> stamp, and structured diagnostics instead of ad-hoc validation strings.</li>
+      <li><strong>What downstream work depended on this:</strong> prompt rewrites, exemplar refresh, reviewer-rubric updates, and bootstrap validation against a regenerated corpus.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Why it is archived instead of treated as shipped</h2>
+    <p>The source explicitly described itself as <strong>draft</strong> and placed hard gates in front of codex adoption: rc21 had to be released from ISN first, then codex could simplify schema and prompts against a stable grammar surface. That makes this file historical design context, not a claim that the full grammar-vNext migration landed exactly as written.</p>
+    <p>Keep this archive as the record of the intended sequence: preserve the corpus, formalize the grammar, release rc21, then simplify codex storage and prompt logic against the released parser.</p>
+  </main>
+</body>
+</html>
