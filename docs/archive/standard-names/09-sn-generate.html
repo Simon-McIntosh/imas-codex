@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="09-sn-generate">
+  <meta name="plan-title" content="09: Standard Name Generation Pipeline">
+  <meta name="plan-summary" content="Replace the heuristic `_compose_single()` with LLM-backed composition using rich prompt context from `imas-standard-names` backing functions. The pipeline runs as: **EXTRACT → COMPOSE → VALIDATE → PERSIST** via `sn bu...">
+  <meta name="plan-status" content="done">
+  <title>09: Standard Name Generation Pipeline | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>09: Standard Name Generation Pipeline</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/09-sn-generate.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Replaces:</strong> Previous 09, 10, 11 (which are archived by this plan) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/09-sn-generate.html">Plan 09</a>, <a href="/imas-codex/archive/standard-names/10-pipeline-fixes.html">Plan 10</a>, <a href="/imas-codex/archive/standard-names/11-rich-compose.html">Plan 11</a>)</span></li>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/39-structured-fanout.md">Plan 39</a>, <a href="/imas-codex/sn-search-facility.html">Plan 40</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Ready to implement
+<strong>Replaces:</strong> Previous 09, 10, 11 (which are archived by this plan)
+<strong>Effort:</strong> 4 phases, parallelizable</p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>Replace the heuristic <code>_compose_single()</code> with LLM-backed composition using
+rich prompt context from <code>imas-standard-names</code> backing functions.  The pipeline
+runs as: <strong>EXTRACT → COMPOSE → VALIDATE → PERSIST</strong> via <code>sn build</code>.</p>
+<p>Key design decisions (from rubber-duck critique):</p>
+<ol>
+<li><strong>Existing names are a reuse list, not a banned list</strong> — many DD paths can
+   map to the same StandardName.  Dedup by <code>source_id</code>, not <code>standard_name</code>.</li>
+<li><strong>VALIDATE stays separate</strong> — it is the quality gate.  Reports <code>validate_valid</code>,
+   <code>validate_invalid</code>, <code>fields_consistent</code> as distinct metrics.</li>
+<li><strong>Checkpoint/resume via source-level skip</strong> — extract skips sources already
+   linked via <code>(:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn)</code> unless <code>--force</code>.</li>
+<li><strong>Explicit provenance</strong> — persist model name, generation timestamp,
+   <code>review_status=skipped</code> (v1), never default confidence to 1.0.</li>
+<li><strong>No UnitOfWork</strong> — graph MERGE is idempotent.  Resumability comes from
+   source-level skip, not undo stacks.</li>
+<li><strong>Relationship direction: entity → concept</strong> — <code>(:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)</code>
+   not <code>(:StandardName)-[:DERIVED_FROM]-&gt;(src)</code>.  Consistent with <code>MEASURES</code>.</li>
+<li><strong>State fields are past tense</strong> — <code>extracted</code>, <code>composed</code>, <code>reviewed</code>, <code>validated</code>.</li>
+</ol>
+<h2 id="architecture">Architecture</h2>
+<pre><code>sn build --source dd --ids equilibrium --limit 200
+
+  EXTRACT (sync)           COMPOSE (async LLM)        VALIDATE (sync)          PERSIST (sync)
+  ┌─────────────┐         ┌──────────────────┐       ┌───────────────┐       ┌──────────────────┐
+  │ Query graph  │         │ Render prompts   │       │ Grammar parse │       │ MERGE StandardName│
+  │ Skip named   │ ──────▶ │ acall_structured │ ────▶ │ Fields check  │ ────▶ │ HAS_STANDARD_NAME│
+  │ Cluster batch│         │ Semaphore(5)     │       │ Normalize     │       │ Provenance props │
+  └─────────────┘         └──────────────────┘       └───────────────┘       └──────────────────┘
+       state.extracted       state.composed            state.validated          graph writes
+</code></pre>
+<h3 id="state-field-naming-all-past-tense">State Field Naming (all past tense)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Written by</th>
+<th>Read by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>extracted</code></td>
+<td>extract</td>
+<td>compose</td>
+</tr>
+<tr>
+<td><code>composed</code></td>
+<td>compose</td>
+<td>review or validate</td>
+</tr>
+<tr>
+<td><code>reviewed</code></td>
+<td>review</td>
+<td>validate</td>
+</tr>
+<tr>
+<td><code>validated</code></td>
+<td>validate</td>
+<td>persist</td>
+</tr>
+</tbody>
+</table>
+<h3 id="relationship-direction-imasnode-standardname">Relationship Direction: IMASNode → StandardName</h3>
+<p>The StandardName is the canonical physics concept hub.  Entities point TO it:</p>
+<pre><code>(:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)
+(:FacilitySignal)-[:MEASURES]-&gt;(sn:StandardName)
+</code></pre>
+<p><strong>NOT</strong> <code>(:StandardName)-[:DERIVED_FROM]-&gt;(src)</code>.  Reasons:</p>
+<ol>
+<li><strong>StandardName is the anchor, not the dependent.</strong> "electron_temperature" is
+   a canonical concept that multiple DD paths and signals reference.  DERIVED_FROM
+   puts the name as the dependent entity, which is semantically backwards.</li>
+<li><strong>Consistent with FacilitySignal pattern.</strong> Signals already use
+   <code>MEASURES -&gt; StandardName</code>.  DD paths should follow the same entity-to-concept
+   direction: <code>HAS_STANDARD_NAME -&gt; StandardName</code>.</li>
+<li><strong>Natural traversal.</strong> The most common query is "what standard name for this
+   DD path?" — <code>(node)-[:HAS_STANDARD_NAME]-&gt;(sn)</code> is direct.</li>
+<li><strong>Provenance is properties, not relationships.</strong> How the name was generated
+   (model, source_type, generated_at, confidence) are properties on StandardName,
+   not a separate relationship.</li>
+</ol>
+<p>This means <code>write_standard_names()</code> in <code>graph_ops.py</code> changes from:</p>
+<pre><code class="language-cypher">MERGE (sn)-[:DERIVED_FROM]-&gt;(src)  -- OLD: wrong direction
+</code></pre>
+<p>to:</p>
+<pre><code class="language-cypher">MERGE (src)-[:HAS_STANDARD_NAME]-&gt;(sn)  -- NEW: entity points to concept
+</code></pre>
+<h3 id="prompt-design">Prompt Design</h3>
+<p><strong>System prompt</strong> (<code>sn/compose_system.md</code>) — static, prompt-cached (~15KB):
+- Grammar rules, segment descriptions, critical distinctions
+- Vocabulary tokens with descriptions (not bare enums)
+- Field guidance and requirements
+- Curated examples grouped by pattern (~42 examples)
+- Tokamak parameter ranges for grounding documentation</p>
+<p><strong>User prompt</strong> (<code>sn/compose_dd.md</code>) — dynamic per-batch (~3KB):
+- IDS name, cluster context
+- DD paths with descriptions, units, data types
+- Existing standard names to reuse (not avoid)</p>
+<p>The system prompt content comes from <code>imas_standard_names</code> backing functions:
+- <code>grammar.constants.SEGMENT_RULES</code> → segment descriptions + critical distinctions
+- <code>grammar.constants.SEGMENT_TOKEN_MAP</code> → vocabulary with descriptions
+- <code>grammar.constants.SEGMENT_TEMPLATES</code> → template application rules
+- <code>grammar.field_schemas.FIELD_GUIDANCE</code> → per-field requirements
+- <code>tools.grammar._build_canonical_pattern()</code> → composition pattern
+- <code>resources/tokamak_parameters/</code> → grounding data
+- <code>resources/standard_name_examples/</code> → curated examples</p>
+<p>These are assembled into Jinja include files at build time (cached in-process).</p>
+<h3 id="batching-strategy">Batching Strategy</h3>
+<p>Hierarchical grouping for semantic coherence:</p>
+<ol>
+<li><strong>Primary:</strong> Semantic cluster (<code>IMASSemanticCluster</code> via <code>IN_CLUSTER</code>)</li>
+<li><strong>Secondary:</strong> IDS name (for unclustered paths or large clusters)</li>
+<li><strong>Tertiary:</strong> Path prefix depth 3 (for groups &gt; 25)</li>
+<li><strong>Cap:</strong> 25 paths per batch</li>
+</ol>
+<pre><code>equilibrium paths (1583)
+  ├── Cluster: &quot;Radial Profile Coordinates&quot; (12 paths) → 1 batch
+  ├── Cluster: &quot;Plasma Boundary Geometry&quot; (39 paths) → 2 batches
+  ├── Unclustered (1383 paths)
+  │   ├── time_slice/profiles_1d (52) → 3 batches
+  │   ├── time_slice/boundary (39) → 2 batches
+  │   └── ...
+</code></pre>
+<h3 id="existing-names-reuse-list">Existing Names = Reuse List</h3>
+<p>The graph model supports many-to-one: multiple DD paths can HAS_STANDARD_NAME
+the same StandardName.  The LLM prompt should say:</p>
+<blockquote>
+<p>These standard names already exist.  <strong>Reuse</strong> them when the DD path measures
+the same quantity.  Only create a new name when no existing name fits.</p>
+</blockquote>
+<p>Deduplication is by <code>source_id</code> (DD path), not <code>standard_name</code>.</p>
+<h3 id="repo-architecture-future-direction">Repo Architecture (future direction)</h3>
+<p>With graph-backed generation, the repos have clear responsibilities:</p>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Role</th>
+<th>Contains</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>imas-standard-names</strong></td>
+<td>Grammar library + web docs</td>
+<td>Grammar rules, enums, compose/parse, validation, Quarto rendering, tokamak params, examples</td>
+</tr>
+<tr>
+<td><strong>imas-standard-names-catalog</strong></td>
+<td>Export target</td>
+<td>YAML files exported from graph via <code>sn publish</code></td>
+</tr>
+<tr>
+<td><strong>imas-codex</strong></td>
+<td>Generation platform</td>
+<td>LLM pipeline, graph storage, MCP tools, semantic search</td>
+</tr>
+</tbody>
+</table>
+<p><strong>imas-standard-names refactoring (Phase 1 prerequisite):</strong></p>
+<p>The MCP server backing functions contain rich prompt context builders that are
+currently private (<code>_build_canonical_pattern()</code>, <code>_get_segment_descriptions()</code>).
+These should be made <strong>public API</strong> in the grammar library so imas-codex can
+import them cleanly.  Specifically:</p>
+<ol>
+<li>Make <code>tools.grammar._build_*()</code> functions public (drop underscore prefix)</li>
+<li>Move them from <code>tools/</code> to <code>grammar/context.py</code> (they're grammar knowledge,
+   not MCP tool internals)</li>
+<li>Remove MCP server code from imas-standard-names (future — after pipeline proves out)</li>
+</ol>
+<p>The generation capability (UnitOfWork, catalog CRUD, MCP tools) is migrating to
+imas-codex.  The grammar library retains: rules definition, validation, resources,
+web rendering.</p>
+<hr>
+<h2 id="phase-1-prompt-templates">Phase 1: Prompt Templates</h2>
+<p><strong>Agent:</strong> engineer (3 files, well-specified)
+<strong>Depends on:</strong> nothing</p>
+<p>Create the Jinja include files that assemble rich grammar context from
+<code>imas_standard_names</code> backing functions.</p>
+<h3 id="files-to-create">Files to Create</h3>
+<p><strong><code>imas_codex/standard_names/context.py</code></strong> — Grammar context builder (replaces <code>build_grammar_context()</code>):</p>
+<pre><code class="language-python">&quot;&quot;&quot;Rich grammar context for SN compose prompts.
+
+Imports segment rules, vocabulary, field guidance, and examples from
+imas_standard_names backing functions.  Assembles them into template
+variables for Jinja2 rendering.
+
+Caches assembled context in-process (same pattern as wiki calibration).
+&quot;&quot;&quot;
+
+def build_compose_context() -&gt; dict[str, Any]:
+    &quot;&quot;&quot;Build rich context dict for sn/compose_system.md template.
+
+    Returns keys: grammar_rules, vocabulary, field_guidance, examples,
+    tokamak_ranges, segment_descriptions, critical_distinctions,
+    template_rules, plus the original enum lists for the user prompt.
+    &quot;&quot;&quot;
+    ...
+</code></pre>
+<p>Internals:
+- Import <code>SEGMENT_RULES</code>, <code>SEGMENT_ORDER</code>, <code>SEGMENT_TEMPLATES</code>,
+  <code>SEGMENT_TOKEN_MAP</code> from <code>imas_standard_names.grammar.constants</code>
+- Import <code>FIELD_GUIDANCE</code>, <code>TYPE_SPECIFIC_REQUIREMENTS</code> from
+  <code>imas_standard_names.grammar.field_schemas</code>
+- Import <code>_build_canonical_pattern()</code>, <code>_get_segment_descriptions()</code>,
+  <code>_build_segment_usage_guidance()</code> from <code>imas_standard_names.tools.grammar</code>
+  (make public wrappers if needed)
+- Load tokamak parameters from <code>imas_standard_names/resources/tokamak_parameters/</code>
+- Load curated examples from <code>imas_standard_names/resources/standard_name_examples/</code>
+- Cache result in module-level dict with TTL (same pattern as <code>_wiki_calibration_cache</code>)</p>
+<p><strong><code>imas_codex/llm/prompts/sn/compose_system.md</code></strong> — System prompt template:</p>
+<pre><code class="language-markdown">---
+name: sn/compose_system
+description: Static system prompt for SN composition (prompt-cached)
+task: composition
+dynamic: false
+---
+
+You are a physics nomenclature expert generating standard names ...
+
+## Grammar Rules
+
+{{ grammar_rules }}
+
+## Vocabulary
+
+{{ vocabulary }}
+
+## Segment Descriptions and Critical Distinctions
+
+{{ segment_descriptions }}
+{{ critical_distinctions }}
+
+## Field Guidance
+
+{{ field_guidance }}
+
+## Composition Pattern
+
+{{ canonical_pattern }}
+
+## Examples
+
+{{ examples }}
+
+## Output Format
+...
+</code></pre>
+<p><strong><code>imas_codex/llm/prompts/sn/compose_dd.md</code></strong> — Rewrite user prompt (dynamic):</p>
+<p>Strip the grammar rules (now in system prompt).  Keep only:
+- IDS name, cluster context
+- DD paths with descriptions, units, data types
+- Existing standard names (as reuse list, not banned list)
+- Output format specification</p>
+<h3 id="acceptance-criteria">Acceptance Criteria</h3>
+<ul>
+<li><code>build_compose_context()</code> returns a dict with all required keys</li>
+<li>System prompt renders to ~15KB of structured grammar context</li>
+<li>User prompt renders to ~3KB of per-batch data</li>
+<li>Grammar context includes segment descriptions (not bare enum lists)</li>
+<li>Tokamak parameters are loaded and available for documentation grounding</li>
+<li>At least 40 curated examples are included</li>
+</ul>
+<h3 id="tests">Tests</h3>
+<ul>
+<li>Unit test: <code>build_compose_context()</code> returns expected keys</li>
+<li>Unit test: System prompt renders without errors</li>
+<li>Unit test: User prompt renders with sample batch data</li>
+</ul>
+<hr>
+<h2 id="phase-2-extract-batching-improvements">Phase 2: Extract + Batching Improvements</h2>
+<p><strong>Agent:</strong> engineer (2-3 files, well-specified)
+<strong>Depends on:</strong> nothing (parallel with Phase 1)</p>
+<h3 id="2a-source-level-skip-resumability">2a: Source-level skip (resumability)</h3>
+<p>In <code>graph_ops.py</code>, add a function to get already-named source IDs:</p>
+<pre><code class="language-python">def get_named_source_ids() -&gt; set[str]:
+    &quot;&quot;&quot;Return source_ids already linked via HAS_STANDARD_NAME.&quot;&quot;&quot;
+    with GraphClient() as gc:
+        results = gc.query(&quot;&quot;&quot;
+            MATCH (src)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)
+            RETURN DISTINCT src.id AS source_id
+        &quot;&quot;&quot;)
+        return {r[&quot;source_id&quot;] for r in results}
+</code></pre>
+<p>In <code>extract_worker</code>, skip already-named sources:</p>
+<pre><code class="language-python">named = get_named_source_ids()
+raw = [c for c in raw if c.get(&quot;path&quot;, c.get(&quot;signal_id&quot;)) not in named]
+wlog.info(&quot;Skipped %d already-named sources&quot;, len(named &amp; ...))
+</code></pre>
+<p>Add <code>--force</code> flag to <code>sn build</code> CLI to bypass skip logic.</p>
+<h3 id="2b-cluster-based-batching">2b: Cluster-based batching</h3>
+<p>In <code>sources/dd.py</code>, replace flat IDS grouping with hierarchical batching:</p>
+<pre><code class="language-python">def _build_semantic_batches(results: list[dict], cap: int = 25) -&gt; list[ExtractionBatch]:
+    &quot;&quot;&quot;Group paths by cluster → IDS → prefix for LLM-coherent batches.&quot;&quot;&quot;
+    # 1. Separate clustered vs unclustered
+    # 2. Group clustered paths by cluster_id, sub-group by IDS
+    # 3. Group unclustered paths by IDS, sub-group by prefix depth 3
+    # 4. Split any group &gt; cap into sub-batches
+</code></pre>
+<h3 id="2c-state-field-rename">2c: State field rename</h3>
+<p>In <code>state.py</code>, rename all state fields to past tense:</p>
+<table>
+<thead>
+<tr>
+<th>Old</th>
+<th>New</th>
+<th>Written by</th>
+<th>Read by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>candidates</code></td>
+<td><code>extracted</code></td>
+<td>extract</td>
+<td>compose</td>
+</tr>
+<tr>
+<td><code>validated</code> (used as compose output)</td>
+<td><code>composed</code></td>
+<td>compose</td>
+<td>review or validate</td>
+</tr>
+<tr>
+<td><code>reviewed</code></td>
+<td><code>reviewed</code></td>
+<td>review</td>
+<td>validate</td>
+</tr>
+<tr>
+<td>(new)</td>
+<td><code>validated</code></td>
+<td>validate</td>
+<td>persist</td>
+</tr>
+</tbody>
+</table>
+<p>Update all references in <code>workers.py</code>, <code>pipeline.py</code>, <code>progress.py</code>.</p>
+<h3 id="acceptance-criteria_1">Acceptance Criteria</h3>
+<ul>
+<li><code>sn build</code> second run on same IDS skips already-derived names</li>
+<li><code>sn build --force</code> re-processes all paths</li>
+<li>Batches are ≤25 paths, grouped by cluster/IDS/prefix</li>
+<li>State fields follow pipeline phase naming</li>
+</ul>
+<h3 id="tests_1">Tests</h3>
+<ul>
+<li>Unit test: <code>get_derived_source_ids()</code> returns expected IDs</li>
+<li>Unit test: <code>_build_semantic_batches()</code> respects cap, groups by cluster</li>
+<li>Unit test: State field wiring (compose writes composed, validate writes validated)</li>
+</ul>
+<hr>
+<h2 id="phase-3-llm-compose-worker">Phase 3: LLM Compose Worker</h2>
+<p><strong>Agent:</strong> architect (5+ files, async LLM, prompt rendering)
+<strong>Depends on:</strong> Phase 1 (prompt templates), Phase 2 (batching + state)</p>
+<p>Replace <code>_compose_single()</code> heuristic with batch LLM calls.</p>
+<h3 id="core-changes">Core Changes</h3>
+<p><strong><code>workers.py</code> — <code>compose_worker</code>:</strong></p>
+<pre><code class="language-python">async def compose_worker(state: SNBuildState, **_kwargs) -&gt; None:
+    &quot;&quot;&quot;LLM-generate standard names from extracted batches.
+
+    Uses acall_llm_structured() with system/user prompt split
+    for prompt caching.  Runs batches concurrently with semaphore.
+    &quot;&quot;&quot;
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.context import build_compose_context
+
+    model = get_model(&quot;language&quot;)
+    context = build_compose_context()
+
+    # Render system prompt once (cached via prompt caching)
+    system_prompt = render_prompt(&quot;sn/compose_system&quot;, context)
+
+    # Process batches concurrently
+    sem = asyncio.Semaphore(5)
+    tasks = []
+    for batch in state.extracted:  # ExtractionBatch objects
+        tasks.append(_compose_batch(batch, model, system_prompt, context, sem, state))
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Collect successful results
+    composed = []
+    for r in results:
+        if isinstance(r, list):
+            composed.extend(r)
+        elif isinstance(r, Exception):
+            state.compose_stats.errors += 1
+
+    state.composed = composed
+</code></pre>
+<p><strong><code>workers.py</code> — <code>_compose_batch</code>:</strong></p>
+<pre><code class="language-python">async def _compose_batch(
+    batch: ExtractionBatch,
+    model: str,
+    system_prompt: str,
+    context: dict,
+    sem: asyncio.Semaphore,
+    state: SNBuildState,
+) -&gt; list[dict]:
+    &quot;&quot;&quot;Compose standard names for a single batch via LLM.&quot;&quot;&quot;
+    async with sem:
+        user_context = {
+            &quot;items&quot;: batch.items,
+            &quot;ids_name&quot;: batch.group_key,
+            &quot;existing_names&quot;: sorted(batch.existing_names)[:200],
+            &quot;cluster_context&quot;: batch.context,
+        }
+        user_prompt = render_prompt(&quot;sn/compose_dd&quot;, {**context, **user_context})
+
+        messages = [
+            {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system_prompt},
+            {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_prompt},
+        ]
+
+        result, cost, tokens = await acall_llm_structured(
+            model=model,
+            messages=messages,
+            response_model=SNComposeBatch,
+        )
+
+        state.compose_stats.cost += cost
+        state.compose_stats.total_tokens += tokens
+        state.compose_stats.record_batch(len(batch.items))
+
+        return [c.model_dump() for c in result.candidates]
+</code></pre>
+<h3 id="key-design-notes">Key Design Notes</h3>
+<ul>
+<li><strong>System/user split</strong>: System prompt is ~15KB static content.  With
+  OpenRouter prompt caching, this is cached after the first call, reducing
+  latency and cost for subsequent batches.</li>
+<li><strong>Semaphore(5)</strong>: Limits concurrent LLM calls.  Matches wiki worker pattern.</li>
+<li><strong>ExtractionBatch objects</strong>: compose_worker receives <code>state.candidates</code> as
+  a list of ExtractionBatch (from Phase 2 batching).  Each batch has items,
+  group_key, context, existing_names.</li>
+<li><strong>Cost tracking</strong>: Per-batch cost accumulated on <code>state.compose_stats</code>.</li>
+</ul>
+<h3 id="validate-worker-update">Validate Worker Update</h3>
+<p>Add fields-consistency check (from benchmark's <code>validate_candidate()</code>):</p>
+<pre><code class="language-python"># In validate_worker, after grammar round-trip:
+from imas_standard_names.grammar import StandardName, compose_standard_name
+
+fields = entry.get(&quot;fields&quot;, {})
+if fields:
+    sn = StandardName(**_parse_fields(fields))
+    from_fields = compose_standard_name(sn)
+    if from_fields != normalized:
+        entry[&quot;fields_consistent&quot;] = False
+    else:
+        entry[&quot;fields_consistent&quot;] = True
+</code></pre>
+<p>Report distinct metrics:
+- <code>validate_valid</code> — name passes grammar round-trip
+- <code>validate_invalid</code> — name fails grammar parse
+- <code>validate_fields_consistent</code> — fields compose to same name
+- <code>validate_fields_inconsistent</code> — fields compose to different name</p>
+<h3 id="persist-worker-new">Persist Worker (new)</h3>
+<p>Add a PERSIST phase after VALIDATE:</p>
+<pre><code class="language-python">async def persist_worker(state: SNBuildState, **_kwargs) -&gt; None:
+    &quot;&quot;&quot;Write validated standard names to graph with provenance.&quot;&quot;&quot;
+    if state.dry_run:
+        state.persist_phase.mark_done()
+        return
+
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.graph_ops import write_standard_names
+
+    # Enrich with provenance before writing
+    model = get_model(&quot;language&quot;)
+    for entry in state.validated:
+        entry.setdefault(&quot;model&quot;, model)
+        entry.setdefault(&quot;review_status&quot;, &quot;skipped&quot;)  # v1: no review
+        entry.setdefault(&quot;generated_at&quot;, datetime.now(UTC).isoformat())
+        # confidence comes from LLM output — never default to 1.0
+
+    written = write_standard_names(state.validated)
+    state.stats[&quot;persist_written&quot;] = written
+    state.persist_phase.mark_done()
+</code></pre>
+<p><code>write_standard_names()</code> must be updated to create <code>HAS_STANDARD_NAME</code>
+relationships (entity → concept) instead of <code>DERIVED_FROM</code> (concept → entity):</p>
+<pre><code class="language-cypher">-- NEW: entity points to concept
+UNWIND $batch AS b
+MERGE (sn:StandardName {id: b.id})
+SET sn += b.properties
+WITH sn, b
+MATCH (src:IMASNode {id: b.source_id})
+MERGE (src)-[:HAS_STANDARD_NAME]-&gt;(sn)
+</code></pre>
+<h3 id="pipeline-wiring">Pipeline Wiring</h3>
+<p>Update <code>pipeline.py</code> to wire 4 phases:</p>
+<pre><code class="language-python">workers = [
+    WorkerSpec(&quot;extract&quot;, &quot;extract_phase&quot;, extract_worker),
+    WorkerSpec(&quot;compose&quot;, &quot;compose_phase&quot;, compose_worker, depends_on=[&quot;extract_phase&quot;]),
+    WorkerSpec(&quot;validate&quot;, &quot;validate_phase&quot;, validate_worker, depends_on=[&quot;compose_phase&quot;]),
+    WorkerSpec(&quot;persist&quot;, &quot;persist_phase&quot;, persist_worker, depends_on=[&quot;validate_phase&quot;]),
+]
+</code></pre>
+<p>Review phase is removed from default pipeline.  Can be re-added later as an
+optional phase between compose and validate.</p>
+<h3 id="schema-update">Schema Update</h3>
+<p>Add provenance fields and <code>HAS_STANDARD_NAME</code> relationship to <code>facility.yaml</code>:</p>
+<pre><code class="language-yaml">StandardName:
+  attributes:
+    # ... existing fields ...
+    model:
+      description: LLM model that generated this name
+    review_status:
+      description: Review lifecycle status
+      range: StandardNameReviewStatus  # new enum: skipped, pending, reviewed
+    generated_at:
+      description: When this name was generated
+      range: datetime
+
+# In IMASNode (imas_dd.yaml) or a new relationship class:
+# IMASNode needs a slot to express the HAS_STANDARD_NAME relationship.
+# This follows the dual property + relationship model.
+</code></pre>
+<p><strong>Relationship declaration:</strong> Add <code>has_standard_name</code> slot to IMASNode in
+<code>imas_dd.yaml</code> (or equivalent):</p>
+<pre><code class="language-yaml">has_standard_name:
+  description: Standard name for this DD path
+  range: StandardName
+  annotations:
+    relationship_type: HAS_STANDARD_NAME
+</code></pre>
+<p>This creates both a property (<code>n.has_standard_name</code>) and a relationship
+<code>(:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)</code> via <code>create_nodes()</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> Since StandardName is in <code>facility.yaml</code> and IMASNode is in
+<code>imas_dd.yaml</code>, the cross-schema reference needs verification during
+Phase 3 implementation.  The MERGE in <code>write_standard_names()</code> can create
+the relationship directly without the slot if cross-schema refs are complex.</p>
+</blockquote>
+<h3 id="acceptance-criteria_2">Acceptance Criteria</h3>
+<ul>
+<li><code>sn build --source dd --ids equilibrium --limit 50</code> produces StandardName
+  nodes in the graph via LLM composition</li>
+<li>System prompt is rendered once, user prompt per batch</li>
+<li>Validate reports <code>validate_valid</code>, <code>validate_invalid</code>, <code>fields_consistent</code></li>
+<li>Persist writes provenance (model, review_status, generated_at, confidence)</li>
+<li>Cost tracking works across batches</li>
+<li><code>--dry-run</code> skips LLM calls and graph writes</li>
+</ul>
+<h3 id="tests_2">Tests</h3>
+<ul>
+<li>Integration test: compose_worker with mocked LLM produces valid candidates</li>
+<li>Unit test: validate_worker reports fields_consistent metric</li>
+<li>Unit test: persist_worker enriches entries with provenance</li>
+<li>Unit test: pipeline wires 4 phases with correct dependencies</li>
+</ul>
+<hr>
+<h2 id="phase-4-end-to-end-verification">Phase 4: End-to-End Verification</h2>
+<p><strong>Agent:</strong> architect (testing + prompt tuning)
+<strong>Depends on:</strong> Phases 1-3</p>
+<h3 id="steps">Steps</h3>
+<ol>
+<li>Run: <code>sn build --source dd --ids equilibrium --limit 50 --dry-run</code>
+   - Verify: extraction count, batch sizes, no LLM calls</li>
+<li>Run: <code>sn build --source dd --ids equilibrium --limit 50</code>
+   - Verify: StandardName nodes created in graph
+   - Verify: DERIVED_FROM relationships exist
+   - Verify: provenance fields populated
+   - Check: grammar validity rate (target &gt; 80%)
+   - Check: fields consistency rate (target &gt; 70%)</li>
+<li>Run again (same command):
+   - Verify: source-level skip works (fewer new candidates)</li>
+<li>Run: <code>sn build --source dd --ids equilibrium --limit 50 --force</code>
+   - Verify: all paths re-processed</li>
+<li>Inspect prompt quality:
+   - Review system prompt size and content
+   - Check prompt cache hit rate in logs
+   - Compare composed names against benchmark reference set</li>
+</ol>
+<h3 id="acceptance-criteria_3">Acceptance Criteria</h3>
+<ul>
+<li>End-to-end pipeline produces valid StandardName nodes</li>
+<li>Grammar validity rate &gt; 80% on equilibrium paths</li>
+<li>Source-level skip prevents duplicate LLM spend on re-runs</li>
+<li>Cost tracking accurate within 5% of actual API cost</li>
+</ul>
+<hr>
+<h2 id="documentation-updates">Documentation Updates</h2>
+<p>After all phases complete:</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Document <code>sn build</code> pipeline architecture</td>
+</tr>
+<tr>
+<td><code>plans/features/standard-names/00-implementation-order.md</code></td>
+<td>Update to reflect new plan structure</td>
+</tr>
+<tr>
+<td><code>plans/README.md</code></td>
+<td>Update plan status</td>
+</tr>
+</tbody>
+</table>
+<h2 id="archived-plans">Archived Plans</h2>
+<p>Plans 09 (previous), 10, 11 are superseded by this consolidated plan.
+The content from those plans is incorporated here:
+- Plan 10 bug fixes → Phase 2 (source skip, state rename, batch improvement)
+- Plan 11 publish validation → deferred until Phase 4 evaluation reveals needs
+- Plan 09 schema providers → Phase 1 (context builder)</p>
+    </section>
+  </main>
+</body>
+</html>

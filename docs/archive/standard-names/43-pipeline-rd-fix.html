@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="43-pipeline-rd-fix">
+  <meta name="plan-title" content="Plan 43 — Pipeline R&amp;D Fix: Prompt Cost, Budget Split, Error Gates &amp; Reviewer Pilot">
+  <meta name="plan-summary" content="---">
+  <meta name="plan-status" content="done">
+  <title>Plan 43 — Pipeline R&amp;D Fix: Prompt Cost, Budget Split, Error Gates &amp; Reviewer Pilot | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Plan 43 — Pipeline R&amp;D Fix: Prompt Cost, Budget Split, Error Gates &amp; Reviewer Pilot</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/43-pipeline-rd-fix.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Active plan links preserved:</strong> <a href="/imas-codex/sn-quality-parity.html">Plan 23</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/29-architectural-pivot.md">Plan 29</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/31-quality-bootstrap-v2.md">Plan 31</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/39-structured-fanout.md">Plan 39</a>, <a href="/imas-codex/sn-search-facility.html">Plan 40</a>, <a href="/imas-codex/sn-closed-physical-base.html">Plan 41</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <blockquote>
+<p><strong>Status</strong>: READY — dispatch in wave order<br>
+<strong>Parent plan</strong>: 38-grammar-vnext<br>
+<strong>R&amp;D sources</strong>: rd1 (budget-allocation-audit), rd2 (reviewer-pattern-audit), rd3 (uncertainty-index-leak), rd4 (cycle-trace-2usd)<br>
+<strong>Branch</strong>: <code>main</code><br>
+<strong>Commit baseline</strong>: <code>650caab2</code>  </p>
+</blockquote>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>Round-1 standard-name generation spent $18.87 across 8 physics domains but
+achieved only 21.6% mean review coverage.  The root cause is a 39K-token
+compose prompt that costs ~$0.15/batch regardless of content size — with 90%
+singleton batches, a $2 domain cycle exhausts at batch 9 of 40, starving all
+downstream review.  Four R&amp;D audits identified four independent fixes:</p>
+<ol>
+<li><strong>Compose prompt reduction</strong> (rd4) — trim static context from 39K→≤8K
+   tokens for a ~4× per-batch cost drop ($0.15→$0.04).  This is the
+   dominant lever.</li>
+<li><strong>Budget split rebalance</strong> (rd1) — shift <code>TURN_SPLIT</code> from
+   <code>(0.30, 0.25, 0.15, 0.15, 0.15)</code> to <code>(0.15, 0.10, 0.30, 0.30, 0.15)</code>
+   so review phases get 60% of budget instead of 30%.</li>
+<li><strong>Error-sibling semantic gate</strong> (rd3) — add
+   <code>_parent_supports_uncertainty_index()</code> to prevent minting
+   <code>uncertainty_index_of_&lt;process_term&gt;</code> names that waste review budget.</li>
+<li><strong>Reviewer cost pilot</strong> (rd2) — trial Haiku-primary + Opus-escalator
+   (Pattern D) for 75% review cost reduction.</li>
+</ol>
+<p>After applying fixes A–D, a single-domain probe loop (Phase E) iterates
+compose→review→prompt-tune cycles on <code>magnetic_field_diagnostics</code> until the
+mean review score stabilises at ≥0.85.  Only then does the $50 all-domain
+final run (Phase G) execute.</p>
+<hr>
+<h2 id="phase-status">Phase Status</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Title</th>
+<th>Wave</th>
+<th>Status</th>
+<th>Depends On</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Compose prompt reduction</td>
+<td>1</td>
+<td>☐ Not started</td>
+<td>—</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Budget split rebalance</td>
+<td>1</td>
+<td>☐ Not started</td>
+<td>—</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Error-sibling semantic gate</td>
+<td>1</td>
+<td>☐ Not started</td>
+<td>—</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Reviewer Haiku pilot</td>
+<td>2</td>
+<td>☐ Not started</td>
+<td>B</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Anti-pattern feedback loop</td>
+<td>2</td>
+<td>☐ Not started</td>
+<td>—</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Single-domain probe loop</td>
+<td>3</td>
+<td>☐ Not started</td>
+<td>A, B, C, D, F</td>
+</tr>
+<tr>
+<td>G</td>
+<td>All-domain $50 final</td>
+<td>4</td>
+<td>☐ Not started</td>
+<td>E (exit criterion met)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Wave 1</strong> — Phases A, B, C dispatched in parallel (3 engineer agents).<br>
+<strong>Wave 2</strong> — Phases D and F dispatched in parallel (2 engineer agents).<br>
+<strong>Wave 3</strong> — Phase E dispatched (1 architect agent).<br>
+<strong>Wave 4</strong> — Phase G dispatched after E exit criterion (1 architect agent).<br>
+<strong>Fleet cap</strong>: 3 agents max in any wave.</p>
+<hr>
+<h2 id="phase-a-compose-prompt-reduction">Phase A — Compose Prompt Reduction</h2>
+<p><strong>Goal</strong>: Reduce the per-batch compose cost from ~$0.15 to ≤$0.04 by trimming
+the 39K-token system prompt to ≤8K tokens.</p>
+<p><strong>Root cause (rd4)</strong>: The system prompt <code>sn/compose_system.md</code> (74 KB, 1152
+lines) is rendered once and reused for all batches. It includes four
+{% include %} partials plus extensive inline sections. The user prompt
+additionally injects up to 200 <code>existing_names</code>.  Output averages 38–639
+tokens.  Cost is 98% input-driven.</p>
+<h3 id="token-budget-analysis">Token budget analysis</h3>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Est. tokens</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_grammar_reference.md</code> (4.3 KB)</td>
+<td>~1,100</td>
+<td>KEEP — core grammar rules</td>
+</tr>
+<tr>
+<td><code>_exemplars.md</code> (4.1 KB)</td>
+<td>~1,000</td>
+<td>TRIM — keep ≤3 exemplars, cut from 77 lines</td>
+</tr>
+<tr>
+<td><code>_exemplars_name_only.md</code> (9.8 KB)</td>
+<td>~2,500</td>
+<td>TRIM aggressively — keep ≤5 name-only exemplars</td>
+</tr>
+<tr>
+<td><code>_compose_scored_examples.md</code> (0.9 KB, dynamic)</td>
+<td>~200–2,000</td>
+<td>CAP at 5 examples</td>
+</tr>
+<tr>
+<td>Hard pre-emit checks (lines 22–68)</td>
+<td>~1,200</td>
+<td>KEEP — prevents name errors</td>
+</tr>
+<tr>
+<td>REJECT / FORBIDDEN blocks (lines 70–155)</td>
+<td>~2,000</td>
+<td>CONDENSE — merge into single compact table</td>
+</tr>
+<tr>
+<td>vNext composition guidance (lines 182–221)</td>
+<td>~800</td>
+<td>KEEP — essential for grammar</td>
+</tr>
+<tr>
+<td>BANNED PREFIXES table (lines 198–221)</td>
+<td>~400</td>
+<td>KEEP — compact already</td>
+</tr>
+<tr>
+<td>Anti-pattern gallery (entries 1–5, lines 251–298)</td>
+<td>~1,200</td>
+<td>TRIM to 2 entries</td>
+</tr>
+<tr>
+<td>Naming Guidance (Jinja template, lines 300–319)</td>
+<td>~2,000</td>
+<td>MOVE to prompt cache — render once at ISN init</td>
+</tr>
+<tr>
+<td>Documentation Quality Guidance (lines 321–339)</td>
+<td>~1,500</td>
+<td>REMOVE for <code>--target names</code> mode</td>
+</tr>
+<tr>
+<td>Curated Examples (lines 341–351)</td>
+<td>~3,000</td>
+<td>TRIM to 3 examples max</td>
+</tr>
+<tr>
+<td>Tokamak Ranges (lines 352–366)</td>
+<td>~1,500</td>
+<td>REMOVE for <code>--target names</code> — only needed for docs</td>
+</tr>
+<tr>
+<td>Applicability (lines 368–382)</td>
+<td>~500</td>
+<td>CONDENSE to 3 lines</td>
+</tr>
+<tr>
+<td>Quick Start / Common Patterns / Critical Distinctions / Anti-Patterns (lines 384–412)</td>
+<td>~2,000</td>
+<td>REMOVE — redundant with pre-emit checks</td>
+</tr>
+<tr>
+<td>Peer-Review Quality Rules NC-1 through NC-29 (lines 414–1002)</td>
+<td>~12,000</td>
+<td>TRIM to top-10 most-violated rules</td>
+</tr>
+<tr>
+<td>Output Format / Schema (lines 1004–end)</td>
+<td>~2,000</td>
+<td>KEEP — structural requirement</td>
+</tr>
+<tr>
+<td><code>existing_names</code> (user prompt, ≤200 entries)</td>
+<td>~3,000</td>
+<td>CAP at 50 names</td>
+</tr>
+<tr>
+<td><code>nearby_existing_names</code> (user prompt)</td>
+<td>~500</td>
+<td>KEEP</td>
+</tr>
+<tr>
+<td><code>reference_exemplars</code> (user prompt, ≤5)</td>
+<td>~1,000</td>
+<td>CAP at 3</td>
+</tr>
+<tr>
+<td><code>domain_vocabulary</code> preseed (user prompt)</td>
+<td>~500</td>
+<td>KEEP</td>
+</tr>
+<tr>
+<td><code>reviewer_themes</code> (user prompt)</td>
+<td>~200</td>
+<td>KEEP</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Target token budget</strong>: ≤8,000 tokens system + ≤2,000 tokens user = ≤10K total
+(~4× reduction from current ~39K).</p>
+<h3 id="implementation-strategy">Implementation strategy</h3>
+<p>Create a new prompt template <code>sn/compose_system_lean.md</code> that:</p>
+<ol>
+<li>Keeps: grammar reference, pre-emit checks, vNext guidance, REJECT table
+   (condensed), output schema, BANNED PREFIXES.</li>
+<li>Trims: exemplars to 3+5 entries, anti-pattern gallery to 2 entries,
+   NC rules to top-10, scored examples capped at 5.</li>
+<li>Removes: Documentation Quality Guidance, Tokamak Ranges, Applicability
+   (verbose form), Quick Start, Common Patterns, Critical Distinctions,
+   Anti-Patterns (template section).</li>
+<li>Caps user-prompt injections: <code>existing_names[:50]</code>,
+   <code>reference_exemplars[:3]</code>.</li>
+</ol>
+<p>Use a feature flag (<code>--lean-prompt</code> / config key <code>compose_lean = true</code>) so
+the full prompt is still available for <code>--target docs</code> mode.  For
+<code>--target names</code>, the lean prompt is the default.</p>
+<h3 id="files-to-modify">Files to modify</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/llm/prompts/sn/compose_system_lean.md</code></td>
+<td><strong>NEW</strong> — lean system prompt</td>
+</tr>
+<tr>
+<td><code>imas_codex/llm/prompts/shared/sn/_exemplars_name_only.md</code></td>
+<td>TRIM to ≤5 exemplars</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code> ~L1213</td>
+<td>In <code>compose_worker()</code>, select <code>compose_system_lean</code> template when target is names</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code> ~L1328</td>
+<td>Render lean system prompt instead of full</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/workers.py</code> ~L1423</td>
+<td>Cap <code>existing_names[:50]</code>, <code>reference_exemplars[:3]</code></td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/context.py</code> ~L35</td>
+<td>Add <code>build_lean_compose_context()</code> that skips tokamak_ranges, documentation_guidance</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/example_loader.py</code></td>
+<td>Cap scored examples at 5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tests-to-add">Tests to add</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_lean_prompt_renders_under_8k_tokens</code></td>
+<td><code>tests/standard_names/test_prompt_size.py</code> (NEW) — use chars/3 heuristic (24K chars ≈ 8K tokens, conservative for mixed prose+JSON)</td>
+</tr>
+<tr>
+<td><code>test_lean_prompt_contains_grammar_reference</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>test_lean_prompt_omits_tokamak_ranges</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>test_existing_names_capped_at_50</code></td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acceptance-criteria">Acceptance criteria</h3>
+<ol>
+<li>Render the lean system prompt for a 1-item batch → token count ≤ 8,000
+   (measured via <code>tiktoken</code> cl100k_base or Anthropic tokenizer).</li>
+<li>Render the lean user prompt for the same batch → token count ≤ 2,000.</li>
+<li>Re-run a 4-name <code>divertor_physics</code> batch with <code>--cost-limit 0.50</code>:
+   compose cost ≤ $0.04/batch (was $0.15/batch).</li>
+<li>No grammar validation regressions: all pre-emit checks still present.</li>
+</ol>
+<h3 id="rollback-strategy">Rollback strategy</h3>
+<p>Revert <code>compose_system_lean.md</code> creation and restore original template
+selection in <code>workers.py</code>.  One-commit revert via <code>git revert &lt;sha&gt;</code>.</p>
+<h3 id="agent-type-engineer">Agent type: engineer</h3>
+<hr>
+<h2 id="phase-b-budget-split-rebalance">Phase B — Budget Split Rebalance</h2>
+<p><strong>Goal</strong>: Shift budget from compose (over-provisioned at 30%) and enrich
+(under-used at 25%) toward review phases (starved at 15% each).</p>
+<p><strong>Root cause (rd1)</strong>: <code>TURN_SPLIT = (0.30, 0.25, 0.15, 0.15, 0.15)</code> gives
+review_names only $0.75 on a $5 budget.  A 15-name batch requires $1.125
+reservation → instant exhaustion.  Round-1 achieved 0% review coverage in
+4 of 6 domains.</p>
+<h3 id="implementation">Implementation</h3>
+<ol>
+<li>
+<p><strong>Update <code>TURN_SPLIT</code></strong> in <code>turn.py</code> line 31:
+   <code>python
+   TURN_SPLIT: tuple[float, float, float, float, float] = (0.15, 0.10, 0.30, 0.30, 0.15)</code></p>
+</li>
+<li>
+<p><strong>Add per-phase hard caps</strong> — phases must not overspend their allocation
+   even if adaptive budget offers more.  Add a <code>max_phase_budget</code> parameter
+   to <code>phase_budget()</code> that returns <code>min(adaptive, split_allocation * 1.5)</code>
+   (50% overshoot allowed, not unbounded).  This prevents compose from
+   burning 2.26× its share.</p>
+</li>
+<li>
+<p><strong>Update adaptive shares</strong> — currently <code>_ADAPTIVE_SHARES</code> gives
+   <code>review_names</code> 0.45 and <code>review_docs</code> 0.35.  After Phase A reduces
+   compose cost, the adaptive budget should give more to names when docs
+   are deferred: when <code>--target names</code>, set <code>review_names: 0.80,
+   regen: 0.20</code> (no docs budget needed).</p>
+</li>
+<li>
+<p><strong>Transitional guard</strong> — add <code>compose_lean: bool = False</code> field to
+   <code>TurnConfig</code>.  In <code>__post_init__</code>, if <code>compose_lean</code> is False, override
+   <code>self.split</code> to the legacy <code>(0.30, 0.25, 0.15, 0.15, 0.15)</code>.  The
+   constructor in <code>turn.py</code> reads <code>get_compose_lean()</code> from settings to
+   set this flag.  When Phase A lands and enables lean prompts, the new
+   split activates.  This prevents B from breaking existing compose
+   behavior if it merges before A.</p>
+</li>
+</ol>
+<h3 id="files-to-modify_1">Files to modify</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/turn.py</code> L31</td>
+<td>Update <code>TURN_SPLIT</code> constant</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/turn.py</code> L113–120</td>
+<td>Add 1.5× hard cap to <code>phase_budget()</code></td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/turn.py</code> L563–589</td>
+<td>Update <code>_ADAPTIVE_SHARES</code> for <code>--target names</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="tests-to-add_1">Tests to add</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_turn_split_sums_to_one</code></td>
+<td><code>tests/standard_names/test_turn.py</code> (NEW or append)</td>
+</tr>
+<tr>
+<td><code>test_turn_split_values</code></td>
+<td>same — assert exact <code>(0.15, 0.10, 0.30, 0.30, 0.15)</code></td>
+</tr>
+<tr>
+<td><code>test_phase_budget_hard_cap</code></td>
+<td>same — verify phase can't exceed 1.5× its share</td>
+</tr>
+<tr>
+<td><code>test_adaptive_shares_names_only</code></td>
+<td>same — verify 80/20 split when <code>--target names</code></td>
+</tr>
+<tr>
+<td><code>test_legacy_split_when_lean_disabled</code></td>
+<td>same — verify old (0.30, 0.25, ...) when compose_lean=False</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acceptance-criteria_1">Acceptance criteria</h3>
+<ol>
+<li><code>TURN_SPLIT</code> sums to 1.0.</li>
+<li>With $5 budget: <code>phase_budget(2)</code> returns $1.50 (review_names = 30%).</li>
+<li>With $2 budget and <code>compose_lean=True</code>: compose phase hard-capped at
+   $0.45 (0.15 × $2 × 1.5).  With <code>compose_lean=False</code>: legacy split
+   active, compose gets $0.90 (0.30 × $2 × 1.5).</li>
+<li>No regression in existing turn orchestration tests.</li>
+</ol>
+<h3 id="rollback-strategy_1">Rollback strategy</h3>
+<p>Single constant change — <code>git revert &lt;sha&gt;</code> reverts the line.</p>
+<h3 id="agent-type-engineer_1">Agent type: engineer</h3>
+<hr>
+<h2 id="phase-c-error-sibling-semantic-gate">Phase C — Error-Sibling Semantic Gate</h2>
+<p><strong>Goal</strong>: Prevent <code>uncertainty_index_of_&lt;P&gt;</code> siblings from being minted when
+the parent <code>P</code> is a process term, identifier, or dimensionless integer.</p>
+<p><strong>Root cause (rd3)</strong>: <code>mint_error_siblings()</code> generates
+<code>uncertainty_index_of_&lt;P&gt;</code> for every parent with <code>HAS_ERROR</code> relationships,
+regardless of semantic suitability.  Process terms like
+<code>power_due_to_thermalization</code> produce nonsensical uncertainty names that cost
+review cycles to score low.</p>
+<h3 id="implementation_1">Implementation</h3>
+<p>Add <code>_parent_supports_uncertainty_index(parent_name: str, unit: str | None) -&gt; bool</code>
+to <code>error_siblings.py</code> before <code>mint_error_siblings()</code>.</p>
+<p><strong>Signature note</strong>: The function needs <code>unit</code> because two deny rules are
+unit-dependent.  The call site in <code>mint_error_siblings()</code> already has <code>unit</code>
+as a parameter — pass it through.</p>
+<p><strong>Deny rules</strong> (name-based, no unit needed):
+- Parent contains <code>due_to_</code> → process attribution
+- Parent contains <code>caused_by_</code> → process attribution
+- Parent starts with <code>constant_</code> or <code>generic_</code> → data-type descriptor
+- Parent ends in <code>_type</code>, <code>_flag</code>, <code>_identifier</code>, <code>_status</code>,
+  <code>_code</code>, <code>_name</code> → metadata/categorical</p>
+<p><strong>Deny rules</strong> (unit-dependent):
+- Parent contains <code>_count</code> AND unit is dimensionless/None → counter
+- Parent ends in <code>_ratio</code> or <code>_fraction</code> AND unit is dimensionless/None →
+  dimensionless ratio (uncertainty index on a ratio is meaningless)</p>
+<p><strong>Deliberately NOT denied</strong>: Parent ending in <code>_index</code> (too aggressive —
+legitimate physical indices like <code>safety_factor_q_index</code> can have
+measurement uncertainty).</p>
+<p><strong>Gate insertion</strong> in <code>mint_error_siblings()</code> around line 95:</p>
+<pre><code class="language-python">if suffix == &quot;_error_index&quot; and not _parent_supports_uncertainty_index(parent_name, unit):
+    logger.info(&quot;Skipped uncertainty_index for unsuitable parent %r&quot;, parent_name)
+    continue
+</code></pre>
+<p>Note: Only gate <code>_error_index</code> siblings.  <code>_error_upper</code> and <code>_error_lower</code>
+are always valid (they represent measurement bounds on any quantity).</p>
+<h3 id="files-to-modify_2">Files to modify</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/error_siblings.py</code></td>
+<td>Add <code>_parent_supports_uncertainty_index()</code> + gate</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tests-to-add_2">Tests to add</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_uncertainty_index_denied_for_process_term</code></td>
+<td><code>tests/standard_names/test_error_siblings.py</code></td>
+</tr>
+<tr>
+<td><code>test_uncertainty_index_denied_for_metadata_field</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>test_uncertainty_index_denied_for_constant_prefix</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>test_uncertainty_index_denied_for_dimensionless_ratio</code></td>
+<td>same — <code>_ratio</code> + unit=None</td>
+</tr>
+<tr>
+<td><code>test_uncertainty_index_allowed_for_physical_quantity</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>test_uncertainty_index_allowed_for_physical_index</code></td>
+<td>same — e.g. parent ending <code>_index</code> with real unit → allowed</td>
+</tr>
+<tr>
+<td><code>test_error_upper_lower_not_affected_by_gate</code></td>
+<td>same — pass mixed <code>[_error_upper, _error_lower, _error_index]</code> for process term → assert exactly 2 returned</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acceptance-criteria_2">Acceptance criteria</h3>
+<ol>
+<li><code>mint_error_siblings("power_due_to_thermalization", ...)</code> with
+   <code>_error_index</code> in node IDs → returns 0 <code>uncertainty_index_*</code> siblings.</li>
+<li><code>mint_error_siblings("power_due_to_thermalization", ...)</code> with
+   <code>_error_upper</code> and <code>_error_lower</code> → still returns 2 siblings.</li>
+<li><code>mint_error_siblings("plasma_current", ...)</code> with all 3 error suffixes →
+   returns 3 siblings (including <code>uncertainty_index_of_plasma_current</code>).</li>
+<li>All existing <code>test_error_siblings.py</code> tests pass unchanged.</li>
+</ol>
+<h3 id="rollback-strategy_2">Rollback strategy</h3>
+<p>Revert single function addition — <code>git revert &lt;sha&gt;</code>.</p>
+<h3 id="agent-type-engineer_2">Agent type: engineer</h3>
+<hr>
+<h2 id="phase-d-reviewer-haiku-pilot">Phase D — Reviewer Haiku Pilot</h2>
+<p><strong>Goal</strong>: Validate Pattern D (Haiku primary + Opus escalator) for 75% review
+cost reduction.  If Haiku quality holds, flip the default configuration.</p>
+<p><strong>Root cause (rd2)</strong>: The 3-model RD-quorum (Opus→GPT→Sonnet) costs ~$0.70
+per reviewed name.  Pattern D projects $0.0075/name if Haiku-Opus dispute
+rate stays below 20%.</p>
+<p><strong>Dependency</strong>: Requires Phase B (budget split) to be merged so the
+reviewer can actually run within budget.</p>
+<h3 id="implementation_2">Implementation</h3>
+<p>The current 2-model semantics in <code>pyproject.toml</code> (lines 340–342) define
+"blind primary + blind secondary, no escalator" — BOTH models always run.
+This means Pattern D ("Haiku primary, Opus escalator only on disagreement")
+is <strong>NOT achievable</strong> with the 2-model config path.</p>
+<p>Two implementation options:</p>
+<p><strong>Option 1 (recommended)</strong>: Use 3-model config with Haiku as primary and
+secondary, Opus as escalator.  This leverages existing RD-quorum logic:</p>
+<pre><code class="language-toml">[tool.imas-codex.sn.review.names.pilot]
+models = [
+  &quot;openrouter/anthropic/claude-haiku-4.5&quot;,     # cycle 0 primary (blind, cheap)
+  &quot;openrouter/anthropic/claude-haiku-4.5&quot;,     # cycle 1 secondary (blind, cheap)
+  &quot;openrouter/anthropic/claude-opus-4.6&quot;,      # cycle 2 escalator (disputes only)
+]
+</code></pre>
+<p>Cost: 2× Haiku always ($0.0006/name) + Opus on disputes (~20% × $0.015) =
+~$0.004/name.  Still an 85% reduction.</p>
+<p><strong>Option 2</strong>: Add a new <code>escalation_only</code> mode to <code>review/pipeline.py</code> where
+the 2nd model only runs on items where the 1st model's confidence is below a
+threshold.  More complex, deferred to a future plan.</p>
+<p>Recommend Option 1: zero new review-pipeline code, just a config change.</p>
+<p><strong>Config profile in <code>pyproject.toml</code></strong> — add the pilot block.  The review
+pipeline reads an environment variable <code>IMAS_CODEX_SN_REVIEW_PROFILE=pilot</code>
+to select the model chain.  Default remains the current Opus→GPT→Sonnet.</p>
+<h3 id="pilot-protocol">Pilot protocol</h3>
+<ol>
+<li>Select 4 names from <code>plasma_initiation</code> (round-1 reviewed, mean 0.795).</li>
+<li>Run Haiku-pilot review with <code>$0.50</code> cap.</li>
+<li>Run default (Opus) review on same 4 names with same cap.</li>
+<li>Compare: per-dimension scores, per-name composite, cost.</li>
+<li><strong>Go/NoGo</strong>: If Haiku-Opus dispute rate &gt;50% on these 4 names, fall back
+   to Pattern B (Opus+Sonnet, 2-model) instead.</li>
+</ol>
+<h3 id="files-to-modify_3">Files to modify</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pyproject.toml</code> after L357</td>
+<td>Add <code>[tool.imas-codex.sn.review.names.pilot]</code> block</td>
+</tr>
+<tr>
+<td><code>imas_codex/standard_names/review/pipeline.py</code></td>
+<td>Read <code>IMAS_CODEX_SN_REVIEW_PROFILE</code> env var, select model list</td>
+</tr>
+<tr>
+<td><code>imas_codex/settings.py</code></td>
+<td>Add <code>get_review_profile()</code> helper</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tests-to-add_3">Tests to add</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_pilot_profile_selects_haiku_opus</code></td>
+<td><code>tests/standard_names/test_review_config.py</code> (NEW)</td>
+</tr>
+<tr>
+<td><code>test_default_profile_selects_opus_gpt_sonnet</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>test_env_override_review_profile</code></td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acceptance-criteria_3">Acceptance criteria</h3>
+<ol>
+<li><code>IMAS_CODEX_SN_REVIEW_PROFILE=pilot</code> selects Haiku+Haiku+Opus chain.</li>
+<li>Pilot run on 4 names completes within $0.50 budget.</li>
+<li>Per-dimension score delta vs default ≤ 0.15 (median across names).</li>
+<li>Cost per name: ≤ $0.02 (pilot) vs ~$0.70 (default).</li>
+<li>If pilot passes, update <code>[tool.imas-codex.sn.review.names]</code> default to
+   pilot chain.  If not, update to Pattern B (Opus+Sonnet, 2-model).</li>
+</ol>
+<h3 id="rollback-strategy_3">Rollback strategy</h3>
+<p>Remove pilot config block and env-var reader.  Single-commit revert.</p>
+<h3 id="agent-type-engineer_3">Agent type: engineer</h3>
+<hr>
+<h2 id="phase-e-single-domain-probe-loop">Phase E — Single-Domain Probe Loop</h2>
+<p><strong>Goal</strong>: Iterate compose→review→prompt-tune cycles on one domain until
+mean review score reaches ≥0.85 across two consecutive cycles.</p>
+<p><strong>Probe domain</strong>: <code>magnetic_field_diagnostics</code> — 11 names, 0% reviewed in
+round-1 (worst performer), best stress test for review-starvation fix.</p>
+<p><strong>Depends on</strong>: All of A, B, C, D merged.</p>
+<h3 id="cycle-protocol">Cycle protocol</h3>
+<pre><code>For each cycle N:
+  1. sn clear --force --physics-domain magnetic_field_diagnostics
+  2. sn run --physics-domain magnetic_field_diagnostics \
+          --target names --cost-limit 2.00 --turn-number N
+  3. Query graph: mean(reviewer_score_name) WHERE physics_domain = 'magnetic_field_diagnostics'
+  4. If mean &lt; 0.85:
+       a. Extract reviewer comments → research/comments-mfd-cycle-N.jsonl
+       b. Analyze top-3 recurring criticisms
+       c. Update prompts/vocab to address criticisms
+       d. Repeat from step 1
+  5. If mean ≥ 0.85 for two consecutive cycles → EXIT
+</code></pre>
+<p><strong>Budget</strong>: $2.00 per cycle, max 5 cycles = $10.00 total probe budget.</p>
+<h3 id="exit-criterion">Exit criterion</h3>
+<p>Mean <code>reviewer_score_name</code> ≥ 0.85 across all <code>magnetic_field_diagnostics</code>
+names with <code>validation_status = 'valid'</code>, achieved in two consecutive cycles
+(i.e., prompt changes in cycle N-1 did not regress in cycle N).</p>
+<h3 id="files-to-modify_4">Files to modify</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt templates (various)</td>
+<td>Iterative edits based on reviewer feedback</td>
+</tr>
+<tr>
+<td>ISN vocabulary files (upstream)</td>
+<td>Potential vocab additions surfaced by compose</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acceptance-criteria_4">Acceptance criteria</h3>
+<ol>
+<li>Mean score ≥ 0.85 on <code>magnetic_field_diagnostics</code>.</li>
+<li>Zero <code>uncertainty_index_of_&lt;process_term&gt;</code> names in graph (Phase C gate).</li>
+<li>Compose cost ≤ $0.04/batch (Phase A effect verified in production).</li>
+<li>Review coverage ≥ 80% of valid names (Phase B effect verified).</li>
+</ol>
+<h3 id="agent-type-architect-iterative-prompt-tuning-requires-judgment">Agent type: architect (iterative prompt tuning requires judgment)</h3>
+<hr>
+<h2 id="phase-f-anti-pattern-feedback-loop">Phase F — Anti-Pattern Feedback Loop</h2>
+<p><strong>Goal</strong>: Persist reviewer comments across <code>sn clear</code> cycles and provide
+tooling to mine recurring criticisms.</p>
+<p><strong>Key finding</strong>: <code>sn clear</code> deletes Review nodes (Step A in
+<code>clear_standard_names</code>, line 2627–2648).  Reviewer comments stored as
+<code>comments_per_dim_json</code> on Review nodes are destroyed.  This breaks the
+feedback loop.</p>
+<h3 id="implementation_3">Implementation</h3>
+<ol>
+<li>
+<p><strong>Pre-clear comment dump</strong> — before each <code>sn clear</code>, export Review
+   comments to <code>research/comments-&lt;domain&gt;-cycle-&lt;N&gt;.jsonl</code>:
+   <code>cypher
+   MATCH (r:Review)-[:REVIEWS]-&gt;(sn:StandardName)
+   WHERE sn.physics_domain = $domain
+   RETURN sn.id AS name, r.score AS score,
+          r.comments_per_dim_json AS comments,
+          r.llm_model AS model, r.reviewed_at AS at</code></p>
+</li>
+<li>
+<p><strong><code>sn analyse-comments</code> CLI command</strong> — reads JSONL files, groups by
+   dimension, counts recurring criticism keywords, surfaces top-N as
+   candidate prompt amendments.</p>
+</li>
+</ol>
+<p><code>bash
+   uv run imas-codex sn analyse-comments --domain magnetic_field_diagnostics
+   # Output:
+   # Top criticisms (grammar): "instrument as prefix" (4 occurrences)
+   # Top criticisms (semantic): "bare outline_point" (3 occurrences)
+   # Suggested prompt additions: ...</code></p>
+<ol start="3">
+<li><strong>Alternative (simpler)</strong>: REPL recipe function
+   <code>analyse_review_comments(domain)</code> that queries graph directly before
+   clear.  No new CLI command needed.  Recommend this for Phase F v1.</li>
+</ol>
+<h3 id="files-to-modify_5">Files to modify</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_codex/standard_names/graph_ops.py</code></td>
+<td>Add <code>export_review_comments(domain, output_path)</code></td>
+</tr>
+<tr>
+<td><code>imas_codex/cli/sn.py</code></td>
+<td>Add <code>analyse-comments</code> subcommand (or defer to REPL recipe)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tests-to-add_4">Tests to add</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_export_review_comments_writes_jsonl</code></td>
+<td><code>tests/standard_names/test_graph_ops.py</code></td>
+</tr>
+<tr>
+<td><code>test_export_review_comments_empty_domain</code></td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acceptance-criteria_5">Acceptance criteria</h3>
+<ol>
+<li>Before every <code>sn clear</code> in Phase E, comments are dumped to JSONL.</li>
+<li>JSONL files contain: name, score, model, per-dimension comments.</li>
+<li><code>analyse_review_comments()</code> returns top-3 criticisms per dimension.</li>
+</ol>
+<h3 id="rollback-strategy_4">Rollback strategy</h3>
+<p>Delete JSONL export function.  No schema changes.</p>
+<h3 id="agent-type-engineer_4">Agent type: engineer</h3>
+<hr>
+<h2 id="phase-g-all-domain-50-final">Phase G — All-Domain $50 Final</h2>
+<p><strong>Goal</strong>: Run the full pipeline across all physics domains with the tuned
+prompts, budget split, and reviewer configuration established in Phases A–F.</p>
+<p><strong>Depends on</strong>: Phase E exit criterion met.</p>
+<h3 id="protocol">Protocol</h3>
+<ol>
+<li>Use <code>scripts/run_domain_cycles.py</code> in single-domain-at-a-time mode.</li>
+<li>Total budget: $50.00, fair-share split across all domains with eligible
+   work (domains with 0 unprocessed items are skipped).</li>
+<li>Target: <code>--target names</code> only.</li>
+<li>Quality gate: abort and roll back if any domain's mean score regresses
+   below 0.70 after review completes.</li>
+</ol>
+<h3 id="budget-arithmetic-post-phase-a-d">Budget arithmetic (post Phase A + D)</h3>
+<p>With compose at $0.04/batch and Haiku-pilot review (Option 1: Haiku×2 +
+Opus escalator at ~20% dispute rate):
+- Per name: ~$0.04 (compose) + $0.01 (enrich) + $0.004 (review, 2× Haiku
+  + 20% Opus escalation) = ~$0.054
+- 500 names × $0.054 = $27.00 — within $50 budget.
+- Residual ~$23 covers retries (~10% rate observed in round-1), re-reviews,
+  and domains with higher escalation rates.
+- If dispute rate is higher (40%): ~$0.008/name review → 500 × $0.058 =
+  $29, still within budget.</p>
+<p><strong>Worst-case guard</strong>: If Pattern D pilot failed and Pattern B (Opus+Sonnet,
+2-model always-run) is active: review ≈ $0.024/name → 500 × $0.074 = $37,
+still within budget.</p>
+<h3 id="abort-mechanism">Abort mechanism</h3>
+<p>After each domain completes review, the turn orchestrator checks:</p>
+<pre><code class="language-python"># In run_domain_cycles.py or turn.py post-review hook
+mean_score = query_mean_score(domain)
+if mean_score &lt; 0.70:
+    logger.error(&quot;Domain %s regressed below 0.70 (mean=%.3f), aborting&quot;, domain, mean_score)
+    raise QualityGateError(domain, mean_score)
+</code></pre>
+<p><strong>Files to modify</strong>: <code>scripts/run_domain_cycles.py</code> — add post-domain score
+check.  This is a manual abort: the script stops, operator reviews, and
+either resumes or rolls back.  No auto-rollback (too risky on a $50 run).</p>
+<h3 id="acceptance-criteria_6">Acceptance criteria</h3>
+<ol>
+<li>All domains with &gt;0 eligible names have review coverage ≥ 80%.</li>
+<li>No domain has mean score &lt; 0.70.</li>
+<li>Total spend ≤ $50.00.</li>
+<li>Graph state: all names <code>pipeline_status IN ['enriched', 'drafted']</code> with
+   <code>reviewer_score_name IS NOT NULL</code>.</li>
+</ol>
+<h3 id="rollback-strategy_5">Rollback strategy</h3>
+<p><code>sn clear --force</code> removes all drafted names.  Round-1 names at <code>accepted</code>
+status are preserved.</p>
+<h3 id="agent-type-architect">Agent type: architect</h3>
+<hr>
+<h2 id="cost-tracking-audit">Cost Tracking Audit</h2>
+<p><strong>Constraint 5</strong>: All cost sites must be tracked in graph (per-phase
+<code>llm_cost</code> fields).</p>
+<p>Current state from code inspection:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th><code>llm_cost</code> tracked?</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>compose</td>
+<td>✅ Yes</td>
+<td><code>workers.py</code> L1451–1455, written to StandardName node</td>
+</tr>
+<tr>
+<td>enrich</td>
+<td>✅ Yes</td>
+<td><code>enrich_workers.py</code></td>
+</tr>
+<tr>
+<td>review_names</td>
+<td>✅ Yes</td>
+<td><code>review/pipeline.py</code> L143, written to Review node</td>
+</tr>
+<tr>
+<td>review_docs</td>
+<td>✅ Yes</td>
+<td>Same pipeline</td>
+</tr>
+<tr>
+<td>regen</td>
+<td>❓ Verify</td>
+<td>Check <code>regen</code> worker — may inherit from compose</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Action</strong>: Phase F engineer should verify regen cost tracking as part of
+the graph_ops work (both involve auditing cost/comment persistence).  If
+missing, add <code>llm_cost</code> write in the regen worker.  This is a sub-task of
+Phase F, not a separate phase.</p>
+<hr>
+<h2 id="worker-async-polling-claim-verification">Worker Async + Polling-Claim Verification</h2>
+<p><strong>Constraint 4</strong>: Workers async + polling-claim pattern (commit 650caab2)
+must not regress.</p>
+<p>All phases must verify that <code>compose_worker</code>, <code>enrich_worker</code>, and
+<code>review_worker</code> use <code>asyncio</code> with <code>budget_manager.reserve()</code> and
+<code>@retry_on_deadlock()</code> claim patterns.  No phase in this plan changes the
+worker concurrency model — this is a hold-the-line constraint, not new work.</p>
+<hr>
+<h2 id="rubber-duck-critique-findings">Rubber-Duck Critique Findings</h2>
+<h3 id="adopted">Adopted</h3>
+<ol>
+<li>
+<p><strong>Phase A: token counting test should use conservative heuristic</strong> —
+   chars/3 (not chars/4) because compose prompts contain JSON schemas and
+   dense identifier lists that tokenize at ~3 chars/token.  Threshold:
+   24,000 chars ≈ 8K tokens.
+   <em>Adopted: updated test spec.</em></p>
+</li>
+<li>
+<p><strong>Phase B: 1.5× hard cap on phase_budget breaks compose if A hasn't
+   landed</strong> — added a transitional guard: <code>compose_lean: bool</code> field on
+   <code>TurnConfig</code>, with legacy split <code>(0.30, 0.25, ...)</code> when disabled.
+   The new split activates only when lean prompt is enabled.
+   <em>Adopted: documented <code>__post_init__</code> override + new test.</em></p>
+</li>
+<li>
+<p><strong>Phase C: deny list needs unit parameter</strong> — gate function signature
+   changed to <code>(parent_name, unit)</code>.  Added <code>_ratio</code>/<code>_fraction</code> + unit
+   deny rule.  Dropped <code>_index</code> suffix deny (too aggressive — legitimate
+   physical indices have real uncertainty).
+   <em>Adopted: signature, deny rules, and tests updated.</em></p>
+</li>
+<li>
+<p><strong>Phase D: 2-model config doesn't produce escalator semantics</strong> — the
+   existing 2-model path runs both models always (blind+blind), not
+   primary+escalator.  Switched to 3-model config (Haiku×2 + Opus
+   escalator) which leverages existing RD-quorum logic.
+   <em>Adopted: rewrote Phase D implementation.</em></p>
+</li>
+<li>
+<p><strong>Phase E depends on Phase F functionality</strong> — Phase E step 4a
+   (export reviewer comments) IS Phase F.  Moved F to Wave 2 so it's
+   complete before E starts.  Phase E now declares dependency on F.
+   <em>Adopted: updated wave table.</em></p>
+</li>
+<li>
+<p><strong>Phase F: JSONL export should include <code>run_id</code> and <code>turn_number</code></strong> for
+   cycle traceability.
+   <em>Adopted: add both fields to the export query.</em></p>
+</li>
+<li>
+<p><strong>Phase G budget arithmetic used wrong review cost</strong> — recomputed with
+   realistic Haiku×2 + 20% Opus escalation.  $27 for 500 names, $37
+   worst-case with Pattern B.  Both within $50.
+   <em>Adopted: updated arithmetic section.</em></p>
+</li>
+<li>
+<p><strong>Phase G abort mechanism was undefined</strong> — added post-domain score
+   check in <code>run_domain_cycles.py</code> with <code>QualityGateError</code>.  Manual
+   abort, not auto-rollback.
+   <em>Adopted: added implementation spec.</em></p>
+</li>
+<li>
+<p><strong>Phase A line-number references pointed to wrong site</strong> — system
+   prompt is rendered in <code>compose_worker()</code> at ~L1213/L1328, not in
+   <code>_compose_batch_body</code>.  Updated file modification list.
+   <em>Adopted: corrected file table.</em></p>
+</li>
+<li>
+<p><strong>Phase A missing partial template files</strong> — <code>_exemplars_name_only.md</code>
+    and <code>example_loader.py</code> were not in the modification list.
+    <em>Adopted: added both.</em></p>
+</li>
+</ol>
+<h3 id="deliberately-set-aside">Deliberately set aside</h3>
+<ol>
+<li>
+<p><strong>"Phase D should also pilot Pattern B (Opus+Sonnet) as a comparison
+   point"</strong> — rd2 already analysed Pattern B theoretically.  Running both
+   pilots doubles cost.  We'll run D only and fall back to B if D fails.
+   <em>Reason: budget conservation.</em></p>
+</li>
+<li>
+<p><strong>"Phase E should use a larger probe domain for statistical
+   significance"</strong> — <code>magnetic_field_diagnostics</code> has only 11 names, which
+   is a small sample.  However, it's the worst-performing domain and the
+   user explicitly recommended it.  Statistical power is less important than
+   exposing the review-starvation bug.
+   <em>Reason: user directive overrides statistical concern.</em></p>
+</li>
+<li>
+<p><strong>"Consider adding a <code>--dry-run</code> mode to the probe loop"</strong> — the probe
+   loop already has <code>sn clear</code> as the reset mechanism.  A dry-run would
+   require mocking the entire LLM call chain.
+   <em>Reason: complexity not justified for a probe.</em></p>
+</li>
+<li>
+<p><strong>"Phase D pilot sample too small (n=4) for statistical conclusions"</strong> —
+   true, but this is a cost-constrained pilot ($0.50 cap).  We use median
+   per-dimension delta ≤0.15 as the gate, which tolerates single outliers.
+   If quality is borderline, we'll expand to 10 names before flipping
+   the default.
+   <em>Reason: $0.50 cap constraint; expandable if results are ambiguous.</em></p>
+</li>
+<li>
+<p><strong>"Phase E exit criterion (2 consecutive cycles) may ping-pong with LLM
+   nondeterminism"</strong> — accepted risk.  If cycle 3 regresses, we continue
+   iterating.  The 5-cycle budget cap ($10 total) prevents runaway.
+   <em>Reason: bounded by budget cap; acceptable variance.</em></p>
+</li>
+</ol>
+<hr>
+<h2 id="sequencing-summary">Sequencing Summary</h2>
+<pre><code>Wave 1 (parallel, 3 engineers):
+  ├─ Phase A: compose prompt reduction
+  ├─ Phase B: budget split rebalance  
+  └─ Phase C: error-sibling gate
+
+Wave 2 (parallel, 2 engineers):
+  ├─ Phase D: reviewer Haiku pilot (after B)
+  └─ Phase F: anti-pattern feedback loop
+
+Wave 3 (1 architect):
+  └─ Phase E: single-domain probe loop (after A+B+C+D+F)
+
+Wave 4 (gated, 1 architect):
+  └─ Phase G: all-domain $50 final (after E exit)
+</code></pre>
+    </section>
+  </main>
+</body>
+</html>

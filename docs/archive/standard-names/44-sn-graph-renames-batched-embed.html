@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="44-sn-graph-renames-batched-embed">
+  <meta name="plan-title" content="Plan 44 — SN graph renames, multi-valued domains, batch embedding, sn clear">
+  <meta name="plan-summary" content="Four cross-cutting issues surfaced from the post-Plan-43 validation `sn run -c 10`:">
+  <meta name="plan-status" content="done">
+  <title>Plan 44 — SN graph renames, multi-valued domains, batch embedding, sn clear | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Plan 44 — SN graph renames, multi-valued domains, batch embedding, sn clear</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/44-sn-graph-renames-batched-embed.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/29-architectural-pivot.md">Plan 29</a>, <a href="/imas-codex/sn-catalog-quality-refactor.html">Plan 36</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <h2 id="problem">Problem</h2>
+<p>Four cross-cutting issues surfaced from the post-Plan-43 validation
+<code>sn run -c 10</code>:</p>
+<ol>
+<li>
+<p><strong>Sequential single-text embedding</strong> is the dominant runtime cost.
+   <code>_hybrid_search_neighbours</code> is called per source path during compose,
+   issuing 2 single-text remote embed round-trips per item. For a 25-path
+   batch that is 50 round-trips — ~3 s of wall time before the LLM call,
+   sequential. The discover and DD-build pipelines already solved this
+   with <code>embed_descriptions_batch</code> (one round-trip for N texts) — SN must
+   adopt the same pattern.</p>
+</li>
+<li>
+<p><strong><code>physics_domain</code> is overwritten</strong> when the same <code>StandardName</code> id
+   surfaces in a second domain turn (e.g. <code>plasma_current</code> produced first
+   in <code>equilibrium</code>, then re-touched in <code>transport</code> — the SN ends up
+   tagged <code>physics_domain=transport</code>, losing equilibrium attribution).
+   The user wants the same multi-source topology that <code>IMASNode</code> and
+   <code>StandardNameSource</code> already use: a name can belong to <strong>many</strong>
+   physics domains.</p>
+</li>
+<li>
+<p><strong><code>Review</code> is a poor class name and <code>REVIEWS</code> is a poor edge name.</strong>
+   They collide with semantic intent in queries (<code>MATCH (r:Review)</code> reads
+   like a noun, but <code>Review</code> as a node label conflicts with the verb
+   <code>r.score</code>/<code>r.tier</code>). Rename to <code>StandardNameReview</code> (matches the
+   <code>StandardName*</code> family — <code>StandardNameSource</code>, <code>StandardNameReview</code>)
+   and <code>HAS_REVIEW</code> (matches the <code>HAS_*</code> ownership pattern used
+   throughout: <code>HAS_UNIT</code>, <code>HAS_COCOS</code>, <code>HAS_PHYSICS_DOMAIN</code>).</p>
+</li>
+<li>
+<p><strong><code>sn clear</code> does not delete <code>LLMCost</code>.</strong> A clean reset for re-running
+   the pipeline must wipe the cost ledger — otherwise stale rows
+   accumulate.</p>
+</li>
+</ol>
+<h2 id="approach">Approach</h2>
+<p>Six work streams, dependency-ordered. Streams A/D run first because
+they touch only schema + CLI. Stream B (multi-valued domain) gates the
+write path. Stream C (batch embed) is pure refactor inside compose.
+Stream E migrates existing graph data. Stream F validates end-to-end.</p>
+<table>
+<thead>
+<tr>
+<th>Stream</th>
+<th>Topic</th>
+<th>Owner</th>
+<th>Depends on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Rename <code>Review</code> → <code>StandardNameReview</code>, <code>REVIEWS</code> → <code>HAS_REVIEW</code></td>
+<td>engineer</td>
+<td>—</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Multi-valued <code>physics_domain</code> on StandardName (list, append-only)</td>
+<td>engineer</td>
+<td>A (model rebuild)</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Batch hybrid-search embedding (kill N+1 in <code>_hybrid_search_neighbours</code>)</td>
+<td>engineer</td>
+<td>—</td>
+</tr>
+<tr>
+<td>D</td>
+<td><code>sn clear</code> includes <code>LLMCost</code>; rebuild gap doc</td>
+<td>engineer</td>
+<td>—</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Graph migration: rename labels/edges, convert domain scalar → list, drop hanging LLMCost</td>
+<td>engineer</td>
+<td>A, B, D</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Tests + validation <code>sn run -c 10</code> (cleared graph), assert correctness, fix bugs</td>
+<td>engineer</td>
+<td>E</td>
+</tr>
+</tbody>
+</table>
+<h2 id="stream-a-rename-review-standardnamereview-reviews-has_review">Stream A — Rename Review → StandardNameReview, REVIEWS → HAS_REVIEW</h2>
+<h3 id="schema-changes-imas_codexschemasstandard_nameyaml">Schema changes (<code>imas_codex/schemas/standard_name.yaml</code>)</h3>
+<pre><code class="language-yaml">StandardNameReview:                 # was: Review
+  description: &gt;-
+    ... A StandardName may have one (canonical) or many (multi-reviewer)
+    StandardNameReview nodes attached via HAS_REVIEW.
+  class_uri: sn:StandardNameReview
+  attributes:
+    standard_name_id:
+      annotations:
+        relationship_type: HAS_REVIEW   # was: REVIEWS, direction reversed
+    ...
+</code></pre>
+<p><strong>Edge direction note.</strong> Today: <code>(Review)-[:REVIEWS]-&gt;(StandardName)</code>.
+After: <code>(StandardName)-[:HAS_REVIEW]-&gt;(StandardNameReview)</code>. The
+<code>HAS_*</code> ownership convention (matches <code>HAS_UNIT</code>, <code>HAS_COCOS</code>,
+<code>HAS_PHYSICS_DOMAIN</code>, <code>HAS_ERROR</code>) requires the parent to be the
+StandardName. Migration must reverse direction.</p>
+<h3 id="code-side-rename-surface">Code-side rename surface</h3>
+<p><code>grep -rn "REVIEWS\|class Review\|:Review\b" imas_codex/ tests/</code> returns
+~15 files. Touch points (verified):</p>
+<ul>
+<li><code>imas_codex/standard_names/graph_ops.py</code> (write_reviews, queries)</li>
+<li><code>imas_codex/standard_names/review/pipeline.py</code> (consolidator,
+  <code>(sn:StandardName)&lt;-[:HAS_STANDARD_NAME]-(node:IMASNode)</code> is
+  unrelated; the <code>:REVIEWS</code> reads need updating)</li>
+<li><code>imas_codex/standard_names/review/audits.py</code></li>
+<li><code>imas_codex/standard_names/review/persist.py</code></li>
+<li><code>imas_codex/cli/sn.py</code> (sn clear queries)</li>
+<li>All <code>tests/standard_names/test_review_*.py</code> (mock fixtures, queries)</li>
+</ul>
+<p>A find-replace is appropriate: every <code>:Review)</code> becomes
+<code>:StandardNameReview)</code>, every <code>[:REVIEWS]</code> becomes <code>[:HAS_REVIEW]</code>,
+every <code>&lt;-[:REVIEWS]-</code> becomes <code>-[:HAS_REVIEW]-&gt;</code> (direction reversal).</p>
+<h3 id="tests">Tests</h3>
+<ul>
+<li><code>tests/graph/test_schema_compliance.py</code> already validates labels +
+  rel types from the LinkML schema — passing this is the gate.</li>
+<li>Add <code>tests/standard_names/test_review_label_migration.py</code> with a
+  fake-graph fixture that asserts the migration query renames labels
+  and reverses the edge correctly.</li>
+</ul>
+<h2 id="stream-b-multi-valued-physics_domain-on-standardname">Stream B — Multi-valued <code>physics_domain</code> on StandardName</h2>
+<h3 id="schema-change">Schema change</h3>
+<pre><code class="language-yaml">StandardName:
+  attributes:
+    ...
+    physics_domain:
+      description: &gt;-
+        Physics domain classifications. A StandardName may belong to multiple
+        domains when its source DD paths span domains (e.g.
+        `plasma_current` appears in equilibrium, transport, magnetics).
+        Append-only at write time — a domain seen once is recorded
+        forever, never overwritten.
+      multivalued: true
+      range: PhysicsDomain                    # references the enum
+      annotations:
+        relationship_type: HAS_PHYSICS_DOMAIN
+    # DROP `physics_domain_ref` (was singular ref). The multivalued
+    # `physics_domain` slot now does the dual-property + relationship
+    # job for both directions.
+</code></pre>
+<p>The graph already has <code>(:StandardName)-[:HAS_PHYSICS_DOMAIN]-&gt;(:PhysicsDomain)</code>
+edges — they just need to become a true 1-to-many.</p>
+<h3 id="write-semantics-append-write-time-dedupe-no-apoc">Write semantics — append + write-time dedupe (no APOC)</h3>
+<p><strong>RD finding (blocking):</strong> APOC is <strong>not</strong> installed on this Neo4j —
+<code>apoc.version()</code> is unknown. Use pure Cypher with write-time set
+semantics (no read-time dedupe — keeps invariants on the node).</p>
+<p>Today (<code>graph_ops.write_standard_names</code>):</p>
+<pre><code class="language-cypher">MERGE (sn:StandardName {id: b.id})
+SET sn.physics_domain = coalesce(b.physics_domain, sn.physics_domain)
+</code></pre>
+<p>After (pure Cypher set semantics, dedupe at write time):</p>
+<pre><code class="language-cypher">MERGE (sn:StandardName {id: b.id})
+WITH sn, b, coalesce(sn.physics_domain, []) AS existing,
+     coalesce(b.physics_domain, []) AS incoming
+WITH sn, b, existing,
+     [d IN incoming WHERE d IS NOT NULL AND NOT (d IN existing) | d] AS new_domains
+SET sn.physics_domain = existing + new_domains
+WITH sn, b, new_domains
+UNWIND new_domains AS domain
+MATCH (pd:PhysicsDomain {id: domain})
+MERGE (sn)-[:HAS_PHYSICS_DOMAIN]-&gt;(pd)
+</code></pre>
+<p><code>b.physics_domain</code> is always sent as a list from the writer
+(scalar→list conversion happens in the python builder, not Cypher).
+Existing-domain check on the python side is unnecessary — Cypher
+filter handles it.</p>
+<h3 id="read-side-updates-full-audit">Read-side updates — full audit</h3>
+<p><strong>RD finding (medium):</strong> loop/status/display readers expect a scalar.
+Audit list (verified call sites):</p>
+<table>
+<thead>
+<tr>
+<th>File:line</th>
+<th>Today</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>loop.py:93-100</code></td>
+<td><code>RETURN sn.physics_domain AS domain</code></td>
+<td><code>UNWIND sn.physics_domain AS domain RETURN domain</code> (rotation visits each domain once per name)</td>
+</tr>
+<tr>
+<td><code>context.py:236-252</code></td>
+<td><code>WHERE sn.physics_domain = $domain</code></td>
+<td><code>WHERE $domain IN sn.physics_domain</code></td>
+</tr>
+<tr>
+<td><code>cli/sn.py:968-970</code></td>
+<td><code>WHERE sn.physics_domain = $domain</code></td>
+<td><code>WHERE $domain IN sn.physics_domain</code></td>
+</tr>
+<tr>
+<td><code>graph_ops.py:335-336</code></td>
+<td>filter equality</td>
+<td><code>IN</code> predicate</td>
+</tr>
+<tr>
+<td><code>export.py:147-149</code></td>
+<td>filter equality</td>
+<td><code>IN</code> predicate</td>
+</tr>
+</tbody>
+</table>
+<p><code>grep -rn "\.physics_domain" imas_codex/ tests/</code> is the gate — every
+hit must be inspected. Filtering predicates always become
+<code>$domain IN sn.physics_domain</code>. Aggregations always become
+<code>UNWIND sn.physics_domain AS d</code>.</p>
+<h3 id="catalog-yaml-round-trip-design-rd-blocking">Catalog YAML round-trip — design (RD blocking)</h3>
+<p><strong>Problem:</strong> <code>export.py:949-975</code> groups by <code>entry_domain =
+cand.get("physics_domain")</code> and writes one file per (domain, name).
+A list breaks this; a roundtrip via <code>catalog_import.py:115-129</code>
+collapses to scalar.</p>
+<p><strong>Decision:</strong> Keep the catalog file path single-domain (one YAML per
+(primary_domain, name)) but preserve the <strong>full list</strong> in the YAML
+body. Specifically:</p>
+<ol>
+<li><strong>Export.</strong> When SN has <code>physics_domain=[a, b, c]</code>, write the file
+   under <code>standard_names/&lt;primary&gt;/&lt;name&gt;.yml</code> where <code>primary</code> is
+   chosen by <strong>priority-first sort</strong> (see §Domain priority below)
+   with alphabetical tie-break for determinism. Body includes
+   <code>physics_domain: [a, b, c]</code> as a YAML list, sorted alphabetically
+   (independent of primary choice — the body is a set, the file
+   path is just one of them).</li>
+<li><strong>Import.</strong> Parse <code>physics_domain</code> as a list. No legacy
+   bare-string handling — the catalog will be cleared and rebuilt
+   from fresh, so import requires the list form. Reject (validation
+   error) any YAML where <code>physics_domain</code> is not a list.</li>
+<li><strong>Round-trip invariant.</strong> The catalog write then re-import must
+   preserve the full list, not collapse to the directory-derived
+   primary.</li>
+</ol>
+<p>The "primary" choice (priority-first) is a display/file-path
+convention — never authoritative.</p>
+<h3 id="domain-priority-derived-from-cluster-mapping-relevance">Domain priority — derived from cluster mapping relevance</h3>
+<p>The existing notion of importance lives at the <strong>cluster</strong> level via
+<code>Cluster.mapping_relevance</code> (<code>high</code> / <code>medium</code> / <code>low</code>, see
+<code>imas_codex/definitions/clusters/mapping_relevance.yaml</code>). HIGH
+clusters are core physics quantities (Te, Ti, ne, Ip, Bt, q-profile,
+boundary shape, plasma current, heating power) — exactly the
+domains we want to surface as "primary" when a name spans several.</p>
+<p>A <code>Cluster</code> node also carries <code>physics_domain</code> (primary physics
+domain of its members). Domain importance therefore lifts naturally
+from cluster importance:</p>
+<pre><code class="language-cypher">MATCH (c:Cluster)
+WHERE c.physics_domain IS NOT NULL
+  AND c.mapping_relevance IS NOT NULL
+WITH c.physics_domain AS domain,
+     CASE c.mapping_relevance
+       WHEN 'high' THEN 100
+       WHEN 'medium' THEN 10
+       ELSE 1
+     END AS weight
+RETURN domain, sum(weight) AS importance
+ORDER BY importance DESC
+</code></pre>
+<p>A domain whose clusters are mostly HIGH-relevance scores high; one
+whose clusters are mostly LOW-relevance scores low. This is
+DD-derived (no hardcoded list), survives DD version changes, and
+extends naturally if <code>MappingRelevance</code> gets new tiers.</p>
+<p><strong>Implementation.</strong> Add a module-level cached helper:</p>
+<pre><code class="language-python"># imas_codex/standard_names/domain_priority.py (new)
+@functools.lru_cache(maxsize=1)
+def get_domain_priority_index() -&gt; dict[str, int]:
+    &quot;&quot;&quot;Return rank (0-based, lower = more important) per physics
+    domain. Computed once per process from Cluster.mapping_relevance
+    weighted counts. Domains absent from the index get rank 999.&quot;&quot;&quot;
+    ...
+
+def pick_primary_domain(domains: list[str]) -&gt; str:
+    &quot;&quot;&quot;Pick the highest-priority domain; alphabetical tie-break.&quot;&quot;&quot;
+    ranks = get_domain_priority_index()
+    return sorted(domains, key=lambda d: (ranks.get(d, 999), d))[0]
+</code></pre>
+<p>Use in <code>export.py:953-954</code>:</p>
+<pre><code class="language-python">from imas_codex.standard_names.domain_priority import pick_primary_domain
+primary = pick_primary_domain(physics_domain_list) if physics_domain_list else &quot;unscoped&quot;
+</code></pre>
+<p><strong>Tests</strong> (<code>tests/standard_names/test_domain_priority.py</code>):
+- Mock graph with 3 high+5 medium clusters in <code>equilibrium</code>, 0
+  high+1 medium in <code>transport</code> → equilibrium ranks above transport
+- Empty cluster set → fall back to alphabetical
+- Tie scores → alphabetical tie-break preserved
+- Cache: subsequent calls don't re-query the graph</p>
+<h3 id="tests_1">Tests</h3>
+<ul>
+<li><code>tests/standard_names/test_physics_domain_multi.py</code>:</li>
+<li>Write SN with domain=[equilibrium], assert list stored</li>
+<li>Re-write same id with domain=[transport], assert list grew to
+    [equilibrium, transport] (order-insensitive)</li>
+<li>Assert HAS_PHYSICS_DOMAIN edges = 2</li>
+</ul>
+<h2 id="stream-c-batch-hybrid-search-embedding">Stream C — Batch hybrid-search embedding</h2>
+<h3 id="root-cause">Root cause</h3>
+<p><code>imas_codex/standard_names/workers.py:_hybrid_search_neighbours</code> calls
+<code>hybrid_dd_search(gc, text, ...)</code> twice per source path (description
+text + path text). Each call hits <code>_embed(text)</code> →
+<code>encoder.embed_texts([text], prompt_name="query")</code> — a 1-text remote
+round-trip with the <strong>query</strong> prompt flavour.</p>
+<p>For a batch of N items: 2N round-trips × ~50 ms = N × 100 ms
+sequential overhead before any LLM call.</p>
+<p><strong>RD finding (blocking):</strong> <code>embed_descriptions_batch</code> does <strong>not</strong>
+pass <code>prompt_name="query"</code> — it embeds in document mode. Reusing it
+unchanged would silently change retrieval semantics. We must add a
+query-flavoured batch helper.</p>
+<h3 id="fix">Fix</h3>
+<p><strong>1. Add query-batch helper.</strong> New function in
+<code>imas_codex/embeddings/description.py</code> (or new module
+<code>imas_codex/embeddings/query.py</code>):</p>
+<pre><code class="language-python">def embed_query_texts(texts: list[str]) -&gt; list[list[float]]:
+    &quot;&quot;&quot;Batch-embed N texts with prompt_name='query'. One round-trip.&quot;&quot;&quot;
+    encoder = _get_encoder()
+    if not texts:
+        return []
+    return encoder.embed_texts(texts, prompt_name=&quot;query&quot;)
+</code></pre>
+<p>This preserves the <code>prompt_name="query"</code> semantics that
+<code>hybrid_dd_search._embed</code> uses today.</p>
+<p><strong>2. Add <code>embedding</code> parameter to <code>hybrid_dd_search</code>.</strong> When provided,
+skip the internal <code>_embed()</code> call and use the caller's pre-computed
+embedding. When not provided, fall back to existing single-text embed
+(for MCP tool callers).</p>
+<p><code>imas_codex/graph/dd_search.py</code>:</p>
+<pre><code class="language-python">def hybrid_dd_search(
+    gc, text, *,
+    embedding: list[float] | None = None,
+    ...
+) -&gt; list[SearchHit]:
+    if embedding is None:
+        embedding = _embed(text)
+    # rest unchanged
+</code></pre>
+<p><strong>3. Pre-batch query texts in <code>_hybrid_search_neighbours</code>.</strong> Push the
+batch boundary down to the helper itself so all callers benefit
+without duplicating cache logic. The helper accepts a list of
+<code>(path, description)</code> tuples and returns a list-of-results in the
+same order. Internally it builds the unique text set, calls
+<code>embed_query_texts()</code> once, and threads the cache through
+<code>hybrid_dd_search(..., embedding=...)</code>.</p>
+<pre><code class="language-python"># imas_codex/standard_names/workers.py
+def _hybrid_search_neighbours_batch(
+    gc, items: list[tuple[str, str | None]], *, k: int = 5,
+) -&gt; list[HybridSearchResult]:
+    # 1. Collect unique query texts
+    texts: set[str] = set()
+    for path, desc in items:
+        if desc:
+            texts.add(desc.strip()[:200])
+        texts.add(path)
+    texts.discard(&quot;&quot;)
+    # 2. One remote round-trip
+    text_list = sorted(texts)
+    embeddings = embed_query_texts(text_list)
+    cache = dict(zip(text_list, embeddings, strict=True))
+    # 3. Per-item enrichment uses cache
+    return [
+        _hybrid_search_neighbours_one(gc, path, desc, cache, k=k)
+        for path, desc in items
+    ]
+</code></pre>
+<p><strong>4. Cover ALL callers (RD blocking).</strong> The N+1 helper is also
+called from:
+- <code>imas_codex/standard_names/workers.py:1642</code> (compose retry)
+- <code>imas_codex/standard_names/enrich_workers.py:676</code> (link candidates)
+- <code>imas_codex/standard_names/review/pipeline.py:678</code> (review context)</p>
+<p>Refactor each to call <code>_hybrid_search_neighbours_batch</code> once with
+all items in scope rather than per-item in a loop.</p>
+<h3 id="performance-target">Performance target</h3>
+<p>For a 25-item batch:
+- <strong>Before</strong>: 50 round-trips × ~50 ms = ~2.5 s embedding overhead
+- <strong>After</strong>: 1 round-trip × ~80 ms (50 texts) = ~80 ms overhead
+- <strong>Speedup</strong>: ~30× on embedding stage</p>
+<h3 id="tests_2">Tests</h3>
+<ul>
+<li><code>tests/standard_names/test_compose_batch_embed.py</code>:</li>
+<li>Mock encoder with call counter</li>
+<li>Run a 5-item batch through compose-prep</li>
+<li>Assert <code>encoder.embed_texts</code> called once (not 10×)</li>
+<li>Assert <code>prompt_name="query"</code> was passed</li>
+<li><code>tests/graph/test_dd_search.py</code>:</li>
+<li>Add test for <code>hybrid_dd_search(text, embedding=...)</code> skipping
+    internal embed call</li>
+</ul>
+<h2 id="stream-d-sn-clear-includes-llmcost">Stream D — <code>sn clear</code> includes LLMCost</h2>
+<h3 id="code-change">Code change</h3>
+<p><code>imas_codex/cli/sn.py</code> <code>_run_sn_clear_cmd</code> — add <code>LLMCost</code> to the
+list of labels deleted. Verify via:</p>
+<pre><code class="language-cypher">MATCH (n:LLMCost) RETURN count(n) AS leftover
+</code></pre>
+<p>after <code>sn clear --force</code>. Should be 0.</p>
+<h3 id="tests_3">Tests</h3>
+<ul>
+<li><code>tests/standard_names/test_sn_clear.py</code>:</li>
+<li>Pre-populate LLMCost + StandardName + StandardNameReview</li>
+<li>Run <code>sn clear --force</code></li>
+<li>Assert all four labels gone</li>
+</ul>
+<h2 id="stream-e-graph-migration">Stream E — Graph migration</h2>
+<p>Run as a one-off Cypher script (per AGENTS.md: never persist as
+<code>scripts/migrate_*.py</code> — execute inline via <code>graph shell</code> or python).
+The migration is destructive of <code>Review</code> label and <code>REVIEWS</code> edges
+but is safe because we will re-run <code>sn clear --force</code> immediately
+afterwards as part of validation.</p>
+<p><strong>RD finding (blocking):</strong> Run in a single explicit write transaction
+and use <code>valueType()</code> (Cypher 5) for type-safe idempotency check —
+not string heuristics like <code>CONTAINS '['</code> (which fails after first
+run when the value is already a list).</p>
+<pre><code class="language-python"># Inline — single transaction, idempotent, no APOC.
+gc.query(&quot;&quot;&quot;
+    // 1. Rename Review → StandardNameReview (idempotent: REMOVE on
+    //    a label that's not present is a no-op)
+    MATCH (r:Review)
+    REMOVE r:Review
+    SET r:StandardNameReview
+    WITH count(*) AS _renamed
+
+    // 2. Reverse + rename REVIEWS → HAS_REVIEW
+    MATCH (r:StandardNameReview)-[old:REVIEWS]-&gt;(sn:StandardName)
+    MERGE (sn)-[:HAS_REVIEW]-&gt;(r)
+    DELETE old
+    WITH count(*) AS _redirected
+
+    // 3. Convert physics_domain string → list (idempotent via valueType)
+    MATCH (sn:StandardName)
+    WHERE sn.physics_domain IS NOT NULL
+      AND valueType(sn.physics_domain) = 'STRING NOT NULL'
+    SET sn.physics_domain = [sn.physics_domain]
+    WITH count(*) AS _converted
+
+    // 4. Drop hanging LLMCost rows
+    MATCH (n:LLMCost) DETACH DELETE n
+    RETURN count(*) AS _llmcost_deleted
+&quot;&quot;&quot;)
+</code></pre>
+<p>We can skip migration in this case (Stream F clears the graph
+anyway), but the script is documented for users with existing data.</p>
+<h2 id="stream-f-validation">Stream F — Validation</h2>
+<ol>
+<li>
+<p><code>sn clear --force</code> then verify:
+   <code>cypher
+   MATCH (n) WHERE labels(n)[0] STARTS WITH 'StandardName' OR labels(n)[0] = 'LLMCost' OR labels(n)[0] = 'SNRun'
+   RETURN labels(n)[0] AS label, count(*) AS n</code>
+   All zero.</p>
+</li>
+<li>
+<p><code>imas-codex sn run -c 10</code> (no domain filter, no extra flags)</p>
+</li>
+<li>
+<p>Pass criteria:
+   - SNRun.status='completed', cost_is_exact=true
+   - LLMCost row count matches LLM call count from logs
+   - At least one StandardName has <code>physics_domain</code> containing 2+
+     entries (cross-domain attribution preserved)
+   - All <code>:StandardNameReview</code> nodes (zero <code>:Review</code> nodes)
+   - All <code>[:HAS_REVIEW]</code> edges (zero <code>[:REVIEWS]</code> edges)
+   - Embedding round-trip count per batch ≤ 2 (one for query texts,
+     one for produced names) — verify via embed server logs or
+     <code>Remote embedding: N texts</code> log lines</p>
+</li>
+<li>
+<p>Iterate fixes until passing.</p>
+</li>
+</ol>
+<h2 id="build-test-order-rd-medium-finding">Build &amp; test order (RD medium finding)</h2>
+<p>After <strong>any</strong> LinkML schema edit, the pipeline is:</p>
+<ol>
+<li>Edit <code>imas_codex/schemas/standard_name.yaml</code></li>
+<li><code>uv run build-models --force</code> — regenerates <code>models.py</code>,
+   <code>schema_context_data.py</code>, <code>schema-reference.md</code>,
+   <code>EXPECTED_RELATIONSHIP_TYPES</code>. Generated files are gitignored.</li>
+<li><code>uv run pytest tests/graph/test_schema_compliance.py</code> — schema
+   gate. This must pass before any other test or Python import that
+   depends on the new model.</li>
+<li>Code edits, then <code>uv run pytest tests/standard_names/</code>.</li>
+<li>Commit.</li>
+</ol>
+<p>Stream A and Stream B both edit the schema — they MUST share one
+<code>build-models --force</code> run (sequential), or merge their schema edits
+before rebuilding. Dispatch order: A first (rename), B second
+(multi-domain) — B builds on A's regenerated models.</p>
+<h2 id="stream-d-sn-clear-includes-llmcost-extended-scope">Stream D — <code>sn clear</code> includes LLMCost (extended scope)</h2>
+<p><strong>RD finding (nit):</strong> <code>sn clear</code> is not the only stale-cost path.
+<code>sn run --reset-to extracted</code> goes through <code>clear_standard_names()</code>
+(<code>graph_ops.py:2672-2865</code>) which also leaves <code>LLMCost</code> orphaned.
+Both code paths must be fixed.</p>
+<h3 id="code-change_1">Code change</h3>
+<ol>
+<li><code>imas_codex/cli/sn.py</code> <code>_run_sn_clear_cmd</code> — add <code>LLMCost</code> to the
+   label list.</li>
+<li><code>imas_codex/standard_names/graph_ops.py</code> <code>clear_standard_names</code>
+   — same label addition.</li>
+</ol>
+<h3 id="test">Test</h3>
+<ul>
+<li><code>tests/standard_names/test_sn_clear.py</code>:</li>
+<li>Pre-populate LLMCost + StandardName + StandardNameReview</li>
+<li>Run <code>sn clear --force</code> → assert all gone</li>
+<li>Pre-populate again, run <code>clear_standard_names()</code> (via reset
+    code-path) → assert LLMCost also gone</li>
+</ul>
+<h2 id="out-of-scope">Out of scope</h2>
+<ul>
+<li>Other pre-existing bugs from the validate-10usd-run inspection
+  (reviewer_tier null, vocab gap classifier issues) — file as
+  separate todos.</li>
+<li>Renaming <code>VocabGap</code> → <code>StandardNameVocabGap</code> (consistent but not
+  requested; defer).</li>
+</ul>
+<h2 id="documentation-updates">Documentation updates</h2>
+<ul>
+<li><code>AGENTS.md</code> table mentioning Review under "key relationships" —
+  update to <code>HAS_REVIEW</code> + StandardNameReview.</li>
+<li><code>agents/schema-reference.md</code> — auto-regenerated by build hook.</li>
+<li>Delete this plan when fully implemented.</li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

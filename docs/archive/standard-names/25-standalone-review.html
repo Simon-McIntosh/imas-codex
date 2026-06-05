@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="25-standalone-review">
+  <meta name="plan-title" content="25: Standalone Standard Name Review Tool">
+  <meta name="plan-summary" content="The `sn generate` pipeline now focuses on composition: EXTRACT → COMPOSE → VALIDATE → CONSOLIDATE → PERSIST. Review/scoring has been removed from this pipeline because:">
+  <meta name="plan-status" content="done">
+  <title>25: Standalone Standard Name Review Tool | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>25: Standalone Standard Name Review Tool</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/25-standalone-review.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> Generate pipeline (auto-attach, no inline review)</li>
+    <li><strong>Active plan links preserved:</strong> <a href="/imas-codex/sn-search-facility.html">Plan 40</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Draft
+<strong>Created:</strong> 2025-07-18
+<strong>Depends on:</strong> Generate pipeline (auto-attach, no inline review)</p>
+<h2 id="problem-statement">Problem Statement</h2>
+<p>The <code>sn generate</code> pipeline now focuses on composition: EXTRACT → COMPOSE →
+VALIDATE → CONSOLIDATE → PERSIST. Review/scoring has been removed from this
+pipeline because:</p>
+<ol>
+<li><strong>Flash-lite rubber-stamps everything</strong> — gives 20/20 on every dimension,
+   providing zero signal. Only premium models (opus) discriminate quality.</li>
+<li><strong>Per-name review lacks cross-catalog visibility</strong> — reviewing names one at
+   a time misses consistency issues (naming pattern divergence, link coverage
+   gaps, documentation style drift).</li>
+<li><strong>Review should operate on resolved state</strong> — links need to be resolved,
+   all related names need to be visible, before quality scoring is meaningful.</li>
+</ol>
+<p>A standalone <code>sn review</code> tool solves these problems by operating at the
+catalog level with full visibility.</p>
+<h2 id="research-findings">Research Findings</h2>
+<h3 id="how-isn-interactive-review-works">How ISN Interactive Review Works</h3>
+<p>The ISN interactive workflow (human + Copilot + MCP tools) reviews names by:</p>
+<ol>
+<li>Loading the full catalog context (all 309+ names)</li>
+<li>Grouping names by physics domain or IDS</li>
+<li>For each group, checking:
+   - Naming consistency (do related quantities follow the same pattern?)
+   - Documentation completeness (equations, sign conventions, typical values)
+   - Link coverage (are cross-references bidirectional?)
+   - Unit consistency across related names</li>
+<li>Using the 6-dimension scoring rubric (grammar, semantic, documentation,
+   convention, completeness, compliance)</li>
+</ol>
+<h3 id="scoring-rubric-from-sn_review_criteriayaml">Scoring Rubric (from sn_review_criteria.yaml)</h3>
+<p>Six dimensions, each 0-20 (total /120, normalized to 0-1):</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>What it measures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grammar</td>
+<td>Correct segment order, valid tokens, canonical form</td>
+</tr>
+<tr>
+<td>semantic</td>
+<td>Name accurately captures the physics quantity</td>
+</tr>
+<tr>
+<td>documentation</td>
+<td>Richness: equations, sign conventions, typical values, links</td>
+</tr>
+<tr>
+<td>convention</td>
+<td>Follows IMAS/fusion naming conventions</td>
+</tr>
+<tr>
+<td>completeness</td>
+<td>All required fields present and properly populated</td>
+</tr>
+<tr>
+<td>compliance</td>
+<td>Passes ISN validation (grammar round-trip, semantic checks)</td>
+</tr>
+</tbody>
+</table>
+<p>Tiers: outstanding (≥0.85), good (0.60-0.84), adequate (0.40-0.59), poor (&lt;0.40)</p>
+<h3 id="existing-review-infrastructure">Existing Review Infrastructure</h3>
+<ul>
+<li><code>review_worker</code> function in <code>workers.py</code> — processes names in batches with
+  LLM scoring. Currently unused by generate pipeline but still functional.</li>
+<li><code>_review_batch()</code> helper — builds review context with calibration entries
+  and existing names, calls LLM for scoring.</li>
+<li><code>SNQualityReviewBatch</code>, <code>SNQualityReview</code>, <code>SNQualityScore</code> models — full
+  Pydantic models for review responses.</li>
+<li><code>sn_review_criteria.yaml</code> — scoring dimensions, tiers, verdict rules.</li>
+<li><code>benchmark_calibration.yaml</code> — 27 curated reference entries for consistency.</li>
+<li>Prompts: <code>review.md</code> (system), <code>review_dd.md</code> (user context).</li>
+</ul>
+<h2 id="design">Design</h2>
+<h3 id="architecture">Architecture</h3>
+<pre><code>sn review [--ids IDS] [--domain DOMAIN] [--score-below FLOAT] [--model MODEL]
+    │
+    ├── 1. Load catalog snapshot from graph
+    │      - All StandardName nodes with relationships
+    │      - Group by IDS, domain, or naming pattern
+    │
+    ├── 2. Resolve links (ensure all links point to real names)
+    │      - Call resolve_links_batch() if unresolved links exist
+    │
+    ├── 3. Build review groups
+    │      - Group by IDS (primary) then physics domain (secondary)
+    │      - Each group gets full cross-name visibility
+    │      - Include calibration entries as quality anchors
+    │
+    ├── 4. LLM Review (premium model — opus or sonnet)
+    │      - System prompt: scoring rubric + calibration examples
+    │      - User prompt: full group context with all names + docs
+    │      - Response: per-name scores + group-level consistency notes
+    │
+    ├── 5. Persist scores to graph
+    │      - Update reviewer_score, reviewer_scores, reviewer_comments
+    │      - Set review_tier, reviewed_at, reviewer_model
+    │
+    └── 6. Report
+           - Console summary: score distribution, low-scorers, consistency issues
+           - Optional: export review report to YAML/markdown
+</code></pre>
+<h3 id="key-design-decisions">Key Design Decisions</h3>
+<ol>
+<li>
+<p><strong>Group-level review, not per-name</strong>: The LLM sees all names in a group
+   at once. This enables consistency checks (e.g., "electron_temperature" and
+   "ion_temperature" should have parallel documentation structure).</p>
+</li>
+<li>
+<p><strong>Premium model only</strong>: Review quality requires opus-class models. The
+   review tool should default to <code>get_model("reasoning")</code> or accept
+   <code>--model</code> override. No point using budget models for quality assessment.</p>
+</li>
+<li>
+<p><strong>Score gate for regeneration</strong>: <code>sn review</code> scores but does not modify
+   names. Low-scoring names can be fed back to <code>sn generate --paths</code> for
+   regeneration. Future: <code>sn review --regenerate-below 0.5</code> could automate
+   this loop.</p>
+</li>
+<li>
+<p><strong>Link resolution prerequisite</strong>: Review should check that all links are
+   resolved before scoring. Unresolved links degrade the completeness score.
+   The tool should warn if unresolved links exist and optionally resolve them
+   first.</p>
+</li>
+<li>
+<p><strong>Cross-name consistency scoring</strong>: Beyond per-name scoring, the review
+   should assess group-level consistency:
+   - Do related names follow the same pattern? (e.g., <code>*_electron_*</code> and
+     <code>*_ion_*</code> should be structurally parallel)
+   - Are links bidirectional? (if A links to B, does B link to A?)
+   - Are documentation templates consistent within a domain?</p>
+</li>
+</ol>
+<h3 id="review-groups-strategy">Review Groups Strategy</h3>
+<table>
+<thead>
+<tr>
+<th>Group By</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IDS</td>
+<td>Default — reviews names within each IDS for internal consistency</td>
+</tr>
+<tr>
+<td>Domain</td>
+<td>Cross-IDS review for physics domain coherence</td>
+</tr>
+<tr>
+<td>Score</td>
+<td>Review only names below a threshold (re-review after regeneration)</td>
+</tr>
+<tr>
+<td>Pattern</td>
+<td>Group by naming pattern (all <code>*_temperature_*</code>, all <code>*_flux_*</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cli-interface">CLI Interface</h3>
+<pre><code class="language-bash"># Review all names in an IDS
+imas-codex sn review --ids equilibrium
+
+# Review names below quality threshold
+imas-codex sn review --score-below 0.7
+
+# Review a specific physics domain across all IDSs
+imas-codex sn review --domain magnetics
+
+# Review with specific model
+imas-codex sn review --model anthropic/claude-opus-4.6
+
+# Dry run — show what would be reviewed without LLM calls
+imas-codex sn review --dry-run
+
+# Review and auto-regenerate low scorers
+imas-codex sn review --regenerate-below 0.5  # future
+</code></pre>
+<h3 id="llm-prompt-design">LLM Prompt Design</h3>
+<p><strong>System prompt</strong> (cached — same for all review groups):
+- Full scoring rubric (6 dimensions with detailed criteria)
+- Calibration examples (3-5 high-quality reference entries)
+- Group-level consistency instructions
+- Output schema (per-name scores + group notes)</p>
+<p><strong>User prompt</strong> (per-group):
+- IDS overview (from graph)
+- All names in the group with full metadata:
+  - name, description, documentation, unit, kind, tags, links
+  - imas_paths, grammar_fields, constraints, validity_domain
+- Cross-reference map (which names link to which)
+- Any unresolved links flagged</p>
+<p><strong>Response model</strong>:</p>
+<pre><code class="language-python">class SNReviewGroupResult(BaseModel):
+    reviews: list[SNQualityReview]  # Per-name scores (reuse existing model)
+    group_consistency: GroupConsistencyReport
+    recommendations: list[str]  # Actionable improvement suggestions
+
+class GroupConsistencyReport(BaseModel):
+    naming_consistency: float  # 0-1: do related names follow the same pattern?
+    documentation_consistency: float  # 0-1: template adherence across group
+    link_coverage: float  # 0-1: ratio of bidirectional links
+    overall_coherence: float  # 0-1: group-level quality assessment
+    issues: list[str]  # Specific consistency problems found
+</code></pre>
+<h2 id="implementation-phases">Implementation Phases</h2>
+<h3 id="phase-1-core-review-command">Phase 1: Core Review Command</h3>
+<ul>
+<li>New <code>sn review</code> CLI command with <code>--ids</code>, <code>--domain</code>, <code>--score-below</code>, <code>--model</code></li>
+<li>Catalog loading from graph (all StandardName nodes + relationships)</li>
+<li>Group building (by IDS, then by domain)</li>
+<li>Reuse existing <code>_review_batch()</code> with enhanced group context</li>
+<li>Persist scores to graph</li>
+<li>Console summary report</li>
+</ul>
+<h3 id="phase-2-cross-name-consistency">Phase 2: Cross-Name Consistency</h3>
+<ul>
+<li>Group consistency model and scoring</li>
+<li>Bidirectional link checking</li>
+<li>Documentation template adherence checking</li>
+<li>Pattern consistency across related quantities</li>
+</ul>
+<h3 id="phase-3-review-regenerate-loop">Phase 3: Review-Regenerate Loop</h3>
+<ul>
+<li><code>--regenerate-below</code> flag to auto-feed low scorers back to generate</li>
+<li>Iteration tracking (review round number)</li>
+<li>Score improvement tracking</li>
+</ul>
+<h2 id="open-questions">Open Questions</h2>
+<ol>
+<li>
+<p><strong>Batch size for review groups</strong>: How many names can fit in one LLM context?
+   With opus at 200K context, we can fit ~50-100 names with full documentation.
+   Groups larger than this need splitting.</p>
+</li>
+<li>
+<p><strong>Incremental vs full review</strong>: Should <code>sn review</code> always review everything,
+   or only names that haven't been reviewed since their last generation?
+   Recommendation: default to unreviewed/stale names, <code>--all</code> for full catalog.</p>
+</li>
+<li>
+<p><strong>Score persistence strategy</strong>: Should review scores from different models
+   coexist (reviewer A scores vs reviewer B scores)? Or does each review
+   overwrite? Recommendation: overwrite — the latest review is authoritative.
+   History is preserved in review audit trail (reviewed_at, reviewer_model).</p>
+</li>
+</ol>
+    </section>
+  </main>
+</body>
+</html>

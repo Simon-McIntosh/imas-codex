@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="10-pipeline-fixes">
+  <meta name="plan-title" content="10: Pipeline Fixes">
+  <meta name="plan-summary" content="Two bugs in the current pipeline:">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="09-sn-generate">
+  <title>10: Pipeline Fixes | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>10: Pipeline Fixes</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/10-pipeline-fixes.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> 09 (LLM compose working) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/09-sn-generate.html">Plan 09</a>)</span></li>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/39-structured-fanout.md">Plan 39</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Pending
+<strong>Priority:</strong> High — prevents wasted LLM budget
+<strong>Depends on:</strong> 09 (LLM compose working)
+<strong>Effort:</strong> 2-4 hours</p>
+<h2 id="problem">Problem</h2>
+<p>Two bugs in the current pipeline:</p>
+<h3 id="bug-1-extract-dedup-is-a-no-op">Bug 1: Extract dedup is a no-op</h3>
+<p><code>extract_worker</code> (workers.py:68-75) fetches existing standard names from the
+graph but never uses them to filter candidates:</p>
+<pre><code class="language-python">existing = get_existing_standard_names()  # Fetched...
+wlog.info(&quot;Found %d raw candidates, %d existing names&quot;, len(raw), len(existing))
+return raw  # ...but never filtered!
+</code></pre>
+<p>Every <code>sn build</code> run will re-compose names that already exist in the graph,
+wasting LLM budget.</p>
+<h3 id="bug-2-confusing-field-naming">Bug 2: Confusing field naming</h3>
+<p><code>compose_worker</code> stores its output in <code>state.validated</code> (line 158), which
+is then read by the VALIDATE worker. But <code>validated</code> implies post-validation
+data. This will confuse anyone reading the code.</p>
+<p>The state fields should follow the pipeline: <code>candidates → composed → reviewed → validated</code>.</p>
+<h2 id="tasks">Tasks</h2>
+<h3 id="1-fix-extract-dedup">1. Fix extract dedup</h3>
+<p>In <code>extract_worker</code>, filter candidates against existing names:</p>
+<pre><code class="language-python">existing = get_existing_standard_names()
+existing_sources = {n.get(&quot;derived_from_dd&quot;) or n.get(&quot;derived_from_signal&quot;)
+                    for n in existing if n.get(&quot;derived_from_dd&quot;) or n.get(&quot;derived_from_signal&quot;)}
+filtered = [c for c in raw if c.get(&quot;path&quot;, c.get(&quot;signal_id&quot;)) not in existing_sources]
+</code></pre>
+<h3 id="2-rename-state-fields">2. Rename state fields</h3>
+<p>In <code>state.py</code>, rename for clarity:</p>
+<table>
+<thead>
+<tr>
+<th>Old</th>
+<th>New</th>
+<th>Written by</th>
+<th>Read by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>validated</code> (used as compose output)</td>
+<td><code>composed</code></td>
+<td>compose_worker</td>
+<td>review_worker</td>
+</tr>
+<tr>
+<td><code>reviewed</code></td>
+<td><code>reviewed</code></td>
+<td>review_worker</td>
+<td>validate_worker</td>
+</tr>
+<tr>
+<td>(new)</td>
+<td><code>validated</code></td>
+<td>validate_worker</td>
+<td>(terminal / publish)</td>
+</tr>
+</tbody>
+</table>
+<p>Update all references in <code>workers.py</code>.</p>
+<h3 id="3-review-caps-existing-names-smartly">3. Review caps existing names smartly</h3>
+<p><code>_build_review_context()</code> (workers.py:439) caps existing names at 200:</p>
+<pre><code class="language-python">&quot;existing_names&quot;: sorted(existing_names)[:200]
+</code></pre>
+<p>Instead, filter to names from the same IDS/domain as the current batch,
+then cap at 200. This gives better dedup context.</p>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<ul>
+<li>Running <code>sn build</code> twice on the same IDS skips already-composed names on the second run</li>
+<li>State field names match the pipeline phase that writes them</li>
+<li>Review context includes domain-relevant existing names (not random 200)</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<ul>
+<li>Run <code>sn build --source dd --ids equilibrium</code> twice</li>
+<li>Second run should have fewer candidates (already-existing names filtered out)</li>
+<li>All tests pass with renamed state fields</li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

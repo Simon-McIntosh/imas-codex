@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="22-rename-and-regeneration-context">
+  <meta name="plan-title" content="22: Rename sn→standard_names, mint→generate, and Regeneration Context">
+  <meta name="plan-summary" content="Three related improvements need to happen together:">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="21-architecture-boundary">
+  <title>22: Rename sn→standard_names, mint→generate, and Regeneration Context | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>22: Rename sn→standard_names, mint→generate, and Regeneration Context</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/22-rename-and-regeneration-context.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> Plan 21 (architecture boundary) — complete <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/21-architecture-boundary.html">Plan 21</a>)</span></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Ready to implement
+<strong>Depends on:</strong> Plan 21 (architecture boundary) — complete
+<strong>Effort:</strong> 5 phases, partially parallelizable</p>
+<h2 id="problem-statement">Problem Statement</h2>
+<p>Three related improvements need to happen together:</p>
+<ol>
+<li>
+<p><strong>Navigational clarity</strong> — <code>imas_codex/standard_names/</code> is cryptic; <code>imas_codex/standard_names/</code>
+   is self-documenting. The CLI subcommand <code>sn</code> stays (it's short for terminal use),
+   but the Python package, test directory, and documentation should use the full name.</p>
+</li>
+<li>
+<p><strong>Command naming</strong> — <code>sn mint</code> implies a one-shot minting action. <code>sn generate</code>
+   better conveys the iterative, improvable nature of LLM-backed name creation.
+   The <code>minted</code> status does NOT exist (confirmed: schema uses <code>drafted</code>), so this
+   is a CLI-only rename.</p>
+</li>
+<li>
+<p><strong>Regeneration context</strong> — When <code>--force</code> re-generates names for paths that already
+   have a <code>HAS_STANDARD_NAME</code> relationship, the LLM currently sees a flat list of ALL
+   existing names for collision avoidance, but does NOT know which specific name was
+   previously assigned to each path in the batch. This is a missed signal: the LLM
+   should see <code>previous_name: electron_temperature</code> on the path item so it can either
+   reuse, improve, or consciously replace it. This context must be framed as a
+   <strong>suggestion, not an anchor</strong> — the LLM must feel free to diverge.</p>
+</li>
+</ol>
+<h2 id="design-decisions">Design Decisions</h2>
+<h3 id="d1-sn-directory-standard_names-python-package-only">D1: <code>sn/</code> directory → <code>standard_names/</code> (Python package only)</h3>
+<p>The CLI subcommand stays <code>sn</code> — it's a terminal command and brevity matters.
+The rename is:
+- <code>imas_codex/standard_names/</code> → <code>imas_codex/standard_names/</code>
+- <code>tests/sn/</code> → <code>tests/standard_names/</code>
+- All <code>from imas_codex.standard_names.X</code> → <code>from imas_codex.standard_names.X</code></p>
+<p><strong>NOT renamed:</strong>
+- CLI group name (<code>sn</code>) — stays short for terminal use
+- Prompt subdirectory (<code>imas_codex/llm/prompts/sn/</code>) — prompt names like <code>sn/compose_dd</code>
+  are internal identifiers, not navigational paths. Renaming would break prompt caching
+  (names are keys in the prompt registry) and adds no clarity.
+- Shared includes (<code>imas_codex/llm/prompts/shared/sn/</code>) — same reasoning
+- Config section (<code>[tool.imas-codex.sn.benchmark]</code>) — pyproject.toml config key
+- Config file (<code>imas_codex/llm/config/sn_review_criteria.yaml</code>) — data file name
+- Worker log names (<code>sn_extract_worker</code>, etc.) — log prefixes are short by convention
+- Schema prefix (<code>sn: https://imas.iter.org/schemas/standard_name/</code>) — XML namespace</p>
+<h3 id="d2-mint-generate-cli-command-pipeline-function">D2: <code>mint</code> → <code>generate</code> (CLI command + pipeline function)</h3>
+<p>Rename scope:
+- <code>sn.command("mint")</code> → <code>sn.command("generate")</code>
+- <code>sn_mint()</code> function → <code>sn_generate()</code>
+- <code>run_sn_mint_engine()</code> → <code>run_sn_generate_engine()</code>
+- Help text: "Mint" → "Generate" everywhere
+- AGENTS.md: <code>sn mint</code> → <code>sn generate</code> in all tables, code blocks, prose
+- Docs: <code>standard-names.md</code>, <code>standard-names-decisions.md</code>
+- Skills: <code>service-ops/SKILL.md</code></p>
+<p><strong>NOT renamed:</strong>
+- <code>minted</code> status — does not exist. Schema uses <code>drafted</code> for LLM-generated names.
+- <code>--reset-to</code> choices remain <code>extracted</code> and <code>drafted</code> (no <code>minted</code> value to change)</p>
+<h3 id="d3-previous-name-injection-regeneration-context">D3: Previous Name Injection (Regeneration Context)</h3>
+<p><strong>Current flow (--force):</strong></p>
+<pre><code>extract_worker:
+  get_named_source_ids()    → skipped (force=True)
+  get_existing_standard_names() → Set[all SN IDs]  ← flat collision list
+
+compose_worker:
+  existing_names = sorted(batch.existing_names)[:200]  ← ALL names, not per-path
+  nearby_existing_names = search_similar_names(...)     ← semantic search
+</code></pre>
+<p><strong>New flow (--force):</strong></p>
+<pre><code>extract_worker:
+  get_named_source_ids()    → skipped (force=True)
+  get_existing_standard_names() → Set[all SN IDs]  ← flat collision list (keep)
+  get_source_name_mapping()  → Dict[source_id → {name, description, kind}]  ← NEW
+
+  For each item in batch:
+    if item.path in source_name_mapping:
+      item[&quot;previous_name&quot;] = source_name_mapping[item.path]  ← INJECT
+
+compose_worker:
+  existing_names = sorted(batch.existing_names)[:200]  ← unchanged
+  nearby_existing_names = ...                           ← unchanged
+  # previous_name already on each item, rendered in template
+</code></pre>
+<p><strong>Prompt rendering (compose_dd.md):</strong></p>
+<pre><code class="language-markdown">### equilibrium/time_slice/profiles_1d/psi
+- Description: Poloidal magnetic flux
+- Unit: Wb
+- Previous name: `poloidal_magnetic_flux` *(from prior generation — reuse if
+  still appropriate, or improve. Do NOT feel anchored to this name.)*
+</code></pre>
+<p>The framing is critical: "reuse if still appropriate, or improve" — not "keep this name".
+The LLM should treat it as one signal among many, not as a constraint.</p>
+<h3 id="d4-fresh-flag-instead-of-exclude-existing">D4: <code>--fresh</code> flag instead of <code>--exclude-existing</code></h3>
+<p><strong>Decision: Not needed.</strong> This is overthinking. The existing mechanisms cover all cases:</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generate names for uncovered paths only</td>
+<td><code>sn generate</code> (default — skips named paths)</td>
+</tr>
+<tr>
+<td>Regenerate names, with previous context</td>
+<td><code>sn generate --force</code> (includes named paths, shows previous_name)</td>
+</tr>
+<tr>
+<td>Regenerate from scratch, no prior context</td>
+<td><code>sn reset --ids equilibrium &amp;&amp; sn generate</code> (clear first, then generate fresh)</td>
+</tr>
+</tbody>
+</table>
+<p>Adding <code>--fresh</code> / <code>--exclude-existing</code> would create a confusing middle ground between
+<code>--force</code> (improve) and reset+generate (start over). The two-step <code>reset &amp;&amp; generate</code>
+workflow is explicit and avoids feature creep.</p>
+<h3 id="d5-force-shows-previous-name-by-default">D5: <code>--force</code> Shows Previous Name by Default</h3>
+<p>When <code>--force</code> is used, previous names are ALWAYS shown to the LLM. There is no flag
+to suppress this — if you want a clean slate, use <code>sn reset</code> first. This keeps the
+<code>--force</code> contract simple: "re-generate with full context including what was there before."</p>
+<h2 id="scope-inventory">Scope Inventory</h2>
+<h3 id="python-package-rename-imas_codexstandard_names-imas_codexstandard_names">Python Package Rename (<code>imas_codex/standard_names/</code> → <code>imas_codex/standard_names/</code>)</h3>
+<p><strong>Source files to move (22 files):</strong></p>
+<pre><code>imas_codex/standard_names/__init__.py          → imas_codex/standard_names/__init__.py
+imas_codex/standard_names/benchmark.py         → imas_codex/standard_names/benchmark.py
+imas_codex/standard_names/benchmark_calibration.yaml → imas_codex/standard_names/benchmark_calibration.yaml
+imas_codex/standard_names/benchmark_reference.py → imas_codex/standard_names/benchmark_reference.py
+imas_codex/standard_names/calibration.py       → imas_codex/standard_names/calibration.py
+imas_codex/standard_names/catalog_import.py    → imas_codex/standard_names/catalog_import.py
+imas_codex/standard_names/classifier.py        → imas_codex/standard_names/classifier.py
+imas_codex/standard_names/consolidation.py     → imas_codex/standard_names/consolidation.py
+imas_codex/standard_names/context.py           → imas_codex/standard_names/context.py
+imas_codex/standard_names/enrichment.py        → imas_codex/standard_names/enrichment.py
+imas_codex/standard_names/graph_ops.py         → imas_codex/standard_names/graph_ops.py
+imas_codex/standard_names/models.py            → imas_codex/standard_names/models.py
+imas_codex/standard_names/pipeline.py          → imas_codex/standard_names/pipeline.py
+imas_codex/standard_names/progress.py          → imas_codex/standard_names/progress.py
+imas_codex/standard_names/publish.py           → imas_codex/standard_names/publish.py
+imas_codex/standard_names/search.py            → imas_codex/standard_names/search.py
+imas_codex/standard_names/seed.py              → imas_codex/standard_names/seed.py
+imas_codex/standard_names/state.py             → imas_codex/standard_names/state.py
+imas_codex/standard_names/workers.py           → imas_codex/standard_names/workers.py
+imas_codex/standard_names/sources/__init__.py  → imas_codex/standard_names/sources/__init__.py
+imas_codex/standard_names/sources/base.py      → imas_codex/standard_names/sources/base.py
+imas_codex/standard_names/sources/dd.py        → imas_codex/standard_names/sources/dd.py
+imas_codex/standard_names/sources/signals.py   → imas_codex/standard_names/sources/signals.py
+</code></pre>
+<p><strong>Test files to move (19 files):</strong></p>
+<pre><code>tests/sn/conftest.py               → tests/standard_names/conftest.py
+tests/sn/__init__.py               → tests/standard_names/__init__.py
+tests/sn/test_benchmark.py         → tests/standard_names/test_benchmark.py
+tests/sn/test_calibration.py       → tests/standard_names/test_calibration.py
+tests/sn/test_catalog_import.py    → tests/standard_names/test_catalog_import.py
+tests/sn/test_classifier.py        → tests/standard_names/test_classifier.py
+tests/sn/test_consolidation.py     → tests/standard_names/test_consolidation.py
+tests/sn/test_enrichment.py        → tests/standard_names/test_enrichment.py
+tests/sn/test_grammar_contract.py  → tests/standard_names/test_grammar_contract.py
+tests/sn/test_graph_ops.py         → tests/standard_names/test_graph_ops.py
+tests/sn/test_integration.py       → tests/standard_names/test_integration.py
+tests/sn/test_publish.py           → tests/standard_names/test_publish.py
+tests/sn/test_review.py            → tests/standard_names/test_review.py
+tests/sn/test_scoring.py           → tests/standard_names/test_scoring.py
+tests/sn/test_search.py            → tests/standard_names/test_search.py
+tests/sn/test_seed.py              → tests/standard_names/test_seed.py
+tests/sn/test_sn_tools.py          → tests/standard_names/test_sn_tools.py
+tests/sn/test_validate_isn.py      → tests/standard_names/test_validate_isn.py
+tests/sn/test_validate_persistence.py → tests/standard_names/test_validate_persistence.py
+</code></pre>
+<p><strong>Files with imports to update (~30 files):</strong>
+- <code>imas_codex/cli/sn.py</code> — ~15 lazy imports from <code>imas_codex.standard_names.*</code>
+- All 22 source files in <code>imas_codex/standard_names/</code> that cross-import siblings
+- <code>imas_codex/cli/__init__.py</code> — line 73 <code>from imas_codex.cli.sn import sn</code>
+- All 19 test files that import from <code>imas_codex.standard_names.*</code></p>
+<p><strong>Documentation to update:</strong>
+- <code>AGENTS.md</code> — ~17 lines referencing <code>sn/</code>, <code>imas_codex.sn</code>, <code>sn mint</code>
+- <code>docs/architecture/standard-names.md</code> — references to <code>sn mint</code>, <code>imas_codex/standard_names/</code>
+- <code>docs/architecture/standard-names-decisions.md</code> — <code>sn mint</code> references
+- <code>.github/skills/service-ops/SKILL.md</code> — <code>sn mint</code> reference
+- <code>plans/features/standard-names/09-sn-generate.md</code> — historical plan, update references
+- <code>plans/README.md</code> — if it references <code>sn/</code></p>
+<h3 id="mint-generate-rename"><code>mint</code> → <code>generate</code> Rename</h3>
+<p><strong>Code changes:</strong>
+- <code>imas_codex/cli/sn.py</code>:
+  - <code>@sn.command("mint")</code> → <code>@sn.command("generate")</code>
+  - <code>def sn_mint(</code> → <code>def sn_generate(</code>
+  - Help text: "Mint" → "Generate" in docstrings and usage examples
+- <code>imas_codex/standard_names/pipeline.py</code>:
+  - <code>async def run_sn_mint_engine(</code> → <code>async def run_sn_generate_engine(</code>
+- All callers of <code>run_sn_mint_engine</code></p>
+<p><strong>Documentation:</strong>
+- <code>AGENTS.md</code>: <code>sn mint</code> → <code>sn generate</code> (~8 occurrences)
+- <code>docs/architecture/standard-names.md</code>: <code>sn mint</code> → <code>sn generate</code>
+- <code>docs/architecture/standard-names-decisions.md</code>: <code>sn mint</code> → <code>sn generate</code>
+- <code>.github/skills/service-ops/SKILL.md</code>: <code>sn mint</code> → <code>sn generate</code></p>
+<h3 id="previous-name-injection">Previous Name Injection</h3>
+<p><strong>New graph query in <code>graph_ops.py</code>:</strong></p>
+<pre><code class="language-python">def get_source_name_mapping() -&gt; dict[str, dict]:
+    &quot;&quot;&quot;Return mapping of source_id → previous standard name info.
+
+    Used by extract_worker in --force mode to inject previous_name
+    context into batch items so the LLM can improve on prior names.
+    &quot;&quot;&quot;
+    with GraphClient() as gc:
+        results = gc.query(&quot;&quot;&quot;
+            MATCH (src)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)
+            RETURN src.id AS source_id,
+                   sn.id AS name,
+                   sn.description AS description,
+                   sn.kind AS kind,
+                   sn.review_status AS review_status
+        &quot;&quot;&quot;)
+        mapping = {}
+        for r in results:
+            mapping[r[&quot;source_id&quot;]] = {
+                &quot;name&quot;: r[&quot;name&quot;],
+                &quot;description&quot;: r.get(&quot;description&quot;),
+                &quot;kind&quot;: r.get(&quot;kind&quot;),
+                &quot;review_status&quot;: r.get(&quot;review_status&quot;),
+            }
+        return mapping
+</code></pre>
+<p><strong>Extract worker changes (<code>workers.py</code>):</strong></p>
+<pre><code class="language-python"># In extract_worker, after batches are built:
+if state.force:
+    source_names = get_source_name_mapping()
+    for batch in batches:
+        for item in batch.items:
+            path = item.get(&quot;path&quot;, item.get(&quot;signal_id&quot;))
+            if path and path in source_names:
+                item[&quot;previous_name&quot;] = source_names[path]
+</code></pre>
+<p><strong>Prompt template changes (<code>compose_dd.md</code>):</strong></p>
+<pre><code class="language-markdown">### {{ item.path }}
+- Description: {{ item.description }}
+{% if item.previous_name %}
+- Previous name: `{{ item.previous_name.name }}` *(from prior generation —
+  reuse if still appropriate, or improve. This is a suggestion, not a constraint.)*
+{% if item.previous_name.description %}  - Prior description: {{ item.previous_name.description[:200] }}{% endif %}
+{% if item.previous_name.review_status == 'accepted' %}  - ⚠️ This name was human-accepted — only replace with a clearly better alternative.{% endif %}
+{% endif %}
+</code></pre>
+<p>Note the escalation: if the previous name was <code>accepted</code>, the prompt warns the LLM
+to only replace it if clearly better. For <code>drafted</code> names, the LLM has full freedom.</p>
+<p><strong>Test requirements:</strong>
+- Unit test: extract_worker with force=True injects previous_name into items
+- Unit test: compose prompt renders previous_name section correctly
+- Unit test: accepted names get the "only replace if clearly better" warning
+- Integration test: end-to-end force regeneration includes previous_name context</p>
+<h2 id="phases">Phases</h2>
+<h3 id="phase-1-package-rename-imas_codexstandard_names-imas_codexstandard_names">Phase 1: Package Rename (<code>imas_codex/standard_names/</code> → <code>imas_codex/standard_names/</code>)</h3>
+<p><strong>Parallelism:</strong> Must complete BEFORE all other phases (they need correct import paths)
+<strong>Agent:</strong> Single agent with <code>git mv</code> + sed-based import rewriting
+<strong>Estimated files:</strong> ~70 files</p>
+<p><strong>Steps:</strong>
+1. Create <code>imas_codex/standard_names/</code> and <code>imas_codex/standard_names/sources/</code>
+2. <code>git mv</code> all files from <code>imas_codex/standard_names/</code> to <code>imas_codex/standard_names/</code>
+3. <code>git mv</code> all files from <code>tests/sn/</code> to <code>tests/standard_names/</code>
+4. Find-and-replace ALL <code>from imas_codex.standard_names.</code> → <code>from imas_codex.standard_names.</code> in:
+   - All <code>.py</code> files under <code>imas_codex/</code>
+   - All <code>.py</code> files under <code>tests/</code>
+5. Update <code>imas_codex/cli/__init__.py</code> line 73 (if it imports from the old path)
+6. Clean up empty <code>imas_codex/standard_names/</code> and <code>tests/sn/</code> directories
+7. Run <code>uv run ruff check --fix . &amp;&amp; uv run ruff format .</code>
+8. Run <code>uv run pytest tests/standard_names/ -x -q</code> to verify all 480+ tests pass
+9. Do NOT commit yet — Phase 2 will commit together</p>
+<p><strong>Critical constraints:</strong>
+- The CLI file stays at <code>imas_codex/cli/sn.py</code> — it's the <code>sn</code> subcommand, not a package file
+- Prompt paths (<code>sn/compose_dd</code>, etc.) are NOT renamed — they're prompt registry keys
+- The <code>render_prompt("sn/compose_dd", ...)</code> calls are NOT changed
+- <code>[tool.imas-codex.sn.benchmark]</code> config key is NOT changed
+- Worker log names (<code>sn_extract_worker</code>) are NOT changed</p>
+<h3 id="phase-2-command-rename-mint-generate">Phase 2: Command Rename (<code>mint</code> → <code>generate</code>)</h3>
+<p><strong>Parallelism:</strong> Can run in parallel with Phase 1 IF working on separate files,
+  but safer to run after Phase 1 to avoid merge conflicts in <code>cli/sn.py</code>
+<strong>Agent:</strong> Single agent</p>
+<p><strong>Steps:</strong>
+1. In <code>imas_codex/cli/sn.py</code>:
+   - <code>@sn.command("mint")</code> → <code>@sn.command("generate")</code>
+   - <code>def sn_mint(</code> → <code>def sn_generate(</code>
+   - Update all help text / docstrings: "mint" → "generate", "Mint" → "Generate"
+   - Update usage examples in docstrings
+2. In <code>imas_codex/standard_names/pipeline.py</code> (note: new path from Phase 1):
+   - <code>async def run_sn_mint_engine(</code> → <code>async def run_sn_generate_engine(</code>
+   - Update all docstrings
+3. Update all callers of <code>run_sn_mint_engine</code> → <code>run_sn_generate_engine</code>
+   (only in <code>imas_codex/cli/sn.py</code>)
+4. Run <code>uv run ruff check --fix . &amp;&amp; uv run ruff format .</code>
+5. Run <code>uv run pytest tests/standard_names/ -x -q</code> to verify
+6. Do NOT commit yet — will commit with Phase 1</p>
+<h3 id="phase-3-documentation-update">Phase 3: Documentation Update</h3>
+<p><strong>Parallelism:</strong> Can run in parallel with Phase 2 (touches different files)
+<strong>Agent:</strong> Single agent</p>
+<p><strong>Steps:</strong>
+1. <code>AGENTS.md</code> — Update all references:
+   - <code>sn mint</code> → <code>sn generate</code> (~8 occurrences in tables, code blocks, prose)
+   - <code>imas_codex/standard_names/</code> → <code>imas_codex/standard_names/</code> where path is referenced
+   - <code>imas_codex.standard_names.</code> → <code>imas_codex.standard_names.</code> where import is referenced
+   - Update the CLI commands table (line ~749)
+   - Update the key modules table
+   - Update the lifecycle documentation
+   - Update <code>sn mint --reset-to</code> → <code>sn generate --reset-to</code>
+2. <code>docs/architecture/standard-names.md</code>:
+   - <code>sn mint</code> → <code>sn generate</code>
+   - Module path references
+3. <code>docs/architecture/standard-names-decisions.md</code>:
+   - <code>sn mint</code> → <code>sn generate</code>
+4. <code>.github/skills/service-ops/SKILL.md</code>:
+   - <code>sn mint</code> → <code>sn generate</code>
+5. Do NOT update plans/ — they are historical records</p>
+<h3 id="phase-4-previous-name-injection-regeneration-context">Phase 4: Previous Name Injection (Regeneration Context)</h3>
+<p><strong>Parallelism:</strong> Can run in parallel with Phase 3 (touches worker/graph code, not docs)
+<strong>Depends on:</strong> Phase 1 (needs correct import paths in <code>imas_codex/standard_names/</code>)
+<strong>Agent:</strong> Opus 4.6 — this requires careful prompt engineering</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>
+<p><strong>New graph query</strong> — Add <code>get_source_name_mapping()</code> to
+   <code>imas_codex/standard_names/graph_ops.py</code>:
+   ```python
+   def get_source_name_mapping() -&gt; dict[str, dict]:
+       """Return mapping of source_id → previous standard name details.</p>
+<p>Used by extract_worker in --force mode to inject per-path
+   previous_name context so the LLM can improve on prior names.
+   Returns dict mapping source_id to {name, description, kind, review_status}.
+   """
+   with GraphClient() as gc:
+       results = gc.query("""
+           MATCH (src)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)
+           RETURN src.id AS source_id,
+                  sn.id AS name,
+                  sn.description AS description,
+                  sn.kind AS kind,
+                  sn.review_status AS review_status
+       """)
+       mapping = {}
+       for r in results:
+           sid = r["source_id"]
+           # If multiple names exist for same source, prefer accepted
+           if sid not in mapping or r.get("review_status") == "accepted":
+               mapping[sid] = {
+                   "name": r["name"],
+                   "description": r.get("description"),
+                   "kind": r.get("kind"),
+                   "review_status": r.get("review_status"),
+               }
+       return mapping
+   ```</p>
+</li>
+<li>
+<p><strong>Extract worker update</strong> — In <code>imas_codex/standard_names/workers.py</code>,
+   inside <code>extract_worker()</code>, after batches are built and ONLY when <code>state.force</code>:
+   <code>python
+   # Inject previous name context for --force regeneration
+   if state.force:
+       from imas_codex.standard_names.graph_ops import get_source_name_mapping
+       source_names = get_source_name_mapping()
+       injected = 0
+       for batch in batches:
+           for item in batch.items:
+               path = item.get("path", item.get("signal_id"))
+               if path and path in source_names:
+                   item["previous_name"] = source_names[path]
+                   injected += 1
+       if injected:
+           wlog.info("Injected previous_name context for %d items", injected)</code></p>
+</li>
+<li>
+<p><strong>Prompt template update</strong> — In <code>imas_codex/llm/prompts/sn/compose_dd.md</code>,
+   add to the per-item rendering block (after the existing fields, before
+   cluster_siblings):
+   <code>markdown
+   {% if item.previous_name %}
+   - Previous name: `{{ item.previous_name.name }}` *(from prior generation —
+     reuse if still appropriate, or improve. This is a suggestion, not a constraint.)*
+   {% if item.previous_name.description %}  - Prior docs: {{ item.previous_name.description[:200] }}{% endif %}
+   {% if item.previous_name.review_status == 'accepted' %}  - ⚠️ This name was human-accepted — prefer keeping it unless you have a clearly better alternative.{% endif %}
+   {% endif %}</code></p>
+</li>
+<li>
+<p><strong>System prompt guidance</strong> — In <code>imas_codex/llm/prompts/sn/compose_system.md</code>,
+   add a section under "Composition Rules" (after rule 9):
+   ```markdown</p>
+</li>
+<li>
+<p>When a <strong>Previous name</strong> is shown for a path, treat it as context:</p>
+<ul>
+<li>If the previous name is good, reuse it (stability matters)</li>
+<li>If you can clearly improve it, do so and explain in the documentation</li>
+<li>If the previous name was marked as human-accepted (⚠️), strongly prefer keeping it</li>
+<li>Never feel anchored — a bad previous name should be replaced without hesitation
+   ```</li>
+</ul>
+</li>
+<li>
+<p><strong>Tests</strong> — Add to <code>tests/standard_names/test_integration.py</code> or a new
+   <code>tests/standard_names/test_regeneration_context.py</code>:
+   - <code>test_get_source_name_mapping</code> — mock GraphClient, verify mapping structure
+   - <code>test_extract_worker_injects_previous_name_on_force</code> — mock graph ops,
+     verify items have <code>previous_name</code> when force=True
+   - <code>test_extract_worker_no_previous_name_without_force</code> — verify items do NOT
+     have <code>previous_name</code> when force=False
+   - <code>test_compose_prompt_renders_previous_name</code> — render template with
+     <code>previous_name</code> in item, verify markdown output contains the section
+   - <code>test_compose_prompt_accepted_warning</code> — render template with
+     <code>previous_name.review_status = "accepted"</code>, verify ⚠️ warning appears
+   - <code>test_compose_prompt_no_previous_name</code> — render template without
+     <code>previous_name</code>, verify section is absent</p>
+</li>
+</ol>
+<h3 id="phase-5-commit-verify-and-push">Phase 5: Commit, Verify, and Push</h3>
+<p><strong>Parallelism:</strong> Sequential — must run after all other phases
+<strong>Agent:</strong> Single agent or manual</p>
+<p><strong>Steps:</strong>
+1. Run full test suite: <code>uv run pytest tests/standard_names/ -x -q</code>
+2. Run lint: <code>uv run ruff check --fix . &amp;&amp; uv run ruff format .</code>
+3. Verify no broken imports: <code>uv run python -c "from imas_codex.standard_names.pipeline import run_sn_generate_engine; print('OK')"</code>
+4. Verify CLI: <code>uv run imas-codex sn generate --help</code> (should show generate, not mint)
+5. Verify old paths are gone: <code>test ! -d imas_codex/sn</code> (should succeed)
+6. Stage only modified files (never <code>git add -A</code>):
+   <code>bash
+   git add imas_codex/standard_names/ tests/standard_names/
+   git add imas_codex/cli/sn.py imas_codex/cli/__init__.py
+   git add AGENTS.md docs/ .github/skills/
+   git add imas_codex/llm/prompts/sn/  # prompt template changes</code>
+7. Commit:
+   ```bash
+   uv run git commit -m "refactor: rename sn→standard_names, mint→generate, add regeneration context</p>
+<ul>
+<li>Move imas_codex/standard_names/ to imas_codex/standard_names/ for navigational clarity</li>
+<li>Move tests/sn/ to tests/standard_names/</li>
+<li>Rename CLI command 'sn mint' to 'sn generate'</li>
+<li>Rename run_sn_mint_engine to run_sn_generate_engine</li>
+<li>Add previous_name injection in --force mode for regeneration context</li>
+<li>Add get_source_name_mapping() graph query</li>
+<li>Update compose_dd.md and compose_system.md for previous name handling</li>
+<li>Update AGENTS.md, architecture docs, and skill files"
+   <code>``
+8. Pull and push:</code>git pull --no-rebase origin main &amp;&amp; git push origin main`</li>
+</ul>
+<h2 id="fleet-execution-strategy">Fleet Execution Strategy</h2>
+<h3 id="wave-1-single-agent-blocking">Wave 1 (single agent, blocking)</h3>
+<ul>
+<li><strong>Phase 1 + Phase 2</strong>: Package rename + command rename</li>
+<li>Must be ONE agent to avoid merge conflicts in shared files (<code>cli/sn.py</code>)</li>
+<li>This agent does the <code>git mv</code>, import rewriting, and function renames</li>
+<li>Validates with pytest before completing</li>
+</ul>
+<h3 id="wave-2-parallel-after-wave-1">Wave 2 (parallel, after Wave 1)</h3>
+<ul>
+<li><strong>Phase 3</strong>: Documentation update agent (AGENTS.md, docs/, skills/)</li>
+<li><strong>Phase 4</strong>: Regeneration context agent (graph_ops, workers, prompts, tests)</li>
+</ul>
+<h3 id="wave-3-sequential-after-wave-2">Wave 3 (sequential, after Wave 2)</h3>
+<ul>
+<li><strong>Phase 5</strong>: Verify + commit + push</li>
+</ul>
+<h2 id="verification-checklist">Verification Checklist</h2>
+<p>After all phases complete:</p>
+<ul>
+<li>[ ] <code>imas_codex/standard_names/</code> directory does not exist</li>
+<li>[ ] <code>tests/sn/</code> directory does not exist</li>
+<li>[ ] <code>imas_codex/standard_names/__init__.py</code> exists</li>
+<li>[ ] <code>tests/standard_names/__init__.py</code> exists</li>
+<li>[ ] <code>uv run imas-codex sn generate --help</code> works</li>
+<li>[ ] <code>uv run imas-codex sn mint --help</code> fails (command not found)</li>
+<li>[ ] <code>uv run pytest tests/standard_names/ -x -q</code> passes all ~480 tests</li>
+<li>[ ] <code>grep -r "from imas_codex.sn\." --include="*.py" imas_codex/ tests/</code> returns nothing</li>
+<li>[ ] <code>grep -r "import imas_codex.sn" --include="*.py" imas_codex/ tests/</code> returns nothing</li>
+<li>[ ] <code>uv run python -c "from imas_codex.standard_names.pipeline import run_sn_generate_engine"</code> succeeds</li>
+<li>[ ] <code>uv run python -c "from imas_codex.standard_names.graph_ops import get_source_name_mapping"</code> succeeds</li>
+<li>[ ] AGENTS.md contains no <code>sn mint</code> references (only <code>sn generate</code>)</li>
+<li>[ ] AGENTS.md <code>sn/</code> → <code>standard_names/</code> where referencing Python paths</li>
+</ul>
+<h2 id="risk-assessment">Risk Assessment</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missed import during rename</td>
+<td>Phase 1 uses <code>grep -r</code> verification; Phase 5 runs full test suite</td>
+</tr>
+<tr>
+<td>Prompt cache invalidation</td>
+<td>Prompt names (<code>sn/compose_dd</code>) are NOT changed — cache preserved</td>
+</tr>
+<tr>
+<td>Parallel agent conflicts</td>
+<td>Phase 1+2 are single-agent; Wave 2 agents touch disjoint files</td>
+</tr>
+<tr>
+<td>Previous name anchoring</td>
+<td>Prompt explicitly says "suggestion, not constraint"; accepted names get extra protection</td>
+</tr>
+<tr>
+<td><code>pyproject.toml</code> config key</td>
+<td><code>[tool.imas-codex.sn.benchmark]</code> stays — <code>settings.py</code> reads this key, no rename needed</td>
+</tr>
+<tr>
+<td>Historical plans referencing <code>sn mint</code></td>
+<td>Plans are historical records — NOT updated (decision D2)</td>
+</tr>
+</tbody>
+</table>
+    </section>
+  </main>
+</body>
+</html>

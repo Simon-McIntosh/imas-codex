@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="21-architecture-boundary">
+  <meta name="plan-title" content="Plan 21: Architecture Boundary and Prompt Infrastructure">
+  <meta name="plan-summary" content="&gt; Establish the imas-codex ↔ imas-standard-names boundary. &gt; Own the generation pipeline. Import grammar as a library. Clean prompt infrastructure.">
+  <meta name="plan-status" content="done">
+  <title>Plan 21: Architecture Boundary and Prompt Infrastructure | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Plan 21: Architecture Boundary and Prompt Infrastructure</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/21-architecture-boundary.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Active plan links preserved:</strong> <a href="/imas-codex/sn-quality-parity.html">Plan 23</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/29-architectural-pivot.md">Plan 29</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/32-extraction-prompt-overhaul.md">Plan 32</a>, <a href="/imas-codex/sn-search-facility.html">Plan 40</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <blockquote>
+<p>Establish the imas-codex ↔ imas-standard-names boundary.
+Own the generation pipeline. Import grammar as a library. Clean prompt infrastructure.</p>
+</blockquote>
+<h2 id="problem-statement">Problem Statement</h2>
+<p>The standard name generation pipeline in imas-codex works end-to-end but has structural
+debt from its rapid development:</p>
+<ol>
+<li><strong>Private API coupling:</strong> 5 imports from ISN's <code>tools/grammar.py</code> use <code>_</code> prefixed
+   functions that can break on any ISN internal refactor.</li>
+<li><strong>Hardcoded prompt content that belongs to ISN:</strong> Composition rules, kind
+   classification, anti-patterns in <code>compose_system.md</code> duplicate ISN's grammar
+   authority. If ISN updates a naming convention, codex's inline rules won't know.</li>
+<li><strong>No shared prompt fragments:</strong> Grammar reference duplicated between compose and review
+   prompts — a change to one must be manually mirrored to the other.</li>
+<li><strong>ISN validation not imported:</strong> codex's <code>validate_worker</code> uses grammar round-trip
+   (parse→compose) but skips ISN's 27 validators (18 Pydantic field + 9 semantic).
+   The A/B comparison showed ISN leads 15:3 on validation surface.</li>
+<li><strong>Import path fragility:</strong> <code>catalog_import.py</code> imports <code>StandardNameEntry</code> from
+   <code>imas_standard_names.catalog.edit</code> which is a re-export — should import from
+   <code>imas_standard_names.models</code> directly. ISN Plan 05 deletes <code>catalog/edit.py</code>.</li>
+<li><strong>No formal boundary documentation:</strong> Neither project documents what it owns vs delegates.</li>
+<li><strong>Validation issues are lost:</strong> <code>validate_worker</code> logs soft-validation warnings but
+   never persists them. <code>SNQualityReview.issues</code> is returned by the LLM but never
+   extracted or stored. The schema has no <code>validation_issues</code> property. This means
+   each name is validated but the results are discarded — forcing re-validation if
+   anyone wants to review issues later.</li>
+<li><strong>0-120 scoring is opaque:</strong> The quality score is stored as an integer 0-120 (6
+   dimensions × 0-20). This is an implementation artifact of the LLM prompt design.
+   The schema says "0-100" (already inconsistent). External consumers need a universal
+   0-1 normalized score. The per-dimension 0-20 integer scoring is correct for LLM
+   consistency (avoids float clustering) but the aggregate should be normalized.</li>
+<li><strong>No existing-name collision avoidance in compose context:</strong> The graph has a full
+   semantic search over StandardName nodes (<code>search_standard_names</code> MCP tool using
+   <code>standard_name_desc_embedding</code> vector index), but this is never used to supply
+   "nearby existing names" to the compose or review prompts.</li>
+</ol>
+<h2 id="boundary-principle">Boundary Principle</h2>
+<p><strong>ISN owns ALL naming knowledge.</strong> If ISN updates the grammar spec and a rule should
+change, it belongs in ISN. Codex owns how to instruct an LLM to produce output and
+how to evaluate that output.</p>
+<p><strong>ISN-owned (via <code>get_grammar_context()</code>):</strong>
+- Grammar rules (canonical pattern, segment order, vocabulary)
+- Naming conventions (composition rules, anti-patterns, reuse guidance)
+- Kind definitions (scalar/vector/metadata classification)
+- Documentation guidance, tag descriptions, applicability rules
+- Field guidance, type-specific requirements</p>
+<p><strong>Codex-owned (inline in prompts or codex config):</strong>
+- LLM output format (JSON schema instructions, candidate field list)
+- DD-specific pipeline rules ("skip array indices", "no unit field", confidence thresholds)
+- Review scoring criteria (6-dim rubric, tiers, verdicts)
+- Calibration dataset</p>
+<h2 id="approach">Approach</h2>
+<p>Six phases, each independently testable and committable. Phases 1-3 are internal
+refactors with no behavioral change. Phases 4-5 add new capability. Phase 6 documents.</p>
+<h2 id="evidence-current-state">Evidence: Current State</h2>
+<h3 id="private-api-imports-imas_codexstandard_namescontextpy">Private API imports (imas_codex/standard_names/context.py)</h3>
+<pre><code class="language-python">from imas_standard_names.tools.grammar import (
+    _build_canonical_pattern,         # Returns composition pattern string
+    _build_segment_order_constraint,  # Returns ordering constraint text
+    _build_template_application_rule, # Returns template usage rules
+    _get_segment_descriptions,        # Returns per-segment descriptions dict
+    _get_vocabulary_description,      # Returns formatted vocab section list
+)
+</code></pre>
+<p>These will be replaced by ISN's new <code>get_grammar_context()</code> public API (ISN Plan 05, Phase 0).</p>
+<h3 id="broken-import-in-catalog_importpy">Broken import in catalog_import.py</h3>
+<pre><code class="language-python"># Lines 264, 370 — imports from module ISN Plan 05 deletes
+from imas_standard_names.catalog.edit import StandardNameEntry
+# Should be:
+from imas_standard_names.models import StandardNameEntry
+</code></pre>
+<h3 id="hardcoded-guidelines-in-compose_systemmd-lines-145-228">Hardcoded guidelines in compose_system.md (lines 145-228)</h3>
+<p>Content analysis — what belongs where:</p>
+<table>
+<thead>
+<tr>
+<th>Lines</th>
+<th>Content</th>
+<th>Owner</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>147-151</td>
+<td>Grammar rules (physical_base/geometric_base, pattern, tokens)</td>
+<td>ISN</td>
+<td>Move to ISN <code>get_grammar_context()</code></td>
+</tr>
+<tr>
+<td>152</td>
+<td>"Reuse existing standard names"</td>
+<td>ISN</td>
+<td>Naming convention → ISN API</td>
+</tr>
+<tr>
+<td>153</td>
+<td>"Skip array indices, metadata"</td>
+<td>Codex</td>
+<td>DD classifier rule, keep in prompt</td>
+</tr>
+<tr>
+<td>154</td>
+<td>"Set confidence &lt; 0.5"</td>
+<td>Codex</td>
+<td>Pipeline rule, keep in prompt</td>
+</tr>
+<tr>
+<td>155</td>
+<td>"Do NOT output unit field"</td>
+<td>Codex</td>
+<td>DD enrichment rule, keep in prompt</td>
+</tr>
+<tr>
+<td>157-179</td>
+<td>Output format / candidate schema</td>
+<td>Codex</td>
+<td>LLM output instructions</td>
+</tr>
+<tr>
+<td>180-194</td>
+<td>Documentation template</td>
+<td>Mixed</td>
+<td>ISN provides DOCUMENTATION_GUIDANCE, codex formats for LLM</td>
+</tr>
+<tr>
+<td>195-213</td>
+<td>Tags controlled vocabulary</td>
+<td>ISN</td>
+<td>Already imported from ISN tag_types</td>
+</tr>
+<tr>
+<td>215-219</td>
+<td>Kind classification</td>
+<td>ISN</td>
+<td>ISN defines Kind enum</td>
+</tr>
+<tr>
+<td>221-228</td>
+<td>Links guidance</td>
+<td>Codex</td>
+<td>Pipeline instructions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="isn-semantic-validation-not-yet-imported">ISN semantic validation (not yet imported)</h3>
+<p>ISN's <code>validation/semantic.py</code> — <code>run_semantic_checks()</code>:
+- <strong>Signature:</strong> <code>run_semantic_checks(entries: dict[str, StandardNameEntry]) -&gt; list[str]</code>
+- <strong>Requires:</strong> Pydantic <code>StandardNameEntry</code> models (not raw dicts)
+- <strong>Checks:</strong> geometric qualifier requirements, component/coordinate base type,
+  orientation vector completeness, trajectory/path qualification, extent dimensionality,
+  physical_base+object, dimensionless quantities, provenance/operator gradient units</p>
+<p>Codex's <code>validate_worker</code> operates on <code>list[dict]</code> from LLM output — impedance mismatch.
+Phase 4 must include adapter code to construct <code>StandardNameEntry</code> from raw dicts.</p>
+<h3 id="duplicate-grammar-context">Duplicate grammar context</h3>
+<p>Both <code>compose_system.md</code> and <code>review.md</code> render grammar vocabulary and rules.
+They do this independently — if grammar formatting changes, both must be updated.
+A shared <code>{% include "sn/_grammar_reference.md" %}</code> fragment eliminates this.</p>
+<p>The Jinja2 <code>PromptsLoader</code> searches <code>prompts/shared/</code> then <code>prompts/</code> root, so
+<code>{% include "sn/_grammar_reference.md" %}</code> resolves to <code>prompts/sn/_grammar_reference.md</code>.
+Verified in <code>prompt_loader.py</code> lines 1095-1113.</p>
+<h2 id="phases">Phases</h2>
+<h3 id="phase-1-replace-private-isn-imports-and-fix-broken-paths">Phase 1: Replace Private ISN Imports and Fix Broken Paths</h3>
+<p><strong>Goal:</strong> Use ISN's public <code>get_grammar_context()</code> API instead of 5 private functions.
+Fix the <code>StandardNameEntry</code> import that will break when ISN removes <code>catalog/edit.py</code>.</p>
+<p><strong>Prerequisite:</strong> ISN Plan 05 Phase 0 is merged and released.</p>
+<p><strong>Files to modify:</strong></p>
+<ul>
+<li><code>imas_codex/standard_names/context.py</code>:</li>
+<li>Replace the 5 private imports with single import:
+    <code>python
+    from imas_standard_names.grammar.context import get_grammar_context</code></li>
+<li>In <code>build_compose_context()</code>, call <code>ctx = get_grammar_context()</code> once</li>
+<li>Map context keys to existing template variables:<ul>
+<li><code>ctx["canonical_pattern"]</code> → <code>canonical_pattern</code></li>
+<li><code>ctx["segment_order"]</code> → <code>segment_order</code></li>
+<li><code>ctx["template_rules"]</code> → <code>template_rules</code></li>
+<li><code>ctx["vocabulary_sections"]</code> → <code>vocabulary_sections</code></li>
+<li><code>ctx["segment_descriptions"]</code> → <code>segment_descriptions</code></li>
+</ul>
+</li>
+<li>
+<p>ISN-owned naming guidelines now also come from <code>get_grammar_context()</code>:</p>
+<ul>
+<li><code>ctx["naming_guidance"]</code> → composition rules for prompt</li>
+<li><code>ctx["kind_definitions"]</code> → kind classification for prompt</li>
+<li><code>ctx["anti_patterns"]</code> → anti-pattern examples for prompt</li>
+</ul>
+</li>
+<li>
+<p><code>imas_codex/standard_names/catalog_import.py</code> (lines 264, 370):</p>
+</li>
+<li>Change <code>from imas_standard_names.catalog.edit import StandardNameEntry</code>
+    to <code>from imas_standard_names.models import StandardNameEntry</code></li>
+</ul>
+<p><strong>Tests:</strong>
+- <code>tests/sn/test_context.py</code> — verify <code>build_compose_context()</code> output unchanged
+- <code>tests/sn/test_grammar_contract.py</code> (NEW) — API contract test:
+  <code>python
+  def test_grammar_context_contract():
+      from imas_standard_names.grammar.context import get_grammar_context
+      ctx = get_grammar_context()
+      required = {"canonical_pattern", "segment_order", "template_rules",
+                  "vocabulary_sections", "segment_descriptions", "naming_guidance"}
+      assert required &lt;= set(ctx.keys())</code>
+- Run <code>uv run pytest tests/sn/</code> — all tests must pass</p>
+<h3 id="phase-2-prompt-restructure-isn-content-via-api-codex-content-via-includes">Phase 2: Prompt Restructure — ISN Content via API, Codex Content via Includes</h3>
+<p><strong>Goal:</strong> Remove hardcoded naming rules from prompts. ISN-owned content comes from
+<code>get_grammar_context()</code> at render time. Codex-owned pipeline instructions use
+<code>{% include %}</code> fragments for shared rendering.</p>
+<p><strong>Key insight:</strong> No YAML config files needed for naming guidelines. ISN's
+<code>get_grammar_context()</code> is the single source of truth. Codex only needs a YAML
+config for its review scoring criteria (used by both mint and benchmark).</p>
+<p><strong>Files to create:</strong></p>
+<ul>
+<li><code>imas_codex/llm/config/sn_review_criteria.yaml</code> (NEW ~60 lines):
+  ```yaml
+  # Review scoring criteria — codex-owned evaluation framework.
+  # Per-dimension scoring uses integers 0-20 in the LLM prompt.
+  # Aggregate score is normalized to 0-1 (sum / 120).
+  dimensions:
+    grammar:
+      max_score: 20
+      description: "Parse/compose round-trip, segment ordering, vocabulary compliance"
+    semantic:
+      max_score: 20
+      description: "Name accurately describes the physical quantity"
+    documentation:
+      max_score: 20
+      description: "Description and documentation are clear, complete, non-redundant"
+    convention:
+      max_score: 20
+      description: "Follows naming conventions (no units in name, no path fragments)"
+    completeness:
+      max_score: 20
+      description: "All required fields filled, links populated, tags relevant"
+    compliance:
+      max_score: 20
+      description: "Follows compose prompt instructions exactly"</li>
+</ul>
+<p>verdict_rules:
+    accept: "score &gt;= 0.60 AND no dimension is 0"
+    reject: "score &lt; 0.40 OR any dimension is 0"
+    revise: "all other cases"</p>
+<p>tiers:
+    outstanding: { min: 0.85 }
+    good: { min: 0.60 }
+    adequate: { min: 0.40 }
+    poor: { min: 0.0 }
+  ```</p>
+<ul>
+<li>
+<p><code>imas_codex/llm/prompts/sn/_grammar_reference.md</code> (NEW ~40 lines):
+  Shared grammar rendering (vocabulary, pattern, segment order) used by both
+  compose and review prompts.</p>
+</li>
+<li>
+<p><code>imas_codex/llm/prompts/sn/_scoring_rubric.md</code> (NEW ~30 lines):
+  Review scoring dimensions rendered from <code>sn_review_criteria.yaml</code>.</p>
+</li>
+</ul>
+<p><strong>Files to modify:</strong></p>
+<ul>
+<li><code>imas_codex/llm/prompts/sn/compose_system.md</code>:</li>
+<li>Replace hardcoded grammar rules (lines 147-151) with ISN-provided
+    <code>naming_guidance</code> from context (rendered via <code>{% include "sn/_grammar_reference.md" %}</code>)</li>
+<li>Keep codex-specific pipeline instructions (lines 153-155) inline</li>
+<li>Replace hardcoded kind classification (lines 215-219) with ISN-provided
+    <code>kind_definitions</code> from context</li>
+<li>
+<p>Keep output format section (lines 157-179) — codex LLM instructions</p>
+</li>
+<li>
+<p><code>imas_codex/llm/prompts/sn/review.md</code>:</p>
+</li>
+<li>Replace inline grammar section with <code>{% include "sn/_grammar_reference.md" %}</code></li>
+<li>
+<p>Replace inline rubric with <code>{% include "sn/_scoring_rubric.md" %}</code></p>
+</li>
+<li>
+<p><code>imas_codex/llm/prompt_loader.py</code>:</p>
+</li>
+<li>Add helper to load YAML config files from <code>llm/config/</code>:
+    <code>python
+    def load_prompt_config(name: str) -&gt; dict:
+        """Load YAML config from imas_codex/llm/config/{name}.yaml"""</code></li>
+</ul>
+<p><strong>Tests:</strong>
+- Render compose_system.md and review.md, verify grammar section is character-identical
+  between the two
+- Verify ISN-owned content no longer hardcoded — comes from <code>get_grammar_context()</code>
+- Full SN test suite passes</p>
+<h3 id="phase-3-isn-validation-persistent-issues-normalized-scoring">Phase 3: ISN Validation + Persistent Issues + Normalized Scoring</h3>
+<p><strong>Goal:</strong> Three connected changes that close the major quality gaps:
+1. Construct ISN Pydantic models for full validation (closes 15 validation gaps)
+2. Persist ALL validation issues to the graph (validate once, review with context)
+3. Normalize quality scores to 0-1 (universal scale)</p>
+<p><strong>Prerequisite:</strong> ISN Plan 05 Phase 0 merged (stable imports).</p>
+<h4 id="3a-validate-once-architecture">3a. Validate-Once Architecture</h4>
+<p><strong>Critical insight:</strong> validate_worker currently acts as a <strong>filter</strong> (logs issues, discards
+them). It should be an <strong>annotator</strong> — ALL validation issues are attached to the entry and
+persisted to the graph. Only names that cannot be parsed at all are rejected.</p>
+<pre><code>validate_worker (annotator, not filter)
+    ↓
+entry[&quot;validation_issues&quot;] = [&quot;[pydantic:unit] ...&quot;, &quot;[semantic] ...&quot;, ...]
+    ↓
+review_worker receives entries WITH their validation issues
+    ↓
+LLM reviewer sees issues as scoring context → more accurate review
+    ↓
+persist_worker writes validation_issues to StandardName node
+    ↓
+Human reviewer sees issues in graph → no need to re-validate
+</code></pre>
+<p><strong>Hard fail boundary (entry truly rejected — cannot proceed):</strong>
+- Name is empty, None, or unparseable (grammar round-trip fails completely)
+- Name string cannot be parsed by <code>parse_standard_name()</code> at all</p>
+<p><strong>Everything else passes through with issues attached:</strong>
+- Pydantic validation errors (name pattern, vocabulary, unit, links, etc.)
+- Semantic check warnings
+- Description quality warnings
+- These are valuable review context, not rejection criteria</p>
+<p><strong>Why this boundary:</strong> Even a name with ISN validation issues may be the best available
+name for a DD path. The review LLM should see the issues and factor them into its score.
+A human reviewer should see them too. Rejecting names that have fixable issues wastes
+the LLM generation cost. Instead: annotate, review with context, let humans decide.</p>
+<h4 id="3b-schema-graph-changes">3b. Schema + Graph Changes</h4>
+<p><strong>Files to modify:</strong></p>
+<ul>
+<li>
+<p><code>imas_codex/schemas/standard_name.yaml</code>:
+  <code>yaml
+  validation_issues:
+    description: &gt;-
+      JSON-encoded list of validation issues from ISN Pydantic model
+      construction, semantic checks, and description quality checks.
+      Each issue is a tagged string like "[pydantic:unit] Invalid unit".
+      Persisted for review context — validate once, review with full context.
+    multivalued: true
+  validation_layer_summary:
+    description: &gt;-
+      JSON-encoded summary of validation by layer:
+      {pydantic: {passed: bool, error_count: int},
+       semantic: {issue_count: int},
+       description: {issue_count: int}}</code></p>
+</li>
+<li>
+<p><code>imas_codex/standard_names/graph_ops.py</code> (<code>write_standard_names</code>):</p>
+</li>
+<li>Add <code>validation_issues</code> and <code>validation_layer_summary</code> to the MERGE query</li>
+<li>Use <code>coalesce(b.validation_issues, sn.validation_issues)</code> to preserve existing</li>
+</ul>
+<h4 id="3c-three-layer-validation-implementation">3c. Three-Layer Validation Implementation</h4>
+<pre><code>Layer 1: Pydantic model construction (create_standard_name_entry)
+         → 18 field validators fire automatically
+         → Issues tagged: [pydantic:field_name] message
+
+Layer 2: Post-construction semantic checks (run_semantic_checks)
+         → 9 grammar-semantic checks on constructed models
+         → Issues tagged: [semantic] message
+
+Layer 3: Description quality checks (validate_description)
+         → Metadata leakage detection
+         → Issues tagged: [description] message
+</code></pre>
+<p><strong>Files to modify:</strong></p>
+<ul>
+<li><code>imas_codex/standard_names/workers.py</code> (<code>validate_worker</code>):</li>
+</ul>
+<p>Replace the current soft-validation section with ISN model construction +
+  issue annotation:</p>
+<p>```python
+  from imas_standard_names.models import create_standard_name_entry
+  from imas_standard_names.validation.semantic import run_semantic_checks
+  from imas_standard_names.validation.description import validate_description
+  from pydantic import ValidationError</p>
+<p>def _validate_via_isn(entry: dict) -&gt; tuple[list[str], dict]:
+      """Construct ISN Pydantic model and collect ALL validation issues.</p>
+<pre><code>  Returns:
+      (issues: list[str], layer_summary: dict)
+
+  This function is purely an annotator — it never rejects entries.
+  Parseability is checked upstream by the grammar round-trip in
+  validate_worker. This function attaches quality annotations.
+  """
+  issues = []
+  summary = {"pydantic": {"passed": True, "error_count": 0},
+             "semantic": {"issue_count": 0, "skipped": False},
+             "description": {"issue_count": 0}}
+
+  # Map codex dict keys to ISN model fields
+  isn_dict = {
+      "name": entry.get("id", ""),
+      "kind": entry.get("kind", "scalar"),
+      "description": entry.get("description", ""),
+      "documentation": entry.get("documentation", ""),
+      "unit": entry.get("unit", ""),
+      "tags": entry.get("tags", []),
+      "links": entry.get("links", []),
+      "physics_domain": entry.get("physics_domain", ""),
+      "ids_paths": entry.get("imas_paths", []),
+  }
+
+  # Layer 1: Pydantic model construction (fires 18 validators)
+  model = None
+  try:
+      model = create_standard_name_entry(isn_dict)
+  except ValidationError as e:
+      summary["pydantic"]["passed"] = False
+      summary["pydantic"]["error_count"] = len(e.errors())
+      for err in e.errors():
+          field = ".".join(str(loc) for loc in err["loc"])
+          issues.append(f"[pydantic:{field}] {err['msg']}")
+
+  # Layer 2: Semantic checks (only if model constructed)
+  if model is not None:
+      sem_issues = run_semantic_checks({isn_dict["name"]: model})
+      summary["semantic"]["issue_count"] = len(sem_issues)
+      issues.extend(f"[semantic] {i}" for i in sem_issues)
+  else:
+      summary["semantic"]["skipped"] = True
+
+  # Layer 3: Description quality
+  desc_issues = validate_description(isn_dict)
+  summary["description"]["issue_count"] = len(desc_issues)
+  issues.extend(f"[description] {i['message']}" for i in desc_issues)
+
+  return issues, summary
+</code></pre>
+<p>```</p>
+<p>After calling <code>_validate_via_isn()</code>, attach issues to the entry:
+  <code>python
+  issues, layer_summary = _validate_via_isn(entry)
+  entry["validation_issues"] = issues
+  entry["validation_layer_summary"] = json.dumps(layer_summary)
+  # Entry always passes through to review (unless grammar round-trip failed)</code></p>
+<h4 id="3d-review-context-validation-issues">3d. Review Context: Validation Issues</h4>
+<ul>
+<li><code>imas_codex/standard_names/workers.py</code> (<code>review_worker</code> / <code>_review_batch</code>):</li>
+<li>Pass each entry's <code>validation_issues</code> to the review prompt context</li>
+<li>
+<p>The LLM reviewer sees the issues and factors them into scoring</p>
+</li>
+<li>
+<p><code>imas_codex/llm/prompts/sn/review.md</code>:</p>
+</li>
+<li>Add section: "## Validation Issues" with per-entry ISN validation results</li>
+<li>Instruct reviewer: "If validation issues are present, assess whether they are
+    genuine quality problems or false positives. Factor genuine issues into your
+    grammar and convention scores."</li>
+</ul>
+<h4 id="3e-normalize-scoring-to-0-1">3e. Normalize Scoring to 0-1</h4>
+<p><strong>Why:</strong> The current 0-120 scale is an implementation artifact. Per-dimension 0-20
+integer scoring is correct for LLM prompt consistency (avoids "everything is 0.73"
+float clustering — documented in LLM-as-judge literature). But the aggregate total
+should be normalized to 0-1 for:
+- Universal comparability (industry standard)
+- Schema consistency (current schema says "0-100" — already wrong)
+- Human readability (0.85 vs 102/120)
+- Threshold clarity (accept ≥ 0.60 vs accept ≥ 72)</p>
+<p><strong>What stays the same:</strong>
+- LLM prompt still asks for 0-20 integer per dimension (6 dimensions)
+- Calibration entries still have per-dimension 0-20 scores
+- <code>SNQualityScore</code> fields remain <code>int</code> in range <code>[0, 20]</code>
+- The LLM never sees or computes the total — we do</p>
+<p><strong>What changes:</strong></p>
+<ul>
+<li><code>imas_codex/standard_names/models.py</code> (<code>SNQualityScore</code>):
+  ```python
+  @property
+  def score(self) -&gt; float:
+      """Normalized quality score (0-1). Sum of 6 dimensions / 120."""
+      return self.total / 120.0</li>
+</ul>
+<p>@property
+  def tier(self) -&gt; str:
+      s = self.score
+      if s &gt;= 0.85:   return "outstanding"
+      elif s &gt;= 0.60: return "good"
+      elif s &gt;= 0.40: return "adequate"
+      return "poor"
+  <code>``
+  Keep</code>total<code>property for internal use but add</code>score` as the public API.</p>
+<ul>
+<li><code>imas_codex/schemas/standard_name.yaml</code>:</li>
+<li>Change <code>reviewer_score</code> description: "Normalized quality score (0-1)"</li>
+<li>
+<p>Change <code>reviewer_score</code> range: <code>float</code> (was <code>integer</code>)</p>
+</li>
+<li>
+<p><code>imas_codex/standard_names/workers.py</code> (<code>review_worker</code>):</p>
+</li>
+<li>
+<p>Change: <code>original["reviewer_score"] = review.scores.score</code>  (was <code>.total</code>)</p>
+</li>
+<li>
+<p><code>imas_codex/standard_names/benchmark.py</code>:</p>
+</li>
+<li>Change score output to use <code>.score</code> (0-1) instead of <code>.total</code> (0-120)</li>
+<li>
+<p>Update table format: <code>f"{score:.2f}"</code> instead of <code>f"{total}/120"</code></p>
+</li>
+<li>
+<p><code>imas_codex/standard_names/benchmark_calibration.yaml</code>:</p>
+</li>
+<li>Add <code>expected_score</code> as normalized 0-1 alongside existing <code>expected_score</code> integers</li>
+<li>
+<p>Or: compute normalized at load time: <code>entry["score"] = entry["expected_score"] / 120.0</code></p>
+</li>
+<li>
+<p><code>imas_codex/llm/prompts/sn/review.md</code>:</p>
+</li>
+<li>Tier descriptions use 0-1: "Outstanding (≥0.85), Good (≥0.60), Adequate (≥0.40), Poor (&lt;0.40)"</li>
+<li>Verdict rules: "accept if score ≥ 0.60 AND no dimension is 0"</li>
+<li>Calibration examples show normalized scores</li>
+<li>
+<p>Per-dimension 0-20 integer scoring instruction unchanged</p>
+</li>
+<li>
+<p><code>imas_codex/llm/config/sn_review_criteria.yaml</code> (Phase 2):</p>
+</li>
+<li>
+<p>Already created with 0-1 thresholds (forward-compatible from Phase 2)</p>
+</li>
+<li>
+<p><strong>Graph migration</strong> (run once after deploying Phase 3):
+  <code>cypher
+  // Normalize existing integer reviewer_score values (0-120) to float (0-1)
+  MATCH (sn:StandardName)
+  WHERE sn.reviewer_score IS NOT NULL AND sn.reviewer_score &gt; 1.0
+  SET sn.reviewer_score = sn.reviewer_score / 120.0
+  RETURN count(sn) AS migrated</code>
+  Also regenerate auto-generated models: <code>uv run build-models --force</code>
+  (updates <code>models.py</code>, <code>dd_models.py</code>, <code>schema_context_data.py</code> to reflect
+  the integer→float type change on <code>reviewer_score</code>)</p>
+</li>
+</ul>
+<p><strong>Validation checks gained (27 total from 3 layers):</strong></p>
+<p>Layer 1 — Pydantic (18 checks):
+1. Name pattern: no <code>__</code>, lowercase, <code>^[a-z][a-z0-9_]*$</code>
+2. Grammar vocabulary consistency (component_of → Component enum, etc.)
+3. Link format validation (http:// or name:xxx pattern)
+4. Physics domain controlled vocabulary (32 valid values)
+5. Secondary tag controlled vocabulary (50+ values)
+6. Documentation sign convention format
+7. Unit canonicalization (reject <code>/</code>, <code>*</code>, whitespace; sort tokens)
+8. Unit pint dimensional analysis
+9. Provenance operator/reduction naming rules
+10. Description max_length=180
+11. Deprecated governance (deprecated → must have superseded_by)
+12. Tags/constraints list normalization
+13. Extra fields rejection (ConfigDict extra="forbid")
+14-18. Provenance sub-model validators (operator token pattern, base pattern, etc.)</p>
+<p>Layer 2 — Semantic (9 checks):
+19. Geometric qualifier requirements
+20. Component with base type check
+21. Coordinate with base type check
+22. Orientation vector completeness
+23. Trajectory/path qualification
+24. Extent dimensionality
+25. Physical base + object check
+26. Dimensionless quantity detection
+27. Gradient operator unit heuristic</p>
+<p>Layer 3 — Description (2+ checks):
+28. Tag-redundant phrase detection
+29. Structural phrase detection</p>
+<p><strong>Tests:</strong>
+- <code>tests/sn/test_validate_isn.py</code> (NEW):
+  - Test model construction succeeds for well-formed LLM output
+  - Test model construction catches double-underscore names
+  - Test unit canonicalization auto-fixes token order
+  - Test pint validation rejects nonsense units
+  - Test link format validation catches malformed links
+  - Test physics domain validation catches invalid values
+  - Test semantic checks flag missing geometric qualifiers
+  - Test description checks flag metadata leakage
+  - Test issues are attached to entry dict (not just logged)
+  - Test graceful handling of malformed dicts (no crash)
+- <code>tests/sn/test_scoring.py</code> (NEW):
+  - Test SNQualityScore.score returns float 0-1
+  - Test tier thresholds at 0.85/0.60/0.40 boundaries
+  - Test verdict derivation with normalized thresholds
+  - Test calibration entries round-trip (expected_score / 120 matches)
+- <code>tests/sn/test_validate_persistence.py</code> (NEW):
+  - Test validation_issues are persisted to graph
+  - Test validation_layer_summary is persisted
+  - Test review prompt includes validation issues as context
+- Run <code>uv run pytest tests/sn/</code> — all tests must pass</p>
+<h3 id="phase-4-centralize-calibration-loading">Phase 4: Centralize Calibration Loading</h3>
+<p><strong>Goal:</strong> Single calibration loading path for both mint review and benchmark.</p>
+<p><strong>Files to create:</strong></p>
+<ul>
+<li><code>imas_codex/standard_names/calibration.py</code> (NEW ~40 lines):
+  ```python
+  """Calibration dataset loader for quality review."""</li>
+</ul>
+<p>import importlib.resources
+  import yaml</p>
+<p>_CACHE: list[dict] | None = None</p>
+<p>def load_calibration() -&gt; list[dict]:
+      """Load benchmark calibration entries (cached)."""
+      global _CACHE
+      if _CACHE is None:
+          ref = importlib.resources.files("imas_codex.sn") / "benchmark_calibration.yaml"
+          _CACHE = yaml.safe_load(ref.read_text())
+      return _CACHE</p>
+<p>def get_calibration_for_prompt() -&gt; list[dict]:
+      """Return calibration entries formatted for prompt rendering.
+      Includes normalized 0-1 score alongside per-dimension 0-20 integers."""
+      return [
+          {
+              "name": e["name"],
+              "tier": e["tier"],
+              "score": round(e["expected_score"] / 120.0, 2),
+              "reasoning": e["reasoning"],
+          }
+          for e in load_calibration()
+      ]
+  ```</p>
+<p><strong>Files to modify:</strong></p>
+<ul>
+<li><code>imas_codex/standard_names/workers.py</code> (<code>review_worker</code>):</li>
+<li>
+<p>Replace inline calibration loading with <code>from imas_codex.standard_names.calibration import load_calibration</code></p>
+</li>
+<li>
+<p><code>imas_codex/standard_names/benchmark.py</code> (<code>score_with_reviewer</code>):</p>
+</li>
+<li>Replace inline calibration loading with <code>from imas_codex.standard_names.calibration import load_calibration</code></li>
+</ul>
+<p><strong>Tests:</strong>
+- <code>tests/sn/test_calibration.py</code> — verify loading, caching, prompt formatting
+- Verify both mint and benchmark use identical calibration data</p>
+<h3 id="phase-5-close-context-enrichment-gaps">Phase 5: Close Context Enrichment Gaps</h3>
+<p><strong>Goal:</strong> Import the ISN context areas where ISN provides richer data than codex,
+closing the 4 gaps identified in the A/B comparison.</p>
+<p><strong>Context gaps from A/B analysis (ISN wins):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>ISN provides</th>
+<th>Codex status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick-start / common patterns</td>
+<td>5-step guide, 11 patterns, critical distinctions</td>
+<td>Not provided to LLM</td>
+</tr>
+<tr>
+<td>Vocabulary usage statistics</td>
+<td>Token frequencies, most_common, unused tokens</td>
+<td>Not provided</td>
+</tr>
+<tr>
+<td>Existing name search</td>
+<td>FTS+fuzzy search, 20 results per concept</td>
+<td>Flat list from graph</td>
+</tr>
+<tr>
+<td>Base JSON schema</td>
+<td>Full Pydantic JSON schema via <code>get_schema()</code></td>
+<td><code>get_pydantic_schema_json()</code> for compose only</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Files to create:</strong></p>
+<ul>
+<li><code>imas_codex/standard_names/search.py</code> (NEW ~30 lines):
+  ```python
+  """Standard name search helpers for pipeline use.</li>
+</ul>
+<p>Provides structured dict results (not formatted strings) for programmatic
+  use in compose and review context. Wraps the same embedding + vector index
+  infrastructure as the <code>search_standard_names</code> MCP tool.
+  """
+  from imas_codex.embeddings import Encoder
+  from imas_codex.graph.client import GraphClient</p>
+<p>def search_similar_names(query: str, k: int = 5) -&gt; list[dict]:
+      """Find existing StandardName nodes similar to query text.</p>
+<pre><code>  Uses Encoder to embed query, then vector search on
+  standard_name_desc_embedding index. Returns list of dicts
+  with keys: id, description, kind, unit, score.
+  """
+</code></pre>
+<p>```</p>
+<p><strong>Files to modify:</strong></p>
+<ul>
+<li><strong>ISN Plan 05 Phase 0 dependency</strong>: <code>get_grammar_context()</code> must expose:</li>
+<li><code>quick_start</code>: 5-step generation guide</li>
+<li><code>common_patterns</code>: 11 frequent patterns with examples</li>
+<li><code>critical_distinctions</code>: Base vs modifier, orientation vs direction, etc.</li>
+<li><code>vocabulary_usage_stats</code>: Per-segment frequency data from catalog</li>
+</ul>
+<p>If ISN doesn't add these in Phase 0, request a Phase 0.1 addition.</p>
+<ul>
+<li><code>imas_codex/standard_names/context.py</code> (<code>build_compose_context()</code>):</li>
+<li>Add <code>quick_start</code>, <code>common_patterns</code>, <code>critical_distinctions</code> from
+    <code>get_grammar_context()</code> to compose context dict</li>
+<li>Add <code>vocabulary_usage_stats</code> for LLM to understand token frequency</li>
+<li>
+<p>Add existing-name search: for each DD path batch, call
+    <code>search_similar_names(batch_description)</code> to find top-5 existing names
+    as collision avoidance context ("names already covering this area")</p>
+</li>
+<li>
+<p><code>imas_codex/llm/prompts/sn/compose_system.md</code>:</p>
+</li>
+<li>Add quick-start section before grammar reference (helps LLM orientation)</li>
+<li>Add common patterns section with "do this, not that" examples</li>
+<li>
+<p>Add token frequency note to vocabulary section ("commonly used:", "rarely used:")</p>
+</li>
+<li>
+<p><code>imas_codex/standard_names/workers.py</code> (<code>review_worker</code>):</p>
+</li>
+<li>Add existing-name collision avoidance to review context using
+    <code>search_similar_names()</code> — embed each candidate's description and search
+    for nearby existing names. Provide as "nearby names" in review prompt.</li>
+</ul>
+<p><strong>Tests:</strong>
+- <code>tests/sn/test_search.py</code> — verify <code>search_similar_names()</code> returns structured dicts
+- Verify <code>build_compose_context()</code> includes all new keys
+- Verify compose_system.md renders quick-start and common-patterns sections
+- Verify review context includes nearby existing names
+- Full SN test suite passes</p>
+<h3 id="phase-6-documentation-and-boundary-definition">Phase 6: Documentation and Boundary Definition</h3>
+<p><strong>Goal:</strong> Document the project boundary and updated architecture.</p>
+<p><strong>Files to create:</strong></p>
+<ul>
+<li><code>docs/architecture/boundary.md</code> (NEW):
+  ```markdown
+  # Project Boundary: imas-codex ↔ imas-standard-names</li>
+</ul>
+<p>## imas-codex owns
+  - Standard name <strong>generation</strong> (LLM pipeline: extract → compose → review →
+    validate → consolidate → persist)
+  - DD enrichment (clusters, siblings, coordinates, parent structures)
+  - Quality review with calibrated 6-dimensional scoring
+  - Graph storage and lifecycle management (drafted → published → accepted)
+  - Benchmark framework for model evaluation
+  - Catalog publish (graph → YAML) and import (YAML → graph) cycle</p>
+<p>## imas-standard-names owns
+  - Grammar specification (specification.yml → code-gen)
+  - Vocabulary definition (YAML → StrEnums)
+  - Parse/compose functions (string ↔ structured)
+  - Naming conventions (composition rules, anti-patterns, kind definitions)
+  - 4-layer validation (structural, semantic, description, quality)
+  - Read-only catalog server (MCP tools for lookup/search)
+  - Curated resources (examples, tokamak parameters, tag descriptions)</p>
+<p>## Principle
+  ISN defines what a valid standard name IS. Codex decides what names to CREATE.
+  If a rule would change when ISN updates the grammar spec, it belongs in ISN.
+  If a rule is about how to instruct an LLM, it belongs in codex.</p>
+<p>## API contract
+  - codex imports from ISN (exhaustive — ISN must not rename/remove without coordination):
+    - Grammar: <code>get_grammar_context()</code>, <code>parse_standard_name()</code>, <code>compose_standard_name()</code>
+    - Models: <code>StandardNameEntry</code>, <code>create_standard_name_entry()</code>
+    - Validation: <code>run_semantic_checks()</code>, <code>validate_description()</code>, <code>run_structural_checks()</code>
+    - Constants: grammar enums (vocabulary StrEnums), tag constants, <code>PhysicsDomain</code>
+  - ISN exposes NO write operations via MCP or Python API
+  - Changes to any contract function require a coordinated release
+  ```</p>
+<ul>
+<li>Update <code>docs/architecture/standard-names.md</code>:</li>
+<li>Add ISN integration section (what we import, why)</li>
+<li>Update pipeline diagram to show 3-layer validation</li>
+<li>
+<p>Add A/B comparison summary table</p>
+</li>
+<li>
+<p>Update <code>AGENTS.md</code>:</p>
+</li>
+<li>Add project boundary reference: <code>docs/architecture/boundary.md</code></li>
+<li>Document review criteria YAML config and its purpose</li>
+<li>Document <code>{% include %}</code> fragments and when to create new ones</li>
+<li>Document 3-layer validation architecture (Pydantic → semantic → description)</li>
+</ul>
+<h2 id="dependency-order">Dependency Order</h2>
+<pre><code>ISN Phase 0 (public API — expanded with naming guidelines, common patterns, usage stats)
+    ↓
+Codex Phase 1 (replace private imports + fix StandardNameEntry path)
+    ↓
+Codex Phase 2 (prompt restructure + shared fragments + review criteria YAML)
+    ↓
+Codex Phase 3 (ISN validation + persistent issues + 0-1 scoring)
+    ←── depends on Phase 1 (ISN public API) + Phase 2 (YAML config exists)
+    ↓
+Codex Phase 4 (centralize calibration) ←── independent, can parallel Phase 2
+    ↓
+Codex Phase 5 (context enrichment gaps) ←── depends on Phase 1 + ISN Phase 0
+    ↓
+Codex Phase 6 (docs) ←── depends on all above
+</code></pre>
+<p>Phase 4 can run in parallel with Phases 2-3 (no cross-dependency).
+Phase 5 can run in parallel with Phase 4 (no cross-dependency).
+Phase 3 needs Phase 1 AND Phase 2 (ISN API + YAML config file must exist).
+Phase 5 needs ISN Phase 0 to expose common_patterns and vocabulary_usage_stats.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li><strong>Each phase is one commit.</strong> Run <code>uv run pytest tests/sn/</code> after each.</li>
+<li><strong>Phase 1 is blocked on ISN Plan 05 Phase 0.</strong> Start with Phase 4 while waiting.</li>
+<li><strong>Prompt output must be semantically identical</strong> after Phase 2 — ISN API returns
+  the same rules that were previously hardcoded. Diff rendered prompts to verify.</li>
+<li><strong>No behavioral change</strong> in Phases 1-2, 4. Phase 3 adds ISN Pydantic validation
+  (27 checks) and changes the scoring scale from 0-120 to 0-1. Names that previously
+  passed may now have validation_issues attached — this is correct and desired.</li>
+<li><strong>Phase 3 is the highest-value phase.</strong> It delivers three connected improvements:
+  (1) 27 ISN validators via Pydantic model construction, (2) persistent validation
+  issues as review context, (3) normalized 0-1 scoring.</li>
+<li><strong>Validate once, review with context.</strong> validate_worker annotates entries with ALL
+  issues. review_worker sees those issues. persist_worker stores them. No re-validation.</li>
+<li><strong>Hard fail is narrow:</strong> Only names that cannot be parsed AT ALL are rejected.
+  Everything else passes through with issues attached. Even a name with Pydantic
+  warnings may be the best available name for a DD path — let review and human
+  reviewers decide.</li>
+<li><strong>0-1 scoring rationale:</strong> Per-dimension integer 0-20 is kept in the LLM prompt
+  (avoids float clustering). The aggregate is normalized to 0-1 (universal scale).
+  The LLM never sees or computes the total — we compute <code>sum / 120.0</code>.</li>
+<li><strong>Existing semantic search:</strong> The <code>standard_name_desc_embedding</code> vector index and
+  <code>_vector_search_sn()</code> function in <code>sn_tools.py</code> already provide full semantic +
+  keyword search over StandardName nodes. Phase 5 uses this for collision avoidance
+  context — no new search infrastructure needed.</li>
+<li><strong>No <code>sn_guidelines.yaml</code> in codex.</strong> Naming knowledge comes from ISN. Only
+  <code>sn_review_criteria.yaml</code> lives in codex (scoring is codex's evaluation framework).</li>
+<li><strong>Include path verified:</strong> <code>PromptsLoader</code> searches <code>prompts/shared/</code> then <code>prompts/</code>
+  root, so <code>{% include "sn/_grammar_reference.md" %}</code> resolves correctly.</li>
+</ul>
+<h2 id="ab-comparison-summary">A/B Comparison Summary</h2>
+<p>Codex pipeline vs ISN agent workflow — winners by area:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>ISN leads</th>
+<th>Codex leads</th>
+<th>Tie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context provided to generator</td>
+<td>4</td>
+<td>2</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Validation checks</td>
+<td>15</td>
+<td>3</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Review quality</td>
+<td>1</td>
+<td>5</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>20</strong></td>
+<td><strong>10</strong></td>
+<td><strong>9</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>After Phase 3:</strong> ISN validation leads 15 → 0 (all closed by Pydantic model construction).
+Validation issues persisted to graph. Scoring normalized to 0-1.
+<strong>After Phase 5:</strong> ISN context lead 4 → 0 (collision avoidance via existing vector index,
+enriched context from expanded <code>get_grammar_context()</code>).
+<strong>Remaining ISN lead:</strong> Iterative retry loop (5 rounds). Assessed as lower priority — the
+validate-once + persistent-issues architecture catches issues upfront rather than iterating.</p>
+<h2 id="documentation-updates">Documentation Updates</h2>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/architecture/boundary.md</code></td>
+<td>Phase 6 — NEW</td>
+</tr>
+<tr>
+<td><code>docs/architecture/standard-names.md</code></td>
+<td>Phase 6 — update pipeline + A/B comparison</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Phase 6 — boundary reference, YAML config, 3-layer validation, 0-1 scoring</td>
+</tr>
+<tr>
+<td><code>plans/README.md</code></td>
+<td>Phase 6 — mark plan 21 done</td>
+</tr>
+</tbody>
+</table>
+    </section>
+  </main>
+</body>
+</html>

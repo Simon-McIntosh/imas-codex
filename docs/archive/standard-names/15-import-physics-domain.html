@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="15-import-physics-domain">
+  <meta name="plan-title" content="Import PhysicsDomain from imas-standard-names">
+  <meta name="plan-summary" content="imas-codex maintains its own `PhysicsDomain` enum (22 values) codegen&#x27;d from a 250-line LinkML schema (`physics_domains.yaml`). This duplicates the physics domain vocabulary that imas-standard-names now owns as the ca...">
+  <meta name="plan-status" content="done">
+  <title>Import PhysicsDomain from imas-standard-names | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Import PhysicsDomain from imas-standard-names</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/15-import-physics-domain.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/31-quality-bootstrap-v2.md">Plan 31</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <blockquote>
+<p><strong>Repo</strong>: imas-codex
+<strong>Status</strong>: planned
+<strong>Depends on</strong>: imas-standard-names <code>01-rename-tags-to-physics-domain.md</code> (Phase 6 RC release)</p>
+</blockquote>
+<h2 id="problem">Problem</h2>
+<p>imas-codex maintains its own <code>PhysicsDomain</code> enum (22 values) codegen'd from
+a 250-line LinkML schema (<code>physics_domains.yaml</code>). This duplicates the physics
+domain vocabulary that imas-standard-names now owns as the canonical source.</p>
+<p>After imas-standard-names publishes <code>PhysicsDomain</code> as a <code>str, Enum</code> (31 values),
+imas-codex should import it rather than maintain a parallel definition.</p>
+<h2 id="current-architecture">Current Architecture</h2>
+<pre><code>imas_codex/schemas/physics_domains.yaml    ← 250-line LinkML schema (SOURCE)
+    ↓ gen_physics_domains.py (codegen)
+imas_codex/core/physics_domain.py          ← PhysicsDomain(str, Enum) 22 values
+    ↓ imported by
+imas_codex/schemas/common.yaml             ← `imports: - physics_domains`
+    ↓ used by
+facility.yaml, standard_name.yaml          ← `range: PhysicsDomain`
+    ↓ used by
+15+ Python modules                         ← runtime enum validation
+</code></pre>
+<h2 id="target-architecture">Target Architecture</h2>
+<pre><code>imas-standard-names (PyPI)
+    ↓ exports
+PhysicsDomain(str, Enum) 31 values
+    ↓ imported by
+imas_codex/core/physics_domain.py          ← re-export (one-line change)
+    ↓ imported by (unchanged)
+15+ Python modules                         ← same import path, no changes
+</code></pre>
+<h2 id="phase-1-replace-codegen-with-import">Phase 1: Replace codegen with import</h2>
+<h3 id="1a-update-imas_codexcorephysics_domainpy">1a. Update <code>imas_codex/core/physics_domain.py</code></h3>
+<p>Replace the entire codegen'd file with a re-export:</p>
+<pre><code class="language-python">&quot;&quot;&quot;Physics domain enum — canonical source is imas-standard-names.
+
+This module re-exports PhysicsDomain from imas-standard-names so that
+all imas-codex code continues to import from the same path:
+    from imas_codex.core.physics_domain import PhysicsDomain
+&quot;&quot;&quot;
+
+from imas_standard_names.grammar.tag_types import PhysicsDomain
+
+__all__ = [&quot;PhysicsDomain&quot;]
+</code></pre>
+<p>This file is currently auto-generated and gitignored. Change it to a
+hand-written re-export and <strong>remove from .gitignore</strong>.</p>
+<h3 id="1b-delete-imas_codexschemasphysics_domainsyaml">1b. Delete <code>imas_codex/schemas/physics_domains.yaml</code></h3>
+<p>The 250-line LinkML schema is no longer needed. The enum source of truth
+is now in imas-standard-names.</p>
+<h3 id="1c-delete-scriptsgen_physics_domainspy">1c. Delete <code>scripts/gen_physics_domains.py</code></h3>
+<p>The codegen script is no longer needed.</p>
+<h3 id="1d-update-scriptsbuild_modelspy">1d. Update <code>scripts/build_models.py</code></h3>
+<p>Remove the physics_domains codegen step. The build hook currently:
+1. Generates physics_domain.py from physics_domains.yaml
+2. Generates graph models from facility.yaml/common.yaml/etc</p>
+<p>Remove step 1. Step 2 continues unchanged.</p>
+<h3 id="1e-update-hatch_build_hookspy">1e. Update <code>hatch_build_hooks.py</code></h3>
+<p>Remove physics_domain from the build hook's generated file list.</p>
+<h3 id="1f-update-gitignore">1f. Update <code>.gitignore</code></h3>
+<p>Remove <code>imas_codex/core/physics_domain.py</code> from gitignore — it's now a
+hand-written file that should be tracked.</p>
+<h3 id="1g-update-imas_codexschemascommonyaml">1g. Update <code>imas_codex/schemas/common.yaml</code></h3>
+<p>Remove <code>imports: - physics_domains</code> from the imports list. The LinkML schema
+no longer needs to reference the physics_domains schema since the enum now
+comes from Python at runtime. The <code>range: PhysicsDomain</code> annotations in
+facility.yaml and standard_name.yaml become string-validated at the LinkML
+level but enum-validated at the Python level.</p>
+<p><strong>Option A</strong> (clean): Remove <code>range: PhysicsDomain</code> from LinkML, use
+<code>range: string</code> — runtime Python code does enum validation via the imported
+enum. This avoids needing a phantom LinkML enum.</p>
+<p><strong>Option B</strong> (keep schema validation): Create a minimal LinkML enum stub
+that lists just the values (no descriptions/categories) and is auto-synced
+from imas-standard-names. This preserves <code>range: PhysicsDomain</code> in schema.</p>
+<p><strong>Decision</strong>: Option A is cleaner. The PhysicsDomain values appear in the
+generated schema_context_data.py regardless (built from Python enum, not
+LinkML). Schema compliance tests validate against the Python enum.</p>
+<h3 id="1h-update-pyprojecttoml">1h. Update <code>pyproject.toml</code></h3>
+<p>Add <code>imas-standard-names &gt;= 0.8.0</code> to dependencies (the version with
+PhysicsDomain export).</p>
+<h2 id="phase-2-add-new-enum-values-to-graph">Phase 2: Add new enum values to graph</h2>
+<p>The unified enum has 9 new values not currently in the graph. These are
+additive — no existing data needs migration.</p>
+<p>New values: <code>core_plasma_physics</code>, <code>fast_particles</code>, <code>runaway_electrons</code>,
+<code>waves</code>, <code>fueling</code>, <code>plasma_initiation</code>, <code>spectroscopy</code>, <code>neutronics</code>,
+<code>gyrokinetics</code>.</p>
+<p>No graph migration needed — new values become available for new data
+automatically. Existing classification prompts will start using them
+as they appear in the enum.</p>
+<h2 id="phase-3-update-tests">Phase 3: Update tests</h2>
+<h3 id="3a-testscoretest_physics_categorizationpy">3a. <code>tests/core/test_physics_categorization.py</code></h3>
+<p>Update test expectations for the new 31-value enum. Add tests for
+new values.</p>
+<h3 id="3b-testsgraphtest_schema_compliancepy">3b. <code>tests/graph/test_schema_compliance.py</code></h3>
+<p>Verify schema compliance tests pass with the new enum source.
+The tests should work unchanged since they validate against the
+Python enum, not the LinkML schema directly.</p>
+<h3 id="3c-run-full-test-suite">3c. Run full test suite</h3>
+<pre><code class="language-bash">uv run build-models --force
+uv run pytest tests/ -x -q
+</code></pre>
+<h2 id="phase-4-clean-up-and-commit">Phase 4: Clean up and commit</h2>
+<pre><code class="language-bash"># Lint
+uv run ruff check --fix .
+uv run ruff format .
+
+# Stage changes (NOT auto-generated files)
+git add imas_codex/core/physics_domain.py  # Now hand-written, tracked
+git add -u  # Stage deletions and modifications
+# DO NOT stage: graph/models.py, graph/dd_models.py, config/models.py
+
+uv run git commit -m &quot;refactor: import PhysicsDomain from imas-standard-names
+
+BREAKING CHANGE: PhysicsDomain enum now has 31 values (was 22).
+Nine new values added: core_plasma_physics, fast_particles,
+runaway_electrons, waves, fueling, plasma_initiation, spectroscopy,
+neutronics, gyrokinetics.
+
+Removed physics_domains.yaml LinkML schema and gen_physics_domains.py
+codegen script. PhysicsDomain is now imported from imas-standard-names
+and re-exported from imas_codex.core.physics_domain.&quot;
+
+git pull --no-rebase origin develop
+git push origin develop
+</code></pre>
+<h2 id="documentation-updates">Documentation Updates</h2>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Update PhysicsDomain section: note it's imported from imas-standard-names</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Remove physics_domains.yaml from schema files list</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Remove gen_physics_domains.py from build pipeline</td>
+</tr>
+</tbody>
+</table>
+<h2 id="files-changed">Files Changed</h2>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>File</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REWRITE</td>
+<td><code>imas_codex/core/physics_domain.py</code></td>
+<td>Codegen → hand-written re-export</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>imas_codex/schemas/physics_domains.yaml</code></td>
+<td>No longer source of truth</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>scripts/gen_physics_domains.py</code></td>
+<td>No longer needed</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>scripts/build_models.py</code></td>
+<td>Remove physics_domains step</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>hatch_build_hooks.py</code></td>
+<td>Remove from generated files</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>.gitignore</code></td>
+<td>Un-ignore physics_domain.py</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>imas_codex/schemas/common.yaml</code></td>
+<td>Remove physics_domains import</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>pyproject.toml</code></td>
+<td>Add imas-standard-names &gt;= 0.8.0 dep</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>tests/core/test_physics_categorization.py</code></td>
+<td>Update for 31 values</td>
+</tr>
+<tr>
+<td>MODIFY</td>
+<td><code>AGENTS.md</code></td>
+<td>Update documentation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="risks">Risks</h2>
+<ul>
+<li><strong>Version pinning</strong>: If imas-standard-names adds/removes PhysicsDomain
+  values in a future release, imas-codex graph data could become inconsistent.
+  Mitigation: pin to <code>&gt;= 0.8.0, &lt; 1.0.0</code> and review on major bumps.</li>
+<li><strong>Build order</strong>: <code>uv sync</code> must install imas-standard-names before the
+  build hook runs. Since physics_domain.py is now hand-written (not codegen'd),
+  this is only a runtime concern, not a build-time concern.</li>
+<li><strong>LinkML validation gap</strong>: With Option A, LinkML schemas lose
+  <code>range: PhysicsDomain</code> validation. Schema compliance tests still work
+  because they validate against the Python enum. The gap is only in the
+  LinkML schema itself (used for documentation, not runtime).</li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

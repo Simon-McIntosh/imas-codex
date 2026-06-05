@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="09-llm-compose">
+  <meta name="plan-title" content="09: Schema Providers + LLM Compose">
+  <meta name="plan-summary" content="Two coupled problems must be solved together:">
+  <meta name="plan-status" content="done">
+  <title>09: Schema Providers + LLM Compose | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>09: Schema Providers + LLM Compose</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/09-llm-compose.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> Nothing (all infrastructure exists)</li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Pending
+<strong>Priority:</strong> Critical — this is THE blocking gap
+<strong>Depends on:</strong> Nothing (all infrastructure exists)
+<strong>Effort:</strong> 2-3 days</p>
+<h2 id="problem">Problem</h2>
+<p>Two coupled problems must be solved together:</p>
+<h3 id="a-impoverished-prompt-context">A. Impoverished prompt context</h3>
+<p>The compose prompt (<code>sn/compose_dd.md</code>) receives bare enum lists from
+<code>build_grammar_context()</code>:</p>
+<pre><code class="language-python">{&quot;subjects&quot;: [&quot;electron&quot;, &quot;ion&quot;, ...], &quot;positions&quot;: [&quot;magnetic_axis&quot;, ...]}
+</code></pre>
+<p>Meanwhile, the imas-standard-names library has rich prompting infrastructure
+that produces ~800 lines of structured context:
+- 42 real examples grouped by composition pattern
+- Segment descriptions with critical distinctions (component vs coordinate)
+- Template application rules, exclusivity constraints
+- Usage guidance per segment
+- Tokamak parameters for grounding documentation examples
+- Field schema guidance with common mistakes</p>
+<p>These are available as <strong>direct Python imports</strong> — no MCP needed:</p>
+<pre><code class="language-python">from imas_standard_names.grammar.constants import (
+    SEGMENT_RULES, SEGMENT_ORDER, SEGMENT_TEMPLATES,
+    SEGMENT_TOKEN_MAP, EXCLUSIVE_SEGMENT_PAIRS,
+    APPLICABILITY_INCLUDE, GENERIC_PHYSICAL_BASES,
+)
+from imas_standard_names.grammar.field_schemas import (
+    FIELD_GUIDANCE, TYPE_SPECIFIC_REQUIREMENTS,
+)
+from imas_standard_names.tools.grammar import (
+    _build_canonical_pattern, _build_segment_order_constraint,
+    _get_segment_descriptions, _build_template_application_rule,
+    _build_segment_usage_guidance,
+)
+</code></pre>
+<h3 id="b-heuristic-compose-worker">B. Heuristic compose worker</h3>
+<p>The <code>compose_worker</code> in <code>workers.py</code> uses a keyword-matching heuristic that
+recognizes only 13 hardcoded words. The benchmark module already has a working
+LLM compose pattern using <code>acall_llm_structured()</code>.</p>
+<h2 id="approach">Approach</h2>
+<h3 id="phase-1a-schema-provider-system">Phase 1a: Schema Provider System</h3>
+<p>Create <code>imas_codex/standard_names/schema_providers.py</code> implementing the 3-tier caching
+design from <code>plans/research/standard-names/06-schema-provider-design.md</code>.</p>
+<p><strong>Tier 1: Process-lifetime (static, ~15KB)</strong></p>
+<p>These import directly from <code>imas_standard_names</code> and are cached with
+<code>@lru_cache(maxsize=1)</code>. They never change during a pipeline run.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Source</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grammar_context</code></td>
+<td><code>grammar.constants.*</code>, <code>tools.grammar._build_*</code></td>
+<td>Canonical pattern, segment order, template rules, exclusivity pairs</td>
+</tr>
+<tr>
+<td><code>segment_descriptions</code></td>
+<td><code>tools.grammar._get_segment_descriptions()</code></td>
+<td>Per-segment rich descriptions with critical distinctions</td>
+</tr>
+<tr>
+<td><code>segment_usage_guidance</code></td>
+<td><code>tools.grammar._build_segment_usage_guidance()</code></td>
+<td>Usage patterns, example constructions per segment</td>
+</tr>
+<tr>
+<td><code>vocabulary_tokens</code></td>
+<td><code>SEGMENT_TOKEN_MAP</code></td>
+<td>Token lists per segment with counts</td>
+</tr>
+<tr>
+<td><code>field_schema_guidance</code></td>
+<td><code>FIELD_GUIDANCE</code>, <code>TYPE_SPECIFIC_REQUIREMENTS</code></td>
+<td>Per-field validation rules, common mistakes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tier 2: Catalog-lifetime (~4KB)</strong></p>
+<p>Loaded from the existing StandardName graph nodes or YAML catalog.
+Invalidated on write. Cached per session.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Source</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>existing_names_summary</code></td>
+<td>Graph query</td>
+<td>Count, by-kind breakdown, sample names</td>
+</tr>
+<tr>
+<td><code>example_entries</code></td>
+<td><code>resources/standard_name_examples/</code> (42 YAML files)</td>
+<td>Curated high-quality entries for few-shot prompting</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tier 3: Per-call dynamic (~3KB)</strong></p>
+<p>Assembled fresh for each LLM batch call.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Source</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dd_paths_context</code></td>
+<td>Extract worker output</td>
+<td>Projected path info for the batch's IDS</td>
+</tr>
+<tr>
+<td><code>tokamak_parameters</code></td>
+<td><code>resources/tokamak_parameters/*.yml</code></td>
+<td>Real machine dimensions for grounding doc examples</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Entry point:</strong></p>
+<pre><code class="language-python">async def get_schema_for_prompt(
+    schema_needs: list[str],
+    *,
+    dynamic_context: dict[str, Any] | None = None,
+) -&gt; dict[str, str]:
+    &quot;&quot;&quot;Load requested providers and merge their output as prompt variables.&quot;&quot;&quot;
+</code></pre>
+<p>Each prompt template declares its <code>schema_needs</code> in frontmatter — only the
+requested providers are loaded. This keeps prompt size predictable (~20KB).</p>
+<h3 id="phase-1b-rewrite-compose-prompt">Phase 1b: Rewrite compose prompt</h3>
+<p>Rewrite <code>llm/prompts/sn/compose_dd.md</code> to consume the rich schema provider
+output instead of bare enum lists. The prompt should reference:
+- <code>{{ grammar_context }}</code> — canonical pattern, segment order, template rules
+- <code>{{ segment_descriptions }}</code> — critical distinctions per segment
+- <code>{{ vocabulary_tokens }}</code> — valid tokens per segment
+- <code>{{ example_entries }}</code> — few-shot examples from the curated set
+- <code>{{ dd_paths_context }}</code> — DD path info for the current batch
+- <code>{{ tokamak_parameters }}</code> — machine parameters for grounding examples</p>
+<h3 id="phase-1c-llm-compose-worker">Phase 1c: LLM compose worker</h3>
+<p>Replace <code>_compose_single()</code> with batch LLM composition mirroring the
+benchmark's <code>_run_model()</code> pattern:</p>
+<pre><code class="language-python">async def compose_worker(state: SNBuildState, **_kwargs) -&gt; None:
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.standard_names.schema_providers import get_schema_for_prompt
+    from imas_codex.standard_names.models import SNComposeBatch
+    from imas_codex.settings import get_model
+
+    model = get_model(&quot;language&quot;)
+
+    # Load static + catalog context once
+    static_context = await get_schema_for_prompt([
+        &quot;grammar_context&quot;, &quot;segment_descriptions&quot;, &quot;vocabulary_tokens&quot;,
+        &quot;field_schema_guidance&quot;, &quot;example_entries&quot;, &quot;existing_names_summary&quot;,
+    ])
+
+    # Group candidates by IDS for coherent batches
+    batches = _group_candidates_by_ids(state.candidates)
+
+    composed = []
+    for batch in batches:
+        # Load per-call context for this batch
+        dynamic_context = await get_schema_for_prompt(
+            [&quot;dd_paths_context&quot;, &quot;tokamak_parameters&quot;],
+            dynamic_context={&quot;ids_name&quot;: batch[&quot;group_key&quot;], &quot;items&quot;: batch[&quot;items&quot;]},
+        )
+        prompt_context = {**static_context, **dynamic_context, **batch}
+        prompt_text = render_prompt(&quot;sn/compose_dd&quot;, prompt_context)
+        messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt_text}]
+
+        result, cost, tokens = await acall_llm_structured(
+            model=model, messages=messages, response_model=SNComposeBatch,
+        )
+        state.compose_stats.cost += cost
+        for c in result.candidates:
+            composed.append(c.model_dump())
+
+    state.composed = composed
+    state.compose_phase.mark_done()
+</code></pre>
+<h2 id="files-to-createmodify">Files to Create/Modify</h2>
+<h3 id="new-imas_codexstandard_namesschema_providerspy">New: <code>imas_codex/standard_names/schema_providers.py</code></h3>
+<p>The schema provider system with 3-tier caching.</p>
+<h3 id="modify-imas_codexllmpromptssncompose_ddmd">Modify: <code>imas_codex/llm/prompts/sn/compose_dd.md</code></h3>
+<p>Rewrite to consume rich schema provider variables instead of bare enums.
+Add <code>schema_needs</code> frontmatter declaring required providers.</p>
+<h3 id="modify-imas_codexstandard_namesworkerspy">Modify: <code>imas_codex/standard_names/workers.py</code></h3>
+<ul>
+<li>Delete <code>_compose_single()</code> and <code>_extract_physical_base()</code> (lines 172-247)</li>
+<li>Rewrite <code>compose_worker()</code> to use batch LLM calls with schema providers</li>
+<li>Rename <code>state.validated</code> → <code>state.composed</code> (see plan 10)</li>
+</ul>
+<h3 id="modify-imas_codexstandard_namesstatepy">Modify: <code>imas_codex/standard_names/state.py</code></h3>
+<ul>
+<li>Add <code>composed: list[dict]</code> field (rename from <code>validated</code>)</li>
+</ul>
+<h3 id="modify-imas_codexstandard_namesbenchmarkpy">Modify: <code>imas_codex/standard_names/benchmark.py</code></h3>
+<ul>
+<li>Replace <code>build_grammar_context()</code> with <code>get_schema_for_prompt()</code> call</li>
+<li>This ensures benchmark and pipeline use identical prompt context</li>
+</ul>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<ul>
+<li>Schema providers return ~15KB of static context (grammar, segments, vocabulary)</li>
+<li><code>sn build --source dd --ids equilibrium</code> calls the LLM and produces real names</li>
+<li>Grammar round-trip validation passes for &gt;80% of composed names</li>
+<li>Cost tracked in <code>state.compose_stats.cost</code></li>
+<li><code>--dry-run</code> still works (skips LLM, reports candidate count)</li>
+<li>Benchmark continues to work with the same schema providers</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<ul>
+<li>Unit test: schema providers return expected content structure and size</li>
+<li>Unit test: <code>@lru_cache</code> actually caches Tier 1 providers</li>
+<li>Integration: <code>sn build --source dd --ids equilibrium --dry-run</code></li>
+<li>Integration: <code>sn build --source dd --ids equilibrium</code> (end-to-end)</li>
+<li>Integration: <code>sn benchmark --ids equilibrium --max-candidates 10</code></li>
+<li>Quality: composed names parse via grammar round-trip</li>
+</ul>
+<h2 id="tokamak-parameters-for-documentation">Tokamak Parameters for Documentation</h2>
+<p>The 42 standard name example files in <code>resources/standard_name_examples/</code>
+include <code>documentation</code> fields with LaTeX-formatted content referencing
+real physical dimensions (e.g., "ITER major radius R₀ = 6.2 m"). The
+tokamak parameters database (12 YAML files with sourced values) prevents
+hallucinations in these documentation strings.</p>
+<p>For Phase 1, tokamak parameters are loaded as a per-call provider and
+injected into the prompt alongside DD path context. The LLM uses real
+machine parameters (major radius, minor radius, B_T, I_p, etc.) when
+generating documentation examples instead of inventing plausible but
+incorrect values.</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>The compose prompt already handles skipping metadata/index paths</li>
+<li>Existing names list prevents duplicates in the prompt</li>
+<li><code>SNComposeBatch</code> model includes both <code>candidates</code> and <code>skipped</code> lists</li>
+<li><strong>Import backing functions directly</strong> from <code>imas_standard_names</code> — never
+  call MCP tools from the pipeline</li>
+<li>The <code>_build_*</code> functions in <code>tools/grammar.py</code> are private but stable —
+  consider making them public or extracting their logic into <code>constants.py</code></li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

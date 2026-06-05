@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="14-mcp-tools-benchmark">
+  <meta name="plan-title" content="14: Standard Name MCP Tools &amp; Benchmark Enhancement">
+  <meta name="plan-summary" content="The imas-codex MCP server (`imas_codex/llm/server.py`) has no tools for querying standard names from the graph. Users and agents can&#x27;t discover, search, or fetch standard name entries. The graph is the richest data so...">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="11-rich-compose">
+  <title>14: Standard Name MCP Tools &amp; Benchmark Enhancement | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>14: Standard Name MCP Tools &amp; Benchmark Enhancement</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/14-mcp-tools-benchmark.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> 11 (rich schema + embedding wiring) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/11-rich-compose.html">Plan 11</a>)</span></li>
+    <li><strong>Enables:</strong> MCP-assisted SN queries, model quality evaluation</li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Ready to implement
+<strong>Depends on:</strong> 11 (rich schema + embedding wiring)
+<strong>Enables:</strong> MCP-assisted SN queries, model quality evaluation
+<strong>Agent:</strong> engineer (MCP tools follow established patterns in llm/server.py)</p>
+<h2 id="problem-a-no-sn-searchfetch-in-imas-codex-mcp">Problem A: No SN search/fetch in imas-codex MCP</h2>
+<p>The imas-codex MCP server (<code>imas_codex/llm/server.py</code>) has no tools for querying
+standard names from the graph. Users and agents can't discover, search, or fetch
+standard name entries. The graph is the richest data source (embeddings, DD links,
+facility signal links, grammar decomposition).</p>
+<p><strong>Prerequisite:</strong> Plan 11 Phase 4d wires embedding generation into the persist
+worker. Without embeddings, vector search returns zero results. If deploying
+before embeddings are wired, fall back to keyword-only search.</p>
+<h2 id="problem-b-benchmark-is-grammar-only">Problem B: Benchmark is grammar-only</h2>
+<p>The <code>sn benchmark</code> command only measures grammar validity and reference overlap.
+It doesn't evaluate documentation quality, naming conventions, semantic accuracy,
+or entry completeness. No quality tiers. No reviewer model.</p>
+<h2 id="part-a-sn-mcp-tools">Part A: SN MCP Tools</h2>
+<h3 id="phase-1-search-standard-names">Phase 1: Search standard names</h3>
+<p><strong>Files:</strong>
+- <code>imas_codex/llm/sn_tools.py</code> — new module (follows search_tools.py pattern)
+- <code>imas_codex/llm/server.py</code> — register tools</p>
+<p>Add <code>search_standard_names</code> tool:</p>
+<pre><code class="language-python">@tool
+def search_standard_names(
+    query: str,
+    kind: str | None = None,
+    tags: list[str] | None = None,
+    review_status: str | None = None,
+    k: int = 20,
+) -&gt; str:
+    &quot;&quot;&quot;Search standard names by physics concept.
+
+    Hybrid search (vector + keyword) over StandardName descriptions
+    and documentation. Enriched with DD path links, unit info, and
+    grammar decomposition.
+    &quot;&quot;&quot;
+</code></pre>
+<p>Uses <code>standard_name_desc_embedding</code> vector index for semantic search,
+combined with keyword matching on name/tags. Falls back to keyword-only
+if no embeddings present.</p>
+<h3 id="phase-2-fetch-standard-names">Phase 2: Fetch standard names</h3>
+<p>Add <code>fetch_standard_names</code> tool:</p>
+<pre><code class="language-python">@tool
+def fetch_standard_names(names: str) -&gt; str:
+    &quot;&quot;&quot;Fetch full entries for known standard names.
+
+    Returns complete metadata: description, documentation, unit, kind,
+    tags, links, ids_paths, grammar fields, provenance, review status.
+    &quot;&quot;&quot;
+</code></pre>
+<h3 id="phase-3-list-standard-names">Phase 3: List standard names</h3>
+<p>Add <code>list_standard_names</code> tool:</p>
+<pre><code class="language-python">@tool
+def list_standard_names(
+    tag: str | None = None,
+    kind: str | None = None,
+    review_status: str | None = None,
+) -&gt; str:
+    &quot;&quot;&quot;List standard names with optional filters.
+
+    Returns name, description, kind, unit, status for each entry.
+    &quot;&quot;&quot;
+</code></pre>
+<p><strong>Acceptance:</strong>
+- MCP server exposes 3 SN tools
+- <code>search_standard_names("electron temperature")</code> returns relevant names
+- <code>fetch_standard_names("electron_temperature")</code> returns full entry
+- <code>list_standard_names(tag="equilibrium")</code> returns filtered names</p>
+<h2 id="part-b-benchmark-enhancement">Part B: Benchmark Enhancement</h2>
+<h3 id="phase-4-quality-tier-labels">Phase 4: Quality tier labels</h3>
+<p><strong>Files:</strong> <code>imas_codex/standard_names/benchmark_labels.yaml</code> — new file</p>
+<p>Curate quality labels for ~20 benchmark reference entries:</p>
+<pre><code class="language-yaml">outstanding:  # Rich docs, correct grammar, cross-linked, LaTeX
+  - electron_temperature
+  - plasma_current
+  - safety_factor
+  - position_of_magnetic_axis
+  - bootstrap_current
+good:  # Correct grammar, adequate docs
+  - toroidal_component_of_magnetic_field_at_magnetic_axis
+  - centroid_of_plasma_boundary
+  - bolometer_radiated_power
+  - collisionality
+adequate:  # Correct grammar, thin docs
+  - area_of_poloidal_magnetic_field_probe
+  - tokamak_scenario
+  - time
+poor:  # Grammar valid but naming debatable
+  - banana_orbits
+  - h_mode
+</code></pre>
+<h3 id="phase-5-reviewer-model">Phase 5: Reviewer model</h3>
+<p><strong>Files:</strong> <code>imas_codex/standard_names/benchmark.py</code>, <code>imas_codex/llm/prompts/sn/review_benchmark.md</code></p>
+<p>Add <code>--reviewer-model</code> option that uses a frontier model to evaluate outputs:</p>
+<pre><code class="language-bash">imas-codex sn benchmark \
+  --models anthropic/claude-sonnet-4-6,google/gemini-2.5-flash \
+  --reviewer-model anthropic/claude-opus-4-6 \
+  --ids equilibrium --limit 50
+</code></pre>
+<p>The reviewer receives:
+1. Grammar rules (same as compose)
+2. Labeled examples at each quality tier
+3. Generated entry (name + all fields)
+4. Rubric: grammar correctness, semantic accuracy, documentation quality,
+   naming conventions, unit consistency</p>
+<p>Returns per-entry: quality tier, score (0-100), reasoning.</p>
+<p>New metrics in benchmark report:
+- <strong>Quality distribution</strong>: % outstanding / good / adequate / poor per model
+- <strong>Documentation richness</strong>: avg doc length, equation count, cross-ref count
+- <strong>Grammar pattern coverage</strong>: does model use subject, component, position, etc.
+- <strong>Entry completeness</strong>: % of fields populated per entry</p>
+<p><strong>Acceptance:</strong>
+- <code>sn benchmark --reviewer-model &lt;model&gt;</code> produces quality-scored report
+- Report includes quality distribution table per model
+- Labeled examples used as scoring anchors</p>
+<h2 id="test-plan">Test Plan</h2>
+<ul>
+<li>Unit tests for MCP tool registration and response format</li>
+<li>Unit test: search with and without embeddings (keyword fallback)</li>
+<li>Unit test: benchmark loads quality tier labels</li>
+<li>Unit test: quality tier classification against labeled examples</li>
+<li>Integration test: search returns graph-resident standard names</li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

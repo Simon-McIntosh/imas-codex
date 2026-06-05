@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="11-rich-compose">
+  <meta name="plan-title" content="11: Rich Standard Name Composition">
+  <meta name="plan-summary" content="The compose worker generates bare StandardName nodes with only `id`, `physical_base`, and `confidence`. The catalog schema requires ~12 rich fields: description, documentation (LaTeX equations, inline cross-references...">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="09-sn-generate">
+  <meta name="plan-informs" content="12-catalog-import,13-publish-pipeline">
+  <title>11: Rich Standard Name Composition | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>11: Rich Standard Name Composition</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/11-rich-compose.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> 09 (pipeline working — DONE) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/09-sn-generate.html">Plan 09</a>)</span></li>
+    <li><strong>Enables:</strong> 12 (catalog import), 13 (publish pipeline) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/12-catalog-import.html">Plan 12</a>, <a href="/imas-codex/archive/standard-names/13-publish-pipeline.html">Plan 13</a>)</span></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Ready to implement
+<strong>Depends on:</strong> 09 (pipeline working — DONE)
+<strong>Enables:</strong> 12 (catalog import), 13 (publish pipeline)
+<strong>Agent:</strong> architect (cross-module: schema + prompts + models + workers + graph_ops + tests)</p>
+<h2 id="problem">Problem</h2>
+<p>The compose worker generates bare StandardName nodes with only <code>id</code>, <code>physical_base</code>,
+and <code>confidence</code>. The catalog schema requires ~12 rich fields: description, documentation
+(LaTeX equations, inline cross-references, typical tokamak values, measurement methods),
+unit, kind (scalar/vector/metadata), tags, links, ids_paths, status, validity_domain,
+constraints, and grammar decomposition.</p>
+<p>The current <code>SNCandidate</code> Pydantic model captures only <code>source_id</code>, <code>standard_name</code>,
+<code>fields</code>, <code>confidence</code>, and <code>reason</code>. The graph schema (<code>StandardName</code> in standard_name.yaml)
+has <code>description</code>, <code>unit</code>, <code>source</code>, <code>source_path</code>, <code>confidence</code> — but no
+documentation, kind, tags, links, ids_paths, or grammar fields.</p>
+<p>Additional bugs found via audit:
+- <code>write_standard_names()</code> uses unconditional SET (not coalesce) — re-runs erase data
+- Schema doc says <code>(FacilitySignal)-[:MEASURES]-&gt;(StandardName)</code> but code uses
+  <code>HAS_STANDARD_NAME</code> for both entity types. <code>sources/signals.py</code> queries MEASURES
+  which is never written, so signal dedup is broken (silent re-processing).
+- <code>review_status</code> enum has <code>candidate</code> (not past tense). User requires all past tense.
+- Embedding generation not wired — persist worker never calls embed functions.
+- Zero tests for <code>sn/graph_ops.py</code> — all DB operations untested.</p>
+<h2 id="approach">Approach</h2>
+<p>Split into two deployment units for parallelism:
+- <strong>Wave 1 (Phases 1+4):</strong> Schema extension + persist fix + tests. Unlocks Plans 12/13.
+- <strong>Wave 2 (Phases 2+3+5):</strong> LLM compose upgrade. Can run parallel with Plan 12.</p>
+<h2 id="phase-1-extend-graph-schema-fix-consistency">Phase 1: Extend graph schema + fix consistency</h2>
+<p><strong>Files:</strong> <code>imas_codex/schemas/standard_name.yaml</code>, <code>imas_codex/standard_names/sources/signals.py</code></p>
+<h3 id="1a-add-rich-fields-to-standardname">1a. Add rich fields to StandardName</h3>
+<pre><code class="language-yaml">documentation:
+  description: &gt;-
+    Rich documentation with LaTeX equations, governing physics,
+    measurement methods, typical values, sign conventions.
+    Uses [name](#name) inline links to other standard names.
+kind:
+  description: Entry kind — scalar, vector, or metadata
+  range: StandardNameKind
+tags:
+  description: Classification tags from controlled vocabulary
+  multivalued: true
+  range: string
+links:
+  description: Internal cross-references to related standard names (name only)
+  multivalued: true
+  range: string
+ids_paths:
+  description: IMAS DD paths mapped to this standard name
+  multivalued: true
+  range: string
+validity_domain:
+  description: Physical region where this quantity is defined
+constraints:
+  description: Physical/mathematical constraints (e.g., T_e &gt; 0)
+  multivalued: true
+  range: string
+subject:
+  description: Particle species (electron, ion, deuterium, etc.)
+component:
+  description: Vector component (radial, toroidal, vertical, etc.)
+coordinate:
+  description: Coordinate qualifier
+position:
+  description: Spatial location qualifier (magnetic_axis, midplane, etc.)
+process:
+  description: Physical process qualifier (ohmic, bootstrap, etc.)
+</code></pre>
+<h3 id="1b-add-standardnamekind-enum">1b. Add StandardNameKind enum</h3>
+<pre><code class="language-yaml">StandardNameKind:
+  permissible_values:
+    scalar: { description: Scalar quantity }
+    vector: { description: Vector quantity (R,Z or multi-component) }
+    metadata: { description: Non-measurable concept or classification }
+</code></pre>
+<h3 id="1c-fix-standardnamereviewstatus-enum-all-past-tense">1c. Fix StandardNameReviewStatus enum (all past tense)</h3>
+<p>Replace current <code>candidate/accepted/rejected/skipped</code> with:</p>
+<pre><code class="language-yaml">StandardNameReviewStatus:
+  permissible_values:
+    drafted: { description: LLM-generated, awaiting review }
+    published: { description: Exported to catalog PR for review }
+    accepted: { description: Imported from merged catalog entry }
+    rejected: { description: Reviewed and rejected }
+    skipped: { description: Skipped during review (e.g., low confidence) }
+</code></pre>
+<h3 id="1d-fix-schema-doc-has_standard_name-for-all-entity-types">1d. Fix schema doc — HAS_STANDARD_NAME for all entity types</h3>
+<p>In <code>StandardName</code> class description, change:</p>
+<pre><code>- (FacilitySignal)-[:MEASURES]-&gt;(StandardName)
+</code></pre>
+<p>to:</p>
+<pre><code>- (FacilitySignal)-[:HAS_STANDARD_NAME]-&gt;(StandardName)
+</code></pre>
+<h3 id="1e-fix-signalspy-measures-query">1e. Fix signals.py MEASURES query</h3>
+<p>In <code>sn/sources/signals.py</code>, change the MEASURES query to HAS_STANDARD_NAME
+so signal dedup works correctly (reads must match writes).</p>
+<p>Run <code>uv run build-models --force</code> after schema changes.</p>
+<p><strong>Acceptance:</strong>
+- <code>uv run pytest tests/graph/test_schema_compliance.py</code> passes
+- <code>grep -r MEASURES imas_codex/standard_names/</code> returns zero matches</p>
+<h2 id="phase-2-extend-llm-response-model">Phase 2: Extend LLM response model</h2>
+<p><strong>Files:</strong> <code>imas_codex/standard_names/models.py</code></p>
+<p>Extend <code>SNCandidate</code> with rich fields matching the catalog schema:</p>
+<pre><code class="language-python">class SNCandidate(BaseModel):
+    &quot;&quot;&quot;Full standard name entry from LLM composition.&quot;&quot;&quot;
+
+    source_id: str = Field(description=&quot;Source entity ID (DD path or signal ID)&quot;)
+    standard_name: str = Field(description=&quot;Composed standard name in snake_case&quot;)
+    description: str = Field(description=&quot;One sentence, &lt;120 chars&quot;)
+    documentation: str = Field(description=&quot;Rich docs with LaTeX, links, typical values&quot;)
+    unit: str | None = Field(default=None, description=&quot;SI unit string (eV, m, A, etc.)&quot;)
+    kind: Literal[&quot;scalar&quot;, &quot;vector&quot;, &quot;metadata&quot;] = Field(description=&quot;Entry kind&quot;)
+    tags: list[str] = Field(default_factory=list, description=&quot;Classification tags&quot;)
+    links: list[str] = Field(default_factory=list, description=&quot;Related standard names&quot;)
+    ids_paths: list[str] = Field(default_factory=list, description=&quot;Mapped IMAS DD paths&quot;)
+    fields: dict[str, str] = Field(description=&quot;Grammar fields used&quot;)
+    confidence: float = Field(ge=0, le=1, description=&quot;Naming confidence&quot;)
+    reason: str = Field(description=&quot;Brief justification&quot;)
+    validity_domain: str | None = Field(default=None, description=&quot;Physical region&quot;)
+    constraints: list[str] = Field(default_factory=list, description=&quot;Physical constraints&quot;)
+</code></pre>
+<p>Update <code>compose_worker</code> in <code>workers.py</code> to pass all new fields through to
+<code>state.composed</code> dicts (currently only passes id, source_type, source_id,
+fields, confidence, reason — lines 193-202).</p>
+<p><strong>Acceptance:</strong> Pydantic model validates against sample LLM output.</p>
+<h2 id="phase-3-update-prompts-for-rich-generation">Phase 3: Update prompts for rich generation</h2>
+<p><strong>Files:</strong>
+- <code>imas_codex/llm/prompts/sn/compose_system.md</code> — add output format section
+- <code>imas_codex/llm/prompts/sn/compose_dd.md</code> — update expected output</p>
+<p>Add to system prompt:</p>
+<ol>
+<li><strong>Output format specification</strong> — JSON schema for rich entries with all fields</li>
+<li><strong>Documentation template</strong> — opening paragraph, governing equations, physical
+   significance, measurement methods, typical values (cite specific machines from
+   tokamak_parameters), sign conventions, inline <code>[name](#name)</code> cross-references</li>
+<li><strong>Tags guidance</strong> — controlled vocabulary from catalog (primary: physics domain,
+   secondary: characteristics like spatial-profile, time-dependent, derived)</li>
+<li><strong>Kind classification rules</strong> — scalar (single value per point), vector (R,Z or
+   components), metadata (concepts, techniques, not measurable quantities)</li>
+<li><strong>Links guidance</strong> — only reference other standard names, 4-8 per entry,
+   validate existence against existing names list</li>
+</ol>
+<p>The compose_dd.md user prompt already passes existing names — extend to include
+existing names with their descriptions for cross-referencing context.</p>
+<p><strong>Acceptance:</strong> Dry-run <code>sn build --ids equilibrium --limit 5 --dry-run</code> shows
+rich entries in progress output.</p>
+<h2 id="phase-4-fix-persist-graph_ops-and-wire-embedding">Phase 4: Fix persist, graph_ops, and wire embedding</h2>
+<p><strong>Files:</strong>
+- <code>imas_codex/standard_names/workers.py</code> (persist_worker)
+- <code>imas_codex/standard_names/graph_ops.py</code> (write_standard_names)</p>
+<h3 id="4a-fix-unconditional-set-overwrite-bug">4a. Fix unconditional SET overwrite bug</h3>
+<p>Current code does <code>SET sn.description = b.description</code> which nulls out existing
+data on re-runs. <strong>This is a data corruption risk</strong> — if Plan 12 imports 309
+catalog entries as <code>accepted</code>, any subsequent <code>sn build</code> on overlapping names
+will downgrade them to <code>drafted</code> and erase catalog-authoritative fields.</p>
+<p>Fix with coalesce for ALL fields:</p>
+<pre><code class="language-cypher">SET sn.description = coalesce(b.description, sn.description),
+    sn.documentation = coalesce(b.documentation, sn.documentation),
+    sn.kind = coalesce(b.kind, sn.kind),
+    sn.tags = coalesce(b.tags, sn.tags),
+    ...
+</code></pre>
+<h3 id="4b-write-all-rich-fields">4b. Write all rich fields</h3>
+<p>Extend <code>write_standard_names()</code> to persist: description, documentation, kind,
+tags, links, ids_paths, validity_domain, constraints, all grammar fields,
+model, generated_at, review_status='drafted'.</p>
+<h3 id="4c-link-unit-has_unit">4c. Link Unit (HAS_UNIT)</h3>
+<p>The schema defines <code>unit</code> with <code>range: Unit</code>. By schema convention
+this creates a <code>HAS_UNIT</code> relationship. After MERGE StandardName:</p>
+<pre><code class="language-cypher">WITH sn, b
+WHERE b.unit IS NOT NULL
+MERGE (u:Unit {id: b.unit})
+MERGE (sn)-[:HAS_UNIT]-&gt;(u)
+</code></pre>
+<h3 id="4d-wire-embedding-generation">4d. Wire embedding generation</h3>
+<p>The persist worker must call <code>embed_descriptions_batch()</code> from
+<code>imas_codex/embeddings/description.py</code> after writing StandardName nodes.
+Without this, Plan 14's MCP vector search returns zero results.</p>
+<pre><code class="language-python"># After write_standard_names()
+from imas_codex.embeddings.description import embed_descriptions_batch
+embed_descriptions_batch(&quot;StandardName&quot;, [n[&quot;id&quot;] for n in validated])
+</code></pre>
+<p><strong>Acceptance:</strong>
+- <code>sn build --ids equilibrium --limit 10</code> generates rich entries
+- Graph query shows StandardName nodes with documentation, kind, tags, unit
+- Re-run doesn't null out existing fields
+- <code>HAS_UNIT</code> relationships exist
+- StandardName nodes have non-null <code>embedding</code> property</p>
+<h2 id="phase-5-update-validate-worker">Phase 5: Update validate worker</h2>
+<p><strong>Files:</strong> <code>imas_codex/standard_names/workers.py</code> (validate_worker)</p>
+<p>Add validation checks:
+- <code>description</code> is present and &lt;120 chars
+- <code>documentation</code> is present and &gt;200 chars
+- <code>unit</code> is valid (matches known Unit nodes or standard SI patterns)
+- <code>kind</code> is valid enum value
+- <code>tags</code> are from controlled vocabulary
+- <code>links</code> reference existing standard names (warn, don't fail)
+- <code>ids_paths</code> contain valid DD paths (check via graph query)</p>
+<p>Report new metrics: <code>doc_present</code>, <code>doc_length_ok</code>, <code>unit_valid</code>, <code>kind_valid</code>.</p>
+<p><strong>Acceptance:</strong> Validate worker reports new metrics in progress display.</p>
+<h2 id="test-plan">Test Plan</h2>
+<h3 id="new-testssntest_graph_opspy-critical-currently-0-tests">New: <code>tests/sn/test_graph_ops.py</code> (CRITICAL — currently 0 tests)</h3>
+<ul>
+<li><code>test_write_standard_names_creates_nodes</code> — write then read back all fields</li>
+<li><code>test_write_standard_names_coalesce</code> — write once, write again with None fields,
+  verify first values preserved (prevents data corruption on re-runs)</li>
+<li><code>test_write_standard_names_dd_relationship</code> — verify HAS_STANDARD_NAME created for DD</li>
+<li><code>test_write_standard_names_signal_relationship</code> — verify HAS_STANDARD_NAME for signals</li>
+<li><code>test_write_standard_names_unit_relationship</code> — verify HAS_UNIT created</li>
+<li><code>test_get_validated_standard_names_filters</code> — confidence and ids_filter work</li>
+<li><code>test_get_existing_standard_names_dedup</code> — returns correct set</li>
+</ul>
+<h3 id="new-testssnconftestpy">New: <code>tests/sn/conftest.py</code></h3>
+<p>Shared fixtures: sample candidates with all fields, mock GraphClient, state factory.</p>
+<h3 id="existing-test-updates">Existing test updates</h3>
+<ul>
+<li><code>tests/sn/test_publish.py</code> — update for new SNCandidate fields</li>
+<li><code>tests/sn/test_review.py</code> — update for new review_status values</li>
+</ul>
+<h2 id="documentation-updates">Documentation Updates</h2>
+<ul>
+<li><code>AGENTS.md</code> — document new schema fields, review_status lifecycle</li>
+<li><code>plans/README.md</code> — update plan status</li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

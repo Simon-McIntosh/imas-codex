@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="12-catalog-import">
+  <meta name="plan-title" content="12: Catalog Feedback Import">
+  <meta name="plan-summary" content="After `sn publish` exports StandardName entries to YAML and a human reviews them via a catalog PR, those edits need to flow back to the graph. Without this feedback loop, the graph diverges from the reviewed catalog.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="11-rich-compose">
+  <meta name="plan-informs" content="13-publish-pipeline,14-mcp-tools-benchmark">
+  <title>12: Catalog Feedback Import | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>12: Catalog Feedback Import</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/12-catalog-import.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> 11 (rich schema — Phase 1 only) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/11-rich-compose.html">Plan 11</a>)</span></li>
+    <li><strong>Enables:</strong> 13 (publish dedup), 14 (SN MCP tools — richer context) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/13-publish-pipeline.html">Plan 13</a>, <a href="/imas-codex/archive/standard-names/14-mcp-tools-benchmark.html">Plan 14</a>)</span></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Ready to implement
+<strong>Depends on:</strong> 11 (rich schema — Phase 1 only)
+<strong>Enables:</strong> 13 (publish dedup), 14 (SN MCP tools — richer context)
+<strong>Agent:</strong> engineer (well-defined: CLI command + graph_ops function)</p>
+<h2 id="problem">Problem</h2>
+<p>After <code>sn publish</code> exports StandardName entries to YAML and a human reviews them
+via a catalog PR, those edits need to flow back to the graph. Without this
+feedback loop, the graph diverges from the reviewed catalog.</p>
+<p><strong>Clean break:</strong> We are NOT importing the previous 309 catalog entries. The
+<code>imas-standard-names-catalog</code> repo will be rebuilt from graph-generated data.
+This plan implements the feedback import for the publish → review → import cycle.</p>
+<h2 id="design-option-b-authority-model">Design: Option B+ Authority Model</h2>
+<p>The catalog YAML is authoritative for <strong>reviewed entries</strong>. The graph is authoritative
+for <strong>drafted candidates</strong> and operational metadata (embeddings, generation batches).</p>
+<p><strong>Authority boundaries:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Owner</th>
+<th>Fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Catalog (YAML)</td>
+<td>name, description, documentation, kind, unit, tags, links, ids_paths, status, constraints, validity_domain, provenance</td>
+</tr>
+<tr>
+<td>Graph only</td>
+<td>embedding, embedded_at, model, generated_at, review_status, confidence, source, source_path</td>
+</tr>
+<tr>
+<td>Derived on import</td>
+<td>grammar fields (from name parse), HAS_UNIT edge (from unit string)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Import rule:</strong> Whole-entry import. Catalog fields always win. Graph-only fields
+are preserved via coalesce. Imported entries get <code>review_status: accepted</code>.</p>
+<h2 id="phase-1-sn-import-catalog-cli-command">Phase 1: <code>sn import-catalog</code> CLI command</h2>
+<p><strong>Files:</strong>
+- <code>imas_codex/cli/sn.py</code> — add <code>import-catalog</code> subcommand
+- <code>imas_codex/standard_names/catalog_import.py</code> — new module</p>
+<h3 id="cli-interface">CLI interface</h3>
+<pre><code class="language-bash"># Import reviewed entries from catalog checkout
+imas-codex sn import-catalog --catalog-dir ../imas-standard-names-catalog/standard_names
+
+# Dry run — show what would be imported
+imas-codex sn import-catalog --catalog-dir &lt;path&gt; --dry-run
+
+# Import only specific tags
+imas-codex sn import-catalog --catalog-dir &lt;path&gt; --tags equilibrium,core-physics
+</code></pre>
+<h3 id="import-logic-catalog_importpy">Import logic (<code>catalog_import.py</code>)</h3>
+<pre><code class="language-python">def import_catalog(
+    catalog_dir: Path,
+    dry_run: bool = False,
+    tag_filter: list[str] | None = None,
+) -&gt; ImportResult:
+    &quot;&quot;&quot;Import YAML catalog entries into graph as accepted StandardName nodes.
+
+    Reads all *.yml files from catalog_dir (recursive), parses each entry,
+    derives grammar fields via name parsing, and MERGEs into the graph.
+
+    Imported entries get review_status='accepted'. Catalog fields overwrite
+    graph fields (catalog is authoritative). Graph-only fields preserved.
+    &quot;&quot;&quot;
+</code></pre>
+<p>Steps:
+1. Walk <code>catalog_dir</code> recursively for <code>*.yml</code> files
+2. Parse each YAML → validate against Pydantic import model
+3. Derive grammar fields by parsing the standard name
+4. MERGE StandardName nodes — catalog fields overwrite, graph-only fields preserved
+5. Set <code>review_status = 'accepted'</code>, <code>imported_at = datetime()</code>
+6. Derive <code>HAS_UNIT</code> relationships from <code>unit</code> field
+7. Derive <code>HAS_STANDARD_NAME</code> relationships from <code>ids_paths</code> field
+   (link to existing IMASNode nodes in the DD graph)
+8. Report: imported, updated, skipped, errors</p>
+<h3 id="graph-write-coalesce-for-graph-only-fields">Graph write — coalesce for graph-only fields</h3>
+<pre><code class="language-cypher">UNWIND $items AS item
+MERGE (sn:StandardName {id: item.name})
+SET sn.description = item.description,
+    sn.documentation = item.documentation,
+    sn.kind = item.kind,
+    sn.unit = item.unit,
+    sn.tags = item.tags,
+    sn.links = item.links,
+    sn.ids_paths = item.ids_paths,
+    sn.constraints = item.constraints,
+    sn.validity_domain = item.validity_domain,
+    sn.review_status = 'accepted',
+    sn.imported_at = datetime(),
+    sn.physical_base = item.physical_base,
+    sn.subject = item.subject,
+    sn.component = item.component,
+    sn.coordinate = item.coordinate,
+    sn.position = item.position,
+    sn.process = item.process,
+    sn.created_at = coalesce(sn.created_at, datetime()),
+    sn.embedding = coalesce(sn.embedding, null),
+    sn.embedded_at = coalesce(sn.embedded_at, null)
+
+WITH sn, item
+WHERE item.unit IS NOT NULL
+MERGE (u:Unit {id: item.unit})
+MERGE (sn)-[:HAS_UNIT]-&gt;(u)
+</code></pre>
+<p>Note: Uses <code>HAS_UNIT</code> not <code>HAS_UNIT</code> per schema convention (range: Unit
+on <code>unit</code> slot auto-generates the relationship type).</p>
+<p><strong>Acceptance:</strong>
+- <code>sn import-catalog --catalog-dir &lt;path&gt; --dry-run</code> reports entries found
+- After import, nodes have <code>review_status: accepted</code>
+- HAS_UNIT relationships exist for entries with units
+- Grammar fields derived from name parsing
+- Graph-only fields (embedding, model, generated_at) preserved</p>
+<h2 id="phase-2-version-tracking">Phase 2: Version tracking</h2>
+<p><strong>Files:</strong> <code>imas_codex/standard_names/catalog_import.py</code></p>
+<p>Add version tracking to imported entries:
+- <code>catalog_commit_sha</code> — git rev-parse HEAD of catalog repo at import time
+- <code>imported_at</code> — timestamp</p>
+<p>Add <code>sn import-catalog --check</code> mode that reports whether graph entries
+match current catalog without importing.</p>
+<p><strong>Acceptance:</strong>
+- Imported nodes have <code>catalog_commit_sha</code> property
+- <code>sn import-catalog --check</code> reports sync status</p>
+<h2 id="test-plan">Test Plan</h2>
+<ul>
+<li>Unit test: YAML parsing and grammar field derivation</li>
+<li>Unit test: import idempotency (re-import same catalog → no changes)</li>
+<li>Unit test: import preserves graph-only fields (embedding, model)</li>
+<li>Unit test: catalog fields overwrite graph fields (authority model)</li>
+<li>Integration test: publish → import round-trip preserves all data</li>
+</ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="11-publish-validation">
+  <meta name="plan-title" content="11: Publish Validation + Graph-Backed Staging">
+  <meta name="plan-summary" content="Two issues with the current write/publish flow:">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="09-sn-generate,10-pipeline-fixes">
+  <title>11: Publish Validation + Graph-Backed Staging | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>11: Publish Validation + Graph-Backed Staging</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/11-publish-validation.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> 09 (schema providers + LLM compose), 10 (pipeline fixes) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/09-sn-generate.html">Plan 09</a>, <a href="/imas-codex/archive/standard-names/10-pipeline-fixes.html">Plan 10</a>)</span></li>
+    <li><strong>Active plan links preserved:</strong> <a href="/imas-codex/sn-search-facility.html">Plan 40</a>, <a href="/imas-codex/sn-closed-physical-base.html">Plan 41</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Pending
+<strong>Priority:</strong> High — prevents publishing invalid entries to catalog
+<strong>Depends on:</strong> 09 (schema providers + LLM compose), 10 (pipeline fixes)
+<strong>Effort:</strong> 1-2 days</p>
+<h2 id="problem">Problem</h2>
+<p>Two issues with the current write/publish flow:</p>
+<h3 id="a-no-validation-gate">A. No validation gate</h3>
+<p>The <code>sn publish</code> command converts StandardName graph nodes to YAML catalog
+files, but only checks for filename collisions. It does NOT validate that
+the generated entries conform to the catalog's grammar, schema, or semantic rules.</p>
+<h3 id="b-no-staging-or-rollback">B. No staging or rollback</h3>
+<p>The pipeline holds results in plain Python lists (<code>state.candidates</code>,
+<code>state.composed</code>) with no transactional semantics. If the compose worker
+crashes midway through a batch, partial results are lost. There's no
+"validate-before-commit" gate — names go straight from the LLM to the
+graph via <code>write_standard_names()</code>.</p>
+<p>The <code>imas-standard-names</code> UnitOfWork pattern provides exactly this:
+- In-memory staging with add/update/remove/rename operations
+- Undo stack with typed operations (UndoOpAdd, UndoOpDelete, etc.)
+- Validation gate before commit
+- Rollback on failure</p>
+<h2 id="approach">Approach</h2>
+<h3 id="phase-4a-validation-gate-for-publish">Phase 4a: Validation gate for publish</h3>
+<p>Import validation functions from <code>imas_standard_names</code> and run them
+against generated entries before writing YAML.</p>
+<pre><code class="language-python">from imas_standard_names.grammar import compose_standard_name, parse_standard_name
+from imas_standard_names.grammar.field_schemas import FIELD_GUIDANCE
+from imas_standard_names.services import validate_models
+</code></pre>
+<h3 id="phase-4b-graph-backed-staging">Phase 4b: Graph-backed staging</h3>
+<p>Adapt the UnitOfWork pattern for graph-backed persistence. The key insight:</p>
+<p><strong>The YAML UnitOfWork commits by writing YAML files. The graph UnitOfWork
+commits by writing to Neo4j.</strong> The staging, validation, undo, and rollback
+mechanics are identical — only the persistence backend changes.</p>
+<pre><code class="language-python">class GraphUnitOfWork:
+    &quot;&quot;&quot;In-memory staging with graph persistence commit boundary.&quot;&quot;&quot;
+
+    def __init__(self):
+        self._staged: dict[str, StandardNameEntry] = {}
+        self._undo: list[UndoOp] = []
+
+    def add(self, entry: StandardNameEntry) -&gt; None:
+        if entry.name in self._staged:
+            raise ValueError(f&quot;'{entry.name}' already staged&quot;)
+        self._staged[entry.name] = entry
+        self._undo.append(UndoOpAdd(entry.name))
+
+    def validate(self) -&gt; list[str]:
+        &quot;&quot;&quot;Run all validation checks. Returns list of error strings.&quot;&quot;&quot;
+        errors = []
+        for entry in self._staged.values():
+            # Grammar round-trip
+            errors.extend(self._check_grammar(entry))
+            # Schema conformance
+            errors.extend(self._check_schema(entry))
+        # Cross-entry semantic checks
+        errors.extend(self._check_semantic_conflicts())
+        return errors
+
+    def commit(self) -&gt; int:
+        &quot;&quot;&quot;Validate and write all staged entries to graph.
+
+        Returns the number of entries written. Raises ValueError if
+        validation fails (entries remain staged for correction).
+        &quot;&quot;&quot;
+        issues = self.validate()
+        if issues:
+            raise ValueError(&quot;Validation failed:\n&quot; + &quot;\n&quot;.join(issues))
+        written = write_standard_names([e.model_dump() for e in self._staged.values()])
+        self._staged.clear()
+        self._undo.clear()
+        return written
+
+    def rollback(self) -&gt; None:
+        &quot;&quot;&quot;Discard all staged entries.&quot;&quot;&quot;
+        self._staged.clear()
+        self._undo.clear()
+</code></pre>
+<p>The compose worker stages results instead of accumulating in plain lists:</p>
+<pre><code class="language-python"># Before (no staging):
+state.composed.append(result.model_dump())
+
+# After (staged):
+state.staging.add(StandardNameEntry(**result.model_dump()))
+</code></pre>
+<p>The validate worker calls <code>state.staging.validate()</code> and only commits
+entries that pass all checks.</p>
+<h2 id="files-to-createmodify">Files to Create/Modify</h2>
+<h3 id="new-imas_codexstandard_namesstagingpy">New: <code>imas_codex/standard_names/staging.py</code></h3>
+<p>Graph-backed UnitOfWork with:
+- <code>add()</code>, <code>update()</code>, <code>remove()</code> with undo stack
+- <code>validate()</code> importing <code>imas_standard_names</code> validation
+- <code>commit()</code> calling <code>write_standard_names()</code>
+- <code>rollback()</code> discarding staged entries</p>
+<h3 id="modify-imas_codexstandard_namespublishpy">Modify: <code>imas_codex/standard_names/publish.py</code></h3>
+<p>Add validation step between entry generation and YAML writing:</p>
+<pre><code class="language-python">for entry in entries:
+    # Grammar round-trip
+    parsed = parse_standard_name(entry.name)
+    recomposed = parsed.compose()
+    if recomposed != entry.name:
+        report_warning(f&quot;Round-trip mismatch: {entry.name} → {recomposed}&quot;)
+
+    # Schema validation
+    try:
+        create_standard_name_entry(entry.to_dict())
+    except ValidationError as e:
+        report_error(f&quot;Schema-invalid: {entry.name}: {e}&quot;)
+</code></pre>
+<h3 id="modify-imas_codexstandard_namesstatepy">Modify: <code>imas_codex/standard_names/state.py</code></h3>
+<p>Add <code>staging: GraphUnitOfWork</code> field, replacing plain list accumulation.</p>
+<h3 id="modify-imas_codexstandard_namesworkerspy">Modify: <code>imas_codex/standard_names/workers.py</code></h3>
+<ul>
+<li>Compose worker stages results via <code>state.staging.add()</code></li>
+<li>Validate worker calls <code>state.staging.validate()</code></li>
+<li>Final write uses <code>state.staging.commit()</code></li>
+</ul>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<ul>
+<li><code>sn publish --dry-run</code> shows validation summary:
+  <code>Publish Validation:
+    Grammar: 42/45 passed (3 failed)
+    Schema: 41/45 passed (4 failed)
+    Publishable: 40 entries</code></li>
+<li>Grammar-invalid names are excluded from output</li>
+<li>Schema-invalid entries are excluded from output</li>
+<li>Compose worker uses staging instead of plain lists</li>
+<li>If compose worker crashes mid-batch, <code>rollback()</code> clears partial results</li>
+<li><code>--force</code> flag overrides warnings (but not errors)</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<ul>
+<li>Unit test: GraphUnitOfWork add/validate/commit/rollback cycle</li>
+<li>Unit test: validation catches invalid grammar, missing fields, bad tags</li>
+<li>Unit test: undo stack correctly reverts operations</li>
+<li>Integration: <code>sn publish --dry-run</code> with known-bad entries</li>
+<li>Integration: <code>sn build</code> with crash simulation (verify rollback)</li>
+</ul>
+<h2 id="design-decision-unitofwork-vs-plain-lists">Design Decision: UnitOfWork vs Plain Lists</h2>
+<p><strong>Why keep UnitOfWork even with Neo4j?</strong></p>
+<p>Neo4j has ACID transactions, but that only covers the <em>write</em> boundary.
+The UnitOfWork pattern adds value at the <em>staging</em> boundary:</p>
+<ol>
+<li><strong>Validate-before-commit</strong> — catch grammar/schema errors BEFORE touching
+   the graph, not after. Failed validation doesn't create orphan nodes.</li>
+<li><strong>Batch rollback</strong> — if the LLM produces garbage for one IDS batch,
+   discard just that batch without affecting earlier successes.</li>
+<li><strong>Undo stack</strong> — the review worker can flag entries for removal;
+   undo preserves the original for debugging.</li>
+<li><strong>Clean separation</strong> — "proposed" entries live in staging until explicitly
+   committed. The graph only contains validated, committed names.</li>
+</ol>
+    </section>
+  </main>
+</body>
+</html>

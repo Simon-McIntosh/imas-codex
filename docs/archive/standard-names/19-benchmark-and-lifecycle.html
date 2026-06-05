@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="19-benchmark-and-lifecycle">
+  <meta name="plan-title" content="19: SN Benchmark Parity, Lifecycle Management &amp; Model Selection">
+  <meta name="plan-summary" content="Three blockers prevent production-quality standard name minting:">
+  <meta name="plan-status" content="done">
+  <title>19: SN Benchmark Parity, Lifecycle Management &amp; Model Selection | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>19: SN Benchmark Parity, Lifecycle Management &amp; Model Selection</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/19-benchmark-and-lifecycle.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Supersedes:</strong> Plans 16, 17, 18</li>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/39-structured-fanout.md">Plan 39</a>, <a href="/imas-codex/sn-search-facility.html">Plan 40</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> Ready to implement
+<strong>Supersedes:</strong> Plans 16, 17, 18
+<strong>Scope:</strong> DD source only — signals source parity is future work
+<strong>Agent type:</strong> Fleet (4 phases, parallel where possible)</p>
+<h2 id="problem-statement">Problem Statement</h2>
+<p>Three blockers prevent production-quality standard name minting:</p>
+<ol>
+<li>
+<p><strong>Benchmark/mint prompt parity gap</strong> — <code>sn benchmark</code> uses user-only messages
+   with thin grammar context. <code>sn mint</code> uses system/user split with full context
+   (grammar rules, vocabulary, examples, cluster context). Benchmark results
+   don't reflect production behavior, prompt caching can't work, and model
+   selection decisions are unreliable.</p>
+</li>
+<li>
+<p><strong>No reset/clear for standard names</strong> — All other discovery domains have
+   <code>--reset-to</code> infrastructure. StandardName is cross-facility (no <code>facility_id</code>),
+   so needs adapted scoping by <code>review_status</code>, <code>source</code>, and <code>ids_filter</code>.</p>
+</li>
+<li>
+<p><strong>Weak reviewer and thin reference set</strong> — 30 reference entries from 4 IDSs,
+   ad-hoc inline reviewer prompt, no calibration examples, no structured scoring.</p>
+</li>
+</ol>
+<h2 id="architecture-notes">Architecture Notes</h2>
+<h3 id="standardname-node-ownership-model">StandardName node ownership model</h3>
+<p>A <code>StandardName</code> node can be linked to multiple DD paths or facility signals via
+<code>(IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn)</code> relationships. <code>clear</code> and <code>reset</code>
+operations must:</p>
+<ol>
+<li>Filter/remove <strong>relationships</strong> first</li>
+<li>Only delete the <code>StandardName</code> <strong>node</strong> if it becomes orphaned (no remaining
+   <code>HAS_STANDARD_NAME</code> edges pointing to it)</li>
+</ol>
+<p>This prevents corrupting names that are shared across sources.</p>
+<h3 id="prompt-caching-architecture">Prompt caching architecture</h3>
+<p>Caching is provider-side (OpenRouter). Our infrastructure already supports it:
+- <code>inject_cache_control()</code> adds <code>cache_control: {"type": "ephemeral"}</code> breakpoints
+- <code>openrouter/</code> model prefix preserves these blocks through LiteLLM
+- OpenRouter returns <code>usage.cache_creation_input_tokens</code> and
+  <code>usage.cache_read_input_tokens</code></p>
+<p>The fix is to use the same prompt architecture as mint, then confirm caching works
+by reading cache token counts from the LLM response metadata.</p>
+<h3 id="lifecycle-states-from-current-graph-reality">Lifecycle states (from current graph reality)</h3>
+<p>Only these <code>review_status</code> values are persisted: <code>drafted</code>, <code>published</code>, <code>accepted</code>.
+The plan does not assume <code>rejected</code>, <code>skipped</code>, or <code>imported</code> exist unless
+explicitly added.</p>
+<hr>
+<h2 id="phase-1-foundation-2-parallel-agents">Phase 1: Foundation (2 parallel agents)</h2>
+<h3 id="phase-1a-benchmark-prompt-parity-sonnet-46-engineer">Phase 1A: Benchmark prompt parity — Sonnet 4.6 (engineer)</h3>
+<p><strong>Files:</strong>
+- <code>imas_codex/standard_names/benchmark.py</code> — main changes
+- <code>tests/sn/test_benchmark.py</code> — update tests</p>
+<p><strong>Changes:</strong></p>
+<ol>
+<li>
+<p><strong>Replace <code>_run_model()</code> prompt construction</strong> with the mint pipeline's pattern:
+   <code>python
+   from imas_codex.standard_names.context import build_compose_context
+   context = build_compose_context()
+   system_prompt = render_prompt("sn/compose_system", context)
+   # ... per batch:
+   user_context = {
+       "items": items,
+       "ids_name": group_key,
+       "existing_names": sorted(existing)[:200],
+       "cluster_context": batch.get("context", ""),
+       **context,
+   }
+   user_prompt = render_prompt("sn/compose_dd", user_context)
+   messages = [
+       {"role": "system", "content": system_prompt},
+       {"role": "user", "content": user_prompt},
+   ]</code></p>
+</li>
+<li>
+<p><strong>Render system prompt once</strong> before the model loop in <code>run_benchmark()</code>,
+   pass it to <code>_run_model()</code> as a parameter (matches mint pattern in workers.py:152).</p>
+</li>
+<li>
+<p><strong>Fix <code>_extract_candidates()</code></strong> to preserve <code>batch.context</code> (cluster_context):
+   <code>python
+   result.append({
+       "group_key": batch.group_key,
+       "items": batch.items,
+       "existing_names": list(batch.existing_names),
+       "context": batch.context,  # ADD THIS
+   })</code></p>
+</li>
+<li>
+<p><strong>Remove <code>build_grammar_context()</code></strong> from benchmark.py. It is replaced by
+   <code>build_compose_context()</code> from <code>context.py</code>. The <code>coordinates</code> key currently
+   maps to <code>Component</code> enum — this bug goes away because <code>build_compose_context()</code>
+   handles it correctly.</p>
+</li>
+<li>
+<p><strong>Update <code>run_benchmark()</code></strong> to pass <code>context</code> and <code>system_prompt</code> through.</p>
+</li>
+<li>
+<p><strong>Basic cache smoke test</strong>: After prompt parity changes, run benchmark with
+   2+ batches and a single model. Log <code>cache_creation_input_tokens</code> and
+   <code>cache_read_input_tokens</code> from the response. Phase 1A is not complete until
+   cache usage is confirmed in logs. If the response object from
+   <code>acall_llm_structured()</code> does not currently expose cache fields, add logging
+   of the raw <code>usage</code> dict.</p>
+</li>
+<li>
+<p><strong>Update tests</strong>: <code>test_build_grammar_context_keys</code> in <code>test_benchmark.py</code>
+   imports <code>build_grammar_context</code> — update or replace with tests that verify
+   the benchmark uses <code>build_compose_context()</code>. Add test that extraction
+   preserves <code>context</code> field. Add test that <code>_run_model()</code> constructs
+   <code>[system, user]</code> messages.</p>
+</li>
+</ol>
+<p><strong>Acceptance criteria:</strong>
+- <code>sn benchmark</code> uses identical prompt construction as <code>sn mint</code>
+- System/user message split enables prompt caching
+- <code>cluster_context</code> is preserved through extraction
+- Cache usage confirmed in logs (cache_creation or cache_read tokens &gt; 0)
+- All existing tests pass, new tests cover parity</p>
+<h3 id="phase-1b-lifecycle-management-sonnet-46-engineer">Phase 1B: Lifecycle management — Sonnet 4.6 (engineer)</h3>
+<p><strong>Files:</strong>
+- <code>imas_codex/standard_names/graph_ops.py</code> — add reset/clear functions
+- <code>imas_codex/cli/sn.py</code> — add <code>sn reset</code> and <code>sn clear</code> commands
+- <code>tests/sn/test_graph_ops.py</code> — add tests</p>
+<p><strong>Changes:</strong></p>
+<ol>
+<li>
+<p><strong>Add <code>reset_standard_names()</code></strong> to graph_ops.py:
+   <code>python
+   def reset_standard_names(
+       *,
+       from_status: str = "drafted",
+       to_status: str | None = None,  # None = clear fields only
+       source_filter: str | None = None,
+       ids_filter: str | None = None,
+       dry_run: bool = False,
+   ) -&gt; int:</code>
+   Fields to clear on reset: <code>embedding</code>, <code>embedded_at</code>, <code>model</code>, <code>generated_at</code>,
+   <code>confidence</code>. Fields to preserve: <code>id</code>, <code>source</code>, <code>source_path</code>, <code>created_at</code>.
+   Relationships to remove: <code>HAS_STANDARD_NAME</code>, <code>HAS_UNIT</code>.</p>
+</li>
+<li>
+<p><strong>Add <code>clear_standard_names()</code></strong> to graph_ops.py:
+   <code>python
+   def clear_standard_names(
+       *,
+       status_filter: list[str] | None = None,
+       source_filter: str | None = None,
+       ids_filter: str | None = None,
+       include_accepted: bool = False,
+       dry_run: bool = False,
+   ) -&gt; int:</code>
+   <strong>Safety model (relationship-first):</strong>
+   - When <code>ids_filter</code> or <code>source_filter</code> is set, delete matching
+     <code>HAS_STANDARD_NAME</code> relationships first
+   - Then delete <code>StandardName</code> nodes that have zero remaining
+     <code>HAS_STANDARD_NAME</code> edges (orphaned)
+   - Default: only delete nodes with <code>review_status IN ['drafted']</code>
+   - Accepted names require explicit <code>--include-accepted</code> flag (not just
+     <code>--confirm</code> — the flag name must be unambiguous)
+   - Always log count before deletion
+   - <code>dry_run</code> returns count without deleting</p>
+</li>
+<li>
+<p><strong>Add <code>sn reset</code> CLI command:</strong>
+   <code>bash
+   imas-codex sn reset --status drafted
+   imas-codex sn reset --status published --to drafted
+   imas-codex sn reset --status drafted --source dd --ids equilibrium
+   imas-codex sn reset --dry-run</code></p>
+</li>
+<li>
+<p><strong>Add <code>sn clear</code> CLI command:</strong>
+   <code>bash
+   imas-codex sn clear --status drafted
+   imas-codex sn clear --status drafted --source dd --ids equilibrium
+   imas-codex sn clear --all --include-accepted  # dangerous
+   imas-codex sn clear --dry-run</code></p>
+</li>
+<li>
+<p><strong>Wire <code>--reset-to</code> into <code>sn mint</code>:</strong>
+   <code>python
+   @click.option("--reset-to", type=click.Choice(["extracted", "drafted"]))</code>
+   - <code>extracted</code> = clear matching SN nodes, re-run full pipeline
+   - <code>drafted</code> = reset existing drafted names, re-compose</p>
+</li>
+<li>
+<p><strong>Tests:</strong> Unit tests for <code>reset_standard_names()</code> and
+   <code>clear_standard_names()</code>. Test that clear refuses accepted without
+   <code>include_accepted</code>. Test relationship-first deletion logic. Test <code>--reset-to</code>
+   triggers reset before pipeline.</p>
+</li>
+</ol>
+<p><strong>Acceptance criteria:</strong>
+- <code>sn reset --status drafted</code> resets nodes and clears embeddings
+- <code>sn clear --status drafted</code> deletes only drafted names
+- <code>sn clear --all</code> requires <code>--include-accepted</code> for accepted names
+- Scoped clear (by IDS/source) removes relationships first, orphans only
+- <code>sn status</code> shows correct counts after reset/clear
+- <code>sn mint --reset-to drafted</code> resets then rebuilds</p>
+<hr>
+<h2 id="phase-2-calibration-reviewer-2-parallel-agents">Phase 2: Calibration &amp; Reviewer (2 parallel agents)</h2>
+<p><strong>Depends on:</strong> Phase 1A (benchmark parity must be fixed)</p>
+<h3 id="phase-2a-expand-gold-reference-sonnet-46-engineer">Phase 2A: Expand gold reference — Sonnet 4.6 (engineer)</h3>
+<p><strong>Files:</strong>
+- <code>imas_codex/standard_names/benchmark_reference.py</code>
+- <code>tests/sn/test_benchmark.py</code></p>
+<p><strong>Changes:</strong></p>
+<ol>
+<li>Expand <code>REFERENCE_NAMES</code> from 30 to ~50 entries:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>IDS</th>
+<th>Current</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>equilibrium</td>
+<td>18</td>
+<td>20</td>
+</tr>
+<tr>
+<td>core_profiles</td>
+<td>6</td>
+<td>10</td>
+</tr>
+<tr>
+<td>magnetics</td>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>summary</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>core_transport</td>
+<td>0</td>
+<td>4</td>
+</tr>
+<tr>
+<td>mhd_linear</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>nbi</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>edge_profiles</td>
+<td>0</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>
+<p>Fix the questionable rogowski_coil reference entry (maps <code>major_radius</code>
+   position to <code>rogowski_coil</code> object, which is not physically meaningful).</p>
+</li>
+<li>
+<p>Source new entries from <code>imas-standard-names</code> package's
+   <code>resources/standard_name_examples/</code> where available. Use DD search tools
+   to find appropriate source paths for each IDS.</p>
+</li>
+<li>
+<p>All entries must pass round-trip validation at import time (existing
+   infrastructure enforces this).</p>
+</li>
+<li>
+<p>Update test that checks reference count.</p>
+</li>
+</ol>
+<p><strong>Acceptance criteria:</strong>
+- 50+ reference entries across 8+ IDSs
+- All entries pass grammar round-trip
+- Rogowski_coil entry fixed or removed
+- Tests updated and passing</p>
+<h3 id="phase-2b-calibration-dataset-reviewer-enhancement-opus-46-architect">Phase 2B: Calibration dataset &amp; reviewer enhancement — Opus 4.6 (architect)</h3>
+<p><strong>Files:</strong>
+- <code>imas_codex/standard_names/benchmark_calibration.yaml</code> (new)
+- <code>imas_codex/llm/prompts/sn/review_benchmark.md</code> (new template)
+- <code>imas_codex/standard_names/benchmark.py</code> — update <code>score_with_reviewer()</code>
+- <code>imas_codex/standard_names/benchmark_labels.yaml</code> — retire (replaced by calibration)
+- <code>tests/sn/test_benchmark.py</code></p>
+<p><strong>Changes:</strong></p>
+<ol>
+<li><strong>Create calibration dataset</strong> (<code>benchmark_calibration.yaml</code>):
+   ~15 hand-crafted full entries spanning 4 quality tiers. Source outstanding/good
+   entries from <code>imas-standard-names</code> examples. Hand-craft poor examples.</li>
+</ol>
+<p><code>yaml
+   entries:
+     - name: electron_temperature
+       tier: outstanding
+       expected_score: 95
+       description: "Temperature of the electron population."
+       documentation: &gt;
+         Electron temperature $T_e$ is a fundamental plasma parameter...
+       unit: eV
+       kind: scalar
+       tags: [core_profiles, equilibrium]
+       fields:
+         physical_base: temperature
+         subject: electron
+       reason: &gt;
+         Canonical physics quantity. Rich documentation. Perfect grammar.</code></p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Count</th>
+<th>Score Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>outstanding</td>
+<td>4</td>
+<td>85-100</td>
+</tr>
+<tr>
+<td>good</td>
+<td>4</td>
+<td>60-79</td>
+</tr>
+<tr>
+<td>adequate</td>
+<td>4</td>
+<td>40-59</td>
+</tr>
+<tr>
+<td>poor</td>
+<td>3</td>
+<td>0-39</td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li>
+<p><strong>Create reviewer prompt template</strong> (<code>sn/review_benchmark.md</code>):
+   Proper Jinja2 template with system/user split. Includes grammar rules,
+   calibration entries as anchors, and structured rubric.</p>
+</li>
+<li>
+<p><strong>Add 5-dimensional scoring</strong> to <code>QualityReview</code> model:
+   <code>python
+   class QualityReview(BaseModel):
+       name: str
+       quality_tier: str
+       score: int = Field(ge=0, le=100)
+       grammar_score: int = Field(ge=0, le=20)
+       semantic_score: int = Field(ge=0, le=20)
+       documentation_score: int = Field(ge=0, le=20)
+       convention_score: int = Field(ge=0, le=20)
+       completeness_score: int = Field(ge=0, le=20)
+       reasoning: str</code></p>
+</li>
+<li>
+<p><strong>Update <code>score_with_reviewer()</code></strong>: Replace inline rubric string with
+   template rendering. Use system/user message split (enables caching for
+   multi-batch reviewer runs). Load calibration entries and pass as template
+   context.</p>
+</li>
+<li>
+<p><strong>Retire <code>benchmark_labels.yaml</code></strong> — replaced by calibration dataset.
+   Update <code>load_quality_labels()</code> or replace with calibration loader.</p>
+</li>
+</ol>
+<p><strong>Acceptance criteria:</strong>
+- Calibration YAML loads and validates (15 entries, 4 tiers)
+- Reviewer uses Jinja2 template with system/user split
+- 5-dimensional scores sum to 0-100
+- Calibration entries appear as scoring anchors in reviewer prompt
+- Running benchmark with <code>--reviewer-model</code> produces dimensional scores
+- Tests for calibration loading, template rendering, review model</p>
+<hr>
+<h2 id="phase-3-cache-reporting-model-selection-runbook-opus-46-architect">Phase 3: Cache Reporting &amp; Model Selection Runbook — Opus 4.6 (architect)</h2>
+<p><strong>Depends on:</strong> Phase 2 (needs calibrated benchmark for meaningful results)</p>
+<p><strong>Files:</strong>
+- <code>imas_codex/standard_names/benchmark.py</code> — add cache reporting to ModelResult and table
+- <code>plans/features/standard-names/model-selection-runbook.md</code> (new)</p>
+<p><strong>Changes:</strong></p>
+<ol>
+<li>
+<p><strong>Add cache hit reporting</strong> to <code>ModelResult</code>:
+   <code>python
+   cache_read_tokens: int = 0
+   cache_creation_tokens: int = 0</code>
+   Extract from response metadata in <code>_run_model()</code>. Check what <code>litellm</code>
+   exposes — OpenRouter includes <code>usage.cache_creation_input_tokens</code> and
+   <code>usage.cache_read_input_tokens</code>. If <code>acall_llm_structured()</code> doesn't
+   currently return these, extend its return or add response metadata logging.</p>
+</li>
+<li>
+<p><strong>Add "Cache %" column</strong> to <code>render_comparison_table()</code> Rich output.
+   Calculate as <code>cache_read / (cache_read + cache_creation) * 100</code>.</p>
+</li>
+<li>
+<p><strong>Create model selection runbook</strong> — a document (in plans/) with:
+   - Exact CLI commands to run multi-model comparison
+   - Cost cap per run ($2 maximum per benchmark execution)
+   - Approved model list with openrouter/ prefixes
+   - Decision criteria table:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Weight</th>
+<th>Threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar valid %</td>
+<td>Critical</td>
+<td>≥95%</td>
+</tr>
+<tr>
+<td>Fields consistent %</td>
+<td>High</td>
+<td>≥85%</td>
+</tr>
+<tr>
+<td>Reference recall</td>
+<td>High</td>
+<td>≥60%</td>
+</tr>
+<tr>
+<td>Avg quality score</td>
+<td>High</td>
+<td>≥65</td>
+</tr>
+<tr>
+<td>Cost per name</td>
+<td>Medium</td>
+<td>&lt;$0.01</td>
+</tr>
+<tr>
+<td>Names/min</td>
+<td>Medium</td>
+<td>&gt;30</td>
+</tr>
+<tr>
+<td>Cache hit rate</td>
+<td>Low</td>
+<td>&gt;50%</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<ul>
+<li>Recommended model candidates for compose and review phases</li>
+<li>Instructions for interpreting results</li>
+</ul>
+<ol start="4">
+<li><strong>Run one validation benchmark</strong> (cost-capped at $1) with a single model
+   to confirm the full stack works end-to-end: prompt parity + caching +
+   calibrated reviewer + dimensional scoring.</li>
+</ol>
+<p><strong>Acceptance criteria:</strong>
+- Cache hit/miss tokens reported in benchmark output
+- Model selection runbook written with exact CLI invocations
+- One successful end-to-end benchmark run with dimensional scoring</p>
+<hr>
+<h2 id="phase-4-documentation-sonnet-46-engineer">Phase 4: Documentation — Sonnet 4.6 (engineer)</h2>
+<p><strong>Depends on:</strong> Phases 1-3</p>
+<p><strong>Files:</strong>
+- <code>AGENTS.md</code> — update SN CLI section
+- <code>.github/skills/project-dev/SKILL.md</code> — add SN testing info
+- <code>.github/skills/service-ops/SKILL.md</code> — add LLM proxy for SN context
+- <code>.github/agents/engineer.agent.md</code> — mention SN pipeline
+- <code>agents/README.md</code> — update if needed
+- <code>plans/features/standard-names/00-implementation-order.md</code> — update status
+- Delete superseded plans: 16, 17, 18</p>
+<p><strong>Changes:</strong></p>
+<ol>
+<li>
+<p><strong>AGENTS.md updates:</strong>
+   - Update CLI command table: add <code>sn reset</code>, <code>sn clear</code>, <code>sn mint --reset-to</code>
+   - Update StandardName lifecycle section with reset/clear semantics
+   - Add cache verification notes to benchmark section
+   - Document model selection workflow</p>
+</li>
+<li>
+<p><strong>Skill updates</strong> (informative, not prescriptive):
+   - <code>project-dev/SKILL.md</code>: Add SN test commands
+     (<code>uv run pytest tests/sn/ -v</code>), note that SN tests don't require
+     Neo4j unless marked <code>@pytest.mark.graph</code>
+   - <code>service-ops/SKILL.md</code>: Add note that <code>sn mint</code> and <code>sn benchmark</code>
+     require the LLM proxy to be running. Document how to check proxy
+     status and what ports are involved. Mention that prompt caching is
+     provider-side via OpenRouter.</p>
+</li>
+<li>
+<p><strong>Agent updates</strong> (informative, not prescriptive):
+   - <code>engineer.agent.md</code>: Add SN module to list of commonly-modified
+     areas (imas_codex/standard_names/, tests/sn/, imas_codex/llm/prompts/sn/)
+   - <code>agents/README.md</code>: Mention SN pipeline if not already covered</p>
+</li>
+<li>
+<p><strong>Plan cleanup:</strong>
+   - Delete <code>16-benchmark-parity.md</code>, <code>17-sn-lifecycle-management.md</code>,
+     <code>18-benchmark-calibration.md</code> (superseded by this plan)
+   - Update <code>00-implementation-order.md</code> with Plan 19 status</p>
+</li>
+</ol>
+<p><strong>Acceptance criteria:</strong>
+- All documentation reflects current CLI commands and workflows
+- Skills are informative (describe what exists, not what to do)
+- Superseded plans deleted
+- Implementation order updated</p>
+<hr>
+<h2 id="fleet-dispatch-summary">Fleet Dispatch Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Agent</th>
+<th>Model</th>
+<th>Depends On</th>
+<th>Parallel With</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1A</td>
+<td>engineer</td>
+<td>Sonnet 4.6</td>
+<td>—</td>
+<td>1B</td>
+</tr>
+<tr>
+<td>1B</td>
+<td>engineer</td>
+<td>Sonnet 4.6</td>
+<td>—</td>
+<td>1A</td>
+</tr>
+<tr>
+<td>2A</td>
+<td>engineer</td>
+<td>Sonnet 4.6</td>
+<td>1A</td>
+<td>2B</td>
+</tr>
+<tr>
+<td>2B</td>
+<td>architect</td>
+<td>Opus 4.6</td>
+<td>1A</td>
+<td>2A</td>
+</tr>
+<tr>
+<td>3</td>
+<td>architect</td>
+<td>Opus 4.6</td>
+<td>2A, 2B</td>
+<td>—</td>
+</tr>
+<tr>
+<td>4</td>
+<td>engineer</td>
+<td>Sonnet 4.6</td>
+<td>3</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total: 6 agent dispatches across 4 phases.</strong></p>
+<p>Phase 1 is fully parallel (2 agents). Phase 2 is fully parallel (2 agents).
+Phases 3 and 4 are sequential.</p>
+<h2 id="test-plan-summary">Test Plan Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Phase</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Benchmark uses system/user messages</td>
+<td>1A</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>Extraction preserves context field</td>
+<td>1A</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>Cache tokens appear in logs</td>
+<td>1A</td>
+<td>test_benchmark.py or manual</td>
+</tr>
+<tr>
+<td><code>build_grammar_context()</code> removed cleanly</td>
+<td>1A</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td><code>reset_standard_names()</code> clears fields</td>
+<td>1B</td>
+<td>test_graph_ops.py</td>
+</tr>
+<tr>
+<td><code>clear_standard_names()</code> relationship-first</td>
+<td>1B</td>
+<td>test_graph_ops.py</td>
+</tr>
+<tr>
+<td>Clear refuses accepted without flag</td>
+<td>1B</td>
+<td>test_graph_ops.py</td>
+</tr>
+<tr>
+<td>Reference set round-trip (50+ entries)</td>
+<td>2A</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>Calibration YAML loads</td>
+<td>2B</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>Reviewer template renders</td>
+<td>2B</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>QualityReview 5-dimensional model</td>
+<td>2B</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>Cache reporting in output</td>
+<td>3</td>
+<td>test_benchmark.py</td>
+</tr>
+<tr>
+<td>E2E benchmark with scoring</td>
+<td>3</td>
+<td>manual (cost-capped)</td>
+</tr>
+</tbody>
+</table>
+    </section>
+  </main>
+</body>
+</html>

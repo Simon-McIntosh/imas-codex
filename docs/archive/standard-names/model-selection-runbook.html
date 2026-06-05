@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="model-selection-runbook">
+  <meta name="plan-title" content="Model Selection Runbook — Standard Name Generation">
+  <meta name="plan-summary" content="Practical guide for running multi-model benchmarks and selecting the best LLM for each role in the standard name pipeline.">
+  <meta name="plan-status" content="done">
+  <title>Model Selection Runbook — Standard Name Generation | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Model Selection Runbook — Standard Name Generation</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/model-selection-runbook.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/31-quality-bootstrap-v2.md">Plan 31</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/32-extraction-prompt-overhaul.md">Plan 32</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p>Practical guide for running multi-model benchmarks and selecting the best
+LLM for each role in the standard name pipeline.</p>
+<h2 id="quick-start">Quick Start</h2>
+<pre><code class="language-bash"># Compare two models on equilibrium IDS (fast, &lt;$0.50)
+uv run imas-codex sn benchmark \
+  --source dd \
+  --ids equilibrium \
+  --max-candidates 10 \
+  --models google/gemini-3.1-flash-lite-preview,anthropic/claude-sonnet-4-6
+
+# Full benchmark with reviewer scoring (~$1–2)
+uv run imas-codex sn benchmark \
+  --source dd \
+  --max-candidates 50 \
+  --models google/gemini-3.1-flash-lite-preview,anthropic/claude-sonnet-4-6 \
+  --reviewer-model anthropic/claude-sonnet-4-6
+
+# Export results to JSON for offline analysis
+uv run imas-codex sn benchmark \
+  --source dd \
+  --ids equilibrium \
+  --max-candidates 20 \
+  --models google/gemini-3.1-flash-lite-preview \
+  --output benchmark-results.json
+</code></pre>
+<h2 id="cost-cap-guidance">Cost Cap Guidance</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th><code>--max-candidates</code></th>
+<th>Expected cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick smoke test</td>
+<td>5–10</td>
+<td>&lt; $0.20</td>
+</tr>
+<tr>
+<td>Single-IDS compare</td>
+<td>20–30</td>
+<td>$0.30–$0.80</td>
+</tr>
+<tr>
+<td>Full benchmark</td>
+<td>50</td>
+<td>$0.50–$1.50</td>
+</tr>
+<tr>
+<td>Production eval</td>
+<td>100+</td>
+<td>$1.50–$4.00</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Hard rule:</strong> never exceed <strong>$2.00</strong> per benchmark execution during
+development and model selection.  Monitor cost in the output table and
+abort early if needed.</p>
+</blockquote>
+<h2 id="approved-model-list">Approved Model List</h2>
+<p>Models are accessed via the LiteLLM proxy running on the ITER login node.
+The proxy routes requests through OpenRouter. Pass model identifiers as
+configured in <code>pyproject.toml</code> (the proxy handles the <code>openrouter/</code> prefix).</p>
+<h3 id="compose-role-name-generation">Compose Role (name generation)</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Tier</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>google/gemini-3.1-flash-lite-preview</code></td>
+<td>Primary</td>
+<td>Current <code>language</code> config, cheapest</td>
+</tr>
+<tr>
+<td><code>google/gemini-2.5-flash</code></td>
+<td>Alt</td>
+<td>Fast, good grammar</td>
+</tr>
+<tr>
+<td><code>anthropic/claude-sonnet-4-6</code></td>
+<td>Fallback</td>
+<td>Higher quality, 3–5× cost</td>
+</tr>
+<tr>
+<td><code>anthropic/claude-haiku-4</code></td>
+<td>Budget</td>
+<td>Fastest Anthropic, lowest cost</td>
+</tr>
+</tbody>
+</table>
+<h3 id="review-role-quality-scoring">Review Role (quality scoring)</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Tier</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>anthropic/claude-sonnet-4-6</code></td>
+<td>Primary</td>
+<td>Best judgment, calibrated scoring</td>
+</tr>
+<tr>
+<td><code>anthropic/claude-opus-4-6</code></td>
+<td>Premium</td>
+<td>Highest quality, ~10× cost</td>
+</tr>
+<tr>
+<td><code>google/gemini-2.5-pro</code></td>
+<td>Alt</td>
+<td>Strong reasoning, competitive cost</td>
+</tr>
+</tbody>
+</table>
+<h3 id="currently-configured-pyprojecttoml">Currently Configured (pyproject.toml)</h3>
+<pre><code class="language-toml">[tool.imas-codex.language]
+model = &quot;google/gemini-3.1-flash-lite-preview&quot;   # compose
+
+[tool.imas-codex.reasoning]
+model = &quot;anthropic/claude-sonnet-4-6&quot;             # review / complex
+
+[tool.imas-codex.agent]
+model = &quot;anthropic/claude-opus-4-6&quot;               # agent
+</code></pre>
+<h2 id="decision-criteria">Decision Criteria</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Weight</th>
+<th>Threshold</th>
+<th>How to read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar valid %</td>
+<td>Critical</td>
+<td>≥ 95%</td>
+<td>Names must parse→compose round-trip</td>
+</tr>
+<tr>
+<td>Fields consistent %</td>
+<td>High</td>
+<td>≥ 85%</td>
+<td>Decomposed fields reconstruct name</td>
+</tr>
+<tr>
+<td>Reference recall</td>
+<td>High</td>
+<td>≥ 60%</td>
+<td>Overlap with human-curated set</td>
+</tr>
+<tr>
+<td>Avg quality score</td>
+<td>High</td>
+<td>≥ 65</td>
+<td>5-dimensional reviewer rating /100</td>
+</tr>
+<tr>
+<td>Cost per name</td>
+<td>Medium</td>
+<td>&lt; $0.01</td>
+<td>Total API cost ÷ candidate count</td>
+</tr>
+<tr>
+<td>Names/min</td>
+<td>Medium</td>
+<td>&gt; 30</td>
+<td>Throughput including API latency</td>
+</tr>
+<tr>
+<td>Cache hit rate</td>
+<td>Low</td>
+<td>&gt; 50%</td>
+<td>OpenRouter prompt cache utilization</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interpreting-the-table">Interpreting the Table</h3>
+<p>The benchmark outputs a Rich table with these columns:</p>
+<pre><code>Model    Names  Valid%  Fields%  Ref Match  Cost     Names/min  $/name  Cache%  Errors
+gemini   47     100%    96%      28/50      $0.0312  62         $0.0007 78%     0
+claude   45     98%     91%      31/50      $0.1450  18         $0.0032 65%     1
+</code></pre>
+<ul>
+<li><strong>Valid %</strong> — ratio of candidates whose <code>standard_name</code> survives grammar
+  <code>parse_standard_name()</code> → <code>compose_standard_name()</code> round-trip.</li>
+<li><strong>Fields %</strong> — ratio where decomposed grammar fields (<code>subject</code>,
+  <code>physical_base</code>, etc.) recompose to the same name string.</li>
+<li><strong>Ref Match</strong> — <code>overlap/total</code> against the reference dataset
+  (<code>benchmark_reference.py</code>).  Higher recall = more agreement with human picks.</li>
+<li><strong>Cache %</strong> — <code>cache_read / (cache_read + cache_creation)</code> — how much of
+  the system prompt was served from OpenRouter's prompt cache. Higher values
+  reduce cost and latency on subsequent batches.</li>
+<li><strong>Errors</strong> — number of batches where the LLM call failed (timeout,
+  rate limit, parse error).</li>
+</ul>
+<p>When <code>--reviewer-model</code> is used, additional columns appear:</p>
+<ul>
+<li><strong>Avg Quality</strong> — mean 5-dimensional score (0–100).</li>
+<li><strong>Avg Doc Len</strong> — average documentation string length.</li>
+<li><strong>Fields Pop%</strong> — ratio of optional fields populated.</li>
+</ul>
+<h2 id="recommended-selections">Recommended Selections</h2>
+<h3 id="for-compose-name-generation">For compose (name generation)</h3>
+<p>Use the <strong>cheapest model that meets grammar + fields thresholds</strong>:</p>
+<ol>
+<li>Start with <code>google/gemini-3.1-flash-lite-preview</code></li>
+<li>If grammar valid &lt; 95%, try <code>anthropic/claude-sonnet-4-6</code></li>
+<li>If cost per name &gt; $0.01, try <code>google/gemini-2.5-flash</code></li>
+</ol>
+<h3 id="for-review-quality-scoring">For review (quality scoring)</h3>
+<p>Use a <strong>stronger model than compose</strong> for unbiased evaluation:</p>
+<ol>
+<li>Primary: <code>anthropic/claude-sonnet-4-6</code></li>
+<li>If budget allows: <code>anthropic/claude-opus-4-6</code></li>
+</ol>
+<blockquote>
+<p><strong>Never use the same model for both compose and review</strong> — self-review
+inflates quality scores.</p>
+</blockquote>
+<h2 id="prompt-cache-optimization">Prompt Cache Optimization</h2>
+<p>OpenRouter supports provider-level prompt caching. The SN benchmark system
+prompt includes grammar rules and calibration examples that remain constant
+across batches. Cache behavior:</p>
+<ul>
+<li><strong>First batch</strong>: <code>cache_creation_tokens</code> &gt; 0 (system prompt written to cache)</li>
+<li><strong>Subsequent batches</strong>: <code>cache_read_tokens</code> &gt; 0 (system prompt served from cache)</li>
+<li><strong>Cost savings</strong>: cached tokens cost ~75% less than uncached tokens</li>
+</ul>
+<p>To maximize cache hit rate:
+- Run batches in rapid succession (caches expire after ~5 minutes idle)
+- Use the <code>openrouter/</code> prefix (caching is provider-side, not proxy-side)
+- Group batches by model to keep the cache warm</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="llm-proxy-not-running">LLM proxy not running</h3>
+<pre><code class="language-bash"># Check proxy status
+uv run imas-codex hpc status
+
+# Start proxy (requires SSH tunnel to ITER)
+uv run imas-codex llm start
+</code></pre>
+<p>If the proxy is unavailable, the benchmark will fail with connection errors.
+The cache reporting code and grammar validation are tested offline via
+<code>uv run pytest tests/sn/test_benchmark.py -v</code>.</p>
+<h3 id="budget-exhausted">Budget exhausted</h3>
+<p>If you see <code>ProviderBudgetExhausted</code>, either:
+1. The OpenRouter account is out of credits — top up
+2. The <code>--cost-limit</code> was exceeded — increase or reduce <code>--limit</code></p>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="26-sn-pipeline-quality-iteration">
+  <meta name="plan-title" content="26: Standard Name Pipeline Quality Iteration">
+  <meta name="plan-summary" content="Outstanding: 167, Good: 36, Adequate: 32, Poor: 9. 203 good/outstanding (target: 100).">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends" content="25-standalone-review">
+  <meta name="plan-informs" content="sn-quality-parity">
+  <title>26: Standard Name Pipeline Quality Iteration | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>26: Standard Name Pipeline Quality Iteration</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/26-sn-pipeline-quality-iteration.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Depends on:</strong> Plan 25 (standalone review — DONE) <span class="meta-links">(links: <a href="/imas-codex/archive/standard-names/25-standalone-review.html">Plan 25</a>)</span></li>
+    <li><strong>Related:</strong> Plans 20, 23 (pending, lower priority); ISN plan 06 (blocked on this) <span class="meta-links">(links: <a href="/imas-codex/sn-quality-parity.html">Plan 23</a>)</span></li>
+    <li><strong>Active plan links preserved:</strong> <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/31-quality-bootstrap-v2.md">Plan 31</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/32-extraction-prompt-overhaul.md">Plan 32</a>, <a href="/imas-codex/sn-catalog-quality-refactor.html">Plan 36</a>, <a href="https://github.com/Simon-McIntosh/imas-codex/blob/main/plans/features/standard-names/39-structured-fanout.md">Plan 39</a>, <a href="/imas-codex/sn-closed-physical-base.html">Plan 41</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> In Progress — infrastructure DONE, prompt/gap/CLI work TODO
+<strong>Depends on:</strong> Plan 25 (standalone review — DONE)
+<strong>Related:</strong> Plans 20, 23 (pending, lower priority); ISN plan 06 (blocked on this)
+<strong>Agent type:</strong> Engineer</p>
+<h2 id="whats-done">What's Done</h2>
+<h3 id="infrastructure-100">Infrastructure (100%)</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generate pipeline stop_fn</td>
+<td><code>pipeline.py:56</code> — <code>_downstream_should_stop()</code></td>
+</tr>
+<tr>
+<td>Review pipeline stop_fn + persist worker</td>
+<td><code>review/pipeline.py:156</code> — same pattern</td>
+</tr>
+<tr>
+<td>Graph state machine fields</td>
+<td><code>claimed_at</code>, <code>claim_token</code>, <code>validated_at</code>, <code>consolidated_at</code> on StandardName</td>
+</tr>
+<tr>
+<td>Claim/mark/release graph_ops</td>
+<td><code>graph_ops.py:537-762</code> — <code>@retry_on_deadlock</code>, claim tokens</td>
+</tr>
+<tr>
+<td>Standalone review pipeline</td>
+<td><code>review/</code> — EXTRACT, ENRICH, REVIEW, PERSIST (6 modules)</td>
+</tr>
+<tr>
+<td>Review CLI</td>
+<td><code>cli/sn.py:1289</code> — <code>--unreviewed</code>, <code>--re-review</code>, <code>--cost-limit</code></td>
+</tr>
+<tr>
+<td>Vocab gap instruction in user prompt</td>
+<td><code>compose_dd.md:148-156</code> — tells LLM to report gaps</td>
+</tr>
+</tbody>
+</table>
+<h3 id="bootstrap-342-names-target-achieved">Bootstrap (342 names, target achieved)</h3>
+<p>Outstanding: 167, Good: 36, Adequate: 32, Poor: 9. 203 good/outstanding (target: 100).</p>
+<h3 id="investigation-complete">Investigation (complete)</h3>
+<p>Grammar analysis of all 342 names: 222 well-structured, 41 legitimate base-only,
+41 compound-base stuffing, 20 transform-needed, 9 process-needed, 9 parse failures.
+Provenance groups distinguishable via <code>model</code> + <code>review_status</code>. Full evidence in
+ISN plan 06.</p>
+<hr>
+<h2 id="phase-1-compose-prompt-improvements-p0">Phase 1: Compose Prompt Improvements (P0)</h2>
+<p><strong>File:</strong> <code>imas_codex/llm/prompts/shared/sn/_grammar_reference.md</code></p>
+<p>The compose LLM generates grammar errors because the prompt has blind spots. These
+are all additions to the shared grammar reference template.</p>
+<h3 id="1a-process-segment-_due_to_-usage">1A: Process segment <code>_due_to_</code> usage</h3>
+<p>The grammar supports process attribution via <code>_due_to_</code> but the prompt never
+explains this pattern. All 26 process tokens are listed but with no usage guidance.</p>
+<p>Add after "Preposition Usage":</p>
+<ul>
+<li>✅ <code>plasma_current_due_to_bootstrap</code> (process=bootstrap, base=plasma_current)</li>
+<li>✅ <code>heating_power_due_to_ohmic</code> (process=ohmic, base=heating_power)</li>
+<li>❌ <code>bootstrap_current</code> (stuffs process into physical_base)</li>
+<li>❌ <code>ohmic_heating_power</code> (stuffs process into physical_base)</li>
+</ul>
+<h3 id="1b-generic-physical-base-qualification">1B: Generic physical base qualification</h3>
+<p>ISN defines 12 generic physical bases that MUST be qualified. This list is not in
+the prompt — the LLM cannot know <code>velocity</code> alone is invalid.</p>
+<p>Add table: area, current, energy, flux, frequency, number_density, power, pressure,
+temperature, velocity, voltage, volume — each with invalid-alone and qualified examples.</p>
+<h3 id="1c-transformation-boundaries-with-gap-reporting">1C: Transformation boundaries with gap reporting</h3>
+<p>Only 4 transformation tokens exist. The LLM invents others (<code>time_derivative_of</code>,
+<code>second_derivative_of</code>, <code>volume_averaged</code>, etc.). These are valid physics operations
+that ISN grammar does not yet support.</p>
+<p><strong>Do NOT force compromised workarounds.</strong> Instead:
+- List the 4 valid tokens explicitly
+- Instruct the LLM: if you need a transformation not listed, report it as a <code>vocab_gap</code>
+  with segment=transformation and the needed token
+- The LLM should still generate the best name it can (may be base-only) alongside
+  the gap report</p>
+<p>This feeds the ISN feedback loop — gaps become extension proposals.</p>
+<h3 id="1d-known-grammar-ambiguity-warnings">1D: Known grammar ambiguity warnings</h3>
+<p><code>diamagnetic</code> appears in both component and coordinate vocabularies (they share
+all 12 tokens). <code>radial_component_of_diamagnetic_velocity</code> triggers a parse error.</p>
+<p>This is a <strong>grammar ambiguity</strong>, not a vocabulary gap. The prompt should warn about
+known component/coordinate overlap tokens and instruct the LLM to flag affected
+names for ISN grammar review rather than producing broken names.</p>
+<hr>
+<h2 id="phase-2-gap-infrastructure-p0">Phase 2: Gap Infrastructure (P0)</h2>
+<h3 id="2a-vocabgap-node-type-and-cross-schema-relationships">2A: VocabGap node type and cross-schema relationships</h3>
+<p>Gaps are NOT standard names — they must be a separate node type to avoid contaminating
+StandardName lifecycle, extract skip logic, and review pipelines.</p>
+<p>The relationship is <strong><code>HAS_SN_VOCAB_GAP</code></strong> (not <code>HAS_VOCAB_GAP</code>) — scoped to standard
+names because the graph contains facility, DD, and SN domains. Follows the same
+cross-domain pattern as <code>HAS_STANDARD_NAME</code> which is declared in all three schemas.</p>
+<p><strong>Schema changes across 3 files:</strong></p>
+<p><strong>1. <code>imas_codex/schemas/standard_name.yaml</code></strong> — new VocabGap class:</p>
+<pre><code class="language-yaml">VocabGap:
+  description: &gt;-
+    Records a missing grammar token identified during SN composition.
+    Linked to source DD paths and facility signals via HAS_SN_VOCAB_GAP
+    relationships. The node stores the normalized gap concept; per-source
+    evidence (reason, observed_at) lives on the relationships.
+  class_uri: sn:VocabGap
+  attributes:
+    id:
+      identifier: true
+      description: &quot;Format: vocab_gap:{segment}:{needed_token}&quot;
+    segment:
+      description: Grammar segment missing the token (transformation, process, subject, etc.)
+      required: true
+    needed_token:
+      description: The token that should exist
+      required: true
+    example_count:
+      description: Number of source paths that need this token
+      range: integer
+    first_seen_at:
+      range: datetime
+    last_seen_at:
+      range: datetime
+</code></pre>
+<p><strong>2. <code>imas_codex/schemas/imas_dd.yaml</code></strong> — add slot to IMASNode:</p>
+<pre><code class="language-yaml"># In IMASNode.attributes (alongside existing has_standard_name slot):
+has_sn_vocab_gap:
+  description: Grammar vocab gap identified for this DD path
+  range: VocabGap
+  annotations:
+    relationship_type: HAS_SN_VOCAB_GAP
+</code></pre>
+<p><strong>3. <code>imas_codex/schemas/facility.yaml</code></strong> — add slot to FacilitySignal:</p>
+<pre><code class="language-yaml"># In FacilitySignal.attributes (alongside existing has_standard_name slot):
+has_sn_vocab_gap:
+  description: Grammar vocab gap identified for this signal
+  range: VocabGap
+  annotations:
+    relationship_type: HAS_SN_VOCAB_GAP
+</code></pre>
+<p>After schema changes: <code>uv run build-models --force</code> to regenerate models.</p>
+<p>Relationships:
+- <code>(IMASNode)-[:HAS_SN_VOCAB_GAP {reason, observed_at}]-&gt;(VocabGap)</code>
+- <code>(FacilitySignal)-[:HAS_SN_VOCAB_GAP {reason, observed_at}]-&gt;(VocabGap)</code></p>
+<p>Per-source <code>reason</code> lives on the relationship (source-specific), not the node
+(gap-global). Node stores the normalized gap concept; relationships store evidence.</p>
+<h3 id="2b-write_vocab_gaps-in-graph_ops">2B: <code>write_vocab_gaps()</code> in graph_ops</h3>
+<p><strong>File:</strong> <code>imas_codex/standard_names/graph_ops.py</code></p>
+<p>New function that:
+1. MERGEs VocabGap nodes by <code>id</code> (dedup across batches)
+2. Creates HAS_VOCAB_GAP relationships from source paths with per-source reason
+3. Increments <code>example_count</code>, updates <code>last_seen_at</code></p>
+<h3 id="2c-wire-compose-worker-to-graph-persistence">2C: Wire compose worker to graph persistence</h3>
+<p><strong>File:</strong> <code>imas_codex/standard_names/workers.py</code> (~line 706)</p>
+<p>Currently gaps collect in <code>state.stats["vocab_gaps"]</code> and are lost on pipeline exit.
+After collecting, immediately call <code>write_vocab_gaps()</code> to persist. This ensures
+gaps survive cost-limit interruption.</p>
+<h3 id="2d-deterministic-ambiguity-classification-in-validate-worker">2D: Deterministic ambiguity classification in validate worker</h3>
+<p><strong>File:</strong> <code>imas_codex/standard_names/workers.py</code> (validate worker)</p>
+<p>The validate worker already runs <code>parse_standard_name()</code>. When it catches errors
+like "component and coordinate cannot both be set", tag <code>validation_issues</code> with
+<code>[grammar:ambiguity:component_coordinate_overlap]</code>. This is deterministic, not
+LLM-dependent, and generalizes to any future grammar ambiguity patterns.</p>
+<h3 id="2e-review-prompt-grammar-richness-i17">2E: Review prompt grammar richness [I1.7]</h3>
+<p><strong>File:</strong> <code>imas_codex/llm/prompts/sn/review.md</code></p>
+<p>Add to section 1 (Grammar Correctness):</p>
+<pre><code>- **[I1.7]** Is the name using the simplest decomposition when a richer one exists?
+  Score lower if the name is a bare physical_base but the DD context suggests
+  component, subject, position, or process qualifiers would be more specific.
+</code></pre>
+<h3 id="2f-tests">2F: Tests</h3>
+<ul>
+<li>VocabGap node creation and dedup across batches</li>
+<li>HAS_VOCAB_GAP relationship with per-source reason</li>
+<li>Mock compose output with vocab_gaps field populated</li>
+<li>Validate worker ambiguity detection for known overlaps</li>
+<li>Gaps survive pipeline cost-limit interruption</li>
+</ul>
+<hr>
+<h2 id="phase-3-cli-improvements-p1">Phase 3: CLI Improvements (P1)</h2>
+<h3 id="3a-force-replacing-re-review-on-review-cli">3A: <code>--force</code> replacing <code>--re-review</code> on review CLI</h3>
+<p><strong>File:</strong> <code>imas_codex/cli/sn.py</code></p>
+<p>Rename <code>--re-review</code> to <code>--force</code> for consistency with <code>sn generate --force</code>.
+Both mean "process even if already processed." Keep <code>--re-review</code> as a hidden
+deprecated alias.</p>
+<h3 id="3b-from-model-filter-on-generate-cli">3B: <code>--from-model</code> filter on generate CLI</h3>
+<p><strong>File:</strong> <code>imas_codex/cli/sn.py</code></p>
+<p>New option for provenance-based regeneration:</p>
+<pre><code class="language-bash">sn generate --from-model gemini --force
+</code></pre>
+<p>Selects StandardNames whose <code>model</code> field CONTAINS the given substring. Model
+strings are long (<code>google/gemini-3.1-flash-lite-preview</code>) so substring matching
+is intentional — document in help text.</p>
+<p><code>--from-model</code> implies <code>--force</code> (selecting by model only makes sense for
+regeneration). Error if <code>--from-model</code> used without <code>--force</code> being either
+explicit or implied.</p>
+<h3 id="3c-name-only-flag-on-generate-cli">3C: <code>--name-only</code> flag on generate CLI</h3>
+<p><strong>File:</strong> <code>imas_codex/cli/sn.py</code>, compose prompt variants</p>
+<p>New flag: compose focuses on naming/grammar only. Documentation fields are
+preserved from existing graph data via coalesce (never write empty-string
+placeholders — omit fields so graph coalescing works).</p>
+<p><strong>Review invalidation rule:</strong> <code>--name-only</code> must clear <code>review_input_hash</code>
+so stale reviews don't appear current.</p>
+<h3 id="3d-sn-enrich-command-name-centric-docs-enrichment">3D: <code>sn enrich</code> command (name-centric docs enrichment)</h3>
+<p><strong>File:</strong> <code>imas_codex/cli/sn.py</code>, new pipeline module</p>
+<p>Separate command for documentation iteration:</p>
+<pre><code class="language-bash">sn enrich --ids equilibrium --cost-limit 3.0
+sn enrich --status drafted
+</code></pre>
+<p>Key design:
+- Operates on <strong>existing StandardName nodes</strong>, not source paths
+- Takes the name as fixed input, generates rich documentation
+- Builds docs from the <strong>name plus ALL linked DD paths</strong> (handles shared names)
+- Clears <code>review_input_hash</code> to invalidate stale reviews
+- Does NOT change the name, grammar fields, kind, or unit</p>
+<h3 id="3e-sn-gaps-command">3E: <code>sn gaps</code> command</h3>
+<pre><code class="language-bash">sn gaps                          # List all VocabGap nodes
+sn gaps --segment transformation # Filter by segment
+sn gaps --export yaml            # Export for ISN issue filing
+</code></pre>
+<p>Queries VocabGap nodes and their HAS_VOCAB_GAP relationships to show evidence.</p>
+<hr>
+<h2 id="phase-4-cross-provenance-leveling-p3">Phase 4: Cross-Provenance Leveling (P3)</h2>
+<h3 id="4a-regenerate-gemini-flash-lite-names-31-names-avg-0660">4A: Regenerate Gemini Flash Lite names (31 names, avg 0.660)</h3>
+<pre><code class="language-bash">sn generate --from-model gemini --force --cost-limit 3.0
+</code></pre>
+<h3 id="4b-regenerate-poor-old-cli-names-39-names-avg-0623">4B: Regenerate poor Old CLI names (39 names, avg 0.623)</h3>
+<p>Target <code>adequate</code> and <code>poor</code> tier only.</p>
+<h3 id="4c-review-isn-imported-names-25-never-reviewed">4C: Review ISN-imported names (25, never reviewed)</h3>
+<pre><code class="language-bash">sn review --status accepted --cost-limit 1.0
+</code></pre>
+<h3 id="4d-name-deduplication-audit">4D: Name deduplication audit</h3>
+<p>Check for duplicate concepts across provenance groups.</p>
+<hr>
+<h2 id="implementation-priority">Implementation Priority</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Effort</th>
+<th>Impact</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1A-1D (compose prompt fixes)</td>
+<td>Small</td>
+<td>High — prevents errors at source</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2A-2C (VocabGap infra)</td>
+<td>Small</td>
+<td>High — closes gap pipeline</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2D (ambiguity detection)</td>
+<td>Small</td>
+<td>Medium — deterministic classification</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2E-2F (review prompt + tests)</td>
+<td>Small</td>
+<td>Medium</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3A (--force rename)</td>
+<td>Small</td>
+<td>Small — consistency</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3B (--from-model)</td>
+<td>Small</td>
+<td>Medium — provenance targeting</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3C-3D (--name-only + sn enrich)</td>
+<td>Medium</td>
+<td>High — separate iteration</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3E (sn gaps)</td>
+<td>Small</td>
+<td>Medium — ISN feedback</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>4A-4D (cross-provenance)</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<h2 id="isn-plan-relationship">ISN Plan Relationship</h2>
+<p>ISN plan 06 proposes vocab extensions (7 transformations, 3 processes, 2 subjects).</p>
+<p><strong>Do NOT implement ISN plan 06 yet.</strong> Sequence:
+1. Codex Phase 1 prompt fixes → reduces false gaps (LLM not using existing grammar)
+2. Codex Phase 2 gap infra → collects real gaps with evidence
+3. Run generation + review cycle → produces clean gap data
+4. ISN vocab extensions → based on evidence from step 3
+5. Codex regeneration → after ISN release with new tokens</p>
+<h2 id="review-invalidation-rule">Review Invalidation Rule</h2>
+<p>Any operation that changes name, description, documentation, kind, unit, or tags
+must invalidate review freshness by clearing <code>review_input_hash</code>. This applies to:
+- <code>sn generate --force</code> (full regeneration)
+- <code>sn generate --name-only</code> (name change)
+- <code>sn enrich</code> (docs change)</p>
+<h2 id="documentation-updates">Documentation Updates</h2>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>After Phase 3: <code>sn enrich</code>, <code>sn gaps</code>, <code>--from-model</code>, <code>--force</code> on review</td>
+</tr>
+<tr>
+<td>Prompt templates</td>
+<td>Phase 1</td>
+</tr>
+<tr>
+<td>Schema reference</td>
+<td>Auto-rebuilt after Phase 2A (VocabGap node type)</td>
+</tr>
+</tbody>
+</table>
+    </section>
+  </main>
+</body>
+</html>

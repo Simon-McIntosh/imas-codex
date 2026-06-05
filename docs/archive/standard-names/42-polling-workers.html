@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="42-polling-workers">
+  <meta name="plan-title" content="42 — Polling-Based Compose and Review Workers">
+  <meta name="plan-summary" content="The SN compose and review pipelines use `asyncio.gather(*tasks)` to fan out all batches at once, with an `asyncio.Semaphore` limiting concurrency. This has three failure modes:">
+  <meta name="plan-status" content="done">
+  <title>42 — Polling-Based Compose and Review Workers | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>42 — Polling-Based Compose and Review Workers</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/42-polling-workers.md</code></p>
+    </div>
+    <section id="relations">
+  <h2>Archived relationships</h2>
+  <ul>
+    <li><strong>Active plan links preserved:</strong> <a href="/imas-codex/sn-quality-parity.html">Plan 23</a></li>
+  </ul>
+</section>
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Status:</strong> implementing
+<strong>Author:</strong> architect agent
+<strong>Created:</strong> 2025-07-23</p>
+<h2 id="problem">Problem</h2>
+<p>The SN compose and review pipelines use <code>asyncio.gather(*tasks)</code> to fan out
+all batches at once, with an <code>asyncio.Semaphore</code> limiting concurrency. This
+has three failure modes:</p>
+<ol>
+<li>
+<p><strong>Silent batch drops</strong> — budget reservation math can reject batches before
+   they run. Fixed partially in <code>20c96f71</code> (1.5× multiplier, adaptive budget)
+   but the root cause remains: all reservations are attempted upfront.</p>
+</li>
+<li>
+<p><strong>No work stealing</strong> — if one worker stalls on a slow LLM response, others
+   cannot pick up remaining batches. The semaphore serialises but doesn't
+   redistribute.</p>
+</li>
+<li>
+<p><strong>No crash recovery</strong> — if the process dies mid-gather, completed batches
+   are persisted (graph-state-machine) but there's no mechanism to resume
+   from the last incomplete batch without re-running extract.</p>
+</li>
+</ol>
+<h2 id="target-architecture">Target Architecture</h2>
+<p>Replace the gather fan-out with <strong>N independent polling tasks</strong> per worker
+type. Each task loops:</p>
+<pre><code>while not should_stop:
+    items = claim_work(limit=batch_size)
+    if not items:
+        if globally_drained(): break
+        await asyncio.sleep(jitter)
+        continue
+    lease = budget_manager.reserve(estimated_cost)
+    if lease is None:
+        await asyncio.sleep(jitter)
+        continue
+    process(items, lease)
+    release_claim(items)
+</code></pre>
+<p>This is the same pattern used by <code>discovery/wiki/graph_ops.py</code> (claim_token +
+ORDER BY rand() + retry_on_deadlock).</p>
+<h2 id="scope">Scope</h2>
+<p><strong>This task:</strong> compose + review workers only.
+<strong>Deferred:</strong> enrich and link workers remain on current model (follow-up todo).</p>
+<h2 id="work-queue-semantics">Work-Queue Semantics</h2>
+<h3 id="compose-worker">Compose Worker</h3>
+<p><strong>Node label:</strong> <code>StandardNameSource</code>
+<strong>Eligible predicate:</strong></p>
+<pre><code class="language-cypher">MATCH (sns:StandardNameSource)
+WHERE sns.status = 'extracted'
+  AND (sns.claimed_at IS NULL
+       OR sns.claimed_at &lt; datetime() - duration($cutoff))
+ORDER BY rand()
+LIMIT $limit
+</code></pre>
+<p><strong>Claim:</strong> SET <code>claimed_at = datetime()</code>, <code>claim_token = $token</code>
+<strong>Verify:</strong> Second query <code>WHERE claim_token = $token</code> (two-step verify)
+<strong>On success:</strong> existing <code>_update_sources_after_compose()</code> sets status='composed'
+<strong>On failure:</strong> SET <code>claimed_at = null</code>, <code>claim_token = null</code>
+<strong>Stale claim timeout:</strong> 300s (5 minutes, matching discovery default)</p>
+<h3 id="review-worker">Review Worker</h3>
+<p><strong>Node label:</strong> <code>StandardName</code>
+<strong>Eligible predicate:</strong></p>
+<pre><code class="language-cypher">MATCH (sn:StandardName)
+WHERE sn.validation_status = 'valid'
+  AND sn.reviewed_name_at IS NULL
+  AND (sn.claimed_at IS NULL
+       OR sn.claimed_at &lt; datetime() - duration($cutoff))
+ORDER BY rand()
+LIMIT $limit
+</code></pre>
+<p>For docs review (<code>target='docs'</code>), replace <code>reviewed_name_at</code> with
+<code>reviewed_docs_at</code> and add <code>sn.reviewed_name_at IS NOT NULL</code> (docs gate).</p>
+<p><strong>Claim/verify/stale:</strong> Same token pattern as compose.
+<strong>On success:</strong> <code>write_name_review_results()</code> stamps <code>reviewed_name_at</code>
+<strong>On failure:</strong> Clear <code>claimed_at</code>, <code>claim_token</code></p>
+<h3 id="batch-size">Batch Size</h3>
+<p>Compose and review operate on <strong>batches</strong> (multiple sources/names per LLM
+call), not individual items. The claim function fetches <code>batch_size</code> items
+which become one LLM call.</p>
+<ul>
+<li><strong>Compose batch_size:</strong> Inherited from <code>get_generate_batch_config()</code> (default ~15 items)</li>
+<li><strong>Review batch_size:</strong> <code>state.batch_size</code> (default 15 names)</li>
+</ul>
+<h2 id="concurrency-knobs">Concurrency Knobs</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Upper bound</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compose_workers</code></td>
+<td>2</td>
+<td>4</td>
+<td><code>get_compose_concurrency()</code></td>
+</tr>
+<tr>
+<td><code>review_workers</code></td>
+<td><code>state.concurrency</code> (2)</td>
+<td>3</td>
+<td>TurnConfig.concurrency</td>
+</tr>
+<tr>
+<td><code>compose_batch_size</code></td>
+<td>15</td>
+<td>30</td>
+<td>generate batch config</td>
+</tr>
+<tr>
+<td><code>review_batch_size</code></td>
+<td>15</td>
+<td>25</td>
+<td>state.batch_size</td>
+</tr>
+</tbody>
+</table>
+<p>Upper bounds are set by the OpenRouter rate ceiling observed in commit
+<code>26b1d278</code> (~60 req/min for reasoning models).</p>
+<h2 id="budget-integration">Budget Integration</h2>
+<p>Each worker independently reserves budget before processing:</p>
+<pre><code class="language-python">lease = budget_manager.reserve(estimated_cost)
+if lease is None:
+    # Budget exhausted — don't drop, just wait and retry
+    await asyncio.sleep(random.uniform(1.0, 3.0))
+    continue  # Next iteration will re-check
+</code></pre>
+<p><strong>Key invariant:</strong> Budget-reserve failure causes <code>sleep + retry</code>, never
+silent drop. If the budget is truly exhausted (pool ≤ 0 and no active
+leases that will release), the termination check will catch it.</p>
+<p><strong>BudgetManager thread safety:</strong> The <code>threading.Lock</code> inside BudgetManager
+protects all mutations. In an async context with <code>asyncio.to_thread()</code> for
+graph operations, the critical sections (pure arithmetic) complete in
+microseconds, so no deadlock risk. Multiple async workers calling <code>reserve()</code>
+concurrently is safe.</p>
+<h2 id="termination-semantics">Termination Semantics</h2>
+<p>The turn-runner spawns N polling workers and awaits completion. A worker
+terminates when ALL of:</p>
+<ol>
+<li><strong>No claim returned</strong> — the claim query returned zero items</li>
+<li><strong>Globally drained</strong> — a separate query confirms zero eligible items
+   remain for this worker type (including those claimed by other workers)</li>
+<li><strong>No active leases</strong> — <code>budget_manager._reserved</code> is empty (no in-flight
+   work from any worker)</li>
+</ol>
+<p>Implementation via a shared <code>IdleTracker</code>:</p>
+<pre><code class="language-python">class IdleTracker:
+    &quot;&quot;&quot;Track how long all workers have been idle.&quot;&quot;&quot;
+    def __init__(self, timeout: float = 15.0):
+        self._last_work = time.monotonic()
+        self._lock = threading.Lock()
+        self._timeout = timeout
+
+    def mark_work(self):
+        with self._lock:
+            self._last_work = time.monotonic()
+
+    def is_idle(self) -&gt; bool:
+        with self._lock:
+            return time.monotonic() - self._last_work &gt; self._timeout
+</code></pre>
+<p>A worker breaks out of its loop when:</p>
+<pre><code class="language-python">if not claimed_items:
+    eligible = await asyncio.to_thread(count_eligible, worker_type)
+    if eligible == 0 and idle_tracker.is_idle():
+        break
+    await asyncio.sleep(random.uniform(0.5, 2.0))
+    continue
+</code></pre>
+<h3 id="edge-cases">Edge Cases</h3>
+<ul>
+<li>
+<p><strong>Budget exhausted but work remains:</strong> Workers keep polling (sleep loop)
+  but no lease is granted. They break on idle_timeout once all active leases
+  complete. This is correct — exhausted budget is a stop condition for compose
+  (the engine's <code>stop_fn</code>), not for review.</p>
+</li>
+<li>
+<p><strong>Worker mid-request when "idle" measured:</strong> The <code>claimed_at IS NOT NULL</code>
+  fence in the eligible-count query correctly excludes items being processed.
+  The <code>active_leases &gt; 0</code> check in the termination gate prevents premature
+  exit.</p>
+</li>
+<li>
+<p><strong>All workers claim the same items:</strong> Impossible — <code>ORDER BY rand()</code> +
+  <code>claim_token</code> two-step verify means at most one worker wins each item.</p>
+</li>
+</ul>
+<h2 id="interaction-with-existing-phases">Interaction with Existing Phases</h2>
+<h3 id="extract">Extract</h3>
+<p>Extract runs first as today. It produces <code>StandardNameSource</code> nodes with
+<code>status='extracted'</code>. The compose workers poll for these nodes instead of
+consuming <code>state.extracted</code> in-memory batches.</p>
+<p><strong>Key change:</strong> Extract still populates <code>state.extracted</code> for enrichment
+and context (IDS prefetch, COCOS, domain vocab). But the compose worker
+re-groups the claimed sources into LLM batches on-the-fly rather than
+using pre-built batch boundaries.</p>
+<p><strong>Alternative (simpler, chosen):</strong> Keep extract's batching. Claim sources
+individually from the graph, but batch them locally for the LLM call. This
+preserves the per-batch enrichment (IDS context, domain vocab, COCOS) while
+adding work-stealing.</p>
+<h3 id="validate-consolidate-persist">Validate / Consolidate / Persist</h3>
+<p>These three downstream workers are <strong>unchanged</strong>. They operate on
+<code>state.composed</code>, <code>state.validated</code>, and <code>state.consolidated</code> in-memory
+lists. Each compose-polling worker appends to <code>state.composed</code> as it
+completes batches.</p>
+<p>Thread safety for <code>state.composed.extend()</code>: Since asyncio is single-
+threaded (GIL + event loop), concurrent <code>extend()</code> calls from different
+worker tasks are safe — they interleave at the await boundary, not mid-call.</p>
+<h3 id="consolidate-and-persist">Consolidate and Persist</h3>
+<p>Run after all compose workers have terminated (same as today's
+<code>depends_on=["compose_phase"]</code> in the engine DAG).</p>
+<h3 id="review-vs-compose-interaction">Review vs Compose Interaction</h3>
+<p>In <code>sn run</code> turns, review runs in a separate phase AFTER generate.
+In standalone <code>sn review</code>, compose is not involved. No interaction.</p>
+<h3 id="-min-score-regen-path"><code>--min-score</code> Regen Path</h3>
+<p>Regen operates on <code>StandardName</code> nodes (not <code>StandardNameSource</code>), selecting
+via <code>reviewer_score &lt; min_score</code>. This is a different queue entirely — it
+creates new <code>StandardNameSource</code> nodes via <code>fetch_low_score_sources()</code> +
+<code>extract_specific_paths()</code>, which then flow through the normal compose
+pipeline. No conflict with polling — the regen-created sources get
+<code>status='extracted'</code> and are claimed like any other.</p>
+<h2 id="failure-modes">Failure Modes</h2>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Detection</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Worker crash (exception)</td>
+<td><code>asyncio.gather</code> captures it</td>
+<td>Other workers continue; crashed sources have stale <code>claimed_at</code> → reclaimed after 5min</td>
+</tr>
+<tr>
+<td>LLM timeout (&gt;60s)</td>
+<td><code>acall_llm_structured</code> raises</td>
+<td>Worker catches, releases claim, moves to next batch</td>
+</tr>
+<tr>
+<td>Neo4j deadlock</td>
+<td><code>TransientError</code></td>
+<td><code>@retry_on_deadlock()</code> with exponential backoff (5 attempts)</td>
+</tr>
+<tr>
+<td>Orphaned claims</td>
+<td><code>claimed_at</code> &gt; 5 minutes old</td>
+<td>Next poll iteration reclaims them</td>
+</tr>
+<tr>
+<td>Budget exhaustion mid-batch</td>
+<td><code>charge_soft()</code> records overspend</td>
+<td>Overspend logged; no batch dropped</td>
+</tr>
+</tbody>
+</table>
+<h2 id="file-changes">File Changes</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>standard_names/graph_ops.py</code></td>
+<td>Add <code>claim_compose_sources()</code>, <code>release_compose_claims()</code>, <code>count_eligible_compose()</code></td>
+</tr>
+<tr>
+<td><code>standard_names/workers.py</code></td>
+<td>Refactor <code>compose_worker</code> from gather to polling loop</td>
+</tr>
+<tr>
+<td><code>standard_names/review/pipeline.py</code></td>
+<td>Refactor <code>review_review_worker</code> from gather to polling loop</td>
+</tr>
+<tr>
+<td><code>standard_names/review/graph_ops.py</code></td>
+<td>Add <code>claim_review_names()</code>, <code>release_review_claims()</code>, <code>count_eligible_review()</code></td>
+</tr>
+<tr>
+<td><code>tests/standard_names/test_polling_claims.py</code></td>
+<td>Unit tests for claim functions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rubber-duck-review-response">Rubber-Duck Review Response</h2>
+<h3 id="q1-termination-budget-exhausted-vs-no-eligible-work">Q1: Termination — budget-exhausted vs no-eligible-work</h3>
+<p><strong>Issue raised:</strong> When budget is exhausted but eligible work remains, workers
+will idle-poll forever (budget.reserve returns None, so they sleep+retry).</p>
+<p><strong>Resolution:</strong> The compose worker already has a <code>state.should_stop()</code> check
+that includes <code>budget_exhausted</code>. When budget is exhausted:
+1. <code>state.should_stop()</code> returns True (for compose — downstream phases use
+   a different stop function)
+2. Workers break on <code>should_stop()</code> check at the top of the loop
+3. This is correct because the engine's <code>stop_fn</code> for compose phases checks
+   budget, while downstream <code>_downstream_should_stop</code> only checks
+   <code>stop_requested</code>.</p>
+<p>For review workers (which have their own BudgetManager), the same
+<code>state.should_stop()</code> check applies — review state checks its own budget.</p>
+<h3 id="q2-budgetmanager-memory-model-under-concurrent-reserverelease">Q2: BudgetManager memory model under concurrent reserve/release</h3>
+<p><strong>Issue raised:</strong> Multiple async tasks calling <code>reserve()</code> concurrently.</p>
+<p><strong>Resolution:</strong> BudgetManager uses <code>threading.Lock</code> which is safe for asyncio
+because:
+- <code>reserve()</code> does only arithmetic (no I/O) under the lock
+- Lock acquisition is effectively instant (microseconds)
+- Even if two tasks call <code>reserve()</code> "simultaneously", they sequence through
+  the lock and the invariant <code>pool + reserved + spent = total</code> is maintained
+- <code>charge_soft()</code> uses the same lock pattern</p>
+<p>No change needed.</p>
+<h3 id="q3-min-score-regen-path-interaction">Q3: <code>--min-score</code> regen path interaction</h3>
+<p><strong>Issue raised:</strong> Regen sources are StandardName nodes, not StandardNameSource.</p>
+<p><strong>Resolution:</strong> Regen creates new StandardNameSource nodes (via
+<code>fetch_low_score_sources</code> → <code>extract_specific_paths</code> → <code>merge_standard_name_sources</code>)
+with <code>status='extracted'</code>. These enter the compose polling queue identically
+to first-run sources. No special handling needed.</p>
+<h3 id="q4-review-finishes-before-compose-drains">Q4: Review finishes before compose drains</h3>
+<p><strong>Issue raised:</strong> In <code>sn run</code> turns, review runs as a separate phase after
+generate completes. But what about standalone <code>sn review</code>?</p>
+<p><strong>Resolution:</strong> In standalone <code>sn review</code>, there is no compose phase. The
+review workers poll <code>StandardName</code> nodes that already have
+<code>validation_status='valid'</code>. No interaction. In <code>sn run</code> turns, the phase
+ordering (generate → review) is enforced by the turn orchestrator — review
+doesn't start until generate completes. No change needed.</p>
+    </section>
+  </main>
+</body>
+</html>

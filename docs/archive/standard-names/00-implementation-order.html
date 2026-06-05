@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="00-implementation-order">
+  <meta name="plan-title" content="Standard Names — Implementation Order">
+  <meta name="plan-summary" content="on real data, then extend based on observed quality gaps.">
+  <meta name="plan-status" content="done">
+  <title>Standard Names — Implementation Order | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard Names — Implementation Order</h1>
+    <div class="archive-note" style="padding:1rem 1.25rem;border-left:4px solid #5b7cfa;background:#f4f7ff;margin:1rem 0 1.5rem 0;">
+      <p><strong>Archive note:</strong> migrated from a completed markdown Standard Names plan into archived HTML.</p>
+      <p><strong>Migration note:</strong> bypassed <code>edit_plan</code> intentionally because this was a sole-writer bulk HTML migration of completed Standard Names docs.</p>
+      <p><strong>Original source:</strong> <code>plans/features/standard-names/completed/00-implementation-order.md</code></p>
+    </div>
+
+    <section class="archived-source" id="source-markdown" style="margin-top:2rem;">
+      <h2>Archived markdown content</h2>
+      <p><strong>Approach:</strong> Iterative. Build the simplest working pipeline first, test it
+on real data, then extend based on observed quality gaps.</p>
+<p><strong>Clean break:</strong> The previous 309 catalog entries are discarded. All standard
+names will be generated fresh from the graph. The catalog repo will be rebuilt.</p>
+<h2 id="authority-model-option-b">Authority Model: Option B+</h2>
+<p><strong>Catalog YAML is authoritative</strong> for reviewed entries. Graph is authoritative
+for drafted candidates and operational metadata. See 12-catalog-import.md for
+the full authority boundary design.</p>
+<table>
+<thead>
+<tr>
+<th>Owner</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Catalog YAML</td>
+<td>name, description, documentation, kind, unit, tags, links, ids_paths, status, constraints, validity_domain, provenance</td>
+</tr>
+<tr>
+<td>Graph only</td>
+<td>embedding, embedded_at, model, generated_at, review_status, confidence, source, source_path</td>
+</tr>
+<tr>
+<td>Derived on import</td>
+<td>grammar fields (from name parse), HAS_UNIT edge (from unit string)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="lifecycle">Lifecycle</h2>
+<pre><code>DRAFTED (graph, LLM-generated) → PUBLISHED (catalog PR) → ACCEPTED (merged PR, imported back)
+</code></pre>
+<p>All status values use past tense: drafted, published, accepted, rejected, skipped.</p>
+<h2 id="consistency-notes">Consistency Notes</h2>
+<ul>
+<li><strong>Relationship direction:</strong> <code>(entity)-[:HAS_STANDARD_NAME]-&gt;(sn:StandardName)</code>
+  for ALL entity types (IMASNode, FacilitySignal). Single relationship name.
+  The schema doc <code>(FacilitySignal)-[:MEASURES]-&gt;(StandardName)</code> is WRONG — fix in Plan 11.</li>
+<li><strong>Unit linking:</strong> <code>(sn:StandardName)-[:HAS_UNIT]-&gt;(u:Unit)</code> via unit
+  range declaration (relationship type: HAS_UNIT per schema convention).</li>
+<li><strong>Embedding:</strong> StandardName.embedding exists in schema with vector index
+  <code>standard_name_desc_embedding</code>. Persist worker must call embed after write.</li>
+<li><strong>Coalesce bug:</strong> <code>write_standard_names()</code> uses unconditional SET — re-runs
+  erase existing data. MUST fix before any production use. Plan 11 Phase 4a.</li>
+</ul>
+<h2 id="implementation-status">Implementation Status</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Plan</th>
+<th>Description</th>
+<th>Status</th>
+<th>Depends On</th>
+<th>Enables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>09</td>
+<td>sn-generate</td>
+<td>Core pipeline EXTRACT→COMPOSE→VALIDATE→PERSIST</td>
+<td>✅ Done</td>
+<td>—</td>
+<td>11</td>
+</tr>
+<tr>
+<td>11</td>
+<td>rich-compose</td>
+<td>Full catalog fields, schema extension, coalesce fix, tests</td>
+<td>📋 Ready</td>
+<td>09</td>
+<td>12, 13, 14</td>
+</tr>
+<tr>
+<td>12</td>
+<td>catalog-import</td>
+<td>Feedback import from reviewed catalog PRs</td>
+<td>📋 Ready</td>
+<td>11 P1</td>
+<td>13 P4</td>
+</tr>
+<tr>
+<td>13</td>
+<td>publish-pipeline</td>
+<td>Lossless YAML export, batched PRs</td>
+<td>📋 Ready</td>
+<td>11 (all)</td>
+<td>12 (feedback loop)</td>
+</tr>
+<tr>
+<td>14</td>
+<td>mcp-tools-benchmark</td>
+<td>SN search/fetch/list MCP tools + benchmark quality</td>
+<td>✅ Done</td>
+<td>11 (embedding)</td>
+<td>19</td>
+</tr>
+<tr>
+<td>15</td>
+<td>import-physics-domain</td>
+<td>Import physics_domain from catalog</td>
+<td>✅ Done</td>
+<td>12</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~16~~</td>
+<td>~~benchmark-parity~~</td>
+<td>~~Superseded by Plan 19~~</td>
+<td>🗑️ Deleted</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~17~~</td>
+<td>~~sn-lifecycle-management~~</td>
+<td>~~Superseded by Plan 19~~</td>
+<td>🗑️ Deleted</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~18~~</td>
+<td>~~benchmark-calibration~~</td>
+<td>~~Superseded by Plan 19~~</td>
+<td>🗑️ Deleted</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>19</td>
+<td>benchmark-and-lifecycle</td>
+<td>Benchmark parity, lifecycle mgmt, calibration, model selection</td>
+<td>✅ Complete</td>
+<td>14</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deployment-waves">Deployment Waves</h2>
+<h3 id="wave-1-schema-persist-fix-tests-plan-11-phases-14">Wave 1: Schema + Persist Fix + Tests (Plan 11 Phases 1+4)</h3>
+<p>Fix the foundation before building on it:
+- Extend StandardName schema with ~12 rich fields + 2 enums (kind, review_status)
+- Rename review_status enum: candidate → drafted (past tense)
+- Fix schema doc: FacilitySignal uses HAS_STANDARD_NAME (not MEASURES)
+- Fix signals.py MEASURES query → HAS_STANDARD_NAME
+- Fix unconditional SET overwrite bug (use coalesce)
+- Wire HAS_UNIT relationship creation
+- Wire embedding generation into persist worker
+- Add graph_ops unit tests (currently 0 tests)
+- Add conftest.py with shared fixtures</p>
+<p><strong>Agent:</strong> architect (cross-module: schema + graph_ops + workers + tests)</p>
+<h3 id="wave-2-llm-compose-upgrade-plan-11-phases-235-catalog-import-plan-12">Wave 2: LLM Compose Upgrade (Plan 11 Phases 2+3+5) + Catalog Import (Plan 12)</h3>
+<p>Run in parallel — compose upgrade and catalog import are independent after schema:
+- <strong>Agent A (architect):</strong> Extend SNCandidate model, update prompts for rich docs, update validate worker
+- <strong>Agent B (engineer):</strong> Build <code>sn import-catalog</code> CLI + catalog_import.py + version tracking</p>
+<h3 id="wave-3-publish-plan-13-mcp-tools-benchmark-plan-14">Wave 3: Publish (Plan 13) + MCP Tools + Benchmark (Plan 14)</h3>
+<p>Run in parallel — export and tools are independent:
+- <strong>Agent A (engineer):</strong> Fix lossy publish export, update graph query, PR workflow, dedup
+- <strong>Agent B (engineer):</strong> 3 MCP tools (search/fetch/list) + benchmark quality tiers + reviewer</p>
+<h3 id="wave-4-benchmark-lifecycle-plan-19">Wave 4: Benchmark &amp; Lifecycle (Plan 19)</h3>
+<p>Fleet-ready plan for production minting readiness:
+- <strong>Phase 1A (engineer, Sonnet 4.6):</strong> Benchmark prompt parity + cache verification
+- <strong>Phase 1B (engineer, Sonnet 4.6):</strong> SN reset/clear commands (parallel with 1A)
+- <strong>Phase 2A (engineer, Sonnet 4.6):</strong> Expand gold reference to 50+ entries
+- <strong>Phase 2B (architect, Opus 4.6):</strong> Calibration dataset + reviewer enhancement
+- <strong>Phase 3 (architect, Opus 4.6):</strong> Cache reporting + model selection runbook
+- <strong>Phase 4 (engineer, Sonnet 4.6):</strong> Documentation + superseded plan cleanup</p>
+<h3 id="wave-5-integration-testing">Wave 5: Integration Testing</h3>
+<ul>
+<li>End-to-end: mint → publish → review → import</li>
+<li>Round-trip idempotence verification</li>
+<li>Embedding coverage for all StandardName nodes</li>
+<li>Documentation updates (AGENTS.md, README)</li>
+</ul>
+<p><strong>Agent:</strong> architect (integration testing + documentation)</p>
+<h2 id="archived-plans">Archived Plans</h2>
+<p>Previous plans 09 (schema providers), 10 (pipeline fixes) are superseded.
+Research material in <code>plans/research/standard-names/</code>.
+Archived v1 plans in <code>plans/research/standard-names/archived-v1/</code>.</p>
+    </section>
+  </main>
+</body>
+</html>
