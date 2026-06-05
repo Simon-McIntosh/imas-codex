@@ -1,7 +1,7 @@
 {
-  "updated": "2026-06-05T11:24:00",
+  "updated": "2026-06-05T13:52:06",
   "project": "imas-codex",
-  "doc": "project",
+  "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
@@ -124,8 +124,14 @@
         "when": "2026-06-05",
         "who": "gpt-5.4",
         "what": "S1-S4 sprint plan authored from the migrated reckon HTML plan inventory and explicit dependency graph."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "Legacy derived-parent lifecycle repair landed on main, the invalid bare-base parent `inductance` was removed from the live graph after review, and `tests/graph/test_sn_graph.py` returned green. Sprint S1 remains active because the remaining work is evidence/rollout closure rather than core code repair."
       }
     ],
-    "blockers": []
+    "blockers": [],
+    "_version": 1
   }
 }
