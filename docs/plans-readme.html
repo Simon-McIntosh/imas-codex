@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="plans-readme">
+  <meta name="plan-title" content="Plans Index">
+  <meta name="plan-summary" content="Index of strategy notes, active feature plans, pending references, and documentation gaps under plans/.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="strategy,docs-refresh,33-cli-harmonization,gpu-cluster-scoping,gpu-cluster-internet-justification">
+  <title>Plans Index | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Plans</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Plan inventory structure" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Plan inventory structure</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Vision &amp; strategy</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Active features</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Pending refs</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Doc gaps</text></svg><figcaption>The plan index ties together strategic direction, active work, pending references, and known documentation debt.</figcaption></figure>
+<blockquote>
+<p>Strategic vision and active feature plans for imas-codex.</p>
+<p><strong>Rule:</strong> Delete plans when implemented. The code is the documentation.
+Completed features belong in <code>completed/</code> for reference, then eventually <code>docs/architecture/</code>.</p>
+</blockquote>
+<h2 id="s1">Vision &amp; Strategy</h2>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/imas-codex/strategy.html">STRATEGY.md</a></td>
+<td>The Federated Fusion Knowledge Graph — four-zone architecture, discovery engine, agile LinkML schema workflow</td>
+</tr>
+<tr>
+<td><a href="/imas-codex/gpu-cluster-scoping.html">gpu-cluster-scoping.md</a></td>
+<td>Executive proposal for ITER GPU infrastructure (4x H200)</td>
+</tr>
+<tr>
+<td><a href="/imas-codex/gpu-cluster-internet-justification.html">gpu-cluster-internet-justification.md</a></td>
+<td>Network topology analysis and DNS workarounds</td>
+</tr>
+</tbody>
+</table>
+<h2 id="s2">Active Feature Plans</h2>
+<p>Refactored after rubber-duck review, docs audit, and live MCP tool testing (2026-04-14).
+Plans validated against 62 existing standard names, current scoring architecture, and docs/ state.</p>
+<p>Primary SN deployment plans are being migrated from markdown into HTML docs under <code>docs/</code>. Current HTML records: <a href="/imas-codex/sn-catalog-quality-refactor.html">sn-catalog-quality-refactor</a>, <a href="/imas-codex/sn-quality-parity.html">sn-quality-parity</a>, <a href="/imas-codex/sn-search-facility.html">sn-search-facility</a>, and <a href="/imas-codex/sn-closed-physical-base.html">sn-closed-physical-base</a>.</p>
+<p><strong>See also:</strong> <a href="/imas-codex/features-readme.html"><code>features/README.md</code></a> for active-plan sequencing, layout conventions, and the plan lifecycle.</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Plan</th>
+<th>Scope</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P1</strong></td>
+<td><a href="/imas-codex/sn-search-facility.html">docs/sn-search-facility.html</a></td>
+<td><strong>NEW</strong> Grammar-aware SN search &amp; fetch facility: 7 MCP tools mirroring DD palette; tiered grammar streams (T1/T2/T3) preventing <code>x_component_of_*</code> floods; backing-function unification in <code>standard_names/search.py</code>; <code>_sn</code>/<code>_sns</code> → <code>_standard_names</code> rename audit. <code>include_standard_names=True</code> default already shipped.</td>
+<td>Active HTML plan — Phase 4 pipeline migration still open</td>
+</tr>
+<tr>
+<td><strong>P1·b</strong></td>
+<td><a href="features/standard-names/39-structured-fanout.md">features/standard-names/39-structured-fanout.md</a></td>
+<td><strong>NEW</strong> Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer consumes targeted context. Depends on plan 40&rsquo;s <code>search_existing_names</code> runner.</td>
+<td>Active — phases 2/3 deferred until plan 40 fully lands</td>
+</tr>
+<tr>
+<td><strong>P1·c</strong></td>
+<td><a href="features/standard-names/29-architectural-pivot.md">features/standard-names/29-architectural-pivot.md</a></td>
+<td>Authoritative SN roadmap: generate/enrich split, ISN grammar upgrade, schema evolution. Supersedes plan 28.</td>
+<td>Living — most structural items shipped</td>
+</tr>
+<tr>
+<td><strong>P1·d</strong></td>
+<td><a href="features/standard-names/31-quality-bootstrap-v2.md">features/standard-names/31-quality-bootstrap-v2.md</a></td>
+<td>7-workstream bootstrap loop; quarantine-rate + description-coverage + reviewer-score targets.</td>
+<td>Active rotation</td>
+</tr>
+<tr>
+<td><strong>P1·e</strong></td>
+<td><a href="features/standard-names/32-extraction-prompt-overhaul.md">features/standard-names/32-extraction-prompt-overhaul.md</a></td>
+<td>Extraction filter audit + compose-prompt A/B bake-off.</td>
+<td>Phase 2 done (see <code>research/standard-names/prompt-ab-results.md</code>); Phase 4 deferred</td>
+</tr>
+<tr>
+<td><strong>P1·f</strong></td>
+<td><a href="features/standard-names/34-benchmark-v1.md">features/standard-names/34-benchmark-v1.md</a></td>
+<td>SN quality benchmark v1: 50 positives × 10 domains + ≥20 negatives; two-reviewer consensus; gating at pass@1 ≥ 0.80.</td>
+<td>Scaffolded (20 + 10 filled; runner + mock dry-run)</td>
+</tr>
+<tr>
+<td><strong>P1·g</strong></td>
+<td><a href="/imas-codex/sn-catalog-quality-refactor.html">docs/sn-catalog-quality-refactor.html</a></td>
+<td>Catalog quality refactor v4+round4: graph-backed DD context amplification (Deltas A–J); target-anchored dynamic example library (Delta K); rubric unification (publish threshold = <code>good</code> floor = 0.65).</td>
+<td>Active HTML plan — phases 4–6 remain open; derived-parent lifecycle still blocking</td>
+</tr>
+<tr>
+<td><strong>P1·h</strong></td>
+<td><a href="features/standard-names/33-benchmark-evolution.md">features/standard-names/33-benchmark-evolution.md</a></td>
+<td>SN benchmark evolution strategy.</td>
+<td>Design / research</td>
+</tr>
+<tr>
+<td>~~P1e~~</td>
+<td>~~features/standard-names/39-graph-relationship-completeness.md~~</td>
+<td>✅ Completed (DELETED — number reused) — structural edges wired into both write_standard_names + catalog import paths; D1–D16 + G1–G10 tests</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P1f~~</td>
+<td>~~features/standard-names/40-catalog-layout-hierarchy.md~~</td>
+<td>✅ Completed (DELETED — number reused) — ISNC one-file-per-domain migration; <code>COMPUTED_FIELDS</code> round-trip; <code>edge_model_version: plan_39_v1</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P1g~~</td>
+<td>~~features/standard-names/41-catalog-graph-consumer.md~~</td>
+<td>✅ Completed (DELETED) — ISN-side NetworkX <code>DiGraph</code>; 4 MCP tools; catalog-site Mermaid hierarchy blocks.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P1h~~</td>
+<td>features/standard-names/completed/42-polling-workers.md</td>
+<td>✅ Completed (2026-04-30 → <code>completed/</code>) — budget-managed polling workers; <code>BudgetManager.pool_admit</code>; async <code>_orphan_sweep_tick</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P1i~~</td>
+<td>features/standard-names/completed/43-pipeline-rd-fix.md</td>
+<td>✅ Completed (2026-04-30 → <code>completed/</code>) — compose-prompt reduction 39K→≤8K tokens; budget split; reviewer-pilot profile; error-gate fixes.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P1j~~</td>
+<td>features/standard-names/completed/44-sn-graph-renames-batched-embed.md</td>
+<td>✅ Completed (2026-04-30 → <code>completed/</code>) — <code>StandardNameReview</code> rename; multi-valued <code>HAS_PHYSICS_DOMAIN</code>; batch embedding; <code>sn clear</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P8.1~~</td>
+<td>features/standard-names/completed/38-grammar-vnext.md</td>
+<td>✅ Completed — six-pool generate/review/refine architecture; <code>REFINED_FROM</code>; <code>DocsRevision</code>; <code>--min-score</code>/<code>--rotation-cap</code>/<code>--escalation-model</code>; commit <code>51fb80dd</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~—~~</td>
+<td>features/standard-names/completed/superseded/37-grammar-identity-prefix.md</td>
+<td>❌ Superseded (2026-04-30) by plan 38 — preposition-stripping rejected by RD + self-review.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td><a href="/imas-codex/docs-refresh.html">features/docs-refresh.md</a></td>
+<td>Fix stale docs: graph backup/restore CLI, LLM proxy port, llamaindex-agents references, docs/README.md (17+ missing entries)</td>
+<td>1 agent</td>
+</tr>
+<tr>
+<td>~~P2~~</td>
+<td>~~features/dd-server-cleanup.md~~</td>
+<td>✅ Completed — list_dd_paths COUNT query, migration guide include_recipes wiring, PathFuzzyMatcher in check_dd_paths (commit <code>fb21ef4e</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P3~~</td>
+<td>~~features/search-quality-improvements.md~~</td>
+<td>✅ Completed — Phase 1A accessor de-ranking, Phase 1B IDS preference (commit <code>64abde14</code>); evaluation alignment (commit <code>1d264f23</code>); cluster_labels populated in core search; Lucene fuzzy BM25 (commit <code>ebd311b6</code>). Phase 1C explicitly deferred.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P5~~</td>
+<td>~~features/sn-extraction-coverage-gaps.md~~</td>
+<td>✅ Completed — StandardNameSource graph-primary architecture, naming standardization, extraction coverage gap fixes</td>
+<td>—</td>
+</tr>
+<tr>
+<td>~~P6~~</td>
+<td>~~features/standard-names/30-dd-semantic-categories.md~~</td>
+<td>✅ Completed — <code>fit_artifact</code> &amp; <code>representation</code> NodeCategory enums, DD classifier rules (F1/F2/R1/R2/R4), SN classifier simplified to S0+S1+S2, graph migration (269 fit_artifact, 2209 representation)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3>Explicitly Removed / Deferred</h3>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute orchestration</td>
+<td>Removed — compute nodes cannot access internet</td>
+</tr>
+<tr>
+<td><code>explain_concept</code> tool</td>
+<td>Removed — frontier LLMs already do this, zero value</td>
+</tr>
+<tr>
+<td>SN benchmarking</td>
+<td>Deferred — insufficient quality content in graph</td>
+</tr>
+<tr>
+<td>SN enrichment gaps</td>
+<td>Deferred — low priority refinements, workarounds exist</td>
+</tr>
+<tr>
+<td>Search dimension upgrade</td>
+<td>Deferred — fix ranking first, then investigate</td>
+</tr>
+<tr>
+<td>DoE weight optimization</td>
+<td>Deferred — harness doesn&rsquo;t match production scoring</td>
+</tr>
+<tr>
+<td>Leaf concept boost</td>
+<td>Deferred — accessor de-ranking may be sufficient, needs investigation</td>
+</tr>
+</tbody>
+</table>
+<h3>Completed plans</h3>
+<p>Fully implemented plans archived in <code>features/completed/</code> and <code>features/standard-names/completed/</code>.</p>
+<p>Notable recent completions:
+- <code>dd-rebuild.md</code> — geometry NodeCategory, Pass 2 refine_worker, bug fixes; commits <code>a975c7f9</code>, <code>5541de01</code>, <code>49a0b850</code>, <code>d79bb9ef</code>
+- <code>dd-search-quality-ab.md</code> — find_related_dd_paths unit_companions fix, cocos_transformation_type filter; commit <code>fddfecd0</code>
+- <code>dd-server-cleanup.md</code> — list_dd_paths COUNT, migration recipes, IDS fuzzy validation; commit <code>fb21ef4e</code>
+- <code>search-quality-improvements.md</code> — accessor de-ranking, IDS preference, evaluation alignment, Lucene fuzzy; commits <code>64abde14</code>, <code>1d264f23</code>, <code>ebd311b6</code>
+- <code>sn-unit-integrity-tests.md</code> — test_sn_unit_integrity.py + backfill; commit <code>9d8207e9</code>
+- <code>sn-bootstrap-loop.md</code> — three-layer review pipeline (deterministic audits, batched LLM, consolidation); commit <code>eefd8506</code>
+- <code>sn-enrichment-rotation.md</code> — enrichment absorbed into <code>sn run --target docs</code>; commit <code>a0bc4a9f</code>
+- <code>sn-coverage-closure.md</code> — coverage expansion infrastructure shipped; <code>sn generate</code> → <code>sn run</code>
+- <code>dd-unified-classification.md</code> — superseded by dd-rebuild.md (merged with multi-pass enrichment)
+- <code>dd-multi-pass-enrichment.md</code> — superseded by dd-rebuild.md (merged with classification)
+- <code>isn-standard-name-kind.md</code> — ISN StandardNameKind assessed: no changes needed (scalar/vector/metadata sufficient)
+- <code>26-sn-pipeline-quality-iteration.md</code> — superseded by #28 greenfield pipeline</p>
+<h3>Reference plans (pending/)</h3>
+<p>Partially implemented plans kept as reference for gap documents.</p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Scope</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="features/pending/33-cli-harmonization.md">33-cli-harmonization.md</a></td>
+<td>CLI option harmonization: Phases 1–3 landed; Phase 4 subcommand consolidation + <code>-f</code> freeing + <code>--limit</code> harmonisation deferred</td>
+<td>Phase 4 pending</td>
+</tr>
+<tr>
+<td><a href="features/standard-names/pending/35-catalog-schema-redesign.md">35-catalog-schema-redesign.md</a></td>
+<td>Catalog schema v2: export/preview/publish/import round-trip, protection model, origin tracking</td>
+<td>Phases 0-7 done; Phase 8 (ISNC clean-break regeneration) pending</td>
+</tr>
+</tbody>
+</table>
+<h2 id="s3">Documentation Gaps</h2>
+<p>Docs review (2026-04-14) found these gaps — addressed in P2 docs-refresh plan:</p>
+<ol>
+<li><strong>docs/README.md</strong> — only lists 6 of 17+ architecture docs; lists non-existent <code>west-access-justification.md</code></li>
+<li><strong>graph.md</strong> — documents non-existent <code>backup</code>/<code>restore</code> CLI commands</li>
+<li><strong>services.md</strong> — wrong LLM proxy port (18790 vs 18400)</li>
+<li><strong>llamaindex-agents.md</strong> — references removed <code>create_enrichment_agent()</code></li>
+</ol>
+<h2 id="s4">Research</h2>
+<p>Historical analysis documents in <code>research/</code> — findings incorporated into implementation plans.</p>
+<h2 id="s5">Related Projects</h2>
+<ul>
+<li><strong><a href="https://github.com/iterorganization/imas-ambix">imas-ambix</a></strong> — Universal Fusion Data Client</li>
+<li><strong><a href="https://github.com/iterorganization/tree-sitter-gdl">tree-sitter-gdl</a></strong> — Tree-sitter grammar for GDL/IDL</li>
+</ul>
+  </main>
+</body>
+</html>

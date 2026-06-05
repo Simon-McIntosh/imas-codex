@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="phase8-smoke-results">
+  <meta name="plan-title" content="Phase 8 Smoke Test Results">
+  <meta name="plan-summary" content="Research note capturing the successful Phase 8 smoke test, the fairness deadlock root cause, and the empty-claim breaker fix.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-catalog-quality-refactor">
+  <title>Phase 8 Smoke Test Results | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Phase 8 Smoke Test Results</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Phase 8 smoke-test outcome" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Phase 8 smoke-test outcome</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Generate</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Regen</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Empty-claim breaker</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Budget stop</text></svg><figcaption>The smoke run proved that productive pools keep running once repeated empty-claim pools are removed from the fairness denominator.</figcaption></figure>
+<p><strong>Date</strong>: 2026-04-29<br />
+<strong>Commit</strong>: ffc5b32e (fairness deadlock fix)<br />
+<strong>Command</strong>: <code>uv run imas-codex sn run -c 5</code></p>
+<h2 id="s1">Result: ✅ PASS</h2>
+<p>The smoke test ran to completion with <code>stop_reason=budget_exhausted</code>.</p>
+<h3>SNRun Node (from graph)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cost_spent</code></td>
+<td>$5.23</td>
+</tr>
+<tr>
+<td><code>stop_reason</code></td>
+<td><code>budget_exhausted</code></td>
+</tr>
+<tr>
+<td><code>names_composed</code></td>
+<td>0 (regen, not compose)</td>
+</tr>
+<tr>
+<td><code>started_at</code></td>
+<td>2026-04-29T03:09:45Z</td>
+</tr>
+<tr>
+<td>Duration</td>
+<td>~30 minutes</td>
+</tr>
+</tbody>
+</table>
+<h3>Pool Activity Summary</h3>
+<p>Active pools (from final PoolHealth log):</p>
+<table>
+<thead>
+<tr>
+<th>Pool</th>
+<th><code>consecutive_empty_claims</code></th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate</code></td>
+<td>0</td>
+<td>✅ Active — composed new names from StandardNameSources</td>
+</tr>
+<tr>
+<td><code>regen</code></td>
+<td>0</td>
+<td>✅ Active — regenerated names with reviewer_score &lt; 0.75</td>
+</tr>
+<tr>
+<td><code>enrich</code></td>
+<td>62</td>
+<td>⛔ Excluded (all 26 eligible names have confidence &lt; 0.75)</td>
+</tr>
+<tr>
+<td><code>review_names</code></td>
+<td>62</td>
+<td>⛔ Excluded (no newly composed names to review in this run)</td>
+</tr>
+<tr>
+<td><code>review_docs</code></td>
+<td>63</td>
+<td>⛔ Excluded (all eligible names have score &lt; 0.75, reserved for regen)</td>
+</tr>
+</tbody>
+</table>
+<h3>Root Cause Fixed: Fairness Deadlock</h3>
+<p><strong>Symptom</strong>: <code>sn run -c 5</code> would hang indefinitely with all pools started but
+only the first batch processed. The display showed <code>graph:pending llm:pending</code>
+forever.</p>
+<p><strong>Root cause</strong>: The weighted admission gate (<code>pool_admit()</code>) computed effective
+weights over <code>active_pools</code> — pools with <code>pending_count &gt; 0</code> from the display
+query. The display query used loose eligibility criteria (e.g. <code>pipeline_status='named'</code>
+for enrich → 463 nodes). The actual claim functions used stricter criteria
+(e.g. <code>confidence &gt;= 0.75</code> for enrich → 0 claimable nodes).</p>
+<p>This caused <code>enrich</code> and <code>review_docs</code> to hold weight share in the admission
+denominator but consistently return <code>None</code> from claim, spending no budget.
+Since <code>total_spent</code> never grew, the spend shares of <code>generate</code> and <code>regen</code>
+(which had successfully processed one batch each) permanently exceeded their
+effective weight thresholds — admission denied forever.</p>
+<p><strong>Fix</strong>: Added <code>consecutive_empty_claims: int = 0</code> to <code>PoolHealth</code>. In
+<code>pool_loop</code>, the counter increments each time a pool is admitted but claim
+returns <code>None</code>, and resets to 0 on any successful claim. In <code>active_pools_fn</code>,
+pools with <code>consecutive_empty_claims &gt;= 3</code> are excluded from the denominator.
+After 3 consecutive empty claims (~21 seconds of backoff), the stalled pool
+is excluded, productive pools get fair admission, and work proceeds.</p>
+<p><strong>Files changed</strong>:
+- <code>imas_codex/standard_names/pools.py</code> — <code>PoolHealth</code> field + <code>pool_loop</code> tracking + <code>active_pools_fn</code> logic
+- <code>tests/standard_names/test_phase8_bugfixes.py</code> — <code>TestFairnessDeadlockBreaker</code> (4 tests)</p>
+<h3>Timeline</h3>
+<pre><code>05:09:45  sn run -c 5 starts
+05:09:56  First LLM calls (cache WRITE, expensive — ~$0.44)
+05:10–05:22  generate + regen active; enrich/review_docs reach threshold=3 → excluded
+05:22–05:35  regen dominates (all regen candidates); generate claiming from compose queue
+05:31:25  Budget pool at $0.03 remaining
+05:35:31  Budget pool at $0.03 (last extension)
+05:39:17  Budget pool exhausted → $0.00
+05:39:21  run_pools: budget exhausted — signalling graceful shutdown
+05:39:21  enrich, review_docs, review_names, generate exit cleanly
+05:40:21  regen cancelled mid-batch (grace period expired)
+05:40:21  All pools exited — SNRun updated with stop_reason=budget_exhausted
+</code></pre>
+<h3>Observations</h3>
+<ul>
+<li><strong>Cache hit rate</strong>: 93–95% (most LLM calls hit prompt cache)</li>
+<li><strong>Unit conflicts</strong>: Several regen candidates had unit mismatches (e.g. <code>s^-1 vs 1</code>,
+  <code>m^-3 vs 1</code>) — these were skipped with a warning but didn&rsquo;t crash the pool</li>
+<li><strong>Truncated LLM responses</strong>: Two batches hit <code>completion=32000</code> (max tokens)
+  with invalid JSON; the retry mechanism correctly handled both</li>
+<li><strong>In-flight batch at shutdown</strong>: regen pool had 1 claim in-flight during grace;
+  cancelled cleanly after 60s timeout</li>
+<li><strong>names_composed=0</strong>: The <code>names_composed</code> field tracks generate→compose
+  write events; regen regenerates via <code>write_standard_names</code> which doesn&rsquo;t
+  update this counter. This is expected behaviour.</li>
+</ul>
+<h3>Follow-up Issues</h3>
+<ol>
+<li><strong><code>review_docs</code> never activated</strong>: All 96 eligible nodes had
+   <code>reviewer_score_name &lt; 0.75</code>, making them reserved for regen. After regen
+   improves scores above 0.75, review_docs will activate naturally.</li>
+<li><strong><code>enrich</code> never activated</strong>: All 26 valid nodes had <code>confidence &lt; 0.75</code>.
+   The confidence gate prevents low-quality enrichment. As generate produces
+   higher-confidence names (or the confidence threshold is tuned), enrich
+   will activate.</li>
+<li><strong>Display shows <code>graph:pending llm:pending</code></strong>: The server status panel is
+   not updating from the health check results. Separate display bug — does not
+   affect pipeline correctness.</li>
+<li><strong>names_composed counter</strong>: Consider incrementing <code>names_composed</code> in the
+   regen persist path for a more accurate progress metric.</li>
+</ol>
+  </main>
+</body>
+</html>

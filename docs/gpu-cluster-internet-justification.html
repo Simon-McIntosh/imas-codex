@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="gpu-cluster-internet-justification">
+  <meta name="plan-title" content="Internet Connectivity for ITER GPU Compute Infrastructure">
+  <meta name="plan-summary" content="Security and operational analysis justifying controlled internet access from ITER compute infrastructure and the future H200 cluster.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="gpu-cluster-scoping">
+  <title>Internet Connectivity for ITER GPU Compute Infrastructure | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Internet Connectivity for ITER GPU Compute Infrastructure</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Connectivity recommendation tiers" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Connectivity recommendation tiers</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Selective DNS</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">HOSTALIASES now</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Proxy tier</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Segmented H200</text></svg><figcaption>The justification distinguishes the current selective-DNS baseline, immediate workarounds, an audited proxy tier, and production H200 segmentation.</figcaption></figure>
+<p>A companion analysis to the compute session orchestration plan, justifying the
+operational need for controlled internet access from SDCC compute nodes and the
+proposed H200 GPU cluster. This report balances security concerns against
+operational requirements.</p>
+<hr />
+<h2 id="s1">1. Executive Summary</h2>
+<p>The ITER SDCC compute infrastructure currently provides selective internet access
+from compute nodes: public repositories (GitHub, PyPI) are reachable while some
+API endpoints (notably <code>api.openrouter.ai</code>) are DNS-filtered. This partial
+connectivity creates an asymmetry where some AI/ML workflows function while others
+fail unpredictably. We recommend a controlled expansion of internet access for
+compute nodes, particularly the future H200 GPU cluster, using a defense-in-depth
+approach that minimizes the attack surface increase.</p>
+<hr />
+<h2 id="s2">2. Current State (Empirically Verified, 2026-03-31)</h2>
+<h3>What Works from Compute Nodes</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Protocol</th>
+<th>Status</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>github.com</td>
+<td>HTTPS</td>
+<td>✅</td>
+<td>HTTP 200, 0.21s</td>
+</tr>
+<tr>
+<td>pypi.org</td>
+<td>HTTPS</td>
+<td>✅</td>
+<td>HTTP 200, 0.11s</td>
+</tr>
+<tr>
+<td>api.anthropic.com</td>
+<td>DNS + HTTPS</td>
+<td>✅</td>
+<td>Resolves to 160.79.104.10</td>
+</tr>
+<tr>
+<td>openrouter.ai</td>
+<td>DNS</td>
+<td>✅</td>
+<td>Resolves to 104.18.2.115 (Cloudflare)</td>
+</tr>
+<tr>
+<td>Compute ↔ Compute</td>
+<td>TCP</td>
+<td>✅</td>
+<td>Neo4j, Embed server accessible</td>
+</tr>
+<tr>
+<td>Login → Compute</td>
+<td>TCP</td>
+<td>✅</td>
+<td>Direct port access works</td>
+</tr>
+</tbody>
+</table>
+<h3>What Fails from Compute Nodes</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Protocol</th>
+<th>Failure Mode</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api.openrouter.ai</td>
+<td>DNS</td>
+<td>NXDOMAIN</td>
+<td>LiteLLM proxy cannot route to OpenRouter</td>
+</tr>
+<tr>
+<td>External DNS (8.8.8.8)</td>
+<td>UDP:53</td>
+<td>Timeout</td>
+<td>Cannot bypass ITER DNS filtering</td>
+</tr>
+<tr>
+<td>Compute → Login</td>
+<td>TCP</td>
+<td>Connection refused</td>
+<td>Cannot reach login-hosted services</td>
+</tr>
+<tr>
+<td>SSH port forwarding</td>
+<td>TCP</td>
+<td>Administratively prohibited</td>
+<td>Cannot tunnel through compute SSH</td>
+</tr>
+</tbody>
+</table>
+<h3>DNS Architecture</h3>
+<p>Compute nodes use four ITER-internal DNS resolvers (10.10.24x.x) with search
+domain <code>iter.org</code>. External DNS servers are unreachable. Resolution is selective
+— the DNS appears to forward queries for whitelisted domains and return NXDOMAIN
+for others, or there is an issue with specific CNAME chain resolution through
+CDN providers like Cloudflare.</p>
+<hr />
+<h2 id="s3">3. Use Cases Requiring Internet Access</h2>
+<h3>3.1 AI Agent Development (Immediate)</h3>
+<p><strong>Current bottleneck:</strong> LiteLLM proxy must run on login nodes because it needs
+outbound HTTPS to LLM API providers. This contributes to login node saturation.</p>
+<p><strong>Services required:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Provider</th>
+<th>Purpose</th>
+<th>Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api.anthropic.com</td>
+<td>Anthropic</td>
+<td>Claude model inference</td>
+<td>HTTPS (443)</td>
+</tr>
+<tr>
+<td>api.openrouter.ai</td>
+<td>OpenRouter</td>
+<td>Multi-provider LLM routing</td>
+<td>HTTPS (443)</td>
+</tr>
+<tr>
+<td>api.openai.com</td>
+<td>OpenAI</td>
+<td>GPT model inference</td>
+<td>HTTPS (443)</td>
+</tr>
+<tr>
+<td>generativelanguage.googleapis.com</td>
+<td>Google</td>
+<td>Gemini model inference</td>
+<td>HTTPS (443)</td>
+</tr>
+<tr>
+<td>openrouter.ai</td>
+<td>OpenRouter</td>
+<td>API key management</td>
+<td>HTTPS (443)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Traffic characteristics:</strong>
+- JSON request/response payloads (1-100 KB typical)
+- No bulk data transfer
+- TLS 1.3 encrypted
+- Outbound-initiated only (no inbound connections)
+- Estimated: 10-50 requests/minute during active development</p>
+<h3>3.2 Embedding Model Downloads (Immediate)</h3>
+<p><strong>Current state:</strong> Embedding models are downloaded on login nodes and cached to GPFS.
+The embedding server runs on the Titan GPU node via SLURM but cannot download
+models directly.</p>
+<p><strong>Services required:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>huggingface.co</td>
+<td>Model weight download</td>
+<td>Monthly (on model updates)</td>
+</tr>
+<tr>
+<td>cdn-lfs.huggingface.co</td>
+<td>Large file storage</td>
+<td>Monthly</td>
+</tr>
+<tr>
+<td>pypi.org</td>
+<td>Python package updates</td>
+<td>Weekly</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 GPU Cluster Training Data (Medium-term, H200)</h3>
+<p><strong>Requirement:</strong> The proposed 8×H200 GPU cluster will train fusion world models
+on experimental data from partner tokamaks. Some data pipelines require fetching
+from external data repositories.</p>
+<p><strong>Services required:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+<th>Data Volume</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Partner facility data APIs</td>
+<td>Experimental data download</td>
+<td>1-100 GB per campaign</td>
+</tr>
+<tr>
+<td>Hugging Face Hub</td>
+<td>Pre-trained model checkpoints</td>
+<td>10-500 GB per model</td>
+</tr>
+<tr>
+<td>Container registries (ghcr.io, nvcr.io)</td>
+<td>ML framework containers</td>
+<td>5-20 GB per image</td>
+</tr>
+</tbody>
+</table>
+<h3>3.4 Software Development Support (Ongoing)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>github.com</td>
+<td>Git operations, CI/CD</td>
+</tr>
+<tr>
+<td>pypi.org</td>
+<td>Python packages</td>
+</tr>
+<tr>
+<td>registry.npmjs.org</td>
+<td>Node.js packages</td>
+</tr>
+<tr>
+<td>crates.io</td>
+<td>Rust packages</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="s4">4. Security Analysis</h2>
+<h3>4.1 Current Security Posture</h3>
+<p>The SDCC compute network operates with a <strong>default-deny DNS policy</strong> (or equivalent
+filtering effect). Compute nodes can only resolve domains that ITER&rsquo;s internal DNS
+servers are configured to forward. This provides:</p>
+<p><strong>Existing controls:</strong>
+1. DNS-level filtering (prevents resolution of unapproved domains)
+2. No inbound connectivity to compute nodes from outside ITER
+3. <code>pam_slurm_adopt</code> blocks SSH access without active SLURM jobs
+4. <code>AllowTcpForwarding no</code> prevents SSH tunnel abuse
+5. No root access for users on compute nodes
+6. GPFS access controls for data isolation</p>
+<h3>4.2 Attack Surface Analysis</h3>
+<table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Current Risk</th>
+<th>Risk with Internet Access</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data exfiltration</strong></td>
+<td>Low (DNS-filtered)</td>
+<td>Medium (HTTPS to API providers)</td>
+<td>Egress proxy with DLP inspection; TLS interception for approved endpoints only</td>
+</tr>
+<tr>
+<td><strong>Malware download</strong></td>
+<td>Low (limited DNS)</td>
+<td>Low-Medium (only whitelisted endpoints)</td>
+<td>Application-layer proxy whitelist; no arbitrary internet access</td>
+</tr>
+<tr>
+<td><strong>C2 communication</strong></td>
+<td>Very Low (no outbound to arbitrary hosts)</td>
+<td>Low (only whitelisted HTTPS)</td>
+<td>Restrict to specific IP ranges + domains; monitor for anomalous traffic patterns</td>
+</tr>
+<tr>
+<td><strong>Lateral movement</strong></td>
+<td>Medium (compute ↔ compute open)</td>
+<td>Unchanged</td>
+<td>Network segmentation already in place; no new lateral paths created</td>
+</tr>
+<tr>
+<td><strong>Credential theft</strong></td>
+<td>Low</td>
+<td>Low (API keys in env vars)</td>
+<td>Secrets management; rotate keys; proxy-level credential injection</td>
+</tr>
+<tr>
+<td><strong>Supply chain attack</strong></td>
+<td>Medium (PyPI, GitHub accessible)</td>
+<td>Unchanged</td>
+<td>Already exposed via current PyPI/GitHub access</td>
+</tr>
+</tbody>
+</table>
+<h3>4.3 Key Observation</h3>
+<p><strong>The most significant supply-chain risk already exists.</strong> Compute nodes can already
+reach <code>github.com</code> and <code>pypi.org</code> — the two most common vectors for software supply
+chain attacks. Adding controlled access to a handful of LLM API endpoints (which
+accept only authenticated HTTPS requests and return only text responses) does not
+materially increase the attack surface beyond what PyPI access already provides.</p>
+<hr />
+<h2 id="s5">5. Recommended Architecture</h2>
+<h3>5.1 Defense-in-Depth Approach</h3>
+<pre><code>┌─ ITER Network Boundary ────────────────────────────────────────────┐
+│                                                                     │
+│  ┌─ DMZ / Proxy Zone ────────────────────────────────────────────┐ │
+│  │                                                                │ │
+│  │  Forward Proxy (Squid/Envoy)                                  │ │
+│  │  ├─ Domain allowlist (api.anthropic.com, api.openrouter.ai)   │ │
+│  │  ├─ TLS inspection for approved domains                       │ │
+│  │  ├─ Rate limiting per source IP                               │ │
+│  │  ├─ Request/response size limits                              │ │
+│  │  └─ Logging to SIEM                                           │ │
+│  │                                                                │ │
+│  └────────────────────────────────────────────────────────────────┘ │
+│       ▲                                                             │
+│       │ HTTPS (443)                                                 │
+│       │                                                             │
+│  ┌─ Compute Network ─────────────────────────────────────────────┐ │
+│  │                                                                │ │
+│  │  Compute Nodes                                                │ │
+│  │  ├─ HTTPS_PROXY=http://proxy:3128                             │ │
+│  │  ├─ Only proxy-routed traffic reaches internet                │ │
+│  │  └─ Direct internet access remains blocked                    │ │
+│  │                                                                │ │
+│  │  H200 GPU Cluster                                             │ │
+│  │  ├─ Same proxy configuration                                  │ │
+│  │  ├─ Additional allowlist for training data endpoints          │ │
+│  │  └─ Bandwidth monitoring for large transfers                  │ │
+│  │                                                                │ │
+│  └────────────────────────────────────────────────────────────────┘ │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Implementation Tiers</h3>
+<p><strong>Tier 1: DNS Whitelist (Minimal change, immediate)</strong></p>
+<p>Add specific domains to the ITER DNS resolver whitelist:
+- <code>api.openrouter.ai</code>
+- <code>api.openai.com</code>
+- <code>generativelanguage.googleapis.com</code>
+- <code>huggingface.co</code>, <code>cdn-lfs.huggingface.co</code></p>
+<p>This requires no infrastructure changes — only a DNS configuration update. The
+existing network architecture already permits HTTPS outbound (proven by github.com
+and pypi.org access). The DNS filter is the only barrier.</p>
+<p><strong>Risk increase:</strong> Minimal. Same HTTPS-outbound pattern as existing PyPI/GitHub access.
+No new network paths are created.</p>
+<p><strong>Tier 2: Forward Proxy (Moderate change, recommended for H200)</strong></p>
+<p>Deploy an HTTP/HTTPS forward proxy (Squid, Envoy, or similar) on a login or
+infrastructure node that:</p>
+<ol>
+<li>Accepts connections from compute subnet (10.154.x.0/24)</li>
+<li>Maintains a strict domain allowlist</li>
+<li>Provides TLS inspection for approved domains</li>
+<li>Logs all requests for audit</li>
+<li>Enforces rate and size limits</li>
+</ol>
+<p>Compute nodes configure <code>HTTPS_PROXY</code> environment variable. No direct internet
+access is granted — all traffic routes through the auditable proxy.</p>
+<p><strong>Tier 3: Network Segmentation (For production H200 cluster)</strong></p>
+<p>The H200 GPU cluster should be placed in a dedicated network segment with:</p>
+<ol>
+<li>Separate VLAN from general compute</li>
+<li>Dedicated proxy instance with GPU-specific allowlist</li>
+<li>Bandwidth monitoring and alerting for large transfers</li>
+<li>DLP (Data Loss Prevention) rules to prevent sensitive data exfiltration</li>
+<li>Integration with ITER&rsquo;s SIEM for security monitoring</li>
+</ol>
+<hr />
+<h2 id="s6">6. Comparison: Login Node vs. Compute Node Internet Access</h2>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Login Nodes (Current)</th>
+<th>Compute Nodes (Proposed)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Users with access</strong></td>
+<td>~30 concurrent users</td>
+<td>Only SLURM job owners</td>
+</tr>
+<tr>
+<td><strong>Access control</strong></td>
+<td>SSH login (any ITER user)</td>
+<td>SLURM job + pam_slurm_adopt</td>
+</tr>
+<tr>
+<td><strong>Process isolation</strong></td>
+<td>None (shared user space)</td>
+<td>cgroup isolation per job</td>
+</tr>
+<tr>
+<td><strong>Audit trail</strong></td>
+<td>SSH session logs</td>
+<td>SLURM accounting + proxy logs</td>
+</tr>
+<tr>
+<td><strong>Resource limits</strong></td>
+<td>None (fair-use only)</td>
+<td>SLURM enforced (CPU, memory, time)</td>
+</tr>
+<tr>
+<td><strong>Cleanup</strong></td>
+<td>Manual / no guarantee</td>
+<td>Automatic on job completion</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Compute nodes are actually MORE controlled</strong> than login nodes for internet access.
+Every process runs within a SLURM cgroup, with tracked resource usage, known job
+owners, and automatic cleanup. Login nodes have no such guarantees.</p>
+<hr />
+<h2 id="s7">7. Immediate Workarounds (No IT Changes Required)</h2>
+<p>While awaiting formal DNS/proxy changes, these workarounds enable compute-based
+LLM access today:</p>
+<h3>7.1 HOSTALIASES Environment Variable</h3>
+<pre><code class="language-bash"># Resolve api.openrouter.ai on login (where it works), cache IP
+echo &quot;$(host api.openrouter.ai | awk '/has address/{print $4; exit}') api.openrouter.ai&quot; \
+    &gt; ~/.local/share/imas-codex/services/hostaliases
+export HOSTALIASES=~/.local/share/imas-codex/services/hostaliases
+</code></pre>
+<h3>7.2 OpenRouter DNS Resolution via HOSTALIASES</h3>
+<p>All LLM access is through OpenRouter (we do not hold direct Anthropic API tokens).
+Since <code>api.openrouter.ai</code> is the only failing domain, resolve it at job startup:</p>
+<pre><code class="language-bash"># In LiteLLM SLURM script — resolve on login, inject into compute job
+OPENROUTER_IP=$(ssh sdcc-login-1003 &quot;getent hosts api.openrouter.ai&quot; 2&gt;/dev/null | awk '{print $1}')
+OPENROUTER_IP=&quot;${OPENROUTER_IP:-104.18.2.115}&quot;  # Fallback: known Cloudflare IP
+echo &quot;$OPENROUTER_IP api.openrouter.ai&quot; &gt; /tmp/hostaliases-litellm
+export HOSTALIASES=/tmp/hostaliases-litellm
+</code></pre>
+<p>This is the critical workaround: without it, LiteLLM on compute cannot reach any
+LLM provider since all traffic routes through OpenRouter.</p>
+<h3>7.3 Login-as-Proxy Pattern</h3>
+<p>Run a lightweight SOCKS or HTTP proxy on the login node that compute nodes can reach:</p>
+<pre><code class="language-bash"># On login node (one-time):
+ssh -D 1080 -N localhost &amp;  # SOCKS proxy
+
+# On compute node:
+export ALL_PROXY=socks5://10.154.100.16:1080
+</code></pre>
+<p><strong>Caveat:</strong> This depends on compute→login TCP working for port 1080. Current tests
+show compute→login TCP is blocked by firewall, so this may not work without IT
+involvement. See Section 2 connectivity matrix.</p>
+<hr />
+<h2 id="s8">8. Recommendation</h2>
+<h3>For Immediate Use (AI Agent Development)</h3>
+<ol>
+<li><strong>Use HOSTALIASES for OpenRouter</strong> — resolves the <code>api.openrouter.ai</code> DNS issue
+   without IT changes. All LLM traffic routes through OpenRouter (no direct
+   Anthropic/OpenAI tokens available), making this a hard requirement</li>
+<li><strong>File IT ticket for DNS whitelist</strong> — request <code>api.openrouter.ai</code> be added
+   to the resolver whitelist (permanent fix)</li>
+<li><strong>Move LiteLLM to compute node</strong> — reduces login node load, keeps proxy
+   co-located with consuming agents on the compute network</li>
+</ol>
+<h3>For H200 GPU Cluster</h3>
+<ol>
+<li><strong>Deploy forward proxy</strong> (Tier 2) before cluster delivery</li>
+<li><strong>Domain allowlist</strong> covering LLM APIs, model registries, training data endpoints</li>
+<li><strong>Dedicated VLAN</strong> for GPU cluster with monitored proxy access</li>
+<li><strong>SIEM integration</strong> for security audit trail</li>
+<li><strong>DLP rules</strong> for sensitive data protection</li>
+<li><strong>Bandwidth monitoring</strong> for large training data transfers</li>
+</ol>
+<h3>Cost-Benefit Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Investment</th>
+<th>Benefit</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DNS whitelist (1h IT work)</td>
+<td>Unblocks all compute LLM access</td>
+<td>Negligible — same HTTPS pattern as existing PyPI</td>
+</tr>
+<tr>
+<td>Forward proxy (~1 week setup)</td>
+<td>Auditable, rate-limited internet access</td>
+<td>Low — standard enterprise pattern</td>
+</tr>
+<tr>
+<td>Dedicated GPU VLAN (~2 weeks)</td>
+<td>Full isolation with monitored access</td>
+<td>Very low — defense-in-depth</td>
+</tr>
+</tbody>
+</table>
+<p>The security posture of compute nodes (cgroup isolation, SLURM accounting,
+pam_slurm_adopt, no root) is <strong>stronger</strong> than the login nodes that currently
+have unrestricted internet access. Extending controlled internet access to compute
+nodes is a net security improvement when it allows migrating workloads off the
+less-controlled login node environment.</p>
+<hr />
+<h2 id="s9">References</h2>
+<ul>
+<li>SDCC Infrastructure Reference: <code>~/sdcc-infrastructure.md</code></li>
+<li>GPU Cluster Requirements: <code>plans/gpu-cluster-scoping.md</code></li>
+<li>LiteLLM Multi-Tenant Gateway: <code>plans/features/litellm-multi-tenant-gateway.md</code></li>
+<li>Network tests: 2026-03-31, login node sdcc-login-1006, compute node 98dci4-clu-3001</li>
+</ul>
+  </main>
+</body>
+</html>

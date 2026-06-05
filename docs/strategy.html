@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="strategy">
+  <meta name="plan-title" content="Federated Fusion Knowledge Graph Builder Strategy">
+  <meta name="plan-summary" content="Strategic architecture for imas-codex as a federated fusion knowledge graph builder, covering the four-zone topology, agile LinkML workflow, and roadmap.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <title>Federated Fusion Knowledge Graph Builder Strategy | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Codex: The Federated Fusion Knowledge Graph Builder</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Core strategy flow" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Core strategy flow</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Discovery engine</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">LinkML schema</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Logic synthesis</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Graph artifact</text></svg><figcaption>The strategy links discovery, schema evolution, logic synthesis, and artifact publishing into one graph-as-code pipeline.</figcaption></figure>
+<p><strong>System:</strong> <code>imas-codex</code>
+<strong>Role:</strong> The Factory (Backend Engineering &amp; Ontology Management)
+<strong>Output:</strong> A versioned, containerized Neo4j Database Artifact</p>
+<hr />
+<h2 id="s1">1. Executive Vision</h2>
+<p><strong>Codex</strong> is the engineering engine that constructs the &ldquo;Map&rdquo; of the fusion world. It does not serve user requests directly; instead, it produces the <strong>Federated Fusion Knowledge Graph (FFKG)</strong>—a comprehensive, versioned artifact that links facility-specific data (Source) to the IMAS standard (Target).</p>
+<p><strong>Core Philosophy: &ldquo;Graph-as-Code&rdquo;</strong>
+We do not manually draw a graph. We engineer a software pipeline. The graph is the deterministic output of running:
+1.  <strong>Discovery Engine</strong> (Command/Deploy Agent Architecture)
+2.  <strong>Ontology</strong> (Agile LinkML definitions)
+3.  <strong>Logic Synthesis</strong> (LLM-driven mapping)</p>
+<hr />
+<h2 id="s2">2. Architecture: The Four-Zone Topology</h2>
+<p>The graph is structured into four distinct zones of &ldquo;Truth&rdquo;:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Zone</th>
+<th style="text-align: left;">Name</th>
+<th style="text-align: left;">Role</th>
+<th style="text-align: left;">Source of Truth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Zone A</strong></td>
+<td style="text-align: left;"><strong>Target Definition</strong> (IMAS)</td>
+<td style="text-align: left;">The immutable standard we map <em>to</em>.</td>
+<td style="text-align: left;"><strong>IMAS Python Library</strong> (<code>imas.dd</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Zone B</strong></td>
+<td style="text-align: left;"><strong>Source Inventory</strong> (Facility)</td>
+<td style="text-align: left;">The catalog of what exists (Files, Trees).</td>
+<td style="text-align: left;"><strong>Discovery Engine</strong> (Subagents)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Zone C</strong></td>
+<td style="text-align: left;"><strong>Forensic Evidence</strong> (Context)</td>
+<td style="text-align: left;">Documentation, legacy code, diagrams.</td>
+<td style="text-align: left;"><strong>Discovery Engine</strong> (Subagents)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Zone D</strong></td>
+<td style="text-align: left;"><strong>Transformation Logic</strong> (The Bridge)</td>
+<td style="text-align: left;">The computed link between Source and Target.</td>
+<td style="text-align: left;"><strong>LLM / LinkML</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="s3">3. The Agile Schema Workflow (LinkML)</h2>
+<p>We reject the &ldquo;Waterfall&rdquo; approach to ontology. The schema must evolve as we discover new patterns in the wild.</p>
+<h3>3.1 The &ldquo;Core&rdquo; vs. &ldquo;Wild&rdquo; Split</h3>
+<p>The LinkML definitions (stored in <code>schemas/</code>) are divided:
+*   <strong><code>schemas/imas_dd.yaml</code></strong>: Rigid definitions for Zone A (IMAS) and base classes.
+*   <strong><code>schemas/facility.yaml</code></strong>: Permissive definitions for Zone B (Facility). Contains FacilityPath, SourceFile, DataNode, etc.</p>
+<h3>3.2 The &ldquo;LLM-as-Ontologist&rdquo; Loop</h3>
+<ol>
+<li><strong>Discover:</strong> Subagents scan the facility and return structured findings.</li>
+<li><strong>Ingest:</strong> The pipeline attempts to validate findings against current LinkML models.</li>
+<li><strong>Identify Misses:</strong> Data that fails validation (e.g., a new file type &ldquo;FastCameraLog&rdquo;) is flagged.</li>
+<li><strong>Synthesize:</strong> An LLM Agent analyzes the &ldquo;Misses&rdquo; and <strong>generates a Schema Proposal (Pull Request)</strong>:<ul>
+<li>It defines a new class <code>FastCameraLog</code> in <code>ontology/wild.yaml</code>.</li>
+<li>It adds the necessary attributes found in the raw JSON.</li>
+</ul>
+</li>
+<li><strong>Validate:</strong> A human engineer (or senior agent) reviews the PR. CI/CD runs <code>linkml-validate</code> to ensure the new definition doesn&rsquo;t break the graph.</li>
+</ol>
+<hr />
+<h2 id="s4">4. Implementation Strategy</h2>
+<h3>4.1 The Discovery Engine (Zone B/C) - Command/Deploy Architecture</h3>
+<p>The discovery process uses a <strong>Command/Deploy</strong> agent architecture where a Commander LLM orchestrates specialist subagents for remote facility exploration.</p>
+<h4>Architecture Overview</h4>
+<pre><code class="language-mermaid">flowchart TB
+    subgraph command [Command Layer - Cursor Chat]
+        Human[Human] --&gt;|prompts| Commander[Commander LLM]
+        Commander --&gt;|findings + learnings| Human
+        Commander --&gt;|reads| Instructions[Agent Instructions]
+    end
+
+    subgraph mcp [MCP Layer]
+        AgentsMCP[&quot;Agents MCP Server&lt;br/&gt;imas-codex serve agents&quot;]
+        DDMCP[&quot;DD MCP Server&lt;br/&gt;imas-codex serve imas&quot;]
+
+        AgentsMCP --&gt;|&quot;/explore_files&quot;| Commander
+        DDMCP --&gt;|&quot;/search_imas&quot;| Commander
+    end
+
+    subgraph deploy [Deploy Layer - Subagents]
+        Commander --&gt;|&quot;dispatch(task)&quot;| FileAgent[File Explorer]
+        Commander --&gt;|&quot;dispatch(task)&quot;| CodeAgent[Code Search]
+        Commander --&gt;|&quot;dispatch(task)&quot;| DataAgent[Data Inspector]
+        Commander --&gt;|&quot;dispatch(task)&quot;| EnvAgent[Environment Probe]
+
+        FileAgent --&gt;|ReAct loop| FrontierLLM[Frontier LLM]
+        CodeAgent --&gt;|ReAct loop| FrontierLLM
+        DataAgent --&gt;|ReAct loop| FrontierLLM
+        EnvAgent --&gt;|ReAct loop| FrontierLLM
+    end
+
+    subgraph remote [Remote Layer]
+        FileAgent --&gt;|SSH| Facility[Remote Facility]
+        CodeAgent --&gt;|SSH| Facility
+        DataAgent --&gt;|SSH| Facility
+        EnvAgent --&gt;|SSH| Facility
+    end
+</code></pre>
+<h4>Knowledge Flow</h4>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant H as Human
+    participant C as Commander LLM
+    participant A as Subagent
+    participant R as Remote Facility
+    participant K as Knowledge Store
+
+    H-&gt;&gt;C: /explore_files tcv /common/tcv
+    C-&gt;&gt;K: Load common.md + tcv.yaml + file_explorer.md
+    K--&gt;&gt;C: Instructions + existing knowledge
+    C-&gt;&gt;A: dispatch(task, context)
+
+    loop ReAct Loop
+        A-&gt;&gt;A: Thought: Analyze and plan
+        A-&gt;&gt;R: Action: Execute bash script
+        R--&gt;&gt;A: Observation: stdout/stderr
+    end
+
+    A--&gt;&gt;C: {findings, learnings}
+    C-&gt;&gt;H: &quot;Found X. Learned: rg unavailable. Persist as knowledge?&quot;
+    H-&gt;&gt;C: &quot;Yes&quot;
+    C-&gt;&gt;K: Update tcv.yaml knowledge section
+</code></pre>
+<h4>Knowledge Hierarchy</h4>
+<p>Agent instructions are organized in a three-level hierarchy:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Format</th>
+<th>Location</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Common</strong></td>
+<td>Markdown</td>
+<td><code>prompts/agents/common.md</code></td>
+<td>Safety rules, ReAct pattern, SSH execution</td>
+</tr>
+<tr>
+<td><strong>Facility</strong></td>
+<td>YAML</td>
+<td><code>config/facilities/*.yaml</code></td>
+<td>Paths, tools, accumulated knowledge</td>
+</tr>
+<tr>
+<td><strong>Specialist</strong></td>
+<td>Markdown</td>
+<td><code>prompts/agents/*.md</code></td>
+<td>Agent-specific behavior and goals</td>
+</tr>
+</tbody>
+</table>
+<h4>Available Subagents</h4>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Status</th>
+<th>Purpose</th>
+<th>MCP Prompt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>File Explorer</strong></td>
+<td>✅ Available</td>
+<td>Map filesystem structure</td>
+<td><code>/explore_files</code></td>
+</tr>
+<tr>
+<td><strong>Code Search</strong></td>
+<td>🔜 Planned</td>
+<td>Find code patterns</td>
+<td><code>/search_code</code></td>
+</tr>
+<tr>
+<td><strong>Data Inspector</strong></td>
+<td>🔜 Planned</td>
+<td>Inspect HDF5/MDSplus data</td>
+<td><code>/inspect_data</code></td>
+</tr>
+<tr>
+<td><strong>Environment Probe</strong></td>
+<td>🔜 Planned</td>
+<td>Discover system capabilities</td>
+<td><code>/probe_environment</code></td>
+</tr>
+<tr>
+<td><strong>Dependency Mapper</strong></td>
+<td>🔜 Planned</td>
+<td>Map code dependencies</td>
+<td><code>/map_dependencies</code></td>
+</tr>
+<tr>
+<td><strong>Documentation Finder</strong></td>
+<td>🔜 Planned</td>
+<td>Locate and index docs</td>
+<td><code>/find_documentation</code></td>
+</tr>
+</tbody>
+</table>
+<h4>Safety Model</h4>
+<p>All subagents execute within a <strong>Read-Only Sandbox</strong> that:
+- Whitelists non-destructive commands (<code>ls</code>, <code>find</code>, <code>grep</code>, <code>cat</code>, etc.)
+- Blocks dangerous commands (<code>rm</code>, <code>mv</code>, <code>sudo</code>, etc.)
+- Enforces output size limits
+- Times out long-running commands</p>
+<h3>4.2 The Builder Pipeline</h3>
+<p>A containerized Python application that:
+1.  Reads <code>config/{machine}.yaml</code>.
+2.  <strong>Phase 1:</strong> Executes the <strong>File Explorer</strong> agent to populate the Zone B skeleton.
+3.  <strong>Phase 2:</strong> The <strong>Code Search</strong> and <strong>Data Inspector</strong> agents iterate through interesting nodes.
+4.  <strong>Phase 3:</strong> Synthesizes Zone D (Logic) and populates Neo4j.</p>
+<h3>4.3 Quality Assurance (CI/CD)</h3>
+<p>Since the LLM can modify the schema, we need rigorous checks.</p>
+<ul>
+<li><strong>Pre-Commit Hook:</strong><ul>
+<li>Runs <code>linkml-lint</code> on <code>ontology/*.yaml</code>.</li>
+<li>Ensures no breaking changes to <code>core.yaml</code>.</li>
+</ul>
+</li>
+<li><strong>CI Pipeline:</strong><ul>
+<li>Generates Pydantic models from LinkML.</li>
+<li>Runs a &ldquo;Dry Run&rdquo; ingestion with sample data.</li>
+<li>If successful, merges the schema update.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="s5">5. MCP Server Architecture</h2>
+<p>The system runs two separate MCP servers:</p>
+<table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Command</th>
+<th>Purpose</th>
+<th>Transport</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IMAS DD</strong></td>
+<td><code>imas-codex serve imas</code></td>
+<td>IMAS Data Dictionary knowledge</td>
+<td>HTTP (public)</td>
+</tr>
+<tr>
+<td><strong>Agents</strong></td>
+<td><code>imas-codex serve agents</code></td>
+<td>Facility exploration prompts</td>
+<td>stdio (local)</td>
+</tr>
+</tbody>
+</table>
+<h3>MCP Configuration</h3>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;imas-dd&quot;: {
+      &quot;url&quot;: &quot;https://imas-dd.iter.org/mcp&quot;,
+      &quot;type&quot;: &quot;http&quot;
+    },
+    &quot;agents&quot;: {
+      &quot;command&quot;: &quot;uv&quot;,
+      &quot;args&quot;: [&quot;run&quot;, &quot;imas-codex&quot;, &quot;serve&quot;, &quot;agents&quot;],
+      &quot;type&quot;: &quot;stdio&quot;
+    }
+  }
+}
+</code></pre>
+<hr />
+<h2 id="s6">6. Artifact Management &amp; Versioning</h2>
+<p>We treat the Database as an Artifact.</p>
+<ol>
+<li><strong>Build:</strong> The pipeline runs and populates a local Neo4j instance.</li>
+<li><strong>Dump:</strong> Run <code>neo4j-admin database dump</code>.</li>
+<li><strong>Package:</strong> Wrap the dump in an OCI-compliant container layer.</li>
+<li><strong>Publish:</strong> Push to <strong>GitHub Container Registry (GHCR)</strong>.<ul>
+<li>Tag: <code>ghcr.io/iter/imas-codex-graph:sha-12345</code></li>
+</ul>
+</li>
+<li><strong>Traceability:</strong> The Git commit hash of the <code>imas-codex</code> repo is the single source of truth. It references the specific GHCR tag used for that version.</li>
+</ol>
+<hr />
+<h2 id="s7">7. Roadmap</h2>
+<h3>Phase 1: Foundation ✅</h3>
+<ul>
+<li>[x] Setup <code>imas-codex</code> repo with <code>schemas/</code> folder (LinkML)</li>
+<li>[x] Implement LinkML schema with auto-generated Pydantic models</li>
+<li>[x] IMAS DD MCP server with semantic search (61k paths indexed)</li>
+</ul>
+<h3>Phase 2: Command/Deploy Architecture ✅</h3>
+<ul>
+<li>[x] Restructure CLI (<code>serve imas</code>, <code>serve agents</code>)</li>
+<li>[x] Agent knowledge hierarchy (common → facility → specialist)</li>
+<li>[x] File Explorer subagent demonstrator</li>
+<li>[x] Agents MCP server with persistent Python REPL</li>
+</ul>
+<h3>Phase 3: Neo4j Knowledge Graph ✅</h3>
+<ul>
+<li>[x] Neo4j integration with Apptainer (v2025.11.2 community)</li>
+<li>[x] GraphClient with Cypher query API</li>
+<li>[x] Schema-driven graph structure from LinkML (<code>GraphSchema</code>)</li>
+<li>[x] OCI artifact versioning (GHCR push/pull)</li>
+<li>[x] <code>get_exploration_progress</code> with per-tree coverage</li>
+<li>[x] <code>get_graph_schema</code> for LLM Cypher generation</li>
+<li>[x] Vector indexes for semantic search (IMAS, code, wiki)</li>
+</ul>
+<h3>Phase 4: Content Ingestion ✅</h3>
+<ul>
+<li>[x] MDSplus tree structure ingestion pipeline</li>
+<li>[x] Wiki ingestion pipeline with semantic chunking</li>
+<li>[x] Code example pipeline with LlamaIndex embedding</li>
+<li>[x] TDI function discovery and parsing</li>
+<li>[x] SourceFile queue management with status tracking</li>
+</ul>
+<h3>Phase 5: Discovery Automation 🔜 (Current Focus)</h3>
+<ul>
+<li>[x] FacilityPath tracking with exploration status</li>
+<li>[x] Multi-dimensional pattern scoring design</li>
+<li>[ ] MapAgent for exhaustive file enumeration (fd/rg)</li>
+<li>[ ] ScoreAgent for LLM-driven semantic enrichment</li>
+<li>[ ] Incremental discovery scheduling</li>
+</ul>
+<h3>Phase 6: Agent Enrichment 🔜</h3>
+<ul>
+<li>[ ] ReAct agents for DataNode metadata enrichment</li>
+<li>[ ] IMAS mapping discovery with confidence scoring</li>
+<li>[ ] Budget controls and checkpoint/resume logic</li>
+<li>[ ] Multi-facility expansion (JET, DIII-D)</li>
+</ul>
+<h3>Phase 7: CI/CD &amp; Production 🔜</h3>
+<ul>
+<li>[ ] Automated graph builds on commit</li>
+<li>[ ] GHCR publishing pipeline</li>
+<li>[ ] Version traceability via DDVersion.build_hash</li>
+<li>[ ] Graph artifact integrity validation</li>
+</ul>
+<hr />
+<h2 id="s8">8. Feature Plans</h2>
+<p>Detailed implementation plans for pending features:</p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Phase</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="features/discovery-agents.md">discovery-agents.md</a></td>
+<td>5-6</td>
+<td>Multi-facility discovery pipeline with Map → Score → Ingest</td>
+</tr>
+<tr>
+<td><a href="features/wiki-ingestion.md">wiki-ingestion.md</a></td>
+<td>4</td>
+<td>Wiki content ingestion with ReAct agent evaluation</td>
+</tr>
+<tr>
+<td><a href="features/enrichment.md">enrichment.md</a></td>
+<td>6</td>
+<td>DataNode LLM enrichment for metadata generation</td>
+</tr>
+<tr>
+<td><a href="features/path-normalization.md">path-normalization.md</a></td>
+<td>5</td>
+<td>DataNode path normalization and TDI integration</td>
+</tr>
+<tr>
+<td><a href="features/mcp-tool-fixes.md">mcp-tool-fixes.md</a></td>
+<td>3</td>
+<td>IMAS MCP tool input handling and error recovery</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="/imas-codex/plans-readme.html">plans/README.md</a> for the complete index.</p>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+  <h2><span class="sec">§</span> Decisions</h2>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+  <h2><span class="sec">§</span> Followups</h2>
+</section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="docs-refresh">
+  <meta name="plan-title" content="Documentation Refresh">
+  <meta name="plan-summary" content="Plan to correct stale architecture and API docs after recent code changes, including README inventory fixes, command corrections, and historical-document cleanup.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="sonnet">
+  <title>Documentation Refresh | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Documentation Refresh</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Docs refresh scope" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Docs refresh scope</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Inventory repair</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">CLI corrections</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Service fixes</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Historical cleanup</text></svg><figcaption>The docs-refresh plan groups work into inventory repair, command corrections, service/config updates, and historical cleanup.</figcaption></figure>
+<blockquote>
+<p>Priority: P4 — Stale docs mislead agents. Fix after code changes land.</p>
+</blockquote>
+<h2 id="s1">Problem</h2>
+<p>Architecture review (2026-04-14) found docs/README.md lists 6 of 17+ docs,
+several docs have stale information, and one referenced file doesn&rsquo;t exist.
+Fixing docs after Waves 1-3 avoids documenting features that are about to change.</p>
+<h2 id="s2">Verified Issues</h2>
+<h3>Critical (fix immediately)</h3>
+<table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Issue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/README.md</code></td>
+<td>Only lists 6 of 17+ architecture docs. Missing: graph-profiles, facility-access, services, keyring, client-setup, standard-names, standard-names-decisions, cocos-validation, copilot-cli-guide, zellij-quickstart, api/REPL_API</td>
+</tr>
+<tr>
+<td><code>docs/README.md</code></td>
+<td>Lists <code>west-access-justification.md</code> which does NOT exist on disk</td>
+</tr>
+<tr>
+<td><code>graph.md</code></td>
+<td>Documents <code>graph backup</code> and <code>graph restore</code> CLI commands that don&rsquo;t exist (internal helpers only)</td>
+</tr>
+<tr>
+<td><code>services.md</code></td>
+<td>LLM Proxy port listed as 18790, actual is 18400 (<code>LLM_BASE_PORT</code> in settings.py)</td>
+</tr>
+<tr>
+<td><code>standard-names.md</code></td>
+<td>References non-existent <code>docs/architecture/boundary.md</code></td>
+</tr>
+<tr>
+<td><code>standard-names.md</code></td>
+<td>Phase table includes REVIEW as part of main pipeline (it&rsquo;s standalone/optional)</td>
+</tr>
+<tr>
+<td><code>api/REPL_API.md</code></td>
+<td>Documents <code>get_dd_overview()</code> which doesn&rsquo;t exist in server.py</td>
+</tr>
+</tbody>
+</table>
+<h3>Medium (fix during docs pass)</h3>
+<table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Issue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>imas_dd.md</code></td>
+<td>CLI commands outdated (<code>uv run build-dd-graph</code> → <code>imas-codex imas dd build</code>)</td>
+</tr>
+<tr>
+<td><code>imas_dd.md</code></td>
+<td>README description says &ldquo;MCP server&rdquo; but doc covers graph schema &amp; build</td>
+</tr>
+<tr>
+<td><code>cocos.md</code></td>
+<td>Documents COCOSMixin in schema but not found in <code>common.yaml</code></td>
+</tr>
+<tr>
+<td><code>llamaindex-agents.md</code></td>
+<td>Documents <code>create_enrichment_agent()</code> which doesn&rsquo;t exist — likely superseded</td>
+</tr>
+<tr>
+<td><code>signals.md</code></td>
+<td>Incorrect relationship: says <code>TDIFunction -[:RESOLVES_TO_NODE]-&gt;</code> but actual is <code>DataReference -[:RESOLVES_TO_NODE]-&gt;</code></td>
+</tr>
+<tr>
+<td><code>wiki.md</code></td>
+<td>Wrong CLI order: <code>uv run imas-codex wiki discover</code> → <code>imas-codex discover wiki</code></td>
+</tr>
+<tr>
+<td><code>mdsplus.md</code></td>
+<td>3 stale CLI commands: <code>discover-mdsplus</code>, <code>ingest-mdsplus</code>, <code>agent enrich</code> don&rsquo;t exist</td>
+</tr>
+<tr>
+<td><code>ids-mapping.md</code></td>
+<td>Confusing dual &ldquo;IMASMapping&rdquo; headings; stale <code>imas seed</code> command</td>
+</tr>
+</tbody>
+</table>
+<h3>Low (informational)</h3>
+<table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Issue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>copilot-cli-guide.md</code></td>
+<td>Date says &ldquo;2026-03-20&rdquo; — user environment guide, not architecture</td>
+</tr>
+</tbody>
+</table>
+<h2 id="s3">Implementation</h2>
+<p>Single agent task — fix all docs in one pass:</p>
+<ol>
+<li><strong>Rewrite <code>docs/README.md</code></strong> — add all 17+ docs with correct descriptions</li>
+<li><strong>Fix <code>graph.md</code></strong> — remove fake backup/restore CLI section, replace with note about internal helpers</li>
+<li><strong>Fix <code>services.md</code></strong> — correct port 18790 → 18400</li>
+<li><strong>Fix <code>standard-names.md</code></strong> — remove boundary.md reference, clarify review is standalone</li>
+<li><strong>Fix <code>imas_dd.md</code></strong> — update CLI commands to current <code>imas-codex imas dd build</code> syntax</li>
+<li><strong>Fix <code>api/REPL_API.md</code></strong> — remove <code>get_dd_overview()</code> or replace with current function</li>
+<li><strong>Remove <code>west-access-justification.md</code> from README</strong> (file doesn&rsquo;t exist)</li>
+<li><strong>Assess <code>llamaindex-agents.md</code></strong> — mark as historical or update for current MCP architecture</li>
+</ol>
+<h2 id="s4">Phase Dependencies</h2>
+<pre><code>This plan → after Waves 1-3 (so docs reflect latest code)
+</code></pre>
+<h2 id="s5">Documentation Updates</h2>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/README.md</code></td>
+<td>Complete rewrite (this IS the plan)</td>
+</tr>
+<tr>
+<td>All docs listed above</td>
+<td>Individual fixes</td>
+</tr>
+</tbody>
+</table>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+  <h2><span class="sec">§</span> Decisions</h2>
+  <div class="r-dec" data-key="llamaindex-agents-disposition" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should <code>llamaindex-agents.md</code> be handled in the refresh pass?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="mark-historical">Mark historical</button>
+      <button class="r-opt" data-value="rewrite-current-mcp">Rewrite for current MCP architecture</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+  <h2><span class="sec">§</span> Followups</h2>
+</section>
+  </main>
+</body>
+</html>

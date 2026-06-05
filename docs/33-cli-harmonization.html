@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="33-cli-harmonization">
+  <meta name="plan-title" content="Feature 33 — CLI Option Harmonization">
+  <meta name="plan-summary" content="Partially landed CLI harmonization plan covering canonical option vocabulary, deferred subcommand consolidation, and remaining alias cleanup.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="sonnet">
+  <title>Feature 33 — CLI Option Harmonization | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Feature 33 — CLI option harmonization</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="CLI harmonization status" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">CLI harmonization status</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Research</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Name-only review</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Alias rollout</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Deferred consolidation</text></svg><figcaption>Feature 33 has landed its research, name-only review mode, and most aliases; the remaining work is consolidation and final vocabulary cleanup.</figcaption></figure>
+<p><strong>Status:</strong> Partially implemented — moved to pending/ (2025-05-xx)</p>
+<h2 id="s1">Gaps remaining</h2>
+<ul>
+<li><strong>Phase 4 — Subcommand consolidation (deferred)</strong>: reduce <code>sn</code> from 15
+  visible subcommands to 10; fold <code>sn seed</code> into <code>sn import --source {isn|west|all}</code>;
+  hide <code>sn resolve-links</code> and <code>sn reconcile</code> as internal debug commands (still callable).
+  Deferred because it is user-visible and requires a migration note + deprecation period.</li>
+<li><strong>Phase 3 partial deferral — <code>-f</code> freeing</strong>: free <code>-f</code> on facility-aware
+  commands (<code>sn clear</code>, <code>discover paths/signals/code/wiki/documents</code>) so <code>-f</code> can
+  consistently mean <code>--facility</code>. Requires coordinated touch of 6+ files.</li>
+<li><strong>Phase 3 partial deferral — <code>--limit</code> harmonisation</strong>: harmonise
+  <code>--limit</code>/<code>-n</code> vs <code>--path-limit</code>/<code>--signal-limit</code>/<code>--max-pages</code> on <code>discover</code>
+  subcommands (add aliases on every subcommand).</li>
+<li><strong>Phase 3 partial deferral — <code>sn generate</code> rename</strong>: harmonise <code>sn generate</code>&rsquo;s
+  option names to canonical vocabulary (was explicitly deferred until
+  extraction-batching PR merged; extraction PR has since landed, this is now
+  unblocked).</li>
+</ul>
+<h2 id="s2">Shipped (do not re-implement)</h2>
+<ul>
+<li>Phase 1: Research + enum foundations (<code>StandardNameReviewMode</code>, <code>review_mode</code>)</li>
+<li>Phase 2: <code>sn review --name-only</code> + <code>StandardNameQualityScoreNameOnly</code> models</li>
+<li>Phase 3 core: <code>--physics-domain</code>/<code>--domain</code> alias on all sn + imas subcommands;
+  <code>--ids</code>/<code>--ids-filter</code> alias on <code>imas dd build</code>; <code>--format</code>/<code>--export</code> on <code>sn gaps</code>;
+  <code>--source</code>/<code>--source-type</code> on <code>sn reconcile</code>. Cross-group audit confirmed
+  <code>graph</code>/<code>embed</code>/<code>llm</code>/<code>tunnel</code>/<code>config</code> groups need no renames.
+<strong>Owner:</strong> imas-codex maintainers
+<strong>Research:</strong> <code>plans/research/cli-option-matrix.md</code> (777-line audit — source of truth)</li>
+</ul>
+<h2 id="s3">Motivation</h2>
+<p><code>imas-codex</code>&rsquo;s CLI has grown organically across six command groups
+(<code>discover</code>, <code>sn</code>, <code>embed</code>, <code>llm</code>, <code>graph</code>, <code>hpc</code>) with 50+ subcommands.
+The research audit in <code>plans/research/cli-option-matrix.md</code> catalogues
+the drift: the same concept is spelled <code>--ids</code> / <code>--domain</code> /
+<code>--physics-domain</code>, <code>--limit</code> / <code>-n</code> / <code>--path-limit</code> / <code>--signal-limit</code> /
+<code>--max-pages</code>, <code>-f</code> is overloaded for <code>--force</code>, <code>--focus</code>, <code>--foreground</code>,
+and <code>--follow</code> etc. This makes muscle-memory transfer between commands
+impossible and <code>--help</code> noisy.</p>
+<p>The goal of this feature is a <strong>single canonical vocabulary</strong> (defined
+in the research doc Part 6) with old spellings kept as aliases so
+nothing breaks.</p>
+<h2 id="s4">Scope</h2>
+<p>Four phases, landed incrementally. Each phase has a dedicated commit
+message style — <code>feat(sn):</code>, <code>refactor(sn):</code>, <code>refactor(cli):</code>, etc.</p>
+<h3>Phase 1 — Research + enum foundations (landed)</h3>
+<ul>
+<li><code>plans/research/cli-option-matrix.md</code> — full audit + canonical
+  vocabulary + <code>sn</code> consolidation proposal (10 visible subcommands)</li>
+<li>per-commit sequencing plan.</li>
+<li><code>imas_codex/schemas/standard_name.yaml</code> — added
+  <code>StandardNameReviewMode</code> enum + <code>review_mode</code> attribute.</li>
+</ul>
+<h3>Phase 2 — <code>sn review --name-only</code> (landed)</h3>
+<p>Pairs with <code>sn generate --name-only</code> (landed in parallel by the
+extraction-batching work):</p>
+<ul>
+<li><code>--name-only</code> flag on <code>sn review</code> selects a 4-dimension rubric
+  (grammar / semantic / convention / completeness, /80) instead of
+  the full 6-dimension review (/120).</li>
+<li>New <code>sn/review_name_only.md</code> prompt (sibling of <code>review.md</code>).</li>
+<li><code>StandardNameQualityScoreNameOnly</code> +
+  <code>StandardNameQualityReviewNameOnly[Batch]</code> Pydantic models.</li>
+<li><code>StandardNameReviewState.name_only</code> + pipeline wiring through
+  <code>_review_single_batch</code> → <code>_match_reviews_to_entries</code>.</li>
+<li>Downgrade guard in <code>extract_review_worker</code>: a <code>--name-only</code> run
+  without <code>--force</code> will not overwrite a prior <code>review_mode == "full"</code>
+  entry. <code>review_mode</code> is stamped onto each scored entry so the guard
+  has state to work with on the next run.</li>
+<li>Unit + prompt-rendering tests in
+  <code>tests/standard_names/test_review_name_only.py</code>.</li>
+</ul>
+<h3>Phase 3 — Option rename on non-generate commands (expanded: landed)</h3>
+<p><code>refactor(sn): canonicalise --physics-domain with --domain alias</code>
+added <code>--physics-domain</code> (canonical) + <code>--domain</code> (alias) on:</p>
+<ul>
+<li><code>sn benchmark</code></li>
+<li><code>sn publish</code></li>
+<li><code>sn review</code></li>
+<li><code>sn enrich</code> (multiple=True)</li>
+<li><code>sn rotate</code> (required=True)</li>
+</ul>
+<p><code>--ids</code> kept distinct — it filters by IDS name, not physics domain
+(see research doc §6.2).</p>
+<p><strong>Cross-group expansion (landed in this PR):</strong></p>
+<p><code>refactor(cli): canonicalise --physics-domain and --ids aliases across
+imas/sn</code> — same alias pattern (canonical first, old name preserved
+through the click decorator) applied outside the <code>sn</code> group:</p>
+<ul>
+<li><code>imas map run</code> — <code>--domain/-d</code> → <code>--physics-domain</code> (alias <code>--domain</code>,
+  short <code>-d</code> preserved). Semantic match: domains filter physics
+  domains, same as <code>sn</code> canonical.</li>
+<li><code>imas dd build</code> — <code>--ids-filter</code> → <code>--ids</code> (alias <code>--ids-filter</code>).
+  Semantic match: <code>--ids</code> is already the canonical IDS-name filter
+  used by <code>imas dd search</code>, <code>sn review/enrich/benchmark/publish</code>.</li>
+<li><code>sn gaps</code> — <code>--export {table,yaml}</code> → <code>--format {table,yaml}</code>
+  (alias <code>--export</code>). Canonical for output formatting per research
+  doc §3.</li>
+<li><code>sn reconcile</code> — <code>--source-type {dd,signals}</code> → <code>--source</code>
+  (alias <code>--source-type</code>). Canonical <code>--source</code> matches <code>sn generate</code>,
+  <code>sn clear</code>, <code>sn seed</code>, <code>sn benchmark</code> which already use <code>--source</code>.</li>
+</ul>
+<p><strong>Audit result for remaining top-level groups</strong> (see research doc §1.3
+— no code changes required):</p>
+<ul>
+<li><code>graph</code> — <code>--facility</code>, <code>--force</code>, <code>--dry-run</code> already canonical.
+  <code>-v</code> = <code>--version</code> inside <code>graph fetch/pull/tags</code> is a local tag
+  selector, no <code>--verbose</code> competition. Keep as-is.</li>
+<li><code>embed</code>, <code>llm</code> — no facility concept, so <code>-f</code> = <code>--foreground</code> /
+  <code>--follow</code> is locally unambiguous. <code>--host/--port/--log-level</code>
+  are infra-standard. Keep as-is.</li>
+<li><code>tunnel</code> — <code>--neo4j/--embed/--llm/--timeout/--all</code> are all tunnel-
+  specific. No collisions with canonical vocab. Keep as-is.</li>
+<li><code>config</code>, <code>release</code>, <code>tools</code>, <code>serve</code>, <code>credentials</code>, <code>host</code>,
+  <code>facilities</code>, <code>hpc</code> — already use <code>--force</code>, <code>--dry-run</code>, <code>--json</code>,
+  <code>--verbose</code> canonically. No renames needed.</li>
+</ul>
+<p><strong>Deferred (not yet implemented):</strong></p>
+<ul>
+<li>Freeing <code>-f</code> on facility-aware commands (<code>sn clear</code>, <code>discover
+  paths/signals/code/wiki/documents</code>) so <code>-f</code> can consistently mean
+  <code>--facility</code>. Requires coordinated touch of 6+ files + per-test
+  verification — tracked separately.</li>
+<li>Harmonising <code>--limit</code> / <code>-n</code> vs <code>--path-limit</code> / <code>--signal-limit</code> /
+  <code>--max-pages</code> on <code>discover</code> subcommands. Requires adding aliases
+  on every subcommand — tracked separately.</li>
+<li>Harmonising <code>sn generate</code>&rsquo;s option names to the canonical vocabulary.
+  <strong>Explicitly deferred until after the extraction-batching PR merges</strong>
+  — that agent owns <code>sn generate</code> right now and simultaneous edits
+  would conflict.</li>
+</ul>
+<h3>Phase 4 — Subcommand consolidation (deferred)</h3>
+<p>Per research doc §7, reduce <code>sn</code> from 15 visible subcommands to 10:</p>
+<ul>
+<li>Fold <code>sn seed</code> into <code>sn import --source {isn|west|all}</code> (hide <code>seed</code>).</li>
+<li>Hide <code>sn resolve-links</code> and <code>sn reconcile</code> as internal debug commands
+  (still callable, no longer in <code>sn --help</code>).</li>
+<li>Keep <code>sn rotate</code>, <code>sn benchmark</code>, and the other eight as visible
+  top-level commands.</li>
+</ul>
+<p>This is deferred because it&rsquo;s user-visible and requires a migration
+note + deprecation period. It should be bundled with a broader
+CLI cleanup after Phase 3&rsquo;s alias additions settle.</p>
+<h2 id="s5">Test strategy</h2>
+<ul>
+<li><code>tests/cli/</code> — existing test suite (~138 passing) covers flag
+  parsing for every subcommand. Any rename keeps tests green because
+  the destination variable name is preserved and the old spelling
+  stays as a click alias.</li>
+<li><code>tests/standard_names/test_review_name_only.py</code> — new coverage for
+  <code>--name-only</code> mode (score arithmetic, <code>review_mode</code> stamping,
+  prompt content).</li>
+<li>No integration test needed for the downgrade guard — covered by a
+  unit test on <code>_match_reviews_to_entries</code> + a documented invariant in
+  the extract worker.</li>
+</ul>
+<h2 id="s6">Non-goals</h2>
+<ul>
+<li>Click group restructuring (e.g. merging <code>discover</code> and <code>sn</code>) —
+  out of scope, would break every user&rsquo;s scripts.</li>
+<li>Changing the default values of any option — backward-compat only.</li>
+<li>Rewriting prompts — <code>review.md</code> is untouched; <code>review_name_only.md</code>
+  is a new sibling.</li>
+</ul>
+<h2 id="s7">References</h2>
+<ul>
+<li>Research artifact: <code>plans/research/cli-option-matrix.md</code></li>
+<li>Parallel work: <code>plans/research/extraction-batching-prompt-ab.md</code>
+  (owns <code>sn generate</code> right now — do not touch its signature until
+  that PR lands).</li>
+</ul>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+  <h2><span class="sec">§</span> Decisions</h2>
+  <div class="r-dec" data-key="subcommand-consolidation-timing" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">When should <code>sn</code> subcommand consolidation move from deferred to active work?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="after-migration-note">After migration note + deprecation window</button>
+      <button class="r-opt" data-value="immediate-cleanup">Immediate cleanup</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+  <div class="r-dec" data-key="free-f-short-flag" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should facility-aware commands free <code>-f</code> so it consistently means <code>--facility</code>?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="yes-free-it">Yes, free <code>-f</code></button>
+      <button class="r-opt" data-value="keep-local-meanings">Keep local meanings</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+  <div class="r-dec" data-key="discover-limit-aliases" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should discover-command limit flags be harmonised?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="add-shared-limit-aliases">Add shared <code>--limit</code> aliases</button>
+      <button class="r-opt" data-value="keep-specialised-flags">Keep specialised flags</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+  <div class="r-dec" data-key="sn-generate-rename-window" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should <code>sn generate</code> option renames ship now that the extraction PR is unblocked?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="ship-now">Ship now</button>
+      <button class="r-opt" data-value="bundle-later-cleanup">Bundle into later cleanup</button>
+    </p>
+    <p class="r-dec-rat"></p>
+  </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+  <h2><span class="sec">§</span> Followups</h2>
+</section>
+  </main>
+</body>
+</html>

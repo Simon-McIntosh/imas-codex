@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="features-readme">
+  <meta name="plan-title" content="Feature Plans Index">
+  <meta name="plan-summary" content="Guide to active feature plans, sequencing constraints, pending gap documents, and plan conventions.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="docs-refresh,33-cli-harmonization">
+  <title>Feature Plans Index | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>Active Feature Plans</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Feature plan lifecycle" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Feature plan lifecycle</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Active plans</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Sequencing</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Pending gaps</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Delete when done</text></svg><figcaption>The feature-plans index explains how active work moves through sequencing, partial-gap tracking, reference retention, and eventual deletion.</figcaption></figure>
+<p>This directory holds <strong>active, ready-to-implement</strong> feature plans. The
+canonical roadmap and completed-plan ledger live one level up in
+<a href="/imas-codex/plans-readme.html"><code>../README.md</code></a>.</p>
+<h2 id="s1">Layout</h2>
+<pre><code>features/
+├── README.md                    ← this file (sequencing &amp; scope)
+├── &lt;topic&gt;.md                   ← top-level cross-cutting plans
+├── completed/                   ← shipped plans kept for reference
+└── standard-names/              ← SN-specific plan family
+    ├── *.md                     ← active SN plans
+    ├── pending/                 ← partially-implemented SN plans
+    └── completed/
+        └── superseded/          ← rejected / replaced SN plans
+</code></pre>
+<p>Per the project rule: <strong>delete plans when fully implemented</strong>. The
+<code>completed/</code> folders exist for plans whose work is complete enough to keep
+as reference (architecture documentation candidates) but not yet promoted
+to <code>docs/</code>.</p>
+<h2 id="s2">Plan Lifecycle</h2>
+<pre><code>features/&lt;name&gt;.md                       active
+   ↓
+features/pending/&lt;name&gt;.md               partial — gaps documented
+   ↓
+features/completed/&lt;name&gt;.md             reference — work shipped
+   ↓
+DELETE                                   absorbed into code + docs
+</code></pre>
+<h2 id="s3">Active plans (SN family)</h2>
+<p>The standard-names family is the dominant active workstream. Two priority SN
+plans now live as HTML docs under <code>docs/</code>; both remain active and
+neither should be treated as fully dispatch-complete yet:</p>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>Plan</th>
+<th>Scope</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="/imas-codex/sn-search-facility.html">../../docs/sn-search-facility.html</a></td>
+<td>Grammar-aware SN search &amp; fetch facility: 7 MCP tools mirroring the DD palette (<code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, <code>find_related_standard_names</code>, <code>check_standard_names</code>, <code>get_standard_name_summary</code>); tiered grammar streams (T1/T2/T3) preventing <code>x_component_of_*</code> floods; backing-function unification in <code>standard_names/search.py</code> mirroring <code>graph/dd_search.py</code>; <code>_sn</code>/<code>_sns</code> → <code>_standard_names</code> rename audit; <code>include_standard_names=True</code> default already shipped (commit <code>33514f2a</code>).</td>
+<td>Active HTML plan — Phase 4 pipeline migration still open</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="standard-names/39-structured-fanout.md">standard-names/39-structured-fanout.md</a></td>
+<td>Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer LLM consumes targeted context. Underwritten by plan 40&rsquo;s unified search surface (<code>search_existing_names</code> runner). Replaces unbounded agentic-loop alternative with deterministic chains.</td>
+<td>Active — phases 2/3 deferred until plan 40 fully lands</td>
+</tr>
+</tbody>
+</table>
+<h3>Sequencing rationale</h3>
+<p><strong>Plan 40 must land first.</strong> Plan 39&rsquo;s <code>search_existing_names</code> runner is a
+direct caller of plan 40&rsquo;s redesigned <code>search_similar_standard_names</code> and
+<code>find_related_standard_names</code>. Dispatching them in parallel risks two
+concurrent rewrites of the same backing-function surface in
+<code>standard_names/search.py</code>.</p>
+<p><strong>Phase-3 vs Phase-4 of plan 40</strong>: per the v3.2 plan §15.1 (&ldquo;alias-bridge
+window&rdquo;), the 1-release deprecated aliases (<code>search_similar_names</code>,
+<code>search_similar_sns_with_full_docs</code>) bridge from Phase-3 (MCP tool ship) to
+Phase-4 (pipeline-caller migration). If plan 39 is dispatched between
+Phase-3 and Phase-4 of plan 40, plan 39 should consume the <strong>new</strong>
+canonical names directly — not the aliases — to avoid widening the
+alias-bridge window.</p>
+<h3>Other active SN plans</h3>
+<p>These are tracked in <a href="/imas-codex/plans-readme.html"><code>../README.md</code></a> under the P1a–P1d
+priority list. Status as of HEAD (2026-04-30):</p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="standard-names/29-architectural-pivot.md">standard-names/29-architectural-pivot.md</a></td>
+<td>Living roadmap — most structural items shipped</td>
+</tr>
+<tr>
+<td><a href="standard-names/31-quality-bootstrap-v2.md">standard-names/31-quality-bootstrap-v2.md</a></td>
+<td>Active rotation harness</td>
+</tr>
+<tr>
+<td><a href="standard-names/32-extraction-prompt-overhaul.md">standard-names/32-extraction-prompt-overhaul.md</a></td>
+<td>Phase 2 done; later phases deferred</td>
+</tr>
+<tr>
+<td><a href="standard-names/33-benchmark-evolution.md">standard-names/33-benchmark-evolution.md</a></td>
+<td>Design / research</td>
+</tr>
+<tr>
+<td><a href="standard-names/34-benchmark-v1.md">standard-names/34-benchmark-v1.md</a></td>
+<td>Scaffolded; runner + mock dry-run in place</td>
+</tr>
+<tr>
+<td><a href="/imas-codex/sn-catalog-quality-refactor.html">../../docs/sn-catalog-quality-refactor.html</a></td>
+<td>Active HTML plan — phases 4–6 remain open; derived-parent lifecycle still blocking</td>
+</tr>
+</tbody>
+</table>
+<p>Additional migrated HTML records now live in <code>docs/</code>: <a href="/imas-codex/sn-quality-parity.html">sn-quality-parity</a> and <a href="/imas-codex/sn-closed-physical-base.html">sn-closed-physical-base</a>.</p>
+<h2 id="s4">Active plans (DD / search / docs)</h2>
+<p>These are independent of the SN workstream and sequenceable in any order.</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Plan</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2</td>
+<td><a href="/imas-codex/docs-refresh.html">docs-refresh.md</a></td>
+<td>Fix stale docs: graph backup/restore CLI, LLM proxy port, llamaindex-agents references, docs/README.md (17+ missing entries)</td>
+</tr>
+</tbody>
+</table>
+<h3>Recently completed (w3 audit, 2026-05-xx)</h3>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Commits</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dd-rebuild.md</code></td>
+<td><code>a975c7f9</code>, <code>5541de01</code>, <code>49a0b850</code>, <code>d79bb9ef</code></td>
+<td>geometry NodeCategory, Pass 2 refine_worker, bug fixes</td>
+</tr>
+<tr>
+<td><code>dd-search-quality-ab.md</code></td>
+<td><code>fddfecd0</code></td>
+<td>find_related_dd_paths fix, cocos_transformation_type filter</td>
+</tr>
+<tr>
+<td><code>dd-server-cleanup.md</code></td>
+<td><code>fb21ef4e</code></td>
+<td>list_dd_paths COUNT, migration recipes, fuzzy check_dd_paths</td>
+</tr>
+<tr>
+<td><code>search-quality-improvements.md</code></td>
+<td><code>64abde14</code>, <code>1d264f23</code>, <code>ebd311b6</code></td>
+<td>accessor de-ranking, IDS preference, evaluation alignment, Lucene fuzzy</td>
+</tr>
+<tr>
+<td><code>sn-unit-integrity-tests.md</code></td>
+<td><code>9d8207e9</code></td>
+<td>test_sn_unit_integrity.py + backfill</td>
+</tr>
+<tr>
+<td><code>sn-bootstrap-loop.md</code></td>
+<td><code>eefd8506</code></td>
+<td>three-layer review pipeline</td>
+</tr>
+<tr>
+<td><code>sn-enrichment-rotation.md</code></td>
+<td><code>a0bc4a9f</code></td>
+<td>absorbed into <code>sn run --target docs</code></td>
+</tr>
+<tr>
+<td><code>sn-coverage-closure.md</code></td>
+<td>—</td>
+<td>infrastructure shipped; <code>sn generate</code> → <code>sn run</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="s5">Pending plans (partial implementations)</h2>
+<p>Plans with gaps that are worth tracking:</p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Gaps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/imas-codex/33-cli-harmonization.html">pending/33-cli-harmonization.md</a></td>
+<td>Phase 4 subcommand consolidation; <code>-f</code> freeing on facility-aware commands; <code>--limit</code> harmonisation on discover subcommands</td>
+</tr>
+</tbody>
+</table>
+<h2 id="s6">Recently relocated (2026-04-30 → 2026-05-xx)</h2>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Destination</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>42-polling-workers.md</code></td>
+<td><code>standard-names/completed/</code></td>
+<td>6-pool polling architecture shipped (commit <code>650caab2</code>)</td>
+</tr>
+<tr>
+<td><code>43-pipeline-rd-fix.md</code></td>
+<td><code>standard-names/completed/</code></td>
+<td>Compose-prompt reduction + budget split + reviewer-pilot all shipped (commit <code>a8a5b89d</code> + downstream)</td>
+</tr>
+<tr>
+<td><code>44-sn-graph-renames-batched-embed.md</code></td>
+<td><code>standard-names/completed/</code></td>
+<td><code>StandardNameReview</code> rename + multi-valued <code>HAS_PHYSICS_DOMAIN</code> + batch embedding + <code>sn clear</code> shipped (commit <code>9ef134c9</code>)</td>
+</tr>
+<tr>
+<td><code>37-grammar-identity-prefix.md</code></td>
+<td><code>standard-names/completed/superseded/</code></td>
+<td>Self-marked superseded by plan 38</td>
+</tr>
+<tr>
+<td><code>38-grammar-vnext.md</code></td>
+<td><code>standard-names/completed/</code> (earlier)</td>
+<td>Six-pool refactor shipped in <code>51fb80dd</code></td>
+</tr>
+<tr>
+<td><code>33-cli-harmonization.md</code></td>
+<td><code>pending/</code></td>
+<td>Phases 1–3 shipped; Phase 4 + partial Phase 3 items deferred</td>
+</tr>
+<tr>
+<td><code>dd-rebuild.md</code></td>
+<td>DELETED</td>
+<td>All code steps shipped (commits <code>a975c7f9</code>, <code>d79bb9ef</code>, <code>49a0b850</code>)</td>
+</tr>
+<tr>
+<td><code>dd-search-quality-ab.md</code></td>
+<td>DELETED</td>
+<td>All features shipped in <code>fddfecd0</code></td>
+</tr>
+<tr>
+<td><code>dd-server-cleanup.md</code></td>
+<td>DELETED</td>
+<td>All 3 fixes shipped in <code>fb21ef4e</code></td>
+</tr>
+<tr>
+<td><code>search-quality-improvements.md</code></td>
+<td>DELETED</td>
+<td>All non-deferred phases shipped</td>
+</tr>
+<tr>
+<td><code>sn-unit-integrity-tests.md</code></td>
+<td>DELETED</td>
+<td>All 3 phases shipped in <code>9d8207e9</code></td>
+</tr>
+<tr>
+<td><code>sn-bootstrap-loop.md</code></td>
+<td>DELETED</td>
+<td>Three-layer review shipped in <code>eefd8506</code></td>
+</tr>
+<tr>
+<td><code>sn-enrichment-rotation.md</code></td>
+<td>DELETED</td>
+<td>Enrichment absorbed into <code>sn run --target docs</code> (<code>a0bc4a9f</code>)</td>
+</tr>
+<tr>
+<td><code>sn-coverage-closure.md</code></td>
+<td>DELETED</td>
+<td>Expansion infrastructure shipped; protocol was operational only</td>
+</tr>
+</tbody>
+</table>
+<h2 id="s7">Conventions</h2>
+<ul>
+<li><strong>One number per plan family.</strong> SN plans share the <code>NN-name.md</code> numbering
+  in the <code>standard-names/</code> subfamily; cross-cutting plans use a different
+  numbering or a topical filename.</li>
+<li><strong>Header status field.</strong> Every active plan should carry a <code>Status:</code> line
+  (e.g. <code>proposed</code>, <code>RD-cleared</code>, <code>implementing</code>, <code>superseded</code>).</li>
+<li><strong>No co-authorship trailers in commits</strong> that touch plan files.</li>
+<li><strong>Acceptance criteria</strong> must map 1:1 to tests in the implementation
+  phase. RD review enforces this.</li>
+</ul>
+  </main>
+</body>
+</html>

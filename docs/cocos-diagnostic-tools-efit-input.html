@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="cocos-diagnostic-tools-efit-input">
+  <meta name="plan-title" content="COCOS Diagnostic Tools — EFIT Input Spec">
+  <meta name="plan-summary" content="RFC-style specification from the EFIT team requesting a shared COCOS detection library and MCP tool in imas-codex.">
+  <meta name="plan-status" content="done">
+  <title>COCOS Diagnostic Tools — EFIT Input Spec | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>COCOS Diagnostic Tools — EFIT Input Spec</h1>
+<figure><svg viewBox="0 0 760 170" role="img" aria-label="Requested COCOS toolchain" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Requested COCOS toolchain</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">DD metadata</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Sign observations</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">COCOS scoring</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">EFIT pre-flight</text></svg><figcaption>The EFIT request ties DD metadata, sign observations, candidate scoring, and downstream EFIT checks into one shared COCOS diagnostic tool.</figcaption></figure>
+<p><strong>Date:</strong> 2025-01-28
+<strong>From:</strong> EFIT (IO) team
+<strong>To:</strong> imas-codex team
+<strong>Status:</strong> Request for comment</p>
+<hr />
+<h2 id="s1">1. EFIT Context</h2>
+<h3>1.1 The Problem We Hit</h3>
+<p>In April 2026, EFIT shipped a sign-convention bug (<code>cocosIpSign</code> returning
+−1 instead of +1 for DDv3 input) that persisted for ~50 days across 4
+corrective commits. The bug was independently encoded in both C++
+(<code>src/imas.cpp</code>) and Python (<code>efit/cli/cocos_canonical.py</code>), showing it
+was a <strong>conceptual error</strong>, not a typo.</p>
+<p>Root cause: the developer assumed <code>σ_Ip</code> differs between COCOS-11 (DDv3)
+and COCOS-17 (DDv4). It does not — <code>σ_Ip</code> is tied to <code>σ_Rφz</code> (coordinate
+handedness), not <code>σ_Bp</code> (poloidal field sign), and <code>σ_Rφz = +1</code> in both
+conventions.</p>
+<h3>1.2 Why We Need a Shared Tool</h3>
+<p>EFIT cannot be the only IMAS consumer that makes sign-convention mistakes.
+The Sauter COCOS framework has 4 parameters, 16 valid index values, and
+non-obvious derived sign relationships. Any code that reads multi-DD-version
+data must implement COCOS transforms, and every implementation is a new
+opportunity for the same class of bug.</p>
+<p>A <strong>shared, authoritative COCOS detection tool</strong> in imas-codex would:
+1. Let any consumer validate their data before processing
+2. Detect mixed-convention datasets (e.g. magnetics in COCOS-11 + wall in COCOS-17)
+3. Serve as the reference implementation of the Sauter framework
+4. Power CI-time data-quality checks across the IMAS ecosystem</p>
+<h3>1.3 What EFIT Needs</h3>
+<p>EFIT will be the first consumer. Our requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Priority</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Detect σ_Bp from data signs</td>
+<td><strong>P0</strong></td>
+<td>Distinguishes COCOS-11 from COCOS-17; our actual bug</td>
+</tr>
+<tr>
+<td>Validate <code>ids_properties.cocos</code> consistency</td>
+<td><strong>P0</strong></td>
+<td>DDv4 datasets declare COCOS; check data matches declaration</td>
+</tr>
+<tr>
+<td>Per-IDS sign analysis</td>
+<td><strong>P1</strong></td>
+<td>Mixed-convention datasets are real (DDv3 machine description + DDv4 measurements)</td>
+</tr>
+<tr>
+<td>Report non-conforming paths</td>
+<td><strong>P1</strong></td>
+<td>Narrows diagnosis to &ldquo;flux_loop is flipped&rdquo; rather than &ldquo;something is wrong&rdquo;</td>
+</tr>
+<tr>
+<td>Detect σ_Rφz</td>
+<td><strong>P2</strong></td>
+<td>Required for COCOS-2/4/6/8 detection; EFIT currently only handles 11/17</td>
+</tr>
+<tr>
+<td>exp_Bp detection</td>
+<td><strong>P3</strong></td>
+<td>Requires absolute scale reference; defer unless low-cost</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="s2">2. Proposed API</h2>
+<h3>2.1 Core Data Model — <code>CocosReport</code></h3>
+<pre><code class="language-python">@dataclass
+class CocosObservation:
+    &quot;&quot;&quot;Single sign observation from an IMAS data field.&quot;&quot;&quot;
+    path: str                      # Full DD path
+    ids_name: str                  # IDS containing this path
+    transformation_type: str       # DD cocos_transformation_type
+    observed_sign: int             # -1, 0 (indeterminate), or +1
+    time_index: int | None = None  # If time-dependent
+    note: str = &quot;&quot;                 # Human-readable context
+
+@dataclass
+class CocosCandidate:
+    &quot;&quot;&quot;Scored COCOS candidate from the detector.&quot;&quot;&quot;
+    cocos_index: int               # 1–18
+    sigma_bp: int                  # +1 or -1
+    sigma_rphiz: int               # +1 or -1
+    sigma_rhotp: int               # +1 or -1
+    exp_bp: int | None             # 0, 1, or None (indeterminate)
+    hamming_distance: int          # Number of disagreeing observations
+    confidence: float              # 1.0 - (hamming_distance / n_observations)
+
+@dataclass
+class CocosReport:
+    &quot;&quot;&quot;Complete COCOS detection report for a dataset.&quot;&quot;&quot;
+    uri: str                       # IMAS URI of the analysed dataset
+    dd_version: str                # DD version of the dataset
+    declared_cocos: int | None     # From ids_properties.cocos (DDv4 only)
+    detected_cocos: CocosCandidate | None  # Best-fit detection result
+    alternatives: list[CocosCandidate]     # All candidates sorted by score
+    observations: list[CocosObservation]   # Raw sign observations
+    non_conforming: list[CocosObservation] # Observations disagreeing with best fit
+    matrix_rank: int               # Rank of transformation matrix (max 3)
+    n_observations: int            # Total non-indeterminate observations
+    warnings: list[str]            # Human-readable caveats
+    is_consistent: bool            # True if all observations agree with one COCOS
+    timestamp: str                 # ISO 8601
+</code></pre>
+<h3>2.2 MCP Tool Spec — <code>detect_cocos</code></h3>
+<pre><code>Tool: detect_cocos
+
+Description:
+  Detect the COCOS sign convention of an IMAS dataset by inspecting
+  the signs of COCOS-sensitive fields. Returns a structured report
+  with the best-fit COCOS index, confidence score, and per-path
+  diagnostics.
+
+Args:
+  uri (str, required):
+    IMAS URI pointing to the dataset.
+    Example: &quot;imas:hdf5?path=/data/WEST/58072/&quot;
+
+  dd_version (str, optional):
+    DD version to use for path metadata lookup.
+    Default: read from ids_properties.version_put.data_dictionary
+
+  ids_list (list[str], optional):
+    Restrict analysis to specific IDSs.
+    Default: all IDSs present in the dataset.
+    Example: [&quot;magnetics&quot;, &quot;pf_active&quot;, &quot;equilibrium&quot;]
+
+  time_index (int, optional):
+    Analyse a specific time slice only.
+    Default: first non-vacuum slice (auto-detected).
+
+  include_observations (bool, optional):
+    Include per-path sign observations in output.
+    Default: true
+
+Returns:
+  CocosReport as JSON.
+</code></pre>
+<h3>2.3 Python Library API</h3>
+<pre><code class="language-python">from imas_codex.cocos import detect_cocos, CocosReport
+
+# Basic usage
+report: CocosReport = detect_cocos(&quot;imas:hdf5?path=tests/data/imas/WEST/58072/&quot;)
+
+# Restricted to specific IDSs
+report = detect_cocos(uri, ids_list=[&quot;magnetics&quot;, &quot;pf_active&quot;])
+
+# Check consistency
+if not report.is_consistent:
+    for obs in report.non_conforming:
+        print(f&quot;  Non-conforming: {obs.path} ({obs.transformation_type})&quot;)
+</code></pre>
+<hr />
+<h2 id="s3">3. Required DD Metadata</h2>
+<p>The detector needs the following metadata per COCOS-sensitive DD path:</p>
+<table>
+<thead>
+<tr>
+<th>Metadata Field</th>
+<th>Source</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cocos_transformation_type</code></td>
+<td>DD node property</td>
+<td>Maps path to sign-bit dependency</td>
+</tr>
+<tr>
+<td><code>data_type</code></td>
+<td>DD node property</td>
+<td>Determines how to extract sign (FLT_1D → array vote)</td>
+</tr>
+<tr>
+<td><code>lifecycle_status</code></td>
+<td>DD node property</td>
+<td>Skip obsolescent/alpha paths</td>
+</tr>
+<tr>
+<td><code>coordinate1..N</code></td>
+<td>DD node property</td>
+<td>Identifies time dimension for slicing</td>
+</tr>
+</tbody>
+</table>
+<h3>3.1 Transformation Type → Sign Matrix</h3>
+<p>The detector maps each <code>cocos_transformation_type</code> to a row in the 3-column
+sign matrix (σ_Bp, σ_Rφz, σ_ρθφ):</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th style="text-align: center;">σ_Bp</th>
+<th style="text-align: center;">σ_Rφz</th>
+<th style="text-align: center;">σ_ρθφ</th>
+<th style="text-align: center;">Net DDv3→DDv4 factor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>psi_like</code></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr>
+<td><code>dodpsi_like</code></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">−1</td>
+</tr>
+<tr>
+<td><code>ip_like</code></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr>
+<td><code>b0_like</code></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr>
+<td><code>q_like</code></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">+1 (composite, net invariant for DDv3→DDv4)</td>
+</tr>
+<tr>
+<td><code>one_like</code></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr>
+<td><code>tor_angle_like</code></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">+1</td>
+</tr>
+<tr>
+<td><code>pol_angle_like</code></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">+1</td>
+</tr>
+</tbody>
+</table>
+<h3>3.2 MCP Requirements</h3>
+<p>The detector needs to look up DD metadata at runtime. The imas-codex DD
+MCP tools already provide everything needed:</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>MCP Tool</th>
+<th>Call Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Path→transformation_type</td>
+<td><code>search_dd_paths</code></td>
+<td><code>query="flux_loop flux", ids_filter="magnetics", cocos_transformation_type="psi_like"</code></td>
+</tr>
+<tr>
+<td>All COCOS-tagged paths</td>
+<td><code>get_dd_cocos_fields</code></td>
+<td><code>ids_filter="magnetics"</code></td>
+</tr>
+<tr>
+<td>Path existence check</td>
+<td><code>check_dd_paths</code></td>
+<td><code>paths="magnetics/flux_loop/flux"</code></td>
+</tr>
+<tr>
+<td>Version-specific lookup</td>
+<td>All tools support <code>dd_version=</code></td>
+<td>Filter by 3 or 4</td>
+</tr>
+</tbody>
+</table>
+<p>For a compiled, fast-path implementation: bundle a static lookup table
+derived from <code>get_dd_cocos_fields(ids_filter=None)</code> at package build time.</p>
+<hr />
+<h2 id="s4">4. Implementation Approach</h2>
+<h3>4.1 Phase 1 — Python Library (Target: T4 2025)</h3>
+<pre><code>imas_codex/cocos/
+├── __init__.py          # Public API: detect_cocos()
+├── detector.py          # Core algorithm: build (T, s), solve, report
+├── observations.py      # Sign extraction from IMAS DBEntry
+├── transformation.py    # DD metadata → transformation matrix
+└── report.py            # CocosReport rendering (JSON, human-readable)
+</code></pre>
+<p><strong>Dependencies:</strong> <code>imas-python</code> (≥2.2.0), DD metadata (bundled or via MCP).</p>
+<h3>4.2 Phase 2 — MCP Tool</h3>
+<p>Register <code>detect_cocos</code> as an MCP tool in the imas-codex server. The tool
+wraps the Python library and returns <code>CocosReport</code> as JSON.</p>
+<h3>4.3 Phase 3 — EFIT Integration</h3>
+<p>EFIT calls <code>detect_cocos()</code> as a pre-flight check before reading IMAS input:</p>
+<pre><code class="language-python"># In efit CLI pre-flight:
+from imas_codex.cocos import detect_cocos
+
+report = detect_cocos(uri, ids_list=[&quot;magnetics&quot;, &quot;pf_active&quot;, &quot;tf&quot;])
+if not report.is_consistent:
+    raise ValueError(f&quot;COCOS inconsistency detected: {report.non_conforming}&quot;)
+if report.detected_cocos.cocos_index not in (11, 17):
+    raise ValueError(f&quot;Unsupported COCOS: {report.detected_cocos.cocos_index}&quot;)
+</code></pre>
+<hr />
+<h2 id="s5">5. Corner Cases</h2>
+<h3>5.1 Vacuum / Zero-Ip Slices</h3>
+<p>When <code>|Ip| &lt; threshold</code> (vacuum or field null), most sign observables are
+indeterminate. The detector should:
+- Skip to the first slice with <code>|Ip| &gt; threshold</code>
+- If all slices are vacuum: return <code>detected_cocos = None</code> with a warning</p>
+<h3>5.2 Mixed-Convention Datasets</h3>
+<p>Real datasets may contain IDSs written at different COCOS conventions:
+- Machine-description IDSs (<code>wall</code>, <code>pf_active</code> geometry) from one source
+- Measurement IDSs (<code>magnetics</code>, <code>mse</code>) from another</p>
+<p>The detector should support per-IDS analysis and report the convention for
+each IDS independently.</p>
+<h3>5.3 DDv4 <code>ids_properties.cocos</code> Validation</h3>
+<p>When <code>ids_properties.cocos</code> is present:
+1. Use it as the <strong>declared</strong> convention
+2. Run sign detection anyway
+3. Report any disagreement between declared and detected as a <strong>data quality
+   warning</strong>, not a hard error</p>
+<h3>5.4 Sparse Data</h3>
+<p>Some IDSs may carry very few COCOS-sensitive fields. The detector should
+report <code>matrix_rank</code> so the caller can assess detection reliability:
+- Rank 0: no COCOS information (e.g. <code>wall</code>-only dataset)
+- Rank 1: one sign bit determined (e.g. <code>tf</code>-only gives σ_Rφz)
+- Rank 2: full detection for COCOS-11/17 (σ_Bp + σ_Rφz determined)</p>
+<h3>5.5 Array Voting for Multi-Element Fields</h3>
+<p>Fields like <code>flux_loop[i]/flux/data</code> contain N values with independent signs.
+The detector uses majority voting:
+- Count positive and negative non-zero values
+- If unanimous: strong observable
+- If mixed but majority &gt; 2/3: weak observable (flag in report)
+- If tied or near-tied: indeterminate (<code>s = 0</code>)</p>
+<hr />
+<h2 id="s6">6. EFIT Interface Plan</h2>
+<h3>6.1 EFIT CLI Command</h3>
+<p>EFIT will wrap <code>detect_cocos()</code> as <code>efit cocos-detect</code>:</p>
+<pre><code class="language-bash">uv run efit cocos-detect &quot;imas:hdf5?path=tests/data/imas/WEST/58072/&quot;
+</code></pre>
+<p>This is an EFIT-side deliverable, not an imas-codex deliverable.</p>
+<h3>6.2 CI Integration</h3>
+<p>EFIT will add a CTest fixture that runs COCOS detection on every test
+dataset before the solver:</p>
+<pre><code class="language-cmake">add_test(NAME cocos-check/${TEST_NAME}
+  COMMAND ${CMAKE_COMMAND} -E env ${EFIT_UV_ENV}
+    uv run efit cocos-detect &quot;${URI}&quot; --assert-consistent)
+set_tests_properties(cocos-check/${TEST_NAME} PROPERTIES
+  LABELS &quot;IMAS;COCOS&quot;
+  FIXTURES_SETUP cocos_check_${DATASET})
+</code></pre>
+<h3>6.3 Solver Pre-Flight (Future)</h3>
+<p>Long-term, the C++ solver could call the detector before reading IMAS input
+and auto-set its internal COCOS parameters from the detection result rather
+than from the DD version string. This eliminates the entire class of
+&ldquo;assumed σ_X from DD version&rdquo; bugs.</p>
+<hr />
+<h2 id="s7">7. Deliverables Request</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Deliverable</th>
+<th>Owner</th>
+<th>Timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>CocosReport</code> data model in imas-codex</td>
+<td>imas-codex</td>
+<td>T4 2025</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>detect_cocos()</code> Python library</td>
+<td>imas-codex</td>
+<td>T4 2025</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>detect_cocos</code> MCP tool</td>
+<td>imas-codex</td>
+<td>T4 2025</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Bundled DD metadata table (transformation_type per path)</td>
+<td>imas-codex</td>
+<td>T4 2025</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>efit cocos-detect</code> CLI command</td>
+<td>EFIT</td>
+<td>T4 2025 (after #2)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>CTest COCOS-check fixture</td>
+<td>EFIT</td>
+<td>T1 2026 (after #5)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>C++ solver auto-detection</td>
+<td>EFIT</td>
+<td>T2 2026 (after #2, #5)</td>
+</tr>
+</tbody>
+</table>
+<p>Items 1–4 are requested from the imas-codex team.
+Items 5–7 are EFIT-side deliverables that depend on items 1–4.</p>
+<h3>7.1 Acceptance Criteria for imas-codex Deliverables</h3>
+<ol>
+<li><code>detect_cocos("imas:hdf5?path=&lt;WEST_58072_DDv3&gt;")</code> returns COCOS-11</li>
+<li><code>detect_cocos("imas:hdf5?path=&lt;WEST_58072_DDv4&gt;")</code> returns COCOS-17</li>
+<li>Injecting a sign flip on <code>magnetics/ip</code> produces <code>is_consistent = False</code>
+   with the flipped path in <code>non_conforming</code></li>
+<li>Empty / all-vacuum dataset returns <code>detected_cocos = None</code></li>
+<li>DDv4 dataset with <code>ids_properties.cocos = 17</code> and consistent data returns
+   <code>declared_cocos = 17, detected_cocos = COCOS-17, is_consistent = True</code></li>
+<li>DDv4 dataset with <code>ids_properties.cocos = 17</code> but psi_like signs matching
+   COCOS-11 returns <code>is_consistent = False</code> with a diagnostic warning</li>
+</ol>
+<hr />
+<p><strong>END OF SPEC</strong></p>
+  </main>
+</body>
+</html>
