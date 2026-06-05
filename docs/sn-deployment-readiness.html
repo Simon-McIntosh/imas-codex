@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-deployment-readiness">
+  <meta name="plan-title" content="SN Deployment Readiness Study — 2026-06">
+  <meta name="plan-summary" content="Comprehensive assessment of Standard Name pipeline deployment readiness: plan implementation status, code stubs, graph quality, and go/no-go verdict.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="sn-catalog-quality-refactor,sn-quality-parity,sn-search-facility,sn-closed-physical-base">
+  <title>SN Deployment Readiness Study — 2026-06 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Deployment Readiness Study — 2026-06</h1>
+    <p>This research note is a deployment decision document, not a feature plan. It combines a fresh code audit of <code>imas_codex/standard_names/</code> with the audited StandardName graph snapshot supplied from 2026-06-04. Where useful, I also note a 2026-06-05 authoring-time spot check against the live graph head; those head metrics are explicitly marked because the graph is still moving.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-deployment-readiness/score-distribution.svg" alt="Score distribution for accepted StandardName nodes and the three conditions behind a conditional-go verdict.">
+      <figcaption>The deployment decision is driven by a strong high-score tail plus a small but important lifecycle-cleanup tail. The problem is not whether the pipeline works; it is whether the remaining structural debt is acceptable for a production catalog release.</figcaption>
+    </figure>
+
+    <h2 id="s1">§1 — Executive summary &amp; verdict</h2>
+    <p><strong>Verdict: CONDITIONAL-GO.</strong> The StandardName system is no longer an experimental stub: the six-pool pipeline runs, the reviewer chain works, documentation quality is high, and the catalog round-trip exists in code. The release should still be held behind three explicit conditions: derived-parent cleanup, resolution of the accepted low-score names, and either implementation or formal deferment of the long-promised “Phase 6” deletion path.</p>
+    <p>The evidence base is asymmetric. The <em>quality signal</em> is strong: in the frozen 2026-06-04 audit snapshot, 123 of 155 accepted names (79%) scored at least 0.90 and the docs score distribution was excellent (min 0.81, mean 0.92, max 0.99). The <em>release risk</em> is concentrated instead in lifecycle debt: five accepted names sat below 0.50, 26 names were exhausted, and the code still contains a comment-level promise that failed derived parents will be deleted later even though that delete path does not exist.</p>
+    <ul>
+      <li><strong>Condition 1:</strong> clean up the derived-parent tail, especially <code>total_plasma_current</code> and the other structural orphans.</li>
+      <li><strong>Condition 2:</strong> resolve the accepted low-<code>rsn</code> names before a production catalog freeze.</li>
+      <li><strong>Condition 3:</strong> either land the Phase 6 delete cascade or explicitly declare that failed derived parents are a manual curation responsibility.</li>
+    </ul>
+
+    <h2 id="s2">§2 — What’s fully production-ready</h2>
+    <p>The core pipeline is real and shippable. The current question is not “does StandardNames work?” but “is the remaining cleanup debt small enough to tolerate?”</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>Code evidence</th>
+          <th>Readiness call</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Six-pool pipeline</td>
+          <td><code>pools.py</code> defines the six production pools and weighted admission control; <code>loop.py</code> orchestrates them; <code>workers.py</code> and <code>graph_ops.py</code> implement the stage transitions.</td>
+          <td><strong>Production-ready.</strong> The loop is implemented, cost-aware, and already operating on live data.</td>
+        </tr>
+        <tr>
+          <td>RD-quorum review chain</td>
+          <td><code>pyproject.toml</code> wires a three-model reviewer chain; <code>review/pipeline.py</code> and <code>persist_reviewed_name/docs</code> implement score-canonical transitions.</td>
+          <td><strong>Production-ready.</strong> The reviewer system is live and no longer just plan prose.</td>
+        </tr>
+        <tr>
+          <td>Catalog round-trip</td>
+          <td><code>export.py</code>, <code>preview.py</code>, <code>catalog_release.py</code>, and <code>catalog_import.py</code> exist and are part of the documented <code>sn export → sn preview → sn release → sn import</code> workflow.</td>
+          <td><strong>Production-ready.</strong> Export/import are implemented, even if one gate remains stubby.</td>
+        </tr>
+        <tr>
+          <td>ISN grammar + closed vocabulary</td>
+          <td><code>parents.py</code>, <code>derivation.py</code>, <code>segments.py</code>, and MCP/CLI helpers such as <code>list_grammar_vocabulary</code> show that grammar-aware naming is runtime code, not a future sketch.</td>
+          <td><strong>Production-ready.</strong> Grammar is central to the current system.</td>
+        </tr>
+        <tr>
+          <td>Embedding, search, MCP tools</td>
+          <td><code>standard_names/search.py</code> and the MCP tool registrations in <code>llm/server.py</code> expose <code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>find_related_standard_names</code>, <code>check_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, and <code>get_standard_name_summary</code>.</td>
+          <td><strong>Production-ready.</strong> Search parity is largely landed.</td>
+        </tr>
+        <tr>
+          <td>Observed quality level</td>
+          <td>Frozen 2026-06-04 audit snapshot: 123/155 accepted names at <code>rsn ≥ 0.90</code>; docs min/mean/max = 0.81 / 0.92 / 0.99.</td>
+          <td><strong>Production-ready.</strong> The quality floor is already good enough to justify release work.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The strongest deployment argument is that the quality profile is no longer bimodal chaos. The accepted set is dominated by very high scores, and the docs axis is uniformly strong. That means the remaining release work is targeted tail cleanup, not another architectural reset.</p>
+
+    <h2 id="s3">§3 — Open work blocking production release</h2>
+
+    <h3>3a. BLOCKING — Phase 6 derived-parent deletion is not implemented</h3>
+    <p>The most important release blocker is still structural, not statistical. <code>claim_refine_name_batch()</code> explicitly skips derived parents and documents the rationale in a comment: <code>graph_ops.py:7972-7977</code> says the admission gate filters bad derived names at write time and “Phase 6 will delete failed ones explicitly via the dead-link cascade.” That delete cascade is not present. The matching schema fields — <code>proposed_verdict</code> and <code>specificity_score</code> in <code>schemas/standard_name.yaml</code> — remain advisory and inert.</p>
+    <ul>
+      <li><strong>What this means in practice:</strong> structurally redundant derived parents can survive in accepted state with low scores because the cleanup stage they depend on never landed.</li>
+      <li><strong>Where it shows up:</strong> <code>total_plasma_current</code> is the clearest example in the supplied audit snapshot; it is a derived orphan with no credible reason to remain a catalog-grade name.</li>
+      <li><strong>Release risk:</strong> the public catalog risks carrying redundancy that the codebase itself already knows is weak.</li>
+      <li><strong>Required fix:</strong> either implement the delete cascade or make a deliberate product decision that weak derived parents are a manual curation problem rather than a runtime lifecycle state.</li>
+    </ul>
+
+    <h3>3b. IMPORTANT — accepted names with very low <code>rsn</code> still need intervention</h3>
+    <p>The frozen study snapshot flagged five accepted names at <code>rsn = 0.30</code> via the semantic-similarity gate: <code>beta</code>, <code>average_magnetic_field</code>, <code>flux_surface_mean_magnetic_field</code>, <code>total_plasma_current</code>, and <code>average_magnetic_flux_due_to_external_coil</code>. That is a tiny fraction of the catalog, but it is too visible a tail to ignore before a production release.</p>
+    <ul>
+      <li><strong><code>total_plasma_current</code></strong> is the strongest prune candidate because it is structural, derived, and redundant with the more stable <code>plasma_current</code> hierarchy.</li>
+      <li><strong><code>beta</code></strong> is the hardest case because it is a legitimate physics quantity; this looks more like a scoring or description-quality mismatch than a bogus name.</li>
+      <li><strong>The remaining names</strong> should go back through a targeted reset/re-review path rather than shipping as-is.</li>
+    </ul>
+    <p>The pragmatic release action is straightforward: prune the obvious structural orphan, explicitly re-review <code>beta</code>, and run a low-score reset for the rest. What matters is not perfection; it is demonstrating that there is an active cleanup path instead of accepting these as harmless noise.</p>
+
+    <h3>3c. IMPORTANT — 26 exhausted names need an explicit policy</h3>
+    <p>The exhausted set is not a release blocker because exhausted names are not destined for the catalog by default. It is still a release concern because exhausted names encode unresolved pipeline debt: they are names that already consumed the allowed refinement budget and still failed acceptance. A production release should not proceed without deciding whether those 26 names are (a) correct failures that should be deleted or left internal forever, or (b) false negatives that deserve manual rescue.</p>
+    <ul>
+      <li>If they are genuine failures, treat them as curation debt and prune or quarantine them explicitly.</li>
+      <li>If they are recoverable, write down the rescue rule now instead of leaving them as an indefinite tail.</li>
+    </ul>
+
+    <h3>3d. ADVISORY — export gate A is still a subprocess stub</h3>
+    <p><code>export.py:_run_gate_a()</code> still shells out to <code>uv run pytest -m &quot;graph or corpus_health&quot;</code> and labels itself a stub that “in Phase 6 … will be made more granular.” This does not invalidate release readiness, but it does mean the export gate is more brittle and less introspectable than the rest of the pipeline.</p>
+    <p>The key judgment call is therefore: do not let this advisory stub distract from the real blocker. The release risk is the missing derived-parent cleanup, not the fact that the gate is currently coarse-grained.</p>
+
+    <h2 id="s4">§4 — Plan implementation vs code reality matrix</h2>
+    <p>This table is the core planning audit. It compares what each active plan says should exist with what the current source tree actually contains. The goal is to separate <em>planning debt</em> from <em>runtime debt</em>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Plan says</th>
+          <th>Code reality</th>
+          <th>Gap</th>
+          <th>Deployment impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="/imas-codex/sn-catalog-quality-refactor.html">36 — catalog quality refactor</a><br><small>impl 0.21</small></td>
+          <td>Postfix grammar, derived-parent lifecycle, export cleanup, and Phase 6 deletion of failed derived parents.</td>
+          <td><code>parents.py</code> implements the admission gate; <code>workers.py</code> implements semantic gating; <code>graph_ops.py</code> still skips derived parents in review/refine and only comments about later deletion; <code>export.py</code> still contains the Phase 6 gate stub.</td>
+          <td>Lifecycle tail incomplete: delete-on-failure and specificity persistence are not wired.</td>
+          <td><strong>Blocking.</strong> This is the only plan whose missing tail can directly leak weak names into release output.</td>
+        </tr>
+        <tr>
+          <td><a href="/imas-codex/sn-quality-parity.html">23 — quality parity</a><br><small>impl 0.12</small></td>
+          <td>Benchmark harness, richer DD context, documentation hardening, link resolution, validation loop.</td>
+          <td>Later work landed part of this outside the original plan: <code>workers.py</code> already injects <code>hybrid_neighbours</code>, <code>related_neighbours</code>, <code>error_fields</code>, and <code>identifier_values</code>; link-state code exists (<code>link_status</code>, unresolved-link claimers); benchmark scripts and eval sets exist.</td>
+          <td>The plan understates what later implementation absorbed, but the full parity program still is not closed.</td>
+          <td><strong>Important but non-blocking.</strong> Quality is already good enough to release; parity work is now incremental improvement, not a hard gate.</td>
+        </tr>
+        <tr>
+          <td><a href="/imas-codex/sn-search-facility.html">40 — search facility</a><br><small>impl 0.55</small></td>
+          <td>Seven-tool search/fetch parity plus grammar-aware retrieval and call-site migration.</td>
+          <td><code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>find_related_standard_names</code>, <code>check_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, and <code>get_standard_name_summary</code> are all registered MCP tools in <code>llm/server.py</code>.</td>
+          <td>The public surface is real; the remaining gap is cleanup of legacy call sites and helper imports.</td>
+          <td><strong>Non-blocking.</strong> Search is not holding up release.</td>
+        </tr>
+        <tr>
+          <td><a href="/imas-codex/sn-closed-physical-base.html">41 — closed physical base</a><br><small>impl 0.50</small></td>
+          <td>ISN physical-base reorganization, qualifier rollout, iterative bootstrap, export closure.</td>
+          <td>Closed-vocabulary infrastructure clearly exists in runtime code and tools, but the repo snapshot still reads as a staged rollout rather than a completed migration.</td>
+          <td>Grammar tooling exists, but the plan is still tracking rollout and validation rather than a closed deployment task.</td>
+          <td><strong>Enhancement.</strong> Important for long-term catalog shape, not a release blocker for the current v1 system.</td>
+        </tr>
+        <tr>
+          <td><code>29 — architectural pivot</code><br><small>impl 0.42</small></td>
+          <td>Split <code>sn generate</code> and <code>sn enrich</code>, standalone enrich pipeline, major grammar upgrade.</td>
+          <td>The current system is not a standalone generate/enrich split; it is a six-pool integrated runtime with name/docs stages. Some sub-goals landed elsewhere, but this plan is no longer the best description of the shipped architecture.</td>
+          <td>Mostly superseded by the current pipeline design.</td>
+          <td><strong>Non-blocking historical debt.</strong></td>
+        </tr>
+        <tr>
+          <td><code>32 — extraction prompt overhaul</code><br><small>impl 0.71</small></td>
+          <td>Classifier audit, prompt A/B/C harness, winner implementation, DD completion endpoint.</td>
+          <td>The plan’s own outcome section reports Phases 1–4 as shipped; the repo contains <code>scripts/prompt_ab_run.py</code>, <code>scripts/run_benchmark_v1.py</code>, and eval sets under <code>tests/standard_names/eval_sets/</code>.</td>
+          <td>Little runtime gap remains; the main debt is stale planning inventory, not missing code.</td>
+          <td><strong>Non-blocking.</strong> Treat this as landed work that needs plan-state cleanup.</td>
+        </tr>
+        <tr>
+          <td><code>39 — structured fan-out</code><br><small>impl 0.38 in survey; code ahead of plan</small></td>
+          <td>Plan-only structured fan-out, default off, refine-name pilot.</td>
+          <td>The repo already contains a full <code>standard_names/fanout/</code> package, dispatcher/tests, worker call sites, and <code>[tool.imas-codex.sn-fanout]</code> with <code>enabled = true</code> in <code>pyproject.toml</code>.</td>
+          <td>The plan is stale relative to reality; runtime has moved faster than planning docs.</td>
+          <td><strong>Non-blocking, but planning debt is real.</strong></td>
+        </tr>
+        <tr>
+          <td><code>31 — quality bootstrap v2</code><br><small>impl 0.38</small></td>
+          <td>Seven workstreams to cut quarantine rate and improve classifier/prompt quality.</td>
+          <td>Many ideas were absorbed into later plans and the current runtime (classifier categories, review chain, prompt cleanup, batching, budgeting). The markdown plan is no longer the canonical picture of the live system.</td>
+          <td>Large historical plan; only parts still matter as archaeology.</td>
+          <td><strong>Non-blocking.</strong></td>
+        </tr>
+        <tr>
+          <td><code>33 — benchmark evolution</code><br><small>impl 0.33</small></td>
+          <td>Multi-reviewer benchmark evolution, softer scoring refinements, stronger calibration, CI gating.</td>
+          <td>Benchmark settings already include multiple reviewer models in <code>pyproject.toml</code>, and benchmark scripts exist, but the full governance loop described in the plan is still incomplete.</td>
+          <td>Partial tooling exists; the benchmark strategy remains only partly operationalized.</td>
+          <td><strong>Enhancement.</strong></td>
+        </tr>
+        <tr>
+          <td><code>34 — benchmark v1</code><br><small>impl 0.25</small></td>
+          <td>Curated positive/negative eval set and hard regression gate.</td>
+          <td><code>scripts/run_benchmark_v1.py</code> and <code>tests/standard_names/eval_sets/benchmark_v1.json</code> exist, so scaffolding has landed. The full 50-path consensus benchmark remains unfinished.</td>
+          <td>Scaffolded but not complete.</td>
+          <td><strong>Enhancement.</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Bottom line for §4:</strong> the plans overstate some missing work and understate other already-landed work, but only one mismatch is deployment-critical: plan 36 assumes a derived-parent cleanup lifecycle that the runtime still does not provide.</p>
+
+    <h2 id="s5">§5 — Recommended actions before v1 release</h2>
+    <ol>
+      <li><strong>Prune <code>total_plasma_current</code>.</strong> Owner: SN maintainer. Effort: ~5 minutes. This is the cleanest obvious orphan and the quickest way to prove the cleanup policy is real.</li>
+      <li><strong>Re-review <code>beta</code>.</strong> Owner: SN maintainer. Effort: one focused pipeline run, roughly $0.05. This is the most legitimate low-score name and the best candidate to separate scoring noise from real naming failure.</li>
+      <li><strong>Implement or explicitly gate Phase 6 derived-parent deletion.</strong> Owner: core SN developer. Effort: 1–2 days. The release should not go out while the code still promises a future delete cascade that does not exist.</li>
+      <li><strong>Audit the 26 exhausted names.</strong> Owner: SN maintainer. Effort: 1–2 hours. Decide whether they are correct failures to prune/document or rescue candidates that deserve manual intervention.</li>
+      <li><strong>Refine the remaining accepted names with <code>rsn &lt; 0.80</code> that are not structural parents.</strong> Owner: SN maintainer. Effort: small bounded rotation. The objective is to narrow the catalog tail, not to restart the pipeline.</li>
+      <li><strong>Correct plan inventory metadata on the six stale/unmigrated plans.</strong> Owner: docs/planning maintainer. Effort: 1–2 hours. The implementation matrix above shows that plan state is now lagging code state badly enough to confuse deployment decisions.</li>
+    </ol>
+
+    <h2 id="s6">§6 — Cost and coverage metrics</h2>
+    <p>This section distinguishes the <strong>frozen study snapshot</strong> from the <strong>moving live head</strong>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Value</th>
+          <th>Source / note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Accepted StandardNames</td>
+          <td>155</td>
+          <td>Frozen deployment snapshot supplied from 2026-06-04.</td>
+        </tr>
+        <tr>
+          <td>Accepted docs</td>
+          <td>154</td>
+          <td>Frozen deployment snapshot supplied from 2026-06-04.</td>
+        </tr>
+        <tr>
+          <td>Total StandardName nodes</td>
+          <td>226</td>
+          <td>Frozen deployment snapshot supplied from 2026-06-04 (155 accepted, 41 superseded, 26 exhausted, 4 other).</td>
+        </tr>
+        <tr>
+          <td>Docs score distribution</td>
+          <td>min 0.81 / mean 0.92 / max 0.99</td>
+          <td>Frozen deployment snapshot supplied from 2026-06-04.</td>
+        </tr>
+        <tr>
+          <td>Total review cost to date</td>
+          <td>$9.47</td>
+          <td>Frozen deployment snapshot supplied from 2026-06-04.</td>
+        </tr>
+        <tr>
+          <td>Accepted low-score tail</td>
+          <td>5 names below 0.50</td>
+          <td>Frozen deployment snapshot supplied from 2026-06-04.</td>
+        </tr>
+        <tr>
+          <td>Exhausted-name tail</td>
+          <td>26</td>
+          <td>Confirmed by the frozen study snapshot; a 2026-06-05 head spot check matched this count.</td>
+        </tr>
+        <tr>
+          <td>DD coverage (authoring-time head spot check)</td>
+          <td>219 / 9240 eligible DD quantity/geometry paths ≈ 2.37%</td>
+          <td>Direct query on 2026-06-05 against the live graph head. This is not the frozen 2026-06-04 study snapshot, but it is the best available in-session coverage measurement.</td>
+        </tr>
+        <tr>
+          <td>Accepted-name domains (authoring-time head spot check)</td>
+          <td><code>equilibrium</code>, <code>general</code>, <code>transport</code>, <code>magnetic_field_systems</code></td>
+          <td>Direct query on 2026-06-05 against the live graph head. Counts were 93, 62, 49, and 13 respectively.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The coverage number deserves one cautionary reading: the catalog is clearly not “DD complete,” nor does it need to be for a v1 release. The key requirement for release is that the currently accepted names are high quality and that the cleanup path for the weak tail is explicit. Coverage scale is a roadmap question; orphan cleanup is a release question.</p>
+
+    <h2 id="s7">§7 — Final decision statement</h2>
+    <p>The StandardName program has crossed the threshold from “experimental subsystem” to “production-capable subsystem with known cleanup debt.” That is why the correct verdict is <strong>CONDITIONAL-GO</strong>, not <strong>NO-GO</strong>. The system already does the hard part — generate, review, refine, document, export, and search names at a quality level that looks like a real catalog.</p>
+    <p>The only honest reason to withhold a production release is the unresolved lifecycle contradiction around derived parents. Fix that contradiction, resolve the obvious low-score tail, and the remaining open plans become ordinary enhancement backlog rather than release blockers.</p>
+  </main>
+</body>
+</html>
