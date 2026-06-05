@@ -283,3 +283,65 @@ def test_fetch_return_fields_override_include_flags() -> None:
             "physical_base": "temperature",
         }
     ]
+
+
+def test_fetch_return_fields_neighbours_only() -> None:
+    """Neighbour-only projections still fetch neighbours via the grouping key."""
+    gc = MagicMock()
+
+    def _query(cypher: str, **params: object) -> list[dict]:
+        if "MATCH (sn:StandardName {id: name_id})" in cypher:
+            return [{"name": "electron_temperature"}]
+        if "MATCH (sn:StandardName {id: sn_id})" in cypher:
+            return [
+                {
+                    "name": "electron_temperature",
+                    "predecessors": ["legacy_temperature"],
+                    "successors": [],
+                    "refined_from": [],
+                }
+            ]
+        return []
+
+    gc.query.side_effect = _query
+    gc.close = MagicMock()
+
+    rows = sn_search.fetch_standard_names(
+        ["electron_temperature"],
+        return_fields=["name", "neighbours"],
+        gc=gc,
+    )
+
+    assert rows == [
+        {
+            "name": "electron_temperature",
+            "neighbours": {
+                "predecessors": ["legacy_temperature"],
+                "successors": [],
+                "refined_from": [],
+            },
+        }
+    ]
+
+
+def test_fetch_aggregate_only_return_fields_preserve_per_name_rows() -> None:
+    """Aggregate-only projections still group by name and return one row per input."""
+    gc = MagicMock()
+    gc.query.return_value = [
+        {"name": "electron_temperature", "source_ids": ["cp/electron_temperature"]},
+        {"name": "ion_temperature", "source_ids": ["cp/ion_temperature"]},
+    ]
+    gc.close = MagicMock()
+
+    rows = sn_search.fetch_standard_names(
+        ["electron_temperature", "ion_temperature"],
+        return_fields=["source_ids"],
+        gc=gc,
+    )
+
+    assert rows == [
+        {"source_ids": ["cp/electron_temperature"]},
+        {"source_ids": ["cp/ion_temperature"]},
+    ]
+    cypher = gc.query.call_args[0][0]
+    assert "sn.id AS name" in cypher

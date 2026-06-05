@@ -642,12 +642,12 @@ def fetch_standard_names(
                 field for field in requested_fields if field in field_projections
             ]
         needs_neighbours = (
-            "neighbours" in effective_fields
+            "neighbours" in requested_fields
             if requested_fields is not None
             else include_neighbours
         )
         query_fields = list(effective_fields)
-        if needs_neighbours and "name" not in query_fields:
+        if "name" not in query_fields:
             query_fields.insert(0, "name")
         select = [field_projections[field] for field in query_fields]
 
