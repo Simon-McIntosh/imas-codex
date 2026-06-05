@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="01-current-state-standard-names">
+  <meta name="plan-title" content="Current State: IMAS Standard Names Prompt Architecture">
+  <meta name="plan-summary" content="The IMAS Standard Names project currently uses two distinct prompting approaches for standard name generation: **interactive MCP-mediated chat** and **scripted agent workflows**. Neither approach employs the structured p">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="03-comparative-analysis,04-parallel-review-synthesis">
+  <title>Current State: IMAS Standard Names Prompt Architecture | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Current State: IMAS Standard Names Prompt Architecture</h1>
+    <h2 id="overview">Overview</h2>
+<p>The IMAS Standard Names project currently uses two distinct prompting approaches for standard name generation: <strong>interactive MCP-mediated chat</strong> and <strong>scripted agent workflows</strong>. Neither approach employs the structured prompt engineering patterns established in the partner <code>imas-codex</code> project.</p>
+<h2 id="architecture-summary">Architecture Summary</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                  Standard Names Prompting                       │
+├──────────────────────┬──────────────────────────────────────────┤
+│   MCP Chat (primary) │   Agent Workflows (experimental)         │
+│                      │                                          │
+│  ┌────────────────┐  │  ┌────────────────┐  ┌───────────────┐  │
+│  │ .github/prompts│  │  │ agent_loop_    │  │ agent_list_   │  │
+│  │ (static .md)   │  │  │ workflow.py    │  │ generate.py   │  │
+│  └───────┬────────┘  │  └───────┬────────┘  └──────┬────────┘  │
+│          │           │          │                   │           │
+│  Loaded by VS Code   │  pydantic_ai.Agent          │           │
+│  or Copilot as       │  with MCP toolsets           │           │
+│  prompt files        │  + inline prompts            │           │
+│          │           │          │                   │           │
+│  ┌───────▼────────┐  │  ┌──────▼─────────┐  ┌─────▼────────┐  │
+│  │ Human operates │  │  │ Sequential     │  │ Review loop  │  │
+│  │ chat manually  │  │  │ generate→      │  │ generate→    │  │
+│  │ via MCP tools  │  │  │ review loop    │  │ AI review→   │  │
+│  └────────────────┘  │  └────────────────┘  │ human review │  │
+│                      │                      └──────────────┘  │
+└──────────────────────┴──────────────────────────────────────────┘
+</code></pre>
+<h2 id="1-mcp-chat-interaction-pattern-primary">1. MCP Chat Interaction Pattern (Primary)</h2>
+<h3 id="how-it-works">How it works</h3>
+<p>The primary method of minting standard names is through <strong>interactive chat sessions</strong> with an LLM that has access to MCP tools. The human operator drives the conversation, providing:</p>
+<ol>
+<li>A natural-language request (e.g., "generate names for poloidal flux paths")</li>
+<li>A list of IMAS DD paths to name</li>
+<li>Iterative feedback on proposed names</li>
+</ol>
+<p>The LLM calls MCP tools (<code>get_grammar</code>, <code>search_standard_names</code>, <code>compose_standard_name</code>, <code>create_standard_names</code>, <code>write_standard_names</code>) to research, compose, validate, and persist names.</p>
+<h3 id="prompt-files">Prompt files</h3>
+<p>Static markdown files in <code>.github/prompts/</code> provide system-level instructions:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate_standard_names_from_imas_paths.prompt.md</code></td>
+<td>Workflow for generating names from IDS paths</td>
+<td>~68</td>
+</tr>
+<tr>
+<td><code>workflows/list_generate_workflow/generate.prompt.md</code></td>
+<td>Phase-based generation system prompt</td>
+<td>~94</td>
+</tr>
+<tr>
+<td><code>workflows/list_generate_workflow/review.md</code></td>
+<td>AI reviewer scoring rubric</td>
+<td>~80</td>
+</tr>
+<tr>
+<td><code>workflows/list_generate_workflow/human.md</code></td>
+<td>Human interaction parsing</td>
+<td>~54</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source</strong>: <code>.github/prompts/generate_standard_names_from_imas_paths.prompt.md</code> <sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></p>
+<h3 id="characteristics">Characteristics</h3>
+<ul>
+<li><strong>Static prompts</strong>: No templating, no dynamic content injection</li>
+<li><strong>No schema injection</strong>: Grammar rules, vocabulary tokens, and Pydantic schemas are not embedded in prompts — the LLM must discover them via MCP tool calls</li>
+<li><strong>Sequential tool calling</strong>: Each tool call happens in conversational turns, not batched</li>
+<li><strong>Human-in-the-loop throughout</strong>: Every generation step requires human confirmation</li>
+<li><strong>No prompt caching</strong>: System prompts are not designed for API-level cache reuse</li>
+<li><strong>No cost tracking</strong>: No budget limits, no spend monitoring</li>
+</ul>
+<h3 id="strengths">Strengths</h3>
+<ul>
+<li>Flexible: can handle novel edge cases through conversation</li>
+<li>Simple implementation: no pipeline infrastructure needed</li>
+<li>Human quality control at every step</li>
+</ul>
+<h3 id="weaknesses">Weaknesses</h3>
+<ul>
+<li><strong>Not scalable</strong>: Each name requires multiple chat turns (5-15 tool calls)</li>
+<li><strong>Inconsistent</strong>: Prompt quality depends on operator skill</li>
+<li><strong>No context reuse</strong>: Grammar, vocabulary, and schema are re-fetched every session</li>
+<li><strong>Expensive</strong>: Redundant token usage from repeated context discovery</li>
+<li><strong>No batch processing</strong>: Cannot process 50+ names efficiently</li>
+<li><strong>No reproducibility</strong>: No structured prompt versioning or A/B testing</li>
+</ul>
+<h2 id="2-agent-workflow-pattern-experimental">2. Agent Workflow Pattern (Experimental)</h2>
+<h3 id="agent-loop-workflow">Agent Loop Workflow</h3>
+<p>Located at <code>imas_standard_names/agents/agent_loop_workflow.py</code> <sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, this uses <code>pydantic_ai</code> to create a generate→review loop:</p>
+<pre><code class="language-python"># Agents defined with inline prompts
+REVIEW_QUERY = &quot;You are an expert in using the IMAS Data Dictionary...&quot;
+
+standard_name_agent = Agent[
+    tuple[list[StandardNameEntry], StandardNameEntry | None, Review | None],
+    StandardNameEntry,
+](model=build_default_model(), output_type=StandardNameEntry, toolsets=SERVERS)
+
+ai_review_agent = Agent[StandardNameEntry, Review](
+    model=build_default_model(), output_type=Review, toolsets=SERVERS
+)
+</code></pre>
+<p><strong>Key issues</strong>:
+- Inline string prompts with no structured context
+- Sequential <code>await</code> calls — no parallel processing
+- Hardcoded model selection (<code>openai/gpt-5</code>)
+- No cost limits or retry logic
+- MCP servers loaded from <code>.vscode/mcp.json</code> (development config)</p>
+<h3 id="agent-list-generate-workflow">Agent List Generate Workflow</h3>
+<p>Located at <code>imas_standard_names/agents/agent_list_generage_workflow.py</code> <sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>, this is more mature:</p>
+<ul>
+<li>Loads system prompts from <code>.github/prompts/workflows/</code> markdown files</li>
+<li>Implements a 2-tier review system (AI + human)</li>
+<li>Uses <code>build_regenerate_query()</code> and <code>build_review_query()</code> for dynamic prompt construction</li>
+<li>Has a retry loop with <code>MAX_RETRIES = 5</code></li>
+</ul>
+<p><strong>Key issues</strong>:
+- Prompts loaded via <code>Path(__file__).resolve()</code> — fragile path resolution
+- String concatenation for dynamic content (<code>"\n".join(str(c) for c in candidates)</code>)
+- No templating engine — prompt construction is ad-hoc Python string formatting
+- No schema injection — review criteria are hardcoded prose
+- No batch dispatch — candidates processed sequentially
+- No cost tracking or budget limits</p>
+<h3 id="namelist-pattern">Namelist Pattern</h3>
+<p><code>imas_standard_names/agents/namelist.py</code> <sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup> is a simpler script:</p>
+<pre><code class="language-python">agent = Agent(model, toolsets=servers, deps_type=Kind, output_type=list[StandardName])
+result = agent.run_sync(
+    &quot;@imas-sn generate a list of standard names from the following IDS paths...&quot;
+)
+</code></pre>
+<p>This fires a single LLM call with IDS paths as inline text. No structured prompt, no review loop, no validation.</p>
+<h2 id="3-mcp-tool-architecture">3. MCP Tool Architecture</h2>
+<p>The standard names MCP server provides 15+ tools <sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup>:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Discovery</td>
+<td><code>search_standard_names</code>, <code>list_standard_names</code>, <code>fetch_standard_names</code></td>
+</tr>
+<tr>
+<td>Grammar</td>
+<td><code>get_grammar</code>, <code>compose_standard_name</code>, <code>parse_standard_name</code></td>
+</tr>
+<tr>
+<td>Vocabulary</td>
+<td><code>get_vocabulary</code>, <code>manage_vocabulary</code></td>
+</tr>
+<tr>
+<td>Creation</td>
+<td><code>create_standard_names</code>, <code>edit_standard_names</code>, <code>write_standard_names</code></td>
+</tr>
+<tr>
+<td>Validation</td>
+<td><code>check_standard_names</code>, <code>validate_catalog</code></td>
+</tr>
+<tr>
+<td>Schema</td>
+<td><code>get_schema</code>, <code>get_tokamak_parameters</code></td>
+</tr>
+</tbody>
+</table>
+<p>These tools are well-designed for interactive use but are not optimized for batch pipeline consumption:
+- Each tool call requires a full MCP request/response cycle
+- No bulk query endpoints (e.g., "fetch grammar + vocabulary + schema in one call")
+- No prompt-ready context assembly (tools return raw data, not prompt-formatted text)</p>
+<h2 id="4-prompt-content-analysis">4. Prompt Content Analysis</h2>
+<h3 id="generate-prompt-generatepromptmd">Generate Prompt (<code>generate.prompt.md</code>)</h3>
+<p>The 94-line generation prompt follows a phased approach:</p>
+<ol>
+<li><strong>Phase 0</strong>: Input interpretation (parse user request)</li>
+<li><strong>Phase 1</strong>: Concept explanation (call <code>explain_concept</code> tool)</li>
+<li><strong>Phase 2</strong>: Exhaustive name survey (multiple <code>search_standard_names</code> calls)</li>
+<li><strong>Phase 3</strong>: Collision analysis</li>
+<li><strong>Phase 4</strong>: Name synthesis</li>
+<li><strong>Phase 5</strong>: Validation checklist</li>
+<li><strong>Phase 6</strong>: Output format</li>
+</ol>
+<p><strong>Problem</strong>: All domain knowledge (naming rules, token ordering, prohibited patterns) is encoded as natural language prose. The LLM must interpret and follow ~94 lines of text instructions, with no structured schema enforcement.</p>
+<h3 id="review-prompt-reviewmd">Review Prompt (<code>review.md</code>)</h3>
+<p>The review prompt defines a weighted scoring model:</p>
+<pre><code>Score = 0.30*Uniqueness + 0.30*Descriptivity + 0.20*Generalizability + 0.20*Conventions
+</code></pre>
+<p>This is sound but relies entirely on LLM interpretation. There is no Pydantic schema enforcing output structure, no calibration examples, and no dimension-specific scoring guidance.</p>
+<h2 id="5-gap-summary">5. Gap Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Current State</th>
+<th>Desired State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt format</td>
+<td>Static markdown, inline strings</td>
+<td>Jinja2 templates with frontmatter</td>
+</tr>
+<tr>
+<td>Context injection</td>
+<td>LLM discovers via tool calls</td>
+<td>Pre-assembled, schema-derived</td>
+</tr>
+<tr>
+<td>Batch processing</td>
+<td>Sequential, one-at-a-time</td>
+<td>Parallel workers, batched dispatch</td>
+</tr>
+<tr>
+<td>Schema enforcement</td>
+<td>Natural language prose</td>
+<td>Pydantic models + JSON schema</td>
+</tr>
+<tr>
+<td>Cost tracking</td>
+<td>None</td>
+<td>Per-call, per-batch, budget limits</td>
+</tr>
+<tr>
+<td>Prompt caching</td>
+<td>None</td>
+<td>Static-first layout, cache breakpoints</td>
+</tr>
+<tr>
+<td>Reproducibility</td>
+<td>None</td>
+<td>Versioned prompts, deterministic rendering</td>
+</tr>
+<tr>
+<td>Orchestration</td>
+<td>Manual chat or simple loops</td>
+<td>Engine with supervision, orphan recovery</td>
+</tr>
+<tr>
+<td>Error handling</td>
+<td>Basic try/except</td>
+<td>Retry with backoff, structured errors</td>
+</tr>
+<tr>
+<td>Calibration</td>
+<td>None</td>
+<td>Score calibration examples in prompts</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="footnotes">Footnotes</h2>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><code>.github/prompts/generate_standard_names_from_imas_paths.prompt.md</code>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p><code>imas_standard_names/agents/agent_loop_workflow.py</code>&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p><code>imas_standard_names/agents/agent_list_generage_workflow.py</code>&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p><code>imas_standard_names/agents/namelist.py</code>&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p><code>imas_standard_names/tools/</code> directory (15+ tool files)&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+  </main>
+</body>
+</html>

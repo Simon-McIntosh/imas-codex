@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="10-implementation-review">
+  <meta name="plan-title" content="10: Standard Names Implementation Review">
+  <meta name="plan-summary" content="The imas-sn MCP server hosts **309 persisted standard names** — a substantial, high-quality catalog that serves as both the gold standard for benchmarking and the reference set for deduplication.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="09-codex-pivot-analysis">
+  <meta name="plan-informs" content="11-deterministic-parent-redesign,12-full-graph-review">
+  <title>10: Standard Names Implementation Review | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>10: Standard Names Implementation Review</h1>
+    <p><strong>Date:</strong> 2026-04-08
+<strong>Scope:</strong> Post-implementation review of Features 05–08
+<strong>Status:</strong> Analysis complete — actionable findings</p>
+<hr />
+<h2 id="1-catalog-assessment-309-existing-names">1. Catalog Assessment (309 Existing Names)</h2>
+<p>The imas-sn MCP server hosts <strong>309 persisted standard names</strong> — a substantial, high-quality catalog that serves as both the gold standard for benchmarking and the reference set for deduplication.</p>
+<h3 id="quality-evaluation">Quality Evaluation</h3>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Assessment</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar validity</td>
+<td><strong>Excellent</strong></td>
+<td>0 grammar errors, 0 schema errors across 309 entries</td>
+</tr>
+<tr>
+<td>Documentation depth</td>
+<td><strong>Outstanding</strong></td>
+<td>Rich entries: LaTeX equations, governing physics, measurement methods, typical values across ITER/JET/DIII-D, sign conventions</td>
+</tr>
+<tr>
+<td>Cross-referencing</td>
+<td><strong>Good but fragile</strong></td>
+<td>810 forward-reference warnings — names linking to concepts not yet in catalog (e.g., <code>tokamak_scenario</code>, <code>gyrokinetic</code>)</td>
+</tr>
+<tr>
+<td>Coverage breadth</td>
+<td><strong>Strong core, gaps at edges</strong></td>
+<td>133 bare quantities, 32 subject-qualified, 40 device-qualified, 95 object-qualified, but only 3 component-qualified, 6 position-qualified, 0 process-qualified</td>
+</tr>
+<tr>
+<td>Unit consistency</td>
+<td><strong>Perfect</strong></td>
+<td>0 unit errors; proper SI notation (eV, m^-3, A, T, W.m^-2)</td>
+</tr>
+<tr>
+<td>Provenance</td>
+<td><strong>Empty</strong></td>
+<td>All entries have empty <code>derived_from</code> — no DD path linking exists yet</td>
+</tr>
+</tbody>
+</table>
+<h3 id="name-distribution-by-grammar-pattern">Name Distribution by Grammar Pattern</h3>
+<pre><code>Bare physical_base only:           133 (43%)  — temperature, safety_factor, time
+Subject + physical_base:            32 (10%)  — electron_temperature, ion_density
+Device + physical_base:             40 (13%)  — bolometer_radiated_power, flux_loop_...
+Object (of_) qualified:             95 (31%)  — area_of_flux_loop, position_of_...
+Component (vector) qualified:        3  (1%)  — toroidal_component_of_magnetic_field_...
+Position (at_) qualified:            6  (2%)  — ..._at_magnetic_axis
+Process (due_to_) qualified:         0  (0%)  — MISSING ENTIRELY
+Binary operator compound:            0  (0%)  — MISSING ENTIRELY
+Transformation (square_of, etc):     0  (0%)  — MISSING ENTIRELY
+</code></pre>
+<h3 id="key-finding-coverage-gaps">Key Finding: Coverage Gaps</h3>
+<p>The catalog has <strong>zero names</strong> using:
+- <code>due_to_&lt;process&gt;</code> pattern (e.g., <code>power_due_to_ohmic</code>, <code>current_due_to_bootstrap</code>)
+- <code>binary_operator</code> compounds (e.g., <code>ratio_of_electron_pressure_to_magnetic_pressure</code>)
+- <code>transformation</code> operators (e.g., <code>square_of_safety_factor</code>, <code>logarithm_of_collisionality</code>)
+- <code>coordinate</code> prefix (geometric vector decomposition)</p>
+<p>These grammar features exist in the grammar API (26 processes, 3 binary operators, 4 transformations) but have no catalog exemplars. This is critical for benchmarking — models cannot learn these patterns from examples.</p>
+<h3 id="name-quality-tiers-for-benchmark-reference">Name Quality Tiers (for benchmark reference)</h3>
+<p><strong>Outstanding</strong> (rich documentation, correct grammar, cross-linked):
+- <code>electron_temperature</code> — 500+ word doc, Spitzer formula, 6 cross-references, LaTeX
+- <code>plasma_current</code> — integral equation, Rogowski coil methods, sign convention
+- <code>safety_factor</code> — q-profile equation, stability boundaries, measurement methods
+- <code>bootstrap_current</code> — neoclassical theory, 16 cross-references
+- <code>position_of_magnetic_axis</code> — Shafranov shift, coordinate system, geometric</p>
+<p><strong>Good</strong> (correct grammar, adequate documentation):
+- <code>toroidal_component_of_magnetic_field_at_magnetic_axis</code> — correct multi-field grammar
+- <code>centroid_of_plasma_boundary</code> — geometric_base with geometry qualifier
+- <code>bolometer_radiated_power</code> — device-qualified, calibration context
+- <code>collisionality</code> — dimensionless quantity with physics context</p>
+<p><strong>Adequate</strong> (correct grammar, thin documentation):
+- <code>area_of_poloidal_magnetic_field_probe</code> — 482 chars, no cross-references
+- <code>tokamak_scenario</code> — metadata kind, no governing equation
+- <code>time</code> — minimal documentation for fundamental coordinate</p>
+<p><strong>Questionable</strong> (grammar concerns or naming issues):
+- <code>flux_surface_averaged_squared_toroidal_flux_coordinate_gradient_magnitude_divided_by_squared_magnetic_field_strength</code> — 113 characters as a single <code>physical_base</code>. Grammar API treats entire compound as open-vocabulary base rather than decomposing with transformations/operators. Valid but tests grammar extensibility limits.
+- <code>h_mode</code>, <code>l_mode</code> — physics concepts rather than measurable quantities. <code>kind: metadata</code> is appropriate but no units.
+- <code>banana_orbits</code>, <code>drift_waves</code> — conceptual entries, not quantities. Useful for cross-referencing but not measurable.</p>
+<hr />
+<h2 id="2-implementation-vs-plan-compliance">2. Implementation vs. Plan Compliance</h2>
+<h3 id="feature-05-sn-build-pipeline">Feature 05: SN Build Pipeline ✅</h3>
+<table>
+<thead>
+<tr>
+<th>Deliverable</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sn/</code> module structure</td>
+<td>✅ Done</td>
+<td>pipeline.py, workers.py, state.py, graph_ops.py, progress.py, models.py</td>
+</tr>
+<tr>
+<td><code>cli/sn.py</code> top-level group</td>
+<td>✅ Done</td>
+<td>build, status, benchmark, publish commands</td>
+</tr>
+<tr>
+<td><code>llm/prompts/sn/</code> templates</td>
+<td>✅ Done</td>
+<td>compose_dd.md, compose_signals.md</td>
+</tr>
+<tr>
+<td><code>sn/progress.py</code> display</td>
+<td>✅ Done</td>
+<td>Uses StageDisplaySpec pattern</td>
+</tr>
+<tr>
+<td><code>sn/sources/</code> plugin system</td>
+<td>✅ Done</td>
+<td>dd.py, signals.py, base.py</td>
+</tr>
+<tr>
+<td>Graph schema updates</td>
+<td>⚠️ Partial</td>
+<td>StandardName node exists but schema not in LinkML</td>
+</tr>
+<tr>
+<td>End-to-end DD source</td>
+<td>✅ Done</td>
+<td>500 paths extracted for equilibrium IDS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical gap:</strong> The compose worker uses a <strong>heuristic keyword matcher</strong> (<code>_extract_physical_base()</code>) that matches against 13 known bases. The LLM compose prompt exists (<code>compose_dd.md</code>) but is NOT wired into the compose worker. In non-dry-run mode, composition quality will be very poor — only bare <code>physical_base</code> names like "temperature" or "density" can be produced, with no subject/component/position qualification.</p>
+<h3 id="feature-06-cross-model-review">Feature 06: Cross-Model Review ✅</h3>
+<table>
+<thead>
+<tr>
+<th>Deliverable</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Review worker</td>
+<td>✅ Done</td>
+<td><code>review_worker()</code> in workers.py, batch processing</td>
+</tr>
+<tr>
+<td>Review prompt template</td>
+<td>✅ Done</td>
+<td><code>sn/review.md</code> — comprehensive with grammar rules</td>
+</tr>
+<tr>
+<td>Pydantic review models</td>
+<td>✅ Done</td>
+<td>SNReviewVerdict, SNReviewItem, SNReviewBatch</td>
+</tr>
+<tr>
+<td>Confidence tier classification</td>
+<td>✅ Done</td>
+<td>In publish.py <code>confidence_tier()</code></td>
+</tr>
+<tr>
+<td>CLI options</td>
+<td>✅ Done</td>
+<td><code>--review-model</code>, <code>--skip-review</code></td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>✅ Done</td>
+<td>19 tests covering accept/reject/revise paths</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Strength:</strong> Clean buffer separation (validated → reviewed → validate reads from reviewed), graceful degradation on LLM failure, intra-run dedup tracking.</p>
+<h3 id="feature-07-benchmarking-needs-enhancement">Feature 07: Benchmarking ⚠️ Needs Enhancement</h3>
+<table>
+<thead>
+<tr>
+<th>Deliverable</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI command</td>
+<td>✅ Done</td>
+<td><code>sn benchmark --models X,Y</code></td>
+</tr>
+<tr>
+<td>Multi-model support</td>
+<td>✅ Done</td>
+<td>Runs each model sequentially</td>
+</tr>
+<tr>
+<td>Quality scoring vs reference</td>
+<td>✅ Done</td>
+<td>precision/recall against REFERENCE_NAMES</td>
+</tr>
+<tr>
+<td>Rich comparison table</td>
+<td>✅ Done</td>
+<td>Names, Valid%, Fields%, Ref Match, Cost, Speed</td>
+</tr>
+<tr>
+<td>JSON report export</td>
+<td>✅ Done</td>
+<td>BenchmarkReport.to_json() / from_json()</td>
+</tr>
+<tr>
+<td>Benchmark dataset</td>
+<td>⚠️ Weak</td>
+<td>30 hand-crafted names — misses 90% of grammar patterns</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Opportunity:</strong> The benchmark CLI is functional but the reference dataset is the wrong source of truth. The 309-entry catalog already exists and covers far more patterns. The benchmark should use the catalog as its gold standard, not 30 hand-picked entries.</p>
+<h3 id="feature-08-publish">Feature 08: Publish ✅</h3>
+<table>
+<thead>
+<tr>
+<th>Deliverable</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YAML generation</td>
+<td>✅ Done</td>
+<td><code>generate_catalog_files()</code></td>
+</tr>
+<tr>
+<td>PR creation</td>
+<td>✅ Done</td>
+<td><code>create_catalog_pr()</code> via <code>gh</code> CLI</td>
+</tr>
+<tr>
+<td>Batching by IDS/domain</td>
+<td>✅ Done</td>
+<td><code>make_publish_batches()</code></td>
+</tr>
+<tr>
+<td>Confidence tier separation</td>
+<td>✅ Done</td>
+<td><code>confidence_tier()</code> — high/medium/low</td>
+</tr>
+<tr>
+<td>Catalog dedup</td>
+<td>✅ Done</td>
+<td><code>check_catalog_duplicates()</code></td>
+</tr>
+<tr>
+<td>PR description template</td>
+<td>✅ Done</td>
+<td>Summary table in PR body</td>
+</tr>
+<tr>
+<td>Dry-run mode</td>
+<td>✅ Done</td>
+<td><code>--dry-run</code> flag</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-opportunity-gaps">3. Opportunity Gaps</h2>
+<h3 id="gap-1-compose-worker-has-no-llm-critical">Gap 1: Compose Worker Has No LLM — CRITICAL</h3>
+<p>The compose worker in <code>workers.py</code> (lines 100-230) uses <code>_compose_single()</code> → <code>_extract_physical_base()</code> which is a 13-keyword heuristic. The Jinja2 prompt template <code>compose_dd.md</code> exists and is well-designed but is <strong>not called</strong>. This means:</p>
+<ul>
+<li>Running <code>sn build --source dd --ids equilibrium</code> (without <code>--dry-run</code>) will produce only bare names like "temperature", "density", "current" — missing subject, component, position, and all other qualifiers</li>
+<li>The review and validate phases work correctly but operate on garbage input</li>
+<li>The benchmark module correctly wires the LLM via <code>_run_model()</code> — so the compose prompt works, it's just not integrated into the pipeline worker</li>
+</ul>
+<p><strong>Priority:</strong> HIGH — this blocks any real standard name generation</p>
+<h3 id="gap-2-benchmark-reference-set-should-draw-from-catalog">Gap 2: Benchmark Reference Set Should Draw from Catalog</h3>
+<p>The 30 entries in <code>benchmark_reference.py</code> are a hand-crafted subset covering:
+- 6 simple physical bases (safety_factor, elongation, etc.)
+- 6 subject-qualified (electron_temperature, ion_density, etc.)
+- 5 component-qualified (j_tor, b_field_pol, etc.)
+- 2 position-qualified
+- 8 compound bases (plasma_current, loop_voltage, etc.)
+- 3 geometric bases (minor_radius, major_radius, aspect_ratio)</p>
+<p>Missing from reference:
+- 0 device-qualified names (40 exist in catalog)
+- 0 object-qualified names (95 exist in catalog)
+- 0 process-qualified (due_to_) patterns
+- 0 binary operator patterns
+- 0 transformation patterns
+- 0 coordinate (geometric vector) patterns</p>
+<p><strong>Opportunity:</strong> Use the 309-entry catalog as the authoritative reference. The benchmark should:
+1. Load catalog entries via the imas-sn grammar API or MCP tools
+2. Parse each catalog entry to extract grammar fields
+3. Use these as the ground truth for precision/recall
+4. Curate a <strong>stratified</strong> subset covering all grammar patterns at quality tiers</p>
+<h3 id="gap-3-benchmark-needs-curated-labeled-examples-for-prompt-injection">Gap 3: Benchmark Needs Curated Labeled Examples for Prompt Injection</h3>
+<p>The user's key insight: the benchmark should not just measure pass/fail rates — it should <strong>inject labeled examples</strong> (poor → outstanding) into prompts and use an Opus 4.6 reviewer to evaluate how different models perform on nuanced quality dimensions.</p>
+<p><strong>Proposed labeled example tiers:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Criteria</th>
+<th>Example</th>
+<th>Why This Tier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Outstanding</strong></td>
+<td>Correct grammar, rich documentation, cross-linked, precise units, appropriate kind</td>
+<td><code>electron_temperature</code></td>
+<td>Full physics context, Spitzer formula, measurement methods, typical values</td>
+</tr>
+<tr>
+<td><strong>Good</strong></td>
+<td>Correct grammar, adequate documentation, proper units</td>
+<td><code>toroidal_component_of_magnetic_field_at_magnetic_axis</code></td>
+<td>Multi-field grammar correct, but documentation could be richer</td>
+</tr>
+<tr>
+<td><strong>Adequate</strong></td>
+<td>Correct grammar, minimal documentation</td>
+<td><code>area_of_poloidal_magnetic_field_probe</code></td>
+<td>Grammar right but bare documentation, no cross-references</td>
+</tr>
+<tr>
+<td><strong>Poor</strong></td>
+<td>Grammar valid but naming questionable</td>
+<td><code>flux_surface_averaged_squared_toroidal_flux_coordinate_gradient_magnitude_divided_by_squared_magnetic_field_strength</code></td>
+<td>Should decompose with transformations rather than cramming into physical_base</td>
+</tr>
+<tr>
+<td><strong>Conceptual</strong></td>
+<td>Valid but not a measurable quantity</td>
+<td><code>banana_orbits</code>, <code>tokamak_operation</code>, <code>h_mode</code></td>
+<td>Physics concepts, not quantities — should use <code>kind: metadata</code> consistently</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Benchmark workflow with Opus 4.6 reviewer:</strong>
+1. Extract DD paths (same as current)
+2. Run each candidate model to generate names + documentation
+3. Inject labeled examples into an Opus 4.6 review prompt:
+   - "Here are examples at different quality levels: [Outstanding: ..., Good: ..., Poor: ...]"
+   - "For each generated name, rate it on these dimensions and assign a tier"
+4. Opus 4.6 returns per-name quality assessments with reasoning
+5. Aggregate into per-model quality distributions</p>
+<p>This transforms the benchmark from a binary "grammar valid/invalid" check into a <strong>nuanced quality evaluation</strong> that can distinguish between models producing technically valid but semantically poor names vs. models producing outstanding names.</p>
+<h3 id="gap-4-model-name-format-issues">Gap 4: Model Name Format Issues</h3>
+<p>The benchmark CLI examples show <code>--models claude-sonnet-4,gpt-4o</code> but pyproject.toml uses <code>anthropic/claude-sonnet-4-6</code> format. The benchmark passes model strings directly to <code>acall_llm_structured()</code> without the <code>openrouter/</code> prefix required for cache_control preservation.</p>
+<h3 id="gap-5-no-signals-source-testing">Gap 5: No Signals Source Testing</h3>
+<p>The signals source (<code>sn/sources/signals.py</code>) exists but has no tests and has never been exercised end-to-end. The <code>compose_signals.md</code> prompt template exists but isn't wired into the worker either (same issue as compose_dd).</p>
+<h3 id="gap-6-standardname-not-in-linkml-schema">Gap 6: StandardName Not in LinkML Schema</h3>
+<p>The <code>StandardName</code> node type is used in <code>graph_ops.py</code> but is not declared in <code>imas_codex/schemas/facility.yaml</code>. This means:
+- No generated Pydantic model for StandardName
+- No schema compliance tests
+- No vector index management
+- Properties are ad-hoc (written in Cypher SET statements)</p>
+<h3 id="gap-7-no-graph-write-in-pipeline">Gap 7: No Graph Write in Pipeline</h3>
+<p>The pipeline runs EXTRACT → COMPOSE → REVIEW → VALIDATE but never writes results to the graph. The <code>write_standard_names()</code> function exists in <code>graph_ops.py</code> but is never called from any worker. Generated names exist only in memory during the pipeline run and are lost when it completes.</p>
+<hr />
+<h2 id="4-benchmark-cli-enhancement-strategy">4. Benchmark CLI Enhancement Strategy</h2>
+<p>The benchmark CLI (<code>sn benchmark</code>) is a <strong>strength</strong> if enhanced correctly. Rather than removing it, enhance it to become a comprehensive quality evaluation tool.</p>
+<h3 id="current-architecture-keep">Current Architecture (keep)</h3>
+<ul>
+<li><code>BenchmarkConfig</code> — model list, source/filter config, temperature</li>
+<li><code>ModelResult</code> — per-model metrics (grammar valid, cost, speed, reference overlap)</li>
+<li><code>BenchmarkReport</code> — aggregated results with JSON serialization</li>
+<li><code>render_comparison_table()</code> — Rich table output</li>
+<li>Grammar validation (<code>validate_candidate()</code>) — round-trip parse/compose</li>
+<li>Reference comparison (<code>compare_to_reference()</code>) — precision/recall</li>
+</ul>
+<h3 id="enhancements-needed">Enhancements Needed</h3>
+<h4 id="a-dynamic-reference-from-catalog">A. Dynamic Reference from Catalog</h4>
+<p>Replace <code>REFERENCE_NAMES</code> dict with a function that loads from the imas-sn catalog:</p>
+<pre><code class="language-python">def load_catalog_reference(ids_filter=None, max_entries=100):
+    &quot;&quot;&quot;Load reference names from the imas-sn catalog.
+
+    Returns dict mapping canonical_name → {name, grammar_fields, kind, unit, quality_tier}
+    &quot;&quot;&quot;
+</code></pre>
+<h4 id="b-stratified-quality-labels">B. Stratified Quality Labels</h4>
+<p>Curate a quality label file (<code>benchmark_labels.yaml</code>) mapping names to quality tiers:</p>
+<pre><code class="language-yaml">outstanding:
+  - electron_temperature
+  - plasma_current
+  - safety_factor
+  - position_of_magnetic_axis
+  - centroid_of_plasma_boundary
+good:
+  - toroidal_component_of_magnetic_field_at_magnetic_axis
+  - bolometer_radiated_power
+  - collisionality
+adequate:
+  - area_of_poloidal_magnetic_field_probe
+  - tokamak_scenario
+  - time
+poor:
+  - flux_surface_averaged_squared_toroidal_flux_coordinate_gradient_magnitude_divided_by_squared_magnetic_field_strength
+conceptual:
+  - banana_orbits
+  - h_mode
+  - tokamak_operation
+</code></pre>
+<h4 id="c-opus-46-quality-reviewer">C. Opus 4.6 Quality Reviewer</h4>
+<p>Add a <code>--reviewer-model</code> option that uses a frontier model to evaluate generated outputs:</p>
+<pre><code>imas-codex sn benchmark \
+  --models anthropic/claude-sonnet-4-6,google/gemini-2.5-flash \
+  --reviewer-model anthropic/claude-opus-4-6 \
+  --ids equilibrium \
+  --max-candidates 50
+</code></pre>
+<p>The reviewer model receives:
+1. Grammar rules (same as compose prompt)
+2. Labeled examples at each quality tier
+3. The generated name + fields + documentation
+4. Rubric: grammar correctness, semantic accuracy, naming conventions, documentation quality, unit consistency</p>
+<p>Returns per-name quality tier assignment with reasoning.</p>
+<h4 id="d-additional-metrics">D. Additional Metrics</h4>
+<ul>
+<li><strong>Quality distribution</strong>: % outstanding / good / adequate / poor per model</li>
+<li><strong>Grammar pattern coverage</strong>: Does the model use subject, component, position, process, etc.?</li>
+<li><strong>Documentation richness</strong>: Average doc length, equation count, cross-reference count</li>
+<li><strong>Naming consistency</strong>: Same input → same output across temperature settings</li>
+</ul>
+<hr />
+<h2 id="5-curated-benchmark-examples">5. Curated Benchmark Examples</h2>
+<h3 id="outstanding-tier-5-examples">Outstanding Tier (5 examples)</h3>
+<p>These names demonstrate mastery of grammar, physics, documentation, and conventions:</p>
+<ol>
+<li>
+<p><strong><code>electron_temperature</code></strong> — Subject-qualified scalar. Rich LaTeX documentation (Spitzer formula, thermal velocity equation). Typical values across 3 devices. 6+ cross-references. Unit: eV.</p>
+</li>
+<li>
+<p><strong><code>plasma_current</code></strong> — Bare compound base. Surface integral equation with proper notation. Sign convention documented. Measurement methods (Rogowski, equilibrium reconstruction). Unit: A.</p>
+</li>
+<li>
+<p><strong><code>safety_factor</code></strong> — Fundamental dimensionless quantity. Ratio definition with field line integrals. Stability boundary context (q&gt;1, q&gt;2). Unit: 1.</p>
+</li>
+<li>
+<p><strong><code>position_of_magnetic_axis</code></strong> — Geometric base (<code>position</code>) + geometry (<code>magnetic_axis</code>). Shafranov shift explained. Kind: vector. Unit: m.</p>
+</li>
+<li>
+<p><strong><code>bootstrap_current</code></strong> — Process-related physics. 16 cross-references (most in catalog). Neoclassical theory context. Unit: A.m^-2.</p>
+</li>
+</ol>
+<h3 id="good-tier-5-examples">Good Tier (5 examples)</h3>
+<p>Correct grammar, adequate physics, could improve documentation:</p>
+<ol start="6">
+<li>
+<p><strong><code>toroidal_component_of_magnetic_field_at_magnetic_axis</code></strong> — Component + physical_base + position. Multi-field grammar correctly composed. Documentation adequate but shorter.</p>
+</li>
+<li>
+<p><strong><code>centroid_of_plasma_boundary</code></strong> — Geometric base (<code>centroid</code>) + geometry (<code>plasma_boundary</code>). Bounding box formula. Kind: vector.</p>
+</li>
+<li>
+<p><strong><code>bolometer_radiated_power</code></strong> — Device-qualified. Calibration and measurement context. Unit: W.m^-2.</p>
+</li>
+<li>
+<p><strong><code>collisionality</code></strong> — Dimensionless parameter. Proper physics context linking to Coulomb collision theory.</p>
+</li>
+<li>
+<p><strong><code>outline_of_plasma_boundary</code></strong> — Geometric contour with parameterized equation. Kind: vector.</p>
+</li>
+</ol>
+<h3 id="adequate-tier-5-examples">Adequate Tier (5 examples)</h3>
+<p>Grammar correct, thin documentation, missing context:</p>
+<ol start="11">
+<li>
+<p><strong><code>area_of_poloidal_magnetic_field_probe</code></strong> — Object-qualified. Faraday's law reference but minimal. No typical values.</p>
+</li>
+<li>
+<p><strong><code>time</code></strong> — Fundamental coordinate. Very brief documentation for such an important quantity.</p>
+</li>
+<li>
+<p><strong><code>tokamak_scenario</code></strong> — Metadata kind. No governing equation (appropriate). Brief listing of scenario types.</p>
+</li>
+<li>
+<p><strong><code>neutron_activation_analysis</code></strong> — Measurement technique as a standard name. Good documentation but unusual — describes a technique rather than a quantity.</p>
+</li>
+<li>
+<p><strong><code>skin_current</code></strong> — Bare physical base. Minimal documentation for a nuanced concept.</p>
+</li>
+</ol>
+<h3 id="poorquestionable-tier-5-examples">Poor/Questionable Tier (5 examples)</h3>
+<p>Grammar valid but naming approach debatable:</p>
+<ol start="16">
+<li>
+<p><strong><code>flux_surface_averaged_squared_toroidal_flux_coordinate_gradient_magnitude_divided_by_squared_magnetic_field_strength</code></strong> — 113 characters crammed into <code>physical_base</code>. Should use transformation operators (<code>square_of</code>) and binary operator (<code>ratio_of</code>) to decompose.</p>
+</li>
+<li>
+<p><strong><code>banana_orbits</code></strong> — Conceptual physics phenomenon, not a measurable quantity. <code>kind: metadata</code> but no clear use case for standard naming.</p>
+</li>
+<li>
+<p><strong><code>h_mode</code></strong> — Confinement regime concept. Documented well but not measurable. Should perhaps be in a separate conceptual namespace.</p>
+</li>
+<li>
+<p><strong><code>magnetic_field_probe_vertical_field</code></strong> — Ambiguous: is this <code>vertical_component_of_magnetic_field_of_probe</code> or <code>magnetic_field_measured_by_vertical_probe</code>? Grammar doesn't disambiguate.</p>
+</li>
+<li>
+<p><strong><code>hot_neutral_temperature_of_isotope</code></strong> — Valid grammar but unusual: <code>subject</code> should be <code>neutral</code> with <code>physical_base: temperature</code>. Instead uses compound physical_base.</p>
+</li>
+</ol>
+<hr />
+<h2 id="6-summary-of-findings">6. Summary of Findings</h2>
+<h3 id="what-works-well">What Works Well</h3>
+<ul>
+<li>4-phase pipeline architecture (EXTRACT → COMPOSE → REVIEW → VALIDATE)</li>
+<li>Review phase with cross-model LLM and graceful degradation</li>
+<li>Publish module with YAML generation, batching, and dedup</li>
+<li>87 tests across 3 test modules</li>
+<li>Rich progress display integration</li>
+<li>Existing catalog (309 entries) is high quality</li>
+</ul>
+<h3 id="what-needs-work-priority-order">What Needs Work (Priority Order)</h3>
+<ol>
+<li><strong>Wire LLM into compose worker</strong> — currently heuristic-only (CRITICAL)</li>
+<li><strong>Upgrade benchmark reference</strong> — use catalog, add quality tiers, add reviewer model</li>
+<li><strong>Fix model name format</strong> — add openrouter/ prefix handling</li>
+<li><strong>Add StandardName to LinkML schema</strong> — enable schema compliance</li>
+<li><strong>Wire graph write into pipeline</strong> — currently results are lost</li>
+<li><strong>Test signals source</strong> — untested code path</li>
+<li><strong>Fill grammar pattern gaps</strong> — catalog needs process, transformation, binary operator examples</li>
+</ol>
+<h3 id="benchmark-enhancement-path">Benchmark Enhancement Path</h3>
+<p>The benchmark CLI is a <strong>strength</strong> if enhanced with:
+- Catalog-sourced reference set (309 → dynamic)
+- Stratified quality labels (outstanding → poor)
+- Frontier model reviewer (Opus 4.6)
+- Grammar pattern coverage metrics
+- Documentation quality scoring</p>
+<p>This transforms it from "grammar pass/fail counter" to "comprehensive model quality evaluator" — providing robust, actionable metrics for model selection.</p>
+  </main>
+</body>
+</html>

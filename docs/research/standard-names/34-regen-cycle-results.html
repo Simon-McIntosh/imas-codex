@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="34-regen-cycle-results">
+  <meta name="plan-title" content="Standard Name Regen Cycle — Low-Scoring Domains">
+  <meta name="plan-summary" content="*Date**: 2025-07-27 **Commit baseline**: `a60b1fcf` **Graph baseline**: 1,406 standard names **ISN version**: v0.7.0rc16 (56 new tokens) **Reviewer**: Opus 4.6 (primary), cross-family diversity enabled **Budget**: $2.00 ">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="11-quality-gap-analysis,12-full-graph-review,33-state-of-the-nation-2026-04-20">
+  <meta name="plan-informs" content="35-metadata-qa-report,36-batching-audit">
+  <title>Standard Name Regen Cycle — Low-Scoring Domains | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard Name Regen Cycle — Low-Scoring Domains</h1>
+    <p><strong>Date</strong>: 2025-07-27
+<strong>Commit baseline</strong>: <code>a60b1fcf</code>
+<strong>Graph baseline</strong>: 1,406 standard names
+<strong>ISN version</strong>: v0.7.0rc16 (56 new tokens)
+<strong>Reviewer</strong>: Opus 4.6 (primary), cross-family diversity enabled
+<strong>Budget</strong>: $2.00 generate + $0.50 review per domain = $17.50 total cap</p>
+<h2 id="baseline-summary">Baseline Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>N</th>
+<th>Mean Score</th>
+<th>Good (≥0.8)</th>
+<th>Poor (&lt;0.5)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>waves</td>
+<td>8</td>
+<td>0.083</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>fast_particles</td>
+<td>47</td>
+<td>0.134</td>
+<td>0</td>
+<td>38</td>
+</tr>
+<tr>
+<td>structural_components</td>
+<td>16</td>
+<td>0.125</td>
+<td>0</td>
+<td>13</td>
+</tr>
+<tr>
+<td>electromagnetic_wave_diagnostics</td>
+<td>64</td>
+<td>0.180</td>
+<td>1</td>
+<td>32</td>
+</tr>
+<tr>
+<td>turbulence</td>
+<td>135</td>
+<td>0.244</td>
+<td>7</td>
+<td>54</td>
+</tr>
+<tr>
+<td>plasma_wall_interactions</td>
+<td>71</td>
+<td>0.367</td>
+<td>8</td>
+<td>37</td>
+</tr>
+<tr>
+<td>gyrokinetics</td>
+<td>132</td>
+<td>0.322</td>
+<td>8</td>
+<td>46</td>
+</tr>
+</tbody>
+</table>
+<p>VocabGap nodes: 0 across all domains (pre-regen baseline).</p>
+<hr />
+<h2 id="per-domain-results">Per-Domain Results</h2>
+<h3 id="1-waves">1. waves</h3>
+<p><strong>Baseline</strong>: n=8, mean=0.083, good=0, poor=1
+<strong>Post-regen</strong>: n=27, mean=0.861, good=18, poor=3
+<strong>Δ</strong>: +19 names, +0.778 mean score, +18 good, +2 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>8</td>
+<td>27</td>
+<td>+19</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.083</td>
+<td>0.861</td>
+<td>+0.778</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>0</td>
+<td>18</td>
+<td>+18</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>1</td>
+<td>3</td>
+<td>+2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.44, review=$0.012, total=$1.45
+<strong>VocabGap</strong>: 0 before → 0 after (VocabGap nodes not created; ~29 token-miss warnings during generation for <code>wave_absorbed_power_per_toroidal_mode</code>, <code>wave_electric_field_*_per_toroidal_mode</code>, etc.)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>wave_absorbed_power_per_toroidal_mode</code> — score=1.0, outstanding
+2. <code>right_hand_circularly_polarized_electric_field_amplitude_per_toroidal_mode</code> — score=1.0, outstanding
+3. <code>right_hand_circularly_polarized_electric_field_phase_per_toroidal_mode</code> — score=1.0, outstanding
+4. <code>left_hand_circularly_polarized_electric_field_phase_per_toroidal_mode</code> — score=1.0, outstanding
+5. <code>wave_driven_toroidal_current_inside_flux_surface</code> — score=1.0, outstanding</p>
+<p><strong>Notes</strong>: Massive improvement. Domain went from near-zero quality (0.083 mean) to outstanding (0.861 mean). 14 of 18 reviewed names scored outstanding (1.0). Remaining 3 poor-scored names are quarantined/needs_revision validation status (not yet reviewable). Grammar decomposition fields empty (expected for <code>--name-only</code> mode). Key vocab gap: <code>wave_absorbed_power_per_toroidal_mode</code> family needs ISN tokens.</p>
+<h3 id="2-fast_particles">2. fast_particles</h3>
+<p><strong>Baseline</strong>: n=47, mean=0.134, good=0, poor=38
+<strong>Post-regen</strong>: n=44, mean=0.751, good=10, poor=0
+<strong>Δ</strong>: -3 names, +0.617 mean score, +10 good, -38 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>47</td>
+<td>44</td>
+<td>-3</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.134</td>
+<td>0.751</td>
+<td>+0.617</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>0</td>
+<td>10</td>
+<td>+10</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>38</td>
+<td>0</td>
+<td>-38</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.92, review=$0.14, total=$2.06
+<strong>VocabGap</strong>: 0 → 0 (token-miss warnings: <code>toroidal_fast_ion_torque_due_to_coulomb_collisions</code>, <code>thermal_ion_total_toroidal_torque</code>)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>trapped_toroidal_current_density</code> — score=1.0, outstanding
+2. <code>trapped_fast_ion_toroidal_current_density</code> — score=1.0, outstanding
+3. <code>co_passing_fast_ion_toroidal_current_density</code> — score=1.0, outstanding
+4. <code>counter_passing_fast_ion_toroidal_current_density</code> — score=1.0, outstanding
+5. <code>co_passing_thermal_electron_collisional_toroidal_torque_density</code> — score=0.925, outstanding</p>
+<p><strong>Notes</strong>: Eliminated all 38 poor-scored names. Count dropped slightly (-3) due to better deduplication. Mean score improved dramatically from 0.134 to 0.751.</p>
+<h3 id="3-structural_components">3. structural_components</h3>
+<p><strong>Baseline</strong>: n=16, mean=0.125, good=0, poor=13
+<strong>Post-regen</strong>: n=13, mean=0.839, good=5, poor=0
+<strong>Δ</strong>: -3 names, +0.714 mean score, +5 good, -13 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>16</td>
+<td>13</td>
+<td>-3</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.125</td>
+<td>0.839</td>
+<td>+0.714</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>0</td>
+<td>5</td>
+<td>+5</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>13</td>
+<td>0</td>
+<td>-13</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.15, review=$0.025, total=$1.17
+<strong>VocabGap</strong>: 0 → 0 (token-miss: <code>coolant_outlet_temperature_of_breeding_blanket_module</code>, <code>radiated_thermal_power_absorbed_by_breeding_blanket_module</code>, etc.)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>coolant_inlet_pressure_of_breeding_blanket_module</code> — score=1.0, outstanding
+2. <code>tritium_breeding_ratio</code> — score=0.975, outstanding
+3. <code>blanket_energy_multiplication_factor</code> — score=0.975, outstanding
+4. <code>coolant_outlet_temperature_of_breeding_blanket_module</code> — score=0.888, outstanding
+5. <code>coolant_inlet_temperature_of_breeding_blanket_module</code> — score=0.888, outstanding</p>
+<p><strong>Notes</strong>: All 13 poor-scored names eliminated. Breeding blanket module quantities dominate. Key vocab gap: <code>breeding_blanket_module</code> as an object modifier not in ISN.</p>
+<h3 id="4-electromagnetic_wave_diagnostics">4. electromagnetic_wave_diagnostics</h3>
+<p><strong>Baseline</strong>: n=64, mean=0.180, good=1, poor=32
+<strong>Post-regen</strong>: n=19, mean=0.760, good=7, poor=1
+<strong>Δ</strong>: -45 names, +0.580 mean score, +6 good, -31 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>64</td>
+<td>19</td>
+<td>-45</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.180</td>
+<td>0.760</td>
+<td>+0.580</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>1</td>
+<td>7</td>
+<td>+6</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>32</td>
+<td>1</td>
+<td>-31</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.08, review=$0.009, total=$1.09
+<strong>VocabGap</strong>: 0 → 0 (token-miss: <code>electron_density_profile_approximation_parameters</code>, <code>refractometer_detector_timebase</code>)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>normalized_poloidal_flux_coordinate</code> — score=1.0, outstanding
+2. <code>normalized_toroidal_flux_coordinate</code> — score=1.0, outstanding
+3. <code>major_radius_of_measurement_position</code> — score=0.975, outstanding
+4. <code>toroidal_angle_of_measurement_position</code> — score=0.975, outstanding
+5. <code>radial_width_of_reflectometer_antenna</code> — score=0.925, outstanding</p>
+<p><strong>Notes</strong>: Major count reduction (64→19) reflects better dedup and filtering of unnameable paths. Mean score jumped from 0.18 to 0.76. Diagnostic-specific terms like <code>refractometer_detector_timebase</code> still need ISN tokens.</p>
+<h3 id="5-turbulence">5. turbulence</h3>
+<p><strong>Baseline</strong>: n=135, mean=0.244, good=7, poor=54
+<strong>Post-regen</strong>: n=30, mean=0.799, good=18, poor=3
+<strong>Δ</strong>: -105 names, +0.555 mean score, +11 good, -51 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>135</td>
+<td>30</td>
+<td>-105</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.244</td>
+<td>0.799</td>
+<td>+0.555</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>7</td>
+<td>18</td>
+<td>+11</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>54</td>
+<td>3</td>
+<td>-51</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.42, review=$0.036, total=$1.46
+<strong>VocabGap</strong>: 0 → 0 (token-miss: <code>perturbed_parallel_vector_potential_parity</code>, <code>cosine_shape_coefficient_radial_derivative_wrt_normalized_minor_radius</code>, etc.)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>normalized_perturbed_parallel_vector_potential_weight</code> — score=1.0, outstanding
+2. <code>gyrokinetic_eigenmode_normalized_gyrocenter_density_moment</code> — score=1.0, outstanding
+3. <code>gyrokinetic_eigenmode_perturbed_parallel_vector_potential_weight</code> — score=1.0, outstanding
+4. <code>ion_temperature</code> — score=1.0, outstanding
+5. <code>normalized_perturbed_parallel_magnetic_field_weight</code> — score=1.0, outstanding</p>
+<p><strong>Notes</strong>: Largest count reduction (135→30) — original had many low-quality duplicates. Mean score tripled from 0.244 to 0.799. 51 poor-scored names eliminated. Remaining 3 poor are quarantined.</p>
+<h3 id="6-plasma_wall_interactions">6. plasma_wall_interactions</h3>
+<p><strong>Baseline</strong>: n=71, mean=0.367, good=8, poor=37
+<strong>Post-regen</strong>: n=15, mean=0.715, good=4, poor=3
+<strong>Δ</strong>: -56 names, +0.348 mean score, -4 good, -34 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>71</td>
+<td>15</td>
+<td>-56</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.367</td>
+<td>0.715</td>
+<td>+0.348</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>8</td>
+<td>4</td>
+<td>-4</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>37</td>
+<td>3</td>
+<td>-34</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.25, review=$0.093, total=$1.34
+<strong>VocabGap</strong>: 0 → 0 (token-miss: <code>bidirectional_reflectance_distribution_function_parameters</code>, <code>electron_particle_flux_from_wall</code>, <code>neutral_particle_flux_from_plasma</code>)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>vertical_component_of_magnetic_vector_potential</code> — score=1.0, outstanding
+2. <code>neutral_particle_flux_from_plasma</code> — score=0.95, outstanding
+3. <code>neutral_particle_flux_from_wall</code> — score=0.95, outstanding
+4. <code>electron_particle_flux_from_wall</code> — score=0.938, outstanding
+5. <code>neutral_chemical_sputtering_coefficient_at_wall</code> — score=0.788, good</p>
+<p><strong>Notes</strong>: Count reduced from 71→15 (79% reduction). Mean score improved from 0.367 to 0.715. Good-count dropped slightly (-4) because fewer total names, but quality per name is much higher. Wall interaction terms (<code>particle_flux_from_wall</code>, <code>sputtering_coefficient_at_wall</code>) named well.</p>
+<h3 id="7-gyrokinetics">7. gyrokinetics</h3>
+<p><strong>Baseline</strong>: n=132, mean=0.322, good=8, poor=46
+<strong>Post-regen</strong>: n=30, mean=0.864, good=20, poor=2
+<strong>Δ</strong>: -102 names, +0.542 mean score, +12 good, -44 poor</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count</td>
+<td>132</td>
+<td>30</td>
+<td>-102</td>
+</tr>
+<tr>
+<td>Mean score</td>
+<td>0.322</td>
+<td>0.864</td>
+<td>+0.542</td>
+</tr>
+<tr>
+<td>Good (≥0.8)</td>
+<td>8</td>
+<td>20</td>
+<td>+12</td>
+</tr>
+<tr>
+<td>Poor (&lt;0.5)</td>
+<td>46</td>
+<td>2</td>
+<td>-44</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cost</strong>: generate=$1.92, review=$0.036, total=$1.96
+<strong>VocabGap</strong>: 0 → 0 (token-miss: <code>gyrokinetic_eigenmode_normalized_gyrocenter_parallel_heat_flux_moment</code>, <code>flux_tube_parallel_domain_poloidal_turn_count</code>, <code>normalized_toroidal_velocity_gradient</code>)</p>
+<p><strong>Sample names (top 5)</strong>:
+1. <code>gyrokinetic_eigenmode_normalized_parallel_velocity_moment_real_part</code> — score=1.0, outstanding
+2. <code>gyrokinetic_eigenmode_normalized_parallel_temperature_moment_gyroaveraged_real_part</code> — score=1.0, outstanding
+3. <code>gyrokinetic_eigenmode_normalized_gyrocenter_density_moment</code> — score=1.0, outstanding
+4. <code>perturbed_electrostatic_potential_parity</code> — score=1.0, outstanding
+5. <code>gyrokinetic_eigenmode_normalized_gyrocenter_perpendicular_pressure_moment</code> — score=1.0, outstanding</p>
+<p><strong>Notes</strong>: Second-best improvement alongside waves. Mean score jumped from 0.322 to 0.864. The gyrokinetic eigenmode naming convention is clean and consistent. Count dropped from 132→30 due to heavy dedup of similar moment-type names.</p>
+<hr />
+<h2 id="aggregate-summary">Aggregate Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>Before Mean</th>
+<th>After Mean</th>
+<th>Δ Mean</th>
+<th>Before N</th>
+<th>After N</th>
+<th>Gen $</th>
+<th>Rev $</th>
+<th>Total $</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>waves</td>
+<td>0.083</td>
+<td>0.861</td>
+<td><strong>+0.778</strong></td>
+<td>8</td>
+<td>27</td>
+<td>1.44</td>
+<td>0.01</td>
+<td>1.45</td>
+</tr>
+<tr>
+<td>fast_particles</td>
+<td>0.134</td>
+<td>0.751</td>
+<td><strong>+0.617</strong></td>
+<td>47</td>
+<td>44</td>
+<td>1.92</td>
+<td>0.14</td>
+<td>2.06</td>
+</tr>
+<tr>
+<td>structural_components</td>
+<td>0.125</td>
+<td>0.839</td>
+<td><strong>+0.714</strong></td>
+<td>16</td>
+<td>13</td>
+<td>1.15</td>
+<td>0.03</td>
+<td>1.17</td>
+</tr>
+<tr>
+<td>electromagnetic_wave_diagnostics</td>
+<td>0.180</td>
+<td>0.760</td>
+<td><strong>+0.580</strong></td>
+<td>64</td>
+<td>19</td>
+<td>1.08</td>
+<td>0.01</td>
+<td>1.09</td>
+</tr>
+<tr>
+<td>turbulence</td>
+<td>0.244</td>
+<td>0.799</td>
+<td><strong>+0.555</strong></td>
+<td>135</td>
+<td>30</td>
+<td>1.42</td>
+<td>0.04</td>
+<td>1.46</td>
+</tr>
+<tr>
+<td>plasma_wall_interactions</td>
+<td>0.367</td>
+<td>0.715</td>
+<td><strong>+0.348</strong></td>
+<td>71</td>
+<td>15</td>
+<td>1.25</td>
+<td>0.09</td>
+<td>1.34</td>
+</tr>
+<tr>
+<td>gyrokinetics</td>
+<td>0.322</td>
+<td>0.864</td>
+<td><strong>+0.542</strong></td>
+<td>132</td>
+<td>30</td>
+<td>1.92</td>
+<td>0.04</td>
+<td>1.96</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td><strong>0.208</strong></td>
+<td><strong>0.805</strong></td>
+<td><strong>+0.597</strong></td>
+<td><strong>473</strong></td>
+<td><strong>178</strong></td>
+<td><strong>$10.18</strong></td>
+<td><strong>$0.35</strong></td>
+<td><strong>$10.53</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="top-3-improvements-best">Top 3 Improvements (Best Δ)</h3>
+<ol>
+<li><strong>waves</strong> (+0.778): 0.083 → 0.861. Near-total transformation — previously almost all names unscored/poor, now 14/18 outstanding.</li>
+<li><strong>structural_components</strong> (+0.714): 0.125 → 0.839. Small domain but clean naming of breeding blanket module quantities.</li>
+<li><strong>fast_particles</strong> (+0.617): 0.134 → 0.751. Eliminated all 38 poor-scored names, consistent torque/current density naming.</li>
+</ol>
+<h3 id="top-3-non-improvements-smallest">Top 3 Non-Improvements (Smallest Δ)</h3>
+<ol>
+<li><strong>plasma_wall_interactions</strong> (+0.348): Still the lowest post-regen score (0.715). Root cause: domain has many diagnostic/engineering quantities (BRDF parameters, sputtering coefficients) that don't decompose cleanly with current ISN grammar. The <code>particle_flux_from_wall/plasma</code> pattern works but engineering terms lack tokens.</li>
+<li><strong>turbulence</strong> (+0.555): Good improvement but 3 names remain poor (quarantined). Root cause: shape coefficient derivatives (<code>cosine_shape_coefficient_radial_derivative_wrt_normalized_minor_radius</code>) are too compositionally complex for current grammar.</li>
+<li><strong>electromagnetic_wave_diagnostics</strong> (+0.580): Diagnostic-specific terms like <code>refractometer_detector_timebase</code> don't have ISN tokens. These are instruments, not physics quantities.</li>
+</ol>
+<h3 id="residual-vocabgap-analysis">Residual VocabGap Analysis</h3>
+<p>VocabGap nodes were not created during this cycle (node creation may be gated by a feature flag or the generation pipeline version). However, token-miss warnings were logged extensively. Key missing ISN tokens by domain:</p>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>Key Missing Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>waves</td>
+<td><code>wave_absorbed_power_per_toroidal_mode</code>, <code>wave_electric_field_amplitude_per_toroidal_mode</code>, <code>beam_tracing_wavevector</code></td>
+</tr>
+<tr>
+<td>fast_particles</td>
+<td><code>toroidal_torque_due_to_coulomb_collisions</code> (process modifier)</td>
+</tr>
+<tr>
+<td>structural_components</td>
+<td><code>breeding_blanket_module</code> (object), <code>coolant_outlet_temperature</code> (base), <code>radiated_thermal_power_absorbed</code> (base)</td>
+</tr>
+<tr>
+<td>electromagnetic_wave_diagnostics</td>
+<td><code>refractometer_detector_timebase</code>, <code>density_profile_approximation_parameters</code></td>
+</tr>
+<tr>
+<td>turbulence</td>
+<td><code>parallel_vector_potential_parity</code>, <code>shape_coefficient_radial_derivative_wrt_normalized_minor_radius</code></td>
+</tr>
+<tr>
+<td>plasma_wall_interactions</td>
+<td><code>bidirectional_reflectance_distribution_function_parameters</code>, <code>particle_flux_from_wall</code> (base), <code>magnetic_vector_potential</code> (base)</td>
+</tr>
+<tr>
+<td>gyrokinetics</td>
+<td><code>gyrocenter_parallel_heat_flux_moment</code>, <code>flux_tube_parallel_domain_poloidal_turn_count</code>, <code>toroidal_velocity_gradient</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="recommendation">Recommendation</h3>
+<p><strong>Is another ISN release candidate needed?</strong> Yes — rc17 should target:</p>
+<ol>
+<li>
+<p><strong>High-impact bases</strong> (cover multiple domains):
+   - <code>particle_flux_from_wall</code>, <code>particle_flux_from_plasma</code> — used by PWI, edge
+   - <code>magnetic_vector_potential</code> — used by PWI, MHD
+   - <code>wave_absorbed_power</code> — used by waves, auxiliary heating</p>
+</li>
+<li>
+<p><strong>Domain-specific compound bases</strong> (reduce quarantined names):
+   - <code>breeding_blanket_module</code> as object modifier — structural_components
+   - <code>beam_tracing_wavevector</code> — waves
+   - <code>reflectance_distribution_function</code> — PWI</p>
+</li>
+<li>
+<p><strong>Process modifiers</strong>:
+   - <code>coulomb_collisions</code> — fast_particles torque terms</p>
+</li>
+</ol>
+<p>Estimated impact: 15-20 currently quarantined names would validate with these ~10 new tokens.</p>
+  </main>
+</body>
+</html>

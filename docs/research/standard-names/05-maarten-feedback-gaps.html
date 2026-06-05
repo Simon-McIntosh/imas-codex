@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="05-maarten-feedback-gaps">
+  <meta name="plan-title" content="Maarten Feedback Gap Analysis">
+  <meta name="plan-summary" content="PR #2: Guidelines documentation - PR #3, #11: Review comments - Issues #4–8: Concrete standard name proposals - Inline comments on naming conventions, units, and sign handling">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="04-parallel-review-synthesis,10-implementation-review">
+  <title>Maarten Feedback Gap Analysis | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Maarten Feedback Gap Analysis</h1>
+    <h2 id="sources">Sources</h2>
+<ul>
+<li>PR #2: Guidelines documentation</li>
+<li>PR #3, #11: Review comments</li>
+<li>Issues #4–8: Concrete standard name proposals</li>
+<li>Inline comments on naming conventions, units, and sign handling</li>
+</ul>
+<h2 id="feedback-by-theme">Feedback by Theme</h2>
+<h3 id="1-missing-transformations">1. Missing Transformations</h3>
+<p>Maarten's guidelines describe transformation patterns that are not implemented in the grammar:</p>
+<table>
+<thead>
+<tr>
+<th>Transformation</th>
+<th>Pattern</th>
+<th>Status</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>square_of_X</code></td>
+<td>Unary transform of physical base</td>
+<td>Not implemented</td>
+<td><code>square_of_electron_temperature</code></td>
+</tr>
+<tr>
+<td><code>change_over_time_in_X</code></td>
+<td>Time derivative transform</td>
+<td>Not implemented</td>
+<td><code>change_over_time_in_magnetic_flux</code></td>
+</tr>
+<tr>
+<td><code>product_of_X_and_Y</code></td>
+<td>Binary operator</td>
+<td>Not implemented</td>
+<td><code>product_of_density_and_temperature</code></td>
+</tr>
+<tr>
+<td><code>ratio_of_X_to_Y</code></td>
+<td>Binary operator</td>
+<td>Not implemented</td>
+<td><code>ratio_of_electron_temperature_to_ion_temperature</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Implementation status</strong>: The grammar currently supports simple <code>component_of_X</code> and <code>X_at_position</code> patterns but has no mechanism for mathematical transformations of physical bases or binary operations over two quantities.</p>
+<p><strong>Action items</strong>:
+1. Design grammar extension for unary transformations (<code>square_of</code>, <code>change_over_time_in</code>, <code>logarithm_of</code>, <code>inverse_of</code>)
+2. Design grammar extension for binary operators (<code>product_of_X_and_Y</code>, <code>ratio_of_X_to_Y</code>, <code>difference_of_X_and_Y</code>)
+3. Binary operators are a significant grammar change — they require two <code>physical_base</code> arguments, which the current single-base grammar cannot represent
+4. Add vocabulary entries for transformation keywords
+5. Update <code>compose_standard_name</code> tool to support transformation parameters</p>
+<p><strong>Priority</strong>: High — blocks correct naming of derived quantities in several IDS domains</p>
+<h3 id="2-missing-standard-name-entries">2. Missing Standard Name Entries</h3>
+<p>Specific name entries identified in Maarten's proposals that are absent from the catalog:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Domain</th>
+<th>Issue/PR</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flux_loop_name</code></td>
+<td>magnetics</td>
+<td>Issues #4–8</td>
+<td>Not created</td>
+</tr>
+<tr>
+<td><code>coil_current</code></td>
+<td>magnetics</td>
+<td>Issues #4–8</td>
+<td>Not created</td>
+</tr>
+<tr>
+<td><code>passive_current</code></td>
+<td>magnetics</td>
+<td>Issues #4–8</td>
+<td>Not created</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Implementation status</strong>: These entries require both grammar support (some may need new vocabulary tokens) and catalog entries.</p>
+<p><strong>Action items</strong>:
+1. Validate each proposed name against current grammar
+2. Identify vocabulary gaps (if <code>flux_loop</code> or <code>passive</code> need to be added as tokens)
+3. Create entries using MCP tools (<code>create_standard_names</code>)
+4. Ensure provenance references the originating issue</p>
+<p><strong>Priority</strong>: Medium — these are concrete deliverables that can be created once grammar support exists</p>
+<h3 id="3-units-none-vs-dimensionless">3. Units: None vs Dimensionless</h3>
+<p>Maarten's feedback distinguishes between:
+- <strong><code>None</code></strong>: The quantity has no unit (e.g., a name or identifier string)
+- <strong><code>dimensionless</code></strong>: The quantity is a ratio or pure number with physical meaning (e.g., safety factor, beta)</p>
+<p><strong>Implementation status</strong>: The current validation does not enforce this distinction. Both values are accepted but the semantic difference is not documented or validated.</p>
+<p><strong>Action items</strong>:
+1. Document the distinction in the grammar reference (<code>docs/grammar-reference.md</code>)
+2. Add validation rule: <code>unit: None</code> only valid for <code>kind: metadata</code> entries
+3. Add validation rule: dimensionless physical quantities must use <code>unit: dimensionless</code>
+4. Audit existing catalog entries for incorrect unit assignments
+5. Update <code>get_schema()</code> tool output to reflect this rule</p>
+<p><strong>Priority</strong>: Medium — affects data quality but not blocking</p>
+<h3 id="4-passiveactive-conductor-naming-ambiguity">4. Passive/Active Conductor Naming Ambiguity</h3>
+<p>Maarten raised a naming policy question about distinguishing passive conductors (vessel, structures) from active conductors (coils) in standard names.</p>
+<p><strong>Implementation status</strong>: No documented naming convention for this distinction. The grammar has vocabulary for specific devices (coils, loops) but no systematic way to distinguish passive vs active.</p>
+<p><strong>Action items</strong>:
+1. Document the naming convention for conductors in guidelines
+2. Determine if <code>passive</code> and <code>active</code> should be vocabulary tokens (subjects? processes?)
+3. Add examples to the grammar reference showing correct naming for both types
+4. Consider whether this maps to existing <code>object</code> vocabulary or needs new tokens</p>
+<p><strong>Priority</strong>: Low — design decision needed before implementation</p>
+<h3 id="5-sign-convention-documentation">5. Sign Convention Documentation</h3>
+<p>Maarten's feedback notes that sign conventions (COCOS) are partially documented. The IMAS DD tools provide COCOS field information, but standard names do not systematically encode or validate sign conventions.</p>
+<p><strong>Implementation status</strong>: The IMAS DD MCP tools have <code>get_dd_cocos_fields()</code> which returns all COCOS-dependent paths grouped by transformation type. Standard names grammar has no sign convention representation.</p>
+<p><strong>Action items</strong>:
+1. Document which standard names are COCOS-sensitive (cross-reference with DD COCOS fields)
+2. Add optional <code>cocos_transform</code> field to standard name entries for COCOS-dependent quantities
+3. Link to DD version context for sign convention changes
+4. Consider adding a validation check that COCOS-sensitive names have documented sign behavior</p>
+<p><strong>Priority</strong>: Low — informational/documentation improvement, not blocking</p>
+<h3 id="6-tag-vocabulary-divergence">6. Tag Vocabulary Divergence</h3>
+<p>Maarten proposed an IDS-aligned tag vocabulary where primary tags map to IDS names (e.g., <code>equilibrium</code>, <code>magnetics</code>). The current implementation uses a different but overlapping approach.</p>
+<p><strong>Implementation status</strong>: The tag system is implemented and functional. The vocabulary has diverged from Maarten's original proposal but serves a similar purpose. The current tags are physics-domain-oriented rather than strictly IDS-aligned.</p>
+<p><strong>Action items</strong>:
+1. Document the rationale for the current tag vocabulary design
+2. Create a mapping table showing the relationship between current tags and Maarten's IDS-aligned proposal
+3. Evaluate whether a reconciliation is beneficial or if the divergence is acceptable
+4. If reconciliation is needed, plan it as a separate effort (not blocking batch generation)</p>
+<p><strong>Priority</strong>: Low — track but do not block. The current system works; alignment is a long-term refinement.</p>
+<h3 id="7-xarray-dimension-usage-pattern">7. xarray Dimension Usage Pattern</h3>
+<p>Maarten's comments reference an xarray-based usage pattern for standard names that is not documented.</p>
+<p><strong>Implementation status</strong>: No documentation exists for how standard names map to xarray dimensions or coordinates.</p>
+<p><strong>Action items</strong>:
+1. Document the intended xarray integration pattern
+2. Add examples showing how standard names are used as xarray dimension labels
+3. Consider whether this affects name design (e.g., length constraints for dimension names)</p>
+<p><strong>Priority</strong>: Low — documentation improvement, non-blocking</p>
+<h2 id="priority-summary">Priority Summary</h2>
+<h3 id="high-priority-blocks-batch-generation-or-grammar-correctness">High Priority (blocks batch generation or grammar correctness)</h3>
+<ol>
+<li><strong>Grammar extensions for unary transformations</strong> — <code>square_of</code>, <code>change_over_time_in</code></li>
+<li><strong>Grammar extensions for binary operators</strong> — <code>product_of_X_and_Y</code>, <code>ratio_of_X_to_Y</code></li>
+</ol>
+<h3 id="medium-priority-improves-quality-can-be-addressed-in-parallel">Medium Priority (improves quality, can be addressed in parallel)</h3>
+<ol start="3">
+<li><strong>Missing standard name entries</strong> — <code>flux_loop_name</code>, <code>coil_current</code>, <code>passive_current</code></li>
+<li><strong>Units None vs dimensionless validation</strong> — enforce semantic distinction</li>
+<li><strong>Conductor naming convention</strong> — document passive/active distinction</li>
+</ol>
+<h3 id="low-priority-documentation-and-refinement">Low Priority (documentation and refinement)</h3>
+<ol start="6">
+<li><strong>Sign convention documentation</strong> — cross-reference with COCOS fields</li>
+<li><strong>Tag vocabulary reconciliation</strong> — document rationale, evaluate alignment</li>
+<li><strong>xarray dimension pattern</strong> — documentation only</li>
+</ol>
+<h2 id="relationship-to-feature-plans">Relationship to Feature Plans</h2>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Related Feature</th>
+<th>Integration Point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unary transformations</td>
+<td>Feature 06 (new)</td>
+<td>Grammar extension</td>
+</tr>
+<tr>
+<td>Binary operators</td>
+<td>Feature 06 (new)</td>
+<td>Grammar extension (significant)</td>
+</tr>
+<tr>
+<td>Missing entries</td>
+<td>Feature 06 (new)</td>
+<td>Catalog entries after grammar work</td>
+</tr>
+<tr>
+<td>None vs dimensionless</td>
+<td>Feature 06 (new)</td>
+<td>Validation rule addition</td>
+</tr>
+<tr>
+<td>Conductor naming</td>
+<td>Guidelines documentation</td>
+<td>Policy decision, then vocabulary</td>
+</tr>
+<tr>
+<td>Sign conventions</td>
+<td>Future work</td>
+<td>DD cross-reference tooling</td>
+</tr>
+<tr>
+<td>Tag vocabulary</td>
+<td>Future work</td>
+<td>Reconciliation assessment</td>
+</tr>
+<tr>
+<td>xarray pattern</td>
+<td>Documentation</td>
+<td>Non-code change</td>
+</tr>
+</tbody>
+</table>
+  </main>
+</body>
+</html>

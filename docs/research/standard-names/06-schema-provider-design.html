@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="06-schema-provider-design">
+  <meta name="plan-title" content="Schema Provider Design">
+  <meta name="plan-summary" content="Schema providers are functions that assemble domain context (grammar rules, vocabulary, field schemas, catalog data) for injection into prompt templates. Rather than having the LLM discover this context via MCP tool call">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="02-codex-prompt-patterns,03-comparative-analysis">
+  <meta name="plan-informs" content="09-codex-pivot-analysis,10-implementation-review">
+  <title>Schema Provider Design | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Schema Provider Design</h1>
+    <h2 id="overview">Overview</h2>
+<p>Schema providers are functions that assemble domain context (grammar rules, vocabulary, field schemas, catalog data) for injection into prompt templates. Rather than having the LLM discover this context via MCP tool calls at runtime, providers pre-assemble it at prompt render time.</p>
+<p>The design uses a 3-tier caching strategy matched to the volatility of each data source. Static data (grammar, vocabulary) is cached for process lifetime. Catalog-derived data (existing names, examples) is cached per catalog load. Dynamic data (DD queries) is assembled per call.</p>
+<h2 id="architecture">Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    Schema Provider System                     │
+│                                                              │
+│  Tier 1: Process-Lifetime (static, ~13KB total)              │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐  │
+│  │ grammar_     │ │ vocabulary_  │ │ field_schema_        │  │
+│  │ overview     │ │ tokens       │ │ guidance             │  │
+│  │ (~4KB)       │ │ (~2KB)       │ │ (~4KB)               │  │
+│  └──────┬───────┘ └──────┬───────┘ └──────────┬───────────┘  │
+│         │                │                     │              │
+│  ┌──────▼────────────────▼─────────────────────▼───────────┐  │
+│  │ Direct imports from grammar.constants, field_schemas     │  │
+│  │ No MCP round-trips for static data                       │  │
+│  └─────────────────────────────────────────────────────────┘  │
+│                                                              │
+│  Tier 2: Catalog-Lifetime (~3KB per domain)                  │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐  │
+│  │ existing_    │ │ tag_         │ │ example_             │  │
+│  │ names_       │ │ taxonomy     │ │ entries              │  │
+│  │ inventory    │ │ (~1KB)       │ │ (~2KB)               │  │
+│  └──────┬───────┘ └──────┬───────┘ └──────────┬───────────┘  │
+│         │                │                     │              │
+│  ┌──────▼────────────────▼─────────────────────▼───────────┐  │
+│  │ Loaded from catalog Repository at startup, invalidated   │  │
+│  │ on write_standard_names                                  │  │
+│  └─────────────────────────────────────────────────────────┘  │
+│                                                              │
+│  Tier 3: Per-Call (dynamic, ~3KB per query)                  │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐  │
+│  │ dd_cluster   │ │ dd_path_     │ │ dd_cocos_            │  │
+│  │ context      │ │ docs         │ │ context              │  │
+│  │ (~1.5KB)     │ │ (~1.5KB)     │ │ (~0.5KB)             │  │
+│  └──────┬───────┘ └──────┬───────┘ └──────────┬───────────┘  │
+│         │                │                     │              │
+│  ┌──────▼────────────────▼─────────────────────▼───────────┐  │
+│  │ Assembled per call via DDAdapter (direct imports from    │  │
+│  │ imas-codex backing functions — no MCP round-trips)       │  │
+│  │ Projection applied to reduce size                        │  │
+│  └─────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="tier-1-process-lifetime-providers-static">Tier 1: Process-Lifetime Providers (Static)</h2>
+<p>These providers import directly from the grammar module's auto-generated constants. They never touch MCP or the network. Cache with <code>@lru_cache(maxsize=1)</code>.</p>
+<h3 id="grammar_overview-4kb"><code>grammar_overview</code> (~4KB)</h3>
+<p><strong>Backing source</strong>: <code>grammar.constants.SEGMENT_RULES</code>, <code>SEGMENT_ORDER</code>, <code>SEGMENT_TEMPLATES</code></p>
+<p><strong>Content</strong>: Grammar composition rules, segment ordering, template patterns. Equivalent to the output of <code>get_grammar()</code> MCP tool but without MCP overhead.</p>
+<pre><code class="language-python">from imas_standard_names.grammar.constants import (
+    SEGMENT_ORDER,
+    SEGMENT_RULES,
+    SEGMENT_TEMPLATES,
+)
+
+@lru_cache(maxsize=1)
+def _provide_grammar_overview() -&gt; dict[str, str]:
+    &quot;&quot;&quot;Assemble grammar rules for prompt injection.&quot;&quot;&quot;
+    rules_text = format_segment_rules(SEGMENT_RULES, SEGMENT_ORDER)
+    templates_text = format_templates(SEGMENT_TEMPLATES)
+    return {
+        &quot;grammar_overview&quot;: rules_text,
+        &quot;grammar_templates&quot;: templates_text,
+    }
+</code></pre>
+<h3 id="vocabulary_tokens-2kb"><code>vocabulary_tokens</code> (~2KB)</h3>
+<p><strong>Backing source</strong>: <code>grammar.constants.SEGMENT_TOKEN_MAP</code></p>
+<p><strong>Content</strong>: Token lists for each vocabulary segment (component, subject, device, object, geometry, position, process, coordinate). Static list of ~200 tokens across all segments.</p>
+<pre><code class="language-python">from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+@lru_cache(maxsize=1)
+def _provide_vocabulary_tokens() -&gt; dict[str, str]:
+    &quot;&quot;&quot;Assemble vocabulary tokens for prompt injection.&quot;&quot;&quot;
+    sections = []
+    for segment, tokens in SEGMENT_TOKEN_MAP.items():
+        sections.append(f&quot;### {segment}\n{', '.join(sorted(tokens))}&quot;)
+    return {&quot;vocabulary_tokens&quot;: &quot;\n\n&quot;.join(sections)}
+</code></pre>
+<p><strong>Note on usage statistics</strong>: The MCP <code>get_vocabulary()</code> tool includes usage frequency counts, which require iterating all 309 catalog entries (~expensive). For prompt injection, raw token lists suffice. Usage stats are only relevant for interactive exploration.</p>
+<h3 id="field_schema_guidance-4kb"><code>field_schema_guidance</code> (~4KB)</h3>
+<p><strong>Backing source</strong>: <code>grammar.field_schemas.FIELD_GUIDANCE</code>, <code>TYPE_SPECIFIC_REQUIREMENTS</code></p>
+<p><strong>Content</strong>: Per-field documentation for standard name entries (name, kind, unit, tags, description, status). Includes naming guidance, prohibited patterns, and examples.</p>
+<pre><code class="language-python">from imas_standard_names.grammar.field_schemas import (
+    FIELD_GUIDANCE,
+    TYPE_SPECIFIC_REQUIREMENTS,
+)
+
+@lru_cache(maxsize=1)
+def _provide_field_schema_guidance() -&gt; dict[str, str]:
+    &quot;&quot;&quot;Assemble field schema guidance for prompt injection.&quot;&quot;&quot;
+    guidance_text = format_field_guidance(FIELD_GUIDANCE)
+    type_reqs_text = format_type_requirements(TYPE_SPECIFIC_REQUIREMENTS)
+    return {
+        &quot;field_guidance&quot;: guidance_text,
+        &quot;type_requirements&quot;: type_reqs_text,
+    }
+</code></pre>
+<h3 id="entry_schema-3kb"><code>entry_schema</code> (~3KB)</h3>
+<p><strong>Backing source</strong>: <code>models.StandardNameEntry</code> Pydantic model</p>
+<p><strong>Content</strong>: JSON schema example + field descriptions generated from the Pydantic model. Shows the LLM the exact structure it should produce.</p>
+<pre><code class="language-python">@lru_cache(maxsize=1)
+def _provide_entry_schema() -&gt; dict[str, str]:
+    &quot;&quot;&quot;Generate schema example and field docs from Pydantic model.&quot;&quot;&quot;
+    return {
+        &quot;entry_schema_example&quot;: get_pydantic_schema_json(StandardNameEntry),
+        &quot;entry_schema_fields&quot;: get_pydantic_schema_description(StandardNameEntry),
+    }
+</code></pre>
+<h2 id="tier-2-catalog-lifetime-providers">Tier 2: Catalog-Lifetime Providers</h2>
+<p>These providers read from the loaded catalog. They are invalidated when the catalog changes (e.g., after <code>write_standard_names</code>). Use a cache that can be explicitly cleared.</p>
+<h3 id="existing_names_summary-1kb"><code>existing_names_summary</code> (~1KB)</h3>
+<p><strong>Content</strong>: Count of existing names, breakdown by kind, sample of recent entries. Provides catalog awareness without listing every name.</p>
+<pre><code class="language-python">def _provide_existing_names_summary(repository: Repository) -&gt; dict[str, str]:
+    &quot;&quot;&quot;Summarize existing catalog for context.&quot;&quot;&quot;
+    names = repository.list_all()
+    by_kind = Counter(n.kind for n in names)
+    samples = names[:10]  # Most recent
+    return {
+        &quot;existing_names_count&quot;: str(len(names)),
+        &quot;existing_names_by_kind&quot;: format_counter(by_kind),
+        &quot;existing_names_samples&quot;: format_name_list(samples),
+    }
+</code></pre>
+<h3 id="tag_taxonomy-1kb"><code>tag_taxonomy</code> (~1KB)</h3>
+<p><strong>Content</strong>: Available tags with their usage counts. Helps the LLM choose appropriate tags.</p>
+<h3 id="example_entries-2kb"><code>example_entries</code> (~2KB)</h3>
+<p><strong>Content</strong>: Curated high-quality entries as YAML examples. Used in few-shot prompting.</p>
+<h2 id="tier-3-per-call-providers-dynamic">Tier 3: Per-Call Providers (Dynamic)</h2>
+<p>These assemble context specific to the current generation/review request. Not cached — assembled fresh each call.</p>
+<h3 id="dd_paths_context-15kb-projected"><code>dd_paths_context</code> (~1.5KB projected)</h3>
+<p><strong>Backing source</strong>: IMAS DD MCP tools (<code>list_imas_paths</code>, <code>fetch_imas_paths</code>)</p>
+<p><strong>Content</strong>: Projected path information for the target IDS/domain. The full <code>search_imas()</code> output is ~79KB — far too large. Apply projection to extract only path, type, units, and description (~3KB for a typical IDS).</p>
+<pre><code class="language-python">async def _provide_dd_paths_context(
+    ids_name: str,
+    paths: list[str],
+) -&gt; dict[str, str]:
+    &quot;&quot;&quot;Assemble DD path context for specific generation request.&quot;&quot;&quot;
+    path_docs = await fetch_imas_paths(paths, ids=ids_name)
+    projected = project_path_docs(path_docs, fields=[&quot;path&quot;, &quot;type&quot;, &quot;units&quot;, &quot;doc&quot;])
+    return {&quot;dd_paths_context&quot;: format_path_table(projected)}
+</code></pre>
+<h3 id="domain_existing_names-15kb"><code>domain_existing_names</code> (~1.5KB)</h3>
+<p><strong>Content</strong>: Names already in the catalog for the target domain. Prevents duplicates and ensures naming consistency within the domain.</p>
+<h2 id="provider-registry">Provider Registry</h2>
+<pre><code class="language-python">_STATIC_PROVIDERS: dict[str, Callable] = {
+    &quot;grammar_overview&quot;: _provide_grammar_overview,
+    &quot;vocabulary_tokens&quot;: _provide_vocabulary_tokens,
+    &quot;field_schema_guidance&quot;: _provide_field_schema_guidance,
+    &quot;entry_schema&quot;: _provide_entry_schema,
+}
+
+_CATALOG_PROVIDERS: dict[str, Callable] = {
+    &quot;existing_names_summary&quot;: _provide_existing_names_summary,
+    &quot;tag_taxonomy&quot;: _provide_tag_taxonomy,
+    &quot;example_entries&quot;: _provide_example_entries,
+}
+
+_DYNAMIC_PROVIDERS: dict[str, Callable] = {
+    &quot;dd_paths_context&quot;: _provide_dd_paths_context,
+    &quot;domain_existing_names&quot;: _provide_domain_existing_names,
+}
+
+async def get_schema_for_prompt(
+    schema_needs: list[str],
+    *,
+    repository: Repository | None = None,
+    dynamic_context: dict[str, Any] | None = None,
+) -&gt; dict[str, str]:
+    &quot;&quot;&quot;Load only the requested providers and merge their output.&quot;&quot;&quot;
+    context: dict[str, str] = {}
+    for need in schema_needs:
+        if need in _STATIC_PROVIDERS:
+            context.update(_STATIC_PROVIDERS[need]())
+        elif need in _CATALOG_PROVIDERS:
+            if repository is None:
+                raise ValueError(f&quot;Catalog provider '{need}' requires a repository&quot;)
+            context.update(_CATALOG_PROVIDERS[need](repository))
+        elif need in _DYNAMIC_PROVIDERS:
+            if dynamic_context is None:
+                raise ValueError(f&quot;Dynamic provider '{need}' requires context&quot;)
+            context.update(await _DYNAMIC_PROVIDERS[need](**dynamic_context))
+    return context
+</code></pre>
+<h2 id="size-budget-analysis">Size Budget Analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Tier</th>
+<th>Size</th>
+<th>Cache Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>grammar_overview</td>
+<td>1</td>
+<td>~4KB</td>
+<td>Process lifetime</td>
+</tr>
+<tr>
+<td>vocabulary_tokens</td>
+<td>1</td>
+<td>~2KB</td>
+<td>Process lifetime</td>
+</tr>
+<tr>
+<td>field_schema_guidance</td>
+<td>1</td>
+<td>~4KB</td>
+<td>Process lifetime</td>
+</tr>
+<tr>
+<td>entry_schema</td>
+<td>1</td>
+<td>~3KB</td>
+<td>Process lifetime</td>
+</tr>
+<tr>
+<td><strong>Tier 1 subtotal</strong></td>
+<td></td>
+<td><strong>~13KB</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>existing_names_summary</td>
+<td>2</td>
+<td>~1KB</td>
+<td>Catalog lifetime</td>
+</tr>
+<tr>
+<td>tag_taxonomy</td>
+<td>2</td>
+<td>~1KB</td>
+<td>Catalog lifetime</td>
+</tr>
+<tr>
+<td>example_entries</td>
+<td>2</td>
+<td>~2KB</td>
+<td>Catalog lifetime</td>
+</tr>
+<tr>
+<td><strong>Tier 2 subtotal</strong></td>
+<td></td>
+<td><strong>~4KB</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>dd_paths_context</td>
+<td>3</td>
+<td>~1.5KB</td>
+<td>Per call</td>
+</tr>
+<tr>
+<td>domain_existing_names</td>
+<td>3</td>
+<td>~1.5KB</td>
+<td>Per call</td>
+</tr>
+<tr>
+<td><strong>Tier 3 subtotal</strong></td>
+<td></td>
+<td><strong>~3KB</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Total per prompt</strong></td>
+<td></td>
+<td><strong>~20KB</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>At ~20KB per rendered prompt, a generation system prompt fits well within model context windows (128K+ for modern models). The static 13KB prefix is ideal for API-level prompt caching.</p>
+<h2 id="caching-strategy">Caching Strategy</h2>
+<h3 id="tier-1-lru_cachemaxsize1">Tier 1: <code>@lru_cache(maxsize=1)</code></h3>
+<p>Grammar constants and Pydantic schemas never change during a process lifecycle. Simple <code>functools.lru_cache</code> is sufficient.</p>
+<h3 id="tier-2-explicit-cache-with-invalidation">Tier 2: Explicit cache with invalidation</h3>
+<p>Catalog data changes when <code>write_standard_names</code> is called. Use a simple cache dict with a <code>clear()</code> method that the repository calls on write:</p>
+<pre><code class="language-python">_catalog_cache: dict[str, Any] = {}
+
+def clear_catalog_cache() -&gt; None:
+    &quot;&quot;&quot;Invalidate all catalog-derived caches.&quot;&quot;&quot;
+    _catalog_cache.clear()
+</code></pre>
+<h3 id="tier-3-no-caching">Tier 3: No caching</h3>
+<p>Per-call providers assemble fresh context each time. The data is small (~3KB) and changes with every request.</p>
+<h2 id="mapping-existing-functions-providers">Mapping: Existing Functions → Providers</h2>
+<table>
+<thead>
+<tr>
+<th>Existing Function/Module</th>
+<th>Provider</th>
+<th>Adaptation Needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grammar.constants.SEGMENT_RULES</code></td>
+<td><code>grammar_overview</code></td>
+<td>Format as markdown</td>
+</tr>
+<tr>
+<td><code>grammar.constants.SEGMENT_ORDER</code></td>
+<td><code>grammar_overview</code></td>
+<td>Include in rules formatting</td>
+</tr>
+<tr>
+<td><code>grammar.constants.SEGMENT_TEMPLATES</code></td>
+<td><code>grammar_overview</code></td>
+<td>Format template examples</td>
+</tr>
+<tr>
+<td><code>grammar.constants.SEGMENT_TOKEN_MAP</code></td>
+<td><code>vocabulary_tokens</code></td>
+<td>Format as token lists</td>
+</tr>
+<tr>
+<td><code>grammar.field_schemas.FIELD_GUIDANCE</code></td>
+<td><code>field_schema_guidance</code></td>
+<td>Format as markdown sections</td>
+</tr>
+<tr>
+<td><code>grammar.field_schemas.TYPE_SPECIFIC_REQUIREMENTS</code></td>
+<td><code>field_schema_guidance</code></td>
+<td>Format per-kind requirements</td>
+</tr>
+<tr>
+<td><code>models.StandardNameEntry</code></td>
+<td><code>entry_schema</code></td>
+<td>Pydantic schema helpers (adapt from codex)</td>
+</tr>
+<tr>
+<td><code>Repository.list_all()</code></td>
+<td><code>existing_names_summary</code></td>
+<td>Aggregate + sample</td>
+</tr>
+<tr>
+<td><code>tools.grammar.GrammarTool.get_grammar()</code></td>
+<td>(bypassed)</td>
+<td>Direct import instead</td>
+</tr>
+<tr>
+<td><code>tools.vocabulary.VocabularyTool.get_vocabulary()</code></td>
+<td>(bypassed)</td>
+<td>Direct import instead</td>
+</tr>
+<tr>
+<td><code>tools.schema.SchemaTool.get_schema()</code></td>
+<td>(bypassed)</td>
+<td>Direct import instead</td>
+</tr>
+</tbody>
+</table>
+<h2 id="implementation-path">Implementation Path</h2>
+<h3 id="phase-1-static-providers-wave-1-with-loader-core">Phase 1: Static providers (Wave 1, with loader core)</h3>
+<ol>
+<li>Create <code>imas_standard_names/prompts/providers.py</code></li>
+<li>Implement <code>_provide_grammar_overview()</code> — direct import from constants</li>
+<li>Implement <code>_provide_vocabulary_tokens()</code> — direct import from constants</li>
+<li>Implement <code>_provide_field_schema_guidance()</code> — direct import from field_schemas</li>
+<li>Implement <code>_provide_entry_schema()</code> — Pydantic schema helpers</li>
+<li>Create <code>_STATIC_PROVIDERS</code> registry</li>
+<li>Write formatting helpers (<code>format_segment_rules</code>, <code>format_templates</code>, etc.)</li>
+<li>Tests: verify output size, content correctness, caching behavior</li>
+</ol>
+<h3 id="phase-2-catalog-providers-wave-1-after-repository-integration">Phase 2: Catalog providers (Wave 1, after repository integration)</h3>
+<ol>
+<li>Implement <code>_provide_existing_names_summary()</code></li>
+<li>Implement <code>_provide_tag_taxonomy()</code></li>
+<li>Implement <code>_provide_example_entries()</code></li>
+<li>Add cache invalidation hook to repository write path</li>
+<li>Tests: verify invalidation, content correctness</li>
+</ol>
+<h3 id="phase-3-dynamic-providers-wave-2-with-pipeline-workers">Phase 3: Dynamic providers (Wave 2, with pipeline workers)</h3>
+<ol>
+<li>Implement <code>_provide_dd_paths_context()</code> — async, uses DD tools</li>
+<li>Implement <code>_provide_domain_existing_names()</code> — async, uses catalog</li>
+<li>Implement DD response projection (reduce ~79KB → ~3KB)</li>
+<li>Implement <code>get_schema_for_prompt()</code> unified entry point</li>
+<li>Tests: verify projection, async behavior, error handling</li>
+</ol>
+<h2 id="design-decision-direct-import-vs-mcp">Design Decision: Direct Import vs MCP</h2>
+<p>For static providers, we bypass the MCP tool layer and import directly from the grammar module. Rationale:</p>
+<ol>
+<li><strong>Performance</strong>: No serialization/deserialization overhead</li>
+<li><strong>Simplicity</strong>: No async MCP round-trip for deterministic data</li>
+<li><strong>Reliability</strong>: No MCP server availability dependency</li>
+<li><strong>Type safety</strong>: Direct Python objects, not JSON strings</li>
+</ol>
+<p>MCP tools remain the interface for interactive use (human-operated chat sessions). The provider system is the interface for batch pipelines.</p>
+  </main>
+</body>
+</html>

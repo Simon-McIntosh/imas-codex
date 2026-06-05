@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="09-codex-pivot-analysis">
+  <meta name="plan-title" content="Strategic Pivot Analysis: Generation in Codex, Governance in Standard-Names">
+  <meta name="plan-summary" content="*The decision:** All pipeline development (generation, review, minting) moves to **imas-codex**. This project (imas-standard-names) retains grammar, validation, catalog management, MCP tools, and website.">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="04-parallel-review-synthesis,06-schema-provider-design,07-dd-exploitation-strategy,08-dd-linking-design">
+  <meta name="plan-informs" content="10-implementation-review,11-deterministic-parent-redesign">
+  <title>Strategic Pivot Analysis: Generation in Codex, Governance in Standard-Names | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Strategic Pivot Analysis: Generation in Codex, Governance in Standard-Names</h1>
+    <p><strong>Status:</strong> Approved<br />
+<strong>Date:</strong> 2025-07-18 (revised 2026-04-08)<br />
+<strong>Researched by:</strong> 5 parallel Opus 4.6 agents + direct investigation  </p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p><strong>The decision:</strong> All pipeline development (generation, review, minting) moves to <strong>imas-codex</strong>. This project (imas-standard-names) retains grammar, validation, catalog management, MCP tools, and website.</p>
+<p><strong>Why codex:</strong> It already provides ~8,000+ lines of proven pipeline infrastructure (graph-as-ledger, supervised workers, LLM structured output, cost tracking, claim-based concurrency). Building this independently here would duplicate battle-tested code.</p>
+<p><strong>Critical scope correction:</strong> Standard names are not just about the IMAS Data Dictionary. The pipeline mints from <strong>multiple sources</strong>:
+- IMAS DD paths (<code>IMASNode</code> → standard names for physics quantities in the DD)
+- Facility signals (<code>FacilitySignal</code> → standard names for experimentally measured quantities)
+- Potentially other graph entities in the future</p>
+<p>Therefore the codex pipeline is a <strong>top-level CLI group</strong> (<code>imas-codex sn</code>), not nested under <code>imas</code>. It sits alongside <code>discover</code> and <code>imas</code> as a peer command group.</p>
+<hr />
+<h2 id="1-evidence-summary">1. Evidence Summary</h2>
+<h3 id="11-what-codex-already-provides">1.1 What codex already provides</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Codex Module</th>
+<th>Lines</th>
+<th>Standard-Names Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supervised parallel workers</td>
+<td><code>discovery/base/engine.py</code></td>
+<td>224</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Claim-based concurrency</td>
+<td><code>discovery/base/claims.py</code></td>
+<td>~200</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Pipeline state machine</td>
+<td><code>discovery/base/supervision.py</code></td>
+<td>1,143</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>LLM structured output + retry</td>
+<td><code>discovery/base/llm.py</code></td>
+<td>938</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Cost tracking + budget limits</td>
+<td>Built into <code>WorkerStats</code></td>
+<td>—</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Worker restart with backoff</td>
+<td><code>supervised_worker()</code></td>
+<td>~200</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>DD path enrichment pipeline</td>
+<td><code>graph/dd_workers.py</code></td>
+<td>~500</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>DD path context gathering</td>
+<td><code>graph/dd_enrichment.py</code></td>
+<td>~700</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Graph-as-work-queue</td>
+<td><code>graph/client.py</code> + <code>claims.py</code></td>
+<td>~1,200</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Embed server (GPU)</td>
+<td><code>embeddings/server.py</code></td>
+<td>~800</td>
+<td>Not applicable</td>
+</tr>
+<tr>
+<td>Jinja2 prompt templates</td>
+<td><code>llm/prompt_loader.py</code></td>
+<td>1,176</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Schema-driven ontology</td>
+<td><code>graph/schema.py</code> (LinkML)</td>
+<td>826</td>
+<td>Not applicable</td>
+</tr>
+<tr>
+<td>StandardName graph node</td>
+<td><code>schemas/facility.yaml</code> L2088</td>
+<td>—</td>
+<td>Already defined, unpopulated</td>
+</tr>
+<tr>
+<td>MEASURES relationship</td>
+<td><code>schemas/facility.yaml</code> L2138</td>
+<td>—</td>
+<td>Links signals → standard names</td>
+</tr>
+<tr>
+<td>CLI discover framework</td>
+<td><code>cli/discover/common.py</code></td>
+<td>~350</td>
+<td>Would need to build from scratch</td>
+</tr>
+<tr>
+<td>Service health monitoring</td>
+<td><code>discovery/base/services.py</code></td>
+<td>~900</td>
+<td>Not applicable</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total infrastructure codex provides:</strong> ~8,000+ lines of proven, battle-tested code.<br />
+<strong>Total we would need to rewrite in standard-names:</strong> ~6,000-8,000 lines.</p>
+<h3 id="12-what-standard-names-uniquely-provides">1.2 What standard-names uniquely provides</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Module</th>
+<th>Lines</th>
+<th>Portable to codex?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar specification</td>
+<td><code>grammar/specification.yml</code></td>
+<td>~800</td>
+<td>Import as dependency</td>
+</tr>
+<tr>
+<td>Parse/compose functions</td>
+<td><code>grammar/support.py</code></td>
+<td>264</td>
+<td>Import as dependency</td>
+</tr>
+<tr>
+<td>Grammar codegen</td>
+<td><code>grammar_codegen/</code></td>
+<td>~1,443</td>
+<td>Stays in standard-names</td>
+</tr>
+<tr>
+<td>Semantic validation (8 rules)</td>
+<td><code>validation/semantic.py</code></td>
+<td>244</td>
+<td>Import as dependency</td>
+</tr>
+<tr>
+<td>Quality validation (NLP)</td>
+<td><code>validation/quality.py</code></td>
+<td>388</td>
+<td>Import as dependency</td>
+</tr>
+<tr>
+<td>Catalog management</td>
+<td><code>catalog/</code>, <code>database/</code></td>
+<td>~1,400</td>
+<td>Stays in standard-names</td>
+</tr>
+<tr>
+<td>MCP tools (14 tools)</td>
+<td><code>tools/</code></td>
+<td>~3,500</td>
+<td>Stays in standard-names</td>
+</tr>
+<tr>
+<td>Entry models (Pydantic)</td>
+<td><code>models.py</code></td>
+<td>681</td>
+<td>Import as dependency</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key finding:</strong> The grammar system has zero external dependencies. It exports clean public APIs via <code>__all__</code> and can be imported by codex with <code>pip install imas-standard-names</code>.</p>
+<h3 id="13-codex-standardname-graph-node-already-exists">1.3 Codex StandardName graph node already exists</h3>
+<p>The LinkML schema at <code>schemas/facility.yaml:2088-2110</code> already defines:</p>
+<pre><code class="language-yaml">StandardName:
+  id: string (snake_case, required, identifier)
+  description: string
+  unit: range Unit
+
+# Relationships:
+#   FacilitySignal -[:MEASURES]-&gt; StandardName (cross-facility semantic linking)
+#   StandardName -[:HAS_UNIT]-&gt; Unit
+#   StandardName -[:IN_DOMAIN]-&gt; PhysicsDomainNode
+</code></pre>
+<p>No code yet populates these nodes. This is the natural extension point.</p>
+<hr />
+<h2 id="2-proposed-architecture">2. Proposed Architecture</h2>
+<h3 id="21-repository-responsibilities">2.1 Repository responsibilities</h3>
+<pre><code>┌─────────────────────────────────────────────┐
+│            imas-standard-names               │
+│                                              │
+│  Grammar     ← specification.yml + codegen   │
+│  Validation  ← semantic + quality + structural│
+│  Catalog     ← YAML store + SQLite + FTS     │
+│  MCP Tools   ← interactive chat interface     │
+│  Website     ← mkdocs-material + mike        │
+│  Models      ← Pydantic entry definitions     │
+│                                              │
+│  Exports:                                    │
+│    compose_standard_name()                   │
+│    parse_standard_name()                     │
+│    validate_models()                         │
+│    StandardNameEntry (Pydantic)              │
+│    Grammar enums (Component, Position, etc.) │
+└────────────────────┬────────────────────────┘
+                     │ pip install (one-way dep)
+                     ▼
+┌─────────────────────────────────────────────┐
+│                imas-codex                     │
+│                                              │
+│  NEW: sn/ module (top-level, NOT under imas)│
+│    pipeline.py  ← orchestrator               │
+│    workers.py   ← compose, review, validate  │
+│    state.py     ← SNBuildState                  │
+│    graph_ops.py ← claim/mark/release          │
+│    sources/                                  │
+│      dd.py      ← mint from IMASNode paths   │
+│      signals.py ← mint from FacilitySignals  │
+│    prompts/     ← Jinja2 generation templates │
+│                                              │
+│  CLI (top-level peer of discover, imas):     │
+│    imas-codex sn build --source dd          │
+│    imas-codex sn build --source signals     │
+│    imas-codex sn build --ids equilibrium    │
+│    imas-codex sn status                     │
+│    imas-codex sn benchmark                  │
+│                                              │
+│  Graph nodes:                                │
+│    StandardName (existing, now populated)     │
+│    StandardName -[:DERIVED_FROM]-&gt; IMASNode   │
+│    FacilitySignal -[:MEASURES]-&gt; StandardName │
+│                                              │
+│  Output:                                     │
+│    Minted YAML files → PR to catalog repo     │
+└─────────────────────────────────────────────┘
+</code></pre>
+<p><strong>Why <code>mint</code> as a top-level group:</strong> Standard names are minted from multiple data sources — IMAS DD paths, facility signals, and potentially others. This is not an IMAS-specific operation (<code>imas sn build</code> is wrong) nor a facility discovery operation (<code>discover standard-names</code> is wrong). Minting is its own domain that consumes output from both <code>imas</code> and <code>discover</code> pipelines.</p>
+<h3 id="22-pipeline-phases-multi-source-architecture">2.2 Pipeline phases — multi-source architecture</h3>
+<p>The pipeline is source-agnostic at its core. Different sources feed candidates into the same compose → review → validate → mint flow:</p>
+<pre><code>Sources:                          Core Pipeline:
+
+  DD paths ──┐                    COMPOSE ──→ REVIEW ──→ VALIDATE ──→ MINT
+              ├──→ EXTRACT ──→    
+  Signals ───┘                    
+
+Source plugins:
+  dd.py:      Walk IMASNode paths (IDS-filtered, domain-filtered)
+              Group by semantic cluster, gather tree context
+              Output: candidate extraction batches
+
+  signals.py: Walk FacilitySignal nodes (facility-filtered)
+              Group by physics domain, gather signal context
+              Output: candidate extraction batches
+</code></pre>
+<p>Using the codex <code>WorkerSpec</code> pattern with <code>PipelinePhase</code>:</p>
+<pre><code>SNBuildState(DiscoveryStateBase):
+
+  extract_phase:  Source-specific path/signal walking
+  compose_phase:  LLM generates candidate names + descriptions
+                  Uses grammar rules + source context as prompt
+                  Grammar validation (compose → parse round-trip)
+  review_phase:   Cross-model &quot;rubber duck&quot; review
+                  Generate with Model A, review with Model B
+  validate_phase: Full validation pipeline
+                  Import validate_models() from standard-names
+  mint_phase:     Convert validated candidates to catalog YAML
+                  Create PR to imas-standard-names-catalog
+</code></pre>
+<h3 id="23-graph-node-extensions">2.3 Graph node extensions</h3>
+<p>New node for pipeline tracking:</p>
+<pre><code class="language-yaml">StandardNameCandidate:
+  id: string (candidate identifier)
+  name: string (proposed standard name)
+  description: string
+  unit: string
+  kind: enum (scalar/vector/metadata)
+  source_ids: string (IDS that triggered generation)
+  source_cluster: string (semantic cluster label)
+  status: enum (extracted → composed → reviewed → validated → minted → rejected)
+  review_model: string (model used for review)
+  review_score: float
+  review_notes: string
+  generation_model: string
+  generation_cost: float
+
+# Relationships:
+#   StandardNameCandidate -[:DERIVED_FROM]-&gt; IMASNode
+#   StandardNameCandidate -[:IN_CLUSTER]-&gt; IMASSemanticCluster
+#   StandardNameCandidate -[:PROMOTED_TO]-&gt; StandardName (after minting)
+</code></pre>
+<h3 id="24-cross-model-review-design">2.4 Cross-model review design</h3>
+<p>Instead of human review at scale, use a different LLM family:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Model Family</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compose</strong></td>
+<td>Claude (Sonnet/Haiku)</td>
+<td>Generate candidate names + descriptions</td>
+</tr>
+<tr>
+<td><strong>Review</strong></td>
+<td>Gemini (Flash/Pro)</td>
+<td>Independent review: grammar correctness, physics accuracy, naming quality</td>
+</tr>
+<tr>
+<td><strong>Arbitrate</strong> (on disagreement)</td>
+<td>GPT (4o/4o-mini)</td>
+<td>Tie-breaking when compose + review disagree</td>
+</tr>
+</tbody>
+</table>
+<p>The review prompt includes:
+- Grammar rules (injected from standard-names)
+- The DD path context (from graph)
+- The candidate name + description
+- Existing catalog names (for consistency checking)</p>
+<hr />
+<h2 id="3-addressing-user-concerns">3. Addressing User Concerns</h2>
+<h3 id="31-over-reliance-on-clustering">3.1 Over-reliance on clustering</h3>
+<p><strong>Solution:</strong> The extract phase walks paths directly, not clusters:</p>
+<pre><code class="language-python"># Primary input: IDS-filtered path enumeration
+imas-codex discover standard-names --ids equilibrium --cost-limit 5
+
+# Secondary input: domain-filtered
+imas-codex discover standard-names --domain magnetics
+
+# Tertiary: cluster-assisted grouping (for deduplication, not input)
+# Clusters inform WHICH paths map to the SAME standard name
+# But the pipeline discovers paths independently
+</code></pre>
+<p>The <code>DDBuildState</code> pattern already supports <code>ids_filter: set[str] | None</code> — we inherit this directly.</p>
+<h3 id="32-no-human-review-at-scale">3.2 No human review at scale</h3>
+<p><strong>Solution:</strong> Cross-model rubber duck review (Section 2.4). The review phase uses a different model family than composition. Both models have access to the same grammar rules and DD context, but bring independent reasoning.</p>
+<h3 id="33-benchmarking-phase-needed">3.3 Benchmarking phase needed</h3>
+<p><strong>Solution:</strong> Add a benchmarking command before production runs:</p>
+<pre><code class="language-bash"># Benchmark: run 20 paths through all model combos, compare quality
+imas-codex discover standard-names benchmark \
+  --ids equilibrium \
+  --sample-size 20 \
+  --models &quot;claude-sonnet-4-20250514,gemini-2.5-flash,gpt-4o-mini&quot;
+</code></pre>
+<p>This generates a comparison table: cost per name, grammar pass rate, review agreement rate, description quality score.</p>
+<h3 id="34-exploiting-existing-codex-infrastructure">3.4 Exploiting existing codex infrastructure</h3>
+<p><strong>Fully exploited.</strong> The generation pipeline:
+- Uses <code>run_discovery_engine()</code> (no new orchestration code)
+- Uses <code>SupervisedWorkerGroup</code> (parallel workers with restart)
+- Uses <code>PipelinePhase</code> (dependency tracking)
+- Uses <code>acall_llm_structured()</code> (LLM with retry + cost)
+- Uses <code>GraphClient.create_nodes()</code> (batch graph writes)
+- Uses claim-based concurrency (no new locking code)
+- Uses the embed server (for candidate embedding)
+- Uses Jinja2 prompt templates (loaded via <code>prompt_loader.py</code>)</p>
+<hr />
+<h2 id="4-risk-analysis">4. Risk Analysis</h2>
+<h3 id="41-risks-and-mitigations">4.1 Risks and mitigations</h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Severity</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compile-time coupling</strong></td>
+<td>Medium</td>
+<td>One-way only: codex → standard-names. Standard-names never imports codex. Version pin in codex's deps.</td>
+</tr>
+<tr>
+<td><strong>Deployment complexity</strong></td>
+<td>Low</td>
+<td>Generation pipeline only runs in codex dev environment (Neo4j + GPU). Standard-names remains lightweight for users.</td>
+</tr>
+<tr>
+<td><strong>Release cycle mismatch</strong></td>
+<td>Low</td>
+<td>Grammar changes in SN trigger codex dep bump via CI. Catalog output is just YAML files — format-stable.</td>
+</tr>
+<tr>
+<td><strong>Integration testing</strong></td>
+<td>Medium</td>
+<td>Test suite in codex mocks standard-names grammar + validation. E2E tests run in CI with both repos.</td>
+</tr>
+<tr>
+<td><strong>Grammar evolution</strong></td>
+<td>Low</td>
+<td>Grammar API is stable (<code>compose_standard_name</code>, <code>parse_standard_name</code>). Breaking changes are rare and versioned.</td>
+</tr>
+<tr>
+<td><strong>Codex Neo4j requirement</strong></td>
+<td>Low</td>
+<td>Only needed for generation. Standard-names catalog consumers never need Neo4j.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-what-we-avoid">4.2 What we avoid</h3>
+<p>By not building the pipeline in standard-names:
+- <strong>~6,000-8,000 lines</strong> of pipeline/worker/state/LLM code not duplicated
+- <strong>No new infrastructure</strong> (no graph DB, no embed server, no worker supervision)
+- <strong>No parallel worker framework</strong> to maintain separately
+- <strong>No LLM client</strong> to build and maintain (litellm integration, retry, cost tracking)
+- <strong>No prompt template system</strong> to build (Jinja2 loader + schema providers)</p>
+<hr />
+<h2 id="5-implementation-phasing">5. Implementation Phasing</h2>
+<h3 id="phase-0-foundation-in-imas-codex">Phase 0: Foundation (in imas-codex)</h3>
+<ul>
+<li>Add <code>imas-standard-names</code> as dependency</li>
+<li>Create <code>discovery/standard_names/</code> module skeleton</li>
+<li>Extend LinkML schema with <code>StandardNameCandidate</code> node</li>
+<li>Create initial Jinja2 prompt templates</li>
+</ul>
+<h3 id="phase-1-extract-compose-in-imas-codex">Phase 1: Extract + Compose (in imas-codex)</h3>
+<ul>
+<li>Implement path walking (IDS-filtered, domain-filtered)</li>
+<li>Implement grammar-aware name composition via LLM</li>
+<li>Grammar validation round-trip (compose → parse)</li>
+<li>CLI: <code>imas-codex discover standard-names --ids &lt;ids&gt;</code></li>
+</ul>
+<h3 id="phase-2-review-validate-in-imas-codex">Phase 2: Review + Validate (in imas-codex)</h3>
+<ul>
+<li>Cross-model review pipeline</li>
+<li>Import <code>validate_models()</code> from standard-names</li>
+<li>Review scoring and accept/reject logic</li>
+</ul>
+<h3 id="phase-3-mint-publish-in-both-repos">Phase 3: Mint + Publish (in both repos)</h3>
+<ul>
+<li>YAML generation from validated candidates</li>
+<li>GitHub API integration for catalog PRs</li>
+<li>Benchmarking command</li>
+</ul>
+<h3 id="phase-4-feedback-loop">Phase 4: Feedback Loop</h3>
+<ul>
+<li>DD path linking back to standard-names catalog</li>
+<li>Populate <code>ids_paths</code> field in catalog entries</li>
+<li>Graph relationship: <code>StandardName -[:DERIVED_FROM]-&gt; IMASNode</code></li>
+</ul>
+<hr />
+<h2 id="6-what-stays-in-imas-standard-names">6. What Stays in imas-standard-names</h2>
+<p>The standard-names project retains its core mission:</p>
+<ol>
+<li><strong>Grammar authority</strong>: specification.yml, codegen, enums — the authoritative source</li>
+<li><strong>Validation authority</strong>: semantic, structural, quality checks — the gatekeeper</li>
+<li><strong>Catalog management</strong>: YAML store, SQLite, FTS — the persistence layer</li>
+<li><strong>MCP tools</strong>: interactive chat interface — the user-facing API</li>
+<li><strong>Website/docs</strong>: mkdocs-material — the publication platform</li>
+<li><strong>Catalog repo</strong>: imas-standard-names-catalog — the data store</li>
+</ol>
+<p>What it <strong>no longer needs</strong> from the previous plans:
+- ~~Feature 01: Prompt System~~ → codex has Jinja2 + prompt_loader
+- ~~Feature 02: LLM Pipeline Infrastructure~~ → codex has llm.py + cost tracking
+- ~~Feature 03: Batch Generation Pipeline~~ → codex has discovery engine
+- ~~Feature 04: CLI Dispatch Commands~~ → codex has CLI discover framework
+- ~~Feature 05: DD Integration (generation parts)~~ → codex has DD graph access</p>
+<p>What it <strong>keeps</strong> from the previous plans:
+- Feature 05 (Phase 1 only): DD path linking in existing catalog entries
+- Feature 06: Grammar Extensions (Maarten's feedback) — grammar must evolve here</p>
+<hr />
+<h2 id="7-comparison-build-in-sn-vs-build-in-codex">7. Comparison: Build in SN vs Build in Codex</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Build in Standard-Names</th>
+<th>Build in Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>New code required</strong></td>
+<td>~6,000-8,000 lines</td>
+<td>~1,500-2,500 lines</td>
+</tr>
+<tr>
+<td><strong>Infrastructure deps</strong></td>
+<td>Would need Neo4j adapter, LLM client, worker framework</td>
+<td>All exist already</td>
+</tr>
+<tr>
+<td><strong>State management</strong></td>
+<td>Would need to build from scratch</td>
+<td>Graph-as-ledger proven across 5 domains</td>
+</tr>
+<tr>
+<td><strong>Parallel execution</strong></td>
+<td>Would need worker supervision</td>
+<td><code>SupervisedWorkerGroup</code> battle-tested</td>
+</tr>
+<tr>
+<td><strong>Cost control</strong></td>
+<td>Would need cost tracking</td>
+<td><code>WorkerStats.cost</code> already tracks USD</td>
+</tr>
+<tr>
+<td><strong>DD access</strong></td>
+<td>Via adapter importing codex functions</td>
+<td>Direct graph queries</td>
+</tr>
+<tr>
+<td><strong>Prompt system</strong></td>
+<td>Would need template engine</td>
+<td>Jinja2 + schema providers exist</td>
+</tr>
+<tr>
+<td><strong>Standard Name node</strong></td>
+<td>No graph</td>
+<td>Already defined in LinkML schema</td>
+</tr>
+<tr>
+<td><strong>Cross-facility linking</strong></td>
+<td>Not possible</td>
+<td><code>FacilitySignal -[:MEASURES]-&gt; StandardName</code></td>
+</tr>
+<tr>
+<td><strong>Benchmarking</strong></td>
+<td>Would need LLM comparison framework</td>
+<td><code>acall_llm_structured</code> supports any model</td>
+</tr>
+<tr>
+<td><strong>Resume/retry</strong></td>
+<td>Would need checkpoint system</td>
+<td>Claim-based: crash-safe by design</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict:</strong> Building in codex requires ~70% less new code, inherits proven patterns, and provides capabilities (graph relationships, cross-facility linking, crash recovery) that would be extremely difficult to replicate in standard-names.</p>
+<hr />
+<h2 id="8-critique-integration">8. Critique Integration</h2>
+<p>An independent rubber-duck review (Opus 4.6, 23 tool calls deep investigation) identified 5 findings:</p>
+<h3 id="81-finding-1-build-pipeline-not-discovery-domain-adopted-revised">8.1 Finding 1: Build pipeline, not discovery domain (adopted, revised)</h3>
+<p>Standard name generation is not "discovering what exists at a facility" — it is "synthesizing canonical vocabulary from multiple graph sources." Every codex discovery domain takes <code>facility</code> as a required argument, and standard names are facility-agnostic.</p>
+<p><strong>Original resolution:</strong> Place at <code>graph/sn_workers.py</code>, CLI as <code>imas-codex imas sn build</code>.</p>
+<p><strong>Revised resolution:</strong> The pipeline mints from <strong>multiple sources</strong> (DD paths, facility signals, potentially others), so it is not IMAS-specific. Create a new <strong>top-level <code>sn</code> module</strong> in codex (<code>imas_codex/standard_names/</code>) with source plugins. CLI becomes <code>imas-codex sn build --source dd</code> or <code>imas-codex sn build --source signals</code>. This sits alongside <code>discover</code> and <code>imas</code> as a peer command group.</p>
+<h3 id="82-finding-2-transient-candidates-not-permanent-nodes-adopted">8.2 Finding 2: Transient candidates, not permanent nodes (adopted)</h3>
+<p>Creating permanent <code>StandardNameCandidate</code> graph nodes for every LLM proposal — including rejected ones — would pollute the graph with thousands of noise nodes. The DD build pipeline only creates <code>IMASNode</code> for paths that actually exist in the DD XML.</p>
+<p><strong>Resolution:</strong> Candidates are tracked in-memory during pipeline runs. Only validated, minted names become <code>StandardName</code> graph nodes. Run metadata (rejected candidates, review scores) stored as structured JSON logs, not graph nodes. The <code>DERIVED_FROM</code> relationship links the final <code>StandardName</code> → <code>IMASNode</code> without intermediate candidate nodes.</p>
+<h3 id="83-finding-3-data-contract-at-the-boundary-optional-library-import-partially-adopted">8.3 Finding 3: Data contract at the boundary, optional library import (partially adopted)</h3>
+<p>A compile-time dependency creates version-lock risk: grammar evolution in standard-names could cause codex's installed version to reject valid new names.</p>
+<p><strong>Resolution:</strong> Hybrid approach:
+- <strong>Hard requirement:</strong> The mint boundary uses a JSON schema contract (matching <code>StandardNameEntry</code> Pydantic schema). Codex outputs YAML files that standard-names validates independently.
+- <strong>Soft dependency:</strong> Codex can optionally <code>pip install imas-standard-names</code> for local grammar validation during composition (faster iteration). If not installed, codex uses schema-only validation and defers full validation to the mint phase.
+- <strong>Version strategy:</strong> Codex pins to <code>&gt;=X.Y.0,&lt;X+1.0.0</code> and CI tests against standard-names main branch.</p>
+<h3 id="84-finding-4-batched-prs-with-confidence-tiers-adopted">8.4 Finding 4: Batched PRs with confidence tiers (adopted)</h3>
+<p>A single monolithic PR with hundreds of names creates a review avalanche.</p>
+<p><strong>Resolution:</strong> The mint phase produces batched PRs by IDS or physics domain. Each PR includes:
+- <strong>Tier 1 (high confidence):</strong> Grammar-valid, strong DD lineage, cross-model agreement. Auto-merge candidates.
+- <strong>Tier 2 (needs review):</strong> Ambiguous physical_base choices, multiple candidate compositions for one DD path. Require human judgment.
+- <strong>Tier 3 (rejected):</strong> Grammar-invalid or review-rejected. Listed in PR description for transparency but not included.</p>
+<h3 id="85-finding-5-catalog-aware-deduplication-adopted">8.5 Finding 5: Catalog-aware deduplication (adopted)</h3>
+<p>The compose phase must know what already exists in the catalog. Without this, the pipeline would propose names that collide with existing entries or duplicate work across runs.</p>
+<p><strong>Resolution:</strong> The compose phase:
+1. Queries the existing catalog before proposing names
+2. Checks for name collisions (same physical concept → same canonical name from different DD paths)
+3. Sets appropriate <code>deprecates</code>/<code>superseded_by</code> fields when re-runs produce superior compositions
+4. Tracks provenance linking to specific DD version and pipeline run</p>
+<hr />
+<h2 id="9-decision-approved">9. Decision: Approved</h2>
+<p><strong>All pipeline development moves to imas-codex. This repo retains governance.</strong></p>
+<p>The split is:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Where</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar (specification, codegen, enums)</td>
+<td>imas-standard-names</td>
+<td>Authoritative source of naming rules</td>
+</tr>
+<tr>
+<td>Validation (semantic, structural, quality)</td>
+<td>imas-standard-names</td>
+<td>Gatekeeper for catalog quality</td>
+</tr>
+<tr>
+<td>Catalog management (YAML, SQLite, FTS)</td>
+<td>imas-standard-names</td>
+<td>Persistence and query layer</td>
+</tr>
+<tr>
+<td>MCP tools (interactive chat)</td>
+<td>imas-standard-names</td>
+<td>User-facing API for agents</td>
+</tr>
+<tr>
+<td>Website/documentation</td>
+<td>imas-standard-names</td>
+<td>Publication platform</td>
+</tr>
+<tr>
+<td>Generation pipeline (extract, compose)</td>
+<td><strong>imas-codex</strong></td>
+<td>Has graph, workers, LLM infra</td>
+</tr>
+<tr>
+<td>Review pipeline (cross-model)</td>
+<td><strong>imas-codex</strong></td>
+<td>Has LLM client + cost tracking</td>
+</tr>
+<tr>
+<td>Minting (YAML output, PR creation)</td>
+<td><strong>imas-codex</strong></td>
+<td>Produces artifacts for catalog</td>
+</tr>
+<tr>
+<td>Benchmarking (model comparison)</td>
+<td><strong>imas-codex</strong></td>
+<td>Has multi-model LLM support</td>
+</tr>
+<tr>
+<td>StandardName graph population</td>
+<td><strong>imas-codex</strong></td>
+<td>Owns the graph</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Dependency direction:</strong> One-way. Codex imports standard-names for grammar + validation. Standard-names never imports codex.</p>
+<p><strong>Data sources for minting:</strong> DD paths, facility signals, and potentially others. The pipeline is source-agnostic with pluggable extractors.</p>
+<p><strong>CLI placement in codex:</strong> <code>imas-codex sn</code> — a top-level command group, not nested under <code>imas</code> or <code>discover</code>.</p>
+<p><strong>What changes in imas-standard-names:</strong>
+1. Grammar API exports: ensure clean importability (Feature 01)
+2. DD path linking for existing 309 entries (Feature 02)
+3. Grammar extensions per Maarten's feedback (Feature 03)
+4. JSON schema contract for cross-project validation (Feature 04)</p>
+<p><strong>What happens in imas-codex:</strong>
+1. <code>imas_codex/standard_names/</code> — new top-level module with source plugins
+2. <code>imas_codex/standard_names/sources/dd.py</code> — extract from IMASNode paths
+3. <code>imas_codex/standard_names/sources/signals.py</code> — extract from FacilitySignal nodes
+4. <code>imas_codex/cli/sn.py</code> — top-level <code>sn</code> CLI group
+5. <code>llm/prompts/sn/</code> — Jinja2 generation/review templates
+6. <code>schemas/facility.yaml</code> — extend StandardName with DERIVED_FROM, source metadata
+7. Benchmarking command for model comparison</p>
+  </main>
+</body>
+</html>

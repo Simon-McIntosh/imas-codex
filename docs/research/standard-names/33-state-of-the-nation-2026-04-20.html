@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="33-state-of-the-nation-2026-04-20">
+  <meta name="plan-title" content="SN Pipeline — State of the Nation (2026-04-20)">
+  <meta name="plan-summary" content="1. **`prompt-ab-results.md`** — the A/B test you asked for. Summary in §3. 2. **`11-quality-gap-analysis.md`** — ISN-catalog vs our output quality deltas; feeds benchmark design. 3. **`12-full-graph-review.md`** — the 70">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="11-quality-gap-analysis,12-full-graph-review,32-plan-audit-and-samples">
+  <meta name="plan-informs" content="34-regen-cycle-results,35-metadata-qa-report,36-batching-audit">
+  <title>SN Pipeline — State of the Nation (2026-04-20) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Pipeline — State of the Nation (2026-04-20)</h1>
+    <blockquote>
+<p>Consolidated review triggered by user request after multi-day fleet rotations.
+Purpose: answer the seven concrete questions, signpost live research,
+and set the direction for the next work cycle.</p>
+</blockquote>
+<h2 id="1-plan-inventory-whats-current-whats-done">1. Plan inventory — what's current, what's done</h2>
+<h3 id="active-feature-plans-plansfeaturesstandard-names">Active feature plans (<code>plans/features/standard-names/</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Status</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>29-architectural-pivot.md</code></td>
+<td><strong>Living roadmap</strong></td>
+<td>Generate/enrich split shipped; F1–F4 ISN grammar fixes shipped in rc14/rc15; embedding backfill done. Some corpus-cleanup items still open (A.1 wave-absorbed family, D.1/D.2 DD-leaked names).</td>
+</tr>
+<tr>
+<td><code>31-quality-bootstrap-v2.md</code></td>
+<td><strong>Partially shipped</strong></td>
+<td>WS-A (classifier) shipped as plan 30. WS-B/C/D (prompt contradictions, grammar, audit) shipped in rc14/rc15. WS-F (remediation) and WS-G (verification) run every rotation. Quarantine rate now 13% (185/1406) vs 17.2% baseline — target was ≤5%.</td>
+</tr>
+<tr>
+<td><code>32-extraction-prompt-overhaul.md</code></td>
+<td><strong>Phase 2 done, Phase 4 deferred</strong></td>
+<td>A/B/C bake-off documented in <code>prompt-ab-results.md</code> — status quo (variant A) retained, variant C flagged for re-test with production cache block. <code>--until-complete</code> endpoint intentionally not implemented: running <code>sn generate</code> with no <code>-c</code> already runs to completion (user-confirmed direction).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pending-reference-only-not-work-items">Pending (reference-only, not work items)</h3>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pending/20-consistency-and-prompt-enrichment.md</code></td>
+<td><strong>File as superseded.</strong> Its DD-enrichment, unit-safety, and naming-scope workstreams are all implemented (unit flows from <code>HAS_UNIT</code>, not LLM; DD context injected; node_category gates scope).</td>
+</tr>
+<tr>
+<td><a href="../../../docs/sn-quality-parity.html"><code>docs/sn-quality-parity.html</code></a></td>
+<td><strong>Keep as reference.</strong> Phase 0 benchmark-harness concept still valid and partially in place (<code>scripts/prompt_ab_run.py</code>, <code>tests/standard_names/eval_sets/prompt_ab_v1.json</code>). Feeds §6 below.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="completed-superseded">Completed / superseded</h3>
+<p><code>completed/</code> (14 items) is clean. <code>completed/superseded/</code> holds plans 27 + 28 + early 9/10/11.</p>
+<h3 id="live-research-worth-reviewing">Live research worth reviewing</h3>
+<p>Signposted in priority order:</p>
+<ol>
+<li><strong><code>prompt-ab-results.md</code></strong> — the A/B test you asked for. Summary in §3.</li>
+<li><strong><code>11-quality-gap-analysis.md</code></strong> — ISN-catalog vs our output quality deltas; feeds benchmark design.</li>
+<li><strong><code>12-full-graph-review.md</code></strong> — the 706-name full audit that drove rc14.</li>
+<li><strong><code>isn-vocab-issues-2026-04-19.md</code></strong> — live list of ISN tokens we still need.</li>
+<li><strong><code>node-category-audit.md</code></strong> — classifier-filter audit (plan 32 WS-1).</li>
+<li><strong><code>gyrokinetics-extraction-debug.md</code></strong> — root-cause for the low-scoring gyro cluster.</li>
+<li><strong><code>dd-unit-bugs.md</code></strong> — documented DD-upstream unit issues (status quo, no filings per user).</li>
+</ol>
+<h2 id="2-current-graph-state-2026-04-20-1630">2. Current graph state (2026-04-20, 16:30)</h2>
+<ul>
+<li><strong>1,406 StandardName nodes</strong> (up from 676 at session 11 baseline, +108 % in two days).</li>
+<li>976 <code>valid</code> · 185 <code>quarantined</code> · 93 <code>needs_revision</code> · 88 unset · 63 <code>pending</code>.</li>
+<li>478 scored ≥ 0.8 ("good"); 320 scored &lt; 0.5 ("poor"); 905 scored total.</li>
+<li>1,076 have both <code>description</code> and <code>documentation</code>.</li>
+<li>Sole compose model: <code>anthropic/claude-sonnet-4.6</code>.</li>
+</ul>
+<h3 id="per-domain-quality-valid-names-only">Per-domain quality (valid names only)</h3>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">avg score</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>general</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">0.98</td>
+<td>Reference-quality anchor</td>
+</tr>
+<tr>
+<td>magnetic_field_systems</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0.97</td>
+<td>Narrow, well-bounded</td>
+</tr>
+<tr>
+<td>particle_measurement_diag</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">0.96</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>plasma_control</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">0.95</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>transport</td>
+<td style="text-align: right;">224</td>
+<td style="text-align: right;">0.91</td>
+<td>Biggest healthy cluster</td>
+</tr>
+<tr>
+<td>equilibrium</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">0.91</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>magnetohydrodynamics</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">0.85</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>radiation_measurement_diag</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">0.75</td>
+<td>Borderline</td>
+</tr>
+<tr>
+<td>edge_plasma_physics</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.66</td>
+<td>Rotation in-flight</td>
+</tr>
+<tr>
+<td>computational_workflow</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.65</td>
+<td>Meta-domain — expected</td>
+</tr>
+<tr>
+<td>plant_systems</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0.60</td>
+<td>Low priority</td>
+</tr>
+<tr>
+<td>auxiliary_heating</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">0.57</td>
+<td><strong>Needs regen pass</strong></td>
+</tr>
+<tr>
+<td>gyrokinetics</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">0.37</td>
+<td><strong>Needs regen pass</strong> (see debug doc)</td>
+</tr>
+<tr>
+<td>plasma_wall_interactions</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">0.34</td>
+<td><strong>Needs regen pass</strong></td>
+</tr>
+<tr>
+<td>turbulence</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">0.33</td>
+<td><strong>Needs regen pass</strong></td>
+</tr>
+<tr>
+<td>electromagnetic_wave_diag</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">0.24</td>
+<td><strong>Highest priority</strong></td>
+</tr>
+<tr>
+<td>structural_components</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0.16</td>
+<td>Likely misdomained</td>
+</tr>
+<tr>
+<td>fast_particles</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">0.14</td>
+<td><strong>Highest priority</strong></td>
+</tr>
+<tr>
+<td>waves</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0.08</td>
+<td>Near-worst; tiny sample</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-ab-test-results-you-asked-for-these">3. A/B test results — you asked for these</h2>
+<p>Empirical run (<code>scripts/prompt_ab_run.py</code>, 20 paths × 3 variants,
+opus-4.6, 2026-04-20). Full write-up in <code>prompt-ab-results.md</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th style="text-align: right;">Mean score</th>
+<th style="text-align: right;">Pass@1</th>
+<th style="text-align: right;">Compose cost</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A (rich static, current default)</td>
+<td style="text-align: right;"><strong>0.805</strong></td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">$0.042</td>
+<td><strong>Retained</strong></td>
+</tr>
+<tr>
+<td>B (lean static, no siblings)</td>
+<td style="text-align: right;">0.755</td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">$0.036</td>
+<td>Rejected — loses 5 pp</td>
+</tr>
+<tr>
+<td>C (lean + optional tool calls)</td>
+<td style="text-align: right;"><strong>0.815</strong></td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">$0.037</td>
+<td>Flagged for re-test</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key finding:</strong> quality is a statistical tie; all three variants fail
+the same four "coordinate of named device" cases — a reviewer-side
+controlled-vocabulary problem, not a prompt-quality problem.</p>
+<p><strong>Open TODO:</strong> re-run the harness with the <strong>full production cache block</strong>
+(<code>compose_system.md</code>, 60 KB, cached). Expected production-A cost
+≥ $0.08 per 20 paths — if confirmed, variant C passes the 50 % cost
+gate and becomes the promoted default.</p>
+<h2 id="4-isn-grammar-vocab-is-another-round-needed">4. ISN grammar &amp; vocab — is another round needed?</h2>
+<p><strong>Shipped in ISN rc14/rc15:</strong>
+- <code>Transformation</code> enum desync (F1)
+- Fourier / toroidal-mode decomposition (F3)
+- <code>over_</code> region-scoped integrals (F4)
+- D5 senior-review expansion
+- rc15 plasma-wall-interactions gap closure</p>
+<p><strong>Outstanding gaps still firing (from graph <code>VocabGap</code> nodes):</strong>
+- Process: <code>diamagnetic_drift</code>, <code>diamagnetic_drift_velocity</code>
+- Object: <code>neoclassical_tearing_mode</code>, <code>ion_state</code>, <code>ion_charge_state</code>,
+  <code>secondary_separatrix</code>, <code>halo_current_area_end_point</code>,
+  <code>strike_point</code>, <code>control_surface</code>, <code>geometric_axis</code>
+- Object: RF launcher parts — <code>ec_launcher_mirror</code>,
+  <code>lower_hybrid_antenna</code>, <code>electron_cyclotron_launcher_launching_position</code>,
+  <code>beam_tracing_point</code>
+- Qualifier: <code>per_toroidal_mode_number</code>, <code>per_toroidal_mode</code>,
+  <code>inside_flux_surface</code>, <code>volume_averaged</code>, <code>vibrational_level</code></p>
+<p><strong>Recommendation:</strong> Package an <strong>rc16</strong> bundle covering the object +
+qualifier tokens before any further PWI/RF rotations. The
+<code>diamagnetic_drift</code> process token has a live issue queue entry
+already.</p>
+<h2 id="5-grammar-decomposition-are-we-persisting-it">5. Grammar decomposition — are we persisting it?</h2>
+<p><strong>No — and this is a real gap.</strong> <code>imas_standard_names.grammar.parse_standard_name</code>
+returns a rich <code>StandardName</code> object with twelve segment fields
+(<code>component</code>, <code>coordinate</code>, <code>subject</code>, <code>device</code>, <code>geometric_base</code>,
+<code>physical_base</code>, <code>object</code>, <code>geometry</code>, <code>position</code>, <code>process</code>,
+<code>transformation</code>, <code>binary_operator</code>, <code>secondary_base</code>). <strong>None</strong> of
+these are written to the graph. The schema currently persists only
+<code>id</code>, <code>unit</code>, <code>kind</code>, <code>physics_domain</code>, <code>tags</code>, <code>description</code>,
+<code>documentation</code>, <code>source_paths</code>, etc.</p>
+<p><strong>Consequence:</strong> we cannot query "show every SN whose <code>physical_base</code>
+is <code>temperature</code>" or "find radial-component names missing the
+<code>radial_component_of_</code> prefix on equivalent vector-component
+siblings". The R2 corpus-audit work used string-matching heuristics
+precisely because the decomposition wasn't available.</p>
+<p><strong>Proposed fix (schema change):</strong></p>
+<pre><code class="language-yaml">StandardName:
+  attributes:
+    grammar_component: {description: 'Component prefix (radial, toroidal, ...)', range: string}
+    grammar_coordinate: {description: 'Coordinate qualifier', range: string}
+    grammar_subject: {description: 'Particle subject (electron, ion, ...)', range: string}
+    grammar_physical_base: {description: 'Core physical quantity', range: string}
+    grammar_process: {description: 'Process / due_to_ token', range: string}
+    grammar_transformation: {description: 'Transformation prefix', range: string}
+    grammar_object: {description: 'Named physical object (separatrix, ...)', range: string}
+    grammar_geometry: {description: 'Geometric qualifier (flux_surface_averaged, ...)', range: string}
+    grammar_position: {description: 'Position qualifier (at_magnetic_axis, ...)', range: string}
+    grammar_segments_hash: {description: 'Stable hash of the full segment tuple — for dedup', range: string}
+</code></pre>
+<p>Write-path: extend <code>persist_worker</code> to call <code>parse_standard_name()</code>
+and <code>SET sn += grammar_fields</code> on the node. Existing names can be
+back-filled by a one-shot loop. This unlocks:</p>
+<ol>
+<li><strong>Base-duplication detection</strong> — <code>MATCH (a)-(b) WHERE a.grammar_physical_base = b.grammar_physical_base AND ...</code></li>
+<li><strong>Auto-anti-pattern checks</strong> — any node with a multi-token
+   <code>physical_base</code> that should have been decomposed (e.g.
+   <code>line_averaged_carbon_number_density</code> — the <code>line_averaged</code>
+   qualifier leaked into the base).</li>
+<li><strong>Benchmark coherence</strong> — a benchmark set can assert per-segment
+   equivalence without string matching.</li>
+</ol>
+<h2 id="6-benchmark-set-are-we-ready">6. Benchmark set — are we ready?</h2>
+<p><strong>Yes, partially.</strong> <code>tests/standard_names/eval_sets/prompt_ab_v1.json</code>
+is a 20-path stratified set (5 domains × 4 path kinds); the runner
+(<code>scripts/prompt_ab_run.py</code>) works; reviewer scoring is calibrated
+(<code>benchmark_calibration.yaml</code>, <code>sn_review_criteria.yaml</code>).</p>
+<p><strong>What's missing before this is a production benchmark:</strong></p>
+<ol>
+<li><strong>Holdout against the ISN catalog.</strong> Pair ≥30 DD paths with
+   known-good ISN catalog names (the list in plan 23 §0A is a
+   solid seed: <code>psi → poloidal_magnetic_flux_profile</code>, <code>q →
+   safety_factor</code>, etc.). Scoring layer: <strong>exact-match bonus +
+   reviewer score + grammar-segment overlap</strong>.</li>
+<li><strong>Two-reviewer consensus.</strong> Single-reviewer scoring is
+   self-reinforcing (see §7). Gate "published" examples on
+   agreement between two different model families.</li>
+<li><strong>Anti-pattern negatives.</strong> ≥20 deliberately-bad names
+   (<code>ip</code> → <code>ip</code>, <code>temperature</code> → <code>temp</code>, unit-mismatched,
+   grammar-violating) to confirm the reviewer actually penalises
+   them.</li>
+</ol>
+<p><strong>Recommendation:</strong> lift the benchmark work out of plan 23 and into a
+dedicated plan <code>34-sn-benchmark-set.md</code> (new). Target deliverable:
+a 50-path curated benchmark with pass criteria, runnable as
+<code>imas-codex sn benchmark --set canonical</code>.</p>
+<h2 id="7-reviewer-model-diversity-yes-we-should-rotate">7. Reviewer model diversity — yes, we should rotate</h2>
+<p>Current state: reviewer is always the same model as compose
+(<code>anthropic/claude-sonnet-4.6</code> in production; opus-4.6 in the A/B
+harness). <strong>This is a measurement anti-pattern.</strong> A model scoring its
+own output under the same rubric will overweight its own stylistic
+preferences and underweight cross-family disagreements.</p>
+<p><strong>Proposed reviewer pool (cost vs breadth):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Model</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary reviewer</td>
+<td><code>anthropic/claude-opus-4.6</code></td>
+<td>Already calibrated; benchmark baseline</td>
+</tr>
+<tr>
+<td>Cross-family reviewer</td>
+<td><code>google/gemini-3.1-pro-preview</code></td>
+<td>Independent tokenization + training data</td>
+</tr>
+<tr>
+<td>Spot-check reviewer</td>
+<td><code>openai/gpt-5.4</code></td>
+<td>Third family; used on tier-boundary names only</td>
+</tr>
+</tbody>
+</table>
+<p>Apply as <code>sn review --reviewer-pool primary,cross-family</code> — score
+recorded per reviewer; consolidated score = min(primary, cross).
+Names flagged when reviewers disagree by &gt; 0.2 get escalated for
+manual inspection. This gives us a robust measurement instrument
+and cleanly generalises to benchmarking future compose models.</p>
+<p><strong>Implement as:</strong> extend the <code>[sn.benchmark]</code> pyproject table with
+<code>reviewer_pool</code> + a disagreement threshold; wire into
+<code>standard_names/review/pipeline.py</code>.</p>
+<h2 id="8-direction-robust-checks-vs-prompt-led-architecture">8. Direction — robust checks vs prompt-led architecture</h2>
+<p>The honest answer: <strong>both, in that order.</strong></p>
+<p>The A/B test shows prompt density is not the bottleneck. Quality
+gains come from:</p>
+<ol>
+<li><strong>Structural filters</strong> (classifier, unit safety, vocab gates) —
+   already shipped, still the highest-leverage knobs.</li>
+<li><strong>Grammar persistence</strong> (§5) — cheap, unblocks whole categories
+   of automated checks.</li>
+<li><strong>Cross-family review</strong> (§7) — the missing measurement layer.</li>
+<li><strong>Prompt refinements</strong> (variant C, exemplar curation) — marginal
+   at this stage; prioritise after steps 1–3.</li>
+</ol>
+<h2 id="9-concrete-next-steps">9. Concrete next steps</h2>
+<p>Ordered by leverage-per-effort:</p>
+<ol>
+<li><strong>File plan 34 — Benchmark set v1</strong> (this document's §6). Deliverable: 50-path curated set + runnable CLI.</li>
+<li><strong>Ship grammar persistence</strong> (this document's §5). Schema change + back-fill loop. Unblocks base-duplication and auto-anti-pattern queries.</li>
+<li><strong>Ship cross-family review</strong> (this document's §7). Config-level change; reuses existing review infra.</li>
+<li><strong>Re-run A/B with production cache block</strong> (plan 32 Phase 2 TODO). Confirms whether variant C is promoted.</li>
+<li><strong>Package ISN rc16</strong> with the object + qualifier tokens in §4. Blocker for PWI/RF domains reaching &gt; 0.7 avg score.</li>
+<li><strong>Continue regen rotations</strong> on the four &lt; 0.5 domains
+   (fast_particles, waves, turbulence, plasma_wall_interactions) —
+   in the existing <code>sn generate --below-score 0.6 --include-review-feedback</code> loop, unchanged.</li>
+</ol>
+<h2 id="10-housekeeping">10. Housekeeping</h2>
+<ul>
+<li><code>plans/README.md</code> is stale — references plan 28 as current (now superseded by 29). Updated alongside this doc.</li>
+<li><code>pending/20-consistency-and-prompt-enrichment.md</code> is fully implemented. Moved to <code>completed/superseded/</code>.</li>
+<li><a href="../../../docs/sn-quality-parity.html"><code>docs/sn-quality-parity.html</code></a> retained as the HTML record — its Phase 0 benchmark-harness design feeds plan 34.</li>
+</ul>
+  </main>
+</body>
+</html>

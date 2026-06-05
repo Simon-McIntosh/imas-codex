@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="36-batching-audit">
+  <meta name="plan-title" content="36 — Batching Audit and Token-Aware Improvements">
+  <meta name="plan-summary" content="Batching happens in `enrichment.py` via two grouping strategies:">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="34-regen-cycle-results,35-metadata-qa-report">
+  <title>36 — Batching Audit and Token-Aware Improvements | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>36 — Batching Audit and Token-Aware Improvements</h1>
+    <p><strong>Status</strong>: implemented
+<strong>Date</strong>: 2025-07-24</p>
+<h2 id="current-behaviour-pre-change">Current Behaviour (pre-change)</h2>
+<h3 id="generate-pipeline-sn-generate">Generate pipeline (<code>sn generate</code>)</h3>
+<p>Batching happens in <code>enrichment.py</code> via two grouping strategies:</p>
+<ol>
+<li>
+<p><strong><code>group_by_concept_and_unit</code></strong> — groups enriched paths by
+   <code>(grouping_cluster_id × unit)</code>.  Unclustered paths sub-group by
+   <code>(IDS × parent_path × unit)</code>.  <code>max_batch_size=25</code> splits
+   oversized groups.</p>
+</li>
+<li>
+<p><strong><code>group_for_name_only</code></strong> — groups by <code>(physics_domain × unit)</code>.
+   <code>batch_size=50</code> (configurable via <code>name-only-batch-size</code> in
+   pyproject).</p>
+</li>
+</ol>
+<p><strong>Problem</strong>: cluster × unit fragments heavily. Most clusters contain
+1–3 paths, yielding singleton batches that pay the full system-prompt
+cost (~3 k tokens) for a single candidate. Logs show sustained
+"Batch X: 1 composed" patterns.</p>
+<h3 id="enrich-pipeline-sn-enrich">Enrich pipeline (<code>sn enrich</code>)</h3>
+<p>Batching in <code>enrich_workers.py::_build_batches</code> — simple sequential
+chunking of claimed items into fixed-size slices (<code>batch_size=8</code> default
+in state, <code>_ENRICH_BATCH_SIZE=10</code> module constant). No concept grouping,
+no token awareness.</p>
+<p><strong>Problem</strong>: no pyproject knob for enrich batch-size default. Enrich packs
+~800–1200 tokens per name (docs, exemplars, DD context) so batches should
+be smaller (8–15) to stay within budget.</p>
+<h3 id="token-budget">Token budget</h3>
+<p>Neither pipeline estimates token usage before dispatch. The 200k
+context window is never measured — oversized batches would silently
+truncate or fail.</p>
+<h2 id="changes-implemented">Changes Implemented</h2>
+<h3 id="1-batching-module-imas_codexstandard_namesbatchingpy">1. Batching module (<code>imas_codex/standard_names/batching.py</code>)</h3>
+<p>New module with three responsibilities:</p>
+<ul>
+<li><strong>Grouping strategies</strong>: <code>group_by_cluster_and_unit</code> (current, for full
+  compose), <code>group_by_domain_and_unit</code> (name-only), <code>group_for_enrich</code>
+  (sequential chunking with claim-token).</li>
+<li><strong>Token estimation</strong>: <code>estimate_batch_tokens()</code> using <code>len(text) / 4</code>
+  heuristic (tiktoken not a dependency).</li>
+<li><strong>Pre-flight check</strong>: <code>pre_flight_token_check()</code> splits any batch
+  exceeding <code>max_tokens</code> (default 150k, configurable) into sub-batches.</li>
+</ul>
+<h3 id="2-configuration-pyprojecttoml">2. Configuration (<code>pyproject.toml</code>)</h3>
+<pre><code class="language-toml">[tool.imas-codex.sn-generate]
+batch-size = 25
+name-only-batch-size = 50
+max-tokens = 150000
+
+[tool.imas-codex.sn-enrich]
+batch-size = 12
+max-tokens = 150000
+</code></pre>
+<h3 id="3-integration">3. Integration</h3>
+<ul>
+<li><code>enrichment.py</code> functions now delegate to <code>batching.py</code> for the
+  chunking + splitting logic while retaining their context-building.</li>
+<li><code>enrich_workers.py</code> reads <code>batch-size</code> from pyproject if state
+  doesn't override.</li>
+<li>Pre-flight token check runs automatically after batch construction
+  in both generate and enrich extract workers.</li>
+</ul>
+<h3 id="4-beforeafter-batch-size-distribution">4. Before/After batch-size distribution</h3>
+<p><strong>Full compose (cluster × unit)</strong>: unchanged — inherently fine-grained
+because cluster scoping is semantically correct for rich-context mode.</p>
+<p><strong>Name-only (domain × unit)</strong>: already dense (mean ~13 at batch_size=50).
+No change to grouping, but pre-flight check now guards against outliers.</p>
+<p><strong>Enrich</strong>: default moves from 10 → 12 (pyproject knob), with pre-flight
+token check splitting any oversized batches.</p>
+  </main>
+</body>
+</html>

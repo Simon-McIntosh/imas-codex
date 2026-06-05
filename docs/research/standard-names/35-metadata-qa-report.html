@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="35-metadata-qa-report">
+  <meta name="plan-title" content="Metadata QA Report — 2025-07-17">
+  <meta name="plan-summary" content="**1083** StandardName nodes audited - DD version: 4.1.0 (uniform across all nodes) - Relationship types verified: HAS_UNIT, HAS_COCOS, HAS_STANDARD_NAME, PRODUCED_NAME, HAS_SEGMENT, FROM_DD_PATH">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="12-full-graph-review,34-regen-cycle-results">
+  <title>Metadata QA Report — 2025-07-17 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Metadata QA Report — 2025-07-17</h1>
+    <h2 id="audit-scope">Audit scope</h2>
+<ul>
+<li><strong>1083</strong> StandardName nodes audited</li>
+<li>DD version: 4.1.0 (uniform across all nodes)</li>
+<li>Relationship types verified: HAS_UNIT, HAS_COCOS, HAS_STANDARD_NAME, PRODUCED_NAME, HAS_SEGMENT, FROM_DD_PATH</li>
+</ul>
+<h2 id="findings">Findings</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Severity</th>
+<th>Category</th>
+<th style="text-align: right;">Count</th>
+<th>Fix applied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HIGH</td>
+<td>Unit mismatch vs DD (SN unit wrong)</td>
+<td style="text-align: right;">5</td>
+<td>Cypher fix: <code>boron_ion_number_density</code> (1→m⁻³), <code>hydrogen_ion_density</code> (1→m⁻³), <code>major_radius_of_magnetic_axis</code> (1→m), <code>poloidal_angle_grid_of_flux_tube</code> (1→rad), <code>poloidal_steering_angle_of_electron_cyclotron_beam</code> (1→rad)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>HIGH</td>
+<td>Unit convention mismatch (charge unit)</td>
+<td style="text-align: right;">4</td>
+<td>Cypher fix: <code>atomic_number</code>, <code>ion_average_charge_of_ion_state</code>, <code>ion_average_square_charge_of_ion_state</code>, <code>ion_charge_number_at_ion_state</code> — all 1→e</td>
+</tr>
+<tr>
+<td>3</td>
+<td>MED</td>
+<td>Unit dimensional equivalents (DD convention preferred)</td>
+<td style="text-align: right;">2</td>
+<td>Cypher fix: <code>fast_ion_pressure</code> (J.m⁻³→Pa), <code>toroidal_torque_inside_flux_surface</code> (kg.m².s⁻²→m.N)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>MED</td>
+<td>Unit ambiguity (DD path has dual units)</td>
+<td style="text-align: right;">2</td>
+<td>Cypher fix: <code>binormal_component_of_wave_magnetic_field</code> (m⁻¹.V→T), <code>parallel_current_due_to_non_inductive_current_drive</code> (A.m→A)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>LOW</td>
+<td>Residual unit mismatches (HAS_STANDARD_NAME mislinks)</td>
+<td style="text-align: right;">7</td>
+<td>No SN fix — mislinked DD paths with dimensionally equivalent or wrong DD units</td>
+</tr>
+<tr>
+<td>6</td>
+<td>MED</td>
+<td>Empty descriptions</td>
+<td style="text-align: right;">136</td>
+<td>Expected: all have <code>review_status=named</code> (pre-enrichment stage)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>LOW</td>
+<td>Orphaned SNs (no PRODUCED_NAME source)</td>
+<td style="text-align: right;">140</td>
+<td>No fix — from enrichment pipeline, <code>model=NULL</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>LOW</td>
+<td>Missing cocos_transformation_type warning guard</td>
+<td style="text-align: right;">1</td>
+<td>Code fix: added warning in <code>write_standard_names()</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>INFO</td>
+<td>physics_domain NULL</td>
+<td style="text-align: right;">1</td>
+<td>Acceptable — single edge case</td>
+</tr>
+</tbody>
+</table>
+<h3 id="unit-fix-detail">Unit fix detail</h3>
+<p>13 StandardName HAS_UNIT relationships corrected via inline Cypher:</p>
+<pre><code class="language-cypher">-- For each (sn_id, new_unit):
+MATCH (sn:StandardName {id: $sn_id})-[old_r:HAS_UNIT]-&gt;(:Unit)
+DELETE old_r
+WITH sn
+MATCH (u:Unit {id: $new_unit})
+MERGE (sn)-[:HAS_UNIT]-&gt;(u)
+</code></pre>
+<h3 id="clean-findings-no-action-needed">Clean findings (no action needed)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing HAS_UNIT (non-metadata)</td>
+<td>0 ✓</td>
+</tr>
+<tr>
+<td>physics_domain values vs PhysicsDomain enum</td>
+<td>All valid ✓</td>
+</tr>
+<tr>
+<td>physics_domain mismatch vs DD source</td>
+<td>0 ✓</td>
+</tr>
+<tr>
+<td>COCOS transformation without HAS_COCOS link</td>
+<td>0 ✓</td>
+</tr>
+<tr>
+<td>Partial grammar population</td>
+<td>0 ✓</td>
+</tr>
+<tr>
+<td>Tag normalisation (case, format)</td>
+<td>48 distinct tags, all lowercase-hyphenated ✓</td>
+</tr>
+<tr>
+<td>Kind values</td>
+<td>5 valid kinds (scalar, vector_component, complex_part, tensor_component, spectrum) ✓</td>
+</tr>
+<tr>
+<td>dd_version consistency</td>
+<td>All 4.1.0 ✓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="distributions">Distributions</h3>
+<p><strong>Validation status:</strong> valid=766, pending=131, quarantined=102, needs_revision=84</p>
+<p><strong>Review status:</strong> enriched=742, named=328, drafted=13</p>
+<p><strong>Kind:</strong> scalar=892, vector_component=179, complex_part=9, tensor_component=2, spectrum=1</p>
+<p><strong>COCOS transformation types:</strong> one_like=614, NULL=457, psi_like=4, b0_like=3, ip_like=2, q_like=1, grid_type_tensor_contravariant_like=1, tor_angle_like=1</p>
+<p><strong>Grammar coverage:</strong> grammar_physical_base=1066/1083, grammar_subject=286, grammar_component=161</p>
+<p><strong>HAS_SEGMENT edges:</strong> 14 SNs (grammar edge writing is optional, runs on-demand)</p>
+<p><strong>Confidence:</strong> min=0.20, max=1.00, avg=0.81 (N=943)</p>
+<h3 id="reviewer-fields-observe-only-c4-multi-reviewer-2-restructuring">Reviewer fields (OBSERVE ONLY — c4-multi-reviewer-2 restructuring)</h3>
+<ul>
+<li>763 SNs have reviewer_score/model/tier</li>
+<li>0 Review nodes exist (migration to Review node schema pending)</li>
+<li><strong>No modifications made</strong> to reviewer_* fields per task constraint</li>
+</ul>
+<h2 id="pipeline-guards">Pipeline guards</h2>
+<h3 id="existing-verified">Existing (verified)</h3>
+<ul>
+<li><code>unit</code> injected from <code>source_item.get("unit")</code> in compose worker (line 1137)</li>
+<li><code>physics_domain</code> injected from <code>source_item.get("physics_domain")</code> (line 1146)</li>
+<li><code>cocos_transformation_type</code> injected from <code>source_item.get("cocos_label")</code> (line 1150)</li>
+<li>Unit conflict detection in <code>write_standard_names()</code> (line 556-585)</li>
+<li><code>coalesce()</code> used for physics_domain, cocos_transformation_type, dd_version in MERGE Cypher</li>
+</ul>
+<h3 id="added">Added</h3>
+<ul>
+<li><strong>cocos_transformation_type without cocos integer warning</strong> in <code>write_standard_names()</code> — logs a WARNING when <code>cocos_transformation_type</code> is set but <code>cocos</code> integer is <code>None</code>, since the HAS_COCOS edge won't be created</li>
+</ul>
+<h2 id="invariant-tests-30-total">Invariant tests (30 total)</h2>
+<h3 id="pre-existing-16">Pre-existing (16)</h3>
+<ul>
+<li>TestSchemaInvariants: unit_slot_has_unit_range, cocos_slot_has_cocos_range, kind_enum_values, validation_status_enum</li>
+<li>TestWriteCypherInvariants: has_unit_relationship, has_cocos_uses_match, physics_domain_coalesce, cocos_transformation_type_coalesce, dd_version_coalesce, cocos_missing_integer_warning, unit_in_batch_payload</li>
+<li>TestGrammarDecomposition: field_set, returns_all_fields</li>
+<li>TestComposeWorkerInjection: unit_from_source, physics_domain_from_source, cocos_from_source</li>
+</ul>
+<h3 id="existing-4">Existing (4)</h3>
+<ul>
+<li>TestPhysicsDomainEnum: importable, has_general, has_equilibrium, no_mhd_alias</li>
+</ul>
+<h3 id="added-10-new">Added (10 new)</h3>
+<ul>
+<li>TestStandardNameKindEnum: kind_enum_no_unknown_values, kind_enum_includes_metadata</li>
+<li>TestTagNormalisation: tags_lowercase_hyphenated, write_cypher_preserves_tags</li>
+<li>TestDDVersionConsistency: dd_version_uses_coalesce_in_write</li>
+<li>TestWritePathRelationships: has_unit_uses_merge, has_standard_name_for_dd, unit_batch_includes_all</li>
+<li>TestUnitOverrideEngine: override_engine_importable, override_config_exists</li>
+</ul>
+<h2 id="residual-not-fixable-in-this-audit">Residual (not fixable in this audit)</h2>
+<ol>
+<li><strong>136 empty descriptions</strong> — expected for <code>named</code> status; will be populated by <code>sn enrich</code> pipeline</li>
+<li><strong>140 orphaned SNs</strong> (no PRODUCED_NAME source) — created by enrichment pipeline without source provenance; needs pipeline investigation</li>
+<li><strong>7 residual unit mismatches</strong> via HAS_STANDARD_NAME — caused by DD paths with dual units or mislinked entity→concept edges; fixing requires HAS_STANDARD_NAME edge cleanup</li>
+<li><strong>0 links populated</strong> — link resolution (<code>sn.links</code>) not yet run on any SN</li>
+<li><strong>14/1083 HAS_SEGMENT edges</strong> — grammar token edge writing is on-demand; most SNs lack segment edges</li>
+<li><strong>Quarantine rate 9.4%</strong> (102/1083) — exceeds 5% test threshold; requires vocab update + regen cycle</li>
+<li><strong>ISN rc17 regression</strong> — <code>test_enrich_document</code> and <code>test_vector_not_defaulted</code> failures are pre-existing in ISN v0.7.0rc17</li>
+</ol>
+  </main>
+</body>
+</html>

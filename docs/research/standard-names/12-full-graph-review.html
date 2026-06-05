@@ -1,0 +1,1245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="12-full-graph-review">
+  <meta name="plan-title" content="12 — Full Graph Standard-Name Review (705 names, 2026 rc13)">
+  <meta name="plan-summary" content="Valid: 584 / 705 (82.8%); Quarantined: 121 / 705 (17.2%). - Descriptions populated: 84 / 705 (11.9%) — **enrichment rotation has not yet run**. - Domains with &gt;30% quarantine (priority order): `current_drive 100%` (1/1),">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="33-state-of-the-nation-2026-04-20,34-regen-cycle-results,35-metadata-qa-report">
+  <title>12 — Full Graph Standard-Name Review (705 names, 2026 rc13) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>12 — Full Graph Standard-Name Review (705 names, 2026 rc13)</h1>
+    <blockquote>
+<p><strong>Role:</strong> senior standard-name reviewer (CF/ISN conventions + IMAS physics).
+<strong>Corpus:</strong> 705 StandardName nodes in the imas-codex Neo4j graph, exported
+to <code>sn-review-dump.md</code> / <code>sn-full-dump.json</code> at the end of the rc13
+bootstrap rotation.
+<strong>Companion plan:</strong> <code>plans/features/standard-names/31-quality-bootstrap-v2.md</code>
+consumes this report and dispatches parallel Opus workstreams.</p>
+<p><strong>Prior context (not repeated here):</strong>
+- R1 grammar findings, R2 semantic audit, R3 enrichment architecture
+  (archived under <code>plans/research/standard-names/archived-v1/</code>).
+- Plan 28 greenfield framing; plan 29 architectural pivot (generate/enrich
+  split + ISN grammar rc bump); plan 30 DD semantic node categories
+  (<code>fit_artifact</code>, <code>representation</code>).
+- D.3 / D.5 / E grammar-graph design notes — already landed in ISN rc12/rc13
+  (see <code>subjects.yml</code>, <code>processes.yml</code>, <code>positions.yml</code>, <code>components.yml</code>,
+  <code>transformations.yml</code>, <code>objects.yml</code>, <code>regions.yml</code>).</p>
+</blockquote>
+<hr />
+<h2 id="0-executive-summary-5-blockers-for-the-next-bootstrap-cycle">0. Executive summary — 5 blockers for the next bootstrap cycle</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Blocker</th>
+<th>Owner</th>
+<th>Estimated impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B1</strong></td>
+<td>DD representation/fit-artifact paths continue to leak into the SN queue because plan 30 (<code>fit_artifact</code>, <code>representation</code> NodeCategory) has not yet landed. <strong>63/121 (52%) of quarantined names</strong> are GGD coefficients, reference-waveforms, or constraint-fit children.</td>
+<td>imas-codex classifier</td>
+<td>Quarantine drops from 17% → ~8% overnight.</td>
+</tr>
+<tr>
+<td><strong>B2</strong></td>
+<td>Prompt/grammar/exemplar contradictions: compose_system.md Rules 17/18/21 require <code>vertical_coordinate_of_</code>, <code>_of_plasma_boundary</code>, <code>_of_magnetic_axis</code>; exemplars P3/P5/P8 still advertise the older <code>_at_</code> / <code>_position_of_</code> forms. The LLM sees both and regresses on rotation.</td>
+<td>imas-codex prompts</td>
+<td>Eliminates ~15 recurrent anti-patterns per rotation.</td>
+</tr>
+<tr>
+<td><strong>B3</strong></td>
+<td>Silent unit-bug propagation on <code>*_reference_waveform</code> / <code>*_reference</code>: 16 quarantined names have <code>unit=1</code> while the name mentions <code>power</code>/<code>angle</code>/<code>frequency</code>/<code>voltage</code>. DD pulse_schedule reference signals publish <code>unit=1</code> as a sentinel (reference-normalized waveform) — but codex treats them as physical quantities.</td>
+<td>imas-codex classifier + DD</td>
+<td>Cuts <code>plasma_control</code> quarantine rate from <strong>51% → ≤10%</strong>.</td>
+</tr>
+<tr>
+<td><strong>B4</strong></td>
+<td>Grammar vocabulary gaps force ~12 near-valid quarantines. Critical missing tokens: <code>e_cross_b_drift</code> (Process), <code>thermalization_of_fast_particles</code> / <code>thermal_fusion</code> (Process), <code>suprathermal_electrons</code> (Subject or Process), <code>ferritic_element_centroid</code> (Position), <code>neutron_detector</code> (Position), <code>atom_multiplicity_of_isotope</code> unit sanitization (DD).</td>
+<td>iter-standard-names + DD</td>
+<td>Unblocks 12 quarantines; adds 2–3 valid names.</td>
+</tr>
+<tr>
+<td><strong>B5</strong></td>
+<td>DD-upstream sentinel leaks into names: <code>diamagnetic_component_of_*</code> (edge_profiles/ggd/*/diamagnetic treats a drift as a spatial axis), <code>vacuum_toroidal_field_function</code> (r·B0 product called "<code>field</code>"), <code>grid_object_measure</code> with <code>unit=m^dimension</code>, <code>atom_multiplicity_of_isotope</code> unit <code>Elementary Charge Unit</code>. These must be filed as DD issues; codex can only suppress them at the classifier.</td>
+<td>IMAS DD</td>
+<td>Ends a class of false quarantines forever.</td>
+</tr>
+</tbody>
+</table>
+<p>Corpus health on rc13 export:</p>
+<ul>
+<li>Valid: 584 / 705 (82.8%); Quarantined: 121 / 705 (17.2%).</li>
+<li>Descriptions populated: 84 / 705 (11.9%) — <strong>enrichment rotation has not yet run</strong>.</li>
+<li>Domains with &gt;30% quarantine (priority order):
+  <code>current_drive 100%</code> (1/1), <code>unknown 100%</code> (1/1), <code>plasma_control 51%</code> (18/35),
+  <code>magnetohydrodynamics 40%</code> (32/80), <code>computational_workflow 38%</code> (5/13),
+  <code>fast_particles 32%</code> (10/31), <code>particle_measurement_diagnostics 32%</code> (6/19).</li>
+<li>Issue classes (total 126 audit hits, multi-hit names common):
+  representation_artifact 36, pydantic:scalar.name 25, name_unit_consistency 25,
+  multi_subject 10, implicit_field 6, diamagnetic_component 6,
+  density_unit_consistency 5, causal_due_to 5, cumulative_prefix 4,
+  parse_error 6, pydantic:scalar.unit 2, unit_validity 1.</li>
+</ul>
+<hr />
+<h2 id="1-quarantine-heat-map">1. Quarantine heat-map</h2>
+<pre><code>current_drive            (1)  ██████████████████████████████ 100%   [dummy placeholder]
+unknown                  (1)  ██████████████████████████████ 100%   [dummy placeholder]
+plasma_control          (35)  ███████████████░░░░░░░░░░░░░░░  51%   pulse_schedule reference_waveform unit=1
+magnetohydrodynamics    (80)  ████████████░░░░░░░░░░░░░░░░░░  40%   mhd/ggd/*/coefficients (representation)
+computational_workflow  (13)  ███████████░░░░░░░░░░░░░░░░░░░  38%   transport_solver_numerics boundary_condition
+fast_particles          (31)  ██████████░░░░░░░░░░░░░░░░░░░░  32%   causal_due_to + multi_subject on distributions
+particle_meas_diag      (19)  ██████████░░░░░░░░░░░░░░░░░░░░  32%   multi_subject on dt/dd pairs + missing Position tokens
+auxiliary_heating       (91)  █████░░░░░░░░░░░░░░░░░░░░░░░░░  14%   wave ggd coefficients
+core_plasma_physics      (7)  █████░░░░░░░░░░░░░░░░░░░░░░░░░  14%   D-T pair
+edge_plasma_physics     (50)  █████░░░░░░░░░░░░░░░░░░░░░░░░░  14%   diamagnetic_component + on_ggd
+equilibrium             (96)  ████░░░░░░░░░░░░░░░░░░░░░░░░░░  11%   constraint children + coordinate_of_
+general                 (62)  ████░░░░░░░░░░░░░░░░░░░░░░░░░░  11%   multi_subject on fusion pairs
+plant_systems           (34)  ███░░░░░░░░░░░░░░░░░░░░░░░░░░░   9%   e_cross_b_drift + coordinate_of_
+structural_components   (15)  ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   7%   energy_multiplication_factor unit=1
+electromagnetic_w_diag  (39)  ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   5%   suprathermal_electrons
+transport               (40)  ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░   5%   diamagnetic_component of e_field + temperature_validity
+radiation_meas_diag     (37)  █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   3%   distance_between_measurement_and_sep
+(all other domains)                                             0%
+</code></pre>
+<p>Two signals dominate: <strong>representation artifacts concentrated in ggd-heavy
+IDSs</strong> (mhd, auxiliary_heating, equilibrium ggd subsets) and
+<strong>reference-waveform sentinels in pulse_schedule</strong>. Neither is a grammar
+failure — both are classifier gaps.</p>
+<hr />
+<h2 id="2-findings-by-category">2. Findings by category</h2>
+<p>Each finding: concrete names, root cause, proposed resolution, owner.
+Owners: <strong>CLS</strong> = codex classifier (<code>imas_codex/standard_names/classifier.py</code>
+and <code>source_paths.py</code>); <strong>CMP</strong> = codex compose prompts
+(<code>imas_codex/llm/prompts/sn/*</code>); <strong>AUD</strong> = codex audits
+(<code>imas_codex/standard_names/audits.py</code>); <strong>ISN</strong> = iter-standard-names
+vocabularies (<code>imas_standard_names/grammar/vocabularies/*.yml</code>);
+<strong>DD</strong> = IMAS Data Dictionary upstream filing;
+<strong>GRF</strong> = graph-side remediation (purge / consolidate / link); <strong>ENR</strong> =
+enrichment prompt (descriptions).</p>
+<h3 id="21-representation-artifacts-classifier-gap-b1">2.1 Representation artifacts — classifier gap (B1)</h3>
+<p><strong>Quarantine contribution:</strong> 36 audit hits + ~25 secondary (GGD-related
+pydantic failures). Dominant in <code>magnetohydrodynamics</code> (22 of 32 quarantines)
+and <code>auxiliary_heating</code> (6 of 13). All already flagged by
+<code>representation_artifact_check</code>.</p>
+<p><strong>Concrete names (sample):</strong>
+- <code>electron_temperature_finite_element_interpolation_coefficients_on_ggd</code>
+  (dd:mhd/ggd/electrons/temperature/coefficients)
+- <code>mass_density_ggd_coefficients</code> (dd:mhd/ggd/mass_density/coefficients)
+- <code>ion_temperature_ggd_coefficients</code>, <code>ion_number_density_ggd_coefficients</code>
+- <code>poloidal_magnetic_flux_finite_element_interpolation_coefficients_on_ggd</code>
+- <code>toroidal_current_density_ggd_coefficients</code>
+- <code>radial_component_of_magnetic_field_ggd_coefficients</code>,
+  <code>vertical_component_of_*</code>, <code>toroidal_component_of_*</code> (×10 variants)
+- <code>effective_charge_interpolation_coefficient_on_ggd</code>
+- <code>radial_component_of_magnetic_vector_potential_interpolation_coefficients</code>
+- <code>toroidal_component_of_plasma_velocity_ggd_coefficients</code> (+ r/z siblings)
+- <code>vorticity_per_major_radius_ggd_coefficients</code>
+- <code>poloidal_component_of_perturbed_magnetic_field_finite_element_coefficients_{real,imaginary}_part</code>
+  (mhd_linear coordinate{1,2,3})</p>
+<p><strong>Root cause.</strong> The DD stores field values at quadrature nodes under
+<code>*/values</code> <em>and</em> basis-function coefficients under <code>*/coefficients</code>. Both
+share the same parent DataNode → both are classified as physics leaves.
+The LLM then faithfully appends <code>_finite_element_interpolation_coefficients_on_ggd</code>
+or <code>_ggd_coefficients</code>.</p>
+<p><strong>Resolution.</strong> Plan 30 already specifies the fix: add <code>NodeCategory=representation</code>
+for <code>*/coefficients</code>, <code>grid_subset/*</code>, <code>grids_ggd/*</code>, <code>fourier_mode/*</code>, and
+finite-element basis paths. <strong>Blocker: plan 30 has not landed.</strong> Until it
+does, re-running the rotation will regenerate these names.</p>
+<p><strong>Owner:</strong> CLS (plan 30 dependency).</p>
+<p><strong>Secondary defect:</strong> 6 names wrongly frame the coefficient as a
+component (e.g. <code>radial_component_of_magnetic_field_ggd_coefficients</code> is
+treated as a vector_component). Even after classifier exclusion, the
+<code>representation_artifact_check</code> regex should also match <code>_ggd_coefficients</code>,
+<code>_interpolation_coefficient</code>, <code>_coefficient_on_ggd</code>, <code>_coefficients_imaginary</code>,
+<code>_coefficients_real</code> (currently misses <code>_coefficients_{imaginary,real}_part</code>
+on mhd_linear). Add as AUD patch.</p>
+<hr />
+<h3 id="22-reference-waveform-sentinels-classifier-gap-b3">2.2 Reference-waveform sentinels — classifier gap (B3)</h3>
+<p><strong>Quarantine contribution:</strong> 16 names, all in <code>plasma_control</code> with
+<code>name_unit_consistency_check</code> on <code>power</code>/<code>angle</code>/<code>frequency</code>/<code>voltage</code>.</p>
+<p><strong>Concrete names:</strong>
+- <code>electron_cyclotron_beam_frequency_reference_waveform</code> [unit=1]
+- <code>electron_cyclotron_beam_launched_power_reference_waveform</code> [unit=1]
+- <code>electron_cyclotron_beam_poloidal_steering_angle_reference_waveform</code> [unit=1]
+- <code>electron_cyclotron_beam_toroidal_steering_angle_reference_waveform</code> [unit=1]
+- <code>electron_cyclotron_launched_power_reference_waveform</code> [unit=1]
+- <code>ion_cyclotron_heating_antenna_reference_frequency</code> [unit=1]
+- <code>ion_cyclotron_heating_antenna_reference_power</code> [unit=1]
+- <code>ion_cyclotron_heating_reference_power</code> [unit=1]
+- <code>loop_voltage_reference_waveform</code> [unit=1]
+- <code>lower_hybrid_antenna_frequency</code> [unit=1]
+- <code>lower_hybrid_heating_power</code> [unit=1]
+- <code>neutral_beam_injection_power_reference</code> [unit=1]
+- <code>poloidal_field_coil_current_reference_waveform</code> [unit=1]
+- <code>poloidal_field_coil_supply_voltage_reference</code> [unit=1]
+- <code>major_radius_of_active_limiter_point</code>, <code>major_radius_of_geometric_axis</code>,
+  <code>major_radius_of_magnetic_axis</code>, <code>major_radius_of_strike_point</code>,
+  <code>vertical_coordinate_of_*</code> (×4), <code>resistance_of_poloidal_field_coil</code>
+  — all <code>unit=1</code> for geometry/resistance under pulse_schedule/position_control.</p>
+<p><strong>Root cause.</strong> DD paths of the form
+<code>dd:pulse_schedule/&lt;system&gt;/&lt;control&gt;/reference</code> and
+<code>dd:pulse_schedule/&lt;system&gt;/&lt;control&gt;/reference/data</code> carry <code>unit=1</code> because
+pulse_schedule reference signals are <strong>controller setpoints/waveforms</strong>,
+not physical quantities. The pulse_schedule IDS intentionally publishes
+them dimensionless as reference traces (normalized or in controller units).
+Classifier has no rule excluding this subtree.</p>
+<p><strong>Resolution.</strong>
+- <strong>CLS:</strong> Exclude all DD paths matching
+  <code>^pulse_schedule/.+/reference(/.+)?$</code> and
+  <code>^pulse_schedule/.+/reference_waveform$</code>. These are setpoint/waveform
+  signals — not suitable for standard-name extraction. Consumers that want
+  a standard name for the controlled quantity should look up the underlying
+  physics path. (Note: some existing valid names like
+  <code>plasma_current_reference_waveform</code>, <code>effective_charge_reference_waveform</code>,
+  <code>gas_valve_flow_rate_reference</code> also live here — these pass audits but
+  are semantically identical to the quarantined ones. Policy must be
+  consistent: <strong>either all pulse_schedule/reference paths are excluded, or
+  a <code>_reference_setpoint</code> standard-name surface is defined</strong>. Recommend the
+  former for rc14; adopt explicit SNs only for controller-specific concepts
+  like <code>ip_reference_waveform</code> that have no physics peer.)
+- <strong>ISN (optional):</strong> If the graph retains some reference-waveforms, add
+  <code>reference_waveform</code> as a <em>transformation</em> token with the explicit rule
+  "outputs a dimensionless controller reference; the physical quantity
+  has its own SN". This is probably over-engineering; prefer exclusion.</p>
+<p><strong>Owner:</strong> CLS primary; DD secondary (DD could publish <code>unit=&lt;same as target&gt;</code>
+or at minimum annotate <code>lifecycle=obsolescent</code> for the bare <code>/reference</code>
+path now that <code>/reference_waveform</code> carries the data).</p>
+<hr />
+<h3 id="23-diamagnetic-component-drift-masquerading-as-a-projection-axis-b5">2.3 Diamagnetic-component drift masquerading as a projection axis (B5)</h3>
+<p><strong>Quarantine contribution:</strong> 6 audit hits (diamagnetic_component_check).</p>
+<p><strong>Concrete names:</strong>
+- <code>diamagnetic_component_of_anomalous_current_density</code>
+- <code>diamagnetic_component_of_ion_exb_drift_velocity</code>
+- <code>diamagnetic_component_of_ion_velocity_per_magnetic_field_magnitude</code>
+- <code>diamagnetic_component_of_magnetic_field</code>
+- <code>diamagnetic_component_of_magnetic_vector_potential</code>
+- <code>diamagnetic_component_of_electric_field</code></p>
+<p><strong>Root cause.</strong> DD paths like
+<code>edge_profiles/ggd/e_field/diamagnetic</code>,
+<code>core_profiles/profiles_1d/e_field/diamagnetic</code>, and
+<code>edge_profiles/ggd/ion/velocity/diamagnetic</code> use <code>/diamagnetic</code> as if it
+were a spatial projection alongside <code>/radial</code>, <code>/poloidal</code>, <code>/toroidal</code>.
+Physically wrong — diamagnetic drift is a <strong>vector quantity defined by the
+drift relation <code>v_dia = (B × ∇p)/(qnB²)</code></strong>, not a component axis of the
+embedded field. The correct standard name for the projection of <code>v_dia</code>
+onto a spatial direction is e.g. <code>radial_component_of_ion_diamagnetic_drift_velocity</code>.</p>
+<p><strong>Resolution.</strong>
+- <strong>DD:</strong> File issue upstream — rename <code>/diamagnetic</code> siblings under
+  <code>*/velocity/</code> and <code>*/e_field/</code> to reflect that they are drift magnitudes
+  or velocity scalars, not spatial components. E.g. rename
+  <code>edge_profiles/ggd/ion/velocity/diamagnetic</code> →
+  <code>edge_profiles/ggd/ion/diamagnetic_drift_velocity</code>.
+- <strong>CLS:</strong> Until DD fix, add a path-level exclusion for any DD path ending
+  in <code>/diamagnetic</code> under a parent that is itself a vector container
+  (<code>/velocity/</code>, <code>/e_field/</code>, <code>/j_tot/</code>, <code>/a_field/</code>, <code>/b_field/</code>). Emit the
+  path into <code>representation</code> or simply skip. The audit
+  <code>diamagnetic_component_check</code> should fire as a <strong>classifier veto</strong>, not
+  just a post-hoc audit.
+- <strong>ISN:</strong> The existing <code>components.yml</code> comment already documents that
+  <code>diamagnetic</code> is deferred as a component token — but the error message
+  surfaced to compose (<code>"Token 'diamagnetic' used with 'component_of'
+  template is missing from Component vocabulary"</code>) is misleading. Upgrade
+  the parser error to explicitly say: <em>"<code>diamagnetic</code> is a drift qualifier
+  (v_dia), not a spatial axis; name the drift as a base
+  (<code>ion_diamagnetic_drift_velocity</code>) and project with
+  <code>&lt;axis&gt;_component_of_</code>."</em></p>
+<p><strong>Owner:</strong> DD primary; CLS secondary; ISN tertiary (error-message patch).</p>
+<hr />
+<h3 id="24-multi-subject-on-d-t-d-d-t-t-pairs">2.4 Multi-subject on D-T / D-D / T-T pairs</h3>
+<p><strong>Quarantine contribution:</strong> 10 audit hits (multi_subject_check).</p>
+<p><strong>Concrete names:</strong>
+- <code>deuterium_tritium_fusion_power_density</code>
+- <code>deuterium_tritium_neutron_emissivity</code>
+- <code>deuterium_tritium_neutron_flux_due_to_{beam_beam,beam_thermal,thermal}_fusion</code>
+- <code>deuterium_tritium_total_neutron_flux</code>
+- <code>toroidal_component_of_collisional_torque_density_on_fast_ion_due_to_neutral_beam_injection</code>
+  (ion + neutral)
+- <code>tritium_gas_injection_accumulated_electron_count</code> (electron + tritium)
+- <code>tritium_to_deuterium_density_ratio</code> (deuterium + tritium)
+- <code>hydrogen_to_deuterium_density_ratio</code> (deuterium + hydrogen)</p>
+<p><strong>Root cause.</strong> ISN <code>subjects.yml</code> already lists <code>deuterium_tritium</code>,
+<code>deuterium_deuterium</code>, <code>tritium_tritium</code> as Tier 3 compound-species
+subjects. The audit splits on <code>_</code> boundaries and flags <strong>any</strong> token pair
+matching two Subject entries, but does not look up the compound forms.</p>
+<p><strong>Resolution.</strong>
+- <strong>AUD:</strong> Fix <code>multi_subject_check</code> to preferentially match the
+  longest compound subject first (<code>deuterium_tritium</code> → one subject,
+  not <code>['deuterium', 'tritium']</code>). Zero-rename; pure false-positive removal.
+- <strong>AUD:</strong> Add a grammar-aware exception for explicit binary-operator
+  compounds (<code>&lt;species_A&gt;_to_&lt;species_B&gt;_density_ratio</code>). These are
+  canonical ratio compounds; not a multi-subject violation. See §2.6.
+- <strong>AUD:</strong> The <code>electron + tritium</code> hit on
+  <code>tritium_gas_injection_accumulated_electron_count</code> is genuinely
+  confusing — the intent is "tritium gas injection quantified in
+  electron-equivalents (i.e. ionization electrons)." Rename to
+  <code>tritium_accumulated_gas_injection_electron_equivalent</code> to match the
+  sibling <code>deuterium_gas_injection_accumulated_electron_equivalent</code> and
+  move <code>electron_equivalent</code> to a recognized transformation or qualifier.</p>
+<p><strong>Owner:</strong> AUD primary; GRF secondary (rename electron_count → electron_equivalent).</p>
+<hr />
+<h3 id="25-causal-due_to_adjective-grammar-misuse">2.5 Causal <code>due_to_&lt;adjective&gt;</code> — grammar misuse</h3>
+<p><strong>Quarantine contribution:</strong> 5 audit hits (causal_due_to_check).</p>
+<p><strong>Concrete names:</strong>
+- <code>heating_power_due_to_halo</code> → use <code>due_to_halo_currents</code>
+- <code>heating_power_due_to_ohmic</code> → use <code>due_to_ohmic_dissipation</code>
+- <code>parallel_heat_flux_power_due_to_halo</code> → <code>due_to_halo_currents</code>
+- <code>toroidal_component_of_collisional_torque_density_on_thermal_ion_due_to_fast_ion</code>
+  → <code>due_to_fast_ions</code> or <code>due_to_fast_ion_slowing_down</code>
+- <code>toroidal_current_due_to_non_inductive</code> → <code>due_to_non_inductive_drive</code></p>
+<p><strong>Root cause.</strong> The LLM picks up DD segment names (<code>power_ohm</code>,
+<code>halo_currents</code>, <code>fast_ion</code>, <code>non_inductive</code>) and splices them with
+<code>due_to_</code>. The existing ISN <code>processes.yml</code> already has
+<code>ohmic_dissipation</code>, <code>non_inductive_drive</code>, and the D.5/rc13 additions
+include <code>halo</code> (with commentary that bare <code>halo</code> is an adjective; the
+process is <code>halo_currents</code>). The audit fires correctly; the prompt lets
+the pattern through.</p>
+<p><strong>Resolution.</strong>
+- <strong>CMP:</strong> Add a FORBIDDEN PATTERN exemplar to
+  <code>_exemplars_name_only.md</code>: <em>"<code>due_to_halo</code> / <code>due_to_ohmic</code> /
+  <code>due_to_fast_ion</code> are adjective forms; always use the process noun
+  (<code>due_to_halo_currents</code>, <code>due_to_ohmic_dissipation</code>,
+  <code>due_to_fast_ions</code>)."</em>
+- <strong>ISN:</strong> Add plural/noun forms <code>halo_currents</code>, <code>fast_ions</code> as Process
+  tokens (currently <code>halo</code> and <code>fast_ion</code> are present but their
+  adjectival surface forms confuse the LLM).
+- <strong>AUD:</strong> Extend <code>causal_due_to_check</code> with the <code>fast_ion</code> case (already
+  caught) and add <code>halo_currents</code> / <code>ohmic_dissipation</code> as canonical
+  replacements in the error message.</p>
+<p><strong>Owner:</strong> CMP + ISN.</p>
+<hr />
+<h3 id="26-_ratio-compounds-and-near-duplicate-density-ratios">2.6 <code>_ratio</code> compounds and near-duplicate density ratios</h3>
+<p><strong>Concrete names:</strong>
+- <code>tritium_to_deuterium_density_ratio</code> (quarantined, multi_subject)
+- <code>hydrogen_to_deuterium_density_ratio</code> (quarantined, multi_subject)
+- <code>hydrogen_isotope_density_ratio</code> (valid)
+- <code>neutron_emissivity_reconstruction_relative_error</code> (valid)</p>
+<p><strong>Root cause.</strong> Binary-operator segment for <code>ratio_of_X_to_Y</code> is not in
+ISN grammar (confirmed: <code>binary_operators.yml</code> lists only the operator
+markers; there is no canonical <code>ratio_of_&lt;A&gt;_to_&lt;B&gt;_density</code> template in
+the catalog). The LLM invents <code>X_to_Y_density_ratio</code>, which the audit
+then rejects as multi-subject.</p>
+<p><strong>Resolution.</strong>
+- <strong>ISN:</strong> Add a formal <em>ratio</em> transformation token or canonical
+  binary-operator form:
+  <code>ratio_of_&lt;subject_A&gt;_&lt;base&gt;_to_&lt;subject_B&gt;_&lt;base&gt;</code> (density ratio,
+  temperature ratio, pressure ratio). Document example:
+  <code>ratio_of_tritium_number_density_to_deuterium_number_density</code>.
+- <strong>GRF:</strong> Rename the two quarantined entries to the new form.
+- <strong>AUD:</strong> Multi_subject_check gets an exception for explicit ratio
+  compounds (see §2.4).</p>
+<p><strong>Owner:</strong> ISN primary.</p>
+<hr />
+<h3 id="27-vocabulary-gaps-b4">2.7 Vocabulary gaps (B4)</h3>
+<p>Each entry: the missing token, example quarantined name(s), proposed
+ISN enum addition, rationale.</p>
+<table>
+<thead>
+<tr>
+<th>Missing token</th>
+<th>Segment</th>
+<th>Example name</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>e_cross_b_drift</code></td>
+<td>Process</td>
+<td><code>vertical_component_of_ion_velocity_due_to_e_cross_b_drift</code>, <code>normalized_toroidal_flux_coordinate_displacement_due_to_e_cross_b_drift</code></td>
+<td>E×B drift is a physics mechanism; already referenced in DD (<code>pellets/.../rho_tor_norm_drift</code>) and plasma rotation literature.</td>
+</tr>
+<tr>
+<td><code>thermalization_of_fast_particles</code></td>
+<td>Process</td>
+<td><code>heating_power_due_to_thermalization_of_fast_particles</code>, <code>thermal_particle_number_density_source_due_to_thermalization_of_fast_particles</code></td>
+<td>Distribution-source mechanism in <code>distributions/.../thermalisation/*</code>. Extending the existing <code>thermalization</code> token with the <code>_of_fast_particles</code> qualifier (or permitting <code>thermalization_of_&lt;subject&gt;</code> template) resolves both.</td>
+</tr>
+<tr>
+<td><code>thermal_fusion</code></td>
+<td>Process</td>
+<td><code>deuterium_deuterium_neutron_flux_due_to_thermal_fusion</code>, <code>tritium_tritium_neutron_flux_due_to_thermal_fusion</code></td>
+<td>ISN has <code>beam_beam_fusion</code>, <code>beam_thermal_fusion</code>, but not the pure-thermal variant. Add <code>thermal_fusion</code>.</td>
+</tr>
+<tr>
+<td><code>suprathermal_electrons</code></td>
+<td>Subject or Population-qualifier</td>
+<td><code>suprathermal_electrons</code> (quarantined, electromagnetic_wave_diagnostics)</td>
+<td>DD has <code>electrons_suprathermal</code>; population tier between <code>thermal</code> and <code>fast</code>. Add to <code>subjects.yml</code> or to a new population axis.</td>
+</tr>
+<tr>
+<td><code>ferritic_element_centroid</code></td>
+<td>Position</td>
+<td><code>toroidal_component_of_magnetic_field_at_ferritic_element_centroid</code></td>
+<td>rc13 already added <code>ferritic_insert_centroid</code>; the <code>_element_</code> variant comes from the DD path <code>ferritic/element/*/time_slice/b_field_tor</code>. Add as synonym or rename the DD ingest to use <code>insert</code> consistently.</td>
+</tr>
+<tr>
+<td><code>neutron_detector</code></td>
+<td>Position</td>
+<td><code>neutron_flux_at_neutron_detector</code></td>
+<td>Diagnostic detector position; currently only <code>neutron_detector</code> is in Objects, not Positions. Either promote or add an Objects→Position mirror rule.</td>
+</tr>
+<tr>
+<td><code>normalized_parallel</code></td>
+<td>Component</td>
+<td>none in rc13 (but next rotation will hit <code>normalized_parallel_refractive_index</code>)</td>
+<td>rc13 added <code>normalized_radial</code>, <code>normalized_vertical</code>; <code>normalized_parallel</code> and <code>normalized_perpendicular</code> are the natural complements.</td>
+</tr>
+<tr>
+<td><code>translation</code></td>
+<td>Component or <strong>remove</strong></td>
+<td><code>translation_component_of_plasma_displacement</code> (from mhd_linear; currently mislabeled as Component)</td>
+<td>"Translation" is not a spatial axis; it is the zeroth-order mode of a perturbation expansion. Drop from Component; promote to a Process or transformation (<code>due_to_translation_mode</code>) or spell out as <code>normal_component_of_plasma_boundary_displacement</code>.</td>
+</tr>
+<tr>
+<td><code>boundary_condition_value</code> / <code>boundary_condition_on_ggd</code></td>
+<td><strong>exclude</strong></td>
+<td><code>electron_energy_transport_boundary_condition_value</code>, etc.</td>
+<td>Solver-configuration metadata, not physics. DD <code>transport_solver_numerics/boundary_conditions_1d/*</code>. Classifier should exclude the subtree. See §2.8.</td>
+</tr>
+<tr>
+<td><code>extensive_cumulative</code> / <code>extensive_integrated</code></td>
+<td><strong>remove</strong></td>
+<td><code>line_integrated_electron_density_constraint_measurement_time</code></td>
+<td>Audit already catches <code>integrated_</code> misuse; see §2.11.</td>
+</tr>
+<tr>
+<td><code>electron_equivalent</code></td>
+<td>Transformation</td>
+<td><code>tritium_gas_injection_accumulated_electron_count</code> (rename to <code>..._electron_equivalent</code>)</td>
+<td>DD publishes several gas-injection counts measured in ionization-electron equivalents. Add as transformation + documentation.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="28-solver-boundary-condition-paths-classifier-gap">2.8 Solver / boundary-condition paths (classifier gap)</h3>
+<p><strong>Concrete names (all quarantined under <code>computational_workflow</code>):</strong>
+- <code>electron_energy_transport_boundary_condition_value</code>
+- <code>electron_particle_boundary_condition_on_ggd</code>
+- <code>ion_energy_transport_boundary_condition_value</code>
+- <code>electron_particle_boundary_condition_value</code>
+- <code>momentum_transport_boundary_condition_on_ggd</code></p>
+<p><strong>Root cause.</strong> DD subtree <code>transport_solver_numerics/boundary_conditions_*</code>
+exposes solver-internal Dirichlet/Neumann choices as leaf nodes. Every
+leaf becomes an SN because the classifier sees
+<code>electron_energy_transport</code> + <code>value</code> as a physics child.</p>
+<p><strong>Resolution.</strong>
+- <strong>CLS:</strong> Exclude all paths matching
+  <code>transport_solver_numerics/boundary_conditions_(1d|ggd)/.*</code> and
+  <code>transport_solver_numerics/solver_1d/.*/coefficient.*</code>. These are solver
+  configuration artefacts — analogous to the <code>fit_artifact</code> category in
+  plan 30. Propose adding <code>solver_artifact</code> as a third NodeCategory,
+  <em>or</em> subsume under <code>fit_artifact</code> with broadened description.</p>
+<p><strong>Owner:</strong> CLS (plan 30 extension).</p>
+<hr />
+<h3 id="29-contradictions-inside-the-compose-prompt-b2">2.9 Contradictions inside the compose prompt (B2)</h3>
+<p><strong>File:</strong> <code>imas_codex/llm/prompts/sn/compose_system.md</code> and
+<code>imas_codex/llm/prompts/shared/sn/_exemplars_name_only.md</code>.</p>
+<p><strong>Contradiction 1 — <code>_at_X</code> vs <code>_of_X</code> for positional qualifiers.</strong>
+Compose_system.md Rules 18/21 (lines 676–691) declare that
+<code>_of_plasma_boundary</code>, <code>_of_magnetic_axis</code>, <code>_of_x_point</code> are preferred
+over <code>_at_plasma_boundary</code>, <code>_at_magnetic_axis</code>, <code>_at_x_point</code>.
+Exemplar P3 in <code>_exemplars_name_only.md</code> (lines 33–38) still advertises
+<code>at_separatrix</code>, <code>at_magnetic_axis</code>, <code>at_plasma_boundary</code> as <strong>GOOD
+EXAMPLES</strong>. ISN <code>positions.yml</code> permits both. Real corpus shows both
+forms (<code>safety_factor_at_magnetic_axis</code> [valid],
+<code>vertical_coordinate_of_magnetic_axis</code> [valid]).</p>
+<p><em>Recommendation:</em> split the Position vocabulary semantically — <code>of_</code> for
+intrinsic geometric properties, <code>at_</code> for field values evaluated at a
+location (already suggested in <code>positions.yml</code> comments). Rewrite P3 to
+exhibit both, each in its intended context. Remove the Rule 18/21
+prohibition; replace with a rule that enforces <em>semantic match</em> instead of
+<em>syntactic preference</em>.</p>
+<p><strong>Contradiction 2 — <code>vertical_position_of_</code> vs <code>vertical_coordinate_of_</code>.</strong>
+Rule 17 in compose_system.md mandates <code>vertical_coordinate_of_x_point</code>.
+Exemplar P8 (<code>_exemplars_name_only.md</code> line 77) still says
+<code>vertical_position_of_x_point</code>. The corpus uses <code>vertical_coordinate_of_</code>
+exclusively (<code>vertical_coordinate_of_x_point</code>,
+<code>vertical_coordinate_of_plasma_boundary</code>, etc.).</p>
+<p><em>Recommendation:</em> update P8 to match Rule 17. Add <code>geometric_base=position</code>
+as the ISN canonical base; <code>vertical_position_of_*</code> remains grammatical
+but <code>vertical_coordinate_of_*</code> is preferred for poloidal-plane Z coords.
+Document the distinction.</p>
+<p><strong>Contradiction 3 — allowed transformations.</strong>
+<code>_grammar_reference.md</code> lists 4 canonical transformation tokens:
+<code>flux_surface_averaged</code>, <code>line_integrated</code>, <code>norm</code>, <code>square_root</code>.
+But <code>transformations.yml</code> in ISN rc13 defines 30+ tokens including
+<code>volume_averaged</code>, <code>time_integrated</code>, <code>time_derivative_of</code>,
+<code>maximum_of</code>, <code>per_toroidal_mode</code>, <code>cumulative_inside_flux_surface</code>,
+<code>amplitude_of</code>, etc. Compose_system.md NC-20 treats
+<code>volume_averaged</code>, <code>surface_averaged</code>, <code>line_averaged</code>,
+<code>density_averaged</code> as valid.</p>
+<p><em>Recommendation:</em> delete the 4-token allow-list from
+<code>_grammar_reference.md</code>; replace with a pointer to the live
+<code>transformations.yml</code> enum (generated/kept-in-sync by <code>build-models</code>).
+Add a rule that the LLM must ONLY use tokens from the enum — the
+compose_system.md prompt loader should inject the live enum at render time.</p>
+<p><strong>Contradiction 4 — <code>_over_</code> preposition.</strong>
+Compose_system.md (lines 59–61) forbids <code>_over_&lt;quantity&gt;</code> as a
+division surrogate (must be <code>_per_</code>). But the corpus contains
+<code>toroidal_component_of_ion_velocity_over_magnetic_field_strength</code> (valid,
+edge_plasma_physics) and its sibling <code>*_per_magnetic_field_magnitude</code>
+(valid, edge_plasma_physics). DD uses <code>velocity_parallel_over_b_field</code> in
+the path names.</p>
+<p><em>Recommendation:</em>
+- <strong>AUD:</strong> Add an audit that flags bare <code>_over_&lt;quantity&gt;_strength|_magnitude</code>
+  as a division surrogate and renames to <code>_per_magnetic_field_strength</code>.
+- <strong>ISN:</strong> Confirm <code>over_</code> is reserved for <strong>region</strong> segments
+  (<code>over_halo_region</code>) per <code>regions.yml</code>; it is NEVER a mathematical
+  division surrogate. Make this explicit in <code>_grammar_reference.md</code>.
+- <strong>GRF:</strong> Merge the two variants
+  (<code>*_over_magnetic_field_strength</code> → <code>*_per_magnetic_field_strength</code>;
+  or, if both refer to different underlying DD paths, consolidate on the
+  DD-canonical <code>_per_</code> form).</p>
+<hr />
+<h3 id="210-near-duplicate-families-consolidation-candidates">2.10 Near-duplicate families — consolidation candidates</h3>
+<p>These are <strong>valid-but-proliferating</strong> names that should be collapsed
+via a population/surface qualifier axis (R1 F3 / R2 A.1 already
+recommend this; confirmed in rc13 export).</p>
+<p><strong>Family A — <code>wave_absorbed_power</code> (8 variants):</strong>
+- <code>wave_absorbed_power</code>, <code>electron_wave_absorbed_power</code>,
+  <code>thermal_electron_wave_absorbed_power</code>, <code>fast_electron_wave_absorbed_power</code>,
+  <code>ion_wave_absorbed_power</code>, <code>thermal_ion_wave_absorbed_power</code>,
+  <code>fast_ion_wave_absorbed_power</code>,
+  <code>ion_wave_absorbed_power_at_beam_tracing_point</code>
+- Plus density and inside-flux-surface variants: 23 total.</p>
+<p><em>Resolution:</em> consolidate to <code>wave_absorbed_power</code> with axes
+{species: electron|ion, population: thermal|fast|total, surface: global|
+flux_surface|flux_surface_integral, per_mode: null|toroidal_mode,
+location: null|beam_tracing_point}.</p>
+<p><strong>Family B — <code>flux_surface_averaged_*_metric_coefficient</code> (gm1–gm9):</strong>
+- <code>flux_surface_averaged_gradient_of_toroidal_flux_coordinate</code> (gm7)
+- <code>flux_surface_averaged_squared_gradient_of_toroidal_flux_coordinate</code> (gm3)
+- <code>flux_surface_averaged_inverse_magnetic_field_squared</code> (gm4)
+- <code>flux_surface_averaged_inverse_magnetic_field_squared_gradient_squared</code> (gm6)
+- <code>flux_surface_averaged_inverse_major_radius</code> (gm9)
+- <code>flux_surface_averaged_inverse_major_radius_squared</code> (gm1)
+- <code>flux_surface_averaged_inverse_major_radius_squared_toroidal_flux_gradient_squared</code> (gm2)
+- <code>flux_surface_averaged_major_radius</code> (gm8)</p>
+<p><em>Resolution:</em> correct-as-is. Each is a distinct metric coefficient and
+the names already match the DD labels. Add descriptions (enrichment rotation).
+Cross-link <code>equilibrium.gm1..gm9</code> to the canonical ISN surface via
+<code>derived_from</code>/<code>REFERENCES</code>.</p>
+<p><strong>Family C — metric tensor <code>g{ij}</code> components (12 variants):</strong>
+- <code>contravariant_metric_tensor_g11 … g33</code> (6)
+- <code>covariant_metric_tensor_g11 … g33</code> (6)</p>
+<p><em>Resolution:</em> consolidate to <code>metric_tensor_component</code> with structured
+axes <code>{variance: covariant|contravariant, i: 1..3, j: 1..3}</code>. Requires
+ISN support for <strong>indexed tensor axes</strong> (explicitly deferred in plan 29,
+ADR-1 non-goal). Recommend: keep as 12 distinct names for rc14 but add a
+parent <code>metric_tensor</code> SN and link each component to it via <code>PART_OF</code>
+(see plan 27 sn-vector-hierarchy).</p>
+<p><strong>Family D — <code>radial|poloidal|toroidal_component_of_perturbed_magnetic_field_{imaginary,real}_part</code>:</strong>
+8 variants (3 axes × 2 parts) + 6 more with <code>_finite_element_coefficients_</code>.</p>
+<p><em>Resolution:</em> the 8 non-coefficient variants are valid and stay. The 6
+coefficient variants are classifier-excluded by plan 30.
+Add vector parent <code>perturbed_magnetic_field</code> (kind=vector) and link
+components via <code>PART_OF</code>.</p>
+<p><strong>Family E — pulse_schedule <code>*_reference_waveform</code>:</strong>
+See §2.2; policy is exclusion, not consolidation.</p>
+<p><strong>Family F — <code>deuterium_deuterium_*_neutron_flux_*</code>, <code>tritium_tritium_*</code>, <code>deuterium_tritium_*</code>:</strong>
+15+ variants across <code>fusion/neutron_fluxes/*</code> and <code>fusion/neutron_rates/*</code>.
+Reactions are physically distinct; keep separate names but:
+- Normalize <code>*_neutron_flux_*</code> vs <code>*_neutron_rate_*</code> — DD ships both
+  under sibling paths with <strong>identical units (Hz)</strong>. This is a DD
+  duplication; codex should pick one canonical name per (reaction,
+  drive-mechanism) and collapse the 2× path count.
+- Canonicalize compound subjects using existing
+  <code>deuterium_tritium</code>/<code>deuterium_deuterium</code>/<code>tritium_tritium</code> tokens to
+  silence the multi_subject_check (see §2.4).</p>
+<p><strong>Family G — <code>*_gas_injection_accumulated_*</code> (~18 variants per species):</strong>
+- <code>accumulated_gas_injection_of_helium_3</code> (one form)
+- <code>ammonia_gas_injection_accumulated_molecule_count</code> (another)
+- <code>beryllium_accumulated_gas_injection</code> (a third)
+- <code>deuterium_gas_injection_accumulated_electron_equivalent</code>, etc.</p>
+<p><strong>Problem:</strong> three different segment orderings across species
+— <code>accumulated_&lt;species&gt;_gas_injection</code>, <code>&lt;species&gt;_gas_injection_accumulated_&lt;count_type&gt;</code>,
+<code>&lt;species&gt;_accumulated_gas_injection</code>.</p>
+<p><em>Resolution:</em> canonicalize to
+<code>&lt;species&gt;_accumulated_gas_injection_&lt;count_type&gt;</code> for the ~15 species
+that carry distinct count-type flavors (electron_equivalent, molecule_count,
+bare count). Add an alias SN (<code>accumulated_gas_injection_of_&lt;species&gt;</code>)
+that points to the canonical via <code>REFERENCES</code>. Fixes ordering
+inconsistency R1-F7.</p>
+<hr />
+<h3 id="211-audit-coverage-gaps">2.11 Audit coverage gaps</h3>
+<p><strong>Cases currently missed:</strong></p>
+<ol>
+<li>
+<p><strong>Trailing <code>_on_ggd</code> suffix</strong> — <code>representation_artifact_check</code> uses a
+   regex on substrings like <code>_finite_element_interpolation_coefficients_</code>,
+   <code>_ggd_coefficients</code>, <code>_coefficient_on_ggd</code>. But <strong>plain
+   <code>_on_ggd</code></strong> (e.g. <code>radial_component_of_electron_velocity_on_ggd</code>,
+   <code>electron_particle_boundary_condition_on_ggd</code>) slips through when the
+   content is not clearly a basis-function coefficient.
+   <strong>Fix (AUD):</strong> add suffix match <code>_on_ggd$</code> as a hint to the
+   classifier, not just the audit; surface to compose as "GGD node
+   indicator, strip suffix or re-route".</p>
+</li>
+<li>
+<p><strong>Bare <code>_field</code> implicit-qualifier</strong> — <code>implicit_field_check</code> catches
+   <code>vacuum_toroidal_field_function</code> and
+   <code>poloidal_field_coil_current_reference_waveform</code>. Good. But the
+   <code>poloidal_field_coil_supply_voltage_reference</code> case fires
+   <code>implicit_field_check</code> + <code>name_unit_consistency_check</code> + nothing else;
+   the correct rename is <code>poloidal_magnetic_field_coil_supply_voltage</code>
+   — audit should <strong>suggest</strong> the fix, not just flag.</p>
+</li>
+<li>
+<p><strong>Stacked transformations</strong> — the name
+   <code>line_integrated_electron_density_constraint_measurement_time</code> hits
+   <code>cumulative_prefix_check</code> correctly, but the root cause is a stacked
+   qualifier: <code>line_integrated</code> + <code>electron_density</code> + <code>constraint</code> +
+   <code>measurement_time</code>. This kind of name is produced when the classifier
+   treats <code>/n_e_line/time_measurement</code> as a physics leaf instead of as a
+   constraint child. The audit should add a sibling check: <em>if
+   <code>_constraint_measurement_time</code> suffix is present, physical_base should
+   match the sibling constraint's name, not include cumulative/integration
+   prefixes.</em> Alternatively, plan 30's <code>fit_artifact</code> category sweeps
+   these out.</p>
+</li>
+<li>
+<p><strong>Compound-subject multi_subject false positive</strong> — §2.4 already
+   addresses: <code>deuterium_tritium</code>, <code>deuterium_deuterium</code>, <code>tritium_tritium</code>
+   must be matched greedy-first.</p>
+</li>
+<li>
+<p><strong><code>_reference</code> vs <code>_reference_waveform</code> inconsistency</strong> — 5 names
+   end in <code>_reference</code> (<code>neutral_beam_injection_power_reference</code>,
+   <code>ion_cyclotron_heating_antenna_reference_power</code>, etc.); ~12 end in
+   <code>_reference_waveform</code>. All are pulse_schedule sentinels (§2.2).
+   Add audit pattern: if name ends in <code>_reference</code> or <code>_reference_waveform</code>
+   <strong>and</strong> DD path matches <code>pulse_schedule/.*/reference</code>, <strong>quarantine
+   regardless of unit.</strong></p>
+</li>
+<li>
+<p><strong>Missing audit: "trivial definitional duplicate."</strong> Pairs like
+   <code>parallel_velocity_per_magnetic_field_strength</code> (valid) and
+   <code>parallel_component_of_plasma_velocity_per_magnetic_field_magnitude</code>
+   (valid) differ only in <code>velocity</code> vs <code>plasma_velocity</code> and <code>strength</code>
+   vs <code>magnitude</code>. An audit should detect two names with shared physics
+   semantics and identical units (see 2.12).</p>
+</li>
+<li>
+<p><strong>Unit validity on placeholder units.</strong> <code>grid_object_measure</code> has
+   unit <code>m^dimension</code>; <code>atom_multiplicity_of_isotope</code> has unit
+   <code>Elementary Charge Unit</code>. The current <code>unit_validity</code> audit fires
+   once (1 hit) but should fire on any DD unit containing whitespace,
+   "e" as a unit-atom (vs the dimensionless <code>e</code> electron charge), or
+   non-UDUNITS syntax. Add specific pattern matches.</p>
+</li>
+</ol>
+<hr />
+<h3 id="212-silent-near-duplicates-different-names-same-physics">2.12 Silent near-duplicates (different names, same physics)</h3>
+<p><strong>Concrete pairs:</strong>
+- <code>parallel_velocity_per_magnetic_field_strength</code> [scalar]
+  ≈ <code>parallel_component_of_plasma_velocity_per_magnetic_field_magnitude</code>
+  [vector_component] — unit <code>m.s^-1.T^-1</code>, same DD family
+  (<code>mhd/ggd/velocity_parallel_over_b_field</code>).
+- <code>plasma_mass_density</code> [valid] ≈ <code>ion_number_density_times_average_mass</code>
+  (not yet minted, but the DD path <code>mhd/ggd/mass_density/values</code> encodes
+  it). Currently just one SN.
+- <code>major_radius_of_current_center</code> [valid] ≈ <code>major_radius_of_plasma_filament</code>
+  [valid, sources the same <code>current_centre</code> DD nodes in some IDS
+  variants] — 7-path overlap.
+- <code>electron_diamagnetic_drift_velocity</code> [valid, scalar] vs a would-be
+  vector-component form
+  <code>&lt;axis&gt;_component_of_electron_diamagnetic_drift_velocity</code>
+  (not yet minted; six DD paths are available).
+- <code>faraday_rotation_angle</code> [valid, scalar] vs <code>faraday_angle_constraint_weight</code>
+  [valid] — the latter is a fit artifact (plan 30 would classify as
+  <code>fit_artifact</code>); one name only survives after plan 30.
+- <code>toroidal_component_of_magnetic_field_of_magnetic_axis</code> (valid, vector)
+  vs <code>toroidal_component_of_magnetic_field_at_reference_major_radius</code>
+  (valid, scalar) vs <code>vacuum_toroidal_magnetic_field_at_reference_major_radius</code>
+  (valid, scalar) — three names for what physicists call <code>B_tor(R_ref)</code>
+  or <code>B_tor(R0)</code>. Consolidation candidate.
+- <code>passive_loop_current</code> + <code>passive_loop_current_constraint_weight</code> +
+  <code>iron_core_segment_{radial,vertical}_magnetization_constraint_{weight,measurement_time}</code>
+  — all fit-artifact children; plan 30 eliminates the <code>_weight</code> /
+  <code>_measurement_time</code> siblings.</p>
+<p><em>Resolution:</em> <strong>GRF</strong> — introduce a <code>NEAR_DUPLICATE_OF</code> relationship in
+the graph (undirected, weighted by unit+cluster agreement) after plan 30
+lands. Use it as an enrichment input (cross-reference each other in
+documentation). Surface these pairs to human review in the next rotation.</p>
+<hr />
+<h3 id="213-dd-upstream-issue-list-b5-detail">2.13 DD-upstream issue list (B5 detail)</h3>
+<p>Each line: DD path / pattern, issue, proposed filing.</p>
+<table>
+<thead>
+<tr>
+<th>DD path / pattern</th>
+<th>Issue</th>
+<th>Proposed fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*/ggd/*/diamagnetic</code> under vector containers</td>
+<td><code>/diamagnetic</code> used as a spatial-axis sibling to <code>/radial</code>, <code>/poloidal</code>, <code>/toroidal</code>. Physically incorrect.</td>
+<td>Rename <code>/diamagnetic</code> → <code>/diamagnetic_drift_velocity</code> (under <code>/velocity/</code>) and equivalent qualified names under <code>/e_field/</code>, <code>/j_tot/</code>, <code>/a_field/</code>.</td>
+</tr>
+<tr>
+<td><code>equilibrium/time_slice/ggd/grid_object/measure</code></td>
+<td>Unit <code>m^dimension</code> (placeholder).</td>
+<td>Replace with <code>units</code> that depend on <code>dimension</code> via a <code>units_template</code> or split into four leaves (<code>measure_point_count</code> [1], <code>measure_length</code> [m], <code>measure_area</code> [m²], <code>measure_volume</code> [m³]).</td>
+</tr>
+<tr>
+<td><code>summary/particles/ion/state/atom_multiplicity</code></td>
+<td>Unit <code>Elementary Charge Unit</code> — whitespace-containing UDUNITS non-standard.</td>
+<td>Rename unit to <code>e</code> (elementary charge) or <code>1</code> (integer multiplicity). Codex unit parser rejects whitespace.</td>
+</tr>
+<tr>
+<td><code>equilibrium/time_slice/constraints/*/exact</code> (integer flag)</td>
+<td>Flag nodes treated as physics quantities.</td>
+<td>Add lifecycle <code>obsolescent</code> or <code>constant</code> + documentation; codex classifier needs plan-30 <code>fit_artifact</code> anyway.</td>
+</tr>
+<tr>
+<td><code>pulse_schedule/*/reference</code> and <code>pulse_schedule/*/reference/data</code></td>
+<td>All publish <code>unit=1</code> regardless of the underlying quantity's physical unit.</td>
+<td>Either (a) publish unit of the controlled quantity, (b) add explicit <code>description</code> tag <code>"controller-reference; dimensionless normalized"</code>, or (c) add <code>lifecycle=alpha</code> so codex can filter.</td>
+</tr>
+<tr>
+<td><code>summary/fusion/neutron_fluxes/*</code> vs <code>summary/fusion/neutron_rates/*</code></td>
+<td>Duplicate leaves with identical unit <code>Hz</code>.</td>
+<td>DD should deprecate one (preferably <code>neutron_rates</code> — "flux" is the standard term) or explicitly document which is authoritative.</td>
+</tr>
+<tr>
+<td><code>*/_error_upper</code>, <code>*/_error_lower</code>, <code>*/_error_index</code></td>
+<td>Expected to be discovered as companion error fields (fetch_dd_error_fields tool exists).</td>
+<td>No fix required; note that codex already excludes these from enumeration.</td>
+</tr>
+<tr>
+<td><code>ferritic/element/*</code> vs <code>ferritic/object/*</code> (DD 4 renaming)</td>
+<td>Same semantic content under two different parent names during DD 3→4 migration.</td>
+<td>Fold <code>/element/</code> into <code>/object/</code> or add an explicit <code>RENAMED_TO</code> record; ferritic_element_centroid vocab gap traces to this.</td>
+</tr>
+<tr>
+<td><code>waves/coherent_wave/*</code> full_wave/values</td>
+<td>Same as GGD: both <code>values</code> and basis-function coefficient leaves.</td>
+<td>Tag basis-function leaves with <code>NodeCategory=representation</code> (plan 30 sweeps).</td>
+</tr>
+<tr>
+<td><code>distributions/distribution/*/thermalisation/*</code></td>
+<td>British spelling <code>thermalisation</code>; DD also has <code>thermalization</code>.</td>
+<td>Pick one spelling; DD currently mints both in some IDSs (see sources of <code>thermal_particle_number_density_source_due_to_thermalization_of_fast_particles</code>).</td>
+</tr>
+<tr>
+<td><code>summary/gas_injection_accumulated/.../value</code> with unit <code>1</code></td>
+<td>Same DD-units issue: counts published as dimensionless. Correct (counts are dimensionless), but the audit <code>name_unit_consistency_check</code> trips when the name says <code>electron_equivalent</code> or <code>molecule_count</code>.</td>
+<td>Either add <code>description</code> clarifying the count semantics, or publish unit as <code>count</code> (UCUM).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="214-description-documentation-quality-enr">2.14 Description / documentation quality (ENR)</h3>
+<p><strong>Coverage:</strong> 84 / 705 names have descriptions (11.9%). The enrichment
+rotation has not yet run on rc13 output; this is expected per plan 29
+ADR-1 (split generate/enrich) and §1 of this report.</p>
+<p><strong>Spot-check of the 84 existing descriptions:</strong></p>
+<ul>
+<li><strong>Length distribution:</strong> median ~190 chars, max 350 chars, min 45 chars.
+  Catalog target (GAP-1 in plan 11) is ≥1200 chars. Current descriptions
+  are exposition-only; they lack the 7-section structure
+  (opening / governing equation / physical significance / measurement /
+  typical values / sign convention / cross-references).</li>
+<li><strong>Good examples (near-catalog quality):</strong></li>
+<li><code>magnetic_shear</code>: equation + definition + normalization.</li>
+<li><code>plasma_inductance</code>: equation + defining relation.</li>
+<li><code>normalized_toroidal_beta</code>: physical significance + stability context.</li>
+<li><strong>Weak examples (need enrichment):</strong></li>
+<li><code>poloidal_angle</code>: one sentence, no sign convention.</li>
+<li><code>vertical_coordinate_of_plasma_boundary_gap_reference_point</code>: pure
+    tautology of the name.</li>
+<li><code>major_radius_of_plasma_boundary_gap_reference_point</code>: pure tautology.</li>
+<li><strong>Description-tag mismatch:</strong></li>
+<li><code>magnetic_shear</code>: description says "radial variation of the safety
+    factor" but tag is <code>spatial-profile</code>. Audit flagged it. Enrichment
+    should either rewrite the description or change the tag.</li>
+</ul>
+<p><strong>Cross-linking signals:</strong> 45+ <code>link_not_found:name:*</code> issues in the
+audit log. Root cause is compose-time ordering: the LLM references names
+that don't yet exist in the graph. R3-architecture §B.3 already
+recommends a two-phase POSTLINK (plan 29 split generate/enrich); confirm
+it populates REFERENCES after enrich sees all minted names.</p>
+<hr />
+<h3 id="215-length-readability-objective-measurements">2.15 Length / readability — objective measurements</h3>
+<p>Using the <code>head -c</code> byte count on the 705 names:</p>
+<ul>
+<li><strong>Mean:</strong> 47 chars · <strong>Median:</strong> 44 chars · <strong>Max:</strong> 113 chars
+  (<code>flux_surface_averaged_inverse_major_radius_squared_toroidal_flux_gradient_squared</code>)</li>
+<li><strong>≥70 chars:</strong> 58 names (8.2%). Typical offenders:</li>
+<li><code>toroidal_component_of_collisional_torque_density_on_thermal_ion_due_to_fast_ion</code> (82)</li>
+<li><code>distance_between_measurement_position_and_separatrix_mapped_to_outboard_midplane</code> (83)</li>
+<li><code>thermal_particle_number_density_source_due_to_thermalization_of_fast_particles</code> (80)</li>
+<li><code>electron_cyclotron_beam_poloidal_steering_angle_reference_waveform</code> (67)</li>
+<li><code>ion_wave_absorbed_power_inside_flux_surface_per_toroidal_mode</code> (62)</li>
+<li>
+<p><code>poloidal_component_of_perturbed_magnetic_field_finite_element_coefficients_imaginary_part</code> (90)</p>
+</li>
+<li>
+<p><strong>≥100 chars: 2 names.</strong> Both come from the GGD subtree or chained
+  qualifiers that plan 30 / §2.2 will classifier-exclude.</p>
+</li>
+</ul>
+<p><strong>Recommendation:</strong> no hard cap (catalog has a 113-char name that is
+intrinsic to the physics). Target a <strong>p95 ≤ 75 chars</strong> after classifier
+fixes and consolidation (§2.10).</p>
+<hr />
+<h3 id="216-coordinate-prefix-pydantic-errors-b2-secondary">2.16 Coordinate-prefix pydantic errors (B2 secondary)</h3>
+<p><strong>Pattern:</strong> 6 quarantines with
+<code>Token 'X_coordinate_of' used as coordinate prefix is missing from
+Component vocabulary</code>.</p>
+<p><strong>Examples:</strong>
+- <code>major_radius_of_outline_point</code>,
+- <code>vertical_coordinate_of_outline_point</code>,
+- <code>vertical_coordinate_of_control_surface_normal_vector</code>,
+- <code>normalized_toroidal_flux_coordinate_displacement_due_to_e_cross_b_drift</code>
+- <code>toroidal_angle_of_outline_point</code></p>
+<p><strong>Root cause.</strong> ISN grammar distinguishes <strong>coordinate prefix</strong> (axis
+label of a Cartesian/cylindrical coordinate) from <strong>Component segment</strong>
+(vector projection). <code>major_radius_of_</code>, <code>vertical_coordinate_of_</code>,
+<code>toroidal_angle_of_</code> are coordinate prefixes when applied to a
+Position/Object and Components when applied to a vector quantity. The
+compose Rule 17 is about coordinate prefixes; the pydantic validator
+thinks the same tokens are Components. Double-definition.</p>
+<p><strong>Resolution.</strong>
+- <strong>ISN:</strong> Split Component vocabulary into <strong>axis</strong> (radial, toroidal,
+  vertical, parallel, perpendicular, …) and <strong>coordinate_prefix</strong>
+  (major_radius_of, vertical_coordinate_of, toroidal_angle_of,
+  minor_radius_of). The R1-F6 proposal (deferred in plan 29) covers this;
+  rc14 should land it.
+- <strong>AUD:</strong> Until ISN is split, suppress the pydantic error for names
+  matching <code>^(major_radius_of|vertical_coordinate_of|toroidal_angle_of|normalized_toroidal_flux_coordinate)_</code> and route them through a
+  <code>coordinate_prefix_check</code> audit that confirms the suffix is a
+  Position/Object token.</p>
+<p><strong>Owner:</strong> ISN primary (R1-F6); AUD as interim.</p>
+<hr />
+<h3 id="217-_reference_waveform-inside-plasma_control-a-policy-gap">2.17 <code>_reference_waveform</code> inside plasma_control — a policy gap</h3>
+<p>See §2.2. Summary: until the classifier excludes
+<code>pulse_schedule/.*/reference.*</code>, the LLM will keep generating names
+whose units are mismatched to their <code>power</code>/<code>angle</code>/<code>frequency</code>/<code>voltage</code>
+mentions. <strong>Prompt cannot fix this</strong> because the DD unit is
+authoritative. Classifier exclusion is the only path.</p>
+<hr />
+<h2 id="3-prompt-root-cause-analysis-file-by-file">3. Prompt root-cause analysis — file-by-file</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line(s)</th>
+<th>Issue</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compose_system.md</code></td>
+<td>54–56</td>
+<td>Forbids <code>_over_&lt;quantity&gt;</code> but does not cross-reference the legitimate <code>over_&lt;region&gt;</code> Region segment. Causes ambiguity.</td>
+<td>Replace the line with <em>"<code>_over_&lt;quantity&gt;</code> is forbidden (use <code>_per_</code>); <code>over_&lt;region&gt;</code> is the Region segment — see <code>_grammar_reference.md</code>."</em></td>
+</tr>
+<tr>
+<td><code>compose_system.md</code></td>
+<td>249–474 (NC-1..NC-26)</td>
+<td>NC-7 forbids dimension-suffix <code>_2d</code>, <code>_3d</code>, yet <code>grid_object_geometry_2d</code> [valid] passes.</td>
+<td>Promote to AUD <code>structural_dim_tag_check</code> that runs on names, not just docs.</td>
+</tr>
+<tr>
+<td><code>compose_system.md</code></td>
+<td>633–698 (Rules 1..22)</td>
+<td>Rule 22 bans <code>diamagnetic_component_of_*</code>; LLM keeps producing it because the DD path is literal.</td>
+<td>Classifier-level veto (§2.3) — prompt cannot prevent it. Downgrade Rule 22 to a reminder.</td>
+</tr>
+<tr>
+<td><code>compose_system.md</code></td>
+<td>676–691 (Rules 17/18/21)</td>
+<td>Contradicts exemplars P3/P8.</td>
+<td>Update exemplars (see below); align rule wording with <code>positions.yml</code> of/at semantics.</td>
+</tr>
+<tr>
+<td><code>_exemplars_name_only.md</code></td>
+<td>33–38 (P3)</td>
+<td>Advertises <code>at_</code> for positional qualifiers that Rules 18/21 now demote.</td>
+<td>Rewrite P3: split into P3a (<code>at_&lt;position&gt;</code> for field-at-locus) and P3b (<code>of_&lt;position&gt;</code> for intrinsic geometric property). Provide one example of each.</td>
+</tr>
+<tr>
+<td><code>_exemplars_name_only.md</code></td>
+<td>77 (P8)</td>
+<td><code>vertical_position_of_x_point</code> vs Rule 17 <code>vertical_coordinate_of_x_point</code>.</td>
+<td>Change P8 to <code>vertical_coordinate_of_x_point</code>.</td>
+</tr>
+<tr>
+<td><code>_grammar_reference.md</code></td>
+<td>115–125 (transformations table)</td>
+<td>4-token allow-list contradicts <code>transformations.yml</code> 30+ tokens.</td>
+<td>Delete the table; render the live enum via <code>prompt_loader</code> at compose time.</td>
+</tr>
+<tr>
+<td><code>_grammar_reference.md</code></td>
+<td>generic_bases table</td>
+<td>Lists 12 tokens; <code>generic_physical_bases.yml</code> lists 12 (matches). OK.</td>
+<td>No change.</td>
+</tr>
+<tr>
+<td><code>compose_dd.md</code>, <code>compose_signals.md</code></td>
+<td>—</td>
+<td>Not reviewed in this pass. Next rotation should check they mirror <code>compose_system.md</code> wording.</td>
+<td>Audit during rc14.</td>
+</tr>
+<tr>
+<td><code>_controlled_tags.md</code></td>
+<td>—</td>
+<td>Not reviewed; flag <code>spatial-profile</code> vs description content (see §2.14 <code>magnetic_shear</code>).</td>
+<td>Enrichment rotation fix.</td>
+</tr>
+<tr>
+<td><code>_scoring_rubric.md</code></td>
+<td>—</td>
+<td>Not reviewed. Confirm it scores documentation length ≥1200 chars per plan 11 GAP-1.</td>
+<td>Enrichment rotation fix.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-prioritized-recommendation-register">4. Prioritized recommendation register</h2>
+<h3 id="41-imas-codex-cls-cmp-aud">4.1 imas-codex (CLS / CMP / AUD)</h3>
+<table>
+<thead>
+<tr>
+<th>Pri</th>
+<th>ID</th>
+<th>Action</th>
+<th>Owner</th>
+<th>Dep</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>CLS-01</td>
+<td>Land plan 30 (NodeCategory <code>fit_artifact</code>, <code>representation</code>).</td>
+<td>CLS</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>CLS-02</td>
+<td>Extend plan 30 with <code>solver_artifact</code> (or fold into <code>fit_artifact</code>) covering <code>transport_solver_numerics/boundary_conditions_*</code>.</td>
+<td>CLS</td>
+<td>CLS-01</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>CLS-03</td>
+<td>Exclude <code>pulse_schedule/.*/reference(/.*)?</code> and <code>pulse_schedule/.*/reference_waveform(/.*)?$</code>. Alternative: classify as <code>representation</code> with documentation that explains.</td>
+<td>CLS</td>
+<td>CLS-01</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>CLS-04</td>
+<td>Veto <code>/diamagnetic</code> leaf paths under vector containers (<code>/velocity/diamagnetic</code>, <code>/e_field/diamagnetic</code>, <code>/a_field/diamagnetic</code>, <code>/j_tot/diamagnetic</code>).</td>
+<td>CLS</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>CMP-01</td>
+<td>Rewrite exemplars P3, P5, P8 in <code>_exemplars_name_only.md</code> to match compose_system Rules 17/18/21.</td>
+<td>CMP</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>CMP-02</td>
+<td>Replace the 4-token transformation allow-list in <code>_grammar_reference.md</code> with a live-rendered enum from <code>transformations.yml</code>.</td>
+<td>CMP</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>AUD-01</td>
+<td>Fix <code>multi_subject_check</code> to prefer longest compound-subject match (e.g. <code>deuterium_tritium</code> &gt; <code>deuterium</code> + <code>tritium</code>).</td>
+<td>AUD</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>AUD-02</td>
+<td>Add <code>pulse_schedule_reference_check</code>: any DD path matching the pattern is quarantined regardless of unit/name.</td>
+<td>AUD</td>
+<td>CLS-03 interim</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>AUD-03</td>
+<td>Extend <code>representation_artifact_check</code> to match <code>_coefficients_(imaginary\|real)_part</code>, <code>_ggd_coefficients$</code>, <code>_on_ggd$</code>, <code>_interpolation_coefficient</code>.</td>
+<td>AUD</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>AUD-04</td>
+<td>Add <code>coordinate_prefix_check</code> (interim to ISN-F6) to whitelist <code>major_radius_of_/vertical_coordinate_of_/toroidal_angle_of_</code> preceding a Position or Object.</td>
+<td>AUD</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>AUD-05</td>
+<td>Fix unit-whitespace acceptance in <code>unit_validity</code> check to reject <code>Elementary Charge Unit</code>, <code>m^dimension</code>, and similar.</td>
+<td>AUD</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>AUD-06</td>
+<td>Add near-duplicate detector (semantic-cluster + same-unit pairs). Emit as advisory, not block.</td>
+<td>AUD</td>
+<td>ENR</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>CMP-03</td>
+<td>Rewrite anti-pattern A-family in <code>_exemplars_name_only.md</code> to cover <code>_on_ggd</code> suffix, <code>_reference_waveform</code> suffix, <code>_ggd_coefficients</code> suffix.</td>
+<td>CMP</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>CMP-04</td>
+<td>Add prompt cue on compound-subject canonicalization — "use <code>deuterium_tritium</code> as a single Subject token, never <code>deuterium_*_tritium_*</code>."</td>
+<td>CMP</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-iter-standard-names-isn">4.2 iter-standard-names (ISN)</h3>
+<table>
+<thead>
+<tr>
+<th>Pri</th>
+<th>ID</th>
+<th>Action</th>
+<th>Dep</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>ISN-01</td>
+<td>Add <code>e_cross_b_drift</code> to <code>processes.yml</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>ISN-02</td>
+<td>Add <code>thermal_fusion</code> to <code>processes.yml</code>; document as parallel to <code>beam_beam_fusion</code>/<code>beam_thermal_fusion</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>ISN-03</td>
+<td>Add <code>thermalization_of_fast_particles</code> to <code>processes.yml</code> or broaden <code>thermalization</code> template to accept <code>thermalization_of_&lt;subject&gt;</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-04</td>
+<td>Add <code>suprathermal_electrons</code> to <code>subjects.yml</code> (Tier 3) and document population tier between <code>thermal</code> and <code>fast</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-05</td>
+<td>Add <code>ferritic_element_centroid</code> to <code>positions.yml</code> (synonym or canonicalize <code>insert</code> vs <code>element</code>).</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-06</td>
+<td>Add <code>neutron_detector</code> to <code>positions.yml</code> (promote Objects→Position mirror).</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-07</td>
+<td>Add <code>normalized_parallel</code>, <code>normalized_perpendicular</code> to <code>components.yml</code> (for next rotation's wave refractive-index names).</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-08</td>
+<td>Drop <code>translation</code> from Component vocabulary (confirmed misplaced) and re-route via Process/Transformation.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-09</td>
+<td>Add <code>electron_equivalent</code> to <code>transformations.yml</code> (for gas-injection counts).</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>ISN-10</td>
+<td>Add canonical <code>ratio_of_&lt;A&gt;_to_&lt;B&gt;</code> pattern via <code>binary_operators.yml</code> extension or a transformation <code>ratio_of</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>ISN-11</td>
+<td>Split Component vocabulary into <strong>axis</strong> vs <strong>coordinate_prefix</strong> (R1-F6 finally landing).</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>ISN-12</td>
+<td>Improve parser error message on <code>diamagnetic_component_of_X</code>: suggest <code>&lt;axis&gt;_component_of_X_diamagnetic_drift_velocity</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>ISN-13</td>
+<td>Investigate tensor-component grammar segment (R1-D4 deferred) for <code>metric_tensor_g{ij}</code> consolidation.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-imas-dd-upstream-filings-jira-bitbucket-ggus">4.3 IMAS DD — upstream filings (Jira / Bitbucket / GGUS)</h3>
+<table>
+<thead>
+<tr>
+<th>Pri</th>
+<th>ID</th>
+<th>Filing</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>DD-01</td>
+<td>Rename <code>/diamagnetic</code> siblings under vector containers (see table §2.13).</td>
+<td>edge_profiles, core_profiles, plasma_profiles</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>DD-02</td>
+<td>Sanitize unit strings: <code>Elementary Charge Unit</code> → <code>e</code>; <code>m^dimension</code> → per-object unit.</td>
+<td>summary/particles, equilibrium/ggd</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>DD-03</td>
+<td>Clarify <code>pulse_schedule/*/reference</code> units — publish underlying quantity's unit, or add explicit dimensionless-reference annotation.</td>
+<td>pulse_schedule</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>DD-04</td>
+<td>Deprecate one of <code>neutron_fluxes</code>/<code>neutron_rates</code> duplicate subtrees.</td>
+<td>summary/fusion</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>DD-05</td>
+<td>Converge British/American spelling: <code>thermalisation</code> ↔ <code>thermalization</code>.</td>
+<td>distributions</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>DD-06</td>
+<td>Fold <code>ferritic/element/*</code> → <code>ferritic/object/*</code> or add <code>RENAMED_TO</code>.</td>
+<td>ferritic</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44-graph-remediation-grf-after-clscmpisn-land">4.4 Graph remediation (GRF) — after CLS/CMP/ISN land</h3>
+<table>
+<thead>
+<tr>
+<th>Pri</th>
+<th>ID</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>GRF-01</td>
+<td>After plan 30: purge all quarantined names flagged <code>representation_artifact</code>, <code>fit_artifact</code>, or under pulse_schedule/reference. Expected deletion: ~60 nodes.</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>GRF-02</td>
+<td>Re-run compose over rc13 quarantines; expect &lt;5% residual quarantine rate.</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>GRF-03</td>
+<td>Consolidate <code>wave_absorbed_power</code> family (§2.10 Family A) into a vector parent + axes.</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>GRF-04</td>
+<td>Consolidate <code>metric_tensor_g{ij}</code> family (§2.10 Family C) — parent + <code>PART_OF</code>.</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>GRF-05</td>
+<td>Normalize segment order in <code>*_gas_injection_accumulated_*</code> family (§2.10 Family G).</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>GRF-06</td>
+<td>Add <code>NEAR_DUPLICATE_OF</code> relationship (semantic cluster + unit); populate with §2.12 pairs.</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>GRF-07</td>
+<td>Run enrichment rotation (plan 29 ENRICH) targeting 0/84 coverage gap; enforce documentation length ≥ 1200 chars.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-success-criteria-for-rc14-bootstrap">5. Success criteria (for rc14 bootstrap)</h2>
+<ul>
+<li><strong>Quarantine rate:</strong> ≤ 5% (from 17.2%). Driven by CLS-01..04.</li>
+<li><strong>Valid-name count:</strong> 580 ± 30 (after consolidation might drop;
+  acceptable).</li>
+<li><strong>Description coverage:</strong> ≥ 90% (ENR rotation).</li>
+<li><strong>Description length:</strong> median ≥ 1200 chars.</li>
+<li><strong>Reviewer score:</strong> avg ≥ 0.80 per plan 11.</li>
+<li><strong>No prompt/exemplar contradictions</strong> (CMP-01/02).</li>
+<li><strong>No pydantic coordinate_prefix errors</strong> (AUD-04 or ISN-11).</li>
+<li><strong>≥ 10 grammar vocabulary tokens</strong> added (ISN-01..09).</li>
+<li><strong>≥ 4 DD issues filed</strong> (DD-01..04).</li>
+</ul>
+<hr />
+<h2 id="6-out-of-scope-deferred">6. Out of scope / deferred</h2>
+<ul>
+<li>Tensor grammar (R1-D4 / ISN-13) — needs ADR and parser work.</li>
+<li><code>basis_frame</code> segment (R1-F5) — deferred.</li>
+<li>New physics_domain values — continue to use existing 24.</li>
+<li>Migration of downstream consumers of <code>review_status='drafted'</code>
+  (plan 29 one-release alias handles this).</li>
+<li>Rebuilding the 6,000 facility-signal MEASURES links — separate
+  rotation.</li>
+</ul>
+<hr />
+<p><em>— End of 12-full-graph-review.md</em></p>
+  </main>
+</body>
+</html>

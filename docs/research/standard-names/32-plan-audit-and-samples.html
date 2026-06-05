@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="32-plan-audit-and-samples">
+  <meta name="plan-title" content="Plan Audit + SN Corpus Snapshot (feature-tree triage)">
+  <meta name="plan-summary" content="Full audit of every plan in `plans/features/` comparing intent to implemented code, with status verdict, action taken, and phasing/benefit assessment for everything that stays in `features/`. Also includes: 3 SN examples">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="33-state-of-the-nation-2026-04-20,35-metadata-qa-report">
+  <title>Plan Audit + SN Corpus Snapshot (feature-tree triage) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Plan Audit + SN Corpus Snapshot (feature-tree triage)</h1>
+    <h2 id="purpose">Purpose</h2>
+<p>Full audit of every plan in <code>plans/features/</code> comparing intent to implemented code,
+with status verdict, action taken, and phasing/benefit assessment for everything that
+stays in <code>features/</code>. Also includes: 3 SN examples per physics domain with length &amp;
+clarity assessment, a unit pass-through verification, and the gap that motivates a
+new unit-integrity-test plan.</p>
+<h2 id="graph-snapshot-at-audit-time">Graph snapshot (at audit time)</h2>
+<pre><code>StandardName (valid):         335
+StandardName (quarantined):    50
+StandardName total:           385   (all produced by claude-sonnet-4.6)
+description coverage:           0 / 335  ← no enrichment has run yet
+documentation coverage:         0 / 335
+source_paths links:           100 % (avg 2.4 paths/name)
+HAS_UNIT + HAS_COCOS edges:   385 / 385
+PRODUCED_NAME back-edges:     822         (sources linked)
+HAS_STANDARD_NAME back-edges: 819
+</code></pre>
+<p>DD-side node-category distribution (proves Plan 30 landed):</p>
+<pre><code>representation   2209
+geometry         1095
+fit_artifact      269
+</code></pre>
+<hr />
+<h2 id="plan-status-matrix">Plan status matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Location before</th>
+<th>Verdict</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>27 sn-vector-hierarchy</td>
+<td>features/standard-names/</td>
+<td><strong>superseded</strong> by 28 (per own header)</td>
+<td>moved → <code>completed/superseded/</code></td>
+</tr>
+<tr>
+<td>28 sn-greenfield-pipeline</td>
+<td>features/standard-names/</td>
+<td><strong>superseded</strong> by 29 (per 29 header)</td>
+<td>moved → <code>completed/superseded/</code></td>
+</tr>
+<tr>
+<td>29 architectural-pivot</td>
+<td>features/standard-names/</td>
+<td><strong>partial landed</strong> — enrich pipeline + split command exist, 0 names enriched</td>
+<td><strong>KEEP</strong> with gap notes (below)</td>
+</tr>
+<tr>
+<td>30 dd-semantic-categories</td>
+<td>features/standard-names/</td>
+<td><strong>completed</strong> — graph proves it</td>
+<td><strong>DELETED</strong> (project rule: code is the doc)</td>
+</tr>
+<tr>
+<td>31 quality-bootstrap-v2</td>
+<td>features/standard-names/</td>
+<td><strong>in-progress</strong> — WS-F/WS-G landed, rotation active</td>
+<td><strong>KEEP</strong> as active</td>
+</tr>
+<tr>
+<td>20 consistency-and-prompt-enrichment</td>
+<td>pending/</td>
+<td>mostly absorbed into 23/29; two items remain (two-pass consolidate, regen CLI)</td>
+<td><strong>KEEP</strong> in <code>pending/</code>, flag for closure in new plan</td>
+</tr>
+<tr>
+<td>23 quality-parity</td>
+<td>pending/</td>
+<td>Phases 0/1A/1B mostly landed; Phase 4 (async link resolution) unlanded</td>
+<td><strong>KEEP</strong> in <code>pending/</code>, flag remaining phases</td>
+</tr>
+<tr>
+<td>dd-rebuild</td>
+<td>features/</td>
+<td>pending, high-leverage (DD-upstream)</td>
+<td><strong>KEEP</strong></td>
+</tr>
+<tr>
+<td>dd-search-quality-ab</td>
+<td>features/</td>
+<td>pending (search tool polish)</td>
+<td><strong>KEEP</strong></td>
+</tr>
+<tr>
+<td>dd-server-cleanup</td>
+<td>features/</td>
+<td>pending (small)</td>
+<td><strong>KEEP</strong></td>
+</tr>
+<tr>
+<td>docs-refresh</td>
+<td>features/</td>
+<td>pending (doc drift)</td>
+<td><strong>KEEP</strong></td>
+</tr>
+<tr>
+<td>search-quality-improvements</td>
+<td>features/</td>
+<td>pending (reranking)</td>
+<td><strong>KEEP</strong></td>
+</tr>
+<tr>
+<td>sn-bootstrap-loop</td>
+<td>features/</td>
+<td>partial — Layer 1 audits landed; Layer 2 batched review, Layer 3 consolidate unlanded</td>
+<td><strong>KEEP</strong> with gap note</td>
+</tr>
+<tr>
+<td>NEW: sn-unit-integrity-tests</td>
+<td>features/</td>
+<td>—</td>
+<td><strong>CREATED</strong> (see below)</td>
+</tr>
+<tr>
+<td>NEW: sn-enrichment-rotation</td>
+<td>features/</td>
+<td>—</td>
+<td><strong>CREATED</strong> (documentation phase, per user stated priority)</td>
+</tr>
+<tr>
+<td>NEW: sn-coverage-closure</td>
+<td>features/</td>
+<td>—</td>
+<td><strong>CREATED</strong> (target "all relevant DD nodes")</td>
+</tr>
+</tbody>
+</table>
+<h2 id="detailed-assessment-of-plans-that-remain-in-features">Detailed assessment of plans that remain in <code>features/</code></h2>
+<h3 id="active-standard-name-plans">Active standard-name plans</h3>
+<p><strong>29 architectural-pivot</strong> — core carrier for generate/enrich split.
+- LANDED: <code>sn enrich</code> CLI, <code>enrich_state.py</code>, <code>enrich_workers.py</code>, <code>enrich_pipeline.py</code>, review subtree.
+- LANDED: <code>sn-generate</code> model label in settings (inferred from code).
+- GAP: 0 / 335 valid names have been enriched. Enrich pipeline is running-capable but
+  has not been exercised in production. This is the first follow-up once grammar rc14+
+  settles.
+- Benefit: produces the description + documentation that downstream MCP search depends
+  on for meaningful SN-based retrieval.
+- Phasing: validate enrich on one domain (edge_plasma, 47 names) → critique → bulk run.
+  Tracked in new <code>sn-enrichment-rotation.md</code>.</p>
+<p><strong>31 quality-bootstrap-v2</strong> — rotation driver.
+- LANDED (per commits): WS-A prompt patches, WS-B audit extensions, WS-C NC-20-31 audits,
+  WS-D dep bumps to rc13+, WS-F graph remediation, WS-G corpus health gates + dashboard +
+  bootstrap orchestration script.
+- GAP: rotation has not covered ~15 physics domains (see <code>sn-coverage-closure.md</code>).
+- Benefit: operational framework for continuing quality bootstrap.
+- Phasing: continue rotation, next target <code>magnetic_field_systems</code> (269 paths) then
+  <code>gyrokinetics</code> (264) per prior session.</p>
+<h3 id="root-level-plans">Root-level plans</h3>
+<p><strong>dd-rebuild</strong> — MUST stay, highest leverage for SN quality ceiling.
+- User explicitly encouraged <code>--force</code> rebuild if it unlocks material gains.
+- NodeCategory geometry already landed via Plan 30. But <code>documentation</code> text enrichment
+  by sonnet-4.6 (the plan's core) has NOT been re-run for all IDSs.
+- Benefit: richer DD descriptions → better SN prompts → better names AND better enrich
+  documentation. Two birds.
+- Phasing: (1) benchmark enrichment model pass on one IDS; (2) full-corpus run on a
+  compute node; (3) re-embed, re-cluster, re-score; (4) archive old DD graph; (5)
+  graph-push.</p>
+<p><strong>dd-server-cleanup</strong> — small, 3 surgical fixes. Run as a maintenance commit.</p>
+<p><strong>dd-search-quality-ab</strong> — adjacent MCP-tool polish. Not on SN critical path; run when
+user-facing retrieval is the focus.</p>
+<p><strong>docs-refresh</strong> — doc drift cleanup. Important to schedule before the next external
+release because the rotation work has added many concepts (audits, node_category,
+validation_status, sn enrich) that aren't in README/AGENTS.</p>
+<p><strong>search-quality-improvements</strong> — reranking. Blocks on enrich being run (no
+descriptions = nothing meaningful to rerank). Defer until <code>sn-enrichment-rotation</code>
+has produced substantive docs.</p>
+<p><strong>sn-bootstrap-loop</strong> — Layer 1 audit framework landed. Layer 2 (batched reviewer LLM)
+and Layer 3 (cross-batch consolidate) are still valuable but have been partially
+absorbed into <code>sn review</code>. Downgrade scope: keep only the consolidation + showcase
+examples phases; fold audit work into Plan 31.</p>
+<h3 id="pending-folder-items-partial">Pending-folder items (partial)</h3>
+<p><strong>pending/20</strong> — two remaining items to fold into a new closure plan:
+- two-pass generate→consolidate (4B in 20's numbering) — partial in compose_worker.
+- <code>sn regenerate</code> CLI — <strong>NOT NEEDED</strong>; replaced by <code>sn clear --domain X</code> + <code>sn generate --domain X</code>.
+  → recommend CLOSING this plan (superseded). Will do in a follow-up commit once confirmed.</p>
+<p><strong>pending/23</strong> — Phase 4 (async link resolution) is a standalone enhancement.
+- Recommend: keep in pending/ until enrich pipeline has been exercised; async links only
+  become useful once there are enriched documents to link.</p>
+<hr />
+<h2 id="3-sn-examples-per-physics-domain-clarity-assessment">3 SN examples per physics domain — clarity assessment</h2>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>n</th>
+<th>Example (length)</th>
+<th>Length grade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transport (113)</td>
+<td><code>radial_component_of_magnetic_field</code> (34)</td>
+<td>✅ clear, &lt;40 char</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>toroidal_beta</code> (13)</td>
+<td>✅ excellent</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>poloidal_magnetic_flux</code> (22)</td>
+<td>✅ excellent</td>
+<td></td>
+</tr>
+<tr>
+<td>equilibrium (63)</td>
+<td><code>distance_to_closest_wall_point_of_plasma_boundary</code> (49)</td>
+<td>⚠️ borderline, 49 char</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>vacuum_toroidal_field_flux_function</code> (35)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>poloidal_component_of_magnetic_field_of_poloidal_magnetic_magnetic_field_probe</code> (78)</td>
+<td>❌ duplicated "magnetic", too long</td>
+<td></td>
+</tr>
+<tr>
+<td>edge_plasma_physics (47)</td>
+<td><code>parallel_component_of_ion_momentum_diffusivity</code> (46)</td>
+<td>✅ acceptable</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>parallel_component_of_ion_velocity</code> (34)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>thermal_electron_pressure</code> (25)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td>radiation_meas_diag (31)</td>
+<td><code>major_radius_of_measurement_position</code> (36)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>radiated_power_due_to_impurity_radiation</code> (40)</td>
+<td>⚠️ tautology ("radiated power ... radiation")</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>toroidal_angle_of_delta_position</code> (32)</td>
+<td>⚠️ <code>delta_position</code> is grammar-weak</td>
+<td></td>
+</tr>
+<tr>
+<td>magnetohydrodynamics (31)</td>
+<td><code>grid_object_geometry</code> (20)</td>
+<td>⚠️ too generic for a canonical SN</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>major_radius_of_closest_wall_point</code> (34)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>flux_surface_averaged_toroidal_current_density</code> (46)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td>plasma_wall_interactions (24)</td>
+<td><code>toroidal_component_of_magnetic_field</code> (36)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>vertical_component_of_magnetic_field</code> (36)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>ion_atomic_mass</code> (15)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td>plasma_control (12)</td>
+<td><code>normalized_toroidal_beta</code> (24)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>plasma_internal_inductance</code> (26)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>lower_elongation_of_plasma_boundary</code> (35)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td>turbulence (10)</td>
+<td><code>neutral_temperature</code> (19)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>ion_temperature</code> (15)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>thermal_ion_number_density</code> (26)</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td>magnetic_field_diagnostics (4)</td>
+<td><code>stokes_s0_of_fiber_optic_current_sensor</code> (39)</td>
+<td>⚠️ hardware-bound (NC-30 risk)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Length stats (valid only, n=335):</strong> min 12, median 39, p75 47, p90 60, max 90,
+avg ≈ 40. Target should be median ≤ 40, p90 ≤ 55. Currently p90 is 60 — acceptable
+but close to the line. <strong>10 names exceed 70 characters</strong> — all candidates for shortening:</p>
+<pre><code> 90  flux_surface_averaged_inverse_square_magnetic_field_strength_times_squared_radial_gradient
+ 88  equilibrium_reconstruction_constraint_weight_of_vertical_iron_core_segment_magnetization
+ 86  equilibrium_reconstruction_constraint_weight_of_radial_iron_core_segment_magnetization
+ 81  derivative_of_flux_surface_cross_sectional_area_with_respect_to_radial_coordinate
+ 78  poloidal_component_of_magnetic_field_of_poloidal_magnetic_magnetic_field_probe   ← duplicated &quot;magnetic&quot;
+ 72  equilibrium_reconstruction_constraint_weight_of_toroidal_current_density
+ 72  parallel_component_of_current_density_due_to_non_inductive_current_drive
+ 71  measurement_time_of_vertical_iron_core_segment_magnetization_constraint
+ 71  normalized_toroidal_flux_coordinate_of_neoclassical_tearing_mode_center
+ 70  equilibrium_reconstruction_constraint_weight_of_mse_polarization_angle
+</code></pre>
+<p><strong>Anti-patterns surfaced:</strong>
+1. Repeated word (<code>magnetic_magnetic</code>) — audit miss, needs a new <code>repeated_token_check</code>.
+2. <code>equilibrium_reconstruction_constraint_weight_of_X</code> family (5 of 10 longest) — genuine
+   physics concept but warrants a vocabulary compaction proposal in ISN
+   (<code>reconstruction_weight</code> as a single base noun?).
+3. <code>*_of_fiber_optic_current_sensor</code> — hardware-instrument-bound name; NC-30 audit exists
+   but hasn't fired on stokes_s0/s1/s2 because they're not <code>_of_X_sensor</code> pattern it recognises.
+   Needs rule extension.</p>
+<hr />
+<h2 id="unit-pass-through-verification-code-review">Unit pass-through verification (code review)</h2>
+<pre><code>imas_codex/standard_names/workers.py → compose_worker
+  reads extracted path info which includes `unit` from DD HAS_UNIT edge
+  LLM prompt marks `unit` as READ-ONLY
+  post-LLM: candidate_dict['unit'] = extracted['unit']   ← OVERWRITE, not LLM value
+
+imas_codex/standard_names/graph_ops.py → write_standard_names
+  CREATE (sn:StandardName) SET sn += $payload
+  MERGE (u:Unit {id: $unit})
+  MERGE (sn)-[:HAS_UNIT]-&gt;(u)
+</code></pre>
+<p><strong>Verdict:</strong> code pass-through is in place. However the audit (below) surfaced 4
+SN nodes whose <code>unit</code> property disagrees with <strong>every</strong> DD path they link to — these
+pre-date the latest sanitizer or were set by a pre-fix compose_worker. They need a one-time
+backfill.</p>
+<h3 id="unit-integrity-audit-single-run-summary">Unit-integrity audit (single-run summary)</h3>
+<pre><code>  match            248   (sn.unit == single DD path unit)
+  no_dd_unit        75   (some source_paths have no HAS_UNIT edge on DD side — DD gap)
+  multi_contains     8   (sn.unit is one of many DD-path units — acceptable)
+  mismatch           4   (sn.unit disagrees with all DD path units — BUG)
+</code></pre>
+<p>The 4 mismatches (all pre-existing, to be fixed by new plan):</p>
+<pre><code>ion_average_charge_of_ion_state        SN='1'   DD='e'     ← DD-side bug (e is elementary charge unit; should be '1')
+ion_average_square_charge_of_ion_state SN='1'   DD='e'     ← same DD-side bug
+electron_temperature_peaking_factor    SN='1'   DD='eV'    ← SN correct, DD eV wrong (peaking factor IS dimensionless)
+plasma_current                         SN='1'   DD='A'     ← SN WRONG (should be 'A'); was poisoned by pulse_schedule source in session 10 before the narrowing fix
+</code></pre>
+<p>Also <strong>173 SN source_paths</strong> point to DD nodes with no <code>HAS_UNIT</code> edge. These are
+dimensionless quantities in the DD that lack an explicit <code>1</code> unit — a DD-schema gap.</p>
+<hr />
+<h2 id="gap-closure-four-new-plans-proposed">Gap-closure: four new plans proposed</h2>
+<ol>
+<li>
+<p><strong><code>sn-unit-integrity-tests.md</code></strong> — graph quality tests + one-time backfill to fix
+   the 4 mismatches + a DD-upstream issue list for the unit gaps. Schema-driven test
+   in <code>tests/graph/test_sn_unit_integrity.py</code>.</p>
+</li>
+<li>
+<p><strong><code>sn-enrichment-rotation.md</code></strong> — formalise the rotation-bootstrap approach for
+   the documentation (enrich) phase. Per-domain $2 cap, graph-aware POSTLINK context,
+   senior-review feedback loop, mirrors the naming rotation.</p>
+</li>
+<li>
+<p><strong><code>sn-coverage-closure.md</code></strong> — finish coverage for the ~15 domains untouched by
+   rotation. Explicit priority order: <code>magnetic_field_systems</code> → <code>gyrokinetics</code> →
+   <code>stellarator_geometry</code> → <code>wave_physics</code> → rest.</p>
+</li>
+<li>
+<p><strong>Name-quality hygiene</strong> — not a full plan, but three audit additions belong in
+   Plan 31 WS-B:
+   - <code>repeated_token_check</code> (catches <code>magnetic_magnetic</code>)
+   - <code>length_soft_cap_check</code> (quarantine &gt; 80 char; warn &gt; 60)
+   - <code>instrument_stokes_bind_check</code> (extends NC-30 to cover <code>stokes_X_of_Y_sensor</code>)</p>
+</li>
+</ol>
+<h2 id="next-steps-ordered">Next steps (ordered)</h2>
+<ol>
+<li>Commit this audit + three new plans.</li>
+<li>Run <code>sn-unit-integrity-tests</code> plan — small, safe, catches real bugs.</li>
+<li>Run first enrich rotation (edge_plasma_physics, 47 names) per
+   <code>sn-enrichment-rotation.md</code> → review → iterate.</li>
+<li>Continue name-coverage rotation on <code>magnetic_field_systems</code> per
+   <code>sn-coverage-closure.md</code>.</li>
+</ol>
+  </main>
+</body>
+</html>

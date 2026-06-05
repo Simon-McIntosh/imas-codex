@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="11-quality-gap-analysis">
+  <meta name="plan-title" content="Standard Name Quality Gap Analysis">
+  <meta name="plan-summary" content="*Catalog baseline** — 309 entries across 20 domains in `imas-standard-names-catalog/standard_names/`, generated via ISN&#x27;s interactive MCP-assisted workflow (`.github/prompts/generate_standard_names_from_imas_paths.prompt">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="33-state-of-the-nation-2026-04-20,34-regen-cycle-results">
+  <title>Standard Name Quality Gap Analysis | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard Name Quality Gap Analysis</h1>
+    <blockquote>
+<p>Reference document tracking measurable gaps between automated pipeline output
+and the ISN catalog standard. Each gap has a <strong>metric</strong>, <strong>evidence</strong>, and
+<strong>resolution status</strong> so progress can be checked off as fixes land.</p>
+</blockquote>
+<h2 id="methodology">Methodology</h2>
+<p><strong>Catalog baseline</strong> — 309 entries across 20 domains in
+<code>imas-standard-names-catalog/standard_names/</code>, generated via ISN's interactive
+MCP-assisted workflow (<code>.github/prompts/generate_standard_names_from_imas_paths.prompt.md</code>).</p>
+<p><strong>Pipeline output</strong> — 17 StandardName nodes produced by <code>sn generate --ids equilibrium --limit 20</code>
+on 2025-04-13, with review enabled. Queried from Neo4j graph.</p>
+<hr />
+<h2 id="summary-scorecard">Summary Scorecard</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Catalog (309)</th>
+<th>Pipeline (before)</th>
+<th>Pipeline (after)</th>
+<th>Target</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Avg documentation length</td>
+<td>1569 chars (median 2008)</td>
+<td>473 chars</td>
+<td><strong>941 chars</strong> (avg of latest 7)</td>
+<td>≥1200 chars</td>
+<td>🟡 <strong>2× improved, closing</strong></td>
+</tr>
+<tr>
+<td>With governing equation</td>
+<td>72% (224/309)</td>
+<td>~40%</td>
+<td><strong>100%</strong> (latest batch)</td>
+<td>≥80%</td>
+<td>✅ <strong>RESOLVED</strong></td>
+</tr>
+<tr>
+<td>With sign convention</td>
+<td>65% (201/309)</td>
+<td>~10%</td>
+<td><strong>100%</strong> (latest batch)</td>
+<td>≥60%</td>
+<td>✅ <strong>RESOLVED</strong></td>
+</tr>
+<tr>
+<td>With links</td>
+<td>47% (145/309), avg 8.2</td>
+<td>100% but many invalid</td>
+<td>100%, avg 3.3</td>
+<td>≥80%, avg ≥6</td>
+<td>🟡 <strong>Prefix fixed, count improving</strong></td>
+</tr>
+<tr>
+<td>Tags — secondary only</td>
+<td>100%, avg 2.6</td>
+<td>~40% include primary tags</td>
+<td><strong>100% secondary only</strong></td>
+<td>100% secondary only</td>
+<td>✅ <strong>RESOLVED</strong> — migrated 9 names</td>
+</tr>
+<tr>
+<td>Units persisted</td>
+<td>100%</td>
+<td>100% (stored as <code>unit</code>)</td>
+<td>100%</td>
+<td>100%</td>
+<td>✅ <strong>RESOLVED</strong></td>
+</tr>
+<tr>
+<td>Reviewer score</td>
+<td>N/A (human reviewed)</td>
+<td>avg 0.54 (range 0.36–0.68)</td>
+<td><strong>avg 0.84</strong> (range 0.50–0.96)</td>
+<td>avg ≥0.75</td>
+<td>✅ <strong>RESOLVED</strong> — 3 outstanding, 4 good</td>
+</tr>
+<tr>
+<td>ISN validation pass</td>
+<td>100% (catalog is canonical)</td>
+<td>~70% (post-fix)</td>
+<td><strong>100%</strong> (latest 7)</td>
+<td>≥95%</td>
+<td>✅ <strong>RESOLVED</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="gap-details">Gap Details</h2>
+<h3 id="gap-1-documentation-depth-critical">GAP-1: Documentation depth (CRITICAL)</h3>
+<p><strong>Metric:</strong> Average documentation character count.</p>
+<p><strong>Evidence:</strong>
+- Catalog Q1=529, Q2=2008, Q3=2155, max=3081 chars
+- Pipeline avg=473, max=573 chars (below catalog Q1!)
+- Catalog entries have structured sections: Opening → Governing equation → Physical significance → Measurement → Typical values → Sign convention → Cross-references
+- Pipeline output is 1–2 paragraphs without section structure</p>
+<p><strong>Catalog example</strong> (<code>poloidal_magnetic_flux_profile</code>, 1720 chars):</p>
+<pre><code>Poloidal magnetic flux ψ(ρ) as function of flux surface coordinate...
+Governing equation: $$Δ*ψ = −μ₀R²p'(ψ) − FF'(ψ)$$
+Physical significance: fundamental solution of Grad-Shafranov equation...
+Measurement/Calculation methods: Computed from magnetic equilibrium...
+Typical values: ITER: ψ ≈ −5 to 0 Wb...
+Sign convention: Positive when poloidal flux increases from axis to boundary.
+</code></pre>
+<p><strong>Pipeline example</strong> (<code>bootstrap_current</code>, 483 chars):</p>
+<pre><code>The bootstrap current I_bs is a non-inductive plasma current driven by
+the pressure gradient and neoclassical effects. It is a critical component
+for steady-state tokamak scenarios...
+</code></pre>
+<p><strong>Root cause:</strong> Compose prompt says "200-500 characters" for documentation.
+ISN catalog targets 150-400 <strong>words</strong> (≈800-2200 chars). The compose system
+prompt's documentation template is too brief and doesn't enforce section structure.</p>
+<p><strong>Resolution:</strong> Update compose_system.md documentation template to require:
+1. Explicit section structure (opening, equation, significance, measurement, values, sign)
+2. Target 800-2200 chars (~150-400 words)
+3. Show 2-3 COMPLETE curated examples with full documentation</p>
+<p><strong>Status:</strong> ☐ Not started</p>
+<hr />
+<h3 id="gap-2-dd-context-starvation-critical">GAP-2: DD context starvation (CRITICAL)</h3>
+<p><strong>Metric:</strong> Characters of DD context passed to compose LLM per path.</p>
+<p><strong>Evidence:</strong>
+- Pipeline passes: description (~30 chars), documentation (~0-100 chars from graph),
+  unit, data_type, cluster label, parent path
+- ISN interactive workflow calls <code>fetch_imas_paths</code> MCP tool → gets 500-2000 chars
+  of DD documentation per path including coordinate specs, related paths, physics domain
+- The <code>n.documentation</code> field in our graph is typically NULL or very short for most
+  IMASNode paths</p>
+<p><strong>ISN workflow step</strong> (from prompt):</p>
+<blockquote>
+<p>"Extract IMAS DD documentation, units, and sign conventions"
+This uses <code>search_imas</code> + <code>fetch_imas_paths</code> MCP tools that return rich documentation.</p>
+</blockquote>
+<p><strong>Root cause:</strong> The pipeline relies on <code>n.documentation</code> from the graph (which is the
+raw DD description), not the LLM-enriched documentation that the ISN workflow gets
+from MCP tools. Our DD MCP server (<code>imas-codex serve --dd-only</code>) has the rich data,
+but the pipeline doesn't call it.</p>
+<p><strong>Resolution:</strong> Before compose, fetch rich DD documentation via the same tools our
+MCP server exposes. This means calling <code>fetch_dd_paths()</code> or the equivalent Python
+function to get full documentation for each path in the batch.</p>
+<p><strong>Status:</strong> ☐ Not started</p>
+<hr />
+<h3 id="gap-3-unit-persistence-failure-resolved">GAP-3: ~~Unit persistence failure~~ — RESOLVED</h3>
+<p><strong>Metric:</strong> Fraction of StandardName nodes with non-null unit.</p>
+<p><strong>Evidence (UPDATED):</strong>
+- Units ARE correctly persisted as <code>unit</code> property (renamed from legacy <code>canonical_units</code>)
+- <code>HAS_UNIT</code> relationships ARE correctly created to <code>Unit</code> nodes
+- Initial investigation used old property name (<code>sn.canonical_units</code> — renamed to <code>sn.unit</code>)
+- Verified: <code>bootstrap_current</code> → <code>unit=A</code>, <code>metric_jacobian</code> → <code>unit=1</code></p>
+<p><strong>Status:</strong> ✅ Resolved — no code change needed. Graph property is <code>unit</code>.</p>
+<hr />
+<h3 id="gap-4-link-format-inconsistency-high">GAP-4: Link format inconsistency (HIGH)</h3>
+<p><strong>Metric:</strong> Fraction of links with correct <code>name:</code> prefix.</p>
+<p><strong>Evidence:</strong>
+- 45 links across older names lack the <code>name:</code> prefix (bare names like <code>plasma_current</code>)
+- Recent pipeline output (post-fix) correctly uses <code>name:</code> prefix
+- ISN catalog uses <code>name:bootstrap_current</code> format consistently
+- Links currently point only to names already in the graph (44 names)</p>
+<p><strong>Root cause:</strong> Two issues:
+1. Older names were generated before the <code>_normalize_links()</code> fix
+2. Links are constrained to <code>existing_names</code> list (only graph names), not the full
+   DD namespace</p>
+<p><strong>User direction:</strong> Links should be able to point to ANY DD path. Unresolved links
+(pointing to names that don't exist yet) should be treated as temporary and resolved
+asynchronously once generation is complete across the DD.</p>
+<p><strong>Resolution:</strong>
+1. Fix older names: batch update to add <code>name:</code> prefix
+2. Remove constraint that links must be in <code>existing_names</code>
+3. Add async link resolution worker (see GAP-8)</p>
+<p><strong>Status:</strong> ☐ Not started</p>
+<hr />
+<h3 id="gap-5-primary-tag-leakage-medium">GAP-5: Primary tag leakage (MEDIUM)</h3>
+<p><strong>Metric:</strong> Fraction of names with primary tags in <code>tags</code> field.</p>
+<p><strong>Evidence:</strong>
+- <code>toroidal_beta</code> has tags <code>['fundamental', 'core-physics', 'global-quantity']</code> —
+  <code>fundamental</code> and <code>core-physics</code> are primary tags
+- <code>poloidal_beta</code> has tags <code>['fundamental', 'equilibrium']</code> — both primary
+- Post-fix names correctly filter to secondary only
+- Older names (pre-fix) still have primary tags</p>
+<p><strong>Root cause:</strong> Names generated before <code>_filter_secondary_tags()</code> was implemented
+still carry primary tags. Also, LLM sometimes ignores the instruction and outputs
+primary tags despite explicit "secondary only" guidance.</p>
+<p><strong>Resolution:</strong>
+1. Batch-fix older names in graph
+2. Strengthen compose prompt to list primary tags as FORBIDDEN in tags field
+3. Post-processing filter is already in place (defense in depth)</p>
+<p><strong>Status:</strong> ☐ Partially addressed (new names clean, old names dirty)</p>
+<hr />
+<h3 id="gap-6-missing-equations-high">GAP-6: Missing equations (HIGH)</h3>
+<p><strong>Metric:</strong> Fraction of documentation containing LaTeX governing equations.</p>
+<p><strong>Evidence:</strong>
+- Catalog: 72% have governing equations with <code>$$...$$</code> display math
+- Pipeline: ~40% have equations, often inline ($...$) not display ($$...$$)
+- Catalog pattern: "Governing equation:\n$$..equation..$$\nwhere ... (definitions)"
+- Pipeline: equations appear inline without dedicated section</p>
+<p><strong>Root cause:</strong> Documentation template in compose_system.md mentions equations
+but doesn't make them mandatory. No structured section headers required.</p>
+<p><strong>Resolution:</strong> Make "Governing equation:" a required section in documentation
+template. Show display-math format (<code>$$...$$</code>) explicitly. Require variable
+definitions after every equation.</p>
+<p><strong>Status:</strong> ☐ Not started</p>
+<hr />
+<h3 id="gap-7-missing-sign-conventions-high">GAP-7: Missing sign conventions (HIGH)</h3>
+<p><strong>Metric:</strong> Fraction of COCOS-dependent quantities with sign convention paragraph.</p>
+<p><strong>Evidence:</strong>
+- Catalog: 65% have "Sign convention: Positive when [condition]."
+- Pipeline: ~10% mention sign conventions at all
+- Catalog format: Separate paragraph, plain text, not bold
+- Many equilibrium quantities are COCOS-dependent (psi, B_t, I_p, q)</p>
+<p><strong>Root cause:</strong> Sign convention guidance in compose_system.md (DS-5) is present
+but not enforced as mandatory for COCOS-dependent quantities. The LLM doesn't
+know which paths are COCOS-dependent without being told.</p>
+<p><strong>Resolution:</strong>
+1. Fetch COCOS dependency info from DD (via <code>get_dd_cocos_fields()</code>)
+2. Pass COCOS flag per path in the user prompt
+3. Make sign convention paragraph mandatory when COCOS flag is set</p>
+<p><strong>Status:</strong> ☐ Not started</p>
+<hr />
+<h3 id="gap-8-no-async-link-resolution-new-user-requirement">GAP-8: No async link resolution (NEW — user requirement)</h3>
+<p><strong>Metric:</strong> Fraction of links pointing to existing standard names.</p>
+<p><strong>Evidence:</strong>
+- Current pipeline requires links to exist in <code>existing_names</code> list at compose time
+- When generating the first batch for an IDS, there are few/no existing names
+- Links should be able to point to ANY standard name — even ones not yet generated
+- ISN catalog links to names across all 20 domain directories</p>
+<p><strong>User direction:</strong> Links should point freely to DD paths. Unresolved links get
+resolved asynchronously after generation completes. Requires:
+1. New graph state: <code>link_status = unresolved | resolved | unresolvable</code>
+2. Async link resolution worker that checks if target names exist
+3. Quasi-random selection with "last_checked" penalty to avoid spinning on
+   unresolvable links (NOT a deterministic ORDER BY — that causes deadlocks)
+4. Worker places back unresolved links at back of queue</p>
+<p><strong>Root cause:</strong> Pipeline was designed for small batches where all names are known.
+At scale (full DD), names reference each other across batches and domains.</p>
+<p><strong>Status:</strong> ✅ <strong>RESOLVED</strong> — LinkResolutionStatus enum, <code>sn resolve-links</code> CLI,
+age-weighted claim_unresolved_links(), resolve_links_batch().</p>
+<hr />
+<h3 id="gap-9-curated-examples-not-fully-exploited-medium">GAP-9: Curated examples not fully exploited (MEDIUM)</h3>
+<p><strong>Metric:</strong> Information from ISN curated examples visible in compose prompt.</p>
+<p><strong>Evidence:</strong>
+- 42 curated examples loaded from ISN package
+- Compose prompt shows: name, category, kind, unit, description (~120 chars)
+- Missing from prompt: full documentation (1500-2500 chars each)
+- ISN interactive workflow has access to full catalog entries via MCP</p>
+<p><strong>Root cause:</strong> <code>_load_curated_examples()</code> loads complete YAML entries but the
+compose_system.md template only renders abbreviated fields.</p>
+<p><strong>Resolution:</strong> Show 3-5 COMPLETE examples with full documentation in the system
+prompt. Use the best examples (poloidal_magnetic_flux_profile, safety_factor,
+flux_surface_averaged_parallel_bootstrap_current_density) as gold standards.</p>
+<p><strong>Status:</strong> ☐ Not started</p>
+<hr />
+<h3 id="gap-10-no-paths-option-for-targeted-debugging-medium">GAP-10: No --paths option for targeted debugging (MEDIUM)</h3>
+<p><strong>Metric:</strong> Developer iteration speed.</p>
+<p><strong>Evidence:</strong>
+- Every debugging iteration requires running full extract pipeline (graph query,
+  classification, batching)
+- <code>--limit</code> caps raw query, not output — unpredictable results
+- ISN workflow accepts specific paths in a markdown list</p>
+<p><strong>Root cause:</strong> CLI was designed for bulk generation, not targeted debugging.</p>
+<p><strong>Resolution:</strong> Add <code>--paths</code> flag accepting space-separated DD paths. Paths
+bypass graph query and classifier, go directly into batches.</p>
+<p><strong>Status:</strong> ✅ <strong>RESOLVED</strong> — <code>--paths</code> flag implemented, implies <code>--force</code>.</p>
+<hr />
+<h2 id="priority-order">Priority Order</h2>
+<ol>
+<li>~~<strong>GAP-3</strong> (unit persistence) — RESOLVED~~</li>
+<li><strong>GAP-2</strong> (DD context) — CRITICAL, highest impact on name quality</li>
+<li><strong>GAP-1</strong> (doc depth) — CRITICAL, requires prompt rewrite</li>
+<li><strong>GAP-10</strong> (--paths flag) — enables rapid iteration for all subsequent fixes</li>
+<li><strong>GAP-6</strong> (equations) — HIGH, addressed by prompt rewrite in GAP-1</li>
+<li><strong>GAP-7</strong> (sign conventions) — HIGH, requires COCOS context injection</li>
+<li><strong>GAP-9</strong> (curated examples) — MEDIUM, amplifies prompt quality</li>
+<li><strong>GAP-4</strong> (link format) — HIGH, batch fix + link resolution design</li>
+<li><strong>GAP-8</strong> (async link resolution) — NEW, requires new worker design</li>
+<li><strong>GAP-5</strong> (primary tags) — MEDIUM, batch fix + already defended</li>
+</ol>
+<hr />
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<p>The pipeline achieves parity with the ISN catalog when:</p>
+<ul>
+<li>[ ] Avg documentation ≥1200 chars (catalog median: 2008)</li>
+<li>[ ] ≥80% of entries have governing equations</li>
+<li>[ ] ≥60% of COCOS-dependent entries have sign conventions</li>
+<li>[ ] 100% of entries have persisted units</li>
+<li>[ ] 100% of links use <code>name:</code> prefix format</li>
+<li>[ ] 0% of entries have primary tags in <code>tags</code> field</li>
+<li>[ ] Avg reviewer score ≥0.75 (current: 0.54)</li>
+<li>[ ] ISN validation pass rate ≥95%</li>
+<li>[ ] Async link resolution resolves ≥80% of links within 2 passes</li>
+</ul>
+  </main>
+</body>
+</html>

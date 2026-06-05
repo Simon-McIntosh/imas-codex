@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="08-dd-linking-design">
+  <meta name="plan-title" content="Design: Linking IMAS Data Dictionary Paths to Standard Names">
+  <meta name="plan-summary" content="Standard names currently have an `ids_paths` field (`list[str]`, default empty) but no entries populate it. This design establishes the mapping model, schema decisions, privacy boundaries, and phased rollout strategy for">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="07-dd-exploitation-strategy">
+  <meta name="plan-informs" content="09-codex-pivot-analysis,10-implementation-review">
+  <title>Design: Linking IMAS Data Dictionary Paths to Standard Names | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Design: Linking IMAS Data Dictionary Paths to Standard Names</h1>
+    <p><strong>Status:</strong> Proposal<br />
+<strong>Date:</strong> 2025-07-18<br />
+<strong>DD Version Analyzed:</strong> 4.1.0  </p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>Standard names currently have an <code>ids_paths</code> field (<code>list[str]</code>, default empty) but no entries populate it. This design establishes the mapping model, schema decisions, privacy boundaries, and phased rollout strategy for linking DD paths to standard names.</p>
+<p><strong>Core principle:</strong> Standard names represent <em>physics concepts</em>; DD paths represent <em>storage locations</em>. The mapping is many-to-many: one standard name maps to multiple DD paths (same concept across IDSs), and occasionally one DD path relates to multiple standard names (a profile field and its derived quantities).</p>
+<hr />
+<h2 id="1-mapping-model">1. Mapping Model</h2>
+<h3 id="11-relationship-cardinality">1.1 Relationship Cardinality</h3>
+<p><strong>One standard name → many DD paths</strong> (dominant pattern):</p>
+<table>
+<thead>
+<tr>
+<th>Standard Name</th>
+<th>DD Paths</th>
+<th>IDSs Spanned</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>electron_temperature</code></td>
+<td>10 paths</td>
+<td>6 IDSs (core_profiles, edge_profiles, plasma_profiles, mhd, turbulence, core_instant_changes)</td>
+</tr>
+<tr>
+<td><code>poloidal_flux</code> (concept)</td>
+<td>20+ paths</td>
+<td>12+ IDSs</td>
+</tr>
+<tr>
+<td><code>toroidal_magnetic_field</code> (concept)</td>
+<td>50 paths</td>
+<td>28 IDSs</td>
+</tr>
+<tr>
+<td><code>plasma_current</code> (concept)</td>
+<td>38 paths</td>
+<td>7 IDSs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Many standard names → one DD path</strong> (rare):
+- A DD path like <code>equilibrium/time_slice/profiles_1d/psi</code> maps only to the poloidal flux standard name
+- Edge cases: <code>summary/volume_average/t_e</code> could relate to both <code>electron_temperature</code> and a volume-averaged variant</p>
+<h3 id="12-what-goes-in-ids_paths">1.2 What Goes in <code>ids_paths</code></h3>
+<p>The <code>ids_paths</code> field stores <strong>exact-equivalence</strong> mappings only — DD paths where the physical quantity is the same concept as the standard name, just stored in a different IDS context.</p>
+<p><strong>Include:</strong>
+- <code>core_profiles/profiles_1d/electrons/temperature</code> → <code>electron_temperature</code> (same quantity, core context)
+- <code>edge_profiles/profiles_1d/electrons/temperature</code> → <code>electron_temperature</code> (same quantity, edge context)
+- <code>plasma_profiles/ggd/electrons/temperature</code> → <code>electron_temperature</code> (same quantity, GGD representation)</p>
+<p><strong>Exclude:</strong>
+- <code>summary/volume_average/t_e</code> — this is a <em>derived aggregation</em>, not the same quantity
+- <code>core_profiles/profiles_1d/electrons/temperature_fit</code> — this is fit metadata, not the temperature itself
+- Error fields (<code>_error_upper</code>, <code>_error_lower</code>) — tracked separately via DD error field tools</p>
+<h3 id="13-clusters-as-discovery-mechanism-not-contract">1.3 Clusters as Discovery Mechanism, Not Contract</h3>
+<p>DD semantic clusters (e.g., the "electron temperature" global cluster) group paths representing the same concept across IDSs. This aligns naturally with standard names, but <strong>clusters are not the authoritative mapping</strong>:</p>
+<ul>
+<li>Clusters are ML-derived artifacts whose labels and membership may change</li>
+<li>Clusters sometimes conflate local vs aggregated quantities, or profile vs summary data</li>
+<li>Clusters can seed candidate mappings, but human/tool review assigns the final <code>ids_paths</code></li>
+</ul>
+<p><strong>Workflow:</strong> <code>cluster → candidate DD paths → review/validate → ids_paths</code></p>
+<hr />
+<h2 id="2-schema-extension-proposal">2. Schema Extension Proposal</h2>
+<h3 id="21-keep-ids_paths-as-is">2.1 Keep <code>ids_paths</code> As-Is</h3>
+<p>The existing field is well-designed:</p>
+<pre><code class="language-python"># field_types.py (already exists)
+IdsPaths = Annotated[
+    list[str],
+    Field(
+        description=&quot;IMAS Data Dictionary paths that map to this standard name. &quot;
+        &quot;Format: 'ids_name/path/to/leaf' (e.g., 'equilibrium/time_slice/profiles_1d/elongation'). &quot;
+        &quot;Paths can be validated via check_imas_paths tool.&quot;,
+    ),
+]
+
+# models.py (already exists)
+ids_paths: IdsPaths = Field(default_factory=list)
+</code></pre>
+<p><strong>No type change needed.</strong> The flat <code>list[str]</code> is correct for exact-equivalence paths.</p>
+<h3 id="22-do-not-add-dd_clusters-inline">2.2 Do Not Add <code>dd_clusters</code> Inline</h3>
+<p>Clusters are unstable derived artifacts. Storing cluster labels in YAML couples standard name entries to clustering algorithm output, causing unnecessary YAML churn when clusters are rebuilt.</p>
+<p><strong>Instead:</strong> Use clusters programmatically in mapping tools and workflows. The graph already stores <code>(IMASNode)-[:IN_CLUSTER]-&gt;(IMASSemanticCluster)</code> relationships for this purpose.</p>
+<h3 id="23-dd-version-tracking-mapping-manifest-not-per-entry">2.3 DD Version Tracking: Mapping Manifest, Not Per-Entry</h3>
+<p>A per-entry <code>dd_version</code> field implies all linked paths were validated together against one release — misleading when mappings are updated incrementally.</p>
+<p><strong>Recommended approach:</strong> A repository-level mapping manifest:</p>
+<pre><code class="language-yaml"># catalog-root/dd_mapping_manifest.yml
+dd_version: &quot;4.1.0&quot;
+validated_at: &quot;2025-07-18&quot;
+validation_tool: &quot;check_imas_paths&quot;
+entry_count: 309
+mapped_count: 0  # entries with non-empty ids_paths
+coverage_stats:
+  total_dd_leaf_paths: ~30000
+  mapped_paths: 0
+  unmapped_physics_paths: ~5000  # estimated
+</code></pre>
+<p>This manifest is updated when bulk revalidation runs, providing a single point of truth for "which DD version are our mappings valid against?"</p>
+<h3 id="24-structured-mapping-sidecar-phase-2">2.4 Structured Mapping Sidecar (Phase 2)</h3>
+<p>For non-exact relations that <code>ids_paths</code> cannot capture, a separate mapping artifact (generated, not hand-curated):</p>
+<pre><code class="language-yaml"># Generated file: catalog-root/.mapping/electron_temperature.yml
+standard_name: electron_temperature
+exact_paths:  # mirrors ids_paths (generated from YAML)
+  - core_profiles/profiles_1d/electrons/temperature
+  - edge_profiles/profiles_1d/electrons/temperature
+  - plasma_profiles/profiles_1d/electrons/temperature
+  # ... 7 more
+related_mappings:
+  - path: summary/volume_average/t_e
+    relation: aggregated
+    target_name: volume_averaged_electron_temperature  # different SN
+  - path: core_profiles/profiles_1d/electrons/temperature_fit
+    relation: fit_metadata
+    target_name: null  # no SN needed
+source_clusters:
+  - label: &quot;electron temperature&quot;
+    scope: global
+    dd_version: &quot;4.1.0&quot;
+</code></pre>
+<p>This is a <strong>generated artifact</strong> (from YAML + graph queries), not a hand-maintained file. It provides richer context for tools and documentation without polluting the core catalog schema.</p>
+<hr />
+<h2 id="3-relationship-types-to-track">3. Relationship Types to Track</h2>
+<h3 id="31-in-ids_paths-authoritative-in-yaml">3.1 In <code>ids_paths</code> (authoritative, in YAML)</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Exact equivalence</strong></td>
+<td>Same physical quantity in different IDS</td>
+<td><code>core_profiles/.../electrons/temperature</code> and <code>edge_profiles/.../electrons/temperature</code></td>
+</tr>
+</tbody>
+</table>
+<p>Only this type belongs in <code>ids_paths</code>. All paths in the list are interchangeable representations of the same concept.</p>
+<h3 id="32-in-graph-edges-derived-generated">3.2 In Graph Edges (derived, generated)</h3>
+<table>
+<thead>
+<tr>
+<th>Relationship</th>
+<th>From</th>
+<th>To</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MAPS_TO_DD</code></td>
+<td>StandardName</td>
+<td>IMASNode</td>
+<td>Direct exact mapping</td>
+</tr>
+<tr>
+<td><code>RELATED_DD</code></td>
+<td>StandardName</td>
+<td>IMASNode</td>
+<td>Non-exact relation (aggregated, diagnostic-specific)</td>
+</tr>
+<tr>
+<td><code>IN_CLUSTER</code></td>
+<td>IMASNode</td>
+<td>IMASSemanticCluster</td>
+<td>Existing cluster membership</td>
+</tr>
+</tbody>
+</table>
+<p>Graph edges are <strong>generated from YAML</strong> during catalog build. YAML is the single source of truth.</p>
+<h3 id="33-path-classification-rules">3.3 Path Classification Rules</h3>
+<p>When populating <code>ids_paths</code>, apply these rules:</p>
+<ol>
+<li>
+<p><strong>Same leaf name, different IDS context</strong> → exact (include)
+   - <code>core_profiles/profiles_1d/electrons/temperature</code> ✓
+   - <code>edge_profiles/ggd/electrons/temperature</code> ✓</p>
+</li>
+<li>
+<p><strong>Aggregated/reduced variant</strong> → different standard name
+   - <code>summary/volume_average/t_e</code> → <code>volume_averaged_electron_temperature</code>
+   - <code>summary/local/magnetic_axis/t_e</code> → <code>electron_temperature_at_magnetic_axis</code></p>
+</li>
+<li>
+<p><strong>Fit/reconstruction metadata</strong> → exclude
+   - <code>*_fit</code>, <code>*_fit/measured</code>, <code>*_fit/reconstructed</code></p>
+</li>
+<li>
+<p><strong>Error/uncertainty companions</strong> → exclude (use DD error field tools)
+   - <code>*_error_upper</code>, <code>*_error_lower</code>, <code>*_error_index</code></p>
+</li>
+<li>
+<p><strong>Grid/coordinate paths</strong> → separate standard names for grid concepts
+   - <code>*/grid/psi</code> → standard name for the grid coordinate, not the physics quantity</p>
+</li>
+</ol>
+<hr />
+<h2 id="4-privacy-and-visibility-design">4. Privacy and Visibility Design</h2>
+<h3 id="41-requirement-clarification">4.1 Requirement Clarification</h3>
+<p>"DD path info should not be on user-facing websites but should be stored."</p>
+<p>This means: <strong>not rendered on documentation sites</strong>, not "cryptographically hidden." The YAML files are in a Git repository and are accessible to anyone with repo access.</p>
+<h3 id="42-implementation">4.2 Implementation</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th><code>ids_paths</code> Visible?</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>YAML files</strong></td>
+<td>Yes</td>
+<td>Source of truth, version-controlled</td>
+</tr>
+<tr>
+<td><strong>MCP tools</strong> (<code>fetch_standard_names</code>)</td>
+<td>Yes</td>
+<td>Internal tooling needs full data</td>
+</tr>
+<tr>
+<td><strong>Documentation site</strong> (mkdocs)</td>
+<td>No</td>
+<td>Exclude from rendered output</td>
+</tr>
+<tr>
+<td><strong>Public API</strong> (if any)</td>
+<td>Configurable</td>
+<td>Allowlist of public fields</td>
+</tr>
+<tr>
+<td><strong>Graph database</strong></td>
+<td>Yes</td>
+<td><code>MAPS_TO_DD</code> edges for cross-referencing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-implementation-notes">4.3 Implementation Notes</h3>
+<ul>
+<li>The HTML renderer (<code>rendering/html.py</code>) already excludes <code>ids_paths</code> from output</li>
+<li><code>fetch_standard_names</code> currently does <strong>not</strong> include <code>ids_paths</code> in its output — this needs to be fixed for MCP tool consumers</li>
+<li>Add an explicit <strong>public field allowlist</strong> for any future API layer rather than relying on per-renderer deny lists</li>
+<li>Test coverage: add a test asserting that public serializers exclude <code>ids_paths</code></li>
+</ul>
+<hr />
+<h2 id="5-cluster-based-naming-strategy">5. Cluster-Based Naming Strategy</h2>
+<h3 id="51-clusters-as-bootstrap-not-authority">5.1 Clusters as Bootstrap, Not Authority</h3>
+<p>Global semantic clusters provide an efficient way to identify candidate standard names:</p>
+<pre><code>Cluster: &quot;electron temperature&quot; (global, cross-IDS)
+  → 10 DD paths across 6 IDSs
+  → Maps cleanly to standard name: electron_temperature
+  → All 10 paths go into ids_paths
+</code></pre>
+<h3 id="52-when-clusters-match-standard-names-well">5.2 When Clusters Match Standard Names Well</h3>
+<table>
+<thead>
+<tr>
+<th>Cluster Pattern</th>
+<th>Standard Name Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global cluster, single physics concept</td>
+<td>One standard name, all cluster paths in <code>ids_paths</code></td>
+</tr>
+<tr>
+<td>Cluster with local + aggregated variants</td>
+<td>Multiple standard names (base + qualified variants)</td>
+</tr>
+<tr>
+<td>COCOS-dependent cluster (e.g., <code>psi_like</code>)</td>
+<td>Shared COCOS annotation, individual standard names per concept</td>
+</tr>
+<tr>
+<td>Diagnostic-specific cluster</td>
+<td>Standard name per diagnostic quantity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-when-clusters-dont-map-cleanly">5.3 When Clusters Don't Map Cleanly</h3>
+<ul>
+<li><strong>Structural clusters</strong> (grid subsets, error fields) → no standard name</li>
+<li><strong>Mixed-concept clusters</strong> (momentum flux components) → multiple standard names</li>
+<li><strong>Summary/aggregation clusters</strong> → separate standard names with position/reduction qualifiers</li>
+<li><strong>IDS-scoped clusters</strong> → may duplicate a global cluster; prefer global</li>
+</ul>
+<h3 id="54-cluster-driven-batch-workflow">5.4 Cluster-Driven Batch Workflow</h3>
+<pre><code>1. Query all global clusters
+2. For each cluster:
+   a. Check if a matching standard name exists (by label similarity)
+   b. If yes: validate and populate ids_paths
+   c. If no: evaluate whether a new standard name is needed
+   d. Filter out structural/metadata clusters
+3. Validate all ids_paths against current DD version
+4. Generate mapping sidecar artifacts
+</code></pre>
+<hr />
+<h2 id="6-scale-assessment">6. Scale Assessment</h2>
+<h3 id="61-dd-inventory-v410">6.1 DD Inventory (v4.1.0)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total IDSs</td>
+<td>87</td>
+</tr>
+<tr>
+<td>Total DD paths</td>
+<td>61,366</td>
+</tr>
+<tr>
+<td>Estimated leaf physics/geometry paths</td>
+<td>~15,000–20,000</td>
+</tr>
+<tr>
+<td>Estimated global clusters (physics-relevant)</td>
+<td>~500–800</td>
+</tr>
+<tr>
+<td>Current standard names</td>
+<td>309</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-coverage-phases">6.2 Coverage Phases</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Target</th>
+<th>Estimated Names</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 1</strong></td>
+<td>Exact mappings for existing 309 names</td>
+<td>309</td>
+<td>Populate <code>ids_paths</code> for current catalog</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td>High-value cluster coverage</td>
+<td>~450–550</td>
+<td>Add names for major unmapped physics concepts</td>
+</tr>
+<tr>
+<td><strong>Phase 3</strong></td>
+<td>Diagnostic + qualified variants</td>
+<td>~600–900</td>
+<td>Position-qualified, aggregated, species-specific</td>
+</tr>
+<tr>
+<td><strong>Full coverage</strong></td>
+<td>All physics-relevant DD concepts</td>
+<td>~800–1200</td>
+<td>Including edge cases, rare diagnostics</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-why-full-coverage-exceeds-initial-estimates">6.3 Why Full Coverage Exceeds Initial Estimates</h3>
+<p>The initial estimate of 400–600 is likely too low because:
+- <strong>Diagnostic-specific quantities</strong>: bolometer power, Thomson scattering profiles, ECE channels — each diagnostic family adds 5–15 names
+- <strong>Geometry-qualified variants</strong>: <code>_at_magnetic_axis</code>, <code>_at_separatrix</code>, <code>_at_midplane</code> — each base quantity multiplied by ~5 positions
+- <strong>Species-qualified variants</strong>: electron, ion, deuterium, tritium, helium, impurity — ~6× multiplier for particle-dependent quantities
+- <strong>Process-qualified variants</strong>: ohmic, bootstrap, neoclassical, turbulent — ~4× for transport quantities
+- <strong>Component variants</strong>: radial, toroidal, poloidal, parallel — ~4× for vector quantities</p>
+<p>Not all combinations exist, but the combinatorial space is larger than concept-query intuition suggests.</p>
+<hr />
+<h2 id="7-implementation-roadmap">7. Implementation Roadmap</h2>
+<h3 id="71-immediate-no-schema-changes">7.1 Immediate (No Schema Changes)</h3>
+<ol>
+<li><strong>Populate <code>ids_paths</code> for existing entries</strong>: Use cluster-based discovery + <code>check_imas_paths</code> validation</li>
+<li><strong>Fix <code>fetch_standard_names</code></strong>: Include <code>ids_paths</code> in MCP tool output</li>
+<li><strong>Add validation</strong>: MCP tool or CLI that checks all <code>ids_paths</code> against current DD version</li>
+<li><strong>Add tests</strong>: Ensure public renderers exclude <code>ids_paths</code></li>
+</ol>
+<h3 id="72-near-term-minor-schema-addition">7.2 Near-Term (Minor Schema Addition)</h3>
+<ol>
+<li><strong>Add mapping manifest</strong>: Repository-level <code>dd_mapping_manifest.yml</code> tracking DD version and coverage stats</li>
+<li><strong>Generate graph edges</strong>: <code>(StandardName)-[:MAPS_TO_DD]-&gt;(IMASNode)</code> from YAML during catalog build</li>
+<li><strong>Add reverse-lookup MCP tool</strong>: "Given a DD path, which standard name(s) map to it?"</li>
+</ol>
+<h3 id="73-future-phase-2">7.3 Future (Phase 2+)</h3>
+<ol>
+<li><strong>Structured mapping sidecar</strong>: Generated artifacts with relation types for non-exact mappings</li>
+<li><strong>Batch name generation</strong>: Cluster-driven workflow for identifying gaps and generating candidates</li>
+<li><strong>Migration tooling</strong>: When DD version changes, detect renamed/moved paths and update <code>ids_paths</code></li>
+<li><strong>Coverage dashboard</strong>: Track what percentage of physics-relevant DD paths have standard name mappings</li>
+</ol>
+<hr />
+<h2 id="8-source-of-truth-policy">8. Source of Truth Policy</h2>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Role</th>
+<th>Authoritative?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>YAML entry files</strong> (with <code>ids_paths</code>)</td>
+<td>Primary store</td>
+<td>Yes — single source of truth</td>
+</tr>
+<tr>
+<td><strong>Mapping manifest</strong></td>
+<td>Version/coverage metadata</td>
+<td>Yes — for DD version info</td>
+</tr>
+<tr>
+<td><strong>Graph edges</strong> (<code>MAPS_TO_DD</code>)</td>
+<td>Query/discovery index</td>
+<td>No — generated from YAML</td>
+</tr>
+<tr>
+<td><strong>Mapping sidecar</strong> (Phase 2)</td>
+<td>Rich relation context</td>
+<td>No — generated from YAML + graph</td>
+</tr>
+<tr>
+<td><strong>Semantic clusters</strong></td>
+<td>Discovery aid</td>
+<td>No — unstable derived artifacts</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule:</strong> Never edit graph edges or sidecar files directly. All mapping changes flow through YAML → build pipeline → derived artifacts.</p>
+<hr />
+<h2 id="9-open-questions">9. Open Questions</h2>
+<ol>
+<li>
+<p><strong>Granularity of GGD vs 1D paths</strong>: Should <code>edge_profiles/ggd/electrons/temperature</code> and <code>edge_profiles/profiles_1d/electrons/temperature</code> both map to <code>electron_temperature</code>, or does the GGD representation warrant a separate name?
+   - <strong>Recommendation:</strong> Same name. The representation format (GGD vs 1D) is a storage detail, not a physics distinction.</p>
+</li>
+<li>
+<p><strong>Summary IDS paths</strong>: The <code>summary</code> IDS contains scalar reductions of profile quantities. Should <code>summary/volume_average/t_e</code> map to <code>electron_temperature</code> or to a qualified variant?
+   - <strong>Recommendation:</strong> Qualified variant (<code>volume_averaged_electron_temperature</code>) since it's a different physical quantity (a spatial average vs a profile).</p>
+</li>
+<li>
+<p><strong>Coordinate grid paths</strong>: <code>core_profiles/profiles_1d/grid/psi</code> is a coordinate grid, not a measurement. Should it get a standard name?
+   - <strong>Recommendation:</strong> Yes, but as a coordinate-type name (e.g., <code>poloidal_flux</code> as a coordinate concept), not mixed with the measurement concept.</p>
+</li>
+<li>
+<p><strong>COCOS-sensitive paths</strong>: 35 <code>b0_like</code> fields, 38 <code>ip_like</code> fields, 14 <code>q_like</code> fields. Should COCOS sensitivity be annotated on standard names?
+   - <strong>Recommendation:</strong> Not in Phase 1. COCOS is a DD-level concern. Standard names describe concepts, not sign conventions. The graph already tracks COCOS via <code>cocos_label_transformation</code> on <code>IMASNode</code>.</p>
+</li>
+</ol>
+<hr />
+<h2 id="appendix-representative-mappings">Appendix: Representative Mappings</h2>
+<h3 id="example-electron_temperature">Example: <code>electron_temperature</code></h3>
+<pre><code class="language-yaml">name: electron_temperature
+kind: scalar
+unit: eV
+ids_paths:
+  - core_profiles/profiles_1d/electrons/temperature
+  - edge_profiles/profiles_1d/electrons/temperature
+  - edge_profiles/ggd/electrons/temperature
+  - edge_profiles/ggd_fast/electrons/temperature
+  - plasma_profiles/profiles_1d/electrons/temperature
+  - plasma_profiles/ggd/electrons/temperature
+  - plasma_profiles/ggd_fast/electrons/temperature
+  - core_instant_changes/change/profiles_1d/electrons/temperature
+  - mhd/ggd/electrons/temperature
+  - turbulence/profiles_2d/electrons/temperature
+</code></pre>
+<h3 id="example-poloidal_flux-if-created">Example: <code>poloidal_flux</code> (if created)</h3>
+<pre><code class="language-yaml">name: poloidal_flux
+kind: scalar
+unit: Wb
+ids_paths:
+  - equilibrium/time_slice/profiles_1d/psi
+  - core_profiles/profiles_1d/grid/psi
+  - edge_profiles/profiles_1d/grid/psi
+  - plasma_profiles/profiles_1d/grid/psi
+  - core_sources/source/profiles_1d/grid/psi
+  - core_transport/model/profiles_1d/grid_flux/psi
+  - core_transport/model/profiles_1d/grid_d/psi
+  - core_transport/model/profiles_1d/grid_v/psi
+  - disruption/profiles_1d/grid/psi
+  - distribution_sources/source/profiles_1d/grid/psi
+  - distributions/distribution/profiles_1d/grid/psi
+  - distributions/distribution/profiles_2d/grid/psi
+  # ... 8+ more paths
+</code></pre>
+<h3 id="example-safety_factor-if-created">Example: <code>safety_factor</code> (if created)</h3>
+<pre><code class="language-yaml">name: safety_factor
+kind: scalar
+unit: &quot;1&quot;
+ids_paths:
+  - equilibrium/time_slice/profiles_1d/q
+  - core_profiles/profiles_1d/q
+  - edge_profiles/profiles_1d/q
+  - plasma_profiles/profiles_1d/q
+  - core_instant_changes/change/profiles_1d/q
+</code></pre>
+  </main>
+</body>
+</html>

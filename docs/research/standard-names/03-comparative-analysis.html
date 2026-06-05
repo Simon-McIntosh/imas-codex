@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="03-comparative-analysis">
+  <meta name="plan-title" content="Comparative Analysis: Standard Names vs Codex Prompt Systems">
+  <meta name="plan-summary" content="The standard names project operates at a fundamentally different maturity level than codex&#x27;s prompt infrastructure. Codex treats prompts as **engineered artifacts** with versioning, caching, schema injection, and cost-bo">
+  <meta name="plan-status" content="done">
+  <meta name="plan-depends-on" content="01-current-state-standard-names,02-codex-prompt-patterns">
+  <meta name="plan-informs" content="04-parallel-review-synthesis,09-codex-pivot-analysis">
+  <title>Comparative Analysis: Standard Names vs Codex Prompt Systems | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Comparative Analysis: Standard Names vs Codex Prompt Systems</h1>
+    <h2 id="executive-summary">Executive Summary</h2>
+<p>The standard names project operates at a fundamentally different maturity level than codex's prompt infrastructure. Codex treats prompts as <strong>engineered artifacts</strong> with versioning, caching, schema injection, and cost-bounded parallel execution. Standard names treats prompts as <strong>prose instructions</strong> consumed by a human-operated chat interface. The gap is structural, not incremental — closing it requires adopting codex's architectural patterns rather than improving the current approach in place.</p>
+<h2 id="dimension-by-dimension-comparison">Dimension-by-Dimension Comparison</h2>
+<h3 id="1-prompt-format-and-templating">1. Prompt Format and Templating</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Format</td>
+<td>Static markdown files</td>
+<td>Markdown + YAML frontmatter + Jinja2</td>
+</tr>
+<tr>
+<td>Templating</td>
+<td>None</td>
+<td>Full Jinja2 (includes, loops, conditionals)</td>
+</tr>
+<tr>
+<td>Variables</td>
+<td>None</td>
+<td><code>{{ facility }}</code>, <code>{{ signal_source_detail }}</code></td>
+</tr>
+<tr>
+<td>Includes</td>
+<td>None</td>
+<td><code>{% include "schema/physics-domains.md" %}</code></td>
+</tr>
+<tr>
+<td>Loops</td>
+<td>None</td>
+<td><code>{% for dim in score_dimensions %}</code></td>
+</tr>
+<tr>
+<td>Conditional</td>
+<td>None</td>
+<td><code>{% if score_calibration %}</code></td>
+</tr>
+<tr>
+<td>Rendering modes</td>
+<td>Single (static read)</td>
+<td>Two (static parse + dynamic render)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Impact</strong>: Standard names prompts cannot adapt to different contexts. The same prompt is used whether generating 1 name or 50, whether the domain is magnetics or transport. Codex prompts self-configure based on the task.</p>
+<h3 id="2-schema-and-context-injection">2. Schema and Context Injection</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar rules</td>
+<td>LLM calls <code>get_grammar()</code> at runtime</td>
+<td>Pre-injected via schema provider</td>
+</tr>
+<tr>
+<td>Vocabulary</td>
+<td>LLM calls <code>get_vocabulary()</code> at runtime</td>
+<td>Enum values injected into template</td>
+</tr>
+<tr>
+<td>Output schema</td>
+<td>Natural language description</td>
+<td>Pydantic JSON example + field descriptions</td>
+</tr>
+<tr>
+<td>Domain context</td>
+<td>LLM discovers via multiple tool calls</td>
+<td>Pre-assembled per-call context block</td>
+</tr>
+<tr>
+<td>Calibration examples</td>
+<td>None</td>
+<td>Real scored examples from knowledge graph</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Impact</strong>: Standard names wastes 3-5 tool calls per session to discover static context that could be pre-injected. Each tool call adds latency and token cost.</p>
+<p><strong>Quantitative estimate</strong>: A typical standard name generation session makes ~8-12 MCP tool calls. Of these, 3-5 are pure context discovery (grammar, vocabulary, schema, existing names). If this context were pre-injected into the prompt, those calls would be eliminated, saving ~2000-4000 tokens and ~30-60 seconds per session.</p>
+<h3 id="3-batch-processing-and-parallelism">3. Batch Processing and Parallelism</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Processing model</td>
+<td>Sequential, one-at-a-time</td>
+<td>Parallel workers with supervisor</td>
+</tr>
+<tr>
+<td>Batch size</td>
+<td>1-5 names per session</td>
+<td>20-50 items per batch</td>
+</tr>
+<tr>
+<td>Concurrency</td>
+<td>None</td>
+<td>2-8 workers per pipeline</td>
+</tr>
+<tr>
+<td>Pipeline stages</td>
+<td>Manual (human drives each step)</td>
+<td>Automated (scan → triage → enrich → score)</td>
+</tr>
+<tr>
+<td>Phase dependencies</td>
+<td>None</td>
+<td>Declarative (<code>depends_on=["extract_phase"]</code>)</td>
+</tr>
+<tr>
+<td>Orphan recovery</td>
+<td>None</td>
+<td>Automatic reset for stuck items</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Impact</strong>: Codex can process 500+ items in a single pipeline run. Standard names requires a human session per small batch.</p>
+<h3 id="4-cost-and-budget-management">4. Cost and Budget Management</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost tracking</td>
+<td>None</td>
+<td>Per-call extraction from LiteLLM response</td>
+</tr>
+<tr>
+<td>Budget limits</td>
+<td>None</td>
+<td><code>--cost-limit 5.0</code> per CLI invocation</td>
+</tr>
+<tr>
+<td>Time limits</td>
+<td>None</td>
+<td><code>--time 30</code> (minutes)</td>
+</tr>
+<tr>
+<td>Budget exhaustion</td>
+<td>Silent failure</td>
+<td><code>ProviderBudgetExhausted</code> exception → halt all</td>
+</tr>
+<tr>
+<td>Cost reporting</td>
+<td>None</td>
+<td>Per-worker stats in progress output</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Impact</strong>: Standard names has no visibility into LLM spend. A poorly constructed prompt or retry loop could burn significant budget with no alerting.</p>
+<h3 id="5-error-handling-and-retry-logic">5. Error Handling and Retry Logic</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Retry on API error</td>
+<td>Basic try/except</td>
+<td>Exponential backoff (5s base, 5 retries)</td>
+</tr>
+<tr>
+<td>Retryable detection</td>
+<td>None</td>
+<td>Pattern matching (429, 503, timeout, JSON)</td>
+</tr>
+<tr>
+<td>Parse error recovery</td>
+<td>Crash</td>
+<td>Retry the entire LLM call</td>
+</tr>
+<tr>
+<td>Validation error</td>
+<td>Return error dict</td>
+<td>Retry with fresh attempt</td>
+</tr>
+<tr>
+<td>Budget exhaustion</td>
+<td>None</td>
+<td>Detect 402, halt all workers immediately</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6-prompt-organization">6. Prompt Organization</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt files</td>
+<td>4 files in <code>.github/prompts/</code></td>
+<td>30+ files in <code>llm/prompts/</code></td>
+</tr>
+<tr>
+<td>Shared fragments</td>
+<td>None</td>
+<td>14 files in <code>shared/schema/</code></td>
+</tr>
+<tr>
+<td>Naming convention</td>
+<td>Flat, descriptive filenames</td>
+<td>Domain-prefixed (e.g., <code>paths/scorer</code>)</td>
+</tr>
+<tr>
+<td>Traceability</td>
+<td>None</td>
+<td><code>used_by</code> frontmatter links to consumer code</td>
+</tr>
+<tr>
+<td>Version hashing</td>
+<td>None</td>
+<td><code>get_prompt_content_hash()</code> for cache invalidation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="7-llm-provider-integration">7. LLM Provider Integration</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider</td>
+<td>OpenRouter via pydantic_ai</td>
+<td>OpenRouter via LiteLLM</td>
+</tr>
+<tr>
+<td>Model selection</td>
+<td>Hardcoded per agent</td>
+<td>Configurable via CLI <code>--model</code></td>
+</tr>
+<tr>
+<td>Token limits</td>
+<td>None</td>
+<td>Model-family-aware (Gemini: 16K, Claude: 32K)</td>
+</tr>
+<tr>
+<td>Prompt caching</td>
+<td>None</td>
+<td><code>inject_cache_control()</code> + static-first layout</td>
+</tr>
+<tr>
+<td>Noise suppression</td>
+<td>None</td>
+<td><code>suppress_litellm_noise()</code></td>
+</tr>
+<tr>
+<td>Offline support</td>
+<td>None</td>
+<td>Air-gap detection, local model cost maps</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-output-structure-and-validation">8. Output Structure and Validation</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Standard Names</th>
+<th>Codex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Output format</td>
+<td>Pydantic via pydantic_ai</td>
+<td>Pydantic via <code>call_llm_structured()</code></td>
+</tr>
+<tr>
+<td>JSON sanitization</td>
+<td>None</td>
+<td>Strip markdown fences, fix truncation</td>
+</tr>
+<tr>
+<td>Batch output</td>
+<td>List of entries</td>
+<td>Batch model (e.g., <code>ScoreBatch</code>, <code>SignalMappingBatch</code>)</td>
+</tr>
+<tr>
+<td>Confidence scores</td>
+<td>Pass/fail threshold (0.7)</td>
+<td>Multi-dimensional (0.0-1.0 per dimension)</td>
+</tr>
+<tr>
+<td>Evidence tracking</td>
+<td>None</td>
+<td><code>primary_evidence</code>, <code>evidence_summary</code>, <code>scoring_reason</code></td>
+</tr>
+<tr>
+<td>Unmapped handling</td>
+<td>None</td>
+<td>Explicit <code>unmapped</code> array with disposition codes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architectural-gap-analysis">Architectural Gap Analysis</h2>
+<h3 id="what-standard-names-has-that-codex-doesnt">What Standard Names Has That Codex Doesn't</h3>
+<ol>
+<li><strong>MCP tool ecosystem</strong>: 15+ well-designed tools for grammar, vocabulary, search, validation</li>
+<li><strong>Grammar validation engine</strong>: Formal grammar parsing with Pydantic models</li>
+<li><strong>Catalog management</strong>: YAML-backed catalog with edit history and rollback</li>
+<li><strong>Interactive flexibility</strong>: Can handle novel edge cases through conversation</li>
+</ol>
+<h3 id="what-codex-has-that-standard-names-needs">What Codex Has That Standard Names Needs</h3>
+<ol>
+<li><strong>Prompt loader with frontmatter and schema injection</strong></li>
+<li><strong>Cached schema providers (grammar, vocabulary, scoring criteria)</strong></li>
+<li><strong>Two-mode rendering (static + dynamic)</strong></li>
+<li><strong>Parallel worker engine with supervision</strong></li>
+<li><strong>Cost-bounded execution with retry logic</strong></li>
+<li><strong>CLI dispatch for pipeline orchestration</strong></li>
+<li><strong>Prompt caching optimization (static-first layout)</strong></li>
+<li><strong>Calibration example injection</strong></li>
+<li><strong>System/user prompt separation for caching</strong></li>
+<li><strong>Batch output models with structured errors</strong></li>
+</ol>
+<h3 id="synergy-opportunities">Synergy Opportunities</h3>
+<p>The standard names MCP tools are a natural <strong>context source</strong> for a codex-style prompt system:</p>
+<pre><code>┌─────────────────────┐     ┌─────────────────────┐
+│  MCP Tools           │     │  Prompt Loader       │
+│  (grammar, vocab,    │────▶│  (Jinja2 + schema    │
+│   search, validate)  │     │   providers)          │
+└─────────────────────┘     └──────────┬────────────┘
+                                       │
+                            ┌──────────▼────────────┐
+                            │  Rendered Prompt       │
+                            │  (grammar rules +      │
+                            │   vocabulary tokens +   │
+                            │   existing names +      │
+                            │   DD context)           │
+                            └──────────┬────────────┘
+                                       │
+                            ┌──────────▼────────────┐
+                            │  LLM Pipeline          │
+                            │  (batch dispatch,      │
+                            │   structured output,    │
+                            │   cost tracking)        │
+                            └───────────────────────┘
+</code></pre>
+<p>The MCP tools would shift from being called interactively by the LLM to being called programmatically by the prompt loader to <strong>pre-assemble context</strong>. The LLM still uses some tools for dynamic research (e.g., searching for name collisions) but receives a much richer starting context.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>The standard names project has excellent domain logic (grammar engine, catalog management, MCP tools) but lacks production prompt infrastructure. The codex project has excellent prompt infrastructure but operates in a different domain. The implementation plan should <strong>port codex's prompt architecture</strong> into standard names, adapting it to the standard name generation domain while preserving the existing MCP tool ecosystem.</p>
+<p>The key insight is that the MCP tools and the prompt pipeline are complementary, not competing. MCP tools provide the data layer; the prompt pipeline provides the orchestration and context assembly layer.</p>
+  </main>
+</body>
+</html>

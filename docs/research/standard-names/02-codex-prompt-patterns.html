@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="02-codex-prompt-patterns">
+  <meta name="plan-title" content="IMAS Codex Prompt Engineering Patterns">
+  <meta name="plan-summary" content="The `imas-codex` project implements a mature, production-grade prompt engineering system built around **Jinja2 templating**, **schema-derived dynamic content injection**, **cached schema providers**, and **parallel worke">
+  <meta name="plan-status" content="done">
+  <meta name="plan-informs" content="03-comparative-analysis,04-parallel-review-synthesis,06-schema-provider-design">
+  <title>IMAS Codex Prompt Engineering Patterns | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>IMAS Codex Prompt Engineering Patterns</h1>
+    <h2 id="overview">Overview</h2>
+<p>The <code>imas-codex</code> project implements a mature, production-grade prompt engineering system built around <strong>Jinja2 templating</strong>, <strong>schema-derived dynamic content injection</strong>, <strong>cached schema providers</strong>, and <strong>parallel worker dispatch with cost-bounded execution</strong>. This document catalogues the patterns that have been proven across discovery, scoring, enrichment, mapping, and clustering pipelines.</p>
+<h2 id="architecture">Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                     imas-codex Prompt System                        │
+│                                                                     │
+│  ┌──────────────────┐   ┌──────────────────┐   ┌────────────────┐  │
+│  │  prompts/*.md    │   │  prompt_loader.py │   │ Schema         │  │
+│  │  (Jinja2 +       │──▶│  parse/render/    │◀──│ Providers      │  │
+│  │   frontmatter)   │   │  schema injection │   │ (@lru_cache)   │  │
+│  └──────────────────┘   └────────┬─────────┘   └────────────────┘  │
+│                                  │                                  │
+│                    ┌─────────────▼──────────────┐                   │
+│                    │   Rendered Prompt (string)  │                   │
+│                    └─────────────┬──────────────┘                   │
+│                                  │                                  │
+│  ┌──────────────────┐   ┌───────▼──────────┐   ┌────────────────┐  │
+│  │  discovery/       │   │  base/llm.py     │   │  LiteLLM +     │  │
+│  │  base/engine.py   │──▶│  call_structured  │──▶│  OpenRouter    │  │
+│  │  (workers,        │   │  (retry, cost,   │   │  (caching,     │  │
+│  │   supervision)    │   │   Pydantic parse) │   │   routing)     │  │
+│  └──────────────────┘   └──────────────────┘   └────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="1-prompt-file-format">1. Prompt File Format</h2>
+<p>Every prompt is a markdown file with YAML frontmatter <sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>:</p>
+<pre><code class="language-markdown">---
+name: signals/enrichment
+description: Batch signal enrichment for physics domain classification
+used_by: imas_codex.discovery.signals.parallel.enrich_worker
+task: enrichment
+dynamic: true
+schema_needs:
+  - physics_domains
+  - signal_enrichment_schema
+  - diagnostic_categories
+---
+
+You are a tokamak physics expert classifying fusion facility data signals.
+
+## Task
+...
+
+{% include &quot;schema/physics-domains.md&quot; %}
+
+## Output Format
+{{ signal_enrichment_schema_example }}
+
+### Field Requirements
+{{ signal_enrichment_schema_fields }}
+</code></pre>
+<h3 id="frontmatter-fields">Frontmatter Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Prompt identifier with path prefix (e.g., <code>signals/enrichment</code>)</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>Human-readable purpose</td>
+</tr>
+<tr>
+<td><code>used_by</code></td>
+<td>Python module that consumes this prompt</td>
+</tr>
+<tr>
+<td><code>task</code></td>
+<td>Task classification for model selection</td>
+</tr>
+<tr>
+<td><code>dynamic</code></td>
+<td>Whether the prompt requires Jinja2 rendering</td>
+</tr>
+<tr>
+<td><code>schema_needs</code></td>
+<td>List of schema providers to inject</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-design-principle-static-first-ordering">Key Design Principle: Static-First Ordering</h3>
+<p>Prompts are structured with <strong>static content first, dynamic content last</strong>. This enables API-level prompt caching (Anthropic/Gemini cache breakpoints):</p>
+<ol>
+<li>Role definition and task description (static)</li>
+<li>Schema references via <code>{% include %}</code> (static, shared)</li>
+<li>Scoring dimensions via <code>{% for dim in ... %}</code> (semi-static, cached per process)</li>
+<li>Per-call context via <code>{{ variable }}</code> (dynamic, changes every call)</li>
+</ol>
+<p><strong>Source</strong>: <code>imas_codex/llm/prompt_loader.py:1-53</code> <sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup></p>
+<h2 id="2-include-system">2. Include System</h2>
+<p>Shared prompt fragments live in <code>prompts/shared/</code> and are included via Jinja2:</p>
+<pre><code>prompts/shared/
+├── safety.md             # Read-only policy, resource limits
+├── tools.md              # Tool usage guidelines (rg, fd, tokei)
+├── completion.md         # Completion criteria (MVE, full exploration)
+└── schema/               # Schema-derived template fragments
+    ├── path-purposes.md
+    ├── physics-domains.md
+    ├── score-dimensions.md
+    ├── scoring-output.md
+    ├── score-output.md
+    ├── discovery-categories.md
+    ├── diagnostic-categories.md
+    ├── dimension-calibration.md
+    └── ... (14 files total)
+</code></pre>
+<p>Include resolution happens at two levels <sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>:
+1. <strong>Static includes</strong> (<code>parse_prompt_file</code>): Regex-based <code>{% include "file.md" %}</code> for MCP registration
+2. <strong>Dynamic includes</strong> (<code>render_prompt</code>): Full Jinja2 environment with template loader</p>
+<p>This separation means prompts can be registered as MCP resources (with includes resolved) without requiring the full Jinja2 rendering pipeline.</p>
+<p><strong>Source</strong>: <code>imas_codex/llm/prompt_loader.py:87-106</code> <sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup></p>
+<h2 id="3-schema-provider-system">3. Schema Provider System</h2>
+<p>The most powerful pattern in codex is <strong>cached schema providers</strong> — functions decorated with <code>@lru_cache</code> that load domain schemas once per process and inject them into prompts:</p>
+<pre><code class="language-python">@lru_cache(maxsize=1)
+def _provide_score_dimensions() -&gt; dict[str, Any]:
+    &quot;&quot;&quot;Provide score_* field definitions from FacilityPath schema.&quot;&quot;&quot;
+    schema = _get_linkml_schema()
+    facility_path_slots = schema.get_all_slots(&quot;FacilityPath&quot;)
+    score_dimensions = [
+        {&quot;field&quot;: name, &quot;label&quot;: ..., &quot;description&quot;: desc}
+        for name, slot_info in facility_path_slots.items()
+        if name.startswith(&quot;score_&quot;) and slot_info.get(&quot;type&quot;) == &quot;float&quot;
+    ]
+    return {&quot;score_dimensions&quot;: score_dimensions}
+</code></pre>
+<h3 id="provider-registry">Provider Registry</h3>
+<p>A central registry maps <code>schema_needs</code> names to provider functions <sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>:</p>
+<pre><code class="language-python">_SCHEMA_PROVIDERS = {
+    &quot;path_purposes&quot;: _provide_path_purposes,
+    &quot;discovery_categories&quot;: _provide_discovery_categories,
+    &quot;score_dimensions&quot;: _provide_score_dimensions,
+    &quot;scoring_schema&quot;: _provide_scoring_schema,
+    &quot;physics_domains&quot;: _provide_physics_domains,
+    &quot;signal_enrichment_schema&quot;: _provide_signal_enrichment_schema,
+    &quot;diagnostic_categories&quot;: _provide_diagnostic_categories,
+    &quot;imas_enrichment_schema&quot;: _provide_imas_enrichment_schema,
+    &quot;cluster_vocabularies&quot;: _provide_cluster_vocabularies,
+    # ... 20+ providers total
+}
+</code></pre>
+<h3 id="pydantic-schema-injection">Pydantic Schema Injection</h3>
+<p>Two helper functions generate prompt-embeddable schema representations <sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>:</p>
+<ol>
+<li><strong><code>get_pydantic_schema_json()</code></strong> — Generates JSON example instances from Pydantic models</li>
+<li><strong><code>get_pydantic_schema_description()</code></strong> — Generates markdown field descriptions with types</li>
+</ol>
+<p>These are used in prompts as:</p>
+<pre><code class="language-markdown">{{ signal_enrichment_schema_example }}   &lt;!-- JSON structure example --&gt;
+{{ signal_enrichment_schema_fields }}    &lt;!-- Markdown field descriptions --&gt;
+</code></pre>
+<p><strong>Source</strong>: <code>imas_codex/llm/prompt_loader.py:211-357</code> <sup id="fnref2:4"><a class="footnote-ref" href="#fn:4">4</a></sup></p>
+<h2 id="4-two-mode-rendering">4. Two-Mode Rendering</h2>
+<p>The prompt system supports two rendering modes:</p>
+<h3 id="static-mode-parse_prompt_file">Static Mode (<code>parse_prompt_file</code>)</h3>
+<ul>
+<li>Resolves <code>{% include %}</code> directives only</li>
+<li>Used for MCP tool registration (prompts as resources)</li>
+<li>No Jinja2 variables or loops evaluated</li>
+</ul>
+<h3 id="dynamic-mode-render_prompt">Dynamic Mode (<code>render_prompt</code>)</h3>
+<ul>
+<li>Full Jinja2 rendering with schema context</li>
+<li>Loads only the schema providers declared in <code>schema_needs</code></li>
+<li>Merges additional per-call context (facility name, calibration data)</li>
+</ul>
+<pre><code class="language-python">def render_prompt(name, context=None, prompts_dir=None):
+    prompt_def = prompts[name]
+    schema_needs = prompt_def.metadata.get(&quot;schema_needs&quot;)
+    full_context = get_schema_for_prompt(name, schema_needs)
+    if context:
+        full_context.update(context)
+    template = env.from_string(prompt_def.content)
+    return template.render(full_context)
+</code></pre>
+<p><strong>Source</strong>: <code>imas_codex/llm/prompt_loader.py:1116-1163</code> <sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup></p>
+<h2 id="5-systemuser-prompt-separation">5. System/User Prompt Separation</h2>
+<p>For mapping pipelines, codex uses a <strong>system + user prompt</strong> pattern <sup id="fnref:6"><a class="footnote-ref" href="#fn:6">6</a></sup>:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>signal_mapping_system.md</code></td>
+<td>System prompt (static, cacheable)</td>
+<td>Task rules, scoring criteria, COCOS handling, output format</td>
+</tr>
+<tr>
+<td><code>signal_mapping.md</code></td>
+<td>User prompt (dynamic, per-call)</td>
+<td>Facility, IDS, signal source, IMAS fields, code references</td>
+</tr>
+</tbody>
+</table>
+<p>The system prompt stays constant across all calls in a pipeline run, enabling API-level caching. The user prompt changes per signal source with Jinja2 variables like <code>{{ facility }}</code>, <code>{{ signal_source_detail }}</code>, <code>{{ imas_fields }}</code>.</p>
+<p>This pattern repeats across all mapping stages:
+- <code>target_assignment_system.md</code> + <code>target_assignment.md</code>
+- <code>assembly_system.md</code> + <code>assembly.md</code>
+- <code>metadata_population_system.md</code> + <code>metadata_population.md</code>
+- <code>validation.md</code> (combined)</p>
+<h2 id="6-calibration-example-injection">6. Calibration Example Injection</h2>
+<p>Scoring prompts include real examples from the knowledge graph for score calibration <sup id="fnref:7"><a class="footnote-ref" href="#fn:7">7</a></sup>:</p>
+<pre><code class="language-markdown">{% if score_calibration %}
+## Score Calibration Examples
+
+{% for category, examples in score_calibration.items() %}
+{% for ex in examples %}
+- `{{ ex.path }}` ({{ ex.facility }}) — score={{ ex.score }}, {{ ex.total_lines }} LOC
+{% endfor %}
+{% endfor %}
+{% endif %}
+</code></pre>
+<p>This pattern provides <strong>grounded scoring</strong> — the LLM sees what previous scores look like for similar items, reducing drift and improving consistency across batches.</p>
+<h2 id="7-llm-infrastructure-discoverybasellmpy">7. LLM Infrastructure (<code>discovery/base/llm.py</code>)</h2>
+<p>The codex LLM layer provides <sup id="fnref:8"><a class="footnote-ref" href="#fn:8">8</a></sup>:</p>
+<h3 id="structured-output-with-retry">Structured Output with Retry</h3>
+<pre><code class="language-python">batch, cost, tokens = call_llm_structured(
+    model=&quot;google/gemini-3-flash-preview&quot;,
+    messages=[{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system_prompt},
+              {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_prompt}],
+    response_model=ScoreBatch,  # Pydantic model
+)
+</code></pre>
+<ul>
+<li>Retry wraps <strong>both</strong> API call and Pydantic parsing</li>
+<li>Exponential backoff: 5s base, doubles each retry</li>
+<li>Retryable patterns: 429, 503, timeout, JSON parse errors, validation errors</li>
+<li>Budget exhaustion detection (402 Payment Required → halt all workers)</li>
+</ul>
+<h3 id="cost-tracking">Cost Tracking</h3>
+<ul>
+<li>Per-call cost extraction from LiteLLM response</li>
+<li>Accumulated cost across workers</li>
+<li>CLI-level budget limits (<code>--cost-limit 5.0</code>)</li>
+<li>Time limits (<code>--time 10</code> minutes)</li>
+</ul>
+<h3 id="model-aware-token-limits">Model-Aware Token Limits</h3>
+<pre><code class="language-python">MODEL_TOKEN_LIMITS = {
+    &quot;gemini&quot;: {&quot;max_tokens&quot;: 16000, &quot;timeout&quot;: 120},
+    &quot;claude&quot;: {&quot;max_tokens&quot;: 32000, &quot;timeout&quot;: 120},
+}
+</code></pre>
+<h3 id="prompt-caching">Prompt Caching</h3>
+<ul>
+<li><code>inject_cache_control()</code> adds cache breakpoints to messages</li>
+<li>Static system prompts designed for 5-minute Anthropic / Gemini cache windows</li>
+<li><code>test_prompt_caching.py</code> script validates cache hit rates across providers</li>
+</ul>
+<h2 id="8-parallel-worker-engine">8. Parallel Worker Engine</h2>
+<p>The discovery engine (<code>discovery/base/engine.py</code>) provides <sup id="fnref:9"><a class="footnote-ref" href="#fn:9">9</a></sup>:</p>
+<pre><code class="language-python">result = await run_discovery_engine(
+    state=my_state,
+    workers=[
+        WorkerSpec(&quot;scan&quot;, &quot;scan_phase&quot;, scan_worker, count=2),
+        WorkerSpec(&quot;triage&quot;, &quot;triage_phase&quot;, triage_worker, count=3),
+        WorkerSpec(&quot;enrich&quot;, &quot;enrich_phase&quot;, enrich_worker, depends_on=[&quot;scan_phase&quot;]),
+        WorkerSpec(&quot;score&quot;, &quot;score_phase&quot;, score_worker, depends_on=[&quot;triage_phase&quot;]),
+    ],
+    orphan_specs=[OrphanRecoverySpec(...)],
+    stop_event=stop_event,
+)
+</code></pre>
+<p><strong>Features</strong>:
+- <strong>Phase dependencies</strong>: Workers wait for upstream phases
+- <strong>Supervision</strong>: Orphan recovery for stuck items
+- <strong>Stop events</strong>: Graceful shutdown on budget/time exhaustion
+- <strong>Progress tracking</strong>: Per-worker stats (items processed, errors, cost)
+- <strong>Cost-based termination</strong>: Scorer halts when budget depleted</p>
+<h2 id="9-cli-dispatch-pattern">9. CLI Dispatch Pattern</h2>
+<p>Every discovery/mapping pipeline is exposed as a CLI command <sup id="fnref:10"><a class="footnote-ref" href="#fn:10">10</a></sup>:</p>
+<pre><code class="language-bash"># Discovery pipelines
+imas-codex discover paths tcv --cost-limit 5.0 --time 30
+imas-codex discover signals jet --enrich-workers 4
+imas-codex discover wiki tcv --scan-only
+
+# Mapping pipeline
+imas-codex imas map jet -d magnetic_field_systems --cost-limit 25 --model sonnet
+</code></pre>
+<p>Each CLI command:
+1. Configures logging and services
+2. Loads facility configuration
+3. Renders prompts with facility-specific context
+4. Dispatches parallel workers with budget/time limits
+5. Reports progress with Rich progress bars
+6. Persists results to Neo4j graph</p>
+<h2 id="10-prompt-organization-summary">10. Prompt Organization Summary</h2>
+<pre><code>imas_codex/llm/prompts/
+├── shared/                    # Reusable fragments (safety, tools, schema)
+│   ├── safety.md
+│   ├── tools.md
+│   ├── completion.md
+│   └── schema/               # 14 schema-derived template fragments
+├── paths/                    # Directory discovery/scoring
+│   ├── triage.md             # First-pass classification
+│   └── scorer.md             # Evidence-based rescoring
+├── code/                     # Source file scoring
+│   ├── triage.md
+│   └── scorer.md
+├── signals/                  # Signal enrichment
+│   ├── enrichment.md         # Batch physics classification
+│   ├── individualization.md
+│   └── source_unwind.md
+├── discovery/                # Frontier discovery
+│   ├── roots.md
+│   ├── enricher.md
+│   ├── data_access.md
+│   └── static-enricher.md
+├── exploration/              # Interactive exploration
+│   └── facility.md
+├── wiki/                     # Wiki scoring
+│   ├── scout.md
+│   ├── scorer.md
+│   ├── document-scorer.md
+│   └── image-captioner.md
+├── mapping/                  # IMAS signal mapping
+│   ├── target_assignment_system.md
+│   ├── target_assignment.md
+│   ├── signal_mapping_system.md
+│   ├── signal_mapping.md
+│   ├── assembly_system.md
+│   ├── assembly.md
+│   ├── metadata_population_system.md
+│   ├── metadata_population.md
+│   └── validation.md
+├── imas/                     # IMAS DD enrichment
+│   ├── enrichment.md
+│   ├── identifier_enrichment.md
+│   └── ids_enrichment.md
+└── clusters/                 # Semantic cluster labeling
+    └── labeler.md
+</code></pre>
+<p><strong>Total</strong>: 30+ prompt files across 9 domains, with 14 shared schema fragments.</p>
+<hr />
+<h2 id="footnotes">Footnotes</h2>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><code>imas_codex/llm/prompt_loader.py:1-53</code> — Module docstring and prompt format specification&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p><code>imas_codex/llm/prompt_loader.py:87-106</code> — <code>_resolve_includes()</code> function&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p><code>imas_codex/llm/prompt_loader.py:878-905</code> — <code>_SCHEMA_PROVIDERS</code> registry&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p><code>imas_codex/llm/prompt_loader.py:211-357</code> — <code>get_pydantic_schema_json()</code> and <code>get_pydantic_schema_description()</code>&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p><code>imas_codex/llm/prompt_loader.py:1116-1163</code> — <code>render_prompt()</code> function&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:6">
+<p><code>imas_codex/llm/prompts/mapping/signal_mapping_system.md</code> and <code>signal_mapping.md</code>&#160;<a class="footnote-backref" href="#fnref:6" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:7">
+<p><code>imas_codex/llm/prompts/paths/scorer.md:174-192</code> — Score calibration template&#160;<a class="footnote-backref" href="#fnref:7" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:8">
+<p><code>imas_codex/discovery/base/llm.py:1-120</code> — LLM infrastructure module&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+<li id="fn:9">
+<p><code>imas_codex/discovery/base/engine.py:1-100</code> — Discovery engine skeleton&#160;<a class="footnote-backref" href="#fnref:9" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+</li>
+<li id="fn:10">
+<p><code>imas_codex/cli/discover/signals.py:1-80</code> — CLI dispatch pattern&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 10 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+  </main>
+</body>
+</html>
