@@ -1669,6 +1669,52 @@ def _query_seedable_derived_parents(
     )
 
 
+def _query_legacy_repairable_derived_parents(
+    gc: Any,
+    *,
+    state_where: str,
+) -> list[dict[str, Any]]:
+    """Return already-admitted legacy derived parents eligible for lifecycle repair."""
+    return list(
+        gc.query(
+            f"""
+            MATCH (parent:StandardName)
+            WHERE (parent.origin IS NULL OR parent.origin = 'derived')
+              AND ({state_where})
+            MATCH (child)-[comp:HAS_PARENT]->(parent)
+            WITH parent,
+                 collect(DISTINCT child) AS children,
+                 collect(comp.operator_kind) AS edge_kinds,
+                 count(child) AS total_children,
+                 count(CASE WHEN child.name_stage IS NOT NULL
+                       THEN 1 END) AS composed_children,
+                 count(CASE WHEN comp.operator_kind IN
+                       ['projection', 'coordinate', 'unary_postfix']
+                       THEN 1 END) AS seedable_edges
+            WHERE total_children = composed_children
+              AND total_children >= 1
+              AND seedable_edges = 0
+            UNWIND children AS child
+            OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
+            OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
+            WITH parent, edge_kinds,
+                 collect(DISTINCT {{
+                     id: child.id,
+                     unit: child.unit,
+                     cocos: child.cocos_transformation_type,
+                     physics_domain: child.physics_domain,
+                     kind: child.kind
+                 }}) AS child_data,
+                 collect(DISTINCT imas.id) AS dd_paths
+            RETURN parent.id AS parent_id,
+                   child_data,
+                   dd_paths,
+                   edge_kinds
+            """
+        )
+    )
+
+
 def _derived_parent_source_metadata(
     parent_id: str,
     *,
@@ -1693,11 +1739,14 @@ def _derived_parent_source_metadata(
 def _materialize_derived_parent_rows(
     gc: Any,
     parents: list[dict[str, Any]],
+    *,
+    infer_kind_from_existing_topology: bool = False,
 ) -> int:
     """Materialize structurally eligible derived parents onto the docs lifecycle."""
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
+    from imas_codex.standard_names.parents import recompute_parent_kind
 
     seeded = 0
     for row in parents:
@@ -1708,16 +1757,20 @@ def _materialize_derived_parent_rows(
         edge_kinds = row.get("edge_kinds") or []
         is_geometric = any(k == "coordinate" for k in edge_kinds)
 
-        seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
-        if not any(k in seedable_edge_kinds for k in edge_kinds):
-            logger.debug(
-                "Parent %s has only non-seedable edges (%s) — skipping",
-                parent_id,
-                edge_kinds,
-            )
-            continue
+        if infer_kind_from_existing_topology:
+            kind = recompute_parent_kind(parent_id, gc)
+        else:
+            seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
+            if not any(k in seedable_edge_kinds for k in edge_kinds):
+                logger.debug(
+                    "Parent %s has only non-seedable edges (%s) — skipping",
+                    parent_id,
+                    edge_kinds,
+                )
+                continue
 
-        is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
+            is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
+            kind = "scalar" if is_magnitude_parent else "vector"
 
         child_units = {c["unit"] for c in child_data if c.get("unit")}
         if is_geometric:
@@ -1741,7 +1794,6 @@ def _materialize_derived_parent_rows(
         }
         physics_domain = next(iter(child_domains)) if len(child_domains) == 1 else None
 
-        kind = "scalar" if is_magnitude_parent else "vector"
         grammar_fields = _parse_parent_grammar(parent_id)
 
         parent_dd_path = None
@@ -1931,17 +1983,27 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
-        parents = _query_seedable_derived_parents(
-            gc,
-            state_where=(
-                "parent.name_stage IS NULL "
-                "OR parent.name_stage = 'pending' "
-                "OR (parent.name_stage = 'accepted' AND parent.docs_stage IS NULL)"
-            ),
+        state_where = (
+            "parent.name_stage IS NULL "
+            "OR parent.name_stage = 'pending' "
+            "OR (parent.name_stage = 'accepted' AND parent.docs_stage IS NULL)"
         )
-        if not parents:
+        seedable_parents = _query_seedable_derived_parents(
+            gc,
+            state_where=state_where,
+        )
+        legacy_parents = _query_legacy_repairable_derived_parents(
+            gc,
+            state_where=state_where,
+        )
+        if not seedable_parents and not legacy_parents:
             return 0
-        repaired = _materialize_derived_parent_rows(gc, parents)
+        repaired = _materialize_derived_parent_rows(gc, seedable_parents)
+        repaired += _materialize_derived_parent_rows(
+            gc,
+            legacy_parents,
+            infer_kind_from_existing_topology=True,
+        )
         logger.info(
             "normalize_derived_parent_lifecycle: repaired %d derived parent SNs",
             repaired,

@@ -63,7 +63,7 @@ class _StatefulDerivedParentGraph:
     def __exit__(self, exc_type, exc, tb):
         return False
 
-    def _eligible_for_repair(self) -> bool:
+    def _eligible_for_seed_repair(self) -> bool:
         target_state = (
             self.parent["name_stage"] is None
             or self.parent["name_stage"] == "pending"
@@ -77,6 +77,26 @@ class _StatefulDerivedParentGraph:
             and target_state
             and self.children_complete
             and any(
+                kind in {"projection", "coordinate", "unary_postfix"}
+                for kind in self.edge_kinds
+            )
+        )
+
+    def _eligible_for_legacy_repair(self) -> bool:
+        target_state = (
+            self.parent["name_stage"] is None
+            or self.parent["name_stage"] == "pending"
+            or (
+                self.parent["name_stage"] == "accepted"
+                and self.parent["docs_stage"] is None
+            )
+        )
+        return (
+            self.parent["origin"] in (None, "derived")
+            and target_state
+            and self.children_complete
+            and bool(self.edge_kinds)
+            and not any(
                 kind in {"projection", "coordinate", "unary_postfix"}
                 for kind in self.edge_kinds
             )
@@ -103,8 +123,11 @@ class _StatefulDerivedParentGraph:
 
     def query(self, cypher: str, **kwargs):
         self.query_calls.append((cypher, kwargs))
+        if "seedable_edges = 0" in cypher and "RETURN parent.id AS parent_id" in cypher:
+            return [self._candidate_row()] if self._eligible_for_legacy_repair() else []
+
         if "RETURN parent.id AS parent_id" in cypher:
-            return [self._candidate_row()] if self._eligible_for_repair() else []
+            return [self._candidate_row()] if self._eligible_for_seed_repair() else []
 
         if "MERGE (sns:StandardNameSource {id: $source_node_id})" in cypher:
             desc = str(self.parent.get("description") or "")
@@ -223,6 +246,7 @@ def test_pending_placeholder_repair_sets_docs_lifecycle_and_dd_source() -> None:
     assert graph.parent["docs_stage"] == "pending"
     assert graph.parent["docs_chain_length"] == 0
     assert graph.parent["description"] == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+    assert graph.parent["kind"] == "vector"
     assert graph.sources["dd:equilibrium/time_slice/profiles_1d"]["source_type"] == "dd"
     assert graph.sources["dd:equilibrium/time_slice/profiles_1d"]["source_id"] == (
         "equilibrium/time_slice/profiles_1d"
@@ -250,6 +274,60 @@ def test_legacy_accepted_null_docs_repair_uses_manual_source_when_needed() -> No
     assert graph.sources["manual:total_plasma_current"]["source_id"] == (
         "total_plasma_current"
     )
+
+
+@pytest.mark.parametrize(
+    ("parent_id", "edge_kinds"),
+    [
+        ("electron_density", ("qualifier",)),
+        ("outer_electron_density", ("locus",)),
+        ("outer_electron_density", ("qualifier", "locus")),
+    ],
+)
+def test_legacy_qualifier_locus_parents_repair_scalar_safely(
+    parent_id: str,
+    edge_kinds: tuple[str, ...],
+) -> None:
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    graph = _StatefulDerivedParentGraph(
+        parent_id=parent_id,
+        name_stage="pending",
+        docs_stage=None,
+        description="",
+        child_units=("m^-3", "m^-3"),
+        child_domains=("core_profiles", "core_profiles"),
+        edge_kinds=edge_kinds,
+    )
+
+    repaired = normalize_derived_parent_lifecycle(graph)
+
+    assert repaired == 1
+    assert graph.parent["name_stage"] == "accepted"
+    assert graph.parent["docs_stage"] == "pending"
+    assert graph.parent["kind"] == "scalar"
+    assert graph.parent["description"] == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+
+
+def test_legacy_heterogeneous_unit_parent_is_skipped() -> None:
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    graph = _StatefulDerivedParentGraph(
+        parent_id="inductance",
+        name_stage="pending",
+        docs_stage=None,
+        description="",
+        child_units=("1", "H"),
+        child_domains=("pf_active", "pf_active"),
+        edge_kinds=("qualifier",),
+    )
+
+    repaired = normalize_derived_parent_lifecycle(graph)
+
+    assert repaired == 0
+    assert graph.parent["name_stage"] == "pending"
+    assert graph.parent["docs_stage"] is None
+    assert graph.sources == {}
 
 
 def test_derived_parent_lifecycle_repair_is_idempotent() -> None:

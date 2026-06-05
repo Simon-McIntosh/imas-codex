@@ -306,6 +306,21 @@ def test_seed_parent_sources_auto_accepts_with_derived_origin():
     )
 
 
+def test_seed_parent_sources_keeps_seedable_operator_gate() -> None:
+    """Deterministic parent seeding must stay limited to the seedable edge kinds."""
+    import inspect
+
+    from imas_codex.standard_names import graph_ops
+
+    src = inspect.getsource(graph_ops._query_seedable_derived_parents)
+    assert "comp.operator_kind IN" in src
+    assert "['projection', 'coordinate', 'unary_postfix']" in src, (
+        "seed_parent_sources must stay narrow; qualifier/locus legacy "
+        "parents are repaired by normalize_derived_parent_lifecycle, not "
+        "by the deterministic seeding query."
+    )
+
+
 def test_refine_name_claim_skips_derived_origin():
     """The REFINE_NAME claim must exclude derived/deterministic origins.
 
