@@ -137,11 +137,11 @@
           <td><strong>Important but non-blocking.</strong> Quality is already good enough to release; parity work is now incremental improvement, not a hard gate.</td>
         </tr>
         <tr>
-          <td><a href="/imas-codex/sn-search-facility.html">40 — search facility</a><br><small>impl 0.55</small></td>
-          <td>Seven-tool search/fetch parity plus grammar-aware retrieval and call-site migration.</td>
-          <td><code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>find_related_standard_names</code>, <code>check_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, and <code>get_standard_name_summary</code> are all registered MCP tools in <code>llm/server.py</code>.</td>
-          <td>The public surface is real; the remaining gap is cleanup of legacy call sites and helper imports.</td>
-          <td><strong>Non-blocking.</strong> Search is not holding up release.</td>
+          <td><a href="/imas-codex/sn-search-facility.html">40 — search facility</a><br><small>impl 1.00</small></td>
+          <td>Seven-tool search/fetch parity plus grammar-aware retrieval, canonical fetch/search backing, and completed caller migration.</td>
+          <td><code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>find_related_standard_names</code>, <code>check_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, and <code>get_standard_name_summary</code> are all registered MCP tools in <code>llm/server.py</code>; the remaining callers now use the canonical helpers and the deprecated alias bridge is gone.</td>
+          <td>The only deferred tail is construction-time DD-only auto-detect; FastMCP still cannot unregister tools after startup.</td>
+          <td><strong>Non-blocking.</strong> Landed in sprint S2.</td>
         </tr>
         <tr>
           <td><a href="/imas-codex/sn-closed-physical-base.html">41 — closed physical base</a><br><small>impl 0.50</small></td>
@@ -165,11 +165,11 @@
           <td><strong>Non-blocking.</strong> Treat this as landed work that needs plan-state cleanup.</td>
         </tr>
         <tr>
-          <td><code>39 — structured fan-out</code><br><small>impl 0.38 in survey; code ahead of plan</small></td>
-          <td>Plan-only structured fan-out, default off, refine-name pilot.</td>
-          <td>The repo already contains a full <code>standard_names/fanout/</code> package, dispatcher/tests, worker call sites, and <code>[tool.imas-codex.sn-fanout]</code> with <code>enabled = true</code> in <code>pyproject.toml</code>.</td>
-          <td>The plan is stale relative to reality; runtime has moved faster than planning docs.</td>
-          <td><strong>Non-blocking, but planning debt is real.</strong></td>
+          <td><code>39 — structured fan-out</code><br><small>impl 1.00</small></td>
+          <td>Bounded <code>refine_name</code> fan-out, helper extraction, telemetry, and deterministic duplicate guard.</td>
+          <td>The repo contains the full <code>standard_names/fanout/</code> package, refine-worker integration, telemetry node writes, real arm and token/cache accounting, and regression coverage; <code>[tool.imas-codex.sn-fanout]</code> keeps the current rollout enabled for <code>refine_name</code>.</td>
+          <td>Phase 2 / 3 expansion and TTL cleanup remain intentionally deferred behind the telemetry gate rather than missing from the shipped scope.</td>
+          <td><strong>Non-blocking.</strong> The current refine-name scope is landed; only future expansion remains open.</td>
         </tr>
         <tr>
           <td><code>31 — quality bootstrap v2</code><br><small>impl 0.38</small></td>

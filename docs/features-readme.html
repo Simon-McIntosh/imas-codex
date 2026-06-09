@@ -46,9 +46,10 @@ features/completed/&lt;name&gt;.md             reference — work shipped
 DELETE                                   absorbed into code + docs
 </code></pre>
 <h2 id="s3">Active plans (SN family)</h2>
-<p>The standard-names family is the dominant active workstream. Two priority SN
-plans now live as HTML docs under <code>docs/</code>; both remain active and
-neither should be treated as fully dispatch-complete yet:</p>
+<p>The standard-names family is still the dominant active workstream, but the two
+Sprint S2 HTML plans are now closed at their current scope: the search facility
+is landed on the canonical surface, and structured fan-out is landed for
+<code>refine_name</code> while broader expansion stays explicitly deferred.</p>
 <table>
 <thead>
 <tr>
@@ -63,29 +64,23 @@ neither should be treated as fully dispatch-complete yet:</p>
 <td>1</td>
 <td><a href="/imas-codex/sn-search-facility.html">../../docs/sn-search-facility.html</a></td>
 <td>Grammar-aware SN search &amp; fetch facility: 7 MCP tools mirroring the DD palette (<code>search_standard_names</code>, <code>fetch_standard_names</code>, <code>list_standard_names</code>, <code>list_grammar_vocabulary</code>, <code>find_related_standard_names</code>, <code>check_standard_names</code>, <code>get_standard_name_summary</code>); tiered grammar streams (T1/T2/T3) preventing <code>x_component_of_*</code> floods; backing-function unification in <code>standard_names/search.py</code> mirroring <code>graph/dd_search.py</code>; <code>_sn</code>/<code>_sns</code> → <code>_standard_names</code> rename audit; <code>include_standard_names=True</code> default already shipped (commit <code>33514f2a</code>).</td>
-<td>Active HTML plan — Phase 4 pipeline migration still open</td>
+<td>Done in S2 — canonical search/fetch backing, caller migration, fetch semantics, and alias cleanup all landed; DD-only auto-detect remains construction-time only.</td>
 </tr>
 <tr>
 <td>2</td>
-<td><a href="/imas-codex/sn-structured-fanout.html">standard-names/39-structured-fanout.md</a></td>
-<td>Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer LLM consumes targeted context. Underwritten by plan 40&rsquo;s unified search surface (<code>search_existing_names</code> runner). Replaces unbounded agentic-loop alternative with deterministic chains.</td>
-<td>Active — phases 2/3 deferred until plan 40 fully lands</td>
+<td><a href="/imas-codex/sn-structured-fanout.html">../../docs/sn-structured-fanout.html</a></td>
+<td>Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer LLM consumes targeted context. The bounded <code>refine_name</code> path, telemetry, and duplicate guard are now live on top of the canonical search surface.</td>
+<td>Done for Phase 0/1/1.5 — broader phases 2/3 remain intentionally deferred behind the telemetry gate.</td>
 </tr>
 </tbody>
 </table>
-<h3>Sequencing rationale</h3>
-<p><strong>Plan 40 must land first.</strong> Plan 39&rsquo;s <code>search_existing_names</code> runner is a
-direct caller of plan 40&rsquo;s redesigned <code>search_similar_standard_names</code> and
-<code>find_related_standard_names</code>. Dispatching them in parallel risks two
-concurrent rewrites of the same backing-function surface in
-<code>standard_names/search.py</code>.</p>
-<p><strong>Phase-3 vs Phase-4 of plan 40</strong>: per the v3.2 plan §15.1 (&ldquo;alias-bridge
-window&rdquo;), the 1-release deprecated aliases (<code>search_similar_names</code>,
-<code>search_similar_sns_with_full_docs</code>) bridge from Phase-3 (MCP tool ship) to
-Phase-4 (pipeline-caller migration). If plan 39 is dispatched between
-Phase-3 and Phase-4 of plan 40, plan 39 should consume the <strong>new</strong>
-canonical names directly — not the aliases — to avoid widening the
-alias-bridge window.</p>
+<h3>S2 sequencing note</h3>
+<p><strong>Plan 40 landed first on the code surface.</strong> The remaining caller migration
+and alias-bridge removal were completed before plan 39 was closed, so the live
+fan-out runner now consumes the canonical search helpers directly.</p>
+<p><strong>The alias bridge is no longer part of the live contract.</strong> Future work
+should start from the canonical search surface and treat the old alias window
+as closed rather than as an active compatibility promise.</p>
 <h3>Other active SN plans</h3>
 <p>These are tracked in <a href="/imas-codex/plans-readme.html"><code>../README.md</code></a> under the P1a–P1d
 priority list. Status as of HEAD (2026-04-30):</p>

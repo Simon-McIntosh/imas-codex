@@ -49,7 +49,7 @@ Completed features belong in <code>completed/</code> for reference, then eventua
 <h2 id="s2">Active Feature Plans</h2>
 <p>Refactored after rubber-duck review, docs audit, and live MCP tool testing (2026-04-14).
 Plans validated against 62 existing standard names, current scoring architecture, and docs/ state.</p>
-<p>Primary SN deployment plans are being migrated from markdown into HTML docs under <code>docs/</code>. Current HTML records: <a href="/imas-codex/sn-catalog-quality-refactor.html">sn-catalog-quality-refactor</a>, <a href="/imas-codex/sn-quality-parity.html">sn-quality-parity</a>, <a href="/imas-codex/sn-search-facility.html">sn-search-facility</a>, and <a href="/imas-codex/sn-closed-physical-base.html">sn-closed-physical-base</a>.</p>
+<p>Primary SN deployment plans are being migrated from markdown into HTML docs under <code>docs/</code>. Current HTML records: <a href="/imas-codex/sn-catalog-quality-refactor.html">sn-catalog-quality-refactor</a>, <a href="/imas-codex/sn-quality-parity.html">sn-quality-parity</a>, <a href="/imas-codex/sn-search-facility.html">sn-search-facility</a>, <a href="/imas-codex/sn-structured-fanout.html">sn-structured-fanout</a>, and <a href="/imas-codex/sn-closed-physical-base.html">sn-closed-physical-base</a>.</p>
 <p><strong>See also:</strong> <a href="/imas-codex/features-readme.html"><code>features/README.md</code></a> for active-plan sequencing, layout conventions, and the plan lifecycle.</p>
 <table>
 <thead>
@@ -65,13 +65,13 @@ Plans validated against 62 existing standard names, current scoring architecture
 <td><strong>P1</strong></td>
 <td><a href="/imas-codex/sn-search-facility.html">docs/sn-search-facility.html</a></td>
 <td><strong>NEW</strong> Grammar-aware SN search &amp; fetch facility: 7 MCP tools mirroring DD palette; tiered grammar streams (T1/T2/T3) preventing <code>x_component_of_*</code> floods; backing-function unification in <code>standard_names/search.py</code>; <code>_sn</code>/<code>_sns</code> → <code>_standard_names</code> rename audit. <code>include_standard_names=True</code> default already shipped.</td>
-<td>Active HTML plan — Phase 4 pipeline migration still open</td>
+<td>Done in S2 — canonical search/fetch backing, caller migration, fetch semantics, and alias cleanup all landed; DD-only auto-detect remains construction-time only.</td>
 </tr>
 <tr>
 <td><strong>P1·b</strong></td>
-<td><a href="/imas-codex/sn-structured-fanout.html">features/standard-names/39-structured-fanout.md</a></td>
-<td><strong>NEW</strong> Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer consumes targeted context. Depends on plan 40&rsquo;s <code>search_existing_names</code> runner.</td>
-<td>Active — phases 2/3 deferred until plan 40 fully lands</td>
+<td><a href="/imas-codex/sn-structured-fanout.html">docs/sn-structured-fanout.html</a></td>
+<td><strong>NEW</strong> Structured multi-pass LLM fan-out: searcher LLM emits typed search queries → backing functions execute → composer consumes targeted context. The bounded <code>refine_name</code> path, telemetry, and duplicate guard are now live on the canonical search surface.</td>
+<td>Done for Phase 0/1/1.5 — broader phases 2/3 remain intentionally deferred behind the telemetry gate</td>
 </tr>
 <tr>
 <td><strong>P1·c</strong></td>
