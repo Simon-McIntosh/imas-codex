@@ -19,6 +19,8 @@
   <title>SN Catalog Quality Refactor | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-06-09">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -64,44 +66,42 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="amplitude-scope" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should <code>_amplitude</code> stay restricted to <code>kind=complex</code>?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="complex-only">Complex only</button>
-          <button class="r-opt" data-value="allow-vector-too">Allow vector use too</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="resolution-model" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should docs and links keep separate resolution status fields?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="parallel-fields">Parallel fields</button>
-          <button class="r-opt" data-value="unified-field">Unified resolution field</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="verifier-gate" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should Phase 4 gating include reviewer-score thresholds?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="structural-only">Structural checks only</button>
-          <button class="r-opt" data-value="structural-plus-score">Structural + reviewer score</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="link-ordering" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How should exported link order be normalized?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="preserve-emission-order">Preserve emission order</button>
-          <button class="r-opt" data-value="canonicalize-alpha">Canonicalize alphabetically</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="amplitude-scope" data-choice="allow-vector-too" data-by="Simon McIntosh" data-when="2026-06-09T09:10:59+00:00">
+    <p class="r-dec-q">Should _amplitude stay restricted to kind=complex ?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="complex-only">Complex only</button>
+      <button class="r-opt chosen" data-value="allow-vector-too">Allow vector use too</button>
+      </p>
+    <p class="r-dec-rat">_amplitude is not currently kind-restricted, and hard-restricting to complex would reject legitimate real-valued amplitudes (MHD mode / perturbation / wave amplitudes are scalar or spectrum kind). Keep amplitude/phase/magnitude as a style guideline (suffix form canonical) rather than a structural kind constraint.</p>
+    </div>
+<div class="r-dec" data-key="resolution-model" data-choice="parallel-fields" data-by="Simon McIntosh" data-when="2026-06-09T09:10:59+00:00">
+    <p class="r-dec-q">Should docs and links keep separate resolution status fields?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="parallel-fields">Parallel fields</button>
+      <button class="r-opt" data-value="unified-field">Unified resolution field</button>
+      </p>
+    <p class="r-dec-rat">docs and links are already tracked by distinct state machines (docs_stage: pending-&gt;drafted-&gt;reviewed-&gt;accepted; link_status: resolved/unresolved/failed with retry_count, max 5). Unifying conflates a generation/review lifecycle with a retry-bounded resolution queue and breaks age-weighted link-retry priority. Confirm current parallel design.</p>
+    </div>
+<div class="r-dec" data-key="verifier-gate" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should Phase 4 gating include reviewer-score thresholds?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="structural-only">Structural checks only</button>
+      <button class="r-opt" data-value="structural-plus-score">Structural + reviewer score</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="link-ordering" data-choice="canonicalize-alpha" data-by="Simon McIntosh" data-when="2026-06-09T09:10:59+00:00">
+    <p class="r-dec-q">How should exported link order be normalized?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="preserve-emission-order">Preserve emission order</button>
+      <button class="r-opt chosen" data-value="canonicalize-alpha">Canonicalize alphabetically</button>
+      </p>
+    <p class="r-dec-rat">For a version-controlled, round-tripped, diff-reviewed authoritative catalog, reproducible export order and clean diffs win. No code consumes link priority, so &#x27;editorial order&#x27; value is theoretical while diff-noise cost is real. If a primary-link semantic emerges later, pin the first link and alpha-sort the remainder.</p>
+    </div>
+</section>
 
-    <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+    
   </main>
 </body>
 </html>
