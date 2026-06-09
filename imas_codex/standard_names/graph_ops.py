@@ -8184,8 +8184,9 @@ def claim_refine_name_batch(
         # Derived parents (seeded by ``seed_parent_sources``) have no
         # refinement target — the name is structurally fixed. Skip
         # them so they don't enter the refine loop. The admission gate
-        # filters bad derived names at write time; Phase 6 will delete
-        # failed ones explicitly via the dead-link cascade.
+        # filters bad derived names at write time, and
+        # normalize_derived_parent_lifecycle deletes any inadmissible
+        # accepted derived parents at startup (the self-healing cascade).
         " AND coalesce(sn.origin, '') <> 'derived'"
     )
     items = _claim_sn_atomic(

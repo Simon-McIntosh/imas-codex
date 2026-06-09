@@ -40,7 +40,7 @@ state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
 | Pool | Label | Stage gate | Key operation |
 |------|-------|------------|---------------|
 | 1 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates a name; new SN persisted at `name_stage='drafted'`. **Unit injected from DD — never from LLM.** |
-| 2 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores the name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents: scores include a `specificity` dimension; `specificity < threshold` → `proposed_verdict='reject'`. |
+| 2 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores the name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents via the admissibility gate; inadmissible accepted parents are deleted by `normalize_derived_parent_lifecycle` at startup. |
 | 3 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | Creates a NEW SN node; predecessor flipped to `superseded`; source edges migrated; `REFINED_FROM` edge added. |
 | 4 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM generates documentation; `docs_stage → 'drafted'`. Cross-pipeline gate: fires only after the name is accepted. |
 | 5 | `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores docs; atomic transition → `accepted` / `reviewed` / `exhausted`. |
@@ -326,12 +326,12 @@ parent nodes for them would populate the catalog with trivially generic entries
 carrying no scientific identity. Clause A rejects exactly these.
 
 Once created, derived parents flow through the standard
-`REVIEW_NAME → GENERATE_DOCS → REVIEW_DOCS` path. `REVIEW_NAME` adds a
-`specificity` scoring dimension gated on `origin='derived'` — a failing
-specificity score routes the name to delete (with its `HAS_PARENT` edges), not
-refine; description-quality failures route to `REFINE_DOCS` instead. Advisory
-slots `proposed_verdict` (admit | reject | uncertain) and `specificity_score`
-track the verdict. The `apply_derived_parent_migration` idempotent self-healing
+`REVIEW_NAME → GENERATE_DOCS → REVIEW_DOCS` path. Derived parents are skipped from the refine loop (their names are structurally
+fixed). Admissibility is enforced by `is_admissible_parent_name`, and
+`normalize_derived_parent_lifecycle` deletes any inadmissible accepted derived
+parent — with its `HAS_PARENT` edges and review scaffolding — on every `sn run`
+startup; description-quality failures route to `REFINE_DOCS`. The
+`apply_derived_parent_migration` idempotent self-healing
 pass runs on every `sn run` startup to migrate legacy `origin='deterministic'`
 entries. There is no separate `sn parents` CLI — all parent handling is folded
 into `sn run`.
