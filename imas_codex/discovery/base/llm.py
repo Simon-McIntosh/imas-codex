@@ -971,11 +971,15 @@ def _build_kwargs(
         "service": service,
     }
 
-    # OpenRouter / LiteLLM reasoning-effort passthrough. litellm maps
-    # ``reasoning_effort`` (low|medium|high) to each provider's reasoning
-    # control. None = provider default (no explicit reasoning budget).
+    # Reasoning-effort passthrough via OpenRouter's NATIVE unified field
+    # (``reasoning: {effort: low|medium|high}``) carried in ``extra_body``,
+    # which litellm forwards verbatim. We deliberately avoid litellm's
+    # ``reasoning_effort`` kwarg — its per-provider mapping raises
+    # UnsupportedParamsError for many OpenRouter models. OpenRouter ignores
+    # the field for models without reasoning. None = provider default.
     if reasoning_effort is not None:
-        kwargs["reasoning_effort"] = reasoning_effort
+        extra_body = kwargs.setdefault("extra_body", {})
+        extra_body["reasoning"] = {"effort": reasoning_effort}
 
     return kwargs
 

@@ -223,7 +223,7 @@ def main() -> int:
         default="low,high",
         help="Comma list of reasoning efforts to sweep (reasoning-capable models).",
     )
-    ap.add_argument("--batch-size", type=int, default=15)
+    ap.add_argument("--batch-size", type=int, default=10)
     ap.add_argument(
         "--models",
         type=str,
@@ -298,9 +298,12 @@ def main() -> int:
                     for s in parsed.scores:
                         by_id[s.identifier] = s
                 except Exception as exc:  # noqa: BLE001
-                    logger.error("%s batch failed: %s", tag, exc)
+                    # One flaky/empty batch must not void the whole model —
+                    # record partial coverage and keep going. (Reliability is
+                    # itself signal: incomplete models are flagged below.)
+                    logger.error("%s batch failed (continuing): %s", tag, exc)
                     failed = True
-                    break
+                    continue
             total_cost += cost
             latency = time.time() - t0
 
