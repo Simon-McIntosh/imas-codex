@@ -1,6 +1,6 @@
-"""Plan 34 — Benchmark v1 runner for Standard Name quality gating.
+"""Plan 34 — Benchmark runner for Standard Name quality gating.
 
-Loads ``tests/standard_names/eval_sets/benchmark_v1.json`` (or a
+Loads ``tests/standard_names/eval_sets/benchmark.json`` (or a
 compatible file) and evaluates:
 
 * **Positives** — invoke the compose prompt per DD path, compare
@@ -11,10 +11,10 @@ compatible file) and evaluates:
 
 Emits, under ``--output``:
 
-- ``benchmark-v1.positives.jsonl``
-- ``benchmark-v1.negatives.jsonl``
-- ``benchmark-v1.summary.json``
-- ``benchmark-v1-summary.md``
+- ``benchmark.positives.jsonl``
+- ``benchmark.negatives.jsonl``
+- ``benchmark.summary.json``
+- ``benchmark-summary.md``
 
 Gating thresholds (from plan 34 §3.4):
 
@@ -24,8 +24,8 @@ Gating thresholds (from plan 34 §3.4):
 
 Usage::
 
-    uv run python scripts/run_benchmark_v1.py \\
-        --eval-set tests/standard_names/eval_sets/benchmark_v1.json \\
+    uv run python scripts/run_benchmark.py \\
+        --eval-set tests/standard_names/eval_sets/benchmark.json \\
         --output plans/research/data \\
         --cost-cap 5.00
 
@@ -332,7 +332,7 @@ def main() -> int:
     ap.add_argument(
         "--eval-set",
         type=Path,
-        default=Path("tests/standard_names/eval_sets/benchmark_v1.json"),
+        default=Path("tests/standard_names/eval_sets/benchmark.json"),
     )
     ap.add_argument(
         "--output",
@@ -562,11 +562,11 @@ def main() -> int:
         )
 
     # ── Write JSONL ────────────────────────────────────────────────────
-    pos_jsonl = args.output / "benchmark-v1.positives.jsonl"
+    pos_jsonl = args.output / "benchmark.positives.jsonl"
     with pos_jsonl.open("w") as f:
         for r in pos_rows:
             f.write(json.dumps(r) + "\n")
-    neg_jsonl = args.output / "benchmark-v1.negatives.jsonl"
+    neg_jsonl = args.output / "benchmark.negatives.jsonl"
     with neg_jsonl.open("w") as f:
         for r in neg_rows:
             f.write(json.dumps(r) + "\n")
@@ -640,12 +640,10 @@ def main() -> int:
         "all_gates_passed": all_passed,
         "per_domain": per_domain_out,
     }
-    (args.output / "benchmark-v1.summary.json").write_text(
-        json.dumps(summary, indent=2)
-    )
+    (args.output / "benchmark.summary.json").write_text(json.dumps(summary, indent=2))
 
     # Markdown summary
-    md = ["# Benchmark v1 — run summary", ""]
+    md = ["# Benchmark — run summary", ""]
     md.append(f"- model: `{model}`  mock: `{args.mock}`  cost: `${total_cost:.4f}`")
     md.append(
         f"- positives: {len(pos_rows)} evaluated ({todo_skipped} TODO stubs skipped); "
@@ -682,10 +680,10 @@ def main() -> int:
             f"{r['reviewer_score']} | {'✅' if r['rejected'] else '❌'} |"
         )
     md.append("")
-    md.append(f"Outputs: `{pos_jsonl}`, `{neg_jsonl}`, `benchmark-v1.summary.json`.")
-    (args.output / "benchmark-v1-summary.md").write_text("\n".join(md))
+    md.append(f"Outputs: `{pos_jsonl}`, `{neg_jsonl}`, `benchmark.summary.json`.")
+    (args.output / "benchmark-summary.md").write_text("\n".join(md))
 
-    logger.info("Wrote %s", args.output / "benchmark-v1-summary.md")
+    logger.info("Wrote %s", args.output / "benchmark-summary.md")
     logger.info("Gates: %s", json.dumps(gates, indent=2))
     return 0 if all_passed else 1
 

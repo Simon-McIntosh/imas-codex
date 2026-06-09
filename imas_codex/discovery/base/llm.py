@@ -831,6 +831,7 @@ def _build_kwargs(
     service: str = "untagged",
     api_base: str | None = None,
     api_key_override: str | None = None,
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
@@ -970,6 +971,12 @@ def _build_kwargs(
         "service": service,
     }
 
+    # OpenRouter / LiteLLM reasoning-effort passthrough. litellm maps
+    # ``reasoning_effort`` (low|medium|high) to each provider's reasoning
+    # control. None = provider default (no explicit reasoning budget).
+    if reasoning_effort is not None:
+        kwargs["reasoning_effort"] = reasoning_effort
+
     return kwargs
 
 
@@ -989,6 +996,7 @@ def call_llm_structured(
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
     service: str = "untagged",
+    reasoning_effort: str | None = None,
 ) -> LLMResult:
     """Call LLM and parse structured output, retrying on both API and parse errors.
 
@@ -1032,6 +1040,7 @@ def call_llm_structured(
         temperature,
         timeout,
         service=service,
+        reasoning_effort=reasoning_effort,
     )
 
     last_error: Exception | None = None
@@ -1110,6 +1119,7 @@ async def acall_llm_structured(
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
     service: str = "untagged",
+    reasoning_effort: str | None = None,
 ) -> LLMResult:
     """Async version of call_llm_structured.
 
@@ -1149,6 +1159,7 @@ async def acall_llm_structured(
         temperature,
         timeout,
         service=service,
+        reasoning_effort=reasoning_effort,
     )
 
     last_error: Exception | None = None

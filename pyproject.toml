@@ -542,7 +542,7 @@ reviewer-model = "openrouter/anthropic/claude-opus-4.6"
 # Reviewer-selection bake-off (2026-06-09): reviewing existing text is a
 # judgment task, not generation — cheap vendor-diverse models may match
 # frontier discrimination at a fraction of cost. Goal: pick a dual-blind
-# pair + one quorum-breaker. Measure over benchmark_v1 gold set before
+# pair + one quorum-breaker. Measure over benchmark gold set before
 # switching the production [sn-review.*] default profile. OpenRouter
 # prices/1M (in/out) noted; all but owl-alpha expose a tunable `reasoning`.
 reviewer-models = [
@@ -555,7 +555,7 @@ reviewer-models = [
     "openrouter/moonshotai/kimi-k2.6",          # Moonshot $0.68/$3.41
     # Quorum-breaker candidates / calibrated anchors
     "openrouter/google/gemini-3.1-pro-preview", # escalator $2/$12
-    "openrouter/anthropic/claude-opus-4.6",     # quality ceiling ref $5/$25
+    "openrouter/anthropic/claude-opus-4.8",     # quality ceiling ref $5/$25
 ]
 
 [tool.imas-codex.sn-fanout]
