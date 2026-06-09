@@ -1780,7 +1780,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import StandardNameComposeBatch
@@ -2066,6 +2066,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     messages=messages,
                     response_model=StandardNameComposeBatch,
                     service="standard-names",
+                    reasoning_effort=get_reasoning_effort("sn-compose"),
                 )
             except (ValueError, Exception) as compose_exc:
                 _exc_str = str(compose_exc)
@@ -3529,7 +3530,7 @@ async def compose_batch(
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import StandardNameComposeBatch
@@ -3729,6 +3730,7 @@ async def compose_batch(
                     messages=messages,
                     response_model=StandardNameComposeBatch,
                     service="standard-names",
+                    reasoning_effort=get_reasoning_effort("sn-compose"),
                 )
             except (ValueError, Exception) as compose_exc:
                 _exc_str = str(compose_exc)

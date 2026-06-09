@@ -1286,9 +1286,20 @@ def get_sn_review_reasoning_effort() -> str | None:
     trivial extra cost. Set to ``"none"`` / empty to use the provider
     default (no explicit reasoning budget).
     """
-    val = _get_section("sn-review").get(
-        "reasoning-effort", _SN_REVIEW_DEFAULTS["reasoning-effort"]
-    )
+    return get_reasoning_effort("sn-review", _SN_REVIEW_DEFAULTS["reasoning-effort"])
+
+
+def get_reasoning_effort(section: str, default: str | None = None) -> str | None:
+    """Reasoning effort (low|medium|high) for LLM calls in *section*.
+
+    Reads ``[tool.imas-codex.<section>].reasoning-effort``; returns ``None``
+    (provider default — no explicit reasoning budget) when unset or ``"none"``.
+    Gives judgment-heavy SN stages (review, name composition) an explicit
+    reasoning budget — the 2026-06-09 bake-off showed high effort materially
+    lifts discrimination/quality at trivial extra cost. Threaded into
+    ``call_llm_structured`` via OpenRouter's native ``reasoning:{effort}``.
+    """
+    val = _get_section(section).get("reasoning-effort", default)
     if val in (None, "", "none"):
         return None
     return str(val)
