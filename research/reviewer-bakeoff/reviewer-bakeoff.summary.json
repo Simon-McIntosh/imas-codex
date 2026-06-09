@@ -1,0 +1,267 @@
+{
+  "eval_set": "tests/standard_names/eval_sets/benchmark.json",
+  "n_pos": 20,
+  "n_neg": 10,
+  "efforts": [
+    "low",
+    "high"
+  ],
+  "total_cost_usd": 0.7699,
+  "rows": [
+    {
+      "model": "openrouter/qwen/qwen3.7-max",
+      "effort": "high",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 1.0,
+      "mean_neg": 0.47,
+      "discrimination": 0.53,
+      "false_accept": 0.7,
+      "false_reject": 0.0,
+      "cost_usd": 0.028,
+      "latency_s": 118.2,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/anthropic/claude-opus-4.8",
+      "effort": "low",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.995,
+      "mean_neg": 0.475,
+      "discrimination": 0.52,
+      "false_accept": 0.6,
+      "false_reject": 0.0,
+      "cost_usd": 0.1282,
+      "latency_s": 41.6,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/anthropic/claude-opus-4.8",
+      "effort": "high",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.99,
+      "mean_neg": 0.478,
+      "discrimination": 0.512,
+      "false_accept": 0.6,
+      "false_reject": 0.0,
+      "cost_usd": 0.1336,
+      "latency_s": 38.4,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/qwen/qwen3.7-max",
+      "effort": "low",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.965,
+      "mean_neg": 0.47,
+      "discrimination": 0.495,
+      "false_accept": 0.7,
+      "false_reject": 0.05,
+      "cost_usd": 0.0377,
+      "latency_s": 166.0,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/minimax/minimax-m3",
+      "effort": "high",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.96,
+      "mean_neg": 0.47,
+      "discrimination": 0.49,
+      "false_accept": 0.6,
+      "false_reject": 0.05,
+      "cost_usd": 0.0077,
+      "latency_s": 125.7,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/moonshotai/kimi-k2.6",
+      "effort": "high",
+      "n_pos": 10,
+      "n_neg": 10,
+      "mean_pos": 0.95,
+      "mean_neg": 0.47,
+      "discrimination": 0.48,
+      "false_accept": 0.7,
+      "false_reject": 0.1,
+      "cost_usd": 0.0814,
+      "latency_s": 969.8,
+      "incomplete": true
+    },
+    {
+      "model": "openrouter/xiaomi/mimo-v2.5-pro",
+      "effort": "high",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.885,
+      "mean_neg": 0.44,
+      "discrimination": 0.445,
+      "false_accept": 0.6,
+      "false_reject": 0.2,
+      "cost_usd": 0.0282,
+      "latency_s": 85.7,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/google/gemini-3.1-pro-preview",
+      "effort": "high",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.99,
+      "mean_neg": 0.57,
+      "discrimination": 0.42,
+      "false_accept": 0.7,
+      "false_reject": 0.0,
+      "cost_usd": 0.0762,
+      "latency_s": 53.1,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/google/gemini-3.1-pro-preview",
+      "effort": "low",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 1.0,
+      "mean_neg": 0.6,
+      "discrimination": 0.4,
+      "false_accept": 0.8,
+      "false_reject": 0.0,
+      "cost_usd": 0.0497,
+      "latency_s": 30.5,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/minimax/minimax-m3",
+      "effort": "low",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.948,
+      "mean_neg": 0.55,
+      "discrimination": 0.397,
+      "false_accept": 0.7,
+      "false_reject": 0.0,
+      "cost_usd": 0.0112,
+      "latency_s": 209.7,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/xiaomi/mimo-v2.5-pro",
+      "effort": "low",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 0.96,
+      "mean_neg": 0.59,
+      "discrimination": 0.37,
+      "false_accept": 0.8,
+      "false_reject": 0.05,
+      "cost_usd": 0.0245,
+      "latency_s": 77.7,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/google/gemini-3.5-flash",
+      "effort": "low",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 1.0,
+      "mean_neg": 0.64,
+      "discrimination": 0.36,
+      "false_accept": 0.8,
+      "false_reject": 0.0,
+      "cost_usd": 0.0272,
+      "latency_s": 17.9,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/google/gemini-3.5-flash",
+      "effort": "high",
+      "n_pos": 20,
+      "n_neg": 10,
+      "mean_pos": 1.0,
+      "mean_neg": 0.64,
+      "discrimination": 0.36,
+      "false_accept": 0.8,
+      "false_reject": 0.0,
+      "cost_usd": 0.0767,
+      "latency_s": 41.8,
+      "incomplete": false
+    },
+    {
+      "model": "openrouter/openrouter/owl-alpha",
+      "effort": "default",
+      "n_pos": 0,
+      "n_neg": 0,
+      "mean_pos": null,
+      "mean_neg": null,
+      "discrimination": null,
+      "false_accept": null,
+      "false_reject": null,
+      "cost_usd": 0.0,
+      "latency_s": 0.3,
+      "incomplete": true
+    },
+    {
+      "model": "openrouter/moonshotai/kimi-k2.6",
+      "effort": "low",
+      "n_pos": 10,
+      "n_neg": 0,
+      "mean_pos": 0.9,
+      "mean_neg": null,
+      "discrimination": null,
+      "false_accept": null,
+      "false_reject": 0.2,
+      "cost_usd": 0.0596,
+      "latency_s": 691.9,
+      "incomplete": true
+    }
+  ],
+  "agreement_spearman": {
+    "openrouter/openrouter/owl-alpha@default": {
+      "openrouter/xiaomi/mimo-v2.5-pro@low": null,
+      "openrouter/qwen/qwen3.7-max@low": null
+    },
+    "openrouter/minimax/minimax-m3@low": {
+      "openrouter/openrouter/owl-alpha@default": null,
+      "openrouter/xiaomi/mimo-v2.5-pro@low": 0.466,
+      "openrouter/qwen/qwen3.7-max@low": 0.682,
+      "openrouter/moonshotai/kimi-k2.6@low": null
+    },
+    "openrouter/xiaomi/mimo-v2.5-pro@low": {},
+    "openrouter/qwen/qwen3.7-max@low": {
+      "openrouter/xiaomi/mimo-v2.5-pro@low": 0.836
+    },
+    "openrouter/google/gemini-3.5-flash@low": {
+      "openrouter/openrouter/owl-alpha@default": null,
+      "openrouter/minimax/minimax-m3@low": 0.559,
+      "openrouter/xiaomi/mimo-v2.5-pro@low": 0.75,
+      "openrouter/qwen/qwen3.7-max@low": 0.787,
+      "openrouter/moonshotai/kimi-k2.6@low": null
+    },
+    "openrouter/moonshotai/kimi-k2.6@low": {
+      "openrouter/openrouter/owl-alpha@default": null,
+      "openrouter/xiaomi/mimo-v2.5-pro@low": -0.167,
+      "openrouter/qwen/qwen3.7-max@low": -0.167
+    },
+    "openrouter/google/gemini-3.1-pro-preview@low": {
+      "openrouter/openrouter/owl-alpha@default": null,
+      "openrouter/minimax/minimax-m3@low": 0.559,
+      "openrouter/xiaomi/mimo-v2.5-pro@low": 0.75,
+      "openrouter/qwen/qwen3.7-max@low": 0.787,
+      "openrouter/google/gemini-3.5-flash@low": 1.0,
+      "openrouter/moonshotai/kimi-k2.6@low": null
+    },
+    "openrouter/anthropic/claude-opus-4.8@low": {
+      "openrouter/openrouter/owl-alpha@default": null,
+      "openrouter/minimax/minimax-m3@low": 0.613,
+      "openrouter/xiaomi/mimo-v2.5-pro@low": 0.707,
+      "openrouter/qwen/qwen3.7-max@low": 0.881,
+      "openrouter/google/gemini-3.5-flash@low": 0.807,
+      "openrouter/moonshotai/kimi-k2.6@low": null,
+      "openrouter/google/gemini-3.1-pro-preview@low": 0.807
+    }
+  }
+}
