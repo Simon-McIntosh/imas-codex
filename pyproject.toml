@@ -438,6 +438,10 @@ isnc-dir = ""
 disagreement-threshold = 0.20
 # Maximum RD-quorum cycles (1 = primary only, 2 = blind pair, 3 = full quorum).
 max-cycles = 3
+# Reasoning effort (low|medium|high) for reviewer LLM calls. high lifts the
+# cheap vendor-diverse reviewers to frontier discrimination at trivial cost
+# (bake-off 2026-06-09). Set "none" for provider default.
+reasoning-effort = "high"
 
 [tool.imas-codex.sn-review.names]
 # Phase 1 (2026-05-18): mixed-vendor RD-quorum chain.

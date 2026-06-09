@@ -1062,6 +1062,7 @@ _SN_REVIEW_DEFAULTS: dict[str, Any] = {
     "docs-models": ["openrouter/anthropic/claude-opus-4.6"],
     "disagreement-threshold": 0.15,
     "max-cycles": 3,
+    "reasoning-effort": "high",
 }
 
 
@@ -1273,6 +1274,24 @@ def get_sn_review_disagreement_threshold() -> float:
     set ``true`` if ``max(scores) - min(scores) >= threshold``.
     """
     return get_sn_review_profile_threshold(get_sn_review_active_profile())
+
+
+def get_sn_review_reasoning_effort() -> str | None:
+    """Reasoning effort (low|medium|high) for SN reviewer LLM calls.
+
+    Reads ``[tool.imas-codex.sn-review].reasoning-effort`` (shared across
+    both axes). Defaults to ``"high"``: the reviewer bake-off (2026-06-09)
+    showed high effort materially lifts the cheap, vendor-diverse reviewers
+    (qwen3.7-max, minimax-m3, deepseek-v4-pro) to frontier discrimination at
+    trivial extra cost. Set to ``"none"`` / empty to use the provider
+    default (no explicit reasoning budget).
+    """
+    val = _get_section("sn-review").get(
+        "reasoning-effort", _SN_REVIEW_DEFAULTS["reasoning-effort"]
+    )
+    if val in (None, "", "none"):
+        return None
+    return str(val)
 
 
 # ─── SN benchmark settings ─────────────────────────────────────────────────

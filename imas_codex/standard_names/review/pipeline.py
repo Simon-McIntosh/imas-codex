@@ -1864,11 +1864,14 @@ async def _review_single_batch(
         {"role": "user", "content": user_prompt},
     ]
 
+    from imas_codex.settings import get_sn_review_reasoning_effort
+
     llm_out = await acall_llm_structured(
         model=model,
         messages=messages,
         response_model=response_model,
         service="standard-names",
+        reasoning_effort=get_sn_review_reasoning_effort(),
     )
     result, cost, tokens = llm_out
 
