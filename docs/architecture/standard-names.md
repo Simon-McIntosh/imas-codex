@@ -1,8 +1,14 @@
 # Standard Name Generation Pipeline
 
-> DD-enriched standard name generation: classify IMAS paths, batch by
-> physics concept, compose names via LLM, validate grammar, consolidate
-> across batches, and persist to the knowledge graph.
+> DD-enriched standard name generation: classify IMAS paths, batch by physics
+> concept, compose names via LLM, review with an RD-quorum, refine low-scoring
+> names and docs, and persist to the knowledge graph. Design rationale lives in
+> [`standard-names-decisions.md`](standard-names-decisions.md); the architecture
+> boundary with ISN is in [`boundary.md`](boundary.md).
+
+This is the detailed reference. `AGENTS.md` carries only the orientation
+(pool table, command index, lifecycle axes, module map) and the safety
+tripwires; everything below is the authoritative depth behind it.
 
 ## Overview
 
@@ -12,242 +18,146 @@ physics identity — e.g. `electron_temperature` for
 DD namespace and the semantic physics vocabulary, enabling cross-facility and
 cross-IDS data discovery.
 
-The naming system follows a **composable grammar** (from `imas_standard_names`)
-where a name is built from ordered segments:
+Names follow a **composable grammar** (from `imas_standard_names`, ISN) where a
+name is built from ordered segments:
 
 ```
-[subject_] [coordinate_] [position_] physical_base [_component] [_process]
+{subject}_{qualifier1}_{qualifier2}_{physical_base}_{due_to_process}
 ```
 
 Examples: `electron_temperature`, `toroidal_magnetic_field_at_magnetic_axis`,
-`ion_deuterium_density`.
+`ion_deuterium_density`. ISN owns the grammar, vocabulary, and validation;
+codex owns the pipeline, evaluation, and graph persistence.
 
-## Pipeline Flow
+## Six-Pool Run Loop
 
-```
- ┌───────────┐     ┌───────────┐     ┌───────────┐
- │  EXTRACT  │────▶│  COMPOSE  │────▶│  VALIDATE │
- │           │     │           │     │           │
- │ DD query  │     │ LLM call  │     │ ISN 3-    │
- │ classify  │     │ per-batch │     │ layer +   │
- │ enrich    │     │ unit from │     │ grammar   │
- │ group     │     │ DD, not   │     │ round-trip│
- └───────────┘     │ LLM       │     └─────┬─────┘
-                   └───────────┘           │
-                                           ▼
-                                    ┌───────────┐     ┌───────────┐
-                                    │CONSOLIDATE│────▶│  PERSIST  │
-                                    │           │     │           │
-                                    │ dedup     │     │ Neo4j     │
-                                    │ conflicts │     │ conflict  │
-                                    │ coverage  │     │ detection │
-                                    └───────────┘     └───────────┘
-```
+`sn run` drives a **single concurrent loop of six pools**. Each pool claims
+eligible work by a stage gate, does one unit of work, and persists a durable
+state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
+(`imas_codex/standard_names/pools.py`); the loop orchestrator is
+`run_sn_pools()` in `loop.py`.
 
-**RD-quorum review** runs as a standalone `sn review` command (not part of
-`sn generate`). Each axis has an independent review pipeline:
+| Pool | Label | Stage gate | Key operation |
+|------|-------|------------|---------------|
+| 1 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates a name; new SN persisted at `name_stage='drafted'`. **Unit injected from DD — never from LLM.** |
+| 2 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores the name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents: scores include a `specificity` dimension; `specificity < threshold` → `proposed_verdict='reject'`. |
+| 3 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | Creates a NEW SN node; predecessor flipped to `superseded`; source edges migrated; `REFINED_FROM` edge added. |
+| 4 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM generates documentation; `docs_stage → 'drafted'`. Cross-pipeline gate: fires only after the name is accepted. |
+| 5 | `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores docs; atomic transition → `accepted` / `reviewed` / `exhausted`. |
+| 6 | `REFINE_DOCS` | `docs_stage='reviewed' AND rds<min AND docs_chain_length<cap` | Rewrites docs in-place; prior content snapshotted on a `DocsRevision` node via `DOCS_REVISION_OF`; `docs_stage → 'drafted'`. |
 
-```
-compose → validate → review_names (RD-quorum) → review_docs (RD-quorum)
+**Acceptance always overrides cap.** Even at `chain_length == cap − 1`, a
+passing score wins — there is no forced exhaustion on a good result.
 
-  review_names:
-    cycle 0: primary   (BLIND)  ──┐
-    cycle 1: secondary (BLIND)  ──┼─ disagree on any dim? → cycle 2
-    cycle 2: escalator (SEES 0+1) ┘  (only if len(models)==3)
+**Escalation.** On the final refine attempt (`chain_length == cap − 1`) the pool
+switches to `DEFAULT_ESCALATION_MODEL` (default
+`openrouter/anthropic/claude-opus-4.6`), overridable via `--escalation-model`.
 
-  review_docs:  same structure, independent rubric
-```
+**Backlog throttle.** When the refine_name backlog exceeds 0.5 × the
+generate_name backlog, `BudgetManager.pool_admit` dampens the generate_name
+effective weight by 0.5× so refinement can catch up.
 
-**Phase summary:**
+**Orphan sweep.** A `refining` claim that stalls reverts to `reviewed` after
+`DEFAULT_ORPHAN_SWEEP_TIMEOUT_S` (600 s). The periodic sweep lives in
+`orphan_sweep.py`.
 
-| Phase | Module | What it does |
-|-------|--------|--------------|
-| EXTRACT | `workers.extract_worker` | Query graph for DD paths, classify, enrich with clusters, group into batches |
-| COMPOSE | `workers.compose_worker` | LLM generates standard names per batch; unit injected from DD |
-| VALIDATE | `workers.validate_worker` | ISN 3-layer validation + grammar round-trip via `parse_standard_name()`, fields consistency |
-| CONSOLIDATE | `workers.consolidate_worker` | Cross-batch dedup, conflict detection, coverage accounting |
-| PERSIST | `workers.persist_worker` | Conflict-detecting Neo4j writes with coalesce semantics |
+**Loop termination.** The loop stops on zero eligible work, an exhausted
+`--cost-limit` (a single shared budget pool across all six pools), or a
+per-pool admission threshold. On `Ctrl-C` it writes an audit `SNRun` node
+(`cost`, pool counters, `min_score`, `rotation_cap`, `stop_reason`); `sn status`
+surfaces the most recent run.
 
-Orchestrator: `imas_codex/standard_names/pipeline.py` — wires workers into the generic
-`run_discovery_engine()` with a DAG dependency graph.
+### Scope routing
 
-## ISN Integration
+`sn run` runs the full loop across all eligible work by default. Two narrower
+modes:
 
-The architecture boundary between imas-codex and imas-standard-names (ISN) is
-documented in detail at [`docs/architecture/boundary.md`](boundary.md).
+- `--only <phase>` — run a single phase in isolation (e.g. `--only reconcile`
+  to mark stale sources without composing).
+- `--focus <path>` — route specific DD paths through the full six-pool loop,
+  scoped by a UUID `scope_run_id`. Use for iterative prompt development and
+  quality investigation on individual paths without a full rotation. Three
+  input forms: trailing positional args (`sn run path1 path2`), quoted
+  space-separated (`--focus "path1 path2"`), or repeated flags
+  (`--focus path1 --focus path2`). Single-pass focus seeding is handled by
+  `pool_adapter.run_explicit_paths()`.
 
-**Single import boundary:** `imas_codex/standard_names/context.py` calls
-`get_grammar_context()` from ISN v0.7.0rc3 as its single entry point for all
-grammar data (19 context keys: vocabulary, patterns, naming guidance, etc.).
-No private ISN modules are imported.
+## EXTRACT → COMPOSE Sub-Pipeline
 
-**Three-layer validation** (`_validate_via_isn()` in `workers.py`):
-
-1. **Pydantic** — `create_standard_name_entry()` fires 18 field validators
-2. **Semantic** — `run_semantic_checks()` runs 9 grammar-semantic checks
-3. **Description** — `validate_description()` checks for metadata leakage
-
-Validation is **annotation-only**: entries are never rejected by ISN validation.
-Issues are persisted to the graph as `validation_issues` (list of tagged
-strings) and `validation_layer_summary` (JSON with per-layer counts). The only
-hard rejection is an unparseable name (grammar round-trip failure).
-
-## Scoring
-
-Review scoring uses 6 dimensions × 0–20 integer scores, normalized to a 0–1
-aggregate via `sum / 120.0`. The LLM scores in integers to avoid float
-clustering (LLMs distribute poorly across continuous ranges). The graph stores
-the normalized 0–1 float as `reviewer_score`.
-
-**6 dimensions:** grammar, semantic, documentation, convention, completeness,
-compliance. Defined in `imas_codex/llm/config/sn_review_criteria.yaml`.
-
-**Tier thresholds:**
-
-| Tier | Minimum Score |
-|------|---------------|
-| outstanding | ≥0.85 |
-| good | ≥0.60 |
-| inadequate | ≥0.40 |
-| poor | <0.40 |
-
-**Verdict rules:** accept (≥0.60, no zero dimensions), reject (<0.40 or any
-zero dimension), revise (otherwise).
-
-## Review Pipeline
-
-`sn review` runs as a **standalone CLI command** (not part of `sn generate`).
-It scores all `valid` (not quarantined) drafted names using an **RD-quorum** flow.
-The two review axes (`names` and `docs`) are independent; each has its own rubric,
-model chain, and per-axis score columns on the `StandardName` node.
-
-### RD-Quorum Architecture
+Inside `GENERATE_NAME` (and via `pool_adapter.run_explicit_paths()` on the
+single-pass focus path) runs the extract→compose→validate→consolidate→persist
+sub-pipeline:
 
 ```
- ┌─────────────┐     ┌─────────────────────────────────────────┐
- │  FETCH      │────▶│  QUORUM                                  │
- │             │     │                                          │
- │ Query graph │     │  cycle 0: primary (BLIND)                │
- │ valid names │     │  cycle 1: secondary (BLIND)              │
- │ (no score)  │     │  disagree on any dim? ──► cycle 2        │
- └─────────────┘     │  cycle 2: escalator (sees 0+1 critiques) │
-                     └──────────────────┬──────────────────────┘
-                                        │
-                                        ▼
-                     ┌─────────────┐     ┌─────────────┐
-                     │  AGGREGATE  │────▶│  PERSIST    │
-                     │             │     │             │
-                     │ winning-    │     │ Review nodes│
-                     │ group select│     │ + axis slots│
-                     └─────────────┘     └─────────────┘
+ ┌───────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐
+ │  EXTRACT  │────▶│  COMPOSE  │────▶│ VALIDATE  │────▶│CONSOLIDATE│────▶│  PERSIST  │
+ │ DD query  │     │ LLM call  │     │ ISN 3-    │     │ dedup     │     │ Neo4j     │
+ │ classify  │     │ per-batch │     │ layer +   │     │ conflicts │     │ conflict  │
+ │ enrich    │     │ unit from │     │ round-trip│     │ coverage  │     │ detection │
+ │ group     │     │ DD only   │     │           │     │           │     │           │
+ └───────────┘     └───────────┘     └───────────┘     └───────────┘     └───────────┘
 ```
 
-**Cycle semantics:**
+### Classification (node_category)
 
-| Cycle | Role | Sees prior reviews? | When runs |
-|-------|------|---------------------|-----------|
-| 0 | primary | No (BLIND) | Always |
-| 1 | secondary | No (BLIND) | When `len(models) ≥ 2` |
-| 2 | escalator | Yes — both cycle 0+1 critiques | Only if disputed items exist AND `len(models) == 3` |
+SN-eligibility is **owned by the DD `node_category`** classification, not a
+bespoke rule engine. EXTRACT pre-filters DD paths through
+`SN_SOURCE_CATEGORIES` in `imas_codex/core/node_categories.py` — only physics
+quantities and the categories declared there proceed to COMPOSE. Error fields,
+pure metadata, structural nodes, and identifiers are filtered out by category.
 
-**Disputed items:** an item is disputed if any dimension score differs by >
-`disagreement-threshold` (default 0.15, normalised 0–1) between cycles 0 and 1.
-Cycle 2 receives only the disputed items as a per-item mini-batch.
+### Enrichment (cluster selection + grouping)
 
-**Immediate persistence:** each cycle's `Review` nodes are written to the graph
-before the next cycle starts (crash-safety).
+`imas_codex/standard_names/enrichment.py`:
 
-**`resolution_method` enum:**
+- **Primary cluster selection** — each path may belong to multiple semantic
+  clusters; one primary is chosen by scope rank (IDS > domain > global), then
+  highest `similarity_score`, then lexicographic tie-break.
+- **Grouping cluster selection** — for batching context, the *broadest* scope
+  is preferred (global > domain > IDS).
+- **Global grouping by (cluster × unit)** — grouping is global across all IDSs,
+  not per-IDS. If `electron_temperature` appears in `core_profiles`,
+  `core_sources`, and `equilibrium`, all three land in the same batch so the
+  LLM sees the full cross-IDS picture and assigns one name. Oversized groups
+  split on `max_batch_size` (token-budget guard); unclustered paths sub-group
+  by `parent_path`.
 
-| Value | Meaning |
-|-------|---------|
-| `quorum_consensus` | Cycles 0+1 agreed within tolerance; final = mean |
-| `authoritative_escalation` | Cycle 2 ran; its result is authoritative for disputed items |
-| `max_cycles_reached` | Cycles 0+1 disagreed; no escalator configured; final = mean with disagreement flag |
-| `retry_item` | Both cycles failed; item quarantined |
-| `single_review` | Only one cycle produced a score |
+Each batch carries: cluster description, cross-IDS path summary, sibling paths,
+and existing standard names for reuse.
 
-**Winning-group selection:** `update_review_aggregates` picks the most-recent
-Review group with `resolution_method` ∈ {`quorum_consensus`,
-`authoritative_escalation`, `single_review`} and mirrors scores onto the
-StandardName axis slots.
+### Validation (ISN 3-layer + grammar round-trip)
 
-**Partial-failure ladder:** both missing → retry; second failure → `retry_item`;
-one missing → `single_review`.
+`_validate_via_isn()` runs three annotation-only layers:
 
-### 1:1 Scoring Invariant
+1. **Pydantic** — `create_standard_name_entry()` fires its field validators.
+2. **Semantic** — `run_semantic_checks()` runs grammar-semantic checks.
+3. **Description** — `validate_description()` checks for metadata leakage.
 
-Each submitted name must receive exactly one score per cycle. The pipeline enforces
-this invariant within each cycle:
+Validation is **annotation-only**: entries are never rejected by semantic
+warnings — they persist to `validation_issues` (tagged strings) and
+`validation_layer_summary` (JSON per-layer counts). The only **hard
+quarantine** triggers are: grammar round-trip failure
+(`parse_standard_name()` rejects), Pydantic construction error, or detected
+ambiguity (one name → multiple distinct physical quantities). See
+[Validation Gating](#validation-gating).
 
-1. Names are sent to the reviewer in batches (typically 10–20 per call)
-2. After each batch, the response is matched back to submitted names by ID
-3. Any names not returned by the LLM are collected as **unmatched**
-4. Unmatched names are automatically retried individually (single-item batches)
+### Consolidation (`consolidation.py`)
 
-This ensures no name is silently skipped due to LLM truncation or output format errors.
+After VALIDATE, all candidates are consolidated in one pass.
 
-### Cost Reference
+**Dedup** — when batches produce the same name: keep the longest documentation,
+**union** `imas_paths` and `tags`, keep the highest confidence.
 
-Approximate cost using `anthropic/claude-opus-4.6` as primary reviewer (2-model chain,
-no escalator):
+**Conflict checks**, applied in order — conflicting entries are *filtered out*,
+not failed (the pipeline makes partial progress rather than aborting):
 
-| Scope | Names | Cost |
-|-------|-------|------|
-| 4 IDSs (equilibrium, core_profiles, edge_profiles, summary) | ~300 | ~$60 (2× with secondary) |
-| Full DD (~3,000 paths → ~1,200 names) | ~1,200 | ~$792 projected |
-
-With a 3-model quorum and typical ~15% dispute rate, the escalator adds ~15% to the
-two-cycle cost. Use `-c/--cost-limit` to cap spending per run.
-
-## A/B Comparison (Plan 21 Outcomes)
-
-Plan 21 closed two categories of gaps relative to ISN's built-in capabilities:
-
-**ISN validation leads — closed.** The `_validate_via_isn()` three-layer
-validation now runs 27+ checks via Pydantic model construction, semantic
-analysis, and description quality checking. All issues are persisted to the
-graph for reviewer context.
-
-**Context gaps — closed.** Collision avoidance via vector search
-(`imas_codex/standard_names/search.py`) finds similar existing StandardName nodes before
-compose and review. ISN grammar context keys (`quick_start`, `common_patterns`,
-`critical_distinctions`) are rendered in the compose prompt for richer LLM
-guidance.
-
-**Remaining ISN lead:** Iterative retry loop (ISN supports validate → fix →
-revalidate cycles). Assessed as lower priority — the validate-once +
-persistent-issues architecture catches issues upfront and surfaces them to
-the reviewer rather than attempting automated repair.
-
-## Naming Scope Classifier
-
-**Module:** `imas_codex/standard_names/classifier.py`
-
-Every DD path is classified into one of three scopes before entering the
-pipeline. The classifier is **rule-based** — no LLM, no cost, deterministic.
-
-```python
-Scope = Literal["quantity", "metadata", "skip"]
-```
-
-| # | Rule | Condition | Result |
-|---|------|-----------|--------|
-| 1 | Structure `/data` with unit | Last segment is `data`, parent is STRUCTURE type, has unit | `metadata` |
-| 2 | `/time` leaf | Last segment is `time` | `metadata` |
-| 3 | Validity fields | Last segment in `{validity, validity_timed}` | `metadata` |
-| 4 | Error fields | Path ends with `_error_upper`, `_error_lower`, `_error_index` | `skip` |
-| 5 | String fields | `data_type == "STR_0D"` | `skip` |
-| 6 | Index/flag integers | `INT_0D`, no unit, description matches index/flag pattern | `skip` |
-| 7 | Unitless integers | `INT_0D`, no unit, passes rule 6 check | `quantity` |
-| 8–9 | Physics leaf types | `data_type` in `{FLT_0D..6D, INT_1D..2D, CPX_0D..2D}` | `quantity` |
-| 10 | Structure with unit | `STRUCTURE` or `STRUCT_ARRAY` with unit | `quantity` |
-| 11a | Structural keywords | Description contains structural keywords (e.g. "array of structure", "index of", "identifier of") | `skip` |
-| 11b | Fit diagnostics | Path matches fit-diagnostic segment patterns (e.g. `chi_squared`, `fit_quality`, `convergence`) | `skip` |
-| 11 | Fallback | Everything else | `skip` |
-
-Only `quantity` paths proceed to COMPOSE. `metadata` and `skip` are filtered
-out during EXTRACT.
+| Check | Type | Catches |
+|-------|------|---------|
+| 1 | `unit_mismatch` | Same name proposed with different units |
+| 2 | `kind_mismatch` | Same name with different kind (scalar vs vector) |
+| 3 | `duplicate_source` | One source path claimed by multiple names |
+| 4 | Coverage gap | Source paths with no candidate mapping |
+| 5 | Registry reuse | Existing accepted names → reuse instead of mint |
 
 ## Unit Safety Model
 
@@ -255,482 +165,597 @@ Units flow from the Data Dictionary to the graph — **never from LLM output**.
 
 ```
 DD (HAS_UNIT relationship)
-        │
-        ▼
- EXTRACT phase reads unit from graph
-        │
-        ▼
- COMPOSE prompt marks unit as "read-only, authoritative"
-        │
-        ▼
- LLM output has no unit field
-        │
-        ▼
- workers.py injects DD unit into candidate dict
-        │
-        ▼
- PERSIST writes unit → (StandardName)-[:HAS_UNIT]->(Unit)
+  → EXTRACT reads unit from graph
+  → COMPOSE prompt marks unit "read-only, authoritative" (LLM output has no unit field)
+  → worker injects DD unit into the candidate dict
+  → PERSIST writes (StandardName)-[:HAS_UNIT]->(Unit)
 ```
-
-The compose prompt (`compose_dd.md`) includes a **Unit Policy** section:
-
-> The unit value shown for each path is authoritative — it comes from the IMAS
-> Data Dictionary. Do NOT include a `unit` field in your output.
 
 If the LLM emits a unit anyway, the worker discards it and uses the DD value.
+`cocos`, `cocos_transformation_type`, `dd_version`, and `physics_domain` are
+likewise DD-authoritative and injected post-LLM — `physics_domain` comes
+directly from `IMASNode.physics_domain` (falls back to `"general"`).
 
-## DD Enrichment
+## Scoring
 
-**Module:** `imas_codex/standard_names/enrichment.py`
+Review scoring uses integer per-dimension scores (0–20) normalized to a 0–1
+aggregate. The **rubric-driven numeric `score` (0–1) is the sole accept/refine
+signal** — there is no separate `verdict` field; the reviewer LLM produces
+scores plus optional `revised_name` / `suggested_name`.
 
-### Primary Cluster Selection
+**Name axis (4 dims):** grammar, semantic, convention, completeness.
+**Docs axis (4 dims):** description_quality, documentation_quality,
+completeness, physics_accuracy.
+**Benchmark (6 dims):** grammar, semantic, documentation, convention,
+completeness, compliance (aggregate `sum / 120.0`).
 
-Each DD path may belong to multiple semantic clusters (IDS-scope, domain-scope,
-global-scope). The enrichment layer selects **one primary cluster** per path
-using a deterministic resolution order:
+Criteria are defined in `imas_codex/llm/config/sn_review_criteria.yaml`.
 
-1. **IDS-scope** clusters (most specific) — scope rank 0
-2. **Domain-scope** clusters — scope rank 1
-3. **Global-scope** clusters (least specific) — scope rank 2
-4. Within same scope: highest `similarity_score`, then lexicographic tie-break
+**Tier thresholds** (`review_tier`, derived from `reviewer_score_name`):
 
-```python
-def select_primary_cluster(clusters: list[dict]) -> dict | None
+| Tier | Minimum |
+|------|---------|
+| outstanding | ≥0.85 |
+| good | ≥0.60 |
+| inadequate | ≥0.40 |
+| poor | <0.40 |
+
+## RD-Quorum Review
+
+`sn review` (and the `REVIEW_NAME` / `REVIEW_DOCS` pools) use a
+**Rational-Disagreement quorum** for high-confidence axis scores. The two axes
+(`names`, `docs`) are independent, each with its own rubric, model chain, and
+per-axis score columns.
+
+```
+ cycle 0: primary   (BLIND)  ──┐
+ cycle 1: secondary (BLIND)  ──┼─ disagree on any dim? → cycle 2
+ cycle 2: escalator (SEES 0+1) ┘  (only if disputed items exist AND len(models)==3)
 ```
 
-### Global Grouping
+- **Cycle 0** (primary, blind) scores with `models[0]`.
+- **Cycle 1** (secondary, blind) re-scores with `models[1]` — blindness
+  enforced (no `prior_reviews` block in the prompt).
+- An item is **disputed** if any per-dimension diff between cycles 0 and 1
+  exceeds `disagreement-threshold` (default 0.15, normalized 0–1).
+- **Cycle 2** (escalator, context-aware) runs only if disputed items exist AND
+  `len(models) == 3`; it receives both prior critiques and is authoritative for
+  the disputed items.
 
-Paths are grouped by **(primary_cluster × unit)** for LLM batching:
+**Immediate persistence:** each cycle's `Review` nodes are written before the
+next cycle starts (crash-safety). After all cycles,
+`update_review_aggregates` picks the most-recent winning group and mirrors final
+scores onto the SN axis slots.
 
-```python
-def group_by_concept_and_unit(
-    items: list[dict],
-    max_batch_size: int = 25,
-    existing_names: set[str] | None = None,
-) -> list[ExtractionBatch]
+**Partial-failure ladder:** both missing → retry → `retry_item` (quarantine);
+one missing → `single_review`.
+
+**`resolution_method` (on `Review` nodes):**
+
+| Value | Meaning |
+|-------|---------|
+| `quorum_consensus` | Cycles 0+1 agreed; final = mean |
+| `authoritative_escalation` | Cycle 2 ran; authoritative for disputed items |
+| `max_cycles_reached` | 0+1 disagreed, no escalator; mean + disagreement flag |
+| `retry_item` | Both cycles failed; item quarantined |
+| `single_review` | Only one cycle produced a score |
+
+**1:1 scoring invariant:** each submitted name receives exactly one score per
+cycle. Names are sent in batches; the response is matched back by ID; unmatched
+names are auto-retried individually so none is silently dropped on LLM
+truncation.
+
+**Configuration:** `[tool.imas-codex.sn-review]` (`disagreement-threshold`,
+`max-cycles`, `active-profile`) + `[tool.imas-codex.sn-review.{names,docs}]`
+(`models = [cycle0, cycle1, cycle2]`). Named profiles live under
+`[tool.imas-codex.sn-review.names.profiles.*]`. Accessors:
+`get_sn_review_{names,docs}_models()`, `get_sn_review_max_cycles()`,
+`get_sn_review_disagreement_threshold()`, `get_sn_review_active_profile()`.
+
+```toml
+[tool.imas-codex.sn-review.names]
+models = [
+  "openrouter/deepseek/deepseek-v4-flash",     # cycle 0 primary (blind, cheapest)
+  "openrouter/openai/gpt-5.4",                 # cycle 1 secondary (blind, fast)
+  "openrouter/google/gemini-3.1-pro-preview",  # cycle 2 escalator (highest quality)
+]
 ```
 
-**Key design choice:** grouping is **global** across all IDSs, not per-IDS.
-If `electron_temperature` appears in `core_profiles`, `core_sources`, and
-`equilibrium`, all three paths land in the same batch. This ensures the LLM
-sees the full cross-IDS picture and assigns the same standard name.
+**Budget:** `review_pipeline` reserves `batch_cost × num_models × 1.3` upfront
+via `BudgetLease.reserve()`, then charges per cycle — prevents secondary-cost
+leaks on a mid-cycle crash.
 
-Oversized groups are split into chunks of `max_batch_size` (token budget
-guard). Unclustered paths are sub-grouped by `parent_path` for coherent
-context.
+**Axis-split review storage:** name and docs reviews persist to independent
+column families so a docs pass cannot clobber name-only data and vice-versa.
+Paired slots per axis: `reviewer_score_{axis}`, `reviewer_scores_{axis}`
+(per-dim JSON), `reviewer_comments_{axis}`,
+`reviewer_comments_per_dim_{axis}`, `reviewer_model_{axis}`. Same-axis
+re-review requires `--force`; the guard is `_axis_overwrite_blocked` in
+`review/pipeline.py`. **Review never demotes** — a low-scoring `valid` name
+stays `valid` and routes to a refine pool.
 
-Each batch carries context: cluster description, cross-IDS path summary,
-sibling paths within the cluster, and existing standard names for reuse.
+**`Review` node fields (RD-quorum):** `review_axis`, `cycle_index` (0/1/2),
+`review_group_id` (UUID per quorum session), `resolution_role`
+(primary/secondary/escalator), `resolution_method`. `id` format:
+`{sn_id}:{axis}:{review_group_id}:{cycle_index}`.
 
-## Cross-Batch Consolidation
+## Structured Fan-Out
 
-**Module:** `imas_codex/standard_names/consolidation.py`
+`imas_codex/standard_names/fanout/` runs a bounded
+Proposer → Executor → Synthesizer fan-out for `refine_name`. The Proposer emits
+a closed-catalog `FanoutPlan` (Pydantic discriminated union on `fn_id`, all
+bounds enforced at parse time); a pure-Python executor runs it in parallel via
+`asyncio.to_thread`; the call-site's LLM call ingests the rendered evidence
+block. No agentic loop, no runtime function generation.
 
-After VALIDATE, all candidates are consolidated in a single pass:
+- **Runtime gating lives in config** (`[tool.imas-codex.sn-fanout]`). Current
+  rollout is enabled for `refine_name`; if disabled, `run_fanout()` is a true
+  no-op.
+- **One `GraphClient` per refine cycle** — the worker passes its `gc` in;
+  runners never instantiate their own.
+- **Cost ownership:** the Proposer call is charged to the caller's
+  `BudgetLease` as a sub-event with `batch_id=fanout_run_id`; callers stamp the
+  same id on the Synthesizer charge so the `Fanout` ↔ `LLMCost` graph join
+  works.
+- **`Fanout` node** is telemetry-only, runtime-written (like `LLMCost`); exempt
+  from LinkML schema management.
 
-```python
-def consolidate_candidates(
-    candidates: list[dict],
-    *,
-    source_paths: set[str] | None = None,
-    existing_registry: dict[str, dict] | None = None,
-) -> ConsolidationResult
-```
+## Derived / Structural Parents
 
-### Deduplication
+Structural parent SNs are inferred from the ISN grammar peel and enter with
+`origin='derived'`, `name_stage='pending'`. The placeholder node is created at
+write time by `_write_standard_name_edges` **only if it passes the two-clause
+admission gate** in `imas_codex/standard_names/parents.py`
+(`is_admissible_parent_name`):
 
-When multiple batches produce the same standard name:
-- Keep the entry with the **longest documentation**
-- **Union** `imas_paths` and `tags` across duplicates
-- Keep the **highest confidence** score
+- **Clause A — IR specificity.** `parse_standard_name(name).ir` has at least one
+  non-empty qualifier, operator, projection, locus, or mechanism. This admits
+  `elongation_of_plasma_boundary` and rejects bare bases like `pressure`.
+- **Clause B — vector-like topology.** The candidate already has ≥2 inbound
+  `HAS_PARENT` edges with `operator_kind='projection'` and distinct `axis`
+  values. This admits bare-base vectors like `magnetic_field` and
+  `electric_field` on topological grounds. (Clause B is callable without a live
+  graph via a stub `gc`.)
 
-### Conflict Detection
+Names failing both clauses are never created; their children remain parentless
+and group via shared `physical_base` / `qualifier` grammar fields in Cypher.
 
-Five conflict checks, applied in order:
+**Why bare-base scalars are excluded:** category labels like `pressure`,
+`density`, `temperature` *are* the `physical_base` grammar segment — making
+parent nodes for them would populate the catalog with trivially generic entries
+carrying no scientific identity. Clause A rejects exactly these.
 
-| Check | Type | What it catches |
-|-------|------|-----------------|
-| 1 | `unit_mismatch` | Same name proposed with different units |
-| 2 | `kind_mismatch` | Same name with different kind (scalar vs vector) |
-| 3 | `duplicate_source` | Same source path claimed by multiple names |
-| 4 | Coverage gaps | Source paths with no candidate mapping |
-| 5 | Registry reuse | Existing accepted names in graph → reuse instead of mint |
+Once created, derived parents flow through the standard
+`REVIEW_NAME → GENERATE_DOCS → REVIEW_DOCS` path. `REVIEW_NAME` adds a
+`specificity` scoring dimension gated on `origin='derived'` — a failing
+specificity score routes the name to delete (with its `HAS_PARENT` edges), not
+refine; description-quality failures route to `REFINE_DOCS` instead. Advisory
+slots `proposed_verdict` (admit | reject | uncertain) and `specificity_score`
+track the verdict. The `apply_derived_parent_migration` idempotent self-healing
+pass runs on every `sn run` startup to migrate legacy `origin='deterministic'`
+entries. There is no separate `sn parents` CLI — all parent handling is folded
+into `sn run`.
 
-Conflicting entries are **filtered out**, not failed — the pipeline makes
-partial progress rather than aborting.
-
-### Result
-
-```python
-@dataclass
-class ConsolidationResult:
-    approved: list[dict]         # Ready for PERSIST
-    conflicts: list[ConflictRecord]
-    coverage_gaps: list[str]     # Source paths not mapped
-    reused: list[dict]           # Existing names reused
-    skipped_vocab_gaps: list[dict]
-    stats: dict                  # Aggregate counts
-```
+**`MAGNITUDE_OF` edge:** when the pipeline composes a `magnitude_of_<X>` name
+from a real DD/signal source AND `<X>` is an admitted `kind='vector'` parent,
+`_emit_magnitude_of_edges` emits `(magnitude_sn)-[:MAGNITUDE_OF]->(vector_sn)`.
+**Passive** — never created speculatively. This is an algebraic-sibling
+relationship, not hierarchical like `HAS_PARENT`.
 
 ## Prompt Architecture
 
-### Static-First Ordering
+### Static-first ordering
 
-The LLM pipeline uses a **two-message pattern** optimized for prompt caching:
+Two-message pattern optimized for prompt caching:
 
-1. **System message** (static, ~6k tokens) — rendered from `sn/compose_system`
-   - Grammar rules, canonical segment order, exclusive pairs
-   - Full vocabulary reference per segment
-   - Curated examples, tokamak parameter ranges
-   - 9 composition rules, output format schema
-   - Cached by OpenRouter across calls (32% cache hit measured)
+1. **System message** (static, ~6k tokens) — grammar rules, canonical segment
+   order, full vocabulary, curated examples, tokamak ranges, composition rules,
+   output schema. Cached by OpenRouter across calls. Rendered from
+   `sn/compose_system.md`.
+2. **User message** (dynamic, per-batch) — unit policy, batch context (IDS,
+   cluster, siblings), existing names for reuse, per-path detail. Rendered from
+   `sn/compose_dd.md`.
 
-2. **User message** (dynamic, per-batch) — rendered from `sn/compose_dd`
-   - Unit policy and anti-patterns
-   - Batch context (IDS, cluster, siblings)
-   - Existing standard names for reuse
-   - Per-path detail: description, documentation, unit, type, coordinates
+In Jinja templates, `{% include %}` schema/rules blocks go *before* dynamic
+variables to maximize the cacheable prefix. `build_compose_context()` in
+`context.py` assembles the static context (module-level cache).
 
-**Prompt files:**
-- `imas_codex/llm/prompts/sn/compose_system.md` — static system context
-- `imas_codex/llm/prompts/sn/compose_dd.md` — dynamic user prompt template
+### Per-item DD context injection
 
-### Context Assembly
-
-`imas_codex/standard_names/context.py` builds the compose context:
-
-```python
-def build_compose_context() -> dict[str, Any]
-```
-
-Assembles grammar rules, vocabulary sections, segment descriptions, curated
-examples, and tokamak parameter ranges. Module-level cache avoids redundant
-computation across batches.
-
-### Per-Item DD Context Injection
-
-Beyond the static grammar context, each DD path item is enriched with four
-channels of Data Dictionary context during the extract phase:
+Each DD path item is enriched with four channels during EXTRACT:
 
 1. **Hybrid DD search neighbours** (`hybrid_neighbours`) — concept-similar DD
-   paths found via vector similarity + keyword search. The `hybrid_dd_search`
-   function in `imas_codex/graph/dd_search.py` runs description-based and
-   path-based queries in parallel, deduplicates results, and pre-resolves
-   existing standard names for each neighbour.
-
+   paths via vector + keyword search (`_hybrid_search_neighbours` in
+   `workers.py`, backed by `hybrid_dd_search` in `graph/dd_search.py`).
 2. **Related DD paths** (`related_neighbours`) — cross-IDS structural siblings
-   discovered via explicit graph relationships: cluster membership, shared
-   coordinates, matching units, identifier schemas, and COCOS transformation
-   type. Uses `find_related_dd_paths` from `dd_search.py`.
+   via explicit graph relationships (cluster membership, shared coordinates,
+   matching units, identifier schemas, COCOS transformation type), via
+   `find_related_dd_paths`.
+3. **Error companions** (`error_fields`) — uncertainty fields (`_error_upper`,
+   `_error_lower`, `_error_index`) for each path.
+4. **Identifier enum values** (`identifier_values`) — allowed enumeration
+   values (name, index, description) when a path references an identifier
+   schema.
 
-3. **Error companions** (`error_fields`) — uncertainty/error field paths
-   (`_error_upper`, `_error_lower`, `_error_index`) associated with each DD
-   path. Gives the composer awareness of the quantity's measurement context.
+**Compose retry with expanded context:** on grammar/validation failure the
+compose worker retries up to `retry_attempts` times (default 1), re-enriching
+with expanded hybrid search (`search_k=retry_k_expansion`, default 12).
+Configurable via `[tool.imas-codex.sn]` or `IMAS_CODEX_SN_RETRY_*` env vars.
 
-4. **Identifier enum values** (`identifier_values`) — when a DD path references
-   an identifier schema, the allowed enumeration values (name, index,
-   description) are injected so the composer can use them for disambiguation.
+**Scored-example injection:** compose and review prompts include dynamically
+selected exemplar StandardName nodes at target thresholds `(1.0, 0.8, 0.65,
+0.4)`, graph-backed and chosen at runtime by the example loader. Context keys:
+`compose_scored_examples`, `review_scored_examples`.
 
-**Compose retry loop:** On grammar/validation failure, the compose worker
-retries up to `retry_attempts` times (configurable via `[tool.imas-codex.sn]`),
-re-enriching items with expanded hybrid search (`search_k=retry_k_expansion`)
-before resubmission.
+### Shared prompt fragments
 
-**Scored-example injection:** Both compose and review prompts include
-dynamically selected exemplar StandardName nodes at target score thresholds
-`(1.0, 0.8, 0.65, 0.4)`. Examples are graph-backed and selected at runtime
-by the example loader. Context keys: `compose_scored_examples`,
-`review_scored_examples`.
+- `{% include "sn/_grammar_reference.md" %}` — grammar vocabulary + segment
+  order (used in `compose_system.md`).
+- `llm/prompts/shared/sn/_scoring_rubric.md` — shared scoring-rubric reference.
+- `llm/config/sn_review_criteria.yaml` — dimensions and tiers (via
+  `load_prompt_config()`).
+- ISN context keys (`quick_start`, `common_patterns`, `critical_distinctions`)
+  rendered in the compose prompt.
+- Axis review prompts `review_names.md` / `review_docs.md` share a
+  `{% if prior_reviews %}…{% endif %}` block rendered **only** for the cycle-2
+  escalator — cycles 0 and 1 never see it (blindness enforced).
 
-### Axis Reviewer Output
+**Response model:** `StandardNameComposeBatch` (`candidates`, `skipped`,
+`vocab_gaps`). `vocab_gaps` capture cases where the grammar lacks a needed
+token; see [Grammar vocabulary](#grammar-vocabulary).
 
-The review worker persists per-dimension data per axis. Each axis has five paired
-slots on `StandardName`:
+## Lifecycle
 
-| Axis | Scalar | Per-dim JSON | Comments | Verdict | Model |
-|------|--------|--------------|----------|---------|-------|
-| names | `reviewer_score_name` | `reviewer_scores_name` | `reviewer_comments_name` | `reviewer_verdict_name` | `reviewer_model_name` |
-| docs | `reviewer_score_docs` | `reviewer_scores_docs` | `reviewer_comments_docs` | `reviewer_verdict_docs` | `reviewer_model_docs` |
+### Four StandardName axes
 
-Scores are written by the winning Review group's `update_review_aggregates` call (after
-all quorum cycles complete).
+| Axis | States | Set by | Notes |
+|---|---|---|---|
+| `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | Pool workers | Cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`. `refining` reverts to `reviewed` after 600 s (orphan sweep). `chain_length` / `docs_chain_length` track refinement depth (root = 0). `superseded` = predecessor in a `REFINED_FROM` chain; source edges migrate to the latest. |
+| `pipeline_status` | `drafted → published → accepted` | `sn run` → `sn export` → `sn import` | Catalog round-trip state. |
+| `status` | `draft → published → deprecated` | Catalog import | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
+| `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn export`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings stay `valid`. |
 
-**Review node fields (RD-quorum, p39-4):**
-- `review_axis` — `names` or `docs`
-- `cycle_index` — 0 (primary), 1 (secondary), 2 (escalator)
-- `review_group_id` — UUID per quorum session (links cycles within a review run)
-- `resolution_role` — `primary`, `secondary`, or `escalator`
-- `resolution_method` — outcome enum (see table in Review Pipeline section)
+**`origin`:** `pipeline` (LLM-generated), `catalog_edit` (human-edited via
+catalog PR), or `derived` (structural parent from the admission gate).
+`filter_protected()` skips `PROTECTED_FIELDS` on `catalog_edit` names unless
+overridden via `sn run --override-edits <name>`. PR provenance:
+`catalog_pr_number`, `catalog_pr_url`, `catalog_commit_sha`; round-trip
+timestamps: `exported_at`, `imported_at`.
 
-### Response Model
+### StandardNameSource lifecycle
 
-```python
-class StandardNameComposeBatch(BaseModel):
-    candidates: list[StandardNameCandidate]
-    skipped: list[str]
-    vocab_gaps: list[StandardNameVocabGap]
+`StandardNameSource` nodes track individual DD-path / facility-signal
+extraction. Written by the extract worker, updated by the compose worker:
+
+```
+extracted → composed | attached | vocab_gap | failed | stale
 ```
 
-`vocab_gaps` captures cases where the grammar vocabulary lacks a needed token
-(e.g. a new particle species). These are logged and tracked for vocabulary
-extension.
+- **extracted** — queued for composition.
+- **composed** — LLM generated a new name for this source.
+- **attached** — auto-attached to an existing name (no LLM call).
+- **vocab_gap** — a grammar vocabulary gap prevented naming.
+- **failed** — composition failed (LLM error, validation rejection).
+- **stale** — backing DD path / signal no longer exists (set by reconcile).
 
-### Open vs Closed Segments
+**ID format:** `dd:{full_dd_path}` or `signals:{facility}:{signal_id}` — the
+`dd:` prefix is the canonical URI scheme (e.g.
+`dd:equilibrium/time_slice/profiles_1d/psi`).
 
-The ISN grammar distinguishes **closed-vocabulary** segments (fixed token
-lists — `transformation`, `subject`, `position`, `component`, `coordinate`,
-`object`, `geometry`, `process`, `device`, `geometric_base`, `region`) from
-**open-vocabulary** segments (free-form compounds — `physical_base`). The LLM
-composer may incidentally report a "missing token" against the open
-`physical_base` segment when it packs a compound (e.g.
-`electron_temperature`, `parallel_component_of_ion_momentum_diffusivity`)
-into that slot — but by design *any* snake_case compound is admissible there.
+**Reconciliation:** `sn run --only reconcile` marks sources whose backing path
+no longer exists as `stale`.
 
-Such reports are **not real vocabulary gaps**: they would pollute the
-`VocabGap` node population and drown out genuine closed-segment gaps during
-release filtering.  The single source of truth for segment openness lives in
-`imas_codex/standard_names/segments.py`:
+### Validation gating
 
-- `open_segments()` — derived from `imas_standard_names.grammar.constants.SEGMENT_TOKEN_MAP` (any segment with an empty token list).
-- `PSEUDO_SEGMENTS` — `{"grammar_ambiguity"}`, a composer-reported structural finding that is not a real segment.
-- `is_open_segment(seg)` — unified predicate used by `write_vocab_gaps()` and `_update_sources_after_vocab_gap()` to drop non-gaps before persistence.
+`validation_status` is independent of review and gates names before review,
+consolidation, or export:
 
-`sn gaps` hides open/pseudo segments by default; pass
-`--include-open-segments` for diagnostics.
+| Status | Set by | Meaning |
+|--------|--------|---------|
+| `pending` | PERSIST phase | Default; awaiting validation |
+| `valid` | VALIDATE phase | Passed critical checks; eligible downstream |
+| `quarantined` | VALIDATE phase | Failed a critical check; excluded |
+
+**Critical (→ quarantine):** grammar round-trip failure, Pydantic construction
+error, detected ambiguity. **Non-critical (→ valid):** semantic warnings,
+description-quality hints — recorded in `validation_issues`, surfaced to the
+reviewer, but never quarantine.
 
 ## Graph Persistence
 
-**Module:** `imas_codex/standard_names/graph_ops.py`
+**Module:** `imas_codex/standard_names/graph_ops.py`.
 
-### Conflict-Detecting Writes
+### Write semantics
 
-Before writing to Neo4j, `write_standard_names()` checks for unit conflicts:
+- **`write_standard_names()` (build path):** `coalesce(b.field, sn.field)` for
+  all fields — passing `None` preserves existing data. Persists
+  `validation_issues` and `validation_layer_summary`. Safe for re-runs:
+  imported catalog data is never clobbered by a subsequent `sn run`.
+- **`_write_catalog_entries()` (import path):** catalog fields SET directly
+  (catalog is authoritative). Graph-only fields (embedding, model,
+  generated_at) preserved via coalesce.
+- **Review write path:** each RD-quorum cycle persists its `Review` nodes
+  immediately; `update_review_aggregates` then mirrors final axis scores onto
+  the SN slots.
+- **Conflict-detecting writes:** before writing, the build path checks for unit
+  conflicts and filters out (does not overwrite) any entry whose unit differs
+  from an existing node's.
 
-```python
-# If existing node has different unit → skip, don't overwrite
-if existing sn.unit != incoming unit:
-    logger.warning("Unit conflict for %s: existing=%s incoming=%s",
-                   name, existing_unit, incoming_unit)
-    # Filter out conflicting entry
-```
+Both paths call shared `_write_standard_name_edges(gc, names)` as a tail pass
+after node MERGE; forward-reference targets are MERGEd as bare placeholder
+nodes.
 
-### Coalesce Semantics
+### Structural edges
 
-Node creation uses `coalesce()` — new values fill in blanks but never
-overwrite existing data:
+| Edge | From → To | Source / Derivation |
+|------|-----------|---------------------|
+| `HAS_ARGUMENT` | derived SN → parent SN | ISN parser: outermost unary prefix/postfix or projection layer; props `{operator, operator_kind, [role, separator, axis, shape]}` |
+| `HAS_PARENT` | child SN → parent SN | ISN grammar peel; direction matches `(IMASNode)-[:HAS_PARENT]->(IMASNode)`; props `{operator, operator_kind, …}`. Emitted only when the parent passes the admission gate (`_filter_admissible_parents`). |
+| `MAGNITUDE_OF` | magnitude SN → vector SN | Passive; only when a sourced SN composes to `magnitude_of_<X>` and `<X>` is an admitted vector parent. |
+| `HAS_ERROR` | inner SN → uncertainty sibling | ISN parser: `upper_/lower_/uncertainty_index` prefix; direction inverted; `{error_type}` |
+| `HAS_PREDECESSOR` / `HAS_SUCCESSOR` | SN → SN | `predecessor`/`successor` (pipeline) or `deprecates`/`superseded_by` (catalog) |
+| `IN_CLUSTER` | SN → `IMASSemanticCluster` | `primary_cluster_id` |
+| `HAS_PHYSICS_DOMAIN` | SN → `PhysicsDomain` | `physics_domain` slug → seeded singleton |
+| `HAS_UNIT` | SN → `Unit` | `unit` (both paths) |
+| `HAS_COCOS` | SN → `COCOS` | `cocos` integer (pipeline path) |
+| `REFINED_FROM` | new SN → predecessor SN | `persist_refined_name`; source edges (`PRODUCED_NAME`, `HAS_STANDARD_NAME`) migrate to the new SN in the same transaction |
+| `DOCS_REVISION_OF` | SN → `DocsRevision` | `persist_refined_docs`; snapshots prior docs+reviewer state before in-place rewrite |
 
-```cypher
-MERGE (sn:StandardName {id: b.id})
-SET sn.source_type    = coalesce(b.source_type, sn.source_type),
-    sn.physical_base  = coalesce(b.physical_base, sn.physical_base),
-    sn.unit = coalesce(b.unit, sn.unit),
-    sn.created_at     = coalesce(sn.created_at, datetime())
-```
+`HAS_ARGUMENT` / `HAS_ERROR` derivation lives in
+`imas_codex/standard_names/derivation.py` (`derive_edges(name)`, pure logic).
+Each name is peeled one layer only; the inner name runs its own derivation when
+written. Unparseable names silently produce no derived edges.
 
-This is safe for re-runs: imported catalog data is never clobbered by a
-subsequent `sn generate` execution.
-
-### Axis-Split Review Storage (rc22 C3 + p39-2)
-
-Name-axis and docs-axis reviews persist to independent column families to
-prevent a docs-only review from clobbering a prior name-only review's
-per-dimension JSON (and vice-versa). The shared scalar+JSON slots that existed
-prior to p39-2 (`reviewer_score`, `reviewer_scores`, `reviewer_comments`,
-`reviewer_comments_per_dim`, `reviewer_verdict`, `reviewer_model`, `reviewed_at`,
-`review_mode`) have been **removed from the schema**. Only axis-specific columns remain:
-
-```cypher
-// --target names (name-axis review)
-SET sn.reviewer_score_name = b.reviewer_score_name,
-    sn.reviewer_scores_name = coalesce(b.reviewer_scores_name, sn.reviewer_scores_name),
-    sn.reviewer_comments_name = coalesce(b.reviewer_comments_name, sn.reviewer_comments_name),
-    sn.reviewer_verdict_name = b.reviewer_verdict_name,
-    sn.reviewer_model_name = b.reviewer_model_name
-
-// --target docs (docs-axis review) — same pattern with _docs suffix
-```
-
-**Reader fallback.** Queries use `coalesce(sn.reviewer_score_name, sn.reviewer_score)`
-so pre-p39-2 nodes with old shared slots still surface correctly on the name axis until
-backfilled.
-
-**Downgrade guard.**
-`imas_codex.standard_names.review.pipeline._axis_overwrite_blocked(name, incoming)`
-rejects axis writes when same-axis data is already present. `--force` bypasses the guard.
-
-### Provenance Fields
-
-Each StandardName node carries a full audit trail:
-
-| Field | Source | Purpose |
-|-------|--------|---------|
-| `model` | Compose worker | LLM model used for generation |
-| `confidence` | LLM output | 0–1 confidence score |
-| `generated_at` | Compose worker | Timestamp of LLM generation |
-| `reviewer_score_name` | Review worker | 0–1 name-axis quality score |
-| `reviewer_scores_name` | Review worker | JSON: grammar, semantic, convention, completeness (each 0–20) |
-| `reviewer_comments_name` | Review worker | Name-axis reasoning text |
-| `reviewer_verdict_name` | Review worker | accept/reject/revise — name-axis verdict |
-| `reviewer_model_name` | Review worker | Winning-cycle model (name axis) |
-| `reviewed_name_at` | Review worker | Timestamp of most recent name-axis review |
-| `reviewer_score_docs` | Review worker | 0–1 docs-axis quality score |
-| `reviewer_scores_docs` | Review worker | JSON: description_quality, documentation_quality, completeness, physics_accuracy (each 0–20) |
-| `reviewer_comments_docs` | Review worker | Docs-axis reasoning text |
-| `reviewer_verdict_docs` | Review worker | accept/reject/revise — docs-axis verdict |
-| `reviewer_model_docs` | Review worker | Winning-cycle model (docs axis) |
-| `reviewed_docs_at` | Review worker | Timestamp of most recent docs-axis review |
-| `review_tier` | Review worker | outstanding/good/inadequate/poor (from `reviewer_score_name`) |
-| `review_count` | Review worker | Number of Review nodes attached via REVIEWS |
-| `review_mean_score` | Review worker | Arithmetic mean of Review.score across all cycles |
-| `review_disagreement` | Review worker | True iff quorum cycles disagreed beyond threshold |
-| `vocab_gap_detail` | Compose worker | JSON: segment, token, reason |
-| `catalog_commit_sha` | Import | Git SHA of catalog source |
-
-### Relationships
+### Source-tracking relationships
 
 ```
 (IMASNode)-[:HAS_STANDARD_NAME]->(StandardName)
 (FacilitySignal)-[:HAS_STANDARD_NAME]->(StandardName)
-(StandardName)-[:HAS_UNIT]->(Unit)
-(StandardName)-[:HAS_PARENT]->(StandardName)
-(StandardName)-[:MAGNITUDE_OF]->(StandardName)
+(StandardNameSource)-[:FROM_DD_PATH]->(IMASNode)
+(StandardNameSource)-[:FROM_SIGNAL]->(FacilitySignal)
+(StandardNameSource)-[:PRODUCED_NAME]->(StandardName)
 ```
 
-## Structural Parents
+### Cost & budget
 
-The `_write_standard_name_edges` function in `graph_ops.py` creates parent
-`StandardName` placeholder nodes when the ISN grammar peel produces a parent
-reference. These parents enter with `origin='derived'`, `name_stage='pending'`
-and must pass a **two-clause admission gate** before the placeholder is
-written to the graph (implementation: `imas_codex/standard_names/parents.py`).
+Cost is graph-backed via `LLMCost` nodes written async by `BudgetManager`.
+`SNRun.status`: `started → completed | interrupted | failed | degraded`. The
+only charge API is `lease.charge_event(cost, event)` (soft, never raises).
+Start the manager with `await shared_mgr.start()`; finalize each run with
+`drain_pending()` + `get_total_spent()` in a `finally` block. (LLMCost node
+properties and canonical cost queries are documented in `AGENTS.md` →
+Graph Operations.)
 
-### Admission gate
+## PR-Driven Round-Trip
 
-A derived parent is admitted if and only if at least one clause holds:
-
-- **Clause A — IR specificity**: `parse_standard_name(name).ir` has at
-  least one non-empty qualifier, operator, projection, locus, or mechanism.
-  This is what differentiates `elongation_of_plasma_boundary` (admitted) from
-  the bare base `pressure` (rejected).
-- **Clause B — vector-like topology**: the candidate already has ≥2 inbound
-  `HAS_PARENT` edges with `operator_kind='projection'` and distinct `axis`
-  values. This admits bare-base vectors like `magnetic_field` and
-  `electric_field` on topological grounds even though their name string has
-  no qualifying anchors.
-
-Names failing both clauses are never created. Their children remain parentless
-in the graph and group via shared `physical_base` / `qualifier` grammar
-properties using Cypher — no placeholder node is needed.
-
-### Why bare-base scalars are excluded
-
-Category labels like `pressure`, `density`, and `temperature` are **not**
-first-class catalog entries — they are the `physical_base` grammar segment
-itself. Creating parent nodes for them would mean the catalog contains entries
-with trivially generic names that carry no scientific identity beyond the
-category. The gate's Clause A rejects exactly these cases.
-
-### `MAGNITUDE_OF` edge
-
-When the pipeline composes a name of the form `magnitude_of_<X>` from an
-actual DD or signal source, and `<X>` is already an admitted `kind='vector'`
-parent, the write path emits `(magnitude_sn)-[:MAGNITUDE_OF]->(vector_sn)`.
-This is **passive** — no magnitude SN is created speculatively. If the
-magnitude SN exists but its vector parent is not yet admitted, the magnitude
-is a normal scalar with no special link. Implementation helper:
-`_emit_magnitude_of_edges` in `graph_ops.py`.
-
-## Standard Name Lifecycle
+The graph is authoritative for pipeline state; the catalog (ISNC) is
+authoritative for human-reviewed editorial fields.
 
 ```
-drafted → published → accepted
-                    ↘ rejected
+sn export → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn import
 ```
 
-| Status | Set by | Meaning |
-|--------|--------|---------|
-| `drafted` | `sn generate` | Generated by LLM pipeline |
-| `published` | `sn publish` | Exported to YAML catalog for human review |
-| `accepted` | `sn import` | Imported from reviewed catalog (authoritative) |
-| `rejected` | `sn import` | Reviewed and rejected in catalog |
+1. **`sn export`** — reads validated SN nodes, applies quality gates
+   (`reviewer_score_name ≥ 0.65` + description sub-score), writes YAML to
+   `<staging>/standard_names/<domain>/<name>.yml` (default staging
+   `~/.cache/imas-codex/staging`).
+2. **`sn preview`** — auto-exports and launches a local MkDocs dev server via
+   ISN's CatalogRenderer. `--no-export` serves an existing staging dir. Tunnel:
+   `ssh -L 8000:localhost:8000 <host>`.
+3. **`sn release -m "msg"`** — auto-exports, copies staging YAML into the ISNC
+   checkout, commits, tags the next semver, pushes. RC → origin (fork); final
+   (`--final`) → upstream. The tag push triggers ISNC CI → GitHub Pages. For
+   custom filtering, run `sn export` first, then `--skip-export`.
+4. **PR review on GitHub** — edits description, documentation, tags, kind,
+   links, status, etc. Merged to ISNC main.
+5. **`sn import`** — reads ISNC YAML (auto-discovered from `isnc-dir`, or
+   `--isnc`), diffs against the graph, and flips `origin=catalog_edit` on any
+   name whose `PROTECTED_FIELDS` were edited.
 
-Additional transient statuses: `reviewed`, `validation_failed`, `vocab_gap`,
-`skipped` — used internally during pipeline execution.
+**Protection model:** `PROTECTED_FIELDS` = {description, documentation, kind,
+tags, links, status, deprecates, superseded_by, validity_domain, constraints}.
+Pipeline writers call `filter_protected()` before graph writes — `catalog_edit`
+names have these stripped from pipeline updates unless `override=True` or the
+name is in `override_names` (`sn run --override-edits <name>`, repeatable).
 
-**Safety model:** `sn generate --reset-to` and `sn clear` require `--include-accepted` to
-touch accepted names. Accepted names are catalog-authoritative and rarely need
-graph modification.
+**Idempotent re-run:** `ImportWatermark` (singleton) records the last imported
+`catalog_commit_sha`; `ImportLock` (singleton) prevents concurrent imports.
 
-## Validation Gating
+## Reset & Clear Semantics
 
-A separate `validation_status` field (independent of `review_status`) gates
-names before they reach review, consolidation, or publish:
+- **`sn run --reset-to {drafted|extracted}`** — re-process existing nodes
+  (`drafted`) or clear matching SN nodes for a full re-run (`extracted`). Clears
+  transient fields (embedding, model, generated_at) and removes
+  `HAS_STANDARD_NAME` / `HAS_UNIT` edges. Scoped to `--source`; narrow with
+  `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`.
+- **`sn run --reset-only`** — perform the cleanup then exit (requires
+  `--reset-to`).
+- **`sn run --from-model <substring>`** — re-generate names produced by a
+  specific model.
+- **`sn clear`** — full-subsystem wipe (SN + Review + StandardNameSource +
+  VocabGap + SNRun + grammar tree) with auto re-seed from ISN. No scoping.
+- **`sn prune`** — relationship-first safe delete. Requires `--status` or
+  `--all`; `--include-sources` also drops StandardNameSource nodes.
+- **`sn sync-grammar`** — idempotent grammar re-sync; auto-run by `sn clear`,
+  manual after ISN version bumps.
 
-```
-pending → valid | quarantined
-```
+**Chain history is permanent.** `--reset-to` leaves `REFINED_FROM` chains and
+`DocsRevision` snapshots in place. **Safety guard:** `--reset-to` and
+`sn prune` require `--include-accepted` to touch `pipeline_status=accepted`
+names (catalog-authoritative). `sn clear` has no such guard.
 
-| Status | Set by | Meaning |
-|--------|--------|---------|
-| `pending` | `sn generate` (PERSIST phase) | Default; awaiting validation |
-| `valid` | VALIDATE phase | Passed all critical checks; eligible for downstream stages |
-| `quarantined` | VALIDATE phase | Failed a critical check; excluded from review/consolidation/publish |
+## CLI Commands
 
-**Critical failures (→ quarantine):**
-- Grammar round-trip failure (`parse_standard_name()` rejects the name)
-- Pydantic construction error (`create_standard_name_entry()` raises)
-- Detected ambiguity (name maps to multiple distinct physical quantities)
+| Command | Purpose | Key options |
+|---------|---------|-------------|
+| `sn run` | Run the six-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted` |
+| `sn review` | Score existing valid names via RD-quorum | `--ids`, `--physics-domain`, `--status`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
+| `sn export` | Export validated SN nodes to YAML staging (quality-gated) | `--staging`, `--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits` |
+| `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
+| `sn release` | Release to ISNC catalog (RC→origin, final→upstream) | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run` |
+| `sn import` | Import reviewed YAML back into the graph | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
+| `sn status` | StandardName + StandardNameSource statistics | — |
+| `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
+| `sn gaps` | Grammar vocabulary gaps from composition | `--segment`, `--export {table,yaml}` |
+| `sn clear` | Full-subsystem wipe + auto re-seed | `--dry-run`, `--force`, `--no-reseed` |
+| `sn prune` | Scoped delete (relationship-first) | `--status`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
+| `sn sync-grammar` | Seed/refresh ISN grammar vocabulary | `--dry-run` |
+| `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
 
-**Non-critical issues (→ valid):** semantic warnings, description quality hints —
-recorded in `validation_issues` and surfaced to the reviewer, but do not quarantine.
+## Benchmark
 
-Only `valid` names participate in `sn review`, consolidation, and `sn publish`.
+`sn bench` uses the same prompt pipeline as `sn run` (system/user split via
+`build_compose_context()`). Model lists default from
+`[tool.imas-codex.sn-benchmark]`. The output table includes a **Cache %**
+column (provider-side via OpenRouter). Scoring is 6-dimensional (see
+[Scoring](#scoring)).
 
-## File Map
+**Qualified compose models** (equilibrium + core_profiles + magnetics):
+
+| Role | Model | Avg quality | Notes |
+|------|-------|-------------|-------|
+| Recommended | `openai/gpt-5.5` | 78.2 | Best overall, strong grammar + docs |
+| Alt | `anthropic/claude-sonnet-4.6` | 76.5 | 32% Outstanding, best grammar + docs |
+| Budget | `google/gemini-3.1-pro-preview` | 74.6 | Near-top, good consistency |
+| Light | `anthropic/claude-haiku-4.5` | 61.2 | Adequate for bulk generation |
+
+**Reviewer models** (7-model benchmark, GPT-5.5 compose, 4 items, 2026-05-15):
+
+| Role | Model | Names | Docs | Cost/run | Notes |
+|------|-------|-------|------|----------|-------|
+| Cycle 0 primary | `deepseek/deepseek-v4-flash` | 0.756 | 0.992 | $0.002 | Cheapest; negative rank-corr (−0.5) maximises escalator |
+| Cycle 1 secondary | `openai/gpt-5.4` | 0.672 | 0.881 | $0.033 | Fastest (31s), cross-vendor |
+| Cycle 2 escalator | `google/gemini-3.1-pro-preview` | 0.884 | 1.000 | $0.469 | Highest quality, authoritative |
+| Eliminated | `anthropic/claude-sonnet-4.6` | 0.581 | 0.875 | $0.079 | Lowest commercial names score |
+| Eliminated | `deepseek/deepseek-v4-pro` | 0.519 | 0.931 | $0.040 | Lowest names, very slow (259s) |
+| Eliminated | `moonshot/kimi-k2.6` | 0.694 | 0.966 | $0.066 | No advantage |
+| Failed | `alibaba/qwen3.6-plus` | 0.703 | 0.000 | — | 100% docs structured-output failure |
+
+Projected cost at 10K sources: $659 (vs prior Sonnet→GPT→Opus $2,578, **−83%**).
+
+**GPT-5.x compatibility:** requires `strict: false` JSON-schema wrapping
+(handled in `llm.py`) and cannot use `temperature=0.0` (handled in benchmark).
+
+## MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `search_standard_names` | Semantic + keyword search; filters: `kind`, `physics_domain`, `pipeline_status`, `cocos_type`, `k`, and exact per-segment grammar filters (`physical_base`, `subject`, `component`, `coordinate`, `position`, `process`, `region`, `geometric_base`, `device`) |
+| `fetch_standard_names` | Fetch full entries by name ID (space/comma separated) |
+| `list_standard_names` | List with `physics_domain` / `kind` / `pipeline_status` / `cocos_type` filters |
+| `list_grammar_vocabulary` | Distinct tokens + usage counts for a grammar segment |
+
+Grammar-segment filters match exactly against the parsed `sn.<segment>`
+property — use `list_grammar_vocabulary` to discover valid tokens first. The
+`physics_domain` filter (canonical scalar + `source_domains` list) is pushed
+into Cypher in all three search branches, so it does not lose results below
+`LIMIT $k`.
+
+## Module / File Map
 
 | File | Purpose |
 |------|---------|
-| `imas_codex/standard_names/pipeline.py` | Six-phase orchestrator (DAG wiring) |
-| `imas_codex/standard_names/workers.py` | Async worker functions for each phase |
-| `imas_codex/standard_names/classifier.py` | 11-rule path classifier (quantity/metadata/skip) |
-| `imas_codex/standard_names/enrichment.py` | Primary cluster selection + global grouping |
-| `imas_codex/standard_names/consolidation.py` | Cross-batch dedup, conflict detection, coverage |
-| `imas_codex/standard_names/graph_ops.py` | Neo4j read/write helpers with conflict detection |
-| `imas_codex/standard_names/models.py` | Pydantic response models (`StandardNameComposeBatch`, `StandardNameReviewBatch`) |
-| `imas_codex/standard_names/context.py` | Grammar context builder (vocabulary, examples, ranges) |
-| `imas_codex/standard_names/state.py` | `StandardNameBuildState` dataclass (shared pipeline state) |
-| `imas_codex/standard_names/sources/` | Extraction source plugins (DD and signals) |
-| `imas_codex/standard_names/publish.py` | Export to YAML catalog |
-| `imas_codex/standard_names/catalog_import.py` | Import reviewed catalog entries |
-| `imas_codex/standard_names/benchmark.py` | LLM model quality benchmarking |
-| `imas_codex/llm/prompts/sn/compose_system.md` | Static system prompt |
-| `imas_codex/llm/prompts/sn/compose_dd.md` | Dynamic user prompt template |
-| `imas_codex/llm/prompts/sn/review_names.md` | Names-axis review prompt (4-dim: grammar/semantic/convention/completeness) |
-| `imas_codex/llm/prompts/sn/review_docs.md` | Docs-axis review prompt (4-dim: description_quality/documentation_quality/completeness/physics_accuracy) |
-| `imas_codex/llm/prompts/shared/sn/_grammar_reference.md` | Shared grammar fragment (included by compose_system.md) |
-| `imas_codex/llm/prompts/shared/sn/_scoring_rubric.md` | Shared scoring rubric reference |
-| `imas_codex/llm/config/sn_review_criteria.yaml` | Review scoring config (dimensions, tiers, verdict rules) |
-| `imas_codex/standard_names/search.py` | Vector search for similar existing StandardName nodes |
-| `imas_codex/schemas/standard_name.yaml` | LinkML schema (v0.5.0) |
-| `imas_codex/graph/dd_search.py` | Pure functions: `hybrid_dd_search`, `find_related_dd_paths` |
-| `imas_codex/standard_names/example_loader.py` | Graph-backed scored example selection for prompts |
+| `pools.py` | Pool specs: `POOL_WEIGHTS`, `POOL_NAMES`, `_build_pool_specs`, backlog throttle |
+| `loop.py` | Six-pool loop orchestrator (`run_sn_pools()`) |
+| `workers.py` | Claim/process/persist for all six pools |
+| `pool_adapter.py` | Routes `--focus` through pool compose; explicit-path seeding |
+| `enrichment.py` | Primary/grouping cluster selection; global (cluster × unit) grouping |
+| `consolidation.py` | Cross-batch dedup, conflict checks, coverage accounting |
+| `graph_ops.py` | Neo4j read/write with unit-conflict detection; `persist_refined_name`, `persist_refined_docs`; `_write_standard_name_edges` |
+| `parents.py` | Derived-parent admission gate (`is_admissible_parent_name`, `recompute_parent_kind`) |
+| `derivation.py` | `HAS_ARGUMENT`/`HAS_ERROR` edge derivation (`derive_edges`) |
+| `defaults.py` | Constants: `DEFAULT_MIN_SCORE=0.80`, `DEFAULT_ORPHAN_SWEEP_TIMEOUT_S=600`, `DEFAULT_REFINE_ROTATIONS`, `DEFAULT_ESCALATION_MODEL` |
+| `models.py` | Pydantic response models (`StandardNameComposeBatch`, `StandardNameAttachment`) |
+| `source_paths.py` | Encode/parse/split/merge for SN source paths |
+| `context.py` | Grammar context builder (single ISN import boundary) |
+| `search.py` | Vector search for similar existing SN nodes (collision avoidance) |
+| `orphan_sweep.py` | Reverts stale `refining` claims after timeout |
+| `example_loader.py` | Graph-backed scored-example selection for prompts |
+| `review/pipeline.py` | RD-quorum review; `_axis_overwrite_blocked` guard |
+| `fanout/` | Bounded Proposer → Executor → Synthesizer fan-out for refine_name |
+| `benchmark.py` | LLM model quality benchmarking |
+| `imas_codex/core/node_categories.py` | `SN_SOURCE_CATEGORIES` pre-filter |
+| `imas_codex/graph/dd_search.py` | `hybrid_dd_search`, `find_related_dd_paths` |
+| `imas_codex/llm/prompts/sn/*` | Compose + review prompts |
+| `imas_codex/llm/config/sn_review_criteria.yaml` | Review scoring config |
+| `imas_codex/schemas/standard_name.yaml` | LinkML schema |
 
-## Migration from Pre-p39-2 Graphs
+## Architecture Boundary
 
-p39-2 removed the shared reviewer slots (`reviewer_score`, `reviewer_scores`,
-`reviewer_comments`, `reviewer_comments_per_dim`, `reviewer_verdict`, `reviewer_model`,
-`reviewed_at`, `review_mode`) from the `StandardName` schema. These fields are no longer
-written but **will not cause runtime errors** if present on existing nodes — they become
-stale orphan properties until the node is re-reviewed.
+ISN owns grammar, vocabulary, and validation; codex owns the pipeline,
+evaluation, and graph persistence. Full detail in [`boundary.md`](boundary.md).
 
-Reader queries use `coalesce(sn.reviewer_score_name, sn.reviewer_score)` for backward
-compatibility so pre-migration nodes surface correctly on the name axis.
+**Import boundary** (ISN ≥0.8.0rc7) — the only public surface codex imports:
+`get_grammar_context()` (single entry point, 19 keys),
+`create_standard_name_entry()` (Pydantic), `run_semantic_checks()`,
+`validate_description()`, `parse_standard_name()` / `compose_standard_name()`
+(round-trip). Never import ISN private modules. Never hardcode grammar rules —
+pull from `get_grammar_context()`. Review criteria live in codex
+(`sn_review_criteria.yaml`).
 
-**Backfill procedure:** Run `sn review --force` to re-review all valid names and populate
-the axis-specific columns.
+## Grammar Vocabulary
 
-The `review_mode` enum has two values: `names` and `docs`. The removed `full` variant
-no longer exists — use `--target names` + `--target docs` in sequence for full coverage.
+Closed-vocabulary system: **physical bases** (~78, irreducible dimensional
+quantities, CI-gated), **qualifiers** (~92, prefix modifiers stripped
+recursively by the parser), **processes** (~90, suffix-only via
+`_due_to_{token}`). All segments — including `physical_base` (~100 tokens) —
+have closed vocabularies defined in ISN's `SEGMENT_TOKEN_MAP`.
 
-The tier rename (`adequate` → `inadequate`) applies to new reviews; stale
-`review_tier = 'adequate'` values persist harmlessly until re-reviewed.
+**Composition order:** `{subject}_{qualifier1}_{qualifier2}_{physical_base}_{due_to_process}`.
+
+**Rules:** (1) Never add compounds to `physical_bases` — use qualifiers.
+(2) Qualifier order is insertion-order, preserved through round-trip.
+(3) Subjects win over qualifiers (parser stage 3 before stage 5). (4) Process
+tokens as prefixes are qualifiers, not processes. Never hardcode vocabulary
+tokens in Python — pull from ISN.
+
+**VocabGap nodes** record missing grammar tokens from composition (linked via
+`HAS_SN_VOCAB_GAP` from `IMASNode`/`FacilitySignal`; carry segment, token,
+reason). Pseudo segments like `grammar_ambiguity` are filtered at write time
+(`imas_codex.standard_names.segments.filter_closed_segment_gaps`); reviewers
+audit the `physical_base` slot via the decomposition rule
+(`sn_review_criteria.yaml` I4.6). Use `sn gaps` for a table view or
+`sn gaps --export yaml` to produce ISN vocabulary issues.
+
+### Vocabulary rotation — ISN fork RC workflow
+
+When rotations surface `VocabGap` nodes blocked by the current ISN vocabulary,
+add tokens on the fork (`~/Code/imas-standard-names` →
+`Simon-McIntosh/IMAS-Standard-Names`) and cut an RC release. Upstream is
+`iterorganization/IMAS-Standard-Names`; the dep in imas-codex pins to a git tag
+on the fork, so RC tags on origin suffice.
+
+**Vocab-addition rules** (apply *before* editing YAML):
+
+- Every legitimate physics quantity deserves a token regardless of frequency.
+  Classify each gap first: TRUE_GAP (add), COMPOSE_ERROR (fix the prompt
+  instead), REJECT (not a valid grammar concept).
+- Single-word base preferred; physical-quantity semantics only; no overlap with
+  existing tokens; not a unit or geometry primitive.
+- **No compound tokens that subsume `physical_base` words** —
+  `trapped_particle` as a subject greedily consumes "particle" and breaks
+  grouping with `particle_density`. Use `trapped` alone.
+- **Prefer atomic qualifiers.** Orbit class (`trapped`, `co_passing`) and
+  species (`fast_particle`, `electron`) are independent axes — never combine.
+- **Grouping invariant:** all orbit/species variants of the same physical
+  quantity MUST parse to the same `physical_base`.
+- **Round-trip every existing name** containing the candidate string:
+  `assert compose_standard_name(parse_standard_name(name)) == name`.
+
+**Release procedure:**
+
+```bash
+cd ~/Code/imas-standard-names
+uv run pytest && git push origin main           # edit vocab YAML, test, commit
+uv run standard-names release status            # inspect state-machine state
+uv run standard-names release -m "feat: ..."    # increment RC (NEVER tag manually)
+# --bump minor/major starts a new series; --final finalizes to upstream.
+
+cd ~/Code/imas-codex                            # bump the dep (appears twice)
+sed -i 's|@v0\.8\.0rc[0-9]\+|@v0.8.0rc<NN>|g' pyproject.toml
+uv sync && uv run pytest tests/standard_names/ -x -q
+git commit -am "deps: bump imas-standard-names to v0.8.0rc<NN>" && git push origin main
+```
+
+Multi-RC chains are normal during bootstrap. Re-rotate vocab-bound domains
+after each bump to measure lift.
