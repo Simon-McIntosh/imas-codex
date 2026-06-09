@@ -6,10 +6,10 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-extraction-prompt-overhaul">
-  <meta name="plan-title" content="Extraction Classifier Audit & Prompt Overhaul">
+  <meta name="plan-title" content="Extraction Classifier Audit &amp; Prompt Overhaul">
   <meta name="plan-summary" content="Records the node-category audit, prompt A/B/C bake-off, winner implementation, and DD-completion endpoint outcome from plan 32.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="1.00">
+  <meta name="plan-status" content="done">
+  <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -20,6 +20,8 @@
   <title>Extraction Classifier Audit &amp; Prompt Overhaul | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-06-09">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -44,37 +46,56 @@
     <p>The plan keeps the empirical results visible: Phase 1 cost roughly $0.18, Phase 2 cost roughly $0.24, mean reviewer scores A = 0.805, B = 0.755, C = 0.815, and pass@1 of 0.75 / 0.65 / 0.75 respectively. The winner decision is therefore preserved as a measured outcome, not a preference.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="source-categories" data-choice="retain-quantity-geometry" data-by="plan-32" data-when="2026-07-15">
-        <p class="r-dec-q">Which DD node categories remain SN-eligible after the audit?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="retain-quantity-geometry">Keep <code>{quantity, geometry}</code></button>
-          <button class="r-opt" data-value="expand-eligibility">Broaden eligibility</button>
-        </p>
-        <p class="r-dec-rat">Phase 1 stayed below the widening threshold, so the existing eligibility set was retained.</p>
-      </div>
-      <div class="r-dec" data-key="default-prompt-variant" data-choice="variant-a" data-by="plan-32" data-when="2026-07-15">
-        <p class="r-dec-q">Which compose-prompt architecture remains the default?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="variant-a">Variant A — rich static prompt</button>
-          <button class="r-opt" data-value="variant-b">Variant B — lean static prompt</button>
-          <button class="r-opt" data-value="variant-c">Variant C — tool-calling hybrid</button>
-        </p>
-        <p class="r-dec-rat">Phase 3 locked the status quo because B and C did not clear the plan’s cost gate under the harness baseline.</p>
-      </div>
-      <div class="r-dec" data-key="completion-loop-surface" data-choice="rotator-default" data-by="plan-32" data-when="2026-07-15">
-        <p class="r-dec-q">How should the DD-completion loop surface in the CLI?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="rotator-default">Make the rotating completion loop the default <code>sn generate</code> behaviour</button>
-          <button class="r-opt" data-value="flag-only">Keep it behind an opt-in flag</button>
-        </p>
-        <p class="r-dec-rat">The shipped outcome removes the temporary flag and keeps single-pass generation only as the explicit opt-out path.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="source-categories" data-choice="retain-quantity-geometry" data-by="plan-32" data-when="2026-07-15">
+    <p class="r-dec-q">Which DD node categories remain SN-eligible after the audit?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="retain-quantity-geometry">Keep {quantity, geometry}</button>
+      <button class="r-opt" data-value="expand-eligibility">Broaden eligibility</button>
+      </p>
+    <p class="r-dec-rat">Phase 1 stayed below the widening threshold, so the existing eligibility set was retained.</p>
+    </div>
+<div class="r-dec" data-key="default-prompt-variant" data-choice="variant-a" data-by="plan-32" data-when="2026-07-15">
+    <p class="r-dec-q">Which compose-prompt architecture remains the default?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="variant-a">Variant A — rich static prompt</button>
+      <button class="r-opt" data-value="variant-b">Variant B — lean static prompt</button>
+      <button class="r-opt" data-value="variant-c">Variant C — tool-calling hybrid</button>
+      </p>
+    <p class="r-dec-rat">Phase 3 locked the status quo because B and C did not clear the plan’s cost gate under the harness baseline.</p>
+    </div>
+<div class="r-dec" data-key="completion-loop-surface" data-choice="rotator-default" data-by="plan-32" data-when="2026-07-15">
+    <p class="r-dec-q">How should the DD-completion loop surface in the CLI?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="rotator-default">Make the rotating completion loop the default sn generate behaviour</button>
+      <button class="r-opt" data-value="flag-only">Keep it behind an opt-in flag</button>
+      </p>
+    <p class="r-dec-rat">The shipped outcome removes the temporary flag and keeps single-pass generation only as the explicit opt-out path.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-20260609-quantity-mislabel" data-status="open" data-tier="sonnet" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-ship sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Clean up quantity-class false positives surfaced by the node-category audit</h4>
+    <div class="r-fu-body"><p>The node-category audit surfaced a tail of false positives inside the <code>quantity</code> class (paths classified as quantity that are not SN-eligible measurands). Left as a deferred cleanup ticket at plan close.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-extraction-prompt-overhaul
+
+Task: Re-run the node-category false-negative/false-positive audit (research/standard-names/node-category-audit) against the current DD graph and identify quantity-class nodes that should be reclassified out of SN eligibility. Fix the classifier or the data; record before/after counts. Do not widen SN_SOURCE_CATEGORIES (locked: retain quantity+geometry).
+Done-when: misclassified quantity nodes reclassified, counts recorded, followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-20260609-variantc-revisit" data-status="open" data-tier="opus" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-ship sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Revisit tool-calling compose variant C when compose_worker next changes materially</h4>
+    <div class="r-fu-body"><p>Phase 3 locked Variant A (rich static prompt) because B and C did not clear the cost gate under the measured baseline. The plan explicitly flags re-evaluating Variant C (tool-calling hybrid) when <code>compose_worker</code> is next materially changed, because the production cache block shifts the cost picture.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-extraction-prompt-overhaul
+
+Trigger: only when compose_worker is materially changed (e.g. new model, restructured prompt, cache-block change).
+Task: Re-benchmark compose Variant C (tool-calling hybrid) vs the locked Variant A under the new baseline, accounting for the production prompt-cache block. Use the existing prompt A/B/C eval harness. If C now clears the cost+quality gate, propose switching; else record the negative result.
+Done-when: re-benchmark recorded with cost/quality numbers and a keep-A-or-switch verdict; followup resolved.</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
