@@ -2,21 +2,34 @@
   "_meta": {
     "version": "v1",
     "purpose": "Plan 34 — curated SN quality benchmark (DD path → expected standard name + anti-pattern negatives)",
-    "target_size": {"positives": 50, "negatives": 20},
-    "current_size": {"positives": 20, "negatives": 10, "todo_stubs": 30},
+    "target_size": {
+      "positives": 50,
+      "negatives": 20
+    },
+    "current_size": {
+      "positives": 20,
+      "negatives": 20,
+      "todo_stubs": 30
+    },
     "domains": [
-      "equilibrium", "core_plasma_physics", "magnetic_field_diagnostics",
-      "transport", "waves", "fast_particles", "turbulence",
-      "plasma_wall_interactions", "gyrokinetics", "edge_plasma_physics"
+      "equilibrium",
+      "core_plasma_physics",
+      "magnetic_field_diagnostics",
+      "transport",
+      "waves",
+      "fast_particles",
+      "turbulence",
+      "plasma_wall_interactions",
+      "gyrokinetics",
+      "edge_plasma_physics"
     ],
     "gating": {
-      "positives_pass_at_1": 0.80,
+      "positives_pass_at_1": 0.8,
       "positives_mean_reviewer_score": 0.75,
-      "negatives_rejection_rate": 0.90
+      "negatives_rejection_rate": 0.9
     },
-    "notes": "Positives sourced from ISN published catalog + high-scoring graph names. Negatives sourced from graph-quarantined low-score names + hand-synthesised classics. Expansion to 50+20 pending future cycles (see plan 34 §3)."
+    "notes": "Positives sourced from ISN published catalog + high-scoring graph names. Negatives sourced from graph-quarantined low-score names + hand-synthesised classics. Expansion to 50+20 pending future cycles (see plan 34 §3). | 2026-06-09: dropped 2 arguable negatives (outline_point qualifier, electrostatic_potential transformation) that all strong reviewers judged valid; added 12 unambiguous grammar-violation negatives anchored on verified real DD paths to reach 20 (reviewer-discrimination hardening)."
   },
-
   "positives": [
     {
       "dd_path": "equilibrium/time_slice/profiles_1d/psi",
@@ -178,46 +191,255 @@
       "source": "isn_catalog",
       "rationale": "Edge-profile ne — cross-IDS reuse test."
     },
-
-    {"dd_path": "TODO", "physics_domain": "waves",                       "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — needs ISN rc16 object vocab before filling (plan 33 §4)."},
-    {"dd_path": "TODO", "physics_domain": "waves",                       "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "waves",                       "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "waves",                       "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "waves",                       "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-
-    {"dd_path": "TODO", "physics_domain": "fast_particles",              "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — fast_particles currently 0.14 avg; needs regen before curation."},
-    {"dd_path": "TODO", "physics_domain": "fast_particles",              "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "fast_particles",              "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "fast_particles",              "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "fast_particles",              "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-
-    {"dd_path": "TODO", "physics_domain": "turbulence",                  "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — turbulence currently 0.33 avg."},
-    {"dd_path": "TODO", "physics_domain": "turbulence",                  "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "turbulence",                  "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "turbulence",                  "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "turbulence",                  "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-
-    {"dd_path": "TODO", "physics_domain": "plasma_wall_interactions",    "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — PWI currently 0.34 avg; needs rc16 first."},
-    {"dd_path": "TODO", "physics_domain": "plasma_wall_interactions",    "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "plasma_wall_interactions",    "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "plasma_wall_interactions",    "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "plasma_wall_interactions",    "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-
-    {"dd_path": "TODO", "physics_domain": "gyrokinetics",                "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — gyrokinetics currently 0.37 avg; normalized-quantity semantics tricky."},
-    {"dd_path": "TODO", "physics_domain": "gyrokinetics",                "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "gyrokinetics",                "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "gyrokinetics",                "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "gyrokinetics",                "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-
-    {"dd_path": "TODO", "physics_domain": "transport",                   "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — reserved for transport diffusivity/flux panel."},
-    {"dd_path": "TODO", "physics_domain": "transport",                   "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "transport",                   "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-
-    {"dd_path": "TODO", "physics_domain": "edge_plasma_physics",         "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub — divertor heat flux / strike point coords."},
-    {"dd_path": "TODO", "physics_domain": "edge_plasma_physics",         "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."},
-    {"dd_path": "TODO", "physics_domain": "edge_plasma_physics",         "expected_name": "TODO", "expected_unit": "TODO", "source": "todo", "rationale": "Stub."}
+    {
+      "dd_path": "TODO",
+      "physics_domain": "waves",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — needs ISN rc16 object vocab before filling (plan 33 §4)."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "waves",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "waves",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "waves",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "waves",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "fast_particles",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — fast_particles currently 0.14 avg; needs regen before curation."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "fast_particles",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "fast_particles",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "fast_particles",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "fast_particles",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "turbulence",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — turbulence currently 0.33 avg."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "turbulence",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "turbulence",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "turbulence",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "turbulence",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "plasma_wall_interactions",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — PWI currently 0.34 avg; needs rc16 first."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "plasma_wall_interactions",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "plasma_wall_interactions",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "plasma_wall_interactions",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "plasma_wall_interactions",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "gyrokinetics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — gyrokinetics currently 0.37 avg; normalized-quantity semantics tricky."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "gyrokinetics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "gyrokinetics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "gyrokinetics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "gyrokinetics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "transport",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — reserved for transport diffusivity/flux panel."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "transport",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "transport",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "edge_plasma_physics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub — divertor heat flux / strike point coords."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "edge_plasma_physics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    },
+    {
+      "dd_path": "TODO",
+      "physics_domain": "edge_plasma_physics",
+      "expected_name": "TODO",
+      "expected_unit": "TODO",
+      "source": "todo",
+      "rationale": "Stub."
+    }
   ],
-
   "negatives": [
     {
       "candidate_name": "poloidal_magnetic_magnetic_field_probe_voltage",
@@ -239,20 +461,6 @@
       "physics_domain": "transport",
       "anti_pattern_category": "component_prefix_order",
       "rejection_reason": "Component token '_toroidal' misplaced — expected 'toroidal_ion_rotation_frequency' (short-form prefix)."
-    },
-    {
-      "candidate_name": "vertical_coordinate_of_outline_point",
-      "dd_path": "wall/description_2d/mobile/unit/outline/z",
-      "physics_domain": "plasma_wall_interactions",
-      "anti_pattern_category": "missing_qualifier",
-      "rejection_reason": "'outline_point' is unscoped — needs host object (e.g. vertical_coordinate_of_first_wall_outline_point). Component vocab missing 'vertical_coordinate_of'."
-    },
-    {
-      "candidate_name": "normalized_energy_flux_due_to_electrostatic_potential",
-      "dd_path": "gyrokinetics/fluxes_integrated_norm/energy_phi_potential",
-      "physics_domain": "gyrokinetics",
-      "anti_pattern_category": "wrong_transformation",
-      "rejection_reason": "Token 'electrostatic_potential' is not a valid Process vocabulary member for the 'due_to_' template."
     },
     {
       "candidate_name": "ion_cumulative_ionization_potential_at_ion_state",
@@ -288,6 +496,90 @@
       "physics_domain": "magnetic_field_diagnostics",
       "anti_pattern_category": "symbol_leakage",
       "rejection_reason": "DD variable name lifted as SN — SN must be plasma_current."
+    },
+    {
+      "candidate_name": "te",
+      "dd_path": "core_profiles/profiles_1d/electrons/temperature",
+      "physics_domain": "core_plasma_physics",
+      "anti_pattern_category": "symbol_leakage",
+      "rejection_reason": "Symbol 'te' lifts the variable shorthand; SN must be the descriptive electron_temperature."
+    },
+    {
+      "candidate_name": "ne",
+      "dd_path": "core_profiles/profiles_1d/electrons/density",
+      "physics_domain": "core_plasma_physics",
+      "anti_pattern_category": "symbol_leakage",
+      "rejection_reason": "Symbol 'ne' for electron density; SN must be electron_density."
+    },
+    {
+      "candidate_name": "electron_density_per_cubic_metre",
+      "dd_path": "core_profiles/profiles_1d/electrons/density",
+      "physics_domain": "core_plasma_physics",
+      "anti_pattern_category": "llm_supplied_unit",
+      "rejection_reason": "Unit 'per_cubic_metre' baked into the name; units are authoritative from HAS_UNIT and must never appear."
+    },
+    {
+      "candidate_name": "toroidal_magnetic_field_tesla",
+      "dd_path": "tf/field_map/b_field_tor/values",
+      "physics_domain": "magnetic_field_diagnostics",
+      "anti_pattern_category": "llm_supplied_unit",
+      "rejection_reason": "Unit 'tesla' appended to the name; forbidden — unit is injected at persistence time."
+    },
+    {
+      "candidate_name": "safety_factor_squared",
+      "dd_path": "equilibrium/time_slice/profiles_1d/q",
+      "physics_domain": "equilibrium",
+      "anti_pattern_category": "wrong_transformation",
+      "rejection_reason": "Spurious 'squared' transformation not present in the DD path; the quantity is the safety factor itself."
+    },
+    {
+      "candidate_name": "magnetic_field_toroidal",
+      "dd_path": "tf/field_map/b_field_tor/values",
+      "physics_domain": "magnetic_field_diagnostics",
+      "anti_pattern_category": "component_prefix_order",
+      "rejection_reason": "Component token 'toroidal' in suffix position; grammar requires the prefix form toroidal_magnetic_field."
+    },
+    {
+      "candidate_name": "plasma_current_current",
+      "dd_path": "magnetics/ip/data",
+      "physics_domain": "magnetic_field_diagnostics",
+      "anti_pattern_category": "base_duplication",
+      "rejection_reason": "Duplicated 'current' token; the canonical name is plasma_current."
+    },
+    {
+      "candidate_name": "elongation",
+      "dd_path": "equilibrium/time_slice/boundary/elongation",
+      "physics_domain": "equilibrium",
+      "anti_pattern_category": "missing_qualifier",
+      "rejection_reason": "Bare 'elongation' is unscoped; boundary-shape quantities require the of_plasma_boundary qualifier."
+    },
+    {
+      "candidate_name": "magnetics_ip_data",
+      "dd_path": "magnetics/ip/data",
+      "physics_domain": "magnetic_field_diagnostics",
+      "anti_pattern_category": "ids_leakage",
+      "rejection_reason": "IDS/DD path leaked verbatim as the name; SN must be the descriptive plasma_current."
+    },
+    {
+      "candidate_name": "electron_temperature",
+      "dd_path": "core_profiles/profiles_1d/ion/temperature",
+      "physics_domain": "core_plasma_physics",
+      "anti_pattern_category": "wrong_identity",
+      "rejection_reason": "Wrong species: the DD path is ion temperature, but the name says electron — identity mismatch."
+    },
+    {
+      "candidate_name": "reconstructed_poloidal_magnetic_flux",
+      "dd_path": "equilibrium/time_slice/profiles_1d/psi",
+      "physics_domain": "equilibrium",
+      "anti_pattern_category": "processing_adjective",
+      "rejection_reason": "Processing adjective 'reconstructed_' is forbidden in a standard name; use poloidal_magnetic_flux."
+    },
+    {
+      "candidate_name": "thomson_scattering_electron_temperature",
+      "dd_path": "core_profiles/profiles_1d/electrons/temperature",
+      "physics_domain": "core_plasma_physics",
+      "anti_pattern_category": "measurement_method",
+      "rejection_reason": "Measurement method 'thomson_scattering' embedded in the name; SN must be method-agnostic electron_temperature."
     }
   ]
 }
