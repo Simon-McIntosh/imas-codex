@@ -936,13 +936,16 @@ class TestClassifyGap:
         """Compound token whose parts are all registered → decomposable."""
         from imas_codex.standard_names.segments import classify_gap, is_known_token
 
-        # Verify prerequisites: 'thermal' in qualifier/subject, 'pressure' in physical_base
+        # Verify prerequisites: 'thermal' in population, 'density' in
+        # physical_base. (thermal_pressure itself became a lexical base in
+        # ISN rc34, so it now classifies false_positive — use a compound
+        # that remains absent from the base vocabulary.)
         segs_thermal = is_known_token("thermal")
-        segs_pressure = is_known_token("pressure")
-        if not segs_thermal or not segs_pressure:
-            pytest.skip("Need thermal+pressure as registered tokens")
+        segs_density = is_known_token("density")
+        if not segs_thermal or not segs_density:
+            pytest.skip("Need thermal+density as registered tokens")
 
-        cat, actual = classify_gap("physical_base", "thermal_pressure")
+        cat, actual = classify_gap("physical_base", "thermal_density")
         assert cat == "decomposable"
         assert len(actual) >= 2  # parts found in ≥2 segments
 
@@ -1054,6 +1057,7 @@ class TestReconcileVocabGaps:
             mock_gc.query.side_effect = [
                 fake_gaps,  # SELECT all gaps
                 None,  # DELETE
+                [{"n": 0}],  # vocab_gap source reset
             ]
 
             stats = reconcile_vocab_gaps()
@@ -1103,6 +1107,7 @@ class TestReconcileVocabGaps:
             mock_gc.query.side_effect = [
                 fake_gaps,  # SELECT all gaps
                 None,  # UPDATE
+                [{"n": 0}],  # vocab_gap source reset
             ]
 
             stats = reconcile_vocab_gaps()
@@ -1330,3 +1335,40 @@ class TestExtractGapFromError:
         )
         assert segment == "base_token"
         assert token == "fallback_value"
+
+
+class TestReconcileVocabGapSourceReset:
+    """Resolved gaps must un-park their vocab_gap sources."""
+
+    def test_sources_reset_when_gaps_resolved(self):
+        """Sources whose entity has no remaining gap edge → 'extracted'."""
+        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+
+        fake_gaps = [
+            {
+                "id": "vocab_gap:qualifier:maximum",
+                "segment": "qualifier",
+                "token": "maximum",
+                "category": "absent",
+            }
+        ]
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+            mock_gc = MagicMock()
+            mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+            mock_gc.query.side_effect = [
+                fake_gaps,  # SELECT all gaps
+                None,  # DELETE false positive
+                [{"n": 3}],  # vocab_gap source reset
+            ]
+
+            stats = reconcile_vocab_gaps()
+
+        assert stats["sources_retried"] == 3
+        # The reset query targets vocab_gap sources, clears claim fields,
+        # and only fires when no gap edge remains on the linked entity.
+        reset_call = mock_gc.query.call_args_list[-1].args[0]
+        assert "StandardNameSource {status: 'vocab_gap'}" in reset_call
+        assert "HAS_STANDARD_NAME_VOCAB_GAP" in reset_call
+        assert "SET sns.status = 'extracted'" in reset_call
+        assert "sns.claimed_at = null" in reset_call

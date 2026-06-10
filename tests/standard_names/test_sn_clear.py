@@ -217,3 +217,74 @@ class TestClearStandardNamesDeletesLLMCost:
             "When no matching SNs, no DETACH DELETE should be issued"
         )
         assert result == 0
+
+
+class TestClearStandardNamesResetsOrphanedSources:
+    """Step E: clearing names must reset orphaned composed/attached sources.
+
+    Deleting a StandardName strands its StandardNameSource at
+    'composed'/'attached' — statuses the generate pool never claims — so
+    the clear path must revert sources with no remaining PRODUCED_NAME
+    edge to 'extracted'.
+    """
+
+    def _make_gc(self, sn_count: int = 5) -> MagicMock:
+        fake_gc = MagicMock()
+        fake_gc.__enter__.return_value = fake_gc
+        fake_gc.__exit__.return_value = None
+
+        def _query(cypher: str, **_kwargs):
+            if "count(DISTINCT sn)" in cypher or "count(sn)" in cypher:
+                return [{"n": sn_count}]
+            if "count(r)" in cypher:
+                return [{"n": 0}]
+            if "count(sns)" in cypher:
+                return [{"n": 7}]
+            return []
+
+        fake_gc.query = MagicMock(side_effect=_query)
+        return fake_gc
+
+    def test_orphaned_sources_reset_on_clear(self):
+        from imas_codex.standard_names import graph_ops
+
+        fake_gc = self._make_gc(sn_count=3)
+        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
+            graph_ops.clear_standard_names()
+
+        queries = [c.args[0] for c in fake_gc.query.call_args_list]
+        reset_q = [
+            q
+            for q in queries
+            if "PRODUCED_NAME" in q and "SET sns.status = 'extracted'" in q
+        ]
+        assert reset_q, (
+            "clear_standard_names must reset orphaned composed/attached "
+            "sources to 'extracted'"
+        )
+        # Orphan guard and claim-field clearing present
+        assert "NOT (sns)-[:PRODUCED_NAME]->(:StandardName)" in reset_q[0]
+        assert "sns.claimed_at = null" in reset_q[0]
+        assert "'composed'" in reset_q[0] and "'attached'" in reset_q[0]
+
+    def test_no_source_reset_in_dry_run(self):
+        from imas_codex.standard_names import graph_ops
+
+        fake_gc = self._make_gc(sn_count=5)
+        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
+            graph_ops.clear_standard_names(dry_run=True)
+
+        queries = [c.args[0] for c in fake_gc.query.call_args_list]
+        assert not any("SET sns.status = 'extracted'" in q for q in queries), (
+            "dry_run must not reset source statuses"
+        )
+
+    def test_no_source_reset_when_no_matching_sn(self):
+        from imas_codex.standard_names import graph_ops
+
+        fake_gc = self._make_gc(sn_count=0)
+        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
+            graph_ops.clear_standard_names()
+
+        queries = [c.args[0] for c in fake_gc.query.call_args_list]
+        assert not any("SET sns.status = 'extracted'" in q for q in queries)

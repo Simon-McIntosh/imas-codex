@@ -4585,6 +4585,30 @@ def clear_standard_names(
         # behind would accumulate stale cost-ledger rows across reset cycles.
         gc.query("MATCH (c:LLMCost) DETACH DELETE c")
 
+        # Step E: reset orphaned sources. Deleting a StandardName strands its
+        # StandardNameSource at 'composed'/'attached' — a status the generate
+        # pool never claims — so without this reset the source silently drops
+        # out of all future regeneration. Orphan check (no remaining
+        # PRODUCED_NAME edge) is inherently scope-correct: sources whose names
+        # survived a filtered clear keep their status.
+        reset_result = gc.query(
+            """
+            MATCH (sns:StandardNameSource)
+            WHERE sns.status IN ['composed', 'attached']
+            AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
+            SET sns.status = 'extracted',
+                sns.claimed_at = null,
+                sns.claim_token = null
+            RETURN count(sns) AS n
+            """
+        )
+        reset_count = reset_result[0]["n"] if reset_result else 0
+        if reset_count:
+            logger.info(
+                "Reset %d orphaned StandardNameSource nodes to 'extracted'",
+                reset_count,
+            )
+
     logger.info("Deleted %d StandardName nodes", count)
     return count
 
@@ -6129,6 +6153,31 @@ def reconcile_vocab_gaps() -> dict[str, int]:
             logger.info(
                 "reconcile_vocab_gaps: reclassified %d gaps",
                 len(to_update),
+            )
+
+        # Sources parked at 'vocab_gap' whose blocking gaps have all been
+        # resolved (no remaining HAS_STANDARD_NAME_VOCAB_GAP edge on their
+        # linked entity) revert to 'extracted' so the next generate pool
+        # retries them under the upgraded vocabulary. Without this, a
+        # vocabulary fix never un-blocks the sources that reported the gap.
+        retried = gc.query(
+            """
+            MATCH (sns:StandardNameSource {status: 'vocab_gap'})
+            MATCH (sns)-[:FROM_DD_PATH|FROM_SIGNAL]->(entity)
+            WITH sns, entity
+            WHERE NOT (entity)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(:VocabGap)
+            SET sns.status = 'extracted',
+                sns.claimed_at = null,
+                sns.claim_token = null
+            RETURN count(sns) AS n
+            """
+        )
+        rows = list(retried) if retried else []
+        stats["sources_retried"] = rows[0].get("n", 0) if rows else 0
+        if stats["sources_retried"]:
+            logger.info(
+                "reconcile_vocab_gaps: reset %d vocab_gap sources to 'extracted'",
+                stats["sources_retried"],
             )
 
     stats["remaining"] = stats["checked"] - len(to_delete)
