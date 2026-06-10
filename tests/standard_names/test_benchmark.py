@@ -1650,3 +1650,281 @@ class TestGenerateDocsForCandidates:
         assert updated[0]["docs_description"] == ""
         assert updated[0]["documentation"] == ""
         assert cost == 0.0
+
+
+# -----------------------------------------------------------------------
+# Compose-time description scoring tests
+# -----------------------------------------------------------------------
+
+
+class TestDescriptionReviewPrompt:
+    """The description rubric prompts render against the real templates."""
+
+    def test_system_prompt_renders_with_schema(self):
+        from imas_codex.llm.prompt_loader import render_prompt
+
+        sys_prompt = render_prompt("sn/review_description_system", {})
+        # Static rubric content present
+        assert "physics_accuracy" in sys_prompt
+        assert "specificity" in sys_prompt
+        assert "consistency" in sys_prompt
+        assert "concision" in sys_prompt
+        # Schema example injected via get_pydantic_schema_json provider
+        assert "reviews" in sys_prompt
+        # No leftover jinja markers
+        assert "{{" not in sys_prompt
+
+    def test_user_prompt_renders_fixture_item(self):
+        from imas_codex.llm.prompt_loader import render_prompt
+
+        item = {
+            "standard_name": "electron_temperature",
+            "source_id": "core_profiles/profiles_1d/electrons/temperature",
+            "description": "Thermal energy of the electron population in the core",
+            "unit": "eV",
+            "kind": "profile",
+            "physics_domain": "transport",
+            "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
+        }
+        user_prompt = render_prompt("sn/review_description_user", {"items": [item]})
+        assert "electron_temperature" in user_prompt
+        assert "Thermal energy of the electron population" in user_prompt
+        assert "eV" in user_prompt
+        assert "{{" not in user_prompt
+
+
+class TestScoreDescriptions:
+    """Aggregation math and the score_descriptions coroutine."""
+
+    @pytest.mark.asyncio
+    async def test_score_descriptions_parses_reviews(self):
+        from imas_codex.standard_names.benchmark import score_descriptions
+        from imas_codex.standard_names.models import (
+            StandardNameQualityReviewDescription,
+            StandardNameQualityReviewDescriptionBatch,
+            StandardNameQualityScoreDescription,
+        )
+
+        batch = StandardNameQualityReviewDescriptionBatch(
+            reviews=[
+                StandardNameQualityReviewDescription(
+                    source_id="p1",
+                    standard_name="electron_temperature",
+                    scores=StandardNameQualityScoreDescription(
+                        physics_accuracy=20,
+                        specificity=18,
+                        consistency=20,
+                        concision=18,
+                    ),
+                    reasoning="precise and specific",
+                ),
+            ]
+        )
+        candidates = [
+            {
+                "source_id": "p1",
+                "standard_name": "electron_temperature",
+                "description": "Electron temperature in the core plasma",
+                "unit": "eV",
+            }
+        ]
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                return_value=(batch, 0.003, 120),
+            ),
+        ):
+            reviews, cost = await score_descriptions(candidates, "mock-reviewer")
+
+        assert cost == 0.003
+        assert len(reviews) == 1
+        r = reviews[0]
+        assert r["name"] == "electron_temperature"
+        assert r["score"] == pytest.approx(76 / 80.0)
+        assert r["physics_accuracy_score"] == 20
+        assert r["concision_score"] == 18
+        assert r["quality_tier"] == "outstanding"
+
+    def test_apply_reviewer_scores_metrics_descriptions(self):
+        from imas_codex.standard_names.benchmark import (
+            ReviewerScores,
+            _apply_reviewer_scores_metrics,
+        )
+
+        reviews = [
+            {
+                "score": 0.9,
+                "quality_tier": "outstanding",
+                "physics_accuracy_score": 18,
+                "specificity_score": 18,
+                "consistency_score": 18,
+                "concision_score": 18,
+            },
+            {
+                "score": 0.5,
+                "quality_tier": "inadequate",
+                "physics_accuracy_score": 10,
+                "specificity_score": 10,
+                "consistency_score": 10,
+                "concision_score": 10,
+            },
+        ]
+        rs = ReviewerScores(reviewer_model="j", target="descriptions")
+        _apply_reviewer_scores_metrics(rs, reviews, "descriptions")
+
+        assert rs.avg_score == pytest.approx(0.7)
+        assert rs.distribution == {"outstanding": 1, "inadequate": 1}
+        assert rs.dim_averages["physics_accuracy"] == pytest.approx(14.0)
+        assert rs.dim_averages["concision"] == pytest.approx(14.0)
+
+    def test_apply_description_aggregate_mean_over_judges(self):
+        from imas_codex.standard_names.benchmark import (
+            ModelResult,
+            ReviewerScores,
+            _apply_description_aggregate,
+        )
+
+        mr = ModelResult(model="m")
+        mr.description_reviewer_results = [
+            ReviewerScores(
+                reviewer_model="j1",
+                target="descriptions",
+                avg_score=0.8,
+                cost=0.01,
+                elapsed_seconds=2.0,
+            ),
+            ReviewerScores(
+                reviewer_model="j2",
+                target="descriptions",
+                avg_score=0.6,
+                cost=0.02,
+                elapsed_seconds=3.0,
+            ),
+            # Failed judge excluded from the score mean but counted in cost
+            ReviewerScores(
+                reviewer_model="j3",
+                target="descriptions",
+                error="boom",
+                cost=0.0,
+                elapsed_seconds=0.5,
+            ),
+        ]
+        _apply_description_aggregate(mr)
+
+        assert mr.avg_description_score == pytest.approx(0.7)
+        assert mr.description_reviewer_cost == pytest.approx(0.03)
+        assert mr.description_review_elapsed_seconds == pytest.approx(5.5)
+
+
+class TestRescoreDescriptions:
+    """--rescore loads an existing report, scores descriptions, merges, writes."""
+
+    @pytest.mark.asyncio
+    async def test_rescore_merges_and_survives_round_trip(self, tmp_path):
+        from imas_codex.standard_names.benchmark import (
+            BenchmarkConfig,
+            BenchmarkReport,
+            ModelResult,
+            rescore_descriptions_report,
+        )
+
+        cfg = BenchmarkConfig(
+            models=["model-a"],
+            reviewer_models=["judge-1", "judge-2"],
+        )
+        mr = ModelResult(
+            model="model-a",
+            candidates=[
+                {
+                    "source_id": "p1",
+                    "standard_name": "electron_temperature",
+                    "description": "Electron temperature in the core",
+                    "unit": "eV",
+                }
+            ],
+        )
+        report = BenchmarkReport(
+            config=cfg, results=[mr], reference_names=["p1"], timestamp="t"
+        )
+
+        # Write the seed report to disk, reload via from_json (the rescore path)
+        seed = tmp_path / "bench.json"
+        seed.write_text(report.to_json())
+        loaded = BenchmarkReport.from_json(seed.read_text())
+
+        # Patch the per-judge scoring coroutine — no LLM
+        async def _fake_score(candidates, reviewer_model):
+            score = 0.9 if reviewer_model == "judge-1" else 0.7
+            return (
+                [
+                    {
+                        "name": c["standard_name"],
+                        "quality_tier": "good",
+                        "score": score,
+                        "physics_accuracy_score": 18,
+                        "specificity_score": 14,
+                        "consistency_score": 18,
+                        "concision_score": 14,
+                    }
+                    for c in candidates
+                ],
+                0.005,
+            )
+
+        with patch(
+            "imas_codex.standard_names.benchmark.score_descriptions",
+            new=AsyncMock(side_effect=_fake_score),
+        ):
+            updated = await rescore_descriptions_report(loaded)
+
+        r = updated.results[0]
+        assert len(r.description_reviewer_results) == 2
+        # mean over two judges (0.9, 0.7)
+        assert r.avg_description_score == pytest.approx(0.8)
+        assert r.description_reviewer_cost == pytest.approx(0.01)
+
+        # Write back and reload — nested ReviewerScores must survive from_json
+        out = tmp_path / "bench_rescored.json"
+        updated.save_atomic(str(out))
+        reloaded = BenchmarkReport.from_json(out.read_text())
+        rr = reloaded.results[0]
+        assert len(rr.description_reviewer_results) == 2
+        # Reconstructed as ReviewerScores, not raw dicts
+        from imas_codex.standard_names.benchmark import ReviewerScores
+
+        assert all(
+            isinstance(j, ReviewerScores) for j in rr.description_reviewer_results
+        )
+        assert rr.description_reviewer_results[0].avg_score == pytest.approx(0.9)
+        assert rr.avg_description_score == pytest.approx(0.8)
+
+    def test_desc_column_renders_in_main_table(self):
+        from imas_codex.standard_names.benchmark import (
+            BenchmarkConfig,
+            BenchmarkReport,
+            ModelResult,
+            ReviewerScores,
+            render_comparison_table,
+        )
+
+        cfg = BenchmarkConfig(models=["m"], reviewer_models=["j1", "j2"])
+        mr = ModelResult(
+            model="m",
+            candidates=[{"source_id": "p", "standard_name": "electron_temperature"}],
+            avg_description_score=0.83,
+            description_reviewer_results=[
+                ReviewerScores(
+                    reviewer_model="j1", target="descriptions", avg_score=0.9
+                ),
+                ReviewerScores(
+                    reviewer_model="j2", target="descriptions", avg_score=0.76
+                ),
+            ],
+        )
+        report = BenchmarkReport(
+            config=cfg, results=[mr], reference_names=["p"], timestamp="t"
+        )
+        # Should render without error and not raise on the Desc column
+        render_comparison_table(report)

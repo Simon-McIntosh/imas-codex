@@ -101,6 +101,13 @@ class ModelResult:
     # Multi-reviewer results (new — matrix evaluation)
     name_reviewer_results: list[ReviewerScores] = field(default_factory=list)
     docs_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    # Compose-time description scoring (per-judge ReviewerScores; the four
+    # description dims live in each ReviewerScores.dim_averages — no flat
+    # avg_*_score fields, to avoid collision with the docs physics_accuracy dim)
+    description_reviewer_results: list[ReviewerScores] = field(default_factory=list)
+    avg_description_score: float = 0.0
+    description_reviewer_cost: float = 0.0
+    description_review_elapsed_seconds: float = 0.0
     # Legacy single-reviewer fields (populated from first reviewer for compat)
     quality_scores: list[dict] = field(default_factory=list)
     quality_distribution: dict[str, int] = field(default_factory=dict)
@@ -251,11 +258,15 @@ class BenchmarkReport:
             docs_revs = [
                 ReviewerScores(**rs) for rs in r.pop("docs_reviewer_results", [])
             ]
+            desc_revs = [
+                ReviewerScores(**rs) for rs in r.pop("description_reviewer_results", [])
+            ]
             filtered = {k: v for k, v in r.items() if k in known_result_keys}
             mr = ModelResult(
                 **filtered,
                 name_reviewer_results=name_revs,
                 docs_reviewer_results=docs_revs,
+                description_reviewer_results=desc_revs,
             )
             results.append(mr)
 
@@ -680,6 +691,90 @@ async def score_with_reviewer(
     return all_reviews, total_reviewer_cost
 
 
+async def score_descriptions(
+    candidates: list[dict],
+    reviewer_model: str,
+) -> tuple[list[dict], float]:
+    """Score each candidate's SHORT compose-time ``description``.
+
+    Parallel in style to :func:`score_with_reviewer` but scores the
+    one-line compose-time ``description`` (NOT ``docs_description``) on a
+    4-dimensional 0–20 rubric: physics_accuracy, specificity, consistency,
+    concision. Unlike the names review, this pass is **self-contained** — it
+    scores against the candidate's own DD context (unit, kind, source_paths,
+    physics_domain) and its companion name, with no graph-neighbour fetch.
+    That keeps the standalone ``--rescore`` path offline.
+
+    Returns (reviews, total_cost) where each review dict carries:
+    ``name``, ``quality_tier``, ``score``, ``reasoning`` and the four
+    per-dimension ``<dim>_score`` keys.
+    """
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.standard_names.models import (
+        StandardNameQualityReviewDescriptionBatch,
+    )
+
+    dim_keys = ("physics_accuracy", "specificity", "consistency", "concision")
+
+    # Static system prompt (cached across batches via schema_needs injection).
+    system_prompt = render_prompt("sn/review_description_system", {})
+
+    all_reviews: list[dict] = []
+    total_cost: float = 0.0
+    for i in range(0, len(candidates), 10):
+        batch = candidates[i : i + 10]
+        batch_items = []
+        for c in batch:
+            name = _resolve_name(c)
+            batch_items.append(
+                {
+                    "standard_name": name,
+                    "source_id": c.get("source_id", ""),
+                    "description": c.get("description", "") or "",
+                    "unit": c.get("unit", "N/A"),
+                    "kind": c.get("kind", "N/A"),
+                    "physics_domain": c.get("physics_domain", ""),
+                    "source_paths": c.get("source_paths", []),
+                }
+            )
+
+        try:
+            user_prompt = render_prompt(
+                "sn/review_description_user", {"items": batch_items}
+            )
+        except Exception as exc:
+            logger.warning("Failed to render description review prompt: %s", exc)
+            continue
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        try:
+            result, cost, _ = await acall_llm_structured(
+                model=reviewer_model,
+                messages=messages,
+                response_model=StandardNameQualityReviewDescriptionBatch,
+                service="standard-names",
+            )
+            total_cost += cost
+            for r in result.reviews:
+                review_dict: dict[str, Any] = {
+                    "name": r.standard_name,
+                    "quality_tier": r.scores.tier,
+                    "score": r.scores.score,
+                    "reasoning": r.reasoning,
+                }
+                for dim in dim_keys:
+                    review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                all_reviews.append(review_dict)
+        except Exception as e:
+            logger.warning("Description scoring failed for batch: %s", e)
+
+    return all_reviews, total_cost
+
+
 # ---------------------------------------------------------------------------
 # Docs generation for benchmark
 # ---------------------------------------------------------------------------
@@ -955,6 +1050,43 @@ async def run_benchmark(
             else:
                 model_result.review_error = "All reviewer models failed for names"
 
+            # --- 2b'. Description scoring phase (same reviewer matrix) ---
+            async def _review_descriptions(
+                rev_model: str,
+                _candidates: list = model_result.candidates,
+                _model: str = model,
+            ) -> ReviewerScores:
+                rs = ReviewerScores(reviewer_model=rev_model, target="descriptions")
+                try:
+                    t0 = time.monotonic()
+                    revs, cost = await score_descriptions(_candidates, rev_model)
+                    rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                    rs.cost = cost
+                    rs.scores = revs
+                    _apply_reviewer_scores_metrics(rs, revs, "descriptions")
+                    logger.info(
+                        "  ✓ description review by %s: avg=%.3f, $%.4f, %.1fs",
+                        rev_model.split("/")[-1],
+                        rs.avg_score,
+                        cost,
+                        rs.elapsed_seconds,
+                    )
+                except Exception as exc:
+                    logger.error(
+                        "Model %s description review by %s failed: %s",
+                        _model,
+                        rev_model,
+                        exc,
+                    )
+                    rs.error = str(exc)
+                return rs
+
+            desc_review_tasks = [_review_descriptions(rm) for rm in reviewer_models]
+            model_result.description_reviewer_results = list(
+                await asyncio.gather(*desc_review_tasks)
+            )
+            _apply_description_aggregate(model_result)
+
         # --- 2c. Docs phase (when not names-only) ---
         if not config.names_only:
             try:
@@ -1064,6 +1196,8 @@ def _apply_reviewer_scores_metrics(
     # Per-dimension averages
     if target == "names":
         dims = ("grammar", "semantic", "convention", "completeness")
+    elif target == "descriptions":
+        dims = ("physics_accuracy", "specificity", "consistency", "concision")
     else:
         dims = (
             "description_quality",
@@ -1127,6 +1261,21 @@ def _apply_review_metrics(result: ModelResult, reviews: list[dict]) -> None:
     result.avg_fields_populated = (
         sum(field_counts) / len(field_counts) if field_counts else 0.0
     )
+
+
+def _apply_description_aggregate(result: ModelResult) -> None:
+    """Aggregate compose-time description scores across judges in-place.
+
+    Sets ``avg_description_score`` to the mean over successful judges, plus
+    the summed reviewer cost and elapsed time. Per-dimension averages remain
+    on each judge's ``ReviewerScores.dim_averages``.
+    """
+    judges = result.description_reviewer_results
+    ok = [r for r in judges if not r.error]
+    if ok:
+        result.avg_description_score = round(sum(r.avg_score for r in ok) / len(ok), 4)
+    result.description_reviewer_cost = sum(r.cost for r in judges)
+    result.description_review_elapsed_seconds = sum(r.elapsed_seconds for r in judges)
 
 
 def _apply_docs_review_metrics(result: ModelResult, docs_reviews: list[dict]) -> None:
@@ -1381,6 +1530,68 @@ async def _run_model(
     return result
 
 
+async def rescore_descriptions_report(
+    report: BenchmarkReport,
+) -> BenchmarkReport:
+    """Run ONLY the compose-time description-scoring pass on an existing report.
+
+    Loads the stored candidates from each :class:`ModelResult` (they carry the
+    compose-time ``description``), scores them with every reviewer model in
+    ``report.config.reviewer_models`` (each judge independently), and merges
+    the new ``description_reviewer_results`` + ``avg_description_score`` back
+    onto the report in-place. Does NOT re-run composition or names review.
+
+    Returns the same (mutated) report for convenience.
+    """
+    reviewer_models = report.config.reviewer_models
+    if not reviewer_models and report.config.reviewer_model:
+        reviewer_models = [report.config.reviewer_model]
+    if not reviewer_models:
+        raise ValueError(
+            "No reviewer_models on the report config; cannot rescore descriptions."
+        )
+
+    for model_result in report.results:
+        if not model_result.candidates:
+            continue
+
+        async def _review_descriptions(
+            rev_model: str,
+            _candidates: list = model_result.candidates,
+            _model: str = model_result.model,
+        ) -> ReviewerScores:
+            rs = ReviewerScores(reviewer_model=rev_model, target="descriptions")
+            try:
+                t0 = time.monotonic()
+                revs, cost = await score_descriptions(_candidates, rev_model)
+                rs.elapsed_seconds = round(time.monotonic() - t0, 2)
+                rs.cost = cost
+                rs.scores = revs
+                _apply_reviewer_scores_metrics(rs, revs, "descriptions")
+                logger.info(
+                    "  ✓ [rescore] description review by %s for %s: avg=%.3f, $%.4f",
+                    rev_model.split("/")[-1],
+                    _model,
+                    rs.avg_score,
+                    cost,
+                )
+            except Exception as exc:
+                logger.error(
+                    "[rescore] %s description review by %s failed: %s",
+                    _model,
+                    rev_model,
+                    exc,
+                )
+                rs.error = str(exc)
+            return rs
+
+        tasks = [_review_descriptions(rm) for rm in reviewer_models]
+        model_result.description_reviewer_results = list(await asyncio.gather(*tasks))
+        _apply_description_aggregate(model_result)
+
+    return report
+
+
 # ---------------------------------------------------------------------------
 # Rich table rendering
 # ---------------------------------------------------------------------------
@@ -1400,6 +1611,7 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     # --- Compose metrics table ---
     has_quality = any(r.quality_scores for r in report.results)
     has_multi_rev = any(len(r.name_reviewer_results) > 1 for r in report.results)
+    has_desc = any(r.description_reviewer_results for r in report.results)
 
     table = Table(
         title="SN Benchmark — Compose Results",
@@ -1419,6 +1631,8 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     table.add_column("$/name", justify="right")
     table.add_column("Cache %", justify="right")
     table.add_column("Errors", justify="right")
+    if has_desc:
+        table.add_column("Desc", justify="right")
     if has_quality and not has_multi_rev:
         # Single-reviewer: inline scores in compose table
         table.add_column("Avg Quality", justify="right")
@@ -1469,6 +1683,15 @@ def render_comparison_table(report: BenchmarkReport) -> None:
             cache_pct,
             err_str,
         ]
+
+        if has_desc:
+            desc_str = (
+                f"{r.avg_description_score:.2f}"
+                if r.description_reviewer_results
+                and any(not jr.error for jr in r.description_reviewer_results)
+                else "—"
+            )
+            row_data.append(desc_str)
 
         if has_quality and not has_multi_rev:
             qual_str = f"{r.avg_quality_score:.2f}" if r.quality_scores else "—"

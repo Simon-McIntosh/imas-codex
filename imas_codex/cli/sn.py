@@ -1661,6 +1661,15 @@ def sn_run(
     help="--include-docs: benchmark names + docs. "
     "--names-only: benchmark name generation only (default).",
 )
+@click.option(
+    "--rescore",
+    type=click.Path(exists=True, dir_okay=False),
+    default=None,
+    help="Load an EXISTING benchmark report JSON and run ONLY the compose-time "
+    "description-scoring pass on its stored candidates, then merge + write back "
+    "(to --output if given, else in place). Does not re-run composition or "
+    "names review.",
+)
 def sn_bench(
     models: tuple[str, ...],
     max_candidates: int | None,
@@ -1671,6 +1680,7 @@ def sn_bench(
     reviewer_model: str | None,
     reviewer_models: tuple[str, ...],
     include_docs: bool,
+    rescore: str | None,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -1693,6 +1703,45 @@ def sn_bench(
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.WARNING)
+
+    # --- Standalone description rescore of an existing report ---
+    if rescore:
+        from pathlib import Path
+
+        from imas_codex.cli.utils import run_async
+        from imas_codex.standard_names.benchmark import (
+            BenchmarkReport,
+            render_comparison_table,
+            rescore_descriptions_report,
+        )
+
+        src_path = Path(rescore)
+        report = BenchmarkReport.from_json(src_path.read_text())
+
+        # Optional reviewer override for the rescore pass
+        if reviewer_models:
+            rev_list = []
+            for m in reviewer_models:
+                rev_list.extend(part.strip() for part in m.split(",") if part.strip())
+            report.config.reviewer_models = rev_list
+            report.config.reviewer_model = rev_list[0] if rev_list else None
+        elif reviewer_model:
+            report.config.reviewer_models = [reviewer_model]
+            report.config.reviewer_model = reviewer_model
+
+        rev_display = ", ".join(m.split("/")[-1] for m in report.config.reviewer_models)
+        console.print("[bold]SN Benchmark — description rescore[/bold]")
+        console.print(f"  Source report: {src_path}")
+        console.print(f"  Reviewer(s): {rev_display}")
+        console.print()
+
+        report = run_async(rescore_descriptions_report(report))
+        render_comparison_table(report)
+
+        dest = Path(output) if output else src_path
+        report.save_atomic(str(dest))
+        console.print(f"\n[green]Report saved:[/green] {dest}")
+        return
 
     from imas_codex.settings import (
         get_sn_benchmark_compose_models,

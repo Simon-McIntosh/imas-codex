@@ -736,6 +736,20 @@ def _provide_wiki_scoring_schema() -> dict[str, Any]:
 
 
 @lru_cache(maxsize=1)
+def _provide_description_review_schema() -> dict[str, Any]:
+    """Provide the compose-time description review Pydantic schema."""
+    from imas_codex.standard_names.models import (
+        StandardNameQualityReviewDescriptionBatch,
+    )
+
+    return {
+        "description_review_schema_example": get_pydantic_schema_json(
+            StandardNameQualityReviewDescriptionBatch
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
 def _provide_document_scoring_schema() -> dict[str, Any]:
     """Provide DocumentScoreBatch Pydantic schema for LLM prompts."""
     from imas_codex.discovery.wiki.models import DocumentScoreBatch, DocumentScoreResult
@@ -890,6 +904,7 @@ _SCHEMA_PROVIDERS: dict[str, Any] = {
     "wiki_score_dimensions": _provide_wiki_score_dimensions,
     "wiki_scoring_schema": _provide_wiki_scoring_schema,
     "document_scoring_schema": _provide_document_scoring_schema,
+    "description_review_schema": _provide_description_review_schema,
     # Image captioning
     "image_caption_schema": _provide_image_caption_schema,
     # Signal enrichment

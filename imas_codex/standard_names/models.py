@@ -940,6 +940,95 @@ class StandardNameQualityReviewDocsBatch(BaseModel):
 
 
 # =============================================================================
+# Description review — 4-dimensional rubric for compose-time descriptions
+# =============================================================================
+
+
+class StandardNameQualityScoreDescription(BaseModel):
+    """4-dimensional quality score for the SHORT compose-time description.
+
+    Scores the one-line description that a name-generation model emits
+    alongside the name (NOT the longer enrichment ``documentation``). Used
+    by the benchmark to turn the short description into a scored
+    discriminator once names converge across models. Normalised over 80.
+    """
+
+    physics_accuracy: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "No hallucinated physics; consistent with the DD source context "
+            "provided (0-20)"
+        ),
+    )
+    specificity: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "Says what the quantity IS — species, location, conditions — not "
+            "generic filler (0-20)"
+        ),
+    )
+    consistency: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "Description and name describe the SAME quantity; flag drift (0-20)"
+        ),
+    )
+    concision: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "One-to-two sentences, no boilerplate, no units-in-prose restating "
+            "the unit field (0-20)"
+        ),
+    )
+
+    @property
+    def total(self) -> int:
+        return (
+            self.physics_accuracy + self.specificity + self.consistency + self.concision
+        )
+
+    @property
+    def score(self) -> float:
+        """Normalized quality score (0-1). Sum of 4 dimensions / 80."""
+        return self.total / 80.0
+
+    @property
+    def tier(self) -> str:
+        s = self.score
+        if s >= 0.85:
+            return "outstanding"
+        elif s >= 0.65:
+            return "good"
+        elif s >= 0.40:
+            return "inadequate"
+        return "poor"
+
+
+class StandardNameQualityReviewDescription(BaseModel):
+    """Review of one compose-time description using the 4-dimensional rubric."""
+
+    source_id: str = Field(description="Source entity ID being reviewed")
+    standard_name: str = Field(description="The standard name under review")
+    scores: StandardNameQualityScoreDescription = Field(
+        description="4-dimensional description quality scores"
+    )
+    reasoning: str = Field(
+        description="One-line justification covering the four dimensions"
+    )
+    issues: list[str] = Field(default_factory=list, description="Specific issues found")
+
+
+class StandardNameQualityReviewDescriptionBatch(BaseModel):
+    """LLM response for compose-time description quality review of a batch."""
+
+    reviews: list[StandardNameQualityReviewDescription]
+
+
+# =============================================================================
 # Enrichment models — documentation iteration (Phase 3D)
 # =============================================================================
 
