@@ -2346,7 +2346,23 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     parse_standard_name,
                 )
 
-                parsed = parse_standard_name(name_id)
+                try:
+                    parsed = parse_standard_name(name_id)
+                except Exception as _order_exc:
+                    # ISN ≥rc35 strict-order rejections carry the unique
+                    # canonical spelling — adopt it deterministically instead
+                    # of spending an L6 LLM retry. Anything else re-raises to
+                    # the L6 path below.
+                    _canonical = getattr(_order_exc, "canonical_form", None)
+                    if not _canonical:
+                        raise
+                    wlog.debug(
+                        "Canonical-order normalization: %r → %r",
+                        name_id,
+                        _canonical,
+                    )
+                    name_id = _canonical
+                    parsed = parse_standard_name(name_id)
                 normalized = compose_standard_name(parsed)
                 if normalized != name_id:
                     wlog.debug(
