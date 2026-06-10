@@ -3093,6 +3093,9 @@ class AgentsServer:
                 cocos_type: str | None = None,
                 physical_base: str | None = None,
                 subject: str | None = None,
+                aggregation: str | None = None,
+                orbit: str | None = None,
+                population: str | None = None,
                 transformation: str | None = None,
                 component: str | None = None,
                 coordinate: str | None = None,
@@ -3122,6 +3125,14 @@ class AgentsServer:
                         "pressure"). Matches the canonical ``sn.physical_base`` column.
                     subject: Filter by subject token (e.g. "electron", "ion").
                         Matches the canonical ``sn.subject`` column.
+                    aggregation: Filter by aggregation token (e.g. "total", "net").
+                        Matches the canonical ``sn.aggregation`` column.
+                    orbit: Filter by orbit-class token (e.g. "trapped",
+                        "co_passing", "counter_current"). Matches the canonical
+                        ``sn.orbit`` column.
+                    population: Filter by energy-state population token (e.g.
+                        "fast", "thermal", "suprathermal"). Matches the canonical
+                        ``sn.population`` column.
                     transformation: Filter by transformation token (e.g. "time_derivative").
                         Matches the canonical ``sn.transformation`` column.
                     component: Filter by component token (e.g. "toroidal", "radial").
@@ -3161,6 +3172,9 @@ class AgentsServer:
                     cocos_type=cocos_type,
                     physical_base=physical_base,
                     subject=subject,
+                    aggregation=aggregation,
+                    orbit=orbit,
+                    population=population,
                     transformation=transformation,
                     component=component,
                     coordinate=coordinate,

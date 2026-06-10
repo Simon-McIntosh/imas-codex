@@ -73,13 +73,13 @@ def _existing_tokens(segment: str) -> set[str]:
 
 # Segment → name of the StandardName property that stores its token.
 _SEGMENT_TO_SN_PROPERTY = {
-    "physical_base": "grammar_physical_base",
-    "geometric_base": "grammar_geometric_base",
-    "subject": "grammar_subject",
-    "component": "grammar_component",
-    "position": "grammar_position",
-    "transformation": "grammar_transformation",
-    "process": "grammar_process",
+    "physical_base": "physical_base",
+    "geometric_base": "geometric_base",
+    "subject": "subject",
+    "component": "component",
+    "position": "position",
+    "transformation": "transformation",
+    "process": "process",
 }
 
 

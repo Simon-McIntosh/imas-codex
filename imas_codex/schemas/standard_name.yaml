@@ -816,7 +816,7 @@ classes:
             - segment: string   — grammar segment name this token
               occupied (e.g. "subject", "transformation").
 
-          In addition to the generic HAS_SEGMENT edge, 10 typed edges are
+          In addition to the generic HAS_SEGMENT edge, 13 typed edges are
           written alongside it for direct graph traversal and MCP filtering
           (W40 Phase 4). The typed edges are keyed on segment name:
             physical_base  → HAS_PHYSICAL_BASE
@@ -829,6 +829,9 @@ classes:
             region         → HAS_REGION
             device         → HAS_DEVICE
             geometric_base → HAS_GEOMETRIC_BASE
+            aggregation    → HAS_AGGREGATION
+            orbit          → HAS_ORBIT
+            population     → HAS_POPULATION
           Each typed edge carries no extra properties; target is the same
           GrammarToken node referenced by HAS_SEGMENT. LinkML does not
           natively model edge labels, so the convention mirrors the
@@ -916,16 +919,102 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_GEOMETRIC_BASE
-      # --- Qualifier fields (R2 A.1 — wave_absorbed_power collapse) ---
-      species:
+      grammar_aggregation_token:
+        description: GrammarToken at the aggregation segment.
+        multivalued: true
+        range: GrammarToken
+        inlined: false
+        annotations:
+          relationship_type: HAS_AGGREGATION
+      grammar_orbit_token:
+        description: GrammarToken at the orbit segment.
+        multivalued: true
+        range: GrammarToken
+        inlined: false
+        annotations:
+          relationship_type: HAS_ORBIT
+      grammar_population_token:
+        description: GrammarToken at the population segment.
+        multivalued: true
+        range: GrammarToken
+        inlined: false
+        annotations:
+          relationship_type: HAS_POPULATION
+      # --- Bare-name grammar-decomposition columns ---
+      # These scalar columns are the canonical per-segment family written by
+      # `_write_grammar_decomposition` and the standard-name persist path
+      # (graph_ops.py). They mirror the typed HAS_* edges above and back the
+      # search/filter surface (search.py segment_filters, grammar_query tiers,
+      # MCP search_standard_names per-segment params). Property names equal the
+      # ISN pydantic StandardName segment attribute names.
+      physical_base:
         description: >-
-          Particle species qualifier (e.g., "electron", "deuterium",
-          "tritium"). Used to collapse species-specific variants into
-          a single parameterised standard name.
+          Core physical-quantity base token (grammar decomposition column,
+          e.g. "temperature", "magnetic_field"). Written by
+          `_write_grammar_decomposition` from the ISN parser.
+      geometric_base:
+        description: >-
+          Geometric carrier base token (grammar decomposition column,
+          e.g. "position", "area"). Written by `_write_grammar_decomposition`.
+      subject:
+        description: >-
+          Subject token (grammar decomposition column, e.g. "electron",
+          "ion"). Written by `_write_grammar_decomposition`.
+      aggregation:
+        description: >-
+          Aggregation token (grammar decomposition column). Single-token
+          closed segment: "total", "net". Renders ahead of subject in the ISN
+          order <aggregation>_<orbit>_<population>_<subject>_<base>. Written
+          by `_write_grammar_decomposition`.
+      orbit:
+        description: >-
+          Orbit-class token (grammar decomposition column). Single-token
+          closed segment: "trapped", "co_passing", "counter_passing",
+          "co_current", "counter_current". Written by
+          `_write_grammar_decomposition`.
       population:
         description: >-
-          Population qualifier (e.g., "thermal", "fast", "runaway").
-          Distinguishes kinetic sub-populations of the same species.
+          Energy-state population token (grammar decomposition column).
+          Single-token closed segment distinguishing kinetic sub-populations:
+          "fast", "thermal", "cold", "hot", "suprathermal", "molecular",
+          "bulk". Written by `_write_grammar_decomposition`.
+      transformation:
+        description: >-
+          Transformation prefix token (grammar decomposition column, e.g.
+          "time_derivative"). Written by `_write_grammar_decomposition`.
+      component:
+        description: >-
+          Vector-component token (grammar decomposition column, e.g.
+          "toroidal", "radial"). Written by `_write_grammar_decomposition`.
+      coordinate:
+        description: >-
+          Coordinate-axis token (grammar decomposition column, e.g.
+          "poloidal", "parallel"). Written by `_write_grammar_decomposition`.
+      process:
+        description: >-
+          Process / due_to_ token (grammar decomposition column). Written by
+          `_write_grammar_decomposition`.
+      position:
+        description: >-
+          Position qualifier token (grammar decomposition column, e.g.
+          "at_magnetic_axis"). Written by `_write_grammar_decomposition`.
+      region:
+        description: >-
+          Region qualifier token (grammar decomposition column). Written by
+          `_write_grammar_decomposition`.
+      device:
+        description: >-
+          Device qualifier token (grammar decomposition column). Written by
+          `_write_grammar_decomposition`.
+      object:
+        description: >-
+          Object token (grammar decomposition column). Written by
+          `_write_grammar_decomposition`.
+      geometry:
+        description: >-
+          Geometry token (grammar decomposition column). Written by
+          `_write_grammar_decomposition`.
+      # --- Qualifier fields (R2 A.1 — wave_absorbed_power collapse) ---
       toroidal_mode:
         description: >-
           Toroidal mode number qualifier. Used for Fourier-decomposed

@@ -105,49 +105,57 @@ def normalize_name_id(name: str) -> str:
 def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
     """Extract grammar segment fields from a parsed ISN IR object.
 
-    Maps ISN IR structure to the ``grammar_*`` properties on StandardName:
-    - ``base.token`` → ``grammar_physical_base`` (quantity) or
-      ``grammar_geometric_base`` (carrier)
-    - ``projection.axis`` → ``grammar_component`` (component shape) or
-      ``grammar_coordinate`` (coordinate shape)
-    - Qualifiers by category → ``grammar_subject``, ``grammar_position``,
-      ``grammar_process``, ``grammar_device``, ``grammar_region``
-    - First unary_prefix operator → ``grammar_transformation``
+    Maps ISN IR structure to the bare-name segment columns on StandardName
+    (the canonical family written by ``_write_grammar_decomposition``):
+    - ``base.token`` → ``physical_base`` (quantity) or
+      ``geometric_base`` (carrier)
+    - ``projection.axis`` → ``component`` (component shape) or
+      ``coordinate`` (coordinate shape)
+    - Qualifiers by category → ``subject``, ``position``, ``process``,
+      ``device``, ``region``
+    - First unary_prefix operator → ``transformation``
+
+    Note: the IR layer is vocabulary-agnostic and does not categorise the
+    single-token segments ``aggregation``/``orbit``/``population``; those
+    are backfilled by :func:`_enrich_segments_from_pydantic`.
     """
     segments: dict[str, str | None] = {
-        "grammar_physical_base": None,
-        "grammar_geometric_base": None,
-        "grammar_subject": None,
-        "grammar_component": None,
-        "grammar_coordinate": None,
-        "grammar_transformation": None,
-        "grammar_position": None,
-        "grammar_process": None,
-        "grammar_device": None,
-        "grammar_region": None,
+        "physical_base": None,
+        "geometric_base": None,
+        "subject": None,
+        "component": None,
+        "coordinate": None,
+        "transformation": None,
+        "position": None,
+        "process": None,
+        "device": None,
+        "region": None,
+        "aggregation": None,
+        "orbit": None,
+        "population": None,
     }
 
     if ir.base:
         kind = getattr(ir.base.kind, "value", str(ir.base.kind))
         if kind == "carrier":
-            segments["grammar_geometric_base"] = ir.base.token
+            segments["geometric_base"] = ir.base.token
         else:
-            segments["grammar_physical_base"] = ir.base.token
+            segments["physical_base"] = ir.base.token
 
     if ir.projection:
         shape = getattr(ir.projection.shape, "value", str(ir.projection.shape))
         if shape == "coordinate":
-            segments["grammar_coordinate"] = ir.projection.axis
+            segments["coordinate"] = ir.projection.axis
         else:
-            segments["grammar_component"] = ir.projection.axis
+            segments["component"] = ir.projection.axis
 
     # Map qualifiers by category
     category_to_field = {
-        "subject": "grammar_subject",
-        "position": "grammar_position",
-        "process": "grammar_process",
-        "device": "grammar_device",
-        "region": "grammar_region",
+        "subject": "subject",
+        "position": "position",
+        "process": "process",
+        "device": "device",
+        "region": "region",
     }
     for qual in ir.qualifiers or []:
         cat = qual.category
@@ -158,7 +166,7 @@ def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
     for op in ir.operators or []:
         kind = getattr(op.kind, "value", str(op.kind))
         if kind == "unary_prefix" and op.op:
-            segments["grammar_transformation"] = op.op
+            segments["transformation"] = op.op
             break
 
     return segments
@@ -181,21 +189,25 @@ def _enrich_segments_from_pydantic(
     except Exception:
         return segments
 
-    field_map = {
-        "grammar_physical_base": "physical_base",
-        "grammar_geometric_base": "geometric_base",
-        "grammar_subject": "subject",
-        "grammar_component": "component",
-        "grammar_coordinate": "coordinate",
-        "grammar_transformation": "transformation",
-        "grammar_position": "position",
-        "grammar_process": "process",
-        "grammar_device": "device",
-        "grammar_region": "region",
-    }
-    for graph_key, sn_attr in field_map.items():
+    # graph column name == ISN pydantic attribute name (bare family).
+    field_map = (
+        "physical_base",
+        "geometric_base",
+        "subject",
+        "component",
+        "coordinate",
+        "transformation",
+        "position",
+        "process",
+        "device",
+        "region",
+        "aggregation",
+        "orbit",
+        "population",
+    )
+    for graph_key in field_map:
         if segments.get(graph_key) is None:
-            val = getattr(sn, sn_attr, None)
+            val = getattr(sn, graph_key, None)
             if val is not None:
                 segments[graph_key] = val.value if hasattr(val, "value") else str(val)
 
@@ -207,22 +219,26 @@ def _parse_grammar(name: str) -> dict[str, str | None]:
 
     Returns a dict with ``grammar_parse_version`` (ISN package version string),
     ``validation_diagnostics_json`` (JSON array of diagnostic objects), and
-    all ``grammar_*`` segment fields extracted from the ISN IR.
+    all bare-name segment fields extracted from the ISN IR (the canonical
+    column family maintained by ``_write_grammar_decomposition``).
     The parse version is always set when ISN is available; diagnostics default
     to ``"[]"`` on parse failure so the field is never ``null`` after the first
     successful stamp.
     """
     segment_defaults: dict[str, str | None] = {
-        "grammar_physical_base": None,
-        "grammar_geometric_base": None,
-        "grammar_subject": None,
-        "grammar_component": None,
-        "grammar_coordinate": None,
-        "grammar_transformation": None,
-        "grammar_position": None,
-        "grammar_process": None,
-        "grammar_device": None,
-        "grammar_region": None,
+        "physical_base": None,
+        "geometric_base": None,
+        "subject": None,
+        "component": None,
+        "coordinate": None,
+        "transformation": None,
+        "position": None,
+        "process": None,
+        "device": None,
+        "region": None,
+        "aggregation": None,
+        "orbit": None,
+        "population": None,
     }
 
     try:
@@ -1597,8 +1613,8 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
 def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     """Attempt ISN parse on a parent name to extract grammar fields.
 
-    Returns a dict with grammar_* keys. On parse failure, all values are None.
-    Uses the same ``_extract_grammar_segments`` as ``_parse_grammar``.
+    Returns a dict with bare-name segment keys. On parse failure, all values
+    are None. Uses the same ``_extract_grammar_segments`` as ``_parse_grammar``.
     """
     try:
         from imas_standard_names.grammar.parser import ParseError, parse
@@ -1610,16 +1626,19 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     except Exception:  # noqa: BLE001
         logger.debug("ISN parse error for parent %s", name_id)
     return {
-        "grammar_physical_base": None,
-        "grammar_geometric_base": None,
-        "grammar_subject": None,
-        "grammar_component": None,
-        "grammar_coordinate": None,
-        "grammar_transformation": None,
-        "grammar_position": None,
-        "grammar_process": None,
-        "grammar_device": None,
-        "grammar_region": None,
+        "physical_base": None,
+        "geometric_base": None,
+        "subject": None,
+        "component": None,
+        "coordinate": None,
+        "transformation": None,
+        "position": None,
+        "process": None,
+        "device": None,
+        "region": None,
+        "aggregation": None,
+        "orbit": None,
+        "population": None,
     }
 
 
@@ -1906,16 +1925,32 @@ def _materialize_derived_parent_rows(
                 parent.needs_composition = null,
                 parent.chain_length = coalesce(parent.chain_length, 0),
                 parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),
-                parent.grammar_physical_base =
-                    coalesce($grammar_physical_base,
-                             parent.grammar_physical_base),
-                parent.grammar_subject =
-                    coalesce($grammar_subject, parent.grammar_subject),
-                parent.grammar_transformation =
-                    coalesce($grammar_transformation,
-                             parent.grammar_transformation),
-                parent.grammar_component =
-                    coalesce($grammar_component, parent.grammar_component),
+                parent.physical_base =
+                    coalesce($physical_base, parent.physical_base),
+                parent.geometric_base =
+                    coalesce($geometric_base, parent.geometric_base),
+                parent.subject =
+                    coalesce($subject, parent.subject),
+                parent.transformation =
+                    coalesce($transformation, parent.transformation),
+                parent.component =
+                    coalesce($component, parent.component),
+                parent.coordinate =
+                    coalesce($coordinate, parent.coordinate),
+                parent.position =
+                    coalesce($position, parent.position),
+                parent.process =
+                    coalesce($process, parent.process),
+                parent.device =
+                    coalesce($device, parent.device),
+                parent.region =
+                    coalesce($region, parent.region),
+                parent.aggregation =
+                    coalesce($aggregation, parent.aggregation),
+                parent.orbit =
+                    coalesce($orbit, parent.orbit),
+                parent.population =
+                    coalesce($population, parent.population),
                 parent.is_geometric_coordinate =
                     coalesce(parent.is_geometric_coordinate,
                              $is_geometric_coordinate)
@@ -2279,16 +2314,19 @@ def write_standard_names(
                 sn.embedded_at = coalesce(b.embedded_at, sn.embedded_at),
                 sn.grammar_parse_version = coalesce(b.grammar_parse_version, sn.grammar_parse_version),
                 sn.validation_diagnostics_json = coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json),
-                sn.grammar_physical_base = coalesce(b.grammar_physical_base, sn.grammar_physical_base),
-                sn.grammar_geometric_base = coalesce(b.grammar_geometric_base, sn.grammar_geometric_base),
-                sn.grammar_subject = coalesce(b.grammar_subject, sn.grammar_subject),
-                sn.grammar_component = coalesce(b.grammar_component, sn.grammar_component),
-                sn.grammar_coordinate = coalesce(b.grammar_coordinate, sn.grammar_coordinate),
-                sn.grammar_transformation = coalesce(b.grammar_transformation, sn.grammar_transformation),
-                sn.grammar_position = coalesce(b.grammar_position, sn.grammar_position),
-                sn.grammar_process = coalesce(b.grammar_process, sn.grammar_process),
-                sn.grammar_device = coalesce(b.grammar_device, sn.grammar_device),
-                sn.grammar_region = coalesce(b.grammar_region, sn.grammar_region),
+                sn.physical_base = coalesce(b.physical_base, sn.physical_base),
+                sn.geometric_base = coalesce(b.geometric_base, sn.geometric_base),
+                sn.subject = coalesce(b.subject, sn.subject),
+                sn.component = coalesce(b.component, sn.component),
+                sn.coordinate = coalesce(b.coordinate, sn.coordinate),
+                sn.transformation = coalesce(b.transformation, sn.transformation),
+                sn.position = coalesce(b.position, sn.position),
+                sn.process = coalesce(b.process, sn.process),
+                sn.device = coalesce(b.device, sn.device),
+                sn.region = coalesce(b.region, sn.region),
+                sn.aggregation = coalesce(b.aggregation, sn.aggregation),
+                sn.orbit = coalesce(b.orbit, sn.orbit),
+                sn.population = coalesce(b.population, sn.population),
                 sn.llm_cost_refine_name = CASE WHEN sn.generate_name_count IS NOT NULL
                                              AND sn.generate_name_count > 0
                                              AND b.llm_cost IS NOT NULL
@@ -3075,10 +3113,15 @@ def _resolve_grammar_token_version(gc: GraphClient, isn_version: str) -> str | N
     return None
 
 
-#: 12 ISN grammar segments stored as bare-name columns on StandardName nodes.
-#: Order matches `imas_standard_names.grammar.parser` model fields.
+#: ISN grammar segments stored as bare-name columns on StandardName nodes.
+#: Canonical render order places the single-token modifier segments
+#: (aggregation, orbit, population) ahead of subject, mirroring the ISN
+#: render order ``<aggregation>_<orbit>_<population>_<subject>_<base>``.
 _GRAMMAR_SEGMENT_COLUMNS = (
     "physical_base",
+    "aggregation",
+    "orbit",
+    "population",
     "subject",
     "transformation",
     "component",
@@ -3090,6 +3133,26 @@ _GRAMMAR_SEGMENT_COLUMNS = (
     "geometric_base",
     "object",
     "geometry",
+)
+
+#: Segment → typed-edge relationship type. Mirrors the GrammarToken edge
+#: convention declared in ``standard_name.yaml`` (grammar_*_token slots).
+#: Only segments that have a corresponding HAS_* typed edge appear here;
+#: ``coordinate``/``object``/``geometry`` carry no typed edge today.
+_SEGMENT_EDGE_TYPES: tuple[tuple[str, str], ...] = (
+    ("physical_base", "HAS_PHYSICAL_BASE"),
+    ("subject", "HAS_SUBJECT"),
+    ("transformation", "HAS_TRANSFORMATION"),
+    ("component", "HAS_COMPONENT"),
+    ("coordinate", "HAS_COORDINATE"),
+    ("process", "HAS_PROCESS"),
+    ("position", "HAS_POSITION"),
+    ("region", "HAS_REGION"),
+    ("device", "HAS_DEVICE"),
+    ("geometric_base", "HAS_GEOMETRIC_BASE"),
+    ("aggregation", "HAS_AGGREGATION"),
+    ("orbit", "HAS_ORBIT"),
+    ("population", "HAS_POPULATION"),
 )
 
 
@@ -3175,6 +3238,25 @@ def _write_grammar_decomposition(
     # idempotent reset before re-applying segment values.
     null_columns = dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
 
+    # Build Cypher fragments once from the trusted module constants. Property
+    # and relationship names come from a closed module-level tuple (never user
+    # input), so direct interpolation is safe.
+    edge_delete_types = "|".join(
+        ["HAS_SEGMENT", *(rel for _seg, rel in _SEGMENT_EDGE_TYPES)]
+    )
+    columns_to_null = ",\n                    ".join(
+        f"sn.{col} = null" for col in _GRAMMAR_SEGMENT_COLUMNS
+    )
+    columns_to_set = ",\n                ".join(
+        f"sn.{col} = ${col}" for col in _GRAMMAR_SEGMENT_COLUMNS
+    )
+    typed_edge_foreach = "\n                ".join(
+        f"FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = '{seg}' "
+        f"THEN [1] ELSE [] END |\n                    "
+        f"MERGE (sn)-[:{rel}]->(t)\n                )"
+        for seg, rel in _SEGMENT_EDGE_TYPES
+    )
+
     for sn_id in name_ids:
         try:
             parsed = parse_standard_name(sn_id)
@@ -3182,23 +3264,12 @@ def _write_grammar_decomposition(
             logger.warning("Grammar parse failed for '%s' — recording fallback", sn_id)
             # Clear columns + typed/segment edges, set fallback=true
             gc.query(
-                """
-                MATCH (sn:StandardName {id: $sn_id})
-                OPTIONAL MATCH (sn)-[r:HAS_SEGMENT|HAS_PHYSICAL_BASE|HAS_SUBJECT|HAS_TRANSFORMATION|HAS_COMPONENT|HAS_COORDINATE|HAS_PROCESS|HAS_POSITION|HAS_REGION|HAS_DEVICE|HAS_GEOMETRIC_BASE]->(:GrammarToken)
+                f"""
+                MATCH (sn:StandardName {{id: $sn_id}})
+                OPTIONAL MATCH (sn)-[r:{edge_delete_types}]->(:GrammarToken)
                 DELETE r
                 WITH sn
-                SET sn.physical_base = null,
-                    sn.subject = null,
-                    sn.transformation = null,
-                    sn.component = null,
-                    sn.coordinate = null,
-                    sn.process = null,
-                    sn.position = null,
-                    sn.region = null,
-                    sn.device = null,
-                    sn.geometric_base = null,
-                    sn.object = null,
-                    sn.geometry = null,
+                SET {columns_to_null},
                     sn.grammar_parse_fallback = true
                 """,
                 sn_id=sn_id,
@@ -3214,20 +3285,9 @@ def _write_grammar_decomposition(
             column_values[seg] = _coerce_segment_value(parsed_dump.get(seg))
 
         gc.query(
-            """
-            MATCH (sn:StandardName {id: $sn_id})
-            SET sn.physical_base = $physical_base,
-                sn.subject = $subject,
-                sn.transformation = $transformation,
-                sn.component = $component,
-                sn.coordinate = $coordinate,
-                sn.process = $process,
-                sn.position = $position,
-                sn.region = $region,
-                sn.device = $device,
-                sn.geometric_base = $geometric_base,
-                sn.object = $object,
-                sn.geometry = $geometry,
+            f"""
+            MATCH (sn:StandardName {{id: $sn_id}})
+            SET {columns_to_set},
                 sn.grammar_parse_fallback = false
             """,
             sn_id=sn_id,
@@ -3251,8 +3311,8 @@ def _write_grammar_decomposition(
 
         # Idempotent: drop existing typed/segment edges before re-writing.
         gc.query(
-            """
-            MATCH (sn:StandardName {id: $sn_id})-[r:HAS_SEGMENT|HAS_PHYSICAL_BASE|HAS_SUBJECT|HAS_TRANSFORMATION|HAS_COMPONENT|HAS_COORDINATE|HAS_PROCESS|HAS_POSITION|HAS_REGION|HAS_DEVICE|HAS_GEOMETRIC_BASE]->(:GrammarToken)
+            f"""
+            MATCH (sn:StandardName {{id: $sn_id}})-[r:{edge_delete_types}]->(:GrammarToken)
             DELETE r
             """,
             sn_id=sn_id,
@@ -3272,50 +3332,21 @@ def _write_grammar_decomposition(
 
         results = list(
             gc.query(
-                """
-                MATCH (sn:StandardName {id: $sn_id})
+                f"""
+                MATCH (sn:StandardName {{id: $sn_id}})
                 UNWIND $edges AS edge
-                OPTIONAL MATCH (t:GrammarToken {
+                OPTIONAL MATCH (t:GrammarToken {{
                     value: edge.token,
                     segment: edge.segment,
                     version: $token_version
-                })
+                }})
                 WITH sn, edge, t
                 FOREACH (_ IN CASE WHEN t IS NOT NULL THEN [1] ELSE [] END |
                     MERGE (sn)-[r:HAS_SEGMENT]->(t)
                     SET r.position = edge.position,
                         r.segment = edge.segment
                 )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'physical_base' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_PHYSICAL_BASE]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'subject' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_SUBJECT]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'transformation' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_TRANSFORMATION]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'component' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_COMPONENT]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'coordinate' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_COORDINATE]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'process' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_PROCESS]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'position' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_POSITION]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'region' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_REGION]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'device' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_DEVICE]->(t)
-                )
-                FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = 'geometric_base' THEN [1] ELSE [] END |
-                    MERGE (sn)-[:HAS_GEOMETRIC_BASE]->(t)
-                )
+                {typed_edge_foreach}
                 RETURN edge.token AS token,
                        edge.segment AS segment,
                        t IS NOT NULL AS matched

@@ -216,24 +216,27 @@ class TestWriteCypherInvariants:
 class TestGrammarParsing:
     """Verify _parse_grammar returns the expected keys.
 
-    Individual grammar_* segment fields (grammar_physical_base,
-    grammar_subject, etc.) are extracted from the ISN parser along with
-    ``grammar_parse_version`` (ISN version string) and
-    ``validation_diagnostics_json`` (JSON array).
+    Individual bare-name segment fields (physical_base, subject, etc.) are
+    extracted from the ISN parser along with ``grammar_parse_version``
+    (ISN version string) and ``validation_diagnostics_json`` (JSON array).
     """
 
     def test_parse_grammar_keys(self) -> None:
-        """_parse_grammar returns grammar_parse_version, validation_diagnostics_json, and grammar segment fields."""
+        """_parse_grammar returns grammar_parse_version, validation_diagnostics_json, and bare segment fields."""
         from imas_codex.standard_names.graph_ops import _parse_grammar
 
         result = _parse_grammar("electron_temperature")
         assert "grammar_parse_version" in result
         assert "validation_diagnostics_json" in result
-        # 10 grammar_* segment fields
-        assert "grammar_physical_base" in result
-        assert "grammar_subject" in result
-        assert "grammar_component" in result
-        assert len(result) == 12
+        # bare-name segment fields
+        assert "physical_base" in result
+        assert "subject" in result
+        assert "component" in result
+        assert "aggregation" in result
+        assert "orbit" in result
+        assert "population" in result
+        # 13 segment fields + grammar_parse_version + validation_diagnostics_json
+        assert len(result) == 15
 
     def test_parse_grammar_graceful_on_missing_package(self) -> None:
         """When imas_standard_names is unavailable, both fields are None."""

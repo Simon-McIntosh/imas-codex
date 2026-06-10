@@ -445,14 +445,16 @@ class TestSegmentEdgeRoundTrip:
         # Reconstruct segment list sorted by position
         sorted_edges = sorted(edges_param, key=lambda e: e["position"])
 
-        # Verify exact field values
+        # Verify exact field values. Positions are ISN SEGMENT_ORDER indices;
+        # since ISN ≥0.8.0rc32 reserves earlier slots for the single-token
+        # aggregation/orbit/population segments, subject=5 and physical_base=8.
         assert sorted_edges[0] == {
-            "position": 2,
+            "position": 5,
             "segment": "subject",
             "token": "electron",
         }
         assert sorted_edges[1] == {
-            "position": 5,
+            "position": 8,
             "segment": "physical_base",
             "token": "temperature",
         }
@@ -460,7 +462,9 @@ class TestSegmentEdgeRoundTrip:
     def test_round_trip_multi_segment_name(self, mock_gc: MagicMock) -> None:
         """A name with 3+ segments should produce edges with monotonically
         increasing positions matching ISN SEGMENT_ORDER."""
-        # poloidal_electron_temperature → component(0), subject(2), physical_base(5)
+        # poloidal_electron_temperature → component(0), subject(5), physical_base(8)
+        # (ISN ≥0.8.0rc32 SEGMENT_ORDER; aggregation/orbit/population reserve
+        # the earlier slots)
         mock_gc.query.side_effect = [
             [],  # column SET
             [],  # DELETE

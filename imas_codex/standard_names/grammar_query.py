@@ -3,7 +3,7 @@
 Pure, dependency-light helpers used by the three-stream RRF in
 ``imas_codex.standard_names.search``.
 
-The grammar stream partitions the 12 ISN segments into three tiers and
+The grammar stream partitions the ISN segments into three tiers and
 applies tier-dependent RRF weights. See plan 40 §5.4 for rationale and
 worked example.
 """
@@ -58,8 +58,19 @@ TIER1_SEGMENTS: Final[frozenset[str]] = frozenset(
 
 #: Tier 2 — operational modifiers. Contributes only with a Tier-1 anchor
 #: AND co-occurrence in the vector or keyword stream (v3.2 strict AND-gate).
+#: aggregation/orbit/population are discriminative name-prefix modifiers
+#: (e.g. total_, trapped_, fast_) that narrow a physical anchor — they behave
+#: like the other operational modifiers, so they join Tier 2.
 TIER2_SEGMENTS: Final[frozenset[str]] = frozenset(
-    {"transformation", "component", "position", "process"}
+    {
+        "transformation",
+        "component",
+        "position",
+        "process",
+        "aggregation",
+        "orbit",
+        "population",
+    }
 )
 
 #: Tier 3 — geometric / device modifiers. Tie-break boost only; never

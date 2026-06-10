@@ -95,10 +95,10 @@ def test_extract_segments_physical_vector_component():
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("toroidal_magnetic_field")
-    assert result["grammar_physical_base"] == "magnetic_field"
-    assert result["grammar_component"] == "toroidal"
-    assert result["grammar_coordinate"] is None
-    assert result["grammar_geometric_base"] is None
+    assert result["physical_base"] == "magnetic_field"
+    assert result["component"] == "toroidal"
+    assert result["coordinate"] is None
+    assert result["geometric_base"] is None
     assert result["grammar_parse_version"] is not None
 
 
@@ -107,9 +107,9 @@ def test_extract_segments_scalar_quantity():
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("pressure")
-    assert result["grammar_physical_base"] == "pressure"
-    assert result["grammar_component"] is None
-    assert result["grammar_coordinate"] is None
+    assert result["physical_base"] == "pressure"
+    assert result["component"] is None
+    assert result["coordinate"] is None
 
 
 def test_extract_segments_unparseable_name():
@@ -118,8 +118,8 @@ def test_extract_segments_unparseable_name():
 
     result = _parse_grammar("nonexistent_gibberish_xyzzy")
     assert result["grammar_parse_version"] is not None
-    assert result["grammar_physical_base"] is None
-    assert result["grammar_component"] is None
+    assert result["physical_base"] is None
+    assert result["component"] is None
     assert result["validation_diagnostics_json"] == "[]"
 
 
@@ -128,31 +128,46 @@ def test_extract_segments_parseable_compound():
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("electron_temperature")
-    assert result["grammar_physical_base"] == "temperature"
-    assert result["grammar_subject"] == "electron"
-    assert result["grammar_component"] is None
+    assert result["physical_base"] == "temperature"
+    assert result["subject"] == "electron"
+    assert result["component"] is None
 
 
 def test_extract_segments_all_keys_present():
-    """All grammar_* keys must be present even on parse failure."""
+    """All bare segment keys must be present even on parse failure."""
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("nonexistent_gibberish_xyzzy")
     expected_keys = {
         "grammar_parse_version",
         "validation_diagnostics_json",
-        "grammar_physical_base",
-        "grammar_geometric_base",
-        "grammar_subject",
-        "grammar_component",
-        "grammar_coordinate",
-        "grammar_transformation",
-        "grammar_position",
-        "grammar_process",
-        "grammar_device",
-        "grammar_region",
+        "physical_base",
+        "geometric_base",
+        "subject",
+        "aggregation",
+        "orbit",
+        "population",
+        "component",
+        "coordinate",
+        "transformation",
+        "position",
+        "process",
+        "device",
+        "region",
     }
     assert expected_keys <= set(result.keys())
+
+
+def test_extract_segments_new_single_token_modifiers():
+    """aggregation / orbit / population are extracted via Pydantic enrichment."""
+    from imas_codex.standard_names.graph_ops import _parse_grammar
+
+    result = _parse_grammar("total_trapped_fast_ion_energy")
+    assert result["aggregation"] == "total"
+    assert result["orbit"] == "trapped"
+    assert result["population"] == "fast"
+    assert result["subject"] == "ion"
+    assert result["physical_base"] == "energy"
 
 
 # ── Grammar field persistence tests (P1) ──
@@ -191,16 +206,19 @@ def test_write_standard_names_persists_grammar_segments():
 
     # All grammar segment fields must appear in the SET clause with coalesce
     grammar_fields = [
-        "grammar_physical_base",
-        "grammar_geometric_base",
-        "grammar_subject",
-        "grammar_component",
-        "grammar_coordinate",
-        "grammar_transformation",
-        "grammar_position",
-        "grammar_process",
-        "grammar_device",
-        "grammar_region",
+        "physical_base",
+        "geometric_base",
+        "subject",
+        "aggregation",
+        "orbit",
+        "population",
+        "component",
+        "coordinate",
+        "transformation",
+        "position",
+        "process",
+        "device",
+        "region",
     ]
     for field in grammar_fields:
         assert f"sn.{field}" in merge_cypher, f"MERGE Cypher must SET sn.{field}"
@@ -242,9 +260,9 @@ def test_write_standard_names_batch_includes_grammar_segments():
     entry = batch[0]
 
     # electron_temperature → physical_base=temperature, subject=electron
-    assert entry["grammar_physical_base"] == "temperature", (
-        "grammar_physical_base should be 'temperature' for electron_temperature"
+    assert entry["physical_base"] == "temperature", (
+        "physical_base should be 'temperature' for electron_temperature"
     )
-    assert entry["grammar_subject"] == "electron", (
-        "grammar_subject should be 'electron' for electron_temperature"
+    assert entry["subject"] == "electron", (
+        "subject should be 'electron' for electron_temperature"
     )

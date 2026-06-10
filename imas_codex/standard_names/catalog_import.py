@@ -373,28 +373,22 @@ def _write_import_entries(
         batch=entries,
     )
 
-    # Grammar fields (separate SET to keep queries readable)
-    grammar_batch = [
-        {k: v for k, v in e.items() if k == "id" or k.startswith("grammar_")}
-        for e in entries
-    ]
+    # Grammar fields (separate SET to keep queries readable). The bare-name
+    # segment columns are the canonical family written everywhere
+    # (graph persist + _write_grammar_decomposition); build the SET clause
+    # programmatically from the trusted module constant.
+    from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
+
+    grammar_keys = {"id", *_GRAMMAR_SEGMENT_COLUMNS}
+    grammar_batch = [{k: v for k, v in e.items() if k in grammar_keys} for e in entries]
+    set_clause = ",\n            ".join(
+        f"sn.{col} = b.{col}" for col in _GRAMMAR_SEGMENT_COLUMNS
+    )
     gc.query(
-        """
+        f"""
         UNWIND $batch AS b
-        MATCH (sn:StandardName {id: b.id})
-        SET sn.grammar_component = b.grammar_component,
-            sn.grammar_coordinate = b.grammar_coordinate,
-            sn.grammar_subject = b.grammar_subject,
-            sn.grammar_physical_base = b.grammar_physical_base,
-            sn.grammar_geometric_base = b.grammar_geometric_base,
-            sn.grammar_process = b.grammar_process,
-            sn.grammar_transformation = b.grammar_transformation,
-            sn.grammar_object = b.grammar_object,
-            sn.grammar_geometry = b.grammar_geometry,
-            sn.grammar_position = b.grammar_position,
-            sn.grammar_device = b.grammar_device,
-            sn.grammar_secondary_base = b.grammar_secondary_base,
-            sn.grammar_binary_operator = b.grammar_binary_operator
+        MATCH (sn:StandardName {{id: b.id}})
+        SET {set_clause}
         """,
         batch=grammar_batch,
     )
