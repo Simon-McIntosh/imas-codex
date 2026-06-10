@@ -53,18 +53,29 @@ enums:
         description: Manually curated
       reference:
         description: Seeded from ISN reference library
+      catalog:
+        description: >-
+          Imported from the ISN catalog. Set on StandardName.source_types
+          for names that originate from a catalog round-trip rather than
+          pipeline extraction (see catalog_import.py).
 
   StandardNameStatus:
     description: >-
-      Catalog-authoritative lifecycle status for standard names.
-      Maps to ISN StatusEnum values (published, drafted, accepted,
-      superseded, deprecated). Set by catalog import; pipeline defaults
-      to 'drafted'.
+      Catalog-authoritative lifecycle status for standard names. Maps to the
+      ISN catalog Status vocabulary (draft, active, deprecated, superseded).
+      Set directly from the imported catalog entry's status by catalog
+      import; pipeline and export default to 'draft'.
     permissible_values:
+      draft:
+        description: >-
+          Draft — not yet active in the catalog. Default for pipeline-
+          generated and freshly exported names.
+      active:
+        description: Active in the catalog — editorial content is authoritative
       published:
-        description: Published in the catalog — editorial content is authoritative
-      drafted:
-        description: Draft — not yet published to catalog
+        description: >-
+          Published in the catalog. Legacy alias retained for entries
+          imported before the ISN catalog standardised on 'active'.
       accepted:
         description: Accepted by reviewers — scheduled for next release
       superseded:
@@ -520,6 +531,31 @@ classes:
           value. A name with sources from {transport, equilibrium}
           will have ``physics_domain='equilibrium'`` (promoted) and
           ``source_domains=['transport', 'equilibrium']``.
+        multivalued: true
+        range: string
+      primary_cluster_id:
+        description: >-
+          ID of the primary semantic cluster this standard name belongs to.
+          Scalar source for the IN_CLUSTER edge (see primary_cluster_ref).
+          Set at compose time from the highest-ranked contributing DD
+          source's cluster (see sources/dd.py and enrichment.py).
+      run_id:
+        description: >-
+          ID of the sn run that produced this standard name. Propagated from
+          the originating StandardNameSource at compose time. Used for
+          run-scoped filtering (``--focus``) and provenance.
+      semantic_sim:
+        description: >-
+          Semantic-similarity score (0-1) from the duplicate-detection gate.
+          Cosine similarity of this name's embedding to its nearest existing
+          neighbour at compose time. Written by the semantic-similarity check
+          regardless of outcome (see workers.py).
+        range: float
+      tags:
+        description: >-
+          Free-form editorial tags carried on the standard name. Set during
+          refine and round-tripped through the catalog. Multivalued string
+          list.
         multivalued: true
         range: string
       cocos_transformation_type:
@@ -1280,6 +1316,45 @@ classes:
         inlined: false
         annotations:
           relationship_type: REFINED_FROM
+      loci:
+        description: >-
+          Locus nodes grouping standard names that share the same ISN locus
+          qualifier (e.g. magnetic_axis, plasma_boundary). Direction:
+          (StandardName)-[:HAS_LOCUS]->(Locus). Emitted by derive_edges() for
+          locus-qualified names (see imas_codex/standard_names/derivation.py)
+          and persisted by _write_standard_name_edges. The HAS_LOCUS edge
+          carries ``locus_token`` and ``locus_relation`` properties on the
+          Cypher edge (LinkML does not model edge properties).
+        multivalued: true
+        range: Locus
+        inlined: false
+        annotations:
+          relationship_type: HAS_LOCUS
+
+  Locus:
+    description: >-
+      A shared ISN locus token (e.g. magnetic_axis, plasma_boundary,
+      separatrix) that groups locus-qualified standard names. Created by
+      the standard-name derivation layer when a name carries a locus
+      qualifier; each StandardName sharing that locus links to the same
+      Locus node via HAS_LOCUS.
+
+      Inbound relationships:
+        - (StandardName)-[:HAS_LOCUS]->(Locus)
+
+      Example Cypher:
+        MATCH (sn:StandardName)-[:HAS_LOCUS]->(loc:Locus {id: 'magnetic_axis'})
+        RETURN sn.id
+    class_uri: sn:Locus
+    attributes:
+      id:
+        identifier: true
+        description: >-
+          The locus token string (e.g. "magnetic_axis", "plasma_boundary").
+          Globally unique — loci are shared across standard names.
+        required: true
+      description:
+        description: Human-readable description of this locus.
 
   DocsRevision:
     description: >-
@@ -1482,6 +1557,13 @@ classes:
           queried for paths, units, and documentation when this source
           was first extracted. Plain string provenance, not a relationship.
         range: string
+      physics_domain:
+        description: >-
+          Physics domain of this source entity at extraction time. For DD
+          sources, copied from the IMASNode's physics_domain; for signal
+          sources, from the FacilitySignal. Plain string provenance — drives
+          the batch_key grouping and is promoted onto the produced
+          StandardName. Set in batch_create_sources (see graph_ops.py).
 
   SNRun:
     description: >-

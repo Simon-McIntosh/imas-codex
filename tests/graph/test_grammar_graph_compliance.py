@@ -30,9 +30,18 @@ def segment_order():
 
 @pytest.fixture(scope="module")
 def grammar_segments(graph_client):
-    """Fetch all GrammarSegment nodes from the graph."""
+    """Fetch GrammarSegment nodes for the active grammar version.
+
+    The graph retains GrammarSegment nodes for every synced ISN release
+    (the schema explicitly allows versions to coexist). Only the active
+    version's segments should be checked against the installed ISN
+    SEGMENT_ORDER — stale historical versions carry positions from older
+    grammars and are not drift.
+    """
     results = graph_client.query(
-        "MATCH (s:GrammarSegment) RETURN s.name AS name, s.position AS position"
+        "MATCH (g:ISNGrammarVersion {active: true}) "
+        "MATCH (s:GrammarSegment {version: g.version}) "
+        "RETURN s.name AS name, s.position AS position"
     )
     return results
 

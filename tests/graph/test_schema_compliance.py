@@ -22,7 +22,10 @@ class TestLabelsAndRelationships:
 
     # Internal labels that are not in the LinkML schema.
     # GraphMeta is an infrastructure singleton for graph identity/metadata.
-    INTERNAL_LABELS: set[str] = {"GraphMeta"}
+    # Fanout is a runtime-telemetry node (like LLMCost in spirit) written
+    # directly via Cypher with no Pydantic model — deliberately exempt from
+    # schema management (see imas_codex/standard_names/fanout/telemetry.py).
+    INTERNAL_LABELS: set[str] = {"GraphMeta", "Fanout"}
 
     def test_all_labels_in_schema(self, graph_labels, schema):
         """Every label in the graph must be defined in the schema."""
