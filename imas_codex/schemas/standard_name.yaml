@@ -72,12 +72,6 @@ enums:
           generated and freshly exported names.
       active:
         description: Active in the catalog — editorial content is authoritative
-      published:
-        description: >-
-          Published in the catalog. Legacy alias retained for entries
-          imported before the ISN catalog standardised on 'active'.
-      accepted:
-        description: Accepted by reviewers — scheduled for next release
       superseded:
         description: Replaced by another standard name (see superseded_by)
       deprecated:

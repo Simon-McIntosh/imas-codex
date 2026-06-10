@@ -580,7 +580,7 @@ Four independent axes on each `StandardName` (full state tables in the doc):
 |------|--------|--------|
 | `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | pool workers (`refining` reverts after 600 s orphan sweep) |
 | `pipeline_status` | `drafted → published → accepted` | `sn run` → `export` → `import` (catalog round-trip) |
-| `status` | `draft → published → deprecated` | catalog import (ISN vocabulary lifecycle) |
+| `status` | `draft → active → {deprecated \| superseded}` | catalog import (ISN vocabulary lifecycle) |
 | `validation_status` | `pending → valid \| quarantined` | compose worker (gates review/consolidation/export) |
 
 `origin`: `pipeline` | `catalog_edit` (human-edited; `filter_protected()` skips
