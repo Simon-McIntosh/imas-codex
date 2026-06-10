@@ -2576,10 +2576,19 @@ def _create_cocos_clusters(client: GraphClient) -> int:
         clusters=clusters,
     )
 
-    # Create IN_CLUSTER relationships
+    # Refresh IN_CLUSTER relationships. Clear stale memberships first —
+    # MERGE alone accumulates members across runs as node categories and
+    # COCOS labels evolve, drifting actual edges away from path_count.
     for row in labels:
         label = row["label"]
         cluster_id = f"cocos_{label}"
+        client.query(
+            """
+            MATCH (cl:IMASSemanticCluster {id: $cluster_id})<-[r:IN_CLUSTER]-()
+            DELETE r
+            """,
+            cluster_id=cluster_id,
+        )
         client.query(
             """
             MATCH (p:IMASNode)
@@ -2648,6 +2657,16 @@ def _create_physics_clusters(client: GraphClient) -> int:
             ids_names=ids_names,
         )
 
+        # Refresh memberships: clear stale IN_CLUSTER edges first — MERGE
+        # alone accumulates members across runs as paths/categories evolve,
+        # drifting actual edges away from path_count.
+        client.query(
+            """
+            MATCH (cl:IMASSemanticCluster {id: $cluster_id})<-[r:IN_CLUSTER]-()
+            DELETE r
+            """,
+            cluster_id=cluster_id,
+        )
         path_ids = [p["id"] for p in matching]
         client.query(
             """
