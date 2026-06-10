@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 
 def test_grammar_context_contract():
     """Verify get_grammar_context() returns all keys codex depends on."""
@@ -102,22 +104,30 @@ def test_extract_segments_physical_vector_component():
     assert result["grammar_parse_version"] is not None
 
 
-def test_extract_segments_scalar_quantity():
-    """Verify extraction of physical_base for a plain scalar."""
+def test_extract_segments_bare_generic_base_is_fallback():
+    """A bare generic base (e.g. 'pressure') is model-invalid → fallback.
+
+    The ISN pydantic model rejects generic physical_base tokens without a
+    subject; since the model is the single accept/reject authority, the
+    persist path records fallback with all segment columns None — exactly
+    like ``_write_grammar_decomposition``.
+    """
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("pressure")
-    assert result["physical_base"] == "pressure"
+    assert result["grammar_parse_fallback"] is True
+    assert result["physical_base"] is None
     assert result["component"] is None
     assert result["coordinate"] is None
 
 
 def test_extract_segments_unparseable_name():
-    """Unparseable names get version but null segment fields."""
+    """Unparseable names get version + fallback but null segment fields."""
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("nonexistent_gibberish_xyzzy")
     assert result["grammar_parse_version"] is not None
+    assert result["grammar_parse_fallback"] is True
     assert result["physical_base"] is None
     assert result["component"] is None
     assert result["validation_diagnostics_json"] == "[]"
@@ -141,6 +151,7 @@ def test_extract_segments_all_keys_present():
     expected_keys = {
         "grammar_parse_version",
         "validation_diagnostics_json",
+        "grammar_parse_fallback",
         "physical_base",
         "geometric_base",
         "subject",
@@ -154,12 +165,14 @@ def test_extract_segments_all_keys_present():
         "process",
         "device",
         "region",
+        "object",
+        "geometry",
     }
     assert expected_keys <= set(result.keys())
 
 
 def test_extract_segments_new_single_token_modifiers():
-    """aggregation / orbit / population are extracted via Pydantic enrichment."""
+    """aggregation / orbit / population are extracted from the pydantic model."""
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     result = _parse_grammar("total_trapped_fast_ion_energy")
@@ -168,6 +181,77 @@ def test_extract_segments_new_single_token_modifiers():
     assert result["population"] == "fast"
     assert result["subject"] == "ion"
     assert result["physical_base"] == "energy"
+
+
+# ── Persist / decomposition parser parity ──
+
+
+def _decomposition_write(name: str) -> tuple[bool, dict | None]:
+    """Run _write_grammar_decomposition against a mock graph.
+
+    Returns ``(fallback, columns)`` where *columns* is the segment-value
+    dict passed to the column-write Cypher (None on fallback).
+    """
+    from unittest.mock import MagicMock
+
+    from imas_codex.standard_names.graph_ops import (
+        _GRAMMAR_SEGMENT_COLUMNS,
+        _write_grammar_decomposition,
+    )
+
+    mock_gc = MagicMock()
+    mock_gc.query = MagicMock(return_value=[])
+    _write_grammar_decomposition(mock_gc, [name])
+    for call in mock_gc.query.call_args_list:
+        cypher = call[0][0]
+        if "grammar_parse_fallback = true" in cypher:
+            return True, None
+        if "grammar_parse_fallback = false" in cypher:
+            return False, {seg: call[1].get(seg) for seg in _GRAMMAR_SEGMENT_COLUMNS}
+    raise AssertionError(f"no column-write query issued for {name!r}")
+
+
+@pytest.mark.parametrize(
+    ("name", "expect_fallback"),
+    [
+        ("total_trapped_fast_ion_energy", False),
+        ("fast_thermal_ion_density", True),  # same-segment population stacking
+        ("pressure", True),  # bare generic base — model-invalid
+        ("nonexistent_gibberish_xyzzy", True),  # unknown base token
+    ],
+)
+def test_persist_and_decomposition_parity(name: str, expect_fallback: bool):
+    """The persist path (_parse_grammar) and the decomposition writer
+    (_write_grammar_decomposition) share the same pydantic accept/reject
+    authority: for ANY name string the fallback flags agree and, on
+    success, the segment columns equal the pydantic model fields.
+    """
+    from imas_standard_names.grammar import parse_standard_name
+
+    from imas_codex.standard_names.graph_ops import (
+        _GRAMMAR_SEGMENT_COLUMNS,
+        _parse_grammar,
+        _segments_from_model,
+    )
+
+    pg = _parse_grammar(name)
+    decomp_fallback, decomp_cols = _decomposition_write(name)
+
+    assert pg["grammar_parse_fallback"] is expect_fallback
+    assert decomp_fallback is expect_fallback
+
+    persist_cols = {seg: pg[seg] for seg in _GRAMMAR_SEGMENT_COLUMNS}
+    if expect_fallback:
+        assert all(v is None for v in persist_cols.values()), (
+            f"fallback must clear all persist columns for {name!r}"
+        )
+    else:
+        assert persist_cols == decomp_cols, (
+            f"persist and decomposition columns diverge for {name!r}"
+        )
+        assert persist_cols == _segments_from_model(parse_standard_name(name)), (
+            f"columns must equal the pydantic model fields for {name!r}"
+        )
 
 
 # ── Grammar field persistence tests (P1) ──

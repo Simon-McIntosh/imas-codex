@@ -102,181 +102,92 @@ def normalize_name_id(name: str) -> str:
     return name.lower()
 
 
-def _extract_grammar_segments(ir: Any) -> dict[str, str | None]:
-    """Extract grammar segment fields from a parsed ISN IR object.
+def _segments_from_model(parsed: Any) -> dict[str, str | None]:
+    """Extract all bare-name segment columns from an ISN pydantic StandardName.
 
-    Maps ISN IR structure to the bare-name segment columns on StandardName
-    (the canonical family written by ``_write_grammar_decomposition``):
-    - ``base.token`` → ``physical_base`` (quantity) or
-      ``geometric_base`` (carrier)
-    - ``projection.axis`` → ``component`` (component shape) or
-      ``coordinate`` (coordinate shape)
-    - Qualifiers by category → ``subject``, ``position``, ``process``,
-      ``device``, ``region``
-    - First unary_prefix operator → ``transformation``
+    Single extraction authority shared by the persist path
+    (:func:`_parse_grammar`), the decomposition writer
+    (:func:`_write_grammar_decomposition`), and the derived-parent seeding
+    path (:func:`_parse_parent_grammar`). Graph column names equal the ISN
+    pydantic ``StandardName`` segment attribute names, so the mapping is a
+    direct ``model_dump`` projection over ``_GRAMMAR_SEGMENT_COLUMNS``.
 
-    Note: the IR layer is vocabulary-agnostic and does not categorise the
-    single-token segments ``aggregation``/``orbit``/``population``; those
-    are backfilled by :func:`_enrich_segments_from_pydantic`.
+    Args:
+        parsed: Result of ``imas_standard_names.grammar.parse_standard_name``.
+
+    Returns:
+        Dict with one entry per segment in ``_GRAMMAR_SEGMENT_COLUMNS``;
+        absent segments are ``None``, enum values are coerced to ``str``.
     """
-    segments: dict[str, str | None] = {
-        "physical_base": None,
-        "geometric_base": None,
-        "subject": None,
-        "component": None,
-        "coordinate": None,
-        "transformation": None,
-        "position": None,
-        "process": None,
-        "device": None,
-        "region": None,
-        "aggregation": None,
-        "orbit": None,
-        "population": None,
+    dump = parsed.model_dump() if hasattr(parsed, "model_dump") else dict(parsed)
+    return {
+        seg: _coerce_segment_value(dump.get(seg)) for seg in _GRAMMAR_SEGMENT_COLUMNS
     }
 
-    if ir.base:
-        kind = getattr(ir.base.kind, "value", str(ir.base.kind))
-        if kind == "carrier":
-            segments["geometric_base"] = ir.base.token
-        else:
-            segments["physical_base"] = ir.base.token
 
-    if ir.projection:
-        shape = getattr(ir.projection.shape, "value", str(ir.projection.shape))
-        if shape == "coordinate":
-            segments["coordinate"] = ir.projection.axis
-        else:
-            segments["component"] = ir.projection.axis
-
-    # Map qualifiers by category
-    category_to_field = {
-        "subject": "subject",
-        "position": "position",
-        "process": "process",
-        "device": "device",
-        "region": "region",
-    }
-    for qual in ir.qualifiers or []:
-        cat = qual.category
-        if cat and cat in category_to_field:
-            segments[category_to_field[cat]] = qual.token
-
-    # First unary_prefix operator → transformation
-    for op in ir.operators or []:
-        kind = getattr(op.kind, "value", str(op.kind))
-        if kind == "unary_prefix" and op.op:
-            segments["transformation"] = op.op
-            break
-
-    return segments
-
-
-def _enrich_segments_from_pydantic(
-    name: str, segments: dict[str, str | None]
-) -> dict[str, str | None]:
-    """Fill ``None`` segment slots using ISN's Pydantic model.
-
-    The IR parser is vocabulary-agnostic — qualifiers like ``electron``
-    get ``category=None``. The Pydantic ``parse_standard_name`` layer
-    categorises them (``subject=electron``). This function backfills
-    any slots the IR left empty.
-    """
-    try:
-        from imas_standard_names.grammar import parse_standard_name
-
-        sn = parse_standard_name(name)
-    except Exception:
-        return segments
-
-    # graph column name == ISN pydantic attribute name (bare family).
-    field_map = (
-        "physical_base",
-        "geometric_base",
-        "subject",
-        "component",
-        "coordinate",
-        "transformation",
-        "position",
-        "process",
-        "device",
-        "region",
-        "aggregation",
-        "orbit",
-        "population",
-    )
-    for graph_key in field_map:
-        if segments.get(graph_key) is None:
-            val = getattr(sn, graph_key, None)
-            if val is not None:
-                segments[graph_key] = val.value if hasattr(val, "value") else str(val)
-
-    return segments
-
-
-def _parse_grammar(name: str) -> dict[str, str | None]:
+def _parse_grammar(name: str) -> dict[str, Any]:
     """Parse ``name`` with the ISN grammar API.
 
-    Returns a dict with ``grammar_parse_version`` (ISN package version string),
-    ``validation_diagnostics_json`` (JSON array of diagnostic objects), and
-    all bare-name segment fields extracted from the ISN IR (the canonical
-    column family maintained by ``_write_grammar_decomposition``).
-    The parse version is always set when ISN is available; diagnostics default
-    to ``"[]"`` on parse failure so the field is never ``null`` after the first
-    successful stamp.
-    """
-    segment_defaults: dict[str, str | None] = {
-        "physical_base": None,
-        "geometric_base": None,
-        "subject": None,
-        "component": None,
-        "coordinate": None,
-        "transformation": None,
-        "position": None,
-        "process": None,
-        "device": None,
-        "region": None,
-        "aggregation": None,
-        "orbit": None,
-        "population": None,
-    }
+    Accept/reject and segment extraction are owned by the ISN pydantic
+    ``parse_standard_name()`` — the same authority
+    ``_write_grammar_decomposition`` uses, so persist-time columns and
+    decomposition-time columns always agree. The lower-level IR ``parse()``
+    is retained ONLY to produce ``validation_diagnostics_json`` (the one
+    artefact the pydantic layer does not provide).
 
+    Returns a dict with ``grammar_parse_version`` (ISN package version
+    string), ``validation_diagnostics_json`` (JSON array of diagnostic
+    objects, ``"[]"`` when the IR parser rejects the name),
+    ``grammar_parse_fallback`` (``True`` when the pydantic model rejects the
+    name — stacked tokens, bare generic base, unknown token — matching the
+    fallback semantics of ``_write_grammar_decomposition``), and all
+    bare-name segment columns (all ``None`` on fallback).
+    """
     try:
         import dataclasses
 
         import imas_standard_names
-        from imas_standard_names.grammar.parser import ParseError, parse
+        from imas_standard_names.grammar import parse_standard_name
+        from imas_standard_names.grammar.parser import parse
 
         version: str = imas_standard_names.__version__
     except ImportError:
         return {
             "grammar_parse_version": None,
             "validation_diagnostics_json": None,
-            **segment_defaults,
+            "grammar_parse_fallback": None,
+            **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS),
         }
 
-    segments = dict(segment_defaults)
+    # IR parse — diagnostics only, never segments.
     try:
         result = parse(name)
         diags = json.dumps([dataclasses.asdict(d) for d in result.diagnostics])
-        segments = _extract_grammar_segments(result.ir)
-        # Pydantic model provides richer categorisation (e.g. subject)
-        segments = _enrich_segments_from_pydantic(name, segments)
-    except ParseError:
+    except Exception:
         logger.debug(
             "ISN grammar parse rejected '%s' — storing empty diagnostics", name
         )
         diags = "[]"
+
+    # Pydantic model — accept/reject + segment authority.
+    try:
+        parsed = parse_standard_name(name)
     except Exception:
         logger.debug(
-            "ISN grammar parse failed for '%s' — storing empty diagnostics", name
+            "ISN model rejected '%s' — fallback, segment columns cleared", name
         )
-        diags = "[]"
+        return {
+            "grammar_parse_version": version,
+            "validation_diagnostics_json": diags,
+            "grammar_parse_fallback": True,
+            **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS),
+        }
 
     return {
         "grammar_parse_version": version,
         "validation_diagnostics_json": diags,
-        **segments,
+        "grammar_parse_fallback": False,
+        **_segments_from_model(parsed),
     }
 
 
@@ -1613,33 +1524,20 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
 def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     """Attempt ISN parse on a parent name to extract grammar fields.
 
-    Returns a dict with bare-name segment keys. On parse failure, all values
-    are None. Uses the same ``_extract_grammar_segments`` as ``_parse_grammar``.
+    Returns a dict with bare-name segment keys. On parse/model failure, all
+    values are None. Uses the same ``parse_standard_name`` +
+    ``_segments_from_model`` authority as ``_parse_grammar`` and
+    ``_write_grammar_decomposition``.
     """
     try:
-        from imas_standard_names.grammar.parser import ParseError, parse
+        from imas_standard_names.grammar import parse_standard_name
 
-        result = parse(name_id)
-        return _extract_grammar_segments(result.ir)
-    except (ImportError, ParseError):
-        logger.debug("ISN parse failed for parent %s", name_id)
+        return _segments_from_model(parse_standard_name(name_id))
+    except ImportError:
+        logger.debug("ISN unavailable — no grammar for parent %s", name_id)
     except Exception:  # noqa: BLE001
-        logger.debug("ISN parse error for parent %s", name_id)
-    return {
-        "physical_base": None,
-        "geometric_base": None,
-        "subject": None,
-        "component": None,
-        "coordinate": None,
-        "transformation": None,
-        "position": None,
-        "process": None,
-        "device": None,
-        "region": None,
-        "aggregation": None,
-        "orbit": None,
-        "population": None,
-    }
+        logger.debug("ISN model rejected parent %s", name_id)
+    return dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
 
 
 def _query_seedable_derived_parents(
@@ -1951,6 +1849,10 @@ def _materialize_derived_parent_rows(
                     coalesce($orbit, parent.orbit),
                 parent.population =
                     coalesce($population, parent.population),
+                parent.object =
+                    coalesce($object, parent.object),
+                parent.geometry =
+                    coalesce($geometry, parent.geometry),
                 parent.is_geometric_coordinate =
                     coalesce(parent.is_geometric_coordinate,
                              $is_geometric_coordinate)
@@ -2313,6 +2215,7 @@ def write_standard_names(
                 sn.embedding = coalesce(b.embedding, sn.embedding),
                 sn.embedded_at = coalesce(b.embedded_at, sn.embedded_at),
                 sn.grammar_parse_version = coalesce(b.grammar_parse_version, sn.grammar_parse_version),
+                sn.grammar_parse_fallback = coalesce(b.grammar_parse_fallback, sn.grammar_parse_fallback),
                 sn.validation_diagnostics_json = coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json),
                 sn.physical_base = coalesce(b.physical_base, sn.physical_base),
                 sn.geometric_base = coalesce(b.geometric_base, sn.geometric_base),
@@ -2327,6 +2230,8 @@ def write_standard_names(
                 sn.aggregation = coalesce(b.aggregation, sn.aggregation),
                 sn.orbit = coalesce(b.orbit, sn.orbit),
                 sn.population = coalesce(b.population, sn.population),
+                sn.object = coalesce(b.object, sn.object),
+                sn.geometry = coalesce(b.geometry, sn.geometry),
                 sn.llm_cost_refine_name = CASE WHEN sn.generate_name_count IS NOT NULL
                                              AND sn.generate_name_count > 0
                                              AND b.llm_cost IS NOT NULL
@@ -3234,10 +3139,6 @@ def _write_grammar_decomposition(
     # from ISN but can never match — exclude them from token-miss detection.
     synced_segments = _resolve_synced_segments(gc, token_version)
 
-    # Constant column-clear template — used both on parse error and as the
-    # idempotent reset before re-applying segment values.
-    null_columns = dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
-
     # Build Cypher fragments once from the trusted module constants. Property
     # and relationship names come from a closed module-level tuple (never user
     # input), so direct interpolation is safe.
@@ -3277,12 +3178,9 @@ def _write_grammar_decomposition(
             continue
 
         # ---- Always-on column write ------------------
-        column_values = {**null_columns}
-        parsed_dump = (
-            parsed.model_dump() if hasattr(parsed, "model_dump") else dict(parsed)
-        )
-        for seg in _GRAMMAR_SEGMENT_COLUMNS:
-            column_values[seg] = _coerce_segment_value(parsed_dump.get(seg))
+        # Shared extraction authority — identical to the persist path
+        # (_parse_grammar), so columns can never diverge between the two.
+        column_values = _segments_from_model(parsed)
 
         gc.query(
             f"""

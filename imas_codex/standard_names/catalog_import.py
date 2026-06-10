@@ -135,7 +135,12 @@ def _derive_domain_from_path(yaml_path: Path) -> str | None:
 
 
 def _grammar_decomposition(name: str) -> dict[str, str | None]:
-    """Parse name via ISN grammar, returning grammar_* fields."""
+    """Parse name via ISN grammar.
+
+    Returns the bare-name segment columns plus ``grammar_parse_version``,
+    ``validation_diagnostics_json`` and ``grammar_parse_fallback`` — the
+    same dict the persist path writes (single extraction authority).
+    """
     from imas_codex.standard_names.graph_ops import _parse_grammar
 
     return _parse_grammar(name)
@@ -379,10 +384,11 @@ def _write_import_entries(
     # programmatically from the trusted module constant.
     from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
 
-    grammar_keys = {"id", *_GRAMMAR_SEGMENT_COLUMNS}
+    grammar_keys = {"id", "grammar_parse_fallback", *_GRAMMAR_SEGMENT_COLUMNS}
     grammar_batch = [{k: v for k, v in e.items() if k in grammar_keys} for e in entries]
     set_clause = ",\n            ".join(
-        f"sn.{col} = b.{col}" for col in _GRAMMAR_SEGMENT_COLUMNS
+        f"sn.{col} = b.{col}"
+        for col in (*_GRAMMAR_SEGMENT_COLUMNS, "grammar_parse_fallback")
     )
     gc.query(
         f"""
