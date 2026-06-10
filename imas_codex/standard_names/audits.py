@@ -962,19 +962,16 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
         from imas_standard_names.grammar import parse_standard_name
 
         parsed = parse_standard_name(name)
-        # StandardName has subject, subject2 fields (or similar)
-        # Check if multiple subject values are present
-        subjects = []
-        if hasattr(parsed, "subject") and parsed.subject is not None:
-            subjects.append(str(parsed.subject))
-        # Check for compound subject patterns in the name itself
-        # (two different species/subject tokens)
+        # Binary operator implies two operands — this is legitimate
         if hasattr(parsed, "binary_operator") and parsed.binary_operator is not None:
-            # Binary operator implies two operands — this is legitimate
             return issues
     except Exception:
-        # Parse failure is handled by grammar round-trip check
-        return issues
+        # Parse failure (incl. ISN ≥rc35 stacking / non-canonical-order
+        # rejections) does NOT exempt the name from this audit — the greedy
+        # heuristic below is purely lexical. Multi-subject names like
+        # ``electron_deuterium_density`` raise at parse and must still be
+        # flagged with the specific multi-subject reason.
+        pass
 
     # Heuristic: check if name contains two subject enum values.
     # Use greedy longest-match so compound subjects like
