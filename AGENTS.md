@@ -528,8 +528,8 @@ uv run imas-codex release --final -m '<msg>'
 
 Pools run concurrently weighted by `POOL_WEIGHTS`. **Acceptance overrides cap**
 (a passing score wins even at the final rotation). **Escalation:** the final
-refine attempt switches to `--escalation-model` (default
-`openrouter/anthropic/claude-opus-4.6`). **Backlog throttle:** refine_name
+refine attempt switches to `--escalation-model` (default: the local
+compose model — override for a paid frontier final attempt). **Backlog throttle:** refine_name
 backlog > 0.5 × generate_name backlog dampens generate weight 0.5×.
 `--cost-limit` is a single shared budget pool; `Ctrl-C` writes an audit `SNRun`.
 Scope routing: `--only <phase>` (single phase, e.g. `--only reconcile`),

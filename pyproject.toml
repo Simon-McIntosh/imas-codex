@@ -308,7 +308,7 @@ reasoning-effort = "high"
 model = "openrouter/openai/gpt-5.5"
 # Reasoning effort for refine_name / refine_docs rewrites (and the opus
 # escalation on the final rotation). "high" — NOT "max": these route through
-# OpenRouter (gpt-5.5 + the opus-4.6 escalator), which accepts only
+# OpenRouter (gpt-5.5; escalation default is local v4-flash), which accepts only
 # low|medium|high. "max" is a vLLM/DeepSeek-only level (see [sn-compose]).
 reasoning-effort = "high"
 
@@ -503,7 +503,7 @@ disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-review.names.profiles.opus-only]
 # Single-model mode: maximum quality, maximum cost (requires OpenRouter credits).
-models = ["openrouter/anthropic/claude-opus-4.6"]
+models = ["openrouter/anthropic/claude-opus-4.8"]
 disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
@@ -546,7 +546,10 @@ compose-models = [
 ]
 # Frontier model used as independent judge for quality scoring.
 # Must be a strong reasoning model — evaluates 5 dimensions (0-100).
-reviewer-model = "openrouter/anthropic/claude-opus-4.6"
+# opus-4.8 (2026-06-11, user): same price as 4.6, stronger; matches the
+# production quorum breaker. NOTE: all 2026-06-10/11 bake-off scorecards
+# were judged by opus-4.6 — re-anchor before comparing across that boundary.
+reviewer-model = "openrouter/anthropic/claude-opus-4.8"
 # Multiple reviewer models for multi-reviewer matrix benchmark.
 # Each reviewer scores independently; pairwise agreement is computed.
 #
