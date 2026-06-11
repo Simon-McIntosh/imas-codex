@@ -286,13 +286,19 @@ model = "openrouter/openai/gpt-5.4"
 batch-size = 50
 
 [tool.imas-codex.sn-docs]
-# Phase 1 (2026-05-18): switched from local DS4-flash to GPT-5.5 after
-# critical-quality regression (rsd=1.0 false positives on hallucinated
-# poloidal-flux docs). Docs require strong physics fidelity — DS4-flash
-# was producing plausible-but-wrong embellishment that the DS4 reviewer
-# blindly approved. Switch-back to local: model="hosted_vllm/deepseek-v4-flash"
-# with api-base="http://98dci4-gpu-0003:18800/v1", api-key-env="AMBIX_API_KEY".
-model = "openrouter/openai/gpt-5.5"
+# Docs bake-off (2026-06-11, grounded claim-verification rubric with DD
+# ground truth in judge context, dual judges opus-4.6 + qwen3.7-max):
+# sonnet-4.6 judge-mean leader (0.740 vs gpt-5.5 0.700) at ~40% of the
+# price, AND passed the adversarial physics probe with DD-exact definitions
+# (magnetic_shear rho_tor convention, beta_pol 4*int(p dV)/(R0*mu0*Ip^2)).
+# deepseek-v4-flash REJECTED for docs (2nd time): textbook-plausible
+# definitional drift vs the DD, fabricated cross-links, and a genuine
+# physics error (I_p = int(j_par dS)) — generation depth does not transfer
+# to long-form physics prose. Names/compose verdict is separate ([sn-compose]).
+# Switch-back: model="openrouter/openai/gpt-5.5".
+model = "openrouter/anthropic/claude-sonnet-4.6"
+# Reasoning effort for docs prose (OpenRouter unified field).
+reasoning-effort = "high"
 
 [tool.imas-codex.sn-refine]
 # Phase 1 (2026-05-18): aligned with sn-docs/sn-compose; refine is where
