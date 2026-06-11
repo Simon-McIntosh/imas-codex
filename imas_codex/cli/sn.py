@@ -65,29 +65,21 @@ class _SpaceSplitMultiple(click.Option):
         return tuple(flat)
 
 
-def _check_llm_direct() -> tuple[bool, str]:
-    """Check LLM endpoint health for the SN compose pipeline.
+def _check_local_llm() -> tuple[bool, str]:
+    """Probe the local GPU model server configured for SN compose.
 
-    Probes the configured compose model endpoint — either a local GPU/vLLM
-    server (via ``api-base``) or OpenRouter (via API key).
+    Sends an **authenticated** ``GET {api-base}/models`` — vLLM launched
+    with ``--api-key`` returns 401 on every unauthenticated route, so the
+    probe must carry the key from ``api-key-env`` or a healthy server is
+    misreported as unreachable.
 
-    Returns ``(healthy, detail)`` where detail is a concise label shown in the
-    SERVERS row.  Failure reasons are distinguished so operators know immediately
-    whether the issue is infrastructure (server down, no key) or account-level
-    (credits exhausted, rate limited):
-
-    Local server:
-      - ``"gpu-model:ok"``        — server responding
-      - ``"gpu-model:down"``      — connection refused (server not running)
-      - ``"gpu-model:unreachable"`` — network/timeout (server exists but unreachable)
-
-    OpenRouter:
-      - ``"openrouter:ok"``        — key valid and credits available
-      - ``"openrouter:no key"``    — ``OPENROUTER_API_KEY_IMAS_CODEX`` not set
-      - ``"openrouter:no credit"`` — 402 / insufficient credits
-      - ``"openrouter:rate limit"`` — 429 / too many requests
-      - ``"openrouter:auth error"`` — 401 / bad key
-      - ``"openrouter:unreachable"`` — network/timeout
+    Returns ``(healthy, detail)``:
+      - healthy   → detail is the served model's short name (e.g.
+        ``"deepseek-v4-flash"``)
+      - unhealthy → detail is a concise reason: ``"down"`` (connection
+        refused), ``"timeout"``, ``"unreachable"``, ``"auth error"``
+        (server up, key rejected), ``"key missing"`` (server up, no key
+        in the environment), or ``"HTTP <code>"``.
     """
     import os
     import urllib.error
@@ -97,49 +89,85 @@ def _check_llm_direct() -> tuple[bool, str]:
 
     cfg = get_model_config("sn-compose")
     api_base = cfg.get("api_base")
+    if not api_base:
+        return False, "not configured"
 
-    if api_base:
-        # Local/self-hosted GPU model server — probe /v1/models
-        url = api_base.rstrip("/")
-        try:
-            req = urllib.request.Request(f"{url}/models", method="GET")
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                if resp.status == 200:
-                    return True, "gpu-model:ok"
-        except urllib.error.URLError as exc:
-            reason = str(exc.reason).lower()
-            if "connection refused" in reason or "actively refused" in reason:
-                return False, "gpu-model:down"
-            return False, "gpu-model:unreachable"
-        except Exception:
-            pass
-        return False, "gpu-model:unreachable"
+    model_label = (cfg.get("model") or "").rsplit("/", 1)[-1] or "local"
+    key_env = cfg.get("api_key_env") or ""
+    key = os.getenv(key_env, "") if key_env else ""
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
 
-    # OpenRouter path
+    url = f"{api_base.rstrip('/')}/models"
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            if resp.status == 200:
+                return True, model_label
+            return False, f"HTTP {resp.status}"
+    except urllib.error.HTTPError as exc:
+        # The server responded — it is up.  4xx here is a key problem,
+        # not an availability problem.
+        if exc.code in (401, 403):
+            return False, "auth error" if key else "key missing"
+        return False, f"HTTP {exc.code}"
+    except urllib.error.URLError as exc:
+        reason = str(exc.reason).lower()
+        if "connection refused" in reason or "actively refused" in reason:
+            return False, "down"
+        if "timed out" in reason or "timeout" in reason:
+            return False, "timeout"
+        return False, "unreachable"
+    except Exception:
+        return False, "unreachable"
+
+
+def _check_openrouter() -> tuple[bool, str]:
+    """Probe OpenRouter key validity and remaining credit.
+
+    The SN pipeline routes docs, refine, and the review quorum through
+    OpenRouter regardless of where compose runs, so this check is always
+    registered.  Uses the free ``/auth/key`` endpoint (no completion
+    request, no cost).
+
+    Returns ``(healthy, detail)``:
+      - healthy   → ``"ok"``, with remaining credit appended when the
+        account reports a limit (e.g. ``"ok $123"``)
+      - unhealthy → ``"no key"``, ``"no credit"``, ``"rate limited"``,
+        ``"auth error"``, ``"unreachable"``, or ``"HTTP <code>"``.
+    """
+    import json
+    import os
+    import urllib.error
+    import urllib.request
+
     key = os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
     if not key:
-        return False, "openrouter:no key"
+        return False, "no key"
     try:
         req = urllib.request.Request(
             "https://openrouter.ai/api/v1/auth/key",
             headers={"Authorization": f"Bearer {key}"},
         )
         with urllib.request.urlopen(req, timeout=5) as resp:
-            if resp.status == 200:
-                return True, "openrouter:ok"
+            if resp.status != 200:
+                return False, f"HTTP {resp.status}"
+            data = json.loads(resp.read()).get("data") or {}
+            remaining = data.get("limit_remaining")
+            if isinstance(remaining, int | float):
+                return True, f"ok ${remaining:,.0f}"
+            return True, "ok"
     except urllib.error.HTTPError as exc:
         if exc.code == 402:
-            return False, "openrouter:no credit"
+            return False, "no credit"
         if exc.code == 429:
-            return False, "openrouter:rate limit"
+            return False, "rate limited"
         if exc.code == 401:
-            return False, "openrouter:auth error"
-        return False, f"openrouter:error {exc.code}"
+            return False, "auth error"
+        return False, f"HTTP {exc.code}"
     except urllib.error.URLError:
-        return False, "openrouter:unreachable"
+        return False, "unreachable"
     except Exception:
-        pass
-    return False, "openrouter:unreachable"
+        return False, "unreachable"
 
 
 def _require_embed_ready(command_label: str) -> None:
@@ -198,14 +226,26 @@ def _split_whitespace(
     return tuple(out)
 
 
-def _compute_pool_pending(
+def _compute_pool_progress(
     gc: object,
     domains: list[str] | None,
     rotation_cap: int,
     min_score: float,
     scope_run_id: str | None = None,
-) -> dict[str, int]:
-    """Return per-pool pending counts mirroring ``claim_*_batch`` predicates.
+) -> dict[str, dict[str, int]]:
+    """Return per-pool ``{"pending": int, "done": int}`` from one query.
+
+    ``pending`` mirrors the ``claim_*_batch`` predicates (work the loop
+    can still claim).  ``done`` counts work already persisted in the
+    graph — across *all* runs — so the display can show true pipeline
+    position instead of restarting at 0 % each session:
+
+    - ``generate_name``: sources processed (composed/attached/vocab_gap/failed)
+    - ``review_name``:   names with a reviewer score
+    - ``refine_name``:   refined name nodes (``chain_length > 0``)
+    - ``generate_docs``: names whose docs left ``pending``
+    - ``review_docs``:   names with a docs reviewer score
+    - ``refine_docs``:   total docs refine operations (Σ ``docs_chain_length``)
 
     Keys: ``generate_name``, ``review_name``, ``refine_name``,
     ``generate_docs``, ``review_docs``, ``refine_docs``.
@@ -289,8 +329,52 @@ def _compute_pool_pending(
         {scope_filter_sn}
       RETURN count(sn) AS refine_docs
     }}
+    CALL {{
+      MATCH (s:StandardNameSource)
+      WHERE s.status IN ['composed', 'attached', 'vocab_gap', 'failed']
+        {domain_filter_src}
+        {scope_filter_src}
+      RETURN count(s) AS generate_name_done
+    }}
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE sn.reviewer_score_name IS NOT NULL
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN count(sn) AS review_name_done
+    }}
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE coalesce(sn.chain_length, 0) > 0
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN count(sn) AS refine_name_done
+    }}
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE sn.docs_stage IS NOT NULL AND sn.docs_stage <> 'pending'
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN count(sn) AS generate_docs_done
+    }}
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE sn.reviewer_score_docs IS NOT NULL
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN count(sn) AS review_docs_done
+    }}
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE coalesce(sn.docs_chain_length, 0) > 0
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN coalesce(sum(sn.docs_chain_length), 0) AS refine_docs_done
+    }}
     RETURN generate_name, review_name, refine_name,
-           generate_docs, review_docs, refine_docs
+           generate_docs, review_docs, refine_docs,
+           generate_name_done, review_name_done, refine_name_done,
+           generate_docs_done, review_docs_done, refine_docs_done
     """
     params: dict[str, object] = {
         "rotation_cap": rotation_cap,
@@ -300,28 +384,45 @@ def _compute_pool_pending(
         params["domains"] = list(domains)
     if scope_run_id:
         params["scope_run_id"] = scope_run_id
+    pools = (
+        "generate_name",
+        "review_name",
+        "refine_name",
+        "generate_docs",
+        "review_docs",
+        "refine_docs",
+    )
     rows = list(gc.query(query, **params))  # type: ignore[attr-defined]
     if not rows:
-        return {
-            "generate_name": 0,
-            "review_name": 0,
-            "refine_name": 0,
-            "generate_docs": 0,
-            "review_docs": 0,
-            "refine_docs": 0,
-        }
+        return {k: {"pending": 0, "done": 0} for k in pools}
     r = rows[0]
     return {
-        k: int(r.get(k, 0))
-        for k in (
-            "generate_name",
-            "review_name",
-            "refine_name",
-            "generate_docs",
-            "review_docs",
-            "refine_docs",
-        )
+        k: {"pending": int(r.get(k, 0)), "done": int(r.get(f"{k}_done", 0) or 0)}
+        for k in pools
     }
+
+
+def _compute_pool_pending(
+    gc: object,
+    domains: list[str] | None,
+    rotation_cap: int,
+    min_score: float,
+    scope_run_id: str | None = None,
+) -> dict[str, int]:
+    """Per-pool pending counts mirroring ``claim_*_batch`` predicates.
+
+    Thin projection of :func:`_compute_pool_progress` — used by the run
+    loop's exit watchdog and pool weighting, which only need the
+    claimable backlog.
+    """
+    progress = _compute_pool_progress(
+        gc,
+        domains=domains,
+        rotation_cap=rotation_cap,
+        min_score=min_score,
+        scope_run_id=scope_run_id,
+    )
+    return {k: v["pending"] for k, v in progress.items()}
 
 
 def _run_sn_cmd(
@@ -384,35 +485,52 @@ def _run_sn_cmd(
     cli_console: Console | None = None
     _on_event: Callable[[dict[str, Any]], None] | None = None
 
-    # Shared pending-count callable for both Rich and headless modes.
-    # Uses the module-level _compute_pool_pending() so there's exactly
-    # one Cypher query mirroring claim predicates.
+    # Shared progress callable for both Rich and headless modes.  One
+    # Cypher query returns pending (mirroring claim predicates) and done
+    # (cross-run graph baseline) per pool; a 1 s cache serves both the
+    # display ticker and the loop's exit watchdog.
     from imas_codex.graph.client import GraphClient as _GC
 
     _domains_list: list[str] | None = list(domains) if domains else None
     _rc = rotation_cap if rotation_cap is not None else 3
     _ms = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _scope_run_id = scope_run_id
+    _POOLS = (
+        "generate_name",
+        "review_name",
+        "refine_name",
+        "generate_docs",
+        "review_docs",
+        "refine_docs",
+    )
+
+    _progress_cache: dict[str, tuple[float, dict[str, dict[str, int]]]] = {
+        "v": (0.0, {})
+    }
+
+    def _pool_progress_fn() -> dict[str, dict[str, int]]:
+        """Cached per-pool {pending, done} counts (1 s TTL)."""
+        import time as _t
+
+        now = _t.monotonic()
+        ts, val = _progress_cache["v"]
+        if not val or (now - ts) > 1.0:
+            try:
+                with _GC() as gc:
+                    val = _compute_pool_progress(
+                        gc,
+                        domains=_domains_list,
+                        rotation_cap=_rc,
+                        min_score=_ms,
+                        scope_run_id=_scope_run_id,
+                    )
+            except Exception:
+                val = {k: {"pending": 0, "done": 0} for k in _POOLS}
+            _progress_cache["v"] = (now, val)
+        return val
 
     def _pool_pending_fn() -> dict[str, int]:
-        try:
-            with _GC() as gc:
-                return _compute_pool_pending(
-                    gc,
-                    domains=_domains_list,
-                    rotation_cap=_rc,
-                    min_score=_ms,
-                    scope_run_id=_scope_run_id,
-                )
-        except Exception:
-            return {
-                "generate_name": 0,
-                "review_name": 0,
-                "refine_name": 0,
-                "generate_docs": 0,
-                "review_docs": 0,
-                "refine_docs": 0,
-            }
+        return {k: v["pending"] for k, v in _pool_progress_fn().items()}
 
     if use_rich:
         cli_console = Console()
@@ -434,24 +552,12 @@ def _run_sn_cmd(
 
         from imas_codex.standard_names.display import SN6PoolDisplay
 
-        _pending_cache: dict[str, tuple[float, dict[str, int]]] = {"v": (0.0, {})}
-
-        def _display_pending_fn() -> dict[str, int]:
-            """Cached pending counts for the display (returns dict)."""
-            import time as _t
-
-            now = _t.monotonic()
-            ts, val = _pending_cache["v"]
-            if not val or (now - ts) > 1.0:
-                val = _pool_pending_fn()
-                _pending_cache["v"] = (now, val)
-            return val
-
         display = SN6PoolDisplay(
             cost_limit=cost_limit,
             console=cli_console,
-            pending_fn=_display_pending_fn,
+            progress_fn=_pool_progress_fn,
             accumulated_cost_fn=_cost_fn,
+            flush=flush,
         )
         _on_event = display.on_event
     else:
@@ -469,16 +575,34 @@ def _run_sn_cmd(
     if not dry_run:
         _require_embed_ready("sn run")
 
-    # Build harness config — SN pipeline wants graph + model status at top.
-    # SN pipeline bypasses the LiteLLM proxy (uses direct OpenRouter), so
-    # we skip the proxy health check and add a direct-routing check instead.
+    # Build harness config — the SERVERS row mirrors the endpoints this
+    # run actually uses: graph, the local embedding server, the local GPU
+    # compose endpoint (when [sn-compose].api-base is set), and OpenRouter
+    # (docs / refine / review quorum).  The LiteLLM proxy check is skipped —
+    # SN routes around the proxy.
+    _llm_checks: list[tuple[str, Any, dict[str, Any]]] = []
+    if use_rich and not dry_run:
+        from imas_codex.settings import get_model_config as _gmc
+
+        if _gmc("sn-compose").get("api_base"):
+            _llm_checks.append(
+                ("gpu", _check_local_llm, {"poll_interval": 30.0, "critical": False})
+            )
+        _llm_checks.append(
+            (
+                "openrouter",
+                _check_openrouter,
+                {"poll_interval": 60.0, "critical": False},
+            )
+        )
+
     disc_config = DiscoveryConfig(
         domain="standard-names",
         facility="sn",
         facility_config={},  # SN has no facility YAML
         display=display,
         check_graph=not dry_run,
-        check_embed=False,
+        check_embed=not dry_run,
         check_ssh=False,
         check_auth=False,
         check_model=False,  # proxy check is misleading — SN uses direct bypass
@@ -500,15 +624,7 @@ def _run_sn_cmd(
         ]
         if use_rich
         else [],
-        extra_service_checks=[
-            (
-                "llm",
-                _check_llm_direct,
-                {"poll_interval": 60.0, "critical": False},
-            ),
-        ]
-        if use_rich and not dry_run
-        else [],
+        extra_service_checks=_llm_checks,
     )
 
     async def async_main(stop_event, service_monitor):

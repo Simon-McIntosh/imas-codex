@@ -354,6 +354,8 @@ class PoolDisplayState:
     name: str
     completed: int = 0
     total: int = 0
+    #: Claimable backlog from the graph (refreshed via ``refresh_progress``).
+    pending: int = 0
     cost: float = 0.0
     start_time: float = field(default_factory=time.time)
 
@@ -386,7 +388,7 @@ class PoolDisplayState:
 
     @property
     def remaining(self) -> int:
-        return max(0, self.total - self.completed)
+        return max(self.pending, self.total - self.completed, 0)
 
     @property
     def ratio(self) -> float:
@@ -604,20 +606,26 @@ def render_full_display(
 
 
 class SN6PoolDisplay(BaseProgressDisplay):
-    """Full-width 7-pool display using the canonical ``BaseProgressDisplay``.
+    """Full-width 6-pool display using the canonical ``BaseProgressDisplay``.
 
-    Internally tracks 7 pools (generate_name, review_name, refine_name,
-    generate_docs, review_docs, refine_docs, embed_name) but renders
-    only 5 display rows by merging generate+refine into combined rows.
+    Internally tracks 6 pools (generate_name, review_name, refine_name,
+    generate_docs, review_docs, refine_docs) but renders only 4 display
+    rows by merging generate+refine into combined rows.
 
     Usage::
 
         display = SN6PoolDisplay(
             cost_limit=5.0,
-            pending_fn=_pending_fn,
+            progress_fn=_progress_fn,
             accumulated_cost_fn=_cost_fn,
         )
         display.on_event({"pool": "review_name", "name": "e_temp", "score": 0.85, ...})
+
+    ``progress_fn`` returns ``{pool: {"pending": int, "done": int}}`` —
+    pending mirrors the claim predicates, done counts work already
+    persisted in the graph (prior runs included).  This seeds the bars
+    with cross-run pipeline position instead of starting at 0 % every
+    session.
 
     The ``on_event`` method is the callback wired into worker pools.
     Each call pushes an item into the corresponding pool's
@@ -629,8 +637,9 @@ class SN6PoolDisplay(BaseProgressDisplay):
         *,
         cost_limit: float = 0.0,
         console: Any | None = None,
-        pending_fn: Any | None = None,
+        progress_fn: Any | None = None,
         accumulated_cost_fn: Any | None = None,
+        flush: bool = False,
     ) -> None:
         super().__init__(
             facility="sn",
@@ -638,8 +647,11 @@ class SN6PoolDisplay(BaseProgressDisplay):
             console=console,
             title_suffix="Standard Name",
         )
-        self._pending_fn = pending_fn
+        self._progress_fn = progress_fn
         self._accumulated_cost_fn = accumulated_cost_fn
+        #: Flush mode: generate_name is gated, so its (large) source
+        #: backlog is excluded from row totals, ETA, and ETC projection.
+        self._flush = flush
 
         # Per-pool observable state (7 pools).
         # PoolDisplayState tracks completed/total/cost; WorkerStats drives
@@ -658,6 +670,12 @@ class SN6PoolDisplay(BaseProgressDisplay):
         # stats.last_batch_time; progress.py passes it to stream_queue.add).
         self._pending_stream: dict[str, list] = {name: [] for name in POOL_ORDER}
         self._batch_start: dict[str, float] = {}  # pool → first-event timestamp
+
+    # ── Header ─────────────────────────────────────────────────────────
+
+    def _header_mode_label(self) -> str | None:
+        """Show FLUSH in the header when draining without generation."""
+        return "FLUSH" if self._flush else None
 
     # ── Event callback (wired into workers) ───────────────────────────
 
@@ -701,35 +719,36 @@ class SN6PoolDisplay(BaseProgressDisplay):
             ws.total = max(state.total, state.completed)
             ws.cost = state.cost
 
-    # ── Pending count / total refresh ─────────────────────────────────
+    # ── Graph progress refresh ────────────────────────────────────────
 
-    def refresh_pending(self) -> None:
-        """Refresh pool totals from the pending-count callback.
+    def refresh_progress(self) -> None:
+        """Refresh pool completed/pending counts from the graph callback.
 
-        The pending-count function returns a dict keyed by pool name
-        (``generate_name``, ``review_name``, etc.) with current pending
-        counts.  Total for each pool is ``completed + pending`` where
-        ``completed`` is tracked locally via :meth:`on_event`.
+        ``progress_fn`` returns ``{pool: {"pending": int, "done": int}}``.
+        The graph is the source of truth: ``completed`` is the graph-side
+        done count (which includes prior runs and concurrent sessions),
+        ratcheted against optimistic ``on_event`` increments so the bar
+        never steps backwards between graph refreshes.  ``total`` is
+        ``completed + pending`` and tracks the live backlog in both
+        directions (work can be added or drained).
         """
-        if self._pending_fn is None:
+        if self._progress_fn is None:
             return
         try:
-            counts = self._pending_fn()
+            counts = self._progress_fn()
         except Exception:
             return
 
-        # counts may be either a dict or a list of (name, count) tuples.
-        if isinstance(counts, list):
-            counts = dict(counts)
-
         for pool_name in POOL_ORDER:
             state = self.pools.get(pool_name)
-            if state is None:
+            entry = counts.get(pool_name) if isinstance(counts, dict) else None
+            if state is None or not isinstance(entry, dict):
                 continue
-            pending = int(counts.get(pool_name, 0))
-            new_total = state.completed + pending
-            if new_total > state.total:
-                state.total = new_total
+            pending = int(entry.get("pending", 0))
+            done = int(entry.get("done", 0))
+            state.pending = pending
+            state.completed = max(state.completed, done)
+            state.total = state.completed + pending
 
             # Sync WorkerStats for canonical rendering.
             ws = self._pool_stats.get(pool_name)
@@ -740,11 +759,26 @@ class SN6PoolDisplay(BaseProgressDisplay):
 
     # ── Canonical display methods (override BaseProgressDisplay) ──────
 
+    def _row_pending(self, sub_pools: tuple[str, ...]) -> int:
+        """Aggregate claimable backlog for a display row.
+
+        In flush mode the generate_name pool is gated, so its (large)
+        source backlog is excluded — only work the run can actually
+        claim counts toward the row total.
+        """
+        return sum(
+            self.pools[p].pending
+            for p in sub_pools
+            if not (self._flush and p == "generate_name")
+        )
+
     def _build_pipeline_section(self) -> Text:
         """Build pipeline section using canonical PipelineRowConfig.
 
-        Renders 5 display rows by aggregating sub-pools according to
-        :data:`DISPLAY_POOL_MAP`.
+        Renders 4 display rows by aggregating sub-pools according to
+        :data:`DISPLAY_POOL_MAP`.  Each row shows graph-truth progress
+        (``done/total`` including prior runs), the live backlog, and the
+        most recent processed name (sticky until replaced).
         """
         rows: list[PipelineRowConfig] = []
         for display_row in DISPLAY_ROWS:
@@ -754,8 +788,8 @@ class SN6PoolDisplay(BaseProgressDisplay):
 
             # Aggregate stats from sub-pools.
             completed = sum(self.pools[p].completed for p in sub_pools)
-            total_raw = sum(self.pools[p].total for p in sub_pools)
-            total = max(total_raw, completed, 1)
+            pending = self._row_pending(sub_pools)
+            total = max(completed + pending, 1)
             cost = sum(self.pools[p].cost for p in sub_pools)
 
             # Combined rate from sub-pools.
@@ -783,6 +817,9 @@ class SN6PoolDisplay(BaseProgressDisplay):
                         score_value = float(_sv)
                     break
 
+            # Idle rows announce their backlog instead of a bare "idle".
+            idle_label = f"{pending:,} queued" if pending > 0 else "idle"
+
             rows.append(
                 PipelineRowConfig(
                     name=label,
@@ -795,10 +832,10 @@ class SN6PoolDisplay(BaseProgressDisplay):
                     primary_text_style=primary_text_style,
                     description=description,
                     score_value=score_value,
-                    is_processing=(
-                        events_this_run > 0 and completed > 0 and completed < total
-                    ),
-                    is_complete=completed > 0 and completed >= total,
+                    show_total=True,
+                    idle_label=idle_label,
+                    is_processing=(events_this_run > 0 and pending > 0),
+                    is_complete=pending == 0 and completed > 0,
                 )
             )
         return build_pipeline_section(rows, self.bar_width)
@@ -819,15 +856,33 @@ class SN6PoolDisplay(BaseProgressDisplay):
 
         total_cost = sum(p.cost for p in self.pools.values())
 
-        # ETA: parallel ETA across pools with remaining work.
+        # ETA: parallel ETA across pools with remaining work.  Pools that
+        # have a backlog but no session rate yet would otherwise silently
+        # drop out of the estimate (the old behavior — ETA 55s while
+        # thousands of items were queued).  Their pending work is folded
+        # in via the aggregate throughput of the pools that *are* rated,
+        # so the estimate is honest even early in a run.  Flush mode
+        # excludes the gated generate_name backlog.
         work_items: list[tuple[int, float | None]] = []
+        unrated_pending = 0
+        rated_total_rate = 0.0
         for pool_name in POOL_ORDER:
+            if self._flush and pool_name == "generate_name":
+                continue
             state = self.pools[pool_name]
             remaining = state.remaining
-            if remaining > 0 and state.rate is not None and state.rate > 0:
+            if remaining <= 0:
+                continue
+            if state.rate is not None and state.rate > 0:
                 work_items.append((remaining, state.rate))
+                rated_total_rate += state.rate
+            else:
+                unrated_pending += remaining
 
         eta = compute_parallel_eta(work_items)
+        if unrated_pending > 0 and rated_total_rate > 0:
+            unrated_eta = unrated_pending / rated_total_rate
+            eta = max(eta or 0.0, unrated_eta)
 
         # Accumulated cost from graph (cross-run).
         accumulated = total_cost
@@ -848,6 +903,12 @@ class SN6PoolDisplay(BaseProgressDisplay):
             )
 
             buckets = query_pipeline_buckets()
+            if self._flush:
+                # Flush gates generation: un-started sources are out of
+                # scope, so ETC projects only the in-flight names.
+                from dataclasses import replace as _dc_replace
+
+                buckets = _dc_replace(buckets, a_sources=0)
 
             # Build CycleEstimates from this-run pool counters.
             gn = self.pools["generate_name"]
@@ -901,8 +962,12 @@ class SN6PoolDisplay(BaseProgressDisplay):
                 accumulated_cost=accumulated,
             )
 
-            # Stall detection.
-            pool_pending = {name: self.pools[name].remaining for name in POOL_ORDER}
+            # Stall detection (gated generate_name never counts as stalled).
+            pool_pending = {
+                name: self.pools[name].remaining
+                for name in POOL_ORDER
+                if not (self._flush and name == "generate_name")
+            }
             pool_last_at = {
                 name: self.pools[name].last_completion_at for name in POOL_ORDER
             }
@@ -954,21 +1019,23 @@ class SN6PoolDisplay(BaseProgressDisplay):
             pending.clear()
 
         # Drain stream queues → _current_stream_item for each pool.
+        # The last item is sticky: SN pools complete items at multi-second
+        # cadence, and the last processed name carries more information
+        # than reverting to a blank "processing..." row.  Items are only
+        # replaced, never cleared.
         for ws in self._pool_stats.values():
             item = ws.stream_queue.pop()
             if item is not None:
                 ws._current_stream_item = item
-            elif ws.stream_queue.is_stale():
-                ws._current_stream_item = None
 
-        self.refresh_pending()
+        self.refresh_progress()
         self._refresh()
 
     # ── Harness compatibility ─────────────────────────────────────────
 
     def refresh_from_graph(self, facility: str) -> None:
         """Called by run_discovery graph-refresh task."""
-        self.refresh_pending()
+        self.refresh_progress()
         self._refresh()
 
     def print_summary(self) -> None:

@@ -117,12 +117,16 @@ class ServiceStatus:
     def format_health_summary(self) -> str:
         """Format as compact health summary for display.
 
-        Example: ``jet (avg 2.3s, fail 3/100)``
+        Sub-second latency is suppressed — a fast healthy service needs
+        no qualifier, and ``avg 0.0s`` noise pushed the SERVERS row past
+        the panel width.  Slow services (SSH, VPN) keep their average;
+        failure ratios always show.
+
+        Examples: ``jet (avg 2.3s, fail 3/100)``, ``titan (fail 1/12)``, ``""``
         """
         parts = [self.detail or self.name]
-        if self._latency_count > 0:
-            avg_s = self.avg_latency_ms / 1000
-            parts.append(f"avg {avg_s:.1f}s")
+        if self._latency_count > 0 and self.avg_latency_ms >= 1000:
+            parts.append(f"avg {self.avg_latency_ms / 1000:.1f}s")
         if self.total_failures > 0:
             parts.append(f"fail {self.failure_ratio}")
         return f" ({', '.join(parts[1:])})" if len(parts) > 1 else ""

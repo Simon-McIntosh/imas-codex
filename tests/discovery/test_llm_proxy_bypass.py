@@ -64,8 +64,10 @@ class TestProxyBypass:
         # Should use direct key
         assert kwargs["api_key"] == "direct-or-key"
 
-    def test_proxy_used_for_non_cache_model(self, monkeypatch):
-        """Non-cache models (e.g., GPT-5) always use proxy."""
+    def test_bypass_for_non_cache_openrouter_model(self, monkeypatch):
+        """Any OpenRouter-routable model bypasses the proxy when a direct
+        key is set — including non-cache models (eda8d029: bypass keeps
+        response_cost telemetry even without cache_control)."""
         _make_stub_settings(monkeypatch, location="iter")
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
         monkeypatch.setenv("LITELLM_API_KEY", "proxy-key")
@@ -79,8 +81,10 @@ class TestProxyBypass:
             temperature=None,
             timeout=None,
         )
-        assert kwargs["api_base"] == "http://127.0.0.1:18400"
-        assert kwargs["model"].startswith("openai/")
+        # Direct to OpenRouter: no proxy api_base, openrouter/ prefix
+        assert "api_base" not in kwargs
+        assert kwargs["model"] == "openrouter/openai/gpt-5.4"
+        assert kwargs["api_key"] == "direct-or-key"
 
     def test_local_mode_bypasses_proxy(self, monkeypatch):
         """Local mode (no proxy URL) always goes direct."""

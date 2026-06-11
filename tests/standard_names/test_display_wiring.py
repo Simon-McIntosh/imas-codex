@@ -4,7 +4,7 @@ Verifies:
 - Worker ``on_event`` callback populates display pool state
 - ``on_event=None`` (default) does not crash workers
 - Events from multiple pools accumulate correctly
-- ``refresh_pending`` seeds baseline from ``*_done`` keys
+- ``refresh_progress`` seeds completed/pending from the graph callback
 - ``begin_shutdown`` alias exists for shutdown handler
 """
 
@@ -182,75 +182,118 @@ class TestMultiPoolAccumulation:
         assert display.pools["refine_docs"].completed == 0
 
 
-class TestRefreshPendingBaseline:
-    """refresh_pending reads pending counts keyed by pool name."""
+def _progress(**pools: tuple[int, int]) -> dict[str, dict[str, int]]:
+    """Build a progress_fn payload: pool=(pending, done)."""
+    return {k: {"pending": p, "done": d} for k, (p, d) in pools.items()}
 
-    def test_pending_counts_by_pool_name(self) -> None:
-        pending = {
-            "generate_name": 10,
-            "review_name": 5,
-            "refine_name": 4,
-            "generate_docs": 3,
-            "review_docs": 2,
-            "refine_docs": 1,
-        }
+
+class TestRefreshProgressBaseline:
+    """refresh_progress reads {pending, done} counts keyed by pool name."""
+
+    def test_progress_counts_by_pool_name(self) -> None:
+        progress = _progress(
+            generate_name=(10, 64),
+            review_name=(5, 49),
+            refine_name=(4, 9),
+            generate_docs=(3, 47),
+            review_docs=(2, 44),
+            refine_docs=(1, 27),
+        )
         display = SN6PoolDisplay(
             cost_limit=5.0,
-            pending_fn=lambda: pending,
+            progress_fn=lambda: progress,
         )
-        display.refresh_pending()
+        display.refresh_progress()
 
-        # total = completed (0) + pending
-        assert display.pools["generate_name"].completed == 0
-        assert display.pools["generate_name"].total == 10
+        # completed = graph done; total = done + pending
+        assert display.pools["generate_name"].completed == 64
+        assert display.pools["generate_name"].pending == 10
+        assert display.pools["generate_name"].total == 74
 
-        assert display.pools["review_name"].completed == 0
-        assert display.pools["review_name"].total == 5
+        assert display.pools["review_name"].completed == 49
+        assert display.pools["review_name"].total == 54
 
-        assert display.pools["refine_name"].completed == 0
-        assert display.pools["refine_name"].total == 4
+        assert display.pools["refine_name"].completed == 9
+        assert display.pools["refine_name"].total == 13
 
-        assert display.pools["generate_docs"].completed == 0
-        assert display.pools["generate_docs"].total == 3
+        assert display.pools["generate_docs"].completed == 47
+        assert display.pools["generate_docs"].total == 50
 
-        assert display.pools["review_docs"].completed == 0
-        assert display.pools["review_docs"].total == 2
+        assert display.pools["review_docs"].completed == 44
+        assert display.pools["review_docs"].total == 46
 
-        assert display.pools["refine_docs"].completed == 0
-        assert display.pools["refine_docs"].total == 1
+        assert display.pools["refine_docs"].completed == 27
+        assert display.pools["refine_docs"].total == 28
 
     def test_on_event_then_refresh(self) -> None:
-        """on_event increments completed; refresh_pending adds pending on top."""
-        pending = {"generate_name": 5}
+        """Optimistic on_event increments are ratcheted against graph done."""
+        progress = _progress(generate_name=(5, 1))
         display = SN6PoolDisplay(
             cost_limit=5.0,
-            pending_fn=lambda: pending,
+            progress_fn=lambda: progress,
         )
 
-        # Worker completes 3 items
+        # Worker completes 3 items this session; graph done lags at 1
         for i in range(3):
             display.on_event({"pool": "generate_name", "name": f"n{i}", "cost": 0.001})
         assert display.pools["generate_name"].completed == 3
 
-        # Refresh adds pending on top of completed
-        display.refresh_pending()
+        # Refresh keeps the optimistic max and adds pending on top
+        display.refresh_progress()
+        assert display.pools["generate_name"].completed == 3  # max(3, 1)
         assert display.pools["generate_name"].total == 8  # 3 + 5
 
-    def test_pending_fn_exception_swallowed(self) -> None:
-        """refresh_pending does not crash if pending_fn raises."""
+    def test_graph_done_overtakes_optimistic(self) -> None:
+        """Graph done (cross-run baseline) dominates session counters."""
+        progress = _progress(generate_name=(5, 100))
+        display = SN6PoolDisplay(cost_limit=5.0, progress_fn=lambda: progress)
+        display.on_event({"pool": "generate_name", "name": "n0", "cost": 0.001})
+        display.refresh_progress()
+        assert display.pools["generate_name"].completed == 100
+        assert display.pools["generate_name"].total == 105
 
-        def boom() -> dict[str, int]:
+    def test_progress_fn_exception_swallowed(self) -> None:
+        """refresh_progress does not crash if progress_fn raises."""
+
+        def boom() -> dict[str, dict[str, int]]:
             raise RuntimeError("graph down")
 
-        display = SN6PoolDisplay(cost_limit=5.0, pending_fn=boom)
-        display.refresh_pending()  # Should not raise
+        display = SN6PoolDisplay(cost_limit=5.0, progress_fn=boom)
+        display.refresh_progress()  # Should not raise
         for state in display.pools.values():
             assert state.completed == 0
 
-    def test_no_pending_fn(self) -> None:
-        """refresh_pending is a no-op when pending_fn is None."""
+    def test_no_progress_fn(self) -> None:
+        """refresh_progress is a no-op when progress_fn is None."""
         display = SN6PoolDisplay(cost_limit=5.0)
-        display.refresh_pending()  # Should not raise
+        display.refresh_progress()  # Should not raise
+
+
+class TestFlushMode:
+    """Flush mode gates generate_name: its backlog leaves rows, ETA, header."""
+
+    def test_flush_excludes_generate_pending_from_row(self) -> None:
+        progress = _progress(
+            generate_name=(7158, 64),
+            refine_name=(1, 9),
+        )
+        display = SN6PoolDisplay(
+            cost_limit=5.0, progress_fn=lambda: progress, flush=True
+        )
+        display.refresh_progress()
+        # Row pending merges generate_name + refine_name, minus the gated pool
+        assert display._row_pending(("generate_name", "refine_name")) == 1
+
+    def test_non_flush_includes_generate_pending(self) -> None:
+        progress = _progress(generate_name=(7158, 64), refine_name=(1, 9))
+        display = SN6PoolDisplay(cost_limit=5.0, progress_fn=lambda: progress)
+        display.refresh_progress()
+        assert display._row_pending(("generate_name", "refine_name")) == 7159
+
+    def test_flush_header_mode_label(self) -> None:
+        display = SN6PoolDisplay(cost_limit=5.0, flush=True)
+        assert display._header_mode_label() == "FLUSH"
+        assert SN6PoolDisplay(cost_limit=5.0)._header_mode_label() is None
 
 
 class TestShutdownAlias:
@@ -299,21 +342,22 @@ class TestEventsThisRun:
         assert display.pools["generate_name"]._events_this_run == 2
 
     def test_events_this_run_not_affected_by_baseline(self) -> None:
-        """Graph pending via refresh_pending does NOT inflate _events_this_run."""
-        pending = {"generate_name": 5}
-        display = SN6PoolDisplay(cost_limit=5.0, pending_fn=lambda: pending)
-        display.refresh_pending()
+        """Graph baseline via refresh_progress does NOT inflate _events_this_run."""
+        progress = _progress(generate_name=(5, 1000))
+        display = SN6PoolDisplay(cost_limit=5.0, progress_fn=lambda: progress)
+        display.refresh_progress()
 
         state = display.pools["generate_name"]
-        # Pending count set total, but _events_this_run untouched
-        assert state.total == 5
+        # Baseline seeds completed/total, but _events_this_run untouched
+        assert state.total == 1005
+        assert state.completed == 1000
         assert state._events_this_run == 0
 
     def test_rate_uses_events_this_run(self) -> None:
         """Rate is computed from _events_this_run, not completed (baseline)."""
-        pending = {"generate_name": 5}
-        display = SN6PoolDisplay(cost_limit=5.0, pending_fn=lambda: pending)
-        display.refresh_pending()
+        progress = _progress(generate_name=(5, 1000))
+        display = SN6PoolDisplay(cost_limit=5.0, progress_fn=lambda: progress)
+        display.refresh_progress()
 
         state = display.pools["generate_name"]
         # Before any event, rate is None

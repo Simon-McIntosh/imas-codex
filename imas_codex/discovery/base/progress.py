@@ -167,6 +167,11 @@ def format_rate(rate: float, unit: str = "s") -> str:
         return f"{rate:.0f}{unit}/s"
     if rate >= 1:
         return f"{rate:.1f}{unit}/s"
+    if rate >= 0.1:
+        return f"{rate:.2f}{unit}/s"
+    if rate > 0:
+        # Slow pipelines (LLM pools): per-minute reads better than 0.01/s
+        return f"{rate * 60:.1f}{unit}/min"
     return f"{rate:.2f}{unit}/s"
 
 
@@ -1101,6 +1106,11 @@ class PipelineRowConfig:
     complete_label: str = "done"
     is_paused: bool = False
     queue_size: int = 0
+    idle_label: str = "idle"  # Shown when no activity (e.g. "7,158 queued")
+
+    # Line 1 count column: show "completed/total" instead of bare count.
+    # Used by pipelines where the backlog matters (e.g. SN pools).
+    show_total: bool = False
 
     @property
     def has_content(self) -> bool:
@@ -1155,7 +1165,11 @@ def build_pipeline_row(config: PipelineRowConfig, bar_width: int = 40) -> Text:
     row.append(make_bar(bar_ratio, effective_bar), style=config.style.split()[-1])
 
     # Right: count + pct only (format_count for compact display)
-    count_s = f" {format_count(config.completed):>8}"
+    if config.show_total:
+        count_s = f" {format_count(config.completed)}/{format_count(total)}"
+        count_s = f"{count_s:>9}"
+    else:
+        count_s = f" {format_count(config.completed):>8}"
     pct_s = f" {pct:>3.0f}%" if config.show_pct else "     "
     pad = max(0, METRICS_WIDTH - len(count_s) - len(pct_s))
     if pad > 0:
@@ -1167,10 +1181,11 @@ def build_pipeline_row(config: PipelineRowConfig, bar_width: int = 40) -> Text:
     row.append("\n")
     line2 = Text()
 
-    # Pre-compute rate text for right-alignment at row_width
+    # Pre-compute rate text for right-alignment at row_width.
+    # unit="" — pipeline rows process heterogeneous items, "0.5/s" not "0.5s/s".
     rate_s = ""
     if config.rate and config.rate > 0:
-        rate_s = format_rate(config.rate)
+        rate_s = format_rate(config.rate, unit="")
 
     if config.has_content:
         line2.append("  ", style="dim")
@@ -1214,7 +1229,7 @@ def build_pipeline_row(config: PipelineRowConfig, bar_width: int = 40) -> Text:
         elif config.is_paused:
             line2.append("paused", style="dim italic")
         else:
-            line2.append("idle", style="dim italic")
+            line2.append(config.idle_label, style="dim italic")
 
     # Right-align rate on line 2
     if rate_s:
@@ -1448,22 +1463,11 @@ def build_servers_section(
             style = "yellow"
             label = f"recovering ({int(s.downtime_seconds)}s)"
         else:
-            # Unhealthy: show concise error reason from health check
-            style = "dim"
+            # Unhealthy: show the concrete failure reason loudly.  A down
+            # service must be unmissable — account-level issues (credit,
+            # rate limit, auth) render yellow, infrastructure failures red.
             detail = (s.detail or "").lower()
-            if s.healthy_detail:
-                # Was healthy before — show last-known good state grayed out
-                label = s.healthy_detail
-            elif s.auth_label:
-                label = s.auth_label
-            elif detail.startswith(("openrouter:", "gpu-model:")):
-                # Structured labels from _check_llm_direct — preserve the full
-                # label so operators see the service category (e.g.
-                # "openrouter:no credit" vs "gpu-model:down").
-                label = s.detail
-                if any(x in detail for x in (":no credit", ":rate limit", ":no key")):
-                    style = "yellow"
-            elif (
+            if (
                 "402" in detail
                 or "budget" in detail
                 or "insufficient" in detail
@@ -1471,24 +1475,30 @@ def build_servers_section(
             ):
                 label = "no credit"
                 style = "yellow"
+            elif "no key" in detail or "key missing" in detail:
+                label = "no API key"
+                style = "yellow"
             elif "401" in detail or "auth" in detail or "api_key" in detail:
                 label = "auth error"
-            elif "no key" in detail:
-                label = "no API key"
                 style = "yellow"
             elif "429" in detail or "rate" in detail:
                 label = "rate limited"
                 style = "yellow"
             elif "timeout" in detail or "timed out" in detail:
                 label = "timeout"
-            elif "connection refused" in detail:
-                label = "refused"
-            elif "no route" in detail or "unreachable" in detail:
-                label = "unreachable"
+                style = "red"
+            elif "connection refused" in detail or "refused" in detail:
+                label = "down"
+                style = "red"
             elif "proxy" in detail or "502" in detail or "503" in detail:
                 label = "proxy down"
+                style = "red"
             else:
-                label = "down"
+                # Short reasons from health checks pass through verbatim
+                # ("unreachable", "down", "HTTP 500"); long exception text
+                # collapses to "down".
+                label = s.detail if s.detail and len(s.detail) <= 24 else "down"
+                style = "red"
             if s.downtime_seconds > 0:
                 label += f" ({int(s.downtime_seconds)}s)"
 

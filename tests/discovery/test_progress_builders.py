@@ -472,7 +472,7 @@ class TestBuildPipelineSection:
             ),
         ]
         result = build_pipeline_section(rows, bar_width=20)
-        assert "3.7s/s" in result.plain
+        assert "3.7/s" in result.plain
 
     def test_percentage_displayed(self):
         """Percentage is shown when show_pct=True (default)."""
@@ -669,25 +669,34 @@ class TestBuildServersSection:
         result = build_servers_section([s])
         assert "timeout" in result.plain
 
-    def test_unhealthy_refused_shows_refused(self):
+    def test_unhealthy_refused_shows_down(self):
         s = self._status(detail="connection refused")
         result = build_servers_section([s])
-        assert "refused" in result.plain
+        assert "down" in result.plain
 
     def test_unhealthy_proxy_shows_proxy_down(self):
         s = self._status(detail="502 bad gateway via proxy")
         result = build_servers_section([s])
         assert "proxy down" in result.plain
 
-    def test_unhealthy_generic_shows_down(self):
-        s = self._status(detail="some unknown error")
+    def test_unhealthy_short_reason_passes_through(self):
+        """Concise reasons from curated health checks render verbatim."""
+        s = self._status(detail="unreachable")
+        result = build_servers_section([s])
+        assert "unreachable" in result.plain
+
+    def test_unhealthy_long_exception_collapses_to_down(self):
+        s = self._status(detail="Traceback (most recent call last): boom " * 3)
         result = build_servers_section([s])
         assert "down" in result.plain
 
-    def test_unhealthy_with_healthy_detail_shows_grayed(self):
-        s = self._status(detail="error", healthy_detail="titan")
+    def test_unhealthy_shows_reason_not_last_good_state(self):
+        """Failures are loud: the reason is shown, never the grayed
+        last-known-good detail (which made outages invisible)."""
+        s = self._status(detail="timeout", healthy_detail="titan")
         result = build_servers_section([s])
-        assert "titan" in result.plain
+        assert "timeout" in result.plain
+        assert "titan" not in result.plain
 
     def test_unhealthy_with_downtime(self):
         import time
