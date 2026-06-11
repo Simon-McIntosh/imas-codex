@@ -627,6 +627,8 @@ Install on any facility: `uv run imas-codex tools install <facility>`
 
 **Critical:** `fd` requires a path argument on large filesystems to avoid hanging: `fd -e py /path`
 
+**Critical:** `rg` also requires an explicit path in scripted/non-tty contexts: with no path and no match it falls back to reading stdin and waits forever (a June-9 session shell hung 46 h on exactly this). Always `rg pattern <path>` in agent commands.
+
 **Remote Python — two-interpreter architecture:**
 
 - `run_python_script()` / `async_run_python_script()` — venv `python3` (3.12+) via `_REMOTE_PATH_PREFIX`. Modern syntax OK (`X | Y`, `match`).
