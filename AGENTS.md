@@ -638,6 +638,8 @@ Install on any facility: `uv run imas-codex tools install <facility>`
 
 Follow the Pre-Commit Hook Policy in `~/.agents/AGENTS.md` (ruff `--fix` + `format` before staging, conventional commits, no `git add -A`). Breaking changes use `BREAKING CHANGE:` footer, not `type!:` suffix.
 
+**The local pre-commit git hook is uninstalled in this repo (2026-06-11, user mandate).** The pre-commit framework stashes unstaged files around every commit — unsafe when parallel agents hold in-flight edits in the same worktree. Do NOT re-install it (`pre-commit install` is banned). Run the equivalent checks manually before staging: `uv run ruff check --fix` + `uv run ruff format` on touched files, and never commit secrets (gitleaks runs in CI).
+
 **Never stage in this repo:** auto-generated files (`models.py`, `dd_models.py`, `config/models.py`, `agents/schema-reference.md`, `schema_context_data.py`), `*_private.yaml`, anything in `.gitignore`.
 
 ### Worktrees
