@@ -510,6 +510,31 @@ If the DD path describes a multi-species quantity, use the most general applicab
 subject. If no single subject fits, flag it for vocabulary review by including a note
 in the `reason` field.
 
+### State-resolution fidelity (R1 rotation finding, 2026-06-11)
+
+The DD resolves species into ionisation/charge states (`ion(i1)/state(i2)`,
+`neutral/state`). The name's subject MUST match the source's resolution level:
+
+- Source path contains `/state/` → state-resolved subject (`ion_state`,
+  `ion_charge_state`, `neutral_state`). ✓ `perpendicular_fast_ion_state_pressure`
+  for `…/ion/state/pressure_fast_perpendicular`.
+- Species-level path (no `/state/`; DD often says "summed/averaged over
+  states") → species subject (`ion`, `electron`, …).
+- NEVER attach a state-resolved source to a species-level name or vice versa
+  — they are different physical quantities. The species-level name is the
+  state name's structural parent, not its synonym.
+
+### Subject required with population/orbit/component prefixes (R1 finding)
+
+A population, orbit, or component prefix on a generic base without a subject
+is grammatically valid but fails review on self-descriptiveness
+(`perpendicular_fast_pressure` → "pressure of WHAT?" — rejected 0.42).
+When the source is species-unresolved (e.g. `distributions/distribution/*`
+where species lives in a sibling identifier), still emit a subject: use the
+distribution's species when identifiable from the provided context, else
+`particle`. ✓ `perpendicular_fast_particle_pressure`, never
+`perpendicular_fast_pressure`.
+
 ### Formatting
 
 **FMT-1 YAML block scalars.** Always use `|` (literal block scalar) for
