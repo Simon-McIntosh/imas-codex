@@ -554,6 +554,27 @@ async def score_with_reviewer(
                     "kind": c.get("kind", "N/A"),
                     "source_paths": c.get("source_paths", []),
                 }
+                # DD ground truth for the grounded physics_accuracy rubric —
+                # mirrors the production docs-review enrichment (workers.py).
+                _src_paths = c.get("source_paths") or []
+                _first_src = c.get("source_id") or (
+                    _src_paths[0] if _src_paths else None
+                )
+                if _first_src:
+                    try:
+                        from imas_codex.graph.client import GraphClient
+                        from imas_codex.standard_names.workers import (
+                            _enrich_dd_path_context,
+                        )
+
+                        with GraphClient() as _gc:
+                            _enrich_dd_path_context(_gc, item, _first_src)
+                    except Exception:
+                        logger.debug(
+                            "bench docs review: dd context fetch failed for %s",
+                            _first_src,
+                            exc_info=True,
+                        )
             else:
                 item = {
                     "standard_name": name,
