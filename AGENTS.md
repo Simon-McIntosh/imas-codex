@@ -535,6 +535,20 @@ backlog > 0.5 × generate_name backlog dampens generate weight 0.5×.
 Scope routing: `--only <phase>` (single phase, e.g. `--only reconcile`),
 `--focus <path>` (specific paths through the full loop, UUID-scoped).
 
+**Budget & run-completion discipline.** Mid-pipeline names (drafted,
+unreviewed, docs pending) are NOT stranded or lost — they are normal durable
+graph state that any subsequent `sn run` claims and continues. Design each
+run so its cohort completes within its `-c` cap: size the cap to carry every
+seeded name through review + docs (≈$0.10–0.15/name name-axis,
+≈$0.30/name docs-axis at 2026-06 rates), especially for `--focus` rotations,
+which should never need a follow-up. `--flush` is a GATE, not a recovery
+tool: it blocks new work from entering (skips seeding + generate_name) so
+the existing backlog drains — use it to converge the graph before an audit
+or release cut, not as routine post-run cleanup. Never kill a running
+campaign to "save money" — the cap already bounds spend; interrupt only when
+the configuration underneath the run has been invalidated, and prefer letting
+the cap expire.
+
 **Tripwires** (the rest is reference — see the doc):
 
 - **Unit safety:** units flow DD `HAS_UNIT` → EXTRACT → prompt (read-only) →
