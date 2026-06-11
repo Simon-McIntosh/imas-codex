@@ -31,11 +31,13 @@ DEFAULT_REFINE_ROTATIONS: int = 3
 """Maximum REFINED_FROM (or DOCS_REVISION_OF) chain depth before exhaustion."""
 
 # Escalation model — used on the final refine attempt before exhaustion.
-# Default to the same locally-hosted DeepSeek v4 flash endpoint used for
-# compose so the full pipeline runs at zero LLM cost. Override per-run via
-# ``sn run --escalation-model openrouter/anthropic/claude-opus-4.6`` when
-# willing to spend budget on a higher-capability final attempt.
-DEFAULT_ESCALATION_MODEL: str = "hosted_vllm/deepseek-v4-flash"
+# MUST be a different vendor from both compose (local deepseek-v4-flash)
+# and refine (gpt-5.5): escalation exists to break a failure loop with an
+# independent perspective, not to hand the item back to a model family
+# that already failed it (user ruling 2026-06-11; previously defaulted to
+# the compose model, which was backwards). opus-4.8 matches the quorum-
+# breaker precedent; it fires only at chain cap so the cost is amortised.
+DEFAULT_ESCALATION_MODEL: str = "openrouter/anthropic/claude-opus-4.8"
 """Model used on the final refine attempt (chain_length == cap-1)."""
 
 # Orphan sweep timing

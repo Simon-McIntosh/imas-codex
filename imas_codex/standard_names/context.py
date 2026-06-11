@@ -348,7 +348,13 @@ def _load_tokamak_ranges() -> dict[str, dict[str, Any]]:
 
 
 def _build_enum_lists() -> dict[str, list[str]]:
-    """Build bare enum lists for user prompt template variables."""
+    """Build bare enum lists for user prompt template variables.
+
+    MUST cover every closed grammar segment — reviewers judge tokens
+    "unregistered" when a segment is missing here (R3 rotation finding:
+    'thermal'/'launched' wrongly docked -4 because the population and
+    qualifier registries were absent from the reviewer context).
+    """
     from imas_standard_names.grammar import (
         BinaryOperator,
         Component,
@@ -359,6 +365,12 @@ def _build_enum_lists() -> dict[str, list[str]]:
         Subject,
         Transformation,
     )
+    from imas_standard_names.grammar.model_types import (
+        Aggregation,
+        Orbit,
+        Population,
+    )
+    from imas_standard_names.grammar.vocab_loaders import load_qualifiers
 
     return {
         "subjects": [e.value for e in Subject],
@@ -370,6 +382,10 @@ def _build_enum_lists() -> dict[str, list[str]]:
         "geometric_bases": [e.value for e in GeometricBase],
         "objects": [e.value for e in Object],
         "binary_operators": [e.value for e in BinaryOperator],
+        "populations": [e.value for e in Population],
+        "orbits": [e.value for e in Orbit],
+        "aggregations": [e.value for e in Aggregation],
+        "qualifiers": sorted(load_qualifiers()),
     }
 
 

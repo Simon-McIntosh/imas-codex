@@ -37,7 +37,7 @@ When sibling lists are empty (greenfield IDS), score on grammar + DD provenance 
 
 ## Token vocabulary
 
-Use only registered tokens. The `physical_base` registry has 80 tokens (e.g. `temperature`, `pressure`, `current_density`, `velocity`, `magnetic_field`). A name using an unregistered token is a grammar defect — dock grammar and completeness points.
+Use only registered tokens. The closed `physical_base` registry holds lexical bases like `temperature`, `pressure`, `current_density`, `velocity`, `magnetic_field`. A name using an unregistered token is a grammar defect — dock grammar and completeness points. **Before flagging a token as unregistered, check EVERY registry listed below — including population, orbit, aggregation, and qualifier.** Tokens like `thermal`, `fast` (population), `trapped` (orbit), `total`, `net` (aggregation), and `launched`, `absorbed`, `reflected` (qualifier) are registered; calling them unregistered is a review error.
 
 Lexicalised compounds like `poloidal_flux`, `minor_radius`, `safety_factor`, `internal_inductance` are valid — they ARE registered tokens. Invented compounds like `bounce_height`, `detector_sensitivity`, `townsend_position` are NOT registered and should be flagged.
 
@@ -121,6 +121,9 @@ For every dimension where you dock points, populate the corresponding entry in `
 When judging grammar correctness, use these closed-vocabulary registries:
 
 - **subject**: {{ subjects | join(', ') }}
+- **population** (energy-state prefix, before subject): {{ populations | join(', ') }}
+- **orbit** (transit-class prefix, before population): {{ orbits | join(', ') }}
+- **aggregation** (outermost prefix): {{ aggregations | join(', ') }}
 - **component**: {{ components | join(', ') }}
 - **position**: {{ positions | join(', ') }}
 - **process**: {{ processes | join(', ') }}
@@ -128,3 +131,4 @@ When judging grammar correctness, use these closed-vocabulary registries:
 - **geometric_base**: {{ geometric_bases | join(', ') }}
 - **object**: {{ objects | join(', ') }}
 - **binary_operator**: {{ binary_operators | join(', ') }}
+- **qualifier** (folds adjacent to the base): {{ qualifiers | join(', ') }}
