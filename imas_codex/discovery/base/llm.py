@@ -49,18 +49,20 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import re
 import time
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, get_args, get_origin
 
 import yaml
+from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
-    from pydantic import BaseModel
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -505,6 +507,111 @@ def _to_json_schema_format(model_cls: type) -> dict:
             "schema": _strip_unsupported_schema_props(raw_schema),
         },
     }
+
+
+# ---------------------------------------------------------------------------
+# Tolerant batch-wrapper coercion
+# ---------------------------------------------------------------------------
+
+
+def _wrapper_field(response_model: type) -> tuple[str, type] | None:
+    """Return ``(field_name, inner_model)`` if *response_model* is a wrapper.
+
+    A "wrapper" model is a Pydantic model with EXACTLY ONE required field
+    whose annotation is ``list[InnerModel]`` for some Pydantic ``InnerModel``.
+    Optional additional fields (defaults / ``default_factory``) are allowed —
+    the rule is exactly one *required* list-of-model field.
+
+    Returns ``None`` for non-wrappers (single objects, multi-required-field
+    models, or list fields whose element type is not a Pydantic model).
+    """
+    if not _is_pydantic_model(response_model):
+        return None
+    required = [
+        (name, field)
+        for name, field in response_model.model_fields.items()
+        if field.is_required()
+    ]
+    if len(required) != 1:
+        return None
+    name, field = required[0]
+    annotation = field.annotation
+    if get_origin(annotation) is not list:
+        return None
+    args = get_args(annotation)
+    if len(args) != 1 or not _is_pydantic_model(args[0]):
+        return None
+    return name, args[0]
+
+
+def _coerce_to_wrapper(raw: Any, response_model: type) -> BaseModel | None:
+    """Coerce a bare inner item/list into a single-list-field wrapper model.
+
+    Some models ignore a batch-wrapper schema and return the bare inner
+    object (``{...}``) or a bare list (``[{...}, ...]``) instead of
+    ``{"<field>": [...]}``. This wraps such payloads when *response_model*
+    is a wrapper (see :func:`_wrapper_field`):
+
+    - ``raw`` is a ``dict`` → try ``{field: [raw]}``
+    - ``raw`` is a ``list`` → try ``{field: raw}``
+
+    The candidate is re-validated through the wrapper, which enforces that
+    the inner items validate as the element model. Returns the validated
+    wrapper instance on success, or ``None`` if *response_model* is not a
+    wrapper or the payload cannot be coerced.
+
+    Pure and side-effect free (no logging) so it is trivially unit-testable.
+    """
+    spec = _wrapper_field(response_model)
+    if spec is None:
+        return None
+    field_name, _inner = spec
+    if isinstance(raw, dict):
+        candidate = {field_name: [raw]}
+    elif isinstance(raw, list):
+        candidate = {field_name: raw}
+    else:
+        return None
+    try:
+        return response_model.model_validate(candidate)
+    except ValidationError:
+        return None
+
+
+def _parse_structured_content(
+    content: str, response_model: type, model: str
+) -> BaseModel:
+    """Validate sanitized LLM *content* against *response_model*.
+
+    On a Pydantic ``ValidationError``, attempt tolerant batch-wrapper
+    coercion (a model returning a bare inner item/list when a single-list
+    -field wrapper was requested) BEFORE surfacing the error. Successful
+    coercion logs a DEBUG line and returns the wrapper instance — no retry
+    is consumed.
+
+    If the content is not valid JSON, or coercion does not apply / fails,
+    the original ``ValidationError`` is re-raised so the existing retry
+    behaviour in the caller is preserved unchanged.
+    """
+    try:
+        return response_model.model_validate_json(content)
+    except ValidationError as exc:
+        try:
+            raw = json.loads(content)
+        except ValueError:
+            # Not valid JSON at all (e.g. truncated) — coercion can't help.
+            raise exc from None
+        coerced = _coerce_to_wrapper(raw, response_model)
+        if coerced is None:
+            raise
+        field_name = _wrapper_field(response_model)[0]  # type: ignore[index]
+        logger.debug(
+            "coerced bare item(s) into %s.%s for model %s",
+            response_model.__name__,
+            field_name,
+            model,
+        )
+        return coerced
 
 
 # ---------------------------------------------------------------------------
@@ -1062,7 +1169,7 @@ def call_llm_structured(
                 raise ValueError("LLM returned empty response content")
 
             content = _sanitize_content(content)
-            parsed = response_model.model_validate_json(content)
+            parsed = _parse_structured_content(content, response_model, model)
 
             total_tokens = (
                 response.usage.prompt_tokens + response.usage.completion_tokens
@@ -1181,7 +1288,7 @@ async def acall_llm_structured(
                 raise ValueError("LLM returned empty response content")
 
             content = _sanitize_content(content)
-            parsed = response_model.model_validate_json(content)
+            parsed = _parse_structured_content(content, response_model, model)
 
             total_tokens = (
                 response.usage.prompt_tokens + response.usage.completion_tokens
