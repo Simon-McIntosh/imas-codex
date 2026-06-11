@@ -855,12 +855,17 @@ async def generate_docs_for_candidates(
             temp = None  # type: ignore[assignment]
 
         try:
+            # Mirror production: docs generation runs at the [sn-docs]
+            # reasoning effort so bench results reflect campaign settings.
+            from imas_codex.settings import get_reasoning_effort
+
             result, cost, _ = await acall_llm_structured(
                 model=model,
                 messages=messages,
                 response_model=GeneratedDocs,
                 temperature=temp,
                 service="standard-names",
+                reasoning_effort=get_reasoning_effort("sn-docs"),
             )
             total_cost += cost
             c["docs_description"] = result.description
