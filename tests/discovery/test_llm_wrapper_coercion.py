@@ -273,3 +273,39 @@ async def test_acall_structured_coerces_bare_item_no_retry(monkeypatch):
     assert isinstance(batch, StandardNameQualityReviewDocsBatch)
     assert len(batch.reviews) == 1
     assert batch.reviews[0].source_id == "dd:foo/bar"
+
+
+class TestReasoningEffortProviderShape:
+    """reasoning_effort must be provider-shaped: vLLM chat_template_kwargs
+    vs OpenRouter unified reasoning field."""
+
+    @staticmethod
+    def _kwargs(model: str) -> dict:
+        from imas_codex.discovery.base.llm import _build_kwargs
+
+        return _build_kwargs(
+            model=model,
+            messages=[{"role": "user", "content": "x"}],
+            api_key=None,
+            response_format=None,
+            max_tokens=None,
+            temperature=0.0,
+            timeout=None,
+            service="test",
+            reasoning_effort="high",
+        )
+
+    def test_hosted_vllm_gets_chat_template_kwargs(self):
+        kw = self._kwargs("hosted_vllm/deepseek-v4-flash")
+        eb = kw.get("extra_body") or {}
+        assert eb.get("chat_template_kwargs") == {
+            "thinking": True,
+            "reasoning_effort": "high",
+        }
+        assert "reasoning" not in eb
+
+    def test_openrouter_keeps_unified_reasoning_field(self):
+        kw = self._kwargs("openrouter/qwen/qwen3.7-max")
+        eb = kw.get("extra_body") or {}
+        assert eb.get("reasoning") == {"effort": "high"}
+        assert "chat_template_kwargs" not in eb
