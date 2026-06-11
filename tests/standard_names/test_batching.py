@@ -3,7 +3,6 @@
 Covers:
 - Token estimation heuristics
 - Pre-flight token check for extraction batches
-- Pre-flight token check for enrich batches
 - Grouping strategies produce expected partitions
 - pyproject configuration reading
 """
@@ -15,11 +14,8 @@ import pytest
 from imas_codex.standard_names.batching import (
     DEFAULT_MAX_TOKENS,
     estimate_batch_tokens,
-    estimate_enrich_batch_tokens,
     estimate_tokens,
-    get_enrich_batch_config,
     get_generate_batch_config,
-    pre_flight_enrich_token_check,
     pre_flight_token_check,
 )
 from imas_codex.standard_names.enrichment import (
@@ -93,52 +89,6 @@ def _make_batch(
     )
 
 
-def _make_enrich_item(
-    name: str = "electron_temperature",
-    description: str = "Electron temperature profile",
-    documentation: str = "The electron temperature T_e.",
-    unit: str = "eV",
-    kind: str = "scalar",
-    physics_domain: str = "transport",
-    context: str | None = None,
-) -> dict:
-    """Build an enrich item dict."""
-    item: dict = {
-        "name": name,
-        "description": description,
-        "documentation": documentation,
-        "unit": unit,
-        "kind": kind,
-        "physics_domain": physics_domain,
-        "links": ["ion_temperature"],
-        "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
-    }
-    if context:
-        item["context"] = context
-    return item
-
-
-def _make_enrich_batch(
-    n_items: int = 5,
-    token: str | None = "claim-123",
-    **item_overrides,
-) -> dict:
-    """Build an enrich batch dict with *n_items* items."""
-    items = [
-        _make_enrich_item(
-            name=f"test_name_{i}",
-            description=f"Description {i}" * 20,
-            **item_overrides,
-        )
-        for i in range(n_items)
-    ]
-    return {
-        "items": items,
-        "claim_token": token,
-        "batch_index": 0,
-    }
-
-
 # ============================================================================
 # Token estimation
 # ============================================================================
@@ -210,28 +160,6 @@ class TestEstimateBatchTokens:
         assert estimate_batch_tokens(batch) > estimate_batch_tokens(batch_no_sibs)
 
 
-class TestEstimateEnrichBatchTokens:
-    """Tests for enrich batch token estimation."""
-
-    def test_empty_batch(self):
-        assert estimate_enrich_batch_tokens({"items": []}) == 0
-
-    def test_includes_item_fields(self):
-        batch = _make_enrich_batch(n_items=3)
-        tokens = estimate_enrich_batch_tokens(batch)
-        assert tokens > 0
-
-    def test_context_string_counted(self):
-        batch = _make_enrich_batch(n_items=1, context="A" * 4000)
-        tokens = estimate_enrich_batch_tokens(batch)
-        assert tokens >= 1000  # 4000 chars / 4
-
-    def test_more_items_more_tokens(self):
-        small = estimate_enrich_batch_tokens(_make_enrich_batch(n_items=2))
-        large = estimate_enrich_batch_tokens(_make_enrich_batch(n_items=10))
-        assert large > small
-
-
 # ============================================================================
 # Pre-flight token check — extraction batches
 # ============================================================================
@@ -284,44 +212,6 @@ class TestPreFlightTokenCheck:
 
     def test_empty_list_returns_empty(self):
         result = pre_flight_token_check([])
-        assert result == []
-
-
-# ============================================================================
-# Pre-flight token check — enrich batches
-# ============================================================================
-
-
-class TestPreFlightEnrichTokenCheck:
-    """Tests for pre_flight_enrich_token_check on enrich batch dicts."""
-
-    def test_no_split_when_under_budget(self):
-        batch = _make_enrich_batch(n_items=3)
-        result = pre_flight_enrich_token_check([batch], max_tokens=999_999)
-        assert len(result) == 1
-
-    def test_splits_oversized_batch(self):
-        batch = _make_enrich_batch(n_items=10)
-        tokens = estimate_enrich_batch_tokens(batch)
-        result = pre_flight_enrich_token_check([batch], max_tokens=tokens // 3)
-        assert len(result) > 1
-        total_items = sum(len(b["items"]) for b in result)
-        assert total_items == 10
-
-    def test_singleton_never_split(self):
-        batch = _make_enrich_batch(n_items=1)
-        result = pre_flight_enrich_token_check([batch], max_tokens=1)
-        assert len(result) == 1
-
-    def test_preserves_claim_token(self):
-        batch = _make_enrich_batch(n_items=6, token="tok-abc")
-        tokens = estimate_enrich_batch_tokens(batch)
-        result = pre_flight_enrich_token_check([batch], max_tokens=tokens // 3)
-        for b in result:
-            assert b["claim_token"] == "tok-abc"
-
-    def test_empty_list_returns_empty(self):
-        result = pre_flight_enrich_token_check([])
         assert result == []
 
 
@@ -524,22 +414,6 @@ class TestBatchConfig:
         cfg = get_generate_batch_config()
         assert cfg["batch_size"] == 25
         assert cfg["name_only_batch_size"] == 50
-        assert cfg["max_tokens"] == 150_000
-
-    def test_enrich_config_has_expected_keys(self):
-        cfg = get_enrich_batch_config()
-        assert "batch_size" in cfg
-        assert "max_tokens" in cfg
-
-    def test_enrich_config_values_are_ints(self):
-        cfg = get_enrich_batch_config()
-        assert isinstance(cfg["batch_size"], int)
-        assert isinstance(cfg["max_tokens"], int)
-
-    def test_enrich_config_defaults(self):
-        """Defaults match pyproject.toml [tool.imas-codex.sn-enrich]."""
-        cfg = get_enrich_batch_config()
-        assert cfg["batch_size"] == 12
         assert cfg["max_tokens"] == 150_000
 
     def test_default_max_tokens_constant(self):

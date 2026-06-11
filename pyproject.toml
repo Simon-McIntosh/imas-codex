@@ -325,7 +325,7 @@ model = "openrouter/anthropic/claude-sonnet-4.6"
 # doc-ingestion paths). It is NOT used in the SN compose/review/refine
 # pipeline. Flash-lite is adequate for OCR-quality transcription and
 # keeps image-processing costs minimal. Any SN-pipeline model must go
-# through [sn-compose], [sn-enrich], [sn-refine], or [sn-review.*] — never vision.
+# through [sn-compose], [sn-refine], or [sn-review.*] — never vision.
 model = "openrouter/google/gemini-3.1-flash-lite-preview"
 
 [tool.imas-codex.reasoning]
@@ -363,34 +363,10 @@ reasoning-effort = "max"
 # the cost of richer per-candidate enrichment, which the subsequent
 # review / enrichment passes restore.
 name-only-batch-size = 50
-# Batch size used when ``sn generate --target docs`` routes through the
-# five-phase enrich pipeline. Enrichment packs ~800–1200 tokens per name
-# (docs, exemplars, DD context) so batches should be smaller than the
-# default compose batches. Mirrors ``[tool.imas-codex.sn-enrich].batch-size``
-# but allows tuning the docs-generation pass independently when invoked
-# through ``sn generate``.
-docs-batch-size = 12
 # Pre-flight token budget guard.  Batches whose estimated token count
 # exceeds this value are binary-split before dispatch.  Set below the
 # model's context window (200 k) to leave headroom for the response.
 max-tokens = 150000
-
-[tool.imas-codex.sn-enrich]
-# Local DeepSeek V4 Flash via vLLM on SLURM GPU node.
-# Zero cost at point of use — see [sn-compose] for endpoint details.
-model = "hosted_vllm/deepseek-v4-flash"
-api-base = "http://98dci4-gpu-0003:18800/v1"
-api-key-env = "AMBIX_API_KEY"
-# Enrich packs ~800–1200 tokens per name (docs, exemplars, DD context)
-# so batches should be smaller than generate batches.
-batch-size = 12
-# Pre-flight token budget guard (same semantics as sn-compose).
-max-tokens = 150000
-# DeepSeek V4 thinking mode at MAX effort: enrich runs on the same local
-# vLLM endpoint as compose, so the vLLM-specific "max" reasoning level
-# applies (free locally, deepest reasoning). "max" is vLLM/DeepSeek-only;
-# OpenRouter models accept only low|medium|high (see [sn-compose]).
-reasoning-effort = "max"
 
 [tool.imas-codex.sn-pools]
 # Concurrent replica counts for each of the six SN pools (see

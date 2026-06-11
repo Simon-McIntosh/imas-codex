@@ -39,7 +39,6 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 | `[sn-compose]` | SN name composition model, batch sizes, max-concurrency | `get_model("sn-compose")` |
 | `[sn-docs]` | SN documentation generation model | `get_model("sn-docs")` |
 | `[sn-refine]` | SN refine_name + refine_docs tier | `get_model("sn-refine")` |
-| `[sn-enrich]` | SN per-item context enrichment | `get_model("sn-enrich")` |
 | `[sn-fanout]` | Structured fan-out (Proposer/Executor/Synthesizer) | — |
 | `[sn-review]` | Shared RD-quorum settings (disagreement threshold, max cycles, active profile) | `get_sn_review_disagreement_threshold()`, `get_sn_review_max_cycles()`, `get_sn_review_active_profile()` |
 | `[sn-review.names]` / `[sn-review.docs]` | Reviewer model chain per axis (1–3 models) | `get_sn_review_names_models()`, `get_sn_review_docs_models()` |

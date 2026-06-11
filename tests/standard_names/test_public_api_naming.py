@@ -57,7 +57,6 @@ EXEMPT: frozenset[str] = ALIAS_BRIDGE_NAMES | OUT_OF_SCOPE_NAMES
 AUDITED_MODULES: tuple[Path, ...] = (
     Path("imas_codex/standard_names/search.py"),
     Path("imas_codex/standard_names/graph_ops.py"),
-    Path("imas_codex/standard_names/enrich_workers.py"),
     Path("imas_codex/standard_names/workers.py"),
     Path("imas_codex/standard_names/review/audits.py"),
     Path("imas_codex/standard_names/review/enrichment.py"),

@@ -373,54 +373,7 @@ class TestComposeStopEvent:
 
 
 # ---------------------------------------------------------------------------
-# Test 3: enrich stop_event short-circuits (H6)
-# ---------------------------------------------------------------------------
-
-
-class TestEnrichStopEvent:
-    @pytest.mark.asyncio
-    async def test_enrich_stop_event_short_circuits(self) -> None:
-        """Set stop_event before LLM call; assert 0 items processed."""
-        from imas_codex.standard_names.enrich_workers import process_enrich_batch
-
-        items = _make_sn_items(3)
-        mgr = _mock_budget_manager()
-        stop = asyncio.Event()
-        stop.set()  # Set immediately — should short-circuit
-
-        with (
-            patch(
-                "imas_codex.standard_names.example_loader.load_compose_examples",
-                return_value=[],
-            ),
-            patch(
-                "imas_codex.graph.client.GraphClient",
-            ),
-            patch(
-                "imas_codex.standard_names.enrich_workers._fetch_existing_sn_names",
-                return_value=set(),
-            ),
-            patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
-                new_callable=AsyncMock,
-            ) as mock_llm,
-            patch(
-                "imas_codex.settings.get_model",
-                return_value="test-model",
-            ),
-            patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
-                return_value="mock prompt",
-            ),
-        ):
-            count = await process_enrich_batch(items, mgr, stop)
-
-        mock_llm.assert_not_called()
-        assert count == 0
-
-
-# ---------------------------------------------------------------------------
-# Test 4: review names processes batch (happy path)
+# Test 3: review names processes batch (happy path)
 # ---------------------------------------------------------------------------
 
 

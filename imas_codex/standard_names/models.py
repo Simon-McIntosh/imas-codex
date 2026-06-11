@@ -1029,38 +1029,6 @@ class StandardNameQualityReviewDescriptionBatch(BaseModel):
 
 
 # =============================================================================
-# Enrichment models — documentation iteration (Phase 3D)
-# =============================================================================
-
-
-class StandardNameEnrichItem(BaseModel):
-    """Enrichment result for a single standard name."""
-
-    standard_name: str = Field(
-        description="The standard name (must match input exactly)"
-    )
-    description: str = Field(description="One sentence definition, <120 chars")
-    documentation: str = Field(
-        description="Rich docs with LaTeX, links, typical values"
-    )
-    links: list[str] = Field(
-        default_factory=list, description="Related standard names (name:xxx format)"
-    )
-    validity_domain: str | None = Field(
-        default=None, description="Physical region where quantity is meaningful"
-    )
-    constraints: list[str] = Field(
-        default_factory=list, description="Physical constraints on the quantity"
-    )
-
-
-class StandardNameEnrichBatch(BaseModel):
-    """LLM response for enriching a batch of standard names."""
-
-    items: list[StandardNameEnrichItem]
-
-
-# =============================================================================
 # Refine-pipeline response models (Phase 8.1)
 # =============================================================================
 

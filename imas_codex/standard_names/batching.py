@@ -1,6 +1,6 @@
-"""Token-aware batching utilities for the SN generate and enrich pipelines.
+"""Token-aware batching utilities for the SN generate pipeline.
 
-Provides three grouping strategies and a pre-flight token check that
+Provides two grouping strategies and a pre-flight token check that
 splits oversized batches before they reach the LLM.
 
 Grouping strategies
@@ -10,7 +10,6 @@ Grouping strategies
   Wraps the existing logic in ``enrichment.group_by_concept_and_unit``.
 - ``group_by_domain_and_unit`` — (physics_domain × unit) for name-only mode.
   Wraps ``enrichment.group_for_name_only``.
-- ``group_for_enrich`` — sequential chunking for the enrich pipeline.
 
 Token estimation
 ----------------
@@ -31,7 +30,6 @@ under budget.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from imas_codex.standard_names.sources.base import ExtractionBatch
 
@@ -74,42 +72,6 @@ def estimate_batch_tokens(batch: ExtractionBatch) -> int:
                 sv = sib.get(k)
                 if sv:
                     total += estimate_tokens(str(sv))
-    return total
-
-
-def estimate_enrich_batch_tokens(batch: dict[str, Any]) -> int:
-    """Estimate total token count for an enrich batch dict.
-
-    Enrich batches are plain dicts with an ``items`` list of SN dicts.
-    Each item carries ``description``, ``documentation``,
-    ``links``, and contextualisation data that all end up in the prompt.
-    """
-    total = 0
-    for item in batch.get("items", []):
-        for key in (
-            "name",
-            "description",
-            "documentation",
-            "unit",
-            "kind",
-            "physics_domain",
-        ):
-            val = item.get(key)
-            if val:
-                total += estimate_tokens(str(val))
-        # Contextualisation payload (added by contextualise worker)
-        ctx = item.get("context")
-        if isinstance(ctx, str):
-            total += estimate_tokens(ctx)
-        elif isinstance(ctx, dict):
-            for v in ctx.values():
-                if isinstance(v, str):
-                    total += estimate_tokens(v)
-        # Tags / links are small but count them
-        for list_key in ("links", "source_paths"):
-            lst = item.get(list_key)
-            if lst:
-                total += estimate_tokens(" ".join(str(x) for x in lst))
     return total
 
 
@@ -192,55 +154,6 @@ def pre_flight_token_check(
     return result
 
 
-def pre_flight_enrich_token_check(
-    batches: list[dict[str, Any]],
-    *,
-    max_tokens: int = DEFAULT_MAX_TOKENS,
-) -> list[dict[str, Any]]:
-    """Split enrich batches that exceed *max_tokens*.
-
-    Same logic as :func:`pre_flight_token_check` but for the plain-dict
-    enrich batch format.
-
-    Args:
-        batches: List of enrich batch dicts.
-        max_tokens: Maximum estimated tokens per batch.
-
-    Returns:
-        A new list where every batch is ≤ *max_tokens*.
-    """
-    result: list[dict[str, Any]] = []
-    splits = 0
-
-    for batch in batches:
-        est = estimate_enrich_batch_tokens(batch)
-        items = batch.get("items", [])
-        if est <= max_tokens or len(items) <= 1:
-            result.append(batch)
-            continue
-
-        # Binary split
-        mid = len(items) // 2
-        left = {**batch, "items": items[:mid], "batch_index": len(result)}
-        right = {**batch, "items": items[mid:], "batch_index": len(result) + 1}
-        splits += 1
-
-        result.extend(
-            pre_flight_enrich_token_check([left, right], max_tokens=max_tokens)
-        )
-
-    if splits:
-        logger.info(
-            "Pre-flight enrich token check: split %d oversized batches "
-            "(max_tokens=%d, result=%d batches)",
-            splits,
-            max_tokens,
-            len(result),
-        )
-
-    return result
-
-
 # ── Configuration helpers ───────────────────────────────────────────────────
 
 
@@ -256,20 +169,5 @@ def get_generate_batch_config() -> dict[str, int]:
     return {
         "batch_size": int(section.get("batch-size", 25)),
         "name_only_batch_size": int(section.get("name-only-batch-size", 50)),
-        "max_tokens": int(section.get("max-tokens", DEFAULT_MAX_TOKENS)),
-    }
-
-
-def get_enrich_batch_config() -> dict[str, int]:
-    """Read batch configuration from ``[tool.imas-codex.sn-enrich]``.
-
-    Returns:
-        Dict with keys ``batch_size``, ``max_tokens``.
-    """
-    from imas_codex.settings import _get_section
-
-    section = _get_section("sn-enrich")
-    return {
-        "batch_size": int(section.get("batch-size", 12)),
         "max_tokens": int(section.get("max-tokens", DEFAULT_MAX_TOKENS)),
     }

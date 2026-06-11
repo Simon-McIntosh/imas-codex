@@ -4,10 +4,9 @@ Validates that:
 1. ``write_standard_names`` accumulates ``llm_cost_generate_name`` with ``+=``
 2. Repeated writes (regeneration) accumulate, not overwrite
 3. ``write_reviews`` propagates ``llm_cost_review_name`` / ``llm_cost_review_docs``
-4. ``persist_enriched_batch`` accumulates aggregate ``llm_cost``
-5. ``llm_cost`` aggregate tracks the sum of per-pool costs
-6. ``sn clear`` (DETACH DELETE) wipes all cost fields
-7. ``write_reviews`` passes ``llm_tokens_cached_read/write`` through
+4. ``llm_cost`` aggregate tracks the sum of per-pool costs
+5. ``sn clear`` (DETACH DELETE) wipes all cost fields
+6. ``write_reviews`` passes ``llm_tokens_cached_read/write`` through
 """
 
 from __future__ import annotations
@@ -150,62 +149,6 @@ class TestComposeCostAccumulation:
 
         # CASE WHEN b.llm_cost IS NOT NULL pattern — NULL cost → no mutation
         assert "b.llm_cost IS NOT NULL" in cypher
-
-
-# ---------------------------------------------------------------------------
-# Phase 2b — persist_enriched_batch enrich cost accumulation
-# ---------------------------------------------------------------------------
-
-
-class TestEnrichCostAccumulation:
-    """``persist_enriched_batch`` must use ``+=`` for enrich cost."""
-
-    def _cypher_from_enrich(self, items: list[dict]) -> str:
-        """Run persist_enriched_batch under a mock and return MERGE Cypher."""
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
-        with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
-            return_value=_make_gc_context(mock_gc),
-        ):
-            from imas_codex.standard_names.graph_ops import persist_enriched_batch
-
-            persist_enriched_batch(items)
-
-        for cypher, _ in _capture_queries(mock_gc):
-            if "MERGE (sn:StandardName" in cypher:
-                return cypher
-        pytest.fail("No MERGE StandardName Cypher found in enrich")
-
-    def test_enrich_cost_uses_accumulation(self):
-        """llm_cost (aggregate) uses += pattern for enrich."""
-        items = [
-            {
-                "id": "electron_temperature",
-                "enriched_description": "Electron temperature.",
-                "llm_cost": 0.003,
-                "enrich_cost_usd": 0.003,
-            }
-        ]
-        cypher = self._cypher_from_enrich(items)
-
-        # No per-pool enrich field — only aggregate llm_cost
-        assert "sn.llm_cost" in cypher
-        assert "coalesce(sn.llm_cost, 0.0)" in cypher
-
-    def test_enrich_aggregate_also_accumulated(self):
-        """The aggregate llm_cost also uses += in enrich writer."""
-        items = [
-            {
-                "id": "electron_temperature",
-                "enriched_description": "Electron temperature.",
-                "llm_cost": 0.003,
-            }
-        ]
-        cypher = self._cypher_from_enrich(items)
-
-        assert "coalesce(sn.llm_cost, 0.0) + b.llm_cost" in cypher
 
 
 # ---------------------------------------------------------------------------
@@ -471,112 +414,3 @@ class TestDropParamsConfig:
             config = yaml.safe_load(f)
 
         assert config["litellm_settings"]["drop_params"] is False
-
-
-# ---------------------------------------------------------------------------
-# Phase 2c — enrich worker distributes per-item cost
-# ---------------------------------------------------------------------------
-
-
-class TestEnrichPerItemCost:
-    """enrich_document_worker must stamp per-item cost on each item."""
-
-    def test_per_item_cost_distributed(self):
-        """After document worker runs, items should have enrich_cost_usd.
-
-        We verify the code path in enrich_document_worker that distributes
-        batch cost to individual items by checking the merge loop directly.
-        """
-        import asyncio
-        from unittest.mock import AsyncMock
-
-        # Create minimal state
-        state = MagicMock()
-        state.batches = [
-            {
-                "items": [
-                    {"id": "electron_temperature", "name": "electron_temperature"},
-                    {"id": "ion_temperature", "name": "ion_temperature"},
-                ],
-                "batch_index": 0,
-            }
-        ]
-        state.dry_run = False
-        state.stop_requested = False
-        state.budget_exhausted = False
-        state.cost = 0.0
-        state.tokens_in = 0
-        state.model = "test/model"
-        state.domain = []
-        state.document_stats = MagicMock()
-        state.document_stats.cost = 0.0
-        state.document_phase = MagicMock()
-
-        # Mock the LLM call to return enriched items
-        mock_enriched = MagicMock()
-        mock_enriched.standard_name = "electron_temperature"
-        mock_enriched.description = "Electron temperature."
-        mock_enriched.documentation = "The electron temperature."
-        mock_enriched.links = []
-        mock_enriched.validity_domain = None
-        mock_enriched.constraints = None
-
-        mock_enriched2 = MagicMock()
-        mock_enriched2.standard_name = "ion_temperature"
-        mock_enriched2.description = "Ion temperature."
-        mock_enriched2.documentation = "The ion temperature."
-        mock_enriched2.links = []
-        mock_enriched2.validity_domain = None
-        mock_enriched2.constraints = None
-
-        mock_result = MagicMock()
-        mock_result.items = [mock_enriched, mock_enriched2]
-
-        batch_cost = 0.010  # $0.01 total for 2 items
-
-        with (
-            patch(
-                "imas_codex.discovery.base.llm.acall_llm_structured",
-                new_callable=AsyncMock,
-                return_value=(mock_result, batch_cost, 100),
-            ),
-            patch(
-                "imas_codex.llm.prompt_loader.render_prompt",
-                return_value="mock prompt",
-            ),
-            patch(
-                "imas_codex.settings.get_model",
-                return_value="test/model",
-            ),
-            patch(
-                "imas_codex.standard_names.example_loader.load_compose_examples",
-                return_value=[],
-            ),
-            patch(
-                "imas_codex.standard_names.enrich_workers._fetch_existing_sn_names",
-                return_value=set(),
-            ),
-            patch(
-                "imas_codex.graph.client.GraphClient",
-            ) as MockGC,
-        ):
-            # Set up GraphClient mock
-            mock_gc_inst = MagicMock()
-            mock_gc_inst.__enter__ = MagicMock(return_value=mock_gc_inst)
-            mock_gc_inst.__exit__ = MagicMock(return_value=False)
-            MockGC.return_value = mock_gc_inst
-
-            from imas_codex.standard_names.enrich_workers import (
-                enrich_document_worker,
-            )
-
-            asyncio.run(enrich_document_worker(state))
-
-        items = state.batches[0]["items"]
-        # Each item should have enrich_cost_usd = batch_cost / 2
-        expected_per_item = batch_cost / 2
-        for item in items:
-            assert "enrich_cost_usd" in item, (
-                f"Item {item['id']} missing enrich_cost_usd"
-            )
-            assert abs(item["enrich_cost_usd"] - expected_per_item) < 1e-9

@@ -318,20 +318,6 @@ class TestEnrichChargeEvent:
         assert result2.overspend > 0
         # Total charged = 6.0, reserved = 0.01 → significant overspend
 
-    @pytest.mark.asyncio
-    async def test_enrich_state_has_budget_manager(self):
-        """StandardNameEnrichState now has budget_manager field."""
-        from imas_codex.standard_names.enrich_state import StandardNameEnrichState
-
-        state = StandardNameEnrichState(facility="dd")
-        assert state.budget_manager is None  # default
-        assert state.budget_phase_tag == ""
-
-        # Can be set
-        mgr = _make_mgr()
-        state.budget_manager = mgr
-        assert state.budget_manager is mgr
-
 
 # =====================================================================
 # 5. Review c0/c1/c2 — correct cycles
