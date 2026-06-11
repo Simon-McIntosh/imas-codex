@@ -1456,11 +1456,19 @@ def build_servers_section(
                 label = s.healthy_detail
             elif s.auth_label:
                 label = s.auth_label
-            elif "402" in detail or "budget" in detail or "insufficient" in detail:
+            elif (
+                "402" in detail
+                or "budget" in detail
+                or "insufficient" in detail
+                or "no credit" in detail
+            ):
                 label = "no credit"
                 style = "yellow"
             elif "401" in detail or "auth" in detail or "api_key" in detail:
                 label = "auth error"
+            elif "no key" in detail:
+                label = "no API key"
+                style = "yellow"
             elif "429" in detail or "rate" in detail:
                 label = "rate limited"
                 style = "yellow"

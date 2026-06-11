@@ -8369,6 +8369,10 @@ def persist_refined_name(
                         // Preserves edge properties so the SPA's parent
                         // widget points at the live successor, not the
                         // superseded predecessor.
+                        // Note: MERGE inside FOREACH cannot reference map
+                        // properties as node patterns (CYPHER_5 restriction).
+                        // Use CALL subquery + UNWIND to bind child as a
+                        // proper node variable before the MERGE.
                         WITH DISTINCT new, old
                         OPTIONAL MATCH (child)-[c_old:HAS_PARENT]->(old)
                         WITH new, old,
@@ -8379,10 +8383,14 @@ def persist_refined_name(
                              }}) AS comp_links
                         FOREACH (link IN comp_links | DELETE link.rel)
                         WITH new, old, comp_links
-                        FOREACH (link IN comp_links |
-                            MERGE (link.child)-[c_new:HAS_PARENT]->(new)
-                            SET   c_new = link.props
-                        )
+                        CALL {{
+                            WITH new, comp_links
+                            UNWIND comp_links AS link
+                            WITH link.child AS ch, link.props AS p, new
+                            WHERE ch IS NOT NULL AND ch.id <> new.id
+                            MERGE (ch)-[c_new:HAS_PARENT]->(new)
+                            SET   c_new = p
+                        }}
 
                         // 6. Inherit HAS_UNIT and IN_CLUSTER edges from the
                         // predecessor so that downstream claim-expand

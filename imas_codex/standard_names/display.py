@@ -651,6 +651,14 @@ class SN6PoolDisplay(BaseProgressDisplay):
             name: WorkerStats() for name in POOL_ORDER
         }
 
+        # Per-pool batch accumulators for smooth streaming.
+        # Accumulate stream items within a burst; tick() flushes them with
+        # last_batch_time so StreamQueue can apply adaptive rate pacing.
+        # This matches the discovery pipeline pattern (parallel.py sets
+        # stats.last_batch_time; progress.py passes it to stream_queue.add).
+        self._pending_stream: dict[str, list] = {name: [] for name in POOL_ORDER}
+        self._batch_start: dict[str, float] = {}  # pool → first-event timestamp
+
     # ── Event callback (wired into workers) ───────────────────────────
 
     def on_event(self, ev: dict[str, Any]) -> None:
@@ -658,6 +666,10 @@ class SN6PoolDisplay(BaseProgressDisplay):
 
         Called by workers after each successful persist.  Thread-safe
         because deque.append is atomic in CPython.
+
+        Events are accumulated in ``_pending_stream`` and flushed in
+        :meth:`tick` with ``last_batch_time`` so the StreamQueue can
+        apply adaptive rate pacing (matching the discovery pipeline pattern).
 
         Args:
             ev: Event dict with at minimum ``"pool"`` key matching one
@@ -675,13 +687,16 @@ class SN6PoolDisplay(BaseProgressDisplay):
         if cost:
             state.cost += float(cost)
 
-        # Push to canonical stream queue for per-worker display.
+        # Accumulate stream items for batch-aware flushing in tick().
+        # Record batch start time on first event in a burst.
         ws = self._pool_stats.get(pool_name)
         if ws is not None:
             mapper = _EVENT_MAPPERS.get(pool_name)
             if mapper:
                 stream_item = mapper(ev)
-                ws.stream_queue.add([stream_item])
+                if pool_name not in self._batch_start:
+                    self._batch_start[pool_name] = time.time()
+                self._pending_stream[pool_name].append(stream_item)
             ws.processed = state.completed
             ws.total = max(state.total, state.completed)
             ws.cost = state.cost
@@ -915,7 +930,29 @@ class SN6PoolDisplay(BaseProgressDisplay):
     # ── Tick (called by run_discovery ticker task) ────────────────────
 
     def tick(self) -> None:
-        """Periodic refresh: drain stream queues, update pending, repaint."""
+        """Periodic refresh: flush pending batches, drain stream queues, repaint.
+
+        Flushing pending batches (accumulated in :meth:`on_event`) with
+        ``last_batch_time`` gives StreamQueue adaptive rate pacing: items
+        spread out over the next expected batch gap rather than cycling
+        through instantly.  Matches the discovery pipeline pattern where
+        ``stats.last_batch_time`` is set after each batch and passed to
+        ``stream_queue.add()``.
+        """
+        now = time.time()
+
+        # Flush pending stream items with batch timing.
+        for pool_name, pending in self._pending_stream.items():
+            if not pending:
+                continue
+            ws = self._pool_stats.get(pool_name)
+            if ws is None:
+                continue
+            batch_start = self._batch_start.pop(pool_name, now)
+            last_batch_time = now - batch_start
+            ws.stream_queue.add(pending, last_batch_time=last_batch_time)
+            pending.clear()
+
         # Drain stream queues → _current_stream_item for each pool.
         for ws in self._pool_stats.values():
             item = ws.stream_queue.pop()

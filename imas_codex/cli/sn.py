@@ -68,49 +68,78 @@ class _SpaceSplitMultiple(click.Option):
 def _check_llm_direct() -> tuple[bool, str]:
     """Check LLM endpoint health for the SN compose pipeline.
 
-    Probes the configured compose model endpoint — either a local vLLM
+    Probes the configured compose model endpoint — either a local GPU/vLLM
     server (via ``api-base``) or OpenRouter (via API key).
+
+    Returns ``(healthy, detail)`` where detail is a concise label shown in the
+    SERVERS row.  Failure reasons are distinguished so operators know immediately
+    whether the issue is infrastructure (server down, no key) or account-level
+    (credits exhausted, rate limited):
+
+    Local server:
+      - ``"gpu-model:ok"``        — server responding
+      - ``"gpu-model:down"``      — connection refused (server not running)
+      - ``"gpu-model:unreachable"`` — network/timeout (server exists but unreachable)
+
+    OpenRouter:
+      - ``"openrouter:ok"``        — key valid and credits available
+      - ``"openrouter:no key"``    — ``OPENROUTER_API_KEY_IMAS_CODEX`` not set
+      - ``"openrouter:no credit"`` — 402 / insufficient credits
+      - ``"openrouter:rate limit"`` — 429 / too many requests
+      - ``"openrouter:auth error"`` — 401 / bad key
+      - ``"openrouter:unreachable"`` — network/timeout
     """
     import os
+    import urllib.error
+    import urllib.request
 
     from imas_codex.settings import get_model_config
 
     cfg = get_model_config("sn-compose")
-    model = cfg["model"]
     api_base = cfg.get("api_base")
-    short_model = model.split("/")[-1] if "/" in model else model
 
     if api_base:
-        # Local/self-hosted endpoint — probe /v1/models or /health
+        # Local/self-hosted GPU model server — probe /v1/models
+        url = api_base.rstrip("/")
         try:
-            import urllib.request
-
-            url = api_base.rstrip("/")
             req = urllib.request.Request(f"{url}/models", method="GET")
             with urllib.request.urlopen(req, timeout=5) as resp:
                 if resp.status == 200:
-                    return True, f"local ({short_model})"
+                    return True, "gpu-model:ok"
+        except urllib.error.URLError as exc:
+            reason = str(exc.reason).lower()
+            if "connection refused" in reason or "actively refused" in reason:
+                return False, "gpu-model:down"
+            return False, "gpu-model:unreachable"
         except Exception:
             pass
-        return False, f"unreachable ({short_model})"
+        return False, "gpu-model:unreachable"
 
     # OpenRouter path
     key = os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
     if not key:
-        return False, "no API key"
+        return False, "openrouter:no key"
     try:
-        import urllib.request
-
         req = urllib.request.Request(
             "https://openrouter.ai/api/v1/auth/key",
             headers={"Authorization": f"Bearer {key}"},
         )
         with urllib.request.urlopen(req, timeout=5) as resp:
             if resp.status == 200:
-                return True, f"direct ({short_model})"
+                return True, "openrouter:ok"
+    except urllib.error.HTTPError as exc:
+        if exc.code == 402:
+            return False, "openrouter:no credit"
+        if exc.code == 429:
+            return False, "openrouter:rate limit"
+        if exc.code == 401:
+            return False, "openrouter:auth error"
+        return False, f"openrouter:error {exc.code}"
+    except urllib.error.URLError:
+        return False, "openrouter:unreachable"
     except Exception:
         pass
-    return False, "unreachable"
+    return False, "openrouter:unreachable"
 
 
 def _require_embed_ready(command_label: str) -> None:
