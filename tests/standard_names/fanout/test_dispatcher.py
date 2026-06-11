@@ -94,6 +94,7 @@ def _patch_llm(monkeypatch: pytest.MonkeyPatch, ret: Any) -> list[dict[str, Any]
                 "response_model": response_model,
                 "temperature": temperature,
                 "service": service,
+                "reasoning_effort": kwargs.get("reasoning_effort"),
             }
         )
         if isinstance(ret, BaseException):
@@ -222,6 +223,26 @@ class TestPropose:
         assert outcome is None
         assert out_plan is not None
         assert lease.charged == pytest.approx(before + 0.0042)
+
+    async def test_proposer_threads_reasoning_effort(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """propose() threads reasoning_effort from [sn-fanout] ("max")."""
+        plan = FanoutPlan(
+            queries=[_SearchExistingNames(fn_id="search_existing_names", query="T_e")]
+        )
+        recorded = _patch_llm(monkeypatch, _FakeLLMResult(plan))
+        await dispatcher.propose(
+            candidate=_candidate(),
+            reviewer_excerpt="unclear",
+            scope=_scope(),
+            settings=_settings(),
+            parent_lease=_new_lease(),
+            fanout_run_id="run-effort",
+        )
+        # vLLM-local proposer uses "max" thinking effort (pyproject mapping
+        # exercised end-to-end via get_reasoning_effort).
+        assert recorded[0]["reasoning_effort"] == "max"
 
     async def test_scope_not_in_llm_args(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Caller-injected scope must never appear in LLM messages (plan §3.3)."""

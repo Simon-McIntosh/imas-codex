@@ -445,9 +445,11 @@ async def test_worker_uses_language_model():
     mgr.reserve = MagicMock(return_value=MagicMock())
 
     language_model_used: list[str] = []
+    reasoning_effort_used: list[str | None] = []
 
-    async def _fake_acall(model, messages, response_model, service):
+    async def _fake_acall(model, messages, response_model, service, **kwargs):
         language_model_used.append(model)
+        reasoning_effort_used.append(kwargs.get("reasoning_effort"))
         return (
             GeneratedDocs(
                 description="Electron kinetic temperature in the plasma.",
@@ -481,6 +483,8 @@ async def test_worker_uses_language_model():
 
     mock_get_model.assert_called_with("sn-docs")
     assert processed == 1
+    # reasoning_effort must be threaded from [tool.imas-codex.sn-docs] ("high").
+    assert reasoning_effort_used == ["high"]
 
 
 # =============================================================================
@@ -496,7 +500,7 @@ async def test_worker_streams_per_item():
 
     expected_desc = "Electron kinetic temperature in the plasma."
 
-    async def _fake_acall(model, messages, response_model, service):
+    async def _fake_acall(model, messages, response_model, service, **kwargs):
         return (
             GeneratedDocs(
                 description=expected_desc,

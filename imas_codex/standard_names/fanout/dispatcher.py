@@ -108,6 +108,7 @@ async def propose(
     and a Fanout-node write with the matching ``outcome``.
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.settings import get_reasoning_effort
 
     system_prompt = render_proposer_system_prompt()
     user_prompt = _build_proposer_user_prompt(candidate, reviewer_excerpt, scope)
@@ -123,6 +124,7 @@ async def propose(
             response_model=FanoutPlan,
             temperature=settings.proposer_temperature,
             service="standard-names",
+            reasoning_effort=get_reasoning_effort("sn-fanout"),
         )
     except Exception as e:
         logger.info(

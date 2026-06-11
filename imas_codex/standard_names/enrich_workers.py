@@ -976,7 +976,7 @@ async def enrich_document_worker(state: StandardNameEnrichState, **_kwargs) -> N
 
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.models import StandardNameEnrichBatch
 
     model = state.model or get_model("sn-enrich")
@@ -1082,6 +1082,7 @@ async def enrich_document_worker(state: StandardNameEnrichState, **_kwargs) -> N
                 messages=messages,
                 response_model=StandardNameEnrichBatch,
                 service="standard-names",
+                reasoning_effort=get_reasoning_effort("sn-enrich"),
             )
             result, cost, tokens = llm_out
 
@@ -1885,7 +1886,7 @@ async def process_enrich_batch(
 
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.models import StandardNameEnrichBatch
 
@@ -1959,6 +1960,7 @@ async def process_enrich_batch(
             messages=messages,
             response_model=StandardNameEnrichBatch,
             service="standard-names",
+            reasoning_effort=get_reasoning_effort("sn-enrich"),
         )
         result, cost, tokens = llm_out
 

@@ -119,7 +119,7 @@ def _stub_review_docs_response() -> StandardNameQualityReviewDocs:
 
 
 def _make_acall(response_obj: Any):
-    async def _fake(model, messages, response_model, service):
+    async def _fake(model, messages, response_model, service, **kwargs):
         return (response_obj, _STUB_COST, 100)
 
     return _fake

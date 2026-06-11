@@ -188,6 +188,40 @@ async def test_document_enriches_items():
 
 
 @pytest.mark.asyncio
+async def test_document_threads_reasoning_effort():
+    """enrich_document_worker passes reasoning_effort from [sn-enrich] ("max")."""
+    items = [_make_item("electron_temperature")]
+    state = _make_state(batches=[_make_batch(items)])
+
+    enrichment = _make_enrich_result("electron_temperature")
+    fake_acall = AsyncMock(
+        return_value=_FakeLLMResult(enrichment, cost=0.01, tokens=100)
+    )
+
+    with (
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            new=fake_acall,
+        ),
+        patch(
+            "imas_codex.llm.prompt_loader.render_prompt",
+            return_value="mock prompt",
+        ),
+        patch(
+            "imas_codex.settings.get_model",
+            return_value="test-model",
+        ),
+    ):
+        from imas_codex.standard_names.enrich_workers import enrich_document_worker
+
+        await enrich_document_worker(state)
+
+    assert fake_acall.await_count == 1
+    # The vLLM-local enrich model uses "max" thinking effort.
+    assert fake_acall.await_args.kwargs.get("reasoning_effort") == "max"
+
+
+@pytest.mark.asyncio
 async def test_document_accumulates_cost_and_tokens():
     """Cost and tokens accumulated on state after LLM call."""
     items = [_make_item("electron_temperature")]

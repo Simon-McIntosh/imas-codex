@@ -46,7 +46,9 @@ to understand what the name represents and how reviewers refined it.
 {% endif %}
 
 {% if item.description %}
-## Existing description (improve or replace)
+## Draft description (untrusted scaffolding — do not inherit)
+
+Rewrite the description from the Physics Reference Material and the name itself; do not carry over any claim you cannot verify from the reference material.
 
 {{ item.description }}
 {% endif %}

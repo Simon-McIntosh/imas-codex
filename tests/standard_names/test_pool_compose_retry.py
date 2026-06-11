@@ -325,7 +325,7 @@ class TestPoolComposeRetry:
 
         grammar_retry_called = False
 
-        async def mock_grammar_retry(name, error, model, acall_fn):
+        async def mock_grammar_retry(name, error, model, acall_fn, **kwargs):
             nonlocal grammar_retry_called
             grammar_retry_called = True
             return (_GOOD_NAME, 0.001, 10, 5)

@@ -1636,6 +1636,8 @@ async def _grammar_retry(
     parse_error: str,
     model: str,
     acall_fn,
+    *,
+    reasoning_effort: str | None = None,
 ) -> tuple[str | None, float, int, int]:
     """L6: Single grammar-failure re-prompt.
 
@@ -1673,6 +1675,7 @@ async def _grammar_retry(
             messages=[{"role": "user", "content": retry_prompt}],
             response_model=GrammarRetryResponse,
             service="standard-names",
+            reasoning_effort=reasoning_effort,
         )
         result, _cost, _tokens = llm_out
         return (
@@ -2383,7 +2386,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 state.grammar_retries += 1
                 try:
                     retry_name, _l6_cost, _l6_ti, _l6_to = await _grammar_retry(
-                        name_id, str(gram_exc), model, acall_llm_structured
+                        name_id,
+                        str(gram_exc),
+                        model,
+                        acall_llm_structured,
+                        reasoning_effort=get_reasoning_effort("sn-compose"),
                     )
                     if lease and _l6_cost > 0:
                         _l6_event = LLMCostEvent(
@@ -3993,7 +4000,11 @@ async def compose_batch(
                 # B2: Single-shot grammar-failure retry.
                 try:
                     retry_name, _r_cost, _r_ti, _r_to = await _grammar_retry(
-                        name_id, str(gram_exc), model, acall_llm_structured
+                        name_id,
+                        str(gram_exc),
+                        model,
+                        acall_llm_structured,
+                        reasoning_effort=get_reasoning_effort("sn-compose"),
                     )
                     if lease and _r_cost > 0:
                         _r_event = LLMCostEvent(
@@ -4342,7 +4353,7 @@ async def process_refine_name_batch(
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.canonical import find_name_key_duplicate
     from imas_codex.standard_names.defaults import (
@@ -4587,6 +4598,7 @@ async def process_refine_name_batch(
                     messages=_messages,
                     response_model=RefinedName,
                     service="standard-names",
+                    reasoning_effort=get_reasoning_effort("sn-refine"),
                 )
 
                 # acall_llm_structured returns an LLMResult that still supports
@@ -4799,6 +4811,7 @@ async def _run_rd_quorum_cycles(
     lease: Any,
     phase: str,
     acall_llm_structured: Callable[..., Any],
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any] | None:
     """Run the configured RD-quorum reviewer chain for a single StandardName.
 
@@ -4861,6 +4874,7 @@ async def _run_rd_quorum_cycles(
                 ],
                 response_model=response_model,
                 service="standard-names",
+                reasoning_effort=reasoning_effort,
             )
             result_obj, cost, _tokens = llm_out
         except Exception:
@@ -5151,6 +5165,7 @@ async def process_review_name_batch(
     from imas_codex.settings import (
         get_sn_review_disagreement_threshold,
         get_sn_review_names_models,
+        get_sn_review_reasoning_effort,
     )
     from imas_codex.standard_names.defaults import (
         DEFAULT_MIN_SCORE,
@@ -5536,6 +5551,7 @@ async def process_review_name_batch(
                 lease=lease,
                 phase="review_name",
                 acall_llm_structured=acall_llm_structured,
+                reasoning_effort=get_sn_review_reasoning_effort(),
             )
 
             if quorum is None:
@@ -6097,7 +6113,7 @@ async def process_generate_docs_batch(
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.graph_ops import (
         persist_generated_docs,
@@ -6228,6 +6244,7 @@ async def process_generate_docs_batch(
                 messages=_messages,
                 response_model=GeneratedDocs,
                 service="standard-names",
+                reasoning_effort=get_reasoning_effort("sn-docs"),
             )
 
             result_obj, cost, _tokens = llm_out
@@ -6333,6 +6350,7 @@ async def process_review_docs_batch(
         get_sn_review_disagreement_threshold,
         get_sn_review_docs_models,
         get_sn_review_names_models,
+        get_sn_review_reasoning_effort,
     )
     from imas_codex.standard_names.defaults import (
         DEFAULT_MIN_SCORE,
@@ -6477,6 +6495,7 @@ async def process_review_docs_batch(
                 lease=lease,
                 phase="review_docs",
                 acall_llm_structured=acall_llm_structured,
+                reasoning_effort=get_sn_review_reasoning_effort(),
             )
 
             if quorum is None:
@@ -6613,7 +6632,7 @@ async def process_refine_docs_batch(
 
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model
+    from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.defaults import (
         DEFAULT_ESCALATION_MODEL,
@@ -6722,6 +6741,7 @@ async def process_refine_docs_batch(
                 messages=_messages,
                 response_model=RefinedDocs,
                 service="standard-names",
+                reasoning_effort=get_reasoning_effort("sn-refine"),
             )
 
             result_obj, cost, _tokens = llm_out
