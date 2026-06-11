@@ -1456,6 +1456,13 @@ def build_servers_section(
                 label = s.healthy_detail
             elif s.auth_label:
                 label = s.auth_label
+            elif detail.startswith(("openrouter:", "gpu-model:")):
+                # Structured labels from _check_llm_direct — preserve the full
+                # label so operators see the service category (e.g.
+                # "openrouter:no credit" vs "gpu-model:down").
+                label = s.detail
+                if any(x in detail for x in (":no credit", ":rate limit", ":no key")):
+                    style = "yellow"
             elif (
                 "402" in detail
                 or "budget" in detail

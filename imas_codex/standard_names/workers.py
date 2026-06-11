@@ -4748,13 +4748,21 @@ async def process_refine_name_batch(
                     )
 
             except Exception as exc:
+                _exc_str = str(exc)
+                # "no-op" means orphan_sweep already reverted this claim
+                # while the LLM call was in flight — the graph is already
+                # consistent; just warn and move on (no release needed).
+                if "no-op" in _exc_str:
+                    logger.warning(
+                        "refine_name skipped (orphan_sweep beat us): %s", sn_id
+                    )
+                    continue
                 logger.exception("refine_name failed for %s", sn_id)
                 token = item.get("claim_token") or ""
                 # Vocab-gap errors and self-referential refines are
                 # deterministic — the LLM will keep producing the same
                 # output.  Mark exhausted instead of reverting to
                 # 'reviewed' (which re-enters the refine loop).
-                _exc_str = str(exc)
                 is_terminal = (
                     "not a registered" in _exc_str
                     or "self-referential REFINED_FROM" in _exc_str
