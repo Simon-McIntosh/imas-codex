@@ -55,11 +55,32 @@ When sibling lists are empty, score on physics correctness + grammar/style alone
 - Dock when `same_path_neighbours` consistently include a piece (e.g. "see also `<sibling>` for the radial profile") that the candidate omits.
 
 ### 4. Physics Accuracy (0–20)
-- Equations correct (RHS units balance LHS).
+
+**This dimension is a claim-level verification against the DD Ground Truth
+block, not a fluency judgment.** Fluent, confident, well-formatted text that
+is WRONG is the single most dangerous failure mode — score it harshly.
+
+- **Verify every definitional claim** (what the quantity IS, its sign
+  convention, coordinate frame, dependencies, defining equation) against the
+  **DD Ground Truth** section and the sibling definitions provided. Quote the
+  agreeing or contradicting evidence in your `physics_accuracy` comment.
+- **Contradiction**: any definitional claim that contradicts the DD ground
+  truth or an accepted sibling's definition → **physics_accuracy ≤ 5** and an
+  entry in `issues` naming the claim and the contradicting source.
+- **Unverifiable confident claims**: a definitional claim that cannot be
+  verified from the provided context AND is not elementary textbook plasma
+  physics → treat as hallucination risk: **cap physics_accuracy at ≤ 10** and
+  list each such claim in `issues`. Vague hedged prose is a quality problem;
+  confident unverifiable specifics are an accuracy problem — the latter is
+  worse.
+- Equations correct (RHS units balance LHS); unit statements must agree with
+  the DD units field.
 - Unit conversions correct.
 - No false physical equivalences (e.g. "equal to" vs "proportional to").
 - Qualifiers appropriate (e.g. "in the plasma frame", "averaged over a flux surface").
-- **No implementation leakage**: documentation must describe physics, not storage. Dock if the text references specific IDS names, DD paths, grid types, or array shapes as storage context. Source provenance is tracked externally via graph edges.
+- **No implementation leakage**: documentation must describe physics, not storage. Dock if the text references specific IDS names, DD paths, grid types, or array shapes as storage context. Source provenance is tracked externally via graph edges. (The DD Ground Truth block is YOUR verification source — the candidate must agree with its facts while never citing it in prose.)
+- The "paraphrase, don't copy" style rule never excuses factual divergence:
+  the candidate must restate the same physics in its own words.
 
 ## Quality Tiers
 

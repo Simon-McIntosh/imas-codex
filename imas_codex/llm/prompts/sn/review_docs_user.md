@@ -28,6 +28,17 @@ Apply the rubric (provided in the system prompt) to the candidate below.
 {% endfor %}{% endif %}
 {% if item.dd_keywords %}- **Keywords:** {{ item.dd_keywords | join(', ') }}
 {% endif %}
+{% if item.dd_documentation or item.dd_description %}
+## DD Ground Truth (verification source — NOT to be cited in output prose)
+
+The authoritative Data Dictionary definition of the source quantity. Verify
+every definitional claim in the candidate documentation against this text:
+
+{% if item.dd_description %}- **DD description**: {{ item.dd_description }}
+{% endif %}{% if item.dd_documentation %}- **DD documentation**: {{ item.dd_documentation }}
+{% endif %}{% if item.dd_units %}- **DD units**: `{{ item.dd_units }}`
+{% endif %}
+{% endif %}
 - **Description**: {{ item.description | default('(missing)', true) }}
 - **Documentation**:
 

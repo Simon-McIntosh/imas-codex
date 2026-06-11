@@ -5668,6 +5668,9 @@ WHERE vc.change_type IN [
 WITH n, clusters, parent,
      collect(DISTINCT {change_id: vc.id, change_type: vc.change_type}) AS changes
 RETURN n.keywords AS keywords,
+       n.documentation AS dd_documentation,
+       n.description AS dd_description,
+       n.units AS dd_units,
        parent.description AS parent_description,
        clusters,
        changes
@@ -5732,6 +5735,18 @@ def _enrich_dd_path_context(gc: Any, item: dict, source_path: str) -> None:
             kw = [k.strip() for k in kw.split(",") if k.strip()]
         if kw:
             item["dd_keywords"] = kw
+
+    # DD ground truth — the authoritative definition the reviewer verifies
+    # documentation claims against (physics_accuracy grounding).
+    dd_doc = row.get("dd_documentation")
+    if dd_doc:
+        item["dd_documentation"] = dd_doc
+    dd_desc = row.get("dd_description")
+    if dd_desc:
+        item["dd_description"] = dd_desc
+    dd_units = row.get("dd_units")
+    if dd_units:
+        item["dd_units"] = dd_units
 
     # Parent description
     parent_desc = row.get("parent_description")
