@@ -41,6 +41,15 @@ Use only registered tokens. The closed `physical_base` registry holds lexical ba
 
 Lexicalised compounds like `poloidal_flux`, `minor_radius`, `safety_factor`, `internal_inductance` are valid — they ARE registered tokens. Invented compounds like `bounce_height`, `detector_sensitivity`, `townsend_position` are NOT registered and should be flagged.
 
+**Value-parameterized positions are grammatical** (ISN ≥rc34): the production
+`at_<position>_equal_to_<value>` samples a quantity at a numeric coordinate,
+where `<position>` is a registered position token and `<value>` is a numeric
+literal with underscores as decimal separator. ✓
+`safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95` (q95) is
+the canonical published form — `equal_to`, `0`, `95` are NOT unregistered
+tokens in this construction; do not dock it. Only flag value-parameterization
+when the position token itself is unregistered or the value is non-numeric.
+
 Flag and dock points whenever any segment would require an unregistered token, and **never** allow such tokens to migrate into `physical_base` to bypass the registry — see the decomposition audit below.
 
 ## Scoring Dimensions
