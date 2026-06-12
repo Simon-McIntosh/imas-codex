@@ -227,6 +227,7 @@ def _graph_available() -> bool:
         return False
 
 
+@pytest.mark.graph
 @pytest.mark.integration
 @pytest.mark.skipif(not _graph_available(), reason="no live graph with StandardNames")
 class TestLiveGraphSmoke:

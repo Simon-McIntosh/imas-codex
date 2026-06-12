@@ -753,6 +753,9 @@ class TestOnEventPayloadsNotTruncated:
                 return_value={},
             ),
             patch(
+                "imas_codex.standard_names.graph_ops.write_reviews",
+            ),
+            patch(
                 "imas_codex.standard_names.graph_ops.persist_reviewed_name",
                 return_value="accepted",
             ),
@@ -810,6 +813,9 @@ class TestOnEventPayloadsNotTruncated:
             patch(
                 "imas_codex.standard_names.context._build_enum_lists",
                 return_value={},
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.write_reviews",
             ),
             patch(
                 "imas_codex.standard_names.graph_ops.persist_reviewed_docs",

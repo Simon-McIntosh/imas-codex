@@ -119,10 +119,16 @@ class TestBug2SetupLogging:
 
         runner = CliRunner()
 
+        mock_gc = MagicMock()
+        mock_gc.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc.__exit__ = MagicMock(return_value=False)
+        mock_gc.query = MagicMock(return_value=[])
+
         with (
             patch("imas_codex.cli.discover.common.setup_logging") as mock_setup,
             patch("imas_codex.standard_names.budget.BudgetManager"),
             patch("imas_codex.standard_names.review.state.StandardNameReviewState"),
+            patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
         ):
             # --dry-run to avoid the full pipeline running
             runner.invoke(sn_review, ["--dry-run"], catch_exceptions=False)

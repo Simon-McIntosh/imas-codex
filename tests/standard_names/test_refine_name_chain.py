@@ -22,7 +22,18 @@ import pytest
 # =============================================================================
 
 _GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+# workers.py uses function-local imports, so patch at the source module.
+_GC_WORKERS_PATH = "imas_codex.graph.client.GraphClient"
 _CHAIN_HISTORY_PATH = "imas_codex.standard_names.chain_history.name_chain_history"
+
+
+def _mock_worker_gc():
+    """Return a context-manager-aware MagicMock for GraphClient in workers."""
+    gc = MagicMock()
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+    gc.query = MagicMock(return_value=[])
+    return gc
 
 
 def _mock_gc_tx():
@@ -536,6 +547,10 @@ class TestProcessCallsEscalationModel:
                 "imas_codex.settings.get_model",
                 return_value="default-model",
             ),
+            patch(
+                _GC_WORKERS_PATH,
+                return_value=_mock_worker_gc(),
+            ),
         ):
             mgr = _mock_budget_manager()
             stop = asyncio.Event()
@@ -589,6 +604,10 @@ class TestProcessCallsEscalationModel:
                 "imas_codex.settings.get_model",
                 return_value="default-model",
             ),
+            patch(
+                _GC_WORKERS_PATH,
+                return_value=_mock_worker_gc(),
+            ),
         ):
             mgr = _mock_budget_manager()
             stop = asyncio.Event()
@@ -633,6 +652,10 @@ class TestProcessReleasesOnFailure:
                 "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
                 return_value=1,
             ) as mock_release,
+            patch(
+                _GC_WORKERS_PATH,
+                return_value=_mock_worker_gc(),
+            ),
         ):
             mgr = _mock_budget_manager()
             stop = asyncio.Event()
@@ -664,6 +687,10 @@ class TestProcessStopEvent:
             patch(
                 "imas_codex.settings.get_model",
                 return_value="m",
+            ),
+            patch(
+                _GC_WORKERS_PATH,
+                return_value=_mock_worker_gc(),
             ),
         ):
             count = await process_refine_name_batch(items, mgr, stop)
@@ -780,6 +807,10 @@ class TestPromptRendering:
             patch(
                 "imas_codex.settings.get_model",
                 return_value="m",
+            ),
+            patch(
+                _GC_WORKERS_PATH,
+                return_value=_mock_worker_gc(),
             ),
         ):
             mgr = _mock_budget_manager()

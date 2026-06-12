@@ -16,6 +16,51 @@ from unittest.mock import patch
 
 import pytest
 
+# ---------------------------------------------------------------------------
+# Structural guard — block live GraphClient connections in default-tier tests
+# ---------------------------------------------------------------------------
+
+#: Markers that indicate a test intentionally needs a live Neo4j connection.
+_LIVE_GRAPH_MARKERS = frozenset(
+    {"graph", "graph_mcp", "requires_graph", "fixture_only"}
+)
+
+
+@pytest.fixture(autouse=True)
+def _block_live_graph(request):
+    """Raise RuntimeError if a default-tier test attempts to open a real
+    Neo4j connection.
+
+    This guard patches ``GraphClient.__post_init__`` — the dataclass
+    initialiser where the driver connection is established — directly on the
+    class object.  Because the patch targets the class itself rather than a
+    module-level name binding, it is effective regardless of how
+    ``GraphClient`` was imported (``from ... import GraphClient``, local
+    import, etc.).
+
+    Tests marked with any live-graph marker (graph, graph_mcp,
+    requires_graph, fixture_only) are exempt and receive an unpatched
+    ``GraphClient``.
+    """
+    if any(request.node.get_closest_marker(m) for m in _LIVE_GRAPH_MARKERS):
+        # Test is allowed to connect; yield without patching.
+        yield
+        return
+
+    from imas_codex.graph.client import GraphClient
+
+    def _blocked_post_init(self, *args, **kwargs):
+        raise RuntimeError(
+            f"GraphClient.__post_init__ called in a default-tier test "
+            f"({request.node.nodeid!r}). "
+            "Mark the test with @pytest.mark.graph (or requires_graph) if "
+            "it intentionally needs a live Neo4j connection, or add a local "
+            "mock/patch so it does not reach GraphClient at all."
+        )
+
+    with patch.object(GraphClient, "__post_init__", _blocked_post_init):
+        yield
+
 
 @pytest.fixture()
 def sample_standard_names() -> list[dict]:

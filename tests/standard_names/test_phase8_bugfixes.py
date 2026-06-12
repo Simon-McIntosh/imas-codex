@@ -1082,6 +1082,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
 
         with (
             patch(f"{_GO}.reconcile_standard_name_sources", return_value={}),
+            patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
             patch(
                 "imas_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,
@@ -1090,6 +1091,10 @@ class TestRunSnPoolsFinalizePopulatesCounters:
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run"),
             patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
+            patch(f"{_GO}.rederive_structural_edges", return_value={}),
+            patch(f"{_GO}.seed_parent_sources", return_value=0),
+            patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
+            patch(f"{_GO}.resolve_doc_links", return_value={}),
             patch(f"{_BM}.start", new_callable=AsyncMock),
             patch(f"{_BM}.drain_pending", new_callable=AsyncMock, return_value=True),
             patch(f"{_BM}.get_total_spent", new_callable=AsyncMock, return_value=0.0),

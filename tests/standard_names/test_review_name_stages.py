@@ -572,11 +572,14 @@ class TestWorkerUsesCanonicalModel:
         )
         mock_llm.add_response("review_name", response=review_response, model=None)
 
-        # Patch persist to avoid graph calls
+        # Patch persist and write_reviews to avoid graph calls
         with (
             patch(
                 "imas_codex.settings.get_sn_review_names_models",
                 return_value=["openrouter/test/review-model"],
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.write_reviews",
             ),
             patch(
                 "imas_codex.standard_names.graph_ops.persist_reviewed_name",
@@ -629,6 +632,9 @@ class TestWorkerUsesCanonicalModel:
             patch(
                 "imas_codex.settings.get_sn_review_names_models",
                 return_value=["openrouter/test/model"],
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.write_reviews",
             ),
             patch(
                 "imas_codex.standard_names.graph_ops.persist_reviewed_name",
@@ -760,6 +766,9 @@ class TestQuarantinedSkipsLLM:
             patch(
                 "imas_codex.settings.get_sn_review_names_models",
                 return_value=["openrouter/test/review-model"],
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.write_reviews",
             ),
             patch(
                 "imas_codex.standard_names.graph_ops.persist_reviewed_name",

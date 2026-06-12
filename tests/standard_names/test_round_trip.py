@@ -247,6 +247,8 @@ class TestFullRoundTrip:
         isnc.mkdir()
 
         # ── Step 1: Export from mocked graph to staging ──────────
+        gc_export = MagicMock()
+        gc_export.query = MagicMock(return_value=[])
         with (
             patch(
                 "imas_codex.standard_names.export._fetch_candidates",
@@ -256,6 +258,7 @@ class TestFullRoundTrip:
                 "imas_codex.standard_names.export._get_codex_commit_sha",
                 return_value="abc123test",
             ),
+            _patch_gc(gc_export),
         ):
             report = run_export(
                 staging,
@@ -380,6 +383,8 @@ class TestFullRoundTrip:
         # Use single-node subset to keep it simple
         nodes = [_FIXTURE_NODES[0]]
 
+        gc_export = MagicMock()
+        gc_export.query = MagicMock(return_value=[])
         with (
             patch(
                 "imas_codex.standard_names.export._fetch_candidates",
@@ -389,6 +394,7 @@ class TestFullRoundTrip:
                 "imas_codex.standard_names.export._get_codex_commit_sha",
                 return_value="test123",
             ),
+            _patch_gc(gc_export),
         ):
             run_export(
                 staging,
@@ -600,6 +606,8 @@ class TestDivergenceInjection:
 
         staging = tmp_path / "staging"
 
+        gc_export = MagicMock()
+        gc_export.query = MagicMock(return_value=[])
         with (
             patch(
                 "imas_codex.standard_names.export._fetch_candidates",
@@ -609,6 +617,7 @@ class TestDivergenceInjection:
                 "imas_codex.standard_names.export._get_codex_commit_sha",
                 return_value="test456",
             ),
+            _patch_gc(gc_export),
         ):
             report = run_export(
                 staging,

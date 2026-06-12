@@ -533,6 +533,9 @@ class TestWorkerStreamsPerItemDocs:
                 return_value=["openrouter/test/model"],
             ),
             patch(
+                "imas_codex.standard_names.graph_ops.write_reviews",
+            ),
+            patch(
                 "imas_codex.standard_names.graph_ops.persist_reviewed_docs",
                 return_value="accepted",
             ),
