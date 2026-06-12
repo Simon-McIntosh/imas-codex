@@ -71,6 +71,15 @@ class GrammarSegments(BaseModel):
         default=None,
         description="Locus classification: 'entity', 'position', 'region', or 'geometry'",
     )
+    locus_value: str | None = Field(
+        default=None,
+        description=(
+            "Numeric value for value-parameterized at-positions, underscores "
+            "as decimal separator (e.g. '0_95' for q95 → "
+            "at_normalized_poloidal_magnetic_flux_equal_to_0_95). Requires "
+            "locus_relation='at' and locus_type='position'."
+        ),
+    )
 
     process_token: str | None = Field(
         default=None,
@@ -255,11 +264,18 @@ class GrammarSegments(BaseModel):
             if rel not in allowed:
                 rel = allowed[0]
 
-            locus = LocusRef(
-                relation=LocusRelation(rel),
-                token=self.locus_token,
-                type=LocusType(lt),
-            )
+            _locus_kwargs: dict = {
+                "relation": LocusRelation(rel),
+                "token": self.locus_token,
+                "type": LocusType(lt),
+            }
+            # Value-parameterized at-positions (ISN ≥rc34): only valid for
+            # relation='at' + type='position'; silently dropping the value
+            # would be a silent-loss bug, so pass it through and let the IR
+            # validator reject invalid combinations.
+            if self.locus_value is not None:
+                _locus_kwargs["value"] = self.locus_value
+            locus = LocusRef(**_locus_kwargs)
 
         mechanism = None
         if self.process_token is not None:

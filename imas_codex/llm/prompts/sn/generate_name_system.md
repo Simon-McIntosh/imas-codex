@@ -524,6 +524,18 @@ The DD resolves species into ionisation/charge states (`ion(i1)/state(i2)`,
   — they are different physical quantities. The species-level name is the
   state name's structural parent, not its synonym.
 
+### Value-parameterized positions (R5 finding — q95-class quantities)
+
+Profile values sampled AT a specific numeric coordinate (q95, q at rho=0.5,
+density at psi_norm=0.95, …) use the value-parameterized position form:
+set ``locus_token`` to the registered position (e.g.
+``normalized_poloidal_magnetic_flux``), ``locus_relation='at'``,
+``locus_type='position'``, and ``locus_value`` to the numeric literal with
+underscores as decimal separator (``'0_95'``). The composer renders
+``…_at_normalized_poloidal_magnetic_flux_equal_to_0_95``. NEVER invent
+percent- or value-baked position tokens (❌ ``95_percent_flux_surface``,
+❌ ``q95_surface``) — they are not in the registry and fail as vocab gaps.
+
 ### Subject required with population/orbit/component prefixes (R1 finding)
 
 A population, orbit, or component prefix on a generic base without a subject
