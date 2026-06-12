@@ -1303,6 +1303,26 @@ def _is_attachment_consistent(source_id: str, sn_name: str) -> tuple[bool, str]:
             f"tense mismatch: path '{source_id}' is a change/rate but SN "
             f"'{sn_name}' is a base quantity"
         )
+
+    # State-resolution consistency (R1/R4 rotation finding): the DD resolves
+    # species into ionisation/atomic states via ``…/state/…`` sub-structures.
+    # A state-resolved path describes ONE state — it must not source a
+    # species-level name (the species name is the structural parent, not a
+    # synonym), and a species-level path must not source a state name.
+    state_subjects = ("ion_state", "ion_charge_state", "neutral_state")
+    padded = f"_{sn_name}_"
+    sn_is_state = any(f"_{t}_" in padded for t in state_subjects)
+    path_is_state = "/state/" in source_id or source_id.endswith("/state")
+    if path_is_state and not sn_is_state:
+        return False, (
+            f"state-resolution mismatch: path '{source_id}' is state-resolved "
+            f"but SN '{sn_name}' is species-level"
+        )
+    if sn_is_state and not path_is_state:
+        return False, (
+            f"state-resolution mismatch: SN '{sn_name}' is state-resolved "
+            f"but path '{source_id}' is species-level"
+        )
     return True, ""
 
 
@@ -2341,6 +2361,25 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     except Exception:
                         wlog.debug("Failed to mark source %s as failed", c.source_id)
                 continue
+
+            # Deterministic source<->name consistency gate (tense + state
+            # resolution). The LLM sometimes emits a species-level sibling
+            # for a state-resolved source (R4 rotation: thermal_neutral_density
+            # sourced from .../neutral/state/density_thermal) -- drop the
+            # pairing so the source retries rather than persisting a
+            # mis-attributed name. Same predicate the auto-attach path uses.
+            if c.source_id:
+                _ok, _why = _is_attachment_consistent(c.source_id, name_id)
+                if not _ok:
+                    state.stats["compose_consistency_rejects"] = (
+                        state.stats.get("compose_consistency_rejects", 0) + 1
+                    )
+                    wlog.warning(
+                        "Source-name consistency reject: %r (%s)",
+                        name_id[:80],
+                        _why,
+                    )
+                    continue
 
             grammar_failed = False
             try:
@@ -3976,6 +4015,22 @@ async def compose_batch(
                     except Exception:
                         wlog.debug("Failed to mark source %s as failed", c.source_id)
                 continue
+
+            # Deterministic source<->name consistency gate (tense + state
+            # resolution). The LLM sometimes emits a species-level sibling
+            # for a state-resolved source (R4 rotation: thermal_neutral_density
+            # sourced from .../neutral/state/density_thermal) -- drop the
+            # pairing so the source retries rather than persisting a
+            # mis-attributed name. Same predicate the auto-attach path uses.
+            if c.source_id:
+                _ok, _why = _is_attachment_consistent(c.source_id, name_id)
+                if not _ok:
+                    wlog.warning(
+                        "Source-name consistency reject: %r (%s)",
+                        name_id[:80],
+                        _why,
+                    )
+                    continue
 
             grammar_failed = False
             try:

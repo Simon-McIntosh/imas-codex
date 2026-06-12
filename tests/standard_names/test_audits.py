@@ -2306,3 +2306,48 @@ class TestCanonicalLocusCheck:
         )
 
         assert not any("secondary_plasma_boundary" in issue for issue in issues)
+
+
+class TestAttachmentStateResolution:
+    """State-resolution consistency in _is_attachment_consistent (R1/R4)."""
+
+    @pytest.mark.parametrize(
+        "source_id,sn_name,expected_ok",
+        [
+            # state path -> state name: OK
+            (
+                "edge_profiles/profiles_1d/neutral/state/density_thermal",
+                "thermal_neutral_state_density",
+                True,
+            ),
+            # state path -> species name: REJECT (R4 live defect)
+            (
+                "edge_profiles/profiles_1d/neutral/state/density_thermal",
+                "thermal_neutral_density",
+                False,
+            ),
+            # species path -> state name: REJECT
+            (
+                "core_profiles/profiles_1d/ion/pressure_fast_parallel",
+                "parallel_fast_ion_state_pressure",
+                False,
+            ),
+            # species path -> species name: OK
+            (
+                "core_profiles/profiles_1d/ion/pressure_fast_parallel",
+                "parallel_fast_ion_pressure",
+                True,
+            ),
+            # ion_charge_state token also counts as state-resolved
+            (
+                "edge_profiles/ggd/ion/state/pressure_fast_perpendicular",
+                "perpendicular_fast_ion_charge_state_pressure",
+                True,
+            ),
+        ],
+    )
+    def test_state_resolution_consistency(self, source_id, sn_name, expected_ok):
+        from imas_codex.standard_names.workers import _is_attachment_consistent
+
+        ok, reason = _is_attachment_consistent(source_id, sn_name)
+        assert ok is expected_ok, reason
