@@ -753,6 +753,7 @@ Each candidate MUST include these fields:
   - `"over"` + `"region"` — integrals OVER regions (e.g., `radiated_power_over_plasma_volume`)
   - ⛔ Other combinations (e.g., `"at"` + `"geometry"`, `"over"` + `"entity"`) are **invalid** and will fail validation.
 - `locus_type`: semantic type of the locus — `"entity"` (device/object), `"position"` (spatial point), `"region"` (spatial region), or `"geometry"` (geometric feature). Required when `locus_token` is set; null otherwise.
+- `locus_value`: numeric value for value-parameterized at-positions, underscores as decimal separator (e.g., `"0_95"` → `…_at_<position>_equal_to_0_95`). Only valid with `locus_relation="at"` + `locus_type="position"`; null otherwise.
 - `process_token`: process/mechanism token for `_due_to_` suffix (e.g., `"bootstrap"`, `"collisions"`). Null if no process attribution.
 - `operator_token`: mathematical operator token (e.g., `"time_derivative"`, `"gradient"`, `"normalized"`, `"magnitude"`). Null if no operator.
 - `operator_kind`: `"unary_prefix"` (wraps with `_of_` scope) or `"unary_postfix"` (appends directly). Required when `operator_token` is set; null otherwise.
