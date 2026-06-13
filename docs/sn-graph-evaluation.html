@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-graph-evaluation">
+  <meta name="plan-title" content="Standard-Name Graph Evaluation — quality, capability gaps, linkage integrity">
+  <meta name="plan-summary" content="Adversarial evaluation of the StandardName graph: accepted-name quality (sample pass rate + worst defects), capability gaps (vocab gaps, blocked sources, prompt robustness), and structural-linkage integrity. Establishes that SN-level HAS_ERROR=0 and HAS_ARGUMENT=0 are both expected — by-design for HAS_ERROR (universal error-modifier strategy), not-yet-exercised for HAS_ARGUMENT — and that the HAS_PARENT orphans are by-design (derived-parent admission gate).">
+  <meta name="plan-status" content="done">
+  <title>Standard-Name Graph Evaluation | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard-Name Graph Evaluation</h1>
+    <p style="font-size:0.9em;color:#555;">Read-only graph snapshot taken at authoring time during a live <code>sn run</code> campaign (codex graph, location <code>iter</code>). Counts are live head; treat them as a moving baseline. This is an analysis-only assessment — no code changes were made; all findings are reported for triage.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-graph-evaluation/overview.svg" alt="Left: accepted-name reviewer-score histogram peaking at 1.0 with median 0.969. Right: StandardName-level structural edge counts — HAS_PARENT 156, HAS_LOCUS 125, REFINED_FROM 23, HAS_ERROR 0, HAS_ARGUMENT 0.">
+      <figcaption>The quality signal is strong (right tail at 1.0). The two zero-count edge types between StandardName nodes are both <em>expected</em>: HAS_ERROR=0 is a deliberate design choice (error/uncertainty quantities are handled universally via an error-modifier on the base name, not as separate catalog names), and HAS_ARGUMENT=0 is genuinely not-yet-exercised (no binary-operator names have been sourced).</figcaption>
+    </figure>
+
+    <div style="border-left:5px solid #2e8b57;background:#f3faf5;padding:0.8em 1.1em;margin:1em 0;">
+      <strong>Headline verdict.</strong> Sample quality is high — 28/28 sampled accepted names round-trip cleanly through the ISN grammar (100% grammatical canonicity), and reviewer scores on the 54 machine-reviewed accepted names are strong (median 0.969, mean 0.957, min 0.85). The defects are <em>semantic</em>, not grammatical: a handful of accepted names drop a load-bearing qualifier (e.g. <code>radiation</code>/<code>nuclear</code>) and/or carry documentation that over-claims relative to the DD source path. Two confirmed duplicate pairs share one DD source.
+    </div>
+    <div style="border-left:5px solid #2e8b57;background:#f3faf5;padding:0.8em 1.1em;margin:1em 0;">
+      <strong>Linkage verdict.</strong> StandardName-level <code>HAS_ERROR = 0</code> is <strong>expected, by design</strong>: error/uncertainty quantities are intentionally <em>not</em> given their own catalog names or HAS_ERROR edges — they are handled universally by applying an error-modifier to the existing base name (e.g. <code>uncertainty_of_&lt;name&gt;</code>), deliberately avoiding the cost of generating/reviewing per-error names. <code>HAS_ARGUMENT = 0</code> is separately expected — genuinely not-yet-exercised: no binary-operator (two-argument) names have been sourced, and the derivation has no <code>HAS_ARGUMENT</code> edge type (binary arguments map to <code>HAS_PARENT</code>). The <code>HAS_PARENT</code> orphans are <strong>by design</strong> — the derived-parent admission gate deliberately drops bare-base parents. <strong>The real linkage question, the HAS_PARENT orphans, resolves to expected behaviour with one watch-item</strong> (species-stripped intermediates not materialised; §3.2).
+    </div>
+
+    <h2 id="s1">§1 — Name &amp; documentation quality (sample-based)</h2>
+
+    <h3>1.1 — Population &amp; distributions</h3>
+    <p>StandardName population at snapshot (by <code>name_stage</code>): <strong>accepted 99</strong>, pending 35, superseded 22, exhausted 20, drafted 6, refining 2, and 132 with no <code>name_stage</code> (catalog-imported / seeded nodes, <code>model=None</code>). Of the 99 accepted names, only <strong>54</strong> carry a <code>reviewer_score_name</code> — the other 45 are deterministic or catalog-seeded and were never machine-scored.</p>
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Accepted names</td><td>99</td></tr>
+        <tr><td>Scored (have <code>reviewer_score_name</code>)</td><td>54</td></tr>
+        <tr><td>Name-score min / median / mean / max</td><td>0.850 / 0.969 / 0.957 / 1.000</td></tr>
+        <tr><td>Name-score histogram (0.1 bins)</td><td>0.80–0.89: 2 · 0.90–0.99: 17 · 1.00: 35</td></tr>
+        <tr><td>docs_stage of accepted names</td><td>accepted 81 · drafted 8 · exhausted 7 · pending 2 · reviewed 1</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.9em;color:#555;">Physics-domain spread of accepted names is broad: divertor_physics 21, transport 14, auxiliary_heating 13, equilibrium 9, edge_plasma_physics 6, magnetic_field_diagnostics 5, general 5, plus a long tail of single-digit domains (9 are <code>None</code>).</p>
+
+    <h3>1.2 — Adversarial sample (28 names across domains)</h3>
+    <p>Twenty-eight accepted names were sampled across the domain-sorted list and assessed for (a) grammatical canonicity via ISN <code>parse</code>→<code>compose</code> round-trip, and (b) description/documentation fidelity against the source DD path's own documentation.</p>
+    <ul>
+      <li><strong>Grammatical canonicity: 28/28 PASS.</strong> Every sampled name round-trips exactly through the ISN grammar (<code>parse → compose</code> returns the identical string). No decomposition defects, no unregistered tokens in accepted names.</li>
+      <li><strong>Description fidelity: ~24/28 clean; 4 with semantic defects.</strong> The defects are concentrated in two patterns: (i) a load-bearing qualifier dropped from the name while the docs silently re-assert it, and (ii) docs that over-claim scope relative to a DD path that is explicitly narrower (e.g. a <code>_thermal</code> path described as covering thermal + fast).</li>
+    </ul>
+
+    <h3>1.3 — Worst 5 defects (with concrete reasoning)</h3>
+
+    <div style="background:#fdf3f2;border-left:4px solid #c0392b;padding:0.5em 0.9em;margin:0.6em 0;">
+      <strong>1. <code>temperature_at_magnetic_axis</code> — mislabeled near-duplicate, docs contradict the DD source.</strong><br>
+      Source DD path <code style="font-size:0.92em;color:#444;">ece/t_radiation_central</code> (unit eV), DD documentation: <em>"Radiation temperature from the closest channel to the magnetic axis."</em> The accepted SN doc instead asserts <em>"electron kinetic temperature… distinct from a blackbody-[radiation] temperature."</em> An ECE channel measures <em>radiation</em> (brightness) temperature — equal to electron temperature only in the optically-thick limit. The name drops the <code>radiation</code> qualifier entirely, and the doc actively re-labels the quantity as something the DD says it is not. <strong>Worse:</strong> the sibling <code>radiative_temperature_at_magnetic_axis</code> exists in the same family and is sourced from the <em>same</em> DD path — so this is a duplicate of a correctly-named node. Consolidation should have caught it.
+    </div>
+
+    <div style="background:#fdf3f2;border-left:4px solid #c0392b;padding:0.5em 0.9em;margin:0.6em 0;">
+      <strong>2. <code>ion_power_density</code> — duplicate DD source + scope over-claim.</strong><br>
+      Source DD path <code style="font-size:0.92em;color:#444;">waves/coherent_wave/profiles_1d/ion/power_density_thermal</code>, DD doc: <em>"Flux surface averaged absorbed wave power density on the thermal species."</em> The accepted SN doc claims <em>"Total volumetric auxiliary-heating power source for all ions… encompassing thermal bulk and fast ion contributions."</em> The DD path is explicitly <code>_thermal</code> (thermal species only) — the doc over-claims by adding fast-ion contributions the path excludes. The sibling <code>ion_wave_absorbed_power_density</code> is sourced from the <em>same</em> DD path: a second duplicate pair on one DD source.
+    </div>
+
+    <div style="background:#fdf3f2;border-left:4px solid #c0392b;padding:0.5em 0.9em;margin:0.6em 0;">
+      <strong>3. <code>power_density_at_midplane</code> — generic name for a domain-specific quantity.</strong><br>
+      Source DD path <code style="font-size:0.92em;color:#444;">breeding_blanket/module/layer/time_slice/midplane_power_density_nuclear</code>, DD doc: <em>"Nuclear heating power density in the layer, evaluated at midplane."</em> The accepted name drops both <code>nuclear</code> and <code>heating</code>, leaving a generic <code>power_density_at_midplane</code> that any midplane power density could match. The refine chain already contains the correct successor <code>nuclear_heating_power_density_at_breeding_blanket_midplane</code> (drafted) — so this is a known-weak name caught mid-refinement, but it is still in <code>accepted</code> name_stage with <code>docs_stage=drafted</code>.
+    </div>
+
+    <div style="background:#fdf3f2;border-left:4px solid #c0392b;padding:0.5em 0.9em;margin:0.6em 0;">
+      <strong>4. <code>source_over_divertor_region_due_to_recycling</code> — bare <code>source</code> physical-base, no source-path link.</strong><br>
+      This accepted name has <strong>no</strong> <code>PRODUCED_NAME</code> link to a <code>StandardNameSource</code> (it is a refine-chain product). <code>source</code> as a bare physical_base is semantically thin ("source of what?"); the meaning rides entirely on the <code>_due_to_recycling</code> mechanism. It is grammatically valid but reads as under-specified against its sibling <code>neutral_particle_flux_over_divertor_region_due_to_recycling</code>, which names the quantity (<code>neutral_particle_flux</code>) explicitly.
+    </div>
+
+    <div style="background:#fdf3f2;border-left:4px solid #c0392b;padding:0.5em 0.9em;margin:0.6em 0;">
+      <strong>5. <code>ion_power_density</code> family — broad scope-attribution prose across the auxiliary-heating cluster.</strong><br>
+      Several accepted auxiliary-heating densities (<code>ion_absorbed_power_density</code>, <code>ion_power_density_due_to_wave_particle_interaction</code>, <code>ion_species_density</code>) carry docs that say "summing over both thermal bulk and suprathermal fast-ion" / "includes thermal, fast, and suprathermal." Individually defensible, but as a group the docs assert a thermal+fast union that is not always backed by the specific DD leaf the name is sourced from. This is a systematic <em>docs-review</em> blind spot worth a targeted re-review of the auxiliary-heating power-density family, not a per-name grammar problem.
+    </div>
+
+    <p style="border-left:5px solid #4a90c0;background:#f2f7fb;padding:0.8em 1.1em;margin:1em 0;"><strong>Quality verdict:</strong> grammar pass rate 28/28 (100%); description-fidelity pass rate ≈ 24/28 (≈86%) on the sample, with the failures clustered in two recurring patterns (dropped distinguishing qualifier; thermal-vs-fast scope over-claim) and two duplicate pairs sharing a single DD source. None of the defects are grammatical; all are semantic and concentrated in the diagnostic-temperature and auxiliary-heating-power-density families.</p>
+
+    <h2 id="s2">§2 — Capability gaps (pipeline + prompt robustness)</h2>
+
+    <h3>2.1 — VocabGap inventory (71 nodes)</h3>
+    <p>VocabGap nodes by segment: <strong>physical_base 25, position 23, qualifier 14, geometry 3, object 2, component 2, geometric_base 1, device 1.</strong> All closed segments — these are genuine missing tokens (pseudo-segments such as <code>grammar_ambiguity</code> are filtered at write time and do not appear). Each token currently appears once (n=1), i.e. one blocked source per token, so the gap is a long tail of distinct concepts rather than a few high-frequency blockers.</p>
+    <table>
+      <thead><tr><th>Segment</th><th>Representative genuine gaps</th><th>DD concepts blocked</th></tr></thead>
+      <tbody>
+        <tr><td>physical_base</td><td><code>poloidal_current_function</code>, <code>geometric_moment</code>, <code>magnetic_field_squared</code>, <code>turns_per_metre</code>, <code>thickness</code>, <code>latency</code>, <code>vibrational_level</code>, flux-surface metric coefficients (4th/6th)</td><td>Equilibrium metric/geometry quantities (FF', moments), coil winding density, structural thickness, atomic physics levels</td></tr>
+        <tr><td>position</td><td>line-of-sight first/second points, plasma-boundary extremum / dr-dz-zero points, PF-coil outline/thick-line points, <code>active_limiter_point</code>, <code>ninety_five_percent_normalized_poloidal_flux</code></td><td>Diagnostic line-of-sight geometry, boundary characteristic points, coil-outline geometry, q95 surface locus</td></tr>
+        <tr><td>qualifier</td><td><code>vacuum</code>, <code>external</code>, <code>loop</code>, <code>decay</code>, <code>spreading</code>, <code>crushing</code>, <code>alpha_side</code>/<code>beta_side</code>, <code>townsend</code></td><td>Vacuum vs plasma fields, externally-applied fields, decay/spreading lengths, mechanical-load sidedness</td></tr>
+        <tr><td>geometry / object / device</td><td><code>arc_of_circle</code>, <code>grid_cell</code>, <code>gauge</code></td><td>GGD cell geometry, pressure-gauge devices</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Top 3 genuine grammar gaps blocking name composition:</strong></p>
+    <ol>
+      <li><strong>Geometric reference <em>positions</em></strong> (23 tokens, the largest single bucket) — line-of-sight endpoints, boundary characteristic points, coil-outline points. These block an entire class of diagnostic- and machine-geometry paths from being named.</li>
+      <li><strong>Equilibrium metric / geometry <em>physical_bases</em></strong> — <code>poloidal_current_function</code> (FF'), flux-surface metric coefficients, <code>geometric_moment</code>. Equilibrium is a high-value domain and these are core quantities.</li>
+      <li><strong>The <code>fast</code> subject / <code>surface</code> &amp; <code>passing</code> modifiers</strong> — these do not appear as VocabGap nodes but dominate the <em>exhausted</em>-name reviewer comments (§2.3). They are absorbed into illegal compound bases rather than flagged as gaps, which is itself a robustness gap (see below).</li>
+    </ol>
+
+    <h3>2.2 — Blocked vs nameable in the source queue</h3>
+    <p>StandardNameSource status: <strong>extracted 6977, skipped 1511, vocab_gap 118, composed 100, attached 88</strong> (≈8794 total). The "6900-source queue" referenced in the brief maps to the 6977 still-<code>extracted</code> (not yet processed) sources — these are <em>nameable in principle</em>, just unprocessed. The genuinely <strong>blocked</strong> tail is the 118 <code>vocab_gap</code> + parts of the 1511 <code>skipped</code>:</p>
+    <table>
+      <thead><tr><th>Blocked bucket</th><th>Count</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><code>skipped: temporal_coordinate</code></td><td>594</td><td>Per-IDS <code>time</code> bases — intentionally not named (one <code>time</code> SN covers all).</td></tr>
+        <tr><td><code>skipped: local_coordinate_frame</code></td><td>432</td><td>GGD grid dims, tensor covariant/contravariant components — coordinate-frame metadata, by-design skip.</td></tr>
+        <tr><td><code>skipped: dd_unit_unresolvable</code></td><td>312</td><td>Unit <code>mixed</code> / unparseable by pint — cannot assign a canonical unit, so cannot name safely.</td></tr>
+        <tr><td><code>skipped: configurable_meaning</code></td><td>85</td><td>Paths whose meaning depends on a runtime identifier/config.</td></tr>
+        <tr><td><code>skipped: (null reason)</code></td><td>88</td><td>Legacy skips with no recorded reason — minor data-hygiene gap.</td></tr>
+        <tr><td><code>vocab_gap</code></td><td>118</td><td>Closed-segment token missing (the 71 distinct tokens of §2.1; multiple sources share some).</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Quantification:</strong> of the ≈8794 sources, ≈<strong>79%</strong> (6977) are simply unprocessed-but-nameable; ≈<strong>13%</strong> (1141 = temporal + local-frame + configurable) are <em>by-design un-nameable</em> metadata/coordinate paths; ≈<strong>4.7%</strong> (412 = unit-unresolvable + null) are blocked by <em>data quality</em> (missing/unresolvable units); and only ≈<strong>1.3%</strong> (118) are blocked by <em>true vocabulary gaps</em>. The vocabulary gap is small in absolute terms but high-value (equilibrium geometry, diagnostic line-of-sight).</p>
+
+    <h3>2.3 — Prompt robustness (exhausted-name failure patterns)</h3>
+    <p>The 20 <code>exhausted</code> names (failed to reach acceptance after max refine rotations) have a clear recurring signature in their reviewer comments. The dominant failure is <strong>not</strong> a prompt-quality problem — it is the compose/refine prompt being asked to name a concept whose required token is missing from a <em>closed</em> segment, and the LLM responding by <em>absorbing the missing token into an illegal compound physical_base</em> instead of emitting a VocabGap.</p>
+    <table>
+      <thead><tr><th>Exhausted name</th><th>Score</th><th>Reviewer-identified failure</th></tr></thead>
+      <tbody>
+        <tr><td><code>upper_bound_delay</code></td><td>0.25</td><td><code>upper_bound</code> + <code>delay</code> both unregistered → should be vocab_gap, was named anyway.</td></tr>
+        <tr><td><code>co_passing_fast_power_density_due_to_collisions</code></td><td>0.40</td><td><code>co</code>, <code>passing</code>, <code>fast</code> all unregistered tokens absorbed into the name.</td></tr>
+        <tr><td><code>perpendicular_fast_pressure</code> / <code>parallel_fast_pressure</code></td><td>0.42–0.44</td><td><code>fast</code> is not a registered subject; absorbed into illegal compound <code>fast_pressure</code>.</td></tr>
+        <tr><td><code>ion_multiplicity</code></td><td>0.45</td><td><code>multiplicity</code> not a registered physical_base; improperly absorbed.</td></tr>
+        <tr><td><code>maximum_delay</code></td><td>0.49</td><td><code>delay</code> not a registered physical_base.</td></tr>
+        <tr><td><code>maximum_surface_temperature</code></td><td>0.56</td><td><code>surface</code> not registered in any closed vocabulary; absorbed as a modifier.</td></tr>
+        <tr><td><code>helium_confinement_time</code></td><td>0.66</td><td><code>confinement_time</code> not a registered physical_base.</td></tr>
+        <tr><td><code>flux_surface_averaged_of_…_due_to_wave_absorption</code></td><td>0.68</td><td><code>wave_absorption</code> process token unregistered.</td></tr>
+      </tbody>
+    </table>
+    <div style="border-left:5px solid #4a90c0;background:#f2f7fb;padding:0.8em 1.1em;margin:1em 0;">
+      <strong>Robustness finding.</strong> The recurring pattern is that the compose prompt, when it cannot find a token, <em>fabricates an illegal compound</em> (e.g. <code>fast_pressure</code>, <code>confinement_time</code>, <code>gap_distance</code>) rather than emitting a VocabGap. The reviewer reliably catches it (low scores, explicit "should be vocab_gap" comments), so quality is protected — but the pipeline wastes refine rotations on un-nameable concepts. <strong>Recommendation:</strong> strengthen the compose-prompt rule to emit a VocabGap when the only way to use a concept is to invent a compound physical_base/subject, and add the high-frequency offenders (<code>fast</code> subject, <code>surface</code>/<code>passing</code>/<code>co</code> modifiers) to the closed-segment vocab via the ISN fork rotation if they are physically warranted. This converts wasted refine cost into actionable gap signal.
+    </div>
+
+    <h2 id="s3">§3 — Linkage &amp; grouping integrity (the core ask)</h2>
+
+    <h3>3.1 — HAS_ERROR / HAS_ARGUMENT = 0 — root cause</h3>
+    <p>First, disambiguation by endpoint label, because the raw edge totals are dominated by the DD graph:</p>
+    <table>
+      <thead><tr><th>Edge</th><th>IMASNode→IMASNode (DD)</th><th>StandardName→StandardName</th></tr></thead>
+      <tbody>
+        <tr><td>HAS_PARENT</td><td>60,334</td><td><strong>156</strong></td></tr>
+        <tr><td>HAS_ERROR</td><td>31,281</td><td><strong>0</strong></td></tr>
+        <tr><td>HAS_LOCUS</td><td>0 (SN→Locus: 125)</td><td>— (to Locus node)</td></tr>
+        <tr><td>REFINED_FROM</td><td>0</td><td><strong>23</strong></td></tr>
+        <tr><td>HAS_ARGUMENT</td><td>0</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>So the "HAS_ERROR=0" and "HAS_ARGUMENT=0" of the brief are about <em>StandardName→StandardName</em> edges. Both zeros are <strong>expected</strong>, for distinct reasons:</p>
+
+    <div style="border-left:5px solid #2e8b57;background:#f3faf5;padding:0.8em 1.1em;margin:1em 0;">
+      <strong>HAS_ERROR = 0 — EXPECTED, BY DESIGN (universal error-modifier strategy).</strong>
+      <p>This is a deliberate design choice, not a defect. Error and uncertainty quantities are intentionally <strong>not</strong> given their own catalog names or per-name <code>HAS_ERROR</code> edges. Uncertainty is handled <em>universally</em> by applying an error-modifier to the existing base name (e.g. <code>uncertainty_of_&lt;name&gt;</code> / <code>upper_uncertainty_of_&lt;name&gt;</code>), so an error quantity is expressed as a modification of its parent rather than as a distinct first-class standard name. Generating and reviewing a separate standard name for every <code>_error_upper</code>/<code>_error_lower</code>/<code>_error_index</code> DD field would burn generation and review cycles for little catalog value — error names probably do not need to live in the catalog at all. The state is revisitable later, but zero SN-level <code>HAS_ERROR</code> edges is the intended current state.</p>
+      <p><strong>Context (for completeness, not a defect):</strong> the DD graph does carry the raw material — 31,281 DD <code>_error_</code> IMASNodes and 23,006 IMASNode→IMASNode <code>HAS_ERROR</code> edges; 137 of 171 composed/attached DD sources have ≥1 error child in the DD graph. That raw material is exactly what the universal error-modifier strategy avoids materialising as separate catalog names. The deterministic minting machinery (<code>error_siblings.mint_error_siblings</code> and its <code>workers.py</code> gate) is consistent with this: it is not currently producing SN error nodes, which matches the design intent. <strong>No fix attempted.</strong></p>
+    </div>
+
+    <div style="border-left:5px solid #4a90c0;background:#f2f7fb;padding:0.8em 1.1em;margin:1em 0;">
+      <strong>HAS_ARGUMENT = 0 — NOT-YET-EXERCISED (no bug, verified on its own merits).</strong>
+      <p>There is no <code>HAS_ARGUMENT</code> edge type in <code>derivation.py</code> at all. The current derivation emits <code>HAS_PARENT</code> (binary operators would produce two <code>HAS_PARENT</code> edges, one per argument — see <code>derivation._derive_structural</code>), <code>HAS_ERROR</code> (uncertainty), and <code>HAS_LOCUS</code> (locus grouping). I checked whether any argument-bearing / parameterised names exist in the sourced set and whether the binary-operator branch would fire: ran <code>derive_edges()</code> over the 35 names matching binary/argument markers (<code>ratio_of_</code>, <code>_to_</code>, <code>difference_of_</code>, <code>product_of_</code>, <code>_over_</code>). <strong>None produced a <code>binary</code> operator edge.</strong> The <code>_due_to_</code> mechanism and <code>_over_</code>/<code>_at_</code> loci are all handled as <code>qualifier</code>/<code>locus</code> <code>HAS_PARENT</code> edges, not binary arguments. Notably the value-parameterised q95 name <code>safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95</code> derives a <em>locus</em> <code>HAS_PARENT → safety_factor</code> (plus <code>HAS_LOCUS</code>), not an argument edge. So zero is expected: no input name uses a true two-argument binary operator, and the relationship — if one ever did — would be recorded as <code>HAS_PARENT</code> with <code>operator_kind="binary"</code>, not a dedicated <code>HAS_ARGUMENT</code> edge. No action needed.</p>
+    </div>
+
+    <h3>3.2 — HAS_PARENT orphans — root cause (by design)</h3>
+    <p>37 of 99 accepted names have a <code>HAS_PARENT</code> edge; 62 do not. Among accepted names that carry a <em>subject</em> segment, <strong>7</strong> have no <code>HAS_PARENT</code>: <code>ion_mass</code>, <code>ion_temperature</code>, <code>neutral_mass</code>, and the four <code>toroidal_deuterium_tritium_velocity_at_*</code> names.</p>
+    <p><strong>Investigation.</strong> Running <code>derive_edges()</code> directly shows the derivation <em>does</em> emit the edge: <code>derive_edges("ion_temperature") → HAS_PARENT → temperature</code> (qualifier peel). So the logic is not failing to fire. The reason the edge is absent from the graph is the <strong>derived-parent admission gate</strong> (<code>parents.is_admissible_parent_name</code>, applied in <code>graph_ops._filter_admissible_parents</code>): it deliberately <em>drops</em> <code>HAS_PARENT</code> edges whose target is a <em>bare base</em> with no specificity and no vector-like topology. Confirmed:</p>
+    <table>
+      <thead><tr><th>Candidate parent</th><th><code>is_admissible_parent_name</code></th></tr></thead>
+      <tbody>
+        <tr><td><code>temperature</code></td><td>admit=False — "bare base, no qualifier/locus/projection/operator/mechanism"</td></tr>
+        <tr><td><code>mass</code></td><td>admit=False — bare base</td></tr>
+        <tr><td><code>velocity</code></td><td>admit=False — bare base</td></tr>
+        <tr><td><code>elongation</code></td><td>admit=False — bare base</td></tr>
+        <tr><td><code>toroidal_velocity</code></td><td>admit=True — "has projection (axis=toroidal)"</td></tr>
+        <tr><td><code>electron_temperature</code></td><td>admit=True — "has qualifiers [electron]"</td></tr>
+        <tr><td><code>plasma_current</code></td><td>admit=True — "has qualifiers [plasma]"</td></tr>
+      </tbody>
+    </table>
+    <p>The bare-base targets <code>temperature</code>/<code>mass</code>/<code>velocity</code>/<code>elongation</code> do not exist as nodes either — they were never created, precisely because the gate refuses to admit them. The control names <code>electron_temperature</code>, <code>electron_density</code>, <code>ion_density</code> are <em>also</em> parentless for the same reason (their would-be parent is the inadmissible bare base).</p>
+    <div style="border-left:5px solid #2e8b57;background:#f3faf5;padding:0.8em 1.1em;margin:1em 0;">
+      <strong>HAS_PARENT-orphan verdict: BY DESIGN, not a derivation bug.</strong> The admission gate (<code>parents.py</code> clause A/B) intentionally prevents generic root nodes like <code>temperature</code> from existing and grouping unrelated names. <code>ion_temperature</code> being parentless is the gate working as intended. The only watch-item: the <em>four</em> <code>toroidal_deuterium_tritium_velocity_at_*</code> names emit a <code>HAS_LOCUS</code> edge (to the locus, e.g. <code>magnetic_axis</code>) instead of <code>HAS_PARENT</code>, because the locus peel fires before the species/qualifier peel and the species-stripped intermediate (<code>toroidal_velocity_at_magnetic_axis</code>) is not in the graph. They are grouped by locus, not by quantity — defensible, but if quantity-grouping is desired the intermediate names would need to exist.</div>
+
+    <h3>3.3 — REFINED_FROM (23) — coherent</h3>
+    <p>All 23 <code>REFINED_FROM</code> chains are well-formed: edge direction is new→old, and <strong>every</strong> predecessor (<code>old</code>) is <code>name_stage='superseded'</code> (23/23). Chains are sensible refinement sequences, e.g. <code>li → normalized_internal_plasma_inductance → normalized_of_internal_inductance_of_plasma</code>; <code>safety_factor → field_line_safety_factor_of_flux_surface → safety_factor_of_flux_surface</code> (accepted tip); <code>particle_flux_over_divertor_region_due_to_recycling → total_particle_flux_over_divertor_region_due_to_recycling</code>. No reversed edges, no live predecessors, no self-loops.</p>
+
+    <h3>3.4 — Family grouping — coherent, with the §1 duplicates as the exception</h3>
+    <p>Three physical_base families inspected (pressure, temperature, density). HAS_PARENT chains within families are correct and group by quantity, not noise:</p>
+    <ul>
+      <li><strong>density:</strong> <code>ion_state_energy_density → energy_density</code>, <code>poloidal_current_density → current_density</code>, <code>toroidal_current_density → current_density</code>, <code>total_ion_density → ion_density</code>, <code>thermal_neutral_density → neutral_density</code>, <code>ion_absorbed_power_density → absorbed_power_density</code>. All admissible-parent links, all sensible.</li>
+      <li><strong>pressure:</strong> <code>coolant_pressure_at_cooling_circuit_inlet → pressure_at_cooling_circuit_inlet</code>, <code>perpendicular_fast_ion_state_pressure → fast_ion_state_pressure</code>. Correct.</li>
+      <li><strong>temperature:</strong> <code>radiative_temperature_at_magnetic_axis → temperature_at_magnetic_axis</code>. Correct structurally — but this is exactly where the §1.3 defect lives: <code>temperature_at_magnetic_axis</code> is itself a mislabeled duplicate of the same DD source.</li>
+    </ul>
+    <p><strong>Duplicate/synonym check:</strong> two confirmed duplicate pairs, both sharing one DD source — (<code>temperature_at_magnetic_axis</code>, <code>radiative_temperature_at_magnetic_axis</code>) on <code>ece/t_radiation_central</code>, and (<code>ion_power_density</code>, <code>ion_wave_absorbed_power_density</code>) on <code>waves/.../ion/power_density_thermal</code>. The consolidation pass should fold each pair to the better-specified name and supersede the other.</p>
+
+    <h2 id="s4">§4 — Summary &amp; recommended actions</h2>
+    <table>
+      <thead><tr><th>Area</th><th>Verdict</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>Name grammar</td><td>Excellent (28/28 round-trip)</td><td>None.</td></tr>
+        <tr><td>Docs fidelity</td><td>Good (≈86% sample) with a diagnostic-temperature + aux-heating-power blind spot</td><td>Targeted docs re-review of those two families; fold 2 duplicate pairs.</td></tr>
+        <tr><td>Vocab gaps</td><td>Small (1.3% of queue) but high-value</td><td>Add equilibrium-geometry physical_bases &amp; line-of-sight positions to ISN vocab via fork rotation.</td></tr>
+        <tr><td>Prompt robustness</td><td>Reviewer protects quality; compose wastes rotations on un-nameable compounds</td><td>Strengthen compose rule to emit VocabGap rather than invent compound bases.</td></tr>
+        <tr><td>SN HAS_ERROR=0</td><td><strong>Expected — by design</strong> (universal error-modifier strategy)</td><td>None. Revisitable later if per-error catalog names are ever wanted.</td></tr>
+        <tr><td>SN HAS_ARGUMENT=0</td><td>Not-yet-exercised (no bug)</td><td>None — would populate as <code>HAS_PARENT</code>(<code>binary</code>) if a true two-argument name is ever sourced.</td></tr>
+        <tr><td>HAS_PARENT orphans</td><td>By design (admission gate)</td><td>None — gate working as intended; optional: materialise species-stripped intermediates if quantity-grouping of the q-velocity family is desired.</td></tr>
+        <tr><td>REFINED_FROM / families</td><td>Coherent</td><td>None.</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:0.9em;color:#555;">This evaluation made no code changes — it is analysis-only. The two SN-level zero-count edge types (HAS_ERROR, HAS_ARGUMENT) are both expected current state, and the HAS_PARENT orphans resolve to the derived-parent admission gate working as designed. The actionable findings are the §1.3 semantic docs defects (two duplicate pairs + a diagnostic-temperature/aux-heating-power docs blind spot) and the §2.3 compose-prompt robustness improvement (emit VocabGap rather than invent compound bases).</p>
+  </main>
+</body>
+</html>
