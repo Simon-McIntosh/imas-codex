@@ -14,6 +14,7 @@ import pytest
 from imas_codex.standard_names.parents import (
     AdmissionResult,
     is_admissible_parent_name,
+    is_single_child_shadow,
     recompute_parent_kind,
 )
 
@@ -263,3 +264,206 @@ class TestWriteEdgesAdmissionIntegration:
                     found = True
                     break
         assert found, "Admissible parent edge should be written"
+
+
+# ---------------------------------------------------------------------------
+# Class-B suppression veto — single-child shadow of an accepted sibling
+# ---------------------------------------------------------------------------
+
+
+class TestSingleChildShadowVeto:
+    """A derived parent that is merely a less-specific spelling of one
+    accepted child sourced from the same DD path must NOT be admitted —
+    materialising it produces a second accepted name competing for the
+    source (the Class-B duplicate). Genuine shared parents (≥2 children)
+    survive untouched.
+    """
+
+    def _shadow_row(
+        self,
+        *,
+        child_id: str,
+        child_sources: list[str],
+        parent_sources: list[str] | None = None,
+        child_stage: str = "accepted",
+        child_origin: str = "pipeline",
+    ) -> dict:
+        return {
+            "child_id": child_id,
+            "child_sources": child_sources,
+            "parent_sources": parent_sources or [],
+            # is_single_child_shadow only reads child_id/sources; the gate's
+            # batch path also reads stage/origin, so include them for parity.
+            "child_stage": child_stage,
+            "child_origin": child_origin,
+        }
+
+    def test_single_child_shadow_suppressed(self):
+        """``radius_of_divertor_target`` shadows its lone accepted child
+        ``major_radius_of_divertor_target`` from the same DD source."""
+        gc = _StubGraph(
+            rows=[
+                self._shadow_row(
+                    child_id="major_radius_of_divertor_target",
+                    child_sources=["divertors/divertor/target/tile/surface_outline/r"],
+                )
+            ]
+        )
+        suppress, reason = is_single_child_shadow("radius_of_divertor_target", gc)
+        assert suppress is True
+        assert "major_radius_of_divertor_target" in reason
+
+    def test_admission_vetoes_single_child_shadow(self):
+        """The veto wins even though the name passes Clause A (has a locus)."""
+        gc = _StubGraph(
+            rows=[
+                self._shadow_row(
+                    child_id="major_radius_of_divertor_target",
+                    child_sources=["divertors/divertor/target/tile/surface_outline/r"],
+                )
+            ]
+        )
+        result = is_admissible_parent_name("radius_of_divertor_target", gc=gc)
+        assert result.admit is False
+        assert result.clause is None
+        assert "suppressed" in result.reason
+
+    def test_no_children_not_suppressed(self):
+        """A candidate with no single child is not a shadow."""
+        gc = _StubGraph(rows=[])
+        suppress, _ = is_single_child_shadow("radius_of_divertor_target", gc)
+        assert suppress is False
+
+    def test_child_without_source_not_suppressed(self):
+        """A lone child with no DD source cannot claim source-equivalence."""
+        gc = _StubGraph(
+            rows=[self._shadow_row(child_id="some_child", child_sources=[])]
+        )
+        suppress, reason = is_single_child_shadow("some_parent", gc)
+        assert suppress is False
+        assert "no DD source" in reason
+
+    def test_independently_sourced_parent_not_suppressed(self):
+        """A parent that owns a DD source the child does not is a real
+        sourced name, not a pure shadow — keep it."""
+        gc = _StubGraph(
+            rows=[
+                self._shadow_row(
+                    child_id="major_radius_of_divertor_target",
+                    child_sources=["divertors/divertor/target/tile/surface_outline/r"],
+                    parent_sources=["some/other/dd/path/radius"],
+                )
+            ]
+        )
+        suppress, reason = is_single_child_shadow("radius_of_divertor_target", gc)
+        assert suppress is False
+        assert "independently sourced" in reason
+
+    def test_genuine_shared_parent_survives(self):
+        """A parent with ≥2 distinct children is never a single-child shadow.
+
+        The probe Cypher filters to ``size(children) = 1`` so a genuine shared
+        parent (``temperature`` over ``electron_temperature`` AND
+        ``ion_temperature``) returns no shadow row.
+        """
+        gc = _StubGraph(rows=[])  # multi-child parent yields no shadow row
+        suppress, _ = is_single_child_shadow("temperature", gc)
+        assert suppress is False
+        # And it still admits via Clause B if it has vector topology, or stays
+        # subject to the normal bare-base rejection — the veto does not fire.
+        result = is_admissible_parent_name("temperature", gc=gc)
+        assert result.admit is False  # bare base, no projection children
+        assert "suppressed" not in result.reason
+
+
+class TestFilterAdmissibleParentsShadowVeto:
+    """Integration: ``_filter_admissible_parents`` drops a single-child-shadow
+    HAS_PARENT edge but keeps a genuine shared-parent edge.
+    """
+
+    def _probe_rows(self, rows: list[dict]):
+        """Build a GraphClient stub returning *rows* from the bulk probe."""
+        from unittest.mock import MagicMock
+
+        gc = MagicMock()
+        gc.query = MagicMock(return_value=rows)
+        return gc
+
+    def test_shadow_edge_dropped(self):
+        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+
+        # The bulk probe reports: parent has exactly one child
+        # (major_radius_of_divertor_target), sourced from the divertor path,
+        # parent owns no independent source.
+        gc = self._probe_rows(
+            [
+                {
+                    "name": "radius_of_divertor_target",
+                    "axes": [],
+                    "child_ids": ["major_radius_of_divertor_target"],
+                    "lone_child_id": "major_radius_of_divertor_target",
+                    "lone_child_stage": "accepted",
+                    "lone_child_origin": "pipeline",
+                    "parent_sources": [],
+                    "lone_child_sources": [
+                        "divertors/divertor/target/tile/surface_outline/r"
+                    ],
+                    "origin": "derived",
+                    "pipeline_status": None,
+                }
+            ]
+        )
+        co_batch = [
+            {
+                "from_name": "major_radius_of_divertor_target",
+                "to_name": "radius_of_divertor_target",
+                "operator_kind": "qualifier",
+                "axis": None,
+            }
+        ]
+        kept = _filter_admissible_parents(co_batch, gc)
+        assert kept == [], "single-child shadow parent edge must be dropped"
+
+    def test_shared_parent_edge_kept(self):
+        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+
+        # 'pressure' is a bare base, but here it groups TWO children
+        # (electron_pressure + ion_pressure). The probe reports >1 child so the
+        # shadow veto cannot fire; the edge survives (admitted as a real
+        # multi-child grouping target through the normal gate).
+        gc = self._probe_rows(
+            [
+                {
+                    "name": "electron_pressure",
+                    "axes": [],
+                    "child_ids": [],
+                    "lone_child_id": None,
+                    "lone_child_stage": None,
+                    "lone_child_origin": None,
+                    "parent_sources": [],
+                    "lone_child_sources": [],
+                    "origin": None,
+                    "pipeline_status": None,
+                }
+            ]
+        )
+        # electron_pressure passes Clause A (qualifier 'electron'); two batch
+        # children both point at it, so even if it were bare it would not be a
+        # single-child shadow.
+        co_batch = [
+            {
+                "from_name": "maximum_of_electron_pressure",
+                "to_name": "electron_pressure",
+                "operator_kind": "unary_prefix",
+                "axis": None,
+            },
+            {
+                "from_name": "minimum_of_electron_pressure",
+                "to_name": "electron_pressure",
+                "operator_kind": "unary_prefix",
+                "axis": None,
+            },
+        ]
+        kept = _filter_admissible_parents(co_batch, gc)
+        kept_targets = {e["to_name"] for e in kept}
+        assert "electron_pressure" in kept_targets

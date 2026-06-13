@@ -271,6 +271,10 @@ class TestPersistGeneratedNameBatch:
                 "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
             ) as mock_finalize,
             patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ),
+            patch(
                 "imas_codex.embeddings.description.embed_descriptions_batch",
                 return_value=None,
             ),
@@ -474,6 +478,10 @@ class TestPersistGeneratedNameBatch:
                 "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
             ) as mock_finalize,
             patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ) as mock_supersede,
+            patch(
                 "imas_codex.embeddings.description.embed_descriptions_batch",
                 return_value=None,
             ),
@@ -484,3 +492,140 @@ class TestPersistGeneratedNameBatch:
         ids = [item["sn_id"] for item in finalize_batch]
         assert "error_sibling" not in ids
         assert "electron_temperature" in ids
+
+        # The deterministic error-sibling must NOT be a supersede candidate
+        # (it owns a distinct error-node source); only the LLM-composed name
+        # participates in the one-source-one-name invariant.
+        supersede_pairs = mock_supersede.call_args.args[0]
+        pair_names = {p["new_name"] for p in supersede_pairs}
+        assert "error_sibling" not in pair_names
+        assert "electron_temperature" in pair_names
+
+
+# ---------------------------------------------------------------------------
+# One-source-one-name invariant (Class-A: forced regen supersedes prior name)
+# ---------------------------------------------------------------------------
+
+
+class TestSupersedePriorSourceNames:
+    """``supersede_prior_source_names`` retires stale pipeline names left on a
+    source by a ``--force``/regen pass, enforcing the invariant
+    *one source → at most one non-superseded pipeline name*.
+    """
+
+    def test_empty_pairs_is_noop(self):
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        # No GraphClient is opened when there is nothing to do.
+        assert supersede_prior_source_names([]) == 0
+
+    def test_pairs_missing_fields_filtered_before_graph(self):
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        # Pairs lacking new_name or source_id are dropped before any
+        # GraphClient connection (so this stays a default-tier test).
+        result = supersede_prior_source_names(
+            [{"new_name": "", "source_id": "dd:x"}, {"new_name": "n", "source_id": ""}]
+        )
+        assert result == 0
+
+    def test_supersedes_prior_pipeline_name(self):
+        """A regen that produced a *different* name supersedes the prior
+        accepted pipeline name on the same source — leaving one live name."""
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        gc = _mock_gc_query()
+        # The Cypher returns the (old, new) row for each predecessor it retired.
+        gc.query = MagicMock(
+            return_value=[
+                {"old_name": "old_pipeline_name", "new_name": "new_pipeline_name"}
+            ]
+        )
+
+        with _patch_gc(gc):
+            n = supersede_prior_source_names(
+                [{"new_name": "new_pipeline_name", "source_id": "dd:eq/q_95"}]
+            )
+
+        assert n == 1
+        cypher = gc.query.call_args.args[0]
+        # The predecessor is marked superseded and linked via REFINED_FROM.
+        assert "old.name_stage = 'superseded'" in cypher
+        assert "MERGE (new)-[:REFINED_FROM]->(old)" in cypher
+        # Only pipeline-origin predecessors are touched — catalog_edit and
+        # derived names are excluded by the WHERE clause.
+        assert "coalesce(old.origin, 'pipeline') = 'pipeline'" in cypher
+        # Already-retired names are never re-superseded.
+        assert "['superseded', 'exhausted']" in cypher
+        # The new name itself is never superseded (byte-identical regen no-op).
+        assert "old.id <> pr.new_name" in cypher
+
+    def test_byte_identical_regen_is_noop(self):
+        """When the regenerated name equals the existing name (same node id),
+        the WHERE ``old.id <> pr.new_name`` clause excludes it — nothing is
+        superseded."""
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        gc = _mock_gc_query()
+        gc.query = MagicMock(return_value=[])  # no predecessor distinct from new
+
+        with _patch_gc(gc):
+            n = supersede_prior_source_names(
+                [{"new_name": "same_name", "source_id": "dd:eq/q_95"}]
+            )
+
+        assert n == 0
+
+    def test_persist_regen_supersedes_one_live_name(self):
+        """End-to-end: a forced regen producing a different name for an
+        already-named source ends with exactly one live (non-superseded)
+        pipeline name for that source.
+
+        Models the graph with an in-memory store driven through the real
+        ``supersede_prior_source_names`` Cypher contract (mocked execution).
+        """
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        # Track which names the persist path asked to supersede.
+        captured: dict[str, object] = {}
+
+        def _fake_supersede(pairs):
+            captured["pairs"] = pairs
+            # Simulate: the source already had 'old_name'; it is now retired,
+            # leaving only the freshly-composed name live.
+            return len(pairs)
+
+        candidates = [
+            _make_candidate(
+                name="safety_factor_of_flux_surface",
+                source_id="equilibrium/time_slice/global_quantities/q_95",
+            )
+        ]
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=1,
+            ),
+            patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage"),
+            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                side_effect=_fake_supersede,
+            ),
+            patch(
+                "imas_codex.embeddings.description.embed_descriptions_batch",
+                return_value=None,
+            ),
+        ):
+            persist_generated_name_batch(candidates, compose_model="test/model")
+
+        # The persist path must have routed the new name + its DD source to the
+        # supersede invariant guard.
+        pairs = captured["pairs"]
+        assert pairs == [
+            {
+                "new_name": "safety_factor_of_flux_surface",
+                "source_id": "equilibrium/time_slice/global_quantities/q_95",
+            }
+        ]

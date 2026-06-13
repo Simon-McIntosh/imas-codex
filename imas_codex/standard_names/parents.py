@@ -130,6 +130,80 @@ def _has_vector_like_topology(name: str, gc: _TopologyProbe) -> tuple[bool, str]
     return False, "no projection children"
 
 
+def is_single_child_shadow(name: str, gc: _TopologyProbe) -> tuple[bool, str]:
+    """Suppression veto — is *name* just a less-specific shadow of one child?
+
+    A derived parent must earn its existence by generalising over **multiple**
+    specific names.  When a candidate parent has exactly one ``HAS_PARENT``
+    child, and that child is a live pipeline-origin name sourced from a DD
+    path (via ``HAS_STANDARD_NAME``), the parent contributes no grouping
+    value: it is merely a less-specific spelling of that single accepted
+    sibling sourced from the same path (e.g. ``radius_of_divertor_target``
+    shadowing ``major_radius_of_divertor_target`` from
+    ``divertors/divertor/target/tile/surface_outline/r``).  Materialising it
+    produces a second accepted name competing for the same source — the
+    Class-B duplicate.
+
+    The veto fires only when **all** of the following hold:
+
+    - the candidate has exactly **one** distinct ``HAS_PARENT`` child;
+    - that child is sourced from at least one DD path the candidate does not
+      independently own (the parent has no DD source of its own that differs
+      from the child's);
+    - the child is a live, non-superseded name (``name_stage`` not in
+      ``{superseded, exhausted}``) of pipeline / catalog origin (i.e. it is a
+      real specific name, not itself a derived placeholder).
+
+    Genuine shared parents survive untouched: ``temperature`` parenting both
+    ``electron_temperature`` and ``ion_temperature`` has ≥2 distinct children,
+    so the single-child condition fails and the veto does not fire.
+
+    Returns ``(suppress, reason)``.
+    """
+    cypher = """
+        MATCH (child:StandardName)-[:HAS_PARENT]->(p:StandardName {id: $name})
+        WITH p, collect(DISTINCT child) AS children
+        WHERE size(children) = 1
+        WITH p, children[0] AS child
+        WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
+          AND coalesce(child.origin, 'pipeline') <> 'derived'
+        OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(child)
+        OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->(p)
+        WITH child,
+             collect(DISTINCT csrc.id) AS child_sources,
+             collect(DISTINCT psrc.id) AS parent_sources
+        RETURN child.id AS child_id, child_sources, parent_sources
+    """
+    try:
+        rows = list(gc.query(cypher, name=name))
+    except Exception as exc:  # pragma: no cover - defensive
+        return False, f"shadow probe failed: {exc.__class__.__name__}: {exc}"
+
+    if not rows:
+        return False, "not a single-child parent"
+
+    row = rows[0]
+    child_id = row.get("child_id")
+    child_sources = set(row.get("child_sources") or [])
+    parent_sources = set(row.get("parent_sources") or [])
+
+    if not child_id:
+        return False, "single child but missing id"
+    if not child_sources:
+        # The lone child carries no DD source — cannot claim source-equivalence.
+        return False, "single child has no DD source"
+    # If the parent independently owns a DD source the child does not, it is a
+    # real sourced name in its own right, not a pure shadow — keep it.
+    if parent_sources - child_sources:
+        return False, "parent independently sourced — not a shadow"
+
+    return (
+        True,
+        f"single-child shadow of {child_id} "
+        f"(shared DD source: {sorted(child_sources)[:2]})",
+    )
+
+
 def is_admissible_parent_name(
     name: str, gc: _TopologyProbe | None = None
 ) -> AdmissionResult:
@@ -141,8 +215,9 @@ def is_admissible_parent_name(
         Candidate parent StandardName id (typically the ``to_name`` of a
         ``DerivedEdge`` from ``derive_edges``).
     gc:
-        Graph client used for Clause-B topology lookup.  When ``None``,
-        only Clause A is evaluated; useful for pure unit tests.
+        Graph client used for Clause-B topology lookup and the single-child
+        shadow veto.  When ``None``, only Clause A is evaluated; useful for
+        pure unit tests.
 
     Returns
     -------
@@ -150,6 +225,20 @@ def is_admissible_parent_name(
         Decision plus reason and which clause matched.
     """
     admit_a, reason_a = _has_structural_specificity(name)
+
+    # Suppression veto (Class-B): even a structurally-specific candidate is
+    # rejected when it is merely a less-specific shadow of a single accepted
+    # sibling sourced from the same DD path. Requires a graph probe; skipped
+    # in pure-logic (gc is None) callers.
+    if gc is not None:
+        suppress, suppress_reason = is_single_child_shadow(name, gc)
+        if suppress:
+            return AdmissionResult(
+                admit=False,
+                reason=f"suppressed: {suppress_reason}",
+                clause=None,
+            )
+
     if admit_a:
         return AdmissionResult(admit=True, reason=reason_a, clause="A")
 

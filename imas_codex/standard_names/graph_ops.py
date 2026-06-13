@@ -1111,12 +1111,24 @@ def _filter_admissible_parents(
 
     # Count batch-level projection axes per target (for Clause B with batch info)
     batch_axes: dict[str, set[str]] = {}
+    # Distinct children proposed for each target within THIS batch.  Combined
+    # with graph children so the single-child shadow veto sees the full child
+    # set even before any edge is persisted.
+    batch_children: dict[str, set[str]] = {}
     for e in co_batch:
         if e.get("operator_kind") == "projection" and e.get("axis"):
             batch_axes.setdefault(e["to_name"], set()).add(e["axis"])
+        if e.get("from_name"):
+            batch_children.setdefault(e["to_name"], set()).add(e["from_name"])
 
-    # Bulk topology probe: pull existing graph state for all targets at once
+    # Bulk topology probe: pull existing graph state for all targets at once.
+    # Besides projection axes (Clause B) and legacy protection, collect each
+    # target's distinct graph children and, when it has exactly one child,
+    # that child's DD sources vs the parent's own DD sources — the inputs to
+    # the single-child shadow veto (Class-B duplicate suppression).
     graph_axes: dict[str, set[str]] = {t: set() for t in targets}
+    graph_children: dict[str, set[str]] = {t: set() for t in targets}
+    shadow_info: dict[str, dict[str, Any]] = {}
     legacy_protected: set[str] = set()
     try:
         rows = list(
@@ -1126,8 +1138,27 @@ def _filter_admissible_parents(
                 OPTIONAL MATCH (child:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: nm})
                   WHERE r.operator_kind = 'projection' AND r.axis IS NOT NULL
                 WITH nm, collect(DISTINCT r.axis) AS axes
+                OPTIONAL MATCH (anychild:StandardName)-[:HAS_PARENT]->(p3:StandardName {id: nm})
+                WITH nm, axes, collect(DISTINCT anychild) AS children
+                OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->(p4:StandardName {id: nm})
+                WITH nm, axes, children, collect(DISTINCT psrc.id) AS parent_sources
+                OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(lone)
+                  WHERE size(children) = 1 AND lone = children[0]
+                WITH nm, axes, children, parent_sources,
+                     collect(DISTINCT csrc.id) AS lone_child_sources
                 OPTIONAL MATCH (p2:StandardName {id: nm})
                 RETURN nm AS name, axes,
+                       [c IN children | c.id] AS child_ids,
+                       CASE WHEN size(children) = 1
+                            THEN children[0].id ELSE null END AS lone_child_id,
+                       CASE WHEN size(children) = 1
+                            THEN coalesce(children[0].name_stage, '')
+                            ELSE null END AS lone_child_stage,
+                       CASE WHEN size(children) = 1
+                            THEN coalesce(children[0].origin, 'pipeline')
+                            ELSE null END AS lone_child_origin,
+                       parent_sources,
+                       lone_child_sources,
                        p2.origin AS origin,
                        p2.pipeline_status AS pipeline_status
                 """,
@@ -1143,13 +1174,57 @@ def _filter_admissible_parents(
         if not nm:
             continue
         graph_axes[nm] = set(r.get("axes") or [])
+        graph_children[nm] = {c for c in (r.get("child_ids") or []) if c}
         if r.get("origin") == "catalog_edit" or r.get("pipeline_status") == "accepted":
             legacy_protected.add(nm)
+        if r.get("lone_child_id"):
+            shadow_info[nm] = {
+                "child_id": r.get("lone_child_id"),
+                "child_stage": r.get("lone_child_stage") or "",
+                "child_origin": r.get("lone_child_origin") or "pipeline",
+                "child_sources": {s for s in (r.get("lone_child_sources") or []) if s},
+                "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
+            }
+
+    def _is_single_child_shadow(target: str) -> tuple[bool, str]:
+        """Batch-aware single-child shadow veto (mirrors parents.is_single_child_shadow).
+
+        Combines graph children with the children proposed in THIS batch so a
+        parent that genuinely groups ≥2 names is never vetoed, even before the
+        sibling edges are written.
+        """
+        all_children = graph_children.get(target, set()) | batch_children.get(
+            target, set()
+        )
+        if len(all_children) != 1:
+            return False, "not a single-child parent"
+        info = shadow_info.get(target)
+        if not info:
+            # Lone child exists only in this batch (not yet in graph) — no DD
+            # source attached yet, so source-equivalence cannot be asserted.
+            return False, "single batch child not yet sourced"
+        if info["child_stage"] in ("superseded", "exhausted"):
+            return False, "lone child superseded/exhausted"
+        if info["child_origin"] == "derived":
+            return False, "lone child is itself derived"
+        child_sources = info["child_sources"]
+        parent_sources = info["parent_sources"]
+        if not child_sources:
+            return False, "lone child has no DD source"
+        if parent_sources - child_sources:
+            return False, "parent independently sourced — not a shadow"
+        return True, f"single-child shadow of {info['child_id']}"
 
     def _admit(target: str) -> tuple[bool, str]:
         # Legacy protection: don't disturb catalog-authoritative entries.
         if target in legacy_protected:
             return True, "legacy (catalog_edit or accepted)"
+        # Suppression veto (Class-B): a less-specific shadow of a single
+        # accepted sibling sourced from the same DD path is dropped even if it
+        # would otherwise admit on Clause A/B.
+        suppress, suppress_reason = _is_single_child_shadow(target)
+        if suppress:
+            return False, f"suppressed: {suppress_reason}"
         result = is_admissible_parent_name(target, gc=None)
         if result.admit:
             return True, f"clause A: {result.reason}"
@@ -3465,6 +3540,23 @@ def persist_generated_name_batch(
         )
     if finalize_batch:
         _finalize_generated_name_stage(finalize_batch)
+
+    # --- Enforce one-source-one-name invariant (Class-A duplicate guard) ---
+    # On ``--force``/regen the source may already carry a prior accepted
+    # pipeline name. Retire it now so a later acceptance of this regenerated
+    # name cannot leave two live accepted names competing for one source.
+    # No-op in normal compose (the source had no prior pipeline name) and for
+    # byte-identical regen (same node id is reused — nothing to supersede).
+    supersede_pairs = [
+        {"new_name": entry["id"], "source_id": entry["source_id"]}
+        for entry in candidates
+        if entry.get("id")
+        and entry.get("source_id")
+        and entry.get("model") != "deterministic:dd_error_modifier"
+        and "dd" in (entry.get("source_types") or [])
+    ]
+    if supersede_pairs:
+        supersede_prior_source_names(supersede_pairs)
 
     # Async counter bump — live progress visibility for ``sn status``
     if written > 0:
@@ -8466,6 +8558,82 @@ def persist_refined_name(
         f"was not in name_stage='refining' at persist time (likely reverted "
         f"by orphan_sweep). LLM call complete but no graph mutation occurred."
     )
+
+
+@retry_on_deadlock()
+def supersede_prior_source_names(
+    pairs: list[dict[str, str]],
+) -> int:
+    """Supersede stale pipeline names left on a source by ``--force``/regen.
+
+    Enforces the invariant **one source → at most one non-superseded
+    pipeline-origin name**.  When ``--force`` (or a regen pass) composes a
+    *new* name for a DD source that already carries an accepted/in-flight
+    pipeline name, the new ``StandardName`` node and its ``HAS_STANDARD_NAME``
+    edge are created without retiring the predecessor — leaving two live names
+    competing for one source (the Class-A duplicate).  This helper, called
+    immediately after persisting the regenerated batch, retires those
+    predecessors.
+
+    For each ``{"new_name": <id>, "source_id": <dd path>}`` pair, any *other*
+    ``StandardName`` linked to that source via ``HAS_STANDARD_NAME`` is
+    superseded when **all** of:
+
+    - its id differs from ``new_name`` (byte-identical regen is a no-op MERGE —
+      the same node is reused, so nothing is superseded);
+    - it is not already ``superseded``/``exhausted``;
+    - its ``origin`` is pipeline (``NULL`` / ``'pipeline'``) — never
+      ``catalog_edit`` (catalog-authoritative) or ``derived`` (structural
+      parent owned by the admission gate).
+
+    For each superseded predecessor the helper marks it
+    ``name_stage='superseded'``, clears its claim, and creates a
+    ``(new)-[:REFINED_FROM]->(old)`` edge so chain history and the SPA's
+    lineage widget stay intact.  ``HAS_STANDARD_NAME`` edges are **left in
+    place** on the predecessor (they form the historical record); live
+    accept/export queries already filter superseded names, so the source's
+    effective name is unambiguous.
+
+    Returns the number of predecessor names superseded.
+    """
+    pairs = [p for p in pairs if p.get("new_name") and p.get("source_id")]
+    if not pairs:
+        return 0
+
+    with GraphClient() as gc:
+        rows = list(
+            gc.query(
+                """
+                UNWIND $pairs AS pr
+                MATCH (src:IMASNode {id: pr.source_id})-[:HAS_STANDARD_NAME]->(old:StandardName)
+                WHERE old.id <> pr.new_name
+                  AND NOT coalesce(old.name_stage, '') IN ['superseded', 'exhausted']
+                  AND coalesce(old.origin, 'pipeline') = 'pipeline'
+                MATCH (new:StandardName {id: pr.new_name})
+                // Skip self and any case where old already descends from new
+                // along the REFINED_FROM chain (would form a cycle).
+                WHERE new.id <> old.id
+                  AND NOT (old)-[:REFINED_FROM*1..]->(new)
+                SET old.name_stage = 'superseded',
+                    old.claim_token = null,
+                    old.claimed_at = null
+                MERGE (new)-[:REFINED_FROM]->(old)
+                RETURN old.id AS old_name, new.id AS new_name
+                """,
+                pairs=pairs,
+            )
+            or []
+        )
+
+    superseded = len(rows)
+    if superseded:
+        for r in rows:
+            logger.info(
+                "supersede_prior_source_names: %s superseded by %s (same source)",
+                r.get("old_name"),
+                r.get("new_name"),
+            )
+    return superseded
 
 
 # =============================================================================
