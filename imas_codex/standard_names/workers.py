@@ -6414,8 +6414,21 @@ async def process_generate_docs_batch(
                     }
                 )
 
-        except Exception:
-            logger.exception("generate_docs failed for %s", sn_id)
+        except Exception as _doc_exc:
+            # A "token mismatch or node not found" persist error is an EXPECTED
+            # race, not a failure: the orphan sweep reclaimed the item (docs
+            # generation can outrun the claim TTL) or another worker took it.
+            # The name is not lost — it stays at its prior stage and is
+            # re-claimed. Log it quietly; reserve the full traceback for
+            # genuinely unexpected errors.
+            if "token mismatch or node not found" in str(_doc_exc):
+                logger.warning(
+                    "generate_docs claim lost for %s (reclaimed mid-generation) "
+                    "— will retry on a later pass",
+                    sn_id,
+                )
+            else:
+                logger.exception("generate_docs failed for %s", sn_id)
             try:
                 await _asyncio.to_thread(
                     release_generate_docs_failed_claims,
