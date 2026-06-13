@@ -353,16 +353,18 @@ api-key-env = "AMBIX_API_KEY"
 batch-size = 25
 # DeepSeek V4 thinking mode via vLLM chat_template_kwargs
 # {"thinking": true, "reasoning_effort": <level>}.
-# "high" — NOT "max". Bench 2026-06-13 on a realistic compose prompt:
-#   high   48.8s / ~1038 tok / reliable
-#   medium 52.8s / ~1079 tok / reliable
-#   max   121.9s / ~1832 tok / UNRELIABLE (returned empty content — the
-#          reasoning trace overruns max_tokens before emitting the answer).
-# max is ~2.5x slower for marginal gain and crashes; on the free local 2-GPU
-# server the only cost is GPU-time = throughput, so max tanked the pipeline to
-# ~0.3 names/min. Mirrors the docs effort dose-response (high was the peak;
-# xhigh degraded). "max" is vLLM/DeepSeek-specific; OpenRouter caps at high.
-reasoning-effort = "high"
+# "max" — names-quality A/B 2026-06-13 (16 reference paths, dual-judge
+# opus-4.8 + qwen3.7-max): max beats high on BOTH judges
+#   high: opus 0.771 / qwen 0.829, 4.0 names/min
+#   max:  opus 0.819 / qwen 0.847, 2.4 names/min
+# The opus +0.048 gain is material (broad small lifts, no single regression);
+# generation is FREE on the local GPU, so quality wins over the 1.7x slower
+# throughput. (The earlier 0.3 names/min collapse was the litellm connection-
+# starvation bug, NOT max — fixed by the dedicated local client.) Names ≠ docs:
+# docs degrade past high (sonnet, different model/task); names improve at max.
+# Reliable with the 32000-token local budget. "max" is vLLM/DeepSeek-specific;
+# OpenRouter caps at high.
+reasoning-effort = "max"
 # Batch size used when ``sn generate --name-only`` groups paths by
 # ``(physics_domain × unit)`` rather than ``(cluster × unit)``.  The
 # name-only mode trades per-item cluster context for breadth: wider
