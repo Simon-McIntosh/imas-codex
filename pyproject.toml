@@ -351,11 +351,18 @@ model = "hosted_vllm/deepseek-v4-flash"
 api-base = "http://98dci4-gpu-0003:18800/v1"
 api-key-env = "AMBIX_API_KEY"
 batch-size = 25
-# DeepSeek V4 thinking mode at MAX effort (user mandate 2026-06-11): vLLM
-# chat_template_kwargs {"thinking": true, "reasoning_effort": "max"} —
-# free locally, deepest reasoning. NOTE "max" is vLLM/DeepSeek-specific;
-# OpenRouter models accept only low|medium|high.
-reasoning-effort = "max"
+# DeepSeek V4 thinking mode via vLLM chat_template_kwargs
+# {"thinking": true, "reasoning_effort": <level>}.
+# "high" — NOT "max". Bench 2026-06-13 on a realistic compose prompt:
+#   high   48.8s / ~1038 tok / reliable
+#   medium 52.8s / ~1079 tok / reliable
+#   max   121.9s / ~1832 tok / UNRELIABLE (returned empty content — the
+#          reasoning trace overruns max_tokens before emitting the answer).
+# max is ~2.5x slower for marginal gain and crashes; on the free local 2-GPU
+# server the only cost is GPU-time = throughput, so max tanked the pipeline to
+# ~0.3 names/min. Mirrors the docs effort dose-response (high was the peak;
+# xhigh degraded). "max" is vLLM/DeepSeek-specific; OpenRouter caps at high.
+reasoning-effort = "high"
 # Batch size used when ``sn generate --name-only`` groups paths by
 # ``(physics_domain × unit)`` rather than ``(cluster × unit)``.  The
 # name-only mode trades per-item cluster context for breadth: wider
@@ -625,12 +632,10 @@ evidence-token-cap-escalation = 800
 # OpenAI accept it cleanly, vLLM/DeepSeek with outlines is also fine.
 proposer-model = "hosted_vllm/deepseek-v4-flash"
 proposer-temperature = 0.1
-# DeepSeek V4 thinking mode at MAX effort for the local vLLM proposer (the
-# default proposer-model is hosted_vllm/deepseek-v4-flash — free locally,
-# deepest reasoning). "max" is vLLM/DeepSeek-only; if you switch
-# proposer-model to an OpenRouter model (gpt-5.5/gemini above), lower this
-# to "high" — OpenRouter accepts only low|medium|high (see [sn-compose]).
-reasoning-effort = "max"
+# DeepSeek V4 thinking mode for the local vLLM proposer. "high" not "max":
+# max is ~2.5x slower and unreliable on the local server (see [sn-compose]
+# bench note). "max" is vLLM/DeepSeek-only; OpenRouter caps at high anyway.
+reasoning-effort = "high"
 # Cost padding added to the parent lease at refine-cycle start (tiered, plan §7.3).
 fanout-cost-estimate-baseline = 0.005
 fanout-cost-estimate-escalation = 0.05
