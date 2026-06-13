@@ -215,6 +215,10 @@ _COMPOSE_PATCHES = {
 
 
 class TestComposeDomainContextFromBatch:
+    # Real compose-context build runs ~24s; the default 30s per-test timeout
+    # tips over only under full-suite concurrent load. Give it headroom so it
+    # is not a load-sensitive flake.
+    @pytest.mark.timeout(120)
     @pytest.mark.asyncio
     async def test_compose_domain_context_from_batch(self) -> None:
         """Pass a batch with mixed physics_domain; mock the LLM call;
