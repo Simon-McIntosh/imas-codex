@@ -66,6 +66,84 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Dedicated local-endpoint HTTP client (connection-pool isolation)
+# ---------------------------------------------------------------------------
+# litellm shares ONE process-global httpx connection pool across every model.
+# When many slow OpenRouter calls (review/docs) hold its connection slots,
+# free local-GPU (hosted_vllm) generate calls cannot acquire a connection —
+# they wait client-side past the timeout and fail while the GPU sits idle.
+# Local calls therefore get their OWN AsyncOpenAI client with a generous,
+# isolated connection pool so local generation can never be starved by paid
+# OpenRouter traffic. Keyed by api_base so each local endpoint is pooled once.
+_LOCAL_CLIENTS: dict[str, Any] = {}
+_LOCAL_CLIENT_MAX_CONNECTIONS = 256
+
+
+def _get_local_client(api_base: str, api_key: str | None) -> Any:
+    """Return a pooled AsyncOpenAI client for a local OpenAI-compatible endpoint.
+
+    One client per ``api_base`` (cached), each with an isolated httpx
+    connection pool large enough to saturate the local GPU without
+    contending with litellm's shared OpenRouter pool.
+    """
+    client = _LOCAL_CLIENTS.get(api_base)
+    if client is None:
+        import httpx
+        from openai import AsyncOpenAI
+
+        limits = httpx.Limits(
+            max_connections=_LOCAL_CLIENT_MAX_CONNECTIONS,
+            max_keepalive_connections=_LOCAL_CLIENT_MAX_CONNECTIONS,
+        )
+        client = AsyncOpenAI(
+            base_url=api_base,
+            api_key=api_key or "EMPTY",
+            http_client=httpx.AsyncClient(limits=limits),
+            max_retries=0,  # retry/backoff handled by the caller loop
+        )
+        _LOCAL_CLIENTS[api_base] = client
+    return client
+
+
+def _is_local_api_base(api_base: str | None) -> bool:
+    """True if ``api_base`` points at a local/self-hosted OpenAI-compatible server."""
+    return bool(api_base)
+
+
+async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
+    """Async chat-completion against a local endpoint via the dedicated client.
+
+    Accepts the same ``kwargs`` litellm would receive (model, messages,
+    api_base, api_key, max_tokens, timeout, extra_body, …) and returns the
+    OpenAI SDK response object, which is shape-compatible with the
+    ``response.choices[0].message.content`` / ``response.usage`` access the
+    caller already uses for litellm responses. Strips the litellm provider
+    prefix from the model id (vLLM serves the bare ``served_name``).
+    """
+    client = _get_local_client(kwargs["api_base"], kwargs.get("api_key"))
+    model = kwargs["model"]
+    for prefix in _LOCAL_MODEL_PREFIXES:
+        if model.startswith(prefix):
+            model = model[len(prefix) :]
+            break
+    call_kwargs: dict[str, Any] = {
+        "model": model,
+        "messages": kwargs["messages"],
+    }
+    if kwargs.get("max_tokens") is not None:
+        call_kwargs["max_tokens"] = kwargs["max_tokens"]
+    if kwargs.get("temperature") is not None:
+        call_kwargs["temperature"] = kwargs["temperature"]
+    if kwargs.get("timeout") is not None:
+        call_kwargs["timeout"] = kwargs["timeout"]
+    if kwargs.get("response_format") is not None:
+        call_kwargs["response_format"] = kwargs["response_format"]
+    if kwargs.get("extra_body"):
+        call_kwargs["extra_body"] = kwargs["extra_body"]
+    return await client.chat.completions.create(**call_kwargs)
+
+
 T = TypeVar("T")
 
 LLM_SERVICE = Literal[
@@ -1383,9 +1461,20 @@ async def acall_llm_structured(
     last_error: Exception | None = None
     total_cost = 0.0
 
+    # Local endpoints (hosted_vllm) bypass litellm's shared connection pool —
+    # they use a dedicated, isolated client so free GPU generation is never
+    # starved by concurrent slow OpenRouter traffic. Detected by the api_base
+    # the routing logic already resolved into kwargs for local models.
+    _use_local = model.startswith("hosted_vllm/") and _is_local_api_base(
+        kwargs.get("api_base")
+    )
+
     for attempt in range(max_retries):
         try:
-            response = await litellm.acompletion(**kwargs)
+            if _use_local:
+                response = await _acompletion_local(kwargs)
+            else:
+                response = await litellm.acompletion(**kwargs)
             total_cost += extract_cost(response, model=model)
             _log_cache_metrics(response, model)
 
