@@ -283,7 +283,16 @@ def _auto_detect_physical_base_gaps(
         candidates: Parsed ``StandardNameCandidate`` objects or dicts.
         known_bases: Pre-loaded set of registered physical_base tokens.
             Defaults to ``_load_known_physical_bases()`` if not provided.
+            The flat registry under-reports the grammar's lexical-compound
+            bases (``internal_inductance``, ``major_radius`` …); on the default
+            path a base absent from the flat set is re-checked against the ISN
+            parser and emitted as a gap only when the parser also rejects it.
+            An explicit ``known_bases`` is treated as authoritative and the
+            parser escape hatch is NOT applied.
     """
+    from imas_codex.standard_names.segments import is_known_physical_base
+
+    consult_parser = known_bases is None
     if known_bases is None:
         known_bases = _load_known_physical_bases()
 
@@ -313,6 +322,11 @@ def _auto_detect_physical_base_gaps(
                 continue
 
             if base_kind == "quantity" and base and base not in known_bases:
+                # The grammar resolves lexical-compound bases that never appear
+                # in the flat registry — those are valid, not gaps.  Skip them
+                # on the default path; an explicit known_bases stays strict.
+                if consult_parser and is_known_physical_base(base):
+                    continue
                 key = (source_id, base)
                 if key not in seen:
                     seen.add(key)

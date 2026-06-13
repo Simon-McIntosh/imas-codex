@@ -49,6 +49,65 @@ def _load_segment_token_map() -> dict[str, tuple[str, ...]] | None:
         return None
 
 
+# Segments whose validity the ISN grammar resolves via lexical-compound
+# matching rather than a flat token list.  For these, a token may be a valid
+# base even when it is absent from ``SEGMENT_TOKEN_MAP`` (e.g.
+# ``internal_inductance``, ``major_radius`` resolve to themselves through the
+# parser).  All other segments are genuinely closed enums.
+_PARSER_RESOLVED_SEGMENTS: frozenset[str] = frozenset(
+    {"physical_base", "geometric_base"}
+)
+
+
+@lru_cache(maxsize=4096)
+def resolved_base_segment(token: str) -> str | None:
+    """Return the base segment the ISN grammar resolves *token* to, if self-resolving.
+
+    The flat ``SEGMENT_TOKEN_MAP['physical_base']`` lists only the registered
+    *atomic* base tokens.  The grammar additionally accepts lexical compounds
+    (``internal_inductance``, ``major_radius``, ``minor_radius`` …) that
+    ``parse_standard_name`` resolves to themselves but that never appear in the
+    flat map.  Such compounds are valid bases, not vocabulary gaps.
+
+    Returns the segment name (``"physical_base"`` or ``"geometric_base"``) when
+    ``parse_standard_name(token)`` succeeds AND yields *token* itself as that
+    base.  Returns ``None`` when the token decomposes to a *different* base
+    (e.g. ``poloidal_magnetic_flux`` → ``magnetic_flux``), when the parser
+    rejects it (genuine gap → ``UnknownBaseTokenError``), or when ISN is
+    unavailable.  Decomposable / absent tokens are left to the surrounding
+    classifier.
+
+    Cached because it is called per gap during reconcile and per candidate
+    during compose auto-detection.
+    """
+    if not token:
+        return None
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+    except ImportError:
+        return None
+    try:
+        parsed = parse_standard_name(token)
+    except Exception:
+        # UnknownBaseTokenError (genuine gap) or any parse failure.
+        return None
+    if getattr(parsed, "physical_base", None) == token:
+        return "physical_base"
+    if getattr(parsed, "geometric_base", None) == token:
+        return "geometric_base"
+    return None
+
+
+def is_known_physical_base(token: str) -> bool:
+    """Return True if the ISN grammar resolves *token* as a base in its own right.
+
+    Thin boolean wrapper over :func:`resolved_base_segment` for callers that
+    only need a yes/no on physical_base membership (e.g. compose
+    auto-detection).
+    """
+    return resolved_base_segment(token) == "physical_base"
+
+
 @lru_cache(maxsize=1)
 def known_segments() -> frozenset[str] | None:
     """Return all valid ISN grammar segment names, or None if ISN unavailable.
@@ -149,8 +208,22 @@ def is_known_token(token: str) -> list[str]:
     Multiple segments may be returned when the token legitimately
     appears in more than one closed vocabulary (e.g. orientation /
     qualifier overlap).
+
+    For ``physical_base`` / ``geometric_base`` the flat map under-reports:
+    the grammar accepts lexical compounds (``internal_inductance``,
+    ``major_radius`` …) that resolve to themselves through
+    ``parse_standard_name`` yet never appear in ``SEGMENT_TOKEN_MAP``.  Such
+    a token is reported as known for the segment the parser resolves it to,
+    so it is correctly classified ``false_positive`` rather than ``absent``.
     """
-    return list(_segment_token_index().get(token, []))
+    found = list(_segment_token_index().get(token, []))
+    # Augment with the parser-resolved base segment when the grammar accepts
+    # the token as a self-resolving lexical-compound base absent from the flat
+    # map (e.g. internal_inductance, major_radius).
+    base_seg = resolved_base_segment(token)
+    if base_seg is not None and base_seg not in found:
+        found.append(base_seg)
+    return found
 
 
 def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
@@ -301,9 +374,11 @@ __all__ = [
     "PSEUDO_SEGMENTS",
     "classify_gap",
     "filter_closed_segment_gaps",
+    "is_known_physical_base",
     "is_known_token",
     "is_open_segment",
     "is_valid_segment",
     "known_segments",
     "open_segments",
+    "resolved_base_segment",
 ]

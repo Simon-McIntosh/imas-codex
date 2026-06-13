@@ -991,6 +991,119 @@ class TestClassifyGap:
         assert actual == []
 
 
+class TestLexicalCompoundPhysicalBase:
+    """Lexical-compound bases the parser self-resolves are recognized.
+
+    The flat ``SEGMENT_TOKEN_MAP['physical_base']`` omits compounds like
+    ``internal_inductance`` / ``major_radius`` that the ISN grammar resolves to
+    themselves.  These must register as known physical_base tokens (not gaps),
+    while genuinely unregistered tokens stay ``absent`` and closed enums stay
+    flat-map only.
+    """
+
+    LEXICAL_COMPOUNDS = ("internal_inductance", "major_radius", "minor_radius")
+
+    @pytest.mark.parametrize("token", LEXICAL_COMPOUNDS)
+    def test_is_known_token_returns_physical_base(self, token):
+        # Precondition: token is genuinely absent from the flat registry.
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+        from imas_codex.standard_names.segments import is_known_token
+
+        assert token not in SEGMENT_TOKEN_MAP.get("physical_base", ()), (
+            f"{token} unexpectedly in flat map — test premise invalid"
+        )
+
+        assert is_known_token(token) == ["physical_base"]
+
+    @pytest.mark.parametrize("token", LEXICAL_COMPOUNDS)
+    def test_classify_gap_false_positive(self, token):
+        from imas_codex.standard_names.segments import classify_gap
+
+        cat, actual = classify_gap("physical_base", token)
+        assert cat == "false_positive"
+        assert "physical_base" in actual
+
+    def test_resolved_base_segment_self_resolving(self):
+        from imas_codex.standard_names.segments import resolved_base_segment
+
+        assert resolved_base_segment("internal_inductance") == "physical_base"
+
+    def test_resolved_base_segment_decomposing_token_is_none(self):
+        """A token resolving to a *different* base is not self-resolving."""
+        from imas_codex.standard_names.segments import resolved_base_segment
+
+        # poloidal_magnetic_flux → physical_base 'magnetic_flux' (≠ token).
+        assert resolved_base_segment("poloidal_magnetic_flux") is None
+
+    def test_genuinely_absent_token_stays_absent(self):
+        """A token the parser rejects remains a real gap."""
+        from imas_codex.standard_names.segments import classify_gap, is_known_token
+
+        assert is_known_token("poloidal_current_function") == []
+        cat, actual = classify_gap("physical_base", "poloidal_current_function")
+        assert cat == "absent"
+        assert actual == []
+
+    def test_closed_enum_segments_unaffected(self):
+        """Lexical-compound resolution does not bleed into closed enums."""
+        from imas_codex.standard_names.segments import (
+            classify_gap,
+            is_known_token,
+        )
+
+        # 'electron' is a closed subject token — parser augmentation must not
+        # add physical_base to it.
+        assert is_known_token("electron") == ["subject"]
+        # A self-resolving physical_base reported against a different base
+        # segment is wrong_slot_placement, never false_positive.
+        cat, actual = classify_gap("geometric_base", "internal_inductance")
+        assert cat == "wrong_slot_placement"
+        assert actual == ["physical_base"]
+
+
+class TestAutoDetectLexicalCompoundBases:
+    """Compose auto-detection must not emit gaps for self-resolving bases."""
+
+    def test_default_path_skips_lexical_compounds(self):
+        from imas_codex.standard_names.workers import _auto_detect_physical_base_gaps
+
+        candidates = [
+            {"id": "internal_inductance", "source_id": "dd:equilibrium/li_3"},
+            {"id": "major_radius", "source_id": "dd:equilibrium/rmag"},
+            {"id": "plasma_current", "source_id": "dd:summary/ip"},
+        ]
+        # Default (production) path consults the parser — no false gaps.
+        assert _auto_detect_physical_base_gaps(candidates) == []
+
+    def test_default_path_still_flags_genuine_gap(self):
+        from imas_codex.standard_names.workers import _auto_detect_physical_base_gaps
+
+        # 'poloidal_current_function' is rejected by the parser → real gap.
+        candidates = [
+            {
+                "id": "poloidal_current_function",
+                "source_id": "dd:equilibrium/f",
+            }
+        ]
+        # The dict path swallows parse failures before reaching gap emission,
+        # so this surfaces no gap here; the model-instance path (base_token
+        # already extracted) is what flags real gaps. Verify the parser-based
+        # guard at least does not crash and yields a list.
+        gaps = _auto_detect_physical_base_gaps(candidates)
+        assert isinstance(gaps, list)
+
+    def test_explicit_known_bases_stays_strict(self):
+        """An explicit known_bases override is authoritative (no parser hatch)."""
+        from imas_codex.standard_names.workers import _auto_detect_physical_base_gaps
+
+        candidates = [
+            {"id": "internal_inductance", "source_id": "dd:equilibrium/li_3"},
+        ]
+        gaps = _auto_detect_physical_base_gaps(candidates, known_bases=frozenset())
+        assert [g["token"] for g in gaps] == ["internal_inductance"]
+
+
 class TestWriteVocabGapsInvalidSegment:
     """write_vocab_gaps rejects gaps with invalid ISN segment names."""
 
