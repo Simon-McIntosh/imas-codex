@@ -926,6 +926,95 @@ def inject_cache_control(
     return messages
 
 
+# Instruction appended to satisfy providers that require the literal word
+# "json" in the prompt before honouring a response_format / json_schema
+# request (Alibaba Dashscope, which backs qwen, rejects the call otherwise:
+# "'messages' must contain the word 'json' in some form, to use
+# 'response_format'"). Harmless for every other provider — they already
+# receive the schema and ignore the extra sentence.
+_JSON_INSTRUCTION = "Respond with a single valid JSON object."
+
+
+def _message_text(content: Any) -> str:
+    """Flatten a message ``content`` field to plain text for substring scans.
+
+    Handles both the plain-string form and the list-of-content-block form
+    (each block a dict carrying a ``text`` key, optionally with
+    ``cache_control``). Non-text blocks contribute nothing.
+    """
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return " ".join(
+            str(block.get("text", "")) for block in content if isinstance(block, dict)
+        )
+    return ""
+
+
+def _messages_mention_json(messages: list[dict[str, Any]]) -> bool:
+    """Return True if any message's text already contains "json" (case-insensitive)."""
+    return any("json" in _message_text(m.get("content")).lower() for m in messages)
+
+
+def _ensure_json_in_messages(
+    messages: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Ensure the word "json" appears in *messages* for response_format calls.
+
+    Some providers (Dashscope/qwen) hard-reject a ``response_format`` /
+    json_schema request unless the literal word "json" is present in the
+    prompt. This appends a minimal JSON instruction so the guard passes,
+    while remaining:
+
+    - **Idempotent** — a no-op when "json" is already present anywhere in
+      the system/user text (many prompts already mention JSON).
+    - **Cache-safe** — appends to the existing text of the last system
+      message rather than adding a new uncached message, preserving any
+      ``cache_control`` breakpoint prefix. The append targets the LAST text
+      block (where ``inject_cache_control`` places the breakpoint), keeping
+      the cacheable prefix byte-identical.
+    - **Provider-agnostic** — every other provider already gets the schema
+      and treats the extra sentence as harmless guidance.
+
+    When no system message exists, one is prepended carrying the
+    instruction. The input list is not mutated — a shallow copy is returned.
+    """
+    if not messages or _messages_mention_json(messages):
+        return messages
+
+    messages = [m.copy() for m in messages]
+
+    # Append to the last system message to preserve any cache_control prefix.
+    for i in range(len(messages) - 1, -1, -1):
+        if messages[i].get("role") != "system":
+            continue
+        content = messages[i]["content"]
+        if isinstance(content, str):
+            sep = "" if content.endswith(("\n", " ")) or not content else " "
+            messages[i]["content"] = f"{content}{sep}{_JSON_INSTRUCTION}"
+        elif isinstance(content, list) and content:
+            # Append to the last text block, keeping its cache_control intact.
+            content = [block.copy() for block in content]
+            for j in range(len(content) - 1, -1, -1):
+                block = content[j]
+                if isinstance(block, dict) and "text" in block:
+                    text = str(block["text"])
+                    sep = "" if text.endswith(("\n", " ")) or not text else " "
+                    block["text"] = f"{text}{sep}{_JSON_INSTRUCTION}"
+                    break
+            else:
+                # No text block to append to — add a fresh text block.
+                content.append({"type": "text", "text": _JSON_INSTRUCTION})
+            messages[i]["content"] = content
+        else:
+            # Empty/None content — set the instruction directly.
+            messages[i]["content"] = _JSON_INSTRUCTION
+        return messages
+
+    # No system message — prepend one carrying the instruction.
+    return [{"role": "system", "content": _JSON_INSTRUCTION}, *messages]
+
+
 def _build_kwargs(
     model: str,
     api_key: str,
@@ -1057,6 +1146,10 @@ def _build_kwargs(
             kwargs["response_format"] = _to_json_schema_format(response_format)
         else:
             kwargs["response_format"] = response_format
+        # Dashscope (qwen) rejects response_format unless the prompt mentions
+        # "json". Inject a minimal instruction on the FINAL messages — covers
+        # every branch (api_base / proxy / direct) and preserves cache_control.
+        kwargs["messages"] = _ensure_json_in_messages(kwargs["messages"])
     if temperature is not None:
         # GPT-5.x models reject temperature=0.0 with a 400 error; clamp to None
         # (provider default) so callers that pin temperature=0.0 don't break.

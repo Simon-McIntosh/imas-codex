@@ -6,9 +6,11 @@ import pytest
 from pydantic import BaseModel, Field
 
 from imas_codex.discovery.base.llm import (
+    _ensure_json_in_messages,
     _extract_balanced_json,
     _find_json_start,
     _is_pydantic_model,
+    _messages_mention_json,
     _sanitize_content,
     _strip_unsupported_schema_props,
     _to_json_schema_format,
@@ -330,3 +332,201 @@ class TestBuildKwargsServiceTag:
         kwargs = self._build(monkeypatch, service="imas-mapping")
         assert "HTTP-Referer" in kwargs["extra_headers"]
         assert "imas-codex" in kwargs["extra_headers"]["HTTP-Referer"]
+
+
+# ---------------------------------------------------------------------------
+# Dashscope (qwen) "json" guard — _ensure_json_in_messages + _build_kwargs wiring
+# ---------------------------------------------------------------------------
+
+
+def _text_of(messages):
+    """Flatten all message content (string + block form) to one lowercase string."""
+    parts = []
+    for m in messages:
+        content = m["content"]
+        if isinstance(content, str):
+            parts.append(content)
+        elif isinstance(content, list):
+            parts.extend(str(b.get("text", "")) for b in content if isinstance(b, dict))
+    return " ".join(parts).lower()
+
+
+class TestEnsureJsonInMessages:
+    """Unit tests for the Dashscope json-guard injection helper."""
+
+    def test_injects_when_no_json_present(self):
+        msgs = [
+            {"role": "system", "content": "You are precise."},
+            {"role": "user", "content": "How many apples?"},
+        ]
+        out = _ensure_json_in_messages(msgs)
+        assert "json" in _text_of(out)
+
+    def test_idempotent_when_json_already_present_user(self):
+        msgs = [
+            {"role": "system", "content": "You are precise."},
+            {"role": "user", "content": "Return a JSON object with the count."},
+        ]
+        out = _ensure_json_in_messages(msgs)
+        # No injection — text unchanged (no duplicate sentence appended).
+        assert out is msgs or _text_of(out) == _text_of(msgs)
+        assert _text_of(out).count("json") == 1
+
+    def test_idempotent_when_json_already_present_system(self):
+        msgs = [
+            {"role": "system", "content": "Respond as json."},
+            {"role": "user", "content": "How many apples?"},
+        ]
+        out = _ensure_json_in_messages(msgs)
+        assert _text_of(out).count("json") == 1
+
+    def test_no_double_injection_on_repeat_call(self):
+        msgs = [
+            {"role": "system", "content": "You are precise."},
+            {"role": "user", "content": "How many apples?"},
+        ]
+        once = _ensure_json_in_messages(msgs)
+        twice = _ensure_json_in_messages(once)
+        assert _text_of(twice).count("json") == 1
+
+    def test_appends_to_system_not_user(self):
+        msgs = [
+            {"role": "system", "content": "You are precise."},
+            {"role": "user", "content": "How many apples?"},
+        ]
+        out = _ensure_json_in_messages(msgs)
+        assert "json" in out[0]["content"].lower()
+        assert out[1]["content"] == "How many apples?"
+
+    def test_prepends_system_when_none_exists(self):
+        msgs = [{"role": "user", "content": "How many apples?"}]
+        out = _ensure_json_in_messages(msgs)
+        assert out[0]["role"] == "system"
+        assert "json" in out[0]["content"].lower()
+        # Original user message preserved at the end.
+        assert out[-1]["content"] == "How many apples?"
+
+    def test_does_not_mutate_input(self):
+        msgs = [
+            {"role": "system", "content": "You are precise."},
+            {"role": "user", "content": "How many apples?"},
+        ]
+        before = msgs[0]["content"]
+        _ensure_json_in_messages(msgs)
+        assert msgs[0]["content"] == before
+
+    def test_empty_messages_returns_empty(self):
+        assert _ensure_json_in_messages([]) == []
+
+    def test_preserves_cache_control_breakpoint(self):
+        """Injection into block-form system message keeps cache_control intact."""
+        msgs = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "You are precise.",
+                        "cache_control": {"type": "ephemeral"},
+                    }
+                ],
+            },
+            {"role": "user", "content": "How many apples?"},
+        ]
+        out = _ensure_json_in_messages(msgs)
+        block = out[0]["content"][-1]
+        assert block["cache_control"] == {"type": "ephemeral"}
+        assert "json" in block["text"].lower()
+        # The cacheable prefix is the same block we appended to (last block).
+        assert block["text"].startswith("You are precise.")
+
+    def test_appends_to_last_text_block_when_multiple(self):
+        msgs = [
+            {
+                "role": "system",
+                "content": [
+                    {"type": "text", "text": "Block one."},
+                    {
+                        "type": "text",
+                        "text": "Block two.",
+                        "cache_control": {"type": "ephemeral"},
+                    },
+                ],
+            },
+        ]
+        out = _ensure_json_in_messages(msgs)
+        blocks = out[0]["content"]
+        assert "json" in blocks[-1]["text"].lower()
+        assert blocks[-1]["cache_control"] == {"type": "ephemeral"}
+        # First block untouched (preserves more of the cacheable prefix).
+        assert "json" not in blocks[0]["text"].lower()
+
+
+class TestMessagesMentionJson:
+    def test_detects_in_user_string(self):
+        assert _messages_mention_json([{"role": "user", "content": "give JSON"}])
+
+    def test_detects_in_block_form(self):
+        msgs = [
+            {
+                "role": "system",
+                "content": [{"type": "text", "text": "Return json please"}],
+            }
+        ]
+        assert _messages_mention_json(msgs)
+
+    def test_negative_when_absent(self):
+        assert not _messages_mention_json([{"role": "user", "content": "hello"}])
+
+
+class TestBuildKwargsJsonGuard:
+    """_build_kwargs must wire json injection only when response_format is set."""
+
+    def _build(self, monkeypatch, **overrides):
+        from imas_codex.discovery.base import llm
+
+        monkeypatch.setattr(llm, "get_llm_location", lambda: "local", raising=False)
+        monkeypatch.setattr(llm, "get_llm_proxy_url", lambda: None, raising=False)
+        defaults = {
+            "model": "openrouter/qwen/qwen3.7-max",
+            "api_key": "test-key",
+            "messages": [
+                {"role": "system", "content": "You are precise."},
+                {"role": "user", "content": "How many apples?"},
+            ],
+            "response_format": DummyResponse,
+            "max_tokens": None,
+            "temperature": None,
+            "timeout": None,
+        }
+        defaults.update(overrides)
+        return llm._build_kwargs(**defaults)
+
+    def test_injects_json_when_response_format_set(self, monkeypatch):
+        kwargs = self._build(monkeypatch)
+        assert "json" in _text_of(kwargs["messages"])
+
+    def test_no_injection_when_response_format_none(self, monkeypatch):
+        kwargs = self._build(monkeypatch, response_format=None)
+        assert "json" not in _text_of(kwargs["messages"])
+
+    def test_idempotent_when_prompt_already_mentions_json(self, monkeypatch):
+        msgs = [
+            {"role": "system", "content": "You are precise."},
+            {"role": "user", "content": "Return a json object."},
+        ]
+        kwargs = self._build(monkeypatch, messages=msgs)
+        assert _text_of(kwargs["messages"]).count("json") == 1
+
+    def test_cache_control_preserved_for_cache_capable_model(self, monkeypatch):
+        """Anthropic models get cache_control; injection must not break it."""
+        kwargs = self._build(
+            monkeypatch,
+            model="openrouter/anthropic/claude-sonnet-4.6",
+        )
+        sys_content = kwargs["messages"][0]["content"]
+        # inject_cache_control converts the system message to block form.
+        assert isinstance(sys_content, list)
+        last_block = sys_content[-1]
+        assert last_block.get("cache_control") == {"type": "ephemeral"}
+        assert "json" in _text_of(kwargs["messages"])
