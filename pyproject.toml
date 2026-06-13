@@ -387,27 +387,43 @@ max-tokens = 150000
 #
 # Operators override individual pool replicas without recompile via
 # IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS env vars (e.g.
-# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=64).
-# Tuned 2026-05-17 with the local 4×H200 DeepSeek v4 flash endpoint
-# (ambix vLLM serve, ``--max-num-seqs 1024 --max-num-batched-tokens
-# 32768``). End-to-end throughput inflection lives between 96 and 128
-# generate replicas:
+# IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS=96). Use this to scale UP to
+# the 4-GPU profile counts below without a code change.
 #
-#   iter | gen/rev/ref | vLLM running | waiting | KV %  | rate (cpm)
-#   -----+-------------+--------------+---------+-------+-----------
-#   1    | 96 / 64 / 32 |     265      |   0     | 30 %  |  26.4   ← optimum
-#   2    | 192/128 / 64 |     359      |  76     | 43 %  |  14.2   ← deferred-queue regression
-#   3    | 128/ 96 / 48 |     344      |   0     | 26 %  |  20.0   ← codex-side coordination penalty
+# GPU-PROFILE SIZING (IMPORTANT). The generate pools hit the LOCAL vLLM
+# DeepSeek-v4-flash endpoint; their replica count is the SOLE governor of
+# concurrent GPU load (the generate pools are free, so the dollar
+# spend-fairness gate does not throttle them — see ``free_pools`` /
+# ``BudgetManager.pool_admit``). The right count therefore depends on how
+# many GPUs the vLLM server has:
 #
-# Iter 1 is the local optimum: KV cache utilization of ~30 % (vLLM
-# scheduler headroom remains) but maximum end-to-end throughput.
-# Beyond ~100 generate replicas the codex side (Neo4j claim contention
-# + async pool coordination) becomes the bottleneck — adding GPU
-# concurrency hurts rather than helps until that's addressed.
-generate-name-replicas = 96
+#   * 4×H200 profile: the throughput inflection sits at ~96 generate
+#     replicas (table below, tuned 2026-05-17 with ``--max-num-seqs 1024
+#     --max-num-batched-tokens 32768``).
+#
+#       iter | gen/rev/ref | vLLM running | waiting | KV %  | rate (cpm)
+#       -----+-------------+--------------+---------+-------+-----------
+#       1    | 96 / 64 / 32 |     265      |   0     | 30 %  |  26.4   ← 4-GPU optimum
+#       2    | 192/128 / 64 |     359      |  76     | 43 %  |  14.2   ← deferred-queue regression
+#       3    | 128/ 96 / 48 |     344      |   0     | 26 %  |  20.0   ← codex-side coordination penalty
+#
+#   * 2×H200 profile (CURRENT default, ambix ``deepseek-v4-flash-2x``,
+#     TP=2): with thinking-max reasoning traces holding KV-cache slots, 96
+#     concurrent generate requests overflow the scheduler queue — requests
+#     wait >300 s for a slot and litellm times out after 5 retries
+#     (``Timeout passed=300.0``), killing the generate pools. Live-probed
+#     2026-06-13: 16-way concurrency to the same endpoint is healthy (5.7 s,
+#     all 200) while 96-way fails. The defaults below are sized for 2 GPUs
+#     at 32 (2× the proven-clean 16, well under the failing 96) — roughly
+#     the 4-GPU optimum halved for half the GPUs. Raise via the env vars
+#     above when the 4-GPU profile is running.
+#
+# Review/refine pools hit OpenRouter, NOT the local GPU, so they are not
+# constrained by the GPU profile — left at the 4-GPU-era values.
+generate-name-replicas = 32
 review-name-replicas = 64
 refine-name-replicas = 32
-generate-docs-replicas = 96
+generate-docs-replicas = 32
 review-docs-replicas = 64
 refine-docs-replicas = 32
 

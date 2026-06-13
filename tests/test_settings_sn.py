@@ -104,26 +104,34 @@ def test_retry_k_expansion_env(monkeypatch):
 
 
 def test_pool_replicas_default_from_pyproject():
-    """Per-pool replica counts come from ``[tool.imas-codex.sn-pools]``."""
+    """Per-pool replica counts come from ``[tool.imas-codex.sn-pools]``.
+
+    Generate pools are sized for the 2-GPU local vLLM profile (32); review
+    pools hit OpenRouter (64) and refine pools carry a small backlog (32).
+    """
     from imas_codex.settings import get_pool_replicas
 
-    assert get_pool_replicas("generate_name") == 256
-    assert get_pool_replicas("review_name") == 128
-    assert get_pool_replicas("refine_name") == 64
-    assert get_pool_replicas("generate_docs") == 256
-    assert get_pool_replicas("review_docs") == 128
-    assert get_pool_replicas("refine_docs") == 64
+    assert get_pool_replicas("generate_name") == 32
+    assert get_pool_replicas("review_name") == 64
+    assert get_pool_replicas("refine_name") == 32
+    assert get_pool_replicas("generate_docs") == 32
+    assert get_pool_replicas("review_docs") == 64
+    assert get_pool_replicas("refine_docs") == 32
 
 
 def test_pool_replicas_env_override(monkeypatch):
-    """``IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS`` overrides pyproject.toml."""
-    monkeypatch.setenv("IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS", "32")
+    """``IMAS_CODEX_SN_POOLS_<NAME>_REPLICAS`` overrides pyproject.toml.
+
+    Operators raise the generate count to the 4-GPU profile (e.g. 96) without
+    a code change via this env var.
+    """
+    monkeypatch.setenv("IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS", "96")
     import imas_codex.settings as mod
 
     importlib.reload(mod)
-    assert mod.get_pool_replicas("generate_name") == 32
+    assert mod.get_pool_replicas("generate_name") == 96
     # Sibling pools unaffected.
-    assert mod.get_pool_replicas("review_name") == 128
+    assert mod.get_pool_replicas("review_name") == 64
 
 
 def test_pool_replicas_unknown_pool_raises():
