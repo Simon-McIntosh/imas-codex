@@ -1454,12 +1454,17 @@ async def _run_model(
                 temp = None  # let the provider use its default
 
             try:
+                # Mirror production: compose runs at the [sn-compose] reasoning
+                # effort so bench name quality reflects campaign settings.
+                from imas_codex.settings import get_reasoning_effort
+
                 llm_response = await acall_llm_structured(
                     model=model,
                     messages=messages,
                     response_model=StandardNameComposeBatch,
                     temperature=temp,
                     service="standard-names",
+                    reasoning_effort=get_reasoning_effort("sn-compose"),
                 )
                 llm_result, cost, tokens = llm_response
                 result.total_cost += cost
