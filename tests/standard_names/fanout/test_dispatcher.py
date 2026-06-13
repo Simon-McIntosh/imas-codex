@@ -227,7 +227,15 @@ class TestPropose:
     async def test_proposer_threads_reasoning_effort(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """propose() threads reasoning_effort from [sn-fanout] ("max")."""
+        """propose() threads reasoning_effort from the live [sn-fanout] config.
+
+        Asserts the resolved config value is threaded end-to-end (not a frozen
+        literal — the effort level is tuned in pyproject and must not break
+        this test when it changes).
+        """
+        from imas_codex.settings import get_reasoning_effort
+
+        expected_effort = get_reasoning_effort("sn-fanout")
         plan = FanoutPlan(
             queries=[_SearchExistingNames(fn_id="search_existing_names", query="T_e")]
         )
@@ -240,9 +248,7 @@ class TestPropose:
             parent_lease=_new_lease(),
             fanout_run_id="run-effort",
         )
-        # vLLM-local proposer uses "max" thinking effort (pyproject mapping
-        # exercised end-to-end via get_reasoning_effort).
-        assert recorded[0]["reasoning_effort"] == "max"
+        assert recorded[0]["reasoning_effort"] == expected_effort
 
     async def test_scope_not_in_llm_args(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Caller-injected scope must never appear in LLM messages (plan §3.3)."""
