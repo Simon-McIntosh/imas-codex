@@ -653,6 +653,18 @@ class SN6PoolDisplay(BaseProgressDisplay):
         #: backlog is excluded from row totals, ETA, and ETC projection.
         self._flush = flush
 
+        #: Authoritative spend ledger from the run's BudgetManager.
+        #: Per-pool ``on_event`` payloads systematically undercount real
+        #: spend — fanout sub-charges, L6 grammar-retry charges, and
+        #: retry-accumulated cost inside ``acall_llm_structured`` bill the
+        #: budget ledger without emitting a matching display event.  When
+        #: the run wires its ledger here (via :meth:`set_budget_ledger`),
+        #: the COST gauge and final summary reconcile to it instead of to
+        #: summed event payloads.  Falls back to event sums when unset
+        #: (tests / dry-run with no manager).
+        self._budget_phase_spent: dict[str, float] | None = None
+        self._budget_total: float | None = None
+
         # Per-pool observable state (7 pools).
         # PoolDisplayState tracks completed/total/cost; WorkerStats drives
         # the canonical streaming display via stream_queue.
@@ -757,6 +769,52 @@ class SN6PoolDisplay(BaseProgressDisplay):
                 ws.total = max(state.total, state.completed)
                 ws.cost = state.cost
 
+    # ── Budget ledger reconciliation ──────────────────────────────────
+
+    def set_budget_ledger(
+        self,
+        *,
+        phase_spent: dict[str, float] | None = None,
+        total: float | None = None,
+    ) -> None:
+        """Wire the run's authoritative spend ledger into the display.
+
+        The per-pool ``on_event`` payloads only carry the cost the worker
+        chose to surface for a single emitted event.  Several charge paths
+        bill the :class:`~imas_codex.standard_names.budget.BudgetManager`
+        ledger *without* a matching display event — fanout sub-charges,
+        grammar-retry charges, and retry-accumulated cost inside
+        ``acall_llm_structured``.  Summing event payloads therefore
+        systematically *undercounts* real spend (the dangerous direction:
+        it hides money).  The budget ledger sees every charge.
+
+        Call this with ``BudgetManager.phase_spent`` (per-pool USD, keyed
+        by :data:`POOL_ORDER` names) and an authoritative total
+        (``BudgetManager.spent`` or the graph-reconciled run total) so the
+        COST gauge and the final summary report what was actually billed.
+
+        Args:
+            phase_spent: Per-pool spend dict keyed by pool name.  Folds
+                fanout / retry sub-charges into their parent phase
+                automatically (that is how the ledger already tags them).
+            total: Authoritative total spend in USD.  Defaults to the sum
+                of ``phase_spent`` when omitted.
+        """
+        if phase_spent is not None:
+            self._budget_phase_spent = dict(phase_spent)
+        if total is not None:
+            self._budget_total = float(total)
+        elif phase_spent is not None and self._budget_total is None:
+            self._budget_total = float(sum(phase_spent.values()))
+
+    def _ledger_total(self) -> float | None:
+        """Authoritative total spend, or ``None`` when no ledger is wired."""
+        if self._budget_total is not None:
+            return self._budget_total
+        if self._budget_phase_spent is not None:
+            return float(sum(self._budget_phase_spent.values()))
+        return None
+
     # ── Canonical display methods (override BaseProgressDisplay) ──────
 
     def _row_pending(self, sub_pools: tuple[str, ...]) -> int:
@@ -854,7 +912,14 @@ class SN6PoolDisplay(BaseProgressDisplay):
             resolve_pool_cpi,
         )
 
-        total_cost = sum(p.cost for p in self.pools.values())
+        # Event-sum cost undercounts (fanout / retry sub-charges emit no
+        # display event); reconcile the COST gauge to the budget ledger
+        # when the run has wired it in, so mid-run and final agree with
+        # the cap.  Fall back to the event sum when no ledger is present.
+        event_cost = sum(p.cost for p in self.pools.values())
+        total_cost = self._ledger_total()
+        if total_cost is None:
+            total_cost = event_cost
 
         # ETA: parallel ETA across pools with remaining work.  Pools that
         # have a backlog but no session rate yet would otherwise silently
@@ -1039,9 +1104,28 @@ class SN6PoolDisplay(BaseProgressDisplay):
         self._refresh()
 
     def print_summary(self) -> None:
-        """Print a compact summary after the run completes."""
+        """Print a compact summary after the run completes.
+
+        COST figures reconcile to the authoritative budget ledger (wired
+        via :meth:`set_budget_ledger`) rather than to summed ``on_event``
+        payloads, which systematically undercount real spend (fanout /
+        retry sub-charges emit no display event).  COMPLETED COUNTS still
+        come from the live per-pool counters — those are correct.  When no
+        ledger is wired (tests / dry-run), fall back to the event sum.
+        """
+        # Per-pool spend: ledger when present, else the live event sum.
+        ledger = self._budget_phase_spent
+
+        def _pool_cost(name: str) -> float:
+            if ledger is not None:
+                return float(ledger.get(name, 0.0))
+            return self.pools[name].cost
+
         total_items = sum(p.completed for p in self.pools.values())
-        total_cost = sum(p.cost for p in self.pools.values())
+        total_cost = self._ledger_total()
+        if total_cost is None:
+            total_cost = sum(p.cost for p in self.pools.values())
+
         if total_items > 0 or total_cost > 0:
             self.console.print()
             for name in POOL_ORDER:
@@ -1050,8 +1134,9 @@ class SN6PoolDisplay(BaseProgressDisplay):
                     parts = [
                         f"  {POOL_LABELS[name]}: {p.completed:,}",
                     ]
-                    if p.cost > 0:
-                        parts.append(f"${p.cost:.2f}")
+                    pool_cost = _pool_cost(name)
+                    if pool_cost > 0:
+                        parts.append(f"${pool_cost:.2f}")
                     self.console.print("  ".join(parts))
             if total_cost > 0:
                 self.console.print(f"  TOTAL COST: ${total_cost:.2f}")

@@ -642,6 +642,7 @@ def _run_sn_cmd(
             stop_event=stop_event,
             pending_fn=_pool_pending_fn,
             on_event=_on_event,
+            display=display,
             scope_run_id=scope_run_id,
             names_only=names_only,
             flush=flush,

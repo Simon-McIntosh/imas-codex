@@ -552,6 +552,7 @@ async def run_sn_pools(
     loop_state: Any | None = None,
     pending_fn: Callable[[], dict[str, int]] | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
+    display: Any | None = None,
     scope_run_id: str | None = None,
     names_only: bool = False,
     flush: bool = False,
@@ -617,6 +618,14 @@ async def run_sn_pools(
             watchdog polls this every 5 seconds to keep
             ``PoolHealth.pending_count`` current in headless / ``--quiet``
             mode where the Rich display ticker is absent.
+        display: Optional :class:`~imas_codex.standard_names.display.SN6PoolDisplay`.
+            When provided, the run's authoritative ``BudgetManager`` spend
+            ledger (per-pool ``phase_spent`` + the graph-reconciled total)
+            is wired into the display before the final render, so the COST
+            gauge and ``print_summary`` report what was actually billed
+            rather than the systematically undercounted sum of emitted
+            ``on_event`` payloads (fanout / retry sub-charges emit no
+            display event).
     """
     from imas_codex.standard_names.budget import BudgetManager
     from imas_codex.standard_names.pools import run_pools
@@ -1220,6 +1229,23 @@ async def run_sn_pools(
         summary.review_cost = phase_spent.get("review_name", 0.0) + phase_spent.get(
             "review_docs", 0.0
         )
+
+        # Reconcile the Rich display's COST figures to the authoritative
+        # budget ledger.  Per-pool ``on_event`` payloads undercount real
+        # spend (fanout / grammar-retry / acall retry sub-charges bill the
+        # ledger without emitting a display event), so the final summary
+        # must source TOTAL COST from ``phase_spent`` + the reconciled run
+        # total — not from summed event payloads.  ``summary.cost_spent``
+        # is the most authoritative total here (max of in-memory ledger
+        # and the force-refreshed graph spend).
+        if display is not None and hasattr(display, "set_budget_ledger"):
+            try:
+                display.set_budget_ledger(
+                    phase_spent=phase_spent,
+                    total=max(summary.cost_spent, shared_mgr.spent),
+                )
+            except Exception:  # noqa: BLE001 — display wiring is non-fatal
+                pass
 
         # Compute pipeline hash — best-effort.
         _pipeline_hash: str | None = None
