@@ -518,3 +518,119 @@ class TestPoolAdmitExtension:
         assert not mgr.pool_admit("generate_name", POOL_WEIGHTS, active), (
             "pool 'generate_name' must be rejected when budget is exhausted"
         )
+
+
+class TestFreePoolBypassesSpendFairness:
+    """Free (zero-cost / local-GPU) pools bypass the dollar spend-fairness gate.
+
+    A pool whose model routes to a local endpoint (e.g. ``generate_name`` on a
+    local vLLM GPU) costs nothing, so it must be admitted whenever it has
+    pending work — its only real limit is GPU concurrency (replica count), not
+    how the paid pools are spending the cost cap.  Free pools are also excluded
+    from the paid pools' fairness denominator.
+    """
+
+    def _mgr(self, total: float = 5.0) -> BudgetManager:
+        return BudgetManager(total_budget=total)
+
+    def _charge(self, mgr: BudgetManager, pool: str, amount: float) -> None:
+        lease = mgr.reserve(amount, phase=pool)
+        assert lease is not None
+        with lease:
+            lease.charge_event(amount, _DUMMY_EVENT)
+
+    def test_free_pool_admitted_even_when_share_exceeds_weight(self) -> None:
+        """A free pool is admitted despite a spend-share above its weight.
+
+        Without the exemption, generate_name (weight 0.15) charged $0.50 while
+        other paid pools are active would be DENIED (share 1.0 > 0.15).  Marked
+        free, it is admitted whenever it has pending work.
+        """
+        mgr = self._mgr()
+        # generate_name has "spent" (hypothetically) far above its weight share.
+        self._charge(mgr, "generate_name", 0.50)
+        self._charge(mgr, "review_name", 0.05)
+        active = {"generate_name", "review_name", "review_docs"}
+
+        # Paid behaviour: generate_name's share (>0.9) >> weight → denied.
+        assert not mgr.pool_admit("generate_name", POOL_WEIGHTS, active), (
+            "precondition: as a PAID pool generate_name would be denied here"
+        )
+        # Free behaviour: admitted regardless of spend share.
+        assert mgr.pool_admit(
+            "generate_name", POOL_WEIGHTS, active, free_pools={"generate_name"}
+        ), "a free pool must be admitted even when its spend share exceeds its weight"
+
+    def test_free_pool_excluded_from_paid_denominator(self) -> None:
+        """Paid pools renormalise over only the paid set; the free pool's weight
+        does not inflate the denominator.
+
+        With generate_name free, review_name + review_docs (weights 0.25 each)
+        renormalise to 0.5 each.  review_name at exactly $0 spend among the paid
+        set is admitted; the free pool's 0.15 weight is NOT in the denominator.
+        """
+        mgr = self._mgr()
+        # Free pool dominates raw spend; paid pools have a small even split.
+        self._charge(mgr, "generate_name", 0.90)
+        self._charge(mgr, "review_name", 0.10)
+        self._charge(mgr, "review_docs", 0.10)
+        active = {"generate_name", "review_name", "review_docs"}
+        free = {"generate_name"}
+
+        # review_name share over the PAID set = 0.10/0.20 = 0.5; effective
+        # weight over paid set = 0.25/(0.25+0.25) = 0.5 → 0.5 < 0.5 is False.
+        assert not mgr.pool_admit("review_name", POOL_WEIGHTS, active, free_pools=free)
+        # If the free pool's spend leaked into the denominator, review_name's
+        # share would be 0.10/1.10 ≈ 0.09 < 0.5 → wrongly admitted.  Exclusion
+        # of the free pool keeps the paid fairness math correct.
+
+    def test_free_pool_still_blocked_when_budget_exhausted(self) -> None:
+        """Even a free pool is gated by the hard budget-exhausted check.
+
+        Free generation costs nothing, but once the shared dollar budget is
+        drained the paid review/refine pools can no longer consume its output,
+        so admission stops (the run is tearing down via the budget watchdog).
+        """
+        mgr = self._mgr()
+        mgr._pool = -0.01
+        assert mgr.exhausted()
+        assert not mgr.pool_admit(
+            "generate_name",
+            POOL_WEIGHTS,
+            {"generate_name"},
+            free_pools={"generate_name"},
+        ), "free pool must still be blocked when the shared budget is exhausted"
+
+    def test_paid_pools_still_ration_among_themselves(self) -> None:
+        """With the free pool excluded, paid pools still enforce fairness.
+
+        A paid pool whose share exceeds its (renormalised) effective weight is
+        denied, exactly as before — the free-pool change only affects the free
+        pool's admission and the denominator.
+        """
+        mgr = self._mgr()
+        free = {"generate_name"}
+        # review_name has spent far more than review_docs among the paid set.
+        self._charge(mgr, "review_name", 0.40)
+        self._charge(mgr, "review_docs", 0.01)
+        active = {"generate_name", "review_name", "review_docs"}
+        # review_name share (0.40/0.41 ≈ 0.98) >> 0.5 effective → denied.
+        assert not mgr.pool_admit("review_name", POOL_WEIGHTS, active, free_pools=free)
+        # review_docs share (≈0.02) < 0.5 effective → admitted.
+        assert mgr.pool_admit("review_docs", POOL_WEIGHTS, active, free_pools=free)
+
+    def test_live_config_marks_generate_name_free(self) -> None:
+        """The free-pool resolver picks up generate_name (local vLLM) from config.
+
+        This ties the admission exemption to the actual model resolution so a
+        config change to a paid compose model would flip the behaviour.
+        """
+        from imas_codex.standard_names.pools import _pool_is_free, free_pools
+
+        free = free_pools()
+        # generate_name routes to a local hosted_vllm model in this repo's
+        # pyproject.toml, so it must be detected as free.
+        assert "generate_name" in free
+        assert _pool_is_free("generate_name")
+        # Review pools route to OpenRouter (paid) in the default profile.
+        assert "review_name" not in free

@@ -67,6 +67,16 @@ logger = logging.getLogger(__name__)
 # so names and docs flow through the pipeline at roughly equal rates.
 # Embedding is handled by the shared discovery embed_description_worker
 # (async background task, not a pool).
+#
+# These weights ration the *dollar* budget across the PAID (OpenRouter)
+# pools.  A pool whose model routes to a local / zero-cost endpoint (see
+# ``free_pools`` / ``_pool_is_free``) is FREE: it bypasses the spend-fairness
+# gate entirely (admitted whenever it has pending work, limited only by GPU
+# replica count) and is excluded from the fairness denominator so the paid
+# pools renormalise over only the paid set.  Its weight below is therefore
+# inert while it is free (e.g. ``generate_name``'s 0.15 has no effect when it
+# runs on a local vLLM GPU) — it matters only if that pool is reconfigured
+# to a paid model.
 POOL_WEIGHTS: dict[str, float] = {
     "generate_name": 0.15,
     "review_name": 0.25,
@@ -77,6 +87,75 @@ POOL_WEIGHTS: dict[str, float] = {
 }
 
 POOL_NAMES: tuple[str, ...] = tuple(POOL_WEIGHTS.keys())
+
+# Maps each pool to the ``pyproject.toml`` model section that determines
+# which LLM endpoint it calls.  Used by :func:`free_pools` to decide which
+# pools route to a local / zero-cost endpoint and therefore bypass the
+# dollar-budget spend-fairness gate (see ``BudgetManager.pool_admit``).
+# Review pools resolve to a *list* of models (the RD-quorum chain); they are
+# free only when every model in the chain is local.
+_POOL_MODEL_SECTIONS: dict[str, str] = {
+    "generate_name": "sn-compose",
+    "generate_docs": "sn-docs",
+    "refine_name": "sn-refine",
+    "refine_docs": "sn-refine",
+    "review_name": "sn-review.names",
+    "review_docs": "sn-review.docs",
+}
+
+
+def _pool_models(pool: str) -> list[str]:
+    """Return the model identifier(s) a pool will call.
+
+    Single-model pools (generate/refine) return a one-element list; review
+    pools return their full RD-quorum chain.  Resolution goes through the
+    canonical settings accessors so env / pyproject overrides are honoured.
+    """
+    from imas_codex.settings import (
+        get_model,
+        get_sn_review_docs_models,
+        get_sn_review_names_models,
+    )
+
+    if pool == "review_name":
+        return list(get_sn_review_names_models())
+    if pool == "review_docs":
+        return list(get_sn_review_docs_models())
+    section = _POOL_MODEL_SECTIONS.get(pool)
+    if section is None:
+        return []
+    return [get_model(section)]
+
+
+def _pool_is_free(pool: str) -> bool:
+    """Return True iff every model *pool* will call is a local/zero-cost endpoint.
+
+    A pool is "free" when its configured model(s) route to a local endpoint
+    (``hosted_vllm/``, ``ollama/``, ``openai/localhost``) rather than a paid
+    OpenRouter model.  Free pools (e.g. ``generate_name`` on a local vLLM GPU)
+    incur no dollar cost, so they must bypass the spend-fairness admission gate
+    — their only real limit is GPU concurrency (replica count).
+
+    Review pools are free only when *all* models in their quorum chain are
+    local (a mixed chain calls paid models, so it is paid).
+    """
+    from imas_codex.discovery.base.llm import _is_local_model
+
+    models = _pool_models(pool)
+    if not models:
+        return False
+    return all(_is_local_model(m) for m in models)
+
+
+def free_pools(pool_names: tuple[str, ...] = POOL_NAMES) -> set[str]:
+    """Return the subset of *pool_names* whose model(s) are local/zero-cost.
+
+    Config is static for the life of a run, so callers should compute this
+    once and reuse it.  ``pool_admit`` consumes the result to exempt free
+    pools from the dollar-budget spend-fairness gate.
+    """
+    return {p for p in pool_names if _pool_is_free(p)}
+
 
 # Number of consecutive admitted-but-empty claim attempts before a pool
 # is temporarily excluded from the active-pools admission denominator.
@@ -232,6 +311,7 @@ async def pool_loop(
     admission_poll: float = 0.5,
     replica_idx: int = 0,
     provider_exhausted_event: asyncio.Event | None = None,
+    free_pool_set: set[str] | None = None,
 ) -> None:
     """Cooperative pool worker.
 
@@ -275,7 +355,7 @@ async def pool_loop(
 
     while not stop_event.is_set():
         # ── Admission gate ────────────────────────────────────────
-        if not mgr.pool_admit(spec.name, weights, active_pools_fn()):
+        if not mgr.pool_admit(spec.name, weights, active_pools_fn(), free_pool_set):
             try:
                 await asyncio.wait_for(stop_event.wait(), timeout=admission_poll)
                 break  # stop_event triggered during wait
@@ -569,6 +649,7 @@ async def run_pools(
     provider_exhausted_event: asyncio.Event | None = None,
     idle_exhaustion_poll: float = 1.0,
     idle_exhaustion_polls: int = 30,
+    free_pool_set: set[str] | None = None,
 ) -> dict[str, PoolHealth]:
     """Run all pool loops concurrently and orchestrate cooperative shutdown.
 
@@ -641,6 +722,16 @@ async def run_pools(
                 result.add(p.name)
         return result
 
+    # Resolve the free-pool set once (config is static per run): pools whose
+    # model routes to a local/zero-cost endpoint bypass the spend-fairness gate.
+    if free_pool_set is None:
+        free_pool_set = free_pools(tuple(p.name for p in pools))
+    if free_pool_set:
+        logger.info(
+            "run_pools: free (zero-cost) pools bypass spend-fairness gate: %s",
+            sorted(free_pool_set),
+        )
+
     tasks = []
     for p in pools:
         for replica_idx in range(p.replicas):
@@ -654,6 +745,7 @@ async def run_pools(
                         weights=weights,
                         replica_idx=replica_idx,
                         provider_exhausted_event=provider_exhausted_event,
+                        free_pool_set=free_pool_set,
                     ),
                     name=f"pool[{p.name}#{replica_idx}]",
                 )
@@ -783,6 +875,8 @@ __all__ = [
     "PoolHealth",
     "PoolSpec",
     "_pending_count_watchdog",
+    "_pool_is_free",
+    "free_pools",
     "pool_loop",
     "run_pools",
 ]

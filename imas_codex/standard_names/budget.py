@@ -704,6 +704,7 @@ class BudgetManager:
         pool: str,
         weights: dict[str, float],
         active_pools: set[str],
+        free_pools: set[str] | None = None,
     ) -> bool:
         """Soft-fairness admission gate for a pool requesting a new batch.
 
@@ -721,15 +722,48 @@ class BudgetManager:
         ``"refine_name"``, ``"generate_docs"``, ``"review_docs"``,
         ``"refine_docs"``).  These map 1:1 to ``_phase_spent`` keys.
 
+        ``free_pools`` names the pools whose configured model routes to a
+        local / zero-cost endpoint (e.g. ``generate_name`` on a local vLLM
+        GPU).  Free pools must NOT be rationed against the *dollar* budget's
+        spend-fairness rule — they cost nothing, so their only real limit is
+        GPU concurrency (their replica count).  Two consequences:
+
+        * A free pool is admitted whenever it has pending work, bypassing the
+          spend-share arithmetic entirely (still subject to the hard
+          budget-exhausted gate below — see note).
+        * Free pools are excluded from the ``active_weight_sum`` denominator
+          when computing paid pools' effective weights, so a free pool's
+          weight (e.g. ``generate_name``'s 0.15) does not inflate the
+          denominator and unfairly shrink the paid pools' shares.
+
         Returns True if the pool is permitted to claim its next batch.
         """
         if pool not in weights:
             return False
+        free = free_pools or set()
         # Hard gate: never admit when budget is exhausted, regardless of
         # active_pools state.  This prevents headless mode from bypassing the
         # cost cap (the bug that caused the 10.5× live smoke overshoot).
+        #
+        # This gate applies to free pools too.  Free *generation* costs
+        # nothing, but once the shared dollar budget is drained the paid
+        # review/docs/refine pools that consume free output can no longer run,
+        # so continuing to generate would only grow an unbounded backlog of
+        # never-reviewed drafts.  In practice ``_budget_watchdog`` sets
+        # ``stop_event`` on ``hard_exhausted()`` and tears down ALL pools
+        # cooperatively, so keeping the gate here merely stops a free pool from
+        # claiming fresh work in the brief window before that shutdown
+        # propagates — the safe, non-wasteful choice.
         if self.exhausted():
             return False
+        # ── Free-pool fast path ───────────────────────────────────────────
+        # A pool whose model is a local/zero-cost endpoint is admitted as soon
+        # as it has pending work — its throughput is bounded by GPU concurrency
+        # (replica count), never by how paid pools are spending the cost cap.
+        # (When active_pools is empty — headless/startup — the generic bypass
+        # below already admits it; this branch covers the steady state.)
+        if pool in free and (not active_pools or pool in active_pools):
+            return True
         # When active_pools is empty (e.g. headless/non-TTY mode where the
         # Rich display never updates pending_count, or at startup before the
         # first display refresh), admit all known pools unconditionally so
@@ -747,18 +781,25 @@ class BudgetManager:
         if pool not in active_pools:
             # This pool has no pending work — forfeit its share.
             return False
-        # Sole active pool always admitted — the "no other pool is
-        # active" branch from plan.md Phase 8.
-        if len(active_pools) == 1:
+        # The paid active set excludes free pools (they bypass fairness and
+        # must not occupy weight share in the denominator).
+        paid_active = active_pools - free
+        # Sole active paid pool always admitted — the "no other pool is
+        # active" branch from plan.md Phase 8.  (A lone paid pool competing
+        # only against free pools rations against nobody.)
+        if len(paid_active) <= 1:
             return True
         with self._lock:
             spent = dict(self._phase_spent)
-        total_spent = sum(spent.values())
+        # Spend share is computed over the paid pools only — free pools incur
+        # no dollar spend, so they never appear meaningfully in ``_phase_spent``
+        # and must not dilute the paid pools' shares.
+        total_spent = sum(spent.get(q, 0.0) for q in paid_active)
         if total_spent < EPSILON:
             return True  # nothing spent yet; everyone gets a turn
         share = spent.get(pool, 0.0) / total_spent
         active_weight_sum = sum(
-            weights.get(q, 0.0) for q in active_pools if q in weights
+            weights.get(q, 0.0) for q in paid_active if q in weights
         )
         if active_weight_sum < EPSILON:
             return True
