@@ -376,6 +376,15 @@ name-only-batch-size = 50
 # exceeds this value are binary-split before dispatch.  Set below the
 # model's context window (200 k) to leave headroom for the response.
 max-tokens = 150000
+# Free local self-refine pass (default off — gated on measurement).
+# When true, the local compose model critiques its own freshly-composed
+# name + description against the deterministic grammar diagnostics and the
+# compose rubric and emits an improved candidate (improve-or-no-op; the
+# original is kept if the rewrite fails grammar or loses canonical order).
+# It runs on the same free local GPU endpoint as compose, so it adds local
+# latency but no paid cost — the goal is a better first-pass that needs
+# fewer PAID refine cycles downstream. Enable only on measured evidence.
+self-refine = false
 
 [tool.imas-codex.sn-pools]
 # Concurrent replica counts for each of the six SN pools (see

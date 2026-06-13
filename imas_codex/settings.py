@@ -1004,6 +1004,27 @@ def get_compose_concurrency() -> int:
     return int(_get_section("sn-compose").get("max-concurrency", 24))
 
 
+def get_compose_self_refine() -> bool:
+    """Whether the compose worker runs a free local self-refine pass.
+
+    When enabled, the locally-served compose model critiques its own
+    freshly-composed name + description against the grammar diagnostics
+    and the compose rubric and emits an improved candidate (improve-or-
+    no-op; the original is kept if the rewrite fails grammar). The pass
+    runs on the same local GPU endpoint as compose, so it adds free
+    latency but no paid cost. Default off — gated on measurement.
+
+    Priority: IMAS_CODEX_SN_COMPOSE_SELF_REFINE env
+              → [sn-compose].self-refine → ``False``.
+    """
+    if env := os.getenv("IMAS_CODEX_SN_COMPOSE_SELF_REFINE"):
+        return _parse_bool(env)
+    val = _get_section("sn-compose").get("self-refine")
+    if val is not None:
+        return _parse_bool(val)
+    return False
+
+
 # Map ``pool_name → (config-key, env-var-suffix)``. Six entries — one per
 # pool wired in ``imas_codex/standard_names/loop.py::_build_pool_specs``.
 _POOL_REPLICA_KEYS: dict[str, tuple[str, str]] = {

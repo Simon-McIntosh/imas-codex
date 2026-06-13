@@ -1708,6 +1708,176 @@ async def _grammar_retry(
         return None, 0.0, 0, 0
 
 
+async def _self_refine_candidate(
+    name: str,
+    description: str,
+    segments: dict[str, Any] | None,
+    dd_context: dict[str, Any] | None,
+    model: str,
+    acall_fn,
+    *,
+    reasoning_effort: str | None = None,
+) -> tuple[str, str]:
+    """Free local self-improvement pass over a freshly-composed candidate.
+
+    Runs AFTER compose + grammar normalization and BEFORE persist (and so
+    before the paid review quorum). The *local* compose model critiques its
+    own ``name`` + ``description`` against deterministic grammar diagnostics
+    and the compose rubric and may emit an improved candidate. The contract
+    is **improve-or-no-op**: it never rejects.
+
+    Safety: the suggested name is re-validated via the grammar round-trip
+    (``parse_standard_name`` → ``compose_standard_name``). If the rewrite
+    fails grammar parsing, or loses canonical order (round-trips to a
+    different string), or fails the well-formedness gate, the **original**
+    ``(name, description)`` is returned unchanged. The local model is free
+    (``get_model("sn-compose")`` served on the local GPU), so this charges
+    ``$0``; callers do not account any cost.
+
+    Returns ``(name, description)`` — improved when the rewrite is safe and
+    the model elected to change it, otherwise the originals unchanged.
+    """
+    from pydantic import BaseModel, Field
+
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.standard_names.context import build_compose_context
+
+    class SelfRefineSegments(BaseModel):
+        base_token: str = Field(description="Registered physical_base/geometry token")
+        base_kind: str = Field(default="quantity", description="quantity | geometry")
+        projection_axis: str | None = None
+        projection_shape: str | None = None
+        qualifiers: list[str] = Field(default_factory=list)
+        locus_token: str | None = None
+        locus_relation: str | None = None
+        locus_type: str | None = None
+        process_token: str | None = None
+        operator_token: str | None = None
+        operator_kind: str | None = None
+
+    class SelfRefineResponse(BaseModel):
+        changed: bool = Field(
+            description="True only if name or description was improved"
+        )
+        name: str = Field(description="Improved (or unchanged) standard name")
+        description: str = Field(
+            default="", description="Improved (or unchanged) ≤120 char description"
+        )
+        segments: SelfRefineSegments | None = Field(
+            default=None,
+            description="IR grammar segments of the improved name",
+        )
+
+    # Build the deterministic diagnostics shown to the model. The name was
+    # already normalized to canonical form by the caller, so the headline is
+    # "round-trip OK"; we surface a couple of cheap structural observations.
+    diagnostics: list[str] = []
+    try:
+        from imas_standard_names.grammar import (
+            compose_standard_name,
+            parse_standard_name,
+        )
+
+        _parsed = parse_standard_name(name)
+        _canon = compose_standard_name(_parsed)
+        if _canon == name:
+            diagnostics.append(
+                "Round-trip: OK — name parses and re-composes to canonical form."
+            )
+        else:
+            diagnostics.append(
+                f"Round-trip: canonical form is `{_canon}` (composed `{name}`)."
+            )
+    except Exception:
+        diagnostics.append(
+            "Round-trip: WARNING — name did not parse cleanly; prefer the closest "
+            "grammatical alternative."
+        )
+
+    try:
+        context = await asyncio.to_thread(build_compose_context)
+    except Exception:
+        context = {}
+
+    system_prompt = render_prompt("sn/self_refine_system", context)
+    user_prompt = render_prompt(
+        "sn/self_refine_user",
+        {
+            **context,
+            "name": name,
+            "description": description or "",
+            "segments": segments or {},
+            "dd_context": dd_context or {},
+            "diagnostics": diagnostics,
+        },
+    )
+
+    try:
+        llm_out = await acall_fn(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            response_model=SelfRefineResponse,
+            service="standard-names",
+            reasoning_effort=reasoning_effort,
+        )
+        result, _cost, _tokens = llm_out
+    except Exception:
+        logger.debug("Self-refine LLM call failed for %r — keeping original", name)
+        return name, description
+
+    if result is None or not result.changed:
+        return name, description
+
+    new_name = normalize_spelling((result.name or "").strip())
+    if not new_name or new_name == name:
+        # No-op rename; still adopt a tightened description if offered.
+        new_desc = normalize_prose_spelling((result.description or "").strip())
+        return name, (new_desc or description)
+
+    # --- Re-validate the suggested name before adopting it. ---
+    _well_formed, _ = is_well_formed_candidate(new_name)
+    if not _well_formed:
+        logger.debug(
+            "Self-refine suggestion %r not well-formed — keeping original %r",
+            new_name,
+            name,
+        )
+        return name, description
+
+    try:
+        from imas_standard_names.grammar import (
+            compose_standard_name,
+            parse_standard_name,
+        )
+
+        _parsed = parse_standard_name(new_name)
+        _canon = compose_standard_name(_parsed)
+        if _canon != new_name:
+            # The "improvement" lost canonical order — discard it.
+            logger.debug(
+                "Self-refine suggestion %r lost canonical order (→ %r) — "
+                "keeping original %r",
+                new_name,
+                _canon,
+                name,
+            )
+            return name, description
+    except Exception:
+        logger.debug(
+            "Self-refine suggestion %r failed grammar round-trip — keeping %r",
+            new_name,
+            name,
+        )
+        return name, description
+
+    new_desc = normalize_prose_spelling((result.description or "").strip())
+    logger.info("Self-refine improved %r → %r", name, new_name)
+    return new_name, (new_desc or description)
+
+
 async def _opus_revise_candidate(
     candidate: dict,
     domain_vocabulary: str,
@@ -3592,7 +3762,11 @@ async def compose_batch(
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model, get_reasoning_effort
+    from imas_codex.settings import (
+        get_compose_self_refine,
+        get_model,
+        get_reasoning_effort,
+    )
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import StandardNameComposeBatch
@@ -4096,11 +4270,47 @@ async def compose_batch(
                         name_id,
                     )
 
+            cand_description = normalize_prose_spelling(c.description or "")
+
+            # ── Free local self-refine pass (default off) ─────────────────
+            # After compose + grammar normalization and BEFORE persist (so
+            # before the paid review quorum), let the LOCAL compose model
+            # critique its own name + description and emit an improved
+            # candidate. Improve-or-no-op; the rewrite is re-validated and
+            # discarded if it fails grammar. Local model → $0, so no budget
+            # charge. OFF = byte-identical to the path without this block.
+            if not grammar_failed and get_compose_self_refine():
+                try:
+                    _ref_name, _ref_desc = await _self_refine_candidate(
+                        name_id,
+                        cand_description,
+                        c.segments.model_dump() if hasattr(c, "segments") else None,
+                        source_item,
+                        model,
+                        acall_llm_structured,
+                        reasoning_effort=get_reasoning_effort("sn-compose"),
+                    )
+                    if _ref_name != name_id:
+                        wlog.info(
+                            "Pool %s: self-refine %r → %r",
+                            phase_tag,
+                            name_id,
+                            _ref_name,
+                        )
+                    name_id = _ref_name
+                    cand_description = _ref_desc
+                except Exception:
+                    wlog.debug(
+                        "Pool %s: self-refine failed for %r — keeping original",
+                        phase_tag,
+                        name_id,
+                    )
+
             cand = {
                 "id": name_id,
                 "source_types": [source_kind],
                 "source_id": c.source_id,
-                "description": normalize_prose_spelling(c.description or ""),
+                "description": cand_description,
                 "kind": c.kind,
                 "source_paths": [
                     encode_source_path(source_kind, p) for p in (c.dd_paths or [])
