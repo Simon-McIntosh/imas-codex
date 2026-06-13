@@ -4383,6 +4383,40 @@ async def process_generate_name_batch(
     return await compose_batch(batch, mgr, stop_event, regen=False, on_event=on_event)
 
 
+# Substrings that identify a deterministic grammar / vocab / schema failure
+# in an LLM-proposed refined name.  These are NORMAL failed-refine outcomes
+# (the model proposed an ungrammatical name), not crashes — the item is
+# routed to the exhaust path rather than re-claimed and re-charged forever.
+_GRAMMAR_FAILURE_MARKERS: tuple[str, ...] = (
+    "not a registered",  # unregistered grammar token (base/qualifier/axis)
+    "kind must be one of",  # schema enum violation (deterministic)
+    "self-referential refined_from",  # refine produced an identical name
+    "validation error for refinedname",  # pydantic RefinedName validation
+)
+
+
+def _is_refine_grammar_failure(exc: BaseException) -> bool:
+    """Return True if *exc* is a deterministic grammar/validation refine failure.
+
+    Such failures (e.g. the LLM proposing an unregistered qualifier token) are
+    a normal failed-refine outcome, not a crash: they must be routed to the
+    exhaust path so the item stops re-claiming and re-burning paid budget.
+    """
+    msg = str(exc).lower()
+    return any(marker in msg for marker in _GRAMMAR_FAILURE_MARKERS)
+
+
+def _is_refine_docs_failure(exc: BaseException) -> bool:
+    """Return True if *exc* is a deterministic ``RefinedDocs`` validation failure.
+
+    A docs-refine that produces docs violating the ``RefinedDocs`` schema
+    (e.g. consistently over/under the length bounds) is deterministic for a
+    given item.  Reverting it to 'reviewed' would re-claim and re-burn paid
+    budget forever, so route it to the docs-exhaust path instead.
+    """
+    return "validation error for refineddocs" in str(exc).lower()
+
+
 async def process_refine_name_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -4639,15 +4673,15 @@ async def process_refine_name_batch(
                 system_prompt = None
 
             # ── LLM call ──────────────────────────────────────────────
+            _messages = (
+                [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ]
+                if system_prompt
+                else [{"role": "user", "content": user_prompt}]
+            )
             try:
-                _messages = (
-                    [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ]
-                    if system_prompt
-                    else [{"role": "user", "content": user_prompt}]
-                )
                 llm_out = await acall_llm_structured(
                     model=model,
                     messages=_messages,
@@ -4812,18 +4846,26 @@ async def process_refine_name_batch(
                         "refine_name skipped (orphan_sweep beat us): %s", sn_id
                     )
                     continue
-                logger.exception("refine_name failed for %s", sn_id)
                 token = item.get("claim_token") or ""
-                # Vocab-gap errors and self-referential refines are
-                # deterministic — the LLM will keep producing the same
-                # output.  Mark exhausted instead of reverting to
-                # 'reviewed' (which re-enters the refine loop).
-                is_terminal = (
-                    "not a registered" in _exc_str
-                    or "self-referential REFINED_FROM" in _exc_str
-                    or "kind must be one of" in _exc_str
-                    or "validation error for RefinedName" in _exc_str
-                )
+                # A grammar/validation failure (the LLM proposed an
+                # ungrammatical name — e.g. an unregistered qualifier token) or
+                # a self-referential refine is a NORMAL failed-refine outcome,
+                # not a crash: the model keeps producing the same output for
+                # this item.  Mark it exhausted (terminal) instead of reverting
+                # to 'reviewed', which would re-claim and re-charge it on a paid
+                # model every cycle — an infinite paid loop.  Log terminal
+                # failures at WARNING; only genuinely unexpected errors get the
+                # ERROR + traceback.
+                is_terminal = _is_refine_grammar_failure(exc)
+                if is_terminal:
+                    logger.warning(
+                        "refine_name failed (deterministic, marking exhausted) "
+                        "for %s: %s",
+                        sn_id,
+                        _exc_str[:200],
+                    )
+                else:
+                    logger.exception("refine_name failed for %s", sn_id)
                 try:
                     if is_terminal:
                         await _asyncio.to_thread(
@@ -4842,6 +4884,17 @@ async def process_refine_name_batch(
                     logger.debug(
                         "release/exhaust also failed for %s",
                         sn_id,
+                    )
+                if on_event is not None:
+                    on_event(
+                        {
+                            "pool": "refine_name",
+                            "name": sn_id,
+                            "old_name": sn_id,
+                            "outcome": "refine_failed",
+                            "model": model,
+                            "cost": 0.0,
+                        }
                     )
             finally:
                 # Always return the unused portion of the lease to the pool.
@@ -6702,6 +6755,7 @@ async def process_refine_docs_batch(
         DEFAULT_REFINE_ROTATIONS,
     )
     from imas_codex.standard_names.graph_ops import (
+        _mark_refine_docs_exhausted,
         persist_refined_docs,
         release_refine_docs_failed_claims,
     )
@@ -6790,15 +6844,15 @@ async def process_refine_docs_batch(
             lease = mgr.reserve(0.0, phase="refine_docs")
 
         # ── LLM call ──────────────────────────────────────────────
+        _messages = (
+            [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+            if system_prompt
+            else [{"role": "user", "content": user_prompt}]
+        )
         try:
-            _messages = (
-                [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ]
-                if system_prompt
-                else [{"role": "user", "content": user_prompt}]
-            )
             llm_out = await acall_llm_structured(
                 model=model,
                 messages=_messages,
@@ -6871,18 +6925,51 @@ async def process_refine_docs_batch(
                     }
                 )
 
-        except Exception:
-            logger.exception("refine_docs failed for %s", sn_id)
-            try:
-                await _asyncio.to_thread(
-                    release_refine_docs_failed_claims,
-                    sn_ids=[sn_id],
-                    claim_token=claim_token,
+        except Exception as exc:
+            # A deterministic ``RefinedDocs`` validation failure (docs that
+            # consistently violate the schema length bounds) is a NORMAL
+            # failed-refine outcome, not a crash — the model keeps producing
+            # the same invalid docs for this item.  Mark it exhausted instead
+            # of reverting to 'reviewed', which would re-claim and re-charge it
+            # on a paid model every cycle (an infinite paid loop).  Log such
+            # failures at WARNING; only unexpected errors get ERROR + traceback.
+            is_terminal = _is_refine_docs_failure(exc)
+            if is_terminal:
+                logger.warning(
+                    "refine_docs failed (deterministic, marking exhausted) for %s: %s",
+                    sn_id,
+                    str(exc)[:200],
                 )
+            else:
+                logger.exception("refine_docs failed for %s", sn_id)
+            try:
+                if is_terminal:
+                    await _asyncio.to_thread(
+                        _mark_refine_docs_exhausted,
+                        sn_id=sn_id,
+                        token=claim_token,
+                        error_msg=str(exc)[:500],
+                    )
+                else:
+                    await _asyncio.to_thread(
+                        release_refine_docs_failed_claims,
+                        sn_ids=[sn_id],
+                        claim_token=claim_token,
+                    )
             except Exception:
                 logger.debug(
-                    "release_refine_docs_failed_claims also failed for %s",
+                    "release/exhaust refine_docs also failed for %s",
                     sn_id,
+                )
+            if on_event is not None:
+                on_event(
+                    {
+                        "pool": "refine_docs",
+                        "name": sn_id,
+                        "outcome": "refine_failed",
+                        "model": model,
+                        "cost": 0.0,
+                    }
                 )
         finally:
             # Always return the unused portion of the lease to the pool.

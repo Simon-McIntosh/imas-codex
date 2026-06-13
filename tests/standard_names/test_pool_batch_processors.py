@@ -834,3 +834,188 @@ class TestOnEventPayloadsNotTruncated:
             f"(expected {len(_LONG_COMMENT)})"
         )
         assert comment == _LONG_COMMENT
+
+
+# ---------------------------------------------------------------------------
+# Refine grammar/validation failures are a NORMAL failed-refine outcome —
+# they must NOT crash-loop and re-burn paid budget.
+# ---------------------------------------------------------------------------
+
+
+def _refined_name_validation_error() -> Exception:
+    """Produce a real ``RefinedName`` ValidationError for the unregistered-token case.
+
+    Mirrors the live failure (``acall_llm_structured`` re-raises the pydantic
+    ValidationError because vocab-gap errors are non-retryable): the message
+    contains both ``"1 validation error for RefinedName"`` and
+    ``"not a registered grammar token"``.
+    """
+    from pydantic import ValidationError
+
+    from imas_codex.standard_names.models import RefinedName
+
+    fake_ctx = {
+        "vocabulary_sections": [
+            {"segment": "physical_base", "tokens": ["confinement_time"]},
+            {"segment": "qualifier", "tokens": ["electron", "ion"]},
+        ]
+    }
+    with patch("imas_standard_names.get_grammar_context", return_value=fake_ctx):
+        try:
+            RefinedName.model_validate(
+                {
+                    "base_token": "confinement_time",
+                    "base_kind": "quantity",
+                    "qualifiers": ["helium_ash"],  # not a registered token
+                    "description": "Helium ash confinement time.",
+                    "kind": "scalar",
+                }
+            )
+        except ValidationError as exc:
+            return exc
+    raise AssertionError("expected RefinedName validation to fail on helium_ash")
+
+
+class TestRefineGrammarFailureNotCrashLoop:
+    """A refine that produces an ungrammatical name is a failed refine, not a crash.
+
+    Regression: ``process_refine_name_batch`` previously let the
+    ``RefinedName`` ValidationError propagate to the broad ``except``, logged
+    it at ERROR, and reverted the item so it was re-claimed and re-charged on a
+    paid model every cycle — an infinite paid loop.  The fix catches the
+    grammar failure explicitly, marks the item exhausted (so it does not
+    re-claim), charges nothing further, and continues.
+    """
+
+    @pytest.mark.asyncio
+    async def test_refine_name_grammar_failure_exhausts_not_reloops(self) -> None:
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        items = [
+            {
+                "id": "helium_confinement_time",
+                "description": "Helium confinement time.",
+                "claim_token": "tok-grammar",
+                "chain_length": 0,
+                "chain_history": [],
+                "physics_domain": "transport",
+                "source_paths": ["dd:summary/global_quantities/tau_energy"],
+            }
+        ]
+        mgr = _mock_budget_manager()
+        stop = asyncio.Event()
+        events: list[dict] = []
+
+        validation_error = _refined_name_validation_error()
+        # Sanity: the synthesized error carries the markers the worker keys on.
+        msg = str(validation_error).lower()
+        assert "validation error for refinedname" in msg
+        assert "not a registered" in msg
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                side_effect=validation_error,
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="mock prompt",
+            ),
+            patch(
+                "imas_codex.standard_names.example_loader.load_compose_examples",
+                return_value=[],
+            ),
+            patch("imas_codex.graph.client.GraphClient"),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch(
+                "imas_codex.standard_names.workers._enrich_dd_path_context",
+                return_value=None,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
+            ) as mock_exhaust,
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
+            ) as mock_release,
+        ):
+            # MUST NOT raise — a grammar failure is a normal failed refine.
+            processed = await process_refine_name_batch(
+                items, mgr, stop, on_event=events.append
+            )
+
+        assert processed == 0, "a failed refine processes 0 items"
+        # Routed to the exhaust path (terminal — item will NOT re-claim).
+        mock_exhaust.assert_called_once()
+        _, kwargs = mock_exhaust.call_args
+        assert kwargs["sn_id"] == "helium_confinement_time"
+        # NOT reverted to 'reviewed' (which would re-claim and re-burn budget).
+        mock_release.assert_not_called()
+        # Failure surfaced as an event with zero additional cost.
+        assert events, "expected a refine_failed event"
+        assert events[-1]["outcome"] == "refine_failed"
+        assert events[-1]["cost"] == 0.0
+
+    @pytest.mark.asyncio
+    async def test_refine_docs_validation_failure_exhausts_not_reloops(self) -> None:
+        from pydantic import ValidationError
+
+        from imas_codex.standard_names.models import RefinedDocs
+        from imas_codex.standard_names.workers import process_refine_docs_batch
+
+        # A RefinedDocs schema violation (description below the 10-char min).
+        try:
+            RefinedDocs.model_validate(
+                {"description": "x", "documentation": "too short"}
+            )
+            raise AssertionError("expected RefinedDocs validation to fail")
+        except ValidationError as exc:
+            docs_error = exc
+        assert "validation error for refineddocs" in str(docs_error).lower()
+
+        items = [
+            {
+                "id": "helium_confinement_time",
+                "description": "Helium confinement time.",
+                "documentation": "Existing docs.",
+                "claim_token": "tok-docs",
+                "docs_chain_length": 0,
+                "docs_chain_history": [],
+                "kind": "scalar",
+                "unit": "s",
+                "physics_domain": "transport",
+            }
+        ]
+        mgr = _mock_budget_manager()
+        stop = asyncio.Event()
+        events: list[dict] = []
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new_callable=AsyncMock,
+                side_effect=docs_error,
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="mock prompt",
+            ),
+            patch("imas_codex.graph.client.GraphClient"),
+            patch(
+                "imas_codex.standard_names.graph_ops._mark_refine_docs_exhausted",
+            ) as mock_exhaust,
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_docs_failed_claims",
+            ) as mock_release,
+        ):
+            processed = await process_refine_docs_batch(
+                items, mgr, stop, on_event=events.append
+            )
+
+        assert processed == 0
+        mock_exhaust.assert_called_once()
+        mock_release.assert_not_called()
+        assert events and events[-1]["outcome"] == "refine_failed"

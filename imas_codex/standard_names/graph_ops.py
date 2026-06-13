@@ -8972,6 +8972,38 @@ def _mark_refine_vocab_gap_exhausted(
         )
 
 
+def _mark_refine_docs_exhausted(
+    *,
+    sn_id: str,
+    token: str,
+    error_msg: str,
+) -> None:
+    """Mark a name's docs exhausted when refine_docs fails deterministically.
+
+    A docs-validation failure (e.g. the LLM consistently returns docs that
+    violate the ``RefinedDocs`` length constraints) is deterministic for a
+    given item — reverting ``docs_stage`` to 'reviewed' would re-claim and
+    re-burn budget forever.  Move to 'exhausted' instead and record the reason.
+    """
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $sn_id})
+            WHERE sn.claim_token = $token
+              AND sn.docs_stage = 'refining'
+            SET sn.docs_stage = 'exhausted',
+                sn.claim_token = null,
+                sn.claimed_at = null,
+                sn.reviewer_comments_docs =
+                    coalesce(sn.reviewer_comments_docs, '')
+                    + ' [docs_refine_exhaust] ' + $error_msg
+            """,
+            sn_id=sn_id,
+            token=token,
+            error_msg=error_msg[:300],
+        )
+
+
 # =============================================================================
 # generate_docs — claim / persist / release
 # =============================================================================
