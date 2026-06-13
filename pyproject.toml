@@ -469,18 +469,19 @@ api-key-env = "AMBIX_API_KEY"
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Production reviewer quorum (bake-off 2026-06-09 over the hardened gold set):
-# dual-blind qwen3.7-max + minimax-m3 — cheap, vendor-diverse, reasoning-
-# capable, and non-GPT so independent of the GPT-5.5 generator (no self-bias)
-# — plus an opus-4.8 breaker that is stable (zero false-reject across runs)
-# and fires only on blind disagreement, so its cost is amortised. deepseek-
-# v4-pro was rejected (run-to-run FR instability at high effort); gemini and
-# DS4-flash were the weakest reviewers. All run at reasoning effort=high
-# (see [sn-review].reasoning-effort).
+# Production reviewer quorum: dual-blind qwen3.7-max + minimax-m3 (cheap,
+# vendor-diverse, reasoning-capable) + a gpt-5.5 breaker. Breaker re-bench
+# 2026-06-13 (40-item gold set, qwen json-bug fixed): the breaker only fires
+# on blind-pair disagreement, so INDEPENDENCE from the pair is what matters —
+# gpt-5.5 is the most independent (Spearman rho 0.92-0.94 vs qwen/minimax)
+# while opus-4.8 was near-redundant (rho 0.96-0.99); quality is a statistical
+# tie (disc 0.60-0.67 across all three). GPT self-bias is moot now the
+# generator is local deepseek-v4-flash, not GPT. All run at effort=high.
+# deepseek-v4-pro rejected (FR instability); gemini/DS4-flash weakest.
 models = [
   "openrouter/qwen/qwen3.7-max",
   "openrouter/minimax/minimax-m3",
-  "openrouter/anthropic/claude-opus-4.8",
+  "openrouter/openai/gpt-5.5",
 ]
 disagreement-threshold = 0.20
 
@@ -507,17 +508,16 @@ models = ["openrouter/anthropic/claude-opus-4.8"]
 disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
-# Mirrors the names quorum (bake-off 2026-06-09): qwen3.7-max + minimax-m3
-# blind + opus-4.8 breaker, reasoning effort=high. Docs review is where
-# physics regressions must be caught; the strong, stable, independent breaker
-# guards against hallucinated-docs false positives on blind disagreement.
-# All OpenRouter — no local api-base needed (endpoints auto-resolve per model
-# in _build_kwargs; the old AMBIX vLLM endpoint was only for the dropped
-# DS4-flash reviewer).
+# Mirrors the names quorum: qwen3.7-max + minimax-m3 blind + gpt-5.5 breaker
+# (breaker re-bench 2026-06-13 — gpt-5.5 most independent of the blind pair;
+# see [sn-review.names.profiles.default]). reasoning effort=high. Docs review
+# is where physics regressions must be caught; the independent breaker guards
+# against hallucinated-docs false positives on blind disagreement. All
+# OpenRouter — endpoints auto-resolve per model in _build_kwargs.
 models = [
   "openrouter/qwen/qwen3.7-max",
   "openrouter/minimax/minimax-m3",
-  "openrouter/anthropic/claude-opus-4.8",
+  "openrouter/openai/gpt-5.5",
 ]
 disagreement-threshold = 0.20
 
