@@ -681,6 +681,8 @@ Multiple agents may edit this repo simultaneously on `main`. Assume another agen
 
 **Session completion is mandatory:** every response that modifies files MUST end with `git add` → `git commit` → `git push` plus a brief summary of the commit.
 
+**Concurrent-staging race (binding):** `git commit` commits the ENTIRE index, not just the paths you `git add`ed — so if a background agent stages its files in the window between your `git add` and your `git commit`, its files are swept into YOUR commit (incident 2026-06-14: a dep-bump commit absorbed a parallel agent's 6 prompt files; no loss, but a misdescribed commit). When committing while background agents may be staging in the same worktree, use **`git commit -- <explicit paths>`** (pathspec-scoped commit — commits ONLY those paths regardless of index state), never a bare `git commit`. The orchestrator should also avoid committing during a window when a dispatched agent is known to be mid-edit; prefer waiting for the agent to commit its own scoped set first.
+
 ## Feature Plan Documentation
 
 Plans live in `plans/features/`. Lifecycle: `features/<name>.md` (active) → `features/pending/<name>.md` (partially implemented, gaps documented) → **DELETE** (fully implemented — the code is the documentation). Gap docs (`gaps-*.md`) consolidate remaining work across related pending plans.
