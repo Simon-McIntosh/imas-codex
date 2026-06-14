@@ -176,6 +176,100 @@ class TestClaimSkipsPendingDocs:
 
 
 # =============================================================================
+# 1b. Claim-race resolution (the docs-cost root cause)
+# =============================================================================
+
+
+class TestVerifyDocsClaimWinners:
+    """_verify_docs_claim_winners drops claim-race losers before LLM spend.
+
+    Root cause of the docs-cost amplification: concurrent pool replicas each
+    bind the same eligible node at MATCH time; the lock-serialised SET lets the
+    LAST claim_token win, but every replica still fires its (paid) LLM call. The
+    verifier re-reads committed state and keeps only nodes that still hold OUR
+    token, so a losing replica spends zero LLM calls.
+    """
+
+    def test_drops_items_whose_token_lost(self):
+        """Only nodes still holding our token survive verification."""
+        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+
+        items = [
+            {"id": "won_a", "claim_token": "tok-1"},
+            {"id": "lost_b", "claim_token": "tok-1"},  # token overwritten by racer
+            {"id": "won_c", "claim_token": "tok-1"},
+        ]
+        # Graph reports only won_a + won_c still carry tok-1 at the eligible stage.
+        gc = _mock_gc_query(return_values=[[{"id": "won_a"}, {"id": "won_c"}]])
+
+        with _patch_gc(gc):
+            survivors = _verify_docs_claim_winners(items, eligible_stage="drafted")
+
+        assert [it["id"] for it in survivors] == ["won_a", "won_c"]
+        # The verification query gates on token + eligible stage.
+        cypher = gc.query.call_args_list[0][0][0]
+        assert "sn.claim_token = $token" in cypher
+        assert "sn.docs_stage = $eligible_stage" in cypher
+        kwargs = gc.query.call_args_list[0][1]
+        assert kwargs["token"] == "tok-1"
+        assert kwargs["eligible_stage"] == "drafted"
+
+    def test_no_query_when_all_survive_is_still_correct(self):
+        """When every claimed node wins, all items are returned unchanged."""
+        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+
+        items = [
+            {"id": "a", "claim_token": "tok-2"},
+            {"id": "b", "claim_token": "tok-2"},
+        ]
+        gc = _mock_gc_query(return_values=[[{"id": "a"}, {"id": "b"}]])
+
+        with _patch_gc(gc):
+            survivors = _verify_docs_claim_winners(items, eligible_stage="refining")
+
+        assert [it["id"] for it in survivors] == ["a", "b"]
+
+    def test_empty_items_short_circuit(self):
+        """Empty claim list returns immediately without a graph round-trip."""
+        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+
+        gc = _mock_gc_query(return_values=[])
+        with _patch_gc(gc):
+            assert _verify_docs_claim_winners([], eligible_stage="drafted") == []
+        gc.query.assert_not_called()
+
+
+class TestPersistReviewedDocsConcurrentWinNoOp:
+    """persist_reviewed_docs is a no-op when a racer already left 'drafted'."""
+
+    def test_concurrent_transition_is_noop(self):
+        """SET RETURNs no row (node no longer 'drafted') → returns ''."""
+        gc = _mock_gc_query(
+            return_values=[
+                [{"docs_chain_length": 0}],  # readback still sees 'drafted'
+                [],  # SET matched nothing — concurrent reviewer won the race
+            ]
+        )
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+
+            result = persist_reviewed_docs(
+                sn_id="electron_temperature",
+                claim_token="tok",
+                score=0.95,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+
+        assert result == ""
+        # The SET must re-assert docs_stage='drafted' as the CAS guard.
+        set_cypher = gc.query.call_args_list[1][0][0]
+        assert "sn.docs_stage = 'drafted'" in set_cypher
+
+
+# =============================================================================
 # 2. persist_reviewed_docs — three-way stage decision
 # =============================================================================
 
@@ -186,7 +280,7 @@ class TestPersistToAccepted:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 0}],  # readback
-                [],  # SET write
+                [{"id": "electron_temperature"}],  # SET write committed
             ]
         )
 
@@ -214,7 +308,7 @@ class TestPersistToReviewedLowScore:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 0}],
-                [],
+                [{"id": "test_name"}],
             ]
         )
 
@@ -245,7 +339,7 @@ class TestPersistToExhaustedAtCap:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 2}],
-                [],
+                [{"id": "test_name"}],
             ]
         )
 
@@ -272,7 +366,7 @@ class TestPersistToExhaustedAtCap:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 3}],
-                [],
+                [{"id": "test_name"}],
             ]
         )
 
@@ -297,7 +391,7 @@ class TestPersistToReviewedBelowCap:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 1}],
-                [],
+                [{"id": "test_name"}],
             ]
         )
 
@@ -322,7 +416,7 @@ class TestAcceptOverridesChainLengthAtCap:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 3}],
-                [],
+                [{"id": "test_name"}],
             ]
         )
 
@@ -370,7 +464,7 @@ class TestPersistWritesReviewerDocsFields:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 0}],
-                [],
+                [{"id": "electron_temperature"}],
             ]
         )
 
@@ -424,7 +518,7 @@ class TestPersistDoesNotChangeNameFields:
         gc = _mock_gc_query(
             return_values=[
                 [{"docs_chain_length": 0}],
-                [],
+                [{"id": "electron_temperature"}],
                 [],
             ]
         )

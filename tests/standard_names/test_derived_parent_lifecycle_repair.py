@@ -203,6 +203,21 @@ class _StatefulDerivedParentGraph:
         if "RETURN count(DISTINCT r.axis) AS n" in cypher:
             return [{"n": 0}]
 
+        # Post-claim race resolution (_verify_docs_claim_winners): echo back
+        # ids that still hold our token at the eligible docs_stage.
+        if (
+            "WHERE sn.claim_token = $token" in cypher
+            and "AND sn.docs_stage = $eligible_stage" in cypher
+        ):
+            ids = kwargs.get("ids", [])
+            if (
+                self.parent.get("claim_token") == kwargs.get("token")
+                and self.parent.get("docs_stage") == kwargs.get("eligible_stage")
+                and self.parent["id"] in ids
+            ):
+                return [{"id": self.parent["id"]}]
+            return []
+
         raise AssertionError(f"Unexpected query: {cypher}")
 
     @contextmanager

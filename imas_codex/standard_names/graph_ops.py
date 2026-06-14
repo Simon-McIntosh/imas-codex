@@ -7865,7 +7865,7 @@ def claim_review_docs_batch(
         query_params: dict[str, Any] = {"facility": facility}
     else:
         query_params = {}
-    return _claim_sn_atomic(
+    items = _claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,
         batch_size=batch_size,
@@ -7879,6 +7879,9 @@ def claim_review_docs_batch(
         domain=domain,
         scope_run_id=scope_run_id,
     )
+    # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
+    # _verify_docs_claim_winners). review_docs is gated on docs_stage='drafted'.
+    return _verify_docs_claim_winners(items, eligible_stage="drafted")
 
 
 # -- persist_reviewed_docs (Phase 8.1: write review + docs_stage transition) --
@@ -7995,11 +7998,12 @@ def persist_reviewed_docs(
     )
 
     with GraphClient() as gc:
-        gc.query(
+        write_rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.name_stage = 'accepted'
+              AND sn.docs_stage = 'drafted'
             SET sn.reviewer_score_docs        = $score,
                 sn.reviewer_scores_docs       = $scores_json,
                 sn.reviewer_comments_docs     = $comments,
@@ -8009,6 +8013,7 @@ def persist_reviewed_docs(
                 sn.docs_stage                 = $target_stage,
                 sn.claim_token                = null,
                 sn.claimed_at                 = null
+            RETURN sn.id AS id
             """,
             id=sn_id,
             token=claim_token,
@@ -8019,6 +8024,16 @@ def persist_reviewed_docs(
             model=model,
             target_stage=target_stage,
         )
+    # A concurrent reviewer already transitioned this node out of 'drafted'
+    # between our readback and this SET — our review is a duplicate; report a
+    # no-op so the worker does not double-count or emit a spurious event.
+    if not write_rows:
+        logger.debug(
+            "persist_reviewed_docs: %s already transitioned out of 'drafted' "
+            "(concurrent reviewer won) — no-op",
+            sn_id,
+        )
+        return ""
 
     logger.info(
         "persist_reviewed_docs: %s → docs_stage=%s (score=%.3f, chain=%d/%d)",
@@ -9173,6 +9188,73 @@ def _mark_refine_docs_exhausted(
 
 
 # =============================================================================
+# Docs-claim race resolution
+# =============================================================================
+# The shared _claim_sn_atomic seed binds its candidate row at MATCH time, then
+# acquires the node write-lock at the SET. When two pool replicas race for the
+# same drafted/pending node, both MATCH it as eligible; the SET serialises on
+# the lock, so the LAST committer's claim_token wins — but BOTH replicas
+# returned the node as "claimed" and proceeded to call the LLM. That phantom
+# is the dominant docs-cost driver: a single accepted name was re-reviewed 27×
+# (≈48 wasted reviewer LLM calls) purely because losing-race replicas still
+# fired their reviewer quorum.
+#
+# _verify_docs_claim_winners closes the window by re-reading COMMITTED state
+# after the claim transaction: a node is a genuine win only if it STILL holds
+# our claim_token. The race loser's token was overwritten by the winner, so it
+# is dropped here — before any LLM call. This is the generate_docs / review_docs
+# analogue of the two-step claim_token verify mandated for all claim functions.
+
+
+def _verify_docs_claim_winners(
+    items: list[dict[str, Any]],
+    *,
+    eligible_stage: str,
+) -> list[dict[str, Any]]:
+    """Drop docs-claim items that lost a concurrent-claim race.
+
+    *items* are the rows returned by :func:`_claim_sn_atomic` (all sharing one
+    ``claim_token``).  This re-reads committed graph state and keeps only the
+    nodes that STILL hold that token AND remain at *eligible_stage* — i.e. the
+    nodes this worker genuinely owns.  Race losers (token overwritten by a
+    concurrent replica) are excluded so the caller never spends an LLM call on
+    them.
+
+    Returns the filtered item list (order preserved).
+    """
+    if not items:
+        return items
+    token = items[0].get("claim_token") or ""
+    if not token:
+        return items
+    ids = [it["id"] for it in items]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sn:StandardName {id: sid})
+            WHERE sn.claim_token = $token
+              AND sn.docs_stage = $eligible_stage
+            RETURN sn.id AS id
+            """,
+            ids=ids,
+            token=token,
+            eligible_stage=eligible_stage,
+        )
+    winners = {r["id"] for r in rows}
+    if len(winners) == len(items):
+        return items
+    logger.debug(
+        "_verify_docs_claim_winners: %d/%d survived claim-race (token=%s, stage=%s)",
+        len(winners),
+        len(items),
+        token[:8],
+        eligible_stage,
+    )
+    return [it for it in items if it["id"] in winners]
+
+
+# =============================================================================
 # generate_docs — claim / persist / release
 # =============================================================================
 # Stage gate: name_stage='accepted' AND docs_stage='pending'
@@ -9251,6 +9333,10 @@ def claim_generate_docs_batch(
         ),
         seed_order_by="_docs_priority ASC, rand()",
     )
+
+    # Drop claim-race losers BEFORE enrichment / LLM spend (see
+    # _verify_docs_claim_winners). generate_docs is gated on docs_stage='pending'.
+    items = _verify_docs_claim_winners(items, eligible_stage="pending")
 
     # Enrich each claimed item with REFINED_FROM chain history.
     for item in items:
@@ -9503,6 +9589,13 @@ def claim_refine_docs_batch(
         domain=domain,
         scope_run_id=scope_run_id,
     )
+
+    # Drop claim-race losers BEFORE the (paid) refine LLM call. The claim
+    # transitions docs_stage 'reviewed'→'refining', but the shared seed's
+    # MATCH-bound row + lock-serialised SET still let concurrent replicas
+    # each transition the same node; only the claim_token winner truly owns
+    # it. See _verify_docs_claim_winners.
+    items = _verify_docs_claim_winners(items, eligible_stage="refining")
 
     # Enrich each claimed item with its DOCS_REVISION_OF chain history and build
     # a unified prior_docs_reviews list that also includes the current node's own

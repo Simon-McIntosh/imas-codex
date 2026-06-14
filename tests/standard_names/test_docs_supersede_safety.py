@@ -326,6 +326,9 @@ class TestNoInfiniteLoopOnSupersede:
                 ],
             ]
         )
+        # _verify_docs_claim_winners re-reads committed state via gc.query():
+        # the claimed node still holds our token at docs_stage='pending'.
+        gc_claim.query = MagicMock(return_value=[{"id": "sn_target"}])
 
         with (
             _patch_gc(gc_claim),

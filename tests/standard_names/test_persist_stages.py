@@ -198,11 +198,13 @@ def test_review_stage_decision(
 
     # persist_reviewed_* makes TWO GraphClient() calls:
     #   Q1 — reads current chain_length (returns a row with the chain key)
-    #   Q2 — writes the new stage (return value is not used by the caller)
+    #   Q2 — writes the new stage. persist_reviewed_docs RETURNs the written
+    #        node id and treats an empty result as a concurrent-win no-op, so
+    #        Q2 must yield a row (harmless for persist_reviewed_name).
     gc = _mock_gc_query(
         return_values=[
             [{chain_key: chain_len}],  # Q1: chain-length read succeeds
-            [],  # Q2: stage write (return value ignored)
+            [{"id": "test_sn"}],  # Q2: stage write committed (one row)
         ]
     )
 

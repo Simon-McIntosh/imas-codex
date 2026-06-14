@@ -93,6 +93,10 @@ def _make_gc_tx(seed_rows=None, readback_rows=None):
         yield session
 
     gc.session = _session_ctx
+    # claim_generate_docs_batch runs a post-claim race-resolution query
+    # (_verify_docs_claim_winners) via gc.query(): echo back the claimed ids
+    # so the mocked items survive verification.
+    gc.query = MagicMock(return_value=[{"id": r["id"]} for r in _readback if "id" in r])
     return gc, tx
 
 

@@ -850,7 +850,12 @@ class TestPersistWritesReviewNode:
 
     def test_persist_reviewed_docs_calls_write_reviews(self):
         """persist_reviewed_docs must MERGE a :StandardNameReview node with axis='docs'."""
-        gc = _mock_gc_query(return_values=[[{"docs_chain_length": 0}], []])
+        gc = _mock_gc_query(
+            return_values=[
+                [{"docs_chain_length": 0}],
+                [{"id": "electron_temperature"}],  # SET committed (one row)
+            ]
+        )
 
         with (
             _patch_gc(gc),
