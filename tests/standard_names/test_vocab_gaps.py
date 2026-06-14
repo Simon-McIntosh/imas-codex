@@ -1037,11 +1037,16 @@ class TestLexicalCompoundPhysicalBase:
         assert resolved_base_segment("poloidal_magnetic_flux") is None
 
     def test_genuinely_absent_token_stays_absent(self):
-        """A token the parser rejects remains a real gap."""
+        """A token the parser rejects remains a real gap.
+
+        Uses a synthetic never-valid token so the assertion cannot go stale
+        when a vocab rotation adds a real candidate (poloidal_current_function
+        was the prior exemplar and became valid in ISN rc39).
+        """
         from imas_codex.standard_names.segments import classify_gap, is_known_token
 
-        assert is_known_token("poloidal_current_function") == []
-        cat, actual = classify_gap("physical_base", "poloidal_current_function")
+        assert is_known_token("zzz_nonexistent_quantity_xyz") == []
+        cat, actual = classify_gap("physical_base", "zzz_nonexistent_quantity_xyz")
         assert cat == "absent"
         assert actual == []
 
