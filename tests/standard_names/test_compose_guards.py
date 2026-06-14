@@ -191,3 +191,38 @@ class TestNoConflictWithConstraintRole:
         # HARD PRE-EMIT CHECKS is near the top.  Both should exist.
         assert "HARD PRE-EMIT CHECKS" in self.raw
         assert "CONSTRAINT ROLE ABSTRACTION" in self.raw
+
+
+class TestNonNameableAndMissingBaseGuidance:
+    """Compose prompts steer non-nameable coordinates to skip and true
+    missing-base concepts to vocab_gap — the two beta-rotation exhaustion
+    classes (``time``/``delay`` and the phase/angle/extent base gaps)."""
+
+    @pytest.fixture(autouse=True)
+    def _load(self) -> None:
+        self.system = _load_compose_system_raw()
+        self.user = (PROMPTS_DIR / "sn" / "generate_name_dd.md").read_text(
+            encoding="utf-8"
+        )
+
+    def test_system_has_non_nameable_skip_section(self) -> None:
+        assert "NON-NAMEABLE" in self.system
+        # The infra classes that exhausted in beta rotation are called out.
+        assert "latency" in self.system
+        assert "timestamp" in self.system or "time_stamp" in self.system
+
+    def test_system_routes_missing_base_to_vocab_gap(self) -> None:
+        assert "MISSING-BASE" in self.system
+        # Phase / angle base-gap concepts are explicitly named.
+        assert "phase_shift" in self.system
+        assert "vocab_gap" in self.system
+
+    def test_user_prompt_has_non_nameable_skip_table(self) -> None:
+        assert "Non-Nameable Paths" in self.user
+        assert "real_time_data/topic/time_stamp" in self.user
+        assert "bremsstrahlung_visible/latency" in self.user
+
+    def test_user_prompt_guides_missing_base_vocab_gap(self) -> None:
+        # The user prompt's Vocabulary Gaps section must distinguish a genuine
+        # missing base from the common false positive.
+        assert "missing base IS a real gap" in self.user

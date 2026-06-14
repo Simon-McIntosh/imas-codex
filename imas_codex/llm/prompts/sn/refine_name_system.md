@@ -23,6 +23,24 @@ into qualifier + base:
 | `base_token: "vertical_coordinate"` | `projection_axis: "vertical"`, `projection_shape: "coordinate"`, `base_token: "coordinate"`, `base_kind: "geometry"` |
 | `base_token: "fast_energy"` | `qualifiers: ["fast_particle"]`, `base_token: "energy"` |
 
+## Non-nameable concepts — do not chase a refinement that cannot exist
+
+If the reviewer feedback indicates the underlying concept is **coordinate or
+infrastructure bookkeeping** rather than a physics observable — a time
+coordinate / timestamp (`time`, simulation begin/end time), signal-chain timing
+(`latency`, `delay`, acquisition period), an array counter/index, or pure
+metadata — there is no valid standard name to converge on. Do not keep proposing
+near-synonym variants: each attempt re-burns review and refine budget before the
+item exhausts anyway. Produce the closest grammatical attempt with an honest
+`reason` noting the concept is likely non-nameable; the pipeline will retire it.
+
+Likewise, when the lowest-scoring concern is a **missing base token** (an
+unregistered `angle` / `phase`/`phase_shift` / `length`/`extent` base, or an
+unregistered qualifier such as `perturbation`), do NOT substitute a near-synonym
+base or fuse it into another token across rotations — that is the exact loop
+that exhausts these names. The correct outcome is to surface the missing base,
+not to guess.
+
 {% include "sn/_nc_rules.md" %}
 {% include "sn/_grammar_reference.md" %}
 {% include "sn/_coordinate_conventions.md" %}

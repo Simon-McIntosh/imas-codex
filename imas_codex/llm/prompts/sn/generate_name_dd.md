@@ -117,6 +117,26 @@ component is being described. Generic geometric primitives alone are useless.
   `_of_antenna_strap`, `_of_first_wall`
 - Multiple tokamaks would use the same term for the same concept
 
+## Non-Nameable Paths — route to `skipped` (do NOT compose)
+
+Some DD paths are **coordinate or infrastructure bookkeeping**, not physics
+observables. Composing a bare name for one of these fails the semantic gate and
+then burns every refine rotation to exhaustion. Add the `source_id` to the
+`skipped` list instead of emitting a candidate.
+
+| ❌ Do NOT compose | DD path example | Why it is non-nameable |
+|-------------------|-----------------|------------------------|
+| `time` | `real_time_data/topic/time_stamp` | Time is the independent coordinate of a signal, not a named quantity |
+| `initial_time_of_simulation` | `summary/simulation/time_begin` | Simulation start/stop timestamps are run metadata |
+| `delay` | `bremsstrahlung_visible/latency` | Signal-chain latency is data-pipeline infrastructure, not plasma physics |
+| `acquisition_period`, `dead_time` | diagnostic timing fields | Acquisition timing describes the instrument chain |
+| `channel_index`, `element_count` | `*/index`, `*/count` | Counters and ordinals are array bookkeeping |
+| version / comment / status strings | metadata leaves | Pure metadata, not a measurable quantity |
+
+**Rule of thumb:** unit `s` + a description naming a timestamp / latency /
+acquisition interval → `skipped`. A genuine physics time constant (confinement
+time, decay time) is the rare nameable exception.
+
 ## Segment Routing — Common Confusions
 
 The following tokens are frequently misrouted to the wrong grammar segment.
@@ -425,3 +445,20 @@ Instead, add the path to the `vocab_gaps` list in your response with:
 1. Search the token in ALL segment registries — it may exist in another segment
 2. For compound tokens, check if each part exists as a registered token — decompose instead
 3. Verify no existing token already covers the concept
+
+**But a genuine missing base IS a real gap — emit it, do not guess.** When the
+irreducible quantity has no registered `physical_base`/`geometric_base`, emit a
+`vocab_gap` for that segment rather than substituting a near-synonym base or
+fusing the concept into another token:
+- A device **angle** (shatter angle, beam tilt angle) when no angle base is
+  registered → `vocab_gap` (`segment: geometric_base`); never invent `tilt`.
+- A **phase shift** of a probing wave (`refractometer/.../phase`) when
+  `phase`/`phase_shift` is unregistered → `vocab_gap`, not a bare `wave_phase`.
+- A **mode/perturbation phase** with an unregistered qualifier/base →
+  `vocab_gap`, not a guessed compound.
+- A characteristic **length/extent** when no length base is registered → reuse
+  an accepted sibling (e.g. `extent_of_pellet`) via `attachments`, else
+  `vocab_gap`.
+
+A clean compose-time `vocab_gap` is cheap; a guessed near-base churns through
+review and every refine rotation to exhaustion.

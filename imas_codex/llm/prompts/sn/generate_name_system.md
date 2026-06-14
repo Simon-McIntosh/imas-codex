@@ -125,6 +125,62 @@ Forbidden names (Report 7 anti-patterns — skip or rename):
 When a DD path would produce one of these, SKIP and record as vocab_gap rather
 than composing.
 
+### NON-NAMEABLE QUANTITIES — route to `skipped`, never compose
+
+Some DD paths carry **coordinate or infrastructure bookkeeping**, not a physics
+or geometric observable. A bare name composed for one of these is doomed: it
+fails the semantic-similarity gate (a reader cannot tell what is measured), then
+burns review + every refine rotation before exhausting. Recognise these at
+compose time and add the `source_id` to the `skipped` list (with a `reason`),
+NEVER emit a candidate name.
+
+Route to `skipped` when the path is any of:
+
+- **A time coordinate or timestamp** — `time`, `time_stamp`, `time_begin`,
+  `time_end`, `time_width`, real-time-network timestamps, simulation start/stop
+  times. Time is the independent coordinate of a signal, not a quantity that
+  gets a standard name. (Sources: `real_time_data/topic/time_stamp`,
+  `summary/simulation/time_begin`.)
+- **Signal-chain timing infrastructure** — `latency`, `delay`, acquisition
+  `period`, sampling `interval`, hardware `dead_time`. These describe the data
+  pipeline, not the plasma. (Source: `bremsstrahlung_visible/latency`.)
+- **Counters, indices, and array bookkeeping** — `*_index`, `count`,
+  `*_count`, channel/element/segment ordinals, connectivity arrays.
+- **Pure metadata** — version strings, identifiers, comment/name strings,
+  status/validity flags, scenario labels.
+
+When in doubt between `skipped` and a real quantity: if the path's unit is `s`
+and its description names a timestamp / latency / acquisition timing, it is
+NON-NAMEABLE → `skipped`. A genuine physics time *interval* with physical
+meaning (e.g. a confinement time, a decay time constant) IS nameable — those are
+the rare exceptions and use a registered `time`-class base only when the
+physics, not the data plumbing, is the subject.
+
+### MISSING-BASE QUANTITIES — emit a clean `vocab_gap`, never guess a near-base
+
+When the irreducible quantity has **no registered `physical_base` or
+`geometric_base` token**, emit a `vocab_gap` for the missing base segment — do
+NOT substitute a near-synonym base or fuse the concept into another token. The
+following recur and are genuine base gaps, not nameable with current vocabulary:
+
+- A geometric **angle** of a device feature (shatter angle, beam tilt angle,
+  oblique angle) when no registered angle base fits → `vocab_gap`
+  (`segment: geometric_base`). Do not coerce to `angle` if `angle` is not
+  registered, and do not invent `tilt`.
+- A **phase shift** of a probing wave / signal (`phase`, `wave_phase`) → if
+  `phase_shift`/`phase` is not a registered `physical_base`, emit `vocab_gap`
+  rather than composing a bare `wave_phase`.
+- A **mode/perturbation phase** (toroidal-mode phase) when the qualifier
+  (`perturbation`) or base (`phase`) is unregistered → `vocab_gap`, not a
+  guessed compound.
+- A **characteristic length/extent** of an object when `length`/`extent` is not
+  a registered `geometric_base` and an accepted sibling already exists (e.g.
+  `extent_of_pellet`) → reuse the sibling via `attachments`, else `vocab_gap`.
+
+A clean compose-time `vocab_gap` is cheap; a guessed near-base churns through
+review and every refine rotation to exhaustion. Surfacing the gap is the correct
+outcome — the vocabulary rotation will add the token if the concept is real.
+
 ### FORBIDDEN PATTERNS (D5 review)
 
 The following name patterns produce synonym families or encode orthogonal axes

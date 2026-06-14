@@ -179,6 +179,47 @@ def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
     return True, None
 
 
+# Bare coordinate/infrastructure tokens that are NOT physics observables.
+# A standard name composed from one of these is doomed: it fails the
+# semantic-similarity gate (a reader cannot tell what is measured), then burns
+# review + every refine rotation before exhausting.  Catch them at compose time
+# and route the source to ``skipped`` instead of composing a doomed bare name.
+_NON_NAMEABLE_BARE_TOKENS: frozenset[str] = frozenset(
+    {
+        "time",  # independent signal coordinate / timestamp
+        "time_stamp",
+        "timestamp",
+        "delay",  # signal-chain latency
+        "latency",
+        "dead_time",
+        "index",  # array bookkeeping
+        "count",
+        "counter",
+        "version",  # pure metadata
+    }
+)
+
+
+def is_non_nameable_coordinate(raw_name: str) -> tuple[bool, str | None]:
+    """Detect bare coordinate / infrastructure tokens that get no standard name.
+
+    Returns ``(True, reason)`` when *raw_name* is a bare non-nameable token
+    (a time coordinate / timestamp, signal-chain timing, an array counter, or
+    pure metadata) that should be routed to ``skipped`` rather than composed.
+    Returns ``(False, None)`` otherwise.
+
+    This is intentionally conservative: it only fires on *bare* tokens (no
+    qualifier/locus context). A qualified name like ``confinement_time`` or
+    ``major_radius_of_magnetic_axis`` is a real quantity and passes through.
+    """
+    if not raw_name:
+        return False, None
+    name = raw_name.strip()
+    if name in _NON_NAMEABLE_BARE_TOKENS:
+        return True, f"non_nameable_coordinate:{name}"
+    return False, None
+
+
 def _coerce_llm_metric(value: Any) -> int:
     """Best-effort int coercion for LLM telemetry fields."""
     try:
@@ -2546,6 +2587,41 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         wlog.debug("Failed to mark source %s as failed", c.source_id)
                 continue
 
+            # Non-nameable coordinate/infrastructure gate: a bare timestamp,
+            # latency, counter, or metadata token is not a physics observable.
+            # Composing it produces a doomed bare name that fails the semantic
+            # gate and burns review + every refine rotation before exhausting.
+            # Route the source to ``skipped`` (terminal) so it never re-claims.
+            _non_nameable, _skip_reason = is_non_nameable_coordinate(name_id)
+            if _non_nameable:
+                state.stats["compose_non_nameable_skips"] = (
+                    state.stats.get("compose_non_nameable_skips", 0) + 1
+                )
+                wlog.warning(
+                    "Non-nameable skip: %r (%s)",
+                    name_id[:80],
+                    _skip_reason,
+                )
+                if c.source_id and not state.dry_run:
+                    try:
+                        from imas_codex.graph.client import GraphClient
+                        from imas_codex.standard_names.graph_ops import (
+                            mark_source_skipped,
+                        )
+
+                        _src_type = "dd" if state.source == "dd" else "signals"
+                        with GraphClient() as gc:
+                            mark_source_skipped(
+                                gc,
+                                c.source_id,
+                                reason=_skip_reason or "non_nameable_coordinate",
+                                detail=f"bare non-nameable token: {name_id}",
+                                source_type=_src_type,
+                            )
+                    except Exception:
+                        wlog.debug("Failed to mark source %s skipped", c.source_id)
+                continue
+
             # Deterministic source<->name consistency gate (tense + state
             # resolution). The LLM sometimes emits a species-level sibling
             # for a state-resolved source (R4 rotation: thermal_neutral_density
@@ -4202,6 +4278,38 @@ async def compose_batch(
                             )
                     except Exception:
                         wlog.debug("Failed to mark source %s as failed", c.source_id)
+                continue
+
+            # Non-nameable coordinate/infrastructure gate: a bare timestamp,
+            # latency, counter, or metadata token is not a physics observable.
+            # Composing it produces a doomed bare name that fails the semantic
+            # gate and burns review + every refine rotation before exhausting.
+            # Route the source to ``skipped`` (terminal) so it never re-claims.
+            _non_nameable, _skip_reason = is_non_nameable_coordinate(name_id)
+            if _non_nameable:
+                wlog.warning(
+                    "Pool %s: non-nameable skip %r (%s)",
+                    phase_tag,
+                    name_id[:80],
+                    _skip_reason,
+                )
+                if c.source_id:
+                    try:
+                        from imas_codex.graph.client import GraphClient
+                        from imas_codex.standard_names.graph_ops import (
+                            mark_source_skipped,
+                        )
+
+                        with GraphClient() as gc:
+                            mark_source_skipped(
+                                gc,
+                                c.source_id,
+                                reason=_skip_reason or "non_nameable_coordinate",
+                                detail=f"bare non-nameable token: {name_id}",
+                                source_type=source_kind,
+                            )
+                    except Exception:
+                        wlog.debug("Failed to mark source %s skipped", c.source_id)
                 continue
 
             # Deterministic source<->name consistency gate (tense + state
