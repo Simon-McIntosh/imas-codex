@@ -1,0 +1,3 @@
+Contains TWO logical changes due to a concurrent-staging race in the shared worktree:
+1. chore(deps): imas-standard-names rc38->rc39 (pyproject.toml, uv.lock) — intended commit.
+2. feat(sn-compose): non-nameable-coordinate skip gate + missing-base vocab_gap prompt guidance (generate_name_system.md, generate_name_dd.md, refine_name_system.md, workers.py is_non_nameable_coordinate, test_compose_guards.py, test_validation_gate.py) — prompt-robustness work (task #15), swept in when a parallel agent staged its files between this commit's add and commit. All changes intact and verified functional; no history rewrite per multi-agent safety rules.
