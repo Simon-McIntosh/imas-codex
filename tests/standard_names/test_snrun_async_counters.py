@@ -120,7 +120,7 @@ class TestReviewNameBumpsReviewed:
         try:
             mock_gc.query.side_effect = [
                 [{"chain_length": 0}],
-                [],
+                [{"id": "electron_temperature"}],  # SET committed (one row)
                 [],
             ]
             with patch("imas_codex.standard_names.graph_ops.write_reviews"):

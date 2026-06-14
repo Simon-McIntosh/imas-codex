@@ -183,7 +183,7 @@ class TestPersistToAccepted:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 0}],  # readback
-                [],  # SET write
+                [{"id": "electron_temperature"}],  # SET write committed (one row)
             ]
         )
 
@@ -209,7 +209,7 @@ class TestPersistToAccepted:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 0}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -236,7 +236,7 @@ class TestPersistToReviewed:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 0}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -259,7 +259,7 @@ class TestPersistToReviewed:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 1}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -290,7 +290,7 @@ class TestPersistToExhausted:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 2}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -318,7 +318,7 @@ class TestPersistToExhausted:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 3}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -341,7 +341,7 @@ class TestPersistToExhausted:
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 3}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -371,7 +371,7 @@ class TestScoreCanonicalPolicy:
 
     def test_revise_with_high_score_promotes_to_accepted(self):
         """score=0.9 → 'accepted' (score wins)."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
@@ -387,7 +387,7 @@ class TestScoreCanonicalPolicy:
 
     def test_reject_with_high_score_promotes_to_accepted(self):
         """verdict='reject' with score>=min_score still promotes (rubric is canonical)."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
@@ -403,7 +403,7 @@ class TestScoreCanonicalPolicy:
 
     def test_high_score_at_cap_still_accepts(self):
         """score>=min_score at chain_length>=cap-1 → accepted (not exhausted)."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 2}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 2}], [{"id": "x"}]])
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
@@ -441,13 +441,188 @@ class TestPersistTokenMismatch:
         assert gc.query.call_count == 1
 
 
+class TestVerifyNameClaimWinners:
+    """_verify_name_claim_winners drops claim-race losers before LLM spend.
+
+    Root cause of the name-cost amplification: concurrent pool replicas each
+    bind the same eligible StandardName at MATCH time; the lock-serialised SET
+    lets the LAST claim_token win, but every replica still fires its (paid) LLM
+    call. The verifier re-reads committed state and keeps only nodes that still
+    hold OUR token, so a losing replica spends zero LLM calls. Live evidence:
+    review_name ran 339 reviewer calls for 64 distinct names (~5×).
+    """
+
+    def test_drops_items_whose_token_lost(self):
+        """Only nodes still holding our token survive verification."""
+        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+
+        items = [
+            {"id": "won_a", "claim_token": "tok-1"},
+            {"id": "lost_b", "claim_token": "tok-1"},  # token overwritten by racer
+            {"id": "won_c", "claim_token": "tok-1"},
+        ]
+        # Graph reports only won_a + won_c still carry tok-1 at the eligible stage.
+        gc = _mock_gc_query(return_values=[[{"id": "won_a"}, {"id": "won_c"}]])
+
+        with _patch_gc(gc):
+            survivors = _verify_name_claim_winners(items, eligible_stage="drafted")
+
+        assert [it["id"] for it in survivors] == ["won_a", "won_c"]
+        # The verification query gates on token + eligible name_stage.
+        cypher = gc.query.call_args_list[0][0][0]
+        assert "sn.claim_token = $token" in cypher
+        assert "sn.name_stage = $eligible_stage" in cypher
+        kwargs = gc.query.call_args_list[0][1]
+        assert kwargs["token"] == "tok-1"
+        assert kwargs["eligible_stage"] == "drafted"
+
+    def test_no_query_when_all_survive_is_still_correct(self):
+        """When every claimed node wins, all items are returned unchanged."""
+        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+
+        items = [
+            {"id": "a", "claim_token": "tok-2"},
+            {"id": "b", "claim_token": "tok-2"},
+        ]
+        gc = _mock_gc_query(return_values=[[{"id": "a"}, {"id": "b"}]])
+
+        with _patch_gc(gc):
+            survivors = _verify_name_claim_winners(items, eligible_stage="refining")
+
+        assert [it["id"] for it in survivors] == ["a", "b"]
+
+    def test_empty_items_short_circuit(self):
+        """Empty claim list returns immediately without a graph round-trip."""
+        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+
+        gc = _mock_gc_query(return_values=[])
+        with _patch_gc(gc):
+            assert _verify_name_claim_winners([], eligible_stage="drafted") == []
+        gc.query.assert_not_called()
+
+
+class TestVerifySourceClaimWinners:
+    """_verify_source_claim_winners drops generate_name claim-race losers.
+
+    The generate_name pool claims StandardNameSource nodes (gate
+    status='extracted'), not StandardName nodes, so it has its own verifier
+    with the same re-read-committed-token semantics.
+    """
+
+    def test_drops_sources_whose_token_lost(self):
+        """Only sources still holding our token at status='extracted' survive."""
+        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+        items = [
+            {"id": "dd:a/path", "claim_token": "tok-9"},
+            {"id": "dd:b/path", "claim_token": "tok-9"},  # token overwritten
+            {"id": "dd:c/path", "claim_token": "tok-9"},
+        ]
+        gc = _mock_gc_query(return_values=[[{"id": "dd:a/path"}, {"id": "dd:c/path"}]])
+
+        with _patch_gc(gc):
+            survivors = _verify_source_claim_winners(items)
+
+        assert [it["id"] for it in survivors] == ["dd:a/path", "dd:c/path"]
+        # The verification query gates on token + StandardNameSource status.
+        cypher = gc.query.call_args_list[0][0][0]
+        assert "StandardNameSource" in cypher
+        assert "sns.claim_token = $token" in cypher
+        assert "sns.status = 'extracted'" in cypher
+        assert gc.query.call_args_list[0][1]["token"] == "tok-9"
+
+    def test_all_survive_unchanged(self):
+        """When every claimed source wins, all items return unchanged."""
+        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+        items = [
+            {"id": "dd:a", "claim_token": "tok-x"},
+            {"id": "dd:b", "claim_token": "tok-x"},
+        ]
+        gc = _mock_gc_query(return_values=[[{"id": "dd:a"}, {"id": "dd:b"}]])
+
+        with _patch_gc(gc):
+            survivors = _verify_source_claim_winners(items)
+
+        assert [it["id"] for it in survivors] == ["dd:a", "dd:b"]
+
+    def test_empty_items_short_circuit(self):
+        """Empty claim list returns immediately without a graph round-trip."""
+        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+        gc = _mock_gc_query(return_values=[])
+        with _patch_gc(gc):
+            assert _verify_source_claim_winners([]) == []
+        gc.query.assert_not_called()
+
+
+class TestPersistReviewedNameConcurrentWinNoOp:
+    """persist_reviewed_name is a no-op when a racer already left 'drafted'."""
+
+    def test_concurrent_transition_is_noop(self):
+        """SET RETURNs no row (node no longer 'drafted') → returns ''."""
+        gc = _mock_gc_query(
+            return_values=[
+                [{"chain_length": 0}],  # readback still sees 'drafted'
+                [],  # SET matched nothing — concurrent reviewer won the race
+            ]
+        )
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="electron_temperature",
+                claim_token="tok",
+                score=0.95,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+
+        assert result == ""
+        # The SET must re-assert name_stage='drafted' as the CAS guard and
+        # RETURN the written id so the empty result signals the race-loss.
+        set_cypher = gc.query.call_args_list[1][0][0]
+        assert "sn.name_stage = 'drafted'" in set_cypher
+        assert "RETURN sn.id AS id" in set_cypher
+
+    def test_concurrent_win_skips_write_reviews(self):
+        """A no-op persist must not write a Review node or bump counters."""
+        gc = _mock_gc_query(
+            return_values=[
+                [{"chain_length": 0}],  # readback
+                [],  # SET race-loss
+            ]
+        )
+        with (
+            _patch_gc(gc),
+            patch(
+                "imas_codex.standard_names.graph_ops.write_reviews"
+            ) as mock_write_reviews,
+        ):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="electron_temperature",
+                claim_token="tok",
+                score=0.95,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+
+        assert result == ""
+        assert not mock_write_reviews.called
+
+
 class TestPersistWritesReviewerFields:
     def test_persist_writes_reviewer_fields(self):
         """score, scores (JSON), comments, comments_per_dim (JSON), verdict, model, reviewed_at populated."""
         gc = _mock_gc_query(
             return_values=[
                 [{"chain_length": 0}],
-                [],
+                [{"id": "x"}],  # SET write committed
             ]
         )
 
@@ -501,7 +676,7 @@ class TestPersistWritesReviewerFields:
 class TestMinScoreThreshold:
     def test_score_equals_min_score_with_accept_verdict(self):
         """score == min_score with verdict='accept' → 'accepted'."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
@@ -517,7 +692,7 @@ class TestMinScoreThreshold:
 
     def test_score_just_below_min_score(self):
         """score < min_score with verdict='accept' → stage depends on chain_length."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
@@ -534,7 +709,7 @@ class TestMinScoreThreshold:
 
     def test_score_below_min_at_rotation_cap(self):
         """score < min_score at chain_length=rotation_cap → 'exhausted'."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 3}], [], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 3}], [{"id": "x"}], []])
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
@@ -798,7 +973,7 @@ class TestQuarantinedSkipsLLM:
 class TestPersistWritesReviewNode:
     def test_persist_reviewed_name_calls_write_reviews(self):
         """persist_reviewed_name must MERGE a :StandardNameReview node via write_reviews."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
 
         with (
             _patch_gc(gc),
@@ -887,7 +1062,7 @@ class TestPersistWritesReviewNode:
 
     def test_persist_does_not_fail_when_write_reviews_raises(self):
         """A failure inside write_reviews must NOT block the stage transition."""
-        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], []])
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
 
         with (
             _patch_gc(gc),

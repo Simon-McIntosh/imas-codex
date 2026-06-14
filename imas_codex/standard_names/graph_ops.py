@@ -7472,6 +7472,11 @@ def claim_generate_name_batch(
                     tx.close()
                 raise
 
+    # Drop claim-race losers BEFORE the (paid) name-composition LLM call (see
+    # _verify_source_claim_winners). generate_name is gated on
+    # StandardNameSource.status='extracted'.
+    items = _verify_source_claim_winners(items)
+
     logger.debug(
         "claim_generate_name_batch: claimed %d (token=%s)",
         len(items),
@@ -7588,7 +7593,7 @@ def claim_review_name_batch(
         query_params: dict[str, Any] = {"facility": facility}
     else:
         query_params = {}
-    return _claim_sn_atomic(
+    items = _claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,
         batch_size=batch_size,
@@ -7603,6 +7608,9 @@ def claim_review_name_batch(
         domain=domain,
         scope_run_id=scope_run_id,
     )
+    # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
+    # _verify_name_claim_winners). review_name is gated on name_stage='drafted'.
+    return _verify_name_claim_winners(items, eligible_stage="drafted")
 
 
 # -- persist_reviewed_name (Phase 8.1: write review + stage transition) -------
@@ -7725,7 +7733,7 @@ def persist_reviewed_name(
     )
 
     with GraphClient() as gc:
-        gc.query(
+        write_rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE sn.name_stage = 'drafted'
@@ -7739,6 +7747,7 @@ def persist_reviewed_name(
                 sn.name_stage                 = $target_stage,
                 sn.claim_token                = null,
                 sn.claimed_at                 = null
+            RETURN sn.id AS id
             """,
             id=sn_id,
             token=claim_token,
@@ -7749,6 +7758,17 @@ def persist_reviewed_name(
             model=model,
             target_stage=target_stage,
         )
+
+    # A concurrent reviewer already transitioned this node out of 'drafted'
+    # between our readback and this SET — our review is a duplicate; report a
+    # no-op so the worker does not double-count or emit a spurious event.
+    if not write_rows:
+        logger.debug(
+            "persist_reviewed_name: %s already transitioned out of 'drafted' "
+            "(concurrent reviewer won) — no-op",
+            sn_id,
+        )
+        return ""
 
     logger.info(
         "persist_reviewed_name: %s → name_stage=%s (score=%.3f, chain=%d/%d)",
@@ -8170,6 +8190,13 @@ def claim_refine_name_batch(
         domain=domain,
         scope_run_id=scope_run_id,
     )
+
+    # Drop claim-race losers BEFORE the (paid) refine LLM call. The claim
+    # transitions name_stage 'reviewed'→'refining', but the shared seed's
+    # MATCH-bound row + lock-serialised SET still let concurrent replicas
+    # each transition the same node; only the claim_token winner truly owns
+    # it. See _verify_name_claim_winners.
+    items = _verify_name_claim_winners(items, eligible_stage="refining")
 
     # Enrich each claimed item with its REFINED_FROM chain history and build
     # a unified prior_reviews list that also includes the current node's own
@@ -9250,6 +9277,113 @@ def _verify_docs_claim_winners(
         len(items),
         token[:8],
         eligible_stage,
+    )
+    return [it for it in items if it["id"] in winners]
+
+
+# =============================================================================
+# Name-claim race resolution
+# =============================================================================
+# Identical mechanism to the docs axis (see _verify_docs_claim_winners): two
+# pool replicas both bind the same eligible StandardName at the shared seed
+# MATCH, the lock-serialised SET lets the LAST claim_token win, but BOTH
+# replicas already returned the node and proceed to the (paid) name LLM call.
+# Live evidence: review_name ran 339 reviewer calls for 64 distinct names
+# (~5× amplification) on a multi-replica run. _verify_name_claim_winners closes
+# the window by re-reading COMMITTED state after the claim transaction: a node
+# is a genuine win only if it STILL holds our claim_token at the eligible
+# name_stage; the race loser's token was overwritten by the winner, so it is
+# dropped here — before any LLM call.
+
+
+def _verify_name_claim_winners(
+    items: list[dict[str, Any]],
+    *,
+    eligible_stage: str,
+) -> list[dict[str, Any]]:
+    """Drop name-claim items that lost a concurrent-claim race.
+
+    *items* are the rows returned by :func:`_claim_sn_atomic` (all sharing one
+    ``claim_token``).  This re-reads committed graph state and keeps only the
+    nodes that STILL hold that token AND remain at *eligible_stage* — i.e. the
+    nodes this worker genuinely owns.  Race losers (token overwritten by a
+    concurrent replica) are excluded so the caller never spends an LLM call on
+    them.
+
+    Returns the filtered item list (order preserved).
+    """
+    if not items:
+        return items
+    token = items[0].get("claim_token") or ""
+    if not token:
+        return items
+    ids = [it["id"] for it in items]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sn:StandardName {id: sid})
+            WHERE sn.claim_token = $token
+              AND sn.name_stage = $eligible_stage
+            RETURN sn.id AS id
+            """,
+            ids=ids,
+            token=token,
+            eligible_stage=eligible_stage,
+        )
+    winners = {r["id"] for r in rows}
+    if len(winners) == len(items):
+        return items
+    logger.debug(
+        "_verify_name_claim_winners: %d/%d survived claim-race (token=%s, stage=%s)",
+        len(winners),
+        len(items),
+        token[:8],
+        eligible_stage,
+    )
+    return [it for it in items if it["id"] in winners]
+
+
+def _verify_source_claim_winners(
+    items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Drop generate_name source-claim items that lost a concurrent-claim race.
+
+    The generate_name pool claims :class:`StandardNameSource` nodes (gate
+    ``status='extracted'``) rather than StandardName nodes, so it cannot share
+    :func:`_verify_name_claim_winners`.  Same mechanism: re-read committed
+    ``claim_token`` ownership and keep only the sources this worker still owns
+    at the eligible ``status='extracted'`` gate, dropping race losers before
+    the (paid) name-composition LLM call.
+
+    Returns the filtered item list (order preserved).
+    """
+    if not items:
+        return items
+    token = items[0].get("claim_token") or ""
+    if not token:
+        return items
+    ids = [it["id"] for it in items]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sns:StandardNameSource {id: sid})
+            WHERE sns.claim_token = $token
+              AND sns.status = 'extracted'
+            RETURN sns.id AS id
+            """,
+            ids=ids,
+            token=token,
+        )
+    winners = {r["id"] for r in rows}
+    if len(winners) == len(items):
+        return items
+    logger.debug(
+        "_verify_source_claim_winners: %d/%d survived claim-race (token=%s)",
+        len(winners),
+        len(items),
+        token[:8],
     )
     return [it for it in items if it["id"] in winners]
 
