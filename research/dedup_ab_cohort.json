@@ -1,0 +1,47 @@
+{
+  "cohort_paths": [
+    "b_field_non_axisymmetric/time_slice/field_map/b_field_r",
+    "balance_of_plant/power_plant/heat_load_wall",
+    "balance_of_plant/power_plant/system/component/port/mass_flow",
+    "breeding_blanket/module/cooling/time_slice/pressure_inlet",
+    "breeding_blanket/module/cooling/time_slice/temperature_inlet",
+    "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+    "breeding_blanket/module/time_slice/wall_flux_max",
+    "breeding_blanket/module/top_cap_thickness",
+    "breeding_blanket/time_slice/power_nuclear_blanket",
+    "bremsstrahlung_visible/channel/filter/wavelengths",
+    "calorimetry/group/component/energy_total",
+    "camera_ir/channel/camera/field_of_view_vertical",
+    "camera_ir/frame/surface_temperature",
+    "camera_ir/optical_element/thickness",
+    "camera_visible/channel/detector/wavelength_lower",
+    "coils_non_axisymmetric/coil/resistance",
+    "core_profiles/global_quantities/energy_diamagnetic",
+    "core_profiles/profiles_1d/conductivity_parallel",
+    "core_profiles/profiles_1d/ion/density",
+    "core_profiles/profiles_1d/ion/temperature",
+    "core_profiles/profiles_1d/pressure_thermal",
+    "core_profiles/profiles_1d/rotation_frequency_tor_sonic",
+    "core_profiles/vacuum_toroidal_field/b0",
+    "core_sources/source/global_quantities/power",
+    "core_sources/vacuum_toroidal_field/b0",
+    "disruption/profiles_1d/power_density_radiative_losses",
+    "distributions/distribution/profiles_1d/density",
+    "distributions/distribution/profiles_1d/pressure",
+    "ece/channel/beam_tracing/beam/power_flow_norm/parallel",
+    "edge_profiles/profiles_1d/ion/density",
+    "edge_profiles/profiles_1d/pressure_thermal",
+    "edge_profiles/profiles_1d/rotation_frequency_tor_sonic"
+  ],
+  "cohort_size": 32,
+  "selection": "non-general extracted DD sources, biased toward synonym-prone families (flux/field, density, power/energy, velocity/flow, length, pressure, temperature, resistivity/conductivity); 2-5 path depth, geometry/error/infra excluded; spread across 14 IDSs",
+  "dedup_threshold_on": 0.85,
+  "dedup_disable_off": "IMAS_CODEX_SN_DEDUP_THRESHOLD=1.01",
+  "pre_state": {
+    "vocab_gap_total": 69,
+    "vocab_gap_dedup_decisions": {
+      "none": 69
+    },
+    "cohort_existing_sn": 0
+  }
+}
