@@ -1199,6 +1199,68 @@ def extract_paths_for_version(version: str, ids_filter: set[str] | None = None) 
     }
 
 
+# DD "units" placeholder strings meaning "inherit the parent node's unit".
+# The DD emits these on fields (e.g. value_error_upper, or quantities that
+# reuse a parent's dimensionality) instead of a concrete unit symbol. They
+# must be resolved to the ancestor's real unit before storage — a literal
+# placeholder in IMASNode.unit corrupts the standard-name reviewer (it sees
+# 'as_parent_level_2' instead of e.g. 'm^-3').  Matching is exact-or-prefix
+# so the verbose form ("as_parent for a local measurement, as_parent.m for a
+# line integrated measurement") is also caught.
+_UNIT_PARENT_PLACEHOLDERS = ("as_parent", "as parent")
+
+
+def _is_unit_parent_placeholder(unit: str | None) -> bool:
+    """True if *unit* is a DD 'inherit from parent' placeholder, not a real unit."""
+    if not unit:
+        return False
+    u = unit.strip()
+    return any(u == p or u.startswith(p) for p in _UNIT_PARENT_PLACEHOLDERS)
+
+
+def _resolve_unit_placeholder(
+    unit: str | None,
+    parent_path: str | None,
+    paths: dict,
+) -> str:
+    """Resolve a DD 'as_parent' unit placeholder to the ancestor's real unit.
+
+    The DD uses ``as_parent`` / ``as_parent_level_2`` / ``as parent`` to mean
+    "this field's unit equals its parent node's unit". imas-python resolves
+    these for current DD versions, but older versions (and deprecated paths
+    that linger in the graph) pass the literal placeholder through. This walks
+    the already-extracted ancestor chain (parents are processed before
+    children in the top-down recursion) to find the nearest concrete unit.
+
+    Args:
+        unit: The raw ``child.units`` value (possibly a placeholder).
+        parent_path: Full path of the immediate parent node.
+        paths: The path_info dict accumulated so far (ancestors present).
+
+    Returns:
+        The resolved concrete unit, or ``""`` if no ancestor carries one
+        (e.g. the entire subtree was structural — better empty than a
+        corrupt placeholder).
+    """
+    if not _is_unit_parent_placeholder(unit):
+        return unit or ""
+    # Walk up the ancestor chain until a concrete (non-placeholder, non-empty)
+    # unit is found. Guard against cycles with a visited set.
+    seen: set[str] = set()
+    cursor = parent_path
+    while cursor and cursor not in seen:
+        seen.add(cursor)
+        ancestor = paths.get(cursor)
+        if ancestor is None:
+            break
+        anc_unit = ancestor.get("units") or ""
+        if anc_unit and not _is_unit_parent_placeholder(anc_unit):
+            return anc_unit
+        cursor = ancestor.get("parent_path")
+    # No concrete ancestor unit found — drop the placeholder rather than store it.
+    return ""
+
+
 def _extract_paths_recursive(
     metadata,
     ids_name: str,
@@ -1211,19 +1273,27 @@ def _extract_paths_recursive(
     for child in metadata:
         child_path = f"{prefix}{child.name}" if prefix else child.name
         full_path = f"{ids_name}/{child_path}"
+        parent_path = f"{ids_name}/{prefix.rstrip('/')}" if prefix else ids_name
+
+        # Resolve DD 'as_parent' unit placeholders to the ancestor's real unit.
+        # imas-python resolves these for current DD versions, but the guard
+        # protects against older versions / regressions storing the literal
+        # placeholder string into IMASNode.unit (which corrupts the SN
+        # reviewer). Parents are already in `paths` (top-down recursion).
+        resolved_units = _resolve_unit_placeholder(child.units, parent_path, paths)
 
         # Extract path info
         path_info = {
             "name": child.name,
             "documentation": child.documentation or "",
-            "units": child.units or "",
+            "units": resolved_units,
             "data_type": f"{child.data_type.name}_{child.ndim}D"
             if child.data_type
             else None,
             "ndim": child.ndim,
             "node_type": child.type.name.lower() if child.type.name else None,
             "maxoccur": child.maxoccur,
-            "parent_path": f"{ids_name}/{prefix.rstrip('/')}" if prefix else ids_name,
+            "parent_path": parent_path,
         }
 
         # COCOS label transformation (e.g., psi_like, ip_like, q_like)
@@ -1291,9 +1361,9 @@ def _extract_paths_recursive(
                 coordinates.append(coord_str)
             path_info["coordinates"] = coordinates
 
-        # Track units
-        if child.units and child.units not in ("", "as_parent"):
-            units.add(child.units)
+        # Track units (resolved, never a placeholder)
+        if resolved_units and not _is_unit_parent_placeholder(resolved_units):
+            units.add(resolved_units)
 
         paths[full_path] = path_info
 

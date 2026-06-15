@@ -119,6 +119,28 @@ class TestSNUnitIntegrity:
             + "\n  ".join(mismatches)
         )
 
+    def test_no_imas_node_has_placeholder_unit(self, graph_client):
+        """No IMASNode.unit may be a literal 'as_parent' placeholder.
+
+        The DD uses ``as_parent`` / ``as_parent_level_2`` / ``as parent`` to
+        mean "inherit the parent node's unit". Storing the literal placeholder
+        corrupts the standard-name reviewer (it sees the placeholder instead
+        of the real unit). Build-time resolution must eliminate these.
+        """
+        rows = graph_client.query("""
+            MATCH (n:IMASNode)
+            WHERE n.unit STARTS WITH 'as_parent' OR n.unit = 'as parent'
+            RETURN n.id AS id, n.unit AS unit
+            ORDER BY id
+        """)
+        if not rows:
+            return
+        sample = [f"{r['id']} [{r['unit']!r}]" for r in rows[:20]]
+        assert not rows, (
+            f"{len(rows)} IMASNodes carry an unresolved 'as_parent' unit "
+            "placeholder:\n  " + "\n  ".join(sample)
+        )
+
     def test_dd_side_unit_bugs_documented(self, graph_client):
         """Known DD-side unit bugs are still present (regression guard).
 
