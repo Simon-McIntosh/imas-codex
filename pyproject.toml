@@ -495,7 +495,7 @@ isnc-dir = ""
 [tool.imas-codex.sn-review]
 # Shared review settings (apply to both axes).
 # Disagreement detection: true iff N>=2 AND max(score) - min(score) >= threshold.
-disagreement-threshold = 0.30
+disagreement-threshold = 0.20
 # Maximum RD-quorum cycles (1 = primary only, 2 = blind pair, 3 = full quorum).
 max-cycles = 3
 # Reasoning effort (low|medium|high) for reviewer LLM calls. high lifts the
@@ -517,7 +517,7 @@ models = [
   "openrouter/anthropic/claude-haiku-4.5",
   "openrouter/openai/gpt-5.5",
 ]
-disagreement-threshold = 0.30
+disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"
 api-key-env = "AMBIX_API_KEY"
 
@@ -541,7 +541,7 @@ models = [
   "openrouter/minimax/minimax-m3",
   "openrouter/openai/gpt-5.5",
 ]
-disagreement-threshold = 0.30
+disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-review.names.profiles.local-only]
 # Zero-cost local-only fallback (pre-Phase-1 behavior).
@@ -558,7 +558,7 @@ models = [
   "openrouter/openai/gpt-5.4",
   "openrouter/google/gemini-3.1-pro-preview",
 ]
-disagreement-threshold = 0.30
+disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-review.names.profiles.opus-only]
 # Single-model mode: maximum quality, maximum cost (requires OpenRouter credits).
@@ -577,7 +577,7 @@ models = [
   "openrouter/minimax/minimax-m3",
   "openrouter/openai/gpt-5.5",
 ]
-disagreement-threshold = 0.30
+disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-benchmark]
 # Models to evaluate for standard name composition.

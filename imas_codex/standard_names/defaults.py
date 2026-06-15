@@ -27,16 +27,8 @@ SEMANTIC_SIM_SYNTHETIC_SCORE: float = 0.30
 Low enough to guarantee routing to the refine_name pool."""
 
 # Refine rotation cap
-DEFAULT_REFINE_ROTATIONS: int = 2
-"""Maximum REFINED_FROM (or DOCS_REVISION_OF) chain depth before exhaustion.
-
-Tightened 3→2 (2026-06-15): exhaust non-converging names one attempt sooner.
-Acceptance still overrides the cap (a passing score wins on the final
-rotation), and the escalation model (opus-4.8) fires on that final attempt,
-so a name that can be fixed still is — this only trims the tail that wasn't
-going to pass. Note: the refine chain was never the review-cost driver
-(0 names ever exceeded depth 3); per-name review inflation came from
-re-review across runs, not refinement."""
+DEFAULT_REFINE_ROTATIONS: int = 3
+"""Maximum REFINED_FROM (or DOCS_REVISION_OF) chain depth before exhaustion."""
 
 # Escalation model — used on the final refine attempt before exhaustion.
 # MUST be a different vendor from both compose (local deepseek-v4-flash)
