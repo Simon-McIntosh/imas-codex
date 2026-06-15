@@ -118,6 +118,31 @@ enums:
           segment is not among them.  May indicate either LLM confusion
           or legitimate vocabulary overlap requiring editorial review.
 
+  VocabGapDedupDecision:
+    description: >-
+      Outcome of the compose-time component-token reuse check for a VocabGap.
+      The check embeds the proposed candidate-new token and compares it to its
+      segment's registered vocabulary; a near-synonym hit triggers a chained
+      compose retry that asks the agent to reuse-or-confirm.
+    permissible_values:
+      distinct_confirmed:
+        description: >-
+          The token was flagged as semantically near a registered same-segment
+          token, the agent was re-prompted, and it RE-EMITTED the gap — the
+          quantity is genuinely distinct on that segment's axis. A real
+          new-vocab request; the ISN rotation need not re-litigate the synonym.
+      reused:
+        description: >-
+          The token was flagged and the agent dropped it on the chained retry,
+          reusing the registered token instead. Recorded for completeness;
+          such gaps are normally not persisted (they no longer appear in the
+          final vocab_gaps).
+      unchecked:
+        description: >-
+          No reuse check fired for this gap (below threshold, the check was
+          disabled, ISN/embeddings unavailable, or the gap was written on a
+          path the check does not run). The default for un-adjudicated gaps.
+
   StandardNameReviewStatus:
     description: >-
       Review lifecycle for standard names.
@@ -1445,6 +1470,22 @@ classes:
           Populated when category is wrong_slot_placement or
           ambiguous_known_token; empty for absent gaps.
         multivalued: true
+      nearest_token:
+        description: >-
+          Nearest registered same-segment token found by the compose-time
+          token-reuse check (cosine-nearest in the segment's vocabulary).
+          Populated when the proposed token was flagged as a likely synonym.
+      nearest_similarity:
+        description: >-
+          Cosine similarity (0-1) between the proposed token and nearest_token
+          at the compose-time dedup check.
+        range: float
+      dedup_decision:
+        description: >-
+          Adjudication of the compose-time token-reuse check for this gap.
+          distinct_confirmed = the agent re-emitted the gap after being shown
+          the near-token; unchecked = no check fired.
+        range: VocabGapDedupDecision
 
   StandardNameSource:
     description: >-

@@ -3769,8 +3769,22 @@ def write_vocab_gaps(
                 "example_count": 0,
                 "category": category,
                 "actual_segments": actual_segments,
+                "nearest_token": None,
+                "nearest_similarity": None,
+                "dedup_decision": None,
             }
         gap_nodes[gap_id]["example_count"] += 1
+
+        # Carry the compose-time token-reuse adjudication (Task 5).  A node may
+        # be observed many times; prefer a distinct_confirmed stamp (with its
+        # nearest token + score) over an unchecked one so the strongest signal
+        # wins and the ISN rotation sees the adjudication.
+        _decision = g.get("dedup_decision")
+        if _decision and gap_nodes[gap_id]["dedup_decision"] != "distinct_confirmed":
+            gap_nodes[gap_id]["dedup_decision"] = _decision
+            if _decision == "distinct_confirmed":
+                gap_nodes[gap_id]["nearest_token"] = g.get("nearest_token")
+                gap_nodes[gap_id]["nearest_similarity"] = g.get("nearest_similarity")
 
         rel_batch.append(
             {
@@ -3794,6 +3808,19 @@ def write_vocab_gaps(
                 vg.actual_segments = b.actual_segments,
                 vg.first_seen_at = coalesce(vg.first_seen_at, datetime()),
                 vg.last_seen_at = datetime()
+            // Token-reuse adjudication: distinct_confirmed is sticky — never
+            // let a later unchecked observation overwrite it; carry the
+            // nearest token + score only on a confirming stamp.
+            FOREACH (_ IN CASE
+                WHEN b.dedup_decision IS NOT NULL
+                     AND coalesce(vg.dedup_decision, '') <> 'distinct_confirmed'
+                THEN [1] ELSE [] END |
+                SET vg.dedup_decision = b.dedup_decision)
+            FOREACH (_ IN CASE
+                WHEN b.dedup_decision = 'distinct_confirmed'
+                THEN [1] ELSE [] END |
+                SET vg.nearest_token = b.nearest_token,
+                    vg.nearest_similarity = b.nearest_similarity)
             """,
             batch=list(gap_nodes.values()),
         )
