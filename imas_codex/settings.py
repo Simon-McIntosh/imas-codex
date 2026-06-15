@@ -925,6 +925,25 @@ def get_sn_desc_name_similarity_threshold() -> float:
     return float(section.get("desc-name-similarity-threshold", 0.55))
 
 
+def get_sn_dedup_threshold() -> float:
+    """Cosine bar for the in-pipeline component-token reuse check.
+
+    A candidate-new grammar token (a ``vocab_gap`` the compose LLM emitted)
+    scoring at/above this against a registered same-segment token is fed back
+    into the next compose attempt as advisory context — the agent reuses the
+    registered token or re-emits the gap (recorded as distinct-confirmed).
+    Advisory only: it adds a retry trigger, never a hard reject. Set the value
+    above 1.0 (e.g. 1.01) to disable the check entirely (no hit can ever fire).
+
+    Priority: IMAS_CODEX_SN_DEDUP_THRESHOLD env
+              → [sn-compose].dedup-similarity-threshold → ``0.85``.
+    """
+    if env := os.getenv("IMAS_CODEX_SN_DEDUP_THRESHOLD"):
+        return float(env)
+    section = _get_section("sn-compose")
+    return float(section.get("dedup-similarity-threshold", 0.85))
+
+
 def get_sn_staging_dir() -> Path:
     """Default staging directory for sn export/preview/publish.
 

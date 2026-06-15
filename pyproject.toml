@@ -385,6 +385,14 @@ max-tokens = 150000
 # latency but no paid cost — the goal is a better first-pass that needs
 # fewer PAID refine cycles downstream. Enable only on measured evidence.
 self-refine = false
+# Component-token reuse check (in-pipeline, free local embeddings).
+# Cosine bar above which a candidate-new component token (a vocab_gap the
+# compose LLM emitted) is treated as a likely synonym of a registered
+# same-segment token and the agent is asked, via a chained compose retry,
+# to reuse-or-confirm it. Advisory only — it adds a retry trigger, never a
+# hard reject; the agent either reuses the registered token or re-emits the
+# gap (recorded as distinct-confirmed). Set >1.0 (e.g. 1.01) to disable.
+dedup-similarity-threshold = 0.85
 
 [tool.imas-codex.sn-pools]
 # Concurrent replica counts for each of the six SN pools (see

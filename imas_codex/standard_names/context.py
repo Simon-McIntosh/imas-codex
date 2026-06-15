@@ -126,6 +126,13 @@ def build_compose_context() -> dict[str, Any]:
         )
         ctx["composition_rules"] = []
 
+    # Component-token reuse threshold — surfaced to the prompt so the agent
+    # sees the same cosine bar the compose retry loop applies when it flags a
+    # candidate-new token as a likely synonym of a registered one.
+    from imas_codex.settings import get_sn_dedup_threshold
+
+    ctx["dedup_similarity_threshold"] = get_sn_dedup_threshold()
+
     # Bare enum lists (backward compat for user prompt)
     ctx.update(_build_enum_lists())
 
