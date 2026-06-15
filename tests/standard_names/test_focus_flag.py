@@ -380,6 +380,7 @@ class TestFocusRoutingSeedsAndStamps:
 
         with (
             patch("imas_codex.cli.sn._run_sn_cmd"),
+            patch("imas_codex.cli.sn._auto_sync_grammar"),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
                 "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
@@ -419,6 +420,7 @@ class TestFocusRoutingSeedsAndStamps:
 
         with (
             patch("imas_codex.cli.sn._run_sn_cmd"),
+            patch("imas_codex.cli.sn._auto_sync_grammar"),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
                 "imas_codex.standard_names.graph_ops.merge_standard_name_sources",

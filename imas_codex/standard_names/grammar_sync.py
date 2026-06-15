@@ -4,9 +4,9 @@ The grammar spec is the canonical vocabulary for Standard Names and is
 owned exclusively by the SN subsystem. This module provides the
 library-level sync helper used by:
 
-* ``sn sync-grammar`` CLI — manual / initial sync
+* ``sn run`` CLI — auto-sync at startup when the active grammar version
+  differs from the installed ISN package (idempotent no-op otherwise)
 * ``sn clear`` CLI — auto re-seed after a full subsystem wipe
-* Release CLI — called during tag creation to stamp grammar
 
 The spec is loaded from the installed ``imas_standard_names`` package.
 Writes are idempotent — re-running is a no-op at the database level.

@@ -1,9 +1,11 @@
-"""Tests for the redesigned `sn clear`, `sn prune`, and `sn sync-grammar`.
+"""Tests for `sn clear` and `sn prune`.
 
-The redesign (Plan 39 follow-up) makes `sn clear` an unconditional full
-subsystem wipe with auto grammar re-seed, moves scoped deletes to
-`sn prune`, and exposes the ISN grammar sync as `sn sync-grammar` (was
-`graph sync-isn-grammar`).
+`sn clear` is an unconditional full subsystem wipe followed by an auto
+grammar re-seed (skippable with `--no-reseed`); scoped deletes live in
+`sn prune`. The standalone grammar-sync command has been retired —
+grammar is auto-synced at `sn run` startup and re-seeded by `sn clear`.
+The underlying graph op (`clear_sn_subsystem`) never touches grammar
+labels itself; the re-seed is driven by the `sn clear` CLI wrapper.
 """
 
 from __future__ import annotations
@@ -31,14 +33,14 @@ class TestSnClearHelp:
     def test_clear_help_has_dry_run(self):
         assert "--dry-run" in self._help()
 
-    def test_clear_help_has_no_reseed_flag_removed(self):
-        # Grammar is no longer touched by clear, so --no-reseed is gone.
-        assert "--no-reseed" not in self._help()
+    def test_clear_help_has_no_reseed_flag(self):
+        # Clear auto-re-seeds the grammar; --no-reseed opts out.
+        assert "--no-reseed" in self._help()
 
-    def test_clear_help_mentions_sync_grammar(self):
-        # The help text should point users at `sn sync-grammar` for
-        # grammar refreshes (since clear no longer touches grammar).
-        assert "sync-grammar" in self._help()
+    def test_clear_help_does_not_mention_sync_grammar(self):
+        # The standalone sync-grammar command is retired — clear handles
+        # the re-seed itself.
+        assert "sync-grammar" not in self._help()
 
     def test_clear_help_has_no_status_flag(self):
         # Scoped flags must have moved to `sn prune`.
@@ -84,19 +86,18 @@ class TestSnPruneHelp:
         assert "--include-sources" in self._help()
 
 
-class TestSnSyncGrammarHelp:
-    """`sn sync-grammar` is the new canonical entry point."""
+class TestSnSyncGrammarRetired:
+    """The standalone `sn sync-grammar` command has been retired."""
 
-    def test_sync_grammar_registered(self):
+    def test_sync_grammar_not_registered(self):
         runner = CliRunner()
         result = runner.invoke(sn, ["--help"])
-        assert "sync-grammar" in result.output
+        assert "sync-grammar" not in result.output
 
-    def test_sync_grammar_help_has_dry_run(self):
+    def test_sync_grammar_invocation_unknown(self):
         runner = CliRunner()
         result = runner.invoke(sn, ["sync-grammar", "--help"])
-        assert result.exit_code == 0
-        assert "--dry-run" in result.output
+        assert result.exit_code != 0
 
 
 class TestClearSnSubsystemLabels:
@@ -104,8 +105,8 @@ class TestClearSnSubsystemLabels:
 
     Grammar labels (GrammarToken, GrammarSegment, GrammarTemplate,
     ISNGrammarVersion) are ISN-authoritative reference data and are
-    NEVER touched by `sn clear` — they are refreshed via
-    `sn sync-grammar` when ISN is upgraded.
+    NEVER touched by the `clear_sn_subsystem` graph op — the `sn clear`
+    CLI wrapper re-seeds them after the wipe.
     """
 
     _EXPECTED_LABELS = {
@@ -179,11 +180,12 @@ class TestClearSnSubsystemLabels:
                 f"clear_sn_subsystem should not touch grammar label {label}"
             )
 
-    def test_wipe_never_calls_grammar_sync(self):
-        """Post-redesign: clear does not auto-reseed grammar.
+    def test_graph_op_never_calls_grammar_sync(self):
+        """The `clear_sn_subsystem` graph op itself never re-seeds grammar.
 
-        Grammar is reference data that stays in the graph. Refreshing
-        is a separate concern exposed via `sn sync-grammar`.
+        The re-seed is the responsibility of the `sn clear` CLI wrapper,
+        not the low-level graph op (so callers that only want the wipe
+        get exactly that).
         """
         from imas_codex.standard_names import graph_ops
 
@@ -200,6 +202,49 @@ class TestClearSnSubsystemLabels:
         ):
             graph_ops.clear_sn_subsystem(dry_run=False)
 
+        mock_sync.assert_not_called()
+
+
+class TestClearCliReseed:
+    """The `sn clear` CLI wrapper re-seeds grammar after the wipe."""
+
+    def _patch_clear(self, preview_count: int):
+        """Patch clear_sn_subsystem so it reports/deletes ``preview_count`` nodes."""
+        from imas_codex.standard_names import graph_ops
+
+        def _fake_clear(*, dry_run: bool):
+            return {"StandardName": preview_count}
+
+        return patch.object(graph_ops, "clear_sn_subsystem", side_effect=_fake_clear)
+
+    def test_clear_reseeds_grammar_by_default(self):
+        runner = CliRunner()
+        with (
+            self._patch_clear(3),
+            patch(
+                "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+            ) as mock_sync,
+        ):
+            mock_sync.return_value = MagicMock(
+                isn_version="9.9.9", segments=11, templates=6
+            )
+            result = runner.invoke(sn, ["clear", "--force", "--no-comment-export"])
+        assert result.exit_code == 0, result.output
+        mock_sync.assert_called_once()
+
+    def test_no_reseed_skips_grammar_sync(self):
+        runner = CliRunner()
+        with (
+            self._patch_clear(3),
+            patch(
+                "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+            ) as mock_sync,
+        ):
+            result = runner.invoke(
+                sn,
+                ["clear", "--force", "--no-comment-export", "--no-reseed"],
+            )
+        assert result.exit_code == 0, result.output
         mock_sync.assert_not_called()
 
     def test_review_deleted_before_standardname(self):

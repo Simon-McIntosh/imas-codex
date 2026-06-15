@@ -25,7 +25,6 @@ class TestGraphCLIPackageRegistration:
                 "prune",
                 "pull",
                 "push",
-                "repair",
                 "secure",
                 "shell",
                 "start",

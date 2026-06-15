@@ -1,7 +1,8 @@
 """Test ``sn --help`` lists the catalog workflow CLI verbs.
 
-Verifies that ``export``, ``preview``, ``release``, and ``import``
-appear as subcommands in the ``sn`` group help.
+Verifies that ``preview``, ``release``, and ``import`` appear as
+subcommands in the ``sn`` group help. The standalone ``export`` verb was
+folded into ``sn release --export-only``.
 """
 
 from __future__ import annotations
@@ -20,8 +21,11 @@ class TestSnHelpNewVerbs:
         assert result.exit_code == 0
         return result.output
 
-    def test_export_in_help(self):
-        assert "export" in self._get_help()
+    def test_export_command_retired(self):
+        # Folded into `sn release --export-only`.
+        runner = CliRunner()
+        result = runner.invoke(sn, ["export", "--help"])
+        assert result.exit_code != 0
 
     def test_preview_in_help(self):
         assert "preview" in self._get_help()
@@ -35,10 +39,11 @@ class TestSnHelpNewVerbs:
     def test_publish_not_in_help(self):
         assert "publish" not in self._get_help()
 
-    def test_export_help_shows_staging(self):
+    def test_release_export_only_shows_staging(self):
         runner = CliRunner()
-        result = runner.invoke(sn, ["export", "--help"])
+        result = runner.invoke(sn, ["release", "--help"])
         assert result.exit_code == 0
+        assert "--export-only" in result.output
         assert "--staging" in result.output
 
     def test_preview_help_shows_port(self):

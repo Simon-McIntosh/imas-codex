@@ -202,7 +202,7 @@ def sn() -> None:
 
     \b
     Catalog workflow:
-      sn export                           # graph → staging YAML
+      sn release --export-only            # graph → staging YAML
       sn preview                          # auto-export + local MkDocs
       sn release -m "msg"                 # auto-export + tag RC + push
       sn release --final -m "msg"         # finalize RC → stable
@@ -211,7 +211,7 @@ def sn() -> None:
 
     \b
     Housekeeping:
-      sn clear | sn prune | sn sync-grammar | sn bench
+      sn clear | sn prune | sn bench
     """
     pass
 
@@ -858,6 +858,49 @@ def _check_pipeline_clear_gate() -> None:
         return  # graph unreachable or error — skip gate silently
 
 
+def _auto_sync_grammar(*, quiet: bool = False) -> None:
+    """Idempotently sync the ISN grammar spec into the graph if stale.
+
+    Compares the graph's active ``ISNGrammarVersion`` against the installed
+    ``imas_standard_names`` version. When they differ (or no grammar is
+    present), runs :func:`sync_isn_grammar_to_graph` so the running pipeline
+    always composes against the installed grammar. A no-op when already in
+    sync.
+
+    Best-effort: any failure (graph unreachable, ISN missing) is logged and
+    swallowed so it degrades gracefully rather than crashing a run.
+    """
+    try:
+        from imas_standard_names import __version__ as isn_version
+
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.grammar_sync import sync_isn_grammar_to_graph
+    except Exception:  # noqa: BLE001 — ISN absent / import failure
+        logger.debug("auto grammar sync skipped (import failed)", exc_info=True)
+        return
+
+    try:
+        with GraphClient(timeout=5) as gc:
+            rows = list(
+                gc.query(
+                    "MATCH (v:ISNGrammarVersion {active: true}) "
+                    "RETURN v.version AS version LIMIT 1"
+                )
+                or []
+            )
+            active = rows[0]["version"] if rows else None
+            if active == isn_version:
+                return  # already in sync — no-op
+            sync_isn_grammar_to_graph(gc=gc)
+        if not quiet:
+            console.print(
+                f"[dim]Grammar synced to ISN {isn_version}"
+                f" (was {active or 'unset'}).[/dim]"
+            )
+    except Exception as exc:  # noqa: BLE001 — degrade gracefully
+        logger.warning("auto grammar sync failed (continuing): %s", exc)
+
+
 @sn.command("run")
 @click.option(
     "--source",
@@ -1383,6 +1426,12 @@ def sn_run(
 
     if not dry_run:
         _require_embed_ready("sn run")
+        # Auto-sync the ISN grammar into the graph when the active grammar
+        # version differs from the installed ISN package. Idempotent — a
+        # no-op when already in sync — and best-effort (a sync failure logs
+        # and continues rather than crashing the run). Runs once at startup,
+        # before any pool launches; never on the per-name hot path.
+        _auto_sync_grammar(quiet=quiet)
 
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
@@ -2502,78 +2551,8 @@ def sn_status() -> None:
 # =============================================================================
 
 
-@sn.command("export")
-@click.option(
-    "--staging",
-    type=click.Path(),
-    default=None,
-    help="Output staging directory (default: ~/.cache/imas-codex/staging)",
-)
-@click.option(
-    "--min-score",
-    type=float,
-    default=0.65,
-    show_default=True,
-    help="Minimum reviewer_score_name for inclusion",
-)
-@click.option(
-    "--include-unreviewed",
-    is_flag=True,
-    help="Include names without a reviewer_score_name",
-)
-@click.option(
-    "--min-description-score",
-    type=float,
-    default=None,
-    help="Secondary threshold on description sub-score",
-)
-@click.option(
-    "--force",
-    is_flag=True,
-    help="Overwrite non-empty staging directory without prompting",
-)
-@click.option(
-    "--skip-gate",
-    is_flag=True,
-    help="Skip all quality gates (debugging only)",
-)
-@click.option(
-    "--gate-only",
-    is_flag=True,
-    help="Run quality gates and report without emitting YAML",
-)
-@click.option(
-    "--gate-scope",
-    type=click.Choice(["all", "a", "b", "c", "d"], case_sensitive=False),
-    default="all",
-    show_default=True,
-    help="Which gates to run",
-)
-@click.option(
-    "--domain",
-    type=str,
-    default=None,
-    help="Filter export to a single physics domain",
-)
-@click.option(
-    "--override-edits",
-    type=str,
-    multiple=True,
-    help="Name(s) to reset from catalog_edit to pipeline origin (repeatable; or 'all')",
-)
-@click.option(
-    "--include-sources/--no-include-sources",
-    default=True,
-    show_default=True,
-    help="Populate sources field in each entry with graph provenance (debug aid)",
-)
-@click.option(
-    "--names-only",
-    "names_only",
-    is_flag=True,
-    help="Export names without requiring accepted docs (skip docs_stage gate)",
-)
-def sn_export(
+def _run_export_cli(
+    *,
     staging: str | None,
     min_score: float,
     include_unreviewed: bool,
@@ -2587,20 +2566,15 @@ def sn_export(
     include_sources: bool,
     names_only: bool,
 ) -> None:
-    """Export validated standard names from graph to a staging directory.
+    """Run the graph→staging export leg and render the CLI summary.
 
-    \b
-    Reads StandardName nodes, applies quality gates (A/B/C/D),
-    and writes YAML files to <staging>/standard_names/<domain>/<name>.yml.
+    Shared by ``sn release --export-only`` (graph → staging YAML, then
+    stop — no tag/push). Reads StandardName nodes, applies quality gates
+    (A/B/C/D), and writes YAML files to
+    ``<staging>/standard_names/<domain>/<name>.yml``.
 
-    \b
-    Examples:
-      imas-codex sn export
-      imas-codex sn export --staging ./staging
-      imas-codex sn export --staging ./staging --gate-only
-      imas-codex sn export --staging ./staging --domain equilibrium
-      imas-codex sn export --staging ./staging --min-score 0.8 --force
-      imas-codex sn export --staging ./staging --no-include-sources
+    Exit codes mirror the export semantics: 1 on blocking gate failure,
+    2 on precondition (FileExists) error, 3 on internal error.
     """
     from pathlib import Path
 
@@ -2853,7 +2827,7 @@ def sn_preview(
 @click.option(
     "--skip-export",
     is_flag=True,
-    help="Skip auto-export (use existing staging content). For custom filtering, run 'sn export' first.",
+    help="Skip auto-export (use existing staging content). For custom filtering, run 'sn release --export-only' first.",
 )
 @click.option(
     "--skip-gate",
@@ -2871,6 +2845,68 @@ def sn_preview(
     is_flag=True,
     help="Export names without requiring accepted docs (skip docs_stage gate)",
 )
+@click.option(
+    "--export-only",
+    is_flag=True,
+    help=(
+        "Run only the graph→staging export leg and stop (no tag/push). "
+        "Use the export-scoping flags below to control what is written; "
+        "then 'sn release --skip-export -m ...' to publish the staged content."
+    ),
+)
+@click.option(
+    "--min-score",
+    type=float,
+    default=0.65,
+    show_default=True,
+    help="[export] Minimum reviewer_score_name for inclusion",
+)
+@click.option(
+    "--include-unreviewed",
+    is_flag=True,
+    help="[export] Include names without a reviewer_score_name",
+)
+@click.option(
+    "--min-description-score",
+    type=float,
+    default=None,
+    help="[export] Secondary threshold on description sub-score",
+)
+@click.option(
+    "--gate-only",
+    is_flag=True,
+    help="[export] Run quality gates and report without emitting YAML",
+)
+@click.option(
+    "--gate-scope",
+    type=click.Choice(["all", "a", "b", "c", "d"], case_sensitive=False),
+    default="all",
+    show_default=True,
+    help="[export] Which gates to run",
+)
+@click.option(
+    "--domain",
+    type=str,
+    default=None,
+    help="[export] Filter export to a single physics domain",
+)
+@click.option(
+    "--override-edits",
+    type=str,
+    multiple=True,
+    help="[export] Name(s) to reset from catalog_edit to pipeline origin (repeatable; or 'all')",
+)
+@click.option(
+    "--include-sources/--no-include-sources",
+    default=True,
+    show_default=True,
+    help="[export] Populate sources field in each entry with graph provenance (debug aid)",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="[export] Overwrite non-empty staging directory without prompting (--export-only)",
+)
 def sn_release(
     action: str | None,
     message: str | None,
@@ -2883,6 +2919,16 @@ def sn_release(
     skip_gate: bool,
     dry_run: bool,
     names_only: bool,
+    export_only: bool,
+    min_score: float,
+    include_unreviewed: bool,
+    min_description_score: float | None,
+    gate_only: bool,
+    gate_scope: str,
+    domain: str | None,
+    override_edits: tuple[str, ...],
+    include_sources: bool,
+    force: bool,
 ) -> None:
     """Release standard names to the ISNC catalog.
 
@@ -2901,8 +2947,9 @@ def sn_release(
       ssh -L 8000:localhost:8000 <host>
 
     \b
-    For custom export filtering, run 'sn export' first, then
-    use --skip-export to release the existing staging content.
+    For custom export filtering, run 'sn release --export-only' (with the
+    [export] scoping flags) to stage the YAML, then use --skip-export to
+    publish that existing staging content.
 
     \b
     Examples:
@@ -2912,12 +2959,40 @@ def sn_release(
       imas-codex sn release --final -m "Production release v1.0.0"
       imas-codex sn release --dry-run --bump minor -m "Test release"
       imas-codex sn release --skip-export -m "Re-release with fixes"
+      imas-codex sn release --export-only                       # graph → staging only
+      imas-codex sn release --export-only --domain equilibrium --gate-only
+      imas-codex sn release --export-only --min-score 0.8 --force
     """
     from pathlib import Path
 
     from rich.table import Table
 
     from imas_codex.settings import get_sn_isnc_dir, get_sn_staging_dir
+
+    # ── --export-only: run the graph→staging export leg and stop ──
+    # No ISNC / tag / push — just the export, with full export-scoping
+    # flags. Exit codes match the export semantics (1 gate fail, 2
+    # precondition, 3 internal).
+    if export_only:
+        if action is not None:
+            raise click.ClickException(
+                "--export-only does not take an ACTION argument."
+            )
+        _run_export_cli(
+            staging=staging,
+            min_score=min_score,
+            include_unreviewed=include_unreviewed,
+            min_description_score=min_description_score,
+            force=force,
+            skip_gate=skip_gate,
+            gate_only=gate_only,
+            gate_scope=gate_scope,
+            domain=domain,
+            override_edits=override_edits,
+            include_sources=include_sources,
+            names_only=names_only,
+        )
+        return
 
     # ── Resolve ISNC path ─────────────────────────────────
     if isnc:
@@ -3173,14 +3248,24 @@ def sn_import(
     default=False,
     help="Skip the pre-clear Review comment export to JSONL.",
 )
-def sn_clear(dry_run: bool, force: bool, no_comment_export: bool) -> None:
+@click.option(
+    "--no-reseed",
+    "no_reseed",
+    is_flag=True,
+    default=False,
+    help="Skip the post-clear ISN grammar re-seed.",
+)
+def sn_clear(
+    dry_run: bool, force: bool, no_comment_export: bool, no_reseed: bool
+) -> None:
     """Wipe every Standard Name the pipeline has produced.
 
     Deletes the six pipeline-output labels: StandardName, StandardNameReview,
     StandardNameSource, VocabGap, SNRun, LLMCost. ISN grammar nodes
     (GrammarToken, GrammarSegment, GrammarTemplate, ISNGrammarVersion)
-    are ISN-authoritative reference data and stay in the graph — use
-    ``sn sync-grammar`` to refresh them after an ISN release.
+    are ISN-authoritative reference data and are automatically re-seeded
+    from the installed ``imas_standard_names`` package after the wipe.
+    Pass ``--no-reseed`` to leave the grammar nodes untouched.
 
     For scoped deletes (by status, source, IDS, score tier, …) use
     ``sn prune`` instead.
@@ -3193,7 +3278,8 @@ def sn_clear(dry_run: bool, force: bool, no_comment_export: bool) -> None:
     \b
     Examples:
       imas-codex sn clear --dry-run    # Preview the wipe
-      imas-codex sn clear --force      # Full wipe (non-interactive)
+      imas-codex sn clear --force      # Full wipe + grammar re-seed
+      imas-codex sn clear --force --no-reseed  # Wipe without re-seeding grammar
     """
     import datetime
 
@@ -3245,6 +3331,24 @@ def sn_clear(dry_run: bool, force: bool, no_comment_export: bool) -> None:
         for label, n in deleted.items():
             if n:
                 console.print(f"  {label}: {n}")
+
+        # Re-seed the ISN grammar so the graph is immediately usable for a
+        # fresh pipeline run. Best-effort — a sync failure is logged and the
+        # clear still succeeds.
+        if not no_reseed:
+            from imas_codex.standard_names.grammar_sync import (
+                sync_isn_grammar_to_graph,
+            )
+
+            try:
+                report = sync_isn_grammar_to_graph()
+                console.print(
+                    f"[green]Re-seeded ISN grammar → {report.isn_version}"
+                    f" ({report.segments} segments, {report.templates} templates)"
+                    f"[/green]"
+                )
+            except Exception as exc:  # noqa: BLE001 — clear already succeeded
+                console.print(f"[yellow]Grammar re-seed skipped: {exc}[/yellow]")
     except click.Abort:
         raise
     except Exception as e:
@@ -3397,53 +3501,6 @@ def sn_prune(
     except Exception as e:
         console.print(f"[red]Prune error:[/red] {e}")
         raise SystemExit(1) from e
-
-
-def _run_sync_grammar(*, dry_run: bool, verbose: bool) -> None:
-    """Shared implementation for ``sn sync-grammar`` and ``sn clear``'s re-seed."""
-    from imas_codex.standard_names.grammar_sync import sync_isn_grammar_to_graph
-
-    try:
-        report = sync_isn_grammar_to_graph(dry_run=dry_run)
-    except RuntimeError as exc:
-        raise click.ClickException(str(exc)) from exc
-
-    console.print(
-        f"ISN version: {report.isn_version}  spec: {report.spec_version}  "
-        f"segments: {report.segments}  templates: {report.templates}"
-    )
-    console.print(f"[green]✓ Grammar sync complete (dry_run={dry_run})[/green]")
-
-    if verbose:
-        planned = report.raw_report.pop("planned_statements", None)
-        for key, val in report.raw_report.items():
-            console.print(f"  {key}: {val}")
-        if planned:
-            console.print(f"  planned_statements: {len(planned)}")
-            for cypher, params in planned:
-                console.print(f"    {cypher}  params={params}")
-
-    console.print(
-        f"[green]✓ Active grammar version → {report.finalise_report.get('target_version')}"
-        f" (applied={report.finalise_report.get('applied')})[/green]"
-    )
-
-
-@sn.command("sync-grammar")
-@click.option("--dry-run", is_flag=True, help="Log Cypher without executing.")
-@click.option("-v", "--verbose", is_flag=True, help="Show planned Cypher statements.")
-def sn_sync_grammar(dry_run: bool, verbose: bool) -> None:
-    """Sync the ISN grammar spec into Neo4j.
-
-    Writes ``ISNGrammarVersion``, ``GrammarSegment``, ``GrammarToken``,
-    and ``GrammarTemplate`` nodes plus ``NEXT`` / ``DEFINES`` /
-    ``HAS_TOKEN`` edges from the installed ``imas_standard_names``
-    package. Idempotent — safe to re-run.
-
-    Run this after ``sn clear --no-reseed``, after upgrading the ISN
-    package, or manually during release preparation.
-    """
-    _run_sync_grammar(dry_run=dry_run, verbose=verbose)
 
 
 @sn.command("review")
