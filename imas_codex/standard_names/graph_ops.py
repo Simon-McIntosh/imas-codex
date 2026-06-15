@@ -1714,13 +1714,18 @@ def _query_accepted_derived_parents_for_cleanup(gc: Any) -> list[str]:
     exportable state even though the gate would now reject them. Restrict to
     ``origin='derived'`` so catalog-authoritative and pipeline-authored names
     are never touched by this cleanup.
+
+    Any ``name_stage='accepted'`` derived parent is re-checked regardless of
+    ``docs_stage``. A single-child-shadow parent minted in ``--names-only`` mode
+    is ``name_stage='accepted'`` with ``docs_stage`` still ``drafted``/``null``;
+    gating on ``docs_stage='accepted'`` let those escape the admission re-check
+    even though :func:`is_admissible_parent_name` rejects them.
     """
     rows = gc.query(
         """
         MATCH (parent:StandardName)
         WHERE parent.origin = 'derived'
           AND parent.name_stage = 'accepted'
-          AND parent.docs_stage = 'accepted'
         MATCH (:StandardName)-[:HAS_PARENT]->(parent)
         RETURN DISTINCT parent.id AS parent_id
         """

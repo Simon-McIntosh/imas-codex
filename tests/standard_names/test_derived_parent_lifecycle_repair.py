@@ -155,9 +155,11 @@ class _StatefulDerivedParentGraph:
             )
 
         if (
-            "AND parent.docs_stage = 'accepted'" in cypher
+            "parent.name_stage = 'accepted'" in cypher
             and "RETURN DISTINCT parent.id AS parent_id" in cypher
         ):
+            # Accepted-derived cleanup re-check (admission gate). No longer
+            # gated on docs_stage — any accepted derived parent is re-checked.
             return []
 
         if "seedable_edges = 0" in cypher and "RETURN parent.id AS parent_id" in cypher:
@@ -489,6 +491,28 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
 
     assert repaired == 1
     delete_nodes.assert_called_once_with(gc, ["pressure"])
+
+
+def test_cleanup_query_rechecks_accepted_parents_regardless_of_docs_stage() -> None:
+    """A names-only single-child shadow (accepted name, drafted docs) must be
+    re-checked for admission — the cleanup query must NOT gate on docs_stage."""
+    from imas_codex.standard_names.graph_ops import (
+        _query_accepted_derived_parents_for_cleanup,
+    )
+
+    captured: dict[str, str] = {}
+
+    class _Probe:
+        def query(self, cypher: str, **kwargs):
+            captured["cypher"] = cypher
+            return [{"parent_id": "radius_of_magnetic_axis"}]
+
+    result = _query_accepted_derived_parents_for_cleanup(_Probe())
+    assert result == ["radius_of_magnetic_axis"]
+    # Regression: the predicate must select accepted derived parents without
+    # requiring docs_stage='accepted' (which let drafted-docs shadows escape).
+    assert "parent.name_stage = 'accepted'" in captured["cypher"]
+    assert "parent.docs_stage = 'accepted'" not in captured["cypher"]
 
 
 def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
