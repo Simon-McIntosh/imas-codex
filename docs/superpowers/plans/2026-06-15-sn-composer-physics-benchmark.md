@@ -662,11 +662,12 @@ git commit -m "feat(sn): sn bench --physics flag + physics-correctness compariso
 **Files:**
 - Create: `research/physics_bench_gold.json`
 
-- [ ] **Step 1: Author the gold labels (HUMAN — the lead)**
+- [ ] **Step 1: Author the gold labels (AGENT — using physics judgment)**
 
-For ~12–15 of the test-set paths (all hard cases + a few controls), the lead
-records the physically-correct verdict. Pull each path's current DD doc + unit
-to ground the label:
+The lead delegated gold-set authoring to the agent. For ~12–15 of the test-set
+paths (all hard cases + a few controls), the agent records the
+physically-correct verdict using domain judgment, citing the measurement
+principle / DD doc. Pull each path's current DD doc + unit to ground the label:
 
 ```bash
 uv run --no-sync python -c "
@@ -707,11 +708,25 @@ git add research/physics_bench_gold.json research/physics_bench-*.json
 git commit -m "research(sn): physics-correctness benchmark gold set + results"
 ```
 
-- [ ] **Step 4: Record the decision**
+- [ ] **Step 4: Record the decision (composer + docs unification + failure-3 finding)**
 
-Append the keep / switch / tiered decision (with the per-model physics rates +
-judge trust level) to the spec's status, and update `[sn-compose].model` only
-if the benchmark justifies a switch.
+Append to the spec's status:
+- **Composer decision** — keep / switch / tiered, with per-model physics rates +
+  judge trust level; update `[sn-compose].model` only if justified.
+- **Docs unification** — the pre-local best for names was gpt-5.5; docs is
+  currently sonnet-4.6 (chosen via a DD-grounded physics probe, so less
+  blindsided, but LLM-judged so not immune). If a single model wins physics
+  correctness on names AND is competitive for docs, unify `[sn-docs].model`
+  with `[sn-compose].model`. Re-score the candidates' DOCS faithfulness with the
+  SAME calibrated judge (reuse `judge_name_physics` adapted for docs prose) to
+  confirm — do not unify on the old prose-definition probe alone.
+- **Failure-3 treatability** — the calibration gate result IS the answer: if the
+  calibrated judge caught the hard-case measurement-principle errors (rogowski
+  etc.), record that failure 3 is treatable by adding the measurement-principle
+  rubric dimension to the live name-review (`review_names.md` +
+  `sn_review_criteria.yaml`) — queue that as the next robustness task. If the
+  judge could NOT catch them, record that instrument/measurement-principle names
+  require human physics review (not treatable with current models).
 
 ---
 
