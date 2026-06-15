@@ -1,0 +1,17 @@
+[
+  {"path": "magnetics/rogowski_coil/current", "category": "measurement_principle"},
+  {"path": "magnetics/ip", "category": "measurement_principle"},
+  {"path": "iron_core/segment/b_field", "category": "locus_ordering"},
+  {"path": "pf_active/coil/b_field_max", "category": "locus_ordering"},
+  {"path": "pf_active/coil/b_field_max_timed", "category": "locus_ordering"},
+  {"path": "ferritic/permeability_table/b_field", "category": "locus_ordering"},
+  {"path": "equilibrium/time_slice/boundary_separatrix/x_point/r", "category": "specificity_consistency"},
+  {"path": "summary/boundary/x_point_main/r", "category": "specificity_consistency"},
+  {"path": "equilibrium/time_slice/constraints/x_point/position/r", "category": "specificity_consistency"},
+  {"path": "breeding_blanket/module/cooling/time_slice/pressure_inlet", "category": "source_qualifier"},
+  {"path": "breeding_blanket/module/time_slice/wall_flux_max", "category": "source_qualifier"},
+  {"path": "core_profiles/profiles_1d/electrons/density", "category": "control"},
+  {"path": "core_profiles/global_quantities/ip", "category": "control"},
+  {"path": "equilibrium/time_slice/global_quantities/magnetic_axis/r", "category": "control"},
+  {"path": "core_profiles/profiles_1d/e_field/toroidal", "category": "control"}
+]
