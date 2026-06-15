@@ -569,10 +569,12 @@ release convergence, not recovery).
 
 ### CLI commands
 
-`sn run` (six-pool loop), `review`, `export`, `preview`, `release`, `import`,
-`status`, `coverage`, `clear`, `prune`, `sync-grammar`, `bench`. Run
+`sn run` (six-pool loop), `review`, `preview`, `release`, `import`,
+`status`, `coverage`, `clear`, `prune`, `bench`. Run
 `uv run imas-codex sn <cmd> --help` for flags; semantics and the full flag
-matrix are in the architecture doc.
+matrix are in the architecture doc. Grammar sync is automatic (`sn run`
+startup + `sn clear` re-seed); the graph→staging export leg is
+`sn release --export-only`.
 
 ### Lifecycle axes
 

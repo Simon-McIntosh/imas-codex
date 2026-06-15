@@ -1,4 +1,10 @@
-"""Tests for `imas-codex sn sync-grammar` CLI and sync idempotency."""
+"""Tests for the auto grammar-sync helper (`sn run` startup) and sync idempotency.
+
+Grammar sync is no longer a standalone CLI command — it is auto-run at
+``sn run`` startup (via ``_auto_sync_grammar``) and re-seeded by
+``sn clear``. These tests cover the auto-sync helper's version-gating and
+graceful-degradation behaviour, plus the ISN ``sync_grammar`` idempotency.
+"""
 
 from __future__ import annotations
 
@@ -6,9 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from click.testing import CliRunner
-
-from imas_codex.cli.sn import sn_sync_grammar
+from imas_codex.cli.sn import _auto_sync_grammar
 
 
 @dataclass
@@ -41,57 +45,58 @@ def _fake_spec() -> dict[str, Any]:
     }
 
 
-def test_sn_sync_grammar_dry_run():
-    """--dry-run calls sync_grammar with dry_run=True and prints report."""
-    runner = CliRunner()
-    fake_gc = MagicMock()
-    fake_gc.__enter__.return_value = fake_gc
-    fake_gc.__exit__.return_value = None
+def _mock_gc(active_version: str | None) -> MagicMock:
+    """A context-manager GraphClient whose active-version query returns ``active_version``."""
+    gc = MagicMock()
+    gc.__enter__.return_value = gc
+    gc.__exit__.return_value = None
+    gc.query = MagicMock(
+        return_value=[{"version": active_version}] if active_version else []
+    )
+    return gc
 
-    fake_report = _fake_report()
 
+def test_auto_sync_skips_when_in_sync():
+    """When the graph's active grammar matches the installed ISN, sync is a no-op."""
+    from imas_standard_names import __version__ as isn_version
+
+    gc = _mock_gc(isn_version)
     with (
+        patch("imas_codex.graph.client.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.grammar_sync.GraphClient",
-            return_value=fake_gc,
-        ),
-        patch(
-            "imas_standard_names.graph.spec.get_grammar_graph_spec",
-            return_value=_fake_spec(),
-        ),
-        patch(
-            "imas_standard_names.graph.sync.sync_grammar", return_value=fake_report
+            "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
         ) as mock_sync,
     ):
-        result = runner.invoke(sn_sync_grammar, ["--dry-run"])
+        _auto_sync_grammar(quiet=True)
 
-    assert result.exit_code == 0, result.output
-    assert "Grammar sync complete" in result.output
-    assert "dry_run=True" in result.output
+    mock_sync.assert_not_called()
+
+
+def test_auto_sync_runs_when_version_differs():
+    """A version mismatch triggers sync_isn_grammar_to_graph with the open client."""
+    gc = _mock_gc("0.0.1-stale")
+    with (
+        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch(
+            "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+        ) as mock_sync,
+    ):
+        _auto_sync_grammar(quiet=True)
+
     mock_sync.assert_called_once()
     _, kwargs = mock_sync.call_args
-    assert kwargs["dry_run"] is True
-    assert kwargs["active_version"]  # ISN version propagated
+    assert kwargs.get("gc") is gc  # reuses the open client
 
 
-def test_sn_sync_grammar_unreachable_raises():
-    """Neo4j connection failure surfaces as ClickException."""
-    runner = CliRunner()
+def test_auto_sync_degrades_gracefully_on_failure():
+    """A graph/sync failure is swallowed (logged) — the run is never crashed."""
 
     def _boom(*_a, **_kw):
         raise ConnectionError("Neo4j unreachable")
 
-    with (
-        patch("imas_codex.standard_names.grammar_sync.GraphClient", side_effect=_boom),
-        patch(
-            "imas_standard_names.graph.spec.get_grammar_graph_spec",
-            return_value=_fake_spec(),
-        ),
-    ):
-        result = runner.invoke(sn_sync_grammar, [])
-
-    assert result.exit_code != 0
-    assert "Failed to sync grammar" in result.output
+    with patch("imas_codex.graph.client.GraphClient", side_effect=_boom):
+        # Must NOT raise.
+        _auto_sync_grammar(quiet=True)
 
 
 # ---------------------------------------------------------------------------

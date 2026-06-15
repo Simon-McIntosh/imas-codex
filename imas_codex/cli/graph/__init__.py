@@ -38,7 +38,8 @@ def graph() -> None:
       imas-codex graph secure              Rotate Neo4j password
 
     \b
-    Standard Names grammar sync has moved to ``imas-codex sn sync-grammar``.
+    Standard Names grammar is auto-synced by ``imas-codex sn run`` (at
+    startup) and ``imas-codex sn clear`` (post-wipe re-seed).
     """
     pass
 

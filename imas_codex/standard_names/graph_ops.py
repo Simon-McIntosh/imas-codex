@@ -3054,10 +3054,10 @@ def _resolve_grammar_token_version(gc: GraphClient, isn_version: str) -> str | N
     """Find the best GrammarToken version for HAS_SEGMENT resolution.
 
     Prefers exact match with the ISN runtime version.  When no tokens
-    exist for that version (e.g. ISN was upgraded but
-    ``imas-codex sn sync-grammar`` was not re-run), falls back
-    to the latest available version so that token-miss detection does
-    not produce false-positive VocabGap nodes.
+    exist for that version (e.g. ISN was upgraded but the grammar has
+    not yet been re-synced — ``sn run`` auto-syncs at startup), falls
+    back to the latest available version so that token-miss detection
+    does not produce false-positive VocabGap nodes.
 
     Returns ``None`` when no GrammarToken nodes exist at all.
     """
@@ -3084,7 +3084,7 @@ def _resolve_grammar_token_version(gc: GraphClient, isn_version: str) -> str | N
         fallback = rows[0]["v"]
         logger.warning(
             "No GrammarToken nodes for ISN %s — falling back to %s. "
-            "Run `imas-codex sn sync-grammar` to update.",
+            "`sn run` auto-syncs the grammar at startup; re-run to update.",
             isn_version,
             fallback,
         )
@@ -4625,9 +4625,10 @@ def clear_sn_subsystem(
 
     **Grammar nodes** (``GrammarToken``, ``GrammarSegment``,
     ``GrammarTemplate``, ``ISNGrammarVersion``) are ISN-authoritative
-    reference data and are never touched. They stay in the graph so the
-    vocabulary is immediately available for the next ``sn run``. Use
-    ``sn sync-grammar`` to re-sync the grammar from a new ISN release.
+    reference data and are never touched here. They stay in the graph so
+    the vocabulary is immediately available for the next ``sn run``; the
+    ``sn clear`` CLI re-seeds them from the installed ISN release after a
+    wipe, and ``sn run`` auto-syncs at startup when the version differs.
 
     Parameters
     ----------

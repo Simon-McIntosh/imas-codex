@@ -411,9 +411,9 @@ token; see [Grammar vocabulary](#grammar-vocabulary).
 | Axis | States | Set by | Notes |
 |---|---|---|---|
 | `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | Pool workers | Cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`. `refining` reverts to `reviewed` after 600 s (orphan sweep). `chain_length` / `docs_chain_length` track refinement depth (root = 0). `superseded` = predecessor in a `REFINED_FROM` chain; source edges migrate to the latest. |
-| `pipeline_status` | `drafted → published → accepted` | `sn run` → `sn export` → `sn import` | Catalog round-trip state. |
+| `pipeline_status` | `drafted → published → accepted` | `sn run` → `sn release --export-only` → `sn import` | Catalog round-trip state. |
 | `status` | `draft → published → deprecated` | Catalog import | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
-| `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn export`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings stay `valid`. |
+| `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn release --export-only`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings stay `valid`. |
 
 **`origin`:** `pipeline` (LLM-generated), `catalog_edit` (human-edited via
 catalog PR), or `derived` (structural parent from the admission gate).
@@ -532,20 +532,21 @@ The graph is authoritative for pipeline state; the catalog (ISNC) is
 authoritative for human-reviewed editorial fields.
 
 ```
-sn export → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn import
+sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn import
 ```
 
-1. **`sn export`** — reads validated SN nodes, applies quality gates
-   (`reviewer_score_name ≥ 0.65` + description sub-score), writes YAML to
-   `<staging>/standard_names/<domain>/<name>.yml` (default staging
-   `~/.cache/imas-codex/staging`).
+1. **`sn release --export-only`** — runs only the export leg: reads validated
+   SN nodes, applies quality gates (`reviewer_score_name ≥ 0.65` + description
+   sub-score), writes YAML to `<staging>/standard_names/<domain>/<name>.yml`
+   (default staging `~/.cache/imas-codex/staging`) and stops (no tag/push).
 2. **`sn preview`** — auto-exports and launches a local MkDocs dev server via
    ISN's CatalogRenderer. `--no-export` serves an existing staging dir. Tunnel:
    `ssh -L 8000:localhost:8000 <host>`.
 3. **`sn release -m "msg"`** — auto-exports, copies staging YAML into the ISNC
    checkout, commits, tags the next semver, pushes. RC → origin (fork); final
    (`--final`) → upstream. The tag push triggers ISNC CI → GitHub Pages. For
-   custom filtering, run `sn export` first, then `--skip-export`.
+   custom filtering, run `sn release --export-only` (with the `[export]`
+   scoping flags) first, then `--skip-export`.
 4. **PR review on GitHub** — edits description, documentation, tags, kind,
    links, status, etc. Merged to ISNC main.
 5. **`sn import`** — reads ISNC YAML (auto-discovered from `isnc-dir`, or
@@ -576,8 +577,10 @@ name is in `override_names` (`sn run --override-edits <name>`, repeatable).
   VocabGap + SNRun + grammar tree) with auto re-seed from ISN. No scoping.
 - **`sn prune`** — relationship-first safe delete. Requires `--status` or
   `--all`; `--include-sources` also drops StandardNameSource nodes.
-- **`sn sync-grammar`** — idempotent grammar re-sync; auto-run by `sn clear`,
-  manual after ISN version bumps.
+- **Grammar sync is automatic** — `sn run` syncs the installed ISN grammar
+  into the graph at startup when the active version differs (idempotent
+  no-op otherwise; best-effort — a sync failure logs and continues), and
+  `sn clear` re-seeds it after a wipe (`--no-reseed` to skip).
 
 **Chain history is permanent.** `--reset-to` leaves `REFINED_FROM` chains and
 `DocsRevision` snapshots in place. **Safety guard:** `--reset-to` and
@@ -589,16 +592,14 @@ names (catalog-authoritative). `sn clear` has no such guard.
 | Command | Purpose | Key options |
 |---------|---------|-------------|
 | `sn run` | Run the six-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted` |
-| `sn review` | Score existing valid names via RD-quorum | `--ids`, `--physics-domain`, `--status`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
-| `sn export` | Export validated SN nodes to YAML staging (quality-gated) | `--staging`, `--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits` |
+| `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--status`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
-| `sn release` | Release to ISNC catalog (RC→origin, final→upstream) | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run` |
+| `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
 | `sn import` | Import reviewed YAML back into the graph | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
 | `sn status` | StandardName + StandardNameSource statistics | — |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
-| `sn clear` | Full-subsystem wipe + auto re-seed | `--dry-run`, `--force`, `--no-reseed` |
+| `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--status`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
-| `sn sync-grammar` | Seed/refresh ISN grammar vocabulary | `--dry-run` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
 
 ## Benchmark
