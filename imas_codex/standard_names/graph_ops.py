@@ -1729,12 +1729,12 @@ def _query_accepted_derived_parents_for_cleanup(gc: Any) -> list[str]:
 
 
 def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
-    """Delete derived-parent nodes and their review/manual-source scaffolding."""
+    """Delete derived-parent nodes and their review/derived-source scaffolding."""
     deleted = 0
     for parent_id in parent_ids:
         gc.query(
             """
-            MATCH (sns:StandardNameSource {source_type: 'manual', source_id: $parent_id})
+            MATCH (sns:StandardNameSource {source_type: 'derived', source_id: $parent_id})
             DETACH DELETE sns
             """,
             parent_id=parent_id,
@@ -1779,8 +1779,8 @@ def _derived_parent_source_metadata(
             "batch_key": "derived_parent",
         }
     return {
-        "source_node_id": f"manual:{parent_id}",
-        "source_type": "manual",
+        "source_node_id": f"derived:{parent_id}",
+        "source_type": "derived",
         "source_id": parent_id,
         "batch_key": "derived_parent",
     }
@@ -4584,7 +4584,9 @@ def clear_standard_names(
         # pool never claims — so without this reset the source silently drops
         # out of all future regeneration. Orphan check (no remaining
         # PRODUCED_NAME edge) is inherently scope-correct: sources whose names
-        # survived a filtered clear keep their status.
+        # survived a filtered clear keep their status. The produced_sn_id
+        # scalar mirror is nulled in the same operation so it never outlives
+        # the deleted name (PRODUCED_NAME edge is the single source of truth).
         reset_result = gc.query(
             """
             MATCH (sns:StandardNameSource)
@@ -4592,7 +4594,8 @@ def clear_standard_names(
             AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
             SET sns.status = 'extracted',
                 sns.claimed_at = null,
-                sns.claim_token = null
+                sns.claim_token = null,
+                sns.produced_sn_id = null
             RETURN count(sns) AS n
             """
         )
@@ -6177,6 +6180,68 @@ def reconcile_vocab_gaps() -> dict[str, int]:
 
     stats["remaining"] = stats["checked"] - len(to_delete)
     return stats
+
+
+def reconcile_provenance() -> dict[str, int]:
+    """Realign StandardNameSource provenance metadata with live StandardNames.
+
+    The ``produced_sn_id`` scalar mirrors the ``PRODUCED_NAME`` edge, but on
+    name supersede/delete/reset only the edge is removed — the scalar mirror
+    is orphaned and silently points at a now-deleted name. Likewise a
+    ``derived_parent`` scaffolding source can outlive the parent StandardName
+    it was minted for. Both are audit pollution, not pipeline blockers, so
+    this idempotent sweep is safe to run every rotation.
+
+    Two passes:
+
+    1. **NULL stale scalars** — any ``StandardNameSource.produced_sn_id`` whose
+       target ``StandardName`` no longer exists is set to null.
+    2. **Delete orphaned derived-parent scaffolding** — any
+       ``StandardNameSource {batch_key: 'derived_parent'}`` (source_type
+       ``derived`` or ``dd``) whose parent ``StandardName(id = source_id)``
+       no longer exists is DETACH-DELETEd.
+
+    Returns dict with counts: {scalars_cleared, orphan_sources_deleted}.
+    """
+    with GraphClient() as gc:
+        scalars = gc.query(
+            """
+            MATCH (sns:StandardNameSource)
+            WHERE sns.produced_sn_id IS NOT NULL
+              AND NOT EXISTS {
+                  MATCH (sn:StandardName {id: sns.produced_sn_id})
+              }
+            SET sns.produced_sn_id = null
+            RETURN count(sns) AS n
+            """
+        )
+        scalars_cleared = scalars[0]["n"] if scalars else 0
+
+        orphans = gc.query(
+            """
+            MATCH (sns:StandardNameSource {batch_key: 'derived_parent'})
+            WHERE sns.source_type IN ['derived', 'dd']
+              AND NOT EXISTS {
+                  MATCH (sn:StandardName {id: sns.source_id})
+              }
+            DETACH DELETE sns
+            RETURN count(sns) AS n
+            """
+        )
+        orphan_sources_deleted = orphans[0]["n"] if orphans else 0
+
+    if scalars_cleared or orphan_sources_deleted:
+        logger.info(
+            "reconcile_provenance: cleared %d stale produced_sn_id scalar(s), "
+            "deleted %d orphaned derived-parent source(s)",
+            scalars_cleared,
+            orphan_sources_deleted,
+        )
+
+    return {
+        "scalars_cleared": scalars_cleared,
+        "orphan_sources_deleted": orphan_sources_deleted,
+    }
 
 
 def reconcile_error_siblings() -> dict[str, int]:

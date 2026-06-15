@@ -49,8 +49,10 @@ enums:
         description: Extracted from IMAS Data Dictionary
       signals:
         description: Extracted from facility signals
-      manual:
-        description: Manually curated
+      derived:
+        description: >-
+          Auto-materialised structural parent scaffolding, sourced from child
+          names by the derived-parent admission gate; NOT human-curated.
       reference:
         description: Seeded from ISN reference library
       catalog:
@@ -1486,6 +1488,12 @@ classes:
           distinct_confirmed = the agent re-emitted the gap after being shown
           the near-token; unchecked = no check fired.
         range: VocabGapDedupDecision
+      reconciled_at:
+        description: >-
+          Timestamp when reconcile_vocab_gaps last reclassified this gap
+          against the current ISN vocabulary. Null until a reconcile pass
+          updates the gap's category/actual_segments.
+        range: datetime
 
   StandardNameSource:
     description: >-
@@ -1525,6 +1533,11 @@ classes:
         description: Current lifecycle status
         range: StandardNameSourceStatus
         required: true
+      created_at:
+        description: >-
+          Timestamp when this source node was first created in the graph.
+          Set ON CREATE by the batch/derived-parent materialisers.
+        range: datetime
       claimed_at:
         description: Timestamp when a worker claimed this source for processing
         range: datetime

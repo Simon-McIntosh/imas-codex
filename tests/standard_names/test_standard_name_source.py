@@ -99,7 +99,7 @@ class TestMergeStandardNameSources:
 
         with pytest.raises(ValueError, match="Invalid source_type"):
             merge_standard_name_sources(
-                [{"id": "manual:test", "source_type": "manual", "source_id": "test"}]
+                [{"id": "derived:test", "source_type": "derived", "source_id": "test"}]
             )
 
     def test_rejects_reference_source_type(self):

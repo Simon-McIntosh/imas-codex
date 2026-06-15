@@ -751,6 +751,22 @@ async def run_sn_pools(
                 vg_result.get("remaining", 0),
             )
 
+        # ── B2c: Reconcile provenance metadata ────────────────────────
+        # NULL produced_sn_id scalars pointing at deleted names and delete
+        # orphaned derived-parent scaffolding. Idempotent, provenance-only.
+        from imas_codex.standard_names.graph_ops import reconcile_provenance
+
+        prov_result = await asyncio.to_thread(reconcile_provenance)
+        if prov_result.get("scalars_cleared", 0) or prov_result.get(
+            "orphan_sources_deleted", 0
+        ):
+            logger.info(
+                "run_sn_pools: provenance reconcile — %d stale scalar(s) cleared, "
+                "%d orphaned derived-parent source(s) deleted",
+                prov_result.get("scalars_cleared", 0),
+                prov_result.get("orphan_sources_deleted", 0),
+            )
+
         # ── B3: Domain extract (auto-seed) ────────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
         # Skip auto-seeding in flush mode — only drain existing work.
