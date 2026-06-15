@@ -2211,7 +2211,7 @@ def sn_status() -> None:
                 RETURN count(sn) AS total,
                        count(CASE WHEN 'dd' IN sn.source_types THEN 1 END) AS from_dd,
                        count(CASE WHEN 'signals' IN sn.source_types THEN 1 END) AS from_signals,
-                       count(CASE WHEN 'manual' IN sn.source_types THEN 1 END) AS from_manual
+                       count(CASE WHEN 'derived' IN sn.source_types THEN 1 END) AS from_derived
             """
             )
             row = next(iter(result), None)
@@ -2219,7 +2219,7 @@ def sn_status() -> None:
                 console.print(f"[bold]Standard Names:[/bold] {row['total']}")
                 console.print(f"  From DD: {row['from_dd']}")
                 console.print(f"  From signals: {row['from_signals']}")
-                console.print(f"  From manual: {row['from_manual']}")
+                console.print(f"  From derived: {row['from_derived']}")
             else:
                 console.print("No standard names in graph")
 
