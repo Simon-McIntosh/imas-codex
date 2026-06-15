@@ -49,8 +49,16 @@ from imas_codex.graph.client import GraphClient
 logger = logging.getLogger(__name__)
 
 # Bump when metadata properties change (new DD XML attributes, schema fields,
-# etc.) to invalidate the build hash and force re-extraction on next --force.
-_BUILD_SCHEMA_VERSION = 2
+# etc.) OR when the unit-extraction output semantics change, to invalidate the
+# build hash and force re-extraction on every instance's next build.
+# v4: units now reflect the LATEST DD version. Per-version node creation only
+# writes a unit at first-add, so a path whose unit changed in a later version
+# (DD correction, or an as_parent placeholder resolved differently) used to
+# keep its first-introduced unit. A final pass now refreshes n.unit + HAS_UNIT
+# from the latest version, alongside the as_parent resolution and edge
+# self-heal. Unit changes don't affect enrich/embed/classify gating (those key
+# off durable status, preserved across rebuild), so re-extraction stays free.
+_BUILD_SCHEMA_VERSION = 4
 
 # Alias for backward-compat within this module
 _strip_dd_indices = strip_path_annotations
@@ -2022,6 +2030,67 @@ def phase_build(
                     paths=batch,
                 )
 
+        # Final-pass: refresh n.unit from the LATEST version's resolved unit.
+        # Per-version node creation only writes the unit when a path is first
+        # ADDED, so a path whose unit changed in a later version (e.g. a DD
+        # correction W→Wb, or an as_parent placeholder that newer versions
+        # resolve differently) would otherwise keep its first-introduced unit
+        # forever. Overwrite with the latest version's value so n.unit always
+        # reflects the current DD. The HAS_UNIT edge self-heal in
+        # _batch_create_path_nodes re-syncs the edge to this value.
+        unit_updates = [
+            {"id": path, "unit": info.get("units", "")}
+            for path, info in latest_paths.items()
+        ]
+        if unit_updates:
+            for i in range(0, len(unit_updates), 1000):
+                batch = unit_updates[i : i + 1000]
+                client.query(
+                    """
+                    UNWIND $paths AS p
+                    MATCH (path:IMASNode {id: p.id})
+                    SET path.unit = p.unit
+                    """,
+                    paths=batch,
+                )
+
+        # Re-sync HAS_UNIT edges to the refreshed n.unit (latest-version value).
+        # The per-version self-heal ran against first-add units; this final pass
+        # may have changed n.unit, so rebuild edges for the latest-version paths:
+        # drop existing HAS_UNIT, then MERGE the normalized current unit (paths
+        # whose unit is now empty/sentinel correctly end with no edge).
+        from imas_codex.units import normalize_unit_symbol
+
+        latest_ids = [u["id"] for u in unit_updates]
+        for i in range(0, len(latest_ids), 1000):
+            id_batch = latest_ids[i : i + 1000]
+            client.query(
+                """
+                UNWIND $ids AS id
+                MATCH (path:IMASNode {id: id})-[r:HAS_UNIT]->()
+                DELETE r
+                """,
+                ids=id_batch,
+            )
+        latest_unit_edges = []
+        for path, info in latest_paths.items():
+            raw = info.get("units", "")
+            if raw:
+                normalized = normalize_unit_symbol(raw)
+                if normalized:
+                    latest_unit_edges.append({"id": path, "unit": normalized})
+        for i in range(0, len(latest_unit_edges), 1000):
+            edge_batch = latest_unit_edges[i : i + 1000]
+            client.query(
+                """
+                UNWIND $paths AS p
+                MATCH (path:IMASNode {id: p.id})
+                MATCH (u:Unit {id: p.unit})
+                MERGE (path)-[:HAS_UNIT]->(u)
+                """,
+                paths=edge_batch,
+            )
+
         # Create HAS_IDENTIFIER_SCHEMA relationships
         id_rels = []
         for path, info in latest_paths.items():
@@ -3448,8 +3517,26 @@ def _batch_create_path_nodes(
             )
 
         # Step 4: Create HAS_UNIT relationships (filter out empty/sentinel units)
-        # Normalize unit symbols to match pint-normalized Unit nodes
+        # Normalize unit symbols to match pint-normalized Unit nodes.
+        #
+        # Self-healing: drop ALL existing HAS_UNIT edges for the batch's nodes
+        # before re-creating, so a unit change on rebuild (e.g. W→Wb, or an
+        # as_parent placeholder resolving to a different concrete unit) replaces
+        # the edge rather than leaving a stale one alongside the new one. Nodes
+        # whose unit became empty/sentinel correctly end with NO HAS_UNIT edge.
+        # Scoped to the batch's node ids — never touches the whole graph.
         from imas_codex.units import normalize_unit_symbol
+
+        batch_ids = [p["id"] for p in batch]
+        if batch_ids:
+            client.query(
+                """
+                UNWIND $ids AS id
+                MATCH (path:IMASNode {id: id})-[r:HAS_UNIT]->()
+                DELETE r
+            """,
+                ids=batch_ids,
+            )
 
         unit_paths = []
         for p in batch:

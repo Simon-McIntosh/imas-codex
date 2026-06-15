@@ -16,8 +16,13 @@ pytestmark = pytest.mark.graph
 # has a wrong unit.  These are tracked for DD-rebuild follow-up and
 # must NOT cause test failures.
 _DD_SIDE_UNIT_BUGS: dict[str, str] = {
-    # All previously-listed bugs have been fixed upstream in the DD.
-    # Add new entries here when a DD-side unit bug is discovered.
+    # The DD tags ion charge NUMBER (z_ion: "Ion charge of the dominant
+    # ionization state") with unit `e` (elementary charge). Charge number is
+    # dimensionless, so the SN unit `1` is physically correct and the DD `e`
+    # is the defect. Surfaced once unit normalization began mapping the DD's
+    # prose 'Elementary Charge Unit' to the canonical `e` symbol (creating a
+    # HAS_UNIT edge the comparison can see).
+    "ion_charge": "z_ion charge number is dimensionless; DD `e` is wrong",
 }
 
 
@@ -84,20 +89,32 @@ class TestSNUnitIntegrity:
             + "\n  ".join(failures)
         )
 
-    def test_all_valid_sns_have_unit(self, graph_client):
-        """Every valid StandardName must have a declared unit (even '1')."""
+    def test_declared_unit_has_matching_edge(self, graph_client):
+        """A live StandardName that declares a unit must carry its HAS_UNIT edge.
+
+        Scope:
+        - ``unit IS NOT NULL`` — a name with no declared unit is a separate
+          concern (e.g. an accepted name still awaiting a unit), not a
+          property↔edge consistency failure.
+        - excludes ``name_stage = 'superseded'`` — superseded names are dead
+          (replaced via ``REFINED_FROM``); the refine that superseded them may
+          legitimately have dropped the unit edge, and they are not subject to
+          the live-unit invariant.
+        """
         rows = graph_client.query("""
             MATCH (sn:StandardName {validation_status: 'valid'})
-            WHERE NOT (sn)-[:HAS_UNIT]->(:Unit)
-            RETURN sn.id AS name
+            WHERE sn.unit IS NOT NULL
+              AND coalesce(sn.name_stage, '') <> 'superseded'
+              AND NOT (sn)-[:HAS_UNIT]->(:Unit)
+            RETURN sn.id AS name, sn.unit AS unit
             ORDER BY name
         """)
         if not rows:
             return
-        missing = [r["name"] for r in rows]
+        missing = [f"{r['name']} (unit={r['unit']!r})" for r in rows]
         assert not missing, (
-            f"{len(missing)} valid StandardNames without HAS_UNIT edge: "
-            + ", ".join(missing[:20])
+            f"{len(missing)} live StandardNames declare a unit but lack the "
+            "HAS_UNIT edge: " + ", ".join(missing[:20])
         )
 
     def test_sn_unit_property_matches_edge(self, graph_client):
@@ -139,6 +156,31 @@ class TestSNUnitIntegrity:
         assert not rows, (
             f"{len(rows)} IMASNodes carry an unresolved 'as_parent' unit "
             "placeholder:\n  " + "\n  ".join(sample)
+        )
+
+    def test_no_imas_node_has_multiple_units(self, graph_client):
+        """No IMASNode may carry more than one HAS_UNIT edge.
+
+        The DD build writes ``n.unit`` and a single ``HAS_UNIT`` edge. When a
+        path's unit changes across a rebuild (a DD correction, or an
+        as_parent placeholder resolving differently), the build self-heals by
+        dropping existing HAS_UNIT edges before re-creating the canonical one.
+        A node with two HAS_UNIT edges means a stale edge survived a unit
+        change — the self-heal invariant is broken.
+        """
+        rows = graph_client.query("""
+            MATCH (n:IMASNode)-[r:HAS_UNIT]->()
+            WITH n, count(r) AS c
+            WHERE c > 1
+            RETURN n.id AS id, c AS edge_count
+            ORDER BY id
+        """)
+        if not rows:
+            return
+        sample = [f"{r['id']} ({r['edge_count']} edges)" for r in rows[:20]]
+        assert not rows, (
+            f"{len(rows)} IMASNodes carry more than one HAS_UNIT edge "
+            "(self-heal invariant broken):\n  " + "\n  ".join(sample)
         )
 
     def test_dd_side_unit_bugs_documented(self, graph_client):
