@@ -387,6 +387,84 @@ def _auto_detect_physical_base_gaps(
     return gaps
 
 
+def _compute_token_reuse_hits(vocab_gaps: list) -> dict[tuple[str, str], Any]:
+    """Flag candidate-new tokens that duplicate a registered same-segment token.
+
+    For each ``vocab_gap`` the compose LLM emitted this attempt, embeds the
+    proposed token and compares it against its segment's registered vocabulary
+    (free local embeddings, batched by segment so each segment's vocab is
+    embedded once).  Returns a map ``(segment, token) -> TokenNeighbour`` for
+    every proposal scoring at/above ``get_sn_dedup_threshold()``.
+
+    Best-effort: never raises (the helper itself is defensive); the local
+    compose model + local embeddings add no OpenRouter spend.  Returns ``{}``
+    when there are no gaps or no near-synonym registered token.
+    """
+    if not vocab_gaps:
+        return {}
+
+    from imas_codex.settings import get_sn_dedup_threshold
+    from imas_codex.standard_names.vocab_semantic_dedup import (
+        nearest_registered_tokens,
+    )
+
+    threshold = get_sn_dedup_threshold()
+    # threshold > 1.0 can never be met — short-circuit (OFF arm of the A/B).
+    if threshold > 1.0:
+        return {}
+
+    # Unique (token, segment) pairs; the segment vocab is embedded once each.
+    items = sorted({(vg.token, vg.segment) for vg in vocab_gaps})
+    hits = nearest_registered_tokens(items, threshold=threshold)
+    # Re-key by (segment, token) for stamp/lookup ergonomics.
+    return {(hit.segment, hit.proposed_token): hit for hit in hits.values()}
+
+
+def _build_token_reuse_retry_reason(hits: dict[tuple[str, str], Any]) -> str:
+    """Render a retry directive naming each flagged candidate-new token.
+
+    The agent re-composes after seeing this: it either reuses the registered
+    token (dedup achieved) or re-emits the same gap (confirming the quantity is
+    genuinely distinct on that segment's axis, recorded as distinct-confirmed).
+    """
+    parts = []
+    for hit in hits.values():
+        parts.append(
+            f"Segment `{hit.segment}`: your proposed new token "
+            f"`{hit.proposed_token}` is {hit.similarity:.2f} similar to "
+            f"registered `{hit.nearest_token}`. Reuse the registered token "
+            f"unless this quantity is genuinely DISTINCT on the {hit.segment} "
+            f"axis; if distinct, keep it and it will be recorded as a "
+            f"new-vocab request."
+        )
+    return "Vocabulary reuse check — re-compose to reuse-or-confirm:\n" + "\n".join(
+        parts
+    )
+
+
+def _stamp_dedup_decision(
+    gap_dicts: list[dict],
+    hits: dict[tuple[str, str], Any],
+) -> None:
+    """Stamp the compose-time token-reuse adjudication onto gap dicts in place.
+
+    A gap whose ``(segment, token)`` was flagged and SURVIVED the chained retry
+    (the agent re-emitted it after being shown the near-token) is
+    ``distinct_confirmed`` and carries the nearest token + score.  Gaps that
+    were never flagged are ``unchecked``.  (Gaps the agent dropped after the
+    prompt — "reused" — are no longer in ``result.vocab_gaps`` and so are never
+    written.)
+    """
+    for g in gap_dicts:
+        hit = hits.get((g.get("segment"), g.get("token")))
+        if hit is not None:
+            g["nearest_token"] = hit.nearest_token
+            g["nearest_similarity"] = hit.similarity
+            g["dedup_decision"] = "distinct_confirmed"
+        else:
+            g["dedup_decision"] = "unchecked"
+
+
 # =============================================================================
 # EXTRACT phase
 # =============================================================================
@@ -2307,6 +2385,10 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         _total_cache_read = 0
         _total_cache_creation = 0
         _max_retries = _retry_attempts()
+        # Token-reuse hits from the FINAL attempt: candidate-new tokens the
+        # agent re-emitted after being shown a near-synonym registered token.
+        # Carried to the post-loop VocabGap stamp as distinct_confirmed.
+        _token_reuse_hits: dict[tuple[str, str], Any] = {}
         for _compose_attempt in range(_max_retries + 1):
             try:
                 llm_out = await acall_llm_structured(
@@ -2426,17 +2508,27 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             except ImportError:
                 pass  # ISN not installed — skip check
 
-            if not _grammar_failures or _compose_attempt >= _max_retries:
+            # Component-token reuse check (free local embeddings): flag any
+            # candidate-new token semantically near a registered same-segment
+            # token so the agent gets a chained chance to reuse-or-confirm.
+            _token_reuse_hits = await asyncio.to_thread(
+                _compute_token_reuse_hits, result.vocab_gaps
+            )
+
+            if (not _grammar_failures and not _token_reuse_hits) or (
+                _compose_attempt >= _max_retries
+            ):
                 break
 
             # Re-enrich items with expanded hybrid search for retry
             wlog.info(
-                "Composition retry %d/%d: %d grammar failures (%s) "
-                "— re-composing with expanded DD context",
+                "Composition retry %d/%d: %d grammar failures (%s), "
+                "%d token-reuse hits — re-composing with expanded DD context",
                 _compose_attempt + 1,
                 _max_retries,
                 len(_grammar_failures),
                 ", ".join(_grammar_failures[:3]),
+                len(_token_reuse_hits),
             )
 
             def _re_enrich_expanded():
@@ -2466,13 +2558,21 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                                 item["hybrid_neighbours"] = hybrid_results[item_idx]
                             item_idx += 1
 
-            await asyncio.to_thread(_re_enrich_expanded)
+            # Only re-enrich when grammar failed; a token-reuse-only retry needs
+            # no expanded neighbour context (the agent just reuses-or-confirms).
+            if _grammar_failures:
+                await asyncio.to_thread(_re_enrich_expanded)
 
-            _retry_reason = (
-                f"Previous attempt failed: grammar round-trip failed for "
-                f"{', '.join(_grammar_failures[:3])}. Consider expanded "
-                f"neighbour context and produce a different name."
-            )
+            _reason_parts = []
+            if _grammar_failures:
+                _reason_parts.append(
+                    f"Previous attempt failed: grammar round-trip failed for "
+                    f"{', '.join(_grammar_failures[:3])}. Consider expanded "
+                    f"neighbour context and produce a different name."
+                )
+            if _token_reuse_hits:
+                _reason_parts.append(_build_token_reuse_retry_reason(_token_reuse_hits))
+            _retry_reason = "\n\n".join(_reason_parts)
             retry_render_ctx = {
                 **context,
                 **user_context,
@@ -2802,6 +2902,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 }
                 state.stats.setdefault("vocab_gaps", []).append(gap_dict)
                 gap_dicts.append(gap_dict)
+
+            # Stamp the compose-time token-reuse adjudication: gaps re-emitted
+            # after being shown a near-synonym registered token are
+            # distinct_confirmed; the rest are unchecked.
+            _stamp_dedup_decision(gap_dicts, _token_reuse_hits)
 
             # Persist to graph immediately so gaps survive cost-limit interruption
             from imas_codex.standard_names.graph_ops import write_vocab_gaps
@@ -4029,6 +4134,8 @@ async def compose_batch(
     # ── Budget reservation ─────────────────────────────────────────────
     # B12: reserve for retry_attempts + 1 LLM calls (re-enrichment retry)
     _max_retries = _retry_attempts()
+    # Token-reuse hits from the FINAL attempt (carried to the VocabGap stamp).
+    _token_reuse_hits: dict[tuple[str, str], Any] = {}
     estimated = len(batch) * 0.20 * (_max_retries + 1)
     phase_tag = "regen" if regen else "generate_name"
     lease = mgr.reserve(estimated, phase=phase_tag)
@@ -4126,18 +4233,28 @@ async def compose_batch(
             except ImportError:
                 pass  # ISN not installed — skip check
 
-            if not _grammar_failures or _compose_attempt >= _max_retries:
+            # Component-token reuse check (free local embeddings): flag any
+            # candidate-new token semantically near a registered same-segment
+            # token so the agent gets a chained chance to reuse-or-confirm.
+            _token_reuse_hits = await asyncio.to_thread(
+                _compute_token_reuse_hits, result.vocab_gaps
+            )
+
+            if (not _grammar_failures and not _token_reuse_hits) or (
+                _compose_attempt >= _max_retries
+            ):
                 break
 
             # Re-enrich items with expanded hybrid search for retry
             logger.info(
-                "Pool %s: composition retry %d/%d: %d grammar failures (%s) "
-                "— re-composing with expanded DD context",
+                "Pool %s: composition retry %d/%d: %d grammar failures (%s), "
+                "%d token-reuse hits — re-composing with expanded DD context",
                 phase_tag,
                 _compose_attempt + 1,
                 _max_retries,
                 len(_grammar_failures),
                 ", ".join(_grammar_failures[:3]),
+                len(_token_reuse_hits),
             )
 
             def _re_enrich_expanded():
@@ -4167,13 +4284,21 @@ async def compose_batch(
                                 item["hybrid_neighbours"] = hybrid_results[item_idx]
                             item_idx += 1
 
-            await asyncio.to_thread(_re_enrich_expanded)
+            # Only re-enrich when grammar failed; a token-reuse-only retry needs
+            # no expanded neighbour context (the agent just reuses-or-confirms).
+            if _grammar_failures:
+                await asyncio.to_thread(_re_enrich_expanded)
 
-            _retry_reason = (
-                f"Previous attempt failed: grammar round-trip failed for "
-                f"{', '.join(_grammar_failures[:3])}. Consider expanded "
-                f"neighbour context and produce a different name."
-            )
+            _reason_parts = []
+            if _grammar_failures:
+                _reason_parts.append(
+                    f"Previous attempt failed: grammar round-trip failed for "
+                    f"{', '.join(_grammar_failures[:3])}. Consider expanded "
+                    f"neighbour context and produce a different name."
+                )
+            if _token_reuse_hits:
+                _reason_parts.append(_build_token_reuse_retry_reason(_token_reuse_hits))
+            _retry_reason = "\n\n".join(_reason_parts)
             retry_render_ctx = {
                 **context,
                 **user_context,
@@ -4562,6 +4687,10 @@ async def compose_batch(
                 }
                 for vg in result.vocab_gaps
             ]
+            # Stamp the compose-time token-reuse adjudication: gaps re-emitted
+            # after being shown a near-synonym registered token are
+            # distinct_confirmed; the rest are unchecked.
+            _stamp_dedup_decision(gap_dicts, _token_reuse_hits)
             try:
                 await asyncio.to_thread(write_vocab_gaps, gap_dicts, source_kind)
                 wlog.debug(
