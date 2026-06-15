@@ -181,6 +181,25 @@ A clean compose-time `vocab_gap` is cheap; a guessed near-base churns through
 review and every refine rotation to exhaustion. Surfacing the gap is the correct
 outcome — the vocabulary rotation will add the token if the concept is real.
 
+### VOCABULARY REUSE — prefer a registered token over a near-synonym
+
+A retry may report that a token you proposed as a `vocab_gap` is semantically
+close to a token already registered in that segment (cosine similarity at or
+above {{ dedup_similarity_threshold }}). When you see such a note:
+
+- **PREFER reusing the registered token.** Two tokens that mean the same thing
+  on the same segment axis (e.g. `field_line_length` vs `connection_length`)
+  split the catalog into synonym families — exactly what the closed vocabulary
+  exists to prevent. Re-compose with the registered token.
+- **Keep your token ONLY when the quantity is genuinely DISTINCT** on that
+  segment's axis (the near token is a false friend, not a synonym). In that
+  case re-emit the same `vocab_gap` — it will be recorded as a confirmed
+  new-vocabulary request and surfaced to the vocabulary rotation.
+
+This is advisory, never a hard rule: a real distinct concept must not be forced
+onto a wrong registered token just because it scored close. Reuse-or-confirm —
+do not silently keep a synonym.
+
 ### FORBIDDEN PATTERNS (D5 review)
 
 The following name patterns produce synonym families or encode orthogonal axes
