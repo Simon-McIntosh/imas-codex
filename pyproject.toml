@@ -509,13 +509,13 @@ reasoning-effort = "high"
 # violations for free; OK at low-stakes pass/fail signal.
 # Cycle 1 (secondary, blind): Haiku 4.5 — cross-vendor cheap diversity,
 # breaks the same-family bias that caused the DS4 rsd=1.0 false positives.
-# Cycle 2 (escalator, context-aware): GPT-5.4 — fast, cheap, cross-vendor
-# authority on disputed items. Sonnet/Opus reserved for Phase 2 reviews.
+# Cycle 2 (escalator, context-aware): GPT-5.5 — cross-vendor authority on
+# disputed items (sees both blind critiques). Sonnet/Opus reserved for Phase 2.
 # Switch-back to single-DS4: see profile.local-only below.
 models = [
   "hosted_vllm/deepseek-v4-flash",
   "openrouter/anthropic/claude-haiku-4.5",
-  "openrouter/openai/gpt-5.4",
+  "openrouter/openai/gpt-5.5",
 ]
 disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"
