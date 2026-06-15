@@ -103,7 +103,7 @@ class TestExemplarAlignment:
         assert "due_to_<adjective>" in rendered_compose_system
         assert "_ggd_coefficients" in rendered_compose_system
         assert "_reference_waveform" in rendered_compose_system
-        assert "diamagnetic_component_of_<vector>" in rendered_compose_system
+        assert "diamagnetic_component_of_ion_velocity" in rendered_compose_system
         assert "deuterium_tritium" in rendered_compose_system
 
 
