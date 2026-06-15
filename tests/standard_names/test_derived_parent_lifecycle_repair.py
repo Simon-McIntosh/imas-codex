@@ -308,7 +308,7 @@ def test_pending_placeholder_repair_sets_docs_lifecycle_and_dd_source() -> None:
     )
 
 
-def test_legacy_accepted_null_docs_repair_uses_manual_source_when_needed() -> None:
+def test_legacy_accepted_null_docs_repair_uses_derived_source_when_needed() -> None:
     from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
 
     graph = _StatefulDerivedParentGraph(
@@ -325,8 +325,8 @@ def test_legacy_accepted_null_docs_repair_uses_manual_source_when_needed() -> No
     assert repaired == 1
     assert graph.parent["docs_stage"] == "pending"
     assert graph.parent["description"] == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
-    assert graph.sources["manual:total_plasma_current"]["source_type"] == "manual"
-    assert graph.sources["manual:total_plasma_current"]["source_id"] == (
+    assert graph.sources["derived:total_plasma_current"]["source_type"] == "derived"
+    assert graph.sources["derived:total_plasma_current"]["source_id"] == (
         "total_plasma_current"
     )
 

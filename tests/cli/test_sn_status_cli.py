@@ -40,7 +40,7 @@ def _make_gc_instance(
     gc.__exit__ = MagicMock(return_value=False)
 
     default_total = [
-        {"total": 497, "from_dd": 300, "from_signals": 100, "from_manual": 97}
+        {"total": 497, "from_dd": 300, "from_signals": 100, "from_derived": 97}
     ]
     default_vstatus = [{"status": "valid", "cnt": 497}]
     default_ns = [
@@ -134,7 +134,9 @@ class TestSnStatusNameStage:
     def test_empty_name_stage_no_crash(self, runner: CliRunner) -> None:
         """If no names exist, acceptance rate section is simply omitted."""
         patches = _patch_sn_status(
-            total_row=[{"total": 0, "from_dd": 0, "from_signals": 0, "from_manual": 0}],
+            total_row=[
+                {"total": 0, "from_dd": 0, "from_signals": 0, "from_derived": 0}
+            ],
             vstatus_rows=[],
             name_stage_rows=[],
             docs_stage_rows=[],
