@@ -1,10 +1,10 @@
-"""Tests for vocab_promotion module and consolidated sn gaps CLI.
+"""Tests for the vocab_promotion module (saturated-token promotion mining).
 
 Covers:
 - mine_promotion_candidates threshold logic (min_usage_count, min_review_mean_score)
 - persist_candidates writes PromotionCandidate nodes + EVIDENCED_BY edges
 - format_isn_pr_snippet renders valid ISN-compatible YAML
-- sn gaps --direction flag routes to saturated / missing / both
+- the manual vocab-gap CLI surface (sn gaps / sn vocab) is fully retired
 """
 
 from __future__ import annotations
@@ -167,33 +167,21 @@ class TestFormatISNPRSnippet:
         assert isinstance(out, str)
 
 
-class TestSnGapsCliRouting:
-    """Consolidated sn gaps routes by --direction."""
+class TestSnVocabCliRetired:
+    """The manual vocab-gap CLI surface is fully retired.
 
-    def test_help_lists_direction_flag(self):
-        from click.testing import CliRunner
+    Vocabulary-gap adjudication is now an automatic in-pipeline step (the
+    compose retry loop's token-reuse check). VocabGap nodes still live in the
+    graph and are queried directly when cutting an ISN vocabulary rotation, so
+    no batch CLI command is needed.
+    """
 
-        from imas_codex.cli.sn import sn_gaps
+    def test_no_sn_gaps_command(self):
+        from imas_codex.cli.sn import sn
 
-        runner = CliRunner()
-        result = runner.invoke(sn_gaps, ["--help"])
-        assert result.exit_code == 0
-        assert "--direction" in result.output
-        assert "missing" in result.output
-        assert "saturated" in result.output
-
-    def test_help_mentions_yaml_export(self):
-        from click.testing import CliRunner
-
-        from imas_codex.cli.sn import sn_gaps
-
-        runner = CliRunner()
-        result = runner.invoke(sn_gaps, ["--help"])
-        assert result.exit_code == 0
-        assert "yaml" in result.output.lower()
+        assert "gaps" not in sn.commands
 
     def test_no_sn_vocab_group(self):
-        """Verify sn vocab group was removed (merged into sn gaps)."""
         from imas_codex.cli.sn import sn
 
         assert "vocab" not in sn.commands
