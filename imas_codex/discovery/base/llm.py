@@ -314,7 +314,13 @@ MODEL_TOKEN_LIMITS: dict[str, dict[str, int]] = {
     },
     "hosted_vllm": {
         "max_tokens": 32000,
-        "timeout": 300,  # 5 min — local GPU with high concurrency needs headroom
+        # 10 min. Max-thinking 25-path compose batches generate ~18.5k tokens
+        # (≈199 s solo, ~305 s at the 4-way concurrency knee — see the
+        # generate-name-replicas tuning note in pyproject [sn-compose]). A
+        # full 32k-token batch at the knee needs ~528 s, so 300 s was too
+        # tight and produced APITimeouts; 600 s clears a worst-case batch with
+        # margin. Concurrency is bounded by the replica count, not this value.
+        "timeout": 600,
     },
     "default": {
         "max_tokens": 32000,
