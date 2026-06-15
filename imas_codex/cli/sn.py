@@ -211,7 +211,7 @@ def sn() -> None:
 
     \b
     Housekeeping:
-      sn clear | sn prune | sn gaps | sn sync-grammar | sn bench
+      sn clear | sn prune | sn sync-grammar | sn bench
     """
     pass
 

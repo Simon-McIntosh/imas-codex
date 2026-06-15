@@ -570,7 +570,7 @@ release convergence, not recovery).
 ### CLI commands
 
 `sn run` (six-pool loop), `review`, `export`, `preview`, `release`, `import`,
-`status`, `coverage`, `gaps`, `clear`, `prune`, `sync-grammar`, `bench`. Run
+`status`, `coverage`, `clear`, `prune`, `sync-grammar`, `bench`. Run
 `uv run imas-codex sn <cmd> --help` for flags; semantics and the full flag
 matrix are in the architecture doc.
 

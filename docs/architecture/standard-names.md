@@ -596,7 +596,6 @@ names (catalog-authoritative). `sn clear` has no such guard.
 | `sn import` | Import reviewed YAML back into the graph | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
 | `sn status` | StandardName + StandardNameSource statistics | — |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
-| `sn gaps` | Grammar vocabulary gaps from composition | `--segment`, `--export {table,yaml}` |
 | `sn clear` | Full-subsystem wipe + auto re-seed | `--dry-run`, `--force`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--status`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn sync-grammar` | Seed/refresh ISN grammar vocabulary | `--dry-run` |
@@ -714,8 +713,14 @@ tokens in Python — pull from ISN.
 reason). Pseudo segments like `grammar_ambiguity` are filtered at write time
 (`imas_codex.standard_names.segments.filter_closed_segment_gaps`); reviewers
 audit the `physical_base` slot via the decomposition rule
-(`sn_review_criteria.yaml` I4.6). Use `sn gaps` for a table view or
-`sn gaps --export yaml` to produce ISN vocabulary issues.
+(`sn_review_criteria.yaml` I4.6). `VocabGap` nodes accumulate automatically
+during composition; query them directly from the graph when assembling an ISN
+vocabulary rotation. A compose-time component-token reuse check
+(`vocab_semantic_dedup.nearest_registered_token`, threshold
+`[sn-compose].dedup-similarity-threshold`) flags a proposed new token that is a
+near-synonym of a registered same-segment token and chains a refine so the
+agent reuses it or confirms it distinct — the confirmation is stamped on the
+`VocabGap` (`dedup_decision`) so the rotation does not re-litigate it.
 
 ### Vocabulary rotation — ISN fork RC workflow
 
