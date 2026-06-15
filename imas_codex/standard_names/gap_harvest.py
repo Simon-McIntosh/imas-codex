@@ -255,6 +255,14 @@ def format_pr_yaml(
                 "token": r["token"],
                 "occurrences": r["occurrences"],
             }
+            # Semantic-dedup triage hint (present when `sn gaps --semantic-dedup`
+            # annotated the record): the nearest existing same-segment token and
+            # its cosine similarity, so a reviewer can fold synonyms before merge.
+            if r.get("nearest_existing") and r.get("nearest_similarity") is not None:
+                entry["nearest_existing"] = r["nearest_existing"]
+                entry["nearest_similarity"] = r["nearest_similarity"]
+                if r.get("likely_duplicate"):
+                    entry["likely_duplicate"] = True
             if r.get("example_dd_paths"):
                 entry["example_dd_paths"] = r["example_dd_paths"]
             if r.get("example_reasons"):

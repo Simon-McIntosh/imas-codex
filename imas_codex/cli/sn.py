@@ -2588,6 +2588,14 @@ def _emit_yaml_output(
     show_default=True,
     help="Output format. --format yaml yields ISN-PR-ready snippets.",
 )
+@click.option(
+    "--semantic-dedup/--no-semantic-dedup",
+    default=True,
+    show_default=True,
+    help="Missing-direction: flag proposed tokens that are semantically "
+    "near-duplicates of an existing same-segment token (advisory triage, "
+    "never auto-rejected). Uses free local embeddings.",
+)
 def sn_gaps(
     direction: str,
     segment: str | None,
@@ -2598,6 +2606,7 @@ def sn_gaps(
     persist: bool,
     output: str | None,
     export_format: str,
+    semantic_dedup: bool,
 ) -> None:
     """Report vocabulary gaps for ISN issue filing.
 
@@ -2699,6 +2708,13 @@ def sn_gaps(
             gc, segment_filter=segment, include_open=include_open
         )
 
+    # Annotate each proposed token with its nearest existing same-segment
+    # neighbour so synonyms surface for triage before they enter the vocab.
+    if semantic_dedup and results:
+        from imas_codex.standard_names.vocab_semantic_dedup import annotate_duplicates
+
+        annotate_duplicates(results)
+
     if export_format == "yaml":
         from imas_codex.standard_names.gap_harvest import (
             _dd_version,
@@ -2729,6 +2745,8 @@ def sn_gaps(
         table.add_column("Category", style="magenta")
         table.add_column("Sources", justify="right")
         table.add_column("Example Count", justify="right")
+        if semantic_dedup:
+            table.add_column("Near Existing", style="yellow")
         table.add_column("First Seen")
         table.add_column("Last Seen")
 
@@ -2739,18 +2757,33 @@ def sn_gaps(
             actual = r.get("actual_segments") or []
             if actual:
                 cat = f"{cat} ({', '.join(actual)})"
-            table.add_row(
+            row = [
                 r["segment"],
                 r["token"],
                 cat,
                 str(r["occurrences"]),
                 str(r.get("example_count") or "—"),
-                first_seen,
-                last_seen,
-            )
+            ]
+            if semantic_dedup:
+                near = r.get("nearest_existing")
+                sim = r.get("nearest_similarity")
+                if near and sim is not None:
+                    mark = "⚠ " if r.get("likely_duplicate") else ""
+                    cell = f"{mark}{near} ({sim:.2f})"
+                else:
+                    cell = "—"
+                row.append(cell)
+            row.extend([first_seen, last_seen])
+            table.add_row(*row)
 
         console.print(table)
-        console.print(f"[dim]{len(results)} missing token(s).[/dim]")
+        n_dup = sum(1 for r in results if r.get("likely_duplicate"))
+        suffix = (
+            f" · [yellow]{n_dup} flagged as likely duplicates (⚠)[/yellow]"
+            if n_dup
+            else ""
+        )
+        console.print(f"[dim]{len(results)} missing token(s).[/dim]{suffix}")
 
 
 # =============================================================================
