@@ -43,5 +43,13 @@
       "none": 69
     },
     "cohort_existing_sn": 0
+  },
+  "post_state": {
+    "vocab_gap_total": 70,
+    "cohort_sources_status": {
+      "extracted": 32
+    },
+    "residual_scratch_sn": 0,
+    "note": "graph left clean \u2014 sources reset to extracted, scratch SN deleted, VocabGap preserved (70 = 69 pre + 1 genuine device/coil)"
   }
 }

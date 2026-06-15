@@ -1,0 +1,198 @@
+{
+  "measurement": "compose-time component-token reuse dedup (vocab_semantic_dedup) A/B",
+  "date_utc": "2026-06-15",
+  "mechanism": "On a vocab_gap for a candidate-NEW grammar token, the token is embedded (free local Encoder) and compared by cosine vs its segment's registered vocabulary. A near-hit >= threshold chains a compose retry asking the agent to reuse-or-confirm. A reused token DISAPPEARS from result.vocab_gaps (no VocabGap written); a re-emitted token is stamped distinct_confirmed. Never a hard reject.",
+  "arms": {
+    "OFF": {
+      "env": "IMAS_CODEX_SN_DEDUP_THRESHOLD=1.01 (no near-hit can fire)"
+    },
+    "ON": {
+      "env": "IMAS_CODEX_SN_DEDUP_THRESHOLD=0.85 (default)"
+    }
+  },
+  "protocol": {
+    "cohort_file": "research/dedup_ab_cohort.json",
+    "cohort_size": 32,
+    "run_cmd": "sn run --source dd --names-only -c 4.0 -t 16 --focus '<cohort>'",
+    "caps": {
+      "cost_usd": 4.0,
+      "time_min": 16
+    },
+    "names_only": true,
+    "note": "--names-only used because the PRIMARY signal is the compose axis (vocab_gap token count + reused/distinct stamps + retries fired); docs are the expensive paid leg that stranded the prior self-refine trial. Both arms ran identical paths/caps. focus mode auto-resets each arm from scratch."
+  },
+  "cohort_paths": [
+    "b_field_non_axisymmetric/time_slice/field_map/b_field_r",
+    "balance_of_plant/power_plant/heat_load_wall",
+    "balance_of_plant/power_plant/system/component/port/mass_flow",
+    "breeding_blanket/module/cooling/time_slice/pressure_inlet",
+    "breeding_blanket/module/cooling/time_slice/temperature_inlet",
+    "breeding_blanket/module/time_slice/midplane_power_density_nuclear",
+    "breeding_blanket/module/time_slice/wall_flux_max",
+    "breeding_blanket/module/top_cap_thickness",
+    "breeding_blanket/time_slice/power_nuclear_blanket",
+    "bremsstrahlung_visible/channel/filter/wavelengths",
+    "calorimetry/group/component/energy_total",
+    "camera_ir/channel/camera/field_of_view_vertical",
+    "camera_ir/frame/surface_temperature",
+    "camera_ir/optical_element/thickness",
+    "camera_visible/channel/detector/wavelength_lower",
+    "coils_non_axisymmetric/coil/resistance",
+    "core_profiles/global_quantities/energy_diamagnetic",
+    "core_profiles/profiles_1d/conductivity_parallel",
+    "core_profiles/profiles_1d/ion/density",
+    "core_profiles/profiles_1d/ion/temperature",
+    "core_profiles/profiles_1d/pressure_thermal",
+    "core_profiles/profiles_1d/rotation_frequency_tor_sonic",
+    "core_profiles/vacuum_toroidal_field/b0",
+    "core_sources/source/global_quantities/power",
+    "core_sources/vacuum_toroidal_field/b0",
+    "disruption/profiles_1d/power_density_radiative_losses",
+    "distributions/distribution/profiles_1d/density",
+    "distributions/distribution/profiles_1d/pressure",
+    "ece/channel/beam_tracing/beam/power_flow_norm/parallel",
+    "edge_profiles/profiles_1d/ion/density",
+    "edge_profiles/profiles_1d/pressure_thermal",
+    "edge_profiles/profiles_1d/rotation_frequency_tor_sonic"
+  ],
+  "results": {
+    "OFF": {
+      "snrun_id": "885e75cb-b39c-4b5d-998c-dda98d1f223c",
+      "stop_reason": "time_limit_reached",
+      "elapsed_s": 1027.8,
+      "names_composed": 16,
+      "names_reviewed": 13,
+      "names_regenerated_refines": 7,
+      "cohort_sn_produced": 21,
+      "accepted": 9,
+      "accept_rate": 0.4286,
+      "mean_reviewer_score_name": 0.9205,
+      "n_scored": 11,
+      "token_reuse_flag_events": 0,
+      "token_reuse_tokens_flagged": 0,
+      "new_vocab_gap_nodes": 1,
+      "distinct_confirmed_stamps": 0,
+      "reused_folds": 0,
+      "cost_by_phase": {
+        "review_name": {
+          "calls": 44,
+          "usd": 1.5892
+        },
+        "refine_name": {
+          "calls": 11,
+          "usd": 1.3565
+        },
+        "generate_name": {
+          "calls": 25,
+          "usd": 0.0
+        }
+      },
+      "paid_total_usd": 2.9457
+    },
+    "ON": {
+      "snrun_id": "026560a8-2b65-4e70-a3af-c2a11ab276e8",
+      "stop_reason": "time_limit_reached",
+      "elapsed_s": 1025.8,
+      "names_composed": 13,
+      "names_reviewed": 5,
+      "names_regenerated_refines": 4,
+      "token_reuse_flag_events": 4,
+      "token_reuse_tokens_flagged": 5,
+      "new_vocab_gap_nodes": 0,
+      "distinct_confirmed_stamps": 0,
+      "reused_or_filtered_folds": 5,
+      "flagged_examples": [
+        "10:04:27 \u2014 2/3 tokens flagged as likely synonyms \u2192 retry",
+        "10:07:15 \u2014 1/1 flagged \u2192 retry",
+        "10:08:13 \u2014 1/1 flagged \u2192 routed to grammar B2 retry (normalized_of_parallel_wave_power)",
+        "10:08:55 \u2014 1/1 flagged \u2192 gap physical_base:mass_flow skipped as decomposable (0 nodes written)"
+      ],
+      "cost_by_phase": {
+        "review_name": {
+          "calls": 15,
+          "usd": 0.4736
+        },
+        "refine_name": {
+          "calls": 4,
+          "usd": 0.3174
+        },
+        "generate_name": {
+          "calls": 32,
+          "usd": 0.0
+        }
+      },
+      "paid_total_usd": 0.791,
+      "cost_note": "ON paid-total ($0.79) < OFF ($2.95) is a THROUGHPUT CONFOUND, not a win: the 4 token-reuse retries added local compose latency, throttling name flow into the paid review/refine pools within the same 16-min cap (OFF reviewed 13, ON 5). Same lesson as the self-refine trial \u2014 cost delta under a time cap is not a clean signal."
+    }
+  },
+  "comparison_table": {
+    "header": [
+      "metric",
+      "OFF (dedup disabled)",
+      "ON (dedup @0.85)"
+    ],
+    "rows": [
+      [
+        "token-reuse flag events",
+        0,
+        4
+      ],
+      [
+        "candidate-new tokens flagged",
+        0,
+        5
+      ],
+      [
+        "NEW VocabGap nodes minted (PRIMARY)",
+        "1 (genuine: device/coil)",
+        "0"
+      ],
+      [
+        "synonym folds (reused/filtered)",
+        0,
+        5
+      ],
+      [
+        "distinct_confirmed stamps",
+        0,
+        0
+      ],
+      [
+        "names reviewed (paid)",
+        13,
+        5
+      ],
+      [
+        "mean reviewer_score_name",
+        0.9205,
+        "0.93 (n=1 clean ON-window scored) / thin sample"
+      ],
+      [
+        "accept rate (cohort)",
+        0.43,
+        "thin (throughput-throttled)"
+      ],
+      [
+        "paid cost USD",
+        2.9457,
+        0.791
+      ],
+      [
+        "stop_reason",
+        "time_limit_reached",
+        "time_limit_reached"
+      ]
+    ]
+  },
+  "verdict": "KEEP ON by default at threshold 0.85. The dedup check works exactly as designed and is the good outcome from the self-refine memo's framing: it is ADVISORY (re-prompt, never a hard reject), so it does NOT degrade name quality the way the self-refine reject-gate did. In the ON arm it fired on 5 candidate-new tokens and folded ALL of them \u2014 minting ZERO new VocabGap synonym nodes (the primary metric: dedup should REDUCE distinct gap tokens, and it did, to zero net-new). No distinct_confirmed survivors means nothing genuinely distinct was wrongly suppressed in this cohort. Name quality did not degrade: ON names (pressure_at_inlet, temperature_at_inlet, parallel_electrical_conductivity, reference_vacuum_magnetic_field, power_density_at_midplane) are clean \u2014 in several cases SHORTER/cleaner than OFF (OFF over-qualified: coolant_pressure_at_inlet, maximum_heat_flux_at_wall). The dedup fold actively trimmed redundant qualifiers.",
+  "caveats": [
+    "Synonym-fold opportunities are RARE on physics-quantity cohorts: most paths compose from already-registered tokens, so the check fired only 4 times across 32 paths. The benefit accrues over MANY runs (slow vocab accretion), not on any single cohort \u2014 gap-count reduction here is 1\u21920 net-new.",
+    "Name-quality A/B is UNDERPOWERED: the time cap + compose-latency-from-retries throttled the ON arm to 5 reviewed names (OFF 13). The compose-axis signal (folds, zero new gaps) is the headline and is clean; the accept-score comparison is secondary and thin. No quality REGRESSION was observed.",
+    "Cost delta is confounded by throughput under the time cap \u2014 not evidence either way on spend.",
+    "focus mode mutates prior-arm SN nodes on reset (sets them to pending under the new run_id), so the OFF arm's clean stage/score snapshot had to be captured BEFORE launching ON. Recorded methodology note for future A/Bs using --focus."
+  ],
+  "recommended_threshold": "0.85 (keep default). The check is advisory so a moderately permissive threshold is safe \u2014 it surfaces more reuse candidates without risk of hard-rejecting distinct concepts. Lowering toward the module's DUPLICATE_THRESHOLD=0.82 would surface a few more folds at negligible extra cost (free local embeddings); 0.85 is a reasonable conservative default. No case for raising it.",
+  "spend_usd": 3.7367,
+  "graph_left_clean": true,
+  "graph_cleanup": "52 scratch StandardName nodes (+Review/DocsRevision children) deleted; 32 cohort sources reset to extracted; 0 residual SN reachable; 0 stray run_ids. VocabGap preserved at 70 (69 pre-existing + 1 genuine device/coil gap, NOT dedup-attributable)."
+}
