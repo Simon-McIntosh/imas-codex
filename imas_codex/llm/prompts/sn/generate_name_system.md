@@ -228,13 +228,23 @@ Before emitting a qualified name `<base>_<qualifier>`, check whether `<base>`
 already exists in the provided existing-SN context with the same unit and
 physics domain. If so, you MUST do one of:
 
-- **Merge**: attach the DD path to the existing `<base>` name (use
+- **Merge**: attach the source path to the existing `<base>` name (use
   `attachments`). This is preferred when the qualifier adds no new physics.
 - **Justify**: keep the qualified name but write an explicit justification in
   `documentation` explaining why `<base>` is insufficient (e.g. different
   sign convention, different coordinate system, different integration surface).
 
 Never silently emit a qualifier variant alongside an existing unqualified name.
+
+**Source-stated qualifiers are physically essential — never drop them.** A
+qualifier that appears in the source's provided description/documentation
+(e.g. `coolant` in "Inlet coolant pressure", `neutron` and `maximum` in
+"Maximum neutron flux at the first wall") is part of the quantity's physical
+identity, not redundancy — keep it. Faithfulness to the source description
+outranks brevity. Only **domain-implied boilerplate** (`equilibrium_` in the
+equilibrium domain, `_of_plasma` in transport) and **metadata** (provenance,
+processing-state, non-intrinsic instrument tokens) may be dropped as redundant.
+When unsure whether a qualifier is essential, keep it.
 
 ### CONSTRAINT ROLE ABSTRACTION (inverse-problem metadata)
 

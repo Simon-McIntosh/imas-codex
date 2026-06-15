@@ -267,7 +267,7 @@ def detect_convention_drift(reviewed_names: list[dict]) -> list[DriftWarning]:
         # ----------------------------------------------------------------
         doc_lengths: list[int] = []
         for n in names:
-            doc = n.get("documentation") or n.get("description") or ""
+            doc = n.get("description") or n.get("documentation") or ""
             doc_lengths.append(len(doc))
 
         if len(doc_lengths) >= 3:

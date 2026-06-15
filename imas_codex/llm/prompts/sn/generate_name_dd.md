@@ -263,7 +263,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% endif %}
 {% if item.species_context %}- **⚠️ Species context:** `{{ item.species_context }}` — this quantity is specific to **{{ item.species_context }}** species. The standard name MUST include the species in the `subject` segment (e.g., `{{ item.species_context }}_temperature`, not just `temperature`).
 {% endif %}- **Description:** {{ item.description }}
-{% if item.documentation and item.documentation != item.description %}- **DD Documentation:** {{ item.documentation }}{% endif %}
+{% if item.documentation and item.documentation != item.description %}- **Source documentation:** {{ item.documentation }}{% endif %}
 - **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative from DD — use for naming context only, do NOT output)*
 - **Data type:** {{ item.data_type or 'unspecified' }}
 {% if item.node_type %}- **Node type:** {{ item.node_type }} *(dynamic=time-varying quantity; static=machine-fixed parameter, e.g. wall geometry; constant=single scalar value; none=unclassified — use other context)*{% endif %}

@@ -26,7 +26,7 @@ addresses the reviewer's concerns.
 ### Linked DD paths
 {% if dd_paths %}
 {% for path in dd_paths %}
-- `{{ path.path }}`{% if path.ids %} ({{ path.ids }}{% if path.unit %}, unit: {{ path.unit }}{% endif %}){% elif path.unit %} (unit: {{ path.unit }}){% endif %}: {{ path.documentation or path.description or "(no documentation)" }}
+- `{{ path.path }}`{% if path.ids %} ({{ path.ids }}{% if path.unit %}, unit: {{ path.unit }}{% endif %}){% elif path.unit %} (unit: {{ path.unit }}){% endif %}: {{ path.description or path.documentation or "(no documentation)" }}
 {% endfor %}
 {% else %}
 _(no linked DD paths)_

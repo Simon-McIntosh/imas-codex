@@ -198,7 +198,7 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 {% endif %}
 {% if item.dd_source_docs %}
 **Source DD definitions** (physics reference — dock if verbatim-copied into output):
-{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
+{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
 {% endfor %}{% endif %}
 {% if item.nearest_peers %}
 **DD neighbours** `[hybrid]` (concept-similar paths — judge naming consistency):

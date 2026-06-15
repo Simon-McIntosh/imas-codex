@@ -88,6 +88,16 @@ grammar and convention scores.
   A name must be unambiguous in isolation. Score ≤ 5 if the name is semantically
   incomplete — e.g. `co_passing_density` (density of what?), `trapped_pressure`
   (pressure of what species/component?), `beam_fraction` (fraction of what?).
+- **Source fidelity**: does the name drop a physically-essential qualifier that
+  the source description states? Compare the name against the provided source
+  description and flag a dropped **kind** (`neutron` vs `heat` flux), **extremum**
+  (`maximum`, `peak`), **species**, or **medium** (`coolant`) qualifier — these
+  change *what is measured* and must appear in the name. Score ≤ 5 when such a
+  qualifier is present in the source description but absent from the name
+  (e.g. source "Maximum neutron flux at the first wall" → name `heat_flux_at_wall`
+  loses `maximum` and `neutron` and mistypes the flux kind). Do NOT penalise the
+  inverse — qualifiers absent from the source that are merely domain-implied
+  boilerplate (`equilibrium_`, `_of_plasma`) should still be dropped.
 
 ### 3. Naming Convention Adherence (0-20)
 - Does the name avoid ambiguous or overloaded terms?
@@ -176,7 +186,7 @@ real defects, not phantom ones.
 {% endfor %}{% endif %}
 {% if item.dd_source_docs %}
 **Source DD definitions** (physics reference for semantic accuracy):
-{% for p in item.dd_source_docs %}  - `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
+{% for p in item.dd_source_docs %}  - `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
 {% endfor %}{% endif %}
 
 {% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}

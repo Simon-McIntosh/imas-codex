@@ -26,7 +26,10 @@ from collections.abc import Callable
 from functools import cache as _cache
 from typing import TYPE_CHECKING, Any
 
-from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+from imas_codex.standard_names.defaults import (
+    DEFAULT_ESCALATION_MODEL,
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+)
 from imas_codex.standard_names.source_paths import (
     encode_source_path,
     strip_dd_prefix,
@@ -807,6 +810,8 @@ RETURN n.coordinate1_same_as AS coordinate1,
        n.cocos_transformation_expression AS cocos_expression,
        n.lifecycle_status AS lifecycle_status,
        n.data_type AS data_type,
+       n.description AS node_description,
+       n.documentation AS node_documentation,
        ident.name AS identifier_schema_name,
        ident.documentation AS identifier_schema_doc,
        ident.options AS identifier_options,
@@ -1033,7 +1038,9 @@ def _hybrid_search_neighbours_batch(
         for h in sorted_hits:
             sn_id = sn_map.get(h.path)
             tag = f"name:{sn_id}" if sn_id else f"dd:{h.path}"
-            doc = (h.documentation or h.description or "")[:300]
+            # Rich-first: prefer the LLM-enriched description over terse source
+            # documentation (matches the DD-enrichment coalesce precedence).
+            doc = (h.description or h.documentation or "")[:300]
             neighbours.append(
                 {
                     "tag": tag,
@@ -1215,6 +1222,28 @@ def _enrich_batch_items(items: list[dict]) -> None:
                 continue
 
             row = rows[0]
+
+            # Grounding text: prefer the rich LLM-enriched node description over
+            # the terse source documentation (rich-first, terse-fallback — the
+            # same precedence the DD-enrichment pipeline uses). Deterministic
+            # parent sources carry a placeholder StandardNameSource.description
+            # ("… pending LLM enrichment") that SHADOWS the rich node
+            # description which already exists on the IMASNode; without this
+            # backfill the composer never sees the physical qualifiers the
+            # source states (e.g. "coolant", "neutron", "maximum") and may drop
+            # them. Backfill the item's description/documentation so the compose
+            # prompt's grounding lines render the rich text for every item.
+            node_desc = (row.get("node_description") or "").strip()
+            node_doc = (row.get("node_documentation") or "").strip()
+            rich = node_desc or node_doc
+            if rich:
+                cur = (item.get("description") or "").strip()
+                if not cur or cur == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER:
+                    item["description"] = rich
+                # Always surface the full grounding text as documentation so the
+                # compose prompt's source-documentation line renders it (the
+                # template shows it only when it differs from the description).
+                item["documentation"] = node_desc or node_doc
 
             # BUG 9 fix: propagate authoritative DD unit from HAS_UNIT into
             # the batch item so compose_batch's unit-safety skip and the
@@ -6430,8 +6459,11 @@ def _enrich_for_docs_gen(
             item["dd_source_docs"] = [
                 {
                     "id": n["id"],
+                    # Rich-first: the LLM-enriched description grounds the docs
+                    # prompts; fall back to terse source documentation only when
+                    # no enriched description exists.
                     "documentation": (
-                        n.get("documentation") or n.get("description") or ""
+                        n.get("description") or n.get("documentation") or ""
                     ),
                     "unit": n.get("unit") or "",
                 }

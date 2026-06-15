@@ -117,7 +117,7 @@ These names already exist in the catalog. Compare docs for consistency and cross
 {% endif %}
 {% if item.dd_source_docs %}
 **Source DD definitions** (physics reference — dock if verbatim-copied into output):
-{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation or p.description }}
+{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
 {% endfor %}{% endif %}
 
 {% if item.parent_path %}**Parent path:** `{{ item.parent_path }}`{% if item.parent_description %} — {{ item.parent_description }}{% endif %}

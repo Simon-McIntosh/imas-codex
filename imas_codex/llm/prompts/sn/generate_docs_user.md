@@ -128,7 +128,7 @@ Use these physics definitions to ground your documentation in correct physics.
 Extract the PHYSICS MEANING, not the source identity. NEVER copy path identifiers,
 IDS names, or DD-specific language into the output text.
 
-{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.documentation }}
+{% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
 {% endfor %}{% endif %}
 
 {% if item.dd_aliases %}
