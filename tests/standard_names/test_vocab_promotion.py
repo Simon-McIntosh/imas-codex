@@ -185,4 +185,3 @@ class TestSnVocabCliRetired:
         from imas_codex.cli.sn import sn
 
         assert "vocab" not in sn.commands
-        assert "gaps" in sn.commands

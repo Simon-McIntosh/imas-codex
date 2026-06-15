@@ -1,4 +1,4 @@
-"""Semantic near-duplicate detection for proposed vocabulary tokens.
+"""Runtime token-reuse check for proposed vocabulary tokens.
 
 The lexical filter in :mod:`vocab_token_filter` catches exact / plural
 duplicates, but it cannot see that ``field_line_length`` and
@@ -7,32 +7,41 @@ near-synonym of an existing ``poloidal_magnetic_flux`` base.  Without a
 semantic check the ISN vocabulary slowly accretes redundant tokens, each
 splitting the source population that should map to one canonical term.
 
-This module embeds each proposed gap token (as a short descriptive phrase)
-and compares it by cosine similarity against the existing tokens of the
-*same* grammar segment.  A near neighbour above ``DUPLICATE_THRESHOLD`` is
-surfaced as a **triage annotation**, never an auto-reject: the self-refine
-measurement (2026-06-14) showed fuzzy LLM/embedding signals degrade quality
-when used as a hard gate.  The human (or LLM) curating the ISN PR sees the
-nearest existing token and its score and decides whether the proposal is a
-genuine new concept or a synonym to fold in.
+This is the **component-token** dedup axis, complementary to the existing
+whole-description name-similarity check injected into the reviewer prompt
+(``fetch_review_neighbours``).  The two axes catch different failures: a novel
+*assembly* of valid tokens (name-similarity) vs a duplicate *token*
+(this module).
+
+The check is wired into the compose retry loop: when the LLM emits a
+``vocab_gap`` for a needed-but-unregistered token, that token is embedded as a
+short descriptive phrase and compared by cosine similarity against the
+registered tokens of its *same* grammar segment.  A near neighbour at/above the
+configured threshold is fed back into the next compose attempt as advisory
+context — the agent then either reuses the registered token (dedup achieved) or
+re-emits the gap (confirming the concept is genuinely distinct).  It is never a
+hard reject: the 2026-06-14 self-refine measurement showed fuzzy
+LLM/embedding signals degrade quality when used as a hard gate.
 
 Embeddings are produced by the shared local/remote :class:`Encoder` and are
 free (no LLM cost).  The check is best-effort: if the embedding backend is
-unavailable the candidates pass through un-annotated rather than blocking
-the gap report.
+unavailable the candidate passes through un-flagged rather than blocking the
+compose pipeline.
 
 Usage::
 
-    from imas_codex.standard_names.vocab_semantic_dedup import annotate_duplicates
-    annotated = annotate_duplicates(gap_records)
-    for r in annotated:
-        if r.get("nearest_existing"):
-            print(r["token"], "~", r["nearest_existing"], r["nearest_similarity"])
+    from imas_codex.standard_names.vocab_semantic_dedup import (
+        nearest_registered_token,
+    )
+    hit = nearest_registered_token("field_line_length", "physical_base")
+    if hit:
+        print(hit.proposed_token, "~", hit.nearest_token, hit.similarity)
 """
 
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -40,14 +49,31 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-#: Cosine similarity at/above which a proposed token is flagged as a likely
-#: semantic duplicate of an existing one.  Tuned to flag clear synonyms while
-#: leaving genuinely distinct neighbours (e.g. ``electron`` vs ``ion``) unflagged.
-#: Surfaced as advice — a flagged token is reviewed, not auto-rejected.
+#: Cosine similarity at/above which a proposed token is treated as a likely
+#: synonym of a registered one.  Tuned to flag clear synonyms while leaving
+#: genuinely distinct neighbours (e.g. ``electron`` vs ``ion``) unflagged.
+#: Surfaced as advice — a flagged token is re-prompted, not auto-rejected.
 DUPLICATE_THRESHOLD: float = 0.82
 
 #: A token whose nearest neighbour is below this is "clearly novel" — no note.
 NOVEL_THRESHOLD: float = 0.70
+
+
+@dataclass(frozen=True)
+class TokenNeighbour:
+    """Nearest registered same-segment token for a proposed new token.
+
+    Attributes:
+        proposed_token: The candidate-new token the LLM wanted.
+        segment: The grammar segment the token was proposed against.
+        nearest_token: The closest registered token in that segment.
+        similarity: Cosine similarity (0..1) between the two.
+    """
+
+    proposed_token: str
+    segment: str
+    nearest_token: str
+    similarity: float
 
 
 def _describe_token(token: str, segment: str) -> str:
@@ -92,121 +118,195 @@ def _existing_tokens_by_segment() -> dict[str, list[str]]:
             seg: sorted(tokens) for seg, tokens in SEGMENT_TOKEN_MAP.items() if tokens
         }
     except Exception:  # ImportError or any parsing error
-        logger.debug("ISN SEGMENT_TOKEN_MAP unavailable — semantic dedup is a no-op")
+        logger.debug("ISN SEGMENT_TOKEN_MAP unavailable — token-reuse check is a no-op")
         return {}
 
 
-def annotate_duplicates(
-    records: list[dict[str, Any]],
+def _get_encoder(encoder: Any | None) -> Any | None:
+    """Return a usable Encoder, or ``None`` if the backend is unavailable.
+
+    Best-effort: never raises — the token-reuse check is advisory.
+    """
+    if encoder is not None:
+        return encoder
+    try:
+        from imas_codex.embeddings.encoder import Encoder
+
+        return Encoder()
+    except Exception as exc:  # noqa: BLE001 — advisory check, never block
+        logger.warning("Token-reuse check skipped — encoder unavailable: %s", exc)
+        return None
+
+
+def _nearest_in_segment(
+    tokens: list[str],
+    segment: str,
+    existing: list[str],
+    encoder: Any,
+) -> dict[str, TokenNeighbour]:
+    """Embed ``tokens`` + the segment's ``existing`` vocab once and pair each.
+
+    Embeds the full existing-vocab list a single time so it is not re-embedded
+    per proposed token.  Returns a map ``proposed_token -> TokenNeighbour``;
+    tokens for which no neighbour could be resolved are omitted.  Never raises.
+    """
+    import numpy as np
+
+    try:
+        existing_texts = [_describe_token(t, segment) for t in existing]
+        proposed_texts = [_describe_token(t, segment) for t in tokens]
+        existing_emb = np.asarray(encoder.embed_texts(existing_texts))
+        proposed_emb = np.asarray(encoder.embed_texts(proposed_texts))
+    except Exception as exc:  # noqa: BLE001 — advisory check, never block
+        logger.warning(
+            "Token-reuse check skipped for segment %s — embed failed: %s",
+            segment,
+            exc,
+        )
+        return {}
+
+    sims = _cosine_matrix(proposed_emb, existing_emb)  # (n_proposed, n_existing)
+    out: dict[str, TokenNeighbour] = {}
+    for i, token in enumerate(tokens):
+        row = sims[i]
+        best_j = int(np.argmax(row))
+        best_sim = float(row[best_j])
+        best_tok = existing[best_j]
+        # A proposed token may already equal a registered one (lexical compound
+        # under-reported elsewhere) — exclude exact self so we surface the
+        # nearest *different* neighbour.
+        if best_tok == token and len(row) > 1:
+            masked = row.copy()
+            masked[best_j] = -1.0
+            best_j = int(np.argmax(masked))
+            best_sim = float(masked[best_j])
+            best_tok = existing[best_j]
+        elif best_tok == token:
+            # Single-element vocab and it IS the token — nothing distinct to
+            # compare against.
+            continue
+        out[token] = TokenNeighbour(
+            proposed_token=token,
+            segment=segment,
+            nearest_token=best_tok,
+            similarity=round(best_sim, 4),
+        )
+    return out
+
+
+def nearest_registered_token(
+    token: str,
+    segment: str,
     *,
-    threshold: float = DUPLICATE_THRESHOLD,
     encoder: Any | None = None,
-) -> list[dict[str, Any]]:
-    """Annotate gap records with their nearest existing same-segment token.
+    threshold: float = DUPLICATE_THRESHOLD,
+) -> TokenNeighbour | None:
+    """Return the nearest registered same-segment token at/above ``threshold``.
 
-    For every record, embeds the proposed ``token`` and compares it against
-    the existing vocabulary of its ``segment``.  Adds three keys in-place:
+    Embeds ``token`` (as a short phrase) and compares it by cosine similarity
+    against the registered vocabulary of ``segment``.  Returns a
+    :class:`TokenNeighbour` only when a near neighbour scores at/above
+    ``threshold``; otherwise ``None``.
 
-    - ``nearest_existing``: the closest existing token (or ``None``)
-    - ``nearest_similarity``: cosine similarity to it (float, or ``None``)
-    - ``likely_duplicate``: ``True`` when similarity >= ``threshold``
+    Returns ``None`` (no flag) when:
 
-    Records whose segment has no existing tokens, or when the embedding
-    backend is unavailable, are returned unchanged (keys set to ``None`` /
-    ``False``).  Never raises on backend failure — annotation is advisory.
+    - ISN is unavailable, or the segment is open / pseudo / has no vocabulary;
+    - the token is already the sole registered token in its segment;
+    - the embedding backend is unavailable or fails (best-effort — never raises);
+    - the nearest neighbour is below ``threshold`` (genuinely distinct token).
 
     Args:
-        records: Flat gap records from
-            :func:`~imas_codex.standard_names.gap_harvest.harvest_vocab_gaps`.
-        threshold: Cosine similarity at/above which ``likely_duplicate`` is set.
+        token: The candidate-new token the LLM proposed.
+        segment: The grammar segment it was proposed against.
         encoder: Optional pre-built :class:`Encoder` (mainly for tests); a
             shared instance is created on demand otherwise.
+        threshold: Cosine similarity at/above which the hit is returned.
 
     Returns:
-        The same list, with annotation keys added to each record.
+        A :class:`TokenNeighbour` when a likely-synonym registered token
+        exists, else ``None``.
     """
-    # Initialise keys so downstream formatting can rely on their presence.
-    for r in records:
-        r.setdefault("nearest_existing", None)
-        r.setdefault("nearest_similarity", None)
-        r.setdefault("likely_duplicate", False)
+    existing_by_seg = _existing_tokens_by_segment()
+    existing = existing_by_seg.get(segment)
+    if not existing:
+        return None
 
-    if not records:
-        return records
+    enc = _get_encoder(encoder)
+    if enc is None:
+        return None
+
+    hit = _nearest_in_segment([token], segment, existing, enc).get(token)
+    if hit is None or hit.similarity < threshold:
+        return None
+    return hit
+
+
+def nearest_registered_tokens(
+    items: list[tuple[str, str]],
+    *,
+    encoder: Any | None = None,
+    threshold: float = DUPLICATE_THRESHOLD,
+) -> dict[tuple[str, str], TokenNeighbour]:
+    """Batch variant of :func:`nearest_registered_token`.
+
+    Groups ``(token, segment)`` pairs by segment so each segment's registered
+    vocabulary is embedded only once — important for throughput when a compose
+    batch reports several gaps.
+
+    Args:
+        items: ``(token, segment)`` pairs to check.
+        encoder: Optional pre-built :class:`Encoder` (shared on demand).
+        threshold: Cosine similarity at/above which a hit is included.
+
+    Returns:
+        Map ``(token, segment) -> TokenNeighbour`` for every pair whose nearest
+        registered same-segment token scored at/above ``threshold``.  Pairs
+        with no hit are omitted.  Never raises — advisory.
+    """
+    if not items:
+        return {}
 
     existing_by_seg = _existing_tokens_by_segment()
     if not existing_by_seg:
-        return records
+        return {}
 
-    # Only segments that have BOTH proposed tokens and existing vocab are worth
-    # embedding.  Group proposed tokens by segment to batch the encoder calls.
-    proposed_by_seg: dict[str, list[dict[str, Any]]] = {}
-    for r in records:
-        seg = r.get("segment")
-        if seg and seg in existing_by_seg:
-            proposed_by_seg.setdefault(seg, []).append(r)
+    # Group proposed tokens by segment; only segments with registered vocab
+    # are worth embedding.
+    by_seg: dict[str, list[str]] = {}
+    for token, segment in items:
+        if segment in existing_by_seg and existing_by_seg[segment]:
+            by_seg.setdefault(segment, []).append(token)
+    if not by_seg:
+        return {}
 
-    if not proposed_by_seg:
-        return records
+    enc = _get_encoder(encoder)
+    if enc is None:
+        return {}
 
-    try:
-        if encoder is None:
-            from imas_codex.embeddings.encoder import Encoder
-
-            encoder = Encoder()
-    except Exception as exc:  # noqa: BLE001 — advisory check, never block
-        logger.warning("Semantic dedup skipped — encoder unavailable: %s", exc)
-        return records
-
-    import numpy as np
-
-    for seg, recs in proposed_by_seg.items():
-        existing = existing_by_seg[seg]
-        proposed_tokens = [r["token"] for r in recs]
-        try:
-            # Embed existing + proposed together so they share the same call /
-            # normalisation; existing-token phrases use the same framing.
-            existing_texts = [_describe_token(t, seg) for t in existing]
-            proposed_texts = [_describe_token(t, seg) for t in proposed_tokens]
-            existing_emb = np.asarray(encoder.embed_texts(existing_texts))
-            proposed_emb = np.asarray(encoder.embed_texts(proposed_texts))
-        except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                "Semantic dedup skipped for segment %s — embed failed: %s", seg, exc
-            )
-            continue
-
-        sims = _cosine_matrix(proposed_emb, existing_emb)  # (n_proposed, n_existing)
-        for i, rec in enumerate(recs):
-            row = sims[i]
-            # Guard: a proposed token may already equal an existing token
-            # (lexical compound under-reported elsewhere) — exclude exact match
-            # so we surface the nearest *different* neighbour.
-            best_j = int(np.argmax(row))
-            best_sim = float(row[best_j])
-            best_tok = existing[best_j]
-            if best_tok == rec["token"] and len(row) > 1:
-                masked = row.copy()
-                masked[best_j] = -1.0
-                best_j = int(np.argmax(masked))
-                best_sim = float(masked[best_j])
-                best_tok = existing[best_j]
-            rec["nearest_existing"] = best_tok
-            rec["nearest_similarity"] = round(best_sim, 4)
-            rec["likely_duplicate"] = best_sim >= threshold
-
-    flagged = sum(1 for r in records if r.get("likely_duplicate"))
-    if flagged:
-        logger.info(
-            "Semantic dedup flagged %d/%d proposed tokens as likely duplicates",
-            flagged,
-            len(records),
+    results: dict[tuple[str, str], TokenNeighbour] = {}
+    for segment, tokens in by_seg.items():
+        # De-dup tokens within a segment so we embed each once.
+        unique_tokens = sorted(set(tokens))
+        neighbours = _nearest_in_segment(
+            unique_tokens, segment, existing_by_seg[segment], enc
         )
-    return records
+        for token, hit in neighbours.items():
+            if hit.similarity >= threshold:
+                results[(token, segment)] = hit
+
+    if results:
+        logger.info(
+            "Token-reuse check flagged %d/%d proposed tokens as likely synonyms",
+            len(results),
+            len(items),
+        )
+    return results
 
 
 __all__ = [
     "DUPLICATE_THRESHOLD",
     "NOVEL_THRESHOLD",
-    "annotate_duplicates",
+    "TokenNeighbour",
+    "nearest_registered_token",
+    "nearest_registered_tokens",
 ]

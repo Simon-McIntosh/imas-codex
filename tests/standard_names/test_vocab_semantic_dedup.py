@@ -1,4 +1,11 @@
-"""Tests for semantic near-duplicate annotation of proposed vocab tokens."""
+"""Tests for the runtime component-token reuse check.
+
+The check embeds a proposed (candidate-new) grammar token and compares it by
+cosine similarity against the registered tokens of its same segment, returning
+the nearest neighbour only when it scores at/above the threshold.  A stub
+encoder maps known phrases to fixed unit vectors so the test controls the
+similarity geometry without a live embedding backend.
+"""
 
 from __future__ import annotations
 
@@ -8,7 +15,9 @@ import pytest
 from imas_codex.standard_names import vocab_semantic_dedup as vsd
 from imas_codex.standard_names.vocab_semantic_dedup import (
     DUPLICATE_THRESHOLD,
-    annotate_duplicates,
+    TokenNeighbour,
+    nearest_registered_token,
+    nearest_registered_tokens,
 )
 
 
@@ -38,7 +47,7 @@ class _StubEncoder:
 
 @pytest.fixture
 def patch_existing(monkeypatch):
-    """Force a known per-segment existing-vocabulary map."""
+    """Force a known per-segment registered-vocabulary map."""
 
     def _apply(mapping: dict[str, list[str]]):
         monkeypatch.setattr(
@@ -52,18 +61,19 @@ def patch_existing(monkeypatch):
 
 def test_flags_near_synonym(patch_existing):
     patch_existing({"physical_base": ["connection_length"]})
-    # Proposed token is geometrically almost identical to the existing one.
+    # Proposed token is geometrically almost identical to the registered one.
     enc = _StubEncoder(
         {
             "field line length": [1.0, 0.05, 0.0],
             "connection length": [0.99, 0.1, 0.0],
         }
     )
-    records = [{"segment": "physical_base", "token": "field_line_length"}]
-    out = annotate_duplicates(records, encoder=enc)
-    assert out[0]["nearest_existing"] == "connection_length"
-    assert out[0]["nearest_similarity"] >= DUPLICATE_THRESHOLD
-    assert out[0]["likely_duplicate"] is True
+    hit = nearest_registered_token("field_line_length", "physical_base", encoder=enc)
+    assert isinstance(hit, TokenNeighbour)
+    assert hit.nearest_token == "connection_length"
+    assert hit.proposed_token == "field_line_length"
+    assert hit.segment == "physical_base"
+    assert hit.similarity >= DUPLICATE_THRESHOLD
 
 
 def test_distinct_token_not_flagged(patch_existing):
@@ -74,25 +84,21 @@ def test_distinct_token_not_flagged(patch_existing):
             "electron": [1.0, 0.0, 0.0],
         }
     )
-    records = [{"segment": "subject", "token": "ion"}]
-    out = annotate_duplicates(records, encoder=enc)
-    assert out[0]["nearest_existing"] == "electron"
-    assert out[0]["nearest_similarity"] < DUPLICATE_THRESHOLD
-    assert out[0]["likely_duplicate"] is False
+    # Orthogonal vectors → similarity 0 < threshold → no hit.
+    hit = nearest_registered_token("ion", "subject", encoder=enc)
+    assert hit is None
 
 
-def test_segment_without_existing_vocab_is_noop(patch_existing):
+def test_segment_without_vocab_is_none(patch_existing):
     patch_existing({"physical_base": ["temperature"]})
     enc = _StubEncoder({"temperature": [1.0, 0.0], "foo": [0.0, 1.0]})
-    # Proposed token is on a segment that has no existing vocab in the map.
-    records = [{"segment": "device", "token": "foo_device"}]
-    out = annotate_duplicates(records, encoder=enc)
-    assert out[0]["nearest_existing"] is None
-    assert out[0]["likely_duplicate"] is False
+    # Proposed token is on a segment absent from the registered map.
+    hit = nearest_registered_token("foo_device", "device", encoder=enc)
+    assert hit is None
 
 
 def test_excludes_exact_self_match(patch_existing):
-    # When the proposed token already equals an existing token, surface the
+    # When the proposed token already equals a registered token, surface the
     # nearest *different* neighbour rather than a self-similarity of 1.0.
     patch_existing({"physical_base": ["temperature", "pressure"]})
     enc = _StubEncoder(
@@ -101,34 +107,104 @@ def test_excludes_exact_self_match(patch_existing):
             "pressure": [0.0, 1.0, 0.0],
         }
     )
-    records = [{"segment": "physical_base", "token": "temperature"}]
-    out = annotate_duplicates(records, encoder=enc)
-    assert out[0]["nearest_existing"] == "pressure"
-    assert out[0]["nearest_similarity"] < DUPLICATE_THRESHOLD
+    # pressure is orthogonal to temperature → below threshold → no hit, but the
+    # self-match (similarity 1.0) must NOT be returned.
+    hit = nearest_registered_token("temperature", "physical_base", encoder=enc)
+    assert hit is None
 
 
-def test_empty_records_returns_empty():
-    assert annotate_duplicates([]) == []
+def test_sole_registered_token_equal_to_proposed_is_none(patch_existing):
+    # Single-element vocab that IS the proposed token: nothing distinct to
+    # compare against.
+    patch_existing({"physical_base": ["temperature"]})
+    enc = _StubEncoder({"temperature": [1.0, 0.0]})
+    hit = nearest_registered_token("temperature", "physical_base", encoder=enc)
+    assert hit is None
 
 
-def test_backend_failure_is_advisory(patch_existing, monkeypatch):
+def test_threshold_override_disables(patch_existing):
+    # A threshold above 1.0 can never be met → check is effectively off
+    # (used for the OFF arm of the A/B).
+    patch_existing({"physical_base": ["connection_length"]})
+    enc = _StubEncoder(
+        {
+            "field line length": [1.0, 0.05, 0.0],
+            "connection length": [0.99, 0.1, 0.0],
+        }
+    )
+    hit = nearest_registered_token(
+        "field_line_length", "physical_base", encoder=enc, threshold=1.01
+    )
+    assert hit is None
+
+
+def test_encoder_failure_is_advisory(patch_existing):
     patch_existing({"subject": ["electron"]})
 
     class _Boom:
         def embed_texts(self, *a, **k):  # noqa: ANN002, ANN003
             raise RuntimeError("backend down")
 
-    records = [{"segment": "subject", "token": "positron"}]
-    # Must not raise — annotation is best-effort.
-    out = annotate_duplicates(records, encoder=_Boom())
-    assert out[0]["nearest_existing"] is None
-    assert out[0]["likely_duplicate"] is False
+    # Must not raise — the check is best-effort.
+    hit = nearest_registered_token("positron", "subject", encoder=_Boom())
+    assert hit is None
 
 
-def test_keys_present_even_when_isn_unavailable(monkeypatch):
+def test_isn_unavailable_is_none(monkeypatch):
     monkeypatch.setattr(vsd, "_existing_tokens_by_segment", dict)
-    records = [{"segment": "physical_base", "token": "whatever"}]
-    out = annotate_duplicates(records)
-    assert out[0]["nearest_existing"] is None
-    assert out[0]["nearest_similarity"] is None
-    assert out[0]["likely_duplicate"] is False
+    hit = nearest_registered_token("whatever", "physical_base")
+    assert hit is None
+
+
+# ---------------------------------------------------------------------------
+# Batch variant
+# ---------------------------------------------------------------------------
+
+
+def test_batch_groups_and_flags(patch_existing):
+    patch_existing(
+        {
+            "physical_base": ["connection_length"],
+            "subject": ["electron"],
+        }
+    )
+    enc = _StubEncoder(
+        {
+            "field line length": [1.0, 0.05, 0.0],
+            "connection length": [0.99, 0.1, 0.0],
+            "ion": [0.0, 1.0, 0.0],
+            "electron": [1.0, 0.0, 0.0],
+        }
+    )
+    items = [
+        ("field_line_length", "physical_base"),  # near-synonym → flagged
+        ("ion", "subject"),  # orthogonal → not flagged
+    ]
+    out = nearest_registered_tokens(items, encoder=enc)
+    assert ("field_line_length", "physical_base") in out
+    assert out[("field_line_length", "physical_base")].nearest_token == (
+        "connection_length"
+    )
+    assert ("ion", "subject") not in out
+
+
+def test_batch_empty_returns_empty():
+    assert nearest_registered_tokens([]) == {}
+
+
+def test_batch_skips_unknown_segments(patch_existing):
+    patch_existing({"physical_base": ["temperature"]})
+    enc = _StubEncoder({"temperature": [1.0, 0.0], "foo": [0.0, 1.0]})
+    out = nearest_registered_tokens([("foo_device", "device")], encoder=enc)
+    assert out == {}
+
+
+def test_batch_encoder_failure_is_advisory(patch_existing):
+    patch_existing({"subject": ["electron"]})
+
+    class _Boom:
+        def embed_texts(self, *a, **k):  # noqa: ANN002, ANN003
+            raise RuntimeError("backend down")
+
+    out = nearest_registered_tokens([("positron", "subject")], encoder=_Boom())
+    assert out == {}
