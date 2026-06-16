@@ -207,10 +207,14 @@ that belong in structured annotations. NEVER emit these patterns:
 
 1. **`_of_plasma` suffix** — when the `physics_domain` already implies a plasma
    quantity (e.g. `equilibrium`, `transport`, `edge_plasma_physics`,
-   `magnetohydrodynamics`), `_of_plasma` is redundant. Drop it. Use
-   `_of_plasma_boundary` only when the *boundary contour* is the geometric
-   subject — for shape parameters of the LCFS, use the bare name
-   (`upper_triangularity`, not `upper_triangularity_of_plasma_boundary`).
+   `magnetohydrodynamics`), the bare `_of_plasma` qualifier is redundant. Drop
+   it. **But shape parameters always name the surface they describe** — a
+   triangularity/elongation/etc. is a property *of a specific surface*, so it
+   takes a surface locus, never a bare name: use `_of_plasma_boundary` when the
+   quantity describes the plasma boundary (LCFS) contour, and `_of_flux_surface`
+   (or the specific interior surface) when it describes an interior flux
+   surface. ✓ `triangularity_of_plasma_boundary`, ✓ `elongation_of_flux_surface`;
+   ✗ bare `upper_triangularity` (triangularity of WHICH surface?).
 2. **`_per_toroidal_mode_number`** — use `_per_toroidal_mode`. The mode *index*
    is implicit; appending `_number` creates physics-identical synonym pairs.
 3. **`_over_*` prepositions** — use `_per_*` for all ratio quantities. `_over_`
@@ -245,6 +249,28 @@ outranks brevity. Only **domain-implied boilerplate** (`equilibrium_` in the
 equilibrium domain, `_of_plasma` in transport) and **metadata** (provenance,
 processing-state, non-intrinsic instrument tokens) may be dropped as redundant.
 When unsure whether a qualifier is essential, keep it.
+
+**PRECEDENCE — specificity vs over-qualification (the one tie-breaker).** Two
+rules pull in opposite directions: "be specific / self-describing" says add
+qualifiers; "no over-qualification" says drop redundant ones. Resolve every
+such conflict with this single test on the candidate qualifier:
+
+- **Does it distinguish this quantity from a sibling?** If removing the
+  qualifier would let the name denote a *different* DD quantity — a different
+  locus, projection/component, species, medium, extremum, or surface — the
+  qualifier is **DISTINGUISHING and REQUIRED**. Specificity wins. (e.g. `main`
+  in `major_radius_of_main_x_point`, `neutron` in `maximum_neutron_flux_at_wall`,
+  `toroidal` on a vector component.)
+- **Or is it already entailed by the base quantity or the domain?** If the
+  canonical quantity *inherently* implies it — so removing it leaves the name
+  denoting the same quantity — the qualifier is **over-qualification and
+  DROPPED**. Anti-over-qualification wins. (e.g. `toroidal` on `plasma_current`
+  — plasma current is inherently toroidal; `_of_plasma` in a plasma domain.)
+
+The test is "would the name still pick out exactly this quantity without the
+qualifier?" — drop only when the answer is yes. When genuinely uncertain
+whether two sibling quantities are distinct, keep the qualifier (a redundant
+qualifier is a lesser error than an ambiguous name).
 
 ### CONSTRAINT ROLE ABSTRACTION (inverse-problem metadata)
 
@@ -293,8 +319,16 @@ Your name must render from this IR. Key composition rules:
   If no token fits, emit a `vocab_gap`. Do NOT invent compounds like
   `bounce_height` or `detector_sensitivity` — these are not registered and
   will be rejected.
-- **Operators require explicit `_of_` scope**: `time_derivative_of_X`, `gradient_of_X`,
-  `volume_averaged_of_X`. Never bare-concatenate a prefix operator to the base.
+- **Prefix operators come in two grammar classes — match each one:**
+  - **Differential / scope operators** (`time_derivative`, `gradient`,
+    `<axis>_derivative`) take explicit `_of_` scope: ✓ `time_derivative_of_X`,
+    `gradient_of_X`, `radial_derivative_of_X`. The bare form is INVALID
+    (non-canonical token order).
+  - **Averaging / reduction / normalization operators** (`volume_averaged`,
+    `line_averaged`, `flux_surface_averaged`, `normalized`) are **bare
+    prefixes** — they attach directly, NO `_of_`: ✓ `volume_averaged_electron_density`,
+    `flux_surface_averaged_current_density`, `normalized_poloidal_magnetic_flux`.
+    The `_of_` form is INVALID (✗ `volume_averaged_of_electron_density`).
 - **Postfix operators concatenate directly**: `X_magnitude`, `X_amplitude`.
 - **Complex parts use prefix form**: `real_part_of_X`, `imaginary_part_of_X` — this is
   the canonical ISN form. The prefix correctly parses as `transformation=real_part`.
@@ -732,10 +766,10 @@ is provided as context for your naming decisions.
     - ✗ `toroidal_component_of_ion_rotation_frequency` (REJECTED by grammar).
     - ✗ `ion_rotation_frequency_toroidal` (trailing suffix — parser misassigns).
     - ✗ `heat_flux_poloidal` — use `poloidal_heat_flux`.
-20. **Prefix operators carry `_of_` scope — NEVER trail** (ISN operator model): Prefix operators (`volume_averaged`, `flux_surface_averaged`, `line_averaged`, `time_derivative`, `gradient`, `normalized`, etc.) wrap the inner name with `_of_` scope. They MUST appear as a leading prefix with explicit `_of_`, never as a trailing suffix or bare concatenation.
-    - ✓ `volume_averaged_of_electron_temperature`, `line_averaged_of_electron_density`, `flux_surface_averaged_of_current_density`.
-    - ✗ `ion_temperature_volume_averaged`, `current_density_flux_surface_averaged`, `electron_density_line_averaged`.
-    - ✗ `volume_averaged_electron_temperature` — missing `_of_` scope marker (legacy form; parser accepts with diagnostic but generator rejects).
+20. **Prefix operators come in two classes — NEVER trail either** (ISN operator model): operators MUST be a leading prefix, never a trailing suffix. But the two classes attach DIFFERENTLY (round-trip-verified):
+    - **Differential / scope operators** (`time_derivative`, `gradient`, `<axis>_derivative`) take explicit `_of_`: ✓ `time_derivative_of_electron_temperature`, `gradient_of_electron_temperature`. The bare form is INVALID (✗ `time_derivative_electron_temperature` — non-canonical token order).
+    - **Averaging / reduction / normalization operators** (`volume_averaged`, `line_averaged`, `flux_surface_averaged`, `normalized`) are **bare prefixes** — NO `_of_`: ✓ `volume_averaged_electron_density`, `line_averaged_electron_density`, `flux_surface_averaged_current_density`, `normalized_poloidal_magnetic_flux`. The `_of_` form is INVALID (✗ `volume_averaged_of_electron_density` — the grammar drops the `of` token and the name fails to round-trip).
+    - ✗ trailing suffix forms are always wrong: `ion_temperature_volume_averaged`, `current_density_flux_surface_averaged`, `electron_density_line_averaged`.
 21. **Canonical locus tokens — never invent synonyms** (HARD RULE): Several physical features have multiple names in the literature; the catalog uses exactly ONE canonical token per concept. Generation must use the canonical form even when the DD path or signal description uses an alias.
 
     | Canonical locus | Forbidden synonyms |
