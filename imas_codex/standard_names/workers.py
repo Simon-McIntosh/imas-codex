@@ -5034,7 +5034,16 @@ async def process_refine_name_batch(
             # validation_issues is stored as a list on the node directly
             validation_issues: list[str] | None = item.get("validation_issues") or None
 
+            # Merge the cached compose context so the system prompt's
+            # ``_grammar_reference.md`` include renders the closed-vocabulary
+            # token map (``closed_vocab_full`` etc.). Without it the refiner
+            # rewrites names with no vocabulary reference — the empty-grammar-
+            # block silent gap. ``build_compose_context`` is ``_CONTEXT_CACHE``-
+            # backed, so this is a dict lookup after the first call.
+            from imas_codex.standard_names.context import build_compose_context
+
             prompt_context: dict[str, Any] = {
+                **build_compose_context(),
                 "item": item,
                 "chain_history": chain_history,
                 "chain_length": chain_length,
@@ -6813,9 +6822,19 @@ async def process_generate_docs_batch(
         sn_id = item["id"]
         claim_token = item.get("claim_token") or ""
         chain_history = item.get("chain_history") or []
+        # Fix D: the docs user template reads ``item.chain_history`` — ensure it
+        # is present on the item (it is fetched into the local var, but the item
+        # dict may not carry it), so refined-docs see predecessor history.
+        item["chain_history"] = chain_history
 
         # ── Build prompt context ───────────────────────────────────────
+        # Merge the cached compose context so the docs SYSTEM prompt's
+        # ``_grammar_reference.md`` include renders the closed-vocabulary map
+        # (otherwise the grammar block is empty). Cached after first call.
+        from imas_codex.standard_names.context import build_compose_context
+
         prompt_context: dict[str, Any] = {
+            **build_compose_context(),
             "item": item,
             "chain_history": chain_history,
             "nearby_existing_names": nearby_existing_names,

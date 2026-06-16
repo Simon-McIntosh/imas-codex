@@ -62,7 +62,11 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
 - **Grammar Fields**: {% if item.physical_base %}physical_base={{ item.physical_base }}{% endif %}{% if item.subject %}, subject={{ item.subject }}{% endif %}{% if item.component %}, component={{ item.component }}{% endif %}{% if item.coordinate %}, coordinate={{ item.coordinate }}{% endif %}{% if item.position %}, position={{ item.position }}{% endif %}{% if item.process %}, process={{ item.process }}{% endif %}
-{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
+{% if item.dd_documentation %}- **DD ground truth** (authoritative source definition — verify physics_accuracy against THIS): {{ item.dd_documentation }}
+{% endif %}{% if item.dd_description %}- **DD enriched description**: {{ item.dd_description }}
+{% endif %}{% if item.physics_domain %}- **Physics domain**: {{ item.physics_domain }}
+{% endif %}{% if item.dd_keywords %}- **DD keywords**: {{ item.dd_keywords | join(', ') if item.dd_keywords is iterable and item.dd_keywords is not string else item.dd_keywords }}
+{% endif %}{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
 {% endif %}
 {% if item.validation_issues %}
 **ISN Validation Issues:**
