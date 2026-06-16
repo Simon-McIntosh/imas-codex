@@ -341,3 +341,136 @@ class TestReasoningEffortProviderShape:
             "thinking": True,
             "reasoning_effort": "max",
         }
+
+
+# ---------------------------------------------------------------------------
+# Empty-content responses are retryable (reasoning-budget exhaustion)
+# ---------------------------------------------------------------------------
+#
+# A reasoning model in thinking mode (DeepSeek-V4 at reasoning_effort="max")
+# can spend its entire completion-token budget on reasoning and return
+# finish_reason="length" with EMPTY content. Before the fix this raised a
+# non-retryable ValueError; now it must retry (and grow the token budget on
+# the length case) so a single transient exhaustion does not kill a compose
+# item.
+
+
+class _UsageFixed:
+    prompt_tokens = 120
+    completion_tokens = 30
+    prompt_tokens_details = None
+
+
+class _ChoiceFR:
+    """Choice carrying a finish_reason, like the real OpenAI/litellm shape."""
+
+    def __init__(self, content: str | None, finish_reason: str) -> None:
+        self.message = _FakeMessage(content)
+        self.finish_reason = finish_reason
+
+
+class _ResponseFR:
+    def __init__(self, content: str | None, finish_reason: str) -> None:
+        self.choices = [_ChoiceFR(content, finish_reason)]
+        self.usage = _UsageFixed()
+        self.model = "test-model"
+        self._hidden_params = {"response_cost": 0.0}
+
+
+_VALID_REVIEW_JSON = (
+    '{"reviews": [{"source_id": "dd:foo/bar", "standard_name": "foo_bar", '
+    '"scores": {"description_quality": 18, "documentation_quality": 18, '
+    '"completeness": 18, "physics_accuracy": 18}, '
+    '"reasoning": "ok", "issues": []}]}'
+)
+
+
+def test_empty_response_error_is_retryable():
+    """The empty-content sentinel message lands in the retry path."""
+    from imas_codex.discovery.base.llm import EmptyResponseError, _is_retryable
+
+    err = EmptyResponseError("length")
+    assert _is_retryable(str(err)) is True
+    assert err.finish_reason == "length"
+
+
+def test_bump_max_tokens_grows_then_caps():
+    """The length-retry budget bump doubles up to a hard cap, then stops."""
+    from imas_codex.discovery.base.llm import (
+        _LENGTH_RETRY_TOKEN_CAP,
+        _bump_max_tokens_for_length,
+    )
+
+    # Cap-agnostic (survives cap re-sizing): a budget one doubling below the cap
+    # grows once, clamps to the cap, then stops bumping.
+    start = _LENGTH_RETRY_TOKEN_CAP // 2
+    kwargs = {"max_tokens": start}
+    assert _bump_max_tokens_for_length(kwargs) == _LENGTH_RETRY_TOKEN_CAP
+    assert kwargs["max_tokens"] == _LENGTH_RETRY_TOKEN_CAP
+    # At the cap, no further bump is applied.
+    assert _bump_max_tokens_for_length(kwargs) is None
+    assert kwargs["max_tokens"] == _LENGTH_RETRY_TOKEN_CAP
+
+    # A value just below the cap doubles but clamps to the cap, never overshoots.
+    kwargs2 = {"max_tokens": _LENGTH_RETRY_TOKEN_CAP - 1}
+    assert _bump_max_tokens_for_length(kwargs2) == _LENGTH_RETRY_TOKEN_CAP
+
+
+async def test_empty_length_response_retries_and_bumps_budget(monkeypatch):
+    """finish_reason='length' empty → retry succeeds AND the budget grows."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+
+    seen_max_tokens: list[int | None] = []
+
+    async def fake(**kwargs):
+        seen_max_tokens.append(kwargs.get("max_tokens"))
+        if len(seen_max_tokens) == 1:
+            # First attempt: reasoning ate the whole budget → empty + length.
+            return _ResponseFR(None, "length")
+        return _ResponseFR(_VALID_REVIEW_JSON, "stop")
+
+    with patch("litellm.acompletion", fake):
+        result = await acall_llm_structured(
+            model="openrouter/qwen/qwen-max",
+            messages=[{"role": "user", "content": "review this"}],
+            response_model=StandardNameQualityReviewDocsBatch,
+            service="standard-names",
+            retry_base_delay=0.0,  # no real sleep in the test
+        )
+
+    # Two API calls: the empty-length response was retried, not hard-failed.
+    assert len(seen_max_tokens) == 2
+    # The retry ran with a larger token budget than the first attempt.
+    assert seen_max_tokens[1] is not None
+    assert seen_max_tokens[0] is not None
+    assert seen_max_tokens[1] > seen_max_tokens[0]
+    batch = result.parsed
+    assert isinstance(batch, StandardNameQualityReviewDocsBatch)
+    assert batch.reviews[0].source_id == "dd:foo/bar"
+
+
+async def test_empty_nonlength_response_retries_without_bump(monkeypatch):
+    """A transient empty that is NOT length-exhaustion still retries, but the
+    token budget is left unchanged (no spurious growth)."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+
+    seen_max_tokens: list[int | None] = []
+
+    async def fake(**kwargs):
+        seen_max_tokens.append(kwargs.get("max_tokens"))
+        if len(seen_max_tokens) == 1:
+            return _ResponseFR(None, "stop")  # empty but not budget-exhausted
+        return _ResponseFR(_VALID_REVIEW_JSON, "stop")
+
+    with patch("litellm.acompletion", fake):
+        await acall_llm_structured(
+            model="openrouter/qwen/qwen-max",
+            messages=[{"role": "user", "content": "review this"}],
+            response_model=StandardNameQualityReviewDocsBatch,
+            service="standard-names",
+            retry_base_delay=0.0,
+        )
+
+    assert len(seen_max_tokens) == 2
+    # No length-exhaustion → budget unchanged across the retry.
+    assert seen_max_tokens[0] == seen_max_tokens[1]

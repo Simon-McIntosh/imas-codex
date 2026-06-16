@@ -173,6 +173,27 @@ class ProviderBudgetExhausted(Exception):
     """
 
 
+class EmptyResponseError(ValueError):
+    """The LLM returned a response with no usable content.
+
+    Retryable. Carries ``finish_reason`` so the retry loop can tell budget
+    exhaustion (``finish_reason='length'`` — a reasoning model spent its whole
+    completion budget on thinking) from other transient empties, and grow the
+    token budget before the next attempt in the former case. Subclasses
+    ``ValueError`` for backward compatibility with callers that catch the old
+    ``ValueError('LLM returned empty response content')``.
+
+    The message always contains ``"empty response content"`` so it matches the
+    retryable-pattern set.
+    """
+
+    def __init__(self, finish_reason: str | None) -> None:
+        self.finish_reason = finish_reason
+        super().__init__(
+            f"LLM returned empty response content (finish_reason={finish_reason!r})"
+        )
+
+
 class LLMResult:
     """Return type for call_llm_structured / acall_llm_structured.
 
@@ -281,6 +302,12 @@ RETRYABLE_PATTERNS = frozenset(
         "json",  # JSON parsing errors
         "truncated",
         "validation",  # Pydantic validation errors from malformed responses
+        # Empty-content responses are transient, not deterministic: a reasoning
+        # model (DeepSeek-V4 thinking mode) can spend its whole completion-token
+        # budget on reasoning and return finish_reason='length' with EMPTY
+        # content. Retrying — with a larger token budget on the length case —
+        # recovers it, so the empty-content sentinel must land in the retry path.
+        "empty response content",
     }
 )
 
@@ -313,14 +340,24 @@ MODEL_TOKEN_LIMITS: dict[str, dict[str, int]] = {
         "timeout": 120,
     },
     "hosted_vllm": {
-        "max_tokens": 32000,
-        # 15 min. Max-thinking 25-path compose batches generate ~18.5k tokens
-        # (≈199 s solo, ~305 s at the 4-way concurrency knee — see the
-        # generate-name-replicas tuning note in pyproject [sn-compose]). A
-        # full 32k-token batch at the knee needs ~528 s solo, but under
-        # sustained load the tail runs longer: 600 s still left a ~5%
-        # APITimeout tail on a real run (2026-06-15), so raised to 900 s to
-        # clear it. Concurrency is bounded by the replica count, not this value.
+        # Output budget = reasoning_content + answer. DeepSeek-V4 thinking mode
+        # at reasoning_effort="max" spends most of the budget on reasoning; a
+        # 32k cap let the model exhaust it mid-think and return finish_reason=
+        # "length" with EMPTY content (the "empty response content" failures,
+        # 2026-06-16). The served context window is 512k, and generation is
+        # free on the local GPU, so size the cap to the task with generous
+        # margin rather than the minimum: ~18.5k answer tokens for a 25-path
+        # batch plus ample max-thinking headroom. 131072 sits well inside 512k
+        # even with a large prompt. (Defense in depth: an empty length-response
+        # is retryable and _bump_max_tokens_for_length grows the budget further
+        # on the rare overrun.)
+        "max_tokens": 131072,
+        # 15 min. Max-thinking 25-path compose batches generate ~18.5k answer
+        # tokens (≈199 s solo, ~305 s at the 4-way concurrency knee — see the
+        # generate-name-replicas tuning note in pyproject [sn-compose]). Under
+        # sustained load the tail runs longer: 600 s still left a ~5% APITimeout
+        # tail on a real run (2026-06-15), so raised to 900 s to clear it.
+        # Concurrency is bounded by the replica count, not this value.
         "timeout": 900,
     },
     "default": {
@@ -714,6 +751,48 @@ def _is_retryable(error_msg: str) -> bool:
     if any(pattern in msg_lower for pattern in NON_RETRYABLE_PATTERNS):
         return False
     return any(pattern in msg_lower for pattern in RETRYABLE_PATTERNS)
+
+
+def _finish_reason(response: Any) -> str | None:
+    """Return ``choices[0].finish_reason`` from an LLM response, if present.
+
+    Shape-compatible with both the litellm response object and the OpenAI SDK
+    response returned by the local-endpoint client. Returns ``None`` when the
+    field is absent so callers can treat "unknown" distinctly from "length".
+    """
+    try:
+        return response.choices[0].finish_reason
+    except (AttributeError, IndexError, TypeError):
+        return None
+
+
+# Multiplier applied to the request's max_tokens when an empty-content response
+# was caused by completion-budget exhaustion (finish_reason='length'). The next
+# retry gets more headroom so reasoning + the JSON answer both fit.
+_LENGTH_RETRY_TOKEN_MULTIPLIER = 2
+# Ceiling for the bumped budget. Must stay ABOVE the base hosted_vllm cap
+# (131072) so a rare length-exhaustion at the base budget can still grow, yet
+# well inside the served 512k context (leaving room for the prompt). 262144 =
+# half the context window.
+_LENGTH_RETRY_TOKEN_CAP = 262144
+
+
+def _bump_max_tokens_for_length(kwargs: dict[str, Any]) -> int | None:
+    """Grow ``kwargs['max_tokens']`` after a length-exhaustion empty response.
+
+    Mutates *kwargs* in place and returns the new budget (or ``None`` when no
+    bump was applied because the budget is already at the cap). The grown
+    budget lets a reasoning model that exhausted its tokens mid-think finish
+    and emit the answer on the next attempt.
+    """
+    current = kwargs.get("max_tokens")
+    if not isinstance(current, int) or current <= 0:
+        return None
+    if current >= _LENGTH_RETRY_TOKEN_CAP:
+        return None
+    bumped = min(current * _LENGTH_RETRY_TOKEN_MULTIPLIER, _LENGTH_RETRY_TOKEN_CAP)
+    kwargs["max_tokens"] = bumped
+    return bumped
 
 
 def _is_local_model(model_id: str) -> bool:
@@ -1364,7 +1443,7 @@ def call_llm_structured(
             # Parse response content through Pydantic
             content = response.choices[0].message.content
             if not content:
-                raise ValueError("LLM returned empty response content")
+                raise EmptyResponseError(_finish_reason(response))
 
             content = _sanitize_content(content)
             parsed = _parse_structured_content(content, response_model, model)
@@ -1393,6 +1472,17 @@ def call_llm_structured(
                     f"LLM provider budget exhausted: {error_msg[:200]}"
                 ) from e
             if _is_retryable(error_msg) and attempt < max_retries - 1:
+                # Budget-exhaustion empty (reasoning model spent its whole
+                # completion budget on thinking): grow the token budget so the
+                # retry can finish reasoning AND emit the answer.
+                if isinstance(e, EmptyResponseError) and e.finish_reason == "length":
+                    bumped = _bump_max_tokens_for_length(kwargs)
+                    if bumped is not None:
+                        logger.debug(
+                            "Empty response (finish_reason=length): raised "
+                            "max_tokens to %d for retry",
+                            bumped,
+                        )
                 delay = retry_base_delay * (2**attempt)
                 logger.debug(
                     "LLM error (attempt %d/%d): %s. Retrying in %.1fs...",
@@ -1494,7 +1584,7 @@ async def acall_llm_structured(
             # Parse response content through Pydantic
             content = response.choices[0].message.content
             if not content:
-                raise ValueError("LLM returned empty response content")
+                raise EmptyResponseError(_finish_reason(response))
 
             content = _sanitize_content(content)
             parsed = _parse_structured_content(content, response_model, model)
@@ -1523,6 +1613,17 @@ async def acall_llm_structured(
                     f"LLM provider budget exhausted: {error_msg[:200]}"
                 ) from e
             if _is_retryable(error_msg) and attempt < max_retries - 1:
+                # Budget-exhaustion empty (reasoning model spent its whole
+                # completion budget on thinking): grow the token budget so the
+                # retry can finish reasoning AND emit the answer.
+                if isinstance(e, EmptyResponseError) and e.finish_reason == "length":
+                    bumped = _bump_max_tokens_for_length(kwargs)
+                    if bumped is not None:
+                        logger.debug(
+                            "Empty response (finish_reason=length): raised "
+                            "max_tokens to %d for retry",
+                            bumped,
+                        )
                 delay = retry_base_delay * (2**attempt)
                 logger.debug(
                     "LLM error (attempt %d/%d): %s. Retrying in %.1fs...",
