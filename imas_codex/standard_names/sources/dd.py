@@ -543,12 +543,23 @@ def extract_dd_candidates(
                 "n.node_category IN $sn_categories",
                 "n.description IS NOT NULL",
                 "n.description <> ''",
-                # Leaf invariant: exclude container nodes (STRUCTURE/STRUCT_ARRAY).
-                # A STRUCTURE wraps sub-fields; it has no physics value itself.
-                # This replaces the old node_type=['dynamic','constant'] gate — it
-                # correctly admits static/geometry and coordinate leaves while
-                # blocking wrappers like summary/global_quantities/q_95{value,source}.
-                "NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])",
+                # Leaf invariant — exclude container nodes (STRUCTURE/STRUCT_ARRAY)
+                # that wrap sub-fields and carry no physics value themselves
+                # (e.g. summary/global_quantities/q_95{value,source}). EXCEPT the
+                # signal signature: a STRUCTURE/STRUCT_ARRAY quantity whose only
+                # quantity content is its own array payload — it has a `/data`
+                # child and NO quantity child (e.g. magnetics/ip, nbi/unit/
+                # power_launched). These ARE the nameable signal; admit them.
+                "("
+                "NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']) "
+                "OR ("
+                "  n.node_category = 'quantity' "
+                "  AND EXISTS { MATCH (d:IMASNode)-[:HAS_PARENT]->(n) "
+                "               WHERE d.id = n.id + '/data' } "
+                "  AND NOT EXISTS { MATCH (q:IMASNode)-[:HAS_PARENT]->(n) "
+                "                   WHERE q.node_category = 'quantity' } "
+                ")"
+                ")",
                 # S1 equivalent at query level: core_instant_changes is a whole-IDS
                 # dedup policy (duplicates core_profiles with "change in X" prefix).
                 # Push into Cypher so LIMIT/ORDER BY pagination doesn't fill a batch

@@ -15,6 +15,26 @@ import pytest
 from imas_codex.standard_names.sources.dd import _apply_unit_overrides
 
 
+@pytest.mark.graph
+class TestSignalSignatureAdmission:
+    """Phase 5: STRUCTURE/STRUCT_ARRAY signal nodes (a `/data` child quantity,
+    no quantity child) are admitted as SN sources despite the leaf invariant."""
+
+    def test_signal_structs_admitted(self) -> None:
+        from imas_codex.standard_names.sources.dd import extract_dd_candidates
+
+        batches = extract_dd_candidates(
+            ids_filter="magnetics", force=True, write_skipped=False, limit=400
+        )
+        paths = {
+            it.get("path") or it.get("source_id") for b in batches for it in b.items
+        }
+        # magnetics/ip (STRUCT_ARRAY) and rogowski_coil/current (STRUCTURE) are
+        # signal containers — previously excluded by the leaf invariant.
+        assert "magnetics/ip" in paths
+        assert "magnetics/rogowski_coil/current" in paths
+
+
 class TestApplyUnitOverrides:
     """Pure-Python behavior of ``_apply_unit_overrides``."""
 

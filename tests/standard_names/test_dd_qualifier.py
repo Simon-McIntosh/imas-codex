@@ -221,6 +221,13 @@ class TestS0StringTypes:
         )
         assert q.eligible
 
+    def test_struct_array_not_skipped_as_string(self) -> None:
+        """STRUCT_ARRAY/STRUCTURE begin 'STR' but are signal containers, not
+        string leaves — S0 matches 'STR_' only, so they pass the qualifier."""
+        for dt in ("STRUCT_ARRAY", "STRUCTURE"):
+            q = qualify_dd(_candidate("magnetics/ip", data_type=dt))
+            assert q.eligible, f"{dt} wrongly skipped: {q.reason_code}"
+
     def test_empty_data_type_passes(self) -> None:
         q = qualify_dd(
             _candidate("core_profiles/profiles_1d/electrons/temperature", data_type="")

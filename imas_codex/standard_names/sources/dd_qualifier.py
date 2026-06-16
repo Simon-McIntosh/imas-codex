@@ -70,7 +70,10 @@ def qualify_dd(candidate: SourceCandidate) -> Qualification:
     # --- Structural checks (Python predicates) ---
 
     # S0: String-typed leaves — names, descriptions, identifiers.
-    if candidate.value_type and candidate.value_type.startswith("STR"):
+    # Match STR_0D / STR_1D (string scalars/arrays) via the trailing underscore —
+    # NOT STRUCTURE / STRUCT_ARRAY, which also begin "STR" but are signal
+    # containers admitted by the leaf-invariant signal signature.
+    if candidate.value_type and candidate.value_type.startswith("STR_"):
         return skip(
             "string_data_type",
             f"String-typed leaf ({candidate.value_type}) — not a physical quantity.",
