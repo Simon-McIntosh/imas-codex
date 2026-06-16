@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-pipeline-hardening">
+  <meta name="plan-title"     content="SN Pipeline Hardening — Compose Correctness, Prompt Consolidation, Regen">
+  <meta name="plan-summary"   content="Land the grammar/IR correctness fix, field-choice-oriented prompt consolidation, compose grounding, docs-model re-assessment, signal-source admission, and the from-scratch SN regen.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="XL">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>SN Pipeline Hardening | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why this plan exists</h2>
+    <p>This plan captures the remaining work to make the IMAS Standard-Names (SN)
+    generation pipeline trustworthy enough for a full from-scratch catalog regen.
+    It was opened after a session that <strong>overturned a false conclusion</strong>:
+    a physics-correctness benchmark had reported that every composer model (free
+    local DeepSeek&nbsp;V4-flash <em>and</em> every frontier model) was collapsing
+    locus/projection quantities to bare bases (e.g. the X-point&nbsp;R and the
+    magnetic-axis&nbsp;R both named <code>major_radius</code>), which had been read
+    as a model/prompt failure. That was a <strong>measurement artifact</strong> —
+    the benchmark's own <code>_resolve_name</code> hand-rolled the IR and silently
+    dropped the locus/projection segments before scoring. The models were emitting
+    fully faithful IR all along.</p>
+    <p>The lesson that governs every task below: <strong>never trust "we inject or
+    produce X" without exercising the real code path</strong>. That mistake bit
+    three times in one session (the resolver, a doc-render check rendered at the
+    wrong pipeline stage, and an audit that over-reported description truncation
+    from its own print buffer). Every change in this plan must be verified on the
+    real path, and every naming change <strong>must round-trip</strong> through
+    ISN <code>parse</code>/<code>compose</code>.</p>
+
+    <h2 id="s2">§2 — What already landed (session of 2026-06-16)</h2>
+    <p>The starting point for the next session. All committed and pushed to
+    <code>origin/main</code>:</p>
+    <ul>
+      <li><strong>Benchmark resolver fix</strong> (<code>617333bd</code>):
+      <code>_resolve_name</code> / <code>validate_candidate</code> now use the
+      canonical <code>GrammarSegments.to_ir()</code>/<code>compose_name()</code>
+      instead of a hand-rolled IR subset that dropped locus/projection/process/
+      operator. The four "faithfulness/collapse-gallery" prompt levers built on
+      the phantom premise were reverted (<code>92142b56</code>).</li>
+      <li><strong>Description truncation — fixed at source</strong>
+      (<code>239259c5</code>): <code>dd_enrichment.py:402</code> sliced parent
+      docs to <code>[:150]</code> mid-word for accessor-terminal nodes
+      (<code>summary/.../value</code>). Removed; <strong>469 accessor descriptions
+      regenerated</strong> through the fixed backing function (free, deterministic);
+      <strong>0</strong> mid-word truncations remain. The audit had over-reported
+      this (1098 → really ~320, and its headline examples were complete in storage).</li>
+      <li><strong>Compose serves both docs</strong> (<code>37877fe9</code>): the
+      terse XML <code>documentation</code> was being clobbered equal to the rich
+      <code>description</code>, so the template's <code>documentation != description</code>
+      guard never fired. Now distinct — the model sees both grounding lines.</li>
+      <li><strong>Four silent-drop wiring fixes</strong> (<code>455103fb</code>):
+      review_names now renders the DD ground truth it fetches (reviewer was scoring
+      <code>physics_accuracy</code> blind); refine_name and generate_docs now merge
+      <code>build_compose_context()</code> so the closed-vocabulary block renders
+      (was a 15.5k-char empty include); generate_docs reads <code>chain_history</code>
+      off the item.</li>
+      <li><strong>True post-fix baseline</strong> (<code>503482ae</code>,
+      <code>research/physics_bench-20260616T100837Z.json</code>): with the resolver
+      fixed, <strong>opus-4.8 = 100% physics / 6-of-6 hard cases; DeepSeek V4-flash
+      (free) = 89% / 4-of-5 hard</strong> (one defensible miss). This is the A/B
+      reference for all prompt/grounding changes — they must not regress it.</li>
+      <li><strong>Prompt contradiction fixes</strong> (<code>2d6d7cad</code>,
+      <code>61221460</code>): C-2 (wrong "ten checks" count), C-1 (shape-parameter
+      surface locus), C-4 (operator-class split), C-7 (specificity-vs-over-
+      qualification precedence rule). See locked decisions below.</li>
+    </ul>
+
+    <h2 id="s3">§3 — The phase plan</h2>
+    <p>Six phases, ordered by dependency. Phase&nbsp;1 is a genuine correctness bug
+    and gates a clean A/B, so it runs first; the from-scratch regen (Phase&nbsp;6)
+    is the endgame once Phases&nbsp;1–5 are trustworthy.</p>
+
+    <svg viewBox="0 0 360 430" width="360" role="img" aria-label="Phase dependency ladder"
+         xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+      <style>
+        .b{fill:#ffffff;stroke:#444;stroke-width:1}
+        .t{fill:#1a1a1a;font-size:13px}
+        .n{fill:#1a1a1a;font-size:13px;font-weight:600}
+        .a{stroke:#2b6cb0;stroke-width:1.5;marker-end:url(#ar)}
+      </style>
+      <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 z" fill="#2b6cb0"/></marker></defs>
+      <rect class="b" x="10" y="8"   width="340" height="44" rx="4"/>
+      <text class="n" x="20" y="26">P1 · to_ir transformation routing</text>
+      <text class="t" x="20" y="43">averaging operators must round-trip (real C-4 bug)</text>
+      <line class="a" x1="180" y1="52" x2="180" y2="66"/>
+      <rect class="b" x="10" y="68"  width="340" height="44" rx="4"/>
+      <text class="n" x="20" y="86">P2 · prompt consolidation (field-choice)</text>
+      <text class="t" x="20" y="103">cut surface-form joining noise; keep signal; A/B</text>
+      <line class="a" x1="180" y1="112" x2="180" y2="126"/>
+      <rect class="b" x="10" y="128" width="340" height="44" rx="4"/>
+      <text class="n" x="20" y="146">P3 · compose grounding (dd_paths members)</text>
+      <text class="t" x="20" y="163">per-member DD doc for grouped sibling paths</text>
+      <line class="a" x1="180" y1="172" x2="180" y2="186"/>
+      <rect class="b" x="10" y="188" width="340" height="44" rx="4"/>
+      <text class="n" x="20" y="206">P4 · docs model re-assessment</text>
+      <text class="t" x="20" y="223">DSv4 vs sonnet for physics-correct docs (A/B)</text>
+      <line class="a" x1="180" y1="232" x2="180" y2="246"/>
+      <rect class="b" x="10" y="248" width="340" height="44" rx="4"/>
+      <text class="n" x="20" y="266">P5 · signal-STRUCTURE SN sources</text>
+      <text class="t" x="20" y="283">admit 336 /data-child quantities; land before regen</text>
+      <line class="a" x1="180" y1="292" x2="180" y2="306"/>
+      <rect class="b" x="10" y="308" width="340" height="56" rx="4" style="stroke:#2b6cb0;stroke-width:2"/>
+      <text class="n" x="20" y="328">P6 · full SN clear + regen (endgame)</text>
+      <text class="t" x="20" y="345">from scratch once P1–P5 trustworthy;</text>
+      <text class="t" x="20" y="360">round-trip + physics-bench gated</text>
+      <text class="t" x="10" y="392" style="font-size:12px;fill:#555">Reference baseline (do not regress):</text>
+      <text class="t" x="10" y="409" style="font-size:12px;fill:#555">opus 100% / 6-6 · DSv4 89% / 4-5 — physics_bench-20260616T100837Z</text>
+    </svg>
+
+    <h3 id="p1">Phase 1 — <code>to_ir</code> transformation routing (the real C-4 bug)</h3>
+    <p><strong>Problem.</strong> The compose model outputs grammar <em>segments</em>
+    (<code>operator_token</code>, <code>operator_kind</code>), not a name string;
+    <code>to_ir()</code>+<code>compose()</code> do the joining. But
+    <code>GrammarSegments.to_ir()</code> (<code>imas_codex/standard_names/models.py</code>
+    ~284-291) routes <code>operator_token</code> into
+    <code>OperatorApplication(kind=unary_prefix)</code>, and <code>compose()</code>
+    joins <em>all</em> unary-prefix operators with <code>_of_</code> →
+    <code>volume_averaged_of_electron_density</code>, which <strong>fails to
+    parse / round-trip</strong> (<code>ValueError: projection lost token {'of'}</code>).
+    The canonical ISN IR puts these in the <code>transformation</code> field: the
+    <code>Transformation</code> enum (~50 members) renders each correctly —
+    averaging/reduction/normalization (<code>volume_averaged</code>,
+    <code>line_averaged</code>, <code>flux_surface_averaged</code>,
+    <code>normalized</code>) <em>bare</em>; differential/scope
+    (<code>time_derivative</code>, <code>gradient</code>,
+    <code>radial_derivative</code>) with <code>_of_</code>; and postfix
+    (<code>magnitude</code>, <code>real_part</code>, <code>imaginary_part</code>,
+    <code>amplitude</code>) as a suffix.</p>
+    <p><strong>Deliverable.</strong> <code>to_ir()</code> routes
+    <code>operator_token</code> to the <code>transformation</code> field
+    (mapping to the right enum member, honouring <code>operator_kind</code> for the
+    prefix/postfix variants such as <code>real_part</code> vs
+    <code>real_part_postfix</code>), with a fallback to
+    <code>OperatorApplication</code> only for any non-transformation operator.
+    Mirror how <code>imas_standard_names.grammar.parser</code> builds the
+    transformation IR (a naive <code>StandardNameIR(transformation=…)</code>
+    construction raised a <code>ValidationError</code> in a probe — study the
+    parser and match its construction). Also reconcile <code>validate_candidate</code>.</p>
+    <p><strong>Done-when.</strong> A comprehensive round-trip test covers every
+    operator class (averaging-bare, differential-<code>_of_</code>, postfix) and
+    passes; the <code>sn-compose</code> stale shared-include examples are corrected
+    (<code>_grammar_reference.md:110,127</code> and <code>_exemplars.md:28,34,52</code>
+    still instruct the invalid <code>volume_averaged_of_X</code> form); the physics
+    benchmark is re-run and is unchanged-or-improved vs the baseline. <strong>High
+    blast radius</strong> — <code>to_ir</code> is on the path of every composed
+    name, so the round-trip suite is mandatory before commit.</p>
+
+    <h3 id="p2">Phase 2 — Prompt consolidation (field-choice oriented)</h3>
+    <p><strong>Reframe (locked).</strong> The model returns segment candidates, and
+    <code>compose()</code> assembles the name. So prompt rules that teach
+    joining-word <em>surface syntax</em> (operator <code>_of_</code> scope,
+    <code>_at_</code>/<code>_of_</code> spelling, adjacent-duplicate-token checks)
+    teach a string the model never emits. These are noise to cut. Genuine
+    <em>field-choice</em> guidance stays and is reframed as such: which
+    <code>locus_relation</code> (<code>of</code>/<code>at</code>/<code>over</code>),
+    which <code>locus_token</code>, which <code>qualifiers</code>, prefix-vs-postfix
+    <code>operator_kind</code>, <code>projection_shape</code>.</p>
+    <p><strong>Deliverable.</strong> A leaner <code>generate_name_system.md</code>
+    (the audit measured ~1700 lines across prompt + includes; target a goal-first
+    structure with one canonical statement of each rule). Lift the goal + 3 gold
+    exemplars to the top. Fold the 6× <code>_at_</code>/<code>_of_</code> and 5×
+    projection restatements into one each, <strong>preserving the union of every
+    nuance</strong>. Resolve the remaining dedup (the 11 HARD checks ~70% duplicate
+    the 36 numbered rules; <code>Rule 25</code> is a "same as Rule 19" stub).</p>
+    <p><strong>Done-when (user mandate).</strong> Every removal is individually
+    justified as pure duplication or contradiction — <strong>no hard-won signal is
+    dropped</strong> (much was earned over many rotation cycles). Each change is
+    A/B-measured against the baseline (<code>physics_bench-20260616T100837Z</code>)
+    and stays ≥ baseline. The exemplars are corrected (no taught-then-banned forms).</p>
+
+    <h3 id="p3">Phase 3 — Compose grounding on per-member <code>dd_paths</code></h3>
+    <p><strong>Problem.</strong> A compose candidate can cover N sibling DD paths
+    (<code>item.dd_paths</code>), but <code>_enrich_batch_items</code> enriches only
+    the primary <code>path</code>; the other members' DD documentation is never
+    fetched or rendered, so a name spanning N leaves is grounded on one. (Lower
+    severity than Phases 1–2: the input item already carries some sibling context
+    via <code>sibling_fields</code>/<code>cluster_siblings</code> — this is a
+    coverage enhancement, not a silent-drop bug.)</p>
+    <p><strong>Deliverable.</strong> A compact <code>dd_paths_docs</code>
+    <code>{path: terse_dd_documentation}</code> map built in
+    <code>_enrich_batch_items</code> (single <code>UNWIND</code> query) + a guarded
+    loop in the compose user template. Must follow Phase&nbsp;2's reframe (terse DD
+    doc, distinct from the rich description). <strong>Done-when:</strong> grouped
+    names show each member's DD clause; A/B neutral-or-better.</p>
+
+    <h3 id="p4">Phase 4 — Docs-model re-assessment (DSv4 vs sonnet)</h3>
+    <p><strong>Context.</strong> The Phase-2 grounding fixes (closed-vocab block now
+    renders for docs; <code>chain_history</code> wired; both description and DD doc
+    served) materially improved docs grounding. <code>[sn-docs]</code> is currently
+    <code>sonnet-4.6</code>; the pre-local-model best was gpt-5.5.</p>
+    <p><strong>Deliverable.</strong> An A/B of DSv4-flash vs sonnet-4.6 on docs
+    generation physics-correctness, using the benchmark's docs path
+    (<code>--include-docs</code> + the description-rescore + docs review) and a
+    docs gold standard. Re-use the calibrated physics judge adapted for docs prose.
+    <strong>Done-when:</strong> a keep/switch decision for <code>[sn-docs]</code>,
+    backed by numbers — can it move to free DSv4, or does it stay sonnet-class?</p>
+
+    <h3 id="p5">Phase 5 — Admit signal-STRUCTURE SN sources (336 quantities)</h3>
+    <p><strong>Problem.</strong> Signal-pattern IMAS quantities
+    (<code>magnetics/ip</code>, <code>rogowski_coil/current</code>,
+    <code>tf/coil/current</code>, langmuir, ece, neutron_diagnostic, …) are wrongly
+    excluded as SN sources by two gates: the extraction leaf-invariant
+    (<code>dd.py:524</code>, <code>NOT data_type IN [STRUCTURE,STRUCT_ARRAY]</code>)
+    and a latent <code>qualify_dd</code> S0 bug (<code>value_type.startswith("STR")</code>
+    over-matches <code>STRUCT_ARRAY</code>/<code>STRUCTURE</code>). The classifier is
+    correct (Rule 11b marks STRUCTURE+unit → quantity); the extraction gates override
+    it.</p>
+    <p><strong>Scope (locked).</strong> Admit the clean signal signature only:
+    <code>STRUCTURE</code>/<code>STRUCT_ARRAY</code> quantity nodes with a
+    <code>/data</code> child and no quantity child = <strong>336 nodes</strong>
+    across magnetics, langmuir_probes, divertors, neutron_diagnostic, ece,
+    charge_exchange, ic_antennas, tf, pf_active, calorimetry. Do <strong>not</strong>
+    admit the broader 447 "no quantity child" set (pulse_schedule setpoint refs,
+    <code>*_fit</code> containers, summary species aggregates — separate classifier
+    decisions). <strong>Done-when:</strong> the 336 are nameable; round-trip + the
+    <code>qualify_dd</code> S0 prefix bug fixed; <strong>land before Phase&nbsp;6</strong>
+    (it changes SN-source eligibility, so the regen must include them).</p>
+
+    <h3 id="p6">Phase 6 — Full SN clear + regen from scratch (endgame)</h3>
+    <p><strong>Goal.</strong> Once Phases 1–5 are trustworthy, clear the SN graph
+    and regenerate the catalog from scratch through the corrected pipeline — the
+    user's stated endgame. <strong>Done-when:</strong> a from-scratch run produces a
+    catalog where names round-trip, the physics-bench rate holds at the baseline or
+    better across the broadened source set (now including the 336 signal quantities),
+    and the docs are generated by the Phase-4-chosen model. Budget tracked via
+    <code>SNRun.cost_spent</code> against the ~$2000 target.</p>
+
+    <h2 id="s4">§4 — Milestones &amp; deliverables</h2>
+    <ul>
+      <li><strong>M1 — Grammar correctness.</strong> Phase 1 done: every operator
+      class round-trips; benchmark ≥ baseline. (Unblocks a clean A/B for P2.)</li>
+      <li><strong>M2 — Lean, consistent prompt.</strong> Phase 2 done: surface-form
+      noise cut, signal preserved, contradictions resolved, A/B ≥ baseline.</li>
+      <li><strong>M3 — Grounding complete.</strong> Phase 3 (dd_paths) + Phase 4
+      (docs model decided).</li>
+      <li><strong>M4 — Source set complete.</strong> Phase 5: 336 signal quantities
+      admitted; eligibility final.</li>
+      <li><strong>M5 — Catalog regenerated.</strong> Phase 6: from-scratch regen,
+      round-trip + physics-bench gated, within budget.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="composer-model" data-choice="keep deepseek-v4-flash" data-by="Simon McIntosh" data-when="2026-06-16">
+        <p class="r-dec-q">Which model composes standard names?</p>
+        <p class="r-dec-rat">LOCKED. Keep the free local <code>hosted_vllm/deepseek-v4-flash</code>.
+        True baseline: DSv4 89% physics / 4-of-5 hard at $0 vs opus-4.8 100% / 6-6 at
+        $1.15. DSv4 is competitive; the gap is one defensible specificity case. The
+        earlier "switch composer" pressure came from the resolver artifact, now
+        refuted.</p>
+      </div>
+
+      <div class="r-dec" data-key="radius-convention" data-choice="major_radius / minor_radius / radius are three distinct concepts — keep the qualifier" data-by="Simon McIntosh" data-when="2026-06-16">
+        <p class="r-dec-q">Bare <code>radius</code> vs <code>major_radius</code>?</p>
+        <p class="r-dec-rat">LOCKED. <code>major_radius</code> = cylindrical R coordinate;
+        <code>minor_radius</code> = flux-surface label; bare <code>radius</code> = an
+        object's physical size (coil/fibre/curvature) — three distinct concepts sharing
+        unit m (102 R-coordinate leaves, 59 size-radius leaves, ~20 minor). The qualifier
+        is distinguishing, not a reflexive wart; keep it.</p>
+      </div>
+
+      <div class="r-dec" data-key="shape-param-locus" data-choice="_of_plasma_boundary when boundary, _of_flux_surface otherwise; never bare" data-by="Simon McIntosh" data-when="2026-06-16">
+        <p class="r-dec-q">C-1: locus for shape parameters (triangularity, elongation)?</p>
+        <p class="r-dec-rat">LOCKED. Shape parameters always name the surface they
+        describe: <code>_of_plasma_boundary</code> for the LCFS contour,
+        <code>_of_flux_surface</code> (or the specific interior surface) otherwise —
+        we measure triangularity of interior surfaces too. Never bare. Both forms
+        round-trip; this is convention. Applied in <code>61221460</code>.</p>
+      </div>
+
+      <div class="r-dec" data-key="operator-joining" data-choice="model sets the segment; to_ir+compose own the joining (the exemplar bare form is correct, _of_ is wrong)" data-by="Simon McIntosh" data-when="2026-06-16">
+        <p class="r-dec-q">C-4: operator joining — bare vs <code>_of_</code>, and at which layer?</p>
+        <p class="r-dec-rat">LOCKED. The bare averaging exemplar is correct; the
+        <code>_of_</code> form is invalid. The model outputs the operator segment and
+        <code>to_ir</code>/<code>compose</code> must produce the right joining — it is
+        NOT a prompt-surface rule. Fix is Phase 1 (<code>to_ir</code> transformation
+        routing). The <code>_at_</code>/<code>_of_</code> <em>locus</em> relations are
+        distinct grammar segments the parser relies on — keep them.</p>
+      </div>
+
+      <div class="r-dec" data-key="signal-source-scope" data-choice="/data-child signal signature only (336), not the broader 447" data-by="Simon McIntosh" data-when="2026-06-16">
+        <p class="r-dec-q">C-/Phase-5: how wide to admit signal-STRUCTURE SN sources?</p>
+        <p class="r-dec-rat">LOCKED. Admit only the unambiguous signal signature
+        (STRUCTURE/STRUCT_ARRAY quantity with a <code>/data</code> child, no quantity
+        child) = 336 nodes. Defer pulse_schedule references, <code>*_fit</code>
+        containers, summary species aggregates as separate classifier decisions. Also
+        fix the <code>qualify_dd</code> S0 <code>startswith("STR")</code> over-match.</p>
+      </div>
+
+      <div class="r-dec" data-key="round-trip-gate" data-choice="all naming/grammar changes must round-trip; update compose/parse as required" data-by="Simon McIntosh" data-when="2026-06-16">
+        <p class="r-dec-q">What is the acceptance gate for any grammar/naming change?</p>
+        <p class="r-dec-rat">LOCKED. Every change must round-trip through ISN
+        <code>parse</code>/<code>compose</code>; update <code>compose</code>/<code>parse</code>
+        (or the codex <code>to_ir</code> mapping) as required. Exercise the real code
+        path — do not assert behaviour from a bypassed stage.</p>
+      </div>
+
+      <div class="r-dec" data-key="docs-model" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">OPEN (Phase 4): does <code>[sn-docs]</code> move to free DSv4-flash, or stay sonnet-class?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="keep-sonnet">keep sonnet-4.6</button>
+          <button class="r-opt" data-value="switch-dsv4">switch to DSv4-flash</button>
+          <button class="r-opt" data-value="tiered">tiered (DSv4 routine, escalate hard)</button>
+        </p>
+        <p class="r-dec-rat">Decide from the Phase-4 docs A/B. Grounding improved
+        materially after the wiring fixes, so re-assessment is warranted.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-snph-001" data-status="open" data-tier="opus"
+               data-written-by="reckon-create" data-written-at="2026-06-16">
+        <h4 class="r-fu-title">Phase 1 — fix to_ir transformation routing (round-trip-gated)</h4>
+        <div class="r-fu-body">
+          <p>Start the next session here. This is a genuine correctness bug on the
+          path of <em>every</em> composed name, so it gates a clean A/B for the
+          prompt consolidation. The model outputs the operator <em>segment</em>;
+          <code>to_ir</code> must produce a joining that round-trips. Build the
+          round-trip test suite first (averaging-bare, differential-<code>_of_</code>,
+          postfix), then make it pass.</p>
+        </div>
+        <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-pipeline-hardening (http://localhost:8765/imas-codex/sn-pipeline-hardening.html)
+Section: §3 Phase 1
+Tier:    opus
+
+Context
+  The compose model outputs grammar SEGMENTS (operator_token + operator_kind), and
+  GrammarSegments.to_ir()/compose() assemble the name. to_ir routes operator_token to
+  OperatorApplication(unary_prefix), so compose joins ALL prefix operators with _of_ →
+  volume_averaged_of_electron_density, which fails to parse/round-trip. The canonical IR
+  uses the `transformation` field (Transformation enum, ~50 members) which renders each
+  correctly (averaging bare, differential _of_, postfix suffix). Honour the locked
+  round-trip gate and the operator-joining decision shown above.
+
+State to read (CODE/FILES — not the plan)
+  imas_codex/standard_names/models.py  (GrammarSegments.to_ir ~219-306; operator block ~284-291)
+  imas_standard_names.grammar.parser   (how parse builds the transformation IR — mirror it;
+                                        a naive StandardNameIR(transformation=...) raised ValidationError)
+  imas_standard_names.grammar Transformation enum (membership: volume_averaged/line_averaged/
+    flux_surface_averaged/normalized = bare; time_derivative/gradient/radial_derivative = _of_;
+    magnitude/real_part/imaginary_part/amplitude + *_postfix = postfix)
+  imas_codex/llm/prompts/shared/sn/_grammar_reference.md (lines 110,127 instruct the invalid _of_ form)
+  imas_codex/llm/prompts/shared/sn/_exemplars.md (lines 28,34,52 instruct invalid _of_/nested forms)
+
+Scope locks / constraints (non-decision)
+  to_ir is on every composed name's path — HIGH blast radius. Build a comprehensive
+  round-trip test (parse_standard_name -> compose_standard_name, equality) over ALL
+  operator classes and run it BEFORE committing. Also reconcile validate_candidate.
+  Correct the stale shared-include exemplars (do not leave them teaching the invalid _of_
+  averaging form). Do NOT touch the _at_/_of_ locus relations — distinct segments.
+
+Done-when
+  1. to_ir routes transformation-class operator_token to the IR transformation field;
+     postfix variants (real_part vs real_part_postfix) honoured via operator_kind.
+  2. New round-trip test covers averaging-bare, differential-_of_, postfix — all green.
+  3. Stale _of_ averaging examples in _grammar_reference.md + _exemplars.md corrected.
+  4. Physics benchmark re-run = baseline or better (research/physics_bench-20260616T100837Z.json).
+  5. Followup written into the plan + this one resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
