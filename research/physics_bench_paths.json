@@ -7,7 +7,7 @@
   {"path": "ferritic/permeability_table/b_field", "category": "locus_ordering"},
   {"path": "equilibrium/time_slice/boundary_separatrix/x_point/r", "category": "specificity_consistency"},
   {"path": "summary/boundary/x_point_main/r", "category": "specificity_consistency"},
-  {"path": "equilibrium/time_slice/constraints/x_point/position/r", "category": "specificity_consistency"},
+  {"path": "equilibrium/time_slice/constraints/x_point/position_measured/r", "category": "specificity_consistency"},
   {"path": "breeding_blanket/module/cooling/time_slice/pressure_inlet", "category": "source_qualifier"},
   {"path": "breeding_blanket/module/time_slice/wall_flux_max", "category": "source_qualifier"},
   {"path": "core_profiles/profiles_1d/electrons/density", "category": "control"},
