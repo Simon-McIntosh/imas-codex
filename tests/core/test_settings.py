@@ -92,9 +92,14 @@ class TestSettingsFunctions:
         assert isinstance(result, str)
         assert len(result) > 0
 
+    # Sections that intentionally use a LOCAL model (free, served on a
+    # dedicated client) and are therefore EXEMPT from the openrouter/ prefix
+    # guard: sn-compose (hosted_vllm DeepSeek-V4) and embedding (local Qwen).
+    _LOCAL_MODEL_SECTIONS = frozenset({"sn-compose", "embedding"})
+
     @pytest.mark.parametrize(
         "section",
-        ["reasoning", "dd-enrichment", "sn-compose", "sn-enrich", "sn-refine"],
+        sorted(set(settings._MODEL_ENV_VARS) - _LOCAL_MODEL_SECTIONS),
     )
     def test_openrouter_prefix_present(self, monkeypatch, section):
         """OpenRouter-billed sections must carry the 'openrouter/' prefix.
@@ -102,6 +107,10 @@ class TestSettingsFunctions:
         Without it, calls silently route through the LiteLLM proxy, which
         strips cache_control breakpoints (~80% cache discount lost) and
         zeroes response_cost (cost telemetry broken). Regression guard.
+
+        Derived from ``_MODEL_ENV_VARS`` (minus the local-model sections) so
+        the guard auto-covers new sections and cannot rot — the previous
+        static list silently referenced a non-existent ``sn-enrich`` section.
         """
         settings._load_pyproject_settings.cache_clear()
         env_var = settings._MODEL_ENV_VARS[section]

@@ -5433,6 +5433,7 @@ async def _run_rd_quorum_cycles(
     phase: str,
     acall_llm_structured: Callable[..., Any],
     reasoning_effort: str | None = None,
+    escalation_reasoning_effort: str | None = None,
 ) -> dict[str, Any] | None:
     """Run the configured RD-quorum reviewer chain for a single StandardName.
 
@@ -5486,6 +5487,15 @@ async def _run_rd_quorum_cycles(
     async def _run_cycle(cycle_idx: int, model: str) -> dict[str, Any] | None:
         """Single LLM call. Returns parsed cycle dict or None on failure."""
         nonlocal total_cost, total_tokens_in, total_tokens_out
+        # The escalator cycle (idx >= 2) fires only on a flagged disagreement,
+        # so it gets a higher reasoning budget on just the contested items; the
+        # base cycles run at the cheaper base effort (review is the cost-
+        # dominant phase). Falls back to the base effort when unset.
+        cycle_effort = (
+            escalation_reasoning_effort
+            if (cycle_idx >= 2 and escalation_reasoning_effort is not None)
+            else reasoning_effort
+        )
         try:
             llm_out = await acall_llm_structured(
                 model=model,
@@ -5495,7 +5505,7 @@ async def _run_rd_quorum_cycles(
                 ],
                 response_model=response_model,
                 service="standard-names",
-                reasoning_effort=reasoning_effort,
+                reasoning_effort=cycle_effort,
             )
             result_obj, cost, _tokens = llm_out
         except Exception:
@@ -5785,6 +5795,7 @@ async def process_review_name_batch(
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import (
         get_sn_review_disagreement_threshold,
+        get_sn_review_escalation_reasoning_effort,
         get_sn_review_names_models,
         get_sn_review_reasoning_effort,
     )
@@ -6173,6 +6184,7 @@ async def process_review_name_batch(
                 phase="review_name",
                 acall_llm_structured=acall_llm_structured,
                 reasoning_effort=get_sn_review_reasoning_effort(),
+                escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
             )
 
             if quorum is None:
@@ -6996,6 +7008,7 @@ async def process_review_docs_batch(
         get_model,
         get_sn_review_disagreement_threshold,
         get_sn_review_docs_models,
+        get_sn_review_escalation_reasoning_effort,
         get_sn_review_names_models,
         get_sn_review_reasoning_effort,
     )
@@ -7143,6 +7156,7 @@ async def process_review_docs_batch(
                 phase="review_docs",
                 acall_llm_structured=acall_llm_structured,
                 reasoning_effort=get_sn_review_reasoning_effort(),
+                escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
             )
 
             if quorum is None:

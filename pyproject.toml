@@ -498,10 +498,20 @@ isnc-dir = ""
 disagreement-threshold = 0.20
 # Maximum RD-quorum cycles (1 = primary only, 2 = blind pair, 3 = full quorum).
 max-cycles = 3
-# Reasoning effort (low|medium|high) for reviewer LLM calls. high lifts the
-# cheap vendor-diverse reviewers to frontier discrimination at trivial cost
-# (bake-off 2026-06-09). Set "none" for provider default.
-reasoning-effort = "high"
+# Reasoning effort for the BASE reviewer cycles (primary + secondary).
+# Review is a bounded judge-against-schema task and the cost-dominant phase
+# (N reviewers x cycles per name), so it does not need the "max" budget the
+# GENERATE/compose task gets; lower effort also tends to improve rule/prompt
+# following (less second-guessing). The disagreement tie-breaker escalates
+# separately (escalation-reasoning-effort). Was "high" (bake-off 2026-06-09);
+# dropped to "medium" 2026-06-16 to cut review-phase cost. Set "none" for
+# provider default.
+reasoning-effort = "medium"
+# Reasoning effort for the ESCALATOR cycle only (cycle >= 2, fired on a flagged
+# disagreement between the base reviewers — rare, so a higher budget on just
+# the contested items is cheap). If it fires too often, prefer raising the base
+# effort or the disagreement threshold over leaning on this.
+escalation-reasoning-effort = "high"
 
 [tool.imas-codex.sn-review.names]
 # Phase 1 (2026-05-18): mixed-vendor RD-quorum chain.

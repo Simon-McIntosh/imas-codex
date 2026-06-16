@@ -1099,7 +1099,8 @@ _SN_REVIEW_DEFAULTS: dict[str, Any] = {
     "docs-models": ["openrouter/anthropic/claude-opus-4.6"],
     "disagreement-threshold": 0.15,
     "max-cycles": 3,
-    "reasoning-effort": "high",
+    "reasoning-effort": "medium",
+    "escalation-reasoning-effort": "high",
 }
 
 
@@ -1314,16 +1315,37 @@ def get_sn_review_disagreement_threshold() -> float:
 
 
 def get_sn_review_reasoning_effort() -> str | None:
-    """Reasoning effort (low|medium|high) for SN reviewer LLM calls.
+    """Reasoning effort for the BASE SN reviewer cycles (primary + secondary).
 
-    Reads ``[tool.imas-codex.sn-review].reasoning-effort`` (shared across
-    both axes). Defaults to ``"high"``: the reviewer bake-off (2026-06-09)
-    showed high effort materially lifts the cheap, vendor-diverse reviewers
-    (qwen3.7-max, minimax-m3, deepseek-v4-pro) to frontier discrimination at
-    trivial extra cost. Set to ``"none"`` / empty to use the provider
-    default (no explicit reasoning budget).
+    Reads ``[tool.imas-codex.sn-review].reasoning-effort`` (shared across both
+    axes). Defaults to ``"medium"``: review is a bounded judge-against-schema
+    task and is the cost-dominant phase (N reviewers x cycles per name), so it
+    does not warrant the ``max`` budget the GENERATE task needs. Lower effort
+    can also improve rule/prompt-following (less second-guessing). The
+    disagreement tie-breaker escalates separately — see
+    :func:`get_sn_review_escalation_reasoning_effort`. Set ``"none"`` / empty
+    for the provider default (no explicit reasoning budget).
     """
     return get_reasoning_effort("sn-review", _SN_REVIEW_DEFAULTS["reasoning-effort"])
+
+
+def get_sn_review_escalation_reasoning_effort() -> str | None:
+    """Reasoning effort for the SN review ESCALATOR cycle (the tie-breaker).
+
+    Reads ``[tool.imas-codex.sn-review].escalation-reasoning-effort``. Defaults
+    to ``"high"``: the escalator only fires on a flagged disagreement between
+    the base reviewers, so it is rare and a higher budget on just those
+    contested items is cheap. If the escalator turns out to fire too often
+    (watch ``resolution_method='authoritative_escalation'`` frequency), prefer
+    raising the base effort or the disagreement threshold over leaning on this.
+    """
+    val = _get_section("sn-review").get(
+        "escalation-reasoning-effort",
+        _SN_REVIEW_DEFAULTS["escalation-reasoning-effort"],
+    )
+    if val in (None, "", "none"):
+        return None
+    return str(val)
 
 
 def get_reasoning_effort(section: str, default: str | None = None) -> str | None:
