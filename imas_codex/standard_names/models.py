@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import logging
 from typing import Any
 
@@ -19,6 +20,52 @@ _LOCUS_RELATIONS = {"of", "at", "over"}
 _LOCUS_TYPES = {"entity", "position", "region", "geometry"}
 _OPERATOR_KINDS = {"unary_prefix", "unary_postfix"}
 _ENTRY_KINDS = {"scalar", "vector", "metadata"}
+
+
+@functools.cache
+def _operator_registry_kinds() -> dict[str, str]:
+    """Map each registered operator token to its registry ``kind``.
+
+    Returns ``{token: "unary_prefix" | "unary_postfix" | "binary"}`` from the
+    public grammar context. The registry ``kind`` is authoritative for whether
+    an operator is a prefix transformation or a postfix decomposition; it is
+    the only operator routing codex needs because the ISN model layer
+    (``compose_standard_name``) owns the bare-vs-``_of_`` prefix distinction.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+    except ImportError:  # pragma: no cover - ISN always present in this repo
+        return {}
+    ctx = get_grammar_context()
+    ops = ctx.get("grammar", {}).get("vocabularies", {}).get("operators", {})
+    return {token: meta.get("kind", "") for token, meta in ops.items()}
+
+
+@functools.cache
+def _projection_axis_tokens() -> dict[str, frozenset[str]]:
+    """Registered component/coordinate axis tokens, keyed by projection shape.
+
+    Used to detect compound axis tokens (e.g. ``normalized_radial``) that ISN
+    forms by fusing a bare-prefix transformation with an axis. Pulled from the
+    live grammar vocabulary — no hardcoded token list.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+    except ImportError:  # pragma: no cover - ISN always present in this repo
+        return {"component": frozenset(), "coordinate": frozenset()}
+    ctx = get_grammar_context()
+    out: dict[str, frozenset[str]] = {}
+    for shape in ("component", "coordinate"):
+        section = next(
+            (
+                s
+                for s in ctx.get("vocabulary_sections", [])
+                if s.get("segment") == shape
+            ),
+            None,
+        )
+        out[shape] = frozenset(section.get("tokens", []) if section else [])
+    return out
 
 
 class GrammarSegments(BaseModel):
@@ -216,94 +263,122 @@ class GrammarSegments(BaseModel):
                     )
         return self
 
-    def to_ir(self) -> Any:
-        """Build ISN StandardNameIR from segment fields."""
-        from imas_standard_names.grammar.ir import (
-            AxisProjection,
-            BaseKind,
-            LocusRef,
-            LocusRelation,
-            LocusType,
-            OperatorApplication,
-            OperatorKind,
-            Process,
-            ProjectionShape,
-            Qualifier,
-            QuantityOrCarrier,
-            StandardNameIR,
-        )
+    def _to_model_dict(self) -> dict[str, Any]:
+        """Build the flat ISN ``StandardName`` model dict from segment fields.
 
-        base = QuantityOrCarrier(token=self.base_token, kind=BaseKind(self.base_kind))
+        Canonical joining is DELEGATED to the ISN model layer rather than
+        re-derived in codex: a prefix operator goes in ``transformation`` and
+        ISN decides bare (``volume_averaged_X``) vs ``_of_``
+        (``time_derivative_of_X``); a postfix goes in ``decomposition``. The
+        operator kind is taken from the registry (authoritative) and falls
+        back to the LLM-supplied ``operator_kind`` only for unregistered
+        tokens. Qualifiers fold into the base compound in the order the model
+        emitted them (ISN re-parses and enforces canonical order downstream).
 
-        projection = None
-        if self.projection_axis is not None and self.projection_shape is not None:
-            projection = AxisProjection(
-                axis=self.projection_axis,
-                shape=ProjectionShape(self.projection_shape),
+        One codex-side adjustment remains: a bare-prefix transformation that
+        co-occurs with a projection axis fuses into a single registered
+        compound axis token (``normalized`` + ``radial`` ->
+        ``normalized_radial``), because ISN forbids ``transformation`` and
+        ``component`` together. The fusion is detected from the live axis
+        vocabulary, not a hardcoded list.
+        """
+        d: dict[str, Any] = {}
+
+        # Base (+ qualifiers folded as a canonical-order compound prefix).
+        base = self.base_token
+        if self.qualifiers:
+            base = "_".join([*self.qualifiers, base])
+        if self.base_kind == "geometry":
+            d["geometric_base"] = base
+        else:
+            d["physical_base"] = base
+
+        projection_axis = self.projection_axis
+        projection_shape = self.projection_shape or "component"
+
+        # Operator → transformation (prefix) / decomposition (postfix).
+        if self.operator_token is not None:
+            kind = (
+                _operator_registry_kinds().get(self.operator_token)
+                or self.operator_kind
             )
+            if kind == "unary_postfix":
+                d["decomposition"] = self.operator_token
+            else:
+                # Prefix transformation. Fuse with the projection axis when the
+                # compound is a registered axis token (ISN represents
+                # normalized_radial as one component, and rejects
+                # transformation + component together).
+                compound = (
+                    f"{self.operator_token}_{projection_axis}"
+                    if projection_axis is not None
+                    else None
+                )
+                if compound is not None and compound in _projection_axis_tokens().get(
+                    projection_shape, frozenset()
+                ):
+                    projection_axis = compound
+                else:
+                    d["transformation"] = self.operator_token
 
-        qualifiers = [Qualifier(token=q) for q in self.qualifiers]
+        # Projection → component / coordinate.
+        if projection_axis is not None:
+            if projection_shape == "coordinate":
+                d["coordinate"] = projection_axis
+            else:
+                d["component"] = projection_axis
 
-        locus = None
+        # Locus → object / position(+value) / geometry / region. Map by type
+        # (and relation for the position split), mirroring ISN's locus matrix;
+        # an out-of-matrix relation is normalised by the type-based mapping.
         if (
             self.locus_token is not None
             and self.locus_relation is not None
             and self.locus_type is not None
         ):
-            # Auto-correct invalid relation+type combos per ISN rules:
-            # entity→of, position→at|of, region→over, geometry→of
-            _VALID_RELATIONS: dict[str, list[str]] = {
-                "entity": ["of"],
-                "position": ["at", "of"],
-                "region": ["over"],
-                "geometry": ["of"],
-            }
-            rel = self.locus_relation
             lt = self.locus_type
-            allowed = _VALID_RELATIONS.get(lt, ["of"])
-            if rel not in allowed:
-                rel = allowed[0]
+            if lt == "entity":
+                d["object"] = self.locus_token
+            elif lt == "region":
+                d["region"] = self.locus_token
+            elif lt == "position":
+                if self.locus_relation == "of":
+                    d["geometry"] = self.locus_token
+                else:  # 'at' (or normalised from an invalid relation)
+                    d["position"] = self.locus_token
+                    if self.locus_value is not None:
+                        d["position_value"] = self.locus_value
+            else:  # geometry-type locus
+                d["geometry"] = self.locus_token
 
-            _locus_kwargs: dict = {
-                "relation": LocusRelation(rel),
-                "token": self.locus_token,
-                "type": LocusType(lt),
-            }
-            # Value-parameterized at-positions (ISN ≥rc34): only valid for
-            # relation='at' + type='position'; silently dropping the value
-            # would be a silent-loss bug, so pass it through and let the IR
-            # validator reject invalid combinations.
-            if self.locus_value is not None:
-                _locus_kwargs["value"] = self.locus_value
-            locus = LocusRef(**_locus_kwargs)
-
-        mechanism = None
+        # Mechanism → process.
         if self.process_token is not None:
-            mechanism = Process(token=self.process_token)
+            d["process"] = self.process_token
 
-        operators: list[OperatorApplication] = []
-        if self.operator_token is not None and self.operator_kind is not None:
-            operators = [
-                OperatorApplication(
-                    kind=OperatorKind(self.operator_kind),
-                    op=self.operator_token,
-                )
-            ]
-
-        return StandardNameIR(
-            operators=operators,
-            projection=projection,
-            qualifiers=qualifiers,
-            base=base,
-            locus=locus,
-            mechanism=mechanism,
-        )
+        return d
 
     def compose_name(self) -> str:
-        """Build canonical standard name string via ISN compose()."""
-        from imas_standard_names.grammar.render import compose
+        """Build the canonical standard name via the ISN model-layer composer.
 
-        return compose(self.to_ir())
+        Delegates to ISN's public ``compose_standard_name``, which owns the
+        bare-vs-``_of_`` prefix routing, postfix joins, qualifier ordering, and
+        compound-axis fusion — so codex inherits ISN's grammar authority rather
+        than re-deriving it in a low-level IR patch.
+        """
+        from imas_standard_names.grammar import compose_standard_name
+
+        return compose_standard_name(self._to_model_dict())
+
+    def to_ir(self) -> Any:
+        """Return the ISN IR for this segment set's canonical name.
+
+        Derived by parsing the canonical name so the IR is always consistent
+        with :meth:`compose_name`. Raises if the segments do not form an
+        expressible canonical name (callers already guard ``compose_name``).
+        """
+        from imas_standard_names.grammar.parser import parse
+
+        return parse(self.compose_name()).ir
 
 
 # Module-level constant: segment field names used by flat-wrap validators.

@@ -97,7 +97,7 @@ In the ISN grammar, `_of_` appears in exactly three structural roles:
 - **DD path independence** — names describe physics, not DD location. Never include IDS names or DD section prefixes.
 - **No processing verbs** — `reconstructed_`, `measured_`, `fitted_` are provenance, not physics. Drop them.
 - **Preposition discipline** — use `_of_` for properties of named entities, `_at_` for field values at points, `_over_` for region integrals. Never use `_from_`.
-- **Spectral decomposition** — `per_toroidal_mode` and `per_poloidal_mode` are registered **unary prefix** operators. Canonical form: `per_toroidal_mode_of_X`. They indicate the quantity is resolved per Fourier toroidal/poloidal mode component. Do not penalise these as unknown operators.
+- **Spectral decomposition** — `per_toroidal_mode` and `per_poloidal_mode` are registered **bare-prefix** transformations. Canonical form: `per_toroidal_mode_X` (bare, no `_of_`). They indicate the quantity is resolved per Fourier toroidal/poloidal mode component. Do not penalise these as unknown operators.
 
 ### Rejected rc20 Forms
 
@@ -107,7 +107,7 @@ In the ISN grammar, `_of_` appears in exactly three structural roles:
 | `amplitude_of_X` | `X_amplitude` | Postfix operator, not prefix |
 | `imaginary_part_of_X` | `X_imaginary_part` | Postfix operator, not prefix |
 | Registered token absorbed into base | `<segment>_token_<rest>` decomposition | Place every registered token in its segment |
-| `volume_averaged_X` (bare concat) | `volume_averaged_of_X` | Operator scope requires `_of_` |
+| `volume_averaged_of_X` | `volume_averaged_X` | Averaging/integrating transformations are bare prefixes (parsed as qualifiers); the `_of_` form is ungrammatical |
 | `electron_thermal_pressure` | `thermal_electron_pressure` | Population precedes species |
 | `ion_rotation_frequency_toroidal` | `toroidal_ion_rotation_frequency` | No trailing component |
 | `diamagnetic_X` (as projection) | `X_due_to_diamagnetic_drift` | Diamagnetic is a drift, not an axis |
@@ -123,8 +123,9 @@ Examples:
 
 - `toroidal_torque` → `toroidal` is in `component`; decompose to
   `component=toroidal, physical_base=torque` → `toroidal_torque` (short form).
-- `volume_averaged_electron_temperature` → `volume_averaged` is a
-  `transformation`; `electron` is a `subject` → `volume_averaged_of_electron_temperature`.
+- `volume_averaged_electron_temperature` → `volume_averaged` is a bare-prefix
+  `transformation`; `electron` is a `subject` → `volume_averaged_electron_temperature`
+  (averaging/integrating transformations attach bare, never with `_of_`).
 - `parallel_viscosity_current_density` → `parallel` is a `component` →
   `parallel_viscosity_current_density` (short form; `_component_of_` is REJECTED).
 

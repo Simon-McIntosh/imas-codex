@@ -25,17 +25,20 @@ The locus `_at_magnetic_axis` follows the base. `_at_` marks a field value sampl
 **E7. Mechanism qualifier** — `plasma_current_due_to_bootstrap`
 The process `bootstrap` is attached via `_due_to_` after the base quantity.
 
-**E8. Prefix operator with scope** — `line_averaged_of_electron_density`
-The operator `line_averaged` applies `_of_` scope to the full inner name. Operators always carry explicit scope.
+**E8. Bare-prefix transformation** — `line_averaged_electron_density`
+`line_averaged` is an averaging transformation: it attaches BARE (no `_of_`), parsed as the outermost qualifier. Averaging/integrating transformations (`volume_averaged`, `flux_surface_averaged`, `normalized`, `surface_integrated`, `per_toroidal_mode`, ...) never carry `_of_`. Differential/scalar operators (`time_derivative`, `gradient`, ...) DO: `gradient_of_electron_pressure`.
 
 **E9. Projection + locus combo** — `radial_magnetic_field_at_separatrix`
 Projection prefix + locus postfix coexist cleanly: `[projection] base [locus]`.
 
-**E10. Nested operators** — `time_derivative_of_volume_averaged_of_electron_density`
-Outer operator `time_derivative` wraps inner operator `volume_averaged` wraps base `electron_density`. Each `_of_` is an operator scope marker; the last `_of_` (if any) would be a locus.
+**E10. Nested operators** — `time_derivative_of_volume_averaged_electron_density`
+Outer operator `time_derivative` (a differential prefix, `_of_` scope) wraps the
+inner bare-prefix transformation `volume_averaged` on base `electron_density`.
+Differential operators carry `_of_`; averaging/integrating transformations attach
+bare — so the two compose as `time_derivative_of_` + `volume_averaged_electron_density`.
 
-**E11. Spectral decomposition** — `per_toroidal_mode_of_wave_absorbed_power`
-Prefix operator `per_toroidal_mode` applied to base `wave_absorbed_power`. Indicates the quantity is resolved per Fourier toroidal-mode component. `per_toroidal_mode` and `per_poloidal_mode` are registered operators — do not flag them as unknown.
+**E11. Spectral decomposition** — `per_toroidal_mode_wave_absorbed_power`
+Bare-prefix transformation `per_toroidal_mode` on base `wave_absorbed_power` (bare, no `_of_`). Indicates the quantity is resolved per Fourier toroidal-mode component. `per_toroidal_mode` and `per_poloidal_mode` are registered bare-prefix transformations — do not flag them as unknown.
 
 ### ❌ Negative Exemplars — rc20 forms now rejected
 
