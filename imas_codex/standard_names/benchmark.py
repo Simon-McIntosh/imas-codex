@@ -1218,14 +1218,14 @@ async def run_benchmark(
     if config.physics_judge:
         from functools import partial
 
-        from imas_codex.settings import get_model
+        from imas_codex.settings import get_sn_benchmark_reviewer_model
         from imas_codex.standard_names.physics_judge import (
             judge_name_physics,
             load_bench_paths,
             score_physics_batch,
         )
 
-        judge_model = config.physics_judge_model or get_model("sn-review")
+        judge_model = config.physics_judge_model or get_sn_benchmark_reviewer_model()
         bench_paths = load_bench_paths()
         hardcase_paths = {
             p["path"] for p in bench_paths if p.get("category") != "control"
@@ -1245,7 +1245,9 @@ async def run_benchmark(
                         "name": nm,
                         "path": pth,
                         "unit": cand.get("unit"),
-                        "documentation": cand.get("description", "") or "",
+                        "documentation": cand.get("documentation")
+                        or cand.get("description")
+                        or "",
                     }
                 )
                 if any(sp in hardcase_paths for sp in src_paths):
