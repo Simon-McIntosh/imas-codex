@@ -1239,6 +1239,19 @@ async def run_benchmark(
                 if any(p in hardcase_paths for p in cand_paths):
                     hard_names.add(nm)
             verdicts = await score_physics_batch(scored, jfn)
+            # A model that composed candidates but got ZERO physics verdicts
+            # means the judge pass did not actually score it (judge error or an
+            # interrupted run) — NOT a genuine 0% faithfulness. Surface it so
+            # the empty physics column is never silently misread as a result.
+            if scored and not verdicts:
+                logger.warning(
+                    "physics_judge: model %s composed %d candidate(s) but the "
+                    "judge returned 0 verdicts — physics metrics are EMPTY for "
+                    "this model (judge failure or interrupted run), not 0%% "
+                    "faithfulness. Re-run; do not compare this as a score.",
+                    model_result.model,
+                    len(scored),
+                )
             apply_physics_metrics(model_result, verdicts, hard_names)
         # Tripwire: if nothing matched the hard-case set, the bench-path↔candidate
         # binding is broken (e.g. wrong source field) — surface it loudly rather
