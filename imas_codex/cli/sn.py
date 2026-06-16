@@ -1857,6 +1857,24 @@ def sn_run(
     "--names-only: benchmark name generation only (default).",
 )
 @click.option(
+    "--physics",
+    is_flag=True,
+    help="Run the physics-correctness judge (gold-set gated).",
+)
+@click.option(
+    "--gold-set",
+    "gold_set",
+    type=click.Path(exists=True),
+    default=None,
+    help="Path to human gold labels (research/physics_bench_gold.json).",
+)
+@click.option(
+    "--physics-judge-model",
+    "physics_judge_model",
+    default=None,
+    help="Judge model (default: the calibrated sn-benchmark reviewer model, opus-4.8).",
+)
+@click.option(
     "--rescore",
     type=click.Path(exists=True, dir_okay=False),
     default=None,
@@ -1875,6 +1893,9 @@ def sn_bench(
     reviewer_model: str | None,
     reviewer_models: tuple[str, ...],
     include_docs: bool,
+    physics: bool,
+    gold_set: str | None,
+    physics_judge_model: str | None,
     rescore: str | None,
 ) -> None:
     """Benchmark LLM models on standard name generation.
@@ -2003,6 +2024,9 @@ def sn_bench(
         reviewer_models=rev_list,
         names_only=names_only,
         output_path=str(out_path),
+        physics_judge=physics,
+        gold_set_path=gold_set,
+        physics_judge_model=physics_judge_model,
     )
 
     mode_str = "names + docs" if include_docs else "names-only"
@@ -2018,6 +2042,34 @@ def sn_bench(
     console.print()
 
     from imas_codex.cli.utils import run_async
+
+    # Gold-set calibration gate: validate the judge before trusting its scores.
+    if physics and gold_set:
+        import json as _json
+        from functools import partial
+
+        from imas_codex.settings import get_sn_benchmark_reviewer_model
+        from imas_codex.standard_names.physics_judge import (
+            judge_name_physics,
+            run_calibration_gate,
+        )
+
+        gold = _json.loads(open(gold_set).read())
+        jmodel = physics_judge_model or get_sn_benchmark_reviewer_model()
+        cal = run_async(
+            run_calibration_gate(gold, partial(judge_name_physics, model=jmodel))
+        )
+        console.print(
+            f"[bold]Judge calibration:[/] trusted={cal['trusted']} "
+            f"overall={cal['overall_agreement']} "
+            f"hardcase={cal['hardcase_errors_caught']}/{cal['hardcase_errors_total']}"
+        )
+        if not cal["trusted"]:
+            console.print(
+                "[red]Judge FAILED calibration — physics scores are advisory; "
+                f"hardcase misses: {cal['hardcase_misses']}. "
+                "Fall back to human scoring.[/]"
+            )
 
     report = run_async(run_benchmark(config))
 

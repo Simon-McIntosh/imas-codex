@@ -1838,6 +1838,30 @@ def render_comparison_table(report: BenchmarkReport) -> None:
     if has_multi_docs_rev:
         _render_reviewer_agreement(console, report, "docs")
 
+    # --- Physics correctness ---
+    if any(getattr(r, "physics_total", 0) for r in report.results):
+        physics_table = Table(
+            title="Physics Correctness", show_header=True, header_style="bold"
+        )
+        physics_table.add_column("Model", style="bold")
+        physics_table.add_column("Physics %", justify="right")
+        physics_table.add_column("Hard-case %", justify="right")
+        physics_table.add_column("Valid %", justify="right")
+        physics_table.add_column("$/name", justify="right")
+        for r in sorted(report.results, key=lambda x: x.physics_rate, reverse=True):
+            n = len(r.candidates)
+            valid_pct = (r.grammar_valid_count / n * 100) if n else 0.0
+            cost_per = (r.total_cost / n) if n else 0.0
+            physics_table.add_row(
+                r.model,
+                f"{r.physics_rate * 100:.0f}",
+                f"{r.physics_hardcase_rate * 100:.0f}",
+                f"{valid_pct:.0f}",
+                f"${cost_per:.4f}",
+            )
+        console.print()
+        console.print(physics_table)
+
     # --- Cost summary ---
     _render_cost_summary(console, report)
 
