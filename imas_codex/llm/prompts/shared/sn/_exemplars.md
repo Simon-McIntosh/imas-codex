@@ -50,13 +50,13 @@ Bare-prefix transformation `per_toroidal_mode` on base `wave_absorbed_power` (ba
 *Rejected:* `amplitude` is postfix. Prefix form with nested `_of_` chains is unparseable. Also `_component_of_` is REJECTED.
 ✅ Use: `parallel_wave_electric_field_amplitude`
 
-**N3.** ❌ `volume_averaged_electron_density` (bare concatenation)
-*Rejected:* Prefix operators require `_of_` scope marker. Bare concatenation is the old transformation-segment form.
-✅ Use: `volume_averaged_of_electron_density`
+**N3.** ❌ `volume_averaged_of_electron_density`
+*Rejected:* Averaging/integrating transformations are BARE prefixes (parsed as qualifiers); the `_of_` scope marker is ungrammatical for them.
+✅ Use: `volume_averaged_electron_density`
 
 **N4.** ❌ `diamagnetic_component_of_ion_velocity`
-*Rejected:* `diamagnetic` is a drift mechanism, not a projection axis. The diamagnetic drift IS a velocity, not a component of another velocity.
-✅ Use: `ion_diamagnetic_drift_velocity`
+*Rejected:* `diamagnetic` is a drift mechanism, not a projection axis. The diamagnetic drift IS a velocity, attached via `_due_to_`.
+✅ Use: `ion_velocity_due_to_diamagnetic_drift`
 
 **N5.** ❌ `reconstructed_safety_factor`
 *Rejected:* Provenance verbs (`reconstructed_`, `measured_`, `fitted_`) describe the data pipeline, not the physics quantity.
@@ -76,7 +76,7 @@ Bare-prefix transformation `per_toroidal_mode` on base `wave_absorbed_power` (ba
 
 **N9.** ❌ `norm_poloidal_flux`
 *Rejected:* Abbreviations fragment the vocabulary. All tokens must be spelled in full.
-✅ Use: `normalized_of_poloidal_magnetic_flux`
+✅ Use: `normalized_poloidal_magnetic_flux`
 
 **N10.** ❌ `poloidal_magnetic_flux_of_plasma_boundary_at_plasma_boundary`
 *Rejected:* Duplicated preposition — `_of_` and `_at_` for the same entity. Only one locus per name.

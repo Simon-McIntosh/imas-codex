@@ -128,6 +128,12 @@ def test_of_prefix_operators_compose_with_scope(op, base, quals, expected) -> No
 
 _POSTFIX_CASES = [
     ("magnitude", "magnetic_field", "magnetic_field_magnitude"),
+    # Scalar-extraction family — canonical POSTFIX (ISN ≥ rc41), consistent
+    # with magnitude. The prefix `_of_` form is rejected; these also combine
+    # with a projection (radial_electric_field_amplitude), unlike the old prefix.
+    ("real_part", "electric_field", "electric_field_real_part"),
+    ("imaginary_part", "electric_field", "electric_field_imaginary_part"),
+    ("amplitude", "electric_field", "electric_field_amplitude"),
 ]
 
 

@@ -187,7 +187,7 @@ output, restructure immediately:
 | `radial_electric_field` | `radial_electric_field` (component=radial, base=electric_field) | `radial` → component |
 | `beam_position_variation` | report as `vocab_gap` (variation is not a registered token) | context-dependent |
 | `thermal_electron_energy` | subject=`thermal_electron`, base=`energy` | `thermal_electron` → subject |
-| `normalized_poloidal_flux` | `normalized_of_poloidal_magnetic_flux` | `normalized` → transformation |
+| `normalized_poloidal_flux` | `normalized_poloidal_magnetic_flux` | `normalized` → bare-prefix transformation |
 
 ### ⚠️ Vocab Gap Validation — check BEFORE emitting any `vocab_gap`
 
