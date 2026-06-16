@@ -128,3 +128,43 @@ async def score_physics_batch(
             res = await res
         out.append(res)
     return out
+
+
+async def run_calibration_gate(
+    gold: list[dict], judge_fn: JudgeFn, *, min_overall_agreement: float = 0.90
+) -> dict:
+    """Validate the judge against human gold labels before trusting it.
+
+    Each gold entry: {name, path, unit, documentation, faithful: bool,
+    hard_case: bool}. The judge is TRUSTED iff it catches every hard-case error
+    (gold faithful=False, hard_case=True) AND overall agreement on
+    ``faithful`` >= min_overall_agreement. Returns a report dict.
+    """
+    verdicts = await score_physics_batch(gold, judge_fn)
+    by_name = {v.name: v for v in verdicts}
+    agree = 0
+    hc_total = hc_caught = 0
+    misses: list[str] = []
+    for g in gold:
+        v = by_name.get(g["name"])
+        if v is None:
+            continue
+        if v.faithful == g["faithful"]:
+            agree += 1
+        if g.get("hard_case") and g["faithful"] is False:
+            hc_total += 1
+            if v.faithful is False:
+                hc_caught += 1
+            else:
+                misses.append(g["name"])
+    n = len(gold)
+    overall = agree / n if n else 0.0
+    trusted = (hc_total == hc_caught) and (overall >= min_overall_agreement)
+    return {
+        "trusted": trusted,
+        "overall_agreement": round(overall, 3),
+        "hardcase_errors_total": hc_total,
+        "hardcase_errors_caught": hc_caught,
+        "hardcase_misses": misses,
+        "n_gold": n,
+    }
