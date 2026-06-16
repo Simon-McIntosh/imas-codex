@@ -1240,10 +1240,16 @@ def _enrich_batch_items(items: list[dict]) -> None:
                 cur = (item.get("description") or "").strip()
                 if not cur or cur == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER:
                     item["description"] = rich
-                # Always surface the full grounding text as documentation so the
-                # compose prompt's source-documentation line renders it (the
-                # template shows it only when it differs from the description).
-                item["documentation"] = node_desc or node_doc
+                # Surface the terse, XML-backed DD documentation as a DISTINCT
+                # grounding line — NOT a copy of the rich description. Keeping
+                # them separate lets the compose template's
+                # ``documentation != description`` guard fire, so the model sees
+                # BOTH the rich enriched description AND the authoritative DD
+                # clause. Fall back to node_desc only when no terse doc exists
+                # (avoids an empty line). Previously this copied node_desc into
+                # documentation, making the two equal and silently suppressing
+                # the source-documentation line entirely.
+                item["documentation"] = node_doc or node_desc
 
             # BUG 9 fix: propagate authoritative DD unit from HAS_UNIT into
             # the batch item so compose_batch's unit-safety skip and the
