@@ -166,3 +166,58 @@ name. Rubric dimensions:
 - Cross-source consistency / anchor-on-established(catalog) names.
 - Physics-aware addition to the live review quorum.
 - The review tail-hang fix (`review_name` ghost-pending liveness bug).
+
+## Outcome (2026-06-16)
+
+Run artifact: `research/physics_bench-20260616T061155Z.json` (12-path test set,
+6 models, sonnet-4.6 name-reviewer, opus-4.8 physics judge). Total benchmark
+spend ≈ $4.6.
+
+| model | overall physics % | hard-case (n) | grammar-valid | cost |
+|---|---|---|---|---|
+| **deepseek-v4-flash** (incumbent, free) | **31** | **2/7** | 12/13 | $0.00 |
+| gpt-5.5 | 30 | 1/7 | 9/10 | $1.08 |
+| gemini-3.1-pro-preview | 30 | 1/7 | 9/10 | $0.49 |
+| claude-sonnet-4.6 | 30 | 1/7 | 9/10 | $0.85 |
+| claude-opus-4.8 | 20 | 0/7 | 9/10 | $1.14 |
+| kimi-k2.6 | 17 | 1/6 | 5/6 | $0.30 |
+
+**Composer decision — KEEP `deepseek-v4-flash`.** It led on *both* overall and
+hard-case physics correctness, is free, and **every** paid frontier model scored
+equal-or-worse — opus-4.8 was the *worst* (20 %, 0/7 hard). Switching or tiering
+would spend money for worse physics. The original hypothesis ("DSv4-flash is the
+physics-correctness bottleneck; a frontier model would do better") is **refuted**.
+
+**Headline finding — the failure is model-independent qualifier-dropping, i.e. a
+prompt/grounding problem, not a model-capability one.** All six composers
+systematically drop the source-stated load-bearing locus/component qualifier and
+collapse to the bare base: every X-point R and the magnetic-axis R → `major_radius`;
+`pf_active/coil/b_field_max` → `maximum_magnetic_field` (drops conductor-surface);
+`wall_flux_max` → `maximum_neutron_flux` (drops first-wall); `e_field/toroidal` →
+`electric_field` (drops the component). This holds on *single-path* cases (no
+grouping excuse) across all models. **The primary robustness lever is the compose
+prompt (enforce preservation of source-stated qualifiers) and the dedup grouping
+(heterogeneous-sibling grouping pushes lowest-common-denominator names) — NOT the
+composer model.**
+
+**Judge calibration / failure-3 (measurement principle).** Standalone gold-set
+calibration was 5/5 hard cases + 10/10 overall; the in-run calibration was 4/5
+(missed the one *borderline* specificity label `major_radius_of_x_point`), so the
+gate flagged scores **advisory** (conservative — requires catching *every* hard
+case). The judge is dependable on measurement-principle, over-qualification, and
+dropped-qualifier errors; borderline only on subtle specificity. → **Failure 3 is
+treatable**: add measurement-principle + qualifier-preservation dimensions to the
+live name-review (`review_names.md` + `sn_review_criteria.yaml`).
+
+**Docs unification — moot.** No model won the names axis, so there is nothing to
+unify the docs model toward; `[sn-docs]` stays `sonnet-4.6`.
+
+**Bugs found + fixed during execution** (cross-provider, beyond the benchmark):
+- `reasoning_effort="max"` is vLLM-only; OpenRouter 400s on it → map to `"xhigh"` (`08d21292`).
+- physics benchmark composed `REFERENCE_NAMES`, not the hard-case test set → physics mode now composes `physics_bench_paths.json` (`9bbea960`).
+- physics judge bound to a nonexistent `source_paths` key → bind `source_id`/`dd_paths`, add a 0-hard-case tripwire (`9cacd4a6`).
+
+**Follow-on (queued, not in this benchmark):**
+- Compose-prompt qualifier-preservation hardening + dedup-grouping review (the headline fix).
+- Add measurement-principle + qualifier dims to live name-review.
+- Admit signal-pattern STRUCTURE nodes as SN sources (336 `/data`-child quantities — task #37) before any from-scratch regen.
