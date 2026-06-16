@@ -1418,15 +1418,27 @@ def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
     from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
     from imas_codex.standard_names.sources.dd import extract_dd_candidates
 
-    # Select reference paths, capped by max_candidates
-    reference_paths = list(REFERENCE_NAMES.keys())
+    # Physics-correctness mode composes the fixed hard-case test set
+    # (research/physics_bench_paths.json) so the judge scores the failure
+    # classes the benchmark targets; otherwise compose the curated
+    # reference dataset for reproducible name/docs scoring.
+    if config.physics_judge:
+        from imas_codex.standard_names.physics_judge import load_bench_paths
+
+        reference_paths = [p["path"] for p in load_bench_paths()]
+        total_available = len(reference_paths)
+    else:
+        reference_paths = list(REFERENCE_NAMES.keys())
+        total_available = len(REFERENCE_NAMES)
+
+    # Cap by max_candidates
     if config.max_candidates and len(reference_paths) > config.max_candidates:
         reference_paths = reference_paths[: config.max_candidates]
 
     logger.info(
         "Benchmark extraction: %d/%d reference paths",
         len(reference_paths),
-        len(REFERENCE_NAMES),
+        total_available,
     )
 
     batches = extract_dd_candidates(

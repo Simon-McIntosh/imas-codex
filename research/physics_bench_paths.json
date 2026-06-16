@@ -1,9 +1,6 @@
 [
-  {"path": "magnetics/rogowski_coil/current", "category": "measurement_principle"},
-  {"path": "magnetics/ip", "category": "measurement_principle"},
   {"path": "iron_core/segment/b_field", "category": "locus_ordering"},
   {"path": "pf_active/coil/b_field_max", "category": "locus_ordering"},
-  {"path": "pf_active/coil/b_field_max_timed", "category": "locus_ordering"},
   {"path": "ferritic/permeability_table/b_field", "category": "locus_ordering"},
   {"path": "equilibrium/time_slice/boundary_separatrix/x_point/r", "category": "specificity_consistency"},
   {"path": "summary/boundary/x_point_main/r", "category": "specificity_consistency"},
