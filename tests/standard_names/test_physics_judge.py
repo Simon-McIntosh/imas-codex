@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import anyio
+
 from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.physics_judge import PhysicsVerdict, load_bench_paths
+from imas_codex.standard_names.physics_judge import (
+    PhysicsVerdict,
+    load_bench_paths,
+    score_physics_batch,
+)
 
 
 def test_physics_verdict_fields():
@@ -41,3 +47,38 @@ def test_judge_prompts_render():
         "current_of_rogowski_coil" in userp
         and "magnetics/rogowski_coil/current" in userp
     )
+
+
+def _stub_judge(name, path, unit, documentation):
+    # deterministic: rogowski is unfaithful, everything else faithful
+    bad = "rogowski" in name
+    return PhysicsVerdict(
+        name=name,
+        faithful=not bad,
+        base_correct=True,
+        measurement_principle_correct=not bad,
+        qualifiers_preserved=True,
+        no_over_qualification=True,
+        valid=True,
+        reason="enclosed current" if bad else "ok",
+    )
+
+
+def test_score_physics_batch():
+    cands = [
+        {
+            "name": "current_of_rogowski_coil",
+            "path": "magnetics/rogowski_coil/current",
+            "unit": "A",
+            "documentation": "d",
+        },
+        {
+            "name": "electron_density",
+            "path": "core_profiles/profiles_1d/electrons/density",
+            "unit": "m^-3",
+            "documentation": "d",
+        },
+    ]
+    verdicts = anyio.run(score_physics_batch, cands, _stub_judge)
+    assert verdicts[0].faithful is False
+    assert verdicts[1].faithful is True

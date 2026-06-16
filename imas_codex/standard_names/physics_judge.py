@@ -17,9 +17,14 @@ LLM judge call, the calibration gate, and wire the judge into
 from __future__ import annotations
 
 import json
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 
 from pydantic import BaseModel, Field
+
+from imas_codex.discovery.base.llm import acall_llm_structured
+from imas_codex.llm.prompt_loader import render_prompt
+from imas_codex.settings import get_reasoning_effort
 
 
 class PhysicsVerdict(BaseModel):
@@ -73,3 +78,53 @@ def load_bench_paths(path: Path | None = None) -> list[dict]:
         )
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+
+async def judge_name_physics(
+    name: str, path: str, unit: str | None, documentation: str, *, model: str
+) -> PhysicsVerdict:
+    """Score one composed name for physical faithfulness via the rubric judge."""
+    system = render_prompt("sn/judge_physics_correctness_system", {})
+    user = render_prompt(
+        "sn/judge_physics_correctness_user",
+        {
+            "name": name,
+            "path": path,
+            "unit": unit or "dimensionless",
+            "documentation": documentation or "",
+        },
+    )
+    result, _cost, _tokens = await acall_llm_structured(
+        model=model,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        response_model=PhysicsVerdict,
+        service="standard-names",
+        reasoning_effort=get_reasoning_effort("sn-review"),
+    )
+    return result
+
+
+JudgeFn = Callable[
+    [str, str, str | None, str], Awaitable[PhysicsVerdict] | PhysicsVerdict
+]
+
+
+async def score_physics_batch(
+    candidates: list[dict], judge_fn: JudgeFn
+) -> list[PhysicsVerdict]:
+    """Score a list of ``{name, path, unit, documentation}`` dicts.
+
+    ``judge_fn`` may be sync (tests) or async (production
+    :func:`judge_name_physics` closed over a model). Runs sequentially —
+    benchmark sets are small (~180 names).
+    """
+    out: list[PhysicsVerdict] = []
+    for c in candidates:
+        res = judge_fn(c["name"], c["path"], c.get("unit"), c.get("documentation", ""))
+        if hasattr(res, "__await__"):
+            res = await res
+        out.append(res)
+    return out
