@@ -141,6 +141,53 @@ common_issues:
       affects: [convention]
       score_override: "convention <= 5 if a forbidden synonym is used"
 
+    I1.9_measurement_principle:
+      description: >-
+        Name attributes the measured quantity to the diagnostic instrument's
+        internal state rather than the physical observable the instrument
+        probes. Diagnostic standard names describe what is physically
+        measured, not the device's own reading.
+      example_bad: "current_of_rogowski_coil"
+      example_good: "plasma_current"
+      rule: >-
+        The name must denote the physical observable, not the instrument's
+        internal state. A Rogowski coil measures the current ENCLOSED by the
+        loop via the induced voltage — so the observable is the enclosed
+        (e.g. plasma) current, never a current "of"/"in" the coil. Likewise
+        an interferometer measures line-integrated density via phase shift
+        (not "phase of the interferometer"), a bolometer measures radiated
+        power reaching the detector (not "power of the bolometer"). When a
+        name attributes the measured quantity to the device rather than to
+        the physical system being probed, this is a measurement-principle
+        error.
+      affects: [semantic]
+      score_override: "semantic <= 5 if the name mis-states the measurement principle"
+
+    I1.10_qualifier_preservation:
+      description: >-
+        A physically load-bearing qualifier stated by the source is dropped
+        (under-qualification), or a redundant/unwarranted qualifier is added
+        (over-qualification). Both change what quantity the name denotes.
+      example_bad: "heat_flux_at_wall (source: 'maximum neutron flux at the first wall')"
+      example_good: "maximum_neutron_flux_at_wall"
+      rule: >-
+        Preserve every physically meaningful qualifier the source states —
+        locus (`at_poloidal_field_coil`), extremum (`maximum`, `minimum`),
+        species (`electron`, `ion`, `neutron`, `neutral`), medium
+        (`coolant`), and flux KIND (`neutron` vs `heat`). Dropping such a
+        qualifier makes the name denote a broader or different quantity than
+        the source (under-qualification). Conversely, do NOT add a qualifier
+        that is neither stated by the source nor physically necessary — a
+        modifier that restates something already inherent in the base
+        over-qualifies (e.g. plasma current is inherently toroidal, so
+        `toroidal_plasma_current` adds nothing and is wrong). Domain-implied
+        boilerplate absent from the source (`equilibrium_`, `_of_plasma`) is
+        NOT a dropped qualifier and should still be omitted.
+      affects: [semantic]
+      score_override: >-
+        semantic <= 5 if a source-stated locus/extremum/species/medium/kind
+        qualifier is dropped, or a redundant qualifier is added.
+
     I1.4_scalar_vs_vector_position:
       description: "Both component and vector position names should coexist"
       rule: "radial_position_of_ / vertical_position_of_ for components; position_of_ for vector"

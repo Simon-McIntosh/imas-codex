@@ -88,16 +88,37 @@ grammar and convention scores.
   A name must be unambiguous in isolation. Score ≤ 5 if the name is semantically
   incomplete — e.g. `co_passing_density` (density of what?), `trapped_pressure`
   (pressure of what species/component?), `beam_fraction` (fraction of what?).
-- **Source fidelity**: does the name drop a physically-essential qualifier that
-  the source description states? Compare the name against the provided source
-  description and flag a dropped **kind** (`neutron` vs `heat` flux), **extremum**
-  (`maximum`, `peak`), **species**, or **medium** (`coolant`) qualifier — these
-  change *what is measured* and must appear in the name. Score ≤ 5 when such a
-  qualifier is present in the source description but absent from the name
-  (e.g. source "Maximum neutron flux at the first wall" → name `heat_flux_at_wall`
-  loses `maximum` and `neutron` and mistypes the flux kind). Do NOT penalise the
-  inverse — qualifiers absent from the source that are merely domain-implied
-  boilerplate (`equilibrium_`, `_of_plasma`) should still be dropped.
+- **[I1.9] Measurement principle (HARD)**: does the name describe the **physical
+  observable** — what the quantity physically IS — rather than the diagnostic
+  instrument's internal state? Diagnostic standard names describe what is
+  measured, not the device's own reading. A Rogowski coil measures the current
+  **enclosed** by the loop via the induced voltage, so the observable is the
+  enclosed (e.g. plasma) current — `current_of_rogowski_coil` /
+  `current_in_rogowski_coil` is **WRONG** (it implies the coil carries the named
+  current). Likewise an interferometer measures line-integrated density via phase
+  shift (not "phase of the interferometer"), a bolometer measures radiated power
+  reaching the detector (not "power of the bolometer"). **Score ≤ 5** when the
+  name attributes the measured quantity to the device rather than to the physical
+  system being probed.
+- **[I1.10] Qualifier fidelity — dropped (HARD)**: does the name drop a
+  physically-essential qualifier that the source description states? Compare the
+  name against the provided source description and flag a dropped **kind**
+  (`neutron` vs `heat` flux), **extremum** (`maximum`, `peak`, `minimum`),
+  **species**, **locus** (`at_poloidal_field_coil`), or **medium** (`coolant`)
+  qualifier — these change *what is measured* and must appear in the name.
+  **Score ≤ 5** when such a qualifier is present in the source description but
+  absent from the name (e.g. source "Maximum neutron flux at the first wall" →
+  name `heat_flux_at_wall` loses `maximum` and `neutron` and mistypes the flux
+  kind). Do NOT penalise the inverse — qualifiers absent from the source that are
+  merely domain-implied boilerplate (`equilibrium_`, `_of_plasma`) should still
+  be dropped.
+- **[I1.10] Qualifier fidelity — over-qualified (HARD)**: does the name add a
+  qualifier that is neither stated by the source nor physically necessary? A
+  modifier that restates something already inherent in the base
+  over-qualifies and is wrong — plasma current is inherently toroidal, so
+  `toroidal_plasma_current` adds nothing; a quantity already scalar-per-species
+  needs no `total_` if the source does not state it. **Score ≤ 5** for an
+  unwarranted added modifier.
 
 ### 3. Naming Convention Adherence (0-20)
 - Does the name avoid ambiguous or overloaded terms?

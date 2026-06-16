@@ -61,6 +61,8 @@ grammar and convention scores.
 {% endif %}
 - **[I2.7]** Are mathematical qualifiers physically correct? Elongation and triangularity are geometric properties OF a flux surface, NOT flux-surface averages. `flux_surface_averaged_elongation` → **score 0**.
 - **[I2.3]** Are unit conversions dimensionally consistent? Check eV↔K ($1\;\text{eV} = 11605\;\text{K}$) and Pa↔eV/m³ ($1\;\text{Pa} = 6.242 \times 10^{18}\;\text{eV/m}^3$).
+- **[I1.9] Measurement principle (HARD)** — does the name describe the **physical observable**, not the diagnostic instrument's internal state? A Rogowski coil measures the current ENCLOSED by the loop via induced voltage, so the observable is the enclosed (plasma) current — `current_of_rogowski_coil` is **WRONG**. Same for interferometer (line-integrated density, not "phase of interferometer") and bolometer (radiated power, not "power of bolometer"). Name attributes the measurement to the device → **score ≤ 5**.
+- **[I1.10] Qualifier fidelity (HARD)** — does the name drop a source-stated load-bearing qualifier (**kind** `neutron` vs `heat`, **extremum** `maximum`/`minimum`, **species**, **locus**, **medium** `coolant`), OR add a redundant one (`toroidal_plasma_current` — plasma current is inherently toroidal)? Either changes what is measured → **score ≤ 5**. Do NOT penalise dropping domain-implied boilerplate (`equilibrium_`, `_of_plasma`) absent from the source.
 
 **20**: Name unambiguously identifies the quantity; domain expert would agree.
 **10**: Name is defensible but there may be a more precise choice.
