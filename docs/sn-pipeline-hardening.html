@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-16">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -298,15 +298,14 @@
     <p class="r-dec-rat">LOCKED. Every change must round-trip through ISN parse / compose ; update compose / parse (or the codex to_ir mapping) as required. Exercise the real code
         path — do not assert behaviour from a bypassed stage.</p>
     </div>
-<div class="r-dec" data-key="docs-model" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="docs-model" data-choice="keep-sonnet" data-by="Simon McIntosh" data-when="2026-06-16T17:48:47+00:00">
     <p class="r-dec-q">OPEN (Phase 4): does [sn-docs] move to free DSv4-flash, or stay sonnet-class?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="keep-sonnet">keep sonnet-4.6</button>
+      <button class="r-opt chosen" data-value="keep-sonnet">keep sonnet-4.6</button>
       <button class="r-opt" data-value="switch-dsv4">switch to DSv4-flash</button>
       <button class="r-opt" data-value="tiered">tiered (DSv4 routine, escalate hard)</button>
       </p>
-    <p class="r-dec-rat">Decide from the Phase-4 docs A/B. Grounding improved
-        materially after the wiring fixes, so re-assessment is warranted.</p>
+    <p class="r-dec-rat">RESOLVED by the Phase-4 docs A/B (2026-06-16, 12-path set, opus-4.8 judge, post the Option-5/resolver/grounding fixes): sonnet-4.6 docs_quality 0.903, physics_accuracy 17.8/20, documentation_quality 18.2/20, distribution 11 outstanding / 1 good / 0 inadequate; DSv4-flash docs_quality 0.838, physics_accuracy 15.8/20, doc_quality 16.8/20, with 2 INADEQUATE. Docs are human-facing physics definitions where fidelity matters and the cost is modest ($0.79 for 12), so keep sonnet-4.6. DSv4&#x27;s 2 inadequate docs make the free option not yet good enough for the corpus&#x27;s documentation. Artifact: research/docs_ab.json.</p>
     </div>
 </section>
 
@@ -397,6 +396,11 @@ If justified, Do
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20260616T174847074920" data-who="orchestrator" data-when="2026-06-16">
+    <div class="r-comment-body">EVIDENCE-GROUNDED per-stage settings (all SN pipeline stages now have a backed model + effort choice). COMPOSE: model=DSv4-flash (locked); effort dropped max->MEDIUM — compose-effort scan (15-path physics gold set) shows medium best on every axis (physics 12/13, hardcase 9/10, grammar 12/13) AND 6x faster than max (3.6 vs 0.6 names/min); effort is non-monotonic for DSv4 thinking-mode and the old A/B that set max predated the resolver fix. n=1/level — speed/failure facts robust, exact rate has variance. DOCS: model=sonnet-4.6 (locked above); A/B beats DSv4 on quality+physics-accuracy with 0 vs 2 inadequate. REVIEW: effort=HIGH (a medium-base attempt was reverted — the review-effort scan harness scored names against the names-quality rubric, which cannot measure physics-faithfulness, so it produced no usable signal; the 2026-06-09 reviewer bake-off on labeled good/bad sets remains the authority and shows high catches more bad names; tiered escalator knob retained for a future labeled-set study). Reviewers (bake-off): best discriminators sonnet-4.6, qwen3.7-max, minimax-m3, gpt-5.5; gemini lenient. Artifacts: research/effort_scan_*.json, research/docs_ab.json, research/review_effort_scan.json.</div>
+</div>
+</section>
+</main>
 </body>
 </html>
