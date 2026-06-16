@@ -398,16 +398,21 @@ def generate_template_description(
         parent_doc = parent_info.get("description", "") or parent_info.get(
             "documentation", ""
         )
-        parent_doc_short = (
-            (parent_doc[:150].rstrip(".") + ".")
-            if parent_doc
+        # Use the parent's FULL description — never truncate. The parent doc is
+        # itself a bounded LLM description; slicing it mid-word (the old
+        # ``[:150]`` cap) stored sentence fragments as the accessor leaf's
+        # description, starving the SN compose grounding (e.g. summary
+        # ``.../value`` leaves). Normalise to a single trailing period only.
+        parent_doc_clause = (
+            (parent_doc.strip().rstrip(".") + ".")
+            if parent_doc.strip()
             else f"{parent_name_readable}."
         )
 
         template = ACCESSOR_TEMPLATES[name]
         desc = template.format(
             parent_name_readable=parent_name_readable,
-            parent_doc_short=parent_doc_short,
+            parent_doc_short=parent_doc_clause,
         )
 
         return {
