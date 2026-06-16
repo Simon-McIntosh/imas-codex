@@ -28,7 +28,7 @@ def test_physics_verdict_fields():
 
 def test_load_bench_paths():
     paths = load_bench_paths()
-    assert any(p["path"] == "magnetics/rogowski_coil/current" for p in paths)
+    assert any(p["path"] == "magnetics/rogowski_coil/current/data" for p in paths)
     assert all("category" in p for p in paths)
 
 
