@@ -1238,8 +1238,12 @@ async def run_benchmark(
                 nm = _resolve_name(cand)
                 if not nm:
                     continue
-                src_paths = cand.get("source_paths") or []
-                pth = src_paths[0] if src_paths else ""
+                # Composed candidates carry the seeding path in ``source_id`` and
+                # the full dedup group in ``dd_paths``. (There is NO ``source_paths``
+                # key on a composed candidate — that is an extraction-item field.)
+                cand_paths = [cand.get("source_id"), *(cand.get("dd_paths") or [])]
+                cand_paths = [p for p in cand_paths if p]
+                pth = cand_paths[0] if cand_paths else ""
                 scored.append(
                     {
                         "name": nm,
@@ -1250,10 +1254,20 @@ async def run_benchmark(
                         or "",
                     }
                 )
-                if any(sp in hardcase_paths for sp in src_paths):
+                if any(p in hardcase_paths for p in cand_paths):
                     hard_names.add(nm)
             verdicts = await score_physics_batch(scored, jfn)
             apply_physics_metrics(model_result, verdicts, hard_names)
+        # Tripwire: if nothing matched the hard-case set, the bench-path↔candidate
+        # binding is broken (e.g. wrong source field) — surface it loudly rather
+        # than silently reporting a meaningless 0/0 hard-case column.
+        if hardcase_paths and not any(r.physics_hardcase_total for r in results):
+            logger.warning(
+                "physics_judge: 0 hard-case candidates matched across all %d models "
+                "(hardcase_paths=%d) — check candidate source-path binding",
+                len(results),
+                len(hardcase_paths),
+            )
         _save_incremental(results)
 
     return _build_partial_report(results)
