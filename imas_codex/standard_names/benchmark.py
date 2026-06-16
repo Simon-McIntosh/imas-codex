@@ -1437,19 +1437,43 @@ def _extract_candidates(config: BenchmarkConfig) -> list[dict]:
         write_skipped=False,  # no graph side effects
     )
 
-    # Fail fast if paths are missing from the graph
+    # A reference path can fail to yield a candidate for two DISTINCT reasons,
+    # which need DIFFERENT corrective action — so classify them explicitly
+    # rather than emit a single ambiguous "missing from graph" line:
+    #   (a) the path does not exist in the Data Dictionary at all → a fixture
+    #       typo/renamed path; fix the reference path (e.g. profiles_1d/q, not
+    #       .../safety_factor).
+    #   (b) the path exists in the DD but was not admitted as a standard-name
+    #       SOURCE (e.g. signal-STRUCTURE quantities pending source admission)
+    #       → expected until that admission lands; the candidate cannot be
+    #       composed yet, not a benchmark bug.
     extracted_paths = set()
     for batch in batches:
         for item in batch.items:
             extracted_paths.add(item.get("path", item.get("source_id", "")))
     missing = set(reference_paths) - extracted_paths
     if missing:
-        logger.warning(
-            "Benchmark: %d/%d reference paths missing from graph: %s",
-            len(missing),
-            len(reference_paths),
-            sorted(missing)[:5],
-        )
+        from imas_codex.standard_names.sources.dd import dd_path_exists
+
+        not_in_dd = sorted(p for p in missing if not dd_path_exists(p))
+        not_admitted = sorted(p for p in missing if p not in not_in_dd)
+        if not_in_dd:
+            logger.warning(
+                "Benchmark: %d/%d reference paths do NOT exist in the Data "
+                "Dictionary — fix the fixture path(s): %s",
+                len(not_in_dd),
+                len(reference_paths),
+                not_in_dd,
+            )
+        if not_admitted:
+            logger.warning(
+                "Benchmark: %d/%d reference paths exist in the DD but are not "
+                "admitted as standard-name sources yet (cannot compose until "
+                "source admission lands) — expected, not a benchmark bug: %s",
+                len(not_admitted),
+                len(reference_paths),
+                not_admitted,
+            )
 
     # Convert ExtractionBatch to plain dicts
     result = []

@@ -393,6 +393,33 @@ def report_extract_breakdown(facility_ids: list[str] | None = None) -> dict:
     }
 
 
+def dd_path_exists(path: str) -> bool:
+    """Whether ``path`` exists as an IMASNode in the DD graph.
+
+    Distinguishes a genuinely non-existent path (fixture typo / renamed DD
+    path) from one that exists but is merely not admitted as a standard-name
+    source. ``IMASNode.id`` is the full DD path.
+
+    Fail-safe: if the graph is unreachable, returns ``True`` (treat existence
+    as unknown rather than asserting a path is missing from the DD). This keeps
+    the helper usable from diagnostic logging without ever crashing a caller
+    or requiring a live graph in mock-tier tests.
+    """
+    try:
+        from imas_codex.graph.client import GraphClient
+
+        with GraphClient() as gc:
+            rows = list(
+                gc.query(
+                    "MATCH (n:IMASNode {id: $path}) RETURN count(n) AS c",
+                    path=path,
+                )
+            )
+        return bool(rows) and rows[0].get("c", 0) > 0
+    except Exception:
+        return True
+
+
 def extract_dd_candidates(
     *,
     ids_filter: str | None = None,

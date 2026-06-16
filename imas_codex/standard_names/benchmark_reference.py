@@ -52,9 +52,7 @@ def _ref(fields: dict) -> dict:
 
 REFERENCE_NAMES: dict[str, dict] = {
     # --- Simple physical bases ---
-    "equilibrium/time_slice/profiles_1d/safety_factor": _ref(
-        {"physical_base": "safety_factor"}
-    ),
+    "equilibrium/time_slice/profiles_1d/q": _ref({"physical_base": "safety_factor"}),
     "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor": _ref(
         {"physical_base": "magnetic_field", "component": Component.TOROIDAL}
     ),

@@ -605,7 +605,7 @@ class TestBenchmarkRunner:
                 "group_key": "equilibrium",
                 "items": [
                     {
-                        "path": "equilibrium/time_slice/profiles_1d/safety_factor",
+                        "path": "equilibrium/time_slice/profiles_1d/q",
                         "description": "Safety factor",
                         "units": None,
                         "data_type": "FLT_1D",
@@ -627,7 +627,7 @@ class TestBenchmarkRunner:
         mock_response = StandardNameComposeBatch(
             candidates=[
                 StandardNameCandidate(
-                    source_id="equilibrium/time_slice/profiles_1d/safety_factor",
+                    source_id="equilibrium/time_slice/profiles_1d/q",
                     base_token="safety_factor",
                     base_kind="quantity",
                     reason="Safety factor profile",
