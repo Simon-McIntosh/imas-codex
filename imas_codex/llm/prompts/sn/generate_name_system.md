@@ -21,6 +21,38 @@ Standard names are a **standalone semantic data model** for fusion plasma physic
 
 Your output is a set of **IR segment fields** (base_token, base_kind, projection_axis, qualifiers, locus_token, etc.) plus a description. The ISN composer and parser are authoritative — you produce the segments, the composer assembles the canonical name string.
 
+## PRIMARY OBJECTIVE — physical faithfulness and self-description come first
+
+Your one goal is a **self-describing, physically-faithful** standard name: a
+domain expert reading the name *alone* must be able to identify exactly which
+physical or geometric quantity it denotes — the correct base, the actually-
+measured observable, and **every element that distinguishes this quantity from
+its siblings**: the locus (which point / surface / region), the projection
+(which vector component or coordinate axis), and the species / medium / extremum
+the source states.
+
+The closed grammar and vocabulary exist to keep names **consistent** — one
+canonical spelling per concept — they do NOT exist to make names shorter or to
+license dropping physics. **Consistency is a servant of faithfulness, never its
+master.** Two consequences, which override any brevity or "consistency" impulse
+elsewhere in this prompt:
+
+1. **Never drop a physical distinction to obtain a shorter or more uniform name.**
+   If two sources denote *different* quantities — different locus, component,
+   species, medium, or extremum — their names MUST differ. Collapsing them to a
+   shared base (e.g. naming the X-point's R and the magnetic axis's R both
+   `major_radius`, or every electric-field component `electric_field`) is a
+   correctness failure, not a consistency win.
+2. **If the vocabulary cannot express a distinguishing element, emit a
+   `vocab_gap` — never drop the element.** A missing token is a signal to extend
+   the vocabulary, not a reason to emit an under-specified name. When the token
+   *does* exist (e.g. `x_point`, `magnetic_axis`, `toroidal`, `coolant`), you
+   MUST use it.
+
+A grammatically valid, perfectly consistent name that is **physically ambiguous
+has FAILED.** Get the physics complete first; then express it in canonical,
+consistent form.
+
 {% include "sn/_grammar_reference.md" %}
 
 {% include "sn/_exemplars.md" %}
@@ -29,7 +61,7 @@ Your output is a set of **IR segment fields** (base_token, base_kind, projection
 
 ### HARD PRE-EMIT CHECKS — validate EVERY candidate name before output
 
-Run these ten checks IN ORDER against each candidate name string before
+Run these checks IN ORDER against each candidate name string before
 emitting it. If any check fails, revise or skip — never emit a violating name.
 
 1. **No adjacent duplicate tokens.** Reject any name containing two identical
@@ -86,6 +118,32 @@ emitting it. If any check fails, revise or skip — never emit a violating name.
     (fraction of what?). ✓ `co_passing_particle_density` (subject is
     explicit), ✓ `trapped_electron_pressure` (subject is explicit),
     ✓ `beam_ion_fraction` (both subject and base are clear).
+12. **No collapse to a bare base — every distinguishing element present.**
+    This is the most common and most damaging failure: emitting the bare base
+    quantity and silently dropping the element that says *which* one. Before
+    emitting, confirm each distinguishing element the source carries is encoded:
+    - **Locus** — if the quantity is a property/coordinate *of*, or a field
+      *at*, a named feature (x_point, magnetic_axis, strike_point, plasma_boundary,
+      coil, wall, divertor_target, …), the `locus_token` MUST be set. ✗ bare
+      `major_radius` for `…/x_point/r` → ✓ `major_radius_of_x_point`; ✗ bare
+      `major_radius` for `…/magnetic_axis/r` → ✓ `major_radius_of_magnetic_axis`.
+    - **Projection** — if the source names a vector component or coordinate axis
+      (toroidal / poloidal / radial / parallel / perpendicular / vertical),
+      `projection_axis` MUST be set. ✗ `electric_field` for `e_field/toroidal`
+      → ✓ `toroidal_electric_field`; the `e_field/{toroidal,poloidal,radial}`
+      siblings are distinct names, never one shared `electric_field`.
+    - **Source-stated qualifier** — species / medium / extremum / population the
+      source states (neutron, coolant, maximum, electron, fast_ion, …) MUST be
+      kept (see "Source-stated qualifiers" below). ✗ `maximum_neutron_flux` for a
+      *first-wall* flux drops the wall locus → keep both.
+    **Test:** read your candidate name and ask "could this name equally denote a
+    *different* DD path in this batch?" If yes, you dropped a distinguishing
+    element — restore it. If the distinguishing token is missing from the
+    vocabulary, emit a `vocab_gap` for it; do NOT emit the bare base.
+    *Disambiguation qualifiers like `major` / `minor` (radius), which separate
+    physically distinct concepts sharing a base+unit, ARE distinguishing
+    elements — keep them; they are not droppable boilerplate (contrast the
+    domain-implied `_of_plasma` / `equilibrium_`, which ARE droppable).*
 
 ### REJECT — Forbidden Name Tokens
 
@@ -245,6 +303,77 @@ outranks brevity. Only **domain-implied boilerplate** (`equilibrium_` in the
 equilibrium domain, `_of_plasma` in transport) and **metadata** (provenance,
 processing-state, non-intrinsic instrument tokens) may be dropped as redundant.
 When unsure whether a qualifier is essential, keep it.
+
+### KEEP-VS-DROP TEST — the one rule for every qualifier
+
+Apply this single test to every modifier (locus, projection, species, medium,
+extremum, qualifier) before dropping it. Do not drop reflexively.
+
+> **A modifier is droppable ONLY if it is implied by context the reader already
+> has** (the physics domain, or a token the base inherently entails). A modifier
+> that names *which* of several sibling quantities this is — i.e. removing it
+> would let the name denote a different DD path — is **essential and MUST stay**.
+
+| Modifier | Keep or drop? | Why |
+|---|---|---|
+| `coolant`, `neutron`, `maximum`, `electron`, `fast_ion` (source-stated) | **KEEP** | Names the specific medium/species/extremum; distinguishes siblings |
+| locus `x_point`, `magnetic_axis`, `coil`, `wall` | **KEEP** | Names *which* feature; bare base denotes many features |
+| projection `toroidal`, `poloidal`, `radial`, `parallel` | **KEEP** | Names *which* vector component; components are distinct quantities |
+| `major` / `minor` (radius) | **KEEP** | `major_radius` (R coordinate), `minor_radius` (flux-surface label) and bare `radius` (object size) are three distinct concepts sharing unit `m` |
+| `equilibrium_` in the equilibrium IDS, `_of_plasma` in a plasma domain | **DROP** | Implied by the physics domain — adds no distinction |
+| instrument prefix on a generic observable (`thomson_scattering_` on temperature) | **DROP** | The observable is DD-independent; instrument is locus metadata at most |
+| provenance / processing state (`measured_`, `reconstructed_`, `raw_`) | **DROP** | Metadata about how, not what |
+
+When the keep-side modifier has **no registered token**, emit a `vocab_gap` for
+it — never drop it to fit the vocabulary.
+
+### COLLAPSE FAILURE GALLERY — real benchmark failures, all models
+
+These are verbatim failures from the physics-correctness benchmark where every
+candidate model dropped a distinguishing element and collapsed to a bare base.
+Each is a CORRECTNESS failure even though the bare name is grammatically valid.
+Study them; never reproduce the pattern.
+
+| ❌ Collapsed (WRONG) | Source path | ✅ Faithful | Element dropped |
+|---|---|---|---|
+| `major_radius` | `equilibrium/.../boundary_separatrix/x_point/r` | `major_radius_of_x_point` | locus (x_point) |
+| `major_radius` | `summary/boundary/x_point_main/r` | `major_radius_of_main_x_point` | locus + `main` specificity |
+| `major_radius` | `equilibrium/.../global_quantities/magnetic_axis/r` | `major_radius_of_magnetic_axis` | locus (magnetic_axis) |
+| `maximum_magnetic_field` | `pf_active/coil/b_field_max` | `maximum_magnetic_field_at_pf_coil_conductor` (or vocab_gap for the conductor-surface locus) | locus (coil conductor surface) |
+| `maximum_neutron_flux` | `breeding_blanket/module/.../wall_flux_max` | keep the `wall` locus (e.g. `maximum_neutron_flux_at_wall`) | locus (first wall) |
+| `electric_field` ×4 | `core_profiles/.../e_field/{toroidal,poloidal,radial,...}` | `toroidal_electric_field`, `poloidal_electric_field`, `radial_electric_field`, … | projection (4 distinct components → 4 names) |
+| `coolant_pressure` | `breeding_blanket/.../cooling/.../pressure_inlet` | `inlet_coolant_pressure` | locus (`inlet`) |
+
+The shared root cause: treating the **base quantity** as the whole answer. The
+base is only the *start* — the locus / projection / qualifier that the source
+states is what makes the name denote *this* quantity and not its siblings.
+
+### BATCH GROUPING & REUSE DISCIPLINE — same base ≠ same name
+
+A compose batch is grouped by shared physics concept and unit, so it
+deliberately contains **sibling quantities that share a base but differ in a
+distinguishing element** (e.g. the R coordinate of several different points; the
+components of one vector field; one quantity across several loci). The grouping
+is there so you name them *consistently with each other*, NOT so you give them
+one shared name.
+
+- **Reuse the base + structure** across siblings — same base token, same field
+  layout, parallel construction. ✓ `major_radius_of_x_point` /
+  `major_radius_of_magnetic_axis` / `major_radius_of_strike_point` reuse the
+  `major_radius_of_<locus>` pattern.
+- **Never reuse the whole NAME** for two paths that differ in locus, projection,
+  species, medium, or extremum. Each distinct sibling gets its own distinct name
+  (or, if truly the same physical quantity in multiple IDSs, ONE name with both
+  paths in `dd_paths` / `attachments` — that is the only legitimate many-to-one).
+- When a batch presents N paths under one base that differ only by locus or
+  component, the correct output is **N distinct names**, one per locus/component
+  — not one name covering all N. Emitting fewer names than there are distinct
+  physical quantities is data loss.
+
+The legitimate collapse — many DD paths → one name — applies ONLY when the paths
+are the **same physical quantity** redundantly represented across IDSs (e.g.
+`ip` in magnetics and core_profiles and equilibrium). Different locus / component
+/ species are different quantities: never merge them.
 
 ### CONSTRAINT ROLE ABSTRACTION (inverse-problem metadata)
 
