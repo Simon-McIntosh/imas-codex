@@ -327,31 +327,20 @@ def _resolve_name(candidate: dict) -> str:
         return name
 
     segs = _get_segment_fields(candidate)
-    base_token = segs.get("base_token")
-    if not base_token:
+    if not segs.get("base_token"):
         return ""
 
+    # Compose via the CANONICAL GrammarSegments.to_ir() — the same path the
+    # production pipeline uses. A hand-rolled IR subset here silently drops
+    # projection / locus / process / operator segments, flattening faithful
+    # names (e.g. major_radius_of_magnetic_axis → major_radius) and producing
+    # spurious "collapse" measurements.
     try:
-        from imas_standard_names.grammar.ir import (
-            BaseKind,
-            QuantityOrCarrier,
-            StandardNameIR,
-        )
-        from imas_standard_names.grammar.render import compose
+        from imas_codex.standard_names.models import GrammarSegments
 
-        base = QuantityOrCarrier(
-            token=base_token,
-            kind=BaseKind(segs.get("base_kind", "quantity")),
-        )
-        qualifiers_raw = segs.get("qualifiers") or []
-        qualifiers = None
-        if qualifiers_raw:
-            from imas_standard_names.grammar.ir import Qualifier
-
-            qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
-
-        ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
-        return compose(ir)
+        allowed = set(GrammarSegments.model_fields)
+        gs = GrammarSegments(**{k: v for k, v in segs.items() if k in allowed})
+        return gs.compose_name()
     except Exception:
         return ""
 
@@ -378,29 +367,16 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     except Exception:
         return False, False
 
-    # Check IR consistency: if candidate has IR fields, compose and compare
+    # Check IR consistency: compose from the FULL segment set via the canonical
+    # GrammarSegments path (NOT a hand-rolled base+qualifiers subset, which would
+    # drop projection/locus/process/operator and report false inconsistency).
     try:
-        base_token = segs.get("base_token")
-        if base_token:
-            from imas_standard_names.grammar.ir import (
-                BaseKind,
-                QuantityOrCarrier,
-                StandardNameIR,
-            )
-            from imas_standard_names.grammar.render import compose
+        if segs.get("base_token"):
+            from imas_codex.standard_names.models import GrammarSegments
 
-            base_kind = segs.get("base_kind", "quantity")
-            base = QuantityOrCarrier(token=base_token, kind=BaseKind(base_kind))
-
-            qualifiers = None
-            qualifiers_raw = segs.get("qualifiers") or []
-            if qualifiers_raw:
-                from imas_standard_names.grammar.ir import Qualifier
-
-                qualifiers = [Qualifier(token=q) for q in qualifiers_raw]
-
-            ir = StandardNameIR(base=base, qualifiers=qualifiers or [])
-            from_ir = compose(ir)
+            allowed = set(GrammarSegments.model_fields)
+            gs = GrammarSegments(**{k: v for k, v in segs.items() if k in allowed})
+            from_ir = gs.compose_name()
             fields_consistent = from_ir == normalized
     except Exception:
         pass
