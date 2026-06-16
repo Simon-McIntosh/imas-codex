@@ -1265,11 +1265,16 @@ def _build_kwargs(
     #   this the model silently runs in non-think mode, which materially
     #   degrades generation quality.
     # * Everything else: OpenRouter's NATIVE unified field
-    #   (``reasoning: {effort: low|medium|high}``) carried in ``extra_body``,
-    #   which litellm forwards verbatim. We deliberately avoid litellm's
-    #   ``reasoning_effort`` kwarg — its per-provider mapping raises
+    #   (``reasoning: {effort: minimal|low|medium|high|xhigh}``) carried in
+    #   ``extra_body``, which litellm forwards verbatim. We deliberately avoid
+    #   litellm's ``reasoning_effort`` kwarg — its per-provider mapping raises
     #   UnsupportedParamsError for many OpenRouter models. OpenRouter ignores
     #   the field for models without reasoning. None = provider default.
+    #
+    #   ``"max"`` is a vLLM-only level (DeepSeek V4 thinking mode); OpenRouter's
+    #   reasoning.effort enum tops out at ``"xhigh"`` and rejects ``"max"`` with
+    #   a 400. Map it so cross-provider callers (e.g. the compose benchmark) can
+    #   request ``"max"`` uniformly and get each provider's maximum effort.
     if reasoning_effort is not None:
         extra_body = kwargs.setdefault("extra_body", {})
         if model.startswith("hosted_vllm/"):
@@ -1278,7 +1283,8 @@ def _build_kwargs(
                 "reasoning_effort": reasoning_effort,
             }
         else:
-            extra_body["reasoning"] = {"effort": reasoning_effort}
+            or_effort = "xhigh" if reasoning_effort == "max" else reasoning_effort
+            extra_body["reasoning"] = {"effort": or_effort}
 
     return kwargs
 

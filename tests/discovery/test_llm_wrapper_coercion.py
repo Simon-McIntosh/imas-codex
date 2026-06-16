@@ -309,3 +309,35 @@ class TestReasoningEffortProviderShape:
         eb = kw.get("extra_body") or {}
         assert eb.get("reasoning") == {"effort": "high"}
         assert "chat_template_kwargs" not in eb
+
+    @staticmethod
+    def _kwargs_effort(model: str, effort: str) -> dict:
+        from imas_codex.discovery.base.llm import _build_kwargs
+
+        return _build_kwargs(
+            model=model,
+            messages=[{"role": "user", "content": "x"}],
+            api_key=None,
+            response_format=None,
+            max_tokens=None,
+            temperature=0.0,
+            timeout=None,
+            service="test",
+            reasoning_effort=effort,
+        )
+
+    def test_openrouter_max_maps_to_xhigh(self):
+        # "max" is a vLLM-only level; OpenRouter rejects it (enum tops at
+        # "xhigh"), so cross-provider "max" must be mapped to the OpenRouter max.
+        kw = self._kwargs_effort("openrouter/moonshotai/kimi-k2.6", "max")
+        eb = kw.get("extra_body") or {}
+        assert eb.get("reasoning") == {"effort": "xhigh"}
+
+    def test_hosted_vllm_max_preserved(self):
+        # Local vLLM accepts "max" verbatim — it must not be remapped.
+        kw = self._kwargs_effort("hosted_vllm/deepseek-v4-flash", "max")
+        eb = kw.get("extra_body") or {}
+        assert eb.get("chat_template_kwargs") == {
+            "thinking": True,
+            "reasoning_effort": "max",
+        }
