@@ -1,0 +1,47 @@
+{
+  "reviewer": "openrouter/qwen/qwen3.7-max",
+  "source_report": "research/effort_scan_max.json",
+  "n_candidates": 12,
+  "rows": [
+    {
+      "effort": "none",
+      "n_reviewed": 11,
+      "mean_faithful": 0.0,
+      "mean_unfaithful": 0.0,
+      "discrimination": 0.0,
+      "bad_caught": "0/0",
+      "cost_usd": 0.0533,
+      "elapsed_s": 191.6
+    },
+    {
+      "effort": "low",
+      "n_reviewed": 11,
+      "mean_faithful": 0.0,
+      "mean_unfaithful": 0.0,
+      "discrimination": 0.0,
+      "bad_caught": "0/0",
+      "cost_usd": 0.0456,
+      "elapsed_s": 211.5
+    },
+    {
+      "effort": "medium",
+      "n_reviewed": 11,
+      "mean_faithful": 0.0,
+      "mean_unfaithful": 0.0,
+      "discrimination": 0.0,
+      "bad_caught": "0/0",
+      "cost_usd": 0.0421,
+      "elapsed_s": 195.6
+    },
+    {
+      "effort": "high",
+      "n_reviewed": 11,
+      "mean_faithful": 0.0,
+      "mean_unfaithful": 0.0,
+      "discrimination": 0.0,
+      "bad_caught": "0/0",
+      "cost_usd": 0.0406,
+      "elapsed_s": 186.7
+    }
+  ]
+}

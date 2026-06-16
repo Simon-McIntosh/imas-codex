@@ -1,0 +1,1052 @@
+{
+  "config": {
+    "models": [
+      "hosted_vllm/deepseek-v4-flash"
+    ],
+    "max_candidates": 52,
+    "runs_per_model": 1,
+    "temperature": 0.0,
+    "reviewer_models": [
+      "openrouter/anthropic/claude-sonnet-4.6"
+    ],
+    "names_only": true,
+    "output_path": "research/effort_scan_high.json",
+    "reasoning_effort": "high",
+    "review_reasoning_effort": null,
+    "physics_judge": true,
+    "physics_judge_model": null,
+    "gold_set_path": null,
+    "source": "dd",
+    "ids_filter": null,
+    "domain_filter": null,
+    "facility": null,
+    "force": true,
+    "reviewer_model": "openrouter/anthropic/claude-sonnet-4.6"
+  },
+  "results": [
+    {
+      "model": "hosted_vllm/deepseek-v4-flash",
+      "status": "completed",
+      "error": "",
+      "compose_error": "",
+      "review_error": "",
+      "docs_error": "",
+      "candidates": [
+        {
+          "source_id": "equilibrium/time_slice/constraints/x_point/position_measured/r",
+          "segments": {
+            "base_token": "radius",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "major"
+            ],
+            "locus_token": "measurement_position",
+            "locus_relation": "of",
+            "locus_type": "position",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Major radius (R) of the measurement position for equilibrium constraints (x-point, current, density, pressure, etc.)",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/constraints/x_point/position_measured/r",
+            "equilibrium/time_slice/constraints/j_parallel/position/r",
+            "equilibrium/time_slice/constraints/j_phi/position/r",
+            "equilibrium/time_slice/constraints/j_tor/position/r",
+            "equilibrium/time_slice/constraints/n_e/position/r",
+            "equilibrium/time_slice/constraints/pressure/position/r"
+          ],
+          "reason": "qualifier=major, base=radius, locus=of measurement_position (generic for all constraint measurement positions)",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "m"
+        },
+        {
+          "source_id": "pf_active/coil/b_field_max",
+          "segments": {
+            "base_token": "magnetic_field",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "maximum"
+            ],
+            "locus_token": "poloidal_field_coil",
+            "locus_relation": "of",
+            "locus_type": "entity",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Maximum magnetic field on the poloidal field coil conductor surface, used as coordinate for current limit lookup",
+          "kind": "scalar",
+          "dd_paths": [
+            "pf_active/coil/b_field_max"
+          ],
+          "reason": "qualifier=maximum, base=magnetic_field, locus=of poloidal_field_coil",
+          "standard_name": "",
+          "physics_domain": "magnetic_field_systems",
+          "unit": "T"
+        },
+        {
+          "source_id": "equilibrium/time_slice/boundary_separatrix/x_point/r",
+          "segments": {
+            "base_token": "radius",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "major"
+            ],
+            "locus_token": "primary_x_point",
+            "locus_relation": "of",
+            "locus_type": "position",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Major radius (cylindrical R coordinate) of the primary X-point in the equilibrium boundary",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/boundary_separatrix/x_point/r",
+            "summary/boundary/x_point_main/r"
+          ],
+          "reason": "qualifier=major, base=radius, locus=of primary_x_point",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "m"
+        },
+        {
+          "source_id": "breeding_blanket/module/cooling/time_slice/pressure_inlet",
+          "segments": {
+            "base_token": "pressure",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "coolant"
+            ],
+            "locus_token": "inlet",
+            "locus_relation": "at",
+            "locus_type": "position",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Coolant pressure at the inlet of the breeding blanket module cooling circuit",
+          "kind": "scalar",
+          "dd_paths": [
+            "breeding_blanket/module/cooling/time_slice/pressure_inlet"
+          ],
+          "reason": "qualifier=coolant, base=pressure, locus=at inlet (field value at a point)",
+          "standard_name": "",
+          "physics_domain": "structural_components",
+          "unit": "Pa"
+        },
+        {
+          "source_id": "breeding_blanket/module/time_slice/wall_flux_max",
+          "segments": {
+            "base_token": "flux",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "maximum",
+              "neutron"
+            ],
+            "locus_token": "first_wall",
+            "locus_relation": "at",
+            "locus_type": "position",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Maximum neutron flux at the first wall of a breeding blanket module",
+          "kind": "scalar",
+          "dd_paths": [
+            "breeding_blanket/module/time_slice/wall_flux_max"
+          ],
+          "reason": "qualifiers=maximum,neutron, base=flux, locus=at first_wall",
+          "standard_name": "",
+          "physics_domain": "structural_components",
+          "unit": "m^-2.W"
+        },
+        {
+          "source_id": "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+          "segments": {
+            "base_token": "radius",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "major"
+            ],
+            "locus_token": "magnetic_axis",
+            "locus_relation": "of",
+            "locus_type": "position",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Major radius (cylindrical R coordinate) of the magnetic axis",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+            "distribution_sources/magnetic_axis/r",
+            "distributions/magnetic_axis/r",
+            "pulse_schedule/position_control/magnetic_axis/r",
+            "waves/magnetic_axis/r"
+          ],
+          "reason": "qualifier=major, base=radius, locus=of magnetic_axis (Rule 17: major_radius_of_X not radial_position_of_X)",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "m"
+        },
+        {
+          "source_id": "core_profiles/global_quantities/ip",
+          "segments": {
+            "base_token": "current",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "plasma"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Total plasma current (Ip), the net toroidal current flowing through the plasma.",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/global_quantities/ip",
+            "equilibrium/time_slice/constraints/ip",
+            "equilibrium/time_slice/global_quantities/ip",
+            "magnetics/ip",
+            "magnetics/method/ip",
+            "plasma_initiation/global_quantities/ip"
+          ],
+          "reason": "qualifier=plasma, base=current, covers all cross-IDS Ip paths.",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "A"
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/e_field/toroidal",
+          "segments": {
+            "base_token": "electric_field",
+            "base_kind": "quantity",
+            "projection_axis": "toroidal",
+            "projection_shape": "component",
+            "qualifiers": [],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Toroidal component of the electric field",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/e_field/toroidal"
+          ],
+          "reason": "projection=toroidal component, base=electric_field",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "m^-1.V"
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/electrons/density",
+          "segments": {
+            "base_token": "density",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "electron"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Total electron density including thermal and non-thermal contributions",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/electrons/density",
+            "core_instant_changes/change/profiles_1d/electrons/density",
+            "edge_profiles/ggd/electrons/density",
+            "edge_profiles/profiles_1d/electrons/density",
+            "plasma_profiles/ggd/electrons/density",
+            "plasma_profiles/profiles_1d/electrons/density"
+          ],
+          "reason": "qualifier=electron, base=density",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "m^-3"
+        },
+        {
+          "source_id": "magnetics/ip/data",
+          "segments": {
+            "base_token": "current",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "plasma"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Total toroidal plasma current measured by the magnetics diagnostic",
+          "kind": "scalar",
+          "dd_paths": [
+            "magnetics/ip/data"
+          ],
+          "reason": "qualifier=plasma, base=current",
+          "standard_name": "",
+          "physics_domain": "magnetic_field_diagnostics",
+          "unit": "A"
+        },
+        {
+          "source_id": "magnetics/rogowski_coil/current/data",
+          "segments": {
+            "base_token": "current",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [],
+            "locus_token": "rogowski_coil",
+            "locus_relation": "of",
+            "locus_type": "entity",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Net current enclosed within the Rogowski coil contour",
+          "kind": "scalar",
+          "dd_paths": [
+            "magnetics/rogowski_coil/current/data"
+          ],
+          "reason": "base=current, object=rogowski_coil (device signal)",
+          "standard_name": "",
+          "physics_domain": "magnetic_field_diagnostics",
+          "unit": "A"
+        },
+        {
+          "source_id": "pf_active/coil/b_field_max_timed/data",
+          "segments": {
+            "base_token": "magnetic_field",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "maximum"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": "magnitude",
+            "operator_kind": "unary_postfix"
+          },
+          "description": "Maximum absolute magnetic field on the poloidal field coil conductor surface as a function of time",
+          "kind": "scalar",
+          "dd_paths": [
+            "pf_active/coil/b_field_max_timed/data"
+          ],
+          "reason": "qualifier=maximum, base=magnetic_field, operator=magnitude postfix, locus=of poloidal_field_coil",
+          "standard_name": "",
+          "physics_domain": "magnetic_field_systems",
+          "unit": "T"
+        }
+      ],
+      "grammar_valid_count": 11,
+      "grammar_invalid_count": 1,
+      "fields_consistent_count": 11,
+      "total_cost": 0.0,
+      "total_tokens": 583757,
+      "elapsed_seconds": 268.45,
+      "names_per_minute": 2.7,
+      "cost_per_name": 0.0,
+      "skipped_count": 0,
+      "attachment_count": 0,
+      "vocab_gap_count": 2,
+      "batch_errors": 0,
+      "reference_overlap": 2,
+      "reference_total": 52,
+      "reference_precision": 0.1667,
+      "reference_recall": 0.0385,
+      "name_reviewer_results": [
+        {
+          "reviewer_model": "openrouter/anthropic/claude-sonnet-4.6",
+          "target": "names",
+          "scores": [
+            {
+              "name": "major_radius_of_measurement_position",
+              "quality_tier": "good",
+              "score": 0.75,
+              "grammar_score": 18,
+              "semantic_score": 12,
+              "convention_score": 16,
+              "completeness_score": 14,
+              "reasoning": "Grammar: `major_radius` is a registered lexicalised compound and `measurement_position` uses registered token `measurement_position` (in the position registry), linked by `_of_`. Round-trip is clean. Minor dock because `measurement_position` is a registered position token but the decomposition is slightly ambiguous. Semantic: The name is opaque without context \u2014 'measurement_position' is so generic it fails the self-descriptiveness test. A domain expert cannot determine from the name alone what kind of measurement or position is being referenced. The accepted sibling `major_radius_of_constraint_position` (sim=0.96) is already in the catalog and represents the same or very similar concept; this name is a near-duplicate of that sibling with a weaker label. Convention: Mostly follows canonical patterns (snake_case, correct `_of_` locus marker, correct ordering), but the generic `measurement_position` departs from the established pattern where specificity is expected. Completeness: The DD path clearly refers to an x_point constraint measurement; neither 'x_point' nor 'constraint' appears in the name, making it less complete than the accepted sibling `major_radius_of_constraint_position`."
+            },
+            {
+              "name": "maximum_magnetic_field_of_poloidal_field_coil",
+              "quality_tier": "outstanding",
+              "score": 0.875,
+              "grammar_score": 18,
+              "semantic_score": 17,
+              "convention_score": 18,
+              "completeness_score": 17,
+              "reasoning": "Grammar: `maximum` is a registered transformation, `magnetic_field` is a registered physical_base, `poloidal_field_coil` is a registered object. The locus `_of_` correctly scopes the object. Round-trip: `maximum` (transformation) + `_of_` + `magnetic_field` + `_of_` + `poloidal_field_coil`. The double `_of_` construction (transformation applied to a base at a given object) is a legitimate pattern. Small dock for the somewhat unusual double-of pattern. Semantic: Self-describing \u2014 a domain expert reading the name immediately understands this is the peak magnetic field at/of a poloidal field coil, matching the unit T perfectly. Convention: snake_case consistent, canonical segment ordering, no abbreviations (avoiding 'b_field_max' abbreviations from the source path). Completeness: The name appropriately captures the maximum, the quantity (magnetic field), and the object (poloidal field coil). No component is specified, which is appropriate for a magnitude-like maximum."
+            },
+            {
+              "name": "major_radius_of_primary_x_point",
+              "quality_tier": "outstanding",
+              "score": 0.9875,
+              "grammar_score": 20,
+              "semantic_score": 19,
+              "convention_score": 20,
+              "completeness_score": 20,
+              "reasoning": "Grammar: `major_radius` is a registered lexicalised compound; `primary_x_point` is a registered position token; `_of_` is the correct locus marker. Round-trip is clean. No decomposition defects. Semantic: Fully self-describing \u2014 a domain expert immediately understands this is the R coordinate (major radius) of the primary X-point of the separatrix. The unit m is consistent. The accepted sibling `major_radius_of_x_point` (sim=0.92) shows this is the canonical pattern; using 'primary' adds needed specificity to distinguish from secondary x-point. Convention: snake_case, canonical ordering, no abbreviations, mirrors exactly the pattern of `major_radius_of_x_point` with appropriate qualifier. Completeness: All relevant segments present. The 'primary' qualifier distinguishes from the secondary x-point as per the registered position vocabulary."
+            },
+            {
+              "name": "coolant_pressure_at_inlet",
+              "quality_tier": "good",
+              "score": 0.8375,
+              "grammar_score": 16,
+              "semantic_score": 17,
+              "convention_score": 17,
+              "completeness_score": 17,
+              "reasoning": "Grammar: `pressure` is a registered physical_base; `coolant` is a registered qualifier; `inlet` is a registered position token; `_at_` is the correct preposition for a position locus. The qualifier `coolant` is registered and folds adjacent to the base per ISN grammar. Round-trip should be clean: qualifier `coolant` + base `pressure` + `_at_` + position `inlet`. Small dock for potential ambiguity in qualifier-base binding order. Semantic: Clearly self-describing \u2014 coolant pressure at the inlet of a cooling circuit. The DD path `breeding_blanket/module/cooling/time_slice/pressure_inlet` confirms this is the coolant pressure at the inlet of the cooling loop. Unit Pa matches pressure. Convention: snake_case, canonical ordering, no abbreviations, no model-specific identifiers. The `_at_inlet` positional suffix follows the registered pattern. Completeness: All relevant segments present \u2014 quantity (pressure), qualifier (coolant), position (inlet). No missing subject or component required for a scalar pressure."
+            },
+            {
+              "name": "maximum_neutron_flux_at_first_wall",
+              "quality_tier": "good",
+              "score": 0.725,
+              "grammar_score": 14,
+              "semantic_score": 14,
+              "convention_score": 16,
+              "completeness_score": 14,
+              "reasoning": "Grammar: `maximum` is a registered transformation; `neutron` is a registered subject; `flux` would need to be a registered physical_base \u2014 it is (neutron_flux pattern is standard). `first_wall` is a registered position; `_at_` is correct preposition. However the unit m^-2.W is problematic \u2014 neutron particle flux would be m^-2.s^-1, while m^-2.W suggests a neutron power density or power flux. This creates a grammar-level concern because the physical_base implied by the name conflicts with the unit. Dock for unit-name mismatch. Semantic: A domain expert reading 'neutron_flux_at_first_wall' would expect units of m^-2.s^-1 (particle flux) or W.m^-2 (power/energy flux, but then the name should be 'neutron_power_flux' or 'neutron_wall_load'). The m^-2.W unit is unusual and creates ambiguity. The 'maximum' transformation is well-placed. Convention: snake_case, canonical ordering, `maximum` as prefix transformation is correct. Completeness: If the unit is correct (m^-2.W), the physical base should be 'neutron_power_flux' or similar rather than plain 'neutron_flux'. The name as given is incomplete for the unit provided."
+            },
+            {
+              "name": "major_radius_of_magnetic_axis",
+              "quality_tier": "outstanding",
+              "score": 1.0,
+              "grammar_score": 20,
+              "semantic_score": 20,
+              "convention_score": 20,
+              "completeness_score": 20,
+              "reasoning": "Grammar: `major_radius` is a registered lexicalised compound; `magnetic_axis` is a registered position token; `_of_` is the correct locus marker. Round-trip is clean. No decomposition defects. Semantic: Fully self-describing \u2014 the major radius coordinate of the magnetic axis is a canonical, unambiguous concept in tokamak physics. Unit m is consistent. No COCOS complications for a position coordinate. Convention: snake_case, canonical ordering, no abbreviations, mirrors the accepted sibling `major_radius_of_x_point` pattern perfectly. Completeness: All relevant segments are present. The physical_base, position, and locus marker are all correct and complete."
+            },
+            {
+              "name": "plasma_current",
+              "quality_tier": "outstanding",
+              "score": 0.85,
+              "grammar_score": 18,
+              "semantic_score": 16,
+              "convention_score": 18,
+              "completeness_score": 16,
+              "reasoning": "Grammar: `plasma` is a registered qualifier; `current` would map to a physical_base. The combination `plasma_current` follows the qualifier-folding pattern. The unit A is consistent with current. Semantic: 'plasma_current' is a universally understood term in fusion physics for the net toroidal plasma current Ip. However, without context it could theoretically refer to other current concepts. The conventional interpretation is unambiguous in the fusion domain. Convention: snake_case, no abbreviations, standard fusion terminology. Completeness: For a fuller specification, the toroidal component could be stated, and 'total' or 'net' could be added. However, as an established tokamak convention, 'plasma_current' is the standard accepted form. The unit A is consistent."
+            },
+            {
+              "name": "toroidal_electric_field",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "grammar_score": 20,
+              "semantic_score": 18,
+              "convention_score": 20,
+              "completeness_score": 18,
+              "reasoning": "Grammar: `toroidal` is a registered component; `electric_field` is a registered physical_base. The component prefix correctly modifies the base. Round-trip is clean: `component=toroidal` + `physical_base=electric_field` \u2192 `toroidal_electric_field`. Semantic: A domain expert immediately recognizes this as the toroidal component of the electric field, consistent with the unit V/m (written as m^-1.V). This is a standard 1D profile quantity in tokamak physics. The DD path confirms `e_field/toroidal`. Convention: snake_case, canonical component-before-base ordering, no abbreviations. Completeness: Component (toroidal) and base (electric_field) are present. No subject required for an electromagnetic field quantity. Unit V/m consistent."
+            },
+            {
+              "name": "electron_density",
+              "quality_tier": "outstanding",
+              "score": 1.0,
+              "grammar_score": 20,
+              "semantic_score": 20,
+              "convention_score": 20,
+              "completeness_score": 20,
+              "reasoning": "Grammar: `electron` is a registered subject; `density` is a registered physical_base. The subject correctly modifies the base. Round-trip: `subject=electron` + `physical_base=density` \u2192 `electron_density`. Clean. Semantic: Fully self-describing and unambiguous \u2014 electron number density is a canonical fundamental plasma quantity. Unit m^-3 is exactly consistent with number density. Convention: snake_case, canonical subject-before-base ordering, no abbreviations or model-specific terms. The DD path `electrons/density` directly confirms. Completeness: All physically relevant segments are present. No position or component required for a profile quantity (this is a 1D profile from the source path)."
+            },
+            {
+              "name": "plasma_current",
+              "quality_tier": "outstanding",
+              "score": 0.85,
+              "grammar_score": 18,
+              "semantic_score": 16,
+              "convention_score": 18,
+              "completeness_score": 16,
+              "reasoning": "This is the same standard name as Candidate 7 (plasma_current, unit A) but from a different source path (magnetics/ip/data vs core_profiles/global_quantities/ip). This is expected and correct \u2014 both paths represent the same physical quantity (net toroidal plasma current). Grammar, semantic, convention, and completeness scores are identical to Candidate 7. The duplication across source paths is a feature, not a defect, of standard names. No additional issues beyond those noted for Candidate 7."
+            },
+            {
+              "name": "current_of_rogowski_coil",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "grammar_score": 20,
+              "semantic_score": 18,
+              "convention_score": 20,
+              "completeness_score": 18,
+              "reasoning": "Grammar (20/20): Clean decomposition \u2014 `physical_base=current`, `_of_` scope marker, `object=rogowski_coil` (registered in the object registry). Mirrors accepted siblings `current_of_passive_loop` and `current_of_poloidal_field_coil` exactly. All tokens registered; no decomposition defects. Semantic (18/20): Largely self-describing \u2014 a domain expert reading the name understands it is an electric current associated with a Rogowski coil. Minor ambiguity exists because a Rogowski coil is a current-sensing device that inductively measures the current of an external conductor, so 'current of rogowski coil' could be read as the coil's own circulating current vs. the measured current signal; however, in the magnetics IDS context this is standard terminology and peers like `current_of_passive_loop` use the same convention. Docking 2 points for mild semantic indirection. Convention (20/20): snake_case consistent, canonical `<physical_base>_of_<object>` ordering, no abbreviations, no model-specific identifiers. Perfectly mirrors established sibling pattern. Completeness (18/20): All physically relevant segments present. Unit (A) and kind (scalar) consistent with an electric current. No component or subject needed for a scalar current quantity. Minor deduction because no qualifier distinguishes whether this is the raw measured signal or a calibrated quantity, but this is consistent with sibling `current_of_poloidal_field_coil` which also omits such qualification."
+            },
+            {
+              "name": "maximum_magnetic_field_magnitude",
+              "quality_tier": "good",
+              "score": 0.725,
+              "grammar_score": 14,
+              "semantic_score": 14,
+              "convention_score": 15,
+              "completeness_score": 15,
+              "reasoning": "Grammar (14/20): `magnetic_field` is a registered physical_base and `magnitude` is a registered transformation (postfix), and `maximum` is a registered transformation. The stacking of two transformation tokens (`maximum` and `magnitude`) without grammar fields supplied raises a decomposition concern \u2014 the name does not specify how these transformations are ordered or scoped. No `_of_` or explicit scope marker separates transformation from base. Docking 6 points for absent grammar fields and ambiguous stacking of two transformations on the same base. Semantic (14/20): The name conveys 'maximum magnitude of the magnetic field' but is critically underspecified in terms of WHERE \u2014 the domain of the maximum is not stated. The source path `pf_active/coil/b_field_max_timed` clearly implies this is at/in a PF coil, but the name provides no such context. A domain expert reading only the name cannot determine whether this is the global maximum B-field in the device, at a coil winding, at the plasma boundary, etc. Contrast with `temperature_of_poloidal_field_coil` (sim=0.90) which fully specifies the object. Docking 6 points for missing object/positional context that renders the name ambiguous without DD provenance. Convention (15/20): snake_case is consistent, but the double-transformation pattern (`maximum_..._magnitude`) is not seen in any accepted sibling and the word order is potentially ambiguous as noted. The established pattern in `same_base_neighbours` and `vector_neighbours` consistently uses `<quantity>_of_<object>` (e.g. `current_of_poloidal_field_coil`, `resistance_of_poloidal_field_coil`). Docking 5 points. Completeness (15/20): Missing object specifier (`_of_poloidal_field_coil` or similar) that is consistently present in all same-path siblings. The maximum-over-what domain is also unspecified. Docking 5 points."
+            }
+          ],
+          "avg_score": 0.875,
+          "distribution": {
+            "good": 4,
+            "outstanding": 8
+          },
+          "cost": 0.13998315,
+          "elapsed_seconds": 132.1,
+          "error": "",
+          "dim_averages": {
+            "grammar": 18.0,
+            "semantic": 16.75,
+            "convention": 18.17,
+            "completeness": 17.08
+          }
+        }
+      ],
+      "docs_reviewer_results": [],
+      "description_reviewer_results": [
+        {
+          "reviewer_model": "openrouter/anthropic/claude-sonnet-4.6",
+          "target": "descriptions",
+          "scores": [
+            {
+              "name": "major_radius_of_measurement_position",
+              "quality_tier": "good",
+              "score": 0.7875,
+              "reasoning": "Accurate physics and unit-consistent (m), good specificity listing constraint types, consistent with name, but the parenthetical enumeration of constraint types adds minor padding and the standard name says 'measurement position' which is broader than x-point alone \u2014 the description anchors too narrowly then over-broadens with the parenthetical list.",
+              "physics_accuracy_score": 17,
+              "specificity_score": 15,
+              "consistency_score": 17,
+              "concision_score": 14
+            },
+            {
+              "name": "maximum_magnetic_field_of_poloidal_field_coil",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "reasoning": "Excellent: physically accurate (T unit, magnetic field on conductor surface), highly specific (conductor surface, current limit lookup context), fully consistent with the name, and concise with no boilerplate.",
+              "physics_accuracy_score": 19,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 18
+            },
+            {
+              "name": "major_radius_of_primary_x_point",
+              "quality_tier": "outstanding",
+              "score": 0.9375,
+              "reasoning": "Accurate, specific (cylindrical R, primary X-point, equilibrium boundary), perfectly consistent with the name, and concise; the redundant parenthetical '(cylindrical R coordinate)' is minor padding since the name already says 'major_radius'.",
+              "physics_accuracy_score": 19,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 18
+            },
+            {
+              "name": "coolant_pressure_at_inlet",
+              "quality_tier": "outstanding",
+              "score": 0.975,
+              "reasoning": "Physically accurate (Pa, pressure), highly specific (breeding blanket module cooling circuit inlet), perfectly consistent with the name, and admirably concise.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "maximum_neutron_flux_at_first_wall",
+              "quality_tier": "good",
+              "score": 0.8,
+              "reasoning": "The description is generally consistent and specific, but the unit m^-2.W is unusual for a neutron flux (typically m^-2.s^-1 or W.m^-2) and the description says 'neutron flux' without clarifying whether this is a particle flux or power flux, leaving a physics ambiguity that could mislead.",
+              "physics_accuracy_score": 14,
+              "specificity_score": 16,
+              "consistency_score": 17,
+              "concision_score": 17
+            },
+            {
+              "name": "major_radius_of_magnetic_axis",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "reasoning": "Accurate, specific (magnetic axis, cylindrical R), fully consistent with the name, and concise; minor redundancy in '(cylindrical R coordinate)' as with candidate 3.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 18
+            },
+            {
+              "name": "plasma_current",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "reasoning": "Accurate (net toroidal current, A), specific (Ip, net toroidal), fully consistent with the name, and concise; the trailing period is trivial.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 18
+            },
+            {
+              "name": "toroidal_electric_field",
+              "quality_tier": "good",
+              "score": 0.8375,
+              "reasoning": "Accurate and consistent with the name, but the description is very generic \u2014 it adds no information beyond what the name itself says (species, location in plasma profile, or physical context are absent), making it under-specific.",
+              "physics_accuracy_score": 17,
+              "specificity_score": 13,
+              "consistency_score": 20,
+              "concision_score": 17
+            },
+            {
+              "name": "electron_density",
+              "quality_tier": "outstanding",
+              "score": 0.925,
+              "reasoning": "Accurate (m^-3, electron density), adds useful specificity (thermal + non-thermal contributions), fully consistent, and concise; minor question whether the source path always includes non-thermal contributions.",
+              "physics_accuracy_score": 18,
+              "specificity_score": 17,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "plasma_current",
+              "quality_tier": "outstanding",
+              "score": 0.975,
+              "reasoning": "Accurate, specific (measured by magnetics diagnostic), fully consistent with the name, and concise \u2014 the diagnostic measurement context adds value over the generic plasma current description.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "current_of_rogowski_coil",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "reasoning": "Physically accurate (Rogowski coils measure enclosed net current via Ampere's law), specific to the coil contour, perfectly consistent with the name, and concisely stated without units-in-prose.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "maximum_magnetic_field_magnitude",
+              "quality_tier": "good",
+              "score": 0.8125,
+              "reasoning": "Physically sound and specific to PF coil conductor surface, but the standard name drops 'poloidal field coil' context creating mild consistency drift, and 'as a function of time' is redundant metadata padding that reduces concision.",
+              "physics_accuracy_score": 18,
+              "specificity_score": 17,
+              "consistency_score": 16,
+              "concision_score": 14
+            }
+          ],
+          "avg_score": 0.9072916666666666,
+          "distribution": {
+            "good": 4,
+            "outstanding": 8
+          },
+          "cost": 0.03626385,
+          "elapsed_seconds": 152.85,
+          "error": "",
+          "dim_averages": {
+            "physics_accuracy": 18.5,
+            "specificity": 17.42,
+            "consistency": 19.17,
+            "concision": 17.5
+          }
+        }
+      ],
+      "avg_description_score": 0.9073,
+      "description_reviewer_cost": 0.03626385,
+      "description_review_elapsed_seconds": 152.85,
+      "quality_scores": [
+        {
+          "name": "major_radius_of_measurement_position",
+          "quality_tier": "good",
+          "score": 0.75,
+          "grammar_score": 18,
+          "semantic_score": 12,
+          "convention_score": 16,
+          "completeness_score": 14,
+          "reasoning": "Grammar: `major_radius` is a registered lexicalised compound and `measurement_position` uses registered token `measurement_position` (in the position registry), linked by `_of_`. Round-trip is clean. Minor dock because `measurement_position` is a registered position token but the decomposition is slightly ambiguous. Semantic: The name is opaque without context \u2014 'measurement_position' is so generic it fails the self-descriptiveness test. A domain expert cannot determine from the name alone what kind of measurement or position is being referenced. The accepted sibling `major_radius_of_constraint_position` (sim=0.96) is already in the catalog and represents the same or very similar concept; this name is a near-duplicate of that sibling with a weaker label. Convention: Mostly follows canonical patterns (snake_case, correct `_of_` locus marker, correct ordering), but the generic `measurement_position` departs from the established pattern where specificity is expected. Completeness: The DD path clearly refers to an x_point constraint measurement; neither 'x_point' nor 'constraint' appears in the name, making it less complete than the accepted sibling `major_radius_of_constraint_position`."
+        },
+        {
+          "name": "maximum_magnetic_field_of_poloidal_field_coil",
+          "quality_tier": "outstanding",
+          "score": 0.875,
+          "grammar_score": 18,
+          "semantic_score": 17,
+          "convention_score": 18,
+          "completeness_score": 17,
+          "reasoning": "Grammar: `maximum` is a registered transformation, `magnetic_field` is a registered physical_base, `poloidal_field_coil` is a registered object. The locus `_of_` correctly scopes the object. Round-trip: `maximum` (transformation) + `_of_` + `magnetic_field` + `_of_` + `poloidal_field_coil`. The double `_of_` construction (transformation applied to a base at a given object) is a legitimate pattern. Small dock for the somewhat unusual double-of pattern. Semantic: Self-describing \u2014 a domain expert reading the name immediately understands this is the peak magnetic field at/of a poloidal field coil, matching the unit T perfectly. Convention: snake_case consistent, canonical segment ordering, no abbreviations (avoiding 'b_field_max' abbreviations from the source path). Completeness: The name appropriately captures the maximum, the quantity (magnetic field), and the object (poloidal field coil). No component is specified, which is appropriate for a magnitude-like maximum."
+        },
+        {
+          "name": "major_radius_of_primary_x_point",
+          "quality_tier": "outstanding",
+          "score": 0.9875,
+          "grammar_score": 20,
+          "semantic_score": 19,
+          "convention_score": 20,
+          "completeness_score": 20,
+          "reasoning": "Grammar: `major_radius` is a registered lexicalised compound; `primary_x_point` is a registered position token; `_of_` is the correct locus marker. Round-trip is clean. No decomposition defects. Semantic: Fully self-describing \u2014 a domain expert immediately understands this is the R coordinate (major radius) of the primary X-point of the separatrix. The unit m is consistent. The accepted sibling `major_radius_of_x_point` (sim=0.92) shows this is the canonical pattern; using 'primary' adds needed specificity to distinguish from secondary x-point. Convention: snake_case, canonical ordering, no abbreviations, mirrors exactly the pattern of `major_radius_of_x_point` with appropriate qualifier. Completeness: All relevant segments present. The 'primary' qualifier distinguishes from the secondary x-point as per the registered position vocabulary."
+        },
+        {
+          "name": "coolant_pressure_at_inlet",
+          "quality_tier": "good",
+          "score": 0.8375,
+          "grammar_score": 16,
+          "semantic_score": 17,
+          "convention_score": 17,
+          "completeness_score": 17,
+          "reasoning": "Grammar: `pressure` is a registered physical_base; `coolant` is a registered qualifier; `inlet` is a registered position token; `_at_` is the correct preposition for a position locus. The qualifier `coolant` is registered and folds adjacent to the base per ISN grammar. Round-trip should be clean: qualifier `coolant` + base `pressure` + `_at_` + position `inlet`. Small dock for potential ambiguity in qualifier-base binding order. Semantic: Clearly self-describing \u2014 coolant pressure at the inlet of a cooling circuit. The DD path `breeding_blanket/module/cooling/time_slice/pressure_inlet` confirms this is the coolant pressure at the inlet of the cooling loop. Unit Pa matches pressure. Convention: snake_case, canonical ordering, no abbreviations, no model-specific identifiers. The `_at_inlet` positional suffix follows the registered pattern. Completeness: All relevant segments present \u2014 quantity (pressure), qualifier (coolant), position (inlet). No missing subject or component required for a scalar pressure."
+        },
+        {
+          "name": "maximum_neutron_flux_at_first_wall",
+          "quality_tier": "good",
+          "score": 0.725,
+          "grammar_score": 14,
+          "semantic_score": 14,
+          "convention_score": 16,
+          "completeness_score": 14,
+          "reasoning": "Grammar: `maximum` is a registered transformation; `neutron` is a registered subject; `flux` would need to be a registered physical_base \u2014 it is (neutron_flux pattern is standard). `first_wall` is a registered position; `_at_` is correct preposition. However the unit m^-2.W is problematic \u2014 neutron particle flux would be m^-2.s^-1, while m^-2.W suggests a neutron power density or power flux. This creates a grammar-level concern because the physical_base implied by the name conflicts with the unit. Dock for unit-name mismatch. Semantic: A domain expert reading 'neutron_flux_at_first_wall' would expect units of m^-2.s^-1 (particle flux) or W.m^-2 (power/energy flux, but then the name should be 'neutron_power_flux' or 'neutron_wall_load'). The m^-2.W unit is unusual and creates ambiguity. The 'maximum' transformation is well-placed. Convention: snake_case, canonical ordering, `maximum` as prefix transformation is correct. Completeness: If the unit is correct (m^-2.W), the physical base should be 'neutron_power_flux' or similar rather than plain 'neutron_flux'. The name as given is incomplete for the unit provided."
+        },
+        {
+          "name": "major_radius_of_magnetic_axis",
+          "quality_tier": "outstanding",
+          "score": 1.0,
+          "grammar_score": 20,
+          "semantic_score": 20,
+          "convention_score": 20,
+          "completeness_score": 20,
+          "reasoning": "Grammar: `major_radius` is a registered lexicalised compound; `magnetic_axis` is a registered position token; `_of_` is the correct locus marker. Round-trip is clean. No decomposition defects. Semantic: Fully self-describing \u2014 the major radius coordinate of the magnetic axis is a canonical, unambiguous concept in tokamak physics. Unit m is consistent. No COCOS complications for a position coordinate. Convention: snake_case, canonical ordering, no abbreviations, mirrors the accepted sibling `major_radius_of_x_point` pattern perfectly. Completeness: All relevant segments are present. The physical_base, position, and locus marker are all correct and complete."
+        },
+        {
+          "name": "plasma_current",
+          "quality_tier": "outstanding",
+          "score": 0.85,
+          "grammar_score": 18,
+          "semantic_score": 16,
+          "convention_score": 18,
+          "completeness_score": 16,
+          "reasoning": "Grammar: `plasma` is a registered qualifier; `current` would map to a physical_base. The combination `plasma_current` follows the qualifier-folding pattern. The unit A is consistent with current. Semantic: 'plasma_current' is a universally understood term in fusion physics for the net toroidal plasma current Ip. However, without context it could theoretically refer to other current concepts. The conventional interpretation is unambiguous in the fusion domain. Convention: snake_case, no abbreviations, standard fusion terminology. Completeness: For a fuller specification, the toroidal component could be stated, and 'total' or 'net' could be added. However, as an established tokamak convention, 'plasma_current' is the standard accepted form. The unit A is consistent."
+        },
+        {
+          "name": "toroidal_electric_field",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "grammar_score": 20,
+          "semantic_score": 18,
+          "convention_score": 20,
+          "completeness_score": 18,
+          "reasoning": "Grammar: `toroidal` is a registered component; `electric_field` is a registered physical_base. The component prefix correctly modifies the base. Round-trip is clean: `component=toroidal` + `physical_base=electric_field` \u2192 `toroidal_electric_field`. Semantic: A domain expert immediately recognizes this as the toroidal component of the electric field, consistent with the unit V/m (written as m^-1.V). This is a standard 1D profile quantity in tokamak physics. The DD path confirms `e_field/toroidal`. Convention: snake_case, canonical component-before-base ordering, no abbreviations. Completeness: Component (toroidal) and base (electric_field) are present. No subject required for an electromagnetic field quantity. Unit V/m consistent."
+        },
+        {
+          "name": "electron_density",
+          "quality_tier": "outstanding",
+          "score": 1.0,
+          "grammar_score": 20,
+          "semantic_score": 20,
+          "convention_score": 20,
+          "completeness_score": 20,
+          "reasoning": "Grammar: `electron` is a registered subject; `density` is a registered physical_base. The subject correctly modifies the base. Round-trip: `subject=electron` + `physical_base=density` \u2192 `electron_density`. Clean. Semantic: Fully self-describing and unambiguous \u2014 electron number density is a canonical fundamental plasma quantity. Unit m^-3 is exactly consistent with number density. Convention: snake_case, canonical subject-before-base ordering, no abbreviations or model-specific terms. The DD path `electrons/density` directly confirms. Completeness: All physically relevant segments are present. No position or component required for a profile quantity (this is a 1D profile from the source path)."
+        },
+        {
+          "name": "plasma_current",
+          "quality_tier": "outstanding",
+          "score": 0.85,
+          "grammar_score": 18,
+          "semantic_score": 16,
+          "convention_score": 18,
+          "completeness_score": 16,
+          "reasoning": "This is the same standard name as Candidate 7 (plasma_current, unit A) but from a different source path (magnetics/ip/data vs core_profiles/global_quantities/ip). This is expected and correct \u2014 both paths represent the same physical quantity (net toroidal plasma current). Grammar, semantic, convention, and completeness scores are identical to Candidate 7. The duplication across source paths is a feature, not a defect, of standard names. No additional issues beyond those noted for Candidate 7."
+        },
+        {
+          "name": "current_of_rogowski_coil",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "grammar_score": 20,
+          "semantic_score": 18,
+          "convention_score": 20,
+          "completeness_score": 18,
+          "reasoning": "Grammar (20/20): Clean decomposition \u2014 `physical_base=current`, `_of_` scope marker, `object=rogowski_coil` (registered in the object registry). Mirrors accepted siblings `current_of_passive_loop` and `current_of_poloidal_field_coil` exactly. All tokens registered; no decomposition defects. Semantic (18/20): Largely self-describing \u2014 a domain expert reading the name understands it is an electric current associated with a Rogowski coil. Minor ambiguity exists because a Rogowski coil is a current-sensing device that inductively measures the current of an external conductor, so 'current of rogowski coil' could be read as the coil's own circulating current vs. the measured current signal; however, in the magnetics IDS context this is standard terminology and peers like `current_of_passive_loop` use the same convention. Docking 2 points for mild semantic indirection. Convention (20/20): snake_case consistent, canonical `<physical_base>_of_<object>` ordering, no abbreviations, no model-specific identifiers. Perfectly mirrors established sibling pattern. Completeness (18/20): All physically relevant segments present. Unit (A) and kind (scalar) consistent with an electric current. No component or subject needed for a scalar current quantity. Minor deduction because no qualifier distinguishes whether this is the raw measured signal or a calibrated quantity, but this is consistent with sibling `current_of_poloidal_field_coil` which also omits such qualification."
+        },
+        {
+          "name": "maximum_magnetic_field_magnitude",
+          "quality_tier": "good",
+          "score": 0.725,
+          "grammar_score": 14,
+          "semantic_score": 14,
+          "convention_score": 15,
+          "completeness_score": 15,
+          "reasoning": "Grammar (14/20): `magnetic_field` is a registered physical_base and `magnitude` is a registered transformation (postfix), and `maximum` is a registered transformation. The stacking of two transformation tokens (`maximum` and `magnitude`) without grammar fields supplied raises a decomposition concern \u2014 the name does not specify how these transformations are ordered or scoped. No `_of_` or explicit scope marker separates transformation from base. Docking 6 points for absent grammar fields and ambiguous stacking of two transformations on the same base. Semantic (14/20): The name conveys 'maximum magnitude of the magnetic field' but is critically underspecified in terms of WHERE \u2014 the domain of the maximum is not stated. The source path `pf_active/coil/b_field_max_timed` clearly implies this is at/in a PF coil, but the name provides no such context. A domain expert reading only the name cannot determine whether this is the global maximum B-field in the device, at a coil winding, at the plasma boundary, etc. Contrast with `temperature_of_poloidal_field_coil` (sim=0.90) which fully specifies the object. Docking 6 points for missing object/positional context that renders the name ambiguous without DD provenance. Convention (15/20): snake_case is consistent, but the double-transformation pattern (`maximum_..._magnitude`) is not seen in any accepted sibling and the word order is potentially ambiguous as noted. The established pattern in `same_base_neighbours` and `vector_neighbours` consistently uses `<quantity>_of_<object>` (e.g. `current_of_poloidal_field_coil`, `resistance_of_poloidal_field_coil`). Docking 5 points. Completeness (15/20): Missing object specifier (`_of_poloidal_field_coil` or similar) that is consistently present in all same-path siblings. The maximum-over-what domain is also unspecified. Docking 5 points."
+        }
+      ],
+      "quality_distribution": {
+        "good": 4,
+        "outstanding": 8
+      },
+      "avg_quality_score": 0.875,
+      "avg_doc_length": 0.0,
+      "avg_fields_populated": 0.4305555555555556,
+      "avg_grammar_score": 18.0,
+      "avg_semantic_score": 16.75,
+      "avg_convention_score": 18.166666666666668,
+      "avg_completeness_score": 17.083333333333332,
+      "cache_read_tokens": 0,
+      "cache_creation_tokens": 0,
+      "reviewer_cost": 0.13998315,
+      "compose_elapsed_seconds": 268.45,
+      "review_elapsed_seconds": 132.1,
+      "docs_quality_scores": [],
+      "docs_quality_distribution": {},
+      "avg_docs_quality_score": 0.0,
+      "avg_description_quality_score": 0.0,
+      "avg_documentation_quality_score": 0.0,
+      "avg_docs_completeness_score": 0.0,
+      "avg_physics_accuracy_score": 0.0,
+      "docs_compose_cost": 0.0,
+      "docs_compose_elapsed_seconds": 0.0,
+      "docs_review_elapsed_seconds": 0.0,
+      "docs_reviewer_cost": 0.0,
+      "physics_verdicts": [
+        {
+          "name": "major_radius_of_measurement_position",
+          "faithful": false,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": false,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The base (major radius R in metres) and measurement framing are correct, but the source node lives specifically under x_point/position_measured, so the name drops the load-bearing x_point locus and denotes a broader generic 'measurement position' than the source carries."
+        },
+        {
+          "name": "maximum_magnetic_field_of_poloidal_field_coil",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The quantity is the maximum magnetic field (T) on the PF coil conductor surface, and the name correctly preserves the maximum extremum and the poloidal-field-coil locus without misstating the observable or adding spurious qualifiers."
+        },
+        {
+          "name": "major_radius_of_primary_x_point",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The name correctly denotes the cylindrical R coordinate (major radius) of the primary X-point of the separatrix, preserving the locus qualifier with no spurious modifiers."
+        },
+        {
+          "name": "coolant_pressure_at_inlet",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The name correctly denotes a pressure (Pa) of the coolant medium at the inlet locus, preserving both the coolant medium and inlet locus qualifiers without adding unwarranted modifiers."
+        },
+        {
+          "name": "maximum_neutron_flux_at_first_wall",
+          "faithful": false,
+          "base_correct": false,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The DD-authoritative unit W\u00b7m^-2 (power per area) denotes a neutron energy/power flux density, but the term 'neutron_flux' conventionally means a particle flux (m^-2\u00b7s^-1), so the base mis-states the physical quantity even though the maximum and first-wall locus qualifiers are correctly preserved."
+        },
+        {
+          "name": "major_radius_of_magnetic_axis",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The name correctly denotes the cylindrical R coordinate (major radius) of the magnetic axis as documented, with the appropriate locus qualifier preserved and no redundant modifiers."
+        },
+        {
+          "name": "plasma_current",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The name correctly denotes the total plasma current (Ip) in amperes; the toroidal direction is inherent to plasma current so omitting it avoids over-qualification while preserving the physical observable."
+        },
+        {
+          "name": "toroidal_electric_field",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The unit V/m and documentation confirm an electric field, and 'toroidal' is a meaningful directional component qualifier that is neither inherent nor redundant, so the name faithfully captures the toroidal component of the electric field."
+        },
+        {
+          "name": "electron_density",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The name correctly denotes electron number density (m^-3) with the species qualifier preserved, matching the documented total electron density without spurious modifiers."
+        },
+        {
+          "name": "plasma_current",
+          "faithful": true,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": true,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The quantity is the total plasma current in amperes; plasma current is inherently toroidal so omitting 'toroidal' avoids over-qualification, and the name correctly denotes the physical current observable rather than the instrument state."
+        },
+        {
+          "name": "current_of_rogowski_coil",
+          "faithful": false,
+          "base_correct": true,
+          "measurement_principle_correct": false,
+          "qualifiers_preserved": false,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The documentation states this is the net current ENCLOSED within the Rogowski coil contour, but `current_of_rogowski_coil` mis-states the measurement principle by attributing the current to the coil itself rather than to the current threading the loop, and drops the load-bearing 'enclosed' qualifier."
+        },
+        {
+          "name": "maximum_magnetic_field_magnitude",
+          "faithful": false,
+          "base_correct": true,
+          "measurement_principle_correct": true,
+          "qualifiers_preserved": false,
+          "no_over_qualification": true,
+          "valid": true,
+          "reason": "The source is specifically the maximum field on the poloidal field coil conductor surface, so dropping the locus qualifier (at_poloidal_field_coil) loses a load-bearing qualifier and broadens the quantity beyond what is measured."
+        }
+      ],
+      "physics_faithful_count": 8,
+      "physics_total": 12,
+      "physics_rate": 0.6666666666666666,
+      "physics_hardcase_faithful": 5,
+      "physics_hardcase_total": 9,
+      "physics_hardcase_rate": 0.5555555555555556
+    }
+  ],
+  "reference_names": [
+    "equilibrium/time_slice/profiles_1d/q",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor",
+    "equilibrium/time_slice/profiles_1d/elongation",
+    "equilibrium/time_slice/profiles_1d/triangularity_upper",
+    "equilibrium/time_slice/profiles_1d/magnetic_shear",
+    "equilibrium/time_slice/global_quantities/beta_pol",
+    "core_profiles/profiles_1d/electrons/temperature",
+    "core_profiles/profiles_1d/ion/temperature",
+    "core_profiles/profiles_1d/electrons/density",
+    "core_profiles/profiles_1d/ion/density",
+    "core_profiles/profiles_1d/electrons/pressure",
+    "core_profiles/profiles_1d/ion/pressure",
+    "equilibrium/time_slice/profiles_1d/j_tor",
+    "equilibrium/time_slice/profiles_1d/j_parallel",
+    "magnetics/b_field_pol_probe/field/data",
+    "magnetics/b_field_tor_probe/field/data",
+    "magnetics/flux_loop/flux/data",
+    "magnetics/rogowski_coil/current/data",
+    "magnetics/ip/data",
+    "magnetics/diamagnetic_flux/data",
+    "core_profiles/profiles_1d/rotation_frequency_tor_sonic",
+    "core_profiles/profiles_1d/e_field/parallel",
+    "core_profiles/profiles_1d/j_bootstrap",
+    "core_profiles/profiles_1d/j_ohmic",
+    "core_profiles/profiles_1d/ion/velocity/toroidal",
+    "core_profiles/profiles_1d/electrons/temperature_fit/boundary_condition/value",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+    "equilibrium/time_slice/profiles_1d/psi",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/z",
+    "equilibrium/time_slice/global_quantities/ip",
+    "equilibrium/time_slice/global_quantities/psi_axis",
+    "equilibrium/time_slice/global_quantities/psi_boundary",
+    "equilibrium/time_slice/global_quantities/energy_mhd",
+    "summary/global_quantities/v_loop/value",
+    "summary/global_quantities/li/value",
+    "summary/global_quantities/beta_tor/value",
+    "summary/global_quantities/tau_energy/value",
+    "equilibrium/time_slice/global_quantities/resistivity",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/b_tor",
+    "equilibrium/time_slice/global_quantities/minor_radius",
+    "equilibrium/time_slice/global_quantities/major_radius",
+    "equilibrium/time_slice/global_quantities/aspect_ratio",
+    "core_transport/model/profiles_1d/electrons/energy/flux",
+    "core_transport/model/profiles_1d/electrons/particles/flux",
+    "core_transport/model/profiles_1d/ion/energy/flux",
+    "core_transport/model/profiles_1d/ion/particles/flux",
+    "mhd_linear/time_slice/toroidal_mode/growthrate",
+    "mhd_linear/time_slice/toroidal_mode/frequency",
+    "nbi/unit/power_launched/data",
+    "nbi/unit/energy/data",
+    "edge_profiles/profiles_1d/electrons/temperature",
+    "edge_profiles/profiles_1d/electrons/density"
+  ],
+  "extraction_count": 15,
+  "extraction_source_ids": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  "dataset_hash": "f9796f10051646d5",
+  "timestamp": "2026-06-16T15:40:22.834326+00:00",
+  "provenance": {
+    "codex_version": "5.3.0rc5.dev1065+g7c1b1ddf6.d20260616",
+    "codex_commit": "df3df208",
+    "isn_version": "0.8.0rc40",
+    "dd_version": "4.1.0"
+  }
+}

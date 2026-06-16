@@ -353,18 +353,21 @@ api-key-env = "AMBIX_API_KEY"
 batch-size = 25
 # DeepSeek V4 thinking mode via vLLM chat_template_kwargs
 # {"thinking": true, "reasoning_effort": <level>}.
-# "max" — names-quality A/B 2026-06-13 (16 reference paths, dual-judge
-# opus-4.8 + qwen3.7-max): max beats high on BOTH judges
-#   high: opus 0.771 / qwen 0.829, 4.0 names/min
-#   max:  opus 0.819 / qwen 0.847, 2.4 names/min
-# The opus +0.048 gain is material (broad small lifts, no single regression);
-# generation is FREE on the local GPU, so quality wins over the 1.7x slower
-# throughput. (The earlier 0.3 names/min collapse was the litellm connection-
-# starvation bug, NOT max — fixed by the dedicated local client.) Names ≠ docs:
-# docs degrade past high (sonnet, different model/task); names improve at max.
-# Reliable with the 32000-token local budget. "max" is vLLM/DeepSeek-specific;
+# "medium" — compose-effort scan 2026-06-16 (15-path physics gold set, post the
+# Option-5 / resolver / vLLM-cap fixes; physics judge as oracle):
+#   level | physics  | hardcase | grammar | names/min
+#   low   | 9/13     | 6/10     | 12/13   | 2.5
+#   medium| 12/13 ✓  | 9/10 ✓   | 12/13 ✓ | 3.6 ✓   <- best on EVERY axis
+#   high  | 8/12     | 5/9      | 11/12   | 2.7
+#   max   | 8/11     | 6/9      | 10/12   | 0.6
+# Medium wins faithfulness AND is fastest; effort is NON-MONOTONIC for DSv4
+# thinking-mode (low≈high under-specify; medium≈max add the distinguishing
+# qualifier, but max is 6x slower and lost cases medium kept). The older
+# 2026-06-13 A/B that set "max" predates the resolver fix (which was inflating
+# the apparent max>high gap). n=1 per level; the speed/failure facts are robust,
+# the exact rate has run-to-run variance. "max" is vLLM/DeepSeek-specific;
 # OpenRouter caps at high.
-reasoning-effort = "max"
+reasoning-effort = "medium"
 # Batch size used when ``sn generate --name-only`` groups paths by
 # ``(physics_domain × unit)`` rather than ``(cluster × unit)``.  The
 # name-only mode trades per-item cluster context for breadth: wider
@@ -499,18 +502,20 @@ disagreement-threshold = 0.20
 # Maximum RD-quorum cycles (1 = primary only, 2 = blind pair, 3 = full quorum).
 max-cycles = 3
 # Reasoning effort for the BASE reviewer cycles (primary + secondary).
-# Review is a bounded judge-against-schema task and the cost-dominant phase
-# (N reviewers x cycles per name), so it does not need the "max" budget the
-# GENERATE/compose task gets; lower effort also tends to improve rule/prompt
-# following (less second-guessing). The disagreement tie-breaker escalates
-# separately (escalation-reasoning-effort). Was "high" (bake-off 2026-06-09);
-# dropped to "medium" 2026-06-16 to cut review-phase cost. Set "none" for
-# provider default.
-reasoning-effort = "medium"
+# "high" — the reviewer bake-off (2026-06-09, labeled good/bad sets) showed
+# high effort materially improves BAD-NAME CATCHING: at low effort the cheap
+# vendor-diverse reviewers caught only ~6/10 known-bad names; at high, ~8/10
+# (qwen3.7-max discrim 0.93 high vs 0.88 low; minimax 0.91 vs 0.80; opus 0.89
+# vs 0.80). A 2026-06-16 attempt to drop this to "medium" to cut cost was NOT
+# validated — the scan harness scored names against the names-quality rubric,
+# which cannot measure physics-faithfulness, so it gave no usable signal; the
+# bake-off remains the authority and counter-indicates dropping below high.
+# Revisit only with a discrimination study on labeled good/bad sets.
+reasoning-effort = "high"
 # Reasoning effort for the ESCALATOR cycle only (cycle >= 2, fired on a flagged
-# disagreement between the base reviewers — rare, so a higher budget on just
-# the contested items is cheap). If it fires too often, prefer raising the base
-# effort or the disagreement threshold over leaning on this.
+# disagreement between the base reviewers). Retained as a tuning knob; currently
+# equal to the base. If a future study shows a cheaper base is safe, the
+# escalator can stay high while the base drops.
 escalation-reasoning-effort = "high"
 
 [tool.imas-codex.sn-review.names]
