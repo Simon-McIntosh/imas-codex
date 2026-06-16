@@ -29,7 +29,7 @@ Your output is a set of **IR segment fields** (base_token, base_kind, projection
 
 ### HARD PRE-EMIT CHECKS — validate EVERY candidate name before output
 
-Run these ten checks IN ORDER against each candidate name string before
+Run these checks IN ORDER against each candidate name string before
 emitting it. If any check fails, revise or skip — never emit a violating name.
 
 1. **No adjacent duplicate tokens.** Reject any name containing two identical
