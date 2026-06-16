@@ -456,6 +456,7 @@ async def score_with_reviewer(
     candidates: list[dict],
     reviewer_model: str,
     target: str = "names",
+    reasoning_effort: str | None = None,
 ) -> tuple[list[dict], float]:
     """Score candidates using the production-fidelity review pipeline.
 
@@ -479,6 +480,9 @@ async def score_with_reviewer(
         fetch_review_neighbours,
     )
     from imas_codex.standard_names.example_loader import load_review_examples
+
+    # "none" → explicit no-reasoning-budget (provider default).
+    review_effort = None if reasoning_effort == "none" else reasoning_effort
 
     if target == "names":
         from imas_codex.standard_names.models import (
@@ -633,6 +637,7 @@ async def score_with_reviewer(
                         messages=messages,
                         response_model=response_model,
                         service="standard-names",
+                        reasoning_effort=review_effort,
                     )
                     total_reviewer_cost += cost
                     for r in result.reviews:
@@ -688,6 +693,7 @@ async def score_with_reviewer(
                     messages=messages,
                     response_model=response_model,
                     service="standard-names",
+                    reasoning_effort=review_effort,
                 )
                 total_reviewer_cost += cost
                 for r in result.reviews:
@@ -1026,7 +1032,10 @@ async def run_benchmark(
                 try:
                     t0 = time.monotonic()
                     revs, cost = await score_with_reviewer(
-                        _candidates, rev_model, target="names"
+                        _candidates,
+                        rev_model,
+                        target="names",
+                        reasoning_effort=config.review_reasoning_effort,
                     )
                     rs.elapsed_seconds = round(time.monotonic() - t0, 2)
                     rs.cost = cost
@@ -1132,7 +1141,10 @@ async def run_benchmark(
                         try:
                             t0 = time.monotonic()
                             dr, dc = await score_with_reviewer(
-                                _candidates, rev_model, target="docs"
+                                _candidates,
+                                rev_model,
+                                target="docs",
+                                reasoning_effort=config.review_reasoning_effort,
                             )
                             rs.elapsed_seconds = round(time.monotonic() - t0, 2)
                             rs.cost = dc

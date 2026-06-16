@@ -1884,6 +1884,15 @@ def sn_run(
     "accuracy vs speed vs cost across runs.",
 )
 @click.option(
+    "--review-reasoning-effort",
+    "review_reasoning_effort",
+    type=click.Choice(["low", "medium", "high", "max", "none"]),
+    default=None,
+    help="Override the REVIEWER reasoning effort (default: provider default). "
+    "Use to scan the review-effort axis with a fixed reviewer set: measure "
+    "bad-name catching vs cost across effort levels.",
+)
+@click.option(
     "--rescore",
     type=click.Path(exists=True, dir_okay=False),
     default=None,
@@ -1906,6 +1915,7 @@ def sn_bench(
     gold_set: str | None,
     physics_judge_model: str | None,
     reasoning_effort: str | None,
+    review_reasoning_effort: str | None,
     rescore: str | None,
 ) -> None:
     """Benchmark LLM models on standard name generation.
@@ -2041,6 +2051,7 @@ def sn_bench(
         gold_set_path=gold_set,
         physics_judge_model=physics_judge_model,
         reasoning_effort=reasoning_effort,
+        review_reasoning_effort=review_reasoning_effort,
     )
 
     mode_str = "names + docs" if include_docs else "names-only"
