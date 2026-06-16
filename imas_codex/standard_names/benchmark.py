@@ -24,6 +24,7 @@ from imas_standard_names.grammar import (
 )
 
 from imas_codex.standard_names.models import StandardNameComposeBatch
+from imas_codex.standard_names.physics_judge import PhysicsVerdict
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,10 @@ class BenchmarkConfig:
     reviewer_models: list[str] = field(default_factory=list)
     names_only: bool = True
     output_path: str | None = None
+    # Physics-correctness judging
+    physics_judge: bool = False
+    physics_judge_model: str | None = None
+    gold_set_path: str | None = None
     # Legacy fields kept for backward-compatible deserialization
     source: str = "dd"
     ids_filter: str | None = None
@@ -140,6 +145,14 @@ class ModelResult:
     docs_compose_elapsed_seconds: float = 0.0
     docs_review_elapsed_seconds: float = 0.0
     docs_reviewer_cost: float = 0.0
+    # Physics-correctness judging
+    physics_verdicts: list[dict] = field(default_factory=list)
+    physics_faithful_count: int = 0
+    physics_total: int = 0
+    physics_rate: float = 0.0
+    physics_hardcase_faithful: int = 0
+    physics_hardcase_total: int = 0
+    physics_hardcase_rate: float = 0.0
 
 
 @dataclass
@@ -1201,6 +1214,46 @@ async def run_benchmark(
         results.append(model_result)
         _save_incremental(results)
 
+    # --- 3. Physics-correctness judging (optional) ---
+    if config.physics_judge:
+        from functools import partial
+
+        from imas_codex.settings import get_model
+        from imas_codex.standard_names.physics_judge import (
+            judge_name_physics,
+            load_bench_paths,
+            score_physics_batch,
+        )
+
+        judge_model = config.physics_judge_model or get_model("sn-review")
+        bench_paths = load_bench_paths()
+        hardcase_paths = {
+            p["path"] for p in bench_paths if p.get("category") != "control"
+        }
+        jfn = partial(judge_name_physics, model=judge_model)
+        for model_result in results:
+            scored: list[dict] = []
+            hard_names: set[str] = set()
+            for cand in model_result.candidates:
+                nm = _resolve_name(cand)
+                if not nm:
+                    continue
+                src_paths = cand.get("source_paths") or []
+                pth = src_paths[0] if src_paths else ""
+                scored.append(
+                    {
+                        "name": nm,
+                        "path": pth,
+                        "unit": cand.get("unit"),
+                        "documentation": cand.get("description", "") or "",
+                    }
+                )
+                if any(sp in hardcase_paths for sp in src_paths):
+                    hard_names.add(nm)
+            verdicts = await score_physics_batch(scored, jfn)
+            apply_physics_metrics(model_result, verdicts, hard_names)
+        _save_incremental(results)
+
     return _build_partial_report(results)
 
 
@@ -1286,6 +1339,30 @@ def _apply_review_metrics(result: ModelResult, reviews: list[dict]) -> None:
         field_counts.append(populated / len(all_fields))
     result.avg_fields_populated = (
         sum(field_counts) / len(field_counts) if field_counts else 0.0
+    )
+
+
+def apply_physics_metrics(
+    result: ModelResult,
+    verdicts: list[PhysicsVerdict],
+    hardcase_names: set[str],
+) -> None:
+    """Aggregate a PhysicsVerdict list onto a ModelResult in-place."""
+    result.physics_verdicts = [v.model_dump() for v in verdicts]
+    result.physics_total = len(verdicts)
+    result.physics_faithful_count = sum(1 for v in verdicts if v.faithful)
+    result.physics_rate = (
+        result.physics_faithful_count / result.physics_total
+        if result.physics_total
+        else 0.0
+    )
+    hc = [v for v in verdicts if v.name in hardcase_names]
+    result.physics_hardcase_total = len(hc)
+    result.physics_hardcase_faithful = sum(1 for v in hc if v.faithful)
+    result.physics_hardcase_rate = (
+        result.physics_hardcase_faithful / result.physics_hardcase_total
+        if result.physics_hardcase_total
+        else 0.0
     )
 
 
