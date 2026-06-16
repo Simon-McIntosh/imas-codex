@@ -1,0 +1,1199 @@
+{
+  "config": {
+    "models": [
+      "openrouter/openai/gpt-5.5"
+    ],
+    "max_candidates": 12,
+    "runs_per_model": 1,
+    "temperature": 0.0,
+    "reviewer_models": [
+      "openrouter/anthropic/claude-opus-4.8"
+    ],
+    "names_only": false,
+    "output_path": "research/docs_ab_gpt55.json",
+    "reasoning_effort": null,
+    "review_reasoning_effort": null,
+    "physics_judge": false,
+    "physics_judge_model": null,
+    "gold_set_path": null,
+    "source": "dd",
+    "ids_filter": null,
+    "domain_filter": null,
+    "facility": null,
+    "force": true,
+    "reviewer_model": "openrouter/anthropic/claude-opus-4.8"
+  },
+  "results": [
+    {
+      "model": "openrouter/openai/gpt-5.5",
+      "status": "completed",
+      "error": "",
+      "compose_error": "",
+      "review_error": "",
+      "docs_error": "",
+      "candidates": [
+        {
+          "source_id": "core_profiles/profiles_1d/electrons/temperature",
+          "segments": {
+            "base_token": "temperature",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "electron"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Temperature characterizing the thermal energy of the core electron population",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/electrons/temperature"
+          ],
+          "reason": "subject=electron, base=temperature; radial sampling is not part of the name",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "eV",
+          "docs_description": "Mean kinetic energy per electron degree of freedom for the electron population, expressed as a thermodynamic temperature.",
+          "documentation": "Electron temperature $T_e$ represents the random kinetic energy of electrons after subtracting any mean flow, usually interpreted as the temperature of the local Maxwellian or near-Maxwellian part of the electron distribution. It controls collisional rates, resistivity, radiation balance, and the electron contribution to [electron pressure](name:electron_pressure), while comparison with [ion temperature](name:ion_temperature) indicates electron-ion thermal equilibration.\n\nA kinetic definition is\n\n$$\n\\frac{3}{2} e T_e = \\left\\langle \\frac{1}{2} m_e |\\mathbf{v}-\\mathbf{u}_e|^2 \\right\\rangle\n$$\n\nwhere $e$ is the elementary charge, $m_e$ is electron mass, $\\mathbf{v}$ is particle velocity, $\\mathbf{u}_e$ is the mean electron flow velocity, and the brackets denote an average over the electron velocity distribution. For a Maxwellian plasma, the pressure relation is $p_e = n_e e T_e$, linking this quantity to [electron density](name:electron_density) and [electron pressure](name:electron_pressure).\n\nElectron temperature is measured by Thomson scattering, inferred from electron cyclotron emission where the emission is optically thick, and estimated in edge plasmas with Langmuir probes or spectroscopic line-ratio methods. Representative values range from 0.5-20 keV in tokamak cores, can exceed 20 keV in high-performance scenarios, and fall to about 10-200 eV in the edge and scrape-off layer."
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/ion/temperature",
+          "segments": {
+            "base_token": "temperature",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "ion"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Temperature of the ion species, averaged over charge states when applicable",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/ion/temperature",
+            "core_profiles/profiles_1d/t_i_average"
+          ],
+          "reason": "qualifier=ion, base=temperature; species-level charge-state average",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "eV",
+          "docs_description": "Kinetic energy per degree of freedom of the ion population, expressed as an effective thermodynamic temperature.",
+          "documentation": "Ion temperature describes the random kinetic energy of ions after subtracting any mean flow velocity. It is a core transport quantity because ion heat conduction, ion pressure, collisional energy exchange, and fusion reactivity depend strongly on it; together with [ion_density](name:ion_density) it determines [ion_pressure](name:ion_pressure). For plasmas with several ion species, this name denotes the effective ion population temperature unless a species-resolved standard name is used.\n\nFor an isotropic ion velocity distribution, the temperature $T_i$ is the second central moment of the distribution:\n\n$$\nT_i = \\frac{m_i}{3 e}\\left\\langle |\\mathbf{v}-\\mathbf{u}_i|^2 \\right\\rangle_i\n$$\n\nwhere $m_i$ is the ion mass, $e$ is the elementary charge, $\\mathbf{v}$ is particle velocity, $\\mathbf{u}_i$ is the mean ion flow velocity, and $\\langle\\cdot\\rangle_i$ denotes an average over the ion distribution. The related [electron_temperature](name:electron_temperature) sets electron thermal pressure and collisional energy transfer, while differences between electron and ion temperatures indicate incomplete equilibration or strong auxiliary heating.\n\nIon temperature is measured with charge-exchange recombination spectroscopy, neutron spectroscopy in fusion plasmas, Doppler broadening of impurity lines, and neutral-particle analysis; it is also inferred from transport modeling constrained by power balance. Representative core values are 1-20 keV in present tokamak H-mode plasmas, rising above 20 keV in reactor-grade scenarios, while edge and scrape-off-layer values are often 10-500 eV."
+        },
+        {
+          "source_id": "equilibrium/time_slice/profiles_1d/triangularity_upper",
+          "segments": {
+            "base_token": "triangularity",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "upper"
+            ],
+            "locus_token": "flux_surface",
+            "locus_relation": "of",
+            "locus_type": "geometry",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Upper D-shape triangularity of a flux surface relative to the magnetic axis",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/profiles_1d/triangularity_upper"
+          ],
+          "reason": "qualifier=upper, base=triangularity, intrinsic shape of flux_surface",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "1",
+          "docs_description": "Dimensionless measure of upper-half D shaping of a magnetic flux surface, set by the inward radial shift of its highest point relative to the surface midplane center.",
+          "documentation": "Upper triangularity describes the D-shaped distortion of the upper half of a closed magnetic flux surface in the right-handed cylindrical $(R, \\phi, Z)$ system, where $R$ is major radius and $Z$ is vertical height. It complements [lower triangularity](name:lower_triangularity_of_flux_surface) and is used with [elongation](name:elongation_of_flux_surface) to characterize equilibrium shaping.\n\nA common equilibrium definition is\n\n$$\n\\delta_u = \\frac{R_c - R_{Z\\max}}{a}\n$$\n\nwhere $\\delta_u$ is the upper triangularity, $R_c=(R_{\\rm out}+R_{\\rm in})/2$ is the midplane center of the same flux surface, $a=(R_{\\rm out}-R_{\\rm in})/2$ is its [minor radius](name:minor_radius_of_flux_surface), and $R_{Z\\max}$ is the major-radius coordinate of the uppermost point on the contour.\n\nThe quantity is computed from reconstructed magnetic-flux contours, usually constrained by external magnetic probes, flux loops, and internal measurements such as motional-Stark-effect polarimetry when available. Contour extraction from [poloidal magnetic flux](name:poloidal_magnetic_flux) surfaces provides the required inner, outer, and uppermost locations.\n\nTypical values are 0-0.6 for conventional positively shaped tokamak plasmas, can approach 0.8 in strongly shaped scenarios, and are negative for inverse-triangularity upper shaping."
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/ion/pressure",
+          "segments": {
+            "base_token": "pressure",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "ion"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Total pressure of an ion species including thermal and non-thermal contributions",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/ion/pressure"
+          ],
+          "reason": "qualifier=ion, base=pressure; total is implied by unsplit ion pressure",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "Pa",
+          "docs_description": "One-third trace of the ion pressure tensor, representing random kinetic stress from ion motion in plasma momentum balance.",
+          "documentation": "Ion pressure is the scalar isotropic part of the kinetic pressure tensor of the ion population, equal to one third of its trace. It supplies the ion contribution to the total plasma pressure and enters force balance through pressure-gradient terms. In a multi-species plasma it is the sum over the included ion species; [ion_density](name:ion_density) and [ion_temperature](name:ion_temperature) determine the Maxwellian limit, while [electron_pressure](name:electron_pressure) gives the corresponding electron contribution.\n\nThe kinetic definition is\n\n$$\np_i = \\frac{1}{3}\\sum_s m_s \\int |\\mathbf{v}-\\mathbf{u}_s|^2 f_s(\\mathbf{x},\\mathbf{v})\\,d^3v\n$$\n\nwhere $p_i$ is the ion pressure in Pa, $s$ labels ion species, $m_s$ is ion mass in kg, $\\mathbf{x}$ is position in m, $\\mathbf{v}$ and $\\mathbf{u}_s$ are particle and mean-flow velocities in m s$^{-1}$, and $f_s$ is normalized so $\\int f_s d^3v=n_s$ with $n_s$ in m$^{-3}$. For Maxwellian ions this reduces to $p_s=n_s k_B T_s$, or $p_s=n_s e T_s$ when $T_s$ is expressed in eV.\n\nIon pressure is obtained by combining ion-temperature measurements from charge-exchange recombination spectroscopy, neutral-particle analysis, or Doppler broadening with ion density inferred from interferometry, Thomson scattering plus quasineutrality, or species-balance modeling. Equilibrium and transport calculations use it together with [plasma_pressure](name:plasma_pressure) to close pressure balance and energy transport.\n\nRepresentative values span about 1-200 kPa in tokamak cores, rising with density and ion temperature, and about 0.01-10 kPa near the pedestal and edge."
+        },
+        {
+          "source_id": "equilibrium/time_slice/global_quantities/beta_pol",
+          "segments": {
+            "base_token": "beta",
+            "base_kind": "quantity",
+            "projection_axis": "poloidal",
+            "projection_shape": "component",
+            "qualifiers": [],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Ratio of volume-averaged plasma pressure to poloidal magnetic pressure",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/global_quantities/beta_pol"
+          ],
+          "reason": "projection=poloidal, base=beta for poloidal beta",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "1",
+          "docs_description": "Dimensionless measure of plasma thermal pressure relative to the magnetic pressure of the confining poloidal field.",
+          "documentation": "Poloidal beta measures how strongly plasma pressure loads the equilibrium supported by the poloidal magnetic field. It is larger than the corresponding toroidal-field beta in tokamaks because the poloidal field is much weaker than the toroidal field, and it is closely tied to Shafranov shift, pressure peaking, and current-profile effects.\n\nA common tokamak definition is\n\n$$\n\\beta_p = \\frac{2\\mu_0 \\langle p \\rangle}{B_{p,\\mathrm{ref}}^2}\n$$\n\nwhere $\\mu_0$ is the vacuum permeability, $\\langle p \\rangle$ is the volume-averaged plasma pressure, and $B_{p,\\mathrm{ref}}$ is a reference edge or boundary poloidal magnetic-field strength. The pressure entering this ratio is related to [plasma pressure](name:plasma_pressure), while the denominator is determined from the [poloidal magnetic field](name:poloidal_magnetic_field).\n\nPoloidal beta is inferred from equilibrium reconstruction constrained by magnetic diagnostics, plasma current, and kinetic pressure measurements such as Thomson scattering, charge-exchange spectroscopy, and interferometry. It is often analyzed together with [plasma current](name:plasma_current), [internal inductance](name:internal_inductance), and [normalized beta](name:normalized_beta) because these quantities jointly determine force balance and stability margins.\n\nRepresentative values are about 0.1-1 in low-pressure or Ohmic tokamak plasmas, 0.5-3 in high-performance H-mode scenarios, and several units in spherical tokamaks or advanced high-pressure regimes."
+        },
+        {
+          "source_id": "equilibrium/time_slice/profiles_1d/magnetic_shear",
+          "segments": {
+            "base_token": "magnetic_shear",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Local radial shear of the safety factor on magnetic flux surfaces",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/profiles_1d/magnetic_shear"
+          ],
+          "reason": "base=magnetic_shear; radial dependence is coordinate context",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "1",
+          "docs_description": "Radial variation of field-line helicity on nested magnetic flux surfaces, measuring how rapidly neighboring field lines change pitch.",
+          "documentation": "Magnetic shear describes the radial change of magnetic-field-line pitch across nested flux surfaces. It is the logarithmic radial derivative of the [safety factor](name:safety_factor), so it controls how rapidly neighboring field lines separate in poloidal angle as they wind toroidally. Low or reversed shear is important for internal transport barriers and tearing-mode stability, while large edge shear affects ballooning and peeling stability.\n\nFor an outward-increasing flux-surface radial coordinate $\\rho$, the local magnetic shear $\\hat{s}$ is defined by:\n\n$$\n\\hat{s}(\\rho) = \\frac{\\rho}{q(\\rho)}\\frac{dq}{d\\rho} = \\frac{d\\ln |q|}{d\\ln \\rho}\n$$\n\nwhere $q(\\rho)$ is the safety factor on that surface. Equivalent forms may use a flux label derived from [poloidal magnetic flux](name:poloidal_magnetic_flux) or [toroidal magnetic flux](name:toroidal_magnetic_flux), provided the derivative is transformed consistently.\n\nMagnetic shear is inferred from equilibrium reconstruction constrained by external magnetic measurements, polarimetry, and motional Stark effect observations; it is not measured directly by a single diagnostic. Typical tokamak values are about 0-1 in the core for monotonic-shear equilibria, 1-5 near the edge, and -2-0 in reversed-shear regions near the minimum of $|q|$.\n\nSign convention: Positive when the magnitude of the safety factor increases from the magnetic axis toward the plasma boundary."
+        },
+        {
+          "source_id": "equilibrium/time_slice/profiles_1d/q",
+          "segments": {
+            "base_token": "safety_factor",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Signed ratio of toroidal to poloidal field-line turns on a flux surface",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/profiles_1d/q",
+            "core_instant_changes/change/profiles_1d/q",
+            "core_profiles/profiles_1d/q",
+            "edge_profiles/profiles_1d/q",
+            "gyrokinetics/flux_surface/q",
+            "gyrokinetics_local/flux_surface/q"
+          ],
+          "reason": "base=safety_factor; radial dependence is coordinate sampling",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "1",
+          "docs_description": "Number of toroidal transits a magnetic field line makes for one poloidal circuit on a magnetic flux surface.",
+          "documentation": "The safety factor $q$ measures magnetic-field-line helicity on a nested magnetic flux surface. It connects the winding of field lines to equilibrium stability: low-order rational values can resonate with magnetohydrodynamic modes, while the radial variation of $q$ determines [magnetic shear](name:magnetic_shear).\n\nFor an axisymmetric equilibrium, $q$ is defined by the ratio of toroidal to poloidal magnetic-flux increments between neighboring flux surfaces:\n\n$$\nq(\\psi) = \\frac{d\\Phi_{\\mathrm{tor}}}{d\\Phi_{\\mathrm{pol}}}\n$$\n\nwhere $\\psi$ labels the flux surface, $\\Phi_{\\mathrm{tor}}$ is the [toroidal magnetic flux](name:toroidal_magnetic_flux), and $\\Phi_{\\mathrm{pol}}$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux). Equivalent field-line definitions count the toroidal angle advance per full poloidal circuit.\n\nThe safety factor is computed from magnetic-equilibrium reconstruction constrained by external magnetic measurements, internal magnetic-pitch measurements such as motional Stark effect, polarimetry, and kinetic pressure information. In tokamak H-mode plasmas, representative values are $q_0 \\approx 0.8$-$1.5$ near the magnetic axis and $q_{95} \\approx 3$-$5$ near the outer confined region; reversed-shear and advanced scenarios can have larger central values or off-axis minima."
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/electrons/density",
+          "segments": {
+            "base_token": "density",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "electron"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Number density of electrons including thermal and non-thermal populations",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/electrons/density",
+            "edge_profiles/ggd/electrons/density",
+            "edge_profiles/profiles_1d/electrons/density",
+            "plasma_profiles/ggd/electrons/density",
+            "plasma_profiles/profiles_1d/electrons/density"
+          ],
+          "reason": "qualifier=electron, base=density; total over thermal and fast populations",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "m^-3",
+          "docs_description": "Number of free electrons per unit volume in the plasma, including all electron populations that contribute to quasineutrality.",
+          "documentation": "Electron density is the local number density of free electrons and is a primary state variable for transport, radiation, collisionality, and wave propagation. In a quasineutral plasma it is constrained by the ion charge balance, so it is closely related to [ion_density](name:ion_density), while its product with [electron_temperature](name:electron_temperature) sets [electron_pressure](name:electron_pressure).\n\nFor a kinetic electron distribution, the density $n_e$ is the zeroth velocity moment of the electron distribution function $f_e(\\mathbf{x},\\mathbf{v})$:\n\n$$\nn_e(\\mathbf{x}) = \\int f_e(\\mathbf{x},\\mathbf{v})\\,d^3v\n$$\n\nwhere $\\mathbf{x}$ is position, $\\mathbf{v}$ is particle velocity, and $f_e$ is defined so that integration over velocity space gives particles per unit volume. For a quasineutral plasma, $n_e \\simeq \\sum_i Z_i n_i$, where $Z_i$ and $n_i$ are the charge number and density of ion species $i$.\n\nElectron density is measured with Thomson scattering, interferometry, polarimetry, reflectometry, and spectroscopy-based inversions. Transport analysis combines these diagnostics with equilibrium geometry to determine the spatial variation used in particle balance, impurity screening, and current-drive calculations.\n\nTypical values range from $10^{19}$ to $2 \\times 10^{20}\\;\\mathrm{m}^{-3}$ in the confined plasma of present tokamaks, with lower scrape-off-layer values near $10^{17}$-$10^{19}\\;\\mathrm{m}^{-3}$ and higher transient edge values during fueling or detachment."
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/electrons/pressure",
+          "segments": {
+            "base_token": "pressure",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "electron"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Total electron pressure including thermal and non-thermal contributions",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/electrons/pressure"
+          ],
+          "reason": "qualifier=electron, base=pressure; total distinguishes from thermal sibling",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "Pa",
+          "docs_description": "Kinetic pressure exerted by the electron population, representing the isotropic momentum flux associated with electron random motion.",
+          "documentation": "Electron pressure is the scalar isotropic part of the electron pressure tensor and measures the momentum flux carried by random electron motion. It enters force balance, drift dynamics, and energy transport through gradients that couple to electric fields and magnetic geometry, making it a key companion to [electron density](name:electron_density) and [electron temperature](name:electron_temperature).\n\nFor a Maxwellian electron population, the pressure is related to density and temperature by\n\n$$\np_e = n_e k_B T_e\n$$\n\nwhere $p_e$ is electron pressure, $n_e$ is electron number density, $T_e$ is electron temperature in kelvin, and $k_B$ is the Boltzmann constant. When $T_e$ is expressed in eV, the equivalent relation is $p_e = n_e e T_e$, where $e$ is the elementary charge.\n\nElectron pressure is computed from measurements of electron density and temperature, most often from Thomson scattering, interferometry combined with temperature diagnostics, electron cyclotron emission, or integrated transport analysis. Its spatial gradient is closely related to [electron_pressure_gradient](name:electron_pressure_gradient), which drives diamagnetic drifts and contributes to pressure-gradient terms in transport equations.\n\nCommon values range from about 10-1,000 Pa near the plasma edge to 1,000-100,000 Pa in high-performance tokamak cores, depending mainly on density, temperature, and confinement regime."
+        },
+        {
+          "source_id": "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor",
+          "segments": {
+            "base_token": "magnetic_field",
+            "base_kind": "quantity",
+            "projection_axis": "toroidal",
+            "projection_shape": "component",
+            "qualifiers": [],
+            "locus_token": "magnetic_axis",
+            "locus_relation": "at",
+            "locus_type": "position",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Toroidal magnetic field evaluated at the magnetic axis",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor"
+          ],
+          "reason": "projection=toroidal, base=magnetic_field, locus=at magnetic_axis",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "T",
+          "docs_description": "Toroidal component of the equilibrium magnetic field evaluated on the magnetic axis, setting the local reference field for gyro-motion and confinement.",
+          "documentation": "The toroidal magnetic field at the magnetic axis is the projection of the equilibrium magnetic-field vector onto the toroidal basis direction at the center of the nested flux surfaces. It is the local reference value used for gyrofrequency estimates, magnetic rigidity, and comparison with the broader [toroidal magnetic field](name:toroidal_magnetic_field) distribution.\n\nIn the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height, the quantity is defined by\n\n$$\nB_{\\phi 0} = \\mathbf{B}(R_{\\mathrm{axis}}, Z_{\\mathrm{axis}}) \\cdot \\hat{\\phi}\n$$\n\nwhere $\\mathbf{B}$ is the equilibrium magnetic-field vector, $\\hat{\\phi}$ is the toroidal unit vector, and $(R_{\\mathrm{axis}}, Z_{\\mathrm{axis}})$ locates the [magnetic axis](name:major_radius_of_magnetic_axis) in the poloidal plane. The field magnitude near the axis also enters the ion gyrofrequency through $\\Omega_i = Z_i e |B_{\\phi 0}|/m_i$, where $Z_i$ is ion charge state, $e$ is the elementary charge, and $m_i$ is ion mass.\n\nThis quantity is obtained from equilibrium reconstruction constrained by external magnetic measurements, polarimetry, and motional-Stark-effect measurements, together with calibrated toroidal-field coil currents. Direct local measurement at the magnetic axis is not available in most toroidal devices, so the value is inferred from the reconstructed field and the reconstructed magnetic-axis position.\n\nTypical values are 1-3 T in medium-size tokamaks, 3-6 T in high-field tokamaks, and can exceed 10 T in compact high-field concepts. It is closely related to [magnetic field magnitude](name:magnetic_field_magnitude) at the axis when the poloidal field is small compared with the toroidal component.\n\nSign convention: Positive when the toroidal field points in the direction of increasing toroidal angle $\\phi$."
+        },
+        {
+          "source_id": "core_profiles/profiles_1d/ion/density",
+          "segments": {
+            "base_token": "density",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [
+              "ion"
+            ],
+            "locus_token": null,
+            "locus_relation": null,
+            "locus_type": null,
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Total ion number density including thermal and nonthermal contributions",
+          "kind": "scalar",
+          "dd_paths": [
+            "core_profiles/profiles_1d/ion/density"
+          ],
+          "reason": "qualifier=ion, base=density; unit indicates number density",
+          "standard_name": "",
+          "physics_domain": "transport",
+          "unit": "m^-3",
+          "docs_description": "Number of ions per unit volume in a plasma, summed over ion populations and charge states when no species resolution is specified.",
+          "documentation": "Ion density is the number density of ion particles in the plasma, including all ion charge states and populations represented by the total ion population. It differs from [electron_density](name:electron_density) because quasineutrality weights each ion species by charge state, so $n_e \\simeq \\sum_s Z_s n_s$ while the total ion count is an unweighted particle sum.\n\nFor ion species or charge-state populations indexed by $s$, the total ion density $n_i$ is defined as\n\n$$\nn_i = \\sum_s n_s\n$$\n\nwhere $n_s$ is the number density of ion population $s$ and $Z_s$ is its charge number when charge neutrality is evaluated. The ion pressure relation is then population dependent; for a single Maxwellian ion population, [ion_pressure](name:ion_pressure) is related to [ion_temperature](name:ion_temperature) through $p_i = n_i k_B T_i$, with $k_B$ the Boltzmann constant and $T_i$ the ion temperature.\n\nIon density is inferred from a combination of diagnostics and modeling: interferometry and Thomson scattering constrain the electron density, charge-exchange recombination spectroscopy and spectroscopy constrain impurity and main-ion concentrations, and quasineutrality closes the ion balance. In deuterium-tritium core plasmas, representative values are about $0.3-1.5 \\times 10^{20}\\;\\mathrm{m^{-3}}$, while edge and scrape-off-layer values can fall to $10^{17}-10^{19}\\;\\mathrm{m^{-3}}$ depending on fueling and recycling. The density is non-negative by definition and has no coordinate-dependent sign convention."
+        },
+        {
+          "source_id": "equilibrium/time_slice/profiles_1d/elongation",
+          "segments": {
+            "base_token": "elongation",
+            "base_kind": "quantity",
+            "projection_axis": null,
+            "projection_shape": null,
+            "qualifiers": [],
+            "locus_token": "flux_surface",
+            "locus_relation": "of",
+            "locus_type": "geometry",
+            "locus_value": null,
+            "process_token": null,
+            "operator_token": null,
+            "operator_kind": null
+          },
+          "description": "Vertical-to-horizontal half-axis ratio of a flux surface",
+          "kind": "scalar",
+          "dd_paths": [
+            "equilibrium/time_slice/profiles_1d/elongation"
+          ],
+          "reason": "base=elongation, intrinsic shape locus=of flux_surface",
+          "standard_name": "",
+          "physics_domain": "equilibrium",
+          "unit": "1",
+          "docs_description": "Ratio of a flux surface's vertical Z half-extent to its radial R half-width in the right-handed cylindrical (R, phi, Z) frame.",
+          "documentation": "Elongation is a dimensionless shaping parameter for a magnetic flux surface in a poloidal cross-section. In the right-handed cylindrical $(R, \\phi, Z)$ frame, $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height; elongation measures how stretched the closed contour is along $Z$ relative to $R$.\n\nFor a closed flux-surface contour, the common geometric definition is\n\n$$\n\\kappa = \\frac{Z_{\\max}-Z_{\\min}}{R_{\\max}-R_{\\min}}\n$$\n\nwhere $Z_{\\max}$ and $Z_{\\min}$ are the upper and lower vertical extrema of the contour, and $R_{\\max}$ and $R_{\\min}$ are its outer and inner radial extrema. This definition connects directly to other shaping descriptors such as [triangularity of the flux surface](name:triangularity_of_flux_surface) and [squareness of the flux surface](name:squareness_of_flux_surface).\n\nElongation is computed from equilibrium reconstruction by identifying contours of [poloidal magnetic flux](name:poloidal_magnetic_flux), often constrained by magnetic probes, flux loops, plasma-boundary imaging, and internal magnetic-angle measurements when available. Representative values are 1 for circular cross-sections, 1.5-2.0 in many elongated tokamak plasmas, and up to about 2.5 in strongly shaped scenarios; increasing elongation improves confinement and stability limits but raises demands on vertical-position control."
+        }
+      ],
+      "grammar_valid_count": 12,
+      "grammar_invalid_count": 0,
+      "fields_consistent_count": 12,
+      "total_cost": 0.84512,
+      "total_tokens": 507817,
+      "elapsed_seconds": 154.97,
+      "names_per_minute": 4.6,
+      "cost_per_name": 0.070427,
+      "skipped_count": 0,
+      "attachment_count": 0,
+      "vocab_gap_count": 0,
+      "batch_errors": 0,
+      "reference_overlap": 8,
+      "reference_total": 52,
+      "reference_precision": 0.6667,
+      "reference_recall": 0.1538,
+      "name_reviewer_results": [
+        {
+          "reviewer_model": "openrouter/anthropic/claude-opus-4.8",
+          "target": "names",
+          "scores": [
+            {
+              "name": "electron_temperature",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "grammar_score": 20,
+              "semantic_score": 18,
+              "convention_score": 20,
+              "completeness_score": 18,
+              "reasoning": "Grammar: clean decomposition subject=electron + physical_base=temperature, both registered, round-trips cleanly. Semantic: self-describing to any plasma physicist as the electron kinetic temperature; unit eV matches temperature base. Consistent with same_base_neighbours like electron_temperature_at_divertor_target (this is the bulk/profile form without position). Convention: canonical snake_case, no clashes. Completeness: subject present, unit/kind consistent; minor deduction since no population qualifier (thermal vs total) but the bare form is the accepted convention for the bulk profile quantity."
+            },
+            {
+              "name": "ion_temperature",
+              "quality_tier": "outstanding",
+              "score": 0.925,
+              "grammar_score": 20,
+              "semantic_score": 17,
+              "convention_score": 20,
+              "completeness_score": 17,
+              "reasoning": "Grammar: subject=ion + physical_base=temperature, both registered, clean round-trip. Semantic: clear concept (ion kinetic temperature) but generic `ion` is less specific than the sibling `ion_species_temperature` which qualifies the species; for a bulk profile the bare form is acceptable. Unit eV matches. Convention: canonical, no clash. Completeness: subject present but no species/charge-state qualifier; sibling ion_species_temperature shows species can be specified \u2014 minor deduction."
+            },
+            {
+              "name": "upper_triangularity_of_flux_surface",
+              "quality_tier": "good",
+              "score": 0.8,
+              "grammar_score": 15,
+              "semantic_score": 16,
+              "convention_score": 16,
+              "completeness_score": 17,
+              "reasoning": "Grammar: `triangularity` is not a clearly registered physical_base token, and `upper` is a registered qualifier; the compound `upper_triangularity` as a physical base is a borderline lexicalized geometric shape parameter. The `_of_flux_surface` locus uses a registered position with correct `_of_` marker. Treated as a lexicalized geometry quantity but unregistered base risk warrants a grammar deduction. Semantic: a domain expert readily understands upper triangularity of a flux surface; unit dimensionless (1) is correct. Convention: snake_case canonical; `upper` reads as qualifier prefix which is acceptable. Completeness: well-specified with position."
+            },
+            {
+              "name": "ion_pressure",
+              "quality_tier": "outstanding",
+              "score": 0.925,
+              "grammar_score": 20,
+              "semantic_score": 17,
+              "convention_score": 20,
+              "completeness_score": 17,
+              "reasoning": "Grammar: subject=ion + physical_base=pressure, both registered, clean round-trip. Semantic: clear (ion kinetic pressure), unit Pa matches pressure base; parallels total_electron_pressure and thermal_electron_pressure in vector_neighbours though those carry population qualifiers. Convention: canonical, no clash. Completeness: subject present, no population (thermal/total) qualifier \u2014 neighbours like thermal_electron_pressure show this distinction can matter; minor deduction."
+            },
+            {
+              "name": "poloidal_beta",
+              "quality_tier": "outstanding",
+              "score": 0.875,
+              "grammar_score": 17,
+              "semantic_score": 17,
+              "convention_score": 18,
+              "completeness_score": 18,
+              "reasoning": "Grammar: `beta` as a physical_base is a recognized plasma parameter, and `poloidal` is a registered component; the compound `poloidal_beta` is a well-established lexicalized quantity though `beta` registration should be verified \u2014 minor deduction. Semantic: poloidal beta is a universally understood tokamak parameter, dimensionless (1) correct. Convention: canonical snake_case. Completeness: well-specified scalar global quantity."
+            },
+            {
+              "name": "magnetic_shear",
+              "quality_tier": "outstanding",
+              "score": 0.9,
+              "grammar_score": 17,
+              "semantic_score": 18,
+              "convention_score": 19,
+              "completeness_score": 18,
+              "reasoning": "Grammar: `magnetic_shear` is a lexicalized compound physical_base; verify it is registered, otherwise it is a decomposition concern. Treated as a recognized atom \u2014 minor deduction for registration uncertainty. Semantic: magnetic shear is a standard, unambiguous equilibrium quantity, dimensionless. Convention: canonical snake_case. Completeness: well-specified scalar profile quantity."
+            },
+            {
+              "name": "safety_factor",
+              "quality_tier": "outstanding",
+              "score": 0.975,
+              "grammar_score": 20,
+              "semantic_score": 19,
+              "convention_score": 20,
+              "completeness_score": 19,
+              "reasoning": "Grammar: `safety_factor` is an explicitly registered lexicalized physical_base atom; clean. Semantic: safety factor (q) is a canonical, unambiguous tokamak quantity, dimensionless (1) correct. Convention: canonical snake_case, no clash. Completeness: fully specified scalar."
+            },
+            {
+              "name": "electron_density",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "grammar_score": 20,
+              "semantic_score": 18,
+              "convention_score": 20,
+              "completeness_score": 18,
+              "reasoning": "Grammar: subject=electron + physical_base=density, both registered, clean round-trip. Semantic: clear (electron number density), unit m^-3 matches; parallels thermal_ion_density though that carries a population qualifier. Convention: canonical. Completeness: subject present; bare form acceptable for bulk profile but lacks population qualifier \u2014 minor deduction."
+            },
+            {
+              "name": "electron_pressure",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "grammar_score": 20,
+              "semantic_score": 18,
+              "convention_score": 20,
+              "completeness_score": 18,
+              "reasoning": "Grammar: subject=electron + physical_base=pressure, both registered, clean round-trip. Semantic: clear (electron kinetic pressure), unit Pa matches; vector_neighbours total_electron_pressure and thermal_electron_pressure show this is the bare/bulk form without population qualifier. Convention: canonical. Completeness: subject present, no population qualifier \u2014 minor deduction."
+            },
+            {
+              "name": "toroidal_magnetic_field_at_magnetic_axis",
+              "quality_tier": "outstanding",
+              "score": 0.9875,
+              "grammar_score": 20,
+              "semantic_score": 19,
+              "convention_score": 20,
+              "completeness_score": 20,
+              "reasoning": "Grammar: component=toroidal + physical_base=magnetic_field + position=magnetic_axis with correct `_at_` locus marker; all tokens registered, clean round-trip. Semantic: fully self-describing \u2014 the toroidal component of the magnetic field at the magnetic axis; unit T matches magnetic_field base. Convention: canonical snake_case, canonical segment ordering, no clash. Completeness: all relevant segments present (component, base, position); unit/kind consistent."
+            },
+            {
+              "name": "ion_density",
+              "quality_tier": "good",
+              "score": 0.8,
+              "grammar_score": 20,
+              "semantic_score": 13,
+              "convention_score": 18,
+              "completeness_score": 13,
+              "reasoning": "Grammar: clean decomposition subject=`ion` + physical_base=`density`, both registered, round-trips correctly, no decomposition defects. Semantic: self-descriptive at the basic level (number density of ions), parallel to the accepted `electron_density`, and unit m^-3 matches a density base. However, siblings show finer-grained discriminators are common \u2014 `thermal_ion_density`, `fast_ion_density`, `thermal_ion_species_density`, `ion_state_density` \u2014 and the bare `ion_density` leaves the population (thermal/fast) and species/state aggregation implicit. It is clear enough to a domain expert with the conventional assumption of total over states, so it sits in the clear-with-assumptions band. Convention: canonical snake_case, mirrors `electron_density` exactly; minor concern that the dense sibling cluster differentiates with population/species tokens. Completeness: no component needed for a scalar density, but the rich sibling set distinguishing thermal/fast/state/species suggests an aggregation or population segment may be expected for full disambiguation."
+            },
+            {
+              "name": "elongation_of_flux_surface",
+              "quality_tier": "outstanding",
+              "score": 0.875,
+              "grammar_score": 18,
+              "semantic_score": 16,
+              "convention_score": 18,
+              "completeness_score": 18,
+              "reasoning": "Grammar: `elongation` is the physical_base and `flux_surface` is a registered position token joined with the correct `_of_` locus marker; round-trips cleanly. `elongation` is not in the listed physical_base registry sample, but it is a standard lexicalised geometric shape parameter and not a compound absorbing closed-vocab tokens, so no decomposition defect \u2014 minor caution applied. Semantic: highly self-descriptive \u2014 a domain expert immediately reads this as the flux-surface elongation (kappa), a well-known equilibrium shape parameter; unit (dimensionless `1`) is correct for a ratio-like shape factor. The `_of_flux_surface` locus correctly situates the per-surface profile quantity. Convention: canonical snake_case, sensible segment ordering with `_of_` scope marker, no abbreviations or model-specific identifiers. Completeness: scalar shape parameter, no component or subject required; unit and kind consistent with the decomposed name."
+            }
+          ],
+          "avg_score": 0.9093749999999999,
+          "distribution": {
+            "outstanding": 10,
+            "good": 2
+          },
+          "cost": 0.19623174999999998,
+          "elapsed_seconds": 62.81,
+          "error": "",
+          "dim_averages": {
+            "grammar": 18.92,
+            "semantic": 17.17,
+            "convention": 19.08,
+            "completeness": 17.58
+          }
+        }
+      ],
+      "docs_reviewer_results": [
+        {
+          "reviewer_model": "openrouter/anthropic/claude-opus-4.8",
+          "target": "docs",
+          "scores": [
+            {
+              "name": "electron_temperature",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "description_quality_score": 18,
+              "documentation_quality_score": 19,
+              "completeness_score": 19,
+              "physics_accuracy_score": 20,
+              "reasoning": "Description quality (18/20): The single-line definition 'Mean kinetic energy per electron degree of freedom for the electron population, expressed as a thermodynamic temperature' is precise and unambiguous, correctly framing Te as a thermodynamic temperature rather than an energy. It is slightly more abstract than the DD's 'thermal energy of the bulk electron population' but does not contradict it. No accepted siblings provided, so consistency is scored on physics alone. Documentation quality (19/20): Provides a correct kinetic defining equation (3/2)e\u00b7Te = <\u00bd m_e |v-u_e|\u00b2> with all variables defined and the e factor correctly accounting for the eV unit convention. The Maxwellian pressure relation p_e = n_e e T_e is correct and dimensionally consistent in eV-based units. Cross-references to electron_pressure, ion_temperature, and electron_density are well integrated. Completeness (19/20): Covers definition, equation, diagnostic methods (Thomson scattering, ECE, Langmuir probes, line-ratio), typical value ranges (0.5-20 keV core, 10-200 eV edge), and cross-references. No IDS/DD path leakage in prose. Physics accuracy (20/20): All definitional claims verify against textbook plasma physics and the DD ground truth \u2014 the random kinetic energy after subtracting mean flow, control of collisional rates/resistivity/radiation, diagnostic methods, and value ranges are all correct. Equation balances dimensionally. No contradictions or unverifiable confident claims."
+            },
+            {
+              "name": "ion_temperature",
+              "quality_tier": "outstanding",
+              "score": 0.925,
+              "description_quality_score": 18,
+              "documentation_quality_score": 19,
+              "completeness_score": 18,
+              "physics_accuracy_score": 19,
+              "reasoning": "description_quality (18/20): The one-line definition is physically precise and unambiguous \u2014 it correctly frames ion temperature as kinetic energy per degree of freedom / effective thermodynamic temperature, consistent with the DD ground truth describing it as 'thermal energy of the ion population'. Minor deduction because the DD specifically frames this as a charge-state-averaged species quantity, which the candidate's description does not signal. documentation_quality (19/20): The defining equation T_i = (m_i/3e)<|v-u_i|^2>_i is the correct second central moment for an isotropic distribution, all variables are defined with units implied, and it correctly handles the subtraction of mean flow velocity. No sign convention is needed for a positive-definite scalar. LaTeX is clean. completeness (18/20): Covers definition, governing equation, diagnostic context, typical magnitudes, and cross-references to ion_density, ion_pressure, and electron_temperature. Slight deduction for not mentioning the charge-state averaging when multiple charge states are present, which is the DD's defining emphasis. No implementation leakage. physics_accuracy (19/20): Every definitional claim is verified against the DD and standard plasma physics \u2014 the moment definition, the flow-velocity subtraction, the units (eV), the multi-species effective-temperature caveat, and the representative value ranges are all correct. No contradictions or unverifiable confident claims."
+            },
+            {
+              "name": "upper_triangularity_of_flux_surface",
+              "quality_tier": "outstanding",
+              "score": 0.9,
+              "description_quality_score": 18,
+              "documentation_quality_score": 18,
+              "completeness_score": 18,
+              "physics_accuracy_score": 18,
+              "reasoning": "Description (18/20): Concise, single-line, dimensionless, correctly identifies upper-half D-shaping set by inward radial shift of the highest point relative to the surface midplane center \u2014 physically precise; no siblings to compare against. Documentation (18/20): Provides a correct defining equation \u03b4_u=(R_c-R_Zmax)/a with all variables defined, proper LaTeX, uses the (R,\u03c6,Z) right-handed system, and cross-references related shape parameters. Sign behavior (negative for inverse triangularity) is stated in prose without COCOS citation. No implementation/IDS leakage. Completeness (18/20): Covers definition, equation, reconstruction/measurement context (magnetic probes, flux loops, MSE), typical value ranges, negative case, and cross-references. Physics accuracy (18/20): Equation balances dimensionally (length/length = dimensionless), agrees with DD ground truth that \u03b4_upper measures upper boundary shape asymmetry; typical ranges and inverse-triangularity behavior are correct textbook plasma physics. Minor note: DD describes triangularity w.r.t. magnetic axis while the candidate uses midplane geometric center R_c \u2014 both are standard equilibrium conventions and the discrepancy is conventional rather than erroneous."
+            },
+            {
+              "name": "ion_pressure",
+              "quality_tier": "good",
+              "score": 0.7125,
+              "description_quality_score": 15,
+              "documentation_quality_score": 17,
+              "completeness_score": 14,
+              "physics_accuracy_score": 11,
+              "reasoning": "Description (15): clear and grammatical but defines the quantity via the isotropic kinetic-tensor framing, not via the DD's authoritative 'total = thermal + fast, summed over charge states' definition. A domain expert reading this would not realize the quantity includes fast-particle pressure. Documentation (17): the LaTeX is correct, variables are defined with units, the Maxwellian reduction p=n k_B T (or n e T in eV) is accurate, and cross-references to ion_density, ion_temperature, electron_pressure, and plasma_pressure are present. Sign convention is not needed for a positive scalar pressure. However the fast/non-thermal and charge-state-summation aspects are absent. Completeness (14): good measurement context and typical value ranges (1-200 kPa core, 0.01-10 kPa edge are reasonable), but omits the key thermal+fast decomposition and per-state/summation structure, and lacks cross-refs to the thermal/fast component siblings the DD calls out. Physics accuracy (11): no unit or equation errors and the elementary plasma physics is correct, but the candidate's central definitional claim that this is the Maxwellian/thermal isotropic pressure conflicts with the DD ground truth, which defines it as the TOTAL ion pressure including non-thermal fast contributions summed over charge states. This is a definitional divergence from the ground truth, so accuracy is docked substantially though not to the contradiction floor since the kinetic definition itself is sound."
+            },
+            {
+              "name": "poloidal_beta",
+              "quality_tier": "good",
+              "score": 0.7375,
+              "description_quality_score": 17,
+              "documentation_quality_score": 13,
+              "completeness_score": 17,
+              "physics_accuracy_score": 12,
+              "reasoning": "Description (17): The short description correctly captures \u03b2p as a dimensionless pressure-to-poloidal-magnetic-pressure ratio, aligning with the DD. Slight vagueness on the reference field. Documentation (13): The prose is fluent and physically motivated (Shafranov shift, current-profile coupling), but the single defining equation presented does not match the authoritative DD form \u03b2p = 4\u222bp dV/(R0 \u03bc0 Ip\u00b2). Instead it uses an approximate B_p,ref\u00b2 form with an under-specified denominator, which is a real divergence from ground truth and the most useful equation to anchor the name. No sign convention is needed for a positive-definite dimensionless scalar, which is appropriate. Completeness (17): Cross-references and typical value ranges are present and helpful; the Ip-based canonical form is the main gap. Physics accuracy (12): The qualitative physics is sound (\u03b2p larger than toroidal beta, ties to confinement and MHD), but the equation contradicts the DD's exact definition by omitting the Ip/R0 normalization and substituting an ambiguous reference poloidal field \u2014 a definitional divergence that must be docked. No siblings available for terminology comparison."
+            },
+            {
+              "name": "magnetic_shear",
+              "quality_tier": "outstanding",
+              "score": 0.9,
+              "description_quality_score": 18,
+              "documentation_quality_score": 18,
+              "completeness_score": 18,
+              "physics_accuracy_score": 18,
+              "reasoning": "description_quality (18/20): Single-line, precise physical definition ('Radial variation of field-line helicity on nested magnetic flux surfaces, measuring how rapidly neighboring field lines change pitch') that captures the essence of magnetic shear without copying the DD prose. No siblings provided, so judged on physics and style alone; very strong. documentation_quality (18/20): Provides the defining equation s_hat = (rho/q)(dq/drho) = dln|q|/dln(rho), which exactly matches the DD ground truth ((rho_tor/q)(dq/drho_tor)). All variables defined, dimensionless unit consistent with unit=1, sign convention stated in prose without COCOS references, and the alternative flux-label forms are correctly noted as requiring consistent transformation. Minor deduction for a slightly trivial sign-convention statement. completeness (18/20): Covers physical definition, defining equation, MHD-stability and transport-barrier context, inference methods (equilibrium reconstruction, polarimetry, MSE), typical value ranges in core/edge/reversed-shear regions, and cross-references to safety_factor, poloidal_magnetic_flux, and toroidal_magnetic_flux. No IDS/DD path leakage. physics_accuracy (18/20): The defining equation agrees exactly with the DD ground truth. The logarithmic-derivative identity s = dln|q|/dln(rho) is correct elementary textbook plasma physics. Stability context (ITBs at low/reversed shear, ballooning/peeling at high edge shear) is accurate. Typical values quoted (0-1 core, 1-5 edge, -2-0 reversed) are reasonable for tokamaks. No contradictions or unverifiable confident claims. Total 72/80 -> outstanding tier, accept."
+            },
+            {
+              "name": "safety_factor",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "description_quality_score": 19,
+              "documentation_quality_score": 19,
+              "completeness_score": 18,
+              "physics_accuracy_score": 20,
+              "reasoning": "description_quality (19/20): The single-line definition 'Number of toroidal transits a magnetic field line makes for one poloidal circuit on a magnetic flux surface' is precise, self-describing, and matches the DD ground-truth notion of toroidal-to-poloidal winding ratio. No siblings available for cross-comparison; phrasing is crisp with no DD/IDS leakage. documentation_quality (19/20): The defining equation q(\u03c8)=d\u03a6_tor/d\u03a6_pol is correct and in proper LaTeX, variables defined, cross-references to toroidal/poloidal magnetic flux and magnetic_shear are well integrated. The dimensionless nature (unit=1) means no sign-convention statement is strictly required, though a brief note that q is conventionally taken as positive could be added; small deduction. completeness (18/20): Covers definition, equation, reconstruction/measurement context (MSE, polarimetry, kinetic constraints), typical values (q0\u22480.8-1.5, q95\u22483-5), reversed-shear scenarios, and cross-references. Minor: could explicitly tie rational-q surfaces to tearing/kink resonance as the DD ground truth emphasizes, though the resonance idea is mentioned. physics_accuracy (20/20): All claims verified against DD ground truth \u2014 q as ratio of toroidal to poloidal field-line turns per flux surface, q(\u03c8)=d\u03a6_tor/d\u03a6_pol, rational surfaces resonating with MHD modes, and representative q0/q95 values are all standard textbook tokamak physics and consistent with the DD description. No false equivalences, no implementation leakage."
+            },
+            {
+              "name": "electron_density",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "description_quality_score": 19,
+              "documentation_quality_score": 19,
+              "completeness_score": 19,
+              "physics_accuracy_score": 20,
+              "reasoning": "description_quality: The description 'Number of free electrons per unit volume in the plasma, including all electron populations that contribute to quasineutrality' is a precise, single-line physical definition. It correctly captures the DD ground truth that the quantity includes both thermal and fast (non-thermal) contributions via the 'all electron populations' phrasing. No siblings provided, so scored on correctness and clarity, which is excellent. documentation_quality: The defining equation n_e = \u222b f_e d^3v as the zeroth velocity moment of the distribution function is correct and properly typeset; all variables (x, v, f_e) are defined with the correct interpretation. The quasineutrality relation n_e \u2248 \u03a3 Z_i n_i is correct. No sign convention is required for a positive-definite density scalar. Cross-references to ion_density, electron_temperature, and electron_pressure are appropriate and physically motivated. completeness: Covers the definition, kinetic moment equation, quasineutrality constraint, diagnostic context (Thomson scattering, interferometry, polarimetry, reflectometry, spectroscopy), transport analysis usage, and typical value ranges with edge/SOL distinctions. Cross-references are present. No IDS names or DD paths leak into prose. physics_accuracy: Every definitional claim is verifiable textbook plasma physics: the zeroth-moment definition of density is standard, the quasineutrality relation n_e \u2248 \u03a3 Z_i n_i is exact, the diagnostic list is correct, and the typical values (10^19 to 2\u00d710^20 m^-3 core, 10^17-10^19 m^-3 SOL) are physically accurate for present tokamaks. The 'thermal + non-thermal' scope matches DD ground truth exactly. Units m^-3 agree with DD."
+            },
+            {
+              "name": "electron_pressure",
+              "quality_tier": "outstanding",
+              "score": 0.8625,
+              "description_quality_score": 17,
+              "documentation_quality_score": 18,
+              "completeness_score": 17,
+              "physics_accuracy_score": 17,
+              "reasoning": "Description quality (17): The single-line description is clean and precise about the isotropic kinetic-pressure nature, but it misses the defining feature in the DD ground truth \u2014 that this is the TOTAL electron pressure including the fast/non-thermal contribution. Documentation quality (18): The defining equation p_e = n_e k_B T_e is in correct LaTeX with all variables defined and units (Pa) consistent; the eV-form equivalent p_e = n_e e T_e is also correct and well explained. Cross-references to electron_density, electron_temperature, and electron_pressure_gradient are appropriate, and diagnostic context (Thomson, ECE, interferometry) is sound. No siblings were available for terminology comparison. Completeness (17): Covers definition, equation, diagnostic inference, typical magnitudes, and cross-references, but does not mention the fast-electron contribution that distinguishes 'total electron pressure' from purely thermal pressure \u2014 a gap relative to the DD scope. Physics accuracy (17): All stated equations balance dimensionally and the typical value ranges (10\u201310^5 Pa) are physically reasonable for tokamak edge to core. The only divergence is the implicit framing of p_e as a Maxwellian/thermal quantity, whereas the DD defines it as total pressure combining thermal and non-thermal electrons; this is an understatement of scope rather than a contradiction. No implementation leakage. Total 69/80, accept."
+            },
+            {
+              "name": "toroidal_magnetic_field_at_magnetic_axis",
+              "quality_tier": "outstanding",
+              "score": 0.9125,
+              "description_quality_score": 18,
+              "documentation_quality_score": 19,
+              "completeness_score": 18,
+              "physics_accuracy_score": 18,
+              "reasoning": "description_quality (18): Concise, physically precise single-line definition identifying the toroidal projection of the equilibrium field at the magnetic axis with relevant physical role. Minor deduction because the DD emphasizes this is the TOTAL field combining all source contributions, a nuance not surfaced in the description. documentation_quality (19): Defining equation in correct LaTeX, all variables defined with units, gyrofrequency relation correct, sign convention stated in prose (positive when field points toward increasing phi) without citing COCOS numbers \u2014 fully compliant. Cross-references to related names use the name: link style consistently. completeness (18): Covers definition, equation, inference/measurement context (equilibrium reconstruction, MSE, polarimetry, TF coil currents), typical magnitudes across device classes, sign convention, and cross-references to magnetic axis position, magnetic field magnitude, and toroidal magnetic field distribution. No implementation leakage. Slight deduction for not emphasizing the total/all-source nature highlighted in the DD. physics_accuracy (18): All definitional claims verified \u2014 the projection definition, gyrofrequency formula (dimensionally balanced), inference methods, and typical value ranges all agree with standard tokamak physics and the DD ground truth. No contradictions or unverifiable confident claims."
+            },
+            {
+              "name": "ion_density",
+              "quality_tier": "outstanding",
+              "score": 0.8625,
+              "description_quality_score": 17,
+              "documentation_quality_score": 18,
+              "completeness_score": 18,
+              "physics_accuracy_score": 16,
+              "reasoning": "description_quality (17): Accurately states number of ions per unit volume summed over populations/charge states, matching the DD ground truth ('thermal and fast contributions, summed over charge states'). Minor awkwardness in the qualifier phrasing. documentation_quality (18): Defining equation n_i = sum_s n_s is correct and properly dimensioned; the quasineutrality contrast with electron_density is physically correct (n_e \u2248 sum Z_s n_s vs unweighted ion sum). The pressure relation p_i = n_i k_B T_i is correct. Minor deduction because Z_s is defined but never used in the displayed equation, leaving a dangling symbol. completeness (18): Covers definition, equation, diagnostic inference (interferometry, Thomson, CXRS), typical core (0.3-1.5e20) and edge/SOL (1e17-1e19) values, and non-negativity. Cross-references to electron_density, ion_pressure, ion_temperature are appropriate. No DD/IDS leakage. physics_accuracy (16): All definitional claims verified against DD ground truth \u2014 total ion density including thermal and fast contributions, summed over charge states. The thermal+non-thermal scope is correctly captured by 'all ion charge states and populations.' Quasineutrality weighting, pressure relation, and typical values are all standard textbook plasma physics and correct. Minor deduction for the Z_s symbol that is introduced without role in the equation, creating slight confusion. No verdict-breaking issues; total 69/80, outstanding/good boundary."
+            },
+            {
+              "name": "elongation_of_flux_surface",
+              "quality_tier": "outstanding",
+              "score": 0.9125,
+              "description_quality_score": 18,
+              "documentation_quality_score": 18,
+              "completeness_score": 18,
+              "physics_accuracy_score": 19,
+              "reasoning": "Description quality (18): The description gives a precise, self-describing geometric definition \u2014 vertical-to-radial extent ratio in the (R,phi,Z) frame \u2014 matching the DD's 'vertical-to-horizontal half-axis ratio.' Slightly verbose but unambiguous. Documentation quality (18): The defining equation is correct LaTeX with all variables defined; for a closed contour the extrema-difference ratio is the standard kappa definition. No sign convention is needed (dimensionless positive shaping parameter), so its absence is appropriate. Completeness (18): Includes the equation, cross-references to related shaping parameters (triangularity, squareness) and poloidal_magnetic_flux, measurement/reconstruction context, and representative values. The DD emphasises it is a radial profile as a function of poloidal flux coordinate; the candidate frames it per-flux-surface (correct as a standard name) and mentions equilibrium reconstruction, so this is adequately covered. Physics accuracy (19): All claims verified \u2014 kappa=1 for circular, 1.5-2.0 elongated, up to ~2.5 strongly shaped, confinement/stability benefits with increased vertical-control demands are all standard textbook tokamak physics. The equation is dimensionless and correct. No implementation leakage; no DD paths cited. Total 73/80 \u2192 outstanding, accept."
+            }
+          ],
+          "avg_score": 0.8822916666666667,
+          "distribution": {
+            "outstanding": 10,
+            "good": 2
+          },
+          "cost": 0.8730185000000001,
+          "elapsed_seconds": 212.58,
+          "error": "",
+          "dim_averages": {
+            "description_quality": 17.67,
+            "documentation_quality": 17.92,
+            "completeness": 17.67,
+            "physics_accuracy": 17.33
+          }
+        }
+      ],
+      "description_reviewer_results": [
+        {
+          "reviewer_model": "openrouter/anthropic/claude-opus-4.8",
+          "target": "descriptions",
+          "scores": [
+            {
+              "name": "electron_temperature",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "reasoning": "Accurate thermal temperature, specific to core electrons, consistent with name, tight one-liner.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "ion_temperature",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "reasoning": "Correct physics with helpful charge-state averaging note, specific, consistent, concise.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "upper_triangularity_of_flux_surface",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "reasoning": "Captures D-shape upper triangularity of flux surface; correct and specific, minor imprecision on 'relative to magnetic axis'.",
+              "physics_accuracy_score": 18,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "ion_pressure",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "reasoning": "Correct pressure description with thermal/non-thermal note, specific to ion species, consistent.",
+              "physics_accuracy_score": 19,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "poloidal_beta",
+              "quality_tier": "outstanding",
+              "score": 0.9875,
+              "reasoning": "Accurate ratio definition for poloidal beta, specific, consistent, tight.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 20
+            },
+            {
+              "name": "magnetic_shear",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "reasoning": "Correct shear-of-q description, specific and consistent, concise.",
+              "physics_accuracy_score": 19,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "safety_factor",
+              "quality_tier": "outstanding",
+              "score": 0.9875,
+              "reasoning": "Accurate signed turns-ratio definition of q, specific and consistent, tight.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 20
+            },
+            {
+              "name": "electron_density",
+              "quality_tier": "outstanding",
+              "score": 0.9625,
+              "reasoning": "Correct number density consistent with unit m^-3, specific to electrons, consistent.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "electron_pressure",
+              "quality_tier": "outstanding",
+              "score": 0.95,
+              "reasoning": "Correct electron pressure with thermal/non-thermal note, specific and consistent.",
+              "physics_accuracy_score": 19,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "toroidal_magnetic_field_at_magnetic_axis",
+              "quality_tier": "outstanding",
+              "score": 0.9875,
+              "reasoning": "Accurate toroidal B at magnetic axis, fully specific and consistent, tight.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 19,
+              "consistency_score": 20,
+              "concision_score": 20
+            },
+            {
+              "name": "ion_density",
+              "quality_tier": "outstanding",
+              "score": 0.925,
+              "reasoning": "Correct physics consistent with m^-3 number density; name and description agree; specific enough though species generic (matches DD 'ion'); tight one-liner.",
+              "physics_accuracy_score": 19,
+              "specificity_score": 16,
+              "consistency_score": 20,
+              "concision_score": 19
+            },
+            {
+              "name": "elongation_of_flux_surface",
+              "quality_tier": "outstanding",
+              "score": 0.975,
+              "reasoning": "Accurate dimensionless elongation as vertical-to-horizontal half-axis ratio; matches name and equilibrium domain; specific and concise.",
+              "physics_accuracy_score": 20,
+              "specificity_score": 18,
+              "consistency_score": 20,
+              "concision_score": 20
+            }
+          ],
+          "avg_score": 0.9625,
+          "distribution": {
+            "outstanding": 12
+          },
+          "cost": 0.06570625,
+          "elapsed_seconds": 34.13,
+          "error": "",
+          "dim_averages": {
+            "physics_accuracy": 19.5,
+            "specificity": 18.17,
+            "consistency": 20.0,
+            "concision": 19.33
+          }
+        }
+      ],
+      "avg_description_score": 0.9625,
+      "description_reviewer_cost": 0.06570625,
+      "description_review_elapsed_seconds": 34.13,
+      "quality_scores": [
+        {
+          "name": "electron_temperature",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "grammar_score": 20,
+          "semantic_score": 18,
+          "convention_score": 20,
+          "completeness_score": 18,
+          "reasoning": "Grammar: clean decomposition subject=electron + physical_base=temperature, both registered, round-trips cleanly. Semantic: self-describing to any plasma physicist as the electron kinetic temperature; unit eV matches temperature base. Consistent with same_base_neighbours like electron_temperature_at_divertor_target (this is the bulk/profile form without position). Convention: canonical snake_case, no clashes. Completeness: subject present, unit/kind consistent; minor deduction since no population qualifier (thermal vs total) but the bare form is the accepted convention for the bulk profile quantity."
+        },
+        {
+          "name": "ion_temperature",
+          "quality_tier": "outstanding",
+          "score": 0.925,
+          "grammar_score": 20,
+          "semantic_score": 17,
+          "convention_score": 20,
+          "completeness_score": 17,
+          "reasoning": "Grammar: subject=ion + physical_base=temperature, both registered, clean round-trip. Semantic: clear concept (ion kinetic temperature) but generic `ion` is less specific than the sibling `ion_species_temperature` which qualifies the species; for a bulk profile the bare form is acceptable. Unit eV matches. Convention: canonical, no clash. Completeness: subject present but no species/charge-state qualifier; sibling ion_species_temperature shows species can be specified \u2014 minor deduction."
+        },
+        {
+          "name": "upper_triangularity_of_flux_surface",
+          "quality_tier": "good",
+          "score": 0.8,
+          "grammar_score": 15,
+          "semantic_score": 16,
+          "convention_score": 16,
+          "completeness_score": 17,
+          "reasoning": "Grammar: `triangularity` is not a clearly registered physical_base token, and `upper` is a registered qualifier; the compound `upper_triangularity` as a physical base is a borderline lexicalized geometric shape parameter. The `_of_flux_surface` locus uses a registered position with correct `_of_` marker. Treated as a lexicalized geometry quantity but unregistered base risk warrants a grammar deduction. Semantic: a domain expert readily understands upper triangularity of a flux surface; unit dimensionless (1) is correct. Convention: snake_case canonical; `upper` reads as qualifier prefix which is acceptable. Completeness: well-specified with position."
+        },
+        {
+          "name": "ion_pressure",
+          "quality_tier": "outstanding",
+          "score": 0.925,
+          "grammar_score": 20,
+          "semantic_score": 17,
+          "convention_score": 20,
+          "completeness_score": 17,
+          "reasoning": "Grammar: subject=ion + physical_base=pressure, both registered, clean round-trip. Semantic: clear (ion kinetic pressure), unit Pa matches pressure base; parallels total_electron_pressure and thermal_electron_pressure in vector_neighbours though those carry population qualifiers. Convention: canonical, no clash. Completeness: subject present, no population (thermal/total) qualifier \u2014 neighbours like thermal_electron_pressure show this distinction can matter; minor deduction."
+        },
+        {
+          "name": "poloidal_beta",
+          "quality_tier": "outstanding",
+          "score": 0.875,
+          "grammar_score": 17,
+          "semantic_score": 17,
+          "convention_score": 18,
+          "completeness_score": 18,
+          "reasoning": "Grammar: `beta` as a physical_base is a recognized plasma parameter, and `poloidal` is a registered component; the compound `poloidal_beta` is a well-established lexicalized quantity though `beta` registration should be verified \u2014 minor deduction. Semantic: poloidal beta is a universally understood tokamak parameter, dimensionless (1) correct. Convention: canonical snake_case. Completeness: well-specified scalar global quantity."
+        },
+        {
+          "name": "magnetic_shear",
+          "quality_tier": "outstanding",
+          "score": 0.9,
+          "grammar_score": 17,
+          "semantic_score": 18,
+          "convention_score": 19,
+          "completeness_score": 18,
+          "reasoning": "Grammar: `magnetic_shear` is a lexicalized compound physical_base; verify it is registered, otherwise it is a decomposition concern. Treated as a recognized atom \u2014 minor deduction for registration uncertainty. Semantic: magnetic shear is a standard, unambiguous equilibrium quantity, dimensionless. Convention: canonical snake_case. Completeness: well-specified scalar profile quantity."
+        },
+        {
+          "name": "safety_factor",
+          "quality_tier": "outstanding",
+          "score": 0.975,
+          "grammar_score": 20,
+          "semantic_score": 19,
+          "convention_score": 20,
+          "completeness_score": 19,
+          "reasoning": "Grammar: `safety_factor` is an explicitly registered lexicalized physical_base atom; clean. Semantic: safety factor (q) is a canonical, unambiguous tokamak quantity, dimensionless (1) correct. Convention: canonical snake_case, no clash. Completeness: fully specified scalar."
+        },
+        {
+          "name": "electron_density",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "grammar_score": 20,
+          "semantic_score": 18,
+          "convention_score": 20,
+          "completeness_score": 18,
+          "reasoning": "Grammar: subject=electron + physical_base=density, both registered, clean round-trip. Semantic: clear (electron number density), unit m^-3 matches; parallels thermal_ion_density though that carries a population qualifier. Convention: canonical. Completeness: subject present; bare form acceptable for bulk profile but lacks population qualifier \u2014 minor deduction."
+        },
+        {
+          "name": "electron_pressure",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "grammar_score": 20,
+          "semantic_score": 18,
+          "convention_score": 20,
+          "completeness_score": 18,
+          "reasoning": "Grammar: subject=electron + physical_base=pressure, both registered, clean round-trip. Semantic: clear (electron kinetic pressure), unit Pa matches; vector_neighbours total_electron_pressure and thermal_electron_pressure show this is the bare/bulk form without population qualifier. Convention: canonical. Completeness: subject present, no population qualifier \u2014 minor deduction."
+        },
+        {
+          "name": "toroidal_magnetic_field_at_magnetic_axis",
+          "quality_tier": "outstanding",
+          "score": 0.9875,
+          "grammar_score": 20,
+          "semantic_score": 19,
+          "convention_score": 20,
+          "completeness_score": 20,
+          "reasoning": "Grammar: component=toroidal + physical_base=magnetic_field + position=magnetic_axis with correct `_at_` locus marker; all tokens registered, clean round-trip. Semantic: fully self-describing \u2014 the toroidal component of the magnetic field at the magnetic axis; unit T matches magnetic_field base. Convention: canonical snake_case, canonical segment ordering, no clash. Completeness: all relevant segments present (component, base, position); unit/kind consistent."
+        },
+        {
+          "name": "ion_density",
+          "quality_tier": "good",
+          "score": 0.8,
+          "grammar_score": 20,
+          "semantic_score": 13,
+          "convention_score": 18,
+          "completeness_score": 13,
+          "reasoning": "Grammar: clean decomposition subject=`ion` + physical_base=`density`, both registered, round-trips correctly, no decomposition defects. Semantic: self-descriptive at the basic level (number density of ions), parallel to the accepted `electron_density`, and unit m^-3 matches a density base. However, siblings show finer-grained discriminators are common \u2014 `thermal_ion_density`, `fast_ion_density`, `thermal_ion_species_density`, `ion_state_density` \u2014 and the bare `ion_density` leaves the population (thermal/fast) and species/state aggregation implicit. It is clear enough to a domain expert with the conventional assumption of total over states, so it sits in the clear-with-assumptions band. Convention: canonical snake_case, mirrors `electron_density` exactly; minor concern that the dense sibling cluster differentiates with population/species tokens. Completeness: no component needed for a scalar density, but the rich sibling set distinguishing thermal/fast/state/species suggests an aggregation or population segment may be expected for full disambiguation."
+        },
+        {
+          "name": "elongation_of_flux_surface",
+          "quality_tier": "outstanding",
+          "score": 0.875,
+          "grammar_score": 18,
+          "semantic_score": 16,
+          "convention_score": 18,
+          "completeness_score": 18,
+          "reasoning": "Grammar: `elongation` is the physical_base and `flux_surface` is a registered position token joined with the correct `_of_` locus marker; round-trips cleanly. `elongation` is not in the listed physical_base registry sample, but it is a standard lexicalised geometric shape parameter and not a compound absorbing closed-vocab tokens, so no decomposition defect \u2014 minor caution applied. Semantic: highly self-descriptive \u2014 a domain expert immediately reads this as the flux-surface elongation (kappa), a well-known equilibrium shape parameter; unit (dimensionless `1`) is correct for a ratio-like shape factor. The `_of_flux_surface` locus correctly situates the per-surface profile quantity. Convention: canonical snake_case, sensible segment ordering with `_of_` scope marker, no abbreviations or model-specific identifiers. Completeness: scalar shape parameter, no component or subject required; unit and kind consistent with the decomposed name."
+        }
+      ],
+      "quality_distribution": {
+        "outstanding": 10,
+        "good": 2
+      },
+      "avg_quality_score": 0.9093749999999999,
+      "avg_doc_length": 0.0,
+      "avg_fields_populated": 0.3333333333333333,
+      "avg_grammar_score": 18.916666666666668,
+      "avg_semantic_score": 17.166666666666668,
+      "avg_convention_score": 19.083333333333332,
+      "avg_completeness_score": 17.666666666666668,
+      "cache_read_tokens": 408320,
+      "cache_creation_tokens": 0,
+      "reviewer_cost": 0.19623174999999998,
+      "compose_elapsed_seconds": 154.97,
+      "review_elapsed_seconds": 62.81,
+      "docs_quality_scores": [
+        {
+          "name": "electron_temperature",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "description_quality_score": 18,
+          "documentation_quality_score": 19,
+          "completeness_score": 19,
+          "physics_accuracy_score": 20,
+          "reasoning": "Description quality (18/20): The single-line definition 'Mean kinetic energy per electron degree of freedom for the electron population, expressed as a thermodynamic temperature' is precise and unambiguous, correctly framing Te as a thermodynamic temperature rather than an energy. It is slightly more abstract than the DD's 'thermal energy of the bulk electron population' but does not contradict it. No accepted siblings provided, so consistency is scored on physics alone. Documentation quality (19/20): Provides a correct kinetic defining equation (3/2)e\u00b7Te = <\u00bd m_e |v-u_e|\u00b2> with all variables defined and the e factor correctly accounting for the eV unit convention. The Maxwellian pressure relation p_e = n_e e T_e is correct and dimensionally consistent in eV-based units. Cross-references to electron_pressure, ion_temperature, and electron_density are well integrated. Completeness (19/20): Covers definition, equation, diagnostic methods (Thomson scattering, ECE, Langmuir probes, line-ratio), typical value ranges (0.5-20 keV core, 10-200 eV edge), and cross-references. No IDS/DD path leakage in prose. Physics accuracy (20/20): All definitional claims verify against textbook plasma physics and the DD ground truth \u2014 the random kinetic energy after subtracting mean flow, control of collisional rates/resistivity/radiation, diagnostic methods, and value ranges are all correct. Equation balances dimensionally. No contradictions or unverifiable confident claims."
+        },
+        {
+          "name": "ion_temperature",
+          "quality_tier": "outstanding",
+          "score": 0.925,
+          "description_quality_score": 18,
+          "documentation_quality_score": 19,
+          "completeness_score": 18,
+          "physics_accuracy_score": 19,
+          "reasoning": "description_quality (18/20): The one-line definition is physically precise and unambiguous \u2014 it correctly frames ion temperature as kinetic energy per degree of freedom / effective thermodynamic temperature, consistent with the DD ground truth describing it as 'thermal energy of the ion population'. Minor deduction because the DD specifically frames this as a charge-state-averaged species quantity, which the candidate's description does not signal. documentation_quality (19/20): The defining equation T_i = (m_i/3e)<|v-u_i|^2>_i is the correct second central moment for an isotropic distribution, all variables are defined with units implied, and it correctly handles the subtraction of mean flow velocity. No sign convention is needed for a positive-definite scalar. LaTeX is clean. completeness (18/20): Covers definition, governing equation, diagnostic context, typical magnitudes, and cross-references to ion_density, ion_pressure, and electron_temperature. Slight deduction for not mentioning the charge-state averaging when multiple charge states are present, which is the DD's defining emphasis. No implementation leakage. physics_accuracy (19/20): Every definitional claim is verified against the DD and standard plasma physics \u2014 the moment definition, the flow-velocity subtraction, the units (eV), the multi-species effective-temperature caveat, and the representative value ranges are all correct. No contradictions or unverifiable confident claims."
+        },
+        {
+          "name": "upper_triangularity_of_flux_surface",
+          "quality_tier": "outstanding",
+          "score": 0.9,
+          "description_quality_score": 18,
+          "documentation_quality_score": 18,
+          "completeness_score": 18,
+          "physics_accuracy_score": 18,
+          "reasoning": "Description (18/20): Concise, single-line, dimensionless, correctly identifies upper-half D-shaping set by inward radial shift of the highest point relative to the surface midplane center \u2014 physically precise; no siblings to compare against. Documentation (18/20): Provides a correct defining equation \u03b4_u=(R_c-R_Zmax)/a with all variables defined, proper LaTeX, uses the (R,\u03c6,Z) right-handed system, and cross-references related shape parameters. Sign behavior (negative for inverse triangularity) is stated in prose without COCOS citation. No implementation/IDS leakage. Completeness (18/20): Covers definition, equation, reconstruction/measurement context (magnetic probes, flux loops, MSE), typical value ranges, negative case, and cross-references. Physics accuracy (18/20): Equation balances dimensionally (length/length = dimensionless), agrees with DD ground truth that \u03b4_upper measures upper boundary shape asymmetry; typical ranges and inverse-triangularity behavior are correct textbook plasma physics. Minor note: DD describes triangularity w.r.t. magnetic axis while the candidate uses midplane geometric center R_c \u2014 both are standard equilibrium conventions and the discrepancy is conventional rather than erroneous."
+        },
+        {
+          "name": "ion_pressure",
+          "quality_tier": "good",
+          "score": 0.7125,
+          "description_quality_score": 15,
+          "documentation_quality_score": 17,
+          "completeness_score": 14,
+          "physics_accuracy_score": 11,
+          "reasoning": "Description (15): clear and grammatical but defines the quantity via the isotropic kinetic-tensor framing, not via the DD's authoritative 'total = thermal + fast, summed over charge states' definition. A domain expert reading this would not realize the quantity includes fast-particle pressure. Documentation (17): the LaTeX is correct, variables are defined with units, the Maxwellian reduction p=n k_B T (or n e T in eV) is accurate, and cross-references to ion_density, ion_temperature, electron_pressure, and plasma_pressure are present. Sign convention is not needed for a positive scalar pressure. However the fast/non-thermal and charge-state-summation aspects are absent. Completeness (14): good measurement context and typical value ranges (1-200 kPa core, 0.01-10 kPa edge are reasonable), but omits the key thermal+fast decomposition and per-state/summation structure, and lacks cross-refs to the thermal/fast component siblings the DD calls out. Physics accuracy (11): no unit or equation errors and the elementary plasma physics is correct, but the candidate's central definitional claim that this is the Maxwellian/thermal isotropic pressure conflicts with the DD ground truth, which defines it as the TOTAL ion pressure including non-thermal fast contributions summed over charge states. This is a definitional divergence from the ground truth, so accuracy is docked substantially though not to the contradiction floor since the kinetic definition itself is sound."
+        },
+        {
+          "name": "poloidal_beta",
+          "quality_tier": "good",
+          "score": 0.7375,
+          "description_quality_score": 17,
+          "documentation_quality_score": 13,
+          "completeness_score": 17,
+          "physics_accuracy_score": 12,
+          "reasoning": "Description (17): The short description correctly captures \u03b2p as a dimensionless pressure-to-poloidal-magnetic-pressure ratio, aligning with the DD. Slight vagueness on the reference field. Documentation (13): The prose is fluent and physically motivated (Shafranov shift, current-profile coupling), but the single defining equation presented does not match the authoritative DD form \u03b2p = 4\u222bp dV/(R0 \u03bc0 Ip\u00b2). Instead it uses an approximate B_p,ref\u00b2 form with an under-specified denominator, which is a real divergence from ground truth and the most useful equation to anchor the name. No sign convention is needed for a positive-definite dimensionless scalar, which is appropriate. Completeness (17): Cross-references and typical value ranges are present and helpful; the Ip-based canonical form is the main gap. Physics accuracy (12): The qualitative physics is sound (\u03b2p larger than toroidal beta, ties to confinement and MHD), but the equation contradicts the DD's exact definition by omitting the Ip/R0 normalization and substituting an ambiguous reference poloidal field \u2014 a definitional divergence that must be docked. No siblings available for terminology comparison."
+        },
+        {
+          "name": "magnetic_shear",
+          "quality_tier": "outstanding",
+          "score": 0.9,
+          "description_quality_score": 18,
+          "documentation_quality_score": 18,
+          "completeness_score": 18,
+          "physics_accuracy_score": 18,
+          "reasoning": "description_quality (18/20): Single-line, precise physical definition ('Radial variation of field-line helicity on nested magnetic flux surfaces, measuring how rapidly neighboring field lines change pitch') that captures the essence of magnetic shear without copying the DD prose. No siblings provided, so judged on physics and style alone; very strong. documentation_quality (18/20): Provides the defining equation s_hat = (rho/q)(dq/drho) = dln|q|/dln(rho), which exactly matches the DD ground truth ((rho_tor/q)(dq/drho_tor)). All variables defined, dimensionless unit consistent with unit=1, sign convention stated in prose without COCOS references, and the alternative flux-label forms are correctly noted as requiring consistent transformation. Minor deduction for a slightly trivial sign-convention statement. completeness (18/20): Covers physical definition, defining equation, MHD-stability and transport-barrier context, inference methods (equilibrium reconstruction, polarimetry, MSE), typical value ranges in core/edge/reversed-shear regions, and cross-references to safety_factor, poloidal_magnetic_flux, and toroidal_magnetic_flux. No IDS/DD path leakage. physics_accuracy (18/20): The defining equation agrees exactly with the DD ground truth. The logarithmic-derivative identity s = dln|q|/dln(rho) is correct elementary textbook plasma physics. Stability context (ITBs at low/reversed shear, ballooning/peeling at high edge shear) is accurate. Typical values quoted (0-1 core, 1-5 edge, -2-0 reversed) are reasonable for tokamaks. No contradictions or unverifiable confident claims. Total 72/80 -> outstanding tier, accept."
+        },
+        {
+          "name": "safety_factor",
+          "quality_tier": "outstanding",
+          "score": 0.95,
+          "description_quality_score": 19,
+          "documentation_quality_score": 19,
+          "completeness_score": 18,
+          "physics_accuracy_score": 20,
+          "reasoning": "description_quality (19/20): The single-line definition 'Number of toroidal transits a magnetic field line makes for one poloidal circuit on a magnetic flux surface' is precise, self-describing, and matches the DD ground-truth notion of toroidal-to-poloidal winding ratio. No siblings available for cross-comparison; phrasing is crisp with no DD/IDS leakage. documentation_quality (19/20): The defining equation q(\u03c8)=d\u03a6_tor/d\u03a6_pol is correct and in proper LaTeX, variables defined, cross-references to toroidal/poloidal magnetic flux and magnetic_shear are well integrated. The dimensionless nature (unit=1) means no sign-convention statement is strictly required, though a brief note that q is conventionally taken as positive could be added; small deduction. completeness (18/20): Covers definition, equation, reconstruction/measurement context (MSE, polarimetry, kinetic constraints), typical values (q0\u22480.8-1.5, q95\u22483-5), reversed-shear scenarios, and cross-references. Minor: could explicitly tie rational-q surfaces to tearing/kink resonance as the DD ground truth emphasizes, though the resonance idea is mentioned. physics_accuracy (20/20): All claims verified against DD ground truth \u2014 q as ratio of toroidal to poloidal field-line turns per flux surface, q(\u03c8)=d\u03a6_tor/d\u03a6_pol, rational surfaces resonating with MHD modes, and representative q0/q95 values are all standard textbook tokamak physics and consistent with the DD description. No false equivalences, no implementation leakage."
+        },
+        {
+          "name": "electron_density",
+          "quality_tier": "outstanding",
+          "score": 0.9625,
+          "description_quality_score": 19,
+          "documentation_quality_score": 19,
+          "completeness_score": 19,
+          "physics_accuracy_score": 20,
+          "reasoning": "description_quality: The description 'Number of free electrons per unit volume in the plasma, including all electron populations that contribute to quasineutrality' is a precise, single-line physical definition. It correctly captures the DD ground truth that the quantity includes both thermal and fast (non-thermal) contributions via the 'all electron populations' phrasing. No siblings provided, so scored on correctness and clarity, which is excellent. documentation_quality: The defining equation n_e = \u222b f_e d^3v as the zeroth velocity moment of the distribution function is correct and properly typeset; all variables (x, v, f_e) are defined with the correct interpretation. The quasineutrality relation n_e \u2248 \u03a3 Z_i n_i is correct. No sign convention is required for a positive-definite density scalar. Cross-references to ion_density, electron_temperature, and electron_pressure are appropriate and physically motivated. completeness: Covers the definition, kinetic moment equation, quasineutrality constraint, diagnostic context (Thomson scattering, interferometry, polarimetry, reflectometry, spectroscopy), transport analysis usage, and typical value ranges with edge/SOL distinctions. Cross-references are present. No IDS names or DD paths leak into prose. physics_accuracy: Every definitional claim is verifiable textbook plasma physics: the zeroth-moment definition of density is standard, the quasineutrality relation n_e \u2248 \u03a3 Z_i n_i is exact, the diagnostic list is correct, and the typical values (10^19 to 2\u00d710^20 m^-3 core, 10^17-10^19 m^-3 SOL) are physically accurate for present tokamaks. The 'thermal + non-thermal' scope matches DD ground truth exactly. Units m^-3 agree with DD."
+        },
+        {
+          "name": "electron_pressure",
+          "quality_tier": "outstanding",
+          "score": 0.8625,
+          "description_quality_score": 17,
+          "documentation_quality_score": 18,
+          "completeness_score": 17,
+          "physics_accuracy_score": 17,
+          "reasoning": "Description quality (17): The single-line description is clean and precise about the isotropic kinetic-pressure nature, but it misses the defining feature in the DD ground truth \u2014 that this is the TOTAL electron pressure including the fast/non-thermal contribution. Documentation quality (18): The defining equation p_e = n_e k_B T_e is in correct LaTeX with all variables defined and units (Pa) consistent; the eV-form equivalent p_e = n_e e T_e is also correct and well explained. Cross-references to electron_density, electron_temperature, and electron_pressure_gradient are appropriate, and diagnostic context (Thomson, ECE, interferometry) is sound. No siblings were available for terminology comparison. Completeness (17): Covers definition, equation, diagnostic inference, typical magnitudes, and cross-references, but does not mention the fast-electron contribution that distinguishes 'total electron pressure' from purely thermal pressure \u2014 a gap relative to the DD scope. Physics accuracy (17): All stated equations balance dimensionally and the typical value ranges (10\u201310^5 Pa) are physically reasonable for tokamak edge to core. The only divergence is the implicit framing of p_e as a Maxwellian/thermal quantity, whereas the DD defines it as total pressure combining thermal and non-thermal electrons; this is an understatement of scope rather than a contradiction. No implementation leakage. Total 69/80, accept."
+        },
+        {
+          "name": "toroidal_magnetic_field_at_magnetic_axis",
+          "quality_tier": "outstanding",
+          "score": 0.9125,
+          "description_quality_score": 18,
+          "documentation_quality_score": 19,
+          "completeness_score": 18,
+          "physics_accuracy_score": 18,
+          "reasoning": "description_quality (18): Concise, physically precise single-line definition identifying the toroidal projection of the equilibrium field at the magnetic axis with relevant physical role. Minor deduction because the DD emphasizes this is the TOTAL field combining all source contributions, a nuance not surfaced in the description. documentation_quality (19): Defining equation in correct LaTeX, all variables defined with units, gyrofrequency relation correct, sign convention stated in prose (positive when field points toward increasing phi) without citing COCOS numbers \u2014 fully compliant. Cross-references to related names use the name: link style consistently. completeness (18): Covers definition, equation, inference/measurement context (equilibrium reconstruction, MSE, polarimetry, TF coil currents), typical magnitudes across device classes, sign convention, and cross-references to magnetic axis position, magnetic field magnitude, and toroidal magnetic field distribution. No implementation leakage. Slight deduction for not emphasizing the total/all-source nature highlighted in the DD. physics_accuracy (18): All definitional claims verified \u2014 the projection definition, gyrofrequency formula (dimensionally balanced), inference methods, and typical value ranges all agree with standard tokamak physics and the DD ground truth. No contradictions or unverifiable confident claims."
+        },
+        {
+          "name": "ion_density",
+          "quality_tier": "outstanding",
+          "score": 0.8625,
+          "description_quality_score": 17,
+          "documentation_quality_score": 18,
+          "completeness_score": 18,
+          "physics_accuracy_score": 16,
+          "reasoning": "description_quality (17): Accurately states number of ions per unit volume summed over populations/charge states, matching the DD ground truth ('thermal and fast contributions, summed over charge states'). Minor awkwardness in the qualifier phrasing. documentation_quality (18): Defining equation n_i = sum_s n_s is correct and properly dimensioned; the quasineutrality contrast with electron_density is physically correct (n_e \u2248 sum Z_s n_s vs unweighted ion sum). The pressure relation p_i = n_i k_B T_i is correct. Minor deduction because Z_s is defined but never used in the displayed equation, leaving a dangling symbol. completeness (18): Covers definition, equation, diagnostic inference (interferometry, Thomson, CXRS), typical core (0.3-1.5e20) and edge/SOL (1e17-1e19) values, and non-negativity. Cross-references to electron_density, ion_pressure, ion_temperature are appropriate. No DD/IDS leakage. physics_accuracy (16): All definitional claims verified against DD ground truth \u2014 total ion density including thermal and fast contributions, summed over charge states. The thermal+non-thermal scope is correctly captured by 'all ion charge states and populations.' Quasineutrality weighting, pressure relation, and typical values are all standard textbook plasma physics and correct. Minor deduction for the Z_s symbol that is introduced without role in the equation, creating slight confusion. No verdict-breaking issues; total 69/80, outstanding/good boundary."
+        },
+        {
+          "name": "elongation_of_flux_surface",
+          "quality_tier": "outstanding",
+          "score": 0.9125,
+          "description_quality_score": 18,
+          "documentation_quality_score": 18,
+          "completeness_score": 18,
+          "physics_accuracy_score": 19,
+          "reasoning": "Description quality (18): The description gives a precise, self-describing geometric definition \u2014 vertical-to-radial extent ratio in the (R,phi,Z) frame \u2014 matching the DD's 'vertical-to-horizontal half-axis ratio.' Slightly verbose but unambiguous. Documentation quality (18): The defining equation is correct LaTeX with all variables defined; for a closed contour the extrema-difference ratio is the standard kappa definition. No sign convention is needed (dimensionless positive shaping parameter), so its absence is appropriate. Completeness (18): Includes the equation, cross-references to related shaping parameters (triangularity, squareness) and poloidal_magnetic_flux, measurement/reconstruction context, and representative values. The DD emphasises it is a radial profile as a function of poloidal flux coordinate; the candidate frames it per-flux-surface (correct as a standard name) and mentions equilibrium reconstruction, so this is adequately covered. Physics accuracy (19): All claims verified \u2014 kappa=1 for circular, 1.5-2.0 elongated, up to ~2.5 strongly shaped, confinement/stability benefits with increased vertical-control demands are all standard textbook tokamak physics. The equation is dimensionless and correct. No implementation leakage; no DD paths cited. Total 73/80 \u2192 outstanding, accept."
+        }
+      ],
+      "docs_quality_distribution": {
+        "outstanding": 10,
+        "good": 2
+      },
+      "avg_docs_quality_score": 0.8822916666666667,
+      "avg_description_quality_score": 17.666666666666668,
+      "avg_documentation_quality_score": 17.916666666666668,
+      "avg_docs_completeness_score": 0.0,
+      "avg_physics_accuracy_score": 17.333333333333332,
+      "docs_compose_cost": 0.8432249999999999,
+      "docs_compose_elapsed_seconds": 471.85,
+      "docs_review_elapsed_seconds": 212.58,
+      "docs_reviewer_cost": 0.8730185000000001,
+      "physics_verdicts": [],
+      "physics_faithful_count": 0,
+      "physics_total": 0,
+      "physics_rate": 0.0,
+      "physics_hardcase_faithful": 0,
+      "physics_hardcase_total": 0,
+      "physics_hardcase_rate": 0.0
+    }
+  ],
+  "reference_names": [
+    "equilibrium/time_slice/profiles_1d/q",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor",
+    "equilibrium/time_slice/profiles_1d/elongation",
+    "equilibrium/time_slice/profiles_1d/triangularity_upper",
+    "equilibrium/time_slice/profiles_1d/magnetic_shear",
+    "equilibrium/time_slice/global_quantities/beta_pol",
+    "core_profiles/profiles_1d/electrons/temperature",
+    "core_profiles/profiles_1d/ion/temperature",
+    "core_profiles/profiles_1d/electrons/density",
+    "core_profiles/profiles_1d/ion/density",
+    "core_profiles/profiles_1d/electrons/pressure",
+    "core_profiles/profiles_1d/ion/pressure",
+    "equilibrium/time_slice/profiles_1d/j_tor",
+    "equilibrium/time_slice/profiles_1d/j_parallel",
+    "magnetics/b_field_pol_probe/field/data",
+    "magnetics/b_field_tor_probe/field/data",
+    "magnetics/flux_loop/flux/data",
+    "magnetics/rogowski_coil/current/data",
+    "magnetics/ip/data",
+    "magnetics/diamagnetic_flux/data",
+    "core_profiles/profiles_1d/rotation_frequency_tor_sonic",
+    "core_profiles/profiles_1d/e_field/parallel",
+    "core_profiles/profiles_1d/j_bootstrap",
+    "core_profiles/profiles_1d/j_ohmic",
+    "core_profiles/profiles_1d/ion/velocity/toroidal",
+    "core_profiles/profiles_1d/electrons/temperature_fit/boundary_condition/value",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+    "equilibrium/time_slice/profiles_1d/psi",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/z",
+    "equilibrium/time_slice/global_quantities/ip",
+    "equilibrium/time_slice/global_quantities/psi_axis",
+    "equilibrium/time_slice/global_quantities/psi_boundary",
+    "equilibrium/time_slice/global_quantities/energy_mhd",
+    "summary/global_quantities/v_loop/value",
+    "summary/global_quantities/li/value",
+    "summary/global_quantities/beta_tor/value",
+    "summary/global_quantities/tau_energy/value",
+    "equilibrium/time_slice/global_quantities/resistivity",
+    "equilibrium/time_slice/global_quantities/magnetic_axis/b_tor",
+    "equilibrium/time_slice/global_quantities/minor_radius",
+    "equilibrium/time_slice/global_quantities/major_radius",
+    "equilibrium/time_slice/global_quantities/aspect_ratio",
+    "core_transport/model/profiles_1d/electrons/energy/flux",
+    "core_transport/model/profiles_1d/electrons/particles/flux",
+    "core_transport/model/profiles_1d/ion/energy/flux",
+    "core_transport/model/profiles_1d/ion/particles/flux",
+    "mhd_linear/time_slice/toroidal_mode/growthrate",
+    "mhd_linear/time_slice/toroidal_mode/frequency",
+    "nbi/unit/power_launched/data",
+    "nbi/unit/energy/data",
+    "edge_profiles/profiles_1d/electrons/temperature",
+    "edge_profiles/profiles_1d/electrons/density"
+  ],
+  "extraction_count": 12,
+  "extraction_source_ids": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  "dataset_hash": "636159b35205da41",
+  "timestamp": "2026-06-16T18:54:01.673202+00:00",
+  "provenance": {
+    "codex_version": "5.3.0rc5.dev1070+gdf3df208a.d20260616",
+    "codex_commit": "510c4b7c",
+    "isn_version": "0.8.0rc40",
+    "dd_version": "4.1.0"
+  }
+}
