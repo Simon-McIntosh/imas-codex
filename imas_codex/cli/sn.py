@@ -1875,6 +1875,15 @@ def sn_run(
     help="Judge model (default: the calibrated sn-benchmark reviewer model, opus-4.8).",
 )
 @click.option(
+    "--reasoning-effort",
+    "reasoning_effort",
+    type=click.Choice(["low", "medium", "high", "max", "none"]),
+    default=None,
+    help="Override the compose reasoning effort (default: [sn-compose] config). "
+    "Use to scan the effort axis with a fixed model: vary this and compare "
+    "accuracy vs speed vs cost across runs.",
+)
+@click.option(
     "--rescore",
     type=click.Path(exists=True, dir_okay=False),
     default=None,
@@ -1896,6 +1905,7 @@ def sn_bench(
     physics: bool,
     gold_set: str | None,
     physics_judge_model: str | None,
+    reasoning_effort: str | None,
     rescore: str | None,
 ) -> None:
     """Benchmark LLM models on standard name generation.
@@ -2015,6 +2025,9 @@ def sn_bench(
     else:
         out_path = Path(output)
 
+    # "none" → explicit no-reasoning-budget; map to None-effort sentinel handled
+    # downstream (config.reasoning_effort stays the literal string the override
+    # passes through to acall_llm_structured).
     config = BenchmarkConfig(
         models=model_list,
         max_candidates=effective_max,
@@ -2027,6 +2040,7 @@ def sn_bench(
         physics_judge=physics,
         gold_set_path=gold_set,
         physics_judge_model=physics_judge_model,
+        reasoning_effort=reasoning_effort,
     )
 
     mode_str = "names + docs" if include_docs else "names-only"

@@ -45,6 +45,12 @@ class BenchmarkConfig:
     reviewer_models: list[str] = field(default_factory=list)
     names_only: bool = True
     output_path: str | None = None
+    # Reasoning-effort overrides for the effort-axis scan. When set, the
+    # benchmark composes / reviews at this effort instead of the production
+    # [sn-compose] / [sn-review] config — so a scan can fix the model(s) and
+    # vary effort to measure accuracy vs speed vs cost. None = production config.
+    reasoning_effort: str | None = None
+    review_reasoning_effort: str | None = None
     # Physics-correctness judging
     physics_judge: bool = False
     physics_judge_model: str | None = None
@@ -1560,16 +1566,22 @@ async def _run_model(
 
             try:
                 # Mirror production: compose runs at the [sn-compose] reasoning
-                # effort so bench name quality reflects campaign settings.
+                # effort so bench name quality reflects campaign settings —
+                # unless the run overrides it for an effort-axis scan.
                 from imas_codex.settings import get_reasoning_effort
 
+                compose_effort = config.reasoning_effort or get_reasoning_effort(
+                    "sn-compose"
+                )
+                if compose_effort == "none":  # explicit no-reasoning-budget
+                    compose_effort = None
                 llm_response = await acall_llm_structured(
                     model=model,
                     messages=messages,
                     response_model=StandardNameComposeBatch,
                     temperature=temp,
                     service="standard-names",
-                    reasoning_effort=get_reasoning_effort("sn-compose"),
+                    reasoning_effort=compose_effort,
                 )
                 llm_result, cost, tokens = llm_response
                 result.total_cost += cost
