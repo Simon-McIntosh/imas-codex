@@ -80,12 +80,15 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
 
 #### P7. Spectral / Fourier decomposition
 
-- ✅ `fourier_coefficient_of_plasma_boundary_radius` (with
+- ✅ `major_radius_of_plasma_boundary_fourier_coefficient` (with
   `description` starting "Fourier cosine coefficient of ...")
-- ✅ `mode_amplitude_of_magnetic_perturbation`
-  - *Why good:* when the quantity *is* a spectral coefficient, the name
-    must carry `fourier_coefficient_*`, `mode_amplitude_*`, or an explicit
-    `harmonic_*` marker. Name and description must agree.
+- ✅ `perturbed_magnetic_field_amplitude`
+  - *Why good:* a spectral coefficient is a POSTFIX operator on the base —
+    `<base>_fourier_coefficient` (indexed by m/n) or `<base>_amplitude` — not a
+    leading `fourier_coefficient_of_*` / `mode_amplitude_of_*` prefix (those do
+    not round-trip). For a per-mode quantity prepend the registered mode
+    operator (`per_toroidal_mode_<base>_amplitude`). Name and description must
+    agree.
 
 #### P8. Poloidal-plane coordinates
 

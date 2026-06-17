@@ -236,7 +236,7 @@ Skip and record as `vocab_gap`/`skipped` rather than composing when a DD path wo
 - bare `vertical_coordinate` / bare `outline_point` (always need `_of_<entity>`)
 - `nuclear_charge_number` (→ `atomic_number`)
 - `azimuth_angle` (→ `toroidal_angle`)
-- `distance_between_*_and_*` (combinatorial pattern → corpus bloat; skip)
+- `distance_between_A_and_B` / `distance_from_A_to_B_along_C` — a VALID geometric quantity (the `distance` base and the named loci are registered), but the multi-locus span is not yet representable in the single-locus grammar. Emit `vocab_gap` (NOT a forbidden skip) pending the distance-span grammar extension; never fabricate a single-locus distance that silently drops an endpoint.
 
 (These are the audit's hard-reject names; the broader forbidden-prefix/structural-leakage lists are in the no-provenance section above.)
 
@@ -251,7 +251,7 @@ Curated from the polarimetry pilot and the spectrometer/gyrokinetics/wall-geomet
 - ❌ `initial_ellipticity_of_polarimeter_channel_beam` (0.3625) → ✅ emit `vocab_gap` (`ellipticity` is not a registered `physical_base`); drop `initial_`, simplify locus to `_of_polarimeter_beam`.
 
 **Instrument prefix carry-over (physics-quantity case).** When the DD path lives under an instrument subtree (spectrometer, camera, magnet, coil, probe, detector, sensor) but the leaf is a generic physical observable (photon energy, count rate, brightness), the instrument tokens are DD-tree leakage — drop them.
-- ❌ `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` → ✅ `photon_energy_lower_bound`.
+- ❌ `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` → ✅ `lower_bound_photon_energy`.
 - *Hardware-property exception applies* (see Hardware section): ✓ `area_of_rogowski_coil`.
 
 **Suffix-form for component instead of canonical prefix.** Component (`parallel`, `perpendicular`, `poloidal`, `toroidal`, `radial`, `vertical`) and transformation (`derivative_of`, `imaginary_part_of`) tokens go BEFORE the base, never trailed as suffixes (suffixes collapse them into `physical_base` and break the parser). Cross-check NC-20 (real_part/imaginary_part/amplitude/phase are the only sanctioned SUFFIX modifiers).

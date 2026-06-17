@@ -33,7 +33,7 @@ ANTI_BAD_EXAMPLES = (
     "z_coordinate_of_sensor_direction_unit_vector",
 )
 ANTI_GOOD_EXAMPLES = (
-    "photon_energy_lower_bound",
+    "lower_bound_photon_energy",
     "parallel_halo_energy",
     "z_direction_unit_vector",
 )

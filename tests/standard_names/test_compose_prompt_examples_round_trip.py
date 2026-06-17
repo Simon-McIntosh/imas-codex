@@ -69,17 +69,14 @@ _VOCAB_GAP_ALLOWLIST: dict[str, str] = {
     "distance_from_magnetic_axis_to_separatrix_along_midplane": (
         "distance_from / along_midplane unregistered base+locus tokens"
     ),
-    "fourier_coefficient_of_plasma_boundary_radius": (
-        "plasma_boundary_radius unregistered; fourier_coefficient is postfix"
+    "distance_between_strike_points_along_divertor_target": (
+        "needs the distance-span grammar (between A and B along C): the distance "
+        "base + strike_point/divertor_target loci all exist, but a multi-locus "
+        "span is not representable in the single locus slot"
     ),
-    "mode_amplitude_of_magnetic_perturbation": (
-        "mode_amplitude / magnetic_perturbation unregistered bases"
-    ),
-    "photon_energy_lower_bound": (
-        "photon_energy / lower_bound unregistered base+bound tokens"
-    ),
-    "vacuum_wavelength_of_polarimeter_beam": (
-        "vacuum_wavelength / polarimeter_beam unregistered base+object tokens"
+    "distance_from_magnetic_axis_to_separatrix_along_midplane": (
+        "needs the distance-span grammar (from A to B along C): three loci, not "
+        "representable in the single locus slot"
     ),
 }
 
