@@ -3,7 +3,7 @@
     "name": "current_of_rogowski_coil",
     "path": "magnetics/rogowski_coil/current",
     "unit": "A",
-    "documentation": "Net current enclosed within the Rogowski coil contour, obtained by integrating the magnetic field along the coil path (Ampere's law). Positive when the current flows along the coil guiding-centre normal.",
+    "documentation": "Net current (I) enclosed within the Rogowski coil contour, measured as the integrated magnetic field along the coil path. Positive when current flows in the direction defined by the coil guiding-centre normal vector.",
     "faithful": false,
     "hard_case": true,
     "rationale": "Measurement-principle error: a Rogowski coil measures the current ENCLOSED by its contour via the induced voltage; it carries no measured conduction current of its own. 'current_of_rogowski_coil' reads as the coil's own current and misrepresents the physical observable (the enclosed/plasma current)."
@@ -12,7 +12,7 @@
     "name": "toroidal_plasma_current",
     "path": "magnetics/ip",
     "unit": "A",
-    "documentation": "Plasma current Ip inferred from magnetic diagnostics. Sign convention: positive when anti-clockwise viewed from above.",
+    "documentation": "Plasma current (Ip) measured by the magnetics diagnostic, supporting multiple calculation methods. Positive Ip indicates anti-clockwise current when viewed from above the device.",
     "faithful": false,
     "hard_case": true,
     "rationale": "Over-qualification: the plasma current is inherently the toroidal current of the plasma; prefixing 'toroidal' adds a component qualifier the canonical quantity already implies. The faithful name is plasma_current."
@@ -21,7 +21,7 @@
     "name": "inlet_pressure",
     "path": "breeding_blanket/module/cooling/time_slice/pressure_inlet",
     "unit": "Pa",
-    "documentation": "Coolant pressure at the inlet of the breeding-blanket module cooling circuit, as a function of time.",
+    "documentation": "Inlet coolant pressure at the breeding blanket module cooling circuit inlet as a function of time. Tracks the hydraulic pressure of the coolant fluid entering the module, complementing the inlet and outlet temperature measurements.",
     "faithful": false,
     "hard_case": true,
     "rationale": "Dropped essential medium qualifier: the source measures the COOLANT inlet pressure. Omitting 'coolant' makes the name ambiguous (any inlet pressure) and loses the medium the quantity is defined over."
@@ -30,7 +30,7 @@
     "name": "maximum_wall_flux",
     "path": "breeding_blanket/module/time_slice/wall_flux_max",
     "unit": "W.m^-2",
-    "documentation": "Maximum neutron flux at the first wall of a breeding-blanket module (drives radiation-damage and tritium-production limits).",
+    "documentation": "Maximum neutron flux at the first wall of a breeding blanket module at a given time slice. Used to assess radiation damage, material activation, and tritium production limits in blanket design and neutronics calculations.",
     "faithful": false,
     "hard_case": true,
     "rationale": "Dropped essential species qualifier: this is the maximum NEUTRON wall flux. Omitting 'neutron' conflates it with heat/radiated wall flux and loses the species that defines the quantity."
@@ -39,7 +39,7 @@
     "name": "major_radius_of_x_point",
     "path": "summary/boundary/x_point_main/r",
     "unit": "m",
-    "documentation": "Major radius R of the main X-point of the plasma boundary (summary IDS).",
+    "documentation": "Major radius (R) coordinate of x point main.",
     "faithful": false,
     "hard_case": true,
     "rationale": "Dropped specificity qualifier: the source identifies the MAIN X-point. A configuration can have several X-points, so omitting 'main' loses which one is meant; the faithful name is major_radius_of_main_x_point."
@@ -48,7 +48,7 @@
     "name": "electron_density",
     "path": "core_profiles/profiles_1d/electrons/density",
     "unit": "m^-3",
-    "documentation": "Total electron density (thermal + non-thermal) as a radial profile.",
+    "documentation": "Total electron density (ne) radial profile including both thermal and fast (non-thermal) electron contributions. A fundamental plasma parameter used in transport, confinement, and integrated modelling analyses.",
     "faithful": true,
     "hard_case": false,
     "rationale": "Correct base quantity and species; faithful and canonical."
@@ -57,7 +57,7 @@
     "name": "plasma_current",
     "path": "magnetics/ip",
     "unit": "A",
-    "documentation": "Plasma current Ip inferred from magnetic diagnostics. Sign convention: positive when anti-clockwise viewed from above.",
+    "documentation": "Plasma current (Ip) measured by the magnetics diagnostic, supporting multiple calculation methods. Positive Ip indicates anti-clockwise current when viewed from above the device.",
     "faithful": true,
     "hard_case": false,
     "rationale": "Correct, unqualified plasma current; faithful to the diagnostic Ip and free of redundant component qualifiers (contrast with toroidal_plasma_current)."
@@ -66,7 +66,7 @@
     "name": "toroidal_electric_field",
     "path": "core_profiles/profiles_1d/e_field/toroidal",
     "unit": "V.m^-1",
-    "documentation": "Toroidal component of the electric field radial profile.",
+    "documentation": "Toroidal component of e field.",
     "faithful": true,
     "hard_case": false,
     "rationale": "Correct base + component; here 'toroidal' is a genuine component of a vector field (not over-qualification)."
@@ -75,7 +75,7 @@
     "name": "major_radius_of_magnetic_axis",
     "path": "equilibrium/time_slice/global_quantities/magnetic_axis/r",
     "unit": "m",
-    "documentation": "Major radius R of the magnetic axis.",
+    "documentation": "Major radius (R) coordinate of magnetic axis.",
     "faithful": true,
     "hard_case": false,
     "rationale": "Correct base (major_radius) with the magnetic-axis locus preserved; faithful and canonical."
@@ -84,7 +84,7 @@
     "name": "major_radius_of_separatrix_x_point",
     "path": "equilibrium/time_slice/boundary_separatrix/x_point/r",
     "unit": "m",
-    "documentation": "Major radius R of the separatrix X-point.",
+    "documentation": "Major radius (R) coordinate of x point.",
     "faithful": true,
     "hard_case": false,
     "rationale": "Faithful: preserves the separatrix locus and the X-point; correct major radius of the separatrix X-point (positive control showing a properly-specific name passes)."
