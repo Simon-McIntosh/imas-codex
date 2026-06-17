@@ -848,6 +848,24 @@ MATCH (d:IMASNode {id: $path})-[:HAS_ERROR]->(e:IMASNode)
 RETURN e.id AS error_path
 """
 
+# Per-member DD documentation grounding: a compose candidate's name can span
+# N sibling leaves (family_siblings, cross-IDS equivalents). Fetch the terse
+# DD-XML documentation for those member paths so the name is grounded on every
+# leaf it covers, not just the primary. Terse doc only — DISTINCT from the rich
+# enriched description the primary already renders.
+_MEMBER_DOC_QUERY = """
+UNWIND $paths AS p
+MATCH (n:IMASNode {id: p})
+RETURN n.id AS path, n.documentation AS documentation
+"""
+
+# Bound the per-item member-doc map so a large family/cluster cannot bloat the
+# compose prompt; the primary path's full grounding is always rendered.
+_MAX_MEMBER_DOCS = 8
+
+# Truncate each terse member clause so the grounding stays compact.
+_MEMBER_DOC_MAX_CHARS = 240
+
 _IDS_CONTEXT_QUERY = """
 MATCH (ids:IDS {id: $ids_name})
 OPTIONAL MATCH (child:IMASNode)-[:IN_IDS]->(ids)
@@ -1442,6 +1460,42 @@ def _enrich_batch_items(items: list[dict]) -> None:
             for bi, hr in zip(batch_indices, hybrid_results, strict=True):
                 if hr:
                     items[bi]["hybrid_neighbours"] = hr
+
+        # ── Batch per-member DD documentation (grounding on covered leaves) ──
+        # The per-item loop above grounds only the primary ``path``. A name can
+        # span N sibling leaves (family_siblings, cross-IDS equivalents) that
+        # render today as bare path strings; without their DD clauses the name
+        # is grounded on one leaf. Collect every member path across the batch,
+        # fetch terse DD documentation in a SINGLE UNWIND, then attach the
+        # per-item subset as ``dd_paths_docs`` {path: terse_doc}. Terse and
+        # bounded — distinct from the rich primary description.
+        member_sets: list[set[str]] = []
+        all_members: set[str] = set()
+        for item in items:
+            primary = item.get("path")
+            members: set[str] = set()
+            for field in ("family_siblings", "cross_ids_paths"):
+                vals = item.get(field) or []
+                if isinstance(vals, list):
+                    members.update(v for v in vals if v and v != primary)
+            bounded = set(sorted(members)[:_MAX_MEMBER_DOCS])
+            member_sets.append(bounded)
+            all_members.update(bounded)
+
+        if all_members:
+            doc_rows = list(gc.query(_MEMBER_DOC_QUERY, paths=sorted(all_members)))
+            member_docs: dict[str, str] = {}
+            for r in doc_rows:
+                p = r.get("path")
+                doc = (r.get("documentation") or "").strip()
+                if p and doc:
+                    if len(doc) > _MEMBER_DOC_MAX_CHARS:
+                        doc = doc[:_MEMBER_DOC_MAX_CHARS].rstrip() + "…"
+                    member_docs[p] = doc
+            for item, members in zip(items, member_sets, strict=True):
+                docs = {p: member_docs[p] for p in members if p in member_docs}
+                if docs:
+                    item["dd_paths_docs"] = docs
 
 
 def _is_attachment_consistent(source_id: str, sn_name: str) -> tuple[bool, str]:

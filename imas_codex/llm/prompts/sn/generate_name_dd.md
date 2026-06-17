@@ -300,6 +300,10 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% for xp in item.cross_ids_paths %}  - `{{ xp }}`
 {% endfor %}  → Generate ONE name that covers all cross-IDS instances.
 {% endif %}
+{% if item.dd_paths_docs %}
+- **Member DD documentation** (the sibling leaves this name must cover — ground every qualifier so the name fits all of them, not just the primary path above):
+{% for mpath, mdoc in item.dd_paths_docs.items() %}  - `{{ mpath }}`: {{ mdoc }}
+{% endfor %}{% endif %}
 {% if item.hybrid_neighbours %}
 - **Hybrid-search neighbours** (physics-concept + structural cousins):
 {% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
