@@ -465,7 +465,15 @@ dedup-similarity-threshold = 0.85
 #
 # Review/refine pools hit OpenRouter, NOT the local GPU, so they are not
 # constrained by the GPU profile — left at the 4-GPU-era values.
-generate-name-replicas = 4
+#
+# MEDIUM-EFFORT RESIZE (2026-06-17): the knee=4 above was probed at MAX
+# reasoning-effort. Compose now runs at MEDIUM (reasoning-effort, ~6× fewer
+# tokens/request than max), so the 2×H200 aggregate tok/s ceiling needs more
+# concurrent requests to stay saturated — the knee moves up ~6× to ≈24. Set to
+# 24 (still 2 GPUs); to be validated against APITimeouts / vLLM deferred-queue
+# during the --focus rotations, then re-confirmed before the full build. Scale
+# further via IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS on a >2-GPU server.
+generate-name-replicas = 24
 review-name-replicas = 64
 refine-name-replicas = 32
 generate-docs-replicas = 32
