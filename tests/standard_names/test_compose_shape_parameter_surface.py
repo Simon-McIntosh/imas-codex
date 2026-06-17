@@ -17,6 +17,7 @@ from imas_codex.standard_names.models import GrammarSegments, StandardNameCandid
 from imas_codex.standard_names.workers import (
     _SHAPE_PARAMETER_BASES,
     _inject_shape_parameter_surface,
+    _is_attachment_consistent,
     _shape_parameter_surface,
     normalize_spelling,
 )
@@ -161,6 +162,61 @@ def test_end_to_end_composed_name(base, qualifiers, path, expected_name):
     c = _candidate(base, qualifiers=qualifiers)
     _inject_shape_parameter_surface(c, path)
     assert normalize_spelling(c.compose_name()) == expected_name
+
+
+# ---------------------------------------------------------------------------
+# Attachment surface-consistency guard — the de-conflation must survive the
+# attachment step (a flux-surface source must not attach to a boundary name)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name,ok",
+    [
+        # flux-surface source must NOT attach to a boundary name (the bug)
+        (
+            "equilibrium/time_slice/profiles_1d/squareness_lower_inner",
+            "lower_inner_squareness_of_plasma_boundary",
+            False,
+        ),
+        # boundary source -> boundary name: consistent
+        (
+            "equilibrium/time_slice/boundary/squareness_lower_inner",
+            "lower_inner_squareness_of_plasma_boundary",
+            True,
+        ),
+        # separatrix IS the boundary -> consistent with a boundary name
+        (
+            "equilibrium/time_slice/boundary_separatrix/squareness_upper_outer",
+            "upper_outer_squareness_of_plasma_boundary",
+            True,
+        ),
+        # profile source -> flux-surface name: consistent
+        (
+            "equilibrium/time_slice/profiles_1d/triangularity_upper",
+            "upper_triangularity_of_flux_surface",
+            True,
+        ),
+        # boundary source must NOT attach to a flux-surface name
+        (
+            "equilibrium/time_slice/boundary/triangularity_upper",
+            "upper_triangularity_of_flux_surface",
+            False,
+        ),
+    ],
+)
+def test_attachment_surface_consistency(source_id, sn_name, ok):
+    consistent, reason = _is_attachment_consistent(source_id, sn_name)
+    assert consistent is ok, reason
+
+
+def test_attachment_guard_ignores_non_shape_names():
+    # A non-shape name carries no surface constraint here.
+    consistent, _ = _is_attachment_consistent(
+        "core_profiles/profiles_1d/electrons/temperature",
+        "electron_temperature",
+    )
+    assert consistent is True
 
 
 def test_boundary_and_profile_siblings_deconflate():

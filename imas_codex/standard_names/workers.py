@@ -1610,6 +1610,28 @@ def _is_attachment_consistent(source_id: str, sn_name: str) -> tuple[bool, str]:
             f"state-resolution mismatch: SN '{sn_name}' is state-resolved "
             f"but path '{source_id}' is species-level"
         )
+
+    # Shape-parameter surface consistency: a shape descriptor
+    # (triangularity/elongation/squareness) is defined OF a surface, and the
+    # boundary scalar and the flux-surface profile are DISTINCT quantities.
+    # A profiles_1d (flux-surface) source must not attach to a
+    # ``…_of_plasma_boundary`` name (and vice versa) — that re-merges the
+    # de-conflated siblings the compose-time injection separated, and triggers
+    # a supersede/refine cascade. A boundary_separatrix source attaching to a
+    # ``…_of_plasma_boundary`` name is consistent (the separatrix IS the
+    # boundary), since both derive ``plasma_boundary``. Mirrors
+    # :func:`_shape_parameter_surface`.
+    if any(b in sn_name for b in _SHAPE_PARAMETER_BASES) and any(
+        f"_of_{s}" in sn_name for s in ("plasma_boundary", "flux_surface")
+    ):
+        expected_surface = _shape_parameter_surface(source_id)
+        if f"_of_{expected_surface}" not in sn_name:
+            return False, (
+                f"shape-parameter surface mismatch: path '{source_id}' is "
+                f"of_{expected_surface} but SN '{sn_name}' carries a "
+                f"different surface"
+            )
+
     return True, ""
 
 
