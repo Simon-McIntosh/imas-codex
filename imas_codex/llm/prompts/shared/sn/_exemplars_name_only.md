@@ -14,9 +14,11 @@ American spelling (NC-17).
     `_r_`, `_rad_`, or `_radial_magnetic_field` (the last is ambiguous
     between "radial component of B" and "B in the radial direction").
 - ✅ `poloidal_plasma_velocity`
-- ✅ `perpendicular_electron_pressure_gradient`
-  - *Why good:* perpendicular/parallel are first-class components; chain
-    them through gradients and fluxes naturally.
+- ✅ `gradient_of_perpendicular_electron_pressure`
+  - *Why good:* the `gradient` operator is a leading `_of_` prefix, never a
+    trailing `_gradient` suffix; the `perpendicular` component then projects
+    the gradient (∇⊥p_e). Operator and projection coexist — the operator
+    renders outermost, wrapping the component.
 
 #### P2. Species subjects
 
@@ -50,9 +52,10 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
 - ✅ `normalized_poloidal_magnetic_flux`
 - ✅ `volume_averaged_electron_density`
 - ✅ `line_averaged_electron_density`
-- ✅ `surface_integrated_toroidal_current_density` (→ `toroidal_plasma_current`)
-  - *Why good:* transformation prefixes attach cleanly; they preserve the
-    base physics while signaling the operation applied.
+- ✅ `toroidal_surface_integrated_current_density` (→ `toroidal_plasma_current`)
+  - *Why good:* a bare-prefix transformation (`surface_integrated`) folds into
+    the qualifier run, so the `toroidal` component stays outermost — canonical
+    order is `{component}_{transformation}_{base}`, not transformation-first.
 
 #### P5. Geometry of a structural entity
 

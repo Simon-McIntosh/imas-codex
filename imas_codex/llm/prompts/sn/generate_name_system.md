@@ -100,7 +100,7 @@ This rule is unconditional and overrides any apparent symmetry with sibling name
 ### Tense / change semantics
 
 - **Match the tense prefix to the path semantics.** Paths under `core_instant_changes/...` (or any IDS modelling **discrete event-driven changes** — sawtooth, ELM, pellet) → `change_in_<base>` (finite increments, not instantaneous derivatives). Paths whose name contains `_dot`, ends in `_tendency`, or sits under a time-derivative IDS (`*_evolution`) → `tendency_of_<base>` or `time_derivative_of_<base>`. Be **consistent across a batch**: if one path under `core_instant_changes/` uses `change_in_`, use it for every sibling under that IDS — mixing `change_in_` and `tendency_of_` for siblings is an anti-pattern.
-- **Component wraps the tense, not vice versa** (ISN grammar). Directional/projection prefixes wrap the entire base including any tense: ✓ `poloidal_change_in_ion_velocity` (`projection_axis=poloidal`, base=`change_in_ion_velocity`), ✓ `toroidal_tendency_of_current_density`; ✗ `change_in_poloidal_ion_velocity` (the parser collapses everything into `physical_base` and the component is lost).
+- **Emit the projection axis and the tense operator as SEPARATE segments** (`projection_axis` + `operator_token`) — never fold the component into `base_token`. The composer picks the canonical surface order for you, and it differs by tense class: a BARE tense (`change_in`) keeps the component outermost — ✓ `poloidal_change_in_ion_velocity` (`projection_axis=poloidal`, `operator_token=change_in`, base=`ion_velocity`); an `_of_` tense (`tendency`, `time_derivative`) renders outermost and wraps the component — ✓ `tendency_of_toroidal_current_density` (`projection_axis=toroidal`, `operator_token=tendency`, base=`current_density`). You supply the same three fields either way. ✗ Never spell the component inside the base (`change_in_poloidal_ion_velocity`) — that names a different quantity and does not round-trip.
 
 ## Output-Discipline Rules
 
@@ -205,8 +205,8 @@ These produce synonym families or encode orthogonal axes that belong in structur
 ### Attachments — tense consistency (strict)
 
 An attachment from a DD path to an existing standard name is valid only when both refer to the same physical aspect:
-- A path under `core_instant_changes/...`, `*/instant_changes/...`, or containing `change`/`delta`/`tendency` represents an **incremental change**. It MUST attach only to names beginning `change_in_`, `tendency_of_`, `rate_of_`, `rate_of_change_of_`, or `time_derivative_of_` — never to a base-quantity name like `electron_density`.
-- Conversely a base-quantity path (e.g. `core_profiles/profiles_1d/electrons/density`) MUST NOT attach to a `change_in_*`/`tendency_of_*`/`rate_of_*` name.
+- A path under `core_instant_changes/...`, `*/instant_changes/...`, or containing `change`/`delta`/`tendency` represents an **incremental change**. It MUST attach only to names beginning `change_in_` (finite increment), `tendency_of_`, or `time_derivative_of_` (per-time rates) — never to a base-quantity name like `electron_density`. (`rate_of_change_of_` is not an ISN operator; use `time_derivative_of_`.)
+- Conversely a base-quantity path (e.g. `core_profiles/profiles_1d/electrons/density`) MUST NOT attach to a `change_in_*`/`tendency_of_*`/`time_derivative_of_*` name.
 - When unsure, do not attach — emit a fresh candidate. Wrong attachments corrupt downstream consumers far more than missing ones.
 
 ### Previous-name handling
