@@ -4559,6 +4559,12 @@ async def compose_batch(
 
             cocos_type = source_item.get("cocos_label") if source_item else None
 
+            # Shape-parameter leaves (triangularity/elongation/squareness) are
+            # only meaningful *of* a surface; force the surface locus from the
+            # source DD path when the composer left it bare so the leaf is
+            # surface-explicit and the boundary/profile siblings de-conflate.
+            _inject_shape_parameter_surface(c, c.source_id, wlog)
+
             # B1/W4b: Pre-validation gate — reject malformed LLM output
             # before MERGE.  Mark the source as 'failed' so it is not
             # re-claimed forever.
