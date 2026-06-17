@@ -5,11 +5,12 @@ suffix-form for component, compound hardware identifiers) are present in
 the system prompt (generate_name_system.md) and the user prompts
 (generate_name_dd.md, generate_name_dd_names.md).
 
-The consolidated system prompt teaches these as one ``ANTI-PATTERN REFERENCE``
-section plus the ``Hardware / instrument tokens`` field-choice rule; rotation
-stage labels (``W38-A1``, ``EMW-1``) were dropped per the naming-hygiene rule
-(source must not leak plan/stage identifiers).  These tests assert the
-surviving bad/good example pairs and decision rules, not the stage labels.
+The system prompt teaches these as one ``ANTI-PATTERN REFERENCE`` section plus
+the ``Hardware / instrument tokens`` field-choice rule; the user-prompt tables
+tag each row with a descriptive rule name. Rotation stage labels were dropped
+per the naming-hygiene rule (source must not leak plan/stage identifiers), so
+these tests assert the surviving bad/good example pairs and the descriptive
+rule tags, never a stage label.
 
 These are content/structural assertions — they do not call the LLM.
 """
@@ -26,17 +27,17 @@ def _load(name: str) -> str:
 
 
 # Concrete real bad/good pairs from the diagnostic-IDS rotation.
-W38_BAD_EXAMPLES = (
+ANTI_BAD_EXAMPLES = (
     "x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound",
     "halo_region_parallel_energy_due_to_heat_flux",
     "z_coordinate_of_sensor_direction_unit_vector",
 )
-W38_GOOD_EXAMPLES = (
+ANTI_GOOD_EXAMPLES = (
     "photon_energy_lower_bound",
     "parallel_halo_energy",
     "z_direction_unit_vector",
 )
-W38_HARDWARE_PROPERTY_EXEMPLAR = "area_of_rogowski_coil"
+ANTI_HARDWARE_PROPERTY_EXEMPLAR = "area_of_rogowski_coil"
 
 
 @pytest.mark.parametrize("filename", ["generate_name_system.md"])
@@ -47,11 +48,11 @@ class TestSystemPromptInstrumentGallery:
         raw = _load(filename)
         assert "ANTI-PATTERN REFERENCE" in raw
 
-    @pytest.mark.parametrize("bad", W38_BAD_EXAMPLES)
+    @pytest.mark.parametrize("bad", ANTI_BAD_EXAMPLES)
     def test_bad_example_present(self, filename: str, bad: str) -> None:
         assert bad in _load(filename)
 
-    @pytest.mark.parametrize("good", W38_GOOD_EXAMPLES)
+    @pytest.mark.parametrize("good", ANTI_GOOD_EXAMPLES)
     def test_good_example_present(self, filename: str, good: str) -> None:
         assert good in _load(filename)
 
@@ -59,25 +60,27 @@ class TestSystemPromptInstrumentGallery:
         # The gallery must carve out the hardware-property exception so the
         # generator does not over-strip instrument tokens.
         raw = _load(filename)
-        assert W38_HARDWARE_PROPERTY_EXEMPLAR in raw
+        assert ANTI_HARDWARE_PROPERTY_EXEMPLAR in raw
         assert "intrinsic" in raw.lower()
 
 
 @pytest.mark.parametrize(
     "filename", ["generate_name_dd.md", "generate_name_dd_names.md"]
 )
-class TestUserPromptW38TableRows:
-    """The user-facing per-batch tables must include W38 row entries."""
+class TestUserPromptAntiPatternRows:
+    """The user-facing per-batch tables must carry the descriptive rule tags."""
 
-    def test_w38_tags_in_table(self, filename: str) -> None:
+    def test_anti_pattern_tags_in_table(self, filename: str) -> None:
         raw = _load(filename)
-        assert "W38-A1" in raw
-        assert "W38-A2" in raw
-        assert "W38-A3" in raw
+        assert "Instrument-prefix carry-over" in raw
+        assert "Suffix-form for component" in raw
+        assert "Compound hardware identifiers" in raw
+        # The plan/stage labels must NOT leak back in.
+        assert "W38" not in raw
 
     @pytest.mark.parametrize(
         "bad,good",
-        list(zip(W38_BAD_EXAMPLES, W38_GOOD_EXAMPLES, strict=True)),
+        list(zip(ANTI_BAD_EXAMPLES, ANTI_GOOD_EXAMPLES, strict=True)),
     )
     def test_concrete_pairs(self, filename: str, bad: str, good: str) -> None:
         raw = _load(filename)
@@ -119,7 +122,7 @@ class TestSystemPromptRendersWithDefaultContext:
     def test_compose_system_renders(self, context: dict) -> None:
         rendered = render_prompt("sn/generate_name_system", context)
         assert "ANTI-PATTERN REFERENCE" in rendered
-        for bad in W38_BAD_EXAMPLES:
+        for bad in ANTI_BAD_EXAMPLES:
             assert bad in rendered
-        for good in W38_GOOD_EXAMPLES:
+        for good in ANTI_GOOD_EXAMPLES:
             assert good in rendered

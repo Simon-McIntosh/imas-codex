@@ -104,9 +104,9 @@ path measures the same quantity — do not invent a synonym.
 | `current_from_passive_loop` | `passive_loop_current` | No `_from_` causation |
 | `reconstructed_faraday_rotation_angle` | `faraday_rotation_angle` | Processing method is metadata |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking in |
-| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `photon_energy_lower_bound` | **W38-A1** drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `cross_sectional_area_of_rogowski_coil`) |
-| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **W38-A2** component/transformation tokens come BEFORE the base as a leading qualifier prefix — never as suffixes |
-| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **W38-A3** drop stacked hardware tokens; a unit-vector field's Z is a projection, not a coordinate |
+| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `photon_energy_lower_bound` | **Instrument-prefix carry-over** — drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `cross_sectional_area_of_rogowski_coil`) |
+| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component/transformation tokens come BEFORE the base as a leading qualifier prefix — never as suffixes |
+| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **Compound hardware identifiers** — drop stacked hardware tokens; a unit-vector field's Z is a projection, not a coordinate |
 
 ## Locus Preposition Rules (`_at_` vs `_of_`)
 
