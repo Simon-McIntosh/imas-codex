@@ -799,7 +799,7 @@ def _check_pipeline_clear_gate() -> None:
         current = compute_pipeline_hash()
         current_composite = current["_composite"]
 
-        with GraphClient(timeout=5) as gc:
+        with GraphClient() as gc:
             # Fetch most recent SNRun that recorded a pipeline_hash
             rows = list(
                 gc.query(
@@ -880,7 +880,7 @@ def _auto_sync_grammar(*, quiet: bool = False) -> None:
         return
 
     try:
-        with GraphClient(timeout=5) as gc:
+        with GraphClient() as gc:
             rows = list(
                 gc.query(
                     "MATCH (v:ISNGrammarVersion {active: true}) "
