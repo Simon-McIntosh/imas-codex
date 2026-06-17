@@ -11,8 +11,12 @@ the LLM.
 
 from __future__ import annotations
 
+import inspect
+import re
+
 import pytest
 
+from imas_codex.standard_names import workers as _workers
 from imas_codex.standard_names.models import GrammarSegments, StandardNameCandidate
 from imas_codex.standard_names.workers import (
     _SHAPE_PARAMETER_BASES,
@@ -217,6 +221,34 @@ def test_attachment_guard_ignores_non_shape_names():
         "electron_temperature",
     )
     assert consistent is True
+
+
+# ---------------------------------------------------------------------------
+# Regression guard — the injection must be wired into EVERY compose persist
+# path. (The bug: it was only in the linear path, not the pooled path `sn run`
+# uses, so it never fired in production.)
+# ---------------------------------------------------------------------------
+
+
+def test_injection_precedes_every_compose_persist_site():
+    """Every ``name_id = normalize_spelling(c.compose_name())`` persist site
+    must be preceded by an ``_inject_shape_parameter_surface(c, ...)`` call in
+    the same function body, so both compose paths force the surface locus."""
+    src = inspect.getsource(_workers)
+    lines = src.splitlines()
+    persist_re = re.compile(r"name_id\s*=\s*normalize_spelling\(c\.compose_name\(\)\)")
+    persist_lines = [i for i, ln in enumerate(lines) if persist_re.search(ln)]
+    assert len(persist_lines) >= 2, (
+        "expected at least two compose persist sites (linear + pooled); "
+        f"found {len(persist_lines)}"
+    )
+    for i in persist_lines:
+        window = "\n".join(lines[max(0, i - 12) : i])
+        assert "_inject_shape_parameter_surface(c," in window, (
+            f"compose persist site at source line ~{i + 1} is not preceded by "
+            "_inject_shape_parameter_surface — a compose path would emit bare "
+            "shape-parameter leaves"
+        )
 
 
 def test_boundary_and_profile_siblings_deconflate():
