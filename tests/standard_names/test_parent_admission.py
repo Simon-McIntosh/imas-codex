@@ -55,12 +55,15 @@ class TestClauseA_StructuralSpecificity:
             ("volume", False),
             ("current", False),
             ("area", False),
-            # Bare SHAPE PARAMETER — admit as a coherent family head
-            # (gathers only triangularity/elongation/squareness quantities),
-            # unlike the generic bare bases above.
-            ("triangularity", True),
-            ("elongation", True),
-            ("squareness", True),
+            # Bare SHAPE PARAMETER — also rejected. A shape parameter is always
+            # OF a surface, so a bare form is a non-quantity (and "the
+            # triangularity" collapses by convention onto the boundary scalar
+            # triangularity_of_plasma_boundary — a duplicate). Family heads are
+            # the surface-explicit forms, reached by stripping projections, not
+            # by stripping the defining surface locus.
+            ("triangularity", False),
+            ("elongation", False),
+            ("squareness", False),
         ],
     )
     def test_admission_per_name(self, name: str, expected_admit: bool) -> None:

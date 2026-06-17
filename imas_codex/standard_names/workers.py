@@ -150,6 +150,71 @@ def _dedup_adjacent_tokens(name: str, log: logging.Logger | None = None) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Shape-parameter surface injection
+# ---------------------------------------------------------------------------
+#
+# Dimensionless plasma shape descriptors are only meaningful *of* a surface.
+# A bare ``triangularity`` conflates the boundary scalar
+# (``equilibrium/.../boundary/triangularity``) with the flux-surface radial
+# profile (``.../profiles_1d/triangularity``) and is not itself a measurable
+# quantity. When the composer omits the surface locus we inject it
+# deterministically from the source DD path so the leaf is always
+# surface-explicit (``triangularity_of_plasma_boundary`` /
+# ``triangularity_of_flux_surface``) — never bare. This also de-conflates the
+# boundary and profile siblings into distinct names instead of one ambiguous
+# parent. Derived structural parents are reached later by stripping
+# qualifiers/projections, never by stripping a base's defining surface — so no
+# bare shape-parameter parent is ever admitted (see ``parents.py``).
+_SHAPE_PARAMETER_BASES = frozenset({"triangularity", "elongation", "squareness"})
+
+
+def _shape_parameter_surface(dd_path: str | None) -> str:
+    """Surface a shape parameter from *dd_path* is defined *of*.
+
+    - ``profiles_1d`` / ``flux_surface`` paths → ``flux_surface`` (radial profile)
+    - all other paths (``boundary``, ``boundary_separatrix``, pulse-schedule
+      control targets, …) → ``plasma_boundary`` (the LCFS)
+
+    The default is the plasma boundary: "the triangularity" without further
+    qualification conventionally means the boundary/separatrix value.
+    """
+    p = (dd_path or "").lower()
+    if "/profiles_1d/" in p or "/flux_surface/" in p:
+        return "flux_surface"
+    return "plasma_boundary"
+
+
+def _inject_shape_parameter_surface(
+    candidate: Any, dd_path: str | None, log: logging.Logger | None = None
+) -> bool:
+    """Force a surface locus onto a bare shape-parameter candidate.
+
+    Mutates ``candidate.segments`` in place so ``compose_name()`` produces the
+    surface-explicit leaf. Deterministic and idempotent: fires only when the
+    base is a shape parameter (quantity kind) and the composer left the locus
+    empty; a composer-supplied locus is always preserved. Returns ``True`` when
+    an injection was applied.
+    """
+    seg = candidate.segments
+    if seg.base_kind != "quantity" or seg.base_token not in _SHAPE_PARAMETER_BASES:
+        return False
+    if seg.locus_token:  # composer already named a surface — trust it
+        return False
+    surface = _shape_parameter_surface(dd_path)
+    seg.locus_token = surface
+    seg.locus_relation = "of"
+    seg.locus_type = "geometry"
+    if log:
+        log.debug(
+            "shape-param surface injection: base=%s src=%s -> _of_%s",
+            seg.base_token,
+            dd_path,
+            surface,
+        )
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Pre-validation gate (W4b): reject malformed LLM output before MERGE
 # ---------------------------------------------------------------------------
 
@@ -2741,6 +2806,12 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
             # Inject COCOS metadata from DD (authoritative, like unit)
             cocos_type = source_item.get("cocos_label") if source_item else None
+
+            # Shape-parameter leaves (triangularity/elongation/squareness) are
+            # only meaningful *of* a surface; force the surface locus from the
+            # source DD path when the composer left it bare so the leaf is
+            # surface-explicit and the boundary/profile siblings de-conflate.
+            _inject_shape_parameter_surface(c, c.source_id, wlog)
 
             # Normalize name via grammar round-trip BEFORE persist
             # to avoid duplicate nodes if validate would rename
