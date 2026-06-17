@@ -63,13 +63,6 @@ _VOCAB_GAP_ALLOWLIST: dict[str, str] = {
         "is structurally forbidden — illustrative restructure target, not composable"
     ),
     "distance_between_strike_points_along_divertor_target": (
-        "distance_between / strike_points / divertor_target unregistered; the "
-        "distance_between_* pattern is itself a documented skip"
-    ),
-    "distance_from_magnetic_axis_to_separatrix_along_midplane": (
-        "distance_from / along_midplane unregistered base+locus tokens"
-    ),
-    "distance_between_strike_points_along_divertor_target": (
         "needs the distance-span grammar (between A and B along C): the distance "
         "base + strike_point/divertor_target loci all exist, but a multi-locus "
         "span is not representable in the single locus slot"
