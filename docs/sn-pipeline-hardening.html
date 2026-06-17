@@ -16,8 +16,8 @@
   <title>SN Pipeline Hardening | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-16">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-06-17">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -427,6 +427,9 @@ If justified, Do (ISN)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260616T212755929103" data-who="orchestrator" data-when="2026-06-16">
     <div class="r-comment-body">PRE-REGEN GATES COMPLETE. ISN rc42 + codex bumped: operator+locus/mechanism + prefix/postfix nests round-trip (f-snph-004, fixed before regen per user). Combined with Phase 5 (336 signal sources), Phase 1 (compose correctness), grounded per-stage settings (compose DSv4@medium, docs sonnet-4.6, review high), and postfix scalar-extraction (rc41) — the grammar is correct, the source set is complete, and the pipeline is evidence-tuned. Remaining before Phase 6 regen: Phase 2 (broad prompt consolidation) + Phase 3 (compose grounding) — OPEN QUESTION to lead: hard gates before regen, or post-regen iteration? Phase 1 already fixed the correctness-critical prompt issues.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260617T0700-phase2-land" data-who="orchestrator" data-when="2026-06-17">
+    <div class="r-comment-body">PHASE 2 LANDED (compose system-prompt consolidation) — codex commit bcb27a83. generate_name_system.md reframed around goal-first Field-Choice + Output-Discipline rule sections, 1103-&gt;678 lines (-39%). Under Option-5 the compose model emits IR segment fields (base_token/qualifiers/locus_token/locus_relation/operator_kind) and the composer assembles the string deterministically, so two surface-syntax-only HARD checks were dropped as DEAD guidance (they validated a string the model never emits): adjacent-duplicate tokens (model emits one base_token, can't concatenate) and character-length/_of_-nesting limits (IR schema bounds nesting to one locus+one operator; model never counts the final string). VERIFIED every SEMANTIC guard survives: locus_relation of/at/over, provenance-prefix ban, invented-base-&gt;vocab_gap, abbreviations, one-subject, US-spelling, structural-leakage, constraint-role (inverse-problem role), non-nameable-&gt;skipped, missing-base-&gt;vocab_gap, instrument-as-postfix-locus WITH the hardware-property 'intrinsic to device' exception (cross_sectional_area_of_rogowski_coil). Section headings de-shouted + rotation stage labels removed per naming hygiene; 6 test files track new anchors (2 STRENGTHENED: coordinate-guidance now asserts two ordering constraints; diamagnetic rule now asserts physics content not the meta-word 'informational'). GATE: A/B over TWO runs on TWO models = 0 faithful-&gt;unfaithful flips on any name common to the pre-consolidation baseline (research/p2_consolidation_ab*.json); full tests/standard_names + tests/llm suite green. DEFERRED hygiene (not blocking regen): the USER prompts generate_name_dd.md / generate_name_dd_names.md still carry W38-A1/A2/A3 stage labels (system-prompt-only scope this pass) — de-label + rename test_compose_w38_anti_patterns.py in a dedicated pass, foldable into Phase 3 (also touches compose user prompts) with A/B. Remaining before Phase 6 regen: Phase 3 (per-member dd_paths grounding in compose).</div>
 </div>
 </section>
 </main>
