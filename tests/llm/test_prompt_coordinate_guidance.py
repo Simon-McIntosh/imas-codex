@@ -70,21 +70,27 @@ class TestCoordinateGuidanceInComposeSystem:
         """Flux coordinates must be mentioned explicitly (no 'the standard')."""
         assert "flux coordinate" in rendered_compose_system.lower()
 
-    def test_coordinate_guidance_before_naming_rules(
+    def test_coordinate_guidance_in_static_prefix(
         self, rendered_compose_system: str
     ) -> None:
-        """Coordinate convention block must precede the naming Rule 17 section.
+        """Coordinate convention block must sit in the static cacheable prefix.
 
-        Static cacheable prefix is maximised when the include appears before
-        the dynamic naming-rule numbering.
+        Both the coordinate naming rule ('ABSOLUTE RULE') and the basis-tuple
+        convention include must appear before the dynamic Curated Examples loop
+        so the static prompt prefix (and the OpenRouter cache hit) is maximised.
         """
         coord_idx = rendered_compose_system.find(r"(R, \phi, Z)")
-        # Rule 17 (coordinate naming) must come after the convention block
-        rule17_idx = rendered_compose_system.find("ABSOLUTE RULE")
+        abs_rule_idx = rendered_compose_system.find("ABSOLUTE RULE")
+        examples_idx = rendered_compose_system.find("## Curated Examples")
         assert coord_idx != -1, r"(R, \phi, Z) not found in compose prompt"
-        assert rule17_idx != -1, "ABSOLUTE RULE not found in compose prompt"
-        assert coord_idx < rule17_idx, (
-            "Coordinate convention block must precede Rule 17 (ABSOLUTE RULE)"
+        assert abs_rule_idx != -1, "ABSOLUTE RULE not found in compose prompt"
+        assert examples_idx != -1, "Curated Examples not found in compose prompt"
+        assert coord_idx < examples_idx, (
+            "Coordinate convention include must be in the static prefix "
+            "(before Curated Examples)"
+        )
+        assert abs_rule_idx < examples_idx, (
+            "Coordinate naming rule must be in the static prefix"
         )
 
 

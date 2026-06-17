@@ -1,8 +1,13 @@
-"""Compose-prompt guard tests for HARD PRE-EMIT CHECKS (Phase 5d).
+"""Compose-prompt guard tests for the field-choice rule set.
 
-Tests that generate_name_system.md contains the required guard content and
-that the rendered prompt includes all ten HARD PRE-EMIT CHECKS.  These
-are structural/content tests — they do not call the LLM.
+Tests that generate_name_system.md contains the required guard SIGNAL — the
+distinct semantic rules that gate name composition — regardless of section
+heading.  The prompt was consolidated into goal-first ``Field-Choice Rules``
+and ``Output-Discipline Rules`` sections (the compose model emits IR segment
+fields, not a string, so surface-syntax-only checks — adjacent-duplicate
+tokens, character-length / ``_of_`` nesting limits — were dropped because the
+model never emits the string they validated; the composer assembles it).
+These are structural/content tests — they do not call the LLM.
 
 A companion file ``test_compose_regex_guards.py`` provides pure-regex
 validators for each anti-pattern.
@@ -38,58 +43,51 @@ def _load_compose_system_raw() -> str:
 # =====================================================================
 
 
-class TestHardPreEmitChecksPresence:
-    """Verify all 10 HARD PRE-EMIT CHECKS are present in generate_name_system.md."""
+class TestFieldChoiceGuardSignal:
+    """Verify every distinct semantic guard SIGNAL survives the consolidation.
+
+    The prompt no longer numbers ten ``HARD PRE-EMIT CHECKS``; the rules were
+    folded into the field-choice / output-discipline sections.  Each test below
+    asserts the surviving signal, not the old heading.
+    """
 
     @pytest.fixture(autouse=True)
     def _load(self) -> None:
         self.raw = _load_compose_system_raw()
 
-    def test_section_heading_present(self) -> None:
-        assert "HARD PRE-EMIT CHECKS" in self.raw
-
-    def test_check_1_adjacent_duplicates(self) -> None:
-        assert "No adjacent duplicate tokens" in self.raw
-        assert "magnetic_magnetic" in self.raw
-
-    def test_check_2_locus_preposition(self) -> None:
-        assert "Locus preposition" in self.raw
+    def test_locus_preposition_semantic(self) -> None:
+        # of/at/over is taught as the locus_relation field choice.
+        assert "locus_relation" in self.raw
+        assert "defining attribute" in self.raw
         assert "magnetic_axis" in self.raw
 
-    def test_check_3_hardware_tokens(self) -> None:
-        assert "Hardware tokens" in self.raw
+    def test_hardware_tokens_postfix_locus(self) -> None:
+        assert "postfix" in self.raw and "locus" in self.raw
         assert "probe" in self.raw
         assert "sensor" in self.raw
 
-    def test_check_4_provenance_prefixes(self) -> None:
-        assert "No provenance prefixes" in self.raw
+    def test_provenance_prefixes_banned(self) -> None:
         assert "initial_" in self.raw
         assert "launched_" in self.raw
         assert "post_crash_" in self.raw
 
-    def test_check_5_invented_bases(self) -> None:
-        assert "physical_base" in self.raw and "closed" in self.raw.lower()
+    def test_invented_bases_to_vocab_gap(self) -> None:
+        assert "base_token" in self.raw and "registered" in self.raw
 
-    def test_check_6_abbreviations(self) -> None:
-        assert "No abbreviations, acronyms, or alphanumerics" in self.raw
+    def test_abbreviations_rejected(self) -> None:
+        assert "No abbreviations, acronyms, alphanumerics" in self.raw
         assert "3db" in self.raw
 
-    def test_check_7_one_subject(self) -> None:
+    def test_one_subject_rule(self) -> None:
         assert "Exactly one subject" in self.raw
         assert "hydrogen_ion" in self.raw
-        assert "deuterium_tritium_ion" in self.raw
 
-    def test_check_8_us_spelling(self) -> None:
+    def test_us_spelling_rule(self) -> None:
         assert "US spelling only" in self.raw
-        assert "analyse" in self.raw
-        assert "fibre" in self.raw
+        assert "ionisation" in self.raw
 
-    def test_check_9_length_nesting(self) -> None:
-        assert "70 characters" in self.raw
-        assert "two `_of_`" in self.raw
-
-    def test_check_10_structural_leakage(self) -> None:
-        assert "No structural leakage" in self.raw
+    def test_structural_leakage_banned(self) -> None:
+        # Structural / data-model leakage tokens are forbidden anywhere.
         assert "obtained_from" in self.raw
         assert "stored_in" in self.raw
         assert "derived_from" in self.raw
@@ -146,51 +144,41 @@ class TestChannelGuidance:
         assert "interferometer_channel_density" in self.raw
 
 
-class TestHardChecksPlacement:
-    """Verify HARD PRE-EMIT CHECKS appear before REJECT and examples."""
+class TestRulePlacement:
+    """Field-choice rules must appear after the prelude includes and before the
+    curated-examples / dynamic blocks, so the static cacheable prefix is large."""
 
     @pytest.fixture(autouse=True)
     def _load(self) -> None:
         self.raw = _load_compose_system_raw()
 
-    def test_hard_checks_before_reject(self) -> None:
-        hard_pos = self.raw.index("HARD PRE-EMIT CHECKS")
-        reject_pos = self.raw.index("### REJECT")
-        assert hard_pos < reject_pos
-
-    def test_hard_checks_before_curated_examples(self) -> None:
-        hard_pos = self.raw.index("HARD PRE-EMIT CHECKS")
+    def test_rules_before_curated_examples(self) -> None:
+        rules_pos = self.raw.index("## Field-Choice Rules")
         examples_pos = self.raw.index("## Curated Examples")
-        assert hard_pos < examples_pos
+        assert rules_pos < examples_pos
 
-    def test_hard_checks_after_includes(self) -> None:
-        # HARD CHECKS must appear after the prelude includes (vocabulary,
-        # exemplars). The scored-examples include moved to the user prompt;
-        # the system prompt's last prelude include is _exemplars_name_only.md.
-        # Since _load_compose_system_raw returns rendered content (includes
-        # already resolved), we anchor on a distinctive phrase from the end
-        # of the _exemplars_name_only.md content.
+    def test_rules_after_includes(self) -> None:
+        # Field-choice rules must appear after the prelude includes (grammar,
+        # exemplars). _load_compose_system_raw returns rendered content, so we
+        # anchor on a distinctive phrase from the end of _exemplars_name_only.md.
         prelude_anchor = "Does the name describe a physical quantity"
         prelude_end = self.raw.index(prelude_anchor) + len(prelude_anchor)
-        hard_pos = self.raw.index("HARD PRE-EMIT CHECKS")
-        assert hard_pos > prelude_end
+        rules_pos = self.raw.index("## Field-Choice Rules")
+        assert rules_pos > prelude_end
 
 
-class TestNoConflictWithConstraintRole:
-    """Verify HARD PRE-EMIT CHECKS don't contradict CONSTRAINT ROLE ABSTRACTION."""
+class TestInverseProblemRoleGuard:
+    """Inverse-problem role wrappers (formerly 'CONSTRAINT ROLE ABSTRACTION')
+    must still be routed to skip with the base physical quantity kept."""
 
     @pytest.fixture(autouse=True)
     def _load(self) -> None:
         self.raw = _load_compose_system_raw()
 
-    def test_constraint_role_block_still_present(self) -> None:
-        assert "CONSTRAINT ROLE ABSTRACTION" in self.raw
-
-    def test_hard_checks_after_constraint_role_or_independent(self) -> None:
-        # The CONSTRAINT ROLE block is at ~line 88-100 in the original;
-        # HARD PRE-EMIT CHECKS is near the top.  Both should exist.
-        assert "HARD PRE-EMIT CHECKS" in self.raw
-        assert "CONSTRAINT ROLE ABSTRACTION" in self.raw
+    def test_constraint_role_signal_present(self) -> None:
+        assert "_constraint_weight" in self.raw
+        assert "_constraint_measured_value" in self.raw
+        assert "inverse_problem_role" in self.raw
 
 
 class TestNonNameableAndMissingBaseGuidance:
@@ -206,15 +194,17 @@ class TestNonNameableAndMissingBaseGuidance:
         )
 
     def test_system_has_non_nameable_skip_section(self) -> None:
-        assert "NON-NAMEABLE" in self.system
+        # Renamed heading: "When NOT to name — route to `skipped`".
+        assert "route to `skipped`" in self.system
         # The infra classes that exhausted in beta rotation are called out.
         assert "latency" in self.system
         assert "timestamp" in self.system or "time_stamp" in self.system
 
     def test_system_routes_missing_base_to_vocab_gap(self) -> None:
-        assert "MISSING-BASE" in self.system
+        # Renamed heading: "When the base is missing — emit a clean `vocab_gap`".
+        assert "base is missing" in self.system
         # Phase / angle base-gap concepts are explicitly named.
-        assert "phase_shift" in self.system
+        assert "phase shift" in self.system or "phase_shift" in self.system
         assert "vocab_gap" in self.system
 
     def test_user_prompt_has_non_nameable_skip_table(self) -> None:

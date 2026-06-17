@@ -150,15 +150,19 @@ class TestSystemPromptContainsAllClosedTokens:
         assert "Tokenise the candidate" in rendered_system_prompt
         assert "physical_base" in rendered_system_prompt
 
-    def test_w2_anti_pattern_gallery_renders(self, rendered_system_prompt):
-        """Anti-pattern gallery section must render with at least 6 entries."""
-        assert "W2 DECOMPOSITION-FAILURE GALLERY" in rendered_system_prompt
-        # Each entry uses the W2-D{n} prefix
+    def test_decomposition_anti_pattern_gallery_renders(self, rendered_system_prompt):
+        """Anti-pattern gallery section must render with at least 6 entries.
+
+        Rotation stage labels (``W2``) were dropped per the naming-hygiene rule;
+        the gallery now uses plain ``DECOMPOSITION-FAILURE GALLERY`` / ``D{n}``.
+        """
+        assert "DECOMPOSITION-FAILURE GALLERY" in rendered_system_prompt
+        # Each entry uses the D{n} prefix
         marker_count = sum(
-            1 for n in range(1, 16) if f"W2-D{n}" in rendered_system_prompt
+            1 for n in range(1, 16) if f"D{n} —" in rendered_system_prompt
         )
         assert marker_count >= 6, (
-            f"expected ≥6 W2 anti-pattern entries, found {marker_count}"
+            f"expected ≥6 decomposition anti-pattern entries, found {marker_count}"
         )
 
 

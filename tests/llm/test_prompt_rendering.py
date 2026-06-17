@@ -121,17 +121,18 @@ class TestRuleAlignment:
         assert "NC-28" in rendered_compose_system
         assert "controller setpoint" in rendered_compose_system
 
-    def test_rule22_demoted_to_informational(
+    def test_diamagnetic_projection_rule_present(
         self, rendered_compose_system: str
     ) -> None:
-        """Rule 22 should be informational, not 'critical'."""
-        # Find the Rule 22 section
-        idx = rendered_compose_system.find("22.")
-        assert idx != -1, "Rule 22 not found"
-        rule_text = rendered_compose_system[idx : idx + 300]
-        assert "informational" in rule_text
-        # The old "(physics semantic — critical)" should be gone
-        assert "physics semantic — critical" not in rule_text
+        """The diamagnetic-is-not-a-projection rule must survive consolidation.
+
+        Previously numbered Rule 22; the rule now lives in the projection-axis
+        field-choice section and is audit-enforced (not merely informational).
+        """
+        assert "diamagnetic_component_check" in rendered_compose_system
+        assert "diamagnetic_drift" in rendered_compose_system
+        # The old "(physics semantic — critical)" framing should be gone.
+        assert "physics semantic — critical" not in rendered_compose_system
 
     def test_over_region_exception(self, rendered_compose_system: str) -> None:
         """The _over_ rule must cross-reference the Region segment."""
@@ -147,8 +148,9 @@ class TestAntiPatternHardening:
     def test_banned_prefixes_section_present(
         self, rendered_compose_system: str
     ) -> None:
-        """BANNED PREFIXES section must appear in the rendered system prompt."""
-        assert "BANNED PREFIXES" in rendered_compose_system
+        """The banned-prefix rule must appear (renamed from 'BANNED PREFIXES'
+        to 'No provenance / state / structural prefixes')."""
+        assert "No provenance / state" in rendered_compose_system
 
     def test_state_prefixes_enumerated(self, rendered_compose_system: str) -> None:
         """Key banned state/provenance prefixes must be explicitly listed."""
@@ -167,8 +169,10 @@ class TestAntiPatternHardening:
     def test_instrument_handling_section_present(
         self, rendered_compose_system: str
     ) -> None:
-        """INSTRUMENT HANDLING section must appear."""
-        assert "INSTRUMENT HANDLING" in rendered_compose_system
+        """The instrument-as-postfix-locus rule must appear (renamed from
+        'INSTRUMENT HANDLING' to 'Hardware / instrument tokens are postfix
+        locus only')."""
+        assert "Hardware / instrument tokens" in rendered_compose_system
 
     def test_instrument_as_locus_rule_stated(
         self, rendered_compose_system: str
@@ -196,12 +200,12 @@ class TestAntiPatternHardening:
         The field_guidance block is the first dynamic section; the banned-prefix
         rule must precede it so the static cacheable prefix is maximised.
         """
-        banned_idx = rendered_compose_system.find("BANNED PREFIXES")
+        banned_idx = rendered_compose_system.find("No provenance / state")
         # 'Naming Guidance' is injected by the first {% if field_guidance %} block
         naming_guidance_idx = rendered_compose_system.find("Naming Guidance")
-        assert banned_idx != -1, "BANNED PREFIXES not found"
+        assert banned_idx != -1, "banned-prefix rule not found"
         # If field_guidance block rendered at all, verify ordering
         if naming_guidance_idx != -1:
             assert banned_idx < naming_guidance_idx, (
-                "BANNED PREFIXES must appear before dynamic Naming Guidance block"
+                "banned-prefix rule must appear before dynamic Naming Guidance block"
             )

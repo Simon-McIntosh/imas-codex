@@ -1,9 +1,15 @@
-"""W38 compose-prompt anti-pattern hardening tests.
+"""Compose-prompt instrument/hardware anti-pattern hardening tests.
 
-Verifies that the three W38 anti-patterns (instrument prefix carry-over,
+Verifies the three diagnostic-IDS anti-patterns (instrument prefix carry-over,
 suffix-form for component, compound hardware identifiers) are present in
 the system prompt (generate_name_system.md) and the user prompts
 (generate_name_dd.md, generate_name_dd_names.md).
+
+The consolidated system prompt teaches these as one ``ANTI-PATTERN REFERENCE``
+section plus the ``Hardware / instrument tokens`` field-choice rule; rotation
+stage labels (``W38-A1``, ``EMW-1``) were dropped per the naming-hygiene rule
+(source must not leak plan/stage identifiers).  These tests assert the
+surviving bad/good example pairs and decision rules, not the stage labels.
 
 These are content/structural assertions — they do not call the LLM.
 """
@@ -19,7 +25,7 @@ def _load(name: str) -> str:
     return (PROMPTS_DIR / "sn" / name).read_text(encoding="utf-8")
 
 
-# Concrete exemplars from the W37 rotation (real bad/good pairs).
+# Concrete real bad/good pairs from the diagnostic-IDS rotation.
 W38_BAD_EXAMPLES = (
     "x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound",
     "halo_region_parallel_energy_due_to_heat_flux",
@@ -34,18 +40,12 @@ W38_HARDWARE_PROPERTY_EXEMPLAR = "cross_sectional_area_of_rogowski_coil"
 
 
 @pytest.mark.parametrize("filename", ["generate_name_system.md"])
-class TestSystemPromptW38Gallery:
-    """The W38 anti-pattern entries must appear in both system prompts."""
+class TestSystemPromptInstrumentGallery:
+    """The instrument anti-pattern entries must appear in the system prompt."""
 
     def test_gallery_heading(self, filename: str) -> None:
         raw = _load(filename)
-        assert "ANTI-PATTERN REFERENCE" in raw or "W38 ANTI-PATTERN GALLERY" in raw
-
-    def test_three_anti_pattern_headers(self, filename: str) -> None:
-        raw = _load(filename)
-        assert "W38-A1" in raw
-        assert "W38-A2" in raw
-        assert "W38-A3" in raw
+        assert "ANTI-PATTERN REFERENCE" in raw
 
     @pytest.mark.parametrize("bad", W38_BAD_EXAMPLES)
     def test_bad_example_present(self, filename: str, bad: str) -> None:
@@ -56,16 +56,11 @@ class TestSystemPromptW38Gallery:
         assert good in _load(filename)
 
     def test_hardware_property_exception(self, filename: str) -> None:
-        # A1 must explicitly carve out the hardware-property exception so the
+        # The gallery must carve out the hardware-property exception so the
         # generator does not over-strip instrument tokens.
         raw = _load(filename)
         assert W38_HARDWARE_PROPERTY_EXEMPLAR in raw
         assert "intrinsic" in raw.lower()
-
-    def test_decision_rule_present_per_block(self, filename: str) -> None:
-        raw = _load(filename)
-        # Each block ends with a "Decision rule:" line.
-        assert raw.count("Decision rule") >= 3
 
 
 @pytest.mark.parametrize(
@@ -90,37 +85,30 @@ class TestUserPromptW38TableRows:
         assert good in raw
 
 
-class TestSystemPromptW38Placement:
+class TestSystemPromptInstrumentPlacement:
     """Anti-patterns must come AFTER the static schema/grammar block (includes)
-    but BEFORE per-item context — i.e. inside the static system prompt cache
-    layer, not inside the dynamic user prompt."""
+    but BEFORE the curated-examples / dynamic context — i.e. inside the static
+    system-prompt cache layer, not inside the dynamic user prompt."""
 
     def test_compose_system_after_includes(self) -> None:
         raw = _load("generate_name_system.md")
-        # W38 must appear after the prelude includes; trailing tail includes
-        # (e.g. _coordinate_conventions.md) may legitimately appear later.
+        # The anti-pattern gallery must appear after the prelude includes;
+        # trailing tail includes (e.g. _coordinate_conventions.md) may
+        # legitimately appear later.
         prelude_end = raw.index('{% include "sn/_exemplars_name_only.md" %}')
-        w38_pos = raw.index("W38-A1")
-        assert w38_pos > prelude_end
-
-    def test_emw_before_w38_in_reference(self) -> None:
-        # EMW entries appear before W38 entries in the consolidated reference.
-        raw = _load("generate_name_system.md")
-        emw_pos = raw.index("EMW-1")
-        w38_pos = raw.index("W38-A1")
-        assert w38_pos > emw_pos
+        gallery_pos = raw.index("ANTI-PATTERN REFERENCE")
+        assert gallery_pos > prelude_end
 
     def test_compose_system_before_curated_examples(self) -> None:
         raw = _load("generate_name_system.md")
-        w38_pos = raw.index("W38-A1")
+        gallery_pos = raw.index("ANTI-PATTERN REFERENCE")
         examples_pos = raw.index("## Curated Examples")
-        assert w38_pos < examples_pos
+        assert gallery_pos < examples_pos
 
 
 class TestSystemPromptRendersWithDefaultContext:
     """Render the system prompt with a representative compose context and
-    confirm the W38 block survives Jinja rendering (no template error,
-    block visible at runtime)."""
+    confirm the instrument anti-pattern examples survive Jinja rendering."""
 
     @pytest.fixture
     def context(self) -> dict:
@@ -130,7 +118,7 @@ class TestSystemPromptRendersWithDefaultContext:
 
     def test_compose_system_renders(self, context: dict) -> None:
         rendered = render_prompt("sn/generate_name_system", context)
-        assert "W38-A1" in rendered
+        assert "ANTI-PATTERN REFERENCE" in rendered
         for bad in W38_BAD_EXAMPLES:
             assert bad in rendered
         for good in W38_GOOD_EXAMPLES:

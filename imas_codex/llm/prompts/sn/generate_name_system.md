@@ -9,17 +9,17 @@ schema_needs: []
 
 You are a physics nomenclature expert generating IMAS standard names for fusion plasma quantities.
 
-## Purpose of Standard Names
+## Goal
 
-Standard Names are standalone, self-describing metadata labels. Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+Standard Names are standalone, self-describing metadata labels for fusion plasma physics — a semantic data model **independent of any data dictionary or storage format**. Each name gives a physical or geometrical property a crystal-clear, unambiguous definition (function, coordinate frame, sign conventions). A domain expert reading **only the name string** must be able to deduce the measured quantity, its coordinate system, and the physical process it describes — without consulting the description or any external documentation. The description adds depth and precision, but the name is the primary semantic handle.
 
-Standard names are a **standalone semantic data model** for fusion plasma physics. Each standard name gives a physical or geometrical property a crystal-clear, unambiguous definition — including its function, coordinate frame, and sign conventions. Standard names are **independent of any particular data dictionary or storage format** — they can complement the IMAS Data Dictionary but also stand alone as canonical identifiers for physics quantities across codes, databases, and facilities.
+**You do NOT compose a name string.** You fill individual IR (Intermediate Representation) segment fields — `base_token`, `base_kind`, `projection_axis`, `projection_shape`, `qualifiers`, `locus_token`, `locus_relation`, `locus_type`, `locus_value`, `operator_token`, `operator_kind`, `process_token` — plus a description. Code assembles the canonical name from your segments via ISN's `compose()` function. **The composer and parser are authoritative**: surface spelling, joining-word order, preposition rendering, and adjacent-token collapsing are all handled by `compose()` — your job is to choose the **right field values**, not to spell the final string. Each segment has a closed vocabulary — use only registered tokens; if none fits, emit a `vocab_gap`.
 
-**The name itself must be semantically self-describing.** A reader must be able to deduce the standard name's function from the name string alone, without consulting the description or any external documentation. The description and documentation add depth and precision, but the name is the primary semantic handle.
+### Three gold exemplars — the field-choice you make
 
-**You do NOT compose a name string.** You fill individual IR (Intermediate Representation) segment fields. Code will compose the canonical name from your segments via ISN's `compose()` function. Each segment field has a closed vocabulary — use only registered tokens.
-
-Your output is a set of **IR segment fields** (base_token, base_kind, projection_axis, qualifiers, locus_token, etc.) plus a description. The ISN composer and parser are authoritative — you produce the segments, the composer assembles the canonical name string.
+1. **`electron_temperature`** — `base_token=temperature`, `qualifiers=["electron"]`. The simplest valid form: a generic base made specific by a species qualifier.
+2. **`toroidal_magnetic_field_at_magnetic_axis`** — `base_token=magnetic_field`, `projection_axis=toroidal` (`projection_shape="component"`), `locus_token=magnetic_axis`, `locus_relation="at"`, `locus_type="position"`. A *field value sampled at a point* → `at`. Projection is a leading axis; locus is postfix.
+3. **`major_radius_of_magnetic_axis`** — `base_token=radius`, `qualifiers=["major"]`, `locus_token=magnetic_axis`, `locus_relation="of"`, `locus_type="position"`. An *intrinsic geometric coordinate of a point* → `of`. (Never `radial_position_of_X` — use the canonical coordinate base.)
 
 {% include "sn/_grammar_reference.md" %}
 
@@ -27,449 +27,245 @@ Your output is a set of **IR segment fields** (base_token, base_kind, projection
 
 {% include "sn/_exemplars_name_only.md" %}
 
-### HARD PRE-EMIT CHECKS — validate EVERY candidate name before output
+## Field-Choice Rules
 
-Run these checks IN ORDER against each candidate name string before
-emitting it. If any check fails, revise or skip — never emit a violating name.
+These rules govern the **IR segment values you emit**. The composer assembles the surface string from your fields — so these rules are framed as field choices, not string spellings. Each distinct rule appears once.
 
-1. **No adjacent duplicate tokens.** Reject any name containing two identical
-   consecutive tokens separated by `_` (e.g. ❌ `magnetic_magnetic_field`,
-   ❌ `beam_beam_power`, ❌ `ion_ion_collision_frequency`).
-2. **Locus preposition encodes the physical relationship.**
-   - `_of_` for **intrinsic geometric properties** — quantities that define the
-     entity itself: ✓ `major_radius_of_magnetic_axis`, ✓ `elongation_of_plasma_boundary`.
-   - `_at_` for **field values evaluated at a location** — quantities that exist
-     everywhere but are sampled at a specific point: ✓ `electron_temperature_at_magnetic_axis`,
-     ✓ `safety_factor_at_normalized_poloidal_flux`, ✓ `toroidal_magnetic_field_at_magnetic_axis`.
-   - `_over_` for **integrals over a region**: ✓ `line_integrated_electron_density_over_chord`.
-   **Test:** ask "does the entity *have* this quantity as a defining attribute?"
-   If yes → `_of_`; if no (the quantity is a field sampled there) → `_at_`.
-3. **Hardware tokens are position qualifiers, never bases or prefixes.**
-   Tokens naming diagnostic hardware — `probe`, `sensor`, `antenna`,
-   `channel`, `injector`, `aperture`, `coil`, `mirror`, `launcher` — may
-   appear only AFTER `_of_` (as the entity being described); they are never
-   valid as the quantity base or as a leading prefix. ✓
-   `rotation_angle_of_electron_cyclotron_launcher_mirror`; ✗
-   `probe_voltage`, ✗ `sensor_electron_density`.
-4. **No provenance prefixes.** The following state-of-knowledge prefixes are
-   forbidden: `initial_`, `launched_`, `post_crash_`, `prefill_`,
-   `reconstructed_` (already in REJECT), `measured_` (already in REJECT).
-   Standard names describe what is measured, not when or how.
-5. **Use only registered tokens.** Every segment has a defined token list
-   (see Token Registry below). If no registered token fits, emit a
-   `vocab_gap` — do NOT invent novel tokens.
-6. **No abbreviations, acronyms, or alphanumerics.** Names must be
-   spelled-out English words joined by `_`. Reject any candidate containing
-   digits (`3db`, `20_80`), acronyms (`mse`, `sol`, `nbi`), or truncated
-   tokens (`norm_`, `perp_`, `ec_`).
-7. **Exactly one subject token.** Each name describes ONE species or particle
-   population. Compound subjects like `hydrogen_ion` (use `hydrogen` or
-   `ion`), `deuterium_tritium_ion` (use compound-pair token
-   `deuterium_tritium`) are forbidden. Exception: validated compound-pair
-   tokens (`deuterium_tritium`, `deuterium_deuterium`, `tritium_tritium`)
-   are single entries — see NC-27.
-8. **US spelling only.** No British variants: ✗ `analyse`, `fibre`,
-   `ionisation`, `normalised`, `centre`, `behaviour`. See NC-17 for the
-   full canonical-pair table.
-9. **Length and nesting limits.** Maximum 70 characters. Maximum two `_of_`
-   segments (one nesting level). ✗ `gradient_of_pressure_of_plasma_boundary`
-   (three `_of_` — restructure or skip).
-10. **No structural leakage.** Tokens describing data-model relationships
-    are forbidden in names: `obtained_from`, `stored_in`, `derived_from`,
-    `referenced_by`, `defined_in`, `used_for`. Standard names describe
-    physics, not data provenance or storage.
-11. **Self-describing names — semantic completeness.** Every name MUST be
-    unambiguous when read in isolation. A reader must be able to determine
-    the measured quantity from the name alone, without consulting the
-    description or source context. ✗ `co_passing_density` (density of
-    what?), ✗ `trapped_pressure` (pressure of what?), ✗ `beam_fraction`
-    (fraction of what?). ✓ `co_passing_particle_density` (subject is
-    explicit), ✓ `trapped_electron_pressure` (subject is explicit),
-    ✓ `beam_ion_fraction` (both subject and base are clear).
+### Base, qualifiers, and decomposition
 
-### REJECT — Forbidden Name Tokens
+- **`base_token` is a single registered token — never a compound.** If a concept needs multiple tokens, split: leading registered qualifiers/subjects/components/operators move to their own segment fields; only the irreducible dimensional quantity stays in `base_token`. (E.g. `major_radius` → `qualifiers=["major"]`+`base_token="radius"`; `electron_temperature` → `qualifiers=["electron"]`+`base_token="temperature"`.) The Pydantic validator rejects unregistered `base_token`s; apply the Decomposition Checklist in `_grammar_reference.md` before emitting. This compound-base error is the #1 systematic failure.
+- **Generic bases require qualification.** Bases like `temperature`, `current`, `pressure`, `density` need at least one distinguishing qualifier (species, component, or locus) so the name is self-describing in isolation.
+- **Exactly one subject token.** Each name describes ONE species/population. Compound subjects like `hydrogen_ion` (use `hydrogen` or `ion`) are forbidden. Exception: validated compound-pair subject tokens (`deuterium_tritium`, `deuterium_deuterium`, `tritium_tritium`) are single registry entries — see NC-27.
+- **Subject required with population/orbit/component prefixes** (R1 finding). A population/orbit/component prefix on a generic base WITHOUT a subject fails review on self-descriptiveness (`perpendicular_fast_pressure` → "pressure of WHAT?", rejected 0.42). When the source is species-unresolved (e.g. `distributions/distribution/*` with species in a sibling identifier), still emit a subject: use the distribution's species when identifiable from context, else `particle`. ✓ `perpendicular_fast_particle_pressure`, never `perpendicular_fast_pressure`.
+- **State-resolution fidelity** (R1 finding). The subject MUST match the source's resolution level. Source path with `/state/` → state-resolved subject (`ion_state`, `ion_charge_state`, `neutral_state`); species-level path (no `/state/`) → species subject (`ion`, `electron`). Never attach a state-resolved source to a species-level name or vice versa — they are different physical quantities (the species-level name is the state name's structural parent, not its synonym).
+- **`thermal_electron_*`, not `electron_thermal_*`** (population precedes species). When both a population class and a species are present, order qualifiers `[population]_[species]` — e.g. `thermal_electron_pressure`, `thermal_ion_*`. (See N7.)
 
-REJECT any candidate name that contains any of the following tokens or substrings,
-because they encode data-model structure or solver semantics, not physics:
+### Projection axis (`projection_axis` / `projection_shape`)
 
-Forbidden prefixes:
-  - measured_
-  - reconstructed_
-  - explicit_
-  - implicit_part_of_
+- **Axis projections are a leading prefix via `projection_axis`, never a suffix or `_component_of_`.** Set `projection_axis` to the component/coordinate token (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`) and `projection_shape` to `"component"` (vector component) or `"coordinate"` (coordinate system). The grammar REJECTS `_component_of_`; a trailing `_<component>` suffix mis-parses. ✓ `toroidal_ion_rotation_frequency`; ✗ `ion_rotation_frequency_toroidal`, ✗ `heat_flux_poloidal`. (See N2, N6.)
+- **`diamagnetic` is NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation). The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` IS a specific drift, not a component of another velocity along a "diamagnetic axis". When a DD path has a sibling/subfield literally named `diamagnetic` (common on transport/edge paths: `current_density/diamagnetic`, `electric_field/diamagnetic`, `velocity/diamagnetic`), DO NOT translate the label as a projection. It is shorthand for "the part due to the diamagnetic drift": use `process_token="diamagnetic_drift"` (for currents/fluxes → `<base>_due_to_diamagnetic_drift`) or the correct drift-velocity name (`diamagnetic_drift_velocity`, `ion_diamagnetic_drift_velocity`). ✗ `diamagnetic_electric_field` (a field has no "diamagnetic" projection); ✗ `diamagnetic_ion_velocity`. Reserve `diamagnetic` for the drift-velocity concept. (See N4.)
 
-Forbidden suffixes:
-  - _measurement_time
-  - _constraint
-  - _constraint_weight
-  - _constraint_weight_of_*
+### Locus relation (`locus_relation` — the semantic of/at/over choice)
 
-Forbidden tokens:
-  - equilibrium_reconstruction_
-  - ggd_object_
-  - _constraint_reconstructed_
-  - _constraint_measured_
-  - ntm_ (use neoclassical_tearing_mode_)
-  - ec_ (use electron_cyclotron_)
-  - exb_ (use e_cross_b_ or decomposition(drift_type))
-  - norm_ (use normalized_)
+The single most-repeated field choice: which `locus_relation` to pair with a `locus_token`. The composer spells the preposition — you pick the **semantic relationship** by base type. Set `locus_relation` ∈ {`of`, `at`, `over`} with a matching `locus_type` (the schema lists valid combinations).
 
-Forbidden names (Report 7 anti-patterns — skip or rename):
-  - bandwidth_3db (alphanumeric; skip or use cutoff_frequency)
-  - turn_count (hardware winding property, not a physics observable — skip)
-  - vertical_coordinate (bare — always needs `_of_<entity>`, e.g. `vertical_coordinate_of_x_point`)
-  - nuclear_charge_number (use atomic_number)
-  - azimuth_angle (use toroidal_angle)
-  - distance_between_*_and_* (combinatorial pattern — creates corpus bloat; skip these paths)
+- **`at` + position** — the base is an **evaluated field** sampled at a spatial point: the quantity exists everywhere and you read its value at one locus. Field-class bases that take `at`: `temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `velocity_magnitude`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `radiation_density`, `mass_density`, `loop_voltage`, `electric_potential`, `electrostatic_potential`, `kinetic_energy`, `internal_energy`, `enthalpy`, `entropy` — and any field/flux/per-volume-or-area density. ✓ `electron_temperature_at_magnetic_axis`, `poloidal_magnetic_flux_at_plasma_boundary`, `electron_density_at_pedestal`.
+- **`of` + position/entity/geometry** — the base is an **intrinsic geometric property** of the named feature: it describes the shape, size, or location of the feature and only makes sense for it. Intrinsic bases that take `of`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`. Use `locus_type="entity"` for devices/objects (`resistance_of_rogowski_coil`), `"position"` for spatial points (`major_radius_of_magnetic_axis`), `"geometry"` for geometric features (`elongation_of_flux_surface`). ✓ `elongation_of_plasma_boundary`, `major_radius_of_magnetic_axis`.
+- **`over` + region** — the base is integrated over a spatial region: `radiated_power_over_plasma_volume`.
+- **The test:** "does the entity *have* this quantity as a defining attribute?" If yes → `of`. If the quantity is a field merely sampled there → `at`. ✗ `poloidal_magnetic_flux_of_plasma_boundary` (flux is a field, evaluated AT the boundary); ✗ `electron_density_of_pedestal` (density is not an intrinsic property of the pedestal).
+- **Value-parameterized positions** (R5 finding, q95-class). For a profile value sampled at a specific numeric coordinate (q95, q at rho=0.5, density at psi_norm=0.95): set `locus_token` to the registered position (e.g. `normalized_poloidal_magnetic_flux`), `locus_relation="at"`, `locus_type="position"`, and `locus_value` to the numeric literal with underscore decimal separator (`"0_95"`). The composer renders `…_at_<position>_equal_to_0_95`. NEVER invent value-baked position tokens (✗ `95_percent_flux_surface`, ✗ `q95_surface`).
+- **Canonical locus tokens — never a synonym** (HARD RULE). Several features have multiple literature names; the catalog uses exactly ONE per concept even when the DD path/description uses an alias. Choose the canonical `locus_token`, THEN apply the of/at test:
 
-When a DD path would produce one of these, SKIP and record as vocab_gap rather
-than composing.
+  | Canonical locus | Forbidden synonyms |
+  |---|---|
+  | `plasma_boundary` | `separatrix`, `last_closed_flux_surface`, `lcfs` |
+  | `divertor_target` | `divertor_plate` |
+  | `magnetic_axis` | `core_axis`, `o_point_axis` (use `o_point` for the field-line topology point) |
+  | `wall` | `wall_surface`, `vacuum_vessel_wall`, `first_wall_surface` |
+  | `pedestal` | `pedestal_region`, `edge_pedestal` |
 
-### NON-NAMEABLE QUANTITIES — route to `skipped`, never compose
+  ✓ `electron_density_at_divertor_target`; ✗ `electron_density_at_separatrix` (synonym → rewritten to `plasma_boundary`); ✗ `electron_density_at_divertor_plate`.
+- **Position token `wall`, never `wall_surface`** — `wall` is the valid registry token; `wall_surface` fails grammar validation (a wall IS a surface). ✓ `emitted_radiation_energy_flux_at_wall`; ✗ `…_at_wall_surface`.
+- **Qualify `outline_point` with its parent entity.** A bare `outline_point` is meaningless; set the compound position (`plasma_boundary_outline_point`, `wall_outline_point`). ✓ `vertical_coordinate_of_plasma_boundary_outline_point`; ✗ `vertical_coordinate_of_outline_point`.
+- **Place names with quantity-words are single location tokens, not quantities.** `center_of_mass` is a reference point (barycentre), not a mass quantity — treat it as a location qualifier. ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`, `center_of_mass_position`; ✗ `mass_velocity`. Apply the same to `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
 
-Some DD paths carry **coordinate or infrastructure bookkeeping**, not a physics
-or geometric observable. A bare name composed for one of these is doomed: it
-fails the semantic-similarity gate (a reader cannot tell what is measured), then
-burns review + every refine rotation before exhausting. Recognise these at
-compose time and add the `source_id` to the `skipped` list (with a `reason`),
-NEVER emit a candidate name.
+### Coordinates — canonical coordinate base, never `_position_of_X`
 
-Route to `skipped` when the path is any of:
+**ABSOLUTE RULE** (regardless of whether the description spells out "coordinate"): when a quantity is a spatial coordinate of a component/point/geometric feature (antenna, launcher, sensor, axis, x-point, strike point, plasma boundary, wall point, …), use the canonical coordinate vocabulary, NEVER `_position_of_X` (which produces silent synonym pairs, e.g. `vertical_coordinate_of_X` vs `vertical_position_of_X`):
 
-- **A time coordinate or timestamp** — `time`, `time_stamp`, `time_begin`,
-  `time_end`, `time_width`, real-time-network timestamps, simulation start/stop
-  times. Time is the independent coordinate of a signal, not a quantity that
-  gets a standard name. (Sources: `real_time_data/topic/time_stamp`,
-  `summary/simulation/time_begin`.)
-- **Signal-chain timing infrastructure** — `latency`, `delay`, acquisition
-  `period`, sampling `interval`, hardware `dead_time`. These describe the data
-  pipeline, not the plasma. (Source: `bremsstrahlung_visible/latency`.)
-- **Counters, indices, and array bookkeeping** — `*_index`, `count`,
-  `*_count`, channel/element/segment ordinals, connectivity arrays.
-- **Pure metadata** — version strings, identifiers, comment/name strings,
-  status/validity flags, scenario labels.
+- Major radius / cylindrical R → `major_radius_of_<X>` (✗ `radial_position_of_<X>`).
+- Toroidal angle / cylindrical φ → `toroidal_angle_of_<X>` (✗ `toroidal_position_of_<X>`).
+- Vertical / Z → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
+- Unspecified 3-vector position with no directional qualifier → plain `position_of_<X>` is acceptable.
+- **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal_vector` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
 
-When in doubt between `skipped` and a real quantity: if the path's unit is `s`
-and its description names a timestamp / latency / acquisition timing, it is
-NON-NAMEABLE → `skipped`. A genuine physics time *interval* with physical
-meaning (e.g. a confinement time, a decay time constant) IS nameable — those are
-the rare exceptions and use a registered `time`-class base only when the
-physics, not the data plumbing, is the subject.
+This rule is unconditional and overrides any apparent symmetry with sibling names.
 
-### MISSING-BASE QUANTITIES — emit a clean `vocab_gap`, never guess a near-base
+### Operators (`operator_token` / `operator_kind`)
 
-When the irreducible quantity has **no registered `physical_base` or
-`geometric_base` token**, emit a `vocab_gap` for the missing base segment — do
-NOT substitute a near-synonym base or fuse the concept into another token. The
-following recur and are genuine base gaps, not nameable with current vocabulary:
+- **Operators are always a leading prefix, never a trailing suffix** — but the two classes attach differently (the composer handles `_of_` insertion; you only pick `operator_kind`):
+  - **Differential / scope operators** (`time_derivative`, `gradient`, `<axis>_derivative`) → `operator_kind="unary_prefix"`. The composer adds `_of_` scope: `time_derivative_of_electron_temperature`, `gradient_of_X`.
+  - **Averaging / reduction / normalization operators** (`volume_averaged`, `line_averaged`, `flux_surface_averaged`, `normalized`, `surface_integrated`, `per_toroidal_mode`, `per_poloidal_mode`) attach BARE (parsed as the outermost qualifier) — also `operator_kind="unary_prefix"`, but the composer emits no `_of_`: `volume_averaged_electron_density`, `normalized_poloidal_magnetic_flux`. Do not flag `per_toroidal_mode`/`per_poloidal_mode` as unknown. (See N3, E8, E11.)
+- **Postfix operators** → `operator_kind="unary_postfix"`, appended directly: `magnetic_field_magnitude`, `X_amplitude`.
+- **Complex parts are POSTFIX, never prefix — HARD PROHIBITION** (the `amplitude_of_prefix_check` audit quarantines violations). For complex-valued perturbation quantities, `real_part` / `imaginary_part` / `amplitude` / `phase` go at the END via `operator_kind="unary_postfix"` — prefix forms break the parser when the inner name already contains `_of_`. ✓ `perturbed_electrostatic_potential_real_part`, `radial_perturbed_magnetic_field_real_part`, `reynolds_stress_tensor_real_part`; ✗ `real_part_of_perturbed_electrostatic_potential`. (See N1, and the rc20 table in `_grammar_reference.md`.)
+- **Ratios use the `ratio_of` operator with `_to_`, not an `<A>_to_<B>_ratio` suffix** (the `ratio_binary_operator_check` audit enforces this). ✓ `ratio_of_ion_to_electron_density`; ✗ `ion_to_electron_density_ratio`.
 
-- A geometric **angle** of a device feature (shatter angle, beam tilt angle,
-  oblique angle) when no registered angle base fits → `vocab_gap`
-  (`segment: geometric_base`). Do not coerce to `angle` if `angle` is not
-  registered, and do not invent `tilt`.
-- A **phase shift** of a probing wave / signal (`phase`, `wave_phase`) → if
-  `phase_shift`/`phase` is not a registered `physical_base`, emit `vocab_gap`
-  rather than composing a bare `wave_phase`.
-- A **mode/perturbation phase** (toroidal-mode phase) when the qualifier
-  (`perturbation`) or base (`phase`) is unregistered → `vocab_gap`, not a
-  guessed compound.
-- A **characteristic length/extent** of an object when `length`/`extent` is not
-  a registered `geometric_base` and an accepted sibling already exists (e.g.
-  `extent_of_pellet`) → reuse the sibling via `attachments`, else `vocab_gap`.
+### Process attribution (`process_token` for `_due_to_`)
 
-A clean compose-time `vocab_gap` is cheap; a guessed near-base churns through
-review and every refine rotation to exhaustion. Surfacing the gap is the correct
-outcome — the vocabulary rotation will add the token if the concept is real.
+- **`process_token` MUST be a process noun from the Process vocabulary** (`ohmic_dissipation`, `impurity_radiation`, `induction`, `conduction`, …) — bare, with no spatial/state qualifier appended. The composer renders `<base>_due_to_<process>`.
+  - **Never a temporal event** after `due_to_` (`disruption`, `ramp_up`, `breakdown`) — use a `during_<event>` construction instead, e.g. `parallel_thermal_energy_during_disruption`.
+  - **Never a bare adjective** — spell out the process noun: `due_to_ohmic_dissipation`, `due_to_halo_currents`, `due_to_runaway_electrons`, `due_to_neutral_beam_injection` (not `due_to_ohmic`/`due_to_halo`/`due_to_runaway`/`due_to_neutral_beam`).
+  - **Never append a location/region/state** to the process token (`_at_X`, `_in_X`, `_on_X`, `_for_X`) — `impurity_radiation_in_halo_region` and `recombination_at_ion_state` are not Process tokens. If you need a place AND a process, move the place to the subject prefix as a `<region>_<rest>` construction: ✓ `halo_region_electron_radiated_energy_due_to_impurity_radiation`; ✓ `ion_incident_energy_flux_at_wall_due_to_recombination` (bare process).
 
-### VOCABULARY REUSE — prefer a registered token over a near-synonym
+### Tense / change semantics
 
-A retry may report that a token you proposed as a `vocab_gap` is semantically
-close to a token already registered in that segment (cosine similarity at or
-above {{ dedup_similarity_threshold }}). When you see such a note:
+- **Match the tense prefix to the path semantics.** Paths under `core_instant_changes/...` (or any IDS modelling **discrete event-driven changes** — sawtooth, ELM, pellet) → `change_in_<base>` (finite increments, not instantaneous derivatives). Paths whose name contains `_dot`, ends in `_tendency`, or sits under a time-derivative IDS (`*_evolution`) → `tendency_of_<base>` or `time_derivative_of_<base>`. Be **consistent across a batch**: if one path under `core_instant_changes/` uses `change_in_`, use it for every sibling under that IDS — mixing `change_in_` and `tendency_of_` for siblings is an anti-pattern.
+- **Component wraps the tense, not vice versa** (ISN grammar). Directional/projection prefixes wrap the entire base including any tense: ✓ `poloidal_change_in_ion_velocity` (`projection_axis=poloidal`, base=`change_in_ion_velocity`), ✓ `toroidal_tendency_of_current_density`; ✗ `change_in_poloidal_ion_velocity` (the parser collapses everything into `physical_base` and the component is lost).
 
-- **PREFER reusing the registered token.** Two tokens that mean the same thing
-  on the same segment axis (e.g. `field_line_length` vs `connection_length`)
-  split the catalog into synonym families — exactly what the closed vocabulary
-  exists to prevent. Re-compose with the registered token.
-- **Keep your token ONLY when the quantity is genuinely DISTINCT** on that
-  segment's axis (the near token is a false friend, not a synonym). In that
-  case re-emit the same `vocab_gap` — it will be recorded as a confirmed
-  new-vocabulary request and surfaced to the vocabulary rotation.
+## Output-Discipline Rules
 
-This is advisory, never a hard rule: a real distinct concept must not be forced
-onto a wrong registered token just because it scored close. Reuse-or-confirm —
-do not silently keep a synonym.
+These constrain *what you emit at all* (skip vs vocab_gap vs compose) and a few semantic guards that aren't single-segment field choices.
 
-### FORBIDDEN PATTERNS (D5 review)
+### When NOT to name — route to `skipped`
 
-The following name patterns produce synonym families or encode orthogonal axes
-that belong in structured annotations. NEVER emit these patterns:
+Some DD paths carry **coordinate or infrastructure bookkeeping**, not a physics observable. A bare name for one of these fails the semantic-similarity gate then burns every refine rotation before exhausting. Recognise these at compose time and add the `source_id` to the `skipped` list (with a `reason`) — NEVER emit a candidate. Skip when the path is:
 
-1. **`_of_plasma` suffix** — when the `physics_domain` already implies a plasma
-   quantity (e.g. `equilibrium`, `transport`, `edge_plasma_physics`,
-   `magnetohydrodynamics`), the bare `_of_plasma` qualifier is redundant. Drop
-   it. **But shape parameters always name the surface they describe** — a
-   triangularity/elongation/etc. is a property *of a specific surface*, so it
-   takes a surface locus, never a bare name: use `_of_plasma_boundary` when the
-   quantity describes the plasma boundary (LCFS) contour, and `_of_flux_surface`
-   (or the specific interior surface) when it describes an interior flux
-   surface. ✓ `triangularity_of_plasma_boundary`, ✓ `elongation_of_flux_surface`;
-   ✗ bare `upper_triangularity` (triangularity of WHICH surface?).
-2. **`_per_toroidal_mode_number`** — use `_per_toroidal_mode`. The mode *index*
-   is implicit; appending `_number` creates physics-identical synonym pairs.
-3. **`_over_*` prepositions** — use `_per_*` for all ratio quantities. `_over_`
-   is a colloquial synonym that splits the catalog. ❌ `velocity_over_magnetic_field_strength`
-   → ✅ `velocity_per_magnetic_field_strength`. **Exception:** `over_<region>`
-   (e.g. `over_halo_region`) is the valid Region segment — do not confuse
-   division-surrogate `_over_` with the spatial Region qualifier.
-4. **`electron_thermal_*`** — population precedes species in the canonical form.
-   Use `thermal_electron_*` (e.g. `thermal_electron_pressure`, not
-   `electron_thermal_pressure`). Same for `ion_thermal_*` → `thermal_ion_*`.
+- **A time coordinate or timestamp** — `time`, `time_stamp`, `time_begin`, `time_end`, `time_width`, real-time-network timestamps, simulation start/stop times. Time is the independent coordinate of a signal, not a named quantity. (e.g. `real_time_data/topic/time_stamp`, `summary/simulation/time_begin`.)
+- **Signal-chain timing infrastructure** — `latency`, `delay`, acquisition `period`, sampling `interval`, hardware `dead_time` (the data pipeline, not the plasma; e.g. `bremsstrahlung_visible/latency`).
+- **Counters, indices, array bookkeeping** — `*_index`, `count`, `*_count`, channel/element/segment ordinals, connectivity arrays.
+- **Pure metadata** — version strings, identifiers, comment/name strings, status/validity flags, scenario labels.
+- **Array indices, structural containers, coordinate grids** (`rho_tor_norm`, `psi`, etc.).
 
-### COLLAPSE-OR-JUSTIFY RULE
+Tie-breaker: if a path's unit is `s` and its description names a timestamp/latency/acquisition timing → `skipped`. A genuine physics time *interval* (confinement time, decay time constant) IS nameable — the rare exception, using a registered `time`-class base only when the physics, not the plumbing, is the subject.
 
-Before emitting a qualified name `<base>_<qualifier>`, check whether `<base>`
-already exists in the provided existing-SN context with the same unit and
-physics domain. If so, you MUST do one of:
+### Inverse-problem role wrappers — SKIP
 
-- **Merge**: attach the source path to the existing `<base>` name (use
-  `attachments`). This is preferred when the qualifier adds no new physics.
-- **Justify**: keep the qualified name but write an explicit justification in
-  `documentation` explaining why `<base>` is insufficient (e.g. different
-  sign convention, different coordinate system, different integration surface).
+The tokens `_constraint_weight`, `_constraint_measurement_time`, `_constraint_measured_value`, `_constraint_reconstructed_value` encode roles in an inverse-problem solver, NOT physical-quantity properties. Emit only the **base physical quantity** (e.g. `flux_loop_voltage`, `mse_polarization_angle`); SKIP any path that is purely a role wrapper (e.g. `equilibrium/time_slice/constraints/flux_loop/*/weight`). A future `inverse_problem_role` annotation will carry the role structurally — do not anticipate it in the name.
 
-Never silently emit a qualifier variant alongside an existing unqualified name.
+### When the base is missing — emit a clean `vocab_gap`, never guess a near-base
 
-**Source-stated qualifiers are physically essential — never drop them.** A
-qualifier that appears in the source's provided description/documentation
-(e.g. `coolant` in "Inlet coolant pressure", `neutron` and `maximum` in
-"Maximum neutron flux at the first wall") is part of the quantity's physical
-identity, not redundancy — keep it. Faithfulness to the source description
-outranks brevity. Only **domain-implied boilerplate** (`equilibrium_` in the
-equilibrium domain, `_of_plasma` in transport) and **metadata** (provenance,
-processing-state, non-intrinsic instrument tokens) may be dropped as redundant.
-When unsure whether a qualifier is essential, keep it.
+When the irreducible quantity has **no registered `physical_base`/`geometric_base` token**, emit a `vocab_gap` for the missing segment — do NOT substitute a near-synonym or fuse the concept into another token. A clean compose-time `vocab_gap` is cheap; a guessed near-base churns through review and every refine rotation to exhaustion. Genuine recurring base gaps:
 
-**PRECEDENCE — specificity vs over-qualification (the one tie-breaker).** Two
-rules pull in opposite directions: "be specific / self-describing" says add
-qualifiers; "no over-qualification" says drop redundant ones. Resolve every
-such conflict with this single test on the candidate qualifier:
+- A geometric **angle** of a device feature (shatter angle, beam tilt, oblique angle) when no registered angle base fits → `vocab_gap` (`segment: geometric_base`). Don't coerce to `angle` if unregistered; don't invent `tilt`.
+- A **phase shift** of a probing wave/signal → if `phase_shift`/`phase` is not a registered `physical_base`, `vocab_gap` rather than a bare `wave_phase`.
+- A **mode/perturbation phase** when the qualifier (`perturbation`) or base (`phase`) is unregistered → `vocab_gap`, not a guessed compound.
+- A **characteristic length/extent** when `length`/`extent` is not a registered `geometric_base` and an accepted sibling exists (e.g. `extent_of_pellet`) → reuse the sibling via `attachments`, else `vocab_gap`.
 
-- **Does it distinguish this quantity from a sibling?** If removing the
-  qualifier would let the name denote a *different* DD quantity — a different
-  locus, projection/component, species, medium, extremum, or surface — the
-  qualifier is **DISTINGUISHING and REQUIRED**. Specificity wins. (e.g. `main`
-  in `major_radius_of_main_x_point`, `neutron` in `maximum_neutron_flux_at_wall`,
-  `toroidal` on a vector component.)
-- **Or is it already entailed by the base quantity or the domain?** If the
-  canonical quantity *inherently* implies it — so removing it leaves the name
-  denoting the same quantity — the qualifier is **over-qualification and
-  DROPPED**. Anti-over-qualification wins. (e.g. `toroidal` on `plasma_current`
-  — plasma current is inherently toroidal; `_of_plasma` in a plasma domain.)
+### Vocabulary reuse vs confirm
 
-The test is "would the name still pick out exactly this quantity without the
-qualifier?" — drop only when the answer is yes. When genuinely uncertain
-whether two sibling quantities are distinct, keep the qualifier (a redundant
-qualifier is a lesser error than an ambiguous name).
+Before emitting ANY `vocab_gap`, run the gap-validation checks in `_grammar_reference.md` (cross-segment, decomposition, semantic-coverage). A retry may report that a token you proposed is within cosine {{ dedup_similarity_threshold }} of a token already registered in that segment:
 
-### CONSTRAINT ROLE ABSTRACTION (inverse-problem metadata)
+- **PREFER reusing the registered token.** Two tokens meaning the same thing on the same segment axis (e.g. `field_line_length` vs `connection_length`) split the catalog into synonym families — exactly what the closed vocabulary prevents. Re-compose with the registered token.
+- **Keep your token ONLY when the quantity is genuinely DISTINCT** on that segment's axis (the near token is a false friend). Re-emit the same `vocab_gap` — it becomes a confirmed new-vocabulary request for the rotation.
 
-The tokens `_constraint_weight`, `_constraint_measurement_time`,
-`_constraint_measured_value`, and `_constraint_reconstructed_value` encode
-roles in an inverse-problem solver, NOT properties of the physical quantity.
-**NEVER** encode these as separate standard names. Instead:
+This is advisory: a real distinct concept must not be forced onto a wrong registered token just because it scored close. Reuse-or-confirm — never silently keep a synonym.
 
-- Emit only the **base physical quantity** (e.g. `flux_loop_voltage`,
-  `mse_polarization_angle`, `poloidal_magnetic_field_probe_voltage`).
-- SKIP any DD path that is purely an inverse-problem role wrapper
-  (e.g. `equilibrium/time_slice/constraints/flux_loop/*/weight`).
-- A future `inverse_problem_role` annotation will carry the role metadata
-  structurally — do not anticipate it in the name.
+### No provenance / state / structural prefixes
 
-### SPECTRUM UNIT RULE
+Standard names describe **what** is measured, not **when**, **how**, or **where stored**. The following prefixes are forbidden as bare prefixes — drop them; the physics quantity is the same regardless of measurement state. If the state is genuinely critical (rare), use a registered operator (e.g. `uncertainty_of_*`); else emit `vocab_gap`.
 
-If the subject ends in `_spectrum`, the unit MUST be a per-quantity form
-(`X.Hz^-1`, `X.s`, `X` per integer mode-number, etc.). A bare extensive
-unit (e.g. plain `W` for a power spectrum, plain `A` for a current spectrum)
-is dimensionally wrong — the spectral coordinate is missing.
-
-When composing a `_spectrum` name:
-- The documentation MUST state which integration variable closes the budget
-  (e.g. "integrating over toroidal mode number $n_\phi$ recovers the total
-  power in W").
-- If the DD-supplied unit lacks the spectral denominator, note the
-  inconsistency in `documentation`.
-
-### BOILERPLATE SUPPRESSION
-
-For χ² weights and Maxwellian-pressure definitions:
-- Do NOT re-derive the generic inverse-problem role definition per name.
-  Use a one-line reference: "Standard χ² weight controlling the relative
-  importance of this measurement in the equilibrium reconstruction."
-- Do NOT repeat the ideal-gas-law derivation (`p = nkT`) for every
-  pressure variant. Reference: "Thermal pressure of the electron
-  population; see `thermal_electron_pressure` for the defining relation."
-
-### Composition Guidance
-
-The ISN grammar uses a 5-group IR (operators, projection, qualifiers, base, locus/mechanism).
-Your name must render from this IR. Key composition rules:
-
-- **Use only registered tokens** — every segment has a defined token list.
-  If no token fits, emit a `vocab_gap`. Do NOT invent compounds like
-  `bounce_height` or `detector_sensitivity` — these are not registered and
-  will be rejected.
-- **Prefix operators come in two grammar classes — match each one:**
-  - **Differential / scope operators** (`time_derivative`, `gradient`,
-    `<axis>_derivative`) take explicit `_of_` scope: ✓ `time_derivative_of_X`,
-    `gradient_of_X`, `radial_derivative_of_X`. The bare form is INVALID
-    (non-canonical token order).
-  - **Averaging / reduction / normalization operators** (`volume_averaged`,
-    `line_averaged`, `flux_surface_averaged`, `normalized`) are **bare
-    prefixes** — they attach directly, NO `_of_`: ✓ `volume_averaged_electron_density`,
-    `flux_surface_averaged_current_density`, `normalized_poloidal_magnetic_flux`.
-    The `_of_` form is INVALID (✗ `volume_averaged_of_electron_density`).
-- **Postfix operators concatenate directly**: `X_magnitude`, `X_amplitude`.
-- **Complex parts use prefix form**: `real_part_of_X`, `imaginary_part_of_X` — this is
-  the canonical ISN form. The prefix correctly parses as `transformation=real_part`.
-- **Projection is always a leading qualifier**: `radial_magnetic_field`. Never trail the axis.
-- **Locus is always postfix**: `electron_temperature_at_magnetic_axis`.
-  Use `_of_` for entity properties, `_at_` for field values at points, `_over_` for regions.
-- **Mechanism is always postfix**: `plasma_current_due_to_bootstrap`.
-
-### BANNED PREFIXES — state and provenance descriptors
-
-The following prefixes are **absolutely forbidden** as bare name prefixes. They encode
-temporal or epistemic state of the measurement, not the physics quantity itself.
-
-| Banned prefix | Rationale |
+| Forbidden prefix | Rationale |
 |---|---|
-| `initial_` | Temporal state descriptor — when a quantity was measured is metadata, not physics |
-| `final_` | Temporal state descriptor — same rationale as `initial_` |
-| `reconstructed_` | Provenance — how a quantity was derived is metadata (already in REJECT list) |
-| `measured_` | Provenance — data source is metadata (already in REJECT list) |
-| `modeled_` | Provenance — model origin is metadata |
-| `predicted_` | Provenance — predictive context is metadata |
-| `expected_` | Epistemic state — expectation value belongs in documentation, not name |
-| `raw_` | Processing state — pre-calibrated data is metadata |
-| `calibrated_` | Processing state — post-calibrated data is metadata |
-| `corrected_` | Processing state — correction applied is metadata |
-| `smoothed_` | Processing state — smoothing is metadata |
-| `filtered_` | Processing state — filtering is metadata |
+| `initial_`, `final_` | Temporal state — when measured is metadata |
+| `reconstructed_`, `measured_`, `modeled_`, `predicted_` | Provenance — data source/origin is metadata |
+| `expected_` | Epistemic state — expectation value belongs in documentation |
+| `raw_`, `calibrated_`, `corrected_`, `smoothed_`, `filtered_` | Processing state — pipeline stage is metadata |
+| `launched_`, `post_crash_`, `prefill_` | State-of-knowledge prefixes |
 
-**Rule**: If the DD path or documentation implies one of these descriptors, drop it from the
-name entirely — the physics quantity is the same regardless of measurement state. If the
-state is critical to semantics (rare), use a registered operator (e.g. `uncertainty_of_*`
-is a valid operator form; `raw_*` is not). Emit `vocab_gap` if no canonical form exists.
+Also forbidden anywhere in a name (encode data-model structure or solver semantics, not physics): `explicit_`, `implicit_part_of_`, `equilibrium_reconstruction_`, `ggd_object_`, `_constraint`, `_constraint_weight`, `_measurement_time`, `obtained_from`, `stored_in`, `derived_from`, `referenced_by`, `defined_in`, `used_for`. Provenance qualifiers (`measured`, `reconstructed`, `simulated`) may appear ONLY when they distinguish genuinely different physical quantities (a measured signal vs a synthetic diagnostic), never as method annotations.
+- ❌ `electron_temperature_fit_measured` → ✅ `electron_temperature`
+- ❌ `plasma_current_reconstructed_value` → ✅ `plasma_current`
+- ❌ `pressure_chi_squared` → ✅ skip (a fit diagnostic, not a physics quantity)
 
-### INSTRUMENT HANDLING — entity names as postfix locus only
+### No abbreviations, acronyms, alphanumerics; US spelling
 
-Instrument, diagnostic, and named-entity tokens
-(e.g. `polarimeter`, `interferometer`, `reflectometer`, `thomson_scattering`,
-`ece`, `neutron_camera`, `bolometer`, `langmuir_probe`, `rogowski_coil`)
-**must appear exclusively as a postfix locus** — in the `_of_<instrument>` tail, never
-as a bare prefix or qualifier.
+Names are spelled-out English words joined by `_`. Reject candidates containing digits (`3db`, `20_80`), acronyms (`mse`, `sol`, `nbi`), or truncated tokens (`norm_`, `perp_`, `ec_`). US spelling only — no British variants (`analyse`, `fibre`, `ionisation`, `normalised`, `centre`, `behaviour`); see NC-17 for the canonical-pair table. Token substitutions: `ntm_`→`neoclassical_tearing_mode_`, `ec_`→`electron_cyclotron_`, `exb_`→`e_cross_b_` (or `decomposition(drift_type)`), `norm_`→`normalized_`.
 
-**Rationale (DD-independence):** A standard name describes a physics quantity that
-*happens* to be measurable by an instrument, not the instrument's property. The instrument
-is locus metadata; the physics base is what varies across DD paths.
+### Hardware / instrument tokens are postfix locus only
 
-| ❌ Instrument as prefix | ✅ Canonical form | Anti-pattern type |
-|---|---|---|
-| `polarimeter_laser_wavelength` | `vacuum_wavelength_of_polarimeter_beam` | Instrument as prefix |
-| `interferometer_line_density` | `line_integrated_electron_density_of_interferometer_chord` | Instrument as prefix |
-| `thomson_scattering_electron_temperature` | `electron_temperature` | Device removed (DD-independent) |
-| `langmuir_probe_ion_saturation_current` | `ion_saturation_current_of_langmuir_probe` | Instrument as prefix |
+Instrument, diagnostic, and named-hardware tokens (`probe`, `sensor`, `antenna`, `channel`, `injector`, `aperture`, `coil`, `mirror`, `launcher`, `polarimeter`, `interferometer`, `reflectometer`, `thomson_scattering`, `ece`, `neutron_camera`, `bolometer`, `langmuir_probe`, `rogowski_coil`, …) may appear ONLY as a postfix `_of_<instrument>` locus — never as `base_token`, a leading prefix, or a qualifier. A standard name describes a physics quantity that *happens* to be measurable by an instrument, not the instrument's reading.
 
-**Locus token rules:**
-- Use the instrument name alone or with a minimal physical qualifier: `_of_polarimeter_beam`,
-  `_of_interferometer_chord`, `_of_bolometer_channel`.
-- Never embed channel numbering or sub-component identity: ❌ `_of_polarimeter_channel_beam`
-  (drop `_channel`); ❌ `_of_probe_tip_3` (non-canonical numbering).
-- When the instrument is implicit from the physics domain (e.g. all paths in the
-  `thomson_scattering` IDS describe TS quantities), drop the instrument locus entirely —
-  use the bare physics name.
+- ✓ `ion_saturation_current_of_langmuir_probe`, `vacuum_wavelength_of_polarimeter_beam`, `line_integrated_electron_density_of_interferometer_chord`, `rotation_angle_of_electron_cyclotron_launcher_mirror`.
+- ✗ `probe_voltage`, ✗ `polarimeter_laser_wavelength`, ✗ `interferometer_line_density`.
+- **Drop the instrument entirely when it is implicit from the physics domain** (all paths in a `thomson_scattering` IDS describe TS quantities) — use the bare physics name: `thomson_scattering_electron_temperature` → `electron_temperature`.
+- **Locus tokens stay minimal:** instrument name alone or with a minimal physical qualifier (`_of_polarimeter_beam`, `_of_bolometer_channel`). Never embed channel numbering or sub-component identity: ✗ `_of_polarimeter_channel_beam` (drop `_channel`), ✗ `_of_probe_tip_3`.
+- **Hardware-property exception:** when the quantity is INTRINSIC to the device (a geometric/electrical property of the hardware itself), keep the instrument as `_of_<instrument>` locus: ✓ `cross_sectional_area_of_rogowski_coil`, ✓ `length_of_flux_loop` — these IS-A coil/loop properties.
+- **Decision rule:** if the same observable measured by a different instrument would yield the same physical meaning → drop the instrument. If the quantity describes the instrument's geometry/electrical state/material → keep it as the locus.
+- **Compound hardware identifiers:** if a DD path stacks ≥2 hardware tokens (`sensor/direction`, `coil/turn/winding`, `probe/tip/electrode`), keep at most ONE — and only if intrinsic to the physics; otherwise drop them all and name the underlying physical concept. ✗ `z_coordinate_of_sensor_direction_unit_vector` → ✓ `vertical_surface_normal_vector`/`z_direction_unit_vector` (a unit-vector field's Z-component is a vector projection); → `winding_number`, `electrode_voltage`.
+
+### Collapse-or-justify, and qualifier precedence
+
+Before emitting a qualified name `<base>_<qualifier>`, check whether `<base>` already exists in the provided existing-SN context with the same unit and physics domain. If so, you MUST either **merge** (attach the source path to the existing `<base>` via `attachments` — preferred when the qualifier adds no new physics) or **justify** (keep the qualified name but explain in `documentation` why `<base>` is insufficient: different sign convention, coordinate system, integration surface). Never silently emit a qualifier variant alongside an existing unqualified name.
+
+**Source-stated qualifiers are physically essential — never drop them.** A qualifier in the source's description/documentation (`coolant` in "Inlet coolant pressure", `neutron` and `maximum` in "Maximum neutron flux at the first wall") is part of the quantity's physical identity, not redundancy. Faithfulness to the source outranks brevity. Only **domain-implied boilerplate** (`equilibrium_` in the equilibrium domain, `_of_plasma` in a plasma domain) and **metadata** (provenance, processing-state, non-intrinsic instrument tokens) may be dropped. When unsure, keep it.
+
+**PRECEDENCE — the one tie-breaker** between "be specific" and "no over-qualification". For each candidate qualifier ask: **does it distinguish this quantity from a sibling?**
+- If removing it would let the name denote a *different* DD quantity (different locus, projection/component, species, medium, extremum, or surface) → the qualifier is **DISTINGUISHING and REQUIRED**; specificity wins. (`main` in `major_radius_of_main_x_point`, `neutron` in `maximum_neutron_flux_at_wall`, `toroidal` on a vector component.)
+- If the canonical quantity *inherently* implies it (removing it leaves the same quantity) → **over-qualification, DROPPED**. (`toroidal` on `plasma_current` — plasma current is inherently toroidal; `_of_plasma` in a plasma domain.)
+
+The test is "would the name still pick out exactly this quantity without the qualifier?" — drop only when the answer is yes. When genuinely uncertain whether two siblings are distinct, keep the qualifier (a redundant qualifier is a lesser error than an ambiguous name).
+
+### Forbidden synonym-family patterns (D5 review)
+
+These produce synonym families or encode orthogonal axes that belong in structured annotations — NEVER emit:
+
+1. **`_of_plasma` when the domain already implies plasma** (`equilibrium`, `transport`, `edge_plasma_physics`, `magnetohydrodynamics`) — drop the redundant qualifier. **But shape parameters always name the surface they describe**: triangularity/elongation/etc. is a property *of a specific surface*, so it takes a surface locus — `_of_plasma_boundary` for the LCFS contour, `_of_flux_surface` for an interior surface. ✓ `triangularity_of_plasma_boundary`; ✗ bare `upper_triangularity` (of WHICH surface?).
+2. **`_per_toroidal_mode_number`** → use `_per_toroidal_mode` (the mode *index* is implicit; `_number` creates physics-identical synonym pairs).
+3. **`_over_*` as a division surrogate** → use `_per_*` for ratio quantities. ✗ `velocity_over_magnetic_field_strength` → ✓ `velocity_per_magnetic_field_strength`. **Exception:** `over_<region>` (e.g. `over_halo_region`) is the valid Region segment — do not confuse the division-surrogate `_over_` with the spatial Region qualifier.
+
+### Bare `field`, `_density`, and `_spectrum` discipline
+
+- **Never the bare token `field`** — it is colloquial and ambiguous. Always qualify: `magnetic_field`, `electric_field`, `radiation_field`. The DD often abbreviates `b_field`/`field` for `magnetic_field` — expand explicitly. ✗ `vacuum_toroidal_field_at_reference_major_radius` → ✓ `vacuum_toroidal_magnetic_field_at_reference_major_radius`.
+- **`_density` suffix MUST agree with the DD-supplied unit.** A `_density` name claims per-volume/area/length, so the unit must contain `m^-3`, `m^-2`, or `m^-1`. If the unit is a bare extensive quantity (`kg.m.s^-1` for momentum, `J` for energy without `m^-3`), drop `_density` or rename. ✗ `toroidal_angular_momentum_density` with `kg.m.s^-1` → ✓ `toroidal_momentum_per_unit_radius`.
+- **`_spectrum` subjects need a per-quantity unit.** If the subject ends in `_spectrum`, the unit MUST be a per-quantity form (`X.Hz^-1`, `X.s`, `X` per integer mode-number). A bare extensive unit (plain `W` for a power spectrum, plain `A` for a current spectrum) is dimensionally wrong — the spectral coordinate is missing. The documentation MUST state which integration variable closes the budget (e.g. "integrating over toroidal mode number $n_\phi$ recovers the total power in W"); if the DD unit lacks the spectral denominator, note the inconsistency in `documentation`.
+
+### Attachments — tense consistency (strict)
+
+An attachment from a DD path to an existing standard name is valid only when both refer to the same physical aspect:
+- A path under `core_instant_changes/...`, `*/instant_changes/...`, or containing `change`/`delta`/`tendency` represents an **incremental change**. It MUST attach only to names beginning `change_in_`, `tendency_of_`, `rate_of_`, `rate_of_change_of_`, or `time_derivative_of_` — never to a base-quantity name like `electron_density`.
+- Conversely a base-quantity path (e.g. `core_profiles/profiles_1d/electrons/density`) MUST NOT attach to a `change_in_*`/`tendency_of_*`/`rate_of_*` name.
+- When unsure, do not attach — emit a fresh candidate. Wrong attachments corrupt downstream consumers far more than missing ones.
+
+### Previous-name handling
+
+When a **Previous name** is shown for a path: reuse it if good (stability matters for downstream consumers); replace + explain in documentation if you can clearly improve it; strongly prefer keeping a human-accepted (⚠️) name. Never feel anchored to a bad previous name — replace without hesitation when you can do better.
+
+### Physics disambiguation glossary
+
+These terms are NOT synonyms — pick the one supported by the source description:
+
+- `geometric_axis` — geometric centre of the plasma cross-section (boundary centroid); minor-radius reference. UNIT: m.
+- `magnetic_axis` — point where the poloidal field vanishes inside the plasma (flux-surface centre). Distinct from geometric axis.
+- `current_center` / `current_centroid` — first moment of the toroidal current-density distribution. Distinct from both axes; use only when the DD exposes a current-moment quantity.
+- `plasma_boundary` — canonical token for the LCFS / the physical boundary used for a computation (may be separatrix- or limiter-defined). Always include the qualifier; do NOT substitute `separatrix` or `last_closed_flux_surface` (non-canonical synonyms, rewritten by the audit) unless the source specifies it. In double-null configurations there are `primary`/`secondary` variants — qualify when the DD distinguishes them.
+
+### Boilerplate suppression
+
+- For χ² weights: one-line reference, do not re-derive the generic inverse-problem role per name — "Standard χ² weight controlling the relative importance of this measurement in the equilibrium reconstruction."
+- For Maxwellian pressure: do not repeat the ideal-gas-law derivation (`p = nkT`) per variant — "Thermal pressure of the electron population; see `thermal_electron_pressure` for the defining relation."
+
+## REJECT — Forbidden Name Tokens (audit-enforced quick list)
+
+Skip and record as `vocab_gap`/`skipped` rather than composing when a DD path would produce any of these audit anti-patterns:
+
+- `bandwidth_3db` (alphanumeric → use `cutoff_frequency`)
+- `turn_count` (hardware winding property, not a physics observable)
+- bare `vertical_coordinate` / bare `outline_point` (always need `_of_<entity>`)
+- `nuclear_charge_number` (→ `atomic_number`)
+- `azimuth_angle` (→ `toroidal_angle`)
+- `distance_between_*_and_*` (combinatorial pattern → corpus bloat; skip)
+
+(These are the audit's hard-reject names; the broader forbidden-prefix/structural-leakage lists are in the no-provenance section above.)
 
 ### ANTI-PATTERN REFERENCE — real review failures
 
-Curated from the EMW pilot (polarimetry) and W37 rotation Set C (spectrometers,
-gyrokinetics, wall geometry). Study these before composing names for any
-diagnostic-heavy IDS.
+Curated from the polarimetry pilot and the spectrometer/gyrokinetics/wall-geometry rotation. Study these before composing names for any diagnostic-heavy IDS.
 
-**EMW-1 — Instrument as bare prefix**
-- ❌ `polarimeter_laser_wavelength` (score 0.50)
-- ✅ `vacuum_wavelength_of_polarimeter_beam`
-- *Fix:* Move instrument to `_of_` locus; add physical qualifier `vacuum_`.
+**Instrument as bare prefix.**
+- ❌ `polarimeter_laser_wavelength` (score 0.50) → ✅ `vacuum_wavelength_of_polarimeter_beam` (move instrument to `_of_` locus; add physical qualifier `vacuum_`).
 
-**EMW-2 — State prefix + unregistered base → emit vocab_gap**
-- ❌ `initial_ellipticity_of_polarimeter_channel_beam` (score 0.3625)
-- ✅ Emit `vocab_gap` — `ellipticity` is not a registered `physical_base` token.
-- *Fix:* Drop `initial_`; simplify locus to `_of_polarimeter_beam`; surface vocab gap
-  rather than fabricating a base token.
+**State prefix + unregistered base → emit vocab_gap.**
+- ❌ `initial_ellipticity_of_polarimeter_channel_beam` (0.3625) → ✅ emit `vocab_gap` (`ellipticity` is not a registered `physical_base`); drop `initial_`, simplify locus to `_of_polarimeter_beam`.
 
-**W38-A1 — Instrument prefix carry-over (physics-quantity case).**
-*Why wrong:* Standard names describe physical quantities, not instrument readings.
-When the DD path lives under an instrument subtree (spectrometer, camera, magnet,
-coil, probe, detector, sensor) but the leaf is a generic physical observable
-(photon energy, count rate, brightness), the instrument tokens MUST be dropped — they
-are DD-tree leakage, not physics qualifiers.
-- ❌ `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound`
-- ✅ `photon_energy_lower_bound`
-- *Hardware-property exception:* When the quantity is INTRINSIC to the device
-  (geometric or electrical property of the hardware itself), keep the instrument as
-  postfix locus: ✓ `cross_sectional_area_of_rogowski_coil` (★0.94),
-  ✓ `length_of_flux_loop` — these IS-A coil/loop properties.
-- *Decision rule:* If the same observable could be measured by a different instrument
-  and yield the same physical meaning → drop the instrument. If the quantity describes
-  the instrument's geometry, electrical state, or material → keep it as
-  `_of_<instrument>` locus per INSTRUMENT HANDLING above.
+**Instrument prefix carry-over (physics-quantity case).** When the DD path lives under an instrument subtree (spectrometer, camera, magnet, coil, probe, detector, sensor) but the leaf is a generic physical observable (photon energy, count rate, brightness), the instrument tokens are DD-tree leakage — drop them.
+- ❌ `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` → ✅ `photon_energy_lower_bound`.
+- *Hardware-property exception applies* (see Hardware section): ✓ `cross_sectional_area_of_rogowski_coil`.
 
-**W38-A2 — Suffix-form for component instead of canonical prefix.**
-*Why wrong:* The ISN 5-group decomposition (transformation, component, base, position,
-qualifier) places the component (`parallel`, `perpendicular`, `poloidal`, `toroidal`,
-`radial`, `vertical`) and transformation (`derivative_of`, `normalized_of`,
-`imaginary_part_of`) BEFORE the base via `<modifier>_of_<base>`. Suffix forms collapse
-component, transformation, and reducer tokens into `physical_base`, breaking the parser.
-- ❌ `halo_region_parallel_energy_due_to_heat_flux`
-- ✅ `parallel_halo_energy`
-- ❌ `vertical_coordinate_of_geometric_axis_radial_derivative_wrt_minor_radius`
-- ✅ `derivative_with_respect_to_minor_radius_of_vertical_coordinate_of_geometric_axis`
-- ❌ `gyroaveraged_parallel_velocity_moment_imaginary_part_normalized`
-- ✅ Restructure as `<axis>_<base>` (leading qualifier prefix), or skip + emit
-  `vocab_gap` if the chain exceeds the two-`_of_` nesting limit (HARD PRE-EMIT #9).
-- *Top-scoring exemplars:* `parallel_runaway_electron_current_density`
-  (★0.95), `parallel_fast_electron_pressure` (★0.95).
-- *Decision rule:* Component, transformation, and reducer tokens always come BEFORE
-  the base via `_of_`. Never trail them as suffixes. Cross-check with NC-20 (real_part /
-  imaginary_part / amplitude / phase are the only sanctioned SUFFIX modifiers).
+**Suffix-form for component instead of canonical prefix.** Component (`parallel`, `perpendicular`, `poloidal`, `toroidal`, `radial`, `vertical`) and transformation (`derivative_of`, `imaginary_part_of`) tokens go BEFORE the base, never trailed as suffixes (suffixes collapse them into `physical_base` and break the parser). Cross-check NC-20 (real_part/imaginary_part/amplitude/phase are the only sanctioned SUFFIX modifiers).
+- ❌ `halo_region_parallel_energy_due_to_heat_flux` → ✅ `parallel_halo_energy`.
+- ❌ `vertical_coordinate_of_geometric_axis_radial_derivative_wrt_minor_radius` → ✅ `derivative_with_respect_to_minor_radius_of_vertical_coordinate_of_geometric_axis`.
+- ❌ `gyroaveraged_parallel_velocity_moment_imaginary_part_normalized` → ✅ restructure as `<axis>_<base>`, or skip + `vocab_gap` if the chain exceeds the parser's nesting limit.
+- *Top exemplars:* `parallel_runaway_electron_current_density` (★0.95), `parallel_fast_electron_pressure` (★0.95).
 
-**W38-A3 — Compound hardware identifiers concatenated in name body.**
-*Why wrong:* When a DD path nests multiple hardware-tree segments (e.g.
-`magnetics/.../sensor/direction/unit_vector`), concatenating all of them into the
-name body (`sensor_direction_unit_vector`) duplicates the leakage warned against in
-HARD PRE-EMIT CHECK #3 and INSTRUMENT HANDLING. Extract the most general physical
-concept; drop intermediate hardware tokens.
-- ❌ `z_coordinate_of_sensor_direction_unit_vector`
-- ✅ `z_direction_unit_vector` (a unit vector field's Z-component
-  is a vector projection, not a coordinate of a point)
-- *Decision rule:* If the DD path stacks ≥2 hardware tokens (`sensor/direction`,
-  `coil/turn/winding`, `probe/tip/electrode`), keep at most ONE hardware token, and
-  only if it is intrinsic to the physics. Otherwise drop them all and let the standard
-  name describe the underlying physical concept (`direction_unit_vector`,
-  `winding_number`, `electrode_voltage`).
+{% include "sn/_coordinate_conventions.md" %}
 
 {% if decomposition_anti_patterns %}
-### W2 DECOMPOSITION-FAILURE GALLERY — registered tokens absorbed into `physical_base`
+### DECOMPOSITION-FAILURE GALLERY — registered tokens absorbed into `physical_base`
 
-These are real names from the W0 reviewer corpus where the dominant failure
-mode (registered tokens absorbed into `physical_base` instead of placed in
-their correct grammar slot) was flagged.  Each entry shows the bad name, the verbatim
-expert critique, the correct slot for each absorbed token, and the rewritten
-canonical name.  Apply the **Decomposition Checklist** in
-`_grammar_reference.md` to every name before emitting it.
+Real names from the reviewer corpus where the dominant failure mode (registered tokens absorbed into `physical_base` instead of placed in their correct grammar slot) was flagged. Each entry shows the bad name, the verbatim expert critique, the correct slot for each absorbed token, and the rewritten canonical name. Apply the **Decomposition Checklist** in `_grammar_reference.md` to every name.
 
 {% for ap in decomposition_anti_patterns %}
-**W2-D{{ loop.index }} — {{ ap.bad_name }}**
+**D{{ loop.index }} — {{ ap.bad_name }}**
 
 - ❌ `{{ ap.bad_name }}`
 - *Critic:* "{{ ap.reviewer_comment | trim }}"
@@ -485,13 +281,12 @@ canonical name.  Apply the **Decomposition Checklist** in
 {% endif %}
 
 {% if w0_curated_examples and w0_curated_examples.outstanding %}
-### W2 EXEMPLAR DECOMPOSITIONS — top-tier W0 reviewer-validated names
+### EXEMPLAR DECOMPOSITIONS — top-tier reviewer-validated names
 
-Reference these high-scoring examples for canonical 5-group decomposition.
-Each entry shows the verbatim reviewer assessment of *why* the name worked.
+Reference these high-scoring examples for canonical 5-group decomposition. Each shows the verbatim reviewer assessment of *why* the name worked.
 
 {% for ex in w0_curated_examples.outstanding[:8] %}
-**W2-E{{ loop.index }} — `{{ ex.id }}`**{% if ex.reviewer_comments_name %}
+**E{{ loop.index }} — `{{ ex.id }}`**{% if ex.reviewer_comments_name %}
 - *Critic:* "{{ ex.reviewer_comments_name | trim | truncate(280) }}"{% endif %}{% if ex.grammar_decomposition %}
 - *Decomposition:* {% for seg, tok in ex.grammar_decomposition.items() %}{% if tok %}`{{ seg }}={{ tok }}` {% endif %}{% endfor %}{% endif %}
 
@@ -579,255 +374,35 @@ Standard names should NOT be created for:
 
 ## Peer-Review Quality Rules
 
-The following rules encode concrete issues found during expert peer review of
-LLM-generated standard names. Treat these as hard constraints.
+The following rules encode concrete issues found during expert peer review of LLM-generated standard names. Treat these as hard constraints.
 
 {% include "sn/_nc_rules.md" %}
 
-### Physics disambiguation glossary
+### Structural Scope
 
-These terms are NOT synonyms. Pick the one supported by the source
-description; do not substitute:
+**SS-1 Prefer generic over explosive.** For machine geometry (positions, cross-sections, areas of device components), prefer generic names parameterized by component metadata over per-component R/Z entries. E.g. one `position_of_flux_loop` rather than dozens of per-loop entries.
 
-- `geometric_axis` — the geometric center of the plasma cross-section
-  (boundary centroid). Used for minor-radius reference. UNIT: m.
-- `magnetic_axis` — the point where the poloidal magnetic field vanishes
-  inside the plasma (flux-surface center). Distinct from geometric axis.
-- `current_center` / `current_centroid` — the first moment of the toroidal
-  current density distribution. Distinct from both geometric and magnetic
-  axes. Only use when the DD explicitly exposes a current-moment quantity.
-- `plasma_boundary` — canonical token for the last-closed flux surface
-  (LCFS). Use this; do **NOT** use `separatrix` or `last_closed_flux_surface`
-  — both are non-canonical synonyms and are rewritten by the audit.
-- `separatrix` (DEPRECATED — auto-rewritten to `plasma_boundary`) — in
-  double-null and near-double-null configurations, there are `primary`
-  and `secondary` variants; qualify when the DD distinguishes them.
-- `plasma_boundary` — the physical boundary used for a given computation
-  (may be the separatrix or a limiter-defined contour). Always include the
-  qualifier — do not substitute `separatrix` unless the source specifies it.
+**SS-2 Standalone fitting quantities.** Generic fitting/uncertainty quantities (`chi_squared`, `fitting_weight`, `residual`) are standalone standard names, not repeated per measured quantity.
 
-### Naming captures the physical quantity, not how it was obtained
+**SS-3 Boundary definition.** When creating boundary-related quantities, document which plasma-boundary definition is assumed (LCFS, 99% ψ_norm, etc.) or note that it is code-dependent.
 
-Standard names describe **what** is measured, not **how** it was measured or processed.
-Avoid processing verbs and method artifacts in names:
-- ❌ `electron_temperature_fit_measured` → ✅ `electron_temperature`
-- ❌ `plasma_current_reconstructed_value` → ✅ `plasma_current`
-- ❌ `pressure_chi_squared` → ✅ (skip — this is a fit diagnostic, not a physics quantity)
-
-Provenance qualifiers like `measured`, `reconstructed`, `simulated` may be included
-only when they distinguish genuinely different physical quantities (e.g., a measured
-signal vs a synthetic diagnostic), not as method annotations.
-
-### One subject per name
-
-Each standard name should describe a single physics quantity for a single particle
-species or component. Do not combine multiple subjects:
-- ❌ `electron_fast_ion_pressure` → ✅ separate names: `electron_pressure`, `fast_ion_pressure`
-- ❌ `deuterium_tritium_density` → ✅ separate names or use a species-generic `fuel_ion_density`
-
-If the DD path describes a multi-species quantity, use the most general applicable
-subject. If no single subject fits, flag it for vocabulary review by including a note
-in the `reason` field.
-
-### State-resolution fidelity (R1 rotation finding, 2026-06-11)
-
-The DD resolves species into ionisation/charge states (`ion(i1)/state(i2)`,
-`neutral/state`). The name's subject MUST match the source's resolution level:
-
-- Source path contains `/state/` → state-resolved subject (`ion_state`,
-  `ion_charge_state`, `neutral_state`). ✓ `perpendicular_fast_ion_state_pressure`
-  for `…/ion/state/pressure_fast_perpendicular`.
-- Species-level path (no `/state/`; DD often says "summed/averaged over
-  states") → species subject (`ion`, `electron`, …).
-- NEVER attach a state-resolved source to a species-level name or vice versa
-  — they are different physical quantities. The species-level name is the
-  state name's structural parent, not its synonym.
-
-### Value-parameterized positions (R5 finding — q95-class quantities)
-
-Profile values sampled AT a specific numeric coordinate (q95, q at rho=0.5,
-density at psi_norm=0.95, …) use the value-parameterized position form:
-set ``locus_token`` to the registered position (e.g.
-``normalized_poloidal_magnetic_flux``), ``locus_relation='at'``,
-``locus_type='position'``, and ``locus_value`` to the numeric literal with
-underscores as decimal separator (``'0_95'``). The composer renders
-``…_at_normalized_poloidal_magnetic_flux_equal_to_0_95``. NEVER invent
-percent- or value-baked position tokens (❌ ``95_percent_flux_surface``,
-❌ ``q95_surface``) — they are not in the registry and fail as vocab gaps.
-
-### Subject required with population/orbit/component prefixes (R1 finding)
-
-A population, orbit, or component prefix on a generic base without a subject
-is grammatically valid but fails review on self-descriptiveness
-(`perpendicular_fast_pressure` → "pressure of WHAT?" — rejected 0.42).
-When the source is species-unresolved (e.g. `distributions/distribution/*`
-where species lives in a sibling identifier), still emit a subject: use the
-distribution's species when identifiable from the provided context, else
-`particle`. ✓ `perpendicular_fast_particle_pressure`, never
-`perpendicular_fast_pressure`.
+**SS-4 Vector units limitation.** Position vectors may have mixed units (m for R, Z; rad for φ). Document this in the description when it applies.
 
 ### Formatting
 
-**FMT-1 YAML block scalars.** Always use `|` (literal block scalar) for
-multiline documentation fields. Never use `>` (folded) — it breaks bullet
-lists and markdown formatting.
+**FMT-1 YAML block scalars.** Always use `|` (literal block scalar) for multiline documentation fields. Never `>` (folded) — it breaks bullet lists and markdown.
 
-**FMT-2 LaTeX safety.** In `|` block scalars, `\n` is literal backslash-n,
-not a newline. This keeps LaTeX commands like `\nabla`, `\nu`, `\theta` intact.
-Never use quoted strings for documentation containing LaTeX.
-
-### Structural Scope
-
-**SS-1 Prefer generic over explosive.** For machine geometry (positions,
-cross-sections, areas of device components), prefer generic names parameterized
-by component metadata over creating separate names for every component's R and
-Z coordinates. E.g., one `position_of_flux_loop` rather than dozens of
-per-loop entries.
-
-**SS-2 Standalone fitting quantities.** Generic fitting/uncertainty quantities
-(`chi_squared`, `fitting_weight`, `residual`) should be standalone standard
-names, not repeated per measured quantity.
-
-**SS-3 Boundary definition.** When creating boundary-related quantities,
-document which definition of plasma boundary is assumed (LCFS, 99% ψ_norm,
-etc.) or note that it is code-dependent.
-
-**SS-4 Vector units limitation.** Position vectors may have mixed units
-(m for R, Z; rad for φ). Document this limitation in the description when it
-applies. (Deferred to ISN vector_axes proposal for structural resolution.)
+**FMT-2 LaTeX safety.** In `|` block scalars, `\n` is literal backslash-n, not a newline — this keeps LaTeX (`\nabla`, `\nu`, `\theta`) intact. Never use quoted strings for documentation containing LaTeX.
 
 {% if physics_domains %}
 ### Physics Domain Reference
 
-The following physics domains classify IMAS data. The `physics_domain` field is
-set automatically from the Data Dictionary — **you do not set it**. This list
-is provided as context for your naming decisions.
+The following physics domains classify IMAS data. The `physics_domain` field is set automatically from the Data Dictionary — **you do not set it**. This list is context for your naming decisions.
 
 {% for domain in physics_domains %}
 - `{{ domain }}`
 {% endfor %}
 {% endif %}
-
-## Composition Rules
-
-1. Every name must have a `physical_base` (any snake_case token that round-trips) or a `geometric_base` for geometry carriers — never both
-2. Follow the canonical 5-group pattern: `[operators] [projection] [qualifiers] base [locus] [mechanism]`
-3. Prefix operators require explicit `_of_` scope; postfix operators concatenate directly
-4. Use only registered tokens for every segment including `physical_base`. If no registered token fits, report as `vocab_gap`
-5. **Reuse existing standard names** when the DD path measures the same quantity — use `attachments` (see Output Format) to link the path to the existing name without regeneration. This avoids unnecessary token usage and preserves already-concrete names.
-6. Skip paths that are: array indices, metadata/timestamps, structural containers, coordinate grids (rho_tor_norm, psi, etc.)
-7. **Do NOT output a `unit` field** — unit is provided as authoritative context from the DD and will be injected at persistence time
-10. When a **Previous name** is shown for a path, treat it as context:
-    - If the previous name is good, reuse it (stability matters for downstream consumers)
-    - If you can clearly improve it, replace it and explain the improvement in documentation
-    - If the previous name was marked as human-accepted (⚠️), strongly prefer keeping it
-    - Never feel anchored to a bad previous name — replace without hesitation when you can do better
-11. **`due_to_<process>` template — strict rules** (recurring quality issue):
-    - The token after `due_to_` MUST be a **process noun** in the Process vocabulary (e.g. `ohmic_dissipation`, `impurity_radiation`, `induction`, `conduction`).
-    - **Never** put a temporal event after `due_to_` (`disruption`, `ramp_up`, `breakdown`). For events use `during_<event>` instead, e.g. `parallel_thermal_energy_during_disruption` (NOT `..._due_to_disruption`).
-    - **Never** put a bare adjective after `due_to_` (`ohmic`, `halo`, `runaway`, `neutral_beam`). Spell out the process noun: `due_to_ohmic_dissipation`, `due_to_halo_currents`, `due_to_runaway_electrons`, `due_to_neutral_beam_injection`.
-    - **Never combine `due_to_X_at_Y`** — the grammar does not support a position qualifier after `due_to_<process>`. If you need both a process and a position, **move the position to the subject prefix** as a `<position>_<rest>` construction. Example: instead of `electron_radiated_energy_due_to_impurity_radiation_at_halo_region`, use `halo_region_electron_radiated_energy_due_to_impurity_radiation`.
-12. **`field` ambiguity** — the bare token `field` is colloquial and ambiguous. Always qualify: `magnetic_field`, `electric_field`, `radiation_field`, `displacement_field`. The DD often abbreviates `b_field` or `field` for `magnetic_field` — expand it explicitly. Example: ❌ `vacuum_toroidal_field_at_reference_major_radius` → ✅ `vacuum_toroidal_magnetic_field_at_reference_major_radius`.
-13. **`attachments` tense consistency — strict** (recurring quality issue): An attachment from a DD path to an existing standard name is ONLY valid when both refer to the same physical aspect. In particular:
-    - A path under `core_instant_changes/...`, `*/instant_changes/...`, or any path containing `change` / `delta` / `tendency` represents an **incremental change** (event-driven step or rate). It MUST NOT be attached to a base-quantity standard name like `electron_density`. It MUST be attached only to names that begin with `change_in_`, `tendency_of_`, `rate_of_`, `rate_of_change_of_`, or `time_derivative_of_`.
-    - Conversely, a base-quantity path (e.g. `core_profiles/profiles_1d/electrons/density`) MUST NOT be attached to a `change_in_*` / `tendency_of_*` / `rate_of_*` standard name.
-    - When unsure, do not attach — emit a fresh candidate. Wrong attachments corrupt downstream consumers far more than missing attachments.
-14. **Tense prefix selection — match the path semantics**:
-    - Paths under `core_instant_changes/...` (or any IDS modelling **discrete event-driven changes** like sawtooth, ELM, pellet) → use `change_in_<base>`. These represent finite increments, not instantaneous time derivatives.
-    - Paths whose name contains `_dot`, ends in `_tendency`, or sits under an IDS explicitly named for time derivatives (e.g. `*_evolution`) → use `tendency_of_<base>` or `time_derivative_of_<base>`.
-    - Be **consistent across a batch**: if you choose `change_in_` for one path under `core_instant_changes/`, use `change_in_` for **every** path under that same IDS in the batch. Mixing `change_in_` and `tendency_of_` for sibling paths is an anti-pattern.
-15. **Component–tense ordering — Component MUST be outside the tense prefix** (ISN grammar requirement):
-    - Correct: `poloidal_change_in_ion_velocity` (Component=poloidal, base=`change_in_ion_velocity`).
-    - Correct: `toroidal_tendency_of_current_density`.
-    - **Incorrect**: `change_in_poloidal_ion_velocity` (parser collapses everything into `physical_base`, Component is lost).
-    - Rule of thumb: directional/projection prefixes (parallel/poloidal/toroidal/radial/normal/tangential) wrap the entire base — including any tense — never the other way round.
-16. **`_density` suffix MUST agree with declared unit** (dimensional anti-pattern): A name ending in `_density` claims a quantity per unit volume / area / length. The DD-supplied unit must contain `m^-3` (volumetric), `m^-2` (areal), or `m^-1` (linear). If the unit is a bare extensive quantity (e.g. `kg.m.s^-1` for momentum, `J` for energy without `m^-3`), **drop `_density`** or rename to reflect the actual quantity. Example: ❌ `toroidal_angular_momentum_density` with unit `kg.m.s^-1` → ✅ `toroidal_momentum_per_unit_radius` or simply `toroidal_momentum_profile` (no `_density` claim).
-{% include "sn/_coordinate_conventions.md" %}
-
-17. **Coordinate naming — ABSOLUTE RULE — use canonical coordinates, NEVER `_position_of_X`** (regardless of whether the description spells out "coordinate"): When a quantity is a spatial coordinate of a component, point, or geometric feature (antenna, launcher, sensor, axis, x-point, strike point, plasma boundary, separatrix, wall point, etc.), you MUST use the canonical coordinate vocabulary. The colloquial `_position_of_X` form is FORBIDDEN because it produces silent synonym pairs in the catalog (e.g. `vertical_coordinate_of_plasma_boundary` vs `vertical_position_of_plasma_boundary`).
-    - Major radius / cylindrical R coordinate → `major_radius_of_<X>` ✓ (NEVER `radial_position_of_<X>` ✗).
-    - Toroidal angle / cylindrical φ coordinate → `toroidal_angle_of_<X>` ✓ (NEVER `toroidal_position_of_<X>` ✗).
-    - Vertical / Z coordinate → `vertical_coordinate_of_<X>` ✓ (NEVER `vertical_position_of_<X>` ✗).
-    - For an unspecified 3-vector position with no directional qualifier, plain `position_of_<X>` is acceptable.
-    - For a *component* of a vector field (not a coordinate of a point), use `<axis>_<vector>` — e.g. `vertical_surface_normal_vector` (NOT `vertical_coordinate_of_surface_normal_vector` — surface normal is a vector field, you take its Z-component, not its Z-coordinate).
-    - This rule is unconditional and overrides any apparent symmetry with sibling names.
-18. **Preposition discipline — `_at_` for evaluated fields, `_of_` for intrinsic shape**: A locus relation must reflect the physical relationship between the quantity and the locus token. Apply this test before choosing the preposition:
-    - **`_at_<locus>`** when the base is an **evaluated field** sampled at the locus — i.e. the quantity exists everywhere in the plasma and we are reading its value at one spatial point. Field bases that trigger `_at_`: `temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `velocity_magnitude`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `radiation_density`, `mass_density`, `loop_voltage`, `electric_potential`, `electrostatic_potential`, `kinetic_energy`, `internal_energy`, `enthalpy`, `entropy`. Treat as `_at_` whenever the base names a field, flux, or per-volume/area density of a field.
-    - **`_of_<locus>`** when the base is an **intrinsic geometric property** of the named feature itself — i.e. the quantity describes the shape, size, or location of the feature, and only makes sense for that feature. Intrinsic bases that trigger `_of_`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`.
-    - ✗ `poloidal_magnetic_flux_of_plasma_boundary` — wrong preposition: flux is a field, evaluated AT the boundary.
-    - ✓ `poloidal_magnetic_flux_at_plasma_boundary` — field sampled at the canonical LCFS locus token.
-    - ✓ `elongation_of_plasma_boundary` — intrinsic shape parameter of the boundary contour.
-    - ✓ `major_radius_of_magnetic_axis` — the magnetic axis IS a point in (R,Z); R is one of its coordinates.
-    - ✓ `electron_density_at_pedestal` — field value at the pedestal location.
-    - ✗ `electron_density_of_pedestal` — density is not an intrinsic property of the pedestal feature.
-    - ✗ `electron_density_at_separatrix` — uses non-canonical synonym; audit rewrites to `electron_density_at_plasma_boundary`.
-19. **Projection is a leading qualifier prefix — use `<axis>_<quantity>` form** (ISN IR requirement): Axis projections (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`) MUST appear as a leading qualifier prefix `<axis>_<quantity>`. The `_component_of_` connector is REJECTED by the grammar. A trailing `_<component>` suffix also violates the canonical rendering.
-    - ✓ `toroidal_ion_rotation_frequency` (axis as leading qualifier).
-    - ✗ `toroidal_component_of_ion_rotation_frequency` (REJECTED by grammar).
-    - ✗ `ion_rotation_frequency_toroidal` (trailing suffix — parser misassigns).
-    - ✗ `heat_flux_poloidal` — use `poloidal_heat_flux`.
-20. **Prefix operators come in two classes — NEVER trail either** (ISN operator model): operators MUST be a leading prefix, never a trailing suffix. But the two classes attach DIFFERENTLY (round-trip-verified):
-    - **Differential / scope operators** (`time_derivative`, `gradient`, `<axis>_derivative`) take explicit `_of_`: ✓ `time_derivative_of_electron_temperature`, `gradient_of_electron_temperature`. The bare form is INVALID (✗ `time_derivative_electron_temperature` — non-canonical token order).
-    - **Averaging / reduction / normalization operators** (`volume_averaged`, `line_averaged`, `flux_surface_averaged`, `normalized`) are **bare prefixes** — NO `_of_`: ✓ `volume_averaged_electron_density`, `line_averaged_electron_density`, `flux_surface_averaged_current_density`, `normalized_poloidal_magnetic_flux`. The `_of_` form is INVALID (✗ `volume_averaged_of_electron_density` — the grammar drops the `of` token and the name fails to round-trip).
-    - ✗ trailing suffix forms are always wrong: `ion_temperature_volume_averaged`, `current_density_flux_surface_averaged`, `electron_density_line_averaged`.
-21. **Canonical locus tokens — never invent synonyms** (HARD RULE): Several physical features have multiple names in the literature; the catalog uses exactly ONE canonical token per concept. Generation must use the canonical form even when the DD path or signal description uses an alias.
-
-    | Canonical locus | Forbidden synonyms |
-    |---|---|
-    | `plasma_boundary` | `separatrix`, `last_closed_flux_surface`, `lcfs` |
-    | `divertor_target` | `divertor_plate` |
-    | `magnetic_axis` | `core_axis`, `o_point_axis` (use `o_point` for the field-line topology point) |
-    | `wall` | `wall_surface`, `vacuum_vessel_wall`, `first_wall_surface` |
-    | `pedestal` | `pedestal_region`, `edge_pedestal` |
-
-    Apply Rule 18 *after* normalising the locus to its canonical form. Example: the DD path `equilibrium/.../plasma_boundary/psi` produces `poloidal_magnetic_flux_at_plasma_boundary` — canonical token (plasma_boundary, NOT separatrix) + `_at_` (because flux is an evaluated field).
-
-    - ✓ `poloidal_magnetic_flux_at_plasma_boundary` (flux + canonical position + `_at_`).
-    - ✓ `elongation_of_plasma_boundary` (intrinsic shape + canonical position + `_of_`).
-    - ✓ `electron_density_at_divertor_target`.
-    - ✗ `electron_density_at_separatrix` — synonym `separatrix`; audit rewrites to `_at_plasma_boundary`.
-    - ✗ `poloidal_magnetic_flux_of_plasma_boundary` — wrong preposition; field bases use `_at_`.
-    - ✗ `electron_density_at_divertor_plate` — synonym `divertor_plate`; use `divertor_target`.
-22. **`diamagnetic` is a drift, NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation — this is not informational): Unlike `toroidal`, `poloidal`, `radial`, or `parallel`, `diamagnetic` does NOT label a spatial projection axis. The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` is itself a specific drift — it is not a component of another velocity along a diamagnetic axis. Therefore `diamagnetic_<X>` used as a projection is **physically wrong and always rejected**. CRITICAL: when a DD path contains a sibling or subfield literally named `diamagnetic` (very common on transport / edge paths — e.g. `current_density/diamagnetic`, `electric_field/diamagnetic`, `velocity/diamagnetic`), DO NOT translate the label directly. The DD label is a shorthand for "the part due to the diamagnetic drift" — you must rename using `_due_to_diamagnetic_drift` (for currents/fluxes) or pick the correct drift-velocity name.
-    - ✓ `diamagnetic_drift_velocity` (the drift itself).
-    - ✓ `ion_diamagnetic_drift_velocity`, `electron_diamagnetic_drift_velocity`.
-    - ✓ `<base>_due_to_diamagnetic_drift` (a flux/current driven by the drift).
-    - ✗ `diamagnetic_electric_field` — makes no physical sense; an electric field does not have a "diamagnetic" projection.
-    - ✗ `diamagnetic_ion_velocity` — the diamagnetic drift IS a velocity; it is not a projection of the ion bulk velocity.
-    - Use `toroidal`, `poloidal`, `parallel`, `perpendicular`, `radial` for projection axes; reserve `diamagnetic` for the drift-velocity concept itself.
-23. **`real_part` / `imaginary_part` are suffixes, NEVER prefixes — HARD PROHIBITION** (the `amplitude_of_prefix_check` audit quarantines every violation): For complex-valued perturbation quantities (common in MHD, linear-stability, wave-tool outputs), the canonical ISN form places `_real_part` / `_imaginary_part` / `_amplitude` / `_phase` at the **end** of the name, after the full component-axis + subject chain. Prefix forms `real_part_of_<X>` and `imaginary_part_of_<X>` break grammar when `<X>` already contains `_of_` (nested prepositions create parse ambiguity).
-    - ✓ `perturbed_electrostatic_potential_real_part`, `perturbed_mass_density_imaginary_part`.
-    - ✓ `radial_perturbed_magnetic_field_real_part`.
-    - ✓ `poloidal_perturbed_plasma_velocity_imaginary_part`.
-    - ✓ `reynolds_stress_tensor_real_part`, `maxwell_stress_tensor_perturbation_imaginary_part`.
-    - ✗ `real_part_of_perturbed_electrostatic_potential` — prefix form, rejected.
-    - ✗ `imaginary_part_of_radial_perturbed_magnetic_field` — nested `_of_` breaks the parser.
-    - ✗ `real_part_of_reynolds_stress_tensor` — use the suffix form instead.
-    - Same rule applies to `_amplitude` and `_phase` for Fourier-component quantities.
-24. **Do not re-quantity a location — `center_of_mass` is a reference point, not a mass quantity**: Place-name tokens that happen to include physical-quantity words are single grammatical location tokens. `center_of_mass` is a reference point (the barycentre), not a quantity with units of mass. When naming a quantity **at** the barycentre, treat `center_of_mass` as a location qualifier.
-    - ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`.
-    - ✓ `center_of_mass_position`.
-    - ✗ `mass_velocity` or `mass_of_center_velocity` (both nonsensical).
-    - Apply the same principle to: `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
-25. **Projection prefix — same as Rule 19** (the `segment_order_check` audit enforces this): See Rule 19. Axis projections always use the `<axis>_<quantity>` leading qualifier form. The `_component_of_` connector is REJECTED by ISN grammar. Never trail.
-    - ✓ `toroidal_ion_rotation_frequency`.
-    - ✓ `poloidal_electron_diffusivity`.
-    - ✗ `ion_rotation_frequency_toroidal`, `electron_diffusivity_poloidal`.
-26. **Ratios use `ratio_of_<A>_to_<B>` — not `<A>_to_<B>_ratio`** (the `ratio_binary_operator_check` audit enforces this): The canonical form places `ratio_of_` as a leading prefix, with `_to_` joining the two operands.
-    - ✓ `ratio_of_ion_to_electron_density`, `ratio_of_poloidal_to_toroidal_magnetic_field`.
-    - ✗ `ion_to_electron_density_ratio`, `poloidal_to_toroidal_magnetic_field_ratio`.
-27. **Position token `wall` — never `wall_surface`** (recurring quarantine pattern): The ISN Position vocabulary has `wall` as a valid token. The compound `wall_surface` is NOT in the vocabulary and will fail grammar validation. When the DD describes a quantity at or on the wall, always use `at_wall`, never `at_wall_surface`. The `_surface` suffix is physically redundant — a wall IS a surface.
-    - ✓ `emitted_radiation_energy_flux_at_wall`, `electron_emitted_kinetic_energy_flux_at_wall`.
-    - ✗ `emitted_radiation_energy_flux_at_wall_surface` — fails grammar validation.
-    - ✗ `ion_emitted_energy_flux_due_to_recombination_at_wall_surface` — fails on both `wall_surface` AND `recombination_at_wall_surface`.
-28. **Process tokens after `due_to_` are BARE vocabulary entries — never append spatial qualifiers**: The token after `due_to_` must exactly match an entry from the Process vocabulary. Never append location, region, or state qualifiers (`_at_X`, `_in_X`, `_on_X`, `_for_X`) to a process token. If you need to specify where a process occurs, move the qualifier to the subject prefix or use a Region segment.
-    - ✓ `halo_region_electron_radiated_energy_due_to_impurity_radiation` — region qualifier is in the subject prefix.
-    - ✓ `ion_incident_energy_flux_at_wall_due_to_recombination` — bare process token.
-    - ✗ `electron_radiated_energy_due_to_impurity_radiation_in_halo_region` — `impurity_radiation_in_halo_region` is not a Process token.
-    - ✗ `ion_incident_energy_flux_due_to_recombination_at_ion_state` — `recombination_at_ion_state` is not a Process token.
-29_b. **Qualify `outline_point` with its parent entity** (recurring quarantine pattern): A bare `outline_point` is meaningless without context. Always prefix it with the entity whose outline is being described: `plasma_boundary_outline_point`, `wall_outline_point`, `separatrix_outline_point`. The grammar position vocabulary expects compound position tokens, not a bare `outline_point`.
-    - ✓ `vertical_coordinate_of_plasma_boundary_outline_point`, `major_radius_of_wall_outline_point`.
-    - ✗ `vertical_coordinate_of_outline_point` — bare `outline_point` fails parse.
 
 ## Output Format
 
@@ -966,7 +541,7 @@ it or report a `vocab_gap`.
   "description": "Major radius (cylindrical R coordinate) of the flux loop",
   "kind": "scalar",
   "dd_paths": ["magnetics/flux_loop/position/r"],
-  "reason": "qualifier=major, base=radius, locus=of flux_loop (Rule 17: major_radius_of_X not radial_position_of_X)"
+  "reason": "qualifier=major, base=radius, locus=of flux_loop (canonical coordinate: major_radius_of_X not radial_position_of_X)"
 }
 ```
 → Composed name: `major_radius_of_flux_loop`
@@ -988,7 +563,7 @@ it or report a `vocab_gap`.
   "description": "Vertical coordinate (cylindrical Z) of the flux loop",
   "kind": "scalar",
   "dd_paths": ["magnetics/flux_loop/position/z"],
-  "reason": "projection=vertical coordinate, base=coordinate (geometry), locus=of flux_loop (Rule 17: vertical_coordinate_of_X not vertical_position_of_X)"
+  "reason": "projection=vertical coordinate, base=coordinate (geometry), locus=of flux_loop (canonical coordinate: vertical_coordinate_of_X not vertical_position_of_X)"
 }
 ```
 → Composed name: `vertical_coordinate_of_flux_loop`
