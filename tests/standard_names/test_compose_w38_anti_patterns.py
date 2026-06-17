@@ -36,7 +36,7 @@ W38_GOOD_EXAMPLES = (
     "parallel_halo_energy",
     "z_direction_unit_vector",
 )
-W38_HARDWARE_PROPERTY_EXEMPLAR = "cross_sectional_area_of_rogowski_coil"
+W38_HARDWARE_PROPERTY_EXEMPLAR = "area_of_rogowski_coil"
 
 
 @pytest.mark.parametrize("filename", ["generate_name_system.md"])

@@ -65,8 +65,8 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
   | `pedestal` | `pedestal_region`, `edge_pedestal` |
 
   ✓ `electron_density_at_divertor_target`; ✗ `electron_density_at_separatrix` (synonym → rewritten to `plasma_boundary`); ✗ `electron_density_at_divertor_plate`.
-- **Position token `wall`, never `wall_surface`** — `wall` is the valid registry token; `wall_surface` fails grammar validation (a wall IS a surface). ✓ `emitted_radiation_energy_flux_at_wall`; ✗ `…_at_wall_surface`.
-- **Qualify `outline_point` with its parent entity.** A bare `outline_point` is meaningless; set the compound position (`plasma_boundary_outline_point`, `wall_outline_point`). ✓ `vertical_coordinate_of_plasma_boundary_outline_point`; ✗ `vertical_coordinate_of_outline_point`.
+- **Position token `wall`, never `wall_surface`** — `wall` is the valid registry token; `wall_surface` fails grammar validation (a wall IS a surface). ✓ `energy_flux_at_wall`; ✗ `…_at_wall_surface`.
+- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `major_radius_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`.
 - **Place names with quantity-words are single location tokens, not quantities.** `center_of_mass` is a reference point (barycentre), not a mass quantity — treat it as a location qualifier. ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`, `center_of_mass_position`; ✗ `mass_velocity`. Apply the same to `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
 
 ### Coordinates — canonical coordinate base, never `_position_of_X`
@@ -77,7 +77,7 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 - Toroidal angle / cylindrical φ → `toroidal_angle_of_<X>` (✗ `toroidal_position_of_<X>`).
 - Vertical / Z → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
 - Unspecified 3-vector position with no directional qualifier → plain `position_of_<X>` is acceptable.
-- **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal_vector` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
+- **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
 
 This rule is unconditional and overrides any apparent symmetry with sibling names.
 
@@ -95,7 +95,7 @@ This rule is unconditional and overrides any apparent symmetry with sibling name
 - **`process_token` MUST be a process noun from the Process vocabulary** (`ohmic_dissipation`, `impurity_radiation`, `induction`, `conduction`, …) — bare, with no spatial/state qualifier appended. The composer renders `<base>_due_to_<process>`.
   - **Never a temporal event** after `due_to_` (`disruption`, `ramp_up`, `breakdown`) — use a `during_<event>` construction instead, e.g. `parallel_thermal_energy_during_disruption`.
   - **Never a bare adjective** — spell out the process noun: `due_to_ohmic_dissipation`, `due_to_halo_currents`, `due_to_runaway_electrons`, `due_to_neutral_beam_injection` (not `due_to_ohmic`/`due_to_halo`/`due_to_runaway`/`due_to_neutral_beam`).
-  - **Never append a location/region/state** to the process token (`_at_X`, `_in_X`, `_on_X`, `_for_X`) — `impurity_radiation_in_halo_region` and `recombination_at_ion_state` are not Process tokens. If you need a place AND a process, move the place to the subject prefix as a `<region>_<rest>` construction: ✓ `halo_region_electron_radiated_energy_due_to_impurity_radiation`; ✓ `ion_incident_energy_flux_at_wall_due_to_recombination` (bare process).
+  - **Never append a location/region/state** to the process token (`_at_X`, `_in_X`, `_on_X`, `_for_X`) — `impurity_radiation_in_halo_region` and `recombination_at_ion_state` are not Process tokens. If you need a place AND a process, attach the place via its own segment: a **region** (an extended zone) as `over_<region>` (rendered after the base, before the process), a point/surface as `_at_<locus>`. ✓ `electron_energy_over_halo_region_due_to_impurity_radiation` (region via `over_`); ✓ `ion_energy_flux_at_wall_due_to_recombination` (point locus via `_at_`, bare process).
 
 ### Tense / change semantics
 
@@ -171,10 +171,10 @@ A standard name names the **physics quantity**. The instrument that *measured* i
   - `magnetics/rogowski_coil/current` (DD: "net toroidal **plasma current** Ip derived from Rogowski coil") → ✓ `plasma_current` — the SAME name as `magnetics/ip`; both are plasma-current measurement methods. ✗ `current_of_rogowski_coil`, ✗ `net_current`, ✗ `rogowski_coil_current` (all obscure the documented quantity).
   - ✓ `electron_temperature` (not `thomson_scattering_electron_temperature`); ✗ `probe_voltage`, ✗ `polarimeter_laser_wavelength`, ✗ `interferometer_line_density` (the apparatus reading must not become the `base_token`/prefix).
 - **Intrinsic property or spatial locus → keep `_of_<device>`.** When the device is the quantity's own identity or the spatial locus it belongs to — NOT the measurement method:
-  - a geometric/electrical property OF the device itself: ✓ `cross_sectional_area_of_rogowski_coil`, ✓ `length_of_flux_loop`.
+  - a geometric/electrical property OF the device itself: ✓ `area_of_rogowski_coil`, ✓ `length_of_flux_loop`.
   - a field/quantity AT a specific device instance: ✓ `maximum_magnetic_field_of_poloidal_field_coil` (DD: max B *at the PF coil conductor surface* — keep WHICH coil). ✗ `maximum_magnetic_field_magnitude`, ✗ `magnetic_field` (drops the locus — every coil's field collapses to one name).
 - **Locus tokens stay minimal:** the device name alone or with a minimal physical qualifier. Never embed channel numbering or sub-component identity: ✗ `_of_polarimeter_channel_beam` (drop `_channel`), ✗ `_of_probe_tip_3`.
-- **Compound hardware identifiers:** if a DD path stacks ≥2 hardware tokens (`coil/turn/winding`, `probe/tip/electrode`), keep at most ONE — and only if intrinsic to the physics; otherwise name the underlying physical concept. ✗ `z_coordinate_of_sensor_direction_unit_vector` → ✓ `vertical_surface_normal_vector` / `z_direction_unit_vector` (a unit-vector field's Z-component is a vector projection); → `winding_number`, `electrode_voltage`.
+- **Compound hardware identifiers:** if a DD path stacks ≥2 hardware tokens (`coil/turn/winding`, `probe/tip/electrode`), keep at most ONE — and only if intrinsic to the physics; otherwise name the underlying physical concept. ✗ `z_coordinate_of_sensor_direction_unit_vector` → ✓ `vertical_surface_normal` / `z_direction_unit_vector` (a unit-vector field's Z-component is a vector projection); → `winding_number`, `electrode_voltage`.
 
 ### Collapse-or-justify, and qualifier precedence
 
@@ -194,12 +194,12 @@ These produce synonym families or encode orthogonal axes that belong in structur
 
 1. **`_of_plasma` when the domain already implies plasma** (`equilibrium`, `transport`, `edge_plasma_physics`, `magnetohydrodynamics`) — drop the redundant qualifier. **But shape parameters always name the surface they describe**: triangularity/elongation/etc. is a property *of a specific surface*, so it takes a surface locus — `_of_plasma_boundary` for the LCFS contour, `_of_flux_surface` for an interior surface. ✓ `triangularity_of_plasma_boundary`; ✗ bare `upper_triangularity` (of WHICH surface?).
 2. **`_per_toroidal_mode_number`** → use `_per_toroidal_mode` (the mode *index* is implicit; `_number` creates physics-identical synonym pairs).
-3. **`_over_*` as a division surrogate** → use `_per_*` for ratio quantities. ✗ `velocity_over_magnetic_field_strength` → ✓ `velocity_per_magnetic_field_strength`. **Exception:** `over_<region>` (e.g. `over_halo_region`) is the valid Region segment — do not confuse the division-surrogate `_over_` with the spatial Region qualifier.
+3. **A ratio of two quantities uses the `ratio_of` operator with `_to_` — never `_over_` and never `_per_`.** ✗ `velocity_over_magnetic_field`, ✗ `velocity_per_magnetic_field` → ✓ `ratio_of_ion_to_electron_density`. A per-volume/area/length quantity uses a registered `_density` base (`toroidal_momentum_density`), not a `_per_unit_<x>` suffix. **Note:** `over_<region>` (e.g. `over_halo_region`) is the valid Region segment — distinct from any division sense of `_over_`.
 
 ### Bare `field`, `_density`, and `_spectrum` discipline
 
-- **Never the bare token `field`** — it is colloquial and ambiguous. Always qualify: `magnetic_field`, `electric_field`, `radiation_field`. The DD often abbreviates `b_field`/`field` for `magnetic_field` — expand explicitly. ✗ `vacuum_toroidal_field_at_reference_major_radius` → ✓ `vacuum_toroidal_magnetic_field_at_reference_major_radius`.
-- **`_density` suffix MUST agree with the DD-supplied unit.** A `_density` name claims per-volume/area/length, so the unit must contain `m^-3`, `m^-2`, or `m^-1`. If the unit is a bare extensive quantity (`kg.m.s^-1` for momentum, `J` for energy without `m^-3`), drop `_density` or rename. ✗ `toroidal_angular_momentum_density` with `kg.m.s^-1` → ✓ `toroidal_momentum_per_unit_radius`.
+- **Never the bare token `field`** — it is colloquial and ambiguous. Always qualify: `magnetic_field`, `electric_field`, `radiation_field`. The DD often abbreviates `b_field`/`field` for `magnetic_field` — expand explicitly. ✗ `toroidal_field_at_magnetic_axis` → ✓ `toroidal_magnetic_field_at_magnetic_axis`.
+- **`_density` suffix MUST agree with the DD-supplied unit.** A `_density` name claims per-volume/area/length, so the unit must contain `m^-3`, `m^-2`, or `m^-1`. If the unit is a bare extensive quantity (`kg.m.s^-1` for momentum, `J` for energy without `m^-3`), drop `_density` or rename. ✗ `toroidal_angular_momentum_density` with `kg.m.s^-1` → ✓ `toroidal_momentum` (drop `_density`; the unit is a bare extensive quantity).
 - **`_spectrum` subjects need a per-quantity unit.** If the subject ends in `_spectrum`, the unit MUST be a per-quantity form (`X.Hz^-1`, `X.s`, `X` per integer mode-number). A bare extensive unit (plain `W` for a power spectrum, plain `A` for a current spectrum) is dimensionally wrong — the spectral coordinate is missing. The documentation MUST state which integration variable closes the budget (e.g. "integrating over toroidal mode number $n_\phi$ recovers the total power in W"); if the DD unit lacks the spectral denominator, note the inconsistency in `documentation`.
 
 ### Attachments — tense consistency (strict)
@@ -252,7 +252,7 @@ Curated from the polarimetry pilot and the spectrometer/gyrokinetics/wall-geomet
 
 **Instrument prefix carry-over (physics-quantity case).** When the DD path lives under an instrument subtree (spectrometer, camera, magnet, coil, probe, detector, sensor) but the leaf is a generic physical observable (photon energy, count rate, brightness), the instrument tokens are DD-tree leakage — drop them.
 - ❌ `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` → ✅ `photon_energy_lower_bound`.
-- *Hardware-property exception applies* (see Hardware section): ✓ `cross_sectional_area_of_rogowski_coil`.
+- *Hardware-property exception applies* (see Hardware section): ✓ `area_of_rogowski_coil`.
 
 **Suffix-form for component instead of canonical prefix.** Component (`parallel`, `perpendicular`, `poloidal`, `toroidal`, `radial`, `vertical`) and transformation (`derivative_of`, `imaginary_part_of`) tokens go BEFORE the base, never trailed as suffixes (suffixes collapse them into `physical_base` and break the parser). Cross-check NC-20 (real_part/imaginary_part/amplitude/phase are the only sanctioned SUFFIX modifiers).
 - ❌ `halo_region_parallel_energy_due_to_heat_flux` → ✅ `parallel_halo_energy`.
