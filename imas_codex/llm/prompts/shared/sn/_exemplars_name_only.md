@@ -61,10 +61,12 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
 
 - ✅ `major_radius_of_magnetic_axis`
 - ✅ `vertical_coordinate_of_x_point`
-- ✅ `major_radius_of_plasma_boundary_outline_point`
+- ✅ `major_radius_of_plasma_boundary`
   - *Why good:* `of_{entity}` reads as "the property belonging to this
     entity". Do not switch to `at_{entity}` — the property *is* a feature
-    of the entity, not a measurement taken at it.
+    of the entity, not a measurement taken at it. Name a boundary-contour
+    coordinate against the registered `plasma_boundary` token, never an
+    unregistered `outline_point`.
   - Note: `vertical_coordinate_of_` is the canonical Z coordinate form
     (Rule 17); prefer it over the legacy `vertical_position_of_` form.
 

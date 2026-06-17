@@ -72,9 +72,6 @@ _VOCAB_GAP_ALLOWLIST: dict[str, str] = {
     "fourier_coefficient_of_plasma_boundary_radius": (
         "plasma_boundary_radius unregistered; fourier_coefficient is postfix"
     ),
-    "major_radius_of_plasma_boundary_outline_point": (
-        "outline_point unregistered base (boundary-point concept gap)"
-    ),
     "mode_amplitude_of_magnetic_perturbation": (
         "mode_amplitude / magnetic_perturbation unregistered bases"
     ),
