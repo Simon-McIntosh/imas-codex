@@ -55,6 +55,12 @@ class TestClauseA_StructuralSpecificity:
             ("volume", False),
             ("current", False),
             ("area", False),
+            # Bare SHAPE PARAMETER — admit as a coherent family head
+            # (gathers only triangularity/elongation/squareness quantities),
+            # unlike the generic bare bases above.
+            ("triangularity", True),
+            ("elongation", True),
+            ("squareness", True),
         ],
     )
     def test_admission_per_name(self, name: str, expected_admit: bool) -> None:

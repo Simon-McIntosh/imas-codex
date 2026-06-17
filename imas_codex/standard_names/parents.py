@@ -33,6 +33,16 @@ from typing import Protocol
 from imas_standard_names.grammar import parser as _isn_parser
 from imas_standard_names.grammar.parser import ParseError as _ParseError
 
+# Bare physical_base tokens that are nonetheless admissible as derived-parent
+# family heads. A plasma-shape parameter gathers a COHERENT family (the
+# boundary scalar, the flux-surface profile, and the upper/lower/inner/outer
+# variants), so a bare head links only related quantities — unlike a generic
+# bare base (area, angle, coordinate), which the structural-specificity veto
+# correctly rejects.
+_SHAPE_PARAMETER_BASES: frozenset[str] = frozenset(
+    {"triangularity", "elongation", "squareness", "ellipticity"}
+)
+
 
 @dataclass(frozen=True)
 class AdmissionResult:
@@ -93,6 +103,16 @@ def _has_structural_specificity(name: str) -> tuple[bool, str]:
     if ir.mechanism is not None:
         tok = getattr(ir.mechanism, "token", "?")
         return True, f"has mechanism ({tok})"
+    # Shape-parameter exception: a bare shape parameter is a COHERENT family
+    # head (it gathers only triangularity/elongation/... quantities — the
+    # boundary scalar, the flux-surface profile, the upper/lower/inner/outer
+    # variants), unlike a generic bare base (area, angle, coordinate) which
+    # would link unrelated quantities. Admit it so the surface-explicit leaves
+    # (triangularity_of_plasma_boundary, triangularity_of_flux_surface, ...)
+    # share one parent the docs stage can cite for cross-surface linking.
+    base_tok = getattr(getattr(ir, "base", None), "token", None)
+    if base_tok in _SHAPE_PARAMETER_BASES:
+        return True, f"bare shape-parameter family head ({base_tok})"
     return False, "bare base — no qualifier, locus, projection, operator, or mechanism"
 
 

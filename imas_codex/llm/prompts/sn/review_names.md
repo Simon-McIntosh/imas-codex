@@ -180,7 +180,10 @@ call them out explicitly in `comments`:
 {% if nearby_existing_names %}
 ## Nearby Existing Standard Names
 
-These names already exist in the catalog. Flag candidates that duplicate them:
+These names already exist in the catalog. Flag a candidate as a duplicate **only** when it is a TRUE duplicate — the SAME physical quantity in a redundant spelling (a synonym). **Do NOT flag a candidate that is RELATED but DISTINCT** — these are family members to KEEP, linked via `HAS_PARENT`, never collapsed:
+- a **surface or projection variant** of an existing name is a *different quantity*: `triangularity_of_flux_surface` (interior profile) vs `triangularity_of_plasma_boundary` (boundary scalar); `upper_triangularity_of_plasma_boundary` vs `lower_…`. Keep both.
+- a **more-specific child of a bare family head** is NOT a duplicate of its parent: `triangularity_of_plasma_boundary` is a child of the headline `triangularity`, not a duplicate of it. Keep the specific leaf; never dock it as a "near-duplicate" of the bare form, and never prefer the bare leaf over its surface-qualified sibling (see [I1.7b]).
+Collapse only exact same-quantity synonyms:
 {% for name in nearby_existing_names %}
 - **{{ name.id }}**: {{ name.description | default('', true) }} ({{ name.kind | default('scalar', true) }}, {{ name.unit | default('dimensionless', true) }})
 {% endfor %}
