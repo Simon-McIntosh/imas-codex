@@ -125,6 +125,25 @@ common_issues:
       affects: [grammar]
       score_override: "grammar <= 5 if a field-base name uses _of_<position|region>"
 
+    I1.7b_shape_param_requires_surface:
+      description: "Plasma-shape parameter missing the surface it describes"
+      example_bad: "outer_triangularity"
+      example_good: "outer_triangularity_of_plasma_boundary"
+      rule: |
+        A plasma-shape parameter — triangularity, elongation, squareness,
+        ellipticity, and their upper/lower/inner/outer variants — is a property
+        OF a specific surface and is meaningless without it ("of WHICH
+        surface?"). It MUST carry a surface locus: ``_of_plasma_boundary`` for
+        the LCFS contour, ``_of_flux_surface`` (or the named interior surface)
+        otherwise. A bare shape parameter parses but is non-canonical even when
+        the physics domain (equilibrium) implies the plasma — the surface
+        locus is distinguishing, never redundant. Reviewers MUST prefer the
+        surface-qualified form and propose ``revised_name`` adding the locus;
+        never score a bare shape parameter at or above its surface-qualified
+        sibling.
+      affects: [convention]
+      score_override: "convention <= 5 if a shape parameter (triangularity/elongation/squareness/ellipticity) lacks a surface locus"
+
     I1.8_locus_token_synonyms:
       description: "Use of forbidden synonym for a canonical locus token"
       example_bad: "electron_density_at_divertor_plate"
