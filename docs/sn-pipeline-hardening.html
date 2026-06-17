@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-17">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 </head>
 <body>
   <main class="plan-doc">
@@ -412,6 +412,32 @@ Evaluate first (gate)
 If justified, Do (ISN)
   Extend the ISN parser to peel a postfix operator that sits after a locus/mechanism suffix, and the flat StandardName model to carry a postfix operator alongside a locus/mechanism (and a bounded operator stack for 2-op nests). Round-trip-gate every form; full ISN suite green; new rc; bump codex dep. Keep silently-dropped-token rejection intact for anything still unrepresentable.</pre>
     <p class="r-fu-outcome">FIXED BEFORE REGEN (user direction — no volume gate). ISN rc42 (fork commit 4e78568, tag pushed): operator + locus/mechanism and prefix+postfix two-operator nests now round-trip. Relaxed the transformation/decomposition mutual-exclusivity — a prefix transformation (front, _of_ scope) and a postfix decomposition (tail) occupy structurally distinct, unambiguous positions, so they coexist deterministically (the parser peels the trailing postfix before the leading prefix); the prior square_of_..._fourier_coefficient 'ambiguity' does not arise. Carried a postfix decomposition alongside a locus/mechanism in the model + IR adapters and fixed the parser peel/strip order. Verified round-trip: magnetic_field_of_iron_core_segment_magnitude, maximum_of_magnetic_field_magnitude, velocity_due_to_pellet_injection_magnitude, maximum_magnetic_field_of_flux_surface_magnitude. Genuinely unrepresentable forms (operator+projection, two-PREFIX nests) still RAISE — no silent token loss. New tests/grammar/test_operator_locus_nesting.py (13 cases); the decomposition-exclusivity negative test converted to a coexistence round-trip. Full ISN suite 1345 passed (+13, 0 regressions). codex bumped to rc42 (commit just pushed) — composes/parses these via Option-5 registry-kind routing, no code change; full codex SN suite green. The regen will now produce these composite names correctly on the first pass.</p>
+    </article>
+<article class="r-fu" data-id="f-snph-005" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">ISN operator development: change_in operator + operator×projection coexistence</h4>
+    <div class="r-fu-body"><p>ISN investigation (2026-06-17) found two grammar gaps the compose prompt depends on. THREE prompt rules were already ISN-native and fixed in codex 086ae7e8 (region→over_region, ratio→ratio_of, outline_point→plasma_boundary). The remaining two need ISN GRAMMAR development (partner repo ../imas-standard-names):</p><ul><li><b>operator×projection coexistence</b> — a projection/component cannot combine with a transformation: <code>toroidal_tendency_of_current_density</code>, <code>poloidal_change_in_ion_velocity</code> fail (model forbids transformation+component). Both parts work alone (toroidal_current_density ✓, tendency_of_current_density ✓).</li><li><b>change_in operator</b> — <code>change_in</code> / <code>rate_of_change_of</code> are NOT in operators.yml; only tendency/time_derivative (which are RATES, semantically distinct from a finite/discrete change_in for core_instant_changes). change_in_electron_density fails. codex uses change_in_ extensively (workers attachment-consistency, audits, rate-quantity prompt rule lines 240-262).</li></ul></div>
+    <pre class="r-fu-prompt">Project: imas-codex + partner repo ../imas-standard-names
+Plan: sn-pipeline-hardening (f-snph-005)
+Tier: opus
+Honour the LOCKED round-trip gate: every form must compose_standard_name(parse_standard_name(name))==name; full ISN suite green; genuinely-unrepresentable forms still RAISE (no silent token drop).
+
+ISN CHANGE 1 — operator×projection coexistence (mirror the rc42 operator+locus fix):
+  Edit ../imas-standard-names/imas_standard_names/grammar/model.py:703 _check_transformation_exclusivity — relax to ALLOW transformation+component and transformation+coordinate (keep transformation+geometric_base forbidden). The canonical order is component OUTERMOST wrapping the transformation: toroidal_tendency_of_current_density = component(toroidal) + transformation(tendency, renders _of_) + base(current_density); poloidal_change_in_ion_velocity = component(poloidal)+transformation(change_in, bare)+subject(ion)+base(velocity).
+  FIRST determine scope: relax ONLY the validator and round-trip toroidal_tendency_of_current_density. If it round-trips, the composer/parser already handle two stacked prefixes (component then transformation) — done. If NOT, extend the model-&gt;IR composer (model.py ~476-530, insert the component prefix outside the transformation) AND the parser to peel a leading component before the transformation (mirror the rc42 peel-order doc on _check_decomposition_exclusivity at model.py:720-738).
+
+ISN CHANGE 2 — change_in operator:
+  Add change_in to grammar/vocabularies/operators.yml (kind: unary_prefix). It must render BARE (change_in_electron_density, NOT change_in_of_...) — add it to the bare-prefix-transformation set in model.py (the frozenset that volume_averaged/normalized/line_averaged/flux_surface_averaged use). Do NOT add rate_of_change_of (redundant with time_derivative — fix the codex prompt to use time_derivative_of instead). Decide change_in vs a discrete-difference name with the lead if semantics are unclear, but the established codex convention is change_in_&lt;base&gt; for core_instant_changes (finite increment).
+
+ISN release: uv run build-grammar (codegen regenerates the Transformation enum); add round-trip tests (toroidal_tendency_of_current_density, poloidal_change_in_ion_velocity, change_in_electron_density, plus negatives that still RAISE); full ISN suite green; commit on the fork; cut a new rcN; push the tag.
+
+codex follow-through:
+  1. Bump the ISN dep to the new rc in pyproject.toml (TWO places).
+  2. Fix generate_name_system.md lines 102-103 (operator+projection now valid; change_in valid) and the rate-quantity HARD CONSTRAINT (lines ~240-262 — drop rate_of_change_of_, keep tendency_of_/time_derivative_of_/change_in_).
+  3. Add the DRIFT-GUARD TEST: assert every ✓ example name in generate_name_system.md + shared includes round-trips through ISN public parse/compose (allowlist NONE once the 2 operator+projection forms compose; if any genuinely-unrepresentable illustration remains, allowlist it with a written reason). This permanently prevents reintroducing non-ISN vocab.
+  4. Validate: full prompt-content tests + compose benchmark @ medium n=3 (gate: physics &gt;= the 0.865 corrected baseline; rogowski stays plasma_current).
+  5. Verify the change_in pipeline path (codex GrammarSegments._to_model_dict puts operator_token in transformation; confirm change_in now composes bare end-to-end).
+
+ALSO outstanding (separate, smaller): item C — regenerate the physics gold calibration docs from the live graph (research/physics_bench_gold.json hand-written docs diverge from the real DD, e.g. rogowski &#x27;net enclosed current&#x27; vs DD &#x27;plasma current Ip&#x27;); re-validate the judge. The judge SCORING is already sound (scores against live-graph docs), so this is calibration hygiene, not a scoring bug.</pre>
     </article>
 </section>
 
