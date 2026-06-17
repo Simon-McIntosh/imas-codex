@@ -57,21 +57,7 @@ _NAME = re.compile(r"^[a-z][a-z0-9]+(?:_[a-z0-9]+)+$")
 # closed ISN vocabulary. They cannot round-trip until the token is added (or the
 # example is rewritten) — tracked under the vocab-templating follow-up. Keep the
 # reason specific so closing a gap is obvious.
-_VOCAB_GAP_ALLOWLIST: dict[str, str] = {
-    "derivative_with_respect_to_minor_radius_of_vertical_coordinate_of_geometric_axis": (
-        "deep operator-of-coordinate-of-geometric_base nest; operator+geometric_base "
-        "is structurally forbidden — illustrative restructure target, not composable"
-    ),
-    "distance_between_strike_points_along_divertor_target": (
-        "needs the distance-span grammar (between A and B along C): the distance "
-        "base + strike_point/divertor_target loci all exist, but a multi-locus "
-        "span is not representable in the single locus slot"
-    ),
-    "distance_from_magnetic_axis_to_separatrix_along_midplane": (
-        "needs the distance-span grammar (from A to B along C): three loci, not "
-        "representable in the single locus slot"
-    ),
-}
+_VOCAB_GAP_ALLOWLIST: dict[str, str] = {}
 
 
 def _round_trips(name: str) -> bool:

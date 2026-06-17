@@ -70,13 +70,17 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
   - Note: `vertical_coordinate_of_` is the canonical Z coordinate form
     (Rule 17); prefer it over the legacy `vertical_position_of_` form.
 
-#### P6. Distance-between form
+#### P6. Distance / clearance form
 
-- ✅ `distance_from_magnetic_axis_to_separatrix_along_midplane`
-- ✅ `distance_between_strike_points_along_divertor_target`
-  - *Why good:* the `distance_between_A_and_B` or
-    `distance_from_A_to_B_along_C` pattern removes ambiguity about which
-    direction is measured.
+- ✅ `radial_distance_at_outboard_midplane` (midplane-mapped radial distance,
+  e.g. a probe/channel position relative to the separatrix)
+- ✅ `gap_at_plasma_boundary` (a clearance gap, with `radial_` etc. for a
+  directed gap)
+  - *Why good:* real DD distance quantities are a `distance`/`gap` base with a
+    single reference locus (the evaluation surface/plane), not an arbitrary
+    multi-locus span. A "distance from A to B" between two distinct named
+    features is not representable in the single locus slot — emit `vocab_gap`
+    (see the REJECT note) rather than fabricate a span that drops an endpoint.
 
 #### P7. Spectral / Fourier decomposition
 

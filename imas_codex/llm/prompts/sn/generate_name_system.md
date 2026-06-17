@@ -236,7 +236,7 @@ Skip and record as `vocab_gap`/`skipped` rather than composing when a DD path wo
 - bare `vertical_coordinate` / bare `outline_point` (always need `_of_<entity>`)
 - `nuclear_charge_number` (→ `atomic_number`)
 - `azimuth_angle` (→ `toroidal_angle`)
-- `distance_between_A_and_B` / `distance_from_A_to_B_along_C` — a VALID geometric quantity (the `distance` base and the named loci are registered), but the multi-locus span is not yet representable in the single-locus grammar. Emit `vocab_gap` (NOT a forbidden skip) pending the distance-span grammar extension; never fabricate a single-locus distance that silently drops an endpoint.
+- `distance_between_A_and_B` / `distance_from_A_to_B_along_C` — a span between two distinct named features is NOT representable in the single locus slot, and the DD has no such arbitrary spans. Name real distance/clearance quantities as a `distance`/`gap` base at a single reference surface or plane (✓ `radial_distance_at_outboard_midplane`, ✓ `gap_at_plasma_boundary`); emit `vocab_gap` if no single-locus form is faithful. Never fabricate a multi-locus span that silently drops an endpoint.
 
 (These are the audit's hard-reject names; the broader forbidden-prefix/structural-leakage lists are in the no-provenance section above.)
 
@@ -256,7 +256,7 @@ Curated from the polarimetry pilot and the spectrometer/gyrokinetics/wall-geomet
 
 **Suffix-form for component instead of canonical prefix.** Component (`parallel`, `perpendicular`, `poloidal`, `toroidal`, `radial`, `vertical`) and transformation (`derivative_of`, `imaginary_part_of`) tokens go BEFORE the base, never trailed as suffixes (suffixes collapse them into `physical_base` and break the parser). Cross-check NC-20 (real_part/imaginary_part/amplitude/phase are the only sanctioned SUFFIX modifiers).
 - ❌ `halo_region_parallel_energy_due_to_heat_flux` → ✅ `parallel_halo_energy`.
-- ❌ `vertical_coordinate_of_geometric_axis_radial_derivative_wrt_minor_radius` → ✅ `derivative_with_respect_to_minor_radius_of_vertical_coordinate_of_geometric_axis`.
+- ❌ `vertical_coordinate_of_geometric_axis_radial_derivative_wrt_minor_radius` → ✅ operators lead (`<op>_of_<base>`), never trailed; but a transformation cannot act on a geometry-coordinate base (operator + `geometric_base` is unrepresentable) — emit `vocab_gap` rather than forcing the deep nest.
 - ❌ `gyroaveraged_parallel_velocity_moment_imaginary_part_normalized` → ✅ restructure as `<axis>_<base>`, or skip + `vocab_gap` if the chain exceeds the parser's nesting limit.
 - *Top exemplars:* `parallel_runaway_electron_current_density` (★0.95), `parallel_fast_electron_pressure` (★0.95).
 
