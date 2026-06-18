@@ -187,6 +187,17 @@ Use them as quality benchmarks for naming style and field usage:
 >   ✅ `parallel_change_in_fast_electron_pressure`
 >   ❌ `change_in_parallel_fast_electron_pressure`
 {% endif %}
+{% if item.value_provenance %}
+> ⚠️ **{{ item.value_provenance | upper }} ESTIMATOR:** this path is the
+> `{{ item.value_provenance }}` estimate of the quantity at `{{ item.provenance_base_path }}`
+> (the grounding above describes that base quantity). Name the **underlying
+> physical quantity ONLY** — do NOT encode `{{ item.value_provenance }}`,
+> `measured`, `reconstructed`, `reference`, `target`, `constraint`, or `fit` in
+> the name. The measured / reconstructed / reference estimates of one quantity
+> share ONE standard name; the estimator is recorded as link metadata, never in
+> the name.
+>   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
+{% endif %}
 - **Description:** {{ item.description }}
 - **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative — do NOT output)*
 {% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}

@@ -1293,6 +1293,7 @@ def _enrich_batch_items(items: list[dict]) -> None:
     version history for each item. Modifies items in-place.
     """
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.provenance import detect_value_provenance
 
     with GraphClient() as gc:
         for item in items:
@@ -1300,7 +1301,20 @@ def _enrich_batch_items(items: list[dict]) -> None:
             if not path:
                 continue
 
-            rows = list(gc.query(_DD_CONTEXT_QUERY, path=path))
+            # Value-provenance collapse: a measured/reconstructed/reference facet
+            # is the SAME quantity as its base — ground on the base quantity (rich
+            # description) so the estimator facets compose ONE name, and flag the
+            # item so the prompt directs the composer to name the base quantity and
+            # NOT encode the estimator (collapse provenance, de-conflate physics).
+            # The estimator itself is recorded on StandardNameSource.provenance.
+            prov_term, base_path = detect_value_provenance(path)
+            grounding_path = path
+            if prov_term:
+                item["value_provenance"] = prov_term
+                item["provenance_base_path"] = base_path
+                grounding_path = base_path
+
+            rows = list(gc.query(_DD_CONTEXT_QUERY, path=grounding_path))
             if not rows:
                 continue
 
@@ -1321,7 +1335,14 @@ def _enrich_batch_items(items: list[dict]) -> None:
             rich = node_desc or node_doc
             if rich:
                 cur = (item.get("description") or "").strip()
-                if not cur or cur == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER:
+                # For a provenance facet the grounding was redirected to the base
+                # quantity, so its terse facet description ("Measured value") must
+                # be REPLACED — not just backfilled — with the base description.
+                if (
+                    not cur
+                    or cur == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+                    or prov_term
+                ):
                     item["description"] = rich
                 # Surface the terse, XML-backed DD documentation as a DISTINCT
                 # grounding line — NOT a copy of the rich description. Keeping

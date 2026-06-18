@@ -261,6 +261,17 @@ These names already exist in the catalog. Reuse them if they match your source, 
 > marker must modify the base quantity X, not intrude between orientation
 > and the base.
 {% endif %}
+{% if item.value_provenance %}
+> ⚠️ **HARD CONSTRAINT — {{ item.value_provenance | upper }} ESTIMATOR:** this
+> path is the `{{ item.value_provenance }}` estimate of the quantity at
+> `{{ item.provenance_base_path }}` (the description above is that base
+> quantity). Name the **underlying physical quantity ONLY** — do NOT encode
+> `{{ item.value_provenance }}`, `measured`, `reconstructed`, `reference`,
+> `target`, `constraint`, or `fit` in the name. The measured / reconstructed /
+> reference estimates of one quantity share ONE standard name; the estimator is
+> recorded as link metadata, never in the name.
+>   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
+{% endif %}
 {% if item.species_context %}- **⚠️ Species context:** `{{ item.species_context }}` — this quantity is specific to **{{ item.species_context }}** species. The standard name MUST include the species in the `subject` segment (e.g., `{{ item.species_context }}_temperature`, not just `temperature`).
 {% endif %}- **Description:** {{ item.description }}
 {% if item.documentation and item.documentation != item.description %}- **Source documentation:** {{ item.documentation }}{% endif %}
