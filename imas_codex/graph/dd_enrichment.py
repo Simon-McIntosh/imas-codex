@@ -27,7 +27,7 @@ import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 if TYPE_CHECKING:
     from imas_codex.graph import GraphClient
@@ -52,13 +52,20 @@ class IMASPathEnrichmentResult(BaseModel):
     )
     keywords: list[str] = Field(
         default_factory=list,
-        max_length=8,
         description=(
             "Searchable keywords (up to 8) — physics abbreviations/symbols, "
             "concepts, measurement types, diagnostic names, and related "
             "terms not already in the description or path name"
         ),
     )
+
+    @field_validator("keywords")
+    @classmethod
+    def _cap_keywords(cls, v: list[str]) -> list[str]:
+        # Truncate rather than reject: a model returning 9+ keywords must not
+        # fail (and re-bill) the whole batch over a soft cap. The writer keeps
+        # only the first few anyway.
+        return v[:8]
 
 
 class IMASPathEnrichmentBatch(BaseModel):
