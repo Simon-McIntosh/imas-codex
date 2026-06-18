@@ -1137,8 +1137,8 @@ async def _refine_batch(
                         "refinement_model": model,
                         "refine_llm_cost": per_node_cost,
                     }
-                    if refinement.physics_domain:
-                        update["physics_domain"] = refinement.physics_domain
+                    # physics_domain is no longer an enrichment/refinement output —
+                    # it is assigned by the separate classify worker.
                     updates.append(update)
 
                 if llm_out.cache_read_tokens:
