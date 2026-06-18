@@ -30,6 +30,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
+from imas_codex.standard_names.provenance import detect_value_provenance
 from imas_codex.standard_names.source_paths import (
     encode_source_path,
     strip_dd_prefix,
@@ -245,6 +246,60 @@ def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
     if not _SNAKE_CASE_RE.fullmatch(name):
         return False, "not_snake_case"
     return True, None
+
+
+def provenance_canonical_names(
+    candidates: list, log: logging.Logger | None = None
+) -> dict[str, str]:
+    """Map each base quantity to ONE canonical name for its estimator facets.
+
+    Per the locked ``name-multiplicity-rule`` (collapse provenance), the
+    measured / reconstructed / reference estimates of one physical quantity must
+    share ONE standard name — but the per-facet composer is non-deterministic
+    (e.g. ``pressure/measured`` -> ``plasma_pressure`` while
+    ``pressure/reconstructed`` -> ``total_plasma_pressure``). Estimator facets of
+    a quantity strip to the same ``base_path`` (and share a compose batch via
+    ``batch_key``), so we group every value-provenance candidate by base and
+    pick one canonical name; the caller overrides each facet's ``name_id`` (the
+    MERGE identity) with it, collapsing the group onto a single StandardName.
+
+    Canonical pick: most-frequently-composed name, ties broken by SHORTEST then
+    lexicographic. Shortest implements the "physics, not instrument" /
+    no-redundant-qualifier preference deterministically — it drops
+    ``_of_flux_loop`` (vs ``poloidal_magnetic_flux``) and ``total_plasma_pressure``
+    (vs ``plasma_pressure``). Returns ``{base_path: canonical_name}`` only for
+    bases whose facets disagree (a no-op map otherwise).
+    """
+    from collections import Counter
+
+    groups: dict[str, list[str]] = {}
+    for c in candidates:
+        term, base = detect_value_provenance(getattr(c, "source_id", "") or "")
+        if not term:
+            continue
+        try:
+            nm = normalize_spelling(c.compose_name())
+        except Exception:
+            continue
+        groups.setdefault(base, []).append(nm)
+
+    canonical: dict[str, str] = {}
+    for base, member_names in groups.items():
+        distinct = set(member_names)
+        if len(distinct) <= 1:
+            continue  # already agree
+        counts = Counter(member_names)
+        winner = min(distinct, key=lambda n: (-counts[n], len(n), n))
+        canonical[base] = winner
+        if log:
+            log.info(
+                "provenance canon: base=%s -> %s (collapsed %d variants: %s)",
+                base,
+                winner,
+                len(distinct),
+                sorted(distinct),
+            )
+    return canonical
 
 
 # Bare coordinate/infrastructure tokens that are NOT physics observables.
@@ -1293,7 +1348,6 @@ def _enrich_batch_items(items: list[dict]) -> None:
     version history for each item. Modifies items in-place.
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.provenance import detect_value_provenance
 
     with GraphClient() as gc:
         for item in items:
@@ -2786,6 +2840,9 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         state.compose_stats.record_batch(len(batch.items))
 
         candidates = []
+        # Deterministic provenance collapse (see pooled path): one canonical
+        # name per base quantity so estimator facets never drift apart.
+        _prov_canon = provenance_canonical_names(result.candidates, log=wlog)
         for c in result.candidates:
             # Find the matching source item to get authoritative fields
             source_item = next(
@@ -2859,6 +2916,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             # Normalize name via grammar round-trip BEFORE persist
             # to avoid duplicate nodes if validate would rename
             name_id = normalize_spelling(c.compose_name())
+            # Provenance collapse: estimator facets of one quantity share the
+            # canonical name (MERGE identity) regardless of per-facet drift.
+            _pterm, _pbase = detect_value_provenance(c.source_id or "")
+            if _pterm and _pbase in _prov_canon:
+                name_id = _prov_canon[_pbase]
 
             # W4b: Pre-validation gate — reject malformed LLM output
             # before it reaches MERGE.
@@ -4524,6 +4586,9 @@ async def compose_batch(
         candidates: list[dict] = []
         wlog = logger  # plain logger; pool path has no WorkerLogAdapter
         source_kind = "dd"  # pool-mode generate-name is DD-only today
+        # Deterministic provenance collapse: one canonical name per base quantity
+        # so estimator facets (measured/reconstructed/reference) never drift apart.
+        _prov_canon = provenance_canonical_names(result.candidates, log=wlog)
         for c in result.candidates:
             source_item = next(
                 (item for item in batch if item.get("path") == c.source_id),
@@ -4590,6 +4655,11 @@ async def compose_batch(
             # before MERGE.  Mark the source as 'failed' so it is not
             # re-claimed forever.
             name_id = normalize_spelling(c.compose_name())
+            # Provenance collapse: estimator facets of one quantity share the
+            # canonical name (MERGE identity) regardless of per-facet drift.
+            _pterm, _pbase = detect_value_provenance(c.source_id or "")
+            if _pterm and _pbase in _prov_canon:
+                name_id = _prov_canon[_pbase]
             _well_formed, _reject_reason = is_well_formed_candidate(name_id)
             if not _well_formed:
                 wlog.warning(

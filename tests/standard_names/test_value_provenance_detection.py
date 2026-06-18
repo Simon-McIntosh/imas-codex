@@ -64,3 +64,57 @@ def test_edge_cases():
     assert detect_value_provenance(None) == (None, "")
     assert detect_value_provenance("") == (None, "")
     assert detect_value_provenance("measured") == (None, "measured")  # no parent
+
+
+class _FakeCand:
+    """Minimal compose-candidate stand-in for canonicalizer tests."""
+
+    def __init__(self, source_id: str, name: str):
+        self.source_id = source_id
+        self._name = name
+
+    def compose_name(self) -> str:
+        return self._name
+
+
+def test_canonicalizer_collapses_drifted_estimators():
+    from imas_codex.standard_names.workers import provenance_canonical_names
+
+    cands = [
+        _FakeCand(
+            "equilibrium/time_slice/constraints/pressure/measured", "plasma_pressure"
+        ),
+        _FakeCand(
+            "equilibrium/time_slice/constraints/pressure/reconstructed",
+            "total_plasma_pressure",
+        ),
+    ]
+    canon = provenance_canonical_names(cands)
+    base = "equilibrium/time_slice/constraints/pressure"
+    assert base in canon
+    # shortest wins on the tie -> drops the spurious 'total_' qualifier
+    assert canon[base] == "plasma_pressure"
+
+
+def test_canonicalizer_noop_when_estimators_agree():
+    from imas_codex.standard_names.workers import provenance_canonical_names
+
+    cands = [
+        _FakeCand("equilibrium/time_slice/constraints/ip/measured", "plasma_current"),
+        _FakeCand(
+            "equilibrium/time_slice/constraints/ip/reconstructed", "plasma_current"
+        ),
+    ]
+    # Agreement -> no entry (nothing to rewrite).
+    assert provenance_canonical_names(cands) == {}
+
+
+def test_canonicalizer_ignores_non_provenance_candidates():
+    from imas_codex.standard_names.workers import provenance_canonical_names
+
+    cands = [
+        _FakeCand(
+            "core_profiles/profiles_1d/electrons/temperature", "electron_temperature"
+        )
+    ]
+    assert provenance_canonical_names(cands) == {}
