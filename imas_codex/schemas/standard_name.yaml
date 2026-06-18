@@ -1581,6 +1581,21 @@ classes:
           Enables recovery of the edge if MERGE fails silently (e.g. when
           the target StandardName was not persisted) and simplifies
           bulk queries that only need the target id.
+      provenance:
+        description: >-
+          Value-provenance / estimator of this source path, from the ISN
+          value-provenance controlled vocabulary
+          (``measured`` | ``reconstructed`` | ``reference``). Null when the
+          path is not a value-provenance facet. This is LINK metadata: the
+          measured / reconstructed / reference facets of the same physical
+          quantity collapse onto ONE StandardName (many sources -> one name),
+          with the estimator recorded here and NEVER emitted in the name.
+          Treated like unit/cocos — DD/ISN-authoritative, injected at link
+          time. Validated against
+          ``imas_standard_names.value_provenance_terms()``; never a codex enum
+          (ISN owns the vocabulary).
+          Query: MATCH (sns:StandardNameSource {provenance: 'measured'})
+                 -[:PRODUCED_NAME]->(sn:StandardName) RETURN sn.id
       embedding:
         description: Vector embedding for semantic search
         multivalued: true
