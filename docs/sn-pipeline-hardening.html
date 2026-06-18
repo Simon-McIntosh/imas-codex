@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 </head>
 <body>
   <main class="plan-doc">
@@ -337,6 +337,16 @@
     <p class="r-dec-q">How is provenance/estimator (measured/reconstructed/target) represented?</p>
     <p class="r-dec-ctx">measured/reconstructed/target are the same physical quantity by different estimators. They must not become separate names, but the distinction must be queryable.</p>
     <p class="r-dec-rat">LOCKED. Provenance/estimator is a CLOSED controlled vocabulary owned by ISN (measured, reconstructed, target, ...). It is captured as a property on the source-&gt;StandardName link in the codex graph (LinkML schema dev), never emitted in the standard name. Treated like units/cocos: DD/ISN-authoritative metadata injected at link time. Enables comprehensive coverage (every DD path mapped) with multiplicity collapsed through multi-source linking. Requires ISN vocab (RC cycle) + codex schema dev.</p>
+    </div>
+<div class="r-dec" data-key="provenance-collapse-determinism" data-choice="Compose base once, attach facets: batch-canonicalize estimator facets to one name" data-by="Simon McIntosh" data-when="2026-06-18">
+    <p class="r-dec-q">How is the provenance collapse made deterministic (estimators -&gt; one name)?</p>
+    <p class="r-dec-ctx">Per-facet compose drifts: pressure/measured-&gt;plasma_pressure vs pressure/reconstructed-&gt;total_plasma_pressure; flux_loop produced both poloidal_magnetic_flux and ..._of_flux_loop.</p>
+    <p class="r-dec-rat">LOCKED. Estimator facets of a quantity share a compose batch (same batch_key); provenance_canonical_names groups them by base_path and rewrites the whole group&#x27;s name_id (MERGE identity) to ONE canonical name = most-frequently composed, ties broken SHORTEST then lexicographic. Shortest deterministically drops redundant qualifiers / instrument loci (total_plasma_pressure -&gt; plasma_pressure; _of_flux_loop dropped). Estimator-only scope: detect_value_provenance strips ONLY the terminal estimator segment, never past the quantity, so physics semantics (diamagnetic, line_integrated, faraday) are preserved. Validated free on equilibrium constraints: 0 quantities with &gt;1 name.</p>
+    </div>
+<div class="r-dec" data-key="constraint-instrument-locus" data-choice="Physics only — drop the instrument" data-by="Simon McIntosh" data-when="2026-06-18">
+    <p class="r-dec-q">Do diagnostic constraints (flux_loop, pol_probe, MSE/Faraday) keep the instrument locus?</p>
+    <p class="r-dec-ctx">constraints/b_field_pol_probe, /flux_loop, /mse_polarization_angle name a physical quantity sampled by a specific diagnostic (an array element).</p>
+    <p class="r-dec-rat">LOCKED. Name the physics, not the instrument (standing SN rule; the specific probe/loop is a per-element metadata locus): poloidal_magnetic_field, poloidal_magnetic_flux, polarization_angle. The compose grounding redirects to the base quantity (which describes the physics, not &#x27;at pickup coil&#x27;) and the shortest-name canonical tiebreak drops instrument loci. Revisit only if the primary diagnostic IDS names these with a defining locus that the constraint should match.</p>
     </div>
 </section>
 
