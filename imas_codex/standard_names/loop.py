@@ -493,6 +493,7 @@ async def _seed_domain_sources(
     domain: str,
     source: str = "dd",
     stop_event: asyncio.Event | None = None,
+    max_sources: int | None = None,
 ) -> int:
     """Seed the generate_name pool with StandardNameSource nodes for *domain*.
 
@@ -544,6 +545,20 @@ async def _seed_domain_sources(
 
     if not sources:
         return 0
+
+    # Honour --max-sources for a single --domain seed too (previously only the
+    # all-domains sweep capped, so --domain X --max-sources N seeded the whole
+    # domain). Cap deterministically by path for a stable subset.
+    if max_sources is not None and len(sources) > max_sources:
+        sources.sort(key=lambda s: s["source_id"])
+        logger.warning(
+            "max_sources=%d reached for domain %r; seeding %d of %d candidates",
+            max_sources,
+            domain,
+            max_sources,
+            len(sources),
+        )
+        sources = sources[:max_sources]
 
     written = await asyncio.to_thread(merge_standard_name_sources, sources, force=False)
     return written
@@ -804,8 +819,22 @@ async def run_sn_pools(
             if _domains:
                 seeded = 0
                 for d in _domains:
+                    # max_sources is a GLOBAL cap across the domain list — pass
+                    # the remaining budget so two domains can't each seed the cap.
+                    _remaining = (
+                        None if max_sources is None else max(0, max_sources - seeded)
+                    )
+                    if _remaining == 0:
+                        logger.warning(
+                            "max_sources=%d reached; skipping remaining domains",
+                            max_sources,
+                        )
+                        break
                     seeded += await _seed_domain_sources(
-                        domain=d, source=source, stop_event=stop_event
+                        domain=d,
+                        source=source,
+                        stop_event=stop_event,
+                        max_sources=_remaining,
                     )
                 logger.info(
                     "Auto-seeded %d sources from %d domain(s)", seeded, len(_domains)
