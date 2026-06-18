@@ -110,6 +110,17 @@ imas.add_command(map_cmd, "map")
         "skip all hash checks, re-enrich and re-embed everything."
     ),
 )
+@click.option(
+    "--enrich-workers",
+    type=int,
+    default=1,
+    show_default=True,
+    help=(
+        "Parallel LLM enrich/refine worker instances. Each claims disjoint "
+        "batches atomically, so higher values raise throughput against the "
+        "OpenRouter concurrency limit. Try 4-8 for a full re-enrich."
+    ),
+)
 def imas_build(
     verbose: bool,
     quiet: bool,
@@ -119,6 +130,7 @@ def imas_build(
     dry_run: bool,
     model: str | None,
     force: bool,
+    enrich_workers: int,
 ) -> None:
     """Build the IMAS Data Dictionary Knowledge Graph.
 
@@ -235,6 +247,7 @@ def imas_build(
             reset_to=reset_to,
             force=force,
             model=model,
+            enrich_workers=enrich_workers,
         )
 
         # Build display for rich mode

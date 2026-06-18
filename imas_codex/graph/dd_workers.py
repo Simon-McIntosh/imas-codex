@@ -66,6 +66,11 @@ class DDBuildState(DiscoveryStateBase):
     # LLM model override (used by enrich and refine workers)
     model: str | None = None
 
+    # Parallelism for the LLM enrich/refine polling loops. Each instance claims
+    # disjoint batches via the atomic row-locked claim queries, so >1 is safe
+    # and scales throughput against OpenRouter concurrency limits.
+    enrich_workers: int = 1
+
     # Feature flags
     dry_run: bool = False
     reset_to: str | None = None
@@ -1503,12 +1508,14 @@ async def run_dd_build_engine(
             "enrich",
             "enrich_phase",
             enrich_worker,
+            count=max(1, state.enrich_workers),
             depends_on=["build_phase"],
         ),
         WorkerSpec(
             "refine",
             "refine_phase",
             refine_worker,
+            count=max(1, state.enrich_workers),
             depends_on=["enrich_phase"],
         ),
         WorkerSpec(
