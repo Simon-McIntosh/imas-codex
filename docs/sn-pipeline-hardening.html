@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 </head>
 <body>
   <main class="plan-doc">
@@ -580,7 +580,7 @@ Done-when
     <pre class="r-fu-prompt">Deferred (docs phase): template the parent/family link (surface-explicit head + qualifier children) into the docs-generation prompt so docs cross-link correctly. Not a names-axis blocker.</pre>
     <p class="r-fu-outcome">Landed (commits a4debaab + follow-ons). Validated end-to-end via focus regen on 30 equilibrium shape paths: 23 names, bare=0, superseded=0, both surfaces present per parameter at high scores, qualifier-stripping HAS_PARENT edges to surface-explicit heads, injection fired 9x in the pooled path. Tests: 27 in test_compose_shape_parameter_surface.py incl. a regression guard that the injection precedes every compose persist site. Deferred: docs-prompt family-link templating (docs phase).</p>
     </article>
-<article class="r-fu" data-id="f-snph-010" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snph-010" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-18T13:07:51+00:00" data-resolved-by="orchestrator">
     <h4 class="r-fu-title">Provenance-facet collapse + self-describing-operations (compose increment)</h4>
     <div class="r-fu-body"><p>Provenance FOUNDATION landed + validated (implements provenance-controlled-vocab + name-multiplicity-rule): ISN <code>value_provenance</code> controlled vocab (measured/reconstructed/reference) in rc45; <code>StandardNameSource.provenance</code> schema slot; <code>detect_value_provenance()</code> detector (11 tests); provenance recorded at seed (46 real equilibrium-constraint sources backfilled: 23 measured + 23 reconstructed). REMAINING: the compose COLLAPSE so estimator facets share one base-quantity name, plus self-describing-operations enforcement (reject free-text operator compounds e.g. current_weighted_average; route averaging through registered ISN operators). Validate free via compose-only.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -601,6 +601,25 @@ Done-when
   2. Compose-only re-run on equilibrium constraints: measured+reconstructed of a quantity collapse to ONE name (e.g. plasma_current), provenance recorded on each source; no hallucinated per-facet names.
   3. Self-describing-ops: composer emits registered averaging operators; current_weighted_average-style free-text compounds rejected by the round-trip gate. Investigate why the gate passed them.
   4. Tests green; followup written; this followup resolved.
+</pre>
+    <p class="r-fu-outcome">Provenance collapse landed + made deterministic (provenance_canonical_names; drift=0 across 12 quantities; estimator-only scope preserves physics). The 'self-describing-ops / faithfulness' half was misdiagnosed as a gate/compose problem: the round-trip gate PARSES the bad names (poloidal_magnetic_flux_due_to_diamagnetic_drift, current_weighted_average_external_loop_voltage are grammatically valid), and the composer is FAITHFUL — root cause is ENRICHMENT injecting specifics the raw DD doc never states (NOT bad DSv4 corpus). Fixed: (1) enrichment.md faithfulness guardrail (never assert a direction/mechanism/weighting/location absent from the source); (2) review_names.md renders the authoritative terse DD doc distinctly (was shadowed by 'description or documentation') + [I1.11] grades the name against it as the backstop the syntax gate can't be. Validated free (A/B re-enrich, $0.008): diamagnetic loses 'poloidal'+'drift', psi_external loses 'current-weighted', faithful physics retained.</p>
+    </article>
+<article class="r-fu" data-id="f-snph-011" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Propagate enrichment faithfulness: re-enrich DD descriptions before SN regen</h4>
+    <div class="r-fu-body"><p>The enrichment faithfulness guardrail (f-snph-010) only affects NEW enrichment. Existing IMASNode descriptions were written with the old prompt and may carry injected specifics (poloidal/drift/current-weighted), which compose still grounds on. SN compose produces faithful names only after the descriptions are re-enriched. Sequencing: re-enrich the campaign's target domains BEFORE composing them.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: re-enrich propagation (f-snph-011)
+Tier: opus
+
+Context
+  enrichment.md now has a faithfulness guardrail (validated: removes injected poloidal/drift/current-weighted). Existing DD descriptions predate it and still mislead compose. Re-enrich before SN regen.
+
+Done-when
+  1. Scope + cost a re-enrich pass: `imas dd build --reset-to built --ids-filter &lt;campaign domains&gt;` (NOT whole DD unless cheap). Note this is a DD-graph cost separate from the $50 SN budget — confirm scope with lead.
+  2. Spot-check a sample of re-enriched descriptions for residual injected specifics; iterate the guardrail if any survive.
+  3. Re-run SN compose-only (free) on the re-enriched domains; confirm hallucinated names (…_due_to_…, current_weighted_…) are gone.
+  4. Followup written; this resolved.
 </pre>
     </article>
 </section>
