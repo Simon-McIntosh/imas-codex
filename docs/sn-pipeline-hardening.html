@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 </head>
 <body>
   <main class="plan-doc">
@@ -347,6 +347,11 @@
     <p class="r-dec-q">Do diagnostic constraints (flux_loop, pol_probe, MSE/Faraday) keep the instrument locus?</p>
     <p class="r-dec-ctx">constraints/b_field_pol_probe, /flux_loop, /mse_polarization_angle name a physical quantity sampled by a specific diagnostic (an array element).</p>
     <p class="r-dec-rat">LOCKED. Name the physics, not the instrument (standing SN rule; the specific probe/loop is a per-element metadata locus): poloidal_magnetic_field, poloidal_magnetic_flux, polarization_angle. The compose grounding redirects to the base quantity (which describes the physics, not &#x27;at pickup coil&#x27;) and the shortest-name canonical tiebreak drops instrument loci. Revisit only if the primary diagnostic IDS names these with a defining locus that the constraint should match.</p>
+    </div>
+<div class="r-dec" data-key="dd-enrichment-model" data-choice="Keep claude-sonnet-4.6 (benchmark-backed); fix the prompt, not the model" data-by="Simon McIntosh" data-when="2026-06-18">
+    <p class="r-dec-q">Which model enriches DD descriptions, and do we change it?</p>
+    <p class="r-dec-ctx">DD description fields are LLM-enriched from the raw documentation + structural context. The diamagnetic fabrication raised whether the model is at fault.</p>
+    <p class="r-dec-rat">LOCKED. DD enrichment uses get_model(&#x27;dd-enrichment&#x27;)=sonnet-4.6 (graph confirms 6236 LLM nodes; 7061 template). The sn-docs bake-off (2026-06-11) found sonnet-4.6 the leader for long-form physics prose (judge-mean 0.740 vs gpt-5.5 0.700, ~40% price, only one to pass the adversarial physics probe; DSv4-flash rejected twice for definitional drift). DD enrichment is the same task, so sonnet-4.6 is benchmark-correct. The fabrication was a PROMPT gap (length quota pressured padding) not the model — proven: same model produced faithful descriptions once the prompt forbade unsupported specifics. Cost recovered from IMASNode props (NOT LLMCost nodes; DD enrichment never wrote those): enrich $14.92 / refine $19.41, ~$0.0024+$0.0032 per node. Fix the stale enrich_imas_paths fallback to get_model(&#x27;language&#x27;)=gpt-5.4 so it can&#x27;t diverge.</p>
     </div>
 </section>
 
