@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 </head>
 <body>
   <main class="plan-doc">
@@ -649,7 +649,7 @@ Done-when
   4. Widen to core_profiles/edge_profiles/pf per campaign order; fix the stale enrich_imas_paths get_model(&#x27;language&#x27;) fallback so it can&#x27;t use gpt-5.4.
   5. Followup written; this resolved.
 </pre>
-    <p class="r-fu-outcome">Superseded by a FULL-DD re-enrich+refine (lead chose one pass over per-domain). Completed clean through all phases: enrich 5129 LLM + 5203 template, refine 5088 LLM, embed 9288 (+62 identifier/87 IDS/198 ident-node), classify 12011 LLM + 36007 inherited, cluster 2912. TOTAL SPEND $31.08 (enrich $13.87 + refine $17.21), sonnet-4.6, ~2.4h wall (classify long tail). Faithfulness validated DD-WIDE: 0 genuine fabrications — diamagnetic_flux/v_external clean; the 2 'weighted by toroidal current density' hits (summary + pf_active psi_*_average) are FAITHFUL (raw docs give int(psi.j_tor.dS)/Ip), correctly distinguished from the equilibrium variant whose raw doc omits the formula. Six DD-build blockers fixed en route (f-snph-013) + --enrich-workers added (count=6 ~7.5x, 33->250 nodes/min). Gotcha: --reset-to built RE-CLEARS on every run (re-bills); resume plain or run once. SN compose-only re-validation on the re-enriched descriptions running (bvfkvta46).</p>
+    <p class="r-fu-outcome">Superseded by a FULL-DD re-enrich+refine (lead chose one pass over per-domain). Completed clean through all phases: enrich 5129 LLM + 5203 template, refine 5088 LLM, embed 9288 (+62 identifier/87 IDS/198 ident-node), classify 12011 LLM + 36007 inherited, cluster 2912. TOTAL SPEND $31.08 (enrich $13.87 + refine $17.21), sonnet-4.6, ~2.4h wall (classify long tail). Faithfulness validated DD-WIDE: 0 genuine fabrications — diamagnetic_flux/v_external clean; the 2 'weighted by toroidal current density' hits (summary + pf_active psi_*_average) are FAITHFUL (raw docs give int(psi.j_tor.dS)/Ip), correctly distinguished from the equilibrium variant whose raw doc omits the formula. Six DD-build blockers fixed en route (f-snph-013) + --enrich-workers added (count=6 ~7.5x, 33-&gt;250 nodes/min). Gotcha: --reset-to built RE-CLEARS on every run (re-bills); resume plain or run once. SN compose-only re-validation on the re-enriched descriptions running (bvfkvta46).</p>
     </article>
 <article class="r-fu" data-id="f-snph-013" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-18" data-resolved-by="orchestrator">
     <h4 class="r-fu-title">Repair four DD-build blockers in the reset-to-built path</h4>
@@ -674,6 +674,24 @@ Done-when
   3. Fix the stale enrich_imas_paths get_model(&#x27;language&#x27;) fallback (so a non-CLI caller can&#x27;t enrich with gpt-5.4).
   4. Once zero-shot quality holds, spend the $50 on the paid review pass (six-pool sn run) domain-by-domain.
   5. Followup written; this resolved.
+</pre>
+    </article>
+<article class="r-fu" data-id="f-snph-015" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Provenance canonicalizer: collapse estimator drift ACROSS batches (graph post-pass)</h4>
+    <div class="r-fu-body"><p>SN compose re-validation on the re-enriched DD (free, $0, 46 facets/21 quantities): mostly faithful (ip-&gt;plasma_current, diamagnetic_flux-&gt;diamagnetic_magnetic_flux, j_phi-&gt;toroidal_flux_surface_averaged_current_density — correctly FSA per the richer raw doc). BUT 8 quantities show estimator DRIFT (e.g. b_field_pol_probe -&gt; {poloidal_magnetic_field, poloidal_magnetic_field_at_constraint_position}; j_tor -&gt; 3 variants; pressure -&gt; {total_particle_pressure, total_plasma_pressure}). Root cause: provenance_canonical_names dedups only WITHIN one result.candidates (single LLM call); these 46 sources span multiple compose calls, so cross-call drift isn't collapsed. The richer re-enriched descriptions also make the composer add a position locus (_at_constraint_position) on some facets — the over-elaboration the shortest-name tiebreak is meant to drop, but only fires if grouped. NOTE: re-enrich itself is a clean success (separate); this is a names-pipeline canonicalizer-scope refinement.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: cross-batch provenance canonicalizer (f-snph-015)
+Tier: opus
+
+Context
+  provenance_canonical_names collapses estimator facets to one name only within a single LLM batch. Across batches (a full domain run), measured/reconstructed of one quantity drift to different names. Need a graph-level canonicalizer.
+
+Done-when
+  1. A reconcile post-pass (e.g. sn run --only reconcile, or a dedicated step) groups all StandardNameSource with provenance != null by base_path (detect_value_provenance), picks the canonical name (most-frequent; ties shortest-then-lexicographic, dropping _at_constraint_position / _of_flux_loop over-elaborations), and re-points every facet&#x27;s PRODUCED_NAME + HAS_STANDARD_NAME to it; superseded/orphan names cleaned.
+  2. Also handle the constraint-position subtree (constraints/&lt;Q&gt;/position/{r,z,phi,psi,rho_tor_norm}) which currently composes its own coordinate names — confirm those are wanted or excluded.
+  3. Re-run compose-only on equilibrium constraints; confirm drift=0 across batches.
+  4. Followup written; this resolved.
 </pre>
     </article>
 </section>
