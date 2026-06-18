@@ -394,16 +394,14 @@ def _inherit_from_parent_by_category(
 
     if dry_run:
         cypher = f"""
-        MATCH (n:IMASNode)-[:HAS_PARENT*1..5]->(ancestor:IMASNode)
+        MATCH path = (n:IMASNode)-[:HAS_PARENT*1..5]->(ancestor:IMASNode)
         WHERE n.node_category IN $categories
           AND ancestor.domain_source IS NOT NULL
           AND ancestor.physics_domain IS NOT NULL
           {needs_clause}
           {ids_clause}
-        WITH n, ancestor
-        ORDER BY size(
-            shortestPath((n)-[:HAS_PARENT*]->(ancestor))
-        ) ASC
+        WITH n, ancestor, length(path) AS dist
+        ORDER BY dist ASC
         WITH n, head(collect(ancestor)) AS nearest
         WHERE nearest IS NOT NULL
         RETURN count(n) AS cnt

@@ -325,12 +325,14 @@ def _print_build_summary(stats: dict) -> None:
         return
 
     click.echo("\n=== Build Complete ===")
-    click.echo(f"Versions processed: {stats['versions_processed']}")
-    click.echo(f"IDS types: {stats['ids_created']}")
-    click.echo(f"IMASNode nodes (across all versions): {stats['paths_created']}")
-    click.echo(f"Unit nodes: {stats['units_created']}")
-    click.echo(f"IMASNodeChange nodes: {stats['path_changes_created']}")
-    click.echo(f"Definitions changed (documentation): {stats['definitions_changed']}")
+    click.echo(f"Versions processed: {stats.get('versions_processed', 0)}")
+    click.echo(f"IDS types: {stats.get('ids_created', 0)}")
+    click.echo(f"IMASNode nodes (across all versions): {stats.get('paths_created', 0)}")
+    click.echo(f"Unit nodes: {stats.get('units_created', 0)}")
+    click.echo(f"IMASNodeChange nodes: {stats.get('path_changes_created', 0)}")
+    click.echo(
+        f"Definitions changed (documentation): {stats.get('definitions_changed', 0)}"
+    )
     click.echo(f"Paths enriched (LLM): {stats.get('enriched_llm', 0)}")
     click.echo(f"Paths enriched (template): {stats.get('enriched_template', 0)}")
     click.echo(f"Enrichment cached: {stats.get('enrichment_cached', 0)}")
@@ -365,7 +367,7 @@ def _print_build_summary(stats: dict) -> None:
             f"IDS embeddings: {stats.get('ids_embeddings_updated', 0)} "
             f"(cached: {stats.get('ids_embeddings_cached', 0)})"
         )
-    click.echo(f"Cluster nodes: {stats['clusters_created']}")
+    click.echo(f"Cluster nodes: {stats.get('clusters_created', 0)}")
     if stats.get("elapsed_seconds", 0) > 0:
         click.echo(f"Elapsed: {stats['elapsed_seconds']:.1f}s")
 
