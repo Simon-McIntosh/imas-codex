@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 </head>
 <body>
   <main class="plan-doc">
@@ -569,6 +569,29 @@ Done-when
     <div class="r-fu-body"><p>Surfaced during the <code>--focus</code> rotations (f-snph-008). Makes every dimensionless shape descriptor (triangularity/elongation/squareness) surface-explicit and de-conflates the boundary scalar from the flux-surface profile, per the locked <code>shape-param-locus</code> decision.</p><ul><li><strong>Compose injection</strong> <code>_inject_shape_parameter_surface</code>: when the composer leaves the locus bare, inject the surface from the source DD path (<code>profiles_1d</code>/<code>flux_surface</code> → flux_surface, else plasma_boundary). Wired into <strong>both</strong> compose persist paths (linear + pooled) — it was first wired only into the linear path while <code>sn run</code> uses the pooled path, so it silently never fired (clean output was just nondeterministic LLM prompt-compliance). Guarded by a structural test.</li><li><strong>Attachment guard</strong> in <code>_is_attachment_consistent</code>: a profiles_1d (flux-surface) source may not attach to a <code>_of_plasma_boundary</code> name (and vice versa); boundary_separatrix→plasma_boundary stays valid. Without it the attachment worker re-merged the de-conflated siblings, triggering a supersede/refine cascade through a bare intermediate.</li><li><strong>Bare-parent revert</strong> in <code>parents.py</code>: bare shape bases are non-quantities/duplicates and are no longer admitted as derived parents; family heads are the surface-explicit forms reached by stripping qualifiers.</li><li><strong>Side fix:</strong> <code>GraphClient(timeout=5)</code> → <code>GraphClient()</code> — the unsupported kwarg had silently broken the grammar auto-sync and pipeline-hash gate.</li></ul></div>
     <pre class="r-fu-prompt">Deferred (docs phase): template the parent/family link (surface-explicit head + qualifier children) into the docs-generation prompt so docs cross-link correctly. Not a names-axis blocker.</pre>
     <p class="r-fu-outcome">Landed (commits a4debaab + follow-ons). Validated end-to-end via focus regen on 30 equilibrium shape paths: 23 names, bare=0, superseded=0, both surfaces present per parameter at high scores, qualifier-stripping HAS_PARENT edges to surface-explicit heads, injection fired 9x in the pooled path. Tests: 27 in test_compose_shape_parameter_surface.py incl. a regression guard that the injection precedes every compose persist site. Deferred: docs-prompt family-link templating (docs phase).</p>
+    </article>
+<article class="r-fu" data-id="f-snph-010" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Provenance-facet collapse + self-describing-operations (compose increment)</h4>
+    <div class="r-fu-body"><p>Provenance FOUNDATION landed + validated (implements provenance-controlled-vocab + name-multiplicity-rule): ISN <code>value_provenance</code> controlled vocab (measured/reconstructed/reference) in rc45; <code>StandardNameSource.provenance</code> schema slot; <code>detect_value_provenance()</code> detector (11 tests); provenance recorded at seed (46 real equilibrium-constraint sources backfilled: 23 measured + 23 reconstructed). REMAINING: the compose COLLAPSE so estimator facets share one base-quantity name, plus self-describing-operations enforcement (reject free-text operator compounds e.g. current_weighted_average; route averaging through registered ISN operators). Validate free via compose-only.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: provenance collapse (f-snph-010)
+Tier: opus
+
+Context
+  Provenance foundation landed (ISN value_provenance vocab rc45; StandardNameSource.provenance slot; detect_value_provenance detector; recording at seed). Now implement the COLLAPSE so measured/reconstructed/reference facets of one quantity share ONE base-quantity standard name (collapse provenance, de-conflate physics), and enforce self-describing-operations.
+
+Locked decisions to honour
+  name-multiplicity-rule -&gt; collapse provenance, de-conflate physics
+  provenance-controlled-vocab -&gt; ISN-owned vocab + graph edge property, never a name segment
+  self-describing-operations -&gt; averaging via registered ISN operators in the name; reject free-text operator compounds
+
+Done-when
+  1. In _enrich_batch_items, provenance-facet items ground on base_path (rich base description) + a compose-prompt directive &#x27;name the underlying physical quantity, not the estimator&#x27;. Confirmed base nodes carry clean descriptions (constraints/ip -&gt; &#x27;Plasma current (Ip) constraint...&#x27;).
+  2. Compose-only re-run on equilibrium constraints: measured+reconstructed of a quantity collapse to ONE name (e.g. plasma_current), provenance recorded on each source; no hallucinated per-facet names.
+  3. Self-describing-ops: composer emits registered averaging operators; current_weighted_average-style free-text compounds rejected by the round-trip gate. Investigate why the gate passed them.
+  4. Tests green; followup written; this followup resolved.
+</pre>
     </article>
 </section>
 
