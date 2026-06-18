@@ -16,8 +16,8 @@
   <title>SN Pipeline Hardening | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="25">
+<meta name="plan-modified" content="2026-06-19">
+<meta name="plan-version" content="26">
 </head>
 <body>
   <main class="plan-doc">
@@ -352,6 +352,11 @@
     <p class="r-dec-q">Which model enriches DD descriptions, and do we change it?</p>
     <p class="r-dec-ctx">DD description fields are LLM-enriched from the raw documentation + structural context. The diamagnetic fabrication raised whether the model is at fault.</p>
     <p class="r-dec-rat">LOCKED. DD enrichment uses get_model(&#x27;dd-enrichment&#x27;)=sonnet-4.6 (graph confirms 6236 LLM nodes; 7061 template). The sn-docs bake-off (2026-06-11) found sonnet-4.6 the leader for long-form physics prose (judge-mean 0.740 vs gpt-5.5 0.700, ~40% price, only one to pass the adversarial physics probe; DSv4-flash rejected twice for definitional drift). DD enrichment is the same task, so sonnet-4.6 is benchmark-correct. The fabrication was a PROMPT gap (length quota pressured padding) not the model — proven: same model produced faithful descriptions once the prompt forbade unsupported specifics. Cost recovered from IMASNode props (NOT LLMCost nodes; DD enrichment never wrote those): enrich $14.92 / refine $19.41, ~$0.0024+$0.0032 per node. Fix the stale enrich_imas_paths fallback to get_model(&#x27;language&#x27;)=gpt-5.4 so it can&#x27;t diverge.</p>
+    </div>
+<div class="r-dec" data-key="sn-quality-metric" data-choice="Reviewer score (qwen3.7-max, single calibrated judge) as primary; reference_overlap only after the gold fixture is regenerated" data-by="Simon McIntosh" data-when="2026-06-19">
+    <p class="r-dec-q">What measures SN name-quality lift (the ruler)?</p>
+    <p class="r-dec-ctx">Need a reproducible before/after metric for the measure-&gt;fix-&gt;loop on name quality. sn bench gives grammar-validity, reviewer scores (0-1 across 4 dims), and reference_overlap vs a gold fixture.</p>
+    <p class="r-dec-rat">LOCKED (operational). Baseline on re-enriched DD (deepseek-v4-flash compose + qwen3.7-max): grammar 47/47, mean name score 0.970, median 1.000, weakest dim SEMANTIC 18.66/20. Run sn bench scoped to the PRODUCTION composer (free local) + a SINGLE reviewer (the 7-reviewer matrix deadlocked litellm&#x27;s async LoggingWorker under ~364 concurrent calls; single reviewer + 50min timeout is the safe form). reference_overlap (0.32) is currently MISLEADING: the benchmark_reference.py gold predates locked decisions (wants bare elongation/triangularity, plasma_current_of_rogowski_coil, bare magnetic_flux) — ~20/28 mismatches are composer-correct/gold-stale. Regenerate the gold against current decisions before trusting reference_overlap; until then the reviewer score (with persisted per-name reasoning) is the ruler.</p>
     </div>
 </section>
 
@@ -693,7 +698,7 @@ Done-when
   3. Re-run compose-only on equilibrium constraints; confirm drift=0 across batches.
   4. Followup written; this resolved.
 </pre>
-    <p class="r-fu-outcome">Redirected per lead: the estimator drift (poloidal_magnetic_field vs _at_constraint_position; j_tor variants) is fixed in the COMPOSE PROMPT (SN generation), not a graph post-pass. Root cause was the composer drawing a locus from the constraints/<Q>/position/ fit-sampling substructure. Both compose prompts' estimator directive now explicitly forbid _at_constraint_position / _at_measurement_position / _at_sensor_attachment_point while keeping a genuine raw-doc-stated surface/flux-average (e.g. flux-surface-averaged current density). The within-batch provenance_canonical_names stays only as a backstop for residual nondeterminism. 75 compose/drift-guard tests green. Lift to be measured via sn bench (baseline + post-fix).</p>
+    <p class="r-fu-outcome">Redirected per lead: the estimator drift (poloidal_magnetic_field vs _at_constraint_position; j_tor variants) is fixed in the COMPOSE PROMPT (SN generation), not a graph post-pass. Root cause was the composer drawing a locus from the constraints/<q>/position/ fit-sampling substructure. Both compose prompts' estimator directive now explicitly forbid _at_constraint_position / _at_measurement_position / _at_sensor_attachment_point while keeping a genuine raw-doc-stated surface/flux-average (e.g. flux-surface-averaged current density). The within-batch provenance_canonical_names stays only as a backstop for residual nondeterminism. 75 compose/drift-guard tests green. Lift to be measured via sn bench (baseline + post-fix).</q></p>
     </article>
 </section>
 
