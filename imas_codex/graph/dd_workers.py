@@ -979,8 +979,8 @@ async def _enrich_batch(
                         "enrichment_source": "llm",
                         "enrich_llm_cost": per_node_cost,
                     }
-                    if enrichment.physics_domain:
-                        update["physics_domain"] = enrichment.physics_domain
+                    # physics_domain is no longer an enrichment output — it is
+                    # assigned by the separate classify worker (Tier 1/2/3).
                     updates.append(update)
 
                 if llm_out.cache_read_tokens:
