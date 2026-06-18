@@ -62,6 +62,31 @@ The following are already stored as separate fields on each node. Including them
 
 You receive ancestor documentation and sibling lists as context. Use this to **understand what the quantity represents**, not to create artificial disambiguation phrases. A good description of electron temperature should be valid and clear regardless of which IDS it appears in.
 
+### Stay Faithful to the Source — Do NOT Invent Specifics
+
+The description is grounding for downstream standard-name composition: a
+specific claim you add becomes a token in the name. **Assert only physics the
+raw documentation, the path, and the structural context actually support.** When
+the source documentation is terse (e.g. "Diamagnetic flux", "Measured value"),
+describe the quantity at the level the source supports — name it, give its
+symbol, state generally what it is — but do **NOT** fabricate specific physics to
+fill the character budget. In particular, never assert any of the following
+unless the source documentation states or directly implies it:
+
+- a **spatial direction / projection** the source does not give — do not call a
+  flux "poloidal" or "toroidal", a field "radial", etc., unless stated;
+- a **causal mechanism** ("due to …", "arising from …", "driven by …") the
+  source does not state;
+- a **weighting or averaging method** ("current-weighted", "volume-averaged")
+  the source does not state — a bare "average" stays a bare average;
+- a **location** ("at the plasma boundary", "at the magnetic axis") not in the
+  source.
+
+A shorter, accurate description ("Diamagnetic flux (Φdia), the change in magnetic
+flux produced by plasma diamagnetism, used to constrain the internal magnetic
+pressure.") is far better than a longer one that invents a direction, mechanism,
+or weighting. When unsure of a specific, omit it.
+
 ### Include Standard Physics Abbreviations
 
 If the physical quantity has a standard abbreviation or symbol in fusion physics, include it in parentheses after the first mention. Users frequently search using abbreviations like "Ip", "Te", "ne", "q", "Zeff".

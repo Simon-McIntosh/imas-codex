@@ -120,6 +120,20 @@ grammar and convention scores.
   `toroidal_plasma_current` adds nothing; a quantity already scalar-per-species
   needs no `total_` if the source does not state it. **Score ≤ 5** for an
   unwarranted added modifier.
+- **[I1.11] Source fidelity vs the AUTHORITATIVE DD doc (HARD)**: the rich
+  `description` is LLM-enriched and may itself over-state the physics. When an
+  **authoritative DD documentation** line is provided for a path (the terse,
+  DD-XML-backed `documentation`), grade the name against THAT, not only the
+  enriched description. **Score ≤ 5** when the name asserts a **direction /
+  projection** (`poloidal`, `toroidal`, `radial`), a **causal mechanism**
+  (`due_to_*`, `_from_*`), a **weighting/averaging method**
+  (`current_weighted_*`), or a **location** (`at_plasma_boundary`) that the
+  authoritative DD doc does not support — even if the enriched description
+  mentions it (the enrichment likely hallucinated the specific). Example:
+  authoritative doc "Diamagnetic flux" → name
+  `poloidal_magnetic_flux_due_to_diamagnetic_drift` is WRONG (injects poloidal +
+  a drift mechanism the source never states); the faithful name is
+  `diamagnetic_magnetic_flux` (or `diamagnetic_flux`).
 
 ### 3. Naming Convention Adherence (0-20)
 - Does the name avoid ambiguous or overloaded terms?
@@ -212,7 +226,8 @@ real defects, not phantom ones.
 {% if item.dd_source_docs %}
 **Source DD definitions** (physics reference for semantic accuracy):
 {% for p in item.dd_source_docs %}  - `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
-{% endfor %}{% endif %}
+{% if p.documentation and p.documentation != p.description %}    ↳ **authoritative DD doc** (grade [I1.11] against THIS — the line above is LLM-enriched and may over-state): {{ p.documentation }}
+{% endif %}{% endfor %}{% endif %}
 
 {% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}
 {% if item.node_type %}- **Node type:** {{ item.node_type }}{% endif %}
