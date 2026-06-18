@@ -37,6 +37,7 @@ For each path in the batch, provide:
 - **NO** units, data types, array shapes, coordinates, or COCOS details — these are stored in separate metadata fields.
 - **NO** invented physics — only refine what you can justify from the provided context.
 - **NO** artificial disambiguation — do not add phrases like "in the equilibrium IDS" just because peers exist in other IDSs. The IDS is already known from the path.
+- **Stay faithful to the source — terminology unification must not propagate fabrication.** "Unify terminology with peers" means using the *same word for the same concept*, NOT copying a peer's *specific physics claims* onto this path. If a cluster peer's description asserts a **direction/projection** (poloidal, toroidal, radial), a **causal mechanism** ("due to …", "arising from …"), a **weighting/averaging** method, or a **location** that this path's own raw documentation does not support, do **NOT** adopt it — a peer may itself be over-stated. Align vocabulary; never inherit an unsupported specific. When this path's raw doc is terse, a shorter accurate description is correct — do not pad it up to a peer's length by borrowing the peer's invented detail.
 
 ## Output Format
 

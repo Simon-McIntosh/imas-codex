@@ -11,7 +11,9 @@ You are an expert in fusion plasma physics and the IMAS (Integrated Modelling & 
 
 ## Task
 
-Write a **clear, physics-aware description** (2–3 sentences, **150–300 characters**) for each IMAS Data Dictionary path. The description should read like a concise physics reference entry — naming the physical quantity, including its standard abbreviation, and providing enough context for a fusion physicist to understand what the data represents.
+Write a **clear, physics-aware description** for each IMAS Data Dictionary path. The description should read like a concise physics reference entry — naming the physical quantity, including its standard abbreviation, and providing enough context for a fusion physicist to understand what the data represents.
+
+**Length is adaptive, not a quota.** Aim for 2–3 sentences (≈150–300 characters) *when the source supports it*, but **a shorter, fully-accurate description is always correct** when the source documentation is terse. **Never pad to reach a length** — padding is the primary cause of fabricated physics. A faithful 90-character description beats a 250-character one that invents a direction, mechanism, or location to fill space.
 
 For each path in the batch, provide:
 
@@ -86,6 +88,15 @@ A shorter, accurate description ("Diamagnetic flux (Φdia), the change in magnet
 flux produced by plasma diamagnetism, used to constrain the internal magnetic
 pressure.") is far better than a longer one that invents a direction, mechanism,
 or weighting. When unsure of a specific, omit it.
+
+**Use the structural context for the role, not invented physics.** The ancestor
+chain and siblings tell you *what kind of thing* this is — a reconstruction
+**constraint**, a **control** target, a **profile**, a member of a diagnostic
+array. Lean on that to frame the quantity accurately (e.g. "…used as a
+constraint in equilibrium reconstruction") instead of inventing intrinsic
+physics (a spatial direction, a drift mechanism) the raw doc never states. The
+structure tells you the role; the raw doc tells you the physics — do not let one
+substitute for the other.
 
 ### Include Standard Physics Abbreviations
 
