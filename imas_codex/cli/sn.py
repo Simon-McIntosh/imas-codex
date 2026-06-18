@@ -646,6 +646,7 @@ def _run_sn_cmd(
             scope_run_id=scope_run_id,
             names_only=names_only,
             flush=flush,
+            skip_review=skip_review,
         )
         return {"summary": summary}
 

@@ -110,6 +110,7 @@ def _build_pool_specs(
     scope_run_id: str | None = None,
     names_only: bool = False,
     flush: bool = False,
+    skip_review: bool = False,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -360,6 +361,20 @@ def _build_pool_specs(
     if flush:
         specs = [s for s in specs if s.name != "generate_name"]
 
+    # ── Skip-review filtering ────────────────────────────────────────
+    # ``--only compose`` (and any generate-only selection) sets skip_review:
+    # run the generate pools but no scoring/refinement. Drops the review AND
+    # refine pools — refine has no work without review, and review is the only
+    # paid (OpenRouter) stage, so this is the free, local-only zero-shot mode.
+    if skip_review:
+        _REVIEW_REFINE_POOLS = {
+            "review_name",
+            "review_docs",
+            "refine_name",
+            "refine_docs",
+        }
+        specs = [s for s in specs if s.name not in _REVIEW_REFINE_POOLS]
+
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
     # queue exceeds the configured cap.  The throttle wraps the claim
@@ -556,6 +571,7 @@ async def run_sn_pools(
     scope_run_id: str | None = None,
     names_only: bool = False,
     flush: bool = False,
+    skip_review: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -854,6 +870,7 @@ async def run_sn_pools(
             scope_run_id=scope_run_id,
             names_only=names_only,
             flush=flush,
+            skip_review=skip_review,
         )
 
         # ── Wire pool health into display state ───────────────────
