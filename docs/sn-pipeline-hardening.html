@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 </head>
 <body>
   <main class="plan-doc">
@@ -625,6 +625,29 @@ Done-when
   2. Spot-check a sample of re-enriched descriptions for residual injected specifics; iterate the guardrail if any survive.
   3. Re-run SN compose-only (free) on the re-enriched domains; confirm hallucinated names (…_due_to_…, current_weighted_…) are gone.
   4. Followup written; this resolved.
+</pre>
+    </article>
+<article class="r-fu" data-id="f-snph-012" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-enrich DD descriptions per-domain (prompt validated at breadth) then SN regen</h4>
+    <div class="r-fu-body"><p>Enrichment-faithfulness prompt is VALIDATED ACROSS BREADTH and ready. Cross-IDS A/B sweep (research/enrich_ab.py --sweep): 239 terse-doc quantity leaves across all 83 IDSs, sonnet-4.6, $0.45. 38 auto-flagged -> ~30 heuristic FPs (specific correctly sourced from path/IDS: tf=toroidal, /z=vertical, profiles_1d=radial, bessel_0=weighted), ~5 legit textbook physics (Faraday line-integration, Lenz eddy currents), ~3 genuine over-elaborations — 2 fixed by a secondary-qualifier guardrail tweak, 1 is a grouping-node FP. Net genuine fabrication ~0 under the refined prompt; [I1.11] review backstop covers the tail. Guardrail on BOTH enrich + refine (refine peer-unification could propagate). Cost (recovered from IMASNode props): full enrich $14.92 / refine $19.41; equilibrium-only ~$8.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: re-enrich + regen (f-snph-012)
+Tier: opus
+
+Context
+  Enrichment faithfulness prompt validated at breadth (239 paths/83 IDSs, ~0 genuine fabrication). Now re-enrich DD descriptions for the SN campaign domains, then regen SN names on the faithful descriptions.
+
+Locked decisions
+  dd-enrichment-model -&gt; keep sonnet-4.6 (prompt, not model)
+  collapse provenance / de-conflate physics; provenance-controlled-vocab
+
+Done-when
+  1. Re-enrich equilibrium first: imas dd build --reset-to built --ids-filter equilibrium (~$8). Spot-check via research/enrich_ab.py that fabrications are gone.
+  2. If --reset-to built also clears refinement, budget refine too; confirm refine prompt faithfulness held.
+  3. Re-run SN compose-only (free) on equilibrium; confirm diamagnetic/external-flux names are faithful (no _due_to_/poloidal/current_weighted hallucinations).
+  4. Widen to core_profiles/edge_profiles/pf per campaign order; fix the stale enrich_imas_paths get_model(&#x27;language&#x27;) fallback so it can&#x27;t use gpt-5.4.
+  5. Followup written; this resolved.
 </pre>
     </article>
 </section>
