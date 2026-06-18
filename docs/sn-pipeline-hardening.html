@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 </head>
 <body>
   <main class="plan-doc">
@@ -676,7 +676,7 @@ Done-when
   5. Followup written; this resolved.
 </pre>
     </article>
-<article class="r-fu" data-id="f-snph-015" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snph-015" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-18T19:14:39+00:00" data-resolved-by="orchestrator">
     <h4 class="r-fu-title">Provenance canonicalizer: collapse estimator drift ACROSS batches (graph post-pass)</h4>
     <div class="r-fu-body"><p>SN compose re-validation on the re-enriched DD (free, $0, 46 facets/21 quantities): mostly faithful (ip-&gt;plasma_current, diamagnetic_flux-&gt;diamagnetic_magnetic_flux, j_phi-&gt;toroidal_flux_surface_averaged_current_density — correctly FSA per the richer raw doc). BUT 8 quantities show estimator DRIFT (e.g. b_field_pol_probe -&gt; {poloidal_magnetic_field, poloidal_magnetic_field_at_constraint_position}; j_tor -&gt; 3 variants; pressure -&gt; {total_particle_pressure, total_plasma_pressure}). Root cause: provenance_canonical_names dedups only WITHIN one result.candidates (single LLM call); these 46 sources span multiple compose calls, so cross-call drift isn't collapsed. The richer re-enriched descriptions also make the composer add a position locus (_at_constraint_position) on some facets — the over-elaboration the shortest-name tiebreak is meant to drop, but only fires if grouped. NOTE: re-enrich itself is a clean success (separate); this is a names-pipeline canonicalizer-scope refinement.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -693,6 +693,7 @@ Done-when
   3. Re-run compose-only on equilibrium constraints; confirm drift=0 across batches.
   4. Followup written; this resolved.
 </pre>
+    <p class="r-fu-outcome">Redirected per lead: the estimator drift (poloidal_magnetic_field vs _at_constraint_position; j_tor variants) is fixed in the COMPOSE PROMPT (SN generation), not a graph post-pass. Root cause was the composer drawing a locus from the constraints/<Q>/position/ fit-sampling substructure. Both compose prompts' estimator directive now explicitly forbid _at_constraint_position / _at_measurement_position / _at_sensor_attachment_point while keeping a genuine raw-doc-stated surface/flux-average (e.g. flux-surface-averaged current density). The within-batch provenance_canonical_names stays only as a backstop for residual nondeterminism. 75 compose/drift-guard tests green. Lift to be measured via sn bench (baseline + post-fix).</p>
     </article>
 </section>
 
