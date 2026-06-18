@@ -1,13 +1,22 @@
 """Focused A/B harness for DD-enrichment prompt iteration.
 
-Re-runs the ENRICH (Pass 1) prompt on a chosen set of DD paths against the live
-model + context WITHOUT writing the graph, and prints raw doc -> current
-description -> candidate description side by side. Lets us iterate the prompt on
-known-hard / currently-incorrect paths before re-enriching the whole DD.
+Re-runs the ENRICH (Pass 1) prompt against the live model + context WITHOUT
+writing the graph, and compares raw doc -> current description -> candidate
+description. Lets us iterate the prompt on known-hard / terse-doc paths before
+re-enriching the whole DD.
 
-Usage:
-    uv run python research/enrich_ab.py <dd_path> [<dd_path> ...]
-    uv run python research/enrich_ab.py --suspect   # a curated hard set
+Modes:
+    uv run python research/enrich_ab.py --suspect          # curated hard set
+    uv run python research/enrich_ab.py <dd_path> ...       # explicit paths
+    uv run python research/enrich_ab.py --sweep [--per-ids 6] [--max 400]
+        # cross-IDS sweep of terse-doc quantity leaves (where fabrication
+        # concentrates), batched, with an auto-flag for NEW descriptions that
+        # assert a specific absent from the source material.
+
+The auto-flag is a triage heuristic, not ground truth: it flags a candidate
+when NEW contains a direction / mechanism / location / weighting phrase that is
+absent from the path's raw documentation, path string, AND ancestor docs — i.e.
+a specific with no visible source. Review flagged ones by hand.
 """
 
 from __future__ import annotations
@@ -23,7 +32,6 @@ from imas_codex.graph.dd_enrichment import (
 )
 from imas_codex.settings import get_model
 
-# Known-hard / previously-fabricated paths (terse raw doc -> over-stated desc).
 SUSPECT = [
     "equilibrium/time_slice/constraints/diamagnetic_flux",
     "equilibrium/time_slice/global_quantities/psi_external_average",
@@ -35,42 +43,164 @@ SUSPECT = [
     "equilibrium/time_slice/constraints/ip",
 ]
 
+# Specific claims whose presence in NEW but absence from source = likely fabrication.
+SPECIFIC_TOKENS: dict[str, list[str]] = {
+    "direction": [
+        "poloidal",
+        "toroidal",
+        "radial",
+        "parallel",
+        "perpendicular",
+        "vertical",
+        "azimuthal",
+        "diamagnetic",
+    ],
+    "mechanism": [
+        "due to",
+        "arising from",
+        "driven by",
+        "caused by",
+        "resulting from",
+        "produced by",
+    ],
+    "location": [
+        "at the plasma boundary",
+        "at the magnetic axis",
+        "at the wall",
+        "at the separatrix",
+        "at the edge",
+        "at the last closed",
+    ],
+    "weighting": [
+        "weighted by",
+        "current-weighted",
+        "volume-averaged",
+        "area-averaged",
+        "flux-surface averaged",
+        "flux surface averaged",
+        "line-integrated",
+        "line integrated",
+    ],
+}
+
+
+def flag_unsourced(new_desc: str, source_text: str) -> list[str]:
+    new_l, src_l = new_desc.lower(), source_text.lower()
+    hits = []
+    for cat, toks in SPECIFIC_TOKENS.items():
+        for t in toks:
+            if t in new_l and t not in src_l:
+                hits.append(f"{cat}:{t}")
+    return hits
+
+
+def _sample_paths(gc: GraphClient, per_ids: int, cap: int) -> list[str]:
+    rows = gc.query(
+        """
+        MATCH (n:IMASNode)
+        WHERE n.node_category = 'quantity'
+          AND n.description IS NOT NULL
+          AND n.documentation IS NOT NULL
+          AND size(n.documentation) < 80
+        WITH split(n.id, '/')[0] AS ids, n
+        ORDER BY rand()
+        WITH ids, collect(n.id)[0..$per_ids] AS sample
+        UNWIND sample AS pid
+        RETURN pid
+        LIMIT $cap
+        """,
+        per_ids=per_ids,
+        cap=cap,
+    )
+    return [r["pid"] for r in rows]
+
 
 def main(argv: list[str]) -> None:
-    paths = SUSPECT if (not argv or argv[0] == "--suspect") else argv
     model = get_model("dd-enrichment")
+    per_ids, cap = 6, 400
+    if argv and argv[0] == "--sweep":
+        rest = argv[1:]
+        if "--per-ids" in rest:
+            per_ids = int(rest[rest.index("--per-ids") + 1])
+        if "--max" in rest:
+            cap = int(rest[rest.index("--max") + 1])
+        paths = None  # resolved from graph below
+    elif not argv or argv[0] == "--suspect":
+        paths = SUSPECT
+    else:
+        paths = argv
+
     with GraphClient() as gc:
-        current = {
-            r["id"]: r["d"]
-            for r in gc.query(
-                "MATCH (n:IMASNode) WHERE n.id IN $p RETURN n.id AS id, n.description AS d",
-                p=paths,
-            )
-        }
+        if paths is None:
+            paths = _sample_paths(gc, per_ids, cap)
         raw = {
-            r["id"]: r["doc"]
+            r["id"]: (r["doc"] or "")
             for r in gc.query(
                 "MATCH (n:IMASNode) WHERE n.id IN $p RETURN n.id AS id, n.documentation AS doc",
                 p=paths,
             )
         }
-        ctxs = gather_path_context(gc, [{"id": p} for p in paths], {})
-        msgs = build_enrichment_messages(ctxs, {})
-        result, cost, _ = call_llm_structured(
-            model=model,
-            messages=msgs,
-            response_model=IMASPathEnrichmentBatch,
-            service="data-dictionary",
-        )
-    by_idx = {r.path_index: r.description for r in result.results}
-    print(f"model={model}  cost=${cost:.4f}  paths={len(paths)}\n")
-    for i, ctx in enumerate(ctxs, 1):
-        pid = ctx["id"]
-        print(f"### {pid}")
-        print(f"  RAW doc : {(raw.get(pid) or '(none)')[:160]}")
-        print(f"  CURRENT : {(current.get(pid) or '(none)')[:220]}")
-        print(f"  NEW     : {by_idx.get(i, '(missing)')[:220]}")
-        print()
+        current = {
+            r["id"]: (r["d"] or "")
+            for r in gc.query(
+                "MATCH (n:IMASNode) WHERE n.id IN $p RETURN n.id AS id, n.description AS d",
+                p=paths,
+            )
+        }
+        # Batch through enrichment exactly as production does.
+        results: dict[str, str] = {}
+        src_text: dict[str, str] = {}
+        total_cost = 0.0
+        BATCH = 40
+        for i in range(0, len(paths), BATCH):
+            chunk = paths[i : i + BATCH]
+            ctxs = gather_path_context(gc, [{"id": p} for p in chunk], {})
+            for ctx in ctxs:
+                anc = " ".join(
+                    (a.get("documentation") or "") for a in ctx.get("ancestors", [])
+                )
+                src_text[ctx["id"]] = f"{raw.get(ctx['id'], '')} {ctx['id']} {anc}"
+            msgs = build_enrichment_messages(ctxs, {})
+            res, cost, _ = call_llm_structured(
+                model=model,
+                messages=msgs,
+                response_model=IMASPathEnrichmentBatch,
+                service="data-dictionary",
+            )
+            total_cost += cost
+            for j, ctx in enumerate(ctxs, 1):
+                desc = next(
+                    (r.description for r in res.results if r.path_index == j), ""
+                )
+                results[ctx["id"]] = desc
+
+    # Report
+    flagged = []
+    changed = 0
+    for pid in paths:
+        new = results.get(pid, "")
+        if not new:
+            continue
+        if new.strip() != current.get(pid, "").strip():
+            changed += 1
+        hits = flag_unsourced(new, src_text.get(pid, ""))
+        if hits:
+            flagged.append((pid, hits, new))
+
+    print(f"\n{'=' * 70}")
+    print(
+        f"model={model}  paths={len(paths)}  changed={changed}  "
+        f"flagged={len(flagged)}  cost=${total_cost:.4f}"
+    )
+    print(f"{'=' * 70}\n")
+    print("### FLAGGED (NEW asserts a specific absent from raw doc + path + ancestors)")
+    for pid, hits, new in flagged:
+        print(f"\n* {pid}")
+        print(f"    raw : {(raw.get(pid) or '(none)')[:120]}")
+        print(f"    new : {new[:200]}")
+        print(f"    flags: {', '.join(hits)}")
+    if not flagged:
+        print("  (none — no unsourced specifics detected in the sample)")
 
 
 if __name__ == "__main__":
