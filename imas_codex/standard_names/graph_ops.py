@@ -5216,6 +5216,11 @@ def merge_standard_name_sources(
     # Birth-invariant: a 'dd' source with no dd_path cannot have a FROM_DD_PATH
     # edge and would be an orphan from the moment it is written.  Drop these
     # before they reach the graph and log a WARNING so the caller knows.
+    # Also stamp value-provenance (estimator) deterministically from the path:
+    # measured/reconstructed/reference facets carry it as link metadata so the
+    # estimator collapses to the base quantity's name (provenance-controlled-vocab).
+    from imas_codex.standard_names.provenance import detect_value_provenance
+
     valid_sources: list[dict] = []
     for s in sources:
         if s.get("source_type") == "dd" and not s.get("dd_path"):
@@ -5226,6 +5231,9 @@ def merge_standard_name_sources(
                 s.get("id"),
             )
             continue
+        if "provenance" not in s:
+            _path = s.get("dd_path") or s.get("source_id") or ""
+            s["provenance"] = detect_value_provenance(_path)[0]
         valid_sources.append(s)
     sources = valid_sources
     if not sources:
@@ -5244,12 +5252,14 @@ def merge_standard_name_sources(
                 sns.description = src.description,
                 sns.physics_domain = src.physics_domain,
                 sns.dd_version = src.dd_version,
+                sns.provenance = src.provenance,
                 sns.attempt_count = 0
             ON MATCH SET
                 sns.batch_key = src.batch_key,
                 sns.description = coalesce(src.description, sns.description),
                 sns.physics_domain = coalesce(src.physics_domain, sns.physics_domain),
                 sns.dd_version = coalesce(src.dd_version, sns.dd_version),
+                sns.provenance = coalesce(src.provenance, sns.provenance),
                 sns.status = CASE
                     WHEN $force THEN 'extracted'
                     WHEN sns.status = 'stale' THEN 'extracted'
