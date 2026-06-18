@@ -196,7 +196,17 @@ Use them as quality benchmarks for naming style and field usage:
 > the name. The measured / reconstructed / reference estimates of one quantity
 > share ONE standard name; the estimator is recorded as link metadata, never in
 > the name.
+> **Also drop the FIT-CONSTRAINT framing entirely:** this is a reconstruction
+> constraint, so the grounding mentions a "position", "constraint position", or
+> "at various positions" — that is the fit's sampling locus, NOT a physical
+> locus of the quantity. Do NOT add `_at_constraint_position`,
+> `_at_measurement_position`, `_at_sensor_attachment_point`, or any
+> position/sensor locus drawn from the constraint substructure. Name the bare
+> physical quantity (the surface/flux-average IS part of the quantity when the
+> raw doc gives the formula, e.g. flux-surface-averaged current density — keep
+> that; the *sampling position* is not).
 >   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
+>   ✅ `poloidal_magnetic_field`   ❌ `poloidal_magnetic_field_at_constraint_position`
 {% endif %}
 - **Description:** {{ item.description }}
 - **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative — do NOT output)*

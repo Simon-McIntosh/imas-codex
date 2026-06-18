@@ -270,7 +270,15 @@ These names already exist in the catalog. Reuse them if they match your source, 
 > `target`, `constraint`, or `fit` in the name. The measured / reconstructed /
 > reference estimates of one quantity share ONE standard name; the estimator is
 > recorded as link metadata, never in the name.
+> **Also drop the FIT-CONSTRAINT framing:** the grounding mentions a "position"
+> / "constraint position" / "at various positions" — that is the fit's sampling
+> locus, NOT a physical locus. Do NOT add `_at_constraint_position`,
+> `_at_measurement_position`, `_at_sensor_attachment_point`, or any
+> position/sensor locus from the constraint substructure. (A surface/flux-average
+> that the raw doc states as part of the quantity — e.g. flux-surface-averaged
+> current density — IS kept; the sampling position is not.)
 >   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
+>   ✅ `poloidal_magnetic_field`   ❌ `poloidal_magnetic_field_at_constraint_position`
 {% endif %}
 {% if item.species_context %}- **⚠️ Species context:** `{{ item.species_context }}` — this quantity is specific to **{{ item.species_context }}** species. The standard name MUST include the species in the `subject` segment (e.g., `{{ item.species_context }}_temperature`, not just `temperature`).
 {% endif %}- **Description:** {{ item.description }}
