@@ -89,6 +89,21 @@ flux produced by plasma diamagnetism, used to constrain the internal magnetic
 pressure.") is far better than a longer one that invents a direction, mechanism,
 or weighting. When unsure of a specific, omit it.
 
+Most dangerous are **secondary qualifiers** added on top of a correctly-named
+quantity — they read plausibly but are usually invented:
+
+- ❌ a *phase* described as "flux-surface averaged and weighted by power
+  deposition density" — a phase is not power-weighted; say only "phase of …".
+- ❌ a *radial velocity* described as "perpendicular to flux surfaces on the
+  outboard equatorial midplane" — the midplane location is invented; say
+  "radial component of the … velocity".
+
+A specific is justified only when the raw documentation, the path/IDS name, or
+an ancestor states it. A path/IDS token DOES justify the entailed specific
+(``tf`` → toroidal field, ``.../z`` → vertical coordinate, ``profiles_1d`` →
+radial profile, ``bessel_0`` → Bessel-weighted) — use those. Do not add a
+*second* qualifier beyond what the name and source already give you.
+
 **Use the structural context for the role, not invented physics.** The ancestor
 chain and siblings tell you *what kind of thing* this is — a reconstruction
 **constraint**, a **control** target, a **profile**, a member of a diagnostic

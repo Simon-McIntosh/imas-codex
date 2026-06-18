@@ -84,13 +84,36 @@ SPECIFIC_TOKENS: dict[str, list[str]] = {
 }
 
 
-def flag_unsourced(new_desc: str, source_text: str) -> list[str]:
-    new_l, src_l = new_desc.lower(), source_text.lower()
+# A specific is "implied" (correctly sourced) when the path/IDS carries a token
+# that conventionally entails it — tf=toroidal field, /z=vertical, profiles_1d=
+# radial profile, bessel_N=Bessel-weighted, etc. Suppress these so the flag
+# isolates genuinely unsourced specifics.
+PATH_IMPLIES: dict[str, list[str]] = {
+    "poloidal": ["pf", "psi", "pol", "poloidal", "b_field_pol", "bpol"],
+    "toroidal": ["tf", "phi", "tor", "toroidal", "b_field_tor", "n_tor", "n_phi"],
+    "radial": ["profiles_1d", "radius", "radial", "rho_tor", "/r", "_r"],
+    "vertical": ["/z", "_z", "height", "magnetic_moment_z"],
+    "parallel": ["parallel", "_par", "j_par", "pressure_parallel"],
+    "perpendicular": ["perp", "radial", "velocity/radial"],
+    "diamagnetic": ["diamag"],
+    "volume-averaged": ["volume_average", "vol_avg"],
+    "line-integrated": ["interferometer", "polarimeter", "refractometer", "line"],
+    "weighted by": ["bessel", "weight"],
+    "flux-surface averaged": ["flux_surface", "fsa"],
+}
+
+
+def flag_unsourced(new_desc: str, source_text: str, path: str) -> list[str]:
+    new_l, src_l, path_l = new_desc.lower(), source_text.lower(), path.lower()
     hits = []
     for cat, toks in SPECIFIC_TOKENS.items():
         for t in toks:
-            if t in new_l and t not in src_l:
-                hits.append(f"{cat}:{t}")
+            if t not in new_l or t in src_l:
+                continue
+            # Suppress when the path/IDS conventionally implies the specific.
+            if any(marker in path_l for marker in PATH_IMPLIES.get(t, [])):
+                continue
+            hits.append(f"{cat}:{t}")
     return hits
 
 
@@ -183,7 +206,7 @@ def main(argv: list[str]) -> None:
             continue
         if new.strip() != current.get(pid, "").strip():
             changed += 1
-        hits = flag_unsourced(new, src_text.get(pid, ""))
+        hits = flag_unsourced(new, src_text.get(pid, ""), pid)
         if hits:
             flagged.append((pid, hits, new))
 
