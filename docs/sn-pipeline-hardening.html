@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-18">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 </head>
 <body>
   <main class="plan-doc">
@@ -629,7 +629,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-snph-012" data-status="open" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Re-enrich DD descriptions per-domain (prompt validated at breadth) then SN regen</h4>
-    <div class="r-fu-body"><p>Enrichment-faithfulness prompt is VALIDATED ACROSS BREADTH and ready. Cross-IDS A/B sweep (research/enrich_ab.py --sweep): 239 terse-doc quantity leaves across all 83 IDSs, sonnet-4.6, $0.45. 38 auto-flagged -> ~30 heuristic FPs (specific correctly sourced from path/IDS: tf=toroidal, /z=vertical, profiles_1d=radial, bessel_0=weighted), ~5 legit textbook physics (Faraday line-integration, Lenz eddy currents), ~3 genuine over-elaborations — 2 fixed by a secondary-qualifier guardrail tweak, 1 is a grouping-node FP. Net genuine fabrication ~0 under the refined prompt; [I1.11] review backstop covers the tail. Guardrail on BOTH enrich + refine (refine peer-unification could propagate). Cost (recovered from IMASNode props): full enrich $14.92 / refine $19.41; equilibrium-only ~$8.</p></div>
+    <div class="r-fu-body"><p>Enrichment-faithfulness prompt is VALIDATED ACROSS BREADTH and ready. Cross-IDS A/B sweep (research/enrich_ab.py --sweep): 239 terse-doc quantity leaves across all 83 IDSs, sonnet-4.6, $0.45. 38 auto-flagged -&gt; ~30 heuristic FPs (specific correctly sourced from path/IDS: tf=toroidal, /z=vertical, profiles_1d=radial, bessel_0=weighted), ~5 legit textbook physics (Faraday line-integration, Lenz eddy currents), ~3 genuine over-elaborations — 2 fixed by a secondary-qualifier guardrail tweak, 1 is a grouping-node FP. Net genuine fabrication ~0 under the refined prompt; [I1.11] review backstop covers the tail. Guardrail on BOTH enrich + refine (refine peer-unification could propagate). Cost (recovered from IMASNode props): full enrich $14.92 / refine $19.41; equilibrium-only ~$8.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
 Plan: sn-pipeline-hardening
 Section: re-enrich + regen (f-snph-012)
@@ -649,6 +649,12 @@ Done-when
   4. Widen to core_profiles/edge_profiles/pf per campaign order; fix the stale enrich_imas_paths get_model(&#x27;language&#x27;) fallback so it can&#x27;t use gpt-5.4.
   5. Followup written; this resolved.
 </pre>
+    </article>
+<article class="r-fu" data-id="f-snph-013" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-18" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-18" data-resolved-by="orchestrator">
+    <h4 class="r-fu-title">Repair four DD-build blockers in the reset-to-built path</h4>
+    <div class="r-fu-body"><p>Running 'imas dd build --reset-to built --ids-filter equilibrium' surfaced four pre-existing blockers, all fixed + verified on a barometry probe (clean enrich/refine/classify, faithful descriptions written):</p><ul><li><strong>classify dry-run Cypher</strong>: size(shortestPath((n)-[..]->(ancestor))) had an unbound endpoint -> Cypher 2026 SyntaxError crashing classify; mirror the working length(path) form.</li><li><strong>build-summary KeyError</strong>: bare stats['ids_created'/'clusters_created'/...] raised AFTER a completed scoped build (extraction skipped) -> stats.get(.,0).</li><li><strong>enrich AttributeError (was silently burning $)</strong>: enrich worker referenced enrichment.physics_domain, removed from IMASPathEnrichmentResult (domain now via classify worker) -> failed EVERY batch after paying for the LLM call; dead ref removed.</li><li><strong>ids-filter scope leak</strong>: identifier-schema / IDS-level enrichment take no ids_filter and with force=True re-enriched all 62 schemas + 87 IDS nodes DD-wide on a scoped run; gated to the full build only.</li></ul><p>Note: the 'Build metadata: total=$32.79' line sums enrich/refine cost across ALL IMASNodes (whole-DD historical), NOT the scoped run's spend — misleading on scoped runs (display only).</p></div>
+    <pre class="r-fu-prompt">done — four DD-build blockers fixed + verified; equilibrium re-enrich+refine now running scoped. Follow-on tracked in f-snph-012.</pre>
+    <p class="r-fu-outcome">Fixed dd_domain_classifier dry-run query, imas_dd.py summary KeyErrors, dd_workers enrich physics_domain dead ref, and the identifier/IDS ids-filter scope leak. Verified on barometry (3 nodes): full enrich->refine->classify pipeline clean, faithful descriptions written. Equilibrium re-enrich+refine launched scoped (run b1u7v5gc9).</p>
     </article>
 </section>
 
