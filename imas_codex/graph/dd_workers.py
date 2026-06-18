@@ -1308,6 +1308,21 @@ async def _run_aux_enrichment(state: DDBuildState) -> None:
             from imas_codex.graph.dd_ids_enrichment import enrich_ids_nodes
             from imas_codex.settings import get_model
 
+            # Identifier-schema and IDS-level enrichment are CROSS-CUTTING (a
+            # schema is shared across IDSs; IDS nodes are top-level) and do not
+            # accept an ids_filter. On an ids-filter-scoped run (e.g. re-enrich
+            # one IDS) re-running them would re-enrich all schemas/IDS nodes
+            # DD-wide and inflate the scoped run's cost. Skip them when scoped;
+            # they belong to the full (unfiltered) build.
+            if state.ids_filter:
+                logger.info(
+                    "Skipping identifier-schema / IDS-level enrichment "
+                    "(ids_filter=%s scoped run — these are DD-wide).",
+                    sorted(state.ids_filter),
+                )
+                _empty = {"enriched": 0, "cached": 0, "cost": 0.0}
+                return 0, 0, dict(_empty), dict(_empty), dict(_empty)
+
             with GraphClient() as client:
                 identifier_total = client.query(
                     "MATCH (s:IdentifierSchema) RETURN count(s) AS total"
