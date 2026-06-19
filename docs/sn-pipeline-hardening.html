@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-19">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 </head>
 <body>
   <main class="plan-doc">
@@ -737,11 +737,16 @@ Done-when
     <pre class="r-fu-prompt">done — observable-vs-hardware compose example added; pipeline well-dialed across 4 uncovered domains.</pre>
     <p class="r-fu-outcome">Rotation 2 clean; observable-vs-hardware boundary reinforced at compose. Moving to the paid $50 six-pool review pass (equilibrium first, b0nsx2st0).</p>
     </article>
-<article class="r-fu" data-id="f-snph-020" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-19" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-19" data-resolved-by="orchestrator">
+<article class="r-fu" data-id="f-snph-020" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-19" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-19T12:47:28+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stall-guard for wedged review residue (4h hang fix)</h4>
     <div class="r-fu-body"><p>Paid review set 1 (equilibrium, six-pool) accepted 104 names + 9 exhausted, $7.74, but then WEDGED for ~4h with 0 OpenRouter calls. Root cause: the idle-exhaustion watchdog only fires when pending_count==0 AND no progress; a residue of ~6 items stuck in a claim-revert / refine-churn cycle (poloidal_flux_surface_averaged_metric from f_df_dpsi/dpressure_dpsi, reviewer ~0.5, never converging) kept pending_count&gt;0 forever, so the watchdog never tripped and total_processed never advanced. Fixes: (1) STALL branch in _idle_exhaustion_watchdog — no forward progress across all pools for stall_seconds (600s) despite pending work -&gt; graceful shutdown (no_eligible_work, SNRun finalised) instead of indefinite idle; (2) _inject_shape_parameter_surface no-ops on a candidate missing .segments (the pooled-loop injection broke test_pool_compose_retry's fake — 6 failures, now green). Cleared the 1 orphaned refining name. No money wasted (0 calls during the hang).</p></div>
     <pre class="r-fu-prompt">done — stall-guard added; equilibrium review residue draining via --flush (bnk9fdh75).</pre>
-    <p class="r-fu-outcome">Stall-guard (600s no-progress -> graceful shutdown) + segments-guard committed. equilibrium 104 accepted/9 exhausted from set 1; residue draining. Review pass continues within remaining budget.</p>
+    <p class="r-fu-outcome">Stall-guard landed AND root-caused: the deeper defect was the budget-saturation gate's all-pools conjunction being vetoed by idle pools whose reserve-failure counter freezes at 0. Fixed in 490eb723 (f-snph-021) by scoping the gate to live pools. Stall-guard remains the non-budget-wedge backstop.</p>
+    </article>
+<article class="r-fu" data-id="f-snph-021" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-19" data-recommends-skill="" data-resolved-at="2026-06-19" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Root-cause the 0-token hang: budget-saturation gate scoped to live pools</h4>
+    <div class="r-fu-body">Followup to f-snph-020 (stall-guard). User asked whether the stall timeout was papering over a real root cause. It was. The 4h hang was a pure empty-claim spin (zero LLM calls, paid + free): review/refine blocked at the dollar reserve BEFORE any OpenRouter call (spend $7.74/$10, batch reserve > $2.26 remaining); free generate_name had drained its sources. None of the three watchdogs could fire: budget-watchdog needs spend>=limit ($7.74<$10); idle-watchdog needs pending==0 (7 drafted names pending review); budget-saturation-watchdog required ALL six pools saturated, but a pool that runs out of WORK stops calling reserve() so its failure counter freezes at 0 and vetoes the all-pools conjunction forever. Fix (commit 490eb723): scope the saturation conjunction to LIVE pools (pending_count>0) via new BudgetManager.pool_budget_saturated(); fires promptly with budget_exhausted when every pool with work is budget-blocked, never kills a productive free composer. Stall-guard retained as the general backstop for non-budget wedges. 2 regression tests (idle+saturated mix fires; productive-free-pool no-fire). 329 passed/1 skipped.</div>
+    <pre class="r-fu-prompt">done — no followup</pre>
     </article>
 </section>
 
