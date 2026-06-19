@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-19">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 </head>
 <body>
   <main class="plan-doc">
@@ -724,6 +724,12 @@ Done-when
   4. Fix the stale enrich_imas_paths get_model(&#x27;language&#x27;) fallback.
   5. Followup written; this resolved.
 </pre>
+    </article>
+<article class="r-fu" data-id="f-snph-018" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-19" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-19" data-resolved-by="orchestrator">
+    <h4 class="r-fu-title">ISN rc46: add mass_density base (broad-rotation vocab gap)</h4>
+    <div class="r-fu-body"><p>Broad free compose rotation (edge_plasma_physics + auxiliary_heating, 160 composed, $0) surfaced one real vocab-gap defect via the flag scan (0 instrument-locus leaks, _due_to_ family confirmed legit): edge_profiles/ggd/mass_density/values composed bare <code>density</code> (dropping 'mass') because <code>mass_density</code> was not a registered physical_base and density+qualifier does not compose. Fixed: ISN <strong>rc46</strong> adds <code>mass_density</code> (sibling of number/power/current/torque_density; scalar, inherently_dimensional). codex dep bumped rc45-&gt;rc46 (both pyproject lines). Required deleting the stale bare <code>density</code> SN node first (the attachment LLM kept re-linking new mass_density sources to it). Validated: plasma_profiles/ggd/mass_density/values -&gt; <code>mass_density</code> (faithful). The vocab-gap -&gt; ISN RC -&gt; faithful-name loop works end-to-end.</p></div>
+    <pre class="r-fu-prompt">done — mass_density base added (rc46), codex on rc46, faithful name validated.</pre>
+    <p class="r-fu-outcome">ISN rc46 (mass_density physical_base); codex bumped; bare-density defect fixed; faithful mass_density name confirmed. 432 ISN tests green.</p>
     </article>
 </section>
 
