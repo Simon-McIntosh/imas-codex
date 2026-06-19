@@ -523,6 +523,7 @@ async def _idle_exhaustion_watchdog(
     *,
     poll: float = 1.0,
     idle_polls: int = 30,
+    stall_seconds: float = 600.0,
 ) -> None:
     """Set ``stop_event`` after sustained genuine idleness across all pools.
 
@@ -555,6 +556,14 @@ async def _idle_exhaustion_watchdog(
     """
     snapshots: dict[str, int] = {p.name: p.health.total_processed for p in pools}
     consecutive_idle = 0
+    # Stall guard: total work done across all pools and the wall-clock time of the
+    # last forward progress. Catches the case where pending_count stays > 0 (so the
+    # idle condition never trips) but NO pool advances — e.g. a residue of items
+    # wedged in a claim-revert / refine-churn cycle that can never be processed.
+    # Without this a run idles indefinitely (observed: 4h, 0 LLM calls, ~6 stuck
+    # items) until killed, leaving the SNRun un-finalised.
+    last_total = sum(snapshots.values())
+    last_progress_ts = time.time()
     while not stop_event.is_set():
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=poll)
@@ -585,6 +594,23 @@ async def _idle_exhaustion_watchdog(
                 return
         else:
             consecutive_idle = 0
+
+        # Stall detection: forward progress across ALL pools (independent of the
+        # all-idle check, which never trips while pending_count > 0).
+        current_total = sum(p.health.total_processed for p in pools)
+        if current_total > last_total:
+            last_total = current_total
+            last_progress_ts = time.time()
+        elif (time.time() - last_progress_ts) >= stall_seconds:
+            logger.warning(
+                "run_pools: no forward progress for ~%.0fs despite pending work "
+                "(pending=%s) — wedged residue; signalling graceful shutdown",
+                stall_seconds,
+                {p.name: p.health.pending_count for p in pools},
+            )
+            idle_exhausted_event.set()
+            stop_event.set()
+            return
 
 
 async def _pending_count_watchdog(

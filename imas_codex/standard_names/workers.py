@@ -196,7 +196,9 @@ def _inject_shape_parameter_surface(
     empty; a composer-supplied locus is always preserved. Returns ``True`` when
     an injection was applied.
     """
-    seg = candidate.segments
+    seg = getattr(candidate, "segments", None)
+    if seg is None:
+        return False
     if seg.base_kind != "quantity" or seg.base_token not in _SHAPE_PARAMETER_BASES:
         return False
     if seg.locus_token:  # composer already named a surface — trust it
