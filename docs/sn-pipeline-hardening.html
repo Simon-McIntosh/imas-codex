@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-19">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 </head>
 <body>
   <main class="plan-doc">
@@ -736,6 +736,12 @@ Done-when
     <div class="r-fu-body"><p>Free compose-only rotation over radiation_measurement_diagnostics + turbulence (153 composed, 50 distinct names, $0). Flag scan VERY clean: 0 bare-generic, 0 over-long, 9 instrument-locus names of which 8 are CORRECT (genuine hardware geometry/spectral properties: vertical_coordinate_of_bolometer = detector position, lower_bound_wavelength_of_visible_camera = spectral range, major_radius_of_detector_pixel). 1 genuine slip: power_of_bolometer (a bolometer measures radiated power, not 'power of the bolometer') — already caught by review rubric [I1.9]; reinforced with an explicit observable-vs-hardware compose-prompt example (-&gt; radiated_power), drift-guard + 75 tests green. Two rotations across 4 big uncovered domains -&gt; exactly 1 vocab gap (mass_density, fixed rc46) + 1 compose slip (reinforced): pipeline is well-dialed.</p></div>
     <pre class="r-fu-prompt">done — observable-vs-hardware compose example added; pipeline well-dialed across 4 uncovered domains.</pre>
     <p class="r-fu-outcome">Rotation 2 clean; observable-vs-hardware boundary reinforced at compose. Moving to the paid $50 six-pool review pass (equilibrium first, b0nsx2st0).</p>
+    </article>
+<article class="r-fu" data-id="f-snph-020" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-19" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-19" data-resolved-by="orchestrator">
+    <h4 class="r-fu-title">Stall-guard for wedged review residue (4h hang fix)</h4>
+    <div class="r-fu-body"><p>Paid review set 1 (equilibrium, six-pool) accepted 104 names + 9 exhausted, $7.74, but then WEDGED for ~4h with 0 OpenRouter calls. Root cause: the idle-exhaustion watchdog only fires when pending_count==0 AND no progress; a residue of ~6 items stuck in a claim-revert / refine-churn cycle (poloidal_flux_surface_averaged_metric from f_df_dpsi/dpressure_dpsi, reviewer ~0.5, never converging) kept pending_count&gt;0 forever, so the watchdog never tripped and total_processed never advanced. Fixes: (1) STALL branch in _idle_exhaustion_watchdog — no forward progress across all pools for stall_seconds (600s) despite pending work -&gt; graceful shutdown (no_eligible_work, SNRun finalised) instead of indefinite idle; (2) _inject_shape_parameter_surface no-ops on a candidate missing .segments (the pooled-loop injection broke test_pool_compose_retry's fake — 6 failures, now green). Cleared the 1 orphaned refining name. No money wasted (0 calls during the hang).</p></div>
+    <pre class="r-fu-prompt">done — stall-guard added; equilibrium review residue draining via --flush (bnk9fdh75).</pre>
+    <p class="r-fu-outcome">Stall-guard (600s no-progress -> graceful shutdown) + segments-guard committed. equilibrium 104 accepted/9 exhausted from set 1; residue draining. Review pass continues within remaining budget.</p>
     </article>
 </section>
 
