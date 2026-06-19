@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-19">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 </head>
 <body>
   <main class="plan-doc">
@@ -699,6 +699,12 @@ Done-when
   4. Followup written; this resolved.
 </pre>
     <p class="r-fu-outcome">Redirected per lead: the estimator drift (poloidal_magnetic_field vs _at_constraint_position; j_tor variants) is fixed in the COMPOSE PROMPT (SN generation), not a graph post-pass. Root cause was the composer drawing a locus from the constraints/<q>/position/ fit-sampling substructure. Both compose prompts' estimator directive now explicitly forbid _at_constraint_position / _at_measurement_position / _at_sensor_attachment_point while keeping a genuine raw-doc-stated surface/flux-average (e.g. flux-surface-averaged current density). The within-batch provenance_canonical_names stays only as a backstop for residual nondeterminism. 75 compose/drift-guard tests green. Lift to be measured via sn bench (baseline + post-fix).</q></p>
+    </article>
+<article class="r-fu" data-id="f-snph-016" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-19" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-19" data-resolved-by="orchestrator">
+    <h4 class="r-fu-title">Align sn bench gold fixture to locked decisions (honest reference_overlap)</h4>
+    <div class="r-fu-body"><p>The benchmark gold (benchmark_reference.py) predated the locked decisions, making reference_overlap (0.32) misleading. Aligned the 47 entries: shape params -&gt; _of_&lt;surface&gt; (elongation_of_flux_surface, triangularity_of_plasma_boundary) never bare; instrument loci dropped (flux_loop-&gt;poloidal_magnetic_flux, rogowski-&gt;plasma_current); fixed a fixture mis-spec (physical_base='poloidal_magnetic_flux' is NOT a base token and rendered bare 'magnetic_flux' — corrected to magnetic_flux base + POLOIDAL component for flux_loop/diamagnetic/psi/psi_axis/psi_boundary); removed 5 paths absent from DD 4.1 (major_radius/aspect_ratio/resistivity global_quantities + temperature_fit/boundary_condition/value), minor_radius -&gt; boundary/minor_radius. All 47 paths now exist in DD; all compose at import; 64 tests pass.</p><p>Also confirmed the _due_to_&lt;process&gt; family (245 names: collisions 113, diamagnetic_drift 39, dreicer/compton/viscosity) is LEGITIMATE distinct physics via the ISN process segment — NOT a defect class to 'fix'. The composer's bare magnetic_flux WAS a real defect (dropped poloidal); poloidal_magnetic_flux as a name round-trips fine (not an ISN bug).</p></div>
+    <pre class="r-fu-prompt">done — gold fixture aligned + honest; re-bench against it running (bs74944at) for true reference_overlap baseline.</pre>
+    <p class="r-fu-outcome">benchmark_reference.py aligned to locked decisions, 0 DD-absent paths, committed. reference_overlap is now a trustworthy accuracy ruler alongside the qwen reviewer score (0.970 baseline). _due_to_ family cleared as legitimate.</p>
     </article>
 </section>
 
