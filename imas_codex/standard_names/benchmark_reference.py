@@ -56,11 +56,13 @@ REFERENCE_NAMES: dict[str, dict] = {
     "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor": _ref(
         {"physical_base": "magnetic_field", "component": Component.TOROIDAL}
     ),
+    # shape-param-locus decision: shape parameters are always _of a surface,
+    # never bare. profiles_1d → flux_surface.
     "equilibrium/time_slice/profiles_1d/elongation": _ref(
-        {"physical_base": "elongation"}
+        {"physical_base": "elongation", "geometry": "flux_surface"}
     ),
-    "equilibrium/time_slice/profiles_1d/triangularity_upper": _ref(
-        {"physical_base": "triangularity"}
+    "equilibrium/time_slice/boundary/triangularity": _ref(
+        {"physical_base": "triangularity", "geometry": "plasma_boundary"}
     ),
     "equilibrium/time_slice/profiles_1d/magnetic_shear": _ref(
         {"physical_base": "magnetic_shear"}
@@ -101,15 +103,18 @@ REFERENCE_NAMES: dict[str, dict] = {
         {"physical_base": "magnetic_field", "component": Component.TOROIDAL}
     ),
     # --- Additional magnetics entries ---
+    # constraint-instrument-locus decision: name the physics, NOT the instrument
+    # (the specific loop/coil is a per-element metadata locus, dropped from the
+    # name). poloidal_magnetic_flux = magnetic_flux base + poloidal component.
     "magnetics/flux_loop/flux/data": _ref(
-        {"physical_base": "poloidal_magnetic_flux", "object": Object.FLUX_LOOP}
+        {"physical_base": "magnetic_flux", "component": Component.POLOIDAL}
     ),
     "magnetics/rogowski_coil/current/data": _ref(
-        {"physical_base": "plasma_current", "object": Object.ROGOWSKI_COIL}
+        {"physical_base": "plasma_current"}
     ),
     "magnetics/ip/data": _ref({"physical_base": "plasma_current"}),
     "magnetics/diamagnetic_flux/data": _ref(
-        {"physical_base": "poloidal_magnetic_flux", "object": Object.DIAMAGNETIC_LOOP}
+        {"physical_base": "magnetic_flux", "component": Component.POLOIDAL}
     ),
     "core_profiles/profiles_1d/rotation_frequency_tor_sonic": _ref(
         {
@@ -144,13 +149,6 @@ REFERENCE_NAMES: dict[str, dict] = {
         }
     ),
     # --- Position-qualified quantities ---
-    "core_profiles/profiles_1d/electrons/temperature_fit/boundary_condition/value": _ref(
-        {
-            "physical_base": "temperature",
-            "subject": Subject.ELECTRON,
-            "position": Position.PLASMA_BOUNDARY,
-        }
-    ),
     "equilibrium/time_slice/global_quantities/magnetic_axis/r": _ref(
         {
             "physical_base": "major_radius",
@@ -158,7 +156,7 @@ REFERENCE_NAMES: dict[str, dict] = {
         }
     ),
     "equilibrium/time_slice/profiles_1d/psi": _ref(
-        {"physical_base": "poloidal_magnetic_flux"}
+        {"physical_base": "magnetic_flux", "component": Component.POLOIDAL}
     ),
     "equilibrium/time_slice/global_quantities/magnetic_axis/z": _ref(
         {
@@ -171,11 +169,16 @@ REFERENCE_NAMES: dict[str, dict] = {
         {"physical_base": "plasma_current"}
     ),
     "equilibrium/time_slice/global_quantities/psi_axis": _ref(
-        {"physical_base": "poloidal_magnetic_flux"}
+        {
+            "physical_base": "magnetic_flux",
+            "component": Component.POLOIDAL,
+            "position": Position.MAGNETIC_AXIS,
+        }
     ),
     "equilibrium/time_slice/global_quantities/psi_boundary": _ref(
         {
-            "physical_base": "poloidal_magnetic_flux",
+            "physical_base": "magnetic_flux",
+            "component": Component.POLOIDAL,
             "position": Position.PLASMA_BOUNDARY,
         }
     ),
@@ -191,21 +194,9 @@ REFERENCE_NAMES: dict[str, dict] = {
     "summary/global_quantities/tau_energy/value": _ref(
         {"physical_base": "confinement_time"}
     ),
-    "equilibrium/time_slice/global_quantities/resistivity": _ref(
-        {"physical_base": "resistivity"}
-    ),
-    "equilibrium/time_slice/global_quantities/magnetic_axis/b_tor": _ref(
-        {"physical_base": "toroidal_magnetic_field"}
-    ),
-    # --- Geometric bases ---
-    "equilibrium/time_slice/global_quantities/minor_radius": _ref(
-        {"physical_base": "minor_radius"}
-    ),
-    "equilibrium/time_slice/global_quantities/major_radius": _ref(
-        {"physical_base": "major_radius"}
-    ),
-    "equilibrium/time_slice/global_quantities/aspect_ratio": _ref(
-        {"physical_base": "aspect_ratio"}
+    # --- Geometric bases (paths that exist in DD 4.1) ---
+    "equilibrium/time_slice/boundary/minor_radius": _ref(
+        {"physical_base": "minor_radius", "geometry": "plasma_boundary"}
     ),
     # --- core_transport ---
     "core_transport/model/profiles_1d/electrons/energy/flux": _ref(
