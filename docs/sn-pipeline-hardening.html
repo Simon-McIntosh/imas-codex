@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-19">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 </head>
 <body>
   <main class="plan-doc">
@@ -730,6 +730,12 @@ Done-when
     <div class="r-fu-body"><p>Broad free compose rotation (edge_plasma_physics + auxiliary_heating, 160 composed, $0) surfaced one real vocab-gap defect via the flag scan (0 instrument-locus leaks, _due_to_ family confirmed legit): edge_profiles/ggd/mass_density/values composed bare <code>density</code> (dropping 'mass') because <code>mass_density</code> was not a registered physical_base and density+qualifier does not compose. Fixed: ISN <strong>rc46</strong> adds <code>mass_density</code> (sibling of number/power/current/torque_density; scalar, inherently_dimensional). codex dep bumped rc45-&gt;rc46 (both pyproject lines). Required deleting the stale bare <code>density</code> SN node first (the attachment LLM kept re-linking new mass_density sources to it). Validated: plasma_profiles/ggd/mass_density/values -&gt; <code>mass_density</code> (faithful). The vocab-gap -&gt; ISN RC -&gt; faithful-name loop works end-to-end.</p></div>
     <pre class="r-fu-prompt">done — mass_density base added (rc46), codex on rc46, faithful name validated.</pre>
     <p class="r-fu-outcome">ISN rc46 (mass_density physical_base); codex bumped; bare-density defect fixed; faithful mass_density name confirmed. 432 ISN tests green.</p>
+    </article>
+<article class="r-fu" data-id="f-snph-019" data-status="resolved" data-tier="opus" data-written-by="orchestrator" data-written-at="2026-06-19" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-06-19" data-resolved-by="orchestrator">
+    <h4 class="r-fu-title">Rotation 2 (diagnostics + turbulence): observable-vs-hardware compose example</h4>
+    <div class="r-fu-body"><p>Free compose-only rotation over radiation_measurement_diagnostics + turbulence (153 composed, 50 distinct names, $0). Flag scan VERY clean: 0 bare-generic, 0 over-long, 9 instrument-locus names of which 8 are CORRECT (genuine hardware geometry/spectral properties: vertical_coordinate_of_bolometer = detector position, lower_bound_wavelength_of_visible_camera = spectral range, major_radius_of_detector_pixel). 1 genuine slip: power_of_bolometer (a bolometer measures radiated power, not 'power of the bolometer') — already caught by review rubric [I1.9]; reinforced with an explicit observable-vs-hardware compose-prompt example (-&gt; radiated_power), drift-guard + 75 tests green. Two rotations across 4 big uncovered domains -&gt; exactly 1 vocab gap (mass_density, fixed rc46) + 1 compose slip (reinforced): pipeline is well-dialed.</p></div>
+    <pre class="r-fu-prompt">done — observable-vs-hardware compose example added; pipeline well-dialed across 4 uncovered domains.</pre>
+    <p class="r-fu-outcome">Rotation 2 clean; observable-vs-hardware boundary reinforced at compose. Moving to the paid $50 six-pool review pass (equilibrium first, b0nsx2st0).</p>
     </article>
 </section>
 
