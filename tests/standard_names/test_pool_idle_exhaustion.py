@@ -4,8 +4,10 @@ These tests guard the fixes for the long-running idle-loop hang described
 in ``plans/`` (SN pipeline workers don't exit when work is exhausted):
 
 1. ``_budget_watchdog`` sets ``stop_event`` on hard exhaustion.
-2. ``_budget_saturation_watchdog`` sets ``stop_event`` when all pools
-   exceed consecutive reserve-failure threshold.
+2. ``_budget_saturation_watchdog`` sets ``stop_event`` when every pool
+   that still has pending work has exceeded the consecutive
+   reserve-failure threshold (idle pools, whose counters freeze below
+   threshold, do not veto the gate).
 3. ``_idle_exhaustion_watchdog`` sets ``stop_event`` after a sustained
    window of zero pending counts and zero progress.
 4. ``run_pools`` exits with the supplied ``idle_exhausted_event`` set
@@ -230,3 +232,79 @@ class TestBudgetSaturationWatchdog:
         assert not mgr.hard_exhausted(), (
             "saturation watchdog should fire before hard exhaustion"
         )
+
+    @pytest.mark.asyncio
+    async def test_watchdog_fires_when_live_pools_saturated_despite_idle_pool(
+        self,
+    ) -> None:
+        """Regression: the gate must fire when every pool with pending work
+        is budget-saturated, even though another pool sits idle with its
+        reserve-failure counter frozen at 0.
+
+        This is the exact 0-token-spin scenario: a free ``generate_name``
+        pool drained its sources (pending=0, never reserves → counter
+        stays 0) while paid ``review_name`` is budget-blocked (pending>0,
+        counter at threshold).  The old all-pools conjunction required the
+        idle pool to be saturated too, so it never fired and the run spun
+        for hours.  Scoping the gate to live pools fixes this.
+        """
+        from imas_codex.standard_names.pools import _budget_saturation_watchdog
+
+        mgr = BudgetManager(total_budget=10.0)
+        # Idle free pool: no pending work, counter frozen at 0 (never reserves).
+        idle_pool = _make_idle_spec("generate_name", pending=0)
+        # Live paid pool: pending work it cannot fund — saturated.
+        live_pool = _make_idle_spec("review_name", pending=7)
+        mgr._consecutive_reserve_failures["review_name"] = mgr.SATURATION_THRESHOLD
+
+        # Sanity: the legacy all-pools predicate would NOT fire here, because
+        # the idle generate_name pool never reaches the threshold.
+        assert not mgr.all_pools_budget_saturated(("generate_name", "review_name"))
+
+        stop_event = asyncio.Event()
+        budget_saturated = asyncio.Event()
+        await asyncio.wait_for(
+            _budget_saturation_watchdog(
+                mgr,
+                [idle_pool, live_pool],
+                stop_event,
+                budget_saturated,
+                poll=0.05,
+            ),
+            timeout=5.0,
+        )
+
+        assert stop_event.is_set()
+        assert budget_saturated.is_set()
+        assert not mgr.hard_exhausted()
+
+    @pytest.mark.asyncio
+    async def test_watchdog_does_not_fire_while_free_pool_productive(self) -> None:
+        """The gate must NOT fire while a live pool is still unsaturated —
+        e.g. a free local-GPU compose pool that keeps reserving successfully
+        (counter resets to 0).  Killing it would waste affordable work."""
+        from imas_codex.standard_names.pools import _budget_saturation_watchdog
+
+        mgr = BudgetManager(total_budget=10.0)
+        productive_pool = _make_idle_spec("generate_name", pending=5)  # not saturated
+        blocked_pool = _make_idle_spec("review_name", pending=7)
+        mgr._consecutive_reserve_failures["review_name"] = mgr.SATURATION_THRESHOLD
+
+        stop_event = asyncio.Event()
+        budget_saturated = asyncio.Event()
+        wd = asyncio.create_task(
+            _budget_saturation_watchdog(
+                mgr,
+                [productive_pool, blocked_pool],
+                stop_event,
+                budget_saturated,
+                poll=0.05,
+            )
+        )
+        await asyncio.sleep(0.3)  # several poll cycles
+        assert not stop_event.is_set(), (
+            "must not shut down while a live pool can still make paid progress"
+        )
+        assert not budget_saturated.is_set()
+        stop_event.set()
+        await asyncio.wait_for(wd, timeout=2.0)

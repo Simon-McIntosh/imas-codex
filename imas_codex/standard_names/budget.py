@@ -841,6 +841,26 @@ class BudgetManager:
         with self._lock:
             return self._spent >= self._total - EPSILON
 
+    def pool_budget_saturated(self, phase: str) -> bool:
+        """Return ``True`` when *phase* has failed to reserve budget
+        ``SATURATION_THRESHOLD`` times in a row.
+
+        A saturated pool cannot fund another batch from the remaining
+        budget.  The counter is only advanced by an *attempted* reserve
+        that fails, and reset to 0 by any success — so a pool that has
+        stopped calling :meth:`reserve` (because it ran out of *work*,
+        not *budget*) holds its counter frozen below threshold and is
+        therefore reported as **not** saturated.  Callers that want a
+        "can no longer progress" signal must combine this with the
+        pool's pending-work count (see
+        ``_budget_saturation_watchdog``).
+        """
+        with self._lock:
+            return (
+                self._consecutive_reserve_failures.get(phase, 0)
+                >= self.SATURATION_THRESHOLD
+            )
+
     def all_pools_budget_saturated(
         self,
         pool_names: tuple[str, ...] = (
@@ -852,22 +872,21 @@ class BudgetManager:
             "refine_docs",
         ),
     ) -> bool:
-        """Return ``True`` when all *pool_names* have exceeded the
-        consecutive reserve-failure threshold.
+        """Return ``True`` when **every** pool in *pool_names* is
+        budget-saturated.
 
-        This is the signal-driven replacement for the old
-        ``near_exhausted()`` shutdown gate.  Instead of comparing
-        remaining budget against a magic dollar floor, we observe that
-        every pool has failed to reserve budget ``SATURATION_THRESHOLD``
-        times in a row — meaning the remaining budget cannot fund any
-        batch in any pool.
+        WARNING — over an unfiltered pool list this is almost never
+        true in practice, because a pool that runs out of *work* stops
+        attempting reservations and so its failure counter never reaches
+        the threshold (see :meth:`pool_budget_saturated`).  A single
+        drained pool (e.g. a free local-GPU generate pool that exhausted
+        its sources) then vetoes the whole conjunction forever while the
+        paid pools sit budget-blocked — the 0-token indefinite spin.
+        The shutdown gate therefore evaluates saturation only over pools
+        that still have pending work; see ``_budget_saturation_watchdog``.
+        This method is retained for diagnostics and direct unit tests.
         """
-        with self._lock:
-            return all(
-                self._consecutive_reserve_failures.get(p, 0)
-                >= self.SATURATION_THRESHOLD
-                for p in pool_names
-            )
+        return all(self.pool_budget_saturated(p) for p in pool_names)
 
     # ------------------------------------------------------------------
     # Graph-aware reads

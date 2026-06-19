@@ -484,28 +484,50 @@ async def _budget_watchdog(
 
 async def _budget_saturation_watchdog(
     mgr: BudgetManager,
+    pools: list[PoolSpec],
     stop_event: asyncio.Event,
     budget_saturated_event: asyncio.Event,
     *,
     poll: float = 2.0,
-    pool_names: tuple[str, ...] = POOL_NAMES,
 ) -> None:
-    """Set ``stop_event`` when all pools have saturated the budget.
+    """Set ``stop_event`` when the budget can no longer fund any
+    progressable pool.
 
-    Polls ``mgr.all_pools_budget_saturated(pool_names)`` every *poll*
-    seconds.  The BudgetManager tracks per-pool consecutive reserve-failure
-    counts internally; when every pool has failed ≥ ``SATURATION_THRESHOLD``
-    times in a row, the remaining budget cannot fund any batch.
+    The gate evaluates saturation only over **live** pools — those that
+    still have pending work (``pending_count > 0``) — and fires when
+    every live pool is budget-saturated.  This replaces the old
+    ``near_exhausted()`` $0.75 floor *and* fixes the all-pools-conjunction
+    defect that produced the 0-token indefinite spin:
 
-    This replaces the old ``near_exhausted()`` shutdown gate (which used
-    a magic $0.75 floor) with a signal-driven equivalent.
+    ``BudgetManager`` advances a pool's reserve-failure counter only on an
+    *attempted* reserve that fails.  A pool that runs out of *work* (not
+    *budget*) stops calling ``reserve`` and so its counter freezes below
+    threshold — it is reported "not saturated" forever.  The previous gate
+    required **all** pools (including such idle pools) to be saturated, so
+    a single drained pool — typically the free local-GPU ``generate_name``
+    pool once its sources are exhausted — vetoed shutdown while the paid
+    review/refine pools sat budget-blocked.  With no exit path (spend below
+    the hard limit, pending work outstanding so the idle watchdog also
+    stays quiet) the run spun for hours making zero LLM calls.
+
+    By scoping the conjunction to pools with outstanding work we exit
+    promptly with ``budget_exhausted`` the moment paid work becomes
+    unaffordable, and we never kill a free pool that is still productively
+    composing (such a pool keeps reserving successfully → counter resets →
+    not saturated → it remains a live, unsaturated pool that holds the gate
+    open).  The stall watchdog in ``_idle_exhaustion_watchdog`` remains the
+    general liveness backstop for *non-budget* wedges (deadlock, claim
+    divergence, throttle interactions) that this gate cannot detect.
     """
     while not stop_event.is_set():
-        if mgr.all_pools_budget_saturated(pool_names):
+        live = [p for p in pools if p.health.pending_count > 0]
+        if live and all(mgr.pool_budget_saturated(p.name) for p in live):
             logger.info(
-                "run_pools: budget saturated — all pools exceeded "
-                "consecutive reserve-failure threshold — signalling "
-                "graceful shutdown"
+                "run_pools: budget saturated — every pool with pending "
+                "work %s exhausted its reserve-failure threshold; remaining "
+                "budget cannot fund any eligible batch — signalling "
+                "graceful shutdown",
+                [p.name for p in live],
             )
             budget_saturated_event.set()
             stop_event.set()
@@ -788,11 +810,8 @@ async def run_pools(
     # ``near_exhausted()`` shutdown gate.  Instead of a magic dollar floor,
     # watches for all pools consecutively failing to reserve budget.
     sat_event = budget_saturated_event or asyncio.Event()
-    pool_name_tuple = tuple(p.name for p in pools)
     saturation_watchdog_task = asyncio.create_task(
-        _budget_saturation_watchdog(
-            mgr, stop_event, sat_event, pool_names=pool_name_tuple
-        ),
+        _budget_saturation_watchdog(mgr, pools, stop_event, sat_event),
         name="budget_saturation_watchdog",
     )
 
