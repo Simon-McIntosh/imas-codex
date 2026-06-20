@@ -18,8 +18,20 @@ _BASE_KINDS = {"quantity", "geometry"}
 _PROJECTION_SHAPES = {"component", "coordinate"}
 _LOCUS_RELATIONS = {"of", "at", "over"}
 _LOCUS_TYPES = {"entity", "position", "region", "geometry"}
-_OPERATOR_KINDS = {"unary_prefix", "unary_postfix"}
+_OPERATOR_KINDS = {"unary_prefix", "unary_postfix", "binary"}
 _ENTRY_KINDS = {"scalar", "vector", "metadata"}
+
+# Binary operators combine two operands into ``<op>_of_<A>_<sep>_<B>`` (e.g.
+# ``ratio_of_electron_temperature_to_ion_temperature``). ISN's model layer
+# expects the model-form token (``ratio_of``) in the ``binary_operator`` field;
+# its operators vocabulary registers the bare IR form (``ratio``). Codex accepts
+# either spelling from the LLM and normalises to the model form.
+_BINARY_OP_MODEL = {"ratio_of", "product_of", "difference_of"}
+_BINARY_BARE_TO_MODEL = {
+    "ratio": "ratio_of",
+    "product": "product_of",
+    "difference": "difference_of",
+}
 
 
 @functools.cache
@@ -141,8 +153,41 @@ class GrammarSegments(BaseModel):
     )
     operator_kind: str | None = Field(
         default=None,
-        description="Operator position: 'unary_prefix' or 'unary_postfix'",
+        description="Operator position: 'unary_prefix', 'unary_postfix', or 'binary'",
     )
+
+    secondary_base: str | None = Field(
+        default=None,
+        description=(
+            "Second operand of a binary operator, as a fully-composed "
+            "standard-name string. Set ONLY when operator_token is a binary "
+            "operator (ratio_of/product_of/difference_of). The first operand is "
+            "built from base_token (+ qualifiers); this is the second. "
+            "Example: for ratio_of_electron_temperature_to_ion_temperature set "
+            "base_token='temperature', qualifiers=['electron'], "
+            "operator_token='ratio_of', secondary_base='ion_temperature'. "
+            "Use this for ratios/products/differences instead of inventing a "
+            "compound base token like 'velocity_over_magnetic_field'."
+        ),
+    )
+
+    def _binary_model_op(self) -> str | None:
+        """Return the ISN model-form binary operator token, or None.
+
+        Recognises both the model spelling (``ratio_of``) and the bare IR
+        spelling (``ratio``); falls back to the operator registry ``kind`` so a
+        future binary token is picked up without a code change.
+        """
+        tok = self.operator_token
+        if tok is None:
+            return None
+        if tok in _BINARY_OP_MODEL:
+            return tok
+        if tok in _BINARY_BARE_TO_MODEL:
+            return _BINARY_BARE_TO_MODEL[tok]
+        if _operator_registry_kinds().get(tok) == "binary":
+            return _BINARY_BARE_TO_MODEL.get(tok, f"{tok}_of")
+        return None
 
     @model_validator(mode="after")
     def _validate_enum_fields(self) -> GrammarSegments:
@@ -263,6 +308,27 @@ class GrammarSegments(BaseModel):
                     )
         return self
 
+    @model_validator(mode="after")
+    def _validate_binary_operator(self) -> GrammarSegments:
+        """A binary operator needs a second operand and vice versa.
+
+        The operand strings themselves are validated by the ISN model layer at
+        compose time (it re-parses each operand), so codex only enforces the
+        pairing here.
+        """
+        binary_op = self._binary_model_op()
+        if binary_op is not None and not self.secondary_base:
+            raise ValueError(
+                f"binary operator '{self.operator_token}' requires a "
+                f"secondary_base (the second operand)."
+            )
+        if self.secondary_base and binary_op is None:
+            raise ValueError(
+                "secondary_base requires a binary operator_token "
+                "(ratio_of / product_of / difference_of)."
+            )
+        return self
+
     def _to_model_dict(self) -> dict[str, Any]:
         """Build the flat ISN ``StandardName`` model dict from segment fields.
 
@@ -288,6 +354,21 @@ class GrammarSegments(BaseModel):
         base = self.base_token
         if self.qualifiers:
             base = "_".join([*self.qualifiers, base])
+
+        # Binary operator short-circuit: operand A is the (qualifier-folded)
+        # base; operand B is the secondary_base string. ISN re-parses both
+        # operand strings and renders ``<op>_of_<A>_<sep>_<B>``. Projection and
+        # locus on a binary expression are not modelled here (rare); a due_to_
+        # process still attaches.
+        binary_model_op = self._binary_model_op()
+        if binary_model_op is not None and self.secondary_base:
+            d["binary_operator"] = binary_model_op
+            d["physical_base"] = base
+            d["secondary_base"] = self.secondary_base
+            if self.process_token is not None:
+                d["process"] = self.process_token
+            return d
+
         if self.base_kind == "geometry":
             d["geometric_base"] = base
         else:

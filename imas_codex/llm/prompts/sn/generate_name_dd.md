@@ -402,8 +402,8 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
   - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
-  - **ISN naming convention:** Derivatives use the form `derivative_of_{X}_with_respect_to_{Y}` where X is the numerator quantity and Y is the denominator coordinate.
-  - All siblings sharing the same denominator should use consistent naming for the denominator coordinate.
+  - **ISN naming convention:** a derivative is an OPERATOR applied to the numerator quantity X — never a coined compound base. Common cases use a dedicated operator with `operator_kind="unary_prefix"` and `base_token`=X: time derivative → `operator_token="time_derivative"`; radial derivative → `operator_token="radial_derivative"`; spatial gradient → `operator_token="gradient"`. For a derivative with respect to a flux coordinate Y (e.g. dV/dψ, dp/dψ), if no operator yet expresses it, emit a `vocab_gap` (segment `operator`) — do NOT coin `derivative_of_X_with_respect_to_Y` as a `base_token`.
+  - All siblings sharing the same denominator should use the consistent operator + base form.
 {% endif %}{% endif %}
 
 {% endfor %}

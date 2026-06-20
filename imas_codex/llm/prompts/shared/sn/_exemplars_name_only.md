@@ -198,11 +198,15 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
    GOOD: `due_to_halo_currents`, `due_to_ohmic_dissipation`,
          `due_to_fast_ions`, `due_to_non_inductive_drive`.
 
-2. `_over_<quantity>` as a division surrogate.
-   BAD: `ion_velocity_over_magnetic_field_strength`.
-   GOOD: `ion_velocity_per_magnetic_field_strength`.
+2. Division of two quantities — use the `ratio_of` binary operator, never an
+   `_over_` or `_per_` surrogate.
+   BAD: `ion_velocity_over_magnetic_field_strength`,
+        `ion_velocity_per_magnetic_field_strength`.
+   GOOD: `ratio_of_ion_velocity_to_magnetic_field_strength`
+         (`operator_token="ratio_of"`, `secondary_base="magnetic_field_strength"`).
    Note: `over_<region>` (e.g. `over_halo_region`) is the valid Region
-   segment.
+   segment; neither `_over_<quantity>` nor `_per_<quantity>` is a valid
+   division form.
 
 3. `_ggd_coefficients`, `_finite_element_interpolation_coefficients_on_ggd`,
    `_on_ggd`, `_coefficient_on_ggd` — basis-function storage, not
