@@ -7051,6 +7051,19 @@ def update_sn_per_phase_costs(run_id: str) -> int:
 
 DEFAULT_POOL_BATCH_SIZE = 25
 
+# Maximum times a single StandardNameSource may be CLAIMED for name generation
+# before it is treated as un-composable and excluded from further claims and
+# from the pending-count.  Without this cap a source whose batch repeatedly
+# fails (LLM omits it from the response, the batch errors, or its candidate is
+# grammar-rejected and released) returns to ``status='extracted'`` unchanged and
+# is re-claimed forever — ``total_processed`` never advances and the run wedges
+# on the residue (observed full-DD build 2026-06-20: 30–468 sources, attempt
+# loop, stall-guard fired).  ``attempt_count`` is incremented on every claim, so
+# this bounds the loop regardless of WHICH release path returned the source; the
+# excluded residue stays ``extracted`` and is revived by ``--reset-to extracted``
+# (which clears ``attempt_count``) once compose/grammar improves.
+_MAX_COMPOSE_CLAIM_ATTEMPTS = 5
+
 
 def _claim_sn_atomic(
     *,
@@ -7416,6 +7429,7 @@ def claim_generate_name_batch(
                         f"""
                         MATCH (sns:StandardNameSource)
                         WHERE sns.status = 'extracted'
+                          AND coalesce(sns.attempt_count, 0) < $max_attempts
                           AND (sns.claimed_at IS NULL
                                OR sns.claimed_at < datetime()
                                     - duration($cutoff))
@@ -7428,6 +7442,7 @@ def claim_generate_name_batch(
                         MATCH (sns2:StandardNameSource)
                               -[:FROM_DD_PATH]->(imas2:IMASNode)
                         WHERE sns2.status = 'extracted'
+                          AND coalesce(sns2.attempt_count, 0) < $max_attempts
                           AND (sns2.claimed_at IS NULL
                                OR sns2.claimed_at < datetime()
                                     - duration($cutoff))
@@ -7436,7 +7451,8 @@ def claim_generate_name_batch(
                           {scope_sns2_where}
                         WITH sns2 ORDER BY rand() LIMIT 1
                         SET sns2.claimed_at = datetime(),
-                            sns2.claim_token = $token
+                            sns2.claim_token = $token,
+                            sns2.attempt_count = coalesce(sns2.attempt_count, 0) + 1
                         WITH sns2 AS sns
                         OPTIONAL MATCH (sns)-[:FROM_DD_PATH]
                             ->(imas:IMASNode)
@@ -7460,6 +7476,7 @@ def claim_generate_name_batch(
                         """,
                         token=token,
                         cutoff=cutoff,
+                        max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                         **extra_params,
                     )
                 )
@@ -7483,6 +7500,7 @@ def claim_generate_name_batch(
                             f"""
                             MATCH (sns:StandardNameSource)
                             WHERE sns.status = 'extracted'
+                              AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND sns.claimed_at IS NULL
                               {facility_where}
                               {scope_sns_where}
@@ -7495,12 +7513,14 @@ def claim_generate_name_batch(
                                 ->(:Unit {{id: $unit}})
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
-                                sns.claim_token = $token
+                                sns.claim_token = $token,
+                                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
                             """,
                             token=token,
                             cluster_id=cluster_id,
                             unit=unit,
                             expand_limit=expand_limit,
+                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
                         expanded = True
@@ -7511,6 +7531,7 @@ def claim_generate_name_batch(
                             f"""
                             MATCH (sns:StandardNameSource)
                             WHERE sns.status = 'extracted'
+                              AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND sns.claimed_at IS NULL
                               {facility_where}
                               {scope_sns_where}
@@ -7522,12 +7543,14 @@ def claim_generate_name_batch(
                                 ->(:Unit {{id: $unit}})
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
-                                sns.claim_token = $token
+                                sns.claim_token = $token,
+                                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
                             """,
                             token=token,
                             fallback_domain=physics_domain,
                             unit=unit,
                             expand_limit=expand_limit,
+                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
                         expanded = True
@@ -7538,17 +7561,20 @@ def claim_generate_name_batch(
                             f"""
                             MATCH (sns:StandardNameSource)
                             WHERE sns.status = 'extracted'
+                              AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND sns.claimed_at IS NULL
                               AND sns.batch_key = $batch_key
                               {facility_where}
                               {scope_sns_where}
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
-                                sns.claim_token = $token
+                                sns.claim_token = $token,
+                                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
                             """,
                             token=token,
                             batch_key=batch_key,
                             expand_limit=expand_limit,
+                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
 
@@ -10241,6 +10267,7 @@ def pool_pending_counts(
 
     cypher = """
     CALL { MATCH (s:StandardNameSource {status: 'extracted'})
+           WHERE coalesce(s.attempt_count, 0) < $max_compose_attempts
            RETURN count(s) AS generate_name }
     CALL { MATCH (sn:StandardName {name_stage: 'drafted'})
            RETURN count(sn) AS review_name }
@@ -10261,7 +10288,14 @@ def pool_pending_counts(
            generate_docs, review_docs, refine_docs
     """
     with GraphClient() as gc:
-        rows = list(gc.query(cypher, min_score=min_score, rotation_cap=rotation_cap))
+        rows = list(
+            gc.query(
+                cypher,
+                min_score=min_score,
+                rotation_cap=rotation_cap,
+                max_compose_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
+            )
+        )
 
     if not rows:
         return {

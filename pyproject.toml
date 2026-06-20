@@ -466,21 +466,17 @@ dedup-similarity-threshold = 0.85
 # Review/refine pools hit OpenRouter, NOT the local GPU, so they are not
 # constrained by the GPU profile — left at the 4-GPU-era values.
 #
-# MEDIUM-EFFORT RESIZE (2026-06-17, DISCONFIRMED 2026-06-20): the knee=4 above
-# was probed at MAX reasoning-effort. The 2026-06-17 reasoning that MEDIUM effort
-# (~6× fewer tokens/request) lets the knee rise ~6× to ≈24 was flagged
-# "to be re-confirmed before the full build" — and the full-DD build re-confirmed
-# the OPPOSITE: at 24 replicas the 2×H200 endpoint threw 56 APIConnectionErrors
-# and the generate pool wedged (full-DD run 2026-06-20: total_processed flat,
-# stall-guard fired on the residue). Real full-DD compose prompts run ~45 k tokens
-# (rich cluster/family context — 2.5× the 18.5 k probe payload that set the knee),
-# so in-flight KV pressure (24 × 45 k ≈ 1 M tokens) saturates the 2-GPU server and
-# it starts refusing/dropping connections. The MEDIUM token reduction is more than
-# offset by the larger real-payload prompts. Reverted to 8 — 2× the validated
-# max-effort knee (4), well under the disconfirmed 24 — to keep in-flight token
-# pressure within the 2-GPU envelope. Scale UP via
+# MEDIUM-EFFORT RESIZE (2026-06-17): knee=4 above was probed at MAX
+# reasoning-effort; MEDIUM (~6× fewer tokens/request) lets the 2×H200 knee rise
+# ~6× to ≈24. The full-DD build (2026-06-20) confirmed 24 is HEALTHY for the
+# local endpoint: 4000+ paths composed cleanly with only 1 APIConnectionError
+# all day (NOT load-correlated). The tail "wedge" on the full-DD build was NOT a
+# concurrency/endpoint problem — it was an unbounded compose-retry loop on a small
+# residue of hard sources (grammar-rejected candidates reset to 'extracted' with no
+# attempt cap → re-claimed forever → total_processed flat → stall-guard). Fixed at
+# the claim/pending layer (compose_attempts cap), not here. 24 stays. Scale UP via
 # IMAS_CODEX_SN_POOLS_GENERATE_NAME_REPLICAS on a >2-GPU server.
-generate-name-replicas = 8
+generate-name-replicas = 24
 review-name-replicas = 64
 refine-name-replicas = 32
 generate-docs-replicas = 32
