@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-20">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 </head>
 <body>
   <main class="plan-doc">
@@ -357,6 +357,10 @@
     <p class="r-dec-q">What measures SN name-quality lift (the ruler)?</p>
     <p class="r-dec-ctx">Need a reproducible before/after metric for the measure-&gt;fix-&gt;loop on name quality. sn bench gives grammar-validity, reviewer scores (0-1 across 4 dims), and reference_overlap vs a gold fixture.</p>
     <p class="r-dec-rat">LOCKED (operational). Baseline on re-enriched DD (deepseek-v4-flash compose + qwen3.7-max): grammar 47/47, mean name score 0.970, median 1.000, weakest dim SEMANTIC 18.66/20. Run sn bench scoped to the PRODUCTION composer (free local) + a SINGLE reviewer (the 7-reviewer matrix deadlocked litellm&#x27;s async LoggingWorker under ~364 concurrent calls; single reviewer + 50min timeout is the safe form). reference_overlap (0.32) is currently MISLEADING: the benchmark_reference.py gold predates locked decisions (wants bare elongation/triangularity, plasma_current_of_rogowski_coil, bare magnetic_flux) — ~20/28 mismatches are composer-correct/gold-stale. Regenerate the gold against current decisions before trusting reference_overlap; until then the reviewer score (with persisted per-name reasoning) is the ruler.</p>
+    </div>
+<div class="r-dec" data-key="geometry-enumeration-coordinate" data-choice="enumeration is a coordinate, not a name — collapse ordinal geometry points to one geometric-quantity name" data-by="Simon McIntosh" data-when="2026-06-20T10:53:39+00:00">
+    <p class="r-dec-q">geometry-enumeration-coordinate</p>
+    <p class="r-dec-rat">A standard name identifies a quantity-KIND by intrinsic physical identity; enumeration along a geometry (LoS endpoint index, polygon vertex, waypoint, element sample) is a COORDINATE, never a name axis. Ordinal geometry points are NOT separately named: collapse to ONE geometric-quantity standard name (line_of_sight/first_point/r AND second_point/r -&gt; both radial_line_of_sight); the ordinal lives in the DD path/mapping (CF geometry-node pattern), not the name. A point earns a distinct name ONLY when it is a distinct physical ENTITY (aperture vs wall) -&gt; name by entity (radial_position_of_aperture), NEVER by ordinal. The earlier split (name LoS endpoints but not outline vertices) was a weak middle ground — it smuggles an index into the name and does not generalise. Honours the Fusion-Conventions name-geometry mandate (the geometric quantity IS named, once), aligns with CF (geometry nodes are coordinate data), is a sibling of name-multiplicity-rule + provenance-collapse-determinism (collapse along enumeration; de-conflate physics), and adds ZERO vocabulary churn. Verified composable today: radial_line_of_sight, vertical_line_of_sight, radial_outline. Distinct from local-coordinate axes x1/x2/x3 — orthogonal directions, NOT ordinals — which use the registered x1_coordinate/x2_coordinate carriers. Implementation: codex compose-prompt collapse rule (name by grandparent carrier when the parent is an ordinal point; multiple DD paths -&gt; one name); NO ordinal-point loci added to ISN.</p>
     </div>
 </section>
 
