@@ -77,10 +77,10 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `energy_flux_at_wall_surface` | `energy_flux_at_wall` | Position token is `wall`, not `wall_surface` — the `_surface` suffix is redundant |
 | `energy_due_to_recombination_at_ion_state` | `energy_due_to_recombination` | Process tokens are bare vocabulary entries — never append `_at_X` / `_in_X` / `_on_X` qualifiers |
 | `energy_due_to_impurity_radiation_in_halo_region` | `halo_region_radiated_energy_due_to_impurity_radiation` | Region qualifiers go in the subject prefix, not after `due_to_<process>` |
-| `vertical_coordinate_of_outline_point` | `vertical_coordinate_of_wall_outline_point` | Always qualify `outline_point` with its parent entity (`wall_`, `plasma_boundary_`) |
+| `vertical_coordinate_of_outline_point` | `vertical_outline` | **Enumeration is a coordinate, not a name** — outline vertices are an ordinal array of ONE geometry; collapse to `radial_outline` / `vertical_outline` (`base_token=outline`, axis as `coordinate` projection). The vertex index lives in the DD path; emit every vertex path in `dd_paths`. Never encode `outline_point` |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
-| `x1_coordinate_of_neutron_detector_geometry_outline` | `first_coordinate_of_detector_outline` | **Local-coordinate naming** — DD `x1`/`x2`/`x3` are abstract local-coordinate indices, NOT Cartesian x/y/z. Name as `first_coordinate`, `second_coordinate`, `third_coordinate`. The standard name describes the geometric concept (outline coordinate), not the DD field label |
-| `x2_width_of_bolometer_detector_aperture` | `second_coordinate_width_of_detector_aperture` | Same rule — `x2` maps to `second_coordinate`, not `x2`. The detector type is context, not part of the name |
+| `x1_coordinate_of_neutron_detector_geometry_outline` | `x1_coordinate` | **Local-coordinate axes are DISTINCT directions, not ordinals** — DD `x1`/`x2`/`x3` are ORTHOGONAL directions of a local sensor frame. Use the REGISTERED carriers `x1_coordinate` / `x2_coordinate` / `x3_coordinate` (`base_kind=geometry`); keep them as separate names (different axes). `first_coordinate` / `second_coordinate` are unregistered → gap. Drop the detector DD-tree prefix |
+| `x2_width_of_bolometer_detector_aperture` | `x2_coordinate` | Same rule — `x2` → registered carrier `x2_coordinate`, NOT `second_coordinate`. The detector type is DD context, not part of the name |
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component / transformation / reducer tokens come BEFORE the base as a leading qualifier prefix. Compare ★0.95 `parallel_fast_electron_pressure` |
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **Compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
 
@@ -99,8 +99,8 @@ component is being described. Generic geometric primitives alone are useless.
 | `alpha_of_oblique` | `oblique_angle_of_poloidal_field_coil_element` | Names the engineering context |
 | `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
 | `height_of_rectangle` | `height_of_poloidal_field_coil_cross_section` | Rectangle alone is meaningless |
-| `outline_r` | `radial_coordinate_of_detector_outline` | Names what the outline belongs to |
-| `first_point_r` | `radial_position_of_line_of_sight_first_point` | Full geometric context |
+| `outline_r` | `radial_outline` | Outline vertices are an ordinal array of ONE geometry → collapse (`base_token=outline`, radial `coordinate` projection); the vertex index lives in the DD path |
+| `first_point_r` | `radial_line_of_sight` | **Enumeration is a coordinate, not a name** — `first_point`/`second_point` are endpoints of ONE line-of-sight; collapse BOTH to `radial_line_of_sight` (`base_token=line_of_sight`, radial `coordinate` projection) and list both endpoint paths in `dd_paths`. NEVER encode the ordinal (`first_point`) in the name |
 
 **When to SKIP geometry paths entirely:**
 
@@ -116,6 +116,45 @@ component is being described. Generic geometric primitives alone are useless.
 - The name includes the hardware context: `_of_poloidal_field_coil`, `_of_detector_aperture`,
   `_of_antenna_strap`, `_of_first_wall`
 - Multiple tokamaks would use the same term for the same concept
+
+### Enumerated geometry points collapse to ONE name
+
+**Enumeration is a coordinate, not a name.** When a DD leaf's **parent is an
+ordinal point** — `first_point` / `second_point` / `third_point` / `point` /
+`<entity>_point`, or an `outline` vertex array — the ordinal is an array index,
+NOT part of the quantity's identity. Name by the **grandparent geometry
+carrier** with the axis projection, and emit `dd_paths` covering **all** the
+ordinal siblings so the multiple DD paths attach to the ONE name:
+
+| DD leaves (ordinal siblings) | ✅ ONE name | Segments |
+|---|---|---|
+| `.../line_of_sight/first_point/r` + `.../second_point/r` | `radial_line_of_sight` | `base_token=line_of_sight`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate` |
+| `.../line_of_sight/first_point/z` + `.../second_point/z` | `vertical_line_of_sight` | …`projection_axis=vertical` |
+| `.../line_of_sight/first_point/phi` + `.../second_point/phi` | `toroidal_line_of_sight` | …`projection_axis=toroidal` |
+| `<entity>/outline/r` (vertex array) | `radial_outline` | `base_token=outline`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate` |
+| `<entity>/outline/z` (vertex array) | `vertical_outline` | …`projection_axis=vertical` |
+
+`dd_paths` for `radial_line_of_sight` MUST list BOTH `.../first_point/r` and
+`.../second_point/r` — the collapse is realised by attaching every endpoint
+path to the single name.
+
+**Distinguish points only by physical ENTITY, never by ordinal.** A point earns
+a distinct name ONLY when it is a distinct physical entity (an aperture vs a
+wall) — name it by that entity:
+
+| Entity-distinguished point | Segments |
+|---|---|
+| `radial_position_of_aperture` | `base_token=position`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate`, `locus_token=aperture`, `locus_relation=of`, `locus_type=entity` |
+| `radial_position_of_first_wall` | …`locus_token=first_wall`, `locus_relation=of`, `locus_type=position` |
+
+Never name such a point by its ordinal (no `first_point`/`second_point` in the name).
+
+**Local sensor-frame axes x1/x2/x3 are NOT ordinal points — keep them
+DISTINCT.** DD `x1` / `x2` / `x3` are ORTHOGONAL local-coordinate DIRECTIONS of
+a sensor frame, not samples along one geometry. Use the REGISTERED carriers
+`x1_coordinate` / `x2_coordinate` / `x3_coordinate` (`base_token=x1_coordinate`,
+`base_kind=geometry`) — each axis is its OWN name. Do NOT collapse them, and do
+NOT use `first_coordinate` / `second_coordinate` (unregistered → vocab gap).
 
 ## Non-Nameable Paths — route to `skipped` (do NOT compose)
 
@@ -398,6 +437,8 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.family_parent_name %}  - **Geometric base:** `{{ item.family_parent_name }}`{% endif %}
 
   - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
+  - **Enumeration is a coordinate, not a name.** If the geometric position is an **ordinal point** (`first_point`/`second_point`/`third_point`/`point`/`<entity>_point`) or an `outline` vertex, the ordinal is an array index — COLLAPSE to the grandparent geometry carrier + axis: line-of-sight endpoints → `radial_line_of_sight` / `vertical_line_of_sight` (`base_token=line_of_sight`); outline vertices → `radial_outline` / `vertical_outline` (`base_token=outline`). Emit `dd_paths` covering EVERY ordinal sibling so they share the ONE name. Never put `first_point`/`second_point`/`outline_point` in the name; distinguish a point only by physical entity (`radial_position_of_aperture`, `radial_position_of_first_wall`), never by ordinal.
+  - **Local sensor axes x1/x2/x3 are DISTINCT directions, not ordinals** — use the registered carriers `x1_coordinate` / `x2_coordinate` / `x3_coordinate` (each its own name); never `first_coordinate`/`second_coordinate`.
   - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
   - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}

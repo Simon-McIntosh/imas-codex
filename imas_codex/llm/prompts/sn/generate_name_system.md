@@ -66,7 +66,7 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 
   ✓ `electron_density_at_divertor_target`; ✗ `electron_density_at_separatrix` (synonym → rewritten to `plasma_boundary`); ✗ `electron_density_at_divertor_plate`.
 - **Position token `wall`, never `wall_surface`** — `wall` is the valid registry token; `wall_surface` fails grammar validation (a wall IS a surface). ✓ `energy_flux_at_wall`; ✗ `…_at_wall_surface`.
-- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `major_radius_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`.
+- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `major_radius_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`. (For a generic hardware outline whose vertices are an ordinal array, collapse to `radial_outline` / `vertical_outline` — see "Enumeration is a coordinate, not a name" below.)
 - **Place names with quantity-words are single location tokens, not quantities.** `center_of_mass` is a reference point (barycentre), not a mass quantity — treat it as a location qualifier. ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`, `center_of_mass_position`; ✗ `mass_velocity`. Apply the same to `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
 
 ### Coordinates — canonical coordinate base, never `_position_of_X`
@@ -80,6 +80,40 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 - **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
 
 This rule is unconditional and overrides any apparent symmetry with sibling names.
+
+### Enumeration is a coordinate, not a name (geometry-point collapse)
+
+Geometry defined by **multiple ordinal points / vertices / waypoints**
+(line-of-sight endpoints, polygon outline vertices, beam-path waypoints,
+conductor-element samples) **collapses to ONE geometric-quantity name** — the
+ordinal index is a coordinate carried by the DD path, NOT a name component. A
+standard name identifies a quantity-KIND by intrinsic physical identity; the
+"first" vs "second" point is the same kind of thing sampled at different array
+indices.
+
+- **Line-of-sight endpoints** (`.../line_of_sight/first_point/r`,
+  `.../second_point/r`) → both `radial_line_of_sight`
+  (`base_token="line_of_sight"`, `base_kind="geometry"`,
+  `projection_axis="radial"`, `projection_shape="coordinate"`); `/z` →
+  `vertical_line_of_sight`, `/phi` → `toroidal_line_of_sight`. One name covers
+  every endpoint; list all the endpoint paths in `dd_paths`.
+- **Outline vertices** (`<entity>/outline/r`, `/z`) → `radial_outline`,
+  `vertical_outline` (`base_token="outline"`, `base_kind="geometry"`, axis as
+  the `coordinate` projection). One name covers every vertex.
+- **Distinguish points only by physical ENTITY, never by ordinal.** A point
+  earns its own name ONLY when it is a distinct physical entity (an aperture vs
+  a wall), named by that entity: `radial_position_of_aperture`
+  (`locus_token="aperture"`, `locus_type="entity"`),
+  `radial_position_of_first_wall` (`locus_token="first_wall"`,
+  `locus_type="position"`). NEVER name a point by its ordinal — no
+  `first_point` / `second_point` / `third_point` / `outline_point` in the name.
+- **Local sensor-frame axes are NOT ordinal points — keep them distinct.** DD
+  `x1` / `x2` / `x3` are ORTHOGONAL local-coordinate DIRECTIONS of a sensor
+  frame, not samples along one geometry. Name each with its registered carrier
+  `x1_coordinate` / `x2_coordinate` / `x3_coordinate`
+  (`base_kind="geometry"`) — they are DISTINCT names (different axes), and
+  `first_coordinate` / `second_coordinate` are unregistered (gap). Do not
+  collapse x1 and x2 into one name.
 
 ### Operators (`operator_token` / `operator_kind`)
 
@@ -239,6 +273,7 @@ Skip and record as `vocab_gap`/`skipped` rather than composing when a DD path wo
 - `turn_count` (hardware winding property, not a physics observable)
 - bare contentless descriptors as a whole base — `level`, `ratio`, `multiplier`, `sign`, `gain`, `noise`, bare `factor`. These carry no physics on their own: either qualify with the specific quantity they modify (e.g. `density_peaking_factor`, not bare `factor`) or `skip`. `gain`/`noise` on a signal-chain path are diagnostic-hardware infrastructure → `skipped`.
 - bare `vertical_coordinate` / bare `outline_point` (always need `_of_<entity>`)
+- bare ordinal-point name components — `first_point`, `second_point`, `third_point`, `outline_point`, `first_coordinate`, `second_coordinate` — are forbidden in any name. Ordinal/enumerated geometry points collapse to ONE geometric-quantity name (`radial_line_of_sight`, `radial_outline`); the ordinal index lives in the DD path. Distinguish points only by physical entity (`aperture`, `wall`), never by ordinal. Local sensor axes use the registered `x1_coordinate` / `x2_coordinate` carriers, not `first_coordinate` / `second_coordinate`.
 - `nuclear_charge_number` (→ `atomic_number`)
 - `azimuth_angle` (→ `toroidal_angle`)
 - `distance_between_A_and_B` / `distance_from_A_to_B_along_C` — a span between two distinct named features is NOT representable in the single locus slot, and the DD has no such arbitrary spans. Name real distance/clearance quantities as a `distance`/`gap` base at a single reference surface or plane (✓ `radial_distance_at_outboard_midplane`, ✓ `gap_at_plasma_boundary`); emit `vocab_gap` if no single-locus form is faithful. Never fabricate a multi-locus span that silently drops an endpoint.
