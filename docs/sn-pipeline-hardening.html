@@ -16,8 +16,8 @@
   <title>SN Pipeline Hardening | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-21">
-<meta name="plan-version" content="36">
+<meta name="plan-modified" content="2026-06-22">
+<meta name="plan-version" content="37">
 </head>
 <body>
   <main class="plan-doc">
@@ -764,8 +764,34 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-snph-024" data-status="in_progress" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-21" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Vocab/grammar STABILIZED (ISN rc48) + re-flush clean; docs rotations started</h4>
-    <div class="r-fu-body">Deep DD-wide assessment (2 research agents over 264 live gap tokens) -> ~28 genuine vocab adds, ~70 expressible-but-mis-routed, ~172 drop. EXECUTED: ISN rc48 (+14 bases incl magnetic_vector_potential/larmor_radius/charge_number, +7 gas subjects, +5 qualifiers, +1 locus; model-layer indexed-operator round-trip fix; model<->parser parity test; 1526 ISN tests). Codex: pin->rc48; d_dt tense-guard (workers.py); operator-routing prompt (per_toroidal_mode/square/bessel_1 route to operator_token, +38 sources, zero vocab); differential base_kind=quantity; IR operator_coordinate field + guards (indexed flux-deriv round-trips, bare derivative_with_respect_to rejected — no more silent derivative_with_respect_to_of_volume); orphan-sweep tests updated. Full SN suite 0 failures. WEDGE ROOT-CAUSED + FIXED (was misdiagnosed as concurrency): unbounded compose re-claim of persistently-failing sources — claim now increments attempt_count + excludes >=cap(5); orphan_sweep terminalizes capped sources to failed every 30s (counter-agnostic) -> idle watchdog exits clean. RE-FLUSH (rc48): drained CLEANLY (pending=0, no wedge); vocab_gap 510->254 (-50%), composed +156, attached +106, 812 name-accepted all docs-pending, 20 capped-failed (genuine un-composable tail, contained). DOCS CAMPAIGN STARTED: added --docs-only flag (runs only docs pools, skips name compose/review + auto-seed); rotation 1 launched (cap $10; generate=sonnet-4.6, review=qwen3.7-max+minimax-m3->gpt5.5 quorum). NEXT: review generated docs, update docs prompts/context, iterate $10 rotations.</div>
+    <div class="r-fu-body">Deep DD-wide assessment (2 research agents over 264 live gap tokens) -&gt; ~28 genuine vocab adds, ~70 expressible-but-mis-routed, ~172 drop. EXECUTED: ISN rc48 (+14 bases incl magnetic_vector_potential/larmor_radius/charge_number, +7 gas subjects, +5 qualifiers, +1 locus; model-layer indexed-operator round-trip fix; model&lt;-&gt;parser parity test; 1526 ISN tests). Codex: pin-&gt;rc48; d_dt tense-guard (workers.py); operator-routing prompt (per_toroidal_mode/square/bessel_1 route to operator_token, +38 sources, zero vocab); differential base_kind=quantity; IR operator_coordinate field + guards (indexed flux-deriv round-trips, bare derivative_with_respect_to rejected — no more silent derivative_with_respect_to_of_volume); orphan-sweep tests updated. Full SN suite 0 failures. WEDGE ROOT-CAUSED + FIXED (was misdiagnosed as concurrency): unbounded compose re-claim of persistently-failing sources — claim now increments attempt_count + excludes &gt;=cap(5); orphan_sweep terminalizes capped sources to failed every 30s (counter-agnostic) -&gt; idle watchdog exits clean. RE-FLUSH (rc48): drained CLEANLY (pending=0, no wedge); vocab_gap 510-&gt;254 (-50%), composed +156, attached +106, 812 name-accepted all docs-pending, 20 capped-failed (genuine un-composable tail, contained). DOCS CAMPAIGN STARTED: added --docs-only flag (runs only docs pools, skips name compose/review + auto-seed); rotation 1 launched (cap $10; generate=sonnet-4.6, review=qwen3.7-max+minimax-m3-&gt;gpt5.5 quorum). NEXT: review generated docs, update docs prompts/context, iterate $10 rotations.</div>
     <pre class="r-fu-prompt">Continue f-snph-024 docs campaign: review docs from each $10 --docs-only rotation for quality (faithfulness to enriched DD description, no fabricated mechanism/direction, grammar-conformant, right length); update sn-docs prompts/context as needed; iterate rotations until docs quality is robust. Residual names tail: 254 vocab_gap (mostly DROP-class device-leakage/geometry-ordinals/niche) + ~20 capped-failed (incl minimum_offset invalid geometric_base, d_dt-of-geometry) — fold into a later names pass if they matter. Then consider the names-only ISNC catalog RC the user deferred earlier.</pre>
+    </article>
+<article class="r-fu" data-id="f-snph-025" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-22" data-recommends-skill="/reckon-ship sn-pipeline-hardening f-snph-025" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Harden bare-bracket normalize: catch docs written late in a rotation (rolling residue → accepted)</h4>
+    <div class="r-fu-body">During docs rotations a small rolling residue (~5/550, ~0.9%) of bare [name] brackets survives the per-rotation Pass-0 normalize in resolve_doc_links. Root cause is a coverage/timing gap, not a logic bug: the normalize pass runs once near the end of run_sn_pools, but docs written by in-flight generate_docs/refine_docs tasks late in the rotation (these show docs_updated_at=None) are not visible to that pass, so their bare brackets are only swept on a LATER settled invocation. Evidence this campaign: an ACCEPTED doc (plasma_resistance) reached accepted stage carrying bare [total_plasma_inductance] brackets. The normalizer LOGIC is correct — a standalone resolve_doc_links(gc) call after the rotation settled cleaned all 5 to 0/550. Fix options: (a) run _normalize_bare_doc_links as a true FINAL step after all pool tasks fully drain in loop.py; and/or (b) wire _normalize_bare_doc_links into the review_docs ACCEPT path so no doc can reach docs_stage=accepted with bare brackets. Bare-bracket regex and the strip-vs-link logic are already correct (graph_ops.py:4894-4945) — only the invocation coverage needs hardening. Manually cleaned to 0/550 on 2026-06-22; this is deferred-not-rushed per campaign discipline.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: f-snph-025
+Tier: sonnet
+
+Context
+  Docs rotations leave a small rolling residue (~0.9%) of bare [name] brackets that the per-rotation Pass-0 normalize in resolve_doc_links misses because in-flight generate_docs/refine_docs tasks write docs AFTER the normalize pass runs near the end of run_sn_pools. An accepted doc (plasma_resistance) was observed carrying bare brackets. The normalize LOGIC is correct (graph_ops.py:4894-4945); only invocation COVERAGE needs hardening.
+
+State to read
+  GET /plan/imas-codex/sn-pipeline-hardening
+  imas_codex/standard_names/graph_ops.py  (_normalize_bare_doc_links, resolve_doc_links)
+  imas_codex/standard_names/loop.py  (run_sn_pools post-rotation reconcile / where resolve_doc_links is called)
+  imas_codex/standard_names/workers.py  (review_docs accept path)
+
+Locked decisions to honour
+  bare-bracket strip-vs-link rule (link if non-dead SN id, else strip) — keep as-is
+
+Done-when
+  1. resolve_doc_links (or the normalize pass) runs after ALL pool tasks fully drain, OR _normalize_bare_doc_links is invoked on the doc-accept path, so no doc can reach docs_stage=accepted with bare brackets.
+  2. A test asserts bare-bracket count stays 0 across a simulated late-write rotation.
+  3. uv run pytest tests/standard_names/ green.
+  4. followup written + this followup resolved.</pre>
     </article>
 </section>
 
