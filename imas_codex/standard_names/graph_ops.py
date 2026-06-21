@@ -4911,7 +4911,16 @@ def _normalize_bare_doc_links(gc: Any) -> int:
     )
     if not rows:
         return 0
-    names = {r["id"] for r in gc.query("MATCH (s:StandardName) RETURN s.id AS id")}
+    # Only link to a NON-dead standard name (drafted/reviewed/accepted); a bare
+    # token that is superseded/exhausted or not a name at all → strip brackets.
+    names = {
+        r["id"]
+        for r in gc.query(
+            "MATCH (s:StandardName) "
+            "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+            "RETURN s.id AS id"
+        )
+    }
 
     def _repl(m: re.Match[str]) -> str:
         tok = m.group(1)
@@ -4986,16 +4995,28 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
         if not rows:
             return {"resolved": 0, "removed": 0, "unchanged": 0}
 
-        # Build the accepted name set
-        accepted_names = {r["id"] for r in rows}
+        # Valid link targets = every StandardName that is NOT genuinely dead
+        # (superseded / exhausted). A link to a drafted/reviewed/accepted name
+        # is valid and must be KEPT — only superseded/exhausted targets are
+        # rewritten to an accepted successor or removed. (Using accepted-only
+        # here wrongly stripped links to not-yet-accepted names — a link to a
+        # drafted SN is a legitimate cross-reference that will publish.)
+        valid_targets = {
+            r["id"]
+            for r in gc.query(
+                "MATCH (s:StandardName) "
+                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+                "RETURN s.id AS id"
+            )
+        }
 
-        # Build superseded→accepted resolution map via REFINED_FROM
+        # Build dead-target→accepted-successor resolution map via REFINED_FROM
         superseded_ids: set[str] = set()
         for row in rows:
             docs = row.get("docs") or ""
             for match in _NAME_LINK_RE.finditer(docs):
                 target = match.group(1)
-                if target not in accepted_names:
+                if target not in valid_targets:
                     superseded_ids.add(target)
 
         if not superseded_ids:
@@ -5027,8 +5048,8 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
             def _replace_link(m: re.Match) -> str:
                 nonlocal resolved, removed
                 target = m.group(1)
-                if target in accepted_names:
-                    return m.group(0)  # valid link, keep as-is
+                if target in valid_targets:
+                    return m.group(0)  # valid (non-dead) link, keep as-is
                 successor = resolution_map.get(target)
                 if successor:
                     resolved += 1
