@@ -1654,7 +1654,15 @@ def _is_attachment_consistent(source_id: str, sn_name: str) -> tuple[bool, str]:
         "rate_of_change_of_",
         "time_derivative_of_",
     )
-    change_path_tokens = ("instant_changes", "/change/", "_delta", "tendency_")
+    change_path_tokens = (
+        "instant_changes",
+        "/change/",
+        "_delta",
+        "tendency_",
+        "/d_dt/",
+        "_dt",
+        "/derivatives_1d/",
+    )
     sn_is_change = any(sn_name.startswith(p) for p in change_prefixes)
     path_is_change = any(t in source_id for t in change_path_tokens)
     if sn_is_change and not path_is_change:

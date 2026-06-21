@@ -47,6 +47,54 @@ def test_consistent_pairs(source_id: str, sn_name: str) -> None:
 @pytest.mark.parametrize(
     "source_id,sn_name",
     [
+        # ``d_dt`` rate-marker paths: the time-derivative IDS structures expose
+        # the rate explicitly. A ``time_derivative_of_X`` SN MUST attach.
+        (
+            "transport_solver_numerics/derivatives_1d/electrons/d_dt/pressure",
+            "time_derivative_of_electron_pressure",
+        ),
+        (
+            "transport_solver_numerics/derivatives_1d/d_dt/ion_density",
+            "tendency_of_ion_density",
+        ),
+        # A ``_dt`` suffixed leaf (e.g. ``..._dt``) is also a rate marker.
+        (
+            "core_profiles/profiles_1d/electrons/temperature_dt",
+            "time_derivative_of_electron_temperature",
+        ),
+    ],
+)
+def test_rate_marker_paths_accept_rate_names(source_id: str, sn_name: str) -> None:
+    """A ``d_dt`` / ``derivatives_1d`` rate path matches a rate SN."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert ok, reason
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # A non-rate base path with a rate SN is STILL flagged: the d_dt fix
+        # must not make every path accept a rate name.
+        (
+            "core_profiles/profiles_1d/electrons/pressure",
+            "time_derivative_of_electron_pressure",
+        ),
+        (
+            "core_profiles/profiles_1d/electrons/temperature",
+            "tendency_of_electron_temperature",
+        ),
+    ],
+)
+def test_non_rate_path_still_rejects_rate_name(source_id: str, sn_name: str) -> None:
+    """A base-quantity path with no rate marker rejects a rate SN."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
         # Base path → change SN: must be rejected.
         ("core_profiles/profiles_1d/electrons/density", "change_in_electron_density"),
         (
