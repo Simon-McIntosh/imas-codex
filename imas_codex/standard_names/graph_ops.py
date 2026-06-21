@@ -4887,6 +4887,53 @@ def resolve_links_batch(
 
 
 _NAME_LINK_RE = re.compile(r"\(name:([^)]+)\)")
+# Bare ``[snake_case_name]`` brackets with NO ``(name:...)`` target — the LLM
+# frequently writes these for related-name mentions; Markdown renders them as
+# broken literal text. ``(?<!\!)`` skips image syntax; ``(?!\()`` skips
+# already-formed ``[label](...)`` links.
+_BARE_DOC_LINK_RE = re.compile(r"(?<!\!)\[([a-z][a-z0-9_]{3,})\](?!\()")
+
+
+def _normalize_bare_doc_links(gc: Any) -> int:
+    """Convert bare ``[name]`` brackets in documentation to proper links or text.
+
+    For every StandardName documentation containing ``[``: each bare
+    ``[snake_case]`` (no ``(name:...)`` target) becomes ``[snake_case](name:snake_case)``
+    when ``snake_case`` is a real StandardName id, else the brackets are stripped
+    (leaving the plain word). Idempotent. Returns the number of docs updated.
+    """
+    rows = list(
+        gc.query(
+            "MATCH (sn:StandardName) "
+            "WHERE sn.documentation IS NOT NULL AND sn.documentation CONTAINS '[' "
+            "RETURN sn.id AS id, sn.documentation AS docs"
+        )
+    )
+    if not rows:
+        return 0
+    names = {r["id"] for r in gc.query("MATCH (s:StandardName) RETURN s.id AS id")}
+
+    def _repl(m: re.Match[str]) -> str:
+        tok = m.group(1)
+        return f"[{tok}](name:{tok})" if tok in names else tok
+
+    updates = []
+    for r in rows:
+        new = _BARE_DOC_LINK_RE.sub(_repl, r["docs"])
+        if new != r["docs"]:
+            updates.append({"id": r["id"], "doc": new})
+    for i in range(0, len(updates), 200):
+        gc.query(
+            "UNWIND $items AS it MATCH (sn:StandardName {id: it.id}) "
+            "SET sn.documentation = it.doc",
+            items=updates[i : i + 200],
+        )
+    if updates:
+        logger.info(
+            "resolve_doc_links: normalized bare [name] brackets in %d doc(s)",
+            len(updates),
+        )
+    return len(updates)
 
 
 def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
@@ -4917,6 +4964,14 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
     if _own_gc:
         gc = GraphClient().__enter__()
     try:
+        # Pass 0: normalize bare ``[name]`` brackets across ALL docs (any stage).
+        # The LLM writes related-name mentions as bare ``[name]`` despite the
+        # prompt rule; Markdown renders these broken. Deterministically convert
+        # ``[x]`` → ``[x](name:x)`` when x is a real standard name, else strip the
+        # brackets to plain text. Runs every rotation (this fn is called from the
+        # pool loop's post-rotation reconcile).
+        _normalize_bare_doc_links(gc)
+
         # Fetch all accepted names with documentation
         rows = list(
             gc.query(
