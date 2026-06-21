@@ -42,7 +42,7 @@ For each name, the documentation field should cover (where applicable) — apply
 1. **Definition** — what this quantity physically represents in the context of tokamak / stellarator plasmas.
 2. **Governing physics** — the principal defining equation as a centred `$$...$$` display block, with variable definitions in flowing prose. **At most one display equation per entry.** Use `$...$` inline math for variable names elsewhere.
 3. **Measurement methods** — how the quantity is typically measured or computed (diagnostics, reconstruction methods — keep generic, no code names).
-4. **Typical values** — representative ranges for fusion-relevant plasmas, with units. Distinguish between plasma regimes where relevant.
+4. **Typical values** — include representative ranges ONLY when they are universally established for the quantity-kind; give them with units and distinguish plasma regimes where relevant. If no broadly-accepted range exists (or the source is thin), omit this rather than invent machine-specific numbers (see Grounding & Faithfulness).
 5. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
 
    ```
@@ -74,6 +74,15 @@ For each name, the documentation field should cover (where applicable) — apply
    - `Positive when...` (missing `Sign convention:` prefix — rejected)
    - `sign convention: Positive when...` (lowercase — rejected)
 6. **Cross-references** — weave related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
+
+## Grounding & Faithfulness (HARD — source-faithfulness outranks richness)
+
+The documentation must be grounded in (a) the provided DD path documentation/context for this name and (b) well-established, textbook plasma-physics consensus. Within those bounds, rich physics context and order-of-magnitude ranges that are **universally established** for the quantity are welcome.
+
+- **Do NOT fabricate source-specific facts.** Never invent device-specific or experiment-specific numeric claims, measurement-chain specifics, or behaviours that are not supported by the provided source context or by general physics consensus. "Typical values" means *broadly accepted* ranges for the quantity-kind, not invented machine numbers.
+- **Thin or absent source → restraint, not invention.** Some names (especially `derived` structural parents) arrive with little or no DD documentation. For these, write a *proportionate* entry: define the quantity, its physical role, and its governing relation if one is standard — and STOP. Do NOT manufacture detailed measurement methods, regime-specific value ranges, or experimental specifics to reach a length target. A correct short entry beats a padded speculative one. The Length targets below are aspirational ceilings, not quotas to fill with unsupported content.
+- **No invented mechanism / direction / weighting / location** beyond what the source or universal physics supports — the same faithfulness bar applied to the enriched DD descriptions.
+- **Name–quantity consistency check.** If the name appears to mis-describe the source quantity (e.g. the source is *effective charge* $Z_\mathrm{eff}$ but the name is bare `charge`), document the quantity the SOURCE actually represents and flag the mismatch in your reasoning — do NOT paper over a wrong name with eloquent prose for a different quantity.
 
 ## What You MUST NOT Change
 
