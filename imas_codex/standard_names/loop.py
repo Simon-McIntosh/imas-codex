@@ -109,6 +109,7 @@ def _build_pool_specs(
     only_domain: str | None = None,
     scope_run_id: str | None = None,
     names_only: bool = False,
+    docs_only: bool = False,
     flush: bool = False,
     skip_review: bool = False,
 ) -> list[Any]:
@@ -350,10 +351,16 @@ def _build_pool_specs(
         ),
     ]
 
-    # ── Names-only filtering ─────────────────────────────────────────
+    # ── Names-only / docs-only filtering ─────────────────────────────
     _DOCS_POOLS = {"generate_docs", "review_docs", "refine_docs"}
     if names_only:
         specs = [s for s in specs if s.name not in _DOCS_POOLS]
+    if docs_only:
+        # Inverse of names_only: run ONLY the docs pools (generate_docs,
+        # review_docs, refine_docs) on already name-accepted names — so a
+        # budget-capped docs rotation spends purely on documentation, not on
+        # name compose/review.
+        specs = [s for s in specs if s.name in _DOCS_POOLS]
 
     # ── Flush filtering ──────────────────────────────────────────────
     # Flush mode drains existing work without generating new names.
@@ -585,6 +592,7 @@ async def run_sn_pools(
     display: Any | None = None,
     scope_run_id: str | None = None,
     names_only: bool = False,
+    docs_only: bool = False,
     flush: bool = False,
     skip_review: bool = False,
 ) -> RunSummary:
@@ -807,8 +815,11 @@ async def run_sn_pools(
                 scope_run_id[:8],
             )
             _domains = domains
-        elif flush:
-            logger.info("run_sn_pools: flush mode — skipping auto-seed")
+        elif flush or docs_only:
+            logger.info(
+                "run_sn_pools: %s mode — skipping auto-seed",
+                "flush" if flush else "docs-only",
+            )
             _domains = domains
         else:
             # Merge only_domain into domains tuple.
@@ -898,6 +909,7 @@ async def run_sn_pools(
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
             names_only=names_only,
+            docs_only=docs_only,
             flush=flush,
             skip_review=skip_review,
         )

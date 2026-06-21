@@ -442,6 +442,7 @@ def _run_sn_cmd(
     skip_generate: bool = False,
     skip_review: bool = False,
     names_only: bool = False,
+    docs_only: bool = False,
     flush: bool = False,
     source: str = "dd",
     override_edits: list[str] | None = None,
@@ -645,6 +646,7 @@ def _run_sn_cmd(
             display=display,
             scope_run_id=scope_run_id,
             names_only=names_only,
+            docs_only=docs_only,
             flush=flush,
             skip_review=skip_review,
         )
@@ -1161,6 +1163,17 @@ def _auto_sync_grammar(*, quiet: bool = False) -> None:
     ),
 )
 @click.option(
+    "--docs-only",
+    "docs_only",
+    is_flag=True,
+    default=False,
+    help=(
+        "Run ONLY the docs pools (generate_docs, review_docs, refine_docs) on "
+        "already name-accepted names; skip name compose/review and auto-seeding. "
+        "Use for budget-capped docs rotations."
+    ),
+)
+@click.option(
     "--flush",
     is_flag=True,
     default=False,
@@ -1287,6 +1300,7 @@ def sn_run(
     review_docs_backlog_cap: int,
     skip_review: bool,
     names_only: bool,
+    docs_only: bool,
     flush: bool,
     only_phase: str | None,
     override_edits: tuple[str, ...],
@@ -1377,6 +1391,8 @@ def sn_run(
     # ── Validate --flush constraints ──────────────────────────────────
     if flush and flat_focus:
         raise click.UsageError("--flush and --focus are mutually exclusive")
+    if docs_only and names_only:
+        raise click.UsageError("--docs-only and --names-only are mutually exclusive")
 
     # ── --reset-only: execute reset then exit (all source types) ──────
     if reset_only:
@@ -1520,6 +1536,7 @@ def sn_run(
             skip_generate=skip_generate_from_only,
             skip_review=skip_review,
             names_only=names_only,
+            docs_only=docs_only,
             source=source,
             override_edits=_override_edits,
             only=only_phase,
@@ -1552,6 +1569,7 @@ def sn_run(
             skip_generate=skip_generate_from_only,
             skip_review=skip_review,
             names_only=names_only,
+            docs_only=docs_only,
             flush=flush,
             source=source,
             override_edits=_override_edits,
