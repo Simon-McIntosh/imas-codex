@@ -81,6 +81,31 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
         RETURN count(*) AS n
         """,
     ),
+    (
+        # Terminal-classify compose sources that have exhausted their claim
+        # budget.  A source whose batch repeatedly fails (LLM omits it, the
+        # batch errors, or its candidate is grammar-rejected) returns to
+        # ``status='extracted'`` and is re-claimed forever — each claim bumps
+        # ``attempt_count`` (claim_generate_name_batch) but nothing ever
+        # transitions it out of the claimable pool, so ``total_processed`` stays
+        # flat and the run wedges on the residue (full-DD build 2026-06-20).
+        # Marking it ``failed`` here (counter-agnostic: ``failed`` is not
+        # ``extracted``, so every pending/idle counter drops it) lets the idle
+        # watchdog exit cleanly instead of the stall-guard.  Revived by
+        # ``--reset-to extracted`` (clears attempt_count) once compose improves.
+        "compose_attempt_cap",
+        """
+        MATCH (s:StandardNameSource)
+        WHERE s.status = 'extracted'
+          AND coalesce(s.attempt_count, 0) >= $max_compose_attempts
+        SET s.status     = 'failed',
+            s.failed_at  = datetime(),
+            s.last_error = 'compose claim-attempt cap reached',
+            s.claim_token = null,
+            s.claimed_at  = null
+        RETURN count(*) AS n
+        """,
+    ),
 ]
 
 
@@ -103,10 +128,16 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
         ``{"name_refining": n, "docs_refining": n, "stale_token_sn": n,
         "stale_token_source": n}``
     """
+    from imas_codex.standard_names.graph_ops import _MAX_COMPOSE_CLAIM_ATTEMPTS
+
     counts: dict[str, int] = {}
     with GraphClient() as gc:
         for label, cypher in _SWEEP_QUERIES:
-            rows = gc.query(cypher, timeout_s=timeout_s)
+            rows = gc.query(
+                cypher,
+                timeout_s=timeout_s,
+                max_compose_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
+            )
             counts[label] = rows[0]["n"] if rows else 0
     return counts
 
