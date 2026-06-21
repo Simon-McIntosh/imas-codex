@@ -48,6 +48,7 @@ def _compose(
     *,
     base_kind: str = "quantity",
     qualifiers: list[str] | None = None,
+    operator_coordinate: str | None = None,
 ) -> str:
     seg = GrammarSegments(
         base_token=base_token,
@@ -55,6 +56,7 @@ def _compose(
         qualifiers=qualifiers or [],
         operator_token=operator_token,
         operator_kind=operator_kind,
+        operator_coordinate=operator_coordinate,
     )
     return seg.compose_name()
 
@@ -208,10 +210,38 @@ def _registered_prefix_operators() -> list[str]:
     )
 
 
+def _coord_indexed_prefix_operators() -> set[str]:
+    from imas_standard_names import get_grammar_context
+
+    ops = get_grammar_context()["grammar"]["vocabularies"]["operators"]
+    return {
+        tok
+        for tok, meta in ops.items()
+        if meta.get("indexed") and meta.get("kind") == "unary_prefix"
+    }
+
+
 @pytest.mark.parametrize("op", _registered_prefix_operators())
 def test_every_prefix_operator_round_trips(op) -> None:
-    """compose_name() for any registered unary_prefix op must round-trip."""
-    produced = _compose("temperature", op, "unary_prefix", qualifiers=["electron"])
+    """compose_name() for any registered unary_prefix op must round-trip.
+
+    Coordinate-indexed prefix operators (``derivative_with_respect_to``) bind a
+    coordinate via ``operator_coordinate``; the bare form is intentionally
+    rejected (it would drop the index), so they are tested with a registered
+    coordinate carrier.
+    """
+    coord = (
+        "normalized_poloidal_flux_coordinate"
+        if op in _coord_indexed_prefix_operators()
+        else None
+    )
+    produced = _compose(
+        "temperature",
+        op,
+        "unary_prefix",
+        qualifiers=["electron"],
+        operator_coordinate=coord,
+    )
     assert _public_round_trips(produced), (
         f"{op}: compose_name produced {produced!r}, which is not canonical "
         f"(public parse->compose does not return it unchanged)"

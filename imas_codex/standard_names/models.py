@@ -54,6 +54,32 @@ def _operator_registry_kinds() -> dict[str, str]:
 
 
 @functools.cache
+def _coord_indexed_operator_tokens() -> frozenset[str]:
+    """Operator tokens that bind a *coordinate* index.
+
+    These require ``operator_coordinate`` to be set; emitting one without the
+    coordinate drops it and mints a malformed name
+    (``derivative_with_respect_to_of_volume``). The coordinate-indexed operators
+    are the ``indexed`` *prefix* operators (``derivative_with_respect_to``);
+    indexed *postfix* operators (``bessel_0``/``bessel_1``/``fourier_coefficient``)
+    are order/mode-indexed and carry their index in the token itself, so they do
+    NOT use ``operator_coordinate``. Pulled from the live registry so a new
+    coordinate-indexed operator is picked up without a code change.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+    except ImportError:  # pragma: no cover - ISN always present in this repo
+        return frozenset()
+    ctx = get_grammar_context()
+    ops = ctx.get("grammar", {}).get("vocabularies", {}).get("operators", {})
+    return frozenset(
+        token
+        for token, meta in ops.items()
+        if meta.get("indexed") and meta.get("kind") == "unary_prefix"
+    )
+
+
+@functools.cache
 def _projection_axis_tokens() -> dict[str, frozenset[str]]:
     """Registered component/coordinate axis tokens, keyed by projection shape.
 
@@ -154,6 +180,22 @@ class GrammarSegments(BaseModel):
     operator_kind: str | None = Field(
         default=None,
         description="Operator position: 'unary_prefix', 'unary_postfix', or 'binary'",
+    )
+
+    operator_coordinate: str | None = Field(
+        default=None,
+        description=(
+            "Bound coordinate index of an INDEXED operator. Set ONLY with an "
+            "indexed operator_token: for 'derivative_with_respect_to' this is the "
+            "coordinate the derivative is taken against, as a registered "
+            "coordinate carrier (e.g. 'poloidal_magnetic_flux_coordinate', "
+            "'toroidal_flux_coordinate', 'normalized_poloidal_flux_coordinate', "
+            "'radial_coordinate'). Example: dVolume/dpsi → base_token='volume', "
+            "operator_token='derivative_with_respect_to', "
+            "operator_coordinate='poloidal_magnetic_flux_coordinate' → "
+            "derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_volume. "
+            "Null for non-indexed operators."
+        ),
     )
 
     secondary_base: str | None = Field(
@@ -329,6 +371,37 @@ class GrammarSegments(BaseModel):
             )
         return self
 
+    @model_validator(mode="after")
+    def _validate_operator_coordinate(self) -> GrammarSegments:
+        """Coordinate-index consistency for indexed operators.
+
+        A coordinate-indexed operator (``derivative_with_respect_to``) needs
+        ``operator_coordinate``; without it the coordinate is silently dropped
+        and a malformed ``derivative_with_respect_to_of_<base>`` is minted.
+        Conversely, ``operator_coordinate`` only makes sense with such an
+        operator.
+        """
+        coord_indexed = _coord_indexed_operator_tokens()
+        if self.operator_coordinate and self.operator_token is None:
+            raise ValueError(
+                "operator_coordinate requires an (indexed) operator_token."
+            )
+        # Only enforce the requires-coordinate rule when the registry actually
+        # knows the operator is coord-indexed (avoids false positives if the
+        # registry is unavailable).
+        if (
+            coord_indexed
+            and self.operator_token in coord_indexed
+            and not self.operator_coordinate
+        ):
+            raise ValueError(
+                f"operator '{self.operator_token}' is coordinate-indexed and "
+                f"requires operator_coordinate (e.g. "
+                f"'poloidal_magnetic_flux_coordinate'). Emitting it without the "
+                f"coordinate drops the index and mints a malformed name."
+            )
+        return self
+
     def _to_model_dict(self) -> dict[str, Any]:
         """Build the flat ISN ``StandardName`` model dict from segment fields.
 
@@ -383,15 +456,23 @@ class GrammarSegments(BaseModel):
                 _operator_registry_kinds().get(self.operator_token)
                 or self.operator_kind
             )
+            # Indexed operators carry a bound coordinate fused into the token,
+            # exactly as the ISN parser/model layer represents them
+            # (``derivative_with_respect_to_<coord>``). Without this the
+            # coordinate is silently dropped and a malformed
+            # ``derivative_with_respect_to_of_<base>`` is minted.
+            op_token = self.operator_token
+            if self.operator_coordinate:
+                op_token = f"{self.operator_token}_{self.operator_coordinate}"
             if kind == "unary_postfix":
-                d["decomposition"] = self.operator_token
+                d["decomposition"] = op_token
             else:
                 # Prefix transformation. Fuse with the projection axis when the
                 # compound is a registered axis token (ISN represents
                 # normalized_radial as one component, and rejects
                 # transformation + component together).
                 compound = (
-                    f"{self.operator_token}_{projection_axis}"
+                    f"{op_token}_{projection_axis}"
                     if projection_axis is not None
                     else None
                 )
@@ -400,7 +481,7 @@ class GrammarSegments(BaseModel):
                 ):
                     projection_axis = compound
                 else:
-                    d["transformation"] = self.operator_token
+                    d["transformation"] = op_token
 
         # Projection → component / coordinate.
         if projection_axis is not None:
