@@ -204,11 +204,26 @@ its leaf children.
 All cross-references to other SNs MUST use the inline link form `[label](name:bare_id)`,
 woven into the natural prose flow.
 
+**No bare brackets — every `[...]` MUST have a `(name:bare_id)` target (HARD).**
+A square-bracketed token with no following `(name:...)` — e.g. `[area_of_flux_surface]`
+or `[lower_elongation_of_plasma_boundary]` — is FORBIDDEN: Markdown renders it as
+broken literal `[text]`, not a link. Either write the FULL `[label](name:bare_id)`
+link (only to a name that EXISTS — do not invent a related-name to link), or mention
+the quantity as plain prose / `inline code` with NO square brackets. Never wrap a
+name in `[...]` unless you immediately supply its `(name:bare_id)` target.
+
+**No self-links / mismatched targets.** Do NOT link an entry to itself, and the
+`(name:bare_id)` target MUST be the actual bare id of the *referenced* name — never
+a different name dressed with a misleading label (e.g. ❌
+`[toroidal_total_plasma_current](name:toroidal_plasma_current)` when the label and
+target name differ).
+
 **Inline-only rule.** Do NOT append a trailing `See also:`, `See related:`,
 `Related:`, or `Cross-references:` block at the end of `description` or
 `documentation`. Every cross-reference must appear inline, in a sentence that
 explains *why* the link is relevant.
 
+- ❌ BAD (bare bracket, renders broken): `captured by [radial_derivative_of_elongation_of_flux_surface].`
 - ❌ BAD (plain text, no link): `see also electron_temperature`
 - ❌ BAD (trailing block):
   ```
