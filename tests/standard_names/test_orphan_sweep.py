@@ -59,13 +59,19 @@ def _patch_gc(gc: MagicMock):
     )
 
 
-# Four query labels in declaration order.
-_LABELS = ["name_refining", "docs_refining", "stale_token_sn", "stale_token_source"]
+# Five query labels in declaration order.
+_LABELS = [
+    "name_refining",
+    "docs_refining",
+    "stale_token_sn",
+    "stale_token_source",
+    "compose_attempt_cap",
+]
 
 
 def _zero_results() -> list[list[dict]]:
-    """Four queries all returning 0."""
-    return [[{"n": 0}]] * 4
+    """Five queries all returning 0."""
+    return [[{"n": 0}]] * 5
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +86,7 @@ def test_revert_stuck_refining_name():
         [{"n": 0}],  # docs_refining
         [{"n": 0}],  # stale_token_sn
         [{"n": 0}],  # stale_token_source
+        [{"n": 0}],  # compose_attempt_cap
     ]
     gc = _make_gc(results)
     with _patch_gc(gc):
@@ -108,6 +115,7 @@ def test_revert_stuck_refining_docs():
         [{"n": 3}],  # docs_refining
         [{"n": 0}],  # stale_token_sn
         [{"n": 0}],  # stale_token_source
+        [{"n": 0}],  # compose_attempt_cap
     ]
     gc = _make_gc(results)
     with _patch_gc(gc):
@@ -129,8 +137,8 @@ def test_no_revert_within_timeout():
         counts = _orphan_sweep_tick(timeout_s=300)
 
     assert all(v == 0 for v in counts.values()), counts
-    # All four queries must still have been called.
-    assert gc.query.call_count == 4
+    # All five queries must still have been called.
+    assert gc.query.call_count == 5
 
 
 # ---------------------------------------------------------------------------
@@ -165,6 +173,7 @@ def test_stale_token_cleared_non_refining():
         [{"n": 0}],  # docs_refining
         [{"n": 5}],  # stale_token_sn  — 5 stale non-refining tokens cleared
         [{"n": 1}],  # stale_token_source
+        [{"n": 0}],  # compose_attempt_cap
     ]
     gc = _make_gc(results)
     with _patch_gc(gc):
@@ -245,6 +254,7 @@ def test_concurrent_safe():
             [{"n": 0}],
             [{"n": 0}],
             [{"n": 0}],
+            [{"n": 0}],  # compose_attempt_cap
         ]
     )
     gc_second = _make_gc(_zero_results())  # second tick: already cleared
@@ -265,7 +275,7 @@ def test_concurrent_safe():
 
 
 def test_tick_returns_all_labels():
-    """_orphan_sweep_tick always returns all four keys regardless of counts."""
+    """_orphan_sweep_tick always returns all five keys regardless of counts."""
     gc = _make_gc(_zero_results())
     with _patch_gc(gc):
         counts = _orphan_sweep_tick(timeout_s=300)
@@ -275,6 +285,7 @@ def test_tick_returns_all_labels():
         "docs_refining",
         "stale_token_sn",
         "stale_token_source",
+        "compose_attempt_cap",
     }
 
 
@@ -284,12 +295,12 @@ def test_tick_returns_all_labels():
 
 
 def test_tick_passes_timeout_to_all_queries():
-    """All four queries receive the timeout_s keyword argument."""
+    """All five queries receive the timeout_s keyword argument."""
     gc = _make_gc(_zero_results())
     with _patch_gc(gc):
         _orphan_sweep_tick(timeout_s=42)
 
-    assert gc.query.call_count == 4
+    assert gc.query.call_count == 5
     for c in gc.query.call_args_list:
         # timeout_s is passed as a keyword argument to gc.query.
         assert c.kwargs.get("timeout_s") == 42, (
