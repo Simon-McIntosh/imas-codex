@@ -355,10 +355,15 @@ def query_pipeline_buckets(
         )
         c = r_c[0]["cnt"] if r_c else 0
 
-        # Bucket D: name accepted, docs not yet drafted
+        # Bucket D: name accepted AND name-reviewed, docs not yet drafted.
+        # Mirrors the claim_generate_docs_batch hard gate — a name must carry a
+        # real name-review score (reviewer_score_name) before docs are eligible,
+        # so derived parents auto-accepted without review are excluded from the
+        # generate_docs backlog until REVIEW_NAME has scored them.
         r_d = gc.query(
             "MATCH (sn:StandardName) "
             "WHERE sn.name_stage = 'accepted' "
+            "AND sn.reviewer_score_name IS NOT NULL "
             "AND (sn.docs_stage IS NULL OR sn.docs_stage = 'pending') "
             "RETURN count(*) AS cnt"
         )
@@ -9633,6 +9638,12 @@ def claim_generate_docs_batch(
     where = (
         "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # HARD GATE: docs require a real name-review score. A name only earns
+        # ``reviewer_score_name`` by passing REVIEW_NAME (RD-quorum). Derived
+        # parents auto-accepted by the admission gate carry no such score, so
+        # they are held out of docs generation until they have been reviewed —
+        # never spend docs effort on a name whose form has not been vetted.
+        " AND sn.reviewer_score_name IS NOT NULL"
     )
 
     items = _claim_sn_atomic(
