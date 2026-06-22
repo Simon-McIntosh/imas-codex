@@ -304,13 +304,19 @@ def run_publish(
         # the graph is the real corruption signal.)
         if export_scope == "full":
             expected = _fetch_expected_domains()
-            if expected is not None and not domains_included.issubset(expected):
-                report.errors.append(
-                    f"Full-scope domain mismatch: manifest has domains "
-                    f"not present in graph: "
-                    f"{sorted(domains_included - expected)}"
-                )
-                return report
+            if expected is not None:
+                # 'unscoped' is the synthetic export bucket for accepted names
+                # that carry no physics_domain — it is never a graph domain, so
+                # it is not corruption. Exempt it; only a REAL domain present in
+                # the manifest but absent from the graph signals corruption.
+                unexpected = domains_included - expected - {"unscoped"}
+                if unexpected:
+                    report.errors.append(
+                        f"Full-scope domain mismatch: manifest has domains "
+                        f"not present in graph: "
+                        f"{sorted(unexpected)}"
+                    )
+                    return report
 
         # ISNC working tree clean check (excluding our own lock file).
         try:
