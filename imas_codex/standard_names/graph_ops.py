@@ -1849,10 +1849,26 @@ def _materialize_derived_parent_rows(
         child_cocos = {c["cocos"] for c in child_data if c.get("cocos")}
         cocos = next(iter(child_cocos)) if len(child_cocos) == 1 else None
 
-        child_domains = {
+        # Inherit the children's physics domain(s). A parent whose children
+        # span MULTIPLE domains (e.g. torque across transport + mhd) must still
+        # be scoped — pick the primary (most-frequent child domain, ties broken
+        # alphabetically for determinism) and record the full provenance set in
+        # source_domains. Leaving it None would export the parent as 'unscoped'.
+        from collections import Counter
+
+        child_domain_list = [
             c["physics_domain"] for c in child_data if c.get("physics_domain")
-        }
-        physics_domain = next(iter(child_domains)) if len(child_domains) == 1 else None
+        ]
+        if child_domain_list:
+            _domain_counts = Counter(child_domain_list)
+            _top = max(_domain_counts.values())
+            physics_domain = sorted(d for d, n in _domain_counts.items() if n == _top)[
+                0
+            ]
+            source_domains = sorted(set(child_domain_list))
+        else:
+            physics_domain = None
+            source_domains = []
 
         grammar_fields = _parse_parent_grammar(parent_id)
 
@@ -1873,6 +1889,7 @@ def _materialize_derived_parent_rows(
             "unit": unit,
             "cocos_transformation_type": cocos,
             "physics_domain": physics_domain,
+            "source_domains": source_domains,
             "kind": kind,
             "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
             "is_geometric_coordinate": is_geometric,
@@ -1912,6 +1929,10 @@ def _materialize_derived_parent_rows(
                              parent.cocos_transformation_type),
                 parent.physics_domain =
                     coalesce($physics_domain, parent.physics_domain),
+                parent.source_domains = CASE
+                    WHEN $source_domains IS NOT NULL AND size($source_domains) > 0
+                    THEN $source_domains ELSE parent.source_domains
+                END,
                 parent.description = CASE
                     WHEN trim(coalesce(parent.description, '')) = ''
                     THEN $description
