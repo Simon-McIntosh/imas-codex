@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-22">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 </head>
 <body>
   <main class="plan-doc">
@@ -793,9 +793,9 @@ Done-when
   3. uv run pytest tests/standard_names/ green.
   4. followup written + this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-snph-026" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-22" data-recommends-skill="/reckon-ship sn-pipeline-hardening f-snph-026" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snph-026" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-22" data-recommends-skill="/reckon-ship sn-pipeline-hardening f-snph-026" data-resolved-at="2026-06-22T09:13:07+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Route derived parents through REVIEW_NAME (Phase 4) so they earn a name-review score before docs</h4>
-    <div class="r-fu-body">Docs generation is now hard-gated on reviewer_score_name IS NOT NULL (commit 316fba72): a name must pass REVIEW_NAME (RD-quorum) before any docs effort. This closed a real leak — derived parents (origin='derived') are auto-accepted straight to name_stage='accepted' by the admission gate (_materialize_derived_parent_rows graph_ops.py:1887, seed_parent_sources, normalize_derived_parent_lifecycle) WITHOUT a name-review, so ~152 finalized + ~197 in-flight docs had been generated on never-name-reviewed parents; all 349 were reverted to docs_stage='pending' and the 158 remaining finalized docs are now 100% on name-reviewed names. CONSEQUENCE: the 348 auto-accepted derived parents can no longer get docs at all until they earn a review score. To document them (the user's decision: 'review them, then doc'), implement the deferred Phase 4 — route origin='derived' parents through REVIEW_NAME with the specificity dimension (the review pipeline already supports a specificity dim for derived parents per AGENTS.md). Work: (1) stop auto-accepting — derived-parent promotion should land them pre-accepted (name_stage routed to review) instead of straight to 'accepted'; (2) remove the `coalesce(sn.origin,'') <> 'derived'` exclusion in claim_review_name_batch (graph_ops.py:7799); (3) ensure derived parents have a real description + embedding before review (they currently carry DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER — the review gate needs description IS NOT NULL + embedding for the semantic_similarity_check); (4) migrate the existing 348 accepted-but-unreviewed derived parents into the review queue. Then derived parents earn a score, pass review, and become docs-eligible under the new gate.</div>
+    <div class="r-fu-body">Docs generation is now hard-gated on reviewer_score_name IS NOT NULL (commit 316fba72): a name must pass REVIEW_NAME (RD-quorum) before any docs effort. This closed a real leak — derived parents (origin='derived') are auto-accepted straight to name_stage='accepted' by the admission gate (_materialize_derived_parent_rows graph_ops.py:1887, seed_parent_sources, normalize_derived_parent_lifecycle) WITHOUT a name-review, so ~152 finalized + ~197 in-flight docs had been generated on never-name-reviewed parents; all 349 were reverted to docs_stage='pending' and the 158 remaining finalized docs are now 100% on name-reviewed names. CONSEQUENCE: the 348 auto-accepted derived parents can no longer get docs at all until they earn a review score. To document them (the user's decision: 'review them, then doc'), implement the deferred Phase 4 — route origin='derived' parents through REVIEW_NAME with the specificity dimension (the review pipeline already supports a specificity dim for derived parents per AGENTS.md). Work: (1) stop auto-accepting — derived-parent promotion should land them pre-accepted (name_stage routed to review) instead of straight to 'accepted'; (2) remove the `coalesce(sn.origin,'') &lt;&gt; 'derived'` exclusion in claim_review_name_batch (graph_ops.py:7799); (3) ensure derived parents have a real description + embedding before review (they currently carry DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER — the review gate needs description IS NOT NULL + embedding for the semantic_similarity_check); (4) migrate the existing 348 accepted-but-unreviewed derived parents into the review queue. Then derived parents earn a score, pass review, and become docs-eligible under the new gate.</div>
     <pre class="r-fu-prompt">Project: imas-codex
 Plan: sn-pipeline-hardening
 Section: f-snph-026
@@ -821,6 +821,35 @@ Done-when
   4. Existing 348 accepted-but-unreviewed derived parents migrated into the review queue (with description+embedding present).
   5. uv run pytest tests/standard_names/ green.
   6. followup written + this followup resolved.</pre>
+    <p class="r-fu-outcome">Review-routing core landed (commit 8416dd7a). claim_review_name_batch no longer excludes origin='derived' (excludes the deterministic placeholder instead); _materialize_derived_parent_rows promotion is review-aware (accepted only with reviewer_score_name, else 'drafted' when review-ready). Migrated 349 review-ready derived parents accepted->drafted (now in REVIEW_NAME). Full SN suite green; 2 old-policy tests updated. Docs gate (316fba72) verified: 0 unreviewed names docs-eligible in practice. Remaining: 289 placeholder-description derived parents are held at 'accepted' (blocked from docs) until enrichment fills a real description -> see f-snph-027.</p>
+    </article>
+<article class="r-fu" data-id="f-snph-027" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-22" data-recommends-skill="/reckon-ship sn-pipeline-hardening f-snph-027" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Enrich placeholder-description derived parents so they too route through review</h4>
+    <div class="r-fu-body">After f-snph-026, derived parents flow drafted->review->accepted(scored)->docs, but only the 349 that already had a real description + embedding were routed. ~289 derived parents still carry the DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER (no SN pool currently fills derived-parent descriptions), so they are held at name_stage='accepted', blocked from docs by the name-review gate, and cannot enter review (the review claim excludes the placeholder). They need a description-generation + embedding step so they become review-ready, then the review-aware promotion routes them to 'drafted'. Work: add/confirm an enrichment path that gives derived parents a real description (grounded on their children/DD structure) + an embedding; on completion they auto-route to review via _materialize_derived_parent_rows. Verify count of placeholder derived parents trends to 0. Until then these ~289 parents are correctly held (no wasted docs), so this is non-urgent but needed for full derived-parent coverage.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: f-snph-027
+Tier: opus
+
+Context
+  Phase-4 review routing landed (8416dd7a): derived parents are reviewed before docs. But ~289 derived parents carry only the DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER and no SN pool fills derived-parent descriptions, so they are held at accepted (blocked from docs by the name-review gate) and cannot enter review (claim excludes the placeholder description). Give them a real description + embedding so the review-aware promotion routes them to &#x27;drafted&#x27;.
+
+State to read
+  GET /plan/imas-codex/sn-pipeline-hardening
+  imas_codex/standard_names/graph_ops.py (_materialize_derived_parent_rows promotion ~1887, claim_review_name_batch ~7768, DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER)
+  imas_codex/standard_names/defaults.py (placeholder constant)
+  how the ~349 already-real-description derived parents got their descriptions (provenance)
+
+Locked decisions to honour
+  name-review is a hard docs gate (reviewer_score_name IS NOT NULL)
+  derived parents must be documented (review them, then doc)
+
+Done-when
+  1. A description-generation + embedding path gives placeholder derived parents a real, grounded description.
+  2. Enriched derived parents auto-route to &#x27;drafted&#x27; via the review-aware promotion and are picked up by REVIEW_NAME.
+  3. Count of placeholder-description derived parents trends to 0.
+  4. uv run pytest tests/standard_names/ green.
+  5. followup written + this followup resolved.</pre>
     </article>
 </section>
 
