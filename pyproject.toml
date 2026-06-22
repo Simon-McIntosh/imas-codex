@@ -347,9 +347,11 @@ max-concurrency = 256
 # canonical_form recovery, stacking rejection) + L6 retry + the paid review
 # quorum absorb its ~8% invalid-name rate. gpt-5.5 (previous, retained for
 # switch-back): model="openrouter/openai/gpt-5.5", reasoning-effort="high".
-model = "hosted_vllm/deepseek-v4-flash"
-api-base = "http://98dci4-gpu-0003:18800/v1"
-api-key-env = "AMBIX_API_KEY"
+# Local DSv4 vLLM compose serve retired 2026-06-22 (names ~fully generated;
+# 2x H200 freed). Compose/escalation now route the SAME model via OpenRouter.
+# Switch-back to local: model="hosted_vllm/deepseek-v4-flash" with
+# api-base="http://98dci4-gpu-0003:18800/v1", api-key-env="AMBIX_API_KEY".
+model = "openrouter/deepseek/deepseek-v4-flash"
 batch-size = 25
 # DeepSeek V4 thinking mode via vLLM chat_template_kwargs
 # {"thinking": true, "reasoning_effort": <level>}.
@@ -694,7 +696,7 @@ evidence-token-cap-escalation = 800
 # Note: Anthropic's structured-output API rejects schemas with ``oneOf``
 # (``FanoutPlan`` is a discriminated union over ``fn_id``); Gemini and
 # OpenAI accept it cleanly, vLLM/DeepSeek with outlines is also fine.
-proposer-model = "hosted_vllm/deepseek-v4-flash"
+proposer-model = "openrouter/deepseek/deepseek-v4-flash"
 proposer-temperature = 0.1
 # DeepSeek V4 thinking mode for the local vLLM proposer. "high" not "max":
 # max is ~2.5x slower and unreliable on the local server (see [sn-compose]
