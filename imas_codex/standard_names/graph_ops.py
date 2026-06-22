@@ -1889,7 +1889,19 @@ def _materialize_derived_parent_rows(
         gc.query(
             """
             MATCH (parent:StandardName {id: $parent_id})
-            SET parent.name_stage = 'accepted',
+            SET parent.name_stage = CASE
+                    // Already name-reviewed → stays accepted (idempotent).
+                    WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
+                    // Unreviewed but review-ready (real description + embedding)
+                    // → route through REVIEW_NAME before it can earn docs.
+                    WHEN trim(coalesce(parent.description, '')) <> ''
+                         AND parent.description <> $description
+                         AND parent.embedding IS NOT NULL THEN 'drafted'
+                    // Unreviewed with only the placeholder description → hold at
+                    // accepted; the docs gate (reviewer_score_name IS NOT NULL)
+                    // keeps it out of docs until enrichment + review fill it in.
+                    ELSE 'accepted'
+                END,
                 parent.docs_stage = coalesce(parent.docs_stage, 'pending'),
                 parent.validation_status = coalesce(parent.validation_status, 'valid'),
                 parent.origin = 'derived',
@@ -7787,27 +7799,32 @@ def claim_review_name_batch(
     ``unit``, ``tags``, ``physics_domain``, ``chain_length``,
     ``claim_token``.
     """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
     where = (
         "sn.name_stage = 'drafted'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # Gate: require description embedding before review so the
-        # semantic_similarity_check in the review worker can run.
+        # Gate: require a real description before review so the
+        # semantic_similarity_check in the review worker can run. Exclude the
+        # deterministic-parent placeholder — a derived parent still carrying it
+        # has no real description to review and must wait for enrichment.
         " AND sn.description IS NOT NULL"
-        # Derived parents (the redesign's new value; legacy
-        # Derived parents auto-accept on the name axis under current
-        # policy — they are written straight to name_stage='accepted'
-        # by seed_parent_sources and never legitimately appear at
-        # 'drafted'. Belt-and-suspenders filter: if any does end up
-        # here (drifted data), exclude it from review_name. Phase 4
-        # will route origin='derived' through REVIEW_NAME with the
-        # specificity dimension when budget is available.
-        " AND coalesce(sn.origin, '') <> 'derived'"
+        " AND sn.description <> $parent_desc_placeholder"
+        # Derived parents now flow through REVIEW_NAME (Phase 4): they earn a
+        # real reviewer_score_name before becoming docs-eligible, so they are
+        # NO LONGER excluded here. The review-aware promotion in
+        # _materialize_derived_parent_rows lands an unreviewed parent at
+        # 'drafted' (only once it has a real description), and it is then scored
+        # like any other name.
     )
+    query_params: dict[str, Any] = {
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    }
     if facility is not None:
         where += " AND sn.facility = $facility"
-        query_params: dict[str, Any] = {"facility": facility}
-    else:
-        query_params = {}
+        query_params["facility"] = facility
     items = _claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,

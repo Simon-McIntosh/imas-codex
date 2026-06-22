@@ -252,12 +252,14 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
     )
 
 
-def test_seed_parent_sources_auto_accepts_with_derived_origin():
-    """Parents auto-accept on the name axis (``name_stage='accepted'``)
-    and are stamped ``origin='derived'``. The quality bar is the
-    docs-axis review, not the name-axis — the name is structurally
-    derived from REVIEW_NAME-validated children and has no alternative
-    to refine to.
+def test_seed_parent_sources_routes_derived_through_review():
+    """Derived parents are stamped ``origin='derived'`` and promoted with a
+    review-aware ``name_stage``: an already-reviewed parent stays ``accepted``,
+    an unreviewed but review-ready parent (real description + embedding) is
+    routed to ``drafted`` so REVIEW_NAME scores it before it can earn docs, and
+    a parent carrying only the placeholder description is held at ``accepted``
+    (the docs gate keeps it out of docs until enrichment + review fill it in).
+    Docs are never spent on a name whose form has not been vetted.
     """
     gc = MagicMock()
     captured_sets: list[str] = []
@@ -291,18 +293,21 @@ def test_seed_parent_sources_auto_accepts_with_derived_origin():
 
     assert seed_parent_sources(gc) == 1
     write_query = next(q for q in captured_sets if "SET parent.name_stage" in q)
-    assert "parent.name_stage = 'accepted'" in write_query, (
-        "Derived parents currently auto-accept on the name axis (no "
-        "Phase 4 review budget yet). The name is structurally derived "
-        "from REVIEW_NAME-validated children and has no alternative to "
-        "refine to; routing it through REVIEW_NAME without the "
-        "specificity dimension produces noise scores."
+    # Review-aware promotion (no blanket auto-accept): reviewed → accepted,
+    # review-ready unreviewed → drafted (enters REVIEW_NAME).
+    assert "parent.reviewer_score_name IS NOT NULL THEN 'accepted'" in write_query, (
+        "A name-reviewed derived parent must stay accepted (idempotent)."
+    )
+    assert "THEN 'drafted'" in write_query, (
+        "An unreviewed, review-ready derived parent must route to 'drafted' so "
+        "REVIEW_NAME scores it before docs — name-review is a hard docs gate."
+    )
+    assert "parent.embedding IS NOT NULL" in write_query, (
+        "Only embedded parents (semantic_similarity_check can run) route to review."
     )
     assert "parent.origin = 'derived'" in write_query, (
-        "Parents must be stamped origin='derived' (the redesign's "
-        "vocabulary — 'deterministic' retired). The semantic-sim gate, "
-        "REFINE_NAME claim, REVIEW_NAME claim, and export Gate C all "
-        "branch on this origin value."
+        "Parents must be stamped origin='derived' — the semantic-sim gate, "
+        "REFINE_NAME claim, and export Gate C branch on this origin value."
     )
 
 
@@ -342,20 +347,25 @@ def test_refine_name_claim_skips_derived_origin():
     )
 
 
-def test_review_name_claim_skips_derived():
-    """The REVIEW_NAME claim must exclude origin='derived' as a
-    belt-and-suspenders defence — these parents auto-accept and should
-    never appear at name_stage='drafted', but drifted data must not
-    get picked up by review_name.
+def test_review_name_claim_includes_review_ready_derived():
+    """The REVIEW_NAME claim no longer excludes origin='derived' — derived
+    parents now flow through REVIEW_NAME (Phase 4) to earn a real
+    ``reviewer_score_name`` before they can become docs-eligible. Instead it
+    gates on a real description: a parent still carrying the deterministic
+    placeholder is held out until enrichment fills a real description.
     """
     import inspect
 
     from imas_codex.standard_names import graph_ops
 
     src = inspect.getsource(graph_ops.claim_review_name_batch)
-    assert "coalesce(sn.origin, '') <> 'derived'" in src, (
-        "claim_review_name_batch must filter out origin='derived' so "
-        "any drifted derived SN at 'drafted' is excluded."
+    assert "coalesce(sn.origin, '') <> 'derived'" not in src, (
+        "claim_review_name_batch must NOT exclude origin='derived' — derived "
+        "parents are reviewed before docs (name-review is a hard docs gate)."
+    )
+    assert "sn.description <> $parent_desc_placeholder" in src, (
+        "claim_review_name_batch must exclude the deterministic-parent "
+        "placeholder description so only review-ready names are scored."
     )
 
 
