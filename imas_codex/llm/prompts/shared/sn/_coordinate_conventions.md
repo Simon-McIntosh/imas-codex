@@ -17,10 +17,10 @@ explicit basis tuple).
 
 2. **Cartesian basis** (used for sensor direction unit vectors, line-of-sight
    points, etc.) is right-handed $(\hat{x}, \hat{y}, \hat{z})$ with
-   $\hat{z} = \hat{Z}$ (vertical) and $\phi = 0$ defined by the IDS or facility
+   $\hat{z} = \hat{Z}$ (vertical) and $\phi = 0$ defined by the facility
    convention.
 
-3. **Outline storage tuples** in IMAS sometimes appear as $(R, Z, \phi)$ — this
+3. **Outline storage tuples** sometimes appear as $(R, Z, \phi)$ — this
    is a tuple of coordinate **values** used for indexing 3-D points, NOT the
    basis-vector ordering. The basis is ALWAYS right-handed
    $(\hat{R}, \hat{\phi}, \hat{Z})$.
@@ -33,7 +33,7 @@ explicit basis tuple).
 
 | ❌ Vague / wrong | ✓ Explicit / correct |
 |---|---|
-| "in the standard cylindrical system" | "in the IMAS cylindrical $(R, \phi, Z)$ frame" |
+| "in the standard cylindrical system" | "in the right-handed cylindrical $(R, \phi, Z)$ frame" |
 | "the cylindrical coordinate system" | "the right-handed cylindrical $(R, \phi, Z)$ system" |
 | "machine cylindrical frame" (alone) | "machine cylindrical frame $(R, \phi, Z)$ where $R$ is major radius and $Z$ is vertical height" |
 | "in cylindrical coordinates $(R, Z, \phi)$" (claiming basis ordering) | "in the cylindrical $(R, \phi, Z)$ frame; outlines may be stored as 3-tuples $(R, Z, \phi)$" |
@@ -47,6 +47,13 @@ explicit basis tuple).
   `validity_domain`, and `constraints`.
 - Do NOT use the word "standard" to qualify a coordinate system unless you
   immediately follow it with the explicit tuple and a brief definition.
+- NEVER attribute the coordinate frame (or any convention) to a project,
+  data model, or storage format — do NOT write "IMAS", "DD", "Data
+  Dictionary", "IDS", or any project name as a qualifier (e.g. ✗ "the IMAS
+  cylindrical frame", ✗ "the DD coordinate system"). Standard names are a
+  standalone, convention-neutral semantic model: the frame is simply "the
+  right-handed cylindrical $(R, \phi, Z)$ frame". Source provenance (DD
+  paths) is tracked externally via graph edges, never named in the prose.
 
 ## COCOS Convention — Prose Rules
 
