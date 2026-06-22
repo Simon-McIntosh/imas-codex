@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-22">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 </head>
 <body>
   <main class="plan-doc">
@@ -792,6 +792,35 @@ Done-when
   2. A test asserts bare-bracket count stays 0 across a simulated late-write rotation.
   3. uv run pytest tests/standard_names/ green.
   4. followup written + this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-snph-026" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-22" data-recommends-skill="/reckon-ship sn-pipeline-hardening f-snph-026" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Route derived parents through REVIEW_NAME (Phase 4) so they earn a name-review score before docs</h4>
+    <div class="r-fu-body">Docs generation is now hard-gated on reviewer_score_name IS NOT NULL (commit 316fba72): a name must pass REVIEW_NAME (RD-quorum) before any docs effort. This closed a real leak — derived parents (origin='derived') are auto-accepted straight to name_stage='accepted' by the admission gate (_materialize_derived_parent_rows graph_ops.py:1887, seed_parent_sources, normalize_derived_parent_lifecycle) WITHOUT a name-review, so ~152 finalized + ~197 in-flight docs had been generated on never-name-reviewed parents; all 349 were reverted to docs_stage='pending' and the 158 remaining finalized docs are now 100% on name-reviewed names. CONSEQUENCE: the 348 auto-accepted derived parents can no longer get docs at all until they earn a review score. To document them (the user's decision: 'review them, then doc'), implement the deferred Phase 4 — route origin='derived' parents through REVIEW_NAME with the specificity dimension (the review pipeline already supports a specificity dim for derived parents per AGENTS.md). Work: (1) stop auto-accepting — derived-parent promotion should land them pre-accepted (name_stage routed to review) instead of straight to 'accepted'; (2) remove the `coalesce(sn.origin,'') <> 'derived'` exclusion in claim_review_name_batch (graph_ops.py:7799); (3) ensure derived parents have a real description + embedding before review (they currently carry DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER — the review gate needs description IS NOT NULL + embedding for the semantic_similarity_check); (4) migrate the existing 348 accepted-but-unreviewed derived parents into the review queue. Then derived parents earn a score, pass review, and become docs-eligible under the new gate.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-pipeline-hardening
+Section: f-snph-026
+Tier: opus
+
+Context
+  Docs are now hard-gated on reviewer_score_name IS NOT NULL (316fba72). Derived parents (origin=&#x27;derived&#x27;) are auto-accepted without name-review, so they are now permanently held out of docs. Implement the deferred Phase 4: route derived parents through REVIEW_NAME so they earn a real name score, then become docs-eligible. The review pipeline already supports a specificity dimension for derived parents.
+
+State to read
+  GET /plan/imas-codex/sn-pipeline-hardening
+  imas_codex/standard_names/parents.py (admission gate)
+  imas_codex/standard_names/graph_ops.py (_materialize_derived_parent_rows ~1866-1930, seed_parent_sources ~1989, normalize_derived_parent_lifecycle ~2055, claim_review_name_batch ~7764 incl. origin&lt;&gt;&#x27;derived&#x27; exclusion at ~7799, claim_generate_docs_batch ~9609 gate)
+  imas_codex/standard_names/review/pipeline.py (specificity dimension for derived parents)
+
+Locked decisions to honour
+  name-review is a HARD GATE before docs (reviewer_score_name IS NOT NULL) — keep
+  derived parents must be documented (user: &#x27;review them, then doc&#x27;) — do not leave them undocumented
+
+Done-when
+  1. Derived parents flow enrichment-&gt;embedding-&gt;REVIEW_NAME (specificity dim) and only reach name_stage=&#x27;accepted&#x27; with a reviewer_score_name once reviewed.
+  2. Auto-accept-to-&#x27;accepted&#x27; removed from the derived-parent promotion path.
+  3. claim_review_name_batch no longer excludes origin=&#x27;derived&#x27;.
+  4. Existing 348 accepted-but-unreviewed derived parents migrated into the review queue (with description+embedding present).
+  5. uv run pytest tests/standard_names/ green.
+  6. followup written + this followup resolved.</pre>
     </article>
 </section>
 
