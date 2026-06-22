@@ -8111,6 +8111,11 @@ def claim_review_docs_batch(
     where = (
         "sn.docs_stage = 'drafted'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # HARD GATE (same invariant as generate_docs): a doc may only advance
+        # while its NAME carries a real review score. Blocks a stray pre-gate
+        # drafted doc on a never-name-reviewed name (e.g. an auto-accepted
+        # derived parent) from being reviewed → accepted ungated.
+        " AND sn.reviewer_score_name IS NOT NULL"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -9935,6 +9940,9 @@ def claim_refine_docs_batch(
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # HARD GATE (same invariant as generate_docs/review_docs): only refine
+        # docs whose NAME carries a real review score.
+        " AND sn.reviewer_score_name IS NOT NULL"
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
