@@ -4931,6 +4931,28 @@ _NAME_LINK_RE = re.compile(r"\(name:([^)]+)\)")
 # already-formed ``[label](...)`` links.
 _BARE_DOC_LINK_RE = re.compile(r"(?<!\!)\[([a-z][a-z0-9_]{3,})\](?!\()")
 
+# When the LLM emits LaTeX with single backslashes inside its JSON output
+# (e.g. ``$\theta$``, ``$\rho$``, ``\frac``), a lenient JSON decoder turns the
+# ``\t``/``\r``/``\f``/``\b``/``\v`` prefix into the corresponding control
+# character (TAB/CR/FF/BS/VT), corrupting the LaTeX (``$\rho$`` -> ``$<CR>ho$``).
+# These control chars never appear legitimately in physics documentation, so map
+# them back to the backslash form to reconstruct the command; any OTHER control
+# char (NUL, ETX, …) is unrecoverable corruption and is stripped. Newline is kept.
+_JSON_ESCAPE_CTRL = {"\b": r"\b", "\t": r"\t", "\f": r"\f", "\r": r"\r", "\v": r"\v"}
+_STRIP_CTRL_RE = re.compile(r"[\x00-\x08\x0b-\x1f]")  # all control chars except \n
+
+
+def _sanitize_doc_text(text: str | None) -> str | None:
+    """Repair JSON-escape-mangled LaTeX control characters in LLM doc text."""
+    if not text:
+        return text
+    for ctrl, repl in _JSON_ESCAPE_CTRL.items():
+        if ctrl in text:
+            text = text.replace(ctrl, repl)
+    if _STRIP_CTRL_RE.search(text):
+        text = _STRIP_CTRL_RE.sub("", text)
+    return text
+
 
 def _normalize_bare_doc_links(gc: Any) -> int:
     """Convert bare ``[name]`` brackets in documentation to proper links or text.
@@ -9782,6 +9804,9 @@ def persist_generated_docs(
     Returns the new ``docs_stage`` value (``'drafted'``).
     Raises :exc:`ValueError` if token verification fails (no matching node).
     """
+    # Repair any JSON-escape-mangled LaTeX control chars before persisting.
+    description = _sanitize_doc_text(description)
+    documentation = _sanitize_doc_text(documentation)
     with GraphClient() as gc:
         # Extract cross-references from documentation text. Pass the
         # SN id so self-references in prose do not land in the
@@ -10061,6 +10086,9 @@ def persist_refined_docs(
     Returns ``{"docs_chain_length": -1, "revision_id": ""}`` on token/stage
     mismatch (no-op).
     """
+    # Repair any JSON-escape-mangled LaTeX control chars before persisting.
+    description = _sanitize_doc_text(description)
+    documentation = _sanitize_doc_text(documentation)
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
