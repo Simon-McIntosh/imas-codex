@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-coverage-and-hygiene">
   <meta name="plan-title" content="SN coverage and link hygiene: derived-parent enrichment + bare-bracket normalize">
   <meta name="plan-summary" content="Resolve the two outstanding SN backlog issues: enrich the placeholder derived parents so they can flow through review and docs (coverage), and fix the bare-bracket rolling residue at its source so no doc reaches accepted with broken links (hygiene).">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -17,161 +17,70 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-23">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
-    <h2 id="s1">§1 — Derived-parent enrichment (coverage)</h2>
+    <section class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-06-23</span>
+        <h2 id="s1">§1 — Derived-parent enrichment (coverage)</h2>
+      </header>
+      <p class="landed-summary">
+        Shipped a seventh <code>sn run</code> pool, <strong>ENRICH_PARENTS</strong>
+        (commit <code>610dc0ac</code>), that breaks the derived-parent coverage
+        deadlock: a placeholder description excluded a derived parent from
+        REVIEW_NAME, and with no <code>reviewer_score_name</code> it was excluded
+        from generate_docs — neither reviewable nor documentable. The pool claims
+        placeholder parents with live children, synthesizes a real description
+        <strong>generalized over those children</strong> (compose-tier model, no
+        invented physics), embeds it locally, and routes
+        <code>name_stage→'drafted'</code> so it flows review → accept → docs.
+        Childless parents are unscoped and skipped. <strong>Live verify:</strong>
+        87 enriched in $1.70; 2 name-accepted @ 0.93–0.94; 2 docs-drafted with
+        children-consistent documentation. Backlog: <strong>441 enrichable</strong>
+        / 282 childless-skipped (the plan's 612/50 split had drifted). Decision
+        <code>parent-enrich-trigger</code> = <strong>in-loop</strong> (async pool,
+        no new CLI). Full record:
+        <a href="archive/sn-coverage-and-hygiene-landed.html">sn-coverage-and-hygiene landed</a>.
+      </p>
+    </section>
+
+    <section class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-06-23</span>
+        <h2 id="s2">§2 — Bare-bracket normalize at source (hygiene)</h2>
+      </header>
+      <p class="landed-summary">
+        Bare <code>[name]</code> brackets are now normalized <strong>at the docs
+        accept path</strong> (<code>persist_reviewed_docs</code>, scoped to the
+        node) — link if the token is a live SN, else strip — so no accepted doc
+        can carry a broken bracket regardless of when it was written, removing the
+        per-cycle manual <code>resolve_doc_links</code> sweep (§2a, the must-have).
+        The post-drain <code>resolve_doc_links</code> reconcile is retained as a
+        belt-and-suspenders net (§2b). Regression tests in
+        <code>test_bare_doc_link_normalize.py</code> (§2c). Proven on a live
+        generate_docs output carrying a clean
+        <code>[ion_mass_density](name:ion_mass_density)</code> link with zero bare
+        brackets. Decision <code>bare-bracket-fix-site</code> =
+        <strong>accept-path</strong> (did both). Commit <code>610dc0ac</code>.
+      </p>
+    </section>
+
+    <h2 id="s3">§3 — Sequencing &amp; documentation <span class="badge badge-shipped">✓ done</span></h2>
     <p>
-      <strong>Problem.</strong> 723 derived parents carry the placeholder
-      description <code>"(deterministic parent — description pending LLM
-      enrichment)"</code> and are stuck in a deadlock: a placeholder description
-      excludes them from <code>REVIEW_NAME</code> (the claim requires a real,
-      non-placeholder description), and with no review score they are excluded
-      from <code>generate_docs</code> (gated on
-      <code>reviewer_score_name IS NOT NULL</code>). They can neither be reviewed
-      nor documented. 612 of the 723 have domain-bearing children (so they can
-      also inherit a physics domain); 61 have children without domains; 50 have
-      no children. This is the gating item for ~700 names' worth of catalog
-      coverage — including <code>area_at_plasma_boundary</code>, the dog-food
-      subject of <a href="/imas-codex/sn-expert-hints.html">sn-expert-hints</a>.
-    </p>
-
-    <figure>
-      <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" role="img"
-           aria-label="Derived-parent deadlock and the enrichment step that breaks it"
-           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
-        <g font-size="12.5" fill="#111827">
-          <rect x="14" y="50" width="150" height="50" rx="6" fill="#fff" stroke="#b91c1c" stroke-width="1.5"/>
-          <text x="89" y="71" text-anchor="middle" font-weight="600">placeholder desc</text>
-          <text x="89" y="88" text-anchor="middle" font-size="11">723 derived parents</text>
-
-          <rect x="250" y="50" width="150" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
-          <text x="325" y="71" text-anchor="middle" font-weight="600">REVIEW_NAME</text>
-          <text x="325" y="88" text-anchor="middle" font-size="11">excluded (placeholder)</text>
-
-          <rect x="486" y="50" width="150" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
-          <text x="561" y="71" text-anchor="middle" font-weight="600">generate_docs</text>
-          <text x="561" y="88" text-anchor="middle" font-size="11">excluded (no score)</text>
-        </g>
-        <!-- deadlock arrows (red, blocked) -->
-        <g stroke="#b91c1c" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#bx)">
-          <line x1="164" y1="75" x2="248" y2="75"/>
-          <line x1="400" y1="75" x2="484" y2="75"/>
-        </g>
-        <!-- enrichment break -->
-        <path d="M89 50 L89 22 L325 22 L325 48" stroke="#16a34a" stroke-width="1.6" fill="none" marker-end="url(#gn)"/>
-        <text x="207" y="16" text-anchor="middle" font-size="11" fill="#166534">enrich: real description from children &#8594; review-ready</text>
-        <defs>
-          <marker id="bx" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#b91c1c"/></marker>
-          <marker id="gn" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#16a34a"/></marker>
-        </defs>
-      </svg>
-      <figcaption style="font-size:12px;color:#374151">
-        The deadlock (red, dashed = blocked): placeholder description &#8594;
-        excluded from review &#8594; no score &#8594; excluded from docs. A
-        derived-parent enrichment step (green) synthesizes a real description
-        from the parent's children, making it review-ready and breaking the loop.
-      </figcaption>
-    </figure>
-
-    <p>
-      <strong>Design.</strong> Add a derived-parent enrichment step that replaces
-      the placeholder with a real description synthesized from the parent's
-      children (their accepted descriptions + shared DD context + the parent's
-      grammar), then routes the parent into the normal flow:
-    </p>
-    <ul>
-      <li><strong>Why children, not the DD path</strong>: a derived parent is an
-        abstraction over its composed children; the children carry the concrete
-        physics and (for 612/723) the domain. The parent description is best
-        synthesized as the common physical meaning across its children — exactly
-        the grounding the enrichment prompt should receive.</li>
-      <li><strong>Cannot reuse <code>generate_docs</code></strong>: it is gated on
-        <code>reviewer_score_name</code>, which needs a real description first —
-        the deadlock. The enrichment must run <em>before</em> review, as its own
-        step (a small LLM call grounded on children), writing
-        <code>description</code> + <code>embedding</code>.</li>
-      <li><strong>Then route to review</strong>: with a real description +
-        embedding, the parent satisfies the <code>claim_review_name_batch</code>
-        gate (already drops the placeholder); the review-aware promotion
-        (from the Phase-4 work) sends it to <code>drafted</code> &#8594; review
-        &#8594; accepted &#8594; docs-eligible.</li>
-      <li><strong>Domain inheritance</strong>: fold in the existing primary-domain
-        inheritance so the enriched parent is scoped (612 inherit from children;
-        the 50 with no children are legitimately unscoped and excluded).</li>
-    </ul>
-    <p><strong>§1 deliverables:</strong></p>
-    <ul>
-      <li><strong>§1a</strong> — an <code>enrich_derived_parents</code> step:
-        claim placeholder-description derived parents (concurrency-safe), build a
-        children-grounded enrichment prompt, write real
-        <code>description</code> + <code>embedding</code>, inherit primary domain.
-        <em>Done-when:</em> placeholder count trends to 0 for parents with
-        children; the 50 childless ones are skipped, not enriched.</li>
-      <li><strong>§1b</strong> — wire it into the loop (a pre-review pass) or as an
-        on-demand CLI (<code>sn enrich-parents</code>); cost-capped.
-        <em>Done-when:</em> a run enriches a batch and they appear at
-        <code>name_stage='drafted'</code> ready for review.</li>
-      <li><strong>§1c</strong> — verify end-to-end: enriched parents flow review
-        &#8594; accept &#8594; docs and export to the catalog.
-        <em>Done-when:</em> a sample of formerly-placeholder parents reach
-        <code>docs_stage='accepted'</code> with sound, children-consistent docs.</li>
-    </ul>
-
-    <h2 id="s2">§2 — Bare-bracket normalize at source (hygiene)</h2>
-    <p>
-      <strong>Problem (f-snph-025).</strong> The per-rotation
-      <code>_normalize_bare_doc_links</code> pass (inside
-      <code>resolve_doc_links</code>) runs once near the end of
-      <code>run_sn_pools</code>, but docs written by in-flight generate/refine
-      tasks <em>after</em> that pass escape it. The result is a small rolling
-      residue of bare <code>[name]</code> brackets (≈2–50 per $50 cycle, scaling
-      with cycle size) that is only swept by a later settled invocation — and
-      occasionally a doc reaches <code>accepted</code> with a bare bracket
-      (observed: <code>plasma_resistance</code>; the docs carrying
-      <code>docs_updated_at=null</code> are the tell). Throughout the $500 docs
-      campaign this was mitigated by running <code>resolve_doc_links</code>
-      manually each cycle, holding the published graph at 0 — but the source
-      timing gap remains.
-    </p>
-    <p><strong>Design.</strong> Close the gap so no doc can reach
-      <code>accepted</code> with a bare bracket, eliminating the need for the
-      manual per-cycle sweep:</p>
-    <ul>
-      <li><strong>§2a — normalize on the accept path</strong>: invoke
-        <code>_normalize_bare_doc_links</code> (scoped to the node) in the docs
-        accept transition (<code>persist_reviewed_docs</code> when it promotes to
-        <code>accepted</code>), so a doc is normalized at the moment it finalizes
-        regardless of when it was written. <em>Done-when:</em> a doc written late
-        in a rotation and accepted in the same rotation has 0 bare brackets
-        without any post-pass.</li>
-      <li><strong>§2b — guaranteed final reconcile</strong>: ensure
-        <code>resolve_doc_links</code> runs as a true final step after all pool
-        tasks fully drain in <code>run_sn_pools</code> (not mid-drain), as a
-        belt-and-suspenders net for the in-flight window. <em>Done-when:</em> a
-        simulated late-write rotation ends with 0 bare brackets and no manual
-        intervention.</li>
-      <li><strong>§2c — regression test</strong>: a test that accepts a doc whose
-        text contains a bare <code>[name]</code> and asserts it is normalized to
-        a link or stripped before/at acceptance. <em>Done-when:</em> test green;
-        the per-cycle manual <code>resolve_doc_links</code> in the operating loop
-        becomes unnecessary.</li>
-    </ul>
-
-    <h2 id="s3">§3 — Sequencing &amp; documentation</h2>
-    <p>
-      §1 is the higher-value item (≈700 names unblocked + it is the prerequisite
-      for the sn-expert-hints §6 dog-food, which should edit a real-description
-      parent). §2 is independent and small; it can land in parallel. On landing:
-      update <code>AGENTS.md</code> (the enrichment step / <code>sn
-      enrich-parents</code> CLI if added; the SN status lifecycle note that
-      derived parents now flow to docs), <code>docs/architecture/standard-names.md</code>
-      (derived-parent enrichment in the pipeline; the normalize-on-accept
-      guarantee), and the schema reference (auto via <code>build-models</code>).
-      Resolve the legacy followups <code>f-snph-027</code> (this §1) and
-      <code>f-snph-025</code> (this §2) on <code>sn-pipeline-hardening</code> when
-      these land.
+      §1 and §2 landed together in <code>610dc0ac</code> (they touch the same
+      modules). <strong>Docs updated:</strong> <code>AGENTS.md</code> (seven-pool
+      table + ENRICH_PARENTS row + <code>[sn-parent-enrich]</code> config row +
+      derived-parent / bare-bracket tripwires), <code>docs/architecture/standard-names.md</code>
+      (Seven-Pool Run Loop, the "Breaking the coverage deadlock" subsection, the
+      normalize-on-accept note), and the schema reference (auto via
+      <code>build-models</code> — added <code>parent_enriched_at</code> /
+      <code>parent_enrich_model</code> slots). Legacy followups
+      <code>f-snph-027</code> (§1) and <code>f-snph-025</code> (§2) on
+      <code>sn-pipeline-hardening</code> resolved. The 441-parent full drain is the
+      queued operator campaign (<code>f-snch-002</code>).
     </p>
     <p>
       <strong>Successors.</strong> §1 enrichment is the prerequisite for two
@@ -189,29 +98,29 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="parent-enrich-trigger" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="parent-enrich-trigger" data-choice="in-loop" data-by="reckon-implement" data-when="2026-06-23T18:45:36+00:00">
     <p class="r-dec-q">Run derived-parent enrichment as an in-loop pre-review pass, or as an on-demand CLI step?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="in-loop">in-loop (automatic each run; parents self-heal)</button>
+      <button class="r-opt chosen" data-value="in-loop">in-loop (automatic each run; parents self-heal)</button>
       <button class="r-opt" data-value="on-demand-cli">on-demand-cli (explicit sn enrich-parents; controlled cost)</button>
       </p>
-    <p class="r-dec-rat">In-loop keeps the backlog from re-accumulating as new derived parents are created; on-demand gives tighter cost control for a one-off drain of the 723. Possibly both: in-loop with a cost cap.</p>
+    <p class="r-dec-rat">User: in-loop as a proper 7th async pool (enrich_parents) that claims work from the graph and shares the single BudgetManager like every other pool — no fear of cost-capping, no new CLI surface. Shipped in 610dc0ac.</p>
     </div>
-<div class="r-dec" data-key="bare-bracket-fix-site" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="bare-bracket-fix-site" data-choice="accept-path" data-by="reckon-implement" data-when="2026-06-23T18:45:36+00:00">
     <p class="r-dec-q">Primary fix site for the bare-bracket residue?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="accept-path">accept-path (normalize when a doc promotes to accepted)</button>
+      <button class="r-opt chosen" data-value="accept-path">accept-path (normalize when a doc promotes to accepted)</button>
       <button class="r-opt" data-value="final-reconcile">final-reconcile (run resolve_doc_links after full pool drain)</button>
       </p>
-    <p class="r-dec-rat">Accept-path is the tightest guarantee (no accepted doc can carry a bare bracket); the final reconcile is a cheaper belt-and-suspenders. Doing both is ideal; accept-path is the must-have.</p>
+    <p class="r-dec-rat">Did both: §2a accept-path normalize in persist_reviewed_docs (the must-have — no accepted doc can carry a bare bracket) + §2b the post-drain resolve_doc_links reconcile retained as belt-and-suspenders. Shipped in 610dc0ac.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-snch-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-coverage-and-hygiene §1" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snch-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-coverage-and-hygiene §1" data-resolved-at="2026-06-23T18:45:36+00:00" data-resolved-by="reckon-implement">
     <h4 class="r-fu-title">§1 derived-parent enrichment + §2 bare-bracket normalize-at-source</h4>
-    <div class="r-fu-body">Two outstanding SN backlog issues. §1 (coverage, higher value): 723 derived parents are deadlocked — placeholder description excludes them from review, no review score excludes them from docs. Add an enrich_derived_parents step that synthesizes a real description from each parent's children (+ inherits primary domain for the 612 with domain-bearing children), then routes them to review->accept->docs. This unblocks ~700 names and is the prerequisite for the sn-expert-hints §6 dog-food. §2 (hygiene, small, parallel): close the bare-bracket timing gap — normalize on the docs accept path and run resolve_doc_links as a guaranteed final post-drain step, removing the need for the per-cycle manual sweep. Resolve legacy f-snph-027 (§1) and f-snph-025 (§2) on sn-pipeline-hardening when landed.</div>
+    <div class="r-fu-body">Two outstanding SN backlog issues. §1 (coverage, higher value): 723 derived parents are deadlocked — placeholder description excludes them from review, no review score excludes them from docs. Add an enrich_derived_parents step that synthesizes a real description from each parent's children (+ inherits primary domain for the 612 with domain-bearing children), then routes them to review-&gt;accept-&gt;docs. This unblocks ~700 names and is the prerequisite for the sn-expert-hints §6 dog-food. §2 (hygiene, small, parallel): close the bare-bracket timing gap — normalize on the docs accept path and run resolve_doc_links as a guaranteed final post-drain step, removing the need for the per-cycle manual sweep. Resolve legacy f-snph-027 (§1) and f-snph-025 (§2) on sn-pipeline-hardening when landed.</div>
     <pre class="r-fu-prompt">Project: imas-codex
 Plan: sn-coverage-and-hygiene (http://localhost:8765/imas-codex/sn-coverage-and-hygiene.html)
 Section: §1 (derived-parent enrichment) then §2 (bare-bracket normalize)
@@ -237,6 +146,34 @@ Done-when
   3. §1c sample formerly-placeholder parents reach docs_stage=accepted with children-consistent docs + export.
   4. §2a normalize on the docs accept path; §2b guaranteed final reconcile after pool drain; §2c regression test (accept a bare-bracket doc -&gt; normalized).
   5. uv run pytest tests/standard_names/ green; resolve f-snph-027 + f-snph-025 on sn-pipeline-hardening; followup written + this resolved.</pre>
+    <p class="r-fu-outcome">Shipped in 610dc0ac (full SN suite green). §1: enrich_parents 7th async pool synthesizes children-grounded descriptions for placeholder derived parents and routes them name_stage→drafted. Live verify: 87 enriched in $1.70, 2 name-accepted @0.93–0.94, 2 docs-drafted with children-consistent docs (e.g. hydrogenic_ion_mass_density). Backlog 441 enrichable / 282 childless-skipped (the 612/50 drifted). §2: §2a accept-path normalize + §2b post-drain reconcile + §2c regression tests; proven on a live doc carrying a clean [ion_mass_density](name:ion_mass_density) link. Detailed record: docs/archive/sn-coverage-and-hygiene-landed.html. Legacy f-snph-027/f-snph-025 on sn-pipeline-hardening resolved separately. Remaining: the full 441-parent drain is an operator campaign (see f-snch-002).</p>
+    </article>
+<article class="r-fu" data-id="f-snch-002" data-status="open" data-tier="sonnet" data-written-by="reckon-implement" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-coverage-and-hygiene" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Full drain: enrich + document the 441 placeholder derived parents to accepted + export</h4>
+    <div class="r-fu-body">The enrich_parents pool + accept-path link hygiene are shipped and verified (610dc0ac). Remaining is the operator campaign: drain all 441 enrichable placeholder derived parents through enrich → name-review → accept → docs → docs-review → accepted, then export to the catalog. CAVEAT: --cost-limit is a SOFT cap — verification showed ~1.7× (names) to ~2.7× (docs) overshoot because in-flight batches finish during the grace window (64 review_docs replicas). Budget with 2–3× headroom or lower [sn-pools].review-docs-replicas. Unblocks sn-expert-hints §6, sn-structural-repair, sn-family-harmonization.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-coverage-and-hygiene (http://localhost:8765/imas-codex/sn-coverage-and-hygiene.html)
+Section: full drain (operator campaign)
+Tier: sonnet
+
+Context
+  The enrich_parents pool (7th sn run pool) and accept-path bare-link normalize shipped + verified in 610dc0ac. 441 placeholder derived parents are enrichable (have ≥1 live child); 282 are childless and correctly skipped. The mechanism is proven through docs generation; this is the operational drain to carry the cohort to docs_stage=accepted + export.
+
+State to read
+  docs/archive/sn-coverage-and-hygiene-landed.html (landed record + verification numbers)
+  imas-codex sn status ; the enrich_parents / review_docs pending counts
+
+How to run (cost-capped rotations, the user&#x27;s directive)
+  Repeated `uv run imas-codex sn run --flush -c &lt;budget&gt; --quiet` rotations (full pipeline; enrich runs under --flush as a producer). Monitor placeholder→0-with-children and docs_stage=accepted climb between rotations via the graph. Mid-pipeline state is durable — each rotation continues the cohort.
+
+Budget caveat (binding)
+  --cost-limit is a SOFT cap: it stops admission but in-flight quorum batches finish during the 60s grace window. Verification overshot 1.7× (names) to 2.7× (docs) with 64 review_docs replicas. Either budget each rotation with 2–3× headroom, or set IMAS_CODEX_SN_POOLS_REVIEW_DOCS_REPLICAS lower for tighter control. Full drain rough order: ~$150–250 of LLM spend across enrich (cheap) + name-review + docs + docs-review.
+
+Done-when
+  1. placeholder-with-children count → 0 (the 441 enriched; childless 282 untouched).
+  2. a representative sample of formerly-placeholder parents at docs_stage=accepted with children-consistent docs.
+  3. `sn release --export-only` (or the normal export leg) emits them to the catalog; spot-check no placeholder description survives export.
+  4. followup written (e.g. confirm sn-expert-hints §6 dog-food can edit a real-description parent) + this resolved.</pre>
     </article>
 </section>
   </main>

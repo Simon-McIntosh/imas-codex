@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-coverage-and-hygiene-landed">
+  <meta name="plan-title" content="SN coverage & hygiene — landed record">
+  <meta name="plan-summary" content="Per-stage landed record: enrich_parents pool breaks the derived-parent coverage deadlock; bare-bracket links normalized at the docs accept path.">
+  <meta name="plan-status" content="archived">
+  <title>SN coverage &amp; hygiene — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN coverage &amp; hygiene — landed record</h1>
+    <p>
+      Detailed record of <a href="/imas-codex/sn-coverage-and-hygiene.html">sn-coverage-and-hygiene</a>
+      §1 (coverage) and §2 (hygiene), landed together in commit
+      <code>610dc0ac</code> on 2026-06-23. Both shipped as a single coherent
+      change to the standard-names pipeline (the two touch the same modules).
+    </p>
+
+    <section>
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-06-23</span>
+        <h2 id="s1">§1 — Derived-parent enrichment (coverage)</h2>
+      </header>
+
+      <p>
+        <strong>The deadlock.</strong> A derived parent (<code>origin='derived'</code>)
+        is materialized with a placeholder description
+        <code>"(deterministic parent — description pending LLM enrichment)"</code>.
+        That placeholder excludes it from <code>REVIEW_NAME</code> (the claim
+        requires a real description for the semantic-similarity check), so it
+        never earns a <code>reviewer_score_name</code>; and
+        <code>claim_generate_docs_batch</code> gates on
+        <code>reviewer_score_name IS NOT NULL</code>, so it never earns docs.
+        The parent is parked at <code>name_stage='accepted'</code> (held),
+        invisible to both axes — neither reviewable nor documentable.
+      </p>
+
+      <p>
+        <strong>The fix — a seventh <code>sn run</code> pool,
+        <code>ENRICH_PARENTS</code>.</strong> An async pool (the user's choice:
+        in-loop, claiming work from the graph, sharing the single
+        <code>BudgetManager</code> like every other pool — no new CLI surface).
+        For each claimed placeholder parent with ≥1 live child it: fetches the
+        parent's children, synthesizes a real description <em>generalized over
+        those children</em> (grounded strictly on them — no invented physics),
+        embeds it locally (free), and routes <code>name_stage→'drafted'</code>
+        so it flows review → accept → docs. Childless derived parents are
+        legitimately unscoped and never claimed. Model:
+        <code>get_model("sn-parent-enrich")</code> (compose-tier deepseek-v4-flash,
+        ~$0.0017/parent; <code>generate_docs</code> rewrites the full long-form
+        documentation downstream).
+      </p>
+
+      <figure>
+        <svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg" role="img"
+             aria-label="Verification funnel: enriched parents flowing through the pipeline"
+             style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+          <g font-size="12" fill="#111827" text-anchor="middle">
+            <rect x="6"   y="55" width="120" height="46" rx="6" fill="#ecfdf5" stroke="#16a34a"/>
+            <text x="66"  y="74" font-weight="600">enriched</text><text x="66" y="92">87</text>
+            <rect x="150" y="55" width="120" height="46" rx="6" fill="#f5f5f7" stroke="#374151"/>
+            <text x="210" y="74" font-weight="600">drafted</text><text x="210" y="92">71</text>
+            <rect x="294" y="55" width="120" height="46" rx="6" fill="#f5f5f7" stroke="#374151"/>
+            <text x="354" y="74" font-weight="600">reviewed</text><text x="354" y="92">14</text>
+            <rect x="438" y="55" width="120" height="46" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+            <text x="498" y="74" font-weight="600">name accepted</text><text x="498" y="92">2 (0.93–0.94)</text>
+            <rect x="582" y="55" width="160" height="46" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+            <text x="662" y="74" font-weight="600">docs drafted</text><text x="662" y="92">2 (children-consistent)</text>
+          </g>
+          <g stroke="#374151" stroke-width="1.4" fill="none" marker-end="url(#a)">
+            <line x1="126" y1="78" x2="148" y2="78"/>
+            <line x1="270" y1="78" x2="292" y2="78"/>
+            <line x1="414" y1="78" x2="436" y2="78"/>
+            <line x1="558" y1="78" x2="580" y2="78"/>
+          </g>
+          <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#374151"/></marker></defs>
+        </svg>
+        <figcaption style="font-size:12px;color:#374151">
+          Live verification (cost-capped rotations, 2026-06-23): a
+          <code>--names-only --flush</code> rotation ($1.70) enriched 87 parents
+          and carried them through REVIEW_NAME to 2 name-accepted at score
+          0.93–0.94; a <code>--docs-only --flush</code> rotation produced
+          children-consistent documentation for 2 parents
+          (e.g. <code>hydrogenic_ion_mass_density</code> defined as the
+          protium/deuterium/tritium subset of total ion mass density). The
+          terminal <code>review_docs→accepted</code> + export is generic shared
+          infrastructure (the parents are queued at <code>docs_drafted</code>)
+          and is the full-drain's remaining mechanical step.
+        </figcaption>
+      </figure>
+
+      <p><strong>Backlog (live, 2026-06-23):</strong> 723 placeholder derived
+        parents — <strong>441 enrichable</strong> (have ≥1 live child),
+        282 childless (correctly skipped). The plan's earlier "612/50" split had
+        drifted as the graph evolved; the design handles whatever the live split
+        is (enrich those with children, skip childless).</p>
+    </section>
+
+    <section>
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-06-23</span>
+        <h2 id="s2">§2 — Bare-bracket normalize at source (hygiene)</h2>
+      </header>
+      <p>
+        <strong>§2a (accept-path, the must-have):</strong> bare <code>[name]</code>
+        brackets are now normalized at the moment a doc promotes to
+        <code>accepted</code> in <code>persist_reviewed_docs</code> — scoped to
+        the single node (no full-catalogue scan), linking the token if it is a
+        live SN else stripping it. No accepted doc can carry a broken bracket
+        regardless of when it was written, eliminating the per-cycle manual
+        <code>resolve_doc_links</code> sweep. <strong>§2b:</strong> the post-drain
+        <code>resolve_doc_links</code> reconcile already runs as the true final
+        step in <code>run_sn_pools</code> — retained as a belt-and-suspenders net
+        for cross-references to names accepted later.
+        <strong>§2c:</strong> regression tests
+        (<code>test_bare_doc_link_normalize.py</code>) assert a doc accepted with
+        a bare <code>[live]</code> is linked and <code>[dead]</code> is stripped,
+        and that the normalize fires only on the <code>accepted</code> transition.
+      </p>
+      <p>
+        <strong>Proven on live content:</strong> a generate_docs output for
+        <code>hydrogenic_ion_mass_density</code> carried a properly-formed
+        <code>[ion_mass_density](name:ion_mass_density)</code> cross-reference
+        with <em>zero</em> bare brackets.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="outcomes">Outcomes</h2>
+      <table>
+        <thead><tr><th>Item</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr><td>§1a enrich_parents pool (claim/persist/worker/prompts)</td><td><span class="badge badge-shipped">shipped</span></td><td><code>610dc0ac</code>; 87 enriched in $1.70</td></tr>
+          <tr><td>§1b in-loop async pool (7th pool, cost-shared, throttled)</td><td><span class="badge badge-shipped">shipped</span></td><td>POOL_WEIGHTS + loop spec + display row</td></tr>
+          <tr><td>§1c enriched parents flow review→accept→docs</td><td><span class="badge badge-shipped">verified (through docs gen)</span></td><td>2 name-accepted @0.93–0.94; 2 docs-drafted, children-consistent</td></tr>
+          <tr><td>§2a normalize on the docs accept path</td><td><span class="badge badge-shipped">shipped</span></td><td><code>persist_reviewed_docs</code> scoped normalize</td></tr>
+          <tr><td>§2b guaranteed final reconcile</td><td><span class="badge badge-shipped">confirmed</span></td><td>post-drain <code>resolve_doc_links</code> in <code>run_sn_pools</code></td></tr>
+          <tr><td>§2c regression test</td><td><span class="badge badge-shipped">shipped</span></td><td><code>test_bare_doc_link_normalize.py</code> (4 tests green)</td></tr>
+          <tr><td>tests/standard_names/ green</td><td><span class="badge badge-shipped">green</span></td><td>full suite exit 0; 6 six→seven-pool assertions updated</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 id="next">What's next</h2>
+      <p>
+        <strong>Full drain (operator campaign, the user's stated target).</strong>
+        The mechanism is shipped and verified; draining all 441 enrichable
+        parents through enrich → name-review → accept → docs → docs-review →
+        accepted → export is a multi-rotation <code>sn run --flush</code> run.
+      </p>
+      <p>
+        <strong>⚠ Budget caveat (pre-existing soft-cap behavior, surfaced during
+        verification):</strong> the <code>--cost-limit</code> stops <em>admission</em>
+        but lets in-flight batches finish during the grace window. With 64
+        review_docs replicas this overshot materially — a $1 names cap spent
+        $1.70 (1.7×) and a $2 docs cap spent $5.37 (2.7×). Budget the full drain
+        with ~2–3× headroom, or lower
+        <code>[sn-pools].review-docs-replicas</code> for tighter control. This is
+        not introduced by this work (docs-only does not even run enrich) — it is
+        the existing budget-watchdog + grace-window characteristic.
+      </p>
+      <p>
+        <strong>Unblocks:</strong>
+        <a href="/imas-codex/sn-expert-hints.html">sn-expert-hints</a> §6 dog-food
+        (edit a real-description parent),
+        <a href="/imas-codex/sn-structural-repair.html">sn-structural-repair</a>, and
+        <a href="/imas-codex/sn-family-harmonization.html">sn-family-harmonization</a>.
+        The 282 childless placeholder parents are candidates for
+        sn-structural-repair's stale-edge cleanup.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
