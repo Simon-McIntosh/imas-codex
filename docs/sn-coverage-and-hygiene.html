@@ -12,7 +12,7 @@
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
-  <meta name="plan-blocks" content="sn-expert-hints">
+  <meta name="plan-blocks" content="sn-expert-hints,sn-structural-repair,sn-family-harmonization">
   <title>SN coverage &amp; hygiene | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -172,6 +172,19 @@
       Resolve the legacy followups <code>f-snph-027</code> (this §1) and
       <code>f-snph-025</code> (this §2) on <code>sn-pipeline-hardening</code> when
       these land.
+    </p>
+    <p>
+      <strong>Successors.</strong> §1 enrichment is the prerequisite for two
+      downstream plans that resolve sibling-name drift flagged by an expert
+      reviewer: <a href="/imas-codex/sn-structural-repair.html">sn-structural-repair</a>
+      (mostly-deterministic ~$0 cleanup — re-derive stale <code>HAS_PARENT</code>
+      edges like the <code>toroidal_mhd_mode_number</code> tangle, backfill 164
+      column-null names, canonicalize 29 names; also consumes §1's
+      <code>source_domains</code> as the cross-domain legitimacy oracle) and
+      <a href="/imas-codex/sn-family-harmonization.html">sn-family-harmonization</a>
+      (a group-aware docs operator over 164 drift-flagged sibling-sets, anchored
+      on §1's enriched parents). Recommended order:
+      <code>§1 → sn-structural-repair → sn-family-harmonization</code>.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
