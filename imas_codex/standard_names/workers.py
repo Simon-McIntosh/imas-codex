@@ -6584,6 +6584,7 @@ MATCH (sn:StandardName {id: $sn_id})
 OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(imas:IMASNode)
 RETURN sn.source_paths AS source_paths,
        sn.cocos_transformation_type AS cocos_label,
+       sn.origin AS origin,
        collect(DISTINCT {
            id: imas.id,
            documentation: coalesce(imas.documentation, ''),
@@ -6591,6 +6592,19 @@ RETURN sn.source_paths AS source_paths,
            alias: imas.alias,
            unit: coalesce(imas.unit, '')
        }) AS dd_nodes
+"""
+
+# Children grounding for a derived-parent docs item. A derived parent is an
+# abstraction over these concrete instances; generate_docs must GENERALISE over
+# them (describe the shared quantity), not over-specialise to any one child.
+_DOCS_GEN_PARENT_CHILDREN_QUERY = """
+MATCH (c:StandardName)-[:HAS_PARENT]->(p:StandardName {id: $sn_id})
+WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+RETURN c.id AS name,
+       c.description AS description,
+       c.unit AS unit,
+       c.physics_domain AS physics_domain
+ORDER BY c.id LIMIT 12
 """
 
 _DOCS_GEN_NEARBY_QUERY = """
@@ -6753,6 +6767,44 @@ def _enrich_for_docs_gen(
             aliases = [n["alias"] for n in dd_nodes if n.get("alias")]
             if aliases:
                 item["dd_aliases"] = aliases
+
+        # ── 1a. Derived-parent children grounding ─────────────────────
+        # A derived parent has no DD source of its own; its concrete physics
+        # lives in its accepted children. Inject them so generate_docs writes a
+        # GENERALISED parent doc (the shared quantity) rather than over-
+        # specialising to one child's component/qualifier (observed defect:
+        # ``perturbed_velocity`` documented as its single ``normalized_parallel``
+        # child). The placeholder description is dropped (null) so only real
+        # child meaning grounds the prompt.
+        if row.get("origin") == "derived":
+            try:
+                from imas_codex.standard_names.defaults import (
+                    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+                )
+
+                kid_rows = list(gc.query(_DOCS_GEN_PARENT_CHILDREN_QUERY, sn_id=sn_id))
+                children = [
+                    {
+                        "name": k["name"],
+                        "description": (
+                            None
+                            if k.get("description")
+                            == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+                            else k.get("description")
+                        ),
+                        "unit": k.get("unit"),
+                        "physics_domain": k.get("physics_domain"),
+                    }
+                    for k in kid_rows
+                ]
+                if children:
+                    item["derived_children"] = children
+            except Exception:
+                logger.debug(
+                    "_enrich_for_docs_gen: derived children fetch failed for %s",
+                    sn_id,
+                    exc_info=True,
+                )
 
         # ── 1b. COCOS sign convention context ─────────────────────────
         cocos_label = row.get("cocos_label")

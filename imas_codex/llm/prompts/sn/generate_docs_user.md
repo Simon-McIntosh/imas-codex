@@ -18,6 +18,27 @@ kind, unit, or any other identity field.
 **Kind:** {{ item.kind or "scalar" }}
 **Physics domain:** {{ item.physics_domain or "—" }}
 
+{% if item.derived_children %}
+## This is a DERIVED PARENT — generalize over its children
+
+`{{ item.name }}` is a structural **parent**: an abstraction over the more
+specific standard names below (its children). These children are the concrete
+instances that carry the real physics and are your **primary grounding** (this
+quantity has no Data Dictionary source of its own).
+
+{% for c in item.derived_children %}- `{{ c.name }}`{% if c.unit %} [{{ c.unit }}]{% endif %}{% if c.physics_domain %} ({{ c.physics_domain }}){% endif %}{% if c.description %} — {{ c.description }}{% endif %}
+{% endfor %}
+
+Write the description and documentation for the **general quantity these
+children share** — the common physical meaning. Do **NOT** over-specialize to
+any single child's component, axis, projection, qualifier, normalization, or
+region (e.g. for a parent `perturbed_velocity` do not write the docs of its
+`normalized_parallel_perturbed_velocity` child — describe the perturbed velocity
+in general). Where natural, cross-reference a representative child or two with
+`[label](name:bare_id)`. Ground strictly on what the children attest; do not
+invent physics beyond them.
+{% endif %}
+
 ## Why this name was accepted (reviewer feedback)
 
 {% if item.reviewer_score_name is defined and item.reviewer_score_name is not none %}
