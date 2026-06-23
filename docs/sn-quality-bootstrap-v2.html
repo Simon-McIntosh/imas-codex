@@ -96,7 +96,7 @@
     
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-20260605-bootstrap-evidence" data-status="resolved" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 16:45" data-recommends-skill="/reckon-ship sn-quality-bootstrap-v2" data-resolved-at="2026-06-05T12:13:27+00:00" data-resolved-by="gpt-5.4">
+<article class="r-fu" data-id="f-20260605-bootstrap-evidence" data-status="resolved" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 16:45" data-recommends-skill="/reckon-implement sn-quality-bootstrap-v2" data-resolved-at="2026-06-05T12:13:27+00:00" data-resolved-by="gpt-5.4">
     <h4 class="r-fu-title">Record bounded bootstrap evidence</h4>
     <div class="r-fu-body"><p>The live graph-remediation blocker is gone and the SN graph-quality gate is green again.</p><p>The remaining closure work is to run a fresh bounded rotation, capture a dated review/health summary, and record that evidence without silently resolving the still-open design decisions.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -127,7 +127,7 @@ Done-when
   3. followup written + this followup marked resolved.</pre>
     <p class="r-fu-outcome"><p>The 2026-06-05 clean flush run ended <code>no_eligible_work</code> after <strong>8m 13s</strong> at <strong>$9.7013 / $10.00</strong>, with <strong>54</strong> names enriched, <strong>73</strong> reviewed, and <strong>68</strong> regenerated.</p><p>Docs-accepted coverage rose from <strong>154</strong> to <strong>215</strong>, quarantine remained <strong>5 / 283</strong> (1.8%), and <code>tests/graph/test_sn_graph.py</code> stayed green. The three design decisions remain intentionally open; this resolution closes only the evidence-gathering followup.</p></p>
     </article>
-<article class="r-fu" data-id="f-20260605-bootstrap-cleanup" data-status="resolved" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 18:30" data-recommends-skill="/reckon-ship sn-quality-bootstrap-v2" data-resolved-at="2026-06-05T15:11:25+00:00" data-resolved-by="gpt-5.4">
+<article class="r-fu" data-id="f-20260605-bootstrap-cleanup" data-status="resolved" data-tier="opus" data-written-by="gpt-5.4" data-written-at="2026-06-05 18:30" data-recommends-skill="/reckon-implement sn-quality-bootstrap-v2" data-resolved-at="2026-06-05T15:11:25+00:00" data-resolved-by="gpt-5.4">
     <h4 class="r-fu-title">Record final export cleanup outcome</h4>
     <div class="r-fu-body"><p>The remaining hard blockers were live-graph drift: invented secondary boundary/contour names, legacy accepted derived parents, and one final invalid catalog-only node.</p><p>Record the final cleanup outcome and the remaining advisory tail without reopening the now-locked design decisions.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex

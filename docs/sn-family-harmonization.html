@@ -374,7 +374,7 @@ WHERE size(kids) >= 2 RETURN parent, opk, kids</pre>
 
     <section data-reckon="followups" id="followups" class="r-followups">
       <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-snfh-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-ship sn-family-harmonization §1" data-resolved-at="" data-resolved-by="">
+      <article class="r-fu" data-id="f-snfh-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-family-harmonization §1" data-resolved-at="" data-resolved-by="">
         <h4 class="r-fu-title">§1 — drift detection + sn harmonize --report (ships now, ungated)</h4>
         <div class="r-fu-body">Build the deterministic drift metric and the read-only <code>sn harmonize --report</code>. This is the foundation for the whole operator and is NOT gated on sn-coverage §1 enrichment (it reads existing docs). Validate the worklist reproduces 164 sets and flags the mode_number / density_at_locus / diffusivity families. §3 (the LLM harmonization) is gated on §1 enrichment landing first; queue it as a successor followup.</div>
         <pre class="r-fu-prompt">Project: imas-codex

@@ -76,7 +76,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-20260609-quantity-mislabel" data-status="open" data-tier="sonnet" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-ship sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260609-quantity-mislabel" data-status="open" data-tier="sonnet" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-implement sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Clean up quantity-class false positives surfaced by the node-category audit</h4>
     <div class="r-fu-body"><p>The node-category audit surfaced a tail of false positives inside the <code>quantity</code> class (paths classified as quantity that are not SN-eligible measurands). Left as a deferred cleanup ticket at plan close.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -85,7 +85,7 @@ Plan: sn-extraction-prompt-overhaul
 Task: Re-run the node-category false-negative/false-positive audit (research/standard-names/node-category-audit) against the current DD graph and identify quantity-class nodes that should be reclassified out of SN eligibility. Fix the classifier or the data; record before/after counts. Do not widen SN_SOURCE_CATEGORIES (locked: retain quantity+geometry).
 Done-when: misclassified quantity nodes reclassified, counts recorded, followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-20260609-variantc-revisit" data-status="open" data-tier="opus" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-ship sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260609-variantc-revisit" data-status="open" data-tier="opus" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-implement sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Revisit tool-calling compose variant C when compose_worker next changes materially</h4>
     <div class="r-fu-body"><p>Phase 3 locked Variant A (rich static prompt) because B and C did not clear the cost gate under the measured baseline. The plan explicitly flags re-evaluating Variant C (tool-calling hybrid) when <code>compose_worker</code> is next materially changed, because the production cache block shifts the cost picture.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
