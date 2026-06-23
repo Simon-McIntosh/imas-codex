@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-coverage-and-hygiene">
+  <meta name="plan-title" content="SN coverage and link hygiene: derived-parent enrichment + bare-bracket normalize">
+  <meta name="plan-summary" content="Resolve the two outstanding SN backlog issues: enrich the placeholder derived parents so they can flow through review and docs (coverage), and fix the bare-bracket rolling residue at its source so no doc reaches accepted with broken links (hygiene).">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-blocks" content="sn-expert-hints">
+  <title>SN coverage &amp; hygiene | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-06-23">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Derived-parent enrichment (coverage)</h2>
+    <p>
+      <strong>Problem.</strong> 723 derived parents carry the placeholder
+      description <code>"(deterministic parent — description pending LLM
+      enrichment)"</code> and are stuck in a deadlock: a placeholder description
+      excludes them from <code>REVIEW_NAME</code> (the claim requires a real,
+      non-placeholder description), and with no review score they are excluded
+      from <code>generate_docs</code> (gated on
+      <code>reviewer_score_name IS NOT NULL</code>). They can neither be reviewed
+      nor documented. 612 of the 723 have domain-bearing children (so they can
+      also inherit a physics domain); 61 have children without domains; 50 have
+      no children. This is the gating item for ~700 names' worth of catalog
+      coverage — including <code>area_at_plasma_boundary</code>, the dog-food
+      subject of <a href="/imas-codex/sn-expert-hints.html">sn-expert-hints</a>.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Derived-parent deadlock and the enrichment step that breaks it"
+           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+        <g font-size="12.5" fill="#111827">
+          <rect x="14" y="50" width="150" height="50" rx="6" fill="#fff" stroke="#b91c1c" stroke-width="1.5"/>
+          <text x="89" y="71" text-anchor="middle" font-weight="600">placeholder desc</text>
+          <text x="89" y="88" text-anchor="middle" font-size="11">723 derived parents</text>
+
+          <rect x="250" y="50" width="150" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
+          <text x="325" y="71" text-anchor="middle" font-weight="600">REVIEW_NAME</text>
+          <text x="325" y="88" text-anchor="middle" font-size="11">excluded (placeholder)</text>
+
+          <rect x="486" y="50" width="150" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
+          <text x="561" y="71" text-anchor="middle" font-weight="600">generate_docs</text>
+          <text x="561" y="88" text-anchor="middle" font-size="11">excluded (no score)</text>
+        </g>
+        <!-- deadlock arrows (red, blocked) -->
+        <g stroke="#b91c1c" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#bx)">
+          <line x1="164" y1="75" x2="248" y2="75"/>
+          <line x1="400" y1="75" x2="484" y2="75"/>
+        </g>
+        <!-- enrichment break -->
+        <path d="M89 50 L89 22 L325 22 L325 48" stroke="#16a34a" stroke-width="1.6" fill="none" marker-end="url(#gn)"/>
+        <text x="207" y="16" text-anchor="middle" font-size="11" fill="#166534">enrich: real description from children &#8594; review-ready</text>
+        <defs>
+          <marker id="bx" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#b91c1c"/></marker>
+          <marker id="gn" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#16a34a"/></marker>
+        </defs>
+      </svg>
+      <figcaption style="font-size:12px;color:#374151">
+        The deadlock (red, dashed = blocked): placeholder description &#8594;
+        excluded from review &#8594; no score &#8594; excluded from docs. A
+        derived-parent enrichment step (green) synthesizes a real description
+        from the parent's children, making it review-ready and breaking the loop.
+      </figcaption>
+    </figure>
+
+    <p>
+      <strong>Design.</strong> Add a derived-parent enrichment step that replaces
+      the placeholder with a real description synthesized from the parent's
+      children (their accepted descriptions + shared DD context + the parent's
+      grammar), then routes the parent into the normal flow:
+    </p>
+    <ul>
+      <li><strong>Why children, not the DD path</strong>: a derived parent is an
+        abstraction over its composed children; the children carry the concrete
+        physics and (for 612/723) the domain. The parent description is best
+        synthesized as the common physical meaning across its children — exactly
+        the grounding the enrichment prompt should receive.</li>
+      <li><strong>Cannot reuse <code>generate_docs</code></strong>: it is gated on
+        <code>reviewer_score_name</code>, which needs a real description first —
+        the deadlock. The enrichment must run <em>before</em> review, as its own
+        step (a small LLM call grounded on children), writing
+        <code>description</code> + <code>embedding</code>.</li>
+      <li><strong>Then route to review</strong>: with a real description +
+        embedding, the parent satisfies the <code>claim_review_name_batch</code>
+        gate (already drops the placeholder); the review-aware promotion
+        (from the Phase-4 work) sends it to <code>drafted</code> &#8594; review
+        &#8594; accepted &#8594; docs-eligible.</li>
+      <li><strong>Domain inheritance</strong>: fold in the existing primary-domain
+        inheritance so the enriched parent is scoped (612 inherit from children;
+        the 50 with no children are legitimately unscoped and excluded).</li>
+    </ul>
+    <p><strong>§1 deliverables:</strong></p>
+    <ul>
+      <li><strong>§1a</strong> — an <code>enrich_derived_parents</code> step:
+        claim placeholder-description derived parents (concurrency-safe), build a
+        children-grounded enrichment prompt, write real
+        <code>description</code> + <code>embedding</code>, inherit primary domain.
+        <em>Done-when:</em> placeholder count trends to 0 for parents with
+        children; the 50 childless ones are skipped, not enriched.</li>
+      <li><strong>§1b</strong> — wire it into the loop (a pre-review pass) or as an
+        on-demand CLI (<code>sn enrich-parents</code>); cost-capped.
+        <em>Done-when:</em> a run enriches a batch and they appear at
+        <code>name_stage='drafted'</code> ready for review.</li>
+      <li><strong>§1c</strong> — verify end-to-end: enriched parents flow review
+        &#8594; accept &#8594; docs and export to the catalog.
+        <em>Done-when:</em> a sample of formerly-placeholder parents reach
+        <code>docs_stage='accepted'</code> with sound, children-consistent docs.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Bare-bracket normalize at source (hygiene)</h2>
+    <p>
+      <strong>Problem (f-snph-025).</strong> The per-rotation
+      <code>_normalize_bare_doc_links</code> pass (inside
+      <code>resolve_doc_links</code>) runs once near the end of
+      <code>run_sn_pools</code>, but docs written by in-flight generate/refine
+      tasks <em>after</em> that pass escape it. The result is a small rolling
+      residue of bare <code>[name]</code> brackets (≈2–50 per $50 cycle, scaling
+      with cycle size) that is only swept by a later settled invocation — and
+      occasionally a doc reaches <code>accepted</code> with a bare bracket
+      (observed: <code>plasma_resistance</code>; the docs carrying
+      <code>docs_updated_at=null</code> are the tell). Throughout the $500 docs
+      campaign this was mitigated by running <code>resolve_doc_links</code>
+      manually each cycle, holding the published graph at 0 — but the source
+      timing gap remains.
+    </p>
+    <p><strong>Design.</strong> Close the gap so no doc can reach
+      <code>accepted</code> with a bare bracket, eliminating the need for the
+      manual per-cycle sweep:</p>
+    <ul>
+      <li><strong>§2a — normalize on the accept path</strong>: invoke
+        <code>_normalize_bare_doc_links</code> (scoped to the node) in the docs
+        accept transition (<code>persist_reviewed_docs</code> when it promotes to
+        <code>accepted</code>), so a doc is normalized at the moment it finalizes
+        regardless of when it was written. <em>Done-when:</em> a doc written late
+        in a rotation and accepted in the same rotation has 0 bare brackets
+        without any post-pass.</li>
+      <li><strong>§2b — guaranteed final reconcile</strong>: ensure
+        <code>resolve_doc_links</code> runs as a true final step after all pool
+        tasks fully drain in <code>run_sn_pools</code> (not mid-drain), as a
+        belt-and-suspenders net for the in-flight window. <em>Done-when:</em> a
+        simulated late-write rotation ends with 0 bare brackets and no manual
+        intervention.</li>
+      <li><strong>§2c — regression test</strong>: a test that accepts a doc whose
+        text contains a bare <code>[name]</code> and asserts it is normalized to
+        a link or stripped before/at acceptance. <em>Done-when:</em> test green;
+        the per-cycle manual <code>resolve_doc_links</code> in the operating loop
+        becomes unnecessary.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Sequencing &amp; documentation</h2>
+    <p>
+      §1 is the higher-value item (≈700 names unblocked + it is the prerequisite
+      for the sn-expert-hints §6 dog-food, which should edit a real-description
+      parent). §2 is independent and small; it can land in parallel. On landing:
+      update <code>AGENTS.md</code> (the enrichment step / <code>sn
+      enrich-parents</code> CLI if added; the SN status lifecycle note that
+      derived parents now flow to docs), <code>docs/architecture/standard-names.md</code>
+      (derived-parent enrichment in the pipeline; the normalize-on-accept
+      guarantee), and the schema reference (auto via <code>build-models</code>).
+      Resolve the legacy followups <code>f-snph-027</code> (this §1) and
+      <code>f-snph-025</code> (this §2) on <code>sn-pipeline-hardening</code> when
+      these land.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="parent-enrich-trigger" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Run derived-parent enrichment as an in-loop pre-review pass, or as an on-demand CLI step?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="in-loop">in-loop (automatic each run; parents self-heal)</button>
+      <button class="r-opt" data-value="on-demand-cli">on-demand-cli (explicit sn enrich-parents; controlled cost)</button>
+      </p>
+    <p class="r-dec-rat">In-loop keeps the backlog from re-accumulating as new derived parents are created; on-demand gives tighter cost control for a one-off drain of the 723. Possibly both: in-loop with a cost cap.</p>
+    </div>
+<div class="r-dec" data-key="bare-bracket-fix-site" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Primary fix site for the bare-bracket residue?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="accept-path">accept-path (normalize when a doc promotes to accepted)</button>
+      <button class="r-opt" data-value="final-reconcile">final-reconcile (run resolve_doc_links after full pool drain)</button>
+      </p>
+    <p class="r-dec-rat">Accept-path is the tightest guarantee (no accepted doc can carry a bare bracket); the final reconcile is a cheaper belt-and-suspenders. Doing both is ideal; accept-path is the must-have.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-snch-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-ship sn-coverage-and-hygiene §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§1 derived-parent enrichment + §2 bare-bracket normalize-at-source</h4>
+    <div class="r-fu-body">Two outstanding SN backlog issues. §1 (coverage, higher value): 723 derived parents are deadlocked — placeholder description excludes them from review, no review score excludes them from docs. Add an enrich_derived_parents step that synthesizes a real description from each parent's children (+ inherits primary domain for the 612 with domain-bearing children), then routes them to review->accept->docs. This unblocks ~700 names and is the prerequisite for the sn-expert-hints §6 dog-food. §2 (hygiene, small, parallel): close the bare-bracket timing gap — normalize on the docs accept path and run resolve_doc_links as a guaranteed final post-drain step, removing the need for the per-cycle manual sweep. Resolve legacy f-snph-027 (§1) and f-snph-025 (§2) on sn-pipeline-hardening when landed.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-coverage-and-hygiene (http://localhost:8765/imas-codex/sn-coverage-and-hygiene.html)
+Section: §1 (derived-parent enrichment) then §2 (bare-bracket normalize)
+Tier: opus
+
+Context
+  §1: 723 derived parents carry the DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER and are deadlocked (placeholder -&gt; excluded from REVIEW_NAME; no score -&gt; excluded from generate_docs). Add a pre-review enrichment step that writes a real description (grounded on the parent&#x27;s children + shared DD context + grammar) + embedding, inherits the primary child domain (612/723 have domain-bearing children; 50 childless are skipped), then routes the parent to drafted-&gt;review-&gt;accept-&gt;docs. Cannot reuse generate_docs (it is review-score-gated -&gt; the deadlock).
+  §2: the per-rotation _normalize_bare_doc_links runs once near the end of run_sn_pools; docs written by in-flight tasks after it escape, leaving a rolling residue and occasionally an accepted doc with a bare bracket. Move normalization to the docs accept path AND run resolve_doc_links as a guaranteed final post-drain step.
+
+State to read
+  imas_codex/standard_names/graph_ops.py (_normalize_bare_doc_links + resolve_doc_links ~4894; claim_review_name_batch ~7768; _materialize_derived_parent_rows ~1866 incl. DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER + domain inheritance; persist_reviewed_docs ~8190)
+  imas_codex/standard_names/parents.py ; loop.py (pool wiring); defaults.py (placeholder constant)
+  imas_codex/standard_names/dd_enrichment.py / enrichment.py (for the children-grounded enrichment prompt pattern)
+
+Scope locks / constraints
+  enrichment grounds on CHILDREN (the concrete instances), not invented physics; faithfulness &gt; richness.
+  never hardcode model strings (get_model); import enums from generated models.
+  the 50 childless derived parents are legitimately unscoped — skip, do not fabricate.
+
+Done-when
+  1. §1a enrich_derived_parents step: placeholder count -&gt; 0 for parents with children; childless skipped.
+  2. §1b wired in-loop (cost-capped) or as sn enrich-parents CLI.
+  3. §1c sample formerly-placeholder parents reach docs_stage=accepted with children-consistent docs + export.
+  4. §2a normalize on the docs accept path; §2b guaranteed final reconcile after pool drain; §2c regression test (accept a bare-bracket doc -&gt; normalized).
+  5. uv run pytest tests/standard_names/ green; resolve f-snph-027 + f-snph-025 on sn-pipeline-hardening; followup written + this resolved.</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>
