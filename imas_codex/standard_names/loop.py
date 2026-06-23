@@ -124,19 +124,19 @@ def _build_pool_specs(
       corresponding ``process_*_batch`` async function, forwarding the
       shared :class:`BudgetManager` and ``stop_event``.
 
-    After construction, backlog throttle wrappers are applied to upstream
-    pools (generate_name, generate_docs, refine_name, refine_docs,
-    enrich_parents) so they pause when their downstream review queues exceed
-    the configured cap.
+    After construction, backlog throttle wrappers are applied to the upstream
+    generate/refine pools (generate_name, generate_docs, refine_name,
+    refine_docs) so they pause when their downstream review queues exceed the
+    configured cap.  ``enrich_parents`` is intentionally NOT throttled.
 
     The ``enrich_parents`` pool drains the *existing* placeholder-derived-parent
-    backlog into ``name_stage='drafted'``, so it is a name-axis producer: it
-    runs under ``names_only`` and ``flush`` (draining existing work, not seeding
-    new), is dropped under ``docs_only`` (it predates the docs axis), and — like
-    other producers — survives ``skip_review`` (the drafted parents simply wait
-    for a later review pass).  These behaviours fall out of the existing
-    ``_DOCS_POOLS`` / flush / skip_review filters below; no special-casing
-    needed.
+    backlog, synthesising a children-grounded description and accepting the
+    parent STRUCTURALLY (``name_stage='accepted'`` with an inherited score —
+    it skips REVIEW_NAME, see ``persist_enriched_parent``).  It is a name-axis
+    producer: it runs under ``names_only`` and ``flush`` (draining existing
+    work, not seeding new), is dropped under ``docs_only``, and survives
+    ``skip_review``.  These behaviours fall out of the existing ``_DOCS_POOLS``
+    / flush / skip_review filters below; no special-casing needed.
     """
     from collections.abc import Awaitable
 
@@ -422,10 +422,14 @@ def _build_pool_specs(
     if not scope_run_id:
         specs_by_name = {s.name: s for s in specs}
 
+        # NB: enrich_parents is NOT throttled. It accepts derived parents
+        # structurally (skips REVIEW_NAME — see persist_enriched_parent), so it
+        # no longer feeds the review_name bottleneck; it is cheap and drains a
+        # finite backlog, and the accepted parents it produces queue durably in
+        # generate_docs-pending (paced by the generate_docs↔review_docs throttle).
         throttle_rules: list[tuple[str, str, int]] = [
             ("generate_name", "review_name", _review_name_cap),
             ("refine_name", "review_name", _review_name_cap),
-            ("enrich_parents", "review_name", _review_name_cap),
             ("generate_docs", "review_docs", _review_docs_cap),
             ("refine_docs", "review_docs", _review_docs_cap),
         ]

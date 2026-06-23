@@ -84,31 +84,9 @@ def _persist_gc(name_stage_returned: str | None):
     return gc
 
 
-def test_persist_routes_to_drafted_when_unscored():
-    import imas_codex.standard_names.graph_ops as g
-
-    gc = _persist_gc("drafted")
-    with patch.object(g, "GraphClient", return_value=gc):
-        stage = g.persist_enriched_parent(
-            sn_id="magnetic_field",
-            claim_token="tok",
-            description="The vector magnetic field.",
-            embedding=[0.1, 0.2, 0.3],
-            model="test/model",
-        )
-    assert stage == "drafted"
-    # The SET must carry the routing CASE and the embedding.
-    set_cypher, set_params = (
-        gc.query.call_args_list[0][0][0],
-        gc.query.call_args_list[0][1],
-    )
-    assert "name_stage = CASE" in set_cypher
-    assert "reviewer_score_name IS NOT NULL" in set_cypher
-    assert set_params["embedding"] == [0.1, 0.2, 0.3]
-
-
-def test_persist_keeps_accepted_when_already_scored():
-    """The CASE keeps an already name-scored parent at accepted (idempotent)."""
+def test_persist_accepts_structurally():
+    """A derived parent skips REVIEW_NAME — accepted directly with an inherited
+    score and the structural-inheritance marker (it is NOT routed to drafted)."""
     import imas_codex.standard_names.graph_ops as g
 
     gc = _persist_gc("accepted")
@@ -117,10 +95,22 @@ def test_persist_keeps_accepted_when_already_scored():
             sn_id="magnetic_field",
             claim_token="tok",
             description="The vector magnetic field.",
-            embedding=[0.1, 0.2],
+            embedding=[0.1, 0.2, 0.3],
             model="test/model",
         )
     assert stage == "accepted"
+    set_cypher, set_params = (
+        gc.query.call_args_list[0][0][0],
+        gc.query.call_args_list[0][1],
+    )
+    # Accepted directly (no review routing); score inherited from children.
+    assert "sn.name_stage = 'accepted'" in set_cypher
+    assert "structural-inheritance" in set_cypher
+    assert "min(c.reviewer_score_name)" in set_cypher
+    # No drafted-routing CASE remains.
+    assert "name_stage = CASE" not in set_cypher
+    assert set_params["embedding"] == [0.1, 0.2, 0.3]
+    assert set_params["structural_score"] == g.DEFAULT_MIN_SCORE
 
 
 def test_persist_noop_when_node_unmatched():
@@ -224,7 +214,7 @@ async def test_worker_enriches_parent_with_children():
         persisted.update(
             sn_id=sn_id, description=description, embedding=embedding, model=model
         )
-        return "drafted"
+        return "accepted"  # derived parents accept structurally (skip review)
 
     with (
         patch(

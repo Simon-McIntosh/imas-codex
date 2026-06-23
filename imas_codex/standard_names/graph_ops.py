@@ -10655,22 +10655,35 @@ def persist_enriched_parent(
     model: str,
     run_id: str | None = None,
 ) -> str:
-    """Persist a synthesised derived-parent description and route to review.
+    """Persist a synthesised derived-parent description and accept structurally.
+
+    A derived parent's NAME is a deterministic grammar peel that already passed
+    the two-clause admission gate, and its DESCRIPTION is a faithful
+    generalisation over its already-RD-quorum-accepted children — so it inherits
+    name validity by construction.  It therefore SKIPS REVIEW_NAME: routing a
+    structurally-fixed abstraction through a name quorum that systematically
+    penalises it for being less specific than its children only sends it to a
+    futile refine→exhaust (measured: ~66% of derived parents scored <0.85,
+    mean 0.778, despite clean grammar).  The description's quality is still
+    gated downstream on the DOCS axis (generate_docs + review_docs).
 
     Single write:
 
     1. Verify the claim (token match OR cleared by the orphan sweep) and that
        the node is still a derived parent.
     2. SET ``description`` + ``embedding`` (+ ``embedded_at``), record the
-       enrichment model/time, and transition ``name_stage`` to ``'drafted'``
-       (so it enters REVIEW_NAME) — unless it already carries a
-       ``reviewer_score_name`` (already accepted), in which case it stays
-       ``'accepted'``.  ``docs_stage`` defaults to ``'pending'``.
+       enrichment model/time, and transition ``name_stage`` directly to
+       ``'accepted'`` with a ``reviewer_score_name`` INHERITED from the parent's
+       accepted children (min — "as valid as its weakest accepted child";
+       falls back to ``DEFAULT_MIN_SCORE`` when no scored children exist) and
+       ``reviewer_model_name='structural-inheritance'`` so the acceptance is
+       auditably distinct from a real LLM review.  ``docs_stage`` defaults to
+       ``'pending'`` so it becomes docs-eligible immediately.
     3. Mirror the description onto the parent's ``StandardNameSource`` so
        consolidation / export see the real text.
 
-    Returns the new ``name_stage`` (``'drafted'`` or ``'accepted'``), or ``''``
-    when the node no longer matched (concurrent winner / not a derived parent).
+    Returns the new ``name_stage`` (``'accepted'``), or ``''`` when the node no
+    longer matched (concurrent winner / not a derived parent).
     """
     description = _sanitize_doc_text(description)
     with GraphClient() as gc:
@@ -10679,6 +10692,9 @@ def persist_enriched_parent(
             MATCH (sn:StandardName {id: $id})
             WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.origin = 'derived'
+            OPTIONAL MATCH (c:StandardName)-[:HAS_PARENT]->(sn)
+            WHERE c.name_stage = 'accepted' AND c.reviewer_score_name IS NOT NULL
+            WITH sn, min(c.reviewer_score_name) AS min_child_score
             SET sn.description        = $description,
                 sn.embedding          = $embedding,
                 sn.embedded_at        = CASE WHEN $embedding IS NULL
@@ -10686,9 +10702,12 @@ def persist_enriched_parent(
                                              ELSE datetime() END,
                 sn.parent_enriched_at = datetime(),
                 sn.parent_enrich_model = $model,
-                sn.name_stage = CASE
-                    WHEN sn.reviewer_score_name IS NOT NULL THEN 'accepted'
-                    ELSE 'drafted' END,
+                // Structural acceptance — skip REVIEW_NAME (see docstring).
+                sn.name_stage = 'accepted',
+                sn.reviewer_score_name = coalesce(
+                    min_child_score, $structural_score),
+                sn.reviewer_model_name = 'structural-inheritance',
+                sn.reviewed_name_at = coalesce(sn.reviewed_name_at, datetime()),
                 sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
                 sn.validation_status = coalesce(sn.validation_status, 'valid'),
                 sn.needs_composition = null,
@@ -10701,6 +10720,7 @@ def persist_enriched_parent(
             description=description,
             embedding=embedding,
             model=model,
+            structural_score=DEFAULT_MIN_SCORE,
         )
         if not rows:
             logger.debug(

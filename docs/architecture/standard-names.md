@@ -40,7 +40,7 @@ state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
 | Pool | Label | Stage gate | Key operation |
 |------|-------|------------|---------------|
 | 1 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates a name; new SN persisted at `name_stage='drafted'`. **Unit injected from DD — never from LLM.** |
-| 2 | `ENRICH_PARENTS` | `origin='derived' AND description=placeholder AND has live child` | LLM synthesizes a real description for a placeholder derived parent by **generalizing over its children**, embeds it locally, routes `name_stage → 'drafted'`. Breaks the derived-parent coverage deadlock (see [Derived / Structural Parents](#derived--structural-parents)). Childless derived parents are legitimately unscoped and skipped. Model: `get_model("sn-parent-enrich")` (compose-tier). |
+| 2 | `ENRICH_PARENTS` | `origin='derived' AND description=placeholder AND has live child` | LLM synthesizes a real description for a placeholder derived parent by **generalizing over its children**, embeds it locally, and **accepts it structurally** (`name_stage → 'accepted'`, score inherited from accepted children — skips REVIEW_NAME). Breaks the derived-parent coverage deadlock (see [Derived / Structural Parents](#derived--structural-parents)). Childless derived parents are legitimately unscoped and skipped. Model: `get_model("sn-parent-enrich")` (compose-tier). |
 | 3 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores the name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents via the admissibility gate; inadmissible accepted parents are deleted by `normalize_derived_parent_lifecycle` at startup. |
 | 4 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | Creates a NEW SN node; predecessor flipped to `superseded`; source edges migrated; `REFINED_FROM` edge added. |
 | 5 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM generates documentation; `docs_stage → 'drafted'`. Cross-pipeline gate: fires only after the name is accepted. |
@@ -362,18 +362,35 @@ with ≥1 live child it:
    on the children's accepted descriptions + names, never invented physics —
    and calls `get_model("sn-parent-enrich")` (compose-tier; `generate_docs`
    rewrites the full long-form documentation downstream),
-3. embeds the synthesized description locally (free) so `REVIEW_NAME`'s
-   semantic-similarity check has an embedding immediately, and
+3. embeds the synthesized description locally (free), and
 4. persists via `persist_enriched_parent`: writes `description` + `embedding`,
-   stamps `parent_enriched_at` / `parent_enrich_model`, and routes
-   `name_stage → 'drafted'` (or keeps `accepted` if it already has a score).
+   stamps `parent_enriched_at` / `parent_enrich_model`, and **accepts the
+   parent structurally** — `name_stage → 'accepted'` with `reviewer_score_name`
+   inherited from its accepted children (the min — "as valid as its weakest
+   accepted child"; falls back to `DEFAULT_MIN_SCORE`) and
+   `reviewer_model_name='structural-inheritance'`.
+
+**Why skip REVIEW_NAME.** A derived parent's name is a deterministic grammar
+peel that already passed the admission gate, and its description generalizes
+over already-RD-quorum-accepted children — so it inherits name validity by
+construction. Routing it through the name quorum is not just wasteful (~$0.27
+each) but actively harmful: the quorum systematically marks a parent down for
+being *less specific than its children* — measured ~66% of derived parents
+scored <0.85 (mean 0.778) despite clean grammar, and a structurally-fixed name
+cannot be improved by refine_name, so each rejection becomes a futile
+refine→exhaust that strands the parent with no docs. Description quality is
+still fully gated on the docs axis (`GENERATE_DOCS` → `REVIEW_DOCS`). The
+`reviewer_model_name='structural-inheritance'` marker keeps these acceptances
+auditably distinct from real LLM reviews; any prior review is preserved in the
+`StandardNameReview` history.
 
 The physics domain was already inherited from the children at materialize time
 (`_materialize_derived_parent_rows`), so enrichment leaves it untouched.
 **Childless derived parents are legitimately unscoped — they are never claimed
-and never fabricated.** The pool is throttled against the `REVIEW_NAME` backlog
-(it feeds that bottleneck) and runs under `--flush` so a cost-capped
-`sn run --flush` cleanly drains the existing backlog.
+and never fabricated.** The pool is **not throttled** (it no longer feeds the
+review_name bottleneck; it is cheap, drains a finite backlog, and the accepted
+parents queue durably in `generate_docs`-pending) and runs under `--flush`, so a
+cost-capped `sn run --flush` cleanly drains the existing backlog.
 
 **`MAGNITUDE_OF` edge:** when the pipeline composes a `magnitude_of_<X>` name
 from a real DD/signal source AND `<X>` is an admitted `kind='vector'` parent,

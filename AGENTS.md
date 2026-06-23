@@ -521,7 +521,7 @@ uv run imas-codex release --final -m '<msg>'
 | Pool | Stage gate | Operation |
 |------|------------|-----------|
 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates name; new SN at `name_stage='drafted'`. **Unit from DD, never LLM.** Runs the EXTRACT→COMPOSE→VALIDATE→CONSOLIDATE→PERSIST sub-pipeline. |
-| `ENRICH_PARENTS` | `origin='derived' AND description=placeholder AND has live child` | LLM synthesizes a real description for a placeholder derived parent by **generalizing over its children**, embeds it locally, routes `name_stage→'drafted'`. Breaks the derived-parent coverage deadlock (placeholder → excluded from review → no score → excluded from docs). Childless derived parents are legitimately unscoped and skipped. Model: `get_model("sn-parent-enrich")` (compose-tier). |
+| `ENRICH_PARENTS` | `origin='derived' AND description=placeholder AND has live child` | LLM synthesizes a real description for a placeholder derived parent by **generalizing over its children**, embeds it locally, and **accepts it structurally** (`name_stage→'accepted'`, `reviewer_score_name` inherited from accepted children, `reviewer_model_name='structural-inheritance'`) — it **skips REVIEW_NAME**: a structurally-fixed abstraction is systematically penalized by the name quorum for being less specific than its children (measured ~66% scored <0.85), so review only sends it to a futile refine→exhaust. Description quality is still gated on the docs axis. Breaks the coverage deadlock (placeholder → excluded from review → no score → excluded from docs). Childless parents are unscoped and skipped. Model: `get_model("sn-parent-enrich")` (compose-tier). |
 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores → `accepted`/`reviewed`/`exhausted`. Derived parents add a `specificity` dim. |
 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | New SN node; predecessor `superseded`; `REFINED_FROM` edge; source edges migrate. |
 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM docs → `docs_stage='drafted'`. Cross-gate: fires only after name accepted. |
@@ -561,8 +561,14 @@ release convergence, not recovery).
   `ENRICH_PARENTS` pool breaks it by synthesizing a children-grounded
   description; it grounds on the parent's **children**, never invented physics.
   Childless derived parents are legitimately unscoped — never fabricate a
-  description for them. Drain the backlog with `sn run --flush` (enrich is a
-  producer that runs under flush; the existing `--cost-limit` caps it).
+  description for them. **Derived parents skip REVIEW_NAME** and are accepted
+  structurally (score inherited from accepted children,
+  `reviewer_model_name='structural-inheritance'`): the name is a deterministic
+  grammar peel and the description generalizes over already-accepted children,
+  so name validity is inherited by construction; the quorum would otherwise
+  reject ~66% for being abstractions. Quality is gated on the docs axis. Drain
+  the backlog with `sn run --flush` (enrich is an unthrottled producer that
+  runs under flush; the existing `--cost-limit` caps it).
 - **Bare-bracket link hygiene is fixed at source:** docs are normalized on the
   REVIEW_DOCS accept path (`persist_reviewed_docs`), so an accepted doc never
   carries a bare `[name]` bracket. The post-drain `resolve_doc_links` reconcile
