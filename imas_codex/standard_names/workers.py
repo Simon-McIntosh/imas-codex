@@ -7916,6 +7916,38 @@ async def process_refine_docs_batch(
         except Exception:
             logger.debug("refine_docs: DD path enrichment failed for %s", sn_id)
 
+        # Parent-aware refine: inject children (origin='derived' only) so the
+        # rewrite GENERALISES over them rather than re-hugging one child — the
+        # parent-aware reviewer dock that routes single-child parents here is
+        # for over-specialisation, which only children-grounding can fix.
+        try:
+            from imas_codex.graph.client import GraphClient as _GCRefKids
+            from imas_codex.standard_names.defaults import (
+                DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER as _PH_REF,
+            )
+
+            with _GCRefKids() as gc:
+                krows = gc.query(
+                    """
+                    MATCH (p:StandardName {id: $sn_id}) WHERE p.origin = 'derived'
+                    MATCH (c:StandardName)-[:HAS_PARENT]->(p)
+                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+                    WITH c ORDER BY c.id
+                    RETURN c.id AS name,
+                           CASE WHEN c.description = $ph THEN null
+                                ELSE c.description END AS description,
+                           c.unit AS unit, c.physics_domain AS physics_domain
+                    LIMIT 12
+                    """,
+                    sn_id=sn_id,
+                    ph=_PH_REF,
+                )
+                kids = [dict(r) for r in krows]
+                if kids:
+                    prompt_context["derived_children"] = kids
+        except Exception:
+            logger.debug("refine_docs: derived children fetch failed for %s", sn_id)
+
         try:
             user_prompt = render_prompt("sn/refine_docs_user", prompt_context)
         except Exception:

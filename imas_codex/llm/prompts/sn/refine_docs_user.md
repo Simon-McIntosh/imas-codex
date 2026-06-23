@@ -32,6 +32,25 @@ addresses the reviewer's concerns.
 _(no linked DD paths)_
 {% endif %}
 
+{% if derived_children %}
+### THIS IS A DERIVED PARENT — generalize over its children when you rewrite
+
+`{{ sn_name }}` is a structural **parent**: an abstraction over the more
+specific child names below (its concrete physics + only DD grounding):
+
+{% for c in derived_children %}- `{{ c.name }}`{% if c.unit %} [{{ c.unit }}]{% endif %}{% if c.physics_domain %} ({{ c.physics_domain }}){% endif %}{% if c.description %} — {{ c.description }}{% endif %}
+{% endfor %}
+
+The reviewer feedback below most likely flags **over-specialization** — docs
+that re-describe a single child instead of the general quantity. Your rewrite
+**must describe the general quantity these children share** and must **NOT**
+narrow to any one child's species, component, axis, projection, qualifier, or
+normalization (e.g. for parent `pressure_at_post_sawtooth_crash` write the
+generic pressure at that state, not its `electron_pressure_*` child). Cross-
+reference a representative child or two with `[label](name:bare_id)`. Ground
+strictly on what the children attest.
+{% endif %}
+
 ---
 
 ## Docs revision history (oldest first; docs chain length so far: {{ docs_chain_length }})
