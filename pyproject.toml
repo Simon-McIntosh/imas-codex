@@ -312,6 +312,20 @@ model = "openrouter/openai/gpt-5.5"
 # low|medium|high. "max" is a vLLM/DeepSeek-only level (see [sn-compose]).
 reasoning-effort = "high"
 
+[tool.imas-codex.sn-parent-enrich]
+# Derived-parent description synthesis. A derived parent (e.g.
+# ``magnetic_field``, ``area_at_plasma_boundary``) abstracts over its accepted
+# HAS_PARENT children; this step writes a real description GENERALISED over
+# those children so the parent leaves the coverage deadlock (placeholder desc
+# → excluded from REVIEW_NAME; no score → excluded from generate_docs) and
+# flows review → accept → docs. It is a concise-description (compose-tier)
+# task, NOT long-form physics prose — generate_docs (sn-docs) rewrites the
+# full documentation downstream — so it routes the cheap/fast compose model.
+# Switch to the docs tier (model="openrouter/anthropic/claude-sonnet-4.6",
+# reasoning-effort="high") if review_name rejects the synthesised descriptions.
+model = "openrouter/deepseek/deepseek-v4-flash"
+reasoning-effort = "medium"
+
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
 # and response_cost. Without it, calls silently route through the proxy,
@@ -484,6 +498,10 @@ refine-name-replicas = 32
 generate-docs-replicas = 32
 review-docs-replicas = 64
 refine-docs-replicas = 32
+# enrich_parents drains a finite placeholder-derived-parent backlog on the
+# cheap compose model and feeds the throttled review_name bottleneck, so a
+# modest replica count is plenty (the catch-all fallback would over-provision).
+enrich-parents-replicas = 16
 
 [tool.imas-codex.sn]
 # Scored-example injection targets: score thresholds for selecting

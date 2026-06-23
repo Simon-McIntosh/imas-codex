@@ -431,9 +431,10 @@ class TestFooterRendering:
         assert "llm:iter (avg 1.2s)" in footer
 
     def test_pool_labels_are_correct(self):
-        """All 6 pool labels use short form that fits LABEL_WIDTH (12)."""
+        """All 7 pool labels use short form that fits LABEL_WIDTH (12)."""
         expected_labels = {
             "DRAFT NAME",
+            "PARENT DESC",
             "REVIEW NAME",
             "REFINE NAME",
             "DRAFT DOCS",
@@ -445,5 +446,5 @@ class TestFooterRendering:
         for label in POOL_LABELS.values():
             assert len(f"  {label}") <= 14, f"Label '{label}' too long for LABEL_WIDTH"
 
-    def test_pool_order_is_six(self):
-        assert len(POOL_ORDER) == 6
+    def test_pool_order_count(self):
+        assert len(POOL_ORDER) == 7

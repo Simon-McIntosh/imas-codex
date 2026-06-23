@@ -125,8 +125,18 @@ def _build_pool_specs(
       shared :class:`BudgetManager` and ``stop_event``.
 
     After construction, backlog throttle wrappers are applied to upstream
-    pools (generate_name, generate_docs, refine_name, refine_docs) so they
-    pause when their downstream review queues exceed the configured cap.
+    pools (generate_name, generate_docs, refine_name, refine_docs,
+    enrich_parents) so they pause when their downstream review queues exceed
+    the configured cap.
+
+    The ``enrich_parents`` pool drains the *existing* placeholder-derived-parent
+    backlog into ``name_stage='drafted'``, so it is a name-axis producer: it
+    runs under ``names_only`` and ``flush`` (draining existing work, not seeding
+    new), is dropped under ``docs_only`` (it predates the docs axis), and — like
+    other producers — survives ``skip_review`` (the drafted parents simply wait
+    for a later review pass).  These behaviours fall out of the existing
+    ``_DOCS_POOLS`` / flush / skip_review filters below; no special-casing
+    needed.
     """
     from collections.abc import Awaitable
 
@@ -135,12 +145,14 @@ def _build_pool_specs(
         REVIEW_NAME_BACKLOG_CAP,
     )
     from imas_codex.standard_names.graph_ops import (
+        claim_enrich_parents_batch,
         claim_generate_docs_batch,
         claim_generate_name_batch,
         claim_refine_docs_batch,
         claim_refine_name_batch,
         claim_review_docs_batch,
         claim_review_name_batch,
+        release_enrich_parents_claims,
         release_generate_docs_claims,
         release_generate_name_claims,
         release_refine_docs_claims,
@@ -150,6 +162,7 @@ def _build_pool_specs(
     )
     from imas_codex.standard_names.pools import PoolSpec
     from imas_codex.standard_names.workers import (
+        process_enrich_parents_batch,
         process_generate_docs_batch,
         process_generate_name_batch,
         process_refine_docs_batch,
@@ -265,6 +278,7 @@ def _build_pool_specs(
     _gen_docs_replicas = get_pool_replicas("generate_docs")
     _review_docs_replicas = get_pool_replicas("review_docs")
     _refine_docs_replicas = get_pool_replicas("refine_docs")
+    _enrich_parents_replicas = get_pool_replicas("enrich_parents")
 
     specs = [
         PoolSpec(
@@ -349,6 +363,19 @@ def _build_pool_specs(
             ),
             replicas=_refine_docs_replicas,
         ),
+        PoolSpec(
+            name="enrich_parents",
+            claim=_make_claim_adapter(
+                claim_enrich_parents_batch,
+                **({"domain": only_domain} if only_domain else {}),
+                **_scope_kwargs,
+            ),
+            process=_make_process_adapter(process_enrich_parents_batch),
+            release=_make_release_adapter(
+                release_enrich_parents_claims, ids_kwarg="sn_ids"
+            ),
+            replicas=_enrich_parents_replicas,
+        ),
     ]
 
     # ── Names-only / docs-only filtering ─────────────────────────────
@@ -398,6 +425,7 @@ def _build_pool_specs(
         throttle_rules: list[tuple[str, str, int]] = [
             ("generate_name", "review_name", _review_name_cap),
             ("refine_name", "review_name", _review_name_cap),
+            ("enrich_parents", "review_name", _review_name_cap),
             ("generate_docs", "review_docs", _review_docs_cap),
             ("refine_docs", "review_docs", _review_docs_cap),
         ]

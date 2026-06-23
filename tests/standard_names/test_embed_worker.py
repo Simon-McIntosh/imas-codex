@@ -192,11 +192,11 @@ def test_display_rows_cover_all_pools():
 
 
 def test_display_rows_count():
-    """4 display rows, 6 internal pools."""
+    """4 display rows, 7 internal pools (enrich_parents folds into GENERATE NAME)."""
     from imas_codex.standard_names.display import DISPLAY_ROWS, POOL_ORDER
 
     assert len(DISPLAY_ROWS) == 4
-    assert len(POOL_ORDER) == 6
+    assert len(POOL_ORDER) == 7
 
 
 def test_pool_weights_sum_to_one():

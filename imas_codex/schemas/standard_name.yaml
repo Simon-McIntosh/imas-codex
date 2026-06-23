@@ -726,6 +726,17 @@ classes:
           ISO 8601 timestamp when generate_docs last wrote documentation
           to this node.
         range: datetime
+      parent_enriched_at:
+        description: >-
+          ISO 8601 timestamp when the enrich_parents pool synthesised a real
+          description for this derived parent (replacing the deterministic
+          placeholder), routing it out of the coverage deadlock into
+          REVIEW_NAME. Null for non-derived names and never-enriched parents.
+        range: datetime
+      parent_enrich_model:
+        description: >-
+          LLM model used by the enrich_parents pool to synthesise this derived
+          parent's description from its children. Null unless enriched.
       review_tier:
         description: >-
           Quality tier from review: outstanding, good, inadequate, poor.

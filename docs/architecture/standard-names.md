@@ -29,9 +29,9 @@ Examples: `electron_temperature`, `toroidal_magnetic_field_at_magnetic_axis`,
 `ion_deuterium_density`. ISN owns the grammar, vocabulary, and validation;
 codex owns the pipeline, evaluation, and graph persistence.
 
-## Six-Pool Run Loop
+## Seven-Pool Run Loop
 
-`sn run` drives a **single concurrent loop of six pools**. Each pool claims
+`sn run` drives a **single concurrent loop of seven pools**. Each pool claims
 eligible work by a stage gate, does one unit of work, and persists a durable
 state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
 (`imas_codex/standard_names/pools.py`); the loop orchestrator is
@@ -40,11 +40,18 @@ state transition. Pools run concurrently, weighted by `POOL_WEIGHTS`
 | Pool | Label | Stage gate | Key operation |
 |------|-------|------------|---------------|
 | 1 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates a name; new SN persisted at `name_stage='drafted'`. **Unit injected from DD — never from LLM.** |
-| 2 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores the name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents via the admissibility gate; inadmissible accepted parents are deleted by `normalize_derived_parent_lifecycle` at startup. |
-| 3 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | Creates a NEW SN node; predecessor flipped to `superseded`; source edges migrated; `REFINED_FROM` edge added. |
-| 4 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM generates documentation; `docs_stage → 'drafted'`. Cross-pipeline gate: fires only after the name is accepted. |
-| 5 | `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores docs; atomic transition → `accepted` / `reviewed` / `exhausted`. |
-| 6 | `REFINE_DOCS` | `docs_stage='reviewed' AND rds<min AND docs_chain_length<cap` | Rewrites docs in-place; prior content snapshotted on a `DocsRevision` node via `DOCS_REVISION_OF`; `docs_stage → 'drafted'`. |
+| 2 | `ENRICH_PARENTS` | `origin='derived' AND description=placeholder AND has live child` | LLM synthesizes a real description for a placeholder derived parent by **generalizing over its children**, embeds it locally, routes `name_stage → 'drafted'`. Breaks the derived-parent coverage deadlock (see [Derived / Structural Parents](#derived--structural-parents)). Childless derived parents are legitimately unscoped and skipped. Model: `get_model("sn-parent-enrich")` (compose-tier). |
+| 3 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores the name; atomic transition → `accepted` (rsn≥min) / `reviewed` / `exhausted`. Also admits `origin='derived'` parents via the admissibility gate; inadmissible accepted parents are deleted by `normalize_derived_parent_lifecycle` at startup. |
+| 4 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | Creates a NEW SN node; predecessor flipped to `superseded`; source edges migrated; `REFINED_FROM` edge added. |
+| 5 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM generates documentation; `docs_stage → 'drafted'`. Cross-pipeline gate: fires only after the name is accepted. |
+| 6 | `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores docs; atomic transition → `accepted` / `reviewed` / `exhausted`. **On promotion to `accepted`, the doc's bare `[name]` brackets are normalized at source** (`_normalize_bare_doc_links` scoped to the node) — link if the target is a live SN, else strip — so no accepted doc carries a broken bracket regardless of when it was written. |
+| 7 | `REFINE_DOCS` | `docs_stage='reviewed' AND rds<min AND docs_chain_length<cap` | Rewrites docs in-place; prior content snapshotted on a `DocsRevision` node via `DOCS_REVISION_OF`; `docs_stage → 'drafted'`. |
+
+`ENRICH_PARENTS` is a name-axis producer: it runs under `--names-only` and
+`--flush` (it drains the *existing* placeholder backlog, not new work), is
+excluded under `--docs-only`, and shares the single `--cost-limit` budget pool.
+Its weight and replica count live alongside the other pools in `POOL_WEIGHTS`
+and `[tool.imas-codex.sn-pools].enrich-parents-replicas`.
 
 **Acceptance always overrides cap.** Even at `chain_length == cap − 1`, a
 passing score wins — there is no forced exhaustion on a good result.
@@ -62,7 +69,7 @@ effective weight by 0.5× so refinement can catch up.
 `orphan_sweep.py`.
 
 **Loop termination.** The loop stops on zero eligible work, an exhausted
-`--cost-limit` (a single shared budget pool across all six pools), or a
+`--cost-limit` (a single shared budget pool across all seven pools), or a
 per-pool admission threshold. On `Ctrl-C` it writes an audit `SNRun` node
 (`cost`, pool counters, `min_score`, `rotation_cap`, `stop_reason`); `sn status`
 surfaces the most recent run.
@@ -74,7 +81,7 @@ modes:
 
 - `--only <phase>` — run a single phase in isolation (e.g. `--only reconcile`
   to mark stale sources without composing).
-- `--focus <path>` — route specific DD paths through the full six-pool loop,
+- `--focus <path>` — route specific DD paths through the full seven-pool loop,
   scoped by a UUID `scope_run_id`. Use for iterative prompt development and
   quality investigation on individual paths without a full rotation. Three
   input forms: trailing positional args (`sn run path1 path2`), quoted
@@ -336,6 +343,38 @@ pass runs on every `sn run` startup to migrate legacy `origin='deterministic'`
 entries. There is no separate `sn parents` CLI — all parent handling is folded
 into `sn run`.
 
+### Breaking the coverage deadlock — `ENRICH_PARENTS`
+
+A freshly materialized derived parent carries the
+`DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER` until a real description is
+written. That placeholder is a **deadlock**: `claim_review_name_batch` excludes
+it (review needs a real description for the semantic-similarity check), so it
+never earns a `reviewer_score_name`; and `claim_generate_docs_batch` gates on
+`reviewer_score_name IS NOT NULL`, so it never earns docs either. The parent is
+parked at `name_stage='accepted'` (held) and is invisible to both axes.
+
+The `ENRICH_PARENTS` pool breaks this loop. For each claimed placeholder parent
+with ≥1 live child it:
+
+1. fetches the parent's live `HAS_PARENT` children (the concrete instances) via
+   `fetch_derived_parent_children`,
+2. renders the `sn/enrich_parent_{system,user}` prompts — which ground strictly
+   on the children's accepted descriptions + names, never invented physics —
+   and calls `get_model("sn-parent-enrich")` (compose-tier; `generate_docs`
+   rewrites the full long-form documentation downstream),
+3. embeds the synthesized description locally (free) so `REVIEW_NAME`'s
+   semantic-similarity check has an embedding immediately, and
+4. persists via `persist_enriched_parent`: writes `description` + `embedding`,
+   stamps `parent_enriched_at` / `parent_enrich_model`, and routes
+   `name_stage → 'drafted'` (or keeps `accepted` if it already has a score).
+
+The physics domain was already inherited from the children at materialize time
+(`_materialize_derived_parent_rows`), so enrichment leaves it untouched.
+**Childless derived parents are legitimately unscoped — they are never claimed
+and never fabricated.** The pool is throttled against the `REVIEW_NAME` backlog
+(it feeds that bottleneck) and runs under `--flush` so a cost-capped
+`sn run --flush` cleanly drains the existing backlog.
+
 **`MAGNITUDE_OF` edge:** when the pipeline composes a `magnitude_of_<X>` name
 from a real DD/signal source AND `<X>` is an admitted `kind='vector'` parent,
 `_emit_magnitude_of_edges` emits `(magnitude_sn)-[:MAGNITUDE_OF]->(vector_sn)`.
@@ -591,7 +630,7 @@ names (catalog-authoritative). `sn clear` has no such guard.
 
 | Command | Purpose | Key options |
 |---------|---------|-------------|
-| `sn run` | Run the six-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted` |
+| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted` |
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--status`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
@@ -657,7 +696,7 @@ into Cypher in all three search branches, so it does not lose results below
 |------|---------|
 | `pools.py` | Pool specs: `POOL_WEIGHTS`, `POOL_NAMES`, `_build_pool_specs`, backlog throttle |
 | `loop.py` | Six-pool loop orchestrator (`run_sn_pools()`) |
-| `workers.py` | Claim/process/persist for all six pools |
+| `workers.py` | Claim/process/persist for all seven pools |
 | `pool_adapter.py` | Routes `--focus` through pool compose; explicit-path seeding |
 | `enrichment.py` | Primary/grouping cluster selection; global (cluster × unit) grouping |
 | `consolidation.py` | Cross-batch dedup, conflict checks, coverage accounting |

@@ -1,8 +1,8 @@
-"""Tests for Phase 8.1 six-pool wiring, backlog throttle, and pending counts.
+"""Tests for the seven-pool wiring, backlog throttle, and pending counts.
 
 Covers:
 
-1. All six pools registered with correct names.
+1. All seven pools registered with correct names (incl. enrich_parents).
 2. No legacy pools (review_names, regen, enrich, compose) remain.
 3. Pool weights sum to 1.0.
 4. Pool ids_kwarg: generate_name uses source_ids, SN-side pools use sn_ids.
@@ -41,16 +41,17 @@ def _build_specs(min_score: float = 0.75) -> list:
 
 
 # =====================================================================
-# 1. All six pools registered
+# 1. All pools registered
 # =====================================================================
 
 
-class TestAllSixPoolsRegistered:
-    def test_all_six_pools_registered(self) -> None:
+class TestAllPoolsRegistered:
+    def test_all_pools_registered(self) -> None:
         specs = _build_specs()
         names = {s.name for s in specs}
         assert names == {
             "generate_name",
+            "enrich_parents",
             "review_name",
             "refine_name",
             "generate_docs",
@@ -58,9 +59,9 @@ class TestAllSixPoolsRegistered:
             "refine_docs",
         }
 
-    def test_pool_count_is_six(self) -> None:
+    def test_pool_count(self) -> None:
         specs = _build_specs()
-        assert len(specs) == 6
+        assert len(specs) == 7
 
 
 # =====================================================================
@@ -481,10 +482,11 @@ class TestPoolStateIncludesPendingCounts:
         for spec in specs:
             mock_state.set_pool_health(spec.name, spec.health)
 
-        assert mock_state.set_pool_health.call_count == 6
+        assert mock_state.set_pool_health.call_count == 7
         called_names = {c[0][0] for c in mock_state.set_pool_health.call_args_list}
         assert called_names == {
             "generate_name",
+            "enrich_parents",
             "review_name",
             "refine_name",
             "generate_docs",

@@ -39,6 +39,7 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 | `[sn-compose]` | SN name composition model, batch sizes, max-concurrency | `get_model("sn-compose")` |
 | `[sn-docs]` | SN documentation generation model | `get_model("sn-docs")` |
 | `[sn-refine]` | SN refine_name + refine_docs tier | `get_model("sn-refine")` |
+| `[sn-parent-enrich]` | Derived-parent description synthesis (enrich_parents pool) | `get_model("sn-parent-enrich")` |
 | `[sn-fanout]` | Structured fan-out (Proposer/Executor/Synthesizer) | — |
 | `[sn-review]` | Shared RD-quorum settings (disagreement threshold, max cycles, active profile) | `get_sn_review_disagreement_threshold()`, `get_sn_review_max_cycles()`, `get_sn_review_active_profile()` |
 | `[sn-review.names]` / `[sn-review.docs]` | Reviewer model chain per axis (1–3 models) | `get_sn_review_names_models()`, `get_sn_review_docs_models()` |
@@ -515,15 +516,16 @@ uv run imas-codex release --final -m '<msg>'
 > (rationale). This section is **orientation + tripwires only** — flags are in
 > `--help`, schema in `agents/schema-reference.md`, live stats in `sn status`.
 
-### Pipeline (six-pool `sn run` loop)
+### Pipeline (seven-pool `sn run` loop)
 
 | Pool | Stage gate | Operation |
 |------|------------|-----------|
 | `GENERATE_NAME` | `StandardNameSource.status=pending` | LLM generates name; new SN at `name_stage='drafted'`. **Unit from DD, never LLM.** Runs the EXTRACT→COMPOSE→VALIDATE→CONSOLIDATE→PERSIST sub-pipeline. |
+| `ENRICH_PARENTS` | `origin='derived' AND description=placeholder AND has live child` | LLM synthesizes a real description for a placeholder derived parent by **generalizing over its children**, embeds it locally, routes `name_stage→'drafted'`. Breaks the derived-parent coverage deadlock (placeholder → excluded from review → no score → excluded from docs). Childless derived parents are legitimately unscoped and skipped. Model: `get_model("sn-parent-enrich")` (compose-tier). |
 | `REVIEW_NAME` | `name_stage='drafted'` | RD-quorum scores → `accepted`/`reviewed`/`exhausted`. Derived parents add a `specificity` dim. |
 | `REFINE_NAME` | `name_stage='reviewed' AND rsn<min AND chain_length<cap` | New SN node; predecessor `superseded`; `REFINED_FROM` edge; source edges migrate. |
 | `GENERATE_DOCS` | `name_stage='accepted' AND docs_stage='pending'` | LLM docs → `docs_stage='drafted'`. Cross-gate: fires only after name accepted. |
-| `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores → `accepted`/`reviewed`/`exhausted`. |
+| `REVIEW_DOCS` | `docs_stage='drafted'` | RD-quorum scores → `accepted`/`reviewed`/`exhausted`. **Accept-path link hygiene:** on promotion to `accepted` the doc's bare `[name]` brackets are normalized at source (link or strip), so no accepted doc carries a broken bracket regardless of when it was written. |
 | `REFINE_DOCS` | `docs_stage='reviewed' AND rds<min AND docs_chain_length<cap` | Rewrites docs in-place; prior snapshot on `DocsRevision` via `DOCS_REVISION_OF`. |
 
 Pools run concurrently weighted by `POOL_WEIGHTS`. **Acceptance overrides cap**
@@ -553,6 +555,19 @@ release convergence, not recovery).
   authoritative) names. `sn clear` has no guard — it wipes everything.
 - **Review never demotes:** a low-scoring `valid` name stays `valid` and routes
   to a refine pool; it is not quarantined.
+- **Derived-parent coverage:** a derived parent (`origin='derived'`) is born
+  with a placeholder description that excludes it from BOTH review (placeholder
+  ≠ real description) and docs (no `reviewer_score_name`) — a deadlock. The
+  `ENRICH_PARENTS` pool breaks it by synthesizing a children-grounded
+  description; it grounds on the parent's **children**, never invented physics.
+  Childless derived parents are legitimately unscoped — never fabricate a
+  description for them. Drain the backlog with `sn run --flush` (enrich is a
+  producer that runs under flush; the existing `--cost-limit` caps it).
+- **Bare-bracket link hygiene is fixed at source:** docs are normalized on the
+  REVIEW_DOCS accept path (`persist_reviewed_docs`), so an accepted doc never
+  carries a bare `[name]` bracket. The post-drain `resolve_doc_links` reconcile
+  remains as a belt-and-suspenders net — the per-cycle manual sweep is no longer
+  needed.
 - **Import boundary (ISN ≥0.8.0rc7):** import only the public surface
   (`get_grammar_context()`, `create_standard_name_entry()`,
   `run_semantic_checks()`, `validate_description()`, `parse_standard_name()` /
@@ -569,7 +584,7 @@ release convergence, not recovery).
 
 ### CLI commands
 
-`sn run` (six-pool loop), `review`, `preview`, `release`, `import`,
+`sn run` (seven-pool loop), `review`, `preview`, `release`, `import`,
 `status`, `coverage`, `clear`, `prune`, `bench`. Run
 `uv run imas-codex sn <cmd> --help` for flags; semantics and the full flag
 matrix are in the architecture doc. Grammar sync is automatic (`sn run`

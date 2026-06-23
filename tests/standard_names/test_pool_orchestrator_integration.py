@@ -219,10 +219,11 @@ class TestPhysicsDomainPassthrough:
         stop = asyncio.Event()
         specs = _build_pool_specs(mgr, stop, min_score=0.6)
 
-        assert len(specs) == 6
+        assert len(specs) == 7
         pool_names = {s.name for s in specs}
         assert pool_names == {
             "generate_name",
+            "enrich_parents",
             "review_name",
             "refine_name",
             "generate_docs",

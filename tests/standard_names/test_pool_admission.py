@@ -619,18 +619,30 @@ class TestFreePoolBypassesSpendFairness:
         # review_docs share (≈0.02) < 0.5 effective → admitted.
         assert mgr.pool_admit("review_docs", POOL_WEIGHTS, active, free_pools=free)
 
-    def test_live_config_marks_generate_name_free(self) -> None:
-        """The free-pool resolver picks up generate_name (local vLLM) from config.
+    def test_live_config_free_pool_resolution_is_consistent(self) -> None:
+        """``free_pools()`` agrees with per-pool ``_pool_is_free`` over live config.
 
-        This ties the admission exemption to the actual model resolution so a
-        config change to a paid compose model would flip the behaviour.
+        The resolver ties the admission exemption to the actual model
+        resolution, so whether any single pool is free depends on the live
+        ``pyproject.toml`` (e.g. compose may route to a local vLLM endpoint OR
+        to a paid OpenRouter model — the live config has flipped between the two
+        and the switch-back is documented). This test therefore asserts the
+        config-robust invariants rather than hardcoding a volatile per-pool
+        verdict:
+
+        * ``free_pools()`` is exactly the set of pools ``_pool_is_free`` marks
+          free (self-consistency of the two entry points), and
+        * review pools route to the OpenRouter RD-quorum chain (paid) in the
+          default profile, so they are never free.
         """
-        from imas_codex.standard_names.pools import _pool_is_free, free_pools
+        from imas_codex.standard_names.pools import (
+            POOL_NAMES,
+            _pool_is_free,
+            free_pools,
+        )
 
         free = free_pools()
-        # generate_name routes to a local hosted_vllm model in this repo's
-        # pyproject.toml, so it must be detected as free.
-        assert "generate_name" in free
-        assert _pool_is_free("generate_name")
+        assert free == {p for p in POOL_NAMES if _pool_is_free(p)}
         # Review pools route to OpenRouter (paid) in the default profile.
         assert "review_name" not in free
+        assert "review_docs" not in free

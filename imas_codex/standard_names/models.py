@@ -1443,3 +1443,29 @@ class GeneratedDocs(BaseModel):
     )
 
     model_config = {"extra": "ignore"}
+
+
+class EnrichedParentDescription(BaseModel):
+    """LLM response model for a single enrich_parents call.
+
+    A derived parent abstracts over its accepted ``HAS_PARENT`` children; this
+    response carries ONLY a concise description GENERALISED over those
+    children — the common physical quantity they share.  It must NOT invent
+    physics beyond what the children attest, and must NOT alter the name, unit,
+    kind, or any identity field (all fixed by the derived parent).  The full
+    long-form documentation is produced later by generate_docs.
+    """
+
+    description: str = Field(
+        ...,
+        min_length=10,
+        max_length=500,
+        description=(
+            "1-2 sentence technical description of the common physical quantity "
+            "the parent's children share — the generalised meaning, not any one "
+            "child's specifics (American spelling, no LaTeX, no markdown links, "
+            "<= 500 chars)."
+        ),
+    )
+
+    model_config = {"extra": "ignore"}

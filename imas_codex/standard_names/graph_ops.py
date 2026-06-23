@@ -4954,33 +4954,71 @@ def _sanitize_doc_text(text: str | None) -> str | None:
     return text
 
 
-def _normalize_bare_doc_links(gc: Any) -> int:
+def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
     """Convert bare ``[name]`` brackets in documentation to proper links or text.
 
     For every StandardName documentation containing ``[``: each bare
     ``[snake_case]`` (no ``(name:...)`` target) becomes ``[snake_case](name:snake_case)``
     when ``snake_case`` is a real StandardName id, else the brackets are stripped
     (leaving the plain word). Idempotent. Returns the number of docs updated.
+
+    When *sn_id* is given the pass is scoped to that single node (the cheap
+    accept-path variant — see :func:`persist_reviewed_docs`): only the tokens
+    present in that one doc are checked for liveness, so no full-catalogue scan
+    is performed.  When *sn_id* is ``None`` (the post-drain reconcile) it scans
+    every doc and resolves token liveness against the whole catalogue.
     """
-    rows = list(
-        gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.documentation IS NOT NULL AND sn.documentation CONTAINS '[' "
-            "RETURN sn.id AS id, sn.documentation AS docs"
+    if sn_id is not None:
+        rows = list(
+            gc.query(
+                "MATCH (sn:StandardName {id: $id}) "
+                "WHERE sn.documentation IS NOT NULL AND sn.documentation CONTAINS '[' "
+                "RETURN sn.id AS id, sn.documentation AS docs",
+                id=sn_id,
+            )
         )
-    )
+    else:
+        rows = list(
+            gc.query(
+                "MATCH (sn:StandardName) "
+                "WHERE sn.documentation IS NOT NULL AND sn.documentation CONTAINS '[' "
+                "RETURN sn.id AS id, sn.documentation AS docs"
+            )
+        )
     if not rows:
         return 0
     # Only link to a NON-dead standard name (drafted/reviewed/accepted); a bare
     # token that is superseded/exhausted or not a name at all → strip brackets.
-    names = {
-        r["id"]
-        for r in gc.query(
-            "MATCH (s:StandardName) "
-            "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
-            "RETURN s.id AS id"
+    if sn_id is not None:
+        # Single-node scope: check liveness only for the bare tokens that
+        # actually appear in this one doc — avoids a full-catalogue scan on
+        # every accept.
+        candidate_tokens = {
+            m.group(1) for r in rows for m in _BARE_DOC_LINK_RE.finditer(r["docs"])
+        }
+        names = (
+            {
+                r["id"]
+                for r in gc.query(
+                    "MATCH (s:StandardName) "
+                    "WHERE s.id IN $toks "
+                    "AND NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+                    "RETURN s.id AS id",
+                    toks=list(candidate_tokens),
+                )
+            }
+            if candidate_tokens
+            else set()
         )
-    }
+    else:
+        names = {
+            r["id"]
+            for r in gc.query(
+                "MATCH (s:StandardName) "
+                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+                "RETURN s.id AS id"
+            )
+        }
 
     def _repl(m: re.Match[str]) -> str:
         tok = m.group(1)
@@ -4999,8 +5037,9 @@ def _normalize_bare_doc_links(gc: Any) -> int:
         )
     if updates:
         logger.info(
-            "resolve_doc_links: normalized bare [name] brackets in %d doc(s)",
+            "resolve_doc_links: normalized bare [name] brackets in %d doc(s)%s",
             len(updates),
+            f" (scoped to {sn_id})" if sn_id else "",
         )
     return len(updates)
 
@@ -8344,6 +8383,27 @@ def persist_reviewed_docs(
         rotation_cap,
     )
 
+    # ── Normalize bare [name] brackets AT acceptance (source-of-truth fix) ──
+    # A doc written by a late in-flight generate/refine task can finalize with
+    # a bare ``[name]`` bracket after the per-rotation reconcile has already
+    # run. Normalizing the node here — the moment it promotes to accepted —
+    # guarantees no accepted doc ever carries a bare bracket, regardless of
+    # when it was written, so the published catalogue stays clean without the
+    # operator's per-cycle manual ``resolve_doc_links`` sweep. Scoped to this
+    # one node (no full-catalogue scan). The post-drain reconcile remains as a
+    # belt-and-suspenders net for cross-references to names accepted later.
+    if target_stage == "accepted":
+        try:
+            with GraphClient() as gc:
+                _normalize_bare_doc_links(gc, sn_id=sn_id)
+        except Exception:
+            logger.debug(
+                "persist_reviewed_docs: bare-link normalize failed for %s "
+                "(non-fatal; post-drain reconcile will catch it)",
+                sn_id,
+                exc_info=True,
+            )
+
     # ── Write StandardNameReview node + HAS_REVIEW edge (Finding 1 fix) ──
     # When ``skip_review_node`` is True the caller (pool RD-quorum
     # worker) writes per-cycle Review nodes itself.
@@ -10476,3 +10536,231 @@ def pool_pending_counts(
         "review_docs": int(r.get("review_docs", 0)),
         "refine_docs": int(r.get("refine_docs", 0)),
     }
+
+
+# =============================================================================
+# enrich_parents — claim / fetch-children / persist / release
+# =============================================================================
+# Coverage deadlock break: a derived parent materialised by
+# ``_materialize_derived_parent_rows`` carries the
+# ``DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER`` until something writes a real
+# description.  The placeholder excludes it from REVIEW_NAME (the claim gate
+# drops it), and with no reviewer_score_name it is excluded from generate_docs
+# (``reviewer_score_name IS NOT NULL`` gate) — neither reviewable nor
+# documentable.  ``enrich_parents`` synthesises a real description GENERALISED
+# over the parent's accepted children, embeds it locally, and routes the parent
+# to ``name_stage='drafted'`` so it flows review → accept → docs like any other
+# name.  Childless derived parents are legitimately unscoped and never claimed.
+
+
+@retry_on_deadlock()
+def claim_enrich_parents_batch(
+    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
+    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
+    domain: str | None = None,
+    scope_run_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """Claim placeholder derived parents that still need a real description.
+
+    Eligibility: ``origin = 'derived'`` AND the description is still the
+    deterministic-parent placeholder AND the parent has at least one live
+    (non-superseded/exhausted) ``HAS_PARENT`` child to ground on.  Childless
+    placeholders (legitimately unscoped) never match and are skipped.
+
+    The claim does NOT transition any stage — only ``claim_token`` /
+    ``claimed_at`` are written.  The stage transition to ``'drafted'`` happens
+    in :func:`persist_enriched_parent` once a real description + embedding
+    exist, so a failed LLM call leaves the parent claimable as a placeholder.
+
+    Returns claimed items as dicts with ``id``, ``name``, ``kind``, ``unit``,
+    ``physics_domain``, ``claim_token``.
+    """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    where = (
+        "sn.origin = 'derived'"
+        " AND sn.description = $parent_desc_placeholder"
+        " AND EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn)"
+        "   WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted'] }"
+    )
+    query_params: dict[str, Any] = {
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    }
+    return _claim_sn_atomic(
+        eligibility_where=where,
+        query_params=query_params,
+        batch_size=batch_size,
+        timeout_seconds=timeout_seconds,
+        extra_return_fields=", coalesce(sn.name, sn.id) AS name",
+        domain=domain,
+        scope_run_id=scope_run_id,
+    )
+
+
+def fetch_derived_parent_children(
+    parent_ids: list[str],
+) -> dict[str, list[dict[str, Any]]]:
+    """Fetch the grounding children for a batch of derived parents.
+
+    For each parent id, returns its live (non-superseded/exhausted)
+    ``HAS_PARENT`` children with the fields the enrichment prompt grounds on:
+    the child standard name, its description, unit, and physics domain.  A
+    child still carrying the placeholder description contributes its NAME (the
+    name itself is meaningful) but an empty description, so the prompt grounds
+    on whatever real descriptions exist plus the child name set.
+
+    Returns ``{parent_id: [child_dict, ...]}``; parents with no live children
+    map to an empty list.
+    """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    if not parent_ids:
+        return {}
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $parent_ids AS pid
+            MATCH (child:StandardName)-[:HAS_PARENT]->(p:StandardName {id: pid})
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
+            WITH pid, child
+            ORDER BY child.id
+            RETURN pid AS parent_id,
+                   collect({
+                     name: child.id,
+                     description: CASE
+                         WHEN child.description = $placeholder THEN null
+                         ELSE child.description END,
+                     unit: child.unit,
+                     physics_domain: child.physics_domain,
+                     kind: child.kind
+                   }) AS children
+            """,
+            parent_ids=parent_ids,
+            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        )
+    return {r["parent_id"]: list(r["children"]) for r in rows}
+
+
+@retry_on_deadlock()
+def persist_enriched_parent(
+    *,
+    sn_id: str,
+    claim_token: str,
+    description: str,
+    embedding: list[float] | None,
+    model: str,
+    run_id: str | None = None,
+) -> str:
+    """Persist a synthesised derived-parent description and route to review.
+
+    Single write:
+
+    1. Verify the claim (token match OR cleared by the orphan sweep) and that
+       the node is still a derived parent.
+    2. SET ``description`` + ``embedding`` (+ ``embedded_at``), record the
+       enrichment model/time, and transition ``name_stage`` to ``'drafted'``
+       (so it enters REVIEW_NAME) — unless it already carries a
+       ``reviewer_score_name`` (already accepted), in which case it stays
+       ``'accepted'``.  ``docs_stage`` defaults to ``'pending'``.
+    3. Mirror the description onto the parent's ``StandardNameSource`` so
+       consolidation / export see the real text.
+
+    Returns the new ``name_stage`` (``'drafted'`` or ``'accepted'``), or ``''``
+    when the node no longer matched (concurrent winner / not a derived parent).
+    """
+    description = _sanitize_doc_text(description)
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
+              AND sn.origin = 'derived'
+            SET sn.description        = $description,
+                sn.embedding          = $embedding,
+                sn.embedded_at        = CASE WHEN $embedding IS NULL
+                                             THEN sn.embedded_at
+                                             ELSE datetime() END,
+                sn.parent_enriched_at = datetime(),
+                sn.parent_enrich_model = $model,
+                sn.name_stage = CASE
+                    WHEN sn.reviewer_score_name IS NOT NULL THEN 'accepted'
+                    ELSE 'drafted' END,
+                sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
+                sn.validation_status = coalesce(sn.validation_status, 'valid'),
+                sn.needs_composition = null,
+                sn.claim_token        = null,
+                sn.claimed_at         = null
+            RETURN sn.name_stage AS name_stage
+            """,
+            id=sn_id,
+            token=claim_token,
+            description=description,
+            embedding=embedding,
+            model=model,
+        )
+        if not rows:
+            logger.debug(
+                "persist_enriched_parent: %s no longer matched (concurrent "
+                "winner or not a derived parent) — no-op",
+                sn_id,
+            )
+            return ""
+        # Mirror onto the parent's source row so consolidation/export agree.
+        gc.query(
+            """
+            MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(
+                sn:StandardName {id: $id})
+            SET sns.description = $description
+            """,
+            id=sn_id,
+            description=description,
+        )
+
+    new_stage: str = rows[0]["name_stage"]
+    logger.info(
+        "\033[32menrich_parents\033[0m: %s → name_stage=%s — %s",
+        sn_id,
+        new_stage,
+        (description or "")[:100],
+    )
+    # NB: deliberately no bump_sn_run_counter here — the SNRun ``names_enriched``
+    # scalar is reconciled against the generate_docs pool total (see
+    # run_sn_pools' async-counter drift check); enrich_parents telemetry is
+    # surfaced via the per-pool completed-count log instead. The ``run_id``
+    # parameter is retained for signature symmetry with the other persist_*
+    # functions and possible future per-pool counters.
+    return new_stage
+
+
+@retry_on_deadlock()
+def release_enrich_parents_claims(
+    *,
+    sn_ids: list[str],
+    claim_token: str,
+) -> int:
+    """Release enrich_parents claims (token-verified, no stage change).
+
+    Used both as the pool release adapter (clears any unprocessed items in a
+    batch) and on LLM/processing failure — the parent stays a placeholder and
+    is re-claimed on a later pass.
+    """
+    if not sn_ids:
+        return 0
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            UNWIND $sn_ids AS sid
+            MATCH (sn:StandardName {id: sid})
+            WHERE sn.claim_token = $token
+            SET sn.claim_token = null,
+                sn.claimed_at  = null
+            RETURN count(sn) AS released
+            """,
+            sn_ids=sn_ids,
+            token=claim_token,
+        )
+    return result[0]["released"] if result else 0

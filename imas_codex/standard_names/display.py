@@ -46,6 +46,7 @@ from imas_codex.discovery.base.progress import (
 #: Pool names in display order (all 7 internal pools).
 POOL_ORDER: tuple[str, ...] = (
     "generate_name",
+    "enrich_parents",
     "review_name",
     "refine_name",
     "generate_docs",
@@ -54,17 +55,20 @@ POOL_ORDER: tuple[str, ...] = (
 )
 
 #: Display rows — each maps to one or more internal pools.
-#: The display merges 6 pools into 4 visual rows.
+#: The display merges 7 pools into 4 visual rows.
 DISPLAY_ROWS: tuple[str, ...] = (
-    "generate_name",  # merges generate_name + refine_name
+    "generate_name",  # merges generate_name + refine_name + enrich_parents
     "review_name",  # review_name only
     "generate_docs",  # merges generate_docs + refine_docs
     "review_docs",  # review_docs only
 )
 
 #: Mapping: display row → internal pools that feed it.
+#: ``enrich_parents`` (derived-parent description synthesis) is a name-axis
+#: producer like generate_name/refine_name, so it folds into the GENERATE NAME
+#: row rather than claiming its own row.
 DISPLAY_POOL_MAP: dict[str, tuple[str, ...]] = {
-    "generate_name": ("generate_name", "refine_name"),
+    "generate_name": ("generate_name", "refine_name", "enrich_parents"),
     "review_name": ("review_name",),
     "generate_docs": ("generate_docs", "refine_docs"),
     "review_docs": ("review_docs",),
@@ -89,6 +93,7 @@ DISPLAY_STYLES: dict[str, str] = {
 #: Display labels — short labels that fit the canonical LABEL_WIDTH (12).
 POOL_LABELS: dict[str, str] = {
     "generate_name": "DRAFT NAME",
+    "enrich_parents": "PARENT DESC",
     "review_name": "REVIEW NAME",
     "refine_name": "REFINE NAME",
     "generate_docs": "DRAFT DOCS",
@@ -100,6 +105,7 @@ POOL_LABELS: dict[str, str] = {
 #: Used by legacy :func:`render_pool_panel` for backward compat.
 _LEGACY_POOL_LABELS: dict[str, str] = {
     "generate_name": "GENERATE_NAME",
+    "enrich_parents": "ENRICH_PARENTS",
     "review_name": "REVIEW_NAME",
     "refine_name": "REFINE_NAME",
     "generate_docs": "GENERATE_DOCS",
@@ -110,6 +116,7 @@ _LEGACY_POOL_LABELS: dict[str, str] = {
 #: Rich styles per pool.
 POOL_STYLES: dict[str, str] = {
     "generate_name": "bold magenta",
+    "enrich_parents": "magenta",
     "review_name": "bold yellow",
     "refine_name": "magenta",
     "generate_docs": "bold cyan",
@@ -138,6 +145,17 @@ def _map_generate_name(ev: dict[str, Any]) -> dict[str, Any]:
         "primary_text": str(source),
         "primary_text_style": "dim",
         "description": f"→ {name}" if name else "",
+    }
+
+
+def _map_enrich_parents(ev: dict[str, Any]) -> dict[str, Any]:
+    """Map an enrich_parents event to PipelineRowConfig stream fields."""
+    name = str(ev.get("name", ""))
+    desc = str(ev.get("description", ""))
+    return {
+        "primary_text": name,
+        "primary_text_style": "magenta",
+        "description": f"⌁ {desc[:80]}" if desc else "⌁ enriched parent",
     }
 
 
@@ -214,6 +232,7 @@ def _map_embed_name(ev: dict[str, Any]) -> dict[str, Any]:
 #: Registry mapping pool name → event-to-stream-fields mapper.
 _EVENT_MAPPERS: dict[str, Any] = {
     "generate_name": _map_generate_name,
+    "enrich_parents": _map_enrich_parents,
     "review_name": _map_review_name,
     "refine_name": _map_refine_name,
     "generate_docs": _map_generate_docs,

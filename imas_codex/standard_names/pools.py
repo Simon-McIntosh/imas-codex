@@ -77,13 +77,19 @@ logger = logging.getLogger(__name__)
 # inert while it is free (e.g. ``generate_name``'s 0.15 has no effect when it
 # runs on a local vLLM GPU) — it matters only if that pool is reconfigured
 # to a paid model.
+# ``enrich_parents`` synthesises a real description for placeholder derived
+# parents (generalising over their accepted children) so they can leave the
+# coverage deadlock and flow review_name → accept → docs.  It feeds
+# review_name and is throttled against the same review_name backlog cap, so a
+# modest weight suffices; it runs on the cheap compose-tier model.
 POOL_WEIGHTS: dict[str, float] = {
-    "generate_name": 0.15,
-    "review_name": 0.25,
+    "generate_name": 0.12,
+    "review_name": 0.24,
     "refine_name": 0.10,
-    "generate_docs": 0.15,
-    "review_docs": 0.25,
-    "refine_docs": 0.10,
+    "generate_docs": 0.14,
+    "review_docs": 0.24,
+    "refine_docs": 0.08,
+    "enrich_parents": 0.08,
 }
 
 POOL_NAMES: tuple[str, ...] = tuple(POOL_WEIGHTS.keys())
@@ -101,6 +107,7 @@ _POOL_MODEL_SECTIONS: dict[str, str] = {
     "refine_docs": "sn-refine",
     "review_name": "sn-review.names",
     "review_docs": "sn-review.docs",
+    "enrich_parents": "sn-parent-enrich",
 }
 
 

@@ -246,9 +246,11 @@ def _compute_pool_progress(
     - ``generate_docs``: names whose docs left ``pending``
     - ``review_docs``:   names with a docs reviewer score
     - ``refine_docs``:   total docs refine operations (Σ ``docs_chain_length``)
+    - ``enrich_parents``: derived parents whose placeholder description has been
+      replaced (``parent_enriched_at`` set)
 
     Keys: ``generate_name``, ``review_name``, ``refine_name``,
-    ``generate_docs``, ``review_docs``, ``refine_docs``.
+    ``generate_docs``, ``review_docs``, ``refine_docs``, ``enrich_parents``.
 
     Parameters
     ----------
@@ -330,6 +332,24 @@ def _compute_pool_progress(
       RETURN count(sn) AS refine_docs
     }}
     CALL {{
+      MATCH (sn:StandardName)
+      WHERE sn.origin = 'derived'
+        AND sn.description = $parent_desc_placeholder
+        AND EXISTS {{ MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted'] }}
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN count(sn) AS enrich_parents
+    }}
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE sn.origin = 'derived'
+        AND sn.parent_enriched_at IS NOT NULL
+        {domain_filter_sn}
+        {scope_filter_sn}
+      RETURN count(sn) AS enrich_parents_done
+    }}
+    CALL {{
       MATCH (s:StandardNameSource)
       WHERE s.status IN ['composed', 'attached', 'vocab_gap', 'failed']
         {domain_filter_src}
@@ -372,13 +392,19 @@ def _compute_pool_progress(
       RETURN coalesce(sum(sn.docs_chain_length), 0) AS refine_docs_done
     }}
     RETURN generate_name, review_name, refine_name,
-           generate_docs, review_docs, refine_docs,
+           generate_docs, review_docs, refine_docs, enrich_parents,
            generate_name_done, review_name_done, refine_name_done,
-           generate_docs_done, review_docs_done, refine_docs_done
+           generate_docs_done, review_docs_done, refine_docs_done,
+           enrich_parents_done
     """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
     params: dict[str, object] = {
         "rotation_cap": rotation_cap,
         "min_score": min_score,
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     }
     if domains:
         params["domains"] = list(domains)
@@ -391,6 +417,7 @@ def _compute_pool_progress(
         "generate_docs",
         "review_docs",
         "refine_docs",
+        "enrich_parents",
     )
     rows = list(gc.query(query, **params))  # type: ignore[attr-defined]
     if not rows:
@@ -503,6 +530,7 @@ def _run_sn_cmd(
         "generate_docs",
         "review_docs",
         "refine_docs",
+        "enrich_parents",
     )
 
     _progress_cache: dict[str, tuple[float, dict[str, dict[str, int]]]] = {

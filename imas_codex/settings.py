@@ -90,6 +90,7 @@ MODEL_SECTIONS = frozenset(
         "sn-compose",
         "sn-docs",
         "sn-refine",
+        "sn-parent-enrich",
     }
 )
 
@@ -109,6 +110,12 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # ~5%).  Sonnet 4.6 matches compose tier so the refine pass is
     # capable enough to recover from reviewer feedback.
     "sn-refine": "openrouter/anthropic/claude-sonnet-4.6",
+    # Derived-parent description synthesis (generalises over a parent's
+    # already-accepted children).  Compose-tier task — a concise
+    # description, not long-form physics prose — so it defaults to the
+    # cheap/fast compose model; the downstream generate_docs (sn-docs)
+    # rewrites the full documentation later.  Override in pyproject.toml.
+    "sn-parent-enrich": "openrouter/anthropic/claude-sonnet-4.6",
 }
 
 # Environment variable names per section
@@ -123,6 +130,7 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "sn-compose": "IMAS_CODEX_SN_COMPOSE_MODEL",
     "sn-docs": "IMAS_CODEX_SN_DOCS_MODEL",
     "sn-refine": "IMAS_CODEX_SN_REFINE_MODEL",
+    "sn-parent-enrich": "IMAS_CODEX_SN_PARENT_ENRICH_MODEL",
 }
 
 
@@ -1053,6 +1061,7 @@ _POOL_REPLICA_KEYS: dict[str, tuple[str, str]] = {
     "generate_docs": ("generate-docs-replicas", "GENERATE_DOCS"),
     "review_docs": ("review-docs-replicas", "REVIEW_DOCS"),
     "refine_docs": ("refine-docs-replicas", "REFINE_DOCS"),
+    "enrich_parents": ("enrich-parents-replicas", "ENRICH_PARENTS"),
 }
 
 
