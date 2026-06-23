@@ -7553,12 +7553,54 @@ async def process_review_docs_batch(
 
     processed = 0
 
+    # ── Derived-parent children for parent-aware docs review ───────────
+    # A derived parent is an abstraction over its children; the docs reviewer
+    # must judge it on positioning + generalisation (does it correctly capture
+    # the common quantity?), NOT as a standalone specific name. Inject the
+    # children (origin='derived' only) so the review_docs_user parent block can
+    # reframe the rubric — otherwise the quorum penalises abstractions for
+    # lacking child-level specifics (observed: parent docs systematically <0.85).
+    parent_children: dict[str, list] = {}
+    try:
+        from imas_codex.graph.client import GraphClient as _GCKids
+        from imas_codex.standard_names.defaults import (
+            DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER as _PH_DESC,
+        )
+
+        def _fetch_parent_children() -> dict[str, list]:
+            with _GCKids() as _gc:
+                rows = _gc.query(
+                    """
+                    MATCH (p:StandardName)
+                    WHERE p.id IN $ids AND p.origin = 'derived'
+                    MATCH (c:StandardName)-[:HAS_PARENT]->(p)
+                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+                    WITH p, c ORDER BY c.id
+                    RETURN p.id AS pid, collect({
+                        name: c.id,
+                        description: CASE WHEN c.description = $ph
+                            THEN null ELSE c.description END,
+                        unit: c.unit,
+                        physics_domain: c.physics_domain
+                    })[..12] AS children
+                    """,
+                    ids=[it["id"] for it in batch],
+                    ph=_PH_DESC,
+                )
+                return {r["pid"]: list(r["children"]) for r in rows}
+
+        parent_children = await _asyncio.to_thread(_fetch_parent_children)
+    except Exception:
+        logger.debug("review_docs: parent children fetch failed", exc_info=True)
+
     for item in batch:
         if stop_event.is_set():
             break
 
         sn_id = item["id"]
         claim_token = item.get("claim_token") or ""
+        if parent_children.get(sn_id):
+            item["derived_children"] = parent_children[sn_id]
 
         # ── Build prompt context ───────────────────────────────────────
         from imas_codex.standard_names.context import fetch_review_neighbours

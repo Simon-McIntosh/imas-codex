@@ -44,6 +44,45 @@ every definitional claim in the candidate documentation against this text:
 
 {{ item.documentation | default('(missing)', true) }}
 
+{% if item.derived_children %}
+## THIS IS A DERIVED PARENT — review it as a generalization, not a standalone name
+
+`{{ item.id }}` is a **structural parent**: an abstraction whose role is to
+generalize over the more specific child standard names below. It deliberately
+has no Data Dictionary source of its own — its concrete physics lives in its
+children, which are the authoritative detail:
+
+{% for c in item.derived_children %}- `{{ c.name }}`{% if c.unit %} [{{ c.unit }}]{% endif %}{% if c.physics_domain %} ({{ c.physics_domain }}){% endif %}{% if c.description %} — {{ c.description }}{% endif %}
+{% endfor %}
+
+**Score this candidate on its POSITIONING and GENERALIZATION with respect to
+those children, NOT on standalone-name specificity. Adjust the rubric as
+follows for this parent:**
+
+- **Positioning & generalization (primary):** Does the description/documentation
+  correctly state the *common* quantity the children share, sitting one level
+  of abstraction above them? Dock hard if it OVER-specializes to a single
+  child (e.g. describing the `normalized_parallel_*` child when the parent is
+  the general quantity), if it is merely a verbatim restatement of one child,
+  or if the generalization is physically wrong/misattributed.
+- **`completeness`:** "complete" for a parent means it covers the children's
+  common ground and cross-references one or two representative children — it
+  does **NOT** require child-level specifics (per-child measurement methods,
+  exact typical values, individual component/projection details, child-specific
+  sign conventions). Their ABSENCE is correct for a parent — **do not dock for
+  it.** This axis is effectively dropped except for the cross-reference check.
+- **`physics_accuracy`:** judge whether the *generalized* physics is sound; do
+  NOT dock for omitting child-specific detail. Still dock genuinely wrong
+  statements or a unit that contradicts the quantity.
+- **`description_quality` / `documentation_quality`:** judge as a clear,
+  correct OVERVIEW; concise is appropriate — an abstraction legitimately has
+  less to say than a specific name.
+
+A well-formed parent overview that correctly generalizes its children and links
+to them should reach the **outstanding** tier even though it lacks child-level
+specifics.
+{% endif %}
+
 ## Sibling-Comparison Context
 
 Use these accepted, in-catalog names as your **third-party reference set**.
