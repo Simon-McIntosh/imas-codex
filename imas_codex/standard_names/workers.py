@@ -7530,7 +7530,10 @@ async def process_review_docs_batch(
         release_review_docs_failed_claims,
         update_review_aggregates,
     )
-    from imas_codex.standard_names.models import StandardNameQualityReviewDocsBatch
+    from imas_codex.standard_names.models import (
+        StandardNameQualityReviewDocsBatch,
+        StandardNameQualityReviewDocsParentBatch,
+    )
 
     # ── Resolve docs review chain ──────────────────────────────────────
     try:
@@ -7666,9 +7669,19 @@ async def process_review_docs_batch(
             **neighbours,
             "review_scored_examples": review_scored_examples,
         }
+        # Derived parents are reviewed against the PARENT rubric (distinct
+        # dimension set: generalization / positioning / physics_accuracy /
+        # clarity), not the standalone-name docs rubric.
+        _is_parent = bool(item.get("derived_children"))
+        _user_tmpl = (
+            "sn/review_docs_parent_user" if _is_parent else "sn/review_docs_user"
+        )
+        _system_tmpl = (
+            "sn/review_docs_parent_system" if _is_parent else "sn/review_docs_system"
+        )
         try:
-            user_prompt = render_prompt("sn/review_docs_user", prompt_context)
-            system_prompt = render_prompt("sn/review_docs_system", prompt_context)
+            user_prompt = render_prompt(_user_tmpl, prompt_context)
+            system_prompt = render_prompt(_system_tmpl, prompt_context)
         except Exception:
             logger.debug("review_docs: prompt render failed for %s", sn_id)
             user_prompt = (
@@ -7693,25 +7706,33 @@ async def process_review_docs_batch(
         # parent-aware rubric does not need multi-model adjudication, and the
         # quorum is the cost-dominant phase. One call (resolution_method=
         # 'single_review') cuts parent docs-review cost ~2-3x.
-        _item_review_models = (
-            review_models[:1] if item.get("derived_children") else review_models
+        _item_review_models = review_models[:1] if _is_parent else review_models
+        _response_model = (
+            StandardNameQualityReviewDocsParentBatch
+            if _is_parent
+            else StandardNameQualityReviewDocsBatch
+        )
+        _rubric_dims = (
+            ("generalization", "positioning", "physics_accuracy", "clarity")
+            if _is_parent
+            else (
+                "description_quality",
+                "documentation_quality",
+                "completeness",
+                "physics_accuracy",
+            )
         )
 
         try:
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
                 review_axis="docs",
-                response_model=StandardNameQualityReviewDocsBatch,
+                response_model=_response_model,
                 user_prompt=user_prompt,
                 system_prompt=system_prompt,
                 models=_item_review_models,
                 disagreement_threshold=disagreement_threshold,
-                rubric_dims=(
-                    "description_quality",
-                    "documentation_quality",
-                    "completeness",
-                    "physics_accuracy",
-                ),
+                rubric_dims=_rubric_dims,
                 lease=lease,
                 phase="review_docs",
                 acall_llm_structured=acall_llm_structured,

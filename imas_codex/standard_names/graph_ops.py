@@ -7894,12 +7894,15 @@ def claim_review_name_batch(
         # has no real description to review and must wait for enrichment.
         " AND sn.description IS NOT NULL"
         " AND sn.description <> $parent_desc_placeholder"
-        # Derived parents now flow through REVIEW_NAME (Phase 4): they earn a
-        # real reviewer_score_name before becoming docs-eligible, so they are
-        # NO LONGER excluded here. The review-aware promotion in
-        # _materialize_derived_parent_rows lands an unreviewed parent at
-        # 'drafted' (only once it has a real description), and it is then scored
-        # like any other name.
+        # Derived parents are NEVER name-reviewed (mirrors claim_refine_name_batch,
+        # which already excludes origin='derived'). A derived parent's name is a
+        # deterministic grammar peel that already passed the admission gate and
+        # generalises its accepted children by construction — the name must NOT
+        # change, so reviewing it is both wasteful and a route to a stuck
+        # 'reviewed' state (review cannot rename, refine excludes them). They are
+        # accepted STRUCTURALLY (persist_enriched_parent / the structural-accept
+        # repair) with a child-inherited score; quality is gated on the docs axis.
+        " AND coalesce(sn.origin, '') <> 'derived'"
     )
     query_params: dict[str, Any] = {
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -10754,6 +10757,72 @@ def persist_enriched_parent(
     # parameter is retained for signature symmetry with the other persist_*
     # functions and possible future per-pool counters.
     return new_stage
+
+
+@retry_on_deadlock()
+def structural_accept_derived_parents(gc: Any | None = None) -> int:
+    """Accept any derived parent stuck on the name axis structurally.
+
+    A derived parent's name is a deterministic grammar peel that already passed
+    the admission gate and generalises its accepted children by construction —
+    so it is NEVER name-reviewed or refined (both claim gates exclude
+    ``origin='derived'``). The enrich pool accepts placeholder parents directly
+    (:func:`persist_enriched_parent`), but a derived parent can still reach
+    ``drafted`` / ``reviewed`` / ``exhausted`` via OTHER paths — a child's
+    refine_name producing the parent-equal general name, or a legacy
+    materialise routing. Without this they would strand there forever (review
+    no longer claims them, refine excludes them).
+
+    This promotes every such parent that has a REAL (non-placeholder)
+    description to ``name_stage='accepted'`` with a ``reviewer_score_name``
+    inherited from its accepted children (min — falls back to
+    ``DEFAULT_MIN_SCORE``) and ``reviewer_model_name='structural-inheritance'``.
+    Idempotent and self-healing — safe to call at every ``sn run`` startup.
+    Placeholder-description parents are left for the enrich pool (or are
+    childless zombies). Returns the count promoted.
+    """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    _own_gc = gc is None
+    if _own_gc:
+        gc = GraphClient().__enter__()
+    try:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.origin = 'derived'
+              AND sn.name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']
+              AND sn.description IS NOT NULL
+              AND sn.description <> $ph
+            OPTIONAL MATCH (c:StandardName)-[:HAS_PARENT]->(sn)
+            WHERE c.name_stage = 'accepted' AND c.reviewer_score_name IS NOT NULL
+            WITH sn, min(c.reviewer_score_name) AS min_child_score
+            SET sn.name_stage = 'accepted',
+                sn.reviewer_score_name = coalesce(min_child_score, $structural),
+                sn.reviewer_model_name = 'structural-inheritance',
+                sn.reviewed_name_at = coalesce(sn.reviewed_name_at, datetime()),
+                sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
+                sn.chain_length = coalesce(sn.chain_length, 0),
+                sn.claim_token = null,
+                sn.claimed_at = null
+            RETURN count(sn) AS promoted
+            """,
+            ph=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+            structural=DEFAULT_MIN_SCORE,
+        )
+        promoted: int = rows[0]["promoted"] if rows else 0
+        if promoted:
+            logger.info(
+                "structural_accept_derived_parents: promoted %d derived parent(s) "
+                "to accepted (structural inheritance)",
+                promoted,
+            )
+        return promoted
+    finally:
+        if _own_gc:
+            gc.__exit__(None, None, None)
 
 
 @retry_on_deadlock()

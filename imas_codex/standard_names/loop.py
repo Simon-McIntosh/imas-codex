@@ -902,6 +902,7 @@ async def run_sn_pools(
             normalize_derived_parent_lifecycle,
             rederive_structural_edges,
             seed_parent_sources,
+            structural_accept_derived_parents,
         )
 
         edge_result = await asyncio.to_thread(rederive_structural_edges)
@@ -925,6 +926,18 @@ async def run_sn_pools(
             logger.info(
                 "Normalized %d derived parent lifecycle nodes",
                 repaired_parent_count,
+            )
+        # Derived parents are never name-reviewed/refined; promote any that
+        # reached drafted/reviewed/exhausted (via a child's refine or legacy
+        # routing) to accepted structurally so they never strand on the name
+        # axis. Self-healing — runs every startup.
+        _structural_accepted = await asyncio.to_thread(
+            structural_accept_derived_parents
+        )
+        if _structural_accepted:
+            logger.info(
+                "Structurally accepted %d derived parent(s) on the name axis",
+                _structural_accepted,
             )
 
         # ── Build pool specs ──────────────────────────────────────

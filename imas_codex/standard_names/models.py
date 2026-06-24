@@ -1193,6 +1193,130 @@ class StandardNameQualityReviewDocsBatch(BaseModel):
 
 
 # =============================================================================
+# Derived-PARENT docs review — distinct dimension set (abstraction rubric)
+# =============================================================================
+# A derived parent is an abstraction OVER its children, not a standalone
+# specific name. Scoring it on the standard docs dims (description_quality /
+# documentation_quality / completeness / physics_accuracy) systematically
+# penalises it for lacking child-level specifics it should not have. Parents
+# therefore get their OWN dimension set, judging the role they are designed for:
+#   - generalization: captures the COMMON quantity its children share, without
+#       over-specialising to any one child (the core parent virtue);
+#   - positioning:    correctly placed as an abstraction — distinct from a
+#       single child, cross-references representative children, not a redundant
+#       restatement of one child;
+#   - physics_accuracy: the GENERALISED physics is sound (no wrong claims, units/
+#       conventions correct at the general level) — child-specific detail is not
+#       required and its absence is NOT penalised;
+#   - clarity:        clear, well-structured overview prose (concise is fine —
+#       an abstraction legitimately says less than a specific name).
+# Normalised over 80 (4×20) so the accept tiers match the standard docs mode.
+
+
+class StandardNameQualityScoreDocsParent(BaseModel):
+    """4-dimensional quality score for a DERIVED-PARENT docs review."""
+
+    generalization: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "Captures the common quantity shared by the children without "
+            "over-specialising to any one child's species/component/axis/"
+            "qualifier/normalization (0-20)"
+        ),
+    )
+    positioning: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "Correctly positioned as an abstraction over its children — "
+            "distinct from a single child, cross-references representative "
+            "children, not a redundant restatement (0-20)"
+        ),
+    )
+    physics_accuracy: int = Field(
+        ge=0,
+        le=20,
+        description=(
+            "The generalised physics is sound; child-level specifics are NOT "
+            "required and their absence is not penalised (0-20)"
+        ),
+    )
+    clarity: int = Field(
+        ge=0,
+        le=20,
+        description="Clear, well-structured overview prose; concision is fine (0-20)",
+    )
+
+    @property
+    def total(self) -> int:
+        return (
+            self.generalization
+            + self.positioning
+            + self.physics_accuracy
+            + self.clarity
+        )
+
+    @property
+    def score(self) -> float:
+        """Normalized quality score (0-1). Sum of 4 parent dimensions / 80."""
+        return self.total / 80.0
+
+    @property
+    def tier(self) -> str:
+        s = self.score
+        if s >= 0.85:
+            return "outstanding"
+        elif s >= 0.65:
+            return "good"
+        elif s >= 0.40:
+            return "inadequate"
+        return "poor"
+
+
+class StandardNameQualityCommentsDocsParent(BaseModel):
+    """Per-dimension comments for the derived-parent docs rubric."""
+
+    generalization: str | None = Field(
+        default=None, description="Comment on generalization score"
+    )
+    positioning: str | None = Field(
+        default=None, description="Comment on positioning score"
+    )
+    physics_accuracy: str | None = Field(
+        default=None, description="Comment on physics accuracy score"
+    )
+    clarity: str | None = Field(default=None, description="Comment on clarity score")
+
+
+class StandardNameQualityReviewDocsParent(BaseModel):
+    """Review of one derived parent's docs using the parent rubric."""
+
+    source_id: str = Field(description="Source entity ID being reviewed")
+    standard_name: str = Field(description="The standard name under review")
+    scores: StandardNameQualityScoreDocsParent = Field(
+        description="4-dimensional derived-parent docs quality scores"
+    )
+    comments: StandardNameQualityCommentsDocsParent | None = Field(
+        default=None, description="Per-dimension reviewer comments"
+    )
+    reasoning: str = Field(description="Specific justification per dimension")
+    revised_description: str | None = Field(
+        default=None, description="Suggested revised description, if any"
+    )
+    revised_documentation: str | None = Field(
+        default=None, description="Suggested revised documentation body"
+    )
+    issues: list[str] = Field(default_factory=list, description="Specific issues found")
+
+
+class StandardNameQualityReviewDocsParentBatch(BaseModel):
+    """LLM response for derived-parent docs quality review of a batch."""
+
+    reviews: list[StandardNameQualityReviewDocsParent]
+
+
+# =============================================================================
 # Description review — 4-dimensional rubric for compose-time descriptions
 # =============================================================================
 
