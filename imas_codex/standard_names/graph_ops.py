@@ -8196,11 +8196,11 @@ def claim_review_docs_batch(
     where = (
         "sn.docs_stage = 'drafted'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # HARD GATE (same invariant as generate_docs): a doc may only advance
-        # while its NAME carries a real review score. Blocks a stray pre-gate
-        # drafted doc on a never-name-reviewed name (e.g. an auto-accepted
-        # derived parent) from being reviewed → accepted ungated.
-        " AND sn.reviewer_score_name IS NOT NULL"
+        # Name-form-vetted gate (same invariant as generate_docs): a real
+        # name-review score OR a structurally-accepted derived parent (its name
+        # is an admission-vetted grammar peel, never reviewed/scored by design).
+        " AND (sn.reviewer_score_name IS NOT NULL"
+        " OR coalesce(sn.origin, '') = 'derived')"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -9766,12 +9766,17 @@ def claim_generate_docs_batch(
     where = (
         "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # HARD GATE: docs require a real name-review score. A name only earns
-        # ``reviewer_score_name`` by passing REVIEW_NAME (RD-quorum). Derived
-        # parents auto-accepted by the admission gate carry no such score, so
-        # they are held out of docs generation until they have been reviewed —
-        # never spend docs effort on a name whose form has not been vetted.
-        " AND sn.reviewer_score_name IS NOT NULL"
+        # Docs-eligibility gate: the name's FORM must be vetted before we spend
+        # docs effort. Two ways to be vetted:
+        #   - a regular name earns a ``reviewer_score_name`` by passing
+        #     REVIEW_NAME (RD-quorum), OR
+        #   - a derived parent's name is a deterministic grammar peel vetted by
+        #     the admission gate (``is_admissible_parent_name``) — it is never
+        #     name-reviewed/refined and carries NO name score by design (scoring
+        #     a name we never change is meaningless). It is docs-eligible by
+        #     being a structurally-accepted derived parent.
+        " AND (sn.reviewer_score_name IS NOT NULL"
+        " OR coalesce(sn.origin, '') = 'derived')"
     )
 
     items = _claim_sn_atomic(
@@ -10049,9 +10054,11 @@ def claim_refine_docs_batch(
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # HARD GATE (same invariant as generate_docs/review_docs): only refine
-        # docs whose NAME carries a real review score.
-        " AND sn.reviewer_score_name IS NOT NULL"
+        # Name-form vetted gate (same invariant as generate_docs): a real
+        # name-review score OR a structurally-accepted derived parent (admission-
+        # vetted name, never reviewed/scored by design).
+        " AND (sn.reviewer_score_name IS NOT NULL"
+        " OR coalesce(sn.origin, '') = 'derived')"
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
@@ -10676,12 +10683,13 @@ def persist_enriched_parent(
        the node is still a derived parent.
     2. SET ``description`` + ``embedding`` (+ ``embedded_at``), record the
        enrichment model/time, and transition ``name_stage`` directly to
-       ``'accepted'`` with a ``reviewer_score_name`` INHERITED from the parent's
-       accepted children (min — "as valid as its weakest accepted child";
-       falls back to ``DEFAULT_MIN_SCORE`` when no scored children exist) and
-       ``reviewer_model_name='structural-inheritance'`` so the acceptance is
-       auditably distinct from a real LLM review.  ``docs_stage`` defaults to
-       ``'pending'`` so it becomes docs-eligible immediately.
+       ``'accepted'``. The name is NOT scored — a derived parent name is a
+       deterministic grammar peel that is never reviewed/refined, so a
+       ``reviewer_score_name`` would be meaningless. ``reviewer_model_name`` is
+       stamped ``'structural-inheritance'`` (audit marker) and ``reviewed_name_at``
+       is set as the "name finalised, docs may proceed" signal. ``docs_stage``
+       defaults to ``'pending'`` so it becomes docs-eligible immediately (the
+       docs gates admit derived parents via ``origin``, not a name score).
     3. Mirror the description onto the parent's ``StandardNameSource`` so
        consolidation / export see the real text.
 
@@ -10695,9 +10703,6 @@ def persist_enriched_parent(
             MATCH (sn:StandardName {id: $id})
             WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.origin = 'derived'
-            OPTIONAL MATCH (c:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE c.name_stage = 'accepted' AND c.reviewer_score_name IS NOT NULL
-            WITH sn, min(c.reviewer_score_name) AS min_child_score
             SET sn.description        = $description,
                 sn.embedding          = $embedding,
                 sn.embedded_at        = CASE WHEN $embedding IS NULL
@@ -10705,10 +10710,13 @@ def persist_enriched_parent(
                                              ELSE datetime() END,
                 sn.parent_enriched_at = datetime(),
                 sn.parent_enrich_model = $model,
-                // Structural acceptance — skip REVIEW_NAME (see docstring).
+                // Structural acceptance — skip REVIEW_NAME (see docstring). The
+                // name is a deterministic grammar peel of the children, never
+                // reviewed/refined, so it carries NO reviewer_score_name (scoring
+                // a name we never change is meaningless). ``reviewed_name_at`` is
+                // the "name finalised, docs may proceed" signal; the docs gates
+                // admit derived parents via origin, not a score.
                 sn.name_stage = 'accepted',
-                sn.reviewer_score_name = coalesce(
-                    min_child_score, $structural_score),
                 sn.reviewer_model_name = 'structural-inheritance',
                 sn.reviewed_name_at = coalesce(sn.reviewed_name_at, datetime()),
                 sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
@@ -10723,7 +10731,6 @@ def persist_enriched_parent(
             description=description,
             embedding=embedding,
             model=model,
-            structural_score=DEFAULT_MIN_SCORE,
         )
         if not rows:
             logger.debug(
@@ -10774,12 +10781,13 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
     no longer claims them, refine excludes them).
 
     This promotes every such parent that has a REAL (non-placeholder)
-    description to ``name_stage='accepted'`` with a ``reviewer_score_name``
-    inherited from its accepted children (min — falls back to
-    ``DEFAULT_MIN_SCORE``) and ``reviewer_model_name='structural-inheritance'``.
-    Idempotent and self-healing — safe to call at every ``sn run`` startup.
-    Placeholder-description parents are left for the enrich pool (or are
-    childless zombies). Returns the count promoted.
+    description to ``name_stage='accepted'`` (no ``reviewer_score_name`` — the
+    name is never reviewed, so scoring it is meaningless), stamping
+    ``reviewer_model_name='structural-inheritance'`` and ``reviewed_name_at``
+    (the "name finalised" signal the docs axis keys on). Idempotent and
+    self-healing — safe to call at every ``sn run`` startup. Placeholder-
+    description parents are left for the enrich pool (or are childless zombies).
+    Returns the count promoted.
     """
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -10796,11 +10804,7 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
               AND sn.name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']
               AND sn.description IS NOT NULL
               AND sn.description <> $ph
-            OPTIONAL MATCH (c:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE c.name_stage = 'accepted' AND c.reviewer_score_name IS NOT NULL
-            WITH sn, min(c.reviewer_score_name) AS min_child_score
             SET sn.name_stage = 'accepted',
-                sn.reviewer_score_name = coalesce(min_child_score, $structural),
                 sn.reviewer_model_name = 'structural-inheritance',
                 sn.reviewed_name_at = coalesce(sn.reviewed_name_at, datetime()),
                 sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
@@ -10810,7 +10814,6 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
             RETURN count(sn) AS promoted
             """,
             ph=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-            structural=DEFAULT_MIN_SCORE,
         )
         promoted: int = rows[0]["promoted"] if rows else 0
         if promoted:

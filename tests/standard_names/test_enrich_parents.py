@@ -85,8 +85,9 @@ def _persist_gc(name_stage_returned: str | None):
 
 
 def test_persist_accepts_structurally():
-    """A derived parent skips REVIEW_NAME — accepted directly with an inherited
-    score and the structural-inheritance marker (it is NOT routed to drafted)."""
+    """A derived parent skips REVIEW_NAME — accepted directly with the
+    structural-inheritance marker and NO fabricated name score (the name is a
+    deterministic peel, never reviewed, so scoring it is meaningless)."""
     import imas_codex.standard_names.graph_ops as g
 
     gc = _persist_gc("accepted")
@@ -103,14 +104,13 @@ def test_persist_accepts_structurally():
         gc.query.call_args_list[0][0][0],
         gc.query.call_args_list[0][1],
     )
-    # Accepted directly (no review routing); score inherited from children.
+    # Accepted directly (no review routing), marked structural, NO name score.
     assert "sn.name_stage = 'accepted'" in set_cypher
     assert "structural-inheritance" in set_cypher
-    assert "min(c.reviewer_score_name)" in set_cypher
-    # No drafted-routing CASE remains.
+    # No fabricated name score is SET (the comment may mention the field).
+    assert "sn.reviewer_score_name =" not in set_cypher
     assert "name_stage = CASE" not in set_cypher
     assert set_params["embedding"] == [0.1, 0.2, 0.3]
-    assert set_params["structural_score"] == g.DEFAULT_MIN_SCORE
 
 
 def test_persist_noop_when_node_unmatched():
