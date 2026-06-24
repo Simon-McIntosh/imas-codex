@@ -8200,7 +8200,10 @@ def claim_review_docs_batch(
         # name-review score OR a structurally-accepted derived parent (its name
         # is an admission-vetted grammar peel, never reviewed/scored by design).
         " AND (sn.reviewer_score_name IS NOT NULL"
-        " OR coalesce(sn.origin, '') = 'derived')"
+        " OR (coalesce(sn.origin, '') = 'derived'"
+        "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+        "       WHERE NOT coalesce(kid.name_stage, '') IN"
+        "       ['superseded', 'exhausted'] }))"
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -9776,7 +9779,10 @@ def claim_generate_docs_batch(
         #     a name we never change is meaningless). It is docs-eligible by
         #     being a structurally-accepted derived parent.
         " AND (sn.reviewer_score_name IS NOT NULL"
-        " OR coalesce(sn.origin, '') = 'derived')"
+        " OR (coalesce(sn.origin, '') = 'derived'"
+        "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+        "       WHERE NOT coalesce(kid.name_stage, '') IN"
+        "       ['superseded', 'exhausted'] }))"
     )
 
     items = _claim_sn_atomic(
@@ -10058,7 +10064,10 @@ def claim_refine_docs_batch(
         # name-review score OR a structurally-accepted derived parent (admission-
         # vetted name, never reviewed/scored by design).
         " AND (sn.reviewer_score_name IS NOT NULL"
-        " OR coalesce(sn.origin, '') = 'derived')"
+        " OR (coalesce(sn.origin, '') = 'derived'"
+        "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+        "       WHERE NOT coalesce(kid.name_stage, '') IN"
+        "       ['superseded', 'exhausted'] }))"
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
