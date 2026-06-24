@@ -7688,6 +7688,15 @@ async def process_review_docs_batch(
         if lease is None:
             lease = mgr.reserve(0.0, phase="review_docs")
 
+        # Derived parents use a SINGLE-model review (the chain anchor), not the
+        # full RD-quorum: a structural abstraction reviewed against the
+        # parent-aware rubric does not need multi-model adjudication, and the
+        # quorum is the cost-dominant phase. One call (resolution_method=
+        # 'single_review') cuts parent docs-review cost ~2-3x.
+        _item_review_models = (
+            review_models[:1] if item.get("derived_children") else review_models
+        )
+
         try:
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
@@ -7695,7 +7704,7 @@ async def process_review_docs_batch(
                 response_model=StandardNameQualityReviewDocsBatch,
                 user_prompt=user_prompt,
                 system_prompt=system_prompt,
-                models=review_models,
+                models=_item_review_models,
                 disagreement_threshold=disagreement_threshold,
                 rubric_dims=(
                     "description_quality",
