@@ -16,8 +16,8 @@
   <title>SN coverage &amp; hygiene | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-23">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-06-25">
+<meta name="plan-version" content="3">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -79,8 +79,28 @@
       <code>build-models</code> — added <code>parent_enriched_at</code> /
       <code>parent_enrich_model</code> slots). Legacy followups
       <code>f-snph-027</code> (§1) and <code>f-snph-025</code> (§2) on
-      <code>sn-pipeline-hardening</code> resolved. The 441-parent full drain is the
-      queued operator campaign (<code>f-snch-002</code>).
+      <code>sn-pipeline-hardening</code> resolved.
+    </p>
+    <p>
+      <strong>Full drain (<code>f-snch-002</code>, done 2026-06-25).</strong>
+      Documented <strong>854 derived parents</strong> at mean
+      <strong>0.966 / 97% parent-rubric pass</strong> for ~$421 of a $500 budget,
+      across nine $50 rotations. Nine implementation fixes landed mid-drain (each
+      validated on live content) — most notably: derived parents
+      <strong>skip REVIEW_NAME</strong> and accept structurally from their
+      children (the name is a deterministic peel that must match the children, so
+      review/refine could only drift it — <code>6332899c</code>); a
+      <strong>distinct parent docs rubric</strong> (generalization · positioning ·
+      physics_accuracy · clarity) replaces the standalone-name dims
+      (<code>d15f7831</code>); and the docs gates require a live child so
+      childless parents are excluded (<code>53daa931</code>). <strong>Finding:</strong>
+      the derived-parent population is structurally unstable — each
+      <code>sn run</code> startup re-derives <code>HAS_PARENT</code>, minting new
+      parents and orphaning others (327 now childless) — so the drain chased a
+      moving target and was stopped at the bulk. Export deferred. Residual
+      (stabilize the churn, clean childless zombies, final docs top-up + export)
+      handed to <a href="/imas-codex/sn-structural-repair.html">sn-structural-repair</a>
+      via <code>f-snch-003</code>.
     </p>
     <p>
       <strong>Successors.</strong> §1 enrichment is the prerequisite for two
@@ -148,7 +168,7 @@ Done-when
   5. uv run pytest tests/standard_names/ green; resolve f-snph-027 + f-snph-025 on sn-pipeline-hardening; followup written + this resolved.</pre>
     <p class="r-fu-outcome">Shipped in 610dc0ac (full SN suite green). §1: enrich_parents 7th async pool synthesizes children-grounded descriptions for placeholder derived parents and routes them name_stage→drafted. Live verify: 87 enriched in $1.70, 2 name-accepted @0.93–0.94, 2 docs-drafted with children-consistent docs (e.g. hydrogenic_ion_mass_density). Backlog 441 enrichable / 282 childless-skipped (the 612/50 drifted). §2: §2a accept-path normalize + §2b post-drain reconcile + §2c regression tests; proven on a live doc carrying a clean [ion_mass_density](name:ion_mass_density) link. Detailed record: docs/archive/sn-coverage-and-hygiene-landed.html. Legacy f-snph-027/f-snph-025 on sn-pipeline-hardening resolved separately. Remaining: the full 441-parent drain is an operator campaign (see f-snch-002).</p>
     </article>
-<article class="r-fu" data-id="f-snch-002" data-status="open" data-tier="sonnet" data-written-by="reckon-implement" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-coverage-and-hygiene" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snch-002" data-status="resolved" data-tier="sonnet" data-written-by="reckon-implement" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-coverage-and-hygiene" data-resolved-at="2026-06-24T22:23:50+00:00" data-resolved-by="reckon-implement">
     <h4 class="r-fu-title">Full drain: enrich + document the 441 placeholder derived parents to accepted + export</h4>
     <div class="r-fu-body">The enrich_parents pool + accept-path link hygiene are shipped and verified (610dc0ac). Remaining is the operator campaign: drain all 441 enrichable placeholder derived parents through enrich → name-review → accept → docs → docs-review → accepted, then export to the catalog. CAVEAT: --cost-limit is a SOFT cap — verification showed ~1.7× (names) to ~2.7× (docs) overshoot because in-flight batches finish during the grace window (64 review_docs replicas). Budget with 2–3× headroom or lower [sn-pools].review-docs-replicas. Unblocks sn-expert-hints §6, sn-structural-repair, sn-family-harmonization.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -174,6 +194,32 @@ Done-when
   2. a representative sample of formerly-placeholder parents at docs_stage=accepted with children-consistent docs.
   3. `sn release --export-only` (or the normal export leg) emits them to the catalog; spot-check no placeholder description survives export.
   4. followup written (e.g. confirm sn-expert-hints §6 dog-food can edit a real-description parent) + this resolved.</pre>
+    <p class="r-fu-outcome">Bulk docs drain done (~$421 of a $500 budget): 854 derived parents documented (docs_stage=accepted) at mean 0.966 / 97% parent-rubric pass; only ~13 exhausted (borderline). 9 implementation fixes found+fixed mid-drain, each validated on live content: enrich pool + accept-path link hygiene (610dc0ac); names skip REVIEW_NAME, accept structurally from children (6332899c); generate_docs grounds parent docs on children + generalize (0f812e89); review_docs parent-aware (4ad3da41); refine_docs parent-aware (a3b4964f); single-model parent review (a235acee); name-axis lockdown + DISTINCT parent docs rubric generalization/positioning/physics_accuracy/clarity (d15f7831); docs gates admit derived parents by origin, drop fabricated name score (c6faeace); docs gates require a LIVE CHILD — exclude childless zombies (53daa931). KEY FINDING: the derived-parent population is structurally UNSTABLE — every sn run startup re-derives HAS_PARENT edges, minting new placeholder parents (154 fresh appeared in the final rotation, no new names composed) and orphaning others (327 now childless). The docs drain therefore chases a moving target; stopped here rather than burn budget on the treadmill. Export (sn release) deliberately NOT run — exporting a churning population is premature. Residual handed to sn-structural-repair via f-snch-003.</p>
+    </article>
+<article class="r-fu" data-id="f-snch-003" data-status="open" data-tier="opus" data-written-by="reckon-implement" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stabilize derived-parent structural churn + clean childless zombies, then final docs top-up + export</h4>
+    <div class="r-fu-body">The parent docs drain documented 854 parents (mean 0.966) but surfaced that the derived-parent population structurally churns: every sn run startup re-derives HAS_PARENT edges, minting new placeholder parents (154 in one no-new-names rotation) and orphaning others (327 childless). This is sn-structural-repair's core concern. Sequence: (1) root-cause + stabilize the HAS_PARENT re-derivation so it is idempotent on a stable name set (stop the per-startup mint/orphan churn); (2) clean the 327 childless 'zombie' derived parents (delete, or re-child if a successor exists) — note ~221 already carry docs that are now orphaned; (3) only THEN a final small docs top-up (~$80 budget remains) for the stabilized child-bearing residual (~164 pending); (4) run sn release --export-only and spot-check no placeholder description survives export. Do NOT run concurrent with any docs drain (both mutate StandardName/HAS_PARENT).</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-structural-repair
+Tier: opus
+
+Context
+  The sn-coverage-and-hygiene parent docs drain is complete for the achievable bulk: 854 derived parents documented at mean 0.966 / 97% parent-rubric pass, ~$421 spent. It surfaced a structural-instability finding that is squarely sn-structural-repair&#x27;s job.
+
+The finding (root-cause this first)
+  Every `sn run` startup runs rederive_structural_edges + seed_parent_sources + normalize_derived_parent_lifecycle + structural_accept_derived_parents. On a STABLE name set (docs-only runs, no new generate_name) these STILL minted 154 fresh placeholder derived parents in a single rotation and grew the childless count to 327. So the HAS_PARENT re-derivation is NOT idempotent — it churns the parent population (mint new + orphan existing) each startup. Until this is stable, the parent docs drain chases a moving target and cannot truly complete.
+
+State to read
+  imas_codex/standard_names/graph_ops.py: rederive_structural_edges, seed_parent_sources, _materialize_derived_parent_rows, _rewire_has_parent_off_superseded, normalize_derived_parent_lifecycle, structural_accept_derived_parents; parents.py (is_admissible_parent_name, single-child shadow veto).
+  Graph: derived parents by (has-live-child, description=placeholder, docs_stage); the 327 childless (sn.origin=&#x27;derived&#x27; AND no live HAS_PARENT child) of which ~221 already have docs.
+
+Done-when
+  1. rederive/seed is idempotent on a stable name set — a no-new-names sn run startup mints 0 new parents and orphans 0 (verify by running startup twice, diffing the derived-parent population).
+  2. The 327 childless zombies are resolved (deleted, or re-childed to a live successor); their orphaned docs handled.
+  3. After stabilization, a final `sn run --flush --docs-only` cycle drains the residual child-bearing pending to docs_accepted (parent rubric; ~$80 budget remains).
+  4. `sn release --export-only` emits the catalog; spot-check NO placeholder description and NO childless parent is exported.
+  5. tests green; followup written; this resolved.
+  Also consumes sn-coverage-and-hygiene §1 source_domains as the cross-domain legitimacy oracle (per the original sn-structural-repair scope).</pre>
     </article>
 </section>
   </main>
