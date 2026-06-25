@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-25">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -40,11 +40,14 @@
           orphaned-content cleanup (794 stale DocsRevisions cleared). Commits
           <code>da19942e</code>/<code>4d16adf1</code>/<code>a9dbc840</code>. Record:
           <a href="archive/sn-structural-repair-s2b-landed.html">§2b landed</a>.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>§2c/§2d — canonicalize + record defects</strong> —
+          <strong>0 NonCanonicalNameError</strong> remain: 27 names renamed in-place to their canonical
+          token order (edges/docs preserved) + 2 deprecate-merged. The 7 genuine defects (6 subject-stack,
+          1 unknown-base) recorded as 5 <code>VocabGap</code> nodes for a maintainer vocab decision. $0.</li>
         <li><strong>Decisions locked:</strong> <code>superseded-base-parent</code> → un-supersede (each
           superseded base was wrongly refined into one of its own projection children);
           <code>repair-vehicle</code> → code-fix + one-time data repair.</li>
-        <li><strong>Remaining:</strong> §2c/§2d (canonical renames + re-compose the 36 defects),
-          then docs top-up for ~25 parents + export.</li>
+        <li><strong>Remaining:</strong> docs top-up for the ~25 undocumented stable parents + export.</li>
       </ul>
     </section>
 
@@ -326,7 +329,7 @@ Done-when
   5. Followup written for §2c/§2d (renames + re-compose, residual in archive) + this one resolved.</pre>
     <p class="r-fu-outcome">§2b landed (2026-06-25): idempotency fixed to a FIXPOINT (startup mints 0 / orphans 0). Four code fixes in graph_ops.py — reconcile-not-accrete edges; rederive from LIVE names only + clear dead-name edges; zero-incoming reaper; batch-authoritative admission (full_rebuild) [the decisive one — transient graph topology was flipping the qualifier single-child shadow-veto verdict → 2-cycle]; + _rewire projection-of-self guard; + Neo4j-2026 NOT-IN fix. Data repair: mode_number/electron/ion_diffusivity un-superseded as vector bases, bad projection-of-self REFINED_FROM deleted, toroidal_mhd_mode_number no longer a projection parent (3→0 children), §2b projection-under-component defects 12→0. Derived parents stabilized 1375→284 (595 documented reaped — churn-era shadows; fixpoint guarantees nothing legitimately-derivable is lost). Commits da19942e (converge), 4d16adf1 (initial 3-bug fix). Suite green except 4 pre-existing unrelated failures. PLUS automatic orphaned-content cleanup (a9dbc840): reaper deletes its DocsRevisions inline + sweep_orphaned_docs_revisions backstop each startup; cleared 794 orphaned revisions live. Record: archive/sn-structural-repair-s2b-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-snsr-003" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2c" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snsr-003" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2c" data-resolved-at="2026-06-25T06:18:47+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§2c/§2d — canonical renames + re-compose the 36 true defects</h4>
     <div class="r-fu-body">§2a's residual is 36 accepted non-derived names the current ISN grammar rejects (grammar_parse_fallback=true). §2c: drive rename_cascade for the absent-target canonical renames (e.g. lower_neutron_energy→neutron_lower_energy), deprecate-and-merge any whose canonical already exists superseded — all --dry-run first. §2d: route the subject-stacked + unknown-base names through GENERATE_NAME / an ISN vocab rotation; each either parses cleanly or carries a recorded VocabGap. Exact 36-name list in archive/sn-structural-repair-s2a-landed.html.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -359,6 +362,7 @@ Done-when
      non-derived names (or each residual carries a recorded VocabGap + note).
   2. uv run pytest tests/standard_names/ green.
   3. Followup written for the docs top-up + export + this one resolved.</pre>
+    <p class="r-fu-outcome">§2c/§2d landed (2026-06-25). §2c: 0 NonCanonicalNameError remain among accepted non-derived names — 27 renamed in-place (SET id=canonical_form from NonCanonicalNameError.canonical_form, preserving all edges/docs/reviews, grammar columns re-parsed, scalar produced_sn_id/DocsRevision.sn_id refs updated) + 2 deprecate-merged where the canonical already existed (sources migrated, old superseded via HAS_SUCCESSOR). §2d: the 7 genuine defects (6 subject-stack: ion+particle×3, helium_4+ion, hydrogenic+ion_species, deuterium_deuterium+neutron; 1 unknown-base: normal_non_axisymmetric_magnetic_field) recorded as 5 VocabGaps (vocab_gap:subject:{particle,ion,ion_species,neutron} category=subject_stack + vocab_gap:physical_base:normal_non_axisymmetric_magnetic_field category=unknown_base, each carrying affected_standard_names). These need a maintainer naming/vocab-rotation decision (the grammar forbids stacked subjects); tracked in-graph rather than guessed. $0, no code changed.</p>
     </article>
 <article class="r-fu" data-id="f-snsr-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Docs top-up for the ~25 undocumented stable derived parents + export</h4>
