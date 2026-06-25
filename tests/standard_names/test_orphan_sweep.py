@@ -5,7 +5,8 @@ Section 1 — Unit tests (mock GraphClient, no live Neo4j required)
 - test_revert_stuck_refining_name          — name_stage='refining' + stale claimed_at → reverted
 - test_revert_stuck_refining_docs          — docs_stage='refining' + stale claimed_at → reverted
 - test_no_revert_within_timeout            — claimed_at is fresh → not reverted
-- test_no_revert_when_claim_clean          — stage='refining' but claimed_at IS NULL → not reverted
+- test_tick_aggregates_zero_counts         — all queries return 0 → tick reports 0 (aggregation)
+- test_sweep_reverts_unclaimed_refining_docs — docs refining + claimed_at IS NULL → reverted (live)
 - test_stale_token_cleared_non_refining    — stale claim_token on non-refining SN → cleared
 - test_loop_cancels_on_stop_event          — coroutine exits promptly when stop_event is set
 - test_concurrent_safe                     — two ticks in flight don't double-revert (idempotent)
@@ -146,13 +147,13 @@ def test_no_revert_within_timeout():
 # ---------------------------------------------------------------------------
 
 
-def test_no_revert_when_claim_clean():
-    """stage='refining' but claimed_at IS NULL → query returns 0 (WHERE filters it out).
+def test_tick_aggregates_zero_counts():
+    """When every sweep query returns 0, the tick reports 0 for each category.
 
-    The WHERE clause requires claimed_at IS NOT NULL, so unclaimed refining
-    nodes are ignored.  We verify the tick returns 0 for name_refining.
+    Aggregation-only check (canned results); the WHERE semantics for the
+    unclaimed-refining case are covered by
+    ``test_sweep_reverts_unclaimed_refining_docs`` against a live graph.
     """
-    # Both refining queries return 0 (claimed_at IS NULL doesn't match filter).
     gc = _make_gc(_zero_results())
     with _patch_gc(gc):
         counts = _orphan_sweep_tick(timeout_s=300)
@@ -536,6 +537,30 @@ def test_sweep_skips_fresh_refining_docs(_gc, _clean_test_nodes):
     row = _fetch_sn(_gc, sn_id)
     assert row["docs_stage"] == "refining", row
     assert row["claim_token"] is not None, row
+
+
+@pytest.mark.graph
+@pytest.mark.integration
+def test_sweep_reverts_unclaimed_refining_docs(_gc, _clean_test_nodes):
+    """docs_stage='refining' with claimed_at IS NULL → reverted to 'reviewed'.
+
+    A refining node whose claim was cleared without advancing the stage owns no
+    worker and is stranded forever under a stale-claim-only sweep. Recovery must
+    catch the unclaimed case too.
+    """
+    sn_id = f"{_TEST_ID_PREFIX}unclaimed_docs"
+    _create_sn(_gc, sn_id, docs_stage="refining", stale=False)
+    _gc.query(
+        "MATCH (sn:StandardName {id: $id}) "
+        "SET sn.claimed_at = null, sn.claim_token = null",
+        id=sn_id,
+    )
+
+    counts = _orphan_sweep_tick(timeout_s=300)
+
+    assert counts["docs_refining"] >= 1
+    row = _fetch_sn(_gc, sn_id)
+    assert row["docs_stage"] == "reviewed", row
 
 
 # ---------------------------------------------------------------------------

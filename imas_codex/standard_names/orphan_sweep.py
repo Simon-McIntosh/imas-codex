@@ -34,8 +34,8 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
         """
         MATCH (sn:StandardName)
         WHERE sn.name_stage = 'refining'
-          AND sn.claimed_at IS NOT NULL
-          AND sn.claimed_at < datetime() - duration({seconds: $timeout_s})
+          AND (sn.claimed_at IS NULL
+               OR sn.claimed_at < datetime() - duration({seconds: $timeout_s}))
         SET sn.name_stage = 'reviewed',
             sn.claim_token = null,
             sn.claimed_at  = null
@@ -47,8 +47,8 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
         """
         MATCH (sn:StandardName)
         WHERE sn.docs_stage = 'refining'
-          AND sn.claimed_at IS NOT NULL
-          AND sn.claimed_at < datetime() - duration({seconds: $timeout_s})
+          AND (sn.claimed_at IS NULL
+               OR sn.claimed_at < datetime() - duration({seconds: $timeout_s}))
         SET sn.docs_stage  = 'reviewed',
             sn.claim_token = null,
             sn.claimed_at  = null
