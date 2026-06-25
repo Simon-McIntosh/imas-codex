@@ -1897,8 +1897,11 @@ def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
                 """
                 MATCH (sn:StandardName {id: $parent_id})
                 OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview)
-                WITH sn, collect(DISTINCT rv) AS reviews
+                OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(dr:DocsRevision)
+                WITH sn, collect(DISTINCT rv) AS reviews,
+                     collect(DISTINCT dr) AS revisions
                 FOREACH (r IN reviews | DETACH DELETE r)
+                FOREACH (d IN revisions | DETACH DELETE d)
                 DETACH DELETE sn
                 RETURN 1 AS deleted
                 """,
@@ -1908,6 +1911,34 @@ def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
         if rows:
             deleted += int(rows[0].get("deleted", 0))
     return deleted
+
+
+def sweep_orphaned_docs_revisions(gc: Any) -> int:
+    """Delete DocsRevision snapshots no longer linked to any StandardName.
+
+    A ``DocsRevision`` is owned by exactly one ``StandardName`` via
+    ``(sn)-[:DOCS_REVISION_OF]->(dr)``. When the owning name is reaped its
+    revisions become unreachable scaffolding. Although ``_delete_derived_parent_nodes``
+    now deletes a parent's revisions inline, this sweep is the idempotent
+    backstop: it clears any revision orphaned by an earlier reap (or a future
+    deletion path that forgets to). Runs every startup so orphaned docs content
+    can never accumulate. Returns the number deleted.
+    """
+    rows = list(
+        gc.query(
+            """
+            MATCH (dr:DocsRevision)
+            WHERE NOT EXISTS { (:StandardName)-[:DOCS_REVISION_OF]->(dr) }
+            WITH dr LIMIT 50000
+            DETACH DELETE dr
+            RETURN count(dr) AS n
+            """
+        )
+    )
+    n = int(rows[0]["n"]) if rows else 0
+    if n:
+        logger.info("sweep_orphaned_docs_revisions: deleted %d orphaned revisions", n)
+    return n
 
 
 def _derived_parent_source_metadata(
@@ -2309,6 +2340,11 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
                     "derived parents",
                     reaped,
                 )
+
+        # Automatic orphaned-content cleanup: clear any DocsRevision left
+        # dangling by a past reap (idempotent backstop — no orphaned docs
+        # content can accumulate across startups).
+        sweep_orphaned_docs_revisions(gc)
 
         if (
             not seedable_parents

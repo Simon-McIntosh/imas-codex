@@ -230,6 +230,10 @@ class _StatefulDerivedParentGraph:
         ):
             return []
 
+        # Orphaned-DocsRevision sweep (normalize_derived_parent_lifecycle).
+        if "MATCH (dr:DocsRevision)" in cypher and "DETACH DELETE dr" in cypher:
+            return [{"n": 0}]
+
         raise AssertionError(f"Unexpected query: {cypher}")
 
     @contextmanager
