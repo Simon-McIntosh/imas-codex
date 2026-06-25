@@ -347,21 +347,23 @@ def test_refine_name_claim_skips_derived_origin():
     )
 
 
-def test_review_name_claim_includes_review_ready_derived():
-    """The REVIEW_NAME claim no longer excludes origin='derived' — derived
-    parents now flow through REVIEW_NAME (Phase 4) to earn a real
-    ``reviewer_score_name`` before they can become docs-eligible. Instead it
-    gates on a real description: a parent still carrying the deterministic
-    placeholder is held out until enrichment fills a real description.
+def test_review_name_claim_excludes_derived_parents():
+    """Derived parents SKIP REVIEW_NAME and are accepted structurally (the name
+    score is inherited from their accepted children, with
+    ``reviewer_model_name='structural-inheritance'``). A structural abstraction
+    is systematically penalised by the name quorum for being less specific than
+    its own children, so ``claim_review_name_batch`` excludes ``origin='derived'``
+    and additionally gates on a real (non-placeholder) description so only
+    review-ready pipeline names are scored.
     """
     import inspect
 
     from imas_codex.standard_names import graph_ops
 
     src = inspect.getsource(graph_ops.claim_review_name_batch)
-    assert "coalesce(sn.origin, '') <> 'derived'" not in src, (
-        "claim_review_name_batch must NOT exclude origin='derived' — derived "
-        "parents are reviewed before docs (name-review is a hard docs gate)."
+    assert "coalesce(sn.origin, '') <> 'derived'" in src, (
+        "claim_review_name_batch must exclude origin='derived' — derived parents "
+        "skip REVIEW_NAME and are accepted structurally from their children."
     )
     assert "sn.description <> $parent_desc_placeholder" in src, (
         "claim_review_name_batch must exclude the deterministic-parent "

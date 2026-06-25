@@ -220,6 +220,16 @@ class _StatefulDerivedParentGraph:
                 return [{"id": self.parent["id"]}]
             return []
 
+        # Childless-derived-parent reaper (normalize_derived_parent_lifecycle).
+        # The single parent under test always carries live children in these
+        # scenarios, so it is never a childless zombie — return nothing.
+        if (
+            "MATCH (p:StandardName {origin: 'derived'})" in cypher
+            and "NOT IN ['superseded', 'exhausted']" in cypher
+            and "RETURN p.id AS id" in cypher
+        ):
+            return []
+
         raise AssertionError(f"Unexpected query: {cypher}")
 
     @contextmanager
@@ -460,6 +470,9 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
     from imas_codex.standard_names.parents import AdmissionResult
 
     gc = MagicMock()
+    # The childless-zombie reaper SELECT must find nothing here (the deletion
+    # under test is the inadmissible-accepted cleanup, not the reaper).
+    gc.query.return_value = []
 
     with (
         patch(

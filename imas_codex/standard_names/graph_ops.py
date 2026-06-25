@@ -1373,6 +1373,40 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
     # deterministic-parent redesign plan.
     co_batch = _filter_admissible_parents(co_batch, gc)
 
+    # Reconcile (NOT accrete) each processed child's structural HAS_PARENT
+    # edges to EXACTLY the current admitted derivation. ``derive_edges`` is a
+    # deterministic function of the child name, but the rule that computes the
+    # structural parent has changed over the pipeline's life; MERGE-only writes
+    # left a child pointing at a parent the CURRENT derivation no longer emits
+    # (the ``toroidal_mhd_mode_number`` / diffusivity tangles). Without this
+    # step every startup keeps the stale edge alive and, when the rule moved a
+    # child to a new parent, orphans the old parent into a childless zombie —
+    # the source of the derived-parent churn. Deleting structural HAS_PARENT
+    # edges (those carrying an ``operator_kind`` — all HAS_PARENT edges are
+    # derivation-produced) whose target is not in the freshly admitted set
+    # makes the edge topology a pure function of the current grammar. Runs for
+    # EVERY child in this batch, including those whose derivation now yields no
+    # admissible parent (so their last stale edge is cleared).
+    desired_by_child: dict[str, set[str]] = {}
+    for e in co_batch:
+        if e.get("from_name"):
+            desired_by_child.setdefault(e["from_name"], set()).add(e["to_name"])
+    recon = [
+        {"child": n["id"], "keep": sorted(desired_by_child.get(n["id"], set()))}
+        for n in names
+        if n.get("id")
+    ]
+    if recon:
+        gc.query(
+            """
+            UNWIND $recon AS rc
+            MATCH (c:StandardName {id: rc.child})-[r:HAS_PARENT]->(p:StandardName)
+            WHERE r.operator_kind IS NOT NULL AND NOT (p.id IN rc.keep)
+            DELETE r
+            """,
+            recon=recon,
+        )
+
     if co_batch:
         gc.query(
             """
@@ -1579,9 +1613,19 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
               AND EXISTS { (child)-[:HAS_PARENT]->(old) }
             MATCH path = (tip:StandardName)-[:REFINED_FROM*1..]->(old)
             WHERE tip.name_stage <> 'superseded'
+              // Never migrate onto a successor that is itself a structural
+              // projection/child of `old` — i.e. a bare base wrongly "refined
+              // into" one of its own axis-projections (mode_number ->
+              // toroidal_mode_index, electron_diffusivity ->
+              // radial_electron_diffusivity). Migrating the base's children
+              // onto such a tip recreates the exact domain-mismatched tangle
+              // this function exists to repair; the correct remedy is to
+              // un-supersede the base, so leave the edge in place here.
+              AND NOT EXISTS { (tip)-[:HAS_PARENT]->(old) }
             WITH old, tip, length(path) AS hops
             ORDER BY hops DESC
             WITH old, head(collect(tip)) AS tip
+            WHERE tip IS NOT NULL
             MATCH (child)-[c:HAS_PARENT]->(old)
             WITH tip, child, properties(c) AS props, c
             DELETE c
@@ -2139,6 +2183,39 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
                 "accepted derived parents",
                 deleted,
             )
+
+        # Reap childless derived "zombie" parents. A derived parent is a
+        # structural abstraction over its children; once every child has been
+        # re-parented (edge reconciliation in ``_write_standard_name_edges``)
+        # or superseded, it abstracts over nothing. The cleanup query above
+        # only re-checks parents that STILL have a child, so childless derived
+        # parents accumulated unboundedly (often carrying orphaned docs). Delete
+        # them along with their docs/reviews/derived-source scaffolding. Scoped
+        # to ``origin='derived'`` so pipeline- and catalog-authored names are
+        # never touched, even when momentarily childless.
+        childless = [
+            r["id"]
+            for r in gc.query(
+                """
+                MATCH (p:StandardName {origin: 'derived'})
+                WHERE NOT EXISTS {
+                    MATCH (c:StandardName)-[:HAS_PARENT]->(p)
+                    WHERE coalesce(c.name_stage, '') NOT IN ['superseded', 'exhausted']
+                }
+                RETURN p.id AS id
+                """
+            )
+            or []
+        ]
+        if childless:
+            reaped = _delete_derived_parent_nodes(gc, childless)
+            if reaped:
+                deleted += reaped
+                logger.info(
+                    "normalize_derived_parent_lifecycle: reaped %d childless "
+                    "derived parents",
+                    reaped,
+                )
 
         if (
             not seedable_parents
