@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="archive">
+  <title>sn-structural-repair §2b landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§2b — derived-parent idempotency fix + structural data repair (landed 2026-06-25)</h1>
+    <p>
+      The handoff <code>f-snch-003</code> reframed §2b: the derived-parent churn
+      was a <strong>live non-idempotency bug</strong>, not stale data. Root-caused,
+      fixed in code, then repaired the live graph to a fixpoint.
+    </p>
+
+    <h2>The fix — four changes in <code>graph_ops.py</code></h2>
+    <ol>
+      <li><strong>Reconcile, not accrete</strong> — <code>_write_standard_name_edges</code>
+        deletes each child's stale derived HAS_PARENT edges and writes exactly the
+        current admitted derivation.</li>
+      <li><strong>Live names only</strong> — <code>rederive_structural_edges</code>
+        derives structure from non-superseded/-exhausted names and clears derived
+        edges originating FROM dead names (they were re-minting reaped parents).</li>
+      <li><strong>Zero-incoming reaper</strong> — <code>normalize_derived_parent_lifecycle</code>
+        reaps truly-orphaned <code>origin='derived'</code> parents (reaping on
+        "no live child" ping-ponged: dead children re-derive the parent each startup).</li>
+      <li><strong>Batch-authoritative admission (decisive)</strong> —
+        <code>_filter_admissible_parents(..., full_rebuild=True)</code> evaluates
+        Clause B + the single-child shadow veto from the batch alone, not transient
+        pre-reconcile graph topology. That graph dependence flipped the shadow-veto
+        verdict for qualifier single-child parents (<code>absorbed_</code>,
+        <code>total_</code>, <code>average_</code>…) → a clean 2-cycle. Batch-authoritative
+        ⇒ admission is a pure function of the live-name set ⇒ convergence.</li>
+    </ol>
+    <p>
+      Also: <code>_rewire_has_parent_off_superseded</code> no longer migrates children
+      onto a REFINED_FROM successor that is a projection-of-self of the base. Caught a
+      Neo4j-2026 <code>NOT IN</code> syntax bug that passed the string-matching unit
+      stub but would have failed live.
+    </p>
+
+    <h2>Convergence to a fixpoint</h2>
+    <table>
+      <thead><tr><th>pass</th><th>derived</th><th>minted</th><th>removed</th><th>s2b defect</th><th>zero-incoming</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>479→347</td><td>54</td><td>186</td><td>0</td><td>60</td></tr>
+        <tr><td>2</td><td>347→302</td><td>15</td><td>60</td><td>0</td><td>14</td></tr>
+        <tr><td>3</td><td>302→287</td><td>2</td><td>17</td><td>0</td><td>2</td></tr>
+        <tr><td>4</td><td>287→286</td><td>1</td><td>2</td><td>0</td><td>1</td></tr>
+        <tr><td>5</td><td>286→284</td><td>0</td><td>2</td><td>0</td><td>0</td></tr>
+        <tr><td><strong>6</strong></td><td><strong>284→284</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Fixpoint reached</strong> — a no-new-names startup mints 0 and orphans 0
+      (the handoff's primary done-when). Convergence spans several passes because each
+      startup climbs one grammar level of the parent chain; <code>sn run</code> runs the
+      startup once, so the graph converges over successive runs, each a fixpoint step.
+    </p>
+
+    <h2>Data repair outcome</h2>
+    <table>
+      <thead><tr><th>metric</th><th>before</th><th>after</th></tr></thead>
+      <tbody>
+        <tr><td><code>mode_number</code> tangle: <code>toroidal_mhd_mode_number</code> projection children</td><td>3</td><td><strong>0</strong></td></tr>
+        <tr><td><code>mode_number</code> base</td><td>superseded, scalar, 0 children</td><td><strong>accepted, vector, 3 axes</strong></td></tr>
+        <tr><td>projection-under-component defects (§2b query)</td><td>12</td><td><strong>0</strong></td></tr>
+        <tr><td>derived parents (total)</td><td>1375</td><td><strong>284</strong></td></tr>
+        <tr><td>childless / zero-incoming derived</td><td>327</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Un-superseded <code>mode_number</code>, <code>electron_diffusivity</code>,
+      <code>ion_diffusivity</code> as live vector bases (decision
+      <code>superseded-base-parent</code>); deleted their projection-of-self REFINED_FROM
+      edges. <code>particle_diffusivity</code> correctly did NOT survive — it has only one
+      projection child, so it is not a vector base.
+    </p>
+    <p>
+      Stabilizing reaped <strong>595 documented</strong> parents (854→259). This is
+      correct, not loss: the fixpoint property guarantees any legitimately-derivable
+      parent reappears, so the reaped set were churn-era shadow/zombie artifacts of the
+      unstable pipeline (the handoff flagged the population as "structurally unstable"
+      and deliberately never exported it). Doc content survives in orphaned
+      <code>DocsRevision</code> snapshots. Only ~25 stable derived parents now need docs.
+    </p>
+
+    <h2>What's next</h2>
+    <p>
+      §2c/§2d: canonical renames + re-compose the 36 true defects (from §2a). Then the
+      docs top-up for the ~25 undocumented stable parents + export. The 2954 orphaned
+      <code>DocsRevision</code> snapshots are a cleanup followup.
+    </p>
+  </main>
+</body>
+</html>

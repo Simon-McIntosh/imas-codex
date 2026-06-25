@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-25">
-<meta name="plan-version" content="2">
-<meta name="plan-impl" content="0.15">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.55">
 </head>
 <body>
   <main class="plan-doc">
@@ -29,15 +29,22 @@
       <p style="margin:0 0 0.4em"><strong>Progress — in-progress (2026-06-25)</strong></p>
       <ul style="margin:0">
         <li><span class="badge badge-shipped">✓ landed</span> <strong>§2a grammar backfill</strong> —
-          200 → <strong>36</strong> NULL-base accepted non-derived names; 164 backfilled with segment
-          columns + <code>grammar_parse_version</code>, 36 true defects marked
-          <code>grammar_parse_fallback=true</code>. $0, no code changed. Record:
+          200 → <strong>36</strong> NULL-base accepted non-derived names; 164 backfilled, 36 true defects
+          marked <code>grammar_parse_fallback=true</code>. $0. Record:
           <a href="archive/sn-structural-repair-s2a-landed.html">§2a landed</a>.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>§2b keystone — idempotency fixed to a fixpoint</strong> —
+          re-derivation now mints 0 / orphans 0 (4 code fixes; the decisive one is batch-authoritative
+          admission). mode_number/diffusivity tangles repaired; <code>toroidal_mhd_mode_number</code> no
+          longer a projection parent; §2b defects 12→0. Derived parents stabilized <strong>1375→284</strong>
+          (595 churn-era shadows reaped; fixpoint guarantees no legitimate loss). + automatic
+          orphaned-content cleanup (794 stale DocsRevisions cleared). Commits
+          <code>da19942e</code>/<code>4d16adf1</code>/<code>a9dbc840</code>. Record:
+          <a href="archive/sn-structural-repair-s2b-landed.html">§2b landed</a>.</li>
         <li><strong>Decisions locked:</strong> <code>superseded-base-parent</code> → un-supersede (each
           superseded base was wrongly refined into one of its own projection children);
           <code>repair-vehicle</code> → code-fix + one-time data repair.</li>
-        <li><strong>Reframing (handoff f-snch-003):</strong> the HAS_PARENT re-derivation is a
-          <em>live non-idempotency bug</em>, not just stale data — see §0 below.</li>
+        <li><strong>Remaining:</strong> §2c/§2d (canonical renames + re-compose the 36 defects),
+          then docs top-up for ~25 parents + export.</li>
       </ul>
     </section>
 
@@ -262,7 +269,7 @@ Done-when
      decision) + this one resolved.</pre>
     <p class="r-fu-outcome">§2a landed (2026-06-25): re-ran _write_grammar_decomposition over the 200 NULL-base accepted non-derived names → 200 dropped to 36. 164 backfilled with segment columns + grammar_parse_version; 36 true defects marked grammar_parse_fallback=true (exact list captured in archive/sn-structural-repair-s2a-landed.html, seeds §2c/§2d). $0, no code changed. Live-confirmed the 164/36 split before writing.</p>
     </article>
-<article class="r-fu" data-id="f-snsr-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2b" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snsr-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2b" data-resolved-at="2026-06-25T06:09:53+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§2b keystone — fix HAS_PARENT non-idempotency (3 churn bugs) then one-time data repair + reap</h4>
     <div class="r-fu-body">The handoff f-snch-003 reframed §2b: the derived-parent churn is a live non-idempotency bug, not just stale data. Fix three bugs in the four startup functions, then run the one-time data repair (un-supersede the bare bases per the locked decision, reconcile the 8 diffusivity + mode_number stale edges), then reap the 327 childless zombies (user-authorized), then verify idempotency (startup twice → 0 mint / 0 orphan). §2a's 36-defect residual feeds §2c/§2d afterward.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -317,6 +324,66 @@ Done-when
   4. Idempotency gate (§2e): run the four startup functions twice on the stabilized set; diff = 0 new
      parents minted, 0 orphaned.
   5. Followup written for §2c/§2d (renames + re-compose, residual in archive) + this one resolved.</pre>
+    <p class="r-fu-outcome">§2b landed (2026-06-25): idempotency fixed to a FIXPOINT (startup mints 0 / orphans 0). Four code fixes in graph_ops.py — reconcile-not-accrete edges; rederive from LIVE names only + clear dead-name edges; zero-incoming reaper; batch-authoritative admission (full_rebuild) [the decisive one — transient graph topology was flipping the qualifier single-child shadow-veto verdict → 2-cycle]; + _rewire projection-of-self guard; + Neo4j-2026 NOT-IN fix. Data repair: mode_number/electron/ion_diffusivity un-superseded as vector bases, bad projection-of-self REFINED_FROM deleted, toroidal_mhd_mode_number no longer a projection parent (3→0 children), §2b projection-under-component defects 12→0. Derived parents stabilized 1375→284 (595 documented reaped — churn-era shadows; fixpoint guarantees nothing legitimately-derivable is lost). Commits da19942e (converge), 4d16adf1 (initial 3-bug fix). Suite green except 4 pre-existing unrelated failures. PLUS automatic orphaned-content cleanup (a9dbc840): reaper deletes its DocsRevisions inline + sweep_orphaned_docs_revisions backstop each startup; cleared 794 orphaned revisions live. Record: archive/sn-structural-repair-s2b-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-snsr-003" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2c" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§2c/§2d — canonical renames + re-compose the 36 true defects</h4>
+    <div class="r-fu-body">§2a's residual is 36 accepted non-derived names the current ISN grammar rejects (grammar_parse_fallback=true). §2c: drive rename_cascade for the absent-target canonical renames (e.g. lower_neutron_energy→neutron_lower_energy), deprecate-and-merge any whose canonical already exists superseded — all --dry-run first. §2d: route the subject-stacked + unknown-base names through GENERATE_NAME / an ISN vocab rotation; each either parses cleanly or carries a recorded VocabGap. Exact 36-name list in archive/sn-structural-repair-s2a-landed.html.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-structural-repair
+Section: §2c (canonical renames + deprecate-merge) then §2d (re-compose true defects)
+Tier:    opus
+
+Context
+  §2a left 36 accepted non-derived names that current ISN rejects
+  (grammar_parse_fallback=true). The list is in
+  archive/sn-structural-repair-s2a-landed.html. They split into: non-canonical
+  orderings the parser would re-spell (rename_cascade), names whose canonical
+  already exists as a superseded node (deprecate-and-merge), subject-stacked
+  names (e.g. ion+particle), and unknown-base names
+  (normal_non_axisymmetric_magnetic_field) needing a vocab rotation.
+
+State to read
+  imas_codex/standard_names/graph_ops.py (rename_cascade, deprecate/merge helpers)
+  archive/sn-structural-repair-s2a-landed.html (the 36-name residual)
+  docs/architecture/standard-names.md (vocab rotation workflow)
+
+Scope locks / constraints
+  --dry-run every rename/merge first; report the mapping before applying.
+  Use the ISN parser to derive the canonical form — never hand-spell.
+  Re-compose via GENERATE_NAME; record a VocabGap when a true token gap blocks.
+  Never DETACH DELETE accepted catalog-authoritative names.
+
+Done-when
+  1. 0 NonCanonicalNameError / grammar_parse_fallback=true among accepted
+     non-derived names (or each residual carries a recorded VocabGap + note).
+  2. uv run pytest tests/standard_names/ green.
+  3. Followup written for the docs top-up + export + this one resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-snsr-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Docs top-up for the ~25 undocumented stable derived parents + export</h4>
+    <div class="r-fu-body">After stabilization only ~25 of the 284 stable derived parents lack accepted docs (vs the ~$80 budgeted; far cheaper now). Run a docs cycle (enrich_parents/generate_docs/review_docs) to bring them to docs_stage=accepted, then sn release --export-only and spot-check that NO placeholder description and NO childless parent is exported. The derived-parent population is now a fixpoint, so exporting is finally safe (was deliberately deferred while churning).</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-structural-repair
+Section: docs top-up + export
+Tier:    sonnet
+
+Context
+  The derived-parent population is now an idempotent fixpoint (284 stable parents,
+  ~259 docs_accepted). Only ~25 lack accepted docs. The handoff deferred export
+  while the population churned; that blocker is gone.
+
+How to run
+  uv run imas-codex sn run --flush -c &lt;small budget&gt; (docs pools drain the ~25).
+  Monitor docs_stage=accepted climb; mid-pipeline state is durable.
+  Then: uv run imas-codex sn release --export-only.
+
+Done-when
+  1. The ~25 undocumented stable derived parents reach docs_stage=accepted
+     (or exhausted if borderline) with children-grounded docs.
+  2. sn release --export-only emits the catalog; spot-check no placeholder
+     description and no childless derived parent survives export.
+  3. Followup written (or plan closed) + this one resolved.</pre>
     </article>
 </section>
 
