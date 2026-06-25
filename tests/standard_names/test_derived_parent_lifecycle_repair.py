@@ -225,7 +225,7 @@ class _StatefulDerivedParentGraph:
         # scenarios, so it is never a childless zombie — return nothing.
         if (
             "MATCH (p:StandardName {origin: 'derived'})" in cypher
-            and "NOT IN ['superseded', 'exhausted']" in cypher
+            and "NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }" in cypher
             and "RETURN p.id AS id" in cypher
         ):
             return []

@@ -1093,6 +1093,8 @@ def fetch_docs_review_feedback_for_sns(
 def _filter_admissible_parents(
     co_batch: list[dict[str, Any]],
     gc: Any,
+    *,
+    full_rebuild: bool = False,
 ) -> list[dict[str, Any]]:
     """Drop HAS_PARENT edges whose target fails the admission gate.
 
@@ -1106,6 +1108,16 @@ def _filter_admissible_parents(
     Skips legacy entries: if a parent has ``origin='catalog_edit'`` or
     is already ``pipeline_status='accepted'``, the edge is preserved
     regardless of admission verdict (catalog is authoritative).
+
+    ``full_rebuild`` (set by ``rederive_structural_edges``, which passes the
+    COMPLETE set of live names) makes admission **batch-authoritative**: Clause
+    B axes and the single-child shadow veto are evaluated from the batch alone,
+    ignoring transient graph topology. This is essential for idempotency — the
+    stale, pre-reconcile graph children would otherwise flip the shadow-veto
+    verdict for qualifier single-child parents (admitted one startup, vetoed
+    and reaped the next), an unbounded mint/reap oscillation. With the batch as
+    the sole source of truth, the verdict is a pure function of the live-name
+    set, so the re-derivation reaches a fixpoint.
     """
     from imas_codex.standard_names.parents import is_admissible_parent_name
 
@@ -1190,6 +1202,56 @@ def _filter_admissible_parents(
                 "child_sources": {s for s in (r.get("lone_child_sources") or []) if s},
                 "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
             }
+
+    if full_rebuild:
+        # Batch-authoritative admission. The batch is the complete live
+        # derivation, so discard transient graph topology (stale, pre-reconcile
+        # children/axes) — using it makes the shadow-veto/Clause-B verdict
+        # depend on graph state that this very pass rewrites, which oscillates.
+        # Clause B then reads batch_axes only; the shadow veto reads
+        # batch_children only, with each target's lone-batch-child DD sources
+        # re-fetched from the static HAS_STANDARD_NAME edges (which the
+        # re-derivation never touches, so the verdict is stable across passes).
+        graph_axes = {t: set() for t in targets}
+        graph_children = {t: set() for t in targets}
+        shadow_info = {}
+        lone_pairs = [
+            {"target": t, "child": next(iter(ch))}
+            for t, ch in batch_children.items()
+            if len(ch) == 1
+        ]
+        if lone_pairs:
+            try:
+                srows = list(
+                    gc.query(
+                        """
+                        UNWIND $pairs AS pr
+                        MATCH (child:StandardName {id: pr.child})
+                        OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(child)
+                        OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->
+                              (:StandardName {id: pr.target})
+                        RETURN pr.target AS target, pr.child AS child,
+                               coalesce(child.name_stage, '') AS child_stage,
+                               coalesce(child.origin, 'pipeline') AS child_origin,
+                               collect(DISTINCT csrc.id) AS child_sources,
+                               collect(DISTINCT psrc.id) AS parent_sources
+                        """,
+                        pairs=lone_pairs,
+                    )
+                )
+            except Exception as exc:  # pragma: no cover - defensive
+                logger.warning(
+                    "Batch shadow-source probe failed: %s; skipping veto", exc
+                )
+                srows = []
+            for r in srows:
+                shadow_info[r["target"]] = {
+                    "child_id": r["child"],
+                    "child_stage": r.get("child_stage") or "",
+                    "child_origin": r.get("child_origin") or "pipeline",
+                    "child_sources": {s for s in (r.get("child_sources") or []) if s},
+                    "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
+                }
 
     def _is_single_child_shadow(target: str) -> tuple[bool, str]:
         """Batch-aware single-child shadow veto (mirrors parents.is_single_child_shadow).
@@ -1298,7 +1360,9 @@ def _emit_magnitude_of_edges(names: list[dict[str, Any]], gc: Any) -> None:
     )
 
 
-def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
+def _write_standard_name_edges(
+    gc: Any, names: list[dict[str, Any]], *, full_rebuild: bool = False
+) -> None:
     """Emit all structural edges for a batch of StandardName nodes.
 
     Called as a tail pass **after** all nodes in the batch have been
@@ -1371,7 +1435,7 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
     # Phase 1 admission gate: drop HAS_PARENT edges to inadmissible
     # parents (bare-base category labels). See parents.py D1/D2 of the
     # deterministic-parent redesign plan.
-    co_batch = _filter_admissible_parents(co_batch, gc)
+    co_batch = _filter_admissible_parents(co_batch, gc, full_rebuild=full_rebuild)
 
     # Reconcile (NOT accrete) each processed child's structural HAS_PARENT
     # edges to EXACTLY the current admitted derivation. ``derive_edges`` is a
@@ -1546,32 +1610,59 @@ def _write_standard_name_edges(gc: Any, names: list[dict[str, Any]]) -> None:
 
 
 def rederive_structural_edges() -> dict[str, int]:
-    """Backfill HAS_PARENT and HAS_ERROR edges for all existing StandardName nodes.
+    """Reconcile HAS_PARENT/HAS_ERROR edges to the current derivation of LIVE names.
 
-    Reads all SN ids, runs ``derive_edges()`` on each, and writes any missing
-    edges. Idempotent — uses MERGE so existing edges are not duplicated.
+    Structure is defined by **live** names only. Superseded/exhausted names are
+    dead (refined away) and must not contribute structural parents: deriving
+    edges from a dead name re-mints a parent that the childless reaper then
+    deletes — an unbounded mint/reap churn across startups. So this:
 
-    Also migrates any inbound ``HAS_PARENT`` edges that still point at a
-    superseded predecessor to the live successor (walking the
-    ``REFINED_FROM`` chain backwards). This keeps the SPA's parent widget
-    pointing at the active name rather than a refined-away predecessor.
+    1. derives + reconciles edges for non-superseded/-exhausted names only
+       (``_write_standard_name_edges`` deletes each child's stale derived edges
+       and writes the current admitted set — idempotent);
+    2. deletes any derived (``operator_kind``-bearing) HAS_PARENT edge still
+       originating FROM a superseded/exhausted name, so dead names stop
+       propping up zombie parents (those parents become reapable, then drain);
+    3. migrates inbound HAS_PARENT edges off superseded PARENTS to their live
+       successor (``_rewire_has_parent_off_superseded``, which skips
+       projection-of-self successors).
 
-    Returns counts of edges created per type, plus ``migrated`` for the
-    number of HAS_PARENT edges rewired.
+    The result is a fixpoint: re-running on a stable live name set mints no new
+    parents and orphans none. Returns processed/dead-edge/migrated counts.
     """
     with GraphClient() as gc:
-        all_sns = gc.query("MATCH (sn:StandardName) RETURN sn.id AS id")
-        names = [{"id": r["id"]} for r in all_sns if r.get("id")]
+        live = gc.query(
+            "MATCH (sn:StandardName) "
+            "WHERE NOT (coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']) "
+            "RETURN sn.id AS id"
+        )
+        names = [{"id": r["id"]} for r in live if r.get("id")]
         if not names:
-            return {"HAS_PARENT": 0, "HAS_ERROR": 0, "migrated": 0}
-        _write_standard_name_edges(gc, names)
+            return {"processed": 0, "dead_edges_cleared": 0, "migrated": 0}
+        _write_standard_name_edges(gc, names, full_rebuild=True)
+        dead = gc.query(
+            """
+            MATCH (c:StandardName)-[r:HAS_PARENT]->(:StandardName)
+            WHERE coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+              AND r.operator_kind IS NOT NULL
+            DELETE r
+            RETURN count(r) AS n
+            """
+        )
+        dead_cleared = int(dead[0]["n"]) if dead else 0
         migrated = _rewire_has_parent_off_superseded(gc)
     logger.info(
-        "rederive_structural_edges: processed %d names, migrated %d HAS_PARENT edges",
+        "rederive_structural_edges: processed %d live names, cleared %d "
+        "dead-name edges, migrated %d HAS_PARENT edges",
         len(names),
+        dead_cleared,
         migrated,
     )
-    return {"processed": len(names), "migrated": migrated}
+    return {
+        "processed": len(names),
+        "dead_edges_cleared": dead_cleared,
+        "migrated": migrated,
+    }
 
 
 def _rewire_has_parent_off_superseded(gc: Any) -> int:
@@ -2185,23 +2276,25 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
             )
 
         # Reap childless derived "zombie" parents. A derived parent is a
-        # structural abstraction over its children; once every child has been
-        # re-parented (edge reconciliation in ``_write_standard_name_edges``)
-        # or superseded, it abstracts over nothing. The cleanup query above
-        # only re-checks parents that STILL have a child, so childless derived
-        # parents accumulated unboundedly (often carrying orphaned docs). Delete
-        # them along with their docs/reviews/derived-source scaffolding. Scoped
-        # to ``origin='derived'`` so pipeline- and catalog-authored names are
-        # never touched, even when momentarily childless.
+        # structural abstraction over its children; once it has no incoming
+        # HAS_PARENT edge at all it abstracts over nothing. The cleanup query
+        # above only re-checks parents that STILL have a child, so orphaned
+        # derived parents accumulated unboundedly (often carrying orphaned
+        # docs). Reap those with ZERO incoming HAS_PARENT (truly orphaned):
+        # ``rederive_structural_edges`` has already cleared edges from dead
+        # (superseded/exhausted) names, so a parent of only-dead children is
+        # now zero-incoming and reaps cleanly WITHOUT being re-minted next
+        # startup (no live name derives it). Reaping on a "no LIVE child"
+        # predicate instead would ping-pong: dead children keep re-deriving the
+        # parent every startup. Scoped to ``origin='derived'`` so pipeline- and
+        # catalog-authored names are never touched, even when momentarily
+        # orphaned. Delete docs/reviews/derived-source scaffolding too.
         childless = [
             r["id"]
             for r in gc.query(
                 """
                 MATCH (p:StandardName {origin: 'derived'})
-                WHERE NOT EXISTS {
-                    MATCH (c:StandardName)-[:HAS_PARENT]->(p)
-                    WHERE coalesce(c.name_stage, '') NOT IN ['superseded', 'exhausted']
-                }
+                WHERE NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }
                 RETURN p.id AS id
                 """
             )
