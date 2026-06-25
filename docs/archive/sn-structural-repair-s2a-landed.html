@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="archive">
+  <title>sn-structural-repair §2a landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§2a — grammar-column backfill (landed 2026-06-25)</h1>
+    <p>
+      Re-ran the canonical grammar-parse authority
+      (<code>_write_grammar_decomposition</code> →
+      <code>parse_standard_name</code>, the same path persist uses) over the
+      200 accepted non-derived StandardName nodes carrying NULL
+      <code>physical_base</code> AND NULL <code>geometric_base</code>. No code
+      changed — a pure, idempotent graph backfill via existing pipeline code.
+    </p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>metric</th><th>before</th><th>after</th></tr></thead>
+      <tbody>
+        <tr><td>accepted non-derived, NULL physical_base AND geometric_base</td><td>200</td><td><strong>36</strong></td></tr>
+        <tr><td>…of those with <code>grammar_parse_version=NULL</code> (predate backfill)</td><td>200</td><td><strong>0</strong></td></tr>
+        <tr><td>backfilled names now carrying a base segment</td><td>0</td><td><strong>164</strong></td></tr>
+        <tr><td>residual true defects (<code>grammar_parse_fallback=true</code>)</td><td>—</td><td><strong>36</strong></td></tr>
+        <tr><td>token-miss VocabGaps reported</td><td>—</td><td>0</td></tr>
+        <tr><td>LLM cost</td><td>—</td><td>$0</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The "200 unparsed" figure decomposes exactly as research predicted:
+      <strong>164 backfill + 36 true defects</strong>. The 36 now carry a clean
+      <code>grammar_parse_fallback=true</code> signal and seed §2c (canonical
+      renames) and §2d (re-compose).
+    </p>
+
+    <h2>The 36 true-defect residual (seeds §2c / §2d)</h2>
+    <p>Subject-stacked, unknown-base, or non-canonical names the current ISN grammar rejects:</p>
+    <pre>accumulated_gas_particle_count_at_inlet_due_to_gas_injection
+accumulated_total_upper_gas_particle_count_at_inlet_due_to_gas_injection
+deuterium_deuterium_neutron_emissivity_due_to_fusion
+effective_neutral_energy_diffusivity
+field_line_average_ion_temperature_over_scrape_off_layer
+flux_surface_average_counter_passing_total_particle_pressure
+implicit_ion_energy_source_rate
+incident_neutron_fluence_of_neutron_detector_converter
+line_averaged_effective_hydrogenic_ion_species_mass
+lower_neutron_energy
+maximum_neutron_energy_of_neutron_detector
+normal_non_axisymmetric_magnetic_field_at_control_surface
+normalized_gyroaveraged_gyrocenter_perturbed_density
+normalized_gyroaveraged_perturbed_gyrocenter_pressure_of_gyrokinetic_eigenmode
+normalized_total_perturbed_particle_pressure_of_gyrokinetic_eigenmode
+parallel_electron_particle_convection_velocity
+parallel_neutral_species_particle_diffusivity
+parallel_normalized_gyroaveraged_perturbed_gyrocenter_pressure_of_gyrokinetic_eigenmode
+poloidal_suprathermal_electron_perturbed_angle_at_measurement_position
+radial_effective_electron_energy_convection_velocity
+radial_effective_total_ion_energy_convection_velocity
+radial_ion_particle_diffusivity
+stored_thermal_electron_energy
+toroidal_flux_surface_average_argon_velocity_at_plasma_boundary
+toroidal_flux_surface_average_beryllium_velocity_at_plasma_boundary
+toroidal_flux_surface_average_helium_4_velocity_at_plasma_boundary
+toroidal_flux_surface_average_iron_velocity_at_plasma_boundary
+toroidal_flux_surface_average_krypton_velocity_at_plasma_boundary
+toroidal_flux_surface_average_lithium_velocity_at_plasma_boundary
+toroidal_flux_surface_average_total_plasma_momentum_at_plasma_boundary
+toroidal_flux_surface_average_xenon_velocity_at_plasma_boundary
+toroidal_helium_4_ion_velocity_at_pedestal
+total_coolant_absorbed_thermal_power_at_wall
+total_incident_electron_particle_flux_at_wall
+total_prefill_lower_gas_particle_count_due_to_gas_injection
+total_upper_prefill_gas_particle_count_due_to_gas_injection</pre>
+
+    <h2>What's next</h2>
+    <p>
+      The keystone follows: the f-snch-003 handoff reframed the plan — the
+      HAS_PARENT re-derivation is a <strong>live non-idempotency bug</strong>
+      (edge accretion, admission ping-pong, unreaped childless zombies), not
+      merely stale data. §2b becomes a <em>code fix</em> to the four startup
+      functions plus a one-time data repair (un-supersede the bare bases,
+      reconcile the 8 diffusivity + mode_number stale edges, reap the 327
+      childless zombies), then an idempotency verification gate.
+    </p>
+  </main>
+</body>
+</html>
