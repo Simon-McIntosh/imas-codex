@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-structural-repair">
   <meta name="plan-title" content="SN structural repair: re-derive stale edges, backfill parse columns, canonicalize names">
   <meta name="plan-summary" content="Mostly-deterministic ($0) cleanup of SN graph data: re-run grammar parse to backfill 164 column-null names, re-derive stale HAS_PARENT edges (the toroidal_mhd_mode_number tangle), rename 29 non-canonical names, deprecate-and-merge stale survivors, and re-compose 7 true defects. Prereq for sn-family-harmonization; partly served by sn-coverage §1.">
-  <meta name="plan-status" content="in-progress">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -19,14 +19,16 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-06-30">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
 
     <section class="card" style="border-left:4px solid #2563eb;padding:0.75em 1em;margin-bottom:1.25em">
-      <p style="margin:0 0 0.4em"><strong>Progress — in-progress (2026-06-25)</strong></p>
+      <p style="margin:0 0 0.4em"><strong>✓ SHIPPED (2026-06-30) — two RCs on the fork for review:</strong>
+        codex graph/MCP <code>v5.3.0-rc5</code> (GHCR + CI) and ISNC catalog
+        <code>v0.2.0rc54</code> (2194 names, GitHub Pages). All structural-health metrics zero.</p>
       <ul style="margin:0">
         <li><span class="badge badge-shipped">✓ landed</span> <strong>§2a grammar backfill</strong> —
           200 → <strong>36</strong> NULL-base accepted non-derived names; 164 backfilled, 36 true defects
@@ -54,7 +56,13 @@
         <li><strong>Decisions locked:</strong> <code>superseded-base-parent</code> → un-supersede (each
           superseded base was wrongly refined into one of its own projection children);
           <code>repair-vehicle</code> → code-fix + one-time data repair.</li>
-        <li><strong>Remaining:</strong> final docs drain for the ~124 restored bases (in progress) + export + spot-check.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>full docs drain + two RCs</strong> —
+          graph-wide docs drained (2229 accepted + 150 exhausted + 8 pending); cut codex graph RC
+          <code>v5.3.0-rc5</code> (origin, GHCR, CI building) and ISNC catalog RC <code>v0.2.0rc54</code>
+          (origin, 2194 names, commit <code>7514c1c0</code>). No new ISN grammar RC needed.</li>
+        <li><strong>Residuals (tracked, optional follow-on):</strong> 5 §2d VocabGaps (ISN vocab rotation);
+          8 docs-pending foundational bases; 3 ISNC validation exclusions + 3 dimensionless-density advisories.
+          Finalize: review RCs → <code>release --final</code> / <code>sn release --final</code> to upstream.</li>
       </ul>
     </section>
 
@@ -371,7 +379,7 @@ Done-when
   3. Followup written for the docs top-up + export + this one resolved.</pre>
     <p class="r-fu-outcome">§2c/§2d landed (2026-06-25). §2c: 0 NonCanonicalNameError remain among accepted non-derived names — 27 renamed in-place (SET id=canonical_form from NonCanonicalNameError.canonical_form, preserving all edges/docs/reviews, grammar columns re-parsed, scalar produced_sn_id/DocsRevision.sn_id refs updated) + 2 deprecate-merged where the canonical already existed (sources migrated, old superseded via HAS_SUCCESSOR). §2d: the 7 genuine defects (6 subject-stack: ion+particle×3, helium_4+ion, hydrogenic+ion_species, deuterium_deuterium+neutron; 1 unknown-base: normal_non_axisymmetric_magnetic_field) recorded as 5 VocabGaps (vocab_gap:subject:{particle,ion,ion_species,neutron} category=subject_stack + vocab_gap:physical_base:normal_non_axisymmetric_magnetic_field category=unknown_base, each carrying affected_standard_names). These need a maintainer naming/vocab-rotation decision (the grammar forbids stacked subjects); tracked in-graph rather than guessed. $0, no code changed.</p>
     </article>
-<article class="r-fu" data-id="f-snsr-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snsr-004" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="2026-06-30T10:13:40+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Docs top-up for the ~25 undocumented stable derived parents + export</h4>
     <div class="r-fu-body">After stabilization only ~25 of the 284 stable derived parents lack accepted docs (vs the ~$80 budgeted; far cheaper now). Run a docs cycle (enrich_parents/generate_docs/review_docs) to bring them to docs_stage=accepted, then sn release --export-only and spot-check that NO placeholder description and NO childless parent is exported. The derived-parent population is now a fixpoint, so exporting is finally safe (was deliberately deferred while churning).</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -395,6 +403,7 @@ Done-when
   2. sn release --export-only emits the catalog; spot-check no placeholder
      description and no childless derived parent survives export.
   3. Followup written (or plan closed) + this one resolved.</pre>
+    <p class="r-fu-outcome">Shipped (2026-06-30). Full graph-wide docs drain complete (campaign ~$285 across runs): 2229 docs-accepted + 150 exhausted + 8 pending (un-superseded origin=None bases the docs gate excludes). Two RCs cut on the FORK (origin) for review: (1) codex graph/MCP v5.3.0-rc5 via `imas-codex release` — both graph variants pushed to GHCR, git tag pushed, CI building (graph-quality/smoke-test/build-and-push → Azure test). (2) ISNC catalog v0.2.0rc54 via `sn release` — 2194 names exported to imas-standard-names-catalog (commit 7514c1c0), pushed to origin, GitHub Pages live. No new ISN (grammar) RC needed (grammar unchanged). Final graph evidence ALL ZERO: childless derived=0, placeholder=0, orphaned DocsRevisions=0, s2b projection-under-component=0, mode_number tangle=0, children-under-superseded=0, NonCanonical accepted=0. Residuals (tracked, optional): 5 §2d VocabGaps (need ISN vocab rotation), 8 docs-pending foundational bases, 3 ISNC validation exclusions + 3 dimensionless-density advisories. Finalize: review RCs → release --final / sn release --final to upstream.</p>
     </article>
 <article class="r-fu" data-id="f-snsr-005" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="2026-06-30T05:37:24+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Wrongly-superseded correct parents (108) + 3 code hardenings</h4>
