@@ -1704,15 +1704,22 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
               AND EXISTS { (child)-[:HAS_PARENT]->(old) }
             MATCH path = (tip:StandardName)-[:REFINED_FROM*1..]->(old)
             WHERE tip.name_stage <> 'superseded'
-              // Never migrate onto a successor that is itself a structural
-              // projection/child of `old` — i.e. a bare base wrongly "refined
-              // into" one of its own axis-projections (mode_number ->
-              // toroidal_mode_index, electron_diffusivity ->
-              // radial_electron_diffusivity). Migrating the base's children
-              // onto such a tip recreates the exact domain-mismatched tangle
-              // this function exists to repair; the correct remedy is to
-              // un-supersede the base, so leave the edge in place here.
-              AND NOT EXISTS { (tip)-[:HAS_PARENT]->(old) }
+              // Migrate ONLY to a true rename of `old` — a successor with the
+              // SAME identity segments (physical/geometric base, subject,
+              // component). A REFINED_FROM "successor" that ADDS a qualifier/
+              // projection or CHANGES the subject (e.g. ion_convection_velocity
+              // -> radial_electron_convection_velocity, or major_radius ->
+              // major_radius_of_flux_surface) is a more-specific CHILD, not a
+              // rename; migrating `old`'s children onto it recreates the
+              // domain/locus-mismatched tangle this function exists to repair.
+              // The correct remedy for those is to un-supersede `old` (it is the
+              // legitimate generic parent), so leave the edge in place here.
+              // Conservative on NULL columns: if identity cannot be confirmed
+              // equal, do not migrate.
+              AND coalesce(tip.physical_base, '')  = coalesce(old.physical_base, '')
+              AND coalesce(tip.geometric_base, '') = coalesce(old.geometric_base, '')
+              AND coalesce(tip.subject, '')        = coalesce(old.subject, '')
+              AND coalesce(tip.component, '')       = coalesce(old.component, '')
             WITH old, tip, length(path) AS hops
             ORDER BY hops DESC
             WITH old, head(collect(tip)) AS tip
