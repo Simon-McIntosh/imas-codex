@@ -1783,13 +1783,15 @@ def _query_seedable_derived_parents(
             UNWIND children AS child
             OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
             OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
+            OPTIONAL MATCH (child)-[cedge:HAS_PARENT]->(parent)
             WITH parent, edge_kinds,
                  collect(DISTINCT {{
                      id: child.id,
                      unit: child.unit,
                      cocos: child.cocos_transformation_type,
                      physics_domain: child.physics_domain,
-                     kind: child.kind
+                     kind: child.kind,
+                     op_kind: cedge.operator_kind
                  }}) AS child_data,
                  collect(DISTINCT imas.id) AS dd_paths
             RETURN parent.id AS parent_id,
@@ -1829,13 +1831,15 @@ def _query_legacy_repairable_derived_parents(
             UNWIND children AS child
             OPTIONAL MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(child)
             OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(imas:IMASNode)
+            OPTIONAL MATCH (child)-[cedge:HAS_PARENT]->(parent)
             WITH parent, edge_kinds,
                  collect(DISTINCT {{
                      id: child.id,
                      unit: child.unit,
                      cocos: child.cocos_transformation_type,
                      physics_domain: child.physics_domain,
-                     kind: child.kind
+                     kind: child.kind,
+                     op_kind: cedge.operator_kind
                  }}) AS child_data,
                  collect(DISTINCT imas.id) AS dd_paths
             RETURN parent.id AS parent_id,
@@ -1998,7 +2002,15 @@ def _materialize_derived_parent_rows(
             is_magnitude_parent = all(k == "unary_postfix" for k in edge_kinds)
             kind = "scalar" if is_magnitude_parent else "vector"
 
-        child_units = {c["unit"] for c in child_data if c.get("unit")}
+        # Binary-operand children (e.g. ``ratio_of_X_to_Y``) carry a HAS_PARENT
+        # edge to each operand, so the parent is an OPERAND of the ratio, not a
+        # unit-sharing generalization of it. A dimensionless ratio child must
+        # NOT constrain the parent's unit/cocos — otherwise a parent whose
+        # qualifier/projection children all share a unit (e.g. m^-3) is wrongly
+        # flagged heterogeneous by the ratio's '1' and skipped. Exclude binary
+        # children from unit/cocos inheritance.
+        unit_children = [c for c in child_data if c.get("op_kind") != "binary"]
+        child_units = {c["unit"] for c in unit_children if c.get("unit")}
         if is_geometric:
             unit = None
         elif len(child_units) > 1:
@@ -2012,7 +2024,7 @@ def _materialize_derived_parent_rows(
         else:
             unit = next(iter(child_units)) if child_units else None
 
-        child_cocos = {c["cocos"] for c in child_data if c.get("cocos")}
+        child_cocos = {c["cocos"] for c in unit_children if c.get("cocos")}
         cocos = next(iter(child_cocos)) if len(child_cocos) == 1 else None
 
         # Inherit the children's physics domain(s). A parent whose children
