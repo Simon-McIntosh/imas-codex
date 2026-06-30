@@ -18,8 +18,8 @@
   <title>SN structural repair | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-25">
-<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-06-30">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.85">
 </head>
 <body>
@@ -44,10 +44,17 @@
           <strong>0 NonCanonicalNameError</strong> remain: 27 names renamed in-place to their canonical
           token order (edges/docs preserved) + 2 deprecate-merged. The 7 genuine defects (6 subject-stack,
           1 unknown-base) recorded as 5 <code>VocabGap</code> nodes for a maintainer vocab decision. $0.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>wrongly-superseded parents (108) + 3 code hardenings</strong> —
+          post-drain audit found 108 superseded names that were the live <code>derive_edges</code>-parent
+          of a child (208 children under dead parents), incl. foundational bases (<code>atomic_mass</code>,
+          <code>major_radius</code>, <code>radius</code>, <code>wavelength</code>). Un-superseded + dropped
+          113 bogus REFINED_FROM → <strong>0 children under superseded parents</strong>. Hardenings:
+          orphan-sweep recovers unclaimed <code>refining</code>; <code>_rewire</code> migrates only to a true
+          rename; binary operands excluded from unit inheritance. See followup f-snsr-005.</li>
         <li><strong>Decisions locked:</strong> <code>superseded-base-parent</code> → un-supersede (each
           superseded base was wrongly refined into one of its own projection children);
           <code>repair-vehicle</code> → code-fix + one-time data repair.</li>
-        <li><strong>Remaining:</strong> docs top-up for the ~25 undocumented stable parents + export.</li>
+        <li><strong>Remaining:</strong> final docs drain for the ~124 restored bases (in progress) + export + spot-check.</li>
       </ul>
     </section>
 
@@ -388,6 +395,28 @@ Done-when
   2. sn release --export-only emits the catalog; spot-check no placeholder
      description and no childless derived parent survives export.
   3. Followup written (or plan closed) + this one resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-snsr-005" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="2026-06-30T05:37:24+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Wrongly-superseded correct parents (108) + 3 code hardenings</h4>
+    <div class="r-fu-body">The post-drain audit surfaced a larger instance of the plan's core defect: 104→108 SUPERSEDED names were the current derive_edges-parent of a LIVE child (208 children under dead parents), including foundational bases (atomic_mass, major_radius, radius, wavelength, power_density, energy_flux, toroidal_angle). They were wrongly superseded by their own MORE-SPECIFIC children via bogus refine cycles. Un-superseded them (name_stage→accepted) + dropped 113 bogus REFINED_FROM edges + reconciled → 0 children under superseded parents. Three root-cause code hardenings landed alongside: orphan-sweep recovers unclaimed 'refining' nodes (was: stale-claim-only, stranding nodes forever); _rewire migrates only to a TRUE rename (same base/subject/component), never a specialization (was recreating projection-under-component tangles); binary-operand children excluded from derived-parent unit inheritance (was: dimensionless ratio polluting m^-3 parents → heterogeneous skip).</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-structural-repair
+Section: wrongly-superseded parents + code hardenings (record)
+Tier: opus
+
+Done (2026-06-30):
+  1. 108 wrongly-superseded correct parents un-superseded (derive_edges-parent of a
+     live child); 113 bogus specialization REFINED_FROM edges dropped; reconciled.
+     Verified 0 live children under a superseded parent, s2b=0, childless=0.
+     Reversible (re-supersede); audit list in scratchpad unsupersede_audit.json.
+  2. orphan_sweep recovers unclaimed refining nodes (commit on this branch).
+  3. _rewire_has_parent_off_superseded migrates only to a true rename.
+  4. binary-operand children excluded from derived-parent unit inheritance.
+  All committed; SN suite green except pre-existing RefinedName/finalize/budget-lease failures.
+
+Residual / next:
+  The 108 un-superseded bases need docs (final drain in progress); then export.</pre>
+    <p class="r-fu-outcome">Un-superseded 108 wrongly-superseded correct parents (208 children re-attached to live parents); 0 children under superseded parents; s2b=0; childless=0. Code hardenings committed: orphan-sweep unclaimed-refining recovery, _rewire rename-only migration, binary-operand unit-inheritance exclusion. Docs top-up for the restored bases in progress (drain #4), then export.</p>
     </article>
 </section>
 
