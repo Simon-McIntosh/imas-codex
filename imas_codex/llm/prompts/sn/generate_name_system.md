@@ -19,7 +19,7 @@ Standard Names are standalone, self-describing metadata labels for fusion plasma
 
 1. **`electron_temperature`** — `base_token=temperature`, `qualifiers=["electron"]`. The simplest valid form: a generic base made specific by a species qualifier.
 2. **`toroidal_magnetic_field_at_magnetic_axis`** — `base_token=magnetic_field`, `projection_axis=toroidal` (`projection_shape="component"`), `locus_token=magnetic_axis`, `locus_relation="at"`, `locus_type="position"`. A *field value sampled at a point* → `at`. Projection is a leading axis; locus is postfix.
-3. **`major_radius_of_magnetic_axis`** — `base_token=radius`, `qualifiers=["major"]`, `locus_token=magnetic_axis`, `locus_relation="of"`, `locus_type="position"`. An *intrinsic geometric coordinate of a point* → `of`. (Never `radial_position_of_X` — use the canonical coordinate base.)
+3. **`radial_coordinate_of_magnetic_axis`** — `base_token=coordinate`, `base_kind="geometry"`, `projection_axis="radial"`, `projection_shape="coordinate"`, `locus_token=magnetic_axis`, `locus_relation="of"`, `locus_type="position"`. An *intrinsic geometric coordinate of a point* → `of`. The R coordinate of a point is `radial_coordinate_of_<X>` (symmetric with `vertical_coordinate_of_<X>`), NOT `major_radius_of_<X>` and never `radial_position_of_X`. Reserve the `radius` base for length scalars (`minor_radius`, `larmor_radius`); bare `major_radius` (R0, the vacuum-vessel/coordinate reference) stays a base.
 
 {% include "sn/_grammar_reference.md" %}
 
@@ -43,14 +43,25 @@ These rules govern the **IR segment values you emit**. The composer assembles th
 ### Projection axis (`projection_axis` / `projection_shape`)
 
 - **Axis projections are a leading prefix via `projection_axis`, never a suffix or `_component_of_`.** Set `projection_axis` to the component/coordinate token (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`) and `projection_shape` to `"component"` (vector component) or `"coordinate"` (coordinate system). The grammar REJECTS `_component_of_`; a trailing `_<component>` suffix mis-parses. ✓ `toroidal_ion_rotation_frequency`; ✗ `ion_rotation_frequency_toroidal`, ✗ `heat_flux_poloidal`. (See N2, N6.)
-- **`diamagnetic` is NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation). The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` IS a specific drift, not a component of another velocity along a "diamagnetic axis". When a DD path has a sibling/subfield literally named `diamagnetic` (common on transport/edge paths: `current_density/diamagnetic`, `electric_field/diamagnetic`, `velocity/diamagnetic`), DO NOT translate the label as a projection. It is shorthand for "the part due to the diamagnetic drift": use `process_token="diamagnetic_drift"` (for currents/fluxes → `<base>_due_to_diamagnetic_drift`) or the correct drift-velocity name (`diamagnetic_drift_velocity`, `ion_diamagnetic_drift_velocity`). ✗ `diamagnetic_electric_field` (a field has no "diamagnetic" projection); ✗ `diamagnetic_ion_velocity`. Reserve `diamagnetic` for the drift-velocity concept. (See N4.)
+- **`diamagnetic` is NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation). `diamagnetic` is never a vector component along a "diamagnetic axis". It plays exactly two roles in the grammar:
+  - **A `channel_qualifier`** that binds to a transported channel — emit it as a `qualifiers[]` entry on a momentum/energy channel base. ✓ `diamagnetic_momentum_flux` (`base_token="flux"`, `qualifiers=["diamagnetic", "momentum"]`); the diamagnetic part of a momentum/energy transport channel.
+  - **The drift-velocity concept** `v_dia = B × ∇p / (qnB²)` — a specific drift, named as its own base. ✓ `diamagnetic_drift_velocity`, `ion_diamagnetic_drift_velocity`.
+  Do NOT translate a DD sibling/subfield literally named `diamagnetic` (e.g. `velocity/diamagnetic`, `current_density/diamagnetic`, `electric_field/diamagnetic`) as a projection axis. ✗ `diamagnetic_electric_field` (a field has no "diamagnetic" projection); ✗ a `projection_axis="diamagnetic"`. (See N4.)
+
+### Transport channels, channel qualifiers, and zones (emit via `qualifiers`)
+
+These three closed segments occupy fixed slots in the canonical prefix order — between `subject`/`device` and the `base` — but, like every prefix token in this IR, **you emit them as `qualifiers[]` entries**; ISN's composer puts them in canonical order. Their token lists are in the segment reference above; use only registered tokens. Canonical order among the prefixes is `… → subject → device → zone → channel_qualifier → channel → base …`.
+
+- **`channel` — WHAT is transported.** The channel token (the transported quantity of a flux/diffusivity/transport-coefficient base) is a `qualifiers[]` entry; the base is the generic transport carrier (`flux`, `diffusivity`, `density`, …), NOT a compound like `heat_flux` in `base_token`. ✓ `heat_flux` (`base_token="flux"`, `qualifiers=["heat"]`); ✓ `energy_flux`, `momentum_diffusivity` (`base_token="diffusivity"`, `qualifiers=["momentum"]`), `particle_flux`. There is no registered `heat_flux`/`energy_flux`/`momentum_flux` base — decompose into channel-qualifier + `flux`.
+- **`channel_qualifier` — binds to the channel.** A `channel_qualifier` token (`kinetic`, `plasma`, `diamagnetic`) narrows the channel/base it sits on; emit it as a `qualifiers[]` entry, ordered before the channel. ✓ `kinetic_energy_flux` (`qualifiers=["kinetic", "energy"]`, `base_token="flux"`), `ion_kinetic_energy_flux` (`qualifiers=["ion", "kinetic", "energy"]`), `plasma_momentum`, `diamagnetic_momentum_flux`.
+- **`zone` — a region / geometric sub-selector PREFIX, never a locus.** A `zone` token (`core`, `edge`, `inner`, `outer`, `upper`, `lower`, `pedestal`, `separatrix`, `divertor`, `scrape_off_layer`, `front_surface`, `back_surface`, `wetted`) selects a region or geometric sub-part as a leading **prefix** — emit it as a `qualifiers[]` entry (NOT as a `locus_token`, and NEVER with `locus_relation="at"`). It sits after the species/subject in canonical order. ✓ `electron_core_temperature` (`qualifiers=["electron", "core"]`, `base_token="temperature"`), `electron_edge_density` (`qualifiers=["electron", "edge"]`), `electron_pedestal_temperature`. ✗ `electron_temperature_at_core`, ✗ `electron_temperature_at_edge` (`core`/`edge`/`pedestal` are zones, not registered positions — a `locus_token="core"` fails validation). Contrast with a true spatial point (`magnetic_axis`, `plasma_boundary`, `wall`): those take the `_at_<position>` locus, e.g. `electron_temperature_at_plasma_boundary`.
 
 ### Locus relation (`locus_relation` — the semantic of/at/over choice)
 
 The single most-repeated field choice: which `locus_relation` to pair with a `locus_token`. The composer spells the preposition — you pick the **semantic relationship** by base type. Set `locus_relation` ∈ {`of`, `at`, `over`} with a matching `locus_type` (the schema lists valid combinations).
 
 - **`at` + position** — the base is an **evaluated field** sampled at a spatial point: the quantity exists everywhere and you read its value at one locus. Field-class bases that take `at`: `temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `velocity_magnitude`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `radiation_density`, `mass_density`, `loop_voltage`, `electric_potential`, `electrostatic_potential`, `kinetic_energy`, `internal_energy`, `enthalpy`, `entropy` — and any field/flux/per-volume-or-area density. ✓ `electron_temperature_at_magnetic_axis`, `poloidal_magnetic_flux_at_plasma_boundary`, `electron_density_at_pedestal`.
-- **`of` + position/entity/geometry** — the base is an **intrinsic geometric property** of the named feature: it describes the shape, size, or location of the feature and only makes sense for it. Intrinsic bases that take `of`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`. Use `locus_type="entity"` for devices/objects (`resistance_of_rogowski_coil`), `"position"` for spatial points (`major_radius_of_magnetic_axis`), `"geometry"` for geometric features (`elongation_of_flux_surface`). ✓ `elongation_of_plasma_boundary`, `major_radius_of_magnetic_axis`.
+- **`of` + position/entity/geometry** — the base is an **intrinsic geometric property** of the named feature: it describes the shape, size, or location of the feature and only makes sense for it. Intrinsic bases that take `of`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`. Use `locus_type="entity"` for devices/objects (`resistance_of_rogowski_coil`), `"position"` for spatial points (`radial_coordinate_of_magnetic_axis`), `"geometry"` for geometric features (`elongation_of_flux_surface`). ✓ `elongation_of_plasma_boundary`, `radial_coordinate_of_magnetic_axis`. (For a point's R coordinate use `radial_coordinate_of_<X>`, not `major_radius_of_<X>` — see §6 coordinate rules below.)
 - **`over` + region** — the base is integrated over a spatial region: `radiated_power_over_plasma_volume`.
 - **The test:** "does the entity *have* this quantity as a defining attribute?" If yes → `of`. If the quantity is a field merely sampled there → `at`. ✗ `poloidal_magnetic_flux_of_plasma_boundary` (flux is a field, evaluated AT the boundary); ✗ `electron_density_of_pedestal` (density is not an intrinsic property of the pedestal).
 - **Value-parameterized positions** (R5 finding, q95-class). For a profile value sampled at a specific numeric coordinate (q95, q at rho=0.5, density at psi_norm=0.95): set `locus_token` to the registered position (e.g. `normalized_poloidal_magnetic_flux`), `locus_relation="at"`, `locus_type="position"`, and `locus_value` to the numeric literal with underscore decimal separator (`"0_95"`). The composer renders `…_at_<position>_equal_to_0_95`. NEVER invent value-baked position tokens (✗ `95_percent_flux_surface`, ✗ `q95_surface`).
@@ -66,16 +77,16 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 
   ✓ `electron_density_at_divertor_target`; ✗ `electron_density_at_separatrix` (synonym → rewritten to `plasma_boundary`); ✗ `electron_density_at_divertor_plate`.
 - **Position token `wall`, never `wall_surface`** — `wall` is the valid registry token; `wall_surface` fails grammar validation (a wall IS a surface). ✓ `energy_flux_at_wall`; ✗ `…_at_wall_surface`.
-- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `major_radius_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`. (For a generic hardware outline whose vertices are an ordinal array, collapse to `radial_outline` / `vertical_outline` — see "Enumeration is a coordinate, not a name" below.)
+- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `radial_coordinate_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`. (For a generic hardware outline whose vertices are an ordinal array, collapse to `radial_outline` / `vertical_outline` — see "Enumeration is a coordinate, not a name" below.)
 - **Place names with quantity-words are single location tokens, not quantities.** `center_of_mass` is a reference point (barycentre), not a mass quantity — treat it as a location qualifier. ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`, `center_of_mass_position`; ✗ `mass_velocity`. Apply the same to `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
 
 ### Coordinates — canonical coordinate base, never `_position_of_X`
 
 **ABSOLUTE RULE** (regardless of whether the description spells out "coordinate"): when a quantity is a spatial coordinate of a component/point/geometric feature (antenna, launcher, sensor, axis, x-point, strike point, plasma boundary, wall point, …), use the canonical coordinate vocabulary, NEVER `_position_of_X` (which produces silent synonym pairs, e.g. `vertical_coordinate_of_X` vs `vertical_position_of_X`):
 
-- Major radius / cylindrical R → `major_radius_of_<X>` (✗ `radial_position_of_<X>`).
+- R coordinate of a point / cylindrical R → `radial_coordinate_of_<X>` via `projection_axis="radial"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `major_radius_of_<X>`, ✗ `radial_position_of_<X>`). This is symmetric with the vertical (Z) form below. Reserve the `radius` base for intrinsic length scalars (`minor_radius`, `larmor_radius`); bare `major_radius` (the R0 reference) stays a base, but a *point's* R coordinate is `radial_coordinate_of_<X>`.
 - Toroidal angle / cylindrical φ → `toroidal_angle_of_<X>` (✗ `toroidal_position_of_<X>`).
-- Vertical / Z → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
+- Z coordinate of a point / vertical / Z → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
 - Unspecified 3-vector position with no directional qualifier → plain `position_of_<X>` is acceptable.
 - **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
 
@@ -136,7 +147,7 @@ indices.
 
 - **`process_token` MUST be a process noun from the Process vocabulary** (`ohmic_dissipation`, `impurity_radiation`, `induction`, `conduction`, …) — bare, with no spatial/state qualifier appended. The composer renders `<base>_due_to_<process>`.
   - **Never a temporal event** after `due_to_` (`disruption`, `ramp_up`, `breakdown`) — use a `during_<event>` construction instead, e.g. `parallel_thermal_energy_during_disruption`.
-  - **Never a bare adjective** — spell out the process noun: `due_to_ohmic_dissipation`, `due_to_halo_currents`, `due_to_runaway_electrons`, `due_to_neutral_beam_injection` (not `due_to_ohmic`/`due_to_halo`/`due_to_runaway`/`due_to_neutral_beam`).
+  - **Never a bare adjective — use the FULL mechanism noun.** A transport or current/heating-drive contribution is attributed by its full mechanism *noun*, never the bare adjective. Transport contributions: `anomalous_transport`, `neoclassical_transport`, `classical_transport`, `turbulent_transport`, `collisional_transport`, `resistive_diffusion`, `ion_inertia`. Drive/source contributions: `ohmic_heating`, `ohmic_current_drive`, `bootstrap_current_drive`, `non_inductive_current_drive`, `wave_driven_current_drive`, `fusion_reactions`. ✓ `radial_current_density_due_to_anomalous_transport` (`process_token="anomalous_transport"`), `current_density_due_to_bootstrap_current_drive`, `electron_particle_flux_due_to_turbulent_transport`, `power_density_due_to_ohmic_heating`. ✗ `due_to_anomalous`, ✗ `due_to_bootstrap`, ✗ `due_to_turbulent`, ✗ `due_to_ohmic`. (Likewise spell out other process nouns: `due_to_ohmic_dissipation`, `due_to_halo_currents`, `due_to_runaway_electrons`, `due_to_neutral_beam_injection` — not `due_to_halo`/`due_to_runaway`/`due_to_neutral_beam`.)
   - **Never append a location/region/state** to the process token (`_at_X`, `_in_X`, `_on_X`, `_for_X`) — `impurity_radiation_in_halo_region` and `recombination_at_ion_state` are not Process tokens. If you need a place AND a process, attach the place via its own segment: a **region** (an extended zone) as `over_<region>` (rendered after the base, before the process), a point/surface as `_at_<locus>`. ✓ `electron_energy_over_halo_region_due_to_impurity_radiation` (region via `over_`); ✓ `ion_energy_flux_at_wall_due_to_recombination` (point locus via `_at_`, bare process).
 
 ### Tense / change semantics
@@ -488,7 +499,7 @@ Each candidate MUST include these fields:
 - `locus_token`: the entity, position, or region token for the postfix locus (e.g., `"magnetic_axis"`, `"flux_loop"`, `"plasma_boundary"`). Null if no locus.
 - `locus_relation`: preposition for the locus. Required when `locus_token` is set; null otherwise. **Valid combinations with `locus_type`:**
   - `"of"` + `"entity"` — properties OF named objects (e.g., `resistance_of_rogowski_coil`)
-  - `"of"` + `"position"` — properties OF spatial points (e.g., `major_radius_of_magnetic_axis`)
+  - `"of"` + `"position"` — properties OF spatial points (e.g., `radial_coordinate_of_magnetic_axis`)
   - `"of"` + `"geometry"` — properties OF geometric features (e.g., `elongation_of_flux_surface`)
   - `"at"` + `"position"` — field values AT spatial points (e.g., `toroidal_magnetic_field_at_magnetic_axis`)
   - `"over"` + `"region"` — integrals OVER regions (e.g., `radiated_power_over_plasma_volume`)
@@ -575,25 +586,27 @@ it or report a `vocab_gap`.
 ```
 → Composed name: `electron_density_at_magnetic_axis`
 
-**Locus with `_of_` — major radius (cylindrical R coordinate):**
+**Locus with `_of_` — radial coordinate (cylindrical R coordinate of a point):**
 ```json
 {
   "source_id": "magnetics/flux_loop/position/r",
   "segments": {
-    "base_token": "radius",
-    "base_kind": "quantity",
-    "qualifiers": ["major"],
+    "base_token": "coordinate",
+    "base_kind": "geometry",
+    "projection_axis": "radial",
+    "projection_shape": "coordinate",
+    "qualifiers": [],
     "locus_token": "flux_loop",
     "locus_relation": "of",
     "locus_type": "entity"
   },
-  "description": "Major radius (cylindrical R coordinate) of the flux loop",
+  "description": "Radial (cylindrical R) coordinate of the flux loop",
   "kind": "scalar",
   "dd_paths": ["magnetics/flux_loop/position/r"],
-  "reason": "qualifier=major, base=radius, locus=of flux_loop (canonical coordinate: major_radius_of_X not radial_position_of_X)"
+  "reason": "projection=radial coordinate, base=coordinate (geometry), locus=of flux_loop (canonical coordinate: radial_coordinate_of_X not major_radius_of_X / radial_position_of_X)"
 }
 ```
-→ Composed name: `major_radius_of_flux_loop`
+→ Composed name: `radial_coordinate_of_flux_loop`
 
 **Locus with `_of_` — vertical coordinate (cylindrical Z coordinate):**
 ```json
