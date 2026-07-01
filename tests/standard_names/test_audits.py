@@ -938,12 +938,18 @@ class TestSegmentOrderCheck:
 
 
 class TestCausalDueToCheckExtended:
-    def test_pass_due_to_resistive_isn_process(self):
-        """`resistive` is registered as a process token in ISN rc13+."""
+    def test_pass_due_to_resistive_diffusion_isn_process(self):
+        """`resistive_diffusion` is the mechanism-noun process token.
+
+        The bare `resistive` regime token was dropped in favour of the
+        specific mechanism nouns (resistive_diffusion / resistive_dissipation).
+        """
         from imas_codex.standard_names.audits import causal_due_to_check
 
         assert (
-            causal_due_to_check({"id": "parallel_current_density_due_to_resistive"})
+            causal_due_to_check(
+                {"id": "parallel_current_density_due_to_resistive_diffusion"}
+            )
             == []
         )
 

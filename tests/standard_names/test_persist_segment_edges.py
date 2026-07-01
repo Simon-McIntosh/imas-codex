@@ -446,15 +446,15 @@ class TestSegmentEdgeRoundTrip:
         sorted_edges = sorted(edges_param, key=lambda e: e["position"])
 
         # Verify exact field values. Positions are ISN SEGMENT_ORDER indices;
-        # since ISN ≥0.8.0rc32 reserves earlier slots for the single-token
-        # aggregation/orbit/population segments, subject=5 and physical_base=8.
+        # the canonical-qualifier-order grammar inserts zone/channel_qualifier/
+        # channel between device and base, so subject=5 and physical_base=11.
         assert sorted_edges[0] == {
             "position": 5,
             "segment": "subject",
             "token": "electron",
         }
         assert sorted_edges[1] == {
-            "position": 8,
+            "position": 11,
             "segment": "physical_base",
             "token": "temperature",
         }

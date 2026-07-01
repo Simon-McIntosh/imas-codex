@@ -3402,14 +3402,25 @@ _SEGMENT_EDGE_TYPES: tuple[tuple[str, str], ...] = (
 
 
 def _coerce_segment_value(value: Any) -> str | None:
-    """Coerce a parser segment value (str / Enum / None) to a graph-safe scalar."""
+    """Coerce a parser segment value (str / Enum / tuple / None) to a graph-safe scalar.
+
+    Multi-token segments (e.g. ``zone`` on ``lower_outer_squareness``) arrive
+    from the ISN model as a tuple/list of tokens; an absent multi-token
+    segment is an EMPTY tuple. Join the tokens with ``_`` (matching the
+    surface form, ``lower_outer``) and map the empty case to ``None`` so an
+    absent segment never persists as the literal string ``"()"``.
+    """
     if value is None:
         return None
+    if isinstance(value, tuple | list):
+        parts = [p for p in (_coerce_segment_value(v) for v in value) if p]
+        return "_".join(parts) if parts else None
     # Enum → its .value
     val = getattr(value, "value", value)
     if val is None:
         return None
-    return str(val)
+    s = str(val).strip()
+    return s or None
 
 
 def _resolve_synced_segments(
