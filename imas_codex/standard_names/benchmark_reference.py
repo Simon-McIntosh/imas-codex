@@ -131,14 +131,14 @@ REFERENCE_NAMES: dict[str, dict] = {
         {
             "physical_base": "current_density",
             "component": Component.PARALLEL,
-            "process": Process.BOOTSTRAP,
+            "process": Process.BOOTSTRAP_CURRENT_DRIVE,
         }
     ),
     "core_profiles/profiles_1d/j_ohmic": _ref(
         {
             "physical_base": "current_density",
             "component": Component.PARALLEL,
-            "process": Process.OHMIC,
+            "process": Process.OHMIC_CURRENT_DRIVE,
         }
     ),
     "core_profiles/profiles_1d/ion/velocity/toroidal": _ref(

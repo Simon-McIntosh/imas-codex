@@ -948,19 +948,30 @@ class TestCausalDueToCheckExtended:
         )
 
     def test_pass_due_to_non_inductive_isn_process(self):
-        """`non_inductive` is registered as a process token in ISN rc13+."""
+        """`non_inductive_current_drive` is a mechanism-noun process token.
+
+        The bare regime token `non_inductive` was lifted to the mechanism
+        noun `non_inductive_current_drive`; the causal check accepts the
+        full mechanism noun after `due_to_`.
+        """
         from imas_codex.standard_names.audits import causal_due_to_check
 
         assert (
-            causal_due_to_check({"id": "parallel_current_density_due_to_non_inductive"})
+            causal_due_to_check(
+                {"id": "parallel_current_density_due_to_non_inductive_current_drive"}
+            )
             == []
         )
 
     def test_pass_due_to_turbulent_isn_process(self):
-        """`turbulent` is registered as a process token in ISN rc13+."""
+        """`turbulent_transport` is a mechanism-noun process token.
+
+        The bare regime token `turbulent` was lifted to `turbulent_transport`;
+        the causal check accepts the full mechanism noun after `due_to_`.
+        """
         from imas_codex.standard_names.audits import causal_due_to_check
 
-        assert causal_due_to_check({"id": "heat_flux_due_to_turbulent"}) == []
+        assert causal_due_to_check({"id": "heat_flux_due_to_turbulent_transport"}) == []
 
     def test_fail_due_to_shutdown_temporal(self):
         """Temporal events not in ISN process vocab remain flagged."""
