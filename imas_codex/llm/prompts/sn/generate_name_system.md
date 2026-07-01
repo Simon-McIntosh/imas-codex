@@ -90,6 +90,7 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 - Z coordinate of a point / vertical / Z → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
 - Unspecified 3-vector position with no directional qualifier → plain `position_of_<X>` is acceptable.
 - **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
+- **A characteristic timescale is a named base, never `time_due_to_<process>`.** The bare `time` base is the time coordinate / elapsed time only; it MUST NOT carry a `due_to_<process>` (`time_due_to_resistive_diffusion` is ambiguous — delay? constant? diffusion time?). A timescale is a named quantity with its own `base_token`: `resistive_diffusion_time`, `confinement_time`, `decay_time`, `exposure_time`, `rise_time`, `fall_time`. ✓ `resistive_diffusion_time`, `energy_confinement_time`; ✗ `time_due_to_resistive_diffusion`. (The ISN validator rejects the bare `time`+`due_to` form.)
 
 This rule is unconditional and overrides any apparent symmetry with sibling names.
 
