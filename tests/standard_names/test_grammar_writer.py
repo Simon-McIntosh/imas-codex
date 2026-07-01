@@ -4,7 +4,8 @@ Mocked GraphClient — does not require a live Neo4j. Verifies:
 
 - T-A1/A3: per-segment columns always populated when parser succeeds
 - T-A6: re-writing with narrower grammar clears stale columns
-- T-A7: parser error → ``grammar_parse_fallback = true``, columns cleared
+- T-A7: parser error → segment columns cleared, no fallback flag written
+  (non-compliance is recorded by ``validation_status`` at validate time)
 - T-A3: open-vocab ``physical_base`` populates the column even when no
   GrammarToken corpus exists in the graph (token_version is ``None``).
 """
@@ -79,8 +80,15 @@ def test_columns_cleared_when_parser_narrowed() -> None:
     assert setters[1]["physical_base"] == "temperature"
 
 
-def test_grammar_parse_fallback_recorded_on_parser_error() -> None:
-    """Parser exception → SET grammar_parse_fallback = true and clear columns."""
+def test_parser_error_clears_columns_without_flag() -> None:
+    """Parser exception → SET clears segment columns; no fallback flag written.
+
+    A name the ISN parser rejects has its per-segment columns nulled and is
+    left unparseable in the graph. Its non-compliance is recorded
+    authoritatively by ``validation_status='quarantined'`` at validate time
+    (the single-pipeline gate), never by a separate ``grammar_parse_fallback``
+    flag.
+    """
     gc = _mock_gc_with_token_version("0.7.0")
 
     def _boom(_name: str):
@@ -96,12 +104,16 @@ def test_grammar_parse_fallback_recorded_on_parser_error() -> None:
         gaps = _write_grammar_decomposition(gc, ["definitely_not_a_real_name"])
 
     assert gaps == []
-    # The fallback path uses a SET that includes grammar_parse_fallback = true
-    fallback_calls = [
-        c for c in gc.query.call_args_list if "grammar_parse_fallback = true" in c[0][0]
+    # The reject path issues a SET that nulls the segment columns …
+    clear_calls = [
+        c for c in gc.query.call_args_list if "physical_base = null" in c[0][0]
     ]
-    assert len(fallback_calls) == 1
-    assert fallback_calls[0][1]["sn_id"] == "definitely_not_a_real_name"
+    assert len(clear_calls) == 1
+    assert clear_calls[0][1]["sn_id"] == "definitely_not_a_real_name"
+    # … and never writes a grammar_parse_fallback flag.
+    assert not any(
+        "grammar_parse_fallback" in c[0][0] for c in gc.query.call_args_list
+    )
 
 
 def test_open_vocab_physical_base_populates_column_with_no_edge() -> None:

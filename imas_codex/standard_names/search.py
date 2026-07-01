@@ -591,9 +591,6 @@ def fetch_standard_names(
             "geometric_base": "sn.geometric_base AS geometric_base",
             "object": "sn.object AS object",
             "geometry": "sn.geometry AS geometry",
-            "grammar_parse_fallback": (
-                "sn.grammar_parse_fallback AS grammar_parse_fallback"
-            ),
             "source_ids": "collect(DISTINCT src.id) AS source_ids",
             "source_ids_names": "collect(DISTINCT ids.id) AS source_ids_names",
             "is_placeholder": (
@@ -635,7 +632,6 @@ def fetch_standard_names(
             "geometric_base",
             "object",
             "geometry",
-            "grammar_parse_fallback",
         ]
         requested_fields = (
             list(dict.fromkeys(return_fields)) if return_fields is not None else None

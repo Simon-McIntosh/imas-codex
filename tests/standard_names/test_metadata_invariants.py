@@ -218,13 +218,14 @@ class TestGrammarParsing:
 
     Individual bare-name segment fields (physical_base, subject, etc.) are
     extracted from the ISN pydantic model along with
-    ``grammar_parse_version`` (ISN version string),
-    ``validation_diagnostics_json`` (JSON array, IR-parser-derived) and
-    ``grammar_parse_fallback`` (model accept/reject verdict).
+    ``grammar_parse_version`` (ISN version string) and
+    ``validation_diagnostics_json`` (JSON array, IR-parser-derived). A name
+    the model rejects yields all-``None`` segment columns; non-compliance is
+    recorded by ``validation_status='quarantined'`` at validate time.
     """
 
     def test_parse_grammar_keys(self) -> None:
-        """_parse_grammar returns the three metadata fields plus every bare segment column."""
+        """_parse_grammar returns the two metadata fields plus every bare segment column."""
         from imas_codex.standard_names.graph_ops import (
             _GRAMMAR_SEGMENT_COLUMNS,
             _parse_grammar,
@@ -233,14 +234,14 @@ class TestGrammarParsing:
         result = _parse_grammar("electron_temperature")
         assert "grammar_parse_version" in result
         assert "validation_diagnostics_json" in result
-        assert "grammar_parse_fallback" in result
+        assert "grammar_parse_fallback" not in result
         # bare-name segment fields — every canonical column present
         assert set(_GRAMMAR_SEGMENT_COLUMNS) <= set(result)
         assert "aggregation" in result
         assert "orbit" in result
         assert "population" in result
-        # all segment columns + the three metadata fields, nothing else
-        assert len(result) == len(_GRAMMAR_SEGMENT_COLUMNS) + 3
+        # all segment columns + the two metadata fields, nothing else
+        assert len(result) == len(_GRAMMAR_SEGMENT_COLUMNS) + 2
 
     def test_parse_grammar_graceful_on_missing_package(self) -> None:
         """When imas_standard_names is unavailable, metadata fields are None."""
@@ -254,7 +255,6 @@ class TestGrammarParsing:
         # but the keys must always be present.
         assert "grammar_parse_version" in result
         assert "validation_diagnostics_json" in result
-        assert "grammar_parse_fallback" in result
 
 
 # ---------------------------------------------------------------------------

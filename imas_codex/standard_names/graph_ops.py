@@ -137,11 +137,12 @@ def _parse_grammar(name: str) -> dict[str, Any]:
 
     Returns a dict with ``grammar_parse_version`` (ISN package version
     string), ``validation_diagnostics_json`` (JSON array of diagnostic
-    objects, ``"[]"`` when the IR parser rejects the name),
-    ``grammar_parse_fallback`` (``True`` when the pydantic model rejects the
-    name — stacked tokens, bare generic base, unknown token — matching the
-    fallback semantics of ``_write_grammar_decomposition``), and all
-    bare-name segment columns (all ``None`` on fallback).
+    objects, ``"[]"`` when the IR parser rejects the name), and all
+    bare-name segment columns. When the ISN pydantic model rejects the name
+    (stacked tokens, bare generic base, unknown token, non-canonical order)
+    the segment columns are all ``None``; the name's non-compliance is
+    recorded authoritatively by ``validation_status='quarantined'`` at
+    validate time (:func:`validate_worker`), not by a separate flag.
     """
     try:
         import dataclasses
@@ -155,7 +156,6 @@ def _parse_grammar(name: str) -> dict[str, Any]:
         return {
             "grammar_parse_version": None,
             "validation_diagnostics_json": None,
-            "grammar_parse_fallback": None,
             **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS),
         }
 
@@ -179,14 +179,12 @@ def _parse_grammar(name: str) -> dict[str, Any]:
         return {
             "grammar_parse_version": version,
             "validation_diagnostics_json": diags,
-            "grammar_parse_fallback": True,
             **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS),
         }
 
     return {
         "grammar_parse_version": version,
         "validation_diagnostics_json": diags,
-        "grammar_parse_fallback": False,
         **_segments_from_model(parsed),
     }
 
@@ -2558,7 +2556,6 @@ def write_standard_names(
                 sn.embedding = coalesce(b.embedding, sn.embedding),
                 sn.embedded_at = coalesce(b.embedded_at, sn.embedded_at),
                 sn.grammar_parse_version = coalesce(b.grammar_parse_version, sn.grammar_parse_version),
-                sn.grammar_parse_fallback = coalesce(b.grammar_parse_fallback, sn.grammar_parse_fallback),
                 sn.validation_diagnostics_json = coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json),
                 sn.physical_base = coalesce(b.physical_base, sn.physical_base),
                 sn.geometric_base = coalesce(b.geometric_base, sn.geometric_base),
@@ -3448,8 +3445,11 @@ def _write_grammar_decomposition(
     bare-name per-segment columns (``sn.physical_base``, ``sn.subject``, …)
     from the ISN parser, regardless of whether a closed-vocabulary
     GrammarToken exists for the value. Conditionally writes typed edges
-    only when a GrammarToken does exist; on parser error sets
-    ``sn.grammar_parse_fallback = true`` and clears columns.
+    only when a GrammarToken does exist; on parser error clears all
+    per-segment columns and edges (leaving the node unparseable). Such a
+    name is quarantined authoritatively at validate time
+    (``validation_status='quarantined'``) — the single-pipeline gate — so
+    no separate fallback flag is recorded.
 
     Idempotent: re-running on existing nodes overwrites columns and
     refreshes typed edges. Missing segments are written as ``null`` so
@@ -3513,8 +3513,7 @@ def _write_grammar_decomposition(
                 OPTIONAL MATCH (sn)-[r:{edge_delete_types}]->(:GrammarToken)
                 DELETE r
                 WITH sn
-                SET {columns_to_null},
-                    sn.grammar_parse_fallback = true
+                SET {columns_to_null}
                 """,
                 sn_id=sn_id,
             )
@@ -3528,8 +3527,7 @@ def _write_grammar_decomposition(
         gc.query(
             f"""
             MATCH (sn:StandardName {{id: $sn_id}})
-            SET {columns_to_set},
-                sn.grammar_parse_fallback = false
+            SET {columns_to_set}
             """,
             sn_id=sn_id,
             **column_values,
