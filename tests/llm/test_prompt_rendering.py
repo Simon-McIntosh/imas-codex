@@ -94,7 +94,8 @@ class TestExemplarAlignment:
     def test_p8_canonical_coordinates(self, rendered_compose_system: str) -> None:
         """P8 must list the three canonical coordinate forms."""
         assert "vertical_coordinate_of_<position>" in rendered_compose_system
-        assert "major_radius_of_<position>" in rendered_compose_system
+        # §6: a point's R coordinate is radial_coordinate_of_<X>, not major_radius_of_<X>.
+        assert "radial_coordinate_of_<position>" in rendered_compose_system
         assert "toroidal_angle_of_<position>" in rendered_compose_system
 
     def test_forbidden_patterns_section(self, rendered_compose_system: str) -> None:

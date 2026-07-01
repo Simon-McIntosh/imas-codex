@@ -149,10 +149,12 @@ REFERENCE_NAMES: dict[str, dict] = {
         }
     ),
     # --- Position-qualified quantities ---
+    # §6: a point's R/Z coordinate is <axis>_coordinate_of_<X> (geometry base),
+    # NOT major_radius_of_X / vertical_position_of_X.
     "equilibrium/time_slice/global_quantities/magnetic_axis/r": _ref(
         {
-            "physical_base": "major_radius",
-            "position": Position.MAGNETIC_AXIS,
+            "geometric_base": "radial_coordinate",
+            "geometry": "magnetic_axis",
         }
     ),
     "equilibrium/time_slice/profiles_1d/psi": _ref(
@@ -160,8 +162,9 @@ REFERENCE_NAMES: dict[str, dict] = {
     ),
     "equilibrium/time_slice/global_quantities/magnetic_axis/z": _ref(
         {
-            "physical_base": "vertical_position",
-            "position": Position.MAGNETIC_AXIS,
+            "geometric_base": "coordinate",
+            "coordinate": Component.VERTICAL,
+            "geometry": "magnetic_axis",
         }
     ),
     # --- Compound physical bases (generic terms qualified via compounding) ---
