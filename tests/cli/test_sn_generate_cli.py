@@ -190,6 +190,70 @@ class TestFilterPlumbing:
         assert call_kwargs["before"] == "2026-05-01"
 
 
+class TestResetToRunsOnPoolPath:
+    """Regression: --reset-to (without --reset-only) must run on the default DD
+    pool-orchestrator path. Previously the reset block sat AFTER the use_pools
+    early-return, so `sn run --reset-to extracted --retry-quarantined` was a
+    silent no-op on DD source — the clear never ran and quarantined names were
+    never regenerated.
+    """
+
+    def test_reset_to_extracted_runs_clear_on_dd_pool_path(
+        self, runner: CliRunner
+    ) -> None:
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.clear_standard_names",
+                return_value=7,
+            ) as mock_clear,
+            patch("imas_codex.cli.sn._run_sn_cmd", return_value=None) as mock_run,
+        ):
+            result = runner.invoke(
+                sn,
+                [
+                    "run",
+                    "--source",
+                    "dd",
+                    "--reset-to",
+                    "extracted",
+                    "--retry-quarantined",
+                    "--skip-clear-gate",
+                ],
+            )
+        assert result.exit_code == 0, result.output
+        # The clear MUST run on the DD pool path (regression guard) …
+        mock_clear.assert_called_once()
+        assert mock_clear.call_args[1]["validation_status"] == "quarantined"
+        assert mock_clear.call_args[1]["source_filter"] == "dd"
+        # … and the pool orchestrator still runs afterwards.
+        mock_run.assert_called_once()
+
+    def test_reset_to_drafted_runs_reset_on_dd_pool_path(
+        self, runner: CliRunner
+    ) -> None:
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.reset_standard_names",
+                return_value=3,
+            ) as mock_reset,
+            patch("imas_codex.cli.sn._run_sn_cmd", return_value=None) as mock_run,
+        ):
+            result = runner.invoke(
+                sn,
+                [
+                    "run",
+                    "--source",
+                    "dd",
+                    "--reset-to",
+                    "drafted",
+                    "--skip-clear-gate",
+                ],
+            )
+        assert result.exit_code == 0, result.output
+        mock_reset.assert_called_once()
+        mock_run.assert_called_once()
+
+
 class TestBackwardCompatibility:
     """Ensure existing --reset-to --dry-run workflow still works."""
 

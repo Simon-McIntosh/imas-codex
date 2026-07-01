@@ -1573,6 +1573,40 @@ def sn_run(
         )
         return
 
+    # Handle --reset-to BEFORE scope routing so it applies to BOTH the DD
+    # pool-orchestrator path and the signals single-pass path. (This block
+    # previously sat AFTER the use_pools early-return, making --reset-to a
+    # silent no-op on the default DD path.) clear_standard_names re-seeds the
+    # orphaned StandardNameSources to 'extracted' (its Step E) so the pool
+    # orchestrator's extract phase re-composes them.
+    if reset_to is not None and not dry_run:
+        _tiers = [t.strip() for t in tier.split(",")] if tier else None
+        _reset_filter_kwargs: dict[str, Any] = {
+            "since": since,
+            "before": before,
+            "below_score": below_score,
+            "tiers": _tiers,
+            "validation_status": "quarantined" if retry_quarantined else None,
+        }
+        source_arg = "dd" if source == "dd" else "signals"
+        from imas_codex.standard_names.graph_ops import (
+            clear_standard_names,
+            reset_standard_names,
+        )
+
+        if reset_to == "extracted":
+            n = clear_standard_names(source_filter=source_arg, **_reset_filter_kwargs)
+            console.print(
+                f"[yellow]--reset-to extracted:[/yellow] cleared {n} SN nodes"
+            )
+        elif reset_to == "drafted":
+            n = reset_standard_names(
+                from_status="drafted",
+                source_filter=source_arg,
+                **_reset_filter_kwargs,
+            )
+            console.print(f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes")
+
     # Scope-routing: default (DD source) → pool orchestrator.
     # Runs all 6 pools concurrently, sampling globally from the available
     # pool of StandardNameSource / StandardName nodes.
@@ -1620,45 +1654,6 @@ def sn_run(
     # --from-model implies --force (selecting by model only makes sense for regeneration)
     if from_model:
         force = True
-
-    # Build filter kwargs for reset/clear functions (single-pass --reset-to without --reset-only).
-    _tiers = [t.strip() for t in tier.split(",")] if tier else None
-    _validation_status: str | None = None
-    if retry_quarantined:
-        _validation_status = "quarantined"
-    _reset_filter_kwargs: dict[str, Any] = {
-        "since": since,
-        "before": before,
-        "below_score": below_score,
-        "tiers": _tiers,
-        "validation_status": _validation_status,
-    }
-
-    # Handle --reset-to before the main pipeline (reset + continue generating)
-    if reset_to is not None and not dry_run:
-        source_arg = "dd" if source == "dd" else "signals"
-        from imas_codex.standard_names.graph_ops import (
-            clear_standard_names,
-            reset_standard_names,
-        )
-
-        if reset_to == "extracted":
-            n = clear_standard_names(
-                source_filter=source_arg,
-                ids_filter=ids_filter_sp,
-                **_reset_filter_kwargs,
-            )
-            console.print(
-                f"[yellow]--reset-to extracted:[/yellow] cleared {n} SN nodes"
-            )
-        elif reset_to == "drafted":
-            n = reset_standard_names(
-                from_status="drafted",
-                source_filter=source_arg,
-                ids_filter=ids_filter_sp,
-                **_reset_filter_kwargs,
-            )
-            console.print(f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes")
 
     # Log Phase B/C flags that are pending wire-up
     if retry_skipped:
