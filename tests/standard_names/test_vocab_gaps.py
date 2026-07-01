@@ -898,11 +898,13 @@ class TestClassifyGap:
         """Token exists in the reported segment → false_positive."""
         from imas_codex.standard_names.segments import classify_gap, is_known_token
 
-        # Find a token that exists in 'qualifier' segment
-        segs = is_known_token("maximum")
-        assert "qualifier" in segs, "maximum should be in qualifier"
+        # Find a token that exists in 'qualifier' segment.  (maximum/minimum
+        # moved to the operator class in the finalized grammar — "effective"
+        # is a genuine qualifier token.)
+        segs = is_known_token("effective")
+        assert "qualifier" in segs, "effective should be in qualifier"
 
-        cat, actual = classify_gap("qualifier", "maximum")
+        cat, actual = classify_gap("qualifier", "effective")
         assert cat == "false_positive"
         assert "qualifier" in actual
 
@@ -995,13 +997,14 @@ class TestLexicalCompoundPhysicalBase:
     """Lexical-compound bases the parser self-resolves are recognized.
 
     The flat ``SEGMENT_TOKEN_MAP['physical_base']`` omits compounds like
-    ``internal_inductance`` / ``major_radius`` that the ISN grammar resolves to
+    ``major_radius`` / ``minor_radius`` that the ISN grammar resolves to
     themselves.  These must register as known physical_base tokens (not gaps),
     while genuinely unregistered tokens stay ``absent`` and closed enums stay
-    flat-map only.
+    flat-map only.  (``internal_inductance`` was promoted to the flat map
+    itself — see ``test_promoted_compound_in_flat_map`` below.)
     """
 
-    LEXICAL_COMPOUNDS = ("internal_inductance", "major_radius", "minor_radius")
+    LEXICAL_COMPOUNDS = ("major_radius", "minor_radius")
 
     @pytest.mark.parametrize("token", LEXICAL_COMPOUNDS)
     def test_is_known_token_returns_physical_base(self, token):
@@ -1023,6 +1026,20 @@ class TestLexicalCompoundPhysicalBase:
         cat, actual = classify_gap("physical_base", token)
         assert cat == "false_positive"
         assert "physical_base" in actual
+
+    def test_promoted_compound_in_flat_map(self):
+        """internal_inductance was promoted to an atomic physical_base token.
+
+        Unlike major_radius / minor_radius (self-resolving compounds absent
+        from the flat map), internal_inductance now lives directly in
+        SEGMENT_TOKEN_MAP['physical_base'].
+        """
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+        from imas_codex.standard_names.segments import is_known_token
+
+        assert "internal_inductance" in SEGMENT_TOKEN_MAP.get("physical_base", ())
+        assert is_known_token("internal_inductance") == ["physical_base"]
 
     def test_resolved_base_segment_self_resolving(self):
         from imas_codex.standard_names.segments import resolved_base_segment
@@ -1136,10 +1153,12 @@ class TestWriteVocabGapsInvalidSegment:
         """Gaps where token exists in reported segment should be skipped."""
         from imas_codex.standard_names.graph_ops import write_vocab_gaps
 
+        # "maximum" moved to the operator class in the finalized grammar;
+        # "effective" is a genuine qualifier token.
         gaps = [
             {
                 "segment": "qualifier",
-                "token": "maximum",
+                "token": "effective",
                 "source_id": "dd:equilibrium/test",
                 "reason": "test",
             }
@@ -1160,11 +1179,13 @@ class TestReconcileVocabGaps:
         """Gap where token now exists in reported segment → deleted."""
         from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
 
+        # "maximum" moved to the operator class in the finalized grammar;
+        # "effective" is a genuine qualifier token.
         fake_gaps = [
             {
-                "id": "vocab_gap:qualifier:maximum",
+                "id": "vocab_gap:qualifier:effective",
                 "segment": "qualifier",
-                "token": "maximum",
+                "token": "effective",
                 "category": "absent",
             }
         ]
@@ -1462,11 +1483,13 @@ class TestReconcileVocabGapSourceReset:
         """Sources whose entity has no remaining gap edge → 'extracted'."""
         from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
 
+        # "maximum" moved to the operator class in the finalized grammar;
+        # "effective" is a genuine qualifier token.
         fake_gaps = [
             {
-                "id": "vocab_gap:qualifier:maximum",
+                "id": "vocab_gap:qualifier:effective",
                 "segment": "qualifier",
-                "token": "maximum",
+                "token": "effective",
                 "category": "absent",
             }
         ]
