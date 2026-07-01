@@ -36,7 +36,7 @@ Positional qualifiers distinguish intrinsic geometric properties from
 field values evaluated at a locus.
 
 - **`of_<position>`** — intrinsic geometric property of a locus.
-  GOOD: `major_radius_of_magnetic_axis`, `area_of_plasma_boundary`,
+  GOOD: `radial_coordinate_of_magnetic_axis`, `area_of_plasma_boundary`,
        `vertical_coordinate_of_x_point`.
 - **`at_<position>`** — value of a field quantity sampled at a point,
   line, or surface.
@@ -45,7 +45,7 @@ field values evaluated at a locus.
        `safety_factor_at_minimum_safety_factor`.
 
 FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
-   BAD: `major_radius_at_magnetic_axis` → use `major_radius_of_magnetic_axis`.
+   BAD: `radial_coordinate_at_magnetic_axis` → use `radial_coordinate_of_magnetic_axis`.
 
 #### P4. Transformations on a base quantity
 
@@ -59,9 +59,9 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
 
 #### P5. Geometry of a structural entity
 
-- ✅ `major_radius_of_magnetic_axis`
+- ✅ `radial_coordinate_of_magnetic_axis`
 - ✅ `vertical_coordinate_of_x_point`
-- ✅ `major_radius_of_plasma_boundary`
+- ✅ `radial_coordinate_of_plasma_boundary`
   - *Why good:* `of_{entity}` reads as "the property belonging to this
     entity". Do not switch to `at_{entity}` — the property *is* a feature
     of the entity, not a measurement taken at it. Name a boundary-contour
@@ -84,7 +84,7 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
 
 #### P7. Spectral / Fourier decomposition
 
-- ✅ `major_radius_of_plasma_boundary_fourier_coefficient` (with
+- ✅ `poloidal_magnetic_flux_fourier_coefficient` (with
   `description` starting "Fourier cosine coefficient of ...")
 - ✅ `perturbed_magnetic_field_amplitude`
   - *Why good:* a spectral coefficient is a POSTFIX operator on the base —
@@ -97,7 +97,7 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
 #### P8. Poloidal-plane coordinates
 
 - ✅ `vertical_coordinate_of_<position>` (preferred; Rule 17).
-- ✅ `major_radius_of_<position>` (preferred; Rule 17).
+- ✅ `radial_coordinate_of_<position>` (preferred; Rule 17 — symmetric with `vertical_coordinate_of_<position>`).
 - ✅ `toroidal_angle_of_<position>` (preferred; Rule 17).
 
 DEPRECATED: `vertical_position_of_<position>` (old form;
@@ -140,7 +140,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 - ❌ `r_of_magnetic_axis` paired with `vertical_coordinate_of_magnetic_axis`
   - *Why bad:* the pair is asymmetric — R uses a letter abbreviation, Z
     uses a full phrase. Grep for one and you miss the other.
-  - *Fix:* pair as `major_radius_of_magnetic_axis` /
+  - *Fix:* pair as `radial_coordinate_of_magnetic_axis` /
     `vertical_coordinate_of_magnetic_axis`.
 
 #### A5. Multi-subject naming (NC-2)

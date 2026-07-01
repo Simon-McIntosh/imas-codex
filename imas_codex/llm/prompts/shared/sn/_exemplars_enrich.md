@@ -82,8 +82,8 @@ exemplars use American spelling (NC-17) in every prose field.
 
 #### E6. Geometric property — concise, no DD leak
 
-- **Name:** `major_radius_of_magnetic_axis` (unit `m`)
-- ✅ *Description:* `Major-radius coordinate of the magnetic axis, i.e. the extremum of the poloidal magnetic flux surface.`
+- **Name:** `radial_coordinate_of_magnetic_axis` (unit `m`)
+- ✅ *Description:* `Radial (R) coordinate of the magnetic axis, i.e. the extremum of the poloidal magnetic flux surface.`
 - ✅ *Documentation:* `The major radius $R_{\rm axis}$ of the magnetic axis is
   the $R$ coordinate at which $\nabla \psi = 0$ inside the plasma, identifying
   the innermost nested flux surface. Typical values 1.6–3.0 m for medium-size
@@ -177,7 +177,7 @@ exemplars use American spelling (NC-17) in every prose field.
   related to `safety_factor`.
 - *Fix:* 2–6 bare-ID links to genuinely related **existing** SNs:
   `["poloidal_magnetic_flux", "toroidal_magnetic_flux", "magnetic_shear",
-   "major_radius_of_magnetic_axis"]` (verify each exists in the catalog).
+   "radial_coordinate_of_magnetic_axis"]` (verify each exists in the catalog).
 
 #### AE10. Generic filler prose
 
