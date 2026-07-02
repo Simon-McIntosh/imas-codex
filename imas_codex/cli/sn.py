@@ -1595,7 +1595,17 @@ def sn_run(
         )
 
         if reset_to == "extracted":
-            n = clear_standard_names(source_filter=source_arg, **_reset_filter_kwargs)
+            # --reset-to extracted deletes matching SN nodes so they recompose
+            # from their (authoritative) DD source. clear_standard_names deletes
+            # only drafted-stage nodes unless include_accepted is set — thread
+            # the flag through so a migration can re-derive accepted/quarantined
+            # names (e.g. sn run --retry-quarantined --reset-to extracted
+            # --include-accepted).
+            n = clear_standard_names(
+                source_filter=source_arg,
+                include_accepted=include_accepted,
+                **_reset_filter_kwargs,
+            )
             console.print(
                 f"[yellow]--reset-to extracted:[/yellow] cleared {n} SN nodes"
             )
