@@ -4138,7 +4138,7 @@ async def persist_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     """
                     MATCH (sn:StandardName)
                     WHERE sn.embedded_at IS NOT NULL
-                      AND sn.pipeline_status IN ['named', 'drafted']
+                      AND sn.name_stage = 'drafted'
                     RETURN sn.id AS id, sn.source_paths AS source_paths
                     """
                 )
@@ -4161,7 +4161,7 @@ async def persist_worker(state: StandardNameBuildState, **_kwargs) -> None:
                             UNWIND $paths AS path
                             MATCH (n:IMASNode {id: path})-[r:HAS_STANDARD_NAME]->(sn:StandardName)
                             WHERE NOT (sn.id IN $keep_names)
-                              AND sn.pipeline_status IN ['named', 'drafted', null]
+                              AND coalesce(sn.name_stage, 'drafted') = 'drafted'
                             DELETE r
                             RETURN count(r) AS detached
                             """,
@@ -4374,7 +4374,7 @@ async def compose_batch(
                         MATCH (other:IMASNode)-[:IN_SEMANTIC_CLUSTER]->(cl)
                         MATCH (other)-[:HAS_STANDARD_NAME]->(sn:StandardName)
                         WHERE coalesce(sn.validation_status, '') <> 'quarantined'
-                          AND coalesce(sn.pipeline_status, '') <> 'superseded'
+                          AND coalesce(sn.name_stage, '') <> 'superseded'
                         RETURN DISTINCT sn.id AS id
                         LIMIT 200
                         """,

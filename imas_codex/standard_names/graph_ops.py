@@ -574,7 +574,7 @@ def get_source_name_mapping(*, rich: bool = False) -> dict[str, dict]:
 
     Returns:
         Dict mapping source entity ID to dict with keys:
-        name, description, kind, pipeline_status (and more if rich=True).
+        name, description, kind, name_stage (and more if rich=True).
         If a source has multiple names, prefers the accepted one.
     """
     if rich:
@@ -587,18 +587,18 @@ def get_source_name_mapping(*, rich: bool = False) -> dict[str, dict]:
                    sn.id AS name,
                    sn.description AS description,
                    sn.kind AS kind,
-                   sn.pipeline_status AS pipeline_status
+                   sn.name_stage AS name_stage
         """)
         mapping: dict[str, dict] = {}
         for r in results:
             sid = r["source_id"]
             # If multiple names exist for same source, prefer accepted
-            if sid not in mapping or r.get("pipeline_status") == "accepted":
+            if sid not in mapping or r.get("name_stage") == "accepted":
                 mapping[sid] = {
                     "name": r["name"],
                     "description": r.get("description"),
                     "kind": r.get("kind"),
-                    "pipeline_status": r.get("pipeline_status"),
+                    "name_stage": r.get("name_stage"),
                 }
         return mapping
 
@@ -617,7 +617,7 @@ def _get_rich_source_name_mapping() -> dict[str, dict]:
                    sn.documentation AS documentation,
                    sn.kind AS kind,
                    sn.links AS links,
-                   sn.pipeline_status AS pipeline_status,
+                   sn.name_stage AS name_stage,
                    sn.reviewer_score_name AS reviewer_score,
                    sn.review_tier AS review_tier,
                    sn.validation_issues AS validation_issues,
@@ -627,14 +627,14 @@ def _get_rich_source_name_mapping() -> dict[str, dict]:
         mapping: dict[str, dict] = {}
         for r in results:
             sid = r["source_id"]
-            if sid not in mapping or r.get("pipeline_status") == "accepted":
+            if sid not in mapping or r.get("name_stage") == "accepted":
                 mapping[sid] = {
                     "name": r["name"],
                     "description": r.get("description"),
                     "documentation": r.get("documentation"),
                     "kind": r.get("kind"),
                     "links": r.get("links"),
-                    "pipeline_status": r.get("pipeline_status"),
+                    "name_stage": r.get("name_stage"),
                     "reviewer_score": r.get("reviewer_score"),
                     "review_tier": r.get("review_tier"),
                     "validation_issues": r.get("validation_issues"),
@@ -1104,7 +1104,7 @@ def _filter_admissible_parents(
          both already-in-graph projections and the current batch.
 
     Skips legacy entries: if a parent has ``origin='catalog_edit'`` or
-    is already ``pipeline_status='accepted'``, the edge is preserved
+    is already ``name_stage='accepted'``, the edge is preserved
     regardless of admission verdict (catalog is authoritative).
 
     ``full_rebuild`` (set by ``rederive_structural_edges``, which passes the
@@ -1175,7 +1175,7 @@ def _filter_admissible_parents(
                        parent_sources,
                        lone_child_sources,
                        p2.origin AS origin,
-                       p2.pipeline_status AS pipeline_status
+                       p2.name_stage AS name_stage
                 """,
                 names=list(targets),
             )
@@ -1190,7 +1190,7 @@ def _filter_admissible_parents(
             continue
         graph_axes[nm] = set(r.get("axes") or [])
         graph_children[nm] = {c for c in (r.get("child_ids") or []) if c}
-        if r.get("origin") == "catalog_edit" or r.get("pipeline_status") == "accepted":
+        if r.get("origin") == "catalog_edit" or r.get("name_stage") == "accepted":
             legacy_protected.add(nm)
         if r.get("lone_child_id"):
             shadow_info[nm] = {
@@ -2413,7 +2413,7 @@ def write_standard_names(
 
     Optional fields: ``unit``, ``description``,
     ``documentation``, ``kind``, ``links``, ``source_paths``,
-    ``validity_domain``, ``constraints``, ``model``, ``pipeline_status``,
+    ``validity_domain``, ``constraints``, ``model``,
     ``generated_at``,
     ``review_tier``,
     ``vocab_gap_detail``, ``validation_issues``,
@@ -2544,7 +2544,6 @@ def write_standard_names(
                 sn.isn_version = coalesce(b.isn_version, sn.isn_version),
                 sn.codex_version = coalesce(b.codex_version, sn.codex_version),
                 sn.model = coalesce(b.model, sn.model),
-                sn.pipeline_status = coalesce(b.pipeline_status, sn.pipeline_status),
                 sn.generated_at = coalesce(b.generated_at, sn.generated_at),
                 sn.review_tier = coalesce(b.review_tier, sn.review_tier),
                 sn.vocab_gap_detail = coalesce(b.vocab_gap_detail, sn.vocab_gap_detail),
@@ -2621,8 +2620,6 @@ def write_standard_names(
                     "isn_version": n.get("isn_version"),
                     "codex_version": n.get("codex_version"),
                     "model": n.get("model"),
-                    "pipeline_status": n.get("pipeline_status")
-                    or n.get("review_status"),
                     "generated_at": n.get("generated_at"),
                     "review_tier": n.get("review_tier"),
                     "vocab_gap_detail": _ensure_json(n.get("vocab_gap_detail")),
@@ -3742,7 +3739,6 @@ def persist_generated_name_batch(
 
     for entry in candidates:
         entry.setdefault("model", compose_model)
-        entry.setdefault("pipeline_status", "named")
         entry.setdefault("dd_version", dd_version)
         entry.setdefault("isn_version", _isn_ver)
         entry.setdefault("codex_version", _codex_ver)
@@ -4162,7 +4158,7 @@ def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any
     with GraphClient() as gc:
         # Step 1: claim with random ordering and unique token
         # Gate: any StandardName with a description that hasn't been validated.
-        # No pipeline_status filter — legacy names with NULL status must also be validated.
+        # No stage filter — names with NULL name_stage must also be validated.
         gc.query(
             """
             MATCH (sn:StandardName)
@@ -4264,7 +4260,7 @@ def claim_names_for_embedding(limit: int = 100) -> tuple[str, list[dict[str, Any
         gc.query(
             """
             MATCH (sn:StandardName)
-            WHERE sn.pipeline_status IN ['named', 'drafted', 'published', 'accepted']
+            WHERE NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']
               AND sn.validated_at IS NOT NULL
               AND sn.embedding IS NULL
               AND sn.description IS NOT NULL
@@ -4343,7 +4339,7 @@ def get_validated_names(
     ``validation_status`` = ``'valid'``.
     """
     where_parts = [
-        "sn.pipeline_status IN ['named', 'drafted']",
+        "sn.name_stage = 'drafted'",
         "sn.validated_at IS NOT NULL",
         "sn.validation_status = 'valid'",
     ]
@@ -4393,100 +4389,11 @@ def mark_names_consolidated(name_ids: list[str]) -> int:
         return result[0]["marked"] if result else 0
 
 
-# =============================================================================
-# Read helpers — publish (validated standard names)
-# =============================================================================
-
-
-def get_validated_standard_names(
-    ids_filter: str | None = None,
-    pipeline_status: str = "drafted",
-) -> list[dict[str, Any]]:
-    """Read validated StandardName nodes and their provenance.
-
-    Queries StandardName nodes with the given ``pipeline_status``, joining
-    through ``HAS_STANDARD_NAME`` to find source entities and their parent IDS,
-    and through ``HAS_UNIT`` to find the unit node.  Uses ``collect()``
-    to avoid row duplication when a name has multiple sources (takes the first).
-
-    Parameters
-    ----------
-    ids_filter:
-        Restrict to names derived from a specific IDS (matched via
-        ``IMASNode -[:HAS_STANDARD_NAME]-> StandardName`` and
-        ``IMASNode -[:IN_IDS]-> IDS``).
-    pipeline_status:
-        Filter by ``pipeline_status`` property (default ``"drafted"``).
-
-    Returns
-    -------
-    list of dicts with keys: name, description, documentation, kind,
-    unit, links, dd_paths, constraints, validity_domain,
-    model, source, source_path, ids_name, source_ids_names.
-    """
-    with GraphClient() as gc:
-        params: dict[str, Any] = {
-            "pipeline_status": pipeline_status,
-        }
-
-        # Collect source info — use HAS_STANDARD_NAME (entity → concept)
-        cypher = """
-            MATCH (sn:StandardName)
-            WHERE sn.pipeline_status = $pipeline_status
-            AND sn.validation_status = 'valid'
-            OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(sn)
-            OPTIONAL MATCH (src)-[:IN_IDS]->(ids:IDS)
-            OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-            WITH sn,
-                 collect(DISTINCT src.id)[0] AS first_source,
-                 collect(DISTINCT ids.id)[0] AS first_ids,
-                 collect(DISTINCT ids.id) AS all_ids,
-                 u
-        """
-
-        if ids_filter:
-            # Re-check: at least one HAS_STANDARD_NAME source must be in the target IDS
-            cypher += """
-            WITH sn, first_source, first_ids, all_ids, u
-            WHERE first_ids = $ids_filter
-            """
-            params["ids_filter"] = ids_filter
-
-        cypher += """
-            RETURN sn.id AS name,
-                   sn.description AS description,
-                   sn.documentation AS documentation,
-                   sn.kind AS kind,
-                   coalesce(u.id, sn.unit) AS unit,
-                   sn.links AS links,
-                   sn.source_paths AS source_paths,
-                   sn.constraints AS constraints,
-                   sn.validity_domain AS validity_domain,
-                   sn.model AS model,
-                   sn.source_types AS source_types,
-                   first_source AS source_path,
-                   first_ids AS ids_name,
-                   all_ids AS source_ids_names,
-                   sn.cocos_transformation_type AS cocos_transformation_type,
-                   sn.cocos AS cocos,
-                   sn.dd_version AS dd_version
-            ORDER BY sn.id
-        """
-
-        results = gc.query(cypher, **params)
-        logger.info(
-            "Read %d validated standard names (ids_filter=%s, pipeline_status=%s)",
-            len(results),
-            ids_filter,
-            pipeline_status,
-        )
-        return list(results)
-
-
 def reset_standard_names(
     *,
-    from_status: str = "drafted",
-    to_status: str | None = None,
+    from_stage: str | None = "drafted",
+    to_stage: str | None = None,
+    include_accepted: bool = False,
     source_filter: str | None = None,
     ids_filter: str | None = None,
     dry_run: bool = False,
@@ -4504,13 +4411,20 @@ def reset_standard_names(
 
     Parameters
     ----------
-    from_status:
-        Only reset nodes with this ``pipeline_status`` (default ``"drafted"``).
-    to_status:
-        Target ``pipeline_status`` after reset.  ``None`` (default) clears fields
-        only without changing the status.
+    from_stage:
+        Only reset nodes with this ``name_stage`` (default ``"drafted"``).
+        ``None`` selects any live stage (terminal ``superseded`` /
+        ``exhausted`` stages are always excluded; ``accepted`` requires
+        ``include_accepted=True``).
+    to_stage:
+        Target ``name_stage`` after reset.  ``None`` (default) clears fields
+        only without changing the stage.
+    include_accepted:
+        Required to reset ``name_stage='accepted'`` names — these are
+        committed catalog entries and the operator must opt in explicitly.
     source_filter:
-        Restrict to nodes with ``source`` equal to ``"dd"`` or ``"signals"``.
+        Restrict to nodes whose ``source_types`` contains ``"dd"`` or
+        ``"signals"``.
     ids_filter:
         Restrict to nodes whose HAS_STANDARD_NAME source path starts with this
         IDS name (matched via ``IMASNode -[:HAS_STANDARD_NAME]-> sn``).
@@ -4532,8 +4446,15 @@ def reset_standard_names(
     Number of nodes reset (or that would be reset in dry-run mode).
     """
     with GraphClient() as gc:
-        params: dict[str, Any] = {"from_status": from_status}
-        where_clauses = ["sn.pipeline_status = $from_status"]
+        params: dict[str, Any] = {}
+        where_clauses = [
+            "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+        ]
+        if from_stage is not None:
+            where_clauses.append("sn.name_stage = $from_stage")
+            params["from_stage"] = from_stage
+        if not include_accepted and from_stage != "accepted":
+            where_clauses.append("coalesce(sn.name_stage, '') <> 'accepted'")
 
         if source_filter:
             where_clauses.append("$source_filter IN sn.source_types")
@@ -4577,9 +4498,9 @@ def reset_standard_names(
         result = gc.query(count_cypher, **params)
         count = result[0]["n"] if result else 0
         logger.info(
-            "reset_standard_names: %d nodes match (from_status=%s, source=%s, ids=%s)",
+            "reset_standard_names: %d nodes match (from_stage=%s, source=%s, ids=%s)",
             count,
-            from_status,
+            from_stage,
             source_filter,
             ids_filter,
         )
@@ -4631,15 +4552,15 @@ def reset_standard_names(
             **reset_params,
         )
 
-        # Clear transient fields, optionally set new status
-        if to_status is not None:
+        # Clear transient fields, optionally set a new stage
+        if to_stage is not None:
             set_clause = (
                 "sn.embedding = null, sn.embedded_at = null, sn.model = null, "
                 "sn.generated_at = null, "
                 "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null, "
-                "sn.pipeline_status = $to_status"
+                "sn.name_stage = $to_stage"
             )
-            reset_params["to_status"] = to_status
+            reset_params["to_stage"] = to_stage
         else:
             set_clause = (
                 "sn.embedding = null, sn.embedded_at = null, sn.model = null, "
@@ -4661,7 +4582,7 @@ def reset_standard_names(
 
 def clear_standard_names(
     *,
-    status_filter: list[str] | None = None,
+    stage_filter: list[str] | None = None,
     source_filter: str | None = None,
     ids_filter: str | None = None,
     include_accepted: bool = False,
@@ -4681,22 +4602,26 @@ def clear_standard_names(
     2. Then delete ``StandardName`` nodes that have zero remaining
        ``HAS_STANDARD_NAME`` edges.
 
-    By default only nodes with ``pipeline_status = 'drafted'`` are deleted.
-    Accepted names require ``include_accepted=True``.
+    With no ``stage_filter`` every live stage is eligible except
+    ``accepted`` (requires ``include_accepted=True``); the terminal
+    ``superseded`` / ``exhausted`` stages are never deleted unless
+    explicitly listed (they carry REFINED_FROM chain history).
 
     Parameters
     ----------
-    status_filter:
-        List of ``pipeline_status`` values to delete (default ``["drafted"]``).
+    stage_filter:
+        List of ``name_stage`` values to delete.  ``None`` (default)
+        selects all live stages, gated by ``include_accepted``.
     source_filter:
-        Restrict to nodes with ``source`` equal to ``"dd"`` or ``"signals"``.
+        Restrict to nodes whose ``source_types`` contains ``"dd"`` or
+        ``"signals"``.
     ids_filter:
         Delete only names linked to an IMASNode whose id starts with this IDS
         name.  Relationships are removed first; nodes become orphans and are
         then deleted.
     include_accepted:
-        When ``True``, ``"accepted"`` names are eligible for deletion even if
-        not listed in ``status_filter``.
+        Required to delete ``name_stage='accepted'`` names — these are
+        committed catalog entries and the operator must opt in explicitly.
     dry_run:
         Return the count of nodes that would be deleted without modifying
         anything.
@@ -4715,23 +4640,25 @@ def clear_standard_names(
     -------
     Number of nodes deleted (or that would be deleted in dry-run mode).
     """
-    all_statuses = status_filter is None
-    effective_statuses = list(status_filter) if status_filter else []
-    if status_filter is not None:
-        if include_accepted and "accepted" not in effective_statuses:
-            effective_statuses.append("accepted")
-        elif not include_accepted and "accepted" in effective_statuses:
-            effective_statuses.remove("accepted")
+    effective_stages = list(stage_filter) if stage_filter else []
+    if stage_filter is not None:
+        if include_accepted and "accepted" not in effective_stages:
+            effective_stages.append("accepted")
+        elif not include_accepted and "accepted" in effective_stages:
+            effective_stages.remove("accepted")
 
     with GraphClient() as gc:
         params: dict[str, Any] = {}
         sn_where_clauses: list[str] = []
-        if all_statuses:
+        if stage_filter is None:
+            sn_where_clauses.append(
+                "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+            )
             if not include_accepted:
-                sn_where_clauses.append("sn.pipeline_status <> 'accepted'")
+                sn_where_clauses.append("coalesce(sn.name_stage, '') <> 'accepted'")
         else:
-            params["statuses"] = effective_statuses
-            sn_where_clauses.append("sn.pipeline_status IN $statuses")
+            params["stages"] = effective_stages
+            sn_where_clauses.append("sn.name_stage IN $stages")
 
         if source_filter:
             sn_where_clauses.append("$source_filter IN sn.source_types")
@@ -4773,9 +4700,9 @@ def clear_standard_names(
         result = gc.query(count_cypher, **params)
         count = result[0]["n"] if result else 0
         logger.info(
-            "clear_standard_names: %d nodes match (statuses=%s, source=%s, ids=%s)",
+            "clear_standard_names: %d nodes match (stages=%s, source=%s, ids=%s)",
             count,
-            effective_statuses,
+            effective_stages or "all-live",
             source_filter,
             ids_filter,
         )
@@ -4960,38 +4887,6 @@ def clear_sn_subsystem(
     logger.info("clear_sn_subsystem: deleted %d nodes (%s)", total, counts)
 
     return counts
-
-
-def update_review_status(names: list[str], status: str = "published") -> int:
-    """Update pipeline_status for a batch of StandardName nodes.
-
-    Parameters
-    ----------
-    names:
-        List of StandardName node IDs (``sn.id``) to update.
-    status:
-        New ``pipeline_status`` value (default ``"published"``).
-
-    Returns
-    -------
-    Number of nodes updated.
-    """
-    if not names:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $names AS name
-            MATCH (sn:StandardName {id: name})
-            SET sn.pipeline_status = $status
-            RETURN count(sn) AS updated
-            """,
-            names=names,
-            status=status,
-        )
-        count = result[0]["updated"] if result else 0
-        logger.info("Updated pipeline_status to '%s' for %d names", status, count)
-        return count
 
 
 # =============================================================================
@@ -5438,84 +5333,6 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
 # =============================================================================
 # Enrichment helpers — documentation iteration (Phase 3D)
 # =============================================================================
-
-
-def get_enrichment_candidates(
-    ids_filter: str | None = None,
-    domain_filter: str | None = None,
-    status_filter: str | None = None,
-    limit: int | None = None,
-) -> list[dict[str, Any]]:
-    """Get StandardName nodes that need documentation enrichment.
-
-    Returns dicts with: id, description, documentation, kind, unit,
-    physics_domain, pipeline_status, plus all linked DD paths aggregated with
-    their documentation.
-    """
-    with GraphClient() as gc:
-        params: dict[str, Any] = {}
-        where_clauses: list[str] = []
-
-        if ids_filter:
-            where_clauses.append(
-                "EXISTS { MATCH (src)-[:HAS_STANDARD_NAME]->(sn) "
-                "MATCH (src)-[:IN_IDS]->(ids:IDS {id: $ids_filter}) }"
-            )
-            params["ids_filter"] = ids_filter
-        if domain_filter:
-            where_clauses.append("sn.physics_domain = $domain_filter")
-            params["domain_filter"] = domain_filter
-        if status_filter:
-            where_clauses.append("sn.pipeline_status = $status_filter")
-            params["status_filter"] = status_filter
-
-        where = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
-
-        limit_clause = ""
-        if limit:
-            limit_clause = "LIMIT $limit"
-            params["limit"] = limit
-
-        results = gc.query(
-            f"""
-            MATCH (sn:StandardName)
-            {where}
-            OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-            OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(sn)
-            WHERE src:IMASNode OR src:FacilitySignal
-            WITH sn, u,
-                 collect(DISTINCT {{
-                     path: src.id,
-                     description: src.description,
-                     documentation: src.documentation
-                 }}) AS dd_paths
-            RETURN sn.id AS id,
-                   sn.description AS description,
-                   sn.documentation AS documentation,
-                   sn.kind AS kind,
-                   coalesce(u.id, sn.unit) AS unit,
-                   sn.links AS links,
-                   sn.validity_domain AS validity_domain,
-                   sn.constraints AS constraints,
-                   sn.physics_domain AS physics_domain,
-                   sn.pipeline_status AS pipeline_status,
-                   dd_paths
-            ORDER BY sn.id
-            {limit_clause}
-            """,
-            **params,
-        )
-
-        candidates = []
-        for r in results or []:
-            row = dict(r)
-            # Filter out null-path entries from the OPTIONAL MATCH
-            dd_paths = row.get("dd_paths") or []
-            row["dd_paths"] = [p for p in dd_paths if p.get("path") is not None]
-            candidates.append(row)
-
-        logger.info("Found %d enrichment candidates", len(candidates))
-        return candidates
 
 
 def write_enrichment_results(
@@ -6679,8 +6496,9 @@ def reconcile_error_siblings() -> dict[str, int]:
     check whether the resulting parent name still has a StandardName
     node in the graph.
 
-    Orphans are marked ``pipeline_status='skipped'`` to prevent them
-    from appearing in downstream phases.
+    Orphans are quarantined (``validation_status='quarantined'`` with
+    ``quarantine_reason``) to prevent them from appearing in downstream
+    phases and exports.
 
     Returns dict with counts: {stale_marked}.
     """
@@ -6696,7 +6514,7 @@ def reconcile_error_siblings() -> dict[str, int]:
                 """
                 MATCH (sn:StandardName)
                 WHERE sn.model = 'deterministic:dd_error_modifier'
-                  AND sn.pipeline_status <> 'skipped'
+                  AND coalesce(sn.validation_status, '') <> 'quarantined'
                 RETURN sn.id AS id
                 """
             )
@@ -6733,13 +6551,14 @@ def reconcile_error_siblings() -> dict[str, int]:
                 """
                 UNWIND $ids AS sid
                 MATCH (sn:StandardName {id: sid})
-                SET sn.pipeline_status = 'skipped'
+                SET sn.validation_status = 'quarantined',
+                    sn.quarantine_reason = 'orphaned error sibling (parent name deleted)'
                 """,
                 ids=orphan_ids,
             )
             stale_count = len(orphan_ids)
             logger.info(
-                "Reconciled %d orphaned error-sibling StandardNames → skipped",
+                "Reconciled %d orphaned error-sibling StandardNames → quarantined",
                 stale_count,
             )
 

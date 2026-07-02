@@ -92,9 +92,9 @@ MATCH (sn:StandardName)
 RETURN count(sn) AS total
 """
 
-_SN_BY_PIPELINE_STATUS_QUERY = """
+_SN_BY_NAME_STAGE_QUERY = """
 MATCH (sn:StandardName)
-RETURN coalesce(sn.pipeline_status, 'none') AS bucket, count(sn) AS cnt
+RETURN coalesce(sn.name_stage, 'none') AS bucket, count(sn) AS cnt
 ORDER BY cnt DESC
 """
 
@@ -195,8 +195,8 @@ class CoverageReport:
     sn_total: int
     """Total StandardName nodes in the graph."""
 
-    sn_by_pipeline_status: dict[str, int]
-    """StandardName count keyed by pipeline_status."""
+    sn_by_name_stage: dict[str, int]
+    """StandardName count keyed by name_stage."""
 
     sn_by_validation_status: dict[str, int]
     """StandardName count keyed by validation_status."""
@@ -282,7 +282,7 @@ def compute_coverage(physics_domain: str | None = None) -> CoverageReport:
 
         # -- Already-minted (not domain-filtered: always total catalog) ------
         sn_total = _one(gc.query(_SN_TOTAL_QUERY), "total")
-        sn_by_pipeline_status = _bucket(gc.query(_SN_BY_PIPELINE_STATUS_QUERY))
+        sn_by_name_stage = _bucket(gc.query(_SN_BY_NAME_STAGE_QUERY))
         sn_by_validation_status = _bucket(gc.query(_SN_BY_VALIDATION_STATUS_QUERY))
         covered_parents = _one(gc.query(_SN_COVERED_PARENTS_QUERY), "cnt")
         error_siblings_minted = _one(gc.query(_SN_ERROR_SIBLINGS_QUERY), "cnt")
@@ -324,7 +324,7 @@ def compute_coverage(physics_domain: str | None = None) -> CoverageReport:
         eligible_by_node_type=eligible_by_node_type,
         eligible_with_errors=eligible_with_errors,
         sn_total=sn_total,
-        sn_by_pipeline_status=sn_by_pipeline_status,
+        sn_by_name_stage=sn_by_name_stage,
         sn_by_validation_status=sn_by_validation_status,
         covered_parents=covered_parents,
         error_siblings_minted=error_siblings_minted,

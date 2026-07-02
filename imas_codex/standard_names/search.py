@@ -90,7 +90,6 @@ def vector_stream(
                 OR $physics_domain IN coalesce(sn.source_domains, [])
               )
               AND coalesce(sn.validation_status, '') <> 'quarantined'
-              AND coalesce(sn.pipeline_status, '') <> 'superseded'
               AND coalesce(sn.name_stage, '') <> 'exhausted'
               AND coalesce(sn.name_stage, '') <> 'superseded'
             RETURN sn.id AS id, score
@@ -206,7 +205,6 @@ def grammar_stream(
                     OR $physics_domain IN coalesce(sn.source_domains, [])
                   )
                   AND coalesce(sn.validation_status, '') <> 'quarantined'
-                  AND coalesce(sn.pipeline_status, '') <> 'superseded'
                   AND coalesce(sn.name_stage, '') <> 'superseded'
                 RETURN sn.id AS id
                 """,
@@ -280,7 +278,7 @@ def _enrich_search_rows(
                    sn.documentation AS documentation,
                    sn.kind AS kind,
                    coalesce(u.id, sn.unit) AS unit,
-                   sn.pipeline_status AS pipeline_status,
+                   sn.name_stage AS name_stage,
                    sn.cocos_transformation_type AS cocos_transformation_type,
                    sn.cocos AS cocos,
                    sn.physics_domain AS physics_domain,
@@ -310,7 +308,7 @@ def search_standard_names(
     mode: Literal["hybrid", "vector"] = "hybrid",
     segment_filters: dict[str, str] | None = None,
     kind: str | None = None,
-    pipeline_status: str | None = None,
+    name_stage: str | None = None,
     cocos_type: str | None = None,
     physics_domain: str | None = None,
     gc: Any = None,
@@ -324,13 +322,13 @@ def search_standard_names(
             skips keyword and grammar streams.
         segment_filters: Optional dict of ``{segment: token}`` — short-circuits
             into a graph-native ``sn.<segment>`` column filter.
-        kind / pipeline_status / cocos_type / physics_domain: Filter constraints.
+        kind / name_stage / cocos_type / physics_domain: Filter constraints.
         gc: Open :class:`GraphClient`. If ``None``, opens one for the duration
             of the call.
 
     Returns:
         List of result dicts with keys ``name, description, documentation,
-        kind, unit, pipeline_status, cocos_transformation_type, cocos,
+        kind, unit, name_stage, cocos_transformation_type, cocos,
         physics_domain, source_domains, physical_base, subject, score``.
     """
     normalized_query = (query or "").strip()
@@ -338,7 +336,7 @@ def search_standard_names(
         (
             segment_filters,
             kind,
-            pipeline_status,
+            name_stage,
             cocos_type,
             physics_domain,
         )
@@ -360,7 +358,7 @@ def search_standard_names(
                 k,
                 segment_filters or {},
                 kind,
-                pipeline_status,
+                name_stage,
                 cocos_type,
                 physics_domain,
             )
@@ -405,11 +403,11 @@ def search_standard_names(
         # Post-filter
         if kind:
             rows = [r for r in rows if (r.get("kind") or "").lower() == kind.lower()]
-        if pipeline_status:
+        if name_stage:
             rows = [
                 r
                 for r in rows
-                if (r.get("pipeline_status") or "").lower() == pipeline_status.lower()
+                if (r.get("name_stage") or "").lower() == name_stage.lower()
             ]
         if cocos_type:
             rows = [
@@ -454,7 +452,7 @@ def _segment_filter_search(
     k: int,
     segment_filters: dict[str, str],
     kind: str | None,
-    pipeline_status: str | None,
+    name_stage: str | None,
     cocos_type: str | None,
     physics_domain: str | None = None,
 ) -> list[dict]:
@@ -485,9 +483,9 @@ def _segment_filter_search(
     if kind:
         params["kind"] = kind
         where.append("toLower(sn.kind) = toLower($kind)")
-    if pipeline_status:
-        params["pipeline_status"] = pipeline_status
-        where.append("toLower(sn.pipeline_status) = toLower($pipeline_status)")
+    if name_stage:
+        params["name_stage"] = name_stage
+        where.append("toLower(sn.name_stage) = toLower($name_stage)")
     if cocos_type:
         params["cocos_type"] = cocos_type
         where.append("sn.cocos_transformation_type = $cocos_type")
@@ -501,7 +499,7 @@ RETURN sn.id AS name,
        sn.documentation AS documentation,
        sn.kind AS kind,
        coalesce(u.id, sn.unit) AS unit,
-       sn.pipeline_status AS pipeline_status,
+       sn.name_stage AS name_stage,
        sn.cocos_transformation_type AS cocos_transformation_type,
        sn.cocos AS cocos,
        sn.physics_domain AS physics_domain,
@@ -560,7 +558,7 @@ def fetch_standard_names(
             "name": "sn.id AS name",
             "kind": "sn.kind AS kind",
             "unit": "coalesce(u.id, sn.unit) AS unit",
-            "pipeline_status": "sn.pipeline_status AS pipeline_status",
+            "name_stage": "sn.name_stage AS name_stage",
             "cocos_transformation_type": (
                 "sn.cocos_transformation_type AS cocos_transformation_type"
             ),
@@ -601,7 +599,7 @@ def fetch_standard_names(
             "name",
             "kind",
             "unit",
-            "pipeline_status",
+            "name_stage",
             "cocos_transformation_type",
             "cocos",
             "dd_version",
@@ -1220,7 +1218,7 @@ def search_standard_names_vector(
         the catalog runners pass the refine-cycle's ``gc`` so a single
         refine cycle never instantiates more than one ``GraphClient``.
     include_superseded:
-        When ``True``, drop the ``pipeline_status='superseded'``
+        When ``True``, drop the ``name_stage='superseded'``
         exclusion. Used by cycle-2 refine fan-out to surface the
         just-superseded cycle-1 name as a comparator. Default ``False``
         preserves existing behaviour for all other callers.
@@ -1252,9 +1250,7 @@ def search_standard_names_vector(
             "coalesce(sn.name_stage, '') <> 'exhausted'",
         ]
         if not include_superseded:
-            lifecycle_clauses.insert(
-                2, "coalesce(sn.pipeline_status, '') <> 'superseded'"
-            )
+            lifecycle_clauses.insert(2, "coalesce(sn.name_stage, '') <> 'superseded'")
         where_clause = " AND ".join(lifecycle_clauses)
         rows = (
             gc.query(

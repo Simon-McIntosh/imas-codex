@@ -3088,7 +3088,7 @@ class AgentsServer:
                 query: str,
                 kind: str | None = None,
                 physics_domain: str | None = None,
-                review_status: str | None = None,
+                name_stage: str | None = None,
                 k: int = 20,
                 cocos_type: str | None = None,
                 physical_base: str | None = None,
@@ -3117,7 +3117,7 @@ class AgentsServer:
                     physics_domain: Filter by physics domain (e.g. "equilibrium",
                         "transport", "core_profiles"). Matches either the promoted
                         scalar ``physics_domain`` or any value in ``source_domains``.
-                    review_status: Filter by review status (e.g. "drafted", "published").
+                    name_stage: Filter by name-pipeline stage (e.g. "drafted", "accepted").
                     k: Maximum results to return (default 20).
                     cocos_type: Filter by COCOS transformation type (e.g. "psi_like",
                         "ip_like", "b0_like"). Only returns names with that transformation.
@@ -3167,7 +3167,7 @@ class AgentsServer:
                     query,
                     kind=kind,
                     physics_domain=physics_domain,
-                    pipeline_status=review_status,
+                    name_stage=name_stage,
                     k=k,
                     cocos_type=cocos_type,
                     physical_base=physical_base,
@@ -3207,7 +3207,7 @@ class AgentsServer:
             def list_standard_names(
                 physics_domain: str | None = None,
                 kind: str | None = None,
-                review_status: str | None = None,
+                name_stage: str | None = None,
                 cocos_type: str | None = None,
             ) -> str:
                 """List standard names with optional filters.
@@ -3219,7 +3219,7 @@ class AgentsServer:
                         "magnetics", "transport"). Matches either the promoted
                         scalar ``physics_domain`` or any value in ``source_domains``.
                     kind: Filter by kind (e.g. "scalar", "vector").
-                    review_status: Filter by review status (e.g. "drafted").
+                    name_stage: Filter by name-pipeline stage (e.g. "drafted").
                     cocos_type: Filter by COCOS transformation type (e.g. "psi_like",
                         "ip_like", "b0_like"). Only returns names with that transformation.
 
@@ -3231,7 +3231,7 @@ class AgentsServer:
                 return _lsn(
                     physics_domain=physics_domain,
                     kind=kind,
-                    pipeline_status=review_status,
+                    name_stage=name_stage,
                     cocos_type=cocos_type,
                 )
 

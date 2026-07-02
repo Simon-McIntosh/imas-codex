@@ -400,11 +400,11 @@ def build_domain_vocabulary_preseed(domain: str | None) -> str:
     """Build a vocabulary pre-seed section for compose prompts.
 
     Queries the graph for all StandardName nodes in *domain* that are
-    ``pipeline_status IN ['drafted', 'published', 'accepted']`` AND
+    live (``name_stage`` not superseded/exhausted) AND
     ``validation_status = 'valid'``, returning up to 40 canonical
     ``(name, description-first-sentence)`` pairs.
 
-    Ordered by pipeline_status priority (accepted > published > drafted),
+    Ordered by name_stage priority (accepted > reviewed > refining > drafted),
     then alphabetically by name.
 
     Returns empty string when *domain* is None or no names are found.
@@ -420,16 +420,17 @@ def build_domain_vocabulary_preseed(domain: str | None) -> str:
                 """
                 MATCH (sn:StandardName)
                 WHERE sn.physics_domain = $domain
-                  AND sn.pipeline_status IN ['drafted', 'published', 'accepted']
+                  AND NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']
                   AND sn.validation_status = 'valid'
                 RETURN sn.id AS name,
                        sn.description AS description,
-                       sn.pipeline_status AS pipeline_status
+                       sn.name_stage AS name_stage
                 ORDER BY
-                    CASE sn.pipeline_status
+                    CASE sn.name_stage
                         WHEN 'accepted' THEN 0
-                        WHEN 'published' THEN 1
-                        WHEN 'drafted' THEN 2
+                        WHEN 'reviewed' THEN 1
+                        WHEN 'refining' THEN 2
+                        WHEN 'drafted' THEN 3
                     END,
                     sn.id
                 LIMIT 40

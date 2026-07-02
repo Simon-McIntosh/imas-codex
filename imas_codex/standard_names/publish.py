@@ -473,7 +473,7 @@ def _fetch_expected_domains() -> set[str] | None:
     """Fetch expected domain set from graph for full-scope validation.
 
     Returns the set of physics domains that have at least one valid
-    StandardName node in the graph (any pipeline_status).
+    StandardName node in the graph (any name_stage).
     """
     try:
         from imas_codex.graph.client import GraphClient

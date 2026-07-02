@@ -159,7 +159,7 @@ _GRAPH_ONLY_PRESERVE = frozenset(
         "generated_at",
         "source_types",
         "source_paths",
-        "pipeline_status",
+        "name_stage",
         "reviewer_score_name",
         "reviewer_score_docs",
         "reviewer_scores_name",
@@ -366,7 +366,7 @@ def _write_import_entries(
             sn.status = b.status,
             sn.deprecates = b.deprecates,
             sn.superseded_by = b.superseded_by,
-            sn.pipeline_status = 'accepted',
+            sn.name_stage = 'accepted',
             sn.origin = b._origin,
             sn.imported_at = datetime(),
             sn.catalog_commit_sha = b._catalog_commit_sha,
@@ -829,7 +829,7 @@ def check_catalog(
         rows = gc.query(
             """
             MATCH (sn:StandardName)
-            WHERE sn.pipeline_status = 'accepted'
+            WHERE sn.name_stage = 'accepted'
             RETURN sn.id AS id,
                    sn.description AS description,
                    sn.documentation AS documentation,

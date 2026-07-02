@@ -242,7 +242,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
     """Load StandardNames from graph, apply filters, and form review batches.
 
     1. Query full StandardName catalog into ``state.all_names``.
-    2. Apply CLI filters (--ids, --domain, --status, --unreviewed, --re-review)
+    2. Apply CLI filters (--ids, --domain, --stage, --unreviewed, --re-review)
        to produce ``state.target_names``.
     3. Reconstruct clusters for targets via batch graph query.
     4. Group into review batches by (cluster × unit) with token budgets.
@@ -283,7 +283,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
                        sn.process AS process,
                        sn.cocos_transformation_type AS cocos_transformation_type,
                        sn.physics_domain AS physics_domain,
-                       sn.pipeline_status AS pipeline_status,
+                       sn.name_stage AS name_stage,
                        sn.reviewer_scores_name AS reviewer_scores_name,
                        sn.reviewer_scores_docs AS reviewer_scores_docs,
                        sn.review_input_hash AS review_input_hash,
@@ -366,10 +366,10 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
                 )
                 continue
 
-        # --status filter
-        if state.status_filter:
-            status = name.get("pipeline_status") or "drafted"
-            if status != state.status_filter:
+        # --stage filter
+        if state.stage_filter:
+            stage = name.get("name_stage") or "drafted"
+            if stage != state.stage_filter:
                 continue
 
         # --unreviewed: no score OR stale hash
@@ -417,12 +417,12 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
     state.target_names = targets
     wlog.info(
         "Filter result: %d targets from %d total (ids=%s, domain=%s, "
-        "status=%s, unreviewed=%s, force_review=%s)",
+        "stage=%s, unreviewed=%s, force_review=%s)",
         len(targets),
         len(all_names),
         state.ids_filter,
         state.domain_filter,
-        state.status_filter,
+        state.stage_filter,
         state.unreviewed_only,
         state.force_review,
     )

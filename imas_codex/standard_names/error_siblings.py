@@ -12,7 +12,8 @@ siblings are:
 Each sibling:
 - Inherits the parent's unit via HAS_UNIT
 - Links to its own error IMASNode via FROM_DD_PATH (source_id)
-- Sets pipeline_status='named', validation_status='valid'
+- Sets validation_status='valid'; name_stage is set by the shared
+  persist finalize step
 - Skips LLM compose + review (deterministic construction)
 - Uses model='deterministic:dd_error_modifier' for provenance
 """
@@ -256,7 +257,6 @@ def mint_error_siblings(
                 "dd_version": dd_version,
                 # Provenance: deterministic, not LLM
                 "model": "deterministic:dd_error_modifier",
-                "pipeline_status": "named",
                 "validation_status": "valid",
                 "generated_at": now,
                 # Mark review phases as complete (deterministic names

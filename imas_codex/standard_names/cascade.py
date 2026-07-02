@@ -35,7 +35,7 @@ Safety knobs (mirror ``sn run --reset-to`` / ``sn prune``):
   ``origin = 'catalog_edit'`` — the catalog is the authoritative editor
   for those entries and silently rewriting them is destructive.
 - ``include_accepted`` is required to rename any descendant with
-  ``pipeline_status = 'accepted'`` — these names are committed catalog
+  ``name_stage = 'accepted'`` — these names are committed catalog
   entries and the operator should opt-in explicitly.
 
 Audit log: every rename writes one line to
@@ -334,7 +334,7 @@ def rename_cascade(
         as a conflict and the cascade refuses to proceed.
     include_accepted:
         Required to rename any descendant with
-        ``pipeline_status='accepted'``.  Mirrors the safety discipline
+        ``name_stage='accepted'``.  Mirrors the safety discipline
         of ``sn run --reset-to`` and ``sn prune``.
     audit_log_path:
         Override for the audit log file (tests pass a tempfile).
@@ -369,7 +369,7 @@ def rename_cascade(
             RETURN
                 CASE WHEN root IS NULL THEN false ELSE true END AS root_exists,
                 root.origin AS origin,
-                root.pipeline_status AS pipeline_status,
+                root.name_stage AS name_stage,
                 CASE WHEN target IS NULL THEN false ELSE true END AS target_exists
             """,
             old=old_name,
@@ -407,7 +407,7 @@ def rename_cascade(
             WITH DISTINCT d
             RETURN d.id AS id,
                    d.origin AS origin,
-                   d.pipeline_status AS pipeline_status
+                   d.name_stage AS name_stage
             """,
             old=old_name,
         )
@@ -415,7 +415,7 @@ def rename_cascade(
     descendants_meta: dict[str, dict[str, Any]] = {
         r["id"]: {
             "origin": r.get("origin"),
-            "pipeline_status": r.get("pipeline_status"),
+            "name_stage": r.get("name_stage"),
         }
         for r in rows
         if r.get("id")
@@ -592,9 +592,9 @@ def rename_cascade(
                 pending.discard(child_id)
                 progress = True
                 continue
-            if meta.get("pipeline_status") == "accepted" and not include_accepted:
+            if meta.get("name_stage") == "accepted" and not include_accepted:
                 conflicts.append(
-                    f"{child_id!r} has pipeline_status='accepted'; "
+                    f"{child_id!r} has name_stage='accepted'; "
                     "pass include_accepted=True to rename anyway"
                 )
                 pending.discard(child_id)

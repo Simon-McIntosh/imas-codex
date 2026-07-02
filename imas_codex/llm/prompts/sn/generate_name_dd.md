@@ -386,7 +386,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% for sib in item.sibling_fields %}  - `{{ sib.path }}`: {{ sib.description or 'no description' }} ({{ sib.data_type or '?' }})
 {% endfor %}{% endif %}
 {% if item.previous_name %}
-- **⟳ Previous generation:** `{{ item.previous_name.name }}` ({{ item.previous_name.pipeline_status or 'drafted' }}{% if item.previous_name.reviewer_score %}, score={{ item.previous_name.reviewer_score | round(2) }}{% endif %}{% if item.previous_name.review_tier %}, {{ item.previous_name.review_tier }}{% endif %})
+- **⟳ Previous generation:** `{{ item.previous_name.name }}` ({{ item.previous_name.name_stage or 'drafted' }}{% if item.previous_name.reviewer_score %}, score={{ item.previous_name.reviewer_score | round(2) }}{% endif %}{% if item.previous_name.review_tier %}, {{ item.previous_name.review_tier }}{% endif %})
 {% if item.previous_name.description %}- **Prior description:** {{ item.previous_name.description }}{% endif %}
 {% if item.previous_name.documentation %}- **Prior documentation:** {{ item.previous_name.documentation }}{% endif %}
 {% if item.previous_name.links %}- **Prior links:** {{ item.previous_name.links | join(', ') if item.previous_name.links is iterable and item.previous_name.links is not string else item.previous_name.links }}{% endif %}
@@ -394,7 +394,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.previous_name.linked_dd_paths %}- **Other DD paths sharing this name:** These paths were also mapped to `{{ item.previous_name.name }}` — your generated name should be appropriate for all of them:
 {% for ldp in item.previous_name.linked_dd_paths %}  - `{{ ldp }}`
 {% endfor %}{% endif %}
-{% if item.previous_name.pipeline_status == 'accepted' %}- **⚠️ This name was human-accepted** — only replace with a clearly better alternative.{% endif %}
+{% if item.previous_name.name_stage == 'accepted' %}- **⚠️ This name was human-accepted** — only replace with a clearly better alternative.{% endif %}
 {% endif %}
 {% if item.review_feedback %}
 - **📝 Prior reviewer feedback — you MUST address the issues below in your new name:**

@@ -48,7 +48,7 @@ def _search_standard_names(
     query: str,
     *,
     kind: str | None = None,
-    pipeline_status: str | None = None,
+    name_stage: str | None = None,
     cocos_type: str | None = None,
     physics_domain: str | None = None,
     physical_base: str | None = None,
@@ -82,7 +82,7 @@ def _search_standard_names(
         v is not None
         for v in (
             kind,
-            pipeline_status,
+            name_stage,
             cocos_type,
             physics_domain,
             physical_base,
@@ -142,7 +142,7 @@ def _search_standard_names(
             k=k,
             segment_filters=segment_filters or None,
             kind=kind,
-            pipeline_status=pipeline_status,
+            name_stage=name_stage,
             cocos_type=cocos_type,
             physics_domain=physics_domain,
             gc=gc,
@@ -171,7 +171,7 @@ def _format_search_report(query: str, rows: list[dict]) -> str:
         score = row.get("score", 0.0)
         kind = row.get("kind") or ""
         unit = row.get("unit") or ""
-        pipeline_status = row.get("pipeline_status") or ""
+        name_stage = row.get("name_stage") or ""
         description = row.get("description") or ""
         documentation = row.get("documentation") or ""
         cocos_transformation_type = row.get("cocos_transformation_type") or ""
@@ -182,8 +182,8 @@ def _format_search_report(query: str, rows: list[dict]) -> str:
             lines.append(f"- **Kind:** {kind}")
         if unit:
             lines.append(f"- **Unit:** {unit}")
-        if pipeline_status:
-            lines.append(f"- **Status:** {pipeline_status}")
+        if name_stage:
+            lines.append(f"- **Stage:** {name_stage}")
         if cocos_transformation_type:
             lines.append(f"- **COCOS Transformation:** {cocos_transformation_type}")
         if cocos is not None:
@@ -268,7 +268,7 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
         dd_paths = row.get("source_paths") or []
         constraints = row.get("constraints") or []
         validity_domain = row.get("validity_domain") or ""
-        pipeline_status = row.get("pipeline_status") or ""
+        name_stage = row.get("name_stage") or ""
         model = row.get("model") or ""
         cocos_transformation_type = row.get("cocos_transformation_type") or ""
         cocos = row.get("cocos")
@@ -286,8 +286,8 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
             lines.append(f"- **Kind:** {kind}")
         if unit:
             lines.append(f"- **Unit:** {unit}")
-        if pipeline_status:
-            lines.append(f"- **Review Status:** {pipeline_status}")
+        if name_stage:
+            lines.append(f"- **Stage:** {name_stage}")
         if model:
             lines.append(f"- **Model:** {model}")
         if cocos_transformation_type:
@@ -341,7 +341,7 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
 def _list_standard_names(
     *,
     kind: str | None = None,
-    pipeline_status: str | None = None,
+    name_stage: str | None = None,
     cocos_type: str | None = None,
     physics_domain: str | None = None,
     include_superseded: bool = False,
@@ -371,9 +371,9 @@ def _list_standard_names(
     if kind:
         conditions.append("toLower(sn.kind) = toLower($kind)")
         params["kind"] = kind
-    if pipeline_status:
-        conditions.append("toLower(sn.pipeline_status) = toLower($pipeline_status)")
-        params["pipeline_status"] = pipeline_status
+    if name_stage:
+        conditions.append("toLower(sn.name_stage) = toLower($name_stage)")
+        params["name_stage"] = name_stage
     if cocos_type:
         conditions.append("sn.cocos_transformation_type = $cocos_type")
         params["cocos_type"] = cocos_type
@@ -393,7 +393,7 @@ MATCH (sn:StandardName)
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
 RETURN sn.id AS name, sn.kind AS kind,
        coalesce(u.id, sn.unit) AS unit,
-       sn.pipeline_status AS pipeline_status,
+       sn.name_stage AS name_stage,
        sn.cocos_transformation_type AS cocos_transformation_type,
        sn.cocos AS cocos,
        sn.description AS description
@@ -410,7 +410,7 @@ ORDER BY sn.id
     return _format_list_report(
         rows,
         kind=kind,
-        pipeline_status=pipeline_status,
+        name_stage=name_stage,
         cocos_type=cocos_type,
         physics_domain=physics_domain,
     )
@@ -420,7 +420,7 @@ def _format_list_report(
     rows: list[dict],
     *,
     kind: str | None = None,
-    pipeline_status: str | None = None,
+    name_stage: str | None = None,
     cocos_type: str | None = None,
     physics_domain: str | None = None,
 ) -> str:
@@ -428,8 +428,8 @@ def _format_list_report(
     filter_parts = []
     if kind:
         filter_parts.append(f"kind={kind}")
-    if pipeline_status:
-        filter_parts.append(f"status={pipeline_status}")
+    if name_stage:
+        filter_parts.append(f"stage={name_stage}")
     if cocos_type:
         filter_parts.append(f"cocos_type={cocos_type}")
     if physics_domain:
@@ -449,7 +449,7 @@ def _format_list_report(
         name = row.get("name") or ""
         row_kind = row.get("kind") or ""
         unit = row.get("unit") or ""
-        status = row.get("pipeline_status") or ""
+        status = row.get("name_stage") or ""
         cocos_type_val = row.get("cocos_transformation_type") or ""
         cocos_val = row.get("cocos") if row.get("cocos") is not None else ""
         desc = row.get("description") or ""

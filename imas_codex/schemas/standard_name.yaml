@@ -61,24 +61,6 @@ enums:
           for names that originate from a catalog round-trip rather than
           pipeline extraction (see catalog_import.py).
 
-  StandardNameStatus:
-    description: >-
-      Catalog-authoritative lifecycle status for standard names. Maps to the
-      ISN catalog Status vocabulary (draft, active, deprecated, superseded).
-      Set directly from the imported catalog entry's status by catalog
-      import; pipeline and export default to 'draft'.
-    permissible_values:
-      draft:
-        description: >-
-          Draft — not yet active in the catalog. Default for pipeline-
-          generated and freshly exported names.
-      active:
-        description: Active in the catalog — editorial content is authoritative
-      superseded:
-        description: Replaced by another standard name (see superseded_by)
-      deprecated:
-        description: Deprecated — should not be used in new work
-
   StandardNameOrigin:
     description: >-
       Provenance of the most recent editorial edit to a StandardName.
@@ -144,47 +126,6 @@ enums:
           No reuse check fired for this gap (below threshold, the check was
           disabled, ISN/embeddings unavailable, or the gap was written on a
           path the check does not run). The default for un-adjudicated gaps.
-
-  StandardNameReviewStatus:
-    description: >-
-      Review lifecycle for standard names.
-      Split-pipeline lifecycle (v0.6.0):
-        named → enriched → reviewable → published → accepted
-      Legacy alias: drafted (equivalent to named, kept for back-compat).
-    permissible_values:
-      named:
-        description: >-
-          Post-generate: name, kind, unit assigned but no
-          documentation or description yet. Entry point for sn enrich.
-      enriched:
-        description: >-
-          Post-enrich: documentation, description, links populated by
-          LLM enrichment pipeline. Awaiting validation.
-      reviewable:
-        description: >-
-          Passed VALIDATE gate in enrich pipeline. Ready for sn review
-          or direct publish.
-      drafted:
-        description: >-
-          LLM-generated, awaiting review (legacy alias for named;
-          kept for one-release back-compat)
-      published:
-        description: Exported to catalog PR for review
-      accepted:
-        description: Imported from merged catalog entry
-      rejected:
-        description: Reviewed and rejected
-      reviewed:
-        description: LLM-reviewed with quality scores, awaiting further processing
-      validation_failed:
-        description: Failed imas_standard_names validation checks
-      vocab_gap:
-        description: >-
-          Name generation blocked by missing grammar vocabulary.
-          Requires vocabulary update in imas-standard-names before
-          this name can be generated.
-      skipped:
-        description: Skipped during review (e.g., low confidence)
 
   StandardNameKind:
     description: Entry kind for standard names
@@ -434,17 +375,6 @@ classes:
       confidence:
         description: LLM confidence score for generated names (0-1)
         range: float
-      pipeline_status:
-        description: >-
-          Pipeline lifecycle status. Renamed from review_status in schema v2;
-          one-release alias maintained at CLI/MCP level.
-        range: StandardNameReviewStatus
-      status:
-        description: >-
-          Catalog-authoritative lifecycle status. Set by catalog import;
-          pipeline defaults to 'drafted'. Distinct from pipeline_status
-          which tracks the internal pipeline state machine.
-        range: StandardNameStatus
       origin:
         description: >-
           Provenance of the most recent editorial edit. 'pipeline' for
@@ -797,7 +727,7 @@ classes:
       vocab_gap_detail:
         description: >-
           JSON-encoded detail about missing vocabulary: segment name,
-          needed token, and reason. Set when review_status is vocab_gap.
+          needed token, and reason. Set when a compose vocab gap is flagged.
       catalog_commit_sha:
         description: >-
           Git commit SHA of the catalog repo at import time.

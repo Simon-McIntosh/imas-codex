@@ -236,7 +236,7 @@ real defects, not phantom ones.
 {% if item.lifecycle_status %}- **Lifecycle:** {{ item.lifecycle_status }} ⚠️{% endif %}
 {% if item.cocos_label %}- **COCOS transformation type:** `{{ item.cocos_label }}`{% endif %}
 {% if item.parent_path %}- **Parent:** {{ item.parent_path }}{% if item.parent_description %} — {{ item.parent_description }}{% endif %}{% endif %}
-{% if item.previous_name %}- **⟳ Previous generation:** `{{ item.previous_name.name }}`{% if item.previous_name.pipeline_status %} ({{ item.previous_name.pipeline_status }}){% endif %}{% endif %}
+{% if item.previous_name %}- **⟳ Previous generation:** `{{ item.previous_name.name }}`{% if item.previous_name.name_stage %} ({{ item.previous_name.name_stage }}){% endif %}{% endif %}
 {% if item.identifier_schema %}- **Identifier schema:** {{ item.identifier_schema }}{% if item.identifier_schema_doc %} — {{ item.identifier_schema_doc }}{% endif %}{% endif %}
 {% if item.identifier_values %}
 - **Identifier enum values:**

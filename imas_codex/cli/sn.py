@@ -1290,7 +1290,7 @@ def _auto_sync_grammar(*, quiet: bool = False) -> None:
     default=False,
     help=(
         "When used with --rename, allow renaming descendants whose "
-        "pipeline_status is 'accepted'. Without this flag, the cascade "
+        "name_stage is 'accepted'. Without this flag, the cascade "
         "refuses to touch catalog-authoritative names."
     ),
 )
@@ -1449,14 +1449,20 @@ def sn_run(
                 n = clear_standard_names(
                     source_filter=source_arg,
                     ids_filter=ids_filter,
+                    include_accepted=include_accepted,
                     **_reset_filter_kwargs,
                 )
                 console.print(
                     f"[yellow]--reset-to extracted:[/yellow] cleared {n} SN nodes"
                 )
             elif reset_to == "drafted":
+                # With --retry-quarantined the targets sit at any live stage
+                # (reviewed/refining/accepted); select by the filter set and
+                # re-stage them to 'drafted' for recompose.
                 n = reset_standard_names(
-                    from_status="drafted",
+                    from_stage=None if retry_quarantined else "drafted",
+                    to_stage="drafted" if retry_quarantined else None,
+                    include_accepted=include_accepted,
                     source_filter=source_arg,
                     ids_filter=ids_filter,
                     **_reset_filter_kwargs,
@@ -1611,7 +1617,9 @@ def sn_run(
             )
         elif reset_to == "drafted":
             n = reset_standard_names(
-                from_status="drafted",
+                from_stage=None if retry_quarantined else "drafted",
+                to_stage="drafted" if retry_quarantined else None,
+                include_accepted=include_accepted,
                 source_filter=source_arg,
                 **_reset_filter_kwargs,
             )
@@ -2280,10 +2288,10 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
     )
     console.print(minted_table)
 
-    ps_table = Table(title="By pipeline_status", show_header=True)
-    ps_table.add_column("pipeline_status", style="dim")
+    ps_table = Table(title="By name_stage", show_header=True)
+    ps_table.add_column("name_stage", style="dim")
     ps_table.add_column("Count", justify="right")
-    for k, v in sorted(report.sn_by_pipeline_status.items(), key=lambda x: -x[1]):
+    for k, v in sorted(report.sn_by_name_stage.items(), key=lambda x: -x[1]):
         ps_table.add_row(k, f"{v:,}")
     console.print(ps_table)
 
@@ -3283,7 +3291,7 @@ def sn_import(
     \b
     Reads YAML files from the ISNC standard_names/ subtree, validates
     them, derives grammar fields, applies diff-based origin tracking,
-    and MERGEs into the graph with pipeline_status='accepted'.
+    and MERGEs into the graph with name_stage='accepted'.
 
     \b
     Examples:
@@ -3487,9 +3495,9 @@ def sn_clear(
 
 @sn.command("prune")
 @click.option(
-    "--status",
+    "--stage",
     default=None,
-    help="Delete names with this pipeline_status (e.g. drafted)",
+    help="Delete names with this name_stage (e.g. drafted)",
 )
 @click.option(
     "--all",
@@ -3518,7 +3526,7 @@ def sn_clear(
     help="Also delete StandardNameSource nodes matching the same scope",
 )
 def sn_prune(
-    status: str | None,
+    stage: str | None,
     prune_all: bool,
     source: str | None,
     ids_filter: str | None,
@@ -3540,21 +3548,21 @@ def sn_prune(
 
     \b
     Examples:
-      imas-codex sn prune --status drafted
+      imas-codex sn prune --stage drafted
       imas-codex sn prune --all --source dd --ids equilibrium
       imas-codex sn prune --all --include-accepted --dry-run
     """
-    if not status and not prune_all:
-        raise click.UsageError("Provide --status <value> or --all to select names.")
+    if not stage and not prune_all:
+        raise click.UsageError("Provide --stage <value> or --all to select names.")
 
-    status_filter = None if prune_all else ([status] if status else None)
+    stage_filter = None if prune_all else ([stage] if stage else None)
 
     from imas_codex.standard_names.graph_ops import clear_standard_names
 
     try:
         # Always preview first
         count = clear_standard_names(
-            status_filter=status_filter,
+            stage_filter=stage_filter,
             source_filter=source,
             ids_filter=ids_filter,
             include_accepted=include_accepted,
@@ -3567,8 +3575,8 @@ def sn_prune(
 
         # Build scope description for the confirmation message
         scope_parts: list[str] = []
-        if status:
-            scope_parts.append(f"status={status}")
+        if stage:
+            scope_parts.append(f"stage={stage}")
         if source:
             scope_parts.append(f"source={source}")
         if ids_filter:
@@ -3588,7 +3596,7 @@ def sn_prune(
             )
 
         deleted = clear_standard_names(
-            status_filter=status_filter,
+            stage_filter=stage_filter,
             source_filter=source,
             ids_filter=ids_filter,
             include_accepted=include_accepted,
@@ -3642,10 +3650,10 @@ def sn_prune(
     help="Scope to physics domain.",
 )
 @click.option(
-    "--status",
-    "status_filter",
+    "--stage",
+    "stage_filter",
     default="drafted",
-    help="Filter by pipeline_status (default: drafted)",
+    help="Filter by name_stage (default: drafted)",
 )
 @click.option(
     "--unreviewed",
@@ -3727,7 +3735,7 @@ def sn_prune(
 def sn_review(
     ids: str | None,
     domain: str | None,
-    status_filter: str,
+    stage_filter: str,
     unreviewed: bool,
     force: bool,
     models_override: str | None,
@@ -3804,7 +3812,7 @@ def sn_review(
         cost_limit=cost_limit,
         ids_filter=ids,
         domain_filter=domain,
-        status_filter=status_filter,
+        stage_filter=stage_filter,
         unreviewed_only=unreviewed,
         force_review=force,
         skip_audit=skip_audit,
@@ -3848,7 +3856,7 @@ def sn_review(
                                sn.process AS process,
                                sn.cocos_transformation_type AS cocos_transformation_type,
                                sn.physics_domain AS physics_domain,
-                               sn.pipeline_status AS pipeline_status,
+                               sn.name_stage AS name_stage,
                                sn.reviewer_score_name AS reviewer_score,
                                sn.review_input_hash AS review_input_hash,
                                sn.embedding AS embedding,
@@ -3896,10 +3904,8 @@ def sn_review(
 
             # Apply filters to get target names
             targets = list(state.all_names) if state.all_names else []
-            if status_filter:
-                targets = [
-                    n for n in targets if n.get("pipeline_status") == status_filter
-                ]
+            if stage_filter:
+                targets = [n for n in targets if n.get("name_stage") == stage_filter]
             if ids:
                 targets = [
                     n
