@@ -22,6 +22,9 @@ import pytest
 from imas_codex.standard_names.budget import BudgetManager
 
 
+from imas_codex.standard_names.pools import PoolSpec, pool_loop
+
+
 @pytest.fixture(autouse=True)
 def _stub_parent_lifecycle_startup():
     """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
@@ -34,8 +37,6 @@ def _stub_parent_lifecycle_startup():
     ):
         yield
 
-
-from imas_codex.standard_names.pools import PoolSpec, pool_loop
 
 # ---------------------------------------------------------------------------
 # Helpers
