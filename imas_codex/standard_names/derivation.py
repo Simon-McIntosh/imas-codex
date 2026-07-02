@@ -37,6 +37,28 @@ class DerivedEdge:
     props: dict  # edge properties (operator, operator_kind, …)
 
 
+def _canonicalize(name: str) -> str:
+    """Return the canonical spelling of a composed inner name.
+
+    ``parser.compose`` renders an IR fragment in segment-slot order, but the
+    model-level canonical form can differ: a bare-prefix transformation
+    qualifier (``perturbed``, ``normalized``, …) renders adjacent to the base
+    inside an operator fold yet outermost as a standalone name. A derived
+    parent id must always be the STANDALONE canonical spelling, otherwise the
+    seeded parent node is born non-canonical.
+    """
+    from imas_standard_names.grammar import parse_standard_name
+    from imas_standard_names.grammar.model import NonCanonicalNameError
+
+    try:
+        parse_standard_name(name)
+    except NonCanonicalNameError as exc:
+        return exc.canonical_form
+    except Exception:
+        pass
+    return name
+
+
 def _strip_outer(ir: isn_ir.StandardNameIR) -> isn_ir.StandardNameIR:
     """Return *ir* with the outermost operator removed.
 
@@ -132,8 +154,8 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
         if op.kind == isn_ir.OperatorKind.BINARY:
             # Binary: two HAS_PARENT edges, one per argument
             try:
-                a = parser.compose(op.args[0])
-                b = parser.compose(op.args[1])
+                a = _canonicalize(parser.compose(op.args[0]))
+                b = _canonicalize(parser.compose(op.args[1]))
             except Exception as exc:
                 logger.debug("derive_edges compose failed for %r: %s", name, exc)
                 return []
@@ -165,7 +187,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
         # Unary prefix / postfix: strip outer and compose inner
         stripped = _strip_outer(ir)
         try:
-            inner = parser.compose(stripped)
+            inner = _canonicalize(parser.compose(stripped))
         except Exception as exc:
             logger.debug("derive_edges compose failed for %r: %s", name, exc)
             return []
@@ -197,7 +219,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     if ir.projection is not None:
         stripped = _strip_projection(ir)
         try:
-            inner = parser.compose(stripped)
+            inner = _canonicalize(parser.compose(stripped))
         except Exception as exc:
             logger.debug("derive_edges compose failed for %r: %s", name, exc)
             return []
@@ -275,7 +297,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     if ir.qualifiers:
         stripped = ir.model_copy(update={"qualifiers": ir.qualifiers[1:]})
         try:
-            inner = parser.compose(stripped)
+            inner = _canonicalize(parser.compose(stripped))
         except Exception as exc:
             logger.debug(
                 "derive_edges qualifier-peel compose failed for %r: %s", name, exc
@@ -306,7 +328,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     if ir.locus is not None:
         stripped = ir.model_copy(update={"locus": None})
         try:
-            inner = parser.compose(stripped)
+            inner = _canonicalize(parser.compose(stripped))
         except Exception as exc:
             logger.debug("derive_edges locus-peel compose failed for %r: %s", name, exc)
             return []
