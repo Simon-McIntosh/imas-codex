@@ -4027,3 +4027,166 @@ def sn_review(
             )
 
     asyncio.run(_run())
+
+
+@sn.command("harmonize")
+@click.option(
+    "--report",
+    "report_mode",
+    is_flag=True,
+    default=False,
+    help="Read-only drift report (required for now; apply mode lands later).",
+)
+@click.option(
+    "--min-drift",
+    "min_drift",
+    type=float,
+    default=0.5,
+    help="Minimum drift score (0-1) for a family to appear in the worklist.",
+)
+@click.option(
+    "--min-size",
+    "min_size",
+    type=int,
+    default=3,
+    help="Minimum sibling count for a family to appear in the worklist.",
+)
+@click.option(
+    "--limit",
+    "limit",
+    type=int,
+    default=30,
+    help="Max families to display (0 = all).",
+)
+@click.option(
+    "--include-parentless",
+    "include_parentless",
+    is_flag=True,
+    default=False,
+    help="Also group parentless names by physical_base.",
+)
+@click.option(
+    "--json",
+    "json_path",
+    type=click.Path(dir_okay=False, writable=True),
+    default=None,
+    help="Write the full worklist as JSON to this path.",
+)
+@click.option(
+    "--seed",
+    "seed_name",
+    default=None,
+    help="Print the assembled family for this seed name instead of the full report.",
+)
+def sn_harmonize(
+    report_mode: bool,
+    min_drift: float,
+    min_size: int,
+    limit: int,
+    include_parentless: bool,
+    json_path: str | None,
+    seed_name: str | None,
+) -> None:
+    """Report documentation drift across standard-name sibling families.
+
+    Standard names are generated per-name, so sibling families (sharing a
+    parent, or sharing a physical_base when parentless) can drift apart in
+    documentation structure. This command is read-only: it computes a
+    deterministic drift metric and prints a harmonization worklist. It
+    never writes to the graph.
+
+    \b
+    Examples:
+      imas-codex sn harmonize --report
+      imas-codex sn harmonize --report --min-drift 0.6 --limit 15
+      imas-codex sn harmonize --report --include-parentless --json out.json
+      imas-codex sn harmonize --seed poloidal_mode_number
+    """
+    from imas_codex.standard_names.harmonize import assemble_family, build_worklist
+
+    if seed_name:
+        family = assemble_family(seed_name)
+        if family is None:
+            console.print(f"[red]No family found for seed[/red] {seed_name!r}")
+            raise SystemExit(1)
+        if json_path:
+            import json as _json
+
+            with open(json_path, "w") as f:
+                _json.dump(family, f, indent=2, default=str)
+            console.print(f"[green]Wrote family to[/green] {json_path}")
+        console.print(f"\n[bold]Family for seed[/bold] {seed_name!r}")
+        console.print(f"  Grouping: {family['grouping']}")
+        console.print(f"  Parent: {family.get('parent') or '—'}")
+        if family.get("physical_base"):
+            console.print(f"  Physical base: {family['physical_base']}")
+        console.print(f"  Operator kinds: {', '.join(family['operator_kinds']) or '—'}")
+        console.print(f"  Members: {len(family['members'])}")
+        console.print(
+            f"  Anchor: {family['anchor'] or '[red]DEFERRED (no anchor)[/red]'}"
+        )
+        for m in family["members"]:
+            marker = " [cyan](anchor)[/cyan]" if m.get("id") == family["anchor"] else ""
+            console.print(f"    - {m.get('id')}{marker}")
+        return
+
+    if not report_mode:
+        console.print(
+            "[yellow]`sn harmonize` currently only supports --report "
+            "(read-only). Apply/stamping mode lands in a later stage.[/yellow]"
+        )
+        raise SystemExit(1)
+
+    worklist = build_worklist(
+        min_drift=min_drift,
+        min_size=min_size,
+        include_parentless=include_parentless,
+    )
+
+    if json_path:
+        import json as _json
+
+        with open(json_path, "w") as f:
+            _json.dump(worklist, f, indent=2, default=str)
+        console.print(
+            f"[green]Wrote worklist ({len(worklist)} families) to[/green] {json_path}"
+        )
+
+    display_list = worklist if limit == 0 else worklist[:limit]
+
+    from rich.table import Table
+
+    table = Table(
+        title=f"SN Family Harmonization Worklist ({len(worklist)} families, "
+        f"min_drift={min_drift}, min_size={min_size})",
+        show_header=True,
+    )
+    table.add_column("Parent / Base", style="cyan")
+    table.add_column("Kind(s)", style="dim")
+    table.add_column("n", justify="right")
+    table.add_column("drift", justify="right")
+    table.add_column("docs-accepted", justify="right")
+    table.add_column("Anchor")
+    table.add_column("Top divergent member")
+
+    for fam in display_list:
+        label = fam.get("parent") or fam.get("physical_base") or "?"
+        kinds = ", ".join(fam.get("operator_kinds") or []) or (
+            "physical_base" if fam["grouping"] == "physical_base" else "—"
+        )
+        anchor_display = fam["anchor"] if fam["anchor"] else "[red]DEFERRED[/red]"
+        table.add_row(
+            label,
+            kinds,
+            str(fam["n"]),
+            f"{fam['drift']:.3f}",
+            str(fam["docs_accepted"]),
+            anchor_display,
+            fam.get("top_divergent_member") or "—",
+        )
+
+    console.print(table)
+    if limit and len(worklist) > limit:
+        console.print(
+            f"[dim]… {len(worklist) - limit} more (raise --limit to see all)[/dim]"
+        )
