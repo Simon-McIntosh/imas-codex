@@ -72,7 +72,33 @@ They are NOT to be re-reviewed. Compare the candidate's documentation
 {% endfor %}
 {% endif %}
 
-{% if not vector_neighbours and not same_base_neighbours and not same_path_neighbours %}
+{% if sibling_family %}
+### Sibling family — PARALLEL-STRUCTURE CHECK (shared parent `{{ sibling_family.parent.name }}`)
+
+The candidate is one member of a matched sibling set. Its opening sentence and
+documentation section structure MUST be parallel to the family template —
+differing only in the axis/species/zone-specific token, member-specific
+symbols, and genuinely member-specific physics.
+
+{% if sibling_family.anchor %}The family template anchor is
+**`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
+- Anchor description: {{ sibling_family.anchor.description }}
+{% endif %}
+Members:
+{% for s in sibling_family.siblings %}
+- **`{{ s.name }}`**{% if s.axis %} (axis: {{ s.axis }}){% endif %}{% if s.docs_stage %} — docs {{ s.docs_stage }}{% endif %}{% if s.description %} — {{ s.description }}{% endif %}{% if s.documentation_opening %}
+  - documentation opens: "{{ s.documentation_opening }}"{% endif %}
+{% endfor %}
+
+Dock Description Quality and Documentation Quality points (citing the sibling
+`id`s) when the candidate's opening template or section structure diverges
+from its **accepted** siblings without a physics reason. Do NOT dock for
+faithful per-member physics differences expressed inside the shared template —
+flattening distinct physics into false uniformity is a Physics Accuracy
+failure, not consistency.
+{% endif %}
+
+{% if not vector_neighbours and not same_base_neighbours and not same_path_neighbours and not sibling_family %}
 *No accepted siblings found — score on physics correctness alone.*
 {% endif %}
 

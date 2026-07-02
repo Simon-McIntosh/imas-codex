@@ -51,6 +51,30 @@ reference a representative child or two with `[label](name:bare_id)`. Ground
 strictly on what the children attest.
 {% endif %}
 
+{% if sibling_family %}
+### Sibling family — converge on the family template (shared parent `{{ sibling_family.parent.name }}`)
+
+`{{ sn_name }}` is one member of a matched sibling set. Your rewrite must be
+**structurally parallel** to the family: same opening noun-phrase template and
+section structure as the anchor / accepted siblings, varying ONLY the
+axis/species/zone-specific token, member-specific symbols, and genuinely
+member-specific physics. Never copy a sibling's physics claim that does not
+hold for this member — harmonize the structure, not the physics.
+
+{% if sibling_family.anchor %}Template anchor **`{{ sibling_family.anchor.name }}`**{% if sibling_family.anchor.is_parent %} (the family parent){% endif %}:
+- Anchor description: {{ sibling_family.anchor.description }}
+{% if sibling_family.anchor.documentation %}- Anchor documentation:
+
+{{ sibling_family.anchor.documentation }}
+{% endif %}
+{% endif %}
+Members:
+{% for s in sibling_family.siblings %}
+- `{{ s.name }}`{% if s.axis %} (axis: {{ s.axis }}){% endif %}{% if s.docs_stage %} — docs {{ s.docs_stage }}{% endif %}{% if s.description %} — {{ s.description }}{% endif %}{% if s.documentation_opening %}
+  - documentation opens: "{{ s.documentation_opening }}"{% endif %}
+{% endfor %}
+{% endif %}
+
 ---
 
 ## Docs revision history (oldest first; docs chain length so far: {{ docs_chain_length }})

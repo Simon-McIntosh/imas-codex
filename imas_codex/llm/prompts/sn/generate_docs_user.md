@@ -39,6 +39,59 @@ in general). Where natural, cross-reference a representative child or two with
 invent physics beyond them.
 {% endif %}
 
+{% if item.sibling_family %}
+## Sibling Family — parallel structure REQUIRED
+
+`{{ item.name }}` belongs to a family of sibling standard names sharing the
+parent `{{ item.sibling_family.parent.name }}`. Family members must read as a
+**matched set**: the same opening noun-phrase template and the same
+documentation section structure, differing ONLY where the physics genuinely
+differs (axis, species, zone, locus — and the symbols that go with them).
+
+{% if item.sibling_family.anchor %}
+### Template anchor: `{{ item.sibling_family.anchor.name }}`{% if item.sibling_family.anchor.is_parent %} (the family parent){% endif %}
+
+Mirror this member's opening template and section ordering.
+
+- **Anchor description:** {{ item.sibling_family.anchor.description }}
+{% if item.sibling_family.anchor.documentation %}- **Anchor documentation:**
+
+{{ item.sibling_family.anchor.documentation }}
+{% endif %}
+{% else %}
+### No accepted anchor yet
+
+No family member has review-accepted documentation. Write YOUR entry so that
+every sibling below could adopt the same opening pattern with only its
+axis/species/zone token and symbols changed — you are setting the family
+template.
+{% endif %}
+
+### Family members
+{% for s in item.sibling_family.siblings %}
+- `{{ s.name }}`{% if s.axis %} (axis: {{ s.axis }}){% endif %}{% if s.operator_kind %} [{{ s.operator_kind }}]{% endif %}{% if s.docs_stage %} — docs {{ s.docs_stage }}{% endif %}{% if s.description %}
+  - description: {{ s.description }}{% endif %}{% if s.documentation_opening %}
+  - documentation opens: "{{ s.documentation_opening }}"{% endif %}
+{% endfor %}
+
+**Family rules (enforced at review):**
+
+1. **Same opening template.** Your first sentence must instantiate the same
+   noun-phrase pattern as the anchor (or, with no anchor, a pattern every
+   sibling could share). Do not invent a new opening shape for one member.
+2. **Vary only the physics that varies** — the axis/species/zone-specific
+   token, the member-specific symbol (e.g. $m$ vs $n$), the direction-specific
+   sign convention. Everything template-shaped stays parallel across siblings.
+3. **Never flatten real physics differences.** If this member's quantity is
+   genuinely different in kind (e.g. a radial branch index vs an angular
+   Fourier harmonic), keep the family's opening template but state the
+   distinction explicitly in the body. Faithfulness outranks uniformity —
+   harmonize the STRUCTURE, never the physics claims.
+4. **Cross-link the family.** Link the parent
+   `[{{ item.sibling_family.parent.name }}](name:{{ item.sibling_family.parent.name }})`
+   and at least one adjacent sibling inline where the prose supports it.
+{% endif %}
+
 ## Why this name was accepted (reviewer feedback)
 
 {% if item.reviewer_score_name is defined and item.reviewer_score_name is not none %}

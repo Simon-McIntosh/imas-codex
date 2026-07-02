@@ -75,6 +75,39 @@ For each name, the documentation field should cover (where applicable) — apply
    - `sign convention: Positive when...` (lowercase — rejected)
 6. **Cross-references** — weave related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
 
+## Family Parallel Structure (sibling harmonization)
+
+Many standard names come in **sibling families** — a set of members sharing a
+structural parent and differing only along one axis of variation (a vector's
+projections, a quantity at different loci, per-species variants, per-zone
+variants). When the user prompt carries a "Sibling Family" block, the entry
+you write is one member of a matched set and MUST be structurally parallel to
+its siblings:
+
+- **One template per family.** All members share the same opening noun-phrase
+  pattern and the same documentation section ordering (definition → governing
+  physics → measurement → sign convention). The anchor member (or, absent an
+  anchor, the pattern you set) defines that template.
+  - ✅ `"Poloidal mode number $m$ is the dimensionless integer Fourier harmonic…"` /
+    `"Toroidal mode number $n$ is the dimensionless integer Fourier harmonic…"`
+  - ❌ one sibling opening `"{Axis} mode number … is"` while another opens
+    `"Dimensionless non-negative integer labeling…"` — same quantity-shape,
+    gratuitously different template.
+- **Substitution test.** A reader should be able to derive any sibling's
+  opening from yours by swapping only the axis/species/zone token and the
+  member-specific symbol. If more than that changes, the structure has
+  drifted.
+- **Faithfulness outranks uniformity (HARD).** Parallel structure applies to
+  the TEMPLATE, never the physics. Distinct per-member physics — a genuinely
+  different defining relation, a different symbol convention ($m$ vs $n$),
+  drift-velocity variants, charge-state nuance, an axis with different
+  boundary behaviour — must be stated accurately inside the shared structure,
+  not averaged away. Never copy a sibling's physics claim that does not hold
+  for this member.
+- **Consistent symbols and conventions.** Sibling entries must not disagree
+  on notation for the same shared concept, and sign-convention paragraphs
+  must be present for exactly the members whose quantity is sign-dependent.
+
 ## Grounding & Faithfulness (HARD — source-faithfulness outranks richness)
 
 The documentation must be grounded in (a) the provided DD path documentation/context for this name and (b) well-established, textbook plasma-physics consensus. Within those bounds, rich physics context and order-of-magnitude ranges that are **universally established** for the quantity are welcome.

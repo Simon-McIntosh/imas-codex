@@ -6604,6 +6604,9 @@ def _enrich_for_docs_gen(
       doc_short, cocos_label}``.
     - ``cocos_label``: COCOS transformation type from the SN node.
     - ``cocos_guidance``: rendered sign convention guidance for the LLM.
+    - ``sibling_family``: the HAS_PARENT sibling family (parent, anchor,
+      siblings) from :func:`~imas_codex.standard_names.context.fetch_sibling_family`
+      — drives the parallel-structure directive in the docs prompts.
 
     Modifies *items* in-place.  Never raises — individual item failures are
     debug-logged and the item is left without the missing key.
@@ -6860,6 +6863,20 @@ def _enrich_for_docs_gen(
         except Exception:
             logger.debug(
                 "_enrich_for_docs_gen: derivative context failed for %s",
+                sn_id,
+                exc_info=True,
+            )
+
+        # ── 6. Sibling-family (parallel-structure) context ─────────────
+        try:
+            from imas_codex.standard_names.context import fetch_sibling_family
+
+            family = fetch_sibling_family(sn_id, gc=gc)
+            if family and family.get("siblings"):
+                item["sibling_family"] = family
+        except Exception:
+            logger.debug(
+                "_enrich_for_docs_gen: sibling family failed for %s",
                 sn_id,
                 exc_info=True,
             )
@@ -7865,6 +7882,17 @@ async def process_refine_docs_batch(
                     prompt_context["derived_children"] = kids
         except Exception:
             logger.debug("refine_docs: derived children fetch failed for %s", sn_id)
+
+        # Sibling-family context so the rewrite converges on the family's
+        # parallel documentation template rather than drifting further.
+        try:
+            from imas_codex.standard_names.context import fetch_sibling_family
+
+            family = fetch_sibling_family(sn_id)
+            if family and family.get("siblings"):
+                prompt_context["sibling_family"] = family
+        except Exception:
+            logger.debug("refine_docs: sibling family fetch failed for %s", sn_id)
 
         try:
             user_prompt = render_prompt("sn/refine_docs_user", prompt_context)

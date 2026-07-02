@@ -528,6 +528,9 @@ def fetch_review_neighbours(
       the candidate's ``physical_base`` token (sibling-by-base comparator).
     * ``same_path_neighbours`` — up to ``n_same_path`` accepted SNs whose
       ``source_paths`` share the candidate's leading IDS prefix.
+    * ``sibling_family`` — the candidate's HAS_PARENT sibling family
+      (:func:`fetch_sibling_family`) for the parallel-structure check;
+      ``None`` when the candidate has no qualifying family.
 
     All result lists exclude the candidate itself by ``id``. On any failure
     (no graph client, missing index, etc.) the corresponding list is empty
@@ -552,10 +555,11 @@ def fetch_review_neighbours(
         (p for p in (_path_ids_prefix(sp) for sp in source_paths) if p), None
     )
 
-    out: dict[str, list[dict[str, Any]]] = {
+    out: dict[str, Any] = {
         "vector_neighbours": [],
         "same_base_neighbours": [],
         "same_path_neighbours": [],
+        "sibling_family": None,
     }
 
     own_gc = False
@@ -648,6 +652,13 @@ def fetch_review_neighbours(
             except Exception:
                 logger.debug("fetch_review_neighbours: same-path lookup failed")
 
+        # --- HAS_PARENT sibling family (parallel-structure comparator) -------
+        if sn_id:
+            try:
+                out["sibling_family"] = fetch_sibling_family(sn_id, gc=gc)
+            except Exception:
+                logger.debug("fetch_review_neighbours: sibling-family lookup failed")
+
         return out
     finally:
         if own_gc and _gc_ctx is not None:
@@ -658,3 +669,167 @@ def fetch_review_neighbours(
                     gc.close()
             except Exception:
                 pass
+
+
+# ---------------------------------------------------------------------------
+# Sibling-family (parallel-structure) context
+# ---------------------------------------------------------------------------
+
+_SIBLING_FAMILY_QUERY = """
+MATCH (sn:StandardName {id: $sn_id})-[r:HAS_PARENT]->(p:StandardName)
+WHERE r.operator_kind IN ['projection', 'qualifier', 'coordinate']
+OPTIONAL MATCH (sib:StandardName)-[rs:HAS_PARENT]->(p)
+WHERE sib.id <> $sn_id
+  AND rs.operator_kind IN ['projection', 'qualifier', 'coordinate']
+  AND coalesce(sib.name_stage, '') <> 'superseded'
+WITH p, r,
+     [s IN collect({
+         id: sib.id,
+         description: sib.description,
+         documentation: sib.documentation,
+         docs_stage: coalesce(sib.docs_stage, ''),
+         reviewer_score_docs: sib.reviewer_score_docs,
+         operator_kind: rs.operator_kind,
+         axis: rs.axis
+     }) WHERE s.id IS NOT NULL] AS sibs
+RETURN p.id AS parent_id,
+       p.description AS parent_description,
+       p.documentation AS parent_documentation,
+       coalesce(p.docs_stage, '') AS parent_docs_stage,
+       r.operator_kind AS member_operator_kind,
+       sibs
+ORDER BY size(sibs) DESC, parent_id
+LIMIT 1
+"""
+
+
+def _doc_opening(text: str | None, limit: int = 240) -> str:
+    """First ``limit`` characters of *text*, cut at a word boundary."""
+    t = (text or "").strip()
+    if len(t) <= limit:
+        return t
+    cut = t[:limit]
+    head, _, _ = cut.rpartition(" ")
+    return (head or cut) + " …"
+
+
+def fetch_sibling_family(
+    sn_id: str,
+    *,
+    gc: Any = None,
+    max_siblings: int = 12,
+) -> dict[str, Any] | None:
+    """Return the HAS_PARENT sibling family of *sn_id* for prompt grounding.
+
+    The family is the set of live (non-superseded) StandardNames sharing a
+    HAS_PARENT parent with the candidate via a structural operator edge
+    (``operator_kind`` in projection / qualifier / coordinate). When the
+    candidate has several such parents the largest family wins.
+
+    Returns ``None`` when the name has no qualifying family (or on any
+    graph failure — never raises). Otherwise a dict:
+
+    - ``parent``: ``{name, description, docs_accepted}``
+    - ``anchor``: the documentation-template authority — the parent when its
+      docs are accepted and its description is real, else the docs-accepted
+      sibling with the highest ``reviewer_score_docs``; ``None`` when the
+      family has no accepted member yet (defer semantics — siblings are
+      still returned for structural comparison).
+    - ``siblings``: up to *max_siblings* entries of ``{name, operator_kind,
+      axis, description, documentation_opening, docs_stage}``.
+    """
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    own_gc = False
+    if gc is None:
+        try:
+            from imas_codex.graph.client import GraphClient
+
+            gc = GraphClient()
+            own_gc = True
+        except Exception:
+            logger.debug("fetch_sibling_family: GraphClient unavailable")
+            return None
+
+    try:
+        rows = list(gc.query(_SIBLING_FAMILY_QUERY, sn_id=sn_id) or [])
+    except Exception:
+        logger.debug("fetch_sibling_family: query failed for %s", sn_id)
+        rows = []
+    finally:
+        if own_gc:
+            try:
+                gc.close()
+            except Exception:
+                pass
+
+    if not rows:
+        return None
+    row = rows[0]
+    raw_sibs = [s for s in (row.get("sibs") or []) if s.get("id")]
+    if not raw_sibs:
+        return None
+
+    placeholder = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+
+    def _real(text: str | None) -> str:
+        t = (text or "").strip()
+        return "" if t == placeholder else t
+
+    parent_desc = _real(row.get("parent_description"))
+    parent_docs_accepted = row.get("parent_docs_stage") == "accepted" and bool(
+        parent_desc
+    )
+
+    siblings = [
+        {
+            "name": s["id"],
+            "operator_kind": s.get("operator_kind") or "",
+            "axis": s.get("axis") or "",
+            "description": _real(s.get("description")),
+            "documentation_opening": _doc_opening(s.get("documentation")),
+            "docs_stage": s.get("docs_stage") or "",
+        }
+        for s in sorted(raw_sibs, key=lambda s: (s.get("operator_kind") or "", s["id"]))
+    ][:max_siblings]
+
+    anchor: dict[str, Any] | None = None
+    if parent_docs_accepted:
+        anchor = {
+            "name": row["parent_id"],
+            "description": parent_desc,
+            "documentation": _doc_opening(row.get("parent_documentation"), 2000),
+            "is_parent": True,
+        }
+    else:
+        accepted = [
+            s
+            for s in raw_sibs
+            if s.get("docs_stage") == "accepted" and _real(s.get("description"))
+        ]
+        if accepted:
+            best = max(
+                accepted,
+                key=lambda s: (
+                    s.get("reviewer_score_docs") or 0.0,
+                    len(_real(s.get("description"))),
+                ),
+            )
+            anchor = {
+                "name": best["id"],
+                "description": _real(best.get("description")),
+                "documentation": _doc_opening(best.get("documentation"), 2000),
+                "is_parent": False,
+            }
+
+    return {
+        "parent": {
+            "name": row["parent_id"],
+            "description": parent_desc,
+            "docs_accepted": parent_docs_accepted,
+        },
+        "anchor": anchor,
+        "siblings": siblings,
+    }
