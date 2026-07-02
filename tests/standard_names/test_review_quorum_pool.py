@@ -146,7 +146,6 @@ def _names_item() -> dict[str, Any]:
         "id": "test_field",
         "description": "Test description.",
         "claim_token": "tok",
-        "pipeline_status": "drafted",
         "name_stage": "claimed_review_name",
     }
 
@@ -427,7 +426,7 @@ def _docs_item() -> dict[str, Any]:
         "description": "Test description.",
         "documentation": "Test documentation.",
         "claim_token": "tok",
-        "pipeline_status": "drafted",
+        "name_stage": "drafted",
         "docs_stage": "claimed_review_docs",
         "reviewer_score_name": 75,
         "reviewer_comments_name": "OK",

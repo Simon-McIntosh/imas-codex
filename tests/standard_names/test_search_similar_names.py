@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 def _row(
     name: str,
     *,
-    pipeline_status: str = "named",
+    name_stage: str = "drafted",
     score: float = 0.9,
 ) -> dict:
     return {
@@ -20,7 +20,7 @@ def _row(
         "kind": "scalar",
         "unit": "eV",
         "score": score,
-        "pipeline_status": pipeline_status,
+        "name_stage": name_stage,
     }
 
 
@@ -129,8 +129,8 @@ class TestIncludeSuperseded:
         MockEncoder.return_value = mock_enc
 
         rows = [
-            _row("active_name", pipeline_status="named", score=0.95),
-            _row("legacy_name", pipeline_status="superseded", score=0.85),
+            _row("active_name", name_stage="drafted", score=0.95),
+            _row("legacy_name", name_stage="superseded", score=0.85),
         ]
         gc = MagicMock()
         gc.query.return_value = rows

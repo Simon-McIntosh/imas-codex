@@ -67,8 +67,8 @@ class TestSnPruneHelp:
         result = runner.invoke(sn, ["--help"])
         assert "prune" in result.output
 
-    def test_prune_has_status(self):
-        assert "--status" in self._help()
+    def test_prune_has_stage(self):
+        assert "--stage" in self._help()
 
     def test_prune_has_all(self):
         assert "--all" in self._help()

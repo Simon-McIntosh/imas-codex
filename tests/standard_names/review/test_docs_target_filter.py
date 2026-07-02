@@ -70,7 +70,7 @@ def _make_state(*, target: str, unreviewed_only: bool = True) -> SimpleNamespace
         force_review=False,
         ids_filter=None,
         domain_filter=None,
-        status_filter=None,
+        stage_filter=None,
         target_names=[],
         all_names=[],
         stats={},
@@ -84,7 +84,7 @@ def _make_state(*, target: str, unreviewed_only: bool = True) -> SimpleNamespace
 
 _NAME_WITH_NAME_REVIEW_ONLY = {
     "id": "electron_temperature",
-    "pipeline_status": "enriched",
+    "name_stage": "reviewed",
     "validation_status": "valid",
     "physics_domain": "equilibrium",
     "description": "Temperature of the thermal electron population.",
@@ -104,7 +104,7 @@ _NAME_WITH_NAME_REVIEW_ONLY = {
 
 _NAME_WITH_BOTH_REVIEWS = {
     "id": "ion_temperature",
-    "pipeline_status": "enriched",
+    "name_stage": "reviewed",
     "validation_status": "valid",
     "physics_domain": "equilibrium",
     "description": "Temperature of the thermal ion population.",
@@ -123,7 +123,7 @@ _NAME_WITH_BOTH_REVIEWS = {
 
 _NAME_UNREVIEWED = {
     "id": "plasma_current",
-    "pipeline_status": "enriched",
+    "name_stage": "reviewed",
     "validation_status": "valid",
     "physics_domain": "equilibrium",
     "reviewer_score_name": None,

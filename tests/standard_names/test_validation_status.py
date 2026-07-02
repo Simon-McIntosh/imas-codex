@@ -5,7 +5,7 @@ Covers:
 - _is_quarantined() decision logic
 - mark_names_validated() sets validation_status in Cypher
 - persist_composed_batch() defaults to "pending"
-- Downstream query filters (get_validated_names, get_validated_standard_names,
+- Downstream query filters (get_validated_names,
   review pipeline _load_all_names)
 """
 
@@ -250,23 +250,6 @@ class TestDownstreamValidationFilters:
             from imas_codex.standard_names.graph_ops import get_validated_names
 
             get_validated_names()
-
-        cypher = mock_gc.query.call_args[0][0]
-        assert "sn.validation_status = 'valid'" in cypher
-
-    def test_get_validated_standard_names_filters_valid(self) -> None:
-        """publish query requires validation_status='valid'."""
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
-            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
-            MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import (
-                get_validated_standard_names,
-            )
-
-            get_validated_standard_names()
 
         cypher = mock_gc.query.call_args[0][0]
         assert "sn.validation_status = 'valid'" in cypher

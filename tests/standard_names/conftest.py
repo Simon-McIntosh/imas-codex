@@ -82,7 +82,7 @@ def sample_standard_names() -> list[dict]:
             "unit": "eV",
             "physics_domain": "core_profiles",
             "model": "test/model",
-            "pipeline_status": "drafted",
+            "name_stage": "drafted",
             "generated_at": "2024-01-01T00:00:00Z",
         },
         {
@@ -95,7 +95,7 @@ def sample_standard_names() -> list[dict]:
             "physics_domain": "magnetics",
             "kind": "scalar",
             "model": "test/model",
-            "pipeline_status": "drafted",
+            "name_stage": "drafted",
             "generated_at": "2024-01-01T00:00:00Z",
         },
     ]

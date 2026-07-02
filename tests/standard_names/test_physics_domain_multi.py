@@ -42,7 +42,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["equilibrium"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -71,7 +71,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["equilibrium"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -82,7 +82,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["transport"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -108,7 +108,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["equilibrium"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -118,7 +118,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["transport"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -129,7 +129,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["transport"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -153,7 +153,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["equilibrium"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -163,7 +163,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": ["transport"],
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )
@@ -187,7 +187,7 @@ class TestPhysicsDomainMultiValued:
                     "id": clean_sn,
                     "source_types": ["dd"],
                     "physics_domain": "magnetics",  # scalar input
-                    "pipeline_status": "named",
+                    "name_stage": "drafted",
                 }
             ]
         )

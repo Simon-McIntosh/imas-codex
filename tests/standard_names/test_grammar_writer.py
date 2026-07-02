@@ -111,9 +111,7 @@ def test_parser_error_clears_columns_without_flag() -> None:
     assert len(clear_calls) == 1
     assert clear_calls[0][1]["sn_id"] == "definitely_not_a_real_name"
     # … and never writes a grammar_parse_fallback flag.
-    assert not any(
-        "grammar_parse_fallback" in c[0][0] for c in gc.query.call_args_list
-    )
+    assert not any("grammar_parse_fallback" in c[0][0] for c in gc.query.call_args_list)
 
 
 def test_open_vocab_physical_base_populates_column_with_no_edge() -> None:

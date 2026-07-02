@@ -105,7 +105,7 @@ class TestDomainCycleRunner:
                 if "StandardNameSource" in cypher and "claimed_at" in cypher:
                     # Domain discovery query
                     return _THREE_DOMAINS
-                if "pipeline_status" in cypher:
+                if "name_stage" in cypher:
                     return [{"status": "named", "n": 10}]
                 if "reviewer_score_name IS NOT NULL" in cypher:
                     return [{"score": 0.7 + i * 0.05} for i in range(5)]

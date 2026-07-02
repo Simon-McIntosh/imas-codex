@@ -1,7 +1,7 @@
 """Tests for standard name graph operations.
 
 Tests write_standard_names coalesce behavior, relationship creation,
-get_validated_standard_names filtering, and reset/clear filter plumbing
+reset/clear filter plumbing
 — all mocked, no live Neo4j.
 """
 
@@ -253,65 +253,6 @@ class TestWriteStandardNames:
         assert result == 0
 
 
-class TestGetValidatedStandardNames:
-    """Test get_validated_standard_names query filtering."""
-
-    def test_ids_filter(self) -> None:
-        """Should filter by IDS name."""
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
-            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
-            MockGC.return_value.__exit__ = MagicMock(return_value=False)
-
-            from imas_codex.standard_names.graph_ops import get_validated_standard_names
-
-            get_validated_standard_names(ids_filter="equilibrium")
-
-        # Verify ids_filter was passed to query
-        call_kwargs = mock_gc.query.call_args[1]
-        assert call_kwargs["ids_filter"] == "equilibrium"
-
-        # Verify the Cypher includes the IDS filter clause
-        cypher = mock_gc.query.call_args[0][0]
-        assert "ids_filter" in cypher
-
-    def test_no_filters(self) -> None:
-        """With no filters, should return all standard names."""
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(
-            return_value=[
-                {
-                    "name": "a",
-                    "description": "",
-                    "source": "dd",
-                    "source_path": "x",
-                    "unit": None,
-                    "ids_name": None,
-                },
-                {
-                    "name": "b",
-                    "description": "",
-                    "source": "dd",
-                    "source_path": "y",
-                    "unit": None,
-                    "ids_name": None,
-                },
-            ]
-        )
-
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
-            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
-            MockGC.return_value.__exit__ = MagicMock(return_value=False)
-
-            from imas_codex.standard_names.graph_ops import get_validated_standard_names
-
-            results = get_validated_standard_names()
-
-        assert len(results) == 2
-
-
 class TestGetExistingStandardNames:
     """Test deduplication query."""
 
@@ -360,7 +301,7 @@ class TestResetStandardNames:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 3}])
 
-        count = self._call_reset(mock_gc, from_status="drafted", dry_run=True)
+        count = self._call_reset(mock_gc, from_stage="drafted", dry_run=True)
 
         assert count == 3
         # Only one query should be called (the count query)
@@ -371,7 +312,7 @@ class TestResetStandardNames:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        count = self._call_reset(mock_gc, from_status="drafted")
+        count = self._call_reset(mock_gc, from_stage="drafted")
 
         assert count == 0
         # Only the count query; no DELETE or SET queries
@@ -383,7 +324,7 @@ class TestResetStandardNames:
         # First call = count query; subsequent calls = relationship + set queries
         mock_gc.query = MagicMock(return_value=[{"n": 2}])
 
-        self._call_reset(mock_gc, from_status="drafted")
+        self._call_reset(mock_gc, from_stage="drafted")
 
         # Collect all Cypher strings passed
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
@@ -399,7 +340,7 @@ class TestResetStandardNames:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 1}])
 
-        self._call_reset(mock_gc, from_status="drafted")
+        self._call_reset(mock_gc, from_stage="drafted")
 
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
         assert "HAS_STANDARD_NAME" in all_cypher
@@ -409,32 +350,32 @@ class TestResetStandardNames:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 1}])
 
-        self._call_reset(mock_gc, from_status="drafted")
+        self._call_reset(mock_gc, from_stage="drafted")
 
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
         assert "HAS_UNIT" in all_cypher
 
-    def test_to_status_sets_pipeline_status(self) -> None:
-        """When to_status is given, SET clause should include pipeline_status."""
+    def test_to_stage_sets_name_stage(self) -> None:
+        """When to_stage is given, SET clause should include name_stage."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 1}])
 
-        self._call_reset(mock_gc, from_status="drafted", to_status="extracted")
+        self._call_reset(mock_gc, from_stage="drafted", to_stage="extracted")
 
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
-        assert "pipeline_status" in all_cypher
+        assert "name_stage" in all_cypher
 
-        # Verify to_status kwarg was passed
+        # Verify to_stage kwarg was passed
         all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
-        to_statuses = [kw.get("to_status") for kw in all_kwargs if "to_status" in kw]
-        assert "extracted" in to_statuses
+        to_stagees = [kw.get("to_stage") for kw in all_kwargs if "to_stage" in kw]
+        assert "extracted" in to_stagees
 
     def test_source_filter_included_in_cypher(self) -> None:
         """source_filter should appear in the WHERE clause."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        self._call_reset(mock_gc, from_status="drafted", source_filter="dd")
+        self._call_reset(mock_gc, from_stage="drafted", source_filter="dd")
 
         # Check source_filter param was passed
         all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
@@ -448,7 +389,7 @@ class TestResetStandardNames:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        self._call_reset(mock_gc, from_status="drafted", ids_filter="equilibrium")
+        self._call_reset(mock_gc, from_stage="drafted", ids_filter="equilibrium")
 
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
         assert "STARTS WITH" in all_cypher
@@ -488,7 +429,7 @@ class TestClearStandardNames:
         assert "DELETE" not in all_cypher
 
     def test_default_status_filter_means_all_statuses(self) -> None:
-        """status_filter=None should mean 'no filter' (all statuses, excl accepted)."""
+        """stage_filter=None should mean 'no filter' (all statuses, excl accepted)."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
@@ -496,33 +437,33 @@ class TestClearStandardNames:
 
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
         # Should not constrain to specific status IN list
-        assert "IN $statuses" not in all_cypher
+        assert "IN $stages" not in all_cypher
         # Should still exclude accepted by default
         assert "<> 'accepted'" in all_cypher
 
     def test_accepted_not_deleted_without_flag(self) -> None:
-        """Without include_accepted, 'accepted' should not be in statuses list."""
+        """Without include_accepted, 'accepted' should not be in stages list."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        self._call_clear(mock_gc, status_filter=["drafted"])
+        self._call_clear(mock_gc, stage_filter=["drafted"])
 
         all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
-        statuses_lists = [kw.get("statuses") for kw in all_kwargs if "statuses" in kw]
+        statuses_lists = [kw.get("stages") for kw in all_kwargs if "stages" in kw]
         for sl in statuses_lists:
             assert "accepted" not in sl, (
                 "accepted should not appear without include_accepted"
             )
 
-    def test_include_accepted_adds_to_statuses(self) -> None:
-        """include_accepted=True should add 'accepted' to effective_statuses."""
+    def test_include_accepted_adds_stage(self) -> None:
+        """include_accepted=True should add 'accepted' to effective_stages."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        self._call_clear(mock_gc, status_filter=["drafted"], include_accepted=True)
+        self._call_clear(mock_gc, stage_filter=["drafted"], include_accepted=True)
 
         all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
-        statuses_lists = [kw.get("statuses") for kw in all_kwargs if "statuses" in kw]
+        statuses_lists = [kw.get("stages") for kw in all_kwargs if "stages" in kw]
         assert any("accepted" in sl for sl in statuses_lists)
 
     def test_returns_zero_for_empty_graph(self) -> None:
@@ -738,7 +679,7 @@ class TestResetStandardNamesFilters:
     def test_since_filter(self) -> None:
         """--since should add a generated_at >= datetime() clause."""
         mock_gc = MagicMock()
-        self._call_reset(mock_gc, from_status="drafted", since="2026-04-19T10:00")
+        self._call_reset(mock_gc, from_stage="drafted", since="2026-04-19T10:00")
         cypher = self._get_count_cypher(mock_gc)
         params = self._get_count_params(mock_gc)
         assert "datetime($since)" in cypher
@@ -747,7 +688,7 @@ class TestResetStandardNamesFilters:
     def test_before_filter(self) -> None:
         """--before should add a generated_at < datetime() clause."""
         mock_gc = MagicMock()
-        self._call_reset(mock_gc, from_status="drafted", before="2026-05-01")
+        self._call_reset(mock_gc, from_stage="drafted", before="2026-05-01")
         cypher = self._get_count_cypher(mock_gc)
         params = self._get_count_params(mock_gc)
         assert "datetime($before)" in cypher
@@ -756,7 +697,7 @@ class TestResetStandardNamesFilters:
     def test_below_score_filter(self) -> None:
         """--below-score should add a reviewer_score_name < clause."""
         mock_gc = MagicMock()
-        self._call_reset(mock_gc, from_status="drafted", below_score=0.6)
+        self._call_reset(mock_gc, from_stage="drafted", below_score=0.6)
         cypher = self._get_count_cypher(mock_gc)
         params = self._get_count_params(mock_gc)
         assert "sn.reviewer_score_name < $below_score" in cypher
@@ -765,7 +706,7 @@ class TestResetStandardNamesFilters:
     def test_tiers_filter(self) -> None:
         """--tier should add a review_tier IN clause."""
         mock_gc = MagicMock()
-        self._call_reset(mock_gc, from_status="drafted", tiers=["poor", "inadequate"])
+        self._call_reset(mock_gc, from_stage="drafted", tiers=["poor", "inadequate"])
         cypher = self._get_count_cypher(mock_gc)
         params = self._get_count_params(mock_gc)
         assert "sn.review_tier IN $tiers" in cypher
@@ -774,9 +715,7 @@ class TestResetStandardNamesFilters:
     def test_validation_status_filter(self) -> None:
         """--validation_status should add a validation_status = clause."""
         mock_gc = MagicMock()
-        self._call_reset(
-            mock_gc, from_status="drafted", validation_status="quarantined"
-        )
+        self._call_reset(mock_gc, from_stage="drafted", validation_status="quarantined")
         cypher = self._get_count_cypher(mock_gc)
         params = self._get_count_params(mock_gc)
         assert "sn.validation_status = $validation_status" in cypher
@@ -787,7 +726,7 @@ class TestResetStandardNamesFilters:
         mock_gc = MagicMock()
         self._call_reset(
             mock_gc,
-            from_status="drafted",
+            from_stage="drafted",
             since="2026-04-01",
             below_score=0.5,
             tiers=["poor"],
@@ -798,11 +737,11 @@ class TestResetStandardNamesFilters:
         assert "sn.review_tier IN $tiers" in cypher
 
     def test_no_filters_backward_compat(self) -> None:
-        """Without new filters, Cypher should only contain from_status clause."""
+        """Without new filters, Cypher should only contain from_stage clause."""
         mock_gc = MagicMock()
-        self._call_reset(mock_gc, from_status="drafted")
+        self._call_reset(mock_gc, from_stage="drafted")
         cypher = self._get_count_cypher(mock_gc)
-        assert "sn.pipeline_status = $from_status" in cypher
+        assert "sn.name_stage = $from_stage" in cypher
         assert "datetime" not in cypher
         assert "reviewer_score" not in cypher
         assert "review_tier" not in cypher
@@ -833,7 +772,7 @@ class TestClearStandardNamesFilters:
     def test_since_filter(self) -> None:
         """--since filter should appear in clear Cypher."""
         mock_gc = MagicMock()
-        self._call_clear(mock_gc, status_filter=["drafted"], since="2026-04-19T10:00")
+        self._call_clear(mock_gc, stage_filter=["drafted"], since="2026-04-19T10:00")
         cypher = self._get_count_cypher(mock_gc)
         params = self._get_count_params(mock_gc)
         assert "datetime($since)" in cypher
@@ -842,14 +781,14 @@ class TestClearStandardNamesFilters:
     def test_below_score_filter(self) -> None:
         """--below-score filter should appear in clear Cypher."""
         mock_gc = MagicMock()
-        self._call_clear(mock_gc, status_filter=["drafted"], below_score=0.6)
+        self._call_clear(mock_gc, stage_filter=["drafted"], below_score=0.6)
         cypher = self._get_count_cypher(mock_gc)
         assert "sn.reviewer_score_name < $below_score" in cypher
 
     def test_tiers_filter(self) -> None:
         """--tier filter should appear in clear Cypher."""
         mock_gc = MagicMock()
-        self._call_clear(mock_gc, status_filter=["drafted"], tiers=["poor"])
+        self._call_clear(mock_gc, stage_filter=["drafted"], tiers=["poor"])
         cypher = self._get_count_cypher(mock_gc)
         assert "sn.review_tier IN $tiers" in cypher
 

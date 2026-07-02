@@ -56,7 +56,7 @@ def _full_review_item() -> dict:
         "parent_description": "Per-electron-species profiles",
         "previous_name": {
             "name": "electron_temperature_old",
-            "pipeline_status": "drafted",
+            "name_stage": "drafted",
         },
         "identifier_schema": "magnetics_probe_type_identifier",
         "identifier_schema_doc": "MagDiag probe taxonomy",

@@ -34,12 +34,12 @@ class TestDomainVocabularyPreseed:
             {
                 "name": "electron_temperature",
                 "description": "Electron temperature profile. Used in transport.",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
             {
                 "name": "plasma_current",
                 "description": "Total plasma current",
-                "pipeline_status": "published",
+                "name_stage": "published",
             },
         ]
 

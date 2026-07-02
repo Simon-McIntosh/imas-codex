@@ -91,7 +91,7 @@ class TestPersistGeneratedNameBatch:
         written = mock_write.call_args[0][0]
         for entry in written:
             assert entry["model"] == "claude-test"
-            assert entry["pipeline_status"] == "named"
+            assert "name_stage" not in entry  # stage owned by _finalize_generated_name_stage
             assert "generated_at" in entry
 
     @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
@@ -156,7 +156,7 @@ class TestPersistGeneratedNameBatch:
         for entry in written:
             assert entry["embedding"] is None
             assert entry["embed_text_hash"] is None
-            assert entry["pipeline_status"] == "named"
+            assert "name_stage" not in entry
             assert entry["validation_status"] != "quarantined"
 
     @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
@@ -209,10 +209,9 @@ class TestPersistGeneratedNameBatch:
         persist_generated_name_batch(batch2, compose_model="test")
         second_written = mock_write.call_args[0][0]
 
-        # Same embeddings (None — deferred), same pipeline_status, same structure
+        # Same embeddings (None — deferred), same structure
         for a, b in zip(first_written, second_written, strict=True):
             assert a["embedding"] == b["embedding"]
-            assert a["pipeline_status"] == b["pipeline_status"]
             assert a["validation_status"] == b["validation_status"]
 
 

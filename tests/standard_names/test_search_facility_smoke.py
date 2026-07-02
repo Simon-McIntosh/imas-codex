@@ -65,7 +65,7 @@ class TestSegmentFilterUsesBareColumns:
             k=5,
             segment_filters={"physical_base": "magnetic_flux"},
             kind=None,
-            pipeline_status=None,
+            name_stage=None,
             cocos_type=None,
         )
         cypher = gc.query.call_args.args[0]
@@ -85,7 +85,7 @@ class TestSegmentFilterUsesBareColumns:
             k=5,
             segment_filters={"subject": "electron"},
             kind=None,
-            pipeline_status=None,
+            name_stage=None,
             cocos_type=None,
             physics_domain=None,
         )
@@ -105,7 +105,7 @@ class TestSegmentFilterUsesBareColumns:
             k=5,
             segment_filters={"bogus": "v"},
             kind=None,
-            pipeline_status=None,
+            name_stage=None,
             cocos_type=None,
             physics_domain=None,
         )
@@ -124,7 +124,7 @@ class TestSegmentFilterUsesBareColumns:
                 "documentation": "",
                 "kind": "scalar",
                 "unit": "eV",
-                "pipeline_status": "drafted",
+                "name_stage": "drafted",
                 "cocos_transformation_type": None,
                 "cocos": None,
                 "physics_domain": "transport",

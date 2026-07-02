@@ -49,11 +49,11 @@ class _MockGraph:
         nid: str,
         *,
         origin: str | None = None,
-        pipeline_status: str | None = None,
+        name_stage: str | None = None,
     ) -> None:
         self.nodes[nid] = {
             "origin": origin,
-            "pipeline_status": pipeline_status,
+            "name_stage": name_stage,
         }
 
     def add_edge(
@@ -117,8 +117,8 @@ class _MockGraph:
             row = {
                 "root_exists": old in self.nodes,
                 "origin": self.nodes.get(old, {}).get("origin") if old else None,
-                "pipeline_status": (
-                    self.nodes.get(old, {}).get("pipeline_status") if old else None
+                "name_stage": (
+                    self.nodes.get(old, {}).get("name_stage") if old else None
                 ),
                 "target_exists": new in self.nodes,
             }
@@ -132,7 +132,7 @@ class _MockGraph:
                 {
                     "id": d,
                     "origin": self.nodes.get(d, {}).get("origin"),
-                    "pipeline_status": self.nodes.get(d, {}).get("pipeline_status"),
+                    "name_stage": self.nodes.get(d, {}).get("name_stage"),
                 }
                 for d in sorted(desc)
             ]
@@ -451,7 +451,7 @@ class TestSafetyChecks:
     def test_accepted_descendant_blocks_without_flag(self) -> None:
         gc = _MockGraph()
         gc.add_node("temperature")
-        gc.add_node("ion_temperature", pipeline_status="accepted")
+        gc.add_node("ion_temperature", name_stage="accepted")
         gc.add_edge(
             "ion_temperature",
             "temperature",
@@ -465,12 +465,12 @@ class TestSafetyChecks:
             "temperature_of_plasma_boundary",
         )
         assert result.conflicts
-        assert any("pipeline_status='accepted'" in c for c in result.conflicts)
+        assert any("name_stage='accepted'" in c for c in result.conflicts)
 
     def test_accepted_descendant_allows_with_flag(self) -> None:
         gc = _MockGraph()
         gc.add_node("temperature")
-        gc.add_node("ion_temperature", pipeline_status="accepted")
+        gc.add_node("ion_temperature", name_stage="accepted")
         gc.add_edge(
             "ion_temperature",
             "temperature",

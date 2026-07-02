@@ -177,7 +177,7 @@ class TestEmbeddingCoverage:
                 "description": "Electron temperature",
                 "kind": "scalar",
                 "unit": "eV",
-                "pipeline_status": "drafted",
+                "name_stage": "drafted",
             }
         ]
         _call_write(names, mock_gc)
@@ -211,7 +211,6 @@ class TestCoalesceSafety:
     # grammar_subject, grammar_component, etc.) from the StandardName schema.
     # grammar_parse_version is the only grammar field written via coalesce now.
     _COALESCE_FIELDS = [
-        ("pipeline_status", "b.pipeline_status, sn.pipeline_status"),
         ("documentation", "b.documentation, sn.documentation"),
         ("kind", "b.kind, sn.kind"),
         ("links", "b.links, sn.links"),
@@ -225,7 +224,7 @@ class TestCoalesceSafety:
         """All optional fields in the MERGE SET must use coalesce(b.field, sn.field).
 
         This protects against a scenario where:
-          1. catalog import sets pipeline_status='accepted', documentation, etc.
+          1. catalog import sets name_stage='accepted', documentation, etc.
           2. sn-build re-runs write_standard_names with those fields = None
           3. Without coalesce, the re-run would null-out the imported values.
         """
@@ -239,7 +238,7 @@ class TestCoalesceSafety:
                 "source_types": ["dd"],
                 "source_id": "core_profiles/profiles_1d/electrons/temperature",
                 "description": "Electron temperature",
-                # pipeline_status, documentation, kind, tags, etc. all absent/None
+                # name_stage, documentation, kind, tags, etc. all absent/None
             }
         ]
         _call_write(names, mock_gc)
@@ -302,7 +301,6 @@ class TestCoalesceSafety:
             "cocos",
             "dd_version",
             "model",
-            "pipeline_status",
             "generated_at",
             "review_tier",
             "vocab_gap_detail",
@@ -422,8 +420,8 @@ class TestCoalesceSafety:
         assert "sn.documentation = b.documentation" in import_cypher, (
             "Catalog import must set documentation directly (authoritative)"
         )
-        assert "sn.pipeline_status = 'accepted'" in import_cypher, (
-            "Catalog import must set pipeline_status='accepted' directly"
+        assert "sn.name_stage = 'accepted'" in import_cypher, (
+            "Catalog import must set name_stage='accepted' directly"
         )
         # Embedding must NOT appear — preserved by omission
         assert "sn.embedding" not in import_cypher, (
@@ -436,7 +434,7 @@ class TestCoalesceSafety:
             "source_types": ["dd"],
             "source_id": "core_profiles/profiles_1d/electrons/temperature",
             "description": "Electron temperature",
-            # pipeline_status, documentation, kind, validity_domain, constraints all absent
+            # name_stage, documentation, kind, validity_domain, constraints all absent
         }
         written = _call_write([basic_entry], build_gc)
         assert written == 1
@@ -445,7 +443,6 @@ class TestCoalesceSafety:
         build_cypher = _merge_cypher(build_gc)
 
         catalog_owned = [
-            ("pipeline_status", "b.pipeline_status, sn.pipeline_status"),
             ("documentation", "b.documentation, sn.documentation"),
             ("kind", "b.kind, sn.kind"),
             ("validity_domain", "b.validity_domain, sn.validity_domain"),
@@ -464,7 +461,6 @@ class TestCoalesceSafety:
 
         # These were not supplied — must be None in batch so coalesce falls back to graph
         for absent_field in (
-            "pipeline_status",
             "documentation",
             "kind",
             "validity_domain",
@@ -581,7 +577,7 @@ class TestImportIdempotence:
             "validity_domain",
             "constraints",
             "physics_domain",
-            "pipeline_status",
+            "name_stage",
             "source_types",
         )
         for e1, e2 in zip(result1.entries, result2.entries, strict=True):
@@ -616,10 +612,10 @@ _RICH_SN_RECORD = {
     "physical_base": "temperature",
     "subject": "electron",
     "model": "gpt-4o",
-    "pipeline_status": "drafted",
+    "name_stage": "drafted",
 }
 
-# What get_validated_standard_names returns — graph-canonical keys
+# Graph-canonical result keys
 _GRAPH_QUERY_ROW = {
     "name": "electron_temperature",
     "description": "Electron temperature in the core plasma",
@@ -696,7 +692,7 @@ class TestE2ERoundTrip:
         assert node["unit"] == "eV"
         assert node["constraints"] == ["T_e > 0"]
         assert node["validity_domain"] == "core plasma"
-        assert node["pipeline_status"] == "drafted"
+        assert "name_stage" not in node  # stage owned by _finalize_generated_name_stage
         assert node["model"] == "gpt-4o"
 
     def test_import_dry_run_does_not_call_graph(self, tmp_path: Path) -> None:

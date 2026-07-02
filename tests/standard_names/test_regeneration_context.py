@@ -18,14 +18,14 @@ class TestGetSourceNameMapping:
                 "name": "poloidal_magnetic_flux",
                 "description": "Poloidal magnetic flux",
                 "kind": "scalar",
-                "pipeline_status": "drafted",
+                "name_stage": "drafted",
             },
             {
                 "source_id": "core_profiles/profiles_1d/electrons/temperature",
                 "name": "electron_temperature",
                 "description": "Electron temperature",
                 "kind": "scalar",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
         ]
 
@@ -48,9 +48,7 @@ class TestGetSourceNameMapping:
             == "poloidal_magnetic_flux"
         )
         assert (
-            mapping["core_profiles/profiles_1d/electrons/temperature"][
-                "pipeline_status"
-            ]
+            mapping["core_profiles/profiles_1d/electrons/temperature"]["name_stage"]
             == "accepted"
         )
 
@@ -64,14 +62,14 @@ class TestGetSourceNameMapping:
                 "name": "old_drafted_name",
                 "description": "Old",
                 "kind": "scalar",
-                "pipeline_status": "drafted",
+                "name_stage": "drafted",
             },
             {
                 "source_id": "equilibrium/time_slice/profiles_1d/psi",
                 "name": "accepted_name",
                 "description": "Accepted",
                 "kind": "scalar",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
         ]
 
@@ -126,7 +124,7 @@ class TestComposePromptPreviousName:
                     "previous_name": {
                         "name": "poloidal_magnetic_flux",
                         "description": "The poloidal magnetic flux",
-                        "pipeline_status": "drafted",
+                        "name_stage": "drafted",
                     },
                 }
             ],
@@ -152,7 +150,7 @@ class TestComposePromptPreviousName:
                     "previous_name": {
                         "name": "electron_temperature",
                         "description": "Electron temperature",
-                        "pipeline_status": "accepted",
+                        "name_stage": "accepted",
                     },
                 }
             ],

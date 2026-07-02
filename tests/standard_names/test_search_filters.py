@@ -22,7 +22,6 @@ def _make_sn_row(
     name: str,
     *,
     validation_status: str = "valid",
-    pipeline_status: str = "named",
     name_stage: str = "drafted",
     description: str = "",
     score: float = 0.9,
@@ -35,7 +34,6 @@ def _make_sn_row(
         "unit": "eV",
         "score": score,
         "validation_status": validation_status,
-        "pipeline_status": pipeline_status,
         "name_stage": name_stage,
     }
 

@@ -175,7 +175,7 @@ class TestCypherUsesHasUnit:
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             from imas_codex.standard_names.graph_ops import reset_standard_names
 
-            reset_standard_names(from_status="drafted")
+            reset_standard_names(from_stage="drafted")
 
         all_cypher = " ".join(call[0][0] for call in mock_gc.query.call_args_list)
         assert "HAS_UNIT" in all_cypher

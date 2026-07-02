@@ -34,7 +34,7 @@ _FIXTURE_NODES: list[dict] = [
         "cocos_transformation_type": None,
         "status": "draft",
         "physics_domain": "kinetics",
-        "pipeline_status": "reviewed",
+        "name_stage": "reviewed",
         "reviewer_score": 0.85,
         "origin": "pipeline",
         "cocos": None,
@@ -51,7 +51,7 @@ _FIXTURE_NODES: list[dict] = [
         "cocos_transformation_type": None,
         "status": "draft",
         "physics_domain": "kinetics",
-        "pipeline_status": "reviewed",
+        "name_stage": "reviewed",
         "reviewer_score": 0.82,
         "origin": "pipeline",
         "cocos": None,
@@ -68,7 +68,7 @@ _FIXTURE_NODES: list[dict] = [
         "cocos_transformation_type": None,
         "status": "draft",
         "physics_domain": "kinetics",
-        "pipeline_status": "reviewed",
+        "name_stage": "reviewed",
         "reviewer_score": 0.78,
         "origin": "pipeline",
         "cocos": None,
@@ -85,7 +85,7 @@ _FIXTURE_NODES: list[dict] = [
         "cocos_transformation_type": "ip_like",
         "status": "draft",
         "physics_domain": "magnetics",
-        "pipeline_status": "reviewed",
+        "name_stage": "reviewed",
         "reviewer_score": 0.90,
         "origin": "pipeline",
         "cocos": None,
@@ -102,7 +102,7 @@ _FIXTURE_NODES: list[dict] = [
         "cocos_transformation_type": "q_like",
         "status": "draft",
         "physics_domain": "equilibrium",
-        "pipeline_status": "reviewed",
+        "name_stage": "reviewed",
         "reviewer_score": 0.88,
         "origin": "pipeline",
         "cocos": None,
@@ -119,7 +119,7 @@ _FIXTURE_NODES: list[dict] = [
         "cocos_transformation_type": "b0_like",
         "status": "draft",
         "physics_domain": "magnetics",
-        "pipeline_status": "reviewed",
+        "name_stage": "reviewed",
         "reviewer_score": 0.75,
         "origin": "pipeline",
         "cocos": None,
@@ -436,12 +436,12 @@ class TestProtectionRegression:
                 "description": "Pipeline wants to overwrite this",
                 "documentation": "Pipeline docs",
                 "kind": "vector",  # pipeline tries to change kind
-                "pipeline_status": "enriched",  # NOT protected
+                "name_stage": "reviewed",  # NOT protected
             },
             {
                 "id": "ion_temperature",
                 "description": "Pipeline generated desc",
-                "pipeline_status": "enriched",
+                "name_stage": "reviewed",
             },
         ]
 
@@ -462,12 +462,12 @@ class TestProtectionRegression:
         assert "description" not in et, "Protected description should be stripped"
         assert "documentation" not in et, "Protected documentation should be stripped"
         assert "kind" not in et, "Protected kind should be stripped"
-        assert et["pipeline_status"] == "enriched", "Non-protected field preserved"
+        assert et["name_stage"] == "reviewed", "Non-protected field preserved"
 
         # ion_temperature: all fields pass through
         it = filtered[1]
         assert it["description"] == "Pipeline generated desc"
-        assert it["pipeline_status"] == "enriched"
+        assert it["name_stage"] == "reviewed"
 
         assert skipped == ["electron_temperature"]
 
@@ -518,7 +518,7 @@ class TestProtectionRegression:
             "embedding",
             "model",
             "generated_at",
-            "pipeline_status",
+            "name_stage",
             "reviewer_score",
             "source_types",
         }

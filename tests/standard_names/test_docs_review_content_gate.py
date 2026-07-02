@@ -44,7 +44,7 @@ def _make_name(
         "process": "",
         "cocos_transformation_type": None,
         "physics_domain": physics_domain,
-        "pipeline_status": "drafted",
+        "name_stage": "drafted",
         "reviewer_scores_name": None,
         "reviewer_scores_docs": None,
         "review_input_hash": None,
@@ -66,7 +66,7 @@ def _make_state(target: str = "docs"):
     state.target = target
     state.unreviewed_only = False
     state.force_review = False
-    state.status_filter = ""  # Disable status filter to focus on content gate
+    state.stage_filter = ""  # Disable stage filter to focus on content gate
     return state
 
 

@@ -418,7 +418,7 @@ class TestFilterAdmissibleParentsShadowVeto:
                         "divertors/divertor/target/tile/surface_outline/r"
                     ],
                     "origin": "derived",
-                    "pipeline_status": None,
+                    "name_stage": None,
                 }
             ]
         )
@@ -452,7 +452,7 @@ class TestFilterAdmissibleParentsShadowVeto:
                     "parent_sources": [],
                     "lone_child_sources": [],
                     "origin": None,
-                    "pipeline_status": None,
+                    "name_stage": None,
                 }
             ]
         )

@@ -150,7 +150,7 @@ def test_mode_vector_skips_keyword_and_grammar() -> None:
                     "documentation": "",
                     "kind": "scalar",
                     "unit": "K",
-                    "pipeline_status": "active",
+                    "name_stage": "accepted",
                     "cocos_transformation_type": None,
                     "cocos": None,
                     "physical_base": "temperature",
@@ -181,7 +181,7 @@ def test_search_empty_query_returns_empty() -> None:
 
 
 def test_search_post_filter_kind() -> None:
-    """kind/pipeline_status/cocos_type filter the enriched rows."""
+    """kind/name_stage/cocos_type filter the enriched rows."""
     gc = _stub_gc(
         {
             "db.index.vector.queryNodes": [
@@ -195,7 +195,7 @@ def test_search_post_filter_kind() -> None:
                     "documentation": "",
                     "kind": "scalar",
                     "unit": "K",
-                    "pipeline_status": "active",
+                    "name_stage": "accepted",
                     "cocos_transformation_type": None,
                     "cocos": None,
                     "physical_base": "temperature",
@@ -207,7 +207,7 @@ def test_search_post_filter_kind() -> None:
                     "documentation": "",
                     "kind": "vector",
                     "unit": "T",
-                    "pipeline_status": "active",
+                    "name_stage": "accepted",
                     "cocos_transformation_type": None,
                     "cocos": None,
                     "physical_base": "magnetic_flux_density",
@@ -234,7 +234,7 @@ def test_search_empty_query_with_filters_uses_catalog_query() -> None:
                     "documentation": "",
                     "kind": "scalar",
                     "unit": "K",
-                    "pipeline_status": "active",
+                    "name_stage": "accepted",
                     "cocos_transformation_type": None,
                     "cocos": None,
                     "physics_domain": "transport",

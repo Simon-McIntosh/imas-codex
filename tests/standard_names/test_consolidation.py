@@ -350,7 +350,7 @@ class TestConceptRegistry:
             "electron_temperature": {
                 "id": "electron_temperature",
                 "unit": "eV",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
         }
         result = consolidate_candidates(candidates, existing_registry=registry)
@@ -369,7 +369,7 @@ class TestConceptRegistry:
             "electron_temperature": {
                 "id": "electron_temperature",
                 "unit": "eV",
-                "pipeline_status": "drafted",
+                "name_stage": "drafted",
             },
         }
         result = consolidate_candidates(candidates, existing_registry=registry)
@@ -394,7 +394,7 @@ class TestConceptRegistry:
             "ion_temperature": {
                 "id": "ion_temperature",
                 "unit": "eV",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
         }
         result = consolidate_candidates(candidates, existing_registry=registry)
@@ -422,7 +422,7 @@ class TestStatsTracking:
         registry = {
             "electron_temperature": {
                 "id": "electron_temperature",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
         }
         result = consolidate_candidates(
@@ -579,7 +579,7 @@ class TestCombinedScenarios:
         registry = {
             "plasma_current": {
                 "id": "plasma_current",
-                "pipeline_status": "accepted",
+                "name_stage": "accepted",
             },
         }
         source_paths = {"mag/ip", "core/ne", "core/ne2", "core/te", "core/te2", "extra"}

@@ -153,7 +153,7 @@ class TestMintErrorSiblings:
         assert len(siblings) == 1
         s = siblings[0]
         assert s["model"] == "deterministic:dd_error_modifier"
-        assert s["pipeline_status"] == "named"
+        assert "name_stage" not in s  # stage owned by persist finalize
         assert s["validation_status"] == "valid"
         assert s["reviewer_score_name"] == 1.0
         assert s["reviewed_name_at"] is not None
@@ -272,7 +272,7 @@ class TestReconcileErrorSiblings:
     """Tests for reconcile_error_siblings orphan detection."""
 
     def test_reconcile_orphans_error_siblings(self):
-        """When the parent StandardName is deleted, error siblings are marked skipped."""
+        """When the parent StandardName is deleted, error siblings are quarantined."""
         from imas_codex.standard_names.graph_ops import reconcile_error_siblings
 
         mock_gc = MagicMock()
@@ -284,7 +284,7 @@ class TestReconcileErrorSiblings:
                 [{"id": "upper_uncertainty_of_plasma_current"}],
                 # Second call: check if parent "plasma_current" exists → empty
                 [],
-                # Third call: SET pipeline_status = 'skipped'
+                # Third call: SET validation_status = 'quarantined'
                 None,
             ]
         )
@@ -299,7 +299,7 @@ class TestReconcileErrorSiblings:
 
         # Verify the SET query was called with the orphan ID
         set_call = mock_gc.query.call_args_list[2]
-        assert "SET sn.pipeline_status = 'skipped'" in set_call[0][0]
+        assert "SET sn.validation_status = 'quarantined'" in set_call[0][0]
         assert set_call[1]["ids"] == ["upper_uncertainty_of_plasma_current"]
 
     def test_reconcile_no_orphans(self):

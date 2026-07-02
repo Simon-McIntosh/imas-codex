@@ -1,7 +1,7 @@
 """Tests for standard name MCP tools.
 
 Validates that ``_search_standard_names`` delegates correctly to the backing
-search function and that result formatting, kind/pipeline_status filtering,
+search function and that result formatting, kind/name_stage filtering,
 and parameter forwarding (physics_domain, segment_filters) all work.
 """
 
@@ -20,7 +20,7 @@ def _row(**overrides):
         "description": "Te",
         "kind": "scalar",
         "unit": "eV",
-        "pipeline_status": "drafted",
+        "name_stage": "drafted",
         "documentation": None,
         "physics_domain": "transport",
         "cocos_transformation_type": None,
@@ -79,20 +79,20 @@ class TestSearchStandardNames:
         _, kwargs = mock_backing.call_args
         assert kwargs.get("kind") == "scalar"
 
-    def test_pipeline_status_filter_forwarded_to_backing(self):
-        """pipeline_status filter is forwarded to backing search function."""
+    def test_name_stage_filter_forwarded_to_backing(self):
+        """name_stage filter is forwarded to backing search function."""
         from imas_codex.llm.sn_tools import _search_standard_names
 
         with self._patch_backing(
-            [_row(name="drafted_name", pipeline_status="drafted")]
+            [_row(name="drafted_name", name_stage="drafted")]
         ) as mock_backing:
             result = _search_standard_names(
-                "test", pipeline_status="drafted", gc=MagicMock()
+                "test", name_stage="drafted", gc=MagicMock()
             )
 
         assert "drafted_name" in result
         _, kwargs = mock_backing.call_args
-        assert kwargs.get("pipeline_status") == "drafted"
+        assert kwargs.get("name_stage") == "drafted"
 
     def test_physics_domain_post_filter(self):
         """physics_domain is forwarded to the backing search implementation."""
@@ -178,7 +178,7 @@ class TestFetchStandardNames:
                     "source_paths": ["core_profiles/profiles_1d/electrons/temperature"],
                     "constraints": ["T_e > 0"],
                     "validity_domain": "core plasma",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "model": "test",
                     "source_ids": ["core_profiles/profiles_1d/electrons/temperature"],
                     "source_ids_names": ["core_profiles"],
@@ -209,7 +209,7 @@ class TestFetchStandardNames:
                     "source_paths": [],
                     "constraints": [],
                     "validity_domain": None,
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "model": None,
                     "source_ids": [],
                     "source_ids_names": [],
@@ -224,7 +224,7 @@ class TestFetchStandardNames:
                     "source_paths": [],
                     "constraints": [],
                     "validity_domain": None,
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "model": None,
                     "source_ids": [],
                     "source_ids_names": [],
@@ -264,7 +264,7 @@ class TestFetchStandardNames:
                     "source_paths": [],
                     "constraints": [],
                     "validity_domain": None,
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "model": None,
                     "source_ids": [],
                     "source_ids_names": [],
@@ -293,14 +293,14 @@ class TestListStandardNames:
                     "name": "electron_temperature",
                     "kind": "scalar",
                     "unit": "eV",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "description": "Te",
                 },
                 {
                     "name": "plasma_current",
                     "kind": "scalar",
                     "unit": "A",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "description": "Ip",
                 },
             ]
@@ -334,7 +334,7 @@ class TestListStandardNames:
                     "name": "electron_temperature",
                     "kind": "scalar",
                     "unit": "eV",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "description": "Te",
                 },
             ]
@@ -367,7 +367,7 @@ class TestListStandardNames:
                     "name": "electron_temperature",
                     "kind": "scalar",
                     "unit": "eV",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "description": "Te",
                 },
             ]
@@ -387,7 +387,7 @@ class TestListStandardNames:
                     "name": "electron_temperature",
                     "kind": "scalar",
                     "unit": "eV",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "description": "Te",
                 },
             ]
@@ -407,7 +407,7 @@ class TestListStandardNames:
                     "name": "electron_temperature",
                     "kind": "scalar",
                     "unit": "eV",
-                    "pipeline_status": "drafted",
+                    "name_stage": "drafted",
                     "description": "Te",
                 },
             ]
@@ -444,7 +444,7 @@ class TestMCPToolRegistration:
         assert "query" in params
         assert "kind" in params
         assert "physics_domain" in params
-        assert "pipeline_status" in params
+        assert "name_stage" in params
         assert "k" in params
         assert "gc" in params
         # The legacy ``tags`` filter has been dropped (Plan MCP+units Track A)
@@ -471,7 +471,7 @@ class TestMCPToolRegistration:
         params = set(sig.parameters.keys())
         assert "physics_domain" in params
         assert "kind" in params
-        assert "pipeline_status" in params
+        assert "name_stage" in params
         assert "gc" in params
         # The legacy ``tag`` filter has been dropped
         assert "tag" not in params
@@ -500,7 +500,7 @@ class TestSupersededExclusion:
             "description": "Superseded fossil",
             "kind": "scalar",
             "unit": "1",
-            "pipeline_status": "superseded",
+            "name_stage": "superseded",
             "documentation": None,
             "physics_domain": "transport",
             "cocos_transformation_type": None,
@@ -514,7 +514,7 @@ class TestSupersededExclusion:
             "description": "Electron temperature",
             "kind": "scalar",
             "unit": "eV",
-            "pipeline_status": "drafted",
+            "name_stage": "drafted",
             "documentation": None,
             "physics_domain": "transport",
             "cocos_transformation_type": None,

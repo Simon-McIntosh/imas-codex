@@ -34,7 +34,7 @@ class TestFilterProtectedOverrideFalse:
                 description="new desc",
                 documentation="new doc",
                 kind="scalar",
-                pipeline_status="enriched",  # NOT protected
+                name_stage="reviewed",  # NOT protected
             )
         ]
         filtered, skipped = filter_protected(
@@ -50,7 +50,7 @@ class TestFilterProtectedOverrideFalse:
         assert "kind" not in result
         # Non-protected fields preserved
         assert result["id"] == "electron_temperature"
-        assert result["pipeline_status"] == "enriched"
+        assert result["name_stage"] == "reviewed"
         # Skipped list
         assert skipped == ["electron_temperature"]
 
@@ -59,7 +59,7 @@ class TestFilterProtectedOverrideFalse:
         items = [
             _make_item(
                 "plasma_current",
-                pipeline_status="named",
+                name_stage="drafted",
                 model="test-model",
             )
         ]
@@ -70,7 +70,7 @@ class TestFilterProtectedOverrideFalse:
         )
         assert len(filtered) == 1
         result = filtered[0]
-        assert result["pipeline_status"] == "named"
+        assert result["name_stage"] == "drafted"
         assert result["model"] == "test-model"
         # No protected fields present → not in skipped
         assert skipped == []

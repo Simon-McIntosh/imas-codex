@@ -1,9 +1,9 @@
 """Regression tests: export _fetch_candidates skips superseded/exhausted/quarantined.
 
 Audit finding (Phase 3C):
-  The old query used ``pipeline_status IN ['published','accepted','reviewed','enriched']``.
+  The old query used ``name_stage IN ['published','accepted','reviewed','enriched']``.
   That field is NOT updated when a name is superseded — only ``name_stage`` is
-  authoritative.  A superseded node therefore kept its old ``pipeline_status``
+  authoritative.  A superseded node therefore kept its old stage property
   value and was erroneously included in export.
 
 Fix: replace the gate with
@@ -107,7 +107,7 @@ class TestFetchCandidatesQueryContract:
 
     These tests are "contract tests" — they assert the *shape* of the query,
     not the database behaviour.  They catch regressions where someone reverts
-    the gate back to the legacy pipeline_status field.
+    the gate back to a legacy status field.
     """
 
     def _run_and_capture(self, **kwargs) -> str:
@@ -150,12 +150,12 @@ class TestFetchCandidatesQueryContract:
             f"'validation_status' missing from WHERE clause.\n\nFull query:\n{cypher}"
         )
 
-    def test_does_not_gate_on_pipeline_status_alone(self):
-        """pipeline_status must NOT be the sole filter gate.
+    def test_does_not_gate_on_legacy_status_alone(self):
+        """A legacy pipeline_status property must NOT be the filter gate.
 
-        The old gate ``pipeline_status IN [...]`` does not exclude superseded
-        nodes (only name_stage tracks supersession).  After the fix the query
-        must not reference pipeline_status at all.
+        The old gate ``pipeline_status IN [...]`` did not exclude superseded
+        nodes (only name_stage tracks supersession).  The query must not
+        reference the removed pipeline_status property at all.
         """
         cypher = self._run_and_capture()
         assert "pipeline_status" not in cypher, (

@@ -40,7 +40,7 @@ def _full_item() -> dict:
         "parent_path": "core_profiles/profiles_1d/electrons",
         "previous_name": {
             "name": "electron_temperature_old",
-            "pipeline_status": "drafted",
+            "name_stage": "drafted",
         },
         "identifier_schema": "magnetics_probe_type_identifier",
         "identifier_schema_doc": "MagDiag probe taxonomy",

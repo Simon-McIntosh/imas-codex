@@ -38,7 +38,7 @@ def _make_gc_side_effects(overrides: dict[int, list] | None = None) -> list:
     defaults[4] = [{"cnt": 0}]
     # query 5: sn total -> [{total: 0}]
     defaults[5] = [{"total": 0}]
-    # query 6: sn_by_pipeline_status -> []
+    # query 6: sn_by_name_stage -> []
     # query 7: sn_by_validation_status -> []
     # query 8: covered_parents -> [{cnt: 0}]
     defaults[8] = [{"cnt": 0}]

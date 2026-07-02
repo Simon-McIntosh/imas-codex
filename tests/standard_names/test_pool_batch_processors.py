@@ -87,7 +87,7 @@ def _make_sn_items(
                 "coordinate": None,
                 "position": None,
                 "process": None,
-                "pipeline_status": "enriched",
+                "name_stage": "reviewed",
                 "validation_status": "valid",
                 "reviewed_name_at": None,
                 "reviewed_docs_at": None,
@@ -728,7 +728,6 @@ class TestOnEventPayloadsNotTruncated:
                 "id": "magnetic_flux_density",
                 "description": "Magnetic flux density.",
                 "claim_token": "tok1",
-                "pipeline_status": "drafted",
                 "name_stage": "claimed_review_name",
             }
         ]
@@ -788,7 +787,7 @@ class TestOnEventPayloadsNotTruncated:
                 "description": "Magnetic flux density.",
                 "documentation": "Full docs.",
                 "claim_token": "tok2",
-                "pipeline_status": "drafted",
+                "name_stage": "drafted",
                 "docs_stage": "claimed_review_docs",
                 "reviewer_score_name": 75,
                 "reviewer_comments_name": "OK",
