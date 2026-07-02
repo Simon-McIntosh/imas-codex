@@ -171,6 +171,18 @@ async def test_generate_docs_releases_lease_on_happy_path():
     )
 
 
+async def _fake_to_thread(fn, *args, **kwargs):
+    """Stand-in for asyncio.to_thread in lease tests.
+
+    The parent-children fetch inside process_review_docs_batch expects a
+    dict; every other to_thread call in these paths persists a review and
+    only needs a truthy sentinel.
+    """
+    if getattr(fn, "__name__", "") == "_fetch_parent_children":
+        return {}
+    return "reviewed"
+
+
 @pytest.mark.asyncio
 async def test_review_name_releases_lease_on_happy_path():
     """process_review_name_batch must return unused budget to the pool."""
@@ -195,7 +207,7 @@ async def test_review_name_releases_lease_on_happy_path():
         ),
         patch(
             "asyncio.to_thread",
-            new=AsyncMock(return_value="reviewed"),
+            new=_fake_to_thread,
         ),
     ):
         await workers.process_review_name_batch([item], mgr, stop)
@@ -236,7 +248,7 @@ async def test_review_docs_releases_lease_on_happy_path():
         ),
         patch(
             "asyncio.to_thread",
-            new=AsyncMock(return_value="reviewed"),
+            new=_fake_to_thread,
         ),
     ):
         await workers.process_review_docs_batch([item], mgr, stop)

@@ -21,6 +21,20 @@ import pytest
 # (imas_codex.standard_names.graph_ops) because loop.py uses deferred
 # imports (inside function bodies).
 _GO = "imas_codex.standard_names.graph_ops"
+
+
+@pytest.fixture(autouse=True)
+def _stub_parent_lifecycle_startup():
+    """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
+    with (
+        patch(f"{_GO}.rederive_structural_edges", return_value={}),
+        patch(f"{_GO}.seed_parent_sources", return_value=0),
+        patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
+        patch(f"{_GO}.structural_accept_derived_parents", return_value=0),
+    ):
+        yield
+
+
 _BM = "imas_codex.standard_names.budget.BudgetManager"
 
 # Stub all 6 claim functions to return empty (no work).
