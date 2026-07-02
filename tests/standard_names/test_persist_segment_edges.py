@@ -445,16 +445,18 @@ class TestSegmentEdgeRoundTrip:
         # Reconstruct segment list sorted by position
         sorted_edges = sorted(edges_param, key=lambda e: e["position"])
 
-        # Verify exact field values. Positions are ISN SEGMENT_ORDER indices;
-        # the canonical-qualifier-order grammar inserts zone/channel_qualifier/
-        # channel between device and base, so subject=5 and physical_base=11.
+        # Verify exact field values. Positions are ISN SEGMENT_ORDER indices —
+        # derive them from the installed grammar so vocabulary-driven segment
+        # insertions (zone, qualifier, channel, ...) never stale this fixture.
+        from imas_standard_names.grammar.constants import SEGMENT_ORDER
+
         assert sorted_edges[0] == {
-            "position": 5,
+            "position": SEGMENT_ORDER.index("subject"),
             "segment": "subject",
             "token": "electron",
         }
         assert sorted_edges[1] == {
-            "position": 11,
+            "position": SEGMENT_ORDER.index("physical_base"),
             "segment": "physical_base",
             "token": "temperature",
         }
