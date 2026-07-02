@@ -656,6 +656,20 @@ classes:
           ISO 8601 timestamp when generate_docs last wrote documentation
           to this node.
         range: datetime
+      harmonized_at:
+        description: >-
+          ISO 8601 timestamp of the most recent family-harmonization pass
+          that stamped this member — i.e. its sibling family's documentation
+          was verified structurally parallel (docs accepted, drift below the
+          worklist threshold). Null for never-harmonized names.
+        range: datetime
+      harmonized_group_signature:
+        description: >-
+          Idempotency signature of the sibling family at harmonization time:
+          a sha256 over the sorted live member ids plus each member's
+          description+documentation content hash. The harmonize worklist
+          skips a family while its current signature equals this stored
+          value; any membership or docs change invalidates it.
       parent_enriched_at:
         description: >-
           ISO 8601 timestamp when the enrich_parents pool synthesised a real
