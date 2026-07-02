@@ -2437,6 +2437,12 @@ _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
     "core_axis": "magnetic_axis",
 }
 
+# Synonym sources whose identity CHANGES under a geometric locus qualifier:
+# the bare separatrix is the plasma boundary, but ``secondary_separatrix``
+# (disconnected double-null) is a distinct surface that is NOT the boundary.
+# Qualified forms of these tokens are never rewritten by the synonym audit.
+_QUALIFIER_SENSITIVE_LOCUS_SYNONYMS: frozenset[str] = frozenset({"separatrix"})
+
 # Substrings that, when found anywhere inside a compound locus token,
 # indicate a canonical-locus violation. The exact-match map above
 # handles known compounds; this scan catches future compounds the
@@ -2533,8 +2539,17 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
         )
         base_token = ir.base.token
 
+        locus_qualifiers = tuple(getattr(ir.locus, "qualifiers", ()) or ())
         canonical = _CANONICAL_LOCUS_SYNONYMS.get(locus_token)
-        if canonical:
+        if canonical and (
+            not locus_qualifiers
+            or locus_token not in _QUALIFIER_SENSITIVE_LOCUS_SYNONYMS
+        ):
+            # Most synonym pairs survive geometric qualification
+            # (``inner_divertor_plate`` IS the inner divertor target).
+            # A qualifier-SENSITIVE pair names a distinct feature once
+            # qualified — the secondary separatrix is not the plasma
+            # boundary — so the rewrite must not apply there.
             issues.append(
                 f"audit:canonical_locus_check: name '{name}' uses synonym "
                 f"locus token '{locus_token}' — the canonical token is "
@@ -2542,25 +2557,29 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
                 f"'{name.replace(locus_token, canonical)}'."
             )
         else:
-            # Substring scan: catches compound forms the exact map misses.
-            # ``outboard_midplane_separatrix`` is exact-mapped above; this
-            # catches future compounds like ``upper_separatrix`` etc.
+            # Substring scan: catches UNREGISTERED compound forms the exact
+            # map misses. A compound the ISN locus registry itself accepts
+            # (compositional geometric qualifiers, e.g.
+            # ``secondary_separatrix``) is a DISTINCT concept, not a synonym
+            # spelling — rewriting it fabricates wrong physics
+            # (``secondary_plasma_boundary``); leave those to the reviewer.
             registered_loci = _isn_locus_tokens()
-            for bad, good in _CANONICAL_LOCUS_SUBSTRINGS.items():
-                if bad in locus_token:
-                    fixed_locus = locus_token.replace(bad, good)
-                    # Only recommend rewrites that exist in the installed ISN
-                    # locus registry; otherwise we fabricate bogus compounds
-                    # such as ``secondary_plasma_boundary``.
-                    if fixed_locus not in registered_loci:
-                        continue
-                    issues.append(
-                        f"audit:canonical_locus_check: name '{name}' has "
-                        f"locus token '{locus_token}' containing "
-                        f"non-canonical substring '{bad}' — rewrite the "
-                        f"locus as '{fixed_locus}'."
-                    )
-                    break
+            if locus_token not in registered_loci:
+                for bad, good in _CANONICAL_LOCUS_SUBSTRINGS.items():
+                    if bad in locus_token:
+                        fixed_locus = locus_token.replace(bad, good)
+                        # Only recommend rewrites that exist in the installed
+                        # ISN locus registry; otherwise we fabricate bogus
+                        # compounds.
+                        if fixed_locus not in registered_loci:
+                            continue
+                        issues.append(
+                            f"audit:canonical_locus_check: name '{name}' has "
+                            f"locus token '{locus_token}' containing "
+                            f"non-canonical substring '{bad}' — rewrite the "
+                            f"locus as '{fixed_locus}'."
+                        )
+                        break
 
         if (
             relation == "of"
