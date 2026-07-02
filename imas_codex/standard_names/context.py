@@ -677,10 +677,10 @@ def fetch_review_neighbours(
 
 _SIBLING_FAMILY_QUERY = """
 MATCH (sn:StandardName {id: $sn_id})-[r:HAS_PARENT]->(p:StandardName)
-WHERE r.operator_kind IN ['projection', 'qualifier', 'coordinate']
+WHERE r.operator_kind IN ['projection', 'qualifier', 'coordinate', 'locus']
 OPTIONAL MATCH (sib:StandardName)-[rs:HAS_PARENT]->(p)
 WHERE sib.id <> $sn_id
-  AND rs.operator_kind IN ['projection', 'qualifier', 'coordinate']
+  AND rs.operator_kind IN ['projection', 'qualifier', 'coordinate', 'locus']
   AND coalesce(sib.name_stage, '') <> 'superseded'
 WITH p, r,
      [s IN collect({
