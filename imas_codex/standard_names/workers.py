@@ -3553,7 +3553,9 @@ def _validate_via_isn(
     # Layer 2c: Codex-side canonical-token + preposition checks. Runs even
     # when the ISN model fails to construct, because the violation is
     # determined from the candidate name itself rather than the model.
-    canon_issues = _check_canonical_locus_and_preposition(isn_dict.get("name", ""))
+    from imas_codex.standard_names.audits import canonical_locus_check
+
+    canon_issues = canonical_locus_check({"id": isn_dict.get("name", "")})
     summary["canonical"] = {"issue_count": len(canon_issues)}
     issues.extend(f"[canonical] {i}" for i in canon_issues)
 
@@ -3568,134 +3570,6 @@ def _validate_via_isn(
         issues.append(f"[description] check failed: {e}")
 
     return issues, summary
-
-
-# Canonical-locus catalog enforced at validate time. Pairs are
-# {forbidden_synonym: canonical_token}. Generation that uses a synonym is
-# annotated as a canonical-token violation and routed through the refine
-# pool to be rewritten to the canonical form.
-_CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
-    "separatrix": "plasma_boundary",
-    "last_closed_flux_surface": "plasma_boundary",
-    "lcfs": "plasma_boundary",
-    "divertor_plate": "divertor_target",
-    "wall_surface": "wall",
-    "first_wall_surface": "wall",
-    "vacuum_vessel_wall": "wall",
-    "pedestal_region": "pedestal",
-    "edge_pedestal": "pedestal",
-    "core_axis": "magnetic_axis",
-}
-
-# Synonym sources whose identity CHANGES under a geometric locus qualifier
-# (mirrors audits._QUALIFIER_SENSITIVE_LOCUS_SYNONYMS).
-_QUALIFIER_SENSITIVE_LOCUS_SYNONYMS: frozenset[str] = frozenset({"separatrix"})
-
-# Bases that name an evaluated field (defined everywhere in the plasma
-# and READ at a locus). When paired with a position/region locus, the
-# relation MUST be `_at_`. `_of_` is reserved for intrinsic geometric
-# properties (area, radius, elongation, …).
-_FIELD_BASES: frozenset[str] = frozenset(
-    {
-        "temperature",
-        "density",
-        "pressure",
-        "magnetic_field",
-        "electric_field",
-        "magnetic_flux",
-        "flux",
-        "current",
-        "current_density",
-        "voltage",
-        "loop_voltage",
-        "velocity",
-        "velocity_magnitude",
-        "magnetic_shear",
-        "safety_factor",
-        "particle_flux",
-        "energy_flux",
-        "momentum_flux",
-        "power",
-        "power_density",
-        "mass_density",
-        "electric_potential",
-        "electrostatic_potential",
-        "kinetic_energy",
-        "internal_energy",
-        "enthalpy",
-        "entropy",
-        "radiation_density",
-        "halo_current",
-    }
-)
-
-
-def _check_canonical_locus_and_preposition(name: str) -> list[str]:
-    """Surface canonical-locus and preposition issues for a candidate name.
-
-    Returns a list of ``WARNING - ...`` strings (zero on a clean name).
-    Decisions:
-
-    1. Locus token is a synonym for a canonical token → flag a rewrite.
-    2. Locus relation is ``of`` + position/region + field base → flag a
-       rewrite to ``_at_`` (the field-at-region anti-pattern).
-
-    The check is permissive: when the IR parser cannot interpret the
-    name, the function returns no issues — upstream grammar gates will
-    have already quarantined that case.
-    """
-    issues: list[str] = []
-    try:
-        from imas_standard_names.grammar.parser import parse as ir_parse
-
-        result = ir_parse(name)
-        ir = getattr(result, "ir", None)
-        if ir is None or ir.locus is None or ir.base is None:
-            return issues
-
-        locus_token = ir.locus.token
-        relation = (
-            ir.locus.relation.value
-            if hasattr(ir.locus.relation, "value")
-            else str(ir.locus.relation)
-        )
-        locus_type = (
-            ir.locus.type.value
-            if hasattr(ir.locus.type, "value")
-            else str(ir.locus.type)
-        )
-        base_token = ir.base.token
-
-        locus_qualifiers = tuple(getattr(ir.locus, "qualifiers", ()) or ())
-        canonical = _CANONICAL_LOCUS_SYNONYMS.get(locus_token)
-        if canonical and (
-            not locus_qualifiers
-            or locus_token not in _QUALIFIER_SENSITIVE_LOCUS_SYNONYMS
-        ):
-            # A geometrically-qualified locus (``secondary_separatrix``) can
-            # name a DISTINCT feature from the bare token — the secondary
-            # separatrix in a disconnected double-null is not the plasma
-            # boundary — so qualifier-sensitive synonyms skip the rewrite
-            # once qualified. See audits.canonical_locus_check (identical
-            # rule; duplicated here pending consolidation).
-            issues.append(
-                f"WARNING - locus token '{locus_token}' is a synonym for "
-                f"canonical '{canonical}'; rewrite using '{canonical}'"
-            )
-
-        if (
-            relation == "of"
-            and locus_type in {"position", "region"}
-            and base_token in _FIELD_BASES
-        ):
-            issues.append(
-                f"WARNING - field base '{base_token}' with "
-                f"_of_{locus_token} should use _at_{locus_token} "
-                "(evaluated fields sample AT a position/region)"
-            )
-    except Exception:
-        pass
-    return issues
 
 
 def _is_quarantined(issues: list[str], layer_summary: dict) -> bool:

@@ -141,17 +141,15 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
 
     # --- Layer 3: codex-side canonical / preposition checks --------------
     # Advisory only — the strong gates run at compose and review time
-    # (see ``_check_canonical_locus_and_preposition`` invoked from
-    # ``_validate_via_isn``). Any violation that reaches this point came
-    # from a pre-existing catalog generated before the canonical rules
-    # were tightened. Warn loudly but allow the publish to proceed so
-    # legacy data can still be promoted while the next regeneration
-    # cycle produces clean names. The post-release ISNC ``Validate
-    # Catalog`` workflow stays in place as the final backstop.
+    # (see ``canonical_locus_check`` invoked from ``_validate_via_isn``).
+    # Any violation that reaches this point came from a pre-existing
+    # catalog generated before the canonical rules were tightened. Warn
+    # loudly but allow the publish to proceed so legacy data can still be
+    # promoted while the next regeneration cycle produces clean names.
+    # The post-release ISNC ``Validate Catalog`` workflow stays in place
+    # as the final backstop.
     try:
-        from imas_codex.standard_names.workers import (
-            _check_canonical_locus_and_preposition,
-        )
+        from imas_codex.standard_names.audits import canonical_locus_check
 
         canonical_issues: list[str] = []
         for yml in yml_files:
@@ -167,8 +165,8 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
                 name = entry.get("name")
                 if not name:
                     continue
-                for issue in _check_canonical_locus_and_preposition(name):
-                    canonical_issues.append(f"{name}: {issue}")
+                for issue in canonical_locus_check({"id": name}):
+                    canonical_issues.append(issue)
 
         if canonical_issues:
             logger.warning(
