@@ -3587,6 +3587,10 @@ _CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
     "core_axis": "magnetic_axis",
 }
 
+# Synonym sources whose identity CHANGES under a geometric locus qualifier
+# (mirrors audits._QUALIFIER_SENSITIVE_LOCUS_SYNONYMS).
+_QUALIFIER_SENSITIVE_LOCUS_SYNONYMS: frozenset[str] = frozenset({"separatrix"})
+
 # Bases that name an evaluated field (defined everywhere in the plasma
 # and READ at a locus). When paired with a position/region locus, the
 # relation MUST be `_at_`. `_of_` is reserved for intrinsic geometric
@@ -3662,8 +3666,18 @@ def _check_canonical_locus_and_preposition(name: str) -> list[str]:
         )
         base_token = ir.base.token
 
+        locus_qualifiers = tuple(getattr(ir.locus, "qualifiers", ()) or ())
         canonical = _CANONICAL_LOCUS_SYNONYMS.get(locus_token)
-        if canonical:
+        if canonical and (
+            not locus_qualifiers
+            or locus_token not in _QUALIFIER_SENSITIVE_LOCUS_SYNONYMS
+        ):
+            # A geometrically-qualified locus (``secondary_separatrix``) can
+            # name a DISTINCT feature from the bare token — the secondary
+            # separatrix in a disconnected double-null is not the plasma
+            # boundary — so qualifier-sensitive synonyms skip the rewrite
+            # once qualified. See audits.canonical_locus_check (identical
+            # rule; duplicated here pending consolidation).
             issues.append(
                 f"WARNING - locus token '{locus_token}' is a synonym for "
                 f"canonical '{canonical}'; rewrite using '{canonical}'"
