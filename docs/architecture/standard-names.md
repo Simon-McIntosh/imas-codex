@@ -467,7 +467,7 @@ token; see [Grammar vocabulary](#grammar-vocabulary).
 | Axis | States | Set by | Notes |
 |---|---|---|---|
 | `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | Pool workers | Cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`. `refining` reverts to `reviewed` after 600 s (orphan sweep). `chain_length` / `docs_chain_length` track refinement depth (root = 0). `superseded` = predecessor in a `REFINED_FROM` chain; source edges migrate to the latest. |
-| `pipeline_status` | `drafted → published → accepted` | `sn run` → `sn release --export-only` → `sn import` | Catalog round-trip state. |
+| `name_stage` | `pending → drafted → reviewed → accepted` (`refining`/`exhausted`/`superseded` side states) | `sn run` → `sn release --export-only` → `sn import` | Name-pipeline + catalog round-trip state. |
 | `status` | `draft → published → deprecated` | Catalog import | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
 | `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn release --export-only`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings stay `valid`. |
 
@@ -631,7 +631,7 @@ name is in `override_names` (`sn run --override-edits <name>`, repeatable).
   specific model.
 - **`sn clear`** — full-subsystem wipe (SN + Review + StandardNameSource +
   VocabGap + SNRun + grammar tree) with auto re-seed from ISN. No scoping.
-- **`sn prune`** — relationship-first safe delete. Requires `--status` or
+- **`sn prune`** — relationship-first safe delete. Requires `--stage` or
   `--all`; `--include-sources` also drops StandardNameSource nodes.
 - **Grammar sync is automatic** — `sn run` syncs the installed ISN grammar
   into the graph at startup when the active version differs (idempotent
@@ -640,7 +640,7 @@ name is in `override_names` (`sn run --override-edits <name>`, repeatable).
 
 **Chain history is permanent.** `--reset-to` leaves `REFINED_FROM` chains and
 `DocsRevision` snapshots in place. **Safety guard:** `--reset-to` and
-`sn prune` require `--include-accepted` to touch `pipeline_status=accepted`
+`sn prune` require `--include-accepted` to touch `name_stage=accepted`
 names (catalog-authoritative). `sn clear` has no such guard.
 
 ## CLI Commands
@@ -648,14 +648,14 @@ names (catalog-authoritative). `sn clear` has no such guard.
 | Command | Purpose | Key options |
 |---------|---------|-------------|
 | `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted` |
-| `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--status`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
+| `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
 | `sn import` | Import reviewed YAML back into the graph | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
 | `sn status` | StandardName + StandardNameSource statistics | — |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
-| `sn prune` | Scoped delete (relationship-first) | `--status`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
+| `sn prune` | Scoped delete (relationship-first) | `--stage`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
 
 ## Benchmark
@@ -696,9 +696,9 @@ Projected cost at 10K sources: $659 (vs prior Sonnet→GPT→Opus $2,578, **−8
 
 | Tool | Purpose |
 |------|---------|
-| `search_standard_names` | Semantic + keyword search; filters: `kind`, `physics_domain`, `pipeline_status`, `cocos_type`, `k`, and exact per-segment grammar filters (`physical_base`, `subject`, `component`, `coordinate`, `position`, `process`, `region`, `geometric_base`, `device`) |
+| `search_standard_names` | Semantic + keyword search; filters: `kind`, `physics_domain`, `name_stage`, `cocos_type`, `k`, and exact per-segment grammar filters (`physical_base`, `subject`, `component`, `coordinate`, `position`, `process`, `region`, `geometric_base`, `device`) |
 | `fetch_standard_names` | Fetch full entries by name ID (space/comma separated) |
-| `list_standard_names` | List with `physics_domain` / `kind` / `pipeline_status` / `cocos_type` filters |
+| `list_standard_names` | List with `physics_domain` / `kind` / `name_stage` / `cocos_type` filters |
 | `list_grammar_vocabulary` | Distinct tokens + usage counts for a grammar segment |
 
 Grammar-segment filters match exactly against the parsed `sn.<segment>`

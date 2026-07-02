@@ -551,7 +551,7 @@ release convergence, not recovery).
 - **Chain history is permanent.** `--reset-to` leaves `REFINED_FROM` chains and
   `DocsRevision` snapshots in place.
 - **Data-safety guard:** `sn run --reset-to` and `sn prune` require
-  `--include-accepted` to touch `pipeline_status=accepted` (catalog-
+  `--include-accepted` to touch `name_stage=accepted` (catalog-
   authoritative) names. `sn clear` has no guard — it wipes everything.
 - **Review never demotes:** a low-scoring `valid` name stays `valid` and routes
   to a refine pool; it is not quarantined.
@@ -604,7 +604,7 @@ Four independent axes on each `StandardName` (full state tables in the doc):
 | Axis | States | Driver |
 |------|--------|--------|
 | `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | pool workers (`refining` reverts after 600 s orphan sweep) |
-| `pipeline_status` | `drafted → published → accepted` | `sn run` → `export` → `import` (catalog round-trip) |
+| `name_stage` | `pending → drafted → reviewed → accepted` (`refining`/`exhausted`/`superseded` side states) | name pipeline + `export` → `import` (catalog round-trip) |
 | `status` | `draft → active → {deprecated \| superseded}` | catalog import (ISN vocabulary lifecycle) |
 | `validation_status` | `pending → valid \| quarantined` | compose worker (gates review/consolidation/export) |
 
