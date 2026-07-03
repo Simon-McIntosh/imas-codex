@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.67">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.89">
 </head>
 <body>
   <main class="plan-doc">
@@ -312,10 +312,19 @@
         <code>DocsRevision</code> snapshot path; superseded-without-successor
         targets are resurrectable, superseded-with-successor refused
         (commit <code>fcf3db0c</code>).</li>
-      <li><strong>§5e CLI + MCP</strong> — <code>imas-codex sn edit</code> with the
-        §3.3 surface + the mirrored MCP write tool, sharing one implementation.
-        <em>Done-when:</em> both surfaces attach the edit and re-enter the SN at
-        the correct stage; <code>--dry-run</code> prints the plan.</li>
+      <li><strong>§5e CLI + MCP</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>sn edit</code> click command (user-facing <code>--scope self</code>
+        maps to <code>EditScope.only_self</code>) + <code>edit_standard_name</code>
+        MCP write tool (<code>origin="agent"</code>, first write tool on that
+        surface), both over one <code>apply_edit</code>
+        (commits <code>2b6aa969</code> + import-cycle fix <code>95494bd8</code>:
+        module-level edit imports made function-local — the cycle
+        edit&#8594;graph_ops&#8594;discovery&#8594;cli.logging&#8594;cli broke
+        standard_names-first imports). apply_edit also stamps a
+        <code>run_id</code> (<code>sn-edit-&lt;ts&gt;</code>) so
+        <code>sn run --scope-run-id</code> can review just the edited candidate
+        (commit <code>a7fe9487</code>).</li>
       <li><strong>§5f Family / cascade</strong> — <code>--scope</code> handling +
         the sibling-desync guard; parent edit cascades to children; family edit
         re-proposes siblings + re-derives parent. <strong>Reuse, don't reinvent:</strong>
@@ -340,9 +349,14 @@
         drives <code>open &#8594; applied|exhausted</code> and applies the staged
         cascade atomically; acceptance-time conflicts never revert the acceptance
         (commit <code>fcf3db0c</code>; 180 unit tests + regression slice green).</li>
-      <li><strong>§5g Status lifecycle</strong> — <code>applied</code> on
-        acceptance, <code>exhausted</code> at the refine cap, surfaced in
-        <code>sn status</code>. <em>Done-when:</em> outcomes reflected + listed.</li>
+      <li><strong>§5g Status lifecycle</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>edit_status</code> transitions in
+        <code>persist_reviewed_name</code>/<code>persist_reviewed_docs</code>
+        (open&#8594;applied on accept, &#8594;exhausted at the cap; steering
+        propagates across refine rotations; commit <code>fcf3db0c</code>) +
+        an "Edits" table in <code>sn status</code> (counts by status, open-edit
+        list) shown only when edits exist (commit <code>2b6aa969</code>).</li>
       <li><strong>§5h Agent skill</strong> <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
         <code>.claude/skills/sn-edit/SKILL.md</code> (132 lines: golden rule, mode
         choice, reason quality, scope/guard rules, dry-run-first workflow, the §6
