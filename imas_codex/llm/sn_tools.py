@@ -9,11 +9,14 @@ Search delegates to :mod:`imas_codex.standard_names.search` which performs
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 
 from neo4j.exceptions import ServiceUnavailable
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.graph.models import EditScope
+from imas_codex.standard_names.edit import apply_edit
 from imas_codex.standard_names.search import (
     check_names as _check_names_backing,
     fetch_standard_names as _fetch_sn_backing,
@@ -773,3 +776,104 @@ def _get_standard_name_summary(
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
+
+
+# ---------------------------------------------------------------------------
+# _edit_standard_name
+# ---------------------------------------------------------------------------
+
+#: agent-facing --scope value -> internal EditScope enum value.
+_EDIT_SCOPE_MAP = {
+    "self": EditScope.only_self.value,
+    "family": EditScope.family.value,
+    "subtree": EditScope.subtree.value,
+}
+
+
+def _edit_standard_name(
+    standard_name: str,
+    reason: str,
+    *,
+    hint: str | None = None,
+    rename: str | None = None,
+    docs: str | None = None,
+    axis: str | None = None,
+    scope: str | None = None,
+    dry_run: bool = False,
+) -> dict:
+    """Attach a steered edit proposal to a StandardName (WRITE tool).
+
+    Mirrors the ``imas-codex sn edit`` CLI — same underlying engine
+    (:func:`imas_codex.standard_names.edit.apply_edit`), always called with
+    ``origin="agent"`` (MCP callers are agents, never humans). The proposal
+    rides the existing generate -> review -> score pipeline; it is **not**
+    applied to the catalogue immediately. Exactly one of ``hint`` / ``rename``
+    / ``docs`` selects the mode; ``reason`` is mandatory.
+
+    Args:
+        standard_name: Target StandardName id.
+        reason: Mandatory justification shown to the reviewer as intent
+            context (neutralises the reviewer's revert-to-original pull).
+            Ground it in physics/DD-path facts, not preference.
+        hint: Steering direction (hint mode) — the pipeline still composes
+            the candidate. Mutually exclusive with rename/docs.
+        rename: Full replacement name (rename mode) — skips generation,
+            enters name review directly.
+        docs: Full replacement documentation (docs mode) — skips
+            generation, enters docs review directly.
+        axis: Which slot(s) a hint steers: ``"name" | "docs" | "both"``
+            (hint mode only — rename/docs modes imply their own axis).
+        scope: Blast radius: ``"self" | "family" | "subtree"``. Mapped to
+            the internal ``EditScope`` enum (``self`` -> ``only_self``).
+        dry_run: Preview the plan (and cascade, if any) without writing to
+            the graph.
+
+    Returns:
+        Dict rendering of the resulting ``EditPlan`` (target, mode, axis,
+        scope, entry, successor, cascade_planned, blocked, actions,
+        applied) plus a ``"summary"`` key with a short human-readable
+        recap. A malformed call (wrong argument combination, missing
+        reason, invalid axis/scope) returns ``{"error": "..."}`` instead
+        of raising.
+    """
+    scope_value: str | None = None
+    if scope is not None:
+        if scope not in _EDIT_SCOPE_MAP:
+            return {"error": f"scope={scope!r} invalid (self|family|subtree)"}
+        scope_value = _EDIT_SCOPE_MAP[scope]
+
+    try:
+        plan = apply_edit(
+            target=standard_name,
+            hint=hint,
+            rename=rename,
+            docs=docs,
+            reason=reason,
+            axis=axis,
+            scope=scope_value,
+            origin="agent",
+            dry_run=dry_run,
+        )
+    except ValueError as e:
+        return {"error": str(e)}
+    except ServiceUnavailable:
+        return {"error": NEO4J_NOT_RUNNING_MSG}
+    except Exception as e:  # noqa: BLE001 — surface as tool error, not a crash
+        return {"error": f"apply_edit failed: {_neo4j_error_message(e)}"}
+
+    result = dataclasses.asdict(plan)
+    if plan.blocked:
+        summary = f"BLOCKED: {plan.blocked}"
+    elif not plan.applied:
+        summary = (
+            f"[dry-run] {plan.mode} edit on {plan.target!r} would enter "
+            f"{plan.entry} ({len(plan.cascade_planned)} cascade step(s))"
+        )
+    else:
+        successor_note = f" -> successor {plan.successor!r}" if plan.successor else ""
+        summary = (
+            f"{plan.mode} edit attached to {plan.target!r}{successor_note}, "
+            f"entering {plan.entry} (edit_status=open)"
+        )
+    result["summary"] = summary
+    return result

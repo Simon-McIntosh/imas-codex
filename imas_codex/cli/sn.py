@@ -11,6 +11,7 @@ import click
 from rich.console import Console
 
 from imas_codex.core.physics_domain import PhysicsDomain
+from imas_codex.graph.models import EditScope
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_MIN_SCORE,
@@ -18,6 +19,7 @@ from imas_codex.standard_names.defaults import (
     REVIEW_DOCS_BACKLOG_CAP,
     REVIEW_NAME_BACKLOG_CAP,
 )
+from imas_codex.standard_names.edit import apply_edit
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -2519,6 +2521,53 @@ def sn_status(family_seed: str | None) -> None:
                     ds_table.add_row(ds_row["stage"] or "—", str(ds_row["n"]))
                 console.print(ds_table)
 
+            # Edit lifecycle (sn edit proposals riding the pipeline)
+            edit_status_rows = list(
+                gc.query("""
+                MATCH (sn:StandardName)
+                WHERE sn.edit_status IS NOT NULL
+                RETURN sn.edit_status AS status, count(*) AS n
+                ORDER BY n DESC
+            """)
+            )
+            if edit_status_rows:
+                console.print()
+                console.print("[bold]Edits[/bold]")
+                edit_table = RichTable(show_header=True)
+                edit_table.add_column("Status")
+                edit_table.add_column("Count", justify="right")
+                for er in edit_status_rows:
+                    edit_table.add_row(er["status"] or "—", str(er["n"]))
+                console.print(edit_table)
+
+                open_edit_rows = list(
+                    gc.query("""
+                    MATCH (sn:StandardName)
+                    WHERE sn.edit_status = 'open'
+                    RETURN sn.id AS id, sn.edit_mode AS edit_mode,
+                           sn.edit_origin AS edit_origin,
+                           sn.edit_requested_at AS edit_requested_at
+                    ORDER BY sn.edit_requested_at DESC
+                    LIMIT 10
+                """)
+                )
+                if open_edit_rows:
+                    open_table = RichTable(show_header=True)
+                    open_table.add_column("ID")
+                    open_table.add_column("Mode")
+                    open_table.add_column("Origin")
+                    open_table.add_column("Requested")
+                    for oer in open_edit_rows:
+                        requested = str(oer.get("edit_requested_at") or "—")[:19]
+                        open_table.add_row(
+                            oer["id"] or "—",
+                            oer.get("edit_mode") or "—",
+                            oer.get("edit_origin") or "—",
+                            requested,
+                        )
+                    console.print("  [dim]open edits (most recent 10):[/dim]")
+                    console.print(open_table)
+
             # Sibling-family harmonization state (stamped vs stale vs waiting)
             try:
                 from imas_codex.standard_names.harmonize import (
@@ -4168,3 +4217,204 @@ def sn_review(
             )
 
     asyncio.run(_run())
+
+
+# ---------------------------------------------------------------------------
+# sn edit
+# ---------------------------------------------------------------------------
+
+#: user-facing --scope value -> internal EditScope enum value.
+_EDIT_SCOPE_CHOICES = ("self", "family", "subtree")
+
+
+def _render_edit_plan(plan: Any) -> None:
+    """Render an :class:`~imas_codex.standard_names.edit.EditPlan` to the console.
+
+    Mirrors :func:`_execute_rename_cascade`'s reporting style: a mode banner,
+    the action log, and (for family/subtree scope) the cascade table.
+    """
+    from rich.panel import Panel
+    from rich.table import Table
+
+    if plan.blocked:
+        console.print(
+            Panel(
+                f"[red bold]BLOCKED[/red bold]\n{plan.blocked}",
+                title=f"sn edit {plan.target}",
+                border_style="red",
+            )
+        )
+        if plan.actions:
+            console.print("\n[bold]Actions considered:[/bold]")
+            for a in plan.actions:
+                console.print(f"  - {a}")
+        return
+
+    mode_banner = (
+        "[bold yellow]DRY RUN[/bold yellow]"
+        if not plan.applied
+        else "[bold green]APPLIED[/bold green]"
+    )
+    console.print(
+        f"\n{mode_banner} sn edit: [cyan]{plan.target}[/cyan]  "
+        f"mode={plan.mode} axis={plan.axis} scope={plan.scope} entry={plan.entry}"
+    )
+
+    if plan.actions:
+        console.print("\n[bold]Actions:[/bold]")
+        for a in plan.actions:
+            console.print(f"  - {a}")
+
+    if plan.cascade_planned:
+        console.print("\n[bold]Cascade (planned renames):[/bold]")
+        table = Table(show_header=True)
+        table.add_column("From")
+        table.add_column("To")
+        for r in plan.cascade_planned[:50]:
+            table.add_row(r["from"], r["to"])
+        console.print(table)
+        if len(plan.cascade_planned) > 50:
+            console.print(f"  ... and {len(plan.cascade_planned) - 50} more")
+
+    if plan.successor:
+        console.print(f"\n  successor: [green]{plan.successor}[/green]")
+
+    if plan.applied:
+        console.print(
+            "\n[dim]Candidate drafted — it will be claimed by the next review "
+            "rotation ([bold]imas-codex sn run[/bold] or [bold]sn review[/bold]). "
+            "Track it with [bold]imas-codex sn status[/bold] "
+            "(edit_status: open → applied | exhausted | rejected).[/dim]"
+        )
+
+
+@sn.command("edit")
+@click.argument("standard_name")
+@click.option(
+    "--hint",
+    default=None,
+    help=(
+        "Steering direction injected into generate/refine prompts "
+        "(hint mode) — the pipeline still composes the candidate."
+    ),
+)
+@click.option(
+    "--rename",
+    "rename_value",
+    default=None,
+    help=(
+        "Full replacement name (rename mode) — skips generation, enters "
+        "review_name directly."
+    ),
+)
+@click.option(
+    "--docs",
+    "docs_value",
+    default=None,
+    help=(
+        "Full replacement documentation (docs mode) — skips generation, "
+        "enters review_docs directly."
+    ),
+)
+@click.option(
+    "--reason",
+    default=None,
+    help=(
+        "Mandatory justification shown to the reviewer as intent context. "
+        "Ground it in physics/DD-path facts, not preference."
+    ),
+)
+@click.option(
+    "--axis",
+    type=click.Choice(["name", "docs", "both"]),
+    default=None,
+    help=(
+        "Which slot(s) a hint steers (hint mode only — rename/docs modes "
+        "imply their own axis)."
+    ),
+)
+@click.option(
+    "--scope",
+    "scope_value",
+    type=click.Choice(_EDIT_SCOPE_CHOICES),
+    default=None,
+    help=(
+        "Blast radius: self (this name only), family (siblings sharing the "
+        "edited segment), subtree (this name as parent + every descendant). "
+        "Default: editing a parent -> subtree, editing a leaf -> self."
+    ),
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview the plan (and cascade, if any) without writing to the graph.",
+)
+def sn_edit(
+    standard_name: str,
+    hint: str | None,
+    rename_value: str | None,
+    docs_value: str | None,
+    reason: str | None,
+    axis: str | None,
+    scope_value: str | None,
+    dry_run: bool,
+) -> None:
+    """Attach a steered edit proposal to STANDARD_NAME.
+
+    Rides the normal generate -> review -> score pipeline instead of
+    hand-editing graph text. Exactly one of --hint / --rename / --docs
+    selects the mode; --reason is mandatory.
+
+    \b
+    Examples:
+      imas-codex sn edit area_of_plasma_boundary \\
+          --rename poloidal_cross_section_of_plasma_boundary \\
+          --reason "DD 'area' is the poloidal cross-section, not the swept \\
+      toroidal surface." --dry-run
+      imas-codex sn edit electron_temperature --hint "clarify subject scope" \\
+          --reason "ambiguous vs ion_temperature in review" --axis docs
+    """
+    provided = [
+        name
+        for name, val in (
+            ("hint", hint),
+            ("rename", rename_value),
+            ("docs", docs_value),
+        )
+        if val
+    ]
+    if len(provided) != 1:
+        raise click.UsageError(
+            "sn edit requires exactly one of --hint, --rename, or --docs "
+            f"(got: {provided or 'none'})"
+        )
+    if not reason or not reason.strip():
+        raise click.UsageError("sn edit requires --reason")
+
+    scope = None
+    if scope_value is not None:
+        scope = {
+            "self": EditScope.only_self.value,
+            "family": EditScope.family.value,
+            "subtree": EditScope.subtree.value,
+        }[scope_value]
+
+    try:
+        plan = apply_edit(
+            target=standard_name,
+            hint=hint,
+            rename=rename_value,
+            docs=docs_value,
+            reason=reason,
+            axis=axis,
+            scope=scope,
+            origin="human",
+            dry_run=dry_run,
+        )
+    except ValueError as e:
+        raise click.UsageError(str(e)) from e
+
+    _render_edit_plan(plan)
+
+    if plan.blocked:
+        raise SystemExit(2)

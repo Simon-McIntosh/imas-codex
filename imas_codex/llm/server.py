@@ -3429,6 +3429,82 @@ class AgentsServer:
 
                 return _gsns(physical_base)
 
+            if not self.read_only:
+
+                @self.mcp.tool()
+                def edit_standard_name(
+                    standard_name: str,
+                    reason: str,
+                    hint: str | None = None,
+                    rename: str | None = None,
+                    docs: str | None = None,
+                    axis: str | None = None,
+                    scope: str | None = None,
+                    dry_run: bool = False,
+                ) -> dict:
+                    """WRITE — attach a steered edit proposal to a StandardName.
+
+                    This is the FIRST write tool on the standard-names MCP
+                    surface: calling it queues a proposed correction that
+                    rides the existing generate -> review -> score pipeline.
+                    It does NOT immediately change the catalogue — the
+                    candidate is scored independently by review, and can be
+                    rejected. Never bypasses grammar validation or review by
+                    hand-editing graph text; this is the only sanctioned
+                    write path for standard-name corrections.
+
+                    Recommend calling with ``dry_run=True`` first to preview
+                    the plan (and, for family/subtree scope, the full
+                    cascade) before attaching it for real.
+
+                    Args:
+                        standard_name: Target StandardName id to correct.
+                        reason: Mandatory justification shown to the
+                            reviewer as intent context — e.g. "DD 'area' is
+                            the poloidal cross-section, not the swept
+                            toroidal surface (that is
+                            surface_area_of_flux_surface)". A weak reason
+                            does not grant immunity from rejection; it only
+                            neutralises the reviewer's pull back toward the
+                            previously-accepted variant.
+                        hint: Steering direction (hint mode) — the pipeline
+                            still composes the candidate. Exactly one of
+                            hint/rename/docs must be given.
+                        rename: Full replacement name (rename mode) — skips
+                            generation, enters name review directly.
+                        docs: Full replacement documentation (docs mode) —
+                            skips generation, enters docs review directly.
+                        axis: Which slot(s) a hint steers: "name" | "docs"
+                            | "both" (hint mode only).
+                        scope: Blast radius: "self" | "family" | "subtree".
+                            Default: editing a parent -> subtree, editing a
+                            leaf -> self. A leaf edit that changes a base
+                            segment shared with siblings is blocked unless
+                            scope="family" is passed explicitly.
+                        dry_run: Preview only — no graph writes.
+
+                    Returns:
+                        Dict rendering of the EditPlan (target, mode, axis,
+                        scope, entry, successor, cascade_planned, blocked,
+                        actions, applied) plus a "summary" string. A
+                        malformed call returns {"error": "..."} instead of
+                        raising.
+                    """
+                    from imas_codex.llm.sn_tools import (
+                        _edit_standard_name as _esn,
+                    )
+
+                    return _esn(
+                        standard_name,
+                        reason,
+                        hint=hint,
+                        rename=rename,
+                        docs=docs,
+                        axis=axis,
+                        scope=scope,
+                        dry_run=dry_run,
+                    )
+
         if not self.read_only:
             # =====================================================================
             # Log Tools (Phase 3: MCP Logs)

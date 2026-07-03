@@ -36,6 +36,9 @@ class TestSnHelpNewVerbs:
     def test_import_in_help(self):
         assert "import" in self._get_help()
 
+    def test_edit_in_help(self):
+        assert "edit" in self._get_help()
+
     def test_publish_not_in_help(self):
         assert "publish" not in self._get_help()
 
@@ -65,3 +68,12 @@ class TestSnHelpNewVerbs:
         result = runner.invoke(sn, ["import", "--help"])
         assert result.exit_code == 0
         assert "--accept-unit-override" in result.output
+
+    def test_edit_help_shows_mode_flags(self):
+        runner = CliRunner()
+        result = runner.invoke(sn, ["edit", "--help"])
+        assert result.exit_code == 0
+        assert "--hint" in result.output
+        assert "--rename" in result.output
+        assert "--docs" in result.output
+        assert "--reason" in result.output
