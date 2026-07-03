@@ -8,15 +8,15 @@
   <meta name="plan-slug" content="sn-expert-hints">
   <meta name="plan-title" content="sn edit: human/agent-steered name and doc proposals through the SN pipeline">
   <meta name="plan-summary" content="An sn edit tool that lets a human or agent propose a name/doc change that rides the generate-review-score pipeline as a steered candidate, with the reason carried into review to break the pull-back to original variants, without decoupling from style, grammar, and checks.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
   <title>sn edit — steered proposals | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-23">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-07-03">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -298,17 +298,29 @@
       <li><strong>§5d Redesign mode (skip-generate)</strong> — write the proposed
         name/docs as a drafted candidate via the refine persist path (name change
         supersedes old + <code>REFINED_FROM</code>), entering at review.
-        <em>Done-when:</em> <code>--rename</code> produces a reviewable candidate
-        with no generate call; old name superseded; links migrated.</li>
+        Note: <code>persist_refined_name</code> gates on
+        <code>old.name_stage='refining'</code>, so the edit engine claims the
+        target through that stage first; targets in terminal stages
+        (<code>superseded</code> without successor, <code>exhausted</code>) are
+        valid edit targets — the edit resurrects the DD-path coverage by giving
+        them a successor. <em>Done-when:</em> <code>--rename</code> produces a
+        reviewable candidate with no generate call; old name superseded; links
+        migrated.</li>
       <li><strong>§5e CLI + MCP</strong> — <code>imas-codex sn edit</code> with the
         §3.3 surface + the mirrored MCP write tool, sharing one implementation.
         <em>Done-when:</em> both surfaces attach the edit and re-enter the SN at
         the correct stage; <code>--dry-run</code> prints the plan.</li>
       <li><strong>§5f Family / cascade</strong> — <code>--scope</code> handling +
         the sibling-desync guard; parent edit cascades to children; family edit
-        re-proposes siblings + re-derives parent. <em>Done-when:</em> a parent
-        edit re-derives its children; a shared-base leaf edit is blocked without
-        <code>--scope family</code>.</li>
+        re-proposes siblings + re-derives parent. <strong>Reuse, don't reinvent:</strong>
+        <code>imas_codex/standard_names/cascade.py</code> (<code>rename_cascade</code>,
+        already wired as <code>sn run --rename OLD:NEW</code>) implements the
+        HAS_PARENT-edge-driven descendant rename with all-or-nothing ISN round-trip
+        validation, audit log, and <code>override_edits</code>/<code>include_accepted</code>
+        safety knobs — <code>sn edit --scope subtree</code> wraps it, adding the
+        pipeline re-entry (review gate) that the direct cascade lacks.
+        <em>Done-when:</em> a parent edit re-derives its children; a shared-base
+        leaf edit is blocked without <code>--scope family</code>.</li>
       <li><strong>§5g Status lifecycle</strong> — <code>applied</code> on
         acceptance, <code>exhausted</code> at the refine cap, surfaced in
         <code>sn status</code>. <em>Done-when:</em> outcomes reflected + listed.</li>
@@ -322,38 +334,60 @@
     </ul>
 
     <h2 id="s6">§6 — Dog-food demo: plasma-boundary area</h2>
+    <p class="landed-summary" style="border-left:3px solid #b45309;padding-left:10px">
+      <strong>Graph-reality update (2026-07-03, pre-implementation audit).</strong>
+      The target drifted since this plan was written: the SN is now
+      <code>area_of_plasma_boundary</code> (the <code>_at_</code>&#8594;<code>_of_</code>
+      locus migration), it is a <strong>leaf</strong> (no <code>HAS_PARENT</code>
+      children — not a derived parent), and it sits at
+      <code>name_stage=superseded</code> with <strong>no successor</strong>: review
+      disagreement (mean 0.846, threshold miss) killed it on exactly the ambiguity
+      this plan describes — the reviewer's own comment reads "ambiguous between
+      cross-sectional area enclosed by the boundary and toroidal boundary surface
+      area". The DD path <code>equilibrium/time_slice/global_quantities/area</code>
+      consequently has <em>no live standard name</em>. The demo therefore also
+      exercises editing a name in a terminal stage (resurrect-by-redesign).
+      The originally proposed target <code>poloidal_cross_section_area_of_plasma_boundary</code>
+      does <strong>not parse</strong> under the current ISN grammar;
+      <code>poloidal_cross_section_of_plasma_boundary</code> does
+      (projection=poloidal, base=cross_section, locus=of plasma_boundary), with
+      <code>cross_section_of_plasma_boundary</code> as fallback. Scope:
+      <code>--scope self</code> (leaf); the subtree cascade is validated by §5f
+      tests against a derived parent with children instead.
+    </p>
     <p>
       The end-to-end acceptance test. Steer the ambiguous bare area to an explicit
       poloidal cross-section through the pipeline:
     </p>
-    <pre class="r-fu-prompt">imas-codex sn edit area_at_plasma_boundary \
-    --rename poloidal_cross_section_area_of_plasma_boundary \
+    <pre class="r-fu-prompt">imas-codex sn edit area_of_plasma_boundary \
+    --rename poloidal_cross_section_of_plasma_boundary \
     --reason "DD 'area' is the poloidal cross-sectional area enclosed by the boundary, \
-              NOT the swept toroidal surface (that is flux_surface_area_at_plasma_boundary). \
+              NOT the swept toroidal surface (that is surface_area_of_flux_surface). \
               The bare 'area' is ambiguous; name it explicitly as the poloidal cross-section." \
-    --scope subtree</pre>
+    --scope self</pre>
     <p>Expected behavior, demonstrating each design element:</p>
     <ul>
       <li><strong>Redesign mode</strong> writes the proposed name as a candidate and
         enters REVIEW_NAME — no generate step.</li>
       <li><strong>Reason &#8594; review</strong> tells the reviewer the rename is a
         deliberate disambiguation, so it does not pull back to the bare
-        <code>area_at_plasma_boundary</code>.</li>
-      <li><strong>Subtree cascade</strong> re-derives the parent's children with the
-        new <code>poloidal_cross_section_area</code> base, keeping the family
-        consistent.</li>
+        <code>area_of_plasma_boundary</code>.</li>
+      <li><strong>Terminal-stage resurrection</strong>: the superseded, successor-less
+        SN gains a successor via <code>REFINED_FROM</code>, re-covering the orphaned
+        DD path.</li>
       <li><strong>Gates still apply</strong>: grammar validation, RD-quorum review,
         scoring — the rename only lands if it passes them.</li>
+      <li><strong>Control edit</strong>: a deliberately-bad edit (physically wrong
+        reason/name) is also submitted; it must score below threshold, proving the
+        anti-revert directive does not rubber-stamp.</li>
       <li><strong>Result</strong>: the bare-"area" ambiguity is resolved by a steered
         candidate that flowed through generate(skipped)&#8594;review&#8594;score, with
         provenance <code>edit_origin</code> recorded — proving the tool works.</li>
     </ul>
     <p>
-      Note: <code>area_at_plasma_boundary</code> currently has a placeholder
-      description (it is one of the derived-parent backlog in
-      <a href="/imas-codex/sn-coverage-and-hygiene.html">sn-coverage-and-hygiene</a>);
-      that plan's §1 enrichment should land first so the demo edits a
-      real-description parent rather than a placeholder.
+      Prerequisite note (resolved): sn-coverage-and-hygiene shipped 2026-06-25
+      (enrich_parents pool; 854 derived parents documented), so the derived-parent
+      backlog no longer blocks this demo.
     </p>
 
     <h2 id="s7">§7 — Documentation updates</h2>
@@ -365,29 +399,29 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="edit-storage" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="edit-storage" data-choice="scalar-fields" data-by="reckon-ship" data-when="2026-07-03T08:44:57+00:00">
     <p class="r-dec-q">Store edit fields as scalars on StandardName, or as a separate Edit/Suggestion node + edge?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="scalar-fields">scalar-fields</button>
+      <button class="r-opt chosen" data-value="scalar-fields">scalar-fields</button>
       <button class="r-opt" data-value="edit-node">edit-node</button>
       </p>
-    <p class="r-dec-rat">Scalars mirror the existing reviewer_score_name/reviewer_comments_name scalars and keep v1 minimal; an Edit node supports edit history + multiple competing proposals at more cost.</p>
+    <p class="r-dec-rat">Scalars mirror the existing reviewer_score_name/reviewer_comments_name pattern and keep v1 minimal; edit history via a node can come later if competing proposals become real. Deducible v1-minimal default per the plan&#x27;s own rationale.</p>
     </div>
-<div class="r-dec" data-key="reason-review-strength" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="reason-review-strength" data-choice="anti-revert-directive" data-by="reckon-ship" data-when="2026-07-03T08:44:57+00:00">
     <p class="r-dec-q">How strongly should the reason steer review — neutral intent context, or an explicit instruction not to favor the prior variant?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="intent-context">intent-context (state the why; reviewer judges freely)</button>
-      <button class="r-opt" data-value="anti-revert-directive">anti-revert-directive (explicitly tell reviewer not to penalize deviation from the original)</button>
+      <button class="r-opt chosen" data-value="anti-revert-directive">anti-revert-directive (explicitly tell reviewer not to penalize deviation from the original)</button>
       </p>
-    <p class="r-dec-rat">Anti-revert is what breaks the pull-back the user identified, but over-strong wording risks rubber-stamping bad edits; needs an empirical check that scores still discriminate (the dog-food demo plus a deliberately-bad control edit).</p>
+    <p class="r-dec-rat">The plan&#x27;s §3.2 prose already words the review injection as the anti-revert directive (&#x27;judge on merits given this intent; do not penalize merely for differing from a prior variant&#x27;) — locking to match. Guard against rubber-stamping retained: §6 runs a deliberately-bad control edit to verify scores still discriminate. Graph evidence supports the need: area_of_plasma_boundary died in review (disagreement, superseded, no successor) precisely on the ambiguity the reviewer itself named.</p>
     </div>
-<div class="r-dec" data-key="leaf-edit-default-scope" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="leaf-edit-default-scope" data-choice="block-and-require" data-by="reckon-ship" data-when="2026-07-03T08:44:57+00:00">
     <p class="r-dec-q">Default scope for a shared-base leaf edit — block and require explicit --scope family, or auto-promote to family?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="block-and-require">block-and-require (safer; editor opts in)</button>
+      <button class="r-opt chosen" data-value="block-and-require">block-and-require (safer; editor opts in)</button>
       <button class="r-opt" data-value="auto-family">auto-family (fewer steps; risk of surprising blast radius)</button>
       </p>
-    <p class="r-dec-rat">Blocking avoids an edit silently rewriting a whole sibling family; auto-family is smoother but can surprise. Lean block-and-require for v1.</p>
+    <p class="r-dec-rat">Blocking a shared-base leaf edit and requiring explicit --scope family avoids silently rewriting a sibling family; matches the plan&#x27;s lean and the existing cascade.py safety-knob style (override_edits / include_accepted opt-ins).</p>
     </div>
 </section>
 
@@ -395,7 +429,7 @@
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-snedit-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-expert-hints §5a" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Build sn edit §5a–§5h + dog-food the plasma-area demo §6</h4>
-    <div class="r-fu-body">Implement in a separate session. Two modes: redesign (--rename/--docs) skips generate and enters at REVIEW; hint (--hint) injects into GENERATE. The --reason rides into BOTH generate (hint) and the REVIEW gate (both modes) to break the pull-back to original variants. SN id is the positional arg; --scope self|family|subtree handles parent->children cascade and the sibling-desync guard. Add an MCP write tool mirroring the CLI and a .claude/skills/sn-edit skill so agents can use it. Resolve the 3 decisions (edit-storage, reason-review-strength, leaf-edit-default-scope) before §5b/§5c. Land sn-coverage-and-hygiene §1 (derived-parent enrichment) first so the §6 demo edits a real-description parent.</div>
+    <div class="r-fu-body">Implement in a separate session. Two modes: redesign (--rename/--docs) skips generate and enters at REVIEW; hint (--hint) injects into GENERATE. The --reason rides into BOTH generate (hint) and the REVIEW gate (both modes) to break the pull-back to original variants. SN id is the positional arg; --scope self|family|subtree handles parent-&gt;children cascade and the sibling-desync guard. Add an MCP write tool mirroring the CLI and a .claude/skills/sn-edit skill so agents can use it. Resolve the 3 decisions (edit-storage, reason-review-strength, leaf-edit-default-scope) before §5b/§5c. Land sn-coverage-and-hygiene §1 (derived-parent enrichment) first so the §6 demo edits a real-description parent.</div>
     <pre class="r-fu-prompt">Project: imas-codex
 Plan: sn-expert-hints (http://localhost:8765/imas-codex/sn-expert-hints.html)
 Section: §5a (schema) through §5h (agent skill), then §6 dog-food demo
