@@ -22,7 +22,7 @@
   <h2>Campaign funnel</h2>
   <figure>
     <svg viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" role="img"
-         aria-label="Worklist funnel: 289 sibling sets to 137 metric-flagged to 10 triage-confirmed families to 17 docs regenerated, all accepted"
+         aria-label="Worklist funnel: 289 sibling sets to 137 metric-flagged to triage-confirmed families to 30 docs regenerated, all accepted"
          style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
       <style>
         .st{fill:#fff;stroke:#374151;stroke-width:1}
@@ -41,7 +41,7 @@
       <text class="tt" x="400" y="82">10 confirmed</text>
       <text class="cap" x="400" y="100">LLM triage + deep-read</text>
       <rect x="580" y="60" width="170" height="52" fill="#fff" stroke="#16a34a" stroke-width="1.4"/>
-      <text class="tt" x="590" y="82">17 docs regen'd</text>
+      <text class="tt" x="590" y="82">30 docs regen'd</text>
       <text class="cap" x="590" y="100">all review-accepted</text>
       <line class="ar" x1="160" y1="86" x2="198" y2="86"/>
       <line class="ar" x1="350" y1="86" x2="388" y2="86"/>
@@ -55,7 +55,7 @@
       The deterministic drift metric over-flags member-specific tokens
       (species/axis/locus) as drift; three Sonnet triage workers reading every
       flagged family's actual docs reduced 624 candidate members to a
-      17-doc regen worklist (triage-confirmed structural drift + deep-read
+      30-doc regen worklist (triage-confirmed structural drift + deep-read
       content defects).
     </figcaption>
   </figure>
@@ -115,7 +115,20 @@
       <tr><td>3 — fraction parent (post prompt-fix) + 2 new link bugs</td><td>3</td>
         <td>fraction now a proper generic part-to-whole ratio (0.875);
         radial_total_current_density 0.869 (flux-surface-normal nuance
-        retained); total_ion_power re-reviewed to acceptance.</td><td>$2.5</td></tr>
+        retained); total_ion_power re-reviewed to acceptance.</td><td>$3.4</td></tr>
+      <tr><td>4 — pre-existing stragglers blocking family stamps</td><td>5</td>
+        <td>5/6 accepted (0.85–0.925); ion_state_energy_diffusivity +
+        deposited_power_density are origin=None/no-name-score stubs the docs
+        gate excludes (known sn-structural-repair residual class) — their
+        families defer correctly.</td><td>$3.1</td></tr>
+      <tr><td>5 — locus-expansion triage findings</td><td>7</td>
+        <td>7/7 accepted: poloidal_angle_of_beam_tracing_beam sign-convention
+        contradiction fixed; power_due_to_conduction parent de-halo-scoped +
+        3 members; 2 safety_factor members regenerated to clear stale anchor
+        text naming the superseded _at_plasma_boundary.</td><td>$4.4</td></tr>
+      <tr><td>6 — final residue</td><td>1</td>
+        <td>lower_wavelength_of_filter converged to its upper_ twin's exact
+        template (0.90).</td><td>$0.7</td></tr>
     </tbody>
   </table>
   <p><strong>Total SN LLM spend ≈ $23</strong> (vs the plan's $80–200
@@ -153,14 +166,27 @@
     invalidates the signature and re-enters the worklist.
   </p>
 
-  <h2>What's next</h2>
+  <h2>Final state</h2>
+  <p>
+    Worklist residue: 40 families, ALL deferring solely on pre-existing
+    non-accepted straggler members (the origin=None/no-name-score docs-gate
+    residual class) — <strong>zero fully-accepted families remain unstamped</strong>.
+    110 families carry the harmonized signature (11 campaign + 99
+    triage-verified-parallel). Every regenerated doc is review-accepted
+    (0.85–1.00).
+  </p>
+  <h2>What's next (f-snfh-003)</h2>
   <ul>
     <li>Link-lint remediation for the ~280 remaining shorthand-label
       mismatches (deterministic detection exists; fix via targeted regen or a
       persist-time label/target validator).</li>
+    <li>Drain the gate-excluded stubs once the origin=None residual class is
+      resolved, then re-stamp their families.</li>
     <li>Optional in-loop harmonize pool (plan §6 tail) — deferred: the always-on
       family context in generate/review/refine already self-heals new names.</li>
-    <li>Catalog release (sn release RC) to publish the 17 regenerated docs.</li>
+    <li>Catalog release (sn release RC) to publish the 30 regenerated docs —
+      requires operator action (release push was permission-gated in this
+      session).</li>
   </ul>
 </main>
 </body>
