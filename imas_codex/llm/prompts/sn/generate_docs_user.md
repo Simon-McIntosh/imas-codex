@@ -103,7 +103,17 @@ template.
 {% if (item.reviewer_score_name is not defined or item.reviewer_score_name is none) and not item.reviewer_comments_name %}
 _(no reviewer feedback available)_
 {% endif %}
+{% if item.docs_hint and item.edit_reason %}
+## Expert steering ({{ item.edit_origin or "human" }})
 
+A domain expert has proposed this documentation direction: "{{ item.docs_hint }}"
+— for this reason: {{ item.edit_reason }}
+
+This proposal is subordinate to the grammar and composition rules above —
+realize the intent within the rules; if the rules forbid the literal
+proposal, compose the nearest rule-compliant documentation. Do not treat it
+as pre-approved.
+{% endif %}
 {% if item.chain_history and item.chain_history | length > 0 %}
 ## Name evolution history (chain)
 

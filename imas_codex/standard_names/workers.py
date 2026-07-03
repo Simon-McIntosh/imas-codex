@@ -7828,6 +7828,13 @@ async def process_refine_docs_batch(
                 "reviewer_comments_per_dim_docs"
             ),
             "dd_paths": [],
+            # Expert edit steering (imas-codex sn edit) — the refine_docs_user
+            # template reads these as top-level context vars, not item.*,
+            # because this prompt_context is a hand-built whitelist rather
+            # than an `item` merge.
+            "docs_hint": item.get("docs_hint"),
+            "edit_reason": item.get("edit_reason"),
+            "edit_origin": item.get("edit_origin"),
         }
 
         # Best-effort DD path enrichment

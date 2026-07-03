@@ -1,0 +1,43 @@
+Apply the rubric (provided in the system prompt) to the candidate below.
+
+## Candidate
+
+- **Standard name**: electron_temperature_at_lcfs
+- **Unit**: eV
+- **Kind**: scalar
+
+
+- **Physics domain**: equilibrium
+
+
+
+
+
+- **Description**: Electron temperature at the last closed flux surface.
+- **Documentation**:
+
+The electron temperature $T_e$ at the LCFS.
+
+## Sibling-Comparison Context
+
+Use these accepted, in-catalog names as your **third-party reference set**.
+They are NOT to be re-reviewed. Compare the candidate's documentation
+*depth*, *terminology*, and *conventions* to them. Cite specific sibling
+`id`s when you dock points.
+
+
+
+
+
+
+
+
+
+
+*No accepted siblings found — score on physics correctness alone.*
+
+
+
+
+Return JSON matching the schema defined in the system prompt; set
+`source_id` and `standard_name` to `electron_temperature_at_lcfs`.

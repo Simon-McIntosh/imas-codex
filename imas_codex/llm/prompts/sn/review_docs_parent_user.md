@@ -22,7 +22,9 @@ generalization and positioning; do NOT dock for missing child-level specifics.
 - **Documentation**:
 
 {{ item.documentation | default('(missing)', true) }}
-
+{% if item.edit_reason %}
+**Deliberate expert steering**: a domain expert ({{ item.edit_origin or "human" }}) has deliberately steered this candidate for the following reason: {{ item.edit_reason }}. Judge the candidate on its physical and grammatical merits given this intent; do NOT penalize it merely for differing from a prior or established variant.
+{% endif %}
 ## Children — the concrete instances this parent generalizes (PRIMARY reference)
 
 The parent must correctly capture the **common quantity** these children share,

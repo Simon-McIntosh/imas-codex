@@ -1,0 +1,40 @@
+Apply the **parent rubric** (provided in the system prompt) to the derived
+parent below. Score it as an abstraction over its children — reward correct
+generalization and positioning; do NOT dock for missing child-level specifics.
+
+## Candidate (derived parent)
+
+- **Standard name**: perturbed_velocity
+- **Unit**: m.s^-1
+- **Kind**: scalar
+- **Physics domain**: mhd
+
+- **Description**: General perturbed velocity.
+- **Documentation**:
+
+The perturbed velocity across MHD contexts.
+
+## Children — the concrete instances this parent generalizes (PRIMARY reference)
+
+The parent must correctly capture the **common quantity** these children share,
+and be positioned as their abstraction (not a restatement of any single one):
+
+
+- `normalized_parallel_perturbed_velocity` [m.s^-1]
+
+
+
+## Sibling-Comparison Context (style/terminology consistency only)
+
+
+
+
+
+
+*No accepted siblings found — score on generalization + physics correctness alone.*
+
+
+
+
+Return JSON matching the parent schema defined in the system prompt; set
+`source_id` and `standard_name` to `perturbed_velocity`.

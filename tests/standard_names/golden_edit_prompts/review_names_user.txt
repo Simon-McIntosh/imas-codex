@@ -1,0 +1,63 @@
+Apply the rubric (provided in the system prompt) to the candidate(s) below.
+
+
+
+## Sibling-Comparison Context
+
+Use these accepted, in-catalog names as your **third-party reference set**. They are NOT to be reviewed. Score the candidate(s) below against the **patterns** these siblings establish (decomposition style, segment usage, naming consistency). Cite specific sibling `id`s when you dock points.
+
+
+
+
+
+
+
+
+*No accepted siblings found — score on grammar + physics correctness alone.*
+
+
+
+
+## Candidates to Review
+
+
+### Candidate 1
+- **Standard name**: electron_temperature
+- **Source ID**: core_profiles/profiles_1d/electrons/temperature
+- **Unit**: eV
+- **Kind**: scalar
+- **Grammar Fields**: physical_base=temperature, subject=electron
+
+
+
+
+
+
+
+
+
+
+## Output Format
+
+Return a JSON object with a `reviews` array. Each review MUST include:
+
+```json
+{
+  "reviews": [
+    {
+      "source_id": "path/to/quantity",
+      "standard_name": "electron_temperature",
+      "scores": {
+        "grammar": 20,
+        "semantic": 18,
+        "convention": 19,
+        "completeness": 18
+      },
+      "reasoning": "Brief specific justification covering each dimension",
+      "revised_name": null,
+      "revised_fields": null,
+      "issues": []
+    }
+  ]
+}
+```

@@ -119,7 +119,17 @@ _(no prior revision history — this is the first docs refine attempt)_
 {% endif %}
 
 {% endif %}
+{% if docs_hint and edit_reason %}
+### Expert steering ({{ edit_origin or "human" }})
 
+A domain expert has proposed this documentation direction: "{{ docs_hint }}"
+— for this reason: {{ edit_reason }}
+
+This proposal is subordinate to the grammar and composition rules above —
+realize the intent within the rules; if the rules forbid the literal
+proposal, compose the nearest rule-compliant documentation. Do not treat it
+as pre-approved.
+{% endif %}
 ---
 
 ## Your task

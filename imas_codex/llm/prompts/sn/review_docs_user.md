@@ -43,7 +43,9 @@ every definitional claim in the candidate documentation against this text:
 - **Documentation**:
 
 {{ item.documentation | default('(missing)', true) }}
-
+{% if item.edit_reason %}
+**Deliberate expert steering**: a domain expert ({{ item.edit_origin or "human" }}) has deliberately steered this candidate for the following reason: {{ item.edit_reason }}. Judge the candidate on its physical and grammatical merits given this intent; do NOT penalize it merely for differing from a prior or established variant.
+{% endif %}
 ## Sibling-Comparison Context
 
 Use these accepted, in-catalog names as your **third-party reference set**.

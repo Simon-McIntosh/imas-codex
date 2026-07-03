@@ -264,6 +264,9 @@ Use them as quality benchmarks for naming style and field usage:
 {% endif %}{% if item.review_feedback.reviewer_suggested_name %}  - **Reviewer's suggested replacement:** `{{ item.review_feedback.reviewer_suggested_name }}`{% if item.review_feedback.reviewer_suggestion_justification %} — {{ item.review_feedback.reviewer_suggestion_justification | replace('\n', ' ') }}{% endif %}
   - Start from the suggestion; refine only if it has grammar or convention defects.
 {% endif %}  - Do NOT re-emit the previous name unchanged.
+{% endif %}{% if item.review_feedback and item.review_feedback.name_hint and item.review_feedback.edit_reason %}
+- **🧭 Expert steering ({{ item.review_feedback.edit_origin or "human" }}):** A domain expert has proposed this naming direction: "{{ item.review_feedback.name_hint }}" — for this reason: {{ item.review_feedback.edit_reason }}
+  - This proposal is subordinate to the grammar and composition rules above — realize the intent within the rules; if the rules forbid the literal proposal, compose the nearest rule-compliant name. Do not treat it as pre-approved.
 {% endif %}
 
 {% endfor %}

@@ -1,12 +1,3 @@
----
-name: sn/generate_name_dd
-description: Dynamic user prompt for SN composition — per-batch DD paths with enriched context
-used_by: imas_codex.standard_names.workers.compose_worker
-task: composition
-dynamic: true
-schema_needs: []
----
-
 Name the **physical or geometric quantities** represented by the following
 IMAS Data Dictionary paths. Each standard name describes the underlying
 physics — NOT the DD path, IDS section, or measurement instrument.
@@ -19,35 +10,13 @@ ion, neutral, fast_ion) go in the `subject` segment, NOT fused into
 `electron_temperature` — but `temperature` is the base, not
 `electron_temperature` as a monolithic token.
 
-{% if retry_reason %}
-## ⚠️ Retry Context
 
-{{ retry_reason }}
-{% endif %}
 
-{% if domain_vocabulary %}
-## PREFERRED VOCABULARY FOR THIS DOMAIN — reuse unless concept is genuinely different
 
-The following standard names already exist in this physics domain and have been
-validated. **Reuse** these terms and naming patterns unless the concept you are
-naming is genuinely different. Synonymous proliferation within a domain is the
-single most common quality failure.
 
-{{ domain_vocabulary }}
-{% endif %}
 
-{% if reviewer_themes %}
-## RECENT REVIEWER FEEDBACK FOR THIS DOMAIN — address these
 
-Expert reviewers have flagged these recurring issues in this domain's standard names.
-Pay special attention to avoiding these patterns:
 
-{% for theme in reviewer_themes %}
-- {{ theme }}
-{% endfor %}
-{% endif %}
-
-{% include "sn/_compose_scored_examples.md" %}
 
 ## Unit Policy
 
@@ -232,225 +201,69 @@ Before finalizing your output, verify:
 
 ## IDS Context
 
-{% if ids_contexts %}
-{% for ids_ctx in ids_contexts %}
-### {{ ids_ctx.ids_name }}
-{{ ids_ctx.ids_description }}
-{% if ids_ctx.ids_documentation %}*{{ ids_ctx.ids_documentation }}*{% endif %}
-{% if ids_ctx.top_sections %}
-**Top-level sections:**
-{% for sec in ids_ctx.top_sections %}
-- `{{ sec.name }}` ({{ sec.data_type }}): {{ sec.description or 'no description' }}
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% else %}
-**Batch:** {{ ids_name }}
-{% endif %}
-{% if cluster_context %}
-{{ cluster_context }}
-{% endif %}
 
-{% if existing_names %}
-## Existing Standard Names (reuse when applicable)
+**Batch:** 
 
-These names already exist. **Reuse** them when the DD path measures the same
-quantity — do not create a duplicate with different wording.
 
-{% for name in existing_names %}
-- {{ name }}
-{% endfor %}
-{% endif %}
 
-{% if nearby_existing_names %}
-## Nearby Existing Standard Names
 
-These names already exist in the catalog. Reuse them if they match your source, or avoid creating duplicates:
-{% for name in nearby_existing_names %}
-- **{{ name.id }}**: {{ name.description | default('', true) }} ({{ name.kind | default('scalar', true) }}, {{ name.unit | default('dimensionless', true) }})
-{% endfor %}
-{% endif %}
+
+
 
 ## DD Paths to Name
 
-{% for item in items %}
-### {{ item.path }}
-{% if item.rate_hint %}
-> ⚠️ **HARD CONSTRAINT — RATE QUANTITY:** The DD documentation for this path
-> indicates a rate / time-derivative quantity (phrases like "instantaneous
-> change", "signed change", "rate of change", "time derivative",
-> "per unit time"). Your name MUST begin with `tendency_of_` (preferred),
-> `change_in_`, or `rate_of_change_of_`. NEVER use `instant_change_*` or
-> `instantaneous_change_*` as a prefix. The description MUST be consistent
-> with the rate-marker prefix (e.g. if the name is `tendency_of_X`, the
-> description should read "Instantaneous signed change in X" or
-> "Time derivative of X"). Do NOT produce a base-quantity name (e.g.
-> `electron_density`) and then describe it as a rate — that is a critical
-> drift error that quarantines the entry.
->
-> **CRITICAL — rate + component ordering:** If the quantity is a rate of a
-> vector component, the orientation token (`parallel`, `perpendicular`,
-> `poloidal`, `toroidal`, `radial`, `diamagnetic`) MUST be placed OUTSIDE
-> the rate marker, wrapping the rate phrase:
->   ✅ `parallel_change_in_fast_electron_pressure`
->   ✅ `poloidal_tendency_of_electron_velocity`
->   ❌ `change_in_parallel_fast_electron_pressure` (grammar rejects)
->   ❌ `change_in_poloidal_electron_velocity` (grammar rejects)
-> The grammar parses `{orientation}_X` as a unit — the rate
-> marker must modify the base quantity X, not intrude between orientation
-> and the base.
-{% endif %}
-{% if item.value_provenance %}
-> ⚠️ **HARD CONSTRAINT — {{ item.value_provenance | upper }} ESTIMATOR:** this
-> path is the `{{ item.value_provenance }}` estimate of the quantity at
-> `{{ item.provenance_base_path }}` (the description above is that base
-> quantity). Name the **underlying physical quantity ONLY** — do NOT encode
-> `{{ item.value_provenance }}`, `measured`, `reconstructed`, `reference`,
-> `target`, `constraint`, or `fit` in the name. The measured / reconstructed /
-> reference estimates of one quantity share ONE standard name; the estimator is
-> recorded as link metadata, never in the name.
-> **Also drop the FIT-CONSTRAINT framing:** the grounding mentions a "position"
-> / "constraint position" / "at various positions" — that is the fit's sampling
-> locus, NOT a physical locus. Do NOT add `_at_constraint_position`,
-> `_at_measurement_position`, `_at_sensor_attachment_point`, or any
-> position/sensor locus from the constraint substructure. (A surface/flux-average
-> that the raw doc states as part of the quantity — e.g. flux-surface-averaged
-> current density — IS kept; the sampling position is not.)
->   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
->   ✅ `poloidal_magnetic_field`   ❌ `poloidal_magnetic_field_at_constraint_position`
-{% endif %}
-{% if item.species_context %}- **⚠️ Species context:** `{{ item.species_context }}` — this quantity is specific to **{{ item.species_context }}** species. The standard name MUST include the species in the `subject` segment (e.g., `{{ item.species_context }}_temperature`, not just `temperature`).
-{% endif %}- **Description:** {{ item.description }}
-{% if item.documentation and item.documentation != item.description %}- **Source documentation:** {{ item.documentation }}{% endif %}
-- **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative from DD — use for naming context only, do NOT output)*
-- **Data type:** {{ item.data_type or 'unspecified' }}
-{% if item.node_type %}- **Node type:** {{ item.node_type }} *(dynamic=time-varying quantity; static=machine-fixed parameter, e.g. wall geometry; constant=single scalar value; none=unclassified — use other context)*{% endif %}
-{% if item.physics_domain %}- **Physics domain:** {{ item.physics_domain }}{% endif %}
-{% if item.ndim is not none %}- **Dimensions:** {{ item.ndim }}D{% endif %}
-{% if item.lifecycle_status %}- **Lifecycle:** {{ item.lifecycle_status }} ⚠️{% endif %}
-{% if item.keywords %}- **Keywords:** {{ item.keywords | join(', ') if item.keywords is iterable and item.keywords is not string else item.keywords }}{% endif %}
-{% if item.coordinate_paths %}- **Coordinates:** {{ item.coordinate_paths | join(', ') }}{% endif %}
-{% if item.timebase %}- **Timebase:** {{ item.timebase }}{% endif %}
-{% if item.cocos_label %}- **COCOS transformation type:** `{{ item.cocos_label }}`{% if item.cocos_expression %} — expression: `{{ item.cocos_expression }}`{% endif %}
-{% if cocos_version is defined and cocos_version %}- **COCOS convention:** {{ cocos_version }}{% if dd_version %} (DD {{ dd_version }}){% endif %}{% endif %}
-{% if item.cocos_guidance %}- **Sign convention guidance:** {{ item.cocos_guidance }}{% endif %}
-  ⚠️ This quantity is COCOS-dependent. You MUST include a sign convention paragraph
-  in the documentation section of the form:
-  `Sign convention: Positive when <concrete physical condition consistent with COCOS {{ cocos_version | default('') }}>.`
-  Write a CONCRETE plain-English condition (e.g. "the current flows counter-clockwise
-  viewed from above"). If you cannot supply a concrete condition, omit that paragraph
-  entirely and write `This quantity has no sign ambiguity.` instead.{% endif %}
-{% if item.identifier_schema %}- **Identifier schema:** {{ item.identifier_schema }}{% if item.identifier_schema_doc %} — {{ item.identifier_schema_doc }}{% endif %}{% endif %}
-{% if item.identifier_values %}
-- **Identifier enum values:**
-{% for iv in item.identifier_values %}  - `{{ iv.name }}` ({{ iv.index }}): {{ iv.description | default('', true) }}
-{% endfor %}{% endif %}
-{% if item.coord_path %}- **Coordinate:** {{ item.coord_path }}{% if item.coord_unit %} ({{ item.coord_unit }}){% endif %}{% endif %}
-{% if item.parent_path %}- **Parent structure:** {{ item.parent_path }} ({{ item.parent_type or 'STRUCTURE' }}){% endif %}
-{% if item.parent_description %}- **Parent description:** {{ item.parent_description }}{% endif %}
-{% if item.clusters %}
-- **Semantic clusters:**
-{% for cl in item.clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}
-    Members: {{ cl.members | join(', ') }}
-{% endfor %}{% endif %}
-{% if item.cross_ids_paths %}
-- **Cross-IDS equivalents:** These paths in other IDSs represent the same quantity:
-{% for xp in item.cross_ids_paths %}  - `{{ xp }}`
-{% endfor %}  → Generate ONE name that covers all cross-IDS instances.
-{% endif %}
-{% if item.dd_paths_docs %}
-- **Member DD documentation** (the sibling leaves this name must cover — ground every qualifier so the name fits all of them, not just the primary path above):
-{% for mpath, mdoc in item.dd_paths_docs.items() %}  - `{{ mpath }}`: {{ mdoc }}
-{% endfor %}{% endif %}
-{% if item.hybrid_neighbours %}
-- **Hybrid-search neighbours** (physics-concept + structural cousins):
-{% for n in item.hybrid_neighbours %}  - `{{ n.tag }}` [{{ n.unit }}, {{ n.physics_domain }}]: {{ n.doc_short }}{% if n.cocos_label %} (COCOS {{ n.cocos_label }}){% endif %}
-{% endfor %}  → Reuse a `name:` entry above when your source measures the same quantity.
-{% endif %}
-{% if item.related_neighbours %}
-- **Graph-relationship neighbours** (explicit cross-IDS peers):
-{% for r in item.related_neighbours %}  - `{{ r.path }}` ({{ r.ids }}) — {{ r.relationship_type }}{% if r.via %} via {{ r.via }}{% endif %}
-{% endfor %}  → These paths share structural relationships (cluster, coordinate, unit, identifier, COCOS) with this path.
-{% endif %}
-{% if item.error_fields %}
-- **DD error companions:**
-{% for ef in item.error_fields %}  - `{{ ef }}`
-{% endfor %}  → Error/uncertainty companions are minted deterministically — do NOT produce `*_uncertainty` variants. Skip this path entirely if it IS an error field (`_error_upper`, `_error_lower`, `_error_index`).
-{% endif %}
-{% if item.version_history %}
-- **Version history:**
-{% for vh in item.version_history %}  - {{ vh.version }}: {{ vh.change_type }}{% if vh.description %} — {{ vh.description }}{% endif %}
-{% endfor %}{% endif %}
-{% if item.sibling_fields %}
-- **Sibling fields** (same parent structure — use for documentation cross-references):
-{% for sib in item.sibling_fields %}  - `{{ sib.path }}`: {{ sib.description or 'no description' }} ({{ sib.data_type or '?' }})
-{% endfor %}{% endif %}
-{% if item.previous_name %}
-- **⟳ Previous generation:** `{{ item.previous_name.name }}` ({{ item.previous_name.name_stage or 'drafted' }}{% if item.previous_name.reviewer_score %}, score={{ item.previous_name.reviewer_score | round(2) }}{% endif %}{% if item.previous_name.review_tier %}, {{ item.previous_name.review_tier }}{% endif %})
-{% if item.previous_name.description %}- **Prior description:** {{ item.previous_name.description }}{% endif %}
-{% if item.previous_name.documentation %}- **Prior documentation:** {{ item.previous_name.documentation }}{% endif %}
-{% if item.previous_name.links %}- **Prior links:** {{ item.previous_name.links | join(', ') if item.previous_name.links is iterable and item.previous_name.links is not string else item.previous_name.links }}{% endif %}
-{% if item.previous_name.validation_issues %}- **⚠️ Validation issues from prior run:** {{ item.previous_name.validation_issues | join('; ') if item.previous_name.validation_issues is iterable and item.previous_name.validation_issues is not string else item.previous_name.validation_issues }}{% endif %}
-{% if item.previous_name.linked_dd_paths %}- **Other DD paths sharing this name:** These paths were also mapped to `{{ item.previous_name.name }}` — your generated name should be appropriate for all of them:
-{% for ldp in item.previous_name.linked_dd_paths %}  - `{{ ldp }}`
-{% endfor %}{% endif %}
-{% if item.previous_name.name_stage == 'accepted' %}- **⚠️ This name was human-accepted** — only replace with a clearly better alternative.{% endif %}
-{% endif %}
-{% if item.review_feedback %}
+
+### equilibrium/time_slice/profiles_1d/psi
+
+
+- **Description:** Poloidal flux
+
+- **Unit:** Wb *(authoritative from DD — use for naming context only, do NOT output)*
+- **Data type:** FLT_1D
+
+- **Physics domain:** equilibrium
+- **Dimensions:** D
+
+
+
+
+
+
+
+
+- **Parent structure:** equilibrium/time_slice/profiles_1d (STRUCTURE)
+- **Parent description:** 1D profiles
+
+
+
+
+
+
+
+
+
+
 - **📝 Prior reviewer feedback — you MUST address the issues below in your new name:**
-  - **Previous name:** `{{ item.review_feedback.previous_name }}`{% if item.review_feedback.reviewer_score is not none %} (score={{ item.review_feedback.reviewer_score | round(2) }}{% if item.review_feedback.review_tier %}, tier={{ item.review_feedback.review_tier }}{% endif %}){% endif %}
-{% if item.review_feedback.previous_description %}  - **Prior description:** {{ item.review_feedback.previous_description }}
-{% endif %}{% if item.review_feedback.previous_documentation %}  - **Prior documentation:** {{ item.review_feedback.previous_documentation | replace('\n', '\n    ') }}
-{% endif %}{% if item.review_feedback.reviewer_scores %}  - **Rubric scores (out of 20 each):**
-{% for dim, dim_score in item.review_feedback.reviewer_scores.items() %}{% if dim not in ('score', 'tier') and dim_score is number %}    - `{{ dim }}`: {{ dim_score }}
-{% endif %}{% endfor %}{% endif %}{% if item.review_feedback.reviewer_comments %}  - **Reviewer critique:**
-    {{ item.review_feedback.reviewer_comments | replace('\n', '\n    ') }}
-{% endif %}{% if item.review_feedback.reviewer_suggested_name %}  - **Reviewer's suggested replacement:** `{{ item.review_feedback.reviewer_suggested_name }}`{% if item.review_feedback.reviewer_suggestion_justification %}
-    - *Justification:* {{ item.review_feedback.reviewer_suggestion_justification | replace('\n', ' ') }}{% endif %}
+  - **Previous name:** `poloidal_flux_old` (score=0.45, tier=inadequate)
+  - **Prior description:** Old description text.
+  - **Prior documentation:** Multi-paragraph prior doc.
+  - **Rubric scores (out of 20 each):**
+    - `grammar`: 12
+    - `semantic`: 10
+    - `convention`: 14
+    - `completeness`: 9
+  - **Reviewer critique:**
+    Name lacks locus distinguisher.
+  - **Reviewer's suggested replacement:** `poloidal_magnetic_flux`
+    - *Justification:* Cluster siblings use _magnetic_.
     - Use this suggestion as your **starting point**. You may refine it (e.g. fix grammar slot order, swap synonyms) but do not regress to the previous name.
-{% endif %}  - **Instruction:** Produce a name that directly fixes every concrete issue raised above. Do NOT re-emit the previous name unchanged. If the reviewer flagged excessive length, redundant qualifiers, or convention violations, your new name must be shorter / cleaner / more idiomatic. If the reviewer was satisfied with a dimension (score ≥ 15), preserve that aspect.
-{% endif %}{% if item.review_feedback and item.review_feedback.name_hint and item.review_feedback.edit_reason %}
-- **🧭 Expert steering ({{ item.review_feedback.edit_origin or "human" }}):** A domain expert has proposed this naming direction: "{{ item.review_feedback.name_hint }}" — for this reason: {{ item.review_feedback.edit_reason }}
-  - This proposal is subordinate to the grammar and composition rules above — realize the intent within the rules; if the rules forbid the literal proposal, compose the nearest rule-compliant name. Do not treat it as pre-approved.
-{% endif %}
-{% if item.reviewer_history %}
-- **📜 Full reviewer history — HARD RULE: if a prior reviewer raised an issue, your new name MUST address it. Do not regenerate with the same flaw.**
-  - **Latest review** (model={{ item.reviewer_history.latest.model }}, score={{ "%.2f"|format(item.reviewer_history.latest.score) if item.reviewer_history.latest.score is not none else 'N/A' }}):
-    {{ item.reviewer_history.latest.comment | replace('\n', '\n    ') }}
-{% if item.reviewer_history.prior_themes %}
-  - **Recurring concerns across earlier reviews:**
-{% for theme in item.reviewer_history.prior_themes %}    - ({{ theme.count }}×) {{ theme.theme }} — e.g. "{{ theme.example }}"
-{% endfor %}{% endif %}
-{% endif %}
-{% if item.cluster_siblings %}- **Cross-IDS siblings:**
-{% for sib in item.cluster_siblings[:5] %}  - {{ sib.path }} ({{ sib.unit or '?' }})
-{% endfor %}
-- **Concept identity:** These {{ item.cluster_siblings|length + 1 }} cross-IDS paths represent the SAME physics concept. Generate ONE name that covers all of them.
-{% endif %}
-{% if item.family_type %}
-- **🔗 Family context ({{ item.family_type }}):**
-{% if item.family_type == "physical_vector" %}  - This path is the **{{ item.family_axis }}** component of a vector quantity.
-  - **Sibling components:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
+  - **Instruction:** Produce a name that directly fixes every concrete issue raised above. Do NOT re-emit the previous name unchanged. If the reviewer flagged excessive length, redundant qualifiers, or convention violations, your new name must be shorter / cleaner / more idiomatic. If the reviewer was satisfied with a dimension (score ≥ 15), preserve that aspect.
 
-  - **ISN naming convention:** Each component should be named `{axis}_{parent}` where `{parent}` is the shared vector name (e.g., `toroidal_current_density`). The `_component_of_` connector is REJECTED by the grammar — use the short leading-qualifier form.
-  - All siblings MUST share the same `physical_base` — only the `component` segment differs.
-{% elif item.family_type == "geometric_coordinate" %}  - This path is the **{{ item.family_axis }}** coordinate of a geometric position.
-  - **Sibling coordinates:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
-{% if item.family_parent_name %}  - **Geometric base:** `{{ item.family_parent_name }}`{% endif %}
 
-  - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
-  - **Enumeration is a coordinate, not a name.** If the geometric position is an **ordinal point** (`first_point`/`second_point`/`third_point`/`point`/`<entity>_point`) or an `outline` vertex, the ordinal is an array index — COLLAPSE to the grandparent geometry carrier + axis: line-of-sight endpoints → `radial_line_of_sight` / `vertical_line_of_sight` (`base_token=line_of_sight`); outline vertices → `radial_outline` / `vertical_outline` (`base_token=outline`). Emit `dd_paths` covering EVERY ordinal sibling so they share the ONE name. Never put `first_point`/`second_point`/`outline_point` in the name; distinguish a point only by physical entity (`radial_position_of_aperture`, `radial_position_of_first_wall`), never by ordinal.
-  - **Local sensor axes x1/x2/x3 are DISTINCT directions, not ordinals** — use the registered carriers `x1_coordinate` / `x2_coordinate` / `x3_coordinate` (each its own name); never `first_coordinate`/`second_coordinate`.
-  - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
-{% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
-  - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
-  - **ISN naming convention:** a derivative is an OPERATOR applied to the numerator quantity X — never a coined compound base. Common cases use a dedicated operator with `operator_kind="unary_prefix"` and `base_token`=X: time derivative → `operator_token="time_derivative"`; radial derivative → `operator_token="radial_derivative"`; spatial gradient → `operator_token="gradient"`. For a derivative with respect to a flux coordinate Y (e.g. dV/dψ, dp/dψ), if no operator yet expresses it, emit a `vocab_gap` (segment `operator`) — do NOT coin `derivative_of_X_with_respect_to_Y` as a `base_token`.
-  - All siblings sharing the same denominator should use the consistent operator + base form.
-{% endif %}{% endif %}
 
-{% endfor %}
+
 
 ## Description — MANDATORY
 

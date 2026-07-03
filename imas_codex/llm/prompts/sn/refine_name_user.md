@@ -96,7 +96,17 @@ _(no prior refinement history — this is the first refine attempt)_
 {% endif %}
 
 {% endif %}
-{% if vocab_gap_detail %}
+{% if item.name_hint and item.edit_reason %}
+### Expert steering ({{ item.edit_origin or "human" }})
+
+A domain expert has proposed this naming direction: "{{ item.name_hint }}" —
+for this reason: {{ item.edit_reason }}
+
+This proposal is subordinate to the grammar and composition rules above —
+realize the intent within the rules; if the rules forbid the literal
+proposal, compose the nearest rule-compliant name. Do not treat it as
+pre-approved.
+{% endif %}{% if vocab_gap_detail %}
 
 ---
 

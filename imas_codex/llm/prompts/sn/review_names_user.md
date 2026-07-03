@@ -86,7 +86,9 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 - **DD version history:**
 {% for vh in item.dd_version_history %}  - {{ vh.change_type }} (v{{ vh.version }})
 {% endfor %}{% endif %}
-
+{% if item.edit_reason %}
+- **Deliberate expert steering**: a domain expert ({{ item.edit_origin or "human" }}) has deliberately steered this candidate for the following reason: {{ item.edit_reason }}. Judge the candidate on its physical and grammatical merits given this intent; do NOT penalize it merely for differing from a prior or established variant.
+{% endif %}
 {% endfor %}
 
 {% include "sn/_review_scored_examples.md" %}

@@ -1,0 +1,175 @@
+Name the **physical or geometric quantities** represented by the following
+IMAS Data Dictionary paths. Each standard name describes the underlying
+physics — NOT the DD path, IDS section, or measurement instrument.
+
+> **Standard Names are standalone, self-describing metadata labels.** Each name must convey its physical or geometrical meaning without reference to any external data dictionary. A domain expert reading only the name should immediately understand what quantity it represents, what coordinate system it uses, and what physical process it describes.
+
+**Subject–base separation rule:** Species and entity qualifiers (electron,
+ion, neutral, fast_ion) go in the `subject` segment, NOT fused into
+`physical_base`. Example: subject=electron + physical_base=temperature →
+`electron_temperature` — but `temperature` is the base, not
+`electron_temperature` as a monolithic token.
+
+This batch was assembled in **name-only mode**: paths share the same
+`physics_domain` and authoritative unit but may span many different
+semantic clusters and IDSs. **Your first task is to identify the
+natural sub-groups within this batch**, then emit one name per path.
+
+
+
+
+
+
+
+## Unit Policy
+
+The `unit` field for each path is pre-populated from the IMAS Data
+Dictionary and is **authoritative and final**:
+
+- Do NOT include unit in your output — it is injected at persistence time
+- Use the unit to disambiguate physics (e.g., `eV` vs `K` for temperature)
+- `dimensionless` means the quantity is genuinely unitless
+
+## Name-Only Mode — Reduced Context
+
+To keep the batch wide and cache-friendly, this prompt intentionally
+omits the deep per-item context (cluster siblings, cross-IDS equivalents,
+COCOS guidance, version history, reviewer feedback). A subsequent
+review / enrichment pass will attach those details. Your job here is
+to produce **clean, grammar-compliant names** that correctly
+identify the physical quantity — documentation depth can be terse.
+
+### What this means for your output
+
+- **Names** must still be fully grammar-compliant — the grammar
+  check runs on every candidate, and failures trigger a retry.
+- **Descriptions** should be concise (1–2 sentences) and faithful
+  to the DD description. Do not invent detail you don't have.
+- **Documentation**: a single paragraph naming the physical
+  observable, its units, and its typical usage context is enough.
+  The enrichment pass will expand this later.
+
+## Identify Natural Sub-Groups First
+
+Before naming, scan the full path list and group items by the
+**physical quantity** they represent (not by IDS). Typical
+sub-groupings within a single `(physics_domain, unit)` batch:
+
+- species-based: electron vs ion vs neutral
+- orientation: parallel vs perpendicular vs radial vs toroidal
+- process: flux vs source vs sink vs diffusivity
+- state: volumetric vs surface vs line-integrated
+
+Then emit **one** name per path, reusing the same base name when the
+sub-group identity is the same (e.g., `electron_particle_flux_parallel`
+and `ion_particle_flux_parallel` share a structure). Reuse existing
+standard names from the "Existing Standard Names" list whenever the DD
+path measures the same quantity — do not invent a synonym.
+
+## Common Anti-Patterns (AVOID)
+
+| ❌ Wrong | ✅ Correct | Why |
+|----------|-----------|-----|
+| `electron_temp` | `electron_temperature` | No abbreviations |
+| `core_electron_temperature` | `electron_temperature_core` | Position after physical_base |
+| `Te` | `electron_temperature` | No symbol abbreviations |
+| `electron_temperature_in_eV` | `electron_temperature` | Unit is never part of the name |
+| `current_from_passive_loop` | `passive_loop_current` | No `_from_` causation |
+| `reconstructed_faraday_rotation_angle` | `faraday_rotation_angle` | Processing method is metadata |
+| `geometric_minor_radius` | `minor_radius` | DD section prefix leaking in |
+| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `cross_sectional_area_of_rogowski_coil`) |
+| `power_of_bolometer` | `radiated_power` | **Observable vs hardware** — a diagnostic MEASURES a physical observable; name the observable, not the device. A bolometer measures the radiated power reaching it (not "power of the bolometer"), an interferometer the line-integrated density (not "phase of the interferometer"). BUT a *geometric/hardware* property genuinely OF the instrument keeps the instrument locus: `vertical_coordinate_of_bolometer` (where the detector is), `lower_bound_wavelength_of_visible_camera` (the camera's spectral range), `radial_coordinate_of_detector_pixel`. Test: is it the physics being probed (drop the device) or a fact about the device itself (keep it)? |
+| `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component/transformation tokens come BEFORE the base as a leading qualifier prefix — never as suffixes |
+| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **Compound hardware identifiers** — drop stacked hardware tokens; a unit-vector field's Z is a projection, not a coordinate |
+
+## Locus Preposition Rules (`_at_` vs `_of_`)
+
+The ISN grammar enforces strict preposition rules for locus qualifiers:
+
+- **`_at_` for spatial/geometric locus** (WHERE something is measured/evaluated): `at_core`, `at_pedestal_top`, `at_lcfs`
+- **`_of_` for entity/object association** (WHAT thing the quantity belongs to or is located at): `of_separatrix`, `of_magnetic_axis`, `of_plasma_boundary`, `of_langmuir_probe`, `of_coil`, `of_antenna`, `of_rogowski_coil`
+
+Named geometric entities (separatrix, magnetic_axis, x_point, plasma_boundary) and hardware objects (probe, coil, antenna) use `_of_`. Abstract spatial regions from the position vocabulary (core, pedestal_top, lcfs) use `_at_`.
+
+## Description Quality Rules
+
+- **No storage-shape tags** — NEVER write "1D", "2D", "3D", "scalar", "array",
+  "profile", "time-dependent" in descriptions. The description defines the
+  *physics*, not the data layout.
+- **American English only** — use "center" not "centre", "meter" not "metre",
+  "ionized" not "ionised". ISN catalog follows American spelling exclusively.
+
+## Batch Consistency Check
+
+Before finalizing, verify across your entire output:
+
+1. **No synonymous names** — same concept = same name
+2. **Consistent orientation suffixes** — all `_parallel`, not a mix of `_par`/`_parallel`
+3. **No DD leakage** — no name starts with an IDS or DD section prefix
+4. **No storage-shape tags** — no description mentions "1D", "2D", "3D", "profile", "array"
+5. **American spelling** — check for "centre", "metre", "behaviour" and correct to American
+
+## Batch Context
+
+
+
+
+
+
+
+
+
+## DD Paths to Name
+
+
+### equilibrium/time_slice/profiles_1d/psi
+
+
+- **Description:** Poloidal flux
+- **Unit:** Wb *(authoritative — do NOT output)*
+- **Data type:** FLT_1D
+
+- **Physics domain:** equilibrium
+- **Dimensions:** D
+
+
+
+- **Parent:** equilibrium/time_slice/profiles_1d
+
+
+
+
+
+
+
+
+
+
+
+- **📝 Prior reviewer feedback — your new name MUST address every issue raised:**
+  - **Previous name:** `poloidal_flux_old` (score=0.45, tier=inadequate)
+  - **Prior documentation:** Multi-paragraph prior doc.
+  - **Rubric scores (out of 20 each):** `grammar`=12, `semantic`=10, `convention`=14, `completeness`=9
+  - **Reviewer critique:** Name lacks locus distinguisher.
+  - **Reviewer's suggested replacement:** `poloidal_magnetic_flux` — Cluster siblings use _magnetic_.
+  - Start from the suggestion; refine only if it has grammar or convention defects.
+  - Do NOT re-emit the previous name unchanged.
+
+
+
+
+## Vocabulary Gaps
+
+If a path requires a token that does **not** exist in a closed grammar
+segment (e.g., a new `subject` species or `position`), do NOT invent
+an invalid name. Instead, add the path to the `vocab_gaps` list with:
+
+- `source_id`: the DD path
+- `segment`: which grammar segment is missing a token
+- `token`: the token value you would need
+- `reason`: why this token is needed
+
+**⚠️ CRITICAL: Most vocab gaps are false positives.** Before emitting:
+1. Search the token in ALL segment registries — it may exist in another segment
+2. For compound tokens, check if each part exists as a registered token — decompose instead
+3. Verify no existing token already covers the concept
