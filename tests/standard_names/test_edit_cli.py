@@ -2,8 +2,12 @@
 
 Both surfaces are thin wrappers over
 :func:`imas_codex.standard_names.edit.apply_edit` — the engine itself is
-tested elsewhere. These tests mock ``apply_edit`` (patched where each
-surface imports it) and verify argument wiring, mutual-exclusion /
+tested elsewhere. Both the CLI and the MCP tool import ``apply_edit``
+function-locally (a module-level import from either surface closes an
+import cycle: edit -> graph_ops -> discovery -> cli.logging -> cli/__init__
+register_commands -> cli.sn), so these tests patch the single source,
+``imas_codex.standard_names.edit.apply_edit``, rather than a
+surface-local name. They verify argument wiring, mutual-exclusion /
 mandatory-reason validation, and rendering of the returned ``EditPlan``.
 
 No graph or LLM access — the autouse ``_block_live_graph`` fixture in
@@ -100,7 +104,9 @@ def test_blank_reason_is_usage_error():
 
 def test_scope_self_maps_to_only_self():
     runner = CliRunner()
-    with patch("imas_codex.cli.sn.apply_edit", return_value=_plan()) as mock_apply:
+    with patch(
+        "imas_codex.standard_names.edit.apply_edit", return_value=_plan()
+    ) as mock_apply:
         result = runner.invoke(
             sn,
             [
@@ -122,7 +128,9 @@ def test_scope_self_maps_to_only_self():
 def test_scope_family_and_subtree_pass_through():
     runner = CliRunner()
     for scope_flag, expected in (("family", "family"), ("subtree", "subtree")):
-        with patch("imas_codex.cli.sn.apply_edit", return_value=_plan()) as mock_apply:
+        with patch(
+            "imas_codex.standard_names.edit.apply_edit", return_value=_plan()
+        ) as mock_apply:
             result = runner.invoke(
                 sn,
                 [
@@ -143,7 +151,9 @@ def test_scope_family_and_subtree_pass_through():
 def test_default_scope_is_none():
     """No --scope means apply_edit resolves the default itself."""
     runner = CliRunner()
-    with patch("imas_codex.cli.sn.apply_edit", return_value=_plan()) as mock_apply:
+    with patch(
+        "imas_codex.standard_names.edit.apply_edit", return_value=_plan()
+    ) as mock_apply:
         result = runner.invoke(
             sn,
             [
@@ -167,7 +177,7 @@ def test_default_scope_is_none():
 def test_dry_run_banner_rendered():
     plan = _plan(applied=False, entry="review_name", mode="rename", axis="name")
     runner = CliRunner()
-    with patch("imas_codex.cli.sn.apply_edit", return_value=plan):
+    with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
         result = runner.invoke(
             sn,
             [
@@ -182,7 +192,9 @@ def test_dry_run_banner_rendered():
         )
     assert result.exit_code == 0, result.output
     assert "DRY RUN" in result.output
-    with patch("imas_codex.cli.sn.apply_edit", return_value=plan) as mock_apply:
+    with patch(
+        "imas_codex.standard_names.edit.apply_edit", return_value=plan
+    ) as mock_apply:
         runner.invoke(
             sn,
             [
@@ -205,7 +217,7 @@ def test_blocked_plan_exits_2_with_message():
         actions=[],
     )
     runner = CliRunner()
-    with patch("imas_codex.cli.sn.apply_edit", return_value=plan):
+    with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
         result = runner.invoke(
             sn,
             [
@@ -231,7 +243,7 @@ def test_successful_apply_prints_successor_and_followthrough_hint():
         applied=True,
     )
     runner = CliRunner()
-    with patch("imas_codex.cli.sn.apply_edit", return_value=plan):
+    with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
         result = runner.invoke(
             sn,
             [
@@ -258,7 +270,7 @@ def test_cascade_table_rendered_for_family_scope():
         cascade_planned=[{"from": "electron_temperature_a", "to": "ion_temperature_a"}],
     )
     runner = CliRunner()
-    with patch("imas_codex.cli.sn.apply_edit", return_value=plan):
+    with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
         result = runner.invoke(
             sn,
             [
@@ -280,7 +292,7 @@ def test_cascade_table_rendered_for_family_scope():
 def test_value_error_from_engine_becomes_usage_error():
     runner = CliRunner()
     with patch(
-        "imas_codex.cli.sn.apply_edit",
+        "imas_codex.standard_names.edit.apply_edit",
         side_effect=ValueError("rename mode requires a non-empty `rename` value"),
     ):
         result = runner.invoke(
@@ -321,7 +333,7 @@ class TestEditStandardNameTool:
         from imas_codex.llm.sn_tools import _edit_standard_name
 
         plan = _plan()
-        with patch("imas_codex.llm.sn_tools.apply_edit", return_value=plan):
+        with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
             result = _edit_standard_name(
                 "electron_temperature", "because", hint="clarify"
             )
@@ -334,7 +346,7 @@ class TestEditStandardNameTool:
         from imas_codex.llm.sn_tools import _edit_standard_name
 
         with patch(
-            "imas_codex.llm.sn_tools.apply_edit", return_value=_plan()
+            "imas_codex.standard_names.edit.apply_edit", return_value=_plan()
         ) as mock_apply:
             _edit_standard_name("electron_temperature", "because", hint="clarify")
         assert mock_apply.call_args.kwargs["origin"] == "agent"
@@ -343,7 +355,7 @@ class TestEditStandardNameTool:
         from imas_codex.llm.sn_tools import _edit_standard_name
 
         with patch(
-            "imas_codex.llm.sn_tools.apply_edit", return_value=_plan()
+            "imas_codex.standard_names.edit.apply_edit", return_value=_plan()
         ) as mock_apply:
             _edit_standard_name(
                 "electron_temperature", "because", hint="clarify", scope="self"
@@ -362,7 +374,7 @@ class TestEditStandardNameTool:
         from imas_codex.llm.sn_tools import _edit_standard_name
 
         with patch(
-            "imas_codex.llm.sn_tools.apply_edit",
+            "imas_codex.standard_names.edit.apply_edit",
             side_effect=ValueError("apply_edit requires a non-empty reason"),
         ):
             result = _edit_standard_name("electron_temperature", "because")
@@ -373,7 +385,7 @@ class TestEditStandardNameTool:
         from imas_codex.llm.sn_tools import _edit_standard_name
 
         plan = _plan(blocked="target not found", applied=False)
-        with patch("imas_codex.llm.sn_tools.apply_edit", return_value=plan):
+        with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
             result = _edit_standard_name("unknown_name", "because", hint="clarify")
         assert result["blocked"] == "target not found"
         assert "BLOCKED" in result["summary"]

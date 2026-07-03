@@ -16,7 +16,6 @@ from neo4j.exceptions import ServiceUnavailable
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import EditScope
-from imas_codex.standard_names.edit import apply_edit
 from imas_codex.standard_names.search import (
     check_names as _check_names_backing,
     fetch_standard_names as _fetch_sn_backing,
@@ -841,6 +840,12 @@ def _edit_standard_name(
         if scope not in _EDIT_SCOPE_MAP:
             return {"error": f"scope={scope!r} invalid (self|family|subtree)"}
         scope_value = _EDIT_SCOPE_MAP[scope]
+
+    # Function-local import: a module-level import of standard_names.edit
+    # closes an import cycle (edit -> graph_ops -> discovery -> cli.logging
+    # -> cli/__init__ register_commands -> cli.sn) and breaks any
+    # standard_names-first import of the package.
+    from imas_codex.standard_names.edit import apply_edit
 
     try:
         plan = apply_edit(

@@ -19,7 +19,6 @@ from imas_codex.standard_names.defaults import (
     REVIEW_DOCS_BACKLOG_CAP,
     REVIEW_NAME_BACKLOG_CAP,
 )
-from imas_codex.standard_names.edit import apply_edit
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -4398,6 +4397,12 @@ def sn_edit(
             "family": EditScope.family.value,
             "subtree": EditScope.subtree.value,
         }[scope_value]
+
+    # Function-local import: a module-level import of standard_names.edit
+    # from this module closes an import cycle (edit → graph_ops → discovery
+    # → cli.logging → cli/__init__ register_commands → cli.sn) and breaks
+    # any standard_names-first import of the package.
+    from imas_codex.standard_names.edit import apply_edit
 
     try:
         plan = apply_edit(
