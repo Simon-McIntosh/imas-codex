@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.44">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
@@ -302,17 +302,16 @@
         <code>review_docs_user</code>, <code>review_docs_parent_user</code>;
         reason + origin only, never the proposal as pre-approved
         (commit <code>3a304f92</code>).</li>
-      <li><strong>§5d Redesign mode (skip-generate)</strong> — write the proposed
-        name/docs as a drafted candidate via the refine persist path (name change
-        supersedes old + <code>REFINED_FROM</code>), entering at review.
-        Note: <code>persist_refined_name</code> gates on
-        <code>old.name_stage='refining'</code>, so the edit engine claims the
-        target through that stage first; targets in terminal stages
-        (<code>superseded</code> without successor, <code>exhausted</code>) are
-        valid edit targets — the edit resurrects the DD-path coverage by giving
-        them a successor. <em>Done-when:</em> <code>--rename</code> produces a
-        reviewable candidate with no generate call; old name superseded; links
-        migrated.</li>
+      <li><strong>§5d Redesign mode (skip-generate)</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>imas_codex/standard_names/edit.py</code> (<code>apply_edit</code> →
+        <code>EditPlan</code>; 781 lines): rename claims the target through
+        <code>refining</code> and persists a drafted successor via
+        <code>persist_refined_name</code> (+<code>REFINED_FROM</code>, edge
+        migration, edit fields stamped); docs mode persists via the
+        <code>DocsRevision</code> snapshot path; superseded-without-successor
+        targets are resurrectable, superseded-with-successor refused
+        (commit <code>fcf3db0c</code>).</li>
       <li><strong>§5e CLI + MCP</strong> — <code>imas-codex sn edit</code> with the
         §3.3 surface + the mirrored MCP write tool, sharing one implementation.
         <em>Done-when:</em> both surfaces attach the edit and re-enter the SN at
@@ -333,8 +332,14 @@
         which §3.5 forbids). Instead the cascade is staged at edit time
         (dry-run planned, conflicts surfaced) and applied atomically when the
         root's review accepts (<code>edit_status &#8594; applied</code> hook).
-        <em>Done-when:</em> a parent edit re-derives its children; a shared-base
-        leaf edit is blocked without <code>--scope family</code>.</li>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        scope resolution + sibling-desync guard in <code>edit.py</code>;
+        <code>cascade.py</code> gains <code>cascade_descendants_of</code> +
+        <code>parent_segment_of_child</code>; acceptance hook in
+        <code>persist_reviewed_name</code>/<code>persist_reviewed_docs</code>
+        drives <code>open &#8594; applied|exhausted</code> and applies the staged
+        cascade atomically; acceptance-time conflicts never revert the acceptance
+        (commit <code>fcf3db0c</code>; 180 unit tests + regression slice green).</li>
       <li><strong>§5g Status lifecycle</strong> — <code>applied</code> on
         acceptance, <code>exhausted</code> at the refine cap, surfaced in
         <code>sn status</code>. <em>Done-when:</em> outcomes reflected + listed.</li>
