@@ -153,13 +153,24 @@ Cross-reference the parent: `[{{ item.parent_sn.name }}](name:{{ item.parent_sn.
 {% endif %}
 
 {% if item.child_components %}
-## Component Standard Names
+## Component Standard Names — document at PARENT scope
 
-This quantity has the following directional/projection components:
+`{{ item.name }}` is the parent of the more specific standard names below.
+Your entry is the family's shared reference: components link here for the
+common physics context.
+
 {% for c in item.child_components %}- `{{ c.name }}`{% if c.axis %} ({{ c.axis }}){% endif %}{% if c.description %}: {{ c.description }}{% endif %}
 {% endfor %}
 
-Write primary documentation here. Components reference this name for shared physics context.
+Write the description and documentation for the **general quantity the name
+denotes**, wide enough that EVERY child above is an instance of it. Do NOT
+narrow the definition to any single child's species, axis, locus, or
+application — and do NOT narrow it to your own source material when the
+children attest a broader span (a parent's source is often just one concrete
+instance). If the children are too heterogeneous to share one physical
+definition, define the name at the level they DO share (e.g. a dimensionless
+part-to-whole ratio) and characterize the distinct sub-uses briefly, cross-
+referencing representative children with `[label](name:bare_id)`.
 {% endif %}
 
 {% if item.base_quantity %}
