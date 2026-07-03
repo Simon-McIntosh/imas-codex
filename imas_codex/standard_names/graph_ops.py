@@ -833,7 +833,12 @@ def fetch_review_feedback_for_sources(
                    sn.reviewer_suggested_name AS reviewer_suggested_name,
                    sn.reviewer_suggestion_justification_name
                        AS reviewer_suggestion_justification,
-                   sn.validation_status AS validation_status
+                   sn.validation_status AS validation_status,
+                   sn.edit_mode AS edit_mode,
+                   sn.name_hint AS name_hint,
+                   sn.docs_hint AS docs_hint,
+                   sn.edit_reason AS edit_reason,
+                   sn.edit_origin AS edit_origin
             """,
             ids=ids,
         )
@@ -865,6 +870,11 @@ def fetch_review_feedback_for_sources(
                 row.get("reviewer_suggestion_justification") or None
             ),
             "validation_status": row.get("validation_status"),
+            "edit_mode": row.get("edit_mode"),
+            "name_hint": row.get("name_hint"),
+            "docs_hint": row.get("docs_hint"),
+            "edit_reason": row.get("edit_reason"),
+            "edit_origin": row.get("edit_origin"),
         }
         existing = mapping.get(sid)
         if existing is None:
@@ -8007,6 +8017,11 @@ def claim_review_name_batch(
             ", coalesce(sn.chain_length, 0) AS chain_length"
             ", sn.name_stage AS name_stage"
             ", sn.origin AS origin"
+            ", sn.edit_mode AS edit_mode"
+            ", sn.name_hint AS name_hint"
+            ", sn.docs_hint AS docs_hint"
+            ", sn.edit_reason AS edit_reason"
+            ", sn.edit_origin AS edit_origin"
         ),
         domain=domain,
         scope_run_id=scope_run_id,
@@ -8100,7 +8115,9 @@ def persist_reviewed_name(
             MATCH (sn:StandardName {id: $id})
             WHERE sn.name_stage = 'drafted'
               AND (sn.claim_token = $token OR sn.claim_token IS NULL)
-            RETURN coalesce(sn.chain_length, 0) AS chain_length
+            RETURN coalesce(sn.chain_length, 0) AS chain_length,
+                   sn.edit_status AS edit_status,
+                   sn.edit_scope AS edit_scope
             """,
             id=sn_id,
             token=claim_token,
@@ -8115,6 +8132,8 @@ def persist_reviewed_name(
         return ""
 
     chain_length: int = int(rows[0]["chain_length"])
+    edit_status_before: str | None = rows[0].get("edit_status")
+    edit_scope_before: str | None = rows[0].get("edit_scope")
 
     # ── Stage decision ────────────────────────────────────────────────
     # Score is canonical (rubric-driven 0–1).
@@ -8129,6 +8148,20 @@ def persist_reviewed_name(
         target_stage = "exhausted"
     else:
         target_stage = "reviewed"
+
+    # ── Edit lifecycle decision ──────────────────────────────────────
+    # Mirrors the `open → applied | exhausted | rejected` lifecycle
+    # documented on EditStatus. A 'reviewed' outcome leaves the edit
+    # 'open' — it rides the refine_name loop (persist_refined_name
+    # propagates the still-open edit fields onto the next rotation).
+    new_edit_status = edit_status_before
+    if edit_status_before == "open":
+        if target_stage == "accepted":
+            new_edit_status = "applied"
+        elif target_stage == "exhausted":
+            new_edit_status = "exhausted"
+        else:
+            new_edit_status = "open"
 
     scores_json = _json.dumps(scores) if scores is not None else None
     comments_per_dim_json = (
@@ -8148,6 +8181,7 @@ def persist_reviewed_name(
                 sn.reviewer_model_name        = $model,
                 sn.reviewed_name_at           = datetime(),
                 sn.name_stage                 = $target_stage,
+                sn.edit_status                = $new_edit_status,
                 sn.claim_token                = null,
                 sn.claimed_at                 = null
             RETURN sn.id AS id
@@ -8160,6 +8194,7 @@ def persist_reviewed_name(
             comments_per_dim_json=comments_per_dim_json,
             model=model,
             target_stage=target_stage,
+            new_edit_status=new_edit_status,
         )
 
     # A concurrent reviewer already transitioned this node out of 'drafted'
@@ -8181,6 +8216,66 @@ def persist_reviewed_name(
         chain_length,
         rotation_cap,
     )
+
+    # ── Apply the staged descendant cascade atomically on edit acceptance ──
+    # scope='family'|'subtree' means sn_id is the (possibly parent-mapped)
+    # rename root of an `imas-codex sn edit` proposal — accepting it here is
+    # the reviewed decision; descendants never individually re-enter LLM
+    # review, they follow the root atomically. Recomputed fresh from the
+    # LIVE subtree (not the edit-time dry-run plan) since HAS_PARENT
+    # topology may have shifted between attach and acceptance.
+    if (
+        target_stage == "accepted"
+        and new_edit_status == "applied"
+        and edit_scope_before in ("family", "subtree")
+    ):
+        from imas_codex.standard_names.cascade import cascade_descendants_of
+
+        with GraphClient() as gc:
+            pred_rows = gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})-[:REFINED_FROM]->(pred:StandardName)
+                RETURN pred.id AS pred_id
+                """,
+                id=sn_id,
+            )
+            old_root = pred_rows[0]["pred_id"] if pred_rows else sn_id
+            cascade_result = cascade_descendants_of(
+                gc,
+                successor_id=sn_id,
+                old_root=old_root,
+                new_root=sn_id,
+                dry_run=False,
+                override_edits=True,
+                include_accepted=True,
+            )
+            if cascade_result.conflicts:
+                # Never lose the acceptance over a cascade conflict — record
+                # it for operator follow-up and leave descendants unrenamed.
+                logger.warning(
+                    "persist_reviewed_name: edit accepted for %s but "
+                    "descendant cascade has %d conflict(s) — descendants "
+                    "left unrenamed: %s",
+                    sn_id,
+                    len(cascade_result.conflicts),
+                    cascade_result.conflicts,
+                )
+                gc.query(
+                    """
+                    MATCH (sn:StandardName {id: $id})
+                    SET sn.validation_issues = coalesce(sn.validation_issues, [])
+                        + [c IN $conflicts | '[edit_cascade] ' + c]
+                    """,
+                    id=sn_id,
+                    conflicts=cascade_result.conflicts,
+                )
+            else:
+                logger.info(
+                    "persist_reviewed_name: edit-cascade applied for %s — "
+                    "%d descendant(s) renamed",
+                    sn_id,
+                    len(cascade_result.renamed),
+                )
 
     # ── Write StandardNameReview node + HAS_REVIEW edge (Finding 1 fix) ──
     # The single-reviewer worker path was previously SETting reviewer_*
@@ -8306,6 +8401,11 @@ def claim_review_docs_batch(
             ", sn.tags AS tags"
             ", coalesce(sn.docs_chain_length, 0) AS docs_chain_length"
             ", sn.docs_stage AS docs_stage"
+            ", sn.edit_mode AS edit_mode"
+            ", sn.name_hint AS name_hint"
+            ", sn.docs_hint AS docs_hint"
+            ", sn.edit_reason AS edit_reason"
+            ", sn.edit_origin AS edit_origin"
         ),
         domain=domain,
         scope_run_id=scope_run_id,
@@ -8398,7 +8498,8 @@ def persist_reviewed_docs(
               AND sn.docs_stage = 'drafted'
               AND sn.name_stage = 'accepted'
             RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
-                   sn.documentation AS documentation
+                   sn.documentation AS documentation,
+                   sn.edit_status AS edit_status
             """,
             id=sn_id,
             token=claim_token,
@@ -8413,6 +8514,7 @@ def persist_reviewed_docs(
         return ""
 
     docs_chain_length: int = int(rows[0]["docs_chain_length"])
+    edit_status_before: str | None = rows[0].get("edit_status")
 
     # ── Stage decision ────────────────────────────────────────────────
     # Score is canonical (see persist_reviewed_name for rationale,
@@ -8463,6 +8565,21 @@ def persist_reviewed_docs(
                 len(mismatches),
             )
 
+    # ── Edit lifecycle decision (docs axis) ────────────────────────────
+    # Computed after the link-mismatch demotion above so a demoted
+    # 'accepted' → 'reviewed' correctly keeps the edit 'open' rather than
+    # prematurely marking it 'applied'. Same open → applied | exhausted |
+    # (stays open) lifecycle as persist_reviewed_name. Docs edits never
+    # cascade — the transition is purely a lifecycle stamp on this node.
+    new_edit_status = edit_status_before
+    if edit_status_before == "open":
+        if target_stage == "accepted":
+            new_edit_status = "applied"
+        elif target_stage == "exhausted":
+            new_edit_status = "exhausted"
+        else:
+            new_edit_status = "open"
+
     scores_json = _json.dumps(scores) if scores is not None else None
     comments_per_dim_json = (
         _json.dumps(comments_per_dim) if comments_per_dim is not None else None
@@ -8482,6 +8599,7 @@ def persist_reviewed_docs(
                 sn.reviewer_model_docs        = $model,
                 sn.reviewed_docs_at           = datetime(),
                 sn.docs_stage                 = $target_stage,
+                sn.edit_status                = $new_edit_status,
                 sn.claim_token                = null,
                 sn.claimed_at                 = null
             RETURN sn.id AS id
@@ -8494,6 +8612,7 @@ def persist_reviewed_docs(
             comments_per_dim_json=comments_per_dim_json,
             model=model,
             target_stage=target_stage,
+            new_edit_status=new_edit_status,
         )
     # A concurrent reviewer already transitioned this node out of 'drafted'
     # between our readback and this SET — our review is a duplicate; report a
@@ -8656,6 +8775,11 @@ def claim_refine_name_batch(
             ", sn.tags AS tags"
             ", sn.vocab_gap_detail AS vocab_gap_detail"
             ", sn.validation_issues AS validation_issues"
+            ", sn.edit_mode AS edit_mode"
+            ", sn.name_hint AS name_hint"
+            ", sn.docs_hint AS docs_hint"
+            ", sn.edit_reason AS edit_reason"
+            ", sn.edit_origin AS edit_origin"
         ),
         stage_field="name_stage",
         to_stage="refining",
@@ -8879,6 +9003,14 @@ def persist_refined_name(
     reason: str = "",
     escalated: bool = False,
     run_id: str | None = None,
+    edit_mode: str | None = None,
+    name_hint: str | None = None,
+    docs_hint: str | None = None,
+    edit_reason: str | None = None,
+    edit_origin: str | None = None,
+    edit_scope: str | None = None,
+    edit_status: str | None = None,
+    edit_requested_at: str | None = None,
 ) -> dict[str, str]:
     """Persist a refined StandardName as a NEW node with source-edge migration.
 
@@ -8898,6 +9030,16 @@ def persist_refined_name(
 
     Raises ``ValueError`` if ``new_name == old_name`` — self-referential
     refinement would create a ``REFINED_FROM`` self-loop.
+
+    Edit-steering fields (``edit_mode``, ``name_hint``, ``docs_hint``,
+    ``edit_reason``, ``edit_origin``, ``edit_scope``, ``edit_status``,
+    ``edit_requested_at``) are set on the new successor node when passed
+    explicitly (the ``imas-codex sn edit`` rename-mode caller).  When the
+    caller passes none of them, this function instead checks whether the
+    predecessor (``old_name``) carries a still-open edit
+    (``edit_status='open'``) and, if so, copies its edit fields forward —
+    a refine rotation of an edited name must not silently drop the
+    steering + reason that got it there.
     """
     if new_name == old_name:
         raise ValueError(
@@ -8905,6 +9047,39 @@ def persist_refined_name(
             f"cannot create self-referential REFINED_FROM edge"
         )
     new_chain_length = old_chain_length + 1
+
+    # Edit-field propagation for the "regular pipeline refine" caller (no
+    # edit kwargs passed explicitly): if the predecessor's edit is still
+    # open, ride its steering fields forward onto the successor. The
+    # `imas-codex sn edit` rename-mode caller always passes edit_mode,
+    # edit_reason, and edit_status explicitly, so this lookup is skipped
+    # for that path.
+    if edit_mode is None and edit_reason is None and edit_status is None:
+        with GraphClient() as gc:
+            _old_rows = gc.query(
+                """
+                MATCH (old:StandardName {id: $old_name})
+                RETURN old.edit_status AS edit_status,
+                       old.edit_mode AS edit_mode,
+                       old.name_hint AS name_hint,
+                       old.docs_hint AS docs_hint,
+                       old.edit_reason AS edit_reason,
+                       old.edit_origin AS edit_origin,
+                       old.edit_scope AS edit_scope,
+                       old.edit_requested_at AS edit_requested_at
+                """,
+                old_name=old_name,
+            )
+        if _old_rows and _old_rows[0].get("edit_status") == "open":
+            _old = _old_rows[0]
+            edit_mode = _old.get("edit_mode")
+            name_hint = _old.get("name_hint")
+            docs_hint = _old.get("docs_hint")
+            edit_reason = _old.get("edit_reason")
+            edit_origin = _old.get("edit_origin")
+            edit_scope = _old.get("edit_scope")
+            edit_status = _old.get("edit_status")
+            edit_requested_at = _old.get("edit_requested_at")
 
     escalation_set = ""
     if escalated:
@@ -8936,7 +9111,15 @@ def persist_refined_name(
                           new.created_at        = datetime(),
                           new.generated_at      = datetime(),
                           new.refine_reason     = $reason,
-                          new.run_id            = $run_id
+                          new.run_id            = $run_id,
+                          new.edit_mode         = $edit_mode,
+                          new.name_hint         = $name_hint,
+                          new.docs_hint         = $docs_hint,
+                          new.edit_reason       = $edit_reason,
+                          new.edit_origin       = $edit_origin,
+                          new.edit_scope        = $edit_scope,
+                          new.edit_status       = $edit_status,
+                          new.edit_requested_at = $edit_requested_at
                           {escalation_set}
 
                         // 2. Link to predecessor
@@ -9028,6 +9211,14 @@ def persist_refined_name(
                         model=model,
                         reason=reason,
                         run_id=run_id,
+                        edit_mode=edit_mode,
+                        name_hint=name_hint,
+                        docs_hint=docs_hint,
+                        edit_reason=edit_reason,
+                        edit_origin=edit_origin,
+                        edit_scope=edit_scope,
+                        edit_status=edit_status,
+                        edit_requested_at=edit_requested_at,
                     )
                 )
                 tx.commit()
@@ -9927,6 +10118,11 @@ def claim_generate_docs_batch(
             ", sn.chain_length AS chain_length"
             ", sn.docs_stage AS docs_stage"
             ", sn.name_stage AS name_stage"
+            ", sn.edit_mode AS edit_mode"
+            ", sn.name_hint AS name_hint"
+            ", sn.docs_hint AS docs_hint"
+            ", sn.edit_reason AS edit_reason"
+            ", sn.edit_origin AS edit_origin"
         ),
         # stage_field=None → claim only, no stage transition
         domain=domain,
@@ -10214,6 +10410,11 @@ def claim_refine_docs_batch(
             ", sn.reviewer_comments_per_dim_docs"
             "     AS reviewer_comments_per_dim_docs"
             ", sn.reviewer_comments_docs AS reviewer_comments_docs"
+            ", sn.edit_mode AS edit_mode"
+            ", sn.name_hint AS name_hint"
+            ", sn.docs_hint AS docs_hint"
+            ", sn.edit_reason AS edit_reason"
+            ", sn.edit_origin AS edit_origin"
         ),
         stage_field="docs_stage",
         to_stage="refining",
