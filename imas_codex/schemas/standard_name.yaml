@@ -329,6 +329,85 @@ enums:
           Replaced by a refined successor node via REFINED_FROM.
           Terminal — old node is kept for lineage but not re-processed.
 
+  EditMode:
+    description: >-
+      How an externally steered edit candidate originated. Set alongside
+      name_hint / docs_hint when a human or agent attaches a proposal to a
+      StandardName via `imas-codex sn edit`.
+    permissible_values:
+      hint:
+        description: >-
+          A direction is injected into generate_name/refine_name (name_hint)
+          or generate_docs/refine_docs (docs_hint) prompts as additional
+          steering context; the pipeline still composes the candidate.
+      rename:
+        description: >-
+          name_hint carries a full replacement name that skips generation —
+          the proposed name rides straight into name review.
+      docs:
+        description: >-
+          docs_hint carries full replacement documentation that skips
+          generation — the proposed documentation rides straight into
+          docs review.
+
+  EditOrigin:
+    description: >-
+      Who proposed an edit attached via `imas-codex sn edit`. Distinct from
+      the implicit reviewer origin of `reviewer_suggested_name` (which is
+      always LLM-authored); edit_origin records the human/agent that
+      requested the steering.
+    permissible_values:
+      human:
+        description: Edit proposed by a human editor.
+      agent:
+        description: Edit proposed by an autonomous or supervised agent.
+
+  EditStatus:
+    description: >-
+      Lifecycle of an edit attached via `imas-codex sn edit`.
+        open → applied | exhausted | rejected
+    permissible_values:
+      open:
+        description: >-
+          Edit is attached and riding the existing generate→review→score
+          pipeline; outcome not yet determined.
+      applied:
+        description: >-
+          The steered candidate was accepted by review — the edit achieved
+          its intended change. Terminal.
+      exhausted:
+        description: >-
+          The refine rotation cap was hit without the steered candidate
+          being accepted. Terminal.
+      rejected:
+        description: >-
+          The steered candidate was scored below threshold by review with
+          no further rotation available, or was terminally rejected by an
+          editor. Terminal.
+
+  EditScope:
+    description: >-
+      Blast radius of an edit attached via `imas-codex sn edit`. Recorded on
+      the edited StandardName so the rename cascade can be applied once the
+      root edit's review accepts it.
+    permissible_values:
+      only_self:
+        description: >-
+          The edit applies to this StandardName only. Named `only_self`
+          rather than `self` — a permissible_value literally named "self"
+          crashes the LinkML/jsonasobj2 YAML loader (ExtendedNamespace
+          kwarg collision with the `self` positional parameter) for every
+          schema in the import closure, not just this one.
+      family:
+        description: >-
+          The edit applies to this StandardName plus sibling StandardNames
+          sharing the edited segment, and triggers parent re-derivation.
+      subtree:
+        description: >-
+          The edit applies to this StandardName (as parent) plus every
+          descendant reachable via HAS_PARENT — the rename cascade follows
+          the full subtree.
+
 # =============================================================================
 # Classes
 # =============================================================================
@@ -1296,6 +1375,62 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_LOCUS
+      # --- sn edit steering (human/agent proposals) ---
+      edit_mode:
+        description: >-
+          How the attached edit steers the pipeline — hint (direction
+          injected into generate/refine), rename (full replacement name,
+          skips generation), or docs (full replacement documentation,
+          skips generation). Null when no edit is attached.
+        range: EditMode
+      name_hint:
+        description: >-
+          Edit-steering payload for the name axis. In hint mode, a proposed
+          direction injected into generate_name/refine_name prompts. In
+          rename mode, the full replacement name that skips generation and
+          rides straight into name review. Null when no name-axis edit is
+          attached.
+        range: string
+      docs_hint:
+        description: >-
+          Edit-steering payload for the docs axis. In hint mode, a proposed
+          direction injected into generate_docs/refine_docs prompts. In
+          docs mode, the full replacement documentation that skips
+          generation and rides straight into docs review. Null when no
+          docs-axis edit is attached.
+        range: string
+      edit_reason:
+        description: >-
+          Mandatory justification for the attached edit. Injected into
+          generate/refine prompts (hint mode) AND into the review gate
+          (both hint and rename/docs modes) to neutralize the reviewer's
+          revert-to-original pull. Required whenever edit_mode is set.
+        range: string
+      edit_origin:
+        description: >-
+          Who proposed the attached edit — human or agent. Distinct from
+          the implicit LLM authorship of reviewer_suggested_name.
+        range: EditOrigin
+      edit_status:
+        description: >-
+          Lifecycle of the attached edit. Set to 'open' when the edit is
+          attached, transitions to 'applied' when review accepts the
+          steered candidate, 'exhausted' when the refine rotation cap is
+          hit first, or 'rejected' when review terminally scores it below
+          threshold. Null when no edit has ever been attached.
+        range: EditStatus
+      edit_scope:
+        description: >-
+          Blast radius of the attached edit — only_self, family, or
+          subtree. Recorded at attach time so the rename cascade can be
+          applied to the correct set of descendants once the root edit's
+          review accepts it.
+        range: EditScope
+      edit_requested_at:
+        description: >-
+          ISO 8601 timestamp when the edit was attached via
+          `imas-codex sn edit`. Null when no edit has ever been attached.
+        range: datetime
 
   Locus:
     description: >-
