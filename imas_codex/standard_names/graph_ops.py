@@ -10329,6 +10329,180 @@ def persist_refined_docs(
 
 
 @retry_on_deadlock()
+def reset_standard_name_docs(
+    *,
+    sn_ids: list[str],
+    run_id: str | None = None,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    """Reset the docs pipeline for an explicit set of StandardNames.
+
+    The family-harmonization mark step: each eligible member has its
+    current docs snapshotted to a :class:`DocsRevision` (same deterministic
+    ``{id}#rev-{chain}`` scheme as :func:`persist_refined_docs`, advancing
+    ``docs_chain_length`` so revision ids never collide), then its
+    ``docs_stage`` is reset to ``'pending'`` and all reviewer-docs state is
+    cleared so the generate_docs → review_docs gate re-runs from scratch.
+    ``description``/``documentation`` are left in place — the generate_docs
+    prompt treats them as untrusted scaffolding and rewrites them.
+
+    Eligible: ``name_stage='accepted'`` AND ``docs_stage`` in
+    accepted/exhausted/reviewed/drafted. Names already ``pending`` (or not
+    in the docs pipeline) are skipped — they regenerate anyway.
+
+    Args:
+        sn_ids: Explicit StandardName ids to reset.
+        run_id: When set, stamped onto ``sn.run_id`` so a subsequent
+            pool run with ``scope_run_id=run_id`` claims ONLY these names
+            (leaving the global docs-pending backlog untouched).
+        dry_run: Report the eligible count without writing.
+
+    Returns:
+        ``{"eligible": n, "reset": n_or_0}``.
+    """
+    if not sn_ids:
+        return {"eligible": 0, "reset": 0}
+
+    eligibility = """
+        UNWIND $sn_ids AS sid
+        MATCH (sn:StandardName {id: sid})
+        WHERE sn.name_stage = 'accepted'
+          AND coalesce(sn.docs_stage, '')
+              IN ['accepted', 'exhausted', 'reviewed', 'drafted']
+    """
+    with GraphClient() as gc:
+        rows = gc.query(eligibility + " RETURN count(sn) AS eligible", sn_ids=sn_ids)
+        eligible: int = rows[0]["eligible"] if rows else 0
+        if dry_run or eligible == 0:
+            return {"eligible": eligible, "reset": 0}
+
+        result = gc.query(
+            eligibility
+            + """
+            WITH sn, coalesce(sn.docs_chain_length, 0) AS cur_chain,
+                 (sn.documentation IS NOT NULL AND sn.documentation <> '')
+                 AS has_docs
+
+            // Snapshot current docs (when present) exactly like a refine
+            // pass would, so the pre-harmonization text stays recoverable.
+            FOREACH (_ IN CASE WHEN has_docs THEN [1] ELSE [] END |
+              MERGE (rev:DocsRevision {id: sn.id + '#rev-' + toString(cur_chain)})
+              ON CREATE SET
+                rev.sn_id                          = sn.id,
+                rev.revision_number                = cur_chain,
+                rev.description                    = coalesce(sn.description, ''),
+                rev.documentation                  = coalesce(sn.documentation, ''),
+                rev.model                          = sn.docs_model,
+                rev.generated_at                   = sn.docs_generated_at,
+                rev.reviewer_score_docs            = sn.reviewer_score_docs,
+                rev.reviewer_comments_docs         = sn.reviewer_comments_docs,
+                rev.reviewer_comments_per_dim_docs = sn.reviewer_comments_per_dim_docs,
+                rev.created_at                     = datetime()
+              MERGE (sn)-[:DOCS_REVISION_OF]->(rev)
+            )
+
+            SET sn.docs_stage        = 'pending',
+                sn.docs_chain_length =
+                    CASE WHEN has_docs THEN cur_chain + 1 ELSE cur_chain END,
+                sn.docs_model        = null,
+                sn.docs_generated_at = null,
+                sn.claim_token       = null,
+                sn.claimed_at        = null,
+                sn.reviewer_score_docs            = null,
+                sn.reviewer_scores_docs           = null,
+                sn.reviewer_comments_per_dim_docs = null,
+                sn.reviewer_comments_docs         = null,
+                sn.reviewer_model_docs            = null,
+                sn.reviewed_docs_at               = null,
+                sn.embed_text_hash                = null,
+                sn.run_id = CASE WHEN $run_id IS NULL
+                                 THEN sn.run_id ELSE $run_id END
+            RETURN count(sn) AS reset
+            """,
+            sn_ids=sn_ids,
+            run_id=run_id,
+        )
+
+        # Members already docs-pending (stubs) need no reset — but they DO
+        # need the scope stamp so they join the same scoped pool run.
+        if run_id:
+            gc.query(
+                """
+                UNWIND $sn_ids AS sid
+                MATCH (sn:StandardName {id: sid})
+                WHERE sn.name_stage = 'accepted'
+                  AND coalesce(sn.docs_stage, 'pending') = 'pending'
+                SET sn.run_id = $run_id
+                """,
+                sn_ids=sn_ids,
+                run_id=run_id,
+            )
+    reset: int = result[0]["reset"] if result else 0
+    logger.info(
+        "reset_standard_name_docs: %d/%d reset to docs pending (run_id=%s)",
+        reset,
+        len(sn_ids),
+        run_id,
+    )
+    return {"eligible": eligible, "reset": reset}
+
+
+@retry_on_deadlock()
+def stamp_harmonized_families(
+    families: list[dict[str, Any]],
+) -> int:
+    """Stamp the §5 idempotency scalars on fully docs-accepted families.
+
+    For each family dict (``{"parent": id|None, "members": [ids],
+    "signature": str}``) whose live members are ALL ``docs_stage='accepted'``,
+    set ``harmonized_at`` + ``harmonized_group_signature`` on every member
+    AND on the shared parent (the harmonize worklist reads the stored
+    signature off the parent node). Families with any non-accepted member
+    are skipped (stamp after the next rotation).
+
+    Returns the number of families stamped.
+    """
+    stamped = 0
+    with GraphClient() as gc:
+        for fam in families:
+            member_ids = fam.get("members") or []
+            signature = fam.get("signature") or ""
+            if not member_ids or not signature:
+                continue
+            rows = gc.query(
+                """
+                UNWIND $ids AS sid
+                MATCH (sn:StandardName {id: sid})
+                WITH collect(sn) AS members,
+                     sum(CASE WHEN sn.docs_stage = 'accepted' THEN 0 ELSE 1 END)
+                     AS not_accepted
+                WHERE not_accepted = 0 AND size(members) = size($ids)
+                FOREACH (sn IN members |
+                  SET sn.harmonized_at = datetime(),
+                      sn.harmonized_group_signature = $sig
+                )
+                RETURN size(members) AS stamped_members
+                """,
+                ids=member_ids,
+                sig=signature,
+            )
+            if rows and rows[0].get("stamped_members"):
+                stamped += 1
+                parent_id = fam.get("parent")
+                if parent_id:
+                    gc.query(
+                        """
+                        MATCH (p:StandardName {id: $pid})
+                        SET p.harmonized_at = datetime(),
+                            p.harmonized_group_signature = $sig
+                        """,
+                        pid=parent_id,
+                        sig=signature,
+                    )
+    return stamped
+
+
+@retry_on_deadlock()
 def release_refine_docs_claims(
     *,
     sn_ids: list[str],

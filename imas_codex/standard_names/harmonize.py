@@ -25,7 +25,12 @@ from imas_codex.standard_names.defaults import (
 )
 
 #: Operator kinds eligible for parent-based family grouping.
-_FAMILY_OPERATOR_KINDS: tuple[str, ...] = ("projection", "qualifier", "coordinate")
+_FAMILY_OPERATOR_KINDS: tuple[str, ...] = (
+    "projection",
+    "qualifier",
+    "coordinate",
+    "locus",
+)
 
 #: docs_stage value indicating an accepted documentation revision.
 _DOCS_STAGE_ACCEPTED = "accepted"
@@ -537,8 +542,144 @@ def _anchor_desc(members: list[dict[str, Any]], anchor_id: str) -> str:
     return ""
 
 
+# ---------------------------------------------------------------------------
+# Harmonization apply: mark + stamp orchestration
+# ---------------------------------------------------------------------------
+
+_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
+
+
+def lint_links(gc: Any | None = None) -> list[dict[str, Any]]:
+    """Scan accepted docs for markdown links whose text names a DIFFERENT
+    standard name than their target resolves to.
+
+    A link ``[label](name:target)`` is flagged when the snake_cased label is
+    itself an existing StandardName id AND differs from ``target`` — the
+    text promises one quantity while the href resolves to another (a real
+    physics error class found across sibling families). Human-readable
+    labels that aren't themselves ids are fine and skipped.
+
+    Returns ``[{member, label, target}]`` sorted by member id.
+    """
+    resolved_gc, own_gc = _resolve_gc(gc)
+    try:
+        rows = (
+            resolved_gc.query(
+                """
+                MATCH (sn:StandardName)
+                WHERE sn.docs_stage = 'accepted'
+                  AND sn.documentation IS NOT NULL
+                RETURN sn.id AS id, sn.documentation AS documentation
+                """
+            )
+            or []
+        )
+        all_ids = {
+            r["id"]
+            for r in (
+                resolved_gc.query("MATCH (sn:StandardName) RETURN sn.id AS id") or []
+            )
+        }
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    findings: list[dict[str, Any]] = []
+    for row in rows:
+        for label, target in _LINK_RE.findall(row.get("documentation") or ""):
+            label_id = label.strip().lower().replace(" ", "_").replace("-", "_")
+            if label_id in all_ids and label_id != target:
+                findings.append({"member": row["id"], "label": label, "target": target})
+    return sorted(findings, key=lambda f: f["member"])
+
+
+def mark_members_for_regen(
+    member_ids: list[str],
+    *,
+    gc: Any | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Mark an explicit member set for docs regeneration (the apply step).
+
+    Snapshots each member's current docs to a DocsRevision, resets its docs
+    pipeline to ``pending`` and stamps a fresh scope ``run_id`` so a
+    subsequent ``sn run --scope-run-id <id> --docs-only --flush`` regenerates
+    ONLY these names. Returns ``{"run_id", "eligible", "reset"}``.
+    """
+    import uuid
+
+    from imas_codex.standard_names.graph_ops import reset_standard_name_docs
+
+    run_id = str(uuid.uuid4())
+    out = reset_standard_name_docs(
+        sn_ids=member_ids,
+        run_id=None if dry_run else run_id,
+        dry_run=dry_run,
+    )
+    return {"run_id": run_id, **out}
+
+
+def stamp_harmonized(
+    family_parents: list[str],
+    *,
+    gc: Any | None = None,
+) -> dict[str, int]:
+    """Recompute + stamp the idempotency signature for the given families.
+
+    For each parent id, reassembles the live family, recomputes the current
+    group signature, and stamps ``harmonized_at`` +
+    ``harmonized_group_signature`` on members AND parent — but only when
+    every live member is docs-accepted (defer otherwise).
+
+    Returns ``{"stamped": n, "deferred": m}``.
+    """
+    from imas_codex.standard_names.graph_ops import stamp_harmonized_families
+
+    resolved_gc, own_gc = _resolve_gc(gc)
+    families: list[dict[str, Any]] = []
+    deferred = 0
+    try:
+        for parent_id in family_parents:
+            rows = (
+                resolved_gc.query(
+                    """
+                    MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: $pid})
+                    WHERE r.operator_kind IN $kinds
+                      AND coalesce(c.name_stage, '') <> 'superseded'
+                      AND c.description IS NOT NULL
+                    RETURN c.id AS id, c.description AS description,
+                           c.documentation AS documentation,
+                           c.docs_stage AS docs_stage
+                    """,
+                    pid=parent_id,
+                    kinds=list(_FAMILY_OPERATOR_KINDS),
+                )
+                or []
+            )
+            members = [dict(r) for r in rows]
+            if not members or any(
+                m.get("docs_stage") != _DOCS_STAGE_ACCEPTED for m in members
+            ):
+                deferred += 1
+                continue
+            families.append(
+                {
+                    "parent": parent_id,
+                    "members": [m["id"] for m in members],
+                    "signature": group_signature(members),
+                }
+            )
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    stamped = stamp_harmonized_families(families)
+    return {"stamped": stamped, "deferred": deferred}
+
+
 __all__ = [
     "doc_sig",
+    "lint_links",
+    "mark_members_for_regen",
+    "stamp_harmonized",
     "drift",
     "group_signature",
     "select_anchor",

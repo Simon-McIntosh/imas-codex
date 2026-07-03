@@ -1212,6 +1212,16 @@ def _auto_sync_grammar(*, quiet: bool = False) -> None:
     ),
 )
 @click.option(
+    "--scope-run-id",
+    "scope_run_id",
+    default=None,
+    help=(
+        "Restrict ALL pool claims to StandardNames stamped with this run_id "
+        "(e.g. the scope id printed by `sn harmonize --mark`). Leaves the "
+        "global backlog untouched."
+    ),
+)
+@click.option(
     "--only",
     "only_phase",
     type=click.Choice(
@@ -1330,6 +1340,7 @@ def sn_run(
     names_only: bool,
     docs_only: bool,
     flush: bool,
+    scope_run_id: str | None,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -1655,6 +1666,7 @@ def sn_run(
             override_edits=_override_edits,
             only=only_phase,
             max_sources=max_sources,
+            scope_run_id=scope_run_id,
         )
         return
 
@@ -4035,7 +4047,7 @@ def sn_review(
     "report_mode",
     is_flag=True,
     default=False,
-    help="Read-only drift report (required for now; apply mode lands later).",
+    help="Print the ranked drift worklist (read-only).",
 )
 @click.option(
     "--min-drift",
@@ -4078,6 +4090,53 @@ def sn_review(
     default=None,
     help="Print the assembled family for this seed name instead of the full report.",
 )
+@click.option(
+    "--mark",
+    "mark_path",
+    type=click.Path(exists=True, dir_okay=False),
+    default=None,
+    help=(
+        "Mark members for docs regeneration from a JSON worklist "
+        "(list of {parent, regen_members, regen_parent} or {members}). "
+        "Snapshots current docs to DocsRevision, resets docs_stage to "
+        "pending, and stamps a scope run_id for the follow-on "
+        "`sn run --scope-run-id <id> --docs-only --flush` rotation."
+    ),
+)
+@click.option(
+    "--include-accepted",
+    "include_accepted",
+    is_flag=True,
+    default=False,
+    help="Required with --mark: authorizes resetting docs on accepted names.",
+)
+@click.option(
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    default=False,
+    help="With --mark: report the eligible member count without writing.",
+)
+@click.option(
+    "--stamp",
+    "stamp_parents",
+    default=None,
+    help=(
+        "Space-separated family parent ids: recompute each family's group "
+        "signature and stamp harmonized_at + harmonized_group_signature on "
+        "members and parent when ALL live members are docs-accepted."
+    ),
+)
+@click.option(
+    "--lint-links",
+    "lint_links_mode",
+    is_flag=True,
+    default=False,
+    help=(
+        "Scan accepted docs for [label](name:target) links whose label is "
+        "itself an existing standard name different from the target."
+    ),
+)
 def sn_harmonize(
     report_mode: bool,
     min_drift: float,
@@ -4086,14 +4145,20 @@ def sn_harmonize(
     include_parentless: bool,
     json_path: str | None,
     seed_name: str | None,
+    mark_path: str | None,
+    include_accepted: bool,
+    dry_run: bool,
+    stamp_parents: str | None,
+    lint_links_mode: bool,
 ) -> None:
-    """Report documentation drift across standard-name sibling families.
+    """Detect and resolve documentation drift across sibling families.
 
     Standard names are generated per-name, so sibling families (sharing a
     parent, or sharing a physical_base when parentless) can drift apart in
-    documentation structure. This command is read-only: it computes a
-    deterministic drift metric and prints a harmonization worklist. It
-    never writes to the graph.
+    documentation structure. --report/--seed/--lint-links are read-only;
+    --mark snapshots + resets the listed members' docs pipeline (guarded by
+    --include-accepted) and prints the scoped regen command; --stamp records
+    the idempotent done-state on fully accepted families.
 
     \b
     Examples:
@@ -4130,10 +4195,78 @@ def sn_harmonize(
             console.print(f"    - {m.get('id')}{marker}")
         return
 
+    if lint_links_mode:
+        from imas_codex.standard_names.harmonize import lint_links
+
+        findings = lint_links()
+        if not findings:
+            console.print("[green]No link text/target mismatches found.[/green]")
+            return
+        console.print(
+            f"[yellow]{len(findings)} link text/target mismatch(es):[/yellow]"
+        )
+        for f in findings:
+            console.print(f"  {f['member']}: [{f['label']}] -> (name:{f['target']})")
+        if json_path:
+            import json as _json
+
+            with open(json_path, "w") as fh:
+                _json.dump(findings, fh, indent=2)
+            console.print(f"[green]Wrote findings to[/green] {json_path}")
+        return
+
+    if stamp_parents:
+        from imas_codex.standard_names.harmonize import stamp_harmonized
+
+        parents = stamp_parents.split()
+        out = stamp_harmonized(parents)
+        console.print(
+            f"[green]Stamped {out['stamped']} family(ies)[/green]; "
+            f"{out['deferred']} deferred (not all members docs-accepted)."
+        )
+        return
+
+    if mark_path:
+        import json as _json
+
+        from imas_codex.standard_names.harmonize import mark_members_for_regen
+
+        with open(mark_path) as fh:
+            entries = _json.load(fh)
+        member_ids: list[str] = []
+        for e in entries:
+            member_ids.extend(e.get("regen_members") or e.get("members") or [])
+            if e.get("regen_parent") and e.get("parent"):
+                member_ids.append(e["parent"])
+        member_ids = sorted(set(member_ids))
+        if not member_ids:
+            console.print("[yellow]No members to mark in the worklist.[/yellow]")
+            raise SystemExit(1)
+        if not include_accepted and not dry_run:
+            console.print(
+                "[red]--mark resets docs on accepted (catalog-authoritative) "
+                "names — pass --include-accepted to authorize.[/red]"
+            )
+            raise SystemExit(1)
+        out = mark_members_for_regen(member_ids, dry_run=dry_run)
+        verb = "Would reset" if dry_run else "Reset"
+        console.print(
+            f"[green]{verb} {out['eligible']} eligible member(s)[/green] "
+            f"of {len(member_ids)} listed."
+        )
+        if not dry_run:
+            console.print(
+                f"Scope run id: [bold]{out['run_id']}[/bold]\n"
+                f"Regenerate with:\n"
+                f"  imas-codex sn run --docs-only --flush "
+                f"--scope-run-id {out['run_id']} -c <budget>"
+            )
+        return
+
     if not report_mode:
         console.print(
-            "[yellow]`sn harmonize` currently only supports --report "
-            "(read-only). Apply/stamping mode lands in a later stage.[/yellow]"
+            "[yellow]`sn harmonize` needs one of --report / --seed / --mark / "
+            "--stamp / --lint-links.[/yellow]"
         )
         raise SystemExit(1)
 

@@ -472,3 +472,34 @@ class TestBuildWorklist:
         # since select_anchor falls back to longest non-placeholder description.
         assert worklist[0]["anchor"] is not None
         assert worklist[0]["deferred"] is False
+
+
+# ---------------------------------------------------------------------------
+# lint_links / mark / stamp
+# ---------------------------------------------------------------------------
+
+
+class _LintGC:
+    def __init__(self, docs, all_ids):
+        self._docs = docs
+        self._ids = all_ids
+
+    def query(self, cypher, **params):
+        if "docs_stage = 'accepted'" in cypher:
+            return [{"id": k, "documentation": v} for k, v in self._docs.items()]
+        if "RETURN sn.id AS id" in cypher:
+            return [{"id": i} for i in self._ids]
+        return []
+
+
+def test_lint_links_flags_label_target_mismatch():
+    from imas_codex.standard_names.harmonize import lint_links
+
+    docs = {
+        "a_name": "See [b_name](name:c_name) for detail.",  # label is a real id != target
+        "d_name": "See [B name](name:b_name).",  # human label normalizes to target — ok
+        "e_name": "See [not a name](name:b_name).",  # label not an id — ok
+    }
+    gc = _LintGC(docs, {"a_name", "b_name", "c_name", "d_name", "e_name"})
+    findings = lint_links(gc=gc)
+    assert findings == [{"member": "a_name", "label": "b_name", "target": "c_name"}]
