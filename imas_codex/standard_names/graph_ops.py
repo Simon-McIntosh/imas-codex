@@ -8022,6 +8022,9 @@ def claim_review_name_batch(
             ", sn.docs_hint AS docs_hint"
             ", sn.edit_reason AS edit_reason"
             ", sn.edit_origin AS edit_origin"
+            ", sn.physical_base AS physical_base"
+            ", sn.geometry AS geometry"
+            ", sn.grammar_parse_version AS grammar_parse_version"
         ),
         domain=domain,
         scope_run_id=scope_run_id,
@@ -9835,6 +9838,11 @@ def _mark_refine_vocab_gap_exhausted(
             SET sn.name_stage = 'exhausted',
                 sn.claim_token = null,
                 sn.claimed_at = null,
+                // A name-axis exhaust closes only a name-steering edit.
+                sn.edit_status = CASE WHEN sn.edit_status = 'open'
+                                       AND sn.name_hint IS NOT NULL
+                                      THEN 'exhausted'
+                                      ELSE sn.edit_status END,
                 sn.reviewer_comments_name =
                     coalesce(sn.reviewer_comments_name, '')
                     + ' [vocab_gap_exhaust] ' + $error_msg
@@ -9867,6 +9875,11 @@ def _mark_refine_docs_exhausted(
             SET sn.docs_stage = 'exhausted',
                 sn.claim_token = null,
                 sn.claimed_at = null,
+                // A docs-axis exhaust closes only a docs-steering edit.
+                sn.edit_status = CASE WHEN sn.edit_status = 'open'
+                                       AND sn.docs_hint IS NOT NULL
+                                      THEN 'exhausted'
+                                      ELSE sn.edit_status END,
                 sn.reviewer_comments_docs =
                     coalesce(sn.reviewer_comments_docs, '')
                     + ' [docs_refine_exhaust] ' + $error_msg

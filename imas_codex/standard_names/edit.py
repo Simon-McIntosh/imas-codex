@@ -133,6 +133,32 @@ def _base_token(name: str) -> str | None:
         return None
 
 
+def _grammar_segment_props(name: str) -> dict[str, str]:
+    """Parsed ISN segment properties for a grammar-valid name.
+
+    Stamped on a rename successor so the review gate scores grammar from
+    the actual registered decomposition instead of reverse-engineering the
+    vocabulary — a reviewer guessing at unregistered base tokens is part of
+    the revert-to-original pull this tool exists to neutralize.
+    """
+    props: dict[str, str] = {}
+    try:
+        ir = _isn_parser.parse(name).ir
+    except Exception:
+        return props
+    if ir.base is not None:
+        props["physical_base"] = ir.base.token
+    if ir.locus is not None:
+        props["geometry"] = ir.locus.token
+    try:
+        from imas_standard_names import __version__ as _isn_version
+
+        props["grammar_parse_version"] = _isn_version
+    except Exception:
+        pass
+    return props
+
+
 def _blocked(
     target: str,
     mode: str,
@@ -580,6 +606,18 @@ def _apply_rename(
         edit_requested_at=_now_iso(),
     )
     successor = result["new_name"]
+
+    # Stamp the parsed ISN segment decomposition on the successor so the
+    # review gate sees the verified grammar fields instead of guessing at
+    # the registered vocabulary.
+    seg_props = _grammar_segment_props(successor)
+    if seg_props:
+        gc.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn += $props",
+            id=successor,
+            props=seg_props,
+        )
+
     actions.append(
         f"renamed {refine_root_old!r} → {successor!r}, entering name review "
         f"(edit_status=open, run_id={run_id})"

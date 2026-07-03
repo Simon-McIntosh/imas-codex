@@ -88,6 +88,9 @@ These names already exist in the catalog. Flag candidates that duplicate them:
 {% endfor %}{% endif %}
 {% if item.edit_reason %}
 - **Deliberate expert steering**: a domain expert ({{ item.edit_origin or "human" }}) has deliberately steered this candidate for the following reason: {{ item.edit_reason }}. Judge the candidate on its physical and grammatical merits given this intent; do NOT penalize it merely for differing from a prior or established variant.
+{% if item.physical_base %}
+- **Deterministic grammar check**: this candidate PARSES under the registered ISN grammar (verified decomposition: physical_base=`{{ item.physical_base }}`{% if item.geometry %}, locus=`{{ item.geometry }}`{% endif %}{% if item.grammar_parse_version %}; grammar v{{ item.grammar_parse_version }}{% endif %}). Score the grammar dimension from this verified decomposition; do not assume any of its tokens are unregistered.
+{% endif %}
 {% endif %}
 {% endfor %}
 
