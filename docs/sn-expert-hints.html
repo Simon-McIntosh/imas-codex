@@ -16,7 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.11">
 </head>
 <body>
   <main class="plan-doc">
@@ -281,11 +282,12 @@
 
     <h2 id="s5">§5 — Implementation plan</h2>
     <ul>
-      <li><strong>§5a Schema</strong> — add <code>edit_mode</code>,
-        <code>name_hint</code>, <code>docs_hint</code>, <code>edit_reason</code>,
-        <code>edit_origin</code>, <code>edit_status</code> to
-        <code>StandardName</code>; regenerate models. <em>Done-when:</em>
-        importable; schema-compliance tests green.</li>
+      <li><strong>§5a Schema</strong> <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>edit_mode</code>/<code>name_hint</code>/<code>docs_hint</code>/<code>edit_reason</code>/<code>edit_origin</code>/<code>edit_status</code>/<code>edit_scope</code>/<code>edit_requested_at</code>
+        on <code>StandardName</code> + enums <code>EditMode</code>/<code>EditOrigin</code>/<code>EditStatus</code>/<code>EditScope</code>
+        (commit <code>2e338a54</code>; 10/10 schema tests green). Note:
+        <code>EditScope.only_self</code> — a permissible value literally named
+        <code>self</code> crashes gen-pydantic's import-closure resolution.</li>
       <li><strong>§5b Generate/refine injection (hint mode)</strong> — conditional
         prompt block + thread hint+reason into the four generate/refine
         <code>render_prompt</code> contexts. <em>Done-when:</em> no-hint output
