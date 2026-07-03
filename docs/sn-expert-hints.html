@@ -319,6 +319,13 @@
         validation, audit log, and <code>override_edits</code>/<code>include_accepted</code>
         safety knobs — <code>sn edit --scope subtree</code> wraps it, adding the
         pipeline re-entry (review gate) that the direct cascade lacks.
+        <strong>Approach adjustment (2026-07-03):</strong> descendants do NOT each
+        re-enter LLM review — the root rename is the reviewed semantic decision;
+        per-child review of deterministic, ISN-round-trip-validated follow-renames
+        adds cost and risks <em>partial</em> acceptance (a half-edited family,
+        which §3.5 forbids). Instead the cascade is staged at edit time
+        (dry-run planned, conflicts surfaced) and applied atomically when the
+        root's review accepts (<code>edit_status &#8594; applied</code> hook).
         <em>Done-when:</em> a parent edit re-derives its children; a shared-base
         leaf edit is blocked without <code>--scope family</code>.</li>
       <li><strong>§5g Status lifecycle</strong> — <code>applied</code> on
