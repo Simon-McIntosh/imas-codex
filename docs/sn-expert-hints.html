@@ -377,7 +377,19 @@
       decomposition; review told the candidate PARSES). The deliberately-bad control
       (<code>major_radius_of_secondary_x_point</code> &#8594; <code>toroidal_angle_of_secondary_x_point</code>)
       was <strong>rejected 0.825</strong> on physics (unit m vs angle) under the same anti-revert
-      directive — scores still discriminate. Full record + score figure:
+      directive — scores still discriminate.
+      <strong>Lead-review round (same day):</strong> the lead rejected
+      <code>cross_section_of_plasma_boundary</code> as under-specified — the name
+      says nothing about WHICH property of the section (area? perimeter?) nor
+      which plane (poloidal/toroidal). Fix: ISN grammar replaces the bare
+      <code>cross_section</code> base with <code>cross_sectional_area</code>
+      (compound binds like <code>surface_area</code>; ISN <code>3d7e625</code>,
+      1618 py + 159 JS round-trip tests green, no alias — RC clean replace), and a
+      further <code>sn edit</code> rename landed the final name
+      <strong><code>poloidal_cross_sectional_area_of_plasma_boundary</code></strong>:
+      accepted 0.963 (grammar 20/20), docs accepted 0.919,
+      <code>edit_status=applied</code>, chain intact through all three
+      predecessors. Full record + score figure:
       <a href="archive/sn-expert-hints-landed.html">landed record</a>.
     </p>
 

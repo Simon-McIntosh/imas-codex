@@ -26,7 +26,7 @@
         <tr><td>§5d/§5f/§5g edit engine + cascade + lifecycle</td><td>✓ shipped</td><td><code>fcf3db0c</code>, <code>a7fe9487</code></td><td>183 unit tests; run_id scoping for surgical rotations</td></tr>
         <tr><td>§5e CLI + MCP + status table</td><td>✓ shipped</td><td><code>2b6aa969</code>, <code>95494bd8</code></td><td>import-cycle fix (function-local edit imports); <code>sn edit --help</code> live</td></tr>
         <tr><td>§5h/§7 skill + docs</td><td>✓ shipped</td><td><code>c55c196f</code></td><td><code>.claude/skills/sn-edit/SKILL.md</code>; AGENTS.md tripwire; architecture section</td></tr>
-        <tr><td>§6 dog-food demo</td><td>✓ passed</td><td><code>85f45373</code> (mid-demo fix)</td><td>real edit applied @0.988; control rejected @0.825; full suite green</td></tr>
+        <tr><td>§6 dog-food demo</td><td>✓ passed</td><td><code>85f45373</code> (mid-demo fix), ISN <code>3d7e625</code> (vocab fix)</td><td>final name <code>poloidal_cross_sectional_area_of_plasma_boundary</code> applied @0.963 + docs 0.919; control rejected @0.825; full suites green</td></tr>
       </tbody>
     </table>
 
@@ -85,6 +85,35 @@
         (<code>PRODUCED_NAME</code>) migrated; rotation cost ≈ $0.72.</li>
     </ul>
 
+    <h3>Attempt 3 — lead review forces the vocabulary fix (the tool's real test)</h3>
+    <p>
+      The lead rejected <code>cross_section_of_plasma_boundary</code>: the name says
+      nothing about WHICH property of the section is meant (area? perimeter?) nor which
+      section plane (poloidal vs toroidal). The reviewer had passed it partly because
+      ISN's <code>cross_section</code> base was <em>documented</em> as the area — but the
+      name must stand alone. The proper fix was upstream, in the grammar itself: ISN
+      commit <code>3d7e625</code> replaces the bare <code>cross_section</code> base with
+      <code>cross_sectional_area</code> (compound binds like <code>surface_area</code> —
+      the established pattern; clean replace, no alias, RC stage; 1618 Python +
+      159 JS compose/seed round-trip tests green), leaving bare
+      <code>cross_section</code> free for a future nuclear reaction-cross-section
+      concept. imas-codex pin bumped, then a further steered rename through the tool:
+    </p>
+    <ul>
+      <li><code>sn edit cross_section_of_plasma_boundary --rename
+        poloidal_cross_sectional_area_of_plasma_boundary</code> with the lead's critique
+        verbatim as the reason.</li>
+      <li><strong>Name accepted 0.963</strong> (grammar 20/20 — reviewer citing the
+        verified <code>cross_sectional_area</code> + <code>poloidal</code> projection
+        decomposition, mirroring <code>poloidal_magnetic_flux</code>).</li>
+      <li><strong>Docs: first draft 0.838 (below gate) &#8594; refine &#8594; accepted
+        0.919</strong> — the docs refine loop exercised live.</li>
+      <li><code>edit_status=applied</code>; final chain:
+        <code>poloidal_cross_sectional_area_of_plasma_boundary &#8594;
+        cross_section_of_plasma_boundary &#8594; poloidal_cross_section_of_plasma_boundary
+        &#8594; area_of_plasma_boundary</code> (all predecessors superseded).</li>
+    </ul>
+
     <h3>Control — the gate stayed honest</h3>
     <p>
       Deliberately-bad edit: <code>sn edit major_radius_of_secondary_x_point --rename
@@ -97,8 +126,8 @@
     </p>
 
     <figure>
-      <svg viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" role="img"
-           aria-label="Review scores: attempt 1 rejected 0.675, attempt 2 accepted 0.988, control rejected 0.825, threshold 0.85"
+      <svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Review scores: attempt 1 rejected 0.675, attempt 2 accepted 0.988, final name accepted 0.963, control rejected 0.825, threshold 0.85"
            style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
         <g font-size="12" fill="#111827">
           <text x="8" y="38">attempt 1 (ungrounded review)</text>
@@ -106,19 +135,24 @@
           <text x="478" y="38">0.675 → exhausted</text>
           <text x="8" y="78">attempt 2 (grounded review)</text>
           <rect x="230" y="66" width="356" height="16" fill="#86c7a1"/>
-          <text x="470" y="78" fill="#166534" font-weight="600">0.988 → applied</text>
-          <text x="8" y="118">bad control (grounded review)</text>
-          <rect x="230" y="106" width="297" height="16" fill="#f5b7a0"/>
-          <text x="532" y="118">0.825 → rejected</text>
-          <line x1="536" y1="14" x2="536" y2="132" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3"/>
-          <text x="540" y="152" font-size="11" fill="#7c3aed">accept gate 0.85</text>
-          <text x="230" y="170" font-size="11" fill="#374151">bar length ∝ score (×360 px)</text>
+          <text x="470" y="78" fill="#166534" font-weight="600">0.988 → applied, then lead-rejected</text>
+          <text x="8" y="118">final name (vocab fixed)</text>
+          <rect x="230" y="106" width="347" height="16" fill="#86c7a1"/>
+          <text x="470" y="118" fill="#166534" font-weight="600">0.963 → applied ✓</text>
+          <text x="8" y="158">bad control (grounded review)</text>
+          <rect x="230" y="146" width="297" height="16" fill="#f5b7a0"/>
+          <text x="532" y="158">0.825 → rejected</text>
+          <line x1="536" y1="14" x2="536" y2="172" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="540" y="192" font-size="11" fill="#7c3aed">accept gate 0.85</text>
+          <text x="230" y="212" font-size="11" fill="#374151">bar length ∝ score (×360 px)</text>
         </g>
       </svg>
       <figcaption style="font-size:12px;color:#374151">
-        Reviewer pressure with the anti-revert directive still discriminates: the steered
-        good edit clears the gate only after review is grounded in the deterministic
-        grammar parse; the steered bad edit stays below it on physics grounds.
+        Reviewer pressure with the anti-revert directive still discriminates: steered good
+        edits clear the gate only once review is grounded in the deterministic grammar
+        parse; the steered bad edit stays below it on physics grounds. The lead's rejection
+        of the LLM-accepted attempt 2 drove the upstream vocabulary fix
+        (<code>cross_sectional_area</code>) that produced the final name.
       </figcaption>
     </figure>
 
