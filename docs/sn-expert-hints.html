@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.22">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.44">
 </head>
 <body>
   <main class="plan-doc">
@@ -288,15 +288,20 @@
         (commit <code>2e338a54</code>; 10/10 schema tests green). Note:
         <code>EditScope.only_self</code> — a permissible value literally named
         <code>self</code> crashes gen-pydantic's import-closure resolution.</li>
-      <li><strong>§5b Generate/refine injection (hint mode)</strong> — conditional
-        prompt block + thread hint+reason into the four generate/refine
-        <code>render_prompt</code> contexts. <em>Done-when:</em> no-hint output
-        byte-identical to today (snapshot); hinted output carries the block.</li>
-      <li><strong>§5c Review injection (reason only)</strong> — add the
-        <code>edit_reason</code> intent block to <code>review_names_*</code> and
-        <code>review_docs_*</code>; verify it does NOT include the proposed
-        string as pre-approved. <em>Done-when:</em> reviewer prompt shows intent
-        context only when a reason is present; scoring still independent.</li>
+      <li><strong>§5b Generate/refine injection (hint mode)</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> — conditional
+        "Expert steering" blocks (subordinate-to-rules wording) in
+        <code>generate_name_dd</code>/<code>_names</code> (via the
+        <code>review_feedback</code> path), <code>refine_name_user</code>,
+        <code>generate_docs_user</code>, <code>refine_docs_user</code>; golden
+        byte-identity test proves no-edit renders unchanged
+        (commit <code>3a304f92</code>; 107 prompt tests green).</li>
+      <li><strong>§5c Review injection (reason only)</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> — per-candidate
+        anti-revert intent block in <code>review_names_user</code>,
+        <code>review_docs_user</code>, <code>review_docs_parent_user</code>;
+        reason + origin only, never the proposal as pre-approved
+        (commit <code>3a304f92</code>).</li>
       <li><strong>§5d Redesign mode (skip-generate)</strong> — write the proposed
         name/docs as a drafted candidate via the refine persist path (name change
         supersedes old + <code>REFINED_FROM</code>), entering at review.
