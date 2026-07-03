@@ -643,11 +643,59 @@ name is in `override_names` (`sn run --override-edits <name>`, repeatable).
 `sn prune` require `--include-accepted` to touch `name_stage=accepted`
 names (catalog-authoritative). `sn clear` has no such guard.
 
+## Family Harmonization
+
+Docs are generated per-name, so sibling families (a vector's projections,
+per-locus / per-species / per-zone variants) can drift apart in their
+documentation structure even when each member individually passes review.
+Two mechanisms address this:
+
+**In-pipeline (always on).** `fetch_sibling_family()` (`context.py`) injects
+each name's HAS_PARENT family — parent, anchor, live members with their doc
+openings — into the generate_docs, review_docs and refine_docs prompts. The
+family = children sharing a parent via `operator_kind ∈ {projection,
+qualifier, coordinate, locus}`; the anchor (template authority) is the parent
+when its docs are accepted and real, else the best-scored docs-accepted
+member. All three prompts carry a parallel-structure directive: one opening
+noun-phrase template per family, varying only member-specific tokens, symbols
+and genuinely member-specific physics — faithfulness outranks uniformity, so
+distinct per-member physics (e.g. an unsigned radial mode index next to
+signed Fourier harmonics) must never be flattened. The review rubric docks
+description/documentation quality for gratuitous template divergence from
+accepted siblings, citing the sibling ids.
+
+**Curative (`sn harmonize`).** For docs accepted before the family context
+existed:
+
+- `--report` — deterministic drift worklist: `doc_sig` = first-6 word
+  tokens of the description (digits→`#`); family drift = 1 − max_cohort/n;
+  ranked table of families with n≥3, drift≥0.5. The metric counts
+  member-specific tokens as drift, so it over-flags — treat it as a
+  RANKING and confirm genuine structural drift with an LLM triage pass
+  before regenerating (measured live: 127/137 flagged families were
+  genuinely parallel).
+- `--mark <worklist.json>` (guarded by `--include-accepted`) — snapshots
+  each listed member's docs to a `DocsRevision` (same `{id}#rev-{chain}`
+  scheme as refine, advancing the chain so ids never collide), resets
+  `docs_stage='pending'`, clears reviewer-docs state, and stamps a scope
+  `run_id`. Regenerate with `sn run --docs-only --flush --scope-run-id
+  <id> -c <budget>` — the scope filter keeps the wave from draining the
+  global docs backlog. Raise `--rotation-cap` when marked members already
+  carry long revision chains.
+- `--stamp "<parent ids>"` — records the idempotent done-state
+  (`harmonized_at` + `harmonized_group_signature`, a sha256 over sorted
+  member ids and content hashes) on members and parent once every live
+  member is docs-accepted; `build_worklist()` skips families whose stored
+  signature matches the current one, so a re-run over an unchanged family
+  is a no-op.
+- `--lint-links` — reports markdown links whose text names a different
+  existing standard name than the `(name:…)` target resolves to.
+
 ## CLI Commands
 
 | Command | Purpose | Key options |
 |---------|---------|-------------|
-| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted` |
+| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id` |
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
@@ -656,6 +704,7 @@ names (catalog-authoritative). `sn clear` has no such guard.
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--stage`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
+| `sn harmonize` | Family-drift report + curative docs regen (see Family Harmonization) | `--report`, `--min-drift`, `--min-size`, `--limit`, `--include-parentless`, `--json`, `--seed`, `--mark` (+`--include-accepted`, `--dry-run`), `--stamp`, `--lint-links` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
 
 ## Benchmark
