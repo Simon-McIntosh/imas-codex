@@ -113,6 +113,10 @@ class TestFamilyMapping:
         assert new_parent["edit_mode"] == "rename"
         assert new_parent["edit_scope"] == "family"
         assert new_parent["edit_status"] == "open"
+        # run_id is stamped on the mapped PARENT (the actual reviewed root),
+        # not on the originally-requested leaf.
+        assert plan.run_id is not None
+        assert new_parent["run_id"] == plan.run_id
 
     def test_family_mapping_dry_run_plans_without_writing(self) -> None:
         fake = FakeGraph()
@@ -128,6 +132,7 @@ class TestFamilyMapping:
             )
         assert plan.applied is False
         assert plan.blocked is None
+        assert plan.run_id is None
         planned_pairs = {(r["from"], r["to"]) for r in plan.cascade_planned}
         assert ("ion_temperature", "ion_density") in planned_pairs
         # No graph mutation at all.

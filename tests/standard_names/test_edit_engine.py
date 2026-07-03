@@ -251,6 +251,7 @@ class FakeGraph:
                     "edit_scope",
                     "edit_status",
                     "edit_requested_at",
+                    "run_id",
                 ):
                     node[key] = params[key]
             return []
@@ -483,6 +484,9 @@ class FakeGraph:
                 node["claim_token"] = None
                 node["claimed_at"] = None
                 node["reviewer_score_docs"] = None
+                run_id = params.get("run_id")
+                if run_id is not None:
+                    node["run_id"] = run_id
                 n += 1
             return [{"reset": n}]
 
@@ -511,6 +515,7 @@ class FakeGraph:
                 physics_domain=params["physics_domain"],
                 tags=params["tags"],
                 model=params["model"],
+                run_id=params.get("run_id"),
                 edit_mode=params.get("edit_mode"),
                 name_hint=params.get("name_hint"),
                 docs_hint=params.get("docs_hint"),
@@ -806,6 +811,39 @@ class TestRenameEligibility:
         assert succ["edit_status"] == "open"
         assert succ["edit_requested_at"] is not None
 
+    def test_run_id_stamped_on_successor_and_plan(self) -> None:
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="accepted")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current", rename="toroidal_plasma_current",
+                reason="clarify component", gc=fake,
+            )
+        assert plan.run_id is not None
+        assert plan.run_id.startswith("sn-edit-")
+        assert fake.nodes[plan.successor]["run_id"] == plan.run_id
+
+    def test_run_id_is_none_for_blocked_rename(self) -> None:
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="pending")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current", rename="toroidal_plasma_current",
+                reason="why", gc=fake,
+            )
+        assert plan.blocked is not None
+        assert plan.run_id is None
+
+    def test_run_id_is_none_for_dry_run_rename(self) -> None:
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="accepted")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current", rename="toroidal_plasma_current",
+                reason="why", dry_run=True, gc=fake,
+            )
+        assert plan.run_id is None
+
 
 # =============================================================================
 # persist_reviewed_name edit lifecycle
@@ -1022,6 +1060,9 @@ class TestDocsMode:
         assert node["edit_mode"] == "docs"
         assert node["edit_status"] == "open"
         assert node["docs_hint"] == "new replacement documentation"
+        assert plan.run_id is not None
+        assert plan.run_id.startswith("sn-edit-")
+        assert node["run_id"] == plan.run_id
 
     def test_docs_requires_accepted_name(self) -> None:
         fake = FakeGraph()
@@ -1046,6 +1087,7 @@ class TestDocsMode:
                 dry_run=True, gc=fake,
             )
         assert plan.applied is False
+        assert plan.run_id is None
         assert fake.nodes["electron_temperature"]["documentation"] == "old docs"
 
 
@@ -1073,6 +1115,9 @@ class TestHintMode:
         assert node["edit_mode"] == "hint"
         assert node["name_hint"] == "prefer core-region wording"
         assert node["edit_status"] == "open"
+        assert plan.run_id is not None
+        assert plan.run_id.startswith("sn-edit-")
+        assert node["run_id"] == plan.run_id
 
     def test_hint_docs_axis_resets_docs_stage(self) -> None:
         fake = FakeGraph()
@@ -1089,6 +1134,7 @@ class TestHintMode:
         node = fake.nodes["electron_temperature"]
         assert node["docs_hint"] == "mention Thomson scattering"
         assert node["docs_stage"] == "pending"
+        assert node["run_id"] == plan.run_id
 
     def test_hint_dry_run_zero_writes(self) -> None:
         fake = FakeGraph()
@@ -1099,6 +1145,7 @@ class TestHintMode:
                 dry_run=True, gc=fake,
             )
         assert plan.applied is False
+        assert plan.run_id is None
         assert fake.nodes["electron_temperature"]["edit_mode"] is None
 
     def test_hint_superseded_with_successor_refused(self) -> None:

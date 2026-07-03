@@ -88,6 +88,13 @@ class EditPlan:
         Human-readable action lines — drives ``--dry-run`` CLI output.
     applied:
         ``False`` for ``dry_run`` or ``blocked`` outcomes.
+    run_id:
+        The ``sn-edit-<UTC timestamp>`` scope stamp written onto the touched
+        SN (rename mode: the drafted successor; docs/hint modes: the
+        target). Lets an operator run a surgical pool rotation over just
+        this edit (``sn run --scope-run-id <id>``) instead of opening the
+        whole backlog. ``None`` for ``dry_run`` or ``blocked`` outcomes —
+        nothing was stamped.
     """
 
     target: str
@@ -100,10 +107,20 @@ class EditPlan:
     blocked: str | None = None
     actions: list[str] = field(default_factory=list)
     applied: bool = False
+    run_id: str | None = None
 
 
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
+
+
+def _new_run_id() -> str:
+    """A fresh ``sn-edit-<UTC compact timestamp>`` scope stamp.
+
+    Passed to ``sn run --scope-run-id`` to restrict pool claims to exactly
+    the SN(s) this edit touched.
+    """
+    return f"sn-edit-{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}"
 
 
 def _base_token(name: str) -> str | None:
@@ -180,6 +197,7 @@ def _stamp_edit_fields(
     edit_origin: str,
     edit_scope: str,
     edit_status: str,
+    run_id: str,
 ) -> None:
     gc.query(
         """
@@ -192,7 +210,8 @@ def _stamp_edit_fields(
             sn.edit_origin       = $edit_origin,
             sn.edit_scope        = $edit_scope,
             sn.edit_status       = $edit_status,
-            sn.edit_requested_at = $edit_requested_at
+            sn.edit_requested_at = $edit_requested_at,
+            sn.run_id            = $run_id
         """,
         id=sn_id,
         edit_mode=edit_mode,
@@ -203,6 +222,7 @@ def _stamp_edit_fields(
         edit_scope=edit_scope,
         edit_status=edit_status,
         edit_requested_at=_now_iso(),
+        run_id=run_id,
     )
 
 
@@ -530,6 +550,7 @@ def _apply_rename(
         )
 
     # 6. Apply: enter REVIEW_NAME by creating the refined successor node.
+    run_id = _new_run_id()
     gc.query(
         """
         // EDIT_SET_REFINING
@@ -549,6 +570,7 @@ def _apply_rename(
         old_chain_length=root_row.get("chain_length") or 0,
         model="sn-edit",
         reason=reason,
+        run_id=run_id,
         edit_mode=EditMode.rename.value,
         name_hint=refine_root_new,
         edit_reason=reason,
@@ -560,7 +582,7 @@ def _apply_rename(
     successor = result["new_name"]
     actions.append(
         f"renamed {refine_root_old!r} → {successor!r}, entering name review "
-        "(edit_status=open)"
+        f"(edit_status=open, run_id={run_id})"
     )
     return EditPlan(
         target=target,
@@ -573,6 +595,7 @@ def _apply_rename(
         blocked=None,
         actions=actions,
         applied=True,
+        run_id=run_id,
     )
 
 
@@ -638,6 +661,7 @@ def _apply_docs(
         id=target,
         token=token,
     )
+    run_id = _new_run_id()
     result = persist_refined_docs(
         sn_id=target,
         claim_token=token,
@@ -648,6 +672,7 @@ def _apply_docs(
         current_documentation=target_row.get("documentation") or "",
         current_model=target_row.get("docs_model"),
         current_generated_at=target_row.get("docs_generated_at"),
+        run_id=run_id,
     )
     if result.get("docs_chain_length", -1) < 0:
         return _blocked(
@@ -666,10 +691,11 @@ def _apply_docs(
         edit_origin=origin,
         edit_scope=scope,
         edit_status=EditStatus.open.value,
+        run_id=run_id,
     )
     actions.append(
         f"docs refined in place (revision={result.get('revision_id')}), "
-        "entering docs review (edit_status=open)"
+        f"entering docs review (edit_status=open, run_id={run_id})"
     )
     return EditPlan(
         target=target,
@@ -682,6 +708,7 @@ def _apply_docs(
         blocked=None,
         actions=actions,
         applied=True,
+        run_id=run_id,
     )
 
 
@@ -730,6 +757,7 @@ def _apply_hint(
             applied=False,
         )
 
+    run_id = _new_run_id()
     name_hint_value = hint if axis in ("name", "both") else None
     docs_hint_value = hint if axis in ("docs", "both") else None
     _stamp_edit_fields(
@@ -742,6 +770,7 @@ def _apply_hint(
         edit_origin=origin,
         edit_scope=scope,
         edit_status=EditStatus.open.value,
+        run_id=run_id,
     )
 
     if axis in ("name", "both"):
@@ -761,12 +790,13 @@ def _apply_hint(
         )
 
     if axis in ("docs", "both"):
-        docs_result = reset_standard_name_docs(sn_ids=[target])
+        docs_result = reset_standard_name_docs(sn_ids=[target], run_id=run_id)
         actions.append(
             f"docs reset for regeneration (eligible={docs_result['eligible']}, "
             f"reset={docs_result['reset']})"
         )
 
+    actions.append(f"scope stamp run_id={run_id}")
     return EditPlan(
         target=target,
         mode="hint",
@@ -778,4 +808,5 @@ def _apply_hint(
         blocked=None,
         actions=actions,
         applied=True,
+        run_id=run_id,
     )
