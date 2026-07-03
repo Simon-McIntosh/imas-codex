@@ -16,8 +16,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.11">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.22">
 </head>
 <body>
   <main class="plan-doc">
@@ -333,13 +333,12 @@
       <li><strong>§5g Status lifecycle</strong> — <code>applied</code> on
         acceptance, <code>exhausted</code> at the refine cap, surfaced in
         <code>sn status</code>. <em>Done-when:</em> outcomes reflected + listed.</li>
-      <li><strong>§5h Agent skill</strong> — author a project skill
-        (<code>.claude/skills/sn-edit/SKILL.md</code>) describing when and how an
-        agent invokes <code>sn edit</code>: the two modes, mandatory reason, axis,
-        scope/family rules, the dog-food example, and the principle that edits go
-        <em>through</em> the pipeline (never hand-edit graph text). Cross-listed
-        in <code>AGENTS.md</code>. <em>Done-when:</em> the skill exists and an
-        agent can follow it to run the §6 demo unaided.</li>
+      <li><strong>§5h Agent skill</strong> <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>.claude/skills/sn-edit/SKILL.md</code> (132 lines: golden rule, mode
+        choice, reason quality, scope/guard rules, dry-run-first workflow, the §6
+        worked example, MCP mirror) + <code>AGENTS.md</code> cross-listing +
+        <code>docs/architecture/standard-names.md</code> edit side-car section
+        (commit <code>c55c196f</code> — also covers §7).</li>
     </ul>
 
     <h2 id="s6">§6 — Dog-food demo: plasma-boundary area</h2>
