@@ -609,11 +609,22 @@ dedicated command:
   filtered at write time. When a true gap blocks naming, follow the vocab
   rotation workflow in the architecture doc (add tokens on the ISN fork, cut an
   RC, bump the dep — appears twice in `pyproject.toml`).
+- **Propose changes THROUGH `sn edit`, never hand-edit graph text.** A wrong
+  name or docs string is fixed by `imas-codex sn edit <name> (--hint TEXT |
+  --rename NAME | --docs TEXT) --reason TEXT`, not a Cypher `SET` — hand
+  editing bypasses grammar validation, RD-quorum review, and scoring. `--hint`
+  steers generate/refine under the grammar; `--rename`/`--docs` skip straight
+  to review with a full replacement. `--reason` is mandatory and is shown to
+  the reviewer as intent context so a deliberate edit isn't penalized for
+  differing from a prior variant — review still scores independently and can
+  reject it. See the `.claude/skills/sn-edit` skill and
+  [Edit Side-Car](docs/architecture/standard-names.md#edit-side-car) for
+  scope/cascade rules and the worked example.
 
 ### CLI commands
 
 `sn run` (seven-pool loop), `review`, `preview`, `release`, `import`,
-`status`, `coverage`, `clear`, `prune`, `bench`. Run
+`status`, `coverage`, `clear`, `prune`, `bench`, `edit`. Run
 `uv run imas-codex sn <cmd> --help` for flags; semantics and the full flag
 matrix are in the architecture doc. Grammar sync is automatic (`sn run`
 startup + `sn clear` re-seed); the graph→staging export leg is

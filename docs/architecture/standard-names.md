@@ -702,6 +702,100 @@ members). The `harmonize.py` library (`build_worklist`, `assemble_family`,
 remains the programmatic surface.
 
 
+## Edit Side-Car
+
+`imas-codex sn edit <standard_name>` lets a human or agent attach a proposed
+correction to an existing StandardName's name or docs as a **steered
+candidate** that rides the normal generate→review→score pipeline, instead of
+mutating graph text directly (which bypasses grammar validation, RD-quorum
+review, and scoring). A mirrored MCP write tool (`edit_standard_name`)
+exposes the same operation to agents; both share one implementation,
+`imas_codex.standard_names.edit.apply_edit`.
+
+```
+imas-codex sn edit <standard_name> (--hint TEXT | --rename NAME | --docs TEXT) --reason TEXT
+                   [--axis name|docs|both] [--scope self|family|subtree] [--dry-run]
+```
+
+### Two-mode entry
+
+The schema's `EditMode` has three values, grouped by how much of the
+pipeline they skip:
+
+- **hint** — a direction is injected into `generate_name`/`refine_name`
+  (`name_hint`) or `generate_docs`/`refine_docs` (`docs_hint`) as additional
+  steering context; the pipeline still composes the candidate. `--axis`
+  selects which slot(s) the hint populates (name, docs, or both).
+- **rename** / **docs** — `name_hint` or `docs_hint` carries a full
+  replacement value that skips generation entirely; the proposed value rides
+  straight into `REVIEW_NAME` / `REVIEW_DOCS`.
+
+### Reason-to-review mechanic
+
+`edit_reason` is mandatory whenever `edit_mode` is set. It is injected into
+the generate/refine prompts (hint mode) **and** into the review gate (every
+mode) as intent context: "a domain expert has deliberately steered this
+candidate for the following reason: …; judge on merits given this intent; do
+not penalize merely for differing from a prior variant." This exists because
+the reviewer LLM measurably pulls back toward previously-accepted variants —
+without intent context, a deliberate correction reads as unexplained
+divergence from the prior candidate and gets marked down for it. Review
+still scores independently on the rubric and **can reject the edit
+outright**; the reason neutralizes the revert bias, it does not pre-approve.
+
+### Schema fields (`standard_name.yaml`)
+
+| Field | Range | Notes |
+|---|---|---|
+| `edit_mode` | `EditMode` (`hint`\|`rename`\|`docs`) | Null when no edit attached |
+| `name_hint` | string | Direction (hint) or full replacement (rename) for the name axis |
+| `docs_hint` | string | Direction (hint) or full replacement (docs) for the docs axis |
+| `edit_reason` | string | Mandatory justification; shown to generate/refine + review |
+| `edit_origin` | `EditOrigin` (`human`\|`agent`) | Who proposed the edit |
+| `edit_status` | `EditStatus` | `open → applied \| exhausted \| rejected` |
+| `edit_scope` | `EditScope` (`only_self`\|`family`\|`subtree`) | Blast radius, recorded at attach time for the cascade |
+| `edit_requested_at` | datetime | ISO 8601 timestamp at attach |
+
+**`edit_status` lifecycle:** `open` (attached, riding the pipeline, outcome
+undetermined) → `applied` (steered candidate accepted by review — terminal)
+\| `exhausted` (refine rotation cap hit first — terminal) \| `rejected`
+(scored below threshold with no rotation left, or terminally rejected by an
+editor — terminal). Surfaced in `sn status`.
+
+### Scope and cascade
+
+`edit_scope` sets the blast radius: `only_self` (CLI accepts `self` — a
+permissible_value literally named `self` crashes the LinkML/jsonasobj2
+loader via an `ExtendedNamespace` kwarg collision with the `self` positional
+parameter), `family` (this SN + siblings sharing the edited segment,
+triggering parent re-derivation), or `subtree` (this SN as parent + every
+`HAS_PARENT` descendant). Defaults: parent → `subtree`, leaf → `self`. A leaf
+edit that changes a base segment shared with siblings is **blocked** without
+explicit `--scope family` — the sibling-desync guard, preventing one
+sibling's rename from silently diverging from the rest of its family.
+
+The cascade is **root-gated and atomic**: the root rename is the single
+reviewed decision; descendant renames are deterministic (ISN grammar peel)
+and ISN-round-trip-validated, and are applied only once the root's review
+accepts (`edit_status → applied`). No half-edited families — either the full
+cascade lands in one transaction or none of it does.
+
+### Provenance: `edit_origin` vs implicit reviewer origin
+
+`edit_origin` (`human`\|`agent`) records who *requested* the steering via
+`sn edit` — set only when an edit is attached. This is distinct from
+`reviewer_suggested_name`, which is always LLM-authored: the reviewer's own
+alternative suggestion produced as a byproduct of scoring a candidate, not
+requested by an editor. An edit's `name_hint`/`docs_hint` is the deliberate
+proposal under review; `reviewer_suggested_name` is the reviewer's incidental
+counter-proposal.
+
+Eligible rename targets include terminal-stage names with no successor: a
+`superseded` name with no successor edge (an orphaned DD path) can be
+resurrected by a redesign edit. Editing runs through `sn edit` to attach the
+candidate, then a subsequent `sn run` (or `sn review`) rotation to drive it
+through review.
+
 ## CLI Commands
 
 | Command | Purpose | Key options |
@@ -716,6 +810,7 @@ remains the programmatic surface.
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--stage`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
+| `sn edit` | Attach a steered edit candidate (name and/or docs) to an existing StandardName; see [Edit Side-Car](#edit-side-car) | `--hint`, `--rename`, `--docs`, `--reason` (mandatory), `--axis {name,docs,both}`, `--scope {self,family,subtree}`, `--dry-run` |
 
 ## Benchmark
 
