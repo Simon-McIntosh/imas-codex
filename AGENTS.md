@@ -540,19 +540,27 @@ Mid-pipeline names are durable state any later run continues — size `-c` so a
 cohort completes; `--flush` gates new work to drain the backlog (pre-audit/
 release convergence, not recovery).
 
-### Family harmonization (`sn harmonize`)
+### Family harmonization (automatic)
 
 Sibling families (projections / per-locus / per-species variants sharing a
-HAS_PARENT parent) must read as a matched set. The docs prompts inject the
-sibling family + a parallel-structure directive on every generate/review/
-refine call (always on). For docs accepted before that existed:
-`sn harmonize --report` ranks drifted families (deterministic metric =
-ranking only — LLM-triage before regenerating; it over-flags member-token
-variation), `--mark <json> --include-accepted` snapshots + resets members
-and prints the scoped regen command (`sn run --docs-only --flush
---scope-run-id <id>`), `--stamp` records the idempotent done-state, and
-`--lint-links` reports label/target mismatches. Never edit docs by hand —
-reset in the graph and regenerate through the pools.
+HAS_PARENT parent) must read as a matched set. This is enforced with NO
+dedicated command:
+
+- Every generate/review/refine docs call injects the sibling family + a
+  parallel-structure directive (always on).
+- The docs accept path gates link integrity: a `[label](name:target)` whose
+  label names a DIFFERENT existing standard name demotes the doc to
+  `reviewed` with a `link_integrity` comment so refine fixes it.
+- Every `sn run` post-drain reconcile restamps family idempotency signatures
+  (`harmonized_at` + `harmonized_group_signature`) for families whose live
+  members are all docs-accepted — a new member's docs landing updates the
+  family automatically on the next run.
+- `sn status` reports family/drift state; `sn status --family <seed>` shows
+  one family.
+- Curative re-open of ACCEPTED docs is the only manual act:
+  `sn run --families "<parent …>" --include-accepted` (one-shot: snapshot →
+  reset → scoped docs drain → restamp). Never edit docs by hand.
+
 
 **Tripwires** (the rest is reference — see the doc):
 

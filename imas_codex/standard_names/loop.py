@@ -1286,6 +1286,33 @@ async def run_sn_pools(
         except Exception as _link_exc:  # noqa: BLE001
             logger.warning("run_sn_pools: resolve_doc_links failed: %s", _link_exc)
 
+        # Family-harmonization bookkeeping: refresh idempotency signatures
+        # for every sibling family whose live members are all docs-accepted
+        # (a member joined, or a member's docs changed and re-passed review).
+        # Purely additive scalar writes; no-op when nothing changed.
+        if not names_only:
+            try:
+                from imas_codex.standard_names.harmonize import (
+                    restamp_harmonized_families,
+                )
+
+                _fam_stats = await asyncio.wait_for(
+                    asyncio.to_thread(restamp_harmonized_families),
+                    timeout=FIXUP_TIMEOUT,
+                )
+                if _fam_stats.get("restamped"):
+                    logger.info(
+                        "run_sn_pools: restamped %d harmonized family(ies) "
+                        "(%d unchanged, %d awaiting member docs)",
+                        _fam_stats["restamped"],
+                        _fam_stats.get("unchanged", 0),
+                        _fam_stats.get("not_ready", 0),
+                    )
+            except TimeoutError:
+                logger.warning("run_sn_pools: family restamp timed out (non-fatal)")
+            except Exception as _fam_exc:  # noqa: BLE001
+                logger.warning("run_sn_pools: family restamp failed: %s", _fam_exc)
+
         # Drain pending LLMCost graph writes.  Bounded by DRAIN_TIMEOUT
         # so a wedged writer cannot block finalize_sn_run.
         cost_is_exact = True

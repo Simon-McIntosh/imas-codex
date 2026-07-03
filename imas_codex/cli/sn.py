@@ -1216,9 +1216,20 @@ def _auto_sync_grammar(*, quiet: bool = False) -> None:
     "scope_run_id",
     default=None,
     help=(
-        "Restrict ALL pool claims to StandardNames stamped with this run_id "
-        "(e.g. the scope id printed by `sn harmonize --mark`). Leaves the "
-        "global backlog untouched."
+        "Restrict ALL pool claims to StandardNames stamped with this run_id. "
+        "Leaves the global backlog untouched."
+    ),
+)
+@click.option(
+    "--families",
+    "families",
+    default=None,
+    help=(
+        "Curative family-docs wave: space-separated family parent ids. "
+        "Snapshots every live member's docs to a DocsRevision, resets the "
+        "family's docs pipeline, and drains ONLY those names through the "
+        "docs pools (implies --docs-only --flush; scoped internally). "
+        "Requires --include-accepted; pair with --dry-run to preview."
     ),
 )
 @click.option(
@@ -1341,6 +1352,7 @@ def sn_run(
     docs_only: bool,
     flush: bool,
     scope_run_id: str | None,
+    families: str | None,
     only_phase: str | None,
     override_edits: tuple[str, ...],
     skip_clear_gate: bool,
@@ -1635,6 +1647,44 @@ def sn_run(
                 **_reset_filter_kwargs,
             )
             console.print(f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes")
+
+    # --families: curative family-docs wave. Resolve parents → members,
+    # snapshot + reset their docs pipeline, then run a docs-only flush
+    # scoped to exactly that set. Post-drain reconcile restamps the
+    # families once every member re-passes review.
+    if families:
+        from imas_codex.standard_names.harmonize import mark_families_for_regen
+
+        parents = families.split()
+        if not include_accepted and not dry_run:
+            raise click.UsageError(
+                "--families resets docs on accepted (catalog-authoritative) "
+                "names — pass --include-accepted to authorize, or --dry-run "
+                "to preview."
+            )
+        out = mark_families_for_regen(parents, dry_run=dry_run)
+        if out.get("unknown_parents"):
+            console.print(
+                "[yellow]Unknown family parents (skipped):[/yellow] "
+                + " ".join(out["unknown_parents"])
+            )
+        if dry_run:
+            console.print(
+                f"[green]Would reset {out['eligible']} docs[/green] across "
+                f"{len(parents) - len(out.get('unknown_parents') or [])} "
+                f"family(ies): {' '.join(out['member_ids'])}"
+            )
+            return
+        if not out.get("reset"):
+            console.print("[yellow]No eligible docs to reset — nothing to do.[/yellow]")
+            return
+        console.print(
+            f"[green]Reset {out['reset']} docs[/green] across the family set; "
+            "draining through the docs pools…"
+        )
+        scope_run_id = out["run_id"]
+        docs_only = True
+        flush = True
 
     # Scope-routing: default (DD source) → pool orchestrator.
     # Runs all 6 pools concurrently, sampling globally from the available
@@ -2348,8 +2398,31 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
 
 
 @sn.command("status")
-def sn_status() -> None:
+@click.option(
+    "--family",
+    "family_seed",
+    default=None,
+    help="Show one sibling family (parent, anchor, members, drift) for a seed name.",
+)
+def sn_status(family_seed: str | None) -> None:
     """Show standard name statistics."""
+    if family_seed:
+        from imas_codex.standard_names.harmonize import assemble_family
+
+        family = assemble_family(family_seed)
+        if family is None:
+            console.print(f"[red]No family found for[/red] {family_seed!r}")
+            raise SystemExit(1)
+        console.print(f"[bold]Family for[/bold] {family_seed!r}")
+        console.print(f"  Parent: {family.get('parent') or '—'}")
+        console.print(f"  Grouping: {family['grouping']}")
+        console.print(
+            f"  Anchor: {family['anchor'] or '[yellow]none (deferred)[/yellow]'}"
+        )
+        for m in family["members"]:
+            marker = " [cyan](anchor)[/cyan]" if m.get("id") == family["anchor"] else ""
+            console.print(f"    - {m.get('id')}{marker}")
+        return
     from imas_codex.graph.client import GraphClient
 
     try:
@@ -2445,6 +2518,62 @@ def sn_status() -> None:
                 for ds_row in docs_stage_rows:
                     ds_table.add_row(ds_row["stage"] or "—", str(ds_row["n"]))
                 console.print(ds_table)
+
+            # Sibling-family harmonization state (stamped vs stale vs waiting)
+            try:
+                from imas_codex.standard_names.harmonize import (
+                    build_worklist,
+                )
+
+                fam_rows = gc.query(
+                    """
+                    MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
+                    WHERE r.operator_kind IN
+                          ['projection', 'qualifier', 'coordinate', 'locus']
+                      AND coalesce(c.name_stage, '') <> 'superseded'
+                    WITH p, count(c) AS n,
+                         sum(CASE WHEN c.docs_stage = 'accepted'
+                             THEN 0 ELSE 1 END) AS waiting
+                    WHERE n >= 2
+                    RETURN count(p) AS families,
+                           sum(CASE WHEN p.harmonized_group_signature IS NOT NULL
+                               THEN 1 ELSE 0 END) AS stamped,
+                           sum(CASE WHEN waiting > 0 THEN 1 ELSE 0 END)
+                               AS awaiting_docs
+                    """
+                )
+                fr = next(iter(fam_rows), None)
+                if fr and fr["families"]:
+                    drifted = build_worklist(gc=gc)
+                    console.print()
+                    console.print("[bold]Sibling Families[/bold]")
+                    fam_table = RichTable(show_header=True)
+                    fam_table.add_column("Metric")
+                    fam_table.add_column("Count", justify="right")
+                    fam_table.add_row("Families (n≥2)", str(fr["families"]))
+                    fam_table.add_row("Harmonization-stamped", str(fr["stamped"]))
+                    fam_table.add_row("Awaiting member docs", str(fr["awaiting_docs"]))
+                    fam_table.add_row(
+                        "Drift worklist (unstamped, n≥3, drift≥0.5)",
+                        str(len(drifted)),
+                    )
+                    console.print(fam_table)
+                    if drifted:
+                        top = drifted[:5]
+                        console.print(
+                            "  [dim]top drifted:[/dim] "
+                            + ", ".join(
+                                f"{f.get('parent') or f.get('physical_base')}"
+                                f" ({f['drift']:.2f})"
+                                for f in top
+                            )
+                        )
+                        console.print(
+                            "  [dim]curative wave: sn run --families "
+                            '"<parent …>" --include-accepted[/dim]'
+                        )
+            except Exception:
+                logger.debug("sn status: family block failed", exc_info=True)
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -4039,287 +4168,3 @@ def sn_review(
             )
 
     asyncio.run(_run())
-
-
-@sn.command("harmonize")
-@click.option(
-    "--report",
-    "report_mode",
-    is_flag=True,
-    default=False,
-    help="Print the ranked drift worklist (read-only).",
-)
-@click.option(
-    "--min-drift",
-    "min_drift",
-    type=float,
-    default=0.5,
-    help="Minimum drift score (0-1) for a family to appear in the worklist.",
-)
-@click.option(
-    "--min-size",
-    "min_size",
-    type=int,
-    default=3,
-    help="Minimum sibling count for a family to appear in the worklist.",
-)
-@click.option(
-    "--limit",
-    "limit",
-    type=int,
-    default=30,
-    help="Max families to display (0 = all).",
-)
-@click.option(
-    "--include-parentless",
-    "include_parentless",
-    is_flag=True,
-    default=False,
-    help="Also group parentless names by physical_base.",
-)
-@click.option(
-    "--json",
-    "json_path",
-    type=click.Path(dir_okay=False, writable=True),
-    default=None,
-    help="Write the full worklist as JSON to this path.",
-)
-@click.option(
-    "--seed",
-    "seed_name",
-    default=None,
-    help="Print the assembled family for this seed name instead of the full report.",
-)
-@click.option(
-    "--mark",
-    "mark_path",
-    type=click.Path(exists=True, dir_okay=False),
-    default=None,
-    help=(
-        "Mark members for docs regeneration from a JSON worklist "
-        "(list of {parent, regen_members, regen_parent} or {members}). "
-        "Snapshots current docs to DocsRevision, resets docs_stage to "
-        "pending, and stamps a scope run_id for the follow-on "
-        "`sn run --scope-run-id <id> --docs-only --flush` rotation."
-    ),
-)
-@click.option(
-    "--include-accepted",
-    "include_accepted",
-    is_flag=True,
-    default=False,
-    help="Required with --mark: authorizes resetting docs on accepted names.",
-)
-@click.option(
-    "--dry-run",
-    "dry_run",
-    is_flag=True,
-    default=False,
-    help="With --mark: report the eligible member count without writing.",
-)
-@click.option(
-    "--stamp",
-    "stamp_parents",
-    default=None,
-    help=(
-        "Space-separated family parent ids: recompute each family's group "
-        "signature and stamp harmonized_at + harmonized_group_signature on "
-        "members and parent when ALL live members are docs-accepted."
-    ),
-)
-@click.option(
-    "--lint-links",
-    "lint_links_mode",
-    is_flag=True,
-    default=False,
-    help=(
-        "Scan accepted docs for [label](name:target) links whose label is "
-        "itself an existing standard name different from the target."
-    ),
-)
-def sn_harmonize(
-    report_mode: bool,
-    min_drift: float,
-    min_size: int,
-    limit: int,
-    include_parentless: bool,
-    json_path: str | None,
-    seed_name: str | None,
-    mark_path: str | None,
-    include_accepted: bool,
-    dry_run: bool,
-    stamp_parents: str | None,
-    lint_links_mode: bool,
-) -> None:
-    """Detect and resolve documentation drift across sibling families.
-
-    Standard names are generated per-name, so sibling families (sharing a
-    parent, or sharing a physical_base when parentless) can drift apart in
-    documentation structure. --report/--seed/--lint-links are read-only;
-    --mark snapshots + resets the listed members' docs pipeline (guarded by
-    --include-accepted) and prints the scoped regen command; --stamp records
-    the idempotent done-state on fully accepted families.
-
-    \b
-    Examples:
-      imas-codex sn harmonize --report
-      imas-codex sn harmonize --report --min-drift 0.6 --limit 15
-      imas-codex sn harmonize --report --include-parentless --json out.json
-      imas-codex sn harmonize --seed poloidal_mode_number
-    """
-    from imas_codex.standard_names.harmonize import assemble_family, build_worklist
-
-    if seed_name:
-        family = assemble_family(seed_name)
-        if family is None:
-            console.print(f"[red]No family found for seed[/red] {seed_name!r}")
-            raise SystemExit(1)
-        if json_path:
-            import json as _json
-
-            with open(json_path, "w") as f:
-                _json.dump(family, f, indent=2, default=str)
-            console.print(f"[green]Wrote family to[/green] {json_path}")
-        console.print(f"\n[bold]Family for seed[/bold] {seed_name!r}")
-        console.print(f"  Grouping: {family['grouping']}")
-        console.print(f"  Parent: {family.get('parent') or '—'}")
-        if family.get("physical_base"):
-            console.print(f"  Physical base: {family['physical_base']}")
-        console.print(f"  Operator kinds: {', '.join(family['operator_kinds']) or '—'}")
-        console.print(f"  Members: {len(family['members'])}")
-        console.print(
-            f"  Anchor: {family['anchor'] or '[red]DEFERRED (no anchor)[/red]'}"
-        )
-        for m in family["members"]:
-            marker = " [cyan](anchor)[/cyan]" if m.get("id") == family["anchor"] else ""
-            console.print(f"    - {m.get('id')}{marker}")
-        return
-
-    if lint_links_mode:
-        from imas_codex.standard_names.harmonize import lint_links
-
-        findings = lint_links()
-        if not findings:
-            console.print("[green]No link text/target mismatches found.[/green]")
-            return
-        console.print(
-            f"[yellow]{len(findings)} link text/target mismatch(es):[/yellow]"
-        )
-        for f in findings:
-            console.print(f"  {f['member']}: [{f['label']}] -> (name:{f['target']})")
-        if json_path:
-            import json as _json
-
-            with open(json_path, "w") as fh:
-                _json.dump(findings, fh, indent=2)
-            console.print(f"[green]Wrote findings to[/green] {json_path}")
-        return
-
-    if stamp_parents:
-        from imas_codex.standard_names.harmonize import stamp_harmonized
-
-        parents = stamp_parents.split()
-        out = stamp_harmonized(parents)
-        console.print(
-            f"[green]Stamped {out['stamped']} family(ies)[/green]; "
-            f"{out['deferred']} deferred (not all members docs-accepted)."
-        )
-        return
-
-    if mark_path:
-        import json as _json
-
-        from imas_codex.standard_names.harmonize import mark_members_for_regen
-
-        with open(mark_path) as fh:
-            entries = _json.load(fh)
-        member_ids: list[str] = []
-        for e in entries:
-            member_ids.extend(e.get("regen_members") or e.get("members") or [])
-            if e.get("regen_parent") and e.get("parent"):
-                member_ids.append(e["parent"])
-        member_ids = sorted(set(member_ids))
-        if not member_ids:
-            console.print("[yellow]No members to mark in the worklist.[/yellow]")
-            raise SystemExit(1)
-        if not include_accepted and not dry_run:
-            console.print(
-                "[red]--mark resets docs on accepted (catalog-authoritative) "
-                "names — pass --include-accepted to authorize.[/red]"
-            )
-            raise SystemExit(1)
-        out = mark_members_for_regen(member_ids, dry_run=dry_run)
-        verb = "Would reset" if dry_run else "Reset"
-        console.print(
-            f"[green]{verb} {out['eligible']} eligible member(s)[/green] "
-            f"of {len(member_ids)} listed."
-        )
-        if not dry_run:
-            console.print(
-                f"Scope run id: [bold]{out['run_id']}[/bold]\n"
-                f"Regenerate with:\n"
-                f"  imas-codex sn run --docs-only --flush "
-                f"--scope-run-id {out['run_id']} -c <budget>"
-            )
-        return
-
-    if not report_mode:
-        console.print(
-            "[yellow]`sn harmonize` needs one of --report / --seed / --mark / "
-            "--stamp / --lint-links.[/yellow]"
-        )
-        raise SystemExit(1)
-
-    worklist = build_worklist(
-        min_drift=min_drift,
-        min_size=min_size,
-        include_parentless=include_parentless,
-    )
-
-    if json_path:
-        import json as _json
-
-        with open(json_path, "w") as f:
-            _json.dump(worklist, f, indent=2, default=str)
-        console.print(
-            f"[green]Wrote worklist ({len(worklist)} families) to[/green] {json_path}"
-        )
-
-    display_list = worklist if limit == 0 else worklist[:limit]
-
-    from rich.table import Table
-
-    table = Table(
-        title=f"SN Family Harmonization Worklist ({len(worklist)} families, "
-        f"min_drift={min_drift}, min_size={min_size})",
-        show_header=True,
-    )
-    table.add_column("Parent / Base", style="cyan")
-    table.add_column("Kind(s)", style="dim")
-    table.add_column("n", justify="right")
-    table.add_column("drift", justify="right")
-    table.add_column("docs-accepted", justify="right")
-    table.add_column("Anchor")
-    table.add_column("Top divergent member")
-
-    for fam in display_list:
-        label = fam.get("parent") or fam.get("physical_base") or "?"
-        kinds = ", ".join(fam.get("operator_kinds") or []) or (
-            "physical_base" if fam["grouping"] == "physical_base" else "—"
-        )
-        anchor_display = fam["anchor"] if fam["anchor"] else "[red]DEFERRED[/red]"
-        table.add_row(
-            label,
-            kinds,
-            str(fam["n"]),
-            f"{fam['drift']:.3f}",
-            str(fam["docs_accepted"]),
-            anchor_display,
-            fam.get("top_divergent_member") or "—",
-        )
-
-    console.print(table)
-    if limit and len(worklist) > limit:
-        console.print(
-            f"[dim]… {len(worklist) - limit} more (raise --limit to see all)[/dim]"
-        )

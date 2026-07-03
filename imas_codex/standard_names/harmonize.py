@@ -679,6 +679,8 @@ __all__ = [
     "doc_sig",
     "lint_links",
     "mark_members_for_regen",
+    "mark_families_for_regen",
+    "restamp_harmonized_families",
     "stamp_harmonized",
     "drift",
     "group_signature",
@@ -686,3 +688,118 @@ __all__ = [
     "assemble_family",
     "build_worklist",
 ]
+
+
+def mark_families_for_regen(
+    family_parents: list[str],
+    *,
+    gc: Any | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Mark whole families for docs regeneration by parent id.
+
+    Resolves each parent's live family (members via the family operator
+    kinds, plus the parent itself), then resets the docs pipeline for the
+    full set via :func:`mark_members_for_regen`. Returns that function's
+    result plus ``member_ids`` and ``unknown_parents``.
+    """
+    resolved_gc, own_gc = _resolve_gc(gc)
+    member_ids: list[str] = []
+    unknown: list[str] = []
+    try:
+        for parent_id in family_parents:
+            rows = (
+                resolved_gc.query(
+                    """
+                    MATCH (p:StandardName {id: $pid})
+                    OPTIONAL MATCH (c:StandardName)-[r:HAS_PARENT]->(p)
+                    WHERE r.operator_kind IN $kinds
+                      AND coalesce(c.name_stage, '') <> $superseded
+                    RETURN p.id AS parent_id,
+                           [x IN collect(c.id) WHERE x IS NOT NULL] AS kids
+                    """,
+                    pid=parent_id,
+                    kinds=list(_FAMILY_OPERATOR_KINDS),
+                    superseded=NameStage.superseded.value,
+                )
+                or []
+            )
+            if not rows:
+                unknown.append(parent_id)
+                continue
+            member_ids.append(rows[0]["parent_id"])
+            member_ids.extend(rows[0]["kids"] or [])
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    member_ids = sorted(set(member_ids))
+    out = mark_members_for_regen(member_ids, dry_run=dry_run)
+    return {**out, "member_ids": member_ids, "unknown_parents": unknown}
+
+
+def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
+    """Reconcile family idempotency signatures against current graph state.
+
+    The automatic steady-state half of harmonization bookkeeping: every
+    family whose live members are ALL docs-accepted gets its
+    ``harmonized_at`` + ``harmonized_group_signature`` refreshed when the
+    stored signature is missing or stale (a member joined or left, or a
+    member's docs changed and re-passed review). Families with any
+    non-accepted member are left alone — they stamp on a later run once
+    their members clear the docs gate. Runs in every ``sn run`` post-drain
+    reconcile; a no-op when nothing changed.
+
+    Returns ``{"restamped": n, "unchanged": m, "not_ready": k}``.
+    """
+    from imas_codex.standard_names.graph_ops import stamp_harmonized_families
+
+    resolved_gc, own_gc = _resolve_gc(gc)
+    try:
+        rows = (
+            resolved_gc.query(
+                """
+                MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
+                WHERE r.operator_kind IN $kinds
+                  AND coalesce(c.name_stage, '') <> $superseded
+                  AND c.description IS NOT NULL
+                WITH p, collect({
+                    id: c.id,
+                    description: c.description,
+                    documentation: c.documentation,
+                    docs_stage: c.docs_stage
+                }) AS members
+                WHERE size(members) >= 2
+                RETURN p.id AS parent_id,
+                       p.harmonized_group_signature AS stored_signature,
+                       members
+                """,
+                kinds=list(_FAMILY_OPERATOR_KINDS),
+                superseded=NameStage.superseded.value,
+            )
+            or []
+        )
+    finally:
+        _close_if_owned(resolved_gc, own_gc)
+
+    to_stamp: list[dict[str, Any]] = []
+    unchanged = 0
+    not_ready = 0
+    for row in rows:
+        members = list(row.get("members") or [])
+        if any(m.get("docs_stage") != _DOCS_STAGE_ACCEPTED for m in members):
+            not_ready += 1
+            continue
+        sig = group_signature(members)
+        if row.get("stored_signature") == sig:
+            unchanged += 1
+            continue
+        to_stamp.append(
+            {
+                "parent": row["parent_id"],
+                "members": [m["id"] for m in members],
+                "signature": sig,
+            }
+        )
+
+    restamped = stamp_harmonized_families(to_stamp) if to_stamp else 0
+    return {"restamped": restamped, "unchanged": unchanged, "not_ready": not_ready}

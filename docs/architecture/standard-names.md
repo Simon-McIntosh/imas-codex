@@ -664,47 +664,57 @@ signed Fourier harmonics) must never be flattened. The review rubric docks
 description/documentation quality for gratuitous template divergence from
 accepted siblings, citing the sibling ids.
 
-**Curative (`sn harmonize`).** For docs accepted before the family context
-existed:
+**Link-integrity gate (accept path).** `persist_reviewed_docs` scans an
+accepting doc's markdown links: a `[label](name:target)` whose snake_cased
+label is itself an existing StandardName id different from the target is a
+referencing error reviewers systematically miss. The doc is demoted to
+`reviewed` (score clamped under the accept threshold) with a
+`link_integrity` per-dimension comment listing the mismatches, so the next
+refine pass fixes the labels. At the rotation cap the doc accepts anyway —
+a link nit never exhausts a doc.
 
-- `--report` — deterministic drift worklist: `doc_sig` = first-6 word
-  tokens of the description (digits→`#`); family drift = 1 − max_cohort/n;
-  ranked table of families with n≥3, drift≥0.5. The metric counts
-  member-specific tokens as drift, so it over-flags — treat it as a
-  RANKING and confirm genuine structural drift with an LLM triage pass
-  before regenerating (measured live: 127/137 flagged families were
-  genuinely parallel).
-- `--mark <worklist.json>` (guarded by `--include-accepted`) — snapshots
-  each listed member's docs to a `DocsRevision` (same `{id}#rev-{chain}`
-  scheme as refine, advancing the chain so ids never collide), resets
-  `docs_stage='pending'`, clears reviewer-docs state, and stamps a scope
-  `run_id`. Regenerate with `sn run --docs-only --flush --scope-run-id
-  <id> -c <budget>` — the scope filter keeps the wave from draining the
-  global docs backlog. Raise `--rotation-cap` when marked members already
-  carry long revision chains.
-- `--stamp "<parent ids>"` — records the idempotent done-state
-  (`harmonized_at` + `harmonized_group_signature`, a sha256 over sorted
-  member ids and content hashes) on members and parent once every live
-  member is docs-accepted; `build_worklist()` skips families whose stored
-  signature matches the current one, so a re-run over an unchanged family
-  is a no-op.
-- `--lint-links` — reports markdown links whose text names a different
-  existing standard name than the `(name:…)` target resolves to.
+**Idempotent done-state (automatic).** Each family carries
+`harmonized_at` + `harmonized_group_signature` (a sha256 over sorted live
+member ids and per-member content hashes) on members and parent. Every
+`sn run` post-drain reconcile calls `restamp_harmonized_families()`: families
+whose live members are ALL docs-accepted get a fresh stamp when membership
+or content changed; families with any non-accepted member wait for a later
+run. A new sibling composing therefore updates its family's stamp
+automatically once its docs pass review — no operator action.
+
+**Curative wave (`sn run --families`).** For docs accepted with drifted or
+defective content, `sn run --families "<parent …>" --include-accepted` is a
+one-shot wave: it resolves each parent's live family, snapshots every
+member's docs to a `DocsRevision` (same `{id}#rev-{chain}` scheme as
+refine), resets the family's docs pipeline, drains ONLY those names through
+the docs pools (docs-only flush, scoped internally), and the post-drain
+reconcile restamps. `--dry-run` previews the member set. The deterministic
+drift metric (first-6-token opening signature; drift = 1 − max_cohort/n)
+counts member-specific tokens as drift and therefore over-flags — treat
+`sn status`'s drift worklist as a RANKING and confirm genuine structural
+drift (LLM triage or human read) before re-opening accepted docs.
+
+**Inspection.** `sn status` prints the Sibling Families block (counts,
+stamped, awaiting docs, drift worklist + top entries);
+`sn status --family <seed>` prints one assembled family (parent, anchor,
+members). The `harmonize.py` library (`build_worklist`, `assemble_family`,
+`lint_links`, `mark_families_for_regen`, `restamp_harmonized_families`)
+remains the programmatic surface.
+
 
 ## CLI Commands
 
 | Command | Purpose | Key options |
 |---------|---------|-------------|
-| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id` |
+| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id`, `--families` |
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
 | `sn import` | Import reviewed YAML back into the graph | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
-| `sn status` | StandardName + StandardNameSource statistics | — |
+| `sn status` | StandardName + StandardNameSource statistics, sibling-family harmonization state | `--family` |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--stage`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
-| `sn harmonize` | Family-drift report + curative docs regen (see Family Harmonization) | `--report`, `--min-drift`, `--min-size`, `--limit`, `--include-parentless`, `--json`, `--seed`, `--mark` (+`--include-accepted`, `--dry-run`), `--stamp`, `--lint-links` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
 
 ## Benchmark

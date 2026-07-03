@@ -5083,6 +5083,39 @@ def _sanitize_doc_text(text: str | None) -> str | None:
     return text
 
 
+_DOC_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
+
+
+def _doc_link_mismatches(gc: Any, documentation: str | None) -> list[str]:
+    """Return ``[label](name:target)`` mismatches in *documentation*.
+
+    A link is a mismatch when its snake_cased label is itself an EXISTING
+    StandardName id different from the link target — the text promises one
+    quantity while the href resolves to another. Human-readable labels that
+    are not themselves ids are fine. Returns human-readable findings like
+    ``"[radial_current_density] -> name:radial_total_current_density"``.
+    """
+    if not documentation:
+        return []
+    pairs = [
+        (label.strip().lower().replace(" ", "_").replace("-", "_"), target, label)
+        for label, target in _DOC_LINK_RE.findall(documentation)
+    ]
+    candidates = {lid for lid, target, _ in pairs if lid != target}
+    if not candidates:
+        return []
+    rows = gc.query(
+        "MATCH (x:StandardName) WHERE x.id IN $ids RETURN x.id AS id",
+        ids=sorted(candidates),
+    )
+    existing = {r["id"] for r in (rows or [])}
+    return [
+        f"[{label}] -> name:{target}"
+        for lid, target, label in pairs
+        if lid != target and lid in existing
+    ]
+
+
 def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
     """Convert bare ``[name]`` brackets in documentation to proper links or text.
 
@@ -8364,7 +8397,8 @@ def persist_reviewed_docs(
             WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
               AND sn.docs_stage = 'drafted'
               AND sn.name_stage = 'accepted'
-            RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length
+            RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
+                   sn.documentation AS documentation
             """,
             id=sn_id,
             token=claim_token,
@@ -8389,6 +8423,45 @@ def persist_reviewed_docs(
         target_stage = "exhausted"
     else:
         target_stage = "reviewed"
+
+    # ── Link label/target gate (accept path only) ─────────────────────
+    # A markdown link whose text names one standard name while its target
+    # resolves to a different one is a physics-referencing error the LLM
+    # reviewers systematically miss. Block promotion and route through
+    # refine_docs with the findings in the comments; never exhaust a doc
+    # over a link nit (accept at the cap and leave it to the batch lint).
+    if target_stage == "accepted":
+        try:
+            with GraphClient() as gc:
+                mismatches = _doc_link_mismatches(gc, rows[0].get("documentation"))
+        except Exception:
+            logger.debug(
+                "persist_reviewed_docs: link-mismatch scan failed for %s "
+                "(non-fatal; accepting)",
+                sn_id,
+                exc_info=True,
+            )
+            mismatches = []
+        if mismatches and docs_chain_length < rotation_cap:
+            target_stage = "reviewed"
+            # Clamp below the accept threshold so claim_refine_docs_batch
+            # (gated on reviewer_score_docs < min_score) picks the doc up.
+            score = min(score, min_score - 0.001)
+            note = (
+                "link text names a different standard name than its target "
+                "resolves to — make each label match its target id (or "
+                "reword to plain prose): " + "; ".join(mismatches)
+            )
+            comments = f"{comments}\n{note}" if comments else note
+            # Per-dim comments are what the refine prompt renders — the
+            # free-text field is not in its context.
+            comments_per_dim = {**(comments_per_dim or {}), "link_integrity": note}
+            logger.info(
+                "persist_reviewed_docs: %s demoted to reviewed — %d mismatched "
+                "doc link(s)",
+                sn_id,
+                len(mismatches),
+            )
 
     scores_json = _json.dumps(scores) if scores is not None else None
     comments_per_dim_json = (
