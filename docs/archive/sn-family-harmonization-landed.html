@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <title>SN family harmonization — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>SN family harmonization — landed record (2026-07-03)</h1>
+  <p>
+    Full record of the campaign executed 2026-07-02/03. The plan's core reframe
+    (owner directive): fix the <strong>pipeline</strong> (family context +
+    hardened prompts), then reset drifted docs in the graph and regenerate
+    through the normal pools — docs are never edited by hand, and deterministic
+    metrics detect/rank while LLM passes judge.
+  </p>
+
+  <h2>Campaign funnel</h2>
+  <figure>
+    <svg viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="Worklist funnel: 289 sibling sets to 137 metric-flagged to 10 triage-confirmed families to 17 docs regenerated, all accepted"
+         style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+      <style>
+        .st{fill:#fff;stroke:#374151;stroke-width:1}
+        .t{fill:#111827;font-size:12px}.tt{fill:#111827;font-size:12.5px;font-weight:600}
+        .cap{fill:#374151;font-size:11px}.ar{stroke:#9ca3af;stroke-width:1;fill:none;marker-end:url(#a)}
+      </style>
+      <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="#9ca3af"/></marker></defs>
+      <rect class="st" x="10"  y="60" width="150" height="52"/>
+      <text class="tt" x="20" y="82">289 sibling sets</text>
+      <text class="cap" x="20" y="100">n≥2, shared parent</text>
+      <rect class="st" x="200" y="60" width="150" height="52"/>
+      <text class="tt" x="210" y="82">137 flagged</text>
+      <text class="cap" x="210" y="100">doc_sig drift ≥0.5, n≥3</text>
+      <rect x="390" y="60" width="150" height="52" fill="#fff" stroke="#b45309" stroke-width="1.4"/>
+      <text class="tt" x="400" y="82">10 confirmed</text>
+      <text class="cap" x="400" y="100">LLM triage + deep-read</text>
+      <rect x="580" y="60" width="170" height="52" fill="#fff" stroke="#16a34a" stroke-width="1.4"/>
+      <text class="tt" x="590" y="82">17 docs regen'd</text>
+      <text class="cap" x="590" y="100">all review-accepted</text>
+      <line class="ar" x1="160" y1="86" x2="198" y2="86"/>
+      <line class="ar" x1="350" y1="86" x2="388" y2="86"/>
+      <line class="ar" x1="540" y1="86" x2="578" y2="86"/>
+      <text class="cap" x="200" y="140">metric = RANKING only: 127/137 flagged families were</text>
+      <text class="cap" x="200" y="156">genuinely parallel (member-token variation, not drift)</text>
+      <text class="cap" x="580" y="140">spend ≈ $23 vs $80–200 planned</text>
+      <text class="cap" x="580" y="156">(triage collapsed the worklist)</text>
+    </svg>
+    <figcaption style="font-size:12px;color:#374151">
+      The deterministic drift metric over-flags member-specific tokens
+      (species/axis/locus) as drift; three Sonnet triage workers reading every
+      flagged family's actual docs reduced 624 candidate members to a
+      17-doc regen worklist (triage-confirmed structural drift + deep-read
+      content defects).
+    </figcaption>
+  </figure>
+
+  <h2>What shipped (commits on imas-codex main)</h2>
+  <table>
+    <thead><tr><th>piece</th><th>commit</th><th>content</th></tr></thead>
+    <tbody>
+      <tr><td>§3 pipeline fix (root cause)</td><td><code>8e2b7880</code></td>
+        <td><code>fetch_sibling_family()</code> injects the HAS_PARENT family
+        (parent, anchor, live members) into generate_docs / review_docs /
+        refine_docs; all three prompts carry a parallel-structure directive
+        (one opening template per family; vary only member-specific physics;
+        faithfulness outranks uniformity); review rubric docks template
+        divergence citing sibling ids.</td></tr>
+      <tr><td>locus grouping</td><td><code>cfc33604</code></td>
+        <td><code>operator_kind='coordinate'</code> has zero live edges; locus
+        (66 edges — radius, safety_factor, power_density) joins the family key.</td></tr>
+      <tr><td>§5 done-state scalars</td><td><code>1d751512</code></td>
+        <td><code>harmonized_at</code> + <code>harmonized_group_signature</code>
+        (LinkML) — worklist skips signature-matched families.</td></tr>
+      <tr><td>§1+§2 drift report</td><td><code>ed302e04</code></td>
+        <td><code>harmonize.py</code> (doc_sig / drift / group_signature /
+        select_anchor / assemble_family / build_worklist) + read-only
+        <code>sn harmonize --report</code>; 24 tests.</td></tr>
+      <tr><td>§6 apply path</td><td><code>d6d03547</code></td>
+        <td><code>--mark</code> (DocsRevision snapshot → docs_stage=pending →
+        scope run_id; <code>--include-accepted</code> guard),
+        <code>sn run --scope-run-id</code> (waves never drain the global
+        backlog), <code>--stamp</code>, <code>--lint-links</code>.</td></tr>
+      <tr><td>parent-scope prompt fix</td><td>(2026-07-03)</td>
+        <td>non-derived parents with children now get the same
+        generalize-over-children pressure as derived parents — found live when
+        bare <code>fraction</code> regenerated helium-4-specific.</td></tr>
+      <tr><td>§8 docs</td><td>(2026-07-03)</td>
+        <td>AGENTS.md harmonize tripwires + architecture "Family Harmonization"
+        section. <em>plans/README.md registration is stale scope — plans are
+        reckon-managed under docs/.</em></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Regeneration waves (reset-to → regenerate → fleet-review)</h2>
+  <table>
+    <thead><tr><th>wave</th><th>docs</th><th>outcome</th><th>spend</th></tr></thead>
+    <tbody>
+      <tr><td>1 — momentum-flux / convection / wall-flux families</td><td>8</td>
+        <td>8/8 accepted (0.875–1.000); fleet review: 8/8 PASS — template
+        convergence + the load-bearing "transported component ≠ direction"
+        nuance preserved verbatim; the ΔE-binning "loss" was adjudicated
+        against DD ground truth and found to be a faithfulness FIX (the old
+        doc had invented the energy-interval integral).</td><td>$10.3</td></tr>
+      <tr><td>2 — content defects (wrong-scope parents, link bugs, carbon ratio)</td><td>9</td>
+        <td>8/9 accepted first pass; energy_diffusivity exhausted at 0.787 →
+        re-mark → accepted 0.900 with textbook electron/ion/neutral
+        generalization; ratio_of_carbon_density also fixed a latent
+        $Z_\mathrm{eff}$ coefficient bug.</td><td>$10.2</td></tr>
+      <tr><td>3 — fraction parent (post prompt-fix) + 2 new link bugs</td><td>3</td>
+        <td>fraction now a proper generic part-to-whole ratio (0.875);
+        radial_total_current_density 0.869 (flux-surface-normal nuance
+        retained); total_ion_power re-reviewed to acceptance.</td><td>$2.5</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Total SN LLM spend ≈ $23</strong> (vs the plan's $80–200
+    estimate) — the LLM triage collapsed 624 candidate members to 17 docs.</p>
+
+  <h2>Fleet review findings (extensive SN review, 2026-07-02)</h2>
+  <ul>
+    <li><strong>The review gate never penalized family drift</strong> —
+      251/256 sibling families had fully divergent openers, all scoring
+      0.85–1.00 under the old rubric (drift and score were uncorrelated).</li>
+    <li><strong>Drift taxonomy</strong> (18-family deep read): parent-scope
+      mismatch (severe, 3/18), link text/target mismatch (6/18), stubs inside
+      mature families, inconsistent boilerplate presence, citation asymmetry,
+      cross-family reference bleed, naming-taxonomy outliers.</li>
+    <li><strong>q95 conflation resolved structurally</strong> —
+      safety_factor_at_plasma_boundary was already superseded by the correctly
+      named safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95;
+      no live accepted doc carries the conflation.</li>
+    <li><strong>§4 verdict</strong>: zero rename_cascade applications
+      warranted. The 'radial' ambiguity class (flux-surface-normal vs
+      cylindrical R) routes to the ISN radial-coordinate refactor;
+      minor_triangularity is documented as a convention outlier, not renamed.</li>
+    <li><strong>Link lint</strong>: 289 label/target mismatches across 249
+      accepted docs (<code>sn harmonize --lint-links</code>) — mostly
+      shorthand labels colliding with existing ids; physics-error subset
+      regenerated in wave 2/3; remainder tracked as an open followup.</li>
+  </ul>
+
+  <h2>Idempotency (§5)</h2>
+  <p>
+    All regenerated families stamped via <code>sn harmonize --stamp</code>
+    (members + parent carry <code>harmonized_group_signature</code>);
+    <code>build_worklist()</code> excludes signature-matched families, so a
+    re-run over unchanged families is a no-op. Any membership or docs change
+    invalidates the signature and re-enters the worklist.
+  </p>
+
+  <h2>What's next</h2>
+  <ul>
+    <li>Link-lint remediation for the ~280 remaining shorthand-label
+      mismatches (deterministic detection exists; fix via targeted regen or a
+      persist-time label/target validator).</li>
+    <li>Optional in-loop harmonize pool (plan §6 tail) — deferred: the always-on
+      family context in generate/review/refine already self-heals new names.</li>
+    <li>Catalog release (sn release RC) to publish the 17 regenerated docs.</li>
+  </ul>
+</main>
+</body>
+</html>

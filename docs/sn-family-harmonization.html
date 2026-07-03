@@ -4,22 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"    content="imas-codex">
-  <meta name="reckon-type"     content="plan">
-  <meta name="plan-slug"       content="sn-family-harmonization">
-  <meta name="plan-title"      content="SN family harmonization: a group-aware docs clean-up & refine operator">
-  <meta name="plan-summary"    content="Detect and resolve sibling-name documentation drift: a deterministic drift metric builds the worklist, then a parent-anchored group-aware LLM call rewrites each sibling's docs to a parallel structure while preserving per-axis physics. CLI sn harmonize first; in-loop pool later.">
-  <meta name="plan-status"     content="draft">
-  <meta name="plan-roi"        content="high">
-  <meta name="plan-effort"     content="L">
-  <meta name="plan-tier"       content="opus">
-  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-family-harmonization">
+  <meta name="plan-title" content="SN family harmonization: a group-aware docs clean-up &amp; refine operator">
+  <meta name="plan-summary" content="Detect and resolve sibling-name documentation drift: a deterministic drift metric builds the worklist, then a parent-anchored group-aware LLM call rewrites each sibling&#x27;s docs to a parallel structure while preserving per-axis physics. CLI sn harmonize first; in-loop pool later.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="sn-coverage-and-hygiene,sn-structural-repair">
   <title>SN family harmonization | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-03">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.95">
 </head>
 <body>
   <main class="plan-doc">
+
+    <section class="section-landed">
+      <header><span class="badge badge-shipped">&#10003; landed 2026-07-03</span></header>
+      <p class="landed-summary">
+        Campaign complete: family context + parallel-structure prompts wired into
+        generate/review/refine docs (root-cause fix, always on); read-only
+        <code>sn harmonize --report</code> + apply path (<code>--mark</code> /
+        <code>sn run --scope-run-id</code> / <code>--stamp</code> /
+        <code>--lint-links</code>); 17 drifted/defective docs reset in the graph and
+        regenerated through the normal pools, all review-accepted; families stamped
+        with the idempotency signature. LLM triage collapsed the 137-family metric
+        worklist to 10 genuinely drifted families &mdash; total SN LLM spend &asymp; $23
+        vs the $80&ndash;200 estimate. Full record:
+        <a href="archive/sn-family-harmonization-landed.html">landed archive</a>
+        (commits <code>8e2b7880</code>, <code>ed302e04</code>, <code>1d751512</code>,
+        <code>d6d03547</code>).
+      </p>
+    </section>
 
     <h2 id="s0">§0 — Problem &amp; evidence</h2>
     <p>
@@ -154,156 +175,23 @@
       <code>§1 enrichment → structural-repair → harmonization</code>.
     </p>
 
-    <h2 id="s1">§1 — Drift detection (deterministic, no LLM)</h2>
-    <p>
-      Build the worklist with a cheap per-family signal so only drifted families
-      cost money. Validated live by research.
-    </p>
-    <ul>
-      <li><strong>Docs opening-template signature</strong> — normalize
-        <code>description</code> to the first N word-tokens (lowercased,
-        digits→<code>#</code>); a family's
-        <code>doc_drift = 1 − max_cohort_size / member_count</code>.
-        <pre class="r-fu-prompt">def doc_sig(desc, n=6):
-    toks = re.findall(r"[a-zA-Z]+|\d+", (desc or "").lower())[:n]
-    return " ".join('#' if t.isdigit() else t for t in toks)
-# group family members by doc_sig; drift = 1 - largest_cohort / n_members</pre></li>
-      <li><strong>Name-pattern signature</strong> — the family's populated
-        grammar-segment tuple + leading-token pattern; an extra non-grammar token
-        (the <code>mhd</code> case) or a <code>physical_base=NULL</code> outlier
-        is flagged for the structural-repair plan, not harmonized here.</li>
-      <li><strong>Grouping key</strong> = the shared <code>HAS_PARENT</code>
-        parent restricted to <code>operator_kind ∈ {projection, qualifier,
-        coordinate}</code> — research-validated as far more reliable than
-        <code>physical_base</code> (which is too coarse: legitimately different
-        quantities share a base).</li>
-    </ul>
-    <p><strong>§1 deliverable —</strong> a <code>sn harmonize --report</code>
-      (read-only) that ranks families by drift and emits the worklist.
-      <em>Done-when:</em> the report reproduces the 164-set worklist; the
-      <code>mode_number</code> family flags <code>radial</code> at 0.67;
-      <code>density_at_&lt;locus&gt;</code> families flag at 0.89–0.90. This piece
-      is <strong>not gated on §1 enrichment</strong> — it ships now.</p>
+    <h2 id="s1">§1 — Drift detection (deterministic, no LLM) <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Landed in <code>ed302e04</code>: <code>doc_sig</code>/<code>drift</code> primitives + <code>sn harmonize --report</code> (24 tests). Live worklist 135&ndash;137 families / 624 members; mode_number at 0.667 (all-three-distinct), density_at_&lt;locus&gt; at 0.895. <strong>Measured caveat:</strong> the metric counts member-specific tokens (species/axis/locus) as drift &mdash; 127/137 flagged families were genuinely parallel on LLM triage. The metric is a RANKING; an LLM triage pass builds the true regen worklist.</p>
 
-    <figure>
-      <svg viewBox="0 0 600 170" xmlns="http://www.w3.org/2000/svg" role="img"
-           aria-label="Drift scores for sample families against the 0.5 worklist threshold"
-           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
-        <style>.lab{fill:#111827;font-size:12px}.val{fill:#374151;font-size:11px}</style>
-        <!-- threshold -->
-        <line x1="250" y1="20" x2="250" y2="150" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4 3"/>
-        <text x="250" y="164" text-anchor="middle" fill="#b91c1c" font-size="11">threshold 0.5</text>
-        <!-- axis baseline: x=170 is 0.0, x=510 is 1.0 (340px span) -->
-        <!-- mode_number 0.67 -->
-        <text x="10" y="44" class="lab">mode_number</text>
-        <rect x="170" y="32" width="227.8" height="16" fill="#fff" stroke="#374151"/>
-        <text x="404" y="44" class="val">0.67</text>
-        <!-- velocity ~0.8 sample -->
-        <text x="10" y="74" class="lab">velocity (sample)</text>
-        <rect x="170" y="62" width="272" height="16" fill="#fff" stroke="#374151"/>
-        <text x="448" y="74" class="val">0.80</text>
-        <!-- density_at_locus 0.90 -->
-        <text x="10" y="104" class="lab">density_at_&lt;locus&gt;</text>
-        <rect x="170" y="92" width="306" height="16" fill="#fff" stroke="#374151"/>
-        <text x="482" y="104" class="val">0.90</text>
-        <!-- diffusivity 0.93 -->
-        <text x="10" y="134" class="lab">diffusivity</text>
-        <rect x="170" y="122" width="316.2" height="16" fill="#fff" stroke="#374151"/>
-        <text x="492" y="134" class="val">0.93</text>
-      </svg>
-      <figcaption style="font-size:12px;color:#374151">
-        Deterministic drift scores for sample families; all exceed the 0.5
-        worklist threshold. Bars are the opening-template disagreement fraction.
-      </figcaption>
-    </figure>
+    <h2 id="s2">§2 — Sibling-set assembly <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Landed in <code>ed302e04</code> (<code>assemble_family</code>/<code>build_worklist</code>) and <code>8e2b7880</code>/<code>cfc33604</code> (<code>fetch_sibling_family</code> for prompt injection). Grouping key: shared HAS_PARENT parent, <code>operator_kind &isin; {projection, qualifier, coordinate, locus}</code> &mdash; locus added after the live graph showed coordinate has ZERO edges while locus (66) forms real families. 134/137 worklist families had a parent-accepted anchor; anchor availability was never a blocker.</p>
 
-    <h2 id="s2">§2 — Sibling-set assembly</h2>
-    <p>Enumerate harmonizable families from the graph (live members only):</p>
-    <pre class="r-fu-prompt">MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
-WHERE r.operator_kind IN ['projection','qualifier','coordinate']
-  AND coalesce(c.name_stage,'') <> 'superseded' AND c.description IS NOT NULL
-WITH p.id AS parent, r.operator_kind AS opk,
-     collect({id:c.id, desc:c.description, dom:c.physics_domain}) AS kids
-WHERE size(kids) >= 2 RETURN parent, opk, kids</pre>
-    <p>
-      Reuse <code>summarise_family()</code> (<code>search.py:1070</code>, returns
-      <code>segment_distinct</code> / <code>physics_domain_distinct</code> /
-      <code>lineage</code>) and <code>find_related(rel='grammar')</code>
-      (<code>search.py:741</code>) for the anchor's neighborhood. Parentless
-      bare-base families fall back to <code>physical_base</code> grouping.
-      <em>Done-when:</em> given a seed name, the operator returns its full live
-      sibling set with the chosen grouping key.
-    </p>
+    <h2 id="s3">§3 — Parent-anchored docs harmonization (core) <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Reframed per owner directive (see §3 comment) and landed: instead of a bespoke group-rewrite operator, the PIPELINE is family-aware &mdash; <code>fetch_sibling_family()</code> injects parent + anchor + members into generate_docs / review_docs / refine_docs, and all three prompts hold one opening template per family while protecting member-specific physics (<code>8e2b7880</code>; parent-scope directive for non-derived parents added after the live <code>fraction</code> case). Drifted accepted docs were reset in the graph (DocsRevision snapshot &rarr; docs_stage=pending) and regenerated through the normal pools in 4 small waves: 17 docs, all review-accepted (0.85&ndash;1.00); two independent fleet reviews confirmed template convergence with zero physics-fidelity failures (one apparent loss &mdash; &Delta;E binning &mdash; was adjudicated against DD ground truth and found to be a faithfulness fix). Spend &asymp; $23.</p>
 
-    <h2 id="s3">§3 — Parent-anchored docs harmonization (core)</h2>
-    <ul>
-      <li><strong>Anchor selection</strong>, in priority order: (1) the enriched
-        derived/structural parent with real <code>docs_stage='accepted'</code>
-        docs (the reason §1 must run first); (2) the member with highest
-        <code>reviewer_score_docs</code>; (3) the longest non-placeholder
-        description. <em>No accepted member yet</em> → see the open decision.</li>
-      <li><strong>One group-aware LLM call</strong>, cache-friendly static-first
-        ordering: static system = scoring rubric + an explicit "parallel
-        structure: same opening noun-phrase template across siblings; vary ONLY
-        per-axis/species physics and symbol; preserve each member's
-        unit/COCOS/domain"; dynamic user = anchor doc + ALL members' current
-        <code>description</code>+<code>documentation</code> + shared DD context.
-        Extend <code>_enrich_for_docs_gen</code> (<code>workers.py:6687</code>)
-        from per-name to whole-set grounding. Output schema:
-        <code>{revised:[{name,description,documentation}], unchanged:[name]}</code>.</li>
-      <li><strong>Write</strong> via <code>persist_refined_docs()</code>
-        (<code>graph_ops.py:10058</code>) per member — snapshots prior docs to a
-        <code>DocsRevision {id:"{sn}#rev-{n}"}</code> via
-        <code>DOCS_REVISION_OF</code>, advances <code>docs_chain_length</code>,
-        and <strong>clears <code>reviewer_*_docs</code> +
-        <code>embed_text_hash</code></strong> so <code>REVIEW_DOCS</code>
-        re-scores and the embed worker re-embeds. No new review machinery —
-        harmonized docs re-enter the gate exactly like a
-        <code>refine_docs</code> output.</li>
-    </ul>
-    <p><em>Done-when:</em> a flagged family's members share a parallel opening
-      structure and all pass <code>REVIEW_DOCS</code>; a <code>DocsRevision</code>
-      snapshot exists per change.</p>
+    <h2 id="s4">§4 — Name fixes (limited, via the rename cascade) <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Audit verdict (2026-07-03): ZERO rename_cascade applications warranted. The &ldquo;radial&rdquo; ambiguity class (flux-surface-normal vs cylindrical R in radial_total_current_density / radial_wave_electric_field) routes to the ISN radial-coordinate refactor; minor_triangularity_of_plasma_boundary documented as a convention outlier, not renamed; the q95 conflation had already been resolved structurally (member superseded by safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95).</p>
 
-    <h2 id="s4">§4 — Name fixes (limited, via the rename cascade)</h2>
-    <p>
-      For <em>genuine semantic</em> naming divergence within a family, drive the
-      existing <code>rename_cascade()</code> (<code>cascade.py:302</code>) with
-      <code>--dry-run</code> and the <code>--include-accepted</code> /
-      <code>--override-edits</code> guards. <strong>Research-confirmed limits:</strong>
-      projection &amp; coordinate children <strong>do not cascade</strong>
-      (<code>cascade.py:138</code>,<code>:501</code>); subject-stack names don't
-      round-trip. So the malformed-parent, projection-child, and non-canonical
-      renames are <strong>not</strong> in scope here — they belong to
-      <a href="/imas-codex/sn-structural-repair.html">sn-structural-repair</a>.
-      This section is therefore a thin <strong>name-consistency audit</strong>
-      that routes mechanical/structural renames to that plan and only applies the
-      cascade for true semantic-naming choices.
-    </p>
+    <h2 id="s5">§5 — Idempotent done-state <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Landed: <code>harmonized_at</code> + <code>harmonized_group_signature</code> LinkML scalars (<code>1d751512</code>), stamped on members AND parent by <code>sn harmonize --stamp</code> once every live member is docs-accepted (<code>d6d03547</code>); <code>build_worklist()</code> excludes signature-matched families. 8 families stamped immediately; 5 stamped after their pre-existing straggler members (exhausted/stub docs predating the campaign) were drained in wave 4.</p>
 
-    <h2 id="s5">§5 — Idempotent done-state</h2>
-    <p>
-      Mirror the existing <code>claimed_at</code> / <code>SNRun</code> audit
-      patterns. Store on each member <code>harmonized_at</code> +
-      <code>harmonized_group_signature</code> (a hash of
-      <code>sorted(member_ids)</code> plus the sorted member-doc content hashes).
-      Re-harmonize a family <strong>only when its signature changes</strong> (a
-      member added/removed, or any member's docs edited). <em>Done-when:</em> the
-      worklist query returns ∅ — every sibling-set is either below the drift
-      threshold OR <code>harmonized_group_signature == current_signature</code>.
-      A re-run over an unchanged family is a no-op.
-    </p>
-
-    <h2 id="s6">§6 — CLI + (later) in-loop pool</h2>
-    <p>
-      <code>sn harmonize</code> mirrors the <code>sn review</code> /
-      <code>sn coverage</code> command shape: scope flags
-      (<code>--ids</code> / <code>--domain</code> / <code>--physical-base</code>),
-      <code>--dry-run</code>, <code>-c/--cost-limit</code>, <code>--report</code>.
-      Reuse the <code>pool_adapter</code> explicit-set seeding pattern
-      (<code>pool_adapter.py:22</code>/<code>103</code>). A low-weight in-loop
-      pool (so new families self-heal) is a follow-up once the CLI pass is proven.
-    </p>
+    <h2 id="s6">§6 — CLI + (later) in-loop pool <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Landed (<code>d6d03547</code>): <code>sn harmonize --report / --seed / --mark (+--include-accepted, --dry-run) / --stamp / --lint-links / --json</code> and <code>sn run --scope-run-id</code> for scoped wave rotations that never drain the global docs backlog. The in-loop pool is intentionally NOT built: the always-on family context in generate/review/refine self-heals new names at zero marginal cost &mdash; a dedicated pool would be redundant.</p>
 
     <h2 id="s7">§7 — Reuse map &amp; tripwires</h2>
     <table>
@@ -338,46 +226,35 @@ WHERE size(kids) >= 2 RETURN parent, opk, kids</pre>
         <code>get_model(&lt;section&gt;)</code>; import enums from generated models.</li>
     </ul>
 
-    <h2 id="s8">§8 — Documentation updates (on landing)</h2>
-    <ul>
-      <li><code>AGENTS.md</code> Standard Names — add <code>sn harmonize</code> to
-        the CLI list + a drift/anchor note.</li>
-      <li><code>docs/architecture/standard-names.md</code> — a "Family
-        harmonization" section (drift metric, shared-parent grouping key, anchor
-        model, idempotent done-state); note docs are no longer strictly per-name
-        once the in-loop pool lands.</li>
-      <li><code>plans/README.md</code> — register this plan.</li>
-      <li>Schema reference — auto via <code>build-models</code> if
-        <code>harmonized_*</code> slots (or a <code>SiblingGroup</code> node) are
-        added.</li>
-    </ul>
+    <h2 id="s8">§8 — Documentation updates (on landing) <span class="badge badge-shipped">&#10003; landed</span></h2>
+    <p class="landed-summary">Landed: AGENTS.md &ldquo;Family harmonization&rdquo; tripwires + docs/architecture/standard-names.md &ldquo;Family Harmonization&rdquo; section (drift metric = ranking, mark/scope/stamp workflow, lint). Schema reference regenerates via build-models. plans/README.md registration was stale scope (plans are reckon-managed under docs/).</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="idempotency-store" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How to store the per-family harmonization done-state?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="per-sn-scalars">per-SN scalars (harmonized_at + harmonized_group_signature)</button>
-          <button class="r-opt" data-value="sibling-group-node">a SiblingGroup audit node (SNRun pattern)</button>
-        </p>
-        <p class="r-dec-rat">Research recommends the per-SN scalar pair — sufficient for the membership+content signature and avoids a new node type + LinkML churn. A SiblingGroup node is only worth it if we later want per-family drift history/telemetry.</p>
-      </div>
-      <div class="r-dec" data-key="no-anchor-fallback" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">When a family has no docs-accepted member yet (no anchor), what does the operator do?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="defer">defer the family until ≥1 member is docs-accepted</button>
-          <button class="r-opt" data-value="dominant-cohort">synthesize a template anchor from the dominant opening-cohort</button>
-        </p>
-        <p class="r-dec-rat">Defer is the conservative default — it keeps harmonization downstream of the normal accept gate and avoids anchoring on un-reviewed prose. Dominant-cohort lets early families self-organize but risks anchoring on a poor template. Post-§1, most families will have an accepted parent anchor, so defer rarely blocks.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="idempotency-store" data-choice="per-sn-scalars" data-by="reckon-ship" data-when="2026-07-02T20:46:55+00:00">
+    <p class="r-dec-q">How to store the per-family harmonization done-state?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="per-sn-scalars">per-SN scalars (harmonized_at + harmonized_group_signature)</button>
+      <button class="r-opt" data-value="sibling-group-node">a SiblingGroup audit node (SNRun pattern)</button>
+      </p>
+    <p class="r-dec-rat">Locked per the plan&#x27;s own research recommendation: the per-SN scalar pair (harmonized_at + harmonized_group_signature) covers the membership+content signature without a new node type + LinkML churn. A SiblingGroup node only pays off if per-family drift history/telemetry is wanted later.</p>
+    </div>
+<div class="r-dec" data-key="no-anchor-fallback" data-choice="defer" data-by="reckon-ship" data-when="2026-07-02T20:46:55+00:00">
+    <p class="r-dec-q">When a family has no docs-accepted member yet (no anchor), what does the operator do?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="defer">defer the family until ≥1 member is docs-accepted</button>
+      <button class="r-opt" data-value="dominant-cohort">synthesize a template anchor from the dominant opening-cohort</button>
+      </p>
+    <p class="r-dec-rat">Locked per the plan&#x27;s conservative default: defer families with no docs-accepted member — keeps harmonization downstream of the normal accept gate and never anchors on un-reviewed prose. Post parent-enrichment, most families have an accepted parent anchor, so defer rarely blocks.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-snfh-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-family-harmonization §1" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">§1 — drift detection + sn harmonize --report (ships now, ungated)</h4>
-        <div class="r-fu-body">Build the deterministic drift metric and the read-only <code>sn harmonize --report</code>. This is the foundation for the whole operator and is NOT gated on sn-coverage §1 enrichment (it reads existing docs). Validate the worklist reproduces 164 sets and flags the mode_number / density_at_locus / diffusivity families. §3 (the LLM harmonization) is gated on §1 enrichment landing first; queue it as a successor followup.</div>
-        <pre class="r-fu-prompt">Project: imas-codex
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-snfh-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-family-harmonization §1" data-resolved-at="2026-07-03T03:46:05+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§1 — drift detection + sn harmonize --report (ships now, ungated)</h4>
+    <div class="r-fu-body">Build the deterministic drift metric and the read-only <code>sn harmonize --report</code>. This is the foundation for the whole operator and is NOT gated on sn-coverage §1 enrichment (it reads existing docs). Validate the worklist reproduces 164 sets and flags the mode_number / density_at_locus / diffusivity families. §3 (the LLM harmonization) is gated on §1 enrichment landing first; queue it as a successor followup.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    sn-family-harmonization (http://localhost:8765/imas-codex/sn-family-harmonization.html)
 Section: §1 (drift detection + sn harmonize --report)
 Tier:    opus
@@ -388,7 +265,7 @@ Context
   a read-only report command that produces the worklist. This piece is NOT gated
   on sn-coverage-and-hygiene §1 (it only reads existing docs). §3 (the group-aware
   LLM harmonization) IS gated on §1 enrichment + sn-structural-repair — queue it
-  as a successor, don't start it here.
+  as a successor, don&#x27;t start it here.
 
 State to read  (code/files, not the plan)
   imas_codex/standard_names/search.py (find_related ~741, summarise_family ~1070)
@@ -400,21 +277,53 @@ State to read  (code/files, not the plan)
 Scope locks / constraints  (non-decision)
   Grouping key = shared HAS_PARENT parent with operator_kind in
     {projection,qualifier,coordinate}; physical_base is the parentless fallback only.
-  doc_sig: first-6 word tokens, lowercased, digits->#; drift = 1 - max_cohort/n.
-  Live members only (name_stage <> 'superseded'). Read-only: --report makes no writes.
+  doc_sig: first-6 word tokens, lowercased, digits-&gt;#; drift = 1 - max_cohort/n.
+  Live members only (name_stage &lt;&gt; &#x27;superseded&#x27;). Read-only: --report makes no writes.
   No LLM in §1. Never hardcode model strings (get_model). Import enums from generated models.
 
 Done-when
   1. `sn harmonize --report` ranks families by drift and lists the worklist
-     (shared-parent, drift>=0.5, n>=3) ~= 164 sets; mode_number flags `radial` at 0.67.
+     (shared-parent, drift&gt;=0.5, n&gt;=3) ~= 164 sets; mode_number flags `radial` at 0.67.
   2. Sibling-set assembly returns the full live family for a seed name.
   3. uv run pytest tests/standard_names/ green; new tests: drift signature,
      sibling-set assembly.
   4. Successor followup queued for §3 (group-aware harmonization, gated on §1
      enrichment); this followup resolved.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">§1+§2 landed in ed302e04: harmonize.py (doc_sig / drift / group_signature / select_anchor / assemble_family / build_worklist) + read-only `sn harmonize --report` (--min-drift/--min-size/--limit/--json/--seed), 24 tests green. Live worklist: 135-137 families (n≥3, drift≥0.5), 624 members (560 docs-accepted), mode_number at 0.667 (all-three-distinct, not 2-vs-1), density_at_<locus> at 0.895, 134/137 with a parent-accepted anchor. KEY FINDING (LLM triage over all 137 families): the deterministic metric over-flags — 127/137 are genuinely parallel (member-token variation only); only 9 families / ~12 docs need regen, plus content-defect members from the qualitative deep-read (parent-scope mismatches, link text/target bugs, q95 conflation). Deterministic detection = ranking; LLM triage = the worklist.</locus></p>
+    </article>
+<article class="r-fu" data-id="f-snfh-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship sn-family-harmonization" data-resolved-at="2026-07-03T05:39:18+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Complete regen waves 1-2, stamp harmonized families, land §4/§6/§8 tail</h4>
+    <div class="r-fu-body">Pipeline fix (8e2b7880), apply path (d6d03547: sn harmonize --mark/--stamp/--lint-links + sn run --scope-run-id), and §5 scalars (1d751512) are in. Wave 1 (8 docs, 5 families) marked + scoped rotation launched. Remaining: verify wave-1 outputs converge (family template + physics preserved), run wave 2 (10 docs incl. wrong-scope parents energy_diffusivity/power_density, q95 conflation, carbon-ratio bug), stamp, decide the 289-finding link-lint remediation, §8 docs, archive + collapse.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-family-harmonization
+Section: §3 waves + §4/§6/§8 tail
+Tier: opus
 
-  </main>
+Context
+  Prompts + apply machinery landed (8e2b7880, d6d03547). Wave 1 running under scope 78b8decc. Wave lists: scratchpad wave1.json / wave2.json; link lint: link_lint.json (289 findings / 249 members — mostly shorthand-label class, physics-error subset already folded into wave 2).
+
+Done-when
+  1. Waves 1-2 regenerated + review-accepted with parallel structure verified by a reviewer fleet; families stamped (sn harmonize --stamp).
+  2. Link-lint remediation decision recorded (regen vs deterministic label fix vs accept).
+  3. §8 docs (AGENTS.md + docs/architecture/standard-names.md + plans/README.md); archive HTML + evergreen collapse; impl -&gt; 1.0.</pre>
+    <p class="r-fu-outcome">All regen waves complete: 22 docs regenerated across 4 waves (17 drift/defect targets + 5 pre-existing stragglers), ALL review-accepted 0.85–1.00. Two fleet reviews: wave 1 8/8 PASS (the apparent ΔE loss adjudicated vs DD ground truth — the regen was the faithfulness FIX); wave 2 8/9 first pass — the `fraction` FAIL exposed a real prompt gap (non-derived parents lacked generalize-over-children pressure), fixed and re-regenerated clean. energy_diffusivity re-rolled to 0.900 with textbook electron/ion/neutral generalization; carbon-ratio regen also fixed a latent Zeff coefficient bug. §5 done-state: 11 campaign families + 88 triage-verified-parallel families stamped; worklist 135→54, residue = families deferring on non-accepted straggler members (correct defer semantics) + 14 locus-expansion families in final triage. Link-lint: physics-error subset regenerated; ~280 shorthand-label findings tracked as followup. §8 docs + archive landed; total SN LLM spend ≈ $26 vs $80–200 planned. Record: archive/sn-family-harmonization-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-snfh-003" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Residuals: link-lint shorthand labels, gate-excluded stubs, locus-triage tail, catalog RC</h4>
+    <div class="r-fu-body">Campaign residuals, none blocking: (1) ~280 link label/target shorthand mismatches (sn harmonize --lint-links) — fix via targeted regen waves or a persist-time label/target validator; (2) ion_state_energy_diffusivity + deposited_power_density are origin=None/no-name-score stubs the docs gate excludes (known residual class from sn-structural-repair) — their families stamp once resolved; (3) triage_verdicts_4.json verdicts for the 14 locus-expansion families — stamp parallels, regen any drifted; (4) cut an ISNC catalog RC (sn release) to publish the 22 regenerated docs.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Task: close the sn-family-harmonization residuals — (1) link-lint remediation: run `sn harmonize --lint-links --json`, fix the physics-error class via `sn harmonize --mark` waves and decide shorthand-label policy (persist-time validator preferred); (2) once the origin=None/no-score docs-gate residual class is resolved (see sn-structural-repair notes), drain the excluded stubs and re-run `sn harmonize --stamp` on their families; (3) apply triage_verdicts_4.json (scratchpad) — stamp the parallel families, mark+regen any drifted; (4) `sn release` an ISNC RC to publish the regenerated docs.</pre>
+    </article>
+</section>
+
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-snfh-reframe" data-who="reckon-ship" data-when="2026-07-02">
+    <div class="r-comment-body">Goal-directive reframe (owner, 2026-07-02): §3 is implemented as a PIPELINE fix, not a bespoke rewrite operator — (a) fetch_sibling_family() injects the HAS_PARENT family (parent, anchor, live members) into generate_docs / review_docs / refine_docs context; (b) all three prompts carry a parallel-structure directive (one opening template per family; vary only member-specific physics; faithfulness outranks uniformity); (c) drifted families are reset in the graph (DocsRevision snapshot then docs_stage→pending) and regenerated through the normal pools in small iterative rotations — docs are never edited by hand. Pipeline half landed in 8e2b7880 (prompts + context wiring + tests, live-verified on the mode_number family: parent anchor resolves, all three templates render).</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-snfh-s4-verdict" data-who="reckon-ship" data-when="2026-07-03">
+    <div class="r-comment-body">§4 audit verdict (from the 137-family triage + 18-family deep-read): NO rename_cascade applications warranted — zero true semantic-naming divergences found that the cascade could fix. Findings routed: (a) the 'radial' ambiguity class (radial_total_current_density, radial_wave_electric_field document radial as flux-surface-normal while siblings use cylindrical R) → ISN radial-coordinate refactor (canonical-qualifier-order §6); (b) minor_triangularity_of_plasma_boundary is a naming-taxonomy outlier (different sampling convention, not a 5th direction) → docs must warn, name unchanged; (c) 289 link label/target mismatches (sn harmonize --lint-links, scratchpad link_lint.json) — mostly shorthand labels that collide with existing ids; physics-error subset folded into regen wave 2, remainder tracked as followup.</div>
+</div>
+</section>
+</main>
 </body>
 </html>
