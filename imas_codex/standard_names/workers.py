@@ -1844,27 +1844,11 @@ def _process_attachments_core(
     """
     from imas_codex.graph.client import GraphClient
 
-    # Seed each target name's already-carried sources from the graph so the
-    # distinct-vector guard sees paths persisted by earlier batches, then
-    # accumulate within-batch accepts so two conflicting attachments in one
-    # batch are also caught.
+    # Accumulate each target name's accepted sources within this batch so two
+    # conflicting attachments — e.g. two different vector fields of one DD
+    # device node — cannot both land on one scalar name. (The graph layer is
+    # only touched once something is accepted; the seed starts empty.)
     existing_by_sn: dict[str, list[str]] = {}
-    sn_ids = sorted({a.standard_name for a in attachments})
-    if sn_ids:
-        try:
-            with GraphClient() as gc:
-                for r in gc.query(
-                    "UNWIND $ids AS wanted "
-                    "MATCH (sn:StandardName {id: wanted}) "
-                    "RETURN sn.id AS id, sn.source_paths AS source_paths",
-                    ids=sn_ids,
-                ):
-                    existing_by_sn[r["id"]] = [
-                        strip_dd_prefix(p) for p in (r.get("source_paths") or [])
-                    ]
-        except Exception:
-            wlog.debug("attach guard: could not preload existing source_paths")
-
     rejected: list[tuple[str, str, str]] = []
     accepted: list = []
     for a in attachments:
