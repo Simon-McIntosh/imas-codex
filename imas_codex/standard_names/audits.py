@@ -2707,6 +2707,180 @@ def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+# ---------------------------------------------------------------------------
+# Corpus-level (family) audit
+# ---------------------------------------------------------------------------
+
+# DD axis leaves and their canonical ISN axis token. ``z`` maps to
+# ``vertical`` (never a bare ``z`` name token); mirrors families._SUFFIX_TO_AXIS.
+_LEAF_TO_AXIS_TOKEN: dict[str, str] = {
+    "x": "x",
+    "y": "y",
+    "z": "vertical",
+    "r": "radial",
+    "phi": "toroidal",
+}
+# Axis prefixes a component name may lead with (longest-first for matching).
+_FAMILY_AXIS_PREFIXES: tuple[str, ...] = (
+    "perpendicular",
+    "toroidal",
+    "poloidal",
+    "parallel",
+    "vertical",
+    "radial",
+    "x",
+    "y",
+)
+# A machine-frame vector uses exactly one of these axis-token triples.
+_CANONICAL_AXIS_TRIPLES: tuple[frozenset[str], ...] = (
+    frozenset({"x", "y", "vertical"}),
+    frozenset({"radial", "toroidal", "vertical"}),
+)
+
+
+def _split_axis_carrier_locus(
+    name: str,
+) -> tuple[str | None, str, str | None]:
+    """Split a component name into (axis prefix, base carrier, locus token)."""
+    axis: str | None = None
+    rest = name
+    for pfx in _FAMILY_AXIS_PREFIXES:
+        if name.startswith(pfx + "_"):
+            axis = pfx
+            rest = name[len(pfx) + 1 :]
+            break
+    of_i = rest.rfind("_of_")
+    at_i = rest.rfind("_at_")
+    i = max(of_i, at_i)
+    if i >= 0:
+        return axis, rest[:i], (rest[i + 4 :] or None)
+    return axis, rest, None
+
+
+def _strip_source_scheme(path: str) -> str:
+    """Drop a ``dd:`` / ``signals:`` provenance scheme prefix from a source path."""
+    for scheme in ("dd:", "signals:"):
+        if path.startswith(scheme):
+            return path[len(scheme) :]
+    return path
+
+
+def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
+    """Corpus-level audit: the components of one DD vector node must agree.
+
+    A DD *vector node* is a parent whose children are the axis leaves
+    ``x``/``y``/``z`` or ``r``/``phi``/``z``. This audit groups the provided
+    standard names by that node — derived from each name's ``source_paths``
+    (``dd_paths`` as a fallback) — and, for each node, verifies its component
+    names:
+
+    1. use the canonical axis token for their leaf (``z`` → ``vertical``,
+       never a bare ``z`` name token) and never conflate two axes on one name;
+    2. agree on the shared **base carrier** (the name minus the axis prefix and
+       any ``_of_``/``_at_`` locus);
+    3. agree on the **locus token** (all bare, or all the same ``_of_<device>``);
+    4. agree on **physics_domain**;
+    5. draw their axis tokens from a single canonical triple (``x, y, vertical``
+       or ``radial, toroidal, vertical``) — never a mix.
+
+    Each disagreement is one tagged issue string. Unlike the per-candidate
+    audits this runs over a name corpus, mirroring
+    :func:`semantic_similarity_check`'s standalone signature.
+    """
+    from collections import defaultdict
+
+    # node -> {name: {"leaves": set[str], "domain": Any}}
+    nodes: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
+    for entry in names:
+        name = (entry.get("id") or entry.get("name") or "").strip()
+        if not name:
+            continue
+        domain = entry.get("physics_domain")
+        paths = entry.get("source_paths") or entry.get("dd_paths") or []
+        if not isinstance(paths, (list, tuple)):
+            continue
+        for raw in paths:
+            if not isinstance(raw, str):
+                continue
+            path = _strip_source_scheme(raw)
+            segs = path.split("/")
+            if len(segs) < 2:
+                continue
+            leaf = segs[-1]
+            if leaf not in _LEAF_TO_AXIS_TOKEN:
+                continue
+            node = "/".join(segs[:-1])
+            member = nodes[node].setdefault(name, {"leaves": set(), "domain": domain})
+            member["leaves"].add(leaf)
+
+    issues: list[str] = []
+    for node in sorted(nodes):
+        members = nodes[node]
+        carriers: set[str] = set()
+        loci: set[str | None] = set()
+        domains: set[Any] = set()
+        axis_tokens: set[str] = set()
+        for name in sorted(members):
+            info = members[name]
+            axis, carrier, locus = _split_axis_carrier_locus(name)
+            carriers.add(carrier)
+            loci.add(locus)
+            if info["domain"] is not None:
+                domains.add(info["domain"])
+            if axis is not None:
+                axis_tokens.add(axis)
+
+            # (1) canonical axis token / no axis conflation on one name.
+            expected = {_LEAF_TO_AXIS_TOKEN[le] for le in info["leaves"]}
+            if len(expected) > 1:
+                issues.append(
+                    f"audit:vector_family_consistency_check: name '{name}' "
+                    f"covers multiple axis leaves {sorted(info['leaves'])} of "
+                    f"vector node '{node}' — each axis is a distinct component."
+                )
+            elif axis is None or axis not in expected:
+                exp = next(iter(expected))
+                issues.append(
+                    f"audit:vector_family_consistency_check: name '{name}' "
+                    f"(leaf {sorted(info['leaves'])} of node '{node}') must "
+                    f"lead with the canonical axis token '{exp}' — "
+                    f"'z' is never a name token (use 'vertical')."
+                )
+
+        if len(members) < 2:
+            continue  # agreement checks need 2+ components
+
+        member_list = ", ".join(sorted(members))
+        if len(carriers) > 1:
+            issues.append(
+                f"audit:vector_family_consistency_check: vector node '{node}' "
+                f"components disagree on base carrier {sorted(carriers)} "
+                f"({member_list})."
+            )
+        if len(loci) > 1:
+            printable = sorted("<none>" if lo is None else lo for lo in loci)
+            issues.append(
+                f"audit:vector_family_consistency_check: vector node '{node}' "
+                f"components disagree on locus {printable} ({member_list})."
+            )
+        if len(domains) > 1:
+            issues.append(
+                f"audit:vector_family_consistency_check: vector node '{node}' "
+                f"components disagree on physics_domain {sorted(domains)} "
+                f"({member_list})."
+            )
+        if axis_tokens and not any(
+            axis_tokens <= triple for triple in _CANONICAL_AXIS_TRIPLES
+        ):
+            issues.append(
+                f"audit:vector_family_consistency_check: vector node '{node}' "
+                f"uses non-canonical axis triple {sorted(axis_tokens)} — expected "
+                f"x, y, vertical or radial, toroidal, vertical ({member_list})."
+            )
+
+    return issues
+
+
 def run_audits(
     candidate: dict[str, Any],
     existing_sns_in_domain: list[dict[str, Any]] | None = None,

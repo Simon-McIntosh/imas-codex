@@ -2368,3 +2368,111 @@ class TestAttachmentStateResolution:
 
         ok, reason = _is_attachment_consistent(source_id, sn_name)
         assert ok is expected_ok, reason
+
+
+# =========================================================================
+# Corpus-level: vector_family_consistency_check
+# =========================================================================
+
+
+class TestVectorFamilyConsistencyCheck:
+    """Family audit — components of one DD vector node must agree."""
+
+    def _cam(self, axis_name, leaf, *, locus="camera", domain="magnetics"):
+        # A fabricated camera direction-vector component.
+        name = f"{axis_name}_direction_unit_vector"
+        if locus:
+            name = f"{name}_of_{locus}"
+        return {
+            "id": name,
+            "physics_domain": domain,
+            "source_paths": [f"camera_ir/channel/camera/direction/{leaf}"],
+        }
+
+    def test_clean_family_passes(self):
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        names = [
+            self._cam("x", "x"),
+            self._cam("y", "y"),
+            self._cam("vertical", "z"),
+        ]
+        assert vector_family_consistency_check(names) == []
+
+    def test_locus_and_domain_drift_flagged(self):
+        """The real camera failure: one component locus-less + off-domain."""
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        names = [
+            self._cam("x", "x", locus=None, domain="camera_visible"),
+            self._cam("y", "y", locus="strain_gauge_sensor", domain="mechanical_loads"),
+            self._cam("vertical", "z", locus=None, domain="camera_visible"),
+        ]
+        issues = vector_family_consistency_check(names)
+        joined = "\n".join(issues)
+        assert "locus" in joined
+        assert "physics_domain" in joined
+
+    def test_bare_z_axis_token_flagged(self):
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        names = [
+            self._cam("radial", "r"),
+            # a 'z' leaf named with a bare 'z' token instead of 'vertical'
+            {
+                "id": "z_direction_unit_vector_of_camera",
+                "physics_domain": "magnetics",
+                "source_paths": ["camera_ir/channel/camera/direction/z"],
+            },
+        ]
+        issues = vector_family_consistency_check(names)
+        joined = "\n".join(issues)
+        assert "vertical" in joined
+        assert "z_direction_unit_vector_of_camera" in joined
+
+    def test_non_canonical_triple_flagged(self):
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        # leaves x / phi / z -> axis tokens {x, toroidal, vertical}: a mix of
+        # both canonical triples, so subset of neither.
+        names = [
+            self._cam("x", "x"),
+            self._cam("toroidal", "phi"),
+            self._cam("vertical", "z"),
+        ]
+        issues = vector_family_consistency_check(names)
+        assert any("non-canonical axis triple" in i for i in issues)
+
+    def test_base_carrier_disagreement_flagged(self):
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        names = [
+            self._cam("x", "x"),
+            {
+                "id": "y_line_of_sight_unit_vector_of_camera",
+                "physics_domain": "magnetics",
+                "source_paths": ["camera_ir/channel/camera/direction/y"],
+            },
+        ]
+        issues = vector_family_consistency_check(names)
+        assert any("base carrier" in i for i in issues)
+
+    def test_single_component_not_flagged(self):
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        assert vector_family_consistency_check([self._cam("vertical", "z")]) == []
+
+    def test_distinct_devices_do_not_group(self):
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        # Different device grandparents -> different vector nodes -> no
+        # cross-family comparison even though both are '/direction/z'.
+        names = [
+            self._cam("vertical", "z"),
+            {
+                "id": "vertical_direction_unit_vector_of_launching_mirror",
+                "physics_domain": "ec_launchers",
+                "source_paths": ["ec_launchers/beam/launching_position/direction/z"],
+            },
+        ]
+        assert vector_family_consistency_check(names) == []
