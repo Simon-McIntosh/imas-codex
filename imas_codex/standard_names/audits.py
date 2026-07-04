@@ -2711,15 +2711,17 @@ def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:
 # Corpus-level (family) audit
 # ---------------------------------------------------------------------------
 
-# DD axis leaves and their canonical ISN axis token. ``z`` maps to
-# ``vertical`` (never a bare ``z`` name token); mirrors families._SUFFIX_TO_AXIS.
+# DD axis leaves and their frame-independent ISN axis token. The ``z`` leaf is
+# frame-dependent (Cartesian ``z`` vs cylindrical ``vertical``) and resolved by
+# :func:`_axis_token_for_leaf`; mirrors families._SUFFIX_TO_AXIS.
 _LEAF_TO_AXIS_TOKEN: dict[str, str] = {
     "x": "x",
     "y": "y",
-    "z": "vertical",
     "r": "radial",
     "phi": "toroidal",
 }
+# All DD axis leaves this audit recognises (adds the frame-dependent ``z``).
+_AXIS_LEAVES: frozenset[str] = frozenset({*_LEAF_TO_AXIS_TOKEN, "z"})
 # Axis prefixes a component name may lead with (longest-first for matching).
 _FAMILY_AXIS_PREFIXES: tuple[str, ...] = (
     "perpendicular",
@@ -2730,12 +2732,36 @@ _FAMILY_AXIS_PREFIXES: tuple[str, ...] = (
     "radial",
     "x",
     "y",
+    "z",
 )
-# A machine-frame vector uses exactly one of these axis-token triples.
+# A machine-frame vector uses exactly one of these axis-token triples: Cartesian
+# (x, y, z) or cylindrical (radial, toroidal, vertical). ``vertical`` is the
+# cylindrical Z; ``z`` is the Cartesian third axis — the two frames never mix.
 _CANONICAL_AXIS_TRIPLES: tuple[frozenset[str], ...] = (
-    frozenset({"x", "y", "vertical"}),
+    frozenset({"x", "y", "z"}),
     frozenset({"radial", "toroidal", "vertical"}),
 )
+
+
+def _node_frame(leaves: set[str]) -> str:
+    """Infer a DD vector node's coordinate frame from its leaf set.
+
+    A cylindrical member (``r``/``phi``) makes the node cylindrical (``z`` →
+    ``vertical``); a purely Cartesian node (``x``/``y``) is Cartesian (``z`` →
+    ``z``); a lone ``z`` defaults to cylindrical.
+    """
+    if leaves & {"r", "phi"}:
+        return "cylindrical"
+    if leaves & {"x", "y"}:
+        return "cartesian"
+    return "cylindrical"
+
+
+def _axis_token_for_leaf(leaf: str, frame: str) -> str | None:
+    """Canonical ISN axis token for a DD leaf given its node's frame."""
+    if leaf == "z":
+        return "z" if frame == "cartesian" else "vertical"
+    return _LEAF_TO_AXIS_TOKEN.get(leaf)
 
 
 def _split_axis_carrier_locus(
@@ -2774,14 +2800,15 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
     (``dd_paths`` as a fallback) — and, for each node, verifies its component
     names:
 
-    1. use the canonical axis token for their leaf (``z`` → ``vertical``,
-       never a bare ``z`` name token) and never conflate two axes on one name;
+    1. use the canonical axis token for their leaf — a ``z`` leaf is ``z`` in a
+       Cartesian node (x, y, z) and ``vertical`` in a cylindrical node
+       (r, phi, z) — and never conflate two axes on one name;
     2. agree on the shared **base carrier** (the name minus the axis prefix and
        any ``_of_``/``_at_`` locus);
     3. agree on the **locus token** (all bare, or all the same ``_of_<device>``);
     4. agree on **physics_domain**;
-    5. draw their axis tokens from a single canonical triple (``x, y, vertical``
-       or ``radial, toroidal, vertical``) — never a mix.
+    5. draw their axis tokens from a single canonical triple (``x, y, z`` or
+       ``radial, toroidal, vertical``) — never a mix of frames.
 
     Each disagreement is one tagged issue string. Unlike the per-candidate
     audits this runs over a name corpus, mirroring
@@ -2807,7 +2834,7 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
             if len(segs) < 2:
                 continue
             leaf = segs[-1]
-            if leaf not in _LEAF_TO_AXIS_TOKEN:
+            if leaf not in _AXIS_LEAVES:
                 continue
             node = "/".join(segs[:-1])
             member = nodes[node].setdefault(name, {"leaves": set(), "domain": domain})
@@ -2816,6 +2843,13 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
     issues: list[str] = []
     for node in sorted(nodes):
         members = nodes[node]
+        # The node's frame (Cartesian vs cylindrical) is read from all its axis
+        # leaves, so a ``z`` leaf resolves to ``z`` or ``vertical`` consistently
+        # across the family.
+        node_leaves: set[str] = set()
+        for info in members.values():
+            node_leaves |= info["leaves"]
+        frame = _node_frame(node_leaves)
         carriers: set[str] = set()
         loci: set[str | None] = set()
         domains: set[Any] = set()
@@ -2831,7 +2865,7 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
                 axis_tokens.add(axis)
 
             # (1) canonical axis token / no axis conflation on one name.
-            expected = {_LEAF_TO_AXIS_TOKEN[le] for le in info["leaves"]}
+            expected = {_axis_token_for_leaf(le, frame) for le in info["leaves"]}
             if len(expected) > 1:
                 issues.append(
                     f"audit:vector_family_consistency_check: name '{name}' "
@@ -2840,11 +2874,16 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
                 )
             elif axis is None or axis not in expected:
                 exp = next(iter(expected))
+                z_hint = (
+                    " ('z' names the Cartesian third axis; 'vertical' the "
+                    "cylindrical Z)"
+                    if "z" in info["leaves"]
+                    else ""
+                )
                 issues.append(
                     f"audit:vector_family_consistency_check: name '{name}' "
                     f"(leaf {sorted(info['leaves'])} of node '{node}') must "
-                    f"lead with the canonical axis token '{exp}' — "
-                    f"'z' is never a name token (use 'vertical')."
+                    f"lead with the canonical axis token '{exp}'{z_hint}."
                 )
 
         if len(members) < 2:
@@ -2875,7 +2914,7 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
             issues.append(
                 f"audit:vector_family_consistency_check: vector node '{node}' "
                 f"uses non-canonical axis triple {sorted(axis_tokens)} — expected "
-                f"x, y, vertical or radial, toroidal, vertical ({member_list})."
+                f"x, y, z or radial, toroidal, vertical ({member_list})."
             )
 
     return issues

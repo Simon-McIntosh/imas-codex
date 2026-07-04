@@ -2389,12 +2389,24 @@ class TestVectorFamilyConsistencyCheck:
             "source_paths": [f"camera_ir/channel/camera/direction/{leaf}"],
         }
 
-    def test_clean_family_passes(self):
+    def test_clean_cartesian_family_passes(self):
+        """Cartesian node (x, y, z): the z leaf is the 'z' axis token."""
         from imas_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("x", "x"),
             self._cam("y", "y"),
+            self._cam("z", "z"),
+        ]
+        assert vector_family_consistency_check(names) == []
+
+    def test_clean_cylindrical_family_passes(self):
+        """Cylindrical node (r, phi, z): the z leaf is the 'vertical' axis token."""
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        names = [
+            self._cam("radial", "r"),
+            self._cam("toroidal", "phi"),
             self._cam("vertical", "z"),
         ]
         assert vector_family_consistency_check(names) == []
@@ -2406,19 +2418,34 @@ class TestVectorFamilyConsistencyCheck:
         names = [
             self._cam("x", "x", locus=None, domain="camera_visible"),
             self._cam("y", "y", locus="strain_gauge_sensor", domain="mechanical_loads"),
-            self._cam("vertical", "z", locus=None, domain="camera_visible"),
+            self._cam("z", "z", locus=None, domain="camera_visible"),
         ]
         issues = vector_family_consistency_check(names)
         joined = "\n".join(issues)
         assert "locus" in joined
         assert "physics_domain" in joined
 
-    def test_bare_z_axis_token_flagged(self):
+    def test_cartesian_z_leaf_must_not_be_vertical(self):
+        """In a Cartesian node the z leaf is 'z' — a 'vertical' name is flagged."""
+        from imas_codex.standard_names.audits import vector_family_consistency_check
+
+        names = [
+            self._cam("x", "x"),
+            self._cam("y", "y"),
+            # z leaf of a Cartesian node named 'vertical' instead of 'z'
+            self._cam("vertical", "z"),
+        ]
+        issues = vector_family_consistency_check(names)
+        joined = "\n".join(issues)
+        assert "canonical axis token 'z'" in joined
+        assert "vertical_direction_unit_vector_of_camera" in joined
+
+    def test_cylindrical_z_leaf_must_not_be_bare_z(self):
         from imas_codex.standard_names.audits import vector_family_consistency_check
 
         names = [
             self._cam("radial", "r"),
-            # a 'z' leaf named with a bare 'z' token instead of 'vertical'
+            # a 'z' leaf of a cylindrical node named with a bare 'z' token
             {
                 "id": "z_direction_unit_vector_of_camera",
                 "physics_domain": "magnetics",
@@ -2427,14 +2454,15 @@ class TestVectorFamilyConsistencyCheck:
         ]
         issues = vector_family_consistency_check(names)
         joined = "\n".join(issues)
-        assert "vertical" in joined
+        assert "canonical axis token 'vertical'" in joined
         assert "z_direction_unit_vector_of_camera" in joined
 
-    def test_non_canonical_triple_flagged(self):
+    def test_mixed_frame_triple_flagged(self):
         from imas_codex.standard_names.audits import vector_family_consistency_check
 
-        # leaves x / phi / z -> axis tokens {x, toroidal, vertical}: a mix of
-        # both canonical triples, so subset of neither.
+        # leaves x / phi / z -> a cylindrical node (phi present) so z -> vertical,
+        # but axis tokens {x, toroidal, vertical} mix frames: subset of neither
+        # canonical triple.
         names = [
             self._cam("x", "x"),
             self._cam("toroidal", "phi"),
