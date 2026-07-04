@@ -120,3 +120,96 @@ def test_inconsistent_pairs_are_rejected(source_id: str, sn_name: str) -> None:
     ok, reason = _is_attachment_consistent(source_id, sn_name)
     assert not ok
     assert "tense mismatch" in reason
+
+
+# ---------------------------------------------------------------------------
+# Locus <-> source device-compatibility guard
+# ---------------------------------------------------------------------------
+
+
+def test_locus_device_mismatch_rejected() -> None:
+    """A camera path may not source a strain-gauge-locus name (zero token
+    overlap between a concrete hardware locus and the path)."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/direction/y",
+        "y_direction_unit_vector_of_strain_gauge_sensor",
+    )
+    assert not ok
+    assert "locus" in reason.lower()
+
+
+def test_locus_device_match_accepted() -> None:
+    """A camera path sourcing a camera-locus name shares the `camera` token."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/up/x",
+        "x_direction_unit_vector_of_camera",
+    )
+    assert ok, reason
+
+
+def test_locus_device_hardware_property_accepted() -> None:
+    """The intrinsic-property case (`area_of_rogowski_coil`) shares `coil`."""
+    ok, reason = _is_attachment_consistent(
+        "magnetics/rogowski_coil/area",
+        "cross_sectional_area_of_rogowski_coil",
+    )
+    assert ok, reason
+
+
+def test_spatial_locus_not_treated_as_hardware() -> None:
+    """A spatial-feature locus (magnetic_axis) is not a hardware token — the
+    zero-overlap rejection must NOT fire even though the path lacks the token."""
+    ok, reason = _is_attachment_consistent(
+        "core_profiles/profiles_1d/electrons/temperature",
+        "electron_temperature_at_magnetic_axis",
+    )
+    assert ok, reason
+
+
+# ---------------------------------------------------------------------------
+# Distinct-vector guard — two vector fields of one device node
+# ---------------------------------------------------------------------------
+
+
+def test_distinct_vector_fields_of_one_device_rejected() -> None:
+    """`camera/direction/z` may not attach to a name that already sources
+    `camera/up/z` — line-of-sight and image-up are DIFFERENT vectors."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/direction/z",
+        "vertical_direction_unit_vector_of_camera",
+        existing_sources=["camera_ir/channel/camera/up/z"],
+    )
+    assert not ok
+    assert "vector" in reason.lower()
+
+
+def test_same_vector_field_siblings_not_flagged() -> None:
+    """Two axis leaves of the SAME vector field (direction/z + direction/x)
+    are legitimate components — no conflict."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/direction/z",
+        "vertical_direction_unit_vector_of_camera",
+        existing_sources=["camera_ir/channel/camera/direction/x"],
+    )
+    assert ok, reason
+
+
+def test_distinct_vector_guard_requires_same_axis_leaf() -> None:
+    """Different axis leaves (direction/z vs up/x) do not conflict — the guard
+    fires only on the SAME leaf axis of a different vector field."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/direction/z",
+        "vertical_direction_unit_vector_of_camera",
+        existing_sources=["camera_ir/channel/camera/up/x"],
+    )
+    assert ok, reason
+
+
+def test_distinct_vector_guard_requires_common_device() -> None:
+    """Same leaf/parent-name but different device grandparent → no conflict."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/direction/z",
+        "vertical_direction_unit_vector_of_camera",
+        existing_sources=["ec_launchers/beam/launching_position/direction/z"],
+    )
+    assert ok, reason

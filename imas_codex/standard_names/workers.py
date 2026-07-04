@@ -22,7 +22,7 @@ import json
 import logging
 import random
 import re as _re
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import cache as _cache
 from typing import TYPE_CHECKING, Any
 
@@ -1640,12 +1640,96 @@ def _enrich_batch_items(items: list[dict]) -> None:
                     item["dd_paths_docs"] = docs
 
 
-def _is_attachment_consistent(source_id: str, sn_name: str) -> tuple[bool, str]:
+_AXIS_LEAVES = frozenset({"x", "y", "z", "r", "phi"})
+
+# Words that mark a locus token as a concrete hardware device (as opposed to a
+# spatial feature such as ``magnetic_axis`` / ``plasma_boundary``). Only when
+# the name's locus is one of these do we apply the zero-overlap rejection — a
+# spatial-feature locus need not appear in the source path.
+_HARDWARE_LOCUS_WORDS = frozenset(
+    {
+        "coil",
+        "probe",
+        "sensor",
+        "gauge",
+        "camera",
+        "detector",
+        "launcher",
+        "mirror",
+        "antenna",
+        "loop",
+        "bolometer",
+        "injector",
+        "strap",
+        "electrode",
+        "magnet",
+        "valve",
+        "thermocouple",
+        "interferometer",
+        "polarimeter",
+        "reflectometer",
+        "spectrometer",
+        "waveguide",
+        "calorimeter",
+        "manometer",
+        "cryopump",
+    }
+)
+
+
+def _vector_fields_conflict(path_a: str, path_b: str) -> bool:
+    """True when two paths are the SAME axis leaf of DIFFERENT vector fields
+    of ONE DD device node.
+
+    e.g. ``.../camera/direction/z`` vs ``.../camera/up/z`` — same leaf ``z``,
+    differing vector-field parent (``direction`` vs ``up``), common device
+    grandparent (``.../camera``). Derived from path structure, not a hardcoded
+    device path.
+    """
+    sa = path_a.split("/")
+    sb = path_b.split("/")
+    if len(sa) < 3 or len(sb) < 3:
+        return False
+    if sa[-1] != sb[-1] or sa[-1] not in _AXIS_LEAVES:
+        return False  # not the same axis leaf
+    if sa[-2] == sb[-2]:
+        return False  # same vector field — legitimate sibling components
+    return sa[:-2] == sb[:-2]  # common device node up to the vector-field segment
+
+
+def _content_tokens(text: str) -> set[str]:
+    """Lower-cased content tokens with a simple plural stem (drop trailing s)."""
+    raw = _re.split(r"[^a-z0-9]+", text.lower())
+    return {(t[:-1] if len(t) > 3 and t.endswith("s") else t) for t in raw if t}
+
+
+def _name_locus_token(sn_name: str) -> str | None:
+    """Extract the trailing ``_of_<locus>`` / ``_at_<locus>`` locus token, or None."""
+    of_i = sn_name.rfind("_of_")
+    at_i = sn_name.rfind("_at_")
+    i = max(of_i, at_i)
+    if i < 0:
+        return None
+    locus = sn_name[i + 4 :]
+    # A process attribution follows the locus — trim it off.
+    due = locus.find("_due_to_")
+    if due >= 0:
+        locus = locus[:due]
+    return locus or None
+
+
+def _is_attachment_consistent(
+    source_id: str, sn_name: str, existing_sources: Sequence[str] = ()
+) -> tuple[bool, str]:
     """Reject attachments where the DD path tense disagrees with the SN tense.
 
     E.g. ``change_in_electron_density`` may not be attached to
     ``core_profiles/.../density`` (a base quantity, not a change). Symmetric:
     a base-quantity SN may not absorb an ``instant_changes`` path.
+
+    ``existing_sources`` are the DD paths already carried by ``sn_name`` (bare,
+    ``dd:``-prefix stripped) — used by the distinct-vector guard to reject a
+    second vector field of one device node collapsing onto one scalar name.
     """
     change_prefixes = (
         "change_in_",
@@ -1717,6 +1801,34 @@ def _is_attachment_consistent(source_id: str, sn_name: str) -> tuple[bool, str]:
                 f"different surface"
             )
 
+    # Distinct-vector guard: the target name must not collapse two DIFFERENT
+    # vector fields of one DD device node onto one scalar name (e.g. a camera's
+    # line-of-sight ``direction`` and its image-up ``up`` vector both landing on
+    # ``vertical_direction_unit_vector``). Derived from path structure.
+    for other in existing_sources:
+        if other and other != source_id and _vector_fields_conflict(source_id, other):
+            return False, (
+                f"distinct-vector conflict: path '{source_id}' and already-"
+                f"sourced '{other}' are the same axis leaf of DIFFERENT vector "
+                f"fields of one device node — SN '{sn_name}' must not carry both"
+            )
+
+    # Locus <-> source device compatibility: when the name carries a concrete
+    # hardware locus (``_of_<device>``/``_at_<device>``), the source path must
+    # share at least one content token with that device. Conservative — only
+    # rejects on ZERO overlap when the locus is a recognised hardware token.
+    locus = _name_locus_token(sn_name)
+    if locus:
+        locus_tokens = _content_tokens(locus)
+        if locus_tokens & _HARDWARE_LOCUS_WORDS:
+            path_tokens = _content_tokens(source_id)
+            if not (locus_tokens & path_tokens):
+                return False, (
+                    f"locus/source device mismatch: SN '{sn_name}' has hardware "
+                    f"locus '{locus}' but path '{source_id}' shares no device "
+                    f"token with it"
+                )
+
     return True, ""
 
 
@@ -1732,12 +1844,37 @@ def _process_attachments_core(
     """
     from imas_codex.graph.client import GraphClient
 
+    # Seed each target name's already-carried sources from the graph so the
+    # distinct-vector guard sees paths persisted by earlier batches, then
+    # accumulate within-batch accepts so two conflicting attachments in one
+    # batch are also caught.
+    existing_by_sn: dict[str, list[str]] = {}
+    sn_ids = sorted({a.standard_name for a in attachments})
+    if sn_ids:
+        try:
+            with GraphClient() as gc:
+                for r in gc.query(
+                    "UNWIND $ids AS wanted "
+                    "MATCH (sn:StandardName {id: wanted}) "
+                    "RETURN sn.id AS id, sn.source_paths AS source_paths",
+                    ids=sn_ids,
+                ):
+                    existing_by_sn[r["id"]] = [
+                        strip_dd_prefix(p) for p in (r.get("source_paths") or [])
+                    ]
+        except Exception:
+            wlog.debug("attach guard: could not preload existing source_paths")
+
     rejected: list[tuple[str, str, str]] = []
     accepted: list = []
     for a in attachments:
-        ok, reason = _is_attachment_consistent(a.source_id, a.standard_name)
+        existing = existing_by_sn.setdefault(a.standard_name, [])
+        ok, reason = _is_attachment_consistent(
+            a.source_id, a.standard_name, existing_sources=existing
+        )
         if ok:
             accepted.append(a)
+            existing.append(a.source_id)
         else:
             rejected.append((a.source_id, a.standard_name, reason))
 
@@ -3004,7 +3141,17 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             # pairing so the source retries rather than persisting a
             # mis-attributed name. Same predicate the auto-attach path uses.
             if c.source_id:
-                _ok, _why = _is_attachment_consistent(c.source_id, name_id)
+                _paths = [
+                    c.source_id,
+                    *(p for p in (c.dd_paths or []) if p != c.source_id),
+                ]
+                _ok, _why = True, ""
+                for _p in _paths:
+                    _ok, _why = _is_attachment_consistent(
+                        _p, name_id, existing_sources=[q for q in _paths if q != _p]
+                    )
+                    if not _ok:
+                        break
                 if not _ok:
                     state.stats["compose_consistency_rejects"] = (
                         state.stats.get("compose_consistency_rejects", 0) + 1
@@ -4621,7 +4768,17 @@ async def compose_batch(
             # pairing so the source retries rather than persisting a
             # mis-attributed name. Same predicate the auto-attach path uses.
             if c.source_id:
-                _ok, _why = _is_attachment_consistent(c.source_id, name_id)
+                _paths = [
+                    c.source_id,
+                    *(p for p in (c.dd_paths or []) if p != c.source_id),
+                ]
+                _ok, _why = True, ""
+                for _p in _paths:
+                    _ok, _why = _is_attachment_consistent(
+                        _p, name_id, existing_sources=[q for q in _paths if q != _p]
+                    )
+                    if not _ok:
+                        break
                 if not _ok:
                     wlog.warning(
                         "Source-name consistency reject: %r (%s)",
