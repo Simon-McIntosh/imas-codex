@@ -83,6 +83,35 @@ def normalize_prose_spelling(text: str) -> str:
     return _re.sub(r"[A-Za-z]+", _replace, text)
 
 
+# Spelled-out Greek letters become their Unicode symbols in description prose
+# (the ISN description-field convention: φ, θ, ρ; frames as (R, φ, Z)).
+# Lowercase only — a capitalized "Phi" may be the flux Φ or a sentence-start
+# angle, so it is left for review rather than guessed.
+_GREEK_WORD_TO_SYMBOL: dict[str, str] = {
+    "phi": "φ",
+    "theta": "θ",
+    "rho": "ρ",
+}
+_GREEK_WORD_RE = _re.compile(r"\b(phi|theta|rho)\b")
+
+
+def normalize_description_notation(text: str) -> str:
+    """Greek word→symbol normalization for description prose.
+
+    Word-bounded, so DD-style tokens such as ``phi_tor`` or ``b_field_phi``
+    (no word boundary at an underscore) are untouched. Applies to the
+    description field only — documentation keeps LaTeX math.
+    """
+    if not text:
+        return text
+    return _GREEK_WORD_RE.sub(lambda m: _GREEK_WORD_TO_SYMBOL[m.group(1)], text)
+
+
+def normalize_description_text(text: str) -> str:
+    """Full description-prose normalization: spelling, then Greek symbols."""
+    return normalize_description_notation(normalize_prose_spelling(text))
+
+
 # Physics-domain UK→US supplements not in breame's dictionary.
 _DOMAIN_UK_US: dict[str, str] = {
     "linearised": "linearized",
@@ -2349,7 +2378,7 @@ async def _self_refine_candidate(
     new_name = normalize_spelling((result.name or "").strip())
     if not new_name or new_name == name:
         # No-op rename; still adopt a tightened description if offered.
-        new_desc = normalize_prose_spelling((result.description or "").strip())
+        new_desc = normalize_description_text((result.description or "").strip())
         return name, (new_desc or description)
 
     # --- Re-validate the suggested name before adopting it. ---
@@ -2388,7 +2417,7 @@ async def _self_refine_candidate(
         )
         return name, description
 
-    new_desc = normalize_prose_spelling((result.description or "").strip())
+    new_desc = normalize_description_text((result.description or "").strip())
     logger.info("Self-refine improved %r → %r", name, new_name)
     return new_name, (new_desc or description)
 
@@ -4835,7 +4864,7 @@ async def compose_batch(
                         name_id,
                     )
 
-            cand_description = normalize_prose_spelling(c.description or "")
+            cand_description = normalize_description_text(c.description or "")
 
             # ── Free local self-refine pass (default off) ─────────────────
             # After compose + grammar normalization and BEFORE persist (so
@@ -5572,7 +5601,7 @@ async def process_refine_name_batch(
                     persist_refined_name,
                     old_name=sn_id,
                     new_name=result_obj.name,
-                    description=normalize_prose_spelling(result_obj.description),
+                    description=normalize_description_text(result_obj.description),
                     kind=result_obj.kind,
                     unit=item.get("unit"),
                     physics_domain=(
@@ -7268,7 +7297,7 @@ async def process_generate_docs_batch(
                 persist_generated_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
-                description=normalize_prose_spelling(result_obj.description),
+                description=normalize_description_text(result_obj.description),
                 documentation=normalize_prose_spelling(result_obj.documentation),
                 model=model,
                 run_id=mgr.run_id,
@@ -7482,7 +7511,7 @@ async def process_enrich_parents_batch(
                 )
                 lease.charge_event(cost, _event)
 
-            description = normalize_prose_spelling(
+            description = normalize_description_text(
                 (result_obj.description or "").strip()
             )
 
@@ -8106,7 +8135,7 @@ async def process_refine_docs_batch(
                 persist_refined_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
-                description=normalize_prose_spelling(result_obj.description),
+                description=normalize_description_text(result_obj.description),
                 documentation=normalize_prose_spelling(result_obj.documentation),
                 model=model,
                 current_description=item.get("description") or "",
