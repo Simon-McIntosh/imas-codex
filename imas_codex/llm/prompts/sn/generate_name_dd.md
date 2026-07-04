@@ -82,7 +82,8 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `x1_coordinate` | **Local-coordinate axes are DISTINCT directions, not ordinals** — DD `x1`/`x2`/`x3` are ORTHOGONAL directions of a local sensor frame. Use the REGISTERED carriers `x1_coordinate` / `x2_coordinate` / `x3_coordinate` (`base_kind=geometry`); keep them as separate names (different axes). `first_coordinate` / `second_coordinate` are unregistered → gap. Drop the detector DD-tree prefix |
 | `x2_width_of_bolometer_detector_aperture` | `x2_coordinate` | Same rule — `x2` → registered carrier `x2_coordinate`, NOT `second_coordinate`. The detector type is DD context, not part of the name |
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component / transformation / reducer tokens come BEFORE the base as a leading qualifier prefix. Compare ★0.95 `parallel_fast_electron_pressure` |
-| `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector` | **Compound hardware identifiers** — when the DD path stacks ≥2 hardware tokens, drop intermediate ones and extract the underlying physical concept. A unit-vector field's Z is a vector projection, not a coordinate |
+| `z_coordinate_of_sensor_direction_unit_vector` | `vertical_direction_unit_vector_of_sensor` | **Device orientation vectors KEEP the `_of_<device>` locus** — a component of a device's orientation/direction unit vector is a locus-qualified coordinate. Drop stacked intermediate hardware tokens but keep the owning device as the locus; a `z` leaf becomes the `vertical` axis (machine-frame Cartesian triple is `x`, `y`, `vertical` — never `z`). Locus-less `z_direction_unit_vector` collapses every device's orientation to one name |
+| both `camera/direction/z` and `camera/up/z` → `vertical_direction_unit_vector` | distinct bases per vector | **Distinct vectors of one device get DISTINCT bases** — `direction` is the line-of-sight, `up` is the image-up vector: different physical vectors. Never name a non-pointing vector (image-up, ellipse axis) bare `direction`; name what the vector IS |
 
 ## Hardware & Diagnostic Geometry — Specificity Required
 
@@ -433,7 +434,10 @@ These names already exist in the catalog. Reuse them if they match your source, 
   - **Sibling components:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
   - **ISN naming convention:** Each component should be named `{axis}_{parent}` where `{parent}` is the shared vector name (e.g., `toroidal_current_density`). The `_component_of_` connector is REJECTED by the grammar — use the short leading-qualifier form.
-  - All siblings MUST share the same `physical_base` — only the `component` segment differs.
+  - All siblings MUST share the same `physical_base`, the same locus, and the same physics_domain — only the `component` (axis) segment differs.
+  - **Machine-frame Cartesian axis triple is `x`, `y`, `vertical` — never `z`.** A `z` leaf maps to the `vertical` axis token.
+  - **Device orientation / direction unit-vector components KEEP the owning-object locus** (`_of_<device>`). ✓ `vertical_direction_unit_vector_of_camera`; ✗ locus-less `vertical_direction_unit_vector` (collapses every device's orientation to one name). Use the registered device token as the locus, and make sure the locus matches the DD path's device.
+  - **Distinct vectors of one device get DISTINCT base carriers.** A device node may expose several vectors (`camera/direction` = line-of-sight, `camera/up` = image-up). Never fold a non-pointing vector into `direction_unit_vector` — name what the vector IS.
 {% elif item.family_type == "geometric_coordinate" %}  - This path is the **{{ item.family_axis }}** coordinate of a geometric position.
   - **Sibling coordinates:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
