@@ -167,3 +167,47 @@ class TestFamilyDetection:
         families = detect_families(items)
         # Only 1 axis member — no family
         assert len(families) == 0
+
+
+class TestFrameAwareAxisTokens:
+    """A z leaf's axis token depends on the frame of its sibling vector node.
+
+    Cartesian nodes (x, y, z) name the third axis ``z``; cylindrical nodes
+    (r, phi, z) name it ``vertical``. The frame is read from the sibling leaf
+    set of the DD vector node the leaf belongs to.
+    """
+
+    def test_cartesian_frame_z_leaf_is_z_axis(self):
+        """A z leaf beside x, y siblings is the Cartesian z axis."""
+        items = [
+            {"path": "camera_ir/channel/camera/direction/x", "unit": ""},
+            {"path": "camera_ir/channel/camera/direction/y", "unit": ""},
+            {"path": "camera_ir/channel/camera/direction/z", "unit": ""},
+        ]
+        families = detect_families(items)
+        assert len(families) == 1
+        axes = {m.suffix: m.axis for m in families[0].members}
+        assert axes == {"x": "x", "y": "y", "z": "z"}
+
+    def test_cylindrical_frame_z_leaf_is_vertical_axis(self):
+        """A z leaf beside r, phi siblings is the vertical (cylindrical Z) axis."""
+        items = [
+            {"path": "barometry/gauge/position/r", "unit": "m"},
+            {"path": "barometry/gauge/position/phi", "unit": "rad"},
+            {"path": "barometry/gauge/position/z", "unit": "m"},
+        ]
+        families = detect_families(items)
+        assert len(families) == 1
+        axes = {m.suffix: m.axis for m in families[0].members}
+        assert axes == {"r": "radial", "phi": "toroidal", "z": "vertical"}
+
+    def test_cylindrical_frame_without_phi_still_vertical(self):
+        """r + z (no phi) is cylindrical — z stays vertical."""
+        items = [
+            {"path": "some/node/r", "unit": "m"},
+            {"path": "some/node/z", "unit": "m"},
+        ]
+        families = detect_families(items)
+        assert len(families) == 1
+        axes = {m.suffix: m.axis for m in families[0].members}
+        assert axes == {"r": "radial", "z": "vertical"}

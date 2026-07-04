@@ -48,17 +48,27 @@ AXIS_ORDER: dict[str, int] = {
 # All ISN Component values
 _COMPONENT_AXES = {c.value for c in Component}
 
-# Map DD suffixes to ISN Component axes
-_SUFFIX_TO_AXIS: dict[str, str] = {
-    "r": "radial",
-    "z": "vertical",
-    "phi": "toroidal",
-    "tor": "toroidal",
-    "pol": "poloidal",
-}
-# Add identity mappings for all Component values
-for _axis in _COMPONENT_AXES:
-    _SUFFIX_TO_AXIS[_axis] = _axis
+# Map DD suffixes to ISN Component axes. Identity mappings for every Component
+# value come first; the explicit DD short-form mappings then override them.
+# ``z`` is frame-dependent: the default here is ``vertical`` (cylindrical Z /
+# machine-vertical), and must win over the ``z`` Component's identity mapping —
+# :func:`_classify_suffix` overrides it to ``z`` when the node is Cartesian.
+_SUFFIX_TO_AXIS: dict[str, str] = {_axis: _axis for _axis in _COMPONENT_AXES}
+_SUFFIX_TO_AXIS.update(
+    {
+        "r": "radial",
+        "z": "vertical",
+        "phi": "toroidal",
+        "tor": "toroidal",
+        "pol": "poloidal",
+    }
+)
+
+# Axis tokens that mark a vector node's coordinate frame. A node carrying a
+# cylindrical member is cylindrical (z → vertical); a purely Cartesian node
+# is Cartesian (z → z). Standalone / ambiguous nodes default to cylindrical.
+_CYLINDRICAL_AXES = frozenset({"radial", "toroidal", "poloidal"})
+_CARTESIAN_AXES = frozenset({"x", "y"})
 
 # GeometricBase values for parent path matching
 _GEOMETRIC_BASES = {g.value for g in GeometricBase}
@@ -120,16 +130,45 @@ class VectorFamily:
 # ---------------------------------------------------------------------------
 
 
-def _classify_suffix(suffix: str) -> str | None:
-    """Map a DD leaf suffix to an ISN axis name, or None."""
+def _is_z_leaf(suffix: str) -> bool:
+    """Whether a DD leaf suffix is the vertical/Cartesian ``z`` axis leaf."""
+    return suffix == "z" or suffix.endswith("_z")
+
+
+def _classify_suffix(suffix: str, frame: str = "cylindrical") -> str | None:
+    """Map a DD leaf suffix to an ISN axis name, or None.
+
+    ``frame`` selects the reading of a ``z`` leaf: ``"cartesian"`` names it the
+    ``z`` axis (third member of an x, y, z triple); ``"cylindrical"`` (the
+    default) names it ``vertical`` (cylindrical Z / machine-vertical).
+    """
     # Direct lookup
+    axis: str | None = None
     if suffix in _SUFFIX_TO_AXIS:
-        return _SUFFIX_TO_AXIS[suffix]
-    # Check if suffix ends with a known axis (e.g., "j_tor" → "tor" → "toroidal")
-    for short, axis in _SUFFIX_TO_AXIS.items():
-        if suffix.endswith(f"_{short}"):
-            return axis
-    return None
+        axis = _SUFFIX_TO_AXIS[suffix]
+    else:
+        # Check if suffix ends with a known axis (e.g. "j_tor" → "tor" → "toroidal")
+        for short, mapped in _SUFFIX_TO_AXIS.items():
+            if suffix.endswith(f"_{short}"):
+                axis = mapped
+                break
+    if frame == "cartesian" and _is_z_leaf(suffix):
+        return "z"
+    return axis
+
+
+def _frame_from_axes(axes: set[str | None]) -> str:
+    """Infer a vector node's coordinate frame from its members' axis tokens.
+
+    A node with any cylindrical member (radial/toroidal/poloidal) is
+    cylindrical; a purely Cartesian node (x/y) is Cartesian; anything else
+    (a lone z leaf, unknown axes) defaults to cylindrical.
+    """
+    if axes & _CYLINDRICAL_AXES:
+        return "cylindrical"
+    if axes & _CARTESIAN_AXES:
+        return "cartesian"
+    return "cylindrical"
 
 
 def _extract_derivative_denominator(suffix: str) -> str | None:
@@ -174,10 +213,16 @@ def detect_families(items: list[dict]) -> list[VectorFamily]:
         is_geometric = parent_name in _GEOMETRIC_BASES
 
         # --- Axis-based detection (physical_vector / geometric_coordinate) ---
+        # Read the node's frame from the sibling leaf set first (cylindrical vs
+        # Cartesian) so a ``z`` leaf is named ``vertical`` (cylindrical Z) or
+        # ``z`` (Cartesian third axis) consistently across the family.
+        frame = _frame_from_axes(
+            {_classify_suffix(item["path"].rsplit("/", 1)[-1]) for item in group_items}
+        )
         axis_members: list[FamilyMember] = []
         for item in group_items:
             suffix = item["path"].rsplit("/", 1)[-1]
-            axis = _classify_suffix(suffix)
+            axis = _classify_suffix(suffix, frame=frame)
             if axis is not None:
                 axis_members.append(
                     FamilyMember(
