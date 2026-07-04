@@ -1804,7 +1804,7 @@ def _is_attachment_consistent(
     # Distinct-vector guard: the target name must not collapse two DIFFERENT
     # vector fields of one DD device node onto one scalar name (e.g. a camera's
     # line-of-sight ``direction`` and its image-up ``up`` vector both landing on
-    # ``vertical_direction_unit_vector``). Derived from path structure.
+    # ``z_direction_unit_vector``). Derived from path structure.
     for other in existing_sources:
         if other and other != source_id and _vector_fields_conflict(source_id, other):
             return False, (

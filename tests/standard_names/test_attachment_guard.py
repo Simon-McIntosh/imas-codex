@@ -176,7 +176,7 @@ def test_distinct_vector_fields_of_one_device_rejected() -> None:
     `camera/up/z` — line-of-sight and image-up are DIFFERENT vectors."""
     ok, reason = _is_attachment_consistent(
         "camera_ir/channel/camera/direction/z",
-        "vertical_direction_unit_vector_of_camera",
+        "z_direction_unit_vector_of_camera",
         existing_sources=["camera_ir/channel/camera/up/z"],
     )
     assert not ok
@@ -188,7 +188,7 @@ def test_same_vector_field_siblings_not_flagged() -> None:
     are legitimate components — no conflict."""
     ok, reason = _is_attachment_consistent(
         "camera_ir/channel/camera/direction/z",
-        "vertical_direction_unit_vector_of_camera",
+        "z_direction_unit_vector_of_camera",
         existing_sources=["camera_ir/channel/camera/direction/x"],
     )
     assert ok, reason
@@ -199,7 +199,7 @@ def test_distinct_vector_guard_requires_same_axis_leaf() -> None:
     fires only on the SAME leaf axis of a different vector field."""
     ok, reason = _is_attachment_consistent(
         "camera_ir/channel/camera/direction/z",
-        "vertical_direction_unit_vector_of_camera",
+        "z_direction_unit_vector_of_camera",
         existing_sources=["camera_ir/channel/camera/up/x"],
     )
     assert ok, reason
@@ -209,7 +209,7 @@ def test_distinct_vector_guard_requires_common_device() -> None:
     """Same leaf/parent-name but different device grandparent → no conflict."""
     ok, reason = _is_attachment_consistent(
         "camera_ir/channel/camera/direction/z",
-        "vertical_direction_unit_vector_of_camera",
+        "z_direction_unit_vector_of_camera",
         existing_sources=["ec_launchers/beam/launching_position/direction/z"],
     )
     assert ok, reason
