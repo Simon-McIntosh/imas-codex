@@ -2920,6 +2920,42 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
     return issues
 
 
+def dd_path_uniqueness_check(names: list[dict[str, Any]]) -> list[str]:
+    """Corpus-level audit: one DD path carries exactly one standard name.
+
+    A DD path attached to two accepted names is an attach error — the review
+    of the 90 live duplicates classified 86/90 as generic-vs-specific double
+    attaches or locus mismatches. Groups the provided names by each of their
+    ``source_paths`` (``dd_paths`` fallback) and flags every path claimed by
+    more than one name. Corpus-level signature, mirroring
+    :func:`vector_family_consistency_check`.
+    """
+    from collections import defaultdict
+
+    claims: dict[str, set[str]] = defaultdict(set)
+    for entry in names:
+        name = (entry.get("id") or entry.get("name") or "").strip()
+        if not name:
+            continue
+        paths = entry.get("source_paths") or entry.get("dd_paths") or []
+        if not isinstance(paths, (list, tuple)):
+            continue
+        for raw in paths:
+            if isinstance(raw, str):
+                claims[_strip_source_scheme(raw)].add(name)
+
+    issues: list[str] = []
+    for path in sorted(claims):
+        holders = claims[path]
+        if len(holders) > 1:
+            issues.append(
+                f"audit:dd_path_uniqueness_check: DD path '{path}' is attached "
+                f"to {len(holders)} names ({', '.join(sorted(holders))}) — one "
+                f"path carries exactly one standard name."
+            )
+    return issues
+
+
 def run_audits(
     candidate: dict[str, Any],
     existing_sns_in_domain: list[dict[str, Any]] | None = None,

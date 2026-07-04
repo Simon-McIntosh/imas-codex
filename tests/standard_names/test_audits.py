@@ -2504,3 +2504,48 @@ class TestVectorFamilyConsistencyCheck:
             },
         ]
         assert vector_family_consistency_check(names) == []
+
+
+# ---------------------------------------------------------------------------
+# Corpus-level: dd_path_uniqueness_check
+# ---------------------------------------------------------------------------
+
+
+class TestDdPathUniquenessCheck:
+    """One DD path carries exactly one standard name."""
+
+    def _entry(self, name, paths):
+        return {"id": name, "source_paths": paths}
+
+    def test_unique_paths_clean(self):
+        from imas_codex.standard_names.audits import dd_path_uniqueness_check
+
+        names = [
+            self._entry("electron_temperature", ["core_profiles/te"]),
+            self._entry("ion_temperature", ["core_profiles/ti"]),
+        ]
+        assert dd_path_uniqueness_check(names) == []
+
+    def test_double_attach_flagged(self):
+        from imas_codex.standard_names.audits import dd_path_uniqueness_check
+
+        names = [
+            self._entry("magnetic_shear", ["summary/local/pedestal/magnetic_shear"]),
+            self._entry(
+                "magnetic_shear_at_pedestal",
+                ["summary/local/pedestal/magnetic_shear"],
+            ),
+        ]
+        issues = dd_path_uniqueness_check(names)
+        assert len(issues) == 1
+        assert "summary/local/pedestal/magnetic_shear" in issues[0]
+        assert "magnetic_shear_at_pedestal" in issues[0]
+
+    def test_dd_scheme_prefix_stripped(self):
+        from imas_codex.standard_names.audits import dd_path_uniqueness_check
+
+        names = [
+            self._entry("a_name", ["dd:x/y/z"]),
+            self._entry("b_name", ["x/y/z"]),
+        ]
+        assert len(dd_path_uniqueness_check(names)) == 1
