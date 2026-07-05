@@ -625,6 +625,7 @@ def run_import(
     from imas_codex.standard_names.import_sync import (
         acquire_import_lock,
         advance_watermark,
+        read_watermark,
         release_import_lock,
     )
 
@@ -685,7 +686,10 @@ def run_import(
             # 4h: Advance watermark
             if catalog_sha and has_git:
                 try:
-                    advance_watermark(gc, catalog_sha)
+                    prev = read_watermark(gc).last_commit_sha
+                    advance_watermark(
+                        gc, expected_prev_sha=prev, new_sha=catalog_sha
+                    )
                     report.watermark_advanced = True
                 except Exception as exc:
                     report.errors.append(f"Failed to advance watermark: {exc}")
