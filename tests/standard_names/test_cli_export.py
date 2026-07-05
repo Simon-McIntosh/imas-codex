@@ -271,3 +271,39 @@ class TestExportSummaryOutput:
             sn, ["release", "--export-only", "--staging", "/tmp/stg"]
         )
         assert "Gate Results" in result.output or "PASS" in result.output
+
+
+class TestGateCCatalogLineage:
+    """Catalog-lineage nodes are review-exempt on the name axis."""
+
+    def _cand(self, origin, score=None):
+        return {
+            "id": "electron_temperature",
+            "origin": origin,
+            "reviewer_score_name": score,
+            "description": "Electron temperature.",
+        }
+
+    def test_catalog_edit_without_score_passes(self):
+        from imas_codex.standard_names.export import _run_gate_c
+
+        _, filtered, below, unreviewed = _run_gate_c(
+            [self._cand("catalog_edit")],
+            min_score=0.65,
+            include_unreviewed=False,
+            min_description_score=None,
+        )
+        assert len(filtered) == 1
+        assert unreviewed == 0
+
+    def test_pipeline_name_without_score_still_excluded(self):
+        from imas_codex.standard_names.export import _run_gate_c
+
+        _, filtered, below, unreviewed = _run_gate_c(
+            [self._cand("dd")],
+            min_score=0.65,
+            include_unreviewed=False,
+            min_description_score=None,
+        )
+        assert len(filtered) == 0
+        assert unreviewed == 1

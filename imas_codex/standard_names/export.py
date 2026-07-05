@@ -366,7 +366,11 @@ def _run_gate_c(
         # already refuses to publish before ``GENERATE_DOCS`` has run,
         # and the ``min_description_score`` check further down still
         # applies if the caller passes a docs threshold.
-        if cand.get("origin") == "derived":
+        # Catalog-lineage nodes (origin='catalog_edit', re-imported from a
+        # released ISNC catalog) passed RD review before their original
+        # export — the catalog IS the review record, so a missing
+        # name-axis score must not exclude them.
+        if cand.get("origin") in ("derived", "catalog_edit"):
             if min_description_score is not None:
                 desc_score = cand.get("reviewer_description_score")
                 if desc_score is not None and desc_score < min_description_score:
