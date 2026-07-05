@@ -933,6 +933,48 @@ def _auto_sync_grammar(*, quiet: bool = False) -> None:
         logger.warning("auto grammar sync failed (continuing): %s", exc)
 
 
+def _reject_unscoped_accepted_reset(
+    *,
+    reset_to: str | None,
+    include_accepted: bool,
+    flat_focus: list[str],
+    dry_run: bool,
+    retry_quarantined: bool,
+    below_score: float | None,
+    since: str | None,
+    before: str | None,
+    tier: str | None,
+) -> None:
+    """Hard-error the unscoped graph-wide accepted-wipe footgun.
+
+    ``sn run --reset-to … --include-accepted`` with no scope resets/deletes
+    *every* accepted (catalog-committed) standard name in the graph — this
+    wiped 1863 accepted names in a prior incident. Require the operator to
+    scope the reset before opting into accepted names: either a ``--focus``
+    path list (exact-path scope, recommended) or a row-level narrowing filter
+    (``--retry-quarantined`` / ``--below-score`` / ``--since`` / ``--before``
+    / ``--tier``). A ``--dry-run`` touches nothing, so previewing is allowed.
+    """
+    if reset_to is None or not include_accepted or dry_run:
+        return
+    scoped = bool(
+        flat_focus
+        or retry_quarantined
+        or below_score is not None
+        or since
+        or before
+        or tier
+    )
+    if not scoped:
+        raise click.UsageError(
+            "--reset-to with --include-accepted and no scope would reset every "
+            "accepted (catalog-committed) standard name in the graph. Scope the "
+            "reset with --focus <dd-path …> (recommended), or a narrowing filter "
+            "(--retry-quarantined / --below-score / --since / --before / --tier), "
+            "or drop --include-accepted."
+        )
+
+
 @sn.command("run")
 @click.option(
     "--source",
@@ -1446,6 +1488,21 @@ def sn_run(
     if docs_only and names_only:
         raise click.UsageError("--docs-only and --names-only are mutually exclusive")
 
+    # ── Guard the unscoped graph-wide accepted-wipe footgun ───────────
+    # Fires before either reset branch so it covers --reset-only and the
+    # default DD/signals reset path alike.
+    _reject_unscoped_accepted_reset(
+        reset_to=reset_to,
+        include_accepted=include_accepted,
+        flat_focus=flat_focus,
+        dry_run=dry_run,
+        retry_quarantined=retry_quarantined,
+        below_score=below_score,
+        since=since,
+        before=before,
+        tier=tier,
+    )
+
     # ── --reset-only: execute reset then exit (all source types) ──────
     if reset_only:
         if reset_to is None:
@@ -1473,6 +1530,7 @@ def sn_run(
                 n = clear_standard_names(
                     source_filter=source_arg,
                     ids_filter=ids_filter,
+                    path_allowlist=flat_focus or None,
                     include_accepted=include_accepted,
                     **_reset_filter_kwargs,
                 )
@@ -1489,6 +1547,7 @@ def sn_run(
                     include_accepted=include_accepted,
                     source_filter=source_arg,
                     ids_filter=ids_filter,
+                    path_allowlist=flat_focus or None,
                     **_reset_filter_kwargs,
                 )
                 console.print(
@@ -1633,6 +1692,7 @@ def sn_run(
             # --include-accepted).
             n = clear_standard_names(
                 source_filter=source_arg,
+                path_allowlist=flat_focus or None,
                 include_accepted=include_accepted,
                 **_reset_filter_kwargs,
             )
@@ -1645,6 +1705,7 @@ def sn_run(
                 to_stage="drafted" if retry_quarantined else None,
                 include_accepted=include_accepted,
                 source_filter=source_arg,
+                path_allowlist=flat_focus or None,
                 **_reset_filter_kwargs,
             )
             console.print(f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes")

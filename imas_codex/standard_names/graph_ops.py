@@ -4406,6 +4406,7 @@ def reset_standard_names(
     include_accepted: bool = False,
     source_filter: str | None = None,
     ids_filter: str | None = None,
+    path_allowlist: list[str] | None = None,
     dry_run: bool = False,
     since: str | None = None,
     before: str | None = None,
@@ -4438,6 +4439,12 @@ def reset_standard_names(
     ids_filter:
         Restrict to nodes whose HAS_STANDARD_NAME source path starts with this
         IDS name (matched via ``IMASNode -[:HAS_STANDARD_NAME]-> sn``).
+    path_allowlist:
+        Restrict to nodes attached to an IMASNode whose ``src.id`` is *exactly*
+        in this list (matched via ``IMASNode -[:HAS_STANDARD_NAME]-> sn`` with
+        ``src.id IN $path_allowlist``).  Unlike ``ids_filter`` this is an
+        exact-path allowlist, not a prefix — names on any other path are left
+        untouched.  Combines with ``ids_filter`` (both predicates apply).
     dry_run:
         Return the count of matching nodes without modifying anything.
     since:
@@ -4488,14 +4495,24 @@ def reset_standard_names(
 
         where = " AND ".join(where_clauses)
 
+        # Build the optional IMASNode-source scope. ids_filter is a prefix
+        # match; path_allowlist is an exact-path membership test. Either (or
+        # both) forces selection to go through the HAS_STANDARD_NAME join.
+        src_clauses: list[str] = []
         if ids_filter:
-            # Match through HAS_STANDARD_NAME to an IMASNode whose id starts with
-            # the given IDS name (ids_filter + "/")
             params["ids_prefix"] = ids_filter + "/"
+            src_clauses.append("src.id STARTS WITH $ids_prefix")
+        if path_allowlist:
+            params["path_allowlist"] = list(path_allowlist)
+            src_clauses.append("src.id IN $path_allowlist")
+        use_src_join = bool(src_clauses)
+        src_where = " AND ".join(src_clauses)
+
+        if use_src_join:
             count_cypher = f"""
                 MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
                 WHERE {where}
-                AND src.id STARTS WITH $ids_prefix
+                AND {src_where}
                 RETURN count(DISTINCT sn) AS n
             """
         else:
@@ -4518,12 +4535,14 @@ def reset_standard_names(
         if dry_run or count == 0:
             return count
 
-        if ids_filter:
-            # Collect matching SN ids first, then operate on them
+        if use_src_join:
+            # Collect matching SN ids first, then operate on them. This keeps
+            # every subsequent mutation scoped to exactly the names attached to
+            # the in-scope source paths — names on other paths are untouched.
             collect_cypher = f"""
                 MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
                 WHERE {where}
-                AND src.id STARTS WITH $ids_prefix
+                AND {src_where}
                 RETURN DISTINCT sn.id AS sn_id
             """
             rows = gc.query(collect_cypher, **params)
@@ -4532,8 +4551,6 @@ def reset_standard_names(
             node_match = "MATCH (sn:StandardName) WHERE sn.id IN $sn_ids"
         else:
             reset_params = dict(params)
-            if ids_filter:
-                reset_params["ids_prefix"] = ids_filter + "/"
             node_match = f"MATCH (sn:StandardName) WHERE {where}"
 
         # Remove HAS_STANDARD_NAME, HAS_UNIT, and HAS_COCOS relationships
@@ -4595,6 +4612,7 @@ def clear_standard_names(
     stage_filter: list[str] | None = None,
     source_filter: str | None = None,
     ids_filter: str | None = None,
+    path_allowlist: list[str] | None = None,
     include_accepted: bool = False,
     dry_run: bool = False,
     since: str | None = None,
@@ -4629,6 +4647,13 @@ def clear_standard_names(
         Delete only names linked to an IMASNode whose id starts with this IDS
         name.  Relationships are removed first; nodes become orphans and are
         then deleted.
+    path_allowlist:
+        Delete only names linked to an IMASNode whose ``src.id`` is *exactly*
+        in this list (``src.id IN $path_allowlist``).  Unlike ``ids_filter``
+        this is an exact-path allowlist, not a prefix.  Relationships are
+        removed first (relationship-first delete), so names attached to any
+        other path — including accepted catalog names — keep their edges and
+        are never deleted.  Combines with ``ids_filter``.
     include_accepted:
         Required to delete ``name_stage='accepted'`` names — these are
         committed catalog entries and the operator must opt in explicitly.
@@ -4692,12 +4717,25 @@ def clear_standard_names(
 
         sn_where = " AND ".join(sn_where_clauses) if sn_where_clauses else "true"
 
+        # Build the optional IMASNode-source scope. ids_filter is a prefix
+        # match; path_allowlist is an exact-path membership test. Either (or
+        # both) forces the relationship-first delete path so names on other
+        # paths keep their edges and survive.
+        src_clauses: list[str] = []
         if ids_filter:
             params["ids_prefix"] = ids_filter + "/"
+            src_clauses.append("src.id STARTS WITH $ids_prefix")
+        if path_allowlist:
+            params["path_allowlist"] = list(path_allowlist)
+            src_clauses.append("src.id IN $path_allowlist")
+        use_src_join = bool(src_clauses)
+        src_where = " AND ".join(src_clauses)
+
+        if use_src_join:
             count_cypher = f"""
                 MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
                 WHERE {sn_where}
-                AND src.id STARTS WITH $ids_prefix
+                AND {src_where}
                 RETURN count(DISTINCT sn) AS n
             """
         else:
@@ -4723,12 +4761,12 @@ def clear_standard_names(
         # Step A: delete StandardNameReview nodes attached to in-scope StandardName nodes
         # (HAS_REVIEW edge goes StandardName -> StandardNameReview). DETACH DELETE on the
         # StandardName alone orphans the StandardNameReview node; we must delete it explicitly.
-        if ids_filter:
+        if use_src_join:
             gc.query(
                 f"""
                 MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)-[:HAS_REVIEW]->(r:StandardNameReview)
                 WHERE {sn_where}
-                AND src.id STARTS WITH $ids_prefix
+                AND {src_where}
                 DETACH DELETE r
                 """,
                 **params,
@@ -4744,12 +4782,12 @@ def clear_standard_names(
             )
 
         # Step B: delete StandardName nodes and their remaining edges
-        if ids_filter:
+        if use_src_join:
             gc.query(
                 f"""
                 MATCH (src:IMASNode)-[r:HAS_STANDARD_NAME]->(sn:StandardName)
                 WHERE {sn_where}
-                AND src.id STARTS WITH $ids_prefix
+                AND {src_where}
                 DELETE r
                 """,
                 **params,
