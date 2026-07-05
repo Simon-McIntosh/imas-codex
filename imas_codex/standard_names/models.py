@@ -263,6 +263,14 @@ class GrammarSegments(BaseModel):
                 f"operator_kind must be one of {_OPERATOR_KINDS}, "
                 f"got '{self.operator_kind}'"
             )
+        # The shape is fully derivable from base_kind whenever a projection is
+        # present (ISN IR: component ↔ quantity base, coordinate ↔ geometry
+        # carrier), so coerce rather than bounce the whole composition when
+        # the LLM picks the wrong one.
+        if self.projection_axis is not None or self.projection_shape is not None:
+            derived = "coordinate" if self.base_kind == "geometry" else "component"
+            if self.projection_shape != derived:
+                self.projection_shape = derived
         return self
 
     @model_validator(mode="after")
