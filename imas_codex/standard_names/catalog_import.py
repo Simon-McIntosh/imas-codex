@@ -209,9 +209,16 @@ def _entry_to_graph_dict(
         primary_domain = None
         source_domains = []
 
+    # Descriptions are plain Unicode text — strip any LaTeX/math markup that a
+    # stale catalog YAML carries so it is not written back verbatim (and so it
+    # does not regenerate on every import cycle). documentation keeps LaTeX.
+    from imas_codex.standard_names.workers import normalize_description_text
+
     result: dict[str, Any] = {
         "id": entry.name,
-        "description": entry.description or None,
+        "description": normalize_description_text(entry.description)
+        if entry.description
+        else None,
         "documentation": entry.documentation or None,
         "kind": str(entry.kind) if hasattr(entry, "kind") and entry.kind else None,
         "unit": str(entry.unit) if hasattr(entry, "unit") and entry.unit else None,
@@ -342,12 +349,19 @@ def _write_import_entries(
     if not entries:
         return 0
 
-    # Add provenance metadata to each entry
+    # Add provenance metadata to each entry, and normalize the description at
+    # the write boundary — descriptions are plain Unicode text, so any LaTeX
+    # ($…$, \phi, …) leaked into a catalog YAML is stripped before it is
+    # written back. documentation is left verbatim (LaTeX is valid there).
+    from imas_codex.standard_names.workers import normalize_description_text
+
     for e in entries:
         e["_catalog_commit_sha"] = catalog_commit_sha
         e["_pr_number"] = pr_number
         e["_pr_url"] = pr_url
         e["_origin"] = e.pop("_origin", "catalog_edit")
+        if e.get("description"):
+            e["description"] = normalize_description_text(e["description"])
 
     # Main MERGE — catalog-owned fields overwrite
     gc.query(

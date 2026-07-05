@@ -89,6 +89,7 @@ CRITICAL_CHECKS = frozenset(
         "semantic_similarity_check",
         "preposition_physical_base_check",
         "canonical_locus_check",
+        "description_notation_check",
     }
 )
 
@@ -398,6 +399,26 @@ def latex_def_check(candidate: dict[str, Any]) -> list[str]:
             )
 
     return issues
+
+
+def description_notation_check(candidate: dict[str, Any]) -> list[str]:
+    """Descriptions must be plain Unicode text — no LaTeX/math markup.
+
+    A ``$`` math delimiter or a backslash (a LaTeX command such as ``\\phi``,
+    or a stranded backslash left by a half-converted Greek symbol ``\\φ``) in
+    the ``description`` is a convention violation that must never reach the
+    catalog. Firing here is a critical failure, so the name is quarantined
+    even if the description normalizer missed an edge case. ``documentation``
+    legitimately carries LaTeX and is not checked.
+    """
+    desc = candidate.get("description") or ""
+    if "$" in desc or "\\" in desc:
+        return [
+            "audit:description_notation_check: description contains math "
+            "markup ('$' or backslash); descriptions must be plain Unicode "
+            "text (LaTeX belongs in the documentation field)"
+        ]
+    return []
 
 
 # Time-derivative / rate-of-change markers that, when present in a
@@ -2981,6 +3002,7 @@ def run_audits(
     all_issues: list[str] = []
 
     all_issues.extend(latex_def_check(candidate))
+    all_issues.extend(description_notation_check(candidate))
     all_issues.extend(placeholder_check(candidate))
     all_issues.extend(unit_validity_check(candidate))
     all_issues.extend(generic_noun_check(candidate))

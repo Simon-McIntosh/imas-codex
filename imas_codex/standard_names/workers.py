@@ -94,17 +94,73 @@ _GREEK_WORD_TO_SYMBOL: dict[str, str] = {
 }
 _GREEK_WORD_RE = _re.compile(r"\b(phi|theta|rho)\b")
 
+# Backslash-escaped Greek commands: \phi \theta \rho \pi (and capitals) →
+# Unicode symbol. Includes \pi because it is the common LaTeX form that leaks
+# into descriptions. The trailing (?![a-zA-Z]) stops \phinx-style over-matching.
+_GREEK_CMD_TO_SYMBOL: dict[str, str] = {
+    "phi": "φ",
+    "theta": "θ",
+    "rho": "ρ",
+    "pi": "π",
+    "Phi": "Φ",
+    "Theta": "Θ",
+    "Rho": "Ρ",
+    "Pi": "Π",
+}
+_GREEK_CMD_RE = _re.compile(r"\\(phi|theta|rho|pi|Phi|Theta|Rho|Pi)(?![a-zA-Z])")
+# A backslash stranded in front of an already-Unicode Greek symbol — the
+# half-converted corruption (\φ) produced by the older word-only normalizer.
+_GREEK_STRANDED_BACKSLASH_RE = _re.compile(r"\\(?=[φθρπΦΘΡΠ])")
+# A LaTeX command carrying a single braced argument: \mathbf{k} → k.
+_LATEX_CMD_ARG_RE = _re.compile(r"\\[a-zA-Z]+\s*\{([^{}]*)\}")
+# A bare LaTeX command with no argument: \left \right \cdot \, → removed.
+_LATEX_CMD_BARE_RE = _re.compile(r"\\[a-zA-Z]+")
+# Braced sub/superscripts: ^{1+} → 1+ ; _{i} → _i (keep the underscore).
+_SUPERSCRIPT_BRACE_RE = _re.compile(r"\^\{([^{}]*)\}")
+_SUBSCRIPT_BRACE_RE = _re.compile(r"_\{([^{}]*)\}")
+# Math delimiters: $$…$$ and $…$ — drop the delimiter, keep inner content.
+_MATH_DELIM_RE = _re.compile(r"\$\$?")
+
 
 def normalize_description_notation(text: str) -> str:
-    """Greek word→symbol normalization for description prose.
+    """Normalize description prose to plain Unicode text.
 
-    Word-bounded, so DD-style tokens such as ``phi_tor`` or ``b_field_phi``
-    (no word boundary at an underscore) are untouched. Applies to the
-    description field only — documentation keeps LaTeX math.
+    Descriptions are plain text (the ISN convention); LaTeX and math markup
+    belong in the ``documentation`` field. Any LaTeX that leaks into a
+    description is stripped to a readable plain form:
+
+    - ``$…$`` / ``$$…$$`` delimiters removed (inner content kept);
+    - ``\\phi \\theta \\rho \\pi`` → ``φ θ ρ π`` (plus capitals), and a
+      stranded backslash in front of an already-Unicode symbol (``\\φ``) → φ;
+    - spelled-out ``phi/theta/rho`` prose words → ``φ/θ/ρ`` (word-bounded, so
+      DD tokens like ``phi_tor`` / ``b_field_phi`` are untouched);
+    - ``\\mathbf{k}`` → ``k`` and other backslash commands dropped;
+    - braced sub/superscripts (``^{1+}`` / ``_{i}``) flattened.
+
+    Idempotent — a description already in plain form is returned unchanged.
+    Applies to the description field only; ``documentation`` keeps LaTeX.
     """
     if not text:
         return text
-    return _GREEK_WORD_RE.sub(lambda m: _GREEK_WORD_TO_SYMBOL[m.group(1)], text)
+    # 1. Backslash Greek commands and stranded backslashes → Unicode symbols.
+    text = _GREEK_CMD_RE.sub(lambda m: _GREEK_CMD_TO_SYMBOL[m.group(1)], text)
+    text = _GREEK_STRANDED_BACKSLASH_RE.sub("", text)
+    # 2. Spelled-out Greek prose words → Unicode (word-bounded; DD tokens safe).
+    text = _GREEK_WORD_RE.sub(lambda m: _GREEK_WORD_TO_SYMBOL[m.group(1)], text)
+    # 3. LaTeX commands: keep the argument of \cmd{arg}, drop bare commands.
+    text = _LATEX_CMD_ARG_RE.sub(r"\1", text)
+    text = _LATEX_CMD_BARE_RE.sub("", text)
+    # 4. Flatten braced sub/superscripts, then drop any residual braces.
+    text = _SUPERSCRIPT_BRACE_RE.sub(r"\1", text)
+    text = _SUBSCRIPT_BRACE_RE.sub(r"_\1", text)
+    text = text.replace("{", "").replace("}", "")
+    # 5. Drop math delimiters (inner content already kept).
+    text = _MATH_DELIM_RE.sub("", text)
+    # 6. Drop any residual backslash — plain text never carries one.
+    text = text.replace("\\", "")
+    # 7. Collapse runs of spaces/tabs left behind by the removals above.
+    text = _re.sub(r"[ \t]{2,}", " ", text)
+    return text
 
 
 def normalize_description_text(text: str) -> str:
