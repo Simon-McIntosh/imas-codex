@@ -33,6 +33,21 @@ _BINARY_BARE_TO_MODEL = {
     "difference": "difference_of",
 }
 
+# Stray DD-leaf axis short-forms the LLM sometimes emits instead of the
+# canonical word (cylindrical-axis-naming decision: one canonical spelling,
+# not a second vocabulary). Coerced to the canonical word at generation time
+# so the stored name is always canonical — the ISN parser itself stays
+# strict and never accepts these short forms. ``z`` is deliberately excluded:
+# it is a valid canonical Cartesian axis, and disambiguating it from
+# cylindrical ``vertical`` is a DD-ingest concern (see
+# families._classify_suffix), not a compose-time one.
+_AXIS_SHORT_FORM_TO_CANONICAL = {
+    "r": "radial",
+    "phi": "toroidal",
+    "tor": "toroidal",
+    "pol": "poloidal",
+}
+
 
 @functools.cache
 def _operator_registry_kinds() -> dict[str, str]:
@@ -311,6 +326,12 @@ class GrammarSegments(BaseModel):
         """Validate projection_axis against closed component/coordinate vocab."""
         if self.projection_axis is None:
             return self
+        # Generation-time catch-and-promote: a stray r/phi/tor/pol short-form
+        # is promoted to its canonical word before the registered-token check
+        # below, so composition succeeds with the one canonical spelling
+        # instead of bouncing on a token the LLM should have written as a word.
+        if self.projection_axis in _AXIS_SHORT_FORM_TO_CANONICAL:
+            self.projection_axis = _AXIS_SHORT_FORM_TO_CANONICAL[self.projection_axis]
         try:
             from imas_standard_names import get_grammar_context
         except ImportError:
