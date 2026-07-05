@@ -687,10 +687,15 @@ def run_import(
             if catalog_sha and has_git:
                 try:
                     prev = read_watermark(gc).last_commit_sha
-                    advance_watermark(
+                    advanced = advance_watermark(
                         gc, expected_prev_sha=prev, new_sha=catalog_sha
                     )
-                    report.watermark_advanced = True
+                    report.watermark_advanced = advanced
+                    if not advanced:
+                        report.errors.append(
+                            "Failed to advance watermark: CAS conflict — "
+                            "another import moved it concurrently"
+                        )
                 except Exception as exc:
                     report.errors.append(f"Failed to advance watermark: {exc}")
                     logger.warning("Watermark advance failed: %s", exc)
