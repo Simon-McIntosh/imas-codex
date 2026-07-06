@@ -8415,17 +8415,27 @@ def claim_review_docs_batch(
     ``unit``, ``tags``, ``physics_domain``, ``docs_chain_length``,
     ``claim_token``.
     """
+    # Name-form-vetted gate (same invariant as generate_docs): a real
+    # name-review score OR a structurally-accepted derived parent. CURATIVE-SCOPE
+    # EXCEPTION: under a scope_run_id (curative family-docs wave) the names are
+    # already-accepted and operator-authorised for re-docs, so the name-score
+    # gate is dropped inside the scope (mirrors claim_generate_docs_batch) —
+    # otherwise derived-leaf families draft docs that can never be reviewed.
+    score_gate = (
+        ""
+        if scope_run_id
+        else (
+            " AND (sn.reviewer_score_name IS NOT NULL"
+            " OR (coalesce(sn.origin, '') = 'derived'"
+            "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+            "       WHERE NOT coalesce(kid.name_stage, '') IN"
+            "       ['superseded', 'exhausted'] }))"
+        )
+    )
     where = (
         "sn.docs_stage = 'drafted'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # Name-form-vetted gate (same invariant as generate_docs): a real
-        # name-review score OR a structurally-accepted derived parent (its name
-        # is an admission-vetted grammar peel, never reviewed/scored by design).
-        " AND (sn.reviewer_score_name IS NOT NULL"
-        " OR (coalesce(sn.origin, '') = 'derived'"
-        "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-        "       WHERE NOT coalesce(kid.name_stage, '') IN"
-        "       ['superseded', 'exhausted'] }))"
+        + score_gate
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -10443,20 +10453,27 @@ def claim_refine_docs_batch(
     """
     from imas_codex.standard_names.chain_history import docs_chain_history
 
+    # Name-form vetted gate (same invariant as generate_docs). CURATIVE-SCOPE
+    # EXCEPTION: dropped under a scope_run_id so curatively-reset derived-leaf
+    # families can refine (mirrors claim_generate_docs_batch/claim_review_docs_batch).
+    score_gate = (
+        ""
+        if scope_run_id
+        else (
+            " AND (sn.reviewer_score_name IS NOT NULL"
+            " OR (coalesce(sn.origin, '') = 'derived'"
+            "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+            "       WHERE NOT coalesce(kid.name_stage, '') IN"
+            "       ['superseded', 'exhausted'] }))"
+        )
+    )
     where = (
         "sn.docs_stage = 'reviewed'"
         " AND sn.reviewer_score_docs IS NOT NULL"
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # Name-form vetted gate (same invariant as generate_docs): a real
-        # name-review score OR a structurally-accepted derived parent (admission-
-        # vetted name, never reviewed/scored by design).
-        " AND (sn.reviewer_score_name IS NOT NULL"
-        " OR (coalesce(sn.origin, '') = 'derived'"
-        "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-        "       WHERE NOT coalesce(kid.name_stage, '') IN"
-        "       ['superseded', 'exhausted'] }))"
+        + score_gate
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
