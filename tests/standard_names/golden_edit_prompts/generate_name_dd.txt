@@ -160,7 +160,8 @@ Study this table before composing — it eliminates the most common vocab-gap re
 | `perpendicular`, `vertical`, `poloidal` | physical_base | component | These are direction tokens — use component segment |
 | `unit_vector_*_component` | geometric_base | — | Decompose: component=`x`/`y`/`z` + geometric_base=`unit_vector` |
 | `perturbed_*_field`, `electrostatic_potential` | process | physical_base | These are quantities, not mechanisms |
-| `separatrix_average`, `flux_surface_average` | position | — | Split: position=`separatrix` + transformation (or physical_base compound) |
+| `separatrix_average`, `flux_surface_average` | position | — | Split: position=`plasma_boundary` (canonical LCFS locus — NOT `separatrix`, which is a deprecated synonym) + transformation (or physical_base compound) |
+| `separatrix` (bare, in a `local/separatrix/...` path) | position | — | Use position=`plasma_boundary` (the bare separatrix IS the plasma boundary / LCFS; reserve `secondary_separatrix` etc. for genuinely distinct qualified surfaces) |
 | `measurement_position` | position (as token) | — | Already exists in position vocab — use it correctly as a locus |
 | `derivative_with_respect_to_*` | operators | transformation | Use transformation segment for derivatives |
 | `diffusion_coefficient`, `convection_velocity` | process | physical_base | Transport coefficients are quantities, not processes |

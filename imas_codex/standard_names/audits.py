@@ -2521,10 +2521,13 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
     LLM occasionally produces anyway:
 
     1. **Synonym locus token** — the candidate uses a deprecated
-       synonym (``plasma_boundary``, ``last_closed_flux_surface``,
-       ``divertor_plate``, ``wall_surface``, …) instead of the
-       canonical token (``separatrix``, ``divertor_target``, ``wall``,
-       …). The audit recommends the rewrite.
+       synonym (``separatrix`` [bare], ``last_closed_flux_surface``,
+       ``lcfs``, ``divertor_plate``, ``wall_surface``, …) instead of the
+       canonical token (``plasma_boundary``, ``divertor_target``,
+       ``wall``, …). The audit recommends the rewrite. (The canonical
+       LCFS locus is ``plasma_boundary`` — the descriptive geometric
+       noun — per ``_CANONICAL_LOCUS_SYNONYMS``; ``separatrix`` is
+       qualifier-sensitive so ``secondary_separatrix`` stays distinct.)
     2. **Field-at-region preposition** — when the base is an evaluated
        field (flux, density, temperature, …) paired with a position or
        region locus, the relation MUST be ``_at_``. ``_of_<region>``
