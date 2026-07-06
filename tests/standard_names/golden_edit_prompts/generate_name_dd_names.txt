@@ -91,6 +91,10 @@ The ISN grammar enforces strict preposition rules for locus qualifiers:
 
 Named geometric entities (separatrix, magnetic_axis, x_point, plasma_boundary) and hardware objects (probe, coil, antenna) use `_of_`. Abstract spatial regions from the position vocabulary (core, pedestal_top, lcfs) use `_at_`.
 
+**Pedestal locus — two positions, never bare `pedestal`:** value-at-the-pedestal quantities (temperature, density, pressure value) → `_at_pedestal_top`; maximum-gradient quantities and flux/position quantities that locate the pedestal → the mid-pedestal locus `_at_pedestal_maximum`. Never emit a bare `_at_pedestal` or a `pedestal_` zone prefix. ✓ `electron_density_at_pedestal_top`, `maximum_electron_pressure_gradient_at_pedestal_maximum`; ✗ `electron_density_at_pedestal`, ✗ `pedestal_electron_temperature`.
+
+**Limiter loci — three distinct positions:** `at_limiter` = the SOL-adjacent limiter point (a value read there, e.g. `electron_temperature_at_limiter`); `along_limiter` = a distribution/peak over the limiter surface (e.g. `peak_power_density_along_limiter`); `active_limiter_point` = the separatrix–limiter tangency contact (e.g. `radial_coordinate_of_active_limiter_point`). Do not use a bare `limiter` for the surface distribution or the tangency contact.
+
 ## Description Quality Rules
 
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "scalar", "array",

@@ -207,6 +207,29 @@ The `process` segment is for mechanisms that MODIFY a quantity — they appear v
 **Test:** Can you say "X due_to Y"? If Y is a mechanism causing X, then Y is a process.
 If Y is itself measurable, it's a physical_base.
 
+### Pedestal & Limiter Loci — canonical positions
+
+**Pedestal is a LOCUS (`_at_`), never a zone prefix or a bare `pedestal` token.**
+It resolves to one of two registered positions by what the quantity measures:
+
+- **Value-at-the-pedestal** (the pedestal *value* of a profile field — temperature,
+  density, pressure) → `pedestal_top`. ✓ `electron_density_at_pedestal_top`.
+- **Maximum-gradient quantities and flux/position quantities** that locate the
+  pedestal → the mid-pedestal locus `pedestal_maximum`. ✓
+  `maximum_electron_pressure_gradient_at_pedestal_maximum`,
+  `normalized_poloidal_flux_coordinate_of_pedestal`.
+- ✗ `electron_density_at_pedestal` (bare locus), ✗ `pedestal_electron_temperature`
+  (zone prefix) — both collapse the two distinct loci onto one ambiguous name.
+
+**Limiter resolves to three distinct positions — do not conflate:**
+
+- **`limiter`** — the SOL-adjacent limiter point (a value read there). ✓
+  `electron_temperature_at_limiter`.
+- **`along_limiter`** — a distribution / peak over the limiter surface. ✓
+  `peak_power_density_along_limiter`.
+- **`active_limiter_point`** — the separatrix–limiter tangency contact. ✓
+  `radial_coordinate_of_active_limiter_point`.
+
 ✅ `energy_due_to_recombination` — recombination is a mechanism → process
 ✅ `current_due_to_ohmic` — ohmic heating is a mechanism → process  
 ❌ `energy_due_to_diffusion_coefficient` — a coefficient is not a mechanism

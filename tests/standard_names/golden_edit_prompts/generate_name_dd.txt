@@ -54,6 +54,8 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector_of_camera` | **Compound hardware identifiers** — a component of a device's orientation/direction unit vector is a locus-qualified coordinate. Drop stacked intermediate hardware tokens but KEEP the owning device as the `_of_<device>` locus. A device direction unit vector is a machine-frame Cartesian vector (triple `x`, `y`, `z`), so a `z` leaf is the `z` axis. `vertical` is the cylindrical Z (`radial`, `toroidal`, `vertical`) — never mix frames. Locus-less `z_direction_unit_vector` collapses every device's orientation to one name |
 | both `camera/direction/z` and `camera/up/z` → `z_direction_unit_vector` | distinct bases per vector | **Distinct vectors of one device get DISTINCT bases** — `direction` is the line-of-sight, `up` is the image-up vector: different physical vectors. Never name a non-pointing vector (image-up, ellipse axis) bare `direction`; name what the vector IS |
 
+> **UNIT-VECTOR LOCUS IS MANDATORY — this OVERRIDES any semantic-cluster suggestion.** A `*_unit_vector` base (direction, image-up, minor/major axis, …) ALWAYS requires a per-device locus `_of_<device>`; a locus-less unit-vector name (e.g. `z_direction_unit_vector`) is **rejected by the grammar at error severity** and collapses every device's orientation onto one name. If a cross-IDS semantic cluster groups this leaf with other devices (EC launcher mirror, camera, sensor, SPI shatter cone, …) and its description suggests "one generic name across device types without a device-specific locus", **IGNORE that suggestion for unit vectors** — emit the name for THIS source's own device using its `DEV:`/path device as the `_of_<device>` locus (`x_direction_unit_vector_of_electron_cyclotron_launcher_mirror`, `x_direction_unit_vector_of_camera`, `x_direction_unit_vector_of_sensor`, `x_direction_unit_vector_of_shatter_cone`). Each device gets its OWN distinct name. Only a displacement/position vector carrying a length unit (`m`) is NOT a unit vector — name it with the appropriate coordinate/position base, still per-device. |
+
 ## Hardware & Diagnostic Geometry — Specificity Required
 
 Many DD paths describe hardware geometry (coil cross-sections, detector outlines,
@@ -173,6 +175,29 @@ The `process` segment is for mechanisms that MODIFY a quantity — they appear v
 
 **Test:** Can you say "X due_to Y"? If Y is a mechanism causing X, then Y is a process.
 If Y is itself measurable, it's a physical_base.
+
+### Pedestal & Limiter Loci — canonical positions
+
+**Pedestal is a LOCUS (`_at_`), never a zone prefix or a bare `pedestal` token.**
+It resolves to one of two registered positions by what the quantity measures:
+
+- **Value-at-the-pedestal** (the pedestal *value* of a profile field — temperature,
+  density, pressure) → `pedestal_top`. ✓ `electron_density_at_pedestal_top`.
+- **Maximum-gradient quantities and flux/position quantities** that locate the
+  pedestal → the mid-pedestal locus `pedestal_maximum`. ✓
+  `maximum_electron_pressure_gradient_at_pedestal_maximum`,
+  `normalized_poloidal_flux_coordinate_of_pedestal`.
+- ✗ `electron_density_at_pedestal` (bare locus), ✗ `pedestal_electron_temperature`
+  (zone prefix) — both collapse the two distinct loci onto one ambiguous name.
+
+**Limiter resolves to three distinct positions — do not conflate:**
+
+- **`limiter`** — the SOL-adjacent limiter point (a value read there). ✓
+  `electron_temperature_at_limiter`.
+- **`along_limiter`** — a distribution / peak over the limiter surface. ✓
+  `peak_power_density_along_limiter`.
+- **`active_limiter_point`** — the separatrix–limiter tangency contact. ✓
+  `radial_coordinate_of_active_limiter_point`.
 
 ✅ `energy_due_to_recombination` — recombination is a mechanism → process
 ✅ `current_due_to_ohmic` — ohmic heating is a mechanism → process  
