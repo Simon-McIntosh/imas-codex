@@ -156,30 +156,33 @@ Rules:
   `$\mathrm{kg\,m^{-1}\,s^{-2}}$`). Units MAY appear inline ONLY in the three
   narrow contexts: numeric typical-value ranges, equation variable definitions,
   and unit-conversion statements.
-- **Number-density canonical opening (HARD).** For number densities (particle
-  number per volume — electron/ion/neutral, unit `m^-3`; NOT mass/current/power
-  density), open BOTH `description` and `documentation` with the fixed family
-  template: electrons → "Electron number density …"; a bare species ion →
-  "<Species> ion number density, summed over all charge states, <at/in locus>";
-  an explicitly charge-state-resolved variant → state the specific state. The
-  short `description` is NOT exempt from this family-anchor rule.
+- **One canonical opening per family (HARD).** When the context above places
+  this entry in a sibling family, open BOTH `description` and `documentation`
+  with the SAME noun-phrase template as the family anchor, substituting only the
+  member-specific token(s) the context supplies (species, axis, locus). The
+  short `description` is NOT exempt. Do not invent a per-member opening shape
+  (a leading "Total…"/"Unweighted…"/"Charge-state-summed…" adjective) for what
+  is one quantity kind. This applies to number-density families (a particle
+  count per volume): a bare species defaults to the charge-state-summed reading;
+  an explicitly charge-state-resolved member states its specific state.
 - **Charge-state aggregation (HARD).** A species-level quantity aggregated over
-  charge states MUST state the convention: extensive quantities (density) are
-  charge-state-SUMMED ("summed over all charge states"); intensive quantities
-  (velocity, temperature) are the density-weighted MEAN over charge states
-  ("density-weighted mean over all charge states") — an intensive quantity is
-  never "summed". Cross-link the charge-state-resolved counterpart when one
-  exists.
-- **Deuterium–tritium wording.** `deuterium_tritium_*` reads two ways — pick the
-  right one: the effective single fuel species (50:50 D–T mix, mean atomic mass
-  2.5 amu) for density/velocity/temperature/pressure quantities, or the D–T
-  fusion REACTION channel (D + T → $^4$He + n) for reaction-product quantities.
-  Keep the underscore spelling in the name; prose may hyphenate.
+  charge states MUST state the convention: extensive quantities (a per-volume
+  amount) are charge-state-summed ("summed over all charge states"); intensive
+  quantities (per-particle fields) are the density-weighted mean over charge
+  states ("density-weighted mean over all charge states") — an intensive
+  quantity is never "summed". Cross-link the charge-state-resolved counterpart
+  when the provided names include one.
+- **Compound / reaction-pair species.** When the injected subject/species
+  semantics mark the subject as a compound fuel mixture or a fusion reaction
+  pair, pick the reading the quantity denotes: the effective single fuel species
+  (the isotope mixture as one species, with its mean atomic mass) for fuel state
+  quantities, or the fusion reaction channel for reaction-product / reactivity
+  quantities. Keep the underscore spelling in the name; prose may hyphenate.
 - **Locus-defining cross-link.** When the quantity is evaluated at a locus whose
-  position is itself a defined standard name (pedestal → its flux coordinate,
-  separatrix / magnetic axis / X-point → their coordinates), cross-link that
-  position-defining quantity inline with `[label](name:bare_id)` — but only when
-  it exists in the provided name lists.
+  position is itself a defined standard name, cross-link that position-defining
+  quantity inline with `[label](name:bare_id)` — using the defining quantity the
+  injected locus context supplies, only when it exists in the provided names.
+  Do not hardcode or guess a locus→defining-quantity mapping.
 - The `name` field must equal `{{ sn_name }}` exactly — do not alter it.
 
 Return a JSON object matching the output schema with fields:

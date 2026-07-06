@@ -208,52 +208,27 @@ class TestSelectAnchor:
         # non-placeholder member (deterministic by id, not longest desc).
         assert anchor == "child1"
 
-    def test_canonical_species_opening_beats_higher_scored_sibling(self):
-        # A verbose, higher-scored sibling with a NON-canonical opening must not
-        # anchor the family when another accepted sibling already opens with the
-        # canonical number-density template (C11).
+    def test_highest_scored_accepted_wins_over_longer_sibling(self):
+        # Anchor selection is score-driven, never length-driven: a shorter,
+        # higher-scored accepted member beats a longer, lower-scored one.
         members = [
             {
-                "id": "charge_state_summed_variant",
+                "id": "long_low_score",
                 "description": (
-                    "Charge-state-summed number density of the tungsten ion "
-                    "population reported per cubic metre for transport modeling"
-                ),
-                "docs_stage": "accepted",
-                "reviewer_score_docs": 0.95,
-            },
-            {
-                "id": "canonical_variant",
-                "description": (
-                    "Tungsten ion number density, summed over all charge "
-                    "states, at the limiter."
+                    "a considerably longer accepted description than the "
+                    "sibling below but with a lower reviewer score"
                 ),
                 "docs_stage": "accepted",
                 "reviewer_score_docs": 0.80,
             },
-        ]
-        assert select_anchor(None, None, None, members) == "canonical_variant"
-
-    def test_canonical_electron_opening_beats_higher_scored_sibling(self):
-        members = [
             {
-                "id": "verbose_variant",
-                "description": (
-                    "Total unweighted electron population count per unit "
-                    "volume throughout the core plasma region described at "
-                    "length here"
-                ),
+                "id": "short_high_score",
+                "description": "short accepted description",
                 "docs_stage": "accepted",
-                "reviewer_score_docs": 0.99,
-            },
-            {
-                "id": "canonical_electron",
-                "description": "Electron number density in the confined plasma.",
-                "docs_stage": "accepted",
-                "reviewer_score_docs": 0.70,
+                "reviewer_score_docs": 0.95,
             },
         ]
-        assert select_anchor(None, None, None, members) == "canonical_electron"
+        assert select_anchor(None, None, None, members) == "short_high_score"
 
     def test_no_longest_description_fallback(self):
         # With no accepted members and no canonical opening, the anchor is

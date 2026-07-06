@@ -108,79 +108,67 @@ its siblings:
   on notation for the same shared concept, and sign-convention paragraphs
   must be present for exactly the members whose quantity is sign-dependent.
 
-## Canonical Description Templates (family anchors — HARD)
+## Family Anchoring & Species Semantics (data-driven — HARD)
 
-Some quantity families drift into many gratuitously different openings for the
-same physics — the `*_density*` family alone has been observed opening with
+Sibling families drift into many gratuitously different openings for the same
+physics (number-density entries alone have been seen opening with
 "Charge-state-summed…", "Total…", "Unweighted…", "Number density of…", and
-several more for what is one quantity kind. To stop that drift, the families
-below have a FIXED canonical opening that BOTH the `description` and the
-`documentation` MUST instantiate. **The short `description` field is explicitly
-subject to this family-anchor rule** — it is NOT exempt because it is short.
+more for one quantity kind). The rules below make the Family Parallel Structure
+section concrete. **None of them enumerates vocabulary** — the species, loci,
+and charge-state facts come from the per-name context supplied with each item
+(the sibling-family block, the subject/species semantics, and the injected
+locus context). Apply each PATTERN to whatever tokens that context provides.
 
-### Number-density quantities (particle number per unit volume)
+### One canonical opening per family (short description included)
 
-Applies to **number densities** — particle number per unit volume (electron,
-ion, and neutral number densities; DD unit `m^-3`). It does NOT apply to
-`mass_density`, `current_density`, `power_density`, `energy_density`, or
-`radiation_density` (those are not particle counts).
+When the per-name context places this entry in a sibling family, open BOTH the
+`description` and the `documentation` with the SAME noun-phrase template as the
+family anchor, substituting only the member-specific token(s) — species, axis,
+locus — that the context supplies. **The short `description` field is explicitly
+subject to this family-anchor rule** — it is not exempt because it is short.
+Do not invent a per-member opening shape (a leading "Total…", "Unweighted…", or
+"Charge-state-summed…" adjective, or a differently-shaped bare opening) for what
+is one quantity kind; that sibling drift is exactly what the anchor prevents.
 
-Open with exactly ONE of these templates:
+For number-density quantities (a particle count per unit volume — not a mass,
+charge, current, or power per unit volume), the opening names the species (from
+context) and its number density: a bare species defaults to the
+charge-state-summed reading, while an explicitly charge-state-resolved member
+states its specific state instead.
 
-- **Electrons:** `Electron number density …` — e.g. "Electron number density in
-  the confined plasma."
-- **Species ions, charge-state-summed (the default reading for a bare species):**
-  `<Species> ion number density, summed over all charge states, <at/in locus>.`
-  — e.g. "Tungsten ion number density, summed over all charge states, at the
-  limiter." `<Species>` is the neutral element/isotope word (tungsten,
-  deuterium, argon), never a chemical symbol.
-- **A specific charge state (explicitly charge-state-resolved variants only):**
-  state the state instead of the summed clause — e.g. "Number density of
-  $\mathrm{W}^{44+}$ ions" / "Number density of the fully stripped carbon ion".
+### State the charge-state aggregation convention
 
-Do NOT open a number-density entry with a leading "Total…", "Unweighted…", or
-"Charge-state-summed…" adjective, and do NOT use a bare "Number density of
-<species>…" for a species that is actually charge-state-summed — use the fixed
-clause above so every sibling reads as a matched set.
+Any species-level quantity that aggregates over charge states MUST state the
+convention explicitly (never leave it implicit), and MUST cross-link its
+charge-state-resolved counterpart when the per-name context provides one:
 
-### Charge-state aggregation convention (species-level quantities — HARD)
+- **Extensive quantities** (a per-volume amount, e.g. a number density) are
+  charge-state-**summed** — say "summed over all charge states".
+- **Intensive quantities** (per-particle fields, e.g. a velocity or a
+  temperature) are the density-weighted **mean over charge states** — say "the
+  density-weighted mean over all charge states". An intensive quantity is NEVER
+  "summed" over charge states; that is a physics error.
 
-Any species-level quantity that is **aggregated over charge states** MUST state
-the aggregation convention explicitly (do not leave it implicit), and MUST
-cross-link its charge-state-resolved counterpart when one exists:
+Where a charge-state-resolved sibling exists in the provided names, cross-link
+it inline with `[label](name:bare_id)` so the reader can reach the per-state
+quantity.
 
-- **Extensive quantities (number density, and other per-volume amounts):**
-  charge-state-**SUMMED** — say "summed over all charge states".
-- **Intensive quantities (velocity, temperature, and other per-particle
-  intensive fields):** the density-weighted **MEAN over charge states** — say
-  "the density-weighted mean over all charge states". An intensive quantity is
-  NEVER "summed" over charge states — that is a physics error.
+### Compound / reaction-pair species have two readings
 
-This is the fix for the `toroidal_<species>_velocity_at_*` inconsistency, where
-some siblings said "summed over all ionization stages" (wrong for an intensive
-velocity) and most said nothing at all. Where a charge-state-resolved sibling
-exists, cross-link it inline with `[label](name:bare_id)` so the reader can
-reach the per-state quantity.
+When the injected subject/species semantics mark this entry's subject as a
+compound fuel mixture or a fusion reaction pair, the description MUST pick the
+reading the quantity actually denotes and state it unambiguously:
 
-### Deuterium–tritium species wording (`deuterium_tritium_*` — HARD)
+- **The effective single fuel species** — the isotope mixture treated as one
+  species (with its mean atomic mass). Use this reading for fuel state
+  quantities (density, velocity, temperature, pressure).
+- **The fusion reaction channel** — the reaction the pair undergoes. Use this
+  reading for reaction-product / reactivity quantities (fusion power, neutron or
+  alpha production, reaction rate).
 
-The token `deuterium_tritium` has TWO distinct physical readings; the
-description MUST pick the one the quantity actually denotes and state it
-unambiguously:
-
-- **(a) The effective single fuel species** — a 50:50 D–T fuel mix treated as
-  one species with mean atomic mass 2.5 amu. Use this reading for density-,
-  velocity-, temperature-, and pressure-type quantities of the fuel (e.g.
-  `deuterium_tritium_ion_number_density`): "…of the deuterium–tritium fuel
-  species (a 50:50 D–T mixture, mean atomic mass 2.5 amu)…".
-- **(b) The deuterium–tritium fusion REACTION channel** — the
-  D + T → $^4$He + n reaction. Use this reading for reaction-product /
-  reactivity quantities (fusion power, neutron or alpha production, reaction
-  rate): "…from the deuterium–tritium fusion reaction (D + T → $^4$He + n)…".
-
-Keep the underscore spelling in the NAME (`deuterium_tritium_*`); never
-introduce a hyphen into a standard name. Prose is free to use the hyphenated
-"deuterium–tritium" (or "deuterium-tritium").
+Keep the underscore spelling of the NAME exactly as given; never introduce a
+hyphen into a standard name. Prose may hyphenate a compound species freely
+(e.g. "deuterium–tritium").
 
 ## Grounding & Faithfulness (HARD — source-faithfulness outranks richness)
 
@@ -420,24 +408,17 @@ implementation. Never mention:
   but not code-specific
 
 ### PR-9 Locus-defining cross-link rule
-When a quantity is evaluated at a location whose POSITION is itself a defined
+When a quantity is evaluated at a locus whose POSITION is itself a defined
 standard quantity, cross-link that position-defining quantity inline with
-`[label](name:bare_id)`. The locus word in the name (pedestal, separatrix,
-magnetic axis, X-point, …) names WHERE the quantity is read; the standard name
-that gives that locus its coordinate is a distinct quantity the reader should
-be able to reach.
+`[label](name:bare_id)`. The locus names WHERE the quantity is read; the
+standard name that gives that locus its coordinate is a distinct quantity the
+reader should be able to reach.
 
-- **Canonical example — pedestal:** an entry `…_at_pedestal_top` (or
-  `…_at_pedestal_maximum`) should link the flux coordinate that fixes the
-  pedestal location, e.g.
-  `[normalized_poloidal_flux_coordinate_of_pedestal](name:normalized_poloidal_flux_coordinate_of_pedestal)`.
-- **Generalize** to any locus whose position is a standard name: separatrix →
-  its flux/geometry coordinate, magnetic axis → its $(R, Z)$ coordinate,
-  X-point → its $(R, Z)$ coordinate.
-
-A **zone → defining-quantity map** is supplied in the docs context; use it to
-find the correct target id. Emit the link ONLY when the position-defining
-standard name actually EXISTS in the provided name lists — if none is
-available, describe the locus in plain prose with NO square brackets (obey the
-no-bare-bracket rule in PR-3; never emit a `[label]` without a real
+The per-name **locus context** carries the defining quantity for each locus
+when one exists (a data-driven field on the injected locus record) — use the id
+it provides as the link target. Do NOT hardcode or guess a
+locus→defining-quantity mapping. Emit the link ONLY when the locus context (or
+the provided name lists) supplies a defining quantity that actually EXISTS;
+otherwise describe the locus in plain prose with NO square brackets (obey the
+no-bare-bracket rule in PR-3 — never emit a `[label]` without a real
 `(name:bare_id)` target).

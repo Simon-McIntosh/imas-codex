@@ -176,28 +176,18 @@ The `process` segment is for mechanisms that MODIFY a quantity — they appear v
 **Test:** Can you say "X due_to Y"? If Y is a mechanism causing X, then Y is a process.
 If Y is itself measurable, it's a physical_base.
 
-### Pedestal & Limiter Loci — canonical positions
+### Loci come from the injected registry — a locus is not a zone
 
-**Pedestal is a LOCUS (`_at_`), never a zone prefix or a bare `pedestal` token.**
-It resolves to one of two registered positions by what the quantity measures:
-
-- **Value-at-the-pedestal** (the pedestal *value* of a profile field — temperature,
-  density, pressure) → `pedestal_top`. ✓ `electron_density_at_pedestal_top`.
-- **Maximum-gradient quantities and flux/position quantities** that locate the
-  pedestal → the mid-pedestal locus `pedestal_maximum`. ✓
-  `maximum_electron_pressure_gradient_at_pedestal_maximum`,
-  `normalized_poloidal_flux_coordinate_of_pedestal`.
-- ✗ `electron_density_at_pedestal` (bare locus), ✗ `pedestal_electron_temperature`
-  (zone prefix) — both collapse the two distinct loci onto one ambiguous name.
-
-**Limiter resolves to three distinct positions — do not conflate:**
-
-- **`limiter`** — the SOL-adjacent limiter point (a value read there). ✓
-  `electron_temperature_at_limiter`.
-- **`along_limiter`** — a distribution / peak over the limiter surface. ✓
-  `peak_power_density_along_limiter`.
-- **`active_limiter_point`** — the separatrix–limiter tangency contact. ✓
-  `radial_coordinate_of_active_limiter_point`.
+The registered locus tokens, the relations each allows (`_at_`/`_of_`/`_over_`/
+along), and any finer VARIANTS of one feature are defined by the injected
+grammar vocabulary — do not invent locus tokens or enumerate them from memory.
+When the registry offers more than one locus for the same feature — a locus for
+a field's *value* there vs one for its steepest-gradient point or the
+coordinate/flux that *locates* it, or a sampled point vs a distribution/peak
+over a surface vs a distinct contact/tangency point — pick the variant matching
+what the source measures, using the relation that variant allows. Never fold a
+locus into a zone prefix or force a bare feature token where the registry
+defines a more specific locus.
 
 ✅ `energy_due_to_recombination` — recombination is a mechanism → process
 ✅ `current_due_to_ohmic` — ohmic heating is a mechanism → process  
