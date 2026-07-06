@@ -37,6 +37,30 @@ _DOCS_STAGE_ACCEPTED = "accepted"
 
 _TOKEN_RE = re.compile(r"[a-zA-Z]+|\d+")
 
+#: Canonical opening templates for known families. A member whose description
+#: opens with one of these already carries the phrasing the family should
+#: converge on, so it is preferred as the harmonization anchor over an
+#: arbitrarily long or high-scored (but non-canonical) sibling. Extend this
+#: tuple as further families gain fixed canonical openings.
+_CANONICAL_OPENING_PATTERNS: tuple[re.Pattern[str], ...] = (
+    # Number-density family: electrons, and charge-state-summed species ions.
+    re.compile(r"^electron number density\b", re.IGNORECASE),
+    re.compile(
+        r"^[a-z][\w\- ]*? ion number density, summed over all charge states\b",
+        re.IGNORECASE,
+    ),
+)
+
+
+def _matches_canonical_opening(description: str | None) -> bool:
+    """True when *description* opens with a recognized canonical family template.
+
+    Used by :func:`select_anchor` to prefer a member already written to the
+    canonical opening over a merely long or high-scored sibling.
+    """
+    text = (description or "").strip()
+    return any(p.match(text) for p in _CANONICAL_OPENING_PATTERNS)
+
 
 def doc_sig(desc: str, n: int = 6) -> str:
     """Deterministic signature over the first *n* word-tokens of *desc*.
@@ -103,9 +127,16 @@ def select_anchor(
     Priority order:
       1. The parent itself, if ``docs_stage == 'accepted'`` and its
          description is real (non-placeholder).
-      2. The member with the highest ``reviewer_score_docs`` among members
-         with ``docs_stage == 'accepted'``.
-      3. The member with the longest non-placeholder description.
+      2. The member whose description opens with a canonical family template
+         (see :data:`_CANONICAL_OPENING_PATTERNS`) — accepted members first,
+         then any non-placeholder member. This keeps harmonization anchored on
+         the canonical opening rather than propagating a non-canonical one.
+      3. The member with the highest ``reviewer_score_docs`` among members
+         with ``docs_stage == 'accepted'`` (accepted-but-unscored breaks ties
+         deterministically by id).
+      4. Last resort (no accepted, no canonical match): a non-placeholder
+         member chosen deterministically by id — NEVER by longest description,
+         which propagates a verbose, non-canonical opening into the family.
 
     Returns ``None`` when no candidate qualifies (family is flagged
     ``deferred`` by the caller).
@@ -123,6 +154,25 @@ def select_anchor(
         if m.get("docs_stage") == _DOCS_STAGE_ACCEPTED
         and not _is_placeholder(m.get("description"))
     ]
+    non_placeholder = [m for m in members if not _is_placeholder(m.get("description"))]
+
+    # Prefer a member already written to a canonical family opening. Search
+    # accepted members first (they cleared review), then any non-placeholder
+    # member; break ties by score then id (deterministic).
+    for pool in (accepted, non_placeholder):
+        canonical = [
+            m for m in pool if _matches_canonical_opening(m.get("description"))
+        ]
+        if canonical:
+            best = max(
+                canonical,
+                key=lambda m: (
+                    m.get("reviewer_score_docs") or 0.0,
+                    m.get("id") or "",
+                ),
+            )
+            return best.get("id")
+
     scored = [m for m in accepted if m.get("reviewer_score_docs") is not None]
     if scored:
         best = max(
@@ -131,20 +181,13 @@ def select_anchor(
         )
         return best.get("id")
     if accepted:
-        # Accepted but unscored — still a valid anchor; prefer longest desc.
-        best = max(
-            accepted,
-            key=lambda m: (len(m.get("description") or ""), m.get("id") or ""),
-        )
-        return best.get("id")
+        # Accepted but unscored — deterministic by id (NOT longest description).
+        return min(accepted, key=lambda m: m.get("id") or "").get("id")
 
-    non_placeholder = [m for m in members if not _is_placeholder(m.get("description"))]
     if non_placeholder:
-        best = max(
-            non_placeholder,
-            key=lambda m: (len(m.get("description") or ""), m.get("id") or ""),
-        )
-        return best.get("id")
+        # Last resort — deterministic by id (NOT longest description); picking
+        # by length propagates a verbose, non-canonical opening to the family.
+        return min(non_placeholder, key=lambda m: m.get("id") or "").get("id")
 
     return None
 
