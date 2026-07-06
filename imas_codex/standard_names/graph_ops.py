@@ -10134,23 +10134,39 @@ def claim_generate_docs_batch(
     """
     from imas_codex.standard_names.chain_history import name_chain_history
 
+    # Docs-eligibility gate: the name's FORM must be vetted before we spend
+    # docs effort. Two ways to be vetted:
+    #   - a regular name earns a ``reviewer_score_name`` by passing
+    #     REVIEW_NAME (RD-quorum), OR
+    #   - a derived parent's name is a deterministic grammar peel vetted by
+    #     the admission gate (``is_admissible_parent_name``) — it is never
+    #     name-reviewed/refined and carries NO name score by design (scoring
+    #     a name we never change is meaningless). It is docs-eligible by
+    #     being a structurally-accepted derived parent.
+    #
+    # CURATIVE-SCOPE EXCEPTION: when a ``scope_run_id`` is supplied the run is a
+    # curative family-docs wave (``sn run --families`` / ``--scope-run-id``) that
+    # has EXPLICITLY reset the docs of a bounded set of ALREADY-ACCEPTED names.
+    # Those names are accepted (their form is authoritative — many are derived
+    # leaves auto-accepted without a name score), so the operator has authorised
+    # re-docs'ing them. Drop the name-score gate inside the scope so derived
+    # leaf families (e.g. <species>_density_at_limiter) can be curatively
+    # regenerated; the ``scope_run_id`` filter keeps the global backlog untouched.
+    score_gate = (
+        ""
+        if scope_run_id
+        else (
+            " AND (sn.reviewer_score_name IS NOT NULL"
+            " OR (coalesce(sn.origin, '') = 'derived'"
+            "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+            "       WHERE NOT coalesce(kid.name_stage, '') IN"
+            "       ['superseded', 'exhausted'] }))"
+        )
+    )
     where = (
         "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        # Docs-eligibility gate: the name's FORM must be vetted before we spend
-        # docs effort. Two ways to be vetted:
-        #   - a regular name earns a ``reviewer_score_name`` by passing
-        #     REVIEW_NAME (RD-quorum), OR
-        #   - a derived parent's name is a deterministic grammar peel vetted by
-        #     the admission gate (``is_admissible_parent_name``) — it is never
-        #     name-reviewed/refined and carries NO name score by design (scoring
-        #     a name we never change is meaningless). It is docs-eligible by
-        #     being a structurally-accepted derived parent.
-        " AND (sn.reviewer_score_name IS NOT NULL"
-        " OR (coalesce(sn.origin, '') = 'derived'"
-        "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-        "       WHERE NOT coalesce(kid.name_stage, '') IN"
-        "       ['superseded', 'exhausted'] }))"
+        + score_gate
     )
 
     items = _claim_sn_atomic(
