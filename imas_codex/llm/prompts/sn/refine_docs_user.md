@@ -150,6 +150,36 @@ Rules:
 - Sign conventions (if COCOS-dependent): use exactly
   `Sign convention: Positive when <condition>.` as a standalone paragraph
   (blank line before/after, plain text — no headings, no bold).
+- **No inline units (HARD).** The entry's unit is structured metadata rendered
+  in the unit panel — do NOT restate it in prose, whether as `(in eV)`,
+  `<value> <unit>`, or a standalone ASCII/LaTeX unit expression (e.g.
+  `$\mathrm{kg\,m^{-1}\,s^{-2}}$`). Units MAY appear inline ONLY in the three
+  narrow contexts: numeric typical-value ranges, equation variable definitions,
+  and unit-conversion statements.
+- **Number-density canonical opening (HARD).** For number densities (particle
+  number per volume — electron/ion/neutral, unit `m^-3`; NOT mass/current/power
+  density), open BOTH `description` and `documentation` with the fixed family
+  template: electrons → "Electron number density …"; a bare species ion →
+  "<Species> ion number density, summed over all charge states, <at/in locus>";
+  an explicitly charge-state-resolved variant → state the specific state. The
+  short `description` is NOT exempt from this family-anchor rule.
+- **Charge-state aggregation (HARD).** A species-level quantity aggregated over
+  charge states MUST state the convention: extensive quantities (density) are
+  charge-state-SUMMED ("summed over all charge states"); intensive quantities
+  (velocity, temperature) are the density-weighted MEAN over charge states
+  ("density-weighted mean over all charge states") — an intensive quantity is
+  never "summed". Cross-link the charge-state-resolved counterpart when one
+  exists.
+- **Deuterium–tritium wording.** `deuterium_tritium_*` reads two ways — pick the
+  right one: the effective single fuel species (50:50 D–T mix, mean atomic mass
+  2.5 amu) for density/velocity/temperature/pressure quantities, or the D–T
+  fusion REACTION channel (D + T → $^4$He + n) for reaction-product quantities.
+  Keep the underscore spelling in the name; prose may hyphenate.
+- **Locus-defining cross-link.** When the quantity is evaluated at a locus whose
+  position is itself a defined standard name (pedestal → its flux coordinate,
+  separatrix / magnetic axis / X-point → their coordinates), cross-link that
+  position-defining quantity inline with `[label](name:bare_id)` — but only when
+  it exists in the provided name lists.
 - The `name` field must equal `{{ sn_name }}` exactly — do not alter it.
 
 Return a JSON object matching the output schema with fields:

@@ -108,6 +108,80 @@ its siblings:
   on notation for the same shared concept, and sign-convention paragraphs
   must be present for exactly the members whose quantity is sign-dependent.
 
+## Canonical Description Templates (family anchors — HARD)
+
+Some quantity families drift into many gratuitously different openings for the
+same physics — the `*_density*` family alone has been observed opening with
+"Charge-state-summed…", "Total…", "Unweighted…", "Number density of…", and
+several more for what is one quantity kind. To stop that drift, the families
+below have a FIXED canonical opening that BOTH the `description` and the
+`documentation` MUST instantiate. **The short `description` field is explicitly
+subject to this family-anchor rule** — it is NOT exempt because it is short.
+
+### Number-density quantities (particle number per unit volume)
+
+Applies to **number densities** — particle number per unit volume (electron,
+ion, and neutral number densities; DD unit `m^-3`). It does NOT apply to
+`mass_density`, `current_density`, `power_density`, `energy_density`, or
+`radiation_density` (those are not particle counts).
+
+Open with exactly ONE of these templates:
+
+- **Electrons:** `Electron number density …` — e.g. "Electron number density in
+  the confined plasma."
+- **Species ions, charge-state-summed (the default reading for a bare species):**
+  `<Species> ion number density, summed over all charge states, <at/in locus>.`
+  — e.g. "Tungsten ion number density, summed over all charge states, at the
+  limiter." `<Species>` is the neutral element/isotope word (tungsten,
+  deuterium, argon), never a chemical symbol.
+- **A specific charge state (explicitly charge-state-resolved variants only):**
+  state the state instead of the summed clause — e.g. "Number density of
+  $\mathrm{W}^{44+}$ ions" / "Number density of the fully stripped carbon ion".
+
+Do NOT open a number-density entry with a leading "Total…", "Unweighted…", or
+"Charge-state-summed…" adjective, and do NOT use a bare "Number density of
+<species>…" for a species that is actually charge-state-summed — use the fixed
+clause above so every sibling reads as a matched set.
+
+### Charge-state aggregation convention (species-level quantities — HARD)
+
+Any species-level quantity that is **aggregated over charge states** MUST state
+the aggregation convention explicitly (do not leave it implicit), and MUST
+cross-link its charge-state-resolved counterpart when one exists:
+
+- **Extensive quantities (number density, and other per-volume amounts):**
+  charge-state-**SUMMED** — say "summed over all charge states".
+- **Intensive quantities (velocity, temperature, and other per-particle
+  intensive fields):** the density-weighted **MEAN over charge states** — say
+  "the density-weighted mean over all charge states". An intensive quantity is
+  NEVER "summed" over charge states — that is a physics error.
+
+This is the fix for the `toroidal_<species>_velocity_at_*` inconsistency, where
+some siblings said "summed over all ionization stages" (wrong for an intensive
+velocity) and most said nothing at all. Where a charge-state-resolved sibling
+exists, cross-link it inline with `[label](name:bare_id)` so the reader can
+reach the per-state quantity.
+
+### Deuterium–tritium species wording (`deuterium_tritium_*` — HARD)
+
+The token `deuterium_tritium` has TWO distinct physical readings; the
+description MUST pick the one the quantity actually denotes and state it
+unambiguously:
+
+- **(a) The effective single fuel species** — a 50:50 D–T fuel mix treated as
+  one species with mean atomic mass 2.5 amu. Use this reading for density-,
+  velocity-, temperature-, and pressure-type quantities of the fuel (e.g.
+  `deuterium_tritium_ion_number_density`): "…of the deuterium–tritium fuel
+  species (a 50:50 D–T mixture, mean atomic mass 2.5 amu)…".
+- **(b) The deuterium–tritium fusion REACTION channel** — the
+  D + T → $^4$He + n reaction. Use this reading for reaction-product /
+  reactivity quantities (fusion power, neutron or alpha production, reaction
+  rate): "…from the deuterium–tritium fusion reaction (D + T → $^4$He + n)…".
+
+Keep the underscore spelling in the NAME (`deuterium_tritium_*`); never
+introduce a hyphen into a standard name. Prose is free to use the hyphenated
+"deuterium–tritium" (or "deuterium-tritium").
+
 ## Grounding & Faithfulness (HARD — source-faithfulness outranks richness)
 
 The documentation must be grounded in (a) the provided DD path documentation/context for this name and (b) well-established, textbook plasma-physics consensus. Within those bounds, rich physics context and order-of-magnitude ranges that are **universally established** for the quantity are welcome.
@@ -281,6 +355,7 @@ via inline link.
 - ❌ BAD: `The electron temperature (in eV) is the kinetic temperature ...`
 - ❌ BAD: `The fast neutral perpendicular pressure (in Pa) quantifies ...`
 - ❌ BAD: `[electron_temperature](name:electron_temperature) (in eV) is the kinetic ...`
+- ❌ BAD (LaTeX unit string): `The parallel ion state momentum, with units $\mathrm{kg\,m^{-1}\,s^{-2}}$, is ...` — a rendered LaTeX (or ASCII) unit expression restating the entry's own unit is the SAME defect as `(in <unit>)`.
 - ✅ GOOD: `The electron temperature is the kinetic temperature ...`
 - ✅ GOOD: `The fast neutral perpendicular pressure quantifies ...`
 - ✅ GOOD: `[electron_temperature](name:electron_temperature) is the kinetic ...`
@@ -296,9 +371,16 @@ because they carry numeric meaning the unit field cannot:
 3. **Unit-conversion statements** — e.g. `$1\;\text{eV} = 11605\;\text{K}$`
    (DS-3 unit-conversion rule).
 
-Outside these three contexts, NEVER write `(in <unit>)` or `<value> <unit>`
-in prose. The unit panel renders the canonical unit at the top of each
-catalog page; repeating it is noise.
+Outside these three contexts, NEVER write `(in <unit>)`, `<value> <unit>`, or a
+standalone unit expression — **whether ASCII (`kg m^-1 s^-2`) or LaTeX
+(`$\mathrm{kg\,m^{-1}\,s^{-2}}$`)** — in prose. Restating the entry's own unit
+as a rendered LaTeX/ASCII string (a legacy leak such as
+`parallel_ion_state_momentum` spelling out `$\mathrm{kg\,m^{-1}\,s^{-2}}$`) is
+the same defect as `(in <unit>)`. The unit panel already renders the canonical
+unit at the top of each catalog page; repeating it anywhere in prose is noise.
+The three exceptions above are narrow — they attach a unit to a NUMBER or an
+equation variable — they do NOT license a free-standing restatement of the
+quantity's unit.
 
 ### PR-4 Calibration-parameter anti-speculation rule
 For SNs whose DD path indicates calibration data (e.g. `*/calibration/*`,
@@ -336,3 +418,26 @@ implementation. Never mention:
 - Specific simulation codes: ❌ "as computed by JINTRAC" — measurement or
   computation methods are fine in general terms (e.g. "from Thomson scattering"),
   but not code-specific
+
+### PR-9 Locus-defining cross-link rule
+When a quantity is evaluated at a location whose POSITION is itself a defined
+standard quantity, cross-link that position-defining quantity inline with
+`[label](name:bare_id)`. The locus word in the name (pedestal, separatrix,
+magnetic axis, X-point, …) names WHERE the quantity is read; the standard name
+that gives that locus its coordinate is a distinct quantity the reader should
+be able to reach.
+
+- **Canonical example — pedestal:** an entry `…_at_pedestal_top` (or
+  `…_at_pedestal_maximum`) should link the flux coordinate that fixes the
+  pedestal location, e.g.
+  `[normalized_poloidal_flux_coordinate_of_pedestal](name:normalized_poloidal_flux_coordinate_of_pedestal)`.
+- **Generalize** to any locus whose position is a standard name: separatrix →
+  its flux/geometry coordinate, magnetic axis → its $(R, Z)$ coordinate,
+  X-point → its $(R, Z)$ coordinate.
+
+A **zone → defining-quantity map** is supplied in the docs context; use it to
+find the correct target id. Emit the link ONLY when the position-defining
+standard name actually EXISTS in the provided name lists — if none is
+available, describe the locus in plain prose with NO square brackets (obey the
+no-bare-bracket rule in PR-3; never emit a `[label]` without a real
+`(name:bare_id)` target).
