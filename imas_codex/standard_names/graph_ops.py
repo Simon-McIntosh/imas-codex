@@ -8183,7 +8183,9 @@ def persist_reviewed_name(
               AND (sn.claim_token = $token OR sn.claim_token IS NULL)
             RETURN coalesce(sn.chain_length, 0) AS chain_length,
                    sn.edit_status AS edit_status,
-                   sn.edit_scope AS edit_scope
+                   sn.edit_scope AS edit_scope,
+                   sn.edit_override_edits AS edit_override_edits,
+                   sn.edit_include_accepted AS edit_include_accepted
             """,
             id=sn_id,
             token=claim_token,
@@ -8200,6 +8202,11 @@ def persist_reviewed_name(
     chain_length: int = int(rows[0]["chain_length"])
     edit_status_before: str | None = rows[0].get("edit_status")
     edit_scope_before: str | None = rows[0].get("edit_scope")
+    # Cascade-authorization opt-in recorded at edit time (coalesce to False —
+    # a rename edit that did not opt in must NOT silently clobber protected
+    # (catalog_edit) or accepted descendants when the root rename is accepted).
+    edit_override_before: bool = bool(rows[0].get("edit_override_edits"))
+    edit_include_before: bool = bool(rows[0].get("edit_include_accepted"))
 
     # ── Stage decision ────────────────────────────────────────────────
     # Score is canonical (rubric-driven 0–1).
@@ -8312,8 +8319,8 @@ def persist_reviewed_name(
                 old_root=old_root,
                 new_root=sn_id,
                 dry_run=False,
-                override_edits=True,
-                include_accepted=True,
+                override_edits=edit_override_before,
+                include_accepted=edit_include_before,
             )
             if cascade_result.conflicts:
                 # Never lose the acceptance over a cascade conflict — record
@@ -9087,6 +9094,8 @@ def persist_refined_name(
     edit_scope: str | None = None,
     edit_status: str | None = None,
     edit_requested_at: str | None = None,
+    edit_override_edits: bool | None = None,
+    edit_include_accepted: bool | None = None,
 ) -> dict[str, str]:
     """Persist a refined StandardName as a NEW node with source-edge migration.
 
@@ -9142,7 +9151,9 @@ def persist_refined_name(
                        old.edit_reason AS edit_reason,
                        old.edit_origin AS edit_origin,
                        old.edit_scope AS edit_scope,
-                       old.edit_requested_at AS edit_requested_at
+                       old.edit_requested_at AS edit_requested_at,
+                       old.edit_override_edits AS edit_override_edits,
+                       old.edit_include_accepted AS edit_include_accepted
                 """,
                 old_name=old_name,
             )
@@ -9156,6 +9167,11 @@ def persist_refined_name(
             edit_scope = _old.get("edit_scope")
             edit_status = _old.get("edit_status")
             edit_requested_at = _old.get("edit_requested_at")
+            # Carry the cascade-authorization opt-in forward so a rename edit
+            # that rotates through refine still respects the operator's
+            # override_edits / include_accepted choice when finally accepted.
+            edit_override_edits = _old.get("edit_override_edits")
+            edit_include_accepted = _old.get("edit_include_accepted")
 
     escalation_set = ""
     if escalated:
@@ -9195,7 +9211,9 @@ def persist_refined_name(
                           new.edit_origin       = $edit_origin,
                           new.edit_scope        = $edit_scope,
                           new.edit_status       = $edit_status,
-                          new.edit_requested_at = $edit_requested_at
+                          new.edit_requested_at = $edit_requested_at,
+                          new.edit_override_edits = $edit_override_edits,
+                          new.edit_include_accepted = $edit_include_accepted
                           {escalation_set}
 
                         // 2. Link to predecessor
@@ -9295,6 +9313,8 @@ def persist_refined_name(
                         edit_scope=edit_scope,
                         edit_status=edit_status,
                         edit_requested_at=edit_requested_at,
+                        edit_override_edits=edit_override_edits,
+                        edit_include_accepted=edit_include_accepted,
                     )
                 )
                 tx.commit()

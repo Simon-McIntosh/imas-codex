@@ -85,6 +85,8 @@ class TestFamilyMapping:
                 rename="electron_density",
                 reason="rename the underlying quantity",
                 scope="family",
+                # siblings are accepted — the family cascade needs the opt-in
+                include_accepted=True,
                 gc=fake,
             )
         assert plan.blocked is None
@@ -127,6 +129,7 @@ class TestFamilyMapping:
                 rename="electron_density",
                 reason="rename the underlying quantity",
                 scope="family",
+                include_accepted=True,
                 dry_run=True,
                 gc=fake,
             )
@@ -150,6 +153,7 @@ class TestSubtreeCascadePlanning:
                 target="temperature",
                 rename="density",
                 reason="rename the underlying quantity",
+                include_accepted=True,  # accepted descendants — opt in
                 gc=fake,
             )
         assert plan.blocked is None
@@ -197,6 +201,8 @@ class TestAcceptanceCascadeApplication:
             edit_status="open",
             edit_scope="subtree",
             edit_mode="rename",
+            # the attach-time opt-in that authorised the accepted descendants
+            edit_include_accepted=True,
             claim_token="tok",
         )
         fake.refined_from["density"] = "temperature"

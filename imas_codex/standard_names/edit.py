@@ -267,6 +267,8 @@ def apply_edit(
     axis: str | None = None,
     scope: str | None = None,
     origin: str = "human",
+    override_edits: bool = False,
+    include_accepted: bool = False,
     dry_run: bool = False,
     gc: GraphClient | None = None,
 ) -> EditPlan:
@@ -279,6 +281,15 @@ def apply_edit(
     axis/scope/origin); returns an :class:`EditPlan` with ``blocked`` set
     for runtime graph-state refusals (unknown target, ineligible stage,
     shared-base desync, cascade conflicts).
+
+    ``override_edits`` / ``include_accepted`` (rename mode, family/subtree
+    scope only) are the operator's opt-in to let the descendant cascade
+    rename descendants that are catalog-edited (``origin='catalog_edit'``)
+    or committed (``name_stage='accepted'``) respectively. Both default to
+    ``False`` — without them, such descendants surface as cascade conflicts
+    in the dry-run plan and block the edit rather than being silently
+    clobbered. The recorded values are re-read at acceptance time so the
+    post-review cascade reproduces exactly the operator's choice.
     """
     provided = [
         name for name, val in (("hint", hint), ("rename", rename), ("docs", docs)) if val
@@ -338,6 +349,8 @@ def apply_edit(
                 origin=origin,
                 scope=scope,
                 is_parent=is_parent,
+                override_edits=override_edits,
+                include_accepted=include_accepted,
                 dry_run=dry_run,
             )
         if mode == "docs":
@@ -382,6 +395,8 @@ def _apply_rename(
     origin: str,
     scope: str,
     is_parent: bool,
+    override_edits: bool,
+    include_accepted: bool,
     dry_run: bool,
 ) -> EditPlan:
     if not new_name:
@@ -542,8 +557,8 @@ def _apply_rename(
             old_name=refine_root_old,
             new_name=refine_root_new,
             dry_run=True,
-            override_edits=True,
-            include_accepted=True,
+            override_edits=override_edits,
+            include_accepted=include_accepted,
         )
         if plan_result.conflicts:
             return _blocked(
@@ -604,6 +619,8 @@ def _apply_rename(
         edit_scope=scope,
         edit_status=EditStatus.open.value,
         edit_requested_at=_now_iso(),
+        edit_override_edits=override_edits,
+        edit_include_accepted=include_accepted,
     )
     successor = result["new_name"]
 

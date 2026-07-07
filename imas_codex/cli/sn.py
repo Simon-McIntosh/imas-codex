@@ -4406,6 +4406,28 @@ def _render_edit_plan(plan: Any) -> None:
     ),
 )
 @click.option(
+    "--override-edits",
+    "override_edits",
+    is_flag=True,
+    default=False,
+    help=(
+        "Rename mode, family/subtree scope only: allow the descendant "
+        "cascade to rename descendants with origin='catalog_edit'. Without "
+        "this flag such descendants surface as conflicts and block the edit."
+    ),
+)
+@click.option(
+    "--include-accepted",
+    "include_accepted",
+    is_flag=True,
+    default=False,
+    help=(
+        "Rename mode, family/subtree scope only: allow the descendant "
+        "cascade to rename descendants whose name_stage is 'accepted' "
+        "(committed catalog entries). Without this flag they block the edit."
+    ),
+)
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Preview the plan (and cascade, if any) without writing to the graph.",
@@ -4418,6 +4440,8 @@ def sn_edit(
     reason: str | None,
     axis: str | None,
     scope_value: str | None,
+    override_edits: bool,
+    include_accepted: bool,
     dry_run: bool,
 ) -> None:
     """Attach a steered edit proposal to STANDARD_NAME.
@@ -4476,6 +4500,8 @@ def sn_edit(
             axis=axis,
             scope=scope,
             origin="human",
+            override_edits=override_edits,
+            include_accepted=include_accepted,
             dry_run=dry_run,
         )
     except ValueError as e:

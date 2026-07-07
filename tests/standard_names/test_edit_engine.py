@@ -50,6 +50,8 @@ _DEFAULT_NODE_FIELDS: dict[str, Any] = {
     "edit_scope": None,
     "edit_status": None,
     "edit_requested_at": None,
+    "edit_override_edits": None,
+    "edit_include_accepted": None,
     "claim_token": None,
     "claimed_at": None,
     "validation_issues": None,
@@ -362,6 +364,8 @@ class FakeGraph:
                     "edit_origin": node.get("edit_origin"),
                     "edit_scope": node.get("edit_scope"),
                     "edit_requested_at": node.get("edit_requested_at"),
+                    "edit_override_edits": node.get("edit_override_edits"),
+                    "edit_include_accepted": node.get("edit_include_accepted"),
                 }
             ]
 
@@ -381,6 +385,8 @@ class FakeGraph:
                     "chain_length": node.get("chain_length", 0) or 0,
                     "edit_status": node.get("edit_status"),
                     "edit_scope": node.get("edit_scope"),
+                    "edit_override_edits": node.get("edit_override_edits"),
+                    "edit_include_accepted": node.get("edit_include_accepted"),
                 }
             ]
 
@@ -524,6 +530,8 @@ class FakeGraph:
                 edit_scope=params.get("edit_scope"),
                 edit_status=params.get("edit_status"),
                 edit_requested_at=params.get("edit_requested_at"),
+                edit_override_edits=params.get("edit_override_edits"),
+                edit_include_accepted=params.get("edit_include_accepted"),
             )
             self.nodes[new_name] = new_row
             self.refined_from[new_name] = old_name
@@ -1159,3 +1167,187 @@ class TestHintMode:
             )
         assert plan.blocked is not None
         assert "successor" in plan.blocked
+
+
+# =============================================================================
+# Rename cascade protections (override_edits / include_accepted opt-in)
+# =============================================================================
+
+
+class TestRenameCascadeProtections:
+    """A subtree ``--rename`` must not silently clobber catalog-edited or
+    accepted descendants. Without the opt-in flags they surface as cascade
+    conflicts that BLOCK the edit; the flags allow the cascade; and the
+    recorded flag values drive the acceptance-time cascade."""
+
+    def _parent_with_child(self, **child_fields: Any) -> FakeGraph:
+        # temperature (accepted parent) → ion_temperature (qualifier 'ion').
+        # Renaming the parent to a locus form cascades the child. All names
+        # round-trip through ISN grammar.
+        fake = FakeGraph()
+        fake.add_node("temperature", name_stage="accepted")
+        fake.add_node("ion_temperature", **child_fields)
+        fake.add_edge("ion_temperature", "temperature", "ion", "qualifier")
+        return fake
+
+    def test_catalog_edit_descendant_blocks_by_default(self) -> None:
+        fake = self._parent_with_child(name_stage="drafted", origin="catalog_edit")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="temperature",
+                rename="temperature_of_plasma_boundary",
+                reason="clarify the locus",
+                dry_run=True,
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "catalog_edit" in plan.blocked
+        assert plan.applied is False
+
+    def test_override_edits_allows_catalog_edit_descendant(self) -> None:
+        fake = self._parent_with_child(name_stage="drafted", origin="catalog_edit")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="temperature",
+                rename="temperature_of_plasma_boundary",
+                reason="clarify the locus",
+                override_edits=True,
+                dry_run=True,
+                gc=fake,
+            )
+        assert plan.blocked is None
+        assert any(
+            r["to"] == "ion_temperature_of_plasma_boundary"
+            for r in plan.cascade_planned
+        )
+
+    def test_accepted_descendant_blocks_by_default(self) -> None:
+        fake = self._parent_with_child(name_stage="accepted")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="temperature",
+                rename="temperature_of_plasma_boundary",
+                reason="clarify the locus",
+                dry_run=True,
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "name_stage='accepted'" in plan.blocked
+        assert plan.applied is False
+
+    def test_include_accepted_allows_accepted_descendant(self) -> None:
+        fake = self._parent_with_child(name_stage="accepted")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="temperature",
+                rename="temperature_of_plasma_boundary",
+                reason="clarify the locus",
+                include_accepted=True,
+                dry_run=True,
+                gc=fake,
+            )
+        assert plan.blocked is None
+        assert any(
+            r["to"] == "ion_temperature_of_plasma_boundary"
+            for r in plan.cascade_planned
+        )
+
+    def test_default_flags_recorded_false_on_successor(self) -> None:
+        fake = FakeGraph()
+        fake.add_node("plasma_current", name_stage="accepted")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="clarify component",
+                gc=fake,
+            )
+        succ = fake.nodes[plan.successor]
+        assert succ["edit_override_edits"] is False
+        assert succ["edit_include_accepted"] is False
+
+    def test_opt_in_flags_recorded_on_successor(self) -> None:
+        fake = self._parent_with_child(name_stage="accepted", origin="catalog_edit")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="temperature",
+                rename="temperature_of_plasma_boundary",
+                reason="clarify the locus",
+                override_edits=True,
+                include_accepted=True,
+                gc=fake,
+            )
+        assert plan.applied is True
+        succ = fake.nodes[plan.successor]
+        assert succ["edit_override_edits"] is True
+        assert succ["edit_include_accepted"] is True
+
+    def test_acceptance_cascade_honours_recorded_include_accepted(self) -> None:
+        """Accepting the root rename cascades the accepted descendant only
+        because include_accepted was recorded True at edit time."""
+        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+        fake = FakeGraph()
+        fake.add_node(
+            "temperature_of_plasma_boundary",
+            name_stage="drafted",
+            edit_status="open",
+            edit_scope="subtree",
+            edit_include_accepted=True,
+            edit_override_edits=False,
+            claim_token="tok",
+        )
+        fake.add_node("temperature", name_stage="superseded")
+        fake.refined_from["temperature_of_plasma_boundary"] = "temperature"
+        fake.add_node("ion_temperature", name_stage="accepted")
+        fake.add_edge(
+            "ion_temperature", "temperature_of_plasma_boundary", "ion", "qualifier"
+        )
+        with _patched_graph(fake):
+            stage = persist_reviewed_name(
+                sn_id="temperature_of_plasma_boundary",
+                claim_token="tok",
+                score=0.95,
+                model="reviewer/x",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+        assert stage == "accepted"
+        assert "ion_temperature_of_plasma_boundary" in fake.nodes
+        assert "ion_temperature" not in fake.nodes
+
+    def test_acceptance_cascade_respects_recorded_false(self) -> None:
+        """When include_accepted was NOT recorded, an accepted descendant is
+        left unrenamed and the conflict is recorded — acceptance is kept."""
+        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+        fake = FakeGraph()
+        fake.add_node(
+            "temperature_of_plasma_boundary",
+            name_stage="drafted",
+            edit_status="open",
+            edit_scope="subtree",
+            edit_include_accepted=False,
+            edit_override_edits=False,
+            claim_token="tok",
+        )
+        fake.add_node("ion_temperature", name_stage="accepted")
+        fake.add_edge(
+            "ion_temperature", "temperature_of_plasma_boundary", "ion", "qualifier"
+        )
+        with _patched_graph(fake):
+            stage = persist_reviewed_name(
+                sn_id="temperature_of_plasma_boundary",
+                claim_token="tok",
+                score=0.95,
+                model="reviewer/x",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+        assert stage == "accepted"
+        # Accepted descendant NOT renamed (no opt-in recorded) …
+        assert "ion_temperature" in fake.nodes
+        assert "ion_temperature_of_plasma_boundary" not in fake.nodes
+        # … and the conflict is surfaced for operator follow-up.
+        issues = fake.nodes["temperature_of_plasma_boundary"].get("validation_issues")
+        assert issues and any("edit_cascade" in v for v in issues)
