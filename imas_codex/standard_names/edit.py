@@ -796,6 +796,28 @@ def _apply_hint(
             "successor instead",
         )
 
+    # A name-axis hint steers regeneration, which is driven by the target's
+    # producing StandardNameSource(s). A derived/structural name has none —
+    # resetting zero sources is a silent no-op that leaves edit_status stuck
+    # 'open' forever. Block with an actionable alternative instead.
+    if axis in ("name", "both"):
+        src_count = gc.query(
+            """
+            // EDIT_COUNT_PRODUCING_SOURCES
+            MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName {id: $id})
+            RETURN count(src) AS n
+            """,
+            id=target,
+        )
+        if not (src_count and src_count[0].get("n")):
+            return _blocked(
+                target, "hint", axis, scope,
+                f"{target!r} has no producing StandardNameSource (it is a "
+                "derived/structural name) — a name-axis hint cannot regenerate "
+                "it. Use `--rename` to propose a replacement name, or "
+                "`--axis docs` to steer only its documentation.",
+            )
+
     actions = [f"hint attached to {target!r} (axis={axis})"]
     if dry_run:
         actions.append("[dry-run] no writes performed")

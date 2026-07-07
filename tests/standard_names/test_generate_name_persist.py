@@ -560,6 +560,38 @@ class TestSupersedePriorSourceNames:
         # The new name itself is never superseded (byte-identical regen no-op).
         assert "old.id <> pr.new_name" in cypher
 
+    def test_open_edit_propagated_to_successor_and_predecessor_reconciled(self):
+        """A name-hint regen that supersedes the edited predecessor must ride
+        the still-open edit forward onto the recomposed successor and reconcile
+        the predecessor to 'applied' — otherwise the edit is stuck 'open' on a
+        superseded node forever."""
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        gc = _mock_gc_query()
+        gc.query = MagicMock(
+            return_value=[{"old_name": "old_name", "new_name": "new_name"}]
+        )
+
+        with _patch_gc(gc):
+            supersede_prior_source_names(
+                [{"new_name": "new_name", "source_id": "dd:eq/q_95"}]
+            )
+
+        cypher = gc.query.call_args.args[0]
+        # The propagation is gated on the predecessor's edit still being open.
+        assert "(coalesce(old.edit_status, '') = 'open') AS carry_edit" in cypher
+        # Predecessor reconciled to 'applied' (no longer stuck 'open').
+        assert "old.edit_status = CASE WHEN carry_edit THEN 'applied'" in cypher
+        # Successor inherits the open-edit steering fields …
+        assert "new.name_hint = CASE WHEN carry_edit" in cypher
+        assert "new.edit_reason = CASE WHEN carry_edit" in cypher
+        assert "new.edit_scope = CASE WHEN carry_edit" in cypher
+        # … including the cascade-authorization opt-in flags (item-1 flags) …
+        assert "new.edit_override_edits = CASE WHEN carry_edit" in cypher
+        assert "new.edit_include_accepted = CASE WHEN carry_edit" in cypher
+        # … and the open status itself so it resolves at review time.
+        assert "new.edit_status = CASE WHEN carry_edit" in cypher
+
     def test_byte_identical_regen_is_noop(self):
         """When the regenerated name equals the existing name (same node id),
         the WHERE ``old.id <> pr.new_name`` clause excludes it — nothing is

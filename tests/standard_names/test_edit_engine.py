@@ -266,6 +266,11 @@ class FakeGraph:
                 node["claimed_at"] = "now"
             return []
 
+        if "// EDIT_COUNT_PRODUCING_SOURCES" in cypher:
+            sn_id = params["id"]
+            n = sum(1 for tgt in self.produced_name.values() if tgt == sn_id)
+            return [{"n": n}]
+
         if "// EDIT_RESET_SOURCES" in cypher:
             sn_id = params["id"]
             hit_ids = []
@@ -656,6 +661,7 @@ class TestValidation:
     def test_hint_axis_default_is_name(self) -> None:
         fake = FakeGraph()
         fake.add_node("electron_temperature", name_stage="accepted")
+        fake.add_source("dd:x", sn_id="electron_temperature")
         with _patched_graph(fake):
             plan = apply_edit(
                 target="electron_temperature", hint="steer", reason="why",
@@ -1147,6 +1153,7 @@ class TestHintMode:
     def test_hint_dry_run_zero_writes(self) -> None:
         fake = FakeGraph()
         fake.add_node("electron_temperature", name_stage="accepted")
+        fake.add_source("dd:x", sn_id="electron_temperature")
         with _patched_graph(fake):
             plan = apply_edit(
                 target="electron_temperature", hint="steer", reason="why",
@@ -1155,6 +1162,41 @@ class TestHintMode:
         assert plan.applied is False
         assert plan.run_id is None
         assert fake.nodes["electron_temperature"]["edit_mode"] is None
+
+    def test_hint_name_axis_on_sourceless_target_blocks(self) -> None:
+        """A derived/structural name has no producing source — a name-axis
+        hint cannot regenerate it, so it must be a hard block (not a silent
+        applied=True that strands edit_status='open')."""
+        fake = FakeGraph()
+        fake.add_node("plasma_boundary", name_stage="accepted", origin="derived")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_boundary", hint="steer the base",
+                reason="reviewer flagged it", gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "no producing" in plan.blocked
+        assert plan.applied is False
+        assert plan.run_id is None
+        # Nothing stamped — no stuck-open edit.
+        assert fake.nodes["plasma_boundary"]["edit_status"] is None
+
+    def test_hint_docs_axis_on_sourceless_target_allowed(self) -> None:
+        """A docs-axis hint on a derived name is fine — it steers docs, not
+        the name, so the zero-sources block does not apply."""
+        fake = FakeGraph()
+        fake.add_node(
+            "plasma_boundary", name_stage="accepted", docs_stage="accepted",
+            origin="derived", documentation="old docs",
+        )
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_boundary", hint="mention the LCFS",
+                axis="docs", reason="clarify", gc=fake,
+            )
+        assert plan.blocked is None
+        assert plan.applied is True
+        assert fake.nodes["plasma_boundary"]["docs_hint"] == "mention the LCFS"
 
     def test_hint_superseded_with_successor_refused(self) -> None:
         fake = FakeGraph()

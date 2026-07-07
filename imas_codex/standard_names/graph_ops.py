@@ -9415,9 +9415,59 @@ def supersede_prior_source_names(
                 // along the REFINED_FROM chain (would form a cycle).
                 WHERE new.id <> old.id
                   AND NOT (old)-[:REFINED_FROM*1..]->(new)
+                // A still-open steered edit (name-hint regeneration) must ride
+                // the recomposed successor so its lifecycle can resolve at
+                // review time; capture the predecessor's edit fields BEFORE any
+                // mutation so `new` inherits the ORIGINAL 'open' status while
+                // `old` is reconciled to 'applied' (its steering produced this
+                // successor — it is no longer stuck 'open').
+                WITH old, new,
+                     (coalesce(old.edit_status, '') = 'open') AS carry_edit,
+                     old.edit_mode AS o_edit_mode,
+                     old.name_hint AS o_name_hint,
+                     old.docs_hint AS o_docs_hint,
+                     old.edit_reason AS o_edit_reason,
+                     old.edit_origin AS o_edit_origin,
+                     old.edit_scope AS o_edit_scope,
+                     old.edit_requested_at AS o_edit_requested_at,
+                     old.edit_override_edits AS o_override_edits,
+                     old.edit_include_accepted AS o_include_accepted,
+                     old.edit_status AS o_edit_status
                 SET old.name_stage = 'superseded',
                     old.claim_token = null,
-                    old.claimed_at = null
+                    old.claimed_at = null,
+                    old.edit_status = CASE WHEN carry_edit THEN 'applied'
+                                          ELSE old.edit_status END,
+                    new.edit_mode = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_mode, o_edit_mode)
+                        ELSE new.edit_mode END,
+                    new.name_hint = CASE WHEN carry_edit
+                        THEN coalesce(new.name_hint, o_name_hint)
+                        ELSE new.name_hint END,
+                    new.docs_hint = CASE WHEN carry_edit
+                        THEN coalesce(new.docs_hint, o_docs_hint)
+                        ELSE new.docs_hint END,
+                    new.edit_reason = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_reason, o_edit_reason)
+                        ELSE new.edit_reason END,
+                    new.edit_origin = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_origin, o_edit_origin)
+                        ELSE new.edit_origin END,
+                    new.edit_scope = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_scope, o_edit_scope)
+                        ELSE new.edit_scope END,
+                    new.edit_requested_at = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_requested_at, o_edit_requested_at)
+                        ELSE new.edit_requested_at END,
+                    new.edit_override_edits = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_override_edits, o_override_edits)
+                        ELSE new.edit_override_edits END,
+                    new.edit_include_accepted = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_include_accepted, o_include_accepted)
+                        ELSE new.edit_include_accepted END,
+                    new.edit_status = CASE WHEN carry_edit
+                        THEN coalesce(new.edit_status, o_edit_status)
+                        ELSE new.edit_status END
                 MERGE (new)-[:REFINED_FROM]->(old)
                 RETURN old.id AS old_name, new.id AS new_name
                 """,
