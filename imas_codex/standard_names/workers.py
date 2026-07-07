@@ -5888,13 +5888,30 @@ async def _run_rd_quorum_cycles(
 
         # Unwrap batch response: prompts ask for {"reviews": [...]}; we pass
         # one item at a time so reviews[0] is the per-item ReviewItem object.
-        reviews_list = getattr(result_obj, "reviews", None)
-        if reviews_list:
+        # A wrapper whose `reviews` is empty/None is a malformed/empty response
+        # — treat it as a FAILED cycle (return None) rather than falling through
+        # to `.scores` on the bare wrapper. That access raises AttributeError,
+        # gets swallowed to score=0.0/tier='poor', and would persist a spurious
+        # canonical review that drives a good name into refine/exhausted.
+        _missing = object()
+        reviews_list = getattr(result_obj, "reviews", _missing)
+        if reviews_list is not _missing:
+            if not reviews_list:
+                logger.warning(
+                    "rd_quorum %s cycle %d returned empty/no reviews for %s "
+                    "(model=%s) — failed cycle",
+                    review_axis,
+                    cycle_idx,
+                    sn_id,
+                    model,
+                )
+                return None
             try:
                 result_obj = reviews_list[0]
             except (IndexError, TypeError):
                 logger.warning(
-                    "rd_quorum %s cycle %d returned empty reviews list for %s (model=%s)",
+                    "rd_quorum %s cycle %d returned unusable reviews for %s "
+                    "(model=%s) — failed cycle",
                     review_axis,
                     cycle_idx,
                     sn_id,

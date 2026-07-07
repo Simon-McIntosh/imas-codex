@@ -348,6 +348,46 @@ async def test_names_batch_response_is_unwrapped() -> None:
 
 
 @pytest.mark.asyncio
+async def test_names_empty_reviews_batch_is_a_failed_cycle() -> None:
+    """LLM returning ``{"reviews": []}`` (empty batch) must be a FAILED cycle.
+
+    Regression: an empty ``reviews`` list is falsy, so the wrapper was left
+    in place and ``.scores`` raised AttributeError → swallowed to score=0.0
+    → a spurious 0.0/'poor' canonical review persisted, driving a good name
+    into refine/exhausted. The cycle must instead return None so the claim is
+    released and the name stays 'drafted' (retryable), with NO review written.
+    """
+    from imas_codex.standard_names.workers import process_review_name_batch
+
+    captured: dict[str, Any] = {}
+    mgr, _ = _mock_budget_manager()
+    empty_batch = SimpleNamespace(reviews=[])
+    llm = _llm_returns([empty_batch])
+
+    patches = _patch_common(
+        captured=captured,
+        llm_mock=llm,
+        models=["only-model"],
+        review_axis="names",
+    )
+    for p in patches:
+        p.start()
+    try:
+        await process_review_name_batch(
+            [_names_item()], mgr, asyncio.Event(), on_event=None
+        )
+    finally:
+        for p in patches:
+            p.stop()
+
+    assert llm.await_count == 1
+    # No review record and no stage transition — the empty response is a
+    # failed cycle, not a 0.0 canonical review.
+    assert "write_reviews_calls" not in captured
+    assert "persist" not in captured
+
+
+@pytest.mark.asyncio
 async def test_names_single_model_chain_uses_single_review() -> None:
     """1-model chain → 1 cycle, ``single_review`` resolution method."""
     from imas_codex.standard_names.workers import process_review_name_batch
