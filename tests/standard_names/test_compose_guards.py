@@ -130,7 +130,7 @@ class TestChannelGuidance:
         assert "*/channel/*" in self.raw
 
     def test_observable_examples(self) -> None:
-        assert "faraday_rotation_angle" in self.raw
+        assert "faraday_angle" in self.raw
         assert "line_integrated_electron_density" in self.raw
 
     def test_diagnostic_examples(self) -> None:
