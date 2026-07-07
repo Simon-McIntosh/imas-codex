@@ -4680,11 +4680,13 @@ def clear_standard_names(
     Number of nodes deleted (or that would be deleted in dry-run mode).
     """
     effective_stages = list(stage_filter) if stage_filter else []
-    if stage_filter is not None:
-        if include_accepted and "accepted" not in effective_stages:
-            effective_stages.append("accepted")
-        elif not include_accepted and "accepted" in effective_stages:
-            effective_stages.remove("accepted")
+    # include_accepted only AUTHORIZES an explicitly-listed 'accepted' stage;
+    # it must NEVER inject 'accepted' into a stage list the operator did not
+    # name. ``--stage drafted --include-accepted`` deletes drafted names only —
+    # not accepted catalog entries. Without the opt-in, an explicitly-listed
+    # 'accepted' is dropped as a protection.
+    if stage_filter is not None and not include_accepted:
+        effective_stages = [s for s in effective_stages if s != "accepted"]
 
     with GraphClient() as gc:
         params: dict[str, Any] = {}

@@ -455,8 +455,10 @@ class TestClearStandardNames:
                 "accepted should not appear without include_accepted"
             )
 
-    def test_include_accepted_adds_stage(self) -> None:
-        """include_accepted=True should add 'accepted' to effective_stages."""
+    def test_include_accepted_does_not_inject_stage(self) -> None:
+        """include_accepted must NOT inject 'accepted' into a stage list the
+        operator did not name — ``--stage drafted --include-accepted`` deletes
+        only drafted names, never accepted catalog entries."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 0}])
 
@@ -464,7 +466,38 @@ class TestClearStandardNames:
 
         all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
         statuses_lists = [kw.get("stages") for kw in all_kwargs if "stages" in kw]
+        assert statuses_lists, "expected a stages param to be passed"
+        for sl in statuses_lists:
+            assert "accepted" not in sl, (
+                "include_accepted must not inject 'accepted' when only "
+                "'drafted' was listed"
+            )
+
+    def test_include_accepted_authorizes_explicit_accepted(self) -> None:
+        """include_accepted DOES authorise an explicitly-listed 'accepted'."""
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(return_value=[{"n": 0}])
+
+        self._call_clear(
+            mock_gc, stage_filter=["drafted", "accepted"], include_accepted=True
+        )
+
+        all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
+        statuses_lists = [kw.get("stages") for kw in all_kwargs if "stages" in kw]
         assert any("accepted" in sl for sl in statuses_lists)
+
+    def test_explicit_accepted_dropped_without_flag(self) -> None:
+        """An explicitly-listed 'accepted' is dropped without the opt-in."""
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(return_value=[{"n": 0}])
+
+        self._call_clear(mock_gc, stage_filter=["drafted", "accepted"])
+
+        all_kwargs = [call[1] for call in mock_gc.query.call_args_list]
+        statuses_lists = [kw.get("stages") for kw in all_kwargs if "stages" in kw]
+        assert statuses_lists
+        for sl in statuses_lists:
+            assert "accepted" not in sl
 
     def test_returns_zero_for_empty_graph(self) -> None:
         """When no nodes match, returns 0 and makes no DELETE queries."""
