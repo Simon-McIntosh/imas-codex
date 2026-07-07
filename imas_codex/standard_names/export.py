@@ -179,7 +179,7 @@ def _fetch_candidates(
     OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
     RETURN sn {
         .*,
-        unit: u.id,
+        unit: coalesce(u.id, sn.unit),
         cocos: c.convention
     } AS record
     ORDER BY sn.id

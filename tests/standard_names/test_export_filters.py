@@ -179,6 +179,44 @@ class TestFetchCandidatesQueryContract:
         )
 
 
+    def test_unit_coalesces_edge_over_node_property(self):
+        """The unit projection must coalesce the HAS_UNIT edge with sn.unit.
+
+        Regression: the projection ``unit: u.id`` overwrote the node's own
+        ``sn.unit`` with null whenever the OPTIONAL MATCH found no Unit edge,
+        so nodes carrying a unit property but lacking the edge exported an
+        empty unit. The canonical read is ``coalesce(u.id, sn.unit)``.
+        """
+        cypher = self._run_and_capture()
+        assert "coalesce(u.id, sn.unit)" in cypher, (
+            "Unit projection must be coalesce(u.id, sn.unit) so a missing "
+            "HAS_UNIT edge falls back to the node's own unit property.\n\n"
+            f"Full query:\n{cypher}"
+        )
+
+
+class TestFetchCandidatesUnitFallback:
+    """Behaviour: a record without a HAS_UNIT edge keeps its node unit.
+
+    The mock stands in for Neo4j's ``coalesce(u.id, sn.unit)`` by returning a
+    record whose ``unit`` key already reflects the fallback (u.id was null, so
+    the node property survives). This exercises the record-unpacking path and
+    documents the contract the Cypher fix guarantees.
+    """
+
+    def test_node_unit_survives_missing_edge(self) -> None:
+        node = _make_node("sn_no_edge", unit="Wb")
+        mock_gc = _make_gc_returning([node])
+        with patch(_GC_PATH) as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+            result = _fetch_candidates()
+        assert len(result) == 1
+        assert result[0]["unit"] == "Wb", (
+            "A node carrying sn.unit but no HAS_UNIT edge must keep its unit."
+        )
+
+
 # ---------------------------------------------------------------------------
 # Class 2: Behaviour — only valid node returned from mixed set
 # ---------------------------------------------------------------------------
