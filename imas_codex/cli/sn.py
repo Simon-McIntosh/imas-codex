@@ -678,6 +678,7 @@ def _run_sn_cmd(
             docs_only=docs_only,
             flush=flush,
             skip_review=skip_review,
+            skip_generate=skip_generate,
         )
         return {"summary": summary}
 

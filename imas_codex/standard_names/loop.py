@@ -112,6 +112,7 @@ def _build_pool_specs(
     docs_only: bool = False,
     flush: bool = False,
     skip_review: bool = False,
+    skip_generate: bool = False,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -389,10 +390,12 @@ def _build_pool_specs(
         # name compose/review.
         specs = [s for s in specs if s.name in _DOCS_POOLS]
 
-    # ── Flush filtering ──────────────────────────────────────────────
+    # ── Flush / skip-generate filtering ──────────────────────────────
     # Flush mode drains existing work without generating new names.
-    # Excludes generate_name so only review/refine pools run.
-    if flush:
+    # ``--only`` phases that exclude the generate phase (skip_generate, e.g.
+    # ``--only link`` / ``--only review``) drop the same pool. Both exclude
+    # generate_name so only review/refine/docs pools run — no new composition.
+    if flush or skip_generate:
         specs = [s for s in specs if s.name != "generate_name"]
 
     # ── Skip-review filtering ────────────────────────────────────────
@@ -627,6 +630,7 @@ async def run_sn_pools(
     docs_only: bool = False,
     flush: bool = False,
     skip_review: bool = False,
+    skip_generate: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -840,17 +844,20 @@ async def run_sn_pools(
 
         # ── B3: Domain extract (auto-seed) ────────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
-        # Skip auto-seeding in flush mode — only drain existing work.
+        # Skip auto-seeding in flush / docs-only mode — only drain existing.
+        # Skip auto-seeding when the generate phase is excluded (skip_generate,
+        # e.g. ``--only link``) — seeding new sources would be composed by a
+        # generate pool that is not going to run.
         if scope_run_id:
             logger.info(
                 "run_sn_pools: focus mode (run_id=%s…) — skipping auto-seed",
                 scope_run_id[:8],
             )
             _domains = domains
-        elif flush or docs_only:
+        elif flush or docs_only or skip_generate:
             logger.info(
                 "run_sn_pools: %s mode — skipping auto-seed",
-                "flush" if flush else "docs-only",
+                "flush" if flush else ("docs-only" if docs_only else "skip-generate"),
             )
             _domains = domains
         else:
@@ -957,6 +964,7 @@ async def run_sn_pools(
             docs_only=docs_only,
             flush=flush,
             skip_review=skip_review,
+            skip_generate=skip_generate,
         )
 
         # ── Wire pool health into display state ───────────────────
