@@ -40,8 +40,8 @@ Every standard name decomposes into five groups:
 |-------|------|----------------|
 | **operators** | Math ops, applied outer→inner | prefix: `time_derivative`, `gradient`, `normalized`, `per_toroidal_mode`, `per_poloidal_mode`, `cumulative_inside_flux_surface`; postfix: `magnitude`, `real_part`, `fourier_coefficient` |
 | **projection** | Axis decomposition of vector/tensor | `radial_`, `toroidal_`, `parallel_` (short-form prefix; `_component_of_` is REJECTED) |
-| **qualifiers** | Species or population prefix | `electron`, `ion`, `deuterium`, `fast_ion`, `thermal_electron` |
-| **base** | Irreducible physical quantity (80 registered tokens) | `temperature`, `pressure`, `density`, `magnetic_field`, `safety_factor` |
+| **qualifiers** | Physical modifier of the base — mechanism, regime, or reaction channel (species live in `subject`, populations in `population`) | `inductive`, `radiative`, `steady_state`, `fluctuating`, `deuterium_tritium` |
+| **base** | Irreducible physical quantity (see the base registry below) | `temperature`, `pressure`, `density`, `magnetic_field`, `safety_factor` |
 | **locus + mechanism** | Where (postfix) + process (postfix) | `_of_plasma_boundary`, `_at_magnetic_axis`, `_over_core_region`, `_due_to_bootstrap` |
 
 ### Canonical Rendering
@@ -62,9 +62,9 @@ Names are assembled from segments in this fixed order:
 |---------|-----------|-------------|--------|
 | `operator` | optional | 0..N (nested) | operators registry |
 | `component` | optional | 0..1 | component/coordinate registry |
-| `qualifier` | optional | 0..N (ordered) | qualifier registry (108 tokens) |
+| `qualifier` | optional | 0..N (ordered) | qualifier registry |
 | `subject` | optional | 0..1 | subject registry |
-| `physical_base` | **REQUIRED** | exactly 1 | base registry (80 tokens) |
+| `physical_base` | **REQUIRED** | exactly 1 | base registry |
 | `geometric_base` | alternative to physical_base | exactly 1 | geometric_base registry |
 | `position` | optional | 0..1 via `_at_` | geometry/position registry |
 | `object` | optional | 0..1 via `_of_` | device/object registry |
