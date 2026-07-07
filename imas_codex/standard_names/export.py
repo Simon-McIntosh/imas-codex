@@ -285,8 +285,29 @@ def _run_gate_b(
                         "detail": str(exc),
                     }
                 )
-    except ImportError:
-        logger.warning("ISN grammar not available — skipping parse gate")
+    except ImportError as exc:
+        # ISN unavailable is not a "skip" condition: without the grammar the
+        # export cannot be validated at all (and _validate_entry would crash
+        # later on the same missing import). Fail the gate loudly so the
+        # export is blocked with a clear message rather than silently
+        # emitting an unvalidated catalog. This issue is intentionally NOT a
+        # grammar_parse_failure, so it blocks RC releases too (the RC path
+        # only downgrades per-name parse failures, not a missing toolchain).
+        issues.append(
+            {
+                "type": "isn_unavailable",
+                "detail": (
+                    "imas_standard_names.grammar could not be imported — the "
+                    "grammar parse gate cannot run, so the export cannot be "
+                    f"validated against ISN: {exc}"
+                ),
+            }
+        )
+        logger.error(
+            "ISN grammar not importable — failing Gate B; export cannot be "
+            "validated against ISN: %s",
+            exc,
+        )
 
     # B3: Links resolve to known names
     # For RC releases (final=False): dangling links are advisory only.
