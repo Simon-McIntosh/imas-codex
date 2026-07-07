@@ -108,7 +108,16 @@ class ExportReport:
     exported_count: int = 0
     excluded_below_score: int = 0
     excluded_unreviewed: int = 0
+    # Domain filtering happens in the _fetch_candidates Cypher query, so a
+    # candidate excluded by domain never reaches this report; this counter is
+    # therefore always 0 and retained only for output-shape stability.
     excluded_by_domain: int = 0
+    # Candidates dropped because their description is still the deterministic
+    # parent placeholder — tracked separately from excluded_below_score, which
+    # they are not (no GENERATE_DOCS run, not a low score).
+    excluded_placeholder: int = 0
+    # Names dropped in RC mode because they failed the ISN grammar parse gate.
+    parse_failures: int = 0
     gate_failures: int = 0
     all_gates_passed: bool = True
     exported_names: list[str] = field(default_factory=list)
@@ -124,6 +133,8 @@ class ExportReport:
                 "excluded_below_score": self.excluded_below_score,
                 "excluded_unreviewed": self.excluded_unreviewed,
                 "excluded_by_domain": self.excluded_by_domain,
+                "excluded_placeholder": self.excluded_placeholder,
+                "parse_failures": self.parse_failures,
                 "gate_failures": self.gate_failures,
                 "validation_failures": self.validation_failures,
             },
@@ -365,7 +376,9 @@ def _run_gate_c(
         # whether it has a score (the score field can be stale or absent
         # while the description still references the placeholder).
         if cand.get("description") == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER:
-            excluded_below_score += 1
+            # Not a score exclusion — GENERATE_DOCS never ran. Counted
+            # separately (excluded_placeholder) by the caller, which reads
+            # these issues; do not inflate excluded_below_score here.
             issues.append(
                 {
                     "type": "deterministic_parent_description_placeholder",
@@ -842,7 +855,15 @@ def _write_manifest(
     export_scope: str = "full",
     domains_included: list[str] | None = None,
 ) -> Path:
-    """Write the catalog.yml manifest to the staging directory root."""
+    """Write the catalog.yml manifest to the staging directory root.
+
+    The manifest carries only fields defined by the ISN
+    ``StandardNameCatalogManifest`` model (extra='forbid'), so publish and
+    the downstream ISNC catalog-validation stay green. The full exclusion
+    accounting that closes ``candidate_count - published_count`` (placeholder,
+    parse-failure and validation-failure buckets) is emitted in the sibling
+    ``.export_report.json`` rather than here — see ``ExportReport.to_dict``.
+    """
     import imas_standard_names
 
     # Deterministic timestamps: derive from the source commit so identical
@@ -1042,6 +1063,11 @@ def run_export(
         report.gate_results.append(gate_c)
         report.excluded_below_score = excluded_below
         report.excluded_unreviewed = excluded_unrev
+        report.excluded_placeholder = sum(
+            1
+            for i in gate_c.issues
+            if i["type"] == "deterministic_parent_description_placeholder"
+        )
 
         # Gate B: Cross-field consistency (on filtered candidates)
         gate_b = _run_gate_b(candidates, cocos_convention, final=final)
@@ -1055,6 +1081,7 @@ def run_export(
             }
             if parse_failures:
                 candidates = [c for c in candidates if c["id"] not in parse_failures]
+                report.parse_failures = len(parse_failures)
                 logger.warning(
                     "Gate B: excluded %d names with grammar parse failures "
                     "(RC mode): %s",
@@ -1114,11 +1141,16 @@ def run_export(
             return report
     else:
         # Gate C still runs for filtering even when gates skipped
-        _, candidates, excluded_below, excluded_unrev = _run_gate_c(
+        gate_c, candidates, excluded_below, excluded_unrev = _run_gate_c(
             candidates, min_score, include_unreviewed, min_description_score
         )
         report.excluded_below_score = excluded_below
         report.excluded_unreviewed = excluded_unrev
+        report.excluded_placeholder = sum(
+            1
+            for i in gate_c.issues
+            if i["type"] == "deterministic_parent_description_placeholder"
+        )
 
     # ── 3. Gate-only mode: report and exit ──────────────────────
     if gate_only:

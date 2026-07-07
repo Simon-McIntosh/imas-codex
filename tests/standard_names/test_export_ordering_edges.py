@@ -74,9 +74,7 @@ class TestOrderingEdgeRoundTrip:
             [],  # cross-domain HAS_ERROR target
         ]
         gc, _ = _capturing_gc(rows)
-        edges, cross = _fetch_ordering_edges_for_domain(
-            gc, "equilibrium", {"orphan"}
-        )
+        edges, cross = _fetch_ordering_edges_for_domain(gc, "equilibrium", {"orphan"})
         assert edges == []
         assert cross == {"orphan"}
 
