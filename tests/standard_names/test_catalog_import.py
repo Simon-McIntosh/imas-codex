@@ -218,6 +218,99 @@ class TestCheckMode:
 
 
 # =============================================================================
+# Import write: validation_status defaulting (export eligibility)
+# =============================================================================
+
+
+def _import_merge_cypher(mock_gc: MagicMock) -> str:
+    """Return the Cypher from the first MERGE StandardName query call."""
+    for call in mock_gc.query.call_args_list:
+        cypher = call[0][0]
+        if "MERGE (sn:StandardName" in cypher:
+            return cypher
+    raise AssertionError("No MERGE StandardName query found in calls")
+
+
+class TestImportSetsValidationStatus:
+    """Import-created nodes must be export-eligible.
+
+    ``export._fetch_candidates`` requires ``validation_status = 'valid'``.
+    A node created purely by import would otherwise carry a null
+    ``validation_status`` and be silently dropped on the next
+    export → publish (and deleted from ISNC by the full-scope rmtree).
+    """
+
+    def test_merge_defaults_validation_status_valid(self) -> None:
+        """The MERGE SET clause must coalesce validation_status to 'valid'."""
+        from imas_codex.standard_names.catalog_import import _write_import_entries
+
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(return_value=[])
+
+        _write_import_entries(
+            mock_gc,
+            [
+                {
+                    "id": "electron_temperature",
+                    "description": "Electron temperature",
+                    "documentation": "Te from Thomson scattering.",
+                    "kind": "scalar",
+                    "unit": "eV",
+                    "links": None,
+                    "status": "active",
+                    "physics_domain": "core_plasma_physics",
+                }
+            ],
+        )
+
+        cypher = _import_merge_cypher(mock_gc)
+        assert (
+            "sn.validation_status = coalesce(sn.validation_status, 'valid')" in cypher
+        ), (
+            "Import MERGE must default validation_status to 'valid' so "
+            "import-created nodes satisfy export eligibility.\n\n"
+            f"Full MERGE query:\n{cypher}"
+        )
+
+    def test_coalesce_preserves_existing_status(self) -> None:
+        """coalesce keeps an existing (e.g. quarantined) status untouched.
+
+        This is a contract assertion on the Cypher form: because the
+        expression is ``coalesce(sn.validation_status, 'valid')`` — reading
+        the node's own property first — a pre-existing non-null status such
+        as ``'quarantined'`` is preserved, and only a null status is defaulted.
+        """
+        from imas_codex.standard_names.catalog_import import _write_import_entries
+
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(return_value=[])
+
+        _write_import_entries(
+            mock_gc,
+            [
+                {
+                    "id": "plasma_current",
+                    "description": "Plasma current",
+                    "documentation": "Total toroidal plasma current.",
+                    "kind": "scalar",
+                    "unit": "A",
+                    "links": None,
+                    "status": "active",
+                    "physics_domain": "equilibrium",
+                }
+            ],
+        )
+
+        cypher = _import_merge_cypher(mock_gc)
+        # The node property is the first coalesce argument → existing wins.
+        assert "coalesce(sn.validation_status, 'valid')" in cypher
+        assert "coalesce('valid', sn.validation_status)" not in cypher, (
+            "coalesce order must read the node property first so an existing "
+            "status (e.g. 'quarantined') is preserved, not clobbered."
+        )
+
+
+# =============================================================================
 # Normalize field
 # =============================================================================
 

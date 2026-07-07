@@ -344,6 +344,15 @@ def _write_import_entries(
     Catalog-owned fields are SET directly (overwrite).
     Graph-only fields (embedding, model, generated_at, etc.) are preserved
     via omission (not in the SET clause at all).
+
+    ``validation_status`` is a special case: it is graph-only (never carried
+    in catalog YAML) yet export eligibility requires it to equal ``'valid'``
+    (see ``export._fetch_candidates``). A node created purely by import would
+    otherwise have a null ``validation_status`` and be silently dropped on the
+    next export → publish (and deleted from ISNC by the full-scope rmtree).
+    We therefore default it with ``coalesce(sn.validation_status, 'valid')`` —
+    preserving an existing status (e.g. ``'quarantined'``) but making
+    import-created nodes export-eligible.
     Returns the number of nodes written.
     """
     if not entries:
@@ -381,6 +390,7 @@ def _write_import_entries(
             sn.deprecates = b.deprecates,
             sn.superseded_by = b.superseded_by,
             sn.name_stage = 'accepted',
+            sn.validation_status = coalesce(sn.validation_status, 'valid'),
             sn.origin = b._origin,
             sn.imported_at = datetime(),
             sn.catalog_commit_sha = b._catalog_commit_sha,
