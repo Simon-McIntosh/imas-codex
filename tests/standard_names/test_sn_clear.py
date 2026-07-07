@@ -173,8 +173,10 @@ class TestClearStandardNamesDeletesLLMCost:
             "clear_standard_names must issue DETACH DELETE for LLMCost"
         )
 
-    def test_llmcost_deleted_with_source_filter(self):
-        """LLMCost must be deleted even when source_filter is applied."""
+    def test_llmcost_not_deleted_with_source_filter(self):
+        """A SCOPED clear (source_filter) must NOT wipe the global LLMCost
+        ledger — it removes only a slice of names, and wiping the whole
+        ledger would erase cost history for the names left intact."""
         from imas_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=2)
@@ -183,8 +185,22 @@ class TestClearStandardNamesDeletesLLMCost:
             graph_ops.clear_standard_names(source_filter="dd")
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
-        assert any("LLMCost" in q and "DETACH DELETE" in q for q in queries), (
-            "clear_standard_names with source_filter must still delete LLMCost"
+        assert not any("LLMCost" in q and "DETACH DELETE" in q for q in queries), (
+            "scoped clear_standard_names must not wipe the whole LLMCost ledger"
+        )
+
+    def test_llmcost_not_deleted_with_stage_filter(self):
+        """A stage-scoped clear must also spare the global LLMCost ledger."""
+        from imas_codex.standard_names import graph_ops
+
+        fake_gc = self._make_gc_for_clear_standard_names(sn_count=2)
+
+        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
+            graph_ops.clear_standard_names(stage_filter=["drafted"])
+
+        queries = [c.args[0] for c in fake_gc.query.call_args_list]
+        assert not any("LLMCost" in q and "DETACH DELETE" in q for q in queries), (
+            "stage-scoped clear_standard_names must not wipe the LLMCost ledger"
         )
 
     def test_llmcost_not_deleted_in_dry_run(self):

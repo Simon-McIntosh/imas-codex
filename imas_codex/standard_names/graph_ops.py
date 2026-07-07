@@ -4826,10 +4826,25 @@ def clear_standard_names(
         if orphan_count:
             logger.info("Swept %d orphaned StandardNameReview nodes", orphan_count)
 
-        # Step D: delete all LLMCost rows — they represent cost for pipeline
-        # runs whose StandardName output is now being cleared. Leaving them
-        # behind would accumulate stale cost-ledger rows across reset cycles.
-        gc.query("MATCH (c:LLMCost) DETACH DELETE c")
+        # Step D: delete the LLMCost ledger — but only on an UNSCOPED clear.
+        # A full clear owns the whole ledger (every run's StandardName output
+        # is being removed, so its cost rows are stale). A SCOPED clear (any
+        # stage/source/ids/path/time/score/tier/validation filter) removes
+        # only a slice of names and must NOT wipe the global cost ledger —
+        # that would erase cost history for the names left intact.
+        scoped = (
+            stage_filter is not None
+            or bool(source_filter)
+            or bool(ids_filter)
+            or path_allowlist is not None
+            or bool(since)
+            or bool(before)
+            or below_score is not None
+            or bool(tiers)
+            or bool(validation_status)
+        )
+        if not scoped:
+            gc.query("MATCH (c:LLMCost) DETACH DELETE c")
 
         # Step E: reset orphaned sources. Deleting a StandardName strands its
         # StandardNameSource at 'composed'/'attached' — a status the generate
