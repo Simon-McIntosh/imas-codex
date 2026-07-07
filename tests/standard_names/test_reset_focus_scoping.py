@@ -119,6 +119,23 @@ class TestResetStandardNamesPathAllowlist:
         cypher = _all_cypher(gc)
         assert "$path_allowlist" not in cypher
 
+    def test_empty_allowlist_fails_closed_matches_nothing(self) -> None:
+        """An empty allowlist selects the SCOPED join branch (matching
+        nothing via ``src.id IN []``) — it must NEVER fall through to the
+        unscoped whole-graph reset."""
+        gc = _make_gc(count=0)
+        self._call(gc, path_allowlist=[])
+
+        cypher = _all_cypher(gc)
+        # Scoped join branch chosen (count(DISTINCT sn) + IN membership) …
+        assert "count(DISTINCT sn)" in cypher
+        assert "src.id IN $path_allowlist" in cypher
+        # … and the empty list is passed verbatim so IN [] matches nothing.
+        lists = [
+            kw["path_allowlist"] for kw in _all_kwargs(gc) if "path_allowlist" in kw
+        ]
+        assert lists and all(pl == [] for pl in lists)
+
 
 # ---------------------------------------------------------------------------
 # SCOPE — path_allowlist on clear_standard_names
@@ -178,6 +195,24 @@ class TestClearStandardNamesPathAllowlist:
         self._call(gc)
         cypher = _all_cypher(gc)
         assert "$path_allowlist" not in cypher
+
+    def test_empty_allowlist_fails_closed_matches_nothing(self) -> None:
+        """An empty allowlist selects the SCOPED join branch (matching
+        nothing via ``src.id IN []``) — it must NEVER fall through to the
+        unscoped blanket delete across the whole graph."""
+        gc = _make_gc(count=0)
+        self._call(gc, path_allowlist=[])
+
+        cypher = _all_cypher(gc)
+        assert "(src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)" in cypher
+        assert "src.id IN $path_allowlist" in cypher
+        # No unscoped blanket delete was issued (count==0 returns early, but
+        # the scoped count query must be the one that ran).
+        assert "count(DISTINCT sn)" in cypher
+        lists = [
+            kw["path_allowlist"] for kw in _all_kwargs(gc) if "path_allowlist" in kw
+        ]
+        assert lists and all(pl == [] for pl in lists)
 
 
 # ---------------------------------------------------------------------------

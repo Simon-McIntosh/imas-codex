@@ -4502,7 +4502,11 @@ def reset_standard_names(
         if ids_filter:
             params["ids_prefix"] = ids_filter + "/"
             src_clauses.append("src.id STARTS WITH $ids_prefix")
-        if path_allowlist:
+        # Fail-closed: an empty allowlist selects the scoped branch and
+        # matches NOTHING (``src.id IN []``). Treating ``[]`` as falsy here
+        # would fall through to the unscoped branch and reset the whole graph
+        # — the 1863-name-wipe shape. ``None`` means "no allowlist scope".
+        if path_allowlist is not None:
             params["path_allowlist"] = list(path_allowlist)
             src_clauses.append("src.id IN $path_allowlist")
         use_src_join = bool(src_clauses)
@@ -4725,7 +4729,11 @@ def clear_standard_names(
         if ids_filter:
             params["ids_prefix"] = ids_filter + "/"
             src_clauses.append("src.id STARTS WITH $ids_prefix")
-        if path_allowlist:
+        # Fail-closed: an empty allowlist selects the scoped branch and
+        # matches NOTHING (``src.id IN []``). Treating ``[]`` as falsy here
+        # would fall through to the unscoped branch and delete across the
+        # whole graph — the 1863-name-wipe shape. ``None`` = no allowlist.
+        if path_allowlist is not None:
             params["path_allowlist"] = list(path_allowlist)
             src_clauses.append("src.id IN $path_allowlist")
         use_src_join = bool(src_clauses)
