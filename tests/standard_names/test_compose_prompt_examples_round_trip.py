@@ -110,6 +110,54 @@ def test_allowlist_has_no_stale_entries(name: str) -> None:
     )
 
 
+# ---------------------------------------------------------------------------
+# NC composition-rule examples (imas_codex/llm/config/sn_composition_rules.yaml)
+# ---------------------------------------------------------------------------
+# The compose system prompt renders every rule's ``examples_good`` verbatim
+# inside a ✓-marked code span (see shared/sn/_nc_rules.md).  The endorsed-name
+# extractor above cannot reach them: it reads the UNRENDERED Jinja template
+# (only ``{% for %}`` tags, no literal names), so the YAML was never checked.
+# Load it directly and hold every endorsed NC example to the same round-trip
+# contract — an ``examples_good`` entry the public ISN grammar cannot parse and
+# re-compose unchanged is non-ISN vocabulary the compose model learns by
+# example.  Each entry is a pure canonical name; any teaching gloss lives in the
+# rule ``rule:`` prose, never the example list.
+
+
+def _nc_good_examples() -> list[tuple[str, str]]:
+    """(rule_id, name) for every ``examples_good`` entry, loaded like the pipeline."""
+    from imas_codex.llm.prompt_loader import load_prompt_config
+
+    cfg = load_prompt_config("sn_composition_rules")
+    out: list[tuple[str, str]] = []
+    for rule in cfg.get("composition_rules", []) or []:
+        rid = rule.get("id", "?")
+        for ex in rule.get("examples_good", []) or []:
+            out.append((rid, ex))
+    return out
+
+
+_NC_GOOD_EXAMPLES = _nc_good_examples()
+
+
+def test_nc_good_examples_were_extracted() -> None:
+    """Guard the guard: a loader/YAML change must not silently empty the corpus."""
+    assert len(_NC_GOOD_EXAMPLES) >= 30, (
+        f"only {len(_NC_GOOD_EXAMPLES)} NC examples_good entries loaded — "
+        "loader or YAML broke?"
+    )
+
+
+@pytest.mark.parametrize("rule_id,name", _NC_GOOD_EXAMPLES)
+def test_nc_rule_good_example_round_trips(rule_id: str, name: str) -> None:
+    """Every ``examples_good`` name round-trips through the public ISN parser."""
+    assert _round_trips(name), (
+        f"NC rule {rule_id} examples_good entry {name!r} does not round-trip "
+        f"through the public ISN parser. Rewrite it to a canonical form (the "
+        f"rule prose carries any teaching gloss)."
+    )
+
+
 # The f-snph operator-development deliverable: a prefix transformation now
 # coexists with a projection, and change_in is a bare-prefix operator. These
 # MUST round-trip permanently (the grammar invariant this guard locks in).

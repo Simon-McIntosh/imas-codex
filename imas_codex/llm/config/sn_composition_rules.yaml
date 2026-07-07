@@ -15,7 +15,7 @@ composition_rules:
       use it. Never create alternative wordings for the same physical quantity.
     examples_good:
       - "poloidal_magnetic_flux"
-      - "flux_surface_area"
+      - "area_of_flux_surface"
     examples_bad:
       - "poloidal_flux"
       - "cross_sectional_area_of_flux_surface"
@@ -43,13 +43,15 @@ composition_rules:
     category: "naming"
     severity: "soft"
     rule: |
-      Both atomic component names (`major_radius_of_x_point`,
+      Both atomic component names (`radial_coordinate_of_x_point`,
       `vertical_coordinate_of_x_point`) and vector names (`position_of_x_point`)
-      are valid. Components use `major_radius_of_` or `vertical_coordinate_of_`
-      prefixes; the vector form uses `position_of_`. Define both when the DD
-      provides both.
+      are valid. Components use `radial_coordinate_of_` or
+      `vertical_coordinate_of_` prefixes; the vector form uses `position_of_`.
+      Define both when the DD provides both. (A point's R coordinate is
+      `radial_coordinate_of_`, never `major_radius_of_` — the parser rejects a
+      positional locus on `major_radius`.)
     examples_good:
-      - "major_radius_of_x_point"
+      - "radial_coordinate_of_x_point"
       - "vertical_coordinate_of_x_point"
       - "position_of_x_point"
     examples_bad: []
@@ -96,9 +98,8 @@ composition_rules:
       by the root noun. Forbidden suffixes include: `_parameter`, `_value`,
       `_quantity`, `_data`, `_variable`.
     examples_good:
-      - "stokes_s0"
-      - "flux"
-      - "temperature"
+      - "electron_temperature"
+      - "poloidal_magnetic_flux"
     examples_bad:
       - "stokes_s0_parameter"
       - "flux_value"
@@ -115,9 +116,8 @@ composition_rules:
       this information; standard names describe the physical concept, not storage
       shape.
     examples_good:
-      - "geometry"
-      - "field"
-      - "profile"
+      - "radial_electric_field"
+      - "electron_temperature"
     examples_bad:
       - "geometry_2d"
       - "field_3d"
@@ -135,8 +135,8 @@ composition_rules:
       is a generic container, use the parent structure or coordinate system as
       the physical qualifier.
     examples_good:
-      - "grid_object_geometry"
-      - "signal_data"
+      - "hard_xray_emissivity"
+      - "safety_factor"
     examples_bad:
       - "geometry"
       - "data"
@@ -152,8 +152,8 @@ composition_rules:
       Do not repeat the same head noun across `_of_`. The qualifier after `_of_`
       must introduce a new physical entity, not restate the head noun.
     examples_good:
-      - "radial_position_of_gap_reference_point"
-      - "normal_component_of_field"
+      - "radial_coordinate_of_plasma_boundary_gap_reference_point"
+      - "radial_magnetic_field"
     examples_bad:
       - "radial_position_of_reference_position"
       - "normal_component_of_field_component"
@@ -167,10 +167,11 @@ composition_rules:
     rule: |
       Do not append `_fourier_coefficients`, `_fourier_modes`, or `_harmonics`
       as a generic suffix to a quantity name. Spectral decompositions are
-      expressed either as `mode_<n>_of_<quantity>` for a specific mode, or as a
-      named amplitude/phase quantity (`fourier_amplitude_of_<quantity>`).
+      expressed either as a per-mode operator prefix (`per_toroidal_mode_<quantity>`)
+      or as a named amplitude quantity with the amplitude marker as a postfix
+      (`<quantity>_amplitude`).
     examples_good:
-      - "mode_amplitude_of_normal_field"
+      - "radial_magnetic_field_amplitude"
     examples_bad:
       - "normal_field_fourier_coefficients"
     affects:
@@ -181,16 +182,16 @@ composition_rules:
     category: "consistency"
     severity: "soft"
     rule: |
-      When both `major_radius_of_X` and `vertical_coordinate_of_X` appear,
+      When both `radial_coordinate_of_X` and `vertical_coordinate_of_X` appear,
       their descriptions MUST agree on which entity X refers to. Do not describe
       the R-coordinate as on the plasma boundary and the Z-coordinate as on the
       secondary separatrix. The two names form an (R,Z) pair parameterising one
       curve — both components share the same boundary context.
     examples_good:
-      - "major_radius_of_plasma_boundary (description: R along the boundary contour)"
-      - "vertical_coordinate_of_plasma_boundary (description: Z along the same boundary contour)"
+      - "radial_coordinate_of_plasma_boundary"
+      - "vertical_coordinate_of_plasma_boundary"
     examples_bad:
-      - "major_radius_of_plasma_boundary described as on primary separatrix while vertical_coordinate_of_plasma_boundary described as on secondary separatrix"
+      - "radial_coordinate_of_plasma_boundary described as on primary separatrix while vertical_coordinate_of_plasma_boundary described as on secondary separatrix"
     affects:
       - "name"
       - "description"
@@ -206,8 +207,8 @@ composition_rules:
       `maximum`, `minimum`, `separatrix`. The truncated forms `norm_`, `perp_`,
       `par_`, `temp_`, `pos_`, `max_`, `min_`, `sep_` are forbidden.
     examples_good:
-      - "normalized_poloidal_flux"
-      - "perpendicular_velocity_component"
+      - "normalized_poloidal_magnetic_flux"
+      - "perpendicular_ion_velocity"
     examples_bad:
       - "norm_poloidal_magnetic_flux"
       - "perp_velocity"
@@ -222,11 +223,11 @@ composition_rules:
       An outline is a set of 2D points (a contour), not a scalar or vector
       field. For the Z-coordinate along the boundary contour use
       `vertical_coordinate_of_plasma_boundary`; the 2D contour itself is
-      expressed as the pair of (major_radius, vertical_coordinate) standard
+      expressed as the pair of (radial_coordinate, vertical_coordinate) standard
       names, not a single `outline` name.
     examples_good:
       - "vertical_coordinate_of_plasma_boundary"
-      - "major_radius_of_plasma_boundary"
+      - "radial_coordinate_of_plasma_boundary"
     examples_bad:
       - "vertical_outline_of_plasma_boundary"
       - "horizontal_outline_of_plasma_boundary"
@@ -234,18 +235,22 @@ composition_rules:
       - "name"
 
   - id: "NC-14"
-    title: "Distance-between-entities uses `distance_between_X_and_Y` form"
+    title: "Distance/clearance is a single-locus quantity — never a two-endpoint span"
     category: "naming"
     severity: "soft"
     rule: |
-      When naming a separation between two named features, place the two feature
-      names in a symmetric tail: `distance_between_<feature_A>_and_<feature_B>`.
-      Do not front-load one feature as the quantity head.
+      A span between two distinct named features is NOT representable in the
+      single locus slot, and the parser rejects a fabricated
+      `distance_between_<A>_and_<B>` compound. Name a real distance/clearance
+      quantity as a `distance` or `gap` base attached to ONE reference surface or
+      plane via its locus (`_at_<locus>`, `_of_<locus>`); emit a `vocab_gap` when
+      no single-locus form is faithful. Never fabricate a multi-locus span that
+      silently drops an endpoint.
     examples_good:
-      - "distance_between_inner_and_outer_separatrices"
-      - "distance_between_magnetic_axis_and_geometric_axis"
+      - "radial_distance_at_outboard_midplane"
+      - "gap_at_plasma_boundary"
     examples_bad:
-      - "separatrix_distance_between_inner_and_outer"
+      - "distance_between_inner_and_outer_separatrices"
       - "magnetic_axis_distance_to_geometric_axis"
     affects:
       - "name"
@@ -262,10 +267,10 @@ composition_rules:
       (`mode_amplitude_of_normal_field`, `fourier_coefficient_of_*`). Never
       describe a decomposition under a name that denotes the underlying field.
     examples_good:
-      - "name: normal_component_of_magnetic_field → description: the component of B normal to the surface"
-      - "name: mode_amplitude_of_normal_field → description: Fourier amplitude of the normal field component"
+      - "radial_magnetic_field"
+      - "radial_magnetic_field_amplitude"
     examples_bad:
-      - "name: normal_component_of_magnetic_field → description: Fourier coefficient of the normal field"
+      - "name: radial_magnetic_field → description: Fourier coefficient of the radial field (a decomposition described under the underlying-field name)"
     affects:
       - "description"
 
@@ -299,11 +304,11 @@ composition_rules:
       has violated grammar; the candidate is quarantined and must be
       refined with the correct preposition.
     examples_good:
-      - "poloidal_magnetic_flux_at_plasma_boundary (field at canonical LCFS locus)"
-      - "elongation_of_plasma_boundary (intrinsic shape parameter)"
-      - "major_radius_of_magnetic_axis (coordinate of a point)"
-      - "electron_density_at_pedestal (field at named region)"
-      - "area_of_reflectometer_antenna (structural entity, of- is correct)"
+      - "poloidal_magnetic_flux_at_plasma_boundary"
+      - "elongation_of_plasma_boundary"
+      - "radial_coordinate_of_magnetic_axis"
+      - "electron_density_at_pedestal"
+      - "area_of_reflectometer_antenna"
     examples_bad:
       - "poloidal_magnetic_flux_of_plasma_boundary (flux is a field — use _at_)"
       - "electron_density_of_pedestal (density is a field — use _at_)"
@@ -361,9 +366,8 @@ composition_rules:
         modeled ← modelled; labeled ← labelled; traveled ← travelled;
         fueling ← fuelling; channeling ← channelling; signaling ← signalling.
     examples_good:
-      - "normalized"
-      - "behavior"
-      - "center"
+      - "normalized_poloidal_magnetic_flux"
+      - "center_of_mass_velocity"
     examples_bad:
       - "normalised"
       - "behaviour"
@@ -387,8 +391,8 @@ composition_rules:
       conveys dimensionality. Any name whose description contains a bare `1D` /
       `2D` / `3D` token is quarantined.
     examples_good:
-      - "radial profile of electron temperature"
-      - "evaluated on a radial grid"
+      - "electron_temperature"
+      - "hard_xray_emissivity"
     examples_bad:
       - "1D radial profile of electron temperature"
       - "on a 2D grid"
@@ -405,13 +409,14 @@ composition_rules:
       When the source quantity is a time derivative (path typically contains
       `d_dt`, `ddt`, or the DD unit includes `.s^-1` as a differentiator rather
       than a rate-of-reaction), name it with `tendency_of_<quantity>` (preferred)
-      or `change_in_<quantity>` or `rate_of_change_of_<quantity>`. Never use
+      or `change_in_<quantity>` or `time_derivative_of_<quantity>`. `rate_of_change_of_`
+      is not an ISN operator — use `time_derivative_of_`. Never use
       `instant_change_of_...` — "instant" / "instantaneous" are not
       standard-name tokens. The description must match: if you describe a "rate
       of change" or "time derivative", the name must carry a rate marker.
     examples_good:
       - "tendency_of_electron_temperature"
-      - "rate_of_change_of_plasma_current"
+      - "time_derivative_of_plasma_current"
     examples_bad:
       - "instant_change_of_electron_temperature"
     affects:
@@ -436,12 +441,10 @@ composition_rules:
     examples_good:
       - "perturbed_electrostatic_potential_real_part"
       - "perturbed_mass_density_imaginary_part"
-      - "radial_component_of_perturbed_magnetic_field_real_part"
-      - "poloidal_component_of_perturbed_plasma_velocity_imaginary_part"
-      - "reynolds_stress_tensor_real_part"
-      - "maxwell_stress_tensor_perturbation_imaginary_part"
-      - "parallel_component_of_wave_electric_field_amplitude"
-      - "right_hand_circularly_polarized_electric_field_phase"
+      - "radial_perturbed_magnetic_field_real_part"
+      - "poloidal_perturbed_ion_velocity_imaginary_part"
+      - "parallel_wave_electric_field_amplitude"
+      - "electric_field_magnitude"
     examples_bad:
       - "real_part_of_perturbed_electrostatic_potential"
       - "imaginary_part_of_radial_component_of_perturbed_magnetic_field"
@@ -451,54 +454,55 @@ composition_rules:
       - "name"
 
   - id: "NC-21"
-    title: "Spectral qualifier is `_per_toroidal_mode` — never `_per_toroidal_mode_number`"
+    title: "Spectral operator is `per_toroidal_mode` — never `per_toroidal_mode_number`"
     category: "spectral"
     severity: "soft"
     rule: |
       When a quantity is resolved per toroidal (or poloidal) Fourier mode, the
-      canonical suffix is `_per_toroidal_mode` or `_per_poloidal_mode`. Do not
-      add the word `_number` — the mode index is implicit. Within a batch, use
-      exactly one spelling.
+      canonical form is the bare-prefix operator `per_toroidal_mode_<quantity>`
+      or `per_poloidal_mode_<quantity>`. Do not add the word `number` — the mode
+      index is implicit. Within a batch, use exactly one spelling.
     examples_good:
-      - "wave_absorbed_power_per_toroidal_mode"
+      - "per_toroidal_mode_wave_absorbed_power"
     examples_bad:
       - "wave_absorbed_power_per_toroidal_mode_number"
     affects:
       - "name"
 
   - id: "NC-22"
-    title: "Do not stack `_density` with `_per_<mode>` on an unintegrated quantity"
+    title: "Do not stack `_density` with the per-mode operator on an unintegrated quantity"
     category: "physics"
     severity: "soft"
     rule: |
       The `_density` suffix means "per unit volume / area / length" and must be
       matched by an inverse-length factor in the unit (m^-1, m^-2, m^-3).
-      Appending `_per_toroidal_mode` to a raw power in Watts does not make it a
+      Applying `per_toroidal_mode` to a raw power in Watts does not make it a
       density. If the source is a spectral density whose unit already carries
-      m^-n, use `_density_per_toroidal_mode`; if the source is a plain per-mode
-      power in W, drop `_density` and use `<...>_power_per_toroidal_mode`.
+      m^-n, keep the `_density` base under the operator
+      (`per_toroidal_mode_<...>_power_density`); if the source is a plain
+      per-mode power in W, drop `_density`: `per_toroidal_mode_<...>_power`.
     examples_good:
-      - "electron_wave_heating_power_per_toroidal_mode"
+      - "per_toroidal_mode_electron_wave_heating_power"
     examples_bad:
       - "electron_wave_heating_power_spectral_density_per_toroidal_mode (when unit is W, not W·m^-n)"
     affects:
       - "name"
 
   - id: "NC-23"
-    title: "Translate DD `_inside` to `_inside_flux_surface`, never to `cumulative_`"
+    title: "Integrated-inside-flux-surface uses the `cumulative_inside_flux_surface` operator"
     category: "naming"
     severity: "soft"
     rule: |
       When the source-path description indicates the quantity is integrated
       inside the enclosing flux surface (DD leaf names ending in `_inside`,
       `power_inside_...`, `current_tor_inside`, etc.), the standard name MUST
-      use the suffix `_inside_flux_surface` placed directly after the quantity
-      it integrates. Do not prefix the name with `cumulative_`, `integrated_`,
-      `running_`, or `accumulated_` — these lose the geometric meaning and are
-      not in the ISN grammar. Keep the word order
-      `<subject>_<quantity>_inside_flux_surface[_per_<spectral>]`.
+      use the bare-prefix operator `cumulative_inside_flux_surface_<quantity>`,
+      the registered ISN operator that encodes flux-surface enclosure. Do not
+      use a bare `cumulative_`, `integrated_`, `running_`, or `accumulated_`
+      qualifier — only the full `cumulative_inside_flux_surface` operator carries
+      the geometric meaning.
     examples_good:
-      - "electron_wave_heating_power_inside_flux_surface_per_toroidal_mode"
+      - "cumulative_inside_flux_surface_electron_wave_heating_power"
     examples_bad:
       - "electron_cumulative_wave_heating_power_per_toroidal_mode"
     affects:
@@ -516,8 +520,8 @@ composition_rules:
       `heating_power` are not synonyms and MUST NOT alternate across species
       within the same source family.
     examples_good:
-      - "electron_cyclotron_absorbed_power"
-      - "ion_cyclotron_absorbed_power"
+      - "electron_absorbed_wave_power"
+      - "ion_absorbed_wave_power"
     examples_bad:
       - "electron_cyclotron_absorbed_power alongside ion_cyclotron_heating_power (alternating verbs)"
     affects:
@@ -534,8 +538,8 @@ composition_rules:
       tokens, e.g. `ion_atomic_mass`) remain acceptable; the rule applies when
       the subject is a named entity with three or more tokens.
     examples_good:
-      - "tangency_radius_of_neutral_beam_injector_beam"
-      - "rotation_angle_of_electron_cyclotron_launcher_mirror"
+      - "tilt_angle_of_electron_cyclotron_launcher_mirror"
+      - "radius_of_neutral_beam_injector"
     examples_bad:
       - "neutral_beam_injector_beam_tangency_radius"
       - "ec_launcher_mirror_rotation_angle"
@@ -553,7 +557,7 @@ composition_rules:
       Abbreviations are not in the ISN grammar and fragment the corpus across
       synonymous aliases.
     examples_good:
-      - "rotation_angle_of_electron_cyclotron_launcher_mirror"
+      - "tilt_angle_of_electron_cyclotron_launcher_mirror"
     examples_bad:
       - "ec_launcher_mirror_rotation_angle"
     affects:
@@ -569,7 +573,7 @@ composition_rules:
       compound fusion-reaction species pairs (D-T, D-D, T-T). Never decompose
       them into two separate subjects.
     examples_good:
-      - "deuterium_tritium_fusion_power (compound subject treated as single token)"
+      - "deuterium_tritium_density"
     examples_bad:
       - "deuterium and tritium treated as two separate subjects"
     affects:
@@ -599,20 +603,24 @@ composition_rules:
     rule: |
       HARD PROHIBITION. Unlike `toroidal`, `poloidal`, `radial`, `parallel`, or
       `perpendicular`, `diamagnetic` does NOT label a spatial projection axis.
-      The diamagnetic drift velocity `v_dia = B × ∇p / (qnB²)` is itself a
-      specific drift, not a component of another field along a "diamagnetic
-      axis." `diamagnetic_component_of_<X>` is physically wrong and always
-      rejected by the `diamagnetic_component_check` audit. When a DD path
-      contains a subfield literally named `diamagnetic`, DO NOT translate the
-      label directly. Use `_due_to_diamagnetic_drift` for currents/fluxes/heat
-      flows driven by the drift, or pick the correct drift-velocity name for
-      velocity-valued quantities. Reserve `toroidal`, `poloidal`, `parallel`,
-      `perpendicular`, `radial` for projection axes. Never use `diamagnetic` in
-      a `_component_of_` or `<axis>_component` slot.
+      The diamagnetic drift `v_dia = B × ∇p / (qnB²)` is a specific drift, not a
+      component of another field along a "diamagnetic axis."
+      `diamagnetic_component_of_<X>` is physically wrong and always rejected by
+      the `diamagnetic_component_check` audit. `diamagnetic` plays exactly two
+      grammatical roles: (1) a drift `process` attributed via `_due_to_` — a
+      velocity-valued quantity is `velocity_due_to_diamagnetic_drift`, and
+      currents/fluxes/heat flows use the same `_due_to_diamagnetic_drift` tail;
+      (2) a `channel_qualifier` on a transported momentum/energy channel
+      (`diamagnetic_momentum_flux`). The fused base `diamagnetic_drift_velocity`
+      does NOT parse — express it as `velocity_due_to_diamagnetic_drift`. Reserve
+      `toroidal`, `poloidal`, `parallel`, `perpendicular`, `radial` for
+      projection axes; never use `diamagnetic` in a `_component_of_` or
+      `<axis>_component` slot.
     examples_good:
-      - "diamagnetic_drift_velocity"
-      - "ion_diamagnetic_drift_velocity"
-      - "electron_diamagnetic_drift_velocity"
+      - "velocity_due_to_diamagnetic_drift"
+      - "ion_velocity_due_to_diamagnetic_drift"
+      - "electron_velocity_due_to_diamagnetic_drift"
+      - "diamagnetic_momentum_flux"
       - "heat_flux_due_to_diamagnetic_drift"
     examples_bad:
       - "diamagnetic_component_of_electric_field"
@@ -641,10 +649,9 @@ composition_rules:
       interferometers, reflectometers, Langmuir probes, Mirnov coils, and any
       other diagnostic node.
     examples_good:
-      - "infrared_camera_filter_central_wavelength"
-      - "infrared_camera_integration_time"
-      - "surface_temperature_observed_by_infrared_camera"
-      - "visible_light_radiance_along_camera_line_of_sight"
+      - "wavelength_of_infrared_camera"
+      - "exposure_time_of_infrared_camera"
+      - "surface_temperature"
     examples_bad:
       - "emissivity_of_infrared_camera"
       - "radiance_of_visible_camera"
@@ -667,10 +674,10 @@ composition_rules:
       channels measure different observables, each gets its own standard name
       based on the observable.
     examples_good:
-      - "faraday_rotation_angle"
+      - "faraday_angle"
       - "line_integrated_electron_density"
       - "electron_temperature"
-      - "phase_shift"
+      - "polarization_angle"
     examples_bad:
       - "polarimeter_channel_angle"
       - "interferometer_channel_density"
