@@ -698,7 +698,7 @@ def _fetch_ordering_edges_for_domain(
     arg_rows = gc.query(
         """
         MATCH (s:StandardName)-[e:HAS_PARENT]->(t:StandardName)
-        WHERE $domain IN s.physics_domain AND $domain IN t.physics_domain
+        WHERE s.physics_domain = $domain AND t.physics_domain = $domain
         RETURN s.id AS src, t.id AS tgt
         """,
         domain=domain,
@@ -707,7 +707,7 @@ def _fetch_ordering_edges_for_domain(
     err_rows = gc.query(
         """
         MATCH (s:StandardName)-[e:HAS_ERROR]->(t:StandardName)
-        WHERE $domain IN s.physics_domain AND $domain IN t.physics_domain
+        WHERE s.physics_domain = $domain AND t.physics_domain = $domain
         RETURN s.id AS src, t.id AS tgt
         """,
         domain=domain,
@@ -726,7 +726,7 @@ def _fetch_ordering_edges_for_domain(
     cross_arg_rows = gc.query(
         """
         MATCH (s:StandardName)-[:HAS_PARENT]->(t:StandardName)
-        WHERE $domain IN s.physics_domain AND NOT ($domain IN t.physics_domain)
+        WHERE s.physics_domain = $domain AND t.physics_domain <> $domain
         RETURN DISTINCT s.id AS name
         """,
         domain=domain,
@@ -735,7 +735,7 @@ def _fetch_ordering_edges_for_domain(
     cross_err_rows = gc.query(
         """
         MATCH (s:StandardName)-[:HAS_ERROR]->(t:StandardName)
-        WHERE $domain IN t.physics_domain AND NOT ($domain IN s.physics_domain)
+        WHERE t.physics_domain = $domain AND s.physics_domain <> $domain
         RETURN DISTINCT t.id AS name
         """,
         domain=domain,
