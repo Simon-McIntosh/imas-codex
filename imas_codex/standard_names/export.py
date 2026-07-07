@@ -118,6 +118,8 @@ class ExportReport:
     excluded_placeholder: int = 0
     # Names dropped in RC mode because they failed the ISN grammar parse gate.
     parse_failures: int = 0
+    # Internal (name:) doc links dropped because their target is not published.
+    pruned_links: int = 0
     gate_failures: int = 0
     all_gates_passed: bool = True
     exported_names: list[str] = field(default_factory=list)
@@ -135,6 +137,7 @@ class ExportReport:
                 "excluded_by_domain": self.excluded_by_domain,
                 "excluded_placeholder": self.excluded_placeholder,
                 "parse_failures": self.parse_failures,
+                "pruned_links": self.pruned_links,
                 "gate_failures": self.gate_failures,
                 "validation_failures": self.validation_failures,
             },
@@ -787,6 +790,86 @@ def _fetch_ordering_edges_for_domain(
 
 
 # =============================================================================
+# Link / computed-ref resolution
+# =============================================================================
+
+
+def _internal_link_target(link: str) -> str | None:
+    """Return the internal target name a link resolves to, or None if external.
+
+    External links (``http://`` / ``https://``) are never pruned and return
+    None. Internal links use the ``name:<target>`` scheme; a bare token is
+    also treated as an internal target for backward compatibility.
+    """
+    if link.startswith(("http://", "https://")):
+        return None
+    if ":" in link:
+        return link.split(":", 1)[1]
+    return link
+
+
+def _prune_dangling_links(
+    domain_entries: dict[str, list[dict[str, Any]]],
+    published_names: set[str],
+) -> tuple[int, list[str]]:
+    """Drop internal links whose target is not in the published set.
+
+    Must run after the final published set is known: a link target that was a
+    candidate at gate time can still be dropped later (ISN validation reject,
+    domain routing), leaving the link dangling. External http(s) links are
+    never touched. Returns the pruned-link count and up to 20
+    ``"<name> -> <link>"`` examples for logging.
+    """
+    pruned = 0
+    examples: list[str] = []
+    for entries in domain_entries.values():
+        for entry in entries:
+            links = entry.get("links")
+            if not links:
+                continue
+            kept: list[str] = []
+            for link in links:
+                target = _internal_link_target(link)
+                if target is None or target in published_names:
+                    kept.append(link)
+                    continue
+                pruned += 1
+                if len(examples) < 20:
+                    examples.append(f"{entry.get('name')} -> {link}")
+            if len(kept) != len(links):
+                entry["links"] = kept
+    return pruned, examples
+
+
+def _unresolved_computed_refs(
+    domain_entries: dict[str, list[dict[str, Any]]],
+    published_names: set[str],
+) -> list[str]:
+    """Return arguments[]/error_variants[] refs pointing outside the published
+    set. These are derived from graph edges and are expected to resolve fully;
+    a non-empty result signals a real defect the caller must surface loudly.
+    """
+    unresolved: list[str] = []
+    for entries in domain_entries.values():
+        for entry in entries:
+            name = entry.get("name")
+            for arg in entry.get("arguments") or []:
+                ref = arg.get("name") if isinstance(arg, dict) else arg
+                if ref and ref not in published_names:
+                    unresolved.append(f"{name}: argument -> {ref}")
+            error_variants = entry.get("error_variants") or {}
+            refs = (
+                error_variants.values()
+                if isinstance(error_variants, dict)
+                else error_variants
+            )
+            for ref in refs:
+                if ref and ref not in published_names:
+                    unresolved.append(f"{name}: error_variant -> {ref}")
+    return unresolved
+
+
+# =============================================================================
 # File writing
 # =============================================================================
 
@@ -1252,6 +1335,40 @@ def run_export(
             ):
                 domain_entries[primary].append(entry_dict)
             exported_names.append(cand["id"])
+
+        # ── 5a2. Resolve links/computed refs against the final set ──
+        # The published set is now known. Drop internal (name:) doc links
+        # whose target isn't published (renamed, dropped below score, or
+        # rejected by ISN validation after gate time); external http(s)
+        # links are left untouched. This runs before writing so the emitted
+        # catalog carries no dangling internal links.
+        published_names = {
+            e.get("name")
+            for entries in domain_entries.values()
+            for e in entries
+            if e.get("name")
+        }
+        pruned_count, pruned_examples = _prune_dangling_links(
+            domain_entries, published_names
+        )
+        report.pruned_links = pruned_count
+        if pruned_count:
+            logger.warning(
+                "Pruned %d dangling internal link(s) whose targets are not "
+                "published; examples: %s",
+                pruned_count,
+                pruned_examples,
+            )
+        # arguments[]/error_variants[] are derived from graph edges and must
+        # resolve fully — surface loudly if any don't (they are left in place).
+        unresolved = _unresolved_computed_refs(domain_entries, published_names)
+        if unresolved:
+            logger.error(
+                "%d computed reference(s) point outside the published set — "
+                "this is a defect (arguments/error_variants should resolve): %s",
+                len(unresolved),
+                unresolved[:20],
+            )
 
         # ── 5b. Order entries per domain and write files ────────
         codex_sha = _get_codex_commit_sha()
