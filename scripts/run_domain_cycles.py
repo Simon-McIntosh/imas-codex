@@ -154,12 +154,12 @@ def _query_domain_stats(gc: Any, domain: str, since_ts: datetime) -> dict[str, A
     Returns:
         Dict with generated, reviewed, scores, quarantine, themes, vocab_gaps, spend.
     """
-    # 1. Pipeline status breakdown
+    # 1. Name-stage breakdown
     pipeline_rows = gc.query(
         """
         MATCH (sn:StandardName)
         WHERE sn.physics_domain = $domain
-        RETURN sn.pipeline_status AS status, count(*) AS n
+        RETURN sn.name_stage AS status, count(*) AS n
         """,
         domain=domain,
     )
