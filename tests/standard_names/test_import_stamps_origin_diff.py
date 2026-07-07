@@ -96,17 +96,23 @@ class TestOriginNoOp:
     def test_noop_preserves_pipeline_origin(self, tmp_path: Path) -> None:
         isnc = _make_isnc(tmp_path, [_ENTRY_BASE])
 
-        # Graph has same values as catalog
+        # Graph matches the catalog on every content field — a genuine
+        # no-op is excluded from the write set entirely, so the node (and
+        # its origin) is never touched.
         graph_state = {
             "electron_temperature": {
                 "description": "Electron temperature",
                 "documentation": "The electron temperature Te.",
                 "kind": "scalar",
+                "unit": "eV",
                 "links": [],
                 "status": "draft",
                 "deprecates": None,
                 "superseded_by": None,
                 "origin": "pipeline",
+                "name_stage": "accepted",
+                "physics_domain": "kinetics",
+                "source_domains": ["kinetics"],
             }
         }
 
@@ -117,15 +123,12 @@ class TestOriginNoOp:
 
             report = run_import(isnc)
 
-        # Check that _origin was set to 'pipeline' (no diff)
-        assert report.imported > 0
-        written_entries = [
-            e for e in report.entries if e["id"] == "electron_temperature"
-        ]
-        assert len(written_entries) == 1
-        assert written_entries[0]["_origin"] == "pipeline"
+        # A true no-op: skipped and excluded from the write set
+        # (imported == 0), so the node and its origin are never touched.
         assert report.skipped == 1
         assert report.updated == 0
+        assert report.created == 0
+        assert report.imported == 0
 
 
 class TestOriginFlip:
