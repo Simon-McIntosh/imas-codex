@@ -787,16 +787,20 @@ def _write_domain_yaml(
 ) -> Path:
     """Write a per-domain YAML file containing all entries as a list.
 
+    ``codex_sha`` is accepted for call-site compatibility but is no longer
+    stamped into the per-domain header: embedding the codex HEAD sha here
+    churned every one of the ~18 domain files on any unrelated codex commit.
+    The source commit sha now lives only in the manifest (catalog.yml).
+
     Returns the path of the written file.
     """
     sn_dir = staging_dir / "standard_names"
     sn_dir.mkdir(parents=True, exist_ok=True)
     filepath = sn_dir / f"{domain}.yml"
 
-    # Build header comment
+    # Build header comment (no per-file sha — see docstring)
     header_lines = [
         f"# Domain: {domain}",
-        f"# Catalog sha: {codex_sha or 'unknown'}",
         f"# Entries: {len(entries)}",
         "# Ordering: structural traversal",
         "#   (HAS_PARENT-incoming + HAS_ERROR-outgoing, Kahn topo sort,",
@@ -841,6 +845,12 @@ def _write_manifest(
     """Write the catalog.yml manifest to the staging directory root."""
     import imas_standard_names
 
+    # Deterministic timestamps: derive from the source commit so identical
+    # content yields identical bytes (see _commit_iso_timestamp). Fall back to
+    # wall-clock only when there is no commit to key off (e.g. a non-git
+    # staging run in tests), which is the only remaining non-deterministic path.
+    stamp = _commit_iso_timestamp(source_commit_sha) or datetime.now(UTC).isoformat()
+
     manifest_data = {
         "catalog_name": "imas-standard-names-catalog",
         "cocos_convention": cocos_convention,
@@ -848,7 +858,7 @@ def _write_manifest(
         "isn_model_version": imas_standard_names.__version__,
         "dd_version_lineage": ["4.0.0"],
         "generated_by": "imas-codex sn export",
-        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_at": stamp,
         "min_score_applied": min_score_applied,
         "min_description_score_applied": min_description_score_applied,
         "include_unreviewed": include_unreviewed,
@@ -861,7 +871,7 @@ def _write_manifest(
         "export_scope": export_scope,
         "domains_included": sorted(domains_included or []),
         "catalog_commit_sha": source_commit_sha,
-        "exported_at": datetime.now(UTC).isoformat(),
+        "exported_at": stamp,
         "edge_model_version": "v1",
     }
 
@@ -902,6 +912,29 @@ def _get_codex_commit_sha() -> str | None:
             timeout=10,
         )
         return result.stdout.strip()
+    except Exception:
+        return None
+
+
+def _commit_iso_timestamp(sha: str | None) -> str | None:
+    """Return the committer date of *sha* as an ISO-8601 string, or None.
+
+    Deriving the manifest timestamps from the source commit (rather than
+    wall-clock ``now()``) makes an export of identical content produce
+    identical bytes, so ``publish``'s ``git diff --cached --quiet`` no-change
+    fast path is not defeated by a timestamp that changes on every run.
+    """
+    if not sha:
+        return None
+    try:
+        result = subprocess.run(
+            ["git", "show", "-s", "--format=%cI", sha],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10,
+        )
+        return result.stdout.strip() or None
     except Exception:
         return None
 
