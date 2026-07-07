@@ -243,6 +243,21 @@ def _entry_to_graph_dict(
 # ---------------------------------------------------------------------------
 
 
+#: Catalog-owned fields that determine whether an incoming entry actually
+#: changes the graph node. Wider than ``PROTECTED_FIELDS`` — a catalog edit to
+#: ``unit`` / ``physics_domain`` / ``source_domains`` is not "protected" (it
+#: does not flip origin) but it is still a real change that must be written.
+#: Used by :func:`_entry_is_unchanged` to keep ``report.skipped`` honest.
+_CONTENT_FIELDS: frozenset[str] = frozenset(
+    PROTECTED_FIELDS | {"unit", "physics_domain", "source_domains"}
+)
+
+#: Extra node properties fetched alongside content fields for the import diff:
+#: ``origin`` (whose value we preserve on non-protected changes) and
+#: ``name_stage`` (so a ``'superseded'`` node is never resurrected).
+_DIFF_STATE_FIELDS: frozenset[str] = frozenset({"origin", "name_stage"})
+
+
 def _fetch_graph_state(
     gc: Any,
     name_ids: list[str],
@@ -251,7 +266,7 @@ def _fetch_graph_state(
     if not name_ids:
         return {}
 
-    props = sorted(PROTECTED_FIELDS | {"origin"})
+    props = sorted(_CONTENT_FIELDS | _DIFF_STATE_FIELDS)
     return_clause = ", ".join(f"sn.{p} AS {p}" for p in props)
 
     rows = gc.query(
@@ -286,6 +301,25 @@ def _protected_fields_differ(
         if old_val != new_val:
             return True
     return False
+
+
+def _entry_is_unchanged(
+    graph_state: dict[str, Any],
+    new_entry: dict[str, Any],
+) -> bool:
+    """Return True when no catalog-owned field differs from the graph node.
+
+    Compares the full :data:`_CONTENT_FIELDS` set (not just protected fields)
+    through :func:`_normalize_field`, so list ordering / empty-vs-null noise
+    does not read as a change. A genuinely-unchanged entry can be excluded
+    from the write set, making ``report.skipped`` an honest no-op count.
+    """
+    for field_name in _CONTENT_FIELDS:
+        if _normalize_field(graph_state.get(field_name)) != _normalize_field(
+            new_entry.get(field_name)
+        ):
+            return False
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -662,38 +696,45 @@ def run_import(
             return report
 
         try:
-            # 4e: Diff-based origin tracking
+            # 4e: Diff-based origin tracking. Decide, per entry, whether to
+            # write it and with which origin, from its current graph state.
+            # Genuine no-ops are excluded from the write set (honest skipped);
+            # a superseded node is never resurrected to 'accepted'.
             name_ids = [e["id"] for e in prepared]
             graph_state = _fetch_graph_state(gc, name_ids)
 
+            to_write: list[dict[str, Any]] = []
             for entry_dict in prepared:
                 eid = entry_dict["id"]
                 existing = graph_state.get(eid)
 
                 if existing is None:
-                    # New entry — mark as catalog_edit origin
+                    # New name — the catalog is its origin.
                     entry_dict["_origin"] = "catalog_edit"
                     report.created += 1
+                    to_write.append(entry_dict)
+                elif existing.get("name_stage") == "superseded":
+                    # Replaced by a refinement — re-importing a stale catalog
+                    # must not flip it back to 'accepted'. Leave it untouched.
+                    report.skipped += 1
+                elif _entry_is_unchanged(existing, entry_dict):
+                    # No catalog-owned field differs — a true no-op. Skip the
+                    # write so skipped is honest and no provenance/timestamp
+                    # churn is introduced.
+                    report.skipped += 1
                 elif _protected_fields_differ(existing, entry_dict):
-                    # Edited entry — flip origin
+                    # A protected editorial field changed — a curator edit.
                     entry_dict["_origin"] = "catalog_edit"
                     report.updated += 1
+                    to_write.append(entry_dict)
                 else:
-                    # No protected-field changes — preserve current origin
+                    # Only non-protected content changed (unit, physics_domain,
+                    # source_domains). Persist it but keep the current origin.
                     entry_dict["_origin"] = existing.get("origin") or "pipeline"
-                    report.skipped += 1
+                    report.updated += 1
+                    to_write.append(entry_dict)
 
-            # Count only created + updated as imported
-            to_write = [
-                e
-                for e in prepared
-                if e.get("_origin") == "catalog_edit"
-                or graph_state.get(e["id"]) is None
-            ]
-            # Actually write ALL entries (even no-ops refresh timestamps)
-            to_write = prepared
-
-            # 4f: Unit validation
+            # 4f: Unit validation (only over the entries we will write)
             if not accept_unit_override:
                 unit_errors = _validate_unit_against_graph(gc, to_write)
                 if unit_errors:

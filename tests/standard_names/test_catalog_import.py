@@ -351,3 +351,217 @@ class TestNormalizeField:
 
         assert _normalize_field(42) == 42
         assert _normalize_field(3.14) == 3.14
+
+
+# =============================================================================
+# Import diff: honest skipped + superseded guard
+# =============================================================================
+
+
+class TestEntryIsUnchanged:
+    """Tests for _entry_is_unchanged() — the true no-op detector."""
+
+    def _graph(self, **overrides) -> dict:
+        base = {
+            "description": "Electron temperature",
+            "documentation": "Te from Thomson scattering.",
+            "kind": "scalar",
+            "unit": "eV",
+            "links": [],
+            "status": "active",
+            "deprecates": None,
+            "superseded_by": None,
+            "validity_domain": None,
+            "constraints": None,
+            "physics_domain": "kinetics",
+            "source_domains": ["kinetics"],
+        }
+        base.update(overrides)
+        return base
+
+    def test_identical_content_is_unchanged(self) -> None:
+        from imas_codex.standard_names.catalog_import import _entry_is_unchanged
+
+        graph = self._graph()
+        # A prepared entry normalises empty links to None — still a no-op.
+        new = self._graph(links=None)
+        assert _entry_is_unchanged(graph, new) is True
+
+    def test_list_reorder_is_unchanged(self) -> None:
+        from imas_codex.standard_names.catalog_import import _entry_is_unchanged
+
+        graph = self._graph(links=["name:a", "name:b"])
+        new = self._graph(links=["name:b", "name:a"])
+        assert _entry_is_unchanged(graph, new) is True
+
+    def test_unit_change_is_a_change(self) -> None:
+        """unit is not a protected field but still a real change."""
+        from imas_codex.standard_names.catalog_import import _entry_is_unchanged
+
+        graph = self._graph(unit="eV")
+        new = self._graph(unit="keV")
+        assert _entry_is_unchanged(graph, new) is False
+
+    def test_physics_domain_change_is_a_change(self) -> None:
+        from imas_codex.standard_names.catalog_import import _entry_is_unchanged
+
+        graph = self._graph(physics_domain="kinetics")
+        new = self._graph(physics_domain="equilibrium")
+        assert _entry_is_unchanged(graph, new) is False
+
+    def test_description_change_is_a_change(self) -> None:
+        from imas_codex.standard_names.catalog_import import _entry_is_unchanged
+
+        graph = self._graph(description="Electron temperature")
+        new = self._graph(description="Electron temperature (revised)")
+        assert _entry_is_unchanged(graph, new) is False
+
+
+class TestFetchGraphStateFields:
+    """_fetch_graph_state must return the fields the diff loop reads."""
+
+    def test_query_projects_diff_fields(self) -> None:
+        from imas_codex.standard_names.catalog_import import _fetch_graph_state
+
+        captured: list[str] = []
+
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(
+            side_effect=lambda cypher, **kw: captured.append(cypher) or []
+        )
+        _fetch_graph_state(mock_gc, ["electron_temperature"])
+
+        cypher = captured[0]
+        for field_name in ("name_stage", "unit", "physics_domain", "source_domains"):
+            assert f"AS {field_name}" in cypher, (
+                f"_fetch_graph_state must project '{field_name}' for the "
+                f"import diff.\n\nFull query:\n{cypher}"
+            )
+
+
+class TestImportDiffWriteSet:
+    """run_import routes entries to the write set honestly.
+
+    - superseded graph node → never resurrected (skipped, not written)
+    - genuinely-unchanged entry → skipped, not written
+    - changed entry → written
+    """
+
+    _GC_PATCH = "imas_codex.graph.client.GraphClient"
+
+    def _make_catalog(self, tmp_path: Path) -> Path:
+        root = tmp_path / "isnc"
+        sn_dir = root / "standard_names"
+        sn_dir.mkdir(parents=True)
+        entries = [
+            {
+                "name": "superseded_name",
+                "kind": "scalar",
+                "unit": "eV",
+                "description": "Superseded quantity",
+                "documentation": "A quantity replaced by a refinement.",
+                "links": [],
+                "status": "active",
+            },
+            {
+                "name": "unchanged_name",
+                "kind": "scalar",
+                "unit": "eV",
+                "description": "Unchanged quantity",
+                "documentation": "Identical to the graph node.",
+                "links": [],
+                "status": "active",
+            },
+            {
+                "name": "changed_name",
+                "kind": "scalar",
+                "unit": "eV",
+                "description": "New description",
+                "documentation": "Description differs from graph.",
+                "links": [],
+                "status": "active",
+            },
+        ]
+        (sn_dir / "kinetics.yml").write_text(yaml.safe_dump(entries))
+        return root
+
+    def _graph_rows(self) -> list[dict]:
+        common = {
+            "kind": "scalar",
+            "unit": "eV",
+            "links": [],
+            "status": "active",
+            "deprecates": None,
+            "superseded_by": None,
+            "validity_domain": None,
+            "constraints": None,
+            "physics_domain": "kinetics",
+            "source_domains": ["kinetics"],
+            "origin": "pipeline",
+        }
+        return [
+            {
+                "id": "superseded_name",
+                "name_stage": "superseded",
+                "description": "Superseded quantity",
+                "documentation": "A quantity replaced by a refinement.",
+                **common,
+            },
+            {
+                "id": "unchanged_name",
+                "name_stage": "accepted",
+                "description": "Unchanged quantity",
+                "documentation": "Identical to the graph node.",
+                **common,
+            },
+            {
+                "id": "changed_name",
+                "name_stage": "accepted",
+                # Graph description differs from the catalog's "New description".
+                "description": "Stale description",
+                "documentation": "Description differs from graph.",
+                **common,
+            },
+        ]
+
+    def test_write_set_excludes_superseded_and_unchanged(self, tmp_path: Path) -> None:
+        from imas_codex.standard_names.catalog_import import run_import
+
+        isnc = self._make_catalog(tmp_path)
+        graph_rows = self._graph_rows()
+        captured: dict[str, Any] = {}
+
+        def _query(cypher: str, **params):
+            if "ImportLock" in cypher and "holder IS NULL" in cypher:
+                return [{"acquired": True}]
+            if "ImportLock" in cypher:
+                return []
+            if "UNWIND $ids AS id" in cypher:  # _fetch_graph_state
+                return graph_rows
+            # Main import MERGE (identified by the name_stage SET); capture once.
+            if (
+                "MERGE (sn:StandardName" in cypher
+                and "sn.name_stage" in cypher
+                and "batch" not in captured
+            ):
+                captured["batch"] = params.get("batch")
+                return []
+            return []
+
+        gc = MagicMock()
+        gc.query = MagicMock(side_effect=_query)
+
+        with patch(self._GC_PATCH) as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+            report = run_import(isnc)
+
+        written_ids = {e["id"] for e in captured.get("batch", [])}
+        assert written_ids == {"changed_name"}, (
+            "Only the changed entry should be written; superseded and "
+            f"unchanged must be excluded. Got: {written_ids}"
+        )
+        assert report.updated == 1
+        assert report.skipped == 2  # superseded + unchanged
+        assert report.created == 0
+        assert report.imported == 1  # only the written entry counts
