@@ -12,6 +12,10 @@ from pathlib import Path
 import pytest
 import yaml
 
+pytest.importorskip("imas_standard_names")
+
+from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP  # noqa: E402
+
 ANTI_PATTERNS_PATH = (
     Path(__file__).resolve().parents[2]
     / "imas_codex"
@@ -28,20 +32,12 @@ REQUIRED_KEYS = {
     "rewritten_name",
 }
 
-VALID_SEGMENTS = {
-    "subject",
-    "component",
-    "coordinate",
-    "device",
-    "object",
-    "geometry",
-    "position",
-    "process",
-    "transformation",
-    "geometric_base",
-    "region",
-    "physical_base",
-}
+# The single source of truth for grammar segment names is ISN's
+# SEGMENT_TOKEN_MAP (the same map the parser, is_known_token, and the
+# decomposition audit use). anti_patterns.yaml additionally cites the
+# `transformation` operator segment, which is not a SEGMENT_TOKEN_MAP key
+# (operators live in their own registry), so admit it explicitly.
+VALID_SEGMENTS = frozenset(SEGMENT_TOKEN_MAP) | {"transformation"}
 
 
 @pytest.fixture(scope="module")
