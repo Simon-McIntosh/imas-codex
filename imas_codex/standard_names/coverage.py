@@ -358,3 +358,48 @@ def _bucket(rows: Any) -> dict[str, int]:
         bucket = str(row.get("bucket") or "none")
         result[bucket] = int(row.get("cnt") or 0)
     return result
+
+
+def separatrix_pair_gaps(gc: Any | None = None) -> dict[str, list[str]]:
+    """WS4 guard: species missing their local<->flux_surface_averaged pair.
+
+    The DD ships both a local (``summary/local/separatrix/...``) and a
+    flux-surface-averaged (``.../separatrix_average/...``) value for every ion
+    species at the last closed flux surface; the catalog must not publish one
+    half of a DD-provided pair. Reports, for the toroidal-velocity and the
+    number-density families at ``plasma_boundary`` (accepted names only), the
+    species that have the local form but not the flux-surface-averaged form and
+    vice versa. All-empty lists ⇒ the pair matrix is complete.
+    """
+    import re
+
+    from imas_codex.graph.client import GraphClient
+
+    own = gc is None
+    gc = gc or GraphClient()
+    try:
+        acc = [
+            r["id"]
+            for r in gc.query(
+                "MATCH (s:StandardName) WHERE s.name_stage='accepted' "
+                "AND s.id ENDS WITH '_at_plasma_boundary' RETURN s.id AS id"
+            )
+        ]
+    finally:
+        if own:
+            gc.close()
+
+    def species(pattern: str, ids: list[str]) -> set[str]:
+        rx = re.compile(pattern)
+        return {m.group(1) for m in (rx.match(i) for i in ids) if m}
+
+    vel_local = species(r"^toroidal_(?!flux_surface_averaged)(.+)_velocity_at_plasma_boundary$", acc)
+    vel_fsa = species(r"^toroidal_flux_surface_averaged_(.+)_velocity_at_plasma_boundary$", acc)
+    den_local = species(r"^(?!flux_surface_averaged)(.+)_density_at_plasma_boundary$", acc)
+    den_fsa = species(r"^flux_surface_averaged_(.+)_density_at_plasma_boundary$", acc)
+    return {
+        "velocity_missing_fsa": sorted(vel_local - vel_fsa),
+        "velocity_missing_local": sorted(vel_fsa - vel_local),
+        "density_missing_fsa": sorted(den_local - den_fsa),
+        "density_missing_local": sorted(den_fsa - den_local),
+    }
