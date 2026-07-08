@@ -833,3 +833,37 @@ def fetch_sibling_family(
         "anchor": anchor,
         "siblings": siblings,
     }
+
+
+def locus_context_for(sn_id: str) -> dict[str, Any] | None:
+    """Resolve the ISN locus-registry context for a name's evaluation locus.
+
+    Returns ``{token, description, defining_quantity}`` for the locus of
+    *sn_id* when the installed ISN registry supplies a DD-anchored gloss or a
+    position-defining standard quantity; ``None`` otherwise. Injected into the
+    docs prompt so the locus-defining cross-link rule (PR-9) can link a name to
+    the standard quantity that fixes its locus (e.g. ``*_at_pedestal_top`` ->
+    ``normalized_poloidal_flux_coordinate_of_pedestal``) — data-driven: the
+    mapping lives in the ISN vocab, the rule lives in the prompt.
+    """
+    try:
+        from imas_standard_names.grammar.parser import parse as _isn_parse
+        from imas_standard_names.grammar.vocab_loaders import (
+            load_locus_registry as _load_locus_registry,
+        )
+
+        ir = getattr(_isn_parse(sn_id), "ir", None)
+        if ir is None or getattr(ir, "locus", None) is None:
+            return None
+        token = ir.locus.token
+        entry = _load_locus_registry().loci.get(token)
+        if entry is None or not (entry.description or entry.defining_quantity):
+            return None
+        return {
+            "token": token,
+            "description": entry.description or "",
+            "defining_quantity": entry.defining_quantity or "",
+        }
+    except Exception:
+        logger.debug("locus_context_for: failed for %s", sn_id, exc_info=True)
+        return None

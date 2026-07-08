@@ -417,7 +417,13 @@ reader should be able to reach.
 The per-name **locus context** carries the defining quantity for each locus
 when one exists (a data-driven field on the injected locus record) — use the id
 it provides as the link target. Do NOT hardcode or guess a
-locus→defining-quantity mapping. Emit the link ONLY when the locus context (or
+locus→defining-quantity mapping.
+
+{% if locus_context and locus_context.defining_quantity %}
+This entry's locus is **`{{ locus_context.token }}`**; its position is defined by the standard quantity **`{{ locus_context.defining_quantity }}`**. Cross-link it inline as `[label](name:{{ locus_context.defining_quantity }})` at the first natural mention of the locus.{% if locus_context.description %} Locus gloss (for accurate prose, do NOT quote verbatim): {{ locus_context.description }}{% endif %}
+{% endif %}
+
+Emit the link ONLY when the locus context (or
 the provided name lists) supplies a defining quantity that actually EXISTS;
 otherwise describe the locus in plain prose with NO square brackets (obey the
 no-bare-bracket rule in PR-3 — never emit a `[label]` without a real

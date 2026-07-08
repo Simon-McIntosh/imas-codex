@@ -7297,7 +7297,10 @@ async def process_generate_docs_batch(
         # Merge the cached compose context so the docs SYSTEM prompt's
         # ``_grammar_reference.md`` include renders the closed-vocabulary map
         # (otherwise the grammar block is empty). Cached after first call.
-        from imas_codex.standard_names.context import build_compose_context
+        from imas_codex.standard_names.context import (
+            build_compose_context,
+            locus_context_for,
+        )
 
         prompt_context: dict[str, Any] = {
             **build_compose_context(),
@@ -7305,6 +7308,12 @@ async def process_generate_docs_batch(
             "chain_history": chain_history,
             "nearby_existing_names": nearby_existing_names,
             "compose_scored_examples": compose_scored_examples,
+            # Locus-defining cross-link context (PR-9): the ISN-registry gloss +
+            # position-defining standard quantity for this name's locus, so the
+            # docs prompt can link e.g. *_at_pedestal_top ->
+            # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
+            # has no locus or the locus carries no gloss/defining quantity.
+            "locus_context": locus_context_for(sn_id),
         }
 
         try:
@@ -8143,6 +8152,14 @@ async def process_refine_docs_batch(
                 prompt_context["sibling_family"] = family
         except Exception:
             logger.debug("refine_docs: sibling family fetch failed for %s", sn_id)
+
+        # Locus-defining cross-link context (PR-9), same as generate_docs.
+        try:
+            from imas_codex.standard_names.context import locus_context_for
+
+            prompt_context["locus_context"] = locus_context_for(sn_id)
+        except Exception:
+            logger.debug("refine_docs: locus context fetch failed for %s", sn_id)
 
         try:
             user_prompt = render_prompt("sn/refine_docs_user", prompt_context)
