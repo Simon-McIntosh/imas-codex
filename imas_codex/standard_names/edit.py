@@ -269,6 +269,7 @@ def apply_edit(
     origin: str = "human",
     override_edits: bool = False,
     include_accepted: bool = False,
+    refine: bool = True,
     dry_run: bool = False,
     gc: GraphClient | None = None,
 ) -> EditPlan:
@@ -290,9 +291,19 @@ def apply_edit(
     in the dry-run plan and block the edit rather than being silently
     clobbered. The recorded values are re-read at acceptance time so the
     post-review cascade reproduces exactly the operator's choice.
+
+    ``refine`` (default ``True``) declares whether the attached proposal may
+    be automatically refined (its wording rewritten) if review scores it
+    below threshold. ``sn merge`` attaches human-approved catalog wording
+    with ``refine=False`` so the proposal is stamped ``edit_refine=false`` —
+    a durable review-only marker recording that the wording must be scored
+    as-is and never silently mutated. It does not alter the attach itself;
+    the merge caller enforces the accept-or-quarantine outcome.
     """
     provided = [
-        name for name, val in (("hint", hint), ("rename", rename), ("docs", docs)) if val
+        name
+        for name, val in (("hint", hint), ("rename", rename), ("docs", docs))
+        if val
     ]
     if len(provided) != 1:
         raise ValueError(
@@ -331,7 +342,10 @@ def apply_edit(
         target_row = _fetch_target(gc, target)
         if target_row is None:
             return _blocked(
-                target, mode, axis, scope or EditScope.only_self.value,
+                target,
+                mode,
+                axis,
+                scope or EditScope.only_self.value,
                 f"target StandardName {target!r} not found",
             )
 
@@ -340,7 +354,7 @@ def apply_edit(
             scope = EditScope.subtree.value if is_parent else EditScope.only_self.value
 
         if mode == "rename":
-            return _apply_rename(
+            plan = _apply_rename(
                 gc,
                 target=target,
                 target_row=target_row,
@@ -353,8 +367,8 @@ def apply_edit(
                 include_accepted=include_accepted,
                 dry_run=dry_run,
             )
-        if mode == "docs":
-            return _apply_docs(
+        elif mode == "docs":
+            plan = _apply_docs(
                 gc,
                 target=target,
                 target_row=target_row,
@@ -364,17 +378,34 @@ def apply_edit(
                 scope=scope,
                 dry_run=dry_run,
             )
-        return _apply_hint(
-            gc,
-            target=target,
-            target_row=target_row,
-            hint=hint,
-            axis=axis,
-            reason=reason,
-            origin=origin,
-            scope=scope,
-            dry_run=dry_run,
-        )
+        else:
+            plan = _apply_hint(
+                gc,
+                target=target,
+                target_row=target_row,
+                hint=hint,
+                axis=axis,
+                reason=reason,
+                origin=origin,
+                scope=scope,
+                dry_run=dry_run,
+            )
+
+        # Durable review-only marker: when the caller disables auto-refine
+        # (``sn merge`` folding human-approved wording), stamp the touched
+        # node so its provenance records that the wording must be scored
+        # as-is and never silently rewritten.
+        if not refine and plan.applied and plan.blocked is None:
+            stamped = plan.successor or target
+            gc.query(
+                """
+                // EDIT_STAMP_REVIEW_ONLY
+                MATCH (sn:StandardName {id: $id})
+                SET sn.edit_refine = false
+                """,
+                id=stamped,
+            )
+        return plan
     finally:
         if owns_gc:
             gc.close()
@@ -406,7 +437,10 @@ def _apply_rename(
     rt_ok, rt_reason = _isn_round_trip_ok(new_name)
     if not rt_ok:
         return _blocked(
-            target, "rename", "name", scope,
+            target,
+            "rename",
+            "name",
+            scope,
             f"new name fails ISN grammar round-trip: {rt_reason}",
         )
 
@@ -419,7 +453,10 @@ def _apply_rename(
     )
     if coll and coll[0].get("n"):
         return _blocked(
-            target, "rename", "name", scope,
+            target,
+            "rename",
+            "name",
+            scope,
             f"a StandardName {new_name!r} already exists",
         )
 
@@ -489,21 +526,30 @@ def _apply_rename(
 
             if scope != EditScope.family.value:
                 return _blocked(
-                    target, "rename", "name", scope,
+                    target,
+                    "rename",
+                    "name",
+                    scope,
                     f"renaming the shared segment {old_part!r} would desync "
                     f"{sib_count} sibling(s) under parent {parent_id!r} — "
                     "use --scope family",
                 )
             if old_part != parent_id:
                 return _blocked(
-                    target, "rename", "name", scope,
+                    target,
+                    "rename",
+                    "name",
+                    scope,
                     f"cannot map family-scope rename onto parent {parent_id!r} — "
                     f"the edited segment {old_part!r} does not match the parent's "
                     "id (topology inconsistency)",
                 )
             if new_part is None:
                 return _blocked(
-                    target, "rename", "name", scope,
+                    target,
+                    "rename",
+                    "name",
+                    scope,
                     f"cannot map family-scope rename onto parent {parent_id!r} — "
                     "the requested new name does not follow the same cascade "
                     "template as the current name",
@@ -523,7 +569,10 @@ def _apply_rename(
         root_row = _fetch_target(gc, refine_root_old)
         if root_row is None:
             return _blocked(
-                target, "rename", "name", scope,
+                target,
+                "rename",
+                "name",
+                scope,
                 f"mapped parent {refine_root_old!r} not found",
                 extra_actions=actions,
             )
@@ -533,14 +582,20 @@ def _apply_rename(
     if root_stage == "superseded":
         if root_has_successor:
             return _blocked(
-                target, "rename", "name", scope,
+                target,
+                "rename",
+                "name",
+                scope,
                 f"{refine_root_old!r} is superseded and has a successor — "
                 "edit the successor instead",
                 extra_actions=actions,
             )
     elif root_stage not in _RENAME_ELIGIBLE_STAGES:
         return _blocked(
-            target, "rename", "name", scope,
+            target,
+            "rename",
+            "name",
+            scope,
             f"{refine_root_old!r} has name_stage={root_stage!r} — not eligible "
             "for rename (must be accepted/reviewed/exhausted/drafted, or "
             "superseded with no successor)",
@@ -562,7 +617,10 @@ def _apply_rename(
         )
         if plan_result.conflicts:
             return _blocked(
-                target, "rename", "name", scope,
+                target,
+                "rename",
+                "name",
+                scope,
                 "cascade plan conflict: " + "; ".join(plan_result.conflicts),
                 extra_actions=actions,
             )
@@ -677,13 +735,19 @@ def _apply_docs(
     has_successor = bool(target_row.get("has_successor"))
     if name_stage == "superseded" and has_successor:
         return _blocked(
-            target, "docs", "docs", scope,
+            target,
+            "docs",
+            "docs",
+            scope,
             f"{target!r} is superseded and has a successor — edit the "
             "successor instead",
         )
     if name_stage != "accepted":
         return _blocked(
-            target, "docs", "docs", scope,
+            target,
+            "docs",
+            "docs",
+            scope,
             f"target name_stage={name_stage!r} — docs edits require an "
             "accepted name (name_stage='accepted')",
         )
@@ -731,7 +795,10 @@ def _apply_docs(
     )
     if result.get("docs_chain_length", -1) < 0:
         return _blocked(
-            target, "docs", "docs", scope,
+            target,
+            "docs",
+            "docs",
+            scope,
             "docs claim raced — target left docs_stage='refining'; retry the edit",
             extra_actions=actions,
         )
@@ -791,7 +858,10 @@ def _apply_hint(
     has_successor = bool(target_row.get("has_successor"))
     if name_stage == "superseded" and has_successor:
         return _blocked(
-            target, "hint", axis, scope,
+            target,
+            "hint",
+            axis,
+            scope,
             f"{target!r} is superseded and has a successor — edit the "
             "successor instead",
         )
@@ -811,7 +881,10 @@ def _apply_hint(
         )
         if not (src_count and src_count[0].get("n")):
             return _blocked(
-                target, "hint", axis, scope,
+                target,
+                "hint",
+                axis,
+                scope,
                 f"{target!r} has no producing StandardNameSource (it is a "
                 "derived/structural name) — a name-axis hint cannot regenerate "
                 "it. Use `--rename` to propose a replacement name, or "
