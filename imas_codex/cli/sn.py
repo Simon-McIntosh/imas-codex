@@ -3626,6 +3626,88 @@ def sn_import(
     console.print(f"\n[green]✓ {action}: {report.imported} entries[/green]")
 
 
+@sn.command("rebuild-provenance")
+@click.option(
+    "--isnc",
+    type=click.Path(),
+    default=None,
+    help="Path to ISNC repository root (default: auto-discover)",
+)
+@click.option(
+    "--ref",
+    default=None,
+    help="Catalog git commit to recover the sources map from "
+    "(default: the last provenance-complete release commit).",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Classify orphans and report what would be bound, without writing.",
+)
+def sn_rebuild_provenance(isnc: str | None, ref: str | None, dry_run: bool) -> None:
+    """Rebuild the provenance ledger to fresh-parity.
+
+    \b
+    Rebinds ``StandardNameSource`` + ``PRODUCED_NAME`` (+ ``FROM_DD_PATH`` /
+    ``HAS_PARENT``) for every live name that lost its source in the
+    export→import round-trip, WITHOUT regenerating names or docs. dd sources
+    are recovered from the catalog's last provenance-complete commit; the DD
+    graph + ISN grammar close the gap; residue becomes an explicit
+    ``manual`` source. Exits non-zero if any orphan remains afterwards.
+    """
+    from pathlib import Path
+
+    from rich.table import Table
+
+    from imas_codex.settings import get_sn_isnc_dir
+    from imas_codex.standard_names.provenance_rebuild import (
+        DEFAULT_RECOVERY_REF,
+        rebuild_provenance,
+    )
+
+    if isnc:
+        isnc_path: Path | None = Path(isnc)
+    else:
+        isnc_path = get_sn_isnc_dir()
+        if isnc_path is None:
+            console.print(
+                "[red]ISNC not found.[/red] Set [bold]IMAS_CODEX_SN_ISNC[/bold] env "
+                "var or clone imas-standard-names-catalog as a sibling directory."
+            )
+            raise SystemExit(2)
+
+    recovery_ref = ref or DEFAULT_RECOVERY_REF
+    console.print("\n[bold]Provenance Ledger Rebuild[/bold]")
+    console.print(f"  ISNC: {isnc_path}")
+    console.print(f"  Recovery ref: {recovery_ref}")
+    if dry_run:
+        console.print("  Mode: [yellow]dry run[/yellow]")
+    console.print("")
+
+    summary = rebuild_provenance(isnc_dir=isnc_path, ref=recovery_ref, dry_run=dry_run)
+
+    table = Table(title="Rebuild Summary")
+    table.add_column("metric", style="cyan")
+    table.add_column("value", style="white")
+    table.add_row("orphans before", str(summary.get("orphans_before", "?")))
+    table.add_row("bound from map (dd/signal)", str(summary.get("bound_from_map", 0)))
+    table.add_row("bound derived", str(summary.get("bound_derived", 0)))
+    table.add_row("bound manual", str(summary.get("bound_manual", 0)))
+    if not dry_run:
+        table.add_row("orphans after", str(summary.get("orphans_after", "?")))
+    console.print(table)
+
+    residual = summary.get("orphans_after")
+    if not dry_run and residual:
+        console.print(
+            f"\n[red]✗ {residual} orphan(s) remain — the ledger is not yet "
+            "complete.[/red]"
+        )
+        raise SystemExit(1)
+
+    console.print("\n[green]✓ Provenance rebuild complete[/green]")
+
+
 @sn.command("clear")
 @click.option("--dry-run", is_flag=True, help="Preview without modifying the graph")
 @click.option("--force", "-f", is_flag=True, help="Skip confirmation prompt")
