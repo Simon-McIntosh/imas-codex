@@ -60,6 +60,13 @@ enums:
           Imported from the ISN catalog. Set on StandardName.source_types
           for names that originate from a catalog round-trip rather than
           pipeline extraction (see catalog_import.py).
+      manual:
+        description: >-
+          Hand-authored origin with no deterministic upstream anchor. Assigned
+          by the provenance rebuild to a live name that has no recoverable dd
+          or derived source, so the ledger records an explicit, auditable
+          origin rather than leaving the name orphaned — never a fabricated
+          DD path.
 
   StandardNameOrigin:
     description: >-
