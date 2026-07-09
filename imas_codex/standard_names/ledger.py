@@ -49,6 +49,16 @@ _FIND_DESYNCS = f"""
     ORDER BY sns.id
 """
 
+_REATTACH_DESYNCS = f"""
+    MATCH (sns:StandardNameSource)
+    WHERE sns.produced_sn_id IS NOT NULL
+    MATCH (sn:StandardName {{id: sns.produced_sn_id}})
+    WHERE {LIVE_NAME}
+      AND NOT (sns)-[:PRODUCED_NAME]->(sn)
+    MERGE (sns)-[:PRODUCED_NAME]->(sn)
+    RETURN count(*) AS reattached
+"""
+
 
 def find_provenance_orphans(*, gc: GraphClient | None = None) -> list[dict[str, Any]]:
     """Return live names with no ``PRODUCED_NAME`` source (excluding error-siblings).
@@ -72,6 +82,23 @@ def find_edge_scalar_desyncs(*, gc: GraphClient | None = None) -> list[dict[str,
     gc = gc or GraphClient()
     try:
         return list(gc.query(_FIND_DESYNCS))
+    finally:
+        if owns:
+            gc.close()
+
+
+def reattach_produced_name_edges(*, gc: GraphClient | None = None) -> int:
+    """Heal edge/scalar desyncs by MERGEing the missing ``PRODUCED_NAME`` edge.
+
+    For every source whose ``produced_sn_id`` scalar names a live name but
+    whose ``PRODUCED_NAME`` edge is absent, create the edge. Idempotent (MERGE);
+    returns the number of edges reattached.
+    """
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = gc.query(_REATTACH_DESYNCS)
+        return int(rows[0]["reattached"]) if rows else 0
     finally:
         if owns:
             gc.close()

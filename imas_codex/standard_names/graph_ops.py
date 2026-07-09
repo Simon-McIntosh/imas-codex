@@ -26,6 +26,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
 )
+from imas_codex.standard_names.ledger import reattach_produced_name_edges
 
 logger = logging.getLogger(__name__)
 
@@ -6539,8 +6540,12 @@ def reconcile_provenance() -> dict[str, int]:
     it was minted for. Both are audit pollution, not pipeline blockers, so
     this idempotent sweep is safe to run every rotation.
 
-    Two passes:
+    Three passes:
 
+    0. **Reattach live desyncs** — any ``StandardNameSource`` whose
+       ``produced_sn_id`` scalar names a LIVE ``StandardName`` but whose
+       ``PRODUCED_NAME`` edge is missing has the edge MERGEd back (the scalar
+       is the recovery mirror; a missing edge is silent provenance loss).
     1. **NULL stale scalars** — any ``StandardNameSource.produced_sn_id`` whose
        target ``StandardName`` no longer exists is set to null.
     2. **Delete orphaned derived-parent scaffolding** — any
@@ -6548,9 +6553,14 @@ def reconcile_provenance() -> dict[str, int]:
        ``derived`` or ``dd``) whose parent ``StandardName(id = source_id)``
        no longer exists is DETACH-DELETEd.
 
-    Returns dict with counts: {scalars_cleared, orphan_sources_deleted}.
+    Returns dict with counts: {edges_reattached, scalars_cleared,
+    orphan_sources_deleted}.
     """
     with GraphClient() as gc:
+        # Pass 0: heal live scalar/missing-edge desyncs before cleanup. Disjoint
+        # from pass 1 (that only touches scalars whose target no longer exists).
+        edges_reattached = reattach_produced_name_edges(gc=gc)
+
         scalars = gc.query(
             """
             MATCH (sns:StandardNameSource)
@@ -6577,15 +6587,18 @@ def reconcile_provenance() -> dict[str, int]:
         )
         orphan_sources_deleted = orphans[0]["n"] if orphans else 0
 
-    if scalars_cleared or orphan_sources_deleted:
+    if edges_reattached or scalars_cleared or orphan_sources_deleted:
         logger.info(
-            "reconcile_provenance: cleared %d stale produced_sn_id scalar(s), "
+            "reconcile_provenance: reattached %d missing PRODUCED_NAME edge(s), "
+            "cleared %d stale produced_sn_id scalar(s), "
             "deleted %d orphaned derived-parent source(s)",
+            edges_reattached,
             scalars_cleared,
             orphan_sources_deleted,
         )
 
     return {
+        "edges_reattached": edges_reattached,
         "scalars_cleared": scalars_cleared,
         "orphan_sources_deleted": orphan_sources_deleted,
     }
@@ -9235,7 +9248,9 @@ def persist_refined_name(
                              collect(r)   AS pn_rels
                         FOREACH (rel IN pn_rels | DELETE rel)
                         WITH new, old, pn_sources
-                        FOREACH (s IN pn_sources | MERGE (s)-[:PRODUCED_NAME]->(new))
+                        FOREACH (s IN pn_sources |
+                            MERGE (s)-[:PRODUCED_NAME]->(new)
+                            SET s.produced_sn_id = new.id)
 
                         // 5. Migrate HAS_STANDARD_NAME edges
                         WITH DISTINCT new, old

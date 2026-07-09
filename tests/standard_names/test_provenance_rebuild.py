@@ -226,12 +226,16 @@ def test_rebuild_routes_orphans_to_map_derived_and_manual():
 
     with (
         patch.object(pr, "find_provenance_orphans", return_value=orphans),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(pr, "reattach_produced_name_edges", return_value=0) as m_re,
         patch.object(pr, "bind_recovery_sources", side_effect=_spy_bind),
         patch.object(pr, "rederive_structural_edges", return_value={}) as m_struct,
         patch.object(pr, "reconcile_standard_name_sources", return_value={}) as m_recon,
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map=recovery_map)
 
+    # reattach runs first (recover true sources before falling back to manual)
+    assert m_re.called
     bound = dict(bind_calls)
     # in-map name bound from the recovery map (dd source)
     assert bound["in_map_name"][0]["source_type"] == "dd"
@@ -263,14 +267,55 @@ def test_rebuild_dry_run_binds_nothing():
 
     with (
         patch.object(pr, "find_provenance_orphans", return_value=orphans),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(pr, "reattach_produced_name_edges") as m_re,
         patch.object(pr, "bind_recovery_sources") as m_bind,
         patch.object(pr, "rederive_structural_edges") as m_struct,
         patch.object(pr, "reconcile_standard_name_sources") as m_recon,
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map={}, dry_run=True)
 
+    assert not m_re.called  # dry run mutates nothing, not even reattach
     assert not m_bind.called
     assert not m_struct.called
     assert not m_recon.called
     assert summary["dry_run"] is True
     assert summary["bound_manual"] == 1  # would-be classification still reported
+
+
+def test_rebuild_reattaches_true_sources_before_binding_fallbacks():
+    """A name that is orphaned only because its PRODUCED_NAME edge is missing
+    (its source still names it via produced_sn_id) must be REATTACHED to that
+    true source — never bound to a fresh manual/derived source.
+    """
+    import imas_codex.standard_names.provenance_rebuild as pr
+
+    orphans = [
+        {"sn_id": "desync_name", "name_stage": "accepted", "origin": "pipeline"},
+        {"sn_id": "residue_name", "name_stage": "accepted", "origin": "catalog_edit"},
+    ]
+    desyncs = [{"source_id": "dd:x", "sn_id": "desync_name", "name_stage": "accepted"}]
+    gc = MagicMock()
+    gc.query.return_value = [{"id": "residue_name", "derived": False}]
+
+    bind_calls = []
+
+    with (
+        patch.object(pr, "find_provenance_orphans", return_value=orphans),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=desyncs),
+        patch.object(pr, "reattach_produced_name_edges", return_value=1) as m_re,
+        patch.object(
+            pr,
+            "bind_recovery_sources",
+            side_effect=lambda name_id, specs, *, gc: bind_calls.append(name_id),
+        ),
+        patch.object(pr, "rederive_structural_edges", return_value={}),
+        patch.object(pr, "reconcile_standard_name_sources", return_value={}),
+    ):
+        summary = pr.rebuild_provenance(gc=gc, recovery_map={})
+
+    assert m_re.called
+    # desync_name was reattached to its real source, not bound to a manual one
+    assert "desync_name" not in bind_calls
+    assert bind_calls == ["residue_name"]
+    assert summary["reattached"] == 1

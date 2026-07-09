@@ -34,7 +34,11 @@ from imas_codex.standard_names.graph_ops import (
     reconcile_standard_name_sources,
     rederive_structural_edges,
 )
-from imas_codex.standard_names.ledger import find_provenance_orphans
+from imas_codex.standard_names.ledger import (
+    find_edge_scalar_desyncs,
+    find_provenance_orphans,
+    reattach_produced_name_edges,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -277,13 +281,22 @@ def rebuild_provenance(
         if recovery_map is None:
             recovery_map = load_recovery_map(isnc_dir, ref) if isnc_dir else {}
 
+        # Pass 0: reattach names orphaned only by a missing PRODUCED_NAME edge
+        # (their source still names them via produced_sn_id). This recovers the
+        # TRUE original source rather than minting a manual/derived fallback, so
+        # it must run before classification. Names in the desync set are excluded
+        # from the map/derived/manual routing below.
+        desync_ids = {d["sn_id"] for d in find_edge_scalar_desyncs(gc=gc)}
+        reattached = 0 if dry_run else reattach_produced_name_edges(gc=gc)
+
         orphans = find_provenance_orphans(gc=gc)
-        orphan_ids = [o["sn_id"] for o in orphans]
+        orphan_ids = [o["sn_id"] for o in orphans if o["sn_id"] not in desync_ids]
         remaining = [i for i in orphan_ids if i not in recovery_map]
         derived_ids = _classify_derived(gc, remaining)
 
         summary: dict[str, Any] = {
             "orphans_before": len(orphan_ids),
+            "reattached": reattached if not dry_run else len(desync_ids),
             "bound_from_map": 0,
             "bound_derived": 0,
             "bound_manual": 0,

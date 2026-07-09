@@ -269,6 +269,30 @@ class TestPersistCypherContent:
         assert "PRODUCED_NAME" in cypher
         assert "HAS_STANDARD_NAME" in cypher
 
+    def test_migrated_source_scalar_tracks_successor(self):
+        """When PRODUCED_NAME migrates to the successor, the source's
+        ``produced_sn_id`` scalar must be repointed too — otherwise the scalar
+        keeps naming the superseded predecessor (a latent edge/scalar desync).
+        """
+        from imas_codex.standard_names.graph_ops import persist_refined_name
+
+        gc, tx = _mock_gc_tx()
+        tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
+
+        with patch(_GC_PATH, return_value=gc):
+            persist_refined_name(
+                old_name="old",
+                new_name="new",
+                description="d",
+                old_chain_length=1,
+            )
+
+        cypher = " ".join(tx.run.call_args.args[0].split())
+        assert "SET s.produced_sn_id = new.id" in cypher, (
+            "the migrated source must repoint its produced_sn_id scalar to the "
+            f"successor, not the superseded predecessor:\n{cypher}"
+        )
+
     def test_chain_length_incremented(self):
         from imas_codex.standard_names.graph_ops import persist_refined_name
 

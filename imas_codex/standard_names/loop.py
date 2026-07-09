@@ -827,19 +827,35 @@ async def run_sn_pools(
             )
 
         # ── B2c: Reconcile provenance metadata ────────────────────────
-        # NULL produced_sn_id scalars pointing at deleted names and delete
-        # orphaned derived-parent scaffolding. Idempotent, provenance-only.
+        # Reattach live scalar/missing-edge desyncs, NULL produced_sn_id
+        # scalars pointing at deleted names, and delete orphaned derived-parent
+        # scaffolding. Idempotent, provenance-only. Then surface the ledger
+        # orphan count (live names with no PRODUCED_NAME source) — the invariant
+        # the ledger must hold; a non-zero count is silent provenance loss.
         from imas_codex.standard_names.graph_ops import reconcile_provenance
+        from imas_codex.standard_names.ledger import find_provenance_orphans
 
         prov_result = await asyncio.to_thread(reconcile_provenance)
-        if prov_result.get("scalars_cleared", 0) or prov_result.get(
-            "orphan_sources_deleted", 0
+        if (
+            prov_result.get("edges_reattached", 0)
+            or prov_result.get("scalars_cleared", 0)
+            or prov_result.get("orphan_sources_deleted", 0)
         ):
             logger.info(
-                "run_sn_pools: provenance reconcile — %d stale scalar(s) cleared, "
+                "run_sn_pools: provenance reconcile — %d edge(s) reattached, "
+                "%d stale scalar(s) cleared, "
                 "%d orphaned derived-parent source(s) deleted",
+                prov_result.get("edges_reattached", 0),
                 prov_result.get("scalars_cleared", 0),
                 prov_result.get("orphan_sources_deleted", 0),
+            )
+        orphans = await asyncio.to_thread(find_provenance_orphans)
+        if orphans:
+            logger.warning(
+                "run_sn_pools: ledger invariant — %d live name(s) have NO source "
+                "(run 'sn rebuild-provenance' to recover). First few: %s",
+                len(orphans),
+                ", ".join(o["sn_id"] for o in orphans[:5]),
             )
 
         # ── B2d: DD source-drift refresh ──────────────────────────────
