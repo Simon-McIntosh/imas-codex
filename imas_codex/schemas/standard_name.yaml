@@ -484,7 +484,7 @@ classes:
       catalog_pr_url:
         description: >-
           Full URL of the catalog PR that last modified this entry.
-          Set by sn import; null for pipeline-only names.
+          Set by sn merge; null for pipeline-only names.
       exported_at:
         description: >-
           ISO 8601 timestamp when this name was last exported to the
@@ -634,8 +634,8 @@ classes:
         range: string
       imported_at:
         description: >-
-          ISO 8601 timestamp when this entry was imported from the catalog.
-          Set by ``sn import`` on each import.
+          ISO 8601 timestamp when this entry was last folded in from the
+          catalog. Set by ``sn merge`` on each catalog-PR merge.
         range: datetime
       reviewer_score_name:
         description: >-
@@ -2106,9 +2106,10 @@ classes:
 
   ImportWatermark:
     description: >-
-      Singleton node tracking the last successful catalog import. Exactly
-      one node with id='singleton' exists in the graph. Used by sn import
-      to determine which catalog commits have already been processed.
+      LEGACY singleton node from the removed bulk catalog import. Tracked the
+      last processed catalog commit; no longer written now that the restore
+      path is the diff-by-id reconciler and acceptance is ``sn merge``. Kept
+      as a declared node only until the singleton is migrated out.
     class_uri: sn:ImportWatermark
     attributes:
       id:
@@ -2130,9 +2131,9 @@ classes:
 
   ImportLock:
     description: >-
-      Singleton advisory lock for catalog import operations. Prevents
-      concurrent sn import runs from corrupting graph state. Exactly
-      one node with id='singleton' exists in the graph.
+      LEGACY singleton advisory lock from the removed bulk catalog import.
+      No longer written now that bulk import is gone. Kept as a declared node
+      only until the singleton is migrated out.
     class_uri: sn:ImportLock
     attributes:
       id:
