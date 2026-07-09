@@ -365,6 +365,9 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.coord_path %}- **Coordinate:** {{ item.coord_path }}{% if item.coord_unit %} ({{ item.coord_unit }}){% endif %}{% endif %}
 {% if item.parent_path %}- **Parent structure:** {{ item.parent_path }} ({{ item.parent_type or 'STRUCTURE' }}){% endif %}
 {% if item.parent_description %}- **Parent description:** {{ item.parent_description }}{% endif %}
+{% if item.ancestor_context %}- **DD path lineage** (ancestor nodes — the quantity's meaning and its evaluation locus live here; use them to resolve the correct locus, e.g. `pedestal_top` vs the bare path segment `pedestal`):
+{% for anc in item.ancestor_context %}  - `{{ anc.path }}`: {{ anc.text }}
+{% endfor %}{% endif %}
 {% if item.clusters %}
 - **Semantic clusters:**
 {% for cl in item.clusters %}  - **{{ cl.label }}** ({{ cl.scope }}): {{ cl.description }}

@@ -1025,7 +1025,30 @@ RETURN n.coordinate1_same_as AS coordinate1,
        u.id AS unit_from_rel,
        parent.id AS parent_path,
        parent.description AS parent_description,
+       n.enrichment_source AS enrichment_source,
        sibling_fields
+"""
+
+# Ancestor lineage context — walk HAS_PARENT up to the IDS root and collect
+# every ancestor that carries a non-empty description/documentation. A DD
+# *value* leaf is often a terse template stub (e.g. a per-species
+# ``.../velocity_phi/<species>/value`` reads only "Deuterium (D)."), while the
+# physically-meaningful text — the quantity AND its evaluation locus (e.g.
+# "Ion toroidal rotation velocity … at the pedestal top") — lives on a parent
+# quantity node. Surfacing the ancestor lineage lets both name and docs
+# composition ground on the real physics + locus instead of the stub. Rich
+# LLM-enriched descriptions are preferred over terse DD documentation; nearest
+# ancestor first.
+_ANCESTOR_CONTEXT_QUERY = """
+MATCH path = (n:IMASNode {id: $path})-[:HAS_PARENT*1..8]->(a:IMASNode)
+WHERE coalesce(trim(a.description), '') <> ''
+   OR coalesce(trim(a.documentation), '') <> ''
+RETURN length(path) AS depth,
+       a.id AS path,
+       a.description AS description,
+       a.documentation AS documentation,
+       a.enrichment_source AS enrichment_source
+ORDER BY depth ASC
 """
 
 _CROSS_IDS_QUERY = """
@@ -1496,7 +1519,33 @@ def _enrich_batch_items(items: list[dict]) -> None:
                 # the source-documentation line entirely.
                 item["documentation"] = node_doc or node_desc
 
-            # BUG 9 fix: propagate authoritative DD unit from HAS_UNIT into
+            # Ancestor lineage context: a terse value leaf ("Deuterium (D).")
+            # hides the meaningful physics + evaluation locus that lives on a
+            # parent quantity node ("Ion toroidal rotation velocity … at the
+            # pedestal top"). Surface the ancestor lineage so the composer sees
+            # the parent description IN ADDITION to the leaf — this is what lets
+            # a name resolve the correct locus (e.g. pedestal_top, not the bare
+            # DD path segment pedestal). Prefer rich LLM-enriched descriptions;
+            # fall back to terse DD documentation; nearest ancestor first; cap
+            # the block so a deep path cannot bloat the prompt.
+            if not item.get("ancestor_context"):
+                anc_rows = list(gc.query(_ANCESTOR_CONTEXT_QUERY, path=grounding_path))
+                lineage: list[dict[str, str]] = []
+                seen_text: set[str] = set()
+                for a in anc_rows:
+                    a_desc = (a.get("description") or "").strip()
+                    a_doc = (a.get("documentation") or "").strip()
+                    text = a_desc or a_doc
+                    if not text or text in seen_text:
+                        continue
+                    seen_text.add(text)
+                    lineage.append({"path": a.get("path") or "", "text": text})
+                    if len(lineage) >= 4:
+                        break
+                if lineage:
+                    item["ancestor_context"] = lineage
+
+            # Propagate the authoritative DD unit from HAS_UNIT into
             # the batch item so compose_batch's unit-safety skip and the
             # downstream persist see the real DD unit (Pa, m, m^-2.W, …)
             # rather than None.  StandardNameSource does not (yet) carry a
@@ -6901,6 +6950,32 @@ def _enrich_for_docs_gen(
             aliases = [n["alias"] for n in dd_nodes if n.get("alias")]
             if aliases:
                 item["dd_aliases"] = aliases
+
+            # Surface the DD ancestor lineage: the primary source leaf is often
+            # a terse template stub, while the quantity's physics + evaluation
+            # locus live on a parent quantity node up the HAS_PARENT chain
+            # (e.g. "…rotation velocity … at the pedestal top"). Mirrors the
+            # name-generation grounding so docs ground on the real physics/locus
+            # instead of the stub. Nearest rich ancestor first; capped.
+            primary = dd_nodes[0]["id"]
+            try:
+                anc_rows = list(gc.query(_ANCESTOR_CONTEXT_QUERY, path=primary))
+            except Exception:
+                anc_rows = []
+            lineage: list[dict[str, str]] = []
+            seen_anc: set[str] = set()
+            for a in anc_rows:
+                text = (a.get("description") or "").strip() or (
+                    a.get("documentation") or ""
+                ).strip()
+                if not text or text in seen_anc:
+                    continue
+                seen_anc.add(text)
+                lineage.append({"path": a.get("path") or "", "text": text})
+                if len(lineage) >= 4:
+                    break
+            if lineage:
+                item["ancestor_context"] = lineage
 
         # ── 1a. Derived-parent children grounding ─────────────────────
         # A derived parent has no DD source of its own; its concrete physics

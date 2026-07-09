@@ -226,6 +226,16 @@ IDS names, or DD-specific language into the output text.
 {% for p in item.dd_source_docs %}- `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
 {% endfor %}{% endif %}
 
+{% if item.ancestor_context %}
+## DD Path Lineage (PRIVATE — do NOT cite in output)
+
+The concrete source leaf is often terse; the quantity's meaning and its
+evaluation locus live on parent nodes. Use this lineage to ground the physics
+and the correct evaluation location. NEVER cite these paths in the output.
+
+{% for anc in item.ancestor_context %}- `{{ anc.path }}`: {{ anc.text }}
+{% endfor %}{% endif %}
+
 {% if item.dd_aliases %}
 ## Aliases (PRIVATE — do NOT cite in output)
 
