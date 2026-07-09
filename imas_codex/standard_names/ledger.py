@@ -38,9 +38,18 @@ _FIND_ORPHANS = f"""
     ORDER BY sn.id
 """
 
+# A genuine desync is a source that HAS produced a name (status composed /
+# attached) whose ``PRODUCED_NAME`` edge went missing. A source still pending
+# (``extracted`` / ``drafted``) has not produced anything yet — its edge is
+# absent by design, not by loss — so it is NOT a desync and must not be
+# reattached (that would falsely mark the name sourced before the pipeline
+# finishes composing it). Pending sources are handled by the compose pipeline
+# (and the provenance-rebuild exclude-pending guard), never here.
+_PRODUCED = "coalesce(sns.status, '') IN ['composed', 'attached']"
+
 _FIND_DESYNCS = f"""
     MATCH (sns:StandardNameSource)
-    WHERE sns.produced_sn_id IS NOT NULL
+    WHERE sns.produced_sn_id IS NOT NULL AND {_PRODUCED}
     MATCH (sn:StandardName {{id: sns.produced_sn_id}})
     WHERE {LIVE_NAME}
       AND NOT (sns)-[:PRODUCED_NAME]->(sn)
@@ -51,7 +60,7 @@ _FIND_DESYNCS = f"""
 
 _REATTACH_DESYNCS = f"""
     MATCH (sns:StandardNameSource)
-    WHERE sns.produced_sn_id IS NOT NULL
+    WHERE sns.produced_sn_id IS NOT NULL AND {_PRODUCED}
     MATCH (sn:StandardName {{id: sns.produced_sn_id}})
     WHERE {LIVE_NAME}
       AND NOT (sns)-[:PRODUCED_NAME]->(sn)

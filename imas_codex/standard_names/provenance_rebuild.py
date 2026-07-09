@@ -238,6 +238,36 @@ def _synth_spec(name_id: str, source_type: str) -> dict[str, Any]:
     }
 
 
+def _fetch_pending_source_names(gc: GraphClient, ids: list[str]) -> set[str]:
+    """Return the subset of *ids* that have a claimable PENDING dd source.
+
+    A live name may be a provenance orphan (no ``PRODUCED_NAME`` edge yet) not
+    because its provenance is lost, but because the pipeline has not finished
+    composing it: a ``StandardNameSource(status='extracted'|'drafted')`` destined
+    for the name (``produced_sn_id`` names it) sits in the GENERATE_NAME queue.
+    Such a name must NOT be given a synthesized ``derived`` / ``manual`` source —
+    that would pre-empt the pipeline and pin a fabricated fallback over the real
+    dd source about to be composed. It is excluded from the fallback and left
+    for the pipeline to source. (The deterministic desync reattach in
+    :mod:`ledger` deliberately ignores pending sources, so they survive to be
+    caught here.)
+    """
+    if not ids:
+        return set()
+    rows = gc.query(
+        """
+        MATCH (sns:StandardNameSource)
+        WHERE coalesce(sns.status, '') IN ['extracted', 'drafted']
+          AND sns.produced_sn_id IS NOT NULL
+          AND sns.produced_sn_id IN $ids
+          AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
+        RETURN DISTINCT sns.produced_sn_id AS id
+        """,
+        ids=ids,
+    )
+    return {r["id"] for r in rows if r.get("id")}
+
+
 def _classify_derived_parents(gc: GraphClient, ids: list[str]) -> set[str]:
     """Return the subset of *ids* that are DERIVED PARENTS.
 
@@ -370,8 +400,13 @@ def rebuild_provenance(
         # Classify the remainder by descending anchor authority.
         not_mapped = [i for i in orphan_ids if i not in recovery_map]
         scalar_specs = _fetch_dd_source_paths(gc, not_mapped)
+        not_scalar = [i for i in not_mapped if i not in scalar_specs]
+        # Exclude-pending guard: an orphan whose real dd source is still pending
+        # (extracted/drafted) in the GENERATE_NAME queue must not be given a
+        # synthesized derived/manual fallback — the pipeline will source it.
+        pending_names = _fetch_pending_source_names(gc, not_scalar)
         parent_ids = _classify_derived_parents(
-            gc, [i for i in not_mapped if i not in scalar_specs]
+            gc, [i for i in not_scalar if i not in pending_names]
         )
 
         summary: dict[str, Any] = {
@@ -381,6 +416,7 @@ def rebuild_provenance(
             "bound_from_scalar": 0,
             "bound_derived": 0,
             "bound_manual": 0,
+            "excluded_pending": 0,
             "dry_run": dry_run,
         }
         for name_id in orphan_ids:
@@ -390,6 +426,11 @@ def rebuild_provenance(
             elif name_id in scalar_specs:
                 specs = scalar_specs[name_id]
                 summary["bound_from_scalar"] += 1
+            elif name_id in pending_names:
+                # Real dd source pending in the queue — leave it for the
+                # pipeline; never synthesize a fallback over a claimable source.
+                summary["excluded_pending"] += 1
+                continue
             elif name_id in parent_ids:
                 specs = [_synth_spec(name_id, "derived")]
                 summary["bound_derived"] += 1

@@ -226,6 +226,7 @@ def test_rebuild_routes_orphans_by_anchor_authority():
         patch.object(pr, "reattach_produced_name_edges", return_value=0),
         patch.object(pr, "_run_deterministic_fixpoints") as m_fix,
         patch.object(pr, "_fetch_dd_source_paths", return_value=scalar_specs),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
         patch.object(pr, "_classify_derived_parents", return_value={"parent_name"}),
         patch.object(
             pr,
@@ -267,6 +268,7 @@ def test_rebuild_dry_run_binds_nothing():
         patch.object(pr, "reattach_produced_name_edges") as m_re,
         patch.object(pr, "_run_deterministic_fixpoints") as m_fix,
         patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
         patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(pr, "bind_recovery_sources") as m_bind,
     ):
@@ -300,6 +302,7 @@ def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
         patch.object(pr, "reattach_produced_name_edges", return_value=1) as m_re,
         patch.object(pr, "_run_deterministic_fixpoints"),
         patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
         patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(
             pr,
@@ -313,3 +316,43 @@ def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
     assert "desync_name" not in bind_calls
     assert bind_calls == ["residue_name"]
     assert summary["reattached"] == 1
+
+
+def test_rebuild_excludes_pending_source_names_from_fallback():
+    """A live orphan whose real dd source is still PENDING (extracted) in the
+    GENERATE_NAME queue is left for the pipeline — never given a synthesized
+    manual/derived fallback that would pin a fabricated source over the real
+    one about to be composed.
+    """
+    import imas_codex.standard_names.provenance_rebuild as pr
+
+    orphans = [
+        {"sn_id": "pending_name", "name_stage": "accepted", "origin": "catalog_edit"},
+        {"sn_id": "residue_name", "name_stage": "accepted", "origin": "catalog_edit"},
+    ]
+    gc = MagicMock()
+    bind_calls = []
+
+    with (
+        patch.object(pr, "find_provenance_orphans", return_value=orphans),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(pr, "reattach_produced_name_edges", return_value=0),
+        patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        # pending_name has a claimable pending extracted source in the queue
+        patch.object(pr, "_fetch_pending_source_names", return_value={"pending_name"}),
+        patch.object(pr, "_classify_derived_parents", return_value=set()),
+        patch.object(
+            pr,
+            "bind_recovery_sources",
+            side_effect=lambda name_id, specs, *, gc: bind_calls.append(name_id),
+        ),
+    ):
+        summary = pr.rebuild_provenance(gc=gc, recovery_map={})
+
+    # the pending-source name is excluded from ANY fallback binding
+    assert "pending_name" not in bind_calls
+    assert bind_calls == ["residue_name"]
+    assert summary["excluded_pending"] == 1
+    assert summary["bound_manual"] == 1
+    assert summary["bound_derived"] == 0
