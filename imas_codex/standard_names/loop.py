@@ -842,6 +842,30 @@ async def run_sn_pools(
                 prov_result.get("orphan_sources_deleted", 0),
             )
 
+        # ── B2d: DD source-drift refresh ──────────────────────────────
+        # Idempotent, always on: names record the DD-source snapshot
+        # (unit/documentation) they were built against; any that no longer match
+        # the live IMASNode (e.g. after a new DD version corrects a unit) are
+        # steered through a docs refine carrying the exact DD delta as the edit
+        # reason. Unstamped names are baselined first (no mass-refine on first
+        # run). No-op when nothing drifted. Runs whenever docs are in scope —
+        # skipped only in names-only mode, where the docs pools it feeds do not run.
+        if not names_only:
+            from imas_codex.standard_names.source_refresh import (
+                refresh_drifted_sources,
+            )
+
+            sr = await asyncio.to_thread(refresh_drifted_sources)
+            if sr.get("baselined") or sr.get("detected"):
+                logger.info(
+                    "run_sn_pools: source-drift refresh — %d baselined, "
+                    "%d drifted, %d steered, %d blocked",
+                    sr.get("baselined", 0),
+                    sr.get("detected", 0),
+                    sr.get("steered", 0),
+                    len(sr.get("blocked", [])),
+                )
+
         # ── B3: Domain extract (auto-seed) ────────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
         # Skip auto-seeding in flush / docs-only mode — only drain existing.
