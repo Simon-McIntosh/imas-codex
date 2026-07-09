@@ -678,9 +678,12 @@ def _fetch_sources_for_entry(
 ) -> list[dict[str, Any]] | None:
     """Query graph for StandardNameSource nodes that produced this name.
 
-    Returns a compact list of source dicts with keys
-    ``source_id``, ``dd_path``, ``signal_id``, ``status``,
-    or ``None`` if no sources are found.
+    Returns a list of source dicts — the sanctioned, restorable projection
+    of the provenance ledger — with keys ``id``, ``dd_path`` | ``signal_id``,
+    ``status``, ``source_type`` (always, every source carries one) and
+    ``provenance`` (only when non-null). Together these are lossless: the
+    reconciler rebuilds the ``StandardNameSource`` node from this block.
+    Returns ``None`` if no sources are found.
     """
     rows = gc.query(
         """
@@ -690,7 +693,9 @@ def _fetch_sources_for_entry(
         RETURN src.id AS source_id,
                n.id   AS dd_path,
                s.id   AS signal_id,
-               src.status AS status
+               src.status AS status,
+               src.source_type AS source_type,
+               src.provenance AS provenance
         ORDER BY src.id
         """,
         name=name,
@@ -709,6 +714,12 @@ def _fetch_sources_for_entry(
             src["signal_id"] = row["signal_id"]
         if row.get("status"):
             src["status"] = row["status"]
+        # source_type is a mandatory ledger field — every source has one.
+        if row.get("source_type"):
+            src["source_type"] = row["source_type"]
+        # provenance is optional — emit only when the source carries it.
+        if row.get("provenance"):
+            src["provenance"] = row["provenance"]
         if src:
             sources.append(src)
 
