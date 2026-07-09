@@ -184,15 +184,10 @@ def test_load_recovery_map_missing_ref_returns_empty(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-def test_rebuild_routes_orphans_to_map_derived_and_manual():
-    """Each orphan is bound by the conservative decision tree:
-
-    - in the recovery map      → its dd/signal sources
-    - else grammar-derived      → an explicit ``derived`` source
-    - else residue (no anchor)  → an explicit ``manual`` source (never a
-      fabricated DD path)
-
-    Then the structural/DD fixpoints run to reach fresh-parity.
+def test_rebuild_routes_orphans_by_anchor_authority():
+    """Remaining orphans are bound by descending anchor authority:
+    recovery map (dd) > surviving source_paths scalar (dd) > derived parent
+    (composed-from-children) > manual residue. Never a fabricated DD path.
     """
     import imas_codex.standard_names.provenance_rebuild as pr
 
@@ -208,51 +203,53 @@ def test_rebuild_routes_orphans_to_map_derived_and_manual():
     }
     orphans = [
         {"sn_id": "in_map_name", "name_stage": "accepted", "origin": "catalog_edit"},
-        {"sn_id": "derived_name", "name_stage": "accepted", "origin": "derived"},
+        {"sn_id": "scalar_name", "name_stage": "accepted", "origin": "catalog_edit"},
+        {"sn_id": "parent_name", "name_stage": "accepted", "origin": "catalog_edit"},
         {"sn_id": "residue_name", "name_stage": "accepted", "origin": "catalog_edit"},
     ]
+    scalar_specs = {
+        "scalar_name": [
+            {
+                "id": "dd:magnetics/flux_loop/area",
+                "source_type": "dd",
+                "dd_path": "magnetics/flux_loop/area",
+                "status": "attached",
+            }
+        ]
+    }
     gc = MagicMock()
-    # classification query → derived_name has a parent/derived, residue_name does not
-    gc.query.return_value = [
-        {"id": "derived_name", "derived": True},
-        {"id": "residue_name", "derived": False},
-    ]
-
     bind_calls = []
-
-    def _spy_bind(name_id, specs, *, gc):  # noqa: ANN001
-        bind_calls.append((name_id, specs))
-        return len(specs)
 
     with (
         patch.object(pr, "find_provenance_orphans", return_value=orphans),
         patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
-        patch.object(pr, "reattach_produced_name_edges", return_value=0) as m_re,
-        patch.object(pr, "bind_recovery_sources", side_effect=_spy_bind),
-        patch.object(pr, "rederive_structural_edges", return_value={}) as m_struct,
-        patch.object(pr, "reconcile_standard_name_sources", return_value={}) as m_recon,
+        patch.object(pr, "reattach_produced_name_edges", return_value=0),
+        patch.object(pr, "_run_deterministic_fixpoints") as m_fix,
+        patch.object(pr, "_fetch_dd_source_paths", return_value=scalar_specs),
+        patch.object(pr, "_classify_derived_parents", return_value={"parent_name"}),
+        patch.object(
+            pr,
+            "bind_recovery_sources",
+            side_effect=lambda name_id, specs, *, gc: bind_calls.append(
+                (name_id, specs)
+            ),
+        ),
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map=recovery_map)
 
-    # reattach runs first (recover true sources before falling back to manual)
-    assert m_re.called
+    assert m_fix.called  # fresh-build fixpoints (incl. seed_parent_sources) ran
     bound = dict(bind_calls)
-    # in-map name bound from the recovery map (dd source)
     assert bound["in_map_name"][0]["source_type"] == "dd"
-    # derived name bound with a synthesised derived source
-    assert bound["derived_name"][0]["source_type"] == "derived"
-    assert bound["derived_name"][0]["id"] == "derived:derived_name"
-    # residue bound with an explicit manual source, never a fabricated dd path
+    assert bound["scalar_name"][0]["dd_path"] == "magnetics/flux_loop/area"
+    # a derived PARENT gets a derived source (composed-from-children), not manual
+    assert bound["parent_name"][0]["source_type"] == "derived"
+    assert bound["parent_name"][0]["id"] == "derived:parent_name"
+    # only genuine residue with no anchor becomes manual, never a fabricated dd
     assert bound["residue_name"][0]["source_type"] == "manual"
-    assert bound["residue_name"][0]["id"] == "manual:residue_name"
     assert "dd_path" not in bound["residue_name"][0]
 
-    # fresh-parity fixpoints ran
-    assert m_struct.called
-    assert m_recon.called
-
-    assert summary["orphans_before"] == 3
     assert summary["bound_from_map"] == 1
+    assert summary["bound_from_scalar"] == 1
     assert summary["bound_derived"] == 1
     assert summary["bound_manual"] == 1
 
@@ -263,30 +260,29 @@ def test_rebuild_dry_run_binds_nothing():
 
     orphans = [{"sn_id": "x", "name_stage": "accepted", "origin": "catalog_edit"}]
     gc = MagicMock()
-    gc.query.return_value = [{"id": "x", "derived": False}]
 
     with (
         patch.object(pr, "find_provenance_orphans", return_value=orphans),
         patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
         patch.object(pr, "reattach_produced_name_edges") as m_re,
+        patch.object(pr, "_run_deterministic_fixpoints") as m_fix,
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(pr, "bind_recovery_sources") as m_bind,
-        patch.object(pr, "rederive_structural_edges") as m_struct,
-        patch.object(pr, "reconcile_standard_name_sources") as m_recon,
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map={}, dry_run=True)
 
-    assert not m_re.called  # dry run mutates nothing, not even reattach
+    assert not m_re.called  # dry run mutates nothing
+    assert not m_fix.called
     assert not m_bind.called
-    assert not m_struct.called
-    assert not m_recon.called
     assert summary["dry_run"] is True
     assert summary["bound_manual"] == 1  # would-be classification still reported
 
 
-def test_rebuild_reattaches_true_sources_before_binding_fallbacks():
-    """A name that is orphaned only because its PRODUCED_NAME edge is missing
-    (its source still names it via produced_sn_id) must be REATTACHED to that
-    true source — never bound to a fresh manual/derived source.
+def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
+    """A name orphaned only by a missing edge (its source still names it via
+    produced_sn_id) is reattached to its TRUE source, never bound to a fresh
+    manual/derived fallback.
     """
     import imas_codex.standard_names.provenance_rebuild as pr
 
@@ -296,26 +292,24 @@ def test_rebuild_reattaches_true_sources_before_binding_fallbacks():
     ]
     desyncs = [{"source_id": "dd:x", "sn_id": "desync_name", "name_stage": "accepted"}]
     gc = MagicMock()
-    gc.query.return_value = [{"id": "residue_name", "derived": False}]
-
     bind_calls = []
 
     with (
         patch.object(pr, "find_provenance_orphans", return_value=orphans),
         patch.object(pr, "find_edge_scalar_desyncs", return_value=desyncs),
         patch.object(pr, "reattach_produced_name_edges", return_value=1) as m_re,
+        patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(
             pr,
             "bind_recovery_sources",
             side_effect=lambda name_id, specs, *, gc: bind_calls.append(name_id),
         ),
-        patch.object(pr, "rederive_structural_edges", return_value={}),
-        patch.object(pr, "reconcile_standard_name_sources", return_value={}),
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map={})
 
     assert m_re.called
-    # desync_name was reattached to its real source, not bound to a manual one
     assert "desync_name" not in bind_calls
     assert bind_calls == ["residue_name"]
     assert summary["reattached"] == 1

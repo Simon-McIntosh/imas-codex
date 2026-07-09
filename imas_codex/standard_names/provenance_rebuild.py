@@ -31,14 +31,18 @@ import yaml
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.graph_ops import (
+    normalize_derived_parent_lifecycle,
     reconcile_standard_name_sources,
     rederive_structural_edges,
+    seed_parent_sources,
+    structural_accept_derived_parents,
 )
 from imas_codex.standard_names.ledger import (
     find_edge_scalar_desyncs,
     find_provenance_orphans,
     reattach_produced_name_edges,
 )
+from imas_codex.standard_names.source_paths import parse_source_path
 
 logger = logging.getLogger(__name__)
 
@@ -234,12 +238,14 @@ def _synth_spec(name_id: str, source_type: str) -> dict[str, Any]:
     }
 
 
-def _classify_derived(gc: GraphClient, ids: list[str]) -> set[str]:
-    """Return the subset of *ids* that are grammar-derived.
+def _classify_derived_parents(gc: GraphClient, ids: list[str]) -> set[str]:
+    """Return the subset of *ids* that are DERIVED PARENTS.
 
-    A name is derived when it has a ``HAS_PARENT`` edge (grammar composition)
-    or is explicitly ``origin='derived'`` — either way its provenance is a
-    composed-from group, so it gets a ``derived`` source rather than ``manual``.
+    A derived parent is a name that other names point at via ``HAS_PARENT``
+    (i.e. it has children) or is explicitly ``origin='derived'``. Its provenance
+    is the composed-from child group — the plan's "derived — a parent/group of
+    SNs" — so it gets a ``derived`` source, not ``manual``. (A pure child with a
+    lost DD anchor is NOT derived here — its source was a DD leaf.)
     """
     if not ids:
         return set()
@@ -247,12 +253,78 @@ def _classify_derived(gc: GraphClient, ids: list[str]) -> set[str]:
         """
         MATCH (sn:StandardName) WHERE sn.id IN $ids
         RETURN sn.id AS id,
-               (exists { (sn)-[:HAS_PARENT]->() }
-                OR coalesce(sn.origin, '') = 'derived') AS derived
+               (exists { (:StandardName)-[:HAS_PARENT]->(sn) }
+                OR coalesce(sn.origin, '') = 'derived') AS is_parent
         """,
         ids=ids,
     )
-    return {r["id"] for r in rows if r.get("derived")}
+    return {r["id"] for r in rows if r.get("is_parent")}
+
+
+def _fetch_dd_source_paths(
+    gc: GraphClient, ids: list[str]
+) -> dict[str, list[dict[str, Any]]]:
+    """For names carrying a surviving ``source_paths`` scalar, build source specs.
+
+    The ``source_paths`` scalar (``dd:<path>`` / facility signal URIs) is a
+    surviving in-graph anchor from the original composition — an authoritative,
+    deterministic recovery of the real dd/signal source, superior to a manual
+    fallback. Returns ``{name: [spec, ...]}`` only for names with a non-empty
+    ``source_paths``.
+    """
+    if not ids:
+        return {}
+    rows = gc.query(
+        """
+        MATCH (sn:StandardName)
+        WHERE sn.id IN $ids AND sn.source_paths IS NOT NULL
+        RETURN sn.id AS id, sn.source_paths AS source_paths
+        """,
+        ids=ids,
+    )
+    out: dict[str, list[dict[str, Any]]] = {}
+    for r in rows:
+        specs: list[dict[str, Any]] = []
+        for path in r["source_paths"] or []:
+            source_type, source_id = parse_source_path(path)
+            if source_type == "dd":
+                specs.append(
+                    {
+                        "id": f"{DD_PREFIX}{source_id}",
+                        "source_type": "dd",
+                        "dd_path": source_id,
+                        "status": "attached",
+                    }
+                )
+            else:
+                specs.append(
+                    {
+                        "id": path,
+                        "source_type": "signals",
+                        "signal_id": source_id,
+                        "status": "attached",
+                    }
+                )
+        if specs:
+            out[r["id"]] = specs
+    return out
+
+
+def _run_deterministic_fixpoints() -> None:
+    """Replay the deterministic half of a fresh build (loop B2 + B3b).
+
+    These are the exact idempotent routines every ``sn run`` executes, so the
+    resulting link topology (HAS_PARENT + derived StandardNameSource +
+    FROM_DD_PATH) equals a fresh from-scratch build by construction. Crucially
+    ``seed_parent_sources`` materialises a ``derived`` StandardNameSource for
+    every admissible derived parent — the composed-from-children provenance.
+    """
+    rederive_structural_edges()
+    seed_parent_sources()
+    normalize_derived_parent_lifecycle()
+    structural_accept_derived_parents()
+    reconcile_standard_name_sources("dd")
+    reconcile_standard_name_sources("signals")
 
 
 def rebuild_provenance(
@@ -265,15 +337,15 @@ def rebuild_provenance(
 ) -> dict[str, Any]:
     """Rebuild provenance for every orphaned live name to fresh-parity.
 
-    Conservative decision tree per orphan (a live name with no ``PRODUCED_NAME``
-    source): (1) present in the ISNC recovery map → bind its dd/signal sources;
-    (2) else grammar-derived (``HAS_PARENT`` or ``origin='derived'``) → an
-    explicit ``derived`` source; (3) else residue → an explicit ``manual``
-    source. Never fabricates a DD path. After binding, the deterministic
-    fixpoints (:func:`rederive_structural_edges`,
-    :func:`reconcile_standard_name_sources`) run so ``HAS_PARENT`` +
-    ``FROM_DD_PATH`` match a fresh build. Content (name/description/docs/stage)
-    is never touched. Returns a summary dict.
+    Runs the deterministic fresh-build fixpoints FIRST (reattach true sources,
+    rederive structure, materialise derived-parent sources, relink DD/signal),
+    so derived parents and reattachable names are sourced natively. Then, for
+    any live name STILL without a source, a conservative decision tree binds:
+    (1) ISNC recovery map → dd/signal; (2) surviving ``source_paths`` scalar →
+    dd/signal (an authoritative in-graph anchor); (3) derived parent (has
+    children) → an explicit ``derived`` source (composed-from-children);
+    (4) residue with no anchor → an explicit ``manual`` source. Never fabricates
+    a DD path. Content (name/description/docs/stage) is never touched.
     """
     owns = gc is None
     gc = gc or GraphClient()
@@ -281,23 +353,32 @@ def rebuild_provenance(
         if recovery_map is None:
             recovery_map = load_recovery_map(isnc_dir, ref) if isnc_dir else {}
 
-        # Pass 0: reattach names orphaned only by a missing PRODUCED_NAME edge
-        # (their source still names them via produced_sn_id). This recovers the
-        # TRUE original source rather than minting a manual/derived fallback, so
-        # it must run before classification. Names in the desync set are excluded
-        # from the map/derived/manual routing below.
+        # Deterministic fixpoints (fresh-build B2+B3b): reattach edge/scalar
+        # desyncs to their TRUE source, rederive HAS_PARENT, and materialise a
+        # derived StandardNameSource for every admissible derived parent, then
+        # relink FROM_DD_PATH. Run before classification so parents drop out of
+        # the orphan set with their real composed-from-children provenance.
         desync_ids = {d["sn_id"] for d in find_edge_scalar_desyncs(gc=gc)}
-        reattached = 0 if dry_run else reattach_produced_name_edges(gc=gc)
+        reattached = 0
+        if not dry_run:
+            reattached = reattach_produced_name_edges(gc=gc)
+            _run_deterministic_fixpoints()
 
         orphans = find_provenance_orphans(gc=gc)
         orphan_ids = [o["sn_id"] for o in orphans if o["sn_id"] not in desync_ids]
-        remaining = [i for i in orphan_ids if i not in recovery_map]
-        derived_ids = _classify_derived(gc, remaining)
+
+        # Classify the remainder by descending anchor authority.
+        not_mapped = [i for i in orphan_ids if i not in recovery_map]
+        scalar_specs = _fetch_dd_source_paths(gc, not_mapped)
+        parent_ids = _classify_derived_parents(
+            gc, [i for i in not_mapped if i not in scalar_specs]
+        )
 
         summary: dict[str, Any] = {
             "orphans_before": len(orphan_ids),
             "reattached": reattached if not dry_run else len(desync_ids),
             "bound_from_map": 0,
+            "bound_from_scalar": 0,
             "bound_derived": 0,
             "bound_manual": 0,
             "dry_run": dry_run,
@@ -306,7 +387,10 @@ def rebuild_provenance(
             if name_id in recovery_map:
                 specs = recovery_map[name_id]
                 summary["bound_from_map"] += 1
-            elif name_id in derived_ids:
+            elif name_id in scalar_specs:
+                specs = scalar_specs[name_id]
+                summary["bound_from_scalar"] += 1
+            elif name_id in parent_ids:
                 specs = [_synth_spec(name_id, "derived")]
                 summary["bound_derived"] += 1
             else:
@@ -316,10 +400,6 @@ def rebuild_provenance(
                 bind_recovery_sources(name_id, specs, gc=gc)
 
         if not dry_run:
-            # Deterministic fresh-parity fixpoints for the other two link types.
-            rederive_structural_edges()
-            reconcile_standard_name_sources("dd")
-            reconcile_standard_name_sources("signals")
             summary["orphans_after"] = len(find_provenance_orphans(gc=gc))
 
         logger.info("rebuild_provenance: %s", summary)
