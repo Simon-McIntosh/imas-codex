@@ -832,7 +832,10 @@ async def run_sn_pools(
         # scaffolding. Idempotent, provenance-only. Then surface the ledger
         # orphan count (live names with no PRODUCED_NAME source) — the invariant
         # the ledger must hold; a non-zero count is silent provenance loss.
-        from imas_codex.standard_names.graph_ops import reconcile_provenance
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_grammar_segments,
+            reconcile_provenance,
+        )
         from imas_codex.standard_names.ledger import find_provenance_orphans
 
         prov_result = await asyncio.to_thread(reconcile_provenance)
@@ -849,6 +852,18 @@ async def run_sn_pools(
                 prov_result.get("scalars_cleared", 0),
                 prov_result.get("orphan_sources_deleted", 0),
             )
+
+        # Realign grammar segment columns with each name's canonical id, so a
+        # stale segment (e.g. position='pedestal' on an ..._at_pedestal_top
+        # name written by a since-removed import path) self-heals and a
+        # re-composition never diverges from the accepted id.
+        seg_result = await asyncio.to_thread(reconcile_grammar_segments)
+        if seg_result.get("names_realigned", 0):
+            logger.info(
+                "run_sn_pools: grammar-segment reconcile — %d name(s) realigned to canonical id",
+                seg_result["names_realigned"],
+            )
+
         # Read-only ledger-health probe — a diagnostic, never fatal to the run.
         try:
             orphans = await asyncio.to_thread(find_provenance_orphans)

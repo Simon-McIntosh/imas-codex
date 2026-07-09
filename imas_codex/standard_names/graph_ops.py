@@ -6604,6 +6604,56 @@ def reconcile_provenance() -> dict[str, int]:
     }
 
 
+def reconcile_grammar_segments() -> dict[str, int]:
+    """Realign each live name's grammar segment columns with its canonical id.
+
+    The bare-name segments (``position``, ``component``, ``subject``, …) are a
+    deterministic function of the canonical name id via the ISN parser. A name
+    written by an out-of-grammar path — e.g. the since-removed bulk catalog
+    import — can carry stale segments that disagree with its own id: an
+    ``…_at_pedestal_top`` name storing ``position='pedestal'`` is the observed
+    case. Such a name no longer recomposes to itself, and a re-composition from
+    its DD leaf would mint a divergent ``_at_pedestal`` near-duplicate.
+
+    This idempotent sweep re-parses every live name through the authoritative
+    ISN parser and realigns any drifted segment column to the parse. Names the
+    ISN grammar cannot parse are skipped (their segments are owned by the
+    quarantine path, never wiped here). Safe to run every rotation.
+
+    Returns ``{"names_realigned": n}``.
+    """
+    from imas_codex.standard_names.ledger import LIVE_NAME
+
+    cols = _GRAMMAR_SEGMENT_COLUMNS
+    select = ", ".join(f"sn.{c} AS {c}" for c in cols)
+    set_clause = ", ".join(f"sn.{c} = b.{c}" for c in cols)
+    batch: list[dict[str, Any]] = []
+    with GraphClient() as gc:
+        rows = gc.query(
+            f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
+        )
+        for r in rows:
+            parsed = _parse_grammar(r["id"])
+            # A successful ISN parse always yields a physical_base; an all-None
+            # parse means the model rejected the name — leave its stored
+            # segments untouched rather than wiping them.
+            if not parsed.get("physical_base"):
+                continue
+            if any(parsed.get(c) != r.get(c) for c in cols):
+                batch.append({"id": r["id"], **{c: parsed.get(c) for c in cols}})
+        if batch:
+            gc.query(
+                f"UNWIND $batch AS b MATCH (sn:StandardName {{id: b.id}}) SET {set_clause}",
+                batch=batch,
+            )
+    if batch:
+        logger.info(
+            "reconcile_grammar_segments: realigned %d name(s) to their canonical id parse",
+            len(batch),
+        )
+    return {"names_realigned": len(batch)}
+
+
 def reconcile_error_siblings() -> dict[str, int]:
     """Detect and mark stale error-sibling StandardNames.
 
@@ -8479,8 +8529,7 @@ def claim_review_docs_batch(
     )
     where = (
         "sn.docs_stage = 'drafted'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        + score_gate
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])" + score_gate
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -10285,8 +10334,7 @@ def claim_generate_docs_batch(
     )
     where = (
         "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        + score_gate
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])" + score_gate
     )
 
     items = _claim_sn_atomic(
@@ -10582,8 +10630,7 @@ def claim_refine_docs_batch(
         " AND sn.reviewer_score_docs IS NOT NULL"
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
-        + score_gate
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])" + score_gate
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
