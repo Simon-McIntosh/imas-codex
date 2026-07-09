@@ -1,11 +1,20 @@
 """Catalog feedback import — read reviewed YAML entries and write to graph.
 
-Phase 4 rewrite: diff-based origin tracking, forbidden-key rejection,
-domain-from-path, grammar reuse, lock/watermark concurrency control,
-and unit/COCOS validation.
+This is the **PR-merge diff path**: it folds curator edits from a merged
+catalog PR back into the graph (diff-based origin tracking, forbidden-key
+rejection, domain-from-path, grammar reuse, lock/watermark concurrency
+control, and unit/COCOS validation).
 
-Catalog entries are authoritative: their fields overwrite graph fields.
-Graph-only fields (embedding, model, generated_at) are preserved.
+It is NOT the graph restore / bootstrap path.  Provenance
+(``StandardNameSource`` + ``PRODUCED_NAME``) is the graph's authoritative
+ledger and is never rebuilt here — restoring the graph from a published
+catalog is the job of the diff-by-id reconciler
+(``catalog_reconcile.reconcile_catalog``), which replays each entry's
+``sources:`` block.  ``run_import`` deliberately creates no source nodes and
+no ``PRODUCED_NAME`` edges (see ``tests/.../test_import_no_source_creation``).
+
+Catalog entries are authoritative for their editorial fields: those overwrite
+graph fields.  Graph-only fields (embedding, model, generated_at) are preserved.
 """
 
 from __future__ import annotations
@@ -497,9 +506,16 @@ def run_import(
     dry_run: bool = False,
     accept_unit_override: bool = False,
 ) -> ImportReport:
-    """Import YAML catalog entries into graph as accepted StandardName nodes.
+    """Fold curator edits from a merged catalog PR back into the graph.
 
-    Phase 4 implementation with:
+    This is the PR-merge diff path, NOT the graph restore/bootstrap path: it
+    updates editorial fields and never rebuilds provenance.  It creates no
+    ``StandardNameSource`` node and no ``PRODUCED_NAME`` edge — any ``sources:``
+    block in the YAML is ignored here.  To restore/bootstrap the graph from a
+    published catalog (which does rebuild provenance), use the diff-by-id
+    reconciler ``catalog_reconcile.reconcile_catalog`` instead.
+
+    Implementation:
     - Forbidden-key rejection (source_paths, dd_paths)
     - Domain-from-path derivation
     - Grammar decomposition via graph_ops helper
