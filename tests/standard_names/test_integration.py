@@ -1,24 +1,17 @@
-"""Integration tests for embedding coverage, coalesce safety, and import idempotence.
+"""Integration tests for embedding coverage and coalesce safety.
 
 Verifies that:
-1. Embedding fields are never accidentally erased by write_standard_names
-   or _write_catalog_entries.
+1. Embedding fields are never accidentally erased by write_standard_names.
 2. All optional fields in write_standard_names use coalesce so that a
    None value in the batch never overwrites existing graph data.
 3. created_at is preserved across rewrites.
-4. The import → build cycle is safe: catalog-imported rich fields are
-   not erased by a subsequent sn-build write.
-5. run_import is deterministic (double import produces identical results).
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, call, patch
 
 import pytest
-import yaml
 
 imas_sn = pytest.importorskip("imas_standard_names")
 
@@ -35,15 +28,6 @@ def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
         from imas_codex.standard_names.graph_ops import write_standard_names
 
         return write_standard_names(names)
-
-
-def _call_import_write(
-    entries: list[dict], mock_gc: MagicMock, catalog_sha: str | None = None
-) -> int:
-    """Call _write_import_entries with a mocked GraphClient."""
-    from imas_codex.standard_names.catalog_import import _write_import_entries
-
-    return _write_import_entries(mock_gc, entries, catalog_commit_sha=catalog_sha)
 
 
 def _merge_cypher(mock_gc: MagicMock) -> str:
@@ -100,61 +84,6 @@ class TestEmbeddingCoverage:
         # (any mention would risk overwriting it with null)
         assert "sn.embedding = b.embedding" not in cypher, (
             "write_standard_names must not set sn.embedding from batch param"
-        )
-
-    def test_import_preserves_existing_embedding(self) -> None:
-        """_write_import_entries does NOT touch embedding fields at all.
-
-        Phase 4 approach: embedding fields are preserved by omission — they
-        are not mentioned in the SET clause, so Neo4j keeps the existing
-        values. This is safer than the old coalesce(sn.embedding, null) pattern.
-        """
-        mock_gc = MagicMock()
-        mock_gc.query = MagicMock(return_value=[])
-
-        entries = [
-            {
-                "id": "electron_temperature",
-                "description": "Electron temperature",
-                "documentation": "Te measured by Thomson scattering.",
-                "kind": "scalar",
-                "unit": "eV",
-                "links": None,
-                "validity_domain": "core plasma",
-                "constraints": ["T_e > 0"],
-                "physics_domain": "core_plasma_physics",
-                "status": "draft",
-                "deprecates": None,
-                "superseded_by": None,
-                "cocos_transformation_type": None,
-                "physical_base": "temperature",
-                "subject": "electron",
-                "component": None,
-                "coordinate": None,
-                "position": None,
-                "process": None,
-                "geometric_base": None,
-                "transformation": None,
-                "object": None,
-                "geometry": None,
-                "device": None,
-                "aggregation": None,
-                "orbit": None,
-                "population": None,
-            }
-        ]
-        _call_import_write(entries, mock_gc)
-
-        cypher = _merge_cypher(mock_gc)
-
-        # Phase 4: import Cypher must NOT mention embedding at all (preserved by omission)
-        assert "sn.embedding" not in cypher, (
-            "_write_import_entries must not mention sn.embedding "
-            "(preserved by omission from SET clause)"
-        )
-        assert "sn.embedded_at" not in cypher, (
-            "_write_import_entries must not mention sn.embedded_at "
-            "(preserved by omission from SET clause)"
         )
 
     def test_embedding_field_not_in_write_batch(self) -> None:
@@ -366,233 +295,12 @@ class TestCoalesceSafety:
             "write_standard_names must not set created_at from batch param"
         )
 
-    def test_import_then_build_preserves_catalog_fields(self) -> None:
-        """Verify coalesce semantics cover the full import → build cycle.
-
-        Step 1: _write_import_entries (import) is called with rich metadata.
-               The Cypher sets catalog-owned fields directly.
-        Step 2: write_standard_names (build) is called with only basic fields.
-               The Cypher uses coalesce for all optional fields.
-        Together, the catalog-set values survive the build re-run because
-        coalesce(None, sn.documentation) = sn.documentation.
-        """
-        import_gc = MagicMock()
-        import_gc.query = MagicMock(return_value=[])
-
-        build_gc = MagicMock()
-        build_gc.query = MagicMock(return_value=[])
-
-        # --- Step 1: catalog import with rich fields ---
-        rich_entry = {
-            "id": "electron_temperature",
-            "description": "Electron temperature",
-            "documentation": "Te measured by Thomson scattering.",
-            "kind": "scalar",
-            "unit": "eV",
-            "links": None,
-            "validity_domain": "core plasma",
-            "constraints": ["T_e > 0"],
-            "physics_domain": "core_plasma_physics",
-            "status": "draft",
-            "deprecates": None,
-            "superseded_by": None,
-            "cocos_transformation_type": None,
-            "physical_base": "temperature",
-            "subject": "electron",
-            "component": None,
-            "coordinate": None,
-            "position": None,
-            "process": None,
-            "geometric_base": None,
-            "transformation": None,
-            "object": None,
-            "geometry": None,
-            "device": None,
-            "aggregation": None,
-            "orbit": None,
-            "population": None,
-        }
-        imported = _call_import_write([rich_entry], import_gc)
-        assert imported == 1
-
-        # Verify import Cypher sets rich fields directly (no coalesce for catalog-owned)
-        import_cypher = _merge_cypher(import_gc)
-        assert "sn.documentation = b.documentation" in import_cypher, (
-            "Catalog import must set documentation directly (authoritative)"
-        )
-        assert "sn.name_stage = 'accepted'" in import_cypher, (
-            "Catalog import must set name_stage='accepted' directly"
-        )
-        # Embedding must NOT appear — preserved by omission
-        assert "sn.embedding" not in import_cypher, (
-            "Phase 4 import must not mention sn.embedding"
-        )
-
-        # --- Step 2: sn-build writes basic fields only ---
-        basic_entry = {
-            "id": "electron_temperature",
-            "source_types": ["dd"],
-            "source_id": "core_profiles/profiles_1d/electrons/temperature",
-            "description": "Electron temperature",
-            # name_stage, documentation, kind, validity_domain, constraints all absent
-        }
-        written = _call_write([basic_entry], build_gc)
-        assert written == 1
-
-        # Verify build Cypher uses coalesce for all catalog-owned fields
-        build_cypher = _merge_cypher(build_gc)
-
-        catalog_owned = [
-            ("documentation", "b.documentation, sn.documentation"),
-            ("kind", "b.kind, sn.kind"),
-            ("validity_domain", "b.validity_domain, sn.validity_domain"),
-            ("constraints", "b.constraints, sn.constraints"),
-        ]
-        for field_name, coalesce_args in catalog_owned:
-            assert f"coalesce({coalesce_args})" in build_cypher, (
-                f"write_standard_names must protect '{field_name}' with coalesce "
-                "so catalog-imported values survive sn-build re-runs"
-            )
-
-        # Verify the build batch item has None for the absent fields
-        build_batch = _merge_batch(build_gc)
-        assert len(build_batch) == 1
-        build_item = build_batch[0]
-
-        # These were not supplied — must be None in batch so coalesce falls back to graph
-        for absent_field in (
-            "documentation",
-            "kind",
-            "validity_domain",
-        ):
-            assert absent_field in build_item, (
-                f"'{absent_field}' must appear in batch dict (as None) for coalesce"
-            )
-            assert build_item[absent_field] is None, (
-                f"'{absent_field}' must be None in batch when not supplied, "
-                f"got {build_item[absent_field]!r}"
-            )
-
 
 # =============================================================================
-# Part 5: Round-trip idempotence
+# Full pipeline: write_standard_names field coverage
 # =============================================================================
 
-imas_sn = pytest.importorskip("imas_standard_names")
-
-SAMPLE_GRAPH_RECORD: dict[str, Any] = {
-    "name": "electron_temperature",
-    "description": "Electron temperature profile",
-    "documentation": "The $T_e$ profile measured by Thomson scattering.",
-    "source": "dd",
-    "source_path": "core_profiles/profiles_1d/electrons/temperature",
-    "unit": "eV",
-    "kind": "scalar",
-    "links": [],
-    "source_paths": ["dd:core_profiles/profiles_1d/electrons/temperature"],
-    "constraints": ["T_e > 0"],
-    "validity_domain": "core plasma",
-    "model": "test/model",
-    "ids_name": None,
-    "physical_base": "temperature",
-    "subject": "electron",
-}
-
-SAMPLE_CATALOG_ENTRY_RT: dict[str, Any] = {
-    "name": "electron_temperature",
-    "description": "Electron temperature",
-    "documentation": "The electron temperature Te is measured by Thomson scattering.",
-    "kind": "scalar",
-    "unit": "eV",
-    "links": [],
-    "validity_domain": "core plasma",
-    "constraints": ["T_e > 0"],
-    "physics_domain": "core_plasma_physics",
-    "status": "active",
-}
-
-
-def _write_catalog_yaml(
-    root: Path,
-    entry: dict[str, Any],
-    *,
-    domain: str = "core_plasma_physics",
-    filename: str | None = None,
-) -> Path:
-    """Write a catalog YAML entry in per-domain list layout.
-
-    Creates ``<root>/standard_names/<domain>.yml`` containing a YAML list
-    and returns ``root`` (which is what ``run_import()`` expects).
-
-    ``physics_domain`` is stripped from the entry dict if present — it's
-    derived from the path, not from YAML content.
-    """
-    clean = {k: v for k, v in entry.items() if k != "physics_domain"}
-    dest = root / "standard_names"
-    dest.mkdir(parents=True, exist_ok=True)
-    domain_file = dest / f"{domain}.yml"
-    # Append to existing list if file exists
-    if domain_file.exists():
-        existing = yaml.safe_load(domain_file.read_text()) or []
-        existing.append(clean)
-        domain_file.write_text(yaml.safe_dump(existing))
-    else:
-        domain_file.write_text(yaml.safe_dump([clean]))
-    return root
-
-
-class TestImportIdempotence:
-    """Verify run_import determinism."""
-
-    def test_double_import_identical_entries(self, tmp_path: Path) -> None:
-        """Importing the same catalog directory twice yields identical result entries.
-
-        Verifies that ``run_import`` is deterministic: repeated calls on the
-        same input produce identical graph dicts (same keys and values).
-        """
-        from imas_codex.standard_names.catalog_import import run_import
-
-        isnc_root = _write_catalog_yaml(
-            tmp_path / "catalog", SAMPLE_CATALOG_ENTRY_RT, domain="core_plasma_physics"
-        )
-
-        result1 = run_import(isnc_root, dry_run=True)
-        result2 = run_import(isnc_root, dry_run=True)
-
-        assert result1.imported == result2.imported, (
-            "Both imports should report the same import count"
-        )
-        assert len(result1.entries) == len(result2.entries), (
-            "Both imports should return the same number of entries"
-        )
-
-        compared_fields = (
-            "id",
-            "description",
-            "documentation",
-            "kind",
-            "unit",
-            "links",
-            "source_paths",
-            "validity_domain",
-            "constraints",
-            "physics_domain",
-            "name_stage",
-            "source_types",
-        )
-        for e1, e2 in zip(result1.entries, result2.entries, strict=True):
-            for field in compared_fields:
-                assert e1.get(field) == e2.get(field), (
-                    f"Field {field!r} differs between imports: "
-                    f"{e1.get(field)!r} != {e2.get(field)!r}"
-                )
-
-
-# =============================================================================
-# Part 4: Full E2E Round-Trip (build → publish → edit → import)
-# =============================================================================
-
-# Rich sample data shared across E2E tests
+# Rich sample data shared across pipeline tests
 _RICH_SN_RECORD = {
     "id": "electron_temperature",
     "source_types": ["dd"],
@@ -615,40 +323,11 @@ _RICH_SN_RECORD = {
     "name_stage": "drafted",
 }
 
-# Graph-canonical result keys
-_GRAPH_QUERY_ROW = {
-    "name": "electron_temperature",
-    "description": "Electron temperature in the core plasma",
-    "documentation": (
-        "The electron temperature $T_e$ is measured via Thomson scattering. "
-        "It is a key parameter for transport modelling."
-    ),
-    "kind": "scalar",
-    "unit": "eV",
-    "links": ["name:ion_temperature"],
-    "source_paths": ["dd:core_profiles/profiles_1d/electrons/temperature"],
-    "constraints": ["T_e > 0"],
-    "validity_domain": "core plasma",
-    "model": "gpt-4o",
-    "source": "dd",
-    "source_path": "core_profiles/profiles_1d/electrons/temperature",
-    "ids_name": "core_profiles",
-    "physical_base": "temperature",
-    "subject": "electron",
-    "component": None,
-    "coordinate": None,
-    "position": None,
-    "process": None,
-    "source_ids_names": ["core_profiles"],
-}
 
-
-class TestE2ERoundTrip:
-    """Full lifecycle: build → import.
+class TestWriteStandardNames:
+    """write_standard_names field coverage.
 
     All graph operations are mocked — no live Neo4j required.
-    Legacy tests using the pre-Phase-3 publish pipeline (graph_records_to_entries,
-    generate_catalog_files) were removed in the p-cli-integration task.
     """
 
     def test_write_standard_names_called_with_all_fields(self) -> None:
@@ -694,35 +373,6 @@ class TestE2ERoundTrip:
         assert node["validity_domain"] == "core plasma"
         assert "name_stage" not in node  # stage owned by _finalize_generated_name_stage
         assert node["model"] == "gpt-4o"
-
-    def test_import_dry_run_does_not_call_graph(self, tmp_path: Path) -> None:
-        """dry_run=True must never invoke the graph write path."""
-        from imas_codex.standard_names.catalog_import import run_import
-
-        catalog_entry = {
-            "name": "electron_temperature",
-            "description": "Electron temperature",
-            "documentation": "Te documentation.",
-            "kind": "scalar",
-            "unit": "eV",
-            "links": [],
-            "validity_domain": "",
-            "constraints": [],
-            "status": "active",
-        }
-        isnc_root = _write_catalog_yaml(
-            tmp_path / "catalog",
-            catalog_entry,
-            domain="core_plasma_physics",
-        )
-
-        with patch(
-            "imas_codex.standard_names.catalog_import._write_import_entries"
-        ) as mock_write:
-            result = run_import(catalog_dir=isnc_root, dry_run=True)
-
-        mock_write.assert_not_called()
-        assert result.imported == 1
 
 
 # =============================================================================

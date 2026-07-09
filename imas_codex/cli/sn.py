@@ -208,7 +208,6 @@ def sn() -> None:
       sn release -m "msg"                 # auto-export + tag RC + push
       sn release --final -m "msg"         # finalize RC → stable
       sn release status                   # show ISNC state and tags
-      sn import                           # ISNC YAML → graph
 
     \b
     Housekeeping:
@@ -3515,115 +3514,6 @@ def sn_release(
         )
     else:
         console.print(f"\n[green]✓ Tagged {report.git_tag} (not pushed)[/green]")
-
-
-@sn.command("import")
-@click.option(
-    "--isnc",
-    type=click.Path(),
-    default=None,
-    help="Path to ISNC repository root (default: auto-discover)",
-)
-@click.option(
-    "--accept-unit-override",
-    is_flag=True,
-    help="Accept unit mismatches against DD values",
-)
-@click.option(
-    "--dry-run", is_flag=True, help="Parse and validate without writing to graph"
-)
-def sn_import(
-    isnc: str | None,
-    accept_unit_override: bool,
-    dry_run: bool,
-) -> None:
-    """Import reviewed catalog entries from ISNC into the graph.
-
-    \b
-    Reads YAML files from the ISNC standard_names/ subtree, validates
-    them, derives grammar fields, applies diff-based origin tracking,
-    and MERGEs into the graph with name_stage='accepted'.
-
-    \b
-    Examples:
-      imas-codex sn import
-      imas-codex sn import --isnc ../imas-standard-names-catalog
-      imas-codex sn import --dry-run
-    """
-    from pathlib import Path
-
-    from rich.table import Table
-
-    from imas_codex.settings import get_sn_isnc_dir
-    from imas_codex.standard_names.catalog_import import run_import
-
-    if isnc:
-        isnc_path = Path(isnc)
-    else:
-        resolved = get_sn_isnc_dir()
-        if resolved is None:
-            console.print(
-                "[red]ISNC not found.[/red] Set [bold]IMAS_CODEX_SN_ISNC[/bold] env var "
-                "or clone imas-standard-names-catalog as a sibling directory."
-            )
-            raise SystemExit(2)
-        isnc_path = resolved
-
-    console.print("\n[bold]Standard Name Import[/bold]")
-    console.print(f"  ISNC: {isnc_path}")
-    if accept_unit_override:
-        console.print("  Unit override: [yellow]accepted[/yellow]")
-    if dry_run:
-        console.print("  Mode: [yellow]dry run[/yellow]")
-    console.print("")
-
-    try:
-        report = run_import(
-            catalog_dir=isnc_path,
-            dry_run=dry_run,
-            accept_unit_override=accept_unit_override,
-        )
-    except Exception as exc:
-        console.print(f"[red]Import error:[/red] {exc}")
-        raise SystemExit(3) from exc
-
-    # ── Errors ─────────────────────────────────────────────
-    if report.errors:
-        console.print(f"[red]Errors: {len(report.errors)}[/red]")
-        for err in report.errors[:10]:
-            console.print(f"  - {err}")
-        if len(report.errors) > 10:
-            console.print(f"  ... and {len(report.errors) - 10} more")
-
-    # ── Summary table ──────────────────────────────────────
-    action = "Would import" if dry_run else "Imported"
-    table = Table(title=f"Import Summary ({action})")
-    table.add_column("metric", style="cyan")
-    table.add_column("value", style="white")
-    table.add_row("imported", str(report.imported))
-    table.add_row("created", str(report.created))
-    table.add_row("updated", str(report.updated))
-    table.add_row("skipped", str(report.skipped))
-    table.add_row("errors", str(len(report.errors)))
-    if report.catalog_commit_sha:
-        table.add_row("catalog SHA", report.catalog_commit_sha[:12])
-    if report.pr_numbers:
-        table.add_row("PR numbers", ", ".join(f"#{n}" for n in report.pr_numbers))
-    table.add_row("watermark advanced", "yes" if report.watermark_advanced else "no")
-    console.print(table)
-
-    if dry_run and report.entries:
-        console.print("\n[bold]Preview:[/bold]")
-        for entry in report.entries[:20]:
-            units = f" [{entry.get('unit', '')}]" if entry.get("unit") else ""
-            console.print(f"  - {entry.get('id', '?')}{units}")
-        if len(report.entries) > 20:
-            console.print(f"  ... and {len(report.entries) - 20} more")
-
-    if report.errors and not dry_run:
-        raise SystemExit(2)
-
-    console.print(f"\n[green]✓ {action}: {report.imported} entries[/green]")
 
 
 @sn.command("clear")

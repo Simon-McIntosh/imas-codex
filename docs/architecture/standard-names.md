@@ -467,8 +467,8 @@ token; see [Grammar vocabulary](#grammar-vocabulary).
 | Axis | States | Set by | Notes |
 |---|---|---|---|
 | `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | Pool workers | Cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`. `refining` reverts to `reviewed` after 600 s (orphan sweep). `chain_length` / `docs_chain_length` track refinement depth (root = 0). `superseded` = predecessor in a `REFINED_FROM` chain; source edges migrate to the latest. |
-| `name_stage` | `pending → drafted → reviewed → accepted` (`refining`/`exhausted`/`superseded` side states) | `sn run` → `sn release --export-only` → `sn import` | Name-pipeline + catalog round-trip state. |
-| `status` | `draft → published → deprecated` | Catalog import | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
+| `name_stage` | `pending → drafted → reviewed → accepted` (`refining`/`exhausted`/`superseded` side states) | `sn run` → `sn release --export-only` → `sn merge` | Name-pipeline + catalog round-trip state. |
+| `status` | `draft → published → deprecated` | Catalog PR (`sn merge`) | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
 | `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn release --export-only`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings stay `valid`. |
 
 **`origin`:** `pipeline` (LLM-generated), `catalog_edit` (human-edited via
@@ -527,9 +527,13 @@ reviewer, but never quarantine.
   all fields — passing `None` preserves existing data. Persists
   `validation_issues` and `validation_layer_summary`. Safe for re-runs:
   imported catalog data is never clobbered by a subsequent `sn run`.
-- **`_write_catalog_entries()` (import path):** catalog fields SET directly
-  (catalog is authoritative). Graph-only fields (embedding, model,
-  generated_at) preserved via coalesce.
+- **Catalog fold-back (`sn merge`):** reviewed curator edits from a merged
+  catalog PR are folded back into the ledger — catalog-owned editorial fields
+  are authoritative; graph-only fields (embedding, model, generated_at) are
+  preserved. Restoring the graph from a published catalog is a separate
+  diff-by-id reconcile (`catalog_reconcile.reconcile_catalog`) that MATCHes
+  every entry by id (never recreating nodes) and replays each entry's
+  `sources:` block to rebuild provenance.
 - **Review write path:** each RD-quorum cycle persists its `Review` nodes
   immediately; `update_review_aggregates` then mirrors final axis scores onto
   the SN slots.
@@ -537,8 +541,8 @@ reviewer, but never quarantine.
   conflicts and filters out (does not overwrite) any entry whose unit differs
   from an existing node's.
 
-Both paths call shared `_write_standard_name_edges(gc, names)` as a tail pass
-after node MERGE; forward-reference targets are MERGEd as bare placeholder
+The build path calls shared `_write_standard_name_edges(gc, names)` as a tail
+pass after node MERGE; forward-reference targets are MERGEd as bare placeholder
 nodes.
 
 ### Structural edges
@@ -588,7 +592,7 @@ The graph is authoritative for pipeline state; the catalog (ISNC) is
 authoritative for human-reviewed editorial fields.
 
 ```
-sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn import
+sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn merge
 ```
 
 1. **`sn release --export-only`** — runs only the export leg: reads validated
@@ -605,9 +609,21 @@ sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages
    scoping flags) first, then `--skip-export`.
 4. **PR review on GitHub** — edits description, documentation, tags, kind,
    links, status, etc. Merged to ISNC main.
-5. **`sn import`** — reads ISNC YAML (auto-discovered from `isnc-dir`, or
-   `--isnc`), diffs against the graph, and flips `origin=catalog_edit` on any
-   name whose `PROTECTED_FIELDS` were edited.
+5. **`sn merge`** — folds the reviewed curator edits from the merged catalog
+   PR back into the ledger: catalog-owned editorial fields overwrite the graph
+   node and `origin` flips to `catalog_edit` on any name whose
+   `PROTECTED_FIELDS` were edited. It attaches to existing names by id and
+   never recreates nodes or provenance.
+
+**Graph restore (separate path).** Rebuilding the graph from a published
+catalog is *not* the fold-back path: it is the diff-by-id reconciler
+`catalog_reconcile.reconcile_catalog`, which MATCHes each entry by id (a
+missing node is reported, never recreated), updates only diverging scalar
+editorial fields, and replays each entry's `sources:` block through the
+provenance-rebuild binder to restore `StandardNameSource` + `PRODUCED_NAME`.
+The read-only `check_catalog` divergence report
+(`imas_codex/standard_names/catalog_import.py`) compares catalog-vs-graph
+without writing.
 
 **Protection model:** `PROTECTED_FIELDS` = {description, documentation, kind,
 tags, links, status, deprecates, superseded_by, validity_domain, constraints}.
@@ -615,8 +631,9 @@ Pipeline writers call `filter_protected()` before graph writes — `catalog_edit
 names have these stripped from pipeline updates unless `override=True` or the
 name is in `override_names` (`sn run --override-edits <name>`, repeatable).
 
-**Idempotent re-run:** `ImportWatermark` (singleton) records the last imported
-`catalog_commit_sha`; `ImportLock` (singleton) prevents concurrent imports.
+**Idempotent by construction:** both the fold-back and the reconcile paths key
+on the name id and never create `StandardName` nodes, so re-running the same
+catalog state is a no-op — no watermark or lock is needed.
 
 ## Reset & Clear Semantics
 
@@ -804,7 +821,6 @@ through review.
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
-| `sn import` | Import reviewed YAML back into the graph | `--isnc`, `--accept-unit-override`, `--accept-cocos-override`, `--dry-run` |
 | `sn status` | StandardName + StandardNameSource statistics, sibling-family harmonization state | `--family` |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |

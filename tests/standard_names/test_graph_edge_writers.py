@@ -1,9 +1,8 @@
 """Graph edge writer integration tests (G1–G10).
 
 All tests are mocked — no live Neo4j required.  They verify that
-``write_standard_names`` and ``_write_import_entries`` emit the correct
-Cypher queries with the expected batch parameters for every structural
-edge type.
+``write_standard_names`` emits the correct Cypher queries with the
+expected batch parameters for every structural edge type.
 
 Edge types covered:
   HAS_PARENT   — derived from ISN parser (G1, G2, G4, G5)
@@ -12,7 +11,6 @@ Edge types covered:
   HAS_SUCCESSOR   — from ``superseded_by`` field (G8)
   IN_CLUSTER      — from ``primary_cluster_id`` field (G9)
   HAS_PHYSICS_DOMAIN — from ``physics_domain`` field (G10)
-  Catalog import parity (G6)
 """
 
 from __future__ import annotations
@@ -55,13 +53,6 @@ def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
             from imas_codex.standard_names.graph_ops import write_standard_names
 
             return write_standard_names(names)
-
-
-def _call_import_entries(entries: list[dict], mock_gc: MagicMock) -> int:
-    """Invoke ``_write_import_entries`` directly with a mocked gc."""
-    from imas_codex.standard_names.catalog_import import _write_import_entries
-
-    return _write_import_entries(mock_gc, entries)
 
 
 def _cyphers(mock_gc: MagicMock) -> list[str]:
@@ -328,65 +319,6 @@ class TestG5:
 
 
 # ---------------------------------------------------------------------------
-# G6 — catalog import parity
-# ---------------------------------------------------------------------------
-
-
-class TestG6:
-    """G6: Catalog import of a file with admissible parent names.
-
-    Same HAS_PARENT edge shape as G1 — import path has pipeline parity.
-    Uses ``electron_temperature`` (qualifier-bearing) as the parent so
-    the admission gate keeps it; bare ``temperature`` would be dropped.
-    """
-
-    PARENT = "electron_temperature"
-    CHILD = "maximum_of_electron_temperature"
-
-    def test_catalog_import_emits_has_argument(self) -> None:
-        entries = [
-            {
-                "id": self.PARENT,
-                "unit": "eV",
-                "physics_domain": "core_plasma_physics",
-            },
-            {
-                "id": self.CHILD,
-                "unit": "eV",
-                "physics_domain": "core_plasma_physics",
-            },
-        ]
-        mock_gc = _make_mock_gc()
-        _call_import_entries(entries, mock_gc)
-
-        write_cyphers = _write_cyphers(mock_gc, "HAS_PARENT")
-        assert write_cyphers, (
-            "Catalog import must emit HAS_PARENT writes (pipeline parity)"
-        )
-
-    def test_catalog_import_has_argument_batch(self) -> None:
-        entries = [
-            {"id": self.PARENT, "unit": "eV"},
-            {"id": self.CHILD, "unit": "eV"},
-        ]
-        mock_gc = _make_mock_gc()
-        _call_import_entries(entries, mock_gc)
-
-        batch = _batch_for(mock_gc, "HAS_PARENT")
-        assert batch is not None
-        edge = next(
-            (
-                b
-                for b in batch
-                if b["from_name"] == self.CHILD and b["to_name"] == self.PARENT
-            ),
-            None,
-        )
-        assert edge is not None
-        assert edge["operator"] == "maximum"
-
-
-# ---------------------------------------------------------------------------
 # G7 — HAS_PREDECESSOR from deprecates field
 # ---------------------------------------------------------------------------
 
@@ -425,19 +357,6 @@ class TestG7:
             and b["to_name"] == "temperature_of_electrons"
             for b in batch
         )
-
-    def test_has_predecessor_edge_catalog(self) -> None:
-        entries = [
-            {
-                "id": "electron_temperature",
-                "unit": "eV",
-                "deprecates": "temperature_of_electrons",
-            }
-        ]
-        mock_gc = _make_mock_gc()
-        _call_import_entries(entries, mock_gc)
-
-        assert any("HAS_PREDECESSOR" in c for c in _cyphers(mock_gc))
 
 
 # ---------------------------------------------------------------------------
@@ -479,19 +398,6 @@ class TestG8:
             and b["to_name"] == "electron_temperature"
             for b in batch
         )
-
-    def test_has_successor_edge_catalog(self) -> None:
-        entries = [
-            {
-                "id": "ion_temperature",
-                "unit": "eV",
-                "superseded_by": "electron_temperature",
-            }
-        ]
-        mock_gc = _make_mock_gc()
-        _call_import_entries(entries, mock_gc)
-
-        assert any("HAS_SUCCESSOR" in c for c in _cyphers(mock_gc))
 
 
 # ---------------------------------------------------------------------------
@@ -583,19 +489,6 @@ class TestG10:
             b["sn_id"] == "plasma_current" and b["domain_id"] == "equilibrium"
             for b in batch
         )
-
-    def test_has_physics_domain_catalog_import(self) -> None:
-        entries = [
-            {
-                "id": "plasma_current",
-                "unit": "A",
-                "physics_domain": "equilibrium",
-            }
-        ]
-        mock_gc = _make_mock_gc()
-        _call_import_entries(entries, mock_gc)
-
-        assert any("HAS_PHYSICS_DOMAIN" in c for c in _cyphers(mock_gc))
 
     def test_no_has_physics_domain_when_absent(self) -> None:
         """No HAS_PHYSICS_DOMAIN Cypher when physics_domain is absent."""

@@ -1,20 +1,19 @@
-"""Catalog feedback import — read reviewed YAML entries and write to graph.
+"""Catalog check — compare reviewed YAML entries against the graph (read-only).
 
-This is the **PR-merge diff path**: it folds curator edits from a merged
-catalog PR back into the graph (diff-based origin tracking, forbidden-key
-rejection, domain-from-path, grammar reuse, lock/watermark concurrency
-control, and unit/COCOS validation).
+``check_catalog`` reports which names are only in the catalog, only in the
+graph, or present in both but with differing editorial fields.  It never
+writes to the graph.
 
-It is NOT the graph restore / bootstrap path.  Provenance
-(``StandardNameSource`` + ``PRODUCED_NAME``) is the graph's authoritative
-ledger and is never rebuilt here — restoring the graph from a published
-catalog is the job of the diff-by-id reconciler
-(``catalog_reconcile.reconcile_catalog``), which replays each entry's
-``sources:`` block.  ``run_import`` deliberately creates no source nodes and
-no ``PRODUCED_NAME`` edges (see ``tests/.../test_import_no_source_creation``).
+Two other paths own the write side and do NOT live here:
 
-Catalog entries are authoritative for their editorial fields: those overwrite
-graph fields.  Graph-only fields (embedding, model, generated_at) are preserved.
+- restoring / bootstrapping the graph from a published catalog (which replays
+  each entry's ``sources:`` block and rebuilds provenance) is the diff-by-id
+  reconciler ``catalog_reconcile.reconcile_catalog``;
+- folding reviewed curator edits from a merged catalog PR back into the ledger
+  is ``sn merge``.
+
+This module only compares; it never recreates nodes and never rebuilds
+provenance.
 """
 
 from __future__ import annotations
@@ -26,37 +25,18 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from imas_codex.standard_names.protection import PROTECTED_FIELDS
-
 logger = logging.getLogger(__name__)
 
-_FORBIDDEN_YAML_KEYS = frozenset({"source_paths", "dd_paths"})
-
-#: Computed fields — re-derived from graph edges on export; silently
-#: ignored on import (never written to node properties, never trigger
-#: ``_protected_fields_differ``).  See plan 40 §1.
+#: Computed fields — re-derived from graph edges (HAS_PARENT / HAS_ERROR) on
+#: export.  A curator edit to one has no effect (it is overwritten on the next
+#: export), so ``check_catalog`` warns about it and strips it before ISN model
+#: validation; it is never compared against the graph.
 COMPUTED_FIELDS: frozenset[str] = frozenset({"arguments", "error_variants"})
 
 
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
-
-
-@dataclass
-class ImportReport:
-    """Summary of a catalog import operation (Phase 4)."""
-
-    imported: int = 0
-    updated: int = 0
-    created: int = 0
-    skipped: int = 0
-    errors: list[str] = field(default_factory=list)
-    entries: list[dict[str, Any]] = field(default_factory=list)
-    catalog_commit_sha: str | None = None
-    pr_numbers: list[int] = field(default_factory=list)
-    dry_run: bool = False
-    watermark_advanced: bool = False
 
 
 @dataclass
@@ -97,27 +77,12 @@ def _resolve_catalog_sha(catalog_dir: Path) -> str | None:
         return None
 
 
-def _is_git_repo(path: Path) -> bool:
-    """Check whether *path* is inside a git work-tree."""
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--git-dir"],
-            cwd=str(path),
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        return result.returncode == 0
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return False
-
-
 # ---------------------------------------------------------------------------
 # Domain-from-path derivation
 # ---------------------------------------------------------------------------
 
 #: Pattern: standard_names/<domain>.yml or standard_names/<domain>.yaml
-#: (domain = file basename without extension; per-domain layout from plan 40)
+#: (domain = file basename without extension; per-domain layout)
 _DOMAIN_PATH_RE = re.compile(r"standard_names/([^/]+)\.ya?ml$")
 
 
@@ -159,48 +124,20 @@ def _grammar_decomposition(name: str) -> dict[str, str | None]:
 # Entry conversion
 # ---------------------------------------------------------------------------
 
-# Graph-only fields that import must never overwrite (omitting = preserving)
-_GRAPH_ONLY_PRESERVE = frozenset(
-    {
-        "embedding",
-        "embedded_at",
-        "model",
-        "generated_at",
-        "source_types",
-        "source_paths",
-        "name_stage",
-        "reviewer_score_name",
-        "reviewer_score_docs",
-        "reviewer_scores_name",
-        "reviewer_scores_docs",
-        "reviewer_comments_name",
-        "reviewer_comments_docs",
-        "reviewed_name_at",
-        "reviewed_docs_at",
-        "review_tier",
-        "review_input_hash",
-        "vocab_gap_detail",
-        "validation_issues",
-        "validation_layer_summary",
-        "validation_status",
-        "link_status",
-    }
-)
-
 
 def _entry_to_graph_dict(
     entry: Any,
     *,
     physics_domain: list[str] | str | None,
 ) -> dict[str, Any]:
-    """Convert a validated ISN entry to a graph-write dict.
+    """Convert a validated ISN entry to a graph-comparison dict.
 
     Does NOT include graph-only fields (source_paths, etc.).
     Grammar fields are derived from the entry name.
 
-    Post-refactor: ``physics_domain`` is the scalar primary domain
-    and ``source_domains`` carries the full list.  Accepts either a
-    list (legacy catalog form) or a scalar.
+    ``physics_domain`` is the scalar primary domain and ``source_domains``
+    carries the full list.  Accepts either a list (legacy catalog form) or a
+    scalar.
     """
     grammar = _grammar_decomposition(entry.name)
 
@@ -219,8 +156,8 @@ def _entry_to_graph_dict(
         source_domains = []
 
     # Descriptions are plain Unicode text — strip any LaTeX/math markup that a
-    # stale catalog YAML carries so it is not written back verbatim (and so it
-    # does not regenerate on every import cycle). documentation keeps LaTeX.
+    # stale catalog YAML carries so it is not compared verbatim against the
+    # graph. documentation keeps LaTeX.
     from imas_codex.standard_names.workers import normalize_description_text
 
     result: dict[str, Any] = {
@@ -248,546 +185,6 @@ def _entry_to_graph_dict(
 
 
 # ---------------------------------------------------------------------------
-# Graph read: current state for diff
-# ---------------------------------------------------------------------------
-
-
-#: Catalog-owned fields that determine whether an incoming entry actually
-#: changes the graph node. Wider than ``PROTECTED_FIELDS`` — a catalog edit to
-#: ``unit`` / ``physics_domain`` / ``source_domains`` is not "protected" (it
-#: does not flip origin) but it is still a real change that must be written.
-#: Used by :func:`_entry_is_unchanged` to keep ``report.skipped`` honest.
-_CONTENT_FIELDS: frozenset[str] = frozenset(
-    PROTECTED_FIELDS | {"unit", "physics_domain", "source_domains"}
-)
-
-#: Extra node properties fetched alongside content fields for the import diff:
-#: ``origin`` (whose value we preserve on non-protected changes) and
-#: ``name_stage`` (so a ``'superseded'`` node is never resurrected).
-_DIFF_STATE_FIELDS: frozenset[str] = frozenset({"origin", "name_stage"})
-
-
-def _fetch_graph_state(
-    gc: Any,
-    name_ids: list[str],
-) -> dict[str, dict[str, Any]]:
-    """Fetch current StandardName properties for diff comparison."""
-    if not name_ids:
-        return {}
-
-    props = sorted(_CONTENT_FIELDS | _DIFF_STATE_FIELDS)
-    return_clause = ", ".join(f"sn.{p} AS {p}" for p in props)
-
-    rows = gc.query(
-        f"""
-        UNWIND $ids AS id
-        OPTIONAL MATCH (sn:StandardName {{id: id}})
-        RETURN sn.id AS id, {return_clause}
-        """,
-        ids=name_ids,
-    )
-
-    result: dict[str, dict[str, Any]] = {}
-    for row in rows or []:
-        if row.get("id"):
-            result[row["id"]] = dict(row)
-    return result
-
-
-def _protected_fields_differ(
-    graph_state: dict[str, Any],
-    new_entry: dict[str, Any],
-) -> bool:
-    """Check whether any PROTECTED_FIELDS differ between graph and new entry."""
-    for field_name in PROTECTED_FIELDS:
-        old_val = graph_state.get(field_name)
-        new_val = new_entry.get(field_name)
-        # Normalise None-like empties
-        if not old_val:
-            old_val = None
-        if not new_val:
-            new_val = None
-        if old_val != new_val:
-            return True
-    return False
-
-
-def _entry_is_unchanged(
-    graph_state: dict[str, Any],
-    new_entry: dict[str, Any],
-) -> bool:
-    """Return True when no catalog-owned field differs from the graph node.
-
-    Compares the full :data:`_CONTENT_FIELDS` set (not just protected fields)
-    through :func:`_normalize_field`, so list ordering / empty-vs-null noise
-    does not read as a change. A genuinely-unchanged entry can be excluded
-    from the write set, making ``report.skipped`` an honest no-op count.
-    """
-    for field_name in _CONTENT_FIELDS:
-        if _normalize_field(graph_state.get(field_name)) != _normalize_field(
-            new_entry.get(field_name)
-        ):
-            return False
-    return True
-
-
-# ---------------------------------------------------------------------------
-# Validation helpers
-# ---------------------------------------------------------------------------
-
-
-def _validate_unit_against_graph(
-    gc: Any,
-    entries: list[dict[str, Any]],
-) -> list[str]:
-    """Check for unit mismatches between catalog entries and graph."""
-    unit_batch = [{"id": e["id"], "unit": e["unit"]} for e in entries if e.get("unit")]
-    if not unit_batch:
-        return []
-
-    rows = gc.query(
-        """
-        UNWIND $batch AS b
-        MATCH (sn:StandardName {id: b.id})
-        WHERE sn.unit IS NOT NULL AND b.unit IS NOT NULL
-          AND sn.unit <> b.unit
-        RETURN sn.id AS name,
-               sn.unit AS existing_unit,
-               b.unit AS incoming_unit
-        """,
-        batch=unit_batch,
-    )
-
-    errors = []
-    for row in rows or []:
-        errors.append(
-            f"Unit mismatch for {row['name']}: "
-            f"graph has '{row['existing_unit']}', "
-            f"catalog has '{row['incoming_unit']}'. "
-            f"Use --accept-unit-override to force."
-        )
-    return errors
-
-
-# ---------------------------------------------------------------------------
-# Graph write: import entries
-# ---------------------------------------------------------------------------
-
-
-def _write_import_entries(
-    gc: Any,
-    entries: list[dict[str, Any]],
-    *,
-    catalog_commit_sha: str | None = None,
-    pr_number: int | None = None,
-    pr_url: str | None = None,
-) -> int:
-    """Write catalog entries to graph with catalog-authoritative semantics.
-
-    Catalog-owned fields are SET directly (overwrite).
-    Graph-only fields (embedding, model, generated_at, etc.) are preserved
-    via omission (not in the SET clause at all).
-
-    ``validation_status`` is a special case: it is graph-only (never carried
-    in catalog YAML) yet export eligibility requires it to equal ``'valid'``
-    (see ``export._fetch_candidates``). A node created purely by import would
-    otherwise have a null ``validation_status`` and be silently dropped on the
-    next export → publish (and deleted from ISNC by the full-scope rmtree).
-    We therefore default it with ``coalesce(sn.validation_status, 'valid')`` —
-    preserving an existing status (e.g. ``'quarantined'``) but making
-    import-created nodes export-eligible.
-    Returns the number of nodes written.
-    """
-    if not entries:
-        return 0
-
-    # Add provenance metadata to each entry, and normalize the description at
-    # the write boundary — descriptions are plain Unicode text, so any LaTeX
-    # ($…$, \phi, …) leaked into a catalog YAML is stripped before it is
-    # written back. documentation is left verbatim (LaTeX is valid there).
-    from imas_codex.standard_names.workers import normalize_description_text
-
-    for e in entries:
-        e["_catalog_commit_sha"] = catalog_commit_sha
-        e["_pr_number"] = pr_number
-        e["_pr_url"] = pr_url
-        e["_origin"] = e.pop("_origin", "catalog_edit")
-        if e.get("description"):
-            e["description"] = normalize_description_text(e["description"])
-
-    # Main MERGE — catalog-owned fields overwrite
-    gc.query(
-        """
-        UNWIND $batch AS b
-        MERGE (sn:StandardName {id: b.id})
-        SET sn.description = b.description,
-            sn.documentation = b.documentation,
-            sn.kind = b.kind,
-            sn.unit = b.unit,
-            sn.links = b.links,
-            sn.validity_domain = b.validity_domain,
-            sn.constraints = b.constraints,
-            sn.physics_domain = b.physics_domain,
-            sn.source_domains = b.source_domains,
-            sn.status = b.status,
-            sn.deprecates = b.deprecates,
-            sn.superseded_by = b.superseded_by,
-            sn.name_stage = 'accepted',
-            sn.validation_status = coalesce(sn.validation_status, 'valid'),
-            sn.origin = b._origin,
-            sn.imported_at = datetime(),
-            sn.catalog_commit_sha = b._catalog_commit_sha,
-            sn.import_pr_number = b._pr_number,
-            sn.import_pr_url = b._pr_url,
-            sn.source_types = coalesce(sn.source_types, ['catalog']),
-            sn.created_at = coalesce(sn.created_at, datetime())
-        """,
-        batch=entries,
-    )
-
-    # Grammar fields (separate SET to keep queries readable). The bare-name
-    # segment columns are the canonical family written everywhere
-    # (graph persist + _write_grammar_decomposition); build the SET clause
-    # programmatically from the trusted module constant.
-    from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
-
-    grammar_keys = {"id", *_GRAMMAR_SEGMENT_COLUMNS}
-    grammar_batch = [{k: v for k, v in e.items() if k in grammar_keys} for e in entries]
-    set_clause = ",\n            ".join(
-        f"sn.{col} = b.{col}" for col in _GRAMMAR_SEGMENT_COLUMNS
-    )
-    gc.query(
-        f"""
-        UNWIND $batch AS b
-        MATCH (sn:StandardName {{id: b.id}})
-        SET {set_clause}
-        """,
-        batch=grammar_batch,
-    )
-
-    # Create HAS_UNIT relationships
-    units_batch = [{"id": e["id"], "unit": e["unit"]} for e in entries if e.get("unit")]
-    if units_batch:
-        gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (sn:StandardName {id: b.id})
-            MERGE (u:Unit {id: b.unit})
-            SET u.symbol = coalesce(u.symbol, b.unit)
-            MERGE (sn)-[:HAS_UNIT]->(u)
-            """,
-            batch=units_batch,
-        )
-
-    # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
-    # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
-    # Tail pass — all nodes in the batch exist before edges are written.
-    # 'deprecates' → HAS_PREDECESSOR, 'superseded_by' → HAS_SUCCESSOR.
-    from imas_codex.standard_names.graph_ops import _write_standard_name_edges
-
-    _write_standard_name_edges(gc, entries)
-
-    written = len(entries)
-    logger.info("Imported %d catalog entries to graph", written)
-    return written
-
-
-# Keep legacy name as alias
-_write_catalog_entries = _write_import_entries
-
-
-# ---------------------------------------------------------------------------
-# Main entry point: run_import
-# ---------------------------------------------------------------------------
-
-
-def run_import(
-    catalog_dir: Path,
-    dry_run: bool = False,
-    accept_unit_override: bool = False,
-) -> ImportReport:
-    """Fold curator edits from a merged catalog PR back into the graph.
-
-    This is the PR-merge diff path, NOT the graph restore/bootstrap path: it
-    updates editorial fields and never rebuilds provenance.  It creates no
-    ``StandardNameSource`` node and no ``PRODUCED_NAME`` edge — any ``sources:``
-    block in the YAML is ignored here.  To restore/bootstrap the graph from a
-    published catalog (which does rebuild provenance), use the diff-by-id
-    reconciler ``catalog_reconcile.reconcile_catalog`` instead.
-
-    Implementation:
-    - Forbidden-key rejection (source_paths, dd_paths)
-    - Domain-from-path derivation
-    - Grammar decomposition via graph_ops helper
-    - Diff-based origin tracking
-    - Lock and watermark concurrency control
-    - Unit validation
-
-    Parameters
-    ----------
-    catalog_dir:
-        Path to ISN catalog repository root (containing ``standard_names/`` subtree).
-    dry_run:
-        If True, parse and validate but do not write to graph.
-
-    Returns
-    -------
-    ImportReport with counts and entry details.
-    """
-    import yaml
-    from imas_standard_names.models import StandardNameEntry
-    from pydantic import TypeAdapter
-
-    ta = TypeAdapter(StandardNameEntry)
-    report = ImportReport(dry_run=dry_run)
-
-    isnc_path = catalog_dir
-
-    # Resolve HEAD SHA
-    catalog_sha = _resolve_catalog_sha(isnc_path)
-    report.catalog_commit_sha = catalog_sha
-
-    has_git = _is_git_repo(isnc_path)
-
-    # ── Phase 1: Parse and validate all YAML files ──────────────────────
-
-    sn_dir = isnc_path / "standard_names"
-    if not sn_dir.is_dir():
-        # Fall back to searching from root (flat layout)
-        sn_dir = isnc_path
-
-    yaml_files = sorted(
-        p for p in sn_dir.rglob("*") if p.suffix in (".yml", ".yaml") and p.is_file()
-    )
-
-    if not yaml_files:
-        logger.info("No YAML files found in %s", sn_dir)
-        return report
-
-    logger.info("Found %d YAML files in %s", len(yaml_files), sn_dir)
-
-    prepared: list[dict[str, Any]] = []
-
-    for yaml_path in yaml_files:
-        relative = (
-            yaml_path.relative_to(isnc_path)
-            if isnc_path in yaml_path.parents
-            else yaml_path
-        )
-        try:
-            with open(yaml_path) as f:
-                data = yaml.safe_load(f)
-
-            if isinstance(data, dict):
-                # Legacy per-file layout — reject with migration error
-                report.errors.append(
-                    f"{relative}: top-level YAML dict detected. "
-                    f"Per-file layout is no longer supported; migrate to "
-                    f"per-domain list layout (one YAML sequence per "
-                    f"physics domain). See plan 40."
-                )
-                continue
-
-            if not isinstance(data, list):
-                report.errors.append(f"{relative}: expected a YAML list of entries")
-                continue
-
-            # Derive domain from file path (per-domain layout)
-            path_domain = _derive_domain_from_path(yaml_path)
-            if path_domain is None:
-                report.errors.append(
-                    f"{relative}: cannot derive physics_domain from file path. "
-                    f"Expected standard_names/<domain>.yml layout."
-                )
-                continue
-
-            for entry_data in data:
-                if not isinstance(entry_data, dict):
-                    report.errors.append(
-                        f"{relative}: entry is not a mapping: {entry_data!r}"
-                    )
-                    continue
-
-                # Silently ignore computed fields (plan 40 §1)
-                for cf in COMPUTED_FIELDS:
-                    if cf in entry_data:
-                        logger.info(
-                            "Ignoring computed field=%s name=%s",
-                            cf,
-                            entry_data.get("name", "?"),
-                        )
-                        entry_data = {
-                            k: v
-                            for k, v in entry_data.items()
-                            if k not in COMPUTED_FIELDS
-                        }
-                        break
-
-                # Reject forbidden keys (source_paths, dd_paths)
-                forbidden_found = _FORBIDDEN_YAML_KEYS & set(entry_data.keys())
-                if forbidden_found:
-                    report.errors.append(
-                        f"{relative}/{entry_data.get('name', '?')}: "
-                        f"contains forbidden key(s) "
-                        f"{sorted(forbidden_found)}. Provenance is graph-only; "
-                        f"use 'sn run' for provenance management."
-                    )
-                    continue
-
-                # Strip graph-only fields before ISN validation
-                # (physics_domain is used later but ISN rejects it)
-                isn_data = {
-                    k: v
-                    for k, v in entry_data.items()
-                    if k not in _GRAPH_ONLY_FIELDS | _ISN_REMOVED_FIELDS
-                }
-
-                # Validate against ISN model
-                entry = ta.validate_python(isn_data)
-
-                # Parse physics_domain — accept scalar (post-refactor) or
-                # list (legacy catalog form).  Normalise to list internally
-                # so downstream code computes source_domains correctly.
-                raw_pd = entry_data.get("physics_domain")
-                if raw_pd is None:
-                    physics_domain_list = [path_domain]
-                elif isinstance(raw_pd, str):
-                    physics_domain_list = [raw_pd] if raw_pd else [path_domain]
-                elif isinstance(raw_pd, list):
-                    physics_domain_list = raw_pd if raw_pd else [path_domain]
-                else:
-                    report.errors.append(
-                        f"{relative}/{entry_data.get('name', '?')}: "
-                        f"physics_domain must be a string or list, got "
-                        f"{type(raw_pd).__name__}."
-                    )
-                    continue
-
-                # Grammar decomposition — hard fail on parse error
-                grammar = _grammar_decomposition(entry.name)
-
-                # Convert to graph dict
-                graph_dict = _entry_to_graph_dict(
-                    entry, physics_domain=physics_domain_list
-                )
-                graph_dict.update(grammar)
-
-                prepared.append(graph_dict)
-                report.entries.append(graph_dict)
-
-        except Exception as exc:
-            report.errors.append(f"{relative}: {exc}")
-            logger.debug("Failed to parse %s: %s", yaml_path, exc)
-            continue
-
-    if report.errors:
-        logger.warning("Encountered %d error(s) during parsing", len(report.errors))
-
-    if not prepared:
-        logger.info("No entries to import after validation")
-        return report
-
-    if dry_run:
-        report.imported = len(prepared)
-        report.skipped = 0
-        logger.info("Dry run: would import %d entries", len(prepared))
-        return report
-
-    # ── Phase 2: Lock, diff, validate, write ────────────────────────────
-
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.import_sync import (
-        acquire_import_lock,
-        advance_watermark,
-        read_watermark,
-        release_import_lock,
-    )
-
-    with GraphClient() as gc:
-        # Acquire lock
-        if not acquire_import_lock(gc):
-            report.errors.append(
-                "Could not acquire import lock — another import may be running."
-            )
-            return report
-
-        try:
-            # 4e: Diff-based origin tracking. Decide, per entry, whether to
-            # write it and with which origin, from its current graph state.
-            # Genuine no-ops are excluded from the write set (honest skipped);
-            # a superseded node is never resurrected to 'accepted'.
-            name_ids = [e["id"] for e in prepared]
-            graph_state = _fetch_graph_state(gc, name_ids)
-
-            to_write: list[dict[str, Any]] = []
-            for entry_dict in prepared:
-                eid = entry_dict["id"]
-                existing = graph_state.get(eid)
-
-                if existing is None:
-                    # New name — the catalog is its origin.
-                    entry_dict["_origin"] = "catalog_edit"
-                    report.created += 1
-                    to_write.append(entry_dict)
-                elif existing.get("name_stage") == "superseded":
-                    # Replaced by a refinement — re-importing a stale catalog
-                    # must not flip it back to 'accepted'. Leave it untouched.
-                    report.skipped += 1
-                elif _entry_is_unchanged(existing, entry_dict):
-                    # No catalog-owned field differs — a true no-op. Skip the
-                    # write so skipped is honest and no provenance/timestamp
-                    # churn is introduced.
-                    report.skipped += 1
-                elif _protected_fields_differ(existing, entry_dict):
-                    # A protected editorial field changed — a curator edit.
-                    entry_dict["_origin"] = "catalog_edit"
-                    report.updated += 1
-                    to_write.append(entry_dict)
-                else:
-                    # Only non-protected content changed (unit, physics_domain,
-                    # source_domains). Persist it but keep the current origin.
-                    entry_dict["_origin"] = existing.get("origin") or "pipeline"
-                    report.updated += 1
-                    to_write.append(entry_dict)
-
-            # 4f: Unit validation (only over the entries we will write)
-            if not accept_unit_override:
-                unit_errors = _validate_unit_against_graph(gc, to_write)
-                if unit_errors:
-                    report.errors.extend(unit_errors)
-
-            # Write entries
-            written = _write_import_entries(
-                gc,
-                to_write,
-                catalog_commit_sha=catalog_sha,
-            )
-            report.imported = written
-
-            # 4h: Advance watermark
-            if catalog_sha and has_git:
-                try:
-                    prev = read_watermark(gc).last_commit_sha
-                    advanced = advance_watermark(
-                        gc, expected_prev_sha=prev, new_sha=catalog_sha
-                    )
-                    report.watermark_advanced = advanced
-                    if not advanced:
-                        report.errors.append(
-                            "Failed to advance watermark: CAS conflict — "
-                            "another import moved it concurrently"
-                        )
-                except Exception as exc:
-                    report.errors.append(f"Failed to advance watermark: {exc}")
-                    logger.warning("Watermark advance failed: %s", exc)
-
-        finally:
-            release_import_lock(gc)
-
-    return report
-
-
-# ---------------------------------------------------------------------------
 # Check mode (catalog-vs-graph comparison)
 # ---------------------------------------------------------------------------
 
@@ -810,7 +207,7 @@ _GRAPH_ONLY_FIELDS = {
     "cocos",
 }
 
-# Fields removed from the ISN Pydantic model in v0.7.0rc46.
+# Fields removed from the ISN Pydantic model in a prior ISN release.
 # Strip before model validation to avoid ``extra_forbidden`` errors;
 # read back with ``getattr`` + default to avoid AttributeError.
 _ISN_REMOVED_FIELDS: frozenset[str] = frozenset({"constraints", "validity_domain"})
@@ -871,19 +268,19 @@ def check_catalog(
                 if not isinstance(entry_data, dict):
                     continue
 
-                # Warn about computed-field edits (§1 curator warning)
+                # Warn about computed-field edits (curator warning)
                 for cf in COMPUTED_FIELDS:
                     if cf in entry_data:
                         warnings.append(
                             f"{cf} is computed from HAS_PARENT / HAS_ERROR "
                             f"graph edges and will be overwritten on next "
-                            f"export — edit has no effect.  See plan 40 / "
+                            f"export — edit has no effect.  See "
                             f"COMPUTED_FIELDS."
                         )
                         logger.warning(
                             "%s is computed from HAS_PARENT / HAS_ERROR "
                             "graph edges and will be overwritten on next "
-                            "export — edit has no effect.  See plan 40 / "
+                            "export — edit has no effect.  See "
                             "COMPUTED_FIELDS.",
                             cf,
                         )

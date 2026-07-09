@@ -13,9 +13,10 @@ never a node-recreating import:
   binder to restore ``StandardNameSource`` + ``PRODUCED_NAME`` +
   ``FROM_DD_PATH`` / ``FROM_SIGNAL`` (every write gated on the name existing).
 
-This is the sanctioned restore path.  ``catalog_import.run_import`` is the
-PR-merge diff path only — it must NOT be used to bootstrap or restore the
-graph (it can create ``StandardName`` nodes and never rebuilds sources).
+This is the sanctioned restore path.  ``sn merge`` is the PR-merge diff path
+that folds reviewed curator edits from a merged catalog PR back into the
+ledger; it must NOT be used to bootstrap or restore the graph.  This
+reconciler is the only path that rebuilds provenance from a published catalog.
 """
 
 from __future__ import annotations

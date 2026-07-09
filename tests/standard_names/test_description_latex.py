@@ -8,8 +8,9 @@ Descriptions are plain Unicode text (the ISN convention); LaTeX belongs in
    ``\\φ`` corruption) to Unicode, and flattens other backslash-commands /
    braces to plain text. Idempotent; DD tokens (``phi_tor``) untouched;
    ``documentation`` never touched.
-2. IMPORT — ``sn import`` normalizes ``description`` before writing, so a
-   stale YAML carrying ``$…$`` is cleaned rather than regressed.
+2. PROJECT — ``_entry_to_graph_dict`` normalizes ``description`` when it
+   projects a catalog entry for the graph comparison, so a stale YAML
+   carrying ``$…$`` is compared as clean text rather than as markup.
 3. GATE — a ``$`` or backslash in a ``description`` is a critical audit
    failure (``description_notation_check``), so such a name is quarantined
    even if the normalizer missed an edge case. ``documentation`` is exempt.
@@ -93,39 +94,11 @@ class TestNormalizerStripsLatex:
 
 
 # ---------------------------------------------------------------------------
-# 2. Import normalizes description (documentation left alone)
+# 2. Projection normalizes description (documentation left alone)
 # ---------------------------------------------------------------------------
 
 
-class TestImportNormalizesDescription:
-    def test_write_entries_normalizes_description(self) -> None:
-        from imas_codex.standard_names import catalog_import
-
-        gc = MagicMock()
-        entries = [
-            {
-                "id": "toroidal_angle",
-                "description": "In the $(R, \\phi, Z)$ frame.",
-                "documentation": "The toroidal angle $\\phi$ is measured …",
-                "unit": None,
-            }
-        ]
-
-        # _write_standard_name_edges does real graph work — stub it out.
-        with patch("imas_codex.standard_names.graph_ops._write_standard_name_edges"):
-            catalog_import._write_import_entries(gc, entries)
-
-        # description cleaned in place …
-        assert entries[0]["description"] == "In the (R, φ, Z) frame."
-        assert "$" not in entries[0]["description"]
-        # … documentation left verbatim (LaTeX is legitimate there) …
-        assert entries[0]["documentation"] == "The toroidal angle $\\phi$ is measured …"
-
-        # … and the value the MERGE writes is the normalized one.
-        merge_call = gc.query.call_args_list[0]
-        assert "MERGE (sn:StandardName" in merge_call.args[0]
-        assert merge_call.kwargs["batch"][0]["description"] == "In the (R, φ, Z) frame."
-
+class TestGraphDictNormalizesDescription:
     def test_entry_to_graph_dict_normalizes_description(self) -> None:
         from imas_codex.standard_names import catalog_import
 

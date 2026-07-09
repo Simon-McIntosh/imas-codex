@@ -413,59 +413,6 @@ class TestRoundTripIdempotence:
 
 
 # ============================================================================
-# Test 11: Computed-field ignored on import + INFO log
-# ============================================================================
-
-
-class TestComputedFieldIgnoredOnImport:
-    """Import ignores arguments/error_variants and logs INFO."""
-
-    def test_computed_fields_stripped_with_log(
-        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        pytest.importorskip("imas_standard_names")
-
-        catalog_dir = tmp_path / "catalog"
-        catalog_dir.mkdir()
-        sn_dir = catalog_dir / "standard_names"
-        sn_dir.mkdir()
-
-        entry_with_computed = [
-            {
-                "name": "temperature",
-                "description": "Temperature",
-                "documentation": "A temperature.",
-                "kind": "scalar",
-                "unit": "eV",
-                "status": "active",
-                "links": [],
-                "arguments": [{"name": "base", "operator": "identity"}],
-                "error_variants": {"upper": "upper_uncertainty_of_temperature"},
-            }
-        ]
-        (sn_dir / "kinetics.yml").write_text(yaml.safe_dump(entry_with_computed))
-
-        from imas_codex.standard_names.catalog_import import run_import
-
-        with caplog.at_level(
-            logging.INFO, logger="imas_codex.standard_names.catalog_import"
-        ):
-            report = run_import(catalog_dir, dry_run=True)
-
-        # Check that computed fields were logged
-        info_messages = [r.message for r in caplog.records if r.levelno == logging.INFO]
-        assert any(
-            "computed field" in m.lower() or "Ignoring" in m for m in info_messages
-        )
-
-        # The entries should have been parsed (arguments stripped)
-        if report.entries:
-            for e in report.entries:
-                assert "arguments" not in e
-                assert "error_variants" not in e
-
-
-# ============================================================================
 # Test 12: Partial-export publish safety + manifest mismatch abort
 # ============================================================================
 
@@ -581,46 +528,6 @@ class TestCheckCatalogListRoot:
 
         # Should have parsed the entry
         assert result.only_in_catalog == ["temperature"]
-
-
-# ============================================================================
-# Test 14: Legacy per-file rejection
-# ============================================================================
-
-
-class TestLegacyPerFileRejection:
-    """Top-level dict YAML file rejected with migration error."""
-
-    def test_dict_root_rejected(self, tmp_path: Path) -> None:
-        pytest.importorskip("imas_standard_names")
-
-        catalog_dir = tmp_path / "catalog"
-        catalog_dir.mkdir()
-        sn_dir = catalog_dir / "standard_names"
-        sn_dir.mkdir()
-
-        # Legacy per-file format: single dict
-        legacy_entry = {
-            "name": "temperature",
-            "description": "Temperature",
-            "documentation": "A temperature.",
-            "kind": "scalar",
-            "unit": "eV",
-            "status": "active",
-            "links": [],
-        }
-        (sn_dir / "kinetics.yml").write_text(yaml.safe_dump(legacy_entry))
-
-        from imas_codex.standard_names.catalog_import import run_import
-
-        report = run_import(catalog_dir, dry_run=True)
-
-        assert report.errors
-        assert any(
-            "top-level YAML dict" in e or "per-file layout" in e.lower()
-            for e in report.errors
-        )
-        assert report.imported == 0
 
 
 # ============================================================================
