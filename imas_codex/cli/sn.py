@@ -3516,6 +3516,102 @@ def sn_release(
         console.print(f"\n[green]✓ Tagged {report.git_tag} (not pushed)[/green]")
 
 
+@sn.command("merge")
+@click.option(
+    "--isnc",
+    type=click.Path(),
+    default=None,
+    help="Path to ISNC repository root (default: auto-discover)",
+)
+@click.option(
+    "--base",
+    "base_ref",
+    required=True,
+    help="Base git ref to diff the reviewed PR against (the merge-base).",
+)
+@click.option(
+    "--threshold",
+    type=float,
+    default=None,
+    help="Review acceptance threshold (default: the configured min-score).",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report the would-be merge without writing to the graph.",
+)
+def sn_merge(
+    isnc: str | None, base_ref: str, threshold: float | None, dry_run: bool
+) -> None:
+    """Fold a reviewed catalog PR back into the graph ledger (id-matched, review-only).
+
+    \b
+    Reads the catalog-entry diff of the PR against --base, matches each changed
+    entry to its graph StandardName BY ID, and re-attaches the human edit as a
+    steered proposal exactly like ``sn edit`` (candidate + reason, no refine —
+    a human-reviewed wording is never silently mutated). Names route through the
+    rename cascade (carrying PRODUCED_NAME provenance). Each proposal is scored
+    by the full review pipeline: ≥ threshold → accepted; below → quarantined and
+    flagged (never accepted, never refined). Provenance-preserving throughout.
+    """
+    from pathlib import Path
+
+    from rich.table import Table
+
+    from imas_codex.settings import get_sn_isnc_dir
+    from imas_codex.standard_names.merge import run_merge
+
+    if isnc:
+        isnc_path: Path | None = Path(isnc)
+    else:
+        isnc_path = get_sn_isnc_dir()
+        if isnc_path is None:
+            console.print(
+                "[red]ISNC not found.[/red] Set [bold]IMAS_CODEX_SN_ISNC[/bold] env "
+                "var or clone imas-standard-names-catalog as a sibling directory."
+            )
+            raise SystemExit(2)
+
+    console.print("\n[bold]Standard Name Merge[/bold]")
+    console.print(f"  ISNC: {isnc_path}")
+    console.print(f"  Base ref: {base_ref}")
+    if dry_run:
+        console.print("  Mode: [yellow]dry run[/yellow]")
+    console.print("")
+
+    report = run_merge(
+        isnc_dir=isnc_path,
+        base_ref=base_ref,
+        threshold=threshold,
+        dry_run=dry_run,
+    )
+
+    table = Table(title="Merge Summary")
+    table.add_column("metric", style="cyan")
+    table.add_column("value", style="white")
+    table.add_row("changes seen", str(report.changes_seen))
+    table.add_row("accepted", str(len(report.accepted)))
+    table.add_row("quarantined", str(len(report.quarantined)))
+    table.add_row("blocked", str(len(report.blocked)))
+    table.add_row("unmatched", str(len(report.unmatched)))
+    console.print(table)
+
+    if report.quarantined:
+        console.print(
+            f"\n[yellow]⚠ {len(report.quarantined)} edit(s) quarantined "
+            "(below threshold) — flagged for human attention.[/yellow]"
+        )
+    if report.blocked:
+        console.print(
+            f"\n[red]✗ {len(report.blocked)} edit(s) blocked (could not attach):[/red]"
+        )
+        for b in report.blocked[:10]:
+            console.print(f"  - {b.get('sn_id', '?')}: {b.get('reason', '')}")
+        raise SystemExit(1)
+
+    console.print("\n[green]✓ Merge complete[/green]")
+
+
 @sn.command("clear")
 @click.option("--dry-run", is_flag=True, help="Preview without modifying the graph")
 @click.option("--force", "-f", is_flag=True, help="Skip confirmation prompt")
