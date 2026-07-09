@@ -3708,6 +3708,78 @@ def sn_rebuild_provenance(isnc: str | None, ref: str | None, dry_run: bool) -> N
     console.print("\n[green]✓ Provenance rebuild complete[/green]")
 
 
+@sn.command("reconcile-catalog")
+@click.option(
+    "--isnc",
+    type=click.Path(),
+    default=None,
+    help="Path to ISNC repository root (default: auto-discover)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report the would-be deltas without writing to the graph.",
+)
+def sn_reconcile_catalog(isnc: str | None, dry_run: bool) -> None:
+    """Restore the graph ledger from the published catalog (diff-by-id).
+
+    \b
+    The sanctioned restore path: every catalog entry is matched to its graph
+    ``StandardName`` BY ID (never recreated), scalar editorial fields are
+    updated where they differ, and each entry's ``sources:`` block is replayed
+    to rebuild ``StandardNameSource`` + ``PRODUCED_NAME`` + ``FROM_DD_PATH`` /
+    ``FROM_SIGNAL``. Exits non-zero if any catalog entry has no graph node.
+    """
+    from pathlib import Path
+
+    from rich.table import Table
+
+    from imas_codex.settings import get_sn_isnc_dir
+    from imas_codex.standard_names.catalog_reconcile import reconcile_catalog
+
+    if isnc:
+        isnc_path: Path | None = Path(isnc)
+    else:
+        isnc_path = get_sn_isnc_dir()
+        if isnc_path is None:
+            console.print(
+                "[red]ISNC not found.[/red] Set [bold]IMAS_CODEX_SN_ISNC[/bold] env "
+                "var or clone imas-standard-names-catalog as a sibling directory."
+            )
+            raise SystemExit(2)
+
+    console.print("\n[bold]Catalog → Graph Reconcile[/bold]")
+    console.print(f"  ISNC: {isnc_path}")
+    if dry_run:
+        console.print("  Mode: [yellow]dry run[/yellow]")
+    console.print("")
+
+    report = reconcile_catalog(isnc_path, dry_run=dry_run)
+
+    table = Table(title="Reconcile Summary")
+    table.add_column("metric", style="cyan")
+    table.add_column("value", style="white")
+    table.add_row("matched", str(report.matched))
+    table.add_row("updated", str(report.updated))
+    table.add_row("sources bound", str(report.sources_bound))
+    table.add_row("missing (no graph node)", str(len(report.missing)))
+    console.print(table)
+
+    if report.errors:
+        console.print(f"[red]Errors: {len(report.errors)}[/red]")
+        for err in report.errors[:10]:
+            console.print(f"  - {err}")
+
+    if report.missing:
+        console.print(
+            f"\n[red]✗ {len(report.missing)} catalog entr(y/ies) have no graph "
+            f"node (e.g. {', '.join(report.missing[:5])}).[/red]"
+        )
+        raise SystemExit(1)
+
+    console.print("\n[green]✓ Reconcile complete[/green]")
+
+
 @sn.command("clear")
 @click.option("--dry-run", is_flag=True, help="Preview without modifying the graph")
 @click.option("--force", "-f", is_flag=True, help="Skip confirmation prompt")
