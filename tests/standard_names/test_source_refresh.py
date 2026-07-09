@@ -46,7 +46,7 @@ def test_format_reason_truncates_long_documentation():
     assert "…" in reason  # long doc is truncated for the steering reason
 
 
-def _row(old_unit, new_unit, old_doc="d", new_doc="d"):
+def _row(old_unit, new_unit, old_doc="d", new_doc="d", old_path="wall/x", new_path="wall/x"):
     return {
         "sn_id": "some_name",
         "name_stage": "accepted",
@@ -55,7 +55,8 @@ def _row(old_unit, new_unit, old_doc="d", new_doc="d"):
         "new_unit": new_unit,
         "old_doc": old_doc,
         "new_doc": new_doc,
-        "source_id": "wall/x/values",
+        "old_path": old_path,
+        "new_path": new_path,
     }
 
 
@@ -65,12 +66,30 @@ def test_detect_drift_units_change():
     assert out[0]["deltas"] == [
         {"field": "units", "old": "m^-2.s^-1", "new": "W.m^-2"}
     ]
+    assert out[0]["renamed"] is False
 
 
 def test_detect_drift_documentation_change():
     out = sr.detect_source_drift(gc=_FakeGC([_row("W.m^-2", "W.m^-2", "old doc", "new doc")]))
     assert len(out) == 1
     assert [d["field"] for d in out[0]["deltas"]] == ["documentation"]
+
+
+def test_detect_drift_path_rename():
+    out = sr.detect_source_drift(
+        gc=_FakeGC([_row("W.m^-2", "W.m^-2", old_path="x/torque_fast_tor", new_path="x/torque_fast_phi")])
+    )
+    assert len(out) == 1
+    assert out[0]["renamed"] is True
+    assert out[0]["deltas"][0]["field"] == "source_path"
+    assert out[0]["new_path"] == "x/torque_fast_phi"
+
+
+def test_format_reason_rename_labelled():
+    reason = sr._format_reason(
+        "x", [{"field": "source_path", "old": "a/tor", "new": "a/phi"}]
+    )
+    assert "path renamed" in reason
 
 
 def test_detect_drift_ignores_whitespace_only_change():
