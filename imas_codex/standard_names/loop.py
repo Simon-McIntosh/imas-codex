@@ -849,7 +849,12 @@ async def run_sn_pools(
                 prov_result.get("scalars_cleared", 0),
                 prov_result.get("orphan_sources_deleted", 0),
             )
-        orphans = await asyncio.to_thread(find_provenance_orphans)
+        # Read-only ledger-health probe — a diagnostic, never fatal to the run.
+        try:
+            orphans = await asyncio.to_thread(find_provenance_orphans)
+        except Exception as exc:  # noqa: BLE001 - diagnostic must not abort the run
+            logger.debug("run_sn_pools: orphan-count probe skipped: %s", exc)
+            orphans = []
         if orphans:
             logger.warning(
                 "run_sn_pools: ledger invariant VIOLATED — %d live name(s) have NO "
