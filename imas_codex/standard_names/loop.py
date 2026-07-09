@@ -852,8 +852,9 @@ async def run_sn_pools(
         orphans = await asyncio.to_thread(find_provenance_orphans)
         if orphans:
             logger.warning(
-                "run_sn_pools: ledger invariant — %d live name(s) have NO source "
-                "(run 'sn rebuild-provenance' to recover). First few: %s",
+                "run_sn_pools: ledger invariant VIOLATED — %d live name(s) have NO "
+                "source. Reattach ran this cycle, so these lack any recoverable "
+                "producing source; investigate the origin. First few: %s",
                 len(orphans),
                 ", ".join(o["sn_id"] for o in orphans[:5]),
             )
