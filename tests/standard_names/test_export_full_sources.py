@@ -29,9 +29,7 @@ def test_query_projects_source_type_and_provenance() -> None:
     """The Cypher must RETURN src.source_type and src.provenance."""
     captured: list[str] = []
     gc = MagicMock()
-    gc.query = MagicMock(
-        side_effect=lambda cypher, **kw: captured.append(cypher) or []
-    )
+    gc.query = MagicMock(side_effect=lambda cypher, **kw: captured.append(cypher) or [])
     _fetch_sources_for_entry(gc, "electron_temperature")
 
     assert captured, "_fetch_sources_for_entry issued no query"
