@@ -1438,6 +1438,22 @@ classes:
           ISO 8601 timestamp when the edit was attached via
           `imas-codex sn edit`. Null when no edit has ever been attached.
         range: datetime
+      edit_override_edits:
+        description: >-
+          Cascade authorization recorded at edit-attach time: when true, the
+          rename cascade may overwrite descendants carrying protected
+          (catalog_edit) human edits. Defaults to false — a rename that did
+          not explicitly opt in must not silently clobber curator edits when
+          the root rename is accepted. Read back and honoured by the cascade
+          preflight in persist_reviewed_name.
+        range: boolean
+      edit_include_accepted:
+        description: >-
+          Cascade authorization recorded at edit-attach time: when true, the
+          rename cascade may rename descendants whose name_stage is
+          'accepted' (catalog-authoritative). Defaults to false. Read back and
+          honoured by the cascade preflight at acceptance time.
+        range: boolean
 
   Locus:
     description: >-
