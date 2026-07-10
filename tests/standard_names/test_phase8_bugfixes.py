@@ -1098,6 +1098,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
             patch(f"{_GO}.reconcile_standard_name_sources", return_value={}),
             patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
             patch(f"{_GO}.reconcile_provenance", return_value={}),
+            patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
             patch(
                 "imas_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,

@@ -74,7 +74,12 @@ _BARE_CASES = [
         "volume_averaged_electron_temperature",
     ),
     ("line_averaged", "density", ["electron"], "line_averaged_electron_density"),
-    ("flux_surface_averaged", "pressure", [], "flux_surface_averaged_pressure"),
+    (
+        "flux_surface_averaged",
+        "density",
+        ["electron"],
+        "flux_surface_averaged_electron_density",
+    ),
     ("normalized", "temperature", ["electron"], "normalized_electron_temperature"),
     ("surface_integrated", "pressure", [], "surface_integrated_pressure"),
     ("volume_integrated", "pressure", [], "volume_integrated_pressure"),

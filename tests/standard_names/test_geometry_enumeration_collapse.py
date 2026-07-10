@@ -37,10 +37,6 @@ def _name(seg: GrammarSegments) -> str:
 @pytest.mark.parametrize(
     "base_token,axis,expected",
     [
-        # line-of-sight endpoints (first_point/second_point) -> ONE name per axis
-        ("line_of_sight", "radial", "radial_line_of_sight"),
-        ("line_of_sight", "vertical", "vertical_line_of_sight"),
-        ("line_of_sight", "toroidal", "toroidal_line_of_sight"),
         # outline vertex array -> ONE name per axis
         ("outline", "radial", "radial_outline"),
         ("outline", "vertical", "vertical_outline"),
@@ -54,6 +50,21 @@ def test_enumerated_geometry_collapses_to_one_carrier(base_token, axis, expected
         projection_shape="coordinate",
     )
     assert _name(seg) == expected
+
+
+@pytest.mark.parametrize("axis", ["radial", "vertical", "toroidal"])
+def test_line_of_sight_is_no_longer_a_geometry_carrier(axis):
+    # line_of_sight migrated from geometry_carriers.yml to locus_registry.yml
+    # (a path locus with relation 'along': toroidal_angle_along_line_of_sight).
+    # Composing it as a carrier must fail; the endpoint collapse now happens
+    # at the locus, not via a carrier base.
+    with pytest.raises(ValidationError):
+        GrammarSegments(
+            base_token="line_of_sight",
+            base_kind="geometry",
+            projection_axis=axis,
+            projection_shape="coordinate",
+        )
 
 
 # ---------------------------------------------------------------------------

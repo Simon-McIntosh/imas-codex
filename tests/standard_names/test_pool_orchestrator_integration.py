@@ -89,7 +89,11 @@ class TestReconcileRunsBeforePools:
                 f"{_GO}.reconcile_standard_name_sources",
                 side_effect=_reconcile_spy,
             ),
-            patch(f"{_GO}.reconcile_provenance", return_value={}),
+            patch.multiple(
+                _GO,
+                reconcile_provenance=MagicMock(return_value={}),
+                reconcile_grammar_segments=MagicMock(return_value={}),
+            ),
             patch(
                 _CLAIM_PATCHES["generate_name"],
                 side_effect=_claim_factory("generate_name"),
@@ -340,7 +344,11 @@ class TestFinalizeWithCorrectStatus:
                 return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
             ),
             patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
-            patch(f"{_GO}.reconcile_provenance", return_value={}),
+            patch.multiple(
+                _GO,
+                reconcile_provenance=MagicMock(return_value={}),
+                reconcile_grammar_segments=MagicMock(return_value={}),
+            ),
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run", side_effect=_finalize),
             patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
@@ -401,7 +409,11 @@ class TestFinalizeWithCorrectStatus:
                 return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
             ),
             patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
-            patch(f"{_GO}.reconcile_provenance", return_value={}),
+            patch.multiple(
+                _GO,
+                reconcile_provenance=MagicMock(return_value={}),
+                reconcile_grammar_segments=MagicMock(return_value={}),
+            ),
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run", side_effect=_finalize),
             patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
