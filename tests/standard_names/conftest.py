@@ -62,6 +62,36 @@ def _block_live_graph(request):
         yield
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _cache_grammar_context():
+    """Memoize ``get_grammar_context()`` for the whole test session.
+
+    ISN's ``get_grammar_context()`` rebuilds and semantic-validates the full
+    published catalog on every call (tens of seconds), and the
+    ``GrammarSegments`` validator invokes it on every construction. Without a
+    cache the suite is effectively unrunnable. The context is a pure function
+    of the on-disk vocabularies, so a single build reused for the session is
+    equivalent. Patches both the source symbol and the top-level re-export so
+    the many local ``from imas_standard_names import get_grammar_context``
+    call sites resolve to the cached value.
+    """
+    from contextlib import ExitStack
+
+    import imas_standard_names as _isn
+    import imas_standard_names.grammar.context as _ctx
+
+    cached = _ctx.get_grammar_context()
+
+    def _cached() -> Any:
+        return cached
+
+    with ExitStack() as stack:
+        stack.enter_context(patch.object(_ctx, "get_grammar_context", _cached))
+        if hasattr(_isn, "get_grammar_context"):
+            stack.enter_context(patch.object(_isn, "get_grammar_context", _cached))
+        yield
+
+
 @pytest.fixture()
 def sample_standard_names() -> list[dict]:
     """Sample standard name dicts for write_standard_names testing."""
