@@ -87,3 +87,20 @@ class TestExtractionGate:
 
         src = inspect.getsource(loop._list_physics_domains_with_extractable_paths)
         assert "coalesce(n.lifecycle_status, '') <> 'removed'" in src
+
+
+class TestReconcileSourcesGate:
+    def test_reconcile_never_revives_removed_node_sources(self):
+        # The revive step must skip sources whose IMASNode is stamped removed,
+        # and the stale step must catch sources on removed source_id paths —
+        # otherwise the startup reconcile resurrects DDv3 sources into the
+        # compose queue on every sn run.
+        import inspect
+
+        from imas_codex.standard_names import graph_ops
+
+        src = inspect.getsource(graph_ops.reconcile_standard_name_sources)
+        assert "lifecycle_status = 'removed'" in src, "stale step must gate on removed"
+        assert "coalesce(imas.lifecycle_status, '') <> 'removed'" in src, (
+            "revive step must exclude removed nodes"
+        )

@@ -6309,12 +6309,18 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     """
     with GraphClient() as gc:
         if source_type == "dd":
-            # Find stale: sources whose DD path no longer exists
+            # Find stale: sources whose DD path no longer exists, or whose
+            # node the DD-version lifecycle stamped removed (absent from the
+            # current DD) — such sources must never re-enter the queue.
             stale = list(
                 gc.query(
                     """
                     MATCH (sns:StandardNameSource {source_type: 'dd'})
-                    WHERE NOT (sns)-[:FROM_DD_PATH]->(:IMASNode)
+                    WHERE (
+                        NOT (sns)-[:FROM_DD_PATH]->(:IMASNode)
+                        OR EXISTS { MATCH (l:IMASNode {id: sns.source_id})
+                                    WHERE l.lifecycle_status = 'removed' }
+                    )
                     AND NOT (sns.status = 'stale')
                     RETURN sns.id AS id
                     """
@@ -6328,6 +6334,7 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
                 """
                 MATCH (sns:StandardNameSource {source_type: 'dd', status: 'stale'})
                 MATCH (imas:IMASNode {id: sns.source_id})
+                WHERE coalesce(imas.lifecycle_status, '') <> 'removed'
                 SET sns.status = 'extracted',
                     sns.claimed_at = null,
                     sns.claim_token = null
