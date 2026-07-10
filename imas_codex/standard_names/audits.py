@@ -3221,3 +3221,35 @@ def find_flux_surface_reduction_violations(*, gc=None) -> list[dict[str, Any]]:
         except Exception:  # noqa: BLE001 - other parse failures are not this gate
             continue
     return violations
+
+
+def find_removed_dd_sources(*, gc=None) -> list[dict[str, Any]]:
+    """Return live names still fed by a DD path absent from the current DD.
+
+    The DD build stamps IMASNodes absent from the current DD version as
+    ``lifecycle_status='removed'`` and extraction excludes them, so any live
+    name whose source resolves through a removed node is legacy debt from a
+    pre-gate extract — re-anchor it to the renamed path or retire it.
+    Read-only diagnostic.
+    """
+    from imas_codex.graph.client import GraphClient  # noqa: PLC0415
+
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        return list(
+            gc.query(
+                """
+                MATCH (s:StandardNameSource {source_type:'dd'})-[:PRODUCED_NAME]->(n:StandardName)
+                WHERE NOT coalesce(n.name_stage, '') IN ['superseded', 'exhausted']
+                MATCH (l:IMASNode {id: s.source_id})
+                WHERE l.lifecycle_status = 'removed'
+                RETURN n.id AS id, s.id AS source_id, l.renamed_to AS renamed_to
+                ORDER BY n.id
+                """
+            )
+            or []
+        )
+    finally:
+        if owns:
+            gc.close()

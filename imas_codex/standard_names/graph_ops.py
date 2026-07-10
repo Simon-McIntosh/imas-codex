@@ -473,6 +473,8 @@ def get_extraction_candidates_dd(
             "n.node_type IN ['dynamic', 'constant']",
             "n.description IS NOT NULL",
             "n.description <> ''",
+            # DD-version gate: nodes absent from the current DD never seed.
+            "coalesce(n.lifecycle_status, '') <> 'removed'",
         ]
 
         if ids_filter:

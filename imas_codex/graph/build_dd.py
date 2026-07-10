@@ -1927,6 +1927,15 @@ def phase_build(
         mappings = load_path_mappings(current_dd_version)
         _batch_create_renamed_to(client, mappings.get("old_to_new", {}))
 
+    # Lifecycle gate: DEPRECATED_IN edges alone are invisible to extraction —
+    # stamp nodes absent from the current DD as lifecycle_status='removed'
+    # (with renamed_to where the NBC rename map resolves them) so seeding
+    # queries can exclude them. Idempotent; restores returnees.
+    if not dry_run:
+        from imas_codex.graph.dd_lifecycle import reconcile_node_lifecycle
+
+        stats["lifecycle"] = reconcile_node_lifecycle(gc=client)
+
     # Update cocos_transformation_type on existing IMASNode nodes
     if not dry_run and version_data:
         latest_version = sorted(version_data.keys())[-1]

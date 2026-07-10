@@ -525,7 +525,10 @@ def extract_dd_candidates(
         if explicit_paths:
             # Fixed-path mode: bypass all dynamic filters, use exact path list.
             # Used by sn bench for reproducible benchmarks.
-            where_clause = "n.id IN $explicit_paths"
+            where_clause = (
+                "n.id IN $explicit_paths "
+                "AND coalesce(n.lifecycle_status, '') <> 'removed'"
+            )
             params = {"explicit_paths": explicit_paths}
             limit_clause = ""
             query = _ENRICHED_QUERY_TPL.format(
@@ -565,6 +568,10 @@ def extract_dd_candidates(
                 # Push into Cypher so LIMIT/ORDER BY pagination doesn't fill a batch
                 # entirely with paths the classifier will reject.
                 "ids.id <> 'core_instant_changes'",
+                # DD-version gate: nodes absent from the current DD (removed or
+                # renamed away in a newer major version) must never seed a
+                # source — standard names are grounded in current-DD semantics.
+                "coalesce(n.lifecycle_status, '') <> 'removed'",
             ]
             if ids_filter:
                 where_parts.append("ids.id = $ids_filter")

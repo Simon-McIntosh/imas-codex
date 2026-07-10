@@ -489,6 +489,7 @@ def _list_physics_domains_with_extractable_paths(source: str) -> list[str]:
       AND n.description <> ''
       AND NOT (n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
       AND ids.id <> 'core_instant_changes'
+      AND coalesce(n.lifecycle_status, '') <> 'removed'
       AND n.physics_domain IS NOT NULL
       AND n.physics_domain <> ''
     RETURN DISTINCT n.physics_domain AS domain
@@ -901,6 +902,25 @@ async def run_sn_pools(
                 "few: %s",
                 len(gate_violations),
                 ", ".join(v["id"] for v in gate_violations[:5]),
+            )
+
+        # Read-only DD-version probe — live names fed by a DD path that the
+        # current DD removed/renamed away can no longer be seeded; survivors
+        # are pre-gate legacy debt to re-anchor or retire.
+        try:
+            from imas_codex.standard_names.audits import find_removed_dd_sources
+
+            removed_srcs = await asyncio.to_thread(find_removed_dd_sources)
+        except Exception as exc:  # noqa: BLE001 - diagnostic must not abort the run
+            logger.debug("run_sn_pools: removed-dd-source probe skipped: %s", exc)
+            removed_srcs = []
+        if removed_srcs:
+            logger.warning(
+                "run_sn_pools: %d live name(s) still fed by DD paths absent "
+                "from the current DD — re-anchor (renamed_to) or retire. "
+                "First few: %s",
+                len(removed_srcs),
+                ", ".join(v["id"] for v in removed_srcs[:5]),
             )
 
         # ── B2d: DD source-drift refresh ──────────────────────────────
