@@ -3877,6 +3877,90 @@ def _is_quarantined(issues: list[str], layer_summary: dict) -> bool:
     return False
 
 
+def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str]:
+    """Run the full name-admission gate on a single candidate and classify it.
+
+    This is the ONE gate every newly-minted StandardName passes before it can
+    reach ``accepted`` — the same checks a pipeline-generated candidate clears:
+    grammar round-trip, the ISN Pydantic/semantic/structural/canonical/
+    description layers (:func:`_validate_via_isn`), and the L3 post-generation
+    audits (:func:`run_audits`).  :func:`_is_quarantined` then decides whether
+    the accumulated issues are critical.
+
+    Both the pool ``generate_name`` path (inline C1 audit) and the legacy
+    ``validate_worker`` classify names this way; the ``sn edit`` rename path
+    calls this so an operator-supplied replacement name rides *exactly* the
+    same gate rather than being stamped ``valid`` on a privileged path.
+
+    Returns ``(issues, layer_summary, validation_status)`` where
+    ``validation_status`` is ``"valid"`` or ``"quarantined"``.
+    """
+    name = entry.get("id", "")
+    try:
+        from imas_standard_names.grammar import (
+            StandardName,
+            compose_standard_name,
+            parse_standard_name,
+        )
+
+        # Grammar round-trip validates parsability.
+        parsed = parse_standard_name(name)
+        compose_standard_name(parsed)
+
+        # Fields-consistency check (best-effort — never rejects here).
+        fields_dict = {}
+        for fk in _GRAMMAR_FIELDS:
+            val = entry.get(fk)
+            if val:
+                fields_dict[fk] = val
+        if fields_dict:
+            try:
+                sn_fields = _convert_fields_to_grammar(fields_dict)
+                if sn_fields:
+                    sn = StandardName(**sn_fields)
+                    compose_standard_name(sn)
+            except Exception:
+                pass
+
+        # ISN three-layer validation (annotate).
+        issues, layer_summary = _validate_via_isn(entry)
+
+        # L3: post-generation audits.
+        try:
+            from imas_codex.standard_names.audits import run_audits
+
+            source_path = None
+            source_paths = entry.get("source_paths") or []
+            if source_paths:
+                source_path = strip_dd_prefix(source_paths[0])
+            audit_issues = run_audits(
+                candidate=entry,
+                existing_sns_in_domain=None,
+                source_path=source_path,
+                source_cocos_type=entry.get("cocos_transformation_type"),
+            )
+            if audit_issues:
+                issues.extend(audit_issues)
+        except Exception:
+            logger.debug("validate_name_candidate: audits failed for %r", name)
+
+        if entry.get("_grammar_retry_exhausted"):
+            issues.append("audit:grammar_retry_exhausted")
+
+        status = "quarantined" if _is_quarantined(issues, layer_summary) else "valid"
+        return issues, layer_summary, status
+    except Exception as exc:
+        exc_msg = str(exc).lower()
+        issues = []
+        if "component" in exc_msg and "coordinate" in exc_msg:
+            issues.append(f"grammar:ambiguity:component_coordinate_overlap: {name}")
+        elif "ambig" in exc_msg:
+            issues.append(f"grammar:ambiguity:unclassified: {name}")
+        else:
+            issues.append(f"parse_error: grammar round-trip failed for {name}")
+        return issues, {}, "quarantined"
+
+
 async def validate_worker(state: StandardNameBuildState, **_kwargs) -> None:
     """Validate composed names via ISN grammar checks (claim loop).
 
@@ -3901,12 +3985,6 @@ async def validate_worker(state: StandardNameBuildState, **_kwargs) -> None:
         state.validate_stats.freeze_rate()
         state.validate_phase.mark_done()
         return
-
-    from imas_standard_names.grammar import (
-        StandardName,
-        compose_standard_name,
-        parse_standard_name,
-    )
 
     from imas_codex.standard_names.graph_ops import (
         claim_names_for_validation,
@@ -3946,101 +4024,24 @@ async def validate_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
             for entry in items:
                 name = entry.get("id", "")
-                try:
-                    # Grammar round-trip validates parsability
-                    # (normalization already done at compose time)
-                    parsed = parse_standard_name(name)
-                    compose_standard_name(parsed)
-
-                    # Fields consistency check
-                    fields_dict = {}
-                    for fk in _GRAMMAR_FIELDS:
-                        val = entry.get(fk)
-                        if val:
-                            fields_dict[fk] = val
-                    if fields_dict:
-                        try:
-                            sn_fields = _convert_fields_to_grammar(fields_dict)
-                            if sn_fields:
-                                sn = StandardName(**sn_fields)
-                                compose_standard_name(sn)
-                        except Exception:
-                            pass
-
-                    # ISN three-layer validation (annotate, never reject)
-                    issues, layer_summary = _validate_via_isn(entry)
-
-                    # --- L3: Post-gen audits ---
-                    try:
-                        from imas_codex.standard_names.audits import run_audits
-
-                        source_path = None
-                        source_paths = entry.get("source_paths") or []
-                        if source_paths:
-                            # Use first source path for provenance check
-                            source_path = strip_dd_prefix(source_paths[0])
-
-                        audit_issues = run_audits(
-                            candidate=entry,
-                            existing_sns_in_domain=None,  # Synonym check needs embeddings — skip in basic mode
-                            source_path=source_path,
-                            source_cocos_type=entry.get("cocos_transformation_type"),
-                        )
-                        if audit_issues:
-                            issues.extend(audit_issues)
-                        state.audits_run += 1
-                        if audit_issues:
-                            state.audits_failed += 1
-                    except Exception:
-                        wlog.debug("L3: Audit failed for %r", name, exc_info=True)
-
-                    # L6: grammar retry exhausted flag from compose
-                    if entry.get("_grammar_retry_exhausted"):
-                        issues.append("audit:grammar_retry_exhausted")
-
-                    results.append(
-                        {
-                            "id": name,
-                            "validation_issues": issues,
-                            "validation_layer_summary": json.dumps(layer_summary),
-                            "validation_status": (
-                                "quarantined"
-                                if _is_quarantined(issues, layer_summary)
-                                else "valid"
-                            ),
-                        }
-                    )
-                except Exception as exc:
-                    exc_msg = str(exc).lower()
-                    issues: list[str] = []
-
-                    # Classify specific grammar ambiguities
-                    if "component" in exc_msg and "coordinate" in exc_msg:
-                        issues.append(
-                            f"grammar:ambiguity:component_coordinate_overlap: {name}"
-                        )
-                    elif "ambig" in exc_msg:
-                        issues.append(f"grammar:ambiguity:unclassified: {name}")
-                    else:
-                        issues.append(
-                            f"parse_error: grammar round-trip failed for {name}"
-                        )
-
-                    wlog.debug(
-                        "Validation error for %r: %s — tagging with %s",
-                        name,
-                        exc_msg[:80],
-                        issues[0].split(":")[0],
-                    )
-                    results.append(
-                        {
-                            "id": name,
-                            "validation_issues": issues,
-                            "validation_layer_summary": json.dumps({}),
-                            "validation_status": "quarantined",
-                        }
-                    )
+                # Single shared admission gate (see validate_name_candidate) —
+                # the same classification the pool generate_name path and the
+                # sn edit rename path apply, so every name is judged identically.
+                issues, layer_summary, status = validate_name_candidate(entry)
+                state.audits_run += 1
+                if any(i.startswith("audit:") or i.startswith("[") for i in issues):
+                    state.audits_failed += 1
+                if status == "quarantined":
                     batch_invalid += 1
+                    wlog.debug("Validation quarantined %r: %s", name, issues[:2])
+                results.append(
+                    {
+                        "id": name,
+                        "validation_issues": issues,
+                        "validation_layer_summary": json.dumps(layer_summary),
+                        "validation_status": status,
+                    }
+                )
 
             # Mark results on graph (token-verified)
             marked = await asyncio.to_thread(mark_names_validated, token, results)

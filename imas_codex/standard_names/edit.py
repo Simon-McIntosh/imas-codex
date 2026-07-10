@@ -25,6 +25,53 @@ Locked decisions (see the SN edit-engine plan):
   accepted (see :func:`imas_codex.standard_names.graph_ops
   .persist_reviewed_name` and :func:`imas_codex.standard_names.cascade
   .cascade_descendants_of`).
+
+Validation-parity call graph (edit entry → accepted, gate by gate)
+------------------------------------------------------------------
+Every edit-origin artifact clears exactly the gates a pipeline-generated
+name clears — there is no privileged accept path:
+
+- **rename** — ``apply_edit`` → ``_apply_rename``:
+  1. ISN grammar round-trip on the literal requested name
+     (``cascade._isn_round_trip_ok``) — same round-trip the validate gate
+     and the cascade apply run; a grammar-invalid name is refused up front.
+  2. id-collision check against the live graph.
+  3. shared-base / sibling desync guard (``--scope family`` mapping).
+  4. ``persist_refined_name`` mints the ``drafted`` successor, then
+     ``_stamp_successor_validation`` runs the FULL name-admission gate
+     (:func:`imas_codex.standard_names.workers.validate_name_candidate`:
+     grammar round-trip + ISN Pydantic/semantic/structural/canonical/
+     description layers + L3 audits) and stamps ``validation_status``.  A
+     quarantined successor is skipped with a 0.0 review by the review
+     worker and can never reach ``accepted`` — identical to a quarantined
+     pipeline candidate.
+  5. name review (``review_name`` pool → ``persist_reviewed_name``) scores
+     it; ``score >= min_score`` accepts.
+  6. on acceptance of a ``family``/``subtree`` rename, the descendant
+     cascade is preflighted (round-trip + uniqueness of every descendant
+     id) BEFORE the acceptance commits; any conflict refuses the
+     acceptance (``name_stage`` stays ``reviewed``) and renames nothing.
+- **docs** — ``apply_edit`` → ``_apply_docs``: ``name_stage='accepted'`` +
+  ``docs_stage in (accepted, exhausted)`` preconditions, then
+  ``protection.filter_protected`` (catalog-edit docs require
+  ``--override-edits``), then ``persist_refined_docs`` → the ``review_docs``
+  pool scores the replacement — the same docs gate a pipeline docs
+  candidate rides.
+- **hint** — ``apply_edit`` → ``_apply_hint``: resets the producing
+  sources / docs so the name is REGENERATED through the ``generate_name`` /
+  ``generate_docs`` pools; it therefore rides the pipeline's own gates by
+  construction (nothing edit-specific to validate).
+
+``--scope family`` semantics: a shared-segment leaf edit is PROMOTED to its
+parent and the parent's rename cascades through the **full** ``HAS_PARENT``
+subtree (every descendant that embeds the segment), not just the leaf's
+direct siblings.  Full-subtree breadth is grammar-required: a grandchild
+such as ``time_derivative_of_upper_elongation`` embeds the same base as
+``elongation`` and would desync into invalid grammar if only direct
+siblings were renamed.  (The ``EditScope.family`` enum docstring in
+``imas_codex.graph.models`` still reads "sibling StandardNames" — that text
+is stale; the behaviour is full-subtree and the enum doc should be
+corrected to match.)
 """
 
 from __future__ import annotations
@@ -159,6 +206,44 @@ def _grammar_segment_props(name: str) -> dict[str, str]:
     return props
 
 
+def _stamp_successor_validation(
+    gc: GraphClient, successor: str, root_row: dict[str, Any]
+) -> None:
+    """Run the pipeline name-admission gate on a rename successor and stamp it.
+
+    Overwrites the provisional ``validation_status`` persist_refined_name
+    seeds so an edit-origin name is judged by exactly the gate a
+    pipeline-generated candidate passes (grammar round-trip, ISN Pydantic /
+    semantic / structural / canonical / description layers, L3 audits).  A
+    quarantined result cannot reach ``accepted`` — the review worker skips
+    quarantined names with a 0.0 score.
+    """
+    from imas_codex.standard_names.workers import validate_name_candidate
+
+    entry = {
+        "id": successor,
+        "kind": root_row.get("kind") or "scalar",
+        "unit": root_row.get("unit"),
+        "description": root_row.get("description") or "",
+        "physics_domain": root_row.get("physics_domain"),
+        "cocos_transformation_type": root_row.get("cocos_transformation_type"),
+        "source_paths": root_row.get("source_paths") or [],
+    }
+    issues, _summary, status = validate_name_candidate(entry)
+    gc.query(
+        """
+        // EDIT_STAMP_VALIDATION
+        MATCH (sn:StandardName {id: $id})
+        SET sn.validation_status = $status,
+            sn.validation_issues = $issues,
+            sn.validated_at = datetime()
+        """,
+        id=successor,
+        status=status,
+        issues=issues,
+    )
+
+
 def _blocked(
     target: str,
     mode: str,
@@ -200,6 +285,7 @@ def _fetch_target(gc: GraphClient, sn_id: str) -> dict[str, Any] | None:
                sn.kind AS kind,
                sn.unit AS unit,
                sn.physics_domain AS physics_domain,
+               sn.origin AS origin,
                sn.tags AS tags,
                coalesce(sn.chain_length, 0) AS chain_length,
                has_successor,
@@ -376,6 +462,7 @@ def apply_edit(
                 reason=reason,
                 origin=origin,
                 scope=scope,
+                override_edits=override_edits,
                 dry_run=dry_run,
             )
         else:
@@ -693,6 +780,15 @@ def _apply_rename(
             props=seg_props,
         )
 
+    # Gate parity: a rename mints a brand-new name string that never rode the
+    # generate pool's admission gate.  persist_refined_name stamps a
+    # provisional validation_status='valid' (its default for a refine
+    # rotation); run the SAME gate a pipeline-generated candidate passes so a
+    # grammar-valid-but-semantically/structurally-invalid replacement is
+    # quarantined here and can never reach 'accepted' (the review worker
+    # persists a 0.0 review for quarantined names). No privileged path.
+    _stamp_successor_validation(gc, successor, root_row)
+
     actions.append(
         f"renamed {refine_root_old!r} → {successor!r}, entering name review "
         f"(edit_status=open, run_id={run_id})"
@@ -726,6 +822,7 @@ def _apply_docs(
     reason: str,
     origin: str,
     scope: str,
+    override_edits: bool,
     dry_run: bool,
 ) -> EditPlan:
     if not new_docs:
@@ -750,6 +847,47 @@ def _apply_docs(
             scope,
             f"target name_stage={name_stage!r} — docs edits require an "
             "accepted name (name_stage='accepted')",
+        )
+
+    # Docs-edit claim precondition (parity with the docs pipeline's own
+    # eligibility): documentation may only be re-opened once the docs axis
+    # has settled — accepted (published) or exhausted (refine cap reached).
+    # A name still drafting/refining/pending docs is mid-flight; steering it
+    # would race the docs pool.
+    docs_stage = target_row.get("docs_stage")
+    if docs_stage not in ("accepted", "exhausted"):
+        return _blocked(
+            target,
+            "docs",
+            "docs",
+            scope,
+            f"target docs_stage={docs_stage!r} — docs edits require the docs "
+            "axis to have settled (docs_stage in accepted/exhausted)",
+        )
+
+    # Catalog-edit protection: `documentation` is a catalog-authoritative
+    # field (see protection.PROTECTED_FIELDS). Editing the documentation of a
+    # name curated via a catalog PR (origin='catalog_edit') runs the SAME
+    # filter the pipeline writers run — it strips the write unless the
+    # operator explicitly overrides. Route through filter_protected so there
+    # is one protection decision, not a parallel one.
+    from imas_codex.standard_names.protection import filter_protected
+
+    is_catalog_edit = target_row.get("origin") == "catalog_edit"
+    _filtered, _skipped = filter_protected(
+        [{"id": target, "documentation": new_docs}],
+        override=override_edits,
+        protected_names={target} if is_catalog_edit else set(),
+    )
+    if _skipped:
+        return _blocked(
+            target,
+            "docs",
+            "docs",
+            scope,
+            f"{target!r} is catalog-edited (origin='catalog_edit') — its "
+            "documentation is catalog-authoritative; pass --override-edits to "
+            "steer it anyway",
         )
 
     actions = [f"docs replacement queued for {target!r}"]

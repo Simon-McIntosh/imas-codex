@@ -234,12 +234,17 @@ class TestAcceptanceCascadeApplication:
         assert "ion_temperature" not in fake.nodes
         assert fake.edges_by_child["electron_density"][0]["parent_id"] == "density"
 
-    def test_acceptance_time_conflict_does_not_revert_acceptance(self) -> None:
+    def test_acceptance_time_conflict_refuses_acceptance_atomically(self) -> None:
+        """Cascade atomicity: a descendant-id collision detected at
+        acceptance time refuses the acceptance itself — the root is NOT
+        accepted and NOTHING is renamed (full rollback, nothing persisted).
+        """
         from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
         fake = FakeGraph()
         self._drafted_subtree_edit(fake)
-        # A collision appears between attach-time and acceptance-time.
+        # A collision appears between attach-time and acceptance-time: the
+        # would-be cascade target `electron_density` already exists.
         fake.add_node("electron_density", name_stage="accepted")
         with _patched_graph(fake):
             stage = persist_reviewed_name(
@@ -250,11 +255,16 @@ class TestAcceptanceCascadeApplication:
                 min_score=0.75,
                 rotation_cap=3,
             )
-        # The acceptance itself is NOT lost over the cascade conflict.
-        assert stage == "accepted"
-        assert fake.nodes["density"]["edit_status"] == "applied"
-        # Descendants are left unrenamed for operator follow-up.
+        # The acceptance is refused — the reviewed decision cannot land while
+        # its atomic cascade is invalid.
+        assert stage == "reviewed"
+        assert fake.nodes["density"]["name_stage"] == "reviewed"
+        # Edit stays open (rides refine) — it was NOT applied.
+        assert fake.nodes["density"]["edit_status"] == "open"
+        # Nothing renamed: descendants and the pre-existing collider untouched.
         assert "electron_temperature" in fake.nodes
         assert "ion_temperature" in fake.nodes
+        assert "ion_density" not in fake.nodes
+        # The refusal reason is recorded for operator follow-up.
         issues = fake.nodes["density"].get("validation_issues") or []
         assert any("edit_cascade" in issue for issue in issues)

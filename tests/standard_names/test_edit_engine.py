@@ -55,6 +55,8 @@ _DEFAULT_NODE_FIELDS: dict[str, Any] = {
     "claim_token": None,
     "claimed_at": None,
     "validation_issues": None,
+    "validation_status": None,
+    "validated_at": None,
     "run_id": None,
 }
 
@@ -200,6 +202,7 @@ class FakeGraph:
                     "kind": node.get("kind"),
                     "unit": node.get("unit"),
                     "physics_domain": node.get("physics_domain"),
+                    "origin": node.get("origin"),
                     "tags": node.get("tags"),
                     "chain_length": node.get("chain_length", 0) or 0,
                     "has_successor": self.has_successor(sn_id),
@@ -234,6 +237,14 @@ class FakeGraph:
                 if any(e["parent_id"] == parent_id for e in edges):
                     n += 1
             return [{"n": n}]
+
+        if "// EDIT_STAMP_VALIDATION" in cypher:
+            node = self.nodes.get(params["id"])
+            if node is not None:
+                node["validation_status"] = params["status"]
+                node["validation_issues"] = params["issues"]
+                node["validated_at"] = "now"
+            return []
 
         if "// EDIT_SET_REFINING" in cypher:
             node = self.nodes.get(params["id"])
@@ -1358,9 +1369,11 @@ class TestRenameCascadeProtections:
         assert "ion_temperature_of_plasma_boundary" in fake.nodes
         assert "ion_temperature" not in fake.nodes
 
-    def test_acceptance_cascade_respects_recorded_false(self) -> None:
-        """When include_accepted was NOT recorded, an accepted descendant is
-        left unrenamed and the conflict is recorded — acceptance is kept."""
+    def test_acceptance_cascade_refuses_when_recorded_false(self) -> None:
+        """When include_accepted was NOT recorded, an accepted descendant
+        makes the cascade preflight conflict — so the acceptance is refused
+        atomically (nothing accepted, nothing renamed) rather than landing a
+        grammar-inconsistent half-cascade with the accepted child stranded."""
         from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
         fake = FakeGraph()
@@ -1386,10 +1399,15 @@ class TestRenameCascadeProtections:
                 min_score=0.75,
                 rotation_cap=3,
             )
-        assert stage == "accepted"
-        # Accepted descendant NOT renamed (no opt-in recorded) …
+        # Acceptance refused — the protected (accepted, non-opted-in)
+        # descendant cannot ride the cascade.
+        assert stage == "reviewed"
+        assert (
+            fake.nodes["temperature_of_plasma_boundary"]["edit_status"] == "open"
+        )
+        # Nothing renamed: the accepted descendant is untouched.
         assert "ion_temperature" in fake.nodes
         assert "ion_temperature_of_plasma_boundary" not in fake.nodes
-        # … and the conflict is surfaced for operator follow-up.
+        # … and the refusal reason is surfaced for operator follow-up.
         issues = fake.nodes["temperature_of_plasma_boundary"].get("validation_issues")
         assert issues and any("edit_cascade" in v for v in issues)

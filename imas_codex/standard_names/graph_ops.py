@@ -8294,6 +8294,56 @@ def persist_reviewed_name(
     else:
         target_stage = "reviewed"
 
+    # ── Cascade atomicity preflight (edit rename acceptance) ─────────────
+    # A family/subtree rename edit accepts the ROOT and cascades every
+    # descendant id atomically.  Validate the WHOLE descendant cascade
+    # (ISN grammar round-trip + uniqueness of every new id) BEFORE the
+    # acceptance is written — so a constraint collision or a grammar-invalid
+    # descendant id refuses the acceptance itself rather than leaving the
+    # root accepted with a half-applied cascade.  On conflict the root is
+    # NOT accepted (it stays reviewable) and no descendant is renamed:
+    # nothing persisted.  The auto-commit query primitive cannot span the
+    # acceptance and the rename in one Neo4j transaction, so atomicity is
+    # achieved by gating the accept on a clean preflight; the residual
+    # accept→apply window is the same TOCTOU the pool path carries.
+    cascade_preflight_conflicts: list[str] = []
+    if target_stage == "accepted" and edit_scope_before in ("family", "subtree"):
+        from imas_codex.standard_names.cascade import cascade_descendants_of
+
+        with GraphClient() as gc:
+            pred_rows = gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})-[:REFINED_FROM]->(pred:StandardName)
+                RETURN pred.id AS pred_id
+                """,
+                id=sn_id,
+            )
+            old_root_pf = pred_rows[0]["pred_id"] if pred_rows else sn_id
+            preflight = cascade_descendants_of(
+                gc,
+                successor_id=sn_id,
+                old_root=old_root_pf,
+                new_root=sn_id,
+                dry_run=True,
+                override_edits=edit_override_before,
+                include_accepted=edit_include_before,
+            )
+        if preflight.conflicts:
+            cascade_preflight_conflicts = preflight.conflicts
+            # Refuse the acceptance — the reviewed decision cannot land
+            # while its atomic consequences (the descendant cascade) are
+            # invalid. Route back to 'reviewed' so an operator can resolve
+            # the collision; nothing is accepted and nothing is renamed.
+            target_stage = "reviewed"
+            logger.warning(
+                "persist_reviewed_name: %s scored acceptance but its "
+                "descendant cascade has %d conflict(s) — refusing acceptance "
+                "(name_stage=reviewed, no rename applied): %s",
+                sn_id,
+                len(preflight.conflicts),
+                preflight.conflicts,
+            )
+
     # ── Edit lifecycle decision ──────────────────────────────────────
     # Mirrors the `open → applied | exhausted | rejected` lifecycle
     # documented on EditStatus. A 'reviewed' outcome leaves the edit
@@ -8362,13 +8412,28 @@ def persist_reviewed_name(
         rotation_cap,
     )
 
+    # Acceptance refused by the cascade preflight — record why on the node so
+    # an operator can resolve the collision. Nothing was accepted, nothing
+    # renamed; the name stays reviewable.
+    if cascade_preflight_conflicts:
+        with GraphClient() as gc:
+            gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})
+                SET sn.validation_issues = coalesce(sn.validation_issues, [])
+                    + [c IN $conflicts | '[edit_cascade] ' + c]
+                """,
+                id=sn_id,
+                conflicts=cascade_preflight_conflicts,
+            )
+
     # ── Apply the staged descendant cascade atomically on edit acceptance ──
     # scope='family'|'subtree' means sn_id is the (possibly parent-mapped)
     # rename root of an `imas-codex sn edit` proposal — accepting it here is
     # the reviewed decision; descendants never individually re-enter LLM
-    # review, they follow the root atomically. Recomputed fresh from the
-    # LIVE subtree (not the edit-time dry-run plan) since HAS_PARENT
-    # topology may have shifted between attach and acceptance.
+    # review, they follow the root atomically. The cascade was already
+    # preflighted clean above (no conflicts), so this apply reproduces that
+    # validated plan against the LIVE subtree.
     if (
         target_stage == "accepted"
         and new_edit_status == "applied"
@@ -8395,12 +8460,13 @@ def persist_reviewed_name(
                 include_accepted=edit_include_before,
             )
             if cascade_result.conflicts:
-                # Never lose the acceptance over a cascade conflict — record
-                # it for operator follow-up and leave descendants unrenamed.
+                # The preflight was clean, so a conflict here is a genuine
+                # concurrent-write race between preflight and apply. Record it
+                # for operator follow-up; the acceptance already landed.
                 logger.warning(
-                    "persist_reviewed_name: edit accepted for %s but "
-                    "descendant cascade has %d conflict(s) — descendants "
-                    "left unrenamed: %s",
+                    "persist_reviewed_name: edit accepted for %s but the "
+                    "descendant cascade raced to %d conflict(s) after a clean "
+                    "preflight — descendants left unrenamed: %s",
                     sn_id,
                     len(cascade_result.conflicts),
                     cascade_result.conflicts,
