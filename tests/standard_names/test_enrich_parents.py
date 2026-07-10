@@ -38,6 +38,60 @@ def _mock_budget_manager() -> MagicMock:
     return mgr
 
 
+def _verify_gc(rows: list[dict]) -> MagicMock:
+    """Mock GraphClient whose single query returns the given winner rows."""
+    gc = MagicMock()
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+    gc.query = MagicMock(return_value=rows)
+    return gc
+
+
+# ---------------------------------------------------------------------------
+# Claim-race verification (two-step claim_token verify)
+# ---------------------------------------------------------------------------
+
+
+class TestVerifyEnrichParentsClaimWinners:
+    """A losing-race replica must spend zero enrichment LLM calls: the verifier
+    re-reads committed state and drops nodes whose token was overwritten."""
+
+    def test_drops_items_whose_token_lost(self):
+        import imas_codex.standard_names.graph_ops as g
+
+        items = [
+            {"id": "won_a", "claim_token": "tok-1"},
+            {"id": "lost_b", "claim_token": "tok-1"},  # overwritten by a racer
+            {"id": "won_c", "claim_token": "tok-1"},
+        ]
+        gc = _verify_gc([{"id": "won_a"}, {"id": "won_c"}])
+        with patch.object(g, "GraphClient", return_value=gc):
+            survivors = g._verify_enrich_parents_claim_winners(items)
+
+        assert [it["id"] for it in survivors] == ["won_a", "won_c"]
+        cypher = gc.query.call_args_list[0][0][0]
+        assert "sn.claim_token = $token" in cypher
+        assert "sn.origin = 'derived'" in cypher
+        assert "sn.description = $placeholder" in cypher
+        assert gc.query.call_args_list[0][1]["token"] == "tok-1"
+
+    def test_all_survive_returns_unchanged(self):
+        import imas_codex.standard_names.graph_ops as g
+
+        items = [{"id": "a", "claim_token": "t"}, {"id": "b", "claim_token": "t"}]
+        gc = _verify_gc([{"id": "a"}, {"id": "b"}])
+        with patch.object(g, "GraphClient", return_value=gc):
+            assert g._verify_enrich_parents_claim_winners(items) == items
+
+    def test_empty_items_short_circuit(self):
+        import imas_codex.standard_names.graph_ops as g
+
+        gc = _verify_gc([])
+        with patch.object(g, "GraphClient", return_value=gc):
+            assert g._verify_enrich_parents_claim_winners([]) == []
+        gc.query.assert_not_called()
+
+
 # ---------------------------------------------------------------------------
 # Claim eligibility
 # ---------------------------------------------------------------------------

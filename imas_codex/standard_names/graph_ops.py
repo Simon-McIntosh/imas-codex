@@ -11408,6 +11408,58 @@ def pool_pending_counts(
 # name.  Childless derived parents are legitimately unscoped and never claimed.
 
 
+def _verify_enrich_parents_claim_winners(
+    items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Drop enrich-parents claim items that lost a concurrent-claim race.
+
+    Same two-step claim_token verify mandated for every claim function (see
+    :func:`_verify_name_claim_winners`): two replicas bind the same eligible
+    derived parent at the shared seed MATCH, the lock-serialised SET lets the
+    LAST claim_token win, but BOTH replicas returned the node and would proceed
+    to the (paid) enrichment LLM call. This re-reads committed state and keeps
+    only nodes that STILL hold our token AND remain enrichment-eligible (a
+    placeholder derived parent) — the race loser's token was overwritten, so it
+    is dropped before any LLM call.
+
+    Returns the filtered item list (order preserved).
+    """
+    if not items:
+        return items
+    token = items[0].get("claim_token") or ""
+    if not token:
+        return items
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    ids = [it["id"] for it in items]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sn:StandardName {id: sid})
+            WHERE sn.claim_token = $token
+              AND sn.origin = 'derived'
+              AND sn.description = $placeholder
+            RETURN sn.id AS id
+            """,
+            ids=ids,
+            token=token,
+            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        )
+    winners = {r["id"] for r in rows}
+    if len(winners) == len(items):
+        return items
+    logger.debug(
+        "_verify_enrich_parents_claim_winners: %d/%d survived claim-race (token=%s)",
+        len(winners),
+        len(items),
+        token[:8],
+    )
+    return [it for it in items if it["id"] in winners]
+
+
 @retry_on_deadlock()
 def claim_enrich_parents_batch(
     batch_size: int = DEFAULT_POOL_BATCH_SIZE,
@@ -11443,7 +11495,7 @@ def claim_enrich_parents_batch(
     query_params: dict[str, Any] = {
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     }
-    return _claim_sn_atomic(
+    items = _claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,
         batch_size=batch_size,
@@ -11452,6 +11504,11 @@ def claim_enrich_parents_batch(
         domain=domain,
         scope_run_id=scope_run_id,
     )
+    # Two-step claim_token verify (mandated for every claim function): drop nodes
+    # a concurrent replica won at the lock-serialised SET, before any enrichment
+    # LLM call — otherwise multi-replica runs pay the enrichment cost N× per
+    # parent (the docs/name amplification analogue).
+    return _verify_enrich_parents_claim_winners(items)
 
 
 def fetch_derived_parent_children(
