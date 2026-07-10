@@ -9294,7 +9294,23 @@ def persist_refined_name(
                         MERGE (new)-[:REFINED_FROM]->(old)
 
                         // 3. Mark old as superseded, clear claim
+                        //
+                        // Record whether the predecessor had reached the
+                        // published bar so the export boundary can decide
+                        // whether to emit a deprecation stub. The caller has
+                        // already flipped name_stage to 'refining' (the WHERE
+                        // gate above), so the pre-refining name-axis stage is
+                        // no longer legible here; the durable "was published"
+                        // signal that survives that flip is docs_stage —
+                        // a name only reaches consumers once its docs review
+                        // has accepted it. A pipeline refine of a merely
+                        // 'reviewed' name (never published) records a
+                        // non-accepted sentinel, so no stub is emitted for it.
                         SET old.name_stage  = 'superseded',
+                            old.superseded_from_stage = coalesce(
+                                old.superseded_from_stage,
+                                CASE WHEN coalesce(old.docs_stage, '') = 'accepted'
+                                     THEN 'accepted' ELSE 'refining' END),
                             old.claim_token = null,
                             old.claimed_at  = null
 
@@ -9496,6 +9512,7 @@ def supersede_prior_source_names(
                 // successor — it is no longer stuck 'open').
                 WITH old, new,
                      (coalesce(old.edit_status, '') = 'open') AS carry_edit,
+                     old.name_stage AS o_prior_stage,
                      old.edit_mode AS o_edit_mode,
                      old.name_hint AS o_name_hint,
                      old.docs_hint AS o_docs_hint,
@@ -9507,6 +9524,13 @@ def supersede_prior_source_names(
                      old.edit_include_accepted AS o_include_accepted,
                      old.edit_status AS o_edit_status
                 SET old.name_stage = 'superseded',
+                    // Capture the predecessor's live name-axis stage before the
+                    // flip so the export boundary can emit a deprecation stub
+                    // only for names that had reached 'accepted'. Unlike the
+                    // refine path, this path supersedes a node still carrying
+                    // its real stage, so it is recorded verbatim.
+                    old.superseded_from_stage =
+                        coalesce(old.superseded_from_stage, o_prior_stage),
                     old.claim_token = null,
                     old.claimed_at = null,
                     old.edit_status = CASE WHEN carry_edit THEN 'applied'
