@@ -4560,32 +4560,6 @@ def reset_standard_names(
             reset_params = dict(params)
             node_match = f"MATCH (sn:StandardName) WHERE {where}"
 
-        # Remove HAS_STANDARD_NAME, HAS_UNIT, and HAS_COCOS relationships
-        gc.query(
-            f"""
-            {node_match}
-            OPTIONAL MATCH (src)-[r:HAS_STANDARD_NAME]->(sn)
-            DELETE r
-            """,
-            **reset_params,
-        )
-        gc.query(
-            f"""
-            {node_match}
-            OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(u)
-            DELETE r
-            """,
-            **reset_params,
-        )
-        gc.query(
-            f"""
-            {node_match}
-            OPTIONAL MATCH (sn)-[r:HAS_COCOS]->(c)
-            DELETE r
-            """,
-            **reset_params,
-        )
-
         # Clear transient fields, optionally set a new stage
         if to_stage is not None:
             set_clause = (
@@ -4602,9 +4576,30 @@ def reset_standard_names(
                 "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null"
             )
 
+        # Remove HAS_STANDARD_NAME, HAS_UNIT, and HAS_COCOS relationships and
+        # clear the transient fields in a SINGLE statement so the reset is
+        # atomic: a mid-sequence failure can no longer leave a node with its
+        # edges stripped but its fields (or target stage) untouched, or vice
+        # versa. Each DELETE runs in its own unit CALL subquery so the outer
+        # cardinality stays one row per node and the SET applies exactly once.
         gc.query(
             f"""
             {node_match}
+            CALL {{
+                WITH sn
+                OPTIONAL MATCH (sn)<-[r:HAS_STANDARD_NAME]-()
+                DELETE r
+            }}
+            CALL {{
+                WITH sn
+                OPTIONAL MATCH (sn)-[r:HAS_UNIT]->()
+                DELETE r
+            }}
+            CALL {{
+                WITH sn
+                OPTIONAL MATCH (sn)-[r:HAS_COCOS]->()
+                DELETE r
+            }}
             SET {set_clause}
             """,
             **reset_params,
