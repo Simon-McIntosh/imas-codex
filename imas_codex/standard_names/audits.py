@@ -2832,7 +2832,13 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
     3. agree on the **locus token** (all bare, or all the same ``_of_<device>``);
     4. agree on **physics_domain**;
     5. draw their axis tokens from a single canonical triple (``x, y, z`` or
-       ``radial, toroidal, vertical``) — never a mix of frames.
+       ``radial, toroidal, vertical``) — never a mix of frames;
+    6. carry **documentation** consistently — when any sibling of a node has
+       non-empty ``documentation``, every sibling must (a name minted as an
+       ``attached`` merge onto a stub, rather than freshly composed, can be
+       left with ``documentation=""`` forever — this is the exact shape of
+       the z-axis documentation gap the systematic review found on 6/6
+       affected coordinate/unit-vector triples, always the last-sorted axis).
 
     Each disagreement is one tagged issue string. Unlike the per-candidate
     audits this runs over a name corpus, mirroring
@@ -2840,13 +2846,14 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
     """
     from collections import defaultdict
 
-    # node -> {name: {"leaves": set[str], "domain": Any}}
+    # node -> {name: {"leaves": set[str], "domain": Any, "documented": bool}}
     nodes: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
     for entry in names:
         name = (entry.get("id") or entry.get("name") or "").strip()
         if not name:
             continue
         domain = entry.get("physics_domain")
+        documented = bool((entry.get("documentation") or "").strip())
         paths = entry.get("source_paths") or entry.get("dd_paths") or []
         if not isinstance(paths, (list, tuple)):
             continue
@@ -2861,7 +2868,9 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
             if leaf not in _AXIS_LEAVES:
                 continue
             node = "/".join(segs[:-1])
-            member = nodes[node].setdefault(name, {"leaves": set(), "domain": domain})
+            member = nodes[node].setdefault(
+                name, {"leaves": set(), "domain": domain, "documented": documented}
+            )
             member["leaves"].add(leaf)
 
     issues: list[str] = []
@@ -2939,6 +2948,21 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
                 f"audit:vector_family_consistency_check: vector node '{node}' "
                 f"uses non-canonical axis triple {sorted(axis_tokens)} — expected "
                 f"x, y, z or radial, toroidal, vertical ({member_list})."
+            )
+
+        # (6) documentation completeness: a sibling merged onto an existing
+        # stub via 'attach' rather than freshly composed can carry
+        # documentation="" indefinitely, since attach never regenerates
+        # docs. Once any sibling in the node is documented, an undocumented
+        # sibling is a defect, not a pending-generation state.
+        documented = {n for n in members if members[n]["documented"]}
+        undocumented = set(members) - documented
+        if documented and undocumented:
+            issues.append(
+                f"audit:vector_family_consistency_check: vector node '{node}' "
+                f"has documented siblings {sorted(documented)} but empty "
+                f"documentation on {sorted(undocumented)} — an attach-only "
+                f"merge likely skipped docs generation ({member_list})."
             )
 
     return issues
