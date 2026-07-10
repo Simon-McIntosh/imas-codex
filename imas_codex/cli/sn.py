@@ -1911,6 +1911,21 @@ def sn_run(
     except Exception:
         pass
 
+    # Regeneration mode recomposes existing names and must only engage when the
+    # operator explicitly asks for it via --min-score. Because the option carries
+    # a non-None default (DEFAULT_MIN_SCORE), ``min_score is not None`` is always
+    # true and would silently flip every ``sn run`` into regen. Gate on the click
+    # parameter source so the default value does not count as an explicit request.
+    try:
+        from click.core import ParameterSource
+
+        _score_source = click.get_current_context().get_parameter_source("min_score")
+        regen = _score_source is not None and _score_source != ParameterSource.DEFAULT
+    except Exception:
+        # No active click context (direct call in tests) — fall back to the
+        # presence check so an explicitly-passed score still engages regen.
+        regen = min_score is not None
+
     state = StandardNameBuildState(
         facility=effective_facility,
         source=source,
@@ -1920,7 +1935,7 @@ def sn_run(
         cost_limit=cost_limit,
         dry_run=dry_run,
         force=force,
-        regen=min_score is not None,
+        regen=regen,
         min_score=min_score,
         limit=limit,
         compose_model=compose_model,
@@ -4386,8 +4401,9 @@ def _render_edit_plan(plan: Any) -> None:
     type=click.Choice(_EDIT_SCOPE_CHOICES),
     default=None,
     help=(
-        "Blast radius: self (this name only), family (siblings sharing the "
-        "edited segment), subtree (this name as parent + every descendant). "
+        "Blast radius: self (this name only), family (this name's shared "
+        "segment — promotes to the parent and cascades the full subtree), "
+        "subtree (this name as parent + every descendant). "
         "Default: editing a parent -> subtree, editing a leaf -> self."
     ),
 )

@@ -407,8 +407,12 @@ enums:
           schema in the import closure, not just this one.
       family:
         description: >-
-          The edit applies to this StandardName plus sibling StandardNames
-          sharing the edited segment, and triggers parent re-derivation.
+          The edit is promoted from this shared-segment leaf to its parent,
+          and the parent's rename cascades through the full HAS_PARENT subtree
+          (every descendant embedding the segment) — not just the leaf's
+          direct siblings. Full-subtree breadth is grammar-required: a
+          grandchild embedding the same base would desync into invalid grammar
+          if only direct siblings were renamed.
       subtree:
         description: >-
           The edit applies to this StandardName (as parent) plus every
