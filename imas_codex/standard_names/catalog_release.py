@@ -549,6 +549,10 @@ def run_release(
         isnc_path=str(isnc_path),
         push=False,  # We handle push ourselves (with tag)
         dry_run=dry_run,
+        # Honour the same RC policy the release-layer clean-tree check applied
+        # above (strict=not is_rc): an RC the release path admitted with a dirty
+        # tree must not then be hard-blocked by publish's own clean-tree gate.
+        allow_dirty=is_rc,
     )
 
     if pub_report.errors:

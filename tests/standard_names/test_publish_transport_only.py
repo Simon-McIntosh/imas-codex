@@ -175,6 +175,32 @@ class TestRunPublish:
     @patch(
         "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
     )
+    def test_dirty_tree_hard_errors_by_default(
+        self, _mock_domains, staging_dir: Path, isnc_repo: Path
+    ) -> None:
+        """A non-clean ISNC tree hard-fails a normal (final) publish."""
+        (isnc_repo / "stray.txt").write_text("uncommitted\n")
+        report = run_publish(staging_dir, isnc_repo)
+        assert any("not clean" in e for e in report.errors)
+        assert report.commit_sha is None
+
+    @patch(
+        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+    )
+    def test_dirty_tree_allowed_for_rc(
+        self, _mock_domains, staging_dir: Path, isnc_repo: Path
+    ) -> None:
+        """allow_dirty (RC policy) downgrades the dirty tree to a warning and
+        the publish proceeds, matching the release-layer RC clean-tree policy."""
+        (isnc_repo / "stray.txt").write_text("uncommitted\n")
+        report = run_publish(staging_dir, isnc_repo, allow_dirty=True)
+        assert not report.errors, f"Errors: {report.errors}"
+        assert any("allowed for RC" in w for w in report.warnings)
+        assert report.commit_sha is not None
+
+    @patch(
+        "imas_codex.standard_names.publish._fetch_expected_domains", return_value=None
+    )
     def test_publish_clears_old_tree(
         self, _mock_domains, staging_dir: Path, isnc_repo: Path
     ) -> None:

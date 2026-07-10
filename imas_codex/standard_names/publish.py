@@ -49,6 +49,7 @@ class PublishReport:
     pushed: bool = False
     dry_run: bool = False
     errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -59,6 +60,7 @@ class PublishReport:
             "pushed": self.pushed,
             "dry_run": self.dry_run,
             "errors": self.errors,
+            "warnings": self.warnings,
         }
 
 
@@ -210,6 +212,7 @@ def run_publish(
     *,
     push: bool = False,
     dry_run: bool = False,
+    allow_dirty: bool = False,
 ) -> PublishReport:
     """Transport a staging directory to an ISNC checkout.
 
@@ -223,6 +226,12 @@ def run_publish(
         If ``True``, push the commit to origin after creating it.
     dry_run:
         If ``True``, validate and report without modifying ISNC.
+    allow_dirty:
+        If ``True``, a non-clean ISNC working tree is downgraded from a hard
+        error to a warning. This mirrors the release layer's RC policy
+        (``catalog_release._check_clean_tree(strict=not is_rc)``): an RC publish
+        the release path already admits with a dirty tree must not then be
+        blocked here. A final (non-RC) publish keeps the strict clean-tree gate.
 
     Returns
     -------
@@ -331,10 +340,20 @@ def run_publish(
                 if line.strip() and ".sn-publish.lock" not in line
             ]
             if dirty_lines:
-                report.errors.append(
-                    "ISNC working tree is not clean — commit or stash changes first"
-                )
-                return report
+                if allow_dirty:
+                    report.warnings.append(
+                        f"ISNC working tree has {len(dirty_lines)} uncommitted "
+                        "change(s) (allowed for RC)"
+                    )
+                    logger.warning(
+                        "ISNC working tree not clean (%d change(s)) — allowed for RC",
+                        len(dirty_lines),
+                    )
+                else:
+                    report.errors.append(
+                        "ISNC working tree is not clean — commit or stash changes first"
+                    )
+                    return report
         except Exception as exc:
             report.errors.append(f"Cannot check ISNC git status: {exc}")
             return report
