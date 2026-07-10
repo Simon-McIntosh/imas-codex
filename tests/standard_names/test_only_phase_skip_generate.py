@@ -100,6 +100,14 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
         patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
         patch(f"{_GO}.structural_accept_derived_parents", return_value=0),
         patch(f"{_GO}.resolve_doc_links", return_value={}),
+        # The always-on source-drift refresh builds its own GraphClient at the
+        # source_refresh binding site, which the graph.client patch below does
+        # not intercept once that module is already imported. Mock the refresh
+        # itself so the startup path stays graph-free regardless of import order.
+        patch(
+            "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+            return_value={},
+        ),
         patch(f"{_LOOP}._seed_all_domains", new=seed_mock),
         patch(
             "imas_codex.standard_names.pools.run_pools",

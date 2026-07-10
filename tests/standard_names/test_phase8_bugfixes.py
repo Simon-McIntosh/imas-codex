@@ -1111,6 +1111,14 @@ class TestRunSnPoolsFinalizePopulatesCounters:
             patch(f"{_GO}.seed_parent_sources", return_value=0),
             patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
             patch(f"{_GO}.resolve_doc_links", return_value={}),
+            # Mock the always-on source-drift refresh: it builds its own
+            # GraphClient at the source_refresh binding site (not interceptable
+            # by the graph.client patch below once that module is imported), so
+            # the startup path stays graph-free regardless of import order.
+            patch(
+                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                return_value={},
+            ),
             patch(f"{_BM}.start", new_callable=AsyncMock),
             patch(f"{_BM}.drain_pending", new_callable=AsyncMock, return_value=True),
             patch(f"{_BM}.get_total_spent", new_callable=AsyncMock, return_value=0.0),

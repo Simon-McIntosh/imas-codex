@@ -295,6 +295,14 @@ class TestRestartClearsStaleClaims:
             patch(_CLAIM_PATCHES["review_docs"], return_value=[]),
             patch(_CLAIM_PATCHES["refine_name"], return_value=[]),
             patch(_CLAIM_PATCHES["refine_docs"], return_value=[]),
+            # Mock the always-on source-drift refresh: it builds its own
+            # GraphClient at the source_refresh binding site, which the
+            # graph.client patch below does not intercept once that module is
+            # imported. Keeps the startup path graph-free regardless of order.
+            patch(
+                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                return_value={},
+            ),
             patch(
                 "imas_codex.graph.client.GraphClient",
                 return_value=_mock_gc_ctx,
@@ -343,9 +351,9 @@ class TestFinalizeWithCorrectStatus:
                 f"{_GO}.reconcile_standard_name_sources",
                 return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
             ),
-            patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
             patch.multiple(
                 _GO,
+                reconcile_vocab_gaps=MagicMock(return_value={}),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
             ),
@@ -365,6 +373,14 @@ class TestFinalizeWithCorrectStatus:
             patch(_CLAIM_PATCHES["review_docs"], return_value=[]),
             patch(_CLAIM_PATCHES["refine_name"], return_value=[]),
             patch(_CLAIM_PATCHES["refine_docs"], return_value=[]),
+            # Mock the always-on source-drift refresh: it builds its own
+            # GraphClient at the source_refresh binding site, which the
+            # graph.client patch below does not intercept once that module is
+            # imported. Keeps the startup path graph-free regardless of order.
+            patch(
+                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                return_value={},
+            ),
             patch(
                 "imas_codex.graph.client.GraphClient",
                 return_value=_mock_gc_ctx,
@@ -408,9 +424,9 @@ class TestFinalizeWithCorrectStatus:
                 f"{_GO}.reconcile_standard_name_sources",
                 return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
             ),
-            patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
             patch.multiple(
                 _GO,
+                reconcile_vocab_gaps=MagicMock(return_value={}),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
             ),
@@ -430,6 +446,14 @@ class TestFinalizeWithCorrectStatus:
             patch(_CLAIM_PATCHES["review_docs"], return_value=[]),
             patch(_CLAIM_PATCHES["refine_name"], return_value=[]),
             patch(_CLAIM_PATCHES["refine_docs"], return_value=[]),
+            # Mock the always-on source-drift refresh: it builds its own
+            # GraphClient at the source_refresh binding site, which the
+            # graph.client patch below does not intercept once that module is
+            # imported. Keeps the startup path graph-free regardless of order.
+            patch(
+                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                return_value={},
+            ),
             patch(
                 "imas_codex.graph.client.GraphClient",
                 return_value=_mock_gc_ctx,
