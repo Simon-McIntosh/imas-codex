@@ -327,7 +327,7 @@ class TestRoundTripByteStability:
         ]
 
         # Write domain file
-        _write_domain_yaml(tmp_path, "kinetics", entries, codex_sha="abc123")
+        _write_domain_yaml(tmp_path, "kinetics", entries)
 
         filepath = tmp_path / "standard_names" / "kinetics.yml"
         assert filepath.exists()
@@ -395,7 +395,7 @@ class TestRoundTripIdempotence:
         ]
 
         # First write
-        _write_domain_yaml(tmp_path, "kinetics", entries, codex_sha="sha1")
+        _write_domain_yaml(tmp_path, "kinetics", entries)
         fp = tmp_path / "standard_names" / "kinetics.yml"
         first_bytes = fp.read_bytes()
 
@@ -406,7 +406,7 @@ class TestRoundTripIdempotence:
         )
         parsed = yaml.safe_load(yaml_text)
 
-        _write_domain_yaml(tmp_path, "kinetics", parsed, codex_sha="sha1")
+        _write_domain_yaml(tmp_path, "kinetics", parsed)
         second_bytes = fp.read_bytes()
 
         assert first_bytes == second_bytes

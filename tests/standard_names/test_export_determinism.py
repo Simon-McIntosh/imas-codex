@@ -115,9 +115,7 @@ class TestDomainHeaderHasNoSha:
             "status": "draft",
             "links": [],
         }
-        _write_domain_yaml(
-            tmp_path, "core_plasma_physics", [entry], codex_sha="deadbeefcafe"
-        )
+        _write_domain_yaml(tmp_path, "core_plasma_physics", [entry])
         text = (tmp_path / "standard_names" / "core_plasma_physics.yml").read_text()
         assert "Catalog sha" not in text
         assert "deadbeefcafe" not in text
