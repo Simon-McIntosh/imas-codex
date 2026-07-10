@@ -3153,3 +3153,71 @@ def semantic_similarity_check(
         )
 
     return sim, issues
+
+
+# ---------------------------------------------------------------------------
+# Graph-side gate audits (live catalog, read-only)
+# ---------------------------------------------------------------------------
+
+#: Flux-surface reduction operator prefixes gated by the ISN grammar
+#: (constant_on_flux_surface bases reject them — the reduction of a flux
+#: function is a no-op). Used to pre-filter the live catalog cheaply before
+#: running the authoritative ISN parse.
+_FLUX_SURFACE_REDUCTION_TOKENS: tuple[str, ...] = (
+    "flux_surface_averaged",
+    "maximum_over_flux_surface",
+    "minimum_over_flux_surface",
+)
+
+
+def find_flux_surface_reduction_violations(*, gc=None) -> list[dict[str, Any]]:
+    """Return live names rejected by the flux-surface-reduction grammar gate.
+
+    A live (non-superseded, non-exhausted) name carrying a flux-surface
+    reduction operator on a base flagged ``constant_on_flux_surface`` in the
+    ISN vocabulary (safety factor, magnetic shear, flux labels, pressure) is
+    a no-op composition the grammar can no longer mint; any survivor in the
+    graph is legacy debt to supersede. Read-only diagnostic.
+    """
+    from imas_standard_names.grammar.model import (  # noqa: PLC0415
+        parse_standard_name,
+    )
+
+    from imas_codex.graph.client import GraphClient  # noqa: PLC0415
+
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = (
+            gc.query(
+                """
+                MATCH (n:StandardName)
+                WHERE NOT coalesce(n.name_stage, '') IN ['superseded', 'exhausted']
+                  AND any(tok IN $tokens WHERE n.id CONTAINS tok)
+                RETURN n.id AS id, n.name_stage AS name_stage
+                ORDER BY n.id
+                """,
+                tokens=list(_FLUX_SURFACE_REDUCTION_TOKENS),
+            )
+            or []
+        )
+    finally:
+        if owns:
+            gc.close()
+
+    violations: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            parse_standard_name(row["id"])
+        except ValueError as exc:
+            if "constant on a flux surface" in str(exc):
+                violations.append(
+                    {
+                        "id": row["id"],
+                        "name_stage": row.get("name_stage"),
+                        "reason": str(exc),
+                    }
+                )
+        except Exception:  # noqa: BLE001 - other parse failures are not this gate
+            continue
+    return violations

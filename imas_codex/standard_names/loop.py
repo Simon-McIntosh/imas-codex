@@ -879,6 +879,30 @@ async def run_sn_pools(
                 ", ".join(o["sn_id"] for o in orphans[:5]),
             )
 
+        # Read-only grammar-gate probe — live names carrying a flux-surface
+        # reduction operator on a flux-function base (constant_on_flux_surface)
+        # can no longer be minted; any survivor is legacy debt to supersede.
+        try:
+            from imas_codex.standard_names.audits import (
+                find_flux_surface_reduction_violations,
+            )
+
+            gate_violations = await asyncio.to_thread(
+                find_flux_surface_reduction_violations
+            )
+        except Exception as exc:  # noqa: BLE001 - diagnostic must not abort the run
+            logger.debug("run_sn_pools: gate-violation probe skipped: %s", exc)
+            gate_violations = []
+        if gate_violations:
+            logger.warning(
+                "run_sn_pools: flux-surface-reduction gate VIOLATED by %d live "
+                "name(s) — reductions of flux functions are no-ops the grammar "
+                "now rejects; supersede them onto the unreduced names. First "
+                "few: %s",
+                len(gate_violations),
+                ", ".join(v["id"] for v in gate_violations[:5]),
+            )
+
         # ── B2d: DD source-drift refresh ──────────────────────────────
         # Idempotent, always on: names record the DD-source snapshot
         # (unit/documentation) they were built against; any that no longer match

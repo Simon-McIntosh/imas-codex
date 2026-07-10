@@ -32,6 +32,18 @@ _FAMILY_OPERATOR_KINDS: tuple[str, ...] = (
     "locus",
 )
 
+#: Averaging-reduction operator tokens whose HAS_PARENT edges also join a
+#: family even though their kind is unary_prefix (excluded above so the
+#: broad prefix class — normalized, time_derivative, … — stays out).
+#: These pair a reduced quantity with its unreduced parent (e.g.
+#: flux_surface_averaged_X_at_plasma_boundary with X_at_plasma_boundary),
+#: which must docs-harmonize together or their descriptions drift.
+_FAMILY_REDUCTION_OPERATORS: tuple[str, ...] = (
+    "flux_surface_averaged",
+    "maximum_over_flux_surface",
+    "minimum_over_flux_surface",
+)
+
 #: docs_stage value indicating an accepted documentation revision.
 _DOCS_STAGE_ACCEPTED = "accepted"
 
@@ -244,12 +256,13 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
             resolved_gc.query(
                 """
                 MATCH (c:StandardName {id: $seed})-[r:HAS_PARENT]->(p:StandardName)
-                WHERE r.operator_kind IN $kinds
+                WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                 RETURN p.id AS parent_id
                 LIMIT 1
                 """,
                 seed=seed_name,
                 kinds=list(_FAMILY_OPERATOR_KINDS),
+                reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
             )
             or []
         )
@@ -260,7 +273,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                 resolved_gc.query(
                     """
                     MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: $parent_id})
-                    WHERE r.operator_kind IN $kinds
+                    WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                       AND coalesce(c.name_stage, '') <> $superseded
                       AND c.description IS NOT NULL
                     RETURN c.id AS id, c.description AS description,
@@ -271,6 +284,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                     """,
                     parent_id=parent_id,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
+                    reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                     superseded=NameStage.superseded.value,
                 )
                 or []
@@ -323,7 +337,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                   AND c.description IS NOT NULL
                   AND NOT EXISTS {
                     MATCH (c)-[r:HAS_PARENT]->(:StandardName)
-                    WHERE r.operator_kind IN $kinds
+                    WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                   }
                 RETURN c.id AS id, c.description AS description,
                        c.documentation AS documentation,
@@ -332,6 +346,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                 """,
                 pb=physical_base,
                 kinds=list(_FAMILY_OPERATOR_KINDS),
+                reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                 superseded=NameStage.superseded.value,
             )
             or []
@@ -387,7 +402,7 @@ def build_worklist(
             resolved_gc.query(
                 """
                 MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
-                WHERE r.operator_kind IN $kinds
+                WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                   AND coalesce(c.name_stage, '') <> $superseded
                   AND c.description IS NOT NULL
                 RETURN p.id AS parent_id,
@@ -404,6 +419,7 @@ def build_worklist(
                        }) AS members
                 """,
                 kinds=list(_FAMILY_OPERATOR_KINDS),
+                reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                 superseded=NameStage.superseded.value,
             )
             or []
@@ -466,7 +482,7 @@ def build_worklist(
                       AND c.description IS NOT NULL
                       AND NOT EXISTS {
                         MATCH (c)-[r:HAS_PARENT]->(:StandardName)
-                        WHERE r.operator_kind IN $kinds
+                        WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                       }
                     RETURN c.physical_base AS physical_base,
                            collect({
@@ -479,6 +495,7 @@ def build_worklist(
                            }) AS members
                     """,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
+                    reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                     superseded=NameStage.superseded.value,
                 )
                 or []
@@ -646,7 +663,7 @@ def stamp_harmonized(
                 resolved_gc.query(
                     """
                     MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName {id: $pid})
-                    WHERE r.operator_kind IN $kinds
+                    WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                       AND coalesce(c.name_stage, '') <> 'superseded'
                       AND c.description IS NOT NULL
                     RETURN c.id AS id, c.description AS description,
@@ -655,6 +672,7 @@ def stamp_harmonized(
                     """,
                     pid=parent_id,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
+                    reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                 )
                 or []
             )
@@ -716,13 +734,14 @@ def mark_families_for_regen(
                     """
                     MATCH (p:StandardName {id: $pid})
                     OPTIONAL MATCH (c:StandardName)-[r:HAS_PARENT]->(p)
-                    WHERE r.operator_kind IN $kinds
+                    WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                       AND coalesce(c.name_stage, '') <> $superseded
                     RETURN p.id AS parent_id,
                            [x IN collect(c.id) WHERE x IS NOT NULL] AS kids
                     """,
                     pid=parent_id,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
+                    reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                     superseded=NameStage.superseded.value,
                 )
                 or []
@@ -762,7 +781,7 @@ def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
             resolved_gc.query(
                 """
                 MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
-                WHERE r.operator_kind IN $kinds
+                WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
                   AND coalesce(c.name_stage, '') <> $superseded
                   AND c.description IS NOT NULL
                 WITH p, collect({
@@ -777,6 +796,7 @@ def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
                        members
                 """,
                 kinds=list(_FAMILY_OPERATOR_KINDS),
+                reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                 superseded=NameStage.superseded.value,
             )
             or []
