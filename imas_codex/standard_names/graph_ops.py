@@ -11284,6 +11284,13 @@ def release_all_orphan_claims() -> dict[str, int]:
     because the run is over and no other process can be competing for the
     same tokens.
 
+    A StandardName caught mid-refine sits at a transient ``'refining'`` stage.
+    Clearing only its claim would strand it there — reviewable/refinable only
+    after the periodic orphan sweep reverts the stage. Apply the same
+    ``refining -> reviewed`` revert the orphan sweep uses (see
+    ``orphan_sweep._SWEEP_QUERIES``) as part of the release, so shutdown leaves
+    no node in a transient stage with a cleared claim.
+
     Returns a dict with ``"sn"`` and ``"sns"`` keys showing the counts
     of released nodes.
     """
@@ -11292,7 +11299,12 @@ def release_all_orphan_claims() -> dict[str, int]:
             """
             MATCH (n:StandardName)
             WHERE n.claimed_at IS NOT NULL
-            SET n.claimed_at = null, n.claim_token = null
+            SET n.name_stage = CASE WHEN n.name_stage = 'refining'
+                                    THEN 'reviewed' ELSE n.name_stage END,
+                n.docs_stage = CASE WHEN n.docs_stage = 'refining'
+                                    THEN 'reviewed' ELSE n.docs_stage END,
+                n.claimed_at = null,
+                n.claim_token = null
             RETURN count(n) AS released
             """
         )

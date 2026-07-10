@@ -1164,6 +1164,13 @@ class TestReleaseAllOrphanClaims:
 
         assert result == {"sn": 3, "sns": 5}
         assert gc.query.call_count == 2
+        # The StandardName release must also revert the transient refining stage
+        # (both axes) so shutdown leaves no node stranded at 'refining' with a
+        # cleared claim — aligned with the orphan sweep's refining->reviewed.
+        sn_cypher = gc.query.call_args_list[0][0][0]
+        assert "n.name_stage = CASE WHEN n.name_stage = 'refining'" in sn_cypher
+        assert "n.docs_stage = CASE WHEN n.docs_stage = 'refining'" in sn_cypher
+        assert "'reviewed'" in sn_cypher
 
     def test_release_returns_zero_when_no_orphans(self) -> None:
         """Empty result sets map to zero counts."""
