@@ -93,3 +93,8 @@ tests/search/.expected_paths_cache.json
 # SN benchmark work area
 .bench-work/
 
+
+# Local research artifacts (session logs, benchmark outputs) — never committed
+research/
+sn_benchmark_*.json
+sn_bench_*.json
