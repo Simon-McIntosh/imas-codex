@@ -502,11 +502,10 @@ def test_escalation_at_final_attempt(_gc, _clean, mock_llm):
     rotation_cap=3 exhaustion) and calls process_refine_name_batch.  Asserts
     the LLM was invoked with the escalation model.
     """
-    from imas_codex.standard_names.models import RefinedName
+    from imas_codex.standard_names.models import GrammarSegments, RefinedName
     from imas_codex.standard_names.workers import process_refine_name_batch
 
     sn_old = _uid("esc_old")
-    sn_new = _uid("esc_new")
     token = f"tok-esc-{uuid.uuid4().hex[:8]}"
 
     # Create a real graph node at chain_length=2 (the final attempt position)
@@ -515,10 +514,13 @@ def test_escalation_at_final_attempt(_gc, _clean, mock_llm):
 
     # MockLLM will receive stage='unknown' because process_refine_name_batch
     # only sends a user-role message (no system message for stage inference).
+    # RefinedName composes the new name from its grammar segments (the LLM never
+    # returns a name string), so supply a valid segment set — the test only
+    # asserts the escalation model was used, not the composed name.
     mock_llm.add_response(
         "unknown",
         response=RefinedName(
-            name=sn_new,
+            segments=GrammarSegments(base_token="temperature", base_kind="quantity"),
             description="Escalation-refined test quantity",
             kind="scalar",
         ),
