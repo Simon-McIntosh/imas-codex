@@ -32,6 +32,9 @@ def _stub_parent_lifecycle_startup():
         patch(f"{_go}.seed_parent_sources", return_value=0),
         patch(f"{_go}.normalize_derived_parent_lifecycle", return_value=0),
         patch(f"{_go}.structural_accept_derived_parents", return_value=0),
+        # Always-on stranded-reviewed promotion builds its own GraphClient;
+        # stub it so the startup path stays graph-free.
+        patch(f"{_go}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
     ):
         yield
 
