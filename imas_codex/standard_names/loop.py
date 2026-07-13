@@ -145,7 +145,10 @@ def _build_pool_specs(
         REVIEW_DOCS_BACKLOG_CAP,
         REVIEW_NAME_BACKLOG_CAP,
     )
+    import contextlib
+
     from imas_codex.standard_names.graph_ops import (
+        _CLAIM_HEARTBEAT_SECONDS,
         claim_enrich_parents_batch,
         claim_generate_docs_batch,
         claim_generate_name_batch,
@@ -153,6 +156,7 @@ def _build_pool_specs(
         claim_refine_name_batch,
         claim_review_docs_batch,
         claim_review_name_batch,
+        refresh_name_claims,
         release_enrich_parents_claims,
         release_generate_docs_claims,
         release_generate_name_claims,
@@ -211,16 +215,66 @@ def _build_pool_specs(
 
         return _adapter
 
+    async def _heartbeat_loop(
+        sn_ids: list[str],
+        token: str,
+        stop: asyncio.Event,
+        interval: float = _CLAIM_HEARTBEAT_SECONDS,
+    ) -> None:
+        """Refresh a held StandardName claim lease until *stop* is set.
+
+        A quorum-consensus review (or an enrich batch) can outrun the claim
+        TTL; without a heartbeat the lease expires mid-flight and a peer
+        worker re-claims the same names, duplicating the paid LLM spend. This
+        bumps ``claimed_at`` on the batch's names (compare-and-set on the
+        token — a lease already lost to a peer is not stolen back) every
+        ``interval`` seconds, comfortably inside the TTL.
+        """
+        while not stop.is_set():
+            try:
+                await asyncio.wait_for(stop.wait(), timeout=interval)
+                return  # stopped between beats
+            except TimeoutError:
+                try:
+                    await asyncio.to_thread(refresh_name_claims, sn_ids, token)
+                except Exception as exc:  # noqa: BLE001 — heartbeat is best-effort
+                    logger.debug("claim heartbeat refresh failed: %s", exc)
+
     def _make_process_adapter(
         process_fn: Callable[
             [list[dict[str, Any]], Any, asyncio.Event],
             Awaitable[int],
         ],
+        *,
+        heartbeat: bool = False,
     ) -> Callable[[dict[str, Any]], Awaitable[int]]:
-        """Wrap a batch processor as a ``ProcessFn``."""
+        """Wrap a batch processor as a ``ProcessFn``.
+
+        When ``heartbeat`` is set, a background task refreshes the batch's
+        StandardName claim lease while the processor runs, so a long batch
+        cannot have its lease expire and be re-claimed by a peer worker. The
+        heartbeat is cancelled as soon as the processor returns or raises.
+        """
 
         async def _adapter(batch: dict[str, Any]) -> int:
-            return await process_fn(batch["items"], mgr, stop_event, on_event=on_event)
+            if not heartbeat:
+                return await process_fn(
+                    batch["items"], mgr, stop_event, on_event=on_event
+                )
+            items = batch.get("items", [])
+            sn_ids = [it["id"] for it in items if it.get("id")]
+            token = items[0].get("claim_token") if items else None
+            if not (sn_ids and token):
+                return await process_fn(items, mgr, stop_event, on_event=on_event)
+            beat_stop = asyncio.Event()
+            beat = asyncio.create_task(_heartbeat_loop(sn_ids, token, beat_stop))
+            try:
+                return await process_fn(items, mgr, stop_event, on_event=on_event)
+            finally:
+                beat_stop.set()
+                beat.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await beat
 
         return _adapter
 
@@ -302,7 +356,9 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_review_name_batch),
+            process=_make_process_adapter(
+                process_review_name_batch, heartbeat=True
+            ),
             release=_make_release_adapter(
                 release_review_names_claims, ids_kwarg="sn_ids"
             ),
@@ -343,7 +399,9 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_review_docs_batch),
+            process=_make_process_adapter(
+                process_review_docs_batch, heartbeat=True
+            ),
             release=_make_release_adapter(
                 release_review_docs_claims, ids_kwarg="sn_ids"
             ),
@@ -371,7 +429,9 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_enrich_parents_batch),
+            process=_make_process_adapter(
+                process_enrich_parents_batch, heartbeat=True
+            ),
             release=_make_release_adapter(
                 release_enrich_parents_claims, ids_kwarg="sn_ids"
             ),

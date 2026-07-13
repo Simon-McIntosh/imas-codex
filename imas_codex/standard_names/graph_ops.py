@@ -6290,6 +6290,43 @@ def release_review_claims(token: str) -> int:
         return result[0]["affected"] if result else 0
 
 
+# Heartbeat interval: refresh a held claim well before the lease TTL so a
+# long quorum-review / enrich batch cannot have its lease expire mid-flight
+# and be re-claimed by a peer worker (which would duplicate the paid LLM
+# spend). One third of the TTL leaves room for two refreshes before expiry
+# even if one heartbeat is delayed.
+_CLAIM_HEARTBEAT_SECONDS = _CLAIM_TIMEOUT_SECONDS // 3
+
+
+def refresh_name_claims(sn_ids: list[str], claim_token: str) -> int:
+    """Refresh the lease on StandardName nodes still held by *claim_token*.
+
+    Compare-and-set on ``claim_token``: only nodes that STILL bear this token
+    have their ``claimed_at`` bumped to now. A node whose lease already
+    expired and was re-claimed by a peer (its ``claim_token`` overwritten) is
+    left untouched — the heartbeat never steals back a claim it has lost. This
+    is the liveness half of the claim lease: the claim SEED is a compare-and-set
+    (two-step token verify); this keeps a legitimately-held claim from expiring
+    under a batch that outruns the TTL.
+
+    Returns the number of nodes whose lease was refreshed.
+    """
+    if not claim_token or not sn_ids:
+        return 0
+    with GraphClient() as gc:
+        result = gc.query(
+            """
+            UNWIND $ids AS nid
+            MATCH (sn:StandardName {id: nid, claim_token: $token})
+            SET sn.claimed_at = datetime()
+            RETURN count(sn) AS refreshed
+            """,
+            ids=list(sn_ids),
+            token=claim_token,
+        )
+        return result[0]["refreshed"] if result else 0
+
+
 def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     """Post-rebuild reconciliation of StandardNameSource nodes.
 
