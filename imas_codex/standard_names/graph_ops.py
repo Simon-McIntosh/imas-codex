@@ -4766,45 +4766,37 @@ def clear_standard_names(
         if dry_run or count == 0:
             return count
 
-        # Step A: delete StandardNameReview nodes attached to in-scope StandardName nodes
-        # (HAS_REVIEW edge goes StandardName -> StandardNameReview). DETACH DELETE on the
-        # StandardName alone orphans the StandardNameReview node; we must delete it explicitly.
+        # Delete the in-scope reviews and StandardName nodes in a SINGLE
+        # statement so the delete is atomic: a mid-sequence failure can no
+        # longer leave a name with its producer edge stripped but the node
+        # (or its review) still present, dropping the name out of every future
+        # regeneration while orphaning its review.
+        #
+        # DETACH DELETE on the StandardName alone would orphan its
+        # StandardNameReview (HAS_REVIEW goes StandardName -> StandardNameReview),
+        # so the review is deleted in the same statement inside a unit CALL
+        # subquery.
         if use_src_join:
+            # Relationship-first, scope-safe: remove the in-scope producer
+            # edges, then (orphan-guard) delete only the names that have NO
+            # remaining HAS_STANDARD_NAME edge. Neo4j inserts an Eager barrier
+            # between the DELETE and the NOT EXISTS read so the guard sees
+            # post-delete state — a name still attached to any out-of-scope
+            # path survives with its review intact (survivor-review handling:
+            # the review is deleted only for names that actually go away).
             gc.query(
                 f"""
-                MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)-[:HAS_REVIEW]->(r:StandardNameReview)
+                MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
                 WHERE {sn_where}
                 AND {src_where}
-                DETACH DELETE r
-                """,
-                **params,
-            )
-        else:
-            gc.query(
-                f"""
-                MATCH (sn:StandardName)-[:HAS_REVIEW]->(r:StandardNameReview)
-                WHERE {sn_where}
-                DETACH DELETE r
-                """,
-                **params,
-            )
-
-        # Step B: delete StandardName nodes and their remaining edges
-        if use_src_join:
-            gc.query(
-                f"""
-                MATCH (src:IMASNode)-[r:HAS_STANDARD_NAME]->(sn:StandardName)
-                WHERE {sn_where}
-                AND {src_where}
-                DELETE r
-                """,
-                **params,
-            )
-            gc.query(
-                f"""
-                MATCH (sn:StandardName)
-                WHERE {sn_where}
-                AND NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
+                DELETE rel
+                WITH DISTINCT sn
+                WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
+                CALL {{
+                    WITH sn
+                    OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
+                    DETACH DELETE r
+                }}
                 DETACH DELETE sn
                 """,
                 **params,
@@ -4814,6 +4806,11 @@ def clear_standard_names(
                 f"""
                 MATCH (sn:StandardName)
                 WHERE {sn_where}
+                CALL {{
+                    WITH sn
+                    OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
+                    DETACH DELETE r
+                }}
                 DETACH DELETE sn
                 """,
                 **params,
