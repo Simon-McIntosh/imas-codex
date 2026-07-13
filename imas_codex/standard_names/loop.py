@@ -1007,6 +1007,29 @@ async def run_sn_pools(
                     len(sr.get("blocked", [])),
                 )
 
+        # ── B2e: stranded-reviewed promotion ──────────────────────────
+        # Idempotent, always on: a name is scored once and staged against the
+        # threshold in force at review time. When the acceptance threshold is
+        # later lowered, names that scored between the old and new thresholds
+        # sit stuck at 'reviewed' — refine only claims BELOW-threshold names, so
+        # a stored score that already clears the current threshold is never
+        # re-touched. Promote those (both name and docs axes) to 'accepted'.
+        # No-op when nothing is stranded. Names carrying an unapplied edit
+        # (edit_status='open') are left for the normal accept path so their
+        # rename / descendant cascade still applies.
+        from imas_codex.standard_names.graph_ops import promote_stranded_reviewed
+
+        _promote_min = min_score if min_score is not None else DEFAULT_MIN_SCORE
+        promoted = await asyncio.to_thread(promote_stranded_reviewed, _promote_min)
+        if promoted.get("name") or promoted.get("docs"):
+            logger.info(
+                "run_sn_pools: promoted %d stranded reviewed name(s) + %d "
+                "docs to accepted (stored score >= %.3f)",
+                promoted.get("name", 0),
+                promoted.get("docs", 0),
+                _promote_min,
+            )
+
         # ── B3: Domain extract (auto-seed) ────────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
         # Skip auto-seeding in flush / docs-only mode — only drain existing.

@@ -6327,6 +6327,99 @@ def refresh_name_claims(sn_ids: list[str], claim_token: str) -> int:
         return result[0]["refreshed"] if result else 0
 
 
+def promote_stranded_reviewed(
+    min_score: float = DEFAULT_MIN_SCORE,
+    *,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    """Promote names stranded at ``'reviewed'`` whose stored score now clears
+    the active threshold.
+
+    A name is scored once and its stage is decided against the threshold in
+    force AT THAT TIME. When the acceptance threshold is later lowered, names
+    that scored between the old and new thresholds are stuck at
+    ``name_stage='reviewed'`` (or ``docs_stage='reviewed'``): the refine pool
+    only claims names BELOW the threshold, so a name whose stored score already
+    clears the current threshold is never re-touched and never accepted. This
+    idempotent pass flips those to ``'accepted'`` on both axes.
+
+    Guards (never promote a name that must go through the normal path):
+
+    * ``reviewer_score_* >= min_score`` — only names that genuinely clear the
+      CURRENT threshold; below-threshold names are left for refine.
+    * name axis excludes ``edit_status='open'`` — a name carrying an unapplied
+      edit (a rename / family-or-subtree cascade) must be accepted through
+      :func:`persist_reviewed_name`, which applies the edit and cascades
+      descendants atomically; a bare stage flip here would strand that cascade.
+    * both axes exclude ``validation_status='quarantined'``.
+    * docs axis requires ``name_stage='accepted'`` (docs is a post-name axis).
+
+    Idempotent: a second run matches nothing (the names are already accepted).
+
+    Returns ``{"name": n_name, "docs": n_docs}`` — the number promoted on each
+    axis (or that would be promoted in ``dry_run``).
+    """
+    name_where = (
+        "sn.name_stage = 'reviewed' "
+        "AND sn.reviewer_score_name >= $min_score "
+        "AND coalesce(sn.edit_status, '') <> 'open' "
+        "AND coalesce(sn.validation_status, '') <> 'quarantined'"
+    )
+    docs_where = (
+        "sn.docs_stage = 'reviewed' "
+        "AND sn.reviewer_score_docs >= $min_score "
+        "AND sn.name_stage = 'accepted' "
+        "AND coalesce(sn.validation_status, '') <> 'quarantined'"
+    )
+    with GraphClient() as gc:
+        if dry_run:
+            n_name = gc.query(
+                f"MATCH (sn:StandardName) WHERE {name_where} RETURN count(sn) AS n",
+                min_score=min_score,
+            )
+            n_docs = gc.query(
+                f"MATCH (sn:StandardName) WHERE {docs_where} RETURN count(sn) AS n",
+                min_score=min_score,
+            )
+            return {
+                "name": n_name[0]["n"] if n_name else 0,
+                "docs": n_docs[0]["n"] if n_docs else 0,
+            }
+        # Name axis first so a name promoted here is eligible for the docs-axis
+        # promotion in the same pass.
+        r_name = gc.query(
+            f"""
+            MATCH (sn:StandardName)
+            WHERE {name_where}
+            SET sn.name_stage = 'accepted'
+            RETURN count(sn) AS n
+            """,
+            min_score=min_score,
+        )
+        r_docs = gc.query(
+            f"""
+            MATCH (sn:StandardName)
+            WHERE {docs_where}
+            SET sn.docs_stage = 'accepted'
+            RETURN count(sn) AS n
+            """,
+            min_score=min_score,
+        )
+    promoted = {
+        "name": r_name[0]["n"] if r_name else 0,
+        "docs": r_docs[0]["n"] if r_docs else 0,
+    }
+    if promoted["name"] or promoted["docs"]:
+        logger.info(
+            "promote_stranded_reviewed: promoted %d name(s) + %d docs to "
+            "accepted (stored score >= %.3f threshold)",
+            promoted["name"],
+            promoted["docs"],
+            min_score,
+        )
+    return promoted
+
+
 def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     """Post-rebuild reconciliation of StandardNameSource nodes.
 
