@@ -41,7 +41,9 @@ def _call(gc: MagicMock, **kwargs):
 
 def _delete_sn_queries(gc: MagicMock) -> list[str]:
     """Every query that ends up deleting a StandardName node."""
-    return [c.args[0] for c in gc.query.call_args_list if "DETACH DELETE sn" in c.args[0]]
+    return [
+        c.args[0] for c in gc.query.call_args_list if "DETACH DELETE sn" in c.args[0]
+    ]
 
 
 class TestScopedClearIsAtomic:

@@ -139,14 +139,13 @@ def _build_pool_specs(
     ``skip_review``.  These behaviours fall out of the existing ``_DOCS_POOLS``
     / flush / skip_review filters below; no special-casing needed.
     """
+    import contextlib
     from collections.abc import Awaitable
 
     from imas_codex.standard_names.defaults import (
         REVIEW_DOCS_BACKLOG_CAP,
         REVIEW_NAME_BACKLOG_CAP,
     )
-    import contextlib
-
     from imas_codex.standard_names.graph_ops import (
         _CLAIM_HEARTBEAT_SECONDS,
         claim_enrich_parents_batch,
@@ -356,9 +355,7 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(
-                process_review_name_batch, heartbeat=True
-            ),
+            process=_make_process_adapter(process_review_name_batch, heartbeat=True),
             release=_make_release_adapter(
                 release_review_names_claims, ids_kwarg="sn_ids"
             ),
@@ -399,9 +396,7 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(
-                process_review_docs_batch, heartbeat=True
-            ),
+            process=_make_process_adapter(process_review_docs_batch, heartbeat=True),
             release=_make_release_adapter(
                 release_review_docs_claims, ids_kwarg="sn_ids"
             ),
@@ -429,9 +424,7 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(
-                process_enrich_parents_batch, heartbeat=True
-            ),
+            process=_make_process_adapter(process_enrich_parents_batch, heartbeat=True),
             release=_make_release_adapter(
                 release_enrich_parents_claims, ids_kwarg="sn_ids"
             ),

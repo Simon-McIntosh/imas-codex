@@ -46,7 +46,10 @@ class _FakeGraph:
         return None
 
     def query(self, cypher: str, **params):
-        if "SET sn.claimed_at = datetime()" in cypher and "claim_token: $token" in cypher:
+        if (
+            "SET sn.claimed_at = datetime()" in cypher
+            and "claim_token: $token" in cypher
+        ):
             refreshed = 0
             for nid in params["ids"]:
                 node = self.nodes.get(nid)
