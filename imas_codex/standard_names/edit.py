@@ -94,6 +94,7 @@ from imas_codex.standard_names.graph_ops import (
     persist_refined_docs,
     persist_refined_name,
     reset_standard_name_docs,
+    tombstone_supersede_into,
 )
 
 #: name_stage values eligible for a direct rename (superseded is handled
@@ -496,6 +497,37 @@ def apply_edit(
     finally:
         if owns_gc:
             gc.close()
+
+
+def supersede_into(
+    old: str,
+    into: str,
+    *,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Fold ``old`` into an already-existing accepted name ``into``.
+
+    The rename path refuses a rename onto an existing id, and the source-keyed
+    supersede only retires predecessors sharing one source — so folding a name
+    into an existing canonical name (or re-pointing a name onto a restored
+    tombstoned id) has no supported operation. This is that operation: it
+    tombstones ``old`` and threads the ``REFINED_FROM`` lineage so the export
+    boundary emits a ``status: deprecated`` stub pointing at ``into``.
+
+    Thin validation wrapper over
+    :func:`imas_codex.standard_names.graph_ops.tombstone_supersede_into` — it
+    normalises the ids and forwards; all guards (target must be accepted, no
+    self-fold, no cycle, idempotent re-stamp) live in the graph op so the CLI
+    and any programmatic caller share one enforcement point.
+
+    Returns the graph op's result dict: ``{"ok": bool, ...}`` — on refusal
+    ``ok`` is False with a ``reason``.
+    """
+    old = (old or "").strip()
+    into = (into or "").strip()
+    if not old or not into:
+        return {"ok": False, "reason": "both old and target names are required"}
+    return tombstone_supersede_into(old, into, dry_run=dry_run)
 
 
 # ---------------------------------------------------------------------------

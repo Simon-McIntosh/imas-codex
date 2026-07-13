@@ -9772,6 +9772,121 @@ def supersede_prior_source_names(
     return superseded
 
 
+@retry_on_deadlock()
+def tombstone_supersede_into(
+    old_id: str,
+    into_id: str,
+    *,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Supersede ``old_id`` INTO an already-existing accepted name ``into_id``.
+
+    Generalises the one-off pair-supersede into a supported operation. Two
+    honest repairs are otherwise blocked because ``sn edit --rename`` refuses a
+    rename onto an existing id and :func:`supersede_prior_source_names` keys on
+    a shared source:
+
+    * folding a name into an already-existing canonical name;
+    * re-pointing a name back onto a tombstoned id (after that id is restored
+      to accepted).
+
+    Mirrors the supersede semantics: stamps ``old.name_stage='superseded'``,
+    ``old.superseded_from_stage = coalesce(old.superseded_from_stage,
+    'accepted')`` (so the P1 export emits a ``status: deprecated`` stub for it),
+    clears its claim, and MERGEs ``(into)-[:REFINED_FROM]->(old)`` so the stub
+    resolves to the live successor. Historical ``HAS_STANDARD_NAME`` /
+    ``PRODUCED_NAME`` edges on ``old`` are left intact as the provenance record.
+
+    Refuses (returns ``{"ok": False, "reason": ...}`` without writing) when:
+
+    * ``old_id == into_id`` (nothing to fold);
+    * ``old_id`` does not exist;
+    * ``into_id`` does not exist;
+    * ``into_id`` is not ``name_stage='accepted'`` — the successor must be the
+      live canonical name so the emitted deprecation stub points somewhere real
+      (an unresolvable stub would be a dangling breaking-change pointer);
+    * folding would create a ``REFINED_FROM`` cycle (``old`` already descends
+      from ``into`` — threading ``into``→``old`` would close a loop).
+
+    Idempotent: a second call re-stamps the same values and the MERGE is a
+    no-op, so re-running reports ``ok`` with ``already_superseded=True``.
+    """
+    if old_id == into_id:
+        return {"ok": False, "reason": "old and target are the same name"}
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            OPTIONAL MATCH (old:StandardName {id: $old_id})
+            OPTIONAL MATCH (into:StandardName {id: $into_id})
+            RETURN old.id AS old_id,
+                   old.name_stage AS old_stage,
+                   old.superseded_from_stage AS old_sfs,
+                   into.id AS into_id,
+                   into.name_stage AS into_stage,
+                   EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(into) } AS cycle
+            """,
+            old_id=old_id,
+            into_id=into_id,
+        )
+        row = rows[0] if rows else {}
+        if not row.get("old_id"):
+            return {"ok": False, "reason": f"name {old_id!r} not found"}
+        if not row.get("into_id"):
+            return {"ok": False, "reason": f"target {into_id!r} not found"}
+        if row.get("into_stage") != "accepted":
+            return {
+                "ok": False,
+                "reason": (
+                    f"target {into_id!r} is name_stage={row.get('into_stage')!r}, "
+                    "not 'accepted' — supersede target must be the live "
+                    "canonical name"
+                ),
+            }
+        if row.get("cycle"):
+            return {
+                "ok": False,
+                "reason": (
+                    f"{old_id!r} already descends from {into_id!r} "
+                    "(REFINED_FROM cycle) — cannot fold"
+                ),
+            }
+
+        already = row.get("old_stage") == "superseded"
+        result = {
+            "ok": True,
+            "old_id": old_id,
+            "into_id": into_id,
+            "old_prior_stage": row.get("old_stage"),
+            "already_superseded": already,
+            "dry_run": dry_run,
+        }
+        if dry_run:
+            return result
+
+        gc.query(
+            """
+            MATCH (old:StandardName {id: $old_id}),
+                  (into:StandardName {id: $into_id})
+            SET old.name_stage = 'superseded',
+                old.superseded_from_stage =
+                    coalesce(old.superseded_from_stage, 'accepted'),
+                old.claim_token = null,
+                old.claimed_at = null
+            MERGE (into)-[:REFINED_FROM]->(old)
+            """,
+            old_id=old_id,
+            into_id=into_id,
+        )
+    logger.info(
+        "tombstone_supersede_into: %s superseded into %s (sfs=accepted, "
+        "REFINED_FROM lineage merged)",
+        old_id,
+        into_id,
+    )
+    return result
+
+
 # =============================================================================
 # Release helpers — seed-and-expand pools
 # =============================================================================

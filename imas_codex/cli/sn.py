@@ -4513,3 +4513,51 @@ def sn_edit(
 
     if plan.blocked:
         raise SystemExit(2)
+
+
+@sn.command("supersede")
+@click.argument("old_name")
+@click.option(
+    "--into",
+    "into_name",
+    required=True,
+    help=(
+        "Existing ACCEPTED standard name to fold OLD_NAME into. OLD_NAME is "
+        "tombstoned (name_stage='superseded') and a REFINED_FROM lineage is "
+        "threaded to --into so the export emits a deprecated stub pointing at it."
+    ),
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report what would happen without writing to the graph.",
+)
+def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
+    """Fold OLD_NAME into an already-existing accepted name.
+
+    For the two repairs that --rename cannot express (the target id already
+    exists) and that the source-keyed supersede cannot reach: folding a name
+    into an existing canonical name, or re-pointing a name onto a restored
+    tombstoned id. The target (--into) must be name_stage='accepted'.
+
+    \b
+    Example:
+      imas-codex sn supersede power_density_at_wall --into energy_flux_at_wall
+    """
+    from imas_codex.standard_names.edit import supersede_into
+
+    result = supersede_into(old_name, into_name, dry_run=dry_run)
+
+    if not result.get("ok"):
+        raise click.UsageError(result.get("reason", "supersede refused"))
+
+    verb = "would supersede" if dry_run else "superseded"
+    note = (
+        " (already superseded — re-stamped)" if result.get("already_superseded") else ""
+    )
+    click.echo(f"{verb} {result['old_id']} into {result['into_id']}{note}")
+    if dry_run:
+        click.echo(
+            f"  old prior stage: {result.get('old_prior_stage')} "
+            "→ superseded (superseded_from_stage=accepted)"
+        )
