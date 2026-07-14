@@ -3378,6 +3378,7 @@ _GRAMMAR_SEGMENT_COLUMNS = (
     "orbit",
     "population",
     "subject",
+    "state",
     "transformation",
     "component",
     "coordinate",

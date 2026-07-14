@@ -70,6 +70,9 @@ TIER2_SEGMENTS: Final[frozenset[str]] = frozenset(
         "aggregation",
         "orbit",
         "population",
+        # state (charge_state/internal_state) is a subject-refinement modifier
+        # that narrows a species anchor exactly like population/orbit — Tier 2.
+        "state",
     }
 )
 
