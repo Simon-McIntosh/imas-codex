@@ -4738,13 +4738,29 @@ def clear_standard_names(
             src_clauses.append("src.id IN $path_allowlist")
         use_src_join = bool(src_clauses)
         src_where = " AND ".join(src_clauses)
+        # Same scope predicate rebound to an ``o`` producer, for the
+        # out-of-scope-producer guard below.
+        out_scope_where = src_where.replace("src.", "o.")
 
         if use_src_join:
+            # Count the names that will ACTUALLY be deleted, not merely the ones
+            # matched in scope: a name matched via an in-scope edge SURVIVES if
+            # it also has a producer outside the scope (relationship-first
+            # delete keeps that edge). Counting bare in-scope matches overcounts
+            # such survivors, so the reported/dry-run number would exceed the
+            # real deletions. Restrict to names whose producers are ALL in
+            # scope (no out-of-scope producer → truly orphaned after the edge
+            # delete).
             count_cypher = f"""
                 MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
                 WHERE {sn_where}
                 AND {src_where}
-                RETURN count(DISTINCT sn) AS n
+                WITH DISTINCT sn
+                WHERE NOT EXISTS {{
+                    MATCH (o:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+                    WHERE NOT ({out_scope_where})
+                }}
+                RETURN count(sn) AS n
             """
         else:
             count_cypher = f"""
@@ -4784,6 +4800,8 @@ def clear_standard_names(
             # post-delete state — a name still attached to any out-of-scope
             # path survives with its review intact (survivor-review handling:
             # the review is deleted only for names that actually go away).
+            # Verified against a live graph in
+            # tests/standard_names/test_clear_atomicity_graph.py.
             gc.query(
                 f"""
                 MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)

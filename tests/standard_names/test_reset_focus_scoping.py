@@ -207,8 +207,11 @@ class TestClearStandardNamesPathAllowlist:
         assert "(src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)" in cypher
         assert "src.id IN $path_allowlist" in cypher
         # No unscoped blanket delete was issued (count==0 returns early, but
-        # the scoped count query must be the one that ran).
-        assert "count(DISTINCT sn)" in cypher
+        # the scoped count query must be the one that ran). The scoped count
+        # dedups via WITH DISTINCT sn and counts only true-orphan-to-be names
+        # (those with no out-of-scope producer), so the reported/dry-run number
+        # equals the actual deletions rather than the in-scope match count.
+        assert "WITH DISTINCT sn" in cypher
         lists = [
             kw["path_allowlist"] for kw in _all_kwargs(gc) if "path_allowlist" in kw
         ]
