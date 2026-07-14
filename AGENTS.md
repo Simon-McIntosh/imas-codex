@@ -603,6 +603,32 @@ dedicated command:
   grammar rules or vocabulary tokens — pull from `get_grammar_context()`.
   Review criteria live in codex (`sn_review_criteria.yaml`). Boundary detail:
   `docs/architecture/boundary.md`.
+- **ISN OWNS ALL GRAMMAR VOCABULARY — NEVER redefine it in codex Python (binding).**
+  The set of grammar segments, and the tokens within each segment (subjects,
+  physical/geometric bases, channels, populations, orbits, aggregations, zones,
+  qualifiers, states, processes, coordinate axes, loci, operators), are defined
+  **only** in the `imas-standard-names` project (its `grammar/vocabularies/*.yml`
+  + generated `SEGMENT_TOKEN_MAP`). A codex `.py` file must never hold a literal
+  list/set/dict of ISN grammar tokens or the ISN segment names — that duplicate
+  silently drifts the instant ISN adds/renames/removes one (e.g. a new `state`
+  segment, a renamed base). Derive every such set at runtime from
+  `get_grammar_context()` (tokens per segment, and the segment list itself).
+  - ❌ `_SHAPE_PARAMETER_BASES = frozenset({"triangularity", "elongation", "squareness"})`
+    — ISN physical_base tokens hardcoded in codex.
+  - ❌ `TIER1_SEGMENTS = frozenset({"physical_base", "subject", ...})` — hardcodes
+    the ISN segment-name set; a new ISN segment is silently untiered.
+  - ✅ derive from `get_grammar_context()["grammar"]` / `SEGMENT_TOKEN_MAP`; codex
+    may still attach codex-only POLICY (search tier, shape-surface flag) keyed by
+    those segment names, but the universe of names/tokens comes from ISN, and a
+    test must assert every ISN segment is covered so drift fails loudly.
+  - **NOT covered by this rule** (legitimately codex): IMAS-DD *path* tokens
+    (`rho_tor_norm`, `psi`, `adc`, `ids_properties` in `core/node_classifier.py`),
+    raw DD-leaf skip lists (`node_classifier`/`workers` non-nameable coordinates
+    like `time`/`delay`/`count`), and DD-path→ISN-token *translation maps* — but
+    the ISN-token *side* of any translation map must be validated against the
+    ISN vocabulary at load, never assumed.
+  When you find a violation, fix it by deriving from ISN (or flag + track it if
+  the ISN accessor doesn't exist yet — request the accessor on the ISN side).
 - **Closed segments:** *all* grammar segments — including `physical_base` — are
   closed (ISN `SEGMENT_TOKEN_MAP`). A composer "missing token" report against
   `physical_base` is not a real gap; pseudo segments (`grammar_ambiguity`) are
