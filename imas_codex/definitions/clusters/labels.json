@@ -21112,8 +21112,8 @@
     "Local and averaged density values for krypton impurities used for cooling or diagnostics."
   ],
   "66dec14692d3a54c": [
-    "Spectrometer Detector Vertical Vector",
-    "Unit vector defining the x2 (vertical) direction of the spectrometer detector."
+    "Spectrometer Detector Second Local Tangential Vector",
+    "Unit vector defining the x2 second local tangential (in-surface) direction of the spectrometer detector."
   ],
   "66df7946760fb310": [
     "Electron Collision Distribution Structures",
@@ -40872,8 +40872,8 @@
     "A intra-IDS cluster containing paths from wall."
   ],
   "c6f50f56b4ef9f92": [
-    "Spectrometer Aperture Vertical Vector",
-    "Unit vector defining the x2 (vertical) direction of the entrance aperture."
+    "Spectrometer Aperture Second Local Tangential Vector",
+    "Unit vector defining the x2 second local tangential (in-surface) direction of the entrance aperture."
   ],
   "c6f95b4d3d6ca42e": [
     "ECE Beam Phase Angle 3",
@@ -50048,8 +50048,8 @@
     "A intra-IDS cluster containing paths from operational_instrumentation."
   ],
   "f4fef1e81a7caf68": [
-    "Spectrometer Grating Vertical Vector",
-    "Unit vector defining the x2 (vertical) direction of the diffraction grating."
+    "Spectrometer Grating Second Local Tangential Vector",
+    "Unit vector defining the x2 second local tangential (in-surface) direction of the diffraction grating."
   ],
   "f500178e73b5dc1f": [
     "Magnetic Field 2D Profiles",
