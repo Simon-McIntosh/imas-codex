@@ -40,6 +40,8 @@ ANTI_GOOD_EXAMPLES = (
 ANTI_HARDWARE_PROPERTY_EXEMPLAR = "area_of_rogowski_coil"
 LOCAL_AXIS_BAD_EXAMPLE = "vertical_front_surface_radius_of_optical_element"
 LOCAL_AXIS_GOOD_EXAMPLE = "second_local_tangential_front_surface_radius_of_reflector"
+RADIAL_FRAME_BAD_EXAMPLE = "radial_wave_electric_field"
+RADIAL_FRAME_GOOD_EXAMPLE = "flux_surface_normal_wave_electric_field"
 
 
 @pytest.mark.parametrize("filename", ["generate_name_system.md"])
@@ -100,6 +102,12 @@ def test_dd_prompt_carries_reflector_local_axis_regression_pair() -> None:
     raw = _load("generate_name_dd.md")
     assert LOCAL_AXIS_BAD_EXAMPLE in raw
     assert LOCAL_AXIS_GOOD_EXAMPLE in raw
+
+
+def test_dd_prompt_carries_flux_surface_normal_regression_pair() -> None:
+    raw = _load("generate_name_dd.md")
+    assert RADIAL_FRAME_BAD_EXAMPLE in raw
+    assert RADIAL_FRAME_GOOD_EXAMPLE in raw
 
 
 class TestSystemPromptInstrumentPlacement:
