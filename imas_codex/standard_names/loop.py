@@ -108,6 +108,7 @@ def _build_pool_specs(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
     names_only: bool = False,
     docs_only: bool = False,
     flush: bool = False,
@@ -313,10 +314,15 @@ def _build_pool_specs(
 
     # ── PoolSpec construction ─────────────────────────────────────────
 
-    # Optional scope_run_id kwargs for --focus mode.
+    # Optional scope kwargs threaded identically into every pool's claim
+    # adapter: scope_run_id for --focus mode, edits_only for --edits mode
+    # (scope the run to pending sn-edit successors, edit_status='open'). Both
+    # may combine — the claim layer ANDs their predicates.
     _scope_kwargs: dict[str, Any] = {}
     if scope_run_id:
         _scope_kwargs["scope_run_id"] = scope_run_id
+    if edits_only:
+        _scope_kwargs["edits_only"] = True
 
     # Per-pool replica counts are config-driven via the
     # ``[tool.imas-codex.sn-pools]`` section (see
@@ -472,10 +478,10 @@ def _build_pool_specs(
     # PoolHealth.pending_count is over cap, causing the pool to enter
     # its normal exponential backoff.  No blocking, no special yield.
     #
-    # In focus mode (scope_run_id set), skip throttle entirely — the
-    # focused set is 1-5 items and should never be blocked by global
-    # review backlog.
-    if not scope_run_id:
+    # In focus mode (scope_run_id set) or edits mode (edits_only), skip
+    # throttle entirely — the scoped set is a bounded batch that should never
+    # be blocked by the global review backlog.
+    if not (scope_run_id or edits_only):
         specs_by_name = {s.name: s for s in specs}
 
         # NB: enrich_parents is NOT throttled. It accepts derived parents
@@ -680,6 +686,7 @@ async def run_sn_pools(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     display: Any | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
     names_only: bool = False,
     docs_only: bool = False,
     flush: bool = False,
@@ -1029,10 +1036,15 @@ async def run_sn_pools(
         # Skip auto-seeding when the generate phase is excluded (skip_generate,
         # e.g. ``--only link``) — seeding new sources would be composed by a
         # generate pool that is not going to run.
-        if scope_run_id:
+        if scope_run_id or edits_only:
+            _scope_label = (
+                f"focus (run_id={scope_run_id[:8]}…)"
+                if scope_run_id
+                else "edits (edit_status='open')"
+            )
             logger.info(
-                "run_sn_pools: focus mode (run_id=%s…) — skipping auto-seed",
-                scope_run_id[:8],
+                "run_sn_pools: %s mode — skipping auto-seed",
+                _scope_label,
             )
             _domains = domains
         elif flush or docs_only or skip_generate:
@@ -1141,6 +1153,7 @@ async def run_sn_pools(
             on_event=on_event,
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
+            edits_only=edits_only,
             names_only=names_only,
             docs_only=docs_only,
             flush=flush,

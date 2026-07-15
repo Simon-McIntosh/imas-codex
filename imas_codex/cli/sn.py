@@ -476,6 +476,7 @@ def _run_sn_cmd(
     only: str | None = None,
     max_sources: int | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> None:
     """Execute the pool-based SN orchestrator with Rich progress display.
 
@@ -673,6 +674,7 @@ def _run_sn_cmd(
             on_event=_on_event,
             display=display,
             scope_run_id=scope_run_id,
+            edits_only=edits_only,
             names_only=names_only,
             docs_only=docs_only,
             flush=flush,
@@ -1255,6 +1257,18 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
+    "--edits",
+    "edits_only",
+    is_flag=True,
+    default=False,
+    help=(
+        "Scope the run to pending sn-edit successors (edit_status='open') — "
+        "no --focus/DD-path needed; an edit is already focused. Pairs with "
+        "--only review (the common case: `sn run --only review --edits`). "
+        "If combined with --focus, the two scopes are ANDed."
+    ),
+)
+@click.option(
     "--scope-run-id",
     "scope_run_id",
     default=None,
@@ -1394,6 +1408,7 @@ def sn_run(
     names_only: bool,
     docs_only: bool,
     flush: bool,
+    edits_only: bool,
     scope_run_id: str | None,
     families: str | None,
     only_phase: str | None,
@@ -1659,6 +1674,7 @@ def sn_run(
             only=only_phase,
             max_sources=max_sources,
             scope_run_id=scope_run_id,
+            edits_only=edits_only,
         )
         return
 
@@ -1779,6 +1795,7 @@ def sn_run(
             only=only_phase,
             max_sources=max_sources,
             scope_run_id=scope_run_id,
+            edits_only=edits_only,
         )
         return
 

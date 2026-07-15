@@ -7623,6 +7623,7 @@ def _claim_sn_atomic(
     to_stage: str | None = None,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
     seed_extra_where: str = "",
     seed_with_extras: str = "",
     seed_order_by: str = "rand()",
@@ -7667,6 +7668,12 @@ def _claim_sn_atomic(
         considered eligible.  Used by ``sn run --physics-domain`` to
         prevent concurrent domain-specific runs from competing for
         each other's items.
+    edits_only:
+        When ``True``, restrict eligibility to StandardName nodes carrying
+        ``edit_status = 'open'`` — the pending successors of a ``sn edit``.
+        Composed exactly like *scope_run_id*'s ``scope_where`` and ANDed
+        alongside it; the common use is *edits_only* alone (an edit is
+        already focused, so no ``--focus``/DD-path is required).
     seed_extra_where:
         Optional additional Cypher WHERE conditions injected into the seed
         step after *eligibility_where* and *domain_where*.  Must begin
@@ -7704,11 +7711,15 @@ def _claim_sn_atomic(
         domain_where = " AND sn.physics_domain = $domain"
         params["domain"] = domain
 
-    # Optional run-id scope for --focus mode.
+    # Optional run-id scope for --focus mode, plus an edit-scope predicate for
+    # --edits mode. Both are ANDed into the same fragment and injected at every
+    # seed/expand step, so they combine cleanly (edits_only is the common case).
     scope_where = ""
     if scope_run_id:
-        scope_where = " AND sn.run_id = $scope_run_id"
+        scope_where += " AND sn.run_id = $scope_run_id"
         params["scope_run_id"] = scope_run_id
+    if edits_only:
+        scope_where += " AND coalesce(sn.edit_status, '') = 'open'"
 
     with GraphClient() as gc:
         with gc.session() as session:
@@ -7884,6 +7895,7 @@ def claim_generate_name_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardNameSource nodes (status='extracted') for name generation.
 
@@ -7953,12 +7965,19 @@ def claim_generate_name_batch(
         extra_params["domain"] = domain
 
     # Optional run-id scope for --focus mode (StandardNameSource).
+    # edits_only additionally gates on the source's edit_status. Sources are
+    # never edit successors (edit successors are already-composed StandardName
+    # nodes), so this predicate makes an edit-scoped run claim NO new sources —
+    # i.e. it correctly blocks fresh composition while draining pending edits.
     scope_sns_where = ""
     scope_sns2_where = ""
     if scope_run_id:
-        scope_sns_where = "AND sns.run_id = $scope_run_id"
-        scope_sns2_where = "AND sns2.run_id = $scope_run_id"
+        scope_sns_where += " AND sns.run_id = $scope_run_id"
+        scope_sns2_where += " AND sns2.run_id = $scope_run_id"
         extra_params["scope_run_id"] = scope_run_id
+    if edits_only:
+        scope_sns_where += " AND coalesce(sns.edit_status, '') = 'open'"
+        scope_sns2_where += " AND coalesce(sns2.edit_status, '') = 'open'"
 
     with GraphClient() as gc:
         with gc.session() as session:
@@ -8238,6 +8257,7 @@ def claim_review_name_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name review (Phase 8.1 stage machine).
 
@@ -8304,6 +8324,7 @@ def claim_review_name_batch(
         ),
         domain=domain,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
     )
     # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
     # _verify_name_claim_winners). review_name is gated on name_stage='drafted'.
@@ -8711,6 +8732,7 @@ def claim_review_docs_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs review (Phase 8.1 stage machine).
 
@@ -8770,6 +8792,7 @@ def claim_review_docs_batch(
         ),
         domain=domain,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
     )
     # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
     # _verify_docs_claim_winners). review_docs is gated on docs_stage='drafted'.
@@ -9091,6 +9114,7 @@ def claim_refine_name_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name refinement (Option B chain creation).
 
@@ -9146,6 +9170,7 @@ def claim_refine_name_batch(
         to_stage="refining",
         domain=domain,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
     )
 
     # Drop claim-race losers BEFORE the (paid) refine LLM call. The claim
@@ -10639,6 +10664,7 @@ def claim_generate_docs_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes ready for generate_docs.
 
@@ -10717,6 +10743,7 @@ def claim_generate_docs_batch(
         # stage_field=None → claim only, no stage transition
         domain=domain,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
         # Parent-first ordering: nodes that have incoming HAS_PARENT edges
         # (i.e. nodes which are parents) receive priority 0 so they are
         # documented before their children.
@@ -10949,6 +10976,7 @@ def claim_refine_docs_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs refinement.
 
@@ -11016,6 +11044,7 @@ def claim_refine_docs_batch(
         to_stage="refining",
         domain=domain,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
     )
 
     # Drop claim-race losers BEFORE the (paid) refine LLM call. The claim
@@ -11739,6 +11768,7 @@ def claim_enrich_parents_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim placeholder derived parents that still need a real description.
 
@@ -11776,6 +11806,7 @@ def claim_enrich_parents_batch(
         extra_return_fields=", coalesce(sn.name, sn.id) AS name",
         domain=domain,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
     )
     # Two-step claim_token verify (mandated for every claim function): drop nodes
     # a concurrent replica won at the lock-serialised SET, before any enrichment
