@@ -467,6 +467,9 @@ def run_merge(
     isnc_dir: str | Path,
     base_ref: str,
     threshold: float | None = None,
+    catalog_pr_number: int | None = None,
+    catalog_pr_url: str | None = None,
+    catalog_merge_commit_sha: str | None = None,
     dry_run: bool = False,
     gc: GraphClient | None = None,
 ) -> MergeReport:
@@ -495,6 +498,18 @@ def run_merge(
     """
     thr = DEFAULT_MIN_SCORE if threshold is None else float(threshold)
     report = MergeReport(threshold=thr, dry_run=dry_run)
+
+    approval_values = (
+        catalog_pr_number,
+        catalog_pr_url,
+        catalog_merge_commit_sha,
+    )
+    if any(value is not None for value in approval_values) and not all(
+        value is not None and value != "" for value in approval_values
+    ):
+        raise ValueError(
+            "catalog approval requires PR number, PR URL, and merge commit SHA"
+        )
 
     changes = read_pr_changes(isnc_dir, base_ref)
     report.changes_seen = len(changes)
@@ -590,6 +605,14 @@ def run_merge(
                     run_id=plan.run_id,
                     gc=gc,
                 )
+                if all(value is not None for value in approval_values):
+                    mark_catalog_name_approved(
+                        review_target,
+                        catalog_pr_number=int(catalog_pr_number),
+                        catalog_pr_url=str(catalog_pr_url),
+                        catalog_merge_commit_sha=str(catalog_merge_commit_sha),
+                        gc=gc,
+                    )
                 report.accepted.append(review_target)
                 report.outcomes.append(
                     MergeOutcome(
@@ -625,3 +648,35 @@ def run_merge(
     finally:
         if owns_gc:
             gc.close()
+
+
+def mark_catalog_name_approved(
+    name: str,
+    *,
+    catalog_pr_number: int,
+    catalog_pr_url: str,
+    catalog_merge_commit_sha: str,
+    gc: GraphClient,
+) -> bool:
+    """Promote an accepted name using complete merged-PR evidence only."""
+    if catalog_pr_number <= 0 or not catalog_pr_url or not catalog_merge_commit_sha:
+        raise ValueError("complete merged catalog PR metadata is required")
+    rows = gc.query(
+        """
+        MATCH (sn:StandardName {id: $name})
+        WHERE sn.name_stage IN ['accepted', 'approved']
+          AND sn.docs_stage = 'accepted'
+        SET sn.name_stage = 'approved',
+            sn.catalog_pr_number = $pr_number,
+            sn.catalog_pr_url = $pr_url,
+            sn.catalog_merge_commit_sha = $merge_commit,
+            sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime()),
+            sn.origin = 'catalog_edit'
+        RETURN sn.id AS id
+        """,
+        name=name,
+        pr_number=catalog_pr_number,
+        pr_url=catalog_pr_url,
+        merge_commit=catalog_merge_commit_sha,
+    )
+    return bool(rows)

@@ -61,16 +61,15 @@ class TestFetchDeprecationStubsQueryContract:
         cypher = self._capture()
         assert "name_stage" in cypher and "'superseded'" in cypher
 
-    def test_accepted_only_scope(self):
-        """Draft/reviewed churn (superseded_from_stage != 'accepted') is
-        excluded by the query — the locked dep-scope decision."""
+    def test_approved_only_scope(self):
+        """RC/LLM acceptance alone never creates public deprecations."""
         cypher = self._capture()
-        assert "superseded_from_stage = 'accepted'" in cypher
+        assert "catalog_approved_at IS NOT NULL" in cypher
 
-    def test_collapses_chain_to_live_accepted_successor(self):
+    def test_collapses_chain_to_live_approved_successor(self):
         cypher = self._capture()
         assert "REFINED_FROM*1.." in cypher
-        assert "succ.name_stage = 'accepted'" in cypher
+        assert "succ.name_stage = 'approved'" in cypher
 
 
 # ---------------------------------------------------------------------------
@@ -181,9 +180,9 @@ class _FakeGraphClient:
         return False
 
     def query(self, cypher: str, **kwargs):
-        if "superseded_from_stage = 'accepted'" in cypher:
+        if "catalog_approved_at IS NOT NULL" in cypher:
             return list(self._stub_rows)
-        if "sn.name_stage = 'accepted'" in cypher and "OPTIONAL MATCH (sn)" in cypher:
+        if "sn.name_stage IN ['accepted', 'approved']" in cypher:
             return [{"record": c} for c in self._candidates]
         # ordering edges / arguments / error_variants / sources / domain
         # priority — none relevant to this fixture.
@@ -218,6 +217,7 @@ class TestRunExportEmitsStub:
                     "physics_domain": "core_profiles",
                     "name_stage": "superseded",
                     "superseded_from_stage": "accepted",
+                    "catalog_approved_at": "2026-07-15T12:00:00Z",
                 },
                 "successors": ["core_ion_temperature"],
             }

@@ -316,7 +316,7 @@ def check_catalog(
         rows = gc.query(
             """
             MATCH (sn:StandardName)
-            WHERE sn.name_stage = 'accepted'
+            WHERE sn.name_stage IN ['accepted', 'approved']
             RETURN sn.id AS id,
                    sn.description AS description,
                    sn.documentation AS documentation,

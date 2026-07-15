@@ -204,6 +204,11 @@ def reconcile_catalog(
             if name not in matched_names or dry_run:
                 continue
             report.sources_bound += bind_recovery_sources(name, specs, gc=gc)
+            from imas_codex.standard_names.provenance_lifecycle import (
+                bind_sources_exclusively,
+            )
+
+            bind_sources_exclusively(gc, name, [spec["id"] for spec in specs])
 
         logger.info(
             "reconcile_catalog: matched=%d updated=%d sources_bound=%d "

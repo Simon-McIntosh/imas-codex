@@ -105,7 +105,7 @@ def filter_protected(
 
 
 def _fetch_catalog_edit_names(name_ids: list[str]) -> set[str]:
-    """Query graph for names with origin='catalog_edit'."""
+    """Query graph for curator-owned or PR-approved names."""
     if not name_ids:
         return set()
     try:
@@ -116,7 +116,7 @@ def _fetch_catalog_edit_names(name_ids: list[str]) -> set[str]:
                 """
                 UNWIND $names AS name
                 MATCH (sn:StandardName {id: name})
-                WHERE sn.origin = 'catalog_edit'
+                WHERE sn.origin = 'catalog_edit' OR sn.name_stage = 'approved'
                 RETURN sn.id AS id
                 """,
                 names=name_ids,

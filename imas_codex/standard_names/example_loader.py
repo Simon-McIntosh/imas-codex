@@ -105,7 +105,7 @@ def _query_examples_for_target(
     cpd_expr = proj["comments_per_dim"]
     comments_expr = proj["comments"]
 
-    stage_filter = "AND sn.name_stage = 'accepted'"
+    stage_filter = "AND sn.name_stage IN ['accepted', 'approved']"
 
     # --- Domain-scoped query ---
     if physics_domains:

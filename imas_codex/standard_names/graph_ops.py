@@ -5334,7 +5334,7 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
             gc.query(
                 """
                 MATCH (sn:StandardName)
-                WHERE sn.name_stage = 'accepted'
+                WHERE sn.name_stage IN ['accepted', 'approved']
                   AND sn.documentation IS NOT NULL
                 RETURN sn.id AS id, sn.documentation AS docs, sn.links AS links
                 """
@@ -5376,7 +5376,7 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
             successors = gc.query(
                 """
                 MATCH (new:StandardName)-[:REFINED_FROM*]->(old:StandardName {id: $target})
-                WHERE new.name_stage = 'accepted'
+                WHERE new.name_stage IN ['accepted', 'approved']
                 RETURN new.id AS successor
                 LIMIT 1
                 """,
@@ -9646,6 +9646,20 @@ def persist_refined_name(
 
     if result:
         row = dict(result[0])
+        from imas_codex.standard_names.provenance_lifecycle import (
+            retarget_standard_name_sources,
+        )
+
+        with GraphClient() as provenance_gc:
+            retarget_standard_name_sources(
+                provenance_gc,
+                old_name,
+                new_name,
+                operation="human_edit" if edit_mode else "refine",
+                reason=edit_reason or reason,
+                origin=edit_origin,
+                run_id=run_id,
+            )
         logger.debug(
             "persist_refined_name: %s → %s (chain_length=%d)",
             old_name,
@@ -9807,6 +9821,18 @@ def supersede_prior_source_names(
 
     superseded = len(rows)
     if superseded:
+        from imas_codex.standard_names.provenance_lifecycle import (
+            retarget_standard_name_sources,
+        )
+
+        with GraphClient() as provenance_gc:
+            for row in rows:
+                retarget_standard_name_sources(
+                    provenance_gc,
+                    row["old_name"],
+                    row["new_name"],
+                    operation="regenerate",
+                )
         for r in rows:
             logger.info(
                 "supersede_prior_source_names: %s superseded by %s (same source)",
@@ -9846,9 +9872,10 @@ def tombstone_supersede_into(
     * ``old_id == into_id`` (nothing to fold);
     * ``old_id`` does not exist;
     * ``into_id`` does not exist;
-    * ``into_id`` is not ``name_stage='accepted'`` — the successor must be the
-      live canonical name so the emitted deprecation stub points somewhere real
-      (an unresolvable stub would be a dangling breaking-change pointer);
+    * ``into_id`` is neither ``name_stage='accepted'`` nor ``'approved'`` —
+      the successor must be a live canonical name so the emitted deprecation
+      stub points somewhere real (an unresolvable stub would be a dangling
+      breaking-change pointer);
     * folding would create a ``REFINED_FROM`` cycle (``old`` already descends
       from ``into`` — threading ``into``→``old`` would close a loop).
 
@@ -9878,12 +9905,12 @@ def tombstone_supersede_into(
             return {"ok": False, "reason": f"name {old_id!r} not found"}
         if not row.get("into_id"):
             return {"ok": False, "reason": f"target {into_id!r} not found"}
-        if row.get("into_stage") != "accepted":
+        if row.get("into_stage") not in ("accepted", "approved"):
             return {
                 "ok": False,
                 "reason": (
                     f"target {into_id!r} is name_stage={row.get('into_stage')!r}, "
-                    "not 'accepted' — supersede target must be the live "
+                    "not 'accepted' or 'approved' — supersede target must be the live "
                     "canonical name"
                 ),
             }
@@ -9921,6 +9948,16 @@ def tombstone_supersede_into(
             """,
             old_id=old_id,
             into_id=into_id,
+        )
+        from imas_codex.standard_names.provenance_lifecycle import (
+            retarget_standard_name_sources,
+        )
+
+        retarget_standard_name_sources(
+            gc,
+            old_id,
+            into_id,
+            operation="fold",
         )
     logger.info(
         "tombstone_supersede_into: %s superseded into %s (sfs=accepted, "

@@ -289,7 +289,12 @@ def parent_segment_of_child(
     if op_kind == "binary":
         role = edge_props.get("role")
         separator = edge_props.get("separator")
-        if not operator or not separator or role not in ("a", "b") or not other_arg_name:
+        if (
+            not operator
+            or not separator
+            or role not in ("a", "b")
+            or not other_arg_name
+        ):
             return None
         if role == "a":
             prefix = f"{operator}_of_"
@@ -808,6 +813,19 @@ def rename_cascade(
         """,
         renames=renamed_list,
     )
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+        refresh_renamed_source_mirrors,
+    )
+
+    refresh_renamed_source_mirrors(gc, renamed_list)
+    for rename in renamed_list:
+        record_standard_name_change(
+            gc,
+            rename["from"],
+            rename["to"],
+            operation="cascade",
+        )
 
     logger.info(
         "rename_cascade applied: root=%s→%s descendants_renamed=%d skipped=%d",

@@ -6790,7 +6790,7 @@ ORDER BY c.id LIMIT 12
 
 _DOCS_GEN_NEARBY_QUERY = """
 MATCH (sn:StandardName)
-WHERE sn.name_stage = 'accepted'
+WHERE sn.name_stage IN ['accepted', 'approved']
   AND sn.physics_domain = $domain
   AND sn.id <> $sn_id
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)

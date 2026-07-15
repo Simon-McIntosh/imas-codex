@@ -3384,6 +3384,28 @@ class AgentsServer:
                 )
 
             @self.mcp.tool()
+            def trace_standard_name_provenance(
+                name: str,
+                include_reviews: bool = False,
+                max_depth: int = 10,
+            ) -> str:
+                """Trace semantic DD/signal sources and internal name changes.
+
+                This operational tool is intentionally separate from ordinary
+                catalog discovery so candidate/edit history is disclosed only
+                when explicitly requested.
+                """
+                from imas_codex.llm.sn_tools import (
+                    _trace_standard_name_provenance as _trace,
+                )
+
+                return _trace(
+                    name,
+                    include_reviews=include_reviews,
+                    max_depth=max_depth,
+                )
+
+            @self.mcp.tool()
             def check_standard_names(names: str) -> str:
                 """Validate names against the standard-name catalogue.
 

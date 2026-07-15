@@ -548,7 +548,11 @@ class TestSupersedePriorSourceNames:
             )
 
         assert n == 1
-        cypher = gc.query.call_args.args[0]
+        cypher = next(
+            call.args[0]
+            for call in gc.query.call_args_list
+            if "old.name_stage = 'superseded'" in call.args[0]
+        )
         # The predecessor is marked superseded and linked via REFINED_FROM.
         assert "old.name_stage = 'superseded'" in cypher
         assert "MERGE (new)-[:REFINED_FROM]->(old)" in cypher
@@ -577,7 +581,11 @@ class TestSupersedePriorSourceNames:
                 [{"new_name": "new_name", "source_id": "dd:eq/q_95"}]
             )
 
-        cypher = gc.query.call_args.args[0]
+        cypher = next(
+            call.args[0]
+            for call in gc.query.call_args_list
+            if "carry_edit" in call.args[0]
+        )
         # The propagation is gated on the predecessor's edit still being open.
         assert "(coalesce(old.edit_status, '') = 'open') AS carry_edit" in cypher
         # Predecessor reconciled to 'applied' (no longer stuck 'open').

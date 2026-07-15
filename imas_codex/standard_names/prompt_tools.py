@@ -142,7 +142,7 @@ def fetch_reference_exemplar(concept: str) -> list[dict[str, Any]]:
     cypher = """
         CALL db.index.vector.queryNodes('standardname_vec', 5, $vec)
         YIELD node, score
-        WHERE node.name_stage = 'accepted'
+        WHERE node.name_stage IN ['accepted', 'approved']
         RETURN node.name AS standard_name,
                node.description AS description,
                score

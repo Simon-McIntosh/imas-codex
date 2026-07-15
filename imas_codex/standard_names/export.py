@@ -180,8 +180,8 @@ def _fetch_candidates(
     Only nodes that have completed the name pipeline and passed
     validation are returned.  Specifically the query requires:
 
-    - ``name_stage = 'accepted'`` — excludes superseded, exhausted, drafted,
-      reviewed, and refining nodes.
+    - ``name_stage IN ['accepted', 'approved']`` — accepted RC candidates and
+      PR-approved names are exportable; superseded/internal attempts are not.
     - ``docs_stage = 'accepted'`` — excludes nodes whose documentation has
       not yet passed the docs review loop (skipped when *names_only*).
     - ``validation_status = 'valid'`` — excludes quarantined nodes.
@@ -193,7 +193,7 @@ def _fetch_candidates(
 
     cypher = """
     MATCH (sn:StandardName)
-    WHERE sn.name_stage = 'accepted'
+    WHERE sn.name_stage IN ['accepted', 'approved']
       AND sn.validation_status = 'valid'
     """
     if not names_only:
@@ -586,10 +586,9 @@ def _fetch_deprecation_stubs(
     A stub is warranted for every ``StandardName`` that:
 
     - is ``name_stage = 'superseded'`` (retired from the live catalog), AND
-    - carries ``superseded_from_stage = 'accepted'`` — it had reached the
-      published bar before being retired.  Draft/reviewed churn records a
-      non-accepted sentinel and emits nothing (dep-scope = accepted-only), AND
-    - has a *live* accepted successor reachable along the incoming
+    - carries durable catalog approval metadata — LLM acceptance or RC
+      appearance alone never creates public deprecation history, AND
+    - has a *live* approved successor reachable along the incoming
       ``REFINED_FROM`` chain that is itself in *published_names*.
 
     Refinement chains collapse.  For ``A → B → C`` (edges ``B-REFINED_FROM→A``,
@@ -609,9 +608,9 @@ def _fetch_deprecation_stubs(
     cypher = """
     MATCH (old:StandardName)
     WHERE coalesce(old.name_stage, '') = 'superseded'
-      AND old.superseded_from_stage = 'accepted'
+      AND old.catalog_approved_at IS NOT NULL
     MATCH (succ:StandardName)-[:REFINED_FROM*1..]->(old)
-    WHERE succ.name_stage = 'accepted'
+    WHERE succ.name_stage = 'approved'
     OPTIONAL MATCH (old)-[:HAS_UNIT]->(u:Unit)
     RETURN old {
         .*,
@@ -791,11 +790,9 @@ def _fetch_sources_for_entry(
 ) -> list[dict[str, Any]] | None:
     """Query graph for StandardNameSource nodes that produced this name.
 
-    Returns a list of source dicts — the sanctioned, restorable projection
-    of the provenance ledger — with keys ``id``, ``dd_path`` | ``signal_id``,
-    ``status``, ``source_type`` (always, every source carries one) and
-    ``provenance`` (only when non-null). Together these are lossless: the
-    reconciler rebuilds the ``StandardNameSource`` node from this block.
+    Returns the public semantic source projection: ``dd_path`` or
+    ``signal_id`` plus optional value-estimator ``provenance``. Operational
+    ledger ids, statuses and source types remain internal.
     Returns ``None`` if no sources are found.
     """
     rows = gc.query(
@@ -803,11 +800,8 @@ def _fetch_sources_for_entry(
         MATCH (sn:StandardName {id: $name})<-[:PRODUCED_NAME]-(src:StandardNameSource)
         OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(n:IMASNode)
         OPTIONAL MATCH (src)-[:FROM_SIGNAL]->(s:FacilitySignal)
-        RETURN src.id AS source_id,
-               n.id   AS dd_path,
+        RETURN n.id   AS dd_path,
                s.id   AS signal_id,
-               src.status AS status,
-               src.source_type AS source_type,
                src.provenance AS provenance
         ORDER BY src.id
         """,
@@ -819,17 +813,10 @@ def _fetch_sources_for_entry(
     sources: list[dict[str, Any]] = []
     for row in rows:
         src: dict[str, Any] = {}
-        if row.get("source_id"):
-            src["id"] = row["source_id"]
         if row.get("dd_path"):
             src["dd_path"] = row["dd_path"]
         if row.get("signal_id"):
             src["signal_id"] = row["signal_id"]
-        if row.get("status"):
-            src["status"] = row["status"]
-        # source_type is a mandatory ledger field — every source has one.
-        if row.get("source_type"):
-            src["source_type"] = row["source_type"]
         # provenance is optional — emit only when the source carries it.
         if row.get("provenance"):
             src["provenance"] = row["provenance"]

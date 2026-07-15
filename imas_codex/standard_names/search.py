@@ -607,11 +607,7 @@ def fetch_standard_names(
             "source_paths",
             "constraints",
             "validity_domain",
-            "confidence",
-            "model",
             "description",
-            "source_ids",
-            "source_ids_names",
             "is_placeholder",
         ]
         grammar_fields = [
@@ -657,6 +653,7 @@ def fetch_standard_names(
         cypher = f"""
             UNWIND $names AS name_id
             MATCH (sn:StandardName {{id: name_id}})
+            WHERE NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']
             OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
             OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(sn)
             OPTIONAL MATCH (src)-[:IN_IDS]->(ids:IDS)
@@ -931,7 +928,9 @@ def _resolve_related_types(relationship_types: str) -> set[str]:
     """Map the public ``relationship_types`` arg to internal bucket-group set."""
     rt = (relationship_types or "all").strip().lower()
     if rt in ("all", "*", ""):
-        return {"grammar", "unit", "cocos", "cluster", "lineage", "source"}
+        # Internal REFINED_FROM history is opt-in; ordinary discovery exposes
+        # semantic relationships and public catalog lineage only.
+        return {"grammar", "unit", "cocos", "cluster", "source"}
     return {p.strip() for p in rt.split(",") if p.strip()}
 
 

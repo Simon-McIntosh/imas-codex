@@ -321,8 +321,13 @@ enums:
           for refine_name claiming.
       accepted:
         description: >-
-          Score >= min_score; name accepted. Transitions docs_stage to
+          Score >= min_score; LLM review accepted. Transitions docs_stage to
           'pending', making the name eligible for generate_docs.
+      approved:
+        description: >-
+          Accepted through a merged catalog pull request. This governance
+          state is set only when the PR number, URL, and merge commit are
+          recorded; RC export/import never grants it.
       refining:
         description: >-
           Claimed by a refine_name worker. Transient state — transitions
@@ -482,13 +487,23 @@ classes:
           during catalog import when this name is replaced.
       catalog_pr_number:
         description: >-
-          GitHub PR number of the catalog PR that last modified this
-          entry. Set by sn import; null for pipeline-only names.
+          GitHub PR number of the merged catalog PR that approved this
+          entry. Never set by RC import/export.
         range: integer
       catalog_pr_url:
         description: >-
-          Full URL of the catalog PR that last modified this entry.
-          Set by sn merge; null for pipeline-only names.
+          Full URL of the merged catalog PR that approved this entry.
+          Set only by sn merge with complete merge metadata.
+      catalog_approved_at:
+        description: >-
+          ISO 8601 timestamp when the catalog pull request was merged. Null
+          until the name reaches the approved lifecycle state.
+        range: datetime
+      catalog_merge_commit_sha:
+        description: >-
+          Merge commit SHA of the catalog pull request that approved this
+          name. Required together with catalog_pr_number and catalog_pr_url
+          before name_stage may become approved.
       exported_at:
         description: >-
           ISO 8601 timestamp when this name was last exported to the

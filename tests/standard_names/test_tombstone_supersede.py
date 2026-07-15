@@ -74,6 +74,10 @@ class _FakeGraph:
             old["claimed_at"] = None
             self.refined_from.add((p["into_id"], p["old_id"]))
             return []
+        if "RETURN size(moved) AS moved" in cypher:
+            return [{"moved": 0}]
+        if "CREATE (change:StandardNameChange" in cypher:
+            return []
         raise AssertionError(f"unexpected query: {cypher}")
 
 
@@ -97,6 +101,16 @@ class TestSupersedeIntoAccepted:
         # successor lineage: (into)-[:REFINED_FROM]->(old)
         assert ("into", "old") in fake.refined_from
 
+    def test_allows_approved_target(self) -> None:
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted"},
+            "into": {"id": "into", "name_stage": "approved"},
+        }
+        res, fake = _run(nodes, "old", "into")
+        assert res["ok"] is True
+        assert nodes["old"]["name_stage"] == "superseded"
+        assert ("into", "old") in fake.refined_from
+
     def test_dry_run_does_not_write(self) -> None:
         nodes = {
             "old": {"id": "old", "name_stage": "accepted"},
@@ -116,7 +130,7 @@ class TestRefusals:
         }
         res, fake = _run(nodes, "old", "into")
         assert res["ok"] is False
-        assert "not 'accepted'" in res["reason"]
+        assert "not 'accepted' or 'approved'" in res["reason"]
         assert nodes["old"]["name_stage"] == "accepted"  # nothing written
 
     def test_refuses_missing_old(self) -> None:

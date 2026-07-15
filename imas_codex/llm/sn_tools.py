@@ -271,7 +271,6 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
         constraints = row.get("constraints") or []
         validity_domain = row.get("validity_domain") or ""
         name_stage = row.get("name_stage") or ""
-        model = row.get("model") or ""
         cocos_transformation_type = row.get("cocos_transformation_type") or ""
         cocos = row.get("cocos")
         dd_version = row.get("dd_version") or ""
@@ -290,8 +289,6 @@ def _format_fetch_report(rows: list[dict], requested: list[str]) -> str:
             lines.append(f"- **Unit:** {unit}")
         if name_stage:
             lines.append(f"- **Stage:** {name_stage}")
-        if model:
-            lines.append(f"- **Model:** {model}")
         if cocos_transformation_type:
             lines.append(f"- **COCOS Transformation:** {cocos_transformation_type}")
         if cocos is not None:
@@ -602,6 +599,64 @@ def _find_related_standard_names(
             else:
                 lines.append(f"- **{related_name}**")
         lines.append("")
+    return "\n".join(lines)
+
+
+def _trace_standard_name_provenance(
+    name: str,
+    *,
+    include_reviews: bool = False,
+    max_depth: int = 10,
+    gc: GraphClient | None = None,
+) -> str:
+    """Render explicitly requested semantic sources and internal history."""
+    owns_gc = gc is None
+    try:
+        gc = gc or GraphClient()
+        from imas_codex.standard_names.provenance_lifecycle import (
+            trace_standard_name_provenance,
+        )
+
+        trace = trace_standard_name_provenance(
+            gc,
+            name,
+            include_reviews=include_reviews,
+            max_depth=max_depth,
+        )
+    except ServiceUnavailable:
+        return NEO4J_NOT_RUNNING_MSG
+    except Exception as exc:
+        return f"Provenance trace failed: {_neo4j_error_message(exc)}"
+    finally:
+        if owns_gc and gc is not None:
+            gc.close()
+
+    lines = [f"## Standard Name Provenance — `{name}`", "", "### Semantic sources"]
+    sources = trace["semantic_sources"]
+    if not sources:
+        lines.append("No semantic sources recorded.")
+    for source in sources:
+        source_id = source.get("dd_path") or source.get("signal_id") or "unknown"
+        facet = source.get("provenance")
+        suffix = f" ({facet})" if facet else ""
+        lines.append(f"- `{source_id}`{suffix}")
+    lines.extend(["", "### Internal change history"])
+    changes = trace["internal_changes"]
+    if not changes:
+        lines.append("No compacted internal changes recorded.")
+    for change in changes:
+        reason = f" — {change['reason']}" if change.get("reason") else ""
+        lines.append(
+            f"- `{change.get('from_name')}` → `{change.get('to_name')}` "
+            f"[{change.get('operation')}] {reason}".rstrip()
+        )
+    if include_reviews:
+        lines.extend(["", "### Review summaries"])
+        for review in trace.get("reviews", []):
+            lines.append(
+                f"- {review.get('axis')}: score={review.get('score')} "
+                f"tier={review.get('tier')}"
+            )
     return "\n".join(lines)
 
 

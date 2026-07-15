@@ -3572,8 +3572,17 @@ def sn_release(
     is_flag=True,
     help="Report the would-be merge without writing to the graph.",
 )
+@click.option("--pr-number", type=int, default=None, help="Merged catalog PR number.")
+@click.option("--pr-url", default=None, help="Merged catalog PR URL.")
+@click.option("--merge-commit", default=None, help="Merged catalog PR commit SHA.")
 def sn_merge(
-    isnc: str | None, base_ref: str, threshold: float | None, dry_run: bool
+    isnc: str | None,
+    base_ref: str,
+    threshold: float | None,
+    dry_run: bool,
+    pr_number: int | None,
+    pr_url: str | None,
+    merge_commit: str | None,
 ) -> None:
     """Fold a reviewed catalog PR back into the graph ledger (id-matched, review-only).
 
@@ -3616,6 +3625,9 @@ def sn_merge(
         base_ref=base_ref,
         threshold=threshold,
         dry_run=dry_run,
+        catalog_pr_number=pr_number,
+        catalog_pr_url=pr_url,
+        catalog_merge_commit_sha=merge_commit,
     )
 
     table = Table(title="Merge Summary")
@@ -3907,6 +3919,47 @@ def sn_prune(
     except Exception as e:
         console.print(f"[red]Prune error:[/red] {e}")
         raise SystemExit(1) from e
+
+
+@sn.command("provenance-cleanup")
+@click.option(
+    "--apply",
+    is_flag=True,
+    help="Compact safe rows after showing the manifest (default is read-only).",
+)
+@click.option("--force", "-f", is_flag=True, help="Skip apply confirmation.")
+def sn_provenance_cleanup(apply: bool, force: bool) -> None:
+    """Manifest or compact unapproved superseded candidate history."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.provenance_lifecycle import (
+        compact_unapproved_superseded,
+    )
+
+    with GraphClient() as gc:
+        manifest = compact_unapproved_superseded(gc, apply=False)
+        safe = [row for row in manifest if row.get("safe_to_compact")]
+        unresolved = len(manifest) - len(safe)
+        console.print(
+            f"Unapproved superseded candidates: {len(manifest)} "
+            f"([green]{len(safe)} safe[/green], "
+            f"[yellow]{unresolved} unresolved[/yellow])"
+        )
+        for row in manifest:
+            tips = ", ".join(row.get("tips") or []) or "—"
+            state = "safe" if row.get("safe_to_compact") else "review"
+            console.print(
+                f"  [{state}] {row['name']} -> {tips} "
+                f"(sources={row.get('source_count', 0)})"
+            )
+        if not apply or not safe:
+            return
+        if not force:
+            click.confirm(
+                f"Compact {len(safe)} candidates? Unresolved rows remain untouched.",
+                abort=True,
+            )
+        compact_unapproved_superseded(gc, apply=True)
+        console.print(f"Compacted {len(safe)} unapproved candidates.")
 
 
 @sn.command("review")

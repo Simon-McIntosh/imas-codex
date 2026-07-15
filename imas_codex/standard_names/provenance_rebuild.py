@@ -110,6 +110,10 @@ def recovery_sources_from_entries(
         specs: list[dict[str, Any]] = []
         for src in sources:
             source_id = src.get("id")
+            if not source_id and src.get("dd_path"):
+                source_id = f"dd:{src['dd_path']}"
+            elif not source_id and src.get("signal_id"):
+                source_id = f"signals:{src['signal_id']}"
             if not source_id:
                 continue
             source_type = _source_type_from_id(source_id)
