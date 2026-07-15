@@ -116,32 +116,6 @@ def fetch_public_semantic_sources(gc: Any, name: str) -> list[dict[str, Any]]:
     return sources
 
 
-def report_unpinned_dd_sources(gc: Any) -> list[dict[str, Any]]:
-    """Report legacy DD sources whose exact historical snapshot is unprovable.
-
-    This audit is deliberately read-only. Mutable current IMASNode properties
-    are not proposed as a backfill because doing so would silently guess that
-    they match the source's original extraction version.
-    """
-    rows = gc.query(
-        """
-        MATCH (source:StandardNameSource {source_type: 'dd'})
-        WHERE coalesce(source.dd_snapshot_pinned, false) = false
-        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-        RETURN source.id AS source_id, dd.id AS dd_path,
-               source.dd_version AS dd_version,
-               [field IN ['dd_version', 'dd_documentation', 'dd_data_type']
-                WHERE source[field] IS NULL] AS missing_fields,
-               CASE WHEN source.dd_version IS NULL
-                    THEN 'original_dd_version_unprovable'
-                    ELSE 'pinned_version_snapshot_incomplete' END AS reason,
-               false AS safe_to_backfill
-        ORDER BY source.id
-        """
-    )
-    return [dict(row) for row in rows or []]
-
-
 def retarget_standard_name_sources(
     gc: Any,
     old_name: str,
