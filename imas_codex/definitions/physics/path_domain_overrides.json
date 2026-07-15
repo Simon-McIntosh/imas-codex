@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "description": "Deterministic physics-domain overrides for specific DD path patterns whose semantic subject the tier-1 LLM classifier mis-assigns against the correct IDS-level default. Consulted after the LLM in _classify_batch; a match pins the domain and sets domain_source='deterministic_override'. Match is a substring test on the DD path id (all listed substrings must be present).",
+    "principle": "Domain follows the semantic subject/function of the quantity (see plan decision domain-principle=semantic-subject)."
+  },
+  "overrides": [
+    {
+      "match": ["distributions/", "/ggd/orbit_frequency"],
+      "domain": "transport",
+      "rationale": "Gyrocenter (guiding-center) orbit frequencies are kinetic orbit-dynamics quantities from the distributions IDS (whose default is transport); the LLM mis-routed them to computational_workflow. Every charged particle has a gyrocenter, so this is orbit/transport physics, not a workflow artifact."
+    },
+    {
+      "match": ["lh_antennas/", "pressure"],
+      "domain": "auxiliary_heating",
+      "rationale": "Lower-hybrid antenna hardware quantities (e.g. pressure_tank) are intrinsic to the LH heating subsystem; by semantic-subject they follow auxiliary_heating (the lh_antennas IDS default), not plant_systems."
+    }
+  ]
+}

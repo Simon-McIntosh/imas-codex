@@ -38,6 +38,7 @@ from imas_codex.graph.dd_domain_classifier import (
     _inherit_remaining_unclassified,
     _needs_classification_clause,
     _parent_is_classified_clause,
+    apply_path_domain_override,
     batch_by_subtree,
     classify_domains,
     classify_tier2_inherit,
@@ -1303,3 +1304,36 @@ class TestCountResidualUnclassified:
     def test_empty_result_returns_zero(self, mock_gc):
         mock_gc.query.return_value = []
         assert _count_residual_unclassified(mock_gc) == 0
+
+
+class TestPathDomainOverride:
+    """Deterministic path → domain overrides guard known LLM mis-assignments."""
+
+    def test_gyrocenter_orbit_frequency_pins_transport(self):
+        # These were mis-classified as computational_workflow by the tier-1 LLM,
+        # overriding the correct distributions→transport IDS default.
+        assert (
+            apply_path_domain_override(
+                "distributions/distribution/ggd/orbit_frequency_pol/values"
+            )
+            == "transport"
+        )
+        assert (
+            apply_path_domain_override(
+                "distributions/distribution/ggd/orbit_frequency_tor/values"
+            )
+            == "transport"
+        )
+
+    def test_lh_antenna_pressure_pins_auxiliary_heating(self):
+        # Mis-classified as plant_systems; LH antenna hardware follows its
+        # auxiliary_heating subsystem by semantic subject.
+        assert (
+            apply_path_domain_override("lh_antennas/antenna/pressure_tank")
+            == "auxiliary_heating"
+        )
+
+    def test_unrelated_paths_are_not_overridden(self):
+        assert apply_path_domain_override("equilibrium/time_slice/profiles_1d/q") is None
+        assert apply_path_domain_override("distributions/distribution/ggd/density") is None
+        assert apply_path_domain_override("") is None

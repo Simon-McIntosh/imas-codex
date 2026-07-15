@@ -14,10 +14,13 @@ Integrated as the CLASSIFY phase in the DD build pipeline, running after EMBED.
 
 from __future__ import annotations
 
+import functools
 import hashlib
+import json
 import logging
 from collections import defaultdict
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, Field
@@ -26,6 +29,44 @@ if TYPE_CHECKING:
     from imas_codex.graph.client import GraphClient
 
 logger = logging.getLogger(__name__)
+
+
+@functools.lru_cache(maxsize=1)
+def _load_path_domain_overrides() -> tuple[tuple[tuple[str, ...], str], ...]:
+    """Load deterministic DD-path → domain overrides.
+
+    See ``imas_codex/definitions/physics/path_domain_overrides.json``. Each
+    override is ``(substrings, domain)``; a path matches when every substring
+    is present in the path id.
+    """
+    p = Path(__file__).resolve().parents[1] / "definitions" / "physics" / "path_domain_overrides.json"
+    try:
+        data = json.loads(p.read_text())
+    except (OSError, ValueError):
+        return ()
+    out: list[tuple[tuple[str, ...], str]] = []
+    for entry in data.get("overrides", []):
+        match = entry.get("match") or []
+        domain = entry.get("domain")
+        if match and domain:
+            out.append((tuple(match), domain))
+    return tuple(out)
+
+
+def apply_path_domain_override(path_id: str) -> str | None:
+    """Return the pinned domain if *path_id* matches a deterministic override.
+
+    Guards DD path patterns whose semantic subject the tier-1 LLM classifier
+    mis-assigns against the correct IDS default (e.g. distributions gyrocenter
+    orbit frequencies → transport, lh_antennas hardware pressure →
+    auxiliary_heating). Returns ``None`` when no override applies.
+    """
+    if not path_id:
+        return None
+    for substrings, domain in _load_path_domain_overrides():
+        if all(s in path_id for s in substrings):
+            return domain
+    return None
 
 # =============================================================================
 # Constants
@@ -709,11 +750,25 @@ async def _classify_batch(
             )
             domain = "general"
 
+        # Deterministic override: pin known DD path patterns whose semantic
+        # subject the LLM mis-assigns against the correct IDS default.
+        domain_source = "llm_classified"
+        override = apply_path_domain_override(batch[idx]["id"])
+        if override is not None and override != domain:
+            logger.info(
+                "path-domain override: %s %s -> %s",
+                batch[idx]["id"],
+                domain,
+                override,
+            )
+            domain = override
+            domain_source = "deterministic_override"
+
         results.append(
             {
                 "id": batch[idx]["id"],
                 "physics_domain": domain,
-                "domain_source": "llm_classified",
+                "domain_source": domain_source,
                 "domain_model": model,
                 "cost": cost / max(len(result_obj.classifications), 1),
             }
