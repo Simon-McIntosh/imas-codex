@@ -4306,11 +4306,16 @@ def sn_review(
 _EDIT_SCOPE_CHOICES = ("self", "family", "subtree")
 
 
-def _render_edit_plan(plan: Any) -> None:
+def _render_edit_plan(plan: Any, *, followup_hint: bool = True) -> None:
     """Render an :class:`~imas_codex.standard_names.edit.EditPlan` to the console.
 
     Mirrors :func:`_execute_rename_cascade`'s reporting style: a mode banner,
     the action log, and (for family/subtree scope) the cascade table.
+
+    ``followup_hint`` controls the trailing "claimed by the next review
+    rotation" note: shown for a stage-only (or dry-run) edit that a later
+    rotation will pick up, suppressed when the caller reviews the edit inline
+    (the inline outcome supersedes it).
     """
     from rich.panel import Panel
     from rich.table import Table
@@ -4358,12 +4363,61 @@ def _render_edit_plan(plan: Any) -> None:
     if plan.successor:
         console.print(f"\n  successor: [green]{plan.successor}[/green]")
 
-    if plan.applied:
+    if plan.applied and followup_hint:
         console.print(
             "\n[dim]Candidate drafted — it will be claimed by the next review "
             "rotation ([bold]imas-codex sn run[/bold] or [bold]sn review[/bold]). "
             "Track it with [bold]imas-codex sn status[/bold] "
             "(edit_status: open → applied | exhausted | rejected).[/dim]"
+        )
+
+
+def _render_inline_review_outcome(outcome: Any) -> None:
+    """Render an :class:`~imas_codex.standard_names.edit.InlineReviewOutcome`.
+
+    One line per touched successor — accepted (with score) or not (stage +
+    score, the signal that the gate held) — plus the inline review's LLM cost.
+    """
+    from rich.table import Table
+
+    if not outcome.ran:
+        return
+
+    table = Table(show_header=True, title="Inline review")
+    table.add_column("StandardName")
+    table.add_column("Outcome")
+    table.add_column("Stage")
+    table.add_column("Score")
+    for r in outcome.results:
+        score = (
+            r.reviewer_score_name
+            if r.reviewer_score_name is not None
+            else (r.reviewer_score_docs)
+        )
+        score_str = f"{float(score):.2f}" if score is not None else "-"
+        stage = (
+            r.docs_stage
+            if (r.name_stage == "accepted" and r.docs_stage)
+            else (r.name_stage)
+        )
+        if r.accepted:
+            verdict = "[green]accepted[/green]"
+        elif (r.name_stage == "exhausted") or (r.docs_stage == "exhausted"):
+            verdict = "[red]exhausted[/red]"
+        else:
+            verdict = "[yellow]below threshold[/yellow]"
+        table.add_row(r.id, verdict, str(stage), score_str)
+    console.print()
+    console.print(table)
+    console.print(f"[dim]Inline review cost: ${outcome.cost:.4f}[/dim]")
+
+    if not outcome.all_accepted:
+        console.print(
+            "\n[yellow]Not every successor landed[/yellow] — the review scored "
+            "it below threshold or exhausted its refine budget. This is a "
+            "result, not an error: inspect the score/reason above, then re-steer "
+            "with another [bold]sn edit[/bold] or accept the outcome. "
+            "Track with [bold]imas-codex sn status[/bold]."
         )
 
 
@@ -4447,6 +4501,29 @@ def _render_edit_plan(plan: Any) -> None:
     ),
 )
 @click.option(
+    "--stage-only",
+    "--no-review",
+    "stage_only",
+    is_flag=True,
+    default=False,
+    help=(
+        "Stage the proposal but do NOT review it inline — leave it drafted "
+        "for a later batch review (`sn run --only review --edits`). Default is "
+        "inline review: `sn edit` stages AND lands the edit in one command. "
+        "Use --stage-only for budget-efficient bulk/scripted migrations (stage "
+        "many, review once)."
+    ),
+)
+@click.option(
+    "-c",
+    "--cost-limit",
+    "cost_limit",
+    type=float,
+    default=1.0,
+    show_default=True,
+    help="Max LLM spend (USD) for the inline review. Ignored with --stage-only.",
+)
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Preview the plan (and cascade, if any) without writing to the graph.",
@@ -4461,13 +4538,21 @@ def sn_edit(
     scope_value: str | None,
     override_edits: bool,
     include_accepted: bool,
+    stage_only: bool,
+    cost_limit: float,
     dry_run: bool,
 ) -> None:
-    """Attach a steered edit proposal to STANDARD_NAME.
+    """Attach a steered edit proposal to STANDARD_NAME and review it inline.
 
     Rides the normal generate -> review -> score pipeline instead of
     hand-editing graph text. Exactly one of --hint / --rename / --docs
     selects the mode; --reason is mandatory.
+
+    By default the edit is staged AND reviewed in one command: after staging,
+    the review pipeline runs scoped to just this edit and lands the successor
+    accepted (or reports the review outcome — below-threshold / exhausted — as
+    a signal). Pass --stage-only to stage without reviewing (batch review
+    later with `sn run --only review --edits`).
 
     \b
     Examples:
@@ -4477,6 +4562,7 @@ def sn_edit(
       toroidal surface." --dry-run
       imas-codex sn edit electron_temperature --hint "clarify subject scope" \\
           --reason "ambiguous vs ion_temperature in review" --axis docs
+      imas-codex sn edit old_name --rename new_name --reason "..." --stage-only
     """
     provided = [
         name
@@ -4507,7 +4593,7 @@ def sn_edit(
     # from this module closes an import cycle (edit → graph_ops → discovery
     # → cli.logging → cli/__init__ register_commands → cli.sn) and breaks
     # any standard_names-first import of the package.
-    from imas_codex.standard_names.edit import apply_edit
+    from imas_codex.standard_names.edit import apply_edit, run_inline_review
 
     try:
         plan = apply_edit(
@@ -4526,10 +4612,51 @@ def sn_edit(
     except ValueError as e:
         raise click.UsageError(str(e)) from e
 
-    _render_edit_plan(plan)
+    # In stage-only (or a dry-run / not-applied) invocation the edit rides a
+    # later review rotation, so keep the follow-up hint. When we review inline
+    # below, suppress it — the outcome supersedes it.
+    _render_edit_plan(plan, followup_hint=stage_only or not plan.applied)
 
     if plan.blocked:
         raise SystemExit(2)
+
+    if dry_run or stage_only or not plan.applied:
+        return
+
+    # Inline review (default): land this edit in one command. Same gates a
+    # pooled review runs (P2 parity) — a failed review is surfaced, never
+    # force-accepted. Scoped to the edit's run_id so only this edit's
+    # successor(s) are claimed, never the backlog.
+    _require_embed_ready("sn edit")
+
+    from imas_codex.graph.client import GraphClient as _GraphClient
+
+    def _pending_fn() -> dict[str, int]:
+        try:
+            with _GraphClient() as gc:
+                progress = _compute_pool_progress(
+                    gc,
+                    domains=None,
+                    rotation_cap=3,
+                    min_score=DEFAULT_MIN_SCORE,
+                    scope_run_id=plan.run_id,
+                )
+            return {k: v["pending"] for k, v in progress.items()}
+        except Exception:  # noqa: BLE001 — best-effort watchdog signal
+            return {}
+
+    console.print(
+        f"\n[bold]Reviewing inline[/bold] (scope run_id={plan.run_id}, "
+        f"budget=${cost_limit:.2f}) …"
+    )
+    outcome = run_inline_review(plan, cost_limit=cost_limit, pending_fn=_pending_fn)
+    _render_inline_review_outcome(outcome)
+
+    # A review that did not land every successor is a valid, valuable result —
+    # signal it with a distinct exit code so scripts can react, without
+    # papering over the gate.
+    if outcome.ran and not outcome.all_accepted:
+        raise SystemExit(3)
 
 
 @sn.command("supersede")

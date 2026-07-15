@@ -158,6 +158,73 @@ class EditPlan:
     run_id: str | None = None
 
 
+@dataclass(frozen=True)
+class InlineReviewResult:
+    """Per-successor outcome of an inline review (:func:`run_inline_review`).
+
+    Attributes
+    ----------
+    id:
+        StandardName id the review scored.
+    name_stage / docs_stage:
+        Final lifecycle stage after the scoped review rotation
+        (``accepted`` / ``reviewed`` / ``exhausted`` / …).
+    edit_status:
+        Edit lifecycle after review (``applied`` when accepted, ``exhausted``
+        when the refine cap was reached below threshold, ``open`` when still
+        mid-rotation — see :class:`imas_codex.graph.models.EditStatus`).
+    reviewer_score_name / reviewer_score_docs:
+        The winning reviewer score on the relevant axis, or ``None`` if the
+        axis was not scored.
+    accepted:
+        ``True`` iff the relevant axis reached ``accepted`` — the gate was
+        cleared with no privileged path. A below-threshold or exhausted
+        successor reports ``accepted=False``; the score is the signal.
+    """
+
+    id: str
+    name_stage: str | None
+    docs_stage: str | None
+    edit_status: str | None
+    reviewer_score_name: float | None
+    reviewer_score_docs: float | None
+    accepted: bool
+
+
+@dataclass(frozen=True)
+class InlineReviewOutcome:
+    """Result of running the review pipeline inline after ``sn edit`` staging.
+
+    Attributes
+    ----------
+    ran:
+        ``False`` when there was nothing to review (the edit did not apply,
+        was blocked, or carries no scope stamp) — the caller staged only.
+    run_id:
+        The ``sn-edit-<ts>`` scope the review claimed against.
+    cost:
+        LLM spend (USD) of the inline review, from the run's authoritative
+        ledger.
+    stop_reason:
+        Why the scoped run stopped (``no_eligible_work`` on a clean drain,
+        ``budget_exhausted`` if the cost cap bound it, …).
+    results:
+        One :class:`InlineReviewResult` per touched successor (rename: the
+        successor + any cascade descendants; docs/hint: the target).
+    """
+
+    ran: bool
+    run_id: str | None
+    cost: float
+    stop_reason: str | None
+    results: list[InlineReviewResult] = field(default_factory=list)
+
+    @property
+    def all_accepted(self) -> bool:
+        """``True`` iff the review ran and every touched successor landed."""
+        return self.ran and bool(self.results) and all(r.accepted for r in self.results)
+
+
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
 
@@ -1094,15 +1161,21 @@ def _apply_hint(
     )
 
     if axis in ("name", "both"):
+        # Stamp the reset sources with the edit's run_id so an inline review
+        # scoped to this run (run_inline_review → scope_run_id) claims exactly
+        # the regenerated candidate — a scope filter on StandardNameSource.run_id
+        # only matches when the source carries the stamp.
         src_rows = gc.query(
             """
             // EDIT_RESET_SOURCES
             MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName {id: $id})
             SET src.status = 'extracted', src.claimed_at = null,
-                src.claim_token = null, src.attempt_count = 0
+                src.claim_token = null, src.attempt_count = 0,
+                src.run_id = $run_id
             RETURN src.id AS id
             """,
             id=target,
+            run_id=run_id,
         )
         actions.append(
             f"reset {len(src_rows)} producing source(s) to status='extracted' "
@@ -1129,4 +1202,171 @@ def _apply_hint(
         actions=actions,
         applied=True,
         run_id=run_id,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Inline review — land a staged edit in one command
+# ---------------------------------------------------------------------------
+
+
+def _inline_review_ids(plan: EditPlan) -> list[str]:
+    """The StandardName ids an inline review over *plan* should report on.
+
+    A rename lands its own successor plus every cascade descendant it staged;
+    docs / hint edits settle the target in place.
+    """
+    if plan.mode == "rename" and plan.successor:
+        ids = [plan.successor]
+        ids += [c["to"] for c in plan.cascade_planned if c.get("to")]
+        return ids
+    return [plan.target]
+
+
+def _collect_inline_outcomes(
+    gc: GraphClient, ids: list[str], *, axis: str
+) -> list[InlineReviewResult]:
+    """Read the post-review state of *ids* and classify each as accepted or not.
+
+    Acceptance is judged on the axis the edit steered: a rename/hint-name edit
+    accepts when ``name_stage='accepted'``; a docs edit accepts when
+    ``docs_stage='accepted'``.  No score comparison here — the review pool has
+    already applied the gate and written the stage; this only surfaces it.
+    """
+    rows = gc.query(
+        """
+        // EDIT_INLINE_COLLECT_OUTCOMES
+        MATCH (sn:StandardName)
+        WHERE sn.id IN $ids
+        RETURN sn.id AS id,
+               sn.name_stage AS name_stage,
+               sn.docs_stage AS docs_stage,
+               sn.edit_status AS edit_status,
+               sn.reviewer_score_name AS reviewer_score_name,
+               sn.reviewer_score_docs AS reviewer_score_docs
+        """,
+        ids=ids,
+    )
+    by_id = {r["id"]: r for r in rows}
+    results: list[InlineReviewResult] = []
+    for _id in ids:
+        r = by_id.get(_id, {})
+        name_stage = r.get("name_stage")
+        docs_stage = r.get("docs_stage")
+        accepted = (
+            docs_stage == "accepted" if axis == "docs" else name_stage == "accepted"
+        )
+        results.append(
+            InlineReviewResult(
+                id=_id,
+                name_stage=name_stage,
+                docs_stage=docs_stage,
+                edit_status=r.get("edit_status"),
+                reviewer_score_name=r.get("reviewer_score_name"),
+                reviewer_score_docs=r.get("reviewer_score_docs"),
+                accepted=accepted,
+            )
+        )
+    return results
+
+
+def _run_scoped_pipeline(
+    *,
+    run_id: str,
+    skip_generate: bool,
+    cost_limit: float,
+    min_score: float | None,
+    rotation_cap: int | None,
+    pending_fn: Any | None,
+) -> Any:
+    """Drive :func:`run_sn_pools` scoped to a single edit's ``run_id``.
+
+    Runs the SAME six-pool orchestrator a normal ``sn run`` uses, so the
+    inline review clears exactly the pool's gates (P2 parity) — there is no
+    edit-privileged accept path.  ``scope_run_id`` restricts every pool claim
+    to the SN(s) this edit stamped, so the review never touches the backlog.
+
+    ``skip_generate`` is ``True`` for rename/docs edits (their candidate is
+    already composed — this is ``--only review`` semantics: review + refine
+    pools run, generation does not) and ``False`` for hint edits (which reset
+    the producing sources for regeneration and therefore need the generate
+    pool too).  The clear-gate footgun does not apply: it is a CLI-level guard
+    on the ``sn run`` command, not part of ``run_sn_pools``, so an inline
+    review — which calls ``run_sn_pools`` directly — never trips it.
+    """
+    import asyncio
+
+    from imas_codex.standard_names.loop import run_sn_pools
+
+    async def _main() -> Any:
+        return await run_sn_pools(
+            cost_limit=cost_limit,
+            min_score=min_score,
+            rotation_cap=rotation_cap,
+            scope_run_id=run_id,
+            skip_generate=skip_generate,
+            pending_fn=pending_fn,
+        )
+
+    return asyncio.run(_main())
+
+
+def run_inline_review(
+    plan: EditPlan,
+    *,
+    cost_limit: float,
+    min_score: float | None = None,
+    rotation_cap: int | None = None,
+    pending_fn: Any | None = None,
+    gc: GraphClient | None = None,
+) -> InlineReviewOutcome:
+    """Review a just-staged ``sn edit`` inline, scoped to its ``run_id``.
+
+    After :func:`apply_edit` stages a successor, this runs the review pipeline
+    over exactly that edit's scope and reports whether it landed — so a single
+    ``sn edit`` invocation stages *and* reviews, with no follow-up ``sn run``.
+
+    The gate is honoured with no exception: the scoped pool scores the
+    successor and writes ``name_stage``/``docs_stage`` itself; a below-threshold
+    or refine-exhausted successor stays un-accepted and is reported as such
+    (``accepted=False`` with its score).  A failed review is a result, not an
+    error to paper over — the caller decides how to signal it.
+
+    Returns an :class:`InlineReviewOutcome`.  When *plan* did not apply (dry-run,
+    blocked, or no ``run_id``), returns ``ran=False`` with no results — nothing
+    was staged to review.
+    """
+    if not (plan.applied and plan.run_id and plan.blocked is None):
+        return InlineReviewOutcome(
+            ran=False, run_id=plan.run_id, cost=0.0, stop_reason=None, results=[]
+        )
+
+    # rename/docs edits ride --only review (the candidate is composed); a hint
+    # edit reset its sources and must regenerate, so keep the generate pool.
+    skip_generate = plan.entry in ("review_name", "review_docs")
+
+    summary = _run_scoped_pipeline(
+        run_id=plan.run_id,
+        skip_generate=skip_generate,
+        cost_limit=cost_limit,
+        min_score=min_score,
+        rotation_cap=rotation_cap,
+        pending_fn=pending_fn,
+    )
+
+    owns_gc = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        results = _collect_inline_outcomes(gc, _inline_review_ids(plan), axis=plan.axis)
+    finally:
+        if owns_gc:
+            gc.close()
+
+    return InlineReviewOutcome(
+        ran=True,
+        run_id=plan.run_id,
+        cost=float(getattr(summary, "cost_spent", 0.0) or 0.0),
+        stop_reason=getattr(summary, "stop_reason", None),
+        results=results,
     )

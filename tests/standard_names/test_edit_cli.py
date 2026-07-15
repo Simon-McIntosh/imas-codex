@@ -118,6 +118,7 @@ def test_scope_self_maps_to_only_self():
                 "because",
                 "--scope",
                 "self",
+                "--stage-only",
             ],
         )
     assert result.exit_code == 0, result.output
@@ -142,6 +143,7 @@ def test_scope_family_and_subtree_pass_through():
                     "because",
                     "--scope",
                     scope_flag,
+                    "--stage-only",
                 ],
             )
         assert result.exit_code == 0, result.output
@@ -163,6 +165,7 @@ def test_default_scope_is_none():
                 "clarify",
                 "--reason",
                 "because",
+                "--stage-only",
             ],
         )
     assert result.exit_code == 0, result.output
@@ -253,6 +256,7 @@ def test_successful_apply_prints_successor_and_followthrough_hint():
                 "ion_temperature",
                 "--reason",
                 "because",
+                "--stage-only",
             ],
         )
     assert result.exit_code == 0, result.output
@@ -282,6 +286,7 @@ def test_cascade_table_rendered_for_family_scope():
                 "because",
                 "--scope",
                 "family",
+                "--stage-only",
             ],
         )
     assert result.exit_code == 0, result.output
