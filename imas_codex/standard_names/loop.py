@@ -638,6 +638,7 @@ async def _seed_domain_sources(
                     "dd_path": path,
                     "batch_key": batch.group_key,
                     "status": "extracted",
+                    "dd_version": batch.dd_version,
                     "description": item.get("description")
                     or item.get("documentation")
                     or "",

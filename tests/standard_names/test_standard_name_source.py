@@ -58,6 +58,18 @@ class TestStandardNameSourceSchema:
             "embedding",
             "embedded_at",
             "description",
+            "dd_version",
+            "dd_snapshot_pinned",
+            "dd_documentation",
+            "dd_parent_path",
+            "dd_parent_documentation",
+            "dd_data_type",
+            "dd_unit",
+            "dd_coordinates",
+            "dd_lifecycle_status",
+            "dd_lifecycle_version",
+            "enhanced_description",
+            "enhancement_kind",
         }
         assert expected.issubset(fields), f"Missing fields: {expected - fields}"
 
@@ -87,7 +99,33 @@ class TestMergeStandardNameSources:
         if return_value is None:
             return_value = [{"affected": 1}]
         mock_ctx = MagicMock()
-        mock_ctx.query.return_value = return_value
+
+        def _query(cypher, **params):
+            if "source.id AS existing_id" in cypher:
+                return [
+                    {
+                        "id": source_id,
+                        "existing_id": None,
+                        "dd_version": None,
+                        "dd_documentation": None,
+                        "dd_snapshot_pinned": None,
+                    }
+                    for source_id in params["ids"]
+                ]
+            if "MATCH (version:DDVersion" in cypher:
+                return [
+                    {
+                        "id": request["id"],
+                        "dd_version": request["dd_version"],
+                        "dd_documentation": "Raw documentation",
+                        "dd_data_type": "FLT_0D",
+                        "dd_coordinates": [],
+                    }
+                    for request in params["requests"]
+                ]
+            return return_value
+
+        mock_ctx.query.side_effect = _query
         patcher = patch("imas_codex.standard_names.graph_ops.GraphClient")
         mock_gc_cls = patcher.start()
         mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
@@ -136,11 +174,12 @@ class TestMergeStandardNameSources:
                         "dd_path": "eq/ts/p1d/psi",
                         "batch_key": "test",
                         "status": "extracted",
+                        "dd_version": "4.1.0",
                     }
                 ]
             )
             assert result == 1
-            mock_ctx.query.assert_called_once()
+            assert mock_ctx.query.call_count == 3
         finally:
             patcher.stop()
 
@@ -193,6 +232,7 @@ class TestMergeStandardNameSources:
                         "dd_path": f"path/{i}",
                         "batch_key": "test",
                         "status": "extracted",
+                        "dd_version": "4.1.0",
                     }
                     for i in range(7)
                 ]

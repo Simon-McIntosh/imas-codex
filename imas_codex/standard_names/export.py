@@ -32,6 +32,9 @@ from imas_codex.standard_names.canonical import (
 from imas_codex.standard_names.catalog_ordering import order_entries_by_hierarchy
 from imas_codex.standard_names.domain_priority import pick_primary_domain
 from imas_codex.standard_names.protection import PROTECTED_FIELDS
+from imas_codex.standard_names.provenance_lifecycle import (
+    fetch_public_semantic_sources,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -790,39 +793,12 @@ def _fetch_sources_for_entry(
 ) -> list[dict[str, Any]] | None:
     """Query graph for StandardNameSource nodes that produced this name.
 
-    Returns the public semantic source projection: ``dd_path`` or
-    ``signal_id`` plus optional value-estimator ``provenance``. Operational
-    ledger ids, statuses and source types remain internal.
+    Returns the public semantic source projection, including a DD source's
+    pinned version and graph-held documentation/type/unit/coordinate/lifecycle
+    context. Operational ledger ids, statuses and edit history remain internal.
     Returns ``None`` if no sources are found.
     """
-    rows = gc.query(
-        """
-        MATCH (sn:StandardName {id: $name})<-[:PRODUCED_NAME]-(src:StandardNameSource)
-        OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(n:IMASNode)
-        OPTIONAL MATCH (src)-[:FROM_SIGNAL]->(s:FacilitySignal)
-        RETURN n.id   AS dd_path,
-               s.id   AS signal_id,
-               src.provenance AS provenance
-        ORDER BY src.id
-        """,
-        name=name,
-    )
-    if not rows:
-        return None
-
-    sources: list[dict[str, Any]] = []
-    for row in rows:
-        src: dict[str, Any] = {}
-        if row.get("dd_path"):
-            src["dd_path"] = row["dd_path"]
-        if row.get("signal_id"):
-            src["signal_id"] = row["signal_id"]
-        # provenance is optional — emit only when the source carries it.
-        if row.get("provenance"):
-            src["provenance"] = row["provenance"]
-        if src:
-            sources.append(src)
-
+    sources = fetch_public_semantic_sources(gc, name)
     return sources or None
 
 

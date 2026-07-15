@@ -3962,6 +3962,29 @@ def sn_provenance_cleanup(apply: bool, force: bool) -> None:
         console.print(f"Compacted {len(safe)} unapproved candidates.")
 
 
+@sn.command("provenance-backfill-report")
+def sn_provenance_backfill_report() -> None:
+    """Report legacy DD sources that cannot be safely snapshot-backfilled."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.provenance_lifecycle import (
+        report_unpinned_dd_sources,
+    )
+
+    with GraphClient() as gc:
+        rows = report_unpinned_dd_sources(gc)
+    console.print(
+        f"DD sources requiring provenance migration: {len(rows)} "
+        "([yellow]read-only; no values inferred[/yellow])"
+    )
+    for row in rows:
+        missing = ", ".join(row.get("missing_fields") or [])
+        console.print(
+            f"  {row.get('source_id')} path={row.get('dd_path') or '—'} "
+            f"version={row.get('dd_version') or 'unprovable'} "
+            f"missing={missing or '—'} reason={row.get('reason')}"
+        )
+
+
 @sn.command("review")
 @click.option("--ids", default=None, help="Scope to names linked to specific IDS")
 @click.option(

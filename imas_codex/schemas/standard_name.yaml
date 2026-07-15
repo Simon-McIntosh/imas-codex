@@ -1745,6 +1745,36 @@ classes:
           queried for paths, units, and documentation when this source
           was first extracted. Plain string provenance, not a relationship.
         range: string
+      dd_documentation:
+        description: >-
+          Immutable raw DD documentation of the source leaf at extraction.
+          Authoritative source text; never replaced by LLM enrichment.
+      dd_snapshot_pinned:
+        description: >-
+          True only when the immutable DD snapshot was captured atomically at
+          source creation from the exact current dd_version.
+        range: boolean
+      dd_parent_path:
+        description: Meaningful direct parent path captured with the DD leaf.
+      dd_parent_documentation:
+        description: Immutable raw DD documentation of the direct parent.
+      dd_data_type:
+        description: Immutable DD data type captured at extraction.
+      dd_unit:
+        description: Immutable normalized DD unit captured at extraction.
+      dd_coordinates:
+        description: Immutable coordinate path/spec identifiers at extraction.
+        multivalued: true
+      dd_lifecycle_status:
+        description: Immutable DD lifecycle status captured at extraction.
+      dd_lifecycle_version:
+        description: DD version in which the captured lifecycle status was set.
+      enhanced_description:
+        description: >-
+          Non-authoritative graph enrichment captured for semantic context.
+          Kept separate from raw DD documentation.
+      enhancement_kind:
+        description: Kind of enhancement captured (template or llm).
       physics_domain:
         description: >-
           Physics domain of this source entity at extraction time. For DD

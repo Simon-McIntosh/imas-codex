@@ -5530,6 +5530,97 @@ def write_enrichment_results(
 _VALID_PIPELINE_SOURCE_TYPES = {"dd", "signals"}
 
 
+def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]:
+    """Capture immutable DD semantics while the requested version is current.
+
+    ``IMASNode`` is a mutable current-version projection, so it may only be
+    sampled when its current ``DDVersion`` exactly matches the version supplied
+    by extraction. Existing source nodes are never backfilled here: their
+    original snapshot cannot be reconstructed safely after the fact.
+    """
+    prepared = [dict(source) for source in sources]
+    requests = [
+        {
+            "id": source["id"],
+            "path": source.get("dd_path"),
+            "dd_version": source.get("dd_version"),
+        }
+        for source in prepared
+        if source.get("source_type") == "dd"
+    ]
+    for request in requests:
+        if not request["dd_version"]:
+            raise ValueError(
+                f"DD source {request['path']!r} has no exact dd_version; "
+                "source creation must never infer latest"
+            )
+    if not requests:
+        return prepared
+
+    existing = gc.query(
+        """
+        UNWIND $ids AS id
+        OPTIONAL MATCH (source:StandardNameSource {id: id})
+        RETURN id, source.id AS existing_id, source.dd_version AS dd_version,
+               source.dd_documentation AS dd_documentation,
+               source.dd_snapshot_pinned AS dd_snapshot_pinned
+        """,
+        ids=[request["id"] for request in requests],
+    )
+    by_existing = {row["id"]: row for row in existing or []}
+    for request in requests:
+        row = by_existing.get(request["id"])
+        if row and row.get("existing_id") and not row.get("dd_snapshot_pinned"):
+            raise ValueError(
+                f"existing DD source {request['id']!r} has no provable immutable "
+                "snapshot; run the provenance backfill report"
+            )
+        if (
+            row
+            and row.get("existing_id")
+            and row.get("dd_version") != request["dd_version"]
+        ):
+            raise ValueError(
+                f"existing DD source {request['id']!r} is pinned to "
+                f"{row.get('dd_version')!r}, not {request['dd_version']!r}"
+            )
+
+    snapshots = gc.query(
+        """
+        UNWIND $requests AS request
+        MATCH (version:DDVersion {id: request.dd_version, is_current: true})
+        MATCH (node:IMASNode {id: request.path})
+        OPTIONAL MATCH (node)-[:HAS_PARENT]->(parent:IMASNode)
+        OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+        OPTIONAL MATCH (node)-[:HAS_COORDINATE]->(coordinate)
+        RETURN request.id AS id, version.id AS dd_version,
+               node.documentation AS dd_documentation,
+               parent.id AS dd_parent_path,
+               parent.documentation AS dd_parent_documentation,
+               node.data_type AS dd_data_type,
+               coalesce(node.unit, unit.id) AS dd_unit,
+               collect(DISTINCT coordinate.id) AS dd_coordinates,
+               node.lifecycle_status AS dd_lifecycle_status,
+               node.lifecycle_version AS dd_lifecycle_version,
+               node.description AS enhanced_description,
+               node.enrichment_source AS enhancement_kind
+        """,
+        requests=requests,
+    )
+    by_id = {row["id"]: dict(row) for row in snapshots or []}
+    missing = sorted(
+        request["id"] for request in requests if request["id"] not in by_id
+    )
+    if missing:
+        raise ValueError(
+            "cannot capture exact DD snapshot for source(s): " + ", ".join(missing)
+        )
+    for source in prepared:
+        if source.get("source_type") == "dd":
+            source.update(by_id[source["id"]])
+    return prepared
+
+
 def merge_standard_name_sources(
     sources: list[dict],
     *,
@@ -5538,7 +5629,9 @@ def merge_standard_name_sources(
     """Batch MERGE StandardNameSource nodes.
 
     Each source dict must have: id, source_type, source_id, batch_key, status.
-    Optional: description, dd_path (for DD sources), signal (for signal sources).
+    DD sources additionally require ``dd_path`` and the exact ``dd_version``;
+    their immutable semantic snapshot is captured centrally here. Optional:
+    description and signal (for signal sources).
 
     On CREATE: sets all fields.
     On MATCH (existing node):
@@ -5586,6 +5679,7 @@ def merge_standard_name_sources(
         return 0
 
     with GraphClient() as gc:
+        sources = _pin_dd_source_snapshots(gc, sources)
         result = gc.query(
             """
             UNWIND $sources AS src
@@ -5599,12 +5693,22 @@ def merge_standard_name_sources(
                 sns.physics_domain = src.physics_domain,
                 sns.dd_version = src.dd_version,
                 sns.provenance = src.provenance,
+                sns.dd_documentation = src.dd_documentation,
+                sns.dd_snapshot_pinned = true,
+                sns.dd_parent_path = src.dd_parent_path,
+                sns.dd_parent_documentation = src.dd_parent_documentation,
+                sns.dd_data_type = src.dd_data_type,
+                sns.dd_unit = src.dd_unit,
+                sns.dd_coordinates = src.dd_coordinates,
+                sns.dd_lifecycle_status = src.dd_lifecycle_status,
+                sns.dd_lifecycle_version = src.dd_lifecycle_version,
+                sns.enhanced_description = src.enhanced_description,
+                sns.enhancement_kind = src.enhancement_kind,
                 sns.attempt_count = 0
             ON MATCH SET
                 sns.batch_key = src.batch_key,
                 sns.description = coalesce(src.description, sns.description),
                 sns.physics_domain = coalesce(src.physics_domain, sns.physics_domain),
-                sns.dd_version = coalesce(src.dd_version, sns.dd_version),
                 sns.provenance = coalesce(src.provenance, sns.provenance),
                 sns.status = CASE
                     WHEN $force THEN 'extracted'

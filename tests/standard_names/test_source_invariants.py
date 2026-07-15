@@ -30,6 +30,41 @@ import pytest
 
 def _call_merge(sources, mock_gc, *, force=False):
     """Call merge_standard_name_sources with a mocked GraphClient."""
+    final_result = mock_gc.query.return_value
+
+    def _query(cypher, **params):
+        if "source.dd_version AS dd_version" in cypher:
+            return [
+                {
+                    "id": source_id,
+                    "existing_id": None,
+                    "dd_version": None,
+                    "dd_documentation": None,
+                    "dd_snapshot_pinned": None,
+                }
+                for source_id in params["ids"]
+            ]
+        if "MATCH (version:DDVersion" in cypher:
+            return [
+                {
+                    "id": request["id"],
+                    "dd_version": request["dd_version"],
+                    "dd_documentation": "Raw DD documentation",
+                    "dd_parent_path": "core_profiles",
+                    "dd_parent_documentation": "Core profiles",
+                    "dd_data_type": "FLT_0D",
+                    "dd_unit": "1",
+                    "dd_coordinates": [],
+                    "dd_lifecycle_status": "active",
+                    "dd_lifecycle_version": "4.1.0",
+                    "enhanced_description": "Enhanced context",
+                    "enhancement_kind": "llm",
+                }
+                for request in params["requests"]
+            ]
+        return final_result
+
+    mock_gc.query.side_effect = _query
     with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
@@ -74,6 +109,7 @@ def _dd_source(i: int, *, dd_path: str | None = "auto") -> dict:
         "batch_key": "test-batch",
         "status": "extracted",
         "description": f"Test field {i}",
+        "dd_version": "4.1.0",
     }
     if path is not None:
         src["dd_path"] = path
@@ -96,7 +132,7 @@ class TestBirthInvariant:
         result = _call_merge([_dd_source(0)], mock_gc)
 
         # Graph was called (source was not filtered)
-        mock_gc.query.assert_called_once()
+        assert mock_gc.query.call_count == 3
         assert result == 1
 
     def test_cypher_includes_from_dd_path(self):
@@ -106,7 +142,7 @@ class TestBirthInvariant:
 
         _call_merge([_dd_source(i) for i in range(5)], mock_gc)
 
-        cypher = mock_gc.query.call_args[0][0]
+        cypher = mock_gc.query.call_args_list[-1].args[0]
         assert "FROM_DD_PATH" in cypher, "Cypher must create FROM_DD_PATH edge"
         assert "IMASNode" in cypher, "Cypher must reference IMASNode"
 
@@ -148,14 +184,24 @@ class TestBirthInvariant:
         result = _call_merge(sources, mock_gc)
 
         # Graph is still called (3 valid sources remain)
-        mock_gc.query.assert_called_once()
+        assert mock_gc.query.call_count == 3
         # Only valid sources sent
-        sent = mock_gc.query.call_args.kwargs.get(
-            "sources", mock_gc.query.call_args[1].get("sources", [])
-        )
+        write_call = mock_gc.query.call_args_list[-1]
+        sent = write_call.kwargs.get("sources", write_call[1].get("sources", []))
         assert all(s.get("dd_path") for s in sent), (
             "All sources forwarded to the graph must have a dd_path"
         )
+        assert all(s.get("dd_version") == "4.1.0" for s in sent)
+        assert all(s.get("dd_documentation") == "Raw DD documentation" for s in sent)
+        assert all(s.get("dd_data_type") == "FLT_0D" for s in sent)
+        assert all(s.get("enhancement_kind") == "llm" for s in sent)
+        write_cypher = write_call.args[0]
+        assert "ON CREATE SET" in write_cypher
+        assert "sns.dd_documentation = src.dd_documentation" in write_cypher
+        assert "sns.dd_snapshot_pinned = true" in write_cypher
+        on_match = write_cypher.split("ON MATCH SET", 1)[1]
+        assert "sns.dd_documentation" not in on_match
+        assert "sns.dd_version =" not in on_match
         assert result == 3
 
     def test_all_orphan_batch_returns_zero_without_graph_call(self):

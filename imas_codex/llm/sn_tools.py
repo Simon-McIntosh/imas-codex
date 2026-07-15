@@ -637,9 +637,11 @@ def _trace_standard_name_provenance(
         lines.append("No semantic sources recorded.")
     for source in sources:
         source_id = source.get("dd_path") or source.get("signal_id") or "unknown"
-        facet = source.get("provenance")
+        facet = source.get("semantic_facet")
         suffix = f" ({facet})" if facet else ""
-        lines.append(f"- `{source_id}`{suffix}")
+        version = source.get("dd_version")
+        pinned = f" [DD {version}]" if version else ""
+        lines.append(f"- `{source_id}`{pinned}{suffix}")
     lines.extend(["", "### Internal change history"])
     changes = trace["internal_changes"]
     if not changes:

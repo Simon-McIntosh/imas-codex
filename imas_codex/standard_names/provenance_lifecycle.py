@@ -11,7 +11,135 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
+from urllib.parse import quote
 from uuid import uuid4
+
+_DD_DOCS_ROOT = "https://imas-data-dictionary.readthedocs.io/en"
+
+
+def official_dd_documentation_url(dd_version: str, dd_path: str) -> str:
+    """Build the official version-pinned IDS reference URL for a DD path."""
+    if not dd_version or not dd_path:
+        raise ValueError("both dd_version and dd_path are required")
+    ids = dd_path.split("/", 1)[0]
+    version_part = quote(dd_version, safe=".-")
+    ids_part = quote(ids, safe="_-")
+    anchor = quote(dd_path.replace("/", "-"), safe="_-")
+    return f"{_DD_DOCS_ROOT}/{version_part}/generated/ids/{ids_part}.html#{anchor}"
+
+
+def fetch_public_semantic_sources(gc: Any, name: str) -> list[dict[str, Any]]:
+    """Return graph-held DD/signal semantics without operational history.
+
+    DD sources are pinned to the version recorded when the source was extracted.
+    A missing version is an export error: callers must never infer or link to the
+    latest DD. Authoritative raw DD content and non-authoritative enhancement
+    context are separate public objects. Internal model/hash/cost/timestamps and
+    edit history are never selected.
+    """
+    rows = gc.query(
+        """
+        MATCH (sn:StandardName {id: $name})<-[:PRODUCED_NAME]-(src:StandardNameSource)
+        OPTIONAL MATCH (src)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+        RETURN CASE WHEN src.source_type = 'dd' THEN src.source_id END AS dd_path,
+               src.dd_version AS dd_version,
+               src.dd_snapshot_pinned AS dd_snapshot_pinned,
+               src.dd_documentation AS leaf_documentation,
+               src.dd_parent_path AS parent_path,
+               src.dd_parent_documentation AS parent_documentation,
+               src.dd_data_type AS data_type,
+               src.dd_unit AS unit,
+               src.dd_coordinates AS coordinates,
+               src.dd_lifecycle_status AS lifecycle_status,
+               src.dd_lifecycle_version AS lifecycle_version,
+               src.enhanced_description AS enhanced_description,
+               src.enhancement_kind AS enhancement_kind,
+               signal.id AS signal_id,
+               src.provenance AS semantic_facet
+        ORDER BY dd_path, signal_id
+        """,
+        name=name,
+    )
+    sources: list[dict[str, Any]] = []
+    for row in rows or []:
+        if row.get("dd_path"):
+            dd_version = row.get("dd_version")
+            if not dd_version:
+                raise ValueError(
+                    f"DD source {row['dd_path']!r} for {name!r} has no pinned "
+                    "dd_version; refusing to infer the latest version"
+                )
+            if not row.get("dd_snapshot_pinned"):
+                raise ValueError(
+                    f"DD source {row['dd_path']!r} for {name!r} has no provable "
+                    "immutable snapshot; refusing public projection"
+                )
+            source: dict[str, Any] = {
+                "dd_path": row["dd_path"],
+                "dd_version": dd_version,
+                "dd_documentation_url": official_dd_documentation_url(
+                    dd_version, row["dd_path"]
+                ),
+            }
+            authoritative = {
+                "leaf": row.get("leaf_documentation"),
+                "parent_path": row.get("parent_path"),
+                "parent": row.get("parent_documentation"),
+                "data_type": row.get("data_type"),
+                "unit": row.get("unit"),
+                "coordinates": [
+                    value for value in row.get("coordinates") or [] if value
+                ],
+                "lifecycle_status": row.get("lifecycle_status"),
+                "lifecycle_version": row.get("lifecycle_version"),
+            }
+            source["dd_documentation"] = {
+                key: value
+                for key, value in authoritative.items()
+                if value is not None and value != []
+            }
+            enhanced = {
+                "description": row.get("enhanced_description"),
+                "kind": row.get("enhancement_kind"),
+            }
+            enhanced = {key: value for key, value in enhanced.items() if value}
+            if enhanced:
+                source["enhanced_context"] = enhanced
+            if row.get("semantic_facet") is not None:
+                source["semantic_facet"] = row["semantic_facet"]
+            sources.append(source)
+        elif row.get("signal_id"):
+            source = {"signal_id": row["signal_id"]}
+            if row.get("semantic_facet") is not None:
+                source["semantic_facet"] = row["semantic_facet"]
+            sources.append(source)
+    return sources
+
+
+def report_unpinned_dd_sources(gc: Any) -> list[dict[str, Any]]:
+    """Report legacy DD sources whose exact historical snapshot is unprovable.
+
+    This audit is deliberately read-only. Mutable current IMASNode properties
+    are not proposed as a backfill because doing so would silently guess that
+    they match the source's original extraction version.
+    """
+    rows = gc.query(
+        """
+        MATCH (source:StandardNameSource {source_type: 'dd'})
+        WHERE coalesce(source.dd_snapshot_pinned, false) = false
+        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+        RETURN source.id AS source_id, dd.id AS dd_path,
+               source.dd_version AS dd_version,
+               [field IN ['dd_version', 'dd_documentation', 'dd_data_type']
+                WHERE source[field] IS NULL] AS missing_fields,
+               CASE WHEN source.dd_version IS NULL
+                    THEN 'original_dd_version_unprovable'
+                    ELSE 'pinned_version_snapshot_incomplete' END AS reason,
+               false AS safe_to_backfill
+        ORDER BY source.id
+        """
+    )
+    return [dict(row) for row in rows or []]
 
 
 def retarget_standard_name_sources(
@@ -290,17 +418,7 @@ def trace_standard_name_provenance(
     max_depth: int = 10,
 ) -> dict[str, Any]:
     """Return explicitly requested semantic sources and internal history."""
-    source_rows = gc.query(
-        """
-        MATCH (sn:StandardName {id: $name})<-[:PRODUCED_NAME]-(source:StandardNameSource)
-        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-        OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
-        RETURN dd.id AS dd_path, signal.id AS signal_id,
-               source.provenance AS provenance
-        ORDER BY coalesce(dd.id, signal.id)
-        """,
-        name=name,
-    )
+    semantic_sources = fetch_public_semantic_sources(gc, name)
     change_rows = gc.query(
         """
         MATCH (sn:StandardName {id: $name})-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange)
@@ -314,7 +432,7 @@ def trace_standard_name_provenance(
     )
     result: dict[str, Any] = {
         "name": name,
-        "semantic_sources": [dict(row) for row in source_rows or []],
+        "semantic_sources": semantic_sources,
         "internal_changes": [dict(row) for row in change_rows or []],
     }
     if include_reviews:

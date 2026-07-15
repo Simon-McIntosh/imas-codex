@@ -111,8 +111,10 @@ async def _seed_explicit_paths(
     that :func:`claim_generate_name_batch` would return.
     """
     from imas_codex.graph.client import GraphClient
+    from imas_codex.settings import get_dd_version
     from imas_codex.standard_names.graph_ops import merge_standard_name_sources
 
+    dd_version = get_dd_version()
     # Build SNS dicts for merge
     sources = []
     for path in paths:
@@ -125,6 +127,7 @@ async def _seed_explicit_paths(
                 "dd_path": path,
                 "batch_key": ids_name,
                 "status": "extracted",
+                "dd_version": dd_version,
                 "description": "",
             }
         )
@@ -171,7 +174,7 @@ async def _seed_explicit_paths(
 
     dd_meta = await asyncio.to_thread(_get_dd_meta)
     for item in items:
-        item["dd_version"] = dd_meta.get("dd_version")
+        item["dd_version"] = dd_meta.get("dd_version") or dd_version
         item["cocos_version"] = dd_meta.get("cocos_version")
 
     return items
@@ -222,7 +225,9 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
         # Flatten all batch items into a single list for pool compose
         all_items = []
         for batch in batches:
-            all_items.extend(batch.items)
+            for item in batch.items:
+                item.setdefault("dd_version", batch.dd_version)
+                all_items.append(item)
 
         # Create SNS nodes for all extracted items
         sources = []
@@ -239,6 +244,7 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
                     "dd_path": path,
                     "batch_key": ids_name,
                     "status": "extracted",
+                    "dd_version": item.get("dd_version"),
                     "description": item.get("description", ""),
                     "physics_domain": item.get("physics_domain"),
                 }
