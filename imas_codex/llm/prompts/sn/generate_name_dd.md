@@ -79,8 +79,8 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `energy_due_to_impurity_radiation_in_halo_region` | `halo_region_radiated_energy_due_to_impurity_radiation` | Region qualifiers go in the subject prefix, not after `due_to_<process>` |
 | `vertical_coordinate_of_outline_point` | `vertical_outline` | **Enumeration is a coordinate, not a name** — outline vertices are an ordinal array of ONE geometry; collapse to `radial_outline` / `vertical_outline` (`base_token=outline`, axis as `coordinate` projection). The vertex index lives in the DD path; emit every vertex path in `dd_paths`. Never encode `outline_point` |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
-| `x1_coordinate_of_neutron_detector_geometry_outline` | `x1_coordinate` | **Local-coordinate axes are DISTINCT directions, not ordinals** — DD `x1`/`x2`/`x3` are ORTHOGONAL directions of a local sensor frame. Use the REGISTERED carriers `x1_coordinate` / `x2_coordinate` / `x3_coordinate` (`base_kind=geometry`); keep them as separate names (different axes). `first_coordinate` / `second_coordinate` are unregistered → gap. Drop the detector DD-tree prefix |
-| `x2_width_of_bolometer_detector_aperture` | `x2_coordinate` | Same rule — `x2` → registered carrier `x2_coordinate`, NOT `second_coordinate`. The detector type is DD context, not part of the name |
+| `x1_coordinate_of_neutron_detector_geometry_outline` | `first_local_tangential_coordinate_of_neutron_detector` | **Local tangent axes are DISTINCT semantic directions, not storage labels** — map source-local X1/X2 to the REGISTERED carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` (`base_kind=geometry`), retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` |
+| `vertical_front_surface_radius_of_optical_element` for reflector X2 curvature | `second_local_tangential_front_surface_radius_of_reflector` | X2 is an object-local surface tangent, not machine vertical. Keep `reflector`, omit diagnostic/channel provenance, and do not claim a principal-curvature direction without source evidence |
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component / transformation / reducer tokens come BEFORE the base as a leading qualifier prefix. Compare ★0.95 `parallel_fast_electron_pressure` |
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector_of_camera` | **Compound hardware identifiers** — a component of a device's orientation/direction unit vector is a locus-qualified coordinate. Drop stacked intermediate hardware tokens but KEEP the owning device as the `_of_<device>` locus. A device direction unit vector is a machine-frame Cartesian vector (triple `x`, `y`, `z`), so a `z` leaf is the `z` axis. `vertical` is the cylindrical Z (`radial`, `toroidal`, `vertical`) — never mix frames. Locus-less `z_direction_unit_vector` collapses every device's orientation to one name |
 | both `camera/direction/z` and `camera/up/z` → `z_direction_unit_vector` | distinct bases per vector | **Distinct vectors of one device get DISTINCT bases** — `direction` is the line-of-sight, `up` is the image-up vector: different physical vectors. Never name a non-pointing vector (image-up, ellipse axis) bare `direction`; name what the vector IS |
@@ -152,12 +152,13 @@ wall) — name it by that entity:
 
 Never name such a point by its ordinal (no `first_point`/`second_point` in the name).
 
-**Local sensor-frame axes x1/x2/x3 are NOT ordinal points — keep them
-DISTINCT.** DD `x1` / `x2` / `x3` are ORTHOGONAL local-coordinate DIRECTIONS of
-a sensor frame, not samples along one geometry. Use the REGISTERED carriers
-`x1_coordinate` / `x2_coordinate` / `x3_coordinate` (`base_token=x1_coordinate`,
-`base_kind=geometry`) — each axis is its OWN name. Do NOT collapse them, and do
-NOT use `first_coordinate` / `second_coordinate` (unregistered → vocab gap).
+**Object-local X1/X2 axes are tangent directions, not ordinal points or machine
+axes.** Map them to the REGISTERED semantic carriers
+`first_local_tangential_coordinate` / `second_local_tangential_coordinate`
+(`base_kind=geometry`) and keep each direction as its OWN name. Retain the
+intrinsic owning object where it changes the quantity. Do NOT emit
+`x1_coordinate` / `x2_coordinate`, call X2 `vertical`, or infer a principal
+curvature direction from an opaque local-axis label.
 
 ## Non-Nameable Paths — route to `skipped` (do NOT compose)
 
@@ -464,7 +465,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 
   - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
   - **Enumeration is a coordinate, not a name.** If the geometric position is an **ordinal point** (`first_point`/`second_point`/`third_point`/`point`/`<entity>_point`) or an `outline` vertex, the ordinal is an array index — COLLAPSE to the grandparent geometry carrier + axis: line-of-sight endpoints → `radial_line_of_sight` / `vertical_line_of_sight` (`base_token=line_of_sight`); outline vertices → `radial_outline` / `vertical_outline` (`base_token=outline`). Emit `dd_paths` covering EVERY ordinal sibling so they share the ONE name. Never put `first_point`/`second_point`/`outline_point` in the name; distinguish a point only by physical entity (`radial_position_of_aperture`, `radial_position_of_first_wall`), never by ordinal.
-  - **Local sensor axes x1/x2/x3 are DISTINCT directions, not ordinals** — use the registered carriers `x1_coordinate` / `x2_coordinate` / `x3_coordinate` (each its own name); never `first_coordinate`/`second_coordinate`.
+  - **Object-local X1/X2 axes are DISTINCT tangent directions, not storage-shaped name tokens** — use `first_local_tangential_coordinate` / `second_local_tangential_coordinate`, retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` or reinterpret X2 as machine `vertical`.
   - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
   - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}

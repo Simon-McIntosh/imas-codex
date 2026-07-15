@@ -31,6 +31,15 @@ def rendered_enrich_system() -> str:
     return render_prompt("sn/generate_docs_system", {})
 
 
+@pytest.fixture()
+def rendered_review_system() -> str:
+    """Render the name reviewer with the same closed grammar context."""
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.standard_names.context import build_compose_context
+
+    return render_prompt("sn/review_names_system", build_compose_context())
+
+
 class TestCoordinateGuidanceInComposeSystem:
     """Coordinate convention guidance must appear in the compose system prompt."""
 
@@ -69,6 +78,21 @@ class TestCoordinateGuidanceInComposeSystem:
     ) -> None:
         """Flux coordinates must be mentioned explicitly (no 'the standard')."""
         assert "flux coordinate" in rendered_compose_system.lower()
+
+    def test_directional_frame_semantics_present(
+        self, rendered_compose_system: str
+    ) -> None:
+        assert "`radial`" in rendered_compose_system
+        assert "means only the cylindrical" in rendered_compose_system
+        assert "flux_surface_normal" in rendered_compose_system
+        assert "perpendicular` remains relative to the" in rendered_compose_system
+
+    def test_local_tangent_semantics_present(
+        self, rendered_compose_system: str
+    ) -> None:
+        assert "first_local_tangential_coordinate" in rendered_compose_system
+        assert "second_local_tangential_coordinate" in rendered_compose_system
+        assert "never reinterpret the second tangent as" in rendered_compose_system
 
     def test_coordinate_guidance_in_static_prefix(
         self, rendered_compose_system: str
@@ -149,3 +173,17 @@ class TestCoordinateGuidanceInEnrichSystem:
             r"\hat{x}" in rendered_enrich_system
             or "Cartesian" in rendered_enrich_system
         )
+
+
+class TestCoordinateGuidanceInReviewSystem:
+    """The independent critic must reject the same frame regressions."""
+
+    def test_radial_and_flux_surface_normal_are_distinct(
+        self, rendered_review_system: str
+    ) -> None:
+        assert "`radial` is only cylindrical" in rendered_review_system
+        assert "cross-flux-surface vector projections require" in rendered_review_system
+
+    def test_local_x2_cannot_be_verticalised(self, rendered_review_system: str) -> None:
+        assert "`x1_coordinate` / `x2_coordinate`" in rendered_review_system
+        assert "silently verticalised" in rendered_review_system

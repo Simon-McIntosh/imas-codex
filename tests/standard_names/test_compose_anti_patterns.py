@@ -38,6 +38,8 @@ ANTI_GOOD_EXAMPLES = (
     "z_direction_unit_vector",
 )
 ANTI_HARDWARE_PROPERTY_EXEMPLAR = "area_of_rogowski_coil"
+LOCAL_AXIS_BAD_EXAMPLE = "vertical_front_surface_radius_of_optical_element"
+LOCAL_AXIS_GOOD_EXAMPLE = "second_local_tangential_front_surface_radius_of_reflector"
 
 
 @pytest.mark.parametrize("filename", ["generate_name_system.md"])
@@ -63,6 +65,12 @@ class TestSystemPromptInstrumentGallery:
         assert ANTI_HARDWARE_PROPERTY_EXEMPLAR in raw
         assert "intrinsic" in raw.lower()
 
+    def test_local_axis_semantic_replacement(self, filename: str) -> None:
+        raw = _load(filename)
+        assert "first_local_tangential_coordinate" in raw
+        assert "second_local_tangential_coordinate" in raw
+        assert "do not emit `x1_coordinate` / `x2_coordinate`" in raw
+
 
 @pytest.mark.parametrize(
     "filename", ["generate_name_dd.md", "generate_name_dd_names.md"]
@@ -86,6 +94,12 @@ class TestUserPromptAntiPatternRows:
         raw = _load(filename)
         assert bad in raw
         assert good in raw
+
+
+def test_dd_prompt_carries_reflector_local_axis_regression_pair() -> None:
+    raw = _load("generate_name_dd.md")
+    assert LOCAL_AXIS_BAD_EXAMPLE in raw
+    assert LOCAL_AXIS_GOOD_EXAMPLE in raw
 
 
 class TestSystemPromptInstrumentPlacement:

@@ -29,6 +29,25 @@ explicit basis tuple).
    $(\psi, \theta, \phi)$, $(s, \theta^*, \phi)$, etc. NEVER call them
    "the standard" or "the usual" flux coordinates.
 
+5. **Directional tokens have fixed frames.** In a standard name, `radial`
+   means only the cylindrical $\hat{R}$ component. A signed vector projection
+   normal to a magnetic flux surface uses `flux_surface_normal`, positive
+   toward increasing flux label. `perpendicular` remains relative to the
+   magnetic-field direction and is never a synonym for `flux_surface_normal`.
+   A scalar flux label or derivative with respect to one is a coordinate
+   quantity, not a unit-normal vector projection.
+
+6. **Object-local tangent axes use semantic ordinal directions.** When a DD
+   source calls two surface-tangent directions X1 and X2, map them to
+   `first_local_tangential` and `second_local_tangential`; for coordinate
+   carriers use `first_local_tangential_coordinate` and
+   `second_local_tangential_coordinate`. Never emit the storage-shaped labels
+   `x1_coordinate` or `x2_coordinate`, never reinterpret the second tangent as
+   machine `vertical`, and never call either direction principal unless the
+   source explicitly establishes a principal-curvature frame. Keep the
+   intrinsic owning object when it changes the quantity (for example,
+   `_of_reflector`), while diagnostic/channel hierarchy remains provenance.
+
 ### Required phrasing — ❌ / ✓ examples
 
 | ❌ Vague / wrong | ✓ Explicit / correct |
@@ -38,6 +57,8 @@ explicit basis tuple).
 | "machine cylindrical frame" (alone) | "machine cylindrical frame $(R, \phi, Z)$ where $R$ is major radius and $Z$ is vertical height" |
 | "in cylindrical coordinates $(R, Z, \phi)$" (claiming basis ordering) | "in the cylindrical $(R, \phi, Z)$ frame; outlines may be stored as 3-tuples $(R, Z, \phi)$" |
 | "the standard flux coordinate" | "the flux coordinate $\rho_\mathrm{tor,norm}$ (normalised toroidal flux radius)" |
+| "radial" for transport normal to a flux surface | "flux-surface-normal", positive toward increasing flux label |
+| "vertical" for a source-local X2 tangent | "second local tangential", retaining the intrinsic owning object |
 
 ### Enforcement
 

@@ -15,6 +15,8 @@ Standard Names are standalone, self-describing metadata labels. Each name must c
 
 Standard names are a **standalone semantic data model** — each gives a physical or geometrical quantity a crystal-clear, unambiguous identity including its function, coordinates, and sign conventions. They are **independent of any data dictionary** and must stand alone as canonical physics identifiers. **The name itself must be semantically self-describing**: a reader must determine what quantity is being named from the name string alone.
 
+{% include "sn/_coordinate_conventions.md" %}
+
 Work like a code reviewer, not a co-author. Be specific, cite the OTHER names that informed your judgement, and prefer **dock the score and explain why** over silent acceptance.
 
 The candidate was produced in **name-only mode** — the generator emitted only the standard name plus grammar fields, with no freshly-written documentation. Do **not** penalise missing or terse `description`/`documentation`; documentation is filled in by a later enrichment pass.
@@ -87,6 +89,7 @@ If ISN validation issues are present, judge whether each is a real defect or fal
 - **COCOS sanity**: if a `cocos_label` is given, the name should be a quantity for which a COCOS transformation makes sense (psi, B-components, currents). Bare scalars without COCOS implications must not carry a COCOS label.
 - **Subject/component/position correctness**: would a domain expert decompose this the same way given the DD provenance?
 - **Source-fidelity (CRITICAL — hard cap the whole dimension at ≤ 6/20):** every locus / subject / feature token in the name MUST denote the SAME physical feature named in the DD `source_paths`. A token that names a *related-but-different* feature than the source path is a critical provenance defect — even when the name is grammatically valid and reads plausibly. Walk each locus/feature token against the DD path segments and reject substitutions: e.g. a source path `.../strike_point_inner_r` names the **inner strike point**, so `radial_coordinate_of_inner_divertor_target` substitutes a different feature (a divertor *target* is a surface, a strike *point* is a point — not the same quantity) and MUST be capped ≤ 6/20 with the mismatch cited. This is the **#1 silent failure**: when the generator cannot express the exact DD feature with a registered token, it substitutes the nearest registered one and the name looks fine. Your job is to catch it. The correct outcome for an inexpressible feature is a **vocab-gap**, never a plausible substitution — dock hard and name the mismatched token.
+- **Frame fidelity (CRITICAL):** `radial` is only cylindrical $R$; cross-flux-surface vector projections require `flux_surface_normal`; `perpendicular` is magnetic-field-relative. Source-local X1/X2 tangent axes require descriptive first/second local-tangential semantics and must not be emitted as `x1_coordinate` / `x2_coordinate` or silently verticalised. Apply the source-fidelity cap when the candidate chooses the wrong frame.
 - **Near-duplicate**: if a `vector_neighbour` is essentially the same physical quantity, dock for **redundancy** (cite the duplicate's `id`).
 
 ### 3. Naming Convention Adherence (0–20)
