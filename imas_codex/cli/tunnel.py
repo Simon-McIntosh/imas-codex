@@ -394,7 +394,7 @@ def _build_foreground_tunnel_command(
             "autossh not found. Install with: sudo apt install autossh"
         )
 
-    from imas_codex.remote.tunnel import SSH_TUNNEL_OPTS
+    from imas_codex.remote.tunnel import SSH_TUNNEL_OPTS, local_forward_spec
 
     forward_args: list[str] = []
     for remote_port, local_port, _label, bind_addr, direction in ports:
@@ -404,7 +404,9 @@ def _build_foreground_tunnel_command(
             forward_args.extend(["-R", f"{remote_port}:{bind_addr}:{local_port}"])
         else:
             # Forward tunnel (default): expose remote service locally.
-            forward_args.extend(["-L", f"{local_port}:{bind_addr}:{remote_port}"])
+            forward_args.extend(
+                ["-L", local_forward_spec(local_port, bind_addr, remote_port)]
+            )
 
     cmd = [
         autossh,
@@ -431,8 +433,14 @@ def _terminate_tunnel_process(child: subprocess.Popen | None) -> None:
         os.killpg(child.pid, signal.SIGTERM)
         child.wait(timeout=10)
     except subprocess.TimeoutExpired:
-        os.killpg(child.pid, signal.SIGKILL)
-        child.wait(timeout=5)
+        try:
+            os.killpg(child.pid, signal.SIGKILL)
+            child.wait(timeout=5)
+        except (subprocess.TimeoutExpired, ProcessLookupError):
+            # A task in uninterruptible kernel sleep cannot be reaped. Do not
+            # wedge the supervisor too; leave it orphaned and start a healthy
+            # replacement when possible.
+            click.echo(f"Tunnel process {child.pid} could not be reaped; continuing")
     except ProcessLookupError:
         pass
 
@@ -447,6 +455,8 @@ def _run_service_supervisor(
     ink_only: bool = False,
     clipboard_only: bool = False,
 ) -> None:
+    from imas_codex.remote.tunnel import is_tunnel_active
+
     stop_requested = False
     child: subprocess.Popen | None = None
     current_signature: tuple[tuple[int, int, str], ...] | None = None
@@ -505,6 +515,20 @@ def _run_service_supervisor(
                     break
                 time.sleep(2)
                 if child is None or child.poll() is not None:
+                    break
+                missing_ports = [
+                    local_port
+                    for _remote, local_port, _label, _bind, direction in ports
+                    if direction == "L" and not is_tunnel_active(local_port)
+                ]
+                if missing_ports:
+                    click.echo(
+                        f"Tunnel listeners missing for {host}: "
+                        + ", ".join(str(port) for port in missing_ports)
+                        + "; restarting autossh"
+                    )
+                    _terminate_tunnel_process(child)
+                    child = None
                     break
                 latest_ports = _get_tunnel_ports(
                     host,
@@ -636,13 +660,17 @@ def _start_tunnels(
     if not to_start:
         return len(already_active)
 
+    from imas_codex.remote.tunnel import local_forward_spec
+
     # Build -L / -R flags for all ports that need tunneling
     forward_args: list[str] = []
     for remote_port, local_port, _label, bind_addr, direction in to_start:
         if direction == "R":
             forward_args.extend(["-R", f"{remote_port}:{bind_addr}:{local_port}"])
         else:
-            forward_args.extend(["-L", f"{local_port}:{bind_addr}:{remote_port}"])
+            forward_args.extend(
+                ["-L", local_forward_spec(local_port, bind_addr, remote_port)]
+            )
 
     # Use shared SSH options from tunnel module (keepalives, no ControlMaster)
     from imas_codex.remote.tunnel import SSH_TUNNEL_OPTS
@@ -1064,24 +1092,11 @@ def tunnel_status() -> None:
     except Exception:
         pass
 
-    # Identify which ports are bound by SSH (via ss -tlnp)
-    ssh_ports: set[int] = set()
-    try:
-        result = subprocess.run(
-            ["ss", "-tlnp"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            for line in result.stdout.splitlines():
-                if "ssh" not in line.lower():
-                    continue
-                for port in known_ports:
-                    if f":{port}" in line:
-                        ssh_ports.add(port)
-    except Exception:
-        pass
+    # Identify configured SSH forwards from process command lines. The
+    # liveness probe below ensures stale/wedged processes are not reported.
+    from imas_codex.remote.tunnel import _ssh_forwarded_local_ports
+
+    ssh_ports = set(known_ports).intersection(_ssh_forwarded_local_ports())
 
     # Check all known ports for liveness
     tunnels: list[tuple[int, str, bool]] = []

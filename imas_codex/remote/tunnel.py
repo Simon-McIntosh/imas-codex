@@ -149,8 +149,9 @@ def _clear_pid(ssh_host: str) -> None:
 def _find_and_record_pid(ssh_host: str, local_port: int) -> None:
     """Find the SSH/autossh process for our tunnel and record its PID."""
     for prog in ("autossh", "ssh"):
+        forward_pattern = rf"-L (127\.0\.0\.1:)?{local_port}:"
         result = subprocess.run(
-            ["pgrep", "-f", f"{prog}.*-L {local_port}:.*{ssh_host}"],
+            ["pgrep", "-f", rf"{prog}.*{forward_pattern}.*{ssh_host}"],
             capture_output=True,
             text=True,
         )
@@ -185,22 +186,78 @@ def is_tunnel_active(port: int) -> bool:
         return False
 
 
-def is_port_bound_by_ssh(port: int) -> bool:
-    """Check if a port is bound specifically by an SSH tunnel process.
+def local_forward_spec(local_port: int, remote_bind: str, remote_port: int) -> str:
+    """Build an SSH local-forward spec bound explicitly to IPv4 loopback.
 
-    Uses ``ss -tlnp`` to distinguish SSH-bound ports from other services.
+    Leaving the listener address implicit makes OpenSSH enumerate local
+    interfaces. A wedged netlink stack can then block tunnel startup in
+    uninterruptible kernel sleep before any port is opened. These services
+    are intentionally localhost-only, so an explicit listener is both safer
+    and more restrictive.
     """
+    return f"127.0.0.1:{local_port}:{remote_bind}:{remote_port}"
+
+
+def _local_forward_port(spec: str) -> int | None:
+    """Extract the local TCP port from an OpenSSH ``-L`` specification."""
+    first, separator, remainder = spec.partition(":")
+    if not separator:
+        return None
+    if first.isdigit():
+        port_text = first
+    elif first.startswith("["):
+        close = spec.find("]:")
+        if close < 0:
+            return None
+        port_text = spec[close + 2 :].partition(":")[0]
+    else:
+        port_text = remainder.partition(":")[0]
     try:
-        result = subprocess.run(
-            ["ss", "-tlnp"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        for line in result.stdout.splitlines():
-            if f":{port}" in line and "ssh" in line.lower():
-                return True
-        return False
+        return int(port_text)
+    except ValueError:
+        return None
+
+
+def _ssh_forwarded_local_ports(proc_root: Path = Path("/proc")) -> set[int]:
+    """Return local ports declared by running SSH/autossh processes.
+
+    This reads process command lines only. It deliberately avoids ``ss``,
+    ``/proc/net/tcp``, and socket-inode traversal because all three can enter
+    the same wedged networking path on affected WSL kernels. Callers still
+    probe the port separately, so a stale command line cannot make a dead
+    tunnel appear active.
+    """
+    ports: set[int] = set()
+    try:
+        pid_dirs = (path for path in proc_root.iterdir() if path.name.isdigit())
+        for pid_dir in pid_dirs:
+            try:
+                raw_args = (pid_dir / "cmdline").read_bytes()
+            except OSError:
+                continue
+            args = [os.fsdecode(arg) for arg in raw_args.split(b"\0") if arg]
+            if not args or Path(args[0]).name not in {"ssh", "autossh"}:
+                continue
+            for index, arg in enumerate(args):
+                spec: str | None = None
+                if arg == "-L" and index + 1 < len(args):
+                    spec = args[index + 1]
+                elif arg.startswith("-L") and len(arg) > 2:
+                    spec = arg[2:]
+                if spec is None:
+                    continue
+                port = _local_forward_port(spec)
+                if port is not None:
+                    ports.add(port)
+    except OSError:
+        return set()
+    return ports
+
+
+def is_port_bound_by_ssh(port: int) -> bool:
+    """Check whether a running SSH process declares this local forward."""
+    try:
+        return port in _ssh_forwarded_local_ports()
     except Exception:
         return False
 
@@ -357,7 +414,7 @@ def _start_tunnel_locked(
     )
 
     use_autossh = _has_autossh()
-    forward_arg = f"{local_port}:{remote_bind}:{port}"
+    forward_arg = local_forward_spec(local_port, remote_bind, port)
 
     if use_autossh:
         cmd = [
@@ -391,9 +448,9 @@ def _start_tunnel_locked(
             text=True,
             env=env,
         )
-        # ssh -f forks after connection setup; ExitOnForwardFailure=yes
-        # ensures the forward is bound before the fork.  Brief sleep for
-        # the forked process to appear in the process table.
+        # ssh -f forks after connection setup. Briefly wait for the forked
+        # process, then verify the local listener explicitly because unrelated
+        # configured remote-forward failures must remain non-fatal.
         time.sleep(0.3)
         _find_and_record_pid(ssh_host, local_port)
 
@@ -432,7 +489,7 @@ def stop_tunnel(ssh_host: str) -> bool:
 
     Uses PID files written at tunnel start to target only our processes.
     Falls back to pattern matching as a safety net, but **only** for
-    ``imas-codex``-style tunnel patterns (``-L {offset_port}:``).
+    ``imas-codex``-style tunnel patterns (offset local ports).
 
     Does **not** use ``ssh -O exit`` (would kill ControlMaster sessions)
     and does **not** blindly ``pkill autossh.*{host}`` (would kill the
@@ -457,7 +514,7 @@ def stop_tunnel(ssh_host: str) -> bool:
 
     # Fallback: pattern match only for imas-codex-style tunnel ports
     # (offset ports like 17687, 17474 that only we create)
-    offset_pattern = f"-L 1[0-9]{{4}}:.*{ssh_host}"
+    offset_pattern = rf"-L (127\.0\.0\.1:)?1[0-9]{{4}}:.*{ssh_host}"
     result = subprocess.run(
         ["pgrep", "-f", offset_pattern],
         capture_output=True,
@@ -616,6 +673,7 @@ def is_systemd_tunnel_active(ssh_host: str) -> bool:
 __all__ = [
     "SSH_TUNNEL_OPTS",
     "TUNNEL_OFFSET",
+    "_ssh_forwarded_local_ports",
     "_write_pid",
     "discover_compute_node",
     "discover_compute_node_local",
@@ -623,6 +681,7 @@ __all__ = [
     "is_port_bound_by_ssh",
     "is_systemd_tunnel_active",
     "is_tunnel_active",
+    "local_forward_spec",
     "resolve_remote_bind",
     "stop_tunnel",
     "verify_tunnel",

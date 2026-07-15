@@ -1,19 +1,54 @@
-from unittest.mock import patch
+import subprocess
+from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
 from imas_codex.cli.tunnel import (
     SERVICE_MANIFEST_PREFIX,
+    _build_foreground_tunnel_command,
     _build_systemd_service_content,
     _get_tunnel_ports,
     _installed_service_supports_request,
     _service_selected_services,
+    _terminate_tunnel_process,
     tunnel,
 )
-from imas_codex.remote.tunnel import SSH_TUNNEL_OPTS, discover_compute_node_local
+from imas_codex.remote.tunnel import (
+    SSH_TUNNEL_OPTS,
+    _local_forward_port,
+    _ssh_forwarded_local_ports,
+    discover_compute_node_local,
+    local_forward_spec,
+)
 
 
 class TestTunnelServiceHelpers:
+    def test_foreground_tunnel_binds_forward_to_ipv4_loopback(self):
+        with patch(
+            "imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
+        ):
+            command, _env = _build_foreground_tunnel_command(
+                "iter",
+                [(8765, 8765, "docs", "127.0.0.1", "L")],
+            )
+
+        forward_index = command.index("-L")
+        assert command[forward_index + 1] == "127.0.0.1:8765:127.0.0.1:8765"
+
+    def test_unreapable_tunnel_child_does_not_wedge_supervisor(self):
+        child = MagicMock()
+        child.pid = 42
+        child.poll.return_value = None
+        child.wait.side_effect = [
+            subprocess.TimeoutExpired("ssh", 10),
+            subprocess.TimeoutExpired("ssh", 5),
+        ]
+
+        with patch("imas_codex.cli.tunnel.os.killpg") as killpg:
+            _terminate_tunnel_process(child)
+
+        assert killpg.call_count == 2
+
     def test_build_systemd_service_content_uses_runtime_service_runner(self):
         with patch(
             "imas_codex.cli.tunnel.shutil.which",
@@ -208,3 +243,32 @@ class TestComputeNodeDiscovery:
         assert node == "98dci4-gpu-0002"
         assert len(calls) == 1
         assert calls[0][2] == "codex-neo4j"
+
+
+class TestTunnelProcessInspection:
+    def test_local_forward_spec_binds_to_ipv4_loopback(self):
+        assert (
+            local_forward_spec(17687, "compute-node", 7687)
+            == "127.0.0.1:17687:compute-node:7687"
+        )
+
+    def test_local_forward_port_accepts_supported_ssh_forms(self):
+        assert _local_forward_port("8765:127.0.0.1:8765") == 8765
+        assert _local_forward_port("127.0.0.1:8765:127.0.0.1:8765") == 8765
+        assert _local_forward_port("[::1]:8765:127.0.0.1:8765") == 8765
+        assert _local_forward_port("not-a-forward") is None
+
+    def test_ssh_forwarded_ports_reads_command_lines_only(self, tmp_path):
+        commands = {
+            "101": ["/usr/bin/ssh", "-N", "-L", "127.0.0.1:8765:host:8765"],
+            "102": ["/usr/bin/autossh", "-L17687:host:7687", "iter"],
+            "103": ["/usr/bin/python", "-L", "9999:host:9999"],
+        }
+        for pid, args in commands.items():
+            pid_dir = tmp_path / pid
+            pid_dir.mkdir()
+            (pid_dir / "cmdline").write_bytes(
+                b"\0".join(arg.encode() for arg in args) + b"\0"
+            )
+
+        assert _ssh_forwarded_local_ports(tmp_path) == {8765, 17687}
