@@ -1,6 +1,7 @@
 ## Documentation Format — Canonical Structure
 
-Every `documentation` field MUST follow this paragraph structure, separated by **blank lines** (literal `\n\n`):
+Every `documentation` field MUST be a **strict normative definition** and follow
+this paragraph structure, separated by **blank lines** (literal `\n\n`):
 
 1. **Definition paragraph** — 1-3 sentences stating what the quantity *is* in physics terms. No equations. No diagnostic context. Just the concept.
 
@@ -22,11 +23,12 @@ Every `documentation` field MUST follow this paragraph structure, separated by *
    - Define every symbol introduced. Define units explicitly only when they are not already on the SN's `unit` field (e.g. inside an equation context: `where $T_e$ is in eV`).
    - **At most one display equation per documentation entry** — the *defining* one. Secondary relations stay inline.
 
-3. **Measurement / computation paragraph** (when applicable) — how the quantity is measured or computed in practice (diagnostics, reconstruction methods). Keep it general — do NOT name specific codes (no "EFIT", "LIUQE", "JINTRAC") unless the SN itself encodes that context.
+3. **Scope / distinction paragraph** (only when needed) — state an exclusion,
+   boundary, aggregation convention, or essential relationship that prevents the
+   quantity being confused with a nearby quantity. This paragraph is semantic,
+   not practical guidance.
 
-4. **Typical values paragraph** (when applicable) — representative ranges with units, distinguishing regimes if relevant. Use the SN's canonical unit. Format ranges as `1-10 keV`, `0.1-1 m^-3 \times 10^{20}`, etc.
-
-5. **Sign convention paragraph** (only for COCOS-dependent / signed quantities) — the LAST paragraph, in this exact format:
+4. **Sign convention paragraph** (only for COCOS-dependent / signed quantities) — the LAST paragraph, in this exact format:
 
    ```
    Sign convention: Positive when <condition>.
@@ -57,6 +59,33 @@ These are all tautological — they convey no information. The reader already kn
 
 > Ask: "Could a competent physicist set up a coordinate frame in which this quantity comes out NEGATIVE under the same physical situation?" If yes (e.g. you can reverse current direction or flip the Z axis), include the sign convention. If no (e.g. it is a length, a count, a density), OMIT it.
 
+### Strict normative boundary
+
+Canonical documentation defines the quantity. It is not a measurement guide,
+simulation recipe, operational handbook, literature review, or collection of
+representative machine values.
+
+- Do **not** list diagnostics merely because they can estimate the quantity.
+- Do **not** describe inference, reconstruction, power-balance, or simulation
+  workflows merely because they are commonly used.
+- Do **not** include typical device values, experiment ranges, machine names,
+  performance records, or scenario estimates.
+- Do **not** pad a rigorous definition with applications, significance, or
+  loosely related physics.
+- Measurement or computation may be stated **only when constitutive of the
+  quantity's definition, or necessary to distinguish it from another physical
+  quantity**. In that exceptional case state only the distinguishing semantic
+  fact, not a diagnostic list or estimator recipe.
+
+For example, documentation for `thermal_plasma_energy` may define the pressure
+integral and its population scope, but must not list Thomson scattering, CXRS,
+equilibrium reconstruction, diamagnetic loops, device ranges, or confinement
+times. Documentation for `total_power_due_to_ion_cyclotron_heating` may define
+the power absorbed by the plasma through ion-cyclotron-range waves and exclude
+generator or launched power, but must not prescribe RF power-balance
+measurements, transmission-loss estimates, wave simulations, modulation
+experiments, or global energy-balance checks.
+
 ### Layout example (poloidal flux — corrected)
 
 ```
@@ -70,10 +99,6 @@ $$
 
 where $\psi_0$ is the [magnetic axis](name:poloidal_magnetic_flux_at_magnetic_axis) value and $\psi_b$ is the boundary value.
 
-The boundary value is recovered from equilibrium reconstruction by integrating $B_Z$ over a horizontal disk whose edge is tracked to the outermost closed flux contour.
-
-Typical absolute magnitudes range from 1-20 Wb in medium-sized tokamaks, with the exact value depending on plasma current, toroidal field, and shape.
-
 Sign convention: Positive when $B_Z$ on the integration disk points in the $+Z$ direction.
 ```
 
@@ -83,8 +108,9 @@ Sign convention: Positive when $B_Z$ on the integration disk points in the $+Z$ 
 - ❌ Display equations without blank lines around the `$$` delimiters
 - ❌ Multiple display equations — only the *defining* one warrants display math
 - ❌ Sign convention buried mid-paragraph or with extra header markup (`### Sign Convention`, `**Sign convention:**`)
-- ❌ Inline unit decorations like `(in Wb)` outside the three narrow exceptions (typical values, equation variable defs, conversions — see PR-3)
+- ❌ Diagnostic lists, estimator recipes, simulation workflows, or typical-value ranges
+- ❌ Inline unit decorations like `(in Wb)` outside equation variable definitions and necessary conversions (see PR-3)
 
 ### When equations are not applicable
 
-For quantities without a single defining equation (e.g. shape parameters, count fields, identifiers, integer indices), omit the governing-equation paragraph entirely. Definition → Measurement → Typical values → Sign convention (if applicable) is a valid 4-paragraph form. Definition alone is acceptable for indices and metadata SNs.
+For quantities without a single defining equation (e.g. shape parameters, count fields, identifiers, integer indices), omit the governing-equation paragraph entirely. Definition → scope/distinction → sign convention (if applicable) is valid. Definition alone is acceptable for indices and metadata SNs.

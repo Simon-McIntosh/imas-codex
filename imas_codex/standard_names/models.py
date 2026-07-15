@@ -1557,7 +1557,11 @@ class RefinedDocs(BaseModel):
         ),
     )
     documentation: str = Field(
-        ..., description="Full documentation text with LaTeX, typical values, context"
+        ...,
+        description=(
+            "Strict normative documentation with defining LaTeX, scope, "
+            "exclusions, essential relationships, and necessary sign conventions"
+        ),
     )
     links: list[str] = Field(
         default_factory=list,
@@ -1589,9 +1593,9 @@ class GeneratedDocs(BaseModel):
         ...,
         min_length=20,
         description=(
-            "Rich markdown documentation covering physical meaning, governing "
-            "equations (LaTeX), typical values, measurement methods, and "
-            "cross-references to related standard names."
+            "Strict normative markdown covering physical meaning, defining "
+            "equations and symbols, scope/exclusions, essential relationships, "
+            "and necessary sign conventions."
         ),
     )
 

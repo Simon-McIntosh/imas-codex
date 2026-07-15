@@ -69,15 +69,23 @@ genuinely member-specific physics.
 - All variables defined with units.
 - Sign conventions stated in prose (especially for fluxes, currents, fields). State direction without citing COCOS numbers — the COCOS convention is structured metadata on the node.
 - **Cross-name consistency**: equation symbols match siblings (don't introduce a new symbol when an accepted sibling uses another).
+- The text is a strict normative definition: no generic diagnostic lists,
+  estimator recipes, simulation workflows, typical device/experiment values,
+  practical advice, or padding.
+- Measurement/computation appears only when constitutive of the quantity or
+  necessary to distinguish it from another quantity.
 
 ### 3. Completeness (0–20)
 - All required documentation fields populated.
-- Physical definition covers the full scope of the quantity (governing equations, measurement context, typical values).
+- Physical definition covers the full scope of the quantity: defining equation
+  and symbols where applicable, scope/exclusions, essential relationships, and
+  necessary sign convention.
 - Cross-references to related standard names included where relevant.
-- Value ranges or typical magnitudes given when meaningful.
 - Identifier-enum entries listed when the source is an enum.
 - Documentation describes the physics quantity without referencing specific data structures, IDS names, or DD paths — source provenance is tracked externally.
 - Dock when `same_path_neighbours` consistently include a piece (e.g. "see also `<sibling>` for the radial profile") that the candidate omits.
+- Dock practical-method appendices and typical-value material; do not reward
+  documentation length or breadth beyond the normative definition.
 
 ### 4. Physics Accuracy (0–20)
 

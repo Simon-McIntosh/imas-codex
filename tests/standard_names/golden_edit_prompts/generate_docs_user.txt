@@ -64,7 +64,7 @@ Return a JSON object with exactly these two fields:
 ```json
 {
   "description": "1-3 sentences, ≤500 chars, no LaTeX, American spelling",
-  "documentation": "Rich markdown with $LaTeX$, typical values, measurement methods, cross-references"
+  "documentation": "Strict normative markdown with defining $LaTeX$, scope, exclusions, and essential cross-references"
 }
 ```
 
@@ -80,8 +80,13 @@ Return a JSON object with exactly these two fields:
   "profile", or "time-dependent" — describe the *physics*, not the data layout
 
 ### documentation requirements
-- ≥ 3 sentences
-- Cover: physical meaning, governing equations (LaTeX), typical values, measurement methods
+- Use only as many sentences as the rigorous definition requires
+- Cover: physical meaning, the defining equation and symbols when applicable,
+  scope/exclusions, essential semantic relationships, and necessary sign conventions
+- Do not include generic diagnostics, estimator recipes, simulation workflows,
+  typical machine values, experiment ranges, or padding
+- Mention measurement/computation only when constitutive of the quantity or
+  necessary to distinguish it from another quantity
 - Cross-references to related standard names use `[label](name:bare_id)` inline links only
 - Sign convention (if COCOS-dependent): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold); omit if sign-invariant
 - American spelling throughout

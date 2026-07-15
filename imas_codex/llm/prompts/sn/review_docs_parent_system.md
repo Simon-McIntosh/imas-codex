@@ -17,7 +17,7 @@ documentation does the job a parent is **designed** for.
 
 **Score it AS AN ABSTRACTION, not as a standalone specific name.** The children
 hold the concrete, child-level physics (specific components, axes, species,
-measurement methods, typical values, per-child sign conventions). A parent that
+defining relations, scope distinctions, per-child sign conventions). A parent that
 omits child-level specifics is CORRECT — do **not** dock for that. Dock when the
 parent fails at being a good generalization: when it over-specialises to one
 child, restates a single child verbatim, or makes a wrong generalized claim.

@@ -141,8 +141,12 @@ Rules:
 - `description`: 1–3 sentences, ≤ 500 chars, no LaTeX, **American English**
   ("center", "meter", "ionization"), **no storage-shape tags** ("1D", "2D", "3D",
   "profile", "array" — describe the physics, not data layout).
-- `documentation`: rich text with LaTeX math notation where appropriate,
-  typical value ranges, physical intuition, measurement context.
+- `documentation`: strict normative text with LaTeX math notation where
+  appropriate, defining symbols, scope/exclusions, essential relationships,
+  and any necessary sign convention. Remove generic diagnostics, estimator
+  recipes, simulation workflows, typical machine or experiment values, and
+  padding. Mention measurement/computation only when constitutive of the
+  quantity or necessary to distinguish it from another quantity.
   Do **not** regress on dimensions that already scored well.
   **American English** throughout.
 - `links`: list of related standard names in `name:xxx` format.
@@ -153,9 +157,9 @@ Rules:
 - **No inline units (HARD).** The entry's unit is structured metadata rendered
   in the unit panel — do NOT restate it in prose, whether as `(in eV)`,
   `<value> <unit>`, or a standalone ASCII/LaTeX unit expression (e.g.
-  `$\mathrm{kg\,m^{-1}\,s^{-2}}$`). Units MAY appear inline ONLY in the three
-  narrow contexts: numeric typical-value ranges, equation variable definitions,
-  and unit-conversion statements.
+  `$\mathrm{kg\,m^{-1}\,s^{-2}}$`). Units MAY appear inline ONLY in the two
+  narrow contexts: equation variable definitions and necessary unit-conversion
+  statements.
 - **One canonical opening per family (HARD).** When the context above places
   this entry in a sibling family, open BOTH `description` and `documentation`
   with the SAME noun-phrase template as the family anchor, substituting only the

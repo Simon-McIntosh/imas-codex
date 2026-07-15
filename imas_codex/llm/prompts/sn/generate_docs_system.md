@@ -41,9 +41,8 @@ For each name, the documentation field should cover (where applicable) — apply
 
 1. **Definition** — what this quantity physically represents in the context of tokamak / stellarator plasmas.
 2. **Governing physics** — the principal defining equation as a centred `$$...$$` display block, with variable definitions in flowing prose. **At most one display equation per entry.** Use `$...$` inline math for variable names elsewhere.
-3. **Measurement methods** — how the quantity is typically measured or computed (diagnostics, reconstruction methods — keep generic, no code names).
-4. **Typical values** — include representative ranges ONLY when they are universally established for the quantity-kind; give them with units and distinguish plasma regimes where relevant. If no broadly-accepted range exists (or the source is thin), omit this rather than invent machine-specific numbers (see Grounding & Faithfulness).
-5. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
+3. **Scope and exclusions** — only the semantic boundaries, aggregation conventions, and essential relationships needed to distinguish this quantity from nearby quantities.
+4. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
 
    ```
    Sign convention: Positive when <physical condition>.
@@ -73,7 +72,7 @@ For each name, the documentation field should cover (where applicable) — apply
    - `**Sign convention:** Positive when...` (bold — rejected)
    - `Positive when...` (missing `Sign convention:` prefix — rejected)
    - `sign convention: Positive when...` (lowercase — rejected)
-6. **Cross-references** — weave related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
+5. **Cross-references** — weave only essential related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
 
 ## Family Parallel Structure (sibling harmonization)
 
@@ -172,10 +171,15 @@ hyphen into a standard name. Prose may hyphenate a compound species freely
 
 ## Grounding & Faithfulness (HARD — source-faithfulness outranks richness)
 
-The documentation must be grounded in (a) the provided DD path documentation/context for this name and (b) well-established, textbook plasma-physics consensus. Within those bounds, rich physics context and order-of-magnitude ranges that are **universally established** for the quantity are welcome.
+The documentation must be grounded in (a) the provided DD path documentation/context for this name and (b) well-established, textbook plasma-physics consensus. Use that evidence to write a strict normative definition, not practical guidance.
 
-- **Do NOT fabricate source-specific facts.** Never invent device-specific or experiment-specific numeric claims, measurement-chain specifics, or behaviours that are not supported by the provided source context or by general physics consensus. "Typical values" means *broadly accepted* ranges for the quantity-kind, not invented machine numbers.
-- **Thin or absent source → restraint, not invention.** Some names (especially `derived` structural parents) arrive with little or no DD documentation. For these, write a *proportionate* entry: define the quantity, its physical role, and its governing relation if one is standard — and STOP. Do NOT manufacture detailed measurement methods, regime-specific value ranges, or experimental specifics to reach a length target. A correct short entry beats a padded speculative one. The Length targets below are aspirational ceilings, not quotas to fill with unsupported content.
+- **Do NOT add practical-method material.** Generic diagnostic lists,
+  reconstruction or simulation recipes, estimator workflows, typical values,
+  device examples, and experiment ranges are forbidden even when factually
+  plausible. Measurement/computation belongs only when constitutive of the
+  quantity or necessary to distinguish it from another quantity; state only
+  that semantic distinction.
+- **Thin or absent source → restraint, not invention.** Some names (especially `derived` structural parents) arrive with little or no DD documentation. For these, write a *proportionate* entry: define the quantity, its scope, and its governing relation if one is standard — and STOP. A correct short entry beats padded prose. The length targets below are ceilings, not quotas.
 - **No invented mechanism / direction / weighting / location** beyond what the source or universal physics supports — the same faithfulness bar applied to the enriched DD descriptions.
 - **Name–quantity consistency check.** If the name appears to mis-describe the source quantity (e.g. the source is *effective charge* $Z_\mathrm{eff}$ but the name is bare `charge`), document the quantity the SOURCE actually represents and flag the mismatch in your reasoning — do NOT paper over a wrong name with eloquent prose for a different quantity.
 
@@ -191,7 +195,7 @@ The documentation must be grounded in (a) the provided DD path documentation/con
 | Field | Target | Hard Limits |
 |---|---|---|
 | `description` | 15–30 words, 1 sentence | Min 10 words, max 50 words, max 250 chars |
-| `documentation` | 80–200 words, ≥3 sentences | Min 50 words, max 300 words |
+| `documentation` | 40–160 words, as many sentences as needed | Min 20 words, max 250 words |
 | `documentation_excerpt` | 10–25 words | Max 160 chars |
 
 ### Quality Checklist (run before emitting each item)
@@ -211,7 +215,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 {
   "standard_name": "exact_input_name",
   "description": "≤2 concise sentences, physics-meaningful, American spelling",
-  "documentation": "≥3 sentence rich documentation with $LaTeX$, typical values, cross-refs",
+  "documentation": "Strict normative documentation with defining $LaTeX$, scope, exclusions, and essential cross-references",
   "links": ["name:related_standard_name_1", "name:related_standard_name_2"],
   "validity_domain": "physical region or regime (e.g. core plasma, SOL)",
   "constraints": ["physical constraint 1"],
@@ -224,7 +228,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 
 - `standard_name` — MUST exactly match the input name (hard requirement for result matching).
 - `description` — **1 concise sentence strongly preferred, 2 max (≤250 characters)**. The first sentence must be a self-contained definition. Add ONLY information beyond what the name tokens already encode. Do NOT start with trailing participles ("Representing...", "Characterizing...", "Quantifying..."). Use American spelling (e.g., "ionization", "behavior").
-- `documentation` — ≥3 sentences. Must cover physical meaning, measurement context, and related quantities. American spelling throughout.
+- `documentation` — a strict normative definition. Cover physical meaning, a defining equation when applicable, symbol definitions, scope/exclusions, essential relationships, and a necessary sign convention. Do not add generic methods or typical values. American spelling throughout.
 - `links` — MUST use the `name:foo_bar` prefix (e.g., `name:electron_temperature`). Each link must name an existing standard name (will be validated; non-existent links cause rejection). URLs (https://…) are permitted for external references.
 - `validity_domain` — optional but encouraged. Physical region or regime where the quantity is meaningful.
 - `constraints` — optional. Physical constraints on the quantity.
@@ -348,15 +352,13 @@ via inline link.
 - ✅ GOOD: `The fast neutral perpendicular pressure quantifies ...`
 - ✅ GOOD: `[electron_temperature](name:electron_temperature) is the kinetic ...`
 
-**Narrow exceptions.** Units MAY appear inline only in these three contexts,
+**Narrow exceptions.** Units MAY appear inline only in these two contexts,
 because they carry numeric meaning the unit field cannot:
 
-1. **Numeric typical-value ranges** — e.g. `Typical values: 1-10 keV in the
-   plasma core, dropping to 10-100 eV in the SOL.`
-2. **Equation variable definitions** — e.g. `where $T_e$ is in eV and
+1. **Equation variable definitions** — e.g. `where $T_e$ is in eV and
    $n_e$ is in m$^{-3}$.` (Define units explicitly so the equation is
    dimensionally unambiguous.)
-3. **Unit-conversion statements** — e.g. `$1\;\text{eV} = 11605\;\text{K}$`
+2. **Unit-conversion statements** — e.g. `$1\;\text{eV} = 11605\;\text{K}$`
    (DS-3 unit-conversion rule).
 
 Outside these three contexts, NEVER write `(in <unit>)`, `<value> <unit>`, or a
@@ -366,8 +368,8 @@ as a rendered LaTeX/ASCII string (a legacy leak such as
 `parallel_ion_state_momentum` spelling out `$\mathrm{kg\,m^{-1}\,s^{-2}}$`) is
 the same defect as `(in <unit>)`. The unit panel already renders the canonical
 unit at the top of each catalog page; repeating it anywhere in prose is noise.
-The three exceptions above are narrow — they attach a unit to a NUMBER or an
-equation variable — they do NOT license a free-standing restatement of the
+The two exceptions above are narrow — they attach a unit to an equation
+variable or necessary conversion — they do NOT license a free-standing restatement of the
 quantity's unit.
 
 ### PR-4 Calibration-parameter anti-speculation rule

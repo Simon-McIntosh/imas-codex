@@ -43,14 +43,17 @@ SI unit symbols (`m`, `kg`, `eV`) are unaffected — only prose spelling matters
 
 ### Documentation Field
 
-- **Minimum 3 sentences**, rich technical reference.
+- A concise strict normative definition; brevity is correct when the definition is complete.
 - Must cover:
   1. **Physical meaning** — what the quantity represents in the plasma.
-  2. **Typical context / diagnostic** — how it is measured or computed
-     (Thomson scattering, interferometry, equilibrium reconstruction, etc.).
-  3. **Relationship to other quantities** — reference related standard names
-     by their IDs in `links`.
-- Include typical value ranges for fusion-relevant plasmas where applicable.
+  2. **Defining relation** — the principal equation and symbol definitions,
+     when one exists.
+  3. **Scope and distinctions** — exclusions, aggregation conventions, or
+     essential relationships needed to delimit the quantity.
+- Do not include generic diagnostic lists, estimator recipes, simulation
+  workflows, typical machine values, experiment ranges, or padding.
+- Mention measurement or computation only when it is constitutive of the
+  definition or necessary to distinguish the quantity from another quantity.
 - For COCOS-dependent quantities, include a sign convention statement:
   `Sign convention: Positive when <condition>.` as a standalone paragraph
   (blank line before and after, plain text — no headings, no bold).
@@ -81,3 +84,6 @@ SI unit symbols (`m`, `kg`, `eV`) are unaffected — only prose spelling matters
   provenance is tracked in graph metadata, not in catalog prose.
 - **Over-generic documentation**: avoid filler phrases like "This is an important
   quantity in fusion research." Every sentence must carry specific physics content.
+- **Practical-method appendix**: do not append how the quantity is usually
+  measured, inferred, reconstructed, or simulated. Those methods are provenance
+  or usage guidance, not part of the canonical definition.

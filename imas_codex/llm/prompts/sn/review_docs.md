@@ -33,11 +33,17 @@ Rate each dimension from 0 to 20. The total score is the sum (0-80).
 - Are sign conventions explicit for COCOS-dependent quantities? State direction using prose (e.g. "positive when counter-clockwise viewed from above") — NEVER cite a COCOS number (COCOS-11, COCOS-17, etc.) in prose. The COCOS convention is structured metadata on the node.
 - Is LaTeX properly escaped (literal block scalar, no corrupted backslashes)?
 - Are references to other standard names rendered as inline links (`[name](#name)`)?
+- Is it a strict normative definition, free of generic diagnostic lists,
+  estimator recipes, simulation workflows, typical values, practical advice,
+  and padding?
+- Is measurement/computation included only when constitutive of the quantity
+  or necessary to distinguish it from another quantity?
 
 ### 3. Completeness (0-20)
 - Are all required doc-side fields populated (description, documentation)?
 - Does the text avoid citing raw DD paths or IDS names as storage context? Source provenance is tracked externally — documentation should describe the physics quantity without referencing specific data structures.
-- Are typical value ranges or measurement units given when meaningful?
+- Are scope, exclusions, aggregation conventions, essential relationships, and
+  necessary sign conventions stated where they delimit the quantity?
 
 ### 4. Physics Accuracy (0-20)
 - Are stated equations physically correct for the named quantity?

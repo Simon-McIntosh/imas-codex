@@ -237,7 +237,13 @@ common_issues:
 
     I2.2_tangential_context:
       description: "Documentation introduces loosely-related physics concepts"
-      rule: "Documentation covers THIS quantity only: definition, equation, significance, typical values"
+      rule: >-
+        Documentation covers THIS quantity only: definition, defining equation
+        and symbols, scope/exclusions, essential relationships, and necessary
+        sign convention. Generic diagnostic lists, estimator recipes,
+        simulation workflows, typical values, practical advice, and padding
+        are defects. Measurement/computation is allowed only when constitutive
+        of the quantity or necessary to distinguish it from another quantity.
       positive_model: "effective_charge — clear definition, one equation, all variables defined"
       affects: [documentation]
 

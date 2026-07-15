@@ -70,11 +70,18 @@ grammar and convention scores.
 **0**: Name is misleading, describes a different quantity, or uses a wrong physics qualifier.
 
 ### 3. Documentation Quality (0-20)
+Treat canonical documentation as a **strict normative definition**, not a
+practical-method appendix.
+
 - Does the documentation include LaTeX mathematical notation?
-- Are typical value ranges provided?
-- Is measurement/diagnostic context mentioned?
+- Does it give the defining equation and define every symbol where applicable?
+- Does it state scope, exclusions, essential relationships, and necessary sign conventions?
 - Are cross-references to related quantities included (using `[name](#name)` links)?
 - Is the documentation substantive (not just rephrasing the name)?
+- Is it free of generic diagnostics, estimator recipes, simulation workflows,
+  typical device/experiment values, practical advice, and padding?
+- Is measurement/computation included only when constitutive of the quantity
+  or necessary to distinguish it from another quantity?
 - **[I2.1]** Are ALL variables in equations defined with units? Any undefined variable → **score ≤ 5**.
 - **[I2.2]** Is the documentation focused on THIS quantity, or does it introduce tangential physics (e.g., Biot-Savart for a simple current measurement)?
 - **[I2.5]** For COCOS-dependent quantities, is a sign convention present as a separate paragraph (`Sign convention: Positive when ...`)? Missing → **score ≤ 10**.
@@ -82,7 +89,8 @@ grammar and convention scores.
 - **[I2.8]** Does the documentation contain superfluous algebraic rearrangements of the same equation?
 - **[I3.1]** Is the sign convention formatted correctly (plain text, separate paragraph, not bold/inline)?
 
-**20**: Rich docs with LaTeX, all variables defined, value ranges, measurement context, cross-refs, sign convention where needed.
+**20**: Rigorous normative docs with defining LaTeX, all variables defined,
+scope/exclusions, essential cross-references, and sign convention where needed.
 **10**: Adequate docs — correct but thin, missing some elements.
 **0**: Empty, circular documentation, or undefined equation variables.
 

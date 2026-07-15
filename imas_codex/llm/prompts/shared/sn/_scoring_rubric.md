@@ -26,12 +26,14 @@ Rate each dimension from 0 to 20. The total is normalized to a 0-1 score (sum / 
 
 ### 3. Documentation Quality (0-20)
 - Does the documentation include LaTeX mathematical notation?
-- Are typical value ranges provided?
-- Is measurement/diagnostic context mentioned?
+- Are defining symbols, scope, exclusions, essential relationships, and
+  necessary sign conventions clear?
 - Are cross-references to related quantities included (using inline links)?
 - Is the documentation substantive (not just rephrasing the name)?
+- Is it free of generic diagnostics, estimator recipes, simulation workflows,
+  typical values, practical advice, and padding?
 
-**20**: Rich docs with LaTeX, value ranges, measurement context, cross-refs.
+**20**: Rigorous normative docs with defining LaTeX, scope/exclusions, and essential cross-refs.
 **10**: Adequate docs — correct but thin, missing some elements.
 **0**: Empty or circular documentation (just restates the name).
 

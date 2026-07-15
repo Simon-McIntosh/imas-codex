@@ -545,8 +545,11 @@ classes:
           Cleared by persist functions when description changes.
       documentation:
         description: >-
-          Rich documentation with LaTeX equations, governing physics,
-          measurement methods, typical values, sign conventions.
+          Strict normative documentation with defining LaTeX equations and
+          symbols, scope and exclusions, essential semantic relationships, and
+          necessary sign conventions. Generic diagnostics, estimator recipes,
+          simulation workflows, typical values, and practical guidance are
+          excluded.
           Uses [name](#name) inline links to other standard names.
       kind:
         description: Entry kind — scalar, vector, or metadata
