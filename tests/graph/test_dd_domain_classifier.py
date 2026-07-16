@@ -1334,6 +1334,59 @@ class TestPathDomainOverride:
         )
 
     def test_unrelated_paths_are_not_overridden(self):
-        assert apply_path_domain_override("equilibrium/time_slice/profiles_1d/q") is None
-        assert apply_path_domain_override("distributions/distribution/ggd/density") is None
+        assert (
+            apply_path_domain_override("equilibrium/time_slice/profiles_1d/q") is None
+        )
+        assert (
+            apply_path_domain_override("distributions/distribution/ggd/density") is None
+        )
         assert apply_path_domain_override("") is None
+
+    def test_lh_antenna_generic_pressure_path_not_overridden(self):
+        # The override targets the pressure_tank hardware quantity only; a
+        # hypothetical plasma-pressure leaf under lh_antennas must not be
+        # pinned to auxiliary_heating by this rule.
+        assert apply_path_domain_override("lh_antennas/antenna/plasma_pressure") is None
+
+    @pytest.mark.asyncio
+    async def test_classify_batch_applies_override_over_llm(self):
+        # Integration: the production _classify_batch path must apply the
+        # deterministic override on top of the LLM result and stamp
+        # domain_source accordingly.
+        from imas_codex.graph.dd_domain_classifier import _classify_batch
+
+        batch = [
+            {"id": "distributions/distribution/ggd/orbit_frequency_pol/values"},
+            {"id": "equilibrium/time_slice/profiles_1d/q"},
+        ]
+        llm_result = DomainBatchResult(
+            classifications=[
+                DomainClassification(
+                    path_index=1, physics_domain="computational_workflow"
+                ),
+                DomainClassification(path_index=2, physics_domain="equilibrium"),
+            ]
+        )
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new=AsyncMock(return_value=(llm_result, 0.0, 0)),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="system",
+            ),
+        ):
+            results, _cost = await _classify_batch(
+                batch,
+                model="test-model",
+                service="test",
+                valid_domains={"computational_workflow", "equilibrium", "transport"},
+            )
+        by_id = {r["id"]: r for r in results}
+        overridden = by_id["distributions/distribution/ggd/orbit_frequency_pol/values"]
+        assert overridden["physics_domain"] == "transport"
+        assert overridden["domain_source"] == "deterministic_override"
+        untouched = by_id["equilibrium/time_slice/profiles_1d/q"]
+        assert untouched["physics_domain"] == "equilibrium"
+        assert untouched["domain_source"] == "llm_classified"
