@@ -361,7 +361,7 @@ because they carry numeric meaning the unit field cannot:
 2. **Unit-conversion statements** — e.g. `$1\;\text{eV} = 11605\;\text{K}$`
    (DS-3 unit-conversion rule).
 
-Outside these three contexts, NEVER write `(in <unit>)`, `<value> <unit>`, or a
+Outside these two contexts, NEVER write `(in <unit>)`, `<value> <unit>`, or a
 standalone unit expression — **whether ASCII (`kg m^-1 s^-2`) or LaTeX
 (`$\mathrm{kg\,m^{-1}\,s^{-2}}$`)** — in prose. Restating the entry's own unit
 as a rendered LaTeX/ASCII string (a legacy leak such as
