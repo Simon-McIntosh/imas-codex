@@ -566,6 +566,84 @@ def apply_edit(
             gc.close()
 
 
+def reclassify_domain(
+    name: str,
+    domain: str,
+    *,
+    reason: str,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Reassign a standard name's physics domain with recorded provenance.
+
+    ``physics_domain`` is not a compose/review axis, so ``--rename``/``--docs``
+    cannot express it; this is the supported operation for a semantic-subject
+    domain move. It SETs ``physics_domain`` and ``source_domains`` on the node
+    and records a ``StandardNameChange`` (operation ``reclassify_domain``) so
+    the move is traceable without leaking into public outputs.
+
+    Returns ``{"ok": bool, ...}`` with the before/after domains; on refusal
+    ``ok`` is False with a ``reason``.
+    """
+    from imas_codex.core.physics_domain import PhysicsDomain
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+    )
+
+    name = (name or "").strip()
+    reason = (reason or "").strip()
+    if not name:
+        return {"ok": False, "reason": "a standard name is required"}
+    if not reason:
+        return {"ok": False, "reason": "--reason is mandatory for a domain move"}
+    try:
+        target_domain = PhysicsDomain(domain).value
+    except ValueError:
+        valid = ", ".join(d.value for d in PhysicsDomain)
+        return {
+            "ok": False,
+            "reason": f"unknown physics domain {domain!r}; one of: {valid}",
+        }
+
+    with GraphClient() as gc:
+        rows = list(
+            gc.query(
+                "MATCH (n:StandardName {id: $id}) "
+                "RETURN n.physics_domain AS domain, n.source_domains AS sources, "
+                "n.name_stage AS stage",
+                id=name,
+            )
+        )
+        if not rows:
+            return {"ok": False, "reason": f"standard name {name!r} not found"}
+        before = rows[0]
+        result = {
+            "ok": True,
+            "name": name,
+            "stage": before["stage"],
+            "from_domain": before["domain"],
+            "to_domain": target_domain,
+            "dry_run": dry_run,
+        }
+        if dry_run or before["domain"] == target_domain:
+            result["noop"] = before["domain"] == target_domain
+            return result
+        gc.query(
+            "MATCH (n:StandardName {id: $id}) "
+            "SET n.physics_domain = $domain, n.source_domains = [$domain]",
+            id=name,
+            domain=target_domain,
+        )
+        result["change_id"] = record_standard_name_change(
+            gc,
+            name,
+            name,
+            operation="reclassify_domain",
+            reason=reason,
+            origin="catalog_edit",
+        )
+        return result
+
+
 def supersede_into(
     old: str,
     into: str,

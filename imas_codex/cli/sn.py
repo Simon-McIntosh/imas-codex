@@ -4758,3 +4758,48 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
             f"  old prior stage: {result.get('old_prior_stage')} "
             "→ superseded (superseded_from_stage=accepted)"
         )
+
+
+@sn.command("reclassify")
+@click.argument("standard_name")
+@click.option(
+    "--domain",
+    required=True,
+    help="Target physics domain (validated against the PhysicsDomain enum).",
+)
+@click.option(
+    "--reason",
+    required=True,
+    help="Mandatory justification, grounded in the semantic-subject principle.",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report the before/after domains without writing to the graph.",
+)
+def sn_reclassify(standard_name: str, domain: str, reason: str, dry_run: bool) -> None:
+    """Reassign STANDARD_NAME's physics domain with recorded provenance.
+
+    The domain is not a compose/review axis, so ``sn edit`` cannot express a
+    domain move; this command SETs ``physics_domain``/``source_domains`` and
+    records a ``StandardNameChange`` event so the move stays traceable.
+
+    \b
+    Example:
+      imas-codex sn reclassify gyrocenter_frequency --domain transport \\
+          --reason "guiding-center orbit dynamics; computational_workflow is a tooling bucket"
+    """
+    from imas_codex.standard_names.edit import reclassify_domain
+
+    result = reclassify_domain(standard_name, domain, reason=reason, dry_run=dry_run)
+    if not result.get("ok"):
+        raise click.UsageError(result.get("reason", "reclassify refused"))
+
+    if result.get("noop"):
+        click.echo(f"{result['name']} already in {result['to_domain']} — no change")
+        return
+    verb = "would reclassify" if dry_run else "reclassified"
+    click.echo(
+        f"{verb} {result['name']} ({result['stage']}): "
+        f"{result['from_domain'] or 'null'} → {result['to_domain']}"
+    )

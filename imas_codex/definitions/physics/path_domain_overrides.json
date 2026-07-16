@@ -7,7 +7,7 @@
     {
       "match": ["distributions/", "/ggd/orbit_frequency"],
       "domain": "transport",
-      "rationale": "Gyrocenter (guiding-center) orbit frequencies are kinetic orbit-dynamics quantities from the distributions IDS (whose default is transport); the LLM mis-routed them to computational_workflow. Every charged particle has a gyrocenter, so this is orbit/transport physics, not a workflow artifact. PROVISIONAL target: the move out of computational_workflow is settled, but the lead has not yet confirmed transport as the destination (alternatives considered: turbulence); update this entry if a different target is chosen."
+      "rationale": "Gyrocenter (guiding-center) orbit frequencies are kinetic orbit-dynamics quantities from the distributions IDS (whose default is transport); the LLM mis-routed them to computational_workflow. Every charged particle has a gyrocenter, so this is orbit/transport physics, not a workflow artifact. Target confirmed by the lead (2026-07-16)."
     },
     {
       "match": ["lh_antennas/", "pressure_tank"],
