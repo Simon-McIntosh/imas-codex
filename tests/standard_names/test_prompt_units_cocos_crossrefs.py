@@ -1,4 +1,4 @@
-"""W40 prompt-hardening tests: COCOS-N prohibition and inline-only cross-refs.
+"""Prompt-hardening tests: COCOS-N prohibition and inline-only cross-refs.
 
 Verifies that:
 1. The shared `_coordinate_conventions.md` fragment forbids citing COCOS-N
@@ -125,10 +125,13 @@ class TestGenerateDocsSystemSeeAlsoProhibition:
         # State the canonical principle (whitespace-tolerant — phrase may wrap).
         assert "structured metadata" in normalized
         assert "HAS_UNIT" in raw
-        # The three narrow exceptions must be spelled out.
-        assert "Numeric typical-value ranges" in raw
+        # The two narrow exceptions must be spelled out. Typical-value ranges
+        # are no longer an exception: normative documentation policy prohibits
+        # typical-values prose entirely, so no inline unit can ride on one.
         assert "Equation variable definitions" in raw
         assert "Unit-conversion statements" in raw
+        assert "Numeric typical-value ranges" not in raw
+        assert "Outside these two contexts" in raw
 
 
 # ---------------------------------------------------------------------------
