@@ -219,6 +219,64 @@ class TestReviewNameEditScope:
         assert "edit_status" not in seed_cypher
 
 
+class TestDocsPoolsEditScopeScoreGate:
+    """edits_only drops the name-score gate on the docs claim pools.
+
+    An open sn-edit is operator authorisation (like a curative scope_run_id):
+    catalog-imported names carry no reviewer_score_name, so keeping the gate
+    would make staged docs edits permanently unclaimable by ``sn run --edits``.
+    """
+
+    @pytest.mark.parametrize(
+        "claim_name",
+        [
+            "claim_review_docs_batch",
+            "claim_generate_docs_batch",
+            "claim_refine_docs_batch",
+        ],
+    )
+    def test_edits_only_drops_score_gate(self, claim_name):
+        import imas_codex.standard_names.graph_ops as graph_ops
+
+        claim = getattr(graph_ops, claim_name)
+        gc, tx = _mock_gc_tx()
+        tx.run = MagicMock(return_value=[])
+
+        with _patch_graph_ops_gc(gc):
+            items = claim(edits_only=True, batch_size=5)
+
+        assert items == []
+        seed_cypher = tx.run.call_args_list[0].args[0]
+        assert "reviewer_score_name" not in seed_cypher, (
+            f"{claim_name}: score gate must drop under edits_only:\n{seed_cypher}"
+        )
+        assert _EDIT_FRAGMENT in seed_cypher
+
+    @pytest.mark.parametrize(
+        "claim_name",
+        [
+            "claim_review_docs_batch",
+            "claim_generate_docs_batch",
+            "claim_refine_docs_batch",
+        ],
+    )
+    def test_default_keeps_score_gate(self, claim_name):
+        import imas_codex.standard_names.graph_ops as graph_ops
+
+        claim = getattr(graph_ops, claim_name)
+        gc, tx = _mock_gc_tx()
+        tx.run = MagicMock(return_value=[])
+
+        with _patch_graph_ops_gc(gc):
+            items = claim(batch_size=5)
+
+        assert items == []
+        seed_cypher = tx.run.call_args_list[0].args[0]
+        assert "reviewer_score_name" in seed_cypher, (
+            f"{claim_name}: unscoped claims must keep the score gate:\n{seed_cypher}"
+        )
+
+
 # ---------------------------------------------------------------------------
 # 3. _build_pool_specs threads edits_only to the claim adapters
 # ---------------------------------------------------------------------------

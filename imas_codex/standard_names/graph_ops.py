@@ -8858,9 +8858,13 @@ def claim_review_docs_batch(
     # already-accepted and operator-authorised for re-docs, so the name-score
     # gate is dropped inside the scope (mirrors claim_generate_docs_batch) —
     # otherwise derived-leaf families draft docs that can never be reviewed.
+    # The same operator authorisation holds under edits_only: an open sn-edit
+    # is an explicit steered proposal on a name whose form is already
+    # authoritative (catalog-imported names carry no reviewer_score_name), so
+    # without this exemption staged docs edits are permanently unclaimable.
     score_gate = (
         ""
-        if scope_run_id
+        if (scope_run_id or edits_only)
         else (
             " AND (sn.reviewer_score_name IS NOT NULL"
             " OR (coalesce(sn.origin, '') = 'derived'"
@@ -10843,9 +10847,12 @@ def claim_generate_docs_batch(
     # re-docs'ing them. Drop the name-score gate inside the scope so derived
     # leaf families (e.g. <species>_density_at_limiter) can be curatively
     # regenerated; the ``scope_run_id`` filter keeps the global backlog untouched.
+    # The same operator authorisation holds under edits_only (an open sn-edit
+    # is an explicit steered proposal; catalog-imported names carry no
+    # reviewer_score_name and would otherwise never draft).
     score_gate = (
         ""
-        if scope_run_id
+        if (scope_run_id or edits_only)
         else (
             " AND (sn.reviewer_score_name IS NOT NULL"
             " OR (coalesce(sn.origin, '') = 'derived'"
@@ -11138,9 +11145,11 @@ def claim_refine_docs_batch(
     # Name-form vetted gate (same invariant as generate_docs). CURATIVE-SCOPE
     # EXCEPTION: dropped under a scope_run_id so curatively-reset derived-leaf
     # families can refine (mirrors claim_generate_docs_batch/claim_review_docs_batch).
+    # Also dropped under edits_only — staged docs edits on catalog-imported
+    # names carry no reviewer_score_name and would otherwise never refine.
     score_gate = (
         ""
-        if scope_run_id
+        if (scope_run_id or edits_only)
         else (
             " AND (sn.reviewer_score_name IS NOT NULL"
             " OR (coalesce(sn.origin, '') = 'derived'"
