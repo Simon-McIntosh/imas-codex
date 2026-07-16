@@ -68,26 +68,39 @@ def test_line_of_sight_is_no_longer_a_geometry_carrier(axis):
 
 
 # ---------------------------------------------------------------------------
-# Local sensor-frame axes x1/x2/x3 — DISTINCT directions, registered carriers
-# (NOT ordinal points; they must NOT collapse, and must NOT use
-# first_coordinate/second_coordinate which are unregistered)
+# Local sensor-frame tangential axes — DISTINCT directions, registered
+# descriptive carriers. The DD-shaped x1/x2 labels are removed from the
+# grammar: the frame is expressed as first/second local tangential
+# directions (e3 = plasma-facing normal, e1 = more-horizontal tangent in
+# positive toroidal phi, e2 = e3 x e1).
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
     "carrier",
-    ["x1_coordinate", "x2_coordinate"],
+    ["first_local_tangential_coordinate", "second_local_tangential_coordinate"],
 )
 def test_local_sensor_axes_use_registered_carriers(carrier):
     seg = GrammarSegments(base_token=carrier, base_kind="geometry")
     assert _name(seg) == carrier
 
 
+@pytest.mark.parametrize("carrier", ["x1_coordinate", "x2_coordinate"])
+def test_dd_shaped_local_axis_labels_are_rejected(carrier):
+    """DD x1/x2 axis labels are no longer registered geometry carriers."""
+    with pytest.raises(ValidationError):
+        GrammarSegments(base_token=carrier, base_kind="geometry")
+
+
 def test_local_sensor_axes_stay_distinct():
-    """x1 and x2 are different axes — they must compose to different names."""
-    x1 = GrammarSegments(base_token="x1_coordinate", base_kind="geometry")
-    x2 = GrammarSegments(base_token="x2_coordinate", base_kind="geometry")
-    assert _name(x1) != _name(x2)
+    """The two tangential axes differ — they must compose to different names."""
+    first = GrammarSegments(
+        base_token="first_local_tangential_coordinate", base_kind="geometry"
+    )
+    second = GrammarSegments(
+        base_token="second_local_tangential_coordinate", base_kind="geometry"
+    )
+    assert _name(first) != _name(second)
 
 
 # ---------------------------------------------------------------------------
