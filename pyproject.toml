@@ -287,17 +287,19 @@ model = "openrouter/openai/gpt-5.4"
 batch-size = 50
 
 [tool.imas-codex.sn-docs]
-# Docs bake-off (2026-06-11, grounded claim-verification rubric with DD
-# ground truth in judge context, dual judges opus-4.6 + qwen3.7-max):
-# sonnet-4.6 judge-mean leader (0.740 vs gpt-5.5 0.700) at ~40% of the
-# price, AND passed the adversarial physics probe with DD-exact definitions
-# (magnetic_shear rho_tor convention, beta_pol 4*int(p dV)/(R0*mu0*Ip^2)).
-# deepseek-v4-flash REJECTED for docs (2nd time): textbook-plausible
-# definitional drift vs the DD, fabricated cross-links, and a genuine
-# physics error (I_p = int(j_par dS)) — generation depth does not transfer
-# to long-form physics prose. Names/compose verdict is separate ([sn-compose]).
-# Switch-back: model="openrouter/openai/gpt-5.5".
-model = "openrouter/anthropic/claude-sonnet-4.6"
+# Docs role bench (2026-07-17, 20-name stratified sample, strict-normative
+# prompt, opus-4.8 judge + banned-prose grep-audit): gpt-5.6-luna at rubric
+# parity with sonnet-4.6 (0.813 vs 0.806) with ZERO banned-prose findings
+# vs the incumbent's 15% rate — decisive for docs campaigns, whose
+# convergence gate hard-fails a batch on any banned-prose reintroduction —
+# and 23% cheaper. Sol scored +0.03 rubric at 2.6x luna's cost (reasoning
+# burn); not worth it.
+# deepseek-v4-flash REJECTED for docs (2026-06-11, 2nd time):
+# textbook-plausible definitional drift vs the DD, fabricated cross-links,
+# and a genuine physics error (I_p = int(j_par dS)) — generation depth does
+# not transfer to long-form physics prose.
+# Switch-back: model="openrouter/anthropic/claude-sonnet-4.6".
+model = "openrouter/openai/gpt-5.6-luna"
 # Reasoning effort for docs prose (OpenRouter unified field).
 reasoning-effort = "high"
 
@@ -575,18 +577,21 @@ api-key-env = "AMBIX_API_KEY"
 
 [tool.imas-codex.sn-review.names.profiles.default]
 # Production reviewer quorum: dual-blind qwen3.7-max + minimax-m3 (cheap,
-# vendor-diverse, reasoning-capable) + a gpt-5.5 breaker. Breaker re-bench
-# 2026-06-13 (40-item gold set, qwen json-bug fixed): the breaker only fires
-# on blind-pair disagreement, so INDEPENDENCE from the pair is what matters —
-# gpt-5.5 is the most independent (Spearman rho 0.92-0.94 vs qwen/minimax)
-# while opus-4.8 was near-redundant (rho 0.96-0.99); quality is a statistical
-# tie (disc 0.60-0.67 across all three). GPT self-bias is moot now the
-# generator is local deepseek-v4-flash, not GPT. All run at effort=high.
-# deepseek-v4-pro rejected (FR instability); gemini/DS4-flash weakest.
+# vendor-diverse, reasoning-capable) + a gpt-5.6-luna breaker. Names-breaker
+# role bench 2026-07-17 (30 quorum-scored names re-scored, independence
+# measured against the blind pair): luna is more decorrelated than gpt-5.5
+# (rho 0.252 vs 0.319; vs qwen essentially uncorrelated at 0.026) and its
+# quorum overrides are right more often (verdict-flip quality 0.714 vs
+# 0.545) at ~1/4 the cost. Caveat: flip-quality rests on a small
+# disagreement count (7 flips); the independence and cost gaps are the
+# robust n=30 signals. The DOCS breaker stays gpt-5.5 — same bench design
+# on the docs axis went the other way (see [sn-review.docs]).
+# All run at effort=high. deepseek-v4-pro rejected (FR instability);
+# gemini/DS4-flash weakest. Switch-back: "openrouter/openai/gpt-5.5".
 models = [
   "openrouter/qwen/qwen3.7-max",
   "openrouter/minimax/minimax-m3",
-  "openrouter/openai/gpt-5.5",
+  "openrouter/openai/gpt-5.6-luna",
 ]
 disagreement-threshold = 0.20
 
@@ -613,12 +618,15 @@ models = ["openrouter/anthropic/claude-opus-4.8"]
 disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
-# Mirrors the names quorum: qwen3.7-max + minimax-m3 blind + gpt-5.5 breaker
-# (breaker re-bench 2026-06-13 — gpt-5.5 most independent of the blind pair;
-# see [sn-review.names.profiles.default]). reasoning effort=high. Docs review
-# is where physics regressions must be caught; the independent breaker guards
-# against hallucinated-docs false positives on blind disagreement. All
-# OpenRouter — endpoints auto-resolve per model in _build_kwargs.
+# qwen3.7-max + minimax-m3 blind + gpt-5.5 breaker. The docs breaker HELD
+# gpt-5.5 in the 2026-07-17 role bench while the NAMES breaker switched to
+# luna — on the docs axis the incumbent is both the most independent of the
+# blind pair (rho 0.176 vs 0.227-0.247) and the most correct on overrides
+# (flip quality 0.286 vs 0.071/0.158; 5.6 tiers flip 2-3x more, nearly
+# always wrongly). reasoning effort=high. Docs review is where physics
+# regressions must be caught; the independent breaker guards against
+# hallucinated-docs false positives on blind disagreement. All OpenRouter —
+# endpoints auto-resolve per model in _build_kwargs.
 models = [
   "openrouter/qwen/qwen3.7-max",
   "openrouter/minimax/minimax-m3",
