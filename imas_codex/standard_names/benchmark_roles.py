@@ -244,6 +244,22 @@ def banned_prose_findings(text: str) -> dict[str, int]:
     }
 
 
+def _classify_refine_failure(exc: BaseException) -> str:
+    """Bucket a refine compose failure so an all-zero row explains itself.
+
+    ``kind_enum``  — the model set the entry ``kind`` to a value outside
+    {scalar, vector, metadata} (a schema/prompt gap, not name quality).
+    ``grammar_token`` — the model used an unregistered grammar token.
+    ``other`` — anything else (timeouts, provider errors, empty responses).
+    """
+    msg = str(exc).lower()
+    if "kind must be one of" in msg:
+        return "kind_enum"
+    if "not a registered" in msg:
+        return "grammar_token"
+    return "other"
+
+
 def exact_match_accuracy(
     predicted: dict[str, str], expected: dict[str, str]
 ) -> tuple[float, int, int]:
@@ -544,7 +560,12 @@ def _format_critique(critique: dict) -> str:
 # ═══════════════════════════════════════════════════════════════════════
 
 
-def build_refine_prompt_context(case: dict, compose_context: dict, rules: list) -> dict:
+def build_refine_prompt_context(
+    case: dict,
+    compose_context: dict,
+    rules: list,
+    scored_examples: list | None = None,
+) -> dict:
     """Build the refine prompt context for one case, mirroring production.
 
     Merges ``compose_context`` (from ``build_compose_context``) so the refine
@@ -553,6 +574,14 @@ def build_refine_prompt_context(case: dict, compose_context: dict, rules: list) 
     invents unregistered tokens — the bench would then measure a grammar-
     failure artifact rather than refine quality (the same empty-grammar-block
     gap ``process_refine_name_batch`` guards against in production).
+
+    ``scored_examples`` are the domain-scoped calibration examples production
+    loads via ``load_compose_examples``.  The ``_compose_scored_examples.md``
+    include renders each with its ``kind=<scalar|vector|metadata>`` tag — the
+    only place the refine prompt shows a valid entry kind.  Without them the
+    model has no in-prompt signal for the free-string ``kind`` field and sets
+    it to a semantic guess (e.g. ``standard_name``), failing RefinedName
+    validation on every case, so the examples must be fed like production.
     """
     chain_history = [
         {
@@ -576,6 +605,7 @@ def build_refine_prompt_context(case: dict, compose_context: dict, rules: list) 
         "hybrid_neighbours": [],
         "fanout_evidence": "",
         "composition_rules": rules,
+        "compose_scored_examples": scored_examples or [],
     }
 
 
@@ -587,12 +617,16 @@ async def run_refine_bench(
     reasoning_effort: str | None = None,
 ) -> RoleBenchReport:
     """Benchmark the refine seat: defect-resolution + collateral change."""
+    from collections import Counter
+
     from pydantic import BaseModel, Field
 
     from imas_codex.discovery.base.llm import acall_llm_structured, ensure_model_prefix
+    from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import load_prompt_config, render_prompt
     from imas_codex.standard_names.benchmark import _resolve_name
     from imas_codex.standard_names.context import build_compose_context
+    from imas_codex.standard_names.example_loader import load_compose_examples
     from imas_codex.standard_names.models import RefinedName
 
     # The refine system prompt's grammar-reference include renders the
@@ -614,14 +648,35 @@ async def run_refine_bench(
     except Exception:
         rules = []
 
+    # Domain-scoped scored examples, loaded once per physics domain and reused
+    # across candidates — mirrors production's per-item load_compose_examples.
+    # These carry the only in-prompt signal for the valid entry ``kind``.
+    examples_by_domain: dict[str, list] = {}
+    with GraphClient() as _gc:
+        for domain in {c.get("physics_domain") or "" for c in corpus}:
+            try:
+                examples_by_domain[domain] = load_compose_examples(
+                    _gc, physics_domains=[domain], axis="name"
+                )
+            except Exception:
+                logger.debug("refine bench: scored-example load failed for %r", domain)
+                examples_by_domain[domain] = []
+
     results: list[RoleModelResult] = []
+
     for model in models:
         m = ensure_model_prefix(model)
         res = RoleModelResult(model=model)
         dr_vals: list[float] = []
         cc_vals: list[float] = []
+        fail_reasons: Counter[str] = Counter()
         for case in corpus:
-            prompt_context = build_refine_prompt_context(case, compose_context, rules)
+            prompt_context = build_refine_prompt_context(
+                case,
+                compose_context,
+                rules,
+                examples_by_domain.get(case.get("physics_domain") or "", []),
+            )
             try:
                 user_prompt = render_prompt("sn/refine_name_user", prompt_context)
                 try:
@@ -644,6 +699,7 @@ async def run_refine_bench(
                 )
                 res.cost += cost
             except Exception as exc:
+                fail_reasons[_classify_refine_failure(exc)] += 1
                 logger.warning("refine %s failed on %s: %s", model, case["sn_id"], exc)
                 continue
 
@@ -686,12 +742,30 @@ async def run_refine_bench(
                 cc_vals.append(float(judgement.collateral_change))
                 res.n += 1
             except Exception as exc:
+                fail_reasons["judge_error"] += 1
                 logger.warning("refine judge failed on %s: %s", case["sn_id"], exc)
 
         if dr_vals:
             res.metrics["defect_resolution"] = round(sum(dr_vals) / len(dr_vals), 4)
             res.metrics["collateral_change"] = round(sum(cc_vals) / len(cc_vals), 4)
+        # A model that judged zero cases produced no signal — record why loudly
+        # rather than emitting a hollow all-zeros row that renders as a valid
+        # table.  The failure breakdown (kind-enum vs grammar-token vs judge)
+        # tells the reader whether it is a candidate defect or a bench gap.
+        if res.n == 0:
+            breakdown = ", ".join(f"{k}={v}" for k, v in sorted(fail_reasons.items()))
+            res.error = f"0/{len(corpus)} cases judged; failures: {breakdown or 'none'}"
+        res.metrics["valid_refine_rate"] = (
+            round(res.n / len(corpus), 4) if corpus else 0.0
+        )
         results.append(res)
+
+    if results and all(r.n == 0 for r in results):
+        detail = "; ".join(f"{r.model}: {r.error}" for r in results)
+        raise RuntimeError(
+            "refine bench produced no judged cases for any model — refusing to "
+            f"save a hollow report ({detail})"
+        )
 
     return RoleBenchReport(
         role="refine",

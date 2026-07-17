@@ -260,3 +260,29 @@ class TestRefinePromptContext:
             "grammar": "use the q-profile token"
         }
         assert ctx["composition_rules"] == ["r1"]
+
+    def test_scored_examples_carry_into_context(self):
+        # The examples are the only place the refine prompt shows a valid entry
+        # kind (kind=<scalar|vector|metadata>); they must reach the context.
+        examples = [{"id": "q", "kind": "scalar", "reviewer_score": 0.9}]
+        ctx = br.build_refine_prompt_context(
+            self._CASE, {}, rules=[], scored_examples=examples
+        )
+        assert ctx["compose_scored_examples"] == examples
+
+    def test_scored_examples_default_empty(self):
+        ctx = br.build_refine_prompt_context(self._CASE, {}, rules=[])
+        assert ctx["compose_scored_examples"] == []
+
+
+class TestClassifyRefineFailure:
+    def test_kind_enum(self):
+        exc = ValueError("kind must be one of {'scalar'}, got 'standard_name'")
+        assert br._classify_refine_failure(exc) == "kind_enum"
+
+    def test_grammar_token(self):
+        exc = ValueError("qualifier 'perturbed' is not a registered grammar token")
+        assert br._classify_refine_failure(exc) == "grammar_token"
+
+    def test_other(self):
+        assert br._classify_refine_failure(RuntimeError("provider timeout")) == "other"
