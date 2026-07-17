@@ -437,11 +437,16 @@ def _submit_service_job(
         partition = _gpu_partition()
         host = _gpu_entry()["location"]
         partition_name = partition["name"]
+        # Some GPU nodes are only reachable through a standing group
+        # reservation (OVERLAP flag) — plain submissions see the node as
+        # 'resv' and never schedule, so the job must name the reservation.
+        reservation = partition.get("reservation")
     else:
         # CPU-only services (e.g. Neo4j) use a general partition —
         # don't pin to the GPU node where embed runs.
         partition_name = _general_partition_name()
         host = None
+        reservation = None
 
     if host:
         node_state, reason = _get_node_state(host)
@@ -458,12 +463,16 @@ def _submit_service_job(
 
     gres_line = f"#SBATCH --gres=gpu:{gpus}\n" if gpus > 0 else ""
     nodelist_line = f"#SBATCH --nodelist={host}\n" if host else ""
+    reservation_line = (
+        f"#SBATCH --reservation={reservation}\n" if reservation else ""
+    )
 
     script = (
         "#!/bin/bash\n"
         f"#SBATCH --partition={partition_name}\n"
         f"{gres_line}"
         f"{nodelist_line}"
+        f"{reservation_line}"
         f"#SBATCH --cpus-per-task={cpus}\n"
         f"#SBATCH --mem={mem}\n"
         "#SBATCH --time=UNLIMITED\n"
