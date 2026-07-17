@@ -3,8 +3,9 @@
 ``derive_kind`` must defer to ISN's authoritative base classification: a
 ``physical_base`` declared ``vector`` in the ISN registry yields ``vector``,
 a projected component of it yields ``scalar``, and a tensor base yields
-``tensor``.  The codex-only extended kinds (eigenfunction / spectrum /
-complex) that the ISN base registry does not model are layered on top.
+``tensor``.  Kind mirrors the ISN catalog ``Kind`` enum exactly — semantic
+categories (eigenfunction / spectrum) are structurally scalar; only the
+complex-part pattern layers on top of the structural classification.
 
 Regression: before the ISN rewrite, ``derive_kind`` never returned
 ``vector`` (its hand-maintained base list was stale and no code path
@@ -109,13 +110,13 @@ class TestTensor:
 
 
 class TestCodexExtendedKinds:
-    def test_eigenfunction(self) -> None:
-        assert derive_kind("plasma_displacement_eigenfunction") == "eigenfunction"
-        assert derive_kind("eigenfunction") == "eigenfunction"
+    def test_eigenfunction_is_structurally_scalar(self) -> None:
+        assert derive_kind("plasma_displacement_eigenfunction") == "scalar"
+        assert derive_kind("eigenfunction") == "scalar"
 
-    def test_spectrum(self) -> None:
-        assert derive_kind("magnetic_fluctuation_spectrum") == "spectrum"
-        assert derive_kind("density_fluctuation_spectrum") == "spectrum"
+    def test_spectrum_is_structurally_scalar(self) -> None:
+        assert derive_kind("magnetic_fluctuation_spectrum") == "scalar"
+        assert derive_kind("density_fluctuation_spectrum") == "scalar"
 
     @pytest.mark.parametrize(
         "name",
@@ -150,7 +151,8 @@ class TestToIsnKind:
             ("tensor", "tensor"),
             ("complex", "complex"),
             ("metadata", "metadata"),
-            # Codex-only extended kinds collapse to scalar for ISN validation.
+            # Legacy graph values from the retired extended vocabulary
+            # still collapse to scalar.
             ("eigenfunction", "scalar"),
             ("spectrum", "scalar"),
             (None, "scalar"),
@@ -159,3 +161,26 @@ class TestToIsnKind:
     )
     def test_mapping(self, local: str | None, expected: str) -> None:
         assert to_isn_kind(local) == expected
+
+
+class TestKindVocabularyConsistency:
+    """One kind vocabulary, three carriers — LinkML is the generated source.
+
+    The LLM-facing ``EntryKind`` Literal (kept flat so structured-output
+    schemas carry a plain enum, no $ref), the LinkML-generated
+    ``StandardNameKind`` graph enum, and the ISN catalog ``Kind`` enum must
+    never drift apart.
+    """
+
+    def test_three_way_equality(self) -> None:
+        from typing import get_args
+
+        from imas_standard_names.models import Kind as IsnKind
+
+        from imas_codex.graph.models import StandardNameKind
+        from imas_codex.standard_names.models import EntryKind
+
+        literal = set(get_args(EntryKind))
+        graph = {e.value for e in StandardNameKind}
+        isn = {k.value for k in IsnKind}
+        assert literal == graph == isn

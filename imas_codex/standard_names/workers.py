@@ -5373,7 +5373,8 @@ async def process_generate_name_batch(
 # routed to the exhaust path rather than re-claimed and re-charged forever.
 _GRAMMAR_FAILURE_MARKERS: tuple[str, ...] = (
     "not a registered",  # unregistered grammar token (base/qualifier/axis)
-    "kind must be one of",  # schema enum violation (deterministic)
+    "kind must be one of",  # legacy schema enum violation message
+    "input should be",  # pydantic Literal enum violation (deterministic)
     "self-referential refined_from",  # refine produced an identical name
     "validation error for refinedname",  # pydantic RefinedName validation
 )

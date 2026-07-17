@@ -4,22 +4,34 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
 logger = logging.getLogger(__name__)
 
-# Valid enum values for IR segment fields.  Plain ``str`` is used on the
-# Pydantic model (instead of ``Literal``) because Anthropic/OpenRouter
+# Valid enum values for NULLABLE IR segment fields.  Plain ``str`` is used on
+# the Pydantic model (instead of ``Literal``) because Anthropic/OpenRouter
 # rejects ``anyOf: [{enum: [...]}, {type: null}]`` patterns in structured
-# output schemas.  Validators below enforce the allowed values.
+# output schemas.  Validators below enforce the allowed values.  This caveat
+# applies only to nullable fields — a non-nullable Literal with a default
+# emits a clean ``{"enum": [...], "type": "string"}`` that providers accept,
+# so required enums (e.g. entry ``kind``) carry the constraint in-schema and
+# the model sees the permitted values instead of guessing from examples.
 _BASE_KINDS = {"quantity", "geometry"}
 _PROJECTION_SHAPES = {"component", "coordinate"}
 _LOCUS_RELATIONS = {"of", "at", "over"}
 _LOCUS_TYPES = {"entity", "position", "region", "geometry"}
 _OPERATOR_KINDS = {"unary_prefix", "unary_postfix", "binary"}
-_ENTRY_KINDS = {"scalar", "vector", "metadata"}
+
+# Entry kind of a catalog entry. In-schema enum: structured-output providers
+# constrain generation to these literals, so validity does not depend on
+# scored examples happening to demonstrate a kind. A static Literal (not the
+# generated StandardNameKind enum class) keeps the JSON schema a flat
+# ``{"enum": [...], "type": "string"}`` with no $ref indirection; a unit test
+# asserts it stays equal to the LinkML-generated enum and the ISN Kind enum,
+# so the LinkML schema remains the source of truth.
+EntryKind = Literal["scalar", "vector", "tensor", "complex", "metadata"]
 
 # Binary operators combine two operands into ``<op>_of_<A>_<sep>_<B>`` (e.g.
 # ``ratio_of_electron_temperature_to_ion_temperature``). ISN's model layer
@@ -592,7 +604,13 @@ class StandardNameCandidate(BaseModel):
         default="",
         description="1-line ≤120 char summary of the physical quantity",
     )
-    kind: str = Field(default="scalar", description="Entry kind")
+    kind: EntryKind = Field(
+        default="scalar",
+        description=(
+            "Structural entry kind: scalar | vector | tensor | complex | "
+            "metadata (scalar for projected components and reductions)"
+        ),
+    )
     dd_paths: list[str] = Field(
         default_factory=list, description="Mapped IMAS DD paths"
     )
@@ -615,12 +633,6 @@ class StandardNameCandidate(BaseModel):
             segments = {k: data.pop(k) for k in seg_keys}
             data["segments"] = segments
         return data
-
-    @model_validator(mode="after")
-    def _validate_kind(self) -> StandardNameCandidate:
-        if self.kind not in _ENTRY_KINDS:
-            raise ValueError(f"kind must be one of {_ENTRY_KINDS}, got '{self.kind}'")
-        return self
 
     # --- Convenience accessors delegating to segments ---
 
@@ -1452,7 +1464,13 @@ class RefinedName(BaseModel):
     description: str = Field(
         ..., description="One-sentence physics definition (≤ 120 chars, no LaTeX)"
     )
-    kind: str = Field(default="scalar", description="Entry kind")
+    kind: EntryKind = Field(
+        default="scalar",
+        description=(
+            "Structural entry kind: scalar | vector | tensor | complex | "
+            "metadata (scalar for projected components and reductions)"
+        ),
+    )
     reason: str = Field(
         default="",
         description="Brief justification for how this addresses reviewer concerns",
@@ -1473,12 +1491,6 @@ class RefinedName(BaseModel):
             segments = {k: data.pop(k) for k in seg_keys}
             data["segments"] = segments
         return data
-
-    @model_validator(mode="after")
-    def _validate_kind(self) -> RefinedName:
-        if self.kind not in _ENTRY_KINDS:
-            raise ValueError(f"kind must be one of {_ENTRY_KINDS}, got '{self.kind}'")
-        return self
 
     # --- Convenience accessors delegating to segments ---
 

@@ -4,10 +4,12 @@ Deterministic classification overriding the LLM's ``kind`` field (the LLM
 defaults to ``scalar`` for everything).  The structural kind of a name is
 authoritative in ISN: each ``physical_base`` token is declared ``scalar`` /
 ``vector`` / ``tensor`` in the ISN base registry, and a projected component
-(or a magnitude reduction) of a vector is itself a scalar.  We defer to ISN
-for that classification and layer on top the codex-only extended kinds
-(``eigenfunction`` / ``spectrum`` / ``complex``) that the ISN base registry
-does not model.
+(or a magnitude reduction) of a vector is itself a scalar.  Kind is the
+STRUCTURAL classification and mirrors the ISN catalog ``Kind`` enum exactly
+(single vocabulary, LinkML ``StandardNameKind`` is the generated source) —
+semantic categories are not kinds: an eigenfunction or a spectrum is
+structurally a scalar unless it names a complex part or carries vector
+topology.
 
 All returned values are validated against the LinkML ``StandardNameKind``
 enum at import time.
@@ -40,8 +42,6 @@ def _load_valid_kinds() -> frozenset[str]:
             "scalar",
             "vector",
             "tensor",
-            "eigenfunction",
-            "spectrum",
             "complex",
             "metadata",
         }
@@ -131,21 +131,18 @@ def derive_kind(name: str) -> str:
     1. **Tensor** — an ISN tensor base (e.g. ``metric_tensor``) or a codex
        ``_tensor`` compound the ISN registry does not model (e.g.
        ``reynolds_stress_tensor``, ``maxwell_stress_tensor``).
-    2. **Eigenfunction** (codex-only) — ``_eigenfunction``.
-    3. **Spectrum** (codex-only) — trailing ``_spectrum``.
-    4. **Complex** (codex-only) — ``real_part`` / ``imaginary_part`` mark a
-       component of a complex-valued pair.
-    5. **Scalar** — a projected component/coordinate axis or a magnitude
+    2. **Complex** — ``real_part`` / ``imaginary_part`` mark a component of
+       a complex-valued pair.
+    3. **Scalar** — a projected component/coordinate axis or a magnitude
        reduction of a vector/tensor (per the ISN parse).
-    6. **Vector** — an ISN vector base (``magnetic_field``, ``velocity``,
+    4. **Vector** — an ISN vector base (``magnetic_field``, ``velocity``,
        ``current_density``, …) with no scalar-reducing projection.
-    7. Default → ``scalar``.
+    5. Default → ``scalar``.
 
-    Codex-only extended kinds (1–4, apart from the ISN-registered tensor
-    base) are matched on the name string and take precedence over the ISN
-    structural scalar/vector kind, both because they classify concepts the
-    ISN base registry does not model and because several of them do not parse
-    as ISN names at all.
+    Eigenfunction / spectrum names carry no kind of their own — they are
+    semantic categories, structurally scalar (or complex via rule 2, or
+    vector via projection topology), matching what the catalog export has
+    always emitted for them.
     """
     valid = _load_valid_kinds()
     name_lower = name.lower()
@@ -161,38 +158,28 @@ def derive_kind(name: str) -> str:
         if re.search(r"_tensor(?:_|$)", name_lower):
             return "tensor"
 
-    # 2. Eigenfunction (codex-only extended kind).
-    if ("_eigenfunction" in name_lower or name_lower == "eigenfunction") and (
-        "eigenfunction" in valid
-    ):
-        return "eigenfunction"
-
-    # 3. Spectrum (codex-only extended kind).
-    if name_lower.endswith("_spectrum") and "spectrum" in valid:
-        return "spectrum"
-
-    # 4. Complex part (codex-only extended kind).
+    # 2. Complex part.
     if ("real_part" in name_lower or "imaginary_part" in name_lower) and (
         "complex" in valid
     ):
         return "complex"
 
-    # 5. Scalar projection (component / coordinate axis or magnitude).
+    # 3. Scalar projection (component / coordinate axis or magnitude).
     if structural == "scalar" and "scalar" in valid:
         return "scalar"
 
-    # 6. Vector base with no scalar-reducing projection.
+    # 4. Vector base with no scalar-reducing projection.
     if structural == "vector" and "vector" in valid:
         return "vector"
 
-    # 7. Default.
+    # 5. Default.
     return "scalar"
 
 
-# Mapping from extended local kinds → ISN's discriminator.
-# ISN now supports {scalar, vector, tensor, complex, metadata}.
-# Eigenfunction and spectrum are still codex-only extended kinds
-# that collapse to scalar for ISN validation.
+# Kind values map to ISN's discriminator one-to-one now that the local
+# vocabulary mirrors the ISN Kind enum. The retired extended kinds
+# (eigenfunction / spectrum) stay as legacy entries so stale graph data
+# written before the vocabulary was unified still collapses to scalar.
 _ISN_KIND_MAP: dict[str, str] = {
     "scalar": "scalar",
     "vector": "vector",
@@ -205,7 +192,7 @@ _ISN_KIND_MAP: dict[str, str] = {
 
 
 def to_isn_kind(kind: str | None) -> str:
-    """Map a local extended kind value to one ISN's discriminator accepts.
+    """Map a stored kind value to one ISN's discriminator accepts.
 
     Defaults to ``scalar`` for unknown values so validation never crashes
     on a kind the ISN library doesn't recognise.

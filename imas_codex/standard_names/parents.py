@@ -265,10 +265,10 @@ def recompute_parent_kind(name: str, gc: _TopologyProbe) -> str:
 
     - ``vector`` if ≥2 distinct-axis projection children exist
     - ``tensor`` if the name contains ``_tensor``
-    - ``eigenfunction`` if the name contains ``_eigenfunction``
-    - ``spectrum`` if the name ends with ``_spectrum``
     - ``complex`` if the name contains ``real_part`` / ``imaginary_part``
-    - ``scalar`` otherwise
+    - ``scalar`` otherwise (including eigenfunction / spectrum names —
+      semantic categories, structurally scalar; kind mirrors the ISN
+      catalog Kind enum exactly)
 
     Topology beats the string pattern when both fire (a name like
     ``foo_spectrum`` with multi-axis projections still returns
@@ -288,10 +288,6 @@ def recompute_parent_kind(name: str, gc: _TopologyProbe) -> str:
         return "vector"
     if "_tensor" in name:
         return "tensor"
-    if "_eigenfunction" in name:
-        return "eigenfunction"
-    if name.endswith("_spectrum"):
-        return "spectrum"
     if "real_part" in name or "imaginary_part" in name:
         return "complex"
     return "scalar"

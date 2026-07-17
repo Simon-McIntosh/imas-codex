@@ -157,6 +157,11 @@ Rules:
   `locus_relation="of"`. Abstract spatial regions from the position vocabulary
   (core, pedestal_top, lcfs) use `locus_relation="at"`.
 - Provide a short `description` (≤ 120 chars, one sentence, no LaTeX).
+- Set `kind` to exactly one of `"scalar"`, `"vector"`, `"tensor"`,
+  `"complex"`, `"metadata"` — the structural classification of the quantity.
+  Almost always `"scalar"` (every projected component or reduction is a
+  scalar); `"vector"` only for an unprojected vector field; never invent
+  other values.
 - **No storage-shape tags** — NEVER write "1D", "2D", "3D", "profile", "array"
   in descriptions. Describe the *physics*, not data layout.
 - **American English only** — "center" not "centre", "meter" not "metre".

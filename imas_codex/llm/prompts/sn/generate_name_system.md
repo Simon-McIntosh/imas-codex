@@ -495,7 +495,7 @@ Each candidate MUST include these fields:
 - `source_id`: full DD path (e.g., `"equilibrium/time_slice/profiles_1d/psi"`)
 - `segments`: object containing the IR grammar segment fields (see below)
 - `description`: one-sentence summary, **under 120 characters** (e.g., `"Electron temperature on the poloidal flux grid"`)
-- `kind`: one of `"scalar"`, `"vector"`, `"metadata"` — see classification rules
+- `kind`: one of `"scalar"`, `"vector"`, `"tensor"`, `"complex"`, `"metadata"` — see classification rules
 - `dd_paths`: array of IMAS DD paths this name maps to (include the source_id at minimum)
 - `reason`: brief justification (≤25 words — list the IR segments used; do not restate description)
 
@@ -743,7 +743,12 @@ it or report a `vocab_gap`.
 {% else %}
 ### Kind Classification Rules
 
+(Fallback — mirrors the ISN catalog Kind enum; the rendered context normally
+injects these definitions from ISN directly.)
+
 - **scalar**: single value per spatial point or time — temperature, density, current, pressure, energy, power, frequency, flux, beta, safety factor
 - **vector**: has R/Z or multi-component structure — magnetic field, velocity field, gradient, current density vector, force density
+- **tensor**: rank-2+ quantity — metric tensor, stress tensor, conductivity tensor (full or component)
+- **complex**: complex-valued quantity — real/imaginary parts or magnitude/phase pairs
 - **metadata**: non-measurable concepts, technique names, classifications, indices, status flags — confinement mode label, scenario identifier
 {% endif %}

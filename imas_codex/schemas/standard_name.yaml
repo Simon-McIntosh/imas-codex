@@ -135,7 +135,12 @@ enums:
           path the check does not run). The default for un-adjudicated gaps.
 
   StandardNameKind:
-    description: Entry kind for standard names
+    description: >-
+      Entry kind for standard names — the structural classification of the
+      quantity. Mirrors the ISN catalog Kind enum exactly (ISN is the
+      authority; a kind outside this set cannot export). Semantic categories
+      are not kinds: an eigenfunction is structurally complex, a spectrum is
+      structurally scalar.
     permissible_values:
       scalar:
         description: Scalar quantity
@@ -143,10 +148,6 @@ enums:
         description: Vector quantity (rank-1, including named single components)
       tensor:
         description: Tensor quantity (rank-2+, e.g. metric tensor, stress tensor)
-      eigenfunction:
-        description: Eigenfunction of a linear operator (MHD, wave, etc.)
-      spectrum:
-        description: Spectral quantity (per-mode or per-frequency decomposition)
       complex:
         description: Complex-valued quantity (real/imaginary parts or magnitude/phase)
       metadata:
@@ -552,7 +553,9 @@ classes:
           excluded.
           Uses [name](#name) inline links to other standard names.
       kind:
-        description: Entry kind — scalar, vector, or metadata
+        description: >-
+          Entry kind — structural classification (see StandardNameKind);
+          mirrors the ISN catalog Kind enum
         range: StandardNameKind
       links:
         description: Internal cross-references to related standard names (name only)

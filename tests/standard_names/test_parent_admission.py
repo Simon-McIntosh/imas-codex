@@ -155,13 +155,13 @@ class TestRecomputeParentKind:
         gc = _StubGraph(rows=[{"n": 0}])
         assert recompute_parent_kind("metric_tensor", gc) == "tensor"
 
-    def test_spectrum_pattern(self) -> None:
+    def test_spectrum_is_structurally_scalar(self) -> None:
         gc = _StubGraph(rows=[{"n": 0}])
-        assert recompute_parent_kind("density_spectrum", gc) == "spectrum"
+        assert recompute_parent_kind("density_spectrum", gc) == "scalar"
 
-    def test_eigenfunction_pattern(self) -> None:
+    def test_eigenfunction_is_structurally_scalar(self) -> None:
         gc = _StubGraph(rows=[{"n": 0}])
-        assert recompute_parent_kind("mhd_eigenfunction", gc) == "eigenfunction"
+        assert recompute_parent_kind("mhd_eigenfunction", gc) == "scalar"
 
     def test_complex_real_part(self) -> None:
         gc = _StubGraph(rows=[{"n": 0}])
