@@ -106,12 +106,13 @@ def test_retry_k_expansion_env(monkeypatch):
 def test_pool_replicas_default_from_pyproject():
     """Per-pool replica counts come from ``[tool.imas-codex.sn-pools]``.
 
-    Generate pools are sized for the 2-GPU local vLLM profile (32); review
-    pools hit OpenRouter (64) and refine pools carry a small backlog (32).
+    Generate-name is sized at the medium-effort knee of the 2-GPU local
+    vLLM profile (24); review pools hit OpenRouter (64) and refine pools
+    carry a small backlog (32).
     """
     from imas_codex.settings import get_pool_replicas
 
-    assert get_pool_replicas("generate_name") == 32
+    assert get_pool_replicas("generate_name") == 24
     assert get_pool_replicas("review_name") == 64
     assert get_pool_replicas("refine_name") == 32
     assert get_pool_replicas("generate_docs") == 32

@@ -202,12 +202,26 @@ def get_model_config(section: str) -> dict[str, str | None]:
 _MODEL_ENDPOINTS: dict[str, dict[str, str | None]] = {}
 
 
-def register_model_endpoints() -> None:
-    """Scan all model sections and register endpoint overrides.
+# Model-id prefixes that denote a locally-served endpoint. Only these are
+# safe to bind to a section's ``api-base`` when they appear in a mixed
+# ``models`` LIST — the openrouter/-prefixed entries in the same list must
+# keep default proxy routing.
+_LOCAL_ENDPOINT_PREFIXES = ("hosted_vllm/", "ollama/")
 
-    Called once at import time.  Sections with ``api-base`` configured
-    get their model→endpoint mapping cached so that ``_build_kwargs()``
-    can resolve them without knowing which section a model came from.
+
+def register_model_endpoints() -> None:
+    """Scan the config tree and register model→endpoint overrides.
+
+    Called once at import time; queried by ``_build_kwargs()`` so any caller
+    (pools, benches, one-off tools) can resolve a local endpoint without
+    knowing which section a model came from. Two passes:
+
+    1. Model sections (``MODEL_SECTIONS``): a section with ``api-base``
+       binds its singular ``model`` to that endpoint.
+    2. Any ``[tool.imas-codex.*]`` subsection carrying BOTH ``api-base`` and
+       a ``models`` list (e.g. review quorums): only the locally-served
+       entries (``hosted_vllm/``, ``ollama/``) bind to the endpoint —
+       openrouter/-prefixed entries in the same list keep proxy routing.
     """
     for section in MODEL_SECTIONS:
         try:
@@ -220,6 +234,27 @@ def register_model_endpoints() -> None:
                 "api_base": cfg["api_base"],
                 "api_key_env": cfg.get("api_key_env"),
             }
+
+    def _walk(node: dict) -> None:
+        api_base = node.get("api-base")
+        models = node.get("models")
+        if api_base and isinstance(models, list):
+            for model_id in models:
+                if isinstance(model_id, str) and model_id.startswith(
+                    _LOCAL_ENDPOINT_PREFIXES
+                ):
+                    _MODEL_ENDPOINTS.setdefault(
+                        model_id,
+                        {
+                            "api_base": api_base,
+                            "api_key_env": node.get("api-key-env"),
+                        },
+                    )
+        for value in node.values():
+            if isinstance(value, dict):
+                _walk(value)
+
+    _walk(_load_pyproject_settings())
 
 
 def get_model_endpoint(model: str) -> dict[str, str | None] | None:
