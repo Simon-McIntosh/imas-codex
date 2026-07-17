@@ -1963,6 +1963,48 @@ def sn_run(
             )
         return
 
+    # Handle --revalidate: clear validated_at on pending/quarantined SNs in the
+    # current scope so validate_worker re-runs ISN checks without a full regen.
+    # Quarantined names are included because a quarantine stamped under an older
+    # grammar or gate is exactly what a re-validation is asked to reassess; a
+    # genuine defect re-quarantines with the same finding. Must run BEFORE the
+    # scope-routing below — both the pool orchestrator and the single-pass path
+    # pick the cleared names up via claim_names_for_validation.
+    if revalidate and not dry_run:
+        from imas_codex.graph.client import GraphClient
+
+        revalidate_domain: str | None = domains[0] if len(domains) == 1 else None
+        with GraphClient() as gc:
+            where_clauses = [
+                "sn.validation_status IN ['pending', 'quarantined']",
+                "sn.validated_at IS NOT NULL",
+            ]
+            params: dict[str, Any] = {}
+            if revalidate_domain:
+                where_clauses.append("sn.physics_domain = $domain")
+                params["domain"] = revalidate_domain
+            if source == "dd":
+                where_clauses.append(
+                    "EXISTS { MATCH (sn)<-[:HAS_STANDARD_NAME]-(:IMASNode) }"
+                )
+            elif source == "signals":
+                where_clauses.append(
+                    "EXISTS { MATCH (sn)<-[:HAS_STANDARD_NAME]-(:FacilitySignal) }"
+                )
+            q = f"""
+                MATCH (sn:StandardName)
+                WHERE {" AND ".join(where_clauses)}
+                WITH sn, sn.id AS id
+                SET sn.validated_at = NULL, sn.claimed_at = NULL, sn.claim_token = NULL
+                RETURN count(sn) AS n
+            """
+            rows = list(gc.query(q, **params))
+            n = rows[0]["n"] if rows else 0
+            console.print(
+                f"[yellow]--revalidate:[/yellow] cleared validated_at on {n} "
+                "pending/quarantined SN node(s)"
+            )
+
     # Scope-routing: default (DD source) → pool orchestrator.
     # Runs all 6 pools concurrently, sampling globally from the available
     # pool of StandardNameSource / StandardName nodes.
@@ -2018,44 +2060,6 @@ def sn_run(
         logger.info("--retry-skipped set (pending Phase B wire-up)")
     if retry_vocab_gap:
         logger.info("--retry-vocab-gap set (pending Phase B wire-up)")
-
-    # Handle --revalidate: clear validated_at on pending/quarantined SNs in the
-    # current scope so validate_worker re-runs ISN checks without a full regen.
-    # Quarantined names are included because a quarantine stamped under an older
-    # grammar or gate is exactly what a re-validation is asked to reassess; a
-    # genuine defect re-quarantines with the same finding. Safe with any source.
-    if revalidate and not dry_run:
-        from imas_codex.graph.client import GraphClient
-
-        with GraphClient() as gc:
-            where_clauses = [
-                "sn.validation_status IN ['pending', 'quarantined']",
-                "sn.validated_at IS NOT NULL",
-            ]
-            params: dict[str, Any] = {}
-            if domain_filter:
-                where_clauses.append("sn.physics_domain = $domain")
-                params["domain"] = domain_filter
-            if source == "dd":
-                where_clauses.append(
-                    "EXISTS { MATCH (sn)<-[:HAS_STANDARD_NAME]-(:IMASNode) }"
-                )
-            elif source == "signals":
-                where_clauses.append(
-                    "EXISTS { MATCH (sn)<-[:HAS_STANDARD_NAME]-(:FacilitySignal) }"
-                )
-            q = f"""
-                MATCH (sn:StandardName)
-                WHERE {" AND ".join(where_clauses)}
-                WITH sn, sn.id AS id
-                SET sn.validated_at = NULL, sn.claimed_at = NULL, sn.claim_token = NULL
-                RETURN count(sn) AS n
-            """
-            rows = list(gc.query(q, **params))
-            n = rows[0]["n"] if rows else 0
-            console.print(
-                f"[yellow]--revalidate:[/yellow] cleared validated_at on {n} pending SN node(s)"
-            )
 
     from imas_codex.discovery.base.llm import set_litellm_offline_env
 
