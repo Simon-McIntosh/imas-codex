@@ -22,6 +22,7 @@ from imas_codex.standard_names.cascade import (
     CascadeResult,
     _cascade_target_name,
     _isn_round_trip_ok,
+    cascade_descendants_of,
     rename_cascade,
 )
 
@@ -165,6 +166,11 @@ class _MockGraph:
         if "WHERE sn IS NOT NULL" in cypher and "UNWIND $ids" in cypher:
             ids = params.get("ids") or []
             return [{"id": nid} for nid in ids if nid in self.nodes]
+
+        # ── Successor-exists probe (cascade_descendants_of) ──
+        if "count(s) AS n" in cypher:
+            nid = params.get("id")
+            return [{"n": 1 if nid in self.nodes else 0}]
 
         # ── Rename write ──
         if "SET sn.id = r.to" in cypher:
@@ -641,6 +647,82 @@ class TestCascadeResultShape:
 # ---------------------------------------------------------------------------
 # Misc — pytest invariants
 # ---------------------------------------------------------------------------
+
+
+class TestDescendantCascadeRecordsProvenance:
+    """cascade_descendants_of (accept-time descendant cascade) must record a
+    StandardNameChange and refresh source mirrors for every descendant it
+    renames — parity with rename_cascade. Without it, accept-time cascades
+    left renamed descendants with no change-history trail and stale source
+    projections."""
+
+    def test_records_change_and_refreshes_mirrors(self) -> None:
+        from unittest.mock import patch
+
+        gc = _MockGraph()
+        # The root rename already landed: the successor id is live and a
+        # qualifier child still carries the old-derived id.
+        new_root = "temperature_of_plasma_boundary"
+        gc.add_node(new_root)
+        gc.add_node("ion_temperature")
+        gc.add_edge(
+            "ion_temperature",
+            new_root,
+            operator="ion",
+            operator_kind="qualifier",
+        )
+
+        _PL = "imas_codex.standard_names.provenance_lifecycle"
+        with (
+            patch(f"{_PL}.record_standard_name_change") as rec,
+            patch(f"{_PL}.refresh_renamed_source_mirrors") as refresh,
+        ):
+            result = cascade_descendants_of(
+                gc,
+                successor_id=new_root,
+                old_root="temperature",
+                new_root=new_root,
+                dry_run=False,
+            )
+
+        assert result.conflicts == []
+        assert {r["from"]: r["to"] for r in result.renamed} == {
+            "ion_temperature": f"ion_{new_root}"
+        }
+        # One change event per renamed descendant, operation='cascade'.
+        assert rec.call_count == 1
+        _args, _kwargs = rec.call_args
+        assert _args[1] == "ion_temperature"
+        assert _args[2] == f"ion_{new_root}"
+        assert _kwargs.get("operation") == "cascade"
+        # Source mirrors refreshed once for the whole rename batch.
+        refresh.assert_called_once()
+
+    def test_dry_run_records_nothing(self) -> None:
+        from unittest.mock import patch
+
+        gc = _MockGraph()
+        new_root = "temperature_of_plasma_boundary"
+        gc.add_node(new_root)
+        gc.add_node("ion_temperature")
+        gc.add_edge(
+            "ion_temperature", new_root, operator="ion", operator_kind="qualifier"
+        )
+
+        _PL = "imas_codex.standard_names.provenance_lifecycle"
+        with (
+            patch(f"{_PL}.record_standard_name_change") as rec,
+            patch(f"{_PL}.refresh_renamed_source_mirrors") as refresh,
+        ):
+            cascade_descendants_of(
+                gc,
+                successor_id=new_root,
+                old_root="temperature",
+                new_root=new_root,
+                dry_run=True,
+            )
+        rec.assert_not_called()
+        refresh.assert_not_called()
 
 
 @pytest.mark.parametrize(

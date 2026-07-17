@@ -985,6 +985,25 @@ def cascade_descendants_of(
         renames=renamed_list,
     )
 
+    # Record provenance for every descendant rename and repair the source
+    # mirrors that key off the old id. This mirrors rename_cascade's apply
+    # step — without it, accept-time descendant cascades left no
+    # StandardNameChange trail and stale source_paths / produced_sn_id
+    # projections (the change-history gap that stranded renamed descendants).
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+        refresh_renamed_source_mirrors,
+    )
+
+    refresh_renamed_source_mirrors(gc, renamed_list)
+    for rename in renamed_list:
+        record_standard_name_change(
+            gc,
+            rename["from"],
+            rename["to"],
+            operation="cascade",
+        )
+
     logger.info(
         "cascade_descendants_of applied: root=%s (was %s) descendants_renamed=%d "
         "skipped=%d",
