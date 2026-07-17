@@ -407,10 +407,17 @@ def load_breaker_corpus(
         minimax = pair.get(BLIND_PAIR[1])
         if qwen is None or minimax is None:
             continue
+        srcs = list(r.get("source_paths") or [])
         items.append(
             {
                 "sn_id": r["sn_id"],
                 "name": r["sn_id"],
+                # score_with_reviewer resolves the display name via _resolve_name,
+                # which reads standard_name/id; the reviewer echoes it back, so
+                # these keys are what re-aligns reviews to corpus items.
+                "standard_name": r["sn_id"],
+                "id": r["sn_id"],
+                "source_id": srcs[0] if srcs else "",
                 "description": r.get("description") or "",
                 "unit": r.get("unit") or "",
                 "data_type": r.get("data_type") or "",
@@ -454,6 +461,11 @@ def load_docs_sample(sample: int, seed: int, gc: Any = None) -> list[dict]:
     cands = [
         {
             "name": r["name"],
+            # generate_docs_for_candidates / score_with_reviewer resolve the
+            # name via _resolve_name (reads standard_name/id).
+            "standard_name": r["name"],
+            "id": r["name"],
+            "source_id": (list(r.get("source_paths") or []) or [""])[0],
             "description": r.get("description") or "",
             "unit": r.get("unit") or "",
             "kind": r.get("kind") or "scalar",
