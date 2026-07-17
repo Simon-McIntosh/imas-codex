@@ -33,11 +33,18 @@ from __future__ import annotations
 import json
 import logging
 import random
-import re
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
+# Re-exported for back-compat: the banned-prose vocabulary now lives in the
+# neutral ``prose_policy`` module so production selection logic need not import
+# a benchmark module.  The docs-seat benchmark below still audits against it.
+from imas_codex.standard_names.prose_policy import (
+    BANNED_PROSE_PATTERNS as BANNED_PROSE_PATTERNS,  # noqa: F401
+    banned_prose_findings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -198,50 +205,6 @@ def verdict_flip_quality(
     if flips == 0:
         return 0.0, 0
     return round(correct / flips, 4), flips
-
-
-# Banned-prose classes for accepted-name documentation (plan §5 policy):
-# typical values, estimator recipes, and procedural padding.  These are
-# heuristic flags for a grep-audit, deliberately conservative; each group is
-# reported separately so a reviewer can calibrate.
-BANNED_PROSE_PATTERNS: dict[str, list[re.Pattern]] = {
-    "typical_values": [
-        re.compile(r"\btypical(?:ly)?\b", re.I),
-        re.compile(r"\bon the order of\b", re.I),
-        re.compile(r"\bof order\s+\d", re.I),
-        re.compile(r"\branges?\s+from\b.*\bto\b", re.I),
-        re.compile(r"~\s*\d"),
-    ],
-    "estimator_recipe": [
-        re.compile(
-            r"\bis (?:computed|calculated|estimated|obtained|derived) (?:as|by|from)\b",
-            re.I,
-        ),
-        re.compile(
-            r"\bcan be (?:computed|calculated|estimated|obtained|derived)\b", re.I
-        ),
-        re.compile(r"\bto (?:compute|calculate|estimate)\b", re.I),
-    ],
-    "procedural_padding": [
-        re.compile(r"\bit should be noted\b", re.I),
-        re.compile(r"\bnote that\b", re.I),
-        re.compile(r"\bin practice\b", re.I),
-        re.compile(r"\bfor example,", re.I),
-    ],
-}
-
-
-def banned_prose_findings(text: str) -> dict[str, int]:
-    """Count banned-prose matches per class in *text*.
-
-    Returns a dict ``{class: match_count}`` including zero-count classes so the
-    caller can aggregate uniformly.
-    """
-    text = text or ""
-    return {
-        cls: sum(len(p.findall(text)) for p in pats)
-        for cls, pats in BANNED_PROSE_PATTERNS.items()
-    }
 
 
 def _classify_refine_failure(exc: BaseException) -> str:

@@ -47,7 +47,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.standard_names.benchmark_roles import (
+from imas_codex.standard_names.prose_policy import (
     BANNED_PROSE_PATTERNS,
     banned_prose_findings,
 )
@@ -68,7 +68,7 @@ from imas_codex.standard_names.benchmark_roles import (
 #   all                   → prose + audit + quarantined
 #
 # The banned-prose classes are the single source of truth in
-# ``benchmark_roles.BANNED_PROSE_PATTERNS`` — the same grep-audit the docs seat
+# ``prose_policy.BANNED_PROSE_PATTERNS`` — the same grep-audit the docs seat
 # is benchmarked against — so selection and evaluation never diverge.
 
 PROSE_CLASSES: tuple[str, ...] = tuple(BANNED_PROSE_PATTERNS.keys())
