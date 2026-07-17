@@ -1025,10 +1025,11 @@ def _reject_unscoped_accepted_reset(
     "--revalidate",
     is_flag=True,
     help=(
-        "Before extraction, sweep StandardName nodes with validation_status='pending' "
-        "in the current scope (source/domain/ids filters) and clear validated_at so "
-        "validate_worker re-runs ISN checks against the current grammar. Use after "
-        "an ISN vocab/grammar update to clear legacy quarantines without a full regen."
+        "Before extraction, sweep StandardName nodes with validation_status "
+        "'pending' or 'quarantined' in the current scope (source/domain/ids "
+        "filters) and clear validated_at so validate_worker re-runs ISN checks "
+        "against the current grammar. Use after an ISN vocab/grammar update to "
+        "clear legacy quarantines without a full regen."
     ),
 )
 @click.option(
@@ -1410,9 +1411,7 @@ def _reject_unscoped_accepted_reset(
     "campaign_batch_cost_cap",
     type=float,
     default=None,
-    help=(
-        "Per-batch cost cap (USD) for the scoped drain. Defaults to -c/--cost."
-    ),
+    help=("Per-batch cost cap (USD) for the scoped drain. Defaults to -c/--cost."),
 )
 @click.option(
     "--campaign-cost-ceiling",
@@ -1875,9 +1874,7 @@ def sn_run(
             selection = select_targets(gc, spec, limit=limit)
 
         if dry_run:
-            manifest = build_manifest(
-                selection, batch_size=campaign_batch_size
-            )
+            manifest = build_manifest(selection, batch_size=campaign_batch_size)
             path = write_manifest(
                 manifest, campaign_manifest or "campaign-manifest.json"
             )
@@ -1891,7 +1888,9 @@ def sn_run(
             return
 
         if selection.total == 0:
-            console.print("[yellow]Campaign selected no names — nothing to do.[/yellow]")
+            console.print(
+                "[yellow]Campaign selected no names — nothing to do.[/yellow]"
+            )
             return
 
         budget = CampaignBudget(
@@ -2020,14 +2019,17 @@ def sn_run(
     if retry_vocab_gap:
         logger.info("--retry-vocab-gap set (pending Phase B wire-up)")
 
-    # Handle --revalidate: clear validated_at on pending SNs in current scope so
-    # validate_worker re-runs ISN checks without a full regen. Safe with any source.
+    # Handle --revalidate: clear validated_at on pending/quarantined SNs in the
+    # current scope so validate_worker re-runs ISN checks without a full regen.
+    # Quarantined names are included because a quarantine stamped under an older
+    # grammar or gate is exactly what a re-validation is asked to reassess; a
+    # genuine defect re-quarantines with the same finding. Safe with any source.
     if revalidate and not dry_run:
         from imas_codex.graph.client import GraphClient
 
         with GraphClient() as gc:
             where_clauses = [
-                "sn.validation_status = 'pending'",
+                "sn.validation_status IN ['pending', 'quarantined']",
                 "sn.validated_at IS NOT NULL",
             ]
             params: dict[str, Any] = {}
@@ -2293,15 +2295,16 @@ def _run_role_bench(
         corpus = br.load_breaker_corpus(sample or 30, seed, axis=axis)
         report = run_async(
             br.run_breaker_bench(
-                model_list, corpus, axis=axis, incumbent=incumbent,
+                model_list,
+                corpus,
+                axis=axis,
+                incumbent=incumbent,
                 reasoning_effort=review_effort,
             )
         )
     elif role == "docs":
         docs_sample = br.load_docs_sample(sample or 20, seed)
-        report = run_async(
-            br.run_docs_bench(model_list, docs_sample, judge, incumbent)
-        )
+        report = run_async(br.run_docs_bench(model_list, docs_sample, judge, incumbent))
     elif role == "classifier":
         gold = br.load_classifier_gold()
         if sample:
