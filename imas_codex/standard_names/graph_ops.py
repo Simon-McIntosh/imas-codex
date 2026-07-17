@@ -9298,6 +9298,12 @@ def claim_refine_name_batch(
         " AND sn.reviewer_score_name < $min_score"
         " AND coalesce(sn.chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        # A pinned rename that has already spent its re-review budget rests at
+        # 'reviewed' — refine must not re-claim it (it is never rewritten, only
+        # resubmitted; see resubmit_pinned_rename_for_review). Under the cap it
+        # IS claimed so the resubmit-to-review can fire.
+        " AND NOT (coalesce(sn.edit_mode, '') = 'rename'"
+        "          AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)"
         # Derived parents (seeded by ``seed_parent_sources``) have no
         # refinement target — the name is structurally fixed. Skip
         # them so they don't enter the refine loop. The admission gate
@@ -10617,6 +10623,113 @@ def release_refine_name_failed_claims(
             token=token,
         )
     return result[0]["released"] if result else 0
+
+
+def resubmit_pinned_rename_for_review(
+    *,
+    sn_id: str,
+    token: str,
+    rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
+) -> str:
+    """Route a below-threshold pinned rename to a fresh review quorum.
+
+    A rename edit (``edit_mode='rename'``) carries an operator-chosen name
+    string — the name is a fixed decision, not a draft to be rewritten. When
+    such a name scores below threshold (quorum variance on a borderline name),
+    the refine pool must NOT try to reword it: re-emitting the identical pinned
+    name trips the self-referential-refine guard and decomposing a lexicalised
+    base trips grammar validation — either way the pinned name is wrongly marked
+    ``exhausted`` and its (already-superseded) predecessor's quantity silently
+    drops from export.
+
+    Instead, resubmit the SAME name to review for a fresh quorum draw
+    (``name_stage`` → ``'drafted'``, reviewer name-score cleared), bounded by
+    ``review_resubmit_count < rotation_cap``. A borderline name whose siblings
+    accept at 0.96+ typically clears on a fresh draw. When the cap is reached
+    the name is left at ``'reviewed'`` (never exhausted) for operator
+    resolution; :func:`claim_refine_name_batch` excludes capped pinned renames
+    so they do not re-loop.
+
+    Token-and-stage verified (``claim_token = $token AND name_stage =
+    'refining'``). Returns ``'resubmitted'``, ``'capped'``, or ``''`` (no-op:
+    token/stage mismatch — a concurrent sweep or worker already moved it).
+    """
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {id: $sn_id})
+            WHERE sn.claim_token = $token AND sn.name_stage = 'refining'
+            WITH sn, coalesce(sn.review_resubmit_count, 0) AS n
+            SET sn.name_stage = CASE WHEN n < $cap THEN 'drafted' ELSE 'reviewed' END,
+                sn.review_resubmit_count = CASE WHEN n < $cap THEN n + 1 ELSE n END,
+                sn.reviewer_score_name = CASE WHEN n < $cap
+                                              THEN null ELSE sn.reviewer_score_name END,
+                sn.claim_token = null,
+                sn.claimed_at = null
+            RETURN CASE WHEN n < $cap THEN 'resubmitted' ELSE 'capped' END AS outcome
+            """,
+            sn_id=sn_id,
+            token=token,
+            cap=rotation_cap,
+        )
+    return rows[0]["outcome"] if rows else ""
+
+
+def requeue_name_for_review(sn_id: str, *, dry_run: bool = False) -> dict[str, Any]:
+    """Return a stranded non-accepted name to review for a fresh quorum.
+
+    Operator recovery path for names stuck at a terminal-but-unpublished
+    name-axis stage — an ``exhausted`` name (refine cap reached, or a
+    borderline name wrongly exhausted) or a ``reviewed`` name whose score never
+    cleared. Reverts ``name_stage`` to ``'drafted'`` so the review pool re-scores
+    it with a fresh quorum, clears the stale reviewer name-score, resets the
+    re-review budget, and clears any claim. Edit fields are left intact so an
+    attached hint (e.g. a "keep this form" steer) rides the fresh review.
+
+    A predecessor that was already superseded stays superseded — the recovered
+    name keeps its REFINED_FROM lineage and, once re-accepted, resolves the
+    export gap it left behind.
+
+    Refuses (``{"ok": False, "reason": ...}``) for names that must not be
+    force-requeued: not found, already ``accepted``/``approved``, ``superseded``
+    (edit the successor instead), or already live (``drafted``/``refining``).
+
+    Returns ``{"ok": True, "sn_id", "prior_stage", "dry_run"}`` on success.
+    """
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (sn:StandardName {id: $id}) RETURN sn.name_stage AS stage",
+            id=sn_id,
+        )
+        if not rows:
+            return {"ok": False, "reason": f"name {sn_id!r} not found"}
+        stage = rows[0].get("stage")
+        if stage not in ("exhausted", "reviewed"):
+            return {
+                "ok": False,
+                "reason": (
+                    f"{sn_id!r} is name_stage={stage!r} — requeue only recovers "
+                    "'exhausted' or 'reviewed' names (accepted names are already "
+                    "live; superseded names should be recovered via their successor)"
+                ),
+            }
+        result = {"ok": True, "sn_id": sn_id, "prior_stage": stage, "dry_run": dry_run}
+        if dry_run:
+            return result
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            WHERE sn.name_stage IN ['exhausted', 'reviewed']
+            SET sn.name_stage = 'drafted',
+                sn.reviewer_score_name = null,
+                sn.review_resubmit_count = 0,
+                sn.claim_token = null,
+                sn.claimed_at = null
+            """,
+            id=sn_id,
+        )
+    logger.info("requeue_name_for_review: %s (%s) → drafted", sn_id, stage)
+    return result
 
 
 def _mark_refine_vocab_gap_exhausted(

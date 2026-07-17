@@ -671,6 +671,54 @@ class TestProcessCallsEscalationModel:
         assert call_model == "default-model"
 
 
+class TestPinnedRenameShortCircuit:
+    """A pinned rename (edit_mode='rename') is resubmitted to review, never
+    rewritten by the LLM — no compose call, no persist, no exhaustion."""
+
+    @pytest.mark.asyncio
+    async def test_pinned_rename_resubmits_without_llm(self):
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        item = _make_refine_item(
+            sn_id="second_local_tangential_coordinate_of_bragg_crystal",
+            chain_length=1,
+            score=0.8,
+            edit_mode="rename",
+            name_hint="second_local_tangential_coordinate_of_bragg_crystal",
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+            ) as mock_llm,
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_refined_name",
+            ) as mock_persist,
+            patch(
+                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
+            ) as mock_exhaust,
+            patch(
+                "imas_codex.standard_names.graph_ops.resubmit_pinned_rename_for_review",
+                return_value="resubmitted",
+            ) as mock_resubmit,
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+        ):
+            mgr = _mock_budget_manager()
+            stop = asyncio.Event()
+            await process_refine_name_batch([item], mgr, stop)
+
+        # The pinned name was resubmitted to review — never rewritten or exhausted.
+        mock_resubmit.assert_called_once()
+        assert mock_resubmit.call_args.kwargs["sn_id"] == item["id"]
+        mock_llm.assert_not_called()
+        mock_persist.assert_not_called()
+        mock_exhaust.assert_not_called()
+
+
 class TestProcessReleasesOnFailure:
     """On LLM error, release_refine_name_failed_claims is called."""
 

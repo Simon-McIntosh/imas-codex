@@ -4760,6 +4760,40 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         )
 
 
+@sn.command("requeue")
+@click.argument("standard_name")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report what would happen without writing to the graph.",
+)
+def sn_requeue(standard_name: str, dry_run: bool) -> None:
+    """Return a stranded non-accepted name to review for a fresh quorum.
+
+    Recovery path for a name stuck at a terminal-but-unpublished name-axis
+    stage: an 'exhausted' name (refine cap, or a borderline name wrongly
+    exhausted) or a 'reviewed' name whose score never cleared. Reverts it to
+    'drafted' so the next `sn run` re-scores it with a fresh quorum; any
+    attached hint rides the review. A superseded predecessor keeps its lineage
+    and the export gap closes once the name re-accepts.
+
+    \b
+    Example:
+      imas-codex sn requeue second_local_tangential_coordinate_of_bragg_crystal
+      imas-codex sn run --edits   # re-review with a fresh quorum
+    """
+    from imas_codex.standard_names.graph_ops import requeue_name_for_review
+
+    result = requeue_name_for_review(standard_name, dry_run=dry_run)
+    if not result.get("ok"):
+        raise click.UsageError(result.get("reason", "requeue refused"))
+    verb = "would requeue" if dry_run else "requeued"
+    click.echo(
+        f"{verb} {result['sn_id']} ({result['prior_stage']} → drafted) — "
+        "re-review with `imas-codex sn run --edits`"
+    )
+
+
 @sn.command("reclassify")
 @click.argument("standard_name")
 @click.option(

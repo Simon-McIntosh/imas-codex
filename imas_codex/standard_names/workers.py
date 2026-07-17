@@ -5375,6 +5375,7 @@ async def process_refine_name_batch(
         _mark_refine_vocab_gap_exhausted,
         persist_refined_name,
         release_refine_name_failed_claims,
+        resubmit_pinned_rename_for_review,
     )
     from imas_codex.standard_names.models import RefinedName
 
@@ -5396,6 +5397,45 @@ async def process_refine_name_batch(
             sn_id = item["id"]
             chain_length = item.get("chain_length", 0) or 0
             chain_history = item.get("chain_history", [])
+
+            # ── Pinned-rename guard (never rewrite an operator's name) ──
+            # A rename edit carries a fixed, operator-chosen name string.
+            # Rewriting it is meaningless and destructive: re-emitting the
+            # identical name trips the self-referential-refine guard and
+            # decomposing a lexicalised base trips grammar validation — both
+            # wrongly exhaust a correct name. Resubmit it to a fresh review
+            # quorum instead (bounded), never spend an LLM rewrite on it.
+            if (item.get("edit_mode") or "") == "rename":
+                token = item.get("claim_token") or ""
+                try:
+                    outcome = await _asyncio.to_thread(
+                        resubmit_pinned_rename_for_review,
+                        sn_id=sn_id,
+                        token=token,
+                        rotation_cap=rotation_cap,
+                    )
+                except Exception:
+                    logger.debug(
+                        "refine_name: pinned-rename resubmit failed for %s", sn_id
+                    )
+                    outcome = ""
+                logger.info(
+                    "refine_name: pinned rename %s not rewritten — %s",
+                    sn_id,
+                    outcome or "no-op",
+                )
+                if on_event is not None:
+                    on_event(
+                        {
+                            "pool": "refine_name",
+                            "name": sn_id,
+                            "old_name": sn_id,
+                            "outcome": f"pinned_rename_{outcome or 'noop'}",
+                            "model": "none",
+                            "cost": 0.0,
+                        }
+                    )
+                continue
 
             # ── Escalation decision ───────────────────────────────────
             escalate = chain_length >= rotation_cap - 1

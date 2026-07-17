@@ -23,6 +23,17 @@ into qualifier + base:
 | `base_token: "vertical_coordinate"` | `projection_axis: "vertical"`, `projection_shape: "coordinate"`, `base_token: "coordinate"`, `base_kind: "geometry"` |
 | `base_token: "fast_energy"` | `qualifiers: ["fast_particle"]`, `base_token: "energy"` |
 
+**Exception — registered lexicalised geometry bases are ATOMIC.** A geometry
+base already registered as a single lexicalised token must NOT be split into
+`projection_axis` + `base`. Its leading word(s) are part of the base name, not a
+decomposable axis. For example a `first_local_tangential_coordinate` /
+`second_local_tangential_coordinate` base stays whole — there is no registered
+`first_local_tangential` / `second_local_tangential` projection-axis token, so
+decomposing it produces an unregistered axis and the name fails validation.
+Only decompose when the leading token is itself a registered projection-axis
+(e.g. `vertical`, `radial`, `toroidal`). When in doubt, keep the registered
+compound base as-is.
+
 ## Non-nameable concepts — do not chase a refinement that cannot exist
 
 If the reviewer feedback indicates the underlying concept is **coordinate or
