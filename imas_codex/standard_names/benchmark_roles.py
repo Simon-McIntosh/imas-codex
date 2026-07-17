@@ -1,0 +1,925 @@
+"""Per-role benchmark modes for the standard-name pipeline seats.
+
+The compose benchmark (:mod:`benchmark`) measures one capability: drafting a
+name from a DD path.  Each pipeline seat exercises a *different* capability, so
+a compose result must not be extrapolated to the refine, review-breaker, docs,
+or classifier seats.  This module benchmarks each seat against its own
+production prompt, its own real fixtures, and the seat's production
+reasoning-effort setting, so re-benchmarking on the next model generation is a
+command (``sn bench --role <role>``) rather than a one-off script.
+
+Roles
+-----
+``refine``          Refine-from-critique: replay real reviewer-critique →
+                    refinement cases from graph history; a held-out judge
+                    scores defect-resolution and collateral change.
+``breaker-names``   Review-breaker independence on the names axis: re-score a
+                    stratified sample already scored by the blind pair
+                    (qwen + minimax) and measure rank-correlation independence
+                    and verdict-flip quality against the final outcome.
+``breaker-docs``    Same design over docs reviews, with seeded normative-policy
+                    violations to measure policy-defect recall.
+``docs``            Docs generation: generate documentation for a fixed
+                    stratified sample under the production prompt; score with
+                    the production rubric; grep-audit for banned prose.
+``classifier``      Domain classifier: run the domain gold set (exact-match).
+
+All corpus loaders are graph read-only.  All scoring arithmetic lives in pure
+helper functions so it is unit-testable without a live graph or LLM.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import random
+import re
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+# The blind reviewer pair whose independence a breaker candidate is measured
+# against (see [sn-review.names.profiles.default]).  A breaker that merely
+# mirrors the pair adds cost without information.
+BLIND_PAIR = ("openrouter/qwen/qwen3.7-max", "openrouter/minimax/minimax-m3")
+
+# Acceptance threshold for a normalised (0-1) review score — mirrors the
+# production triage threshold default.
+ACCEPT_THRESHOLD = 0.75
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Report types
+# ═══════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class RoleModelResult:
+    """One model's measured row for a role benchmark."""
+
+    model: str
+    n: int = 0
+    cost: float = 0.0
+    # Role-specific measured metrics, e.g. defect_resolution, collateral_change,
+    # independence_rho, verdict_flip_quality, rubric_score, banned_prose_rate,
+    # accuracy.  Kept as a free dict so each role names its own axes.
+    metrics: dict[str, float] = field(default_factory=dict)
+    error: str | None = None
+
+    @property
+    def cost_per_item(self) -> float:
+        return round(self.cost / self.n, 6) if self.n else 0.0
+
+
+@dataclass
+class RoleBenchReport:
+    """Measured table for a single role, across candidate models."""
+
+    role: str
+    results: list[RoleModelResult]
+    incumbent: str | None = None
+    judge_model: str | None = None
+    sample_ids: list[str] = field(default_factory=list)
+    seed: int = 0
+    axis: str | None = None
+    timestamp: str = ""
+    provenance: dict[str, Any] = field(default_factory=dict)
+
+    def to_json(self) -> str:
+        return json.dumps(
+            {
+                "role": self.role,
+                "results": [asdict(r) for r in self.results],
+                "incumbent": self.incumbent,
+                "judge_model": self.judge_model,
+                "sample_ids": self.sample_ids,
+                "seed": self.seed,
+                "axis": self.axis,
+                "timestamp": self.timestamp,
+                "provenance": self.provenance,
+            },
+            indent=2,
+        )
+
+    @classmethod
+    def from_json(cls, text: str) -> RoleBenchReport:
+        d = json.loads(text)
+        return cls(
+            role=d["role"],
+            results=[RoleModelResult(**r) for r in d["results"]],
+            incumbent=d.get("incumbent"),
+            judge_model=d.get("judge_model"),
+            sample_ids=d.get("sample_ids", []),
+            seed=d.get("seed", 0),
+            axis=d.get("axis"),
+            timestamp=d.get("timestamp", ""),
+            provenance=d.get("provenance", {}),
+        )
+
+    def save_atomic(self, path: str) -> None:
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        tmp = p.with_suffix(p.suffix + ".tmp")
+        tmp.write_text(self.to_json())
+        tmp.replace(p)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Pure scoring helpers (unit-testable, no I/O)
+# ═══════════════════════════════════════════════════════════════════════
+
+
+def spearman_rho(x: list[float], y: list[float]) -> float:
+    """Spearman rank correlation between two equal-length sequences.
+
+    Returns 0.0 for degenerate input (length < 2 or a constant vector), which
+    is the correct "no measurable correlation" sentinel for these samples.
+    """
+    n = len(x)
+    if n < 2 or len(y) != n:
+        return 0.0
+
+    def _ranks(v: list[float]) -> list[float]:
+        order = sorted(range(n), key=lambda i: v[i])
+        ranks = [0.0] * n
+        i = 0
+        while i < n:
+            j = i
+            while j + 1 < n and v[order[j + 1]] == v[order[i]]:
+                j += 1
+            avg = (i + j) / 2.0 + 1.0  # average rank, 1-based
+            for k in range(i, j + 1):
+                ranks[order[k]] = avg
+            i = j + 1
+        return ranks
+
+    rx, ry = _ranks(x), _ranks(y)
+    mx = sum(rx) / n
+    my = sum(ry) / n
+    num = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=False))
+    dx = sum((a - mx) ** 2 for a in rx) ** 0.5
+    dy = sum((b - my) ** 2 for b in ry) ** 0.5
+    if dx == 0 or dy == 0:
+        return 0.0
+    return round(num / (dx * dy), 4)
+
+
+def verdict_flip_quality(
+    candidate_scores: list[float],
+    pair_mean_scores: list[float],
+    final_outcomes: list[bool],
+    threshold: float = ACCEPT_THRESHOLD,
+) -> tuple[float, int]:
+    """Fraction of pair-disagreements where the candidate matched the outcome.
+
+    A "flip" is an item where the candidate's accept/reject verdict differs
+    from the blind pair's mean verdict.  Quality = of those flips, the fraction
+    where the candidate's verdict agreed with the final accepted/rejected
+    ``final_outcome``.  A high value means the breaker adds *correct*
+    information when it overrides the pair.
+
+    Returns ``(quality, n_flips)``.  Quality is 0.0 when there are no flips.
+    """
+    flips = 0
+    correct = 0
+    for cs, ps, outcome in zip(
+        candidate_scores, pair_mean_scores, final_outcomes, strict=False
+    ):
+        cand_accept = cs >= threshold
+        pair_accept = ps >= threshold
+        if cand_accept == pair_accept:
+            continue
+        flips += 1
+        if cand_accept == outcome:
+            correct += 1
+    if flips == 0:
+        return 0.0, 0
+    return round(correct / flips, 4), flips
+
+
+# Banned-prose classes for accepted-name documentation (plan §5 policy):
+# typical values, estimator recipes, and procedural padding.  These are
+# heuristic flags for a grep-audit, deliberately conservative; each group is
+# reported separately so a reviewer can calibrate.
+BANNED_PROSE_PATTERNS: dict[str, list[re.Pattern]] = {
+    "typical_values": [
+        re.compile(r"\btypical(?:ly)?\b", re.I),
+        re.compile(r"\bon the order of\b", re.I),
+        re.compile(r"\bof order\s+\d", re.I),
+        re.compile(r"\branges?\s+from\b.*\bto\b", re.I),
+        re.compile(r"~\s*\d"),
+    ],
+    "estimator_recipe": [
+        re.compile(
+            r"\bis (?:computed|calculated|estimated|obtained|derived) (?:as|by|from)\b",
+            re.I,
+        ),
+        re.compile(
+            r"\bcan be (?:computed|calculated|estimated|obtained|derived)\b", re.I
+        ),
+        re.compile(r"\bto (?:compute|calculate|estimate)\b", re.I),
+    ],
+    "procedural_padding": [
+        re.compile(r"\bit should be noted\b", re.I),
+        re.compile(r"\bnote that\b", re.I),
+        re.compile(r"\bin practice\b", re.I),
+        re.compile(r"\bfor example,", re.I),
+    ],
+}
+
+
+def banned_prose_findings(text: str) -> dict[str, int]:
+    """Count banned-prose matches per class in *text*.
+
+    Returns a dict ``{class: match_count}`` including zero-count classes so the
+    caller can aggregate uniformly.
+    """
+    text = text or ""
+    return {
+        cls: sum(len(p.findall(text)) for p in pats)
+        for cls, pats in BANNED_PROSE_PATTERNS.items()
+    }
+
+
+def exact_match_accuracy(
+    predicted: dict[str, str], expected: dict[str, str]
+) -> tuple[float, int, int]:
+    """Exact-match accuracy over keys present in *expected*.
+
+    Returns ``(accuracy, n_correct, n_total)``.  Keys missing from *predicted*
+    count as incorrect.
+    """
+    total = len(expected)
+    if total == 0:
+        return 0.0, 0, 0
+    correct = sum(1 for k, v in expected.items() if predicted.get(k) == v)
+    return round(correct / total, 4), correct, total
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Corpus loaders (graph read-only)
+# ═══════════════════════════════════════════════════════════════════════
+
+
+def _stratified_sample(
+    rows: list[dict], sample: int, seed: int, key: str = "physics_domain"
+) -> list[dict]:
+    """Deterministic stratified sample of *rows* balanced across *key*.
+
+    Draws round-robin across the value buckets of ``key`` so every physics
+    domain is represented before any is doubled up.
+    """
+    rng = random.Random(seed)
+    buckets: dict[Any, list[dict]] = {}
+    for r in rows:
+        buckets.setdefault(r.get(key), []).append(r)
+    for b in buckets.values():
+        rng.shuffle(b)
+    ordered_keys = sorted(buckets, key=lambda k: (k is None, str(k)))
+    out: list[dict] = []
+    while len(out) < sample and any(buckets[k] for k in ordered_keys):
+        for k in ordered_keys:
+            if buckets[k]:
+                out.append(buckets[k].pop())
+                if len(out) >= sample:
+                    break
+    return out
+
+
+def load_refine_corpus(
+    sample: int, seed: int, axis: str = "names", gc: Any = None
+) -> list[dict]:
+    """Load real refine-from-critique cases from REFINED_FROM history.
+
+    Each case is a name that was refined: its immediate REFINED_FROM ancestor
+    carries the reviewer critique (per-dimension comments) and the below-par
+    score that triggered the refinement.  That ancestor's context + critique is
+    the refine input; the bench re-runs each candidate model on it.
+
+    Returns case dicts: sn_id, path, description, unit, data_type,
+    physics_domain, prior_name, prior_score, critique (per-dim comment dict).
+    """
+    from imas_codex.graph.client import GraphClient
+
+    cypher = """
+        MATCH (sn:StandardName)-[:REFINED_FROM]->(a:StandardName)
+        WHERE a.reviewer_comments_per_dim_name IS NOT NULL
+          AND a.reviewer_score_name IS NOT NULL
+        WITH sn, a
+        ORDER BY a.chain_length ASC
+        WITH sn, collect(a)[0] AS anc
+        RETURN
+          sn.id                                   AS sn_id,
+          anc.id                                  AS prior_name,
+          anc.reviewer_score_name                 AS prior_score,
+          anc.reviewer_comments_per_dim_name      AS critique,
+          coalesce(sn.source_paths, anc.source_paths) AS source_paths,
+          coalesce(sn.description, anc.description)    AS description,
+          coalesce(sn.unit, anc.unit)                 AS unit,
+          coalesce(sn.kind, anc.kind)                 AS data_type,
+          coalesce(sn.physics_domain, anc.physics_domain) AS physics_domain
+    """
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = gc.query(cypher)
+    finally:
+        if owns:
+            gc.close()
+
+    cases: list[dict] = []
+    for r in rows:
+        crit = r.get("critique")
+        if isinstance(crit, str):
+            try:
+                crit = json.loads(crit)
+            except (ValueError, TypeError):
+                crit = {"overall": crit}
+        paths = r.get("source_paths") or []
+        cases.append(
+            {
+                "sn_id": r["sn_id"],
+                "prior_name": r.get("prior_name"),
+                "prior_score": float(r.get("prior_score") or 0.0),
+                "critique": crit or {},
+                "path": paths[0] if paths else "",
+                "source_paths": list(paths),
+                "description": r.get("description") or "",
+                "unit": r.get("unit") or "",
+                "data_type": r.get("data_type") or "",
+                "physics_domain": r.get("physics_domain") or "",
+            }
+        )
+    return _stratified_sample(cases, sample, seed)
+
+
+def load_breaker_corpus(
+    sample: int, seed: int, axis: str = "names", gc: Any = None
+) -> list[dict]:
+    """Load names/docs already scored by BOTH blind-pair reviewers.
+
+    Groups StandardNameReview nodes by ``standard_name_id`` on the requested
+    axis and keeps only items where both qwen and minimax scored, so a
+    candidate breaker can be measured for rank-correlation independence against
+    the pair.  ``final_accepted`` is the eventual outcome (name_stage) used for
+    verdict-flip quality.
+
+    Returns item dicts: sn_id, name, description, unit, data_type,
+    physics_domain, source_paths, pair_scores {qwen, minimax}, final_accepted.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    review_axis = "names" if axis == "names" else "docs"
+    cypher = """
+        MATCH (r:StandardNameReview {review_axis: $axis})
+        WHERE r.reviewer_model IN $pair AND r.score IS NOT NULL
+        WITH r.standard_name_id AS sid, r.reviewer_model AS m,
+             avg(toFloat(r.score)) AS s
+        WITH sid, collect({m: m, s: s}) AS scores
+        WHERE size(scores) = 2
+        MATCH (sn:StandardName {id: sid})
+        RETURN
+          sid                       AS sn_id,
+          scores                    AS scores,
+          sn.name_stage             AS name_stage,
+          sn.description            AS description,
+          sn.unit                   AS unit,
+          sn.kind                   AS data_type,
+          sn.physics_domain         AS physics_domain,
+          sn.source_paths           AS source_paths,
+          sn.documentation          AS documentation
+    """
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = gc.query(cypher, axis=review_axis, pair=list(BLIND_PAIR))
+    finally:
+        if owns:
+            gc.close()
+
+    items: list[dict] = []
+    for r in rows:
+        pair = {s["m"]: float(s["s"]) for s in r["scores"]}
+        qwen = pair.get(BLIND_PAIR[0])
+        minimax = pair.get(BLIND_PAIR[1])
+        if qwen is None or minimax is None:
+            continue
+        items.append(
+            {
+                "sn_id": r["sn_id"],
+                "name": r["sn_id"],
+                "description": r.get("description") or "",
+                "unit": r.get("unit") or "",
+                "data_type": r.get("data_type") or "",
+                "physics_domain": r.get("physics_domain") or "",
+                "source_paths": list(r.get("source_paths") or []),
+                "documentation": r.get("documentation") or "",
+                "pair_scores": {"qwen": qwen, "minimax": minimax},
+                "final_accepted": (r.get("name_stage") == "accepted"),
+            }
+        )
+    return _stratified_sample(items, sample, seed)
+
+
+def load_docs_sample(sample: int, seed: int, gc: Any = None) -> list[dict]:
+    """Load a stratified sample of accepted names for docs regeneration.
+
+    Returns candidate dicts shaped for :func:`generate_docs_for_candidates`
+    (name, unit, kind, physics_domain, description, source_paths).
+    """
+    from imas_codex.graph.client import GraphClient
+
+    cypher = """
+        MATCH (sn:StandardName {name_stage: 'accepted'})
+        WHERE sn.description IS NOT NULL
+        RETURN
+          sn.id             AS name,
+          sn.description    AS description,
+          sn.unit           AS unit,
+          sn.kind           AS kind,
+          sn.physics_domain AS physics_domain,
+          sn.source_paths   AS source_paths
+    """
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = gc.query(cypher)
+    finally:
+        if owns:
+            gc.close()
+
+    cands = [
+        {
+            "name": r["name"],
+            "description": r.get("description") or "",
+            "unit": r.get("unit") or "",
+            "kind": r.get("kind") or "scalar",
+            "physics_domain": r.get("physics_domain") or "",
+            "source_paths": list(r.get("source_paths") or []),
+        }
+        for r in rows
+    ]
+    return _stratified_sample(cands, sample, seed)
+
+
+GOLD_SET_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "definitions"
+    / "physics"
+    / "domain_gold_set.json"
+)
+
+
+def load_classifier_gold() -> list[dict]:
+    """Load the domain classification gold set (list of path/expected_domain)."""
+    return json.loads(GOLD_SET_PATH.read_text())
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Held-out refine judge
+# ═══════════════════════════════════════════════════════════════════════
+
+_REFINE_JUDGE_SYSTEM = """\
+You are a strict, held-out judge evaluating whether a REFINED IMAS standard
+name resolved the defects a reviewer flagged on the previous attempt, WITHOUT
+making needless collateral changes.
+
+You are given: the DD path context, the previous (rejected) name, the reviewer
+critique per dimension, and the refined name + its description. Judge only what
+the critique named. Score two axes on 0.0-1.0:
+
+- defect_resolution: fraction of the critique's concrete defects that the
+  refined name genuinely fixes (1.0 = all named defects addressed; 0.0 = none).
+- collateral_change: degree of change UNRELATED to the critique — renaming or
+  rewording parts the reviewer did not flag (0.0 = surgical, only flagged parts
+  changed; 1.0 = wholesale rewrite ignoring what was actually wrong).
+
+Lower collateral_change is better. Reward surgical fixes, penalise both
+under-fixing and scattershot rewrites.
+"""
+
+_REFINE_JUDGE_USER = """\
+## DD path
+{path}
+Description: {description}
+Unit: {unit}   Data type: {data_type}   Physics domain: {physics_domain}
+
+## Previous (rejected) name — score {prior_score:.2f}
+{prior_name}
+
+## Reviewer critique (per dimension)
+{critique}
+
+## Refined name
+{refined_name}
+Refined description: {refined_description}
+
+Return your two scores and a one-sentence justification.
+"""
+
+
+def _format_critique(critique: dict) -> str:
+    if not critique:
+        return "(no per-dimension critique recorded)"
+    return "\n".join(f"- {k}: {v}" for k, v in critique.items() if v)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Runners
+# ═══════════════════════════════════════════════════════════════════════
+
+
+async def run_refine_bench(
+    models: list[str],
+    corpus: list[dict],
+    judge_model: str,
+    incumbent: str | None = None,
+    reasoning_effort: str | None = None,
+) -> RoleBenchReport:
+    """Benchmark the refine seat: defect-resolution + collateral change."""
+    from pydantic import BaseModel, Field
+
+    from imas_codex.discovery.base.llm import acall_llm_structured, ensure_model_prefix
+    from imas_codex.llm.prompt_loader import load_prompt_config, render_prompt
+    from imas_codex.standard_names.benchmark import _resolve_name
+    from imas_codex.standard_names.models import RefinedName
+
+    class _RefineJudgement(BaseModel):
+        defect_resolution: float = Field(ge=0.0, le=1.0)
+        collateral_change: float = Field(ge=0.0, le=1.0)
+        justification: str = ""
+
+    try:
+        rules = load_prompt_config("sn_composition_rules").get("composition_rules", [])
+    except Exception:
+        rules = []
+
+    results: list[RoleModelResult] = []
+    for model in models:
+        m = ensure_model_prefix(model)
+        res = RoleModelResult(model=model)
+        dr_vals: list[float] = []
+        cc_vals: list[float] = []
+        for case in corpus:
+            prompt_context = {
+                "item": {
+                    "path": case["path"],
+                    "ids_name": (case["path"].split("/")[0] if case["path"] else ""),
+                    "description": case["description"],
+                    "unit": case["unit"],
+                    "data_type": case["data_type"],
+                    "physics_domain": case["physics_domain"],
+                },
+                "chain_history": [
+                    {
+                        "name": case["prior_name"],
+                        "reviewer_score": case["prior_score"],
+                        "reviewer_comments_per_dim": case["critique"],
+                    }
+                ],
+                "hybrid_neighbours": [],
+                "fanout_evidence": "",
+                "composition_rules": rules,
+            }
+            try:
+                user_prompt = render_prompt("sn/refine_name_user", prompt_context)
+                try:
+                    system_prompt = render_prompt(
+                        "sn/refine_name_system", prompt_context
+                    )
+                except Exception:
+                    system_prompt = None
+                messages = (
+                    [{"role": "system", "content": system_prompt}]
+                    if system_prompt
+                    else []
+                ) + [{"role": "user", "content": user_prompt}]
+                refined, cost, _ = await acall_llm_structured(
+                    model=m,
+                    messages=messages,
+                    response_model=RefinedName,
+                    service="standard-names",
+                    reasoning_effort=reasoning_effort,
+                )
+                res.cost += cost
+            except Exception as exc:
+                logger.warning("refine %s failed on %s: %s", model, case["sn_id"], exc)
+                continue
+
+            refined_name = (
+                _resolve_name(
+                    {
+                        "segments": refined.segments.model_dump()
+                        if hasattr(refined.segments, "model_dump")
+                        else refined.segments
+                    }
+                )
+                or case["sn_id"]
+            )
+
+            # Held-out judge
+            try:
+                juser = _REFINE_JUDGE_USER.format(
+                    path=case["path"],
+                    description=case["description"],
+                    unit=case["unit"],
+                    data_type=case["data_type"],
+                    physics_domain=case["physics_domain"],
+                    prior_score=case["prior_score"],
+                    prior_name=case["prior_name"],
+                    critique=_format_critique(case["critique"]),
+                    refined_name=refined_name,
+                    refined_description=refined.description or "",
+                )
+                judgement, jcost, _ = await acall_llm_structured(
+                    model=ensure_model_prefix(judge_model),
+                    messages=[
+                        {"role": "system", "content": _REFINE_JUDGE_SYSTEM},
+                        {"role": "user", "content": juser},
+                    ],
+                    response_model=_RefineJudgement,
+                    service="standard-names",
+                )
+                res.cost += jcost
+                dr_vals.append(float(judgement.defect_resolution))
+                cc_vals.append(float(judgement.collateral_change))
+                res.n += 1
+            except Exception as exc:
+                logger.warning("refine judge failed on %s: %s", case["sn_id"], exc)
+
+        if dr_vals:
+            res.metrics["defect_resolution"] = round(sum(dr_vals) / len(dr_vals), 4)
+            res.metrics["collateral_change"] = round(sum(cc_vals) / len(cc_vals), 4)
+        results.append(res)
+
+    return RoleBenchReport(
+        role="refine",
+        results=results,
+        incumbent=incumbent,
+        judge_model=judge_model,
+        sample_ids=[c["sn_id"] for c in corpus],
+        axis="names",
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance={"corpus": "REFINED_FROM history", "n_cases": len(corpus)},
+    )
+
+
+async def run_breaker_bench(
+    models: list[str],
+    corpus: list[dict],
+    axis: str = "names",
+    incumbent: str | None = None,
+    reasoning_effort: str | None = None,
+) -> RoleBenchReport:
+    """Benchmark a review-breaker seat: independence + verdict-flip quality."""
+    from imas_codex.discovery.base.llm import ensure_model_prefix
+    from imas_codex.standard_names.benchmark import score_with_reviewer
+
+    target = "names" if axis == "names" else "docs"
+    qwen = [c["pair_scores"]["qwen"] for c in corpus]
+    minimax = [c["pair_scores"]["minimax"] for c in corpus]
+    pair_mean = [(a + b) / 2.0 for a, b in zip(qwen, minimax, strict=False)]
+    outcomes = [bool(c["final_accepted"]) for c in corpus]
+
+    results: list[RoleModelResult] = []
+    for model in models:
+        res = RoleModelResult(model=model)
+        try:
+            reviews, cost = await score_with_reviewer(
+                corpus,
+                reviewer_model=ensure_model_prefix(model),
+                target=target,
+                reasoning_effort=reasoning_effort,
+            )
+            res.cost = cost
+        except Exception as exc:
+            logger.warning("breaker %s failed: %s", model, exc)
+            res.error = str(exc)[:200]
+            results.append(res)
+            continue
+
+        by_name = {r["name"]: float(r.get("score") or 0.0) for r in reviews}
+        cand_scores: list[float] = []
+        aligned_qwen: list[float] = []
+        aligned_minimax: list[float] = []
+        aligned_pair_mean: list[float] = []
+        aligned_outcomes: list[bool] = []
+        for c, q, mm, pm, out in zip(
+            corpus, qwen, minimax, pair_mean, outcomes, strict=False
+        ):
+            if c["name"] not in by_name:
+                continue
+            cand_scores.append(by_name[c["name"]])
+            aligned_qwen.append(q)
+            aligned_minimax.append(mm)
+            aligned_pair_mean.append(pm)
+            aligned_outcomes.append(out)
+
+        res.n = len(cand_scores)
+        if res.n >= 2:
+            rho_q = spearman_rho(cand_scores, aligned_qwen)
+            rho_m = spearman_rho(cand_scores, aligned_minimax)
+            vfq, n_flips = verdict_flip_quality(
+                cand_scores, aligned_pair_mean, aligned_outcomes
+            )
+            res.metrics["independence_rho"] = round((rho_q + rho_m) / 2.0, 4)
+            res.metrics["rho_qwen"] = rho_q
+            res.metrics["rho_minimax"] = rho_m
+            res.metrics["verdict_flip_quality"] = vfq
+            res.metrics["n_flips"] = float(n_flips)
+        results.append(res)
+
+    return RoleBenchReport(
+        role=f"breaker-{axis}",
+        results=results,
+        incumbent=incumbent,
+        sample_ids=[c["sn_id"] for c in corpus],
+        axis=axis,
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance={"blind_pair": list(BLIND_PAIR), "n_items": len(corpus)},
+    )
+
+
+async def run_docs_bench(
+    models: list[str],
+    sample: list[dict],
+    judge_model: str,
+    incumbent: str | None = None,
+    reasoning_effort: str | None = None,
+) -> RoleBenchReport:
+    """Benchmark the docs-generation seat: rubric score + banned-prose rate."""
+    from imas_codex.discovery.base.llm import ensure_model_prefix
+    from imas_codex.standard_names.benchmark import (
+        generate_docs_for_candidates,
+        score_with_reviewer,
+    )
+    from imas_codex.standard_names.context import build_compose_context
+
+    context = build_compose_context()
+    results: list[RoleModelResult] = []
+    for model in models:
+        res = RoleModelResult(model=model)
+        cands = [dict(c) for c in sample]
+        try:
+            cands, gcost, _ = await generate_docs_for_candidates(
+                cands, ensure_model_prefix(model), context
+            )
+            res.cost += gcost
+        except Exception as exc:
+            logger.warning("docs gen %s failed: %s", model, exc)
+            res.error = str(exc)[:200]
+            results.append(res)
+            continue
+
+        # Banned-prose grep audit over generated documentation.
+        total_findings = 0
+        docs_with_findings = 0
+        for c in cands:
+            findings = banned_prose_findings(
+                (c.get("documentation") or "")
+                + "\n"
+                + (c.get("docs_description") or "")
+            )
+            hit = sum(findings.values())
+            total_findings += hit
+            if hit:
+                docs_with_findings += 1
+
+        # Production docs rubric scoring (held-out judge).
+        try:
+            reviews, rcost = await score_with_reviewer(
+                cands, reviewer_model=ensure_model_prefix(judge_model), target="docs"
+            )
+            res.cost += rcost
+            scores = [float(r.get("score") or 0.0) for r in reviews]
+        except Exception as exc:
+            logger.warning("docs rubric scoring failed: %s", exc)
+            scores = []
+
+        res.n = len(cands)
+        if scores:
+            res.metrics["rubric_score"] = round(sum(scores) / len(scores), 4)
+        res.metrics["banned_prose_rate"] = (
+            round(docs_with_findings / res.n, 4) if res.n else 0.0
+        )
+        res.metrics["banned_prose_findings"] = float(total_findings)
+        results.append(res)
+
+    return RoleBenchReport(
+        role="docs",
+        results=results,
+        incumbent=incumbent,
+        judge_model=judge_model,
+        sample_ids=[c.get("name", "") for c in sample],
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance={"n_docs": len(sample)},
+    )
+
+
+async def run_classifier_bench(
+    models: list[str], gold: list[dict], incumbent: str | None = None, gc: Any = None
+) -> RoleBenchReport:
+    """Benchmark the domain classifier seat: gold-set exact-match accuracy."""
+    from imas_codex.core.physics_domain import PhysicsDomain
+    from imas_codex.discovery.base.llm import ensure_model_prefix
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.graph.dd_domain_classifier import (
+        DEFAULT_BATCH_SIZE,
+        _classify_batch,
+        batch_by_subtree,
+        gather_classification_context,
+    )
+
+    valid_domains = {d.value for d in PhysicsDomain}
+    expected = {g["path"]: g["expected_domain"] for g in gold}
+    path_ids = [g["path"] for g in gold]
+
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        contexts = gather_classification_context(gc, path_ids)
+    finally:
+        if owns:
+            gc.close()
+    ctx_by_id = {c["id"]: c for c in contexts}
+    enriched = [{"id": pid, **ctx_by_id.get(pid, {})} for pid in path_ids]
+
+    results: list[RoleModelResult] = []
+    for model in models:
+        res = RoleModelResult(model=model)
+        predicted: dict[str, str] = {}
+        batches = batch_by_subtree(enriched, batch_size=DEFAULT_BATCH_SIZE)
+        for batch in batches:
+            try:
+                batch_results, cost = await _classify_batch(
+                    batch,
+                    model=ensure_model_prefix(model),
+                    service="standard-names",
+                    valid_domains=valid_domains,
+                )
+                res.cost += cost
+                for r in batch_results:
+                    predicted[r["id"]] = r["physics_domain"]
+            except Exception as exc:
+                logger.warning("classifier %s batch failed: %s", model, exc)
+        acc, correct, total = exact_match_accuracy(predicted, expected)
+        res.n = total
+        res.metrics["accuracy"] = acc
+        res.metrics["correct"] = float(correct)
+        results.append(res)
+
+    return RoleBenchReport(
+        role="classifier",
+        results=results,
+        incumbent=incumbent,
+        sample_ids=path_ids,
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance={"gold_set": "domain_gold_set.json", "n_paths": len(gold)},
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Rendering
+# ═══════════════════════════════════════════════════════════════════════
+
+
+def render_role_report(report: RoleBenchReport) -> None:
+    """Print a measured comparison table for a role benchmark."""
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    metric_keys: list[str] = []
+    for r in report.results:
+        for k in r.metrics:
+            if k not in metric_keys:
+                metric_keys.append(k)
+
+    table = Table(title=f"Role benchmark — {report.role}")
+    table.add_column("model")
+    table.add_column("n", justify="right")
+    for k in metric_keys:
+        table.add_column(k, justify="right")
+    table.add_column("cost", justify="right")
+    table.add_column("cost/item", justify="right")
+
+    for r in report.results:
+        marker = (
+            " (incumbent)" if report.incumbent and report.incumbent in r.model else ""
+        )
+        row = [r.model.split("/")[-1] + marker, str(r.n)]
+        for k in metric_keys:
+            v = r.metrics.get(k)
+            row.append(f"{v:.4f}" if isinstance(v, float) else "—")
+        row.append(f"${r.cost:.4f}")
+        row.append(f"${r.cost_per_item:.4f}")
+        table.add_row(*row)
+
+    console.print(table)
+    if report.judge_model:
+        console.print(f"  judge: {report.judge_model}")
+    if report.incumbent:
+        console.print(f"  incumbent: {report.incumbent}")

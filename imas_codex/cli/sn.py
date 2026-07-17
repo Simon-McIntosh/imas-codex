@@ -2018,6 +2018,110 @@ def sn_run(
             log_print("(dry run — no LLM calls or graph writes)")
 
 
+def _run_role_bench(
+    *,
+    role: str,
+    models: tuple[str, ...],
+    sample: int | None,
+    seed: int,
+    reviewer_model: str | None,
+    reasoning_effort: str | None,
+    review_reasoning_effort: str | None,
+    output: str | None,
+) -> None:
+    """Resolve seat defaults and dispatch to the matching role runner.
+
+    Candidate defaults per seat are the incumbent plus the GPT-5.6 tiers the
+    plan lists for that seat; --models overrides them. The held-out judge and
+    the seat's production reasoning-effort are resolved from config so a bench
+    reflects how the seat actually runs.
+    """
+    from datetime import UTC, datetime
+    from pathlib import Path
+
+    from imas_codex.cli.utils import run_async
+    from imas_codex.settings import (
+        get_reasoning_effort,
+        get_sn_benchmark_reviewer_model,
+    )
+    from imas_codex.standard_names import benchmark_roles as br
+
+    LUNA = "openrouter/openai/gpt-5.6-luna"
+    TERRA = "openrouter/openai/gpt-5.6-terra"
+    SOL = "openrouter/openai/gpt-5.6-sol"
+    GPT55 = "openrouter/openai/gpt-5.5"
+    SONNET = "openrouter/anthropic/claude-sonnet-4.6"
+
+    # Incumbent + default candidate slate per seat (plan §2 table).
+    seat_incumbent = {
+        "refine": GPT55,
+        "breaker-names": GPT55,
+        "breaker-docs": GPT55,
+        "docs": SONNET,
+        "classifier": None,
+    }
+    seat_defaults = {
+        "refine": [GPT55, LUNA, TERRA],
+        "breaker-names": [GPT55, LUNA, TERRA],
+        "breaker-docs": [GPT55, LUNA, TERRA],
+        "docs": [SONNET, LUNA, TERRA, SOL],
+        "classifier": [LUNA],
+    }
+
+    if models:
+        model_list: list[str] = []
+        for m in models:
+            model_list.extend(p.strip() for p in m.split(",") if p.strip())
+    else:
+        model_list = seat_defaults[role]
+
+    incumbent = seat_incumbent[role]
+    judge = reviewer_model or get_sn_benchmark_reviewer_model()
+    refine_effort = get_reasoning_effort("sn-refine") or "high"
+    # Production review quorum runs at effort=high; allow an explicit override.
+    review_effort = review_reasoning_effort or "high"
+
+    if role == "refine":
+        corpus = br.load_refine_corpus(sample or 20, seed)
+        report = run_async(
+            br.run_refine_bench(
+                model_list, corpus, judge, incumbent, reasoning_effort or refine_effort
+            )
+        )
+    elif role in ("breaker-names", "breaker-docs"):
+        axis = "names" if role == "breaker-names" else "docs"
+        corpus = br.load_breaker_corpus(sample or 30, seed, axis=axis)
+        report = run_async(
+            br.run_breaker_bench(
+                model_list, corpus, axis=axis, incumbent=incumbent,
+                reasoning_effort=review_effort,
+            )
+        )
+    elif role == "docs":
+        docs_sample = br.load_docs_sample(sample or 20, seed)
+        report = run_async(
+            br.run_docs_bench(model_list, docs_sample, judge, incumbent)
+        )
+    elif role == "classifier":
+        gold = br.load_classifier_gold()
+        if sample:
+            gold = gold[:sample]
+        report = run_async(br.run_classifier_bench(model_list, gold, incumbent))
+    else:  # pragma: no cover - click.Choice guards this
+        raise click.UsageError(f"Unknown role {role!r}")
+
+    br.render_role_report(report)
+
+    if output is None:
+        bench_dir = Path.home() / ".local" / "share" / "imas-codex" / "benchmarks"
+        ts = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%S")
+        out_path = bench_dir / f"sn_rolebench_{role}_{ts}.json"
+    else:
+        out_path = Path(output)
+    report.save_atomic(str(out_path))
+    console.print(f"\n[green]Role report saved:[/green] {out_path}")
+
+
 @sn.command("bench")
 @click.option(
     "--models",
@@ -2117,6 +2221,23 @@ def sn_run(
     "(to --output if given, else in place). Does not re-run composition or "
     "names review.",
 )
+@click.option(
+    "--role",
+    type=click.Choice(
+        ["refine", "breaker-names", "breaker-docs", "docs", "classifier"]
+    ),
+    default=None,
+    help="Benchmark a specific PIPELINE SEAT instead of compose. Each role uses "
+    "its production prompt, real graph fixtures, and the seat's reasoning-effort. "
+    "--max-candidates bounds the fixture sample; --reviewer-model is the held-out "
+    "judge where a role needs one.",
+)
+@click.option(
+    "--seed",
+    type=int,
+    default=1729,
+    help="Deterministic sample seed for --role fixture selection.",
+)
 def sn_bench(
     models: tuple[str, ...],
     max_candidates: int | None,
@@ -2133,6 +2254,8 @@ def sn_bench(
     reasoning_effort: str | None,
     review_reasoning_effort: str | None,
     rescore: str | None,
+    role: str | None,
+    seed: int,
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
@@ -2155,6 +2278,20 @@ def sn_bench(
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.WARNING)
+
+    # --- Per-role seat benchmark (production prompt + real graph fixtures) ---
+    if role:
+        _run_role_bench(
+            role=role,
+            models=models,
+            sample=max_candidates,
+            seed=seed,
+            reviewer_model=reviewer_model,
+            reasoning_effort=reasoning_effort,
+            review_reasoning_effort=review_reasoning_effort,
+            output=output,
+        )
+        return
 
     # --- Standalone description rescore of an existing report ---
     if rescore:
