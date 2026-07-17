@@ -276,8 +276,17 @@ class TestRefinePromptContext:
 
 
 class TestClassifyRefineFailure:
-    def test_kind_enum(self):
+    def test_kind_enum_legacy_after_validator(self):
         exc = ValueError("kind must be one of {'scalar'}, got 'standard_name'")
+        assert br._classify_refine_failure(exc) == "kind_enum"
+
+    def test_kind_enum_literal_schema(self):
+        # Current form after kind became a Literal enum in the schema.
+        exc = ValueError(
+            "1 validation error for RefinedName\nkind\n  Input should be "
+            "'scalar', 'vector', 'tensor', 'complex' or 'metadata' "
+            "[type=literal_error, input_value='standard_name', input_type=str]"
+        )
         assert br._classify_refine_failure(exc) == "kind_enum"
 
     def test_grammar_token(self):

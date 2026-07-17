@@ -247,13 +247,17 @@ def banned_prose_findings(text: str) -> dict[str, int]:
 def _classify_refine_failure(exc: BaseException) -> str:
     """Bucket a refine compose failure so an all-zero row explains itself.
 
-    ``kind_enum``  — the model set the entry ``kind`` to a value outside
-    {scalar, vector, metadata} (a schema/prompt gap, not name quality).
+    ``kind_enum``  — the model set the entry ``kind`` to an out-of-vocabulary
+    value (a schema/prompt gap, not name quality).  Matches both the historical
+    after-validator message ("kind must be one of ...") and the current
+    ``Literal`` schema form ("kind\\n  Input should be 'scalar', ... 'metadata'").
     ``grammar_token`` — the model used an unregistered grammar token.
     ``other`` — anything else (timeouts, provider errors, empty responses).
     """
     msg = str(exc).lower()
-    if "kind must be one of" in msg:
+    if "kind must be one of" in msg or (
+        "input should be" in msg and "'scalar'" in msg and "'metadata'" in msg
+    ):
         return "kind_enum"
     if "not a registered" in msg:
         return "grammar_token"
