@@ -90,6 +90,7 @@ CRITICAL_CHECKS = frozenset(
         "preposition_physical_base_check",
         "canonical_locus_check",
         "description_notation_check",
+        "derived_parent_structure_check",
     }
 )
 
@@ -3083,6 +3084,57 @@ def has_critical_audit_failure(issues: list[str]) -> bool:
             if f"audit:{check}:" in issue:
                 return True
     return False
+
+
+def derived_parent_structural_check(name: str, children: list[str]) -> list[str]:
+    """Structural admission for a derived family parent (a partial name).
+
+    A derived family parent is a deliberately partial name peeled from its
+    children: ``internal_state_energy_flux`` generalises over the species
+    subject that each concrete child (``deuterium_internal_state_energy_flux``,
+    …) carries; ``magnetic_field`` generalises over the projection axis of its
+    ``radial_magnetic_field`` / ``toroidal_magnetic_field`` children. Such a
+    parent is NOT required to parse as a standalone full name — the peel
+    legitimately drops the very segment (subject, projection, …) a complete
+    name would have to carry, so the full-name grammar round-trip that gates
+    standalone names is the wrong instrument for it.
+
+    What a derived parent MUST satisfy is the structural contract that
+    justifies materialising it:
+
+    - it groups at least one child via ``HAS_PARENT`` — an orphan parent
+      generalises nothing and is residue;
+    - it is a genuine generalisation of a child — every token of the parent
+      appears in at least one child, so the parent is a peel of a real family
+      member rather than an unrelated string. Token *set* containment (not
+      ordered subsequence) is used because qualifier binding can reorder tokens
+      between a child and its peeled parent.
+
+    Returns critical ``audit:derived_parent_structure_check`` issues when either
+    clause is broken — the missed-acceptance-gate signal is preserved for a
+    genuinely malformed parent — or ``[]`` when the parent is a sound peel.
+    """
+    parent = (name or "").strip()
+    if not parent:
+        return ["audit:derived_parent_structure_check: empty parent name"]
+
+    child_ids = [c for c in (children or []) if c]
+    if not child_ids:
+        return [
+            f"audit:derived_parent_structure_check: derived parent {parent!r} "
+            "has no HAS_PARENT children — it generalises nothing"
+        ]
+
+    parent_tokens = set(parent.split("_"))
+    if not any(parent_tokens <= set(child.split("_")) for child in child_ids):
+        sample = ", ".join(sorted(child_ids)[:3])
+        return [
+            f"audit:derived_parent_structure_check: derived parent {parent!r} is "
+            f"not a token-generalisation of any child ({sample}) — the peel is "
+            "inconsistent with the family it heads"
+        ]
+
+    return []
 
 
 # =============================================================================

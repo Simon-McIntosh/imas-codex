@@ -2549,3 +2549,82 @@ class TestDdPathUniquenessCheck:
             self._entry("b_name", ["x/y/z"]),
         ]
         assert len(dd_path_uniqueness_check(names)) == 1
+
+
+# =========================================================================
+# Derived-parent structural admission
+# =========================================================================
+
+
+class TestDerivedParentStructuralCheck:
+    """Structural gate for derived family parents (deliberately partial names)."""
+
+    def test_consistent_peel_over_species_passes(self):
+        """A species-peel parent whose tokens are a subset of a child passes."""
+        from imas_codex.standard_names.audits import derived_parent_structural_check
+
+        # Parent drops the species subject its children carry.
+        assert (
+            derived_parent_structural_check(
+                "internal_state_energy_flux",
+                [
+                    "deuterium_internal_state_energy_flux",
+                    "tungsten_internal_state_energy_flux",
+                ],
+            )
+            == []
+        )
+
+    def test_reordered_qualifier_peel_passes(self):
+        """Token-SET containment tolerates qualifier reordering between peel/child."""
+        from imas_codex.standard_names.audits import derived_parent_structural_check
+
+        # parent tokens {perturbed, particle, energy} ⊆ child token set.
+        assert (
+            derived_parent_structural_check(
+                "perturbed_particle_energy",
+                ["normalized_particle_perturbed_energy"],
+            )
+            == []
+        )
+
+    def test_orphan_parent_quarantines(self):
+        """A derived parent with no children generalises nothing — critical."""
+        from imas_codex.standard_names.audits import (
+            derived_parent_structural_check,
+            has_critical_audit_failure,
+        )
+
+        issues = derived_parent_structural_check("velocity_due_to_convection", [])
+        assert len(issues) == 1
+        assert "no HAS_PARENT children" in issues[0]
+        assert has_critical_audit_failure(issues) is True
+
+    def test_inconsistent_peel_quarantines(self):
+        """A parent whose tokens are not a subset of any child is a bad peel."""
+        from imas_codex.standard_names.audits import (
+            derived_parent_structural_check,
+            has_critical_audit_failure,
+        )
+
+        issues = derived_parent_structural_check(
+            "wave_power",
+            ["electron_temperature", "ion_density"],
+        )
+        assert len(issues) == 1
+        assert "not a token-generalisation" in issues[0]
+        assert has_critical_audit_failure(issues) is True
+
+    def test_empty_name_quarantines(self):
+        from imas_codex.standard_names.audits import derived_parent_structural_check
+
+        issues = derived_parent_structural_check("", ["some_child"])
+        assert len(issues) == 1
+        assert "empty parent name" in issues[0]
+
+    def test_none_children_treated_as_orphan(self):
+        from imas_codex.standard_names.audits import derived_parent_structural_check
+
+        issues = derived_parent_structural_check("plasma_momentum", None)
+        assert len(issues) == 1
+        assert "no HAS_PARENT children" in issues[0]

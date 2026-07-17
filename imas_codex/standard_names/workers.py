@@ -3896,12 +3896,24 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
     ``validation_status`` is ``"valid"`` or ``"quarantined"``.
     """
     name = entry.get("id", "")
+    # A derived family parent is a deliberately partial name (a grammar peel
+    # that drops the segment its children carry — species, projection axis, …).
+    # The full-name round-trip below is the wrong gate for it: dropping that
+    # segment is the whole point, so a legitimately partial parent would be
+    # mis-flagged as an unparseable standalone name. Such parents are validated
+    # STRUCTURALLY (children exist + the peel generalises them) instead — while
+    # a structurally-broken parent (orphan / inconsistent peel) still
+    # quarantines, so the missed-gate signal is preserved.
+    is_derived_parent = entry.get("origin") == "derived"
+    derived_children = entry.get("children") or []
     try:
         from imas_standard_names.grammar import (
             StandardName,
             compose_standard_name,
             parse_standard_name,
         )
+
+        from imas_codex.standard_names.audits import derived_parent_structural_check
 
         # Grammar round-trip validates parsability.
         parsed = parse_standard_name(name)
@@ -3947,9 +3959,21 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
         if entry.get("_grammar_retry_exhausted"):
             issues.append("audit:grammar_retry_exhausted")
 
+        # A derived parent that DOES round-trip still owes its structural
+        # contract — an orphan parent that happens to parse generalises nothing.
+        if is_derived_parent:
+            issues.extend(derived_parent_structural_check(name, derived_children))
+
         status = "quarantined" if _is_quarantined(issues, layer_summary) else "valid"
         return issues, layer_summary, status
     except Exception as exc:
+        # A derived family parent is intentionally partial; a full-name parse
+        # failure is expected, not a defect. Validate it structurally instead —
+        # it quarantines only when its family structure is broken.
+        if is_derived_parent:
+            struct_issues = derived_parent_structural_check(name, derived_children)
+            status = "quarantined" if struct_issues else "valid"
+            return struct_issues, {}, status
         exc_msg = str(exc).lower()
         issues = []
         if "component" in exc_msg and "coordinate" in exc_msg:

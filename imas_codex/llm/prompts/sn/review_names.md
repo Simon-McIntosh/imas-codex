@@ -213,6 +213,13 @@ real defects, not phantom ones.
 
 {% for item in items %}
 ### Candidate {{ loop.index }} — `{{ item.standard_name or item.id }}`
+{% if item.derived_children %}
+> **DERIVED FAMILY PARENT — score as an abstraction, not a standalone name.**
+> {{ item.derived_parent_note }}
+> Its children (the concrete instances it heads) are:
+{% for c in item.derived_children %}> - `{{ c.name }}`{% if c.unit %} [{{ c.unit }}]{% endif %}{% if c.physics_domain %} ({{ c.physics_domain }}){% endif %}{% if c.description %} — {{ c.description }}{% endif %}
+{% endfor %}> A partial name that correctly generalises its children is CORRECT — do **not** dock `completeness`/`semantic` for the distinguishing segment it deliberately drops (that segment lives on the children). Only flag it if it fails to capture the common quantity, or is not a genuine generalisation of the children above.
+{% endif %}
 - **Source ID**: {{ item.source_id }}
 - **Unit**: {{ item.unit | default('N/A', true) }} *(authoritative)*
 - **Kind**: {{ item.kind | default('N/A', true) }}

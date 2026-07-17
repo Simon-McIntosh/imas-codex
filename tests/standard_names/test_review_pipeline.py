@@ -962,3 +962,74 @@ def test_build_summary_report_all_scored():
     assert summary.total_scored == 2
     assert summary.total_unscored == 0
     assert sum(summary.tier_distribution.values()) == summary.total_scored
+
+
+# =============================================================================
+# Derived-parent review-context injection
+# =============================================================================
+
+
+def test_derived_parent_peel_note_names_dropped_axis():
+    """The peel note surfaces the distinguishing tokens the parent drops."""
+    from imas_codex.standard_names.review.pipeline import _derived_parent_peel_note
+
+    note = _derived_parent_peel_note(
+        "internal_state_energy_flux",
+        [
+            {"name": "deuterium_internal_state_energy_flux"},
+            {"name": "tungsten_internal_state_energy_flux"},
+        ],
+    )
+    assert "Derived family parent" in note
+    assert "deuterium" in note and "tungsten" in note
+    assert "generalises" in note
+
+
+def test_fetch_review_derived_children_only_enriches_derived(monkeypatch):
+    """Only origin='derived' items get derived_children + a peel note."""
+    import imas_codex.standard_names.graph_ops as graph_ops
+    import imas_codex.standard_names.review.pipeline as pipeline
+
+    def _fake_fetch(parent_ids):
+        assert parent_ids == ["internal_state_energy_flux"]
+        return {
+            "internal_state_energy_flux": [
+                {
+                    "name": "deuterium_internal_state_energy_flux",
+                    "unit": "W.m^-2",
+                    "physics_domain": "edge",
+                    "description": "D energy flux",
+                }
+            ]
+        }
+
+    monkeypatch.setattr(graph_ops, "fetch_derived_parent_children", _fake_fetch)
+
+    names = [
+        {"id": "internal_state_energy_flux", "origin": "derived"},
+        {"id": "electron_temperature", "origin": "pipeline"},
+    ]
+    pipeline._fetch_review_derived_children(names)
+
+    parent, leaf = names
+    assert parent["derived_children"][0]["name"] == (
+        "deuterium_internal_state_energy_flux"
+    )
+    assert "Derived family parent" in parent["derived_parent_note"]
+    # A non-derived name is untouched.
+    assert "derived_children" not in leaf
+    assert "derived_parent_note" not in leaf
+
+
+def test_fetch_review_derived_children_noop_without_derived(monkeypatch):
+    """No derived items → the fetch helper is never called."""
+    import imas_codex.standard_names.graph_ops as graph_ops
+    import imas_codex.standard_names.review.pipeline as pipeline
+
+    def _boom(parent_ids):  # pragma: no cover - must not run
+        raise AssertionError("fetch should not be called without derived parents")
+
+    monkeypatch.setattr(graph_ops, "fetch_derived_parent_children", _boom)
+    names = [{"id": "electron_temperature", "origin": "pipeline"}]
+    pipeline._fetch_review_derived_children(names)
+    assert "derived_children" not in names[0]

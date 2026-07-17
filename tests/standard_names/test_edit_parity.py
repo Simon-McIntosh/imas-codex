@@ -43,6 +43,65 @@ class TestPipelineGateBaseline:
         assert status == "valid"
 
 
+class TestDerivedParentGateScoping:
+    """The full-name parse gate is scoped for derived family parents.
+
+    A derived parent is a deliberately partial name (a grammar peel). It must
+    be validated structurally — children exist + the peel generalises them —
+    NOT rejected merely for failing the standalone full-name round-trip.
+    """
+
+    def test_partial_derived_parent_with_children_is_valid(self) -> None:
+        """``internal_state_energy_flux`` cannot parse standalone (its species
+        subject is peeled off) but is a valid parent of species children."""
+        issues, _summary, status = validate_name_candidate(
+            {
+                "id": "internal_state_energy_flux",
+                "origin": "derived",
+                "children": [
+                    "deuterium_internal_state_energy_flux",
+                    "tungsten_internal_state_energy_flux",
+                ],
+            }
+        )
+        assert status == "valid", issues
+
+    def test_orphan_derived_parent_quarantines(self) -> None:
+        """A derived parent that fails the parse AND has no children is a
+        structurally-broken residue — the missed-gate signal is preserved."""
+        issues, _summary, status = validate_name_candidate(
+            {
+                "id": "internal_state_energy_flux",
+                "origin": "derived",
+                "children": [],
+            }
+        )
+        assert status == "quarantined"
+        assert any("no HAS_PARENT children" in i for i in issues)
+
+    def test_inconsistent_peel_derived_parent_quarantines(self) -> None:
+        """A derived parent whose tokens do not generalise any child is a bad
+        peel — quarantined with a structural finding, not silently admitted."""
+        issues, _summary, status = validate_name_candidate(
+            {
+                "id": "internal_state_energy_flux",
+                "origin": "derived",
+                "children": ["electron_temperature"],
+            }
+        )
+        assert status == "quarantined"
+        assert any("not a token-generalisation" in i for i in issues)
+
+    def test_non_derived_partial_name_still_fails_full_parse(self) -> None:
+        """Scoping is derived-only: a non-derived name that fails the full-name
+        parse is still quarantined for the parse error."""
+        issues, _summary, status = validate_name_candidate(
+            {"id": "internal_state_energy_flux", "origin": "pipeline"}
+        )
+        assert status == "quarantined"
+        assert any("parse_error" in i or "grammar:ambiguity" in i for i in issues)
+
+
 # =============================================================================
 # rename mode
 # =============================================================================

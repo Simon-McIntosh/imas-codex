@@ -286,6 +286,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
                        sn.name_stage AS name_stage,
                        sn.reviewer_scores_name AS reviewer_scores_name,
                        sn.reviewer_scores_docs AS reviewer_scores_docs,
+                       sn.origin AS origin,
                        sn.review_input_hash AS review_input_hash,
                        sn.embedding AS embedding,
                        sn.review_tier AS review_tier,
@@ -533,6 +534,9 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
         batch_names = batch.get("names", [])
         if batch_names:
             await asyncio.to_thread(_fetch_review_dd_context, batch_names)
+            # Derived family parents: attach their children + a peel note so
+            # the reviewer scores the abstraction, not a blind partial name.
+            await asyncio.to_thread(_fetch_review_derived_children, batch_names)
 
         # Audit findings (if audit was run)
         if state.audit_report is not None:
@@ -559,6 +563,74 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
             }
         ]
     )
+
+
+def _derived_parent_peel_note(parent_id: str, children: list[dict]) -> str:
+    """Describe the peel that produced a derived family parent.
+
+    A derived parent is a partial name: it is the child names with their
+    family-distinguishing segment removed. The tokens that appear in the
+    children but not in the parent ARE that dropped axis (a species/subject,
+    a projection component, a locus, …). Surfacing them tells the reviewer
+    exactly what the parent generalises over, so a legitimately partial name
+    is not scored as an incomplete standalone name.
+    """
+    parent_tokens = set(parent_id.split("_"))
+    dropped: list[str] = []
+    seen: set[str] = set()
+    for child in children:
+        cid = child.get("name") or ""
+        for tok in cid.split("_"):
+            if tok and tok not in parent_tokens and tok not in seen:
+                seen.add(tok)
+                dropped.append(tok)
+    if dropped:
+        axis = ", ".join(f"`{t}`" for t in dropped[:8])
+        return (
+            f"Derived family parent: `{parent_id}` is a partial name peeled from "
+            f"its children by dropping the distinguishing segment they carry "
+            f"({axis}). It deliberately generalises over that axis and is NOT a "
+            f"standalone specific name — judge it as the correct common "
+            f"abstraction of the children, not as an under-qualified full name."
+        )
+    return (
+        f"Derived family parent: `{parent_id}` is a partial name that generalises "
+        f"over its children. Judge it as their common abstraction, not as an "
+        f"under-qualified standalone name."
+    )
+
+
+def _fetch_review_derived_children(names: list[dict]) -> None:
+    """Attach child grounding + a peel note to derived-parent review items.
+
+    For every item with ``origin == 'derived'``, fetch its live ``HAS_PARENT``
+    children (the concrete family members it heads) and a human-readable peel
+    explanation. Both flow into the review prompt so the model scores the
+    parent as the abstraction it is rather than flagging a partial name blind.
+    Modifies items in-place, adding ``derived_children`` and
+    ``derived_parent_note``.
+    """
+    from imas_codex.standard_names.graph_ops import fetch_derived_parent_children
+
+    parent_ids = [
+        n.get("id", "") for n in names if (n.get("origin") == "derived") and n.get("id")
+    ]
+    if not parent_ids:
+        return
+    try:
+        children_map = fetch_derived_parent_children(parent_ids)
+    except Exception:
+        logger.debug("Review derived-parent children fetch failed", exc_info=True)
+        return
+    for item in names:
+        if item.get("origin") != "derived":
+            continue
+        children = children_map.get(item.get("id", "")) or []
+        if children:
+            item["derived_children"] = children[:12]
+            item["derived_parent_note"] = _derived_parent_peel_note(
+                item.get("id", ""), children
+            )
 
 
 def _fetch_review_dd_context(names: list[dict]) -> None:

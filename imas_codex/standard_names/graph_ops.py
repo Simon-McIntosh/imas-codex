@@ -4192,13 +4192,17 @@ def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any
             """
             MATCH (sn:StandardName {claim_token: $token})
             OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
+            OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
             RETURN sn.id AS id, sn.description AS description,
                    sn.documentation AS documentation, sn.kind AS kind,
                    sn.unit AS unit, sn.links AS links,
                    sn.source_paths AS source_paths,
                    sn.object AS object,
                    sn.physics_domain AS physics_domain,
-                   collect(DISTINCT src.id) AS source_ids
+                   sn.origin AS origin,
+                   collect(DISTINCT src.id) AS source_ids,
+                   collect(DISTINCT child.id) AS children
             """,
             token=token,
         )

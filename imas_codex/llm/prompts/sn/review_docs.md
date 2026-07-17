@@ -106,6 +106,13 @@ These names already exist in the catalog. Compare docs for consistency and cross
 {% for item in items %}
 ### Candidate {{ loop.index }}
 - **Standard name**: {{ item.standard_name or item.id }}
+{% if item.derived_children %}
+> **DERIVED FAMILY PARENT — score its documentation as an abstraction over its children.**
+> {{ item.derived_parent_note }}
+> Its children (the concrete instances it heads) are:
+{% for c in item.derived_children %}> - `{{ c.name }}`{% if c.unit %} [{{ c.unit }}]{% endif %}{% if c.physics_domain %} ({{ c.physics_domain }}){% endif %}{% if c.description %} — {{ c.description }}{% endif %}
+{% endfor %}> Reward documentation that correctly captures the common quantity these children share and positions the parent as their generalisation; do **not** dock for missing child-level specifics.
+{% endif %}
 - **Source ID**: {{ item.source_id }}
 - **Unit**: {{ item.unit | default('N/A', true) }}
 - **Kind**: {{ item.kind | default('N/A', true) }}
