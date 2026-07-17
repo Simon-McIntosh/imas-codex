@@ -69,6 +69,13 @@ class _NodeGraph:
                 n["claimed_at"] = None
                 if p.get("run_id") is not None:
                     n["run_id"] = p["run_id"]
+                # Mirror the stale-quarantine reset in the real Cypher.
+                if "was_quarantined" in cypher and (
+                    n.get("validation_status") == "quarantined"
+                ):
+                    n["validation_status"] = "pending"
+                    n["validation_issues"] = None
+                    n["validated_at"] = None
             return []
         raise AssertionError(f"unexpected query: {cypher}")
 
@@ -170,6 +177,28 @@ class TestStageNameForRescore:
         res = _stage_rescore(node, dry_run=True)
         assert res["ok"] is True and res["dry_run"] is True
         assert node["name_stage"] == "exhausted"  # untouched
+
+    def test_stale_quarantine_reset_for_revalidation(self) -> None:
+        # A quarantine stamped under an older grammar must not survive a
+        # rescore — validation re-runs under the current grammar.
+        node = {
+            "id": "n",
+            "name_stage": "reviewed",
+            "validation_status": "quarantined",
+            "validation_issues": ["parse_error: grammar round-trip failed"],
+            "validated_at": "2026-07-17T00:00:00Z",
+        }
+        res = _stage_rescore(node, run_id="r")
+        assert res["ok"] is True
+        assert node["validation_status"] == "pending"
+        assert node["validation_issues"] is None
+        assert node["validated_at"] is None
+
+    def test_valid_validation_state_is_preserved(self) -> None:
+        node = {"id": "n", "name_stage": "reviewed", "validation_status": "valid"}
+        res = _stage_rescore(node, run_id="r")
+        assert res["ok"] is True
+        assert node["validation_status"] == "valid"
 
 
 class TestRescoreNameOrchestrator:

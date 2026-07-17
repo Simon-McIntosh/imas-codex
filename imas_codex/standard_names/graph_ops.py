@@ -10735,12 +10735,22 @@ def stage_name_for_rescore(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE sn.name_stage IN ['exhausted', 'reviewed']
+            // A quarantine stamped under an older grammar is stale by
+            // definition here — the operator asks for a fresh pass, so
+            // validation must re-run under the CURRENT grammar too.
+            WITH sn, sn.validation_status = 'quarantined' AS was_quarantined
             SET sn.name_stage = 'drafted',
                 sn.reviewer_score_name = null,
                 sn.review_resubmit_count = 0,
                 sn.claim_token = null,
                 sn.claimed_at = null,
-                sn.run_id = coalesce($run_id, sn.run_id)
+                sn.run_id = coalesce($run_id, sn.run_id),
+                sn.validation_status = CASE WHEN was_quarantined
+                    THEN 'pending' ELSE sn.validation_status END,
+                sn.validation_issues = CASE WHEN was_quarantined
+                    THEN null ELSE sn.validation_issues END,
+                sn.validated_at = CASE WHEN was_quarantined
+                    THEN null ELSE sn.validated_at END
             """,
             id=sn_id,
             run_id=run_id,
