@@ -1417,6 +1417,18 @@ def _reject_unscoped_accepted_reset(
     show_default=True,
     help="Resume a campaign from this batch index (batches are idempotent).",
 )
+@click.option(
+    "--campaign-pilot",
+    "campaign_pilot",
+    type=int,
+    default=None,
+    help=(
+        "Reduce the campaign selection to a deterministic stratified pilot "
+        "of N names — round-robin across physics domains, rotating defect "
+        "classes within each domain. Pair with --dry-run to write the pilot "
+        "manifest; the same N in a live run drains exactly those names."
+    ),
+)
 @click.argument("paths", nargs=-1)
 def sn_run(
     source: str,
@@ -1469,6 +1481,7 @@ def sn_run(
     campaign_cost_ceiling: float | None,
     campaign_accept_rate: float,
     campaign_resume_from: int,
+    campaign_pilot: int | None,
 ) -> None:
     """Generate standard names from a source.
 
@@ -1830,6 +1843,7 @@ def sn_run(
             ConvergenceThresholds,
             build_manifest,
             select_targets,
+            stratified_pilot,
             write_manifest,
         )
 
@@ -1848,17 +1862,33 @@ def sn_run(
         with GraphClient() as gc:
             selection = select_targets(gc, spec, limit=limit)
 
+        pilot_from: int | None = None
+        if campaign_pilot is not None:
+            pilot_from = selection.total
+            selection = stratified_pilot(selection, campaign_pilot)
+
         if dry_run:
-            manifest = build_manifest(selection, batch_size=campaign_batch_size)
+            manifest = build_manifest(
+                selection,
+                batch_size=campaign_batch_size,
+                sample_size=(selection.total if campaign_pilot is not None else 20),
+                pilot_from=pilot_from,
+            )
             path = write_manifest(
                 manifest, campaign_manifest or "campaign-manifest.json"
             )
+            pilot_note = (
+                f" (stratified pilot of {selection.total} from {pilot_from})"
+                if pilot_from is not None
+                else ""
+            )
             console.print(
-                f"[green]Campaign manifest[/green] ({spec.describe()}): "
+                f"[green]Campaign manifest[/green] ({spec.describe()}){pilot_note}: "
                 f"{selection.total} accepted name(s), "
                 f"{manifest['batch_plan']['n_batches']} batch(es) of "
                 f"{campaign_batch_size}. Per-predicate: "
-                f"{manifest['per_predicate']}. Written to {path}"
+                f"{manifest['per_predicate']}. Per-domain: "
+                f"{manifest['per_domain']}. Written to {path}"
             )
             return
 

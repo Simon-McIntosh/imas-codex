@@ -28,6 +28,7 @@ from imas_codex.standard_names.campaign import (
     measure_batch,
     plan_batches,
     select_targets,
+    stratified_pilot,
     write_manifest,
 )
 
@@ -159,6 +160,11 @@ class TestMatchTarget:
         assert target.quarantined is True
         assert "quarantined" in target.matched_predicates
 
+    def test_physics_domain_flows_to_target(self):
+        row = _row(documentation="Typically 3 T.", physics_domain="equilibrium")
+        target = match_target(row, CampaignSpec.parse("prose"))
+        assert target.physics_domain == "equilibrium"
+
     def test_no_predicate_match_returns_none(self):
         row = _row(validation_issues=["audit:latex_def_check: x"])
         assert match_target(row, CampaignSpec.parse("audit:decomposition")) is None
@@ -246,12 +252,79 @@ class TestManifest:
         b = build_manifest(sel, seed=7)
         assert [s["id"] for s in a["sample"]] == [s["id"] for s in b["sample"]]
 
+    def test_manifest_carries_per_domain_and_pilot_marker(self):
+        targets = [
+            _target(i, domain, "audit")
+            for domain in ["equilibrium", "transport"]
+            for i in range(2)
+        ]
+        sel = CampaignSelection(spec=CampaignSpec.parse("all"), targets=targets)
+        m = build_manifest(sel, sample_size=4, batch_size=10, pilot_from=2332)
+        assert m["per_domain"] == {"equilibrium": 2, "transport": 2}
+        assert m["pilot"] == {"n": 4, "from_total": 2332}
+        assert all("physics_domain" in s for s in m["sample"])
+
     def test_write_manifest_roundtrip(self, tmp_path):
         m = build_manifest(self._selection(3), sample_size=3)
         path = write_manifest(m, tmp_path / "sub" / "manifest.json")
         assert path.exists()
         loaded = json.loads(path.read_text())
         assert loaded["total"] == 3
+
+
+# ── Stratified pilot ─────────────────────────────────────────────────────────
+
+
+def _target(i, domain, cls):
+    return CampaignTarget(
+        id=f"{domain}_{cls}_{i}",
+        name=f"{domain}_{cls}_{i}",
+        matched_predicates={cls: ["1 match(es)"]},
+        physics_domain=domain,
+    )
+
+
+class TestStratifiedPilot:
+    def _selection(self):
+        targets = []
+        classes = ["prose:typical_values", "prose:estimator_recipe", "audit"]
+        for domain in ["equilibrium", "transport", "mhd", "heating", "edge"]:
+            for cls in classes:
+                for i in range(4):
+                    targets.append(_target(i, domain, cls))
+        return CampaignSelection(spec=CampaignSpec.parse("all"), targets=targets)
+
+    def test_every_domain_represented(self):
+        pilot = stratified_pilot(self._selection(), 25)
+        assert pilot.total == 25
+        domains = {t.physics_domain for t in pilot.targets}
+        assert domains == {"equilibrium", "transport", "mhd", "heating", "edge"}
+
+    def test_defect_classes_mixed_within_domain(self):
+        pilot = stratified_pilot(self._selection(), 25)
+        eq = [t for t in pilot.targets if t.physics_domain == "equilibrium"]
+        classes = {t.predicate_keys[0] for t in eq}
+        assert len(classes) > 1
+
+    def test_deterministic_for_seed(self):
+        a = stratified_pilot(self._selection(), 25, seed=3)
+        b = stratified_pilot(self._selection(), 25, seed=3)
+        assert a.ids == b.ids
+
+    def test_n_at_least_total_returns_selection(self):
+        sel = CampaignSelection(
+            spec=CampaignSpec.parse("all"),
+            targets=[_target(0, "mhd", "audit")],
+        )
+        assert stratified_pilot(sel, 25) is sel
+
+    def test_nonpositive_n_raises(self):
+        with pytest.raises(ValueError):
+            stratified_pilot(self._selection(), 0)
+
+    def test_preserves_spec(self):
+        pilot = stratified_pilot(self._selection(), 5)
+        assert pilot.spec.raw == "all"
 
 
 # ── Batching ────────────────────────────────────────────────────────────────────

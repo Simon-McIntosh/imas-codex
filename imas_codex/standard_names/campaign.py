@@ -173,6 +173,7 @@ class CampaignTarget:
     name: str
     matched_predicates: dict[str, list[str]] = field(default_factory=dict)
     quarantined: bool = False
+    physics_domain: str = ""
 
     @property
     def predicate_keys(self) -> list[str]:
@@ -201,6 +202,13 @@ class CampaignSelection:
     @property
     def quarantined_count(self) -> int:
         return sum(1 for t in self.targets if t.quarantined)
+
+    @property
+    def per_domain(self) -> dict[str, int]:
+        counter: Counter[str] = Counter(
+            t.physics_domain or "(none)" for t in self.targets
+        )
+        return dict(sorted(counter.items()))
 
     @property
     def ids(self) -> list[str]:
@@ -267,6 +275,7 @@ def match_target(row: dict[str, Any], spec: CampaignSpec) -> CampaignTarget | No
         name=row.get("name") or row["id"],
         matched_predicates=matched,
         quarantined=quarantined,
+        physics_domain=row.get("physics_domain") or "",
     )
 
 
@@ -280,6 +289,7 @@ RETURN sn.id AS id,
        sn.validation_issues AS validation_issues,
        sn.validation_status AS validation_status,
        sn.quarantine_reason AS quarantine_reason,
+       sn.physics_domain AS physics_domain,
        sn.docs_stage AS docs_stage
 ORDER BY sn.id
 """
@@ -307,6 +317,56 @@ def select_targets(
     return CampaignSelection(spec=spec, targets=targets)
 
 
+def stratified_pilot(
+    selection: CampaignSelection,
+    n: int,
+    *,
+    seed: int = 0,
+) -> CampaignSelection:
+    """Reduce *selection* to a deterministic stratified pilot of *n* targets.
+
+    Round-robins across physics domains so every domain is represented before
+    any is doubled up; within a domain, rotates across defect (predicate)
+    classes so the pilot carries a mixed defect profile.  Deterministic for a
+    given selection and seed, so a ``--dry-run`` pilot manifest and the
+    subsequent live pilot run pick exactly the same members.
+    """
+    if n <= 0:
+        raise ValueError("pilot size must be positive")
+    if n >= selection.total:
+        return selection
+
+    rng = random.Random(seed)
+    # domain → defect class → shuffled targets
+    domains: dict[str, dict[str, list[CampaignTarget]]] = {}
+    for t in selection.targets:
+        cls = t.predicate_keys[0] if t.predicate_keys else ""
+        domains.setdefault(t.physics_domain or "", {}).setdefault(cls, []).append(t)
+    for classes in domains.values():
+        for bucket in classes.values():
+            rng.shuffle(bucket)
+
+    domain_keys = sorted(domains)
+    class_cursor = dict.fromkeys(domain_keys, 0)
+    picked: list[CampaignTarget] = []
+    while len(picked) < n:
+        progressed = False
+        for dom in domain_keys:
+            classes = domains[dom]
+            keys = sorted(k for k, bucket in classes.items() if bucket)
+            if not keys:
+                continue
+            key = keys[class_cursor[dom] % len(keys)]
+            class_cursor[dom] += 1
+            picked.append(classes[key].pop())
+            progressed = True
+            if len(picked) >= n:
+                break
+        if not progressed:
+            break
+    return CampaignSelection(spec=selection.spec, targets=picked)
+
+
 # ── Manifest ─────────────────────────────────────────────────────────────────
 
 
@@ -316,13 +376,16 @@ def build_manifest(
     sample_size: int = 20,
     batch_size: int = 100,
     seed: int = 0,
+    pilot_from: int | None = None,
 ) -> dict[str, Any]:
     """Materialise a reviewable manifest for a selection.
 
-    The manifest carries the total count, the per-predicate breakdown, the
-    batch plan, and a deterministic random sample (default 20) of matched
-    names with their matched-defect evidence — the object the lead approves
-    before a live campaign runs.
+    The manifest carries the total count, the per-predicate and per-domain
+    breakdowns, the batch plan, and a deterministic random sample (default 20)
+    of matched names with their matched-defect evidence — the object the lead
+    approves before a live campaign runs.  For a pilot selection pass
+    ``pilot_from`` = the size of the full selection it was drawn from; the
+    manifest then carries a ``pilot`` marker.
     """
     rng = random.Random(seed)
     sample_targets = list(selection.targets)
@@ -333,20 +396,25 @@ def build_manifest(
             "name": t.name,
             "matched_predicates": t.matched_predicates,
             "quarantined": t.quarantined,
+            "physics_domain": t.physics_domain,
         }
         for t in sample_targets[:sample_size]
     ]
     n_batches = (selection.total + batch_size - 1) // batch_size if batch_size else 0
-    return {
+    manifest = {
         "spec": selection.spec.raw,
         "spec_describe": selection.spec.describe(),
         "generated_at": datetime.now(UTC).isoformat(),
         "total": selection.total,
         "per_predicate": selection.per_predicate,
+        "per_domain": selection.per_domain,
         "quarantined_count": selection.quarantined_count,
         "batch_plan": {"batch_size": batch_size, "n_batches": n_batches},
         "sample": sample,
     }
+    if pilot_from is not None:
+        manifest["pilot"] = {"n": selection.total, "from_total": pilot_from}
+    return manifest
 
 
 def write_manifest(manifest: dict[str, Any], path: str | Path) -> Path:
@@ -792,6 +860,7 @@ __all__ = [
     "CampaignSelection",
     "match_target",
     "select_targets",
+    "stratified_pilot",
     "build_manifest",
     "write_manifest",
     "CampaignBudget",
