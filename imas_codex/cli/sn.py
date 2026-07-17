@@ -1983,14 +1983,12 @@ def sn_run(
             if revalidate_domain:
                 where_clauses.append("sn.physics_domain = $domain")
                 params["domain"] = revalidate_domain
-            if source == "dd":
-                where_clauses.append(
-                    "EXISTS { MATCH (sn)<-[:HAS_STANDARD_NAME]-(:IMASNode) }"
-                )
-            elif source == "signals":
-                where_clauses.append(
-                    "EXISTS { MATCH (sn)<-[:HAS_STANDARD_NAME]-(:FacilitySignal) }"
-                )
+            # No source scoping: provenance rides StandardNameSource /
+            # PRODUCED_NAME (direct IMASNode / FacilitySignal HAS_STANDARD_NAME
+            # links are legacy and sparse — a source-scoped EXISTS silently
+            # excludes most of the backlog, e.g. every derived family parent),
+            # and the validation drain that picks the cleared names up is
+            # source-agnostic anyway.
             q = f"""
                 MATCH (sn:StandardName)
                 WHERE {" AND ".join(where_clauses)}
