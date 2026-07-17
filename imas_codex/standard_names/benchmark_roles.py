@@ -544,6 +544,41 @@ def _format_critique(critique: dict) -> str:
 # ═══════════════════════════════════════════════════════════════════════
 
 
+def build_refine_prompt_context(case: dict, compose_context: dict, rules: list) -> dict:
+    """Build the refine prompt context for one case, mirroring production.
+
+    Merges ``compose_context`` (from ``build_compose_context``) so the refine
+    system prompt's grammar-reference include renders the closed-vocabulary
+    token map.  Omitting it leaves the grammar block empty, and the model
+    invents unregistered tokens — the bench would then measure a grammar-
+    failure artifact rather than refine quality (the same empty-grammar-block
+    gap ``process_refine_name_batch`` guards against in production).
+    """
+    chain_history = [
+        {
+            "name": case["prior_name"],
+            "reviewer_score": case["prior_score"],
+            "reviewer_comments_per_dim": case["critique"],
+        }
+    ]
+    return {
+        **compose_context,
+        "item": {
+            "path": case["path"],
+            "ids_name": (case["path"].split("/")[0] if case["path"] else ""),
+            "description": case["description"],
+            "unit": case["unit"],
+            "data_type": case["data_type"],
+            "physics_domain": case["physics_domain"],
+        },
+        "chain_history": chain_history,
+        "chain_length": len(chain_history),
+        "hybrid_neighbours": [],
+        "fanout_evidence": "",
+        "composition_rules": rules,
+    }
+
+
 async def run_refine_bench(
     models: list[str],
     corpus: list[dict],
@@ -557,7 +592,17 @@ async def run_refine_bench(
     from imas_codex.discovery.base.llm import acall_llm_structured, ensure_model_prefix
     from imas_codex.llm.prompt_loader import load_prompt_config, render_prompt
     from imas_codex.standard_names.benchmark import _resolve_name
+    from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.models import RefinedName
+
+    # The refine system prompt's grammar-reference include renders the
+    # closed-vocabulary token map from the compose context (vocabulary_sections,
+    # closed_vocab_full).  Production merges this into the refine prompt context;
+    # without it the model rewrites names with no vocabulary reference and
+    # invents unregistered tokens, so the bench must merge it too or it
+    # under-feeds every candidate and measures a grammar-failure artifact
+    # instead of refine quality.  Cache-backed, so this is a dict lookup.
+    compose_context = build_compose_context()
 
     class _RefineJudgement(BaseModel):
         defect_resolution: float = Field(ge=0.0, le=1.0)
@@ -576,26 +621,7 @@ async def run_refine_bench(
         dr_vals: list[float] = []
         cc_vals: list[float] = []
         for case in corpus:
-            prompt_context = {
-                "item": {
-                    "path": case["path"],
-                    "ids_name": (case["path"].split("/")[0] if case["path"] else ""),
-                    "description": case["description"],
-                    "unit": case["unit"],
-                    "data_type": case["data_type"],
-                    "physics_domain": case["physics_domain"],
-                },
-                "chain_history": [
-                    {
-                        "name": case["prior_name"],
-                        "reviewer_score": case["prior_score"],
-                        "reviewer_comments_per_dim": case["critique"],
-                    }
-                ],
-                "hybrid_neighbours": [],
-                "fanout_evidence": "",
-                "composition_rules": rules,
-            }
+            prompt_context = build_refine_prompt_context(case, compose_context, rules)
             try:
                 user_prompt = render_prompt("sn/refine_name_user", prompt_context)
                 try:

@@ -218,3 +218,45 @@ class TestReportRoundTrip:
         gold = br.load_classifier_gold()
         assert len(gold) >= 100
         assert {"path", "expected_domain"} <= set(gold[0])
+
+
+class TestRefinePromptContext:
+    """The refine bench must feed the same grammar vocabulary as production.
+
+    Without merging the compose context, the refine system prompt's grammar
+    block renders empty and candidates invent unregistered tokens — a bench
+    that measures a grammar-failure artifact rather than refine quality.
+    """
+
+    _CASE = {
+        "sn_id": "safety_factor",
+        "prior_name": "safety_factor",
+        "prior_score": 0.6,
+        "critique": {"grammar": "use the q-profile token"},
+        "path": "equilibrium/time_slice/profiles_1d/q",
+        "description": "safety factor",
+        "unit": "-",
+        "data_type": "scalar",
+        "physics_domain": "equilibrium",
+    }
+
+    def test_merges_compose_context_vocabulary(self):
+        compose_context = {
+            "vocabulary_sections": [{"segment": "base", "tokens": ["q"]}],
+            "closed_vocab_full": {"base": ["q"]},
+        }
+        ctx = br.build_refine_prompt_context(self._CASE, compose_context, rules=[])
+        # The vocabulary the grammar-reference include renders must survive.
+        assert ctx["vocabulary_sections"] == compose_context["vocabulary_sections"]
+        assert ctx["closed_vocab_full"] == compose_context["closed_vocab_full"]
+
+    def test_wires_case_and_chain(self):
+        ctx = br.build_refine_prompt_context(self._CASE, {}, rules=["r1"])
+        assert ctx["item"]["path"] == self._CASE["path"]
+        assert ctx["item"]["ids_name"] == "equilibrium"
+        assert ctx["chain_length"] == 1
+        assert ctx["chain_history"][0]["name"] == "safety_factor"
+        assert ctx["chain_history"][0]["reviewer_comments_per_dim"] == {
+            "grammar": "use the q-profile token"
+        }
+        assert ctx["composition_rules"] == ["r1"]
