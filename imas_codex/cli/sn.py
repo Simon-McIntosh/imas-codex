@@ -4760,38 +4760,84 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         )
 
 
-@sn.command("requeue")
+@sn.command("rescore")
 @click.argument("standard_name")
+@click.option(
+    "--stage-only",
+    is_flag=True,
+    default=False,
+    help=(
+        "Transition to drafted but do NOT review inline — leave it for a later "
+        "`sn run`. Use when the embedding server is down (inline review needs "
+        "it). Default is inline review: rescore returns a fresh score."
+    ),
+)
+@click.option(
+    "-c",
+    "--cost-limit",
+    "cost_limit",
+    type=float,
+    default=1.0,
+    show_default=True,
+    help="Max LLM spend (USD) for the inline review. Ignored with --stage-only.",
+)
 @click.option(
     "--dry-run",
     is_flag=True,
-    help="Report what would happen without writing to the graph.",
+    help="Report the intended transition without writing to the graph.",
 )
-def sn_requeue(standard_name: str, dry_run: bool) -> None:
-    """Return a stranded non-accepted name to review for a fresh quorum.
+def sn_rescore(
+    standard_name: str, stage_only: bool, cost_limit: float, dry_run: bool
+) -> None:
+    """Re-score a stranded non-accepted name with a fresh review quorum.
 
     Recovery path for a name stuck at a terminal-but-unpublished name-axis
     stage: an 'exhausted' name (refine cap, or a borderline name wrongly
     exhausted) or a 'reviewed' name whose score never cleared. Reverts it to
-    'drafted' so the next `sn run` re-scores it with a fresh quorum; any
-    attached hint rides the review. A superseded predecessor keeps its lineage
+    'drafted' and, by default, runs the review pipeline scoped to just this
+    name — so you get a fresh score/outcome back, not a queue state. Any
+    attached hint rides the review; a superseded predecessor keeps its lineage
     and the export gap closes once the name re-accepts.
 
     \b
     Example:
-      imas-codex sn requeue second_local_tangential_coordinate_of_bragg_crystal
-      imas-codex sn run --edits   # re-review with a fresh quorum
+      imas-codex sn rescore second_local_tangential_coordinate_of_bragg_crystal
+      imas-codex sn rescore <name> --stage-only   # embed server down: defer review
     """
-    from imas_codex.standard_names.graph_ops import requeue_name_for_review
+    from imas_codex.standard_names.edit import rescore_name
 
-    result = requeue_name_for_review(standard_name, dry_run=dry_run)
-    if not result.get("ok"):
-        raise click.UsageError(result.get("reason", "requeue refused"))
-    verb = "would requeue" if dry_run else "requeued"
-    click.echo(
-        f"{verb} {result['sn_id']} ({result['prior_stage']} → drafted) — "
-        "re-review with `imas-codex sn run --edits`"
+    if not (dry_run or stage_only):
+        _require_embed_ready("sn rescore")
+
+    if not (dry_run or stage_only):
+        console.print(
+            f"\n[bold]Re-scoring inline[/bold] ({standard_name}, "
+            f"budget=${cost_limit:.2f}) …"
+        )
+
+    result = rescore_name(
+        standard_name,
+        cost_limit=cost_limit,
+        stage_only=stage_only,
+        dry_run=dry_run,
     )
+    if not result.get("ok"):
+        raise click.UsageError(result.get("reason", "rescore refused"))
+
+    verb = "would rescore" if dry_run else "rescored"
+    click.echo(
+        f"{verb} {result['sn_id']} ({result['prior_stage']} → drafted, "
+        f"run_id={result['run_id']})"
+    )
+
+    if result.get("reviewed") and result.get("outcome") is not None:
+        _render_inline_review_outcome(result["outcome"])
+        if not result["outcome"].all_accepted:
+            raise SystemExit(3)
+    elif stage_only:
+        click.echo(
+            "  staged only — re-review with `imas-codex sn run --only review --edits`"
+        )
 
 
 @sn.command("reclassify")

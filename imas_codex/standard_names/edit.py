@@ -1448,3 +1448,81 @@ def run_inline_review(
         stop_reason=getattr(summary, "stop_reason", None),
         results=results,
     )
+
+
+def rescore_name(
+    sn_id: str,
+    *,
+    cost_limit: float = 1.0,
+    stage_only: bool = False,
+    min_score: float | None = None,
+    rotation_cap: int | None = None,
+    pending_fn: Any | None = None,
+    dry_run: bool = False,
+    gc: GraphClient | None = None,
+) -> dict[str, Any]:
+    """Recover a stranded name and re-score it with a fresh review quorum.
+
+    Reverts an ``exhausted`` / ``reviewed`` name to ``'drafted'`` (stamped with
+    a fresh scope run_id) and then — unless *stage_only* — runs the review
+    pipeline scoped to exactly that name, so the operator gets a fresh
+    score/outcome back rather than a queue state. This is the ``sn rescore``
+    backend and mirrors :func:`run_inline_review`'s scoped pattern.
+
+    ``stage_only=True`` performs only the drafted transition (no review) — the
+    escape hatch for when the embedding service is down; a later ``sn run``
+    picks the drafted name up. ``dry_run=True`` reports the intended transition
+    without writing.
+
+    Returns a dict with ``ok`` (bool) and, on success, ``prior_stage``,
+    ``run_id``, ``reviewed`` (bool), and ``outcome`` (an
+    :class:`InlineReviewOutcome` or ``None`` when not reviewed). On refusal,
+    ``ok`` is ``False`` with a ``reason``.
+    """
+    from imas_codex.standard_names.graph_ops import stage_name_for_rescore
+
+    run_id = f"sn-rescore-{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}"
+    staged = stage_name_for_rescore(sn_id, run_id=run_id, dry_run=dry_run)
+    if not staged.get("ok"):
+        return staged
+
+    reviewed = not (stage_only or dry_run)
+    result: dict[str, Any] = {
+        "ok": True,
+        "sn_id": sn_id,
+        "prior_stage": staged.get("prior_stage"),
+        "run_id": run_id,
+        "reviewed": reviewed,
+        "outcome": None,
+    }
+    if not reviewed:
+        return result
+
+    # skip_generate: the name already exists (it is being re-scored, not
+    # regenerated) — run the review (+refine) pools scoped to this run_id only.
+    summary = _run_scoped_pipeline(
+        run_id=run_id,
+        skip_generate=True,
+        cost_limit=cost_limit,
+        min_score=min_score,
+        rotation_cap=rotation_cap,
+        pending_fn=pending_fn,
+    )
+
+    owns_gc = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        results = _collect_inline_outcomes(gc, [sn_id], axis="name")
+    finally:
+        if owns_gc:
+            gc.close()
+
+    result["outcome"] = InlineReviewOutcome(
+        ran=True,
+        run_id=run_id,
+        cost=float(getattr(summary, "cost_spent", 0.0) or 0.0),
+        stop_reason=getattr(summary, "stop_reason", None),
+        results=results,
+    )
+    return result

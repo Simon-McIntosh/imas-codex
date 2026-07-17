@@ -8,14 +8,16 @@ grammar validation, either way wrongly marking a CORRECT name ``exhausted`` and
 silently dropping the (already-superseded) predecessor's quantity from export.
 
 The fix: refine resubmits a pinned rename to a fresh review quorum (bounded),
-never rewrites it; and ``sn requeue`` recovers an already-stranded name. Graph
-interaction is mocked (no live Neo4j) with a small stateful fake.
+never rewrites it; and ``sn rescore`` recovers an already-stranded name by
+reverting it to drafted and re-scoring it with a fresh quorum. Graph
+interaction is mocked (no live Neo4j) and the scoped review is mocked (no live
+LLM / embed calls).
 """
 
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import graph_ops
 
@@ -51,10 +53,10 @@ class _NodeGraph:
             n["claim_token"] = None
             n["claimed_at"] = None
             return [{"outcome": "capped"}]
-        # ── requeue_name_for_review probe ──
+        # ── stage_name_for_rescore probe ──
         if "RETURN sn.name_stage AS stage" in cypher:
             return [{"stage": n.get("name_stage")}] if n else []
-        # ── requeue_name_for_review write ──
+        # ── stage_name_for_rescore write ──
         if (
             "SET sn.name_stage = 'drafted'" in cypher
             and "review_resubmit_count = 0" in cypher
@@ -65,6 +67,8 @@ class _NodeGraph:
                 n["review_resubmit_count"] = 0
                 n["claim_token"] = None
                 n["claimed_at"] = None
+                if p.get("run_id") is not None:
+                    n["run_id"] = p["run_id"]
             return []
         raise AssertionError(f"unexpected query: {cypher}")
 
@@ -77,10 +81,14 @@ def _resubmit(node: dict[str, Any], token: str, cap: int = 4):
         )
 
 
-def _requeue(node: dict[str, Any], dry_run: bool = False):
+def _stage_rescore(
+    node: dict[str, Any], run_id: str | None = None, dry_run: bool = False
+):
     fake = _NodeGraph(node)
     with patch.object(graph_ops, "GraphClient", return_value=fake):
-        return graph_ops.requeue_name_for_review(node["id"], dry_run=dry_run)
+        return graph_ops.stage_name_for_rescore(
+            node["id"], run_id=run_id, dry_run=dry_run
+        )
 
 
 class TestResubmitPinnedRename:
@@ -121,44 +129,126 @@ class TestResubmitPinnedRename:
         assert node["name_stage"] == "refining"
 
 
-class TestRequeueNameForReview:
-    def test_requeues_exhausted(self) -> None:
+class TestStageNameForRescore:
+    def test_stages_exhausted_and_stamps_run_id(self) -> None:
         node = {"id": "n", "name_stage": "exhausted", "reviewer_score_name": 0.8}
-        res = _requeue(node)
+        res = _stage_rescore(node, run_id="sn-rescore-x")
         assert res["ok"] is True and res["prior_stage"] == "exhausted"
+        assert res["run_id"] == "sn-rescore-x"
         assert node["name_stage"] == "drafted"
         assert node["reviewer_score_name"] is None
         assert node["review_resubmit_count"] == 0
+        # Stamped so a scoped review claims exactly this name.
+        assert node["run_id"] == "sn-rescore-x"
 
-    def test_requeues_reviewed(self) -> None:
+    def test_stages_reviewed(self) -> None:
         node = {"id": "n", "name_stage": "reviewed"}
-        res = _requeue(node)
+        res = _stage_rescore(node, run_id="r")
         assert res["ok"] is True
         assert node["name_stage"] == "drafted"
 
     def test_refuses_accepted(self) -> None:
         node = {"id": "n", "name_stage": "accepted"}
-        res = _requeue(node)
+        res = _stage_rescore(node)
         assert res["ok"] is False and "accepted" in res["reason"]
         assert node["name_stage"] == "accepted"
 
     def test_refuses_superseded(self) -> None:
         node = {"id": "n", "name_stage": "superseded"}
-        res = _requeue(node)
+        res = _stage_rescore(node)
         assert res["ok"] is False
         assert node["name_stage"] == "superseded"
 
     def test_refuses_missing(self) -> None:
         fake = _NodeGraph({})
         with patch.object(graph_ops, "GraphClient", return_value=fake):
-            res = graph_ops.requeue_name_for_review("missing")
+            res = graph_ops.stage_name_for_rescore("missing")
         assert res["ok"] is False and "not found" in res["reason"]
 
     def test_dry_run_does_not_write(self) -> None:
         node = {"id": "n", "name_stage": "exhausted"}
-        res = _requeue(node, dry_run=True)
+        res = _stage_rescore(node, dry_run=True)
         assert res["ok"] is True and res["dry_run"] is True
         assert node["name_stage"] == "exhausted"  # untouched
+
+
+class TestRescoreNameOrchestrator:
+    """rescore_name stages the transition then, unless stage_only, runs a
+    scoped review. The scoped pipeline is mocked — no live LLM/embed calls."""
+
+    def test_stage_only_skips_review(self) -> None:
+        from imas_codex.standard_names import edit as edit_mod
+
+        with (
+            patch.object(
+                graph_ops,
+                "stage_name_for_rescore",
+                return_value={
+                    "ok": True,
+                    "sn_id": "n",
+                    "prior_stage": "exhausted",
+                    "run_id": "sn-rescore-x",
+                    "dry_run": False,
+                },
+            ),
+            patch.object(edit_mod, "_run_scoped_pipeline") as mock_pipeline,
+        ):
+            res = edit_mod.rescore_name("n", stage_only=True)
+        assert res["ok"] is True
+        assert res["reviewed"] is False
+        assert res["outcome"] is None
+        mock_pipeline.assert_not_called()
+
+    def test_review_path_runs_scoped_pipeline(self) -> None:
+        from imas_codex.standard_names import edit as edit_mod
+        from imas_codex.standard_names.edit import InlineReviewResult
+
+        summary = MagicMock(cost_spent=0.02, stop_reason="no_eligible_work")
+        outcome_result = InlineReviewResult(
+            id="n",
+            name_stage="accepted",
+            docs_stage="pending",
+            edit_status="applied",
+            reviewer_score_name=0.9,
+            reviewer_score_docs=None,
+            accepted=True,
+        )
+        with (
+            patch.object(
+                graph_ops,
+                "stage_name_for_rescore",
+                return_value={
+                    "ok": True,
+                    "sn_id": "n",
+                    "prior_stage": "exhausted",
+                    "run_id": "sn-rescore-x",
+                    "dry_run": False,
+                },
+            ),
+            patch.object(
+                edit_mod, "_run_scoped_pipeline", return_value=summary
+            ) as mock_pipeline,
+            patch.object(
+                edit_mod, "_collect_inline_outcomes", return_value=[outcome_result]
+            ),
+            patch.object(edit_mod, "GraphClient", return_value=MagicMock()),
+        ):
+            res = edit_mod.rescore_name("n", cost_limit=0.5)
+        assert res["ok"] is True and res["reviewed"] is True
+        # skip_generate: a rescore re-scores an existing name, never regenerates.
+        assert mock_pipeline.call_args.kwargs["skip_generate"] is True
+        assert res["outcome"].all_accepted is True
+
+    def test_refusal_propagates(self) -> None:
+        from imas_codex.standard_names import edit as edit_mod
+
+        with patch.object(
+            graph_ops,
+            "stage_name_for_rescore",
+            return_value={"ok": False, "reason": "name 'n' not found"},
+        ):
+            res = edit_mod.rescore_name("n")
+        assert res["ok"] is False and "not found" in res["reason"]
 
 
 class TestRefineClaimExcludesCappedPinnedRenames:

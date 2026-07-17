@@ -10675,26 +10675,35 @@ def resubmit_pinned_rename_for_review(
     return rows[0]["outcome"] if rows else ""
 
 
-def requeue_name_for_review(sn_id: str, *, dry_run: bool = False) -> dict[str, Any]:
+def stage_name_for_rescore(
+    sn_id: str,
+    *,
+    run_id: str | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any]:
     """Return a stranded non-accepted name to review for a fresh quorum.
 
     Operator recovery path for names stuck at a terminal-but-unpublished
     name-axis stage — an ``exhausted`` name (refine cap reached, or a
     borderline name wrongly exhausted) or a ``reviewed`` name whose score never
-    cleared. Reverts ``name_stage`` to ``'drafted'`` so the review pool re-scores
-    it with a fresh quorum, clears the stale reviewer name-score, resets the
+    cleared. Reverts ``name_stage`` to ``'drafted'`` so a review re-scores it
+    with a fresh quorum, clears the stale reviewer name-score, resets the
     re-review budget, and clears any claim. Edit fields are left intact so an
     attached hint (e.g. a "keep this form" steer) rides the fresh review.
 
-    A predecessor that was already superseded stays superseded — the recovered
-    name keeps its REFINED_FROM lineage and, once re-accepted, resolves the
-    export gap it left behind.
+    When *run_id* is given it is stamped on the node so a scoped review
+    (``run_sn_pools(scope_run_id=run_id)``) claims exactly this name — the
+    mechanism the ``sn rescore`` inline review uses. A predecessor that was
+    already superseded stays superseded — the recovered name keeps its
+    REFINED_FROM lineage and, once re-accepted, resolves the export gap it
+    left behind.
 
     Refuses (``{"ok": False, "reason": ...}``) for names that must not be
-    force-requeued: not found, already ``accepted``/``approved``, ``superseded``
+    force-staged: not found, already ``accepted``/``approved``, ``superseded``
     (edit the successor instead), or already live (``drafted``/``refining``).
 
-    Returns ``{"ok": True, "sn_id", "prior_stage", "dry_run"}`` on success.
+    Returns ``{"ok": True, "sn_id", "prior_stage", "run_id", "dry_run"}`` on
+    success.
     """
     with GraphClient() as gc:
         rows = gc.query(
@@ -10708,12 +10717,18 @@ def requeue_name_for_review(sn_id: str, *, dry_run: bool = False) -> dict[str, A
             return {
                 "ok": False,
                 "reason": (
-                    f"{sn_id!r} is name_stage={stage!r} — requeue only recovers "
+                    f"{sn_id!r} is name_stage={stage!r} — rescore only recovers "
                     "'exhausted' or 'reviewed' names (accepted names are already "
                     "live; superseded names should be recovered via their successor)"
                 ),
             }
-        result = {"ok": True, "sn_id": sn_id, "prior_stage": stage, "dry_run": dry_run}
+        result = {
+            "ok": True,
+            "sn_id": sn_id,
+            "prior_stage": stage,
+            "run_id": run_id,
+            "dry_run": dry_run,
+        }
         if dry_run:
             return result
         gc.query(
@@ -10724,11 +10739,15 @@ def requeue_name_for_review(sn_id: str, *, dry_run: bool = False) -> dict[str, A
                 sn.reviewer_score_name = null,
                 sn.review_resubmit_count = 0,
                 sn.claim_token = null,
-                sn.claimed_at = null
+                sn.claimed_at = null,
+                sn.run_id = coalesce($run_id, sn.run_id)
             """,
             id=sn_id,
+            run_id=run_id,
         )
-    logger.info("requeue_name_for_review: %s (%s) → drafted", sn_id, stage)
+    logger.info(
+        "stage_name_for_rescore: %s (%s) → drafted (run_id=%s)", sn_id, stage, run_id
+    )
     return result
 
 
