@@ -1,4 +1,4 @@
-"""Tests for pipeline_version.py — hash stability, diff, and clear gate."""
+"""Tests for pipeline_version.py — hash stability, diff, and drift note."""
 
 from __future__ import annotations
 
@@ -164,7 +164,7 @@ def test_diff_empty_when_no_changes() -> None:
 
 
 # ---------------------------------------------------------------------------
-# _check_pipeline_clear_gate (via CLI)
+# _note_pipeline_version_drift (via CLI)
 # ---------------------------------------------------------------------------
 
 
@@ -193,9 +193,9 @@ def _make_gc_mock(composite: str, detail_dict: dict, name_count: int) -> MagicMo
     return gc
 
 
-def test_clear_gate_passes_when_hashes_match() -> None:
-    """Gate must not raise when current and stored hashes match."""
-    from imas_codex.cli.sn import _check_pipeline_clear_gate
+def test_drift_note_silent_when_hashes_match(caplog) -> None:
+    """No drift log when current and stored hashes match."""
+    from imas_codex.cli.sn import _note_pipeline_version_drift
 
     current = compute_pipeline_hash()
     gc_mock = _make_gc_mock(current["_composite"], {}, 100)
@@ -206,13 +206,15 @@ def test_clear_gate_passes_when_hashes_match() -> None:
             "imas_codex.standard_names.pipeline_version.compute_pipeline_hash",
             return_value=current,
         ),
+        caplog.at_level("INFO", logger="imas_codex.cli.sn"),
     ):
-        _check_pipeline_clear_gate()  # must not raise
+        _note_pipeline_version_drift()
+    assert "drift" not in caplog.text.lower()
 
 
-def test_clear_gate_passes_when_no_prior_run() -> None:
-    """Gate must not raise on a fresh graph (no SNRun with pipeline_hash)."""
-    from imas_codex.cli.sn import _check_pipeline_clear_gate
+def test_drift_note_silent_when_no_prior_run() -> None:
+    """No drift log on a fresh graph (no SNRun with pipeline_hash)."""
+    from imas_codex.cli.sn import _note_pipeline_version_drift
 
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)
@@ -220,12 +222,17 @@ def test_clear_gate_passes_when_no_prior_run() -> None:
     gc.query = MagicMock(return_value=[])  # no rows
 
     with patch("imas_codex.graph.client.GraphClient", return_value=gc):
-        _check_pipeline_clear_gate()  # must not raise
+        _note_pipeline_version_drift()  # must not raise
 
 
-def test_clear_gate_blocks_when_hash_differs() -> None:
-    """Gate must exit(1) when hash changed and there are generated names."""
-    from imas_codex.cli.sn import _check_pipeline_clear_gate
+def test_drift_note_logs_but_never_blocks_when_hash_differs(caplog) -> None:
+    """Drift is logged for provenance; the run is NEVER blocked.
+
+    The catalog is a curated asset — prompts evolve with the project and
+    existing names are refined through edits/campaigns, never wiped. The
+    old clear gate (SystemExit(1) + a wipe recommendation) is retired.
+    """
+    from imas_codex.cli.sn import _note_pipeline_version_drift
 
     current = compute_pipeline_hash()
     # Store a deliberately different composite
@@ -237,16 +244,16 @@ def test_clear_gate_blocks_when_hash_differs() -> None:
             "imas_codex.standard_names.pipeline_version.compute_pipeline_hash",
             return_value=current,
         ),
-        pytest.raises(SystemExit) as exc_info,
+        caplog.at_level("INFO", logger="imas_codex.cli.sn"),
     ):
-        _check_pipeline_clear_gate()
+        _note_pipeline_version_drift()  # must not raise
 
-    assert exc_info.value.code == 1
+    assert "drift" in caplog.text.lower()
 
 
-def test_clear_gate_passes_when_no_names_exist() -> None:
-    """Gate must not block when hashes differ but graph has zero names."""
-    from imas_codex.cli.sn import _check_pipeline_clear_gate
+def test_drift_note_handles_empty_graph() -> None:
+    """Drift note tolerates an empty graph (no names) without raising."""
+    from imas_codex.cli.sn import _note_pipeline_version_drift
 
     current = compute_pipeline_hash()
     gc_mock = _make_gc_mock("deadbeef12345678", {}, 0)
@@ -258,15 +265,15 @@ def test_clear_gate_passes_when_no_names_exist() -> None:
             return_value=current,
         ),
     ):
-        _check_pipeline_clear_gate()  # must not raise (empty graph)
+        _note_pipeline_version_drift()  # must not raise
 
 
-def test_clear_gate_skips_silently_on_graph_error() -> None:
-    """Gate must not raise when the graph is unreachable."""
-    from imas_codex.cli.sn import _check_pipeline_clear_gate
+def test_drift_note_skips_silently_on_graph_error() -> None:
+    """Drift note must not raise when the graph is unreachable."""
+    from imas_codex.cli.sn import _note_pipeline_version_drift
 
     with patch(
         "imas_codex.graph.client.GraphClient",
         side_effect=Exception("connection refused"),
     ):
-        _check_pipeline_clear_gate()  # must not raise
+        _note_pipeline_version_drift()  # must not raise

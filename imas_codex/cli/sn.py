@@ -805,21 +805,21 @@ def _execute_rename_cascade(
             console.print(f"  ... and {len(result.skipped) - 20} more")
 
 
-def _check_pipeline_clear_gate() -> None:
-    """Check whether the pipeline version has changed since the last SNRun.
+def _note_pipeline_version_drift() -> None:
+    """Log (never block) when the pipeline version changed since the last run.
 
-    Queries the graph for the most recent ``SNRun`` node that has a
-    ``pipeline_hash`` set.  If the stored composite hash differs from the
-    current one **and** there are ``StandardName`` nodes generated after
-    that run, print a warning banner and raise ``SystemExit(1)``.
+    The catalog is a curated, incrementally-refined asset: prompts and vocab
+    evolve with the project, and existing names are corrected through edits
+    and campaigns — never wiped and regenerated. The composite pipeline hash
+    stamped on each ``SNRun`` therefore serves as provenance (which prompt
+    generation produced a name), not as a wipe trigger. A one-line INFO note
+    keeps the drift visible in run logs without stopping anyone.
 
     Best-effort: if the graph is unreachable or the import fails, the
-    function returns silently so it never blocks a legitimate first run.
+    function returns silently.
     """
     try:
         import json as _json
-
-        from rich.console import Console as _Console
 
         from imas_codex.graph.client import GraphClient
         from imas_codex.standard_names.pipeline_version import (
@@ -827,45 +827,30 @@ def _check_pipeline_clear_gate() -> None:
             diff_pipeline_hashes,
         )
     except ImportError:
-        return  # bootstrap — skip gate
+        return
 
     try:
         current = compute_pipeline_hash()
         current_composite = current["_composite"]
 
         with GraphClient() as gc:
-            # Fetch most recent SNRun that recorded a pipeline_hash
             rows = list(
                 gc.query(
                     """
                     MATCH (r:SNRun)
                     WHERE r.pipeline_hash IS NOT NULL
                     RETURN r.pipeline_hash          AS composite,
-                           r.pipeline_hash_detail   AS detail,
-                           r.started_at             AS started_at,
-                           r.id                     AS run_id
+                           r.pipeline_hash_detail   AS detail
                     ORDER BY r.started_at DESC
                     LIMIT 1
                     """
                 )
             )
             if not rows:
-                return  # no prior run with hash — fresh graph, skip gate
-
+                return
             row = rows[0]
-            prev_composite = row["composite"]
-            if prev_composite == current_composite:
-                return  # no change
-
-            # Hashes differ — check whether there are generated names
-            name_count_rows = list(
-                gc.query("MATCH (sn:StandardName) RETURN count(sn) AS n")
-            )
-            name_count = name_count_rows[0]["n"] if name_count_rows else 0
-            if name_count == 0:
-                return  # empty graph — nothing to protect
-
-            # Compute which keys changed for a useful message
+            if row["composite"] == current_composite:
+                return
             prev_detail: dict[str, str] = {}
             if row["detail"]:
                 try:
@@ -873,23 +858,13 @@ def _check_pipeline_clear_gate() -> None:
                 except Exception:  # noqa: BLE001
                     pass
             changed_keys = diff_pipeline_hashes(prev_detail, current)
-
-            _Console(stderr=True).print(
-                "\n[bold yellow]⚠  Pipeline version changed since last cycle.[/bold yellow]\n"
-                f"   Previous composite hash : [dim]{prev_composite}[/dim]\n"
-                f"   Current  composite hash : [dim]{current_composite}[/dim]\n"
-                f"   Keys that changed       : [yellow]{', '.join(changed_keys) or '(detail unavailable)'}[/yellow]\n"
-                f"   Existing generated names: [cyan]{name_count}[/cyan]\n\n"
-                "   Recommendation: run the following command before continuing:\n"
-                "     [bold]imas-codex sn clear --all --force --include-sources[/bold]\n\n"
-                "   To bypass this check and continue anyway:\n"
-                "     [bold]imas-codex sn run --skip-clear-gate ...[/bold]\n"
+            logger.info(
+                "Pipeline version drift since last run (%s) — expected as "
+                "prompts/vocab evolve; new hash is stamped on this run.",
+                ", ".join(changed_keys) or "detail unavailable",
             )
-            raise SystemExit(1)
-    except SystemExit:
-        raise
     except Exception:  # noqa: BLE001
-        return  # graph unreachable or error — skip gate silently
+        return
 
 
 def _auto_sync_grammar(*, quiet: bool = False) -> None:
@@ -1325,11 +1300,11 @@ def _reject_unscoped_accepted_reset(
     "--skip-clear-gate",
     is_flag=True,
     default=False,
+    hidden=True,
     help=(
-        "Bypass the pipeline-version change check. Normally ``sn run`` "
-        "exits non-zero when prompt files or ISN vocab have changed since "
-        "the last SNRun node and there are existing generated names. "
-        "Pass this flag to suppress the gate and continue anyway."
+        "Deprecated no-op, retained so existing scripts don't break. "
+        "The pipeline-version change check no longer blocks runs — drift "
+        "is logged and the new hash is stamped on the run."
     ),
 )
 @click.option(
@@ -1545,12 +1520,12 @@ def sn_run(
     if reviewer_profile != "default":
         _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
 
-    # --- Pipeline-version clear gate ---
-    # Check if prompt/vocab/code has changed since the last SNRun.
-    # Exits non-zero with a warning banner unless --skip-clear-gate is set
-    # or there are no existing generated names (fresh graph).
-    if not skip_clear_gate and not dry_run:
-        _check_pipeline_clear_gate()
+    # --- Pipeline-version drift note ---
+    # The catalog is never wiped and regenerated; prompt/vocab evolution is
+    # normal. Log drift for provenance and carry on (--skip-clear-gate is a
+    # deprecated no-op kept for script compatibility).
+    if not dry_run:
+        _note_pipeline_version_drift()
 
     # --- Apply --only overrides ---
     if only_phase:
