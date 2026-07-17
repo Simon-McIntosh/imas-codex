@@ -10,10 +10,10 @@ reasoning-effort. Reports live under
 Candidate slate: incumbent + the GPT-5.6 tiers the plan lists for each seat
 (`gpt-5.6-luna`, `-terra`, `-sol`). Held-out judge where a seat needs one:
 `openrouter/anthropic/claude-opus-4.8`. Deterministic sample seed: 0 (CLI
-default). Measured spend so far (four completed roles): **$23.59** — refine
-$3.55, breaker-names $2.08, breaker-docs $6.57, docs $11.39. Classifier and the
-added sn-compose re-bench are pending; the $40 ceiling applies to the aggregate
-and no sample-size reductions have been forced.
+default). Total measured spend: **$29.92** (ceiling $40) — refine $3.55,
+breaker-names $2.08, breaker-docs $6.57, docs $11.39, classifier $0.34 (two
+runs), compose re-bench $5.88, DSv4 smoke $0.12. One sample-size reduction was
+forced (compose re-bench 47→20 paths — see that section); no other reductions.
 
 ## Summary — verdict per seat
 
@@ -23,8 +23,8 @@ and no sample-size reductions have been forced.
 | breaker-names | gpt-5.5 | luna, terra | **SWITCH (luna)** | Both candidates more independent from the blind pair and higher flip-quality than incumbent at ~1/3–1/4 cost; luna best flip-quality (0.71). Thin flip sample. |
 | breaker-docs | gpt-5.5 | luna, terra | **HOLD** | Incumbent both most independent (rho 0.176) and most correct on overrides (0.286); candidates flip 2–3× more but are almost always wrong (vfq 0.07/0.16). |
 | docs | sonnet-4.6 | luna, terra, sol | **SWITCH (luna)** | Rubric parity+ (0.813 vs 0.806), zero banned prose vs incumbent's 15%, 23% cheaper; terra/sol gain marginal rubric at 45–158% more cost. |
-| classifier | (none) | luna | PENDING (running) | |
-| sn-compose (added) | (see note) | dsv4-local, luna, terra, gpt-5.5, kimi-k3 | PENDING | Local DSv4 vs GPT-5.6; free-at-margin economics. |
+| classifier | gpt-5.4 (`language`) | luna, haiku-4.5 | **HOLD** | Incumbent gpt-5.4 best gold-set accuracy (0.823); luna 0.794, haiku 0.751 — cheaper but less accurate. |
+| sn-compose (added) | dsv4-local | luna, terra, gpt-5.5, kimi-k3 | **HOLD (dsv4-local)** | gpt-5.5 highest quality (0.891) but paid; DSv4-local (0.814) ties luna (0.826) within the tie band and is free at the margin. kimi-k3 NEEDS-MORE-DATA (upstream rate-limited launch day). |
 
 ## Methods & caveats
 
@@ -156,16 +156,53 @@ zero banned prose, and 23% cheaper than the incumbent. Terra and Sol score
 marginally higher on the rubric (0.820, 0.836) but cost 45% and 158% more than
 Luna for a ≤0.024 rubric gain — not worth it. Spend: $11.39.
 
-## classifier — PENDING (report incoming — run by the lead)
+## classifier — domain gold-set exact-match
 
-Domain classifier exact-match accuracy over the 209-path gold set; candidate
-`gpt-5.6-luna`. Table and verdict fold in when the report lands.
+Report: `sn_rolebench_classifier_20260717T193243.json` (rebaseline, all three
+models) · full 209-path gold set. The production domain classifier uses the
+`language` seat, currently **gpt-5.4**. (An earlier luna-only run,
+`sn_rolebench_classifier_20260717T160839.json`, measured luna at 0.775; the
+rebaseline below supersedes it with a matched three-model comparison.)
 
-## sn-compose (added run) — PENDING
+| model | n | accuracy ↑ | correct | cost/item |
+|---|---|---|---|---|
+| **gpt-5.4** (incumbent) | 209 | **0.823** | 172 | $0.00060 |
+| gpt-5.6-luna | 209 | 0.794 | 166 | $0.00036 |
+| claude-haiku-4.5 | 209 | 0.751 | 157 | $0.00030 |
 
-Compose re-bench comparing the locally-served `deepseek-v4-flash` against the
-GPT-5.6 tiers (luna, terra) and the `gpt-5.5` baseline on the full 54-path
-reference set, standard physics-judge scoring, plus `kimi-k3` at a reduced
-sample (15 paths) to measure day-one per-name cost. Rationale: local DSv4 makes
-compose inference free at the margin, so a quality near-tie versus Luna flips
-the compose-seat economics. Table and verdict fold in when the report lands.
+**Verdict: HOLD (gpt-5.4).** The incumbent has the best gold-set exact-match
+accuracy (0.823, 172/209). Luna (0.794) and haiku-4.5 (0.751) are cheaper per
+item but trail by 2.9 and 7.2 points — the classifier's job is correctness, and
+per-item cost is already negligible for every model, so the accuracy lead
+decides it. Spend: $0.34 (both runs).
+
+## sn-compose (added run) — quality vs free-at-margin economics
+
+Report: `sn_benchmark_20260717T162402.json` · sample reduced to **20 paths (17
+usable** after 3 unadmitted) · single opus-4.8 judge. Budget-forced reduction
+from the 47-path reference set: the opus judge runs ~$0.12/name, and 4 models ×
+47 would have breached the $40 aggregate ceiling. `kimi-k3` was probed
+separately at 15 paths but returned upstream 429 rate-limits on every call
+(day-one congestion) — no usable data.
+
+| model | n | avg_quality ↑ | grammar_valid | ref_precision | cost/name |
+|---|---|---|---|---|---|
+| **deepseek-v4-flash** (local, incumbent) | 17 | 0.814 | 16/17 | 0.706 | **$0.000** (local) |
+| gpt-5.6-luna | 17 | 0.826 | 17/17 | 0.647 | $0.063 |
+| gpt-5.6-terra | 17 | 0.874 | 17/17 | 0.588 | $0.152 |
+| gpt-5.5 | 17 | 0.891 | 17/17 | 0.647 | $0.081 |
+| kimi-k3 | — | — | — | — | NEEDS-MORE-DATA (upstream 429) |
+
+**Verdict: HOLD (deepseek-v4-flash, local).** gpt-5.5 tops quality (0.891) and
+Terra is next (0.874), but both are paid. The decision axis for the compose seat
+is economics-at-quality-parity: DSv4-local composes for **$0 at the margin**
+(served on the 2×H200; only the judge/review cost is incurred), and its quality
+(0.814) sits within the tie band of the cheapest paid candidate, Luna (0.826) —
+a 1.2-point gap at n=17, below the resolution of this sample. At a quality tie
+the free local generator wins, so HOLD. **Caveat / followup:** at 17 usable
+paths the ranking is switch/hold-grade, not fine-grained; if a finer DSv4-vs-luna
+call is ever needed, a full-47-path two-model tiebreak (~$11, DSv4 free apart
+from the judge) would resolve it — only worth running if the tie itself becomes
+decision-relevant. **kimi-k3: NEEDS-MORE-DATA** — upstream rate-limited on launch
+day; re-probe once provider congestion clears. Spend: $5.88 (compose run) +
+$0.12 (DSv4 route smoke).
