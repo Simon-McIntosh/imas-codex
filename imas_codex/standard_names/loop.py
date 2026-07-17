@@ -828,6 +828,20 @@ async def run_sn_pools(
                 "aborting to prevent telemetry blackhole"
             )
 
+    # Reconcile SNRun rows orphaned by a hard-killed prior process (finalize
+    # runs in a finally block, so an open 'started' row means the process died
+    # before it could close the run). Best-effort — never let a sweep failure
+    # abort a fresh run.
+    try:
+        from imas_codex.standard_names.graph_ops import mark_orphaned_sn_runs_stale
+
+        mark_orphaned_sn_runs_stale(current_run_id=run_id)
+    except Exception as _stale_exc:  # noqa: BLE001 — non-fatal reconciliation
+        logger.warning(
+            "run_sn_pools: orphaned-SNRun sweep failed (non-fatal): %s",
+            _stale_exc,
+        )
+
     cost_is_exact = True
 
     # ── A3: LLM routing observability ─────────────────────────────

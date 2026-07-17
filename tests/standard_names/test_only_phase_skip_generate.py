@@ -103,6 +103,8 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
         # The always-on stranded-reviewed promotion builds its own GraphClient;
         # mock it so the startup path stays graph-free.
         patch(f"{_GO}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
+        # The always-on orphaned-SNRun sweep builds its own GraphClient; mock it.
+        patch(f"{_GO}.mark_orphaned_sn_runs_stale", return_value=0),
         # The always-on source-drift refresh builds its own GraphClient at the
         # source_refresh binding site, which the graph.client patch below does
         # not intercept once that module is already imported. Mock the refresh

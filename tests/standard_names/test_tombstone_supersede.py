@@ -72,6 +72,9 @@ class _FakeGraph:
             )
             old["claim_token"] = None
             old["claimed_at"] = None
+            # Mirror the Cypher CASE that closes an open edit on the fold.
+            if old.get("edit_status") == "open":
+                old["edit_status"] = "applied"
             self.refined_from.add((p["into_id"], p["old_id"]))
             return []
         if "RETURN size(moved) AS moved" in cypher:
@@ -110,6 +113,29 @@ class TestSupersedeIntoAccepted:
         assert res["ok"] is True
         assert nodes["old"]["name_stage"] == "superseded"
         assert ("into", "old") in fake.refined_from
+
+    def test_closes_open_edit_on_fold(self) -> None:
+        """A predecessor folded with a still-open edit must not stay 'open' —
+        it becomes terminal (unreviewable), so the edit is reconciled to
+        'applied' rather than orphaned."""
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted", "edit_status": "open"},
+            "into": {"id": "into", "name_stage": "accepted"},
+        }
+        res, _ = _run(nodes, "old", "into")
+        assert res["ok"] is True
+        assert nodes["old"]["name_stage"] == "superseded"
+        assert nodes["old"]["edit_status"] == "applied"
+
+    def test_leaves_closed_edit_untouched(self) -> None:
+        """A predecessor with no open edit keeps whatever edit_status it had."""
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted", "edit_status": "rejected"},
+            "into": {"id": "into", "name_stage": "accepted"},
+        }
+        res, _ = _run(nodes, "old", "into")
+        assert res["ok"] is True
+        assert nodes["old"]["edit_status"] == "rejected"
 
     def test_dry_run_does_not_write(self) -> None:
         nodes = {

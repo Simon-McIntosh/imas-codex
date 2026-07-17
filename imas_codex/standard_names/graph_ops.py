@@ -7405,6 +7405,59 @@ def finalize_sn_run(
         logger.warning("Failed to finalize SNRun %s: %s", run_id, exc)
 
 
+def mark_orphaned_sn_runs_stale(
+    *,
+    current_run_id: str | None = None,
+    max_age_hours: float = 6.0,
+) -> int:
+    """Finalize SNRun rows that never reached a terminal status.
+
+    ``finalize_sn_run`` runs inside ``run_sn_pools``' ``finally`` block, so a
+    clean/exception/SIGINT exit always closes the run. A run left at the
+    open ``status='started'``/``'running'`` status therefore means the process
+    died before Python could finalize (hard kill, OOM, node loss) — the row is
+    an orphan that no live process will ever close.
+
+    This sweep marks such rows ``status='stale'`` with
+    ``stop_reason='orphaned_no_finalize'`` so ``sn status`` and provenance
+    stop reporting them as in-flight. A run is only considered orphaned when
+    its most recent liveness signal (``last_heartbeat``, else ``created_at``)
+    is older than *max_age_hours* — an active run heartbeats via
+    :func:`update_sn_run_progress`, so a generous threshold never touches a
+    genuinely-running peer. The current run (``current_run_id``) is always
+    excluded.
+
+    Idempotent: a second call matches nothing (the rows are now ``'stale'``).
+    Returns the number of runs marked stale.
+    """
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (rr:SNRun)
+            WHERE rr.status IN ['started', 'running']
+              AND ($current_run_id IS NULL OR rr.id <> $current_run_id)
+              AND coalesce(rr.last_heartbeat, rr.created_at, rr.stopped_at)
+                  < datetime() - duration({hours: $max_age})
+            SET rr.status = 'stale',
+                rr.stop_reason = 'orphaned_no_finalize',
+                rr.cost_is_exact = false,
+                rr.ended_at = datetime()
+            RETURN rr.id AS id
+            """,
+            current_run_id=current_run_id,
+            max_age=max_age_hours,
+        )
+    marked = len(rows or [])
+    if marked:
+        logger.info(
+            "mark_orphaned_sn_runs_stale: marked %d orphaned SNRun(s) stale "
+            "(no finalize, older than %.1fh)",
+            marked,
+            max_age_hours,
+        )
+    return marked
+
+
 def backfill_sn_run_telemetry() -> list[dict[str, Any]]:
     """One-shot backfill of cost_total/events_total on existing SNRun nodes.
 
@@ -9652,7 +9705,18 @@ def persist_refined_name(
                                 CASE WHEN coalesce(old.docs_stage, '') = 'accepted'
                                      THEN 'accepted' ELSE 'refining' END),
                             old.claim_token = null,
-                            old.claimed_at  = null
+                            old.claimed_at  = null,
+                            // Close the predecessor's edit lifecycle: a
+                            // still-open steer was already carried forward onto
+                            // the successor (see the copy-forward read above), so
+                            // its intended change is realized by this rename.
+                            // Leaving 'open' on a superseded (terminal) node
+                            // orphans the edit — it can never resolve because the
+                            // predecessor is no longer reviewable. Reconcile to
+                            // 'applied', mirroring supersede_prior_source_names.
+                            old.edit_status = CASE
+                                WHEN coalesce(old.edit_status, '') = 'open'
+                                THEN 'applied' ELSE old.edit_status END
 
                         // 4. Migrate PRODUCED_NAME edges
                         WITH new, old
@@ -10051,7 +10115,13 @@ def tombstone_supersede_into(
                 old.superseded_from_stage =
                     coalesce(old.superseded_from_stage, 'accepted'),
                 old.claim_token = null,
-                old.claimed_at = null
+                old.claimed_at = null,
+                // Close any open edit on the folded predecessor. Once folded
+                // into a live canonical name it is terminal and unreviewable;
+                // a lingering 'open' edit would be orphaned forever.
+                old.edit_status = CASE
+                    WHEN coalesce(old.edit_status, '') = 'open'
+                    THEN 'applied' ELSE old.edit_status END
             MERGE (into)-[:REFINED_FROM]->(old)
             """,
             old_id=old_id,

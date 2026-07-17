@@ -269,6 +269,31 @@ class TestPersistCypherContent:
         assert "PRODUCED_NAME" in cypher
         assert "HAS_STANDARD_NAME" in cypher
 
+    def test_cypher_closes_open_predecessor_edit(self):
+        """The superseded predecessor must not stay ``edit_status='open'`` — a
+        still-open steer is carried forward to the successor, so leaving the
+        terminal predecessor 'open' orphans the edit. The Cypher reconciles it
+        to 'applied' in the same write that supersedes it."""
+        from imas_codex.standard_names.graph_ops import persist_refined_name
+
+        gc, tx = _mock_gc_tx()
+        tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
+
+        with patch(_GC_PATH, return_value=gc):
+            persist_refined_name(
+                old_name="old",
+                new_name="new",
+                description="d",
+                old_chain_length=1,
+            )
+
+        cypher = " ".join(tx.run.call_args.args[0].split())
+        assert "old.edit_status = CASE" in cypher, (
+            "the superseded predecessor's open edit must be reconciled in the "
+            f"same write:\n{cypher}"
+        )
+        assert "THEN 'applied'" in cypher
+
     def test_migrated_source_scalar_tracks_successor(self):
         """When PRODUCED_NAME migrates to the successor, the source's
         ``produced_sn_id`` scalar must be repointed too — otherwise the scalar
