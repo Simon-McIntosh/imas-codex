@@ -730,7 +730,9 @@ class CampaignRunner:
     Every graph interaction is an injected callable so the loop is testable
     against a mock graph and mock pools.  The drain itself
     (``drain_fn(run_id, cost_limit)``) runs the normal six-pool orchestrator —
-    this runner never accepts a name directly.
+    this runner never accepts a name directly.  A drain that measured its own
+    spend returns it (USD); returning ``None`` falls back to aggregating
+    ``LLMCost`` by the scope ``run_id``.
     """
 
     def __init__(
@@ -748,7 +750,7 @@ class CampaignRunner:
         *,
         gc: Any,
         target_ids: Sequence[str],
-        drain_fn: Callable[[str, float], None],
+        drain_fn: Callable[[str, float], float | None],
         mark_fn: Callable[..., dict[str, Any]] | None = None,
         clear_quarantine_fn: Callable[
             [Any, Sequence[str]], int
@@ -814,10 +816,16 @@ class CampaignRunner:
                 result.run_ids.append(run_id)
 
             # 3. Drain ONLY this scope through the normal six-pool orchestrator.
-            drain_fn(run_id, self.budget.per_batch_cost_cap)
+            drained_cost = drain_fn(run_id, self.budget.per_batch_cost_cap)
 
-            # 4. Measure the drained batch.
-            cost = float(cost_fn(run_id)) if run_id else 0.0
+            # 4. Measure the drained batch.  The pool session bills its
+            #    LLMCost under its own session run_id, not the campaign
+            #    scope run_id, so a drain that measured its own spend is
+            #    authoritative; the scope-run aggregation is the fallback.
+            if drained_cost is not None:
+                cost = float(drained_cost)
+            else:
+                cost = float(cost_fn(run_id)) if run_id else 0.0
             refreshed = fetch_refreshed_fn(gc, batch)
             outcome = measure_batch(refreshed, batch, batch_index=index, cost=cost)
 

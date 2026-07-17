@@ -477,12 +477,17 @@ def _run_sn_cmd(
     max_sources: int | None = None,
     scope_run_id: str | None = None,
     edits_only: bool = False,
-) -> None:
+) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
 
     Uses the ``run_discovery()`` harness for 3-press shutdown,
     periodic ticker, graph-refresh, and service monitoring.
     Falls back to plain-mode logging when Rich is unavailable.
+
+    Returns the flattened run summary (:func:`summary_table` row — session
+    ``run_id``, measured ``cost_spent``, counters) so callers such as the
+    campaign runner can account spend billed under the pool session's own
+    run id; ``None`` when no summary was produced (e.g. dry-run).
     """
     import uuid as _uuid
 
@@ -686,14 +691,14 @@ def _run_sn_cmd(
     result = run_discovery(disc_config, async_main)
     summary = result.get("summary")
     if summary is None:
-        return
+        return None
 
     row = summary_table(summary)
 
     if quiet:
         if row.get("stop_reason") == "provider_budget_exhausted":
             raise SystemExit(4)
-        return
+        return row
 
     # Print summary table (in both rich and plain mode, after display exits)
     out_console = cli_console or Console()
@@ -728,6 +733,8 @@ def _run_sn_cmd(
             "next run picks up where this one stopped."
         )
         raise SystemExit(4)
+
+    return row
 
 
 def _execute_rename_cascade(
@@ -1533,13 +1540,6 @@ def sn_run(
     if reviewer_profile != "default":
         _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
 
-    # --- Pipeline-version drift note ---
-    # The catalog is never wiped and regenerated; prompt/vocab evolution is
-    # normal. Log drift for provenance and carry on (--skip-clear-gate is a
-    # deprecated no-op kept for script compatibility).
-    if not dry_run:
-        _note_pipeline_version_drift()
-
     # --- Apply --only overrides ---
     if only_phase:
         from imas_codex.standard_names.turn import skip_flags_from_only
@@ -1646,6 +1646,12 @@ def sn_run(
         # and continues rather than crashing the run). Runs once at startup,
         # before any pool launches; never on the per-name hot path.
         _auto_sync_grammar(quiet=quiet)
+        # Pipeline-version drift note: the catalog is never wiped and
+        # regenerated; prompt/vocab evolution is normal. Log drift for
+        # provenance and carry on. Placed after the embed preflight so a
+        # failed preflight aborts before ANY graph access, even reads
+        # (--skip-clear-gate is a deprecated no-op kept for compatibility).
+        _note_pipeline_version_drift()
 
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
@@ -1913,8 +1919,8 @@ def sn_run(
         )
         thresholds = ConvergenceThresholds(min_docs_accept_rate=campaign_accept_rate)
 
-        def _campaign_drain(run_id: str, batch_cost_cap: float) -> None:
-            _run_sn_cmd(
+        def _campaign_drain(run_id: str, batch_cost_cap: float) -> float | None:
+            row = _run_sn_cmd(
                 cost_limit=batch_cost_cap,
                 time_limit=time_limit,
                 per_domain_limit=None,
@@ -1934,6 +1940,13 @@ def sn_run(
                 source="dd",
                 scope_run_id=run_id,
             )
+            # The pool session bills LLMCost under its own run_id, not the
+            # campaign scope run_id — return the session's measured spend so
+            # the campaign cost ceiling accounts real dollars.
+            if row is None:
+                return None
+            cost = row.get("cost_spent")
+            return float(cost) if cost is not None else None
 
         from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
 

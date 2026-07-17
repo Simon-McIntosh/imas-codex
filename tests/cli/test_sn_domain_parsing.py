@@ -86,11 +86,9 @@ def _invoke_run(runner: CliRunner, extra_args: list[str]) -> tuple[int, list[str
         captured.append(list(kwargs.get("domains", ())))
 
     with patch("imas_codex.cli.sn._run_sn_cmd", side_effect=fake_run_loop):
-        # Also silence the pipeline-version clear-gate check
-        with patch("imas_codex.cli.sn._check_pipeline_clear_gate"):
-            result = runner.invoke(
-                sn, ["run", "--dry-run"] + extra_args, catch_exceptions=False
-            )
+        result = runner.invoke(
+            sn, ["run", "--dry-run"] + extra_args, catch_exceptions=False
+        )
 
     domains = captured[0] if captured else []
     return result.exit_code, domains

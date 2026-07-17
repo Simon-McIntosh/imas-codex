@@ -564,6 +564,34 @@ class TestCampaignRunner:
         assert result.run_ids == ["run-1", "run-2"]
         assert result.total_cost == pytest.approx(2.0)
 
+    def test_drain_measured_cost_preferred_over_cost_fn(self):
+        # The drain returns its own measured spend (the pool session bills
+        # under a different run_id than the campaign scope); the runner must
+        # use it instead of the scope-run aggregation.
+        harness = _RunnerHarness([[_accepted("a")]])
+
+        def measuring_drain(run_id, cost_limit):
+            harness.drain_fn(run_id, cost_limit)
+            return 4.25
+
+        runner = CampaignRunner(
+            CampaignSpec.parse("prose"),
+            CampaignBudget(batch_size=10),
+            ConvergenceThresholds(),
+        )
+        result = runner.run(
+            gc=None,
+            target_ids=["a"],
+            drain_fn=measuring_drain,
+            mark_fn=harness.mark_fn,
+            clear_quarantine_fn=harness.clear_quarantine_fn,
+            fetch_refreshed_fn=harness.fetch_refreshed_fn,
+            revalidate_fn=harness.revalidate_fn,
+            record_change_fn=harness.record_change_fn,
+            cost_fn=harness.cost_fn,
+        )
+        assert result.total_cost == pytest.approx(4.25)
+
     def test_operation_order_within_a_batch(self):
         harness = _RunnerHarness([[_accepted("a")]])
         runner = CampaignRunner(
