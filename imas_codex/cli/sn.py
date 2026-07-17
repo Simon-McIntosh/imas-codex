@@ -1372,6 +1372,77 @@ def _reject_unscoped_accepted_reset(
         "refuses to touch catalog-authoritative names."
     ),
 )
+@click.option(
+    "--campaign",
+    "campaign",
+    default=None,
+    help=(
+        "Documentation-refinement campaign scope: a defect-predicate selector "
+        "over accepted names. Comma-separated tokens: 'prose[:class]' "
+        "(typical_values/estimator_recipe/procedural_padding), 'audit[:substr]' "
+        "(e.g. audit:decomposition, audit:latex), 'quarantined', or 'all'. "
+        "Snapshots each member's docs to a DocsRevision, resets its docs "
+        "pipeline, and drains through the normal docs pools in budgeted batches "
+        "with a per-batch convergence gate. Requires --include-accepted; pair "
+        "with --dry-run to write a reviewable manifest without mutating anything."
+    ),
+)
+@click.option(
+    "--campaign-manifest",
+    "campaign_manifest",
+    type=click.Path(dir_okay=False),
+    default=None,
+    help=(
+        "Path for the --campaign --dry-run manifest (JSON). Defaults to "
+        "'campaign-manifest.json' in the working directory."
+    ),
+)
+@click.option(
+    "--campaign-batch-size",
+    "campaign_batch_size",
+    type=int,
+    default=100,
+    show_default=True,
+    help="Names per campaign batch.",
+)
+@click.option(
+    "--campaign-batch-cost-cap",
+    "campaign_batch_cost_cap",
+    type=float,
+    default=None,
+    help=(
+        "Per-batch cost cap (USD) for the scoped drain. Defaults to -c/--cost."
+    ),
+)
+@click.option(
+    "--campaign-cost-ceiling",
+    "campaign_cost_ceiling",
+    type=float,
+    default=None,
+    help=(
+        "Campaign-level cost ceiling (USD); halts between batches once "
+        "cumulative spend reaches it. Defaults to -c/--cost."
+    ),
+)
+@click.option(
+    "--campaign-accept-rate",
+    "campaign_accept_rate",
+    type=float,
+    default=0.90,
+    show_default=True,
+    help=(
+        "Convergence gate: minimum fraction of touched docs accepted per "
+        "batch before the campaign halts for root-causing."
+    ),
+)
+@click.option(
+    "--campaign-resume-from",
+    "campaign_resume_from",
+    type=int,
+    default=0,
+    show_default=True,
+    help="Resume a campaign from this batch index (batches are idempotent).",
+)
 @click.argument("paths", nargs=-1)
 def sn_run(
     source: str,
@@ -1417,6 +1488,13 @@ def sn_run(
     reviewer_profile: str,
     rename_spec: str | None,
     include_accepted: bool,
+    campaign: str | None,
+    campaign_manifest: str | None,
+    campaign_batch_size: int,
+    campaign_batch_cost_cap: float | None,
+    campaign_cost_ceiling: float | None,
+    campaign_accept_rate: float,
+    campaign_resume_from: int,
 ) -> None:
     """Generate standard names from a source.
 
@@ -1763,6 +1841,128 @@ def sn_run(
         scope_run_id = out["run_id"]
         docs_only = True
         flush = True
+
+    # --campaign: budgeted, gated documentation-refinement campaign scoped by a
+    # defect predicate. Dry-run writes a reviewable manifest and exits; a live
+    # run drains the selection through the normal docs pools batch by batch,
+    # snapshotting each member's docs to a DocsRevision and halting on the first
+    # batch that fails the convergence gate.
+    if campaign:
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.campaign import (
+            CampaignBudget,
+            CampaignRunner,
+            CampaignSpec,
+            ConvergenceThresholds,
+            build_manifest,
+            select_targets,
+            write_manifest,
+        )
+
+        try:
+            spec = CampaignSpec.parse(campaign)
+        except ValueError as exc:
+            raise click.UsageError(str(exc)) from exc
+
+        if not include_accepted and not dry_run:
+            raise click.UsageError(
+                "--campaign refreshes docs on accepted (catalog-authoritative) "
+                "names — pass --include-accepted to authorize, or --dry-run to "
+                "write a manifest and preview."
+            )
+
+        with GraphClient() as gc:
+            selection = select_targets(gc, spec, limit=limit)
+
+        if dry_run:
+            manifest = build_manifest(
+                selection, batch_size=campaign_batch_size
+            )
+            path = write_manifest(
+                manifest, campaign_manifest or "campaign-manifest.json"
+            )
+            console.print(
+                f"[green]Campaign manifest[/green] ({spec.describe()}): "
+                f"{selection.total} accepted name(s), "
+                f"{manifest['batch_plan']['n_batches']} batch(es) of "
+                f"{campaign_batch_size}. Per-predicate: "
+                f"{manifest['per_predicate']}. Written to {path}"
+            )
+            return
+
+        if selection.total == 0:
+            console.print("[yellow]Campaign selected no names — nothing to do.[/yellow]")
+            return
+
+        budget = CampaignBudget(
+            batch_size=campaign_batch_size,
+            per_batch_cost_cap=(
+                campaign_batch_cost_cap
+                if campaign_batch_cost_cap is not None
+                else cost_limit
+            ),
+            campaign_cost_ceiling=(
+                campaign_cost_ceiling
+                if campaign_cost_ceiling is not None
+                else cost_limit
+            ),
+        )
+        thresholds = ConvergenceThresholds(min_docs_accept_rate=campaign_accept_rate)
+
+        def _campaign_drain(run_id: str, batch_cost_cap: float) -> None:
+            _run_sn_cmd(
+                cost_limit=batch_cost_cap,
+                time_limit=time_limit,
+                per_domain_limit=None,
+                dry_run=False,
+                quiet=quiet,
+                domains=domains,
+                verbose=verbose,
+                min_score=min_score,
+                rotation_cap=rotation_cap,
+                escalation_model=escalation_model,
+                review_name_backlog_cap=review_name_backlog_cap,
+                review_docs_backlog_cap=review_docs_backlog_cap,
+                skip_generate=True,
+                skip_review=skip_review,
+                docs_only=True,
+                flush=True,
+                source="dd",
+                scope_run_id=run_id,
+            )
+
+        from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+
+        console.print(
+            f"[green]Campaign[/green] ({spec.describe()}): draining "
+            f"{selection.total} name(s) in batches of {campaign_batch_size}…"
+        )
+        runner = CampaignRunner(spec, budget, thresholds)
+        with GraphClient() as gc:
+            result = runner.run(
+                gc=gc,
+                target_ids=selection.ids,
+                drain_fn=_campaign_drain,
+                cost_fn=aggregate_spend_for_run,
+                start_batch=campaign_resume_from,
+            )
+        if result.halted:
+            console.print(
+                f"[red]Campaign halted[/red] after {result.batches_run} batch(es): "
+                + "; ".join(result.halt_reasons)
+                + (
+                    f"  Resume with --campaign-resume-from {result.resume_from}"
+                    if result.resume_from is not None
+                    else ""
+                )
+            )
+        else:
+            console.print(
+                f"[green]Campaign complete[/green]: {result.batches_run} batch(es), "
+                f"{result.total_accepted}/{result.total_touched} docs accepted, "
+                f"spend ${result.total_cost:.2f}."
+            )
+        return
 
     # Scope-routing: default (DD source) → pool orchestrator.
     # Runs all 6 pools concurrently, sampling globally from the available
