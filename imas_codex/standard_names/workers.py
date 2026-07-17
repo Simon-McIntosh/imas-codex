@@ -3985,6 +3985,52 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
         return issues, {}, "quarantined"
 
 
+async def drain_validation_backlog(batch_size: int = 50) -> dict[str, int]:
+    """Drain every unvalidated StandardName through the admission gate.
+
+    Standalone claim→validate→mark loop over ``claim_names_for_validation``
+    (any name with a description and ``validated_at`` null). Deterministic and
+    LLM-free — safe to run as a maintenance pass after ``--revalidate`` clears
+    stamps, without composing or reviewing anything. Returns
+    ``{"validated": n, "quarantined": m}``.
+    """
+    from imas_codex.standard_names.graph_ops import (
+        claim_names_for_validation,
+        mark_names_validated,
+        release_validation_claims,
+    )
+
+    totals = {"validated": 0, "quarantined": 0}
+    while True:
+        token, items = await asyncio.to_thread(claim_names_for_validation, batch_size)
+        if not items:
+            break
+        try:
+            results: list[dict[str, Any]] = []
+            for entry in items:
+                issues, layer_summary, status = validate_name_candidate(entry)
+                if status == "quarantined":
+                    totals["quarantined"] += 1
+                results.append(
+                    {
+                        "id": entry.get("id", ""),
+                        "validation_issues": issues,
+                        "validation_layer_summary": json.dumps(layer_summary),
+                        "validation_status": status,
+                    }
+                )
+            marked = await asyncio.to_thread(mark_names_validated, token, results)
+            totals["validated"] += marked
+        except Exception:
+            logger.warning(
+                "drain_validation_backlog: batch failed — releasing claims",
+                exc_info=True,
+            )
+            await asyncio.to_thread(release_validation_claims, token)
+            raise
+    return totals
+
+
 async def validate_worker(state: StandardNameBuildState, **_kwargs) -> None:
     """Validate composed names via ISN grammar checks (claim loop).
 

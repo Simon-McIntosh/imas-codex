@@ -91,7 +91,9 @@ class TestPersistGeneratedNameBatch:
         written = mock_write.call_args[0][0]
         for entry in written:
             assert entry["model"] == "claude-test"
-            assert "name_stage" not in entry  # stage owned by _finalize_generated_name_stage
+            assert (
+                "name_stage" not in entry
+            )  # stage owned by _finalize_generated_name_stage
             assert "generated_at" in entry
 
     @patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage")
@@ -710,6 +712,89 @@ class TestValidateWorkerClaimLoop:
             await validate_worker(state)
 
             assert mock_release.called
+            assert mock_release.call_args[0][0] == "token-err"
+
+    @pytest.mark.asyncio()
+    async def test_drain_validation_backlog_marks_until_empty(self):
+        """drain_validation_backlog loops claim→validate→mark until no claims."""
+        from imas_codex.standard_names.workers import drain_validation_backlog
+
+        claimed_items = [
+            {
+                "id": "electron_temperature",
+                "description": "Te",
+                "physical_base": "temperature",
+                "subject": "electron",
+            },
+        ]
+        call_count = 0
+
+        def _claim_side_effect(limit):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                return ("token-1", claimed_items)
+            return ("token-2", [])
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.claim_names_for_validation",
+                side_effect=_claim_side_effect,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.mark_names_validated",
+                return_value=1,
+            ) as mock_mark,
+            patch(
+                "imas_standard_names.grammar.parse_standard_name",
+            ) as mock_parse,
+            patch(
+                "imas_standard_names.grammar.compose_standard_name",
+                return_value="electron_temperature",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._validate_via_isn",
+                return_value=([], {"pydantic": {"passed": 5}}),
+            ),
+        ):
+            mock_parse.return_value = MagicMock()
+
+            totals = await drain_validation_backlog()
+
+            assert totals["validated"] == 1
+            assert mock_mark.call_args[0][0] == "token-1"
+            assert call_count == 2  # drained then exited on the empty claim
+
+    @pytest.mark.asyncio()
+    async def test_drain_validation_backlog_releases_and_raises_on_error(self):
+        """drain_validation_backlog releases the claim batch when mark fails."""
+        from imas_codex.standard_names.workers import drain_validation_backlog
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.claim_names_for_validation",
+                return_value=("token-err", [{"id": "bad_name"}]),
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.mark_names_validated",
+                side_effect=RuntimeError("graph write failed"),
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.release_validation_claims",
+                return_value=1,
+            ) as mock_release,
+            patch(
+                "imas_standard_names.grammar.parse_standard_name",
+                side_effect=ValueError("bad grammar"),
+            ),
+            patch(
+                "imas_codex.standard_names.workers._validate_via_isn",
+                return_value=([], {}),
+            ),
+        ):
+            with pytest.raises(RuntimeError):
+                await drain_validation_backlog()
+
             assert mock_release.call_args[0][0] == "token-err"
 
     @pytest.mark.asyncio()

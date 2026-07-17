@@ -2005,6 +2005,25 @@ def sn_run(
                 "pending/quarantined SN node(s)"
             )
 
+    # --only validate is a maintenance drain, not a pipeline run: the pool
+    # orchestrator carries no validation worker (pool-composed names are
+    # admission-gated inline at persist time), so routing it into the pools
+    # would compose new names and never re-stamp the cleared ones. Drain the
+    # validation backlog directly — deterministic ISN checks, no LLM cost.
+    if only_phase == "validate":
+        from imas_codex.cli.utils import run_async
+        from imas_codex.standard_names.workers import drain_validation_backlog
+
+        if dry_run:
+            console.print("[yellow]--only validate --dry-run:[/yellow] no-op")
+            return
+        totals = run_async(drain_validation_backlog())
+        console.print(
+            f"[green]Validation drain:[/green] {totals['validated']} name(s) "
+            f"re-stamped, {totals['quarantined']} quarantined."
+        )
+        return
+
     # Scope-routing: default (DD source) → pool orchestrator.
     # Runs all 6 pools concurrently, sampling globally from the available
     # pool of StandardNameSource / StandardName nodes.
