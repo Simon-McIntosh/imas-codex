@@ -857,11 +857,11 @@ def locus_context_for(sn_id: str) -> dict[str, Any] | None:
             return None
         token = ir.locus.token
         entry = _load_locus_registry().loci.get(token)
-        if entry is None or not (entry.description or entry.defining_quantity):
+        if entry is None or not (entry.definition or entry.defining_quantity):
             return None
         return {
             "token": token,
-            "description": entry.description or "",
+            "description": entry.definition or "",
             "defining_quantity": entry.defining_quantity or "",
         }
     except Exception:

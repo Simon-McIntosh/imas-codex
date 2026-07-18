@@ -200,3 +200,16 @@ def test_names_mode_minimal_item_renders_without_context_sections() -> None:
         "Prior reviewer feedback",
     ):
         assert header not in rendered, f"Empty-context render leaked header '{header}'."
+
+
+def test_locus_context_reads_isn_definition_field():
+    """The docs-prompt locus gloss comes from the ISN registry's
+    ``definition`` field; a registry entry with a definition or a
+    defining quantity must yield a non-empty context dict (a silent
+    None here strips the locus cross-link from every docs prompt)."""
+    from imas_codex.standard_names.context import locus_context_for
+
+    out = locus_context_for("electron_temperature_at_pedestal_top")
+    assert out is not None
+    assert out["token"] == "pedestal_top"
+    assert out["description"] or out["defining_quantity"]
