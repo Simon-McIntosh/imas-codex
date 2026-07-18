@@ -717,6 +717,27 @@ def test_seed_parent_sources_keeps_unit_between_normalized_names():
     assert unit_writes, "unit shared across normalized names must inherit"
 
 
+def test_repair_normalization_peel_parent_units_scoping():
+    """The repair Cypher keys on all three guards: derived origin with a
+    recorded name-unit finding, no own normalization marker, and only
+    normalization-variant unit children."""
+    import inspect
+
+    from imas_codex.standard_names import graph_ops
+
+    src = inspect.getsource(graph_ops.repair_normalization_peel_parent_units)
+    assert "name_unit_consistency_check" in src, (
+        "repair must be gated on a recorded name-unit finding so genuinely "
+        "dimensionless parents (collisionality) are untouched"
+    )
+    assert "origin: 'derived'" in src
+    assert "SET sn.unit = null" in src and "DELETE r" in src
+
+    gc = MagicMock()
+    gc.query = MagicMock(return_value=[{"id": "particle_mass"}])
+    assert graph_ops.repair_normalization_peel_parent_units(gc) == ["particle_mass"]
+
+
 # ── Tests: docs enrichment with parent/child context ────────────────────
 
 

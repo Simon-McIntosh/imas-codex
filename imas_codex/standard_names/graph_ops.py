@@ -2235,6 +2235,59 @@ def _materialize_derived_parent_rows(
     return seeded
 
 
+def repair_normalization_peel_parent_units(gc: Any) -> list[str]:
+    """Unset the dimensionless unit mis-inherited across a normalization peel.
+
+    Before the seeder excluded normalization-peel children from unit
+    inheritance, a derived parent whose only unit signal was a
+    ``normalized_*`` child was stamped ``'1'`` — wrong whenever the parent's
+    name asserts a dimensional head noun (``particle_mass`` is not
+    dimensionless; its normalized child is). Repair is scoped to parents
+    where ALL THREE hold, so genuinely dimensionless parents (e.g.
+    collisionality) are untouched:
+
+    - ``origin='derived'`` with unit ``'1'`` and no normalization marker of
+      its own;
+    - every unit-bearing child is a dimensionless normalization variant
+      (the only possible source of the inherited ``'1'``);
+    - a ``name_unit_consistency_check`` finding is on record — the name
+      itself contradicts the dimensionless stamp.
+
+    Clears ``unit`` and the ``HAS_UNIT`` edge; validation re-stamping is the
+    caller's job (route the returned ids through the validation drain).
+    Idempotent: repaired parents no longer match. Returns repaired ids.
+    """
+    rows = gc.query(
+        """
+        MATCH (sn:StandardName {unit: '1', origin: 'derived'})
+        WHERE NOT any(t IN split(sn.id, '_')
+                      WHERE t IN ['normalized', 'normalised'])
+          AND sn.validation_issues IS NOT NULL
+          AND sn.validation_issues CONTAINS 'name_unit_consistency_check'
+        MATCH (c)-[:HAS_PARENT]->(sn)
+        WITH sn, collect(c) AS kids
+        WHERE all(k IN kids
+                  WHERE k.unit = '1'
+                    AND any(t IN split(k.id, '_')
+                            WHERE t IN ['normalized', 'normalised']))
+        OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(:Unit {id: '1'})
+        DELETE r
+        SET sn.unit = null
+        RETURN sn.id AS id
+        ORDER BY id
+        """
+    )
+    repaired = [r["id"] for r in rows]
+    if repaired:
+        logger.info(
+            "repair_normalization_peel_parent_units: cleared mis-inherited "
+            "unit '1' on %d parent(s): %s",
+            len(repaired),
+            ", ".join(repaired),
+        )
+    return repaired
+
+
 def seed_parent_sources(gc: Any | None = None) -> int:
     """Fully populate parent StandardName nodes from their children.
 
