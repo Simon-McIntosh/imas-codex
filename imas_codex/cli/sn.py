@@ -5268,3 +5268,136 @@ def sn_reclassify(standard_name: str, domain: str, reason: str, dry_run: bool) -
         f"{verb} {result['name']} ({result['stage']}): "
         f"{result['from_domain'] or 'null'} → {result['to_domain']}"
     )
+
+
+@sn.command("decomp-triage")
+@click.option(
+    "--apply",
+    "apply_",
+    is_flag=True,
+    help="Clear stale findings for the drain/suppress buckets (writes to the graph). "
+    "Default is a read-only dry run.",
+)
+@click.option(
+    "--limit",
+    type=int,
+    default=None,
+    help="Triage at most N flagged names (debugging; default all).",
+)
+@click.option(
+    "--out",
+    type=click.Path(dir_okay=False, writable=True),
+    default=None,
+    help="Write the full JSON manifest (incl. the rename queue) to this path.",
+)
+@click.option(
+    "--review-cost",
+    type=float,
+    default=0.08,
+    show_default=True,
+    help="Projected review cost per rename-queue name (compose is free on local DSv4).",
+)
+def sn_decomp_triage(
+    apply_: bool, limit: int | None, out: str | None, review_cost: float
+) -> None:
+    """Deterministically triage stale ``decomposition_audit`` findings.
+
+    The audit substring-scans the raw name, so it flags a closed token even
+    when the grammar correctly slots it (``ion_current_density`` → subject).
+    This re-parses every flagged accepted name under the current grammar and
+    buckets it — no LLM, no cost:
+
+    \b
+      drain     re-parse slots the token; the finding is stale → clearable
+      suppress  token sits inside a registered lexicalised base → clearable
+      rename    token genuinely absorbed into a non-base compound → rename queue
+
+    Default is a read-only dry run that prints the bucket counts and sizes the
+    rename queue. ``--apply`` clears the stale findings for the two clearable
+    buckets and re-stamps the segment columns; it never touches the rename
+    queue or renames anything.
+    """
+    import json as _json
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.decomposition_triage import (
+        apply_drain,
+        build_manifest,
+        fetch_flagged_names,
+        triage,
+    )
+
+    with GraphClient() as gc:
+        names = fetch_flagged_names(gc, limit=limit)
+
+    if not names:
+        console.print("[green]No accepted names carry a decomposition_audit finding.[/green]")
+        return
+
+    console.print(f"Re-parsing [cyan]{len(names)}[/cyan] flagged accepted names…")
+    entries = triage(names)
+    manifest = build_manifest(entries, rename_review_cost_per_name=review_cost)
+    b = manifest["buckets"]
+
+    console.print("\n[bold]Decomposition re-parse triage[/bold]")
+    console.print(f"  total flagged:      {manifest['total']}")
+    console.print(
+        f"  [green]drain[/green] (stale):       {b['drain']}"
+        f"   [dim]re-parse slots the token; clear + re-stamp[/dim]"
+    )
+    console.print(
+        f"  [green]suppress[/green] (lexical):  {b['suppress']}"
+        f"   [dim]token in a registered base; clear[/dim]"
+    )
+    console.print(
+        f"  [yellow]rename[/yellow] (absorbed):  {b['rename']}"
+        f"   [dim]genuine decomposition failure; rename rotation[/dim]"
+    )
+    if b["parse_fail"] or b["non_canonical"]:
+        console.print(
+            f"  [red]grammar backlog[/red]:     "
+            f"parse_fail={b['parse_fail']} non_canonical={b['non_canonical']}"
+        )
+    console.print(
+        f"  clearable for free (a+b): [green]{manifest['clearable_free']}[/green]"
+    )
+    console.print(
+        f"  rename queue projected review cost: "
+        f"[cyan]${manifest['rename_queue_projected_review_cost_usd']:.2f}[/cyan] "
+        f"({b['rename']} names × ${review_cost:.2f})"
+    )
+
+    if manifest["rename_queue"]:
+        console.print("\n[bold]Rename queue (sample):[/bold]")
+        for item in manifest["rename_queue"][:15]:
+            console.print(
+                f"  [yellow]{item['name']}[/yellow]  "
+                f"[dim]{item['suggestion'] or ''}[/dim]"
+            )
+        if len(manifest["rename_queue"]) > 15:
+            console.print(f"  … and {len(manifest['rename_queue']) - 15} more")
+
+    if out:
+        with open(out, "w") as fh:
+            _json.dump(manifest, fh, indent=2)
+        console.print(f"\nManifest written to [cyan]{out}[/cyan]")
+
+    if not apply_:
+        console.print(
+            "\n[dim]Dry run — no writes. Re-run with --apply to clear the "
+            "drain/suppress findings once the manifest is reviewed.[/dim]"
+        )
+        return
+
+    from imas_codex.standard_names.graph_ops import rederive_structural_edges
+
+    with GraphClient() as gc:
+        drained = apply_drain(gc, entries)
+    console.print(
+        f"\n[bold green]APPLIED[/bold green] cleared {drained['cleared']} stale findings "
+        f"(drain + suppress)."
+    )
+    stats = rederive_structural_edges()
+    console.print(
+        f"  re-stamped segment edges: processed={stats.get('processed', 0)}"
+    )
