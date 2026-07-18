@@ -96,6 +96,30 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
 # Imported from defaults.py — do not re-define here.
 
 
+def _count_scope_names(scope_run_id: str) -> int:
+    """Return the number of StandardName nodes bound to *scope_run_id*.
+
+    This is the size of a ``--focus`` scoped drain — the natural ceiling on how
+    many nodes any pool can concurrently work. Used to cap docs-pool replicas so
+    concurrency never exceeds the available work. Returns 0 on any query error
+    (the caller then leaves configured replicas unchanged).
+    """
+    from imas_codex.graph.client import GraphClient
+
+    try:
+        with GraphClient() as gc:
+            rows = list(
+                gc.query(
+                    "MATCH (sn:StandardName {run_id: $rid}) RETURN count(sn) AS n",
+                    rid=scope_run_id,
+                )
+            )
+        return int(rows[0]["n"]) if rows else 0
+    except Exception as exc:  # noqa: BLE001 — best-effort sizing, never fatal
+        logger.warning("_count_scope_names(%s) failed: %s", scope_run_id, exc)
+        return 0
+
+
 def _build_pool_specs(
     mgr: Any,
     stop_event: asyncio.Event,
@@ -339,6 +363,35 @@ def _build_pool_specs(
     _review_docs_replicas = get_pool_replicas("review_docs")
     _refine_docs_replicas = get_pool_replicas("refine_docs")
     _enrich_parents_replicas = get_pool_replicas("enrich_parents")
+
+    # Scoped drains (``--focus``/``--edits``) target a small, bounded set of
+    # names. Running the configured replica count (tuned for an unbounded global
+    # run) against a 1–2-name eligible set is pure amplification: N replicas all
+    # bind the same node, all pass the paid LLM call, and only one persist lands
+    # — the claim-race waste the settle+seq verify only partially recovers. Cap
+    # each docs pool's replicas at ~half the scope size (min 1) so concurrency
+    # never exceeds the work available. The names pools are left alone: a scoped
+    # docs drain (``docs_only``) is where this pathology was measured, and the
+    # scope size is the natural ceiling for the docs axis.
+    if scope_run_id:
+        import math
+
+        _scope_size = _count_scope_names(scope_run_id)
+        if _scope_size > 0:
+            _cap = max(1, math.ceil(_scope_size / 2))
+            _gen_docs_replicas = min(_gen_docs_replicas, _cap)
+            _review_docs_replicas = min(_review_docs_replicas, _cap)
+            _refine_docs_replicas = min(_refine_docs_replicas, _cap)
+            logger.info(
+                "scoped run (%s): %d names in scope — docs-pool replicas capped "
+                "at %d (generate=%d review=%d refine=%d)",
+                scope_run_id,
+                _scope_size,
+                _cap,
+                _gen_docs_replicas,
+                _review_docs_replicas,
+                _refine_docs_replicas,
+            )
 
     specs = [
         PoolSpec(
@@ -1300,25 +1353,76 @@ async def run_sn_pools(
         logger.info("run_sn_pools: all pools exited — %s", health_map)
 
         # ── A3: per-pool cost observability ────────────────────────
+        # NB: ``processed`` here is ``PoolHealth.total_processed`` — the number
+        # of batch items a pool ATTEMPTED (each ``spec.process`` return value),
+        # not the number that persisted. Paid LLM calls whose persist no-oped on
+        # a claim-race (see the wasted-paid-call tripwire below) are counted as
+        # processed here but did NOT advance graph state; the honest persisted
+        # count lives in the SNRun ``names_*`` counters (bumped only on success).
         phase_spent = shared_mgr.phase_spent
         for pool_name, h in (health_map or {}).items():
-            completed = getattr(h, "total_processed", 0) if h else 0
+            processed = getattr(h, "total_processed", 0) if h else 0
             spent = phase_spent.get(pool_name, 0.0)
-            mean_cost = spent / completed if completed > 0 else 0.0
+            mean_cost = spent / processed if processed > 0 else 0.0
             logger.info(
-                "run_sn_pools: pool=%s completed=%d spent=$%.4f mean_cost=$%.6f",
+                "run_sn_pools: pool=%s processed=%d spent=$%.4f mean_cost=$%.6f",
                 pool_name,
-                completed,
+                processed,
                 spent,
                 mean_cost,
             )
-            if completed > 0 and mean_cost == 0.0 and _a3_route == "direct":
+            if processed > 0 and mean_cost == 0.0 and _a3_route == "direct":
                 logger.warning(
-                    "run_sn_pools: pool=%s has %d completed items but mean_cost=0 "
+                    "run_sn_pools: pool=%s has %d processed items but mean_cost=0 "
                     "with expected route='direct' — cost tracking may be broken",
                     pool_name,
-                    completed,
+                    processed,
                 )
+
+        # ── Wasted-paid-call tripwire ──────────────────────────────
+        # A paid LLM call whose persist no-oped means a concurrent replica had
+        # already advanced the node past our claim: the LLM spend was pure
+        # claim-race waste. Surface the per-pool ratio and warn when it exceeds
+        # the tripwire threshold so a regressed run is visible in the summary
+        # rather than hiding inside an inflated ``processed`` count.
+        try:
+            from imas_codex.standard_names.graph_ops import (
+                persist_outcome_snapshot,
+                reset_persist_outcomes,
+            )
+
+            _WASTE_TRIPWIRE = 0.02  # >2% wasted paid calls is a regression signal
+            _outcomes = persist_outcome_snapshot(run_id)
+            for pool_name, oc in sorted(_outcomes.items()):
+                attempts = oc["attempts"]
+                wasted = oc["wasted"]
+                if attempts <= 0:
+                    continue
+                ratio = wasted / attempts
+                logger.info(
+                    "run_sn_pools: pool=%s paid_calls=%d wasted_persist=%d "
+                    "(%.1f%% claim-race waste)",
+                    pool_name,
+                    attempts,
+                    wasted,
+                    ratio * 100.0,
+                )
+                if ratio > _WASTE_TRIPWIRE and wasted > 2:
+                    logger.warning(
+                        "run_sn_pools: pool=%s wasted %d/%d paid calls (%.1f%%) on "
+                        "claim-race no-op persists — exceeds %.0f%% tripwire; check "
+                        "replica scaling vs eligible-set size",
+                        pool_name,
+                        wasted,
+                        attempts,
+                        ratio * 100.0,
+                        _WASTE_TRIPWIRE * 100.0,
+                    )
+            reset_persist_outcomes(run_id)
+        except Exception:  # noqa: BLE001 — telemetry only, never fail the run
+            logger.debug(
+                "run_sn_pools: wasted-paid-call tripwire check failed", exc_info=True
+            )
 
         # Aggregate per-pool processed counts into RunSummary.
         def _total(name: str) -> int:

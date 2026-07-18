@@ -15,6 +15,7 @@ import json
 import logging
 import os
 import re
+import time
 import uuid
 from datetime import UTC
 from pathlib import Path
@@ -6221,6 +6222,60 @@ def release_standard_name_source_claims(token: str) -> int:
 
 _CLAIM_TIMEOUT_SECONDS = 300  # 5 minutes — matches DEFAULT_CLAIM_TIMEOUT_SECONDS
 
+# Settle window inserted before the post-claim winner re-read (see
+# _verify_docs_claim_winners / _verify_name_claim_winners). Concurrent replicas
+# that bind the same eligible node commit their claim SETs in a lock-serialised
+# burst; the last committer's claim_seq wins the node. Re-reading immediately
+# after our own commit can observe our claim_seq as current before a later
+# racer commits, so every racer would momentarily look like the winner and each
+# would fire a paid LLM call. Waiting out this short window lets the burst's
+# final committer land, so exactly one replica survives the re-read. Kept small
+# (batch LLM calls dwarf it) and overridable to 0 in tests.
+_CLAIM_VERIFY_SETTLE_SECONDS = 0.5
+
+
+# In-process tally of paid-call outcomes at the persist step, keyed by
+# (run_id, pool). ``attempts`` counts every persist call that follows a paid
+# LLM call; ``wasted`` counts those that no-oped because a concurrent replica
+# already advanced the node past our claim (the claim-race residue). The run
+# summary reads a snapshot to surface a wasted-paid-call ratio and warn when it
+# exceeds the tripwire threshold. Populated by persist functions that can
+# silently no-op (currently the docs axis — the names axis raises instead).
+_persist_outcomes: dict[tuple[str, str], list[int]] = {}
+
+
+def _record_persist_outcome(run_id: str | None, pool: str, *, persisted: bool) -> None:
+    """Record one paid-call persist outcome for the (run_id, pool) tallies."""
+    key = (run_id or "", pool)
+    entry = _persist_outcomes.setdefault(key, [0, 0])
+    entry[0] += 1
+    if not persisted:
+        entry[1] += 1
+
+
+def persist_outcome_snapshot(run_id: str | None) -> dict[str, dict[str, int]]:
+    """Return ``{pool: {"attempts": a, "wasted": w}}`` for *run_id*.
+
+    ``wasted`` is the count of paid LLM calls whose persist no-oped because a
+    concurrent replica had already claimed and advanced the node — the direct
+    measure of claim-race waste. Empty when nothing was recorded for the run.
+    """
+    rid = run_id or ""
+    return {
+        pool: {"attempts": a, "wasted": w}
+        for (r, pool), (a, w) in _persist_outcomes.items()
+        if r == rid
+    }
+
+
+def reset_persist_outcomes(run_id: str | None = None) -> None:
+    """Clear persist-outcome tallies (all runs, or just *run_id*)."""
+    if run_id is None:
+        _persist_outcomes.clear()
+        return
+    for key in [k for k in _persist_outcomes if k[0] == (run_id or "")]:
+        del _persist_outcomes[key]
+
 
 @retry_on_deadlock()
 def claim_compose_sources(
@@ -7901,7 +7956,8 @@ def _claim_sn_atomic(
                         WITH sn{seed_with_extras}
                         ORDER BY {seed_order_by} LIMIT 1
                         SET sn.claimed_at = datetime(),
-                            sn.claim_token = $token
+                            sn.claim_token = $token,
+                            sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                             {stage_set}
                         WITH sn
                         OPTIONAL MATCH (sn)-[:IN_CLUSTER]
@@ -7947,7 +8003,8 @@ def _claim_sn_atomic(
                                 ->(:Unit {{id: $unit}})
                             WITH sn LIMIT $expand_limit
                             SET sn.claimed_at = datetime(),
-                                sn.claim_token = $token
+                                sn.claim_token = $token,
+                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
                             """,
                             **expand_params,
@@ -7965,7 +8022,8 @@ def _claim_sn_atomic(
                                     {{id: $cluster_id}})
                             WITH sn LIMIT $expand_limit
                             SET sn.claimed_at = datetime(),
-                                sn.claim_token = $token
+                                sn.claim_token = $token,
+                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
                             """,
                             **expand_params,
@@ -7983,7 +8041,8 @@ def _claim_sn_atomic(
                                 ->(:Unit {{id: $unit}})
                             WITH sn LIMIT $expand_limit
                             SET sn.claimed_at = datetime(),
-                                sn.claim_token = $token
+                                sn.claim_token = $token,
+                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
                             """,
                             **expand_params,
@@ -7999,7 +8058,8 @@ def _claim_sn_atomic(
                               AND sn.physics_domain = $fallback_domain
                             WITH sn LIMIT $expand_limit
                             SET sn.claimed_at = datetime(),
-                                sn.claim_token = $token
+                                sn.claim_token = $token,
+                                sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
                             """,
                             **expand_params,
@@ -8023,7 +8083,8 @@ def _claim_sn_atomic(
                                sn.physics_domain AS physics_domain,
                                sn.validation_status
                                    AS validation_status,
-                               sn.claim_token AS claim_token
+                               sn.claim_token AS claim_token,
+                               sn.claim_seq AS claim_seq
                                {extra_return_fields}
                         """,
                         token=token,
@@ -10844,59 +10905,107 @@ def _mark_refine_docs_exhausted(
 # The shared _claim_sn_atomic seed binds its candidate row at MATCH time, then
 # acquires the node write-lock at the SET. When two pool replicas race for the
 # same drafted/pending node, both MATCH it as eligible; the SET serialises on
-# the lock, so the LAST committer's claim_token wins — but BOTH replicas
-# returned the node as "claimed" and proceeded to call the LLM. That phantom
-# is the dominant docs-cost driver: a single accepted name was re-reviewed 27×
-# (≈48 wasted reviewer LLM calls) purely because losing-race replicas still
-# fired their reviewer quorum.
+# the lock, so the LAST committer's claim_token / claim_seq wins — but BOTH
+# replicas returned the node as "claimed" and proceeded to call the LLM. That
+# phantom is the dominant docs-cost driver: a single accepted name was
+# re-reviewed 27× (≈48 wasted reviewer LLM calls) purely because losing-race
+# replicas still fired their reviewer quorum.
 #
 # _verify_docs_claim_winners closes the window by re-reading COMMITTED state
-# after the claim transaction: a node is a genuine win only if it STILL holds
-# our claim_token. The race loser's token was overwritten by the winner, so it
-# is dropped here — before any LLM call. This is the generate_docs / review_docs
-# analogue of the two-step claim_token verify mandated for all claim functions.
+# after a short settle: each claim stamps a strictly-increasing per-node
+# claim_seq, so a node is a genuine win only if it STILL holds our claim_token
+# AND its committed claim_seq equals the one we were assigned — i.e. no later
+# racer superseded us. The settle lets the lock-serialised claim burst finish
+# committing before we read, so exactly one replica (the final committer) sees
+# its own claim_seq as current; all earlier racers observe a higher seq and
+# self-exclude before any LLM call. This is the generate_docs / review_docs
+# analogue of the claim_token verify mandated for all claim functions, hardened
+# against the "every racer is momentarily the token holder" false-positive.
 
 
 def _verify_docs_claim_winners(
     items: list[dict[str, Any]],
     *,
     eligible_stage: str,
+    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
 ) -> list[dict[str, Any]]:
     """Drop docs-claim items that lost a concurrent-claim race.
 
     *items* are the rows returned by :func:`_claim_sn_atomic` (all sharing one
-    ``claim_token``).  This re-reads committed graph state and keeps only the
-    nodes that STILL hold that token AND remain at *eligible_stage* — i.e. the
-    nodes this worker genuinely owns.  Race losers (token overwritten by a
-    concurrent replica) are excluded so the caller never spends an LLM call on
-    them.
+    ``claim_token``).  After a short *settle_seconds* pause — long enough for a
+    lock-serialised claim burst to finish committing — this re-reads committed
+    graph state and keeps only the nodes that STILL hold that token, remain at
+    *eligible_stage*, AND carry the exact ``claim_seq`` this worker was
+    assigned.  A race loser's ``claim_seq`` was superseded by a later
+    committer's higher value, so it is dropped here before any LLM call.
+
+    ``settle_seconds`` is overridable (tests pass ``0``); this function runs in
+    a worker thread (claims go through ``asyncio.to_thread``), so the pause does
+    not block the event loop.
 
     Returns the filtered item list (order preserved).
+    """
+    return _verify_claim_winners(
+        items,
+        stage_field="docs_stage",
+        eligible_stage=eligible_stage,
+        settle_seconds=settle_seconds,
+        axis="docs",
+    )
+
+
+def _verify_claim_winners(
+    items: list[dict[str, Any]],
+    *,
+    stage_field: str,
+    eligible_stage: str,
+    settle_seconds: float,
+    axis: str,
+) -> list[dict[str, Any]]:
+    """Shared claim-race winner verifier for the docs and names axes.
+
+    Keeps only items that still hold ``claim_token`` at *eligible_stage* with
+    the assigned ``claim_seq`` after settling; see the module comment above
+    :func:`_verify_docs_claim_winners` for the mechanism.
     """
     if not items:
         return items
     token = items[0].get("claim_token") or ""
     if not token:
         return items
+    # Per-item (id, claim_seq). Legacy claims that predate the seq stamp fall
+    # back to token+stage only so this never over-drops on missing data.
+    seqs = {it["id"]: it.get("claim_seq") for it in items}
+    have_seq = all(v is not None for v in seqs.values())
+    # The settle only helps the claim_seq dedup — it gives a lock-serialised
+    # claim burst time to finish committing so the seq re-read is decisive.
+    # Without claim_seq (legacy nodes / mocked claims) there is nothing for the
+    # pause to resolve, so skip it and fall through to the token-only check.
+    if have_seq and settle_seconds > 0:
+        time.sleep(settle_seconds)
     ids = [it["id"] for it in items]
     with GraphClient() as gc:
         rows = gc.query(
-            """
+            f"""
             UNWIND $ids AS sid
-            MATCH (sn:StandardName {id: sid})
+            MATCH (sn:StandardName {{id: sid}})
             WHERE sn.claim_token = $token
-              AND sn.docs_stage = $eligible_stage
-            RETURN sn.id AS id
+              AND sn.{stage_field} = $eligible_stage
+            RETURN sn.id AS id, sn.claim_seq AS claim_seq
             """,
             ids=ids,
             token=token,
             eligible_stage=eligible_stage,
         )
-    winners = {r["id"] for r in rows}
+    if have_seq:
+        winners = {r["id"] for r in rows if r.get("claim_seq") == seqs[r["id"]]}
+    else:
+        winners = {r["id"] for r in rows}
     if len(winners) == len(items):
         return items
     logger.debug(
-        "_verify_docs_claim_winners: %d/%d survived claim-race (token=%s, stage=%s)",
+        "_verify_claim_winners[%s]: %d/%d survived claim-race (token=%s, stage=%s)",
+        axis,
         len(winners),
         len(items),
         token[:8],
@@ -10910,62 +11019,34 @@ def _verify_docs_claim_winners(
 # =============================================================================
 # Identical mechanism to the docs axis (see _verify_docs_claim_winners): two
 # pool replicas both bind the same eligible StandardName at the shared seed
-# MATCH, the lock-serialised SET lets the LAST claim_token win, but BOTH
-# replicas already returned the node and proceed to the (paid) name LLM call.
-# Live evidence: review_name ran 339 reviewer calls for 64 distinct names
+# MATCH, the lock-serialised SET lets the LAST claim_token / claim_seq win, but
+# BOTH replicas already returned the node and proceed to the (paid) name LLM
+# call. Live evidence: review_name ran 339 reviewer calls for 64 distinct names
 # (~5× amplification) on a multi-replica run. _verify_name_claim_winners closes
-# the window by re-reading COMMITTED state after the claim transaction: a node
-# is a genuine win only if it STILL holds our claim_token at the eligible
-# name_stage; the race loser's token was overwritten by the winner, so it is
-# dropped here — before any LLM call.
+# the window via the same settle + claim_seq check as the docs axis: after the
+# claim burst settles, a node is a genuine win only if it STILL holds our
+# claim_token at the eligible name_stage with our assigned claim_seq; every
+# earlier racer sees a higher committed seq and is dropped before any LLM call.
 
 
 def _verify_name_claim_winners(
     items: list[dict[str, Any]],
     *,
     eligible_stage: str,
+    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
 ) -> list[dict[str, Any]]:
     """Drop name-claim items that lost a concurrent-claim race.
 
-    *items* are the rows returned by :func:`_claim_sn_atomic` (all sharing one
-    ``claim_token``).  This re-reads committed graph state and keeps only the
-    nodes that STILL hold that token AND remain at *eligible_stage* — i.e. the
-    nodes this worker genuinely owns.  Race losers (token overwritten by a
-    concurrent replica) are excluded so the caller never spends an LLM call on
-    them.
-
-    Returns the filtered item list (order preserved).
+    Names-axis twin of :func:`_verify_docs_claim_winners` — same settle +
+    ``claim_seq`` mechanism, gated on ``name_stage`` instead of ``docs_stage``.
     """
-    if not items:
-        return items
-    token = items[0].get("claim_token") or ""
-    if not token:
-        return items
-    ids = [it["id"] for it in items]
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = $eligible_stage
-            RETURN sn.id AS id
-            """,
-            ids=ids,
-            token=token,
-            eligible_stage=eligible_stage,
-        )
-    winners = {r["id"] for r in rows}
-    if len(winners) == len(items):
-        return items
-    logger.debug(
-        "_verify_name_claim_winners: %d/%d survived claim-race (token=%s, stage=%s)",
-        len(winners),
-        len(items),
-        token[:8],
-        eligible_stage,
+    return _verify_claim_winners(
+        items,
+        stage_field="name_stage",
+        eligible_stage=eligible_stage,
+        settle_seconds=settle_seconds,
+        axis="name",
     )
-    return [it for it in items if it["id"] in winners]
 
 
 def _verify_source_claim_winners(
@@ -11585,7 +11666,9 @@ def persist_refined_docs(
 
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")
+        _record_persist_outcome(run_id, "refine_docs", persisted=True)
         return row
+    _record_persist_outcome(run_id, "refine_docs", persisted=False)
     logger.debug(
         "persist_refined_docs: no-op for %s (token/stage mismatch)",
         sn_id,
