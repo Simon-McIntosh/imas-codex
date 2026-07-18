@@ -477,6 +477,10 @@ class BatchOutcome:
     reintroduced_ids: list[str] = field(default_factory=list)
     name_drift: list[str] = field(default_factory=list)
     cost: float = 0.0
+    # Deterministic-audit deltas from re-stamping the refreshed batch: how many
+    # members a fresh ISN audit re-quarantined (genuine defect) vs cleared.
+    audit_requarantined: int = 0
+    audit_cleared: int = 0
 
     @property
     def accept_rate(self) -> float:
@@ -652,6 +656,57 @@ def default_revalidate(
     return {"requarantined": requarantined, "confirmed": confirmed}
 
 
+def _run_scoped_validation_drain(ids: Sequence[str]) -> dict[str, Any]:
+    """Bridge to the LLM-free scoped ISN audit drain (lazy import + run).
+
+    Isolated so the campaign default can wire the real drain while tests inject
+    a fake, keeping this module free of a hard dependency on the worker/graph
+    machinery at import time.
+    """
+    from imas_codex.cli.utils import run_async
+    from imas_codex.standard_names.workers import drain_validation_for_ids
+
+    return run_async(drain_validation_for_ids(ids))
+
+
+def default_audit_revalidate(
+    gc: Any,
+    ids: Sequence[str],
+    *,
+    drain_fn: Callable[[Sequence[str]], dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Clear the validation stamp on *ids* then re-run the deterministic ISN
+    audit scoped to them, re-stamping validation status.
+
+    The fast banned-prose grep confirms 'valid' too eagerly — it never re-runs
+    the deterministic checks (latex definitions, spelling, length, unit
+    consistency), so a refreshed doc carrying a genuine defect would wash to
+    'valid'. This clears ``validated_at`` on every batch member (so the scoped
+    drain re-claims them) and runs the full audit; a member whose fresh audit
+    finds a defect re-quarantines instead. Returns ``{"cleared": n,
+    "requarantined_ids": [...], "valid_ids": [...]}``.
+    """
+    ids = list(ids)
+    if not ids:
+        return {"cleared": 0, "requarantined_ids": [], "valid_ids": []}
+    rows = gc.query(
+        """
+        UNWIND $ids AS sid
+        MATCH (sn:StandardName {id: sid})
+        SET sn.validated_at = null, sn.claimed_at = null, sn.claim_token = null
+        RETURN count(sn) AS n
+        """,
+        ids=ids,
+    )
+    cleared = int(rows[0]["n"]) if rows else 0
+    drained = (drain_fn or _run_scoped_validation_drain)(ids) or {}
+    return {
+        "cleared": cleared,
+        "requarantined_ids": list(drained.get("requarantined_ids", [])),
+        "valid_ids": list(drained.get("cleared_ids", [])),
+    }
+
+
 def default_record_change(
     gc: Any,
     ids: Sequence[str],
@@ -702,6 +757,8 @@ class CampaignResult:
     total_touched: int = 0
     total_accepted: int = 0
     total_cost: float = 0.0
+    total_audit_requarantined: int = 0
+    total_audit_cleared: int = 0
     run_ids: list[str] = field(default_factory=list)
     outcomes: list[BatchOutcome] = field(default_factory=list)
     halted: bool = False
@@ -717,6 +774,8 @@ class CampaignResult:
             "total_touched": self.total_touched,
             "total_accepted": self.total_accepted,
             "total_cost": round(self.total_cost, 4),
+            "total_audit_requarantined": self.total_audit_requarantined,
+            "total_audit_cleared": self.total_audit_cleared,
             "halted": self.halted,
             "halt_reasons": self.halt_reasons,
             "resume_from": self.resume_from,
@@ -761,6 +820,7 @@ class CampaignRunner:
         revalidate_fn: Callable[
             [Any, Sequence[str], Sequence[str]], dict[str, int]
         ] = default_revalidate,
+        audit_fn: Callable[[Any, Sequence[str]], dict[str, Any]] | None = None,
         record_change_fn: Callable[
             [Any, Sequence[str], str, CampaignSpec], int
         ] = default_record_change,
@@ -772,10 +832,12 @@ class CampaignRunner:
         """Run the campaign from *start_batch*, halting on the first failure.
 
         The batch loop, per batch: lift quarantine → snapshot+reset+stamp a
-        fresh scope ``run_id`` → drain that scope → measure → re-validate →
-        record the change event → convergence gate.  A failed gate, an
-        exceeded cost ceiling, or an abort request halts between batches and
-        records ``resume_from`` so a later run resumes cleanly.
+        fresh scope ``run_id`` → drain that scope → measure → re-run the
+        deterministic ISN audit on the refreshed docs (``audit_fn``) →
+        re-quarantine banned-prose reintroductions → record the change event →
+        convergence gate.  A failed gate, an exceeded cost ceiling, or an abort
+        request halts between batches and records ``resume_from`` so a later run
+        resumes cleanly.
         """
         if mark_fn is None:
             from imas_codex.standard_names.harmonize import mark_members_for_regen
@@ -829,16 +891,30 @@ class CampaignRunner:
             refreshed = fetch_refreshed_fn(gc, batch)
             outcome = measure_batch(refreshed, batch, batch_index=index, cost=cost)
 
-            # 5. Re-validate: re-quarantine reintroductions, confirm the rest.
+            touched_ids = [r["id"] for r in refreshed]
+
+            # 5. Re-run the deterministic ISN audit on the refreshed batch:
+            #    clear the validation stamp and re-stamp validation status, so a
+            #    genuine defect (e.g. a unit inconsistency) re-quarantines
+            #    instead of the fast prose grep washing it to 'valid'.
+            if audit_fn is not None:
+                audit_deltas = audit_fn(gc, touched_ids)
+                outcome.audit_requarantined = len(
+                    audit_deltas.get("requarantined_ids", [])
+                )
+                outcome.audit_cleared = len(audit_deltas.get("valid_ids", []))
+
+            # 6. Re-quarantine banned-prose reintroductions on top of the audit
+            #    stamp — the prose grep is a campaign-specific signal the ISN
+            #    audit does not carry, and it must not overwrite an audit
+            #    quarantine (default_revalidate only confirms non-quarantined
+            #    members to 'valid').
             clean_ids = [
-                r["id"]
-                for r in refreshed
-                if r["id"] not in set(outcome.reintroduced_ids)
+                sid for sid in touched_ids if sid not in set(outcome.reintroduced_ids)
             ]
             revalidate_fn(gc, outcome.reintroduced_ids, clean_ids)
 
-            # 6. Record a campaign change event per touched name.
-            touched_ids = [r["id"] for r in refreshed]
+            # 7. Record a campaign change event per touched name.
             record_change_fn(gc, touched_ids, run_id or "", self.spec)
 
             # Accounting.
@@ -846,6 +922,8 @@ class CampaignRunner:
             result.total_touched += outcome.touched
             result.total_accepted += outcome.accepted
             result.total_cost += cost
+            result.total_audit_requarantined += outcome.audit_requarantined
+            result.total_audit_cleared += outcome.audit_cleared
             result.outcomes.append(outcome)
             if on_batch is not None:
                 on_batch(outcome)
@@ -880,6 +958,7 @@ __all__ = [
     "default_clear_quarantine",
     "default_fetch_refreshed",
     "default_revalidate",
+    "default_audit_revalidate",
     "default_record_change",
     "CampaignResult",
     "CampaignRunner",

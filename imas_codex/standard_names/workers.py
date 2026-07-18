@@ -4031,6 +4031,129 @@ async def drain_validation_backlog(batch_size: int = 50) -> dict[str, int]:
     return totals
 
 
+# Matches the backlog claim timeout in graph_ops so a stale scoped claim
+# expires on the same schedule.
+_SCOPED_VALIDATION_CLAIM_TIMEOUT = "PT300S"
+
+
+def claim_ids_for_validation(
+    ids: Sequence[str], limit: int
+) -> tuple[str, list[dict[str, Any]]]:
+    """Atomically claim named StandardNames for a scoped ISN re-validation.
+
+    The id-scoped counterpart of ``claim_names_for_validation``: only nodes in
+    *ids* whose ``validated_at`` is null are claimed, so a campaign re-stamp
+    never touches names outside its batch. Returns ``(token, items)`` where the
+    token must be passed to ``mark_names_validated`` or
+    ``release_validation_claims``.
+    """
+    import uuid
+
+    from imas_codex.graph.client import GraphClient
+
+    token = str(uuid.uuid4())
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.id IN $ids
+              AND sn.description IS NOT NULL
+              AND sn.validated_at IS NULL
+              AND (sn.claimed_at IS NULL
+                   OR sn.claimed_at < datetime() - duration($timeout))
+            WITH sn ORDER BY rand() LIMIT $limit
+            SET sn.claimed_at = datetime(), sn.claim_token = $token
+            """,
+            ids=list(ids),
+            limit=limit,
+            token=token,
+            timeout=_SCOPED_VALIDATION_CLAIM_TIMEOUT,
+        )
+        results = gc.query(
+            """
+            MATCH (sn:StandardName {claim_token: $token})
+            OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
+            OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
+            RETURN sn.id AS id, sn.description AS description,
+                   sn.documentation AS documentation, sn.kind AS kind,
+                   sn.unit AS unit, sn.links AS links,
+                   sn.source_paths AS source_paths,
+                   sn.object AS object,
+                   sn.physics_domain AS physics_domain,
+                   sn.origin AS origin,
+                   collect(DISTINCT src.id) AS source_ids,
+                   collect(DISTINCT child.id) AS children
+            """,
+            token=token,
+        )
+        return token, [dict(r) for r in results]
+
+
+async def drain_validation_for_ids(
+    ids: Sequence[str], *, batch_size: int = 50
+) -> dict[str, Any]:
+    """Re-run the deterministic ISN audit on an explicit id scope.
+
+    Id-scoped counterpart of :func:`drain_validation_backlog`. Claims only the
+    named nodes whose ``validated_at`` is null — a campaign clears the stamp on
+    a batch before calling this — runs the shared admission gate
+    (:func:`validate_name_candidate`), and re-stamps ``validation_issues`` /
+    ``validation_status`` / ``validated_at``. LLM-free; a genuine defect (e.g. a
+    unit inconsistency) re-quarantines instead of washing to 'valid'. Returns
+    ``{"validated": n, "quarantined": m, "requarantined_ids": [...],
+    "cleared_ids": [...]}``.
+    """
+    from imas_codex.standard_names.graph_ops import (
+        mark_names_validated,
+        release_validation_claims,
+    )
+
+    ids = list(ids)
+    totals: dict[str, Any] = {
+        "validated": 0,
+        "quarantined": 0,
+        "requarantined_ids": [],
+        "cleared_ids": [],
+    }
+    if not ids:
+        return totals
+    while True:
+        token, items = await asyncio.to_thread(
+            claim_ids_for_validation, ids, batch_size
+        )
+        if not items:
+            break
+        try:
+            results: list[dict[str, Any]] = []
+            for entry in items:
+                issues, layer_summary, status = validate_name_candidate(entry)
+                sid = entry.get("id", "")
+                if status == "quarantined":
+                    totals["quarantined"] += 1
+                    totals["requarantined_ids"].append(sid)
+                else:
+                    totals["cleared_ids"].append(sid)
+                results.append(
+                    {
+                        "id": sid,
+                        "validation_issues": issues,
+                        "validation_layer_summary": json.dumps(layer_summary),
+                        "validation_status": status,
+                    }
+                )
+            marked = await asyncio.to_thread(mark_names_validated, token, results)
+            totals["validated"] += marked
+        except Exception:
+            logger.warning(
+                "drain_validation_for_ids: batch failed — releasing claims",
+                exc_info=True,
+            )
+            await asyncio.to_thread(release_validation_claims, token)
+            raise
+    return totals
+
+
 async def validate_worker(state: StandardNameBuildState, **_kwargs) -> None:
     """Validate composed names via ISN grammar checks (claim loop).
 

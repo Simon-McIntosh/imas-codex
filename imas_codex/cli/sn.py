@@ -1948,6 +1948,7 @@ def sn_run(
             cost = row.get("cost_spent")
             return float(cost) if cost is not None else None
 
+        from imas_codex.standard_names.campaign import default_audit_revalidate
         from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
 
         console.print(
@@ -1961,6 +1962,9 @@ def sn_run(
                 target_ids=selection.ids,
                 drain_fn=_campaign_drain,
                 cost_fn=aggregate_spend_for_run,
+                # Re-run the deterministic ISN audit on each refreshed batch so a
+                # genuine defect re-quarantines instead of washing to 'valid'.
+                audit_fn=default_audit_revalidate,
                 start_batch=campaign_resume_from,
             )
         if result.halted:
@@ -1977,6 +1981,8 @@ def sn_run(
             console.print(
                 f"[green]Campaign complete[/green]: {result.batches_run} batch(es), "
                 f"{result.total_accepted}/{result.total_touched} docs accepted, "
+                f"re-audit {result.total_audit_requarantined} re-quarantined / "
+                f"{result.total_audit_cleared} cleared, "
                 f"spend ${result.total_cost:.2f}."
             )
         return

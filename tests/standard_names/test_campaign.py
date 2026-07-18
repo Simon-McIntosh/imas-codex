@@ -20,6 +20,7 @@ from imas_codex.standard_names.campaign import (
     CampaignTarget,
     ConvergenceThresholds,
     build_manifest,
+    default_audit_revalidate,
     default_clear_quarantine,
     default_fetch_refreshed,
     default_revalidate,
@@ -472,6 +473,37 @@ class TestDefaultGraphOps:
         gc = _FakeGraph([])
         assert default_fetch_refreshed(gc, []) == []
 
+    def test_audit_revalidate_clears_stamp_before_scoped_drain(self):
+        gc = _FakeGraph([])
+        calls: dict[str, list[str]] = {}
+
+        def fake_drain(ids):
+            # The stamp must already be cleared when the drain re-claims: assert
+            # the clear write landed before the drain runs.
+            calls["ids"] = list(ids)
+            calls["writes_before_drain"] = [c for c, _ in gc.writes]
+            return {"requarantined_ids": ["bad"], "cleared_ids": ["good"]}
+
+        out = default_audit_revalidate(gc, ["bad", "good"], drain_fn=fake_drain)
+
+        clear_cypher, clear_params = gc.writes[-1]
+        assert "SET sn.validated_at = null" in clear_cypher
+        assert clear_params["ids"] == ["bad", "good"]
+        # Drain saw the batch ids, and the clear happened first.
+        assert calls["ids"] == ["bad", "good"]
+        assert any(
+            "SET sn.validated_at = null" in c for c in calls["writes_before_drain"]
+        )
+        assert out["cleared"] == 2
+        assert out["requarantined_ids"] == ["bad"]
+        assert out["valid_ids"] == ["good"]
+
+    def test_audit_revalidate_noop_on_empty(self):
+        gc = _FakeGraph([])
+        out = default_audit_revalidate(gc, [], drain_fn=lambda ids: {})
+        assert out == {"cleared": 0, "requarantined_ids": [], "valid_ids": []}
+        assert gc.writes == []
+
 
 # ── Runner orchestration (fully injected) ────────────────────────────────────
 
@@ -485,6 +517,9 @@ class _RunnerHarness:
         self.drained_run_ids: list[str] = []
         self.marked_batches: list[list[str]] = []
         self.recorded: list[tuple[list[str], str]] = []
+        self.audited_ids: list[list[str]] = []
+        # ids whose fresh deterministic audit finds a genuine defect.
+        self.defective: set[str] = set()
         self._batch_calls = 0
 
     def mark_fn(self, batch, dry_run=False):
@@ -513,6 +548,13 @@ class _RunnerHarness:
     def revalidate_fn(self, gc, reintroduced, clean):
         self.events.append(f"revalidate:{len(reintroduced)}:{len(clean)}")
         return {"requarantined": len(reintroduced), "confirmed": len(clean)}
+
+    def audit_fn(self, gc, ids):
+        self.events.append(f"audit:{','.join(ids)}")
+        self.audited_ids.append(list(ids))
+        req = [i for i in ids if i in self.defective]
+        val = [i for i in ids if i not in self.defective]
+        return {"requarantined_ids": req, "valid_ids": val}
 
     def record_change_fn(self, gc, ids, run_id, spec):
         self.events.append(f"record:{','.join(ids)}:{run_id}")
@@ -738,3 +780,90 @@ class TestCampaignRunner:
         assert result.batches_run == 1
         assert result.halted is False  # abort is clean, not a failure
         assert result.resume_from == 1
+
+    def test_audit_fn_reruns_on_every_touched_id(self):
+        # The re-audit must cover the whole refreshed batch so no member keeps a
+        # stale validated_at from before the drain.
+        refreshed = [[_accepted("a"), _accepted("b")], [_accepted("c")]]
+        harness = _RunnerHarness(refreshed)
+        runner = CampaignRunner(
+            CampaignSpec.parse("prose"),
+            CampaignBudget(batch_size=2, campaign_cost_ceiling=100.0),
+            ConvergenceThresholds(),
+        )
+        result = runner.run(
+            gc=None,
+            target_ids=["a", "b", "c"],
+            drain_fn=harness.drain_fn,
+            mark_fn=harness.mark_fn,
+            clear_quarantine_fn=harness.clear_quarantine_fn,
+            fetch_refreshed_fn=harness.fetch_refreshed_fn,
+            revalidate_fn=harness.revalidate_fn,
+            audit_fn=harness.audit_fn,
+            record_change_fn=harness.record_change_fn,
+            cost_fn=harness.cost_fn,
+        )
+        assert harness.audited_ids == [["a", "b"], ["c"]]
+        assert result.total_audit_cleared == 3
+        assert result.total_audit_requarantined == 0
+
+    def test_audit_fn_requarantines_genuine_defect(self):
+        # A refreshed doc whose fresh deterministic audit finds a genuine defect
+        # (e.g. a unit inconsistency) ends re-quarantined, not washed to 'valid'.
+        refreshed = [[_accepted("a"), _accepted("b")]]
+        harness = _RunnerHarness(refreshed)
+        harness.defective = {"b"}
+        runner = CampaignRunner(
+            CampaignSpec.parse("prose"),
+            CampaignBudget(batch_size=2),
+            ConvergenceThresholds(),
+        )
+        result = runner.run(
+            gc=None,
+            target_ids=["a", "b"],
+            drain_fn=harness.drain_fn,
+            mark_fn=harness.mark_fn,
+            clear_quarantine_fn=harness.clear_quarantine_fn,
+            fetch_refreshed_fn=harness.fetch_refreshed_fn,
+            revalidate_fn=harness.revalidate_fn,
+            audit_fn=harness.audit_fn,
+            record_change_fn=harness.record_change_fn,
+            cost_fn=harness.cost_fn,
+        )
+        outcome = result.outcomes[0]
+        assert outcome.audit_requarantined == 1
+        assert outcome.audit_cleared == 1
+        assert result.total_audit_requarantined == 1
+        assert result.total_audit_cleared == 1
+        assert result.summary()["total_audit_requarantined"] == 1
+
+    def test_audit_runs_before_prose_requarantine(self):
+        # Ordering: the deterministic re-audit stamps the whole batch first, then
+        # the prose-grep re-quarantine lands on top (campaign-specific signal).
+        harness = _RunnerHarness([[_accepted("a")]])
+        runner = CampaignRunner(
+            CampaignSpec.parse("prose"),
+            CampaignBudget(batch_size=10),
+            ConvergenceThresholds(),
+        )
+        runner.run(
+            gc=None,
+            target_ids=["a"],
+            drain_fn=harness.drain_fn,
+            mark_fn=harness.mark_fn,
+            clear_quarantine_fn=harness.clear_quarantine_fn,
+            fetch_refreshed_fn=harness.fetch_refreshed_fn,
+            revalidate_fn=harness.revalidate_fn,
+            audit_fn=harness.audit_fn,
+            record_change_fn=harness.record_change_fn,
+            cost_fn=harness.cost_fn,
+        )
+        assert harness.events == [
+            "clear:a",
+            "mark:a",
+            "drain:run-1:10.0",
+            "fetch:a",
+            "audit:a",
+            "revalidate:0:1",
+            "record:a:run-1",
+        ]
