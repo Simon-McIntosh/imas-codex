@@ -2263,7 +2263,8 @@ def repair_normalization_peel_parent_units(gc: Any) -> list[str]:
         WHERE NOT any(t IN split(sn.id, '_')
                       WHERE t IN ['normalized', 'normalised'])
           AND sn.validation_issues IS NOT NULL
-          AND sn.validation_issues CONTAINS 'name_unit_consistency_check'
+          AND any(issue IN sn.validation_issues
+                  WHERE issue CONTAINS 'name_unit_consistency_check')
         MATCH (c)-[:HAS_PARENT]->(sn)
         WITH sn, collect(c) AS kids
         WHERE all(k IN kids
