@@ -2633,114 +2633,6 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
-@lru_cache(maxsize=1)
-def _decomposition_closed_vocab() -> dict[str, tuple[str, ...]]:
-    """Closed-vocabulary token sets keyed by segment (all except open bases).
-
-    Cached — the segment map is fixed for a given installed grammar.
-    """
-    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-
-    aliases = {"coordinate", "object", "position"}
-    return {
-        seg: tuple(toks)
-        for seg, toks in SEGMENT_TOKEN_MAP.items()
-        if seg not in aliases and seg != "physical_base" and toks
-    }
-
-
-@lru_cache(maxsize=1)
-def _registered_base_tokens() -> frozenset[str]:
-    """Tokens the grammar accepts as atomic bases/carriers (cached).
-
-    A ``physical_base`` in this set is a lexicalised compound the grammar owns
-    (``convection_velocity``, ``diffusion_coefficient``, ``safety_factor``): a
-    closed-vocab substring inside it is legitimate, not an absorption.
-    """
-    from imas_standard_names.grammar.parser import load_default_vocabularies
-
-    vocabs = load_default_vocabularies()
-    return frozenset(set(vocabs.bases) | set(vocabs.carriers))
-
-
-def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
-    """Detect closed-vocabulary tokens genuinely absorbed into ``physical_base``.
-
-    Parse-aware: the name is parsed under the current grammar and only the
-    resulting ``physical_base`` is scanned for embedded closed-vocab tokens.
-    A raw-name substring scan would flag a token even when the grammar
-    correctly slots it (``ion_current_density`` → ``subject=ion``); parsing
-    first means those are never reported. A ``physical_base`` the grammar
-    registers as an atomic/lexicalised base is exempt — the embedded token is
-    part of the base, not an absorption. Only a token left inside a
-    ``physical_base`` the grammar does NOT accept as a base is a genuine
-    decomposition failure and gets flagged.
-
-    Names the grammar rejects outright return no issue here — the parse gate
-    owns that failure, so it is not double-reported.
-
-    This audit is deliberately **non-critical** (NOT in ``CRITICAL_CHECKS``):
-    a surviving flag is a curation signal for the reviewer (rubric I4.6),
-    not an auto-quarantine.
-
-    Returns tagged issue strings of the form::
-
-        "audit:decomposition_audit: name '<name>' contains closed-vocab token"
-        " '<token>' (segment={<segments>}) absorbed into the name body. ..."
-    """
-    name = (candidate.get("id") or "").strip()
-    if not name:
-        return []
-
-    try:
-        from imas_standard_names.grammar import parse_standard_name
-
-        from imas_codex.standard_names.decomposition import find_absorbed_closed_tokens
-    except ImportError:
-        return []
-
-    # Parse under the current grammar. A name that does not parse (or is
-    # non-canonical) is owned by the grammar gate, not this audit.
-    try:
-        model = parse_standard_name(name)
-    except Exception:  # noqa: BLE001 — any grammar rejection is not our concern
-        return []
-
-    physical_base = (getattr(model, "physical_base", None) or "").strip()
-    if not physical_base:
-        return []
-
-    # A grammar-registered atomic/lexicalised base owns any closed-vocab
-    # substring it contains.
-    if physical_base in _registered_base_tokens():
-        return []
-
-    closed_vocab = {
-        seg: list(toks) for seg, toks in _decomposition_closed_vocab().items()
-    }
-    if not closed_vocab:
-        return []
-
-    absorbed = find_absorbed_closed_tokens(physical_base, closed_vocab)
-    if not absorbed:
-        return []
-
-    # Group (token, segment) pairs by token so each token is reported once.
-    grouped: dict[str, list[str]] = {}
-    for tok, seg in absorbed:
-        grouped.setdefault(tok, []).append(seg)
-
-    issues: list[str] = []
-    for tok in sorted(grouped):
-        seg_str = ", ".join(sorted(grouped[tok]))
-        issues.append(
-            f"audit:decomposition_audit: name '{name}' contains closed-vocab "
-            f"token '{tok}' (segment={{{seg_str}}}) absorbed into the name "
-            f"body. Place it in its segment slot rather than letting it "
-            f"leak into physical_base."
-        )
-    return issues
-
 
 def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:
     """Flag GGD implementation details leaking into description or documentation.
@@ -3114,7 +3006,6 @@ def run_audits(
     all_issues.extend(process_qualifier_check(candidate))
     all_issues.extend(preposition_physical_base_check(candidate))
     all_issues.extend(canonical_locus_check(candidate))
-    all_issues.extend(decomposition_audit_check(candidate))
     all_issues.extend(ggd_implementation_leakage_check(candidate))
 
     return all_issues

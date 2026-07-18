@@ -52,7 +52,7 @@ the canonical published form — `equal_to`, `0`, `95` are NOT unregistered
 tokens in this construction; do not dock it. Only flag value-parameterization
 when the position token itself is unregistered or the value is non-numeric.
 
-Flag and dock points whenever any segment would require an unregistered token, and **never** allow such tokens to migrate into `physical_base` to bypass the registry — see the decomposition audit below.
+Flag and dock points whenever any segment would require an unregistered token. The base slot is itself a **controlled vocabulary** — the grammar rejects an unregistered base token (a made-up compound base does not parse), so a token cannot migrate into `physical_base` to bypass the registry; when no registered base fits, the composer must emit a `vocab_gap`.
 
 ## Scoring Dimensions
 
@@ -61,7 +61,7 @@ Rate each dimension from 0 to 20. The total score is the sum (0–80).
 If ISN validation issues are present, judge whether each is a real defect or false positive; cite the issue when you dock points.
 
 ### 1. Grammar Correctness (0–20)
-**Round-trip + decomposition audit.** A compound `physical_base` that is not in the closed registry is a grammar defect — the composer should have emitted a `vocab_gap`.
+**Round-trip + controlled base.** The base slot is a controlled vocabulary; a name that parses necessarily has a registered base token, and structural decomposition (subject / component / operator / process out of the base) is done by the grammar, not by hand.
 
 - Does the name round-trip: `parse(name) → compose() == name`?
 - For all closed segments, is the token in its registry?
@@ -69,11 +69,7 @@ If ISN validation issues are present, judge whether each is a real defect or fal
 - Are postfix operators (`_magnitude`, `_real_part`, …) correctly appended (not prefix `_of_` form)?
 - Locus correctly expressed with `_of_`/`_at_`/`_over_` prepositions?
 - Mechanism with `_due_to_`?
-- **Decomposition audit** — inspect `physical_base` for closed-vocab tokens (subjects, components, coordinates, transformations, processes, positions, objects, geometric_bases) appearing as whole underscore-separated substrings. Each candidate defect:
-    - `toroidal_torque` → component=`toroidal` + physical_base=`torque`
-    - `volume_averaged_electron_temperature` → transformation=`volume_averaged` + subject=`electron` + physical_base=`temperature`
-    - `flux_surface_cross_sectional_area` → position=`flux_surface` + physical_base=`cross_sectional_area`
-  Allow genuine lexicalised atoms (`poloidal_flux`, `minor_radius`, `cross_sectional_area`, `safety_factor`). For real defects: dock **4 points per defect, cumulative cap −8**. Record each as `decomposition: <token>(<segment>) absorbed into physical_base` in the `issues` field.
+- **Base registry** — the parser resolves the base token and rejects an unregistered one (`parse` raises `UnknownBaseTokenError`). Do **not** hand-scan `physical_base` for embedded closed-vocab tokens and dock for them: the surface base phrase legitimately carries glued **kind-forming** qualifiers (`absorbed_power`, `wave_electric_field`, `ion_atomic_mass`) whose base token is registered (`power`, `electric_field`, `atomic_mass`). If a name conveys a quantity with no registered base, that is a `vocab_gap` for the composer, not a base you invent.
 
 ### 2. Semantic Accuracy (0–20)
 **Self-descriptiveness + cross-name consistency + provenance + physical correctness.** This is the most important dimension — it measures whether the name succeeds at its primary purpose: being a standalone physics label.

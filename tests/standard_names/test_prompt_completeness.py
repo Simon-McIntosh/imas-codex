@@ -28,8 +28,7 @@ from imas_codex.standard_names.context import build_compose_context
 _ALIASES = {"coordinate", "object", "position"}
 
 # Tokens shorter than this are skipped because single-letter coordinate
-# tokens (x, y, z) are guaranteed to clash with arbitrary substrings.  The
-# ``find_absorbed_closed_tokens`` primitive uses the same threshold.
+# tokens (x, y, z) are guaranteed to clash with arbitrary substrings.
 _MIN_TOKEN_LEN = 3
 
 
