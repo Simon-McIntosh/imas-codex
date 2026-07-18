@@ -2633,61 +2633,95 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+@lru_cache(maxsize=1)
+def _decomposition_closed_vocab() -> dict[str, tuple[str, ...]]:
+    """Closed-vocabulary token sets keyed by segment (all except open bases).
+
+    Cached — the segment map is fixed for a given installed grammar.
+    """
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+    aliases = {"coordinate", "object", "position"}
+    return {
+        seg: tuple(toks)
+        for seg, toks in SEGMENT_TOKEN_MAP.items()
+        if seg not in aliases and seg != "physical_base" and toks
+    }
+
+
+@lru_cache(maxsize=1)
+def _registered_base_tokens() -> frozenset[str]:
+    """Tokens the grammar accepts as atomic bases/carriers (cached).
+
+    A ``physical_base`` in this set is a lexicalised compound the grammar owns
+    (``convection_velocity``, ``diffusion_coefficient``, ``safety_factor``): a
+    closed-vocab substring inside it is legitimate, not an absorption.
+    """
+    from imas_standard_names.grammar.parser import load_default_vocabularies
+
+    vocabs = load_default_vocabularies()
+    return frozenset(set(vocabs.bases) | set(vocabs.carriers))
+
+
 def decomposition_audit_check(candidate: dict[str, Any]) -> list[str]:
-    """Detect closed-vocabulary tokens absorbed into the candidate name.
+    """Detect closed-vocabulary tokens genuinely absorbed into ``physical_base``.
 
-    Uses :func:`imas_codex.standard_names.decomposition.find_absorbed_closed_tokens`
-    to scan the candidate's full ``id`` for any closed-vocab segment token
-    that appears as an underscore-delimited substring.  Such tokens almost
-    always indicate the candidate failed grammar decomposition — the token
-    should occupy its closed segment slot rather than be absorbed into
-    ``physical_base``.
+    Parse-aware: the name is parsed under the current grammar and only the
+    resulting ``physical_base`` is scanned for embedded closed-vocab tokens.
+    A raw-name substring scan would flag a token even when the grammar
+    correctly slots it (``ion_current_density`` → ``subject=ion``); parsing
+    first means those are never reported. A ``physical_base`` the grammar
+    registers as an atomic/lexicalised base is exempt — the embedded token is
+    part of the base, not an absorption. Only a token left inside a
+    ``physical_base`` the grammar does NOT accept as a base is a genuine
+    decomposition failure and gets flagged.
 
-    This audit is deliberately **non-critical** (NOT in ``CRITICAL_CHECKS``)
-    because:
+    Names the grammar rejects outright return no issue here — the parse gate
+    owns that failure, so it is not double-reported.
 
-    1. The token may legitimately belong to a lexicalised compound such as
-       ``poloidal_flux``, ``minor_radius``, ``cross_sectional_area``,
-       ``safety_factor``, where ``find_absorbed_closed_tokens`` already has
-       a static whitelist.
-    2. The reviewer rubric (I4.6 in ``review_names.md``) handles the
-       judgement call between genuine decomposition failures and accepted
-       atomic terms.
-    3. Auto-quarantining on this audit would mass-reject early-pipeline
-       candidates and overwhelm the review queue.
-
-    Issues are still surfaced on every candidate so reviewers and the LLM
-    self-revision loop have a structured signal to act on.
+    This audit is deliberately **non-critical** (NOT in ``CRITICAL_CHECKS``):
+    a surviving flag is a curation signal for the reviewer (rubric I4.6),
+    not an auto-quarantine.
 
     Returns tagged issue strings of the form::
 
-        "audit:decomposition_audit: physical_base contains closed-vocab token"
-        " '<token>' (segment={<segments>}); place it in its segment slot."
+        "audit:decomposition_audit: name '<name>' contains closed-vocab token"
+        " '<token>' (segment={<segments>}) absorbed into the name body. ..."
     """
     name = (candidate.get("id") or "").strip()
     if not name:
         return []
 
     try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+        from imas_standard_names.grammar import parse_standard_name
 
         from imas_codex.standard_names.decomposition import find_absorbed_closed_tokens
     except ImportError:
         return []
 
-    # Build the closed-vocab dict.  Skip aliased segments and ``physical_base``
-    # (open by definition).  Skip empty segments.
-    aliases = {"coordinate", "object", "position"}
-    closed_vocab: dict[str, list[str]] = {}
-    for seg, toks in SEGMENT_TOKEN_MAP.items():
-        if seg in aliases or seg == "physical_base" or not toks:
-            continue
-        closed_vocab[seg] = list(toks)
+    # Parse under the current grammar. A name that does not parse (or is
+    # non-canonical) is owned by the grammar gate, not this audit.
+    try:
+        model = parse_standard_name(name)
+    except Exception:  # noqa: BLE001 — any grammar rejection is not our concern
+        return []
 
+    physical_base = (getattr(model, "physical_base", None) or "").strip()
+    if not physical_base:
+        return []
+
+    # A grammar-registered atomic/lexicalised base owns any closed-vocab
+    # substring it contains.
+    if physical_base in _registered_base_tokens():
+        return []
+
+    closed_vocab = {
+        seg: list(toks) for seg, toks in _decomposition_closed_vocab().items()
+    }
     if not closed_vocab:
         return []
 
-    absorbed = find_absorbed_closed_tokens(name, closed_vocab)
+    absorbed = find_absorbed_closed_tokens(physical_base, closed_vocab)
     if not absorbed:
         return []
 

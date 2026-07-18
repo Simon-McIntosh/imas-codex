@@ -238,36 +238,53 @@ class TestDecompositionAuditCheck:
         }
         assert decomposition_audit_check(candidate) == []
 
-    def test_toroidal_torque_flags_component(self):
+    @pytest.mark.parametrize(
+        "name",
+        [
+            # Correctly-decomposed names: the token the old raw-name scan
+            # flagged is slotted by the grammar (projection / operator /
+            # subject), so the parsed physical_base is clean.
+            "toroidal_torque",  # projection=toroidal, base=torque
+            "volume_averaged_electron_temperature",  # operator + subject, base=temperature
+            "poloidal_pfirsch_schlueter_current_density",  # base=current_density
+        ],
+    )
+    def test_correctly_decomposed_name_not_flagged(self, name):
+        """Parse-aware: a token the grammar slots is not a decomposition failure."""
         from imas_codex.standard_names.audits import decomposition_audit_check
 
-        issues = decomposition_audit_check({"id": "toroidal_torque"})
+        assert decomposition_audit_check({"id": name}) == []
+
+    @pytest.mark.parametrize(
+        "name,token",
+        [
+            # Genuine absorptions: the token is left inside a physical_base the
+            # grammar does NOT accept as an atomic base.
+            ("reference_magnetic_field", "reference"),
+            ("vacuum_magnetic_field", "vacuum"),
+        ],
+    )
+    def test_genuine_absorption_flagged(self, name, token):
+        from imas_codex.standard_names.audits import decomposition_audit_check
+
+        issues = decomposition_audit_check({"id": name})
         joined = " | ".join(issues)
         assert "audit:decomposition_audit:" in joined
-        assert "toroidal" in joined
-        assert "component" in joined
+        assert token in joined
 
-    def test_pfirsch_schlueter_subject_flagged(self):
+    def test_lexicalised_compound_base_not_flagged(self):
+        """A grammar-registered compound base owns its closed-vocab substring."""
         from imas_codex.standard_names.audits import decomposition_audit_check
 
-        issues = decomposition_audit_check(
-            {"id": "poloidal_pfirsch_schlueter_current_density"}
-        )
-        joined = " | ".join(issues)
-        assert "pfirsch_schlueter" in joined
-        # pfirsch_schlueter is a closed-vocab subject token
-        assert "subject" in joined
+        # convection_velocity is a registered atomic base; 'convection' is a
+        # process token but legitimately part of the base here.
+        assert decomposition_audit_check({"id": "energy_convection_velocity"}) == []
 
-    def test_volume_averaged_transformation_flagged(self):
+    def test_unparseable_name_not_double_reported(self):
+        """The parse gate owns grammar rejections; this audit stays silent."""
         from imas_codex.standard_names.audits import decomposition_audit_check
 
-        issues = decomposition_audit_check(
-            {"id": "volume_averaged_electron_temperature"}
-        )
-        joined = " | ".join(issues)
-        assert "volume_averaged" in joined or "electron" in joined
-        # Must surface a non-critical audit tag
-        assert all(i.startswith("audit:decomposition_audit:") for i in issues)
+        assert decomposition_audit_check({"id": "definitely__not_valid"}) == []
 
     def test_audit_is_not_critical(self):
         """The decomposition audit must NOT be in the critical-failure set."""
@@ -286,14 +303,14 @@ class TestDecompositionAuditCheck:
         assert has_critical_audit_failure(issues) is False
 
     def test_run_audits_invokes_decomposition_check(self):
-        """``run_audits`` wires the new check into the global audit suite."""
+        """``run_audits`` wires the check into the global audit suite."""
         from imas_codex.standard_names.audits import run_audits
 
         candidate = {
-            "id": "toroidal_torque",
-            "description": "Toroidal torque on the plasma column.",
-            "documentation": "Toroidal torque",
-            "unit": "N.m",
+            "id": "vacuum_magnetic_field",
+            "description": "Vacuum magnetic field.",
+            "documentation": "Vacuum magnetic field",
+            "unit": "T",
         }
         all_issues = run_audits(candidate)
         decomposition_issues = [
@@ -301,5 +318,5 @@ class TestDecompositionAuditCheck:
         ]
         assert decomposition_issues, (
             "run_audits must surface decomposition_audit issues for "
-            "names with absorbed closed-vocab tokens"
+            "names with genuinely absorbed closed-vocab tokens"
         )
