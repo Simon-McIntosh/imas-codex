@@ -642,6 +642,81 @@ def test_seed_parent_sources_skips_heterogeneous_units():
     assert count == 0  # Skipped due to unit mismatch
 
 
+def _seed_gc_with_row(row):
+    """MagicMock GraphClient serving *row* from the seedable-parents query."""
+    gc = MagicMock()
+    call_log = []
+
+    def _query(cypher, **kwargs):
+        call_log.append((cypher, kwargs))
+        if "name_stage IS NULL" in cypher:
+            return [row]
+        return []
+
+    gc.query = _query
+    gc.__enter__ = MagicMock(return_value=gc)
+    gc.__exit__ = MagicMock(return_value=False)
+    return gc, call_log
+
+
+def test_seed_parent_sources_ignores_normalized_child_unit():
+    """A normalization-peel child's dimensionless unit must not become the
+    physical parent's unit — the parent seeds unit-less instead."""
+    gc, call_log = _seed_gc_with_row(
+        {
+            "parent_id": "particle_mass",
+            "child_data": [
+                {
+                    "id": "normalized_particle_mass",
+                    "unit": "1",
+                    "cocos": None,
+                    "physics_domain": "gyrokinetics",
+                    "kind": "scalar",
+                    "op_kind": "unary_postfix",
+                }
+            ],
+            "dd_paths": [],
+            "edge_kinds": ["unary_postfix"],
+        }
+    )
+
+    from imas_codex.standard_names.graph_ops import seed_parent_sources
+
+    count = seed_parent_sources(gc)
+    assert count == 1
+    unit_writes = [c for c, _ in call_log if "MERGE (u:Unit" in c]
+    assert not unit_writes, "normalized child unit must not seed the parent"
+
+
+def test_seed_parent_sources_keeps_unit_between_normalized_names():
+    """When the parent itself carries the normalization marker, a
+    normalized child's unit is a legitimate inheritance signal."""
+    gc, call_log = _seed_gc_with_row(
+        {
+            "parent_id": "normalized_particle_perturbed_energy",
+            "child_data": [
+                {
+                    "id": "normalized_particle_perturbed_energy_at_midplane",
+                    "unit": "1",
+                    "cocos": None,
+                    "physics_domain": "gyrokinetics",
+                    "kind": "scalar",
+                    "op_kind": "unary_postfix",
+                }
+            ],
+            "dd_paths": [],
+            "edge_kinds": ["unary_postfix"],
+        }
+    )
+
+    from imas_codex.standard_names.graph_ops import seed_parent_sources
+
+    count = seed_parent_sources(gc)
+    assert count == 1
+    unit_writes = [c for c, _ in call_log if "MERGE (u:Unit" in c]
+    assert unit_writes, "unit shared across normalized names must inherit"
+
+
 # ── Tests: docs enrichment with parent/child context ────────────────────
 
 

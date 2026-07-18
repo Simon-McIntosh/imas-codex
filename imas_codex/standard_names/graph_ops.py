@@ -2029,6 +2029,20 @@ def _materialize_derived_parent_rows(
         # flagged heterogeneous by the ratio's '1' and skipped. Exclude binary
         # children from unit/cocos inheritance.
         unit_children = [c for c in child_data if c.get("op_kind") != "binary"]
+        # Normalization-peel children must not constrain the parent's unit
+        # either: a child carrying a normalization marker the parent lacks
+        # (``normalized_particle_mass`` → ``particle_mass``) is the
+        # dimensionless variant of the parent's PHYSICAL concept, so its
+        # unit '1' is correct for the child and wrong for the parent. With
+        # no other unit signal the parent stays unit-less rather than
+        # inheriting a dimensionless stamp it cannot honour.
+        _norm_markers = ("normalized", "normalised")
+        if not any(m in parent_id.split("_") for m in _norm_markers):
+            unit_children = [
+                c
+                for c in unit_children
+                if not any(m in (c.get("id") or "").split("_") for m in _norm_markers)
+            ]
         child_units = {c["unit"] for c in unit_children if c.get("unit")}
         if is_geometric:
             unit = None
