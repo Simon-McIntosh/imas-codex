@@ -1113,6 +1113,32 @@ class TestPeakingFactorExemption:
         )
         assert issues
 
+    def test_pass_energy_velocity_with_transport_velocity_unit(self):
+        """``velocity`` is the head noun in convective-transport names —
+        ``energy`` classifies what is transported, so m.s^-1 is correct."""
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        for name in [
+            "energy_velocity_due_to_convection",
+            "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+        ]:
+            assert (
+                name_unit_consistency_check(
+                    {"id": name, "unit": "m.s^-1", "description": ""}
+                )
+                == []
+            ), f"unexpected fail for {name}"
+
+    def test_fail_bare_energy_with_velocity_unit(self):
+        """Without the ``velocity`` head noun, energy with m.s^-1 must
+        still fail — guards against the exemption being too broad."""
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "particle_energy", "unit": "m.s^-1", "description": ""}
+        )
+        assert issues
+
 
 class TestAggregatorOrderCheck:
     def test_fail_trailing_volume_averaged(self):

@@ -857,6 +857,15 @@ def name_unit_consistency_check(
         # consistency checks at the description layer.
         if "flux" in name_tokens and token in ("energy", "mass", "voltage"):
             continue
+        # ``velocity`` shifts the head noun to a transport velocity:
+        # ``energy_velocity_due_to_convection`` → m.s^-1 (convective
+        # transport velocity of thermal energy), not energy. Same physics
+        # as the ``_convection_velocity`` coefficient exemption below, but
+        # covering the grammar-canonical ``velocity ... due_to_<process>``
+        # ordering. Momentum is excluded: momentum per unit mass IS a
+        # velocity, so that mismatch stays meaningful.
+        if "velocity" in name_tokens and token in ("energy", "mass", "charge"):
+            continue
         # ``_density`` qualifier already handled for power/energy above; also
         # exempt for mass (mass_density → kg.m^-3) and pressure (rare).
         if token == "mass" and "density" in name_tokens:
