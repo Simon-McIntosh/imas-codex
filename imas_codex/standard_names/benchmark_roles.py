@@ -924,17 +924,27 @@ def _seed_bad_documentation(good_doc: str, defect: str, unit: str) -> str:
     return good_doc
 
 
-def _seed_bad_description(good_desc: str, defect: str, foreign_desc: str) -> str:
-    """Return a defective twin of a NAME's description for the names axis."""
+def _seed_bad_name(good_name: str, defect: str, foreign_name: str) -> str:
+    """Return a defective NAME twin for the names axis.
+
+    The names-review rubric scores the NAME (grammar / semantic / convention /
+    completeness) against its description — so a genuinely-bad item must corrupt
+    the NAME, not the description (which is left unchanged). Corrupting the
+    description instead leaves the accepted name intact and the reviewer scores
+    it high regardless, producing no discrimination.
+    """
+    toks = [t for t in good_name.split("_") if t]
     if defect == "vacuous":
-        return "A physical quantity used in plasma analysis."
+        # Strip to a bare, underspecified base — drops every qualifier, so the
+        # name no longer captures the specific quantity its description names
+        # (completeness / semantic failure).
+        return "_".join(toks[-2:]) if len(toks) >= 2 else good_name
     if defect == "unit_contradiction":
-        return (
-            good_desc or ""
-        ) + " It is dimensionless and measured in arbitrary units."
-    # banned_prose maps to a semantic name/description MISMATCH on the names
-    # axis: pair the accepted name with an unrelated quantity's description.
-    return foreign_desc or "An unrelated quantity from a different physics domain."
+        # Reverse the token order — a non-canonical, convention-violating name.
+        return "_".join(reversed(toks)) if len(toks) > 1 else good_name
+    # banned_prose → SEMANTIC MISMATCH: an unrelated accepted name paired with
+    # this item's real description (the name describes a different quantity).
+    return foreign_name or good_name
 
 
 def load_discrimination_corpus(
@@ -976,7 +986,7 @@ def load_discrimination_corpus(
 
     goods = _stratified_sample([dict(r) for r in rows], sample, seed)
     rng = random.Random(seed)
-    all_descs = [r.get("description") or "" for r in rows]
+    all_names = [r["name"] for r in rows]
 
     corpus: list[dict] = []
     for i, r in enumerate(goods):
@@ -1022,13 +1032,19 @@ def load_discrimination_corpus(
                 }
             )
         else:
-            foreign = rng.choice(all_descs) if all_descs else ""
+            # Corrupt the NAME (keep the real description) so the names rubric
+            # can discriminate. The bad twin carries a distinct standard name.
+            foreign_name = rng.choice(all_names) if all_names else ""
+            bad_name = _seed_bad_name(r["name"], defect, foreign_name)
             corpus.append(
                 {
                     **base,
+                    "name": bad_name,
+                    "standard_name": bad_name,
+                    "id": bad_name,
                     "label": 0,
                     "defect": defect,
-                    "description": _seed_bad_description(good_desc, defect, foreign),
+                    "description": good_desc,
                     "documentation": good_doc,
                 }
             )
