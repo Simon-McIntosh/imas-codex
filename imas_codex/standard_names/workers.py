@@ -6071,6 +6071,40 @@ async def process_refine_name_batch(
 # =============================================================================
 
 
+# In-process tally of RD-quorum reviews deferred because a ≥2-model quorum did
+# NOT complete — a secondary reviewer failed (throttled or empty response), so
+# only cycle 0 (or nothing) survived. Keyed by (run_id, review_axis). Accepting
+# such a name on the single surviving review would silently advance it on ONE
+# review when the profile demanded ≥2 — a critical correctness failure under
+# provider throttling. Instead the review is deferred (the claim is released
+# back to ``drafted``) and counted here so the run summary can surface the
+# shortfall rather than let acceptance quietly degrade to single-model.
+_quorum_incomplete_deferrals: dict[tuple[str, str], int] = {}
+
+
+def _record_quorum_incomplete(run_id: str | None, review_axis: str) -> None:
+    """Record one incomplete-quorum deferral for the (run_id, axis) tally."""
+    key = (run_id or "", review_axis)
+    _quorum_incomplete_deferrals[key] = _quorum_incomplete_deferrals.get(key, 0) + 1
+
+
+def quorum_incomplete_snapshot(run_id: str | None) -> dict[str, int]:
+    """Return ``{review_axis: deferrals}`` for *run_id* (empty when none)."""
+    rid = run_id or ""
+    return {
+        axis: n for (r, axis), n in _quorum_incomplete_deferrals.items() if r == rid
+    }
+
+
+def reset_quorum_incomplete(run_id: str | None = None) -> None:
+    """Clear incomplete-quorum tallies (all runs, or just *run_id*)."""
+    if run_id is None:
+        _quorum_incomplete_deferrals.clear()
+        return
+    for key in [k for k in _quorum_incomplete_deferrals if k[0] == (run_id or "")]:
+        del _quorum_incomplete_deferrals[key]
+
+
 async def _run_rd_quorum_cycles(
     *,
     sn_id: str,
@@ -6086,6 +6120,7 @@ async def _run_rd_quorum_cycles(
     acall_llm_structured: Callable[..., Any],
     reasoning_effort: str | None = None,
     escalation_reasoning_effort: str | None = None,
+    run_id: str | None = None,
 ) -> dict[str, Any] | None:
     """Run the configured RD-quorum reviewer chain for a single StandardName.
 
@@ -6280,7 +6315,32 @@ async def _run_rd_quorum_cycles(
         if c1 is not None:
             cycles.append(c1)
 
+    # ── Quorum-completeness guard ──────────────────────────────────────
+    # A profile with ≥2 models demands ≥2 successful reviews. If a secondary
+    # reviewer failed (throttled / empty response) only cycle 0 — or nothing —
+    # survived. A single surviving review must NOT be accepted for a name the
+    # profile intended for multi-model adjudication, or throttling would
+    # silently advance names on ONE review. Defer instead: return None so the
+    # caller releases the claim back to ``drafted`` (same path it already takes
+    # for a total failure), and count the deferral so the run summary can
+    # surface the shortfall. Cycle 2 need not be considered — it only fires when
+    # both base cycles already succeeded, which is a complete quorum.
+    intended_model_count = len(models)
+    successful_cycles = len(cycles)
+    if intended_model_count >= 2 and successful_cycles < 2:
+        logger.warning(
+            "rd_quorum %s incomplete: %d/%d reviews succeeded for %s — "
+            "deferring, NOT accepting on a single review",
+            review_axis,
+            successful_cycles,
+            intended_model_count,
+            sn_id,
+        )
+        _record_quorum_incomplete(run_id, review_axis)
+        return None
+
     if not cycles:
+        # Single-model profile whose only cycle failed — nothing to persist.
         return None
 
     # ── Per-dimension disagreement (cycle 2 gate) ──────────────────────
@@ -6303,13 +6363,12 @@ async def _run_rd_quorum_cycles(
     # ── Determine winning score + resolution method ────────────────────
     canonical_model = models[0]  # SN axis attribution always cycle-0 model
     if len(cycles) == 1:
-        # Only cycle 0 succeeded (or chain is single-model)
+        # Reachable only for a single-model profile (len(models) == 1): a
+        # ≥2-model profile with fewer than 2 successful cycles is deferred by
+        # the quorum-completeness guard above and never reaches here, so a
+        # single review is never a silent degradation of a multi-model quorum.
         winning = cycles[0]
-        if len(models) == 1:
-            resolution_method = "single_review"
-        else:
-            # Cycle 1 failed — degrade to single_review semantics
-            resolution_method = "single_review"
+        resolution_method = "single_review"
         winning_score = float(winning["score"])
         winning_scores = dict(winning["scores"])
         winning_comments = winning["comments"]
@@ -6854,6 +6913,7 @@ async def process_review_name_batch(
                 acall_llm_structured=acall_llm_structured,
                 reasoning_effort=get_sn_review_reasoning_effort(),
                 escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
+                run_id=mgr.run_id,
             )
 
             if quorum is None:
@@ -8205,6 +8265,7 @@ async def process_review_docs_batch(
                 acall_llm_structured=acall_llm_structured,
                 reasoning_effort=get_sn_review_reasoning_effort(),
                 escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
+                run_id=mgr.run_id,
             )
 
             if quorum is None:

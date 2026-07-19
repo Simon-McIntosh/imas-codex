@@ -918,6 +918,35 @@ async def run_pools(
     except TimeoutError:
         logger.warning("run_pools: drain_pending timed out after 30s — continuing")
 
+    # ── Quorum-completeness tripwire ───────────────────────────────────
+    # Reviews whose ≥2-model quorum did not complete (a secondary reviewer
+    # throttled or returned empty) are DEFERRED, not accepted on the single
+    # surviving review. Surface the per-axis deferral count so a throttled run
+    # is visible here rather than silently degrading name acceptance to a
+    # single model. Reset the tally afterwards so it does not leak across runs.
+    try:
+        from imas_codex.standard_names.workers import (
+            quorum_incomplete_snapshot,
+            reset_quorum_incomplete,
+        )
+
+        run_id = getattr(mgr, "run_id", None)
+        deferrals = quorum_incomplete_snapshot(run_id)
+        for axis, n in sorted(deferrals.items()):
+            if n > 0:
+                logger.warning(
+                    "run_pools: rd_quorum %s deferred %d review(s) — quorum "
+                    "incomplete (secondary reviewer throttled/empty); names NOT "
+                    "accepted on a single review. Check provider rate limits.",
+                    axis,
+                    n,
+                )
+        reset_quorum_incomplete(run_id)
+    except Exception:  # noqa: BLE001 — telemetry only, never fail the run
+        logger.debug(
+            "run_pools: quorum-incomplete tripwire check failed", exc_info=True
+        )
+
     return {p.name: p.health for p in pools}
 
 
