@@ -2298,24 +2298,25 @@ def _run_role_bench(
     SOL = "openrouter/openai/gpt-5.6-sol"
     GPT55 = "openrouter/openai/gpt-5.5"
     SONNET = "openrouter/anthropic/claude-sonnet-4.6"
-    # Concurrency-resilient, vendor-diverse reviewer replacement candidates —
-    # the throttle-prone incumbents (qwen3.7-max, minimax-m3) are excluded.
+    # Concurrency-resilient, vendor-diverse reviewer replacement candidates.
+    # The former blind pair (qwen3.7-max, minimax-m3) is DISCARDED: both are
+    # served by thin-capacity OpenRouter providers that upstream-throttle (429)
+    # under the review pool's concurrency, so they are excluded from every seat.
     GROK = "openrouter/x-ai/grok-4.5"
     GEM_FLASH = "openrouter/google/gemini-3.5-flash"
     GEM_PRO = "openrouter/google/gemini-3.1-pro-preview"
     DSV4PRO = "openrouter/deepseek/deepseek-v4-pro"
-    # The incumbent blind pair, kept as a baseline row where a seat compares.
-    QWEN = "openrouter/qwen/qwen3.7-max"
 
     reviewer_candidates = [GROK, GEM_FLASH, GEM_PRO, TERRA, DSV4PRO]
 
-    # Incumbent + default candidate slate per seat (plan §2 table).
+    # Incumbent + default candidate slate per seat. The reviewer seats have no
+    # incumbent to compare against — the discarded blind pair is being replaced.
     seat_incumbent = {
         "refine": GPT55,
         "breaker-names": GPT55,
         "breaker-docs": GPT55,
-        "review-names": QWEN,
-        "review-docs": QWEN,
+        "review-names": None,
+        "review-docs": None,
         "docs": SONNET,
         "classifier": None,
         "concurrency": None,
@@ -2324,16 +2325,11 @@ def _run_role_bench(
         "refine": [GPT55, LUNA, TERRA],
         "breaker-names": [GPT55, LUNA, TERRA],
         "breaker-docs": [GPT55, LUNA, TERRA],
-        "review-names": [QWEN, *reviewer_candidates],
-        "review-docs": [QWEN, *reviewer_candidates],
+        "review-names": list(reviewer_candidates),
+        "review-docs": list(reviewer_candidates),
         "docs": [SONNET, LUNA, TERRA, SOL],
         "classifier": [LUNA],
-        "concurrency": [
-            QWEN,
-            "openrouter/minimax/minimax-m3",
-            LUNA,
-            *reviewer_candidates,
-        ],
+        "concurrency": [LUNA, *reviewer_candidates],
     }
 
     if models:
