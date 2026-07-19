@@ -58,6 +58,32 @@ BLIND_PAIR = ("openrouter/qwen/qwen3.7-max", "openrouter/minimax/minimax-m3")
 ACCEPT_THRESHOLD = 0.75
 
 
+def _bench_progress(msg: str) -> None:
+    """Append a flushed, timestamped progress line for long bench runs.
+
+    Console output from a bench is block-buffered through the process wrapper,
+    so a multi-hour run is otherwise a black box (cannot tell slow from hung).
+    This writes an immediately-flushed line to the file named by
+    ``IMAS_CODEX_BENCH_PROGRESS`` (no-op when unset), so ``tail -f`` on that
+    file is a reliable live progress + liveness signal independent of logging
+    level or stdout buffering.
+    """
+    import os
+    from datetime import UTC, datetime
+
+    path = os.environ.get("IMAS_CODEX_BENCH_PROGRESS")
+    line = f"{datetime.now(tz=UTC).strftime('%H:%M:%S')} {msg}"
+    logger.info("bench-progress: %s", msg)
+    if not path:
+        return
+    try:
+        with open(path, "a") as fh:
+            fh.write(line + "\n")
+            fh.flush()
+    except OSError:
+        pass
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Report types
 # ═══════════════════════════════════════════════════════════════════════
@@ -1043,15 +1069,25 @@ async def run_review_discrimination_bench(
         return [float(r.get("score") or 0.0) for r in reviews], cost
 
     results: list[RoleModelResult] = []
-    for model in models:
+    total = len(models)
+    _bench_progress(
+        f"review-{axis}: start {total} model(s) x {len(goods)}+{len(bads)} items"
+    )
+    spend = 0.0
+    for i, model in enumerate(models, 1):
         res = RoleModelResult(model=model)
+        tag = model.split("/")[-1]
         try:
+            _bench_progress(f"review-{axis}: [{i}/{total}] {tag} scoring goods…")
             good_scores, gcost = await _score(goods, model)
+            _bench_progress(f"review-{axis}: [{i}/{total}] {tag} scoring bads…")
             bad_scores, bcost = await _score(bads, model)
             res.cost = gcost + bcost
+            spend += res.cost
         except Exception as exc:
             logger.warning("discrimination %s failed: %s", model, exc)
             res.error = str(exc)[:200]
+            _bench_progress(f"review-{axis}: [{i}/{total}] {tag} FAILED: {exc}")
             results.append(res)
             continue
 
@@ -1061,6 +1097,11 @@ async def run_review_discrimination_bench(
         res.metrics["n_bad"] = float(len(bad_scores))
         if res.n == 0:
             res.error = f"0/{len(corpus)} items scored (no reviews aligned to corpus)"
+        _bench_progress(
+            f"review-{axis}: [{i}/{total}] {tag} done "
+            f"auc={res.metrics.get('auc')} sep={res.metrics.get('separation')} "
+            f"(run spend ${spend:.2f})"
+        )
         results.append(res)
 
     if results and all(r.n == 0 for r in results):
