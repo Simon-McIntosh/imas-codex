@@ -7532,7 +7532,7 @@ def finalize_sn_run(
         logger.warning("Failed to finalize SNRun %s: %s", run_id, exc)
 
 
-def mark_orphaned_sn_runs_stale(
+def mark_orphaned_standard_name_runs_stale(
     *,
     current_run_id: str | None = None,
     max_age_hours: float = 6.0,
@@ -7577,7 +7577,7 @@ def mark_orphaned_sn_runs_stale(
     marked = len(rows or [])
     if marked:
         logger.info(
-            "mark_orphaned_sn_runs_stale: marked %d orphaned SNRun(s) stale "
+            "mark_orphaned_standard_name_runs_stale: marked %d orphaned SNRun(s) stale "
             "(no finalize, older than %.1fh)",
             marked,
             max_age_hours,

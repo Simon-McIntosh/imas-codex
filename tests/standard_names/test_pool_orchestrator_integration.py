@@ -35,7 +35,7 @@ def _stub_parent_lifecycle_startup():
         # stub it so the startup path stays graph-free.
         patch(f"{_GO}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
         # Always-on orphaned-SNRun sweep builds its own GraphClient; stub it.
-        patch(f"{_GO}.mark_orphaned_sn_runs_stale", return_value=0),
+        patch(f"{_GO}.mark_orphaned_standard_name_runs_stale", return_value=0),
     ):
         yield
 

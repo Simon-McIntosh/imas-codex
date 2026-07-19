@@ -2,7 +2,7 @@
 
 ``finalize_sn_run`` runs in ``run_sn_pools``' ``finally`` block, so a run left
 at the open ``status='started'``/``'running'`` status means the process was
-hard-killed before it could close the run. ``mark_orphaned_sn_runs_stale``
+hard-killed before it could close the run. ``mark_orphaned_standard_name_runs_stale``
 sweeps those rows to ``status='stale'`` at the next run start so ``sn status``
 and provenance stop treating a dead run as in-flight.
 
@@ -39,7 +39,7 @@ class _CapturingGraph:
 def _run(result: list[dict[str, Any]], **kwargs: Any):
     fake = _CapturingGraph(result)
     with patch.object(graph_ops, "GraphClient", return_value=fake):
-        marked = graph_ops.mark_orphaned_sn_runs_stale(**kwargs)
+        marked = graph_ops.mark_orphaned_standard_name_runs_stale(**kwargs)
     return marked, fake
 
 
