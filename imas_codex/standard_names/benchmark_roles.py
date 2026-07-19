@@ -30,6 +30,7 @@ helper functions so it is unit-testable without a live graph or LLM.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import random
@@ -658,6 +659,12 @@ async def run_refine_bench(
     results: list[RoleModelResult] = []
 
     _bench_progress(f"refine: start {len(models)} model(s) x {len(corpus)} cases")
+    # Cases run concurrently (bounded); each case's refine→judge stay sequential
+    # (the judge needs the refined name). A serial per-case loop let a single
+    # hung provider call block the whole model for minutes; max_retries=2 also
+    # fails a hung call fast instead of the default 5×timeout amplification.
+    _refine_sem = asyncio.Semaphore(6)
+    _judge = ensure_model_prefix(judge_model)
     for _mi, model in enumerate(models, 1):
         m = ensure_model_prefix(model)
         res = RoleModelResult(model=model)
@@ -665,80 +672,95 @@ async def run_refine_bench(
         cc_vals: list[float] = []
         fail_reasons: Counter[str] = Counter()
         _bench_progress(f"refine: [{_mi}/{len(models)}] {model.split('/')[-1]}…")
-        for case in corpus:
+
+        async def _refine_one(
+            case: dict, _m: str = m
+        ) -> tuple[str, float, float, float]:
             prompt_context = build_refine_prompt_context(
                 case,
                 compose_context,
                 rules,
                 examples_by_domain.get(case.get("physics_domain") or "", []),
             )
-            try:
-                user_prompt = render_prompt("sn/refine_name_user", prompt_context)
+            async with _refine_sem:
                 try:
-                    system_prompt = render_prompt(
-                        "sn/refine_name_system", prompt_context
+                    user_prompt = render_prompt("sn/refine_name_user", prompt_context)
+                    try:
+                        system_prompt = render_prompt(
+                            "sn/refine_name_system", prompt_context
+                        )
+                    except Exception:
+                        system_prompt = None
+                    messages = (
+                        [{"role": "system", "content": system_prompt}]
+                        if system_prompt
+                        else []
+                    ) + [{"role": "user", "content": user_prompt}]
+                    refined, cost, _ = await acall_llm_structured(
+                        model=_m,
+                        messages=messages,
+                        response_model=RefinedName,
+                        service="standard-names",
+                        reasoning_effort=reasoning_effort,
+                        max_retries=2,
                     )
-                except Exception:
-                    system_prompt = None
-                messages = (
-                    [{"role": "system", "content": system_prompt}]
-                    if system_prompt
-                    else []
-                ) + [{"role": "user", "content": user_prompt}]
-                refined, cost, _ = await acall_llm_structured(
-                    model=m,
-                    messages=messages,
-                    response_model=RefinedName,
-                    service="standard-names",
-                    reasoning_effort=reasoning_effort,
-                )
-                res.cost += cost
-            except Exception as exc:
-                fail_reasons[_classify_refine_failure(exc)] += 1
-                logger.warning("refine %s failed on %s: %s", model, case["sn_id"], exc)
-                continue
+                except Exception as exc:
+                    logger.warning("refine %s failed on %s: %s", _m, case["sn_id"], exc)
+                    return (_classify_refine_failure(exc), 0.0, 0.0, 0.0)
 
-            refined_name = (
-                _resolve_name(
-                    {
-                        "segments": refined.segments.model_dump()
-                        if hasattr(refined.segments, "model_dump")
-                        else refined.segments
-                    }
+                refined_name = (
+                    _resolve_name(
+                        {
+                            "segments": refined.segments.model_dump()
+                            if hasattr(refined.segments, "model_dump")
+                            else refined.segments
+                        }
+                    )
+                    or case["sn_id"]
                 )
-                or case["sn_id"]
-            )
+                try:
+                    juser = _REFINE_JUDGE_USER.format(
+                        path=case["path"],
+                        description=case["description"],
+                        unit=case["unit"],
+                        data_type=case["data_type"],
+                        physics_domain=case["physics_domain"],
+                        prior_score=case["prior_score"],
+                        prior_name=case["prior_name"],
+                        critique=_format_critique(case["critique"]),
+                        refined_name=refined_name,
+                        refined_description=refined.description or "",
+                    )
+                    judgement, jcost, _ = await acall_llm_structured(
+                        model=_judge,
+                        messages=[
+                            {"role": "system", "content": _REFINE_JUDGE_SYSTEM},
+                            {"role": "user", "content": juser},
+                        ],
+                        response_model=_RefineJudgement,
+                        service="standard-names",
+                        max_retries=2,
+                    )
+                except Exception as exc:
+                    logger.warning("refine judge failed on %s: %s", case["sn_id"], exc)
+                    return ("judge_error", 0.0, 0.0, cost)
+                return (
+                    "ok",
+                    float(judgement.defect_resolution),
+                    float(judgement.collateral_change),
+                    cost + jcost,
+                )
 
-            # Held-out judge
-            try:
-                juser = _REFINE_JUDGE_USER.format(
-                    path=case["path"],
-                    description=case["description"],
-                    unit=case["unit"],
-                    data_type=case["data_type"],
-                    physics_domain=case["physics_domain"],
-                    prior_score=case["prior_score"],
-                    prior_name=case["prior_name"],
-                    critique=_format_critique(case["critique"]),
-                    refined_name=refined_name,
-                    refined_description=refined.description or "",
-                )
-                judgement, jcost, _ = await acall_llm_structured(
-                    model=ensure_model_prefix(judge_model),
-                    messages=[
-                        {"role": "system", "content": _REFINE_JUDGE_SYSTEM},
-                        {"role": "user", "content": juser},
-                    ],
-                    response_model=_RefineJudgement,
-                    service="standard-names",
-                )
-                res.cost += jcost
-                dr_vals.append(float(judgement.defect_resolution))
-                cc_vals.append(float(judgement.collateral_change))
+        for outcome, _dr, _cc, _cost in await asyncio.gather(
+            *(_refine_one(c) for c in corpus)
+        ):
+            res.cost += _cost
+            if outcome == "ok":
+                dr_vals.append(_dr)
+                cc_vals.append(_cc)
                 res.n += 1
-            except Exception as exc:
-                fail_reasons["judge_error"] += 1
-                logger.warning("refine judge failed on %s: %s", case["sn_id"], exc)
+            else:
+                fail_reasons[outcome] += 1
 
         if dr_vals:
             res.metrics["defect_resolution"] = round(sum(dr_vals) / len(dr_vals), 4)
@@ -795,7 +817,9 @@ async def run_breaker_bench(
     _bench_progress(f"breaker-{axis}: start {len(models)} model(s) x {len(corpus)}")
     for _bi, model in enumerate(models, 1):
         res = RoleModelResult(model=model)
-        _bench_progress(f"breaker-{axis}: [{_bi}/{len(models)}] {model.split('/')[-1]}…")
+        _bench_progress(
+            f"breaker-{axis}: [{_bi}/{len(models)}] {model.split('/')[-1]}…"
+        )
         try:
             reviews, cost = await score_with_reviewer(
                 corpus,
@@ -1316,23 +1340,35 @@ async def run_classifier_bench(
     enriched = [{"id": pid, **ctx_by_id.get(pid, {})} for pid in path_ids]
 
     results: list[RoleModelResult] = []
-    for model in models:
+    _cls_sem = asyncio.Semaphore(6)
+    _bench_progress(f"classifier: start {len(models)} model(s) x {len(path_ids)} paths")
+    for _ci, model in enumerate(models, 1):
         res = RoleModelResult(model=model)
         predicted: dict[str, str] = {}
         batches = batch_by_subtree(enriched, batch_size=DEFAULT_BATCH_SIZE)
-        for batch in batches:
-            try:
-                batch_results, cost = await _classify_batch(
-                    batch,
-                    model=ensure_model_prefix(model),
-                    service="standard-names",
-                    valid_domains=valid_domains,
-                )
-                res.cost += cost
-                for r in batch_results:
-                    predicted[r["id"]] = r["physics_domain"]
-            except Exception as exc:
-                logger.warning("classifier %s batch failed: %s", model, exc)
+        _bench_progress(f"classifier: [{_ci}/{len(models)}] {model.split('/')[-1]}…")
+
+        async def _classify_one(
+            batch: list[dict], _m: str = ensure_model_prefix(model)
+        ) -> tuple[list[dict], float]:
+            async with _cls_sem:
+                try:
+                    return await _classify_batch(
+                        batch,
+                        model=_m,
+                        service="standard-names",
+                        valid_domains=valid_domains,
+                    )
+                except Exception as exc:
+                    logger.warning("classifier %s batch failed: %s", _m, exc)
+                    return [], 0.0
+
+        for batch_results, cost in await asyncio.gather(
+            *(_classify_one(b) for b in batches)
+        ):
+            res.cost += cost
+            for r in batch_results:
+                predicted[r["id"]] = r["physics_domain"]
         acc, correct, total = exact_match_accuracy(predicted, expected)
         res.n = total
         res.metrics["accuracy"] = acc

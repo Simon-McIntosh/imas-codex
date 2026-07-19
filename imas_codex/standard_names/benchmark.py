@@ -646,6 +646,7 @@ async def score_with_reviewer(
                             response_model=response_model,
                             service="standard-names",
                             reasoning_effort=review_effort,
+                            max_retries=2,
                         )
                     except Exception as e:
                         logger.warning(
@@ -712,6 +713,7 @@ async def score_with_reviewer(
                     response_model=response_model,
                     service="standard-names",
                     reasoning_effort=review_effort,
+                    max_retries=2,
                 )
                 total_reviewer_cost += cost
                 for r in result.reviews:
@@ -832,16 +834,21 @@ async def generate_docs_for_candidates(
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.settings import get_reasoning_effort
     from imas_codex.standard_names.models import GeneratedDocs
 
     system_prompt = render_prompt("sn/generate_docs_system", context)
-    total_cost = 0.0
     t0 = time.monotonic()
+    _docs_effort = get_reasoning_effort("sn-docs")
+    # GPT-5.x models don't support temperature=0.0.
+    temp = None if "gpt-5" in model else 0.0
+    # Candidates are independent → generate concurrently (bounded). A serial
+    # loop let one hung provider call block the whole set; max_retries=2 fails
+    # a hang fast instead of the default 5×timeout amplification.
+    _gen_sem = asyncio.Semaphore(8)
 
-    for c in candidates:
+    async def _gen_one(c: dict) -> float:
         name = _resolve_name(c)
-
-        # Build item context for the docs generation prompt
         item = {
             "name": name,
             "unit": c.get("unit", ""),
@@ -849,53 +856,44 @@ async def generate_docs_for_candidates(
             "physics_domain": c.get("physics_domain", ""),
             "description": c.get("description", ""),
             "source_paths": c.get("source_paths", []),
-            # Minimal context — no enrichment for benchmark simplicity
             "reviewer_score_name": None,
             "reviewer_comments_name": "",
             "chain_history": [],
         }
-
         try:
             user_prompt = render_prompt(
                 "sn/generate_docs_user", {**context, "item": item}
             )
         except Exception as exc:
             logger.warning("Failed to render docs prompt for %s: %s", name, exc)
-            continue
-
+            return 0.0
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
+        async with _gen_sem:
+            try:
+                result, cost, _ = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=GeneratedDocs,
+                    temperature=temp,
+                    service="standard-names",
+                    reasoning_effort=_docs_effort,
+                    max_retries=2,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Docs generation failed for %s with %s: %s", name, model, exc
+                )
+                c["docs_description"] = ""
+                c["documentation"] = ""
+                return 0.0
+        c["docs_description"] = result.description
+        c["documentation"] = result.documentation
+        return cost
 
-        # GPT-5.x models don't support temperature=0.0
-        temp = 0.0
-        if "gpt-5" in model:
-            temp = None  # type: ignore[assignment]
-
-        try:
-            # Mirror production: docs generation runs at the [sn-docs]
-            # reasoning effort so bench results reflect campaign settings.
-            from imas_codex.settings import get_reasoning_effort
-
-            result, cost, _ = await acall_llm_structured(
-                model=model,
-                messages=messages,
-                response_model=GeneratedDocs,
-                temperature=temp,
-                service="standard-names",
-                reasoning_effort=get_reasoning_effort("sn-docs"),
-            )
-            total_cost += cost
-            c["docs_description"] = result.description
-            c["documentation"] = result.documentation
-        except Exception as exc:
-            logger.warning(
-                "Docs generation failed for %s with %s: %s", name, model, exc
-            )
-            c["docs_description"] = ""
-            c["documentation"] = ""
-
+    total_cost = sum(await asyncio.gather(*(_gen_one(c) for c in candidates)))
     elapsed = time.monotonic() - t0
     return candidates, total_cost, round(elapsed, 2)
 
