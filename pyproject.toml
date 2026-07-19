@@ -639,25 +639,42 @@ disagreement-threshold = 0.20
 # Each is benchmarked independently; results are compared side-by-side.
 # Format: OpenRouter model IDs (provider/model-slug).
 compose-models = [
-    "openrouter/anthropic/claude-opus-4.7",
-    "openrouter/anthropic/claude-sonnet-4.6",
+    "openrouter/anthropic/claude-opus-4.8",
+    "openrouter/anthropic/claude-sonnet-5",
     "openrouter/anthropic/claude-haiku-4.5",
     "openrouter/openai/gpt-5.6-sol",
     "openrouter/openai/gpt-5.6-terra",
     "openrouter/openai/gpt-5.6-luna",
     "openrouter/openai/gpt-5.5",
     "openrouter/openai/gpt-5.4",
+    "openrouter/x-ai/grok-4.5",
+    "openrouter/google/gemini-3.5-flash",
     "openrouter/google/gemini-3.1-pro-preview",
     "openrouter/google/gemini-3-flash-preview",
     "openrouter/google/gemini-3.1-flash-lite-preview",
-    "openrouter/qwen/qwen3.6-plus",
-    "openrouter/qwen/qwen3.7-max",
-    "openrouter/minimax/minimax-m3",
+    "openrouter/qwen/qwen3.7-plus",
     "openrouter/xiaomi/mimo-v2.5-pro",
-    "openrouter/moonshotai/kimi-k2.6",
+    "openrouter/moonshotai/kimi-k3",
     "openrouter/deepseek/deepseek-v4-pro",
     "openrouter/deepseek/deepseek-v4-flash",
     "openrouter/meta-llama/llama-4-maverick",
+]
+# qwen3.7-max / minimax-m3 removed — thin-capacity providers that upstream-429
+# under concurrency; discarded from every benchmark seat.
+# Candidate models under evaluation across ALL pipeline seats via
+# `sn bench --role <seat>`. Each --role run measures these against the seat's
+# current production model (read live from the seat's own [sn-*] config as the
+# incumbent) — so the bench slate is managed HERE, never hardcoded in source.
+# Current slate: concurrency-resilient, vendor-diverse reviewer replacements
+# (all hold 16/16 at 16-way load); the throttle-prone qwen3.7-max/minimax-m3
+# are deliberately absent. Edit this list to change what the seat benches test.
+candidate-models = [
+    "openrouter/x-ai/grok-4.5",
+    "openrouter/google/gemini-3.5-flash",
+    "openrouter/google/gemini-3.1-pro-preview",
+    "openrouter/openai/gpt-5.6-terra",
+    "openrouter/anthropic/claude-sonnet-5",
+    "openrouter/deepseek/deepseek-v4-pro",
 ]
 # Frontier model used as independent judge for quality scoring.
 # Must be a strong reasoning model — evaluates 5 dimensions (0-100).

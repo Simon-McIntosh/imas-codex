@@ -2275,6 +2275,7 @@ def _run_role_bench(
     reasoning_effort: str | None,
     review_reasoning_effort: str | None,
     output: str | None,
+    efforts: str | None = None,
 ) -> None:
     """Resolve seat defaults and dispatch to the matching role runner.
 
@@ -2288,110 +2289,142 @@ def _run_role_bench(
 
     from imas_codex.cli.utils import run_async
     from imas_codex.settings import (
+        get_model,
         get_reasoning_effort,
+        get_sn_benchmark_candidate_models,
         get_sn_benchmark_reviewer_model,
+        get_sn_review_docs_models,
+        get_sn_review_names_models,
     )
     from imas_codex.standard_names import benchmark_roles as br
 
-    LUNA = "openrouter/openai/gpt-5.6-luna"
-    TERRA = "openrouter/openai/gpt-5.6-terra"
-    SOL = "openrouter/openai/gpt-5.6-sol"
-    GPT55 = "openrouter/openai/gpt-5.5"
-    SONNET = "openrouter/anthropic/claude-sonnet-4.6"
-    # Concurrency-resilient, vendor-diverse reviewer replacement candidates.
-    # The former blind pair (qwen3.7-max, minimax-m3) is DISCARDED: both are
-    # served by thin-capacity OpenRouter providers that upstream-throttle (429)
-    # under the review pool's concurrency, so they are excluded from every seat.
-    GROK = "openrouter/x-ai/grok-4.5"
-    GEM_FLASH = "openrouter/google/gemini-3.5-flash"
-    GEM_PRO = "openrouter/google/gemini-3.1-pro-preview"
-    DSV4PRO = "openrouter/deepseek/deepseek-v4-pro"
+    def _dedup(seq: list[str | None]) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for x in seq:
+            if x and x not in seen:
+                seen.add(x)
+                out.append(x)
+        return out
 
-    reviewer_candidates = [GROK, GEM_FLASH, GEM_PRO, TERRA, DSV4PRO]
+    def _safe(fn, *a):
+        try:
+            return fn(*a)
+        except Exception:
+            return None
 
-    # Incumbent + default candidate slate per seat. The reviewer seats have no
-    # incumbent to compare against — the discarded blind pair is being replaced.
-    seat_incumbent = {
-        "refine": GPT55,
-        "breaker-names": GPT55,
-        "breaker-docs": GPT55,
-        "review-names": None,
-        "review-docs": None,
-        "docs": SONNET,
-        "classifier": None,
-        "concurrency": None,
-    }
-    seat_defaults = {
-        "refine": [GPT55, LUNA, TERRA],
-        "breaker-names": [GPT55, LUNA, TERRA],
-        "breaker-docs": [GPT55, LUNA, TERRA],
-        "review-names": list(reviewer_candidates),
-        "review-docs": list(reviewer_candidates),
-        "docs": [SONNET, LUNA, TERRA, SOL],
-        "classifier": [LUNA],
-        "concurrency": [LUNA, *reviewer_candidates],
-    }
+    # Incumbent = the seat's LIVE production model, read from its own pyproject
+    # config so the bench always compares against what actually runs. No model
+    # IDs are hardcoded here — the candidate slate comes from pyproject
+    # [sn-benchmark].candidate-models.
+    def _seat_incumbent(seat: str) -> str | None:
+        if seat == "refine":
+            return _safe(get_model, "sn-refine")
+        if seat == "docs":
+            return _safe(get_model, "sn-docs")
+        if seat == "breaker-names":
+            chain = _safe(get_sn_review_names_models) or []
+            return chain[-1] if chain else None
+        if seat == "breaker-docs":
+            chain = _safe(get_sn_review_docs_models) or []
+            return chain[-1] if chain else None
+        # review-*/concurrency/classifier: no single production model to mark.
+        return None
+
+    candidates = list(get_sn_benchmark_candidate_models())
+    incumbent = _seat_incumbent(role)
 
     if models:
         model_list: list[str] = []
         for m in models:
             model_list.extend(p.strip() for p in m.split(",") if p.strip())
     else:
-        model_list = seat_defaults[role]
+        # Default slate = the seat's live incumbent (if any) + the candidates.
+        model_list = _dedup([incumbent, *candidates])
 
-    incumbent = seat_incumbent[role]
     judge = reviewer_model or get_sn_benchmark_reviewer_model()
     refine_effort = get_reasoning_effort("sn-refine") or "high"
-    # Production review quorum runs at effort=high; allow an explicit override.
     review_effort = review_reasoning_effort or "high"
 
-    if role == "refine":
-        corpus = br.load_refine_corpus(sample or 20, seed)
-        report = run_async(
-            br.run_refine_bench(
-                model_list, corpus, judge, incumbent, reasoning_effort or refine_effort
+    # Effort dimension: sweep reasoning-effort so overthinking is measured, not
+    # assumed. Only roles that thread effort into their LLM calls are swept;
+    # each (model, effort) becomes its own row tagged `@effort`.
+    sweep_roles = {
+        "refine",
+        "breaker-names",
+        "breaker-docs",
+        "review-names",
+        "review-docs",
+    }
+    effort_sweep: list[str | None] = [
+        e.strip() for e in (efforts or "").split(",") if e.strip()
+    ]
+    if not effort_sweep or role not in sweep_roles:
+        effort_sweep = [None]
+
+    def _dispatch(eff: str | None):
+        r_eff = eff or review_effort
+        f_eff = eff or reasoning_effort or refine_effort
+        if role == "refine":
+            corpus = br.load_refine_corpus(sample or 20, seed)
+            return run_async(
+                br.run_refine_bench(model_list, corpus, judge, incumbent, f_eff)
             )
-        )
-    elif role in ("breaker-names", "breaker-docs"):
-        axis = "names" if role == "breaker-names" else "docs"
-        corpus = br.load_breaker_corpus(sample or 30, seed, axis=axis)
-        report = run_async(
-            br.run_breaker_bench(
-                model_list,
-                corpus,
-                axis=axis,
-                incumbent=incumbent,
-                reasoning_effort=review_effort,
+        if role in ("breaker-names", "breaker-docs"):
+            axis = "names" if role == "breaker-names" else "docs"
+            corpus = br.load_breaker_corpus(sample or 30, seed, axis=axis)
+            return run_async(
+                br.run_breaker_bench(
+                    model_list,
+                    corpus,
+                    axis=axis,
+                    incumbent=incumbent,
+                    reasoning_effort=r_eff,
+                )
             )
-        )
-    elif role in ("review-names", "review-docs"):
-        axis = "names" if role == "review-names" else "docs"
-        corpus = br.load_discrimination_corpus(sample or 24, seed, axis=axis)
-        report = run_async(
-            br.run_review_discrimination_bench(
-                model_list,
-                corpus,
-                axis=axis,
-                incumbent=incumbent,
-                reasoning_effort=review_effort,
+        if role in ("review-names", "review-docs"):
+            axis = "names" if role == "review-names" else "docs"
+            corpus = br.load_discrimination_corpus(sample or 24, seed, axis=axis)
+            return run_async(
+                br.run_review_discrimination_bench(
+                    model_list,
+                    corpus,
+                    axis=axis,
+                    incumbent=incumbent,
+                    reasoning_effort=r_eff,
+                )
             )
-        )
-    elif role == "concurrency":
-        report = run_async(
-            br.run_concurrency_bench(
-                model_list, concurrency=sample or 16, reasoning_effort=review_effort
+        if role == "concurrency":
+            return run_async(
+                br.run_concurrency_bench(
+                    model_list, concurrency=sample or 16, reasoning_effort=review_effort
+                )
             )
-        )
-    elif role == "docs":
-        docs_sample = br.load_docs_sample(sample or 20, seed)
-        report = run_async(br.run_docs_bench(model_list, docs_sample, judge, incumbent))
-    elif role == "classifier":
-        gold = br.load_classifier_gold()
-        if sample:
-            gold = gold[:sample]
-        report = run_async(br.run_classifier_bench(model_list, gold, incumbent))
-    else:  # pragma: no cover - click.Choice guards this
-        raise click.UsageError(f"Unknown role {role!r}")
+        if role == "docs":
+            docs_sample = br.load_docs_sample(sample or 20, seed)
+            return run_async(
+                br.run_docs_bench(model_list, docs_sample, judge, incumbent)
+            )
+        if role == "classifier":
+            gold = br.load_classifier_gold()
+            if sample:
+                gold = gold[:sample]
+            return run_async(br.run_classifier_bench(model_list, gold, incumbent))
+        raise click.UsageError(f"Unknown role {role!r}")  # pragma: no cover
+
+    if effort_sweep == [None]:
+        report = _dispatch(None)
+    else:
+        report = None
+        for eff in effort_sweep:
+            rep = _dispatch(eff)
+            for r in rep.results:
+                r.model = f"{r.model} @{eff}"
+            if report is None:
+                report = rep
+            else:
+                report.results.extend(rep.results)
+        report.provenance["efforts"] = [e for e in effort_sweep if e]
 
     br.render_role_report(report)
 
@@ -2496,6 +2529,15 @@ def _run_role_bench(
     "bad-name catching vs cost across effort levels.",
 )
 @click.option(
+    "--efforts",
+    type=str,
+    default=None,
+    help="Comma-separated reasoning-effort sweep for --role (e.g. "
+    "'minimal,low,medium,high'). Each (model, effort) becomes its own row "
+    "(tagged @effort) so overthinking is measured, not assumed. Applies to the "
+    "refine / breaker-* / review-* roles that thread effort into their calls.",
+)
+@click.option(
     "--rescore",
     type=click.Path(exists=True, dir_okay=False),
     default=None,
@@ -2545,6 +2587,7 @@ def sn_bench(
     physics_judge_model: str | None,
     reasoning_effort: str | None,
     review_reasoning_effort: str | None,
+    efforts: str | None,
     rescore: str | None,
     role: str | None,
     seed: int,
@@ -2581,6 +2624,7 @@ def sn_bench(
             reviewer_model=reviewer_model,
             reasoning_effort=reasoning_effort,
             review_reasoning_effort=review_reasoning_effort,
+            efforts=efforts,
             output=output,
         )
         return

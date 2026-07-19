@@ -1436,6 +1436,14 @@ _SN_BENCHMARK_DEFAULTS = {
         "anthropic/claude-sonnet-4.6",
         "openai/gpt-5.4",
     ],
+    "candidate-models": [
+        "openrouter/x-ai/grok-4.5",
+        "openrouter/google/gemini-3.5-flash",
+        "openrouter/google/gemini-3.1-pro-preview",
+        "openrouter/openai/gpt-5.6-terra",
+        "openrouter/anthropic/claude-sonnet-5",
+        "openrouter/deepseek/deepseek-v4-pro",
+    ],
 }
 
 
@@ -1446,6 +1454,18 @@ def get_sn_benchmark_compose_models() -> list[str]:
     """
     section = _get_section("sn-benchmark")
     return section.get("compose-models", _SN_BENCHMARK_DEFAULTS["compose-models"])
+
+
+def get_sn_benchmark_candidate_models() -> list[str]:
+    """Candidate models evaluated across pipeline seats by ``sn bench --role``.
+
+    Priority: ``[sn-benchmark].candidate-models`` in pyproject.toml → defaults.
+    The per-seat default bench slate is these candidates plus the seat's live
+    production model (its own ``[sn-*]`` config) as the incumbent — so the
+    slate is managed in pyproject, never hardcoded in the CLI.
+    """
+    section = _get_section("sn-benchmark")
+    return section.get("candidate-models", _SN_BENCHMARK_DEFAULTS["candidate-models"])
 
 
 def get_sn_benchmark_reviewer_model() -> str:
