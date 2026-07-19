@@ -1474,3 +1474,81 @@ def get_sn_benchmark_reviewer_models() -> list[str]:
     """
     section = _get_section("sn-benchmark")
     return section.get("reviewer-models", _SN_BENCHMARK_DEFAULTS["reviewer-models"])
+
+
+# ─── Adaptive concurrency governor (AIMD backpressure on 429s) ──────────────
+#
+# A process-global ceiling on concurrent in-flight LLM calls that pulls back on
+# provider rate-limits and recovers gradually. Defaults are chosen so the
+# governor is a no-op under healthy load. All values are env-overridable only
+# (no pyproject section) so throughput tuning needs no config-file edit.
+
+_RATE_GOVERNOR_DEFAULTS = {
+    "enabled": True,
+    "max-ceiling": 128,
+    "min-ceiling": 2,
+    "decrease-factor": 0.5,
+    "cooldown": 5.0,
+    "settle": 1.0,
+}
+
+
+def get_rate_governor_enabled() -> bool:
+    """Whether the global AIMD concurrency governor is active.
+
+    Priority: IMAS_CODEX_RATE_GOVERNOR env → ``True``. Accepts the usual
+    truthy/falsey spellings (``0/false/no/off`` disable it).
+    """
+    if (env := os.getenv("IMAS_CODEX_RATE_GOVERNOR")) is not None:
+        return env.strip().lower() not in ("0", "false", "no", "off", "")
+    return bool(_RATE_GOVERNOR_DEFAULTS["enabled"])
+
+
+def get_rate_governor_max_ceiling() -> int:
+    """Upper bound on concurrent in-flight LLM calls (governor starts here).
+
+    Priority: IMAS_CODEX_RATE_GOVERNOR_MAX_CEILING env → ``128``.
+    """
+    if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_MAX_CEILING"):
+        return int(env)
+    return int(_RATE_GOVERNOR_DEFAULTS["max-ceiling"])
+
+
+def get_rate_governor_min_ceiling() -> int:
+    """Lower bound the multiplicative decrease can never breach.
+
+    Priority: IMAS_CODEX_RATE_GOVERNOR_MIN_CEILING env → ``2``.
+    """
+    if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_MIN_CEILING"):
+        return int(env)
+    return int(_RATE_GOVERNOR_DEFAULTS["min-ceiling"])
+
+
+def get_rate_governor_decrease_factor() -> float:
+    """Multiplier applied to the ceiling on each observed rate-limit.
+
+    Priority: IMAS_CODEX_RATE_GOVERNOR_DECREASE_FACTOR env → ``0.5``.
+    """
+    if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_DECREASE_FACTOR"):
+        return float(env)
+    return float(_RATE_GOVERNOR_DEFAULTS["decrease-factor"])
+
+
+def get_rate_governor_cooldown() -> float:
+    """Seconds after a rate-limit during which additive increases are suppressed.
+
+    Priority: IMAS_CODEX_RATE_GOVERNOR_COOLDOWN env → ``5.0``.
+    """
+    if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_COOLDOWN"):
+        return float(env)
+    return float(_RATE_GOVERNOR_DEFAULTS["cooldown"])
+
+
+def get_rate_governor_settle() -> float:
+    """Minimum seconds between additive ceiling increases (gates bursty ramp-up).
+
+    Priority: IMAS_CODEX_RATE_GOVERNOR_SETTLE env → ``1.0``.
+    """
+    if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_SETTLE"):
+        return float(env)
+    return float(_RATE_GOVERNOR_DEFAULTS["settle"])

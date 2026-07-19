@@ -61,6 +61,8 @@ from typing import TYPE_CHECKING, Any, Literal, TypeVar, get_args, get_origin
 import yaml
 from pydantic import BaseModel, ValidationError
 
+from imas_codex.discovery.base.rate_governor import get_rate_governor
+
 if TYPE_CHECKING:
     pass
 
@@ -751,6 +753,31 @@ def _is_retryable(error_msg: str) -> bool:
     if any(pattern in msg_lower for pattern in NON_RETRYABLE_PATTERNS):
         return False
     return any(pattern in msg_lower for pattern in RETRYABLE_PATTERNS)
+
+
+# Substrings identifying an upstream provider rate-limit (HTTP 429). Matched
+# case-insensitively. Kept narrow (unlike the broad "rate" retryable token) so
+# only genuine 429s trigger global concurrency pullback — a transient timeout or
+# JSON error must not shrink the fleet's ceiling.
+_RATE_LIMIT_PATTERNS = frozenset(
+    {
+        "429",
+        "rate limit",
+        "rate-limit",
+        "ratelimit",
+        "too many requests",
+    }
+)
+
+
+def _is_rate_limited(error_msg: str) -> bool:
+    """Return True if *error_msg* looks like an upstream 429 rate-limit.
+
+    litellm surfaces OpenRouter throttling as ``RateLimitError`` whose message
+    carries "Provider returned error" with code 429 / "rate-limited upstream".
+    """
+    msg_lower = error_msg.lower()
+    return any(pattern in msg_lower for pattern in _RATE_LIMIT_PATTERNS)
 
 
 def _finish_reason(response: Any) -> str | None:
@@ -1572,12 +1599,21 @@ async def acall_llm_structured(
         kwargs.get("api_base")
     )
 
+    # Global AIMD backpressure: every attempt takes a governor slot around the
+    # network call so a fleet-wide 429 pulls the shared concurrency ceiling back
+    # instead of all replicas hammering the throttled provider. Local calls have
+    # their own isolated pool and are never rate-limited, so they run ungoverned.
+    governor = None if _use_local else get_rate_governor()
+
     for attempt in range(max_retries):
         try:
             if _use_local:
                 response = await _acompletion_local(kwargs)
             else:
-                response = await litellm.acompletion(**kwargs)
+                async with governor.slot():
+                    response = await litellm.acompletion(**kwargs)
+                # The call returned without a 429 — probe the ceiling back up.
+                governor.record_success()
             total_cost += extract_cost(response, model=model)
             _log_cache_metrics(response, model)
 
@@ -1612,6 +1648,10 @@ async def acall_llm_structured(
                 raise ProviderBudgetExhausted(
                     f"LLM provider budget exhausted: {error_msg[:200]}"
                 ) from e
+            # Global concurrency pullback on a provider 429 (independent of the
+            # per-call retry/backoff, which still handles this attempt's retry).
+            if governor is not None and _is_rate_limited(error_msg):
+                governor.record_rate_limited()
             if _is_retryable(error_msg) and attempt < max_retries - 1:
                 # Budget-exhaustion empty (reasoning model spent its whole
                 # completion budget on thinking): grow the token budget so the
