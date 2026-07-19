@@ -2330,7 +2330,9 @@ def _run_role_bench(
         if seat == "breaker-docs":
             chain = _safe(get_sn_review_docs_models) or []
             return chain[-1] if chain else None
-        # review-*/concurrency/classifier: no single production model to mark.
+        if seat == "classifier":
+            return _safe(get_model, "sn-classifier")
+        # review-*/concurrency: no single production model to mark.
         return None
 
     candidates = list(get_sn_benchmark_candidate_models())

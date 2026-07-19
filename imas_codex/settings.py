@@ -91,6 +91,7 @@ MODEL_SECTIONS = frozenset(
         "sn-docs",
         "sn-refine",
         "sn-parent-enrich",
+        "sn-classifier",
     }
 )
 
@@ -116,6 +117,9 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # cheap/fast compose model; the downstream generate_docs (sn-docs)
     # rewrites the full documentation later.  Override in pyproject.toml.
     "sn-parent-enrich": "openrouter/anthropic/claude-sonnet-4.6",
+    # Physics-domain classifier for DD paths (SN names inherit the domain).
+    # Previously borrowed the generic [language] seat; now SN-attributable.
+    "sn-classifier": "openrouter/openai/gpt-5.5",
 }
 
 # Environment variable names per section
@@ -131,6 +135,7 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "sn-docs": "IMAS_CODEX_SN_DOCS_MODEL",
     "sn-refine": "IMAS_CODEX_SN_REFINE_MODEL",
     "sn-parent-enrich": "IMAS_CODEX_SN_PARENT_ENRICH_MODEL",
+    "sn-classifier": "IMAS_CODEX_SN_CLASSIFIER_MODEL",
 }
 
 

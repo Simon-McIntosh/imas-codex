@@ -329,6 +329,16 @@ reasoning-effort = "high"
 model = "openrouter/deepseek/deepseek-v4-flash"
 reasoning-effort = "medium"
 
+[tool.imas-codex.sn-classifier]
+# Physics-domain classifier (dd_domain_classifier.classify_domains): assigns a
+# physics_domain to DD paths, which SN names inherit — so it is an
+# SN-attributable seat, not the generic [language] model it used to borrow.
+# Domain classification shapes downstream domain-scoping (which examples a
+# name sees at compose/review), so it wants a strong model. Gold-set accuracy
+# (209 paths, exact match, sn bench --role classifier, 2026-07-19): see the
+# results doc; gpt-5.5 seated as the robust OpenAI-tier default.
+model = "openrouter/openai/gpt-5.5"
+
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
 # and response_cost. Without it, calls silently route through the proxy,

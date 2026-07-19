@@ -39,7 +39,12 @@ def _load_path_domain_overrides() -> tuple[tuple[tuple[str, ...], str], ...]:
     override is ``(substrings, domain)``; a path matches when every substring
     is present in the path id.
     """
-    p = Path(__file__).resolve().parents[1] / "definitions" / "physics" / "path_domain_overrides.json"
+    p = (
+        Path(__file__).resolve().parents[1]
+        / "definitions"
+        / "physics"
+        / "path_domain_overrides.json"
+    )
     try:
         data = json.loads(p.read_text())
     except (OSError, ValueError):
@@ -67,6 +72,7 @@ def apply_path_domain_override(path_id: str) -> str | None:
         if all(s in path_id for s in substrings):
             return domain
     return None
+
 
 # =============================================================================
 # Constants
@@ -158,7 +164,7 @@ async def classify_domains(
         ids_filter: Optional set of IDS names to scope classification.
         force: Reclassify even if inputs unchanged (bypass hash check).
         dry_run: Log what would be classified without writing.
-        model: Override model (defaults to get_model("language")).
+        model: Override model (defaults to get_model("sn-classifier")).
         on_cost: Callback for cost accumulation.
         on_items: Callback for item count progress.
 
@@ -168,7 +174,10 @@ async def classify_domains(
     from imas_codex.settings import get_model as _get_model
 
     if model is None:
-        model = _get_model("language")
+        # Domain classification feeds SN names' physics_domain, so it is an
+        # SN-attributable seat with its own [sn-classifier] config rather than
+        # borrowing the generic [language] model.
+        model = _get_model("sn-classifier")
 
     stats: dict[str, Any] = {
         "tier3_none": 0,
