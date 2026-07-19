@@ -336,29 +336,96 @@ class TestPhysicsDomainEnum:
 class TestStandardNameKindEnum:
     """Verify kind enum from schema includes all expected values."""
 
+    @pytest.mark.graph
     def test_kind_enum_no_unknown_values(self) -> None:
-        """All graph kind values must be in the schema enum."""
-        schema = _load_schema()
-        kind_enum = schema["enums"]["StandardNameKind"]
-        allowed = set(kind_enum["permissible_values"].keys())
-        # Kinds actually stored on StandardName nodes. The retired extended
-        # kinds (eigenfunction / spectrum) collapse to scalar at export and no
-        # longer appear on any node, so they are not listed here — a graph kind
-        # outside the schema enum would still fail this guard.
-        observed = {
-            "scalar",
-            "vector",
-            "complex",
-            "tensor",
-        }
+        """Every kind stored on a StandardName node must be an ISN Kind value.
+
+        The valid set is the ISN catalog ``Kind`` enum (imas_standard_names) —
+        the authority for the closed kind vocabulary, never a value hardcoded
+        or redefined here. Retired kinds (eigenfunction / spectrum) collapse to
+        scalar and must not persist on any node; an off-enum kind is legacy
+        data that :func:`normalize_stored_standard_name_kinds` migrates. This
+        reads the live graph so a real off-enum node fails the guard rather
+        than being masked by a static list.
+        """
+        from imas_standard_names.models import Kind
+
+        from imas_codex.graph.client import GraphClient
+
+        allowed = {k.value for k in Kind}
+        with GraphClient() as gc:
+            rows = gc.query(
+                "MATCH (sn:StandardName) WHERE sn.kind IS NOT NULL "
+                "RETURN DISTINCT sn.kind AS kind"
+            )
+        observed = {r["kind"] for r in (rows or [])}
         unknown = observed - allowed
-        assert not unknown, f"Kinds observed in graph but not in schema: {unknown}"
+        assert not unknown, (
+            f"StandardName nodes carry kinds outside the ISN Kind enum: "
+            f"{unknown}. Run normalize_stored_standard_name_kinds() to migrate "
+            f"this legacy data (retired kinds collapse to scalar)."
+        )
 
     def test_kind_enum_includes_metadata(self) -> None:
         """metadata kind must be in the enum for non-measurable concepts."""
         schema = _load_schema()
         kind_enum = schema["enums"]["StandardNameKind"]
         assert "metadata" in kind_enum["permissible_values"]
+
+
+class TestNormalizeStoredKinds:
+    """``normalize_stored_standard_name_kinds`` collapses off-enum kinds."""
+
+    def test_retired_kind_rewritten_to_scalar(self) -> None:
+        """A node whose stored kind is retired (spectrum) is rewritten to scalar."""
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(
+            side_effect=[
+                # read: one node carries a retired kind
+                [{"id": "legacy_spectrum_name", "kind": "spectrum"}],
+                # write: no rows returned
+                [],
+            ]
+        )
+
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+            from imas_codex.standard_names.graph_ops import (
+                normalize_stored_standard_name_kinds,
+            )
+
+            rewritten = normalize_stored_standard_name_kinds()
+
+        assert rewritten == 1
+        # The read must filter on the ISN enum, not a hardcoded list.
+        read_kwargs = mock_gc.query.call_args_list[0].kwargs
+        from imas_standard_names.models import Kind
+
+        assert set(read_kwargs["allowed"]) == {k.value for k in Kind}
+        # The write maps the retired kind to its ISN-canonical collapse.
+        write_cypher = mock_gc.query.call_args_list[1].args[0]
+        assert "SET sn.kind = u.kind" in write_cypher
+        updates = mock_gc.query.call_args_list[1].kwargs["updates"]
+        assert updates == [{"id": "legacy_spectrum_name", "kind": "scalar"}]
+
+    def test_clean_graph_is_noop(self) -> None:
+        """When no node carries an off-enum kind, no write is issued."""
+        mock_gc = MagicMock()
+        mock_gc.query = MagicMock(return_value=[])  # read returns nothing
+
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+            from imas_codex.standard_names.graph_ops import (
+                normalize_stored_standard_name_kinds,
+            )
+
+            rewritten = normalize_stored_standard_name_kinds()
+
+        assert rewritten == 0
+        # Only the read query — no write when the graph is already clean.
+        assert mock_gc.query.call_count == 1
 
 
 # ---------------------------------------------------------------------------

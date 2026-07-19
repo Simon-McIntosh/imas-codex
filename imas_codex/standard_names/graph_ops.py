@@ -7585,6 +7585,55 @@ def mark_orphaned_standard_name_runs_stale(
     return marked
 
 
+def normalize_stored_standard_name_kinds() -> int:
+    """Collapse any stored ``StandardName.kind`` outside the ISN Kind enum.
+
+    The ISN catalog ``Kind`` enum (imas_standard_names) is the authority for
+    the closed kind vocabulary. Legacy graph data written before the local
+    vocabulary was unified with ISN may still carry a retired kind
+    (``eigenfunction`` / ``spectrum``); this sweep rewrites each offending node
+    to the value the ISN discriminator accepts via :func:`to_isn_kind` — the
+    single source of truth for the collapse (retired kinds map to ``scalar``).
+
+    Idempotent: a second call matches nothing (every node now holds an
+    in-enum kind). Returns the number of nodes rewritten.
+    """
+    from imas_standard_names.models import Kind
+
+    from imas_codex.standard_names.kind_derivation import to_isn_kind
+
+    allowed = [k.value for k in Kind]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.kind IS NOT NULL AND NOT sn.kind IN $allowed
+            RETURN sn.id AS id, sn.kind AS kind
+            """,
+            allowed=allowed,
+        )
+        updates = [
+            {"id": r["id"], "kind": to_isn_kind(r["kind"])} for r in (rows or [])
+        ]
+        if updates:
+            gc.query(
+                """
+                UNWIND $updates AS u
+                MATCH (sn:StandardName {id: u.id})
+                SET sn.kind = u.kind
+                """,
+                updates=updates,
+            )
+    rewritten = len(updates)
+    if rewritten:
+        logger.info(
+            "normalize_stored_standard_name_kinds: collapsed %d node(s) with a "
+            "retired/off-enum kind to the ISN-canonical value",
+            rewritten,
+        )
+    return rewritten
+
+
 def backfill_sn_run_telemetry() -> list[dict[str, Any]]:
     """One-shot backfill of cost_total/events_total on existing SNRun nodes.
 
