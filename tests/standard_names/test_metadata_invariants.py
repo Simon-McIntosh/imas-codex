@@ -341,13 +341,15 @@ class TestStandardNameKindEnum:
         schema = _load_schema()
         kind_enum = schema["enums"]["StandardNameKind"]
         allowed = set(kind_enum["permissible_values"].keys())
-        # These are the kinds observed in the graph as of 2025-07 audit
+        # Kinds actually stored on StandardName nodes. The retired extended
+        # kinds (eigenfunction / spectrum) collapse to scalar at export and no
+        # longer appear on any node, so they are not listed here — a graph kind
+        # outside the schema enum would still fail this guard.
         observed = {
             "scalar",
             "vector",
             "complex",
             "tensor",
-            "spectrum",
         }
         unknown = observed - allowed
         assert not unknown, f"Kinds observed in graph but not in schema: {unknown}"
