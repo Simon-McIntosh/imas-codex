@@ -54,6 +54,7 @@ import logging
 import os
 import re
 import time
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, get_args, get_origin
@@ -778,6 +779,158 @@ def _is_rate_limited(error_msg: str) -> bool:
     """
     msg_lower = error_msg.lower()
     return any(pattern in msg_lower for pattern in _RATE_LIMIT_PATTERNS)
+
+
+# ---------------------------------------------------------------------------
+# LLM-activity heartbeat (observability)
+# ---------------------------------------------------------------------------
+# A long campaign (12h+) of async LLM calls is otherwise a black box: with the
+# governor pulling concurrency back on 429s, "slow" and "hung" look identical
+# from the outside. This module tracks fleet-wide call activity and a lazily
+# started background task logs a periodic snapshot, escalating to a WARNING when
+# work is in flight but nothing is completing (a provider or governor stall).
+
+# Warn when calls are in flight but none have completed for this many seconds.
+_HEARTBEAT_STALL_SECONDS = 120.0
+
+
+class _ActivityState:
+    """Process-wide counters for in-flight LLM structured calls.
+
+    All mutations are synchronous and run on the single event-loop thread, so
+    plain field updates are atomic with respect to other coroutines. ``time_fn``
+    is injectable for deterministic tests.
+    """
+
+    def __init__(self, time_fn: Callable[[], float] = time.monotonic) -> None:
+        self._time_fn = time_fn
+        self.started = 0
+        self.completed = 0
+        self.failed = 0
+        self.in_flight = 0
+        self.spend_usd = 0.0
+        # Stall clock: time of the last completion, or — while a burst is
+        # running before its first completion — the moment the burst began.
+        self.last_completion_monotonic: float | None = None
+
+    def record_started(self) -> None:
+        # A fresh burst (in_flight 0 → 1) restarts the stall clock so an idle
+        # gap since the previous completion is not mistaken for a stall.
+        if self.in_flight == 0:
+            self.last_completion_monotonic = self._time_fn()
+        self.started += 1
+        self.in_flight += 1
+
+    def add_spend(self, usd: float) -> None:
+        self.spend_usd += usd
+
+    def record_completed(self) -> None:
+        self.completed += 1
+        self.in_flight = max(0, self.in_flight - 1)
+        self.last_completion_monotonic = self._time_fn()
+
+    def record_failed(self) -> None:
+        self.failed += 1
+        self.in_flight = max(0, self.in_flight - 1)
+
+    def snapshot(self) -> dict[str, Any]:
+        return {
+            "started": self.started,
+            "completed": self.completed,
+            "failed": self.failed,
+            "in_flight": self.in_flight,
+            "spend_usd": round(self.spend_usd, 4),
+            "last_completion_monotonic": self.last_completion_monotonic,
+        }
+
+
+_ACTIVITY = _ActivityState()
+_HEARTBEAT_TASK: asyncio.Task[None] | None = None
+
+
+def heartbeat_snapshot() -> dict[str, Any]:
+    """Return a copy of the current LLM-activity counters (for callers/tests)."""
+    return _ACTIVITY.snapshot()
+
+
+def _heartbeat_should_warn(
+    snap: dict[str, Any],
+    now: float,
+    stall_seconds: float = _HEARTBEAT_STALL_SECONDS,
+) -> bool:
+    """True if work is in flight but nothing has completed for *stall_seconds*."""
+    if snap["in_flight"] <= 0:
+        return False
+    last = snap["last_completion_monotonic"]
+    if last is None:
+        return False
+    return (now - last) >= stall_seconds
+
+
+async def _heartbeat_loop(interval: float) -> None:
+    """Periodically log LLM-activity; stop cleanly once the fleet goes idle."""
+    idle_ticks = 0
+    while True:
+        await asyncio.sleep(interval)
+        snap = _ACTIVITY.snapshot()
+        now = _ACTIVITY._time_fn()
+        last = snap["last_completion_monotonic"]
+        since = None if last is None else now - last
+        try:
+            ceiling = get_rate_governor().effective_ceiling()
+        except Exception:  # pragma: no cover - governor must never break logging
+            ceiling = float("nan")
+        logger.info(
+            "LLM heartbeat: in_flight=%d started=%d completed=%d failed=%d "
+            "spend=$%.4f since_completion=%s ceiling=%s",
+            snap["in_flight"],
+            snap["started"],
+            snap["completed"],
+            snap["failed"],
+            snap["spend_usd"],
+            "n/a" if since is None else f"{since:.0f}s",
+            ceiling,
+        )
+        if _heartbeat_should_warn(snap, now):
+            logger.warning(
+                "LLM possible stall: %d call(s) in flight, no completion for "
+                "%.0fs — provider or governor",
+                snap["in_flight"],
+                since if since is not None else 0.0,
+            )
+        if snap["in_flight"] == 0:
+            idle_ticks += 1
+            # Two consecutive idle ticks → nothing to report; stop. The next
+            # call re-arms the heartbeat via _heartbeat_ensure_started().
+            if idle_ticks >= 2:
+                return
+        else:
+            idle_ticks = 0
+
+
+def _heartbeat_ensure_started() -> None:
+    """Lazily start the heartbeat task; idempotent and loop-safe.
+
+    No-op when the heartbeat is disabled (interval 0), when there is no running
+    event loop, or when a heartbeat task is already running.
+    """
+    interval = _heartbeat_interval()
+    if interval <= 0:
+        return
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return
+    global _HEARTBEAT_TASK
+    if _HEARTBEAT_TASK is not None and not _HEARTBEAT_TASK.done():
+        return
+    _HEARTBEAT_TASK = loop.create_task(_heartbeat_loop(interval))
+
+
+def _heartbeat_interval() -> float:
+    from imas_codex.settings import get_llm_heartbeat_interval
+
+    return get_llm_heartbeat_interval()
 
 
 def _finish_reason(response: Any) -> str | None:
@@ -1605,87 +1758,104 @@ async def acall_llm_structured(
     # their own isolated pool and are never rate-limited, so they run ungoverned.
     governor = None if _use_local else get_rate_governor()
 
-    for attempt in range(max_retries):
-        try:
-            if _use_local:
-                response = await _acompletion_local(kwargs)
-            else:
-                async with governor.slot():
-                    response = await litellm.acompletion(**kwargs)
-                # The call returned without a 429 — probe the ceiling back up.
-                governor.record_success()
-            total_cost += extract_cost(response, model=model)
-            _log_cache_metrics(response, model)
+    # Fleet-wide activity accounting for the heartbeat/stall watchdog. One
+    # started is paired with exactly one completed (success) or failed (any
+    # raise) via the finally below.
+    _heartbeat_ensure_started()
+    _ACTIVITY.record_started()
+    succeeded = False
+    try:
+        for attempt in range(max_retries):
+            try:
+                if _use_local:
+                    response = await _acompletion_local(kwargs)
+                else:
+                    async with governor.slot():
+                        response = await litellm.acompletion(**kwargs)
+                    # The call returned without a 429 — probe the ceiling up.
+                    governor.record_success()
+                cost_delta = extract_cost(response, model=model)
+                total_cost += cost_delta
+                _ACTIVITY.add_spend(cost_delta)
+                _log_cache_metrics(response, model)
 
-            # Parse response content through Pydantic
-            content = response.choices[0].message.content
-            if not content:
-                raise EmptyResponseError(_finish_reason(response))
+                # Parse response content through Pydantic
+                content = response.choices[0].message.content
+                if not content:
+                    raise EmptyResponseError(_finish_reason(response))
 
-            content = _sanitize_content(content)
-            parsed = _parse_structured_content(content, response_model, model)
+                content = _sanitize_content(content)
+                parsed = _parse_structured_content(content, response_model, model)
 
-            total_tokens = (
-                response.usage.prompt_tokens + response.usage.completion_tokens
-            )
-            input_tokens = response.usage.prompt_tokens or 0
-            output_tokens = response.usage.completion_tokens or 0
-            cache_read, cache_creation = extract_cache_tokens(response)
-            return LLMResult(
-                parsed,
-                total_cost,
-                total_tokens,
-                cache_read,
-                cache_creation,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-            )
-
-        except Exception as e:
-            last_error = e
-            error_msg = str(e)
-            if _is_budget_exhausted(error_msg):
-                raise ProviderBudgetExhausted(
-                    f"LLM provider budget exhausted: {error_msg[:200]}"
-                ) from e
-            # Global concurrency pullback on a provider 429 (independent of the
-            # per-call retry/backoff, which still handles this attempt's retry).
-            if governor is not None and _is_rate_limited(error_msg):
-                governor.record_rate_limited()
-            if _is_retryable(error_msg) and attempt < max_retries - 1:
-                # Budget-exhaustion empty (reasoning model spent its whole
-                # completion budget on thinking): grow the token budget so the
-                # retry can finish reasoning AND emit the answer.
-                if isinstance(e, EmptyResponseError) and e.finish_reason == "length":
-                    bumped = _bump_max_tokens_for_length(kwargs)
-                    if bumped is not None:
-                        logger.debug(
-                            "Empty response (finish_reason=length): raised "
-                            "max_tokens to %d for retry",
-                            bumped,
-                        )
-                delay = retry_base_delay * (2**attempt)
-                logger.debug(
-                    "LLM error (attempt %d/%d): %s. Retrying in %.1fs...",
-                    attempt + 1,
-                    max_retries,
-                    error_msg[:100],
-                    delay,
+                total_tokens = (
+                    response.usage.prompt_tokens + response.usage.completion_tokens
                 )
-                await asyncio.sleep(delay)
-            elif attempt == max_retries - 1:
-                logger.error(
-                    "LLM failed after %d attempts: %s",
-                    max_retries,
-                    error_msg[:200],
+                input_tokens = response.usage.prompt_tokens or 0
+                output_tokens = response.usage.completion_tokens or 0
+                cache_read, cache_creation = extract_cache_tokens(response)
+                _ACTIVITY.record_completed()
+                succeeded = True
+                return LLMResult(
+                    parsed,
+                    total_cost,
+                    total_tokens,
+                    cache_read,
+                    cache_creation,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
                 )
-                raise ValueError(
-                    f"LLM failed after {max_retries} attempts: {error_msg[:200]}"
-                ) from e
-            else:
-                raise
 
-    raise last_error  # type: ignore[misc]
+            except Exception as e:
+                last_error = e
+                error_msg = str(e)
+                if _is_budget_exhausted(error_msg):
+                    raise ProviderBudgetExhausted(
+                        f"LLM provider budget exhausted: {error_msg[:200]}"
+                    ) from e
+                # Global concurrency pullback on a provider 429 (independent of
+                # the per-call retry/backoff, which still retries this attempt).
+                if governor is not None and _is_rate_limited(error_msg):
+                    governor.record_rate_limited()
+                if _is_retryable(error_msg) and attempt < max_retries - 1:
+                    # Budget-exhaustion empty (reasoning model spent its whole
+                    # completion budget on thinking): grow the token budget so
+                    # the retry can finish reasoning AND emit the answer.
+                    if (
+                        isinstance(e, EmptyResponseError)
+                        and e.finish_reason == "length"
+                    ):
+                        bumped = _bump_max_tokens_for_length(kwargs)
+                        if bumped is not None:
+                            logger.debug(
+                                "Empty response (finish_reason=length): raised "
+                                "max_tokens to %d for retry",
+                                bumped,
+                            )
+                    delay = retry_base_delay * (2**attempt)
+                    logger.debug(
+                        "LLM error (attempt %d/%d): %s. Retrying in %.1fs...",
+                        attempt + 1,
+                        max_retries,
+                        error_msg[:100],
+                        delay,
+                    )
+                    await asyncio.sleep(delay)
+                elif attempt == max_retries - 1:
+                    logger.error(
+                        "LLM failed after %d attempts: %s",
+                        max_retries,
+                        error_msg[:200],
+                    )
+                    raise ValueError(
+                        f"LLM failed after {max_retries} attempts: {error_msg[:200]}"
+                    ) from e
+                else:
+                    raise
+
+        raise last_error  # type: ignore[misc]
+    finally:
+        if not succeeded:
+            _ACTIVITY.record_failed()
 
 
 # ---------------------------------------------------------------------------

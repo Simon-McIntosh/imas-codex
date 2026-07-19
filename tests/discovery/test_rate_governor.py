@@ -2,11 +2,16 @@
 
 The governor caps the number of in-flight LLM calls across the whole process.
 Under healthy load it is a no-op (ceiling pinned at ``max_ceiling``); on
-provider rate-limits it multiplicatively pulls the ceiling back, then additively
-recovers once a cooldown/settle window has elapsed.
+provider rate-limits it multiplicatively pulls the ceiling back, then recovers
+*multiplicatively on wall-clock time* — even when no calls complete — once a
+cooldown/settle window has elapsed.
 
 Time is injected via ``time_fn`` so every timing assertion is deterministic and
-uses no real sleeps.
+uses no real sleeps (the async recovery test uses a sub-10ms settle to exercise
+the acquire wait-timeout without meaningful wall-clock cost).
+
+The heartbeat activity-tracker tests live here too since they were reopened
+alongside the governor and share the deterministic ``Clock``.
 """
 
 from __future__ import annotations
@@ -15,6 +20,10 @@ import asyncio
 
 import pytest
 
+from imas_codex.discovery.base.llm import (
+    _ActivityState,
+    _heartbeat_should_warn,
+)
 from imas_codex.discovery.base.rate_governor import (
     AdaptiveConcurrencyGovernor,
     get_rate_governor,
@@ -109,7 +118,7 @@ def test_min_ceiling_floor_respected():
 
 
 # ---------------------------------------------------------------------------
-# Additive increase after cooldown / settle
+# Multiplicative, time-based recovery after cooldown / settle
 # ---------------------------------------------------------------------------
 
 
@@ -123,40 +132,70 @@ def test_no_increase_during_cooldown():
     assert gov.ceiling == 64
 
 
-def test_additive_ramp_after_cooldown():
+def test_multiplicative_ramp_after_cooldown():
     clock = Clock()
-    gov = make_governor(clock, cooldown=5.0, settle=1.0)
-    gov.record_rate_limited()  # 64
+    gov = make_governor(clock, min_ceiling=8, cooldown=5.0, settle=1.0)
+    for _ in range(4):
+        gov.record_rate_limited()  # 128→64→32→16→8 (floor)
+    assert gov.ceiling == 8
     clock.advance(6.0)  # past cooldown
     gov.record_success()
-    assert gov.ceiling == 65
+    assert gov.ceiling == 16  # doubled, not +1
     clock.advance(1.0)
     gov.record_success()
-    assert gov.ceiling == 66
+    assert gov.ceiling == 32
+    clock.advance(1.0)
+    gov.record_success()
+    assert gov.ceiling == 64
 
 
 def test_settle_gates_bursty_successes():
     clock = Clock()
-    gov = make_governor(clock, cooldown=5.0, settle=1.0)
-    gov.record_rate_limited()  # 64
+    gov = make_governor(clock, min_ceiling=8, cooldown=5.0, settle=1.0)
+    for _ in range(4):
+        gov.record_rate_limited()  # → 8
     clock.advance(6.0)
     gov.record_success()
-    assert gov.ceiling == 65
+    assert gov.ceiling == 16
     # A burst of successes without advancing the clock past settle → no ramp.
     for _ in range(10):
         gov.record_success()
-    assert gov.ceiling == 65
+    assert gov.ceiling == 16
+
+
+def test_time_based_recovery_without_any_successes():
+    """Ceiling climbs to max on the clock with ZERO record_success calls.
+
+    Simulates a blocked fleet: the acquire wait-timeout calls _maybe_recover
+    each settle even though nothing is completing. Recovery is bounded to
+    log2(max/min) multiplicative steps.
+    """
+    clock = Clock()
+    gov = make_governor(clock, min_ceiling=8, cooldown=5.0, settle=1.0)
+    for _ in range(4):
+        gov.record_rate_limited()  # → 8
+    assert gov.ceiling == 8
+    clock.advance(5.0)  # cooldown boundary elapsed
+    steps = 0
+    while gov.ceiling < 128 and steps < 50:
+        clock.advance(1.0)
+        gov._maybe_recover(clock.now)
+        steps += 1
+    assert gov.ceiling == 128
+    # log2(128 / 8) == 4 steps — the documented recovery bound.
+    assert steps == 4
 
 
 def test_ramp_recovers_to_max():
     clock = Clock()
-    gov = make_governor(clock, max_ceiling=68, cooldown=5.0, settle=1.0)
-    gov.record_rate_limited()  # 34
+    gov = make_governor(clock, min_ceiling=8, max_ceiling=64, cooldown=5.0, settle=1.0)
+    for _ in range(4):
+        gov.record_rate_limited()  # → 8
     clock.advance(6.0)
     for _ in range(200):
         gov.record_success()
         clock.advance(1.0)
-    assert gov.ceiling == 68
+    assert gov.ceiling == 64
 
 
 # ---------------------------------------------------------------------------
@@ -245,6 +284,123 @@ async def test_disabled_governor_admits_all():
     await asyncio.gather(*(worker() for _ in range(10)))
     # Disabled → the cap does not apply; more than max_ceiling may run.
     assert peak > 2
+
+
+@pytest.mark.asyncio
+async def test_blocked_acquire_recovers_without_completions():
+    """A blocked acquire climbs back via its wait-timeout — no releases needed.
+
+    Sub-10ms settle keeps the real wall-clock cost negligible; the recovery
+    DECISION is driven by the injected clock.
+    """
+    clock = Clock()
+    # Small non-zero cooldown so a premature wait-timeout can't grow the ceiling
+    # before the clock is advanced past the cooldown (keeps the test robust).
+    gov = make_governor(clock, min_ceiling=8, cooldown=0.5, settle=0.01)
+    for _ in range(4):
+        gov.record_rate_limited()  # → 8
+    assert gov.ceiling == 8
+
+    # Take all 8 slots and never release them.
+    for _ in range(8):
+        await gov.acquire()
+    assert gov.in_flight == 8
+
+    blocked = asyncio.create_task(gov.acquire())
+    await asyncio.sleep(0)
+    assert not blocked.done()
+
+    # No releases, no successes — only the clock advances (past the cooldown).
+    # The blocked acquirer's settle-bounded wait must grow the ceiling and
+    # admit it.
+    clock.advance(1.0)
+    await asyncio.wait_for(blocked, timeout=2.0)
+    assert gov.in_flight == 9
+    assert gov.ceiling >= 9
+
+
+@pytest.mark.asyncio
+async def test_record_success_wakes_blocked_acquirer():
+    """A ceiling increase from the sync success hook wakes blocked acquirers.
+
+    Settle is large so the acquire's own wait-timeout cannot fire in the test
+    window — the only wake path exercised is the scheduled notify from
+    record_success().
+    """
+    clock = Clock()
+    gov = make_governor(clock, min_ceiling=8, cooldown=0.0, settle=100.0)
+    for _ in range(4):
+        gov.record_rate_limited()  # → 8
+    for _ in range(8):
+        await gov.acquire()
+
+    blocked = asyncio.create_task(gov.acquire())
+    await asyncio.sleep(0)
+    assert not blocked.done()
+
+    clock.advance(101.0)  # past settle so the success grows the ceiling
+    gov.record_success()  # 8 → 16, schedules a wake of the blocked acquirer
+    await asyncio.wait_for(blocked, timeout=2.0)
+    assert gov.in_flight == 9
+
+
+# ---------------------------------------------------------------------------
+# LLM-activity heartbeat
+# ---------------------------------------------------------------------------
+
+
+def test_heartbeat_counters_and_stall_warning():
+    clock = Clock()
+    act = _ActivityState(time_fn=clock)
+    act.record_started()
+    act.add_spend(0.25)
+    snap = act.snapshot()
+    assert snap["started"] == 1
+    assert snap["in_flight"] == 1
+    assert snap["completed"] == 0
+    assert snap["spend_usd"] == 0.25
+
+    # In flight but within the stall threshold → no warning.
+    clock.advance(60.0)
+    assert not _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
+
+    # In flight and no completion past the threshold → warn.
+    clock.advance(70.0)
+    assert _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
+
+    # A completion clears in-flight and resets the stall clock.
+    act.record_completed()
+    snap = act.snapshot()
+    assert snap["completed"] == 1
+    assert snap["in_flight"] == 0
+    # Nothing in flight → never warns however long the idle.
+    clock.advance(10_000.0)
+    assert not _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
+
+
+def test_heartbeat_failed_decrements_in_flight():
+    clock = Clock()
+    act = _ActivityState(time_fn=clock)
+    act.record_started()
+    act.record_failed()
+    snap = act.snapshot()
+    assert snap["failed"] == 1
+    assert snap["in_flight"] == 0
+    assert snap["completed"] == 0
+
+
+def test_heartbeat_new_burst_resets_stall_clock():
+    # An idle gap since the last completion must not read as a stall when a
+    # fresh burst starts.
+    clock = Clock()
+    act = _ActivityState(time_fn=clock)
+    act.record_started()
+    act.record_completed()  # last completion at t=start
+    clock.advance(10_000.0)  # long idle
+    act.record_started()  # new burst restarts the stall clock
+    assert not _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
+    clock.advance(130.0)
+    assert _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
 
 
 # ---------------------------------------------------------------------------

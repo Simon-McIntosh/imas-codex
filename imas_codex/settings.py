@@ -1506,7 +1506,9 @@ def get_sn_benchmark_reviewer_models() -> list[str]:
 _RATE_GOVERNOR_DEFAULTS = {
     "enabled": True,
     "max-ceiling": 128,
-    "min-ceiling": 2,
+    # A single 429 must not cripple throughput: an 8-slot floor is still a large
+    # pullback from 128 while leaving useful concurrency to recover from.
+    "min-ceiling": 8,
     "decrease-factor": 0.5,
     "cooldown": 5.0,
     "settle": 1.0,
@@ -1537,7 +1539,7 @@ def get_rate_governor_max_ceiling() -> int:
 def get_rate_governor_min_ceiling() -> int:
     """Lower bound the multiplicative decrease can never breach.
 
-    Priority: IMAS_CODEX_RATE_GOVERNOR_MIN_CEILING env → ``2``.
+    Priority: IMAS_CODEX_RATE_GOVERNOR_MIN_CEILING env → ``8``.
     """
     if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_MIN_CEILING"):
         return int(env)
@@ -1572,3 +1574,18 @@ def get_rate_governor_settle() -> float:
     if env := os.getenv("IMAS_CODEX_RATE_GOVERNOR_SETTLE"):
         return float(env)
     return float(_RATE_GOVERNOR_DEFAULTS["settle"])
+
+
+def get_llm_heartbeat_interval() -> float:
+    """Seconds between LLM-activity heartbeat log lines (0 disables).
+
+    The heartbeat is a lazily-started background task that periodically logs
+    in-flight/started/completed/failed counts, spend, seconds-since-last
+    completion, and the governor ceiling — so a long campaign is observable and
+    a stall (in-flight work with no completions) surfaces as a WARNING.
+
+    Priority: IMAS_CODEX_LLM_HEARTBEAT_INTERVAL env → ``15.0``.
+    """
+    if (env := os.getenv("IMAS_CODEX_LLM_HEARTBEAT_INTERVAL")) is not None:
+        return float(env)
+    return 15.0

@@ -7,12 +7,20 @@ empty/failed responses. This module adds *global* backpressure: a single
 process-wide ceiling on in-flight LLM calls that
 
 * **multiplicatively decreases** the moment a 429 is observed, and
-* **additively increases** back toward the maximum once the provider has
-  settled (after a short cooldown, at most one step per settle interval).
+* **recovers on wall-clock time** back toward the maximum once the provider has
+  settled — after a short cooldown, growing *multiplicatively* (double) at most
+  once per settle interval.
 
-This is the classic AIMD control law (as used by TCP congestion control): fast
-back-off under stress, gentle recovery afterwards, so throughput degrades
-gracefully instead of collapsing.
+This is an AIMD-style control law (as in TCP congestion control), but with one
+deliberate departure that fixes a real production defect: recovery is **decoupled
+from call completions**. A purely additive, completion-gated ramp (``+1`` per
+successful call) crawls back at the rate of throughput — at the floor with slow
+high-effort calls that is tens of minutes, and any fresh 429 mid-crawl re-halves
+it, so a run gets pinned near the floor for its whole duration. Instead the
+ceiling grows on the clock (driven both by :meth:`record_success` and, crucially,
+by a blocked :meth:`acquire` on its wait timeout even when *nothing completes*),
+multiplicatively, so it returns to full concurrency within
+``cooldown + log2(max/min)*settle`` (~9 s with the defaults) regardless of load.
 
 Under healthy load the governor is a **no-op**: the ceiling sits pinned at
 ``max_ceiling`` (high enough that it never binds) and every ``acquire`` returns
@@ -23,9 +31,10 @@ deterministic in tests with no real sleeps. The state-mutating hooks
 (:meth:`record_rate_limited`, :meth:`record_success`) are plain synchronous
 methods: they only touch integer/float fields and never ``await``, so on the
 single-threaded event loop they are atomic with respect to other coroutines.
-Waiters are woken by :meth:`release` (which does hold the async lock), so a
-ceiling that ramps up while calls are in flight is picked up on the next
-release — no explicit wake from the sync hooks is needed.
+On a ceiling increase they schedule a wake of blocked acquirers; :meth:`release`
+also wakes them, and a blocked ``acquire`` re-checks on its own settle-bounded
+timeout — so a grown ceiling is never invisible to a waiter for longer than
+``settle``.
 """
 
 from __future__ import annotations
@@ -67,7 +76,7 @@ class AdaptiveConcurrencyGovernor:
         self,
         *,
         max_ceiling: int = 128,
-        min_ceiling: int = 2,
+        min_ceiling: int = 8,
         decrease_factor: float = 0.5,
         cooldown: float = 5.0,
         settle: float = 1.0,
@@ -135,25 +144,69 @@ class AdaptiveConcurrencyGovernor:
         )
         self._cooldown_until = self._time_fn() + self._cooldown
 
-    def record_success(self) -> None:
-        """Additive increase, gated by cooldown and settle interval.
+    def _maybe_recover(self, now: float) -> bool:
+        """Grow the ceiling toward max on a TIME basis; return True if it grew.
 
-        A single success bumps the ceiling by one, but only once the cooldown
-        after the last rate-limit has elapsed and at least ``settle`` seconds
-        have passed since the previous increase. Successes while already at
-        ``max_ceiling`` are no-ops.
+        Recovery is deliberately **decoupled from call completions**: once the
+        post-rate-limit cooldown has elapsed and at least ``settle`` seconds have
+        passed since the last increase, the ceiling grows *multiplicatively*
+        (double, floored at +1) toward ``max_ceiling``. Multiplicative growth
+        bounds recovery to ``log2(max/min)`` steps — from the floor to the max
+        with the defaults (8 → 128) that is 4 steps of ``settle`` each, so a
+        blocked fleet is back to full concurrency within
+        ``cooldown + 4*settle`` (~9 s), not the tens of minutes a
+        completion-gated +1 crawl took at the floor.
+
+        No-op (returns False) when disabled, already at max, still inside the
+        cooldown, or inside the settle interval since the last increase.
+        """
+        if not self._enabled:
+            return False
+        if self._ceiling >= self._max_ceiling:
+            return False
+        if now < self._cooldown_until:
+            return False
+        if now - self._last_increase < self._settle:
+            return False
+        self._ceiling = min(
+            self._max_ceiling, max(self._ceiling + 1, self._ceiling * 2)
+        )
+        self._last_increase = now
+        return True
+
+    def record_success(self) -> None:
+        """Opportunistically recover the ceiling after a completed call.
+
+        Delegates to :meth:`_maybe_recover`; this is only one of two recovery
+        drivers — a blocked :meth:`acquire` also recovers on its wait timeout, so
+        the ceiling climbs on wall-clock even when zero calls complete. Wakes
+        blocked acquirers when the ceiling actually grows.
         """
         if not self._enabled:
             return
-        if self._ceiling >= self._max_ceiling:
+        if self._maybe_recover(self._time_fn()):
+            self._schedule_wake()
+
+    def _schedule_wake(self) -> None:
+        """Wake blocked acquirers after a sync ceiling increase.
+
+        The record hooks are synchronous and cannot hold the async condition
+        lock to notify directly, so schedule a tiny task that does. Safe to call
+        with no running loop or before any acquire (no condition yet) — both are
+        no-ops; a blocked acquirer would still recover on its own wait timeout.
+        """
+        if self._condition is None:
             return
-        now = self._time_fn()
-        if now < self._cooldown_until:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
             return
-        if now - self._last_increase < self._settle:
-            return
-        self._ceiling = min(self._max_ceiling, self._ceiling + 1)
-        self._last_increase = now
+        loop.create_task(self._notify_waiters())
+
+    async def _notify_waiters(self) -> None:
+        cond = self._get_condition()
+        async with cond:
+            cond.notify_all()
 
     # -- slot admission ----------------------------------------------------
 
@@ -172,15 +225,28 @@ class AdaptiveConcurrencyGovernor:
         """Wait until an in-flight slot is available, then take it.
 
         A disabled governor admits immediately. Otherwise blocks (without
-        busy-waiting) until ``in_flight < ceiling``, re-checking the predicate
-        each time a slot is released or the ceiling changes.
+        busy-waiting) until ``in_flight < ceiling``. The wait is bounded by
+        ``settle`` so that a blocked fleet drives time-based recovery
+        (:meth:`_maybe_recover`) even when **no calls are completing** — the
+        core fix for a ceiling pinned at the floor by a completion-gated ramp.
+        The predicate is also re-checked whenever a slot is released or the
+        ceiling grows.
         """
         if not self._enabled:
             self._in_flight += 1
             return
         cond = self._get_condition()
         async with cond:
-            await cond.wait_for(lambda: self._in_flight < self._ceiling)
+            while self._in_flight >= self._ceiling:
+                try:
+                    # Bounded wait: on timeout we re-evaluate recovery on the
+                    # wall clock rather than waiting for a completion/notify.
+                    await asyncio.wait_for(cond.wait(), timeout=self._settle)
+                except TimeoutError:
+                    # cond.wait() re-acquires the lock before the cancellation
+                    # surfaces, so the condition state is safe to touch here.
+                    if self._maybe_recover(self._time_fn()):
+                        cond.notify_all()
             self._in_flight += 1
 
     async def release(self) -> None:
