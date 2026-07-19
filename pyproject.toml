@@ -576,21 +576,22 @@ api-key-env = "AMBIX_API_KEY"
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Production reviewer quorum: dual-blind qwen3.7-max + minimax-m3 (cheap,
-# vendor-diverse, reasoning-capable) + a gpt-5.6-luna breaker. Names-breaker
-# role bench 2026-07-17 (30 quorum-scored names re-scored, independence
-# measured against the blind pair): luna is more decorrelated than gpt-5.5
-# (rho 0.252 vs 0.319; vs qwen essentially uncorrelated at 0.026) and its
-# quorum overrides are right more often (verdict-flip quality 0.714 vs
-# 0.545) at ~1/4 the cost. Caveat: flip-quality rests on a small
-# disagreement count (7 flips); the independence and cost gaps are the
-# robust n=30 signals. The DOCS breaker stays gpt-5.5 — same bench design
-# on the docs axis went the other way (see [sn-review.docs]).
-# All run at effort=high. deepseek-v4-pro rejected (FR instability);
-# gemini/DS4-flash weakest. Switch-back: "openrouter/openai/gpt-5.5".
+# Production reviewer quorum: dual-blind claude-sonnet-5 + grok-4.5 + a
+# gpt-5.6-luna breaker. The former blind pair (qwen3.7-max + minimax-m3) was
+# REPLACED after both upstream-throttled (HTTP 429) under the review pool's
+# concurrency and stalled a live docs campaign — thin-capacity providers that
+# cannot sustain 64-way concurrent review. sonnet-5 + grok-4.5 hold 16/16 at
+# 16-way with zero rate-limiting and are vendor-diverse (Anthropic + xAI).
+# Discrimination bench 2026-07-19 (labelled accepted-good vs seeded-defect-bad
+# docs, AUC + calibration): sonnet-5 best (AUC 0.910 @high / 0.859 @low),
+# grok-4.5 strong + best-calibrated of the fast models (0.861 @low, good-pass
+# 0.75). gpt-5.6-terra rejected (good-pass 0.08 — rejects most GOOD docs);
+# deepseek-v4-pro discriminates well but its provider is ~8x slower.
+# Breaker luna held from the 2026-07-17 names-breaker bench. Switch-back:
+# "openrouter/qwen/qwen3.7-max","openrouter/minimax/minimax-m3".
 models = [
-  "openrouter/qwen/qwen3.7-max",
-  "openrouter/minimax/minimax-m3",
+  "openrouter/anthropic/claude-sonnet-5",
+  "openrouter/x-ai/grok-4.5",
   "openrouter/openai/gpt-5.6-luna",
 ]
 disagreement-threshold = 0.20
@@ -618,18 +619,20 @@ models = ["openrouter/anthropic/claude-opus-4.8"]
 disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
-# qwen3.7-max + minimax-m3 blind + gpt-5.5 breaker. The docs breaker HELD
-# gpt-5.5 in the 2026-07-17 role bench while the NAMES breaker switched to
-# luna — on the docs axis the incumbent is both the most independent of the
-# blind pair (rho 0.176 vs 0.227-0.247) and the most correct on overrides
-# (flip quality 0.286 vs 0.071/0.158; 5.6 tiers flip 2-3x more, nearly
-# always wrongly). reasoning effort=high. Docs review is where physics
-# regressions must be caught; the independent breaker guards against
-# hallucinated-docs false positives on blind disagreement. All OpenRouter —
-# endpoints auto-resolve per model in _build_kwargs.
+# Dual-blind claude-sonnet-5 + grok-4.5 + gpt-5.5 breaker. The blind pair
+# replaced qwen3.7-max + minimax-m3 (upstream-429 under pool concurrency; see
+# [sn-review.names.profiles.default]). Docs discrimination bench 2026-07-19
+# is the primary evidence for this axis — it is the seat that stalled, and
+# docs review is where physics regressions must be caught. The gpt-5.5 docs
+# breaker is HELD (2026-07-17 docs-breaker bench: most independent + most
+# correct on overrides). Effort note: at LOW effort grok is at its best
+# (AUC 0.861) and sonnet-5 nearly so (0.859) — the pair overthinks at high on
+# several models; a names-axis effort study is queued before lowering the
+# shared [sn-review].reasoning-effort. All OpenRouter — endpoints auto-resolve
+# per model in _build_kwargs.
 models = [
-  "openrouter/qwen/qwen3.7-max",
-  "openrouter/minimax/minimax-m3",
+  "openrouter/anthropic/claude-sonnet-5",
+  "openrouter/x-ai/grok-4.5",
   "openrouter/openai/gpt-5.5",
 ]
 disagreement-threshold = 0.20
