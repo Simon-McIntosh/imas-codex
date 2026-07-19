@@ -75,12 +75,29 @@ def _cache_grammar_context():
     the many local ``from imas_standard_names import get_grammar_context``
     call sites resolve to the cached value.
     """
+    import warnings
     from contextlib import ExitStack
 
     import imas_standard_names as _isn
     import imas_standard_names.grammar.context as _ctx
 
-    cached = _ctx.get_grammar_context()
+    try:
+        cached = _ctx.get_grammar_context()
+    except Exception as exc:
+        # A broken ISN pin (e.g. a grammar/catalog internal inconsistency that
+        # raises ParseError while building the context) must not error every
+        # test in this package at setup. Skip memoization and leave the real
+        # function in place: pure-unit tests that never touch the grammar
+        # context still run, and tests that genuinely need it fail (fast) on
+        # their own rather than taking the whole package down at collection.
+        warnings.warn(
+            f"grammar context unavailable ({type(exc).__name__}: {exc}); "
+            "skipping session cache — grammar-dependent tests may fail "
+            "individually until the ISN pin is fixed",
+            stacklevel=2,
+        )
+        yield
+        return
 
     def _cached() -> Any:
         return cached

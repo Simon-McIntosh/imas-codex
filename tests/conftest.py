@@ -42,19 +42,47 @@ _neo4j_available: bool | None = None
 
 
 def _check_neo4j() -> bool:
-    """Quick probe to see if Neo4j is reachable (cached per session)."""
+    """Probe whether Neo4j is reachable (cached per session).
+
+    Constructing a ``GraphClient`` resolves the active graph profile, which
+    for a remote location establishes an SSH tunnel. When the host is
+    unreachable that resolution can block far longer than the repo's
+    ``faulthandler_timeout``, which would SIGSEGV the whole pytest session at
+    collection time. To keep collection bounded regardless of reachability,
+    the probe runs on a daemon thread with a bounded join: if it hasn't
+    answered within the timeout the host is treated as unavailable and the
+    still-blocked thread is abandoned (it dies with the process, so pytest can
+    still exit and the main thread never stalls long enough to trip
+    faulthandler). The generous default comfortably covers a cold-tunnel
+    reachable case while staying well under any faulthandler timeout.
+    """
     global _neo4j_available
     if _neo4j_available is not None:
         return _neo4j_available
-    try:
-        from imas_codex.graph.client import GraphClient
 
-        client = GraphClient()
-        client.get_stats()
-        client.close()
-        _neo4j_available = True
-    except Exception:
-        _neo4j_available = False
+    import threading
+
+    timeout_s = float(os.environ.get("IMAS_CODEX_TEST_NEO4J_PROBE_TIMEOUT", "20"))
+    result: dict[str, bool] = {}
+
+    def _probe() -> None:
+        try:
+            from imas_codex.graph.client import GraphClient
+
+            client = GraphClient()
+            try:
+                client.get_stats()
+                result["ok"] = True
+            finally:
+                client.close()
+        except Exception:
+            result["ok"] = False
+
+    thread = threading.Thread(target=_probe, name="neo4j-probe", daemon=True)
+    thread.start()
+    thread.join(timeout_s)
+
+    _neo4j_available = bool(result.get("ok", False))
     return _neo4j_available
 
 
