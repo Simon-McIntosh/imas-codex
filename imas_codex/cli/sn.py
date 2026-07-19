@@ -1662,13 +1662,15 @@ def sn_run(
 
         scope_run_id = str(_uuid.uuid4())
 
-        # 1. Clear stale run_ids from previous focused runs.
+        # 1. Clear stale run_ids from previous focused runs. Both node labels
+        #    are cleared in a single statement so the reset is atomic and the
+        #    scoping invariant (no residual run_id survives a fresh focus run)
+        #    holds even if a preceding read query interposes.
         with GraphClient() as gc:
             gc.query(
                 "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
-                "SET sn.run_id = NULL"
-            )
-            gc.query(
+                "SET sn.run_id = NULL "
+                "WITH count(*) AS _cleared "
                 "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
                 "SET sns.run_id = NULL"
             )
