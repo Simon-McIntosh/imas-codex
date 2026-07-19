@@ -657,12 +657,14 @@ async def run_refine_bench(
 
     results: list[RoleModelResult] = []
 
-    for model in models:
+    _bench_progress(f"refine: start {len(models)} model(s) x {len(corpus)} cases")
+    for _mi, model in enumerate(models, 1):
         m = ensure_model_prefix(model)
         res = RoleModelResult(model=model)
         dr_vals: list[float] = []
         cc_vals: list[float] = []
         fail_reasons: Counter[str] = Counter()
+        _bench_progress(f"refine: [{_mi}/{len(models)}] {model.split('/')[-1]}…")
         for case in corpus:
             prompt_context = build_refine_prompt_context(
                 case,
@@ -790,8 +792,10 @@ async def run_breaker_bench(
     outcomes = [bool(c["final_accepted"]) for c in corpus]
 
     results: list[RoleModelResult] = []
-    for model in models:
+    _bench_progress(f"breaker-{axis}: start {len(models)} model(s) x {len(corpus)}")
+    for _bi, model in enumerate(models, 1):
         res = RoleModelResult(model=model)
+        _bench_progress(f"breaker-{axis}: [{_bi}/{len(models)}] {model.split('/')[-1]}…")
         try:
             reviews, cost = await score_with_reviewer(
                 corpus,
@@ -1222,8 +1226,10 @@ async def run_docs_bench(
 
     context = build_compose_context()
     results: list[RoleModelResult] = []
-    for model in models:
+    _bench_progress(f"docs: start {len(models)} model(s) x {len(sample)} names")
+    for _di, model in enumerate(models, 1):
         res = RoleModelResult(model=model)
+        _bench_progress(f"docs: [{_di}/{len(models)}] {model.split('/')[-1]}…")
         cands = [dict(c) for c in sample]
         try:
             cands, gcost, _ = await generate_docs_for_candidates(

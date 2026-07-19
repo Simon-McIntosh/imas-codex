@@ -536,6 +536,8 @@ async def score_with_reviewer(
     # Process in batches of 10
     all_reviews: list[dict] = []
     total_reviewer_cost: float = 0.0
+    # Bounds the per-batch docs-review fan-out (see the concurrent path below).
+    _docs_sem = asyncio.Semaphore(8)
     for i in range(0, len(candidates), 10):
         batch = candidates[i : i + 10]
 
@@ -610,8 +612,14 @@ async def score_with_reviewer(
         # Build user prompt — docs template expects single `item`, names
         # template iterates over `items` list.
         if target == "docs":
-            # Single-item template: render and call per candidate
-            for item_ctx in batch_items:
+            # Single-item docs template → one call per candidate. Fire the
+            # batch's per-item calls CONCURRENTLY (bounded) instead of serially
+            # — a serial await-per-item made each 10-item batch take minutes at
+            # effort=high. The global rate governor still throttles across the
+            # whole fleet; this bound just caps the per-batch fan-out.
+            async def _score_one_doc(
+                item_ctx: dict[str, Any],
+            ) -> tuple[float, list[dict[str, Any]]]:
                 user_context = {
                     **compose_ctx,
                     "review_scored_examples": review_scored_examples,
@@ -625,36 +633,46 @@ async def score_with_reviewer(
                         item_ctx.get("id", "?"),
                         exc,
                     )
-                    continue
-
+                    return 0.0, []
                 messages = [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ]
-                try:
-                    result, cost, _ = await acall_llm_structured(
-                        model=reviewer_model,
-                        messages=messages,
-                        response_model=response_model,
-                        service="standard-names",
-                        reasoning_effort=review_effort,
-                    )
-                    total_reviewer_cost += cost
-                    for r in result.reviews:
-                        review_dict: dict[str, Any] = {
-                            "name": r.standard_name,
-                            "quality_tier": r.scores.tier,
-                            "score": r.scores.score,
-                        }
-                        for dim in dim_keys:
-                            review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
-                        if hasattr(r, "reasoning"):
-                            review_dict["reasoning"] = r.reasoning
-                        all_reviews.append(review_dict)
-                except Exception as e:
-                    logger.warning(
-                        "Docs review failed for %s: %s", item_ctx.get("id", "?"), e
-                    )
+                async with _docs_sem:
+                    try:
+                        result, cost, _ = await acall_llm_structured(
+                            model=reviewer_model,
+                            messages=messages,
+                            response_model=response_model,
+                            service="standard-names",
+                            reasoning_effort=review_effort,
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            "Docs review failed for %s: %s",
+                            item_ctx.get("id", "?"),
+                            e,
+                        )
+                        return 0.0, []
+                revs: list[dict[str, Any]] = []
+                for r in result.reviews:
+                    review_dict: dict[str, Any] = {
+                        "name": r.standard_name,
+                        "quality_tier": r.scores.tier,
+                        "score": r.scores.score,
+                    }
+                    for dim in dim_keys:
+                        review_dict[f"{dim}_score"] = getattr(r.scores, dim, 0)
+                    if hasattr(r, "reasoning"):
+                        review_dict["reasoning"] = r.reasoning
+                    revs.append(review_dict)
+                return cost, revs
+
+            for _cost, _revs in await asyncio.gather(
+                *(_score_one_doc(ic) for ic in batch_items)
+            ):
+                total_reviewer_cost += _cost
+                all_reviews.extend(_revs)
         else:
             # Batch template: render with items list
             user_context = {
