@@ -822,6 +822,348 @@ async def run_breaker_bench(
     )
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# Review-discrimination bench (blind-pair reviewer seat)
+# ═══════════════════════════════════════════════════════════════════════
+#
+# The breaker bench above measures a THIRD reviewer's independence from an
+# existing blind pair.  It cannot measure the blind-pair reviewers themselves,
+# and it correlates against a pair that may be retired.  The discrimination
+# bench measures a candidate reviewer directly: score a labelled corpus of
+# GOOD (accepted, in-catalog) items against BAD twins carrying a seeded defect
+# a competent reviewer MUST catch, and measure the score separation, the
+# fraction of defects caught, and the fraction of good items not falsely
+# rejected.  This is the capability a blind-pair replacement must have.
+
+# Deterministic defect seeds.  Each is an unambiguous quality failure the
+# production rubric penalises; a reviewer that cannot separate these from the
+# accepted original is not fit for the seat.
+_DISCRIM_DEFECTS = ("banned_prose", "vacuous", "unit_contradiction")
+
+_VACUOUS_DOC = (
+    "This quantity represents an important physical property of the plasma "
+    "that is relevant to the analysis and can be used in various calculations "
+    "as appropriate for the scenario under consideration."
+)
+
+
+def _seed_bad_documentation(good_doc: str, defect: str, unit: str) -> str:
+    """Return a defective twin of *good_doc* carrying exactly one seeded flaw."""
+    good_doc = good_doc or ""
+    if defect == "banned_prose":
+        # Procedural padding + typical-values estimator prose — the exact
+        # normative-policy class the docs campaign exists to remove.
+        return (
+            good_doc + "\n\nTypical values range from about 0.1 to 10 depending on the "
+            "device and scenario; to compute it, first obtain the relevant "
+            "profiles, then integrate over the volume and normalise as needed."
+        )
+    if defect == "vacuous":
+        return _VACUOUS_DOC
+    if defect == "unit_contradiction":
+        stated = unit or "SI units"
+        return (
+            good_doc
+            + f"\n\nAlthough the registered unit is {stated}, this quantity is "
+            "in fact dimensionless and carries arbitrary units."
+        )
+    return good_doc
+
+
+def _seed_bad_description(good_desc: str, defect: str, foreign_desc: str) -> str:
+    """Return a defective twin of a NAME's description for the names axis."""
+    if defect == "vacuous":
+        return "A physical quantity used in plasma analysis."
+    if defect == "unit_contradiction":
+        return (
+            good_desc or ""
+        ) + " It is dimensionless and measured in arbitrary units."
+    # banned_prose maps to a semantic name/description MISMATCH on the names
+    # axis: pair the accepted name with an unrelated quantity's description.
+    return foreign_desc or "An unrelated quantity from a different physics domain."
+
+
+def load_discrimination_corpus(
+    sample: int, seed: int, axis: str = "docs", gc: Any = None
+) -> list[dict]:
+    """Build a labelled good/bad reviewer-discrimination corpus.
+
+    Draws a stratified sample of accepted, documented names (the GOOD set,
+    ``label=1``) and, for each, one defective twin (``label=0``) carrying one
+    deterministically-assigned seeded defect.  The reviewer under test should
+    score GOOD high and BAD low; the gap is the discrimination signal.
+
+    ``axis='docs'`` corrupts the documentation text; ``axis='names'`` corrupts
+    the description (with a foreign-description swap standing in for a semantic
+    mismatch).  Graph read-only.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    cypher = """
+        MATCH (sn:StandardName {name_stage: 'accepted'})
+        WHERE sn.description IS NOT NULL AND sn.documentation IS NOT NULL
+              AND size(sn.documentation) > 40
+        RETURN
+          sn.id             AS name,
+          sn.description    AS description,
+          sn.documentation  AS documentation,
+          sn.unit           AS unit,
+          sn.kind           AS kind,
+          sn.physics_domain AS physics_domain,
+          sn.source_paths   AS source_paths
+    """
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = gc.query(cypher)
+    finally:
+        if owns:
+            gc.close()
+
+    goods = _stratified_sample([dict(r) for r in rows], sample, seed)
+    rng = random.Random(seed)
+    all_descs = [r.get("description") or "" for r in rows]
+
+    corpus: list[dict] = []
+    for i, r in enumerate(goods):
+        srcs = list(r.get("source_paths") or [])
+        base = {
+            "name": r["name"],
+            "standard_name": r["name"],
+            "id": r["name"],
+            "source_id": srcs[0] if srcs else "",
+            "unit": r.get("unit") or "",
+            "kind": r.get("kind") or "scalar",
+            "data_type": r.get("kind") or "scalar",
+            "physics_domain": r.get("physics_domain") or "",
+            "source_paths": srcs,
+        }
+        good_desc = r.get("description") or ""
+        good_doc = r.get("documentation") or ""
+        # GOOD item — the accepted, in-catalog text.
+        corpus.append(
+            {
+                **base,
+                "label": 1,
+                "defect": "",
+                "description": good_desc,
+                "documentation": good_doc,
+            }
+        )
+        # BAD twin — one seeded defect, cycled deterministically across items.
+        # Good and bad twins share a standard name, so they are scored in
+        # SEPARATE reviewer passes (see run_review_discrimination_bench) to keep
+        # the review→item alignment unambiguous.
+        defect = _DISCRIM_DEFECTS[i % len(_DISCRIM_DEFECTS)]
+        if axis == "docs":
+            corpus.append(
+                {
+                    **base,
+                    "label": 0,
+                    "defect": defect,
+                    "description": good_desc,
+                    "documentation": _seed_bad_documentation(
+                        good_doc, defect, base["unit"]
+                    ),
+                }
+            )
+        else:
+            foreign = rng.choice(all_descs) if all_descs else ""
+            corpus.append(
+                {
+                    **base,
+                    "label": 0,
+                    "defect": defect,
+                    "description": _seed_bad_description(good_desc, defect, foreign),
+                    "documentation": good_doc,
+                }
+            )
+    return corpus
+
+
+def discrimination_metrics(
+    good_scores: list[float],
+    bad_scores: list[float],
+    threshold: float = ACCEPT_THRESHOLD,
+) -> dict[str, float]:
+    """Compute reviewer-discrimination metrics from labelled scores.
+
+    ``separation`` — mean(good) − mean(bad); the core signal (higher is better).
+    ``bad_recall`` — fraction of BAD items scored below *threshold* (caught).
+    ``good_pass`` — fraction of GOOD items scored at/above *threshold* (kept).
+    ``auc`` — probability a random good outranks a random bad (rank AUC), the
+    threshold-free separation measure; 0.5 = no discrimination, 1.0 = perfect.
+    """
+    metrics: dict[str, float] = {}
+    if good_scores:
+        metrics["good_mean"] = round(sum(good_scores) / len(good_scores), 4)
+        metrics["good_pass"] = round(
+            sum(1 for s in good_scores if s >= threshold) / len(good_scores), 4
+        )
+    if bad_scores:
+        metrics["bad_mean"] = round(sum(bad_scores) / len(bad_scores), 4)
+        metrics["bad_recall"] = round(
+            sum(1 for s in bad_scores if s < threshold) / len(bad_scores), 4
+        )
+    if good_scores and bad_scores:
+        metrics["separation"] = round(metrics["good_mean"] - metrics["bad_mean"], 4)
+        wins = 0.0
+        for g in good_scores:
+            for b in bad_scores:
+                wins += 1.0 if g > b else 0.5 if g == b else 0.0
+        metrics["auc"] = round(wins / (len(good_scores) * len(bad_scores)), 4)
+    return metrics
+
+
+async def run_review_discrimination_bench(
+    models: list[str],
+    corpus: list[dict],
+    axis: str = "docs",
+    incumbent: str | None = None,
+    reasoning_effort: str | None = None,
+) -> RoleBenchReport:
+    """Benchmark the blind-pair reviewer seat: good/bad discrimination."""
+    from imas_codex.discovery.base.llm import ensure_model_prefix
+    from imas_codex.standard_names.benchmark import score_with_reviewer
+
+    target = "names" if axis == "names" else "docs"
+    goods = [c for c in corpus if c["label"] == 1]
+    bads = [c for c in corpus if c["label"] == 0]
+
+    async def _score(items: list[dict], model: str) -> tuple[list[float], float]:
+        # Good and bad twins share a standard name, so each label is scored in
+        # its own pass — within a pass every item is a distinct accepted name,
+        # so reviews align to items unambiguously.
+        reviews, cost = await score_with_reviewer(
+            items,
+            reviewer_model=ensure_model_prefix(model),
+            target=target,
+            reasoning_effort=reasoning_effort,
+        )
+        return [float(r.get("score") or 0.0) for r in reviews], cost
+
+    results: list[RoleModelResult] = []
+    for model in models:
+        res = RoleModelResult(model=model)
+        try:
+            good_scores, gcost = await _score(goods, model)
+            bad_scores, bcost = await _score(bads, model)
+            res.cost = gcost + bcost
+        except Exception as exc:
+            logger.warning("discrimination %s failed: %s", model, exc)
+            res.error = str(exc)[:200]
+            results.append(res)
+            continue
+
+        res.n = len(good_scores) + len(bad_scores)
+        res.metrics.update(discrimination_metrics(good_scores, bad_scores))
+        res.metrics["n_good"] = float(len(good_scores))
+        res.metrics["n_bad"] = float(len(bad_scores))
+        if res.n == 0:
+            res.error = f"0/{len(corpus)} items scored (no reviews aligned to corpus)"
+        results.append(res)
+
+    if results and all(r.n == 0 for r in results):
+        detail = "; ".join(f"{r.model}: {r.error}" for r in results)
+        raise RuntimeError(
+            "discrimination bench scored no items for any model — refusing to "
+            f"save a hollow report ({detail})"
+        )
+
+    return RoleBenchReport(
+        role=f"review-{axis}",
+        results=results,
+        incumbent=incumbent,
+        sample_ids=[c["id"] for c in corpus],
+        axis=axis,
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance={
+            "corpus": "labelled accepted (good) + seeded-defect twins (bad)",
+            "defects": list(_DISCRIM_DEFECTS),
+            "n_items": len(corpus),
+        },
+    )
+
+
+async def run_concurrency_bench(
+    models: list[str],
+    concurrency: int = 16,
+    reasoning_effort: str | None = None,
+    gc: Any = None,
+) -> RoleBenchReport:
+    """Benchmark reviewer-seat provider resilience under concurrent load.
+
+    Fires ``concurrency`` production docs-review calls at once per model and
+    tallies success vs upstream rate-limiting (HTTP 429) vs empty response.
+    This is the axis the review pools actually stress (up to 64 replicas): a
+    high-quality reviewer whose OpenRouter provider 429s under load is unusable
+    as a blind-pair seat regardless of its discrimination score.
+    """
+    import asyncio
+
+    from imas_codex.discovery.base.llm import ensure_model_prefix
+    from imas_codex.standard_names.benchmark import score_with_reviewer
+
+    probe = load_discrimination_corpus(1, seed=0, axis="docs", gc=gc)
+    if not probe:
+        raise RuntimeError("concurrency bench: no accepted item to probe with")
+    item = next((c for c in probe if c["label"] == 1), probe[0])
+
+    def _classify(exc: Exception) -> str:
+        m = str(exc).lower()
+        if "429" in m or "rate" in m or "temporarily rate-limited" in m:
+            return "rate_limited"
+        if "empty response" in m:
+            return "empty"
+        if "503" in m or "502" in m or "overload" in m:
+            return "unavailable"
+        return "error"
+
+    results: list[RoleModelResult] = []
+    for model in models:
+        res = RoleModelResult(model=model)
+        prefixed = ensure_model_prefix(model)
+
+        async def _one(_m: str = prefixed) -> tuple[str, float]:
+            try:
+                reviews, cost = await score_with_reviewer(
+                    [dict(item)],
+                    reviewer_model=_m,
+                    target="docs",
+                    reasoning_effort=reasoning_effort,
+                )
+                ok = bool(reviews) and reviews[0].get("score") is not None
+                return ("ok" if ok else "empty", cost)
+            except Exception as exc:  # noqa: BLE001 — outcome tally, not a raise
+                return (_classify(exc), 0.0)
+
+        outcomes = await asyncio.gather(*[_one() for _ in range(concurrency)])
+        tally: dict[str, int] = {}
+        for kind, cost in outcomes:
+            tally[kind] = tally.get(kind, 0) + 1
+            res.cost += cost
+        res.n = concurrency
+        ok = tally.get("ok", 0)
+        res.metrics["success_rate"] = round(ok / concurrency, 4)
+        res.metrics["rate_limited_rate"] = round(
+            tally.get("rate_limited", 0) / concurrency, 4
+        )
+        res.metrics["empty_rate"] = round(tally.get("empty", 0) / concurrency, 4)
+        res.metrics["ok"] = float(ok)
+        if ok == 0:
+            res.error = f"0/{concurrency} succeeded; outcomes={tally}"
+        results.append(res)
+
+    return RoleBenchReport(
+        role="concurrency",
+        results=results,
+        sample_ids=[item["id"]],
+        axis="docs",
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        provenance={"concurrency": concurrency, "probe_item": item["id"]},
+    )
+
+
 async def run_docs_bench(
     models: list[str],
     sample: list[dict],
