@@ -799,6 +799,7 @@ async def score_descriptions(
                 messages=messages,
                 response_model=StandardNameQualityReviewDescriptionBatch,
                 service="standard-names",
+                max_retries=2,
             )
             total_cost += cost
             for r in result.reviews:
@@ -1623,6 +1624,7 @@ async def _run_model(
                     temperature=temp,
                     service="standard-names",
                     reasoning_effort=compose_effort,
+                    max_retries=2,
                 )
                 llm_result, cost, tokens = llm_response
                 result.total_cost += cost
