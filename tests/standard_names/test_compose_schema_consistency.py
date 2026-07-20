@@ -83,3 +83,62 @@ class TestCandidateSchemaMatchesPromptSpec:
             f"  In prompt but not model: {prompt_fields - self.model_fields}\n"
             f"  In model but not prompt: {self.model_fields - prompt_fields}"
         )
+
+
+# --------------------------------------------------------------------------
+# Regression guard: structured-output schemas must stay within the Anthropic /
+# OpenRouter per-object property limit.  RefinedName.segments silently grew to
+# 14 properties and every Anthropic structured call with it failed at runtime
+# with "Schema is too complex" — invisible until a live bench.  Pin the
+# invariant so a future field addition fails in CI, not in production.
+# --------------------------------------------------------------------------
+
+# OpenRouter's undocumented cap for Anthropic structured output is ~13
+# properties per JSON-Schema object ($defs item).  Stay at or below it.
+_ANTHROPIC_MAX_PROPS_PER_OBJECT = 13
+
+
+def _max_object_property_count(schema: dict) -> tuple[int, str]:
+    """Return (max properties on any object, the object's title) in *schema*.
+
+    Walks the root schema plus every ``$defs`` entry — an Anthropic structured
+    call rejects a schema when ANY single object exceeds the cap, so the
+    per-object maximum is what matters, not the total field count.
+    """
+    worst = (0, "<root>")
+    objects = [("<root>", schema)]
+    for name, defn in (schema.get("$defs") or {}).items():
+        objects.append((name, defn))
+    for name, obj in objects:
+        n = len(obj.get("properties") or {})
+        if n > worst[0]:
+            worst = (n, name)
+    return worst
+
+
+@pytest.mark.parametrize(
+    "model_import",
+    [
+        "RefinedName",
+        "StandardNameCandidate",
+        "StandardNameCandidateResponse",
+    ],
+)
+def test_llm_schema_object_within_anthropic_property_limit(model_import):
+    """Every object in an LLM response-model's validation schema stays ≤ the
+    Anthropic per-object property cap, so Anthropic structured output does not
+    fail with 'Schema is too complex'."""
+    import importlib
+
+    models_mod = importlib.import_module("imas_codex.standard_names.models")
+    model_cls = getattr(models_mod, model_import, None)
+    if model_cls is None:
+        pytest.skip(f"{model_import} not present")
+    schema = model_cls.model_json_schema()  # validation mode = the LLM's schema
+    count, obj_name = _max_object_property_count(schema)
+    assert count <= _ANTHROPIC_MAX_PROPS_PER_OBJECT, (
+        f"{model_import} object '{obj_name}' has {count} properties, exceeding "
+        f"the Anthropic structured-output cap of {_ANTHROPIC_MAX_PROPS_PER_OBJECT}"
+        f" — Anthropic calls will fail with 'Schema is too complex'. Split the "
+        f"object or derive a field (see GrammarSegments.projection_shape)."
+    )

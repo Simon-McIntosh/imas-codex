@@ -6,7 +6,13 @@ import functools
 import logging
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationError,
+    computed_field,
+    model_validator,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +25,6 @@ logger = logging.getLogger(__name__)
 # so required enums (e.g. entry ``kind``) carry the constraint in-schema and
 # the model sees the permitted values instead of guessing from examples.
 _BASE_KINDS = {"quantity", "geometry"}
-_PROJECTION_SHAPES = {"component", "coordinate"}
 _LOCUS_RELATIONS = {"of", "at", "over"}
 _LOCUS_TYPES = {"entity", "position", "region", "geometry"}
 _OPERATOR_KINDS = {"unary_prefix", "unary_postfix", "binary"}
@@ -157,12 +162,6 @@ class GrammarSegments(BaseModel):
             "Axis token for component/coordinate projection, e.g. 'radial', 'toroidal'"
         ),
     )
-    projection_shape: str | None = Field(
-        default=None,
-        description=(
-            "'component' for physical quantities, 'coordinate' for geometric bases"
-        ),
-    )
 
     qualifiers: list[str] = Field(
         default_factory=list,
@@ -240,6 +239,23 @@ class GrammarSegments(BaseModel):
         ),
     )
 
+    @computed_field  # serialized in model_dump(), absent from the LLM (validation) schema
+    @property
+    def projection_shape(self) -> str | None:
+        """Projection shape, fully derived from ``base_kind``.
+
+        ISN IR fixes the correspondence: a physical-quantity base projects to a
+        ``component``, a geometry carrier projects to a ``coordinate``.  There
+        is therefore nothing for the LLM to choose — the field was previously an
+        input the validator overwrote — so it is a derived property, keeping the
+        LLM ``GrammarSegments`` schema at 13 properties (Anthropic/OpenRouter
+        reject a ``$defs`` object above ~13 with "Schema is too complex").
+        ``None`` when there is no projection axis.
+        """
+        if self.projection_axis is None:
+            return None
+        return "coordinate" if self.base_kind == "geometry" else "component"
+
     def _binary_model_op(self) -> str | None:
         """Return the ISN model-form binary operator token, or None.
 
@@ -265,14 +281,9 @@ class GrammarSegments(BaseModel):
             raise ValueError(
                 f"base_kind must be one of {_BASE_KINDS}, got '{self.base_kind}'"
             )
-        if (
-            self.projection_shape is not None
-            and self.projection_shape not in _PROJECTION_SHAPES
-        ):
-            raise ValueError(
-                f"projection_shape must be one of {_PROJECTION_SHAPES}, "
-                f"got '{self.projection_shape}'"
-            )
+        # projection_shape is a derived property (see the computed field): it is
+        # always canonical for base_kind, so there is nothing to validate or
+        # coerce here anymore.
         if (
             self.locus_relation is not None
             and self.locus_relation not in _LOCUS_RELATIONS
@@ -290,14 +301,6 @@ class GrammarSegments(BaseModel):
                 f"operator_kind must be one of {_OPERATOR_KINDS}, "
                 f"got '{self.operator_kind}'"
             )
-        # The shape is fully derivable from base_kind whenever a projection is
-        # present (ISN IR: component ↔ quantity base, coordinate ↔ geometry
-        # carrier), so coerce rather than bounce the whole composition when
-        # the LLM picks the wrong one.
-        if self.projection_axis is not None or self.projection_shape is not None:
-            derived = "coordinate" if self.base_kind == "geometry" else "component"
-            if self.projection_shape != derived:
-                self.projection_shape = derived
         return self
 
     @model_validator(mode="after")

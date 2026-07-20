@@ -2395,7 +2395,8 @@ async def _self_refine_candidate(
         base_token: str = Field(description="Registered physical_base/geometry token")
         base_kind: str = Field(default="quantity", description="quantity | geometry")
         projection_axis: str | None = None
-        projection_shape: str | None = None
+        # projection_shape is derived from base_kind (see GrammarSegments) — not
+        # an LLM input.
         qualifiers: list[str] = Field(default_factory=list)
         locus_token: str | None = None
         locus_relation: str | None = None
