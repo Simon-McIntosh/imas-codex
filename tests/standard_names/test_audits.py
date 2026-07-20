@@ -72,15 +72,17 @@ class TestLatexDefCheck:
         }
         assert latex_def_check(candidate) == []
 
-    def test_pass_definition_word_with_unit_still_passes(self):
-        """A symbol defined by identity (a def word) still passes even when a
-        unit is also present — the change only removes unit-ONLY as satisfier."""
+    def test_pass_identity_defined_symbol(self):
+        """A symbol defined by identity (a def word) passes. latex_def_check
+        scores identity only; unit tokens have no place in documentation prose
+        and are policed separately (see audit:symbol_units)."""
         from imas_codex.standard_names.audits import latex_def_check
 
         candidate = {
             "documentation": (
                 "The poloidal field $B_p$ is the poloidal magnetic-field "
-                "magnitude on the contour, in T. It weights the average."
+                "magnitude evaluated on the integration contour. "
+                "It weights the flux-surface average."
             ),
         }
         assert latex_def_check(candidate) == []
