@@ -25,19 +25,26 @@ BANNED_PROSE_PATTERNS: dict[str, list[re.Pattern]] = {
         re.compile(r"~\s*\d"),
     ],
     "estimator_recipe": [
-        # A compute recipe narrates *how* a value is produced.  "X is
-        # computed/obtained/calculated/estimated as|by|from ..." is such a
-        # recipe.  "X is derived FROM [related quantity]" instead names the
-        # source quantity — legitimate provenance, not a recipe — so `derived`
-        # pairs only with as|by here, exempting the "derived from" provenance
-        # form the refine seat writes for any derived quantity.
+        # A compute recipe narrates *how* a value is produced: "X is
+        # computed/obtained/calculated/estimated as|by|from <procedure>".
         re.compile(
             r"\bis (?:computed|calculated|estimated|obtained) (?:as|by|from)\b",
             re.I,
         ),
-        re.compile(r"\bis derived (?:as|by)\b", re.I),
         re.compile(
             r"\bcan be (?:computed|calculated|estimated|obtained)\b", re.I
+        ),
+        # "derived as|by <procedure>" is always a recipe.
+        re.compile(r"\b(?:is|can be) derived (?:as|by)\b", re.I),
+        # "derived from Y" is a recipe when Y is a procedure/measurement, but
+        # NOT when Y is a catalogued quantity linked as [label](name:id) within
+        # the same sentence — that is the parent/child provenance form the
+        # refine seat writes for a derived quantity, e.g.
+        # "derived from the local [hydrogen density](name:hydrogen_density)".
+        # Exempt only that linked-quantity provenance; keep flagging
+        # "derived from equilibrium reconstruction by fitting ...".
+        re.compile(
+            r"\b(?:is|can be) derived from\b(?![^.]*\[[^\]]+\]\(name:)", re.I
         ),
         re.compile(r"\bto (?:compute|calculate|estimate)\b", re.I),
     ],

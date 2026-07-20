@@ -8,32 +8,41 @@ from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
 from imas_codex.standard_names.prose_policy import banned_prose_findings
 
 
-def test_derived_from_provenance_is_not_an_estimator_recipe() -> None:
-    """"X is derived from [related quantity]" names a source quantity — that is
-    provenance, not a compute recipe — so it must not flag as estimator_recipe.
+def test_derived_from_linked_quantity_is_provenance_not_a_recipe() -> None:
+    """"X is derived from [Y](name:Y)" names a catalogued source quantity — the
+    parent/child provenance form the refine seat writes — so it must not flag as
+    estimator_recipe.  The exemption is conditioned on the in-sentence
+    ``[label](name:id)`` link, NOT on the word "derived" alone.
 
-    Anchored on the two accepted docs whose "is derived from the local ..."
-    provenance sentence tripped the campaign convergence gate as a spurious
-    banned-prose reintroduction.
+    Anchored on the two accepted docs whose linked "derived from the local ..."
+    provenance sentence tripped the campaign gate as a spurious reintroduction.
     """
     provenance = [
-        "It is derived from the local hydrogen density and excludes neutral "
-        "atomic hydrogen and heavier hydrogen isotopes.",
-        "It is derived from the local tritium density and deuterium density.",
-        "This ratio can be derived from the deuterium density.",
+        "It is derived from the local [hydrogen density](name:hydrogen_density) "
+        "and excludes neutral atomic hydrogen and heavier hydrogen isotopes.",
+        "It is derived from the local [tritium density](name:tritium_density) "
+        "and [deuterium density](name:deuterium_density).",
+        "This ratio can be derived from the local "
+        "[deuterium density](name:deuterium_density).",
     ]
     for text in provenance:
         assert banned_prose_findings(text)["estimator_recipe"] == 0, text
 
 
-def test_genuine_compute_recipes_still_flag_estimator_recipe() -> None:
-    """The exemption must not blunt detection of real "how it is computed"
-    recipes — those use computed/obtained/calculated/estimated, or "derived
-    by" a procedure, all of which stay banned."""
+def test_derived_from_a_procedure_still_flags_estimator_recipe() -> None:
+    """"derived from <procedure/measurement>" (no linked quantity) is a genuine
+    recipe and must stay flagged — the exemption is only for linked provenance."""
     recipes = [
+        # unlinked "derived from <procedure>" — the majority catalog usage
+        "It is derived from equilibrium reconstruction by fitting magnetic "
+        "field measurements.",
+        "This quantity is derived from view-factor integration of the total "
+        "radiated power.",
+        "The profile is derived from transport models that parameterize "
+        "neoclassical fluxes.",
+        # other compute verbs are unconditional
         "In practice this quantity is computed by integrating local absorption.",
         "This quantity is obtained by integrating the fast-ion distribution.",
-        "The velocity is computed from kinetic or fluid models.",
         "This value can be computed with a transport code.",
         "It is derived by differentiating the smoothed profile.",
     ]
