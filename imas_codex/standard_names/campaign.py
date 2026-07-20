@@ -39,6 +39,7 @@ callable so the orchestration is testable against a mock graph.
 from __future__ import annotations
 
 import json
+import logging
 import random
 from collections import Counter
 from collections.abc import Callable, Sequence
@@ -51,6 +52,8 @@ from imas_codex.standard_names.prose_policy import (
     BANNED_PROSE_PATTERNS,
     banned_prose_findings,
 )
+
+logger = logging.getLogger(__name__)
 
 # ── Predicate vocabulary ────────────────────────────────────────────────────
 #
@@ -481,6 +484,9 @@ class BatchOutcome:
     # members a fresh ISN audit re-quarantined (genuine defect) vs cleared.
     audit_requarantined: int = 0
     audit_cleared: int = 0
+    # Docs the prose grep flagged but the LLM adjudicator cleared as legitimate
+    # definitional writing (recorded for review, do NOT count as reintroduction).
+    prose_adjudicated_clear: list[str] = field(default_factory=list)
 
     @property
     def accept_rate(self) -> float:
@@ -527,18 +533,28 @@ def measure_batch(
     *,
     batch_index: int,
     cost: float = 0.0,
+    adjudicate: Callable[[Sequence[tuple[str, str, dict[str, int]]]], list[bool]]
+    | None = None,
 ) -> BatchOutcome:
     """Compute a :class:`BatchOutcome` from post-drain graph rows — pure.
 
     ``refreshed_rows`` needs ``id``, ``name_stage``, ``docs_stage``,
     ``description`` and ``documentation`` for each still-present member.  A
     batch id absent from the rows, or present with a non-accepted name stage,
-    counts as name-axis drift.  A refreshed doc that still trips the
-    banned-prose grep counts as reintroduction.
+    counts as name-axis drift.
+
+    The banned-prose grep is a cheap, over-inclusive pre-filter.  A doc it flags
+    is a *candidate* reintroduction; when ``adjudicate`` is supplied, the flagged
+    candidates are passed to a light LLM that decides which are genuine banned
+    prose versus legitimate definitional writing (mathematical definitions,
+    provenance/derivation among catalogued quantities, taxonomy links).  Only
+    genuine flags count as reintroduction and can halt the gate; the rest are
+    recorded in ``prose_adjudicated_clear`` for review.  Without ``adjudicate``
+    every grep flag counts as reintroduction (grep-only fallback).
     """
     by_id = {r["id"]: r for r in refreshed_rows}
     accepted = 0
-    reintroduced: list[str] = []
+    flagged: list[tuple[str, str, dict[str, int]]] = []
     drift: list[str] = []
     touched = 0
 
@@ -554,8 +570,25 @@ def measure_batch(
         if (row.get("docs_stage") or "") == "accepted":
             accepted += 1
         text = f"{row.get('description') or ''}\n{row.get('documentation') or ''}"
-        if any(v > 0 for v in banned_prose_findings(text).values()):
-            reintroduced.append(sid)
+        findings = banned_prose_findings(text)
+        if any(v > 0 for v in findings.values()):
+            flagged.append((sid, text, findings))
+
+    if flagged and adjudicate is not None:
+        verdicts = adjudicate(flagged)
+        reintroduced = [
+            sid
+            for (sid, _, _), genuine in zip(flagged, verdicts, strict=True)
+            if genuine
+        ]
+        adjudicated_clear = [
+            sid
+            for (sid, _, _), genuine in zip(flagged, verdicts, strict=True)
+            if not genuine
+        ]
+    else:
+        reintroduced = [sid for sid, _, _ in flagged]
+        adjudicated_clear = []
 
     return BatchOutcome(
         batch_index=batch_index,
@@ -565,6 +598,7 @@ def measure_batch(
         reintroduced_ids=reintroduced,
         name_drift=drift,
         cost=cost,
+        prose_adjudicated_clear=adjudicated_clear,
     )
 
 
@@ -759,6 +793,7 @@ class CampaignResult:
     total_cost: float = 0.0
     total_audit_requarantined: int = 0
     total_audit_cleared: int = 0
+    total_prose_adjudicated_clear: int = 0
     run_ids: list[str] = field(default_factory=list)
     outcomes: list[BatchOutcome] = field(default_factory=list)
     halted: bool = False
@@ -828,6 +863,10 @@ class CampaignRunner:
         start_batch: int = 0,
         abort_check: Callable[[], bool] | None = None,
         on_batch: Callable[[BatchOutcome], None] | None = None,
+        adjudicate_prose_fn: Callable[
+            [Sequence[tuple[str, str, dict[str, int]]]], list[bool]
+        ]
+        | None = None,
     ) -> CampaignResult:
         """Run the campaign from *start_batch*, halting on the first failure.
 
@@ -889,7 +928,13 @@ class CampaignRunner:
             else:
                 cost = float(cost_fn(run_id)) if run_id else 0.0
             refreshed = fetch_refreshed_fn(gc, batch)
-            outcome = measure_batch(refreshed, batch, batch_index=index, cost=cost)
+            outcome = measure_batch(
+                refreshed,
+                batch,
+                batch_index=index,
+                cost=cost,
+                adjudicate=adjudicate_prose_fn,
+            )
 
             touched_ids = [r["id"] for r in refreshed]
 
@@ -924,7 +969,15 @@ class CampaignRunner:
             result.total_cost += cost
             result.total_audit_requarantined += outcome.audit_requarantined
             result.total_audit_cleared += outcome.audit_cleared
+            result.total_prose_adjudicated_clear += len(outcome.prose_adjudicated_clear)
             result.outcomes.append(outcome)
+            if outcome.prose_adjudicated_clear:
+                logger.info(
+                    "prose adjudicator cleared %d grep-flagged doc(s) as "
+                    "legitimate this batch: %s",
+                    len(outcome.prose_adjudicated_clear),
+                    ", ".join(outcome.prose_adjudicated_clear[:10]),
+                )
             if on_batch is not None:
                 on_batch(outcome)
 

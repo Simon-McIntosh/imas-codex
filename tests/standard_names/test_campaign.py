@@ -442,6 +442,79 @@ class TestMeasureBatch:
         assert outcome.accept_rate == 1.0
         assert outcome.name_drift == ["gone"]
 
+    def _two_flagged(self):
+        return [
+            {
+                "id": "genuine",
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "description": "Typically ~5 keV.",
+                "documentation": "In practice it is obtained from Thomson scattering.",
+            },
+            {
+                "id": "definitional",
+                # A definitional relation the grep still flags (compute verb with
+                # no trailing equation) but the adjudicator recognises as
+                # legitimate — the real ion_kinetic_energy_flux_at_wall form.
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "description": "A scalar.",
+                "documentation": (
+                    "The associated particle flux is obtained by omitting the "
+                    "kinetic-energy factor from the integrand."
+                ),
+            },
+        ]
+
+    def test_adjudicator_splits_genuine_from_legitimate(self):
+        # grep flags BOTH docs; the adjudicator keeps only the genuine one and
+        # records the definitional false positive as cleared (no halt on it).
+        seen = {}
+
+        def adjudicate(flagged):
+            seen["ids"] = [sid for sid, _, _ in flagged]
+            return [sid == "genuine" for sid, _, _ in flagged]
+
+        outcome = measure_batch(
+            self._two_flagged(),
+            ["genuine", "definitional"],
+            batch_index=0,
+            adjudicate=adjudicate,
+        )
+        assert set(seen["ids"]) == {"genuine", "definitional"}
+        assert outcome.reintroduced_ids == ["genuine"]
+        assert outcome.prose_adjudicated_clear == ["definitional"]
+        assert outcome.banned_prose_reintroduced == 1
+
+    def test_no_adjudicator_falls_back_to_grep_only(self):
+        # Without an adjudicator every grep flag counts as reintroduction.
+        outcome = measure_batch(
+            self._two_flagged(), ["genuine", "definitional"], batch_index=0
+        )
+        assert set(outcome.reintroduced_ids) == {"genuine", "definitional"}
+        assert outcome.prose_adjudicated_clear == []
+
+    def test_adjudicator_not_called_when_nothing_flagged(self):
+        called = {"n": 0}
+
+        def adjudicate(flagged):
+            called["n"] += 1
+            return [True] * len(flagged)
+
+        clean = [
+            {
+                "id": "ok",
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "description": "Clean.",
+                "documentation": "A clean scalar field.",
+            }
+        ]
+        outcome = measure_batch(clean, ["ok"], batch_index=0, adjudicate=adjudicate)
+        assert called["n"] == 0
+        assert outcome.reintroduced_ids == []
+        assert outcome.prose_adjudicated_clear == []
+
 
 # ── Default graph writes ───────────────────────────────────────────────────────
 

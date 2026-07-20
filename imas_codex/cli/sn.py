@@ -1958,6 +1958,22 @@ def sn_run(
             f"{selection.total} name(s) in batches of {campaign_batch_size}…"
         )
         runner = CampaignRunner(spec, budget, thresholds)
+        # The banned-prose grep is an over-inclusive candidate pre-filter; a
+        # light LLM adjudicates each flagged refined doc so the convergence gate
+        # halts on genuine reintroductions, not on legitimate definitional prose
+        # (mathematical definitions, provenance/derivation among catalogued
+        # quantities, taxonomy links) that good docs legitimately contain.
+        from imas_codex.settings import _get_section
+        from imas_codex.standard_names.prose_adjudicator import (
+            DEFAULT_ADJUDICATOR_MODEL,
+            make_prose_adjudicator,
+        )
+
+        adjudicator_cfg = _get_section("sn-prose-adjudicator")
+        adjudicate_prose_fn = make_prose_adjudicator(
+            adjudicator_cfg.get("model", DEFAULT_ADJUDICATOR_MODEL),
+            reasoning_effort=adjudicator_cfg.get("reasoning-effort", "low"),
+        )
         with GraphClient() as gc:
             result = runner.run(
                 gc=gc,
@@ -1968,6 +1984,7 @@ def sn_run(
                 # genuine defect re-quarantines instead of washing to 'valid'.
                 audit_fn=default_audit_revalidate,
                 start_batch=campaign_resume_from,
+                adjudicate_prose_fn=adjudicate_prose_fn,
             )
         if result.halted:
             console.print(
@@ -1985,6 +2002,8 @@ def sn_run(
                 f"{result.total_accepted}/{result.total_touched} docs accepted, "
                 f"re-audit {result.total_audit_requarantined} re-quarantined / "
                 f"{result.total_audit_cleared} cleared, "
+                f"prose-adjudicator cleared {result.total_prose_adjudicated_clear} "
+                f"grep flag(s) as legitimate, "
                 f"spend ${result.total_cost:.2f}."
             )
         return
