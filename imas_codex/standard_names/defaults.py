@@ -2,8 +2,12 @@
 
 All tunable thresholds and timing knobs live here. Override at the CLI or in
 ``pyproject.toml`` under ``[tool.imas-codex.sn]`` rather than editing this
-file.
+file.  Model *selections* are NOT tunables — they live in their own
+``[tool.imas-codex.sn-*]`` pyproject sections and are read via
+``settings.get_model()``; never hardcode a model id here.
 """
+
+from imas_codex.settings import get_model
 
 # Reviewer-score thresholds
 DEFAULT_MIN_SCORE: float = 0.85
@@ -30,14 +34,12 @@ Low enough to guarantee routing to the refine_name pool."""
 DEFAULT_REFINE_ROTATIONS: int = 3
 """Maximum REFINED_FROM (or DOCS_REVISION_OF) chain depth before exhaustion."""
 
-# Escalation model — used on the final refine attempt before exhaustion.
-# MUST be a different vendor from both compose (local deepseek-v4-flash)
-# and refine (gpt-5.5): escalation exists to break a failure loop with an
-# independent perspective, not to hand the item back to a model family
-# that already failed it (user ruling 2026-06-11; previously defaulted to
-# the compose model, which was backwards). opus-4.8 matches the quorum-
-# breaker precedent; it fires only at chain cap so the cost is amortised.
-DEFAULT_ESCALATION_MODEL: str = "openrouter/anthropic/claude-opus-4.8"
+# Model used on the final refine attempt before exhaustion, for BOTH
+# name-refine and docs-refine escalation. Configured in
+# ``[tool.imas-codex.sn-escalation]`` (vendor-diverse from compose/refine so
+# escalation breaks a failure loop with an independent perspective; fires only
+# at chain cap).
+DEFAULT_ESCALATION_MODEL: str = get_model("sn-escalation")
 """Model used on the final refine attempt (chain_length == cap-1)."""
 
 # Orphan sweep timing

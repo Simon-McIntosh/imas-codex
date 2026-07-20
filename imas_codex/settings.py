@@ -90,8 +90,10 @@ MODEL_SECTIONS = frozenset(
         "sn-compose",
         "sn-docs",
         "sn-refine",
+        "sn-escalation",
         "sn-parent-enrich",
         "sn-classifier",
+        "sn-prose-adjudicator",
     }
 )
 
@@ -111,6 +113,10 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # ~5%).  Sonnet 4.6 matches compose tier so the refine pass is
     # capable enough to recover from reviewer feedback.
     "sn-refine": "openrouter/anthropic/claude-sonnet-4.6",
+    # Final refine attempt at chain cap (name + docs). Vendor-diverse from
+    # compose and refine so escalation breaks a failure loop with an
+    # independent perspective. Active model in [tool.imas-codex.sn-escalation].
+    "sn-escalation": "openrouter/anthropic/claude-fable-5",
     # Derived-parent description synthesis (generalises over a parent's
     # already-accepted children).  Compose-tier task — a concise
     # description, not long-form physics prose — so it defaults to the
@@ -120,6 +126,10 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # Physics-domain classifier for DD paths (SN names inherit the domain).
     # Previously borrowed the generic [language] seat; now SN-attributable.
     "sn-classifier": "openrouter/openai/gpt-5.5",
+    # Adjudicates banned-prose grep flags on refined docs at the campaign
+    # convergence gate; quorum-independent. Active model in
+    # [tool.imas-codex.sn-prose-adjudicator].
+    "sn-prose-adjudicator": "openrouter/openai/gpt-5.6-luna",
 }
 
 # Environment variable names per section
@@ -134,8 +144,10 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "sn-compose": "IMAS_CODEX_SN_COMPOSE_MODEL",
     "sn-docs": "IMAS_CODEX_SN_DOCS_MODEL",
     "sn-refine": "IMAS_CODEX_SN_REFINE_MODEL",
+    "sn-escalation": "IMAS_CODEX_SN_ESCALATION_MODEL",
     "sn-parent-enrich": "IMAS_CODEX_SN_PARENT_ENRICH_MODEL",
     "sn-classifier": "IMAS_CODEX_SN_CLASSIFIER_MODEL",
+    "sn-prose-adjudicator": "IMAS_CODEX_SN_PROSE_ADJUDICATOR_MODEL",
 }
 
 

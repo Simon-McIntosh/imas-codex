@@ -309,11 +309,18 @@ reasoning-effort = "high"
 # Switch-back to local: model="hosted_vllm/deepseek-v4-flash"
 # with api-base="http://98dci4-gpu-0003:18800/v1", api-key-env="AMBIX_API_KEY".
 model = "openrouter/openai/gpt-5.5"
-# Reasoning effort for refine_name / refine_docs rewrites (and the opus
-# escalation on the final rotation). "high" — NOT "max": these route through
-# OpenRouter (gpt-5.5; escalation default is local v4-flash), which accepts only
-# low|medium|high. "max" is a vLLM/DeepSeek-only level (see [sn-compose]).
+# Reasoning effort for refine_name / refine_docs rewrites. "high" — NOT "max":
+# these route through OpenRouter, which accepts only low|medium|high. "max" is a
+# vLLM/DeepSeek-only level (see [sn-compose]). The final chain-cap attempt uses
+# [tool.imas-codex.sn-escalation] at escalation-reasoning-effort.
 reasoning-effort = "high"
+
+[tool.imas-codex.sn-escalation]
+# Final refine attempt at chain cap, for both name-refine and docs-refine.
+# Vendor-diverse from the refine base (OpenAI) and compose model (local
+# DeepSeek) so escalation breaks a failure loop with an independent perspective
+# rather than the family that already failed the item; fires only at chain cap.
+model = "openrouter/anthropic/claude-fable-5"
 
 [tool.imas-codex.sn-parent-enrich]
 # Derived-parent description synthesis. A derived parent (e.g.
@@ -338,6 +345,14 @@ reasoning-effort = "medium"
 # (209 paths, exact match, sn bench --role classifier, 2026-07-19): see the
 # results doc; gpt-5.5 seated as the robust OpenAI-tier default.
 model = "openrouter/openai/gpt-5.5"
+
+[tool.imas-codex.sn-prose-adjudicator]
+# Adjudicates banned-prose grep flags on refined docs at the campaign
+# convergence gate: decides whether a flagged doc genuinely reintroduced banned
+# prose or is legitimate definitional writing. A light seat, kept independent of
+# the docs review quorum so it does not double-count a reviewer's blind spot.
+model = "openrouter/openai/gpt-5.6-luna"
+reasoning-effort = "low"
 
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control

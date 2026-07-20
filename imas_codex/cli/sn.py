@@ -1963,17 +1963,12 @@ def sn_run(
         # halts on genuine reintroductions, not on legitimate definitional prose
         # (mathematical definitions, provenance/derivation among catalogued
         # quantities, taxonomy links) that good docs legitimately contain.
-        from imas_codex.settings import _get_section
         from imas_codex.standard_names.prose_adjudicator import (
-            DEFAULT_ADJUDICATOR_MODEL,
             make_prose_adjudicator,
         )
 
-        adjudicator_cfg = _get_section("sn-prose-adjudicator")
-        adjudicate_prose_fn = make_prose_adjudicator(
-            adjudicator_cfg.get("model", DEFAULT_ADJUDICATOR_MODEL),
-            reasoning_effort=adjudicator_cfg.get("reasoning-effort", "low"),
-        )
+        # Model + effort come from [tool.imas-codex.sn-prose-adjudicator].
+        adjudicate_prose_fn = make_prose_adjudicator()
         with GraphClient() as gc:
             result = runner.run(
                 gc=gc,

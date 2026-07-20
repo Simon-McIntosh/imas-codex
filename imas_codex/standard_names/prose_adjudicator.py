@@ -30,18 +30,10 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
-# Default adjudicator seat.  A light, well-calibrated discriminator is wanted:
-# the job is to NOT flag legitimate definitional prose, so a model that
-# over-rejects good docs is a poor fit here.  Selected on a labelled bench
-# (2026-07-20, 12 grep-flagged docs: definitional relations / provenance /
-# taxonomy vs genuine measurement recipes + typical values): grok-4.5,
-# gpt-5.6-terra, gpt-5.6-luna, and gemini-3.5-flash all classified correctly
-# with zero over-rejection of legitimate prose; luna was cheapest
-# ($0.0018/call) AND is independent of the docs review quorum
-# (sonnet-5 + grok-4.5 + gpt-5.5), so it does not double-count a reviewer's
-# blind spots.  Overridable via ``[tool.imas-codex.sn-prose-adjudicator].model``
-# and the ``model`` argument.
-DEFAULT_ADJUDICATOR_MODEL = "openrouter/openai/gpt-5.6-luna"
+# The adjudicator seat is configured in ``[tool.imas-codex.sn-prose-adjudicator]``
+# (read via ``settings.get_model``).  It wants a light, well-calibrated
+# discriminator that does NOT over-reject legitimate definitional prose, kept
+# independent of the docs review quorum so it does not double-count a reviewer.
 
 
 class ProseVerdict(BaseModel):
@@ -160,9 +152,9 @@ async def _adjudicate_one(
 
 
 def make_prose_adjudicator(
-    model: str = DEFAULT_ADJUDICATOR_MODEL,
+    model: str | None = None,
     *,
-    reasoning_effort: str | None = "low",
+    reasoning_effort: str | None = None,
     service: str = "standard-names",
 ) -> Callable[[Sequence[tuple[str, str, dict[str, int]]]], list[bool]]:
     """Build a sync gate-adjudicator callable.
@@ -171,7 +163,16 @@ def make_prose_adjudicator(
     for a batch and returns a genuine-banned bool per item, adjudicating them
     concurrently with a light LLM.  Called from the synchronous campaign loop
     after a drain has completed, so it owns its event loop.
+
+    ``model``/``reasoning_effort`` default to the ``sn-prose-adjudicator``
+    pyproject seat when not supplied.
     """
+    from imas_codex.settings import get_model, get_reasoning_effort
+
+    if model is None:
+        model = get_model("sn-prose-adjudicator")
+    if reasoning_effort is None:
+        reasoning_effort = get_reasoning_effort("sn-prose-adjudicator", "low")
 
     def _adjudicate(
         flagged: Sequence[tuple[str, str, dict[str, int]]],
