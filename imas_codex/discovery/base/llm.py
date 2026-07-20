@@ -300,6 +300,15 @@ RETRYABLE_PATTERNS = frozenset(
         "rate",
         "429",
         "503",
+        # Upstream 500s are provider-side transients (the backend accepted the
+        # request but errored building the response), NOT rate-limits — a retry
+        # of the single call recovers them, whereas the AIMD governor's
+        # concurrency pullback (429-only, by design) cannot. Matched by phrase,
+        # not a bare "500", to avoid colliding with token counts / prices in an
+        # error string. Covers OpenRouter ("the server had an error") and
+        # litellm's canonical InternalServerError ("internal server error").
+        "internal server error",
+        "the server had an error",
         "timeout",
         "eof",  # EOF while parsing JSON (truncated response)
         "json",  # JSON parsing errors

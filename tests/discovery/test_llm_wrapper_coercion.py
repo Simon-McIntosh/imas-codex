@@ -394,6 +394,28 @@ def test_empty_response_error_is_retryable():
     assert err.finish_reason == "length"
 
 
+def test_upstream_500_is_retryable_but_not_rate_limited():
+    """Provider 500s retry the single call but never pull back concurrency.
+
+    A 500 is a backend transient, distinct from a 429: retrying recovers it,
+    whereas the AIMD governor's concurrency pullback (429-only) would not.
+    """
+    from imas_codex.discovery.base.llm import _is_rate_limited, _is_retryable
+
+    openrouter_500 = (
+        "litellm.APIError: APIError: OpenrouterException - The server had an "
+        "error processing your request. Sorry about that!"
+    )
+    internal_500 = (
+        "litellm.InternalServerError: Internal server error from provider"
+    )
+    for msg in (openrouter_500, internal_500):
+        assert _is_retryable(msg) is True
+        # A 500 must NOT be misread as a rate-limit — it stays out of the
+        # governor's backoff path.
+        assert _is_rate_limited(msg) is False
+
+
 def test_bump_max_tokens_grows_then_caps():
     """The length-retry budget bump doubles up to a hard cap, then stops."""
     from imas_codex.discovery.base.llm import (
