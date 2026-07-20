@@ -228,7 +228,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 
 - `standard_name` — MUST exactly match the input name (hard requirement for result matching).
 - `description` — **1 concise sentence strongly preferred, 2 max (≤250 characters)**. The first sentence must be a self-contained definition. Add ONLY information beyond what the name tokens already encode. Do NOT start with trailing participles ("Representing...", "Characterizing...", "Quantifying..."). Use American spelling (e.g., "ionization", "behavior").
-- `documentation` — a strict normative definition. Cover physical meaning, a defining equation when applicable, symbol definitions, scope/exclusions, essential relationships, and a necessary sign convention. Do not add generic methods or typical values. American spelling throughout.
+- `documentation` — a strict normative definition. Cover physical meaning, a defining equation when applicable, symbol definitions (by identity, preferring `name:` links), scope/exclusions, essential relationships, and a necessary sign convention. Do not add generic methods, typical values, or units in prose (the unit is the structured `unit` field). American spelling throughout.
 - `links` — MUST use the `name:foo_bar` prefix (e.g., `name:electron_temperature`). Each link must name an existing standard name (will be validated; non-existent links cause rejection). URLs (https://…) are permitted for external references.
 - `validity_domain` — optional but encouraged. Physical region or regime where the quantity is meaningful.
 - `constraints` — optional. Physical constraints on the quantity.
@@ -237,11 +237,13 @@ Return a JSON object with an `items` array. Each item conforms to:
 
 ## Documentation Quality Rules (D5 review)
 
-### Spectrum unit rule
+### Spectrum integration rule
 If the name ends in `_spectrum`, the documentation MUST state which
-integration variable closes the budget (e.g. "integrating over toroidal
-mode number $n_\phi$ recovers the total power in W"). If the unit lacks
-a spectral denominator, note the inconsistency explicitly.
+integration variable closes the budget by naming the recovered quantity
+(e.g. "integrating over toroidal mode number $n_\phi$ recovers the
+[total power](name:total_power)"). State the recovered quantity's identity,
+never its unit. If the spectral denominator is missing from the structured
+`unit` field, note the inconsistency explicitly.
 
 ### Boilerplate suppression
 - For χ² constraint weights: do NOT re-derive the generic inverse-problem
@@ -352,25 +354,17 @@ via inline link.
 - ✅ GOOD: `The fast neutral perpendicular pressure quantifies ...`
 - ✅ GOOD: `[electron_temperature](name:electron_temperature) is the kinetic ...`
 
-**Narrow exceptions.** Units MAY appear inline only in these two contexts,
-because they carry numeric meaning the unit field cannot:
-
-1. **Equation variable definitions** — e.g. `where $T_e$ is in eV and
-   $n_e$ is in m$^{-3}$.` (Define units explicitly so the equation is
-   dimensionally unambiguous.)
-2. **Unit-conversion statements** — e.g. `$1\;\text{eV} = 11605\;\text{K}$`
-   (DS-3 unit-conversion rule).
-
-Outside these two contexts, NEVER write `(in <unit>)`, `<value> <unit>`, or a
-standalone unit expression — **whether ASCII (`kg m^-1 s^-2`) or LaTeX
-(`$\mathrm{kg\,m^{-1}\,s^{-2}}$`)** — in prose. Restating the entry's own unit
-as a rendered LaTeX/ASCII string (a legacy leak such as
-`parallel_ion_state_momentum` spelling out `$\mathrm{kg\,m^{-1}\,s^{-2}}$`) is
-the same defect as `(in <unit>)`. The unit panel already renders the canonical
-unit at the top of each catalog page; repeating it anywhere in prose is noise.
-The two exceptions above are narrow — they attach a unit to an equation
-variable or necessary conversion — they do NOT license a free-standing restatement of the
-quantity's unit.
+**No exceptions.** Units never appear in prose — not in equation variable
+definitions (`where $T_e$ is in eV and $n_e$ is in m$^{-3}$` is a defect), not
+as a unit-conversion statement, and not as a standalone unit expression whether
+ASCII (`kg m^-1 s^-2`) or LaTeX (`$\mathrm{kg\,m^{-1}\,s^{-2}}$`). Define every
+symbol by its **identity** — the physical quantity it denotes, preferring a
+`[label](name:bare_id)` link — never by its dimension. An equation whose
+symbols are each bound to a named quantity is already dimensionally
+unambiguous; the symbol's unit follows from that quantity. The `unit` field is
+authoritative and the unit panel renders it at the top of every catalog page,
+so any unit anywhere in prose — the entry's own or a linked sibling's — is a
+defect.
 
 ### PR-4 Calibration-parameter anti-speculation rule
 For SNs whose DD path indicates calibration data (e.g. `*/calibration/*`,

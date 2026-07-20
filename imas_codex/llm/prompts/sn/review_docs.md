@@ -47,7 +47,7 @@ Rate each dimension from 0 to 20. The total score is the sum (0-80).
 
 ### 4. Physics Accuracy (0-20)
 - Are stated equations physically correct for the named quantity?
-- Are unit conversions correct (e.g. ``eV_to_K = 11605``, ``Pa_to_eV_per_m3 = 6.242e+18``)?
+- **No units in prose:** the documentation must carry NO unit anywhere (no ``(in eV)``, no ``where $T_e$ is in eV``, no ``$\mathrm{kg\,m^{-1}\,s^{-2}}$`` expression, no unit-conversion statement). The unit is the structured field; symbols are defined by identity. Flag any unit in prose as a defect.
 - Is the physics qualifier appropriate (no ``flux_surface_averaged_elongation`` when elongation is a geometric property)?
 - Does the documentation correctly position the quantity against related ones (no false equivalences)?
 

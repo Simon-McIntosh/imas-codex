@@ -20,7 +20,7 @@ this paragraph structure, separated by **blank lines** (literal `\n\n`):
    - Use `$$...$$` (display math) for the principal equation — MkDocs Material renders it centred on its own line.
    - The `$$` opening and closing delimiters must each be on their own line, with a blank line before and after the equation block.
    - Use `$...$` (inline math) only for variable names and small expressions in flowing prose.
-   - Define every symbol introduced. Define units explicitly only when they are not already on the SN's `unit` field (e.g. inside an equation context: `where $T_e$ is in eV`).
+   - Define every symbol by its **identity** — the physical quantity it denotes — preferring an inline `[label](name:bare_id)` link when the symbol is itself a catalog quantity (e.g. `where $B_p$ is the [poloidal magnetic-field magnitude](name:poloidal_magnetic_field)`). **Never state a unit in the documentation.** A unit describes a symbol's dimension, not which quantity it is; the quantity's unit is the authoritative structured `unit` field and a linked quantity carries its own unit via its link. Write the identity, never `where $B_p$ is in T` or `with unit $\mathrm{T}$`.
    - **At most one display equation per documentation entry** — the *defining* one. Secondary relations stay inline.
 
 3. **Scope / distinction paragraph** (only when needed) — state an exclusion,
@@ -109,7 +109,7 @@ Sign convention: Positive when $B_Z$ on the integration disk points in the $+Z$ 
 - ❌ Multiple display equations — only the *defining* one warrants display math
 - ❌ Sign convention buried mid-paragraph or with extra header markup (`### Sign Convention`, `**Sign convention:**`)
 - ❌ Diagnostic lists, estimator recipes, simulation workflows, or typical-value ranges
-- ❌ Inline unit decorations like `(in Wb)` outside equation variable definitions and necessary conversions (see PR-3)
+- ❌ Any unit anywhere in the prose — `(in Wb)`, `in T`, `with unit $\mathrm{m^{-3}}$`, or a `\mathrm{A\,m^{-2}}` unit expression in a where-clause. Units live in the structured `unit` field, never in the documentation. Define each symbol by identity (prefer a `name:` link) with no unit.
 
 ### When equations are not applicable
 

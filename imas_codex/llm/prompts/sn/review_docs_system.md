@@ -106,9 +106,12 @@ is WRONG is the single most dangerous failure mode — score it harshly.
   list each such claim in `issues`. Vague hedged prose is a quality problem;
   confident unverifiable specifics are an accuracy problem — the latter is
   worse.
-- Equations correct (RHS units balance LHS); unit statements must agree with
-  the DD units field.
-- Unit conversions correct.
+- Equations correct (RHS dimensions balance LHS).
+- **No units in prose (defect).** Documentation must carry NO unit anywhere —
+  no `(in eV)`, no `where $T_e$ is in eV`, no `$\mathrm{kg\,m^{-1}\,s^{-2}}$`
+  expression, no unit-conversion statement. The unit is the structured field;
+  symbols are defined by identity (prefer `name:` links). Flag any unit in prose
+  in `issues` and dock quality.
 - No false physical equivalences (e.g. "equal to" vs "proportional to").
 - Qualifiers appropriate (e.g. "in the plasma frame", "averaged over a flux surface").
 - **No implementation leakage**: documentation must describe physics, not storage. Dock if the text references specific IDS names, DD paths, grid types, or array shapes as storage context. Source provenance is tracked externally via graph edges. (The DD Ground Truth block is YOUR verification source — the candidate must agree with its facts while never citing it in prose.)
