@@ -126,6 +126,67 @@ class TestLatexDefCheck:
 
 
 # =========================================================================
+# symbol_units_check — no units in documentation prose
+# =========================================================================
+
+
+class TestSymbolUnitsCheck:
+    """Tests for symbol_units_check (advisory 'no units in prose')."""
+
+    def _flag(self, doc):
+        from imas_codex.standard_names.audits import symbol_units_check
+
+        return symbol_units_check({"documentation": doc})
+
+    def test_flag_in_unit(self):
+        assert self._flag("The field $B_p$ is this magnitude, in T here.")
+
+    def test_flag_with_unit_mathrm(self):
+        assert self._flag(
+            "The density is the value with unit $\\mathrm{m^{-3}}$ over the volume."
+        )
+
+    def test_flag_unit_exponent(self):
+        assert self._flag("The momentum density is stated as kg.m^-2.s^-1 here.")
+
+    def test_flag_mathrm_unit_product(self):
+        assert self._flag(
+            "The current density component is $\\mathrm{A\\,m^{-2}}$ overall."
+        )
+
+    def test_flag_explicit_in_units_of(self):
+        assert self._flag("The energy is expressed in units of eV throughout.")
+
+    def test_pass_identity_no_units(self):
+        """An identity-defined, unit-free doc is clean."""
+        assert (
+            self._flag(
+                "The poloidal field $B_p$ is the poloidal magnetic-field magnitude "
+                "on the contour. It weights the flux-surface average."
+            )
+            == []
+        )
+
+    def test_pass_mathrm_label_not_a_unit(self):
+        """A \\mathrm{} label subscript (radiated, axis, eff) is not a unit."""
+        assert self._flag("The power $P_{\\mathrm{rad}}$ is the radiated total.") == []
+        assert self._flag("At $R_{\\mathrm{axis}}$ the value peaks smoothly.") == []
+        assert self._flag("The area $A_{\\mathrm{eff}}$ enters the coupling here.") == []
+
+    def test_pass_empty(self):
+        assert self._flag("") == []
+        from imas_codex.standard_names.audits import symbol_units_check
+
+        assert symbol_units_check({}) == []
+
+    def test_advisory_not_critical(self):
+        """The check is advisory — it must not be in CRITICAL_CHECKS."""
+        from imas_codex.standard_names.audits import CRITICAL_CHECKS
+
+        assert "symbol_units_check" not in CRITICAL_CHECKS
+
+
+# =========================================================================
 # L3: provenance_verb_check
 # =========================================================================
 

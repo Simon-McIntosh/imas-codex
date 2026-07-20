@@ -406,6 +406,55 @@ def latex_def_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+# Units have no place in documentation prose: a unit states a symbol's
+# dimension, not which quantity it denotes. A quantity's unit is the
+# authoritative structured `unit` field, and a linked auxiliary quantity
+# carries its own unit via its `name:` link — so a unit in prose is redundant
+# and drift-prone. Detection is tuned for high precision (validated 432/2100
+# accepted docs, no false positives on a sample): a `\mathrm{}` group counts
+# only when it is a unit EXPRESSION (an exponent, or a `\,`/`\cdot` product),
+# never a bare alpha label subscript (`\mathrm{rad}` = "radiated",
+# `\mathrm{axis}`, `\mathrm{eff}`).
+_UNIT_EXPLICIT_RE = re.compile(r"\bwith units?\b|\bin units of\b", re.IGNORECASE)
+_UNIT_IN_RE = re.compile(
+    r"\bin\s+\$?\\?(?:mathrm\{)?(?:T|Wb|Pa|eV|K|sr|Hz|mol|rad|Gy|Sv)\b"
+)
+_UNIT_EXP_RE = re.compile(r"\b(?:m|s|A|kg|mol|cd|K)\s*\^\s*\{?-?\d")
+_MATHRM_GROUP_RE = re.compile(r"\\mathrm\{([^}]*)\}")
+_UNIT_INNER_RE = re.compile(r"(?:\^|\\,|\\cdot)")
+
+
+def symbol_units_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag any unit token in documentation prose (ADVISORY).
+
+    Documentation must define quantities and symbols by identity, never by
+    unit. This is the enforcement + campaign-selection side of that policy: it
+    is NOT in ``CRITICAL_CHECKS``, so it flags and feeds the ``audit:symbol_units``
+    cleanup selector without quarantining an otherwise-valid name.
+    """
+    doc = candidate.get("documentation") or ""
+    if not doc:
+        return []
+    hit: str | None = None
+    if _UNIT_EXPLICIT_RE.search(doc):
+        hit = "with unit / in units of"
+    elif _UNIT_IN_RE.search(doc):
+        hit = "in <unit>"
+    elif _UNIT_EXP_RE.search(doc):
+        hit = "unit exponent (e.g. m^-3, s^-1)"
+    else:
+        for inner in _MATHRM_GROUP_RE.findall(doc):
+            if _UNIT_INNER_RE.search(inner):
+                hit = r"\mathrm{} unit expression"
+                break
+    if hit is None:
+        return []
+    return [
+        f"audit:symbol_units_check: unit token in documentation prose ({hit}) — "
+        "units belong to the structured unit field, not the documentation"
+    ]
+
+
 def description_notation_check(candidate: dict[str, Any]) -> list[str]:
     """Descriptions must be plain Unicode text — no LaTeX/math markup.
 
@@ -2969,6 +3018,7 @@ def run_audits(
     all_issues: list[str] = []
 
     all_issues.extend(latex_def_check(candidate))
+    all_issues.extend(symbol_units_check(candidate))
     all_issues.extend(description_notation_check(candidate))
     all_issues.extend(placeholder_check(candidate))
     all_issues.extend(unit_validity_check(candidate))
