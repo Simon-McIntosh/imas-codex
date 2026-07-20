@@ -980,6 +980,15 @@ def _is_local_model(model_id: str) -> bool:
     return any(model_id.startswith(p) for p in _LOCAL_MODEL_PREFIXES)
 
 
+def _is_anthropic_model(model_id: str) -> bool:
+    """Return True for Anthropic (Claude) models, however prefixed.
+
+    Matches ``anthropic/…``, ``openrouter/anthropic/…``, and bare ``claude…``.
+    """
+    low = model_id.lower()
+    return "anthropic/" in low or "claude" in low
+
+
 def extract_cost(response: Any, *, model: str | None = None) -> float:
     """Extract actual LLM cost from a LiteLLM response.
 
@@ -1487,7 +1496,19 @@ def _build_kwargs(
         # The explicit schema dict is provider-agnostic; strict=false lets
         # the model use it as guidance while our Pydantic parsing validates.
         if _is_pydantic_model(response_format):
-            kwargs["response_format"] = _to_json_schema_format(response_format)
+            if _is_anthropic_model(model):
+                # Anthropic (reached DIRECT here — SN Anthropic calls bypass the
+                # proxy on the OpenRouter direct key) rejects a complex
+                # json_schema response_format with "Schema is too complex" once a
+                # ``$defs`` object exceeds ~13 properties (e.g.
+                # ``RefinedName.segments`` = 14). Passing the Pydantic class lets
+                # litellm route Anthropic structured output through NATIVE
+                # tool-use, which has no such limit. The proxy-unreliability that
+                # motivates the explicit json_schema dict for other providers
+                # does not apply on the Anthropic-direct path.
+                kwargs["response_format"] = response_format
+            else:
+                kwargs["response_format"] = _to_json_schema_format(response_format)
         else:
             kwargs["response_format"] = response_format
         # Dashscope (qwen) rejects response_format unless the prompt mentions

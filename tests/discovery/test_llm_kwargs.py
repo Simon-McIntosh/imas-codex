@@ -90,17 +90,26 @@ def test_to_json_schema_format_strips_constraints():
 
 
 @pytest.mark.parametrize(
-    "model_name",
+    "model_name,expect_json_schema_dict",
     [
-        "anthropic/claude-sonnet-4.6",
-        "openrouter/anthropic/claude-sonnet-4.6",
-        "google/gemini-3-flash-preview",
-        "openai/gpt-5.4",
-        "gpt-5.2-codex",
+        # Anthropic → keep the Pydantic class so litellm routes structured
+        # output through native tool-use; an explicit complex json_schema
+        # response_format is rejected by OpenRouter as "Schema is too complex"
+        # once a $defs object exceeds ~13 properties.
+        ("anthropic/claude-sonnet-4.6", False),
+        ("openrouter/anthropic/claude-sonnet-4.6", False),
+        # Non-Anthropic → explicit non-strict json_schema dict (reliable via
+        # the proxy, where a raw Pydantic class is not enforced).
+        ("google/gemini-3-flash-preview", True),
+        ("openai/gpt-5.4", True),
+        ("gpt-5.2-codex", True),
     ],
 )
-def test_build_kwargs_wraps_pydantic_for_all_models(model_name, monkeypatch):
-    """All models get Pydantic→json_schema conversion, not just GPT-5."""
+def test_build_kwargs_wraps_pydantic_by_provider(
+    model_name, expect_json_schema_dict, monkeypatch
+):
+    """Non-Anthropic models get Pydantic→json_schema; Anthropic keeps the
+    Pydantic class (native tool-use) to avoid the json_schema complexity cap."""
     from imas_codex.discovery.base import llm
 
     # Stub out settings/proxy lookups
@@ -117,10 +126,18 @@ def test_build_kwargs_wraps_pydantic_for_all_models(model_name, monkeypatch):
         timeout=None,
     )
     rf = kwargs["response_format"]
-    assert isinstance(rf, dict), f"Expected dict, got {type(rf)} for model {model_name}"
-    assert rf["type"] == "json_schema"
-    assert rf["json_schema"]["name"] == "DummyResponse"
-    assert rf["json_schema"]["strict"] is False
+    if expect_json_schema_dict:
+        assert isinstance(rf, dict), (
+            f"Expected dict, got {type(rf)} for model {model_name}"
+        )
+        assert rf["type"] == "json_schema"
+        assert rf["json_schema"]["name"] == "DummyResponse"
+        assert rf["json_schema"]["strict"] is False
+    else:
+        assert rf is DummyResponse, (
+            f"Anthropic model {model_name} must keep the Pydantic class "
+            f"(native tool-use), got {type(rf)}: {rf!r}"
+        )
 
 
 def test_build_kwargs_passes_dict_response_format_unchanged(monkeypatch):
