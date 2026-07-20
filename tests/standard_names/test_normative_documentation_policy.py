@@ -9,7 +9,7 @@ from imas_codex.standard_names.prose_policy import banned_prose_findings
 
 
 def test_derived_from_linked_quantity_is_provenance_not_a_recipe() -> None:
-    """"X is derived from [Y](name:Y)" names a catalogued source quantity — the
+    """ "X is derived from [Y](name:Y)" names a catalogued source quantity — the
     parent/child provenance form the refine seat writes — so it must not flag as
     estimator_recipe.  The exemption is conditioned on the in-sentence
     ``[label](name:id)`` link, NOT on the word "derived" alone.
@@ -30,7 +30,7 @@ def test_derived_from_linked_quantity_is_provenance_not_a_recipe() -> None:
 
 
 def test_derived_from_a_procedure_still_flags_estimator_recipe() -> None:
-    """"derived from <procedure/measurement>" (no linked quantity) is a genuine
+    """ "derived from <procedure/measurement>" (no linked quantity) is a genuine
     recipe and must stay flagged — the exemption is only for linked provenance."""
     recipes = [
         # unlinked "derived from <procedure>" — the majority catalog usage
@@ -48,6 +48,77 @@ def test_derived_from_a_procedure_still_flags_estimator_recipe() -> None:
     ]
     for text in recipes:
         assert banned_prose_findings(text)["estimator_recipe"] >= 1, text
+
+
+def test_compute_verb_introducing_an_equation_is_a_definition_not_a_recipe() -> None:
+    """ "X is obtained/computed by <operation>: $$equation$$" is a mathematical
+    definition, not a procedure — the definitional form the refine seat writes
+    for derived/integral quantities.  Exempt when a display or inline equation
+    follows within ~200 chars.
+
+    Anchored on the two accepted docs whose definitional-integral sentence
+    tripped the campaign gate as a spurious reintroduction.
+    """
+    definitions = [
+        # display equation on the next block (current_due_to_ion_cyclotron_...)
+        "The current is obtained by integrating the driven toroidal current "
+        "density over the plasma cross-section:\n\n$$\nI = \\int_A j\\,dA\n$$\n",
+        # inline equation immediately after (perturbed_gyrocenter_pressure)
+        "The dimensional counterpart is obtained by omitting the "
+        "$1/(n_\\mathrm{ref} T_\\mathrm{ref})$ factor and carries units of "
+        "pressure.",
+        "The area is computed as the surface integral $$A = \\int dS$$.",
+    ]
+    for text in definitions:
+        assert banned_prose_findings(text)["estimator_recipe"] == 0, text
+
+
+def test_compute_verb_without_an_equation_still_flags_estimator_recipe() -> None:
+    """A compute verb with no nearby equation narrates a measurement/estimation
+    procedure and must stay flagged — the equation exemption is definitional
+    only."""
+    recipes = [
+        "On-axis temperature is obtained from Thomson scattering or electron "
+        "cyclotron emission radiometry for the electron channel.",
+        "In practice it is computed by summing charge-state-resolved iron ion "
+        "densities and applying the flux-surface average.",
+        "This average is obtained from equilibrium reconstruction by evaluating "
+        "the external-source Green's functions.",
+    ]
+    for text in recipes:
+        assert banned_prose_findings(text)["estimator_recipe"] >= 1, text
+
+
+def test_for_example_introducing_a_linked_child_is_taxonomy_not_padding() -> None:
+    """ "for example, [child](name:id)" points at a catalogued specialisation in
+    a parent-concept doc — legitimate taxonomy, not procedural padding.  Exempt
+    when a name link follows within ~120 chars.
+
+    Anchored on power_of_breeder_blanket, whose linked-child example tripped the
+    campaign gate.
+    """
+    taxonomy = [
+        "Child quantities define those restrictions explicitly; for example, "
+        "[thermal power of breeder blanket](name:thermal_power_of_breeder_"
+        "blanket) denotes a thermal-load specialisation.",
+        "For example, the child standard name "
+        "[energy flux at wall](name:energy_flux_at_wall_due_to_surface_emission) "
+        "restricts the accounting boundary.",
+    ]
+    for text in taxonomy:
+        assert banned_prose_findings(text)["procedural_padding"] == 0, text
+
+
+def test_for_example_without_a_link_still_flags_procedural_padding() -> None:
+    """Illustrative "for example, <formula/text>" with no catalogued child link
+    remains procedural padding and keeps flagging."""
+    padding = [
+        "For example, $10^{20}\\ \\mathrm{m^{-3}\\,s^{-1}}$ changes the balance.",
+        "The count is by atoms; for example, deuterium and tritium nuclei in a "
+        "mixed hydrogenic core are counted individually.",
+    ]
+    for text in padding:
+        assert banned_prose_findings(text)["procedural_padding"] >= 1, text
 
 
 def _read(relative: str) -> str:
