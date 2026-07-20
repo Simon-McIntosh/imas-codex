@@ -415,13 +415,24 @@ def latex_def_check(candidate: dict[str, Any]) -> list[str]:
 # only when it is a unit EXPRESSION (an exponent, or a `\,`/`\cdot` product),
 # never a bare alpha label subscript (`\mathrm{rad}` = "radiated",
 # `\mathrm{axis}`, `\mathrm{eff}`).
-_UNIT_EXPLICIT_RE = re.compile(r"\bwith units?\b|\bin units of\b", re.IGNORECASE)
+# "with unit(s)" / "in units of" — but NOT "with unit normal/vector", a
+# unit-LENGTH geometric vector (`with unit normal $\hat{n}$`), not a physical
+# unit.
+_UNIT_EXPLICIT_RE = re.compile(
+    r"\bwith units?\b(?!\s+(?:normal|vector))|\bin units of\b", re.IGNORECASE
+)
 _UNIT_IN_RE = re.compile(
     r"\bin\s+\$?\\?(?:mathrm\{)?(?:T|Wb|Pa|eV|K|sr|Hz|mol|rad|Gy|Sv)\b"
 )
-_UNIT_EXP_RE = re.compile(r"\b(?:m|s|A|kg|mol|cd|K)\s*\^\s*\{?-?\d")
+# A NEGATIVE exponent on a unit letter (m^{-3}, s^{-1}, kg^-1) is almost always
+# a unit; a POSITIVE one (m^2, c^2) is usually a physics variable (mass², c²),
+# so require the minus sign to avoid flagging equation variables.
+_UNIT_EXP_RE = re.compile(r"\b(?:m|s|A|kg|mol|cd|K)\s*\^\s*\{?-\s*\d")
 _MATHRM_GROUP_RE = re.compile(r"\\mathrm\{([^}]*)\}")
-_UNIT_INNER_RE = re.compile(r"(?:\^|\\,|\\cdot)")
+# A \mathrm{} group is a unit expression only when it carries an EXPONENT
+# (`m^{-3}`, `kg\,m^{-1}\,s^{-2}`). A bare `\,` product just joins label words
+# (`\mathrm{th\,ion}`, `\mathrm{wave\,beam}`, `\mathrm{gas\,inj}`) — not a unit.
+_UNIT_INNER_RE = re.compile(r"\^")
 
 
 def symbol_units_check(candidate: dict[str, Any]) -> list[str]:

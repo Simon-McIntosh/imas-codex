@@ -173,6 +173,25 @@ class TestSymbolUnitsCheck:
         assert self._flag("At $R_{\\mathrm{axis}}$ the value peaks smoothly.") == []
         assert self._flag("The area $A_{\\mathrm{eff}}$ enters the coupling here.") == []
 
+    def test_pass_mathrm_multiword_label_with_thin_space(self):
+        """A \\mathrm{} label joining words with \\, (th ion, wave beam, gas inj)
+        is not a unit — only an exponent inside \\mathrm{} marks a unit."""
+        assert self._flag("The density $n_{\\mathrm{th\\,ion}}$ is the thermal ion.") == []
+        assert self._flag("The power $P_{\\mathrm{wave\\,beam}}$ enters here.") == []
+        assert self._flag("The rate $S_{\\mathrm{gas\\,inj}}$ counts injection.") == []
+
+    def test_pass_positive_exponent_variable_not_a_unit(self):
+        """A positive exponent on a physics variable (mass², c²) is not a unit;
+        only negative-exponent unit letters (m^{-3}, s^{-1}) flag."""
+        assert self._flag("The rest energy uses $m^2 c^2$ in the relation.") == []
+        assert self._flag("The density scales as $m^{2}$ over the region.") == []
+
+    def test_pass_unit_normal_vector_not_a_unit(self):
+        """'with unit normal' / 'with unit vector' is a geometric unit-length
+        vector, not a physical unit."""
+        assert self._flag("The surface with unit normal $\\hat{n}$ bounds it.") == []
+        assert self._flag("Projected onto the with unit vector $\\hat{e}$ basis.") == []
+
     def test_pass_empty(self):
         assert self._flag("") == []
         from imas_codex.standard_names.audits import symbol_units_check
