@@ -32,9 +32,16 @@ logger = logging.getLogger(__name__)
 
 # Default adjudicator seat.  A light, well-calibrated discriminator is wanted:
 # the job is to NOT flag legitimate definitional prose, so a model that
-# over-rejects good docs is a poor fit here.  Overridable via
-# ``[tool.imas-codex.sn-prose-adjudicator].model`` and the ``model`` argument.
-DEFAULT_ADJUDICATOR_MODEL = "openrouter/x-ai/grok-4.5"
+# over-rejects good docs is a poor fit here.  Selected on a labelled bench
+# (2026-07-20, 12 grep-flagged docs: definitional relations / provenance /
+# taxonomy vs genuine measurement recipes + typical values): grok-4.5,
+# gpt-5.6-terra, gpt-5.6-luna, and gemini-3.5-flash all classified correctly
+# with zero over-rejection of legitimate prose; luna was cheapest
+# ($0.0018/call) AND is independent of the docs review quorum
+# (sonnet-5 + grok-4.5 + gpt-5.5), so it does not double-count a reviewer's
+# blind spots.  Overridable via ``[tool.imas-codex.sn-prose-adjudicator].model``
+# and the ``model`` argument.
+DEFAULT_ADJUDICATOR_MODEL = "openrouter/openai/gpt-5.6-luna"
 
 
 class ProseVerdict(BaseModel):
