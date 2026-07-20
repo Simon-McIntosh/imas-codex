@@ -386,11 +386,15 @@ def latex_def_check(candidate: dict[str, Any]) -> list[str]:
             has_def_word = bool(_DEF_WORD_RE.search(sent_lower)) or any(
                 p in sent_lower for p in _DEFINITION_PHRASES
             )
-            # Check for unit in brackets/parentheses
-            has_unit_bracket = bool(
-                re.search(r"\([^)]*(?:eV|m|A|T|Pa|Wb|K|rad|s|W|V)[^)]*\)", sent)
-            )
-            if has_def_word or has_unit_bracket:
+            # A `name:` link binds the symbol to a catalog quantity — a valid
+            # identity, whether or not a definition verb is also present.
+            has_name_link = "name:" in sent_lower
+            # A bare unit is NOT a definition: it states the symbol's dimension,
+            # not which quantity it denotes. The primary quantity's unit is the
+            # structured `unit` field and a linked quantity carries its own unit
+            # via its link, so a unit in prose is redundant — never the thing
+            # that makes a symbol "defined".
+            if has_def_word or has_name_link:
                 found_def = True
                 break
 

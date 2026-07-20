@@ -43,6 +43,48 @@ class TestLatexDefCheck:
         assert len(issues) >= 1
         assert any("latex_def_check" in i for i in issues)
 
+    def test_fail_unit_only_is_not_a_definition(self):
+        """A bare parenthetical unit no longer satisfies the check — it states
+        the symbol's dimension, not which quantity it denotes."""
+        from imas_codex.standard_names.audits import latex_def_check
+
+        candidate = {
+            "documentation": (
+                "The reference field enters as $B_p$ (T). "
+                "The contour integral runs over the poloidal loop. "
+                "The result normalizes the profile."
+            ),
+        }
+        issues = latex_def_check(candidate)
+        assert any("latex_def_check" in i and "B_p" in i for i in issues)
+
+    def test_pass_name_link_is_identity(self):
+        """A `name:` link binds a symbol to a catalog quantity — a valid
+        identity even with no definition verb present."""
+        from imas_codex.standard_names.audits import latex_def_check
+
+        candidate = {
+            "documentation": (
+                "The normalization uses $\\psi_b$, the "
+                "[boundary poloidal flux](name:poloidal_magnetic_flux_at_boundary). "
+                "It sets the outer reference."
+            ),
+        }
+        assert latex_def_check(candidate) == []
+
+    def test_pass_definition_word_with_unit_still_passes(self):
+        """A symbol defined by identity (a def word) still passes even when a
+        unit is also present — the change only removes unit-ONLY as satisfier."""
+        from imas_codex.standard_names.audits import latex_def_check
+
+        candidate = {
+            "documentation": (
+                "The poloidal field $B_p$ is the poloidal magnetic-field "
+                "magnitude on the contour, in T. It weights the average."
+            ),
+        }
+        assert latex_def_check(candidate) == []
+
     def test_pass_universal_constants_skipped(self):
         """Universal physics constants (\\pi, \\alpha, \\mu_0, \\hbar,
         k_B) and numeric factors thereof (``2\\pi``, ``\\pi/2``) do not
