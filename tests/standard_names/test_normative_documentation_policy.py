@@ -5,6 +5,40 @@ from pathlib import Path
 import yaml
 
 from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
+from imas_codex.standard_names.prose_policy import banned_prose_findings
+
+
+def test_derived_from_provenance_is_not_an_estimator_recipe() -> None:
+    """"X is derived from [related quantity]" names a source quantity — that is
+    provenance, not a compute recipe — so it must not flag as estimator_recipe.
+
+    Anchored on the two accepted docs whose "is derived from the local ..."
+    provenance sentence tripped the campaign convergence gate as a spurious
+    banned-prose reintroduction.
+    """
+    provenance = [
+        "It is derived from the local hydrogen density and excludes neutral "
+        "atomic hydrogen and heavier hydrogen isotopes.",
+        "It is derived from the local tritium density and deuterium density.",
+        "This ratio can be derived from the deuterium density.",
+    ]
+    for text in provenance:
+        assert banned_prose_findings(text)["estimator_recipe"] == 0, text
+
+
+def test_genuine_compute_recipes_still_flag_estimator_recipe() -> None:
+    """The exemption must not blunt detection of real "how it is computed"
+    recipes — those use computed/obtained/calculated/estimated, or "derived
+    by" a procedure, all of which stay banned."""
+    recipes = [
+        "In practice this quantity is computed by integrating local absorption.",
+        "This quantity is obtained by integrating the fast-ion distribution.",
+        "The velocity is computed from kinetic or fluid models.",
+        "This value can be computed with a transport code.",
+        "It is derived by differentiating the smoothed profile.",
+    ]
+    for text in recipes:
+        assert banned_prose_findings(text)["estimator_recipe"] >= 1, text
 
 
 def _read(relative: str) -> str:

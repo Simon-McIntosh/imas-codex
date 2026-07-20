@@ -25,12 +25,19 @@ BANNED_PROSE_PATTERNS: dict[str, list[re.Pattern]] = {
         re.compile(r"~\s*\d"),
     ],
     "estimator_recipe": [
+        # A compute recipe narrates *how* a value is produced.  "X is
+        # computed/obtained/calculated/estimated as|by|from ..." is such a
+        # recipe.  "X is derived FROM [related quantity]" instead names the
+        # source quantity — legitimate provenance, not a recipe — so `derived`
+        # pairs only with as|by here, exempting the "derived from" provenance
+        # form the refine seat writes for any derived quantity.
         re.compile(
-            r"\bis (?:computed|calculated|estimated|obtained|derived) (?:as|by|from)\b",
+            r"\bis (?:computed|calculated|estimated|obtained) (?:as|by|from)\b",
             re.I,
         ),
+        re.compile(r"\bis derived (?:as|by)\b", re.I),
         re.compile(
-            r"\bcan be (?:computed|calculated|estimated|obtained|derived)\b", re.I
+            r"\bcan be (?:computed|calculated|estimated|obtained)\b", re.I
         ),
         re.compile(r"\bto (?:compute|calculate|estimate)\b", re.I),
     ],
