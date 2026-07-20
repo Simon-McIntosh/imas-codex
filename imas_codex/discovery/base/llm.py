@@ -867,9 +867,119 @@ def _heartbeat_should_warn(
     return (now - last) >= stall_seconds
 
 
-async def _heartbeat_loop(interval: float) -> None:
-    """Periodically log LLM-activity; stop cleanly once the fleet goes idle."""
+def _heartbeat_material_change(
+    *,
+    prev_busy: bool,
+    busy: bool,
+    prev_failed: int,
+    failed: int,
+    prev_ceiling: float | None,
+    ceiling: float,
+    stalling: bool,
+) -> bool:
+    """True when the fleet's state moved enough to warrant dense sampling again.
+
+    A "material change" is a fresh burst (idle→busy), a new failure, a
+    governor-ceiling move (throttle up or down), or an active stall. Any of
+    these snaps the adaptive cadence back to the base interval so the
+    interesting stretch is sampled at full rate rather than deep in backoff.
+    ``NaN`` ceilings (governor read failed) never count as a move — ``x != x``
+    is only true for NaN, so both-non-NaN-and-different is required.
+    """
+    if busy and not prev_busy:
+        return True
+    if failed > prev_failed:
+        return True
+    if stalling:
+        return True
+    if (
+        prev_ceiling is not None
+        and prev_ceiling == prev_ceiling  # not NaN
+        and ceiling == ceiling  # not NaN
+        and ceiling != prev_ceiling
+    ):
+        return True
+    return False
+
+
+def _advance_cadence(
+    interval: float,
+    beat: int,
+    *,
+    changed: bool,
+    base: float,
+    factor: float,
+    cap: float,
+    fast_beats: int,
+) -> tuple[float, int]:
+    """Return ``(next_interval, next_beat_index)`` for one busy heartbeat tick.
+
+    The first ``fast_beats`` beats after a (re)start fire at ``base`` — the
+    ramp; thereafter each quiet beat multiplies the interval by ``factor`` up to
+    ``cap`` — the settle backoff. A material ``changed`` restarts the ramp, so
+    the cadence re-densifies whenever the run gets interesting again.
+    """
+    beat = 1 if changed else beat + 1
+    if beat <= fast_beats:
+        return base, beat
+    return min(interval * factor, cap), beat
+
+
+def _log_heartbeat(
+    snap: dict[str, Any], since: float | None, ceiling: float, next_desc: str
+) -> None:
+    logger.info(
+        "LLM heartbeat: in_flight=%d started=%d completed=%d failed=%d "
+        "spend=$%.4f since_completion=%s ceiling=%s next_beat=%s",
+        snap["in_flight"],
+        snap["started"],
+        snap["completed"],
+        snap["failed"],
+        snap["spend_usd"],
+        "n/a" if since is None else f"{since:.0f}s",
+        ceiling,
+        next_desc,
+    )
+
+
+async def _heartbeat_loop(
+    base_interval: float,
+    *,
+    max_interval: float | None = None,
+    fast_beats: int | None = None,
+    backoff_factor: float | None = None,
+) -> None:
+    """Periodically log LLM-activity with an adaptive, self-advertising cadence.
+
+    A 12h campaign should not drown its own log once it settles, yet must be
+    sampled densely while volatile. So the cadence is dense at the start and
+    after any material change, and relaxes geometrically as the run steadies:
+
+    * the first ``fast_beats`` beats fire at ``base_interval`` (the ramp);
+    * each quiet beat thereafter multiplies the interval by ``backoff_factor``
+      up to ``max_interval`` (the settle backoff);
+    * a material change — fresh burst, new failure, governor-ceiling move, or an
+      active stall — snaps the cadence back to ``base_interval``.
+
+    Every line advertises ``next_beat=in <secs>`` so a reader can tell "settled"
+    (silence shorter than the advertised gap) from "hung" (silence past it).
+    When the fleet goes idle the loop emits one final ``next_beat=idle`` trailer
+    beat and stops; the next LLM call re-arms it via
+    ``_heartbeat_ensure_started()``, restarting the fast ramp.
+    """
+    if max_interval is None:
+        max_interval = _heartbeat_max_interval()
+    if fast_beats is None:
+        fast_beats = _heartbeat_fast_beats()
+    if backoff_factor is None:
+        backoff_factor = _heartbeat_backoff_factor()
+
+    interval = base_interval
+    beat = 0
     idle_ticks = 0
+    prev_failed = 0
+    prev_ceiling: float | None = None
+    prev_busy = False
     while True:
         await asyncio.sleep(interval)
         snap = _ACTIVITY.snapshot()
@@ -880,32 +990,54 @@ async def _heartbeat_loop(interval: float) -> None:
             ceiling = get_rate_governor().effective_ceiling()
         except Exception:  # pragma: no cover - governor must never break logging
             ceiling = float("nan")
-        logger.info(
-            "LLM heartbeat: in_flight=%d started=%d completed=%d failed=%d "
-            "spend=$%.4f since_completion=%s ceiling=%s",
-            snap["in_flight"],
-            snap["started"],
-            snap["completed"],
-            snap["failed"],
-            snap["spend_usd"],
-            "n/a" if since is None else f"{since:.0f}s",
-            ceiling,
+
+        busy = snap["in_flight"] > 0
+        if not busy:
+            # One base-interval re-check confirms a settle before the trailer,
+            # so a momentary lull between batches does not stop the heartbeat.
+            idle_ticks += 1
+            trailer = idle_ticks >= 2
+            _log_heartbeat(
+                snap, since, ceiling, "idle" if trailer else f"in {base_interval:.0f}s"
+            )
+            if trailer:
+                return
+            interval = base_interval
+            beat = 0
+            prev_busy = False
+            continue
+
+        idle_ticks = 0
+        stalling = _heartbeat_should_warn(snap, now)
+        changed = _heartbeat_material_change(
+            prev_busy=prev_busy,
+            busy=busy,
+            prev_failed=prev_failed,
+            failed=snap["failed"],
+            prev_ceiling=prev_ceiling,
+            ceiling=ceiling,
+            stalling=stalling,
         )
-        if _heartbeat_should_warn(snap, now):
+        interval, beat = _advance_cadence(
+            interval,
+            beat,
+            changed=changed,
+            base=base_interval,
+            factor=backoff_factor,
+            cap=max_interval,
+            fast_beats=fast_beats,
+        )
+        _log_heartbeat(snap, since, ceiling, f"in {interval:.0f}s")
+        if stalling:
             logger.warning(
                 "LLM possible stall: %d call(s) in flight, no completion for "
                 "%.0fs — provider or governor",
                 snap["in_flight"],
                 since if since is not None else 0.0,
             )
-        if snap["in_flight"] == 0:
-            idle_ticks += 1
-            # Two consecutive idle ticks → nothing to report; stop. The next
-            # call re-arms the heartbeat via _heartbeat_ensure_started().
-            if idle_ticks >= 2:
-                return
-        else:
-            idle_ticks = 0
+        prev_failed = snap["failed"]
+        prev_ceiling = ceiling
+        prev_busy = True
 
 
 def _heartbeat_ensure_started() -> None:
@@ -931,6 +1063,24 @@ def _heartbeat_interval() -> float:
     from imas_codex.settings import get_llm_heartbeat_interval
 
     return get_llm_heartbeat_interval()
+
+
+def _heartbeat_max_interval() -> float:
+    from imas_codex.settings import get_llm_heartbeat_max_interval
+
+    return get_llm_heartbeat_max_interval()
+
+
+def _heartbeat_fast_beats() -> int:
+    from imas_codex.settings import get_llm_heartbeat_fast_beats
+
+    return get_llm_heartbeat_fast_beats()
+
+
+def _heartbeat_backoff_factor() -> float:
+    from imas_codex.settings import get_llm_heartbeat_backoff_factor
+
+    return get_llm_heartbeat_backoff_factor()
 
 
 def _finish_reason(response: Any) -> str | None:

@@ -1594,15 +1594,60 @@ def get_rate_governor_settle() -> float:
 
 
 def get_llm_heartbeat_interval() -> float:
-    """Seconds between LLM-activity heartbeat log lines (0 disables).
+    """Base (fast) seconds between LLM-activity heartbeat log lines (0 disables).
 
     The heartbeat is a lazily-started background task that periodically logs
     in-flight/started/completed/failed counts, spend, seconds-since-last
     completion, and the governor ceiling — so a long campaign is observable and
     a stall (in-flight work with no completions) surfaces as a WARNING.
 
+    This is the *fast* interval used for the opening ramp and after any material
+    change; the cadence then backs off geometrically toward
+    :func:`get_llm_heartbeat_max_interval` as the run settles. Every line
+    advertises when the next beat is due.
+
     Priority: IMAS_CODEX_LLM_HEARTBEAT_INTERVAL env → ``15.0``.
     """
     if (env := os.getenv("IMAS_CODEX_LLM_HEARTBEAT_INTERVAL")) is not None:
         return float(env)
     return 15.0
+
+
+def get_llm_heartbeat_max_interval() -> float:
+    """Cap (settled) seconds between heartbeat lines once the run is steady.
+
+    The adaptive cadence backs off from :func:`get_llm_heartbeat_interval`
+    toward this ceiling while nothing material changes. The default matches the
+    stall-detection window, so even a fully settled fleet still beats at least
+    once per stall window.
+
+    Priority: IMAS_CODEX_LLM_HEARTBEAT_MAX_INTERVAL env → ``120.0``.
+    """
+    if (env := os.getenv("IMAS_CODEX_LLM_HEARTBEAT_MAX_INTERVAL")) is not None:
+        return float(env)
+    return 120.0
+
+
+def get_llm_heartbeat_fast_beats() -> int:
+    """Number of base-interval beats fired on start / after a material change.
+
+    The opening ramp (and every re-densification after a burst, failure,
+    ceiling move, or stall) emits this many fast beats before the geometric
+    backoff toward the cap begins.
+
+    Priority: IMAS_CODEX_LLM_HEARTBEAT_FAST_BEATS env → ``3``.
+    """
+    if (env := os.getenv("IMAS_CODEX_LLM_HEARTBEAT_FAST_BEATS")) is not None:
+        return max(1, int(env))
+    return 3
+
+
+def get_llm_heartbeat_backoff_factor() -> float:
+    """Multiplier applied to the interval on each quiet beat during backoff.
+
+    Priority: IMAS_CODEX_LLM_HEARTBEAT_BACKOFF_FACTOR env → ``2.0`` (clamped to
+    ≥ 1.0 so the cadence never runs faster than the base interval).
+    """
+    if (env := os.getenv("IMAS_CODEX_LLM_HEARTBEAT_BACKOFF_FACTOR")) is not None:
+        return max(1.0, float(env))
+    return 2.0

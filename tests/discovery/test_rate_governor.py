@@ -22,6 +22,8 @@ import pytest
 
 from imas_codex.discovery.base.llm import (
     _ActivityState,
+    _advance_cadence,
+    _heartbeat_material_change,
     _heartbeat_should_warn,
 )
 from imas_codex.discovery.base.rate_governor import (
@@ -401,6 +403,202 @@ def test_heartbeat_new_burst_resets_stall_clock():
     assert not _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
     clock.advance(130.0)
     assert _heartbeat_should_warn(act.snapshot(), clock.now, stall_seconds=120.0)
+
+
+# ---------------------------------------------------------------------------
+# Adaptive heartbeat cadence
+# ---------------------------------------------------------------------------
+
+_CAD = {"base": 15.0, "factor": 2.0, "cap": 120.0, "fast_beats": 3}
+
+
+def test_cadence_ramp_stays_at_base_for_fast_beats():
+    # The first fast_beats quiet beats all fire at the base interval.
+    interval, beat = 15.0, 0
+    seen = []
+    for _ in range(_CAD["fast_beats"]):
+        interval, beat = _advance_cadence(interval, beat, changed=False, **_CAD)
+        seen.append(interval)
+    assert seen == [15.0, 15.0, 15.0]
+    assert beat == 3
+
+
+def test_cadence_backs_off_geometrically_to_cap():
+    # After the ramp, quiet beats double until clamped at the cap.
+    interval, beat = 15.0, _CAD["fast_beats"]  # ramp already spent
+    seen = []
+    for _ in range(6):
+        interval, beat = _advance_cadence(interval, beat, changed=False, **_CAD)
+        seen.append(interval)
+    # 30, 60, 120 (cap), then held at the cap.
+    assert seen == [30.0, 60.0, 120.0, 120.0, 120.0, 120.0]
+
+
+def test_cadence_change_restarts_the_ramp():
+    # Deep in backoff, a material change snaps straight back to base and
+    # re-earns fast_beats fast beats before backing off again.
+    interval, beat = 120.0, 12
+    interval, beat = _advance_cadence(interval, beat, changed=True, **_CAD)
+    assert interval == 15.0
+    assert beat == 1
+    # The two following quiet beats stay fast (fast_beats=3), then back off.
+    interval, beat = _advance_cadence(interval, beat, changed=False, **_CAD)
+    assert interval == 15.0
+    interval, beat = _advance_cadence(interval, beat, changed=False, **_CAD)
+    assert interval == 15.0
+    interval, beat = _advance_cadence(interval, beat, changed=False, **_CAD)
+    assert interval == 30.0
+
+
+def test_material_change_fresh_burst():
+    assert _heartbeat_material_change(
+        prev_busy=False,
+        busy=True,
+        prev_failed=0,
+        failed=0,
+        prev_ceiling=64.0,
+        ceiling=64.0,
+        stalling=False,
+    )
+
+
+def test_material_change_new_failure_and_stall():
+    common = {
+        "prev_busy": True,
+        "busy": True,
+        "prev_ceiling": 64.0,
+        "ceiling": 64.0,
+    }
+    assert _heartbeat_material_change(prev_failed=2, failed=3, stalling=False, **common)
+    assert _heartbeat_material_change(prev_failed=2, failed=2, stalling=True, **common)
+
+
+def test_material_change_ceiling_move_but_nan_is_quiet():
+    common = {
+        "prev_busy": True,
+        "busy": True,
+        "prev_failed": 0,
+        "failed": 0,
+        "stalling": False,
+    }
+    # A real ceiling move (throttle) counts.
+    assert _heartbeat_material_change(prev_ceiling=64.0, ceiling=32.0, **common)
+    # A NaN ceiling read (governor blip) never counts as a move.
+    nan = float("nan")
+    assert not _heartbeat_material_change(prev_ceiling=64.0, ceiling=nan, **common)
+    assert not _heartbeat_material_change(prev_ceiling=nan, ceiling=64.0, **common)
+    # First observation (prev_ceiling None) is not a move on its own.
+    assert not _heartbeat_material_change(prev_ceiling=None, ceiling=64.0, **common)
+
+
+def test_material_change_steady_state_is_quiet():
+    assert not _heartbeat_material_change(
+        prev_busy=True,
+        busy=True,
+        prev_failed=5,
+        failed=5,
+        prev_ceiling=128.0,
+        ceiling=128.0,
+        stalling=False,
+    )
+
+
+class _FakeActivity:
+    """Serves a scripted sequence of snapshots for the heartbeat loop."""
+
+    def __init__(self, snaps):
+        self._snaps = list(snaps)
+
+    def _time_fn(self):
+        return 0.0
+
+    def snapshot(self):
+        return self._snaps.pop(0)
+
+
+def _snap(in_flight, failed=0):
+    return {
+        "in_flight": in_flight,
+        "started": 10,
+        "completed": 10 - in_flight,
+        "failed": failed,
+        "spend_usd": 1.23,
+        # Recent completion → never a stall in these tests.
+        "last_completion_monotonic": 0.0,
+    }
+
+
+async def test_heartbeat_loop_advertises_next_beat_and_idle_trailer(
+    monkeypatch, caplog
+):
+    from imas_codex.discovery.base import llm
+
+    intervals: list[float] = []
+
+    async def fake_sleep(secs):
+        intervals.append(secs)
+
+    class _Gov:
+        def effective_ceiling(self):
+            return 64.0
+
+    # Busy for three beats, then two idle observations → settle re-check + trailer.
+    fake = _FakeActivity([_snap(5), _snap(5), _snap(5), _snap(0), _snap(0)])
+    monkeypatch.setattr(llm.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(llm, "_ACTIVITY", fake)
+    monkeypatch.setattr(llm, "get_rate_governor", lambda: _Gov())
+
+    with caplog.at_level("INFO", logger="imas_codex.discovery.base.llm"):
+        await llm._heartbeat_loop(
+            15.0, max_interval=120.0, fast_beats=3, backoff_factor=2.0
+        )
+
+    beats = [
+        r.getMessage() for r in caplog.records if "LLM heartbeat" in r.getMessage()
+    ]
+    # Five snapshots consumed → five beat lines, the last a trailer.
+    assert len(beats) == 5
+    # Every busy line advertises the next beat; the fast ramp stays at base.
+    assert all("next_beat=" in b for b in beats)
+    assert "next_beat=in 15s" in beats[0]
+    # The fleet went idle → exactly one idle trailer, and the loop returned.
+    assert beats[-1].endswith("next_beat=idle")
+    assert sum("next_beat=idle" in b for b in beats) == 1
+
+
+async def test_heartbeat_loop_backs_off_when_steady(monkeypatch, caplog):
+    from imas_codex.discovery.base import llm
+
+    async def fake_sleep(secs):
+        pass
+
+    class _Gov:
+        def effective_ceiling(self):
+            return 64.0
+
+    # Six steady busy beats then idle-idle to terminate: base×3 then 30, 60, 120.
+    fake = _FakeActivity([_snap(5)] * 6 + [_snap(0), _snap(0)])
+    monkeypatch.setattr(llm.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(llm, "_ACTIVITY", fake)
+    monkeypatch.setattr(llm, "get_rate_governor", lambda: _Gov())
+
+    with caplog.at_level("INFO", logger="imas_codex.discovery.base.llm"):
+        await llm._heartbeat_loop(
+            15.0, max_interval=120.0, fast_beats=3, backoff_factor=2.0
+        )
+
+    beats = [
+        r.getMessage() for r in caplog.records if "LLM heartbeat" in r.getMessage()
+    ]
+    advertised = [b.split("next_beat=")[1] for b in beats]
+    assert advertised[:6] == [
+        "in 15s",
+        "in 15s",
+        "in 15s",
+        "in 30s",
+        "in 60s",
+        "in 120s",
+    ]
 
 
 # ---------------------------------------------------------------------------
