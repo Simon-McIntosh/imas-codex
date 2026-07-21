@@ -2345,23 +2345,6 @@ def repeated_token_check(candidate: dict[str, Any]) -> list[str]:
     return []
 
 
-def length_soft_cap_check(candidate: dict[str, Any]) -> list[str]:
-    """Warn when a name exceeds 70 characters.
-
-    The current corpus median is ~39 characters; names beyond 70 are
-    usually over-qualified and should be simplified. This is advisory
-    only — no quarantine.
-    """
-    name = str(candidate.get("id") or candidate.get("name") or "").strip()
-    n = len(name)
-    if n > 70:
-        return [
-            f"audit:length_soft_cap_check: name length {n} chars exceeds "
-            f"soft cap of 70 — consider simplification"
-        ]
-    return []
-
-
 # Instrument tokens that indicate a diagnostic device
 _STOKES_INSTRUMENTS = frozenset(
     {"polarimeter", "interferometer", "radiometer", "spectrometer"}
@@ -3065,7 +3048,6 @@ def run_audits(
     all_issues.extend(profile_suffix_check(candidate))
     all_issues.extend(repeated_token_check(candidate))
     all_issues.extend(adjacent_duplicate_token_check(candidate))
-    all_issues.extend(length_soft_cap_check(candidate))
     all_issues.extend(instrument_stokes_bind_check(candidate))
     all_issues.extend(position_redundancy_check(candidate))
     all_issues.extend(process_qualifier_check(candidate))

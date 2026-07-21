@@ -684,6 +684,35 @@ from the `parents.py` admission gate). `StandardNameSource`:
 `extracted → composed | attached | vocab_gap | failed | stale`; ID scheme
 `dd:{path}` or `signals:{facility}:{id}`.
 
+### Acceptance & recovery (binding)
+
+- **Never direct-accept a name.** Acceptance is earned only through the
+  RD-quorum review pool (`REVIEW_NAME`). Promoting a name to
+  `name_stage='accepted'` by hand — a Cypher `SET`, a "blind accept", or any
+  code path that sets accepted without a fresh quorum score — is a banned
+  anti-pattern, **even when the name is structurally identical to accepted
+  siblings**. The single sanctioned structural accept is `ENRICH_PARENTS` for
+  placeholder derived parents (systematically penalised by the quorum by
+  construction; documented at its emission point) — nothing else.
+- **`exhausted` is recoverable, not a dead end.** A sound name that reaches
+  the refine cap and lands `exhausted`/`reviewed` on quorum variance is
+  recovered with `sn rescore` (`rescore_name` → `stage_name_for_rescore`):
+  it reverts the name to `drafted` and resubmits the *same* name for a fresh
+  quorum draw — never a reword, never a hand-accept. A name whose siblings
+  accept at 0.96+ typically clears on a fresh draw. **Repeated exhaustion of
+  structurally-sound names is a pipeline signal to fix** (prompt, quorum
+  composition, or threshold), not to paper over with an accept.
+
+### Naming principle (binding)
+
+- **As short as possible while fully retaining semantic meaning, and no
+  shorter.** There is no arbitrary character cap — a name is exactly as long
+  as its physics requires. (The former 70-char `length_soft_cap` audit was an
+  anti-pattern and has been removed.)
+- **US spelling throughout.** Names and prose use American spelling
+  (`normalized`, `gage`); `american_spelling_check` enforces this from the
+  breame UK→US map and quarantines British forms for regeneration.
+
 ### Key modules
 
 `pools.py` (pool specs + throttle) · `loop.py` (`run_sn_pools()`) · `workers.py`

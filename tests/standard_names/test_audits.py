@@ -1851,59 +1851,6 @@ class TestRepeatedTokenCheck:
 
 
 # =========================================================================
-# length_soft_cap_check
-# =========================================================================
-
-
-class TestLengthSoftCapCheck:
-    """Tests for length_soft_cap_check audit."""
-
-    def test_fail_long_name(self):
-        """Names > 70 chars trigger warning."""
-        from imas_codex.standard_names.audits import length_soft_cap_check
-
-        long_name = (
-            "normalized_toroidal_flux_coordinate_of_neoclassical_tearing_mode_center"
-        )
-        assert len(long_name) > 70
-        issues = length_soft_cap_check({"id": long_name})
-        assert len(issues) == 1
-        assert "length_soft_cap_check" in issues[0]
-        assert "soft cap of 70" in issues[0]
-
-    def test_pass_short_name(self):
-        """Names ≤ 70 chars pass."""
-        from imas_codex.standard_names.audits import length_soft_cap_check
-
-        short_name = "electron_temperature_at_pedestal_top"  # 36 chars
-        assert len(short_name) <= 70
-        assert length_soft_cap_check({"id": short_name}) == []
-
-    def test_pass_50_char_name(self):
-        """A 50-char name is well below the cap."""
-        from imas_codex.standard_names.audits import length_soft_cap_check
-
-        name50 = "a" * 50
-        assert length_soft_cap_check({"id": name50}) == []
-
-    def test_pass_exactly_70(self):
-        """Exactly 70 chars does not trigger (> 70 only)."""
-        from imas_codex.standard_names.audits import length_soft_cap_check
-
-        name70 = "a" * 70
-        assert length_soft_cap_check({"id": name70}) == []
-
-    def test_fail_71_chars(self):
-        """71 chars triggers the warning."""
-        from imas_codex.standard_names.audits import length_soft_cap_check
-
-        name71 = "a" * 71
-        issues = length_soft_cap_check({"id": name71})
-        assert len(issues) == 1
-        assert "71 chars" in issues[0]
-
-
-# =========================================================================
 # instrument_stokes_bind_check
 # =========================================================================
 
