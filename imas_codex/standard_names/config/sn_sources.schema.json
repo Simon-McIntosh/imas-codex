@@ -7,6 +7,10 @@
   "required": ["schema_version", "name", "sources"],
   "additionalProperties": false,
   "properties": {
+    "kind": {
+      "description": "File-kind discriminator. When present it must be 'sn_sources'; the release-side --focus dispatcher requires it to tell an sn-sources file from an sn-names file. Optional for the mop-up loader (a file without it is treated as sn-sources).",
+      "const": "sn_sources"
+    },
     "schema_version": {
       "description": "Manifest format version. Loaders reject unknown versions.",
       "const": 1

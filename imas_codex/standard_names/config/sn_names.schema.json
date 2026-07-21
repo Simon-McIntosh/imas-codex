@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/iterorganization/imas-codex/imas_codex/standard_names/config/sn_names.schema.json",
+  "title": "Standard-Name review-batch manifest",
+  "description": "A frozen, provenance-carrying list of standard-name ids that constitutes one review batch. This is the review/approval currency: export, PR, merge, and approval all operate on the SN ids listed here. Minted live from an sn-sources file (path -> name join + immediate-family closure) and materialised so the reviewed set is reproducible and can be approved exactly on merge.",
+  "type": "object",
+  "required": ["kind", "schema_version", "name", "names"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "description": "File-kind discriminator. Must be 'sn_names' — the release-side --focus dispatcher validates against this schema when it sees this value.",
+      "const": "sn_names"
+    },
+    "schema_version": {
+      "description": "Manifest format version. Loaders reject unknown versions.",
+      "const": 1
+    },
+    "name": {
+      "description": "Stable kebab-case identifier for this batch.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "title": {
+      "description": "Human-readable title.",
+      "type": "string"
+    },
+    "description": {
+      "description": "One-paragraph synopsis of what the batch covers.",
+      "type": "string"
+    },
+    "names": {
+      "description": "The batch's standard-name ids. This is the authoritative reviewed set carried through export -> PR -> merge.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "minted_from": {
+      "description": "The sn-sources file the batch was minted from (provenance).",
+      "type": "string"
+    },
+    "rc_version": {
+      "description": "The self-assigned RC catalog version that carries this batch (e.g. 'v0.2.0rc65'). Known before push, so it is the traceable key.",
+      "type": "string"
+    },
+    "minted_at": {
+      "description": "ISO timestamp the batch was minted.",
+      "type": "string"
+    },
+    "pr_number": {
+      "description": "Upstream PR number, back-filled after gh pr create.",
+      "type": ["integer", "null"]
+    },
+    "pr_url": {
+      "description": "Upstream PR URL, back-filled after gh pr create.",
+      "type": ["string", "null"]
+    },
+    "merge_commit": {
+      "description": "Merge-commit SHA, back-filled after the PR is merged.",
+      "type": ["string", "null"]
+    },
+    "unmatched_sources": {
+      "description": "Informational: DD source paths from minted_from that had no linked live standard name (reported, not dropped).",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

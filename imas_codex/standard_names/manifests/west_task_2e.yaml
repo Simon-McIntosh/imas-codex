@@ -12,6 +12,7 @@
 # imas-dd migration data and validated against the imas-codex DD graph.
 # =============================================================================
 
+kind: sn_sources
 schema_version: 1
 name: west-task-2e
 title: WEST production DD paths (Task 2e DB analysis)

@@ -20,12 +20,32 @@ class SourcesManifestError(ValueError):
     """A focus file is missing, unreadable, or not schema-compliant."""
 
 
-def _load_schema() -> dict:
-    ref = resources.files("imas_codex.standard_names.config").joinpath(
-        "sn_sources.schema.json"
-    )
+def _load_schema(filename: str = "sn_sources.schema.json") -> dict:
+    ref = resources.files("imas_codex.standard_names.config").joinpath(filename)
     with ref.open("r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def _validate(doc: dict, schema_filename: str, path: str | Path) -> None:
+    """Validate *doc* against a committed JSON Schema, raising on non-compliance.
+
+    Falls back to a minimal structural check when ``jsonschema`` is absent.
+    """
+    try:
+        import jsonschema
+
+        try:
+            jsonschema.validate(doc, _load_schema(schema_filename))
+        except jsonschema.ValidationError as exc:
+            raise SourcesManifestError(
+                f"{path}: not schema-compliant — {exc.message} "
+                f"(at {'/'.join(str(k) for k in exc.absolute_path) or '<root>'})"
+            ) from exc
+    except ImportError:
+        if doc.get("schema_version") != 1:
+            raise SourcesManifestError(
+                f"{path}: unsupported or missing schema_version (expected 1)"
+            ) from None
 
 
 def is_sources_file(token: str) -> bool:
@@ -46,48 +66,84 @@ def load_sources_file(path: str | Path) -> list[str]:
         SourcesManifestError: file missing/unreadable, invalid YAML, or the
             document fails the ``sn_sources`` JSON Schema.
     """
+    doc = _read_doc(path)
+    _validate(doc, "sn_sources.schema.json", path)
+    if not isinstance(doc.get("sources"), dict) or not doc["sources"]:
+        raise SourcesManifestError(f"{path}: 'sources' must be a non-empty mapping")
+
+    flat = _flatten_sources(doc["sources"])
+    if not flat:
+        raise SourcesManifestError(f"{path}: manifest resolved to zero sources")
+    return flat
+
+
+def _read_doc(path: str | Path) -> dict:
+    """Read a YAML file to a mapping, raising ``SourcesManifestError`` on failure."""
     p = Path(path)
     if not p.is_file():
-        raise SourcesManifestError(f"sn-sources file not found: {path}")
+        raise SourcesManifestError(f"focus file not found: {path}")
     try:
         doc = yaml.safe_load(p.read_text(encoding="utf-8"))
     except yaml.YAMLError as exc:
         raise SourcesManifestError(f"{path}: not valid YAML ({exc})") from exc
     if not isinstance(doc, dict):
         raise SourcesManifestError(f"{path}: top level must be a mapping")
+    return doc
 
-    try:
-        import jsonschema
 
-        try:
-            jsonschema.validate(doc, _load_schema())
-        except jsonschema.ValidationError as exc:
-            raise SourcesManifestError(
-                f"{path}: not schema-compliant — {exc.message} "
-                f"(at {'/'.join(str(k) for k in exc.absolute_path) or '<root>'})"
-            ) from exc
-    except ImportError:
-        # Minimal structural fallback when jsonschema is unavailable.
-        if doc.get("schema_version") != 1:
-            raise SourcesManifestError(
-                f"{path}: unsupported or missing schema_version (expected 1)"
-            ) from None
-        if not isinstance(doc.get("sources"), dict) or not doc["sources"]:
-            raise SourcesManifestError(
-                f"{path}: 'sources' must be a non-empty mapping"
-            ) from None
-
+def _flatten_sources(sources: dict) -> list[str]:
+    """Flatten ``sources.<ids>[]`` to a de-duplicated ``<ids>/<path>`` list."""
     flat: list[str] = []
     seen: set[str] = set()
-    for ids, paths in doc["sources"].items():
+    for ids, paths in sources.items():
         for rel in paths:
             full = f"{ids}/{rel}"
             if full not in seen:
                 seen.add(full)
                 flat.append(full)
-    if not flat:
-        raise SourcesManifestError(f"{path}: manifest resolved to zero sources")
     return flat
+
+
+def load_names_file(path: str | Path) -> list[str]:
+    """Load and validate an sn-names batch file; return its list of SN ids.
+
+    Raises:
+        SourcesManifestError: file missing/unreadable, invalid YAML, or the
+            document fails the ``sn_names`` JSON Schema.
+    """
+    doc = _read_doc(path)
+    _validate(doc, "sn_names.schema.json", path)
+    names = doc.get("names")
+    if not isinstance(names, list) or not names:
+        raise SourcesManifestError(f"{path}: 'names' must be a non-empty list")
+    # Preserve order, drop duplicates.
+    out: list[str] = []
+    seen: set[str] = set()
+    for n in names:
+        if n not in seen:
+            seen.add(n)
+            out.append(n)
+    return out
+
+
+def load_focus_file(path: str | Path) -> tuple[str, list[str]]:
+    """Dispatch a release-side ``--focus`` file by its ``kind`` discriminator.
+
+    Returns ``(kind, items)`` where *kind* is ``"sn_sources"`` (items are
+    flattened ``<ids>/<path>`` DD paths) or ``"sn_names"`` (items are SN ids).
+    Raises ``SourcesManifestError`` if ``kind`` is absent or unrecognised — the
+    release path must never guess whether a file lists DD paths or SN ids.
+    """
+    doc = _read_doc(path)
+    kind = doc.get("kind")
+    if kind == "sn_sources":
+        return "sn_sources", load_sources_file(path)
+    if kind == "sn_names":
+        return "sn_names", load_names_file(path)
+    raise SourcesManifestError(
+        f"{path}: missing or unrecognised 'kind' (expected 'sn_sources' or "
+        f"'sn_names'); a release --focus file must declare its kind"
+    )
 
 
 def expand_focus_tokens(tokens: list[str]) -> list[str]:
