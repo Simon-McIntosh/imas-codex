@@ -207,47 +207,78 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       names on those paths. This is the load-bearing design decision D-focus below.
     </p>
 
-    <h2 id="s6">§6 — Gap B: subset-scoped export</h2>
+    <h2 id="s6">§6 — Gap B: batch-scoped, additive export (never subset-replace)</h2>
     <p>
-      Export today supports only a <code>--domain</code> subset (<code>export.py:206-208</code>).
-      We need to export the names whose sources fall in a manifest — a
-      <strong>source-path-scoped</strong> selection. Add a scope to <code>_fetch_candidates</code>
-      that admits a name iff any of its <code>source_paths</code> matches a manifest entry
-      (join on the <code>dd:&lt;ids&gt;/&lt;path&gt;</code> URI form from
-      <code>source_paths.py</code>), surfaced as
-      <code>sn release --export-only --sources-file &lt;manifest&gt;</code>. The export manifest
-      must stamp <code>export_scope: "manifest_subset"</code> with the manifest name and the set
-      of included name ids, so the downstream PR and the approve-on-merge step (§8) can operate
-      on exactly the same set. The per-domain files in the staging tree then contain only the
-      subset's entries, producing a clean minimal diff against ISNC main.
+      <strong>Correction to an earlier design error.</strong> A first instinct was to export
+      only the batch's names into the domain files. That is wrong: the catalog on ISNC
+      <code>main</code> already holds the full accepted corpus (~2345 names, <code>status:
+      active</code>), so writing only a subset would delete every other name from the files —
+      a batch PR would read as "removes 2000 SNs." Diffs across batches must be <strong>strictly
+      additive</strong>.
+    </p>
+    <p>
+      The rule: the export is <strong>always the full catalog, written deterministically</strong>
+      (all names, stable sort by id, canonical field order). Because unchanged names serialise
+      byte-identically, a re-export against <code>main</code> produces a diff of <em>only</em>
+      what this batch changes — no phantom removals. The <em>batch</em> is the scoped subset
+      whose entries actually change in this PR: they gain a review/approval stamp (§7) and any
+      reviewer edits. So Gap B is not "export a subset" but "export the whole catalog with a
+      scoped set marked" — the scope selector (<code>--sources-file &lt;manifest&gt;</code>,
+      <code>--domain</code>, or an id list) picks which names carry the stamp, and the export
+      records the batch's included-id set in the manifest so §8 approves exactly that set.
+      Determinism (stable order + canonical serialisation) is the load-bearing property; without
+      it, incidental reordering pollutes every diff.
     </p>
 
-    <h2 id="s7">§7 — Gap C: subset PR flow</h2>
+    <h2 id="s7">§7 — Gap C: additive batch-review PR + how approval is recorded</h2>
     <p>
-      <code>sn release</code> is a full publish (export + tag + push to ISNC). For a review gate
-      we need a non-tagging <strong>PR of a subset</strong>: export the manifest subset into a
-      working checkout of ISNC merged against its current <code>main</code>, commit on a branch
-      (<code>review/west-task-2e</code>), push, and open a PR whose body carries the manifest
-      provenance and the DD v4 source paths for reviewer context. ISNC's existing
-      <code>validate.yml</code> gates the PR structurally/semantically on any change to
-      <code>standard_names/**/*.yml</code>; no new CI is needed for validation. The PR adds the
-      subset's names to the domain files with <code>status: active</code> (the catalog data
-      format has no <code>approved</code> field — approval is graph-side governance only).
+      Because the names are already published on <code>main</code>, a review PR does not
+      <em>add</em> names — it <strong>elevates a batch to approved</strong>. To make that a
+      clean, self-documenting diff, each batch's entries carry a visible <strong>review
+      stamp</strong> in the catalog (e.g. a per-entry <code>review: { pr, approved_at }</code>
+      block, or promotion of a <code>reviewed</code> status). A batch PR is then: full
+      deterministic re-export with the batch's N entries gaining the stamp (± reviewer edits),
+      on a branch <code>review/&lt;batch&gt;</code>, with a PR body listing the batch and its
+      provenance. The diff shows exactly those N entries getting <code>+ review:</code> next to
+      their full definition — reviewers see the definition and the approval in one place, and
+      merging <em>is</em> the approval. ISNC's existing <code>validate.yml</code> gates it; no
+      new validation CI is needed.
+    </p>
+    <p>
+      <strong>Practical options for 2345 names.</strong> Two catalog models keep diffs additive:
+      (a) <em>in-catalog stamp</em> (recommended) — approval recorded per entry as above;
+      definition + approval reviewed together; costs one small ISNC schema addition. (b)
+      <em>separate append-only approved list</em> — a <code>approved/&lt;domain&gt;.yml</code>
+      that each batch appends ids to; catalog files untouched, diff is purely <code>+ids</code>,
+      but reviewers must cross-reference definitions (mitigated by rendering them in the PR body).
+      Either way the review corpus is chunked into human-sized batches: scope by
+      <strong>(facility manifest) ∩ (physics domain or IDS)</strong>, ~50–150 names per PR, so a
+      domain expert reviews one coherent diagnostic/domain in one sitting. WEST (355) is the
+      pilot facility, itself sub-batched by domain/IDS. Batches proceed monotonically — each
+      merged batch stays approved and byte-identical in later diffs.
     </p>
 
-    <h2 id="s8">§8 — Gap D: approve-on-merge covering the whole subset + local import</h2>
+    <h2 id="s8">§8 — Gap D: import from the approved PR (not <code>sn merge</code>)</h2>
     <p>
-      This is the most consequential gap. <code>sn merge</code> only marks names
-      <code>approved</code> whose <em>wording changed</em> in the PR diff
-      (<code>read_pr_changes</code> captures docs edits and renames, not unchanged or newly-added
-      entries). A first-review PR that reviewers approve <em>as-is</em> would therefore mark
-      <strong>nothing</strong> approved. We need a <strong>subset bulk-approve</strong>: given a
-      merged PR's entry set (from the manifest / the export's included-id list) plus the PR
-      number, URL and merge-commit sha, call the existing per-name
-      <code>mark_catalog_name_approved</code> for every name in the merged subset, not only the
-      diffed ones. Recommended surface: extend <code>sn merge</code> with a
-      <code>--manifest &lt;file&gt; --approve-all</code> mode that reuses the existing accept /
-      re-score path for any genuinely-edited entries and bulk-approves the remainder.
+      <strong><code>sn merge</code> is the wrong tool for the human gate.</strong> It re-attaches
+      the PR's diffed entries as steered edits and <em>re-scores them through the LLM review</em>,
+      quarantining any that fall below threshold (<code>merge.py:run_merge</code>). That inverts
+      the trust model: a human expert just approved these names, so re-running the machine
+      reviewer — which can <em>reject</em> a human-approved name — is exactly backwards. It also
+      only touches wording-diffed entries, so a batch approved as-is marks nothing.
+    </p>
+    <p>
+      The correct back-import treats the merged PR as <strong>authoritative</strong>. Call it
+      <code>sn import</code> (from an approved/merged PR): given the merged branch + PR metadata
+      (number, URL, merge-commit sha), it (1) applies any reviewer editorial edits via
+      <code>catalog_reconcile</code> — scalar fields only, <strong>no re-scoring</strong>; and
+      (2) marks the batch's names <code>approved</code> via <code>mark_catalog_name_approved</code>,
+      recording the provenance fields. It never quarantines. The batch set comes from the review
+      stamp / included-id set the export recorded (§6), so it approves exactly the merged batch,
+      not just the diffed rows. <code>catalog_reconcile</code> already does the edit-apply half
+      (it has no CLI today — give it one); the approval half reuses the existing per-name
+      <code>mark_catalog_name_approved</code>. <code>sn merge</code>'s re-score path is retained
+      only for a genuinely-untrusted-edit scenario, if at all.
     </p>
     <p>
       <strong>The CI-vs-local split is a hard constraint, not a choice.</strong> A GitHub-hosted
@@ -255,20 +286,10 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       approved on merge" resolves to: ISNC CI <em>validates</em> the PR and, on merge, records
       the merge metadata (PR number, URL, merge-commit sha) as a durable signal (a workflow
       artifact, a release, or a committed marker); the authoritative graph write is a
-      <strong>local</strong> <code>sn merge --manifest west_sn_sources.yaml --pr-number … --pr-url
-      … --merge-commit …</code>, run by the maintainer or a local poller that watches ISNC for
-      merged review PRs. The user has already noted this: "the graph is local so we will always
-      need an import step following PR approval." The design honours it rather than pretending CI
-      can close the loop.
-    </p>
-    <p>
-      <strong>Wiring <code>reconcile_catalog</code>.</strong> The scan found
-      <code>reconcile_catalog</code> has no CLI and no production caller, and never sets
-      <code>approved</code>. Approval flows only through <code>sn merge</code>. So the import step
-      is <code>sn merge</code> (which both re-validates any edited entries and sets the governance
-      state); <code>reconcile_catalog</code> remains the separate scalar/provenance self-heal for
-      restore scenarios and should get a thin CLI so it is callable outside tests — but it is not
-      the approval path.
+      <strong>local</strong> <code>sn import --pr-number … --pr-url … --merge-commit …</code>,
+      run by the maintainer or a local poller that watches ISNC for merged review PRs. The user
+      noted this: "the graph is local so we will always need an import step following PR
+      approval." The design honours it rather than pretending CI can close the loop.
     </p>
 
     <h2 id="s9">§9 — TDD strategy</h2>
@@ -314,14 +335,16 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       <li><code>sn run --focus-file imas_codex/standard_names/manifests/west_task_2e.yaml</code> → assert every
         eligible WEST source has an <code>accepted</code>, <code>valid</code> name (report the
         residual gaps and their skip reasons).</li>
-      <li><code>sn release --export-only --sources-file …</code> into a scratch ISNC checkout →
-        assert the staged diff contains exactly the subset and the export manifest scope is
-        <code>manifest_subset</code>.</li>
+      <li>Full deterministic export with the batch scoped (<code>--sources-file …</code>) into a
+        scratch ISNC checkout → assert the diff is <strong>additive</strong>: only the batch's
+        entries change (they gain the review stamp), every other name byte-identical, nothing
+        removed.</li>
       <li>Open the PR against a <em>fork/scratch</em> ISNC; assert <code>validate.yml</code>
-        passes on the subset diff.</li>
-      <li>Merge the scratch PR; run the local <code>sn merge --manifest … --pr-number … --pr-url …
-        --merge-commit …</code> → assert every subset name is <code>approved</code> with
-        provenance fields set.</li>
+        passes and the diff is the batch only.</li>
+      <li>Merge the scratch PR; run the local <code>sn import --pr-number … --pr-url …
+        --merge-commit …</code> → assert every batch name is <code>approved</code> with
+        provenance fields set, reviewer edits applied, and <strong>nothing re-scored or
+        quarantined</strong>.</li>
       <li>Re-run <code>sn run</code> (no focus) → assert no approved WEST name mutated (frozen),
         and <code>sn edit</code> on one is rejected.</li>
     </ol>
@@ -343,21 +366,40 @@ review_candidates:             # dimensionless physical signals mis-gated as str
         <p class="r-dec-rat"></p>
       </div>
 
-      <div class="r-dec" data-key="export-subset-selector" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-export — how is the export subset selected?</p>
+      <div class="r-dec" data-key="export-additivity" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-export — how do we guarantee batch PR diffs are additive (never look like removals) while the full catalog lives on main?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="sources-file">By manifest file: a name is in-scope iff any source_path intersects the manifest (Recommended — reuses the same file that drove focus)</button>
-          <button class="r-opt" data-value="id-list">By explicit --name-id list</button>
-          <button class="r-opt" data-value="focus-scope">By the focus run_id / scope of the mop-up run</button>
+          <button class="r-opt" data-value="full-deterministic">Always export the FULL catalog, deterministically (stable sort + canonical serialisation); the batch is the scoped set that changes — diff is inherently additive (Recommended)</button>
+          <button class="r-opt" data-value="subset-merge-into-checkout">Export the subset and merge it into a checkout of main's files</button>
+          <button class="r-opt" data-value="subset-replace">Export only the subset into the files (REJECTED — deletes every other name)</button>
         </p>
         <p class="r-dec-rat"></p>
       </div>
 
-      <div class="r-dec" data-key="approve-coverage" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-approve — how do we mark the whole merged subset approved when reviewers approve as-is (no wording diff)?</p>
+      <div class="r-dec" data-key="approval-recording" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-recording — how is per-name approval recorded so a batch PR is a clear, additive, self-documenting diff?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="merge-manifest">Extend sn merge with --manifest --approve-all: re-score edited entries, bulk-approve the rest via mark_catalog_name_approved (Recommended)</button>
-          <button class="r-opt" data-value="separate-cmd">A separate sn approve-subset command distinct from sn merge</button>
+          <button class="r-opt" data-value="in-catalog-stamp">Per-entry review stamp in the catalog (review:{pr,approved_at}); definition + approval reviewed together (Recommended — small ISNC schema add)</button>
+          <button class="r-opt" data-value="separate-approved-list">Separate append-only approved/&lt;domain&gt;.yml of ids; catalog untouched, but reviewers cross-reference definitions</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="batch-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-batching — how is the ~2345-name corpus chunked into reviewable batches?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="facility-x-domain">(facility manifest) ∩ (physics domain or IDS), ~50–150/PR — one coherent diagnostic/domain per expert per sitting (Recommended)</button>
+          <button class="r-opt" data-value="facility-only">Whole facility per PR (WEST = 355 in one) — fewer PRs, heavier review</button>
+          <button class="r-opt" data-value="domain-only">Physics domain per PR, ignoring facility</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="back-import-tool" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-import — what brings the merged (approved) PR back into the graph?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="sn-import">A dedicated sn import from the approved PR: reconcile reviewer edits (no re-score) + mark batch approved; never quarantine (Recommended)</button>
+          <button class="r-opt" data-value="sn-merge">Extend sn merge (re-scores diffed entries through LLM review — REJECTED: can reject a human-approved name)</button>
         </p>
         <p class="r-dec-rat"></p>
       </div>
@@ -365,8 +407,8 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       <div class="r-dec" data-key="merge-trigger" data-choice="" data-by="" data-when="">
         <p class="r-dec-q">D-trigger — what performs the local graph write after upstream merge (CI cannot reach the local graph)?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="local-poller">Local poller watches ISNC for merged review PRs and runs sn merge automatically; CI only validates + records merge metadata (Recommended)</button>
-          <button class="r-opt" data-value="manual">Maintainer runs sn merge manually after each merge</button>
+          <button class="r-opt" data-value="local-poller">Local poller watches ISNC for merged review PRs and runs sn import automatically; CI only validates + records merge metadata (Recommended)</button>
+          <button class="r-opt" data-value="manual">Maintainer runs sn import manually after each merge</button>
           <button class="r-opt" data-value="self-hosted">Self-hosted CI runner with graph access (heavy; against infra policy)</button>
         </p>
         <p class="r-dec-rat"></p>

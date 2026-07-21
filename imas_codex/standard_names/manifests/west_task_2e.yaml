@@ -40,8 +40,8 @@ counts:
   raw_leaves: 744          # all leaves listed across 22 IDS sheets
   after_structural_filter: 507   # minus ids_properties/* and code/*
   eligible_sources: 355       # distinct nameable v4 sources (this file)
-  renamed_v3_to_v4: 57
-  removed_no_v4_equivalent: 26
+  renamed_v3_to_v4: 61
+  removed_no_v4_equivalent: 22
   excluded_ineligible: 114
 
 # -----------------------------------------------------------------------------
@@ -443,9 +443,13 @@ resolution:
     - { from: magnetics/b_field_tor_probe/position/z, to: magnetics/b_field_phi_probe/position/z }
     - { from: magnetics/b_field_tor_probe/toroidal_angle, to: magnetics/b_field_phi_probe/toroidal_angle }
     - { from: magnetics/b_field_tor_probe/turns, to: magnetics/b_field_phi_probe/turns }
+    - { from: equilibrium/time_slice/boundary/elongation_lower, to: equilibrium/time_slice/boundary/elongation }
+    - { from: equilibrium/time_slice/boundary/elongation_upper, to: equilibrium/time_slice/boundary/elongation }
     - { from: equilibrium/time_slice/boundary/x_point/r, to: equilibrium/time_slice/contour_tree/node/r }
     - { from: equilibrium/time_slice/boundary/x_point/z, to: equilibrium/time_slice/contour_tree/node/z }
     - { from: equilibrium/time_slice/boundary_separatrix/elongation, to: equilibrium/time_slice/boundary/elongation }
+    - { from: equilibrium/time_slice/boundary_separatrix/elongation_lower, to: equilibrium/time_slice/boundary/elongation }
+    - { from: equilibrium/time_slice/boundary_separatrix/elongation_upper, to: equilibrium/time_slice/boundary/elongation }
     - { from: equilibrium/time_slice/boundary_separatrix/geometric_axis/r, to: equilibrium/time_slice/boundary/geometric_axis/r }
     - { from: equilibrium/time_slice/boundary_separatrix/geometric_axis/z, to: equilibrium/time_slice/boundary/geometric_axis/z }
     - { from: equilibrium/time_slice/boundary_separatrix/minor_radius, to: equilibrium/time_slice/boundary/minor_radius }
@@ -493,14 +497,10 @@ resolution:
   removed:  # present in WEST v3 usage; no DD v4 SN-eligible target — see reason
     - { path: equilibrium/time_slice/boundary/active_limiter_point/r, reason: "removed_v4.0.0_no_equivalent" }
     - { path: equilibrium/time_slice/boundary/active_limiter_point/z, reason: "removed_v4.0.0_no_equivalent" }
-    - { path: equilibrium/time_slice/boundary/elongation_lower, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
-    - { path: equilibrium/time_slice/boundary/elongation_upper, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
     - { path: equilibrium/time_slice/boundary/strike_point/r, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
     - { path: equilibrium/time_slice/boundary/strike_point/z, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
     - { path: equilibrium/time_slice/boundary_separatrix/active_limiter_point/r, reason: "removed_v4.0.0_no_equivalent" }
     - { path: equilibrium/time_slice/boundary_separatrix/active_limiter_point/z, reason: "removed_v4.0.0_no_equivalent" }
-    - { path: equilibrium/time_slice/boundary_separatrix/elongation_lower, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
-    - { path: equilibrium/time_slice/boundary_separatrix/elongation_upper, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
     - { path: equilibrium/time_slice/boundary_separatrix/strike_point/r, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
     - { path: equilibrium/time_slice/boundary_separatrix/strike_point/z, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
     - { path: equilibrium/time_slice/ggd (not detailed here), reason: "workbook_annotation_not_a_path" }
