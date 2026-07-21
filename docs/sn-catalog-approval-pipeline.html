@@ -57,9 +57,9 @@
       additive batch PR against ISNC, reviewed by experts, whose merge triggers a local
       <code>sn merge</code> that promotes the reviewed names to <code>approved</code> and freezes
       them in the graph. A GitHub-hosted CI runner cannot reach the local Neo4j graph, so the
-      authoritative graph write is always a local step — CI's role is to validate the PR and
-      record the merge metadata (PR number, URL, merge-commit sha) that the local
-      <code>sn merge</code> consumes.
+      authoritative graph write is always a local step run by the maintainer — CI's only role is
+      <code>validate.yml</code> on the PR. Review itself happens in the SPA (served from our ISNC
+      fork), scoped to the PR's SNs and shared by URL (§7).
     </p>
     <p>
       <img src="/imas-codex/figures/sn-approval-pipeline/pipeline.svg"
@@ -172,14 +172,15 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       join over graph state: <code>mint_sn_list(dd_paths)</code> = (1) <em>base join</em> — every
       <code>StandardName</code> whose <code>source_paths</code> list intersects the DD-path set
       (the link is the <code>dd:&lt;ids&gt;/&lt;path&gt;</code> URI on the SN, not a
-      relationship); then (2) <em>set closure</em> — because approving half a coherent group is
-      incoherent, pull in the whole family of any name touched. "Family" is a decision
-      (D-minting-closure): the concrete candidates are the <code>HAS_PARENT</code> hierarchy
-      (a base name + its projection/component/statistic children, 1506 edges) and names sharing
-      a grammar base token (<code>HAS_GEOMETRIC_BASE</code>/<code>HAS_SUBJECT</code>); looser
-      groupings (<code>IN_CLUSTER</code>, <code>REFINED_FROM</code> lineage) are almost certainly
-      too broad. This is the <strong>path→name join</strong> that the earlier design left
-      unspecified — it is now the heart of the flow.
+      relationship); then (2) <em>immediate-family closure</em> — because approving a base
+      without its siblings is incoherent, pull in only the <strong>immediate family</strong> of
+      any name touched: its <code>HAS_PARENT</code> parent and that parent's direct children
+      (siblings), one hop in each direction, <em>non-transitive</em>. Sharing a grammar base
+      token (<code>HAS_GEOMETRIC_BASE</code>/<code>HAS_SUBJECT</code>) is deliberately <strong>not</strong>
+      a closure edge — it is too broad — and neither is the transitive descendant tree,
+      <code>IN_CLUSTER</code>, or <code>REFINED_FROM</code> lineage. This is the
+      <strong>path→name join</strong> that the earlier design left unspecified — it is now the
+      heart of the flow.
     </p>
     <p>
       <strong>Do we need a fixed SN file? — derive live, but materialise for the record.</strong>
@@ -297,19 +298,35 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       catalog); and the batching structure itself — a focus manifest scopes the batch for now.
     </p>
 
-    <h2 id="s7">§7 — Gap C: the additive review PR</h2>
+    <h2 id="s7">§7 — Gap C: the review PR and a PR-scoped SPA view</h2>
     <p>
-      Because <code>main</code> holds only the approved set, a batch's names are <strong>new
-      additions</strong> to it: the PR shows each batch name's full definition (name,
-      documentation, unit, provenance) being added, on a branch <code>review/&lt;batch&gt;</code>,
-      with a PR body listing the batch and its origin. Reviewers review the added definitions;
-      the already-approved names sit unchanged above the diff (carried so nothing reads as
-      removed). Merging the PR <em>is</em> the human approval act — there is no separate approval
-      field to set in the catalog; a name's presence in the merged approved catalog is the
-      marker, and §8 mirrors that into the graph. ISNC's existing <code>validate.yml</code> gates
-      the PR structurally/semantically; no new validation CI is needed. Start small and push
-      several PRs; the concrete batching structure (how the corpus is chunked) is deferred to a
-      future session — a focus manifest already scopes the batch for now.
+      <strong>The additive PR (data).</strong> A batch's names are new additions to the approved
+      catalog: the PR shows each batch name's full definition being added, on a branch
+      <code>review/&lt;batch&gt;</code>, carrying the already-approved names unchanged so nothing
+      reads as removed. Merging <em>is</em> the human approval act; §8 mirrors it into the graph.
+      ISNC's existing <code>validate.yml</code> gates it — no new validation CI needed.
+    </p>
+    <p>
+      <strong>The fork is an anything-goes preview; upstream is the gate.</strong> We own a fork
+      of ISNC where we push RCs, and each RC build renders the catalog through the ISN-repo SPA,
+      which <strong>serves all catalog versions</strong>. So the fork can host whatever we like —
+      a focus topic, the full set, work-in-progress — and its SPA gives a <strong>shareable
+      URL</strong> to put in front of reviewers without touching upstream. The upstream ISNC PR
+      remains the actual approval gate; the fork is where review and iteration happen cheaply.
+    </p>
+    <p>
+      <strong>Proposed feature — PR-scoped SPA view.</strong> The SPA (on both the fork and
+      upstream) should <strong>surface open PRs</strong> and let a viewer <strong>select a PR</strong>,
+      filtering the rendered catalog to <em>only the SNs that PR introduces</em> — not the
+      previously-approved names carried along for additivity. The filter set is exactly the
+      <strong>sn_names batch artifact</strong> the export materialised (§3b/§6): the SPA reads
+      that list (from the PR branch, or the PR's changed entries) and shows just those names,
+      richly rendered (definition, unit, provenance, family). This turns review from reading raw
+      YAML diffs into browsing a scoped, shareable catalog view — e.g.
+      <code>&lt;spa-url&gt;?pr=NNN</code> — which is the natural home for the first human-review
+      trial. Build items: (a) a PR-listing surface in the SPA; (b) a per-PR SN-id filter driven
+      by the batch artifact; (c) the shareable deep-link. Start small and push several such PRs;
+      the batching structure is deferred — a focus manifest scopes each batch for now.
     </p>
 
     <h2 id="s8">§8 — Gap D: <code>sn merge</code> from an accepted PR — the approval state machine</h2>
@@ -354,14 +371,14 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       its pool-exclusion and resolution handling.
     </p>
     <p>
-      <strong>The CI-vs-local split is a hard constraint, not a choice.</strong> A GitHub-hosted
-      runner has no route to the local Neo4j graph. So the "CI watcher that sets lifecycle to
-      approved on merge" resolves to: ISNC CI <em>validates</em> the PR and, on merge, records
-      the merge metadata (PR number, URL, merge-commit sha) as a durable signal; the
-      authoritative graph write is a <strong>local</strong> <code>sn merge --pr-number …
-      --pr-url … --merge-commit …</code>, run by the maintainer or a local poller that watches
-      ISNC for merged review PRs. "The graph is local so we will always need an import step
-      following PR approval."
+      <strong>No CI signal/watcher — the merge step is a manual local run.</strong> The graph is
+      local and a GitHub runner cannot reach it, so a CI job could not actually promote anything;
+      there is little value in a watcher emitting a signal. The maintainer simply observes the
+      merged PR (its number is right there) and runs the <strong>local</strong> <code>sn merge
+      --pr-number … --pr-url … --merge-commit …</code> against the sn_names batch artifact. CI's
+      only role stays what it already is — <code>validate.yml</code> on the PR. "The graph is
+      local so we will always need an import step following PR approval," and that step is a
+      deliberate local action, not automation.
     </p>
 
     <h2 id="s9">§9 — TDD strategy</h2>
@@ -381,7 +398,8 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       <li><strong>Minting (Gap B):</strong> <code>mint_sn_list(dd_paths)</code> is pure over an
         injected graph view — assert the base join (SN whose <code>source_paths</code> intersect
         the set, incl. a name with one in / one out path) and the family closure (a touched base
-        pulls its <code>HAS_PARENT</code> children / shared-base siblings per D-minting-closure);
+        pulls its immediate family — <code>HAS_PARENT</code> parent + that parent's direct children
+        (siblings), one hop, non-transitive, and NOT shared-grammar-base names);
         a DD path with no linked SN is reported, not dropped.</li>
       <li><strong>Additive export (Gap B):</strong> export of <code>approved ∪ batch</code> is
         deterministic (stable sort + canonical serialisation) and, against an approved-only
@@ -453,15 +471,15 @@ review_candidates:             # dimensionless physical signals mis-gated as str
         <p class="r-dec-rat">Context: extraction speaks DD paths; export/PR/merge/approval speak SN ids. A materialised sn_names list is also the reproducible batch id-set that carries through the gate (§3b).</p>
       </div>
 
-      <div class="r-dec" data-key="minting-closure" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-minting-closure — when minting the SN set from DD paths, which relations define the "family/set" that gets pulled in whole?</p>
+      <div class="r-dec" data-key="minting-closure" data-choice="immediate-siblings" data-by="Simon McIntosh" data-when="2026-07-21">
+        <p class="r-dec-q">D-minting-closure — when minting the SN set from DD paths, which relations define the "family" pulled in whole?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="parent-plus-base">HAS_PARENT hierarchy (base + projection/component/statistic children) + shared grammar base token (Recommended — coherent, bounded)</button>
-          <button class="r-opt" data-value="parent-only">HAS_PARENT hierarchy only</button>
-          <button class="r-opt" data-value="include-cluster">Also close over IN_CLUSTER / REFINED_FROM (REJECTED — too broad, pulls unrelated names)</button>
-          <button class="r-opt" data-value="no-closure">Base join only, no closure (risks approving partial families)</button>
+          <button class="r-opt" data-value="immediate-siblings">Immediate family only: HAS_PARENT parent + that parent's direct children (siblings), one hop, non-transitive (Locked)</button>
+          <button class="r-opt" data-value="parent-plus-base">HAS_PARENT hierarchy + shared grammar base token (REJECTED — too broad)</button>
+          <button class="r-opt" data-value="include-cluster">Also close over IN_CLUSTER / REFINED_FROM (REJECTED — too broad)</button>
+          <button class="r-opt" data-value="no-closure">Base join only, no closure (risks partial families)</button>
         </p>
-        <p class="r-dec-rat">Context: base join = SN whose source_paths intersect the DD-path set; closure avoids approving a base without its projections. Exact relation set needs confirming against how families are actually modelled.</p>
+        <p class="r-dec-rat">Locked: base join (SN whose source_paths intersect the DD-path set) then immediate family only — parent + siblings, one hop, non-transitive. Grammar-base sharing is deliberately NOT a closure edge (too broad).</p>
       </div>
 
       <div class="r-dec" data-key="sn-list-materialisation" data-choice="" data-by="" data-when="">
@@ -521,14 +539,23 @@ review_candidates:             # dimensionless physical signals mis-gated as str
         <p class="r-dec-rat"></p>
       </div>
 
-      <div class="r-dec" data-key="merge-trigger" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-trigger — what performs the local graph write after upstream merge (CI cannot reach the local graph)?</p>
+      <div class="r-dec" data-key="merge-trigger" data-choice="manual" data-by="Simon McIntosh" data-when="2026-07-21">
+        <p class="r-dec-q">D-trigger — what performs the local graph write after upstream merge?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="local-poller">Local poller watches ISNC for merged review PRs and runs sn merge automatically; CI only validates + records merge metadata (Recommended)</button>
-          <button class="r-opt" data-value="manual">Maintainer runs sn merge manually after each merge</button>
-          <button class="r-opt" data-value="self-hosted">Self-hosted CI runner with graph access (heavy; against infra policy)</button>
+          <button class="r-opt" data-value="manual">Maintainer observes the merged PR and runs sn merge locally — no CI automation (Locked)</button>
+          <button class="r-opt" data-value="local-poller">Local poller auto-runs sn merge on merged PRs</button>
+          <button class="r-opt" data-value="ci-signal">CI watcher emits a signal on merge (REJECTED — graph is local, CI can't promote; little value)</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">Locked: no CI signal/watcher. The graph is local so CI can't do the promotion; the PR number is visible on merge, and the maintainer runs the local sn merge deliberately. CI stays just validate.yml.</p>
+      </div>
+
+      <div class="r-dec" data-key="spa-pr-view" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-spa-view — should the SPA (fork + upstream) surface PRs and filter the rendered catalog to a selected PR's SNs?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="pr-scoped-spa">Yes — SPA lists PRs, and selecting one filters to only that PR's SNs (from the sn_names batch artifact); shareable deep-link, e.g. ?pr=NNN (Recommended — the review surface)</button>
+          <button class="r-opt" data-value="raw-diff">No — reviewers read the raw YAML diff (harder for 100s of names)</button>
+        </p>
+        <p class="r-dec-rat">Context: the fork SPA already serves all catalog versions, so RCs can be pushed and shared freely by URL. A PR-scoped filter (driven by the materialised sn_names list) turns review into browsing a scoped, richly-rendered catalog rather than YAML. Build: PR-listing surface + per-PR SN-id filter + deep-link.</p>
       </div>
 
       <div class="r-dec" data-key="dimensionless-classifier" data-choice="fix-classifier" data-by="Simon McIntosh" data-when="2026-07-21">
