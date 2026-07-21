@@ -620,7 +620,7 @@ def _fetch_deprecation_stubs(
         unit: coalesce(u.id, old.unit)
     } AS record,
     collect(DISTINCT succ.id) AS successors
-    ORDER BY old.id
+    ORDER BY record.id
     """
     with GraphClient() as gc:
         rows = gc.query(cypher)
