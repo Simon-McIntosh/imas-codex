@@ -110,6 +110,12 @@ COORDINATE_SEGMENTS: frozenset[str] = frozenset(
 # Units that indicate a "no-unit" / dimensionless quantity.
 _NO_UNIT: frozenset[str] = frozenset({"", "-", "mixed"})
 
+# Units that are an EXPLICIT dimensionless marker (a pure number/ratio the DD
+# author deliberately labelled), as opposed to an absent unit ("", "-") or the
+# non-standard "mixed". A signal container carrying "1" is a real dimensionless
+# physical quantity (Z_eff, optical depth, a fraction), not structure.
+_DIMENSIONLESS_UNITS: frozenset[str] = frozenset({"1"})
+
 # Metadata subtree segments (depth ≥ 2)
 _METADATA_SUBTREES: frozenset[str] = frozenset({"ids_properties", "code"})
 
@@ -679,6 +685,7 @@ def classify_node_pass2(
     unit: str | None = None,
     name: str | None = None,
     parent_name: str | None = None,
+    has_data_child: bool = False,
 ) -> str | None:
     """Refine classification using graph relationships.
 
@@ -708,6 +715,10 @@ def classify_node_pass2(
     parent_name:
         Name (last segment) of the parent node, if available.
         Used by R4 to detect ``*_fit`` parents for fit-child promotion.
+    has_data_child:
+        ``True`` if the node has a direct child leaf named ``data`` (the DD
+        signal signature: a ``data`` + ``time`` pair). Used by R5 to promote a
+        dimensionless signal container back to a nameable quantity.
     """
     dt = (data_type or "").upper()
 
@@ -752,6 +763,22 @@ def classify_node_pass2(
         and _FIT_PARENT_RE.search(parent_name)
     ):
         return "fit_artifact"
+
+    # R5: Dimensionless signal-signature promotion — a structural
+    # STRUCTURE/STRUCT_ARRAY carrying the explicit dimensionless unit "1" AND a
+    # direct ``data`` leaf child is a nameable dimensionless physical quantity
+    # (Z_eff, optical depth, ellipticity, a fraction), not a container. Pass 1
+    # demotes it via Rule 12 because the dimensionless unit is not yet resolved
+    # at build time; the data-child signature recovers it here. Containers
+    # WITHOUT a data child (fit artifacts, reference waveforms, summary structs)
+    # and absent/"mixed" units are deliberately left structural.
+    if (
+        current_category == "structural"
+        and dt in STRUCTURE_TYPES
+        and (unit or "") in _DIMENSIONLESS_UNITS
+        and has_data_child
+    ):
+        return "quantity"
 
     return None
 

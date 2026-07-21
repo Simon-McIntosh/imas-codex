@@ -2271,6 +2271,37 @@ def _reclassify_relational(client: GraphClient) -> int:
         if new_cat and new_cat != row["current"]:
             updates[node_id] = new_cat
 
+    # R5: Dimensionless signal-signature promotion — structural
+    # STRUCTURE/STRUCT_ARRAY nodes carrying the explicit dimensionless unit "1"
+    # that own a direct `data` leaf child are dimensionless physical signals
+    # (Z_eff, optical depth, a fraction), demoted by Pass 1 Rule 12 because the
+    # dimensionless unit is unresolved at build time. Promote them to quantity.
+    signal_rows = client.query(
+        """
+        MATCH (n:IMASNode)
+        WHERE n.node_category = 'structural'
+          AND n.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']
+          AND n.unit = '1'
+        RETURN n.id AS id, n.node_category AS current,
+               n.data_type AS data_type, n.unit AS unit, n.name AS name,
+               EXISTS { (c:IMASNode {name: 'data'})-[:HAS_PARENT]->(n) }
+                   AS has_data_child
+        """,
+    )
+    for row in signal_rows:
+        node_id = row["id"]
+        if node_id in updates:
+            continue
+        new_cat = classify_node_pass2(
+            row["current"],
+            data_type=row.get("data_type"),
+            unit=row.get("unit"),
+            name=row.get("name"),
+            has_data_child=row.get("has_data_child", False),
+        )
+        if new_cat and new_cat != row["current"]:
+            updates[node_id] = new_cat
+
     # R4: Fit-child promotion — quantity leaves under *_fit parents
     fit_rows = client.query(
         """

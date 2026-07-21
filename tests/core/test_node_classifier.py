@@ -438,6 +438,85 @@ class TestClassifyNodePass2:
         )
         assert result is None
 
+    # --- R5: dimensionless signal-signature promotion ---
+
+    def test_r5_dimensionless_signal_structure_promoted(self):
+        """A structural STRUCTURE carrying the explicit dimensionless unit "1"
+        AND a direct data-leaf child is a nameable dimensionless quantity
+        (e.g. zeff_line_average, optical_depth) → promote to quantity."""
+        result = classify_node_pass2(
+            current_category="structural",
+            has_identifier_schema=False,
+            is_coordinate_target=False,
+            data_type="STRUCTURE",
+            unit="1",
+            has_data_child=True,
+        )
+        assert result == "quantity"
+
+    def test_r5_struct_array_dimensionless_signal_promoted(self):
+        result = classify_node_pass2(
+            current_category="structural",
+            data_type="STRUCT_ARRAY",
+            unit="1",
+            has_data_child=True,
+        )
+        assert result == "quantity"
+
+    def test_r5_no_data_child_stays_structural(self):
+        """A dimensionless STRUCTURE with NO data child is a genuine container
+        (fit artifact, reference waveform, summary struct) → keep structural."""
+        result = classify_node_pass2(
+            current_category="structural",
+            data_type="STRUCTURE",
+            unit="1",
+            has_data_child=False,
+        )
+        assert result is None
+
+    def test_r5_empty_unit_not_promoted(self):
+        """Absent unit ("") is not the explicit dimensionless marker; those
+        containers (validity_timed, mode, geometry_matrix) stay structural."""
+        result = classify_node_pass2(
+            current_category="structural",
+            data_type="STRUCTURE",
+            unit="",
+            has_data_child=True,
+        )
+        assert result is None
+
+    def test_r5_mixed_unit_not_promoted(self):
+        """A "mixed"-unit signal is deliberately excluded (non-standard unit)."""
+        result = classify_node_pass2(
+            current_category="structural",
+            data_type="STRUCTURE",
+            unit="mixed",
+            has_data_child=True,
+        )
+        assert result is None
+
+    def test_r5_non_structure_dimensionless_leaf_untouched(self):
+        """R5 only promotes STRUCTURE/STRUCT_ARRAY containers, not plain leaves."""
+        result = classify_node_pass2(
+            current_category="structural",
+            data_type="FLT_1D",
+            unit="1",
+            has_data_child=True,
+        )
+        assert result is None
+
+    def test_r5_already_quantity_signal_kept(self):
+        """A dimensionless signal already classified quantity with a data child
+        must not be demoted (R3 sees the child) nor double-handled."""
+        result = classify_node_pass2(
+            current_category="quantity",
+            data_type="STRUCTURE",
+            unit="1",
+            children_categories=["structural", "coordinate"],
+            has_data_child=True,
+        )
+        assert result is None
+
 
 # ──────────────────────────────────────────────────────────────────
 # Constants consistency
