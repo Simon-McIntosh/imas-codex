@@ -1443,7 +1443,18 @@ def _build_uk_to_us_mapping() -> dict[str, str]:
         }
 
 
-_UK_TO_US_SPELLING = _build_uk_to_us_mapping()
+# Words breame's UK→US table maps but that are the standard American spelling
+# in scientific/engineering usage, so must NOT be flagged. "gauge" is the
+# primary US headword (Merriam-Webster); "gage" is only a niche technical
+# variant, and the IMAS DD itself writes "gauge" (pressure gauge, strain
+# gauge). Keep the left-hand (mapped) form off the flag list.
+_SPELLING_ALLOWLIST = frozenset({"gauge", "gauged", "gauges"})
+
+_UK_TO_US_SPELLING = {
+    uk: us
+    for uk, us in _build_uk_to_us_mapping().items()
+    if uk not in _SPELLING_ALLOWLIST
+}
 
 _UK_WORD_RE = re.compile(
     r"\b(" + "|".join(re.escape(w) for w in _UK_TO_US_SPELLING) + r")\b",

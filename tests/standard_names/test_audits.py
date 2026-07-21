@@ -777,6 +777,22 @@ class TestAmericanSpellingCheck:
         assert len(issues) == 1
         assert "Normalised" in issues[0]
 
+    def test_pass_gauge_is_valid_american(self):
+        """'gauge' is the standard US spelling (Merriam-Webster headword) and
+        the spelling the IMAS DD uses; breame maps it to the niche variant
+        'gage', so it must be allowlisted and never flagged."""
+        from imas_codex.standard_names.audits import american_spelling_check
+
+        assert (
+            american_spelling_check(
+                {
+                    "id": "x_first_measurement_direction_unit_vector_of_strain_gauge",
+                    "description": "Unit vector of a strain gauge; two gauges gauged per axis.",
+                }
+            )
+            == []
+        )
+
 
 # =========================================================================
 # description_verb_drift_check
