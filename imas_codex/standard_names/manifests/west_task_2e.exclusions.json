@@ -1,0 +1,688 @@
+{
+ "excluded_ineligible": [
+  {
+   "path": "magnetics/b_field_pol_probe/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "magnetics/b_field_pol_probe/type/index",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "magnetics/b_field_phi_probe/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "magnetics/flux_loop/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/boundary/type",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/boundary/type",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "core_profiles/profiles_1d/electrons/temperature_fit/chi_squared",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "core_profiles/profiles_1d/electrons/temperature_fit/parameters",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "core_profiles/profiles_1d/electrons/temperature_fit/reconstructed",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "core_profiles/profiles_1d/electrons/temperature_fit/weight",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "core_profiles/profiles_1d/electrons/temperature_validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "interferometer/channel/n_e_line/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "interferometer/channel/n_e_line_average/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "interferometer/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "soft_x_rays/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "spectrometer_visible/channel/grating_spectrometer/intensity_spectrum/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "spectrometer_visible/channel/grating_spectrometer/processed_line/intensity/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "spectrometer_visible/channel/grating_spectrometer/processed_line/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "spectrometer_visible/channel/grating_spectrometer/processed_line/radiance/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "spectrometer_visible/channel/grating_spectrometer/radiance_spectral/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "spectrometer_visible/channel/isotope_ratios/isotope/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "spectrometer_visible/channel/isotope_ratios/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "spectrometer_visible/channel/isotope_ratios/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "spectrometer_visible/channel/isotope_ratios/validity_timed",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_1D"
+  },
+  {
+   "path": "spectrometer_visible/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "pf_active/coil/element/geometry/geometry_type",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "pf_active/coil/element/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "pf_active/coil/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "pf_passive/loop/element/geometry/geometry_type",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "pf_passive/loop/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "ic_antennas/antenna/frequency/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/current/amplitude/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/matching_element/capacitance/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/matching_element/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/phase_forward/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/phase_reflected/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/power_forward/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/power_reflected/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/pressure/amplitude/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/strap/phase/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/voltage/amplitude/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/module/voltage/phase/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "ic_antennas/antenna/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "ic_antennas/antenna/power_launched/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "calorimetry/cooling_loop/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "calorimetry/group/component/energy_cumulated/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/component/energy_total/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/component/mass_flow/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "calorimetry/group/component/mass_flow/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/component/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "calorimetry/group/component/power/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/component/temperature_in/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "calorimetry/group/component/temperature_in/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/component/temperature_out/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "calorimetry/group/component/temperature_out/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/component/transit_time/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "calorimetry/group/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "gas_injection/valve/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "gas_injection/valve/species/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "hard_x_rays/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "hard_x_rays/channel/radiance/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "hard_x_rays/emissivity_profile_1d/validity_timed",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "STRUCTURE"
+  },
+  {
+   "path": "camera_x_rays/camera/pixels_n",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_1D"
+  },
+  {
+   "path": "camera_x_rays/frame/counts_n",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_2D"
+  },
+  {
+   "path": "camera_ir/channel/camera/frame/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "bremsstrahlung_visible/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "bremsstrahlung_visible/channel/radiance_spectral/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "bremsstrahlung_visible/channel/zeff_line_average/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "bremsstrahlung_visible/channel/zeff_line_average/validity_timed",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_1D"
+  },
+  {
+   "path": "wall/description_2d/limiter/type/description",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "wall/description_2d/limiter/type/index",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "wall/description_2d/limiter/type/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "wall/description_2d/limiter/unit/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "wall/description_2d/mobile/type/description",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "wall/description_2d/mobile/type/index",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "wall/description_2d/mobile/type/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "wall/description_2d/type/description",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "wall/description_2d/type/index",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "wall/description_2d/type/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "polarimeter/channel/faraday_angle/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "polarimeter/channel/faraday_angle/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "polarimeter/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "spectrometer_mass/channel/validity",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "barometry/gauge/calibration_coefficient",
+   "reason": "excluded_representation",
+   "category": "representation",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "barometry/gauge/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "barometry/gauge/pressure/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "barometry/gauge/type/description",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "barometry/gauge/type/index",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "barometry/gauge/type/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "ece/channel/harmonic/data",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_1D"
+  },
+  {
+   "path": "ece/channel/name",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "ece/channel/t_radiation/validity_timed",
+   "reason": "excluded_structural",
+   "category": "structural",
+   "data_type": "INT_1D"
+  },
+  {
+   "path": "summary/boundary/x_point_main/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/configuration/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/configuration/value",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/disruption/time/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/boundary/distance_inner_outer_separatrices/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/gas_injection_accumulated/total/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/gas_injection_rates/total/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/global_quantities/h_98/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/global_quantities/power_radiated/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/global_quantities/power_radiated_inside_lcfs/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/global_quantities/tau_energy/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/heating_current_drive/ic/power/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/heating_current_drive/lh/power/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/heating_current_drive/power_additional/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/local/divertor_target/name/value",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/local/divertor_target/power_flux_peak/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/local/magnetic_axis/n_e/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/local/magnetic_axis/t_e/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/local/separatrix/n_e/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/plasma_duration/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  },
+  {
+   "path": "summary/time_breakdown/source",
+   "reason": "excluded_metadata",
+   "category": "metadata",
+   "data_type": "STR_0D"
+  }
+ ]
+}

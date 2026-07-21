@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/iterorganization/imas-codex/imas_codex/standard_names/config/sn_sources.schema.json",
+  "title": "Standard-Name source manifest",
+  "description": "A curated, provenance-carrying set of DD v4 nameable source paths that drives focused standard-name generation (sn run --focus-file) and selects an accepted-name subset for an upstream review PR. Paths are pre-filtered to standard-name-eligible physical, geometric, and coordinate quantities.",
+  "type": "object",
+  "required": ["schema_version", "name", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "description": "Manifest format version. Loaders reject unknown versions.",
+      "const": 1
+    },
+    "name": {
+      "description": "Stable kebab-case identifier for this manifest.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "title": {
+      "description": "Human-readable title.",
+      "type": "string"
+    },
+    "description": {
+      "description": "One-paragraph synopsis of what the manifest covers and why.",
+      "type": "string"
+    },
+    "provenance": {
+      "description": "Where the corpus came from and the policies applied when deriving it.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "facility": { "type": "string" },
+        "source_document": { "type": "string" },
+        "reference_shot": { "type": ["integer", "string"] },
+        "dd_version_target": { "type": "string" },
+        "prepared_utc": { "type": "string" },
+        "eligibility_policy": {
+          "description": "Which node categories are admitted. 'sn_source_categories' mirrors imas_codex.core.node_categories.SN_SOURCE_CATEGORIES = {quantity, geometry, coordinate}.",
+          "type": "string",
+          "enum": ["sn_source_categories"]
+        },
+        "path_form": {
+          "description": "How sources[] entries are expressed. 'dd_source_id' = IDS-relative nameable node id, with signal '/data' leaves collapsed to their parent container.",
+          "type": "string",
+          "enum": ["dd_source_id"]
+        }
+      }
+    },
+    "counts": {
+      "description": "Bookkeeping totals for the derivation (informational).",
+      "type": "object",
+      "additionalProperties": { "type": "integer" }
+    },
+    "sources": {
+      "description": "Canonical, machine-consumable source list, grouped by IDS for readability. A loader flattens sources.<ids>[] to '<ids>/<path>'. Every entry is a DD v4 IDS-relative nameable source id.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "description": "IDS name -> list of IDS-relative source paths.",
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resolution": {
+      "description": "Auditable record of the DD-version conversion that produced sources[]. Informational; not consumed when seeding focus sources.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "renamed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" }
+            }
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "path": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

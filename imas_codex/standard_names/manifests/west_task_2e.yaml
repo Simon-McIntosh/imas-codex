@@ -1,0 +1,520 @@
+# =============================================================================
+# Standard-Name source manifest  ·  schema_version 1
+# =============================================================================
+# Machine-consumable input for `sn run --focus-file <this>` (proposed) and the
+# accepted-name PR-subset selector.  Every entry is a DD **v4** nameable source
+# id (an IDS-relative path), pre-filtered to standard-name-eligible physical,
+# geometric, and coordinate quantities.  Signal containers are collapsed to the
+# nameable parent (e.g. `magnetics/ip`, not `magnetics/ip/data`).
+#
+# Provenance: derived from the WEST production DD-path usage listing
+# (Task 2e DB analysis, shot 62253); v3-era paths resolved to DD v4 via the
+# imas-dd migration data and validated against the imas-codex DD graph.
+# =============================================================================
+
+schema_version: 1
+name: west-task-2e
+title: WEST production DD paths (Task 2e DB analysis)
+description: >-
+  DD paths actively populated in the WEST IMAS database, resolved to DD v4 and
+  filtered to standard-name-eligible physical / geometric / coordinate
+  quantities. Drives focused `sn run` mop-up so every eligible WEST source
+  acquires an accepted standard name, and selects the accepted-name subset to
+  PR upstream to imas-standard-names for the first human review gate.
+
+provenance:
+  facility: WEST
+  source_document: research/west/Task_2e_WEST_DB_analysis_20251113.xlsx
+  reference_shot: 62253
+  dd_version_target: "4.0.0"
+  prepared_utc: "2026-07-21"
+  # Eligibility mirrors imas_codex.core.node_categories.SN_SOURCE_CATEGORIES
+  # {quantity, geometry, coordinate}; structural/metadata/error/identifier/
+  # fit_artifact/representation nodes are excluded (see exclusions sidecar).
+  eligibility_policy: sn_source_categories
+  # Path form: DD source id (IDS-relative); signal '/data' leaves collapsed
+  # to their nameable parent container.
+  path_form: dd_source_id
+
+counts:
+  raw_leaves: 744          # all leaves listed across 22 IDS sheets
+  after_structural_filter: 507   # minus ids_properties/* and code/*
+  eligible_sources: 355       # distinct nameable v4 sources (this file)
+  renamed_v3_to_v4: 57
+  removed_no_v4_equivalent: 26
+  excluded_ineligible: 114
+
+# -----------------------------------------------------------------------------
+# Canonical source list. Grouped by IDS for readability; a loader flattens
+# `sources.<ids>[]` to `<ids>/<path>` before seeding focus sources.
+# -----------------------------------------------------------------------------
+sources:
+  magnetics:
+    - b_field_phi_probe/area
+    - b_field_phi_probe/field
+    - b_field_phi_probe/length
+    - b_field_phi_probe/poloidal_angle
+    - b_field_phi_probe/position/phi
+    - b_field_phi_probe/position/r
+    - b_field_phi_probe/position/z
+    - b_field_phi_probe/toroidal_angle
+    - b_field_phi_probe/turns
+    - b_field_pol_probe/area
+    - b_field_pol_probe/field
+    - b_field_pol_probe/length
+    - b_field_pol_probe/poloidal_angle
+    - b_field_pol_probe/position/phi
+    - b_field_pol_probe/position/r
+    - b_field_pol_probe/position/z
+    - b_field_pol_probe/toroidal_angle
+    - b_field_pol_probe/turns
+    - b_field_pol_probe/voltage
+    - diamagnetic_flux
+    - flux_loop/flux
+    - flux_loop/position/r
+    - flux_loop/position/z
+    - ip
+  equilibrium:
+    - time_slice/boundary/elongation
+    - time_slice/boundary/geometric_axis/r
+    - time_slice/boundary/geometric_axis/z
+    - time_slice/boundary/minor_radius
+    - time_slice/boundary/outline/r
+    - time_slice/boundary/outline/z
+    - time_slice/boundary/psi
+    - time_slice/boundary/psi_norm
+    - time_slice/boundary/triangularity
+    - time_slice/boundary/triangularity_lower
+    - time_slice/boundary/triangularity_upper
+    - time_slice/constraints/b_field_pol_probe/measured
+    - time_slice/constraints/b_field_pol_probe/reconstructed
+    - time_slice/constraints/b_field_pol_probe/weight
+    - time_slice/constraints/faraday_angle/measured
+    - time_slice/constraints/faraday_angle/reconstructed
+    - time_slice/constraints/faraday_angle/weight
+    - time_slice/constraints/flux_loop/measured
+    - time_slice/constraints/flux_loop/reconstructed
+    - time_slice/constraints/flux_loop/weight
+    - time_slice/constraints/n_e_line/measured
+    - time_slice/constraints/n_e_line/reconstructed
+    - time_slice/constraints/n_e_line/weight
+    - time_slice/contour_tree/node/r
+    - time_slice/contour_tree/node/z
+    - time_slice/convergence/iterations_n
+    - time_slice/global_quantities/area
+    - time_slice/global_quantities/beta_pol
+    - time_slice/global_quantities/beta_tor
+    - time_slice/global_quantities/beta_tor_norm
+    - time_slice/global_quantities/energy_mhd
+    - time_slice/global_quantities/ip
+    - time_slice/global_quantities/length_pol
+    - time_slice/global_quantities/li_3
+    - time_slice/global_quantities/magnetic_axis/b_field_phi
+    - time_slice/global_quantities/magnetic_axis/r
+    - time_slice/global_quantities/magnetic_axis/z
+    - time_slice/global_quantities/psi_axis
+    - time_slice/global_quantities/psi_boundary
+    - time_slice/global_quantities/q_95
+    - time_slice/global_quantities/q_axis
+    - time_slice/global_quantities/q_min/rho_tor_norm
+    - time_slice/global_quantities/q_min/value
+    - time_slice/global_quantities/surface
+    - time_slice/global_quantities/volume
+    - time_slice/profiles_1d/area
+    - time_slice/profiles_1d/b_field_average
+    - time_slice/profiles_1d/b_field_max
+    - time_slice/profiles_1d/b_field_min
+    - time_slice/profiles_1d/darea_dpsi
+    - time_slice/profiles_1d/darea_drho_tor
+    - time_slice/profiles_1d/dpsi_drho_tor
+    - time_slice/profiles_1d/dvolume_dpsi
+    - time_slice/profiles_1d/dvolume_drho_tor
+    - time_slice/profiles_1d/elongation
+    - time_slice/profiles_1d/f_df_dpsi
+    - time_slice/profiles_1d/gm1
+    - time_slice/profiles_1d/gm2
+    - time_slice/profiles_1d/gm3
+    - time_slice/profiles_1d/gm4
+    - time_slice/profiles_1d/gm5
+    - time_slice/profiles_1d/gm6
+    - time_slice/profiles_1d/gm7
+    - time_slice/profiles_1d/gm8
+    - time_slice/profiles_1d/gm9
+    - time_slice/profiles_1d/j_parallel
+    - time_slice/profiles_1d/j_phi
+    - time_slice/profiles_1d/magnetic_shear
+    - time_slice/profiles_1d/phi
+    - time_slice/profiles_1d/pressure
+    - time_slice/profiles_1d/psi
+    - time_slice/profiles_1d/q
+    - time_slice/profiles_1d/r_inboard
+    - time_slice/profiles_1d/r_outboard
+    - time_slice/profiles_1d/rho_tor
+    - time_slice/profiles_1d/rho_tor_norm
+    - time_slice/profiles_1d/surface
+    - time_slice/profiles_1d/triangularity_lower
+    - time_slice/profiles_1d/triangularity_upper
+    - time_slice/profiles_1d/volume
+    - time_slice/time
+    - vacuum_toroidal_field/b0
+    - vacuum_toroidal_field/r0
+  core_profiles:
+    - global_quantities/z_eff_resistive
+    - profiles_1d/electrons/density
+    - profiles_1d/electrons/density_thermal
+    - profiles_1d/electrons/pressure
+    - profiles_1d/electrons/pressure_thermal
+    - profiles_1d/electrons/temperature
+    - profiles_1d/grid/area
+    - profiles_1d/grid/psi
+    - profiles_1d/grid/psi_boundary
+    - profiles_1d/grid/psi_magnetic_axis
+    - profiles_1d/grid/rho_pol_norm
+    - profiles_1d/grid/rho_tor
+    - profiles_1d/grid/rho_tor_norm
+    - profiles_1d/grid/volume
+    - profiles_1d/time
+    - profiles_1d/zeff
+    - vacuum_toroidal_field/b0
+    - vacuum_toroidal_field/r0
+  interferometer:
+    - channel/line_of_sight/first_point/phi
+    - channel/line_of_sight/first_point/r
+    - channel/line_of_sight/first_point/z
+    - channel/line_of_sight/second_point/phi
+    - channel/line_of_sight/second_point/r
+    - channel/line_of_sight/second_point/z
+    - channel/line_of_sight/third_point/phi
+    - channel/line_of_sight/third_point/r
+    - channel/line_of_sight/third_point/z
+    - channel/n_e_line
+    - channel/n_e_line_average
+    - channel/path_length_variation
+    - channel/wavelength/phase_corrected
+    - channel/wavelength/phase_to_n_e_line
+    - channel/wavelength/value
+    - electrons_n
+    - n_e_volume_average
+  soft_x_rays:
+    - channel/brightness
+    - channel/energy_band/lower_bound
+    - channel/energy_band/upper_bound
+    - channel/etendue
+    - channel/line_of_sight/first_point/phi
+    - channel/line_of_sight/first_point/r
+    - channel/line_of_sight/first_point/z
+    - channel/line_of_sight/second_point/phi
+    - channel/line_of_sight/second_point/r
+    - channel/line_of_sight/second_point/z
+    - channel/power
+  spectrometer_visible:
+    - channel/grating_spectrometer/intensity_spectrum
+    - channel/grating_spectrometer/processed_line/intensity
+    - channel/grating_spectrometer/processed_line/radiance
+    - channel/grating_spectrometer/processed_line/wavelength_central
+    - channel/grating_spectrometer/radiance_spectral
+    - channel/grating_spectrometer/wavelengths
+    - channel/isotope_ratios/isotope/cold_neutrals_fraction
+    - channel/isotope_ratios/isotope/cold_neutrals_temperature
+    - channel/isotope_ratios/isotope/density_ratio
+    - channel/isotope_ratios/isotope/element/a
+    - channel/isotope_ratios/isotope/element/atoms_n
+    - channel/isotope_ratios/isotope/element/z_n
+    - channel/isotope_ratios/isotope/hot_neutrals_fraction
+    - channel/isotope_ratios/isotope/hot_neutrals_temperature
+    - channel/isotope_ratios/signal_to_noise
+    - channel/line_of_sight/first_point/phi
+    - channel/line_of_sight/first_point/r
+    - channel/line_of_sight/first_point/z
+    - channel/line_of_sight/second_point/phi
+    - channel/line_of_sight/second_point/r
+    - channel/line_of_sight/second_point/z
+  pf_active:
+    - coil/current
+    - coil/element/geometry/rectangle/height
+    - coil/element/geometry/rectangle/r
+    - coil/element/geometry/rectangle/width
+    - coil/element/geometry/rectangle/z
+    - coil/element/turns_with_sign
+  pf_passive:
+    - loop/current
+    - loop/element/turns_with_sign
+  ic_antennas:
+    - antenna/frequency
+    - antenna/module/current/amplitude
+    - antenna/module/matching_element/capacitance
+    - antenna/module/phase_forward
+    - antenna/module/phase_reflected
+    - antenna/module/power_forward
+    - antenna/module/power_reflected
+    - antenna/module/pressure/amplitude
+    - antenna/module/strap/distance_to_conductor
+    - antenna/module/strap/outline/phi
+    - antenna/module/strap/outline/r
+    - antenna/module/strap/outline/z
+    - antenna/module/strap/phase
+    - antenna/module/strap/width_phi
+    - antenna/module/voltage/amplitude
+    - antenna/module/voltage/phase
+    - antenna/power_launched
+  calorimetry:
+    - cooling_loop/mass_flow
+    - cooling_loop/temperature_in
+    - cooling_loop/temperature_out
+    - group/component/energy_cumulated
+    - group/component/energy_total/data
+    - group/component/mass_flow
+    - group/component/power
+    - group/component/temperature_in
+    - group/component/temperature_out
+    - group/component/transit_time
+  gas_injection:
+    - valve/flow_rate
+  hard_x_rays:
+    - channel/detector/surface
+    - channel/energy_band/lower_bound
+    - channel/energy_band/upper_bound
+    - channel/etendue
+    - channel/line_of_sight/first_point/r
+    - channel/line_of_sight/first_point/z
+    - channel/line_of_sight/second_point/r
+    - channel/line_of_sight/second_point/z
+    - channel/radiance
+    - emissivity_profile_1d/emissivity
+    - emissivity_profile_1d/half_width_external
+    - emissivity_profile_1d/half_width_internal
+    - emissivity_profile_1d/lower_bound
+    - emissivity_profile_1d/peak_position
+    - emissivity_profile_1d/rho_tor_norm
+    - emissivity_profile_1d/time
+    - emissivity_profile_1d/upper_bound
+  camera_x_rays:
+    - aperture/centre/phi
+    - aperture/centre/r
+    - aperture/centre/z
+    - camera/camera_dimensions
+    - camera/centre/phi
+    - camera/centre/r
+    - camera/centre/z
+    - camera/line_of_sight/first_point/phi
+    - camera/line_of_sight/first_point/r
+    - camera/line_of_sight/first_point/z
+    - camera/line_of_sight/second_point/phi
+    - camera/line_of_sight/second_point/r
+    - camera/line_of_sight/second_point/z
+    - camera/pixel_position/phi
+    - camera/pixel_position/r
+    - camera/pixel_position/z
+    - detector_humidity
+    - detector_humidity/time
+    - detector_temperature
+    - detector_temperature/time
+    - filter_window/thickness
+    - frame/time
+  camera_ir:
+    - channel/camera/frame/apparent_temperature
+  bremsstrahlung_visible:
+    - channel/filter/wavelength_lower
+    - channel/filter/wavelength_upper
+    - channel/line_of_sight/first_point/phi
+    - channel/line_of_sight/first_point/r
+    - channel/line_of_sight/first_point/z
+    - channel/line_of_sight/second_point/phi
+    - channel/line_of_sight/second_point/r
+    - channel/line_of_sight/second_point/z
+    - channel/radiance_spectral
+    - channel/zeff_line_average
+  wall:
+    - description_2d/limiter/unit/outline/r
+    - description_2d/limiter/unit/outline/z
+    - description_2d/limiter/unit/phi_extensions
+    - description_2d/mobile/unit/outline/r
+    - description_2d/mobile/unit/outline/z
+  tf:
+    - b_field_phi_vacuum_r
+    - delta_b_field_phi_vacuum_r
+  polarimeter:
+    - channel/ellipticity_initial
+    - channel/faraday_angle
+    - channel/line_of_sight/first_point/phi
+    - channel/line_of_sight/first_point/r
+    - channel/line_of_sight/first_point/z
+    - channel/line_of_sight/second_point/phi
+    - channel/line_of_sight/second_point/r
+    - channel/line_of_sight/second_point/z
+    - channel/line_of_sight/third_point/phi
+    - channel/line_of_sight/third_point/r
+    - channel/line_of_sight/third_point/z
+    - channel/polarization_initial
+    - channel/wavelength
+  spectrometer_mass:
+    - channel/a
+    - channel/current
+    - channel/photomultiplier_voltage
+  barometry:
+    - gauge/pressure
+  ece:
+    - channel/frequency
+    - channel/optical_depth
+    - channel/position/phi
+    - channel/position/psi
+    - channel/position/r
+    - channel/position/rho_tor_norm
+    - channel/position/theta
+    - channel/position/z
+    - channel/t_radiation
+    - t_radiation_central
+  summary:
+    - boundary/distance_inner_outer_separatrices/value
+    - boundary/elongation/value
+    - boundary/gap_limiter_wall/value
+    - boundary/geometric_axis_r/value
+    - boundary/geometric_axis_z/value
+    - boundary/magnetic_axis_r/value
+    - boundary/magnetic_axis_z/value
+    - boundary/minor_radius/value
+    - boundary/strike_point_inner_r/value
+    - boundary/strike_point_inner_z/value
+    - boundary/strike_point_outer_r/value
+    - boundary/strike_point_outer_z/value
+    - boundary/triangularity_lower/value
+    - boundary/triangularity_upper/value
+    - boundary/x_point_main/r
+    - boundary/x_point_main/z
+    - disruption/time/value
+    - fusion/neutron_rates/total/value
+    - gas_injection_accumulated/total/value
+    - gas_injection_rates/total/value
+    - global_quantities/b0/value
+    - global_quantities/beta_pol_mhd/value
+    - global_quantities/beta_tor/value
+    - global_quantities/beta_tor_norm_mhd/value
+    - global_quantities/energy_mhd
+    - global_quantities/greenwald_fraction/value
+    - global_quantities/h_98/value
+    - global_quantities/ip/value
+    - global_quantities/li_3/value
+    - global_quantities/power_loss/value
+    - global_quantities/power_ohm/value
+    - global_quantities/power_radiated/value
+    - global_quantities/power_radiated_inside_lcfs/value
+    - global_quantities/power_steady/value
+    - global_quantities/q_95/value
+    - global_quantities/r0/value
+    - global_quantities/tau_energy/value
+    - global_quantities/tau_energy_98/value
+    - global_quantities/v_loop/value
+    - global_quantities/volume/value
+    - heating_current_drive/ic/power/value
+    - heating_current_drive/lh/power/value
+    - heating_current_drive/power_additional/value
+    - heating_current_drive/power_ic/value
+    - heating_current_drive/power_lh/value
+    - line_average/isotope_fraction_hydrogen/value
+    - line_average/n_e/value
+    - line_average/zeff/value
+    - local/divertor_target/n_e/value
+    - local/divertor_target/power_flux_peak/value
+    - local/divertor_target/t_e/value
+    - local/magnetic_axis/b_field_tor/value
+    - local/magnetic_axis/n_e/value
+    - local/magnetic_axis/position/r
+    - local/magnetic_axis/position/z
+    - local/magnetic_axis/q/value
+    - local/magnetic_axis/t_e/value
+    - local/separatrix/n_e/value
+    - plasma_duration/value
+    - time_breakdown/value
+    - volume_average/n_e/value
+
+# -----------------------------------------------------------------------------
+# v3 -> v4 resolution record (informational; not consumed by --focus).
+# Reproduces the DD-version conversion so the mapping is auditable.
+# -----------------------------------------------------------------------------
+resolution:
+  renamed:
+    - { from: magnetics/b_field_tor_probe/area, to: magnetics/b_field_phi_probe/area }
+    - { from: magnetics/b_field_tor_probe/field/data, to: magnetics/b_field_phi_probe/field/data }
+    - { from: magnetics/b_field_tor_probe/length, to: magnetics/b_field_phi_probe/length }
+    - { from: magnetics/b_field_tor_probe/name, to: magnetics/b_field_phi_probe/name }
+    - { from: magnetics/b_field_tor_probe/poloidal_angle, to: magnetics/b_field_phi_probe/poloidal_angle }
+    - { from: magnetics/b_field_tor_probe/position/phi, to: magnetics/b_field_phi_probe/position/phi }
+    - { from: magnetics/b_field_tor_probe/position/r, to: magnetics/b_field_phi_probe/position/r }
+    - { from: magnetics/b_field_tor_probe/position/z, to: magnetics/b_field_phi_probe/position/z }
+    - { from: magnetics/b_field_tor_probe/toroidal_angle, to: magnetics/b_field_phi_probe/toroidal_angle }
+    - { from: magnetics/b_field_tor_probe/turns, to: magnetics/b_field_phi_probe/turns }
+    - { from: equilibrium/time_slice/boundary/x_point/r, to: equilibrium/time_slice/contour_tree/node/r }
+    - { from: equilibrium/time_slice/boundary/x_point/z, to: equilibrium/time_slice/contour_tree/node/z }
+    - { from: equilibrium/time_slice/boundary_separatrix/elongation, to: equilibrium/time_slice/boundary/elongation }
+    - { from: equilibrium/time_slice/boundary_separatrix/geometric_axis/r, to: equilibrium/time_slice/boundary/geometric_axis/r }
+    - { from: equilibrium/time_slice/boundary_separatrix/geometric_axis/z, to: equilibrium/time_slice/boundary/geometric_axis/z }
+    - { from: equilibrium/time_slice/boundary_separatrix/minor_radius, to: equilibrium/time_slice/boundary/minor_radius }
+    - { from: equilibrium/time_slice/boundary_separatrix/outline/r, to: equilibrium/time_slice/boundary/outline/r }
+    - { from: equilibrium/time_slice/boundary_separatrix/outline/z, to: equilibrium/time_slice/boundary/outline/z }
+    - { from: equilibrium/time_slice/boundary_separatrix/psi, to: equilibrium/time_slice/boundary/psi }
+    - { from: equilibrium/time_slice/boundary_separatrix/triangularity, to: equilibrium/time_slice/boundary/triangularity }
+    - { from: equilibrium/time_slice/boundary_separatrix/triangularity_lower, to: equilibrium/time_slice/boundary/triangularity_lower }
+    - { from: equilibrium/time_slice/boundary_separatrix/triangularity_upper, to: equilibrium/time_slice/boundary/triangularity_upper }
+    - { from: equilibrium/time_slice/boundary_separatrix/type, to: equilibrium/time_slice/boundary/type }
+    - { from: equilibrium/time_slice/boundary_separatrix/x_point/r, to: equilibrium/time_slice/contour_tree/node/r }
+    - { from: equilibrium/time_slice/boundary_separatrix/x_point/z, to: equilibrium/time_slice/contour_tree/node/z }
+    - { from: equilibrium/time_slice/constraints/bpol_probe/measured, to: equilibrium/time_slice/constraints/b_field_pol_probe/measured }
+    - { from: equilibrium/time_slice/constraints/bpol_probe/reconstructed, to: equilibrium/time_slice/constraints/b_field_pol_probe/reconstructed }
+    - { from: equilibrium/time_slice/constraints/bpol_probe/weight, to: equilibrium/time_slice/constraints/b_field_pol_probe/weight }
+    - { from: equilibrium/time_slice/constraints/ne_line/measured, to: equilibrium/time_slice/constraints/n_e_line/measured }
+    - { from: equilibrium/time_slice/constraints/ne_line/reconstructed, to: equilibrium/time_slice/constraints/n_e_line/reconstructed }
+    - { from: equilibrium/time_slice/constraints/ne_line/weight, to: equilibrium/time_slice/constraints/n_e_line/weight }
+    - { from: equilibrium/time_slice/global_quantities/beta_normal, to: equilibrium/time_slice/global_quantities/beta_tor_norm }
+    - { from: equilibrium/time_slice/global_quantities/magnetic_axis/b_field_tor, to: equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi }
+    - { from: equilibrium/time_slice/profiles_1d/b_average, to: equilibrium/time_slice/profiles_1d/b_field_average }
+    - { from: equilibrium/time_slice/profiles_1d/b_max, to: equilibrium/time_slice/profiles_1d/b_field_max }
+    - { from: equilibrium/time_slice/profiles_1d/b_min, to: equilibrium/time_slice/profiles_1d/b_field_min }
+    - { from: equilibrium/time_slice/profiles_1d/j_tor, to: equilibrium/time_slice/profiles_1d/j_phi }
+    - { from: core_profiles/profiles_1d/electrons/temperature_fit/weigh, to: core_profiles/profiles_1d/electrons/temperature_fit/weight }
+    - { from: soft_x_rays/channel/channel/energy_band/lower_bound, to: soft_x_rays/channel/energy_band/lower_bound }
+    - { from: soft_x_rays/channel/channel/energy_band/upper_bound, to: soft_x_rays/channel/energy_band/upper_bound }
+    - { from: spectrometer_visible/channel/grating_spectrometer/processed_line/label, to: spectrometer_visible/channel/grating_spectrometer/processed_line/name }
+    - { from: spectrometer_visible/channel/isotope_ratios/isotope/label, to: spectrometer_visible/channel/isotope_ratios/isotope/name }
+    - { from: pf_active/coil/element/geometry/rectangle/heigth, to: pf_active/coil/element/geometry/rectangle/height }
+    - { from: ic_antennas/antenna/module/strap/width_tor, to: ic_antennas/antenna/module/strap/width_phi }
+    - { from: gas_injection/valve/species/label, to: gas_injection/valve/species/name }
+    - { from: camera_ir/frame/surface_temperature, to: camera_ir/channel/camera/frame/apparent_temperature }
+    - { from: camera_ir/frame/time, to: camera_ir/channel/camera/frame/time }
+    - { from: tf/b_field_tor_vacuum_r/data, to: tf/b_field_phi_vacuum_r/data }
+    - { from: tf/delta_b_field_tor_vacuum_r/data, to: tf/delta_b_field_phi_vacuum_r/data }
+    - { from: ece/channel/t_e/data, to: ece/channel/t_radiation/data }
+    - { from: ece/channel/t_e/validity_timed, to: ece/channel/t_radiation/validity_timed }
+    - { from: ece/t_e_central/data, to: ece/t_radiation_central/data }
+    - { from: summary/distance_inner_outer_separatrices/source, to: summary/boundary/distance_inner_outer_separatrices/source }
+    - { from: summary/distance_inner_outer_separatrices/value, to: summary/boundary/distance_inner_outer_separatrices/value }
+    - { from: summary/fusion/neutron_fluxes/total/value, to: summary/fusion/neutron_rates/total/value }
+    - { from: summary/global_quantities/li/value, to: summary/global_quantities/li_3/value }
+    - { from: summary/local/magnetic_axis/b_field/value, to: summary/local/magnetic_axis/b_field_tor/value }
+  removed:  # present in WEST v3 usage; no DD v4 SN-eligible target — see reason
+    - { path: equilibrium/time_slice/boundary/active_limiter_point/r, reason: "removed_v4.0.0_no_equivalent" }
+    - { path: equilibrium/time_slice/boundary/active_limiter_point/z, reason: "removed_v4.0.0_no_equivalent" }
+    - { path: equilibrium/time_slice/boundary/elongation_lower, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
+    - { path: equilibrium/time_slice/boundary/elongation_upper, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
+    - { path: equilibrium/time_slice/boundary/strike_point/r, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
+    - { path: equilibrium/time_slice/boundary/strike_point/z, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
+    - { path: equilibrium/time_slice/boundary_separatrix/active_limiter_point/r, reason: "removed_v4.0.0_no_equivalent" }
+    - { path: equilibrium/time_slice/boundary_separatrix/active_limiter_point/z, reason: "removed_v4.0.0_no_equivalent" }
+    - { path: equilibrium/time_slice/boundary_separatrix/elongation_lower, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
+    - { path: equilibrium/time_slice/boundary_separatrix/elongation_upper, reason: "removed_v4.0.0_no_upper_lower_split (single boundary/elongation kept)" }
+    - { path: equilibrium/time_slice/boundary_separatrix/strike_point/r, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
+    - { path: equilibrium/time_slice/boundary_separatrix/strike_point/z, reason: "no_equilibrium_resolved_home (covered via summary/boundary/strike_point_*)" }
+    - { path: equilibrium/time_slice/ggd (not detailed here), reason: "workbook_annotation_not_a_path" }
+    - { path: interferometer/channel/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: soft_x_rays/channel/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: pf_active/coil/element/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: pf_active/coil/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: ic_antennas/antenna/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: ic_antennas/antenna/module/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: calorimetry/group/component/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: calorimetry/group/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: gas_injection/valve/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: hard_x_rays/channel/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+    - { path: wall/description_2d/limiter/unit/closed, reason: "not_found (boolean flag; structural, not SN-eligible)" }
+    - { path: wall/description_2d/mobile/unit/closed, reason: "not_found (boolean flag; structural, not SN-eligible)" }
+    - { path: polarimeter/channel/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
+
