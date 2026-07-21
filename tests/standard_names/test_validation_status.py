@@ -104,6 +104,36 @@ class TestIsQuarantined:
         summary = {"pydantic": {"passed": True, "error_count": 0}}
         assert _is_quarantined(issues, summary) is False
 
+    def test_isn_semantic_error_quarantined(self) -> None:
+        """An ISN semantic ERROR (catalog-blocking at publish) must quarantine —
+        else the name slips into the export set and blocks the ISNC release."""
+        from imas_codex.standard_names.workers import _is_quarantined
+
+        issues = [
+            "[semantic] coordinate: ERROR - geometric quantity 'coordinate' "
+            "requires object, geometry, or position qualifier"
+        ]
+        summary = {"pydantic": {"passed": True, "error_count": 0}}
+        assert _is_quarantined(issues, summary) is True
+
+    def test_isn_structural_error_quarantined(self) -> None:
+        from imas_codex.standard_names.workers import _is_quarantined
+
+        issues = ["[structural] foo: ERROR - mode number without a base quantity"]
+        summary = {"pydantic": {"passed": True, "error_count": 0}}
+        assert _is_quarantined(issues, summary) is True
+
+    def test_isn_semantic_warning_not_quarantined(self) -> None:
+        """WARNING/INFO-level ISN semantic issues stay advisory."""
+        from imas_codex.standard_names.workers import _is_quarantined
+
+        issues = [
+            "[semantic] foo: WARNING - documentation references non-existent "
+            "standard name 'bar'"
+        ]
+        summary = {"pydantic": {"passed": True, "error_count": 0}}
+        assert _is_quarantined(issues, summary) is False
+
     def test_empty_summary_not_quarantined(self) -> None:
         """Missing pydantic key defaults to passed."""
         from imas_codex.standard_names.workers import _is_quarantined

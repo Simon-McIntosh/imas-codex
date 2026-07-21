@@ -3848,13 +3848,29 @@ def _is_quarantined(issues: list[str], layer_summary: dict) -> bool:
     - Invalid kind value
     - L3 critical audit failures (latex_def_check, synonym_check, multi_subject_check)
     - L6 grammar retry exhausted
+    - ISN semantic/structural ERROR-level issues (ISN's own catalog publish gate
+      hard-fails on these, so a name carrying one can never be published)
 
-    Non-critical issues (semantic warnings, description quality hints,
+    Non-critical issues (semantic WARNING/INFO hints, description quality hints,
     non-critical audits) do NOT trigger quarantine — they are advisory.
     """
     # Grammar round-trip failures are always critical
     if any(i.startswith("parse_error:") for i in issues):
         return True
+
+    # ISN semantic/structural ERROR-level issues are catalog-blocking: ISN's
+    # publish-time validator (imas_standard_names, run by the ISNC gate) hard-
+    # fails on them, so a name carrying one can never be published. Mirror that
+    # authority here — an ISN-invalid name (e.g. a bare geometric quantity such
+    # as 'coordinate' that lacks the required object/geometry/position
+    # qualifier) must not reach validation_status='valid' and slip into the
+    # export set. ISN emits an explicit 'ERROR -' severity marker for hard
+    # failures; WARNING/INFO-level semantic hints stay advisory.
+    for i in issues:
+        if (i.startswith("[semantic]") or i.startswith("[structural]")) and (
+            " ERROR - " in i
+        ):
+            return True
 
     # Grammar ambiguity is also critical — the name can't be reliably parsed
     if any("grammar:ambiguity" in i for i in issues):
