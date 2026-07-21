@@ -670,67 +670,26 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       <article class="r-fu" data-id="f-scap-002" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-21">
         <h4 class="r-fu-title">Implement the complete approval pipeline (single long session)</h4>
         <div class="r-fu-body">
-          <p>All design decisions are locked. Build the whole pipeline (Gaps A-tail → D) in one
-          long TDD session, in the phase order below. Read the full plan first; honour every
-          locked decision (injected live above this brief). Graph-marked tests run against live
-          Neo4j from the main session; subagents cannot write the production graph.</p>
+          <p>Implement the complete pipeline this plan describes in one long TDD session. Read the
+          full plan; the sections carry the mechanisms, file references, TDD strategy (§9) and
+          done-when (§10), and every decision is locked above this brief. Build in section order.</p>
         </div>
         <pre class="r-fu-prompt">Project: imas-codex
-Plan:    sn-catalog-approval-pipeline (http://localhost:8765/imas-codex/sn-catalog-approval-pipeline.html)
+Plan:    sn-catalog-approval-pipeline (this plan — read it fully; decisions are locked above)
 Tier:    opus (1M)
 
-Context
-  Design is locked (see the plan §1-§8 and the live Locked decisions above). Gap A's
-  --focus &lt;file&gt; loader already shipped. Build the rest end-to-end, TDD, phase by
-  phase, committing each phase. Do NOT re-litigate locked decisions.
+Implement the whole pipeline, test-first, one phase per plan section, committing on
+each green phase, in this order:
+  §5  Gap A tail — the --reseed flag (default gap-only) + the missing --focus <file> CLI test
+  §3b Two schemas (kind discriminator) + mint_sn_list (join + immediate-sibling closure)
+  §6  Additive export (approved ∪ batch, deterministic) + review_batch marker + frozen
+      sn_names artifact + the single `sn release` orchestrator (D-artifact-cli)
+  §7  SPA fixed batch view (ISN repo site/src)
+  §8  sn merge state machine + the `contested` NameStage
 
-State to read (CODE / FILES / DATA)
-  - The FULL plan (all sections + locked decisions).
-  - imas_codex/cli/sn.py                    (sn run --focus; add sn release orchestrator)
-  - imas_codex/standard_names/sources_manifest.py  (shipped loader; extend for kind + sn_names)
-  - imas_codex/standard_names/config/sn_sources.schema.json  (add sn_names.schema.json beside it)
-  - imas_codex/standard_names/export.py     (_fetch_candidates, run_export, _write_domain_yaml)
-  - imas_codex/standard_names/merge.py      (run_merge, read_pr_changes, mark_catalog_name_approved)
-  - imas_codex/standard_names/catalog_reconcile.py
-  - imas_codex/schemas/standard_name.yaml   (NameStage enum)
-  - imas_codex/standard_names/workers.py    (pool claim predicates / stage exclusions)
-  - imas_codex/graph/client.py; StandardName.source_paths + HAS_PARENT for minting
-  - ISN repo (imas-standard-names) site/src: data.js, Filters.jsx, ResultsList.jsx,
-    url-state.js; imas_standard_names/catalog/dataset.py (data.json builder)
-
-Phases (each: test-first, commit on green)
-  1. Focus --reseed: add --reseed (default OFF = gap-only). Gap-only must NOT reprocess
-     paths that already have a live accepted name; --reseed restores today's reset-all.
-     Add the missing CLI-level test for sn run --focus &lt;file&gt; wiring.
-  2. Two schemas + minting: add sn_names.schema.json (kind: sn_names) and a `kind:`
-     discriminator on both schemas; extend the loader to dispatch (raise if kind absent/
-     ambiguous). Implement mint_sn_list(dd_paths): source_paths base join + immediate-family
-     closure (HAS_PARENT parent + its direct children/siblings, one hop, non-transitive;
-     NOT grammar base). Pure + graph tests.
-  3. Additive export: _fetch_candidates predicate = name_stage=='approved' OR id in batch;
-     deterministic serialisation (stable id sort + canonical fields); stamp review_batch
-     (the minted id-set) into data.json via dataset.py. Test: diff vs approved-only baseline
-     = batch additions only.
-  4. Freeze + single sn release CLI: materialise manifests/reviews/&lt;rc&gt;.sn_names.yaml
-     (RC-tagged, kind: sn_names, minted_from, ids); fold mint → freeze → export → versions.json
-     bump → branch → push(fork) → gh pr create → back-fill pr_number/url → push into ONE command.
-  5. SPA fixed-view (ISN repo): when data.json carries review_batch, render only those names
-     (no toggle), reusing Filters/ResultsList; RC version URL is the shareable link.
-  6. sn merge state machine + contested: untouched batch names auto-promote accepted→approved;
-     edited names re-trigger full review (pass→approved, fail→contested). Add `contested` to
-     NameStage; exclude it from all pool claim predicates; resolution = sn edit (→re-review),
-     sn approve --override --reason (force approve), revert (→accepted); sn status --contested.
-
-Scope locks / constraints (non-decision)
-  - TDD throughout; graph-marked tests RUN against live Neo4j from the main session.
-  - No plan labels / version numbers / PR numbers in symbol, file, or comment names.
-  - No AI co-author trailer; conventional commits; commit + push each phase.
-  - Do not run the full DD rebuild; do not churn accepted names (gap-only default).
-
-Done-when
-  1. All six phases landed with green tests (graph-marked included).
-  2. End-to-end rehearsal (§10) passes against a scratch ISNC checkout + local graph.
-  3. Plan sections collapsed to shipped summaries; this followup resolved.</pre>
+Everything else — files to touch, exact mechanisms, constraints, and acceptance —
+is in the referenced sections and §9/§10. Honour the locked decisions; do not
+re-litigate them. Finish when §10's rehearsal passes and shipped sections are collapsed.</pre>
       </article>
     </section>
 
