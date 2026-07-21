@@ -9,8 +9,8 @@ requires = [
     "networkx>=3.0,<4.0",
     "PyYAML>=6.0,<7.0",
     "ruamel-yaml>=0.18.17",
-    "imas-data-dictionary>=4.1.0",
-    "imas-data-dictionaries>=4.1.0",
+    "imas-data-dictionary>=4.1.1",
+    "imas-data-dictionaries>=4.1.1",
     "imas-python>=2.0.1",
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
@@ -60,7 +60,7 @@ dependencies = [
     "PyYAML>=6.0,<7.0",
     "numpy>=2.3.1",
     "cachetools>=5.3.0,<6.0.0",
-    "imas-data-dictionaries>=4.1.0",
+    "imas-data-dictionaries>=4.1.1",
     "anyio>=4.0.0,<5.0.0",
     "rapidfuzz>=3.0.0",
     "neo4j>=5.28.0,<6.0.0",
@@ -248,7 +248,7 @@ password = "imas-codex"
 # data-dir = "/custom/path/neo4j-staging"
 
 [tool.imas-codex.data-dictionary]
-version = "4.1.0"
+version = "4.1.1"
 include-ggd = true
 include-error-fields = false
 

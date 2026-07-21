@@ -52,11 +52,11 @@ def _get_default_dd_version_from_pyproject() -> str:
                 data.get("tool", {})
                 .get("imas-codex", {})
                 .get("data-dictionary", {})
-                .get("version", "4.1.0")
+                .get("version", "4.1.1")
             )
     except Exception:
         pass
-    return "4.1.0"
+    return "4.1.1"
 
 
 def _get_max_available_dd_version() -> str | None:
