@@ -4091,7 +4091,7 @@ def claim_ids_for_validation(
             MATCH (sn:StandardName {claim_token: $token})
             OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
             OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
             RETURN sn.id AS id, sn.description AS description,
                    sn.documentation AS documentation, sn.kind AS kind,
                    sn.unit AS unit, sn.links AS links,
@@ -7091,7 +7091,7 @@ RETURN sn.source_paths AS source_paths,
 # them (describe the shared quantity), not over-specialise to any one child.
 _DOCS_GEN_PARENT_CHILDREN_QUERY = """
 MATCH (c:StandardName)-[:HAS_PARENT]->(p:StandardName {id: $sn_id})
-WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted', 'contested']
 RETURN c.id AS name,
        c.description AS description,
        c.unit AS unit,
@@ -8121,7 +8121,7 @@ async def process_review_docs_batch(
                     MATCH (p:StandardName)
                     WHERE p.id IN $ids AND p.origin = 'derived'
                     MATCH (c:StandardName)-[:HAS_PARENT]->(p)
-                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted', 'contested']
                     WITH p, c ORDER BY c.id
                     RETURN p.id AS pid, collect({
                         name: c.id,
@@ -8513,7 +8513,7 @@ async def process_refine_docs_batch(
                     """
                     MATCH (p:StandardName {id: $sn_id}) WHERE p.origin = 'derived'
                     MATCH (c:StandardName)-[:HAS_PARENT]->(p)
-                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted', 'contested']
                     WITH c ORDER BY c.id
                     RETURN c.id AS name,
                            CASE WHEN c.description = $ph THEN null

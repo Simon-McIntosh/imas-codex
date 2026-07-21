@@ -341,6 +341,14 @@ enums:
         description: >-
           Replaced by a refined successor node via REFINED_FROM.
           Terminal — old node is kept for lineage but not re-processed.
+      contested:
+        description: >-
+          Edited by a reviewer during human catalog review, but the edited
+          form failed the compliance re-review on merge; frozen pending human
+          adjudication. Not published (not 'approved') and not silently
+          reverted (a human deliberately changed it). Excluded from all pools
+          like 'exhausted'/'superseded'; resolved by sn edit (→re-review),
+          sn approve --override (force approve), or sn revert (→accepted).
 
   EditMode:
     description: >-
@@ -510,6 +518,28 @@ classes:
           ISO 8601 timestamp when this name was last exported to the
           catalog staging directory by sn export.
         range: datetime
+      merge_quarantine_reason:
+        description: >-
+          Why sn merge quarantined a reviewer edit (the failing rubric verdict).
+          Set on the validation_status='quarantined' path during merge.
+      merge_quarantine_at:
+        description: >-
+          ISO 8601 timestamp when sn merge quarantined a reviewer edit.
+        range: datetime
+      contested_reason:
+        description: >-
+          Why a reviewer-edited name was moved to the 'contested' stage — the
+          edited form and the failing compliance re-review verdict recorded by
+          sn merge. Human-vs-machine conflict awaiting adjudication.
+      contested_at:
+        description: >-
+          ISO 8601 timestamp when sn merge moved the name to 'contested'.
+        range: datetime
+      contested_resolution:
+        description: >-
+          How a contested name was adjudicated — the human justification passed
+          to sn approve --override (force approve over the rubric) or sn revert
+          (drop the edit back to accepted). Null while still contested.
       model:
         description: >-
           LLM model that generated this standard name

@@ -559,8 +559,8 @@ class TestSupersedePriorSourceNames:
         # Only pipeline-origin predecessors are touched — catalog_edit and
         # derived names are excluded by the WHERE clause.
         assert "coalesce(old.origin, 'pipeline') = 'pipeline'" in cypher
-        # Already-retired names are never re-superseded.
-        assert "['superseded', 'exhausted']" in cypher
+        # Already-retired / frozen names are never re-superseded.
+        assert "['superseded', 'exhausted', 'contested']" in cypher
         # The new name itself is never superseded (byte-identical regen no-op).
         assert "old.id <> pr.new_name" in cypher
 

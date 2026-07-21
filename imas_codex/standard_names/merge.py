@@ -106,6 +106,8 @@ class MergeReport:
     changes_seen: int = 0
     accepted: list[str] = field(default_factory=list)
     quarantined: list[dict[str, Any]] = field(default_factory=list)
+    contested: list[dict[str, Any]] = field(default_factory=list)
+    auto_approved: list[str] = field(default_factory=list)
     blocked: list[dict[str, Any]] = field(default_factory=list)
     unmatched: list[str] = field(default_factory=list)
     outcomes: list[MergeOutcome] = field(default_factory=list)
@@ -440,6 +442,120 @@ def _quarantine(
     )
 
 
+def _contest(
+    review_target: str,
+    *,
+    axis: str,
+    score: float,
+    threshold: float,
+    reason: str,
+    gc: GraphClient,
+) -> None:
+    """Move a reviewer edit that failed the compliance re-review to 'contested'.
+
+    A human deliberately changed the wording but the edited form did not pass
+    the rubric, so it is neither published (approved) nor silently reverted:
+    ``name_stage='contested'`` freezes it (pool-excluded) pending human
+    adjudication via sn edit / sn approve --override / sn revert.
+    """
+    score_field = "reviewer_score_name" if axis == "name" else "reviewer_score_docs"
+    detail = (
+        f"{axis} edit failed compliance re-review "
+        f"(score {score:.3f} < {threshold:.3f}): {reason}"
+    )
+    gc.query(
+        f"""
+        // MERGE_CONTEST
+        MATCH (sn:StandardName {{id: $id}})
+        SET sn.name_stage = 'contested',
+            sn.edit_status = 'rejected',
+            sn.{score_field} = $score,
+            sn.contested_reason = $reason,
+            sn.contested_at = $ts,
+            sn.contested_resolution = null,
+            sn.claim_token = null,
+            sn.claimed_at = null
+        """,
+        id=review_target,
+        score=score,
+        reason=detail,
+        ts=datetime.now(UTC).isoformat(),
+    )
+
+
+def list_contested(gc: GraphClient | None = None) -> list[dict[str, Any]]:
+    """Return all names in the 'contested' stage with their failing verdict."""
+    owns = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {name_stage: 'contested'})
+            RETURN sn.id AS id, sn.contested_reason AS reason,
+                   sn.contested_at AS at
+            ORDER BY sn.id
+            """
+        )
+        return [dict(r) for r in (rows or [])]
+    finally:
+        if owns:
+            gc.close()
+
+
+def override_approve_contested(
+    name: str, *, reason: str, gc: GraphClient | None = None
+) -> bool:
+    """Force a contested name to 'approved' over the rubric, on the record.
+
+    Human authority beats the machine rubric, but only deliberately: the
+    justification is stored in ``contested_resolution``.
+    """
+    owns = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {id: $name, name_stage: 'contested'})
+            SET sn.name_stage = 'approved',
+                sn.contested_resolution = $reason,
+                sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime()),
+                sn.origin = 'catalog_edit'
+            RETURN sn.id AS id
+            """,
+            name=name,
+            reason=reason,
+        )
+        return bool(rows)
+    finally:
+        if owns:
+            gc.close()
+
+
+def revert_contested(name: str, *, reason: str, gc: GraphClient | None = None) -> bool:
+    """Drop a contested name back to 'accepted', re-opening it for a later batch."""
+    owns = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {id: $name, name_stage: 'contested'})
+            SET sn.name_stage = 'accepted',
+                sn.contested_resolution = $reason,
+                sn.edit_status = null
+            RETURN sn.id AS id
+            """,
+            name=name,
+            reason=reason,
+        )
+        return bool(rows)
+    finally:
+        if owns:
+            gc.close()
+
+
 def _name_exists(sn_id: str, gc: GraphClient) -> bool:
     rows = gc.query(
         "// MERGE_MATCH_BY_ID\nMATCH (sn:StandardName {id: $id}) RETURN count(sn) AS n",
@@ -471,6 +587,7 @@ def run_merge(
     catalog_pr_url: str | None = None,
     catalog_merge_commit_sha: str | None = None,
     dry_run: bool = False,
+    batch: list[str] | None = None,
     gc: GraphClient | None = None,
 ) -> MergeReport:
     """Fold a reviewed catalog PR back into the graph-ledger.
@@ -513,7 +630,10 @@ def run_merge(
 
     changes = read_pr_changes(isnc_dir, base_ref)
     report.changes_seen = len(changes)
-    if not changes:
+    # With no edits AND no batch there is nothing to do. A batch with no edits
+    # is the common case (reviewers approved as-is) — fall through to the
+    # untouched auto-approve below.
+    if not changes and not batch:
         return report
 
     owns_gc = gc is None
@@ -624,26 +744,50 @@ def run_merge(
                     )
                 )
             else:
-                _quarantine(
+                # A reviewer edit that fails re-review is neither approved nor
+                # silently reverted — it moves to the 'contested' holding state.
+                _contest(
                     review_target,
                     axis=change.axis,
                     score=score,
+                    threshold=thr,
                     reason=reason,
                     gc=gc,
                 )
-                report.quarantined.append(
+                report.contested.append(
                     {"sn_id": change.sn_id, "target_id": review_target, "score": score}
                 )
                 report.outcomes.append(
                     MergeOutcome(
                         sn_id=change.sn_id,
                         axis=change.axis,
-                        decision="quarantined",
+                        decision="contested",
                         target_id=review_target,
                         score=score,
                         reason=reason,
                     )
                 )
+
+        # ── Untouched batch names auto-promote accepted → approved ──────
+        # The human approved the batch by merging; a name the reviewers left
+        # unchanged carries an implicit compliance rubber-stamp, so it is
+        # promoted directly (no re-review). Only with complete PR metadata.
+        if batch and not dry_run and all(v is not None for v in approval_values):
+            edited_ids = {c.sn_id for c in changes}
+            for nid in batch:
+                if nid in edited_ids:
+                    continue
+                if mark_catalog_name_approved(
+                    nid,
+                    catalog_pr_number=int(catalog_pr_number),
+                    catalog_pr_url=str(catalog_pr_url),
+                    catalog_merge_commit_sha=str(catalog_merge_commit_sha),
+                    gc=gc,
+                ):
+                    report.auto_approved.append(nid)
+                    report.outcomes.append(
+                        MergeOutcome(sn_id=nid, axis="name", decision="auto_approved")
+                    )
         return report
     finally:
         if owns_gc:

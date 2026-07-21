@@ -1695,12 +1695,28 @@ def sn_run(
 
         scope_run_id = str(_uuid.uuid4())
 
+        # 1. Clear stale run_ids from previous focused runs. Both node labels
+        #    are cleared in a single statement so the reset is atomic and the
+        #    scoping invariant (no residual run_id survives a fresh focus run)
+        #    holds even if a preceding read query interposes.
+        with GraphClient() as gc:
+            gc.query(
+                "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
+                "SET sn.run_id = NULL "
+                "WITH count(*) AS _cleared "
+                "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
+                "SET sns.run_id = NULL"
+            )
+
         # Gap-only default: a focused path that already carries a live
         # accepted/approved name is left untouched — a focus mop-up must not
         # churn names the catalog already holds. --reseed opts back into the
         # reset-all behaviour (re-stage every focused path to 'pending').
         if not reseed:
-            gap_focus, accepted_focus = partition_focus_by_accepted(flat_focus)
+            with GraphClient() as _pgc:
+                gap_focus, accepted_focus = partition_focus_by_accepted(
+                    flat_focus, gc=_pgc
+                )
             if accepted_focus and not quiet:
                 click.echo(
                     f"Gap-only: skipping {len(accepted_focus)} focused path(s) "
@@ -1714,19 +1730,6 @@ def sn_run(
                         "name — nothing to do"
                     )
                 return
-
-        # 1. Clear stale run_ids from previous focused runs. Both node labels
-        #    are cleared in a single statement so the reset is atomic and the
-        #    scoping invariant (no residual run_id survives a fresh focus run)
-        #    holds even if a preceding read query interposes.
-        with GraphClient() as gc:
-            gc.query(
-                "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
-                "SET sn.run_id = NULL "
-                "WITH count(*) AS _cleared "
-                "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
-                "SET sns.run_id = NULL"
-            )
 
         # 2. Seed StandardNameSource nodes for each focused path.
         sources = []
@@ -3042,8 +3045,38 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
     default=None,
     help="Show one sibling family (parent, anchor, members, drift) for a seed name.",
 )
-def sn_status(family_seed: str | None) -> None:
+@click.option(
+    "--contested",
+    "show_contested",
+    is_flag=True,
+    default=False,
+    help="List names in the 'contested' stage (failed re-review) awaiting "
+    "adjudication, with their failing verdict.",
+)
+def sn_status(family_seed: str | None, show_contested: bool) -> None:
     """Show standard name statistics."""
+    if show_contested:
+        from imas_codex.standard_names.merge import list_contested
+
+        rows = list_contested()
+        if not rows:
+            console.print("[green]No contested names.[/green]")
+            return
+        from rich.table import Table as RichTable
+
+        console.print(f"[bold]Contested names:[/bold] {len(rows)}")
+        ctable = RichTable(show_header=True)
+        ctable.add_column("id")
+        ctable.add_column("contested at")
+        ctable.add_column("reason")
+        for r in rows:
+            ctable.add_row(
+                str(r.get("id")),
+                str(r.get("at") or "—"),
+                str(r.get("reason") or "—"),
+            )
+        console.print(ctable)
+        return
     if family_seed:
         from imas_codex.standard_names.harmonize import assemble_family
 
@@ -4184,6 +4217,17 @@ def sn_release(
 @click.option("--pr-number", type=int, default=None, help="Merged catalog PR number.")
 @click.option("--pr-url", default=None, help="Merged catalog PR URL.")
 @click.option("--merge-commit", default=None, help="Merged catalog PR commit SHA.")
+@click.option(
+    "--batch",
+    "batch_file",
+    type=click.Path(exists=True, dir_okay=False),
+    default=None,
+    help=(
+        "Frozen sn-names batch artifact (manifests/reviews/<rc>.sn_names.yaml). "
+        "Untouched batch names auto-promote accepted→approved on merge; edited "
+        "names still re-trigger the full review."
+    ),
+)
 def sn_merge(
     isnc: str | None,
     base_ref: str,
@@ -4192,6 +4236,7 @@ def sn_merge(
     pr_number: int | None,
     pr_url: str | None,
     merge_commit: str | None,
+    batch_file: str | None,
 ) -> None:
     """Fold a reviewed catalog PR back into the graph ledger (id-matched, review-only).
 
@@ -4210,6 +4255,7 @@ def sn_merge(
 
     from imas_codex.settings import get_sn_isnc_dir
     from imas_codex.standard_names.merge import run_merge
+    from imas_codex.standard_names.sources_manifest import load_names_file
 
     if isnc:
         isnc_path: Path | None = Path(isnc)
@@ -4222,9 +4268,15 @@ def sn_merge(
             )
             raise SystemExit(2)
 
+    batch: list[str] | None = None
+    if batch_file:
+        batch = load_names_file(batch_file)
+
     console.print("\n[bold]Standard Name Merge[/bold]")
     console.print(f"  ISNC: {isnc_path}")
     console.print(f"  Base ref: {base_ref}")
+    if batch is not None:
+        console.print(f"  Batch: {len(batch)} name(s)")
     if dry_run:
         console.print("  Mode: [yellow]dry run[/yellow]")
     console.print("")
@@ -4237,6 +4289,7 @@ def sn_merge(
         catalog_pr_number=pr_number,
         catalog_pr_url=pr_url,
         catalog_merge_commit_sha=merge_commit,
+        batch=batch,
     )
 
     table = Table(title="Merge Summary")
@@ -4244,11 +4297,19 @@ def sn_merge(
     table.add_column("value", style="white")
     table.add_row("changes seen", str(report.changes_seen))
     table.add_row("accepted", str(len(report.accepted)))
+    table.add_row("auto-approved", str(len(report.auto_approved)))
+    table.add_row("contested", str(len(report.contested)))
     table.add_row("quarantined", str(len(report.quarantined)))
     table.add_row("blocked", str(len(report.blocked)))
     table.add_row("unmatched", str(len(report.unmatched)))
     console.print(table)
 
+    if report.contested:
+        console.print(
+            f"\n[yellow]⚠ {len(report.contested)} edit(s) contested "
+            "(failed re-review) — resolve with sn edit / sn approve --override / "
+            "sn revert.[/yellow]"
+        )
     if report.quarantined:
         console.print(
             f"\n[yellow]⚠ {len(report.quarantined)} edit(s) quarantined "
@@ -4263,6 +4324,66 @@ def sn_merge(
         raise SystemExit(1)
 
     console.print("\n[green]✓ Merge complete[/green]")
+
+
+@sn.command("approve")
+@click.argument("name")
+@click.option(
+    "--override",
+    is_flag=True,
+    required=True,
+    help="Required acknowledgement that this force-approves over the compliance "
+    "rubric. Only a contested name can be approved this way.",
+)
+@click.option(
+    "--reason",
+    required=True,
+    help="Justification recorded in the change ledger (contested_resolution).",
+)
+def sn_approve(name: str, override: bool, reason: str) -> None:
+    """Force a contested name to 'approved', overriding the rubric — on the record.
+
+    \b
+    A contested name is a human-vs-machine conflict: the reviewer changed the
+    wording but it failed the compliance re-review. `--override` accepts the
+    human wording deliberately; the justification is stored on the node.
+    """
+    from imas_codex.standard_names.merge import override_approve_contested
+
+    if override_approve_contested(name, reason=reason):
+        console.print(f"[green]✓ {name} → approved[/green] (override: {reason})")
+    else:
+        console.print(
+            f"[red]✗ {name} is not contested[/red] — override-approve only "
+            "resolves a contested name."
+        )
+        raise SystemExit(1)
+
+
+@sn.command("revert")
+@click.argument("name")
+@click.option(
+    "--reason",
+    required=True,
+    help="Justification recorded in the change ledger (contested_resolution).",
+)
+def sn_revert(name: str, reason: str) -> None:
+    """Drop a contested name back to 'accepted', re-opening it for a later batch.
+
+    \b
+    Discards the reviewer edit that failed re-review and returns the name to the
+    accepted state so it rejoins a future review batch unchanged.
+    """
+    from imas_codex.standard_names.merge import revert_contested
+
+    if revert_contested(name, reason=reason):
+        console.print(f"[green]✓ {name} → accepted[/green] (reverted: {reason})")
+    else:
+        console.print(
+            f"[red]✗ {name} is not contested[/red] — revert only resolves a "
+            "contested name."
+        )
+        raise SystemExit(1)
 
 
 @sn.command("clear")

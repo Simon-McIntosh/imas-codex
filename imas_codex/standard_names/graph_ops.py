@@ -566,7 +566,9 @@ def get_named_source_ids() -> set[str]:
         return {r["source_id"] for r in results}
 
 
-def partition_focus_by_accepted(paths: list[str]) -> tuple[list[str], list[str]]:
+def partition_focus_by_accepted(
+    paths: list[str], *, gc: Any | None = None
+) -> tuple[list[str], list[str]]:
     """Split focus DD paths into ``(gap, accepted)`` by live accepted name.
 
     A path is *accepted* when its ``StandardNameSource`` (id ``dd:<path>``)
@@ -575,20 +577,24 @@ def partition_focus_by_accepted(paths: list[str]) -> tuple[list[str], list[str]]
     paths lack any such name and are the ones focused mop-up should (re)stage;
     accepted paths are left untouched so a focus run never churns names the
     catalog already holds. Input order is preserved in both lists.
+
+    *gc* may be an already-open graph client (reused for the query); when None a
+    fresh :class:`GraphClient` is opened.
     """
     if not paths:
         return [], []
     ids = [f"dd:{p}" for p in paths]
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            WHERE sn.name_stage IN ['accepted', 'approved']
-            RETURN DISTINCT sid AS sid
-            """,
-            ids=ids,
-        )
+    cypher = """
+        UNWIND $ids AS sid
+        MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
+        WHERE sn.name_stage IN ['accepted', 'approved']
+        RETURN DISTINCT sid AS sid
+        """
+    if gc is not None:
+        rows = gc.query(cypher, ids=ids)
+    else:
+        with GraphClient() as _gc:
+            rows = _gc.query(cypher, ids=ids)
     accepted_ids = {r["sid"] for r in (rows or [])}
     gap = [p for p in paths if f"dd:{p}" not in accepted_ids]
     accepted = [p for p in paths if f"dd:{p}" in accepted_ids]
@@ -1674,7 +1680,7 @@ def rederive_structural_edges() -> dict[str, int]:
     with GraphClient() as gc:
         live = gc.query(
             "MATCH (sn:StandardName) "
-            "WHERE NOT (coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']) "
+            "WHERE NOT (coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']) "
             "RETURN sn.id AS id"
         )
         names = [{"id": r["id"]} for r in live if r.get("id")]
@@ -4291,7 +4297,7 @@ def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any
             MATCH (sn:StandardName {claim_token: $token})
             OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
             OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
             RETURN sn.id AS id, sn.description AS description,
                    sn.documentation AS documentation, sn.kind AS kind,
                    sn.unit AS unit, sn.links AS links,
@@ -4376,7 +4382,7 @@ def claim_names_for_embedding(limit: int = 100) -> tuple[str, list[dict[str, Any
         gc.query(
             """
             MATCH (sn:StandardName)
-            WHERE NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']
+            WHERE NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']
               AND sn.validated_at IS NOT NULL
               AND sn.embedding IS NULL
               AND sn.description IS NOT NULL
@@ -4571,7 +4577,7 @@ def reset_standard_names(
     with GraphClient() as gc:
         params: dict[str, Any] = {}
         where_clauses = [
-            "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+            "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']"
         ]
         if from_stage is not None:
             where_clauses.append("sn.name_stage = $from_stage")
@@ -4794,7 +4800,7 @@ def clear_standard_names(
         sn_where_clauses: list[str] = []
         if stage_filter is None:
             sn_where_clauses.append(
-                "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+                "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']"
             )
             if not include_accepted:
                 sn_where_clauses.append("coalesce(sn.name_stage, '') <> 'accepted'")
@@ -5353,7 +5359,7 @@ def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
                 for r in gc.query(
                     "MATCH (s:StandardName) "
                     "WHERE s.id IN $toks "
-                    "AND NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+                    "AND NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted', 'contested'] "
                     "RETURN s.id AS id",
                     toks=list(candidate_tokens),
                 )
@@ -5366,7 +5372,7 @@ def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
             r["id"]
             for r in gc.query(
                 "MATCH (s:StandardName) "
-                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted', 'contested'] "
                 "RETURN s.id AS id"
             )
         }
@@ -5455,7 +5461,7 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
             r["id"]
             for r in gc.query(
                 "MATCH (s:StandardName) "
-                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted'] "
+                "WHERE NOT coalesce(s.name_stage, '') IN ['superseded', 'exhausted', 'contested'] "
                 "RETURN s.id AS id"
             )
         }
@@ -8667,7 +8673,7 @@ def claim_review_name_batch(
 
     where = (
         "sn.name_stage = 'drafted'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         # Gate: require a real description before review so the
         # semantic_similarity_check in the review worker can run. Exclude the
         # deterministic-parent placeholder — a derived parent still carrying it
@@ -9154,12 +9160,13 @@ def claim_review_docs_batch(
             " OR (coalesce(sn.origin, '') = 'derived'"
             "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
             "       WHERE NOT coalesce(kid.name_stage, '') IN"
-            "       ['superseded', 'exhausted'] }))"
+            "       ['superseded', 'exhausted', 'contested'] }))"
         )
     )
     where = (
         "sn.docs_stage = 'drafted'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])" + score_gate
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
+        + score_gate
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -9528,7 +9535,7 @@ def claim_refine_name_batch(
         " AND sn.reviewer_score_name IS NOT NULL"
         " AND sn.reviewer_score_name < $min_score"
         " AND coalesce(sn.chain_length, 0) < $rotation_cap"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])"
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         # A pinned rename that has already spent its re-review budget rests at
         # 'reviewed' — refine must not re-claim it (it is never rewritten, only
         # resubmitted; see resubmit_pinned_rename_for_review). Under the cap it
@@ -10152,7 +10159,7 @@ def supersede_prior_source_names(
                 UNWIND $pairs AS pr
                 MATCH (src:IMASNode {id: pr.source_id})-[:HAS_STANDARD_NAME]->(old:StandardName)
                 WHERE old.id <> pr.new_name
-                  AND NOT coalesce(old.name_stage, '') IN ['superseded', 'exhausted']
+                  AND NOT coalesce(old.name_stage, '') IN ['superseded', 'exhausted', 'contested']
                   AND coalesce(old.origin, 'pipeline') = 'pipeline'
                 MATCH (new:StandardName {id: pr.new_name})
                 // Skip self and any case where old already descends from new
@@ -11321,12 +11328,13 @@ def claim_generate_docs_batch(
             " OR (coalesce(sn.origin, '') = 'derived'"
             "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
             "       WHERE NOT coalesce(kid.name_stage, '') IN"
-            "       ['superseded', 'exhausted'] }))"
+            "       ['superseded', 'exhausted', 'contested'] }))"
         )
     )
     where = (
         "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])" + score_gate
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
+        + score_gate
     )
 
     items = _claim_sn_atomic(
@@ -11618,7 +11626,7 @@ def claim_refine_docs_batch(
             " OR (coalesce(sn.origin, '') = 'derived'"
             "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
             "       WHERE NOT coalesce(kid.name_stage, '') IN"
-            "       ['superseded', 'exhausted'] }))"
+            "       ['superseded', 'exhausted', 'contested'] }))"
         )
     )
     where = (
@@ -11626,7 +11634,8 @@ def claim_refine_docs_batch(
         " AND sn.reviewer_score_docs IS NOT NULL"
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted'])" + score_gate
+        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
+        + score_gate
     )
     items = _claim_sn_atomic(
         eligibility_where=where,
@@ -12408,7 +12417,7 @@ def claim_enrich_parents_batch(
         "sn.origin = 'derived'"
         " AND sn.description = $parent_desc_placeholder"
         " AND EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn)"
-        "   WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted'] }"
+        "   WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested'] }"
     )
     query_params: dict[str, Any] = {
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -12456,7 +12465,7 @@ def fetch_derived_parent_children(
             """
             UNWIND $parent_ids AS pid
             MATCH (child:StandardName)-[:HAS_PARENT]->(p:StandardName {id: pid})
-            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted']
+            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
             WITH pid, child
             ORDER BY child.id
             RETURN pid AS parent_id,

@@ -139,8 +139,8 @@ class TestRunMergeAcceptPath:
 # ---------------------------------------------------------------------------
 
 
-class TestRunMergeQuarantinePath:
-    def test_low_score_quarantines_not_accepted_not_refined(self):
+class TestRunMergeContestPath:
+    def test_low_score_contests_not_accepted_not_refined(self):
         change = MergeChange(sn_id="ion_density", axis="docs", new_value="Bad docs.")
         gc = _gc_exists(True)
         with (
@@ -157,18 +157,17 @@ class TestRunMergeQuarantinePath:
         m_name.assert_not_called()
         assert "ion_density" not in report.accepted
 
-        # Quarantined + flagged.
-        assert any(q["sn_id"] == "ion_density" for q in report.quarantined)
-        # The existing quarantine signal is written to the graph.
-        quarantine_queries = [
+        # A failed reviewer edit is contested, not quarantined.
+        assert any(c["sn_id"] == "ion_density" for c in report.contested)
+        assert not report.quarantined
+        # The contested signal (name_stage='contested') is written to the graph.
+        contest_queries = [
             c.args[0]
             for c in gc.query.call_args_list
-            if c.args and "quarantined" in c.args[0]
+            if c.args and "contested" in c.args[0]
         ]
-        assert quarantine_queries, (
-            "expected a gc.query setting validation_status='quarantined'"
-        )
-        assert "validation_status" in quarantine_queries[0]
+        assert contest_queries, "expected a gc.query setting name_stage='contested'"
+        assert "name_stage = 'contested'" in contest_queries[0]
 
     def test_full_review_runs_but_refine_never_invoked(self):
         """FULL review is exercised; NO refine pool is ever entered."""
@@ -208,7 +207,7 @@ class TestRunMergeQuarantinePath:
         m_prn.assert_not_called()
         m_prd.assert_not_called()
         assert "a_name" in report.accepted
-        assert any(q["sn_id"] == "b_name" for q in report.quarantined)
+        assert any(c["sn_id"] == "b_name" for c in report.contested)
 
 
 # ---------------------------------------------------------------------------
