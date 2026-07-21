@@ -607,3 +607,318 @@ def run_release(
     logger.info("Pushed %s to %s", git_tag, effective_remote)
 
     return report
+
+
+# =============================================================================
+# Review-batch release — mint → freeze → export → branch → push → PR → back-fill
+# =============================================================================
+
+_UPSTREAM_ISNC_REPO = "iterorganization/IMAS-Standard-Names"
+_FORK_OWNER = "Simon-McIntosh"
+
+
+@dataclass
+class ReviewReleaseReport:
+    """Result of a review-batch release."""
+
+    dry_run: bool = False
+    rc_version: str = ""
+    batch_size: int = 0
+    names: list[str] = field(default_factory=list)
+    unmatched_sources: list[str] = field(default_factory=list)
+    artifact_path: str | None = None
+    branch: str = ""
+    remote: str = ""
+    pushed: bool = False
+    pr_number: int | None = None
+    pr_url: str | None = None
+    errors: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "dry_run": self.dry_run,
+            "rc_version": self.rc_version,
+            "batch_size": self.batch_size,
+            "unmatched_sources": self.unmatched_sources,
+            "artifact_path": self.artifact_path,
+            "branch": self.branch,
+            "remote": self.remote,
+            "pushed": self.pushed,
+            "pr_number": self.pr_number,
+            "pr_url": self.pr_url,
+            "errors": self.errors,
+        }
+
+
+def _reviews_dir() -> Path:
+    """The committed home for frozen review-batch artifacts (imas-codex repo)."""
+    return Path(__file__).parent / "manifests" / "reviews"
+
+
+def _slug_from_rc(rc_version: str) -> str:
+    """Kebab-case batch name derived from an RC version tag (e.g. v0.2.0rc65)."""
+    body = re.sub(r"[^a-z0-9]+", "-", rc_version.lower()).strip("-")
+    return f"review-{body}"
+
+
+def _freeze_review_artifact(
+    reviews_dir: Path,
+    *,
+    rc_version: str,
+    names: list[str],
+    minted_from: str,
+    unmatched: list[str],
+) -> Path:
+    """Materialise the frozen sn-names batch record, tagged by the RC version.
+
+    The artifact is the reproducible batch identity carried through export → PR
+    → merge; ``pr_number``/``pr_url``/``merge_commit`` are written null here and
+    back-filled once the PR exists.
+    """
+    from datetime import UTC, datetime
+
+    import yaml
+
+    reviews_dir.mkdir(parents=True, exist_ok=True)
+    doc = {
+        "kind": "sn_names",
+        "schema_version": 1,
+        "name": _slug_from_rc(rc_version),
+        "rc_version": rc_version,
+        "minted_from": minted_from,
+        "minted_at": datetime.now(UTC).isoformat(),
+        "names": sorted(names),
+        "unmatched_sources": sorted(unmatched),
+        "pr_number": None,
+        "pr_url": None,
+        "merge_commit": None,
+    }
+    path = reviews_dir / f"{rc_version}.sn_names.yaml"
+    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+    return path
+
+
+def _backfill_review_artifact(
+    path: Path, *, pr_number: int | None, pr_url: str | None
+) -> None:
+    """Write the PR number/URL into a frozen artifact after the PR is created."""
+    import yaml
+
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    doc["pr_number"] = pr_number
+    doc["pr_url"] = pr_url
+    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+
+
+def _gh_pr_create(
+    *, branch: str, base: str, title: str, body: str, repo: str, head_owner: str
+) -> tuple[int | None, str | None]:
+    """Open a PR via the gh CLI; return (pr_number, pr_url).
+
+    Injected as ``pr_creator`` in tests so no live GitHub call is made.
+    """
+    result = subprocess.run(
+        [
+            "gh",
+            "pr",
+            "create",
+            "--repo",
+            repo,
+            "--base",
+            base,
+            "--head",
+            f"{head_owner}:{branch}",
+            "--title",
+            title,
+            "--body",
+            body,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"gh pr create failed: {result.stderr.strip()}")
+    url = result.stdout.strip().splitlines()[-1] if result.stdout.strip() else None
+    number = None
+    if url and "/pull/" in url:
+        try:
+            number = int(url.rsplit("/", 1)[-1])
+        except ValueError:
+            number = None
+    return number, url
+
+
+def run_review_release(
+    isnc_path: Path,
+    focus_file: str | Path,
+    message: str,
+    *,
+    staging_dir: Path | None = None,
+    bump: str | None = None,
+    remote: str | None = None,
+    dry_run: bool = False,
+    export_kwargs: dict[str, Any] | None = None,
+    reviews_dir: Path | None = None,
+    gc: object | None = None,
+    exporter: Any | None = None,
+    publisher: Any | None = None,
+    pr_creator: Any | None = None,
+    upstream_repo: str = _UPSTREAM_ISNC_REPO,
+    fork_owner: str = _FORK_OWNER,
+) -> ReviewReleaseReport:
+    """Mint → freeze → export → branch → push → PR → back-fill, in one call.
+
+    A single orchestrating step so the frozen sn-names artifact, the pushed RC
+    catalog, and the PR stay in lock-step. The focus file drives the batch: an
+    sn-sources file is minted live to the SN set (:func:`mint_sn_list`), an
+    sn-names file is used directly (schema dispatch). The resolved set is frozen
+    under ``manifests/reviews/<rc>.sn_names.yaml`` (RC-tagged, the traceable key)
+    and the PR number/URL back-filled after ``gh pr create``.
+
+    ``exporter``/``publisher``/``pr_creator`` are injectable so the flow is
+    testable against a local bare repo with no live GitHub call.
+    """
+    from imas_codex.standard_names.minting import mint_sn_list
+    from imas_codex.standard_names.sources_manifest import load_focus_file
+
+    report = ReviewReleaseReport(dry_run=dry_run)
+    isnc_path = Path(isnc_path)
+    reviews_dir = reviews_dir or _reviews_dir()
+    if staging_dir is None:
+        from imas_codex.settings import get_sn_staging_dir
+
+        staging_dir = get_sn_staging_dir()
+    staging_dir = Path(staging_dir)
+    effective_remote = remote or _RC_REMOTE
+    report.remote = effective_remote
+
+    exporter = exporter or _default_exporter
+    publisher = publisher or _default_publisher
+    pr_creator = pr_creator or _gh_pr_create
+
+    # ── 1. Resolve the focus file to the batch SN set ──────────────────
+    try:
+        kind, items = load_focus_file(focus_file)
+    except Exception as exc:
+        report.errors.append(f"focus file: {exc}")
+        return report
+
+    if kind == "sn_sources":
+        mint = mint_sn_list(items, gc=gc)
+        names, unmatched = mint.names, mint.unmatched_paths
+    else:
+        names, unmatched = list(dict.fromkeys(items)), []
+
+    if not names:
+        report.errors.append("focus resolved to zero standard names")
+        return report
+    report.names = sorted(names)
+    report.batch_size = len(report.names)
+    report.unmatched_sources = sorted(unmatched)
+
+    # ── 2. Pre-flight ISNC + compute the RC version ────────────────────
+    try:
+        _check_on_main(isnc_path)
+    except ValueError as exc:
+        report.errors.append(str(exc))
+        return report
+    _run_git("fetch", "--tags", effective_remote, cwd=isnc_path)
+    try:
+        git_tag, _version = compute_next_version(isnc_path, bump, final=False)
+    except ValueError as exc:
+        report.errors.append(str(exc))
+        return report
+    report.rc_version = git_tag
+    report.branch = f"review/{git_tag}"
+
+    # ── 3. Freeze the batch artifact (pre-PR fields) ───────────────────
+    artifact = _freeze_review_artifact(
+        reviews_dir,
+        rc_version=git_tag,
+        names=report.names,
+        minted_from=str(focus_file),
+        unmatched=report.unmatched_sources,
+    )
+    report.artifact_path = str(artifact)
+
+    # ── 4. Export approved ∪ batch (review_batch stamped) ──────────────
+    staging_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        exporter(
+            staging_dir=staging_dir,
+            force=True,
+            review_batch=report.names,
+            **(export_kwargs or {}),
+        )
+    except Exception as exc:
+        report.errors.append(f"export failed: {exc}")
+        return report
+
+    if dry_run:
+        logger.info(
+            "[dry-run] would branch %s, publish, push to %s, and open a PR",
+            report.branch,
+            effective_remote,
+        )
+        return report
+
+    # ── 5. Branch, publish (copy + commit), push to the fork ───────────
+    br = _run_git("checkout", "-b", report.branch, cwd=isnc_path)
+    if br.returncode != 0:
+        report.errors.append(f"failed to create branch {report.branch}: {br.stderr}")
+        return report
+    try:
+        pub = publisher(
+            staging_dir=str(staging_dir),
+            isnc_path=str(isnc_path),
+            push=False,
+            allow_dirty=True,
+        )
+    except Exception as exc:
+        report.errors.append(f"publish failed: {exc}")
+        return report
+    if getattr(pub, "errors", None):
+        report.errors.extend(pub.errors)
+        return report
+
+    push = _run_git("push", effective_remote, report.branch, cwd=isnc_path)
+    if push.returncode != 0:
+        report.errors.append(f"failed to push {report.branch}: {push.stderr}")
+        return report
+    report.pushed = True
+
+    # ── 6. Open the PR upstream and back-fill the artifact ─────────────
+    title = message or f"Standard-name review batch {git_tag}"
+    body = (
+        f"Review batch **{git_tag}** — {report.batch_size} standard name(s) for "
+        f"first human review.\n\nMinted from `{focus_file}`."
+    )
+    try:
+        pr_number, pr_url = pr_creator(
+            branch=report.branch,
+            base="main",
+            title=title,
+            body=body,
+            repo=upstream_repo,
+            head_owner=fork_owner,
+        )
+    except Exception as exc:
+        report.errors.append(f"gh pr create failed: {exc}")
+        return report
+    report.pr_number = pr_number
+    report.pr_url = pr_url
+    _backfill_review_artifact(artifact, pr_number=pr_number, pr_url=pr_url)
+
+    return report
+
+
+def _default_exporter(**kwargs: Any) -> Any:
+    from imas_codex.standard_names.export import run_export
+
+    return run_export(**kwargs)
+
+
+def _default_publisher(**kwargs: Any) -> Any:
+    from imas_codex.standard_names.publish import run_publish
+
+    return run_publish(**kwargs)

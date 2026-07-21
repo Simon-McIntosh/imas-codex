@@ -3809,6 +3809,18 @@ def sn_preview(
     help="Export names without requiring accepted docs (skip docs_stage gate)",
 )
 @click.option(
+    "--review-batch",
+    "review_batch",
+    type=click.Path(exists=True, dir_okay=False),
+    default=None,
+    help=(
+        "Cut a review-batch RC from a focus file (sn_sources or sn_names): mint "
+        "the SN set, freeze it under manifests/reviews/<rc>.sn_names.yaml, export "
+        "approved ∪ batch, branch + push to the fork, open the upstream PR, and "
+        "back-fill the PR number/URL — all in one step."
+    ),
+)
+@click.option(
     "--export-only",
     is_flag=True,
     help=(
@@ -3882,6 +3894,7 @@ def sn_release(
     skip_gate: bool,
     dry_run: bool,
     names_only: bool,
+    review_batch: str | None,
     export_only: bool,
     min_score: float,
     include_unreviewed: bool,
@@ -3969,6 +3982,58 @@ def sn_release(
             )
             raise SystemExit(2)
         isnc_path = resolved
+
+    # ── --review-batch: mint → freeze → export → branch → PR → back-fill ──
+    if review_batch:
+        if action is not None:
+            raise click.ClickException(
+                "--review-batch does not take an ACTION argument."
+            )
+        from imas_codex.standard_names.catalog_release import run_review_release
+
+        staging_path = Path(staging) if staging else get_sn_staging_dir()
+        export_kwargs: dict[str, Any] = {}
+        if skip_gate:
+            export_kwargs["skip_gate"] = True
+        if names_only:
+            export_kwargs["names_only"] = True
+        console.print("\n[bold]Standard-Name Review Batch[/bold]")
+        console.print(f"  ISNC: {isnc_path}")
+        console.print(f"  Focus: {review_batch}")
+        if dry_run:
+            console.print("  Mode: [yellow]dry run[/yellow]")
+        console.print("")
+        try:
+            rr = run_review_release(
+                isnc_path=isnc_path,
+                focus_file=review_batch,
+                message=message or "",
+                staging_dir=staging_path,
+                bump=bump,
+                remote=remote,
+                dry_run=dry_run,
+                export_kwargs=export_kwargs or None,
+            )
+        except Exception as exc:
+            console.print(f"[red]Review-batch error:[/red] {exc}")
+            raise SystemExit(3) from exc
+        if rr.errors:
+            console.print(f"[red]Errors: {len(rr.errors)}[/red]")
+            for err in rr.errors[:10]:
+                console.print(f"  - {err}")
+            raise SystemExit(1)
+        console.print(f"[green]Review batch {rr.rc_version}[/green]")
+        console.print(f"  Batch size: {rr.batch_size} name(s)")
+        if rr.unmatched_sources:
+            console.print(
+                f"  [yellow]Unmatched sources: {len(rr.unmatched_sources)}[/yellow]"
+            )
+        console.print(f"  Artifact: {rr.artifact_path}")
+        if not dry_run:
+            console.print(f"  Branch: {rr.branch} → {rr.remote}")
+            if rr.pr_url:
+                console.print(f"  PR: {rr.pr_url}")
+        return
 
     # ── Status subcommand ─────────────────────────────────
     if action == "status":
