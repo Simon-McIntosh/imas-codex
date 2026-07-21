@@ -7,7 +7,7 @@
   <meta name="reckon-type"     content="plan">
   <meta name="plan-slug"       content="sn-catalog-approval-pipeline">
   <meta name="plan-title"      content="Standard-Name Catalog Approval Pipeline (WEST first-review gate)">
-  <meta name="plan-summary"    content="Drive eligible WEST DD paths to accepted standard names, PR the subset upstream for first human review, and freeze approved names back into the graph.">
+  <meta name="plan-summary"    content="Drive eligible WEST DD paths to accepted standard names, PR reviewed batches upstream for first human review, and freeze approved names back into the graph.">
   <meta name="plan-status"     content="draft">
   <meta name="plan-roi"        content="high">
   <meta name="plan-effort"     content="L">
@@ -31,13 +31,15 @@
       <li>Ensure every <em>eligible</em> WEST DD source (physical, geometric, coordinate
         quantities) carries an <strong>accepted</strong> standard name in the local graph —
         running focused mop-up where names are missing.</li>
-      <li>Export <strong>only that subset</strong> of accepted names and open a pull request
-        against the upstream catalog repository (ISNC) for human experts to review.</li>
-      <li>On PR merge, flip those names' lifecycle to a frozen <strong>approved</strong> state
-        that is immune to further mutation by general <code>sn run</code> pools.</li>
-      <li>Import the approval back into the local graph — because the graph is the single
-        source of truth and lives locally, the merged PR is the human gate but never itself
-        writes the graph; a local import step always follows approval.</li>
+      <li>Export a small <strong>batch</strong> (carrying the already-approved set so the diff is
+        additive) and open a pull request against the upstream catalog repository (ISNC) for
+        human experts to review.</li>
+      <li>On PR merge, promote the reviewed names' lifecycle to a frozen <strong>approved</strong>
+        state immune to further mutation by general <code>sn run</code> pools — untouched names
+        automatically, edited names only if they re-pass the compliance review.</li>
+      <li>Bring the approval back into the local graph — because the graph is the single source
+        of truth and lives locally, the merged PR is the human gate but never itself writes the
+        graph; a local <code>sn merge</code> step always follows approval.</li>
     </ol>
     <p>
       This plan is a <strong>design</strong>. It records what already exists (so we do not
@@ -51,16 +53,17 @@
     <h2 id="s2">§2 — Pipeline architecture</h2>
     <p>
       Two coupled loops. The <strong>local loop</strong> (graph = source of truth) mints
-      accepted names from the manifest. The <strong>upstream loop</strong> is the human gate:
-      a subset PR against ISNC, reviewed by experts, whose merge triggers a local import that
-      freezes the approved names in the graph. A GitHub-hosted CI runner cannot reach the local
-      Neo4j graph, so the authoritative graph write is always a local step — CI's role is to
-      validate the PR and record the merge metadata (PR number, URL, merge-commit sha) that the
-      local import consumes.
+      accepted names from the manifest. The <strong>upstream loop</strong> is the human gate: an
+      additive batch PR against ISNC, reviewed by experts, whose merge triggers a local
+      <code>sn merge</code> that promotes the reviewed names to <code>approved</code> and freezes
+      them in the graph. A GitHub-hosted CI runner cannot reach the local Neo4j graph, so the
+      authoritative graph write is always a local step — CI's role is to validate the PR and
+      record the merge metadata (PR number, URL, merge-commit sha) that the local
+      <code>sn merge</code> consumes.
     </p>
     <p>
       <img src="/imas-codex/figures/sn-approval-pipeline/pipeline.svg"
-           alt="WEST standard-name approval pipeline: local compose/review loop mints accepted names; a subset PR to the upstream catalog is the human gate; merge flips lifecycle accepted→approved and a local import reconcile writes the frozen state back into the graph."
+           alt="WEST standard-name approval pipeline: local compose/review loop mints accepted names; an additive batch PR to the upstream catalog is the human gate; a local sn merge promotes reviewed names accepted→approved (untouched auto, edited via re-review) and freezes them in the graph."
            style="max-width:100%; height:auto; border:1px solid #e0e4e8; border-radius:6px; padding:8px; background:#fff;">
     </p>
 
@@ -98,7 +101,7 @@
       <strong>Schema decision — yes, a light schema earns its keep.</strong> A bare path list
       cannot carry the three things this file must provide: (a) <em>provenance</em> so the
       v3→v4 conversion is reproducible and auditable, (b) a stable identity so the same file
-      drives <em>both</em> the focus mop-up <em>and</em> the export-subset selection, and (c) a
+      drives <em>both</em> the focus mop-up <em>and</em> the export/approval selection, and (c) a
       way to surface paths that need a human/classifier decision. The
       <code>schema_version: 1</code> shape is:
     </p>
@@ -148,8 +151,49 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       <code>data</code> child (fit artifacts, <code>pulse_schedule</code> reference waveforms,
       summary structs whose value lives in <code>/value</code>) are deliberately left
       structural. Landed with unit tests (Red→Green) and applied to the live graph; the four
-      WEST review-candidates now flow into <code>sources</code>, lifting the corpus from 346 to
-      351.
+      WEST review-candidates now flow into <code>sources</code> (the corpus is 355 after the
+      boundary remap recorded in the resolution block).
+    </p>
+
+    <h2 id="s3b">§3b — Two manifest schemas &amp; minting the SN set</h2>
+    <p>
+      The review operates on two different currencies, so it needs two file schemas:
+    </p>
+    <ul>
+      <li><strong>sn-sources</strong> (<code>sn_sources.schema.json</code>, exists) — a set of
+        <strong>DD paths</strong> (grouped by IDS). This is the extraction/mop-up currency: it
+        drives which sources acquire names. The WEST manifest is one.</li>
+      <li><strong>sn-names</strong> (<code>sn_names.schema.json</code>, to add) — a flat list of
+        <strong>standard-name ids</strong>. This is the review/approval currency: export, PR,
+        merge, and approval all operate on SN ids, not DD paths.</li>
+    </ul>
+    <p>
+      <strong>Minting the SN set from DD paths.</strong> The two are bridged by a deterministic
+      join over graph state: <code>mint_sn_list(dd_paths)</code> = (1) <em>base join</em> — every
+      <code>StandardName</code> whose <code>source_paths</code> list intersects the DD-path set
+      (the link is the <code>dd:&lt;ids&gt;/&lt;path&gt;</code> URI on the SN, not a
+      relationship); then (2) <em>set closure</em> — because approving half a coherent group is
+      incoherent, pull in the whole family of any name touched. "Family" is a decision
+      (D-minting-closure): the concrete candidates are the <code>HAS_PARENT</code> hierarchy
+      (a base name + its projection/component/statistic children, 1506 edges) and names sharing
+      a grammar base token (<code>HAS_GEOMETRIC_BASE</code>/<code>HAS_SUBJECT</code>); looser
+      groupings (<code>IN_CLUSTER</code>, <code>REFINED_FROM</code> lineage) are almost certainly
+      too broad. This is the <strong>path→name join</strong> that the earlier design left
+      unspecified — it is now the heart of the flow.
+    </p>
+    <p>
+      <strong>Do we need a fixed SN file? — derive live, but materialise for the record.</strong>
+      Because the SN set is derivable, <code>--focus &lt;file&gt;</code> need not require a
+      pre-made SN list: it dispatches on the file's schema — an sn-sources file is
+      <em>minted live</em> to the SN set, an sn-names file is used directly. But the live mint
+      depends on graph state at run time (which names exist, current family membership), so it is
+      <strong>not reproducible</strong> across time. Therefore the release CLI should
+      <strong>materialise the resolved SN list as an sn-names artifact</strong> and carry it with
+      the batch — this frozen list is exactly the <em>batch id-set carrier</em> the earlier design
+      lacked: it travels export → PR → merge so <code>sn merge</code> approves precisely the names
+      that were reviewed, not a re-derived (possibly drifted) set. So: sn-sources is the human
+      input; sn-names is the machine-frozen batch record; neither is mandatory as input, but the
+      materialised sn-names list is the authoritative batch identity through the gate.
     </p>
 
     <h2 id="s4">§4 — What already exists (build only the gaps)</h2>
@@ -215,6 +259,14 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       manifests (churn vs gap-only) remains D-focus below; the file-input mechanism itself is
       independent of that choice and is done.
     </p>
+    <p>
+      <strong>Scope of what shipped:</strong> this is the <em>mop-up half</em> — an sn-sources
+      file expands to <strong>DD paths</strong> to seed extraction of missing names. The
+      <em>release/review half</em> consumes the same file differently: it mints the
+      <strong>SN set</strong> (§3b) and also accepts an sn-names list directly (schema dispatch).
+      That minting, the sn-names schema, and the release dispatch are design (§6), not yet built —
+      only the DD-path mop-up loader is code.
+    </p>
 
     <h2 id="s6">§6 — Gap B: export the growing approved catalog (small PRs, never the full corpus)</h2>
     <p>
@@ -228,15 +280,21 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       just the batch); the approved catalog grows monotonically as batches merge.
     </p>
     <p>
-      So the export candidate predicate is <code>name_stage == 'approved' OR id ∈ batch</code>
-      (the batch = the focus scope), not the current
-      <code>name_stage IN ['accepted','approved']</code> full dump. Determinism (stable order +
+      So the export candidate predicate is <code>name_stage == 'approved' OR id ∈ batch</code>,
+      not the current <code>name_stage IN ['accepted','approved']</code> full dump. The
+      <strong>batch</strong> is the minted SN set (§3b): the release CLI takes a focus input —
+      an sn-sources file, minted live to the SN set, or an sn-names file used directly — resolves
+      it to SN ids, and <strong>materialises that resolved set as an sn-names artifact</strong>.
+      That frozen artifact is the batch's identity from here on: it is committed with the export
+      and carried into the PR so §8's merge approves exactly it. Determinism (stable sort by id +
       canonical serialisation) is the load-bearing property — without it, incidental reordering
-      pollutes every diff. One transition question, deferred to a future session: the catalog
-      presently published on <code>main</code> holds the full accepted set at
-      <code>status: active</code>, so adopting the approved-only-growing model needs a one-time
-      re-baseline (or a parallel approved catalog). The batching structure itself is likewise
-      deferred — a focus manifest already scopes the batch for now.
+      pollutes every diff.
+    </p>
+    <p>
+      Two questions are deferred to a future session (not needed to start): the catalog presently
+      on <code>main</code> holds the full accepted set at <code>status: active</code>, so adopting
+      the approved-only-growing model needs a one-time re-baseline (or a parallel approved
+      catalog); and the batching structure itself — a focus manifest scopes the batch for now.
     </p>
 
     <h2 id="s7">§7 — Gap C: the additive review PR</h2>
@@ -314,30 +372,35 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       <code>merge.py</code> use injectable graph callables).
     </p>
     <ul>
-      <li><strong>Manifest loader (Gap A):</strong> a pure <code>load_sources_file()</code> test —
-        a fixture YAML round-trips to the expected flattened <code>&lt;ids&gt;/&lt;path&gt;</code>
-        set; rejects unknown <code>schema_version</code>; ignores <code>review_candidates</code>.
-        Gap-only seeding: given a graph with some paths already accepted, the focus seed touches
-        only the not-yet-named paths and does not reset accepted names (mock graph).</li>
-      <li><strong>Subset export (Gap B):</strong> given a graph with names spanning several
-        domains, <code>--sources-file</code> selects exactly the names whose
-        <code>source_paths</code> intersect the manifest; the staged domain files contain only
-        those; the export manifest records <code>export_scope: manifest_subset</code> and the
-        included id set. Boundary cases: a name with multiple source paths (one in, one out) is
-        included; a manifest path with no accepted name is reported, not silently dropped.</li>
-      <li><strong>Subset PR (Gap C):</strong> the export-into-checkout produces a diff touching
-        only subset entries; a name absent from ISNC is an addition, an existing name is an
-        idempotent no-op. (PR creation itself is exercised via a dry-run / local bare-repo
-        fixture, not a live GitHub call.)</li>
-      <li><strong>Bulk approve-on-merge (Gap D):</strong> given a merged subset and PR metadata,
-        every name in the subset ends <code>name_stage='approved'</code> with the four catalog-PR
-        fields populated; names <em>outside</em> the subset are untouched; an entry whose wording
-        the reviewers edited is re-scored before approval; approval is idempotent (re-running does
-        not error or double-write). Guard test: without PR metadata, nothing is approved.</li>
-      <li><strong>Freeze (Gap E, mostly verification):</strong> an <code>approved</code> name
-        rejects <code>sn edit</code> rename and docs edits; a subsequent <code>sn run</code> pool
-        pass does not re-claim it and <code>protection.py</code> strips editorial writes to it.
-        These assert existing behaviour so a regression is caught.</li>
+      <li><strong>Manifest loader (Gap A, SHIPPED):</strong> pure loader tests (done) — a fixture
+        sn-sources YAML flattens to the expected <code>&lt;ids&gt;/&lt;path&gt;</code> set; unknown
+        <code>schema_version</code>, mis-shaped <code>sources</code>, and non-YAML raise; file vs
+        bare-path mixing dedups. <em>Owed:</em> a CLI-level test of the <code>sn run --focus
+        &lt;file&gt;</code> wiring (currently only the pure loader is covered), and — once D-focus
+        locks — a gap-only-seeding test proving accepted names on listed paths are not re-staged.</li>
+      <li><strong>Minting (Gap B):</strong> <code>mint_sn_list(dd_paths)</code> is pure over an
+        injected graph view — assert the base join (SN whose <code>source_paths</code> intersect
+        the set, incl. a name with one in / one out path) and the family closure (a touched base
+        pulls its <code>HAS_PARENT</code> children / shared-base siblings per D-minting-closure);
+        a DD path with no linked SN is reported, not dropped.</li>
+      <li><strong>Additive export (Gap B):</strong> export of <code>approved ∪ batch</code> is
+        deterministic (stable sort + canonical serialisation) and, against an approved-only
+        baseline, the diff is exactly the batch's additions — nothing else changes or is removed;
+        the resolved sn-names artifact is materialised and matches the minted set.</li>
+      <li><strong>Review PR (Gap C):</strong> the export-into-checkout yields an additive diff
+        (batch definitions added, approved set byte-identical); PR creation exercised via a local
+        bare-repo fixture, not a live GitHub call.</li>
+      <li><strong>Merge state machine (Gap D):</strong> from a merged PR + the sn-names batch
+        artifact — an <em>untouched</em> batch name auto-promotes to <code>approved</code> with
+        provenance set (no re-review); an <em>edited</em> name is re-reviewed (pass →
+        <code>approved</code>); an edit crafted to fail the rubric lands in <code>contested</code>;
+        names outside the batch are untouched; without PR metadata nothing is approved; re-running
+        is idempotent.</li>
+      <li><strong>Freeze &amp; contested (verification + new):</strong> an <code>approved</code>
+        name rejects <code>sn edit</code> rename/docs edits, no pool re-claims it, and
+        <code>protection.py</code> strips editorial writes (existing behaviour — regression
+        guard); a <code>contested</code> name is likewise pool-excluded and is resolvable by
+        edit→re-review, override-approve, or revert-to-accepted (new).</li>
     </ul>
 
     <h2 id="s10">§10 — End-to-end verification procedure</h2>
@@ -346,7 +409,7 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       closes before any real upstream PR:
     </p>
     <ol>
-      <li><code>sn run --focus-file imas_codex/standard_names/manifests/west_task_2e.yaml</code> → assert every
+      <li><code>sn run --focus imas_codex/standard_names/manifests/west_task_2e.yaml</code> → assert every
         eligible WEST source has an <code>accepted</code>, <code>valid</code> name (report the
         residual gaps and their skip reasons).</li>
       <li>Deterministic export of <code>approved ∪ batch</code> into a scratch ISNC checkout →
@@ -379,6 +442,45 @@ review_candidates:             # dimensionless physical signals mis-gated as str
           <button class="r-opt" data-value="flag">Add an explicit --reseed flag; default gap-only</button>
         </p>
         <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="two-schemas" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-schemas — do we define two file schemas (DD-path sources and SN-id list)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="two">Two: sn_sources (DD paths, exists) drives extraction/mop-up; sn_names (SN ids, new) is the review/approval currency and the frozen batch record (Recommended)</button>
+          <button class="r-opt" data-value="one-sources">Keep only sn_sources; derive the SN set live everywhere, never materialise it</button>
+        </p>
+        <p class="r-dec-rat">Context: extraction speaks DD paths; export/PR/merge/approval speak SN ids. A materialised sn_names list is also the reproducible batch id-set that carries through the gate (§3b).</p>
+      </div>
+
+      <div class="r-dec" data-key="minting-closure" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-minting-closure — when minting the SN set from DD paths, which relations define the "family/set" that gets pulled in whole?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="parent-plus-base">HAS_PARENT hierarchy (base + projection/component/statistic children) + shared grammar base token (Recommended — coherent, bounded)</button>
+          <button class="r-opt" data-value="parent-only">HAS_PARENT hierarchy only</button>
+          <button class="r-opt" data-value="include-cluster">Also close over IN_CLUSTER / REFINED_FROM (REJECTED — too broad, pulls unrelated names)</button>
+          <button class="r-opt" data-value="no-closure">Base join only, no closure (risks approving partial families)</button>
+        </p>
+        <p class="r-dec-rat">Context: base join = SN whose source_paths intersect the DD-path set; closure avoids approving a base without its projections. Exact relation set needs confirming against how families are actually modelled.</p>
+      </div>
+
+      <div class="r-dec" data-key="sn-list-materialisation" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-materialise — is the resolved SN list a required input, or derived-live and materialised as a record?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="derive-and-freeze">Derive live from sn_sources (or accept an sn_names file), and materialise the resolved set as an sn_names artifact carried through the gate (Recommended)</button>
+          <button class="r-opt" data-value="required-input">Require a hand-made sn_names file as input</button>
+          <button class="r-opt" data-value="live-only">Derive live only, never materialise (REJECTED — non-reproducible; merge can't confirm the exact reviewed set)</button>
+        </p>
+        <p class="r-dec-rat">Context: the live mint depends on graph state at run time; freezing the resolved list makes the batch identity reproducible and lets merge approve exactly the reviewed names.</p>
+      </div>
+
+      <div class="r-dec" data-key="focus-input-dispatch" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-dispatch — how does <code>--focus &lt;file&gt;</code> tell an sn_sources file from an sn_names file?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="kind-field">Explicit `kind: sn_sources | sn_names` discriminator, validated against the matching schema; raise if absent/ambiguous (Recommended)</button>
+          <button class="r-opt" data-value="key-presence">Detect by which block is present (sources vs names); raise if both/neither</button>
+        </p>
+        <p class="r-dec-rat">Context: release-side --focus must dispatch (mint vs use-directly); the shipped mop-up loader handles only the sources→DD-paths case today.</p>
       </div>
 
       <div class="r-dec" data-key="export-additivity" data-choice="approved-plus-batch" data-by="Simon McIntosh" data-when="2026-07-21">
@@ -436,7 +538,7 @@ review_candidates:             # dimensionless physical signals mis-gated as str
           <button class="r-opt" data-value="manifest-override">Add them to the manifest sources manually (focus bypasses the gate anyway)</button>
           <button class="r-opt" data-value="defer">Defer; leave as review_candidates for this first pass</button>
         </p>
-        <p class="r-dec-rat">Locked and shipped: pass-2 R5 signal-signature promotion in node_classifier + build_dd._reclassify_relational, with unit tests, applied to the live graph (23 nodes). Corpus rose 346→351. See §3.</p>
+        <p class="r-dec-rat">Locked and shipped: pass-2 R5 signal-signature promotion in node_classifier + build_dd._reclassify_relational, with unit tests, applied to the live graph (23 nodes); restored the 4 WEST dimensionless signals (corpus 355 after the boundary remap). See §3.</p>
       </div>
     </section>
 

@@ -33,13 +33,13 @@
 
   <!-- manifest -->
   <rect x="28" y="84" width="150" height="60" rx="4" class="box accent"/>
-  <text x="36" y="106" class="lbl">west_sn_sources.yaml</text>
-  <text x="36" y="123" class="sub">346 eligible v4 sources</text>
+  <text x="36" y="106" class="lbl">west_task_2e.yaml</text>
+  <text x="36" y="123" class="sub">355 eligible v4 sources</text>
   <text x="36" y="137" class="sub">schema_version 1</text>
 
   <!-- focus run -->
   <rect x="220" y="84" width="150" height="60" rx="4" class="box accent"/>
-  <text x="228" y="106" class="lbl">sn run --focus-file</text>
+  <text x="228" y="106" class="lbl">sn run --focus &lt;file&gt;</text>
   <text x="228" y="123" class="sub">seed sources · 6-pool</text>
   <text x="228" y="137" class="sub">compose + review</text>
 
@@ -51,15 +51,15 @@
 
   <!-- export subset -->
   <rect x="220" y="184" width="150" height="60" rx="4" class="box accent"/>
-  <text x="228" y="206" class="lbl">export subset</text>
-  <text x="228" y="223" class="sub">select by manifest ids</text>
+  <text x="228" y="206" class="lbl">export appr ∪ batch</text>
+  <text x="228" y="223" class="sub">approved ∪ minted batch</text>
   <text x="228" y="237" class="sub">→ catalog YAML</text>
 
   <!-- import reconcile -->
   <rect x="412" y="184" width="150" height="60" rx="4" class="box accent"/>
-  <text x="420" y="206" class="lbl">import reconcile</text>
-  <text x="420" y="223" class="sub">apply approved state</text>
-  <text x="420" y="237" class="sub">→ freeze in graph</text>
+  <text x="420" y="206" class="lbl">sn merge</text>
+  <text x="420" y="223" class="sub">promote → approved</text>
+  <text x="420" y="237" class="sub">(untouched auto / edit re-review)</text>
 
   <!-- HUMAN GATE band -->
   <rect x="656" y="44" width="312" height="400" rx="6" class="band"/>
@@ -68,8 +68,8 @@
 
   <!-- PR -->
   <rect x="700" y="96" width="220" height="66" rx="4" class="box human"/>
-  <text x="712" y="120" class="lbl">Pull request: WEST subset</text>
-  <text x="712" y="138" class="sub">catalog YAML diff, names only</text>
+  <text x="712" y="120" class="lbl">Batch review PR (additive)</text>
+  <text x="712" y="138" class="sub">approved ∪ batch; diff = batch</text>
   <text x="712" y="152" class="sub">provenance + DD v4 paths</text>
 
   <!-- human review -->
@@ -81,8 +81,8 @@
   <!-- CI watcher -->
   <rect x="700" y="296" width="220" height="66" rx="4" class="box human"/>
   <text x="712" y="320" class="lbl">CI approval watcher</text>
-  <text x="712" y="338" class="sub">on merge: mark names</text>
-  <text x="712" y="352" class="sub">approved · emit signal</text>
+  <text x="712" y="338" class="sub">on merge: emit signal</text>
+  <text x="712" y="352" class="sub">(PR#, url, sha)</text>
 
   <!-- flows local top row -->
   <path class="flowa" d="M178,114 L216,114"/>
@@ -108,6 +108,6 @@
 
   <!-- caption -->
   <text x="16" y="404" class="cap">Two feedback loops: the local compose/review loop mints accepted names; the upstream PR loop is the human gate. Merge flips lifecycle</text>
-  <text x="16" y="422" class="cap">accepted → approved and the local import reconcile writes that frozen state back into the graph, which remains the single source of truth.</text>
+  <text x="16" y="422" class="cap">accepted → approved (untouched auto; edited names only if they re-pass review) and the local sn merge writes that frozen state back into the graph, the single source of truth.</text>
   <text x="16" y="440" class="cap">Accent = local graph operations · brown = upstream human/CI gate · dashed = feedback / state-change edges.</text>
 </svg>
