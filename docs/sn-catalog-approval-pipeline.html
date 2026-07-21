@@ -307,26 +307,44 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       ISNC's existing <code>validate.yml</code> gates it — no new validation CI needed.
     </p>
     <p>
-      <strong>The fork is an anything-goes preview; upstream is the gate.</strong> We own a fork
-      of ISNC where we push RCs, and each RC build renders the catalog through the ISN-repo SPA,
-      which <strong>serves all catalog versions</strong>. So the fork can host whatever we like —
-      a focus topic, the full set, work-in-progress — and its SPA gives a <strong>shareable
-      URL</strong> to put in front of reviewers without touching upstream. The upstream ISNC PR
-      remains the actual approval gate; the fork is where review and iteration happen cheaply.
+      <strong>The existing SPA is the review surface — we do not build a new one.</strong> The
+      catalog SPA (code in the ISN repo, <code>site/src</code>) already renders the catalog and
+      already has a <strong>multi-release version selector</strong>: it deploys per version, each
+      version folder carrying its own <code>data.json</code> (built by
+      <code>imas_standard_names/catalog/dataset.py</code>) with a top-level <code>versions.json</code>
+      driving the dropdown (the rc60…rc64 selector in the live UI). Our fork publishes RCs the
+      same way, so each batch is just <strong>an RC = a catalog version</strong>, browsable and
+      shareable at its version URL (<code>…/imas-standard-names-catalog/&lt;version&gt;/#/browse/…</code>)
+      with no new app or hosting.
     </p>
     <p>
-      <strong>Proposed feature — PR-scoped SPA view.</strong> The SPA (on both the fork and
-      upstream) should <strong>surface open PRs</strong> and let a viewer <strong>select a PR</strong>,
-      filtering the rendered catalog to <em>only the SNs that PR introduces</em> — not the
-      previously-approved names carried along for additivity. The filter set is exactly the
-      <strong>sn_names batch artifact</strong> the export materialised (§3b/§6): the SPA reads
-      that list (from the PR branch, or the PR's changed entries) and shows just those names,
-      richly rendered (definition, unit, provenance, family). This turns review from reading raw
-      YAML diffs into browsing a scoped, shareable catalog view — e.g.
-      <code>&lt;spa-url&gt;?pr=NNN</code> — which is the natural home for the first human-review
-      trial. Build items: (a) a PR-listing surface in the SPA; (b) a per-PR SN-id filter driven
-      by the batch artifact; (c) the shareable deep-link. Start small and push several such PRs;
-      the batching structure is deferred — a focus manifest scopes each batch for now.
+      <strong>PR-scoping = a catalog-shape marker + an ISN-side filter.</strong> "Show only the
+      items in this PR" resolves to: the review RC's catalog carries the batch's SN id-set (the
+      materialised sn_names artifact, §3b), and the SPA, seeing a batch marker, <strong>auto-scopes
+      to those names</strong> (with a toggle to reveal the already-approved context). Concretely,
+      two small pieces:
+    </p>
+    <ul>
+      <li><strong>Driving catalog shape (imas-codex export → dataset.py):</strong> emit the batch
+        id-set into the RC's dataset — a top-level <code>review_batch: [&lt;sn-id&gt;, …]</code>
+        (equivalently the sn_names list). This is the "correct shape" requirement: the export
+        must stamp the batch into <code>data.json</code>. Normal (non-review) builds omit it.</li>
+      <li><strong>Filter (ISN repo SPA):</strong> when <code>data.json</code> carries
+        <code>review_batch</code>, the SPA defaults its result set to those ids — reusing the
+        existing <code>Filters</code>/<code>ResultsList</code> machinery rather than a new
+        surface — with a "show all (context)" toggle. This is a small change in
+        <code>site/src</code> (a batch facet + default scope), not a new SPA.</li>
+    </ul>
+    <p>
+      <strong>Deep links — advice: reuse what exists, add nothing new.</strong> The SPA already
+      encodes state in the URL (<code>url-state.js</code>: <code>#/&lt;view&gt;/&lt;name&gt;?q=…</code>)
+      and the version is already in the path, so the RC version URL <em>is</em> the shareable
+      per-batch link — auto-scoped because the catalog itself carries the marker. No PR-number
+      routing or bespoke deep-link machinery is needed. The only optional nicety is one extra
+      query param (e.g. <code>?scope=all|batch</code>) so a reviewer can share the "with context"
+      toggle state; that piggybacks on the existing URL-state param handling. Recommendation:
+      ship the marker + default-scope first; treat the scope query param as a trivial follow-on,
+      and add nothing else.
     </p>
 
     <h2 id="s8">§8 — Gap D: <code>sn merge</code> from an accepted PR — the approval state machine</h2>
@@ -367,9 +385,44 @@ review_candidates:             # dimensionless physical signals mis-gated as str
       edited from unchanged, the re-review/quarantine path exists in <code>run_merge</code>, and
       <code>mark_catalog_name_approved</code> sets the governance fields. The additions are:
       auto-approving the <em>untouched</em> batch (merge today only touches diffed rows), and the
-      <code>contested</code> stage on the schema (<code>standard_name.yaml</code> NameStage) with
-      its pool-exclusion and resolution handling.
+      <code>contested</code> stage below.
     </p>
+    <p><strong><code>contested</code> — concrete spec.</strong> Worked out against the real schema
+      and worker machinery:</p>
+    <ul>
+      <li><strong>Schema (<code>imas_codex/schemas/standard_name.yaml</code>, NameStage enum
+        ~305-343):</strong> add <code>contested</code> alongside the other non-progressing states
+        (<code>refining</code>/<code>exhausted</code>/<code>superseded</code>). Description: "Edited
+        during human catalog review, but the edited form failed the compliance re-review; frozen
+        pending human adjudication. Not published; not silently reverted." It is orthogonal to
+        <code>validation_status</code> — a contested name simply never reaches the approved catalog
+        because it is not <code>approved</code>, so no <code>validation_status</code> change is
+        needed (leave it as it was; the name_stage gate does the work).</li>
+      <li><strong>Freeze / pool-exclusion:</strong> the pool claim predicates in
+        <code>workers.py</code> that already exclude <code>['superseded','exhausted']</code> (and
+        never re-claim <code>accepted</code>/<code>approved</code>) gain <code>contested</code> in
+        the exclusion set — one predicate change per claim query — so no generate/review/docs pool
+        ever touches it. It is thus as frozen as <code>approved</code>, but unlike
+        <code>approved</code> it is neither published nor terminal — it is a holding state.</li>
+      <li><strong>Entry point:</strong> set only by <code>sn merge</code> on an accepted PR, when a
+        reviewer-edited name fails the re-review (the branch that today would quarantine). Instead
+        of quarantine-on-an-accepted-name, the name moves <code>accepted → contested</code> with a
+        <code>StandardNameChange</code> recording the failing edit and the rubric verdict.</li>
+      <li><strong>Resolution (three explicit exits, all human-driven):</strong>
+        (a) <strong>fix</strong> — <code>sn edit</code> revises the wording → the existing
+        edit→review path → <code>approved</code> if it now passes, else back to
+        <code>contested</code>;
+        (b) <strong>override</strong> — a new <code>sn approve --override &lt;id&gt; --reason
+        "…"</code> that force-sets <code>approved</code> over the rubric, recording the
+        justification in the change ledger (human authority beats the machine rubric, but only
+        deliberately and on the record);
+        (c) <strong>revert</strong> — drop the reviewer edit back to the prior <code>accepted</code>
+        form, returning the name to a future review batch unchanged.</li>
+      <li><strong>Visibility:</strong> a <code>sn status --contested</code> report (or a facet in
+        the pool-status output) lists contested names with their failing edit and verdict, so
+        conflicts are actioned rather than lost. Because it is pool-excluded and unpublished, a
+        contested name is inert until a human resolves it.</li>
+    </ul>
     <p>
       <strong>No CI signal/watcher — the merge step is a manual local run.</strong> The graph is
       local and a GitHub runner cannot reach it, so a CI job could not actually promote anything;
@@ -549,13 +602,14 @@ review_candidates:             # dimensionless physical signals mis-gated as str
         <p class="r-dec-rat">Locked: no CI signal/watcher. The graph is local so CI can't do the promotion; the PR number is visible on merge, and the maintainer runs the local sn merge deliberately. CI stays just validate.yml.</p>
       </div>
 
-      <div class="r-dec" data-key="spa-pr-view" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-spa-view — should the SPA (fork + upstream) surface PRs and filter the rendered catalog to a selected PR's SNs?</p>
+      <div class="r-dec" data-key="spa-pr-view" data-choice="marker-plus-filter" data-by="" data-when="">
+        <p class="r-dec-q">D-spa-view — how does the existing catalog SPA show "only the items in this PR/batch"?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="pr-scoped-spa">Yes — SPA lists PRs, and selecting one filters to only that PR's SNs (from the sn_names batch artifact); shareable deep-link, e.g. ?pr=NNN (Recommended — the review surface)</button>
-          <button class="r-opt" data-value="raw-diff">No — reviewers read the raw YAML diff (harder for 100s of names)</button>
+          <button class="r-opt" data-value="marker-plus-filter">Catalog-driven: the RC's data.json carries a review_batch id-set; the existing SPA auto-scopes results to it (reusing Filters/ResultsList), with a "show all" toggle. No new app, no GitHub-PR integration (Recommended)</button>
+          <button class="r-opt" data-value="spa-queries-github">SPA queries GitHub for the PR's changed entries (couples the SPA to GitHub; unnecessary — the RC catalog already carries the set)</button>
+          <button class="r-opt" data-value="new-surface">Build a new PR-listing surface/app (REJECTED — we already have the multi-release SPA)</button>
         </p>
-        <p class="r-dec-rat">Context: the fork SPA already serves all catalog versions, so RCs can be pushed and shared freely by URL. A PR-scoped filter (driven by the materialised sn_names list) turns review into browsing a scoped, richly-rendered catalog rather than YAML. Build: PR-listing surface + per-PR SN-id filter + deep-link.</p>
+        <p class="r-dec-rat">Recommended: the batch is an RC (a catalog version the SPA already selects); scoping is driven by a review_batch marker in the RC's data.json (imas-codex/dataset.py stamps it) and an ISN-repo SPA filter default. Deep links reuse the existing version URL + url-state; no bespoke deep-link machinery. data-choice set as the recommendation, awaiting confirmation.</p>
       </div>
 
       <div class="r-dec" data-key="dimensionless-classifier" data-choice="fix-classifier" data-by="Simon McIntosh" data-when="2026-07-21">
