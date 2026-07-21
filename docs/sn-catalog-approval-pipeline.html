@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type"     content="plan">
+  <meta name="plan-slug"       content="sn-catalog-approval-pipeline">
+  <meta name="plan-title"      content="Standard-Name Catalog Approval Pipeline (WEST first-review gate)">
+  <meta name="plan-summary"    content="Drive eligible WEST DD paths to accepted standard names, PR the subset upstream for first human review, and freeze approved names back into the graph.">
+  <meta name="plan-status"     content="draft">
+  <meta name="plan-roi"        content="high">
+  <meta name="plan-effort"     content="L">
+  <meta name="plan-tier"       content="opus">
+  <meta name="plan-owner"      content="Simon McIntosh">
+  <title>Standard-Name Catalog Approval Pipeline | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Goal &amp; context</h2>
+    <p>
+      We want the <strong>first human-review gate</strong> for the machine-generated
+      standard-name (SN) set. The vehicle is a concrete, bounded corpus: the DD paths
+      actually populated in the WEST production database (Task 2e DB analysis, shot 62253).
+      The end-to-end intent is:
+    </p>
+    <ol>
+      <li>Ensure every <em>eligible</em> WEST DD source (physical, geometric, coordinate
+        quantities) carries an <strong>accepted</strong> standard name in the local graph —
+        running focused mop-up where names are missing.</li>
+      <li>Export <strong>only that subset</strong> of accepted names and open a pull request
+        against the upstream catalog repository (ISNC) for human experts to review.</li>
+      <li>On PR merge, flip those names' lifecycle to a frozen <strong>approved</strong> state
+        that is immune to further mutation by general <code>sn run</code> pools.</li>
+      <li>Import the approval back into the local graph — because the graph is the single
+        source of truth and lives locally, the merged PR is the human gate but never itself
+        writes the graph; a local import step always follows approval.</li>
+    </ol>
+    <p>
+      This plan is a <strong>design</strong>. It records what already exists (so we do not
+      rebuild it), isolates the narrow gaps, and specifies the TDD and end-to-end verification
+      for each. The concrete input corpus — <code>imas_codex/standard_names/manifests/west_task_2e.yaml</code>,
+      351 validated DD v4 sources with provenance, governed by the committed schema
+      <code>imas_codex/standard_names/config/sn_sources.schema.json</code> — is already produced
+      and committed; see §3.
+    </p>
+
+    <h2 id="s2">§2 — Pipeline architecture</h2>
+    <p>
+      Two coupled loops. The <strong>local loop</strong> (graph = source of truth) mints
+      accepted names from the manifest. The <strong>upstream loop</strong> is the human gate:
+      a subset PR against ISNC, reviewed by experts, whose merge triggers a local import that
+      freezes the approved names in the graph. A GitHub-hosted CI runner cannot reach the local
+      Neo4j graph, so the authoritative graph write is always a local step — CI's role is to
+      validate the PR and record the merge metadata (PR number, URL, merge-commit sha) that the
+      local import consumes.
+    </p>
+    <p>
+      <img src="/imas-codex/figures/sn-approval-pipeline/pipeline.svg"
+           alt="WEST standard-name approval pipeline: local compose/review loop mints accepted names; a subset PR to the upstream catalog is the human gate; merge flips lifecycle accepted→approved and a local import reconcile writes the frozen state back into the graph."
+           style="max-width:100%; height:auto; border:1px solid #e0e4e8; border-radius:6px; padding:8px; background:#fff;">
+    </p>
+
+    <h2 id="s3">§3 — Input corpus &amp; the sn-sources manifest schema</h2>
+    <p>
+      The WEST workbook lists 744 DD leaf paths across 22 IDS sheets, in DD v3-era spelling.
+      Producing the corpus involved three transforms, all already done and captured in
+      <code>imas_codex/standard_names/manifests/west_task_2e.yaml</code>:
+    </p>
+    <ul>
+      <li><strong>Structural pre-filter</strong> — drop <code>ids_properties/*</code> and
+        <code>code/*</code> (744 → 507).</li>
+      <li><strong>DD v3 → v4 resolution</strong> — every path validated via the imas-dd MCP
+        tools and the migration data; 40 renamed (e.g. <code>b_field_tor_probe</code> →
+        <code>b_field_phi_probe</code>, <code>j_tor</code> → <code>j_phi</code>,
+        <code>bpol_probe</code> → <code>b_field_pol_probe</code>, ECE <code>t_e</code> →
+        <code>t_radiation</code>), 43 removed with no v4 equivalent (the entire
+        <code>boundary_separatrix</code> subtree, <code>boundary/x_point</code>,
+        <code>boundary/strike_point</code>). The <code>resolution:</code> block records every
+        rename and removal so the conversion is auditable.</li>
+      <li><strong>SN-eligibility filter</strong> — classify each resolved path by the graph's
+        authoritative <code>node_category</code>, keeping only
+        <code>{quantity, geometry, coordinate}</code>
+        (<code>imas_codex.core.node_categories.SN_SOURCE_CATEGORIES</code>). Signal containers
+        collapse to the nameable parent (<code>magnetics/ip/data</code> →
+        <code>magnetics/ip</code>); depth-≥3 <code>time</code> leaves are skipped; structural,
+        metadata, error, identifier, and fit nodes are excluded. Result:
+        <strong>351 distinct eligible v4 sources</strong> (after the classifier fix below).</li>
+    </ul>
+    <p>
+      <strong>Schema decision — yes, a light schema earns its keep.</strong> A bare path list
+      cannot carry the three things this file must provide: (a) <em>provenance</em> so the
+      v3→v4 conversion is reproducible and auditable, (b) a stable identity so the same file
+      drives <em>both</em> the focus mop-up <em>and</em> the export-subset selection, and (c) a
+      way to surface paths that need a human/classifier decision. The
+      <code>schema_version: 1</code> shape is:
+    </p>
+    <pre style="white-space:pre-wrap; background:#f6f8fa; border:1px solid #e0e4e8; border-radius:6px; padding:12px; font-size:12px;">schema_version: 1
+name: west-task-2e
+title: ...
+description: ...
+provenance:
+  facility: WEST
+  source_document: research/west/Task_2e_WEST_DB_analysis_20251113.xlsx
+  reference_shot: 62253
+  dd_version_target: "4.0.0"
+  eligibility_policy: sn_source_categories   # {quantity, geometry, coordinate}
+  path_form: dd_source_id                    # signal '/data' leaves collapsed to parent
+counts: { raw_leaves, after_structural_filter, eligible_sources, ... }
+sources:                       # canonical, machine-consumable; loader flattens to &lt;ids&gt;/&lt;path&gt;
+  &lt;ids&gt;: [ &lt;ids-relative path&gt;, ... ]
+resolution:                    # informational audit of the v3→v4 conversion
+  renamed: [ { from, to }, ... ]
+  removed: [ { path, reason }, ... ]
+review_candidates:             # dimensionless physical signals mis-gated as structural
+  - { path, note }</pre>
+    <p>
+      The <code>sources</code> mapping is grouped by IDS for human readability; a loader
+      flattens <code>sources.&lt;ids&gt;[]</code> to <code>&lt;ids&gt;/&lt;path&gt;</code>.
+      Entries are DD <strong>source ids</strong> (the nameable node), not raw <code>/data</code>
+      leaves — this matches how the graph stores a <code>StandardNameSource</code> and how
+      export joins names back to paths. Full per-path exclusion detail lives in the
+      <code>west_sn_sources.exclusions.json</code> sidecar to keep the driver file lean.
+    </p>
+    <p>
+      <strong>Classifier gap — found and fixed (landed).</strong> Producing this corpus
+      surfaced a real DD-classifier defect: a whole group of dimensionless physical signals was
+      classified <code>structural</code> and thus invisible to the extractor. Root cause: a
+      signal is stored as a STRUCTURE container with a <code>data</code> leaf and the explicit
+      dimensionless unit <code>'1'</code>, but the container is classified while its unit is
+      still unresolved at build time, so Rule 12 (STRUCTURE-without-unit → structural) demotes
+      it — the same asymmetry that leaves <em>dimensioned</em> signals as quantity only when
+      their unit happens to be present at pass 1. The fix is a pass-2 signal-signature
+      promotion: a <code>structural</code> STRUCTURE/STRUCT_ARRAY carrying unit <code>'1'</code>
+      with a direct <code>data</code> child is promoted to <code>quantity</code>
+      (<code>node_classifier.classify_node_pass2</code> R5;
+      <code>build_dd._reclassify_relational</code>), matching the signal signature the extractor
+      already honours. Scope is exactly the 23 genuine dimensionless quantities across the DD
+      (Z_eff, optical depth, ellipticity, Mach number, flux expansion, beam fractions, strain,
+      j&#8341; skew/kurtosis, …); the 148 <code>'1'</code>-unit containers without a
+      <code>data</code> child (fit artifacts, <code>pulse_schedule</code> reference waveforms,
+      summary structs whose value lives in <code>/value</code>) are deliberately left
+      structural. Landed with unit tests (Red→Green) and applied to the live graph; the four
+      WEST review-candidates now flow into <code>sources</code>, lifting the corpus from 346 to
+      351.
+    </p>
+
+    <h2 id="s4">§4 — What already exists (build only the gaps)</h2>
+    <p>
+      A machinery scan of imas-codex and ISNC found that most of the target design is
+      <strong>already scaffolded</strong>. This narrows the work sharply — we wire up and fill
+      four gaps rather than build a pipeline. Grounding references:
+    </p>
+    <ul>
+      <li><strong>The <code>approved</code> lifecycle state exists.</strong>
+        <code>NameStage</code> in <code>imas_codex/schemas/standard_name.yaml:305-343</code> is
+        <code>pending → drafted → reviewed → accepted → approved</code>, with
+        <code>approved</code> documented as "accepted through a merged catalog PR … set only
+        when the PR number, URL and merge commit are recorded; RC export/import never grants
+        it." That is exactly the frozen governance state we want.</li>
+      <li><strong>The freeze exists.</strong> <code>sn edit</code> excludes <code>approved</code>
+        from rename eligibility (<code>edit.py:102</code>) and from docs edits
+        (<code>edit.py:1019-1027</code>); field-level <code>protection.py</code> strips protected
+        editorial fields from pipeline writes for any <code>approved</code> /
+        <code>origin='catalog_edit'</code> name (<code>protection.py:119</code>). The name-pipeline
+        pools never re-claim <code>approved</code>/<code>accepted</code>/<code>superseded</code>/<code>exhausted</code>
+        names.</li>
+      <li><strong>Catalog-PR provenance fields exist</strong> on the schema
+        (<code>standard_name.yaml:481-512</code>): <code>catalog_pr_number</code>,
+        <code>catalog_pr_url</code>, <code>catalog_approved_at</code>,
+        <code>catalog_merge_commit_sha</code>, <code>exported_at</code>, <code>origin</code>.</li>
+      <li><strong>Export exists.</strong> <code>sn release --export-only</code>
+        (<code>cli/sn.py:3698-3841</code>, core <code>export.py:run_export</code>) writes one
+        YAML per physics domain plus a <code>catalog.yml</code> manifest — the exact live ISNC
+        layout. Candidate predicate:
+        <code>name_stage IN ['accepted','approved'] AND validation_status='valid' AND docs_stage='accepted'</code>.</li>
+      <li><strong>Approve-on-merge exists.</strong> <code>sn merge</code>
+        (<code>cli/sn.py:4042</code>, <code>merge.py:run_merge</code>) diffs a reviewed PR branch
+        and, with <code>--pr-number/--pr-url/--merge-commit</code>, calls
+        <code>mark_catalog_name_approved</code> (<code>merge.py:653-681</code>) to flip
+        <code>accepted→approved</code> and record the provenance fields.</li>
+      <li><strong>Import/reconcile exists.</strong> <code>catalog_reconcile.reconcile_catalog</code>
+        (<code>catalog_reconcile.py:137</code>) diffs catalog YAML by id and updates editorial
+        fields + provenance for matched names.</li>
+    </ul>
+    <p>The genuine gaps, and only these, are the subject of §5–§8.</p>
+
+    <h2 id="s5">§5 — Gap A: focus mop-up from the manifest (<code>--focus-file</code>)</h2>
+    <p>
+      <code>sn run --focus</code> exists but takes bare paths on the command line only; there is
+      no file input. Add <code>sn run --focus-file &lt;manifest&gt;</code> that loads a
+      <code>schema_version: 1</code> sn-sources file, flattens <code>sources.&lt;ids&gt;[]</code>
+      to <code>&lt;ids&gt;/&lt;path&gt;</code>, and feeds the existing focus path list. This is a
+      thin loader over the existing focus machinery.
+    </p>
+    <p>
+      <strong>Two behaviours to get right, both flagged by prior incidents.</strong> First,
+      focus seeding mints <code>StandardNameSource</code> nodes directly and
+      <em>bypasses the eligibility gate at seed time</em> — which is precisely why the manifest
+      is pre-filtered to eligible sources in §3; the file is the gate. Second, focus is known to
+      recompose existing names (near-duplicates) and to re-stage cross-linked accepted names.
+      For a mop-up whose purpose is to <em>fill gaps, not churn</em>, the loader must default to
+      seeding only paths that lack a live accepted name, and must not reset already-accepted
+      names on those paths. This is the load-bearing design decision D-focus below.
+    </p>
+
+    <h2 id="s6">§6 — Gap B: subset-scoped export</h2>
+    <p>
+      Export today supports only a <code>--domain</code> subset (<code>export.py:206-208</code>).
+      We need to export the names whose sources fall in a manifest — a
+      <strong>source-path-scoped</strong> selection. Add a scope to <code>_fetch_candidates</code>
+      that admits a name iff any of its <code>source_paths</code> matches a manifest entry
+      (join on the <code>dd:&lt;ids&gt;/&lt;path&gt;</code> URI form from
+      <code>source_paths.py</code>), surfaced as
+      <code>sn release --export-only --sources-file &lt;manifest&gt;</code>. The export manifest
+      must stamp <code>export_scope: "manifest_subset"</code> with the manifest name and the set
+      of included name ids, so the downstream PR and the approve-on-merge step (§8) can operate
+      on exactly the same set. The per-domain files in the staging tree then contain only the
+      subset's entries, producing a clean minimal diff against ISNC main.
+    </p>
+
+    <h2 id="s7">§7 — Gap C: subset PR flow</h2>
+    <p>
+      <code>sn release</code> is a full publish (export + tag + push to ISNC). For a review gate
+      we need a non-tagging <strong>PR of a subset</strong>: export the manifest subset into a
+      working checkout of ISNC merged against its current <code>main</code>, commit on a branch
+      (<code>review/west-task-2e</code>), push, and open a PR whose body carries the manifest
+      provenance and the DD v4 source paths for reviewer context. ISNC's existing
+      <code>validate.yml</code> gates the PR structurally/semantically on any change to
+      <code>standard_names/**/*.yml</code>; no new CI is needed for validation. The PR adds the
+      subset's names to the domain files with <code>status: active</code> (the catalog data
+      format has no <code>approved</code> field — approval is graph-side governance only).
+    </p>
+
+    <h2 id="s8">§8 — Gap D: approve-on-merge covering the whole subset + local import</h2>
+    <p>
+      This is the most consequential gap. <code>sn merge</code> only marks names
+      <code>approved</code> whose <em>wording changed</em> in the PR diff
+      (<code>read_pr_changes</code> captures docs edits and renames, not unchanged or newly-added
+      entries). A first-review PR that reviewers approve <em>as-is</em> would therefore mark
+      <strong>nothing</strong> approved. We need a <strong>subset bulk-approve</strong>: given a
+      merged PR's entry set (from the manifest / the export's included-id list) plus the PR
+      number, URL and merge-commit sha, call the existing per-name
+      <code>mark_catalog_name_approved</code> for every name in the merged subset, not only the
+      diffed ones. Recommended surface: extend <code>sn merge</code> with a
+      <code>--manifest &lt;file&gt; --approve-all</code> mode that reuses the existing accept /
+      re-score path for any genuinely-edited entries and bulk-approves the remainder.
+    </p>
+    <p>
+      <strong>The CI-vs-local split is a hard constraint, not a choice.</strong> A GitHub-hosted
+      runner has no route to the local Neo4j graph. So the "CI watcher that sets lifecycle to
+      approved on merge" resolves to: ISNC CI <em>validates</em> the PR and, on merge, records
+      the merge metadata (PR number, URL, merge-commit sha) as a durable signal (a workflow
+      artifact, a release, or a committed marker); the authoritative graph write is a
+      <strong>local</strong> <code>sn merge --manifest west_sn_sources.yaml --pr-number … --pr-url
+      … --merge-commit …</code>, run by the maintainer or a local poller that watches ISNC for
+      merged review PRs. The user has already noted this: "the graph is local so we will always
+      need an import step following PR approval." The design honours it rather than pretending CI
+      can close the loop.
+    </p>
+    <p>
+      <strong>Wiring <code>reconcile_catalog</code>.</strong> The scan found
+      <code>reconcile_catalog</code> has no CLI and no production caller, and never sets
+      <code>approved</code>. Approval flows only through <code>sn merge</code>. So the import step
+      is <code>sn merge</code> (which both re-validates any edited entries and sets the governance
+      state); <code>reconcile_catalog</code> remains the separate scalar/provenance self-heal for
+      restore scenarios and should get a thin CLI so it is callable outside tests — but it is not
+      the approval path.
+    </p>
+
+    <h2 id="s9">§9 — TDD strategy</h2>
+    <p>
+      Each gap is specified test-first. Tests run against the live Neo4j (graph-marked tests are
+      run, not skipped) per project convention, and pure logic is unit-tested with injected
+      callables where the existing modules already allow it (e.g. <code>campaign.py</code>,
+      <code>merge.py</code> use injectable graph callables).
+    </p>
+    <ul>
+      <li><strong>Manifest loader (Gap A):</strong> a pure <code>load_sources_file()</code> test —
+        a fixture YAML round-trips to the expected flattened <code>&lt;ids&gt;/&lt;path&gt;</code>
+        set; rejects unknown <code>schema_version</code>; ignores <code>review_candidates</code>.
+        Gap-only seeding: given a graph with some paths already accepted, the focus seed touches
+        only the not-yet-named paths and does not reset accepted names (mock graph).</li>
+      <li><strong>Subset export (Gap B):</strong> given a graph with names spanning several
+        domains, <code>--sources-file</code> selects exactly the names whose
+        <code>source_paths</code> intersect the manifest; the staged domain files contain only
+        those; the export manifest records <code>export_scope: manifest_subset</code> and the
+        included id set. Boundary cases: a name with multiple source paths (one in, one out) is
+        included; a manifest path with no accepted name is reported, not silently dropped.</li>
+      <li><strong>Subset PR (Gap C):</strong> the export-into-checkout produces a diff touching
+        only subset entries; a name absent from ISNC is an addition, an existing name is an
+        idempotent no-op. (PR creation itself is exercised via a dry-run / local bare-repo
+        fixture, not a live GitHub call.)</li>
+      <li><strong>Bulk approve-on-merge (Gap D):</strong> given a merged subset and PR metadata,
+        every name in the subset ends <code>name_stage='approved'</code> with the four catalog-PR
+        fields populated; names <em>outside</em> the subset are untouched; an entry whose wording
+        the reviewers edited is re-scored before approval; approval is idempotent (re-running does
+        not error or double-write). Guard test: without PR metadata, nothing is approved.</li>
+      <li><strong>Freeze (Gap E, mostly verification):</strong> an <code>approved</code> name
+        rejects <code>sn edit</code> rename and docs edits; a subsequent <code>sn run</code> pool
+        pass does not re-claim it and <code>protection.py</code> strips editorial writes to it.
+        These assert existing behaviour so a regression is caught.</li>
+    </ul>
+
+    <h2 id="s10">§10 — End-to-end verification procedure</h2>
+    <p>
+      A single rehearsal against a throwaway ISNC checkout and the local graph, proving the loop
+      closes before any real upstream PR:
+    </p>
+    <ol>
+      <li><code>sn run --focus-file imas_codex/standard_names/manifests/west_task_2e.yaml</code> → assert every
+        eligible WEST source has an <code>accepted</code>, <code>valid</code> name (report the
+        residual gaps and their skip reasons).</li>
+      <li><code>sn release --export-only --sources-file …</code> into a scratch ISNC checkout →
+        assert the staged diff contains exactly the subset and the export manifest scope is
+        <code>manifest_subset</code>.</li>
+      <li>Open the PR against a <em>fork/scratch</em> ISNC; assert <code>validate.yml</code>
+        passes on the subset diff.</li>
+      <li>Merge the scratch PR; run the local <code>sn merge --manifest … --pr-number … --pr-url …
+        --merge-commit …</code> → assert every subset name is <code>approved</code> with
+        provenance fields set.</li>
+      <li>Re-run <code>sn run</code> (no focus) → assert no approved WEST name mutated (frozen),
+        and <code>sn edit</code> on one is rejected.</li>
+    </ol>
+    <p>
+      Only after this rehearsal passes do we run the real corpus and open the real ISNC PR for
+      expert review — the deliverable that gives the SN set its first human validation.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="focus-seed-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-focus — how should <code>--focus-file</code> seed sources for a mop-up so it fills gaps without churning existing names?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="gap-only">Gap-only: seed only paths lacking a live accepted name; never reset accepted names (Recommended)</button>
+          <button class="r-opt" data-value="reseed-all">Re-seed all manifest paths (current --focus behaviour; re-stages accepted names)</button>
+          <button class="r-opt" data-value="flag">Add an explicit --reseed flag; default gap-only</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="export-subset-selector" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-export — how is the export subset selected?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="sources-file">By manifest file: a name is in-scope iff any source_path intersects the manifest (Recommended — reuses the same file that drove focus)</button>
+          <button class="r-opt" data-value="id-list">By explicit --name-id list</button>
+          <button class="r-opt" data-value="focus-scope">By the focus run_id / scope of the mop-up run</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="approve-coverage" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-approve — how do we mark the whole merged subset approved when reviewers approve as-is (no wording diff)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="merge-manifest">Extend sn merge with --manifest --approve-all: re-score edited entries, bulk-approve the rest via mark_catalog_name_approved (Recommended)</button>
+          <button class="r-opt" data-value="separate-cmd">A separate sn approve-subset command distinct from sn merge</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="merge-trigger" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-trigger — what performs the local graph write after upstream merge (CI cannot reach the local graph)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="local-poller">Local poller watches ISNC for merged review PRs and runs sn merge automatically; CI only validates + records merge metadata (Recommended)</button>
+          <button class="r-opt" data-value="manual">Maintainer runs sn merge manually after each merge</button>
+          <button class="r-opt" data-value="self-hosted">Self-hosted CI runner with graph access (heavy; against infra policy)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="dimensionless-classifier" data-choice="fix-classifier" data-by="Simon McIntosh" data-when="2026-07-21">
+        <p class="r-dec-q">D-classifier — how do we recover the dimensionless physical signals (Z_eff line-average, optical depth, electrons_n) mis-gated as structural?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="fix-classifier">Fix the DD node classifier so a dimensionless signal STRUCTURE with a /data child + real documentation classifies as quantity; they then flow into sources naturally (Recommended)</button>
+          <button class="r-opt" data-value="manifest-override">Add them to the manifest sources manually (focus bypasses the gate anyway)</button>
+          <button class="r-opt" data-value="defer">Defer; leave as review_candidates for this first pass</button>
+        </p>
+        <p class="r-dec-rat">Locked and shipped: pass-2 R5 signal-signature promotion in node_classifier + build_dd._reclassify_relational, with unit tests, applied to the live graph (23 nodes). Corpus rose 346→351. See §3.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-scap-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-21">
+        <h4 class="r-fu-title">Resolve design decisions, then implement Gap A (focus-file loader) test-first</h4>
+        <div class="r-fu-body">
+          <p>The five decisions in §Decisions gate the implementation shape. Once locked, start
+          with Gap A — it is the smallest and unblocks the end-to-end rehearsal. Implement the
+          <code>schema_version: 1</code> loader and <code>sn run --focus-file</code> test-first,
+          honouring the gap-only seeding decision so the mop-up does not churn accepted names.</p>
+        </div>
+        <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-catalog-approval-pipeline (http://localhost:8765/imas-codex/sn-catalog-approval-pipeline.html)
+Section: §5 (Gap A)
+Tier:    opus
+
+Context
+  First implementable slice of the WEST approval pipeline. The input manifest
+  (imas_codex/standard_names/manifests/west_task_2e.yaml, schema_version 1, 351 sources) already
+  exists. Honour the locked decisions shown live above this brief, especially
+  the focus-seed-scope choice (do not churn already-accepted names).
+
+State to read (CODE / FILES / DATA)
+  - imas_codex/standard_names/manifests/west_task_2e.yaml  (the schema this loader consumes)
+  - imas_codex/cli/sn.py  (the sn run --focus option decl and downstream focus
+    seeding of StandardNameSource nodes)
+  - imas_codex/standard_names/source_paths.py  (dd:&lt;ids&gt;/&lt;path&gt; URI form)
+  - imas_codex/standard_names/sources/dd.py  (extract_specific_paths, qualifier)
+
+Scope locks / constraints (non-decision)
+  - Pure loader logic must be unit-testable without a graph.
+  - Graph-marked tests RUN against live Neo4j (do not rely on default exclusion).
+  - Subagents cannot write the production graph in auto mode; author + run tests
+    from the main session.
+  - No plan labels / version numbers in symbol or file names.
+
+Done-when
+  1. load_sources_file() parses schema_version 1, flattens sources.&lt;ids&gt;[] to
+     &lt;ids&gt;/&lt;path&gt;, rejects unknown schema_version, ignores review_candidates —
+     with unit tests.
+  2. sn run --focus-file &lt;manifest&gt; feeds the flattened paths through the existing
+     focus path, with gap-only seeding per the locked decision — with a test on a
+     mock/live graph proving accepted names on listed paths are not reset.
+  3. Tests green (graph-marked included).
+  4. Followup written for Gap B (subset export) + this followup resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

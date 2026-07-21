@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" font-family="system-ui, -apple-system, sans-serif">
+  <style>
+    .box  { fill:#ffffff; stroke:#333; stroke-width:1; }
+    .lbl  { fill:#111; font-size:13px; }
+    .sub  { fill:#444; font-size:11px; }
+    .hdr  { fill:#111; font-size:13px; font-weight:600; }
+    .cap  { fill:#333; font-size:12px; }
+    .accent { stroke:#1a6ea8; }
+    .accbar { fill:#1a6ea8; }
+    .human { stroke:#b5651d; }
+    .humbar { fill:#b5651d; }
+    .flow { stroke:#666; stroke-width:1.4; fill:none; marker-end:url(#ah); }
+    .flowa { stroke:#1a6ea8; stroke-width:1.6; fill:none; marker-end:url(#aha); }
+    .note { fill:#555; font-size:11px; }
+    .band { fill:#f6f8fa; stroke:#e0e4e8; stroke-width:1; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#666"/>
+    </marker>
+    <marker id="aha" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#1a6ea8"/>
+    </marker>
+  </defs>
+
+  <!-- title -->
+  <text x="16" y="26" class="hdr" font-size="15">WEST standard-name approval pipeline — graph is source of truth, upstream PR is the human gate</text>
+
+  <!-- LOCAL band -->
+  <rect x="12" y="44" width="620" height="220" rx="6" class="band"/>
+  <text x="24" y="64" class="hdr">Local (imas-codex · Neo4j graph)</text>
+  <rect x="24" y="52" width="4" height="200" class="accbar"/>
+
+  <!-- manifest -->
+  <rect x="28" y="84" width="150" height="60" rx="4" class="box accent"/>
+  <text x="36" y="106" class="lbl">west_sn_sources.yaml</text>
+  <text x="36" y="123" class="sub">346 eligible v4 sources</text>
+  <text x="36" y="137" class="sub">schema_version 1</text>
+
+  <!-- focus run -->
+  <rect x="220" y="84" width="150" height="60" rx="4" class="box accent"/>
+  <text x="228" y="106" class="lbl">sn run --focus-file</text>
+  <text x="228" y="123" class="sub">seed sources · 6-pool</text>
+  <text x="228" y="137" class="sub">compose + review</text>
+
+  <!-- accepted -->
+  <rect x="412" y="84" width="150" height="60" rx="4" class="box accent"/>
+  <text x="420" y="106" class="lbl">accepted names</text>
+  <text x="420" y="123" class="sub">in graph (mutable)</text>
+  <text x="420" y="137" class="sub">catalog reconcile</text>
+
+  <!-- export subset -->
+  <rect x="220" y="184" width="150" height="60" rx="4" class="box accent"/>
+  <text x="228" y="206" class="lbl">export subset</text>
+  <text x="228" y="223" class="sub">select by manifest ids</text>
+  <text x="228" y="237" class="sub">→ catalog YAML</text>
+
+  <!-- import reconcile -->
+  <rect x="412" y="184" width="150" height="60" rx="4" class="box accent"/>
+  <text x="420" y="206" class="lbl">import reconcile</text>
+  <text x="420" y="223" class="sub">apply approved state</text>
+  <text x="420" y="237" class="sub">→ freeze in graph</text>
+
+  <!-- HUMAN GATE band -->
+  <rect x="656" y="44" width="312" height="400" rx="6" class="band"/>
+  <text x="668" y="64" class="hdr">Upstream (imas-standard-names)</text>
+  <rect x="668" y="52" width="4" height="380" class="humbar"/>
+
+  <!-- PR -->
+  <rect x="700" y="96" width="220" height="66" rx="4" class="box human"/>
+  <text x="712" y="120" class="lbl">Pull request: WEST subset</text>
+  <text x="712" y="138" class="sub">catalog YAML diff, names only</text>
+  <text x="712" y="152" class="sub">provenance + DD v4 paths</text>
+
+  <!-- human review -->
+  <rect x="700" y="196" width="220" height="66" rx="4" class="box human"/>
+  <text x="712" y="220" class="lbl">Human expert review</text>
+  <text x="712" y="238" class="sub">first trial of the SN set</text>
+  <text x="712" y="252" class="sub">request changes ↺ or approve</text>
+
+  <!-- CI watcher -->
+  <rect x="700" y="296" width="220" height="66" rx="4" class="box human"/>
+  <text x="712" y="320" class="lbl">CI approval watcher</text>
+  <text x="712" y="338" class="sub">on merge: mark names</text>
+  <text x="712" y="352" class="sub">approved · emit signal</text>
+
+  <!-- flows local top row -->
+  <path class="flowa" d="M178,114 L216,114"/>
+  <path class="flowa" d="M370,114 L408,114"/>
+  <!-- accepted -> export (down) -->
+  <path class="flowa" d="M487,144 L487,170 L345,170 L345,180"/>
+  <!-- export -> PR (to upstream) -->
+  <path class="flow" d="M370,208 L560,208 L560,129 L696,129"/>
+  <!-- PR -> review -->
+  <path class="flow humflow" style="stroke:#b5651d" d="M810,162 L810,192"/>
+  <!-- review -> back to focus (request changes) -->
+  <path class="flow" style="stroke:#b5651d;stroke-dasharray:4 3" d="M700,235 L640,235 L640,300 L120,300 L120,148"/>
+  <text x="150" y="316" class="note">request changes → re-run focus / sn edit (names stay mutable until approved)</text>
+  <!-- review -> CI (merge) -->
+  <path class="flow" style="stroke:#b5651d" d="M810,262 L810,292"/>
+  <!-- CI -> import reconcile (back local) -->
+  <path class="flow" d="M700,329 L600,329 L600,214 L564,214"/>
+  <text x="576" y="352" class="note">merge signal</text>
+
+  <!-- import -> accepted becomes approved (freeze annotation) -->
+  <path class="flowa" d="M487,184 L487,150" style="stroke-dasharray:4 3"/>
+  <text x="150" y="264" class="note">approved names are frozen: skipped by all sn-run pools; sn edit requires explicit override</text>
+
+  <!-- caption -->
+  <text x="16" y="404" class="cap">Two feedback loops: the local compose/review loop mints accepted names; the upstream PR loop is the human gate. Merge flips lifecycle</text>
+  <text x="16" y="422" class="cap">accepted → approved and the local import reconcile writes that frozen state back into the graph, which remains the single source of truth.</text>
+  <text x="16" y="440" class="cap">Accent = local graph operations · brown = upstream human/CI gate · dashed = feedback / state-change edges.</text>
+</svg>
