@@ -5610,26 +5610,22 @@ def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]
     sampled when its current ``DDVersion`` exactly matches the version supplied
     by extraction. Existing source nodes are never backfilled here: their
     original snapshot cannot be reconstructed safely after the fact.
+
+    An already-pinned source is re-seedable without re-supplying its version.
+    Re-seeding one (e.g. ``sn run --focus`` / ``--edits`` over a path whose
+    source already exists) reuses the stored immutable snapshot: no version is
+    required from the caller and ``IMASNode`` is not re-sampled — the ``MERGE
+    ON MATCH`` clause preserves every ``dd_*`` field regardless. Only a
+    genuinely new source must supply an exact ``dd_version`` to be snapshotted;
+    inferring ``latest`` for a new source is still refused.
     """
     prepared = [dict(source) for source in sources]
-    requests = [
-        {
-            "id": source["id"],
-            "path": source.get("dd_path"),
-            "dd_version": source.get("dd_version"),
-        }
-        for source in prepared
-        if source.get("source_type") == "dd"
-    ]
-    for request in requests:
-        if not request["dd_version"]:
-            raise ValueError(
-                f"DD source {request['path']!r} has no exact dd_version; "
-                "source creation must never infer latest"
-            )
-    if not requests:
+    dd_sources = [s for s in prepared if s.get("source_type") == "dd"]
+    if not dd_sources:
         return prepared
 
+    # Consult existing nodes FIRST — the pin state decides whether a source is
+    # a re-seed (reuse stored snapshot) or a genuinely new one (must snapshot).
     existing = gc.query(
         """
         UNWIND $ids AS id
@@ -5638,25 +5634,49 @@ def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]
                source.dd_documentation AS dd_documentation,
                source.dd_snapshot_pinned AS dd_snapshot_pinned
         """,
-        ids=[request["id"] for request in requests],
+        ids=[source["id"] for source in dd_sources],
     )
     by_existing = {row["id"]: row for row in existing or []}
-    for request in requests:
-        row = by_existing.get(request["id"])
+
+    requests: list[dict] = []  # only genuinely-new sources need snapshotting
+    for source in dd_sources:
+        row = by_existing.get(source["id"])
+        already_pinned = bool(
+            row and row.get("existing_id") and row.get("dd_snapshot_pinned")
+        )
+        if already_pinned:
+            # Re-seed: reuse the stored pin. Validate an explicitly-supplied
+            # version, but never require one, and never re-sample IMASNode —
+            # the immutable snapshot already exists and ON MATCH preserves it.
+            supplied = source.get("dd_version")
+            stored = row.get("dd_version")
+            if supplied and supplied != stored:
+                raise ValueError(
+                    f"existing DD source {source['id']!r} is pinned to "
+                    f"{stored!r}, not {supplied!r}"
+                )
+            source["dd_version"] = stored
+            continue
         if row and row.get("existing_id") and not row.get("dd_snapshot_pinned"):
             raise ValueError(
-                f"existing DD source {request['id']!r} has no provable immutable "
+                f"existing DD source {source['id']!r} has no provable immutable "
                 "snapshot; run the provenance backfill report"
             )
-        if (
-            row
-            and row.get("existing_id")
-            and row.get("dd_version") != request["dd_version"]
-        ):
+        if not source.get("dd_version"):
             raise ValueError(
-                f"existing DD source {request['id']!r} is pinned to "
-                f"{row.get('dd_version')!r}, not {request['dd_version']!r}"
+                f"DD source {source.get('dd_path')!r} has no exact dd_version; "
+                "source creation must never infer latest"
             )
+        requests.append(
+            {
+                "id": source["id"],
+                "path": source.get("dd_path"),
+                "dd_version": source.get("dd_version"),
+            }
+        )
+
+    if not requests:
+        return prepared
 
     snapshots = gc.query(
         """
@@ -5689,7 +5709,7 @@ def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]
             "cannot capture exact DD snapshot for source(s): " + ", ".join(missing)
         )
     for source in prepared:
-        if source.get("source_type") == "dd":
+        if source.get("source_type") == "dd" and source["id"] in by_id:
             source.update(by_id[source["id"]])
     return prepared
 

@@ -241,6 +241,108 @@ class TestMergeStandardNameSources:
         finally:
             patcher.stop()
 
+    def _patch_gc_existing_pinned(self, pinned_version="4.1.0"):
+        """GraphClient mock where every queried source already exists pinned."""
+        mock_ctx = MagicMock()
+
+        def _query(cypher, **params):
+            if "source.id AS existing_id" in cypher:
+                return [
+                    {
+                        "id": source_id,
+                        "existing_id": source_id,
+                        "dd_version": pinned_version,
+                        "dd_documentation": "stored snapshot",
+                        "dd_snapshot_pinned": True,
+                    }
+                    for source_id in params["ids"]
+                ]
+            if "MATCH (version:DDVersion" in cypher:
+                raise AssertionError(
+                    "re-seed of an already-pinned source must NOT re-sample IMASNode"
+                )
+            return [{"affected": 1}]
+
+        mock_ctx.query.side_effect = _query
+        patcher = patch("imas_codex.standard_names.graph_ops.GraphClient")
+        mock_gc_cls = patcher.start()
+        mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_ctx)
+        mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
+        return patcher, mock_ctx
+
+    def test_reseed_existing_pinned_source_without_version(self):
+        """Re-seeding an already-pinned source needs no dd_version and must not
+        re-snapshot — `sn run --focus`/`--edits` rebuilds source dicts without a
+        version, and that path must merge cleanly rather than raise."""
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        patcher, mock_ctx = self._patch_gc_existing_pinned()
+        try:
+            result = merge_standard_name_sources(
+                [
+                    {
+                        "id": "dd:operational_instrumentation/sensor/direction/y",
+                        "source_type": "dd",
+                        "source_id": "operational_instrumentation/sensor/direction/y",
+                        "dd_path": "operational_instrumentation/sensor/direction/y",
+                        "batch_key": "focus",
+                        "status": "extracted",
+                        # no dd_version — the stored pin is authoritative
+                    }
+                ],
+                force=True,
+            )
+            assert result == 1
+        finally:
+            patcher.stop()
+
+    def test_reseed_version_mismatch_raises(self):
+        """A supplied version that disagrees with the stored pin still raises."""
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        patcher, _ = self._patch_gc_existing_pinned(pinned_version="4.1.0")
+        try:
+            with pytest.raises(ValueError, match="is pinned to"):
+                merge_standard_name_sources(
+                    [
+                        {
+                            "id": "dd:a/b",
+                            "source_type": "dd",
+                            "source_id": "a/b",
+                            "dd_path": "a/b",
+                            "batch_key": "test",
+                            "status": "extracted",
+                            "dd_version": "3.42.0",
+                        }
+                    ]
+                )
+        finally:
+            patcher.stop()
+
+    def test_new_source_without_version_raises(self):
+        """A genuinely new dd source (no existing pinned node) still must supply
+        an exact version — inferring latest remains refused."""
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        patcher, _ = self._patch_gc()  # existing_id=None → new source
+        try:
+            with pytest.raises(ValueError, match="no exact dd_version"):
+                merge_standard_name_sources(
+                    [
+                        {
+                            "id": "dd:new/path",
+                            "source_type": "dd",
+                            "source_id": "new/path",
+                            "dd_path": "new/path",
+                            "batch_key": "test",
+                            "status": "extracted",
+                            # no dd_version, and no existing pinned node
+                        }
+                    ]
+                )
+        finally:
+            patcher.stop()
+
 
 class TestMarkSourcesFailed:
     """Test durable retry logic."""
