@@ -1049,7 +1049,11 @@ def _reject_unscoped_accepted_reset(
         "Runs the complete 6-pool pipeline (generate → review → refine → docs) "
         "scoped to only these items via run_id filtering. "
         "Accepts multiple --focus flags and/or quoted space-separated values "
-        '(e.g., --focus "path/a path/b" --focus path/c).'
+        '(e.g., --focus "path/a path/b" --focus path/c). A token that is a file '
+        "on disk is loaded as a schema_version 1 sn-sources manifest "
+        "(config/sn_sources.schema.json); its sources are validated and expanded "
+        "to focus paths, and a malformed manifest raises. "
+        "(e.g., --focus standard_names/manifests/west_task_2e.yaml)."
     ),
 )
 @click.option(
@@ -1558,6 +1562,20 @@ def sn_run(
     # Flatten --focus values (handled by _SpaceSplitMultiple.type_cast_value).
     # Merge with trailing positional paths argument.
     flat_focus = list(focus_paths) + list(paths)
+
+    # A focus token that is a file on disk is an sn-sources manifest: validate it
+    # against the schema and expand its sources to <ids>/<path> focus paths.
+    # Bare DD paths pass through unchanged; a malformed manifest fails fast.
+    if flat_focus:
+        from imas_codex.standard_names.sources_manifest import (
+            SourcesManifestError,
+            expand_focus_tokens,
+        )
+
+        try:
+            flat_focus = expand_focus_tokens(flat_focus)
+        except SourcesManifestError as exc:
+            raise click.UsageError(str(exc)) from exc
 
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
