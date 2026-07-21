@@ -1057,6 +1057,17 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
+    "--reseed",
+    is_flag=True,
+    default=False,
+    help=(
+        "With --focus: re-stage focused paths that already carry a live "
+        "accepted/approved name, resetting them to 'pending' for a full "
+        "re-run. The default is gap-only — such paths are left untouched and "
+        "only paths lacking a live accepted name are seeded and processed."
+    ),
+)
+@click.option(
     "--reset-to",
     type=click.Choice(["extracted", "drafted"]),
     default=None,
@@ -1456,6 +1467,7 @@ def sn_run(
     quiet: bool,
     focus_paths: tuple[str, ...],
     paths: tuple[str, ...],
+    reseed: bool,
     reset_to: str | None,
     from_model: str | None,
     revalidate: bool,
@@ -1676,9 +1688,32 @@ def sn_run(
         import uuid as _uuid
 
         from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+        from imas_codex.standard_names.graph_ops import (
+            merge_standard_name_sources,
+            partition_focus_by_accepted,
+        )
 
         scope_run_id = str(_uuid.uuid4())
+
+        # Gap-only default: a focused path that already carries a live
+        # accepted/approved name is left untouched — a focus mop-up must not
+        # churn names the catalog already holds. --reseed opts back into the
+        # reset-all behaviour (re-stage every focused path to 'pending').
+        if not reseed:
+            gap_focus, accepted_focus = partition_focus_by_accepted(flat_focus)
+            if accepted_focus and not quiet:
+                click.echo(
+                    f"Gap-only: skipping {len(accepted_focus)} focused path(s) "
+                    "with a live accepted name (use --reseed to re-stage them)"
+                )
+            flat_focus = gap_focus
+            if not flat_focus:
+                if not quiet:
+                    click.echo(
+                        "Gap-only: all focused paths already carry an accepted "
+                        "name — nothing to do"
+                    )
+                return
 
         # 1. Clear stale run_ids from previous focused runs. Both node labels
         #    are cleared in a single statement so the reset is atomic and the

@@ -566,6 +566,35 @@ def get_named_source_ids() -> set[str]:
         return {r["source_id"] for r in results}
 
 
+def partition_focus_by_accepted(paths: list[str]) -> tuple[list[str], list[str]]:
+    """Split focus DD paths into ``(gap, accepted)`` by live accepted name.
+
+    A path is *accepted* when its ``StandardNameSource`` (id ``dd:<path>``)
+    has PRODUCED a ``StandardName`` whose ``name_stage`` is ``accepted`` or
+    ``approved`` — i.e. it already carries a live, catalog-bound name. Gap
+    paths lack any such name and are the ones focused mop-up should (re)stage;
+    accepted paths are left untouched so a focus run never churns names the
+    catalog already holds. Input order is preserved in both lists.
+    """
+    if not paths:
+        return [], []
+    ids = [f"dd:{p}" for p in paths]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
+            WHERE sn.name_stage IN ['accepted', 'approved']
+            RETURN DISTINCT sid AS sid
+            """,
+            ids=ids,
+        )
+    accepted_ids = {r["sid"] for r in (rows or [])}
+    gap = [p for p in paths if f"dd:{p}" not in accepted_ids]
+    accepted = [p for p in paths if f"dd:{p}" in accepted_ids]
+    return gap, accepted
+
+
 def get_source_name_mapping(*, rich: bool = False) -> dict[str, dict]:
     """Return mapping of source_id → previous standard name details.
 
