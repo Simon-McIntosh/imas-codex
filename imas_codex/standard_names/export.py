@@ -174,6 +174,7 @@ def _fetch_candidates(
     include_unreviewed: bool = False,
     domain: str | None = None,
     names_only: bool = False,
+    batch: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Fetch StandardName nodes eligible for export from the graph.
 
@@ -191,17 +192,31 @@ def _fetch_candidates(
 
     When *names_only* is True, the ``docs_stage`` gate is dropped so
     names can be exported before documentation is generated.
+
+    When *batch* is given (a review-batch export), the name gate becomes
+    ``name_stage = 'approved' OR sn.id IN batch``: the already-approved catalog
+    plus exactly this batch, so the PR diff is additive. The other gates
+    (validation, docs) still apply. When *batch* is None the full accepted∪
+    approved corpus is fetched (the normal RC export).
     """
     from imas_codex.graph.client import GraphClient
 
-    cypher = """
+    params: dict[str, Any] = {}
+    if batch is not None:
+        cypher = """
+    MATCH (sn:StandardName)
+    WHERE (sn.name_stage = 'approved' OR sn.id IN $batch)
+      AND sn.validation_status = 'valid'
+    """
+        params["batch"] = batch
+    else:
+        cypher = """
     MATCH (sn:StandardName)
     WHERE sn.name_stage IN ['accepted', 'approved']
       AND sn.validation_status = 'valid'
     """
     if not names_only:
         cypher += "  AND sn.docs_stage = 'accepted'\n"
-    params: dict[str, Any] = {}
 
     if domain:
         cypher += " AND sn.physics_domain = $domain"
@@ -1049,6 +1064,7 @@ def _write_manifest(
     source_commit_sha: str | None = None,
     export_scope: str = "full",
     domains_included: list[str] | None = None,
+    review_batch: list[str] | None = None,
 ) -> Path:
     """Write the catalog.yml manifest to the staging directory root.
 
@@ -1090,6 +1106,12 @@ def _write_manifest(
         "exported_at": stamp,
         "edge_model_version": "v1",
     }
+    # A review-batch export carries the batch id-set so the SPA can render a
+    # PR-scoped fixed view. Omitted on normal builds so their output is
+    # byte-identical to today. (The ISN manifest model must know the field for
+    # validation to pass; older models reject it and the raw dict is written.)
+    if review_batch is not None:
+        manifest_data["review_batch"] = sorted(review_batch)
 
     # Validate via ISN manifest model
     try:
@@ -1176,6 +1198,7 @@ def run_export(
     include_sources: bool = True,
     names_only: bool = False,
     final: bool = False,
+    review_batch: list[str] | None = None,
 ) -> ExportReport:
     """Export standard names from the graph to a staging directory.
 
@@ -1212,6 +1235,11 @@ def run_export(
         When True, applies strict quality gates (dangling links
         block export).  When False (default, RC mode), dangling
         documentation links are advisory only.
+    review_batch:
+        Standard-name ids of a review batch. When given, the export is
+        additive — ``approved`` catalog ∪ this batch — and the batch id-set is
+        stamped into ``catalog.yml`` (``export_scope: review``, ``review_batch``)
+        so the SPA can render a PR-scoped view. When None, a normal RC export.
 
     Returns
     -------
@@ -1226,6 +1254,7 @@ def run_export(
         include_unreviewed=include_unreviewed,
         domain=domain,
         names_only=names_only,
+        batch=review_batch,
     )
     report.total_candidates = len(candidates)
     logger.info("Found %d candidate(s)", len(candidates))
@@ -1560,7 +1589,12 @@ def run_export(
 
     # ── 6. Write manifest ───────────────────────────────────────
     all_domains = sorted(domain_entries.keys())
-    export_scope = "domain_subset" if domain else "full"
+    if review_batch is not None:
+        export_scope = "review"
+    elif domain:
+        export_scope = "domain_subset"
+    else:
+        export_scope = "full"
     _write_manifest(
         staging_path,
         cocos_convention=cocos_convention,
@@ -1574,6 +1608,7 @@ def run_export(
         source_commit_sha=codex_sha,
         export_scope=export_scope,
         domains_included=all_domains,
+        review_batch=sorted(review_batch) if review_batch is not None else None,
     )
 
     # ── 7. Write export report ──────────────────────────────────
