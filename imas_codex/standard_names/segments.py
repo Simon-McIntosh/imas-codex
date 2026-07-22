@@ -49,6 +49,39 @@ def _load_segment_token_map() -> dict[str, tuple[str, ...]] | None:
         return None
 
 
+# Synthetic segment label under which operator tokens are reported as "known".
+# Operators are not a SEGMENT_TOKEN_MAP segment — they are a distinct grammar
+# mechanism — so this label never appears in a real standard name; it exists
+# only so the gap classifier can say "this token is a known operator, in the
+# wrong slot" rather than "absent".
+_OPERATOR_SEGMENT = "operator"
+
+
+@lru_cache(maxsize=1)
+def _operator_tokens() -> frozenset[str]:
+    """Return the ISN operator vocabulary (derived from the grammar, not hardcoded).
+
+    Operators (``flux_surface_averaged``, ``line_integrated``, ``normalized``,
+    ``square``, ``derivative_with_respect_to``, ``gradient`` …) compose into
+    names through the operator rendering engine (``<op>_of_<base>`` / postfix)
+    rather than occupying a ``SEGMENT_TOKEN_MAP`` slot.  A composer that reports
+    one as a missing *segment* token has mis-slotted a known operator, not found
+    a genuine vocabulary gap — so the classifier must recognise these to avoid
+    fabricating ``absent`` gaps (and retiring the source) for existing grammar.
+
+    Returns an empty set when ISN is unavailable so real-segment gaps are
+    preserved.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+
+        ctx = get_grammar_context()
+        ops = ctx.get("grammar", {}).get("vocabularies", {}).get("operators", {})
+        return frozenset(ops.keys())
+    except Exception:
+        return frozenset()
+
+
 # Segments whose validity the ISN grammar resolves via lexical-compound
 # matching rather than a flat token list.  For these, a token may be a valid
 # base even when it is absent from ``SEGMENT_TOKEN_MAP`` (e.g.
@@ -223,6 +256,11 @@ def is_known_token(token: str) -> list[str]:
     base_seg = resolved_base_segment(token)
     if base_seg is not None and base_seg not in found:
         found.append(base_seg)
+    # Augment with the operator vocabulary (a grammar mechanism outside
+    # SEGMENT_TOKEN_MAP): a token that is a known operator is not an absent gap
+    # — the composer mis-slotted it, so it classifies as wrong-slot placement.
+    if token in _operator_tokens() and _OPERATOR_SEGMENT not in found:
+        found.append(_OPERATOR_SEGMENT)
     return found
 
 
