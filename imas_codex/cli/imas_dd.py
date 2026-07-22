@@ -69,16 +69,16 @@ imas.add_command(map_cmd, "map")
 @click.option(
     "--reset-to",
     type=click.Choice(
-        ["extracted", "built", "enriched", "refined", "embedded"], case_sensitive=False
+        ["built", "enriched", "refined", "embedded"], case_sensitive=False
     ),
     default=None,
     help=(
-        "Reset nodes to a target state before rebuilding. "
-        "extracted: delete all nodes and rebuild from DD XML. "
+        "Re-run an LLM/embed stage on existing nodes (never deletes). "
         "built: clear enrichments and re-enrich all nodes. "
         "enriched: clear refinements and re-refine all nodes. "
         "refined: clear embeddings and re-embed all nodes. "
-        "embedded: clear domain classifications and re-classify."
+        "embedded: clear domain classifications and re-classify. "
+        "Needed when a prompt/model change is invisible to the content hash."
     ),
 )
 @click.option(
@@ -103,14 +103,6 @@ imas.add_command(map_cmd, "map")
     ),
 )
 @click.option(
-    "--force",
-    is_flag=True,
-    help=(
-        "Force a complete rebuild: reset all nodes to extracted state, "
-        "skip all hash checks, re-enrich and re-embed everything."
-    ),
-)
-@click.option(
     "--enrich-workers",
     type=int,
     default=1,
@@ -129,7 +121,6 @@ def imas_build(
     ids_filter: str | None,
     dry_run: bool,
     model: str | None,
-    force: bool,
     enrich_workers: int,
 ) -> None:
     """Build the IMAS Data Dictionary Knowledge Graph.
@@ -151,9 +142,8 @@ def imas_build(
 
     \b
     Examples:
-        imas-codex imas dd build                  # Build all DD versions (default)
+        imas-codex imas dd build                  # Build/update all DD versions (default)
         imas-codex imas dd build --from-version 4.0.0  # Incremental from 4.0.0
-        imas-codex imas dd build --reset-to extracted  # Full rebuild from DD XML
         imas-codex imas dd build --reset-to built      # Re-enrich (prompt/model change)
         imas-codex imas dd build --reset-to enriched   # Re-refine only
         imas-codex imas dd build --reset-to refined    # Re-embed (embedding model change)
@@ -161,7 +151,10 @@ def imas_build(
         imas-codex imas dd build --model openrouter/anthropic/claude-sonnet-4.6  # Override model
         imas-codex imas dd build --dry-run -v     # Preview without writing
         imas-codex imas dd build --ids-filter "core_profiles equilibrium"  # Test subset
-        imas-codex imas dd build --force          # Full rebuild, no skips, no hash matches
+
+    To roll the version horizon forward to the latest DD release, use
+    ``imas-codex imas dd update`` — it bumps the config, builds every missing
+    version, and verifies StandardName provenance links survive.
     """
     # On air-gapped nodes, prevent LiteLLM import-time remote fetches
     from imas_codex.discovery.base.llm import set_litellm_offline_env
@@ -216,9 +209,6 @@ def imas_build(
             log_print(f"  Model: {model}")
         if dry_run:
             log_print("  Mode: dry run")
-        if force:
-            reset_to = "extracted"
-            log_print("  Mode: [bold red]FORCE[/bold red] (full rebuild, no skips)")
         if reset_to:
             log_print(f"  Reset: nodes → {reset_to}")
         log_print("")
@@ -245,7 +235,6 @@ def imas_build(
             ids_filter=ids_set,
             dry_run=dry_run,
             reset_to=reset_to,
-            force=force,
             model=model,
             enrich_workers=enrich_workers,
         )
@@ -328,6 +317,231 @@ def imas_build(
             logger.exception("Full traceback:")
         click.echo(f"Error: {e}", err=True)
         raise SystemExit(1) from e
+
+
+def _latest_installed_dd_version() -> str:
+    """Return the highest DD version the installed package can build."""
+    from imas_codex import _get_max_available_dd_version
+    from imas_codex.graph.build_dd import get_all_dd_versions
+
+    pkg_max = _get_max_available_dd_version()
+    if pkg_max:
+        return pkg_max
+    # Fall back to the sorted list of XML-available versions.
+    return get_all_dd_versions()[-1]
+
+
+def _graph_current_version() -> str | None:
+    """Return the DD version currently marked ``is_current`` in the graph."""
+    from imas_codex.graph import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (v:DDVersion {is_current: true}) RETURN v.id AS id LIMIT 1"
+        )
+    return rows[0]["id"] if rows else None
+
+
+def _set_dd_version_in_pyproject(target: str) -> None:
+    """Rewrite ``[tool.imas-codex.data-dictionary].version`` to *target*.
+
+    Section-scoped so only the DD horizon version line is touched. No TOML
+    library dependency — the edit preserves surrounding formatting.
+    """
+    import re
+    from pathlib import Path
+
+    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    text = pyproject.read_text()
+
+    # Find the [tool.imas-codex.data-dictionary] section body (up to the next
+    # top-level table header) and replace its version = "..." line.
+    section_re = re.compile(
+        r"(\[tool\.imas-codex\.data-dictionary\][^\[]*?)"
+        r'(^\s*version\s*=\s*)"[^"]*"',
+        re.MULTILINE | re.DOTALL,
+    )
+    new_text, n = section_re.subn(rf'\g<1>\g<2>"{target}"', text)
+    if n != 1:
+        raise RuntimeError(
+            "Could not locate [tool.imas-codex.data-dictionary].version in "
+            f"pyproject.toml (matched {n} times)"
+        )
+    pyproject.write_text(new_text)
+
+
+@dd.command("update")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
+@click.option(
+    "--to-version",
+    type=str,
+    default=None,
+    help="Target DD version (default: latest installed). Refuses to lower the horizon.",
+)
+@click.option(
+    "--enrich-workers",
+    type=int,
+    default=4,
+    show_default=True,
+    help="Parallel LLM enrich/refine workers for the new/changed paths.",
+)
+@click.option(
+    "--model",
+    type=str,
+    default=None,
+    help="Override the enrichment/refinement model (see 'dd build --help').",
+)
+def imas_update(
+    verbose: bool,
+    to_version: str | None,
+    enrich_workers: int,
+    model: str | None,
+) -> None:
+    """Roll the DD graph's version horizon forward — incrementally, SN-link-safe.
+
+    Auto-detects the graph's current horizon and the latest installed DD
+    release, bumps the pyproject horizon so ``is_current`` re-keys, then builds
+    every missing version forward (no manual ``--from-version``). Unchanged
+    paths are a content-hash no-op, so only genuinely new/changed paths incur
+    LLM/embed cost. Clustering is a full recompute.
+
+    IMASNodes are never deleted — a path removed in a newer DD version is
+    marked ``lifecycle_status='removed'``, so StandardName provenance links
+    survive. The command captures the SN provenance-link counts before and
+    after the build and FAILS if any count decreased or any link dangles.
+
+    \b
+    Examples:
+        imas-codex imas dd update                    # Roll to latest installed
+        imas-codex imas dd update --to-version 4.1.1 # Pin an explicit target
+        imas-codex imas dd update --enrich-workers 8 # Faster re-enrich
+    """
+    import subprocess
+    import sys
+
+    from packaging.version import Version
+
+    from imas_codex import dd_version as config_version
+    from imas_codex.graph.sn_link_guardrail import (
+        capture_sn_link_counts,
+        check_sn_links_safe,
+    )
+
+    latest = _latest_installed_dd_version()
+    target = to_version or latest
+
+    # Refuse to lower the horizon below the config or the graph's current mark.
+    graph_current = _graph_current_version()
+    floor_candidates = [config_version]
+    if graph_current:
+        floor_candidates.append(graph_current)
+    horizon_floor = max(floor_candidates, key=Version)
+
+    try:
+        if Version(target) < Version(horizon_floor):
+            click.echo(
+                f"Error: target {target} would LOWER the horizon "
+                f"(current floor {horizon_floor}). The horizon only moves "
+                "forward. Use 'imas dd build --reset-to ...' to reprocess in "
+                "place, or start a fresh graph instance for a rebuild.",
+                err=True,
+            )
+            raise SystemExit(1)
+        if Version(target) > Version(latest):
+            click.echo(
+                f"Error: target {target} exceeds the latest installed DD "
+                f"version {latest}. Update the imas-data-dictionary dependency "
+                "first.",
+                err=True,
+            )
+            raise SystemExit(1)
+    except SystemExit:
+        raise
+    except Exception as e:
+        click.echo(f"Error: could not compare versions: {e}", err=True)
+        raise SystemExit(1) from e
+
+    click.echo(f"DD horizon: {horizon_floor} → {target}")
+    if graph_current and graph_current != target:
+        click.echo(f"  Graph current: {graph_current}")
+
+    # Snapshot SN provenance links before the build.
+    try:
+        before = capture_sn_link_counts()
+        click.echo(
+            f"  SN links before: {before.from_dd_path} FROM_DD_PATH, "
+            f"{before.has_standard_name} HAS_STANDARD_NAME, "
+            f"{before.vocab_gap} VOCAB_GAP, {before.dangling} dangling"
+        )
+    except Exception as e:
+        click.echo(f"Error: could not read SN link counts: {e}", err=True)
+        raise SystemExit(1) from e
+
+    # Bump the config so is_current + the lifecycle reconciler re-key.
+    if config_version != target:
+        _set_dd_version_in_pyproject(target)
+        click.echo(f"  Bumped pyproject horizon → {target}")
+    else:
+        click.echo(f"  Config already at {target}")
+
+    # Run the build in a FRESH subprocess so the bumped horizon is re-imported
+    # (imas_codex.dd_version is resolved at import time). Use the venv's
+    # console script next to the running interpreter to stay in the same env.
+    from pathlib import Path
+
+    script = Path(sys.executable).parent / "imas-codex"
+    entry = str(script) if script.exists() else "imas-codex"
+    build_cmd = [
+        entry,
+        "imas",
+        "dd",
+        "build",
+        "--enrich-workers",
+        str(enrich_workers),
+    ]
+    if verbose:
+        build_cmd.append("-v")
+    if model:
+        build_cmd.extend(["--model", model])
+
+    click.echo("  Building missing versions forward…")
+    result = subprocess.run(build_cmd)
+    if result.returncode != 0:
+        click.echo(
+            f"Error: build failed (exit {result.returncode}). The horizon "
+            "config was bumped; recover the graph with 'imas-codex graph load' "
+            "if needed, then retry.",
+            err=True,
+        )
+        raise SystemExit(result.returncode)
+
+    # Verify the invariant held.
+    try:
+        after = capture_sn_link_counts()
+    except Exception as e:
+        click.echo(f"Error: could not read SN link counts after build: {e}", err=True)
+        raise SystemExit(1) from e
+
+    click.echo(
+        f"  SN links after:  {after.from_dd_path} FROM_DD_PATH, "
+        f"{after.has_standard_name} HAS_STANDARD_NAME, "
+        f"{after.vocab_gap} VOCAB_GAP, {after.dangling} dangling"
+    )
+
+    violations = check_sn_links_safe(before, after)
+    if violations:
+        click.echo(
+            "\n[GUARDRAIL FAILED] StandardName provenance links changed:", err=True
+        )
+        for v in violations:
+            click.echo(f"  - {v}", err=True)
+        click.echo(
+            "Recover the graph with 'imas-codex graph load' and investigate.",
+            err=True,
+        )
+        raise SystemExit(1)
+
+    click.echo(f"\nHorizon rolled to {target}. SN provenance links intact.")
 
 
 def _print_build_summary(stats: dict) -> None:
@@ -817,122 +1031,6 @@ def _show_versions_summary(gc) -> None:
         console.print(
             f"  {v['version']}: {v['introduced']} paths introduced{embedded}{current}"
         )
-
-
-@dd.command("clear")
-@click.option("--force", "-f", is_flag=True, help="Skip confirmation prompt")
-@click.option(
-    "--dump-first",
-    is_flag=True,
-    help="Create a graph dump before clearing (recommended)",
-)
-def imas_clear(force: bool, dump_first: bool) -> None:
-    """Delete all IMAS Data Dictionary nodes from the graph.
-
-    Removes ALL DD-specific nodes: DDVersion, IDS, IMASNode, IMASNodeChange,
-    IMASSemanticCluster, IMASCoordinateSpec, IdentifierSchema, and
-    EmbeddingChange. Orphaned Unit nodes are also cleaned up.
-
-    Cross-references from facility nodes (IMASMapping, MENTIONS_IMAS) are
-    detached before deletion. DD-specific vector indexes are dropped.
-
-    \b
-    Examples:
-      imas-codex imas dd clear             # Interactive confirmation
-      imas-codex imas dd clear --force     # Skip confirmation
-      imas-codex imas dd clear --dump-first  # Backup before clearing
-    """
-    from imas_codex.cli.logging import configure_cli_logging
-    from imas_codex.graph import GraphClient
-    from imas_codex.graph.build_dd import clear_dd_graph
-
-    configure_cli_logging("imas_dd")
-
-    with GraphClient() as gc:
-        # Count nodes that will be deleted
-        counts = gc.query("""
-            OPTIONAL MATCH (p:IMASNode)
-            WITH count(p) AS paths
-            OPTIONAL MATCH (v:DDVersion)
-            WITH paths, count(v) AS versions
-            OPTIONAL MATCH (i:IDS)
-            WITH paths, versions, count(i) AS ids
-            OPTIONAL MATCH (c:IMASSemanticCluster)
-            WITH paths, versions, ids, count(c) AS clusters
-            OPTIONAL MATCH (ch:IMASNodeChange)
-            RETURN paths, versions, ids, clusters, count(ch) AS changes
-        """)
-
-        if not counts or counts[0]["paths"] == 0:
-            console.print("[yellow]No DD nodes found in graph[/yellow]")
-            return
-
-        c = counts[0]
-        console.print("[bold red]This will delete:[/bold red]")
-        console.print(f"  {c['paths']:,} IMASNode nodes")
-        console.print(f"  {c['versions']} DDVersion nodes")
-        console.print(f"  {c['ids']} IDS nodes")
-        console.print(f"  {c['clusters']:,} IMASSemanticCluster nodes")
-        console.print(f"  {c['changes']:,} IMASNodeChange nodes")
-        console.print("  + IMASCoordinateSpec, IdentifierSchema, orphaned Units")
-        console.print("  + DD vector indexes (imas_node_embedding, cluster_embedding)")
-
-        if not force:
-            click.confirm(
-                "\nThis action is irreversible. Continue?",
-                abort=True,
-            )
-
-        if dump_first:
-            console.print("[dim]Creating graph dump...[/dim]")
-            try:
-                import subprocess
-
-                result = subprocess.run(
-                    ["uv", "run", "imas-codex", "neo4j", "dump"],
-                    capture_output=True,
-                    text=True,
-                    timeout=120,
-                )
-                if result.returncode == 0:
-                    console.print("[green]Dump created successfully[/green]")
-                else:
-                    raise RuntimeError(result.stderr.strip() or "dump failed")
-            except Exception as e:
-                console.print(f"[red]Dump failed: {e}[/red]")
-                if not force:
-                    click.confirm("Continue without dump?", abort=True)
-
-        console.print("[dim]Clearing DD graph...[/dim]")
-        results = clear_dd_graph(gc)
-
-        # Display results
-        table = Table(title="DD Graph Cleared")
-        table.add_column("Node Type", style="cyan")
-        table.add_column("Deleted", justify="right", style="red")
-
-        label_map = {
-            "paths": "IMASNode",
-            "versions": "DDVersion",
-            "ids_nodes": "IDS",
-            "clusters": "IMASSemanticCluster",
-            "path_changes": "IMASNodeChange",
-            "embedding_changes": "EmbeddingChange",
-            "identifier_schemas": "IdentifierSchema",
-            "coordinate_specs": "IMASCoordinateSpec",
-            "orphaned_units": "Unit (orphaned)",
-        }
-
-        total = 0
-        for key, label in label_map.items():
-            count = results.get(key, 0)
-            if count > 0:
-                table.add_row(label, f"{count:,}")
-                total += count
-
-        table.add_row("[bold]Total[/bold]", f"[bold]{total:,}[/bold]")
-        console.print(table)
-        console.print("[green]DD graph cleared successfully[/green]")
 
 
 @dd.command("path-history")

@@ -74,43 +74,26 @@ class DDBuildState(DiscoveryStateBase):
     # Feature flags
     dry_run: bool = False
     reset_to: str | None = None
-    force: bool = False
-
-    @property
-    def skip_build_hash(self) -> bool:
-        """Bypass build-level hash check (re-extract/rebuild)."""
-        return self.force or self.reset_to == "extracted"
 
     @property
     def skip_enrichment_hash(self) -> bool:
         """Bypass per-path enrichment hash check (re-enrich all)."""
-        return self.force or self.reset_to in ("extracted", "built")
+        return self.reset_to == "built"
 
     @property
     def skip_refinement_hash(self) -> bool:
         """Bypass per-path refinement hash check (re-refine all)."""
-        return self.force or self.reset_to in ("extracted", "built", "enriched")
+        return self.reset_to in ("built", "enriched")
 
     @property
     def skip_embedding_hash(self) -> bool:
         """Bypass per-path embedding hash check (re-embed all)."""
-        return self.force or self.reset_to in (
-            "extracted",
-            "built",
-            "enriched",
-            "refined",
-        )
+        return self.reset_to in ("built", "enriched", "refined")
 
     @property
     def skip_classification_hash(self) -> bool:
         """Bypass per-path classification hash check (re-classify all)."""
-        return self.force or self.reset_to in (
-            "extracted",
-            "built",
-            "enriched",
-            "refined",
-            "embedded",
-        )
+        return self.reset_to in ("built", "enriched", "refined", "embedded")
 
     # Shared data (extract → build/embed)
     version_data: dict[str, dict] = field(default_factory=dict)
@@ -220,7 +203,7 @@ async def extract_worker(state: DDBuildState, **_kwargs) -> None:
             return
 
         # Quick graph check before expensive XML parsing
-        if not state.dry_run and not state.skip_build_hash:
+        if not state.dry_run:
             build_hash = _compute_build_hash(state.versions, state.ids_filter)
             try:
                 with GraphClient() as client:
@@ -292,7 +275,7 @@ async def build_worker(state: DDBuildState, **_kwargs) -> None:
             return
 
         with GraphClient() as client:
-            if not state.dry_run and not state.skip_build_hash:
+            if not state.dry_run:
                 # Full check: everything including embeddings + clusters
                 if _check_graph_up_to_date(
                     client,

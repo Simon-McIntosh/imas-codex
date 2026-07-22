@@ -610,61 +610,31 @@ _RESET_SOURCE_STATUSES: dict[str, list[str]] = {
 }
 
 
-def _reset_to_extracted(*, ids_filter: set[str] | None = None) -> int:
-    """Delete all IMASNode nodes and clear DDVersion.build_hash.
-
-    This forces a full rebuild from DD XML on the next run.
-    """
-    ids_clause = "AND p.ids IN $ids_filter" if ids_filter else ""
-    params: dict = {}
-    if ids_filter:
-        params["ids_filter"] = list(ids_filter)
-
-    with GraphClient() as gc:
-        # Delete IMASNode nodes (DETACH removes relationships too)
-        result = gc.query(
-            f"""
-            MATCH (p:IMASNode)
-            WHERE true {ids_clause}
-            DETACH DELETE p
-            RETURN count(p) AS deleted_count
-            """,
-            **params,
-        )
-        count = result[0]["deleted_count"] if result else 0
-
-        # Clear DDVersion.build_hash to force rebuild
-        gc.query("MATCH (d:DDVersion) SET d.build_hash = null")
-
-    logger.info(
-        "Deleted %d IMASNode nodes and cleared DDVersion.build_hash",
-        count,
-    )
-    return count
-
-
 def reset_imas_nodes(
     target_status: str,
     *,
     ids_filter: set[str] | None = None,
 ) -> int:
-    """Reset IMASNode nodes to a target status for reprocessing.
+    """Reset IMASNode nodes to an earlier stage for reprocessing.
+
+    Clears the stage's output properties (enrichment, refinement, embedding,
+    or classification) and moves the node's status back, so the next build
+    re-runs that LLM/embed stage on the *existing* node. Never deletes a node
+    — the version-agnostic IMASNode identity and every provenance link it
+    carries are preserved.
 
     Args:
-        target_status: Target status (``extracted``, ``built``,
-            ``enriched``, or ``refined``).
+        target_status: Target status (``built``, ``enriched``, ``refined``,
+            or ``embedded``).
         ids_filter: Optional set of IDS names to limit the reset.
 
     Returns:
         Number of nodes affected.
     """
-    if target_status == "extracted":
-        return _reset_to_extracted(ids_filter=ids_filter)
-
     if target_status not in _RESET_CLEAR_FIELDS:
         raise ValueError(
             f"Invalid target_status '{target_status}'. "
-            f"Must be one of: extracted, {', '.join(_RESET_CLEAR_FIELDS)}"
+            f"Must be one of: {', '.join(_RESET_CLEAR_FIELDS)}"
         )
 
     clear_fields = _RESET_CLEAR_FIELDS[target_status]
