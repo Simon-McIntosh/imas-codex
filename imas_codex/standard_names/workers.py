@@ -2170,19 +2170,35 @@ def _update_sources_after_attach(
 
 
 def _update_sources_after_vocab_gap(
-    vocab_gaps: list[dict], source: str, wlog: logging.LoggerAdapter
+    vocab_gaps: list[dict],
+    source: str,
+    wlog: logging.LoggerAdapter,
+    *,
+    max_attempts: int = 3,
 ) -> None:
-    """Update StandardNameSource nodes to 'vocab_gap' status.
+    """Persist the compose-time vocab-gap outcome onto each source.
 
-    Gaps reported on pseudo segments (e.g. ``grammar_ambiguity``) are
-    ignored — they are not real vocabulary gaps and must not retire
-    the source from future composition attempts.
+    A source is retired to ``vocab_gap`` ONLY when it is blocked by a
+    genuinely-absent token in a closed grammar segment — the sole actionable
+    signal for an ISN vocabulary addition. The blocking ``segment:token`` list
+    is recorded in ``skip_reason_detail`` so the source explains itself without
+    a join back through the DD path.
+
+    A gap the composer mis-reported — a token that decomposes into existing
+    tokens, sits in the wrong slot, is ambiguous, or is a false positive — is
+    not a vocabulary deficiency: the source is still nameable and the composer
+    erred, so it is kept retryable under the attempt-count cap rather than
+    stranded at ``vocab_gap``. Open/pseudo-segment gaps (grammar_ambiguity) are
+    ignored entirely.
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.segments import is_open_segment
+    from imas_codex.standard_names.segments import (
+        is_actionable_gap,
+        is_open_segment,
+    )
 
     source_type = "dd" if source == "dd" else "signals"
-    source_ids = []
+    gaps_by_source: dict[str, list[dict]] = {}
     skipped_pseudo = 0
     for vg in vocab_gaps:
         if is_open_segment(vg.get("segment")):
@@ -2190,32 +2206,71 @@ def _update_sources_after_vocab_gap(
             continue
         sid = vg.get("source_id")
         if sid:
-            source_ids.append(f"{source_type}:{sid}")
+            gaps_by_source.setdefault(f"{source_type}:{sid}", []).append(vg)
 
     if skipped_pseudo:
         wlog.debug(
-            "Skipped vocab_gap status update for %d pseudo-segment gaps",
-            skipped_pseudo,
+            "Skipped vocab_gap update for %d pseudo-segment gaps", skipped_pseudo
         )
-
-    if not source_ids:
+    if not gaps_by_source:
         return
+
+    retire_rows: list[dict] = []
+    retry_rows: list[dict] = []
+    for sns_id, gaps in gaps_by_source.items():
+        detail = "; ".join(f"{g.get('segment')}:{g.get('token')}" for g in gaps)[:300]
+        row = {"sns_id": sns_id, "detail": detail}
+        if any(is_actionable_gap(g.get("segment"), g.get("token")) for g in gaps):
+            retire_rows.append(row)
+        else:
+            retry_rows.append(row)
 
     try:
         with GraphClient() as gc:
-            gc.query(
-                """
-                UNWIND $ids AS sns_id
-                MATCH (sns:StandardNameSource {id: sns_id})
-                SET sns.status = 'vocab_gap'
-                """,
-                ids=source_ids,
-            )
-        wlog.debug("Updated %d StandardNameSource nodes to vocab_gap", len(source_ids))
-    except Exception:
-        wlog.warning(
-            "Failed to update StandardNameSource vocab_gap status", exc_info=True
+            if retire_rows:
+                gc.query(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (sns:StandardNameSource {id: row.sns_id})
+                    SET sns.status = 'vocab_gap',
+                        sns.skip_reason = 'vocab_gap',
+                        sns.skip_reason_detail = row.detail,
+                        sns.claimed_at = null,
+                        sns.claim_token = null
+                    """,
+                    rows=retire_rows,
+                )
+            if retry_rows:
+                # Composer mis-report, not a vocabulary gap — increment the
+                # attempt count and return the source to the compose pool;
+                # a deterministic failure still terminates at 'failed' once
+                # the cap is hit, so it is bounded, never stranded.
+                gc.query(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (sns:StandardNameSource {id: row.sns_id})
+                    SET sns.attempt_count = coalesce(sns.attempt_count, 0) + 1,
+                        sns.skip_reason = 'vocab_gap_nonactionable',
+                        sns.skip_reason_detail = row.detail,
+                        sns.claimed_at = null,
+                        sns.claim_token = null,
+                        sns.status = CASE
+                            WHEN coalesce(sns.attempt_count, 0) + 1 >= $max_attempts
+                            THEN 'failed' ELSE 'extracted' END,
+                        sns.failed_at = CASE
+                            WHEN coalesce(sns.attempt_count, 0) + 1 >= $max_attempts
+                            THEN datetime() ELSE sns.failed_at END
+                    """,
+                    rows=retry_rows,
+                    max_attempts=max_attempts,
+                )
+        wlog.debug(
+            "vocab_gap update: %d retired, %d kept retryable",
+            len(retire_rows),
+            len(retry_rows),
         )
+    except Exception:
+        wlog.warning("Failed to persist vocab_gap source outcome", exc_info=True)
 
 
 def _update_sources_after_skip(

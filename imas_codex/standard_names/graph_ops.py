@@ -4110,7 +4110,11 @@ def write_vocab_gaps(
     now = datetime.now(UTC).isoformat()
 
     # Classify gaps using the ISN-backed classify_gap() function
-    from imas_codex.standard_names.segments import classify_gap, is_valid_segment
+    from imas_codex.standard_names.segments import (
+        NON_ACTIONABLE_GAP_CATEGORIES,
+        classify_gap,
+        is_valid_segment,
+    )
 
     # Build deduplicated gap nodes and relationship batch
     gap_nodes: dict[str, dict] = {}
@@ -4135,15 +4139,9 @@ def write_vocab_gaps(
             category, actual_segments = classify_gap(segment, token)
 
             # Filter non-actionable gaps — these are not genuine vocabulary
-            # deficiencies but LLM mis-classifications or decomposable compounds
-            _NON_ACTIONABLE = {
-                "false_positive",
-                "open_segment",
-                "wrong_slot_placement",
-                "ambiguous_known_token",
-                "decomposable",
-            }
-            if category in _NON_ACTIONABLE:
+            # deficiencies but LLM mis-classifications or decomposable compounds.
+            # Shared with the source-marking path so the two never drift.
+            if category in NON_ACTIONABLE_GAP_CATEGORIES:
                 logger.debug(
                     "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
                     category,
@@ -6055,31 +6053,6 @@ def mark_sources_attached(
             source_ids=source_ids,
             token=token,
             sn_id=standard_name_id,
-        )
-        return result[0]["affected"] if result else 0
-
-
-def mark_sources_vocab_gap(
-    token: str,
-    source_ids: list[str],
-) -> int:
-    """Mark sources as blocked by missing grammar vocabulary.
-
-    Token-verified. Clears claim but preserves attempt_count.
-    Returns count of updated sources.
-    """
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $source_ids AS sid
-            MATCH (sns:StandardNameSource {id: sid, claim_token: $token})
-            SET sns.status = 'vocab_gap',
-                sns.claimed_at = null,
-                sns.claim_token = null
-            RETURN count(sns) AS affected
-            """,
-            source_ids=source_ids,
-            token=token,
         )
         return result[0]["affected"] if result else 0
 

@@ -25,14 +25,24 @@ class TestVocabGapClassification:
         """Clear lru_cache between tests so mock data takes effect."""
         from imas_codex.standard_names.segments import (
             _segment_token_index,
+            known_segments,
             open_segments,
+            resolved_base_segment,
         )
 
-        _segment_token_index.cache_clear()
-        open_segments.cache_clear()
+        # Clear ALL segment-lookup caches — a mocked SEGMENT_TOKEN_MAP must not
+        # leak cached results (e.g. known_segments) into sibling test modules.
+        _caches = (
+            _segment_token_index,
+            open_segments,
+            known_segments,
+            resolved_base_segment,
+        )
+        for _c in _caches:
+            _c.cache_clear()
         yield
-        _segment_token_index.cache_clear()
-        open_segments.cache_clear()
+        for _c in _caches:
+            _c.cache_clear()
 
     def _run_write_vocab_gaps(self, gaps, segment_token_map):
         """Run write_vocab_gaps with a mocked ISN and GraphClient."""

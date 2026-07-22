@@ -263,6 +263,38 @@ def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
     return "wrong_slot_placement", segments_found
 
 
+# Gap categories that are NOT genuine vocabulary deficiencies: the token
+# already exists (here or in another segment), decomposes into existing
+# tokens, or sits in an open-vocabulary segment.  Only an ``absent``
+# closed-segment gap warrants an ISN vocabulary addition — or retiring the
+# source that reported it.
+NON_ACTIONABLE_GAP_CATEGORIES: frozenset[str] = frozenset(
+    {
+        "false_positive",
+        "invalid_segment",
+        "open_segment",
+        "wrong_slot_placement",
+        "ambiguous_known_token",
+        "decomposable",
+    }
+)
+
+
+def is_actionable_gap(segment: str | None, token: str) -> bool:
+    """Whether a reported gap names a genuinely-absent closed-segment token.
+
+    True iff :func:`classify_gap` returns ``"absent"`` — the one category that
+    both justifies an ISN vocabulary addition and warrants retiring the source
+    to ``vocab_gap``.  Every other category is a composer mis-report (token in
+    the wrong slot, decomposable into existing tokens, ambiguous, or a false
+    positive) or an open-vocabulary segment: the source is still nameable, so
+    it must not be stranded.
+    """
+    if not segment:
+        return False
+    return classify_gap(segment, token)[0] == "absent"
+
+
 # Lexicalized physics compounds that must NOT be decomposed even though
 # their prefixes match registered tokens.  These are single, irreducible
 # physical concepts in the ISN physical_base registry.
@@ -371,9 +403,11 @@ def filter_closed_segment_gaps(
 
 __all__ = [
     "ATOMIC_COMPOUNDS",
+    "NON_ACTIONABLE_GAP_CATEGORIES",
     "PSEUDO_SEGMENTS",
     "classify_gap",
     "filter_closed_segment_gaps",
+    "is_actionable_gap",
     "is_known_physical_base",
     "is_known_token",
     "is_open_segment",
