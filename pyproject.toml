@@ -354,6 +354,13 @@ model = "openrouter/openai/gpt-5.5"
 model = "openrouter/openai/gpt-5.6-luna"
 reasoning-effort = "low"
 
+[tool.imas-codex.sn-release-notes]
+# PR-description synthesis for catalog review PRs: grounds on the release
+# message, the frozen batch artifact, and the per-domain catalog diff to write
+# a concise, factual PR body for human reviewers. Pure summarisation over
+# supplied evidence (never invents physics) — language tier is sufficient.
+model = "openrouter/anthropic/claude-sonnet-4.6"
+
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
 # and response_cost. Without it, calls silently route through the proxy,

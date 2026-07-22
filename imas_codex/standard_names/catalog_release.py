@@ -791,6 +791,8 @@ def run_review_release(
     upstream_repo: str | None = None,
     fork_owner: str | None = None,
     pr_target: str = "upstream",
+    notes_builder: Any | None = None,
+    llm_notes: bool = False,
 ) -> ReviewReleaseReport:
     """Mint → freeze → export → branch → push → PR → back-fill, in one call.
 
@@ -943,11 +945,35 @@ def run_review_release(
             return report
         fork_owner = slug[0]
 
-    title = message or f"Standard-name review batch {git_tag}"
-    body = (
-        f"Review batch **{git_tag}** — {report.batch_size} standard name(s) for "
-        f"first human review.\n\nMinted from `{focus_file}`."
+    # PR description: grounded LLM synthesis (release message + batch record +
+    # per-domain catalog diff) when enabled; deterministic static body
+    # otherwise. notes_builder is injectable for tests; the LLM path never
+    # raises (it falls back to the static form internally).
+    from imas_codex.standard_names.release_notes import (
+        build_pr_notes,
+        collect_catalog_changes,
+        static_pr_notes,
     )
+
+    if notes_builder is None and llm_notes:
+        notes_builder = build_pr_notes
+    if notes_builder is not None:
+        changes = collect_catalog_changes(isnc_path, base_ref="main")
+        title, body = notes_builder(
+            message=message,
+            rc_version=git_tag,
+            batch_size=report.batch_size,
+            minted_from=str(focus_file),
+            unmatched_count=len(report.unmatched_sources),
+            changes=changes,
+        )
+    else:
+        title, body = static_pr_notes(
+            message=message,
+            rc_version=git_tag,
+            batch_size=report.batch_size,
+            minted_from=str(focus_file),
+        )
     try:
         pr_number, pr_url = pr_creator(
             branch=report.branch,

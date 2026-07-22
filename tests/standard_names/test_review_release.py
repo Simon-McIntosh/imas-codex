@@ -319,3 +319,88 @@ def test_pr_target_fork_uses_origin_slug(isnc_repo, tmp_path):
     from imas_codex.standard_names.catalog_release import _github_slug
 
     assert _github_slug(isnc_repo, "origin") == ("example-fork", "example-catalog")
+
+
+# ── grounded PR notes ───────────────────────────────────────────────────────
+
+
+def test_collect_catalog_changes(isnc_repo):
+    """Per-domain added/changed/removed entry names vs the base branch."""
+    from imas_codex.standard_names.release_notes import collect_catalog_changes
+
+    sn_dir = isnc_repo / "standard_names"
+    sn_dir.mkdir()
+    (sn_dir / "equilibrium.yml").write_text(
+        "- name: poloidal_flux\n  unit: Wb\n- name: old_entry\n  unit: m\n"
+    )
+    _git("add", "standard_names", cwd=isnc_repo)
+    _git("commit", "-m", "base catalog", cwd=isnc_repo)
+
+    # Worktree: add one, change one, remove one; add a new domain file.
+    (sn_dir / "equilibrium.yml").write_text(
+        "- name: poloidal_flux\n  unit: Wb\n  documentation: revised\n"
+        "- name: plasma_current\n  unit: A\n"
+    )
+    (sn_dir / "transport.yml").write_text("- name: heat_flux\n  unit: W.m^-2\n")
+    # The real flow diffs AFTER publish committed the files — stage them so the
+    # new domain file is tracked (untracked files never appear in git diff).
+    _git("add", "standard_names", cwd=isnc_repo)
+
+    changes = collect_catalog_changes(isnc_repo, base_ref="HEAD")
+
+    by_domain = {c["domain"]: c for c in changes}
+    assert by_domain["equilibrium"]["added"] == ["plasma_current"]
+    assert by_domain["equilibrium"]["changed"] == ["poloidal_flux"]
+    assert by_domain["equilibrium"]["removed"] == ["old_entry"]
+    assert by_domain["transport"]["added"] == ["heat_flux"]
+
+
+def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
+    from imas_codex.standard_names import release_notes
+
+    def _boom(**kw):
+        raise RuntimeError("no model")
+
+    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _boom)
+    title, body = release_notes.build_pr_notes(
+        message="WEST batch",
+        rc_version="v0.1.0rc1",
+        batch_size=3,
+        minted_from="west_task_2e.yaml",
+    )
+    assert title == "WEST batch"
+    assert "v0.1.0rc1" in body and "3 standard name(s)" in body
+
+
+def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
+    """The notes builder receives the batch evidence; its output titles the PR."""
+    focus = _write_names_focus(tmp_path)
+    seen: dict = {}
+
+    def notes_builder(**kw):
+        seen.update(kw)
+        return "Custom title", "Custom body"
+
+    def pr_creator(*, branch, base, title, body, repo, head_owner):
+        seen["pr_title"] = title
+        seen["pr_body"] = body
+        return 5, f"https://github.com/{repo}/pull/5"
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "msg",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=pr_creator,
+        notes_builder=notes_builder,
+        **_PR_TARGET,
+    )
+    assert report.errors == [], report.errors
+    assert seen["rc_version"] == "v0.1.0rc1"
+    assert seen["batch_size"] == 2
+    assert seen["pr_title"] == "Custom title"
+    assert seen["pr_body"] == "Custom body"

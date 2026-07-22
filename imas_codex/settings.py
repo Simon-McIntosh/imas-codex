@@ -94,6 +94,7 @@ MODEL_SECTIONS = frozenset(
         "sn-parent-enrich",
         "sn-classifier",
         "sn-prose-adjudicator",
+        "sn-release-notes",
     }
 )
 
@@ -130,6 +131,10 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # convergence gate; quorum-independent. Active model in
     # [tool.imas-codex.sn-prose-adjudicator].
     "sn-prose-adjudicator": "openrouter/openai/gpt-5.6-luna",
+    # PR-description synthesis for catalog review PRs: grounds on the release
+    # message, the frozen batch artifact, and the per-domain catalog diff to
+    # write a concise human summary. Summarisation task — language tier.
+    "sn-release-notes": "openrouter/anthropic/claude-sonnet-4.6",
 }
 
 # Environment variable names per section
@@ -148,6 +153,7 @@ _MODEL_ENV_VARS: dict[str, str] = {
     "sn-parent-enrich": "IMAS_CODEX_SN_PARENT_ENRICH_MODEL",
     "sn-classifier": "IMAS_CODEX_SN_CLASSIFIER_MODEL",
     "sn-prose-adjudicator": "IMAS_CODEX_SN_PROSE_ADJUDICATOR_MODEL",
+    "sn-release-notes": "IMAS_CODEX_SN_RELEASE_NOTES_MODEL",
 }
 
 

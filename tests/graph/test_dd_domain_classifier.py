@@ -954,7 +954,7 @@ class TestClassifyDomains:
                         ):
                             stats = await classify_domains(mock_gc)
 
-        mock_get.assert_called_once_with("language")
+        mock_get.assert_called_once_with("sn-classifier")
         assert stats["model"] == "settings-model"
 
     @pytest.mark.asyncio

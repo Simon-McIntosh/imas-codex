@@ -3885,15 +3885,28 @@ def sn_preview(
     ),
 )
 @click.option(
-    "--pr-target",
-    type=click.Choice(["upstream", "fork"]),
-    default="upstream",
+    "--target",
+    "pr_target",
+    type=click.Choice(["auto", "fork", "upstream"]),
+    default="auto",
     show_default=True,
     help=(
-        "[--batch] Where the review PR is raised: 'upstream' (the checkout's "
-        "upstream remote — the real catalog) or 'fork' (the origin remote — a "
-        "full gh rehearsal with review/merge touch points, zero upstream "
-        "noise)."
+        "[--batch] Where the review PR is raised. 'auto' follows the release "
+        "mode: an RC batch targets the FORK (origin remote — safe rehearsal "
+        "with the full gh review/merge flow); --final directs the PR UPSTREAM "
+        "(the real catalog). The branch always pushes to the fork — upstream "
+        "main is never pushed directly."
+    ),
+)
+@click.option(
+    "--notes/--no-notes",
+    "llm_notes",
+    default=True,
+    show_default=True,
+    help=(
+        "[--batch] Synthesize a grounded PR description (release message + "
+        "batch record + per-domain catalog diff) with the sn-release-notes "
+        "model; --no-notes uses the deterministic static body."
     ),
 )
 @click.option(
@@ -3972,6 +3985,7 @@ def sn_release(
     names_only: bool,
     batch_file: str | None,
     pr_target: str,
+    llm_notes: bool,
     export_only: bool,
     min_score: float,
     include_unreviewed: bool,
@@ -4077,6 +4091,12 @@ def sn_release(
             )
         batch_file = str(resolved_batch)
 
+        # auto target: RC batch → fork (safe rehearsal); --final → upstream
+        # (the real expert-review PR). A batch is an RC version either way —
+        # --final directs the PR, it never cuts a stable tag for a batch.
+        if pr_target == "auto":
+            pr_target = "upstream" if is_final else "fork"
+
         staging_path = Path(staging) if staging else get_sn_staging_dir()
         export_kwargs: dict[str, Any] = {}
         if skip_gate:
@@ -4101,6 +4121,7 @@ def sn_release(
                 dry_run=dry_run,
                 export_kwargs=export_kwargs or None,
                 pr_target=pr_target,
+                llm_notes=llm_notes,
             )
         except Exception as exc:
             console.print(f"[red]Review-batch error:[/red] {exc}")

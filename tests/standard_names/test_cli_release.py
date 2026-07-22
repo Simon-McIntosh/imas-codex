@@ -167,3 +167,46 @@ class TestReleaseUnknownAction:
         result = runner.invoke(sn, ["release", "bogus"])
         assert result.exit_code != 0
         assert "Unknown action" in result.output
+
+
+class TestBatchTargetAuto:
+    """--target auto: RC batch → fork; --final → upstream."""
+
+    def _invoke(self, args):
+        from unittest.mock import patch
+
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+        from imas_codex.standard_names.catalog_release import ReviewReleaseReport
+
+        captured: dict = {}
+
+        def _fake(**kw):
+            captured.update(kw)
+            return ReviewReleaseReport(rc_version="v0.1.0rc1", batch_size=1)
+
+        with patch(
+            "imas_codex.standard_names.catalog_release.run_review_release",
+            side_effect=_fake,
+        ):
+            result = CliRunner().invoke(
+                sn,
+                ["release", "--batch", "west_task_2e", "--isnc", "/tmp/x", *args],
+            )
+        return result, captured
+
+    def test_rc_batch_targets_fork(self):
+        result, captured = self._invoke(["-m", "x"])
+        assert result.exit_code == 0, result.output
+        assert captured["pr_target"] == "fork"
+
+    def test_final_batch_targets_upstream(self):
+        result, captured = self._invoke(["-m", "x", "--final"])
+        assert result.exit_code == 0, result.output
+        assert captured["pr_target"] == "upstream"
+
+    def test_explicit_target_overrides_auto(self):
+        result, captured = self._invoke(["-m", "x", "--target", "upstream"])
+        assert result.exit_code == 0, result.output
+        assert captured["pr_target"] == "upstream"
