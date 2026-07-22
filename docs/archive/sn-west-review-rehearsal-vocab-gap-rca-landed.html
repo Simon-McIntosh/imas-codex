@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-vocab-gap-rca-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — vocab-gap persistence + operator-classifier RCA | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 stage 1 — vocab-gap signal loss: two defects found and fixed (2026-07-22)</h1>
+    <p>
+      Draining the WEST mop-up surfaced a class of blocked sources parked at
+      <code>vocab_gap</code> with no record of what blocked them. Pulling that
+      thread revealed two independent defects — one in how the outcome is
+      persisted, one in how the gap is classified — that together let the
+      pipeline <em>fabricate</em> vocabulary gaps for grammar that already
+      exists and then silently strand the sources. Both are fixed; the false
+      gaps are reconciled away.
+    </p>
+
+    <h2>What landed</h2>
+    <table>
+      <thead><tr><th>Fix</th><th>Commit</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Persist the blocking gap on the source; stop stranding nameable sources</td>
+          <td><code>57283b08</code></td>
+          <td>The blocking <code>segment:token</code> is now recorded in
+              <code>skip_reason_detail</code>; only genuinely-absent
+              closed-segment gaps retire a source, the rest stay retryable</td>
+        </tr>
+        <tr>
+          <td>Recognize operator tokens in the gap classifier</td>
+          <td><code>ab826533</code></td>
+          <td>Operators (<code>normalized</code>, <code>flux_surface_averaged</code>,
+              <code>line_integrated</code>, <code>square</code>, …) are no longer
+              mis-classified as <code>absent</code> gaps</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Defect 1 — the outcome was persisted lossily</h2>
+    <p>
+      When compose reports a vocab gap it hands the marker a list of
+      <code>{source_id, segment, token, reason}</code>. The live marker
+      (<code>_update_sources_after_vocab_gap</code>) set only
+      <code>status='vocab_gap'</code> and discarded the token — so a blocked
+      source recorded <em>nothing</em> about why. The gap survived only as a
+      global <code>VocabGap</code> node hung off the DD <code>IMASNode</code>,
+      recoverable by a join and, for sources whose gap was non-actionable,
+      absent entirely: 9 of 38 WEST sources had no gap record anywhere.
+    </p>
+    <p>
+      Worse, the marker filtered only <em>open</em> segments while the
+      node-writer (<code>write_vocab_gaps</code>) drops five non-actionable
+      categories. So a source whose reported gap was <code>decomposable</code>,
+      <code>wrong_slot_placement</code>, <code>ambiguous_known_token</code>, or a
+      <code>false_positive</code> — i.e. still nameable, the composer merely
+      erred — was retired to <code>vocab_gap</code> and stranded, with the
+      matching <code>VocabGap</code> node never written.
+    </p>
+    <p>
+      The fix records <code>skip_reason='vocab_gap'</code> +
+      <code>skip_reason_detail</code> (the blocking <code>segment:token</code>
+      list) so a source explains itself, and retires <em>only</em> on a
+      genuinely-absent closed-segment gap; non-actionable reports keep the
+      source retryable under the attempt-count cap. A shared
+      <code>is_actionable_gap()</code> means the node-write and source-mark
+      paths classify identically and cannot drift; the dead
+      <code>mark_sources_vocab_gap</code> is removed.
+    </p>
+
+    <h2>Defect 2 — the classifier was blind to operators (the real root cause)</h2>
+    <p>
+      Reviewing the actual blocking tokens against the ISN grammar showed the
+      biggest "gaps" were not gaps at all. ISN <strong>operators</strong> —
+      <code>flux_surface_averaged</code>, <code>line_integrated</code>,
+      <code>normalized</code>, <code>square</code>,
+      <code>derivative_with_respect_to</code>, <code>gradient</code> — are a
+      grammar mechanism <em>separate</em> from <code>SEGMENT_TOKEN_MAP</code>:
+      they compose into names as <code>&lt;op&gt;_of_&lt;base&gt;</code> or as a
+      postfix. Codex's gap classifier
+      (<code>is_known_token</code>/<code>classify_gap</code>) never consulted the
+      operator vocabulary, so a composer that mis-slotted a known operator as a
+      qualifier had it classified <code>absent</code> — fabricating a gap and,
+      before Defect 1's fix, retiring the source.
+    </p>
+    <p>
+      <svg viewBox="0 0 900 210" role="img" aria-label="Gap classification flow before and after the operator-awareness fix" style="max-width:100%; height:auto;">
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#444"/></marker></defs>
+        <g font-family="system-ui" font-size="13" fill="#1a1a1a">
+          <text x="10" y="20" font-weight="bold">composer reports: token "normalized" in segment "qualifier"</text>
+          <!-- before -->
+          <text x="10" y="58" font-weight="bold" fill="#b00">BEFORE</text>
+          <rect x="90" y="42" width="150" height="34" fill="#fff" stroke="#999"/><text x="165" y="63" text-anchor="middle">is_known_token</text>
+          <rect x="270" y="42" width="150" height="34" fill="#fff" stroke="#999"/><text x="345" y="63" text-anchor="middle">SEGMENT_TOKEN_MAP</text>
+          <rect x="450" y="42" width="130" height="34" fill="#fde8e8" stroke="#b00"/><text x="515" y="63" text-anchor="middle">absent → GAP</text>
+          <rect x="610" y="42" width="150" height="34" fill="#fde8e8" stroke="#b00"/><text x="685" y="63" text-anchor="middle">source retired ✗</text>
+          <line x1="240" y1="59" x2="268" y2="59" stroke="#444" marker-end="url(#ar)"/>
+          <line x1="420" y1="59" x2="448" y2="59" stroke="#444" marker-end="url(#ar)"/>
+          <line x1="580" y1="59" x2="608" y2="59" stroke="#444" marker-end="url(#ar)"/>
+          <!-- after -->
+          <text x="10" y="130" font-weight="bold" fill="#0a7">AFTER</text>
+          <rect x="90" y="114" width="150" height="34" fill="#fff" stroke="#999"/><text x="165" y="135" text-anchor="middle">is_known_token</text>
+          <rect x="270" y="114" width="150" height="34" fill="#eaf6ff" stroke="#0788c9"/><text x="345" y="129" text-anchor="middle">+ operators</text><text x="345" y="143" text-anchor="middle" font-size="11">(get_grammar_context)</text>
+          <rect x="450" y="114" width="130" height="34" fill="#e8f6ee" stroke="#0a7"/><text x="515" y="129" text-anchor="middle">wrong_slot</text><text x="515" y="143" text-anchor="middle" font-size="11">non-actionable</text>
+          <rect x="610" y="114" width="150" height="34" fill="#e8f6ee" stroke="#0a7"/><text x="685" y="129" text-anchor="middle">no gap; retryable</text><text x="685" y="143" text-anchor="middle" font-size="11">compose via operator</text>
+          <line x1="240" y1="131" x2="268" y2="131" stroke="#444" marker-end="url(#ar)"/>
+          <line x1="420" y1="131" x2="448" y2="131" stroke="#444" marker-end="url(#ar)"/>
+          <line x1="580" y1="131" x2="608" y2="131" stroke="#444" marker-end="url(#ar)"/>
+          <text x="10" y="190" font-size="12" fill="#555">operator tokens derived at runtime from ISN — never hardcoded in codex (ISN owns the vocabulary)</text>
+        </g>
+      </svg>
+    </p>
+    <p>
+      <code>is_known_token</code> now augments its result with a synthetic
+      <code>operator</code> membership derived at runtime from
+      <code>get_grammar_context().grammar.vocabularies.operators</code>. A
+      mis-slotted operator classifies as <code>wrong_slot_placement</code> — no
+      <code>VocabGap</code> node, source stays retryable. Reconcile then
+      reclassified the standing false gaps in place:
+      <code>normalized</code> (n=43), <code>square</code> (n=14),
+      <code>flux_surface_averaged</code> (n=5), <code>line_integrated</code> — all
+      <code>absent → wrong_slot_placement</code>; 15 gaps reclassified, sources
+      revived to <code>extracted</code>.
+    </p>
+
+    <h2>The gap review: three classes, one is an ISN add</h2>
+    <p>
+      An exhaustive search of the 46 tokens blocking the WEST residual against
+      the full ISN vocabulary (all segments + operators + semantic
+      equivalents) sorted them into three responses — only one being an actual
+      ISN vocabulary addition:
+    </p>
+    <table>
+      <thead><tr><th>Class</th><th>Examples</th><th>Response</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Known operators, mis-slotted</td>
+          <td><code>normalized</code>, <code>flux_surface_averaged</code>,
+              <code>line_integrated</code>, <code>square</code>; the
+              <code>gm1–gm7</code> flux-surface metric coefficients and
+              <code>darea_dpsi</code> compose from these
+              (<code>derivative_with_respect_to</code>)</td>
+          <td>classifier fix (landed) + composer must <em>use</em> the operator
+              (compose-prompt work — followup)</td>
+        </tr>
+        <tr>
+          <td>Ordinal DD artifacts</td>
+          <td>line-of-sight <code>first/second/third_point</code>
+              (~35 sources), contour-tree nodes</td>
+          <td>the ordinal index does not enter the name; name the quantity via
+              the existing <code>line_of_sight</code> locus, dropping the point
+              index (compose-prompt work — followup)</td>
+        </tr>
+        <tr>
+          <td>Semantic duplicates / genuine atomic gaps</td>
+          <td><code>optical_depth</code> = existing <code>opacity</code>;
+              genuinely absent: <code>ellipticity</code>,
+              <code>signal_to_noise_ratio</code>, <code>transit_time</code>,
+              <code>path_length_variation</code>, <code>inboard_midplane</code></td>
+          <td>use the existing synonym; add the ~5 genuine atomic tokens to the
+              ISN fork, cut an RC, bump the codex pin (followup)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Mop-up progress</h2>
+    <p>
+      Accepted names on the 355-source WEST corpus, gap-only re-runs
+      (~$21 total, far under the 500 USD ceiling): <strong>209 → 258 → 273</strong>.
+      Post-fix reconcile revived 19 sources to <code>extracted</code> (zero
+      blocking absent tokens) ready to re-compose. Remaining unresolved:
+      genuine ISN gaps + operator-composed quantities awaiting the compose-prompt
+      work + ordinal-naming, tracked as followups on the parent plan.
+    </p>
+
+    <h2>Tests</h2>
+    <p>
+      New: <code>test_vocab_gap_source_persistence.py</code> (retire-with-detail
+      vs non-actionable-stays-retryable vs open-segment-ignored),
+      <code>test_operator_token_awareness.py</code> (operators known,
+      wrong-slot not absent, genuine token still absent). Also completed the
+      segment-cache clearing in <code>test_vocab_gap_gate.py</code> so a mocked
+      <code>SEGMENT_TOKEN_MAP</code> no longer leaks into sibling modules. Full
+      SN suite green.
+    </p>
+  </main>
+</body>
+</html>
