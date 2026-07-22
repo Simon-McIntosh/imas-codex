@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-west-review-rehearsal">
   <meta name="plan-title" content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
   <meta name="plan-summary" content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -18,7 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.15">
 </head>
 <body>
   <main class="plan-doc">
@@ -157,61 +158,29 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
       provenance — the machine-generated nameset's first human validation.
     </p>
 
-    <h2 id="s4b">§4b — The tag contract: the version tag is the fold-back receipt</h2>
-    <p>
-      Two events complete any release. The human merging the PR is durably recorded by
-      GitHub. The maintainer folding it back into the graph (<code>sn merge</code>) is
-      recorded nowhere durable today — a merged PR with a forgotten fold-back is
-      silently inconsistent. <strong>Decision (D-final-shape, locked): the version tag
-      is the receipt for the fold-back, created by <code>sn merge</code>, not by
-      release.</strong>
-    </p>
-    <ul>
-      <li><strong>Who tags, when, where:</strong> after a successful non-dry
-        fold-back, <code>sn merge</code> creates the version tag (batch:
-        <code>vX.Y.ZrcN</code>; final: <code>vX.Y.Z</code>) <em>on the merge
-        commit</em> and pushes it to the PR's target repo. Tag-on-merge-commit also
-        resolves the ordering problem a release-time tag would have — a tag cut before
-        the merge points at a commit the target repo never receives.</li>
-      <li><strong>Tag message = the machine-readable contract:</strong>
-        <code>graph-merged: &lt;iso-ts&gt;</code> + PR number/URL + batch artifact +
-        outcome counts (approved / auto-approved / contested). A tag whose message
-        starts <code>graph-merged:</code> ⇒ catalog and graph are in sync for this
-        version.</li>
-      <li><strong>Idempotency guard:</strong> <code>sn merge</code> checks for the tag
-        first — if it already carries the contract shape, the fold-back has happened
-        and the run refuses (or reports) instead of double-promoting.</li>
-      <li><strong>Inverse:</strong> <code>sn merge --undo</code> deletes the tag
-        (local + remote) — the contract no longer holds, and the absence of the tag
-        again means "merged but not folded back".</li>
-      <li><strong>Downstream benefit:</strong> the catalog site/CI deploys versions
-        from tags, so a deployed catalog version now <em>implies</em> graph
-        consistency. Plain full-catalog finals follow the same shape
-        (release branch → upstream PR → <code>sn merge</code>-owned tag on the merge
-        commit); no direct upstream-main or release-time upstream tag push remains.</li>
-      <li><strong>Human summary in the tag message (LLM, grounded).</strong> Below the
-        deterministic contract block, <code>sn merge</code> appends a concise
-        human-written account of what review did to the batch, synthesized by the
-        <code>sn-release-notes</code> seat from four evidence sources, all recoverable
-        from the PR itself via <code>gh</code>:
-        (1) the PR description; (2) the <em>full PR conversation</em> — review
-        comments and threads (<code>gh pr view --json body,comments,reviews</code>);
-        (3) every commit message that went into the PR; and (4) the
-        <em>review delta</em> — the diff between the PR's original content (the first
-        pushed head of <code>review/&lt;rc&gt;</code>) and the final merged state,
-        scoped to <code>standard_names/</code>, i.e. exactly what the reviewers
-        changed. Grounded summarisation only — never invention.
-        <strong>Layout rule:</strong> the contract lines come first and are
-        deterministic; the idempotency check and any tooling parse only them. The LLM
-        section is prose below a separator; on any synthesis failure the tag is
-        written with the deterministic block alone (a notes failure must never block
-        or delay the fold-back), and <code>--no-notes</code> skips it.</li>
-    </ul>
-    <p>
-      Implementation is queued as a followup below and should land before §3 stage 4
-      so the rehearsal exercises the contract — including the grounded tag summary —
-      end-to-end.
-    </p>
+    <section id="s4b" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-22</span>
+        <h2>§4b — The tag contract: the version tag is the fold-back receipt</h2>
+      </header>
+      <p class="landed-summary">
+        Shipped in <code>sn merge</code> (commit <code>66480249</code>, TDD, no
+        spend): after a successful non-dry fold-back it tags the merge commit
+        with a deterministic <code>graph-merged:</code> contract block (PR ref +
+        batch artifact + approved/auto_approved/contested counts) and pushes it
+        to the PR's target remote. The tag's presence is the idempotency guard
+        (a second fold-back is refused); <code>--undo</code> deletes it (local +
+        remote); push failures roll back the local tag. Below the block a
+        grounded human summary is appended — synthesized by the
+        <code>sn-release-notes</code> seat from the PR description, full
+        conversation, commit messages, and the review-delta diff — with a
+        deterministic-only fallback and <code>--no-notes</code>; a notes failure
+        never blocks the fold-back. 23 tag tests + 2 notes tests green (bare
+        repo, gh + LLM mocked). Full record:
+        <a href="archive/sn-west-review-rehearsal-s4b-landed.html">§4b landed</a>.
+        §3 stage 4 will exercise the <code>graph-merged:</code> tag live.
+      </p>
+    </section>
 
     <h2 id="s5">§5 — Graph-state management &amp; cross-checks</h2>
     <ul>
@@ -368,7 +337,7 @@ Done-when
   2. Fork PR open; RC version + PR URL + batch size captured; PR-body quality judged.
   3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-swrr-004" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-004" data-status="resolved" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="2026-07-22T07:08:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement the sn merge tag contract + grounded tag summary (§4b)</h4>
     <div class="r-fu-body"><p>Land the full §4b design in <code>sn merge</code> before §3 stage 4: the deterministic <code>graph-merged:</code> contract tag on the merge commit (create/push, refuse double fold-back, delete on <code>--undo</code>) plus the LLM human summary appended below the contract block, grounded on the PR description, the full PR conversation, the PR's commit messages, and the review-delta diff (original PR content vs merged state). <code>sn-release-notes</code> seat; deterministic-only fallback; <code>--no-notes</code> respected. TDD on the local bare-repo fixture with gh mocked.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -411,6 +380,7 @@ Done-when
      local bare repo with gh + LLM mocked (no live calls).
   2. Full sn merge test set green.
   3. This followup resolved; §3 stage-4 note already references the contract.</pre>
+    <p class="r-fu-outcome">§4b landed — commit 66480249. sn merge writes the fold-back receipt: a deterministic graph-merged: contract tag on the merge commit (idempotency guard refuses a second fold-back; --undo deletes it local+remote; push failure rolls back the local tag), plus a grounded human summary appended below the block via the sn-release-notes seat (PR description + full conversation + commit messages + review-delta diff), with deterministic-only fallback and --no-notes; a notes failure never blocks. TDD: 23 tag tests + 2 notes tests green (bare repo, gh + LLM mocked). §4b collapsed; record: docs/archive/sn-west-review-rehearsal-s4b-landed.html. Next: the cost-gated operational rehearsal (f-swrr-003, §3 stages 0–2), which exercises the graph-merged: tag at stage 4.</p>
     </article>
 </section>
 

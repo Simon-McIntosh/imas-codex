@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-s4b-landed">
+  <meta name="plan-title" content="WEST Review Rehearsal §4b — the fold-back receipt tag (landed record)">
+  <meta name="plan-summary" content="sn merge now writes a version tag on the merge commit after a successful fold-back: a deterministic graph-merged: contract block (idempotency + --undo delete) plus a grounded LLM human summary synthesized from the PR description, conversation, commit messages, and review-delta diff. TDD against a local bare repo with gh + LLM mocked.">
+  <meta name="plan-status" content="reference">
+  <title>WEST Review Rehearsal §4b — fold-back receipt (landed) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§4b — The fold-back receipt tag (landed 2026-07-22)</h1>
+    <p>
+      Two events complete a release: the human merges the catalog PR (durably
+      recorded by GitHub) and the maintainer folds it back into the graph
+      (<code>sn merge</code>). The second was recorded nowhere durable, so a
+      merged-but-not-folded release was indistinguishable from a folded one.
+      The receipt closes that gap. D-final-shape (locked) named the version tag
+      as the fold-back receipt, owned by <code>sn merge</code>; §4b later added a
+      grounded human summary below the contract block. Both halves are now
+      shipped — commit <code>66480249</code>, TDD, no LLM spend (gh + notes model
+      mocked).
+    </p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>Deliverable</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Deterministic <code>graph-merged:</code> contract tag on the merge commit</td><td>✓ shipped</td><td><code>build_contract_block</code>, <code>create_fold_back_tag</code></td></tr>
+        <tr><td>Idempotency guard — refuse a second fold-back</td><td>✓ shipped</td><td><code>has_contract_tag</code> + CLI refuse</td></tr>
+        <tr><td><code>--undo</code> deletes the tag (local + remote)</td><td>✓ shipped</td><td><code>delete_fold_back_tag</code> + CLI undo</td></tr>
+        <tr><td>Grounded human summary appended below the block</td><td>✓ shipped</td><td><code>build_merge_notes</code> (sn-release-notes seat)</td></tr>
+        <tr><td>Deterministic-only fallback; <code>--no-notes</code> respected; never blocks</td><td>✓ shipped</td><td>synthesis failure → contract block alone</td></tr>
+        <tr><td>Tests — bare repo, gh + LLM mocked</td><td>✓ green</td><td>23 in <code>test_sn_merge_tag.py</code> + 2 notes in <code>test_review_release.py</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>The contract</h2>
+    <p>
+      After a successful non-dry fold-back, <code>sn merge</code> creates an
+      annotated tag <em>on the merge commit</em> (batch: <code>vX.Y.ZrcN</code>;
+      final: <code>vX.Y.Z</code>, derived from the PR head branch
+      <code>review/&lt;rc&gt;</code> or <code>release/&lt;version&gt;</code>) and
+      pushes it to the PR's target repo remote (fork for a batch RC, upstream for
+      a final — matched from the PR URL's owner/repo against the checkout's
+      remotes). Tag-on-merge-commit also resolves the ordering problem a
+      release-time tag would have had — a tag cut before the merge points at a
+      commit the target repo never receives.
+    </p>
+    <p>The tag message layout — contract first, prose below a separator:</p>
+    <pre style="white-space:pre-wrap; background:#f6f8fa; border:1px solid #e0e4e8; border-radius:6px; padding:10px;">graph-merged: 2026-07-22T09:14:03+00:00
+pr: #7 https://github.com/&lt;org&gt;/&lt;catalog&gt;/pull/7
+batch: v0.2.0rc65.sn_names.yaml
+outcomes: approved=1 auto_approved=310 contested=1
+
+---
+
+&lt;grounded human summary of what review changed&gt;</pre>
+    <ul>
+      <li><strong>Machine-readable, deterministic prefix.</strong> The
+        idempotency check parses <em>only</em> the first line
+        (<code>graph-merged:</code>). A tag carrying that marker ⇒ catalog and
+        graph are in sync for the version, so <code>sn merge</code> refuses a
+        second fold-back (clear message, nonzero exit).</li>
+      <li><strong>Inverse.</strong> <code>sn merge --undo</code> deletes the tag
+        (local + remote) — its absence again means "merged but not folded back".</li>
+      <li><strong>Push failures are reported, never silent.</strong> A failed
+        push rolls back the local tag so no local receipt exists without a remote
+        counterpart.</li>
+    </ul>
+
+    <h2>The grounded summary</h2>
+    <p>
+      Below the separator, <code>build_merge_notes</code> (the
+      <code>sn-release-notes</code> seat — no new seat) synthesizes a factual
+      account of what review did to the batch, from four evidence sources
+      recovered from the PR itself via <code>gh</code>:
+    </p>
+    <ol>
+      <li>the PR description;</li>
+      <li>the <em>full PR conversation</em> — review comments and threads
+        (<code>gh pr view --json body,comments,reviews</code>);</li>
+      <li>every commit message that went into the PR
+        (<code>--json commits</code>);</li>
+      <li>the <em>review-delta diff</em> — the diff between the PR's original
+        content (the first commit of the PR) and the merged state, scoped to
+        <code>standard_names/</code>, i.e. exactly what the reviewers changed.</li>
+    </ol>
+    <p>
+      Grounded summarisation only — never invention. The summary is prose below
+      the separator; it is never parsed and never blocks: on any synthesis
+      failure the tag is written with the deterministic block alone, and
+      <code>--no-notes</code> skips it entirely. Downstream, the catalog
+      site/CI deploys versions from tags, so a deployed catalog version now
+      <em>implies</em> graph consistency.
+    </p>
+
+    <h2>Where it lives</h2>
+    <ul>
+      <li><code>imas_codex/standard_names/merge.py</code> — <code>CONTRACT_MARKER</code>,
+        <code>merge_tag_name</code>, <code>build_contract_block</code>,
+        <code>build_merge_tag_message</code>, <code>has_contract_tag</code>,
+        <code>create_fold_back_tag</code>, <code>delete_fold_back_tag</code>,
+        <code>resolve_tag_remote</code>, <code>fetch_pr_evidence</code>,
+        <code>review_delta_diff</code>, and the <code>tag_fold_back</code>
+        orchestrator (<code>FoldBackTagReport</code>).</li>
+      <li><code>imas_codex/standard_names/release_notes.py</code> —
+        <code>MergeNotes</code> + <code>build_merge_notes</code> (grounded, static
+        fallback to empty).</li>
+      <li><code>imas_codex/llm/prompts/sn/merge_notes_{system,user}.md</code> —
+        the grounded-summary prompt templates (service <code>standard-names</code>).</li>
+      <li><code>imas_codex/cli/sn.py</code> — <code>sn merge</code> gains the
+        idempotency guard, post-merge tag write, <code>--undo</code> tag delete,
+        and the <code>--notes/--no-notes</code> flag.</li>
+      <li>Tests — <code>tests/standard_names/test_sn_merge_tag.py</code> (23),
+        <code>tests/standard_names/test_review_release.py</code> (+2 notes tests).</li>
+    </ul>
+
+    <h2>What's next</h2>
+    <p>
+      The contract is now exercisable end-to-end. §3 stage 4 of the rehearsal
+      (<code>sn merge --pr &lt;merged-fork-pr-url&gt;</code>) will verify the
+      <code>graph-merged:</code> tag appears on the merge commit and that stage
+      6's <code>--undo</code> removes it — as part of the cost-gated operational
+      run tracked by followup <code>f-swrr-003</code> (§3 stages 0–2, then the
+      human-review + fold-back stages).
+    </p>
+  </main>
+</body>
+</html>
