@@ -113,15 +113,15 @@
         the line-of-sight guidance was corrected to name the endpoint via its
         <code>line_of_sight</code> <em>locus</em>
         (<code>radial_coordinate_of_line_of_sight</code>) rather than a retired
-        base token; and the two genuinely-absent atomic tokens
-        (<code>ellipticity</code> base + <code>inboard_midplane</code> locus)
-        were added to the ISN fork (rc55, pin → <code>4265af7</code>,
-        <code>b0665da0</code>). Verification pared the candidate ISN adds from 5
-        to 2: <code>path_length_variation</code> composes via the existing
-        <code>variation</code> operator + <code>length</code> base,
-        <code>signal_to_noise_ratio</code> is a signal-chain metric (skip),
-        <code>transit_time</code> isn't in the corpus, <code>optical_depth</code>
-        = <code>opacity</code>.
+        base token; and four genuinely-absent atomic tokens were added to the
+        ISN fork — <code>ellipticity</code> base + <code>inboard_midplane</code>
+        locus (rc55, <code>4265af7</code>), then <code>signal_to_noise_ratio</code>
+        + <code>transit_time</code> bases (rc56, <code>2ee68c7</code>); pin bumped
+        both sites. Of the 5 candidate ISN adds only
+        <code>path_length_variation</code> was excluded — it composes via the
+        existing <code>variation</code> operator + <code>length</code> base
+        (<code>optical_depth</code> = existing <code>opacity</code>). Commits
+        <code>d622dfc2</code>, <code>b0665da0</code>.
       </p>
       <p style="margin:0;">
         Two gap-only re-runs drained to <code>no_eligible_work</code> for
@@ -129,9 +129,9 @@
         residual 50 non-skipped, 37 carry a correct valid name awaiting review
         acceptance (a <em>review-entry</em> throughput matter — names produced
         at <code>name_stage=pending</code> aren't claimed by REVIEW_NAME), 3 are
-        superseded relinks, and 10 are the genuinely-hard tail (gm1/6/7/9
+        superseded relinks, and ~9 are the genuinely-hard tail (gm1/6/7/9
         flux-surface metric coefficients, <code>change_in</code> delta,
-        <code>h_98</code>, contour node, SNR-skip). Full record:
+        <code>h_98</code>, contour node, hard-x-ray peak). Full record:
         <a href="archive/sn-west-review-rehearsal-gap-closure-landed.html">gap-closure landed</a>.
         Stage 2 (cut the fork-PR RC) needs a review pass to accept the 37
         pending names first — see the followups below.

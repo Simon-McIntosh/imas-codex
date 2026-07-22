@@ -60,22 +60,37 @@
       </tbody>
     </table>
 
-    <h2>Verification searches — three of the five candidates were NOT genuine gaps</h2>
+    <h2>Verification searches — four of the five candidates are genuine adds</h2>
     <p>
       The followup listed five candidate ISN adds; an exhaustive search of the
-      installed vocabulary confirmed only two were genuinely absent:
+      installed vocabulary confirmed four are genuinely absent, valid, recurring
+      quantities. (An initial pass wrongly excluded <code>signal_to_noise_ratio</code>
+      and <code>transit_time</code>; both are real WEST sources with clear DD
+      definitions and were added on review — see the note below the table.)
     </p>
     <table>
       <thead><tr><th>Candidate</th><th>Verdict</th><th>Resolution</th></tr></thead>
       <tbody>
-        <tr><td><code>ellipticity</code></td><td>ABSENT everywhere</td><td>Added (physical_base)</td></tr>
-        <tr><td><code>inboard_midplane</code></td><td>ABSENT (but <code>outboard_midplane</code> exists)</td><td>Added (position locus)</td></tr>
+        <tr><td><code>ellipticity</code></td><td>ABSENT everywhere</td><td>Added (physical_base, rc55)</td></tr>
+        <tr><td><code>inboard_midplane</code></td><td>ABSENT (but <code>outboard_midplane</code> exists)</td><td>Added (position locus, rc55)</td></tr>
+        <tr><td><code>signal_to_noise_ratio</code></td><td>ABSENT — a documented dimensionless diagnostic (dB log signal/noise ratio)</td><td>Added (physical_base, rc56)</td></tr>
+        <tr><td><code>transit_time</code></td><td>ABSENT — a named timescale (coolant transit), in the <code>confinement_time</code>/<code>decay_time</code> family</td><td>Added (physical_base, rc56)</td></tr>
         <tr><td><code>path_length_variation</code></td><td>Expressible</td><td>The <code>variation</code> operator + the existing <code>length</code> base compose <code>variation_of_length_of_interferometer_beam</code> — no add</td></tr>
-        <tr><td><code>signal_to_noise_ratio</code></td><td>Signal-chain quality metric</td><td>Not a plasma physics observable — routes to <code>skipped</code>, not an ISN add</td></tr>
-        <tr><td><code>transit_time</code></td><td>Not in the WEST residual</td><td>No source needs it — not added</td></tr>
         <tr><td><code>optical_depth</code></td><td>Synonym of <code>opacity</code></td><td>Existing token — not added</td></tr>
       </tbody>
     </table>
+    <p>
+      <strong>Correction (2026-07-22):</strong> <code>signal_to_noise_ratio</code>
+      and <code>transit_time</code> were initially excluded — SNR as
+      &ldquo;signal-chain infrastructure&rdquo; and transit_time as
+      &ldquo;not in the corpus&rdquo;. Both were wrong: SNR
+      (<code>spectrometer_visible/channel/isotope_ratios/signal_to_noise</code>,
+      dB) is a genuine documented diagnostic quantity, and transit_time
+      (<code>calorimetry/group/component/transit_time</code>, s) IS a WEST source
+      that the composer had to render awkwardly as
+      <code>coolant_duration_of_plant_component_port_due_to_convection</code> for
+      lack of the token. Both added in ISN rc56 (<code>2ee68c7</code>); pin bumped.
+    </p>
 
     <h2>The composer now names each class correctly</h2>
     <p>
@@ -91,6 +106,8 @@
         <tr><td>Line-of-sight locus</td><td><code>*/line_of_sight/*_point/r</code></td><td><code>radial_coordinate_of_line_of_sight</code></td></tr>
         <tr><td>New token</td><td><code>polarimeter/channel/ellipticity_initial</code></td><td><code>initial_wave_polarization_ellipticity_at_line_of_sight</code></td></tr>
         <tr><td>New token</td><td><code>equilibrium/.../r_inboard</code></td><td><code>radial_coordinate_at_inboard_midplane</code> (accepted)</td></tr>
+        <tr><td>New token (rc56)</td><td><code>spectrometer_visible/.../signal_to_noise</code></td><td><code>signal_to_noise_ratio</code> (composed from the new base; quarantined — a validation/review-entry follow-up, not a token issue)</td></tr>
+        <tr><td>New token (rc56)</td><td><code>calorimetry/.../transit_time</code></td><td>token added &amp; valid (<code>coolant_transit_time</code> parses); the source stays on its old attached name until a re-compose picks it up (attached-source plumbing — f-swrr-008)</td></tr>
       </tbody>
     </table>
 
@@ -129,7 +146,7 @@
       <li><strong>3 superseded</strong> — <code>beta_tor</code> variants whose
         source should re-link to the successor
         <code>normalized_toroidal_plasma_beta</code> (a provenance relink).</li>
-      <li><strong>10 genuinely unnamed</strong> — the hard residual:
+      <li><strong>~9 genuinely unnamed</strong> — the hard residual:
         the flux-surface metric coefficients <code>gm1</code> (⟨1/R²⟩),
         <code>gm6</code>, <code>gm7</code> (⟨|∇ρ|⟩), <code>gm9</code>
         (deep nested <code>inverse</code>/<code>square</code> or a
@@ -137,9 +154,10 @@
         <code>tf/delta_b_field_phi_vacuum_r</code> (<code>change_in</code> not
         applied); <code>ece/channel/optical_depth</code> (should reuse
         <code>opacity</code>); the contour-tree node; <code>h_98</code>
-        (confinement-scaling factor); the hard-x-ray peak position; and the
-        <code>signal_to_noise</code> diagnostic-quality metric (properly a
-        <code>skipped</code>, not a gap).</li>
+        (confinement-scaling factor); and the hard-x-ray peak position.
+        (<code>signal_to_noise</code> now composes from the new
+        <code>signal_to_noise_ratio</code> base — quarantined pending a
+        validation follow-up, no longer a naming gap.)</li>
     </ul>
     <p>
       The starting plateau (operator-composed + line-of-sight + genuine-token
