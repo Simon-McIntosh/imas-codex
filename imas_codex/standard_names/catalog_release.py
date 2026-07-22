@@ -613,8 +613,21 @@ def run_release(
 # Review-batch release — mint → freeze → export → branch → push → PR → back-fill
 # =============================================================================
 
-_UPSTREAM_ISNC_REPO = "iterorganization/IMAS-Standard-Names"
-_FORK_OWNER = "Simon-McIntosh"
+
+def _github_slug(isnc_path: Path, remote: str) -> tuple[str, str] | None:
+    """Parse a github ``owner/repo`` pair from a remote URL of the ISNC checkout.
+
+    Handles both SSH (``git@github.com:owner/repo.git``) and HTTPS forms.
+    Returns None when the remote is missing or not a github URL — the caller
+    decides whether that is an error.
+    """
+    result = _run_git("remote", "get-url", remote, cwd=isnc_path)
+    if result.returncode != 0:
+        return None
+    m = re.search(
+        r"github\.com[:/]([\w.-]+)/([\w.-]+?)(?:\.git)?/?$", result.stdout.strip()
+    )
+    return (m[1], m[2]) if m else None
 
 
 @dataclass
@@ -650,7 +663,7 @@ class ReviewReleaseReport:
         }
 
 
-def _reviews_dir() -> Path:
+def default_reviews_dir() -> Path:
     """The committed home for frozen review-batch artifacts (imas-codex repo)."""
     return Path(__file__).parent / "manifests" / "reviews"
 
@@ -698,15 +711,27 @@ def _freeze_review_artifact(
     return path
 
 
-def _backfill_review_artifact(
-    path: Path, *, pr_number: int | None, pr_url: str | None
+def backfill_review_artifact(
+    path: Path,
+    *,
+    pr_number: int | None = None,
+    pr_url: str | None = None,
+    merge_commit: str | None = None,
 ) -> None:
-    """Write the PR number/URL into a frozen artifact after the PR is created."""
+    """Write PR provenance into a frozen artifact as it becomes known.
+
+    The PR number/URL land after ``gh pr create``; the merge commit lands when
+    ``sn merge`` folds the merged PR back. Only the provided fields are written.
+    """
     import yaml
 
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
-    doc["pr_number"] = pr_number
-    doc["pr_url"] = pr_url
+    if pr_number is not None:
+        doc["pr_number"] = pr_number
+    if pr_url is not None:
+        doc["pr_url"] = pr_url
+    if merge_commit is not None:
+        doc["merge_commit"] = merge_commit
     path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
 
 
@@ -763,8 +788,8 @@ def run_review_release(
     exporter: Any | None = None,
     publisher: Any | None = None,
     pr_creator: Any | None = None,
-    upstream_repo: str = _UPSTREAM_ISNC_REPO,
-    fork_owner: str = _FORK_OWNER,
+    upstream_repo: str | None = None,
+    fork_owner: str | None = None,
 ) -> ReviewReleaseReport:
     """Mint → freeze → export → branch → push → PR → back-fill, in one call.
 
@@ -783,7 +808,7 @@ def run_review_release(
 
     report = ReviewReleaseReport(dry_run=dry_run)
     isnc_path = Path(isnc_path)
-    reviews_dir = reviews_dir or _reviews_dir()
+    reviews_dir = reviews_dir or default_reviews_dir()
     if staging_dir is None:
         from imas_codex.settings import get_sn_staging_dir
 
@@ -888,6 +913,28 @@ def run_review_release(
     report.pushed = True
 
     # ── 6. Open the PR upstream and back-fill the artifact ─────────────
+    # The PR target and fork owner are derived from the ISNC checkout's own
+    # remotes — never hardcoded — so the tool follows whatever catalog repo
+    # the checkout actually tracks.
+    if upstream_repo is None:
+        slug = _github_slug(isnc_path, "upstream") or _github_slug(isnc_path, "origin")
+        if slug is None:
+            report.errors.append(
+                "cannot derive the PR target repo: the ISNC checkout has no "
+                "github 'upstream' (or 'origin') remote — pass upstream_repo"
+            )
+            return report
+        upstream_repo = f"{slug[0]}/{slug[1]}"
+    if fork_owner is None:
+        slug = _github_slug(isnc_path, "origin")
+        if slug is None:
+            report.errors.append(
+                "cannot derive the fork owner: the ISNC checkout has no github "
+                "'origin' remote — pass fork_owner"
+            )
+            return report
+        fork_owner = slug[0]
+
     title = message or f"Standard-name review batch {git_tag}"
     body = (
         f"Review batch **{git_tag}** — {report.batch_size} standard name(s) for "
@@ -907,7 +954,7 @@ def run_review_release(
         return report
     report.pr_number = pr_number
     report.pr_url = pr_url
-    _backfill_review_artifact(artifact, pr_number=pr_number, pr_url=pr_url)
+    backfill_review_artifact(artifact, pr_number=pr_number, pr_url=pr_url)
 
     return report
 

@@ -3842,15 +3842,16 @@ def sn_preview(
     help="Export names without requiring accepted docs (skip docs_stage gate)",
 )
 @click.option(
-    "--review-batch",
-    "review_batch",
+    "--batch",
+    "batch_file",
     type=click.Path(exists=True, dir_okay=False),
     default=None,
     help=(
-        "Cut a review-batch RC from a focus file (sn_sources or sn_names): mint "
-        "the SN set, freeze it under manifests/reviews/<rc>.sn_names.yaml, export "
-        "approved ∪ batch, branch + push to the fork, open the upstream PR, and "
-        "back-fill the PR number/URL — all in one step."
+        "Cut a review-batch RC from a manifest file (sn_sources or sn_names): "
+        "mint the SN set, freeze it under manifests/reviews/<rc>.sn_names.yaml, "
+        "export approved ∪ batch, branch + push to the fork, open the upstream "
+        "PR, and back-fill the PR number/URL — all in one step. The same file "
+        "drives sn run --focus for the mop-up half."
     ),
 )
 @click.option(
@@ -3927,7 +3928,7 @@ def sn_release(
     skip_gate: bool,
     dry_run: bool,
     names_only: bool,
-    review_batch: str | None,
+    batch_file: str | None,
     export_only: bool,
     min_score: float,
     include_unreviewed: bool,
@@ -3971,6 +3972,7 @@ def sn_release(
       imas-codex sn release --export-only                       # graph → staging only
       imas-codex sn release --export-only --domain equilibrium --gate-only
       imas-codex sn release --export-only --min-score 0.8 --force
+      imas-codex sn release --batch <manifest.yaml> --bump minor -m "WEST batch"
     """
     from pathlib import Path
 
@@ -4016,12 +4018,10 @@ def sn_release(
             raise SystemExit(2)
         isnc_path = resolved
 
-    # ── --review-batch: mint → freeze → export → branch → PR → back-fill ──
-    if review_batch:
+    # ── --batch: mint → freeze → export → branch → PR → back-fill ──
+    if batch_file:
         if action is not None:
-            raise click.ClickException(
-                "--review-batch does not take an ACTION argument."
-            )
+            raise click.ClickException("--batch does not take an ACTION argument.")
         from imas_codex.standard_names.catalog_release import run_review_release
 
         staging_path = Path(staging) if staging else get_sn_staging_dir()
@@ -4032,14 +4032,14 @@ def sn_release(
             export_kwargs["names_only"] = True
         console.print("\n[bold]Standard-Name Review Batch[/bold]")
         console.print(f"  ISNC: {isnc_path}")
-        console.print(f"  Focus: {review_batch}")
+        console.print(f"  Batch: {batch_file}")
         if dry_run:
             console.print("  Mode: [yellow]dry run[/yellow]")
         console.print("")
         try:
             rr = run_review_release(
                 isnc_path=isnc_path,
-                focus_file=review_batch,
+                focus_file=batch_file,
                 message=message or "",
                 staging_dir=staging_path,
                 bump=bump,
@@ -4198,10 +4198,24 @@ def sn_release(
     help="Path to ISNC repository root (default: auto-discover)",
 )
 @click.option(
+    "--pr",
+    "pr_ref",
+    default=None,
+    help=(
+        "Merged PR URL. Resolves the PR number, merge commit, and diff base "
+        "automatically, and locates the frozen batch artifact from the "
+        "review/<rc> branch name — no other flags needed."
+    ),
+)
+@click.option(
     "--base",
     "base_ref",
-    required=True,
-    help="Base git ref to diff the reviewed PR against (the merge-base).",
+    required=False,
+    default=None,
+    help=(
+        "Base git ref to diff the reviewed PR against (the merge-base). "
+        "Required unless --pr is given (then it defaults to <merge-commit>^1)."
+    ),
 )
 @click.option(
     "--threshold",
@@ -4225,36 +4239,63 @@ def sn_release(
     help=(
         "Frozen sn-names batch artifact (manifests/reviews/<rc>.sn_names.yaml). "
         "Untouched batch names auto-promote accepted→approved on merge; edited "
-        "names still re-trigger the full review."
+        "names still re-trigger the full review. Auto-located from the PR's "
+        "review/<rc> branch when --pr is given."
+    ),
+)
+@click.option(
+    "--undo",
+    is_flag=True,
+    default=False,
+    help=(
+        "Unwind a previously folded merge: names approved by this PR drop back "
+        "to accepted (provenance cleared); contested batch names revert to "
+        "accepted. Accepted human edits are graph history and are NOT "
+        "un-applied — revert wording via sn edit."
     ),
 )
 def sn_merge(
     isnc: str | None,
-    base_ref: str,
+    pr_ref: str | None,
+    base_ref: str | None,
     threshold: float | None,
     dry_run: bool,
     pr_number: int | None,
     pr_url: str | None,
     merge_commit: str | None,
     batch_file: str | None,
+    undo: bool,
 ) -> None:
     """Fold a reviewed catalog PR back into the graph ledger (id-matched, review-only).
 
     \b
-    Reads the catalog-entry diff of the PR against --base, matches each changed
+    Simplest form — the PR URL is the only input needed:
+      imas-codex sn merge --pr https://github.com/<org>/<catalog>/pull/<n>
+    The PR number, merge commit, diff base (<merge-commit>^1), and the frozen
+    batch artifact (from the review/<rc> branch name) are all resolved from it.
+    Pull the merged main into the ISNC checkout first.
+
+    \b
+    Reads the catalog-entry diff of the PR against the base, matches each changed
     entry to its graph StandardName BY ID, and re-attaches the human edit as a
     steered proposal exactly like ``sn edit`` (candidate + reason, no refine —
     a human-reviewed wording is never silently mutated). Names route through the
     rename cascade (carrying PRODUCED_NAME provenance). Each proposal is scored
-    by the full review pipeline: ≥ threshold → accepted; below → quarantined and
-    flagged (never accepted, never refined). Provenance-preserving throughout.
+    by the full review pipeline: ≥ threshold → approved; below → contested
+    (frozen for human adjudication). Untouched batch names auto-promote
+    accepted→approved. --undo unwinds the promotions of a folded merge.
     """
+    import subprocess as _subprocess
     from pathlib import Path
 
     from rich.table import Table
 
     from imas_codex.settings import get_sn_isnc_dir
-    from imas_codex.standard_names.merge import run_merge
+    from imas_codex.standard_names.merge import (
+        resolve_merged_pr,
+        run_merge,
+        undo_merge,
+    )
     from imas_codex.standard_names.sources_manifest import load_names_file
 
     if isnc:
@@ -4268,9 +4309,56 @@ def sn_merge(
             )
             raise SystemExit(2)
 
+    # ── --pr <url>: the URL is the only input needed ──────────────────
+    # PR number, merge commit, diff base, and the frozen batch artifact are
+    # all recoverable from the PR itself.
+    if pr_ref:
+        try:
+            resolved = resolve_merged_pr(pr_ref)
+        except ValueError as exc:
+            console.print(f"[red]--pr:[/red] {exc}")
+            raise SystemExit(2) from exc
+        pr_number = pr_number or resolved.number
+        pr_url = pr_url or resolved.url
+        merge_commit = merge_commit or resolved.merge_commit
+        if base_ref is None:
+            base_ref = f"{resolved.merge_commit}^1"
+            # Make the merge commit resolvable locally for the content diff.
+            _subprocess.run(
+                ["git", "fetch", "--all", "--quiet"],
+                cwd=str(isnc_path),
+                capture_output=True,
+                timeout=60,
+            )
+        if batch_file is None and resolved.head_ref.startswith("review/"):
+            from imas_codex.standard_names.catalog_release import default_reviews_dir
+
+            rc = resolved.head_ref.removeprefix("review/")
+            candidate = default_reviews_dir() / f"{rc}.sn_names.yaml"
+            if candidate.is_file():
+                batch_file = str(candidate)
+                console.print(f"  Batch artifact: {candidate.name} (from {rc})")
+
     batch: list[str] | None = None
     if batch_file:
         batch = load_names_file(batch_file)
+
+    # ── --undo: unwind this PR's promotions and stop ───────────────────
+    if undo:
+        if not pr_number:
+            raise click.UsageError("--undo requires --pr <url> or --pr-number")
+        report = undo_merge(pr_number=pr_number, batch=batch)
+        console.print(f"[green]✓ Merge of PR #{pr_number} unwound[/green]")
+        console.print(f"  approved → accepted: {len(report.demoted)}")
+        console.print(f"  contested → accepted: {len(report.contested_reverted)}")
+        console.print(
+            "  [dim]Accepted human edits remain graph history — revert wording "
+            "via sn edit.[/dim]"
+        )
+        return
+
+    if base_ref is None:
+        raise click.UsageError("--base is required unless --pr is given")
 
     console.print("\n[bold]Standard Name Merge[/bold]")
     console.print(f"  ISNC: {isnc_path}")
@@ -4322,6 +4410,18 @@ def sn_merge(
         for b in report.blocked[:10]:
             console.print(f"  - {b.get('sn_id', '?')}: {b.get('reason', '')}")
         raise SystemExit(1)
+
+    # Record the merge commit on the frozen artifact so the batch record
+    # carries its full PR provenance (number, URL, merge commit).
+    if batch_file and merge_commit and not dry_run:
+        from imas_codex.standard_names.catalog_release import backfill_review_artifact
+
+        backfill_review_artifact(
+            Path(batch_file),
+            pr_number=pr_number,
+            pr_url=pr_url,
+            merge_commit=merge_commit,
+        )
 
     console.print("\n[green]✓ Merge complete[/green]")
 

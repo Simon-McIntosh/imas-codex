@@ -66,9 +66,17 @@ def _stub_publisher(isnc):
 
 def _stub_pr():
     def pr_creator(*, branch, base, title, body, repo, head_owner):
-        return 42, "https://github.com/iterorganization/IMAS-Standard-Names/pull/42"
+        return 42, f"https://github.com/{repo}/pull/42"
 
     return pr_creator
+
+
+# The PR target/fork owner are derived from the checkout's github remotes; the
+# bare-repo fixture has none, so tests pass them explicitly.
+_PR_TARGET = {
+    "upstream_repo": "example-org/example-catalog",
+    "fork_owner": "example-fork",
+}
 
 
 def _write_names_focus(tmp_path):
@@ -100,6 +108,7 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
         exporter=_stub_exporter(record),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
+        **_PR_TARGET,
     )
 
     assert report.errors == [], report.errors
@@ -145,6 +154,7 @@ def test_review_release_dry_run_no_push_no_pr(isnc_repo, tmp_path):
         exporter=_stub_exporter(record),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
+        **_PR_TARGET,
     )
 
     assert report.errors == []
@@ -171,6 +181,7 @@ def test_review_release_empty_focus_errors(isnc_repo, tmp_path):
         exporter=_stub_exporter({}),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
+        **_PR_TARGET,
     )
     # An empty sn_names list fails schema validation (minItems) → focus error.
     assert report.errors
@@ -224,7 +235,36 @@ def test_review_release_mints_from_sources(isnc_repo, tmp_path, mint_source):
         exporter=_stub_exporter(record),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
+        **_PR_TARGET,
     )
     assert report.errors == [], report.errors
     assert f"{PREFIX}_name" in report.names
     assert record["review_batch"] == report.names
+
+
+# ── PR target derivation from the checkout's remotes ───────────────────────
+
+
+def test_pr_target_derived_from_remotes(isnc_repo, tmp_path):
+    """With github-style remotes, repo/owner come from the checkout itself."""
+    _git(
+        "remote",
+        "add",
+        "upstream",
+        "git@github.com:example-org/example-catalog.git",
+        cwd=isnc_repo,
+    )
+    _git(
+        "remote",
+        "set-url",
+        "origin",
+        "https://github.com/example-fork/example-catalog.git",
+        cwd=isnc_repo,
+    )
+    # origin now points at github, so push must be stubbed out via dry_run=False
+    # is not possible; instead verify derivation directly.
+    from imas_codex.standard_names.catalog_release import _github_slug
+
+    assert _github_slug(isnc_repo, "upstream") == ("example-org", "example-catalog")
+    assert _github_slug(isnc_repo, "origin") == ("example-fork", "example-catalog")
+    assert _github_slug(isnc_repo, "nosuch") is None

@@ -794,6 +794,136 @@ def run_merge(
             gc.close()
 
 
+@dataclass(frozen=True)
+class ResolvedPr:
+    """Merged-PR metadata resolved from a PR URL via the gh CLI."""
+
+    number: int
+    url: str
+    merge_commit: str
+    head_ref: str
+    base_ref: str
+
+
+def resolve_merged_pr(pr_url: str) -> ResolvedPr:
+    """Resolve a merged PR's number, merge commit, and branch refs from its URL.
+
+    The URL is the only input the maintainer should need: the PR number, the
+    merge-commit SHA (base for the content diff is ``<merge_commit>^1``), and
+    the head branch (``review/<rc>`` — which locates the frozen batch artifact)
+    are all recorded on the PR itself.
+
+    Raises ValueError when gh fails, the PR is not merged, or no merge commit
+    is recorded.
+    """
+    import json
+
+    result = subprocess.run(
+        [
+            "gh",
+            "pr",
+            "view",
+            pr_url,
+            "--json",
+            "number,url,state,mergeCommit,headRefName,baseRefName",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        raise ValueError(f"gh pr view failed: {result.stderr.strip()}")
+    data = json.loads(result.stdout)
+    if data.get("state") != "MERGED":
+        raise ValueError(
+            f"PR is not merged (state={data.get('state')}) — sn merge runs only "
+            "from an accepted (merged) PR"
+        )
+    oid = (data.get("mergeCommit") or {}).get("oid")
+    if not oid:
+        raise ValueError("merged PR records no merge commit")
+    return ResolvedPr(
+        number=int(data["number"]),
+        url=data.get("url") or pr_url,
+        merge_commit=oid,
+        head_ref=data.get("headRefName") or "",
+        base_ref=data.get("baseRefName") or "main",
+    )
+
+
+@dataclass
+class UndoReport:
+    """Summary of an :func:`undo_merge` invocation."""
+
+    pr_number: int = 0
+    demoted: list[str] = field(default_factory=list)
+    contested_reverted: list[str] = field(default_factory=list)
+
+
+def undo_merge(
+    *,
+    pr_number: int,
+    batch: list[str] | None = None,
+    gc: GraphClient | None = None,
+) -> UndoReport:
+    """Unwind the graph promotions of a previously folded merge.
+
+    The reverse of :func:`run_merge`'s *promotions* — a property-level revert,
+    not a checkout:
+
+    * names ``approved`` by this PR (``catalog_pr_number`` matches) drop back
+      to ``accepted`` with the catalog provenance fields cleared;
+    * ``contested`` names in *batch* (the frozen artifact list) drop back to
+      ``accepted`` with the contested fields cleared.
+
+    What it deliberately does NOT undo: accepted human *edits*. A merged rename
+    or docs change is permanent graph history (``REFINED_FROM`` chains,
+    ``DocsRevision`` snapshots) — reverting wording is a new ``sn edit``, never
+    node surgery. Full-state rollback is a graph-archive restore
+    (``imas-codex graph export`` / ``graph load``), the checkout analogue.
+    """
+    report = UndoReport(pr_number=pr_number)
+    owns = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        resolution = f"merge of catalog PR {pr_number} unwound"
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {name_stage: 'approved'})
+            WHERE sn.catalog_pr_number = $pr
+            SET sn.name_stage = 'accepted',
+                sn.catalog_pr_number = null,
+                sn.catalog_pr_url = null,
+                sn.catalog_merge_commit_sha = null,
+                sn.catalog_approved_at = null
+            RETURN sn.id AS id ORDER BY id
+            """,
+            pr=pr_number,
+        )
+        report.demoted = [r["id"] for r in (rows or [])]
+        if batch:
+            rows = gc.query(
+                """
+                MATCH (sn:StandardName {name_stage: 'contested'})
+                WHERE sn.id IN $batch
+                SET sn.name_stage = 'accepted',
+                    sn.contested_reason = null,
+                    sn.contested_at = null,
+                    sn.contested_resolution = $resolution,
+                    sn.edit_status = null
+                RETURN sn.id AS id ORDER BY id
+                """,
+                batch=batch,
+                resolution=resolution,
+            )
+            report.contested_reverted = [r["id"] for r in (rows or [])]
+        return report
+    finally:
+        if owns:
+            gc.close()
+
+
 def mark_catalog_name_approved(
     name: str,
     *,

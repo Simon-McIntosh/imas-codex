@@ -224,3 +224,42 @@ def test_contested_child_not_live_for_enrich(clean):
         )
     claimed2 = {i["id"] for i in claim_enrich_parents_batch(batch_size=200)}
     assert parent in claimed2
+
+
+# ── undo: unwind a folded merge's promotions ───────────────────────────────
+
+
+@pytest.mark.graph
+def test_undo_merge_demotes_and_reverts(clean):
+    from imas_codex.standard_names.merge import undo_merge
+
+    approved = f"{PREFIX}_undo_approved"
+    other_pr = f"{PREFIX}_undo_other_pr"
+    contested = f"{PREFIX}_undo_contested"
+    with GraphClient() as gc:
+        _stage(
+            gc,
+            approved,
+            name_stage="approved",
+            catalog_pr_number=7,
+            catalog_pr_url=PR["catalog_pr_url"],
+            catalog_merge_commit_sha=PR["catalog_merge_commit_sha"],
+        )
+        _stage(gc, other_pr, name_stage="approved", catalog_pr_number=99)
+        _stage(gc, contested, name_stage="contested", contested_reason="x")
+
+    report = undo_merge(pr_number=7, batch=[approved, contested])
+
+    assert report.demoted == [approved]
+    assert report.contested_reverted == [contested]
+    # Names approved by a DIFFERENT PR are untouched.
+    assert _name_stage(other_pr) == "approved"
+    assert _name_stage(approved) == "accepted"
+    assert _name_stage(contested) == "accepted"
+    with GraphClient() as gc:
+        row = gc.query(
+            "MATCH (n:StandardName {id:$id}) "
+            "RETURN n.catalog_pr_number AS pr, n.catalog_approved_at AS at",
+            id=approved,
+        )[0]
+    assert row["pr"] is None and row["at"] is None

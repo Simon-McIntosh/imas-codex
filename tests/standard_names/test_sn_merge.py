@@ -370,3 +370,61 @@ class TestReadPrChanges:
         assert len(names) == 1
         assert names[0].sn_id == "elongation"
         assert names[0].new_value == "elongation_of_closed_flux_surface"
+
+
+# ---------------------------------------------------------------------------
+# PR-URL resolution (gh CLI mocked)
+# ---------------------------------------------------------------------------
+
+
+class TestResolveMergedPr:
+    def _gh_result(self, payload, rc=0, err=""):
+        import json as _json
+        from types import SimpleNamespace
+
+        return SimpleNamespace(returncode=rc, stdout=_json.dumps(payload), stderr=err)
+
+    def test_resolves_merged_pr(self):
+        from imas_codex.standard_names.merge import resolve_merged_pr
+
+        payload = {
+            "number": 7,
+            "url": "https://github.com/o/r/pull/7",
+            "state": "MERGED",
+            "mergeCommit": {"oid": "cafe1234"},
+            "headRefName": "review/v0.2.0rc65",
+            "baseRefName": "main",
+        }
+        with patch(
+            "imas_codex.standard_names.merge.subprocess.run",
+            return_value=self._gh_result(payload),
+        ):
+            r = resolve_merged_pr("https://github.com/o/r/pull/7")
+        assert r.number == 7
+        assert r.merge_commit == "cafe1234"
+        assert r.head_ref == "review/v0.2.0rc65"
+
+    def test_unmerged_pr_rejected(self):
+        from imas_codex.standard_names.merge import resolve_merged_pr
+
+        payload = {"number": 7, "state": "OPEN", "mergeCommit": None}
+        with (
+            patch(
+                "imas_codex.standard_names.merge.subprocess.run",
+                return_value=self._gh_result(payload),
+            ),
+            pytest.raises(ValueError, match="not merged"),
+        ):
+            resolve_merged_pr("https://github.com/o/r/pull/7")
+
+    def test_gh_failure_surfaces(self):
+        from imas_codex.standard_names.merge import resolve_merged_pr
+
+        with (
+            patch(
+                "imas_codex.standard_names.merge.subprocess.run",
+                return_value=self._gh_result({}, rc=1, err="no auth"),
+            ),
+            pytest.raises(ValueError, match="gh pr view failed"),
+        ):
+            resolve_merged_pr("https://github.com/o/r/pull/7")
