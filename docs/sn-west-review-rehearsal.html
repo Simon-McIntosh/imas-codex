@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type"     content="plan">
+  <meta name="plan-slug"       content="sn-west-review-rehearsal">
+  <meta name="plan-title"      content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
+  <meta name="plan-summary"    content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
+  <meta name="plan-status"     content="draft">
+  <meta name="plan-roi"        content="high">
+  <meta name="plan-effort"     content="M">
+  <meta name="plan-tier"       content="opus">
+  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-catalog-approval-pipeline">
+  <title>WEST Review Rehearsal | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Goal &amp; scope</h2>
+    <p>
+      The approval pipeline is <strong>built and tested</strong>
+      (<a href="/imas-codex/sn-catalog-approval-pipeline.html">sn-catalog-approval-pipeline</a>,
+      all six phases + the converged CLI). What has never happened is a single
+      <em>operational</em> pass of the whole loop on real data with a human in the loop.
+      This plan is that pass, in two acts:
+    </p>
+    <ol>
+      <li><strong>Dress rehearsal on the fork</strong> — the full mop-up → batch RC →
+        PR → review → merge → fold-back → unwind cycle, with the PR raised
+        <em>within</em> the fork (<code>--target fork</code>, the auto default for an RC
+        batch) so gh, the review UI, and every human touch point are exercised with zero
+        upstream noise. Everything is reversible: <code>sn merge --undo</code> +
+        a graph snapshot.</li>
+      <li><strong>The real thing</strong> — the identical release command with
+        <code>--final</code>, directing the PR at
+        <code>iterorganization/imas-standard-names-catalog</code> for expert review.
+        That merge is the SN set's first human validation; its approvals stay.</li>
+    </ol>
+    <p>
+      The corpus is the real WEST Task-2e set: 355 SN-eligible DD-v4 sources
+      (<code>imas_codex/standard_names/manifests/west_task_2e.yaml</code>, shot 62253,
+      22 IDS). Stage 1 drains those sources through the paid LLM pipeline — this plan is
+      therefore <strong>cost-gated and user-triggered</strong>; nothing here runs
+      autonomously.
+    </p>
+
+    <h2 id="s2">§2 — The converged CLI surface (record)</h2>
+    <p>
+      One batch token, three verbs — settled and shipped in the parent plan's follow-on
+      work (commits <code>c2983802</code>, <code>ecfb004b</code>, <code>35230189</code>):
+    </p>
+    <ul>
+      <li><code>sn run --batch west_task_2e</code> — mop-up. Resolves the short name
+        under <code>standard_names/manifests/</code>; gap-only by default
+        (<code>--reseed</code> opts out). <code>--focus</code> remains for bare DD
+        paths.</li>
+      <li><code>sn release --batch west_task_2e --bump minor -m "…"</code> — the single
+        orchestrator: mint → freeze artifact
+        (<code>manifests/reviews/&lt;rc&gt;.sn_names.yaml</code>) → export approved ∪
+        batch → branch <code>review/&lt;rc&gt;</code> → push to the fork →
+        <code>gh pr create</code> → back-fill PR number/URL.
+        <code>--target auto</code>: RC batch → <strong>fork</strong> PR;
+        <code>--final</code> → <strong>upstream</strong> PR (still an RC version — a
+        batch never cuts a stable tag; <code>--final</code> only directs the PR).
+        The branch always pushes to the fork; <strong>upstream main is never pushed
+        directly</strong>. PR repo/owner derive from the ISNC checkout's own git
+        remotes. The PR description is synthesized by the <code>sn-release-notes</code>
+        seat from the release message + batch artifact + per-domain catalog diff
+        (grounded; static fallback; <code>--no-notes</code> to skip).</li>
+      <li><code>sn merge --pr &lt;url&gt;</code> — fold-back. The URL alone resolves the
+        PR number, merge commit, diff base (<code>&lt;merge-commit&gt;^1</code>) and the
+        frozen batch artifact (from the <code>review/&lt;rc&gt;</code> branch name).
+        Untouched batch names auto-promote <code>accepted→approved</code>; edited names
+        re-review (pass → approved, fail → <code>contested</code>).
+        <code>sn merge --undo --pr &lt;url&gt;</code> unwinds the promotions
+        (accepted human edits stay — graph history).</li>
+    </ul>
+
+    <h2 id="s3">§3 — Rehearsal procedure (act 1: fork PR)</h2>
+    <p>
+      <svg viewBox="0 0 940 150" role="img" aria-label="Rehearsal loop: snapshot, mop-up, batch RC with fork PR, human review and merge, fold back, unwind" style="max-width:100%; height:auto;">
+        <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
+        <g font-family="system-ui" font-size="13" fill="#1a1a1a">
+          <rect x="8"   y="40" width="120" height="44" fill="#fff" stroke="#999"/><text x="68"  y="58" text-anchor="middle">0 · graph</text><text x="68" y="74" text-anchor="middle">export</text>
+          <rect x="160" y="40" width="120" height="44" fill="#fff" stroke="#999"/><text x="220" y="58" text-anchor="middle">1 · sn run</text><text x="220" y="74" text-anchor="middle">--batch (LLM $)</text>
+          <rect x="312" y="40" width="130" height="44" fill="#fff" stroke="#999"/><text x="377" y="58" text-anchor="middle">2 · sn release</text><text x="377" y="74" text-anchor="middle">--batch → fork PR</text>
+          <rect x="474" y="40" width="140" height="44" fill="#fff" stroke="#b8860b" stroke-width="1.6"/><text x="544" y="58" text-anchor="middle">3 · HUMAN: SPA +</text><text x="544" y="74" text-anchor="middle">gh review, merge</text>
+          <rect x="646" y="40" width="130" height="44" fill="#fff" stroke="#999"/><text x="711" y="58" text-anchor="middle">4 · sn merge</text><text x="711" y="74" text-anchor="middle">--pr &lt;url&gt;</text>
+          <rect x="808" y="40" width="124" height="44" fill="#fff" stroke="#999"/><text x="870" y="58" text-anchor="middle">5–6 · verify +</text><text x="870" y="74" text-anchor="middle">merge --undo</text>
+          <line x1="128" y1="62" x2="158" y2="62" stroke="#333" marker-end="url(#a)"/>
+          <line x1="280" y1="62" x2="310" y2="62" stroke="#333" marker-end="url(#a)"/>
+          <line x1="442" y1="62" x2="472" y2="62" stroke="#333" marker-end="url(#a)"/>
+          <line x1="614" y1="62" x2="644" y2="62" stroke="#333" marker-end="url(#a)"/>
+          <line x1="776" y1="62" x2="806" y2="62" stroke="#333" marker-end="url(#a)"/>
+          <text x="544" y="112" text-anchor="middle" font-size="12" fill="#555">gold border = the human touch point this rehearsal exists to exercise; act 2 repeats 2→4 with --final (upstream PR) and no undo</text>
+        </g>
+      </svg>
+    </p>
+    <p>Full commands, in order — each stage records its outcome in this plan before the next runs:</p>
+    <ol>
+      <li><strong>Snapshot.</strong>
+        <code>imas-codex graph export</code> (restore path: <code>graph load</code>);
+        optionally <code>imas-codex graph push --dev</code> for an offsite GHCR copy.
+        Record: archive path.</li>
+      <li><strong>Mop-up (LLM spend — size the cap).</strong>
+        <code>uv run imas-codex sn run --batch west_task_2e --cost-limit &lt;N&gt;</code>
+        — gap-only, so re-runs only work the residual gap.
+        Done-when: every eligible WEST source has an <code>accepted</code>,
+        <code>valid</code> name; record the residual-gap count and skip reasons.</li>
+      <li><strong>Cut the batch RC (fork PR — the auto target for an RC batch).</strong>
+        <code>uv run imas-codex sn release --batch west_task_2e --bump minor -m "WEST review batch rehearsal"</code>
+        Done-when: additive diff (batch added, approved set byte-identical);
+        <code>catalog.yml</code> carries <code>export_scope: review</code> +
+        <code>review_batch</code>; artifact frozen and RC-tagged; PR open on the fork.
+        Record: RC version, PR URL, batch size, the LLM-written PR body (judge its
+        quality — this is the first live output of the <code>sn-release-notes</code>
+        seat).</li>
+      <li><strong>Human touch points (the point of the rehearsal).</strong>
+        Build/serve the RC <code>data.json</code>; confirm the SPA fixed batch view.
+        In the gh UI: review the PR, comment, make <em>one good edit</em> and
+        <em>one deliberately non-compliant edit</em> to two batch entries, merge.
+        Record: friction notes — anything that felt awkward is a design finding.</li>
+      <li><strong>Fold back.</strong>
+        <code>uv run imas-codex sn merge --pr &lt;merged-pr-url&gt;</code>
+        Done-when: untouched names <code>approved</code> with provenance; the good edit
+        re-reviewed → <code>approved</code>; the bad edit → <code>contested</code>
+        (visible in <code>sn status --contested</code>). Exercise one resolution path
+        (<code>sn revert &lt;id&gt; --reason "rehearsal"</code>).</li>
+      <li><strong>Freeze check, then unwind.</strong>
+        <code>uv run imas-codex sn run</code> (no scope) — no approved name mutates;
+        contested/approved are pool-excluded. Then
+        <code>uv run imas-codex sn merge --undo --pr &lt;merged-pr-url&gt;</code> —
+        approvals drop back to <code>accepted</code>, provenance cleared.
+        Record: undo counts match the merge counts.</li>
+    </ol>
+
+    <h2 id="s4">§4 — Act 2: the real upstream PR</h2>
+    <p>
+      Only after §3 passes without design findings (or after fixing what it surfaces):
+    </p>
+    <pre style="white-space:pre-wrap; background:#f6f8fa; border:1px solid #e0e4e8; border-radius:6px; padding:10px;">uv run imas-codex sn release --batch west_task_2e --final -m "WEST Task-2e standard-name review batch"
+# --final directs the PR at upstream (iterorganization/imas-standard-names-catalog);
+# still an RC version; branch still pushes to the fork.
+# … expert review happens upstream; on merge:
+uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FINAL — no undo</pre>
+    <p>
+      Deliverable: the WEST batch <code>approved</code> in the graph with full PR
+      provenance — the machine-generated nameset's first human validation.
+    </p>
+
+    <h2 id="s5">§5 — Graph-state management &amp; cross-checks</h2>
+    <ul>
+      <li><strong>State discipline:</strong> snapshot before act 1 (stage 0); the
+        rehearsal's graph writes are cleared by <code>--undo</code> (stage 6), with
+        <code>graph load</code> as the belt-and-suspenders fallback. Act 2 writes are
+        permanent by design.</li>
+      <li><strong>Backup policy (settled):</strong> the catalog is <em>not</em> the
+        backup — it is lossy (no scores, chains, review history). The graph→GHCR
+        archive (<code>graph export</code> / <code>graph push --dev</code>; automated by
+        the <code>imas-codex release</code> CLI) is the backup. Review PRs stay
+        approved ∪ batch, never full dumps.</li>
+      <li><strong>Pre-flight cross-checks</strong> (things the implementation session
+        flagged; verify before stage 2):
+        the ISN dep pin in <code>pyproject.toml</code> can be bumped to
+        <code>411d812</code> so the review export validates <code>catalog.yml</code>
+        without a warning (the marker is written either way);
+        confirm the scratch/fork ISNC checkout's <code>origin</code>/<code>upstream</code>
+        remotes since they drive the PR target;
+        confirm <code>gh auth status</code> on this host.</li>
+      <li><strong>Known deferred items</strong> (out of scope here, tracked in the
+        parent plan): the batching structure for future corpora; the one-time
+        re-baseline of the published full catalog onto the approved-only model; the
+        plain (non-batch) <code>--final</code> release restructure — content via
+        fork→upstream PR with a tag-after-merge step, mirroring the batch flow — is an
+        open decision below.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="pilot-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-pilot — run act 1 on the full 355-source manifest, or on a small pilot subset first (e.g. one IDS, ~30 sources) to bound LLM spend before the full drain?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="pilot-first">Pilot subset first (one IDS manifest), then the full 355 (Recommended — bounds spend while the loop is unproven)</button>
+          <button class="r-opt" data-value="full-355">Full 355 directly (one pass, higher spend at risk)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="final-release-shape" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">D-final-shape — restructure the plain (full-catalog) `sn release --final` to match the batch flow: content travels by fork→upstream PR from a release branch, with the stable tag applied to the merge commit afterwards (no direct upstream-main push)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="pr-then-tag">Yes: release/&lt;version&gt; branch → upstream PR → tag-on-merge (Recommended; do after this rehearsal)</button>
+          <button class="r-opt" data-value="keep-direct">Keep the current direct upstream push for finals (content already merged via the fork-main PR workflow)</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-swrr-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-22">
+        <h4 class="r-fu-title">Pre-flight + stages 0–2: snapshot, mop-up, cut the fork-PR batch RC</h4>
+        <div class="r-fu-body">
+          <p>Run the §5 pre-flight cross-checks (ISN pin, remotes, gh auth), lock
+          D-pilot, then execute §3 stages 0–2 and record outcomes (gap counts, RC
+          version, PR URL, the LLM PR body). Stages 3–6 follow in a later session
+          after the human review of the fork PR.</p>
+        </div>
+        <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stages 0–2
+Tier:    opus
+
+Context
+  The approval pipeline + converged CLI are shipped (parent plan). This is the
+  cost-gated operational rehearsal, act 1 (fork PR). Honour the locked decisions
+  shown live above; lock D-pilot with the user before spending.
+
+State to read
+  imas_codex/standard_names/manifests/west_task_2e.yaml   (the corpus)
+  imas_codex/cli/sn.py                                    (run --batch / release --batch / merge --pr)
+  docs/archive/sn-catalog-approval-pipeline-landed.html   (what shipped + limits)
+
+Scope locks / constraints
+  - LLM spend gated: agree --cost-limit with the user before sn run.
+  - Stage 0 snapshot (graph export) is mandatory before any graph write.
+  - PR target stays fork (auto for an RC batch) — no --final in act 1.
+  - Pre-flight: gh auth status; fork ISNC checkout remotes; optional ISN pin bump to 411d812.
+
+Done-when
+  1. Stage 0–2 outcomes recorded in the plan (§3 collapsed per stage as they land).
+  2. Fork PR open; RC version + PR URL + batch size captured; PR-body quality judged.
+  3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
