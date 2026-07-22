@@ -115,7 +115,9 @@ async def _seed_explicit_paths(
     from imas_codex.standard_names.graph_ops import merge_standard_name_sources
 
     dd_version = get_dd_version()
-    # Build SNS dicts for merge
+    # Build SNS dicts for merge. Per-source dicts carry no version (the re-seed
+    # contract); the current version is passed as the batch default, pinning
+    # only genuinely-new paths while re-seeds keep their immutable stored pin.
     sources = []
     for path in paths:
         ids_name = path.split("/")[0] if "/" in path else ""
@@ -127,14 +129,15 @@ async def _seed_explicit_paths(
                 "dd_path": path,
                 "batch_key": ids_name,
                 "status": "extracted",
-                "dd_version": dd_version,
                 "description": "",
             }
         )
 
     # MERGE into graph
     def _merge():
-        return merge_standard_name_sources(sources, force=force)
+        return merge_standard_name_sources(
+            sources, force=force, default_dd_version=dd_version
+        )
 
     await asyncio.to_thread(_merge)
 
@@ -186,6 +189,7 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
     Runs the extract logic to discover DD paths, creates SNS nodes,
     and returns enriched batch items.
     """
+    from imas_codex.settings import get_dd_version
     from imas_codex.standard_names.graph_ops import (
         get_existing_standard_names,
         get_named_source_ids,
@@ -229,7 +233,10 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
                 item.setdefault("dd_version", batch.dd_version)
                 all_items.append(item)
 
-        # Create SNS nodes for all extracted items
+        # Create SNS nodes for all extracted items. Per-source dicts carry no
+        # version (the re-seed contract); the current version is the batch
+        # default, pinning only genuinely-new paths while re-seeds keep their
+        # immutable stored pin.
         sources = []
         for item in all_items:
             path = item.get("path", "")
@@ -244,14 +251,15 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
                     "dd_path": path,
                     "batch_key": ids_name,
                     "status": "extracted",
-                    "dd_version": item.get("dd_version"),
                     "description": item.get("description", ""),
                     "physics_domain": item.get("physics_domain"),
                 }
             )
 
         if sources:
-            merge_standard_name_sources(sources, force=state.force)
+            merge_standard_name_sources(
+                sources, force=state.force, default_dd_version=get_dd_version()
+            )
 
         return all_items
 

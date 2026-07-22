@@ -343,6 +343,57 @@ class TestMergeStandardNameSources:
         finally:
             patcher.stop()
 
+    def test_new_source_pinned_from_default_version(self):
+        """A batch default pins a genuinely-new source that carries no per-source
+        version — an explicit declaration, not 'latest' inference."""
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        patcher, _ = self._patch_gc()  # existing_id=None → new source
+        try:
+            result = merge_standard_name_sources(
+                [
+                    {
+                        "id": "dd:new/path",
+                        "source_type": "dd",
+                        "source_id": "new/path",
+                        "dd_path": "new/path",
+                        "batch_key": "test",
+                        "status": "extracted",
+                        # no per-source version — the default supplies it
+                    }
+                ],
+                default_dd_version="4.1.0",
+            )
+            assert result == 1
+        finally:
+            patcher.stop()
+
+    def test_reseed_ignores_batch_default_version(self):
+        """A re-seed keeps its stored pin even when a batch default (the current
+        version) differs — the default pins only genuinely-new sources, so an
+        older-pinned source is not falsely re-pinned to current."""
+        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+
+        patcher, _ = self._patch_gc_existing_pinned(pinned_version="4.1.0")
+        try:
+            result = merge_standard_name_sources(
+                [
+                    {
+                        "id": "dd:a/b",
+                        "source_type": "dd",
+                        "source_id": "a/b",
+                        "dd_path": "a/b",
+                        "batch_key": "test",
+                        "status": "extracted",
+                        # no per-source version (re-seed contract)
+                    }
+                ],
+                default_dd_version="4.1.1",  # current > stored 4.1.0
+            )
+            assert result == 1
+        finally:
+            patcher.stop()
+
 
 class TestMarkSourcesFailed:
     """Test durable retry logic."""

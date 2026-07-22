@@ -1761,10 +1761,12 @@ def sn_run(
                 return
 
         # 2. Seed StandardNameSource nodes for each focused path. A genuinely
-        #    new DD source must be pinned to an exact DD version — the seed
-        #    guard refuses to infer 'latest' — so stamp the current version on
-        #    every source dict, mirroring the extraction worker. Re-seeds reuse
-        #    their stored snapshot and ignore this value.
+        #    new DD source must be pinned to an exact DD version (the seed guard
+        #    refuses to infer 'latest'), while a re-seed keeps its immutable
+        #    stored pin. The focus set mixes both, so pass the current version
+        #    as the batch default — it pins only the new sources; re-seeds
+        #    ignore it. Per-source dicts carry no version, matching the re-seed
+        #    contract.
         from imas_codex.settings import get_dd_version
 
         dd_ver = get_dd_version()
@@ -1778,11 +1780,12 @@ def sn_run(
                     "dd_path": path,
                     "batch_key": "focus",
                     "status": "extracted",
-                    "dd_version": dd_ver,
                     "description": "",
                 }
             )
-        written = merge_standard_name_sources(sources, force=True)
+        written = merge_standard_name_sources(
+            sources, force=True, default_dd_version=dd_ver
+        )
         if not quiet:
             click.echo(f"Seeded {written} focus source(s) (run_id={scope_run_id[:8]}…)")
 

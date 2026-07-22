@@ -88,7 +88,7 @@ def _stub_seed(monkeypatch):
     """
     monkeypatch.setattr(
         "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
-        lambda sources, force=False: len(sources),
+        lambda sources, force=False, default_dd_version=None: len(sources),
     )
 
 
@@ -146,24 +146,27 @@ def test_focus_gap_only_leaves_accepted_untouched(focus_nodes, tmp_path, monkeyp
 
 
 @pytest.mark.graph
-def test_focus_seeds_sources_with_exact_dd_version(focus_nodes, tmp_path, monkeypatch):
-    """Every seeded focus source must carry an exact ``dd_version``.
+def test_focus_seeds_new_sources_with_default_dd_version(
+    focus_nodes, tmp_path, monkeypatch
+):
+    """Focus seeding pins genuinely-new sources via ``default_dd_version``.
 
     ``_pin_dd_source_snapshots`` refuses to infer ``latest`` for a genuinely
-    new DD source, so the CLI must stamp the current DD version onto every
-    source dict (mirroring the extraction worker). A missing stamp aborts the
-    whole mop-up before any LLM spend the moment the manifest carries a source
-    that was never seeded before.
+    new DD source, so the CLI must pass the current version as the batch
+    default — without a missing stamp the whole mop-up aborts before any LLM
+    spend the moment the manifest carries a source that was never seeded
+    before. Per-source dicts stay version-free (the re-seed contract), so a
+    re-seed of an older-pinned source is not falsely re-pinned to current.
     """
     from imas_codex.settings import get_dd_version
 
     manifest = _write_manifest(tmp_path)
     monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", lambda **kw: None)
 
-    captured: list[dict] = []
+    calls: list[dict] = []
 
-    def _capture(sources, force=False):
-        captured.extend(sources)
+    def _capture(sources, *, force=False, default_dd_version=None):
+        calls.append({"sources": sources, "default_dd_version": default_dd_version})
         return len(sources)
 
     monkeypatch.setattr(
@@ -174,11 +177,13 @@ def test_focus_seeds_sources_with_exact_dd_version(focus_nodes, tmp_path, monkey
     result = CliRunner().invoke(sn, ["run", "--focus", str(manifest), "--dry-run"])
 
     assert result.exit_code == 0, result.output
-    assert captured, "no focus sources were seeded"
-    current = get_dd_version()
-    for src in captured:
-        assert src.get("dd_version") == current, (
-            f"seeded source {src.get('id')!r} lacks an exact dd_version"
+    assert calls, "merge_standard_name_sources was never called"
+    call = calls[0]
+    assert call["default_dd_version"] == get_dd_version()
+    # Per-source dicts stay version-free — re-seeds must not be re-pinned.
+    for src in call["sources"]:
+        assert "dd_version" not in src, (
+            f"seeded source {src.get('id')!r} must not carry a per-source version"
         )
 
 

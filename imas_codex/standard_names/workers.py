@@ -908,6 +908,9 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 path = item.get("path", item.get("signal_id"))
                 if not path:
                     continue
+                # Per-source dicts carry no version (the re-seed contract); the
+                # current version is the batch default, pinning only new sources
+                # while re-seeds keep their immutable stored pin.
                 sources.append(
                     {
                         "id": f"{source_type}:{path}",
@@ -916,7 +919,6 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         "dd_path": path if source_type == "dd" else None,
                         "batch_key": batch.group_key,
                         "status": "extracted",
-                        "dd_version": _dd_ver,
                         "description": item.get("description")
                         or item.get("documentation")
                         or "",
@@ -925,7 +927,10 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
         if sources:
             written = await asyncio.to_thread(
-                merge_standard_name_sources, sources, force=state.force
+                merge_standard_name_sources,
+                sources,
+                force=state.force,
+                default_dd_version=_dd_ver,
             )
             wlog.info("Wrote %d StandardNameSource nodes to graph", written)
 

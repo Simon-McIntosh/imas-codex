@@ -5638,7 +5638,12 @@ def write_enrichment_results(
 _VALID_PIPELINE_SOURCE_TYPES = {"dd", "signals"}
 
 
-def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]:
+def _pin_dd_source_snapshots(
+    gc: GraphClient,
+    sources: list[dict],
+    *,
+    default_dd_version: str | None = None,
+) -> list[dict]:
     """Capture immutable DD semantics while the requested version is current.
 
     ``IMASNode`` is a mutable current-version projection, so it may only be
@@ -5653,6 +5658,14 @@ def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]
     ON MATCH`` clause preserves every ``dd_*`` field regardless. Only a
     genuinely new source must supply an exact ``dd_version`` to be snapshotted;
     inferring ``latest`` for a new source is still refused.
+
+    A batch seeder that mixes re-seeds with the occasional genuinely-new source
+    (a manifest mop-up over a corpus whose pins predate a later-added path)
+    cannot know per-source which is which. It passes ``default_dd_version`` —
+    the current version — which pins ONLY the genuinely-new sources; re-seeds
+    ignore it and keep their stored pin. This is an explicit declaration, not
+    ``latest`` inference, so the never-infer-latest contract still holds. A
+    per-source ``dd_version`` that disagrees with a stored pin still raises.
     """
     prepared = [dict(source) for source in sources]
     dd_sources = [s for s in prepared if s.get("source_type") == "dd"]
@@ -5697,16 +5710,18 @@ def _pin_dd_source_snapshots(gc: GraphClient, sources: list[dict]) -> list[dict]
                 f"existing DD source {source['id']!r} has no provable immutable "
                 "snapshot; run the provenance backfill report"
             )
-        if not source.get("dd_version"):
+        version = source.get("dd_version") or default_dd_version
+        if not version:
             raise ValueError(
                 f"DD source {source.get('dd_path')!r} has no exact dd_version; "
                 "source creation must never infer latest"
             )
+        source["dd_version"] = version
         requests.append(
             {
                 "id": source["id"],
                 "path": source.get("dd_path"),
-                "dd_version": source.get("dd_version"),
+                "dd_version": version,
             }
         )
 
@@ -5753,6 +5768,7 @@ def merge_standard_name_sources(
     sources: list[dict],
     *,
     force: bool = False,
+    default_dd_version: str | None = None,
 ) -> int:
     """Batch MERGE StandardNameSource nodes.
 
@@ -5760,6 +5776,11 @@ def merge_standard_name_sources(
     DD sources additionally require ``dd_path`` and the exact ``dd_version``;
     their immutable semantic snapshot is captured centrally here. Optional:
     description and signal (for signal sources).
+
+    ``default_dd_version`` pins genuinely-new DD sources that carry no per-source
+    version (a mop-up seeder that mixes re-seeds with occasional new paths passes
+    the current version here); re-seeds ignore it and keep their stored pin. See
+    :func:`_pin_dd_source_snapshots`.
 
     On CREATE: sets all fields.
     On MATCH (existing node):
@@ -5807,7 +5828,9 @@ def merge_standard_name_sources(
         return 0
 
     with GraphClient() as gc:
-        sources = _pin_dd_source_snapshots(gc, sources)
+        sources = _pin_dd_source_snapshots(
+            gc, sources, default_dd_version=default_dd_version
+        )
         result = gc.query(
             """
             UNWIND $sources AS src
