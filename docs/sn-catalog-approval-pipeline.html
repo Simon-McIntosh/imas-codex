@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -777,7 +777,7 @@ Done-when
     <pre class="r-fu-prompt">done — shipped (commit 83a77011).</pre>
     <p class="r-fu-outcome">Phase 6 landed — commit 83a77011.</p>
     </article>
-<article class="r-fu" data-id="f-scap-rehearsal" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-scap-rehearsal" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22T04:42:56+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run the §10 end-to-end rehearsal on the real WEST corpus</h4>
     <div class="r-fu-body"><p>All pipeline code is shipped and unit/graph tested. The remaining step is the §10 operational rehearsal against the live graph + a scratch ISNC checkout: drive the 355 WEST sources to accepted names, cut a review-batch RC, open the scratch PR, merge, and confirm freeze. It is deliberately deferred because step 1 (<code>sn run --focus west_task_2e.yaml</code>) drains 355 names through the LLM pipeline — significant spend + time — so it is a user-triggered run, not autonomous.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -791,6 +791,28 @@ Run the §10 end-to-end rehearsal now that all six phases are shipped:
 5. Re-run sn run (no focus) — assert no approved name mutated and contested names are pool-excluded.
 Only then open the real upstream ISNC PR for expert review.
 Optional first: bump the imas-codex ISN dep pin to 411d812 so review exports validate the manifest without a warning.</pre>
+    <p class="r-fu-outcome">Superseded by f-scap-rehearsal-2: CLI converged first (commit c2983802 — release --batch, merge --pr <url>, merge --undo, remotes-derived PR target); rehearsal commands updated to the new surface.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-rehearsal-2" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the §10 end-to-end rehearsal on the real WEST corpus (converged CLI)</h4>
+    <div class="r-fu-body"><p>All pipeline code is shipped, plus the converged CLI (commit <code>c2983802</code>): <code>sn release --batch</code>, <code>sn merge --pr &lt;url&gt;</code> (URL-only resolution), <code>sn merge --undo</code> (unwind), remotes-derived PR target. The rehearsal is a user-triggered, cost-gated run (drains ~355 WEST names through the LLM pipeline). Snapshot the graph first; use --undo to clear the scratch approvals afterwards — which also exercises the unwind path.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-catalog-approval-pipeline
+
+Run the §10 end-to-end rehearsal with the converged CLI (all against a SCRATCH ISNC fork checkout — point --isnc at it; its remotes drive the PR target):
+0. imas-codex graph export        # snapshot (restore via graph load if needed); optionally graph push --dev for offsite
+1. uv run imas-codex sn run --focus imas_codex/standard_names/manifests/west_task_2e.yaml --cost-limit &lt;N&gt;
+   (gap-only default) — assert every eligible WEST source has an accepted, valid name; report residual gaps.
+2. uv run imas-codex sn release --batch imas_codex/standard_names/manifests/west_task_2e.yaml --bump minor -m &#x27;WEST review batch rehearsal&#x27; --isnc &lt;scratch-isnc&gt;
+   — assert additive diff (batch added, approved set byte-identical), catalog.yml carries review_batch + export_scope: review, artifact frozen under manifests/reviews/&lt;rc&gt;.sn_names.yaml, PR opened against the scratch repo.
+3. Build the RC data.json in the scratch checkout and confirm the SPA fixed batch view.
+4. Merge the scratch PR (with one reviewer edit + one edit crafted to fail), then:
+   uv run imas-codex sn merge --pr &lt;merged-pr-url&gt; --isnc &lt;scratch-isnc&gt;
+   — assert untouched names auto-approve, the good edit re-reviews → approved, the bad edit → contested; sn status --contested lists it.
+5. uv run imas-codex sn run (no focus) — assert no approved name mutated; contested names pool-excluded.
+6. Unwind the scratch state: uv run imas-codex sn merge --undo --pr &lt;merged-pr-url&gt;  (verifies the unwind path; graph back to accepted).
+Only after this passes: re-run steps 2–4 for real against the true ISNC checkout (remotes → iterorganization/imas-standard-names-catalog) and leave the approvals in place.
+Optional first: bump the imas-codex ISN dep pin to 411d812 so review exports validate the manifest cleanly.</pre>
     </article>
 </section>
 
