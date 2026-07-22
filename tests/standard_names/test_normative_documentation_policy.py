@@ -205,7 +205,10 @@ def test_shared_format_keeps_normative_positive_content() -> None:
         "Governing equation paragraph",
         "Scope / distinction paragraph",
         "Sign convention paragraph",
-        "Define every symbol introduced",
+        # Every symbol is defined by its IDENTITY (the quantity it denotes),
+        # never by a unit — units are the structured `unit` field only.
+        "Define every symbol by its",
+        "Never state a unit in the documentation",
     ):
         assert required in docs_format
 

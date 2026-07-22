@@ -125,13 +125,17 @@ class TestGenerateDocsSystemSeeAlsoProhibition:
         # State the canonical principle (whitespace-tolerant — phrase may wrap).
         assert "structured metadata" in normalized
         assert "HAS_UNIT" in raw
-        # The two narrow exceptions must be spelled out. Typical-value ranges
-        # are no longer an exception: normative documentation policy prohibits
-        # typical-values prose entirely, so no inline unit can ride on one.
-        assert "Equation variable definitions" in raw
-        assert "Unit-conversion statements" in raw
+        # No exceptions. The former equation-variable and unit-conversion
+        # carve-outs are removed: units never appear in prose, and every symbol
+        # is defined by its IDENTITY (the quantity it denotes), never by its
+        # unit/dimension. (Typical-value ranges were already prohibited.)
+        assert "No exceptions." in raw
+        assert "identity" in normalized
         assert "Numeric typical-value ranges" not in raw
-        assert "Outside these two contexts" in raw
+        # The old two-exception framing must be gone.
+        assert "Equation variable definitions" not in raw
+        assert "Unit-conversion statements" not in raw
+        assert "Outside these two contexts" not in raw
 
 
 # ---------------------------------------------------------------------------

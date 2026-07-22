@@ -59,12 +59,15 @@ Rules:
 - Sign conventions (if COCOS-dependent): use exactly
   `Sign convention: Positive when <condition>.` as a standalone paragraph
   (blank line before/after, plain text — no headings, no bold).
-- **No inline units (HARD).** The entry's unit is structured metadata rendered
-  in the unit panel — do NOT restate it in prose, whether as `(in eV)`,
-  `<value> <unit>`, or a standalone ASCII/LaTeX unit expression (e.g.
-  `$\mathrm{kg\,m^{-1}\,s^{-2}}$`). Units MAY appear inline ONLY in the two
-  narrow contexts: equation variable definitions and necessary unit-conversion
-  statements.
+- **No units in prose, no exceptions (HARD).** The unit is structured metadata
+  rendered in the unit panel — never restate it in prose, whether as `(in eV)`,
+  `<value> <unit>`, a standalone ASCII/LaTeX unit expression (e.g.
+  `$\mathrm{kg\,m^{-1}\,s^{-2}}$`), a `where $T_e$ is in eV` equation-variable
+  annotation, or a unit-conversion statement. Define every symbol by its
+  **identity** — the quantity it denotes, preferring a `[label](name:id)` link.
+  An equation whose symbols are each a named quantity is already dimensionally
+  unambiguous, so no unit is needed. If the existing doc carries any unit in
+  prose, strip it — that is a primary goal of the refinement.
 - **One canonical opening per family (HARD).** When the context above places
   this entry in a sibling family, open BOTH `description` and `documentation`
   with the SAME noun-phrase template as the family anchor, substituting only the
