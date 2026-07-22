@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-west-review-rehearsal">
   <meta name="plan-title" content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
   <meta name="plan-summary" content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
-  <meta name="plan-status" content="blocked">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.3">
 </head>
 <body>
   <main class="plan-doc">
@@ -85,20 +85,35 @@
     </ul>
 
     <h2 id="s3">§3 — Rehearsal procedure (act 1: fork PR)</h2>
-    <div class="card" style="border-left:4px solid #b8860b; padding-left:12px;">
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>Stage 1 mop-up unblocked and running; two pipeline defects found &amp; fixed (2026-07-22).</strong>
+        The OpenRouter key limit was lifted; the mop-up drained over three
+        gap-only passes (~$21, well under the 500 USD ceiling), taking accepted
+        names <strong>209 → 274 / 355</strong>.
+      </p>
+      <p style="margin:0 0 6px;">
+        Draining surfaced — and fixed — two independent vocab-gap defects: the
+        blocked-source outcome was persisted lossily and would strand nameable
+        sources (<code>57283b08</code>), and the gap classifier was blind to the
+        ISN <strong>operator</strong> vocabulary, fabricating <code>absent</code>
+        gaps for existing grammar (<code>normalized</code> n=43,
+        <code>flux_surface_averaged</code>, <code>line_integrated</code>,
+        <code>square</code>; <code>ab826533</code>). Reconcile reclassified the
+        15 false gaps and revived the sources. Full record:
+        <a href="archive/sn-west-review-rehearsal-vocab-gap-rca-landed.html">vocab-gap RCA</a>
+        (+ the earlier <a href="archive/sn-west-review-rehearsal-s0-1-landed.html">stages 0–1</a>).
+      </p>
       <p style="margin:0;">
-        <strong>⛔ Stages 0–1 in progress; drain blocked on billing (2026-07-22).</strong>
-        Stage 0 snapshot landed (<code>imas-codex-graph-west-rehearsal-snapshot.tar.gz</code>).
-        Stage 1 surfaced and fixed a real seeding defect (new focus/batch
-        sources never pinned a <code>dd_version</code>; commit
-        <code>8c4b1f54</code>) — the mop-up now seeds the 150 gap sources
-        cleanly — then hit a hard wall: <code>OPENROUTER_API_KEY_IMAS_CODEX</code>
-        has reached its <strong>total spend limit</strong>, so every LLM call
-        403s (<code>cost_spent=$0</code>, 0 composed). The accepted set is
-        unharmed (209/355); the 150 failed + ~77 pending gap sources are
-        recoverable via a gap-only re-run. <strong>Resume needs the OpenRouter
-        key limit lifted</strong>, then re-run stage 1 → stage 2. Full record:
-        <a href="archive/sn-west-review-rehearsal-s0-1-landed.html">§3 stages 0–1</a>.
+        <strong>Not yet converged.</strong> The exhaustive gap review showed the
+        residual is three classes, only one an ISN add: operator-composed
+        quantities (need the composer to <em>use</em> operators — a compose-prompt
+        fix), ordinal DD artifacts (name the quantity, drop the point index —
+        prompt fix), and ~5 genuinely-absent atomic tokens
+        (<code>ellipticity</code>, <code>signal_to_noise_ratio</code>,
+        <code>transit_time</code>, <code>path_length_variation</code>,
+        <code>inboard_midplane</code> → ISN RC + pin bump). Stage 2 (cut the
+        fork-PR RC) follows convergence — see the followups below.
       </p>
     </div>
     <p>
@@ -399,7 +414,7 @@ Done-when
   3. This followup resolved; §3 stage-4 note already references the contract.</pre>
     <p class="r-fu-outcome">§4b landed — commit 66480249. sn merge writes the fold-back receipt: a deterministic graph-merged: contract tag on the merge commit (idempotency guard refuses a second fold-back; --undo deletes it local+remote; push failure rolls back the local tag), plus a grounded human summary appended below the block via the sn-release-notes seat (PR description + full conversation + commit messages + review-delta diff), with deterministic-only fallback and --no-notes; a notes failure never blocks. TDD: 23 tag tests + 2 notes tests green (bare repo, gh + LLM mocked). §4b collapsed; record: docs/archive/sn-west-review-rehearsal-s4b-landed.html. Next: the cost-gated operational rehearsal (f-swrr-003, §3 stages 0–2), which exercises the graph-merged: tag at stage 4.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-005" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T10:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-005" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T10:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-22T11:46:41+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Resume §3 stages 1–2 once the OpenRouter key limit is lifted</h4>
     <div class="r-fu-body"><p>Stage 0 (snapshot) is done and the focus/batch seeding defect is fixed (commit <code>8c4b1f54</code>) — the mop-up now seeds cleanly. Stage 1 is blocked only by billing: <code>OPENROUTER_API_KEY_IMAS_CODEX</code> reached its total spend limit (403 on every call). Once the key's total limit is raised (or credits topped up) on the OpenRouter workspace, re-run the full-355 gap mop-up (gap-only retries the 150 failed sources), then cut the fork-PR batch RC. Corpus at 209/355 accepted; ~146 nameable residual. 500 USD ceiling still authorized; --cost-limit is soft (~1.7–2.7× overshoot).</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -440,6 +455,71 @@ Done-when
      RC-tagged. Record RC version, PR URL, batch size, and judge the LLM PR body.
   3. Total LLM spend vs the 500 USD ceiling recorded; followup for stages 3-6
      (post-human-review) queued; this one resolved.</pre>
+    <p class="r-fu-outcome">Precondition met (OpenRouter key limit lifted; probe composed paid calls, zero 403s). Stage-1 mop-up drained over three gap-only passes (~$21, far under the 500 USD ceiling): accepted 209→258→273→274/355. Draining surfaced two independent vocab-gap defects, both fixed + TDD'd: (1) the blocked-source outcome was persisted lossily and would strand nameable sources — now records skip_reason_detail (segment:token) and retires only on a genuinely-absent closed-segment gap (commit 57283b08); (2) THE root cause — the gap classifier was blind to the ISN operator vocabulary (a mechanism outside SEGMENT_TOKEN_MAP), fabricating 'absent' gaps for existing grammar: normalized (n=43), flux_surface_averaged, line_integrated, square — now derives operators from get_grammar_context() at runtime (commit ab826533). Reconcile reclassified 15 false gaps absent→wrong_slot_placement and revived the sources. Exhaustive gap review answered 'update ISN as required': most 'gaps' already exist (operators; optical_depth=opacity) — the residual is three classes, only ~5 tokens a genuine ISN add. NOT yet converged: pass 3 confirmed the composer still mis-slots operators (operator-dependent sources now cycle retry→failed instead of vocab_gap — still unnamed), so a compose-prompt fix (inject full operator registry + ordinal-drop guidance) is the missing lever. Stage 2 (cut the fork-PR RC) is deferred to convergence. Record: docs/archive/sn-west-review-rehearsal-vocab-gap-rca-landed.html. Continued in f-swrr-006 (gap-closure) → f-swrr-007 (stage-2 RC).</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-006" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T14:10:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the WEST gap residual: compose-prompt operators + ordinal naming, then the ~5 genuine ISN adds</h4>
+    <div class="r-fu-body"><p>Mop-up plateaued at 274/355; the classifier fix (ab826533) stopped false-retirement but the composer still mis-slots operators, so operator-composed quantities (normalized-beta, the gm1–gm7 flux-surface metric coefficients, darea_dpsi) now cycle retry→failed unnamed. The missing lever is a compose-prompt fix: inject the FULL operator registry (get_grammar_context().grammar.vocabularies.operators — the static examples in _grammar_reference.md omit flux_surface_averaged / line_integrated / square) and add ordinal-drop guidance (name the line-of-sight endpoint quantity via the existing line_of_sight locus, WITHOUT the point index — per the user: ordinality never enters the name). Then add the ~5 genuinely-absent atomic tokens to the ISN fork (ellipticity, signal_to_noise_ratio, transit_time, path_length_variation, inboard_midplane — verify each truly absent from operators + physical_bases + semantic equivalents first; optical_depth already = opacity), cut an ISN RC, bump the codex pin (pyproject 2 sites). Re-run the gap-only mop-up to converge, recording the residual + skip reasons.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stage 1 gap-closure (compose-prompt + genuine ISN adds)
+Tier:    opus
+
+Context
+  Stage-1 mop-up is at 274/355 accepted (~$21 spent, 500 USD ceiling). Two vocab-gap
+  defects are already fixed + committed (57283b08 persistence; ab826533 operator
+  classifier) and reconcile revived the false-gap sources. Pass 3 confirmed the
+  composer still mis-slots operators, so operator-composed + ordinal sources stay
+  unnamed. This followup closes the residual via the composer + a small ISN add.
+
+State to read
+  docs/archive/sn-west-review-rehearsal-vocab-gap-rca-landed.html   (the RCA + 3-class review)
+  imas_codex/llm/prompts/shared/sn/_grammar_reference.md            (compose grammar ref — operator examples are a STATIC subset)
+  imas_codex/standard_names/segments.py                            (is_actionable_gap / _operator_tokens — the landed classifier fix)
+  ~/Code/imas-standard-names/imas_standard_names/grammar/vocabularies/  (ISN fork vocab; operators.yml, physical_bases.yml, locus_registry.yml)
+
+Scope / constraints
+  - ISN OWNS ALL GRAMMAR VOCABULARY: derive operator/segment tokens from get_grammar_context() — never hardcode in codex.
+  - Compose-prompt: inject the FULL operator registry (not a static example subset); add ordinal-drop guidance (name the quantity via the line_of_sight locus, drop the point index — ordinality never enters the name). Find existing examples of ordinal-indexed DD quantities named without the index.
+  - Genuine ISN adds: ONLY after an exhaustive search confirms each token is absent from operators AND physical_bases AND semantic equivalents. Candidates: ellipticity, signal_to_noise_ratio, transit_time, path_length_variation, inboard_midplane. optical_depth = existing opacity (do NOT add). Follow ISN conventions (definitions), run build-grammar, run the ISN grammar suites, cut v0.8.0rc55 on the fork, bump the codex pyproject pin (2 sites).
+  - gm1-gm7 / darea_dpsi: nameable via operators (flux_surface_averaged, square, derivative_with_respect_to) — long descriptive names are fine (no hard length limit); no new giant compound base tokens.
+  - Gap-only mop-up; never --reseed; PR target stays fork.
+
+Done-when
+  1. Compose prompt injects the full operator registry + ordinal-drop guidance; a mop-up pass names a meaningful share of the previously-failed operator-composed + line-of-sight sources (measure before/after accepted count).
+  2. The ~5 genuine ISN tokens (those confirmed absent) added on the fork, RC cut, codex pin bumped; grammar suites green.
+  3. Gap-only mop-up re-run to convergence; residual + skip reasons recorded (legitimately-skipped eligibility exclusions vs remaining genuine gaps). Total spend vs the 500 USD ceiling recorded.
+  4. This followup resolved; f-swrr-007 (stage-2 RC) is unblocked.</pre>
+    </article>
+<article class="r-fu" data-id="f-swrr-007" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T14:10:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut the fork-PR batch RC (stage 2) once the gap residual is closed</h4>
+    <div class="r-fu-body"><p>After f-swrr-006 converges the WEST accepted set, cut the review-batch RC on the fork (stage 2): <code>sn release --batch west_task_2e --bump minor -m "WEST review batch rehearsal"</code>. Verify the additive diff (approved set byte-identical), catalog.yml export_scope=review + review_batch, the frozen artifact, RC tag, and the fork PR open. Record RC version, PR URL, batch size, and judge the LLM-written PR body (first live output of the sn-release-notes seat). Then queue stages 3–6 (human review → sn merge fold-back exercising the graph-merged: tag from §4b → freeze-check → --undo unwind).</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stage 2 (cut the fork-PR batch RC)
+Tier:    opus
+
+Context
+  Stage-1 gap-closure (f-swrr-006) has converged the WEST accepted set. This cuts
+  the review-batch RC on the fork and opens the PR — the first live exercise of the
+  sn-release-notes PR-body seat and (at stage 4) the §4b graph-merged: tag.
+
+State to read
+  imas_codex/cli/sn.py                                    (sn release --batch)
+  docs/archive/sn-west-review-rehearsal-vocab-gap-rca-landed.html
+  ~/.local/share/imas-codex/logs/                          (per-run logs; never pipe CLI output)
+
+Scope / constraints
+  - PR target stays fork (auto for an RC batch) — no --final in act 1.
+  - Snapshot already exists (stage 0); do NOT re-snapshot unless the graph was reloaded.
+
+Done-when
+  1. sn release --batch west_task_2e --bump minor opens the fork PR; additive diff
+     (approved set byte-identical); catalog.yml export_scope=review + review_batch;
+     artifact frozen + RC-tagged. Record RC version, PR URL, batch size, LLM PR-body quality.
+  2. §3 stages 0–2 collapse to a landed summary; stages 3–6 (human review → sn merge
+     fold-back → freeze-check → --undo) queued as the next followup.
+  3. This followup resolved.</pre>
     </article>
 </section>
 
