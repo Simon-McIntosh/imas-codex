@@ -146,6 +146,43 @@ def test_focus_gap_only_leaves_accepted_untouched(focus_nodes, tmp_path, monkeyp
 
 
 @pytest.mark.graph
+def test_focus_seeds_sources_with_exact_dd_version(focus_nodes, tmp_path, monkeypatch):
+    """Every seeded focus source must carry an exact ``dd_version``.
+
+    ``_pin_dd_source_snapshots`` refuses to infer ``latest`` for a genuinely
+    new DD source, so the CLI must stamp the current DD version onto every
+    source dict (mirroring the extraction worker). A missing stamp aborts the
+    whole mop-up before any LLM spend the moment the manifest carries a source
+    that was never seeded before.
+    """
+    from imas_codex.settings import get_dd_version
+
+    manifest = _write_manifest(tmp_path)
+    monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", lambda **kw: None)
+
+    captured: list[dict] = []
+
+    def _capture(sources, force=False):
+        captured.extend(sources)
+        return len(sources)
+
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+        _capture,
+    )
+
+    result = CliRunner().invoke(sn, ["run", "--focus", str(manifest), "--dry-run"])
+
+    assert result.exit_code == 0, result.output
+    assert captured, "no focus sources were seeded"
+    current = get_dd_version()
+    for src in captured:
+        assert src.get("dd_version") == current, (
+            f"seeded source {src.get('id')!r} lacks an exact dd_version"
+        )
+
+
+@pytest.mark.graph
 def test_focus_reseed_restages_accepted(focus_nodes, tmp_path, monkeypatch):
     manifest = _write_manifest(tmp_path)
     monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", lambda **kw: None)

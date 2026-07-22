@@ -1760,7 +1760,14 @@ def sn_run(
                     )
                 return
 
-        # 2. Seed StandardNameSource nodes for each focused path.
+        # 2. Seed StandardNameSource nodes for each focused path. A genuinely
+        #    new DD source must be pinned to an exact DD version — the seed
+        #    guard refuses to infer 'latest' — so stamp the current version on
+        #    every source dict, mirroring the extraction worker. Re-seeds reuse
+        #    their stored snapshot and ignore this value.
+        from imas_codex.settings import get_dd_version
+
+        dd_ver = get_dd_version()
         sources = []
         for path in flat_focus:
             sources.append(
@@ -1771,6 +1778,7 @@ def sn_run(
                     "dd_path": path,
                     "batch_key": "focus",
                     "status": "extracted",
+                    "dd_version": dd_ver,
                     "description": "",
                 }
             )
