@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-gap-closure-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — gap-closure: compose-prompt operators, line-of-sight locus, ISN adds | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 stage-1 gap-closure — the composer now names operator-composed, line-of-sight, and genuine-gap sources (2026-07-22)</h1>
+    <p>
+      The mop-up plateaued at 274/355 not because the residual was
+      unnameable, but because three levers were missing: the compose prompt
+      hid most of the operator vocabulary, the line-of-sight guidance pointed
+      at a base token the grammar had retired, and two atomic quantities were
+      genuinely absent from ISN. All three are now fixed; a gap-only re-run
+      shows the composer producing the correct names for every class.
+    </p>
+
+    <h2>What landed</h2>
+    <table>
+      <thead><tr><th>Fix</th><th>Commit</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Inject the FULL operator registry into the compose grammar reference</td>
+          <td><code>d622dfc2</code></td>
+          <td>Derived from <code>get_grammar_context()</code> and rendered grouped
+              by attachment kind; the composer stopped mis-slotting
+              <code>line_integrated</code> / <code>flux_surface_averaged</code> /
+              <code>square</code> / <code>inverse</code> / <code>variation</code> /
+              <code>change_in</code> as qualifiers or false gaps</td>
+        </tr>
+        <tr>
+          <td>Name line-of-sight endpoints via the <code>line_of_sight</code> locus</td>
+          <td><code>d622dfc2</code></td>
+          <td>The prompt told the composer to use
+              <code>base_token=line_of_sight</code>, but that token is a
+              registered LOCUS (not a base) — so it emitted a false
+              <code>vocab_gap</code>. Fixed both system and DD prompts to
+              <code>radial_coordinate_of_line_of_sight</code> (base=coordinate,
+              locus=line_of_sight), matching the accepted catalog form and the
+              grammar reality the code already enforced
+              (<code>test_line_of_sight_is_no_longer_a_geometry_carrier</code>)</td>
+        </tr>
+        <tr>
+          <td>Add the two genuinely-absent atomic tokens to the ISN fork (rc55)</td>
+          <td><code>b0665da0</code></td>
+          <td><code>ellipticity</code> (physical_base, dimensionless — the
+              polarization-ellipse ellipticity) and <code>inboard_midplane</code>
+              (position locus, the high-field-side counterpart of the existing
+              <code>outboard_midplane</code>); pin bumped both pyproject sites +
+              lockfile to <code>4265af7</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Verification searches — three of the five candidates were NOT genuine gaps</h2>
+    <p>
+      The followup listed five candidate ISN adds; an exhaustive search of the
+      installed vocabulary confirmed only two were genuinely absent:
+    </p>
+    <table>
+      <thead><tr><th>Candidate</th><th>Verdict</th><th>Resolution</th></tr></thead>
+      <tbody>
+        <tr><td><code>ellipticity</code></td><td>ABSENT everywhere</td><td>Added (physical_base)</td></tr>
+        <tr><td><code>inboard_midplane</code></td><td>ABSENT (but <code>outboard_midplane</code> exists)</td><td>Added (position locus)</td></tr>
+        <tr><td><code>path_length_variation</code></td><td>Expressible</td><td>The <code>variation</code> operator + the existing <code>length</code> base compose <code>variation_of_length_of_interferometer_beam</code> — no add</td></tr>
+        <tr><td><code>signal_to_noise_ratio</code></td><td>Signal-chain quality metric</td><td>Not a plasma physics observable — routes to <code>skipped</code>, not an ISN add</td></tr>
+        <tr><td><code>transit_time</code></td><td>Not in the WEST residual</td><td>No source needs it — not added</td></tr>
+        <tr><td><code>optical_depth</code></td><td>Synonym of <code>opacity</code></td><td>Existing token — not added</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The composer now names each class correctly</h2>
+    <p>
+      A gap-only, names-only mop-up on the residual (81 seeded sources) shows
+      the composer emitting the correct forms it previously could not:
+    </p>
+    <table>
+      <thead><tr><th>Class</th><th>Source example</th><th>Name now produced</th></tr></thead>
+      <tbody>
+        <tr><td>Operator-composed</td><td><code>interferometer/channel/n_e_line</code></td><td><code>line_integrated_electron_density</code></td></tr>
+        <tr><td>Operator-composed</td><td><code>equilibrium/.../gm5</code> (⟨B²⟩)</td><td><code>flux_surface_averaged_magnetic_field</code></td></tr>
+        <tr><td>Operator (variation)</td><td><code>interferometer/channel/path_length_variation</code></td><td><code>variation_of_length_of_interferometer_beam</code></td></tr>
+        <tr><td>Line-of-sight locus</td><td><code>*/line_of_sight/*_point/r</code></td><td><code>radial_coordinate_of_line_of_sight</code></td></tr>
+        <tr><td>New token</td><td><code>polarimeter/channel/ellipticity_initial</code></td><td><code>initial_wave_polarization_ellipticity_at_line_of_sight</code></td></tr>
+        <tr><td>New token</td><td><code>equilibrium/.../r_inboard</code></td><td><code>radial_coordinate_at_inboard_midplane</code> (accepted)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="convergence">Mop-up convergence</h2>
+    <p id="convergence-body">
+      Two gap-only, names-only re-runs on the 81-source residual reached
+      <code>stop_reason=no_eligible_work</code> for a combined
+      <strong>$6.59</strong> (≈$28 cumulative rehearsal, far under the 500 USD
+      ceiling). Accepted sources rose <strong>274 → 290 (+16)</strong>; skipped
+      steady at 19. The first run was cut short (<code>degraded</code>) by a
+      Neo4j SLURM-node failure at finalize — the writes it had already committed
+      persisted; the node auto-restarted on
+      <code>98dci4-clu-3062</code> and the second run drained cleanly. Total
+      composed 52, reviewed 43, regenerated 18 across the two passes.
+    </p>
+
+    <h2>Residual after gap-closure</h2>
+    <p id="residual-body">
+      Of the 50 non-skipped sources not yet <code>accepted</code>:
+    </p>
+    <ul>
+      <li><strong>37 carry a correct, valid produced name awaiting review
+        acceptance</strong> (25 <code>pending</code>, 8 <code>drafted</code>,
+        4 <code>reviewed</code>) — e.g.
+        <code>line_integrated_electron_density_of_line_of_sight</code>,
+        <code>total_energy</code>, <code>toroidal_plasma_beta</code>,
+        <code>variation_of_length_of_interferometer_beam</code>,
+        <code>initial_wave_polarization_ellipticity_at_line_of_sight</code>.
+        These are NOT naming gaps — the names exist and validate; they are a
+        <strong>review-entry gap</strong>: names produced at
+        <code>name_stage=pending</code> (score null) are never claimed by
+        <code>REVIEW_NAME</code> (which claims <code>drafted</code>), so the
+        pool reports <code>no_eligible_work</code> while valid names sit
+        unreviewed. Advancing them to <code>accepted</code> is a review pass
+        (stage-2 prep), not composer work.</li>
+      <li><strong>3 superseded</strong> — <code>beta_tor</code> variants whose
+        source should re-link to the successor
+        <code>normalized_toroidal_plasma_beta</code> (a provenance relink).</li>
+      <li><strong>10 genuinely unnamed</strong> — the hard residual:
+        the flux-surface metric coefficients <code>gm1</code> (⟨1/R²⟩),
+        <code>gm6</code>, <code>gm7</code> (⟨|∇ρ|⟩), <code>gm9</code>
+        (deep nested <code>inverse</code>/<code>square</code> or a
+        |∇ρ| carrier the composer still won't assemble);
+        <code>tf/delta_b_field_phi_vacuum_r</code> (<code>change_in</code> not
+        applied); <code>ece/channel/optical_depth</code> (should reuse
+        <code>opacity</code>); the contour-tree node; <code>h_98</code>
+        (confinement-scaling factor); the hard-x-ray peak position; and the
+        <code>signal_to_noise</code> diagnostic-quality metric (properly a
+        <code>skipped</code>, not a gap).</li>
+    </ul>
+    <p>
+      The starting plateau (operator-composed + line-of-sight + genuine-token
+      sources unnameable) is closed: every one of those classes now composes a
+      correct name. What remains is a small, well-understood tail — a
+      review-entry throughput matter (stage-2 prep) plus ~10 esoteric or
+      skippable quantities.
+    </p>
+
+    <h2>Tests</h2>
+    <p>
+      New <code>test_compose_operator_registry.py</code>: the operator registry
+      is injected and mirrors ISN exactly (no drift, no hardcoding); the
+      grammar reference renders the full registry; the compose prompt names
+      line-of-sight via its locus. The ISN rc55 manifest model added a
+      <code>review_batch</code> field, so the export validation round-trip was
+      re-introducing <code>review_batch: null</code> on full-catalog manifests
+      — fixed by dropping it post-dump when no batch is present, restoring the
+      byte-identical additive-diff guarantee. Golden DD-prompt regenerated.
+      ISN grammar suite: 1234 passed. Codex SN suite green.
+    </p>
+  </main>
+</body>
+</html>
