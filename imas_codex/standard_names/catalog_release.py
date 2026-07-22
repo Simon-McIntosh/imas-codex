@@ -790,6 +790,7 @@ def run_review_release(
     pr_creator: Any | None = None,
     upstream_repo: str | None = None,
     fork_owner: str | None = None,
+    pr_target: str = "upstream",
 ) -> ReviewReleaseReport:
     """Mint → freeze → export → branch → push → PR → back-fill, in one call.
 
@@ -912,16 +913,23 @@ def run_review_release(
         return report
     report.pushed = True
 
-    # ── 6. Open the PR upstream and back-fill the artifact ─────────────
-    # The PR target and fork owner are derived from the ISNC checkout's own
+    # ── 6. Open the PR and back-fill the artifact ──────────────────────
+    # The PR repo and fork owner are derived from the ISNC checkout's own
     # remotes — never hardcoded — so the tool follows whatever catalog repo
-    # the checkout actually tracks.
+    # the checkout actually tracks. pr_target='fork' raises the PR within the
+    # fork itself (origin) — the full gh review/merge flow with no upstream
+    # noise (rehearsals); 'upstream' (default) targets the real catalog.
     if upstream_repo is None:
-        slug = _github_slug(isnc_path, "upstream") or _github_slug(isnc_path, "origin")
+        if pr_target == "fork":
+            slug = _github_slug(isnc_path, "origin")
+        else:
+            slug = _github_slug(isnc_path, "upstream") or _github_slug(
+                isnc_path, "origin"
+            )
         if slug is None:
             report.errors.append(
-                "cannot derive the PR target repo: the ISNC checkout has no "
-                "github 'upstream' (or 'origin') remote — pass upstream_repo"
+                f"cannot derive the PR target repo (pr_target={pr_target}): the "
+                "ISNC checkout has no matching github remote — pass upstream_repo"
             )
             return report
         upstream_repo = f"{slug[0]}/{slug[1]}"

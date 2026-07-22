@@ -87,3 +87,28 @@ def test_load_names_dedups_and_orders(tmp_path):
     p2 = _write(tmp_path, "d2.yaml", body)
     with pytest.raises(SourcesManifestError):
         load_names_file(p2)
+
+
+# ── batch-token resolution (short name → committed manifest) ───────────────
+
+
+def test_resolve_batch_token_literal_path(tmp_path):
+    from imas_codex.standard_names.sources_manifest import resolve_batch_token
+
+    p = _write(tmp_path, "x.yaml", SOURCES_DOC)
+    assert resolve_batch_token(str(p)) == p
+
+
+def test_resolve_batch_token_short_name_finds_committed_manifest():
+    from imas_codex.standard_names.sources_manifest import resolve_batch_token
+
+    resolved = resolve_batch_token("west_task_2e")
+    assert resolved is not None
+    assert resolved.name == "west_task_2e.yaml"
+    assert resolved.parent.name == "manifests"
+
+
+def test_resolve_batch_token_unknown_returns_none():
+    from imas_codex.standard_names.sources_manifest import resolve_batch_token
+
+    assert resolve_batch_token("no_such_manifest_anywhere") is None

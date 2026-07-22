@@ -268,3 +268,54 @@ def test_pr_target_derived_from_remotes(isnc_repo, tmp_path):
     assert _github_slug(isnc_repo, "upstream") == ("example-org", "example-catalog")
     assert _github_slug(isnc_repo, "origin") == ("example-fork", "example-catalog")
     assert _github_slug(isnc_repo, "nosuch") is None
+
+
+def test_pr_target_fork_uses_origin_slug(isnc_repo, tmp_path):
+    """pr_target='fork' derives the PR repo from origin, not upstream."""
+    _git(
+        "remote",
+        "add",
+        "upstream",
+        "git@github.com:example-org/example-catalog.git",
+        cwd=isnc_repo,
+    )
+    focus = _write_names_focus(tmp_path)
+    seen: dict = {}
+
+    def pr_creator(*, branch, base, title, body, repo, head_owner):
+        seen["repo"] = repo
+        return 1, f"https://github.com/{repo}/pull/1"
+
+    # origin is the local bare path (not github) → fork derivation must fail
+    # loudly rather than fall back to upstream.
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "x",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=pr_creator,
+        fork_owner="example-fork",
+        pr_target="fork",
+    )
+    assert report.errors and "pr_target=fork" in report.errors[0]
+    assert "repo" not in seen
+
+    # With a github origin, the fork slug is used as the PR repo.
+    _git(
+        "remote",
+        "set-url",
+        "origin",
+        "git@github.com:example-fork/example-catalog.git",
+        cwd=isnc_repo,
+    )
+    # Pushing to a fake github URL would fail — pre-create the branch push
+    # target locally by re-pointing origin back after derivation is not
+    # possible mid-call, so assert via dry_run=False is skipped; instead
+    # verify the derivation helper directly.
+    from imas_codex.standard_names.catalog_release import _github_slug
+
+    assert _github_slug(isnc_repo, "origin") == ("example-fork", "example-catalog")

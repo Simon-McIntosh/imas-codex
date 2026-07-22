@@ -48,6 +48,30 @@ def _validate(doc: dict, schema_filename: str, path: str | Path) -> None:
             ) from None
 
 
+def resolve_batch_token(token: str) -> Path | None:
+    """Resolve a batch token to a manifest file on disk.
+
+    Accepts a literal path, or a short name resolved against the committed
+    manifest homes — ``manifests/<name>.yaml`` (sn-sources) and
+    ``manifests/reviews/<name>.sn_names.yaml`` (frozen batch artifacts) — so
+    ``--batch west_task_2e`` finds the WEST manifest without a path.
+    Returns None when nothing matches (the caller raises with context).
+    """
+    p = Path(token)
+    if p.is_file():
+        return p
+    base = Path(__file__).parent / "manifests"
+    for candidate in (
+        base / f"{token}.yaml",
+        base / f"{token}.yml",
+        base / "reviews" / f"{token}.sn_names.yaml",
+        base / "reviews" / f"{token}.yaml",
+    ):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def is_sources_file(token: str) -> bool:
     """True if *token* refers to an existing file (vs a bare DD path)."""
     try:

@@ -1057,6 +1057,19 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
+    "--batch",
+    "batch_name",
+    type=str,
+    default=None,
+    help=(
+        "Scope the run to a committed manifest by NAME or path — "
+        "'--batch west_task_2e' resolves to standard_names/manifests/"
+        "west_task_2e.yaml and behaves exactly like --focus <that file>. The "
+        "same token drives sn release --batch, keeping one batch identity "
+        "across mop-up, release, and merge."
+    ),
+)
+@click.option(
     "--reseed",
     is_flag=True,
     default=False,
@@ -1467,6 +1480,7 @@ def sn_run(
     quiet: bool,
     focus_paths: tuple[str, ...],
     paths: tuple[str, ...],
+    batch_name: str | None,
     reseed: bool,
     reset_to: str | None,
     from_model: str | None,
@@ -1574,6 +1588,21 @@ def sn_run(
     # Flatten --focus values (handled by _SpaceSplitMultiple.type_cast_value).
     # Merge with trailing positional paths argument.
     flat_focus = list(focus_paths) + list(paths)
+
+    # --batch <name-or-path>: resolve against the committed manifest homes and
+    # feed the file through the same focus machinery — one batch identity
+    # across sn run / sn release / sn merge.
+    if batch_name:
+        from imas_codex.standard_names.sources_manifest import resolve_batch_token
+
+        resolved_batch = resolve_batch_token(batch_name)
+        if resolved_batch is None:
+            raise click.UsageError(
+                f"--batch {batch_name!r}: no such file, and no manifest named "
+                f"'{batch_name}.yaml' under standard_names/manifests/ "
+                "(or reviews/)."
+            )
+        flat_focus.append(str(resolved_batch))
 
     # A focus token that is a file on disk is an sn-sources manifest: validate it
     # against the schema and expand its sources to <ids>/<path> focus paths.
@@ -3844,14 +3873,27 @@ def sn_preview(
 @click.option(
     "--batch",
     "batch_file",
-    type=click.Path(exists=True, dir_okay=False),
+    type=str,
     default=None,
     help=(
-        "Cut a review-batch RC from a manifest file (sn_sources or sn_names): "
-        "mint the SN set, freeze it under manifests/reviews/<rc>.sn_names.yaml, "
-        "export approved ∪ batch, branch + push to the fork, open the upstream "
-        "PR, and back-fill the PR number/URL — all in one step. The same file "
-        "drives sn run --focus for the mop-up half."
+        "Cut a review-batch RC from a manifest (sn_sources or sn_names), given "
+        "as a NAME ('west_task_2e' resolves under standard_names/manifests/) or "
+        "a path: mint the SN set, freeze it under manifests/reviews/"
+        "<rc>.sn_names.yaml, export approved ∪ batch, branch + push to the "
+        "fork, open the PR, and back-fill the PR number/URL — all in one step. "
+        "The same token drives sn run --batch for the mop-up half."
+    ),
+)
+@click.option(
+    "--pr-target",
+    type=click.Choice(["upstream", "fork"]),
+    default="upstream",
+    show_default=True,
+    help=(
+        "[--batch] Where the review PR is raised: 'upstream' (the checkout's "
+        "upstream remote — the real catalog) or 'fork' (the origin remote — a "
+        "full gh rehearsal with review/merge touch points, zero upstream "
+        "noise)."
     ),
 )
 @click.option(
@@ -3929,6 +3971,7 @@ def sn_release(
     dry_run: bool,
     names_only: bool,
     batch_file: str | None,
+    pr_target: str,
     export_only: bool,
     min_score: float,
     include_unreviewed: bool,
@@ -4023,6 +4066,16 @@ def sn_release(
         if action is not None:
             raise click.ClickException("--batch does not take an ACTION argument.")
         from imas_codex.standard_names.catalog_release import run_review_release
+        from imas_codex.standard_names.sources_manifest import resolve_batch_token
+
+        resolved_batch = resolve_batch_token(batch_file)
+        if resolved_batch is None:
+            raise click.UsageError(
+                f"--batch {batch_file!r}: no such file, and no manifest named "
+                f"'{batch_file}.yaml' under standard_names/manifests/ "
+                "(or reviews/)."
+            )
+        batch_file = str(resolved_batch)
 
         staging_path = Path(staging) if staging else get_sn_staging_dir()
         export_kwargs: dict[str, Any] = {}
@@ -4033,6 +4086,7 @@ def sn_release(
         console.print("\n[bold]Standard-Name Review Batch[/bold]")
         console.print(f"  ISNC: {isnc_path}")
         console.print(f"  Batch: {batch_file}")
+        console.print(f"  PR target: {pr_target}")
         if dry_run:
             console.print("  Mode: [yellow]dry run[/yellow]")
         console.print("")
@@ -4046,6 +4100,7 @@ def sn_release(
                 remote=remote,
                 dry_run=dry_run,
                 export_kwargs=export_kwargs or None,
+                pr_target=pr_target,
             )
         except Exception as exc:
             console.print(f"[red]Review-batch error:[/red] {exc}")
@@ -4234,13 +4289,14 @@ def sn_release(
 @click.option(
     "--batch",
     "batch_file",
-    type=click.Path(exists=True, dir_okay=False),
+    type=str,
     default=None,
     help=(
-        "Frozen sn-names batch artifact (manifests/reviews/<rc>.sn_names.yaml). "
-        "Untouched batch names auto-promote accepted→approved on merge; edited "
-        "names still re-trigger the full review. Auto-located from the PR's "
-        "review/<rc> branch when --pr is given."
+        "Frozen sn-names batch artifact, by NAME (resolved under "
+        "standard_names/manifests/reviews/) or path. Untouched batch names "
+        "auto-promote accepted→approved on merge; edited names still "
+        "re-trigger the full review. Auto-located from the PR's review/<rc> "
+        "branch when --pr is given."
     ),
 )
 @click.option(
@@ -4341,6 +4397,16 @@ def sn_merge(
 
     batch: list[str] | None = None
     if batch_file:
+        from imas_codex.standard_names.sources_manifest import resolve_batch_token
+
+        resolved_artifact = resolve_batch_token(batch_file)
+        if resolved_artifact is None:
+            raise click.UsageError(
+                f"--batch {batch_file!r}: no such file, and no artifact named "
+                f"'{batch_file}.sn_names.yaml' under standard_names/manifests/"
+                "reviews/."
+            )
+        batch_file = str(resolved_artifact)
         batch = load_names_file(batch_file)
 
     # ── --undo: unwind this PR's promotions and stop ───────────────────
