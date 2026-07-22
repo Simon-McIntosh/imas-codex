@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"    content="imas-codex">
-  <meta name="reckon-type"     content="plan">
-  <meta name="plan-slug"       content="sn-west-review-rehearsal">
-  <meta name="plan-title"      content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
-  <meta name="plan-summary"    content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
-  <meta name="plan-status"     content="draft">
-  <meta name="plan-roi"        content="high">
-  <meta name="plan-effort"     content="M">
-  <meta name="plan-tier"       content="opus">
-  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-west-review-rehearsal">
+  <meta name="plan-title" content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
+  <meta name="plan-summary" content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="sn-catalog-approval-pipeline">
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-22">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -130,7 +132,9 @@
         Done-when: untouched names <code>approved</code> with provenance; the good edit
         re-reviewed → <code>approved</code>; the bad edit → <code>contested</code>
         (visible in <code>sn status --contested</code>). Exercise one resolution path
-        (<code>sn revert &lt;id&gt; --reason "rehearsal"</code>).</li>
+        (<code>sn revert &lt;id&gt; --reason "rehearsal"</code>). With the §4b tag
+        contract landed, also verify the <code>graph-merged:</code> tag appears on the
+        merge commit — and that stage 6's <code>--undo</code> removes it.</li>
       <li><strong>Freeze check, then unwind.</strong>
         <code>uv run imas-codex sn run</code> (no scope) — no approved name mutates;
         contested/approved are pool-excluded. Then
@@ -153,6 +157,44 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
       provenance — the machine-generated nameset's first human validation.
     </p>
 
+    <h2 id="s4b">§4b — The tag contract: the version tag is the fold-back receipt</h2>
+    <p>
+      Two events complete any release. The human merging the PR is durably recorded by
+      GitHub. The maintainer folding it back into the graph (<code>sn merge</code>) is
+      recorded nowhere durable today — a merged PR with a forgotten fold-back is
+      silently inconsistent. <strong>Decision (D-final-shape, locked): the version tag
+      is the receipt for the fold-back, created by <code>sn merge</code>, not by
+      release.</strong>
+    </p>
+    <ul>
+      <li><strong>Who tags, when, where:</strong> after a successful non-dry
+        fold-back, <code>sn merge</code> creates the version tag (batch:
+        <code>vX.Y.ZrcN</code>; final: <code>vX.Y.Z</code>) <em>on the merge
+        commit</em> and pushes it to the PR's target repo. Tag-on-merge-commit also
+        resolves the ordering problem a release-time tag would have — a tag cut before
+        the merge points at a commit the target repo never receives.</li>
+      <li><strong>Tag message = the machine-readable contract:</strong>
+        <code>graph-merged: &lt;iso-ts&gt;</code> + PR number/URL + batch artifact +
+        outcome counts (approved / auto-approved / contested). A tag whose message
+        starts <code>graph-merged:</code> ⇒ catalog and graph are in sync for this
+        version.</li>
+      <li><strong>Idempotency guard:</strong> <code>sn merge</code> checks for the tag
+        first — if it already carries the contract shape, the fold-back has happened
+        and the run refuses (or reports) instead of double-promoting.</li>
+      <li><strong>Inverse:</strong> <code>sn merge --undo</code> deletes the tag
+        (local + remote) — the contract no longer holds, and the absence of the tag
+        again means "merged but not folded back".</li>
+      <li><strong>Downstream benefit:</strong> the catalog site/CI deploys versions
+        from tags, so a deployed catalog version now <em>implies</em> graph
+        consistency. Plain full-catalog finals follow the same shape
+        (release branch → upstream PR → <code>sn merge</code>-owned tag on the merge
+        commit); no direct upstream-main or release-time upstream tag push remains.</li>
+    </ul>
+    <p>
+      Implementation is queued as a followup below and should land before §3 stage 4
+      so the rehearsal exercises the contract end-to-end.
+    </p>
+
     <h2 id="s5">§5 — Graph-state management &amp; cross-checks</h2>
     <ul>
       <li><strong>State discipline:</strong> snapshot before act 1 (stage 0); the
@@ -172,47 +214,47 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
         confirm the scratch/fork ISNC checkout's <code>origin</code>/<code>upstream</code>
         remotes since they drive the PR target;
         confirm <code>gh auth status</code> on this host.</li>
+      <li><strong>Spend authorization:</strong> full 355-source processing approved
+        (D-pilot locked full-355) with a <strong>500 USD ceiling</strong>; expected
+        total well below it. Size <code>--cost-limit</code> accordingly and note that
+        it is a soft cap (observed overshoot ~1.7–2.7×) — set the flag conservatively
+        below the ceiling.</li>
       <li><strong>Known deferred items</strong> (out of scope here, tracked in the
         parent plan): the batching structure for future corpora; the one-time
-        re-baseline of the published full catalog onto the approved-only model; the
-        plain (non-batch) <code>--final</code> release restructure — content via
-        fork→upstream PR with a tag-after-merge step, mirroring the batch flow — is an
-        open decision below.</li>
+        re-baseline of the published full catalog onto the approved-only model. The
+        plain <code>--final</code> release restructure is now locked (D-final-shape,
+        §4b) and its <code>sn merge</code> tag contract is queued below.</li>
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-
-      <div class="r-dec" data-key="pilot-scope" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-pilot — run act 1 on the full 355-source manifest, or on a small pilot subset first (e.g. one IDS, ~30 sources) to bound LLM spend before the full drain?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="pilot-first">Pilot subset first (one IDS manifest), then the full 355 (Recommended — bounds spend while the loop is unproven)</button>
-          <button class="r-opt" data-value="full-355">Full 355 directly (one pass, higher spend at risk)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-
-      <div class="r-dec" data-key="final-release-shape" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">D-final-shape — restructure the plain (full-catalog) `sn release --final` to match the batch flow: content travels by fork→upstream PR from a release branch, with the stable tag applied to the merge commit afterwards (no direct upstream-main push)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="pr-then-tag">Yes: release/&lt;version&gt; branch → upstream PR → tag-on-merge (Recommended; do after this rehearsal)</button>
-          <button class="r-opt" data-value="keep-direct">Keep the current direct upstream push for finals (content already merged via the fork-main PR workflow)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="pilot-scope" data-choice="full-355" data-by="Simon McIntosh" data-when="2026-07-22T06:00:03+00:00">
+    <p class="r-dec-q">D-pilot — run act 1 on the full 355-source manifest, or on a small pilot subset first (e.g. one IDS, ~30 sources) to bound LLM spend before the full drain?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="pilot-first">Pilot subset first (one IDS manifest), then the full 355 (Recommended — bounds spend while the loop is unproven)</button>
+      <button class="r-opt chosen" data-value="full-355">Full 355 directly (one pass, higher spend at risk)</button>
+      </p>
+    <p class="r-dec-rat">Locked: full spend — all 355 sn-sources need processing regardless, so a pilot only delays. Authorization: 500 USD ceiling; expected total well below. --cost-limit is a soft cap (observed overshoot ~1.7–2.7×) — set it conservatively under the ceiling.</p>
+    </div>
+<div class="r-dec" data-key="final-release-shape" data-choice="pr-then-tag" data-by="Simon McIntosh" data-when="2026-07-22T06:00:03+00:00">
+    <p class="r-dec-q">D-final-shape — restructure the plain (full-catalog) `sn release --final` to match the batch flow: content travels by fork→upstream PR from a release branch, with the stable tag applied to the merge commit afterwards (no direct upstream-main push)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="pr-then-tag">Yes: release/&lt;version&gt; branch → upstream PR → tag-on-merge (Recommended; do after this rehearsal)</button>
+      <button class="r-opt" data-value="keep-direct">Keep the current direct upstream push for finals (content already merged via the fork-main PR workflow)</button>
+      </p>
+    <p class="r-dec-rat">Locked, refined (§4b): the version tag is the FOLD-BACK RECEIPT, owned by sn merge — created on the merge commit after a successful graph fold-back, message prefixed &#x27;graph-merged:&#x27; with PR + batch + outcome counts. Contract: tag present with that shape ⇒ catalog and graph are in sync. sn merge checks it first (idempotency); --undo deletes it. Applies to batch RCs and plain finals alike; no direct upstream-main or release-time tag push remains.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-swrr-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-22">
-        <h4 class="r-fu-title">Pre-flight + stages 0–2: snapshot, mop-up, cut the fork-PR batch RC</h4>
-        <div class="r-fu-body">
-          <p>Run the §5 pre-flight cross-checks (ISN pin, remotes, gh auth), lock
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-swrr-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22T06:00:03+00:00" data-resolved-by="reckon-edit">
+    <h4 class="r-fu-title">Pre-flight + stages 0–2: snapshot, mop-up, cut the fork-PR batch RC</h4>
+    <div class="r-fu-body"><p>Run the §5 pre-flight cross-checks (ISN pin, remotes, gh auth), lock
           D-pilot, then execute §3 stages 0–2 and record outcomes (gap counts, RC
           version, PR URL, the LLM PR body). Stages 3–6 follow in a later session
-          after the human review of the fork PR.</p>
-        </div>
-        <pre class="r-fu-prompt">Project: imas-codex
+          after the human review of the fork PR.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
 Section: §3 stages 0–2
 Tier:    opus
@@ -237,8 +279,77 @@ Done-when
   1. Stage 0–2 outcomes recorded in the plan (§3 collapsed per stage as they land).
   2. Fork PR open; RC version + PR URL + batch size captured; PR-body quality judged.
   3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">Superseded by f-swrr-002 (tag contract, lands first) and f-swrr-003 (stages 0–2 with locked budget); D-pilot and D-final-shape are now locked so the pre-flight brief changed.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-002" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the sn merge tag contract (§4b) — fold-back receipt on the merge commit</h4>
+    <div class="r-fu-body"><p>Land the D-final-shape contract in <code>sn merge</code> before §3 stage 4 so the rehearsal exercises it: tag the merge commit with the version (<code>graph-merged:</code> message + PR/batch/outcome counts), push to the PR target repo, refuse a double fold-back when the contract tag exists, and delete the tag on <code>--undo</code>. TDD against the local bare-repo fixture.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §4b
+Tier:    opus
+
+Context
+  D-final-shape is locked: the version tag is the fold-back receipt, owned by
+  sn merge (see §4b for the full contract). Implement it so §3 stage 4 can
+  exercise it on the fork PR.
+
+State to read
+  imas_codex/standard_names/merge.py          (run_merge, undo_merge, resolve_merged_pr)
+  imas_codex/standard_names/catalog_release.py (_run_git, compute_next_version, backfill_review_artifact)
+  imas_codex/cli/sn.py                        (sn merge --pr / --undo wiring)
+  tests/standard_names/test_review_release.py (bare-repo fixture pattern)
+  tests/standard_names/test_sn_merge.py       (mocked-gh pattern)
+
+Scope locks / constraints
+  - Tag is created ONLY after a successful non-dry fold-back, on the merge commit,
+    named by the RC/version (from the review/&lt;rc&gt; branch), message first line
+    &#x27;graph-merged: &lt;iso-ts&gt;&#x27; then pr/batch/outcome lines.
+  - sn merge refuses (clear message, nonzero exit) when the contract tag already
+    exists on the target; --undo deletes the tag local+remote.
+  - Tag push goes to the PR target repo remote; failures are reported, never silent.
+  - No plan labels in symbols/comments; conventional commits; commit+push on green.
+
+Done-when
+  1. Tag created/pushed on fold-back; double fold-back refused; --undo removes it
+     (all covered by tests against the local bare repo — no live GitHub).
+  2. Full sn merge test set green.
+  3. This followup resolved; stage-4 rehearsal note in §3 already references it.</pre>
+    </article>
+<article class="r-fu" data-id="f-swrr-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stages 0–2: snapshot, full-355 mop-up (≤500 USD), cut the fork-PR batch RC</h4>
+    <div class="r-fu-body"><p>Budget authorized: 500 USD ceiling, expected well below. Run the §5 pre-flight cross-checks (gh auth, fork ISNC remotes, optional ISN pin bump), then §3 stages 0–2 on the full manifest and record outcomes (gap counts, RC version, PR URL, LLM PR-body quality). Stages 3–6 follow after the human review of the fork PR.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stages 0–2
+Tier:    opus
+
+Context
+  Decisions are locked (full-355, tag contract). Budget: 500 USD hard ceiling,
+  authorized; --cost-limit is a SOFT cap with ~1.7–2.7× observed overshoot, so
+  start around --cost-limit 150–200 and iterate in capped runs rather than one
+  large one. f-swrr-002 (tag contract) should land before stage 4 but does not
+  block stages 0–2.
+
+State to read
+  imas_codex/standard_names/manifests/west_task_2e.yaml   (the corpus)
+  imas_codex/cli/sn.py                                    (run --batch / release --batch)
+  docs/archive/sn-catalog-approval-pipeline-landed.html   (what shipped + limits)
+  ~/.local/share/imas-codex/logs/                          (per-run logs; never pipe CLI output)
+
+Scope locks / constraints
+  - Stage 0 snapshot (imas-codex graph export) is mandatory before any graph write.
+  - PR target stays fork (auto for an RC batch) — no --final in act 1.
+  - Gap-only default — never --reseed on this corpus.
+  - Pre-flight: gh auth status; fork ISNC checkout remotes; optional ISN pin bump to 411d812.
+
+Done-when
+  1. Stage 0–2 outcomes recorded in the plan (§3 collapsed per stage as they land),
+     including total LLM spend vs the 500 USD ceiling.
+  2. Fork PR open; RC version + PR URL + batch size captured; PR-body quality judged.
+  3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
+    </article>
+</section>
 
   </main>
 </body>
