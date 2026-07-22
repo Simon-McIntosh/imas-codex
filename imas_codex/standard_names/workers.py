@@ -2176,20 +2176,22 @@ def _update_sources_after_vocab_gap(
     *,
     max_attempts: int = 3,
 ) -> None:
-    """Persist the compose-time vocab-gap outcome onto each source.
+    """Set the source status after a compose-time vocab-gap report.
 
     A source is retired to ``vocab_gap`` ONLY when it is blocked by a
     genuinely-absent token in a closed grammar segment — the sole actionable
-    signal for an ISN vocabulary addition. The blocking ``segment:token`` list
-    is recorded in ``skip_reason_detail`` so the source explains itself without
-    a join back through the DD path.
+    signal for an ISN vocabulary addition. The blocking gap itself is persisted
+    by :func:`write_vocab_gaps` (which runs first) as a ``VocabGap`` node with a
+    direct ``StandardNameSource -[:HAS_STANDARD_NAME_VOCAB_GAP]-> VocabGap``
+    edge, so the source explains itself in one hop and ``reconcile_vocab_gaps``
+    revives it when the gap is resolved. This function only flips the status.
 
     A gap the composer mis-reported — a token that decomposes into existing
     tokens, sits in the wrong slot, is ambiguous, or is a false positive — is
-    not a vocabulary deficiency: the source is still nameable and the composer
-    erred, so it is kept retryable under the attempt-count cap rather than
-    stranded at ``vocab_gap``. Open/pseudo-segment gaps (grammar_ambiguity) are
-    ignored entirely.
+    not a vocabulary deficiency (and gets no node): the source is still nameable
+    and the composer erred, so it is kept retryable under the attempt-count cap
+    rather than stranded at ``vocab_gap``. Open/pseudo-segment gaps
+    (grammar_ambiguity) are ignored entirely.
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.segments import (
@@ -2215,43 +2217,37 @@ def _update_sources_after_vocab_gap(
     if not gaps_by_source:
         return
 
-    retire_rows: list[dict] = []
-    retry_rows: list[dict] = []
+    retire_ids: list[str] = []
+    retry_ids: list[str] = []
     for sns_id, gaps in gaps_by_source.items():
-        detail = "; ".join(f"{g.get('segment')}:{g.get('token')}" for g in gaps)[:300]
-        row = {"sns_id": sns_id, "detail": detail}
         if any(is_actionable_gap(g.get("segment"), g.get("token")) for g in gaps):
-            retire_rows.append(row)
+            retire_ids.append(sns_id)
         else:
-            retry_rows.append(row)
+            retry_ids.append(sns_id)
 
     try:
         with GraphClient() as gc:
-            if retire_rows:
+            if retire_ids:
                 gc.query(
                     """
-                    UNWIND $rows AS row
-                    MATCH (sns:StandardNameSource {id: row.sns_id})
+                    UNWIND $ids AS sns_id
+                    MATCH (sns:StandardNameSource {id: sns_id})
                     SET sns.status = 'vocab_gap',
-                        sns.skip_reason = 'vocab_gap',
-                        sns.skip_reason_detail = row.detail,
                         sns.claimed_at = null,
                         sns.claim_token = null
                     """,
-                    rows=retire_rows,
+                    ids=retire_ids,
                 )
-            if retry_rows:
+            if retry_ids:
                 # Composer mis-report, not a vocabulary gap — increment the
                 # attempt count and return the source to the compose pool;
                 # a deterministic failure still terminates at 'failed' once
                 # the cap is hit, so it is bounded, never stranded.
                 gc.query(
                     """
-                    UNWIND $rows AS row
-                    MATCH (sns:StandardNameSource {id: row.sns_id})
+                    UNWIND $ids AS sns_id
+                    MATCH (sns:StandardNameSource {id: sns_id})
                     SET sns.attempt_count = coalesce(sns.attempt_count, 0) + 1,
-                        sns.skip_reason = 'vocab_gap_nonactionable',
-                        sns.skip_reason_detail = row.detail,
                         sns.claimed_at = null,
                         sns.claim_token = null,
                         sns.status = CASE
@@ -2261,13 +2257,13 @@ def _update_sources_after_vocab_gap(
                             WHEN coalesce(sns.attempt_count, 0) + 1 >= $max_attempts
                             THEN datetime() ELSE sns.failed_at END
                     """,
-                    rows=retry_rows,
+                    ids=retry_ids,
                     max_attempts=max_attempts,
                 )
         wlog.debug(
             "vocab_gap update: %d retired, %d kept retryable",
-            len(retire_rows),
-            len(retry_rows),
+            len(retire_ids),
+            len(retry_ids),
         )
     except Exception:
         wlog.warning("Failed to persist vocab_gap source outcome", exc_info=True)

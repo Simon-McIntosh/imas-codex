@@ -4214,33 +4214,36 @@ def write_vocab_gaps(
             batch=list(gap_nodes.values()),
         )
 
-        # Create HAS_STANDARD_NAME_VOCAB_GAP relationships from source entities
-        if source_type == "dd":
-            # DD sources (IMASNode)
-            gc.query(
-                """
-                UNWIND $batch AS b
-                MATCH (vg:VocabGap {id: b.gap_id})
-                MATCH (src:IMASNode {id: b.source_id})
-                MERGE (src)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(vg)
-                SET r.reason = b.reason,
-                    r.observed_at = datetime(b.observed_at)
-                """,
-                batch=rel_batch,
-            )
-        else:
-            # Signal sources (FacilitySignal)
-            gc.query(
-                """
-                UNWIND $batch AS b
-                MATCH (vg:VocabGap {id: b.gap_id})
-                MATCH (src:FacilitySignal {id: b.source_id})
-                MERGE (src)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(vg)
-                SET r.reason = b.reason,
-                    r.observed_at = datetime(b.observed_at)
-                """,
-                batch=rel_batch,
-            )
+        # Create HAS_STANDARD_NAME_VOCAB_GAP relationships from the underlying
+        # DD path / facility signal entity (the DD-catalog view).
+        entity_label = "IMASNode" if source_type == "dd" else "FacilitySignal"
+        gc.query(
+            f"""
+            UNWIND $batch AS b
+            MATCH (vg:VocabGap {{id: b.gap_id}})
+            MATCH (src:{entity_label} {{id: b.source_id}})
+            MERGE (src)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(vg)
+            SET r.reason = b.reason,
+                r.observed_at = datetime(b.observed_at)
+            """,
+            batch=rel_batch,
+        )
+
+        # And a source-first link from the StandardNameSource itself — the
+        # canonical, one-hop "why is this source blocked?" edge that reconcile
+        # traverses. Its id is uniform across source types ({type}:{source_id}).
+        gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (vg:VocabGap {id: b.gap_id})
+            MATCH (sns:StandardNameSource {id: $prefix + b.source_id})
+            MERGE (sns)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(vg)
+            SET r.reason = b.reason,
+                r.observed_at = datetime(b.observed_at)
+            """,
+            batch=rel_batch,
+            prefix=f"{source_type}:",
+        )
 
     written = len(gap_nodes)
     logger.info("Wrote %d VocabGap nodes from %d gap reports", written, len(gaps))
@@ -6934,16 +6937,15 @@ def reconcile_vocab_gaps() -> dict[str, int]:
             )
 
         # Sources parked at 'vocab_gap' whose blocking gaps have all been
-        # resolved (no remaining HAS_STANDARD_NAME_VOCAB_GAP edge on their
-        # linked entity) revert to 'extracted' so the next generate pool
-        # retries them under the upgraded vocabulary. Without this, a
-        # vocabulary fix never un-blocks the sources that reported the gap.
+        # resolved (no remaining source-first HAS_STANDARD_NAME_VOCAB_GAP edge)
+        # revert to 'extracted' so the next generate pool retries them under the
+        # upgraded vocabulary. Without this, a vocabulary fix never un-blocks the
+        # sources that reported the gap. Uses the direct source→VocabGap edge; a
+        # deleted gap node removes it via DETACH, a reclassified one keeps it.
         retried = gc.query(
             """
             MATCH (sns:StandardNameSource {status: 'vocab_gap'})
-            MATCH (sns)-[:FROM_DD_PATH|FROM_SIGNAL]->(entity)
-            WITH sns, entity
-            WHERE NOT (entity)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(:VocabGap)
+            WHERE NOT (sns)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(:VocabGap)
             SET sns.status = 'extracted',
                 sns.claimed_at = null,
                 sns.claim_token = null

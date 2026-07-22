@@ -154,6 +154,12 @@ enums:
         description: Experimental definition, subject to change
       obsolescent:
         description: Deprecated definition, scheduled for removal
+      removed:
+        description: >-
+          Definition removed in the current DD version — the path existed in an
+          earlier version and is retained in the graph (marked, not deleted) so
+          cross-version history and migrations resolve. The most common status
+          in a multi-version DD build.
 
   IDSType:
     description: >-

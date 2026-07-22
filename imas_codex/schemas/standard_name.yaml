@@ -108,6 +108,13 @@ enums:
           Token exists in multiple closed segments and the reported
           segment is not among them.  May indicate either LLM confusion
           or legitimate vocabulary overlap requiring editorial review.
+      decomposable:
+        description: >-
+          A compound token whose parts already exist as registered tokens in
+          other segments — nameable by composition, not a genuine gap.  Assigned
+          by reconcile_vocab_gaps when re-classifying against the current ISN
+          vocabulary; persists on the node (unlike false_positive / open_segment
+          / invalid_segment classifications, which reconcile deletes).
 
   VocabGapDedupDecision:
     description: >-
@@ -301,6 +308,26 @@ enums:
         description: Run aborted due to fatal error.
       degraded:
         description: Run completed but one or more LLMCost writes could not be drained — cost_spent is a lower bound.
+      stale:
+        description: >-
+          Run left in-progress by a process that died without writing a terminal
+          status; reclaimed by the orphan sweep so its claimed work is released.
+
+  StandardNameStatus:
+    description: >-
+      ISN catalog lifecycle status of a StandardName — the vocabulary axis set
+      on catalog import, orthogonal to the pipeline `name_stage` / `docs_stage`
+      composition axes. Pipeline-minted names are `draft` until the catalog
+      round-trip promotes them.
+    permissible_values:
+      draft:
+        description: Pipeline-composed, not yet imported to the ISN catalog vocabulary.
+      active:
+        description: Live in the ISN catalog vocabulary.
+      deprecated:
+        description: Retired in the ISN catalog vocabulary; retained for resolution.
+      superseded:
+        description: Replaced by another catalog entry.
 
   NameStage:
     description: >-
@@ -934,6 +961,43 @@ classes:
           driven by `sn run --min-score F`, which selects valid names
           whose `reviewer_score_name` falls below the threshold.
         range: StandardNameValidationStatus
+      status:
+        description: >-
+          ISN catalog lifecycle status — the vocabulary axis set on catalog
+          import, orthogonal to the pipeline name_stage/docs_stage axes.
+          Pipeline-minted names are 'draft' until the catalog round-trip.
+        range: StandardNameStatus
+      claim_seq:
+        description: >-
+          Monotonic claim counter incremented each time a pool worker claims
+          this name; disambiguates concurrent claims and orders retries.
+        range: integer
+      source_path:
+        description: >-
+          Snapshot of the originating source id (DD path or facility signal)
+          this name was composed from, denormalized from the StandardNameSource
+          at refresh time for fast lookup without traversing PRODUCED_NAME.
+      source_documentation:
+        description: >-
+          Snapshot of the source DD/signal documentation captured at refresh
+          time (drives grounded compose/docs without re-reading the source).
+      source_unit:
+        description: >-
+          Snapshot of the source DD/signal unit captured at refresh time
+          (unit is DD-authoritative; mirrored here for display and validation).
+      superseded_from_stage:
+        description: >-
+          The name_stage this name held immediately before it was superseded,
+          retained so the compaction sweep can reason about what was lost.
+      internal_changes:
+        description: >-
+          Non-indexed internal change events (rename, domain reclassify,
+          supersede) recorded against this name for traceability without minting
+          a new StandardName.
+        multivalued: true
+        range: StandardNameChange
+        annotations:
+          relationship_type: HAS_INTERNAL_CHANGE
       consolidated_at:
         description: >-
           Timestamp when cross-batch consolidation approved this name.
@@ -1585,15 +1649,54 @@ classes:
           When this revision snapshot was created.
         range: datetime
 
+  StandardNameChange:
+    description: >-
+      A non-indexed internal change event (rename, domain reclassification,
+      supersede) recorded against a StandardName for traceability, WITHOUT
+      minting a new StandardName. Linked from the affected name via
+      HAS_INTERNAL_CHANGE. History belongs here, not on REFINED_FROM chains.
+
+      Example Cypher:
+        MATCH (sn:StandardName {id: $name})-[:HAS_INTERNAL_CHANGE]->(c:StandardNameChange)
+        RETURN c.operation, c.from_name, c.to_name, c.changed_at
+    class_uri: sn:StandardNameChange
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Composite key: sn-change:{uuid}"
+      from_name:
+        description: The name (or value) before the change.
+      to_name:
+        description: The name (or value) after the change; the linked StandardName id.
+      operation:
+        description: >-
+          The change operation (e.g. reclassify_domain, rename, supersede).
+      reason:
+        description: Human/edit-supplied rationale for the change.
+      origin:
+        description: What initiated the change (pipeline phase, edit, cascade).
+      run_id:
+        description: The SNRun that produced the change, when applicable.
+      changed_at:
+        description: When the change was recorded.
+        range: datetime
+      internal:
+        description: Always true — marks this as an internal (non-indexed) event.
+        range: boolean
+
   VocabGap:
     description: >-
       Records a missing grammar token identified during standard name composition.
-      Linked to source DD paths and facility signals via HAS_STANDARD_NAME_VOCAB_GAP
-      relationships. The node stores the normalized gap concept; per-source
-      evidence (reason, observed_at) lives on the relationships.
+      Linked via HAS_STANDARD_NAME_VOCAB_GAP from the blocked StandardNameSource
+      (source-first, one hop — used by reconcile) and from the underlying DD path
+      / facility signal entity (the DD-catalog view). The node stores the
+      normalized gap concept; per-source evidence (reason, observed_at) lives on
+      the relationships.
 
       Example Cypher:
         MATCH (vg:VocabGap) RETURN vg.segment, vg.token, vg.example_count
+        MATCH (s:StandardNameSource)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(vg:VocabGap) RETURN s.id, vg.id
         MATCH (n:IMASNode)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(vg:VocabGap) RETURN n.id, vg.id
     class_uri: sn:VocabGap
     attributes:
@@ -1731,6 +1834,20 @@ classes:
         range: StandardName
         annotations:
           relationship_type: PRODUCED_NAME
+      vocab_gaps:
+        description: >-
+          VocabGap nodes whose missing tokens block this source's composition,
+          set when the source is retired to status='vocab_gap'. A direct,
+          source-first link to the canonical gap record (the DD IMASNode /
+          FacilitySignal entity carries the same edge for the DD-catalog view).
+          "Why is this source blocked?" is then a one-hop query returning the
+          actual VocabGap node(s); reconcile_vocab_gaps revives the source when
+          this edge is gone. Only genuinely-absent closed-segment gaps produce a
+          node — non-actionable composer mis-reports do not.
+        multivalued: true
+        range: VocabGap
+        annotations:
+          relationship_type: HAS_STANDARD_NAME_VOCAB_GAP
       produced_sn_id:
         description: >-
           ID of the StandardName this source produced (composed or
