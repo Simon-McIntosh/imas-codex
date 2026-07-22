@@ -32,6 +32,71 @@ class PrNotes(BaseModel):
     body: str = Field(description="PR body, GitHub-flavoured markdown")
 
 
+class MergeNotes(BaseModel):
+    """Grounded human summary of what review did to a batch, for the fold-back tag."""
+
+    summary: str = Field(
+        description=(
+            "A concise, factual account of what the review changed in the batch, "
+            "grounded strictly on the supplied evidence (PR description, "
+            "conversation, commit messages, review-delta diff). GitHub-flavoured "
+            "markdown; a few short sentences to a short paragraph. Never invent."
+        )
+    )
+
+
+def build_merge_notes(
+    *,
+    pr_description: str,
+    conversation: list[dict[str, Any]],
+    commit_messages: list[str],
+    review_delta: str,
+) -> str:
+    """Synthesize the grounded human summary for the fold-back tag message.
+
+    Reuses the ``sn-release-notes`` seat over four evidence sources recovered
+    from the merged PR: its description, the full conversation (review comments
+    + threads), the commit messages, and the review-delta diff (what reviewers
+    actually changed). Grounded summarisation only — never invention.
+
+    Never raises: on any synthesis failure this logs and returns ``""`` so the
+    fold-back tag is written with its deterministic contract block alone (a
+    notes failure must never block or delay the fold-back).
+    """
+    try:
+        from imas_codex.discovery.base.llm import call_llm_structured
+        from imas_codex.llm.prompt_loader import render_prompt
+        from imas_codex.settings import get_model
+
+        system = render_prompt("sn/merge_notes_system", {})
+        user = render_prompt(
+            "sn/merge_notes_user",
+            {
+                "pr_description": pr_description,
+                "conversation": conversation or [],
+                "commit_messages": commit_messages or [],
+                "review_delta": review_delta,
+            },
+        )
+        notes, _cost, _tokens = call_llm_structured(
+            model=get_model("sn-release-notes"),
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            response_model=MergeNotes,
+            service="standard-names",
+        )
+        return notes.summary.strip()
+    except Exception:
+        logger.warning(
+            "merge-notes synthesis failed — the fold-back tag keeps its "
+            "deterministic block alone",
+            exc_info=True,
+        )
+        return ""
+
+
 def collect_catalog_changes(
     isnc_path: str | Path, base_ref: str = "main"
 ) -> list[dict[str, Any]]:

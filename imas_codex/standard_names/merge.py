@@ -33,6 +33,7 @@ node (see :func:`~imas_codex.standard_names.edit.apply_edit`).
 from __future__ import annotations
 
 import logging
+import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -954,3 +955,363 @@ def mark_catalog_name_approved(
         merge_commit=catalog_merge_commit_sha,
     )
     return bool(rows)
+
+
+# ---------------------------------------------------------------------------
+# The fold-back receipt — a version tag on the merge commit
+# ---------------------------------------------------------------------------
+#
+# Merging the catalog PR is durably recorded by GitHub; folding it back into the
+# graph-ledger was recorded nowhere durable, so a merged-but-not-folded release
+# looked identical to a folded one. The receipt closes that gap: after a
+# successful fold-back the merge commit is tagged with a deterministic contract
+# block whose presence means "catalog and graph are in sync for this version".
+# A grounded human summary is appended below the block; it is never parsed and
+# never blocks the fold-back.
+
+#: First token of the machine-readable contract line. A tag whose message
+#: starts with this marker certifies that its version has been folded back.
+CONTRACT_MARKER = "graph-merged:"
+
+#: Separates the deterministic contract block from the human prose below it.
+_NOTES_SEPARATOR = "---"
+
+
+@dataclass
+class FoldBackTagReport:
+    """Outcome of writing the fold-back receipt tag."""
+
+    tag: str = ""
+    created: bool = False
+    pushed: bool = False
+    notes_included: bool = False
+    error: str | None = None
+
+
+def _git_cp(args: list[str], cwd: str | Path) -> subprocess.CompletedProcess[str]:
+    """Run git in *cwd* returning the full result (returncode + stderr).
+
+    Distinct from :func:`_git` (which swallows failures to ``None``): tag
+    creation and pushes need the return code and stderr to report failures.
+    """
+    return subprocess.run(
+        ["git", *args],
+        cwd=str(cwd),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+def merge_tag_name(head_ref: str) -> str | None:
+    """Derive the version tag from a PR's head branch.
+
+    Both the batch flow (``review/<rc>``) and the locked plain-final flow
+    (``release/<version>``) name the branch after the version being released,
+    so the tag is exactly the branch suffix. Any other branch yields ``None``
+    (there is no version to certify).
+    """
+    for prefix in ("review/", "release/"):
+        if head_ref.startswith(prefix):
+            return head_ref[len(prefix) :].strip("/") or None
+    return None
+
+
+def build_contract_block(
+    *,
+    pr_number: int | None,
+    pr_url: str | None,
+    batch_artifact: str | None,
+    report: MergeReport,
+    timestamp: str | None = None,
+) -> str:
+    """The deterministic, machine-readable contract lines.
+
+    Line 1 is ``graph-merged: <iso-ts>`` — the idempotency guard parses only
+    this. The remaining lines carry the PR reference, the frozen batch artifact,
+    and the fold-back outcome counts for the human record.
+    """
+    ts = timestamp or datetime.now(UTC).isoformat()
+    return "\n".join(
+        [
+            f"{CONTRACT_MARKER} {ts}",
+            f"pr: #{pr_number} {pr_url}",
+            f"batch: {batch_artifact or '(none)'}",
+            (
+                f"outcomes: approved={len(report.accepted)} "
+                f"auto_approved={len(report.auto_approved)} "
+                f"contested={len(report.contested)}"
+            ),
+        ]
+    )
+
+
+def build_merge_tag_message(contract_block: str, notes: str = "") -> str:
+    """Assemble the tag message: contract block first, prose (if any) below.
+
+    The contract block is always the head of the message so the idempotency
+    check reads a stable prefix regardless of whether a summary was written.
+    """
+    if notes and notes.strip():
+        return f"{contract_block}\n\n{_NOTES_SEPARATOR}\n\n{notes.strip()}"
+    return contract_block
+
+
+def has_contract_tag(isnc_dir: str | Path, tag: str) -> bool:
+    """True when *tag* exists locally and carries the fold-back contract.
+
+    Reads the annotated tag's message; a tag whose message begins with the
+    contract marker certifies the version has already been folded back.
+    """
+    contents = _git(["tag", "-l", tag, "--format=%(contents)"], Path(isnc_dir))
+    return bool(contents) and contents.lstrip().startswith(CONTRACT_MARKER)
+
+
+def create_fold_back_tag(
+    isnc_dir: str | Path,
+    *,
+    tag: str,
+    merge_commit: str,
+    message: str,
+    remote: str,
+) -> tuple[bool, str | None]:
+    """Create the annotated tag on the merge commit and push it to *remote*.
+
+    On a push failure the local tag is rolled back so the repo never carries a
+    local receipt with no remote counterpart. Returns ``(ok, error)``.
+    """
+    isnc = Path(isnc_dir)
+    made = _git_cp(["tag", "-a", tag, merge_commit, "-m", message], isnc)
+    if made.returncode != 0:
+        return False, f"failed to create tag {tag}: {made.stderr.strip()}"
+    pushed = _git_cp(["push", remote, tag], isnc)
+    if pushed.returncode != 0:
+        _git_cp(["tag", "-d", tag], isnc)  # roll back the local tag
+        return False, f"failed to push tag {tag} to {remote}: {pushed.stderr.strip()}"
+    return True, None
+
+
+def delete_fold_back_tag(
+    isnc_dir: str | Path, *, tag: str, remote: str
+) -> tuple[bool, str | None]:
+    """Delete the fold-back tag locally and on *remote* (the ``--undo`` inverse).
+
+    A missing local tag is not an error (undo may run after a fresh checkout);
+    a remote-delete failure is reported. Returns ``(ok, error)``.
+    """
+    isnc = Path(isnc_dir)
+    errors: list[str] = []
+    local = _git_cp(["tag", "-d", tag], isnc)
+    if local.returncode != 0 and "not found" not in local.stderr.lower():
+        errors.append(local.stderr.strip())
+    remote_del = _git_cp(["push", remote, "--delete", tag], isnc)
+    if remote_del.returncode != 0:
+        errors.append(remote_del.stderr.strip())
+    return (not errors), ("; ".join(e for e in errors if e) or None)
+
+
+def resolve_tag_remote(
+    isnc_dir: str | Path, pr_url: str, *, default: str = "origin"
+) -> str:
+    """The checkout remote whose github repo matches the PR URL's owner/repo.
+
+    The receipt tag is pushed to the PR's target repo — the fork for a batch RC,
+    upstream for a final. Both are remotes of the ISNC checkout, so match the
+    PR URL's ``owner/repo`` against each remote's github slug.
+    """
+    m = re.search(r"github\.com[:/]([\w.-]+)/([\w.-]+?)(?:\.git)?/pull/", pr_url)
+    if not m:
+        return default
+    want = (m[1], m[2])
+
+    from imas_codex.standard_names.catalog_release import _github_slug
+
+    for remote in ("upstream", "origin"):
+        if _github_slug(Path(isnc_dir), remote) == want:
+            return remote
+    return default
+
+
+def fetch_pr_evidence(pr_url: str) -> dict[str, Any]:
+    """Gather the merge summary's evidence from the PR itself, via ``gh``.
+
+    One call returns the PR description, the full conversation (comments +
+    reviews), and the commit list (whose first entry locates the review-delta
+    base). Never raises — a gh failure returns ``{}`` so the summary degrades
+    to the deterministic block alone.
+    """
+    import json
+
+    try:
+        result = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "view",
+                pr_url,
+                "--json",
+                "body,comments,reviews,commits",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        logger.warning("gh pr view (evidence) failed: %s", exc)
+        return {}
+    if result.returncode != 0:
+        logger.warning("gh pr view (evidence) failed: %s", result.stderr.strip())
+        return {}
+    try:
+        data = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def review_delta_diff(
+    isnc_dir: str | Path,
+    *,
+    base_oid: str | None,
+    merge_commit: str | None,
+    max_chars: int = 20000,
+) -> str:
+    """The diff of what reviewers changed, scoped to ``standard_names/``.
+
+    Compares the PR's original content (``base_oid``) against the merged state
+    (``merge_commit``); truncated to *max_chars* to keep the prompt bounded.
+    Returns ``""`` when either ref is missing or the diff is empty.
+    """
+    if not base_oid or not merge_commit:
+        return ""
+    out = _git(["diff", base_oid, merge_commit, "--", "standard_names"], Path(isnc_dir))
+    return (out or "")[:max_chars]
+
+
+def _conversation_from_evidence(evidence: dict[str, Any]) -> list[dict[str, str]]:
+    """Flatten PR comments + reviews into ``{author, kind, body}`` records."""
+    out: list[dict[str, str]] = []
+    for comment in evidence.get("comments") or []:
+        body = (comment.get("body") or "").strip()
+        if body:
+            out.append(
+                {
+                    "author": (comment.get("author") or {}).get("login", ""),
+                    "kind": "comment",
+                    "body": body,
+                }
+            )
+    for review in evidence.get("reviews") or []:
+        body = (review.get("body") or "").strip()
+        if body:
+            out.append(
+                {
+                    "author": (review.get("author") or {}).get("login", ""),
+                    "kind": f"review ({review.get('state', '')})".strip(),
+                    "body": body,
+                }
+            )
+    return out
+
+
+def _commit_messages_from_evidence(evidence: dict[str, Any]) -> list[str]:
+    """Every commit message that went into the PR (headline + body)."""
+    out: list[str] = []
+    for commit in evidence.get("commits") or []:
+        headline = (commit.get("messageHeadline") or "").strip()
+        body = (commit.get("messageBody") or "").strip()
+        msg = f"{headline}\n{body}".strip()
+        if msg:
+            out.append(msg)
+    return out
+
+
+def _default_merge_notes(**kwargs: Any) -> str:
+    """Bind the grounded merge-summary synthesizer (lazy import)."""
+    from imas_codex.standard_names.release_notes import build_merge_notes
+
+    return build_merge_notes(**kwargs)
+
+
+def tag_fold_back(
+    *,
+    isnc_dir: str | Path,
+    head_ref: str,
+    merge_commit: str,
+    pr_number: int | None,
+    pr_url: str | None,
+    batch_artifact: str | None,
+    report: MergeReport,
+    remote: str,
+    include_notes: bool = True,
+    pr_evidence: dict[str, Any] | None = None,
+    notes_builder: Any | None = None,
+    timestamp: str | None = None,
+) -> FoldBackTagReport:
+    """Write the fold-back receipt after a successful non-dry merge.
+
+    Builds the deterministic contract block, optionally appends a grounded human
+    summary synthesized from the PR (description + conversation + commit messages
+    + review-delta diff), then tags the merge commit and pushes it to *remote*.
+
+    A notes-synthesis failure never blocks the fold-back — the tag is written
+    with the deterministic block alone. ``pr_evidence`` / ``notes_builder`` are
+    injectable so the flow is testable with no live GitHub and no live LLM.
+    """
+    out = FoldBackTagReport()
+    tag = merge_tag_name(head_ref)
+    if not tag:
+        out.error = f"cannot derive a version tag from head ref {head_ref!r}"
+        return out
+    out.tag = tag
+
+    contract = build_contract_block(
+        pr_number=pr_number,
+        pr_url=pr_url,
+        batch_artifact=batch_artifact,
+        report=report,
+        timestamp=timestamp,
+    )
+
+    notes = ""
+    if include_notes:
+        evidence = (
+            pr_evidence if pr_evidence is not None else fetch_pr_evidence(pr_url or "")
+        )
+        commits = evidence.get("commits") or []
+        base_oid = commits[0].get("oid") if commits else None
+        delta = review_delta_diff(
+            isnc_dir, base_oid=base_oid, merge_commit=merge_commit
+        )
+        builder = notes_builder or _default_merge_notes
+        try:
+            notes = (
+                builder(
+                    pr_description=evidence.get("body") or "",
+                    conversation=_conversation_from_evidence(evidence),
+                    commit_messages=_commit_messages_from_evidence(evidence),
+                    review_delta=delta,
+                )
+                or ""
+            )
+        except Exception:
+            logger.warning(
+                "merge-notes builder raised — writing the deterministic tag block "
+                "alone",
+                exc_info=True,
+            )
+            notes = ""
+
+    message = build_merge_tag_message(contract, notes)
+    ok, err = create_fold_back_tag(
+        isnc_dir,
+        tag=tag,
+        merge_commit=merge_commit,
+        message=message,
+        remote=remote,
+    )
+    out.created = ok
+    out.pushed = ok
+    out.notes_included = bool(notes and notes.strip())
+    out.error = err
+    return out

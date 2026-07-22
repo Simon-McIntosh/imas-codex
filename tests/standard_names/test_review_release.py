@@ -372,6 +372,41 @@ def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
     assert "v0.1.0rc1" in body and "3 standard name(s)" in body
 
 
+def test_build_merge_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
+    """A merge-summary synthesis failure yields '' so the deterministic tag
+    block is written alone — the fold-back is never blocked by the notes model."""
+    from imas_codex.standard_names import release_notes
+
+    def _boom(**kw):
+        raise RuntimeError("no model")
+
+    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _boom)
+    notes = release_notes.build_merge_notes(
+        pr_description="Review batch demo",
+        conversation=[{"author": "rev", "kind": "review", "body": "approve"}],
+        commit_messages=["publish batch"],
+        review_delta="--- a/standard_names/equilibrium.yml\n+++ b/...\n",
+    )
+    assert notes == ""
+
+
+def test_build_merge_notes_returns_model_summary(monkeypatch):
+    """When the model succeeds, its grounded summary is returned verbatim."""
+    from imas_codex.standard_names import release_notes
+
+    def _ok(**kw):
+        return release_notes.MergeNotes(summary="Reviewers renamed one entry."), 0.0, {}
+
+    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
+    notes = release_notes.build_merge_notes(
+        pr_description="d",
+        conversation=[],
+        commit_messages=[],
+        review_delta="",
+    )
+    assert notes == "Reviewers renamed one entry."
+
+
 def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
     """The notes builder receives the batch evidence; its output titles the PR."""
     focus = _write_names_focus(tmp_path)

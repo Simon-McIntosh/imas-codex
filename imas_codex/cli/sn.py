@@ -4328,7 +4328,21 @@ def sn_release(
         "Unwind a previously folded merge: names approved by this PR drop back "
         "to accepted (provenance cleared); contested batch names revert to "
         "accepted. Accepted human edits are graph history and are NOT "
-        "un-applied — revert wording via sn edit."
+        "un-applied — revert wording via sn edit. Also deletes the fold-back "
+        "tag (local + remote)."
+    ),
+)
+@click.option(
+    "--notes/--no-notes",
+    "llm_notes",
+    default=True,
+    show_default=True,
+    help=(
+        "Append a grounded human summary (PR description + conversation + "
+        "commit messages + review-delta diff, via the sn-release-notes model) "
+        "below the deterministic contract block in the fold-back tag. "
+        "--no-notes writes the contract block alone. A notes failure never "
+        "blocks the fold-back."
     ),
 )
 def sn_merge(
@@ -4342,6 +4356,7 @@ def sn_merge(
     merge_commit: str | None,
     batch_file: str | None,
     undo: bool,
+    llm_notes: bool,
 ) -> None:
     """Fold a reviewed catalog PR back into the graph ledger (id-matched, review-only).
 
@@ -4369,11 +4384,20 @@ def sn_merge(
 
     from imas_codex.settings import get_sn_isnc_dir
     from imas_codex.standard_names.merge import (
+        delete_fold_back_tag,
+        has_contract_tag,
+        merge_tag_name,
         resolve_merged_pr,
+        resolve_tag_remote,
         run_merge,
+        tag_fold_back,
         undo_merge,
     )
     from imas_codex.standard_names.sources_manifest import load_names_file
+
+    # The PR's head branch (review/<rc> or release/<version>) names the version
+    # tag that certifies this fold-back; captured from --pr resolution.
+    resolved_head_ref: str | None = None
 
     if isnc:
         isnc_path: Path | None = Path(isnc)
@@ -4398,6 +4422,7 @@ def sn_merge(
         pr_number = pr_number or resolved.number
         pr_url = pr_url or resolved.url
         merge_commit = merge_commit or resolved.merge_commit
+        resolved_head_ref = resolved.head_ref
         if base_ref is None:
             base_ref = f"{resolved.merge_commit}^1"
             # Make the merge commit resolvable locally for the content diff.
@@ -4438,11 +4463,33 @@ def sn_merge(
         console.print(f"[green]✓ Merge of PR #{pr_number} unwound[/green]")
         console.print(f"  approved → accepted: {len(report.demoted)}")
         console.print(f"  contested → accepted: {len(report.contested_reverted)}")
+        # The fold-back receipt no longer holds — delete the version tag so the
+        # tag's absence again means "merged but not folded back".
+        tag = merge_tag_name(resolved_head_ref) if resolved_head_ref else None
+        if tag and has_contract_tag(isnc_path, tag):
+            remote = resolve_tag_remote(isnc_path, pr_url or "")
+            ok, err = delete_fold_back_tag(isnc_path, tag=tag, remote=remote)
+            if ok:
+                console.print(f"  fold-back tag {tag} deleted ({remote})")
+            else:
+                console.print(f"  [yellow]⚠ could not delete tag {tag}: {err}[/yellow]")
         console.print(
             "  [dim]Accepted human edits remain graph history — revert wording "
             "via sn edit.[/dim]"
         )
         return
+
+    # ── Idempotency guard: refuse a second fold-back ───────────────────
+    # A contract tag on the merge commit means this version's PR has already
+    # been folded into the graph; re-running would double-promote.
+    fold_tag = merge_tag_name(resolved_head_ref) if resolved_head_ref else None
+    if fold_tag and not dry_run and has_contract_tag(isnc_path, fold_tag):
+        console.print(
+            f"[red]Refusing:[/red] {fold_tag} already carries the fold-back "
+            "contract tag — this PR has been folded back into the graph. "
+            "Use [bold]sn merge --undo[/bold] first to re-fold."
+        )
+        raise SystemExit(1)
 
     if base_ref is None:
         raise click.UsageError("--base is required unless --pr is given")
@@ -4509,6 +4556,31 @@ def sn_merge(
             pr_url=pr_url,
             merge_commit=merge_commit,
         )
+
+    # ── Write the fold-back receipt: tag the merge commit ──────────────
+    # The tag on the merge commit (contract block + grounded human summary) is
+    # the durable record that this version's PR was folded into the graph.
+    if fold_tag and merge_commit and not dry_run:
+        remote = resolve_tag_remote(isnc_path, pr_url or "")
+        tag_report = tag_fold_back(
+            isnc_dir=isnc_path,
+            head_ref=resolved_head_ref or "",
+            merge_commit=merge_commit,
+            pr_number=pr_number,
+            pr_url=pr_url,
+            batch_artifact=Path(batch_file).name if batch_file else None,
+            report=report,
+            remote=remote,
+            include_notes=llm_notes,
+        )
+        if tag_report.error:
+            console.print(
+                f"[yellow]⚠ fold-back tag {tag_report.tag or fold_tag} not "
+                f"written: {tag_report.error}[/yellow]"
+            )
+        else:
+            summary = "with summary" if tag_report.notes_included else "contract only"
+            console.print(f"  fold-back tag {tag_report.tag} → {remote} ({summary})")
 
     console.print("\n[green]✓ Merge complete[/green]")
 
