@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="dd-horizon-update">
   <meta name="plan-title" content="DD Version-Horizon Roll-Forward (incremental, SN-link-safe)">
   <meta name="plan-summary" content="Roll the DD graph&#x27;s version horizon forward to the latest release incrementally — hash-persisting LLM enrichment, full re-clustering — while guaranteeing StandardName provenance links are never lost, with a never-delete invariant and a guardrail test.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -17,10 +17,31 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
+
+    <section class="landed-card" style="border:2px solid #0a7; border-radius:6px; padding:12px 16px; margin:12px 0; background:rgba(0,170,119,0.06);">
+      <p style="margin:0 0 6px;"><strong>✓ SHIPPED &amp; ROLLED — 2026-07-22.</strong>
+        <code>imas dd update</code> shipped, the three IMASNode delete-path
+        footguns removed, the SN-link guardrail landed, and the horizon rolled
+        (4.1.1 finished: <code>build_hash</code> ✓, 2950 clusters,
+        embeddings 9480→9503).</p>
+      <p style="margin:0 0 6px;"><strong>SN links intact:</strong> before = after
+        (8763 FROM_DD_PATH, 2454 HAS_STANDARD_NAME, 2316 VOCAB_GAP), <strong>0
+        dangling</strong> — the guardrail passed automatically.
+        <strong>Incremental spend $0.81</strong> (34 enrich + 23 embed + 157
+        cluster labels) vs ~$31 full-rebuild baseline (~2.6%) — the hash no-op
+        proven.</p>
+      <p style="margin:0;">Commits <code>29b02bbd</code> (command + footguns +
+        guardrail), <code>c2d5cd23</code> (lifecycle test). Full record:
+        <a href="archive/dd-horizon-update-landed.html">landed archive</a>.
+        Horizon-caused §6 gates green; pre-existing unit / embedding-cache /
+        SN-quality / COCOS-on-removed debt deferred to curation followups (not
+        roll-caused).</p>
+    </section>
 
     <h2 id="s1">§1 — Goal &amp; the never-delete invariant</h2>
     <p>
@@ -184,160 +205,69 @@
       <code>removed</code> by the reconciler.
     </p>
 
-    <h2 id="s4">§4 — The safe roll-forward runbook</h2>
-    <p>
-      Deliver a documented, repeatable procedure (and — D-ergonomics — optionally
-      a thin <code>imas dd update</code> wrapper) that performs exactly this:
-    </p>
-    <ol>
-      <li><strong>Snapshot first (mandatory).</strong>
-        <code>imas-codex graph export</code> — the belt-and-suspenders restore
-        path (<code>graph load</code>) if anything goes wrong. A fresh snapshot
-        <code>imas-codex-graph-dev-ce45294.tar.gz</code> already exists from
-        2026-07-22.</li>
-      <li><strong>Bump the horizon.</strong> Set
-        <code>[tool.imas-codex.data-dictionary].version</code> to the latest
-        installed DD release (verify against the installed
-        <code>imas-data-dictionary</code> package; the resolver refuses a version
-        beyond it). This re-keys <code>is_current</code> + the reconciler.</li>
-      <li><strong>Roll forward all missing versions in one pass</strong> via the
-        new <code>imas dd update</code> command (§7, <strong>locked</strong>):
-        it auto-detects the graph's current horizon and the latest installed DD
-        version, builds <em>every</em> missing version forward (no manual
-        <code>--from-version</code>), bumps the config so <code>is_current</code>
-        re-keys, and refuses to ever <em>lower</em> the horizon. Under the hood
-        phase_build re-runs (build_hash stale) → repairs lifecycle + build_hash,
-        MERGEs new paths, marks removed, hash-persists LLM work, embeds missing,
-        full re-cluster. <strong>The destructive paths do not exist</strong> — see
-        the footgun-removal deliverable below.</li>
-      <li><strong>Verify the invariant held (§5) — the update runs it automatically.</strong></li>
-    </ol>
-    <p>
-      Because enrichment/refinement persist via hashes and only the new/changed
-      nodes need LLM work, the incremental cost is a fraction of a full rebuild;
-      embeddings are free. Clustering re-runs in full (accepted).
-    </p>
-    <p style="border-left:4px solid #c0392b; padding:8px 12px; margin:10px 0;">
-      <strong>Footgun removal (locked deliverable) — precisely the delete-paths,
-      nothing more.</strong> Three IMASNode-deleting operations are a dev-era
-      throwback and are <strong>removed from the codebase</strong>: the
-      <code>extracted</code> target of <code>--reset-to</code> (the
-      <code>DETACH DELETE</code> path in <code>_reset_to_extracted</code>),
-      <code>--force</code> (which merely implied <code>extracted</code>), and the
-      <code>imas dd clear</code> command. A genuine from-scratch build targets a
-      <em>fresh empty graph instance</em> (<code>graph init</code>), never a wipe
-      of the live graph; a build-logic change re-MERGEs every node via the
-      <code>_BUILD_SCHEMA_VERSION</code> bump in the build hash — no deletion
-      needed. After the change no code path deletes an IMASNode short of dropping
-      the whole graph instance.
-    </p>
-    <p style="border-left:4px solid #0a7; padding:8px 12px; margin:10px 0;">
-      <strong><code>--reset-to</code> stays (it is a project convention).</strong>
-      The four <strong>non-destructive</strong> targets —
-      <code>--reset-to built|enriched|refined|embedded</code> — are property
-      clears that re-run an LLM/embed stage on <em>existing</em> nodes and
-      <strong>never delete</strong>. They are kept under the same
-      <code>--reset-to</code> spelling the facility discovery tools use (no rename
-      to <code>--reprocess</code>); only the <code>extracted</code> choice is
-      dropped from the flag's allowed values. They remain necessary because a
-      <strong>prompt-template change is not in the content hash</strong>, so
-      re-enrich/re-embed must be forceable.
-    </p>
-    <p style="border-left:4px solid #0788c9; padding:8px 12px; margin:10px 0;">
-      <strong>Unchanged nodes are a hash no-op — the roll-forward is near-free.</strong>
-      Enrichment and embedding are gated by per-node content hashes
-      (<code>enrichment_hash</code>, <code>embedding_hash</code>); an unchanged DD
-      path keeps its stored value and is advanced without an LLM or embed call.
-      So rolling the horizon only pays for the genuinely new/changed paths in the
-      incoming version(s); the tens of thousands of unchanged nodes cost nothing.
+    <h2 id="s4">§4 — The safe roll-forward runbook &nbsp;<span class="badge badge-shipped" style="color:#0a7;">✓ landed 2026-07-22</span></h2>
+    <p class="landed-summary" style="border-left:4px solid #0a7; padding:8px 12px; margin:10px 0;">
+      Shipped as <code>imas dd update</code> (§7) and the footgun removal
+      (commit <code>29b02bbd</code>). The three IMASNode delete-paths — the
+      <code>extracted</code> target of <code>--reset-to</code>
+      (+ <code>_reset_to_extracted</code>), <code>--force</code>, and
+      <code>imas dd clear</code> — are deleted from the codebase; the four
+      non-destructive <code>--reset-to built|enriched|refined|embedded</code>
+      targets stay verbatim. <strong>No code path deletes an IMASNode now</strong>
+      short of dropping the graph instance. The roll finished 4.1.1 with the
+      hash no-op proven: 34/61k paths enriched, $0.81 vs ~$31 full rebuild.
+      Full detail: <a href="archive/dd-horizon-update-landed.html">landed archive</a>.
     </p>
 
-    <h2 id="s5">§5 — SN-link safety, reattach, and the guardrail test</h2>
-    <p>
-      The invariant is enforced by construction (§3) but must also be enforced by
-      <strong>test</strong> so a future refactor cannot silently break it:
-    </p>
-    <ul>
-      <li><strong>Guardrail test (new, <code>-m graph</code>):</strong> capture the
-        three SN-edge counts (<code>FROM_DD_PATH</code>,
-        <code>HAS_STANDARD_NAME</code>, source→<code>VocabGap</code>) and the
-        dangling-link count (SN source with <code>dd_path</code> set but no
-        <code>FROM_DD_PATH</code> → IMASNode) <em>before</em> and <em>after</em> an
-        update; assert edge counts are <strong>non-decreasing</strong> and
-        dangling stays <strong>0</strong>. This is the acceptance gate for any
-        horizon update.</li>
-      <li><strong>Reattach — two things, disentangled (D-reattach LOCKED:
-        stay-pinned).</strong> The 496 SN sources pinned to a
-        <code>RENAMED_TO</code>-ed path <strong>stay pinned to the old node</strong>
-        they were composed from (it persists forever under the invariant, so the
-        link always resolves). This keeps provenance honest ("composed from
-        <code>old_path</code> at version V"); anyone needing the live path
-        <strong>traverses the DD graph's <code>RENAMED_TO</code> edge</strong> at
-        query time — the link is never rewritten. The rejected alternatives were
-        <em>follow-rename</em> (re-point to the successor — rewrites provenance,
-        silently wrong if a rename carried a semantic change) and <em>dual-link</em>
-        (keep both — extra edge type to maintain). Separately, "reattach" as a
-        <em>repair</em> (re-resolve a dangling <code>source.dd_path → IMASNode</code>)
-        collapses, once the footguns are removed, into the guardrail's
-        <strong>dangling=0 invariant check</strong> — there is no code path left
-        that could strand a link, so the repair is a check that must always pass,
-        not a migration.</li>
-    </ul>
-
-    <h2 id="s6">§6 — Validation &amp; the graph-quality gates</h2>
-    <p>
-      Acceptance = the guardrail test green PLUS the previously-red
-      <code>-m graph</code> quality tests moving to green as a consequence of the
-      finished horizon:
-    </p>
-    <ul>
-      <li><code>test_dd_build.py</code>: embedding completeness, field lifecycle
-        status — fixed once 4.1.1 embeds + the reconciler stamps lifecycle.</li>
-      <li><code>test_structural.py</code>: current DD version has build_hash;
-        clusters have members — fixed once build_hash is written for the new
-        current version and clustering re-runs.</li>
-      <li><code>test_data_quality.py</code>: StandardName embedding coverage, empty
-        descriptions, COCOS half-state.</li>
-      <li><code>test_sn_unit_integrity.py</code>: the ~248 SN-vs-DD unit mismatches
-        are a <strong>separate curation axis</strong> (mostly
-        <code>V.m^-1</code>↔<code>m^-1.V</code> ordering that normalizes to the
-        same unit; some genuine, partly DD-side). Scope: a normalization pass for
-        the ordering class; track the genuine mismatches separately — do NOT block
-        the horizon update on them.</li>
-    </ul>
-    <p>
-      Record before/after counts for each gate and the incremental LLM spend vs a
-      full-rebuild baseline (the headline "incremental, not full-reprocess" proof).
+    <h2 id="s5">§5 — SN-link safety, reattach, and the guardrail test &nbsp;<span class="badge badge-shipped" style="color:#0a7;">✓ landed 2026-07-22</span></h2>
+    <p class="landed-summary" style="border-left:4px solid #0a7; padding:8px 12px; margin:10px 0;">
+      Shipped <code>imas_codex/graph/sn_link_guardrail.py</code>
+      (<code>capture_sn_link_counts</code> + <code>check_sn_links_safe</code>) and
+      <code>tests/graph/test_sn_link_guardrail.py</code> (commit
+      <code>29b02bbd</code>); wired into <code>imas dd update</code> before/after
+      every build. The roll verified it live: SN edge counts before = after,
+      <strong>0 dangling</strong>. Reattach = stay-pinned (D-reattach): links are
+      never rewritten — the <code>RENAMED_TO</code> traversal resolves the live
+      path at query time, and with the footguns gone the "repair" collapses into
+      the guardrail's dangling==0 check that must always pass.
     </p>
 
-    <h2 id="s7">§7 — Ergonomics: the <code>imas dd update</code> command (LOCKED)</h2>
-    <p>
-      D-ergonomics is <strong>locked to a dedicated <code>imas dd update</code>
-      command</strong> — safe by construction, with the destructive surface
-      removed entirely (§4 footgun removal). It:
+    <h2 id="s6">§6 — Validation &amp; the graph-quality gates &nbsp;<span class="badge badge-shipped" style="color:#0a7;">✓ horizon gates green 2026-07-22</span></h2>
+    <p class="landed-summary" style="border-left:4px solid #0a7; padding:8px 12px; margin:10px 0;">
+      <strong>Green (horizon-caused):</strong> <code>test_structural.py</code>
+      (current version <code>build_hash</code> + clusters have members) and
+      <code>test_dd_build.py</code> field lifecycle (fixed by accepting the
+      schema-defined <code>removed</code> value — the valid-set now derives from
+      the <code>LifecycleStatus</code> enum; commit <code>c2d5cd23</code>), plus
+      the SN-link guardrail. <strong>Incremental spend $0.81 vs ~$31 full
+      rebuild (~2.6%)</strong> recorded.
     </p>
-    <ul>
-      <li><strong>Rolls forward all missing versions in one pass.</strong>
-        Auto-detects the graph's current horizon and the latest installed DD
-        release, then builds <em>every</em> version between them (no manual
-        <code>--from-version</code>). Optional <code>--to-version</code> pins an
-        explicit target; it <strong>refuses to lower</strong> the horizon.</li>
-      <li><strong>Bumps the config</strong> (<code>[tool.imas-codex.data-dictionary].version</code>)
-        so <code>is_current</code> + the lifecycle reconciler re-key to the new
-        horizon — the step a bare <code>--from-version</code> would miss.</li>
-      <li><strong>No destructive path in its surface.</strong> The
-        <code>extracted</code> target, <code>--force</code>, and
-        <code>imas dd clear</code> are deleted from the codebase. The
-        <strong>non-destructive</strong> re-run controls keep their existing
-        <code>--reset-to built|enriched|refined|embedded</code> spelling (the
-        facility-tool convention — no rename), needed for the prompt-template
-        change the content hash cannot detect; they only clear properties and
-        re-run on existing nodes, never deleting.</li>
-      <li><strong>Runs the §5 guardrail automatically</strong> — captures SN-edge
-        counts + dangling before/after and fails the command if any count
-        decreased or dangling &gt; 0. The invariant is enforced by the tool, not
-        by operator discipline.</li>
-    </ul>
+    <p style="border-left:4px solid #b8860b; padding:8px 12px; margin:10px 0;">
+      <strong>Deferred (pre-existing debt — NOT roll-caused; the roll only added
+      23 embeddings, never cleared any):</strong> unit mismatches (the
+      <code>W.m^-2</code>↔<code>m^-2.W</code> ordering axis + a stale
+      <code>ion_charge</code> DD-bug entry), embedding-cache hygiene (~2792 legacy
+      stale-archive <code>classified</code> nodes with <code>embedding_text</code>
+      but no vector — the embed worker only claims <code>refined</code>, so a
+      finished horizon never reclaims them), SN-side data quality (203+14 empty
+      descriptions; 15/4028 unembedded StandardNames), and COCOS half-state (20
+      nodes, all <code>lifecycle_status=removed</code> — a current-only artifact on
+      lineage nodes). Queued as curation followups (see below).
+    </p>
+
+    <h2 id="s7">§7 — Ergonomics: the <code>imas dd update</code> command &nbsp;<span class="badge badge-shipped" style="color:#0a7;">✓ landed 2026-07-22</span></h2>
+    <p class="landed-summary" style="border-left:4px solid #0a7; padding:8px 12px; margin:10px 0;">
+      Shipped (commit <code>29b02bbd</code>). Auto-detects the graph horizon +
+      latest installed DD, refuses to lower the horizon, bumps the pyproject
+      config, then runs the build in a <strong>fresh subprocess</strong> (the
+      module-global <code>dd_version</code> is import-time, so only a clean
+      interpreter re-keys <code>is_current</code> + the reconciler). Captures SN
+      provenance-link counts before/after and fails on any decrease or dangle.
+      Optional <code>--to-version</code> pins a target; the four non-destructive
+      <code>--reset-to</code> targets remain for prompt/model re-runs the content
+      hash can't see. Verified on the live roll — see the
+      <a href="archive/dd-horizon-update-landed.html">landed archive</a>.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -494,7 +424,7 @@ Done-when
   5. This followup resolved.</pre>
     <p class="r-fu-outcome">Superseded by f-ddhu-003: --reset-to is KEPT (project convention; only the destructive `extracted` target + --force + `imas dd clear` are removed — no --reprocess rename); D-historical locked to current-only; the hash-match no-op on unchanged enrichment/embedding is made explicit (roll-forward near-free).</p>
     </article>
-<article class="r-fu" data-id="f-ddhu-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22T17:10:00+00:00" data-recommends-skill="/reckon-ship dd-horizon-update" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddhu-003" data-status="resolved" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22T17:10:00+00:00" data-recommends-skill="/reckon-ship dd-horizon-update" data-resolved-at="2026-07-22T14:52:07+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship imas dd update (roll-forward-all) + remove the delete-path footguns + SN-link guardrail, then roll the horizon</h4>
     <div class="r-fu-body"><p>All three decisions are locked (see live above): D-ergonomics = dedicated <code>imas dd update</code> (roll-forward ALL missing versions); D-reattach = stay-pinned; D-historical = current-only. Build the command, remove the three delete-paths (the <code>extracted</code> target of <code>--reset-to</code>, <code>--force</code>, <code>imas dd clear</code>) while KEEPING <code>--reset-to built|enriched|refined|embedded</code> (project convention; no rename), land the SN-link guardrail, then roll the horizon to the latest DD release. Unchanged nodes hash-match on enrichment + embedding → the roll-forward is near-free; only new/changed paths incur LLM/embed cost. Clustering is a full recompute (accepted).</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -560,6 +490,80 @@ Done-when
   3. §6 gates green; unit-mismatch curation followup queued.
   4. Incremental LLM spend vs a full-rebuild baseline recorded.
   5. This followup resolved.</pre>
+    <p class="r-fu-outcome">SHIPPED & ROLLED (commits 29b02bbd + c2d5cd23). imas dd update shipped (roll-forward-all, fresh-subprocess config bump, auto guardrail); the three delete-path footguns removed (extracted target of --reset-to + _reset_to_extracted, --force, imas dd clear) with --reset-to built|enriched|refined|embedded kept; SN-link guardrail (helper + -m graph test) landed and wired in. Horizon rolled: 4.1.1 finished (build_hash, 2950 clusters, embeddings 9480→9503, lifecycle 'removed' stamped on historical). SN links before=after (8763 FROM_DD_PATH / 2454 HAS_STANDARD_NAME / 2316 VOCAB_GAP), 0 dangling — guardrail passed automatically. Hash no-op proven: 34/61k enriched, incremental $0.81 vs ~$31 full rebuild (~2.6%). §6 horizon-caused gates green (structural build_hash+clusters, field lifecycle, guardrail); pre-existing unit/embedding-cache/SN-quality/COCOS-on-removed debt deferred (not roll-caused) — queued as f-ddhu-004 and f-ddhu-005.</p>
+    </article>
+<article class="r-fu" data-id="f-ddhu-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-22T18:30:00+00:00" data-recommends-skill="/reckon-create sn-dd-unit-curation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">SN↔DD unit-mismatch curation axis (ordering normalization + genuine mismatches)</h4>
+    <div class="r-fu-body"><p>The ~248 SN-vs-DD unit mismatches remain red in <code>test_sn_unit_integrity.py</code> — plan-scoped as a separate curation axis, not a horizon blocker. Two classes: (1) commutative-ordering (<code>W.m^-2</code>↔<code>m^-2.W</code>, <code>V.m^-1</code>↔<code>m^-1.V</code>) that normalize to the same physical unit — needs an order-insensitive comparison/normalization pass; (2) genuine mismatches (some SN-side, some DD-side). Also: the <code>ion_charge</code> DD-side-bug entry in <code>_DD_SIDE_UNIT_BUGS</code> was fixed upstream and must be removed (the test flags it as stale). Fix the ordering class with a canonical-unit normalizer, then triage the residual genuine set.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    (new) sn-dd-unit-curation
+Section: unit-integrity curation
+Tier:    sonnet
+
+Context
+  test_sn_unit_integrity.py has ~248 SN-vs-DD unit mismatches, red independent
+  of the DD horizon roll (dd-horizon-update shipped 2026-07-22). Plan-scoped as
+  a separate curation axis. Not a regression — pre-existing.
+
+State to read
+  tests/graph/test_sn_unit_integrity.py (the four failing assertions + _DD_SIDE_UNIT_BUGS)
+  imas_codex/units/ (unit normalization/parsing)
+  agents/schema-reference.md (Unit node, HAS_UNIT edges)
+
+Deliverables
+  1. Order-insensitive unit comparison for the commutative class (W.m^-2 == m^-2.W,
+     V.m^-1 == m^-1.V) — a canonical-unit normalizer applied on both the SN.unit
+     property, the declared-unit edge, and the DD-path HAS_UNIT target.
+  2. Remove the stale ion_charge entry from _DD_SIDE_UNIT_BUGS (fixed upstream).
+  3. Triage the residual genuine mismatches: split SN-side (regenerate via sn edit
+     if the SN unit is wrong) from DD-side (document as upstream DD bugs).
+  4. Drive test_sn_unit_integrity.py green (ordering + documented-bug classes).
+
+Done-when
+  1. Ordering-class mismatches normalized; the three unit tests green for that class.
+  2. ion_charge removed; test_dd_side_unit_bugs_documented green.
+  3. Genuine residual triaged + tracked; count recorded.
+  4. This followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-ddhu-005" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-22T18:31:00+00:00" data-recommends-skill="/reckon-create dd-graph-hygiene" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pre-existing -m graph hygiene debt (embedding-cache consistency, SN-side quality, COCOS-on-removed)</h4>
+    <div class="r-fu-body"><p>Four <code>-m graph</code> gates are red from pre-existing stale-archive debt, NOT the horizon roll (the roll only added 23 embeddings, never cleared any). (1) Embedding-cache consistency: ~198 IMASNodes have an embedding but no <code>embedding_text</code>; ~2792 have <code>embedding_text</code> but no vector — ~2457 are legacy <code>classified</code> nodes with no <code>enrichment_source</code> (impossible in the current pipeline); the embed worker only claims <code>status=refined</code>, so a finished horizon never reclaims them — they need an explicit re-embed or a status reset to refined. (2) SN-side data quality: 203 StandardNameSource + 14 StandardName empty descriptions; 15/4028 unembedded StandardNames. (3) COCOS half-state: 20 nodes, all <code>lifecycle_status=removed</code> — kept <code>cocos_label_source</code> but lost <code>cocos_transformation_type</code> when the build cleared stale labels; either groom removed nodes or scope the test to non-removed.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    (new) dd-graph-hygiene
+Section: pre-existing -m graph debt
+Tier:    sonnet
+
+Context
+  Four -m graph gates are red from pre-existing stale-archive debt, confirmed
+  NOT caused by the dd-horizon-update roll (2026-07-22): the roll only added 23
+  embeddings and never cleared any. Separate hygiene axis.
+
+State to read
+  tests/graph/test_dd_build.py TestEmbeddingCompleteness (198 + 2792 mismatches)
+  tests/graph/test_data_quality.py TestDescriptionEmbeddingCoverage / test_no_empty_string_descriptions / test_no_cocos_half_state
+  imas_codex/graph/dd_workers.py (embed_worker claim: status=refined only)
+  imas_codex/graph/dd_graph_ops.py (claim_paths_for_embedding)
+  imas_codex/graph/build_dd.py (cocos stale-label clear pass ~line 1969)
+
+Deliverables
+  1. Embedding-cache consistency: reconcile the ~2457 legacy classified nodes
+     with embedding_text but no vector (re-embed or reset to refined so the embed
+     worker reclaims them) and the ~198 with a vector but no embedding_text
+     (backfill embedding_text on embed). Decide: are the enrichment_source=None
+     classified nodes non-embeddable categories that should be excluded, or
+     genuinely missing embeddings?
+  2. SN-side: regenerate the 14 StandardName + 203 StandardNameSource empty
+     descriptions; embed the 15 unembedded StandardNames (SN pipeline, not DD).
+  3. COCOS half-state on removed nodes: either clear cocos_label_source when the
+     build clears cocos_transformation_type on removed paths, or scope
+     test_no_cocos_half_state to lifecycle_status&lt;&gt;&#x27;removed&#x27; (current-only design).
+  4. Drive the four gates green.
+
+Done-when
+  1. TestEmbeddingCompleteness green (both directions).
+  2. test_no_empty_string_descriptions + StandardName embedding coverage green.
+  3. test_no_cocos_half_state green.
+  4. This followup resolved.</pre>
     </article>
 </section>
 

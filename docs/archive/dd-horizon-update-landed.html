@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="dd-horizon-update-landed">
+  <meta name="plan-status" content="reference">
+  <title>DD Horizon Roll-Forward — landed (2026-07-22) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>DD version-horizon roll-forward — shipped &amp; rolled (2026-07-22)</h1>
+    <p>
+      The <code>imas dd update</code> command shipped, the three IMASNode
+      delete-path footguns were removed, the SN-link guardrail landed, and the
+      horizon was rolled forward — finishing the unfinished 4.1.1 build. Every
+      StandardName provenance link survived (the guardrail passed automatically),
+      and the roll cost <strong>$0.81 in LLM spend</strong> versus a
+      <strong>~$31 full-rebuild baseline</strong> — the incremental design proven
+      at ~2.6%.
+    </p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>Deliverable</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>§7 <code>imas dd update</code> (roll-forward-all)</td><td>✓ shipped</td><td>commit <code>29b02bbd</code>; auto-detects horizon + latest DD, bumps config, builds forward in a fresh subprocess, runs guardrail before/after</td></tr>
+        <tr><td>§4 Footgun removal (3 delete-paths)</td><td>✓ shipped</td><td>commit <code>29b02bbd</code>; <code>--reset-to extracted</code> choice + <code>_reset_to_extracted</code>, <code>--force</code>, and <code>imas dd clear</code> all deleted; <code>--reset-to built|enriched|refined|embedded</code> kept</td></tr>
+        <tr><td>§5 SN-link guardrail (test + helper, wired in)</td><td>✓ shipped</td><td>commit <code>29b02bbd</code>; <code>sn_link_guardrail.py</code> + <code>test_sn_link_guardrail.py</code>; enforced by <code>imas dd update</code></td></tr>
+        <tr><td>§4 Roll the horizon</td><td>✓ landed</td><td>4.1.1 fully built: <code>build_hash</code> ✓, clusters 2950 ✓, embeddings 9480→9503; snapshot <code>imas-codex-graph-dev-29b02bb.tar.gz</code></td></tr>
+        <tr><td>§5 SN links intact</td><td>✓ verified</td><td>before = after (8763 FROM_DD_PATH, 2454 HAS_STANDARD_NAME, 2316 VOCAB_GAP), 0 dangling</td></tr>
+        <tr><td>§6 Horizon-caused quality gates</td><td>✓ green</td><td><code>test_structural.py</code> (build_hash + clusters), <code>test_dd_build.py</code> lifecycle, guardrail all pass</td></tr>
+        <tr><td>§6 Pre-existing curation debt</td><td>↦ deferred</td><td>unit mismatches, embedding-cache hygiene, SN-side quality — queued, not roll-caused</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What shipped (code)</h2>
+    <h3><code>imas dd update</code> — the horizon roll-forward command</h3>
+    <p>
+      Auto-detects the graph's <code>is_current</code> horizon and the latest
+      installed DD version, refuses to <em>lower</em> the horizon, bumps
+      <code>[tool.imas-codex.data-dictionary].version</code> in pyproject, then
+      runs <code>imas dd build</code> in a <strong>fresh subprocess</strong> — the
+      module-global <code>imas_codex.dd_version</code> is resolved at import time,
+      so the bumped horizon only re-keys <code>is_current</code> + the reconciler
+      in a clean interpreter. It captures the SN provenance-link counts before
+      and after and <strong>fails the command</strong> if any count decreased or
+      any link dangles. Optional <code>--to-version</code> pins a target.
+    </p>
+    <h3>Footgun removal — the three IMASNode-deleting paths</h3>
+    <p>
+      Deleted precisely: the <code>extracted</code> target of <code>--reset-to</code>
+      (dropped from the flag's choices; <code>_reset_to_extracted</code>'s
+      <code>DETACH DELETE</code> removed), <code>--force</code> (which implied
+      <code>extracted</code>; the <code>force</code> field + <code>skip_build_hash</code>
+      property gone from <code>DDBuildState</code>), and the <code>imas dd clear</code>
+      command + <code>clear_dd_graph</code>. The four <strong>non-destructive</strong>
+      <code>--reset-to built|enriched|refined|embedded</code> targets stay verbatim
+      (project convention; property-clear + re-run on existing nodes, never
+      delete) — needed when a prompt/model change is invisible to the content
+      hash. <strong>No code path deletes an IMASNode now</strong> short of dropping
+      the whole graph instance. A from-scratch build targets a fresh empty
+      instance (<code>graph init</code>); a build-logic change re-MERGEs via the
+      <code>_BUILD_SCHEMA_VERSION</code> bump.
+    </p>
+    <h3>SN-link guardrail</h3>
+    <p>
+      <code>sn_link_guardrail.py</code>: <code>capture_sn_link_counts()</code>
+      snapshots the three provenance-edge counts + the dangling count (a source
+      naming a <code>dd_path</code> with no <code>FROM_DD_PATH</code> → IMASNode);
+      <code>check_sn_links_safe()</code> returns violations (empty == safe:
+      non-decreasing edges, dangling == 0). The <code>-m graph</code> test asserts
+      the pure comparison logic plus the live dangling==0 invariant. The
+      reattach decision (D-reattach = stay-pinned) collapses, with the footguns
+      gone, into this dangling==0 check — no code path can strand a link, so the
+      "repair" is a check that must always pass.
+    </p>
+
+    <h2>The roll (operational)</h2>
+    <p>
+      Config was already at 4.1.1 and the graph's <code>is_current</code> was
+      4.1.1 — but 4.1.1 was extracted-but-unfinished (no <code>build_hash</code>,
+      no clusters). The roll therefore <em>finished</em> 4.1.1 rather than adding
+      a new version. Result:
+    </p>
+    <ul>
+      <li><strong>4.1.1 now fully built:</strong> <code>build_hash</code> written,
+        2950 clusters (23324 <code>IN_CLUSTER</code> edges), embeddings 9480→9503.</li>
+      <li><strong>Lifecycle stamped:</strong> the reconciler marked historical
+        paths <code>removed</code> (the null-lifecycle backlog auto-resolved, as
+        the plan predicted) — never deleting.</li>
+      <li><strong>Hash no-op confirmed:</strong> of 61k nodes only 34 were
+        enriched (LLM) and 23 re-embedded — the unchanged tens of thousands cost
+        nothing.</li>
+      <li><strong>Incremental spend $0.81</strong> (34 enrich + 23 embed + 157
+        cluster labels) vs ~$31.22 cumulative full-enrichment baseline — ~2.6%.</li>
+      <li><strong>Elapsed 655 s</strong> (~11 min), dominated by the full
+        cluster recompute + labeling (accepted by design).</li>
+      <li><strong>SN links: before = after</strong> — 8763 FROM_DD_PATH, 2454
+        HAS_STANDARD_NAME, 2316 VOCAB_GAP, 0 dangling. Guardrail passed
+        automatically: <em>"Horizon rolled to 4.1.1. SN provenance links intact."</em></li>
+    </ul>
+
+    <h2>§6 gate status — green vs. deferred</h2>
+    <p><strong>Green (horizon-caused, fixed by the roll):</strong></p>
+    <ul>
+      <li><code>test_structural.py</code> — current version has <code>build_hash</code>;
+        clusters have members.</li>
+      <li><code>test_dd_build.py</code> field lifecycle — fixed by accepting the
+        schema-defined <code>removed</code> value (the test's valid-set predated
+        the reconciler overloading <code>lifecycle_status</code>; now derived from
+        the <code>LifecycleStatus</code> enum). commit <code>c2d5cd23</code>.</li>
+      <li>SN-link guardrail — dangling==0, non-decreasing.</li>
+    </ul>
+    <p>
+      <strong>Deferred (pre-existing debt, NOT roll-caused — confirmed the roll
+      only <em>added</em> 23 embeddings and never cleared any):</strong>
+    </p>
+    <ul>
+      <li><strong>Unit mismatches</strong> (plan-named axis): the
+        <code>W.m^-2</code>↔<code>m^-2.W</code> ordering class + a stale DD-side
+        bug entry (<code>ion_charge</code>, fixed upstream). Queued.</li>
+      <li><strong>Embedding-cache hygiene:</strong> ~198 nodes have an embedding
+        but no <code>embedding_text</code>; ~2792 have <code>embedding_text</code>
+        but no vector — overwhelmingly (2457) legacy stale-archive
+        <code>classified</code> nodes with no <code>enrichment_source</code>
+        (impossible in the current pipeline). The embed worker only claims
+        <code>status=refined</code>, so a finished horizon never reclaims them.
+        Queued.</li>
+      <li><strong>SN-side data quality:</strong> 203 StandardNameSource + 14
+        StandardName empty descriptions; 15/4028 StandardName unembedded — SN
+        pipeline, untouched by a DD build. Queued.</li>
+      <li><strong>COCOS half-state:</strong> 20 nodes, all
+        <code>lifecycle_status=removed</code> — a current-only-design artifact on
+        lineage nodes (kept <code>cocos_label_source</code>, lost
+        <code>cocos_transformation_type</code> when the build cleared stale
+        labels). Queued.</li>
+    </ul>
+
+    <h2>Decisions honoured</h2>
+    <ul>
+      <li><strong>D-ergonomics = update-command</strong> — dedicated
+        <code>imas dd update</code>, roll-forward-all, footguns removed,
+        <code>--reset-to</code> kept minus <code>extracted</code>.</li>
+      <li><strong>D-reattach = stay-pinned</strong> — links never rewritten;
+        <code>RENAMED_TO</code> traversal is the live-path resolution; repair
+        collapses to the dangling==0 check.</li>
+      <li><strong>D-historical = current-only</strong> — embed/enrich the current
+        horizon only; the reconciler stamped <code>removed</code> on historical
+        paths so the lifecycle-null concern auto-resolved.</li>
+    </ul>
+
+    <h2>Commits</h2>
+    <ul>
+      <li><code>29b02bbd</code> — feat(dd): <code>imas dd update</code> + SN-link
+        guardrail; remove delete-path footguns.</li>
+      <li><code>c2d5cd23</code> — test(dd): accept schema-defined <code>removed</code>
+        lifecycle_status in the field gate.</li>
+    </ul>
+  </main>
+</body>
+</html>
