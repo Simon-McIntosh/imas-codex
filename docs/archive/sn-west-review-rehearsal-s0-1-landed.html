@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-s0-1-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST Review Rehearsal §3 stages 0–1 — snapshot + mop-up (blocked) | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 stages 0–1 — snapshot taken, mop-up seeding fixed, drain blocked (2026-07-22)</h1>
+    <p>
+      Act 1 of the rehearsal begins with a graph snapshot (stage 0) and the
+      paid full-355 mop-up (stage 1). Stage 0 landed. Stage 1 surfaced — and
+      fixed — a real seeding defect that would have aborted every focus/batch
+      mop-up, then hit a hard external wall: the OpenRouter billing key has
+      reached its total spend limit, so no LLM call can complete. The drain is
+      paused at that wall with zero spend and no damage to the accepted set.
+    </p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Stage 0 — graph snapshot</td><td>✓ landed</td><td><code>imas-codex-graph-west-rehearsal-snapshot.tar.gz</code> (2306 MB); restore via <code>graph load</code></td></tr>
+        <tr><td>Pre-flight — gh auth, ISNC remotes, ISN pin</td><td>✓ verified</td><td>gh: Simon-McIntosh; catalog origin=fork / upstream=iterorganization; pin <code>73126e5</code> (SPA marker written regardless — no bump needed)</td></tr>
+        <tr><td>Seeding defect — new sources lacked a pinned <code>dd_version</code></td><td>✓ fixed</td><td>commit <code>8c4b1f54</code> (supersedes <code>049bd9ae</code>)</td></tr>
+        <tr><td>Stage 1 — full-355 gap mop-up</td><td>⛔ blocked</td><td>OpenRouter key total-limit → 403 on every call; <code>cost_spent=$0</code></td></tr>
+        <tr><td>Stage 2 — cut the fork-PR batch RC</td><td>⏳ waiting</td><td>gated on stage 1's accepted-set done-when</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The seeding defect (fixed, no spend)</h2>
+    <p>
+      The <code>--focus</code>/<code>--batch</code> seeders build
+      <code>StandardNameSource</code> dicts and hand them to
+      <code>merge_standard_name_sources</code>, which pins each DD source to an
+      immutable snapshot of its DD semantics. Two failures surfaced in
+      sequence:
+    </p>
+    <ol>
+      <li><strong>New source, no version.</strong> A genuinely-new source
+        (e.g. <code>interferometer/electrons_n</code>, added to the corpus by
+        the dimensionless-signal classifier fix) reached the pin guard with no
+        <code>dd_version</code>; the guard refuses to infer <em>latest</em>, so
+        the whole mop-up aborted before any spend.</li>
+      <li><strong>Re-seed, wrong version.</strong> A first patch that stamped
+        the current version on <em>every</em> source then tripped the opposite
+        guard: an already-pinned source (pinned to <code>4.1.0</code>, older
+        than the current <code>4.1.1</code>) looked like a re-pin request and
+        raised.</li>
+    </ol>
+    <p>
+      The fix threads a batch-level <code>default_dd_version</code> through
+      <code>merge_standard_name_sources</code> to
+      <code>_pin_dd_source_snapshots</code>: it pins <em>only</em> genuinely-new
+      sources, while re-seeds keep their immutable stored pin. Per-source dicts
+      carry no version (the documented re-seed contract), and the per-source
+      mismatch guard is preserved. Applied to all four seeders (the CLI
+      focus/batch path, both <code>pool_adapter</code> seeders, and the
+      extraction worker), so the fragility is closed everywhere, not just on the
+      path this rehearsal exercised. Regression + guard tests (unit + graph)
+      cover new-source pin, re-seed default-ignore, and the version-free dict
+      shape; full SN suite green.
+    </p>
+    <p>
+      Mechanically the mop-up now runs cleanly: it seeded the 150 gap sources
+      (355 − 205 already-accepted) and launched all pools before hitting the
+      billing wall.
+    </p>
+
+    <h2>The blocker: OpenRouter key total-limit</h2>
+    <pre style="white-space:pre-wrap; background:#f6f8fa; border:1px solid #e0e4e8; border-radius:6px; padding:10px;">model=openrouter/deepseek/deepseek-v4-flash route=proxy api_key_source=OPENROUTER_API_KEY_IMAS_CODEX
+OpenRouterException: {"error":{"message":"Key limit exceeded (total limit)."}}  → HTTP 403</pre>
+    <p>
+      Every compose / docs / review call returns 403, so the run recorded
+      <code>stop_reason=no_eligible_work</code>, <code>cost_spent=$0.0</code>,
+      <code>names_composed=0</code>. The 150 gap sources were reset to
+      <code>extracted</code> by seeding and then marked <code>failed</code> when
+      their calls 403'd — a recoverable state (they carry no accepted name, so a
+      gap-only re-run retries them). The proxy itself is healthy; the limit is at
+      the OpenRouter account, which <code>llm status</code> cannot see because it
+      makes no API calls.
+    </p>
+
+    <h3>Corpus state (unchanged by the blocked run)</h3>
+    <table>
+      <thead><tr><th>State</th><th>Count</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>accepted</td><td>209 / 355</td><td>protected by gap-only; not harmed (was 205)</td></tr>
+        <tr><td>pending / drafted (in flight)</td><td>~77</td><td>reset by seeding; resume on unblock</td></tr>
+        <tr><td>failed (403'd)</td><td>150</td><td>recoverable — gap-only retries</td></tr>
+        <tr><td>nameable residual to close</td><td>~146</td><td>includes prior vocab-gap / exhausted sources</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What's next</h2>
+    <div class="card">
+      <p>
+        <strong>Lift the OpenRouter key limit, then resume.</strong> Raise the
+        total limit (or top up credits) for <code>OPENROUTER_API_KEY_IMAS_CODEX</code>
+        on the OpenRouter workspace, then re-run stage 1:
+        <code>uv run imas-codex sn run --batch west_task_2e --cost-limit 150</code>
+        (gap-only; retries the failed sources). When the accepted set covers the
+        eligible corpus, cut the fork-PR batch RC (stage 2):
+        <code>uv run imas-codex sn release --batch west_task_2e --bump minor -m "WEST review batch rehearsal"</code>.
+        Stages 3–6 (human review, fold-back, unwind) follow, exercising the
+        <code>graph-merged:</code> tag shipped in §4b.
+      </p>
+    </div>
+  </main>
+</body>
+</html>

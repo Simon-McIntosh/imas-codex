@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-west-review-rehearsal">
   <meta name="plan-title" content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
   <meta name="plan-summary" content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.15">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -85,6 +85,22 @@
     </ul>
 
     <h2 id="s3">§3 — Rehearsal procedure (act 1: fork PR)</h2>
+    <div class="card" style="border-left:4px solid #b8860b; padding-left:12px;">
+      <p style="margin:0;">
+        <strong>⛔ Stages 0–1 in progress; drain blocked on billing (2026-07-22).</strong>
+        Stage 0 snapshot landed (<code>imas-codex-graph-west-rehearsal-snapshot.tar.gz</code>).
+        Stage 1 surfaced and fixed a real seeding defect (new focus/batch
+        sources never pinned a <code>dd_version</code>; commit
+        <code>8c4b1f54</code>) — the mop-up now seeds the 150 gap sources
+        cleanly — then hit a hard wall: <code>OPENROUTER_API_KEY_IMAS_CODEX</code>
+        has reached its <strong>total spend limit</strong>, so every LLM call
+        403s (<code>cost_spent=$0</code>, 0 composed). The accepted set is
+        unharmed (209/355); the 150 failed + ~77 pending gap sources are
+        recoverable via a gap-only re-run. <strong>Resume needs the OpenRouter
+        key limit lifted</strong>, then re-run stage 1 → stage 2. Full record:
+        <a href="archive/sn-west-review-rehearsal-s0-1-landed.html">§3 stages 0–1</a>.
+      </p>
+    </div>
     <p>
       <svg viewBox="0 0 940 150" role="img" aria-label="Rehearsal loop: snapshot, mop-up, batch RC with fork PR, human review and merge, fold back, unwind" style="max-width:100%; height:auto;">
         <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
@@ -304,7 +320,7 @@ Done-when
   3. This followup resolved; stage-4 rehearsal note in §3 already references it.</pre>
     <p class="r-fu-outcome">Superseded by f-swrr-004: §4b refined to add the LLM-grounded human summary in the tag message (PR body + full PR conversation + commit messages + review-delta diff); same deterministic contract block, notes never block the fold-back.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-003" data-status="resolved" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-22T08:40:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stages 0–2: snapshot, full-355 mop-up (≤500 USD), cut the fork-PR batch RC</h4>
     <div class="r-fu-body"><p>Budget authorized: 500 USD ceiling, expected well below. Run the §5 pre-flight cross-checks (gh auth, fork ISNC remotes, optional ISN pin bump), then §3 stages 0–2 on the full manifest and record outcomes (gap counts, RC version, PR URL, LLM PR-body quality). Stages 3–6 follow after the human review of the fork PR.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -336,6 +352,7 @@ Done-when
      including total LLM spend vs the 500 USD ceiling.
   2. Fork PR open; RC version + PR URL + batch size captured; PR-body quality judged.
   3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
+    <p class="r-fu-outcome">Stage 0 landed (snapshot imas-codex-graph-west-rehearsal-snapshot.tar.gz, 2306 MB) + pre-flight verified (gh Simon-McIntosh; catalog origin=fork/upstream=iterorganization; ISN pin 73126e5, no bump needed). Stage 1 surfaced and fixed a real seeding defect — the focus/batch seeders never pinned a dd_version on genuinely-new sources and re-stamped re-seeds to the current version, tripping the immutable-pin guard two ways; fixed at the contract layer via a batch default_dd_version across all four seeders (commit 8c4b1f54, supersedes 049bd9ae; unit+graph tests green, no spend). Stage 1 then BLOCKED: OPENROUTER_API_KEY_IMAS_CODEX hit its total spend limit → 403 on every call, cost_spent=$0, 0 composed; 150 gap sources marked failed (recoverable — gap-only retries). Accepted set unharmed (209/355). Record: docs/archive/sn-west-review-rehearsal-s0-1-landed.html. Stages 1-2 continue in f-swrr-005 once the key limit is lifted.</p>
     </article>
 <article class="r-fu" data-id="f-swrr-004" data-status="resolved" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="2026-07-22T07:08:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement the sn merge tag contract + grounded tag summary (§4b)</h4>
@@ -381,6 +398,48 @@ Done-when
   2. Full sn merge test set green.
   3. This followup resolved; §3 stage-4 note already references the contract.</pre>
     <p class="r-fu-outcome">§4b landed — commit 66480249. sn merge writes the fold-back receipt: a deterministic graph-merged: contract tag on the merge commit (idempotency guard refuses a second fold-back; --undo deletes it local+remote; push failure rolls back the local tag), plus a grounded human summary appended below the block via the sn-release-notes seat (PR description + full conversation + commit messages + review-delta diff), with deterministic-only fallback and --no-notes; a notes failure never blocks. TDD: 23 tag tests + 2 notes tests green (bare repo, gh + LLM mocked). §4b collapsed; record: docs/archive/sn-west-review-rehearsal-s4b-landed.html. Next: the cost-gated operational rehearsal (f-swrr-003, §3 stages 0–2), which exercises the graph-merged: tag at stage 4.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-005" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T10:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Resume §3 stages 1–2 once the OpenRouter key limit is lifted</h4>
+    <div class="r-fu-body"><p>Stage 0 (snapshot) is done and the focus/batch seeding defect is fixed (commit <code>8c4b1f54</code>) — the mop-up now seeds cleanly. Stage 1 is blocked only by billing: <code>OPENROUTER_API_KEY_IMAS_CODEX</code> reached its total spend limit (403 on every call). Once the key's total limit is raised (or credits topped up) on the OpenRouter workspace, re-run the full-355 gap mop-up (gap-only retries the 150 failed sources), then cut the fork-PR batch RC. Corpus at 209/355 accepted; ~146 nameable residual. 500 USD ceiling still authorized; --cost-limit is soft (~1.7–2.7× overshoot).</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stages 1–2 (resume)
+Tier:    opus
+
+Context
+  Stage 0 (graph snapshot) landed and the seeding defect is fixed (commit
+  8c4b1f54: batch default_dd_version pins new sources; re-seeds keep their pin).
+  Stage 1 was blocked ONLY by OpenRouter billing — OPENROUTER_API_KEY_IMAS_CODEX
+  hit its total spend limit (403 on every call; cost_spent=$0, 0 composed). This
+  followup resumes AFTER the user has lifted that limit.
+
+Precondition (verify first)
+  - Confirm the OpenRouter key limit is lifted: a single cheap live call must
+    succeed (e.g. a short `sn run --batch west_task_2e --cost-limit 5` and check
+    it composes &gt;0 without a 403). If it still 403s, STOP — the key is not yet
+    topped up.
+
+State to read
+  docs/archive/sn-west-review-rehearsal-s0-1-landed.html   (what landed + the blocker)
+  imas_codex/standard_names/manifests/west_task_2e.yaml    (the corpus)
+  ~/.local/share/imas-codex/logs/                          (per-run logs; never pipe CLI output)
+
+Scope locks / constraints
+  - Gap-only default — never --reseed on this corpus (protects the 209 accepted).
+  - PR target stays fork (auto for an RC batch) — no --final in act 1.
+  - 500 USD ceiling; --cost-limit soft (~1.7–2.7x). Start ~150 and iterate.
+  - The stage-0 snapshot already exists; do NOT re-snapshot unless the graph was
+    reloaded.
+
+Done-when
+  1. Stage 1: every eligible WEST source has an accepted, valid name; residual-gap
+     count + skip reasons recorded (vocab-gap sources are legitimately unclosable).
+  2. Stage 2: sn release --batch west_task_2e --bump minor opens the fork PR;
+     additive diff, catalog.yml export_scope=review + review_batch, artifact frozen,
+     RC-tagged. Record RC version, PR URL, batch size, and judge the LLM PR body.
+  3. Total LLM spend vs the 500 USD ceiling recorded; followup for stages 3-6
+     (post-human-review) queued; this one resolved.</pre>
     </article>
 </section>
 
