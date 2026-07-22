@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -189,10 +189,28 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
         consistency. Plain full-catalog finals follow the same shape
         (release branch → upstream PR → <code>sn merge</code>-owned tag on the merge
         commit); no direct upstream-main or release-time upstream tag push remains.</li>
+      <li><strong>Human summary in the tag message (LLM, grounded).</strong> Below the
+        deterministic contract block, <code>sn merge</code> appends a concise
+        human-written account of what review did to the batch, synthesized by the
+        <code>sn-release-notes</code> seat from four evidence sources, all recoverable
+        from the PR itself via <code>gh</code>:
+        (1) the PR description; (2) the <em>full PR conversation</em> — review
+        comments and threads (<code>gh pr view --json body,comments,reviews</code>);
+        (3) every commit message that went into the PR; and (4) the
+        <em>review delta</em> — the diff between the PR's original content (the first
+        pushed head of <code>review/&lt;rc&gt;</code>) and the final merged state,
+        scoped to <code>standard_names/</code>, i.e. exactly what the reviewers
+        changed. Grounded summarisation only — never invention.
+        <strong>Layout rule:</strong> the contract lines come first and are
+        deterministic; the idempotency check and any tooling parse only them. The LLM
+        section is prose below a separator; on any synthesis failure the tag is
+        written with the deterministic block alone (a notes failure must never block
+        or delay the fold-back), and <code>--no-notes</code> skips it.</li>
     </ul>
     <p>
       Implementation is queued as a followup below and should land before §3 stage 4
-      so the rehearsal exercises the contract end-to-end.
+      so the rehearsal exercises the contract — including the grounded tag summary —
+      end-to-end.
     </p>
 
     <h2 id="s5">§5 — Graph-state management &amp; cross-checks</h2>
@@ -281,7 +299,7 @@ Done-when
   3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
     <p class="r-fu-outcome">Superseded by f-swrr-002 (tag contract, lands first) and f-swrr-003 (stages 0–2 with locked budget); D-pilot and D-final-shape are now locked so the pre-flight brief changed.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-002" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-002" data-status="resolved" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="2026-07-22T06:33:48+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Implement the sn merge tag contract (§4b) — fold-back receipt on the merge commit</h4>
     <div class="r-fu-body"><p>Land the D-final-shape contract in <code>sn merge</code> before §3 stage 4 so the rehearsal exercises it: tag the merge commit with the version (<code>graph-merged:</code> message + PR/batch/outcome counts), push to the PR target repo, refuse a double fold-back when the contract tag exists, and delete the tag on <code>--undo</code>. TDD against the local bare-repo fixture.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -315,6 +333,7 @@ Done-when
      (all covered by tests against the local bare repo — no live GitHub).
   2. Full sn merge test set green.
   3. This followup resolved; stage-4 rehearsal note in §3 already references it.</pre>
+    <p class="r-fu-outcome">Superseded by f-swrr-004: §4b refined to add the LLM-grounded human summary in the tag message (PR body + full PR conversation + commit messages + review-delta diff); same deterministic contract block, notes never block the fold-back.</p>
     </article>
 <article class="r-fu" data-id="f-swrr-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Stages 0–2: snapshot, full-355 mop-up (≤500 USD), cut the fork-PR batch RC</h4>
@@ -348,6 +367,50 @@ Done-when
      including total LLM spend vs the 500 USD ceiling.
   2. Fork PR open; RC version + PR URL + batch size captured; PR-body quality judged.
   3. Followup for stages 3–6 (post-human-review) queued; this one resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-swrr-004" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §4b" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the sn merge tag contract + grounded tag summary (§4b)</h4>
+    <div class="r-fu-body"><p>Land the full §4b design in <code>sn merge</code> before §3 stage 4: the deterministic <code>graph-merged:</code> contract tag on the merge commit (create/push, refuse double fold-back, delete on <code>--undo</code>) plus the LLM human summary appended below the contract block, grounded on the PR description, the full PR conversation, the PR's commit messages, and the review-delta diff (original PR content vs merged state). <code>sn-release-notes</code> seat; deterministic-only fallback; <code>--no-notes</code> respected. TDD on the local bare-repo fixture with gh mocked.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §4b
+Tier:    opus
+
+Context
+  D-final-shape is locked and §4b now specifies BOTH halves of the tag: the
+  deterministic contract block (fold-back receipt, idempotency, --undo deletes)
+  and a grounded LLM human summary appended below it. Implement both so §3
+  stage 4 exercises them on the fork PR.
+
+State to read
+  imas_codex/standard_names/merge.py            (run_merge, undo_merge, resolve_merged_pr)
+  imas_codex/standard_names/release_notes.py    (sn-release-notes seat pattern, static fallback)
+  imas_codex/standard_names/catalog_release.py  (_run_git, backfill_review_artifact)
+  imas_codex/cli/sn.py                          (sn merge --pr / --undo wiring; add --notes/--no-notes)
+  tests/standard_names/test_review_release.py   (bare-repo fixture pattern)
+  tests/standard_names/test_sn_merge.py         (mocked-gh pattern)
+
+Scope locks / constraints
+  - Contract block first, deterministic, parsed by the idempotency check: line 1
+    &#x27;graph-merged: &lt;iso-ts&gt;&#x27;, then pr/batch/outcome lines. LLM prose only BELOW a
+    separator; never parsed; never blocks — synthesis failure writes the
+    deterministic block alone.
+  - Evidence for the summary, all via gh from the PR URL: description; full
+    conversation (comments + reviews); commit messages; review-delta diff
+    (first pushed head of review/&lt;rc&gt; vs merge commit, standard_names/ only).
+  - Reuse the sn-release-notes seat — no new seat; prompt templates beside
+    release_notes_{system,user}.md; service=&#x27;standard-names&#x27;.
+  - Tag created only after a successful non-dry fold-back, on the merge commit,
+    pushed to the PR target remote; failures reported, never silent; --undo
+    deletes local+remote.
+  - No plan labels in symbols/comments; conventional commits; commit+push on green.
+
+Done-when
+  1. Contract tag created/pushed on fold-back; double fold-back refused; --undo
+     removes it; LLM summary appended when available — all tested against the
+     local bare repo with gh + LLM mocked (no live calls).
+  2. Full sn merge test set green.
+  3. This followup resolved; §3 stage-4 note already references the contract.</pre>
     </article>
 </section>
 
