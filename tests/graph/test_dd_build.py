@@ -1149,7 +1149,13 @@ class TestLifecycleMetadata:
             )
         assert total >= 200, f"Expected >=200 fields with lifecycle_status, got {total}"
         statuses = {r["status"] for r in result}
-        valid = {"active", "alpha", "obsolescent"}
+        # Valid values are the schema's LifecycleStatus enum. 'removed' is
+        # written by the lifecycle reconciler for paths absent from the current
+        # DD (retained, not deleted) — the most common status in a multi-version
+        # build, per the schema.
+        from imas_codex.graph.dd_models import LifecycleStatus
+
+        valid = {s.value for s in LifecycleStatus}
         invalid = statuses - valid
         assert not invalid, f"Invalid field lifecycle_status values: {invalid}"
 
