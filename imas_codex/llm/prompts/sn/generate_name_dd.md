@@ -104,7 +104,7 @@ component is being described. Generic geometric primitives alone are useless.
 | `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
 | `height_of_rectangle` | `height_of_poloidal_field_coil_cross_section` | Rectangle alone is meaningless |
 | `outline_r` | `radial_outline` | Outline vertices are an ordinal array of ONE geometry → collapse (`base_token=outline`, radial `coordinate` projection); the vertex index lives in the DD path |
-| `first_point_r` | `radial_line_of_sight` | **Enumeration is a coordinate, not a name** — `first_point`/`second_point` are endpoints of ONE line-of-sight; collapse BOTH to `radial_line_of_sight` (`base_token=line_of_sight`, radial `coordinate` projection) and list both endpoint paths in `dd_paths`. NEVER encode the ordinal (`first_point`) in the name |
+| `first_point_r` | `radial_coordinate_of_line_of_sight` | **Enumeration is a coordinate, not a name** — `first_point`/`second_point`/`third_point` are endpoints of ONE line-of-sight; collapse ALL to `radial_coordinate_of_line_of_sight` (`base_token=coordinate`, radial `coordinate` projection, `locus_token=line_of_sight`, `locus_relation=of`). `line_of_sight` is a LOCUS, never a base. List every endpoint path in `dd_paths`. NEVER encode the ordinal (`first_point`) in the name |
 
 **When to SKIP geometry paths entirely:**
 
@@ -132,14 +132,14 @@ ordinal siblings so the multiple DD paths attach to the ONE name:
 
 | DD leaves (ordinal siblings) | ✅ ONE name | Segments |
 |---|---|---|
-| `.../line_of_sight/first_point/r` + `.../second_point/r` | `radial_line_of_sight` | `base_token=line_of_sight`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate` |
-| `.../line_of_sight/first_point/z` + `.../second_point/z` | `vertical_line_of_sight` | …`projection_axis=vertical` |
-| `.../line_of_sight/first_point/phi` + `.../second_point/phi` | `toroidal_line_of_sight` | …`projection_axis=toroidal` |
+| `.../line_of_sight/first_point/r` + `.../second_point/r` + `.../third_point/r` | `radial_coordinate_of_line_of_sight` | `base_token=coordinate`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate`, `locus_token=line_of_sight`, `locus_relation=of`, `locus_type=geometry` |
+| `.../line_of_sight/*_point/z` | `vertical_coordinate_of_line_of_sight` | …`projection_axis=vertical` |
+| `.../line_of_sight/*_point/phi` | `toroidal_coordinate_of_line_of_sight` | …`projection_axis=toroidal` |
 | `<entity>/outline/r` (vertex array) | `radial_outline` | `base_token=outline`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate` |
 | `<entity>/outline/z` (vertex array) | `vertical_outline` | …`projection_axis=vertical` |
 
-`dd_paths` for `radial_line_of_sight` MUST list BOTH `.../first_point/r` and
-`.../second_point/r` — the collapse is realised by attaching every endpoint
+`dd_paths` for `radial_coordinate_of_line_of_sight` MUST list every
+`.../*_point/r` endpoint — the collapse is realised by attaching every endpoint
 path to the single name.
 
 **Distinguish points only by physical ENTITY, never by ordinal.** A point earns
@@ -465,7 +465,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.family_parent_name %}  - **Geometric base:** `{{ item.family_parent_name }}`{% endif %}
 
   - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
-  - **Enumeration is a coordinate, not a name.** If the geometric position is an **ordinal point** (`first_point`/`second_point`/`third_point`/`point`/`<entity>_point`) or an `outline` vertex, the ordinal is an array index — COLLAPSE to the grandparent geometry carrier + axis: line-of-sight endpoints → `radial_line_of_sight` / `vertical_line_of_sight` (`base_token=line_of_sight`); outline vertices → `radial_outline` / `vertical_outline` (`base_token=outline`). Emit `dd_paths` covering EVERY ordinal sibling so they share the ONE name. Never put `first_point`/`second_point`/`outline_point` in the name; distinguish a point only by physical entity (`radial_position_of_aperture`, `radial_position_of_first_wall`), never by ordinal.
+  - **Enumeration is a coordinate, not a name.** If the geometric position is an **ordinal point** (`first_point`/`second_point`/`third_point`/`point`/`<entity>_point`) or an `outline` vertex, the ordinal is an array index — COLLAPSE to the grandparent geometry carrier + axis: line-of-sight endpoints → `radial_coordinate_of_line_of_sight` / `vertical_coordinate_of_line_of_sight` (`base_token=coordinate`, `locus_token=line_of_sight`, `locus_relation=of` — `line_of_sight` is a LOCUS, not a base); outline vertices → `radial_outline` / `vertical_outline` (`base_token=outline`). Emit `dd_paths` covering EVERY ordinal sibling so they share the ONE name. Never put `first_point`/`second_point`/`outline_point` in the name; distinguish a point only by physical entity (`radial_position_of_aperture`, `radial_position_of_first_wall`), never by ordinal.
   - **Object-local X1/X2 axes are DISTINCT tangent directions, not storage-shaped name tokens** — use `first_local_tangential_coordinate` / `second_local_tangential_coordinate`, retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` or reinterpret X2 as machine `vertical`.
   - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.

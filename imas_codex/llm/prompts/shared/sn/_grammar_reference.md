@@ -137,6 +137,54 @@ Examples:
 ```
 
 {% endfor %}
+{% if operators_full %}
+#### `operator` — the FULL operator registry (a grammar mechanism, NOT a `SEGMENT_TOKEN_MAP` segment)
+
+Operators route through `operator_token` + `operator_kind` — **never** a
+`qualifier`, **never** a `vocab_gap`. Any token in the lists below that a
+composer reports as a "missing" segment token is a **mis-slot**, not a gap.
+Use ONLY these registered operators; nested prefix operators are legal, applied
+outer→inner.
+
+- **Prefix** (`operator_kind="unary_prefix"`): differential/scope operators
+  (`time_derivative`, `gradient`, `derivative_with_respect_to`, `change_in`,
+  `tendency`) render `<op>_of_<base>`; averaging / reduction / normalization /
+  reshaping operators (`flux_surface_averaged`, `line_integrated`,
+  `line_averaged`, `volume_averaged`, `normalized`, `square`, `inverse`,
+  `variation`, `maximum`, `minimum`, `logarithm`, `per_toroidal_mode` …) attach
+  **bare** (no `_of_`).
+
+```
+{{ operators_full.unary_prefix | map(attribute='token') | join(', ') }}
+```
+
+- **Postfix** (`operator_kind="unary_postfix"`, appended `<base>_<op>`):
+
+```
+{{ operators_full.unary_postfix | map(attribute='token') | join(', ') }}
+```
+
+- **Binary** (`operator_kind="binary"`, first operand from `base_token`, second
+  in `secondary_base`; renders `<op>_of_<A>_<sep>_<B>`):
+
+```
+{{ operators_full.binary | map(attribute='token') | join(', ') }}
+```
+
+**Composed-quantity worked examples** (name via operators — long descriptive
+names are fine, there is no length cap):
+
+- flux-surface-averaged $\langle B^2\rangle$ → `flux_surface_averaged` of
+  `square` of `magnetic_field` (nested prefix, outer→inner).
+- flux-surface-averaged $\langle 1/R^2\rangle$ (`gm1`) → `flux_surface_averaged`
+  of `inverse` of `square` of `major_radius`.
+- line-integrated electron density (`n_e_line`) → `line_integrated` of
+  `electron_density` (`operator_token="line_integrated"`, `operator_kind="unary_prefix"`).
+- line-averaged effective charge (`zeff_line_average`) → `line_averaged` of
+  `effective_charge`.
+- optical-path-length change of an interferometer beam → `variation` of the
+  path-length base.
+{% endif %}
 
 ### Decomposition Checklist — apply BEFORE you commit your IR segments
 

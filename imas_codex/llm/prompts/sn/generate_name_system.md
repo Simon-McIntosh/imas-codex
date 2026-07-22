@@ -107,11 +107,18 @@ standard name identifies a quantity-KIND by intrinsic physical identity; the
 indices.
 
 - **Line-of-sight endpoints** (`.../line_of_sight/first_point/r`,
-  `.../second_point/r`) → both `radial_line_of_sight`
-  (`base_token="line_of_sight"`, `base_kind="geometry"`,
-  `projection_axis="radial"`, `projection_shape="coordinate"`); `/z` →
-  `vertical_line_of_sight`, `/phi` → `toroidal_line_of_sight`. One name covers
-  every endpoint; list all the endpoint paths in `dd_paths`.
+  `.../second_point/r`, `.../third_point/r`) → all collapse to ONE name per
+  axis: `radial_coordinate_of_line_of_sight` (`base_token="coordinate"`,
+  `base_kind="geometry"`, `projection_axis="radial"`,
+  `projection_shape="coordinate"`, `locus_token="line_of_sight"`,
+  `locus_relation="of"`, `locus_type="geometry"`); `/z` →
+  `vertical_coordinate_of_line_of_sight`, `/phi` →
+  `toroidal_coordinate_of_line_of_sight`. **`line_of_sight` is a registered
+  LOCUS, never a `base_token`** — a bare `base_token="line_of_sight"` is not a
+  registered base and emits a false `vocab_gap` (it is a coordinate *of* the
+  sight-line, exactly like `radial_coordinate_of_<point>`). One name covers
+  every endpoint of every diagnostic's sight-line; list all the endpoint paths
+  in `dd_paths`.
 - **Outline vertices** (`<entity>/outline/r`, `/z`) → `radial_outline`,
   `vertical_outline` (`base_token="outline"`, `base_kind="geometry"`, axis as
   the `coordinate` projection). One name covers every vertex.
@@ -297,7 +304,7 @@ Skip and record as `vocab_gap`/`skipped` rather than composing when a DD path wo
 - `turn_count` (hardware winding property, not a physics observable)
 - bare contentless descriptors as a whole base — `level`, `ratio`, `multiplier`, `sign`, `gain`, `noise`, bare `factor`. These carry no physics on their own: either qualify with the specific quantity they modify (e.g. `density_peaking_factor`, not bare `factor`) or `skip`. `gain`/`noise` on a signal-chain path are diagnostic-hardware infrastructure → `skipped`.
 - bare `vertical_coordinate` / bare `outline_point` (always need `_of_<entity>`)
-- bare ordinal-point name components — `first_point`, `second_point`, `third_point`, `outline_point`, `first_coordinate`, `second_coordinate` — are forbidden in any name. Ordinal/enumerated geometry points collapse to ONE geometric-quantity name (`radial_line_of_sight`, `radial_outline`); the ordinal index lives in the DD path. Distinguish points only by physical entity (`aperture`, `wall`), never by ordinal. The separate semantic carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` are reserved for genuine ordered directions in an object-local tangent frame.
+- bare ordinal-point name components — `first_point`, `second_point`, `third_point`, `outline_point`, `first_coordinate`, `second_coordinate` — are forbidden in any name. Ordinal/enumerated geometry points collapse to ONE geometric-quantity name (`radial_coordinate_of_line_of_sight`, `radial_outline`); the ordinal index lives in the DD path. Distinguish points only by physical entity (`aperture`, `wall`), never by ordinal. The separate semantic carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` are reserved for genuine ordered directions in an object-local tangent frame.
 - `nuclear_charge_number` (→ `atomic_number`)
 - `azimuth_angle` (→ `toroidal_angle`)
 - `distance_between_A_and_B` / `distance_from_A_to_B_along_C` — a span between two distinct named features is NOT representable in the single locus slot, and the DD has no such arbitrary spans. Name real distance/clearance quantities as a `distance`/`gap` base at a single reference surface or plane (✓ `radial_distance_at_outboard_midplane`, ✓ `gap_at_plasma_boundary`); emit `vocab_gap` if no single-locus form is faithful. Never fabricate a multi-locus span that silently drops an endpoint.

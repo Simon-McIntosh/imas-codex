@@ -101,6 +101,13 @@ def build_compose_context() -> dict[str, Any]:
     # failures (closed tokens absorbed into physical_base).
     ctx["closed_vocab_full"] = _load_closed_vocab_full()
 
+    # Full operator registry (grouped by attachment kind).  Operators are a
+    # grammar mechanism SEPARATE from SEGMENT_TOKEN_MAP, so they are absent from
+    # ``closed_vocab_full``; without the complete list the composer only sees a
+    # static prose subset and mis-slots real operators (line_integrated, square,
+    # inverse, change_in, variation …) as qualifiers or false vocab gaps.
+    ctx["operators_full"] = _load_operators_full()
+
     # W2: curated examples + anti-patterns from the W0 snapshot YAMLs.  These
     # are static, cacheable, and survive `sn clear`; the graph-driven
     # `compose_scored_examples` injection still complements them at runtime
@@ -244,6 +251,57 @@ def _load_closed_vocab_full() -> list[dict[str, Any]]:
             }
         )
     return out
+
+
+# ---------------------------------------------------------------------------
+# Full operator registry injection
+# ---------------------------------------------------------------------------
+
+
+@lru_cache(maxsize=1)
+def _load_operators_full() -> dict[str, list[dict[str, Any]]] | None:
+    """Return the complete ISN operator vocabulary grouped by attachment kind.
+
+    Operators (``line_integrated``, ``flux_surface_averaged``, ``square``,
+    ``inverse``, ``change_in``, ``variation`` …) compose through
+    ``operator_token`` + ``operator_kind`` rather than occupying a
+    ``SEGMENT_TOKEN_MAP`` slot, so they never appear in
+    :func:`_load_closed_vocab_full`.  The compose prompt otherwise sees only a
+    hand-written prose subset of operators and mis-slots the rest — reporting a
+    known operator as a ``qualifier`` (validation failure) or as a
+    ``vocab_gap`` (fabricated deficiency), stranding the source.
+
+    The vocabulary is derived at runtime from ISN's public
+    ``get_grammar_context()`` — ISN owns the operator vocabulary; codex never
+    hardcodes it.  Returns a mapping ``kind -> [{token, separator}, …]`` with
+    kinds ``unary_prefix`` / ``unary_postfix`` / ``binary``, tokens sorted
+    within each kind.  Returns ``None`` when ISN is unavailable so the prompt
+    block degrades out rather than raising.
+    """
+    try:
+        isn = _get_isn_context()
+        operators = isn["grammar"]["vocabularies"]["operators"]
+    except Exception:
+        logger.warning(
+            "imas_standard_names operators unavailable — operators_full empty"
+        )
+        return None
+
+    grouped: dict[str, list[dict[str, Any]]] = {
+        "unary_prefix": [],
+        "unary_postfix": [],
+        "binary": [],
+    }
+    for token in sorted(operators):
+        spec = operators[token] or {}
+        kind = (
+            spec.get("kind", "unary_prefix")
+            if isinstance(spec, dict)
+            else "unary_prefix"
+        )
+        separator = spec.get("separator") if isinstance(spec, dict) else None
+        grouped.setdefault(kind, []).append({"token": token, "separator": separator})
+    return grouped
 
 
 # ---------------------------------------------------------------------------
