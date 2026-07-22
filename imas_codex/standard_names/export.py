@@ -1122,6 +1122,13 @@ def _write_manifest(
     except Exception as exc:
         logger.warning("Manifest validation warning: %s", exc)
 
+    # The ISN model now declares ``review_batch`` (default None), so the
+    # validation round-trip re-introduces the key even on a normal build.
+    # Drop it again when there is no batch so full-catalog manifests stay
+    # byte-identical (the additive-diff guarantee); a real batch keeps it.
+    if review_batch is None:
+        manifest_data.pop("review_batch", None)
+
     filepath = staging_dir / "catalog.yml"
     content = yaml.safe_dump(manifest_data, sort_keys=False, default_flow_style=False)
     filepath.write_text(content, encoding="utf-8")
