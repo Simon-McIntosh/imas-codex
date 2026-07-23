@@ -185,7 +185,7 @@ class TestStandardNameGraph:
             f"{row['no_scalar']}/{row['total']} COCOS-dependent names lack a cocos "
             f"integer and {row['no_edge']}/{row['total']} lack a HAS_COCOS edge. "
             f"Run `sn run` (post-drain reconcile links them) or "
-            f"reconcile_sn_cocos_links()."
+            f"reconcile_standard_name_cocos_links()."
         )
 
     def test_documentation_length_median(self, gc):

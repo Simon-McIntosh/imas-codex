@@ -92,6 +92,7 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
         patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
         patch(f"{_GO}.reconcile_provenance", return_value={}),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
+        patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
         patch(f"{_GO}.create_sn_run_open"),
         patch(f"{_GO}.finalize_sn_run"),
         patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),

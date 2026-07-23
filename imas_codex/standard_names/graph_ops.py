@@ -7061,7 +7061,7 @@ def reconcile_provenance() -> dict[str, int]:
     }
 
 
-def reconcile_sn_cocos_links(gc: Any | None = None) -> dict[str, int]:
+def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]:
     """Link COCOS-dependent standard names to the catalog's COCOS convention.
 
     A standard name with a ``cocos_transformation_type`` (psi_like, ip_like, …)
@@ -7088,7 +7088,7 @@ def reconcile_sn_cocos_links(gc: Any | None = None) -> dict[str, int]:
         )
         if convention is None:
             logger.debug(
-                "reconcile_sn_cocos_links: no current DD COCOS convention — skipping"
+                "reconcile_standard_name_cocos_links: no current DD COCOS convention — skipping"
             )
             return {"convention": 0, "scalars_set": 0, "edges_created": 0}
 
@@ -7121,7 +7121,7 @@ def reconcile_sn_cocos_links(gc: Any | None = None) -> dict[str, int]:
 
     if scalars_set or edges_created:
         logger.info(
-            "reconcile_sn_cocos_links: convention=COCOS %s, set %d cocos scalar(s), "
+            "reconcile_standard_name_cocos_links: convention=COCOS %s, set %d cocos scalar(s), "
             "created %d HAS_COCOS edge(s)",
             convention,
             scalars_set,

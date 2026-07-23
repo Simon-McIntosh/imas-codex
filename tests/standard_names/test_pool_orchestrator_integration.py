@@ -98,6 +98,7 @@ class TestReconcileRunsBeforePools:
                 _GO,
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_standard_name_cocos_links=MagicMock(return_value={}),
             ),
             patch(
                 _CLAIM_PATCHES["generate_name"],
@@ -361,6 +362,7 @@ class TestFinalizeWithCorrectStatus:
                 reconcile_vocab_gaps=MagicMock(return_value={}),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_standard_name_cocos_links=MagicMock(return_value={}),
             ),
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run", side_effect=_finalize),
@@ -434,6 +436,7 @@ class TestFinalizeWithCorrectStatus:
                 reconcile_vocab_gaps=MagicMock(return_value={}),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_standard_name_cocos_links=MagicMock(return_value={}),
             ),
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run", side_effect=_finalize),
