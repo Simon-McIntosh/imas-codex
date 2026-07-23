@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="dd-graph-hygiene">
   <meta name="plan-title" content="DD Graph Hygiene">
   <meta name="plan-summary" content="Drive four pre-existing -m graph gates green: embedding-cache consistency on legacy classified nodes, SN-side empty descriptions + coverage, and COCOS half-state on removed nodes.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="sonnet">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="2">
-<meta name="plan-impl" content="0.6667">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -92,14 +92,23 @@
       </p>
     </section>
 
-    <h2 id="s3">§3 — Axis B: SN-side description &amp; embedding coverage</h2>
-    <p>Entirely on the standard-names side, not DD. 14 <code>StandardName</code> and 203
-      <code>StandardNameSource</code> nodes carry empty descriptions, and 15/4028
-      <code>StandardName</code> nodes are unembedded. The fix is to run these through the SN pipeline
-      (<code>sn run</code>) rather than hand-writing text: regenerate the missing descriptions and
-      let the embed step cover the 15 unembedded names. Before regenerating, triage whether any of
-      the 203 empty-description sources are <em>stale</em> (superseded / orphaned) and should be
-      pruned instead of regenerated — an empty description on a dead source is noise, not a gap.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-23</span>
+        <h2>§3 — Axis B: SN-side description &amp; embedding coverage</h2>
+      </header>
+      <p class="landed-summary">
+        Both SN-side gates green (commits <code>7a6eb498</code> + <code>369b91c4</code>). Root cause was a
+        source bug, not a data accident: <code>coalesce('', existing)</code> returns <code>''</code> (empty
+        string is non-null), so a blank incoming description clobbered a real one, and seeders emitted
+        <code>''</code>. Fix = wrap the incoming value in <code>nullIf(&hellip;, '')</code> at both merge
+        chokepoints + pass <code>None</code> from the <code>--focus</code> re-seeder. Empty-string rows then
+        normalized to null through backing code: <code>StandardNameSource</code> 203→0,
+        <code>StandardName</code> 14→0, embedded-but-no-vector 12→0. Dead sources triaged out; a small live
+        residual drained via focused <code>sn run --names-only</code> (~$0.19 total). SN suite green.
+        Full record: <a href="archive/dd-graph-hygiene-s3-landed.html">§3 landed</a>.
+      </p>
+    </section>
 
     <section id="s4" class="section-landed">
       <header>
@@ -148,7 +157,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ddgh-001" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship dd-graph-hygiene" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddgh-001" data-status="resolved" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship dd-graph-hygiene" data-resolved-at="2026-07-23T09:54:42+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Drive the four -m graph hygiene gates green (all three axes)</h4>
     <div class="r-fu-body"><p>Execute the three code-disjoint axes and turn the four red gates green. Verify each axis's live counts and root cause before touching code, then regenerate through the backing pipeline — never patch vectors, <code>embedding_text</code>, or descriptions in-place via Cypher. Lock the three decisions above before starting the axis each governs.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -190,6 +199,7 @@ Done-when
   2. test_no_empty_string_descriptions + StandardName embedding coverage green.
   3. test_no_cocos_half_state green.
   4. Decisions locked with rationale; outcomes recorded per axis; this followup resolved.</pre>
+    <p class="r-fu-outcome">ALL FOUR -m graph gates green (verified live + as a set, 2026-07-23). Axis A (d6658150): live data reframed it — all 2824 text-no-vector nodes are non-embeddable categories (0 embeddable; 'reset to refined' void); generation already category-gated, so cleared the legacy cruft via a re-runnable self-healing build pass + backfilled 198 identifier embedding_text (persistence bug fixed) + scoped the gate to EMBEDDABLE_CATEGORIES. Axis C (d6658150, groom per lock): build clear pass now clears cocos_label_source alongside cocos_transformation_type + groom_cocos_half_state wired in; 20 removed-node half-states groomed. Axis B (7a6eb498 + 369b91c4, triage-then-regen): root cause was coalesce('',existing) returning '' (clobber) + seeders emitting '' — fixed with nullIf at both chokepoints + None from the --focus reseeder; SNSource 203→0, SN 14→0, embedded-no-vector 12→0, ~$0.19. SN suite + sibling graph classes green. NOTE: an unrelated, uncommitted imas-standard-names pin bump (2ee68c7→a9c02d0 in pyproject.toml/uv.lock) is present in the worktree — NOT authored by this plan's work and left untouched for the parallel SN-campaign session to own; my commits are pathspec-scoped and exclude it.</p>
     </article>
 </section>
 

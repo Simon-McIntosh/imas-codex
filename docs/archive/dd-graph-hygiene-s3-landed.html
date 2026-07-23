@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-graph-hygiene">
+  <meta name="plan-title" content="DD Graph Hygiene — §3 Axis B landed">
+  <meta name="plan-summary" content="Landed record for Axis B: SN-side empty descriptions and embedding coverage — empty-string clobber fixed at the write chokepoints, dead/live sources triaged, gates green.">
+  <meta name="plan-status" content="archived">
+  <title>DD Graph Hygiene — §3 Axis B landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 — Axis B: SN-side description &amp; embedding coverage (landed 2026-07-23)</h1>
+    <p><strong>Both SN-side gates green.</strong> Commits <code>7a6eb498</code> + <code>369b91c4</code>.
+      Chosen approach: <em>triage-then-regen</em> — but the true fix turned out to be a root-cause source
+      bug, so almost no regeneration was needed.</p>
+
+    <table class="quick-status">
+      <thead><tr><th>Gate</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_no_empty_string_descriptions</code> — <code>StandardName</code></td><td>14 red</td><td>✓ 0</td></tr>
+        <tr><td><code>test_no_empty_string_descriptions</code> — <code>StandardNameSource</code></td><td>203 red</td><td>✓ 0</td></tr>
+        <tr><td><code>test_description_embedding_coverage[StandardName]</code></td><td>12 red (embedded_at set, no vector)</td><td>✓ 0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="rootcause">Root cause</h2>
+    <p>Empty-string descriptions were not a data accident — they were written by the pipeline. Two source
+      defects, same family:</p>
+    <ul>
+      <li><strong>Clobber via <code>coalesce('', existing)</code>.</strong> The StandardName /
+        StandardNameSource merge sites used <code>coalesce(incoming, existing)</code> to preserve prior text.
+        But an empty string is non-null, so <code>coalesce('', existing)</code> returns <code>''</code> — a
+        blank incoming description silently overwrote a real one.</li>
+      <li><strong>Seeders emitted <code>''</code>.</strong> Source seeders (including the <code>--focus</code>
+        re-seeder in the CLI) built the source dict with a literal <code>"description": ""</code> when a DD
+        path had no documentation, so a source could be born empty-string rather than null.</li>
+    </ul>
+
+    <h2 id="fix">What landed</h2>
+    <table class="quick-status">
+      <thead><tr><th>Change</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td>Wrap the incoming description in <code>nullIf(&hellip;, '')</code> at both merge chokepoints — a blank never overwrites existing text and a source is never born with <code>''</code></td><td><code>standard_names/graph_ops.py</code>, <code>loop.py</code>, <code>pool_adapter.py</code> (<code>7a6eb498</code>)</td></tr>
+        <tr><td>Pass <code>None</code> (not <code>""</code>) from the <code>--focus</code> re-seeder</td><td><code>cli/sn.py</code> (<code>369b91c4</code>)</td></tr>
+        <tr><td>Regression test for the null-not-empty invariant</td><td><code>tests/standard_names/test_graph_ops.py</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="triage">Triage &amp; data outcome</h2>
+    <p>With the clobber fixed, the existing empty-string rows were normalized to null through the backing code
+      (never hand-edited): <code>StandardNameSource</code> <strong>203 → 0</strong>, <code>StandardName</code>
+      <strong>14 → 0</strong>. Dead-state sources (stale/failed/skipped/superseded) were triaged out as noise
+      rather than regenerated; a small residual of genuinely-live names was drained through a focused
+      <code>sn run --names-only</code> (local compose, ~$0). The 12 <code>StandardName</code> with
+      <code>embedded_at</code> set but no vector (mostly superseded/exhausted) were resolved to
+      <strong>0</strong>. Total LLM spend for the axis: ~$0.19.</p>
+    <p>Full SN test suite (<code>tests/standard_names/</code>) green after the source changes — the
+      null-not-empty fix does not regress the pipeline.</p>
+
+    <div class="next-card" style="border:1px solid #c9ccd1;border-left:4px solid #1a7f37;padding:0.75rem 1rem;border-radius:4px;margin-top:1rem;">
+      <strong>What's next.</strong> Axis B was the last open axis — all four originally-red <code>-m graph</code>
+      gates are green and the plan is shipped. No follow-on plan work.
+    </div>
+  </main>
+</body>
+</html>
