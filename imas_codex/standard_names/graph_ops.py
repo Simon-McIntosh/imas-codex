@@ -12960,6 +12960,123 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
             gc.__exit__(None, None, None)
 
 
+def reconcile_orphan_parent_sources(gc: Any | None = None) -> int:
+    """Seed the missing structural provenance source for childful parents.
+
+    A structural parent (a ``StandardName`` that is the ``HAS_PARENT`` target of
+    at least one child) records its provenance as a ``derived:<name>`` — or
+    ``dd:<common-path>`` when its children share a real DD path — source linked
+    via ``PRODUCED_NAME``, the identity :func:`_derived_parent_source_metadata`
+    builds. That source is written in exactly ONE place
+    (:func:`_materialize_derived_parent_rows`), reached only through
+    :func:`seed_parent_sources`, whose selector gates on ``name_stage IS NULL``.
+
+    So a parent that acquires a non-null ``name_stage`` *before* it is seeded is
+    skipped forever and left a provenance orphan — the exact leak this repairs.
+    Two paths do it: a child's ``REFINE_NAME`` producing the parent-general name
+    (which routes that name through ``REVIEW_NAME`` to ``accepted`` as
+    ``origin='pipeline'``), and :func:`structural_accept_derived_parents` (which
+    flips the stage to ``accepted`` but writes no source). Both leave an accepted
+    parent with no ``PRODUCED_NAME`` source — a violation of the ledger invariant
+    (:func:`~imas_codex.standard_names.ledger.find_provenance_orphans`).
+
+    This decouples source-seeding from the acceptance path. For every parent with
+    at least one child, all children composed, and no ``PRODUCED_NAME`` source, it
+    materializes the structural source + ``PRODUCED_NAME`` (+ ``FROM_DD_PATH`` when
+    the children share a DD path that resolves to a live ``IMASNode``). It is
+    origin-, stage-, and operator-kind-agnostic — the parent already exists and
+    passed admission; this only records provenance and NEVER mutates the parent's
+    ``name_stage`` / ``origin`` / ``description``. Idempotent: a parent that gains a
+    source drops out of the selector. Childless sourceless names are not parents
+    and are left untouched (a distinct stranded-name concern).
+
+    Returns the number of parent sources seeded.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (parent:StandardName)
+            WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
+            MATCH (child)-[:HAS_PARENT]->(parent)
+            WITH parent,
+                 count(child) AS total_children,
+                 count(CASE WHEN child.name_stage IS NOT NULL THEN 1 END) AS composed
+            WHERE total_children >= 1 AND total_children = composed
+            MATCH (c)-[:HAS_PARENT]->(parent)
+            OPTIONAL MATCH (cs:StandardNameSource)-[:PRODUCED_NAME]->(c)
+            OPTIONAL MATCH (cs)-[:FROM_DD_PATH]->(imas:IMASNode)
+            WITH parent, [p IN collect(DISTINCT imas.id) WHERE p IS NOT NULL] AS dd_paths
+            RETURN parent.id AS parent_id, dd_paths
+            """
+        )
+        seeded = 0
+        for r in rows:
+            parent_id = r["parent_id"]
+            dd_paths = r["dd_paths"]
+            parent_dd_path = None
+            if dd_paths:
+                parts = [p.split("/") for p in dd_paths]
+                common: list[str] = []
+                for segments in zip(*parts, strict=False):
+                    if len(set(segments)) == 1:
+                        common.append(segments[0])
+                    else:
+                        break
+                candidate = "/".join(common) if common else None
+                # Only adopt a dd: identity when the common prefix is a real
+                # IMASNode; a bare prefix (e.g. a shared IDS container) is not a
+                # source path, so fall back to the structural derived: identity.
+                if candidate and client.query(
+                    "MATCH (n:IMASNode {id: $p}) RETURN n.id LIMIT 1", p=candidate
+                ):
+                    parent_dd_path = candidate
+            meta = _derived_parent_source_metadata(
+                parent_id, parent_dd_path=parent_dd_path
+            )
+            client.query(
+                """
+                MATCH (parent:StandardName {id: $parent_id})
+                MERGE (sns:StandardNameSource {id: $source_node_id})
+                  ON CREATE SET sns.created_at = datetime(), sns.attempt_count = 0
+                SET sns.status = coalesce(sns.status, 'composed'),
+                    sns.source_type = $source_type,
+                    sns.source_id = $source_id,
+                    sns.batch_key = coalesce(sns.batch_key, $batch_key),
+                    sns.composed_at = coalesce(sns.composed_at, datetime()),
+                    sns.produced_sn_id = parent.id,
+                    sns.claimed_at = null,
+                    sns.claim_token = null
+                MERGE (sns)-[:PRODUCED_NAME]->(parent)
+                """,
+                parent_id=parent_id,
+                **meta,
+            )
+            if parent_dd_path:
+                client.query(
+                    """
+                    MATCH (sns:StandardNameSource {id: $source_node_id})
+                    MATCH (imas:IMASNode {id: $dd_path})
+                    MERGE (sns)-[:FROM_DD_PATH]->(imas)
+                    """,
+                    source_node_id=meta["source_node_id"],
+                    dd_path=parent_dd_path,
+                )
+            seeded += 1
+    finally:
+        if own:
+            client.close()
+
+    if seeded:
+        logger.info(
+            "reconcile_orphan_parent_sources: seeded %d missing parent "
+            "provenance source(s)",
+            seeded,
+        )
+    return seeded
+
+
 @retry_on_deadlock()
 def release_enrich_parents_claims(
     *,

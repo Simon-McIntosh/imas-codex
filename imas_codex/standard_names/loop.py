@@ -1292,6 +1292,23 @@ async def run_sn_pools(
                 _structural_accepted,
             )
 
+        # Seed the structural provenance source for any parent that reached a
+        # non-null name_stage before it was seeded (a child's refine producing
+        # the parent-general name, or structural acceptance above) — those paths
+        # accept the parent but write no PRODUCED_NAME source, stranding it as a
+        # ledger orphan. Runs after acceptance so same-run parents are covered;
+        # idempotent and self-healing.
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_orphan_parent_sources,
+        )
+
+        _parent_sources = await asyncio.to_thread(reconcile_orphan_parent_sources)
+        if _parent_sources:
+            logger.info(
+                "Seeded %d missing parent provenance source(s)",
+                _parent_sources,
+            )
+
         # ── Build pool specs ──────────────────────────────────────
         _only_domain_for_pools = _domains[0] if len(_domains) == 1 else None
         specs = _build_pool_specs(

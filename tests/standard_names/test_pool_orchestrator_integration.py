@@ -105,6 +105,7 @@ class TestReconcileRunsBeforePools:
                 reconcile_standard_name_source_paths=MagicMock(
                     return_value={"names_reconciled": 0}
                 ),
+                reconcile_orphan_parent_sources=MagicMock(return_value=0),
             ),
             patch(
                 _CLAIM_PATCHES["generate_name"],
@@ -375,6 +376,7 @@ class TestFinalizeWithCorrectStatus:
                 reconcile_standard_name_source_paths=MagicMock(
                     return_value={"names_reconciled": 0}
                 ),
+                reconcile_orphan_parent_sources=MagicMock(return_value=0),
             ),
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run", side_effect=_finalize),
@@ -455,6 +457,7 @@ class TestFinalizeWithCorrectStatus:
                 reconcile_standard_name_source_paths=MagicMock(
                     return_value={"names_reconciled": 0}
                 ),
+                reconcile_orphan_parent_sources=MagicMock(return_value=0),
             ),
             patch(f"{_GO}.create_sn_run_open"),
             patch(f"{_GO}.finalize_sn_run", side_effect=_finalize),

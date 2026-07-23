@@ -150,6 +150,41 @@ class TestStandardNameEdgeIntegrity:
             "edge: " + "; ".join(f"{r['name']} → {r['stale']}" for r in rows)
         )
 
+    def test_childful_parent_has_provenance_source(self, gc):
+        """Every structural parent with composed children carries a source.
+
+        A parent (``HAS_PARENT`` target) whose children are all composed must
+        carry a ``PRODUCED_NAME`` source — a ``derived:<name>`` (or ``dd:<path>``)
+        structural provenance record. The source is seeded by
+        ``reconcile_orphan_parent_sources`` regardless of how the parent reached
+        its stage; a parent that lacks one is the provenance orphan the ledger
+        invariant forbids (it acquired a stage before ``seed_parent_sources``
+        could seed it and was skipped). Scoped to parents with ``>=1`` composed
+        child — childless sourceless names are a distinct stranded-name concern,
+        not a parent-seeding gap.
+        """
+        rows = gc.query(
+            """
+            MATCH (parent:StandardName)
+            WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
+            MATCH (child)-[:HAS_PARENT]->(parent)
+            WITH parent,
+                 count(child) AS total,
+                 count(CASE WHEN child.name_stage IS NOT NULL THEN 1 END) AS composed
+            WHERE total >= 1 AND total = composed
+            RETURN parent.id AS name, parent.origin AS origin, total AS children
+            ORDER BY name
+            LIMIT 25
+            """
+        )
+        assert not rows, (
+            f"{len(rows)} childful parent(s) lack a PRODUCED_NAME source (run "
+            "`sn run` to reconcile via reconcile_orphan_parent_sources): "
+            + "; ".join(
+                f"{r['name']} ({r['origin']}, {r['children']} kids)" for r in rows
+            )
+        )
+
     def test_dd_edge_is_complete_provenance_projection(self, gc):
         """Every eligible, unit-agreeing provenance pair carries a DD-side edge.
 

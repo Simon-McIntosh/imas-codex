@@ -1113,6 +1113,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 reconcile_standard_name_source_paths=MagicMock(
                     return_value={"names_reconciled": 0}
                 ),
+                reconcile_orphan_parent_sources=MagicMock(return_value=0),
             ),
             patch(
                 "imas_codex.standard_names.pools.run_pools",
