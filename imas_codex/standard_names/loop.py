@@ -694,7 +694,7 @@ async def _seed_domain_sources(
                     "dd_version": batch.dd_version,
                     "description": item.get("description")
                     or item.get("documentation")
-                    or "",
+                    or None,
                     "physics_domain": item.get("physics_domain"),
                 }
             )

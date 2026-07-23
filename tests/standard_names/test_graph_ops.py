@@ -58,7 +58,10 @@ class TestWriteStandardNames:
 
         # Every field SET should use coalesce pattern
         assert "coalesce(b.source_types, sn.source_types)" in cypher
-        assert "coalesce(b.description, sn.description)" in cypher
+        # description normalizes an empty incoming value to null first, so a
+        # blank regeneration preserves an existing real description rather than
+        # clobbering it with ''.
+        assert "coalesce(nullIf(b.description, ''), sn.description)" in cypher
         assert "coalesce(b.documentation, sn.documentation)" in cypher
         assert "coalesce(b.kind, sn.kind)" in cypher
         assert "coalesce(b.links, sn.links)" in cypher

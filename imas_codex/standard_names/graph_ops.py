@@ -2647,7 +2647,7 @@ def write_standard_names(
             UNWIND $batch AS b
             MERGE (sn:StandardName {id: b.id})
             SET sn.source_types = coalesce(b.source_types, sn.source_types),
-                sn.description = coalesce(b.description, sn.description),
+                sn.description = coalesce(nullIf(b.description, ''), sn.description),
                 sn.documentation = coalesce(b.documentation, sn.documentation),
                 sn.kind = coalesce(b.kind, sn.kind),
                 sn.links = coalesce(b.links, sn.links),
@@ -5841,7 +5841,7 @@ def merge_standard_name_sources(
                 sns.source_id = src.source_id,
                 sns.batch_key = src.batch_key,
                 sns.status = src.status,
-                sns.description = src.description,
+                sns.description = nullIf(src.description, ''),
                 sns.physics_domain = src.physics_domain,
                 sns.dd_version = src.dd_version,
                 sns.provenance = src.provenance,
@@ -5859,7 +5859,7 @@ def merge_standard_name_sources(
                 sns.attempt_count = 0
             ON MATCH SET
                 sns.batch_key = src.batch_key,
-                sns.description = coalesce(src.description, sns.description),
+                sns.description = coalesce(nullIf(src.description, ''), sns.description),
                 sns.physics_domain = coalesce(src.physics_domain, sns.physics_domain),
                 sns.provenance = coalesce(src.provenance, sns.provenance),
                 sns.status = CASE

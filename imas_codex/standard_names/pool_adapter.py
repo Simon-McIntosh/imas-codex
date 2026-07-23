@@ -129,7 +129,7 @@ async def _seed_explicit_paths(
                 "dd_path": path,
                 "batch_key": ids_name,
                 "status": "extracted",
-                "description": "",
+                "description": None,
             }
         )
 
@@ -251,7 +251,7 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
                     "dd_path": path,
                     "batch_key": ids_name,
                     "status": "extracted",
-                    "description": item.get("description", ""),
+                    "description": item.get("description") or None,
                     "physics_domain": item.get("physics_domain"),
                 }
             )
