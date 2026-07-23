@@ -7159,6 +7159,88 @@ def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]
     }
 
 
+# Terminal / dead name stages — refined-away or given-up names whose edges have
+# already been migrated off them; their denormalised scalar is left as-is.
+_TERMINAL_NAME_STAGES = ["superseded", "exhausted", "contested"]
+
+
+def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int]:
+    """Materialize each live name's ``source_paths`` scalar from its edges.
+
+    ``source_paths`` is a denormalised cache written once at compose time (the
+    union of DD paths sent to the composer) and updated by NO edge-mutating
+    path — not refine (``persist_refined_name`` migrates HAS_STANDARD_NAME
+    edges but never touches the scalar), not prune (the sever path deletes
+    edges but leaves the scalar), and not ``reconcile_standard_name_sources``
+    (which reconciles FROM_DD_PATH edges only). So the scalar goes stale the
+    moment any mapping is remapped or pruned, mis-driving consumers that trust
+    it. This reconcile makes the edges the source of truth: it recomputes the
+    scalar as the sorted, deduped union of the canonical-URI forms of the live
+    provenance edges —
+
+    - ``'dd:' + imas.id`` for each ``HAS_STANDARD_NAME`` IMASNode source, and
+    - ``src.id`` for each non-``derived`` ``PRODUCED_NAME`` StandardNameSource
+
+    — while preserving any existing ``derived:`` scalar entries (structural
+    provenance, not a source entity). This mirrors exactly the edge→scalar
+    mapping the edge-integrity invariant asserts, so the invariant guards it in
+    CI. Scoped to non-terminal names; idempotent (no-op once the scalar equals
+    the union). Any HAS_STANDARD_NAME edges backfilled later are picked up on
+    the next run automatically — edge completeness is a separate concern this
+    function deliberately does not judge.
+
+    Returns dict: {names_reconciled}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE NOT (sn.name_stage IN $terminal)
+            OPTIONAL MATCH (imas:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+            WITH sn, collect(DISTINCT 'dd:' + imas.id) AS hsn
+            OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+            WHERE src.source_type <> 'derived' AND src.id IS NOT NULL
+            WITH sn, hsn, collect(DISTINCT src.id) AS prod
+            RETURN sn.id AS id,
+                   coalesce(sn.source_paths, []) AS current,
+                   [p IN hsn WHERE p IS NOT NULL AND p <> 'dd:'] AS hsn_paths,
+                   prod AS produced_paths
+            """,
+            terminal=_TERMINAL_NAME_STAGES,
+        )
+        updates = []
+        for r in rows:
+            current = list(r["current"])
+            derived_keep = [p for p in current if p.startswith("derived:")]
+            union = sorted(
+                set(derived_keep) | set(r["hsn_paths"]) | set(r["produced_paths"])
+            )
+            if union != current:
+                updates.append({"id": r["id"], "paths": union})
+        if updates:
+            client.query(
+                """
+                UNWIND $updates AS u
+                MATCH (sn:StandardName {id: u.id})
+                SET sn.source_paths = u.paths
+                """,
+                updates=updates,
+            )
+    finally:
+        if own:
+            client.close()
+
+    if updates:
+        logger.info(
+            "reconcile_standard_name_source_paths: materialized source_paths "
+            "from live edges on %d name(s)",
+            len(updates),
+        )
+    return {"names_reconciled": len(updates)}
+
+
 def reconcile_grammar_segments() -> dict[str, int]:
     """Realign each live name's grammar segment columns with its canonical id.
 

@@ -1013,6 +1013,21 @@ async def run_sn_pools(
                 cocos_result.get("convention"),
             )
 
+        # Materialize the denormalised source_paths scalar from live edges, so a
+        # remapped/pruned/refined mapping can't leave the scalar stale (no other
+        # path reconciles it). Edges are the source of truth; idempotent.
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_standard_name_source_paths,
+        )
+
+        sp_result = await asyncio.to_thread(reconcile_standard_name_source_paths)
+        if sp_result.get("names_reconciled", 0):
+            logger.info(
+                "run_sn_pools: source_paths reconcile — %d name(s) materialized "
+                "from live edges",
+                sp_result["names_reconciled"],
+            )
+
         # Read-only ledger-health probe — a diagnostic, never fatal to the run.
         try:
             orphans = await asyncio.to_thread(find_provenance_orphans)
