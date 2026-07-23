@@ -2255,9 +2255,16 @@ def _materialize_derived_parent_rows(
             )
 
         if unit:
+            # Self-heal: drop any pre-existing HAS_UNIT edge (possibly to a
+            # different Unit) before re-creating, so a unit correction replaces
+            # the edge rather than leaving a stale one alongside the new one.
+            # An SN must carry at most one HAS_UNIT edge, matching sn.unit.
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $parent_id})
+                OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(:Unit)
+                DELETE r
+                WITH sn
                 MERGE (u:Unit {id: $unit})
                 MERGE (sn)-[:HAS_UNIT]->(u)
                 """,
@@ -2908,10 +2915,28 @@ def write_standard_names(
             )
 
         # Create HAS_UNIT relationships: StandardName → Unit
+        #
+        # Self-healing: for each SN carrying a unit in this batch, drop ALL
+        # existing HAS_UNIT edges before re-creating, so a unit correction
+        # (e.g. m.sr → m^2.sr) replaces the edge rather than leaving a stale
+        # one alongside the new one. An SN must have at most ONE HAS_UNIT edge,
+        # matching its sn.unit property. Mirrors the IMASNode self-heal in
+        # build_dd.py. Scoped to the batch's SN ids that carry a unit — an SN
+        # not supplying a unit in this batch (e.g. a docs-only refine) keeps
+        # its existing edge untouched.
         units_batch = [
             {"id": n["id"], "unit": n["unit"]} for n in names if n.get("unit")
         ]
         if units_batch:
+            unit_sn_ids = [b["id"] for b in units_batch]
+            gc.query(
+                """
+                UNWIND $ids AS id
+                MATCH (sn:StandardName {id: id})-[r:HAS_UNIT]->()
+                DELETE r
+                """,
+                ids=unit_sn_ids,
+            )
             gc.query(
                 """
                 UNWIND $batch AS b
