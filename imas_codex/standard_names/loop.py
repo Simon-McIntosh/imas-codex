@@ -995,6 +995,22 @@ async def run_sn_pools(
                 seg_result["names_realigned"],
             )
 
+        # Link COCOS-dependent names to the catalog's COCOS convention
+        # (current DD version's — DDv4 → COCOS 17). Sets the cocos integer and
+        # HAS_COCOS edge for any COCOS-dependent name missing it, across all
+        # origins. Idempotent; no-op once the invariant holds.
+        from imas_codex.standard_names.graph_ops import reconcile_sn_cocos_links
+
+        cocos_result = await asyncio.to_thread(reconcile_sn_cocos_links)
+        if cocos_result.get("scalars_set", 0) or cocos_result.get("edges_created", 0):
+            logger.info(
+                "run_sn_pools: COCOS-link reconcile — %d cocos scalar(s) set, "
+                "%d HAS_COCOS edge(s) created (COCOS %s)",
+                cocos_result.get("scalars_set", 0),
+                cocos_result.get("edges_created", 0),
+                cocos_result.get("convention"),
+            )
+
         # Read-only ledger-health probe — a diagnostic, never fatal to the run.
         try:
             orphans = await asyncio.to_thread(find_provenance_orphans)

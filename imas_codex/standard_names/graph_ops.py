@@ -2596,7 +2596,30 @@ def write_standard_names(
         if not names:
             return 0
 
-    # Guard: warn when cocos_transformation_type is set but cocos integer is missing
+    # A COCOS-dependent name (cocos_transformation_type set) must carry the
+    # integer cocos convention so the HAS_COCOS edge below is created. The
+    # catalog follows a single convention — the current DD version's (DDv4 →
+    # COCOS 17) — so default it from the current DD whenever compose/refine
+    # didn't thread it through. COCOS-independent names stay unlinked by design.
+    if any(
+        n.get("cocos_transformation_type") and n.get("cocos") is None for n in names
+    ):
+        with GraphClient() as _conv_gc:
+            _conv_row = _conv_gc.query(
+                "MATCH (v:DDVersion {is_current: true}) RETURN v.cocos AS cocos"
+            )
+        _convention = (
+            _conv_row[0]["cocos"]
+            if _conv_row and _conv_row[0].get("cocos") is not None
+            else None
+        )
+        if _convention is not None:
+            for n in names:
+                if n.get("cocos_transformation_type") and n.get("cocos") is None:
+                    n["cocos"] = _convention
+
+    # Guard: warn when cocos_transformation_type is set but cocos integer is
+    # still missing (e.g. no current DD convention resolvable).
     for n in names:
         if n.get("cocos_transformation_type") and n.get("cocos") is None:
             logger.warning(
@@ -7035,6 +7058,79 @@ def reconcile_provenance() -> dict[str, int]:
         "edges_reattached": edges_reattached,
         "scalars_cleared": scalars_cleared,
         "orphan_sources_deleted": orphan_sources_deleted,
+    }
+
+
+def reconcile_sn_cocos_links(gc: Any | None = None) -> dict[str, int]:
+    """Link COCOS-dependent standard names to the catalog's COCOS convention.
+
+    A standard name with a ``cocos_transformation_type`` (psi_like, ip_like, …)
+    is COCOS-dependent: its sign depends on the convention. The catalog follows
+    a single convention — the current DD version's (DDv4 → COCOS 17) — so every
+    such name should carry the integer ``cocos`` and a ``HAS_COCOS`` edge to
+    that COCOS singleton. COCOS-independent names (no transformation type) are
+    left unlinked by design.
+
+    Idempotent and re-runnable: sets the ``cocos`` scalar where null and MERGEs
+    the ``HAS_COCOS`` edge where missing, across every origin (pipeline, derived
+    parents, catalog edits). No-op once the invariant holds.
+
+    Returns dict: {convention, scalars_set, edges_created}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        row = client.query(
+            "MATCH (v:DDVersion {is_current: true}) RETURN v.cocos AS cocos"
+        )
+        convention = (
+            row[0]["cocos"] if row and row[0].get("cocos") is not None else None
+        )
+        if convention is None:
+            logger.debug(
+                "reconcile_sn_cocos_links: no current DD COCOS convention — skipping"
+            )
+            return {"convention": 0, "scalars_set": 0, "edges_created": 0}
+
+        scalars = client.query(
+            """
+            MATCH (s:StandardName)
+            WHERE s.cocos_transformation_type IS NOT NULL AND s.cocos IS NULL
+            SET s.cocos = $conv
+            RETURN count(s) AS n
+            """,
+            conv=convention,
+        )
+        scalars_set = scalars[0]["n"] if scalars else 0
+
+        edges = client.query(
+            """
+            MATCH (s:StandardName)
+            WHERE s.cocos_transformation_type IS NOT NULL
+              AND s.cocos IS NOT NULL
+              AND NOT (s)-[:HAS_COCOS]->(:COCOS)
+            MATCH (c:COCOS {id: s.cocos})
+            MERGE (s)-[:HAS_COCOS]->(c)
+            RETURN count(s) AS n
+            """
+        )
+        edges_created = edges[0]["n"] if edges else 0
+    finally:
+        if own:
+            client.close()
+
+    if scalars_set or edges_created:
+        logger.info(
+            "reconcile_sn_cocos_links: convention=COCOS %s, set %d cocos scalar(s), "
+            "created %d HAS_COCOS edge(s)",
+            convention,
+            scalars_set,
+            edges_created,
+        )
+    return {
+        "convention": convention,
+        "scalars_set": scalars_set,
+        "edges_created": edges_created,
     }
 
 

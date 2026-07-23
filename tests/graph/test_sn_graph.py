@@ -159,6 +159,35 @@ class TestStandardNameGraph:
             f"({row['has_desc']}/{row['total']} accepted names have descriptions)"
         )
 
+    def test_cocos_dependent_names_linked(self, gc):
+        """Every COCOS-dependent name carries a cocos integer + HAS_COCOS edge.
+
+        A name with a ``cocos_transformation_type`` (psi_like, ip_like, …) is
+        COCOS-dependent; the catalog follows a single convention (the current
+        DD version's — DDv4 → COCOS 17), so each such name must have the
+        ``cocos`` scalar set and a ``HAS_COCOS`` edge to the COCOS singleton.
+        COCOS-independent names (no transformation type) are excluded by design.
+        """
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.cocos_transformation_type IS NOT NULL
+            RETURN count(sn) AS total,
+                   count(CASE WHEN sn.cocos IS NULL THEN 1 END) AS no_scalar,
+                   count(CASE WHEN NOT (sn)-[:HAS_COCOS]->(:COCOS)
+                              THEN 1 END) AS no_edge
+            """
+        )
+        row = rows[0] if rows else {"total": 0, "no_scalar": 0, "no_edge": 0}
+        if row["total"] == 0:
+            pytest.skip("No COCOS-dependent standard names in graph")
+        assert row["no_scalar"] == 0 and row["no_edge"] == 0, (
+            f"{row['no_scalar']}/{row['total']} COCOS-dependent names lack a cocos "
+            f"integer and {row['no_edge']}/{row['total']} lack a HAS_COCOS edge. "
+            f"Run `sn run` (post-drain reconcile links them) or "
+            f"reconcile_sn_cocos_links()."
+        )
+
     def test_documentation_length_median(self, gc):
         """Documentation (not description) length median ≥ 800 chars among docs-accepted names."""
         rows = gc.query(_DOCUMENTATION_LENGTHS_QUERY)
