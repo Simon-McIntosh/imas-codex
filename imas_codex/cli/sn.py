@@ -1780,7 +1780,7 @@ def sn_run(
                     "dd_path": path,
                     "batch_key": "focus",
                     "status": "extracted",
-                    "description": "",
+                    "description": None,
                 }
             )
         written = merge_standard_name_sources(
