@@ -1,92 +1,97 @@
 """Unit-integrity tests for StandardName ↔ DD-path unit agreement.
 
-For every valid StandardName with DD source paths, asserts that the
-SN's HAS_UNIT target matches the canonical DD-path HAS_UNIT target.
+For every live StandardName the mismatch axis compares the SN's declared unit
+against the unit each of its DD source paths declares, normalising both sides
+through the single canonical authority
+(:func:`imas_standard_names.canonical_unit`, via
+:mod:`imas_codex.units.dd_unit_exceptions`) so ordering-only and spelling-only
+differences collapse. Two curated exception classes are suppressed rather than
+flagged (see ``imas_codex/units/dd_unit_exceptions.yaml``): DD-side unit bugs
+(the DD path carries a wrong unit and the SN correctly overrides it) and unit
+equivalences (two canonical forms that are the same physical unit).
 
-DD-side issues (paths whose units disagree among themselves, or known
-DD unit bugs like ``ion_atomic_number [e]``) are documented as
-skip-reasons, not failures.
+The axis reads the SN's live ``HAS_STANDARD_NAME`` edges — the graph source of
+truth — NOT the denormalised ``source_paths`` scalar (which strands stale paths
+of pruned/refined-away mappings). Terminal ``superseded``/``exhausted``/
+``contested`` names are excluded: they are dead (replaced via ``REFINED_FROM``)
+and not subject to the live-unit invariant.
 """
 
 import pytest
 
+from imas_codex.units.dd_unit_exceptions import (
+    canonical_or_none,
+    dd_unit_bug_globs,
+    units_agree,
+)
+
 pytestmark = pytest.mark.graph
 
-# DD-side unit bugs: the SN unit is physically correct but the DD path
-# has a wrong unit.  These are tracked for DD-rebuild follow-up and
-# must NOT cause test failures.
-_DD_SIDE_UNIT_BUGS: dict[str, str] = {
-    # The DD tags ion charge NUMBER (z_ion: "Ion charge of the dominant
-    # ionization state") with unit `e` (elementary charge). Charge number is
-    # dimensionless, so the SN unit `1` is physically correct and the DD `e`
-    # is the defect. Surfaced once unit normalization began mapping the DD's
-    # prose 'Elementary Charge Unit' to the canonical `e` symbol (creating a
-    # HAS_UNIT edge the comparison can see).
-    "ion_charge": "z_ion charge number is dimensionless; DD `e` is wrong",
-}
+# Terminal name stages that are dead (replaced/abandoned) and excluded from the
+# live-unit invariant.
+_TERMINAL_STAGES = ["superseded", "exhausted", "contested"]
 
 
 def _query_sn_unit_vs_dd(graph_client):
-    """Return rows of (name, sn_unit, dd_units) for valid SNs with DD source paths."""
-    return graph_client.query("""
-        MATCH (sn:StandardName {validation_status: 'valid'})
-        WHERE sn.unit IS NOT NULL AND sn.source_paths IS NOT NULL
-        UNWIND sn.source_paths AS sp_raw
-        WITH sn, replace(sp_raw, 'dd:', '') AS sp
-        OPTIONAL MATCH (dd:IMASNode {id: sp})-[:HAS_UNIT]->(du:Unit)
-        WITH sn.id AS name, sn.unit AS sn_unit,
-             collect(DISTINCT du.id) AS raw_dd_units,
-             collect(DISTINCT sp) AS source_paths
-        WITH name, sn_unit,
-             [x IN raw_dd_units WHERE x IS NOT NULL] AS dd_units,
-             source_paths
-        RETURN name, sn_unit, dd_units, source_paths
-        ORDER BY name
-    """)
+    """Return per-(name, path) rows over live SN → DD-path unit links.
+
+    Uses the live ``HAS_STANDARD_NAME`` edge (IMASNode → StandardName), not the
+    ``source_paths`` scalar, so a stale scalar path from a pruned mapping never
+    reaches the comparison. One row per (SN, DD path); ``dd_units`` is the set
+    of ``Unit`` ids on that path (normally one).
+    """
+    return graph_client.query(
+        """
+        MATCH (dd:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName {validation_status: 'valid'})
+        WHERE sn.unit IS NOT NULL
+          AND NOT coalesce(sn.name_stage, '') IN $terminal
+        MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+        RETURN sn.id AS name, sn.unit AS sn_unit, dd.id AS path,
+               collect(DISTINCT du.id) AS dd_units
+        ORDER BY name, path
+        """,
+        terminal=_TERMINAL_STAGES,
+    )
 
 
 class TestSNUnitIntegrity:
     """StandardName unit must agree with its DD source path unit."""
 
     def test_sn_unit_matches_linked_dd_path_unit(self, graph_client):
-        """Every StandardName.unit must equal its DD source paths' unit.
+        """Every live StandardName.unit must agree with its DD path unit.
 
-        Skips cleanly if no SNs have source-path linkage.
-        DD-internal inconsistencies (paths disagree among themselves)
-        are reported as skips, not failures.
-        Known DD-side bugs are excluded via allow-list.
+        Both sides are normalised through ``canonical_unit`` so ordering- and
+        spelling-only differences collapse. A curated DD-side unit bug (the DD
+        path is wrong, the SN correct) or a recorded unit equivalence is
+        suppressed via ``units_agree``. Skips cleanly if no SNs have DD-path
+        unit linkage. DD-internal inconsistencies (a path carrying more than
+        one Unit) are reported as skips, not failures.
         """
         rows = _query_sn_unit_vs_dd(graph_client)
-
-        # Skip if graph has no source-path-linked SNs
-        has_dd_units = [r for r in rows if len(r["dd_units"]) > 0]
-        if not has_dd_units:
-            pytest.skip("No StandardNames with DD source-path unit linkage")
+        if not rows:
+            pytest.skip("No live StandardNames with DD-path unit linkage")
 
         failures = []
-        for r in has_dd_units:
-            name = r["name"]
-            sn_unit = r["sn_unit"]
+        for r in rows:
             dd_units = r["dd_units"]
 
-            # SN unit matches at least one DD unit → pass
-            if sn_unit in dd_units:
-                continue
-
-            # DD paths disagree among themselves → skip (DD quality issue)
+            # DD path carries more than one Unit → DD-internal issue, skip.
             if len(dd_units) > 1:
                 continue
 
-            # Known DD-side bug → skip
-            if name in _DD_SIDE_UNIT_BUGS:
+            # Canonical-equal, a recorded equivalence, or a curated DD-side
+            # unit bug on this path → agree.
+            if units_agree(r["sn_unit"], dd_units[0], r["path"]):
                 continue
 
-            # Genuine SN-side mismatch → fail
-            failures.append(f"{name}: SN unit={sn_unit!r}, DD unit(s)={dd_units}")
+            failures.append(
+                f"{r['name']}: SN unit={r['sn_unit']!r}, "
+                f"DD unit={dd_units[0]!r} on {r['path']}"
+            )
 
         assert not failures, (
-            "StandardName units disagree with canonical DD units:\n  "
-            + "\n  ".join(failures)
+            "StandardName units disagree with canonical DD units "
+            f"({len(failures)} rows):\n  " + "\n  ".join(failures)
         )
 
     def test_declared_unit_has_matching_edge(self, graph_client):
@@ -96,19 +101,22 @@ class TestSNUnitIntegrity:
         - ``unit IS NOT NULL`` — a name with no declared unit is a separate
           concern (e.g. an accepted name still awaiting a unit), not a
           property↔edge consistency failure.
-        - excludes ``name_stage = 'superseded'`` — superseded names are dead
-          (replaced via ``REFINED_FROM``); the refine that superseded them may
-          legitimately have dropped the unit edge, and they are not subject to
-          the live-unit invariant.
+        - excludes terminal ``superseded``/``exhausted``/``contested`` stages —
+          dead names (replaced via ``REFINED_FROM`` or abandoned) whose unit
+          edge may legitimately be gone; they are not subject to the live-unit
+          invariant.
         """
-        rows = graph_client.query("""
+        rows = graph_client.query(
+            """
             MATCH (sn:StandardName {validation_status: 'valid'})
             WHERE sn.unit IS NOT NULL
-              AND coalesce(sn.name_stage, '') <> 'superseded'
+              AND NOT coalesce(sn.name_stage, '') IN $terminal
               AND NOT (sn)-[:HAS_UNIT]->(:Unit)
             RETURN sn.id AS name, sn.unit AS unit
             ORDER BY name
-        """)
+            """,
+            terminal=_TERMINAL_STAGES,
+        )
         if not rows:
             return
         missing = [f"{r['name']} (unit={r['unit']!r})" for r in rows]
@@ -118,22 +126,31 @@ class TestSNUnitIntegrity:
         )
 
     def test_sn_unit_property_matches_edge(self, graph_client):
-        """SN.unit property must equal the HAS_UNIT target node id."""
-        rows = graph_client.query("""
+        """A live SN's unit property must equal its HAS_UNIT target, canonically.
+
+        The ``unit`` property is stored in the ISN canonical form while a
+        ``Unit`` node id may have been written by the DD build's own formatter,
+        so the two can differ by ordering/spelling only. Both are normalised
+        through ``canonical_unit`` and a residual difference is a genuine
+        property↔edge desync. Terminal stages are excluded (dead names).
+        """
+        rows = graph_client.query(
+            """
             MATCH (sn:StandardName {validation_status: 'valid'})-[:HAS_UNIT]->(u:Unit)
-            WHERE sn.unit <> u.id
+            WHERE NOT coalesce(sn.name_stage, '') IN $terminal
             RETURN sn.id AS name, sn.unit AS prop_unit, u.id AS edge_unit
             ORDER BY name
-        """)
-        if not rows:
-            return
+            """,
+            terminal=_TERMINAL_STAGES,
+        )
         mismatches = [
             f"{r['name']}: property={r['prop_unit']!r}, edge={r['edge_unit']!r}"
             for r in rows
+            if canonical_or_none(r["prop_unit"]) != canonical_or_none(r["edge_unit"])
         ]
         assert not mismatches, (
-            "SN unit property disagrees with HAS_UNIT edge:\n  "
-            + "\n  ".join(mismatches)
+            "SN unit property disagrees with HAS_UNIT edge "
+            f"({len(mismatches)} rows):\n  " + "\n  ".join(mismatches)
         )
 
     def test_no_imas_node_has_placeholder_unit(self, graph_client):
@@ -183,22 +200,35 @@ class TestSNUnitIntegrity:
             "(self-heal invariant broken):\n  " + "\n  ".join(sample)
         )
 
-    def test_dd_side_unit_bugs_documented(self, graph_client):
-        """Known DD-side unit bugs are still present (regression guard).
+    def test_dd_side_unit_bug_globs_are_live(self, graph_client):
+        """Every DD-side unit-bug glob must still match ≥1 live buggy DD path.
 
-        When a DD rebuild fixes these, remove them from _DD_SIDE_UNIT_BUGS.
+        Staleness guard on ``dd_unit_exceptions.yaml``: if a DD rebuild fixes a
+        path's unit (or the path is removed), the glob stops matching any DD
+        node that still carries the buggy unit, and the entry is dead residue
+        that should be pruned. A glob that matches no DD ``Unit`` at all is
+        surfaced as stale so the exception file does not accrete.
+
+        Skips cleanly if the DD graph carries no ``Unit`` nodes at all.
         """
-        rows = _query_sn_unit_vs_dd(graph_client)
-        still_mismatched = set()
-        for r in rows:
-            if r["name"] in _DD_SIDE_UNIT_BUGS and len(r["dd_units"]) > 0:
-                if r["sn_unit"] not in r["dd_units"]:
-                    still_mismatched.add(r["name"])
+        import fnmatch
 
-        # If a DD-side bug gets fixed, the allow-list entry is stale
-        stale = set(_DD_SIDE_UNIT_BUGS.keys()) - still_mismatched
-        if stale:
-            pytest.fail(
-                "DD-side bugs fixed upstream — remove from _DD_SIDE_UNIT_BUGS: "
-                + ", ".join(sorted(stale))
-            )
+        globs = dd_unit_bug_globs()
+        if not globs:
+            pytest.skip("No DD-side unit-bug globs declared")
+
+        dd_paths = graph_client.query(
+            """
+            MATCH (n:IMASNode)-[:HAS_UNIT]->(:Unit)
+            RETURN n.id AS id
+            """
+        )
+        if not dd_paths:
+            pytest.skip("No IMASNodes carry a HAS_UNIT edge")
+        ids = [r["id"] for r in dd_paths]
+
+        stale = [g for g in globs if not any(fnmatch.fnmatchcase(i, g) for i in ids)]
+        assert not stale, (
+            "DD-side unit-bug globs match no live DD path (prune from "
+            "dd_unit_exceptions.yaml):\n  " + "\n  ".join(stale)
+        )

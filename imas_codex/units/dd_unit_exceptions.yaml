@@ -1,0 +1,151 @@
+# SN ↔ DD unit-mismatch axis exceptions.
+#
+# The standard-name pipeline sometimes assigns a physically-correct unit that
+# disagrees with the unit its Data-Dictionary source path declares, because the
+# DD path itself carries a wrong unit. This file records those DD-side unit bugs
+# (where the SN is correct) plus genuine unit equivalences that the canonical
+# formatter does not collapse, so the mismatch axis suppresses them instead of
+# raising a false positive.
+#
+# Both sides are compared on their canonical form (imas_standard_names.
+# canonical_unit): ordering-only and spelling-only differences already collapse
+# there, so only the residual physical disagreements reach this file.
+#
+# Consumed by tests/graph/test_sn_unit_integrity.py via
+# imas_codex.units.dd_unit_exceptions.units_agree().
+
+# ---------------------------------------------------------------------------
+# DD-side unit bugs — the DD source path declares `dd_unit`; the physically
+# correct unit is `correct_unit` (which the SN carries). `path` is an
+# fnmatch-style glob over the DD node id (`*` matches any characters, INCLUDING
+# `/`; `[xyz]` is a character class). A mismatch is suppressed only when the DD
+# unit canonicalises to `dd_unit` AND the SN unit canonicalises to
+# `correct_unit` on a path matching the glob — so a broad glob cannot mask an
+# unrelated unit disagreement.
+# ---------------------------------------------------------------------------
+dd_unit_bugs:
+  # -- Charge / quantum NUMBERS tagged with the elementary-charge unit `e`.
+  #    A charge state (Z), nuclear charge (z_n) or vibrational level is a pure
+  #    number; the DD annotates it `e`. The SN correctly carries dimensionless.
+  - path: "*/z_ion"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Ion charge is a charge number (dimensionless); the DD tags it `e`.
+  - path: "*/z_n"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Nuclear charge number is dimensionless; the DD tags it `e`.
+  - path: "*/z_n/value"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Nuclear charge number is dimensionless; the DD tags it `e`.
+  - path: "*/z_average"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Average charge state is a number (dimensionless); the DD tags it `e`.
+  - path: "*/z_square_average"
+    dd_unit: e
+    correct_unit: "1"
+    reason: Mean-square charge state is a number (dimensionless); the DD tags it `e`.
+  - path: "*/vibrational_level"
+    dd_unit: e
+    correct_unit: "1"
+    reason: A vibrational level is a quantum number (dimensionless); the DD tags it `e`.
+
+  # -- Direction / unit-vector components tagged with metre `m`.
+  #    A direction cosine (component of a unit vector) is dimensionless; the DD
+  #    annotates the axis component with the position unit `m`.
+  - path: "*/direction/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A direction unit-vector component is a dimensionless cosine; the DD tags it metre.
+  - path: "*/direction_second/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A direction unit-vector component is a dimensionless cosine; the DD tags it metre.
+  - path: "*/up/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: An orientation ("up") unit-vector component is dimensionless; the DD tags it metre.
+  - path: "*/injection_direction/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: An injection-direction unit-vector component is dimensionless; the DD tags it metre.
+  - path: "*/unit_vector_major/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A unit-vector component is dimensionless; the DD tags it metre.
+  - path: "*/unit_vector_minor/[xyz]"
+    dd_unit: m
+    correct_unit: "1"
+    reason: A unit-vector component is dimensionless; the DD tags it metre.
+  - path: "ec_launchers/beam/direction/kphi"
+    dd_unit: m^-1
+    correct_unit: "1"
+    reason: >-
+      A normalised (toroidal) wave-vector component is dimensionless; the DD
+      tags it with the un-normalised wave-vector unit m^-1.
+
+  # -- Areal power density tagged with total power `W`.
+  #    A peak power density (per unit area) is W.m^-2; two wall global-quantity
+  #    paths named power_density_*_target_max carry the total-power unit `W`.
+  - path: "wall/global_quantities/power_density_*_target_max"
+    dd_unit: W
+    correct_unit: W.m^-2
+    reason: >-
+      A peak areal power density is W.m^-2; the DD tags these
+      power_density_*_target_max paths with total power W.
+
+  # -- Neutral incident ENERGY flux tagged as a PARTICLE flux.
+  #    Sibling energy_fluxes paths carry W.m^-2; the neutral incident facets
+  #    carry the particle-flux unit m^-2.s^-1.
+  - path: "*/energy_fluxes/kinetic/neutral/state/incident/values"
+    dd_unit: m^-2.s^-1
+    correct_unit: W.m^-2
+    reason: >-
+      An incident energy flux is W.m^-2 (sibling energy_fluxes facets agree);
+      the DD tags the neutral facet with the particle-flux unit m^-2.s^-1.
+  - path: "*/energy_fluxes/recombination/neutral/incident/values"
+    dd_unit: m^-2.s^-1
+    correct_unit: W.m^-2
+    reason: >-
+      An incident energy flux is W.m^-2 (sibling energy_fluxes facets agree);
+      the DD tags the neutral facet with the particle-flux unit m^-2.s^-1.
+
+  # -- Poloidal magnetic flux (psi) tagged with total power `W`.
+  #    psi is definitionally a poloidal magnetic flux in weber; some
+  #    measurement-position facets carry the total-power unit `W`. (Forward-
+  #    looking: a psi standard name correctly carrying Wb is suppressed against
+  #    these W-tagged facets; a facet correctly tagged Wb never matches.)
+  - path: "*/position/psi"
+    dd_unit: W
+    correct_unit: Wb
+    reason: >-
+      Poloidal magnetic flux (psi) is weber; some measurement-position psi
+      facets are tagged with total power W.
+
+  # -- Toroidal current tagged with a torque unit.
+  #    A toroidal (particle) current is in ampere; one distributions facet of
+  #    current_tor carries the torque unit N.m.
+  - path: "distributions/distribution/global_quantities/current_tor"
+    dd_unit: N.m
+    correct_unit: A
+    reason: >-
+      A toroidal current is in ampere (the sibling current_phi facet agrees);
+      the DD tags this current_tor facet with the torque unit N.m.
+
+# ---------------------------------------------------------------------------
+# Unit equivalences — canonical forms the formatter keeps distinct but which
+# are the same physical unit. A mismatch is suppressed when the SN and DD
+# canonical forms are BOTH members of one equivalence set. Keep these to
+# genuine identities (a spelling the canonical formatter does not fold), never
+# a mere shared dimensionality — dimensionality alone would wrongly equate, for
+# example, torque and energy.
+# ---------------------------------------------------------------------------
+unit_equivalences:
+  # Frequency: the DD spells a rate as Hz in some IDSs and s^-1 in others.
+  - [Hz, s^-1]
+  # Torque: the DD spells it with the derived N.m in some IDSs and the base
+  # kg.m^2.s^-2 in others (both == joule dimensionally, distinct from J's
+  # canonical short symbol so energy is not swept in).
+  - [N.m, kg.m^2.s^-2]
