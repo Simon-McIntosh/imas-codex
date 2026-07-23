@@ -10329,6 +10329,16 @@ def persist_refined_name(
                                      THEN 'accepted' ELSE 'refining' END),
                             old.claim_token = null,
                             old.claimed_at  = null,
+                            // A refine stays in the predecessor's scope: a
+                            // scoped drain (--focus/--batch) binds names by
+                            // run_id, so a successor minted with no run_id (the
+                            // refine worker's run_id is unset in the pool path)
+                            // would fall out of scope — the scoped review pool
+                            // could never claim it and the drain would report
+                            // no_eligible_work while the refined name sits
+                            // stranded 'drafted'. Inherit the predecessor's
+                            // run_id when the successor has none.
+                            new.run_id = coalesce(new.run_id, old.run_id),
                             // Close the predecessor's edit lifecycle: a
                             // still-open steer was already carried forward onto
                             // the successor (see the copy-forward read above), so

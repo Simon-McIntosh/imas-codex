@@ -220,6 +220,36 @@ def test_refine_into_accepted_name_is_not_demoted(_gc, _clean):
     assert _stage(_gc, new) == "accepted"
 
 
+@pytest.mark.graph
+def test_refined_successor_inherits_predecessor_run_id(_gc, _clean):
+    """A refine keeps the successor in the predecessor's scope (run_id).
+
+    A scoped drain (``--focus``/``--batch``) binds names by ``run_id``. If the
+    successor of a refine does not inherit the predecessor's scope, the scoped
+    review pool cannot claim it and the drain reports ``no_eligible_work`` while
+    the refined name is stranded ``drafted`` out of scope.
+    """
+    from imas_codex.standard_names.graph_ops import persist_refined_name
+
+    old = _uid("old")
+    new = _uid("successor")  # fresh
+    scope = f"scope-{uuid.uuid4().hex[:8]}"
+    _create_sn(_gc, old, name_stage="refining", origin="pipeline")
+    _gc.query(
+        "MATCH (sn:StandardName {id: $id}) SET sn.run_id = $rid", id=old, rid=scope
+    )
+
+    # The refine worker's run_id is unset here (the failure mode in the field).
+    persist_refined_name(
+        old_name=old, new_name=new, description="refined", old_chain_length=0
+    )
+
+    rid = _gc.query("MATCH (sn:StandardName {id: $id}) RETURN sn.run_id AS r", id=new)[
+        0
+    ]["r"]
+    assert rid == scope
+
+
 # ---------------------------------------------------------------------------
 # Part B — reconcile_reviewable_name_stage self-heals stranded names
 # ---------------------------------------------------------------------------
