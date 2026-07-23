@@ -5573,6 +5573,13 @@ _GRAMMAR_FAILURE_MARKERS: tuple[str, ...] = (
     "input should be",  # pydantic Literal enum violation (deterministic)
     "self-referential refined_from",  # refine produced an identical name
     "validation error for refinedname",  # pydantic RefinedName validation
+    # ISN StandardName grammar composition raised inside the refine compose
+    # step (compose_standard_name → StandardName.model_validate): the model
+    # proposed a name whose tokens/structure are not grammatical (invalid
+    # operator token, unregistered base, malformed transformation). Same
+    # output every cycle, so terminal — not a crash.
+    "validation error for standardname",
+    "invalid operator token",  # deterministic fused-operator/coordinate misuse
 )
 
 
