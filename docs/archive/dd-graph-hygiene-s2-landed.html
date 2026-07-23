@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-graph-hygiene">
+  <meta name="plan-title" content="DD Graph Hygiene — §2 Axis A landed">
+  <meta name="plan-summary" content="Landed record for Axis A: embedding-cache consistency on the DD graph — orphan embedding_text cleared on non-embeddable nodes, identifier embedding_text persisted + backfilled.">
+  <meta name="plan-status" content="archived">
+  <title>DD Graph Hygiene — §2 Axis A landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§2 — Axis A: embedding-cache consistency (landed 2026-07-23)</h1>
+    <p><strong>Both <code>TestEmbeddingCompleteness</code> assertions are green in both directions.</strong>
+      Commit <code>d6658150</code>. The fix is machine-agnostic and self-healing on every future build.</p>
+
+    <table class="quick-status">
+      <thead><tr><th>Gate</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_no_embeddings_without_embedding</code> (text ⇒ vector)</td><td>2792 red</td><td>✓ 0</td></tr>
+        <tr><td><code>test_meaningful_paths_have_embeddings</code> (vector ⇒ text)</td><td>198 red</td><td>✓ 0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="rootcause">Root cause (live-verified, reframed the plan's snapshot)</h2>
+    <p>The plan's authoring snapshot assumed the ~2457 <code>embedding_text</code>-but-no-vector nodes were
+      legacy <code>classified</code> nodes that could be <em>reset to <code>refined</code></em> so the embed
+      worker reclaims them. The live graph disproved that premise:</p>
+    <ul>
+      <li>All <strong>2824</strong> text-no-vector nodes are in <strong>non-embeddable categories</strong>
+        (representation 2045, fit_artifact 330, structural 276, coordinate 98, metadata 75) — <strong>zero</strong>
+        are embeddable. Embedding is deliberately restricted to <code>EMBEDDABLE_CATEGORIES</code>
+        (quantity/geometry/identifier) to keep semantic-search noise low, so these nodes <em>correctly</em>
+        have no vector. Resetting them to <code>refined</code> is a no-op — the embed worker filters on
+        embeddable categories and would never claim them.</li>
+      <li>No current code path persists <code>embedding_text</code> to a non-embeddable node (worker-embed
+        claims embeddable categories; <code>update_path_embeddings</code> runs under a clusterable filter /
+        <code>embedding IS NOT NULL</code>). The 2824 are <strong>legacy cruft</strong> from an earlier
+        category scheme. Generation is already gated — so the fix is to clean the graph, exactly as expected.</li>
+      <li>The <strong>198</strong> vector-but-no-text nodes are all <code>identifier</code> (embeddable, correctly
+        embedded) hit by a real persistence bug: <code>embed_identifier_nodes</code> computed the source text
+        but never wrote it.</li>
+    </ul>
+
+    <figure style="margin:1.25rem 0;">
+      <svg viewBox="0 0 560 150" width="100%" style="max-width:560px;font-family:system-ui,-apple-system,sans-serif;" role="img" aria-label="Before/after node counts for Axis A">
+        <text x="8" y="18" font-size="13" font-weight="600" fill="#1a1a1a">embedding-cache mismatches: before → after</text>
+        <!-- text-no-vector -->
+        <text x="8" y="52" font-size="12" fill="#333">text, no vector</text>
+        <rect x="150" y="42" width="330" height="14" fill="#b3261e"/><text x="486" y="53" font-size="12" fill="#333">2824</text>
+        <rect x="150" y="60" width="2" height="14" fill="#1a7f37"/><text x="158" y="71" font-size="12" fill="#1a7f37">0 ✓</text>
+        <!-- vector-no-text -->
+        <text x="8" y="104" font-size="12" fill="#333">vector, no text</text>
+        <rect x="150" y="94" width="24" height="14" fill="#b3261e"/><text x="180" y="105" font-size="12" fill="#333">198</text>
+        <rect x="150" y="112" width="2" height="14" fill="#1a7f37"/><text x="158" y="123" font-size="12" fill="#1a7f37">0 ✓</text>
+      </svg>
+      <figcaption style="font-size:12px;color:#444;">Bars are linear in node count; green = post-fix (0). Live graph, 2026-07-23.</figcaption>
+    </figure>
+
+    <h2 id="fix">What landed</h2>
+    <table class="quick-status">
+      <thead><tr><th>Change</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td>Clear orphan <code>embedding_text</code>/<code>embedding_hash</code> on non-embeddable nodes with no vector — re-runnable, wired into the build so it self-heals every run</td><td><code>build_dd.py::cleanup_orphan_embedding_text</code></td></tr>
+        <tr><td>Persist <code>embedding_text</code> on the identifier embed path (was computed, never stored)</td><td><code>dd_identifier_enrichment.py::embed_identifier_nodes</code></td></tr>
+        <tr><td>Backfill <code>embedding_text</code> on already-embedded identifier nodes, regenerated deterministically from their descriptions (vectors untouched — a faithful cache repair, not a re-embed)</td><td><code>dd_identifier_enrichment.py::backfill_identifier_embedding_text</code></td></tr>
+        <tr><td>Scope the completeness gate to <code>EMBEDDABLE_CATEGORIES</code> — the real embedding contract; defensive against future reclassification cruft</td><td><code>tests/graph/test_dd_build.py::test_no_embeddings_without_embedding</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Applied to the live graph:</strong> 2824 orphan texts cleared, 198 identifier texts backfilled.
+      Regenerated through backing code, not hand-patched. Sibling COCOS/embedding test classes (19 tests) still green.</p>
+
+    <div class="next-card" style="border:1px solid #c9ccd1;border-left:4px solid #1a7f37;padding:0.75rem 1rem;border-radius:4px;margin-top:1rem;">
+      <strong>What's next.</strong> Axis A and Axis C landed together in <code>d6658150</code>. Remaining plan
+      work is Axis B (SN-side empty descriptions + embedding coverage), tracked in the evergreen plan under
+      <code>f-ddgh-001</code>.
+    </div>
+  </main>
+</body>
+</html>

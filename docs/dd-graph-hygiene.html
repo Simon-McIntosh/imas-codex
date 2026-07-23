@@ -4,19 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"    content="imas-codex">
-  <meta name="reckon-type"     content="plan">
-  <meta name="plan-slug"       content="dd-graph-hygiene">
-  <meta name="plan-title"      content="DD Graph Hygiene">
-  <meta name="plan-summary"    content="Drive four pre-existing -m graph gates green: embedding-cache consistency on legacy classified nodes, SN-side empty descriptions + coverage, and COCOS half-state on removed nodes.">
-  <meta name="plan-status"     content="draft">
-  <meta name="plan-roi"        content="high">
-  <meta name="plan-effort"     content="M">
-  <meta name="plan-tier"       content="sonnet">
-  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-graph-hygiene">
+  <meta name="plan-title" content="DD Graph Hygiene">
+  <meta name="plan-summary" content="Drive four pre-existing -m graph gates green: embedding-cache consistency on legacy classified nodes, SN-side empty descriptions + coverage, and COCOS half-state on removed nodes.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="sonnet">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="dd-horizon-update">
   <title>DD Graph Hygiene | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-23">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.6667">
 </head>
 <body>
   <main class="plan-doc">
@@ -71,28 +74,23 @@
       root-cause hypothesis before touching code — stale context kills, and the graph moves under
       concurrent workers.</p>
 
-    <h2 id="s2">§2 — Axis A: embedding-cache consistency (DD)</h2>
-    <p>The DD embed worker (<code>dd_workers.py</code>) claims paths through
-      <code>claim_paths_for_embedding()</code> (<code>dd_graph_ops.py:332</code>), which filters on
-      <code>status='refined'</code>. Legacy <code>classified</code> nodes sit past that status, so
-      once they lost (or never gained) a vector they are permanently invisible to the embed loop.
-      Two mismatch directions exist:</p>
-    <ul>
-      <li><strong>~2792 with <code>embedding_text</code>, no vector</strong> — of which ~2457 are
-        legacy <code>classified</code> with <code>enrichment_source=None</code> (a state the current
-        pipeline cannot produce). These need either a reset to <code>refined</code> so the embed
-        worker reclaims them, or explicit exclusion if their <code>node_category</code> is genuinely
-        non-embeddable (infra metadata such as <code>ids_properties/*</code>, <code>code/*</code>).</li>
-      <li><strong>~198 with a vector, no <code>embedding_text</code></strong> — the embed step
-        should persist the source text alongside the vector; backfill <code>embedding_text</code>
-        for these on (re-)embed so the cache is self-consistent in both directions.</li>
-    </ul>
-    <p>First separate the ~2457 into <em>should-embed</em> vs <em>non-embeddable-by-category</em>
-      (query <code>node_category</code> + <code>enrichment_source</code>). Non-embeddable categories
-      should be excluded from the completeness assertion at its source, not force-embedded; genuinely
-      missing embeddings are reset to <code>refined</code> and drained through <code>imas dd</code>
-      (the cheapest faithful path — resume, don't full-rebuild). Regenerate through the backing
-      pipeline; never patch vectors or <code>embedding_text</code> in-place via Cypher.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-23</span>
+        <h2>§2 — Axis A: embedding-cache consistency (DD)</h2>
+      </header>
+      <p class="landed-summary">
+        <code>TestEmbeddingCompleteness</code> green in both directions (commit <code>d6658150</code>).
+        Live data reframed the plan snapshot: all <strong>2824</strong> <code>embedding_text</code>-but-no-vector
+        nodes are <strong>non-embeddable categories</strong> that correctly have no vector (0 embeddable — the
+        "reset to refined" premise was void); they were legacy cruft and generation is already category-gated.
+        Fix = clear the orphan text via a re-runnable self-healing build pass (2824 cleared), persist
+        <code>embedding_text</code> on the identifier embed + backfill the 198 vector-but-no-text identifiers
+        deterministically from their descriptions (198 backfilled, vectors untouched), and scope the
+        completeness gate to <code>EMBEDDABLE_CATEGORIES</code>. Both mismatch counts now 0.
+        Full record: <a href="archive/dd-graph-hygiene-s2-landed.html">§2 landed</a>.
+      </p>
+    </section>
 
     <h2 id="s3">§3 — Axis B: SN-side description &amp; embedding coverage</h2>
     <p>Entirely on the standard-names side, not DD. 14 <code>StandardName</code> and 203
@@ -103,58 +101,57 @@
       the 203 empty-description sources are <em>stale</em> (superseded / orphaned) and should be
       pruned instead of regenerated — an empty description on a dead source is noise, not a gap.</p>
 
-    <h2 id="s4">§4 — Axis C: COCOS half-state on removed nodes (DD)</h2>
-    <p>20 nodes fail <code>test_no_cocos_half_state</code>: they retained
-      <code>cocos_label_source</code> but lost <code>cocos_transformation_type</code> when the build's
-      stale-label clear pass (<code>build_dd.py</code> ~line 1015) ran. <strong>All 20 are
-      <code>lifecycle_status='removed'</code></strong> — historical fields that no longer exist in the
-      current DD horizon. The dd-horizon-update plan already locked <em>D-historical = current-only</em>
-      (historical/removed nodes are retained for provenance but are not held to current-node
-      invariants). That decision points strongly at scoping the test to
-      <code>lifecycle_status &lt;&gt; 'removed'</code> rather than grooming dead nodes — but grooming
-      (clear <code>cocos_label_source</code> whenever the build clears
-      <code>cocos_transformation_type</code>, so removed nodes never enter a half-state) is the
-      alternative. See the decision below.</p>
-
-    <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-
-      <div class="r-dec" data-key="embedding-cache-reconcile" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Axis A — how to reconcile the ~2457 legacy <code>classified</code> nodes with <code>embedding_text</code> but no vector?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="split-reset-and-exclude">Split by category: reset embeddable nodes to <code>refined</code> (embed worker reclaims), exclude non-embeddable categories at the assertion source</button>
-          <button class="r-opt" data-value="reset-all-refined">Reset all to <code>refined</code> and re-embed unconditionally</button>
-          <button class="r-opt" data-value="exclude-all-classified">Exclude all <code>enrichment_source=None classified</code> from the completeness gate</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-
-      <div class="r-dec" data-key="cocos-half-state-fix" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Axis C — clear the COCOS half-state, or scope the test to current nodes?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="scope-test-non-removed">Scope <code>test_no_cocos_half_state</code> to <code>lifecycle_status &lt;&gt; 'removed'</code> (consistent with locked D-historical = current-only)</button>
-          <button class="r-opt" data-value="groom-removed-nodes">Groom removed nodes: clear <code>cocos_label_source</code> whenever the build clears <code>cocos_transformation_type</code></button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-
-      <div class="r-dec" data-key="sn-empty-descriptions" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Axis B — regenerate the 203 empty-description <code>StandardNameSource</code> nodes, or prune the stale ones first?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="triage-then-regen">Triage stale/superseded sources → prune those, regenerate the rest through <code>sn run</code></button>
-          <button class="r-opt" data-value="regen-all">Regenerate all 203 through the SN pipeline</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-23</span>
+        <h2>§4 — Axis C: COCOS half-state on removed nodes (DD)</h2>
+      </header>
+      <p class="landed-summary">
+        <code>test_no_cocos_half_state</code> green (commit <code>d6658150</code>). All 20 half-state nodes
+        were <code>lifecycle_status='removed'</code>; root cause = the build's stale-label clear pass dropped
+        <code>cocos_transformation_type</code> but left <code>cocos_label_source</code>. Locked decision =
+        <em>groom</em> (not scope-the-test): clear <code>cocos_label_source</code> in the same SET so removed
+        nodes never enter a half-state, plus a re-runnable <code>groom_cocos_half_state</code> pass wired into
+        the build. 20 groomed; count now 0; the inverse invariant (type ⇒ source) still holds.
+        Full record: <a href="archive/dd-graph-hygiene-s4-landed.html">§4 landed</a>.
+      </p>
     </section>
 
-    <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="embedding-cache-reconcile" data-choice="split-reset-and-exclude" data-by="Simon McIntosh" data-when="2026-07-23T09:22:05+00:00">
+    <p class="r-dec-q">Axis A — how to reconcile the ~2457 legacy classified nodes with embedding_text but no vector?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="split-reset-and-exclude">Split by category: reset embeddable nodes to refined (embed worker reclaims), exclude non-embeddable categories at the assertion source</button>
+      <button class="r-opt" data-value="reset-all-refined">Reset all to refined and re-embed unconditionally</button>
+      <button class="r-opt" data-value="exclude-all-classified">Exclude all enrichment_source=None classified from the completeness gate</button>
+      </p>
+    <p class="r-dec-rat">Live graph reframed the axis: ALL 2792 embedding_text-but-no-vector nodes are non-embeddable categories (representation/fit_artifact/structural/coordinate/metadata) that correctly have no vector; ZERO are embeddable, so the &#x27;reset embeddable to refined&#x27; half is a no-op. Root cause confirmed: no current code path persists embedding_text to a non-embeddable node (worker-embed claims EMBEDDABLE_CATEGORIES; update_path_embeddings runs under a CLUSTERABLE filter / embedding-IS-NOT-NULL) — the 2792 are legacy cruft from pre-category-split builds. Fix = (1) clean the graph cruft via a re-runnable code path that clears embedding_text/embedding_hash on non-embeddable nodes with no vector (the embed-category exclusion is intentional for search-noise reduction, so text-gen legitimately follows it); (2) category-scope test_no_embeddings_without_embedding to EMBEDDABLE_CATEGORIES (the real embedding contract, defensive against future reclassification cruft); (3) the 198 vector-but-no-text are all identifiers hit by a real persistence bug in embed_identifier_nodes (computes text, never SETs it) — fix the SET + backfill embedding_text on the 198 by regenerating deterministically from their descriptions (vector unchanged, $0).</p>
+    </div>
+<div class="r-dec" data-key="cocos-half-state-fix" data-choice="groom-removed-nodes" data-by="Simon McIntosh" data-when="2026-07-23T09:22:05+00:00">
+    <p class="r-dec-q">Axis C — clear the COCOS half-state, or scope the test to current nodes?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="scope-test-non-removed">Scope test_no_cocos_half_state to lifecycle_status &lt;&gt; &#x27;removed&#x27; (consistent with locked D-historical = current-only)</button>
+      <button class="r-opt chosen" data-value="groom-removed-nodes">Groom removed nodes: clear cocos_label_source whenever the build clears cocos_transformation_type</button>
+      </p>
+    <p class="r-dec-rat">All 20 half-state nodes are lifecycle_status=&#x27;removed&#x27;. Root cause is build_dd.py&#x27;s stale-label clear pass (~:1974): it sets cocos_transformation_type=null on stale paths but leaves cocos_label_source set. Groom fix = clear cocos_label_source in the same SET so removed nodes never enter a half-state (prevents recurrence on every build), then groom the existing 20 by applying the corrected clear logic. Chosen over scope-test so the invariant holds for ALL nodes and the graph stays internally consistent rather than tolerating dead half-states.</p>
+    </div>
+<div class="r-dec" data-key="sn-empty-descriptions" data-choice="triage-then-regen" data-by="Simon McIntosh" data-when="2026-07-23T09:22:05+00:00">
+    <p class="r-dec-q">Axis B — regenerate the 203 empty-description StandardNameSource nodes, or prune the stale ones first?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="triage-then-regen">Triage stale/superseded sources → prune those, regenerate the rest through sn run</button>
+      <button class="r-opt" data-value="regen-all">Regenerate all 203 through the SN pipeline</button>
+      </p>
+    <p class="r-dec-rat">14 StandardName + 203 StandardNameSource carry literal &#x27;&#x27; descriptions and 12 SN have embedded_at set but no vector; the affected SNs skew to dead states (superseded/exhausted) and the sources include stale/failed/skipped/vocab_gap. An empty description on a dead source is noise, not a gap — triage first: prune/normalize dead sources, regenerate genuinely-live empty descriptions through the SN pipeline (sn run), never hand-write text. Investigate why &#x27;&#x27; (vs null) is being written and fix at source if it is a worker bug.</p>
+    </div>
+</section>
 
-      <article class="r-fu" data-id="f-ddgh-001" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship dd-graph-hygiene">
-        <h4 class="r-fu-title">Drive the four <code>-m graph</code> hygiene gates green (all three axes)</h4>
-        <div class="r-fu-body"><p>Execute the three code-disjoint axes and turn the four red gates green. Verify each axis's live counts and root cause before touching code, then regenerate through the backing pipeline — never patch vectors, <code>embedding_text</code>, or descriptions in-place via Cypher. Lock the three decisions above before starting the axis each governs.</p></div>
-        <pre class="r-fu-prompt">Project: imas-codex
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ddgh-001" data-status="open" data-tier="sonnet" data-written-by="reckon-create" data-written-at="2026-07-22" data-recommends-skill="/reckon-ship dd-graph-hygiene" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Drive the four -m graph hygiene gates green (all three axes)</h4>
+    <div class="r-fu-body"><p>Execute the three code-disjoint axes and turn the four red gates green. Verify each axis's live counts and root cause before touching code, then regenerate through the backing pipeline — never patch vectors, <code>embedding_text</code>, or descriptions in-place via Cypher. Lock the three decisions above before starting the axis each governs.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
 Plan:    dd-graph-hygiene (http://localhost:8765/imas-codex/dd-graph-hygiene.html)
 Section: all axes
 Tier:    sonnet
@@ -193,8 +190,8 @@ Done-when
   2. test_no_empty_string_descriptions + StandardName embedding coverage green.
   3. test_no_cocos_half_state green.
   4. Decisions locked with rationale; outcomes recorded per axis; this followup resolved.</pre>
-      </article>
-    </section>
+    </article>
+</section>
 
   </main>
 </body>

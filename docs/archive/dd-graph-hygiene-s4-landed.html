@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-graph-hygiene">
+  <meta name="plan-title" content="DD Graph Hygiene — §4 Axis C landed">
+  <meta name="plan-summary" content="Landed record for Axis C: COCOS half-state groomed — cocos_label_source is now cleared alongside cocos_transformation_type so removed nodes never enter a half-state.">
+  <meta name="plan-status" content="archived">
+  <title>DD Graph Hygiene — §4 Axis C landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§4 — Axis C: COCOS half-state on removed nodes (landed 2026-07-23)</h1>
+    <p><strong><code>test_no_cocos_half_state</code> is green.</strong> Commit <code>d6658150</code>.
+      Chosen fix: <em>groom removed nodes</em> (not scope-the-test) so the invariant "label source ⇒
+      transformation type" holds across the whole node set and the graph stays internally consistent.</p>
+
+    <table class="quick-status">
+      <thead><tr><th>Gate</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_no_cocos_half_state</code></td><td>20 red (all <code>lifecycle_status='removed'</code>)</td><td>✓ 0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="rootcause">Root cause</h2>
+    <p>The build's stale-label clear pass (<code>build_dd.py</code>, ~line 1974) set
+      <code>cocos_transformation_type = null</code> on paths absent from the current DD horizon but left
+      <code>cocos_label_source</code> set — a half-state (source with no type) invisible to COCOS-filtered
+      queries. All 20 affected nodes were <code>lifecycle_status='removed'</code> historical fields (e.g.
+      <code>summary/local/separatrix_average/velocity_tor/&lt;species&gt;</code>), exactly the paths the clear
+      pass drops.</p>
+
+    <h2 id="fix">What landed</h2>
+    <table class="quick-status">
+      <thead><tr><th>Change</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td>Clear <code>cocos_label_source</code> in the same SET that clears <code>cocos_transformation_type</code> — a dropped path never keeps a dangling source (prevents recurrence on every build)</td><td><code>build_dd.py</code> stale-label clear pass</td></tr>
+        <tr><td>Groom pre-existing half-state — re-runnable, wired into the build after the clear pass</td><td><code>build_dd.py::groom_cocos_half_state</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Applied to the live graph:</strong> 20 half-state nodes groomed. The inverse invariant
+      (<code>TestCOCOSBackfill.test_cocos_label_source_populated</code>: type ⇒ source) still holds — the
+      groom only touches type-null nodes. Sibling COCOS test classes green.</p>
+
+    <p><em>Consistency note.</em> This complements the locked dd-horizon-update decision
+      <em>D-historical = current-only</em> (removed nodes are provenance-only): rather than tolerate a dead
+      half-state, the groom removes it so no node — current or historical — carries a meaningless source tag.</p>
+
+    <div class="next-card" style="border:1px solid #c9ccd1;border-left:4px solid #1a7f37;padding:0.75rem 1rem;border-radius:4px;margin-top:1rem;">
+      <strong>What's next.</strong> Landed with Axis A in <code>d6658150</code>. Remaining plan work is Axis B
+      (SN-side), tracked under <code>f-ddgh-001</code> in the evergreen plan.
+    </div>
+  </main>
+</body>
+</html>
