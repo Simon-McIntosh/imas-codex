@@ -195,17 +195,18 @@ class TestWriteCypherInvariants:
 
             write_standard_names(sample_standard_names)
 
-        # Find the HAS_UNIT call and verify the batch includes our units
+        # Find the HAS_UNIT MERGE batch call (not the self-heal DELETE sweep,
+        # which also mentions HAS_UNIT but carries an `ids` param, no batch).
         for c in mock_gc.query.call_args_list:
             cypher = c[0][0]
-            if "HAS_UNIT" in cypher:
+            if "HAS_UNIT" in cypher and "MERGE" in cypher:
                 batch = c[1].get("batch", [])
                 unit_ids = {b["unit"] for b in batch}
                 # Both sample names have units (eV and A)
                 assert "eV" in unit_ids
                 assert "A" in unit_ids
                 return
-        pytest.fail("No HAS_UNIT query found in calls")
+        pytest.fail("No HAS_UNIT MERGE query found in calls")
 
 
 # ---------------------------------------------------------------------------
@@ -460,12 +461,34 @@ class TestWritePathRelationships:
     """Verify relationship creation patterns in write_standard_names."""
 
     def test_has_unit_uses_merge(self, sample_standard_names: list[dict]) -> None:
-        """HAS_UNIT must use MERGE to be idempotent."""
+        """The HAS_UNIT edge write must use MERGE to be idempotent."""
         stmts = _get_write_cypher(sample_standard_names)
-        unit_stmts = [s for s in stmts if "HAS_UNIT" in s]
-        assert unit_stmts, "HAS_UNIT statement must exist"
-        for s in unit_stmts:
-            assert "MERGE" in s, "HAS_UNIT must use MERGE for idempotency"
+        # The writer emits two HAS_UNIT statements: a self-heal DELETE sweep
+        # and the MERGE edge write. Only the edge write must use MERGE.
+        merge_stmts = [s for s in stmts if "HAS_UNIT" in s and "MERGE" in s]
+        assert merge_stmts, "A HAS_UNIT MERGE statement must exist"
+
+    def test_has_unit_self_heals_before_merge(
+        self, sample_standard_names: list[dict]
+    ) -> None:
+        """The writer drops existing HAS_UNIT edges before re-MERGEing.
+
+        Guards the single-edge invariant: without a drop-existing-then-MERGE
+        self-heal, a unit correction leaves a stale HAS_UNIT edge alongside the
+        new one. The DELETE sweep must precede the MERGE edge write.
+        """
+        stmts = _get_write_cypher(sample_standard_names)
+        delete_idx = next(
+            (i for i, s in enumerate(stmts) if "HAS_UNIT" in s and "DELETE" in s),
+            None,
+        )
+        merge_idx = next(
+            (i for i, s in enumerate(stmts) if "HAS_UNIT" in s and "MERGE" in s),
+            None,
+        )
+        assert delete_idx is not None, "HAS_UNIT self-heal DELETE must exist"
+        assert merge_idx is not None, "HAS_UNIT MERGE must exist"
+        assert delete_idx < merge_idx, "self-heal DELETE must precede the MERGE"
 
     def test_has_standard_name_created_for_dd_source(
         self,
@@ -491,8 +514,12 @@ class TestWritePathRelationships:
 
             write_standard_names(sample_standard_names)
 
-        unit_calls = [c for c in mock_gc.query.call_args_list if "HAS_UNIT" in c[0][0]]
-        assert unit_calls, "HAS_UNIT query must be called"
+        unit_calls = [
+            c
+            for c in mock_gc.query.call_args_list
+            if "HAS_UNIT" in c[0][0] and "MERGE" in c[0][0]
+        ]
+        assert unit_calls, "HAS_UNIT MERGE query must be called"
         batch = unit_calls[0][1]["batch"]
         unit_ids = {b["unit"] for b in batch}
         # All sample names have units
