@@ -17,9 +17,9 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-22">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.45">
+<meta name="plan-modified" content="2026-07-23">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -123,18 +123,28 @@
         (<code>optical_depth</code> = existing <code>opacity</code>). Commits
         <code>d622dfc2</code>, <code>b0665da0</code>.
       </p>
-      <p style="margin:0;">
+      <p style="margin:0 0 6px;">
         Two gap-only re-runs drained to <code>no_eligible_work</code> for
-        <strong>$6.59</strong>: accepted <strong>274 → 290</strong>. Of the
-        residual 50 non-skipped, 37 carry a correct valid name awaiting review
-        acceptance (a <em>review-entry</em> throughput matter — names produced
-        at <code>name_stage=pending</code> aren't claimed by REVIEW_NAME), 3 are
-        superseded relinks, and ~9 are the genuinely-hard tail (gm1/6/7/9
-        flux-surface metric coefficients, <code>change_in</code> delta,
-        <code>h_98</code>, contour node, hard-x-ray peak). Full record:
+        <strong>$6.59</strong>: accepted <strong>274 → 290</strong>. Full record:
         <a href="archive/sn-west-review-rehearsal-gap-closure-landed.html">gap-closure landed</a>.
-        Stage 2 (cut the fork-PR RC) needs a review pass to accept the 37
-        pending names first — see the followups below.
+      </p>
+      <p style="margin:0;">
+        <strong>Review-entry defect root-caused &amp; fixed (2026-07-23).</strong>
+        The ~37 valid names that gap-only runs reported as
+        <code>no_eligible_work</code> were refine products stranded at
+        <code>name_stage=pending</code>: <code>persist_refined_name</code>
+        initialised the successor stage <code>ON CREATE</code> only, so a refine
+        that converged onto a pre-existing placeholder name kept it
+        <code>pending</code> and <code>REVIEW_NAME</code> (which claims
+        <code>drafted</code>) never saw it. Fixed with TDD (commit
+        <code>35e46bc7</code>): an <code>ON MATCH</code> advance in
+        <code>persist_refined_name</code> plus a
+        <code>reconcile_reviewable_name_stage</code> self-heal wired into the
+        startup reconcile. A cost-capped review pass ($12.61) then accepted the
+        advanced names on merit: WEST accepted <strong>290 → 306 / 355</strong>;
+        <strong>0</strong> stranded names remain graph-wide. Full record:
+        <a href="archive/sn-west-review-rehearsal-review-entry-landed.html">review-entry landed</a>.
+        Stage 2 (cut the fork-PR RC, <code>f-swrr-007</code>) is now unblocked.
       </p>
     </div>
     <p>
@@ -543,7 +553,7 @@ Done-when
      fold-back → freeze-check → --undo) queued as the next followup.
   3. This followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-swrr-008" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T15:35:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-008" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T15:35:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-23T18:19:44+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Review-entry: accept the ~37 pending WEST names (they never enter REVIEW_NAME)</h4>
     <div class="r-fu-body"><p>Gap-closure (f-swrr-006) proved the composer now names the operator-composed, line-of-sight, and genuine-token sources correctly (accepted 274→290). But ~37 WEST sources carry a correct, <strong>valid</strong> produced name stuck at <code>name_stage=pending</code> (score null) — never claimed by <code>REVIEW_NAME</code> (which claims <code>drafted</code>), so gap-only runs report <code>no_eligible_work</code> while valid names sit unreviewed. Since the RC (f-swrr-007) exports <code>accepted</code> names, these must be accepted first. Root-cause why pipeline-origin names land at <code>pending</code> instead of <code>drafted</code> (attachment/consolidation path?), fix the transition in code (never hand-set name_stage), then run a review pass to accept them on merit.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -589,6 +599,7 @@ Done-when
      new accepted count + the remaining genuinely-hard residual (gm1/6/7/9,
      change_in delta, h_98, contour node — deferrable).
   3. This followup resolved; f-swrr-007 (RC cut) unblocked.</pre>
+    <p class="r-fu-outcome">Root-caused + fixed (TDD, commit 35e46bc7). The ~37 valid names stuck at name_stage=pending were refine products: persist_refined_name initialised the successor stage ON CREATE only, so a refine converging onto a pre-existing placeholder name (a locus/parent scaffold minted 'pending' by the HAS_PARENT derivation writer, or a bare MERGE node with null stage) kept it 'pending' and REVIEW_NAME (claims 'drafted') never saw it — even though the refine migrated all its produced sources onto it. Compose never strands (its finalize is an unconditional SET). Confirmed on the live graph: 22/22 stranded WEST pending pipeline names were refine products. Fix, both TDD'd: (1) persist_refined_name adds ON MATCH SET advancing a placeholder-merged successor (name_stage null/'pending' AND origin<>'derived') to 'drafted'+'pipeline', leaving live/terminal stages and structural derived parents untouched; (2) new reconcile_reviewable_name_stage self-heals any valid, non-derived, source-backed name stranded below 'drafted', wired into the run_sn_pools startup reconcile (every run, incl. --only reconcile). New test_reviewable_name_stage.py (9 tests incl. live-graph e2e) + 4 repaired startup-reconcile mock lists; full SN suite green. Live verification: reconcile advanced all stranded names to drafted (0 stranded graph-wide, was 22); a cost-capped review pass (sn run --only review --names-only --cost-limit 12; $12.61, 86 reviewed / 22 refined, stop_reason=budget_exhausted) accepted them on merit — WEST accepted 290 → 306 / 355 (+16). Residual 29 all ENTERED review (fix working): 18 reviewed <0.85 (routed to refine), 11 drafted still queued at the budget cap, + 2 grammar-rejected/quarantined names correctly excluded (regen, not review) — ordinary throughput + the genuinely-hard tail (gm-metrics, hard_xray_width, camera up-vector), not stranding. Record: docs/archive/sn-west-review-rehearsal-review-entry-landed.html. Unblocks f-swrr-007 (stage-2 RC cut).</p>
     </article>
 </section>
 

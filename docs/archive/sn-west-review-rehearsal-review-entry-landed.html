@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-review-entry-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — review-entry: refine products stranded at name_stage=pending | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 review-entry — refine products stranded at <code>name_stage=pending</code> never entered review (2026-07-23)</h1>
+    <p>
+      Gap-closure left ~37 WEST sources carrying a correct, valid produced name
+      that gap-only runs reported as <code>no_eligible_work</code>: the names
+      existed and validated but sat at <code>name_stage=pending</code>
+      (score null) and were never claimed by <code>REVIEW_NAME</code>, which
+      claims <code>drafted</code>. This was a real pipeline transition defect,
+      not a naming gap. Root-caused, fixed with TDD, and the stranded set was
+      advanced into review and accepted on merit.
+    </p>
+
+    <h2>Root cause — refine adopts a placeholder without advancing its stage</h2>
+    <p>
+      A refined name is minted as a NEW node keyed by the name string. The
+      normal compose path advances a name to <code>drafted</code> with an
+      <em>unconditional</em> <code>MATCH … SET</code>
+      (<code>_finalize_generated_name_stage</code>), so compose never strands.
+      But <code>persist_refined_name</code> initialised the successor stage with
+      <code>MERGE (new) ON CREATE SET name_stage='drafted'</code>. When a refine
+      converges onto a name string that <em>already exists</em> as an
+      un-reviewed placeholder — a locus/parent scaffold minted
+      <code>pending</code> by the <code>HAS_PARENT</code> derivation writer, or
+      a bare <code>MERGE</code>-created node with no stage — <code>ON CREATE</code>
+      does not fire, so the successor kept the placeholder stage even though the
+      refine migrates all its <code>PRODUCED_NAME</code> /
+      <code>HAS_STANDARD_NAME</code> sources onto it and supersedes the
+      predecessor. The only code path that <em>writes</em>
+      <code>name_stage='pending'</code> is that ON-CREATE derived-parent MERGE.
+    </p>
+    <p>
+      Evidence (live graph): every one of the 22 WEST pending pipeline names
+      carrying a produced source was a refine product (had a
+      <code>REFINED_FROM</code> out-edge). A minimal reproduction — refine an
+      <code>old</code> name into a pre-existing pending placeholder — left the
+      successor <code>pending</code> before the fix and <code>drafted</code>
+      after (<code>test_refine_into_pending_placeholder_advances_to_drafted</code>).
+    </p>
+
+    <h2>Fix (TDD, commit <code>35e46bc7</code>)</h2>
+    <table>
+      <thead><tr><th>Change</th><th>Mechanism</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>persist_refined_name</code> — advance a placeholder-merged successor at write time</td>
+          <td>Added <code>ON MATCH SET</code>: when the merged-onto node is an
+              un-reviewed placeholder (<code>name_stage</code> null or
+              <code>'pending'</code>) and not a structural <code>derived</code>
+              parent, advance it to <code>drafted</code> + <code>origin='pipeline'</code>.
+              Live/terminal stages (<code>drafted</code>/<code>reviewed</code>/<code>accepted</code>/…)
+              and derived parents are left untouched.</td>
+        </tr>
+        <tr>
+          <td><code>reconcile_reviewable_name_stage</code> — self-heal already-stranded names</td>
+          <td>New reconcile in <code>graph_ops</code>: any name at
+              <code>name_stage</code> null/<code>'pending'</code> that is
+              <code>valid</code>, not <code>derived</code>, and carries a
+              non-<code>derived</code> produced source is advanced to
+              <code>drafted</code>. Idempotent; wired into the
+              <code>run_sn_pools</code> startup reconcile so it runs every
+              <code>sn run</code> (incl. <code>--only reconcile</code>), before
+              the pools, so the review pool sees the advanced names the same run.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Both are guarded to never touch a structural <code>derived</code> parent
+      (those skip <code>REVIEW_NAME</code> and are accepted structurally by
+      <code>ENRICH_PARENTS</code>) — the review-name claim already excludes
+      <code>origin='derived'</code>. No <code>name_stage</code> is ever
+      hand-set in Cypher: advancing <code>pending → drafted</code> feeds the
+      RD-quorum, which scores on merit.
+    </p>
+
+    <h2>Tests</h2>
+    <p>
+      New <code>tests/standard_names/test_reviewable_name_stage.py</code> — a
+      fast import/return-shape guard plus live-graph (<code>@pytest.mark.graph</code>)
+      end-to-end cases: refine into a pending placeholder advances to
+      <code>drafted</code>; refine into a <code>derived</code> parent placeholder
+      stays <code>pending</code>; refine into a brand-new name is
+      <code>drafted</code> (unchanged); refine into a live <code>accepted</code>
+      name is not demoted; and the reconcile advances a stranded name, skips
+      derived/quarantined names, and is idempotent. Four pre-existing tests that
+      enumerate the startup reconciles in a <code>patch.multiple</code> mock list
+      were extended for the new reconcile. Full SN suite green.
+    </p>
+
+    <h2>Outcome — stranded names accepted on merit</h2>
+    <p>
+      The <code>reconcile_reviewable_name_stage</code> pass advanced every
+      stranded name (22 WEST refine products, plus a graph-wide backlog) into
+      <code>drafted</code>, and a cost-capped names-only review pass
+      (<code>sn run --only review --names-only --cost-limit 12</code>,
+      <strong>$12.61</strong>, 86 reviewed / 22 refined,
+      <code>stop_reason=budget_exhausted</code>) accepted them on merit through
+      the RD-quorum. WEST accepted sources rose <strong>290 → 306 / 355
+      (+16)</strong>. Crucially, the stranding signature is gone: <strong>0</strong>
+      valid pipeline names carrying a produced source now sit at
+      <code>pending</code> graph-wide (was 22).
+    </p>
+    <p>
+      The WEST residual after the pass is <strong>29</strong> names that all
+      <em>entered</em> review (the fix working) — 18 <code>reviewed</code> below
+      the 0.85 accept bar (routed to refine, e.g. <code>magnetic_shear</code>
+      0.825, <code>plasma_confinement_time</code> 0.475) and 11 <code>drafted</code>
+      still queued when the budget cap cut the pass short — plus 2 genuinely
+      grammar-rejected/quarantined names (<code>cross_section_of_flux_surface</code>,
+      <code>flux_surface_average_magnetic_field_magnitude</code>) that are
+      correctly excluded from review (they regenerate, not review). None are
+      stranded; the remainder is ordinary review throughput a subsequent pass
+      drains. The genuinely-hard tail (gm-metric coefficients,
+      <code>hard_xray_width</code>, the camera up-vector) scores low on merit and
+      is a naming-quality matter, not a transition defect.
+    </p>
+
+    <h2>What's next</h2>
+    <p>
+      The review-entry throughput matter is closed — refine products now enter
+      review at write time and any historical straggler self-heals on the next
+      run. Stage 2 (cut the fork-PR batch RC, <code>f-swrr-007</code>) is
+      unblocked: the WEST accepted set now includes the previously-stranded
+      names.
+    </p>
+  </main>
+</body>
+</html>
