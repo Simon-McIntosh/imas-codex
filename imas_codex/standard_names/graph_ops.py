@@ -7241,6 +7241,61 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
     return {"names_reconciled": len(updates)}
 
 
+def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
+    """Advance source-backed pipeline names stranded below the review entry stage.
+
+    The name review pool claims ``name_stage='drafted'``. A name minted by the
+    normal compose path always reaches 'drafted' (its finalize is an
+    unconditional ``SET``), but a refine that converges onto a name string that
+    already exists as an un-reviewed placeholder — a locus/parent scaffold at
+    ``name_stage='pending'`` or a bare node with no stage — historically kept
+    that placeholder stage (its successor init was ``ON CREATE`` only). The
+    refine still migrates the real ``PRODUCED_NAME`` / ``HAS_STANDARD_NAME``
+    sources onto it, so the result is a valid, source-backed quantity that can
+    never be reviewed.
+
+    :func:`persist_refined_name` now advances such a successor at write time;
+    this reconcile heals any name already stranded by the earlier behaviour and
+    is an idempotent safety net for any other path that could leave a produced
+    name below 'drafted'. A name qualifies when it is at ``name_stage`` null or
+    ``'pending'``, is ``validation_status='valid'`` (quarantined names are
+    regenerated, not reviewed), is not a structural ``derived`` parent (those
+    are reviewed structurally, not by the name quorum), and carries at least one
+    non-``derived`` produced source (a real DD/signal origin). Once advanced the
+    name is ``'drafted'`` and no longer matches — the pass is a no-op thereafter.
+
+    Returns dict: {names_advanced}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+            WHERE coalesce(sn.name_stage, '') IN ['', 'pending']
+              AND coalesce(sn.origin, '') <> 'derived'
+              AND coalesce(sn.validation_status, '') = 'valid'
+              AND coalesce(src.source_type, '') <> 'derived'
+            WITH DISTINCT sn
+            SET sn.name_stage = 'drafted',
+                sn.origin     = 'pipeline'
+            RETURN count(sn) AS advanced
+            """
+        )
+    finally:
+        if own:
+            client.close()
+
+    advanced = rows[0]["advanced"] if rows else 0
+    if advanced:
+        logger.info(
+            "reconcile_reviewable_name_stage: advanced %d stranded "
+            "source-backed name(s) to 'drafted' for review",
+            advanced,
+        )
+    return {"names_advanced": advanced}
+
+
 def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     """Materialize the DD-side ``HAS_STANDARD_NAME`` edge from provenance.
 
@@ -10225,6 +10280,28 @@ def persist_refined_name(
                           new.edit_override_edits = $edit_override_edits,
                           new.edit_include_accepted = $edit_include_accepted
                           {escalation_set}
+
+                        // 1b. Adopt a pre-existing placeholder as the successor.
+                        // The successor id may already exist as an un-reviewed
+                        // scaffold — a locus/parent placeholder minted at
+                        // name_stage='pending' by the derivation writer, or a
+                        // bare node with no stage. ON CREATE does not fire for
+                        // it, so without this the refined name would keep the
+                        // placeholder stage and never be claimed by the name
+                        // review pool (which claims 'drafted'), even though this
+                        // refine migrates its produced sources below. Advance
+                        // such a placeholder into review; leave a structural
+                        // 'derived' parent (reviewed structurally, not by the
+                        // name quorum) and any live/terminal stage untouched.
+                        ON MATCH SET
+                          new.name_stage = CASE
+                            WHEN coalesce(new.name_stage, '') IN ['', 'pending']
+                             AND coalesce(new.origin, '') <> 'derived'
+                            THEN 'drafted' ELSE new.name_stage END,
+                          new.origin = CASE
+                            WHEN coalesce(new.name_stage, '') IN ['', 'pending']
+                             AND coalesce(new.origin, '') <> 'derived'
+                            THEN 'pipeline' ELSE new.origin END
 
                         // 2. Link to predecessor
                         WITH new

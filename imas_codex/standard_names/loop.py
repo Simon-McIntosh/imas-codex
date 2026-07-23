@@ -1023,6 +1023,26 @@ async def run_sn_pools(
                 seg_result["names_realigned"],
             )
 
+        # Advance any source-backed pipeline name stranded below the review
+        # entry stage. A refine that converged onto a pre-existing placeholder
+        # name kept it at 'pending' (its successor init was ON CREATE only), so
+        # a valid, source-backed name could sit unreviewed forever — the name
+        # review pool claims 'drafted'. persist_refined_name now advances such a
+        # successor at write time; this heals any name already stranded and is
+        # an idempotent net. Runs BEFORE the pools so the review pool sees the
+        # advanced names the same run.
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_reviewable_name_stage,
+        )
+
+        entry_result = await asyncio.to_thread(reconcile_reviewable_name_stage)
+        if entry_result.get("names_advanced", 0):
+            logger.info(
+                "run_sn_pools: review-entry reconcile — %d stranded name(s) "
+                "advanced to 'drafted'",
+                entry_result["names_advanced"],
+            )
+
         # Link COCOS-dependent names to the catalog's COCOS convention
         # (current DD version's — DDv4 → COCOS 17). Sets the cocos integer and
         # HAS_COCOS edge for any COCOS-dependent name missing it, across all

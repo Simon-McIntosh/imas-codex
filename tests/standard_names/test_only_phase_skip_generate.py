@@ -111,6 +111,10 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
             f"{_GO}.reconcile_standard_name_source_paths",
             return_value={"names_reconciled": 0},
         ),
+        patch(
+            f"{_GO}.reconcile_reviewable_name_stage",
+            return_value={"names_advanced": 0},
+        ),
         patch(f"{_GO}.create_sn_run_open"),
         patch(f"{_GO}.finalize_sn_run"),
         patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
@@ -202,6 +206,10 @@ async def test_attach_only_runs_two_reconciles_and_no_pools() -> None:
             f"{_GO}.reconcile_standard_name_source_paths",
             return_value={"names_reconciled": 3},
         ) as sp,
+        patch(
+            f"{_GO}.reconcile_reviewable_name_stage",
+            return_value={"names_advanced": 0},
+        ),
         patch(f"{_LOOP}._seed_all_domains", new=seed_mock),
         patch(
             "imas_codex.standard_names.pools.run_pools",

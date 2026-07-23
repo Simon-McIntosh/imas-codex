@@ -1113,6 +1113,9 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 reconcile_standard_name_source_paths=MagicMock(
                     return_value={"names_reconciled": 0}
                 ),
+                reconcile_reviewable_name_stage=MagicMock(
+                    return_value={"names_advanced": 0}
+                ),
                 reconcile_orphan_parent_sources=MagicMock(return_value=0),
             ),
             patch(
