@@ -109,25 +109,35 @@ class TestStandardNameEdgeIntegrity:
     def test_source_paths_scalar_consistent_with_edges(self, gc):
         """``sn.source_paths`` contains no entry absent from the live edges.
 
-        The denormalised scalar must be a subset of the DD paths reachable via
-        the live provenance edges — ``HAS_STANDARD_NAME`` from an IMASNode and
-        ``PRODUCED_NAME`` from a DD-typed StandardNameSource. Entries that
+        The denormalised scalar must be a subset of the source entities
+        reachable via the live provenance edges — ``HAS_STANDARD_NAME`` from an
+        IMASNode and ``PRODUCED_NAME`` from a StandardNameSource. Entries that
         appear only in the scalar are stale residue from pruned/refined
         mappings; the edges are the source of truth. Scoped to accepted names
         (the ones a consumer trusts).
+
+        ``source_paths`` stores canonical URI entries (``dd:<path>`` for DD
+        paths, ``<facility>:<id>`` for signals — see
+        ``imas_codex/standard_names/source_paths.py``), so both edge sides are
+        compared in that URI form: an IMASNode id is prefixed ``dd:``, and a
+        StandardNameSource contributes its ``id`` (already the URI). Structural
+        ``derived:`` sources are provenance, not source entities, and are
+        excluded on both sides.
         """
         rows = gc.query(
             """
             MATCH (sn:StandardName {name_stage: 'accepted'})
             WHERE sn.source_paths IS NOT NULL AND size(sn.source_paths) > 0
             OPTIONAL MATCH (imas:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-            WITH sn, collect(DISTINCT imas.id) AS hsn_paths
+            WITH sn, collect(DISTINCT 'dd:' + imas.id) AS hsn_paths
             OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-            WHERE src.source_type = 'dd' AND src.source_id IS NOT NULL
-            WITH sn, hsn_paths, collect(DISTINCT src.source_id) AS produced_paths
-            WITH sn, [p IN hsn_paths WHERE p IS NOT NULL]
+            WHERE src.source_type <> 'derived' AND src.id IS NOT NULL
+            WITH sn, hsn_paths, collect(DISTINCT src.id) AS produced_paths
+            WITH sn, [p IN hsn_paths WHERE p IS NOT NULL AND p <> 'dd:']
                      + [p IN produced_paths WHERE p IS NOT NULL] AS edge_paths
-            WITH sn, [p IN sn.source_paths WHERE NOT (p IN edge_paths)] AS stale
+            WITH sn, [p IN sn.source_paths
+                      WHERE NOT (p IN edge_paths)
+                        AND NOT p STARTS WITH 'derived:'] AS stale
             WHERE size(stale) > 0
             RETURN sn.id AS name, stale
             ORDER BY name
