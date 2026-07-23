@@ -35,6 +35,7 @@ import numpy as np
 from imas_codex import dd_version as current_dd_version
 from imas_codex.core.node_categories import (
     CLUSTERABLE_CATEGORIES,
+    EMBEDDABLE_CATEGORIES,
     ENRICHABLE_CATEGORIES,
     QUANTITY_CATEGORIES,
     SEARCHABLE_CATEGORIES,
@@ -1936,6 +1937,11 @@ def phase_build(
 
         stats["lifecycle"] = reconcile_node_lifecycle(gc=client)
 
+        # Self-heal the embedding cache: non-embeddable nodes must not carry
+        # embedding_text without a vector (legacy cruft from earlier category
+        # schemes). Re-runnable; keeps embedding_text ⇔ genuine embedding.
+        stats["orphan_embedding_text_cleared"] = cleanup_orphan_embedding_text(client)
+
     # Update cocos_transformation_type on existing IMASNode nodes
     if not dry_run and version_data:
         latest_version = sorted(version_data.keys())[-1]
@@ -1964,17 +1970,27 @@ def phase_build(
         backfill_count, backfilled_paths = _backfill_cocos_labels(client, version_data)
         stats["cocos_labels_backfilled"] = backfill_count
 
-        # Clear stale labels — exclude BOTH XML-sourced AND backfilled paths
+        # Clear stale labels — exclude BOTH XML-sourced AND backfilled paths.
+        # Clear cocos_label_source in the SAME pass: a path that loses its
+        # transformation type must not keep a dangling label source, or it
+        # enters a half-state (source set, type null) that is invisible to
+        # COCOS-filtered queries. Removed/historical paths hit exactly this.
         all_labeled = latest_labeled | backfilled_paths
         client.query(
             """
             MATCH (p:IMASNode)
             WHERE p.cocos_transformation_type IS NOT NULL
             AND NOT p.id IN $labeled_paths
-            SET p.cocos_transformation_type = null
+            SET p.cocos_transformation_type = null,
+                p.cocos_label_source = null
             """,
             labeled_paths=list(all_labeled),
         )
+
+        # Groom any pre-existing half-state left by earlier builds: a source
+        # tag with no transformation type is meaningless — clear it so the
+        # graph stays internally consistent across the full node set.
+        stats["cocos_half_state_groomed"] = groom_cocos_half_state(client)
 
     # Final-pass: field-level metadata from latest version
     if not dry_run and version_data:
@@ -3937,6 +3953,72 @@ def _cleanup_stale_embeddings(client: GraphClient) -> int:
     cleaned = result[0]["cleaned"] if result else 0
     if cleaned > 0:
         logger.debug(f"Cleaned up {cleaned} stale embeddings from deprecated paths")
+    return cleaned
+
+
+def groom_cocos_half_state(client: GraphClient) -> int:
+    """Clear COCOS label sources that have no transformation type.
+
+    A path with ``cocos_label_source`` set but ``cocos_transformation_type``
+    null is in a half-state: the source tag is meaningless without a label, and
+    the path is invisible to COCOS-filtered queries. This arises when the stale-
+    label clear pass drops a path's transformation type (e.g. removed/historical
+    fields absent from the current DD) without clearing the source. Grooming
+    keeps the invariant "source ⇒ type" across the whole node set. Idempotent
+    and re-runnable.
+
+    Returns:
+        Number of nodes groomed.
+    """
+    result = client.query(
+        """
+        MATCH (p:IMASNode)
+        WHERE p.cocos_label_source IS NOT NULL
+          AND p.cocos_transformation_type IS NULL
+        SET p.cocos_label_source = null
+        RETURN count(p) AS groomed
+        """
+    )
+    groomed = result[0]["groomed"] if result else 0
+    if groomed > 0:
+        logger.debug("Groomed %d COCOS half-state nodes", groomed)
+    return groomed
+
+
+def cleanup_orphan_embedding_text(client: GraphClient) -> int:
+    """Clear cached embedding_text on nodes that are never embedded.
+
+    Embedding is intentionally restricted to embeddable categories (physics
+    quantities/geometry/identifiers) to keep semantic-search noise low, and
+    embedding_text generation follows the same gate. A node in a non-embeddable
+    category (e.g. representation, fit_artifact, structural, coordinate,
+    metadata) that carries embedding_text but no vector is legacy cruft from an
+    earlier category scheme: the vector will never be produced, so the cached
+    source text is dead weight. Clear it (and the stale hash) so the cache is
+    self-consistent — embedding_text exists iff the node is a genuine embedding
+    candidate. Idempotent and re-runnable; only touches rows still carrying the
+    orphaned text, and never removes text from a node that actually has a vector.
+
+    Returns:
+        Number of nodes cleaned.
+    """
+    result = client.query(
+        """
+        MATCH (p:IMASNode)
+        WHERE p.embedding_text IS NOT NULL
+          AND p.embedding IS NULL
+          AND NOT p.node_category IN $embeddable
+        SET p.embedding_text = null,
+            p.embedding_hash = null
+        RETURN count(p) AS cleaned
+        """,
+        embeddable=list(EMBEDDABLE_CATEGORIES),
+    )
+    cleaned = result[0]["cleaned"] if result else 0
+    if cleaned > 0:
+        logger.debug(
+            "Cleaned orphan embedding_text from %d non-embeddable nodes", cleaned
+        )
     return cleaned
 
 

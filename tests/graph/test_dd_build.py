@@ -330,19 +330,28 @@ class TestEmbeddingCompleteness:
         )
 
     def test_no_embeddings_without_embedding(self, graph_client, label_counts):
-        """Non-template paths should not have embedding_text without an embedding.
+        """Embeddable paths should not have embedding_text without an embedding.
 
-        Template-enriched nodes (accessor terminals) are excluded from embedding
-        by design — they get concise descriptions but don't need vector search.
+        Embedding is intentionally restricted to embeddable categories (physics
+        quantities/geometry/identifiers) to keep semantic-search noise low, and
+        embedding_text generation follows the same gate — so the completeness
+        invariant only holds for embeddable nodes. Non-embeddable categories
+        (representation, structural, metadata, …) never get a vector by design;
+        the build's cleanup pass keeps stray embedding_text off them. Template-
+        enriched accessor terminals are likewise excluded from embedding.
         """
         if not label_counts.get("IMASNode"):
             pytest.skip("No IMASNode nodes in graph")
 
+        from imas_codex.core.node_categories import EMBEDDABLE_CATEGORIES
+
         result = graph_client.query(
             "MATCH (p:IMASNode) "
             "WHERE p.embedding IS NULL AND p.embedding_text IS NOT NULL "
+            "  AND p.node_category IN $categories "
             "  AND (p.enrichment_source IS NULL OR p.enrichment_source <> 'template') "
-            "RETURN count(p) AS cnt"
+            "RETURN count(p) AS cnt",
+            categories=list(EMBEDDABLE_CATEGORIES),
         )
         count = result[0]["cnt"] if result else 0
         assert count == 0, f"{count} paths have embedding_text but no embedding vector"

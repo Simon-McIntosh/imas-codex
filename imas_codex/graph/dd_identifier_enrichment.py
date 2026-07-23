@@ -755,7 +755,9 @@ def embed_identifier_nodes(
     texts = [item["text"] for item in to_embed]
     embeddings = encoder.embed_texts(texts)
 
-    # Store embeddings and advance status
+    # Store embeddings and advance status. Persist embedding_text alongside the
+    # vector so the cache is self-consistent (vector ⇔ text) — the completeness
+    # gate requires every embedded node to retain the text it was embedded from.
     batch_data = []
     for i, item in enumerate(to_embed):
         batch_data.append(
@@ -763,6 +765,7 @@ def embed_identifier_nodes(
                 "id": item["id"],
                 "embedding": embeddings[i].tolist(),
                 "embedding_hash": item["hash"],
+                "embedding_text": item["text"],
             }
         )
 
@@ -772,6 +775,7 @@ def embed_identifier_nodes(
         MATCH (n:IMASNode {id: b.id})
         SET n.embedding = b.embedding,
             n.embedding_hash = b.embedding_hash,
+            n.embedding_text = b.embedding_text,
             n.embedded_at = datetime(),
             n.status = 'embedded'
         """,
@@ -792,3 +796,56 @@ def embed_identifier_nodes(
         f"{stats['cached']} cached"
     )
     return stats
+
+
+def backfill_identifier_embedding_text(client: GraphClient) -> int:
+    """Restore missing embedding_text on already-embedded identifier nodes.
+
+    Earlier embed runs persisted the vector but not the source text, leaving
+    identifier IMASNodes with a valid embedding and no embedding_text. The text
+    is deterministic (``generate_embedding_text`` over the node's own
+    description/keywords), so it is regenerated from the backing content and
+    written back — the existing vector is left untouched, so this is a faithful
+    cache repair, not a re-embed. Idempotent and re-runnable.
+
+    Returns:
+        Number of nodes backfilled.
+    """
+    from imas_codex.graph.build_dd import generate_embedding_text
+
+    rows = list(
+        client.query("""
+            MATCH (n:IMASNode)
+            WHERE n.node_category = 'identifier'
+              AND n.embedding IS NOT NULL
+              AND (n.embedding_text IS NULL OR n.embedding_text = '')
+            RETURN n.id AS id, n.description AS description, n.keywords AS keywords
+        """)
+    )
+    if not rows:
+        return 0
+
+    updates = []
+    for r in rows:
+        path_info = {
+            "description": r.get("description") or "",
+            "documentation": "",
+            "keywords": r.get("keywords") or [],
+        }
+        text = generate_embedding_text(r["id"], path_info)
+        if text:
+            updates.append({"id": r["id"], "embedding_text": text})
+
+    if not updates:
+        return 0
+
+    client.query(
+        """
+        UNWIND $batch AS b
+        MATCH (n:IMASNode {id: b.id})
+        SET n.embedding_text = b.embedding_text
+        """,
+        batch=updates,
+    )
+    logger.info("Backfilled embedding_text on %d identifier nodes", len(updates))
+    return len(updates)
