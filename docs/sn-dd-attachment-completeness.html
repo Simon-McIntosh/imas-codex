@@ -109,33 +109,41 @@ RETURN count(*)  -- 3423 edges · 1522 names · 3348 DD nodes</pre>
       was left <em>imperative</em> and incomplete.
     </p>
 
-    <h2 id="s1c">§1c — Two catalogs, and the scalar-vs-edge split</h2>
+    <h2 id="s1c">§1c — The published catalog is unaffected; the edge is an internal concern</h2>
     <p>
-      "Catalog" is ambiguous — there are two, and the DD↔path mapping lives in one but not the other:
+      <strong>The exported catalog carries the DD↔path mapping, and it is complete.</strong> The
+      imas-standard-names-catalog site is a faithful render of the catalog, built in that repo's CI from
+      ISN + the catalog YAML with <em>no</em> graph access. The chain that puts dd-paths on the page:
     </p>
-    <ul>
-      <li><strong>Codex graph catalog</strong> — what the SPA / MCP <code>fetch_standard_names</code>
-        serves. It <em>does</em> carry dd-paths: <code>_format_fetch_report</code>
-        (<code>sn_tools.py:270</code>) prints <code>sn.source_paths</code> as <code>dd_paths</code>.</li>
-      <li><strong>Exported ISN vocabulary catalog</strong> — the YAML shipped to
-        <code>imas-standard-names</code>. Pure vocabulary; <code>_graph_node_to_entry_dict</code>
-        (<code>export.py:561</code>) emits <code>name, description, documentation, kind, unit, status,
-        links</code> + ISN grammatical provenance and <em>explicitly drops</em>
-        <code>source_paths</code>/<code>dd_paths</code> (<code>export.py:589</code>); the ISN entry
-        schema has no path field. The DD↔path applicability never leaves codex.</li>
-    </ul>
+    <ol>
+      <li>Codex <code>run_export</code> populates each entry's <code>sources</code> list via
+        <code>_fetch_sources_for_entry</code> → <code>fetch_public_semantic_sources</code>
+        (<code>export.py:1470</code>, default on).</li>
+      <li>That function walks <strong><code>PRODUCED_NAME</code></strong>
+        (<code>provenance_lifecycle.py:42</code>) — <em>not</em> <code>HAS_STANDARD_NAME</code> — emitting
+        per-source <code>dd_path</code>, <code>dd_version</code>, <code>dd_documentation</code>, and
+        enrichment. Provenance is complete (85/85 for <code>ion_atomic_number</code>), so the exported
+        <code>sources</code> are complete.</li>
+      <li>ISN <code>yaml_store</code> strips only the raw <code>dd_paths</code>/<code>physics_domain</code>
+        scalars, keeping <code>sources</code>; ISN <code>catalog/dataset.py</code> — the "SPA dataset
+        builder" — reads <code>sources</code> to build the site data.</li>
+    </ol>
     <p>
-      <strong>The subtlety that hides the bug:</strong> the SPA's dd-path list is driven by the
-      <code>source_paths</code> <em>scalar</em>, not the <code>HAS_STANDARD_NAME</code> <em>edges</em>.
-      The scalar is provenance-reconciled, so it correctly shows all 85 paths for
-      <code>ion_atomic_number</code> — the forward view looks complete. The missing edges instead break
-      every <strong>edge-dependent</strong> view: <code>source_ids</code>/<code>source_ids_names</code> in
-      that same report (collected via <code>(src)-[:HAS_STANDARD_NAME]-&gt;(sn)</code>,
-      <code>search.py:658</code>), the reverse DD-path → standard-name lookup
-      (<code>search.py:888</code>), <code>find_related</code>, coverage, and graph-RAG traversal — all
-      empty or wrong for the 1522 affected names. So <code>HAS_STANDARD_NAME</code> is the
-      codex-internal 1-hop index the edge-walking consumers depend on; keeping it consistent with the
-      scalar (both from one authority) is the whole job. The ISN export is unaffected either way.
+      So the missing <code>HAS_STANDARD_NAME</code> edges do <strong>not</strong> touch the published
+      catalog or its SPA. The edge is instead read <strong>pervasively inside the pipeline</strong>:
+      review-context enrichment (which DD nodes back a name, fed to the reviewer —
+      <code>review/enrichment.py:46</code>), source eligibility (already-mapped nodes are skipped —
+      <code>sources/dd.py:584</code>), coverage, dedup, derived-parent admission
+      (<code>parents.py</code>), plus the codex MCP edge-walkers (reverse DD-path → name, <code>find_related</code>,
+      <code>source_ids</code> columns). At 15.5% edge coverage these all under-read for the 1522 affected
+      names. That — not the catalog — is the blast radius.
+    </p>
+    <p>
+      This also settles "are the three edges redundant?": <code>PRODUCED_NAME</code>+<code>FROM_DD_PATH</code>
+      is the complete authority and already drives the catalog; <code>HAS_STANDARD_NAME</code> is a
+      denormalized 1-hop convenience. But it is <strong>load-bearing in dozens of internal queries</strong>,
+      so dropping it (repointing every consumer to the 2-hop) is infeasible — the sound move is to keep it
+      and <em>derive</em> it from the authority.
     </p>
 
     <h2 id="s2">§2 — Design: one authority, self-healing projections</h2>
@@ -220,7 +228,7 @@ RETURN count(*)  -- 3423 edges · 1522 names · 3348 DD nodes</pre>
           <button class="r-opt" data-value="authored">Authored per-name at create time (the current, broken imperative write)</button>
           <button class="r-opt" data-value="drop-it">Drop the edge entirely; make every consumer traverse the 2-hop provenance</button>
         </p>
-        <p class="r-dec-rat">LOCKED. The edge is structurally a 1-hop denormalization of the provenance 2-hop; the root-cause bug was maintaining it by hand. Reconcile it from the authority (symmetric with <code>source_paths</code>). Not dropped: consumers (MCP, graph-RAG, coverage) want 1-hop, and <code>StandardNameSource</code> is transient scaffolding you don't want on the query path. Not exported to the ISNC catalog, so this is a codex-internal index only.</p>
+        <p class="r-dec-rat">LOCKED. The edge is structurally a 1-hop denormalization of the provenance 2-hop; the root-cause bug was maintaining it by hand. Reconcile it from the authority (symmetric with <code>source_paths</code>). Not dropped: it is load-bearing in dozens of internal queries (review-context enrichment, source eligibility, coverage, dedup, derived-parent admission) plus the MCP edge-walkers — repointing them all to the 2-hop is infeasible. Not read by the export/catalog SPA (those use <code>PRODUCED_NAME</code> directly), so this repair is a codex-internal concern only; the published catalog is unaffected.</p>
       </div>
 
       <div class="r-dec" data-key="where-it-runs" data-choice="reconcile-substep" data-by="Simon McIntosh" data-when="2026-07-23">
@@ -276,6 +284,13 @@ Context
   provenance exactly as reconcile_standard_name_source_paths does the scalar. The
   units_agree gate shipped in 7d9648e7. Honour the Locked decisions shown live
   above this brief.
+
+  NOT a catalog fix: the imas-standard-names-catalog SPA reads the exported
+  `sources` field, built from PRODUCED_NAME (provenance_lifecycle.py:42), which is
+  already complete — the published catalog is unaffected. This repair is purely
+  codex-internal: it restores the edge that review-context enrichment
+  (review/enrichment.py:46), source eligibility (sources/dd.py:584), coverage,
+  dedup, and the MCP edge-walkers depend on.
 
 State to read  (code/data — not the plan)
   imas_codex/standard_names/graph_ops.py
