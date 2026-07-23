@@ -1100,11 +1100,20 @@ class TestRunSnPoolsFinalizePopulatesCounters:
         _mock_gc_ctx.__exit__ = MagicMock(return_value=False)
 
         with (
-            patch(f"{_GO}.reconcile_standard_name_sources", return_value={}),
-            patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
-            patch(f"{_GO}.reconcile_provenance", return_value={}),
-            patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
-            patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
+            patch.multiple(
+                _GO,
+                reconcile_standard_name_sources=MagicMock(return_value={}),
+                reconcile_vocab_gaps=MagicMock(return_value={}),
+                reconcile_provenance=MagicMock(return_value={}),
+                reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_standard_name_cocos_links=MagicMock(return_value={}),
+                reconcile_standard_name_dd_edges=MagicMock(
+                    return_value={"edges_created": 0, "pairs_dropped": 0}
+                ),
+                reconcile_standard_name_source_paths=MagicMock(
+                    return_value={"names_reconciled": 0}
+                ),
+            ),
             patch(
                 "imas_codex.standard_names.pools.run_pools",
                 new_callable=AsyncMock,

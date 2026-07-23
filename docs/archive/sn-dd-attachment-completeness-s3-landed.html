@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-dd-attachment-completeness">
+  <meta name="plan-title" content="SN↔DD Attachment Completeness — §3 landed">
+  <meta name="plan-summary" content="Landed record: the DD-side HAS_STANDARD_NAME edge is now a self-healing provenance projection reconciled every sn run; backfill lifted accepted-name DD coverage 15.5% → 77.3% and drove the missing-projection count to 0.">
+  <meta name="plan-status" content="archived">
+  <title>SN↔DD Attachment Completeness — §3 landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 — Provenance backfill (landed 2026-07-23)</h1>
+    <p>
+      The DD-side <code>(:IMASNode)-[:HAS_STANDARD_NAME]-&gt;(:StandardName)</code> edge is no longer
+      authored imperatively one-edge-per-name — it is a <strong>materialized projection of the per-source
+      provenance</strong> (<code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code>), reconciled every
+      <code>sn run</code> beside the <code>source_paths</code> scalar. A one-shot backfill materialized the
+      whole backlog; a second pass created zero edges (idempotent). Coverage of accepted names carrying a DD
+      edge rose <strong>15.5% → 77.3%</strong> and the completeness oracle now reports <strong>0</strong>
+      missing eligible-agreeing edges.
+    </p>
+
+    <table class="quick-status">
+      <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>HAS_STANDARD_NAME</code> edges (live)</td><td>2 427</td><td>✓ 5 795</td></tr>
+        <tr><td>Accepted names with ≥1 DD edge</td><td>369 / 2 379 (15.5%)</td><td>✓ 1 839 / 2 379 (77.3%)</td></tr>
+        <tr><td>Missing eligible-agreeing projection edges</td><td>3 285</td><td>✓ 0</td></tr>
+        <tr><td>Second-run edges created (idempotency)</td><td>—</td><td>✓ 0</td></tr>
+        <tr><td>Worked example <code>ion_atomic_number</code> → DD paths</td><td>0</td><td>✓ 85</td></tr>
+      </tbody>
+    </table>
+
+    <figure style="margin:1.5rem 0;">
+      <svg viewBox="0 0 720 210" width="100%" style="max-width:720px;font-family:system-ui,-apple-system,sans-serif;" role="img" aria-label="Accepted-name DD edge coverage before and after the backfill">
+        <text x="12" y="22" font-size="14" font-weight="600" fill="#1a1a1a">Accepted StandardNames with ≥1 live DD edge</text>
+
+        <text x="12" y="52" font-size="12.5" fill="#666">before</text>
+        <rect x="70" y="40" width="560" height="24" fill="#ffffff" stroke="#b0b0b0" stroke-width="1"/>
+        <rect x="70" y="40" width="87" height="24" fill="#e6d3c4" stroke="#8a4b1f" stroke-width="1"/>
+        <text x="640" y="57" font-size="12.5" font-weight="600" fill="#8a4b1f">15.5%</text>
+
+        <text x="12" y="92" font-size="12.5" fill="#666">after</text>
+        <rect x="70" y="80" width="560" height="24" fill="#ffffff" stroke="#b0b0b0" stroke-width="1"/>
+        <rect x="70" y="80" width="433" height="24" fill="#c8d9c0" stroke="#3f7a34" stroke-width="1"/>
+        <text x="640" y="97" font-size="12.5" font-weight="600" fill="#3f7a34">77.3%</text>
+
+        <text x="12" y="140" font-size="13" fill="#333"><tspan font-weight="600">2 427 → 5 795</tspan> live edges · <tspan font-weight="600">+3 368</tspan> materialized, <tspan font-weight="600">112</tspan> dropped on unit disagreement</text>
+        <text x="12" y="162" font-size="13" fill="#333">missing eligible-agreeing projection edges <tspan font-weight="600" fill="#8a4b1f">3 285</tspan> → <tspan font-weight="600" fill="#3f7a34">0</tspan> · re-run creates <tspan font-weight="600" fill="#3f7a34">0</tspan> (idempotent)</text>
+        <text x="12" y="190" font-size="12" fill="#777">gate: attach every eligible provenance pair unless the DD path has a known unit that units_agree rejects</text>
+      </svg>
+      <figcaption style="font-size:13px;color:#555;margin-top:.4rem;">
+        Live <code>codex</code> graph, 2026-07-23. Coverage counts accepted names; the edge also attaches
+        non-terminal drafted/reviewed names, so the live edge total (5 795) exceeds the accepted-only slice.
+      </figcaption>
+    </figure>
+
+    <h2 id="what-landed">What landed</h2>
+    <table class="quick-status">
+      <thead><tr><th>Change</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td><code>reconcile_standard_name_dd_edges()</code> — MERGE the DD edge for every eligible provenance pair, dropping + logging known unit disagreements; idempotent (matches only missing pairs)</td><td><code>standard_names/graph_ops.py</code></td></tr>
+        <tr><td>Wired into the post-drain reconcile block, immediately before the <code>source_paths</code> reconcile so the scalar picks up the new edges the same run</td><td><code>standard_names/loop.py</code></td></tr>
+        <tr><td><code>sn run --only attach</code> — focused, no-LLM, no-pools one-shot backfill (short-circuits to the DD-edge + <code>source_paths</code> reconcile)</td><td><code>standard_names/turn.py</code>, <code>cli/sn.py</code>, <code>loop.py</code> (<code>attach_only</code>)</td></tr>
+        <tr><td>Completeness oracle <code>missing_projection_edges()</code> + <code>-m graph</code> test asserting the edge equals the eligible-agreeing projection (0 missing)</td><td><code>graph/sn_link_guardrail.py</code>, <code>tests/graph/test_sn_edge_integrity.py</code></td></tr>
+        <tr><td>Unit tests: <code>attach</code> phase mapping + <code>attach_only</code> short-circuit</td><td><code>tests/standard_names/test_only_phase_skip_generate.py</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="unit-gate">The unit gate (drop-and-triage)</h2>
+    <p>
+      A provenance pair is dropped only on a <em>known</em> disagreement: the DD path carries a
+      <code>HAS_UNIT</code> edge whose unit canonically conflicts with the name's, judged by
+      <code>units_agree</code> over the ISN <code>canonical_unit</code> authority plus the DD-unit-bug
+      exception record. A DD path with <em>no</em> unit edge is a DD-completeness gap (nothing to disagree
+      with) and is attached — the same predicate the soundness invariant
+      (<code>test_dd_attachment_unit_agrees_with_name</code>) already asserts, so edge and invariant stay
+      self-consistent. <strong>112</strong> pairs were dropped and logged for the unit-curation triage —
+      genuine conflicts such as <code>ion/state/z_min</code> tagged <code>e</code> (elementary charge) against
+      a dimensionless charge number, and <code>equilibrium/…/gm4</code>/<code>gm5</code> metric coefficients.
+      They are surfaced, never forced into the index.
+    </p>
+
+    <h2 id="discovery">Discovery residual (measure-first)</h2>
+    <p>
+      <strong>1 530</strong> SN-eligible DD nodes (of 10 288) carry no producing source <em>and</em> no edge.
+      All 1 530 have <em>no <code>StandardNameSource</code> at all</em> — they are ordinary extraction backlog,
+      not a distinct discovery mechanism. The plan's "→ all z_n" concern is served by the backfill already
+      (every sibling path is its own source): <code>ion_atomic_number</code> reaches all 85. So the
+      <code>discovery-axis</code> decision locked to <strong>extract-sources</strong>: any genuine
+      same-quantity gap closes when the ordinary extraction pipeline gives the node a source, after which the
+      now-always-on reconcile materializes its edge automatically. No orphan <code>HAS_STANDARD_NAME</code>
+      edge is ever authored without a source behind it, and no dedicated discovery predicate was built.
+    </p>
+
+    <h2 id="not-catalog">Not a catalog change</h2>
+    <p>
+      The published imas-standard-names-catalog SPA reads the exported <code>sources</code> field, built from
+      <code>PRODUCED_NAME</code> (already complete) — it never reads <code>HAS_STANDARD_NAME</code>. This
+      repair is purely codex-internal: it restores the 1-hop index that review-context enrichment, source
+      eligibility, coverage, dedup, derived-parent admission, and the MCP edge-walkers all depend on.
+    </p>
+
+    <div class="next-card" style="border:1px solid #c9ccd1;border-left:4px solid #1a7f37;padding:0.75rem 1rem;border-radius:4px;margin-top:1rem;">
+      <strong>What's next.</strong> §3 was the plan's only implementable section and the
+      <code>discovery-axis</code> decision is now locked — the plan is shipped. The reconcile self-heals every
+      <code>sn run</code>, so newly-composed sources are picked up automatically; the 112 unit-disagreeing
+      pairs are tracked by the separate unit-curation triage (fix the name/source or record a DD-unit-bug
+      exception). No follow-on plan work.
+    </div>
+  </main>
+</body>
+</html>

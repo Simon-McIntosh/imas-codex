@@ -10,6 +10,7 @@ from __future__ import annotations
 # Valid --only phase choices (CLI enforces this set).
 TURN_PHASES: tuple[str, ...] = (
     "reconcile",
+    "attach",
     "extract",
     "compose",
     "validate",
@@ -25,6 +26,9 @@ TURN_PHASES: tuple[str, ...] = (
 # Everything outside the set is skipped.
 _ONLY_TO_ACTIVE: dict[str, set[str]] = {
     "reconcile": {"reconcile"},
+    # 'attach' is a focused one-shot: run_sn_pools short-circuits to the
+    # DD-edge + source_paths reconcile only. Like reconcile, it runs no pools.
+    "attach": {"reconcile"},
     "extract": {"generate"},
     "compose": {"generate"},
     "validate": {"generate"},

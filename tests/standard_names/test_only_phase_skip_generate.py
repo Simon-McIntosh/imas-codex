@@ -45,6 +45,16 @@ def test_only_review_maps_to_skip_generate() -> None:
     assert flags["skip_review"] is False
 
 
+def test_attach_is_a_valid_phase_that_skips_generate() -> None:
+    from imas_codex.standard_names.turn import TURN_PHASES, skip_flags_from_only
+
+    assert "attach" in TURN_PHASES
+    flags = skip_flags_from_only("attach")
+    # attach runs no pools — the run_sn_pools short-circuit handles the focus.
+    assert flags["skip_generate"] is True
+    assert flags["skip_review"] is True
+
+
 # ---------------------------------------------------------------------------
 # pool specs
 # ---------------------------------------------------------------------------
@@ -93,6 +103,14 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
         patch(f"{_GO}.reconcile_provenance", return_value={}),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
         patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
+        patch(
+            f"{_GO}.reconcile_standard_name_dd_edges",
+            return_value={"edges_created": 0, "pairs_dropped": 0},
+        ),
+        patch(
+            f"{_GO}.reconcile_standard_name_source_paths",
+            return_value={"names_reconciled": 0},
+        ),
         patch(f"{_GO}.create_sn_run_open"),
         patch(f"{_GO}.finalize_sn_run"),
         patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
@@ -163,3 +181,39 @@ async def test_run_sn_pools_without_skip_generate_autoseeds() -> None:
     """Control: without skip_generate, the auto-seed sweep runs (domains=())."""
     seed_mock = await _run(skip_generate=False)
     assert seed_mock.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_attach_only_runs_two_reconciles_and_no_pools() -> None:
+    """``attach_only`` short-circuits to the DD-edge + source_paths reconcile.
+
+    It must run exactly those two reconciles, never seed domains, and never
+    launch the pools — the focused, no-LLM one-shot backfill.
+    """
+    from imas_codex.standard_names.loop import run_sn_pools
+
+    seed_mock = AsyncMock(return_value=0)
+    with (
+        patch(
+            f"{_GO}.reconcile_standard_name_dd_edges",
+            return_value={"edges_created": 7, "pairs_dropped": 2},
+        ) as dd_edge,
+        patch(
+            f"{_GO}.reconcile_standard_name_source_paths",
+            return_value={"names_reconciled": 3},
+        ) as sp,
+        patch(f"{_LOOP}._seed_all_domains", new=seed_mock),
+        patch(
+            "imas_codex.standard_names.pools.run_pools",
+            new_callable=AsyncMock,
+            return_value={},
+        ) as run_pools_mock,
+    ):
+        summary = await run_sn_pools(cost_limit=5.0, attach_only=True)
+
+    dd_edge.assert_called_once()
+    sp.assert_called_once()
+    seed_mock.assert_not_awaited()
+    run_pools_mock.assert_not_awaited()
+    assert summary.sources_reconciled == 7
+    assert summary.stop_reason == "completed"

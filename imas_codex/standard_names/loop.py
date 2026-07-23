@@ -746,6 +746,7 @@ async def run_sn_pools(
     flush: bool = False,
     skip_review: bool = False,
     skip_generate: bool = False,
+    attach_only: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -830,6 +831,33 @@ async def run_sn_pools(
         time_limit_s=time_limit_s,
         min_score=min_score,
     )
+
+    # ── --only attach: focused, no-LLM DD-edge backfill ───────────────
+    # Materialize the DD-side HAS_STANDARD_NAME projection from provenance and
+    # reconcile the source_paths scalar, then return. No pools, no SNRun audit
+    # row, no LLM-touching maintenance (source-drift steering, stranded-review
+    # promotion) — just the two self-healing projections. The full maintenance
+    # suite is `--only reconcile`; this is the one-shot edge backfill.
+    if attach_only:
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_standard_name_dd_edges,
+            reconcile_standard_name_source_paths,
+        )
+
+        edge_res = await asyncio.to_thread(reconcile_standard_name_dd_edges)
+        sp_res = await asyncio.to_thread(reconcile_standard_name_source_paths)
+        logger.info(
+            "run_sn_pools: --only attach — %d HAS_STANDARD_NAME edge(s) "
+            "materialized, %d dropped on unit disagreement, %d source_paths "
+            "scalar(s) reconciled",
+            edge_res.get("edges_created", 0),
+            edge_res.get("pairs_dropped", 0),
+            sp_res.get("names_reconciled", 0),
+        )
+        summary.stopped_at = datetime.now(UTC)
+        summary.sources_reconciled = edge_res.get("edges_created", 0)
+        summary.stop_reason = "completed"
+        return summary
 
     if stop_event is None:
         stop_event = asyncio.Event()
@@ -1011,6 +1039,27 @@ async def run_sn_pools(
                 cocos_result.get("scalars_set", 0),
                 cocos_result.get("edges_created", 0),
                 cocos_result.get("convention"),
+            )
+
+        # Materialize the DD-side HAS_STANDARD_NAME edge from per-source
+        # provenance, so a name reaches every DD path its provenance asserts —
+        # not just the one source that seeded it. Gated on DD-eligibility and
+        # units_agree; unit-disagreeing pairs are dropped and logged to the
+        # unit-curation triage. Runs BEFORE the source_paths reconcile so the
+        # scalar picks up the new edges the same run. Idempotent.
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_standard_name_dd_edges,
+        )
+
+        dd_edge_result = await asyncio.to_thread(reconcile_standard_name_dd_edges)
+        if dd_edge_result.get("edges_created", 0) or dd_edge_result.get(
+            "pairs_dropped", 0
+        ):
+            logger.info(
+                "run_sn_pools: DD-edge reconcile — %d HAS_STANDARD_NAME edge(s) "
+                "materialized, %d pair(s) dropped on unit disagreement",
+                dd_edge_result.get("edges_created", 0),
+                dd_edge_result.get("pairs_dropped", 0),
             )
 
         # Materialize the denormalised source_paths scalar from live edges, so a

@@ -7241,6 +7241,107 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
     return {"names_reconciled": len(updates)}
 
 
+def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
+    """Materialize the DD-side ``HAS_STANDARD_NAME`` edge from provenance.
+
+    The ``(:IMASNode)-[:HAS_STANDARD_NAME]->(:StandardName)`` edge is the
+    codex-internal 1-hop navigation index over the DD: given a name, every DD
+    path that realizes it; given a path, its canonical name. It was written
+    imperatively — one edge per name, to the single representative source that
+    seeded it (``create_nodes``). When consolidation collapses N same-concept
+    DD sources into one name, the other N-1 keep their
+    ``PRODUCED_NAME``/``FROM_DD_PATH`` provenance but never receive a DD-side
+    edge, so the index reaches only a fraction of the paths the provenance
+    already asserts.
+
+    This makes the edge what it structurally is — a materialized projection of
+    the per-source provenance — and reconciles it, symmetric with
+    :func:`reconcile_standard_name_source_paths` on the SN-side scalar. For
+    every ``(s)-[:PRODUCED_NAME]->(sn)`` on a non-terminal name where
+    ``(s)-[:FROM_DD_PATH]->(dd)`` and ``dd`` is SN-eligible
+    (``node_category ∈ SN_SOURCE_CATEGORIES``), MERGE the edge — unless the DD
+    path carries a *known* unit that ``units_agree`` rejects.
+
+    **Unit gate (drop-and-triage).** A pair is dropped only on a *known*
+    disagreement: the DD path has a ``HAS_UNIT`` edge whose unit canonically
+    conflicts with the name's. That means a wrong name or a wrong source, not
+    an edge to force, so it is dropped and logged for the unit-curation triage.
+    A DD path with **no** unit edge is a DD-completeness gap (nothing to
+    disagree with), not an attachment defect — it is attached. This is exactly
+    the predicate the soundness invariant in ``test_sn_edge_integrity`` asserts
+    on the existing edges, so edge and invariant stay self-consistent.
+
+    Idempotent: the match excludes pairs already carrying the edge, so a second
+    run creates zero. Provenance stays the sole authority — no orphan edge is
+    ever authored for a node with no producing source.
+
+    Returns dict: {edges_created, pairs_dropped}.
+    """
+    from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+    from imas_codex.units.dd_unit_exceptions import units_agree
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+            WHERE NOT (sn.name_stage IN $terminal)
+            MATCH (s)-[:FROM_DD_PATH]->(dd:IMASNode)
+            WHERE dd.node_category IN $categories
+              AND NOT (dd)-[:HAS_STANDARD_NAME]->(sn)
+            OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+            RETURN DISTINCT dd.id AS dd_path, sn.id AS sn_id, sn.name AS name,
+                   sn.unit AS sn_unit, du.id AS dd_unit
+            """,
+            terminal=_TERMINAL_NAME_STAGES,
+            categories=list(SN_SOURCE_CATEGORIES),
+        )
+        attach: list[dict[str, str]] = []
+        dropped: list[dict[str, Any]] = []
+        for r in rows:
+            dd_unit = r["dd_unit"]
+            if dd_unit and not units_agree(r["sn_unit"], dd_unit, r["dd_path"]):
+                dropped.append(r)
+            else:
+                attach.append({"dd_path": r["dd_path"], "sn_id": r["sn_id"]})
+        if attach:
+            client.query(
+                """
+                UNWIND $pairs AS p
+                MATCH (dd:IMASNode {id: p.dd_path})
+                MATCH (sn:StandardName {id: p.sn_id})
+                MERGE (dd)-[:HAS_STANDARD_NAME]->(sn)
+                """,
+                pairs=attach,
+            )
+    finally:
+        if own:
+            client.close()
+
+    if attach:
+        logger.info(
+            "reconcile_standard_name_dd_edges: materialized %d HAS_STANDARD_NAME "
+            "edge(s) from provenance",
+            len(attach),
+        )
+    if dropped:
+        # Route unit-disagreeing pairs to the unit-curation triage: a
+        # disagreement is a wrong name or a wrong source, never an edge to
+        # force. Surface them (capped) so a curator can fix the name/source or
+        # record a DD-unit-bug exception in dd_unit_exceptions.yaml.
+        logger.warning(
+            "reconcile_standard_name_dd_edges: dropped %d provenance pair(s) on "
+            "SN↔DD unit disagreement (route to unit-curation triage). First few: %s",
+            len(dropped),
+            "; ".join(
+                f"{d['name']}({d['sn_unit']}) ↮ {d['dd_path']}({d['dd_unit']})"
+                for d in dropped[:10]
+            ),
+        )
+    return {"edges_created": len(attach), "pairs_dropped": len(dropped)}
+
+
 def reconcile_grammar_segments() -> dict[str, int]:
     """Realign each live name's grammar segment columns with its canonical id.
 

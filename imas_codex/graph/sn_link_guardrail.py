@@ -61,6 +61,64 @@ class SNLinkCounts:
         }
 
 
+#: The provenance pairs the DD-side ``HAS_STANDARD_NAME`` edge must project.
+#: Every ``(s)-[:PRODUCED_NAME]->(sn)`` on a non-terminal name whose source is
+#: composed from an SN-eligible DD path (``FROM_DD_PATH``) is a pair the edge
+#: is expected to materialize. Terminal stages (refined-away / given-up) are
+#: excluded — they legitimately trail incomplete edges.
+_TERMINAL_NAME_STAGES = ["superseded", "exhausted", "contested"]
+
+_PROJECTION_PAIRS_QUERY = """
+MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+WHERE NOT (sn.name_stage IN $terminal)
+MATCH (s)-[:FROM_DD_PATH]->(dd:IMASNode)
+WHERE dd.node_category IN $categories
+  AND NOT (dd)-[:HAS_STANDARD_NAME]->(sn)
+OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+RETURN DISTINCT dd.id AS dd_path, sn.name AS name, sn.unit AS sn_unit,
+       du.id AS dd_unit
+"""
+
+
+def missing_projection_edges(gc=None) -> list[dict]:
+    """Return provenance pairs that *should* carry an edge but don't.
+
+    The completeness oracle for the DD-side ``HAS_STANDARD_NAME`` projection:
+    an eligible, unit-agreeing provenance pair
+    (``PRODUCED_NAME`` + ``FROM_DD_PATH`` on an SN-eligible DD node) with no
+    materialized edge is drift the reconcile
+    (:func:`imas_codex.standard_names.graph_ops.reconcile_standard_name_dd_edges`)
+    is meant to erase. After a run this list must be empty.
+
+    A pair whose DD path carries a *known* unit that ``units_agree`` rejects is
+    excluded — those are intentionally dropped-and-triaged, not missing edges.
+    A DD path with no unit edge is attached (nothing to disagree with), so it
+    counts toward the projection here — symmetric with the reconcile gate.
+    """
+    from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.units.dd_unit_exceptions import units_agree
+
+    owns = gc is None
+    gc = gc or GraphClient()
+    try:
+        rows = gc.query(
+            _PROJECTION_PAIRS_QUERY,
+            terminal=_TERMINAL_NAME_STAGES,
+            categories=list(SN_SOURCE_CATEGORIES),
+        )
+    finally:
+        if owns:
+            gc.close()
+    return [
+        r
+        for r in rows
+        if not (
+            r["dd_unit"] and not units_agree(r["sn_unit"], r["dd_unit"], r["dd_path"])
+        )
+    ]
+
+
 def capture_sn_link_counts(gc=None) -> SNLinkCounts:
     """Snapshot the SN provenance-edge counts and dangling-link count.
 

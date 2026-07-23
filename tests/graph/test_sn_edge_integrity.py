@@ -150,6 +150,28 @@ class TestStandardNameEdgeIntegrity:
             "edge: " + "; ".join(f"{r['name']} → {r['stale']}" for r in rows)
         )
 
+    def test_dd_edge_is_complete_provenance_projection(self, gc):
+        """Every eligible, unit-agreeing provenance pair carries a DD-side edge.
+
+        The completeness half of the projection invariant (the soundness half
+        is ``test_dd_attachment_unit_agrees_with_name``): the DD-side
+        ``HAS_STANDARD_NAME`` edge is a materialized projection of the per-source
+        provenance (``PRODUCED_NAME`` + ``FROM_DD_PATH`` on an SN-eligible DD
+        node), reconciled every ``sn run`` by
+        ``reconcile_standard_name_dd_edges``. A pair that is provenance-derivable
+        and unit-agreeing but carries no edge is drift the reconcile must have
+        erased. Known unit disagreements are intentionally dropped-and-triaged,
+        so they are excluded by the oracle. After a run this must be empty.
+        """
+        from imas_codex.graph.sn_link_guardrail import missing_projection_edges
+
+        missing = missing_projection_edges(gc)
+        assert not missing, (
+            f"{len(missing)} eligible provenance pair(s) missing a "
+            "HAS_STANDARD_NAME edge (run `sn run --only attach` to reconcile): "
+            + "; ".join(f"{r['name']} ↮ {r['dd_path']}" for r in missing[:25])
+        )
+
     def test_dd_attachment_unit_agrees_with_name(self, gc):
         """No SN attaches to a DD path whose (known) unit canonically disagrees.
 

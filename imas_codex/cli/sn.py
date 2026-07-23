@@ -685,6 +685,7 @@ def _run_sn_cmd(
             flush=flush,
             skip_review=skip_review,
             skip_generate=skip_generate,
+            attach_only=(only == "attach"),
         )
         return {"summary": summary}
 
@@ -1306,6 +1307,7 @@ def _reject_unscoped_accepted_reset(
     type=click.Choice(
         [
             "reconcile",
+            "attach",
             "extract",
             "compose",
             "validate",
@@ -1319,7 +1321,9 @@ def _reject_unscoped_accepted_reset(
     default=None,
     help=(
         "Run only this phase — all others are skipped. "
-        "extract/compose/validate/consolidate/persist select the generate phase."
+        "extract/compose/validate/consolidate/persist select the generate phase. "
+        "attach backfills the DD-side HAS_STANDARD_NAME edge from provenance "
+        "(no LLM, no pools)."
     ),
 )
 @click.option(
