@@ -57,181 +57,262 @@
         <!-- worked example box -->
         <rect x="12" y="182" width="696" height="100" fill="#fbfbfb" stroke="#d0d0d0" stroke-width="1"/>
         <text x="26" y="206" font-size="13" font-weight="600" fill="#1a1a1a">Worked example — ion_atomic_number (unit = 1)</text>
-        <text x="26" y="230" font-size="13" fill="#333">scalar <tspan font-family="ui-monospace,monospace">source_paths</tspan>:</text>
+        <text x="26" y="230" font-size="13" fill="#333">producing sources <tspan font-family="ui-monospace,monospace">(PRODUCED_NAME)</tspan>:</text>
         <rect x="150" y="217" width="60" height="20" fill="#e7eef3" stroke="#41668a" stroke-width="1"/>
         <text x="180" y="231" font-size="12" text-anchor="middle" fill="#1a1a1a">85</text>
-        <text x="230" y="230" font-size="13" fill="#333">live DD edges:</text>
-        <rect x="340" y="217" width="60" height="20" fill="#fff" stroke="#a33" stroke-width="1"/>
-        <text x="370" y="231" font-size="12" text-anchor="middle" fill="#a33" font-weight="600">0</text>
-        <text x="420" y="231" font-size="12" fill="#666">→ the concept reaches none of its 85 DD paths</text>
+        <text x="248" y="230" font-size="13" fill="#333">materialized DD edges:</text>
+        <rect x="400" y="217" width="60" height="20" fill="#fff" stroke="#a33" stroke-width="1"/>
+        <text x="430" y="231" font-size="12" text-anchor="middle" fill="#a33" font-weight="600">0</text>
+        <text x="480" y="231" font-size="12" fill="#666">→ reaches none of its 85 paths</text>
         <text x="26" y="258" font-size="12.5" fill="#555">atomic_mass 69 → 12 · radial_coordinate_of_measurement_position 43 → 1 · ion_charge 39 → 0 …</text>
-        <text x="26" y="276" font-size="12" fill="#777">source_paths = scalar mirror of intended attachment · HAS_STANDARD_NAME = live edge (truth)</text>
+        <text x="26" y="276" font-size="12" fill="#777">every producing source has a live FROM_DD_PATH — the DD-side HAS_STANDARD_NAME edge was simply never written</text>
       </svg>
       <figcaption style="font-size:13px;color:#555;margin-top:.4rem;">
-        Live <code>codex</code> graph, 2026-07-23. The scalar mirror already records thousands of
-        attachments the graph never materialized as edges — before we discover a single new one.
+        Live <code>codex</code> graph, 2026-07-23. The per-source provenance
+        (<code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code>) already asserts every attachment;
+        the denormalized DD-side edge was only ever written for the one representative source per name.
       </figcaption>
     </figure>
 
     <p>
-      <strong>Lineage.</strong> This plan is the sibling axis to
-      <a href="/imas-codex/sn-dd-unit-curation.html">sn-dd-unit-curation</a> (followup
-      <code>f-ddhu-004</code> from the shipped
-      <a href="/imas-codex/dd-horizon-update.html">dd-horizon-update</a>). That plan builds the
-      order-insensitive <code>units_agree</code> canonical-unit normalizer
-      (<code>W.m^-2 ≡ m^-2.W</code>); this plan <em>consumes</em> it as the safety gate for
-      every backfilled edge. It was originally sketched as <code>f-sdu-005</code> inside the
-      unit-curation campaign and is promoted here to its own plan.
+      <strong>Lineage — dependency satisfied.</strong> The <code>units_agree</code> gate this plan
+      relies on has <strong>shipped</strong>: the unit-curation axis (followup <code>f-ddhu-004</code>
+      from <a href="/imas-codex/dd-horizon-update.html">dd-horizon-update</a>) landed as
+      <code>7d9648e7</code> (<code>imas_codex/units/dd_unit_exceptions.py</code> —
+      <code>units_agree(sn_unit, dd_unit, dd_path)</code> over the ISN <code>canonical_unit</code>
+      authority + a path-globbed DD-unit-bug exception record), with the HAS_UNIT self-heal
+      (<code>30ba5053</code>) and the source_paths↔edge reconcile (<code>b955da37</code>). This plan
+      is therefore <strong>unblocked</strong>. It was originally sketched as <code>f-sdu-005</code>
+      inside that campaign and is promoted here to its own plan.
     </p>
 
-    <h2 id="s2">§2 — Two mechanisms, one gate</h2>
-    <p>The backfill has two distinct populations of missing edge, with very different risk:</p>
+    <h2 id="s1b">§1b — Root cause: the DD-side edge was written for the birth source only</h2>
+    <p>
+      The generate write path (<code>create_nodes</code>, <code>graph_ops.py:2884</code>) MERGEs
+      <strong>exactly one</strong> <code>HAS_STANDARD_NAME</code> edge per name record — to the single
+      representative <code>source_id</code>. When consolidation collapses N same-concept DD sources
+      into one <code>StandardName</code>, the other N−1 keep their
+      <code>PRODUCED_NAME</code>/<code>FROM_DD_PATH</code> provenance but never receive a DD-side edge,
+      and nothing downstream backfills them (refine migrates the one edge, prune deletes, the source
+      reconcile only touches <code>FROM_DD_PATH</code>). The gap is provenance-derivable and exact:
+    </p>
+    <pre style="font-size:12.5px;overflow-x:auto;background:#fbfbfb;border:1px solid #e0e0e0;padding:.7rem;">MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+WHERE sn.name_stage='accepted'
+MATCH (s)-[:FROM_DD_PATH]->(dd:IMASNode)
+WHERE NOT (dd)-[:HAS_STANDARD_NAME]->(sn)
+RETURN count(*)  -- 3423 edges · 1522 names · 3348 DD nodes</pre>
+    <p>
+      The tell is an <strong>asymmetry</strong>: the SN-side <code>source_paths</code> scalar is
+      already reconciled <em>from</em> provenance (<code>reconcile_standard_name_source_paths</code>
+      unions <code>PRODUCED_NAME</code> source ids, <code>graph_ops.py:7203</code>) — which is why it
+      correctly reads 85. The DD-side <code>HAS_STANDARD_NAME</code> edge is the one projection that
+      was left <em>imperative</em> and incomplete.
+    </p>
+
+    <h2 id="s1c">§1c — Two catalogs, and the scalar-vs-edge split</h2>
+    <p>
+      "Catalog" is ambiguous — there are two, and the DD↔path mapping lives in one but not the other:
+    </p>
     <ul>
-      <li>
-        <strong>Mechanism 1 — Realize (deterministic, $0).</strong> For every accepted name,
-        <code>source_paths</code> already names DD paths that carry no
-        <code>HAS_STANDARD_NAME</code> edge (3423 edges / 1522 names). These are <em>already
-        asserted</em> attachments the write path dropped. Materialize them — but re-gate each
-        entry through DD-eligibility (<code>node_category ∈ SN_SOURCE_CATEGORIES</code>) and
-        <code>units_agree</code>, so a stale or wrong scalar entry is rejected rather than
-        trusted blindly. No LLM, no review.
-      </li>
-      <li>
-        <strong>Mechanism 2 — Fan-out (discovery).</strong> Beyond what
-        <code>source_paths</code> ever recorded, an accepted name should attach to <em>every</em>
-        DD-eligible node that is the same quantity — the "<code>ion_atomic_number → all z_n</code>"
-        case, including paths never seen during generation. This needs a positive match predicate,
-        not just a unit check: <code>units_agree</code> alone would attach every dimensionless
-        integer to <code>ion_atomic_number</code>. Candidate predicates are the open design
-        question in §4.
-      </li>
+      <li><strong>Codex graph catalog</strong> — what the SPA / MCP <code>fetch_standard_names</code>
+        serves. It <em>does</em> carry dd-paths: <code>_format_fetch_report</code>
+        (<code>sn_tools.py:270</code>) prints <code>sn.source_paths</code> as <code>dd_paths</code>.</li>
+      <li><strong>Exported ISN vocabulary catalog</strong> — the YAML shipped to
+        <code>imas-standard-names</code>. Pure vocabulary; <code>_graph_node_to_entry_dict</code>
+        (<code>export.py:561</code>) emits <code>name, description, documentation, kind, unit, status,
+        links</code> + ISN grammatical provenance and <em>explicitly drops</em>
+        <code>source_paths</code>/<code>dd_paths</code> (<code>export.py:589</code>); the ISN entry
+        schema has no path field. The DD↔path applicability never leaves codex.</li>
     </ul>
     <p>
-      <code>units_agree</code> is the shared floor for both: <strong>no edge is written unless the
-      DD-path unit and the SN unit reconcile under the canonical-unit normalizer.</strong> An edge
-      that would violate <code>units_agree</code> is a signal of a wrong name or a wrong source, not
-      an edge to force.
+      <strong>The subtlety that hides the bug:</strong> the SPA's dd-path list is driven by the
+      <code>source_paths</code> <em>scalar</em>, not the <code>HAS_STANDARD_NAME</code> <em>edges</em>.
+      The scalar is provenance-reconciled, so it correctly shows all 85 paths for
+      <code>ion_atomic_number</code> — the forward view looks complete. The missing edges instead break
+      every <strong>edge-dependent</strong> view: <code>source_ids</code>/<code>source_ids_names</code> in
+      that same report (collected via <code>(src)-[:HAS_STANDARD_NAME]-&gt;(sn)</code>,
+      <code>search.py:658</code>), the reverse DD-path → standard-name lookup
+      (<code>search.py:888</code>), <code>find_related</code>, coverage, and graph-RAG traversal — all
+      empty or wrong for the 1522 affected names. So <code>HAS_STANDARD_NAME</code> is the
+      codex-internal 1-hop index the edge-walking consumers depend on; keeping it consistent with the
+      scalar (both from one authority) is the whole job. The ISN export is unaffected either way.
     </p>
 
-    <h2 id="s3">§3 — Implementation approach (to be locked in §4)</h2>
+    <h2 id="s2">§2 — Design: one authority, self-healing projections</h2>
     <p>
-      The strong prior is a single <strong>idempotent reconcile sub-step</strong> that runs on every
-      <code>sn run</code> post-drain (alongside the existing source-path / vocab-gap reconcile in
-      <code>loop.py</code>), plus an <code>sn run --only attach</code> entry point for a one-shot
-      backfill of the current backlog. Idempotency is mandatory — the SN pipeline reconciles
-      continuously, so the pass must be safe to re-run and must converge (running twice writes zero
-      new edges). It mirrors the existing <code>reconcile_standard_name_sources</code> /
-      source-path reconcile pattern in <code>graph_ops.py</code> rather than adding a one-off
-      migration script (banned per AGENTS.md).
+      The root cause is that <code>HAS_STANDARD_NAME</code> was treated as <em>authored truth</em>,
+      written imperatively one-edge-per-name. The fix is to treat it as what it structurally is — a
+      <strong>materialized projection</strong> of the per-source provenance — and reconcile it, exactly
+      as <code>source_paths</code> is already reconciled. This gives a single authority and two
+      self-healing views, so the 3423-edge drift becomes structurally unrepresentable.
     </p>
-    <p>Concretely, per accepted (and derived-parent-accepted) StandardName:</p>
+    <table style="border-collapse:collapse;font-size:13.5px;margin:.5rem 0 1rem;">
+      <thead><tr style="border-bottom:2px solid #ccc;text-align:left;">
+        <th style="padding:.35rem .8rem .35rem 0;">Element</th><th style="padding:.35rem;">Role</th></tr></thead>
+      <tbody>
+      <tr style="border-bottom:1px solid #eee;"><td style="padding:.35rem .8rem .35rem 0;"><code>FROM_DD_PATH</code> + <code>PRODUCED_NAME</code></td>
+        <td style="padding:.35rem;"><strong>Authority</strong> — per-source provenance; the pipeline writes it; already complete (85/85 for <code>ion_atomic_number</code>).</td></tr>
+      <tr style="border-bottom:1px solid #eee;"><td style="padding:.35rem .8rem .35rem 0;"><code>HAS_STANDARD_NAME</code></td>
+        <td style="padding:.35rem;"><strong>Materialized view</strong> — reconciled each run from the 2-hop, <code>units_agree</code>-gated; the codex-internal 1-hop index for MCP / graph-RAG / coverage.</td></tr>
+      <tr><td style="padding:.35rem .8rem .35rem 0;"><code>source_paths</code> scalar</td>
+        <td style="padding:.35rem;"><strong>Materialized view</strong> — SN-side, already reconciled from provenance (<code>b955da37</code>).</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The two projections are <strong>not redundant with the authority</strong> — they are denormalized
+      indexes it would be expensive to recompute per query. The authority is not redundant with them —
+      it is the only per-source record. What was wrong was maintaining one projection by hand.
+    </p>
+    <p><strong>Two populations of missing edge, one gate:</strong></p>
+    <ul>
+      <li>
+        <strong>Provenance backfill (the 3423 — deterministic, $0).</strong> For every
+        <code>(s)-[:PRODUCED_NAME]-&gt;(sn)</code> where <code>(s)-[:FROM_DD_PATH]-&gt;(dd)</code>,
+        MERGE <code>(dd)-[:HAS_STANDARD_NAME]-&gt;(sn)</code> — gated on DD-eligibility
+        (<code>node_category ∈ SN_SOURCE_CATEGORIES</code>) and <code>units_agree</code>. A pair whose
+        units disagree is <em>dropped and logged</em> to the unit-curation triage, never forced: a
+        disagreement means a wrong name or a wrong source, not an edge to write. No LLM, no review.
+      </li>
+      <li>
+        <strong>True discovery (measure first, maybe empty).</strong> A DD-eligible node that is the
+        same quantity but has <em>no producing source</em> (never extracted, or extracted to a different
+        name) is invisible to the provenance backfill. But most siblings <em>are</em> their own source
+        (every <code>z_n</code> path is a <code>StandardNameSource</code> that composed to
+        <code>ion_atomic_number</code>), so the "→ all z_n" case is largely served by the backfill
+        already. <strong>Measure the residual before building any predicate.</strong> If a genuine gap
+        exists, close it by <strong>extracting a source</strong> for that node — so provenance stays the
+        single authority — never by authoring an orphan <code>HAS_STANDARD_NAME</code> edge with no
+        source behind it.
+      </li>
+    </ul>
+
+    <h2 id="s3">§3 — Implementation approach</h2>
+    <p>
+      A single <strong>idempotent reconcile sub-step</strong> on every <code>sn run</code> post-drain
+      (right beside <code>reconcile_standard_name_source_paths</code> in <code>loop.py</code>), plus an
+      <code>sn run --only attach</code> entry point for a one-shot backfill of the current backlog.
+      Idempotency is mandatory — a second run writes zero new edges. It mirrors the existing reconcile
+      pattern in <code>graph_ops.py</code>; <strong>no</strong> one-off migration script (banned per
+      AGENTS.md).
+    </p>
     <ol>
-      <li><strong>Realize pass</strong> — MERGE an edge for each <code>source_paths</code> entry that
-        resolves to a live, DD-eligible <code>IMASNode</code> whose <code>HAS_UNIT</code> target
-        <code>units_agree</code> with <code>sn.unit</code>. Drop (and log) entries that fail either
-        gate; feed genuine failures to the unit-curation triage.</li>
-      <li><strong>Fan-out pass</strong> — for each name, enumerate DD-eligible candidate nodes by the
-        §4 match predicate, gate on <code>units_agree</code>, and attach. Emit a count of newly
-        discovered edges per name so over-attachment is visible.</li>
-      <li><strong>Reconcile the scalar</strong> — after edges are authoritative, re-derive
-        <code>source_paths</code> from the live edges (the existing scalar-from-edges reconcile), so
-        scalar and graph agree in both directions.</li>
-      <li><strong>Guardrail</strong> — extend the SN-link integrity test: edges non-decreasing across
-        a run, zero dangling, and every <code>HAS_STANDARD_NAME</code> edge satisfies
-        <code>units_agree</code>. This is the acceptance oracle.</li>
+      <li><strong>Materialize the edge</strong> — one Cypher pass: MERGE
+        <code>(dd)-[:HAS_STANDARD_NAME]-&gt;(sn)</code> for every provenance pair on a non-terminal name,
+        skipping DD-ineligible nodes and dropping (with a logged reason) any pair failing
+        <code>units_agree</code>.</li>
+      <li><strong>Reconcile the scalar</strong> — the existing
+        <code>reconcile_standard_name_source_paths</code> then runs unchanged; edge and scalar agree by
+        construction because both derive from the same authority.</li>
+      <li><strong>Guardrail (acceptance oracle)</strong> — extend the SN-link integrity test: after a
+        run, <code>HAS_STANDARD_NAME</code> equals the eligible ∩ units_agree provenance projection,
+        edges are non-decreasing, zero dangling, and every edge satisfies <code>units_agree</code>.</li>
+      <li><strong>Measure discovery</strong> — record the count of DD-eligible, same-unit nodes with no
+        producing source, to decide whether the discovery axis is worth any further work.</li>
     </ol>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
       <h2><span class="sec">§</span> Decisions</h2>
 
-      <div class="r-dec" data-key="fanout-match-predicate" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What positive-match predicate gates Mechanism-2 fan-out (beyond <code>units_agree</code>)?</p>
+      <div class="r-dec" data-key="edge-model" data-choice="derived-projection" data-by="Simon McIntosh" data-when="2026-07-23">
+        <p class="r-dec-q">Is <code>HAS_STANDARD_NAME</code> authored truth or a derived projection?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="concept-key">Deterministic concept key (shared physical_base + subject/grammar signature + units_agree) — high precision, may miss synonyms</button>
-          <button class="r-opt" data-value="embedding">Embedding similarity ≥ threshold between SN.description and IMASNode.description + units_agree — high recall, risk of false edges</button>
-          <button class="r-opt" data-value="both">Both — deterministic key auto-attaches; embedding-only matches flagged low-confidence for review</button>
-          <button class="r-opt" data-value="realize-only">Ship Mechanism 1 only for now; defer fan-out to a follow-on once units_agree lands</button>
+          <button class="r-opt" data-value="derived-projection">Derived projection of provenance (<code>FROM_DD_PATH</code>+<code>PRODUCED_NAME</code>), reconciled each run, units_agree-gated</button>
+          <button class="r-opt" data-value="authored">Authored per-name at create time (the current, broken imperative write)</button>
+          <button class="r-opt" data-value="drop-it">Drop the edge entirely; make every consumer traverse the 2-hop provenance</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">LOCKED. The edge is structurally a 1-hop denormalization of the provenance 2-hop; the root-cause bug was maintaining it by hand. Reconcile it from the authority (symmetric with <code>source_paths</code>). Not dropped: consumers (MCP, graph-RAG, coverage) want 1-hop, and <code>StandardNameSource</code> is transient scaffolding you don't want on the query path. Not exported to the ISNC catalog, so this is a codex-internal index only.</p>
       </div>
 
-      <div class="r-dec" data-key="dimensionless-guard" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How do we prevent over-attachment for dimensionless / weak-unit concepts (<code>unit = 1</code>), where <code>units_agree</code> is nearly vacuous?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="require-concept">Require a non-unit concept match for any unit=1 name (never attach on units alone)</button>
-          <button class="r-opt" data-value="review-gate">Route all unit=1 fan-out candidates through review rather than auto-attach</button>
-          <button class="r-opt" data-value="realize-only-dimensionless">Realize-pass only for unit=1 names (trust source_paths, no fan-out)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-
-      <div class="r-dec" data-key="where-it-runs" data-choice="" data-by="" data-when="">
+      <div class="r-dec" data-key="where-it-runs" data-choice="reconcile-substep" data-by="Simon McIntosh" data-when="2026-07-23">
         <p class="r-dec-q">Where does the backfill live?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="reconcile-substep">Idempotent post-drain reconcile sub-step in <code>sn run</code> + an <code>sn run --only attach</code> entry point</button>
-          <button class="r-opt" data-value="extend-existing">Fold into the existing <code>reconcile_standard_name_sources</code> pass</button>
+          <button class="r-opt" data-value="reconcile-substep">Idempotent post-drain reconcile sub-step in <code>sn run</code> (beside <code>reconcile_standard_name_source_paths</code>) + an <code>sn run --only attach</code> entry point</button>
           <button class="r-opt" data-value="oneshot-cli">Standalone <code>sn</code> command run manually</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">LOCKED. Mirrors the existing scalar reconcile; self-heals every run so any later-composed source is picked up automatically. No migration script (banned).</p>
       </div>
 
-      <div class="r-dec" data-key="realize-trust" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Does the Realize pass trust <code>source_paths</code>, or re-gate every entry?</p>
+      <div class="r-dec" data-key="units-disagree" data-choice="drop-and-triage" data-by="Simon McIntosh" data-when="2026-07-23">
+        <p class="r-dec-q">What happens when a provenance pair's DD unit and SN unit disagree?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="regate-always">Re-gate every entry through eligibility + units_agree; drop + log failures for unit-curation triage</button>
-          <button class="r-opt" data-value="trust-scalar">Trust the scalar (it was written by the pipeline) and MERGE directly</button>
+          <button class="r-opt" data-value="drop-and-triage">Drop the edge, log the reason, route to the unit-curation triage — a disagreement is a wrong name/source, not an edge to force</button>
+          <button class="r-opt" data-value="attach-anyway">Attach regardless (units_agree advisory only)</button>
         </p>
-        <p class="r-dec-rat"></p>
+        <p class="r-dec-rat">LOCKED. units_agree is the safety gate; violating it surfaces a real defect rather than propagating it into the index.</p>
+      </div>
+
+      <div class="r-dec" data-key="discovery-axis" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Is a true discovery axis (DD-eligible nodes with no producing source) worth building?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="measure-first">Measure the residual after the provenance backfill; decide then</button>
+          <button class="r-opt" data-value="extract-sources">If a real gap exists, close it by extracting sources (provenance stays sole authority), never orphan edges</button>
+          <button class="r-opt" data-value="skip">Assume the backfill covers it (most siblings are their own source) and skip</button>
+        </p>
+        <p class="r-dec-rat">Open — gated on the measured residual from §3 step 4. Whatever the answer, no orphan <code>HAS_STANDARD_NAME</code> edge is authored without a source behind it.</p>
       </div>
     </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
       <h2><span class="sec">§</span> Followups</h2>
       <article class="r-fu" data-id="f-sdac-001" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship sn-dd-attachment-completeness §3" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Ship the deterministic Realize pass (3423 recoverable edges)</h4>
-        <div class="r-fu-body"><p>The cheapest, lowest-risk win — materialize the <code>HAS_STANDARD_NAME</code> edges that <code>source_paths</code> already asserts, gated on DD-eligibility + <code>units_agree</code>. Blocked only on the <code>units_agree</code> normalizer from <a href="/imas-codex/sn-dd-unit-curation.html">sn-dd-unit-curation</a>; if that lands first this is a fast follow. Lock the §4 decisions <code>where-it-runs</code> and <code>realize-trust</code> before starting.</p></div>
+        <h4 class="r-fu-title">Reconcile HAS_STANDARD_NAME from provenance (3423 derivable edges)</h4>
+        <div class="r-fu-body"><p>Materialize the DD-side edge as a projection of the per-source provenance (<code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code>), gated on DD-eligibility + <code>units_agree</code> — symmetric with the existing <code>source_paths</code> reconcile. The <code>units_agree</code> gate has already shipped (<code>7d9648e7</code>). Decisions <code>edge-model</code>, <code>where-it-runs</code>, and <code>units-disagree</code> are locked; honour them.</p></div>
         <pre class="r-fu-prompt">Project: imas-codex
 Plan:    sn-dd-attachment-completeness (http://localhost:8765/imas-codex/sn-dd-attachment-completeness.html)
-Section: §3 — Realize pass
+Section: §3 — provenance backfill
 Tier:    opus
 
 Context
-  Only 369/2379 accepted StandardNames (15.5%) carry any HAS_STANDARD_NAME edge,
-  yet 1522 accepted names already record source_paths entries with no matching
-  live edge — 3423 recoverable edges, $0, deterministic. This is the Mechanism-1
-  Realize pass. The units_agree canonical-unit normalizer is built in the sibling
-  plan sn-dd-unit-curation (dd-horizon-update f-ddhu-004); confirm it exists (or
-  build a minimal order-insensitive comparator) before writing edges. Honour the
-  Locked decisions shown live above this brief.
+  Only 369/2379 accepted StandardNames (15.5%) carry any HAS_STANDARD_NAME edge.
+  The root cause: create_nodes writes ONE edge per name (the birth source_id), so
+  consolidated same-concept siblings keep their PRODUCED_NAME/FROM_DD_PATH
+  provenance but never get a DD-side edge. 3423 edges across 1522 names are
+  provenance-derivable-but-missing:
+    MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+    WHERE sn.name_stage='accepted'
+    MATCH (s)-[:FROM_DD_PATH]->(dd:IMASNode)
+    WHERE NOT (dd)-[:HAS_STANDARD_NAME]->(sn) RETURN count(*)
+  The edge is a materialized projection, NOT authored truth — reconcile it from
+  provenance exactly as reconcile_standard_name_source_paths does the scalar. The
+  units_agree gate shipped in 7d9648e7. Honour the Locked decisions shown live
+  above this brief.
 
 State to read  (code/data — not the plan)
-  imas_codex/standard_names/graph_ops.py (_write_standard_name_edges ~L1410;
-    reconcile_standard_name_sources ~L6775; source_paths scalar reconcile added
-    in b955da37)
-  imas_codex/standard_names/source_paths.py (encode/parse/normalize source paths)
-  imas_codex/standard_names/loop.py (post-drain reconcile wiring ~L928)
+  imas_codex/standard_names/graph_ops.py
+    - create_nodes HAS_STANDARD_NAME write ~L2884 (the one-edge-per-name root cause)
+    - reconcile_standard_name_source_paths ~L7167 (the projection pattern to mirror)
+    - reconcile_standard_name_sources ~L6775
+  imas_codex/standard_names/loop.py (post-drain reconcile wiring; add beside the
+    source_paths reconcile)
   imas_codex/core/node_categories.py (SN_SOURCE_CATEGORIES = DD-eligibility)
+  imas_codex/units/dd_unit_exceptions.py (units_agree(sn_unit, dd_unit, dd_path))
   imas_codex/graph/sn_link_guardrail.py + the SN-link -m graph guardrail test
-  imas_codex/units/ (unit parse/normalize for units_agree)
+  imas_codex/standard_names/search.py (edge-dependent consumers: source_ids ~L658,
+    reverse path->name ~L888) — the views this repairs
 
-Scope locks / constraints  (non-decision)
-  - Idempotent + convergent: a second run writes zero new edges. No migration
-    script (imas_codex/scripts/migrate_*.py is banned) — inline reconcile only.
-  - Every backfilled edge MUST satisfy units_agree AND DD-eligibility; drop +
-    log entries that fail either gate (feed genuine unit failures to the
-    sn-dd-unit-curation triage). Never force an edge past units_agree.
-  - Realize pass only in this followup — fan-out (Mechanism 2) is a separate
-    decision/followup. Do not auto-attach discovered nodes here.
+Scope locks / constraints  (non-decision, from locked decisions)
+  - Edge is a DERIVED PROJECTION of provenance. Do NOT hand-author edges; reconcile
+    them. Idempotent + convergent: a second run writes zero new edges. No migration
+    script (banned) — inline reconcile only.
+  - Gate every pair on DD-eligibility AND units_agree. A units-disagreeing pair is
+    DROPPED + logged to the unit-curation triage, never forced.
+  - Provenance stays the sole authority: do NOT create orphan edges for nodes with
+    no producing source. Discovery (nodes with no source) is a separate, measure-first
+    followup — only report its residual count here, attach nothing.
   - Derived-parent-accepted names are in scope alongside pipeline-accepted.
 
 Done-when
-  1. Reconcile sub-step (+ `sn run --only attach` entry) merges the asserted,
-     gated edges idempotently; edge count rises toward ~3800+, re-run is a no-op.
-  2. source_paths reconciled from the now-authoritative edges (both directions agree).
-  3. SN-link guardrail extended: HAS_STANDARD_NAME non-decreasing, 0 dangling,
-     every edge satisfies units_agree; -m graph test committed + green.
-  4. Post-backfill coverage recorded (accepted-with-DD-edge % before/after).
-  5. Followup written into the plan + this one resolved.</pre>
+  1. Reconcile sub-step (+ `sn run --only attach` entry) merges the eligible,
+     units_agree provenance edges idempotently; edge count rises ~2427 -> ~5850,
+     re-run is a no-op.
+  2. source_paths reconcile still green; edge and scalar agree by construction.
+  3. SN-link guardrail extended: HAS_STANDARD_NAME == the eligible-and-agreeing
+     provenance projection, non-decreasing, 0 dangling, every edge satisfies
+     units_agree; -m graph test committed + green.
+  4. Coverage recorded before/after (accepted-with-DD-edge %); source_ids and
+     reverse path->name views verified non-empty for a sampled affected name.
+  5. Discovery residual (DD-eligible same-unit nodes with no producing source)
+     counted and written into the plan; followup written + this one resolved.</pre>
       </article>
     </section>
 
