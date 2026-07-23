@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -200,6 +200,33 @@ Done-when
   3. test_no_cocos_half_state green.
   4. Decisions locked with rationale; outcomes recorded per axis; this followup resolved.</pre>
     <p class="r-fu-outcome">ALL FOUR -m graph gates green (verified live + as a set, 2026-07-23). Axis A (d6658150): live data reframed it — all 2824 text-no-vector nodes are non-embeddable categories (0 embeddable; 'reset to refined' void); generation already category-gated, so cleared the legacy cruft via a re-runnable self-healing build pass + backfilled 198 identifier embedding_text (persistence bug fixed) + scoped the gate to EMBEDDABLE_CATEGORIES. Axis C (d6658150, groom per lock): build clear pass now clears cocos_label_source alongside cocos_transformation_type + groom_cocos_half_state wired in; 20 removed-node half-states groomed. Axis B (7a6eb498 + 369b91c4, triage-then-regen): root cause was coalesce('',existing) returning '' (clobber) + seeders emitting '' — fixed with nullIf at both chokepoints + None from the --focus reseeder; SNSource 203→0, SN 14→0, embedded-no-vector 12→0, ~$0.19. SN suite + sibling graph classes green. NOTE: an unrelated, uncommitted imas-standard-names pin bump (2ee68c7→a9c02d0 in pyproject.toml/uv.lock) is present in the worktree — NOT authored by this plan's work and left untouched for the parallel SN-campaign session to own; my commits are pathspec-scoped and exclude it.</p>
+    </article>
+<article class="r-fu" data-id="f-ddgh-002" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-23T10:23:11+00:00" data-recommends-skill="" data-resolved-at="2026-07-23T10:23:59+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Close the SN HAS_COCOS gap flagged at ship — link COCOS-dependent names to COCOS 17</h4>
+    <div class="r-fu-body"><p>The ship report flagged that <code>StandardName</code> stored the <code>cocos_transformation_type</code> scalar (736 names) but had <strong>0</strong> <code>HAS_COCOS</code> edges to the COCOS singleton. Root cause: the edge creator in <code>write_standard_names</code> was gated on a <code>cocos</code> integer that the DD source resolved (<code>cocos_version=17</code>) but never threaded onto the persisted name. Close it in code (future names) + backfill (existing), keeping COCOS-independent names unlinked.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    dd-graph-hygiene
+Section: SN HAS_COCOS closure (post-ship extension)
+Tier:    sonnet
+
+Context
+  StandardName stored cocos_transformation_type (736) but 0 HAS_COCOS edges;
+  the catalog is uniformly COCOS 17 (current DDv4). Link COCOS-dependent names
+  (cocos_transformation_type set) to the COCOS 17 singleton; leave COCOS-
+  independent names unlinked.
+
+State to read
+  imas_codex/standard_names/graph_ops.py  write_standard_names (cocos_batch/HAS_COCOS creator; guard)
+  imas_codex/standard_names/sources/dd.py  DD-version COCOS resolution (dv.cocos, HAS_COCOS)
+  imas_codex/standard_names/loop.py        post-drain reconcile block
+
+Done-when
+  1. write_standard_names defaults a COCOS-dependent name&#x27;s cocos integer to the
+     current DD convention so the existing HAS_COCOS creator fires.
+  2. reconcile_standard_name_cocos_links (idempotent) sets cocos + HAS_COCOS for
+     every COCOS-dependent name missing it, wired into sn run reconcile.
+  3. Existing names backfilled; graph invariant test green; SN suite green.</pre>
+    <p class="r-fu-outcome">CLOSED (commits 170b6a98 + ee0cece8). Root cause: the HAS_COCOS creator in write_standard_names was gated on a cocos integer that sources/dd.py resolved (cocos_version=17) but never threaded onto the persisted name — 736 COCOS-dependent SNs had the cocos_transformation_type scalar but 0 HAS_COCOS edges. Fix: (1) write_standard_names now defaults a COCOS-dependent name's cocos integer to the current DD convention so the existing creator fires; (2) new idempotent reconcile_standard_name_cocos_links wired into the sn run post-drain reconcile sets cocos + HAS_COCOS for every COCOS-dependent name across all origins (pipeline/derived/catalog_edit). Backfilled live: 736 SNs → cocos=17 + HAS_COCOS→COCOS 17, 0 unlinked; idempotent (2nd run 0/0). Added invariant test test_cocos_dependent_names_linked; full SN suite green (fixed 4 run_sn_pools tests to mock the new reconcile + renamed reconcile_sn_cocos_links→reconcile_standard_name_cocos_links for the sn-abbreviation policy). Also confirmed: psi_like COCOS labels (dropped from DD XML in DDv4.0.0) are recovered by inference — 158 psi_like IMASNodes, all inferred_forward/inferred_sign_flip, none from xml.</p>
     </article>
 </section>
 
