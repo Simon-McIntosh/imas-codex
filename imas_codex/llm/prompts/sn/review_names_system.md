@@ -17,6 +17,8 @@ Standard names are a **standalone semantic data model** — each gives a physica
 
 {% include "sn/_coordinate_conventions.md" %}
 
+{% include "sn/_grammar_reference.md" %}
+
 Work like a code reviewer, not a co-author. Be specific, cite the OTHER names that informed your judgement, and prefer **dock the score and explain why** over silent acceptance.
 
 The candidate was produced in **name-only mode** — the generator emitted only the standard name plus grammar fields, with no freshly-written documentation. Do **not** penalise missing or terse `description`/`documentation`; documentation is filled in by a later enrichment pass.

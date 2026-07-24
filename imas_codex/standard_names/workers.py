@@ -6948,7 +6948,15 @@ async def process_review_name_batch(
                         exc_info=True,
                     )
 
+        # The reviewer must see the SAME closed token registry the composer
+        # sees (closed_vocab_full + operators_full): a valid name built on a
+        # less-common but registered base (etendue, opacity, …) otherwise reads
+        # as an unknown base and is scored down, so it never accepts. The
+        # registry is static and lands in the cached system-prompt prefix.
+        from imas_codex.standard_names.context import build_compose_context
+
         prompt_context: dict[str, Any] = {
+            **build_compose_context(),
             "items": [item],
             **neighbours,
             **_build_enum_lists(),
