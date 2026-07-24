@@ -1787,8 +1787,12 @@ def sn_run(
                     "description": None,
                 }
             )
+        # Default (no --reseed) preserves each existing source's status so an
+        # already-composed/attached source is not re-staged to 'extracted' and
+        # re-composed; only genuinely-new sources are created (ON CREATE). Under
+        # --reseed the whole focus set is re-staged for a full re-compose.
         written = merge_standard_name_sources(
-            sources, force=True, default_dd_version=dd_ver
+            sources, force=reseed, default_dd_version=dd_ver
         )
         if not quiet:
             click.echo(f"Seeded {written} focus source(s) (run_id={scope_run_id[:8]}…)")
@@ -1804,25 +1808,16 @@ def sn_run(
                 run_id=scope_run_id,
             )
 
-        # 4. Force-reset any existing StandardNames for these paths.
+        # 4. Bind existing StandardNames for these paths to this run. Default is
+        #    NO-RESET: names keep their stage/scores and cycle from where they
+        #    are (drafted→review, reviewed→refine, extracted sources→compose) —
+        #    re-staging in-flight items churns the hard tail (each pass re-shoots
+        #    exhausted names). --reseed opts into the blunt re-stage-to-pending;
+        #    targeted resets use --reset-to (handled above, before scope routing).
+        from imas_codex.standard_names.graph_ops import scope_focus_names
+
         with GraphClient() as gc:
-            gc.query(
-                """
-                UNWIND $ids AS sid
-                MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-                SET sn.name_stage = 'pending',
-                    sn.docs_stage = 'pending',
-                    sn.run_id = $run_id,
-                    sn.reviewed_name_at = null,
-                    sn.reviewed_docs_at = null,
-                    sn.reviewer_score_name = null,
-                    sn.reviewer_score_docs = null,
-                    sn.claim_token = null,
-                    sn.claimed_at = null
-                """,
-                ids=sns_ids,
-                run_id=scope_run_id,
-            )
+            scope_focus_names(sns_ids, scope_run_id, reset=reseed, gc=gc)
 
         # 5. Route through the pool orchestrator with scope_run_id.
         _run_sn_cmd(

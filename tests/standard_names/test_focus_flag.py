@@ -447,8 +447,8 @@ class TestFocusRoutingSeedsAndStamps:
         assert src["batch_key"] == "focus"
         assert src["status"] == "extracted"
 
-    def test_stamps_run_id_on_sns_and_resets_sns(self):
-        """Steps 3 & 4: run_id is stamped on SNS and existing SNs are force-reset."""
+    def _run_focus_capturing_queries(self, extra_args: list[str]):
+        """Invoke a focus run, returning (query_calls, captured_loop_kwargs)."""
         gc_mock = _make_cli_gc_mock()
         query_calls: list[tuple[str, dict]] = []
 
@@ -457,54 +457,63 @@ class TestFocusRoutingSeedsAndStamps:
             return []
 
         gc_mock.query = MagicMock(side_effect=_capture_query)
-
         captured_loop: dict = {}
 
-        def _fake_loop_cmd(**kwargs):
-            captured_loop.update(kwargs)
-
         with (
-            patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd),
+            patch(
+                "imas_codex.cli.sn._run_sn_cmd",
+                side_effect=lambda **kw: captured_loop.update(kw),
+            ),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
                 "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
                 return_value=1,
             ),
         ):
-            runner = CliRunner()
-            runner.invoke(
+            CliRunner().invoke(
                 sn,
                 [
                     "run",
                     "--skip-clear-gate",
                     "--focus",
                     "equilibrium/time_slice/profiles_1d/psi",
+                    *extra_args,
                 ],
                 catch_exceptions=False,
             )
+        return query_calls, captured_loop
 
-        # All query calls after the initial clear (calls 0, 1) should carry run_id.
+    def test_default_binds_run_id_without_resetting(self):
+        """Step 3 & 4 (default): run_id is stamped; names are NOT reset to pending.
+
+        The no-reset default lets in-flight names cycle from their current stage
+        (re-staging the residual churns the hard tail). Only the run_id binding
+        query should touch StandardName; no name_stage='pending' reset.
+        """
+        query_calls, captured_loop = self._run_focus_capturing_queries([])
+        # Skip the two stale-run_id clears (calls 0, 1).
         stamp_queries = [(q, kw) for q, kw in query_calls[2:]]
         all_query_text = " ".join(q for q, _ in stamp_queries)
 
         # Step 3: stamp run_id on SNS.
-        assert "SET sns.run_id = $run_id" in all_query_text, (
-            f"Expected SNS stamp query, queries were:\n{all_query_text}"
+        assert "SET sns.run_id = $run_id" in all_query_text
+        # Step 4 (no-reset): bind the name's run_id only — no pending reset.
+        assert "SET sn.run_id = $run_id" in all_query_text
+        assert "sn.name_stage = 'pending'" not in all_query_text, (
+            f"default focus must NOT reset names; queries:\n{all_query_text}"
         )
 
-        # Step 4: force-reset existing SN nodes.
-        assert "sn.name_stage = 'pending'" in all_query_text, (
-            f"Expected SN reset query, queries were:\n{all_query_text}"
-        )
-        assert "sn.docs_stage = 'pending'" in all_query_text
-
-        # The scope_run_id passed to step 3 and 4 should match what the loop got.
         loop_scope_id = captured_loop.get("scope_run_id")
         assert loop_scope_id is not None
         stamp_run_ids = [kw.get("run_id") for _, kw in stamp_queries if "run_id" in kw]
-        assert all(rid == loop_scope_id for rid in stamp_run_ids), (
-            f"run_id mismatch: loop got {loop_scope_id!r}, queries used {stamp_run_ids}"
-        )
+        assert all(rid == loop_scope_id for rid in stamp_run_ids)
+
+    def test_reseed_resets_names_to_pending(self):
+        """Step 4 under --reseed: the opt-in blunt reset re-stages to pending."""
+        query_calls, _ = self._run_focus_capturing_queries(["--reseed"])
+        all_query_text = " ".join(q for q, _ in query_calls[2:])
+        assert "sn.name_stage = 'pending'" in all_query_text
+        assert "sn.docs_stage = 'pending'" in all_query_text
 
     def test_scope_run_id_forwarded_to_loop(self):
         """Step 5: _run_sn_cmd is called with a non-None scope_run_id."""

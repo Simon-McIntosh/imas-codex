@@ -601,6 +601,60 @@ def partition_focus_by_accepted(
     return gap, accepted
 
 
+@retry_on_deadlock()
+def scope_focus_names(
+    sns_ids: list[str], run_id: str, *, reset: bool, gc: Any | None = None
+) -> int:
+    """Bind the names produced by focused sources to a scope ``run_id``.
+
+    A ``--focus``/``--batch`` drain scopes its pools by ``run_id``; every name
+    that should be worked this run must carry it. Two modes:
+
+    - ``reset=False`` (default): bind ``run_id`` only, leaving each name in its
+      current stage so it cycles from where it is (``drafted``→review,
+      ``reviewed``→refine). This is the no-reset default — re-staging in-flight
+      names to ``pending`` churns the hard tail (a genuinely-hard name is
+      re-shot out of ``exhausted`` every pass and never settles).
+    - ``reset=True`` (opt-in via ``--reseed``): re-stage each name to
+      ``pending`` on both axes and clear its review scores/claims, then bind the
+      ``run_id`` — the blunt reset-all. Targeted resets use ``--reset-to``.
+
+    Returns the number of names bound.
+    """
+    if not sns_ids:
+        return 0
+    if reset:
+        cypher = """
+            UNWIND $ids AS sid
+            MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
+            SET sn.name_stage = 'pending',
+                sn.docs_stage = 'pending',
+                sn.run_id = $run_id,
+                sn.reviewed_name_at = null,
+                sn.reviewed_docs_at = null,
+                sn.reviewer_score_name = null,
+                sn.reviewer_score_docs = null,
+                sn.claim_token = null,
+                sn.claimed_at = null
+            RETURN count(DISTINCT sn) AS n
+            """
+    else:
+        cypher = """
+            UNWIND $ids AS sid
+            MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
+            SET sn.run_id = $run_id
+            RETURN count(DISTINCT sn) AS n
+            """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(cypher, ids=sns_ids, run_id=run_id)
+    finally:
+        if own:
+            client.close()
+    return rows[0]["n"] if rows else 0
+
+
 def get_source_name_mapping(*, rich: bool = False) -> dict[str, dict]:
     """Return mapping of source_id → previous standard name details.
 
