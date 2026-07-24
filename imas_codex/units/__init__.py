@@ -38,17 +38,22 @@ with importlib.resources.as_file(
     unit_registry.load_definitions(str(resource_path))
 
 
-# Sentinel unit strings that are not physical units
+# Dimensionless markers. The IMAS DD writes "-" for a dimensionless quantity
+# (imas-python returns it verbatim); "1" and "dimensionless" are equivalent
+# spellings. These are a REAL unit — the canonical dimensionless unit "1" — not
+# the absence of one, so they must normalize to "1" (the standard-name side and
+# the Unit{id:'1'} node already use "1"). Mapping them to None dropped every
+# dimensionless quantity's HAS_UNIT edge and desynced it from its standard name.
+_DIMENSIONLESS_STRINGS = frozenset({"-", "1", "dimensionless"})
+
+# Sentinel strings that are genuinely NOT a unit (no dimensionality to assign).
 _NON_UNIT_STRINGS = frozenset(
     {
-        "-",
-        "1",
         "mixed",
         "as parent",
         "as_parent",
         "as_parent_level_2",
         "Toroidal angle",
-        "dimensionless",
         "",
     }
 )
@@ -84,6 +89,8 @@ def normalize_unit_symbol(raw: str) -> str | None:
     """
     if not raw or raw in _NON_UNIT_STRINGS:
         return None
+    if raw in _DIMENSIONLESS_STRINGS:
+        return "1"
     if raw.startswith("units given") or raw.startswith("as_parent"):
         return None
 

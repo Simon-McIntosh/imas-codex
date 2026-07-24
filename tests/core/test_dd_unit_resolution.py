@@ -109,3 +109,26 @@ class TestUnitNormalizationSurvival:
 
     def test_weber_and_watt_are_distinct(self):
         assert normalize_unit_symbol("Wb") != normalize_unit_symbol("W")
+
+
+class TestDimensionlessIsTheUnitOne:
+    """Dimensionless is the unit ``1``, not the absence of a unit.
+
+    The IMAS DD marks dimensionless quantities with ``-``; imas-python returns
+    that string. Mapping it (and the equivalent ``1`` / ``dimensionless``) to
+    None dropped every dimensionless quantity's HAS_UNIT edge, desyncing the DD
+    side (no unit) from the standard-name side (canonical ``1``) so the SN↔DD
+    edge reconcile discarded the pair on a false unit disagreement.
+    """
+
+    def test_dimensionless_markers_normalize_to_one(self):
+        for raw in ("-", "1", "dimensionless"):
+            assert normalize_unit_symbol(raw) == "1", raw
+
+    def test_genuine_non_units_stay_none(self):
+        for raw in ("mixed", "as parent", "as_parent", "Toroidal angle", "", None):
+            assert normalize_unit_symbol(raw) is None, raw
+
+    def test_real_units_are_unaffected(self):
+        assert normalize_unit_symbol("m.s^-1") == "m.s^-1"
+        assert normalize_unit_symbol("m^2.sr") == "m^2.sr"
