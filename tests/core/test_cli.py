@@ -169,7 +169,18 @@ class TestReadOnlyServer:
         rw_tools = {v.name for k, v in rw_comps.items() if k.startswith("tool:")}
 
         assert ro_tools < rw_tools  # strict subset
-        assert len(rw_tools) - len(ro_tools) == 6  # exactly 6 write tools suppressed
+        # Name the suppressed set rather than counting it: a bare count goes
+        # stale silently every time a write tool is added, and the failure then
+        # says nothing about which tool moved.
+        assert rw_tools - ro_tools == {
+            "add_to_graph",
+            "edit_standard_name",
+            "get_logs",
+            "list_logs",
+            "repl",
+            "tail_logs",
+            "update_facility_config",
+        }
 
     def test_dd_only_excludes_facility_tools(self):
         """DD-only mode does not register any facility tools."""
