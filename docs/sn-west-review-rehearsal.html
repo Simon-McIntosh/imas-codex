@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-27">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.55">
 </head>
 <body>
@@ -174,6 +174,49 @@
         rc58. One gap-only drain, then <strong>cut the RC and get a human into
         stage 3</strong>. Full record:
         <a href="archive/sn-west-review-rehearsal-unit-hygiene-landed.html">unit hygiene + DD defects + ISN rc58</a>.
+      </p>
+    </div>
+    <div class="card" style="border-left:4px solid #c0392b; padding-left:12px; margin-top:10px;">
+      <p style="margin:0 0 6px;">
+        <strong>Sequencing inverted — graph correctness before the RC (2026-07-27, lead direction).</strong>
+        The pre-flight check for the RC cut found <strong>11 accepted WEST names
+        whose unit contradicts their own DD source</strong> (354 graph-wide, 262
+        on accepted/approved names), including a divertor strike-point coordinate
+        attached to a camera up-vector. The direction was explicit: <em>"this is
+        CRITICAL. the backing graph data needs to be correct … all such
+        occurrences should be properly root caused and fixed."</em> PR'ing a batch
+        with known-faulty names would spend the stage-3 reviewer's attention on
+        defects we already knew about — the opposite of what the rehearsal is for.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>Root cause.</strong> <code>_is_attachment_consistent</code>
+        <em>already</em> rejects the strike-point case — but it was reachable from
+        one module (compose). An audit of all 15 write paths that can create a
+        source→name edge found <strong>13 ungated</strong>, chiefly
+        <code>persist_refined_name</code>, which migrates every source onto a
+        refine successor wholesale with no re-validation: a refine laundered the
+        edge past the guard <em>after</em> compose had refused it. So healing alone
+        would not hold — the bad edges return on the next rotation.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>One bug in three disguises</strong> — a query keyed on a projection
+        rather than the authority. Minting joined <code>source_paths</code>
+        (<code>dd:</code>-prefixed) against bare paths, so batch release resolved
+        to <strong>zero</strong> names and no RC was cuttable at all. Hint delivery
+        keyed on <code>HAS_STANDARD_NAME</code> (which originates from the
+        bare-path-keyed DD node), so <strong>0 of 40</strong> hint-carrying sources
+        were reachable and 305 names carried an ignored hint.
+        <code>reconcile_standard_name_dd_edges</code> half-checked units only.
+      </p>
+      <p style="margin:0;">
+        12 commits landed; tests 4635 → <strong>4762 passed / 0 failed</strong>.
+        Both blockers are fixed and verified live — the DD pin guard no longer
+        aborts unscoped runs (a pin is immutable provenance; a pin behind the
+        current DD is ordinary state), and hints now reach compose (0 → 39 of 40).
+        <strong>Not done:</strong> the ~354 attachments are not yet healed in the
+        stored graph, and 15 staged <code>sn edit</code> repairs await compose +
+        review. Full record:
+        <a href="archive/sn-west-review-rehearsal-attachment-integrity-landed.html">attachment integrity + batch versioning</a>.
       </p>
     </div>
     <p>
@@ -630,7 +673,7 @@ Done-when
   3. This followup resolved; f-swrr-007 (RC cut) unblocked.</pre>
     <p class="r-fu-outcome">Root-caused + fixed (TDD, commit 35e46bc7). The ~37 valid names stuck at name_stage=pending were refine products: persist_refined_name initialised the successor stage ON CREATE only, so a refine converging onto a pre-existing placeholder name (a locus/parent scaffold minted 'pending' by the HAS_PARENT derivation writer, or a bare MERGE node with null stage) kept it 'pending' and REVIEW_NAME (claims 'drafted') never saw it — even though the refine migrated all its produced sources onto it. Compose never strands (its finalize is an unconditional SET). Confirmed on the live graph: 22/22 stranded WEST pending pipeline names were refine products. Fix, both TDD'd: (1) persist_refined_name adds ON MATCH SET advancing a placeholder-merged successor (name_stage null/'pending' AND origin&lt;&gt;'derived') to 'drafted'+'pipeline', leaving live/terminal stages and structural derived parents untouched; (2) new reconcile_reviewable_name_stage self-heals any valid, non-derived, source-backed name stranded below 'drafted', wired into the run_sn_pools startup reconcile (every run, incl. --only reconcile). New test_reviewable_name_stage.py (9 tests incl. live-graph e2e) + 4 repaired startup-reconcile mock lists; full SN suite green. Live verification: reconcile advanced all stranded names to drafted (0 stranded graph-wide, was 22); a cost-capped review pass (sn run --only review --names-only --cost-limit 12; $12.61, 86 reviewed / 22 refined, stop_reason=budget_exhausted) accepted them on merit — WEST accepted 290 → 306 / 355 (+16). Residual 29 all ENTERED review (fix working): 18 reviewed &lt;0.85 (routed to refine), 11 drafted still queued at the budget cap, + 2 grammar-rejected/quarantined names correctly excluded (regen, not review) — ordinary throughput + the genuinely-hard tail (gm-metrics, hard_xray_width, camera up-vector), not stranding. Record: docs/archive/sn-west-review-rehearsal-review-entry-landed.html. Unblocks f-swrr-007 (stage-2 RC cut).</p>
     </article>
-<article class="r-fu" data-id="f-swrr-009" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T13:40:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-009" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T13:40:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-27T18:04:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Drain the last 4 WEST names on ISN rc58, then CUT THE RC (stage 2) — the loop is the demonstrator</h4>
     <div class="r-fu-body"><p><strong>Course correction (see the §3 amber card): the demonstrator is the review LOOP, not naming completeness.</strong> Stage 1 has absorbed several sessions of genuine defect-fixing; stages 2–6 still have zero coverage. WEST is at <strong>335/355 accepted</strong> with only 4 names in flight, and ISN <strong>rc58</strong> (pin bumped, <code>5d5d9690</code>) now supplies <code>half_width</code>, <code>confinement_enhancement_factor</code> and the <code>ipb98y2</code> qualifier — the exact tokens the hard-X-ray half-widths and <code>h_98</code> needed. Run ONE gap-only drain to land those, then <strong>cut the fork-PR batch RC and get a human into stage 3</strong>. Do not chase the 12 non-nameable sources (time/iteration/humidity coordinates and true vocab gaps) or re-open the units thread — both are closed and recorded.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -690,6 +733,103 @@ Done-when
   1. Final drain recorded (accepted delta + any still-unnameable, with reasons).
   2. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
   3. §3 stages 0–2 collapsed; stages 3–6 queued; this followup resolved.</pre>
+    <p class="r-fu-outcome">SEQUENCING INVERTED by lead direction — correctness before the RC. The final drain and RC cut did NOT happen; a pre-flight check of the batch found 11 ACCEPTED WEST names whose unit contradicts their own DD source (354 graph-wide), including a divertor strike-point coordinate attached to a camera up-vector. Lead: 'this is CRITICAL. the backing graph data needs to be correct ... all such occurrences should be properly root caused and fixed.' PR'ing known-faulty names would spend the stage-3 reviewer's attention on defects we already knew about. ROOT CAUSE (definitive): _is_attachment_consistent ALREADY rejects the strike-point case, but it was reachable from ONE module (compose). An audit of all 15 write paths that can create a source-to-name edge found 13 ungated — chiefly persist_refined_name, which migrates every source onto a refine successor wholesale with no re-validation, so a refine laundered the edge past the guard AFTER compose refused it. The guard also had no dimensionality rule, so distinct quantities collapsed onto one name. ONE BUG IN THREE DISGUISES: a query keyed on a projection instead of the authority — minting joined source_paths (dd:-prefixed) against bare paths so batch release resolved to ZERO names (no RC was cuttable at all); hint delivery keyed on HAS_STANDARD_NAME (originates from IMASNode, bare-path-keyed) so 0 of 40 hint-carrying sources were reachable and 305 names carried an ignored hint; reconcile_standard_name_dd_edges half-checked units only. LANDED (12 commits, all pushed, tests 4635 -> 4762 passed / 0 failed): 0e240431 dimensionality rule + ISN-derived shape bases (fixes a binding AGENTS.md violation); eb9252c1 retroactive re-validation of existing attachments every run; 277a3061 an IDS abbreviation (focs vs fiber_optic_current_sensor) is not a device mismatch — 15 CORRECT attachments were being rejected, found BY the new audit; e4f32c5c ~90 DD unit defects registered + 5 correct_in_graph where the DD contradicts itself (25 tests); 71c95689 minting joins PRODUCED_NAME (355 paths -> 407 names); c32a9196 hint delivered over PRODUCED_NAME + no prior-review requirement (0 -> 39 of 40 reachable); fcca33a5 the DD pin guard aborted EVERY unscoped run (8741 sources pinned 4.1.0 vs configured 4.1.1) — per lead's rule a pin is immutable provenance and a pin behind current DD is ordinary state, so the seeder stops asserting the current version per source and passes it as default_dd_version (verified live: run now proceeds past extract); d32e738a 41 sources revived from stale unit skips; aec1c19d+eb9a7773 batch RC carries its identity as semver build metadata (v0.2.0rc66+west-task-2e; the tag grammar did not match +build at all, so a batch tag was invisible to state detection and the next release would have re-minted the same RC over an existing tag); 1dad29ee a domain-scoped export stamped an invalid scope and _write_manifest warns rather than raises, so it was written silently; eea28170 campaign manifest gets a schema, a kind, and a home outside the worktree; 1a9430d8 a test no longer mutates a committed LLM prompt on disk (reproduced the concurrent-run race in the act, leaving it DOUBLY mutated); 598eff14 order-independent mocks kill the whole-repo-only StopIteration failures. imas-standard-names: version ordering root-caused server-side, not in the SPA — _SEMVER_RE required a prerelease to start with -/+ so v0.2.0rc64 never matched and every version fell to a string sort (b27c5fb, 8b45a46, c960740; verified against the real 65-entry deployed list). OPEN: WEST is 325/355 (down from 335 — 10 names deliberately mid-repair, sources reset to extracted so each recomposes from its own DD path); the ~354 unit-disagreeing attachments are NOT yet healed in the stored graph (rule + audit landed and tested, healing pass incomplete when the session's agents stopped); 15 name repairs staged via sn edit awaiting compose+review; paid review deliberately HELD until the hint fix was in (now done). Record: docs/archive/sn-west-review-rehearsal-attachment-integrity-landed.html. Continued in f-swrr-010.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-010" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T20:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Heal the attachment graph, complete the 15 staged repairs, THEN cut the RC</h4>
+    <div class="r-fu-body"><p>Both blockers that stalled the last session are fixed and verified live: the DD pin guard no longer aborts unscoped runs (<code>fcca33a5</code>) and <code>sn edit --hint</code> now actually reaches compose (<code>c32a9196</code>, 0 → 39 of 40 sources). The attachment guard has a dimensionality rule and a retroactive re-validation pass (<code>0e240431</code>, <code>eb9252c1</code>), but <strong>the healing has not run against the stored graph</strong> — ~354 unit-disagreeing attachments remain, 262 on accepted/approved names. Run the heal, drain the 15 staged <code>sn edit</code> repairs through compose + review (now correctly steered), verify the detector count falls to only registry-excepted DD defects, and then cut the fork-PR RC. The RC is the deliverable; correctness is the gate the lead set.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — heal attachments, land the staged repairs, cut the RC
+Tier:    opus
+
+Context
+  The lead inverted the sequencing: graph correctness before the RC. &quot;this is
+  CRITICAL. the backing graph data needs to be correct ... all such occurrences
+  should be properly root caused and fixed.&quot; The root cause is fixed in code
+  (the attachment guard was reachable from one module; 13 of 15 write paths were
+  ungated, chiefly persist_refined_name laundering sources onto a refine
+  successor). What remains is applying it to the stored data and finishing the
+  in-flight repairs.
+
+State to read FIRST
+  docs/archive/sn-west-review-rehearsal-attachment-integrity-landed.html
+    — the full root cause, the 12 landed commits, and every open item with its
+      verified numbers. Read this before touching anything.
+
+Verified state (2026-07-27, end of session)
+  tests/standard_names/ 4762 passed / 0 failed. Worktree clean, all pushed.
+  WEST 325/355 accepted (10 deliberately mid-repair).
+  Unit-disagreeing attachments: ~354 graph-wide, 262 on accepted/approved names.
+  DD pins: 8741 at 4.1.0, 21 at 4.1.1, 74 null — UNCHANGED and immutable by design.
+  ~$40 of the 500 USD ceiling spent; --cost-limit is SOFT (~1.7–2.7x overshoot).
+
+Do, in order
+  1. HEAL. Run the retroactive attachment audit against the live graph and record
+     the real effect: rejections by rule, sources rerouted, and a second pass
+     acting on nothing (idempotency). Note the guard now also rejects the
+     line-of-sight point collapse (first/second/third_point onto one name) via the
+     distinct-vector rule — confirm whether that is the correct outcome for those
+     ~110 attachments or an over-reach, and say which. One of the two names
+     involved is origin=catalog_edit (human-edited, PROTECTED_FIELDS): do NOT pass
+     --override-edits on it without the lead&#x27;s explicit authorization.
+  2. DRAIN THE 15 STAGED REPAIRS. They are staged via `sn edit` (no Cypher, no
+     hand-accepts) and their sources are reset to `extracted`, so each recomposes
+     from its own DD path with its own DD-injected unit — that is the sanctioned
+     collapse-split mechanism. Compose is free (local); review is the only paid
+     stage. Verify the gm1–gm7 collapse dissolves into seven distinct names
+     (gm1=&lt;1/R^2&gt; m^-2, gm2=&lt;|grad rho|^2/R^2&gt; m^-2, gm3=&lt;|grad rho|^2&gt; 1,
+     gm4=&lt;1/B^2&gt; T^-2, gm5=&lt;B^2&gt; T^2, gm6=&lt;|grad rho|^2/B^2&gt; T^-2,
+     gm7=&lt;|grad rho|&gt; 1; gm8/gm9 are already correct).
+  3. VERIFY. Re-run the detector query (source DD unit vs name unit over
+     PRODUCED_NAME + FROM_DD_PATH). Every remaining row must be explained: either
+     a registry-excepted DD defect or a stated, reasoned exception. Also assert no
+     StandardName carries more than one HAS_UNIT edge —
+     radial_flux_surface_averaged_metric currently carries two (1 and m^-2), the
+     only such node, a schema-cardinality symptom of the collapse. Add that as a
+     graph-quality test under tests/graph/.
+  4. CUT THE RC (stage 2). Only once step 3 is clean:
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     It will mint v0.&lt;n&gt;.0rc&lt;N&gt;+west-task-2e — the batch label is derived from the
+     manifest name and carried as semver build metadata. Verify: additive diff
+     (approved set byte-identical); catalog.yml export_scope=review + review_batch;
+     artifact frozen at manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND
+     batch_label; RC-tagged; PR open on the FORK (never --final in act 1). Record
+     RC version, PR URL, batch size, and judge the LLM-written PR body — the first
+     live output of the sn-release-notes seat.
+  5. Collapse §3 stages 0–2 and queue stages 3–6 (human review → sn merge
+     fold-back exercising the graph-merged: tag → freeze-check → --undo unwind).
+
+Also open (do not let these block the RC; report status)
+  - The line-of-sight split: ~40 /r paths on one name while the matching /z paths
+    are split across two names on no principle, one having also swallowed
+    pure-geometry thick_line paths (pf_active, iron_core, ferritic) that are not
+    beam tracing at all. Root-cause WHY identical structure diverged.
+  - Dead code: build_unapproved_cleanup_manifest has no callers and no tests —
+    delete it. find_semantic_source_invariant_violations likewise, BUT it encodes a
+    real invariant: wire it in as a graph-quality test rather than deleting it. An
+    unwired checker carries no signal.
+  - Judge whether write paths #9–#15 from the audit need the guard at write time or
+    are correctly covered by the retroactive pass (the derived-parent seeders and
+    provenance_rebuild reconstruct edges that already existed; gating a faithful
+    reconstruction with a newer rule would destroy history rather than protect it).
+    State the reasoning per path.
+
+Scope / constraints
+  - Gap-only; never --reseed. PR target stays fork.
+  - The stage-0 snapshot exists; do NOT re-snapshot.
+  - NEVER hand-accept a name or hand-edit graph text: acceptance is earned only
+    through the RD-quorum review pool, and corrections go through `sn edit`.
+  - A DD pin is immutable — never re-stamp one, never re-extract on a version bump.
+  - No AI attribution in ANY commit, issue, PR, or comment (~/.agents/AGENTS.md).
+
+Done-when
+  1. Attachment heal run and recorded (rejections by rule, reroutes, idempotency).
+  2. The 15 staged repairs composed + reviewed on merit; gm1–gm7 verified distinct.
+  3. Detector count fully explained; the HAS_UNIT cardinality test added and green.
+  4. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
+  5. Stages 3–6 queued; this followup resolved.</pre>
     </article>
 </section>
 
