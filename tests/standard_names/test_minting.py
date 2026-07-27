@@ -20,10 +20,12 @@ class _FakeGC:
         self._base = base_rows
         self._fam = fam_rows
         self.calls = 0
+        self.base_params = None
 
     def query(self, cypher, **params):
         self.calls += 1
-        if "source_paths" in cypher and "HAS_PARENT" not in cypher:
+        if "PRODUCED_NAME" in cypher and "HAS_PARENT" not in cypher:
+            self.base_params = params
             return self._base
         if "HAS_PARENT" in cypher:
             return self._fam
@@ -39,8 +41,8 @@ def test_mint_empty_does_not_touch_graph():
 
 def test_mint_base_join_family_and_unmatched():
     base = [
-        {"id": "b_name", "source_paths": ["ids/p1", "ids/other"]},
-        {"id": "a_name", "source_paths": ["ids/p2"]},
+        {"path": "ids/p1", "ids": ["b_name"]},
+        {"path": "ids/p2", "ids": ["a_name"]},
     ]
     fam = [{"fam_ids": ["parent_z", "sibling_y"]}]
     fake = _FakeGC(base, fam)
@@ -53,8 +55,35 @@ def test_mint_base_join_family_and_unmatched():
     assert res.unmatched_paths == ["ids/p3"]
 
 
+def test_mint_joins_over_the_produced_name_edge_on_bare_paths():
+    """The join key is the bare DD path, resolved to the ``dd:``-prefixed source.
+
+    The name's ``source_paths`` projection stores prefixed ids, so joining on it
+    against bare input paths matches nothing — the edge is the authority.
+    """
+    fake = _FakeGC([{"path": "ids/p1", "ids": ["n"]}], [{"fam_ids": []}])
+    mint_sn_list(["ids/p1"], gc=fake)
+    assert fake.base_params["paths"] == ["ids/p1"]
+
+
+def test_mint_reports_a_path_whose_only_names_are_dead():
+    """A row with no live names is unmatched, not a silent match."""
+    fake = _FakeGC([{"path": "ids/p1", "ids": []}], [{"fam_ids": []}])
+    res = mint_sn_list(["ids/p1"], gc=fake)
+    assert res.names == []
+    assert res.unmatched_paths == ["ids/p1"]
+
+
+def test_mint_collects_every_name_a_path_produced() -> None:
+    """One DD path may produce several live names; all belong to the batch."""
+    fake = _FakeGC([{"path": "ids/p1", "ids": ["n2", "n1"]}], [{"fam_ids": []}])
+    res = mint_sn_list(["ids/p1"], gc=fake)
+    assert res.names == ["n1", "n2"]
+    assert res.unmatched_paths == []
+
+
 def test_mint_dedups_input_paths():
-    fake = _FakeGC([{"id": "n", "source_paths": ["ids/p1"]}], [{"fam_ids": []}])
+    fake = _FakeGC([{"path": "ids/p1", "ids": ["n"]}], [{"fam_ids": []}])
     res = mint_sn_list(["ids/p1", "ids/p1"], gc=fake)
     assert res.names == ["n"]
     assert res.unmatched_paths == []
@@ -65,6 +94,7 @@ def test_mint_dedups_input_paths():
 PREFIX = "__minttest__"
 LEAF1 = f"{PREFIX}/leaf1"
 LEAF2 = f"{PREFIX}/leaf2"
+LEAF_DEAD = f"{PREFIX}/leaf_dead"
 
 
 def _cleanup():
@@ -79,7 +109,7 @@ def mint_graph():
         gc.query(
             """
             MERGE (child_a:StandardName {id: $child_a})
-              SET child_a.name_stage='accepted', child_a.source_paths=[$leaf1]
+              SET child_a.name_stage='accepted', child_a.source_paths=['dd:'+$leaf1]
             MERGE (parent:StandardName {id: $parent})
               SET parent.name_stage='accepted', parent.source_paths=[]
             MERGE (child_b:StandardName {id: $child_b})
@@ -94,6 +124,15 @@ def mint_graph():
             MERGE (child_b)-[:HAS_PARENT]->(parent)
             MERGE (child_dead)-[:HAS_PARENT]->(parent)
             MERGE (grandchild)-[:HAS_PARENT]->(child_a)
+            // The source node and its PRODUCED_NAME edge are what the base join
+            // reads; source_paths above is only the projection of it. A dead
+            // name also carries a source, to prove the stage filter bites.
+            MERGE (src1:StandardNameSource {id: 'dd:'+$leaf1})
+              SET src1.source_type='dd', src1.status='composed'
+            MERGE (src1)-[:PRODUCED_NAME]->(child_a)
+            MERGE (src_dead:StandardNameSource {id: 'dd:'+$leaf_dead})
+              SET src_dead.source_type='dd', src_dead.status='composed'
+            MERGE (src_dead)-[:PRODUCED_NAME]->(child_dead)
             """,
             child_a=f"{PREFIX}_child_a",
             parent=f"{PREFIX}_parent",
@@ -102,6 +141,7 @@ def mint_graph():
             grandchild=f"{PREFIX}_grandchild",
             unrelated=f"{PREFIX}_unrelated",
             leaf1=LEAF1,
+            leaf_dead=LEAF_DEAD,
         )
     yield
     _cleanup()
@@ -109,7 +149,7 @@ def mint_graph():
 
 @pytest.mark.graph
 def test_mint_live_closure(mint_graph):
-    res = mint_sn_list([LEAF1, LEAF2])
+    res = mint_sn_list([LEAF1, LEAF2, LEAF_DEAD])
 
     assert res.names == sorted(
         [
@@ -122,5 +162,6 @@ def test_mint_live_closure(mint_graph):
     # superseded sibling and the unrelated (no HAS_PARENT) name are excluded.
     assert f"{PREFIX}_child_dead" not in res.names
     assert f"{PREFIX}_unrelated" not in res.names
-    # leaf2 has no linked name → reported.
-    assert res.unmatched_paths == [LEAF2]
+    # leaf2 has no source at all; leaf_dead has one, but it produced only a
+    # superseded name — both are reported rather than silently matched.
+    assert res.unmatched_paths == [LEAF2, LEAF_DEAD]

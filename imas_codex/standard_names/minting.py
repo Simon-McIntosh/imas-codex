@@ -4,10 +4,11 @@ The review pipeline speaks two currencies: extraction/mop-up speaks DD paths,
 while export/PR/merge/approval speak standard-name ids. :func:`mint_sn_list`
 bridges them deterministically over graph state:
 
-1. **Base join** — every ``StandardName`` whose ``source_paths`` list
-   intersects the input DD-path set. ``source_paths`` stores *bare* DD paths
-   (e.g. ``equilibrium/time_slice/profiles_1d/psi``), so the join matches on
-   bare paths, not the ``dd:``-prefixed source-node id.
+1. **Base join** — every live ``StandardName`` reached by a ``PRODUCED_NAME``
+   edge from the ``StandardNameSource`` for an input DD path. The edge is the
+   authority; the ``source_paths`` list on the name is a projection of it and
+   holds prefixed source ids (``dd:<path>``), so it is not a valid join key for
+   an input of bare DD paths.
 2. **Immediate-family closure** — approving a name without its immediate
    family is incoherent, so each touched name pulls in its one-hop family:
    its ``HAS_PARENT`` parent(s), that parent's direct children (siblings), and
@@ -69,25 +70,30 @@ def mint_sn_list(dd_paths: list[str], *, gc: object | None = None) -> MintResult
 
 
 def _mint_with_client(gc: object, paths: list[str]) -> MintResult:
-    # 1. Base join: live names whose source_paths intersect the input set.
+    # 1. Base join: live names produced by the sources for these DD paths.
+    #    Joined over the PRODUCED_NAME edge, which is the authority — the
+    #    ``source_paths`` list on the name is a projection of it and cannot be
+    #    the join key: it stores prefixed source ids (``dd:<path>``), matching
+    #    the StandardNameSource id scheme, so an input of bare DD paths never
+    #    intersects it.
     base_rows = gc.query(
         """
-        MATCH (sn:StandardName)
+        UNWIND $paths AS p
+        MATCH (src:StandardNameSource {id: 'dd:' + p})-[:PRODUCED_NAME]->(sn:StandardName)
         WHERE NOT coalesce(sn.name_stage, '') IN $dead
-          AND any(p IN coalesce(sn.source_paths, []) WHERE p IN $paths)
-        RETURN sn.id AS id, sn.source_paths AS source_paths
+        RETURN p AS path, collect(DISTINCT sn.id) AS ids
         """,
         paths=paths,
         dead=_DEAD_STAGES,
     )
     base_ids: set[str] = set()
     matched_paths: set[str] = set()
-    path_set = set(paths)
     for row in base_rows or []:
-        base_ids.add(row["id"])
-        for p in row.get("source_paths") or []:
-            if p in path_set:
-                matched_paths.add(p)
+        ids = row.get("ids") or []
+        if not ids:
+            continue
+        base_ids.update(ids)
+        matched_paths.add(row["path"])
 
     batch: set[str] = set(base_ids)
 
