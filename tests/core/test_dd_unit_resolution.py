@@ -132,3 +132,31 @@ class TestDimensionlessIsTheUnitOne:
     def test_real_units_are_unaffected(self):
         assert normalize_unit_symbol("m.s^-1") == "m.s^-1"
         assert normalize_unit_symbol("m^2.sr") == "m^2.sr"
+
+
+class TestDdCountPseudoUnits:
+    """DD count pseudo-units are dimensionless counts, not unparseable junk.
+
+    The DD expresses "a number of things" with a plural noun unit — ``electrons``
+    (summary/gas_injection_*), ``atoms`` (isotope element counts). pint cannot
+    parse these, so they were dropped and the quantity lost its unit entirely.
+    A count is the dimensionless unit ``1``. This also recovers the
+    ``as_parent`` chain: gas_injection ``value`` fields inherit ``electrons``
+    from their grandparent, so dropping it dropped the resolved inheritance too.
+    """
+
+    def test_count_pseudo_units_are_dimensionless(self):
+        for raw in ("electrons", "atoms"):
+            assert normalize_unit_symbol(raw) == "1", raw
+
+    def test_elementary_charge_maps_to_a_real_charge_unit(self):
+        # 'Elementary Charge Unit' is a genuine unit (e), not dimensionless.
+        assert normalize_unit_symbol("Elementary Charge Unit") == "e"
+
+    def test_parametric_and_runtime_units_stay_unresolved(self):
+        # These carry no fixed dimensionality — better None than a wrong unit.
+        for raw in (
+            "m^dimension",
+            "units given by process(i1)/results_units",
+        ):
+            assert normalize_unit_symbol(raw) is None, raw

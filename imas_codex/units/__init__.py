@@ -46,6 +46,18 @@ with importlib.resources.as_file(
 # dimensionless quantity's HAS_UNIT edge and desynced it from its standard name.
 _DIMENSIONLESS_STRINGS = frozenset({"-", "1", "dimensionless"})
 
+# DD "count" pseudo-units: the DD expresses "a number of things" with a plural
+# noun (``electrons`` on summary/gas_injection_*, ``atoms`` on isotope element
+# counts, ``events`` ratios). pint cannot parse these, so they were dropped and
+# the quantity lost its unit — which also silently discarded the resolved
+# ``as_parent`` inheritance for every gas-injection ``value`` field, since the
+# unit those inherit from their grandparent IS ``electrons``. A count is the
+# dimensionless unit 1.
+_COUNT_PSEUDO_UNITS = frozenset({"electrons", "atoms", "events.neutron^-1"})
+
+# DD spellings of real units that pint does not recognise verbatim.
+_UNIT_SPELLING_ALIASES = {"Elementary Charge Unit": "e"}
+
 # Sentinel strings that are genuinely NOT a unit (no dimensionality to assign).
 _NON_UNIT_STRINGS = frozenset(
     {
@@ -89,8 +101,9 @@ def normalize_unit_symbol(raw: str) -> str | None:
     """
     if not raw or raw in _NON_UNIT_STRINGS:
         return None
-    if raw in _DIMENSIONLESS_STRINGS:
+    if raw in _DIMENSIONLESS_STRINGS or raw in _COUNT_PSEUDO_UNITS:
         return "1"
+    raw = _UNIT_SPELLING_ALIASES.get(raw, raw)
     if raw.startswith("units given") or raw.startswith("as_parent"):
         return None
 
