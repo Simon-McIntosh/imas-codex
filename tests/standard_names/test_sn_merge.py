@@ -499,7 +499,19 @@ class TestBatchLabelledVersionRoundTrip:
         )
         branch = f"review/{tag}"
         rc = merge_tag_name(branch)
-        assert rc == tag
+        # The branch name alone yields the full version, so the artifact is
+        # located without recomputing the label from any manifest.
+        assert rc == tag == "v0.2.0rc65+west-task-2e"
         located = tmp_path / f"{rc}.sn_names.yaml"
         assert located == artifact
         assert load_names_file(located) == ["plasma_current"]
+
+        # rc_version carries the FULL version; batch_label is only the part
+        # after the '+'. The two must not be conflated — merge resolves the
+        # artifact from the former and reports batch identity from the latter.
+        import yaml as _yaml
+
+        doc = _yaml.safe_load(artifact.read_text(encoding="utf-8"))
+        assert doc["rc_version"] == "v0.2.0rc65+west-task-2e"
+        assert doc["batch_label"] == "west-task-2e"
+        assert doc["rc_version"].split("+", 1)[1] == doc["batch_label"]
