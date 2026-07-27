@@ -10,6 +10,7 @@ Relationship direction: entity → concept
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 import logging
@@ -7064,6 +7065,250 @@ def reconcile_vocab_gaps() -> dict[str, int]:
 
     stats["remaining"] = stats["checked"] - len(to_delete)
     return stats
+
+
+# Skip classifications produced by the DD unit resolution leg. Everything else
+# on ``skip_reason`` is a permanent eligibility exclusion (a temporal or local
+# coordinate, configurable meaning, …) that no resolver change can lift, so the
+# unit revival must never touch it.
+_UNIT_SKIP_REASON_PREFIX = "dd_unit_"
+
+
+def revive_unit_skipped_sources(gc: Any | None = None) -> dict[str, int]:
+    """Re-evaluate unit-derived skips against the CURRENT unit resolver.
+
+    ``_apply_unit_overrides`` removes a DD row whose effective unit fails the
+    parse and records the exclusion durably as
+    ``skip_reason='dd_unit_unresolvable'`` (status ``'skipped'``). That verdict
+    is a snapshot of the resolver at extraction time: when the resolver later
+    learns the unit — a dimensionless sentinel is a real unit, a count
+    pseudo-unit maps to ``1``, a symbol is reordered into canonical form — the
+    source stays excluded because nothing revisits it.
+
+    This pass asks the extractor's own question again, through the extractor's
+    own code (``resolve_unit`` + ``_is_unparseable_dd_unit``), for every source
+    still blocked by a unit skip, and returns the ones that now parse to
+    ``'extracted'`` so the generate pool picks them up. The unit is read the way
+    extraction reads it — the ``HAS_UNIT`` edge first, the ``unit`` property as
+    fallback — so the verdict cannot diverge from what a fresh extraction would
+    decide.
+
+    Scope is deliberately narrow:
+
+    * only ``status='skipped'`` — a source that already advanced carries
+      ``skip_reason`` as an audit crumb, and reviving it would rewind progress;
+    * only ``skip_reason`` in the ``dd_unit_*`` family — non-unit skips are
+      correct, permanent eligibility exclusions;
+    * never a source whose DD node is gone or ``lifecycle_status='removed'``;
+    * a source whose unit still fails (or whose path an explicit skip rule
+      matches) is left exactly as it was.
+
+    ``attempt_count`` is reset because the recorded attempts were spent under
+    the broken resolver — a revived source that stays over the seeding cap
+    would be revived into a queue that never claims it.
+
+    Idempotent: a revived source no longer carries the skip, so a second pass
+    at an unchanged resolver revives nothing.
+
+    Returns dict: {checked, revived}.
+    """
+    from imas_codex.standard_names.sources.dd import _is_unparseable_dd_unit
+    from imas_codex.standard_names.unit_overrides import resolve_unit
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        candidates = list(
+            client.query(
+                """
+                MATCH (sns:StandardNameSource {status: 'skipped'})
+                      -[:FROM_DD_PATH]->(n:IMASNode)
+                WHERE sns.skip_reason STARTS WITH $prefix
+                  AND coalesce(n.lifecycle_status, '') <> 'removed'
+                OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+                WITH sns, n, collect(DISTINCT u.id) AS unit_rels
+                RETURN sns.id AS id,
+                       sns.source_id AS source_id,
+                       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
+                            WHEN size(unit_rels) > 1
+                            THEN coalesce(n.units, unit_rels[0])
+                            ELSE null END AS unit_from_rel,
+                       n.unit AS node_unit
+                """,
+                prefix=_UNIT_SKIP_REASON_PREFIX,
+            )
+        )
+
+        revivable: list[str] = []
+        for row in candidates:
+            path = row.get("source_id") or ""
+            raw_unit = row.get("unit_from_rel") or row.get("node_unit") or None
+            effective, meta = resolve_unit(path, raw_unit)
+            if meta and meta.get("rule") == "skip":
+                continue  # an explicit rule still skips this path
+            final = effective if (meta and meta.get("rule") == "override") else raw_unit
+            if not final or _is_unparseable_dd_unit(final):
+                continue
+            revivable.append(row["id"])
+
+        revived = 0
+        if revivable:
+            rows = client.query(
+                """
+                UNWIND $ids AS sns_id
+                MATCH (sns:StandardNameSource {id: sns_id})
+                SET sns.status = 'extracted',
+                    sns.skip_reason = null,
+                    sns.skip_reason_detail = null,
+                    sns.attempt_count = 0,
+                    sns.claimed_at = null,
+                    sns.claim_token = null
+                RETURN count(sns) AS revived
+                """,
+                ids=revivable,
+            )
+            revived = rows[0]["revived"] if rows else 0
+    finally:
+        if own:
+            client.close()
+
+    if revived:
+        logger.info(
+            "revive_unit_skipped_sources: revived %d of %d unit-skipped "
+            "source(s) whose unit the current resolver parses",
+            revived,
+            len(candidates),
+        )
+    return {"checked": len(candidates), "revived": revived}
+
+
+def _isn_grammar_context() -> dict[str, Any] | None:
+    """Return the live ISN grammar context, or None when ISN is unavailable."""
+    try:
+        from imas_standard_names import get_grammar_context
+
+        return get_grammar_context()
+    except Exception:  # noqa: BLE001 — ISN absent or failing to load
+        return None
+
+
+@functools.lru_cache(maxsize=1)
+def isn_vocabulary_signature() -> str | None:
+    """Return a digest identifying the ISN grammar vocabulary in force.
+
+    The identity is derived from the vocabulary ITSELF — every segment with its
+    token list, plus the operator registry — not from a package version string.
+    A version is the wrong key: a fork or an editable install can change the
+    vocabulary without moving the version, and a version bump that touches no
+    vocabulary would pointlessly re-open every parked source. ISN owns the
+    vocabulary; this only hashes what ``get_grammar_context()`` reports.
+
+    Returns ``None`` when ISN is unavailable, so callers can no-op rather than
+    stamp a meaningless identity.
+    """
+    ctx = _isn_grammar_context()
+    if not ctx:
+        return None
+
+    sections = ctx.get("vocabulary_sections") or []
+    payload: list[tuple[str, tuple[str, ...]]] = []
+    for section in sections:
+        segment = section.get("segment")
+        if not segment:
+            continue
+        payload.append((str(segment), tuple(sorted(section.get("tokens") or ()))))
+    operators = (ctx.get("grammar") or {}).get("vocabularies", {}).get("operators", {})
+    payload.append(("operators", tuple(sorted(operators))))
+
+    if not payload:
+        return None
+    payload.sort()
+    return hashlib.sha256(json.dumps(payload).encode()).hexdigest()[:16]
+
+
+def retry_vocab_gap_sources_on_grammar_change(
+    gc: Any | None = None,
+) -> dict[str, int]:
+    """Grant a parked ``vocab_gap`` source one retry per vocabulary change.
+
+    ``reconcile_vocab_gaps`` un-parks a source only once it has no remaining
+    blocking ``VocabGap`` — i.e. only when the *exact token the composer asked
+    for* turns out to exist. But that request is frequently the wrong spelling
+    of a capability the vocabulary already expresses, or now expresses, another
+    way (a request for ``h_98_factor`` / ``confinement`` is answered by
+    ``confinement_enhancement_factor`` + ``ipb98y2``). Keyed on the requested
+    token, such a source is stranded permanently by construction.
+
+    So the retry key is the vocabulary as a whole. Each source records the
+    vocabulary digest in force when it was parked
+    (``vocab_gap_grammar_signature``); a source whose stamp differs from the
+    live digest — including an unstamped source parked before the stamp
+    existed — is returned to ``'extracted'`` for exactly ONE fresh compose
+    attempt, and re-stamped with the current digest. The blocking gap edges are
+    dropped so the next attempt reports what actually blocks it now rather than
+    inheriting a stale request; the ``VocabGap`` nodes themselves survive (they
+    are the ISN-facing worklist and are owned by ``reconcile_vocab_gaps``).
+    ``attempt_count`` is reset because the prior attempts were spent under a
+    vocabulary that could not express the quantity.
+
+    Idempotent: after one pass at a fixed vocabulary every remaining parked
+    source carries the current digest, so a second pass revives nothing. A
+    genuinely inexpressible quantity re-parks with the current stamp and waits
+    for the next vocabulary change — one retry per change, never a loop.
+
+    Returns dict: {checked, revived} (plus ``skipped`` when ISN is unavailable).
+    """
+    signature = isn_vocabulary_signature()
+    if signature is None:
+        logger.warning(
+            "retry_vocab_gap_sources_on_grammar_change: ISN vocabulary "
+            "unavailable — skipping retry pass"
+        )
+        return {"checked": 0, "revived": 0, "skipped": True}
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (sns:StandardNameSource {status: 'vocab_gap'})
+            RETURN count(sns) AS checked
+            """
+        )
+        checked = rows[0]["checked"] if rows else 0
+
+        revived_rows = client.query(
+            """
+            MATCH (sns:StandardNameSource {status: 'vocab_gap'})
+            WHERE coalesce(sns.vocab_gap_grammar_signature, '') <> $signature
+            SET sns.status = 'extracted',
+                sns.vocab_gap_grammar_signature = $signature,
+                sns.skip_reason = null,
+                sns.skip_reason_detail = null,
+                sns.attempt_count = 0,
+                sns.claimed_at = null,
+                sns.claim_token = null
+            WITH sns
+            OPTIONAL MATCH (sns)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(:VocabGap)
+            DELETE r
+            RETURN count(DISTINCT sns) AS revived
+            """,
+            signature=signature,
+        )
+        revived = revived_rows[0]["revived"] if revived_rows else 0
+    finally:
+        if own:
+            client.close()
+
+    if revived:
+        logger.info(
+            "retry_vocab_gap_sources_on_grammar_change: returned %d of %d "
+            "parked source(s) to 'extracted' for one retry under vocabulary %s",
+            revived,
+            checked,
+            signature,
+        )
+    return {"checked": checked, "revived": revived}
 
 
 def reconcile_provenance() -> dict[str, int]:

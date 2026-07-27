@@ -985,6 +985,44 @@ async def run_sn_pools(
                 vg_result.get("remaining", 0),
             )
 
+        # Re-evaluate durably-cached blocking decisions whose cause has since
+        # been fixed upstream. Both are the same defect shape — a verdict
+        # snapshotted onto the source and never revisited — so both run right
+        # after the VocabGap pass and BEFORE seeding, so a revived source is
+        # claimable the same run.
+        #
+        # A unit skip records the unit resolver as it stood at extraction; a
+        # resolver fix (dimensionless is a unit, count pseudo-units, canonical
+        # symbol order) does not lift it. Re-ask the extractor's own question.
+        from imas_codex.standard_names.graph_ops import revive_unit_skipped_sources
+
+        unit_result = await asyncio.to_thread(revive_unit_skipped_sources)
+        if unit_result.get("revived", 0):
+            logger.info(
+                "run_sn_pools: unit-skip revival — %d of %d unit-skipped "
+                "source(s) returned to 'extracted' (unit now parses)",
+                unit_result.get("revived", 0),
+                unit_result.get("checked", 0),
+            )
+
+        # A vocab_gap source is un-parked by reconcile_vocab_gaps only when the
+        # exact token it asked for appears — but the request is often the wrong
+        # spelling of a capability the vocabulary now expresses another way. Give
+        # each parked source one retry per vocabulary change instead.
+        from imas_codex.standard_names.graph_ops import (
+            retry_vocab_gap_sources_on_grammar_change,
+        )
+
+        gap_retry = await asyncio.to_thread(retry_vocab_gap_sources_on_grammar_change)
+        if gap_retry.get("revived", 0):
+            logger.info(
+                "run_sn_pools: vocabulary-bump retry — %d of %d parked "
+                "source(s) returned to 'extracted' under the current ISN "
+                "vocabulary",
+                gap_retry.get("revived", 0),
+                gap_retry.get("checked", 0),
+            )
+
         # ── B2c: Reconcile provenance metadata ────────────────────────
         # Reattach live scalar/missing-edge desyncs, NULL produced_sn_id
         # scalars pointing at deleted names, and delete orphaned derived-parent

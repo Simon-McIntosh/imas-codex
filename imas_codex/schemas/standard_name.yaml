@@ -1889,6 +1889,17 @@ classes:
         description: >-
           Human-readable detail for the skip (e.g. the raw DD unit string,
           the conflicting parent/child units). Set when status='skipped'.
+      vocab_gap_grammar_signature:
+        description: >-
+          Digest of the ISN grammar vocabulary in force when this source was
+          parked at ``status='vocab_gap'``. A parked source is blocked on a
+          token the composer asked for, but that request is frequently the
+          wrong spelling of a capability the vocabulary expresses another way —
+          so waiting for the exact token to appear strands it forever. The
+          reconcile compares this stamp against the live vocabulary digest and
+          grants one retry per vocabulary change; re-stamping it makes the pass
+          idempotent at a fixed vocabulary. ``null`` means the source was
+          parked before the stamp existed and is due one retry.
       dd_version:
         description: >-
           DD version at extraction time. Records which DD snapshot was

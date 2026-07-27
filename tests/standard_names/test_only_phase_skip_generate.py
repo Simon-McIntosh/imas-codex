@@ -100,6 +100,14 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
     return [
         patch(f"{_GO}.reconcile_standard_name_sources", return_value={}),
         patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
+        patch(
+            f"{_GO}.revive_unit_skipped_sources",
+            return_value={"checked": 0, "revived": 0},
+        ),
+        patch(
+            f"{_GO}.retry_vocab_gap_sources_on_grammar_change",
+            return_value={"checked": 0, "revived": 0},
+        ),
         patch(f"{_GO}.reconcile_provenance", return_value={}),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
         patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),

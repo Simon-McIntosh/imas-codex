@@ -1104,6 +1104,12 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 _GO,
                 reconcile_standard_name_sources=MagicMock(return_value={}),
                 reconcile_vocab_gaps=MagicMock(return_value={}),
+                revive_unit_skipped_sources=MagicMock(
+                    return_value={"checked": 0, "revived": 0}
+                ),
+                retry_vocab_gap_sources_on_grammar_change=MagicMock(
+                    return_value={"checked": 0, "revived": 0}
+                ),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
                 reconcile_standard_name_cocos_links=MagicMock(return_value={}),
