@@ -76,12 +76,50 @@ def _make_node_row(
     return row
 
 
-def _make_mock_gc(side_effects: list) -> MagicMock:
-    """Build a GraphClient context-manager mock with given query side_effects."""
+def _make_mock_gc(
+    *,
+    main_rows: list | None = None,
+    dd_version_rows: list | None = None,
+    siblings_rows: list | None = None,
+    breakdown_count_rows: list | None = None,
+    breakdown_sample_rows: list | None = None,
+    breakdown_error_rows: list | None = None,
+) -> MagicMock:
+    """Build a GraphClient context-manager mock that dispatches on query shape.
+
+    ``extract_dd_candidates`` conditionally runs ``report_extract_breakdown()``
+    as a diagnostic pre-flight when ``logger.isEnabledFor(logging.INFO)`` is
+    true — a global condition set by the ambient ``imas_codex`` root logger
+    level, not by anything in this test module. When another test module run
+    earlier in the same process has raised that level (e.g. a CLI test that
+    calls ``setup_logging()``), the breakdown queries fire as three *extra*
+    ``gc.query()`` calls before the main extraction queries. A positional
+    ``side_effect`` list sized for exactly N calls silently assumes call
+    order/count, so it raises ``StopIteration`` the moment an extra call is
+    inserted — dispatching by the query's own Cypher text keeps the mock
+    correct regardless of how many diagnostic calls precede the real ones.
+    """
     mock_gc = MagicMock()
     mock_gc.__enter__ = MagicMock(return_value=mock_gc)
     mock_gc.__exit__ = MagicMock(return_value=False)
-    mock_gc.query = MagicMock(side_effect=[iter(rows) for rows in side_effects])
+
+    def _dispatch(query: str, **_params):
+        if "DDVersion" in query:
+            return iter(
+                dd_version_rows if dd_version_rows is not None else [_DD_VERSION_ROW]
+            )
+        if "count(*) AS cnt" in query:
+            return iter(breakdown_count_rows or [])
+        if "LIMIT $sample_limit" in query:
+            return iter(breakdown_sample_rows or [])
+        if "has_errors_count" in query:
+            return iter(breakdown_error_rows or [])
+        if "sibling_path" in query:
+            return iter(siblings_rows or [])
+        # Default: the main enriched extraction query.
+        return iter(main_rows or [])
+
+    mock_gc.query = MagicMock(side_effect=_dispatch)
     return mock_gc
 
 
@@ -106,13 +144,7 @@ class TestExtractAdmitsStaticGeometry:
             data_type="FLT_1D",
         )
 
-        mock_gc = _make_mock_gc(
-            [
-                [_DD_VERSION_ROW],  # DD version query
-                [static_geo_row],  # Main extraction query
-                [],  # Siblings query
-            ]
-        )
+        mock_gc = _make_mock_gc(main_rows=[static_geo_row])
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
             from imas_codex.standard_names.sources.dd import extract_dd_candidates
@@ -235,13 +267,7 @@ class TestCoordinateCategoryAdmitted:
             data_type="FLT_1D",
         )
 
-        mock_gc = _make_mock_gc(
-            [
-                [_DD_VERSION_ROW],
-                [coord_row],
-                [],  # siblings
-            ]
-        )
+        mock_gc = _make_mock_gc(main_rows=[coord_row])
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
             from imas_codex.standard_names.sources.dd import extract_dd_candidates
@@ -315,13 +341,7 @@ class TestCandidateSurfacesNodeType:
                 data_type="FLT_1D",
             )
 
-            mock_gc = _make_mock_gc(
-                [
-                    [_DD_VERSION_ROW],
-                    [row],
-                    [],
-                ]
-            )
+            mock_gc = _make_mock_gc(main_rows=[row])
 
             with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
                 from imas_codex.standard_names.sources.dd import extract_dd_candidates
@@ -365,13 +385,7 @@ class TestCandidateSurfacesErrorLinks:
             ],
         )
 
-        mock_gc = _make_mock_gc(
-            [
-                [_DD_VERSION_ROW],
-                [row],
-                [],
-            ]
-        )
+        mock_gc = _make_mock_gc(main_rows=[row])
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
             from imas_codex.standard_names.sources.dd import extract_dd_candidates
@@ -400,13 +414,7 @@ class TestCandidateSurfacesErrorLinks:
             error_node_ids=[],
         )
 
-        mock_gc = _make_mock_gc(
-            [
-                [_DD_VERSION_ROW],
-                [row],
-                [],
-            ]
-        )
+        mock_gc = _make_mock_gc(main_rows=[row])
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
             from imas_codex.standard_names.sources.dd import extract_dd_candidates
@@ -500,7 +508,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_return_shape(self):
         """report_extract_breakdown returns a dict with the expected top-level keys."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -519,7 +529,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_total_aggregation(self):
         """total must be the sum of all cnt values."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -533,7 +545,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_by_node_type_aggregation(self):
         """by_node_type must aggregate counts correctly."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -550,7 +564,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_by_category_aggregation(self):
         """by_category must aggregate counts across all node_type values."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -566,7 +582,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_by_data_type_aggregation(self):
         """by_data_type must aggregate counts and must not include STRUCTURE."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -586,7 +604,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_has_errors_count(self):
         """has_errors_count must reflect the errors-query result."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -599,7 +619,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_samples_buckets_present(self):
         """samples must contain keys for each non-dynamic (node_type, node_category) pair."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -618,7 +640,11 @@ class TestReportBreakdownGroupsByTypeCategory:
             {"node_type": "static", "node_category": "quantity", "path": f"path/{i}"}
             for i in range(10)
         ]
-        mock_gc = _make_mock_gc([self._MOCK_COUNTS, many_samples, self._MOCK_ERRORS])
+        mock_gc = _make_mock_gc(
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=many_samples,
+            breakdown_error_rows=self._MOCK_ERRORS,
+        )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
             from imas_codex.standard_names.sources.dd import report_extract_breakdown
@@ -630,7 +656,9 @@ class TestReportBreakdownGroupsByTypeCategory:
     def test_dynamic_nodes_not_in_samples(self):
         """Dynamic-type paths must not appear in samples (only new admissions)."""
         mock_gc = _make_mock_gc(
-            [self._MOCK_COUNTS, self._MOCK_SAMPLES, self._MOCK_ERRORS]
+            breakdown_count_rows=self._MOCK_COUNTS,
+            breakdown_sample_rows=self._MOCK_SAMPLES,
+            breakdown_error_rows=self._MOCK_ERRORS,
         )
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
@@ -646,7 +674,7 @@ class TestReportBreakdownGroupsByTypeCategory:
 
     def test_empty_graph_returns_zero_total(self):
         """If the graph returns no rows, total must be 0."""
-        mock_gc = _make_mock_gc([[], [], []])
+        mock_gc = _make_mock_gc()
 
         with patch("imas_codex.graph.client.GraphClient", return_value=mock_gc):
             from imas_codex.standard_names.sources.dd import report_extract_breakdown
