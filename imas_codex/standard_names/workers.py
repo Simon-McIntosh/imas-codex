@@ -23,7 +23,7 @@ import logging
 import random
 import re as _re
 from collections.abc import Callable, Sequence
-from functools import cache as _cache
+from functools import cache as _cache, lru_cache
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.standard_names.defaults import (
@@ -251,7 +251,57 @@ def _dedup_adjacent_tokens(name: str, log: logging.Logger | None = None) -> str:
 # parent. Derived structural parents are reached later by stripping
 # qualifiers/projections, never by stripping a base's defining surface — so no
 # bare shape-parameter parent is ever admitted (see ``parents.py``).
-_SHAPE_PARAMETER_BASES = frozenset({"triangularity", "elongation", "squareness"})
+#
+# WHICH bases require the surface is codex POLICY; the tokens themselves are
+# ISN's. The policy is validated against the live ISN ``physical_base``
+# vocabulary at load, so a token ISN renames or retires drops out of the set and
+# is reported as drift rather than silently persisting as a spelling that
+# matches nothing. ISN's own naming guidance states the requirement ("Use
+# elongation_of_plasma_boundary or elongation_of_flux_surface, not elongation")
+# but exposes no machine-readable flag for it, so the selection lives here.
+_SHAPE_PARAMETER_BASE_POLICY: tuple[str, ...] = (
+    "triangularity",
+    "elongation",
+    "squareness",
+)
+
+
+@lru_cache(maxsize=1)
+def _isn_physical_bases() -> frozenset[str]:
+    """The ISN ``physical_base`` token universe, or empty when ISN is absent."""
+    try:
+        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+    except ImportError:
+        return frozenset()
+    return frozenset(SEGMENT_TOKEN_MAP.get("physical_base") or ())
+
+
+def shape_parameter_base_drift() -> frozenset[str]:
+    """Policy tokens that are no longer ISN ``physical_base`` tokens.
+
+    Non-empty means ISN's vocabulary moved out from under the surface rule and
+    the policy needs updating (a renamed or retired shape descriptor). Empty
+    when ISN is unavailable — an absent vocabulary is not evidence of drift.
+    """
+    isn = _isn_physical_bases()
+    if not isn:
+        return frozenset()
+    return frozenset(_SHAPE_PARAMETER_BASE_POLICY) - isn
+
+
+@lru_cache(maxsize=1)
+def _shape_parameter_bases() -> frozenset[str]:
+    """Shape-descriptor bases that must carry a surface locus.
+
+    The codex policy intersected with the live ISN ``physical_base``
+    vocabulary: a token ISN no longer registers is dropped (and reported by
+    :func:`shape_parameter_base_drift`) rather than applied blind. When ISN is
+    unavailable the policy is returned as-is so the rule keeps working offline.
+    """
+    isn = _isn_physical_bases()
+    if not isn:
+        return frozenset(_SHAPE_PARAMETER_BASE_POLICY)
+    return frozenset(_SHAPE_PARAMETER_BASE_POLICY) & isn
 
 
 def _shape_parameter_surface(dd_path: str | None) -> str:
@@ -284,7 +334,7 @@ def _inject_shape_parameter_surface(
     seg = getattr(candidate, "segments", None)
     if seg is None:
         return False
-    if seg.base_kind != "quantity" or seg.base_token not in _SHAPE_PARAMETER_BASES:
+    if seg.base_kind != "quantity" or seg.base_token not in _shape_parameter_bases():
         return False
     if seg.locus_token:  # composer already named a surface — trust it
         return False
@@ -1858,7 +1908,12 @@ def _name_locus_token(sn_name: str) -> str | None:
 
 
 def _is_attachment_consistent(
-    source_id: str, sn_name: str, existing_sources: Sequence[str] = ()
+    source_id: str,
+    sn_name: str,
+    existing_sources: Sequence[str] = (),
+    *,
+    dd_unit: str | None = None,
+    sn_unit: str | None = None,
 ) -> tuple[bool, str]:
     """Reject attachments where the DD path tense disagrees with the SN tense.
 
@@ -1869,6 +1924,10 @@ def _is_attachment_consistent(
     ``existing_sources`` are the DD paths already carried by ``sn_name`` (bare,
     ``dd:``-prefix stripped) — used by the distinct-vector guard to reject a
     second vector field of one device node collapsing onto one scalar name.
+
+    ``dd_unit`` / ``sn_unit`` enable the dimensionality rule. Both are optional
+    because the lexical rules are unit-independent; a caller with no unit
+    context gets exactly the pre-unit behaviour.
     """
     change_prefixes = (
         "change_in_",
@@ -1929,7 +1988,7 @@ def _is_attachment_consistent(
     # ``…_of_plasma_boundary`` name is consistent (the separatrix IS the
     # boundary), since both derive ``plasma_boundary``. Mirrors
     # :func:`_shape_parameter_surface`.
-    if any(b in sn_name for b in _SHAPE_PARAMETER_BASES) and any(
+    if any(b in sn_name for b in _shape_parameter_bases()) and any(
         f"_of_{s}" in sn_name for s in ("plasma_boundary", "flux_surface")
     ):
         expected_surface = _shape_parameter_surface(source_id)
@@ -1967,6 +2026,32 @@ def _is_attachment_consistent(
                     f"locus '{locus}' but path '{source_id}' shares no device "
                     f"token with it"
                 )
+
+    # Dimensionality: a source cannot realize a name whose unit is a different
+    # physical quantity. Compares DIMENSIONALITY through the one canonical unit
+    # authority (``units_agree`` → ``imas_standard_names.canonical_unit``), so
+    # ordering-only and spelling-only differences (``m^-3.W`` vs ``W.m^-3``,
+    # ``Hz`` vs ``s^-1``) collapse and never reject. The DD contradicts itself on
+    # a curated set of paths — direction/up-vector components declared ``m`` when
+    # they are dimensionless cosines, charge NUMBER fields declared ``e`` — where
+    # the DD is wrong and the name is right; those route through the same
+    # ``dd_unit_exceptions.yaml`` registry ``units_agree`` already consults, so
+    # there is no second list here. A unit that is absent or that the canonical
+    # parser cannot resolve on either side is a DD-completeness gap, not an
+    # attachment defect: nothing to disagree with, so the pair is accepted.
+    if dd_unit and sn_unit:
+        from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
+
+        if (
+            canonical_or_none(dd_unit) is not None
+            and canonical_or_none(sn_unit) is not None
+            and not units_agree(sn_unit, dd_unit, source_id)
+        ):
+            return False, (
+                f"unit dimensionality mismatch: path '{source_id}' declares "
+                f"'{dd_unit}' but SN '{sn_name}' declares '{sn_unit}' — "
+                f"physically distinct quantities"
+            )
 
     return True, ""
 

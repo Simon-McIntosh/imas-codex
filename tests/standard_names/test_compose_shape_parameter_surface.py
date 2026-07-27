@@ -19,9 +19,9 @@ import pytest
 from imas_codex.standard_names import workers as _workers
 from imas_codex.standard_names.models import GrammarSegments, StandardNameCandidate
 from imas_codex.standard_names.workers import (
-    _SHAPE_PARAMETER_BASES,
     _inject_shape_parameter_surface,
     _is_attachment_consistent,
+    _shape_parameter_bases,
     _shape_parameter_surface,
     normalize_spelling,
 )
@@ -117,7 +117,18 @@ def test_idempotent():
 
 
 def test_closed_set_membership():
-    assert _SHAPE_PARAMETER_BASES == frozenset(
+    """The surface rule covers the three dimensionless boundary-shape descriptors.
+
+    Resolved against the live ISN vocabulary — a token ISN retires drops out and
+    is reported by ``shape_parameter_base_drift`` instead of silently persisting.
+    """
+    from imas_codex.standard_names.workers import shape_parameter_base_drift
+
+    assert not shape_parameter_base_drift(), (
+        "ISN's physical_base vocabulary no longer registers every "
+        "shape-parameter policy token"
+    )
+    assert _shape_parameter_bases() == frozenset(
         {"triangularity", "elongation", "squareness"}
     )
 
