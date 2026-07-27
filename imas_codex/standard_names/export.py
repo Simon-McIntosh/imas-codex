@@ -1050,6 +1050,23 @@ def _write_domain_yaml(
     return filepath
 
 
+def resolve_export_scope(*, review_batch: list[str] | None, domain: str | None) -> str:
+    """Classify an export run for the ``catalog.yml`` ``export_scope`` stamp.
+
+    The returned value must be one of the literals the ISN
+    ``StandardNameCatalogManifest`` model accepts, otherwise the manifest
+    fails validation and is written unvalidated (``_write_manifest`` warns
+    rather than raises, so a wrong value is silent). Kept as one small pure
+    function so the accepted set is asserted directly against the pinned ISN
+    model rather than inferred from a live export.
+    """
+    if review_batch is not None:
+        return "review"
+    if domain:
+        return "domain"
+    return "full"
+
+
 def _write_manifest(
     staging_dir: Path,
     *,
@@ -1596,12 +1613,7 @@ def run_export(
 
     # ── 6. Write manifest ───────────────────────────────────────
     all_domains = sorted(domain_entries.keys())
-    if review_batch is not None:
-        export_scope = "review"
-    elif domain:
-        export_scope = "domain_subset"
-    else:
-        export_scope = "full"
+    export_scope = resolve_export_scope(review_batch=review_batch, domain=domain)
     _write_manifest(
         staging_path,
         cocos_convention=cocos_convention,

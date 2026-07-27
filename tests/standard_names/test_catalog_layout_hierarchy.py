@@ -449,7 +449,7 @@ class TestPartialExportPublishSafety:
         assert report.errors
         assert any("domain mismatch" in e.lower() for e in report.errors)
 
-    def test_domain_subset_only_touches_listed(self, tmp_path: Path) -> None:
+    def test_domain_scoped_publish_only_touches_listed(self, tmp_path: Path) -> None:
         """Domain-subset publish only copies listed domain files."""
         from imas_codex.standard_names.publish import run_publish
 
@@ -462,7 +462,7 @@ class TestPartialExportPublishSafety:
 
         manifest = {
             "catalog_name": "imas-standard-names-catalog",
-            "export_scope": "domain_subset",
+            "export_scope": "domain",
             "domains_included": ["transport"],
             "edge_model_version": "v1",
         }
