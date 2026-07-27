@@ -134,6 +134,49 @@ class TestDimensionlessIsTheUnitOne:
         assert normalize_unit_symbol("m^2.sr") == "m^2.sr"
 
 
+class TestDdUnitDefectCuration:
+    """A DD-declared unit that contradicts the quantity's dimensionality is not
+    propagated into a standard name.
+
+    DD 4.1.1 declares ``ionisation_potential`` as ``eV`` under ``profiles_1d``
+    but as ``e`` under ``ggd`` — the same quantity, one an energy and one a
+    charge. Blindly trusting the declaration types the GGD copy as a charge and
+    desyncs it from its own scalar sibling, so the curated resolver returns the
+    dimensionally-correct unit. Charge numbers (z_ion / z_min / z_max / z_n /
+    z_average / z_square_average) legitimately carry ``e`` and must be
+    untouched.
+    """
+
+    def test_ionisation_potential_resolves_to_energy(self):
+        from imas_codex.units import resolve_dd_unit
+
+        for path in (
+            "edge_profiles/ggd/ion/state/ionisation_potential",
+            "plasma_profiles/ggd/ion/state/ionisation_potential/values",
+        ):
+            assert resolve_dd_unit(path, "e") == "eV", path
+
+    def test_scalar_sibling_declaration_is_unchanged(self):
+        from imas_codex.units import resolve_dd_unit
+
+        path = "edge_profiles/profiles_1d/ion/state/ionisation_potential"
+        assert resolve_dd_unit(path, "eV") == "eV"
+
+    def test_charge_numbers_keep_the_charge_unit(self):
+        from imas_codex.units import resolve_dd_unit
+
+        for leaf in ("z_ion", "z_min", "z_max", "z_n", "z_average", "z_square_average"):
+            path = f"core_profiles/profiles_1d/ion/state/{leaf}"
+            assert resolve_dd_unit(path, "e") == "e", leaf
+
+    def test_uncurated_paths_fall_through_to_normalisation(self):
+        from imas_codex.units import resolve_dd_unit
+
+        assert resolve_dd_unit("equilibrium/time_slice/profiles_1d/psi", "Wb") == "Wb"
+        assert resolve_dd_unit("equilibrium/time_slice/boundary/elongation", "-") == "1"
+        assert resolve_dd_unit("some/path", "mixed") is None
+
+
 class TestDdCountPseudoUnits:
     """DD count pseudo-units are dimensionless counts, not unparseable junk.
 

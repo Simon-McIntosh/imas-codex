@@ -2084,7 +2084,7 @@ def phase_build(
         # may have changed n.unit, so rebuild edges for the latest-version paths:
         # drop existing HAS_UNIT, then MERGE the normalized current unit (paths
         # whose unit is now empty/sentinel correctly end with no edge).
-        from imas_codex.units import normalize_unit_symbol
+        from imas_codex.units import resolve_dd_unit
 
         latest_ids = [u["id"] for u in unit_updates]
         for i in range(0, len(latest_ids), 1000):
@@ -2101,7 +2101,9 @@ def phase_build(
         for path, info in latest_paths.items():
             raw = info.get("units", "")
             if raw:
-                normalized = normalize_unit_symbol(raw)
+                # Path-aware: corrects DD declarations that contradict the
+                # quantity's dimensionality (see units.resolve_dd_unit).
+                normalized = resolve_dd_unit(path, raw)
                 if normalized:
                     latest_unit_edges.append({"id": path, "unit": normalized})
         for i in range(0, len(latest_unit_edges), 1000):
@@ -3581,7 +3583,7 @@ def _batch_create_path_nodes(
         # the edge rather than leaving a stale one alongside the new one. Nodes
         # whose unit became empty/sentinel correctly end with NO HAS_UNIT edge.
         # Scoped to the batch's node ids — never touches the whole graph.
-        from imas_codex.units import normalize_unit_symbol
+        from imas_codex.units import resolve_dd_unit
 
         batch_ids = [p["id"] for p in batch]
         if batch_ids:
@@ -3597,7 +3599,9 @@ def _batch_create_path_nodes(
         unit_paths = []
         for p in batch:
             if p["unit"] and p["unit"] != "":
-                normalized = normalize_unit_symbol(p["unit"])
+                # Path-aware: corrects DD declarations that contradict the
+                # quantity's dimensionality (see units.resolve_dd_unit).
+                normalized = resolve_dd_unit(p["id"], p["unit"])
                 if normalized:
                     unit_paths.append({**p, "unit": normalized})
         if unit_paths:
