@@ -266,14 +266,25 @@ _SHAPE_PARAMETER_BASE_POLICY: tuple[str, ...] = (
 )
 
 
-@lru_cache(maxsize=1)
-def _isn_physical_bases() -> frozenset[str]:
-    """The ISN ``physical_base`` token universe, or empty when ISN is absent."""
+@_cache
+def _isn_segment_tokens(segment: str) -> frozenset[str]:
+    """The token universe ISN registers for one grammar *segment*.
+
+    Empty when ISN is absent or the segment is unknown. Callers must read empty
+    as "the vocabulary cannot be consulted", never as "no token qualifies" — a
+    rule keyed on an empty set would judge every name by a vocabulary it could
+    not read.
+    """
     try:
         from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
     except ImportError:
         return frozenset()
-    return frozenset(SEGMENT_TOKEN_MAP.get("physical_base") or ())
+    return frozenset(SEGMENT_TOKEN_MAP.get(segment) or ())
+
+
+def _isn_physical_bases() -> frozenset[str]:
+    """The ISN ``physical_base`` token universe, or empty when ISN is absent."""
+    return _isn_segment_tokens("physical_base")
 
 
 def shape_parameter_base_drift() -> frozenset[str]:
@@ -320,6 +331,36 @@ def _rate_natured_bases() -> frozenset[str]:
         for t in _isn_physical_bases()
         if t in {"rate", "frequency"} or t.endswith(("_rate", "_frequency"))
     )
+
+
+@lru_cache(maxsize=1)
+def _state_resolution_tokens() -> frozenset[str]:
+    """Grammar tokens that mark a name as resolved to ONE state of a species.
+
+    The grammar carries state resolution two ways, and both are read from the
+    live vocabulary rather than restated here: a dedicated ``state`` segment
+    whose tokens name the KIND of state (a charge state, an internal excitation
+    state), and the ``subject`` tokens that fold the state into the species
+    (``ion_state``, ``neutral_state``, ``ion_charge_state``). Codex owns only
+    the POLICY on the subject side — a subject that names a state ends in
+    ``_state`` — so a new kind of state added upstream is recognised with no
+    codex edit. Empty when the vocabulary cannot be consulted, which switches
+    the rule off rather than judging every name species-level.
+    """
+    subjects = frozenset(
+        t for t in _isn_segment_tokens("subject") if t.endswith("_state")
+    )
+    return _isn_segment_tokens("state") | subjects
+
+
+def _name_denotes_state(sn_name: str) -> bool:
+    """True when *sn_name* is resolved to one state of a species.
+
+    Matched as whole grammar tokens, so a word that merely ends in ``state``
+    (``steady_state``, a regime rather than a species state) never counts.
+    """
+    padded = f"_{sn_name}_"
+    return any(f"_{t}_" in padded for t in _state_resolution_tokens())
 
 
 def _name_denotes_rate(sn_name: str) -> bool:
@@ -2096,25 +2137,27 @@ def _is_attachment_consistent(
             f"'{sn_name}' is a base quantity"
         )
 
-    # State-resolution consistency (R1/R4 rotation finding): the DD resolves
-    # species into ionisation/atomic states via ``…/state/…`` sub-structures.
-    # A state-resolved path describes ONE state — it must not source a
-    # species-level name (the species name is the structural parent, not a
-    # synonym), and a species-level path must not source a state name.
-    state_subjects = ("ion_state", "ion_charge_state", "neutral_state")
-    padded = f"_{sn_name}_"
-    sn_is_state = any(f"_{t}_" in padded for t in state_subjects)
-    path_is_state = "/state/" in source_id or source_id.endswith("/state")
-    if path_is_state and not sn_is_state:
-        return False, (
-            f"state-resolution mismatch: path '{source_id}' is state-resolved "
-            f"but SN '{sn_name}' is species-level"
-        )
-    if sn_is_state and not path_is_state:
-        return False, (
-            f"state-resolution mismatch: SN '{sn_name}' is state-resolved "
-            f"but path '{source_id}' is species-level"
-        )
+    # State-resolution consistency: the DD resolves a species into its
+    # ionisation / excitation states through ``…/state/…`` sub-structures, and
+    # each state entry carries its own value. A state-resolved path therefore
+    # describes ONE state and must not source a species-level name (the species
+    # is the structural parent of the value, not a synonym for it), and a
+    # species-level path must not source a state name. Skipped entirely when the
+    # grammar vocabulary cannot be consulted — with no tokens to recognise, the
+    # name side would read as species-level for every name.
+    if _state_resolution_tokens():
+        sn_is_state = _name_denotes_state(sn_name)
+        path_is_state = "/state/" in source_id or source_id.endswith("/state")
+        if path_is_state and not sn_is_state:
+            return False, (
+                f"state-resolution mismatch: path '{source_id}' is state-resolved "
+                f"but SN '{sn_name}' is species-level"
+            )
+        if sn_is_state and not path_is_state:
+            return False, (
+                f"state-resolution mismatch: SN '{sn_name}' is state-resolved "
+                f"but path '{source_id}' is species-level"
+            )
 
     # Shape-parameter surface consistency: a shape descriptor
     # (triangularity/elongation/squareness) is defined OF a surface, and the

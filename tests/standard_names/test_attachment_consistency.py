@@ -11,8 +11,10 @@ import pytest
 from imas_codex.standard_names.workers import (
     _is_attachment_consistent,
     _name_denotes_rate,
+    _name_denotes_state,
     _rate_natured_bases,
     _shape_parameter_bases,
+    _state_resolution_tokens,
 )
 
 # ---------------------------------------------------------------------------
@@ -291,6 +293,64 @@ def test_rate_base_detection_respects_token_boundaries(
     sn_name: str, denotes_rate: bool
 ) -> None:
     assert _name_denotes_rate(sn_name) is denotes_rate
+
+
+# ---------------------------------------------------------------------------
+# State resolution is read from the ISN vocabulary, not from a literal
+# ---------------------------------------------------------------------------
+
+
+def test_every_isn_state_segment_token_is_recognised() -> None:
+    """Adding a state token to ISN must never silently un-gate the rule.
+
+    The grammar expresses state resolution through a dedicated ``state``
+    segment. Every token in it must mark a name as state-resolved, so a new
+    kind of state ISN registers is picked up without a codex edit — this is the
+    drift tripwire for the whole rule.
+    """
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+    state_tokens = frozenset(SEGMENT_TOKEN_MAP.get("state") or ())
+    assert state_tokens, "ISN state vocabulary is empty — grammar not loaded"
+    missing = {
+        t for t in state_tokens if not _name_denotes_state(f"neutral_{t}_density")
+    }
+    assert not missing, (
+        f"ISN state tokens {sorted(missing)} are not recognised as state "
+        "resolution — the rule would treat their names as species-level"
+    )
+
+
+def test_state_tokens_come_from_the_isn_vocabulary() -> None:
+    """The set is ISN's own tokens filtered by codex policy, never a literal."""
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+    state_tokens = frozenset(SEGMENT_TOKEN_MAP.get("state") or ())
+    subjects = frozenset(SEGMENT_TOKEN_MAP.get("subject") or ())
+    assert subjects, "ISN subject vocabulary is empty — grammar not loaded"
+    resolved = _state_resolution_tokens()
+    assert resolved <= state_tokens | subjects
+    # Codex owns only the policy: a subject token that names a state ends in
+    # ``_state``. Every such subject must be covered.
+    assert {t for t in subjects if t.endswith("_state")} <= resolved
+
+
+@pytest.mark.parametrize(
+    "sn_name,denotes_state",
+    [
+        ("neutral_internal_state_density", True),
+        ("ion_state_minimum_charge_number", True),
+        ("radial_ion_charge_state_diffusion_coefficient", True),
+        ("neutral_density", False),
+        ("ion_charge_number", False),
+        # A regime that happens to end in ``state`` is not a species state.
+        ("steady_state_plasma_current", False),
+    ],
+)
+def test_state_detection_respects_token_boundaries(
+    sn_name: str, denotes_state: bool
+) -> None:
+    assert _name_denotes_state(sn_name) is denotes_state
 
 
 def test_shape_parameter_surface_rule_still_fires() -> None:

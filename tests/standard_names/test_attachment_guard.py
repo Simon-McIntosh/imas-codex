@@ -287,6 +287,123 @@ def test_inconsistent_pairs_are_rejected(source_id: str, sn_name: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# State resolution — a state-resolved path needs a state-resolved name
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # The grammar carries state resolution in a dedicated ``state`` segment
+        # whose tokens name the KIND of state, so an ``internal_state`` name is
+        # state-resolved and its ``/state/`` source is a consistent one.
+        (
+            "core_profiles/profiles_1d/neutral/state/density",
+            "neutral_internal_state_density",
+        ),
+        (
+            "core_profiles/profiles_1d/neutral/state/temperature",
+            "neutral_internal_state_temperature",
+        ),
+        (
+            "core_profiles/profiles_1d/neutral/state/density_fast",
+            "fast_neutral_internal_state_number_density",
+        ),
+        (
+            "core_transport/model/profiles_1d/neutral/state/energy/d",
+            "effective_neutral_internal_state_energy_diffusivity",
+        ),
+        (
+            "edge_profiles/ggd/neutral/state/velocity_diamagnetic/diamagnetic",
+            "effective_neutral_internal_state_velocity_due_to_diamagnetic_drift",
+        ),
+        (
+            "edge_transport/model/ggd/neutral/state/energy/flux/values",
+            "neutral_internal_state_energy_flux",
+        ),
+        (
+            "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/emitted/values",
+            "neutral_internal_state_particle_flux_at_wall",
+        ),
+        # The subject tokens that fold the state into the species keep working.
+        (
+            "core_profiles/profiles_1d/ion/state/z_min",
+            "ion_state_minimum_charge_number",
+        ),
+        (
+            "core_transport/model/profiles_1d/ion/state/particles/d",
+            "radial_ion_charge_state_diffusion_coefficient",
+        ),
+    ],
+)
+def test_state_resolved_name_accepts_a_state_resolved_path(
+    source_id: str, sn_name: str
+) -> None:
+    """Any grammar token naming a state marks the name as state-resolved."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert ok, reason
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # The name claims a state; the path stops at the element/species level.
+        (
+            "edge_transport/model/ggd/ion/element/atoms_n",
+            "atomic_count_of_ion_state",
+        ),
+        (
+            "core_transport/model/profiles_1d/ion/particles/d",
+            "radial_ion_charge_state_diffusion_coefficient",
+        ),
+        (
+            "core_profiles/profiles_1d/neutral/density",
+            "neutral_internal_state_density",
+        ),
+    ],
+)
+def test_state_resolved_name_rejects_a_species_level_path(
+    source_id: str, sn_name: str
+) -> None:
+    """A state-resolved name may not source a path that resolves no state."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert not ok
+    assert "state-resolution mismatch" in reason
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # ``z_max`` is the upper bound of the charge-state BUNDLE the state entry
+        # represents: the same species carries a different value in every state
+        # entry, so a name with no state qualifier cannot say which it means.
+        ("core_profiles/profiles_1d/ion/state/z_max", "ion_upper_bound_charge_number"),
+        ("core_profiles/profiles_1d/neutral/state/density", "neutral_density"),
+        ("edge_profiles/ggd/ion/state/energy_density_kinetic", "energy_density"),
+    ],
+)
+def test_state_resolved_path_rejects_a_species_level_name(
+    source_id: str, sn_name: str
+) -> None:
+    """A ``/state/`` path describes ONE state, not the species it sits under."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert not ok
+    assert "state-resolution mismatch" in reason
+
+
+def test_steady_state_is_not_state_resolution() -> None:
+    """``steady_state`` is a regime, not a species state.
+
+    The state tokens are matched as whole grammar tokens, so a word that merely
+    ends in ``state`` never gates the rule.
+    """
+    ok, reason = _is_attachment_consistent(
+        "equilibrium/time_slice/global_quantities/ip", "steady_state_plasma_current"
+    )
+    assert ok, reason
+
+
+# ---------------------------------------------------------------------------
 # Locus <-> source device-compatibility guard
 # ---------------------------------------------------------------------------
 
