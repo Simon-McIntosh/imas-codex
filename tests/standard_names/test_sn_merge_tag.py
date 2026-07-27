@@ -531,3 +531,203 @@ class TestMergeCliTag:
             )
         assert result.exit_code == 0, result.output
         assert not has_contract_tag(work, rc)
+
+
+# ---------------------------------------------------------------------------
+# A batch RC's version carries semver build metadata (v0.2.0rc65+label)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def labelled_merged_repo(tmp_path: Path) -> dict:
+    """The merged_repo shape, but the review branch carries a labelled version."""
+    bare = tmp_path / "origin.git"
+    _git(["init", "--bare", "-b", "main", str(bare)], tmp_path)
+    work = tmp_path / "isnc"
+    work.mkdir()
+    (work / "standard_names").mkdir()
+    _git(["init", "-b", "main"], work)
+    _git(["config", "user.email", "t@t"], work)
+    _git(["config", "user.name", "t"], work)
+    _git(["remote", "add", "origin", str(bare)], work)
+    yml = work / "standard_names" / "equilibrium.yml"
+    yml.write_text("- name: elongation\n  unit: '1'\n  documentation: Original.\n")
+    _git(["add", "."], work)
+    _git(["commit", "-q", "-m", "base catalog"], work)
+    _git(["push", "-q", "origin", "main"], work)
+
+    rc = "v0.1.0rc1+west-task-2e"
+    _git(["checkout", "-q", "-b", f"review/{rc}"], work)
+    yml.write_text("- name: elongation\n  unit: '1'\n  documentation: Batch add.\n")
+    _git(["add", "."], work)
+    _git(["commit", "-q", "-m", "review batch"], work)
+    _git(["checkout", "-q", "main"], work)
+    _git(["merge", "-q", "--no-ff", f"review/{rc}", "-m", "Merge review batch"], work)
+    merge_commit = _git(["rev-parse", "HEAD"], work).strip()
+    _git(["push", "-q", "origin", "main"], work)
+    return {"work": work, "merge_commit": merge_commit, "rc": rc}
+
+
+class TestLabelledVersionReceipt:
+    def test_a_plus_label_is_a_legal_branch_and_tag_ref(self, labelled_merged_repo):
+        """'+' is legal in a git ref, so branch and tag both hold the label."""
+        work, rc = labelled_merged_repo["work"], labelled_merged_repo["rc"]
+        assert f"review/{rc}" in _git(["branch"], work)
+
+    def test_receipt_tag_uses_the_full_labelled_version(self, labelled_merged_repo):
+        work, merge_commit, rc = (
+            labelled_merged_repo["work"],
+            labelled_merged_repo["merge_commit"],
+            labelled_merged_repo["rc"],
+        )
+        out = tag_fold_back(
+            isnc_dir=work,
+            head_ref=f"review/{rc}",
+            merge_commit=merge_commit,
+            pr_number=7,
+            pr_url="https://github.com/o/r/pull/7",
+            batch_artifact=f"{rc}.sn_names.yaml",
+            report=_report(),
+            remote="origin",
+            include_notes=False,
+            timestamp="T",
+        )
+        assert out.error is None
+        assert out.tag == rc
+        assert out.created and out.pushed
+        assert has_contract_tag(work, rc)
+        assert _git(["rev-list", "-n1", rc], work).strip() == merge_commit
+        assert rc in _git(["ls-remote", "--tags", "origin"], work)
+
+    def test_undo_deletes_the_labelled_receipt_tag(self, labelled_merged_repo):
+        from imas_codex.standard_names.merge import delete_fold_back_tag
+
+        work, merge_commit, rc = (
+            labelled_merged_repo["work"],
+            labelled_merged_repo["merge_commit"],
+            labelled_merged_repo["rc"],
+        )
+        tag_fold_back(
+            isnc_dir=work,
+            head_ref=f"review/{rc}",
+            merge_commit=merge_commit,
+            pr_number=7,
+            pr_url="u",
+            batch_artifact=None,
+            report=_report(),
+            remote="origin",
+            include_notes=False,
+            timestamp="T",
+        )
+        assert has_contract_tag(work, rc)
+        ok, err = delete_fold_back_tag(work, tag=rc, remote="origin")
+        assert ok, err
+        assert not has_contract_tag(work, rc)
+        assert rc not in _git(["ls-remote", "--tags", "origin"], work)
+
+
+class TestMergeCliLabelledVersion:
+    """The CLI must resolve a labelled batch RC end-to-end from the branch name."""
+
+    def _resolved(self, repo):
+        from imas_codex.standard_names.merge import ResolvedPr
+
+        return ResolvedPr(
+            number=7,
+            url="https://github.com/o/r/pull/7",
+            merge_commit=repo["merge_commit"],
+            head_ref=f"review/{repo['rc']}",
+            base_ref="main",
+        )
+
+    def test_merge_locates_the_labelled_artifact_and_tags_the_version(
+        self, labelled_merged_repo, tmp_path, monkeypatch
+    ):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+
+        work, rc = labelled_merged_repo["work"], labelled_merged_repo["rc"]
+        # Frozen artifact for this labelled RC, in a temp reviews home.
+        reviews = tmp_path / "reviews"
+        reviews.mkdir()
+        (reviews / f"{rc}.sn_names.yaml").write_text(
+            "kind: sn_names\nschema_version: 1\nname: b\nnames:\n  - plasma_current\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            "imas_codex.standard_names.catalog_release.default_reviews_dir",
+            lambda: reviews,
+        )
+        seen: dict = {}
+
+        def _run_merge(**kw):
+            seen.update(kw)
+            return _report(accepted=1, auto=0)
+
+        with (
+            patch(
+                f"{MERGE}.resolve_merged_pr",
+                return_value=self._resolved(labelled_merged_repo),
+            ),
+            patch(f"{MERGE}.run_merge", side_effect=_run_merge),
+        ):
+            result = CliRunner().invoke(
+                sn,
+                [
+                    "merge",
+                    "--isnc",
+                    str(work),
+                    "--pr",
+                    "https://github.com/o/r/pull/7",
+                    "--no-notes",
+                ],
+            )
+        assert result.exit_code == 0, result.output
+        # The artifact was auto-located from the labelled branch name.
+        assert seen["batch"] == ["plasma_current"]
+        assert f"{rc}.sn_names.yaml" in result.output
+        # The receipt tag carries the full labelled version.
+        assert has_contract_tag(work, rc)
+
+    def test_second_fold_back_of_a_labelled_rc_is_refused(self, labelled_merged_repo):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+
+        work, rc, merge_commit = (
+            labelled_merged_repo["work"],
+            labelled_merged_repo["rc"],
+            labelled_merged_repo["merge_commit"],
+        )
+        create_fold_back_tag(
+            work,
+            tag=rc,
+            merge_commit=merge_commit,
+            message=build_merge_tag_message(
+                build_contract_block(
+                    pr_number=7,
+                    pr_url="u",
+                    batch_artifact=None,
+                    report=_report(),
+                    timestamp="T",
+                )
+            ),
+            remote="origin",
+        )
+        with patch(
+            f"{MERGE}.resolve_merged_pr",
+            return_value=self._resolved(labelled_merged_repo),
+        ):
+            result = CliRunner().invoke(
+                sn,
+                [
+                    "merge",
+                    "--isnc",
+                    str(work),
+                    "--pr",
+                    "https://github.com/o/r/pull/7",
+                ],
+            )
+        assert result.exit_code == 1
+        assert rc in result.output

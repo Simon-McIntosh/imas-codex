@@ -210,3 +210,82 @@ class TestBatchTargetAuto:
         result, captured = self._invoke(["-m", "x", "--target", "upstream"])
         assert result.exit_code == 0, result.output
         assert captured["pr_target"] == "upstream"
+
+
+class TestBatchVersionVisibility:
+    """A batch RC must be recognisable as such in the CLI output."""
+
+    def test_batch_label_and_labelled_version_are_reported(self):
+        from imas_codex.standard_names.catalog_release import ReviewReleaseReport
+
+        def _fake(**kw):
+            return ReviewReleaseReport(
+                rc_version="v0.2.0rc66+west-task-2e",
+                batch_label="west-task-2e",
+                batch_size=12,
+            )
+
+        with patch(
+            "imas_codex.standard_names.catalog_release.run_review_release",
+            side_effect=_fake,
+        ):
+            result = CliRunner().invoke(
+                sn,
+                [
+                    "release",
+                    "--batch",
+                    "west_task_2e",
+                    "--isnc",
+                    "/tmp/x",
+                    "-m",
+                    "x",
+                ],
+            )
+        assert result.exit_code == 0, result.output
+        assert "v0.2.0rc66+west-task-2e" in result.output
+        assert "+west-task-2e" in result.output
+
+    @patch(MOCK_ISNC_DIR)
+    @patch(MOCK_GET_STATUS)
+    def test_status_flags_a_batch_rc(self, mock_status, mock_isnc):
+        mock_isnc.return_value = "/tmp/isnc"
+        mock_status.return_value = {
+            "state": "rc",
+            "tag": "v0.2.0rc66+west-task-2e",
+            "major": 0,
+            "minor": 2,
+            "patch": 0,
+            "rc": 66,
+            "build": "west-task-2e",
+            "commits_since": 0,
+            "isnc_path": "/tmp/isnc",
+            "isn_version": None,
+            "remotes": {},
+            "pages_enabled": None,
+        }
+        result = CliRunner().invoke(sn, ["release", "status"])
+        assert result.exit_code == 0, result.output
+        assert "v0.2.0rc66+west-task-2e" in result.output
+        assert "Batch RC" in result.output
+
+    @patch(MOCK_ISNC_DIR)
+    @patch(MOCK_GET_STATUS)
+    def test_status_of_a_plain_rc_shows_no_batch_line(self, mock_status, mock_isnc):
+        mock_isnc.return_value = "/tmp/isnc"
+        mock_status.return_value = {
+            "state": "rc",
+            "tag": "v0.2.0rc66",
+            "major": 0,
+            "minor": 2,
+            "patch": 0,
+            "rc": 66,
+            "build": None,
+            "commits_since": 0,
+            "isnc_path": "/tmp/isnc",
+            "isn_version": None,
+            "remotes": {},
+            "pages_enabled": None,
+        }
+        result = CliRunner().invoke(sn, ["release", "status"])
+        assert result.exit_code == 0, result.output
+        assert "Batch RC" not in result.output

@@ -40,8 +40,12 @@
       "type": "string"
     },
     "rc_version": {
-      "description": "The self-assigned RC catalog version that carries this batch (e.g. 'v0.2.0rc65'). Known before push, so it is the traceable key.",
+      "description": "The self-assigned RC catalog version that carries this batch (e.g. 'v0.2.0rc65+west-task-2e'). A batch RC carries the batch label as semver build metadata after the '+', so the version alone distinguishes it from a full candidate release. Known before push, so it is the traceable key.",
       "type": "string"
+    },
+    "batch_label": {
+      "description": "The semver build-metadata label identifying this batch, i.e. the part of rc_version after the '+'. Derived from the source manifest's name and sanitized to the semver build-metadata grammar.",
+      "type": ["string", "null"]
     },
     "minted_at": {
       "description": "ISO timestamp the batch was minted.",

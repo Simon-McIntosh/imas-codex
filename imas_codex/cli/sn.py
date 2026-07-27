@@ -4142,6 +4142,8 @@ def sn_release(
                 console.print(f"  - {err}")
             raise SystemExit(1)
         console.print(f"[green]Review batch {rr.rc_version}[/green]")
+        if rr.batch_label:
+            console.print(f"  Batch label: +{rr.batch_label}")
         console.print(f"  Batch size: {rr.batch_size} name(s)")
         if rr.unmatched_sources:
             console.print(
@@ -4164,6 +4166,11 @@ def sn_release(
         console.print(f"  State: {info['state'] or '[dim]no releases yet[/dim]'}")
         if info["tag"]:
             console.print(f"  Latest tag: {info['tag']}")
+            if info.get("build"):
+                console.print(
+                    f"  Batch RC: [cyan]+{info['build']}[/cyan] "
+                    "[dim](cut against a review batch)[/dim]"
+                )
             if info["commits_since"]:
                 console.print(f"  Commits since: {info['commits_since']}")
         if info.get("isn_version"):

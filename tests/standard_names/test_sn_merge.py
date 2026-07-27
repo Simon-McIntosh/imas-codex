@@ -428,3 +428,78 @@ class TestResolveMergedPr:
             pytest.raises(ValueError, match="gh pr view failed"),
         ):
             resolve_merged_pr("https://github.com/o/r/pull/7")
+
+
+# ---------------------------------------------------------------------------
+# Batch RCs carry the batch label as semver build metadata (v0.2.0rc65+label)
+# ---------------------------------------------------------------------------
+
+
+class TestBatchLabelledVersionRoundTrip:
+    """A release cut against a batch must survive release → branch → merge.
+
+    The version string carrying a ``+label`` suffix is the single key that
+    names the tag, the review branch, and the frozen artifact — so the merge
+    side must parse it back out of the branch name unchanged.
+    """
+
+    def test_merge_tag_name_keeps_the_label(self):
+        from imas_codex.standard_names.merge import merge_tag_name
+
+        assert (
+            merge_tag_name("review/v0.2.0rc65+west-task-2e")
+            == "v0.2.0rc65+west-task-2e"
+        )
+
+    def test_plain_and_release_branches_are_unaffected(self):
+        from imas_codex.standard_names.merge import merge_tag_name
+
+        assert merge_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
+        assert merge_tag_name("release/v1.0.0") == "v1.0.0"
+
+    def test_resolve_merged_pr_carries_a_labelled_head_ref(self):
+        from imas_codex.standard_names.merge import resolve_merged_pr
+
+        payload = {
+            "number": 9,
+            "url": "https://github.com/o/r/pull/9",
+            "state": "MERGED",
+            "mergeCommit": {"oid": "beef5678"},
+            "headRefName": "review/v0.2.0rc65+west-task-2e",
+            "baseRefName": "main",
+        }
+        import json as _json
+        from types import SimpleNamespace
+
+        with patch(
+            "imas_codex.standard_names.merge.subprocess.run",
+            return_value=SimpleNamespace(
+                returncode=0, stdout=_json.dumps(payload), stderr=""
+            ),
+        ):
+            r = resolve_merged_pr("https://github.com/o/r/pull/9")
+        assert r.head_ref == "review/v0.2.0rc65+west-task-2e"
+
+    def test_release_branch_name_resolves_back_to_the_frozen_artifact(self, tmp_path):
+        """release → branch name → merge locates the same artifact file."""
+        from imas_codex.standard_names.catalog_release import (
+            _format_tag,
+            _freeze_review_artifact,
+        )
+        from imas_codex.standard_names.merge import merge_tag_name
+        from imas_codex.standard_names.sources_manifest import load_names_file
+
+        tag = _format_tag(0, 2, 0, 65, build="west_task_2e")
+        artifact = _freeze_review_artifact(
+            tmp_path,
+            rc_version=tag,
+            names=["plasma_current"],
+            minted_from="west_task_2e.yaml",
+            unmatched=[],
+        )
+        branch = f"review/{tag}"
+        rc = merge_tag_name(branch)
+        assert rc == tag
+        located = tmp_path / f"{rc}.sn_names.yaml"
+        assert located == artifact
+        assert load_names_file(located) == ["plasma_current"]

@@ -79,12 +79,12 @@ _PR_TARGET = {
 }
 
 
-def _write_names_focus(tmp_path):
-    p = tmp_path / "batch.yaml"
+def _write_names_focus(tmp_path, *, name="demo-batch", filename="batch.yaml"):
+    p = tmp_path / filename
     p.write_text(
         "kind: sn_names\n"
         "schema_version: 1\n"
-        "name: demo-batch\n"
+        f"name: {name}\n"
         "names:\n"
         "  - poloidal_flux\n"
         "  - plasma_current\n",
@@ -112,12 +112,14 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     )
 
     assert report.errors == [], report.errors
-    assert report.rc_version == "v0.1.0rc1"
+    # The batch identity rides the version as semver build metadata.
+    assert report.rc_version == "v0.1.0rc1+demo-batch"
+    assert report.batch_label == "demo-batch"
     assert report.batch_size == 2
     # Export received the sorted batch (additive review export).
     assert record["review_batch"] == ["plasma_current", "poloidal_flux"]
     # Branch created and pushed to the fork remote.
-    assert report.branch == "review/v0.1.0rc1"
+    assert report.branch == "review/v0.1.0rc1+demo-batch"
     assert report.pushed is True
     # PR opened and back-filled.
     assert report.pr_number == 42
@@ -125,17 +127,18 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
 
     # Artifact frozen and back-filled.
     artifact = Path(report.artifact_path)
-    assert artifact.name == "v0.1.0rc1.sn_names.yaml"
+    assert artifact.name == "v0.1.0rc1+demo-batch.sn_names.yaml"
     doc = yaml.safe_load(artifact.read_text())
     assert doc["kind"] == "sn_names"
     assert doc["names"] == ["plasma_current", "poloidal_flux"]
-    assert doc["rc_version"] == "v0.1.0rc1"
+    assert doc["rc_version"] == "v0.1.0rc1+demo-batch"
+    assert doc["batch_label"] == "demo-batch"
     assert doc["pr_number"] == 42
     assert doc["pr_url"].endswith("/pull/42")
 
     # The review branch exists in the checkout.
     branches = _git("branch", cwd=isnc_repo).stdout
-    assert "review/v0.1.0rc1" in branches
+    assert "review/v0.1.0rc1+demo-batch" in branches
 
 
 def test_review_release_dry_run_no_push_no_pr(isnc_repo, tmp_path):
@@ -435,7 +438,112 @@ def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
         **_PR_TARGET,
     )
     assert report.errors == [], report.errors
-    assert seen["rc_version"] == "v0.1.0rc1"
+    assert seen["rc_version"] == "v0.1.0rc1+demo-batch"
     assert seen["batch_size"] == 2
     assert seen["pr_title"] == "Custom title"
     assert seen["pr_body"] == "Custom body"
+
+
+# ── the batch label in the version (semver build metadata) ─────────────────
+
+
+def test_batch_label_falls_back_to_the_manifest_filename_stem(isnc_repo, tmp_path):
+    """A manifest with no usable name is labelled from its filename."""
+    focus = tmp_path / "no_name_batch.yaml"
+    focus.write_text(
+        "kind: sn_names\nschema_version: 1\nname: x\nnames:\n  - plasma_current\n",
+        encoding="utf-8",
+    )
+    # 'name: x' is usable, so override it away to exercise the fallback.
+    import yaml as _yaml
+
+    doc = _yaml.safe_load(focus.read_text())
+    del doc["name"]
+    focus.write_text(_yaml.safe_dump(doc), encoding="utf-8")
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "x",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+    # The sn_names schema requires 'name', so the focus load fails first —
+    # but the label derivation itself is independent of that and is asserted
+    # directly here.
+    from imas_codex.standard_names.catalog_release import batch_build_metadata
+
+    assert batch_build_metadata(focus) == "no-name-batch"
+    assert report.errors  # schema still enforces 'name' on sn_names files
+
+
+def test_dry_run_version_and_artifact_carry_the_label(isnc_repo, tmp_path):
+    focus = _write_names_focus(tmp_path, name="west-task-2e")
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "x",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+    assert report.errors == [], report.errors
+    assert report.rc_version == "v0.1.0rc1+west-task-2e"
+    assert report.branch == "review/v0.1.0rc1+west-task-2e"
+    assert Path(report.artifact_path).name == "v0.1.0rc1+west-task-2e.sn_names.yaml"
+
+
+def test_batch_rc_counter_continues_past_a_labelled_tag(isnc_repo, tmp_path):
+    """The RC counter must see a batch tag — otherwise it silently reuses it."""
+    focus = _write_names_focus(tmp_path, name="second-batch")
+    _git("tag", "v0.1.0rc1+first-batch", cwd=isnc_repo)
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "x",
+        staging_dir=tmp_path / "staging",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+    assert report.errors == [], report.errors
+    # rc2, and the NEW batch's label — never the superseded tag's.
+    assert report.rc_version == "v0.1.0rc2+second-batch"
+
+
+def test_frozen_artifact_is_schema_valid_with_the_label(isnc_repo, tmp_path):
+    """The label field must not break the sn_names schema the merge side loads."""
+    from imas_codex.standard_names.sources_manifest import load_names_file
+
+    focus = _write_names_focus(tmp_path, name="west-task-2e")
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "x",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+    assert load_names_file(report.artifact_path) == [
+        "plasma_current",
+        "poloidal_flux",
+    ]

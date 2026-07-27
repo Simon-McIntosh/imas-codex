@@ -19,8 +19,13 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-# Only match clean semver tags (ignore legacy suffixed tags like v0.3.0-rc1-w40-corpus)
-_SEMVER_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?$")
+# Only match clean semver tags (ignore legacy suffixed tags like
+# v0.3.0-rc1-w40-corpus). The optional ``+<build>`` suffix is semver build
+# metadata carrying the review-batch identity of a batch RC — see
+# :func:`sanitize_build_metadata` for the grammar it must satisfy.
+_SEMVER_RE = re.compile(
+    r"^v(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"
+)
 
 _RC_REMOTE = "origin"
 _FINAL_REMOTE = "upstream"
@@ -75,16 +80,94 @@ def _run_git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess
     )
 
 
-def _format_tag(major: int, minor: int, patch: int, rc: int | None) -> str:
-    """Format version components as a git tag (v1.0.0 or v1.0.0rc1)."""
+def sanitize_build_metadata(label: str) -> str:
+    """Coerce *label* into legal semver build metadata.
+
+    Semver permits build metadata to be a dot-separated series of identifiers
+    made only of ``[0-9A-Za-z-]`` — underscores and every other character are
+    illegal. So each run of illegal characters collapses to a single hyphen,
+    dots are kept as identifier separators, the result is lower-cased, and
+    leading/trailing separators are stripped.
+
+    Raises ValueError when nothing usable survives: a batch release must never
+    be cut with a silently-empty label.
+    """
+    if not label or not label.strip():
+        raise ValueError("build metadata label is empty")
+    body = re.sub(r"[^0-9a-z.]+", "-", label.strip().lower())
+    body = re.sub(r"-{2,}", "-", body)
+    # Drop empty identifiers (e.g. from a doubled dot) and edge separators.
+    parts = [p.strip("-") for p in body.split(".")]
+    body = ".".join(p for p in parts if p)
+    if not body:
+        raise ValueError(f"no legal semver build metadata in label: {label!r}")
+    return body
+
+
+def batch_build_metadata(manifest: str | Path) -> str:
+    """The build-metadata label identifying a review batch, from its manifest.
+
+    Derived from the manifest's own ``name`` field; when that is absent the
+    filename stem is used (any ``.sn_names`` inner suffix dropped). Either way
+    the value passes through :func:`sanitize_build_metadata`, so a manifest
+    whose identity yields no legal label raises rather than cutting an
+    unlabelled batch release.
+    """
+    import yaml
+
+    path = Path(manifest)
+    declared: str | None = None
+    try:
+        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if isinstance(doc, dict) and isinstance(doc.get("name"), str):
+            declared = doc["name"]
+    except (OSError, yaml.YAMLError):
+        declared = None
+    if declared and declared.strip():
+        return sanitize_build_metadata(declared)
+    stem = path.name.split(".", 1)[0]
+    try:
+        return sanitize_build_metadata(stem)
+    except ValueError as exc:
+        raise ValueError(
+            f"{path}: cannot derive a batch label — the manifest declares no "
+            "usable 'name' and its filename yields no legal semver build "
+            "metadata"
+        ) from exc
+
+
+def _format_tag(
+    major: int,
+    minor: int,
+    patch: int,
+    rc: int | None,
+    *,
+    build: str | None = None,
+) -> str:
+    """Format version components as a git tag (v1.0.0, v1.0.0rc1, v1.0.0rc1+label).
+
+    Build metadata is only ever carried by a release candidate — a stable
+    release is the catalog's authoritative version and must not be qualified
+    by the batch it happened to be cut from.
+    """
     base = f"v{major}.{minor}.{patch}"
-    return f"{base}rc{rc}" if rc else base
+    tag = f"{base}rc{rc}" if rc else base
+    if not build:
+        return tag
+    if rc is None:
+        raise ValueError(
+            "build metadata is only carried by a release candidate, "
+            f"not by the stable tag {tag}"
+        )
+    return f"{tag}+{sanitize_build_metadata(build)}"
 
 
 def _parse_version(tag: str) -> tuple[int, int, int, int | None]:
     """Parse a version tag into (major, minor, patch, rc_number|None).
 
-    Handles: v1.0.0, v1.0.0rc1
+    Handles: v1.0.0, v1.0.0rc1, v1.0.0rc1+build-label. Build metadata does not
+    participate in precedence (semver), so it is deliberately absent from the
+    returned tuple — read it with :func:`_parse_build`.
     """
     match = _SEMVER_RE.match(tag)
     if not match:
@@ -92,6 +175,14 @@ def _parse_version(tag: str) -> tuple[int, int, int, int | None]:
     major, minor, patch = int(match[1]), int(match[2]), int(match[3])
     rc = int(match[4]) if match[4] else None
     return major, minor, patch, rc
+
+
+def _parse_build(tag: str) -> str | None:
+    """The build-metadata label of a version tag, or None when it carries none."""
+    match = _SEMVER_RE.match(tag)
+    if not match:
+        raise ValueError(f"Cannot parse version tag: {tag}")
+    return match[5]
 
 
 def _tag_exists(tag: str, *, cwd: Path | None = None) -> bool:
@@ -109,16 +200,37 @@ def _commits_since_tag(tag: str, *, cwd: Path | None = None) -> int:
 # =============================================================================
 
 
+def _tag_sort_key(tag: str) -> tuple[int, int, int, int]:
+    """Ordering key for a version tag — **build metadata excluded by design**.
+
+    Two tags differing only in build metadata are equal in precedence (semver),
+    so a labelled batch RC and the bare RC of the same number rank identically
+    and the RC counter continues from either.
+
+    An unsuffixed tag sorts *below* the RCs of the same M.m.p, mirroring the
+    ordering git's version sort produced here before: the state machine leaves
+    RC mode via an explicit ``--bump``, never by tag ordering.
+    """
+    major, minor, patch, rc = _parse_version(tag)
+    return (major, minor, patch, rc if rc is not None else -1)
+
+
 def _get_semver_tags(cwd: Path | None = None) -> list[str]:
-    """Get all clean semver tags, sorted by version (descending)."""
-    result = _run_git("tag", "--sort=-v:refname", cwd=cwd)
+    """Get all clean semver tags, ordered by version (descending).
+
+    Ordering is computed in Python rather than delegated to git's
+    ``--sort=-v:refname``, which orders a ``+build`` suffix lexically and has no
+    notion of build metadata being precedence-neutral.
+    """
+    result = _run_git("tag", cwd=cwd)
     if result.returncode != 0:
         return []
-    return [
+    tags = [
         tag.strip()
         for tag in result.stdout.strip().splitlines()
         if _SEMVER_RE.match(tag.strip())
     ]
+    return sorted(tags, key=_tag_sort_key, reverse=True)
 
 
 def detect_state(isnc_path: Path, *, fetch_remote: str | None = None) -> dict:
@@ -133,7 +245,8 @@ def detect_state(isnc_path: Path, *, fetch_remote: str | None = None) -> dict:
 
     Returns
     -------
-    Dict with keys: state, tag, major, minor, patch, rc, commits_since.
+    Dict with keys: state, tag, major, minor, patch, rc, build, commits_since.
+    ``build`` is the batch label of a batch RC (``None`` for a plain release).
     """
     if fetch_remote:
         _run_git("fetch", "--tags", fetch_remote, cwd=isnc_path)
@@ -147,6 +260,7 @@ def detect_state(isnc_path: Path, *, fetch_remote: str | None = None) -> dict:
             "minor": 0,
             "patch": 0,
             "rc": None,
+            "build": None,
             "commits_since": 0,
         }
 
@@ -162,6 +276,7 @@ def detect_state(isnc_path: Path, *, fetch_remote: str | None = None) -> dict:
         "minor": minor,
         "patch": patch,
         "rc": rc,
+        "build": _parse_build(latest),
         "commits_since": commits,
     }
 
@@ -188,16 +303,30 @@ def compute_next_version(
     bump: str | None,
     *,
     final: bool = False,
+    build: str | None = None,
 ) -> tuple[str, str]:
     """Compute next version tag from current ISNC state.
 
     Returns (git_tag, version_string) e.g. ("v1.0.0rc1", "1.0.0rc1").
 
+    *build* attaches semver build metadata identifying the review batch the RC
+    is cut against (``v0.2.0rc66+west-task-2e``). It is precedence-neutral: the
+    RC counter continues from the latest RC whether or not that RC carried a
+    label, and the label of the tag being superseded is never inherited — each
+    batch RC carries its own.
+
     Raises
     ------
     ValueError
-        If on stable and no bump specified, or other invalid transitions.
+        If on stable and no bump specified, if *build* is combined with
+        *final*, or other invalid transitions.
     """
+    if final and build:
+        raise ValueError(
+            "a stable release carries no build metadata — the catalog's "
+            "authoritative version must not be qualified by a review batch"
+        )
+
     info = detect_state(isnc_path)
     state = info["state"]
     major, minor, patch = info["major"], info["minor"], info["patch"]
@@ -209,7 +338,7 @@ def compute_next_version(
         else:
             m, n, p = 1, 0, 0  # Default to v1.0.0
         rc = None if final else 1
-        tag = _format_tag(m, n, p, rc)
+        tag = _format_tag(m, n, p, rc, build=build)
         return tag, tag.lstrip("v")
 
     if state == "stable":
@@ -220,7 +349,7 @@ def compute_next_version(
             )
         m, n, p = _apply_bump(major, minor, patch, bump)
         rc = None if final else 1
-        tag = _format_tag(m, n, p, rc)
+        tag = _format_tag(m, n, p, rc, build=build)
         return tag, tag.lstrip("v")
 
     # RC mode
@@ -233,7 +362,7 @@ def compute_next_version(
             s_maj, s_min, s_pat = major, minor, patch
         m, n, p = _apply_bump(s_maj, s_min, s_pat, bump)
         rc = None if final else 1
-        tag = _format_tag(m, n, p, rc)
+        tag = _format_tag(m, n, p, rc, build=build)
         return tag, tag.lstrip("v")
 
     if final:
@@ -243,7 +372,7 @@ def compute_next_version(
 
     # Increment RC: v1.0.0rc1 → v1.0.0rc2
     next_rc = info["rc"] + 1
-    tag = _format_tag(major, minor, patch, next_rc)
+    tag = _format_tag(major, minor, patch, next_rc, build=build)
     return tag, tag.lstrip("v")
 
 
@@ -636,6 +765,7 @@ class ReviewReleaseReport:
 
     dry_run: bool = False
     rc_version: str = ""
+    batch_label: str = ""
     batch_size: int = 0
     names: list[str] = field(default_factory=list)
     unmatched_sources: list[str] = field(default_factory=list)
@@ -651,6 +781,7 @@ class ReviewReleaseReport:
         return {
             "dry_run": self.dry_run,
             "rc_version": self.rc_version,
+            "batch_label": self.batch_label,
             "batch_size": self.batch_size,
             "unmatched_sources": self.unmatched_sources,
             "artifact_path": self.artifact_path,
@@ -681,6 +812,7 @@ def _freeze_review_artifact(
     names: list[str],
     minted_from: str,
     unmatched: list[str],
+    batch_label: str | None = None,
 ) -> Path:
     """Materialise the frozen sn-names batch record, tagged by the RC version.
 
@@ -698,6 +830,7 @@ def _freeze_review_artifact(
         "schema_version": 1,
         "name": _slug_from_rc(rc_version),
         "rc_version": rc_version,
+        "batch_label": batch_label or _parse_build(rc_version),
         "minted_from": minted_from,
         "minted_at": datetime.now(UTC).isoformat(),
         "names": sorted(names),
@@ -803,6 +936,12 @@ def run_review_release(
     under ``manifests/reviews/<rc>.sn_names.yaml`` (RC-tagged, the traceable key)
     and the PR number/URL back-filled after ``gh pr create``.
 
+    The RC version carries the batch identity as semver build metadata
+    (``v0.2.0rc66+<label>``, derived from the manifest — see
+    :func:`batch_build_metadata`), and that one string names the tag, the
+    ``review/<rc>`` branch, and the frozen artifact, so a batch RC is
+    recognisable as such from its version alone.
+
     ``exporter``/``publisher``/``pr_creator`` are injectable so the flow is
     testable against a local bare repo with no live GitHub call.
     """
@@ -851,12 +990,23 @@ def run_review_release(
         report.errors.append(str(exc))
         return report
     _run_git("fetch", "--tags", effective_remote, cwd=isnc_path)
+    # The batch's identity rides the version as semver build metadata, so a
+    # batch RC is distinguishable from a full candidate release by its version
+    # alone — and the same string names the branch, the tag, and the artifact.
     try:
-        git_tag, _version = compute_next_version(isnc_path, bump, final=False)
+        batch_label = batch_build_metadata(focus_file)
+    except ValueError as exc:
+        report.errors.append(f"batch label: {exc}")
+        return report
+    try:
+        git_tag, _version = compute_next_version(
+            isnc_path, bump, final=False, build=batch_label
+        )
     except ValueError as exc:
         report.errors.append(str(exc))
         return report
     report.rc_version = git_tag
+    report.batch_label = batch_label
     report.branch = f"review/{git_tag}"
 
     # ── 3. Freeze the batch artifact (pre-PR fields) ───────────────────
@@ -866,6 +1016,7 @@ def run_review_release(
         names=report.names,
         minted_from=str(focus_file),
         unmatched=report.unmatched_sources,
+        batch_label=batch_label,
     )
     report.artifact_path = str(artifact)
 
