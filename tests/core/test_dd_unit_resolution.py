@@ -134,6 +134,47 @@ class TestDimensionlessIsTheUnitOne:
         assert normalize_unit_symbol("m^2.sr") == "m^2.sr"
 
 
+class TestCanonicalUnitOrdering:
+    """One canonical authority: symbol ORDER is physics, not cosmetics.
+
+    ``W.m^-3`` is the conventional rendering of a power density; ``m^-3.W`` is
+    not. The pint formatter orders factors by its own internal sequence, so it
+    emitted ``m^-3.W`` while the standard-name side canonicalised the same unit
+    to ``W.m^-3`` — two spellings of one unit in one graph. The DD side must
+    therefore canonicalise through the SAME authority the standard-name side
+    uses (``imas_standard_names.canonical_unit``).
+    """
+
+    def test_leading_named_unit_is_preserved(self):
+        for raw, want in {
+            "W.m^-3": "W.m^-3",
+            "m^-3.W": "W.m^-3",
+            "W/m^3": "W.m^-3",
+            "N.m^-2": "N.m^-2",
+            "m^-2.N": "N.m^-2",
+            "V.m^-1": "V.m^-1",
+            "T.m": "T.m",
+            "W.m^-2.sr^-1": "W.m^-2.sr^-1",
+        }.items():
+            assert normalize_unit_symbol(raw) == want, raw
+
+    def test_agrees_with_the_standard_name_authority(self):
+        from imas_standard_names import canonical_unit
+
+        for raw in ("W.m^-3", "N.m^-2", "V.m^-1", "T.m", "m^3.Pa.s^-1", "A/m^2"):
+            assert normalize_unit_symbol(raw) == canonical_unit(raw), raw
+
+    def test_dimensionless_and_no_unit_stay_distinct(self):
+        """Dimensionless (dimensions cancel -> '1') is NOT the same as no unit."""
+        assert normalize_unit_symbol("-") == "1"
+        assert normalize_unit_symbol("1") == "1"
+        assert normalize_unit_symbol("dimensionless") == "1"
+        # No unit / not a unit -> None, never '1'.
+        assert normalize_unit_symbol("") is None
+        assert normalize_unit_symbol(None) is None
+        assert normalize_unit_symbol("mixed") is None
+
+
 class TestDdUnitDefectCuration:
     """A DD-declared unit that contradicts the quantity's dimensionality is not
     propagated into a standard name.

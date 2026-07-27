@@ -14,12 +14,27 @@ logger = logging.getLogger(__name__)
 def format_unit_simple(
     unit, registry: pint.UnitRegistry, **options: dict[str, Any]
 ) -> str:
+    """Render a pint unit in IMAS dot-exponential notation (``W.m^-3``).
+
+    Symbol ORDER is part of the convention, not cosmetic: a power density is
+    written ``W.m^-3``, never ``m^-3.W``. ``unit.items()`` yields pint's internal
+    order, which interleaves numerator and denominator factors, so factors are
+    grouped here — positive exponents first, then negative — mirroring the
+    numerator/denominator reading of the conventional form. The authority for
+    units in the canonical vocabulary is
+    ``imas_standard_names.canonical_unit``; this formatter serves the fallback
+    path for units that vocabulary does not cover.
+    """
+
     def _fmt_exp(p: float | int) -> str:
         # Coerce integer-valued floats (e.g. -1.0) to int to avoid 'ohm^-1.0'
         ip = int(p)
         return str(ip) if ip == p else str(p)
 
-    return ".".join(u if p == 1 else f"{u}^{_fmt_exp(p)}" for u, p in unit.items())
+    # Stable sort: numerator factors (exponent > 0) precede denominators, and
+    # each group keeps pint's relative order.
+    ordered = sorted(unit.items(), key=lambda item: item[1] < 0)
+    return ".".join(u if p == 1 else f"{u}^{_fmt_exp(p)}" for u, p in ordered)
 
 
 if "U" not in pint.formatting.REGISTERED_FORMATTERS:
@@ -114,6 +129,21 @@ def normalize_unit_symbol(raw: str) -> str | None:
     if raw.startswith("units given") or raw.startswith("as_parent"):
         return None
 
+    # Canonicalise through the SAME authority the standard-name side uses, so a
+    # unit has ONE spelling across the graph. Symbol order is meaningful — a
+    # power density is conventionally 'W.m^-3', not 'm^-3.W' — and the pint
+    # formatter orders factors by its own internal sequence, which disagreed
+    # with the standard-name canonical form and produced two spellings of one
+    # unit (30 Unit nodes were affected).
+    try:
+        from imas_standard_names import canonical_unit
+
+        return canonical_unit(raw)
+    except Exception:
+        logger.debug("imas_standard_names could not canonicalise unit '%s'", raw)
+
+    # Fallback: pint, for units the canonical vocabulary does not cover. Keeps
+    # a DD-only unit resolvable rather than dropping it.
     try:
         parsed = unit_registry.parse_expression(raw)
         compact = f"{parsed.units:~U}"
