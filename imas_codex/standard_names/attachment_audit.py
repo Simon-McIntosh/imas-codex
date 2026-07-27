@@ -25,14 +25,56 @@ snapshots all stay, and every detachment is recorded as a
 ``StandardNameChange`` (``operation='detach_inconsistent_attachment'``) linked
 from the name, so the event is auditable and the history is intact.
 
+**Compose semantics for the pairwise rule.** Most of the guard's rules are
+order-independent: they look at the one path, the one name and the two units.
+One is not — the distinct-vector rule consults ``existing_sources``, and at
+compose time (``_process_attachments_core``) that list accumulates only the
+sources ALREADY ACCEPTED for the name, so of a mutually-conflicting group the
+first is kept and the rest rejected: one representative survives. The audit
+reproduces that by walking each name's attachments in a fixed order and
+evaluating every one against the accumulated ACCEPTED siblings, never against
+the name's whole source set. Handing each member the full set instead would
+reject all N of a conflicting group — including the representative compose would
+have kept — and strip the name of its entire justification. The order must be
+deterministic (paths sorted) because the read returns rows in Neo4j's order:
+without it, two passes would detach different members of the same group.
+Evaluating against the accumulated set needs no rule taxonomy — an
+order-independent rule ignores the sibling list, so its verdict is unchanged.
+
 **Accepted names.** An accepted name losing a source is a real event, not
 routine hygiene: the name is catalog-authoritative and may already be published.
 Following the precedent of ``sn run --reset-to`` / ``sn prune``, attachments on
 ``name_stage='accepted'`` names are reported but NOT detached unless the caller
-passes ``include_accepted=True``. A name left with no source at all is flagged
-in the result as ``names_orphaned`` — that is a name whose entire justification
-was a wrong attachment and it needs a human decision, not an automatic
-supersede.
+passes ``include_accepted=True``.
+
+**A whole-name wipeout is a NAME defect.** When EVERY attachment of a name is
+rejected by the SAME rule, the sources agree with each other and with the DD and
+it is the NAME that is the outlier — e.g. an ``…_of_ion_state`` name whose every
+source is a species-level ``…/ion/element/atoms_n`` path claims a state
+resolution none of its sources has. Detaching them would strip an accepted name
+of its justification and rewind every source for paid re-composition to repair
+what one ``imas-codex sn edit <name> --rename … --reason …`` fixes. Those names
+are classified into ``names_misnamed`` and their attachments are EXCLUDED from
+the detach set, so the audit hands the operator a rename worklist instead of
+destroying the evidence. Two judgements are baked in:
+
+* **Same rule, not any rule.** A uniform failure is a consensus of sources
+  against one name, which is exactly what a rename repairs. Attachments failing
+  for MIXED reasons are an incoherent source set — no single rename addresses
+  them — so they stay on the ordinary detach-and-recompose path.
+* **At least two attachments.** One source is no corroboration: with a single
+  attachment there is no evidence about which side is wrong, the recompose costs
+  one call, and that lone case is precisely what the detach path was written for
+  (a strike-point source on a camera-orientation name). Because the pairwise
+  rule now keeps a representative, a wipeout can only be caused by an
+  order-independent rule — the uniform-rule reading is well defined.
+
+``names_orphaned`` stays, and is not a duplicate of ``names_misnamed``: it is
+measured on the graph AFTER the detach and catches the residue the classifier
+deliberately lets through — chiefly the mixed-rule wipeout — so a name that
+ended up with no source at all is still surfaced for a human decision rather
+than auto-superseded. The two sets cannot overlap, since a misnamed name's
+attachments are never detached.
 
 Idempotent: a detached attachment no longer matches the selector, and an
 attachment the guard accepts is never touched, so a second pass acts on nothing.
@@ -49,6 +91,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "AttachmentVerdict",
     "AttachmentAuditResult",
+    "NameLevelDefect",
     "audit_attachments",
     "reconcile_attachment_consistency",
 ]
@@ -67,9 +110,17 @@ _PROTECTED_NAME_STAGES: frozenset[str] = frozenset({"accepted"})
 #: acted on.
 _HISTORICAL_NAME_STAGES: frozenset[str] = frozenset({"superseded"})
 
+#: How many attachments a name needs before a uniform rejection is read as a
+#: NAME-level defect rather than an attachment defect. Two is the smallest
+#: corroboration: one source rejected on its own says nothing about which side is
+#: wrong, and rewinding it costs a single re-compose.
+_MIN_WIPEOUT_ATTACHMENTS = 2
+
 #: Every attachment the graph asserts, with the unit context the dimensionality
-#: rule needs on both sides. Sibling source paths of the same name are collected
-#: so the distinct-vector rule sees what the name already carries.
+#: rule needs on both sides. Sibling source paths are NOT collected here: the
+#: pairwise rule must see only the siblings already ACCEPTED (compose semantics,
+#: see the module docstring), which the audit accumulates from these very rows —
+#: every attachment of a name is one of them.
 #:
 #: ``other_live_names`` counts the OTHER names this source still produces. A
 #: source that also backs a live name has already been re-composed correctly;
@@ -80,10 +131,6 @@ MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
-OPTIONAL MATCH (sibling:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-OPTIONAL MATCH (sibling)-[:FROM_DD_PATH]->(sib_dd:IMASNode)
-WITH src, sn, dd, du, nu,
-     [p IN collect(DISTINCT sib_dd.id) WHERE p IS NOT NULL AND p <> dd.id] AS siblings
 OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
 WHERE other.id <> sn.id
   AND NOT (coalesce(other.name_stage, '') IN $historical)
@@ -94,7 +141,6 @@ RETURN src.id            AS source_node_id,
        sn.origin         AS origin,
        coalesce(du.id, dd.unit) AS dd_unit,
        coalesce(nu.id, sn.unit) AS sn_unit,
-       siblings          AS siblings,
        count(DISTINCT other) AS other_live_names
 """
 
@@ -169,6 +215,32 @@ class AttachmentVerdict:
         return self.other_live_names == 0
 
 
+@dataclass(frozen=True)
+class NameLevelDefect:
+    """A name whose every attachment is rejected by one rule — rename it.
+
+    Carries what the operator needs to act without re-querying: the name, the
+    rule its whole source set trips, how many sources say so, and one example
+    path to read the physics off. The repair is
+    ``imas-codex sn edit <sn_id> --rename … --reason …``.
+    """
+
+    sn_id: str
+    rule: str
+    attachment_count: int
+    example_dd_path: str
+    name_stage: str | None = None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "sn_id": self.sn_id,
+            "rule": self.rule,
+            "attachments": self.attachment_count,
+            "example_dd_path": self.example_dd_path,
+            "name_stage": self.name_stage,
+        }
+
+
 @dataclass
 class AttachmentAuditResult:
     """Outcome of one audit / reconcile pass."""
@@ -179,6 +251,8 @@ class AttachmentAuditResult:
     sources_rerouted: int = 0
     skipped_protected: int = 0
     skipped_historical: int = 0
+    skipped_misnamed: int = 0
+    names_misnamed: list[NameLevelDefect] = field(default_factory=list)
     names_orphaned: list[str] = field(default_factory=list)
 
     def by_rule(self) -> dict[str, int]:
@@ -195,6 +269,11 @@ class AttachmentAuditResult:
             "sources_rerouted": self.sources_rerouted,
             "skipped_protected": self.skipped_protected,
             "skipped_historical": self.skipped_historical,
+            "skipped_misnamed": self.skipped_misnamed,
+            "names_misnamed": len(self.names_misnamed),
+            # The rename worklist itself, not just its size — it is the whole
+            # point of the classification and the operator acts on it directly.
+            "misnamed": [d.as_dict() for d in self.names_misnamed],
             "names_orphaned": len(self.names_orphaned),
             "by_rule": self.by_rule(),
         }
@@ -223,28 +302,74 @@ def audit_attachments(gc: Any | None = None) -> AttachmentAuditResult:
         if own:
             client.close()
 
-    result = AttachmentAuditResult(checked=len(rows))
+    by_name: dict[str, list[dict]] = {}
     for r in rows:
-        ok, reason = _is_attachment_consistent(
-            r["dd_path"],
-            r["sn_id"],
-            existing_sources=r["siblings"] or (),
-            dd_unit=r["dd_unit"],
-            sn_unit=r["sn_unit"],
+        by_name.setdefault(r["sn_id"], []).append(r)
+
+    result = AttachmentAuditResult(checked=len(rows))
+    for sn_id in sorted(by_name):
+        # Sorted by path so the pairwise rule keeps the SAME representative on
+        # every pass: the read returns rows in Neo4j's order, and an
+        # order-dependent rule applied to an unstable order would detach a
+        # different member of a conflicting group each time.
+        group = sorted(
+            by_name[sn_id],
+            key=lambda r: (r["dd_path"] or "", r["source_node_id"] or ""),
         )
-        if ok:
-            continue
-        result.rejected.append(
-            AttachmentVerdict(
-                source_node_id=r["source_node_id"],
-                dd_path=r["dd_path"],
-                sn_id=r["sn_id"],
-                name_stage=r["name_stage"],
-                reason=reason,
-                other_live_names=int(r.get("other_live_names") or 0),
+        accepted_paths: list[str] = []
+        group_rejected: list[AttachmentVerdict] = []
+        for r in group:
+            ok, reason = _is_attachment_consistent(
+                r["dd_path"],
+                sn_id,
+                existing_sources=tuple(accepted_paths),
+                dd_unit=r["dd_unit"],
+                sn_unit=r["sn_unit"],
             )
-        )
+            if ok:
+                accepted_paths.append(r["dd_path"])
+                continue
+            group_rejected.append(
+                AttachmentVerdict(
+                    source_node_id=r["source_node_id"],
+                    dd_path=r["dd_path"],
+                    sn_id=sn_id,
+                    name_stage=r["name_stage"],
+                    reason=reason,
+                    other_live_names=int(r.get("other_live_names") or 0),
+                )
+            )
+        result.rejected.extend(group_rejected)
+        defect = _name_level_defect(sn_id, group, group_rejected)
+        if defect is not None:
+            result.names_misnamed.append(defect)
     return result
+
+
+def _name_level_defect(
+    sn_id: str, group: list[dict], rejected: list[AttachmentVerdict]
+) -> NameLevelDefect | None:
+    """Classify a name whose whole source set trips one rule. See the docstring.
+
+    None unless the name has corroborating sources (``_MIN_WIPEOUT_ATTACHMENTS``),
+    every one of them is rejected, and they all trip the SAME rule. A superseded
+    name is excluded: its edges are the deliberate provenance record, so there is
+    no live claim to rename.
+    """
+    if len(group) < _MIN_WIPEOUT_ATTACHMENTS or len(rejected) != len(group):
+        return None
+    if (group[0].get("name_stage") or "") in _HISTORICAL_NAME_STAGES:
+        return None
+    rules = {v.rule for v in rejected}
+    if len(rules) != 1:
+        return None
+    return NameLevelDefect(
+        sn_id=sn_id,
+        rule=next(iter(rules)),
+        attachment_count=len(group),
+        example_dd_path=rejected[0].dd_path,
+        name_stage=group[0].get("name_stage"),
+    )
 
 
 def reconcile_attachment_consistency(
@@ -271,15 +396,20 @@ def reconcile_attachment_consistency(
         client = gc
     try:
         result = audit_attachments(client)
-        result.skipped_historical = sum(1 for v in result.rejected if v.historical)
-        result.skipped_protected = sum(
-            1 for v in result.rejected if v.protected and not include_accepted
-        )
-        actionable = [
-            v
-            for v in result.rejected
-            if not v.historical and (include_accepted or not v.protected)
-        ]
+        misnamed = {d.sn_id for d in result.names_misnamed}
+        # Disjoint buckets, most-binding first: a provenance edge is never
+        # touched; a name-level defect is repaired by renaming the name, not by
+        # stripping its sources; only then does the accepted-name gate apply.
+        actionable: list[AttachmentVerdict] = []
+        for v in result.rejected:
+            if v.historical:
+                result.skipped_historical += 1
+            elif v.sn_id in misnamed:
+                result.skipped_misnamed += 1
+            elif v.protected and not include_accepted:
+                result.skipped_protected += 1
+            else:
+                actionable.append(v)
 
         if result.rejected:
             logger.warning(
@@ -300,8 +430,25 @@ def reconcile_attachment_consistency(
                 "; ".join(
                     f"{v.dd_path} → {v.sn_id} ({v.reason})"
                     for v in result.rejected
-                    if v.protected
+                    if v.protected and v.sn_id not in misnamed
                 )[:1200],
+            )
+        if result.names_misnamed:
+            # Loud: this is a worklist the operator must act on, and the audit
+            # deliberately declines to "fix" it by destroying the evidence.
+            logger.warning(
+                "reconcile_attachment_consistency: %d name(s) are rejected by "
+                "EVERY one of their sources under a single rule — the NAME is "
+                "wrong, not the attachments (%d attachment(s) left in place). "
+                "Repair with: imas-codex sn edit <name> --rename <new> --reason "
+                "<why>. %s",
+                len(result.names_misnamed),
+                result.skipped_misnamed,
+                "; ".join(
+                    f"{d.sn_id} [{d.rule}, {d.attachment_count} src, "
+                    f"e.g. {d.example_dd_path}]"
+                    for d in result.names_misnamed
+                )[:2000],
             )
         if result.skipped_historical:
             logger.info(

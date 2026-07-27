@@ -7,6 +7,12 @@ provenance rebuild) — is permanently wrong. These tests cover the reconcile
 that re-asks the guard's question of the graph: what it detaches, what it
 protects, where the freed source goes, and that a second pass is a no-op.
 
+Two properties get their own sections because they decide whether the reconcile
+is safe to run at all: the guard's one order-DEPENDENT rule must be applied with
+compose semantics (a conflicting group keeps one representative, deterministically
+chosen), and a name whose every source is rejected by one rule is a NAME defect
+for ``sn edit --rename``, never an attachment defect to detach.
+
 Mocked unit tests run in the default tier; the end-to-end guarantees run
 against a live graph (``@pytest.mark.graph``).
 """
@@ -40,7 +46,6 @@ def _row(
     name_stage: str = "drafted",
     dd_unit: str | None = None,
     sn_unit: str | None = None,
-    siblings: list[str] | None = None,
     other_live_names: int = 0,
 ) -> dict:
     return {
@@ -51,7 +56,6 @@ def _row(
         "origin": "pipeline",
         "dd_unit": dd_unit,
         "sn_unit": sn_unit,
-        "siblings": siblings or [],
         "other_live_names": other_live_names,
     }
 
@@ -136,19 +140,78 @@ def test_audit_passes_registry_excepted_dd_defect() -> None:
     assert audit_attachments(gc).rejected == []
 
 
-def test_audit_feeds_siblings_to_the_distinct_vector_rule() -> None:
+# ---------------------------------------------------------------------------
+# Mocked — order-dependent rules carry compose semantics
+# ---------------------------------------------------------------------------
+
+_CAMERA = "camera_ir/channel/camera"
+_VECTOR_NAME = "z_direction_unit_vector_of_camera"
+
+
+def test_conflicting_group_keeps_one_representative() -> None:
+    """The distinct-vector rule is pairwise: one member of a group survives.
+
+    At compose time the conflicting sources arrive one at a time and only the
+    ACCEPTED ones accumulate, so the first is kept and the rest rejected. The
+    audit must reproduce that, not reject the whole group.
+    """
     gc = _client(
         [
-            _row(
-                "camera_ir/channel/camera/direction/z",
-                "z_direction_unit_vector_of_camera",
-                siblings=["camera_ir/channel/camera/up/z"],
-            )
+            _row(f"{_CAMERA}/direction/z", _VECTOR_NAME),
+            _row(f"{_CAMERA}/up/z", _VECTOR_NAME),
         ]
     )
     result = audit_attachments(gc)
-    assert len(result.rejected) == 1
+    assert result.checked == 2
+    assert len(result.rejected) == 1, "a two-way conflict is one surplus, not two"
     assert result.rejected[0].rule == "distinct-vector conflict"
+    assert result.rejected[0].dd_path == f"{_CAMERA}/up/z"
+
+
+def test_conflicting_group_verdict_is_deterministic() -> None:
+    """Row order is Neo4j's; two runs must reject the same member."""
+    rows = [
+        _row(f"{_CAMERA}/up/z", _VECTOR_NAME),
+        _row(f"{_CAMERA}/direction/z", _VECTOR_NAME),
+    ]
+    forward = audit_attachments(_client(list(rows)))
+    reverse = audit_attachments(_client(list(reversed(rows))))
+    assert [v.dd_path for v in forward.rejected] == [f"{_CAMERA}/up/z"]
+    assert [v.dd_path for v in reverse.rejected] == [f"{_CAMERA}/up/z"]
+
+
+def test_three_way_conflict_rejects_only_the_surplus() -> None:
+    """N mutually-conflicting attachments are N-1 rejections."""
+    gc = _client(
+        [
+            _row(f"{_CAMERA}/up/z", _VECTOR_NAME),
+            _row(f"{_CAMERA}/line_of_sight/z", _VECTOR_NAME),
+            _row(f"{_CAMERA}/direction/z", _VECTOR_NAME),
+        ]
+    )
+    result = audit_attachments(gc)
+    assert {v.dd_path for v in result.rejected} == {
+        f"{_CAMERA}/line_of_sight/z",
+        f"{_CAMERA}/up/z",
+    }
+
+
+def test_accumulation_does_not_alter_an_order_independent_verdict() -> None:
+    """Tense / state / locus / unit rules look only at the one attachment.
+
+    Accumulating accepted siblings for the pairwise rule must not make an
+    order-independent verdict depend on where the attachment sits in the group.
+    """
+    good = "core_profiles/profiles_1d/electrons/density"
+    bad = "core_profiles/profiles_1d/electrons/state/density"
+    name = "electron_density"
+    for rows in (
+        [_row(good, name), _row(bad, name)],
+        [_row(bad, name), _row(good, name)],
+    ):
+        result = audit_attachments(_client(rows))
+        assert [v.dd_path for v in result.rejected] == [bad]
+        assert result.rejected[0].rule == "state-resolution mismatch"
 
 
 def test_by_rule_groups_rejections() -> None:
@@ -251,6 +314,104 @@ def test_accepted_names_are_not_detached_by_default() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Mocked — a whole-name wipeout is a NAME defect, not an attachment defect
+# ---------------------------------------------------------------------------
+
+#: An accepted name whose ``_of_ion_state`` locus claims a state resolution none
+#: of its species-level sources has: the sources agree with each other and with
+#: the DD, the NAME is the outlier.
+_STATE_NAME = "atomic_count_of_ion_state"
+_SPECIES_PATHS = (
+    "core_profiles/profiles_1d/ion/element/atoms_n",
+    "edge_profiles/profiles_1d/ion/element/atoms_n",
+)
+
+
+def _wipeout_rows(*, name_stage: str = "accepted") -> list[dict]:
+    return [_row(p, _STATE_NAME, name_stage=name_stage) for p in _SPECIES_PATHS]
+
+
+def test_uniform_wipeout_is_reported_as_a_name_defect() -> None:
+    result = audit_attachments(_client(_wipeout_rows()))
+    assert len(result.rejected) == 2
+    assert len(result.names_misnamed) == 1
+    d = result.names_misnamed[0]
+    assert d.sn_id == _STATE_NAME
+    assert d.rule == "state-resolution mismatch"
+    assert d.attachment_count == 2
+    assert d.example_dd_path in _SPECIES_PATHS
+    assert d.name_stage == "accepted"
+
+
+def test_uniform_wipeout_is_never_detached() -> None:
+    """Renaming the name is the repair — detaching would rewind every source."""
+    gc = _client(_wipeout_rows())
+    result = reconcile_attachment_consistency(gc, include_accepted=True)
+    assert len(result.rejected) == 2
+    assert result.skipped_misnamed == 2
+    assert result.detached == 0
+    assert result.names_orphaned == []
+    assert gc.query.call_count == 1, "only the read query may run"
+
+
+def test_mixed_rule_wipeout_is_detached() -> None:
+    """Attachments failing for DIFFERENT reasons are an incoherent source set.
+
+    No single rename fixes them, so the ordinary detach-and-recompose path owns
+    the repair and the post-detach orphan net reports the result.
+    """
+    gc = _client(
+        [
+            _row(_SPECIES_PATHS[0], _STATE_NAME),
+            _row(
+                "core_profiles/profiles_1d/ion/state/instant_changes/atoms_n",
+                _STATE_NAME,
+            ),
+        ]
+    )
+    result = reconcile_attachment_consistency(gc)
+    assert {v.rule for v in result.rejected} == {
+        "state-resolution mismatch",
+        "tense mismatch",
+    }
+    assert result.names_misnamed == []
+    assert result.skipped_misnamed == 0
+    assert result.detached == 2
+
+
+def test_single_rejected_attachment_is_not_a_name_defect() -> None:
+    """One source is no corroboration — and it is the case the detach was for."""
+    gc = _client(
+        [
+            _row(
+                "summary/boundary/strike_point_inner_z/value",
+                "z_image_up_unit_vector_of_camera",
+            )
+        ]
+    )
+    result = reconcile_attachment_consistency(gc)
+    assert result.names_misnamed == []
+    assert result.detached == 1
+
+
+def test_superseded_wipeout_is_not_reported_as_a_name_defect() -> None:
+    """A deprecation stub's edges are provenance; there is nothing to rename."""
+    gc = _client(_wipeout_rows(name_stage="superseded"))
+    result = reconcile_attachment_consistency(gc, include_accepted=True)
+    assert result.names_misnamed == []
+    assert result.skipped_historical == 2
+    assert result.detached == 0
+
+
+def test_as_dict_reports_name_level_defects() -> None:
+    result = audit_attachments(_client(_wipeout_rows()))
+    d = result.as_dict()
+    assert d["names_misnamed"] == 1
+    assert d["misnamed"][0]["sn_id"] == _STATE_NAME
+    assert d["misnamed"][0]["rule"] == "state-resolution mismatch"
+
+
+# ---------------------------------------------------------------------------
 # Live graph — detach, reroute, orphan reporting, idempotency
 # ---------------------------------------------------------------------------
 
@@ -313,7 +474,11 @@ def _seed_attachment(
               sn.validation_status = 'valid',
               sn.unit              = $sn_unit,
               sn.description       = 'Seeded attachment fixture',
-              sn.source_paths      = ['dd:' + $dd_path]
+              // Append, so a name can be seeded with several sources.
+              sn.source_paths      = CASE
+                WHEN 'dd:' + $dd_path IN coalesce(sn.source_paths, [])
+                THEN sn.source_paths
+                ELSE coalesce(sn.source_paths, []) + ('dd:' + $dd_path) END
         MERGE (src:StandardNameSource {id: $source_node_id})
           SET src.status      = 'composed',
               src.source_type = 'dd',
@@ -635,3 +800,65 @@ def test_orphaned_name_is_reported(_gc, _clean):
         "MATCH (sn:StandardName {id: $sn}) RETURN sn.name_stage AS stage", sn=sn_id
     )
     assert still_there[0]["stage"] == "drafted", "the name must not be auto-retired"
+
+
+@pytest.mark.graph
+def test_conflicting_group_leaves_one_edge_standing(_gc, _clean):
+    """Only the surplus member of a pairwise-conflicting group is detached."""
+    kept = f"{_PREFIX}camera_ir/channel/camera/direction/z"
+    surplus = f"{_PREFIX}camera_ir/channel/camera/up/z"
+    sn_id = _uid("z_direction_unit_vector_of_camera")
+    for path in (surplus, kept):  # seeded surplus-first on purpose
+        _seed_attachment(_gc, dd_path=path, sn_id=sn_id, dd_unit="1", sn_unit="1")
+
+    result = reconcile_attachment_consistency(_ScopedClient(_gc))
+    assert [v.dd_path for v in result.rejected] == [surplus]
+    assert result.detached == 1
+    assert result.names_orphaned == [], "the representative keeps the name sourced"
+
+    rows = _gc.query(
+        """
+        MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName {id: $sn})
+        MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+        RETURN collect(dd.id) AS paths, sn.source_paths AS source_paths
+        """,
+        sn=sn_id,
+    )
+    assert rows[0]["paths"] == [kept]
+    assert rows[0]["source_paths"] == [f"dd:{kept}"]
+
+
+@pytest.mark.graph
+def test_name_level_defect_keeps_every_attachment(_gc, _clean):
+    """A uniformly-rejected name is handed to ``sn edit``, not stripped."""
+    sn_id = _uid("atomic_count_of_ion_state")
+    paths = [
+        f"{_PREFIX}core_profiles/profiles_1d/ion/element/atoms_n",
+        f"{_PREFIX}edge_profiles/profiles_1d/ion/element/atoms_n",
+    ]
+    for path in paths:
+        _seed_attachment(
+            _gc,
+            dd_path=path,
+            sn_id=sn_id,
+            name_stage="accepted",
+            dd_unit="1",
+            sn_unit="1",
+        )
+
+    result = reconcile_attachment_consistency(_ScopedClient(_gc), include_accepted=True)
+    assert len(result.rejected) == 2
+    assert [d.sn_id for d in result.names_misnamed] == [sn_id]
+    assert result.skipped_misnamed == 2
+    assert result.detached == 0
+
+    rows = _gc.query(
+        """
+        MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName {id: $sn})
+        MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+        RETURN count(*) AS attachments, collect(src.status) AS statuses
+        """,
+        sn=sn_id,
+    )
+    assert rows[0]["attachments"] == 2, "no attachment may be detached"
+    assert set(rows[0]["statuses"]) == {"composed"}, "no source may be rewound"
