@@ -898,10 +898,21 @@ def fetch_review_feedback_for_sources(
         - ``validation_status`` (str | None): graph lifecycle state at
           fetch time
 
-        Only sources that currently link to a StandardName with a
-        non-null ``reviewer_score_name`` are returned — entries without prior
-        review data are silently omitted (the caller can treat this as a
-        cold-start and skip feedback injection).
+        A source's link to its name is read over ``PRODUCED_NAME`` — the
+        authority — with ``HAS_STANDARD_NAME`` unioned in for callers that pass
+        an upstream ``IMASNode``/``FacilitySignal`` id instead. Reading only
+        ``HAS_STANDARD_NAME`` silently returned nothing for every
+        ``StandardNameSource`` id, since that edge originates from the DD node
+        (keyed on the bare path) and never from the source node (keyed
+        ``dd:<path>``) — so an operator's ``sn edit --hint`` never reached the
+        compose prompt.
+
+        An entry is returned when the name carries prior review data OR an open
+        edit. A hint is the operator's intent and does not depend on a review
+        having happened, so requiring ``reviewer_score_name`` would drop the
+        steering on exactly the names an edit just staged for regeneration.
+        Sources with neither are omitted (a cold start; the caller skips
+        feedback injection).
     """
     if not source_ids:
         return {}
@@ -914,8 +925,19 @@ def fetch_review_feedback_for_sources(
         rows = gc.query(
             """
             UNWIND $ids AS source_id
-            MATCH (src {id: source_id})-[:HAS_STANDARD_NAME]->(sn:StandardName)
+            MATCH (src {id: source_id})
+            CALL {
+                WITH src
+                MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName)
+                RETURN sn
+              UNION
+                WITH src
+                MATCH (src)-[:HAS_STANDARD_NAME]->(sn:StandardName)
+                RETURN sn
+            }
+            WITH source_id, sn
             WHERE sn.reviewer_score_name IS NOT NULL
+               OR coalesce(sn.edit_mode, '') <> ''
             RETURN source_id AS source_id,
                    sn.id AS previous_name,
                    sn.description AS previous_description,
