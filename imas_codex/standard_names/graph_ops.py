@@ -1194,11 +1194,11 @@ def fetch_docs_review_feedback_for_standard_names(
     return mapping
 
 
-# Plan 40 §17 — public rename. Canonical name is
+# Public rename. The canonical name is
 # ``fetch_docs_review_feedback_for_standard_names`` (above); the legacy
 # ``fetch_docs_review_feedback_for_sns`` alias is retained for one
-# release with a DeprecationWarning. Phase 4 callsite migration has
-# moved package-internal callers to the canonical name.
+# release with a DeprecationWarning. Package-internal callers have already
+# moved to the canonical name.
 def fetch_docs_review_feedback_for_sns(
     sn_ids: list[str] | set[str] | None,
 ) -> dict[str, dict[str, Any]]:
@@ -1222,7 +1222,7 @@ def _filter_admissible_parents(
 ) -> list[dict[str, Any]]:
     """Drop HAS_PARENT edges whose target fails the admission gate.
 
-    Two-clause gate (see parents.py D1):
+    Two-clause gate (see the admission gate in ``parents.py``):
       A. IR specificity — keep if the target name has qualifiers, locus,
          operators, projection, or mechanism in its ISN parse.
       B. Vector-like topology — keep bare-base targets if they have or
@@ -1457,7 +1457,7 @@ def _emit_magnitude_of_edges(names: list[dict[str, Any]], gc: Any) -> None:
       3. ``<X>`` is an admitted parent (not catalog-only metadata).
 
     Never speculatively creates magnitude SNs; the magnitude must already
-    be sourced from a DD path or facility signal. See plan D5/D13.
+    be sourced from a DD path or facility signal.
     """
     candidates: list[dict[str, str]] = []
     for n in names:
@@ -1556,9 +1556,8 @@ def _write_standard_name_edges(
                     }
                 )
 
-    # Phase 1 admission gate: drop HAS_PARENT edges to inadmissible
-    # parents (bare-base category labels). See parents.py D1/D2 of the
-    # deterministic-parent redesign plan.
+    # Admission gate: drop HAS_PARENT edges to inadmissible parents
+    # (bare-base category labels). The two clauses live in ``parents.py``.
     co_batch = _filter_admissible_parents(co_batch, gc, full_rebuild=full_rebuild)
 
     # Reconcile (NOT accrete) each processed child's structural HAS_PARENT
@@ -1619,7 +1618,7 @@ def _write_standard_name_edges(
             batch=co_batch,
         )
 
-        # Phase 3: MAGNITUDE_OF passive materialisation. When a written
+        # MAGNITUDE_OF passive materialisation. When a written
         # name matches "magnitude_of_<X>" and X is an admitted vector
         # parent in the graph, emit (this)-[:MAGNITUDE_OF]->(X). Never
         # create the magnitude node speculatively — only links existing.
@@ -3692,7 +3691,7 @@ def _write_grammar_decomposition(
 ) -> list[dict[str, str]]:
     """Write per-segment columns and typed grammar edges on StandardName nodes.
 
-    Plan 40 Phase 1 — replaces ``_write_segment_edges``. Always populates
+    Replaces ``_write_segment_edges``. Always populates
     bare-name per-segment columns (``sn.physical_base``, ``sn.subject``, …)
     from the ISN parser, regardless of whether a closed-vocabulary
     GrammarToken exists for the value. Conditionally writes typed edges
@@ -3878,9 +3877,9 @@ def _write_grammar_decomposition(
     return all_gaps
 
 
-# Deprecation alias — Phase 1 retains old name for one release. Callers
+# Deprecation alias — the old name is retained for one release. Callers
 # inside the package have been migrated; external pipeline code may still
-# import this symbol. Removed in the release after Phase 4.
+# import this symbol, so it is removed only in the release after that.
 def _write_segment_edges(gc: GraphClient, name_ids: list[str]) -> list[dict[str, str]]:
     """Deprecated alias for :func:`_write_grammar_decomposition`."""
     import warnings
@@ -4001,7 +4000,7 @@ def persist_generated_name_batch(
         raw_name = entry.get("id") or ""
         if raw_name:
             entry["id"] = normalize_name_id(raw_name)
-        # D5/P0.3: derive kind from name structure (overrides LLM default).
+        # Derive kind from the name's own structure, overriding the LLM default.
         name = entry.get("id") or ""
         if name:
             entry["kind"] = derive_kind(name)
@@ -5685,7 +5684,7 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
 
 
 # =============================================================================
-# Enrichment helpers — documentation iteration (Phase 3D)
+# Enrichment helpers — documentation iteration
 # =============================================================================
 
 
@@ -8103,7 +8102,7 @@ def export_review_comments(
 
 
 # =============================================================================
-# Graph-backed LLM cost tracking API  (Phase 2)
+# Graph-backed LLM cost tracking API
 # =============================================================================
 
 # Phase → StandardName.llm_cost_<suffix> field mapping.
@@ -8464,7 +8463,7 @@ def backfill_sn_run_telemetry() -> list[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# LLMCost pool normalisation (W4c)
+# LLMCost pool normalisation
 # ---------------------------------------------------------------------------
 # Maps the raw ``phase`` labels used by callers to six canonical pool names.
 _PHASE_TO_POOL: dict[str, str] = {
@@ -8727,9 +8726,9 @@ def update_sn_per_phase_costs(run_id: str) -> int:
 
 
 # =============================================================================
-# Seed-and-expand claims  (Phase 8 worker pools)
+# Seed-and-expand claims — the worker pools' claim protocol
 #
-# Each function follows the H4 pattern from plan.md Phase 8:
+# Every claim function follows the same two-step shape:
 #   1. Seed: pick one random eligible row, SET claimed_at + claim_token
 #   2. Expand: claim up to batch_size−1 more with same (cluster_id, unit);
 #      fallback: (physics_domain, unit) when cluster_id is absent
@@ -9395,7 +9394,7 @@ def claim_review_names_seed_and_expand(
     )
 
 
-# -- review_name (Phase 8.1: name_stage='drafted', claim only) ----------------
+# -- review_name (name_stage='drafted', claim only) ---------------------------
 
 
 @retry_on_deadlock()
@@ -9407,7 +9406,7 @@ def claim_review_name_batch(
     scope_run_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
-    """Claim StandardName nodes for name review (Phase 8.1 stage machine).
+    """Claim StandardName nodes for name review.
 
     Eligibility: ``name_stage = 'drafted'`` AND ``claimed_at IS NULL``.
 
@@ -9479,7 +9478,7 @@ def claim_review_name_batch(
     return _verify_name_claim_winners(items, eligible_stage="drafted")
 
 
-# -- persist_reviewed_name (Phase 8.1: write review + stage transition) -------
+# -- persist_reviewed_name (write the review + the stage transition) ----------
 
 
 @retry_on_deadlock()
@@ -9870,7 +9869,7 @@ def persist_reviewed_name(
     return target_stage
 
 
-# -- review_docs (Phase 8.1: docs_stage='drafted', claim only) ----------------
+# -- review_docs (docs_stage='drafted', claim only) ---------------------------
 
 
 @retry_on_deadlock()
@@ -9882,7 +9881,7 @@ def claim_review_docs_batch(
     scope_run_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
-    """Claim StandardName nodes for docs review (Phase 8.1 stage machine).
+    """Claim StandardName nodes for docs review.
 
     Eligibility: ``docs_stage = 'drafted'`` AND ``claimed_at IS NULL``.
 
@@ -9952,7 +9951,7 @@ def claim_review_docs_batch(
     return _verify_docs_claim_winners(items, eligible_stage="drafted")
 
 
-# -- persist_reviewed_docs (Phase 8.1: write review + docs_stage transition) --
+# -- persist_reviewed_docs (write the review + the docs_stage transition) -----
 
 
 @retry_on_deadlock()
@@ -12760,7 +12759,7 @@ def reset_standard_name_docs(
 def stamp_harmonized_families(
     families: list[dict[str, Any]],
 ) -> int:
-    """Stamp the §5 idempotency scalars on fully docs-accepted families.
+    """Stamp the family idempotency scalars on fully docs-accepted families.
 
     For each family dict (``{"parent": id|None, "members": [ids],
     "signature": str}``) whose live members are ALL ``docs_stage='accepted'``,

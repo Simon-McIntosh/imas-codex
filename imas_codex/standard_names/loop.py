@@ -89,7 +89,8 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Phase 8 — Pool-based orchestrator (replaces domain rotation)
+# Pool-based orchestrator — concurrent weighted pools over one shared budget,
+# in place of a sequential rotation over physics domains.
 # ═══════════════════════════════════════════════════════════════════════
 
 # Default regen threshold when min_score is not explicitly provided.
@@ -779,7 +780,7 @@ async def run_sn_pools(
     Startup sequence:
 
     1. Create ``SNRun`` node and ``BudgetManager``.
-    2. **Reconcile-once (B2)** — ``reconcile_standard_name_sources()``
+    2. **Reconcile-once at startup** — ``reconcile_standard_name_sources()``
        runs in a worker thread, completing before any pool issues its
        first claim.  This clears stale claims and revives sources
        whose upstream entities reappeared.
@@ -965,7 +966,7 @@ async def run_sn_pools(
     )
 
     try:
-        # ── B2: Reconcile-once-at-startup ─────────────────────────
+        # ── Reconcile-once-at-startup ─────────────────────────────
         # Must complete BEFORE any pool issues its first claim.
         from imas_codex.standard_names.graph_ops import (
             reconcile_standard_name_sources,
@@ -981,7 +982,7 @@ async def run_sn_pools(
             recon_result,
         )
 
-        # ── B2b: Reconcile VocabGap nodes against current ISN vocab ───
+        # ── Reconcile VocabGap nodes against current ISN vocab ────────
         from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
 
         vg_result = await asyncio.to_thread(reconcile_vocab_gaps)
@@ -1038,7 +1039,7 @@ async def run_sn_pools(
                 gap_retry.get("checked", 0),
             )
 
-        # ── B2c: Reconcile provenance metadata ────────────────────────
+        # ── Reconcile provenance metadata ─────────────────────────────
         # Reattach live scalar/missing-edge desyncs, NULL produced_sn_id
         # scalars pointing at deleted names, and delete orphaned derived-parent
         # scaffolding. Idempotent, provenance-only. Then surface the ledger
