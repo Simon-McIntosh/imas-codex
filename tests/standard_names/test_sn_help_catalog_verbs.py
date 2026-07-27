@@ -13,7 +13,7 @@ from click.testing import CliRunner
 from imas_codex.cli.sn import sn
 
 
-class TestSnHelpNewVerbs:
+class TestSnHelpCatalogVerbs:
     """sn --help must list the catalog workflow verbs."""
 
     def _get_help(self) -> str:
