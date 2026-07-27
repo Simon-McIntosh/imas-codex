@@ -3,13 +3,15 @@
 The lexical rules of ``_is_attachment_consistent`` (tense, state resolution,
 shape-parameter surface, distinct-vector, locus/device) are covered in
 ``test_attachment_guard.py``; this module covers the unit-dimensionality rule
-and the ISN derivation of the shape-parameter base set.
+and the ISN derivation of the shape-parameter and rate-natured base sets.
 """
 
 import pytest
 
 from imas_codex.standard_names.workers import (
     _is_attachment_consistent,
+    _name_denotes_rate,
+    _rate_natured_bases,
     _shape_parameter_bases,
 )
 
@@ -248,6 +250,47 @@ def test_shape_parameter_bases_are_isn_physical_bases() -> None:
         f"shape-parameter policy names {sorted(missing)}, absent from the ISN "
         "physical_base vocabulary — ISN drifted; update the policy or ask ISN"
     )
+
+
+def test_rate_natured_bases_come_from_the_isn_vocabulary() -> None:
+    """The rate-natured base set is ISN's vocabulary filtered by codex policy.
+
+    Codex owns the POLICY (a base counting per unit time reads as a rate);
+    ISN owns the token universe. Asserting containment keeps the set derived
+    rather than hardcoded, so an ISN addition is picked up automatically.
+    """
+    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+
+    isn_bases = frozenset(SEGMENT_TOKEN_MAP.get("physical_base") or ())
+    assert isn_bases, "ISN physical_base vocabulary is empty — grammar not loaded"
+    bases = _rate_natured_bases()
+    assert bases, "no rate-natured bases resolved from the ISN vocabulary"
+    assert bases <= isn_bases
+    # Every ISN base that counts per unit time must be in the set — a new
+    # ISN rate base must never need a codex edit to be recognised.
+    expected = {
+        t
+        for t in isn_bases
+        if t in {"rate", "frequency"} or t.endswith(("_rate", "_frequency"))
+    }
+    assert bases == expected
+
+
+@pytest.mark.parametrize(
+    "sn_name,denotes_rate",
+    [
+        ("fast_electron_source_rate", True),
+        ("rotation_frequency_of_neoclassical_tearing_mode", True),
+        ("growth_rate_of_neoclassical_tearing_mode_width", True),
+        # ``substrate`` contains ``rate`` as a substring only.
+        ("substrate_temperature", False),
+        ("electron_density", False),
+    ],
+)
+def test_rate_base_detection_respects_token_boundaries(
+    sn_name: str, denotes_rate: bool
+) -> None:
+    assert _name_denotes_rate(sn_name) is denotes_rate
 
 
 def test_shape_parameter_surface_rule_still_fires() -> None:

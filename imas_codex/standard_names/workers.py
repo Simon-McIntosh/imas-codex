@@ -304,6 +304,34 @@ def _shape_parameter_bases() -> frozenset[str]:
     return frozenset(_SHAPE_PARAMETER_BASE_POLICY) & isn
 
 
+@lru_cache(maxsize=1)
+def _rate_natured_bases() -> frozenset[str]:
+    """ISN ``physical_base`` tokens that count a quantity per unit time.
+
+    A codex POLICY keyed on the live ISN vocabulary: a base that IS ``rate`` or
+    ``frequency``, or that ends in ``_rate`` / ``_frequency``, already denotes a
+    per-time quantity, so a name built on it reads as a rate without carrying a
+    ``time_derivative_of_`` prefix. Derived at runtime, so a base ISN adds or
+    renames is picked up with no codex edit; empty when ISN is unavailable,
+    which only relaxes the rate reading back to the prefix form.
+    """
+    return frozenset(
+        t
+        for t in _isn_physical_bases()
+        if t in {"rate", "frequency"} or t.endswith(("_rate", "_frequency"))
+    )
+
+
+def _name_denotes_rate(sn_name: str) -> bool:
+    """True when *sn_name* is built on a rate-natured base.
+
+    Matched on token boundaries, so a word that merely contains a base as a
+    substring (``substrate`` ⊃ ``rate``) never counts as one.
+    """
+    padded = f"_{sn_name}_"
+    return any(f"_{t}_" in padded for t in _rate_natured_bases())
+
+
 def _shape_parameter_surface(dd_path: str | None) -> str:
     """Surface a shape parameter from *dd_path* is defined *of*.
 
@@ -1829,6 +1857,15 @@ def _enrich_batch_items(items: list[dict]) -> None:
                     item["dd_paths_docs"] = docs
 
 
+#: A DD path segment naming a time derivative. The DD writes the differential
+#: explicitly: the differentiated quantity carries a leading ``d`` and the time
+#: denominator is ``dt`` — ``dphase_dt``, ``ddensity_dt_total``, ``dn_e_dt``,
+#: ``d_dvolume_drho_tor_dt`` — and a whole structure of such derivatives is
+#: ``d_dt``. That leading ``d`` is what separates a derivative from the DD's
+#: OTHER use of the same suffix, the deuterium-tritium reaction
+#: (``emissivity_dt``, ``fusion_power_dt``), which differentiates nothing.
+_TIME_DERIVATIVE_SEGMENT_RE = _re.compile(r"d(?:_|.+_)dt(?:_.*)?")
+
 _AXIS_LEAVES = frozenset({"x", "y", "z", "r", "phi"})
 
 # Words that mark a locus token as a concrete hardware device (as opposed to a
@@ -1866,6 +1903,51 @@ _HARDWARE_LOCUS_WORDS = frozenset(
 )
 
 
+#: Ordinal position words the DD uses to index successive samples along ONE
+#: object. IMAS-DD PATH vocabulary — the DD gives each sampled position its own
+#: sub-structure and names it by its place along the object being sampled.
+_ORDINAL_POSITION_WORDS = frozenset(
+    {
+        "first",
+        "second",
+        "third",
+        "fourth",
+        "fifth",
+        "start",
+        "end",
+        "intermediate",
+        "middle",
+        "centre",
+        "centres",
+        "center",
+        "centers",
+    }
+)
+
+
+def _is_ordinal_point_sample(segment: str) -> bool:
+    """True when *segment* names one ordinal sample of a single object.
+
+    The DD samples one geometric object — a line of sight, a conductor path, a
+    thick line — at successive positions and gives each position its own
+    structure: ``line_of_sight/first_point``, ``line_of_sight/second_point``,
+    ``conductor/elements/start_points``, ``…/elements/centres``. Recognised by
+    shape: the DD's ``point``/``points`` sampling noun and/or an ordinal
+    position word, rather than by an exhaustive path list.
+
+    Where the sample sits along the object is a position on ONE quantity, not a
+    second quantity — which is what separates it from a distinct vector FIELD of
+    a device (``camera/direction`` vs ``camera/up``, a line of sight and an
+    image-up orientation) that genuinely measures something else.
+    """
+    words = segment.split("_")
+    if words[-1] in {"point", "points"}:
+        words = words[:-1]
+        if not words:  # a bare ``point``/``points`` sampling structure
+            return True
+    return all(w in _ORDINAL_POSITION_WORDS for w in words)
+
+
 def _vector_fields_conflict(path_a: str, path_b: str) -> bool:
     """True when two paths are the SAME axis leaf of DIFFERENT vector fields
     of ONE DD device node.
@@ -1874,6 +1956,11 @@ def _vector_fields_conflict(path_a: str, path_b: str) -> bool:
     differing vector-field parent (``direction`` vs ``up``), common device
     grandparent (``.../camera``). Derived from path structure, not a hardcoded
     device path.
+
+    Ordinal samples of one object (``line_of_sight/first_point/r`` vs
+    ``.../second_point/r``) are excluded: they are the same coordinate of the
+    same object read at successive positions, so they belong on one name and the
+    sample index never enters it.
     """
     sa = path_a.split("/")
     sb = path_b.split("/")
@@ -1883,6 +1970,8 @@ def _vector_fields_conflict(path_a: str, path_b: str) -> bool:
         return False  # not the same axis leaf
     if sa[-2] == sb[-2]:
         return False  # same vector field — legitimate sibling components
+    if _is_ordinal_point_sample(sa[-2]) and _is_ordinal_point_sample(sb[-2]):
+        return False  # successive samples of one object, not two vector fields
     return sa[:-2] == sb[:-2]  # common device node up to the vector-field segment
 
 
@@ -1981,18 +2070,27 @@ def _is_attachment_consistent(
         "/change/",
         "_delta",
         "tendency_",
-        "/d_dt/",
-        "_dt",
-        "/derivatives_1d/",
     )
-    sn_is_change = any(sn_name.startswith(p) for p in change_prefixes)
-    path_is_change = any(t in source_id for t in change_path_tokens)
-    if sn_is_change and not path_is_change:
+    # A name claims a derivative through its leading prefix; it can ALSO be a
+    # rate by construction, through a rate-natured base (``…_source_rate``,
+    # ``rotation_frequency_of_…``). Only the explicit claim demands a
+    # differentiating source — a directly measured frequency is its own base
+    # quantity — while either reading satisfies a derivative source.
+    sn_claims_derivative = any(sn_name.startswith(p) for p in change_prefixes)
+    sn_is_rate = sn_claims_derivative or _name_denotes_rate(sn_name)
+    # Rate-ness on the path side is a property of the individual SEGMENT that
+    # names the derivative, not of an enclosing container: a container of
+    # derivatives (``derivatives_1d``) also holds the radial grid they are
+    # computed on and the species metadata, which are plain quantities.
+    path_is_change = any(t in source_id for t in change_path_tokens) or any(
+        _TIME_DERIVATIVE_SEGMENT_RE.fullmatch(seg) for seg in source_id.split("/")
+    )
+    if sn_claims_derivative and not path_is_change:
         return False, (
             f"tense mismatch: SN '{sn_name}' is a change/rate but path "
             f"'{source_id}' is a base quantity"
         )
-    if path_is_change and not sn_is_change:
+    if path_is_change and not sn_is_rate:
         return False, (
             f"tense mismatch: path '{source_id}' is a change/rate but SN "
             f"'{sn_name}' is a base quantity"

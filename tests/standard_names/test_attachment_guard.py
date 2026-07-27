@@ -57,17 +57,181 @@ def test_consistent_pairs(source_id: str, sn_name: str) -> None:
             "transport_solver_numerics/derivatives_1d/d_dt/ion_density",
             "tendency_of_ion_density",
         ),
-        # A ``_dt`` suffixed leaf (e.g. ``..._dt``) is also a rate marker.
+        # The DD's ``d<quantity>_dt`` leaf is also a rate marker: the leading
+        # ``d`` is the differential of the quantity, ``_dt`` the denominator.
         (
-            "core_profiles/profiles_1d/electrons/temperature_dt",
-            "time_derivative_of_electron_temperature",
+            "transport_solver_numerics/derivatives_1d/dpsi_dt",
+            "time_derivative_of_poloidal_magnetic_flux",
+        ),
+        (
+            "summary/global_quantities/denergy_thermal_dt/value",
+            "time_derivative_of_thermal_stored_energy",
+        ),
+        (
+            "runaway_electrons/profiles_1d/ddensity_dt_total",
+            "time_derivative_of_runaway_electron_density",
         ),
     ],
 )
 def test_rate_marker_paths_accept_rate_names(source_id: str, sn_name: str) -> None:
-    """A ``d_dt`` / ``derivatives_1d`` rate path matches a rate SN."""
+    """A ``d_dt`` / ``d<quantity>_dt`` rate path matches a rate SN."""
     ok, reason = _is_attachment_consistent(source_id, sn_name)
     assert ok, reason
+
+
+# ---------------------------------------------------------------------------
+# ``_dt`` is overloaded: time denominator vs deuterium-tritium species
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # The DD uses ``_dt`` for the deuterium-tritium REACTION as well as for
+        # a time denominator. These leaves carry no leading differential ``d``,
+        # so they are plain base quantities of the D-T reaction.
+        (
+            "neutron_diagnostic/reconstructed_emissivity/emissivity_dt",
+            "deuterium_tritium_emissivity_due_to_fusion",
+        ),
+        (
+            "neutron_diagnostic/reconstructed_emissivity/fusion_power_dt",
+            "deuterium_tritium_power_density_due_to_fusion",
+        ),
+    ],
+)
+def test_deuterium_tritium_suffix_is_not_a_time_derivative(
+    source_id: str, sn_name: str
+) -> None:
+    """A ``<quantity>_dt`` species leaf is a base quantity, not a rate."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert ok, reason
+
+
+@pytest.mark.parametrize(
+    "source_id",
+    [
+        # ``d<quantity>_dt`` — the differentiated quantity carries the leading d.
+        "ntms/time_slice/mode/dphase_dt",
+        "transport_solver_numerics/derivatives_1d/dpsi_dt",
+        "summary/line_average/dn_e_dt/value",
+        # ``d_dt`` container segment.
+        "transport_solver_numerics/derivatives_1d/electrons/d_dt/pressure",
+    ],
+)
+def test_time_derivative_paths_still_reject_base_names(source_id: str) -> None:
+    """The rate marker must keep firing on the DD's genuine derivative form."""
+    ok, reason = _is_attachment_consistent(source_id, "electron_pressure")
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+# ---------------------------------------------------------------------------
+# ``derivatives_1d`` is a container, not a per-leaf rate marker
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # The radial grid the derivatives are computed ON is plain geometry:
+        # ``grid/area`` is documented "Cross-sectional area of the flux surface".
+        (
+            "transport_solver_numerics/derivatives_1d/grid/area",
+            "area_of_flux_surface",
+        ),
+        (
+            "transport_solver_numerics/derivatives_1d/grid/volume",
+            "volume_of_flux_surface",
+        ),
+        # Species metadata inside the container is likewise not a rate.
+        (
+            "transport_solver_numerics/derivatives_1d/ion/z_ion",
+            "ion_charge_number",
+        ),
+    ],
+)
+def test_container_leaf_without_a_rate_marker_is_a_base_quantity(
+    source_id: str, sn_name: str
+) -> None:
+    """A leaf under ``derivatives_1d`` is only a rate when it says so itself."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert ok, reason
+
+
+# ---------------------------------------------------------------------------
+# Rate-ness reads from the name's BASE as well as from a leading prefix
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        (
+            "runaway_electrons/profiles_1d/ddensity_dt_total",
+            "fast_electron_source_rate",
+        ),
+        (
+            "runaway_electrons/ggd_fluid/ddensity_dt_compton/values",
+            "runaway_electron_source_rate",
+        ),
+        (
+            "runaway_electrons/profiles_1d/ddensity_dt_dreicer",
+            "fast_electron_source_rate_due_to_dreicer",
+        ),
+        (
+            "ntms/time_slice/mode/dphase_dt",
+            "rotation_frequency_of_neoclassical_tearing_mode",
+        ),
+        (
+            "ntms/time_slice/mode/detailed_evolution/dwidth_dt",
+            "growth_rate_of_neoclassical_tearing_mode_width",
+        ),
+    ],
+)
+def test_rate_natured_base_absorbs_a_derivative_path(
+    source_id: str, sn_name: str
+) -> None:
+    """A ``…_source_rate`` / ``…_frequency`` name IS a rate quantity.
+
+    The name expresses rate-ness through its base token, not only through a
+    ``time_derivative_of_`` prefix, so a genuine derivative path is a
+    consistent source for it.
+    """
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert ok, reason
+
+
+def test_rate_natured_base_does_not_demand_a_derivative_path() -> None:
+    """A rate-natured base is not a CLAIM that the source differentiates.
+
+    A frequency measured directly is a base quantity of its own — the
+    rate-natured base must not force a derivative path on the source side.
+    """
+    ok, reason = _is_attachment_consistent(
+        "ec_launchers/beam/frequency", "frequency_of_electron_cyclotron_beam"
+    )
+    assert ok, reason
+
+
+def test_rate_word_inside_another_token_is_not_a_rate_base() -> None:
+    """``substrate`` contains ``rate`` — token boundaries must be respected."""
+    ok, reason = _is_attachment_consistent(
+        "core_instant_changes/change/profiles_1d/electrons/temperature",
+        "substrate_temperature",
+    )
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+def test_derivative_claiming_name_on_a_plain_path_still_rejected() -> None:
+    """A name claiming a time derivative of a plain intensity is still invalid."""
+    ok, reason = _is_attachment_consistent(
+        "bremsstrahlung_visible/channel/intensity",
+        "time_derivative_of_bremsstrahlung_count_at_detector_pixel",
+    )
+    assert not ok
+    assert "tense mismatch" in reason
 
 
 @pytest.mark.parametrize(
@@ -213,3 +377,83 @@ def test_distinct_vector_guard_requires_common_device() -> None:
         existing_sources=["ec_launchers/beam/launching_position/direction/z"],
     )
     assert ok, reason
+
+
+def test_geometry_primitive_alternatives_still_conflict() -> None:
+    """Alternative geometry primitives of one object are DIFFERENT quantities.
+
+    ``rectangle/r`` is the centre of the rectangle while ``oblique/r`` is a
+    reference corner — not two samples of one coordinate, so they must not
+    collapse onto one name.
+    """
+    ok, reason = _is_attachment_consistent(
+        "ferritic/object/axisymmetric/rectangle/r",
+        "radial_coordinate_of_ferritic_object",
+        existing_sources=["ferritic/object/axisymmetric/oblique/r"],
+    )
+    assert not ok
+    assert "vector" in reason.lower()
+
+
+# ---------------------------------------------------------------------------
+# Ordinal samples of ONE object share a name — ordinality never enters it
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,existing,sn_name",
+    [
+        # The DD samples one line of sight at successive points.
+        (
+            "bolometer/channel/line_of_sight/second_point/r",
+            "bolometer/channel/line_of_sight/first_point/r",
+            "radial_coordinate_of_line_of_sight",
+        ),
+        (
+            "ece/channel/line_of_sight/third_point/z",
+            "ece/channel/line_of_sight/first_point/z",
+            "vertical_coordinate_of_line_of_sight",
+        ),
+        # One conductor path sampled at its element start/end/centre positions.
+        (
+            "coils_non_axisymmetric/coil/conductor/elements/end_points/z",
+            "coils_non_axisymmetric/coil/conductor/elements/start_points/z",
+            "vertical_coordinate_of_conductor_element",
+        ),
+        (
+            "coils_non_axisymmetric/coil/conductor/elements/centres/phi",
+            "coils_non_axisymmetric/coil/conductor/elements/intermediate_points/phi",
+            "toroidal_angle_of_conductor_element",
+        ),
+        # A thick line is delimited by two points of the same object.
+        (
+            "ferritic/object/axisymmetric/thick_line/second_point/r",
+            "ferritic/object/axisymmetric/thick_line/first_point/r",
+            "radial_coordinate_of_ferritic_object",
+        ),
+    ],
+)
+def test_ordinal_point_samples_of_one_object_share_a_name(
+    source_id: str, existing: str, sn_name: str
+) -> None:
+    """Successive samples of one geometric object are one quantity.
+
+    The point index is a position along the sampled object, not a different
+    physical quantity, so it never enters the standard name and the guard must
+    let every sample attach to the same name.
+    """
+    ok, reason = _is_attachment_consistent(
+        source_id, sn_name, existing_sources=[existing]
+    )
+    assert ok, reason
+
+
+def test_point_sample_versus_vector_field_still_conflicts() -> None:
+    """A sampled position and a direction vector are different quantities."""
+    ok, reason = _is_attachment_consistent(
+        "camera_ir/channel/camera/direction/z",
+        "z_direction_unit_vector_of_camera",
+        existing_sources=["camera_ir/channel/camera/first_point/z"],
+    )
+    assert not ok
+    assert "vector" in reason.lower()
