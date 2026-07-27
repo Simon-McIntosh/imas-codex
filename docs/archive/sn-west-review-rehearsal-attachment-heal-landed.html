@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-attachment-heal-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — the attachment heal, and three guard rules that were wrong | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 — the attachment heal, and the three guard rules it caught (2026-07-27)</h1>
+
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>The heal ran, and it would have damaged the graph had it run as
+        written.</strong> The previous session left a retroactive attachment
+        audit that was landed, tested, and — as it turned out — never called by
+        anything. Pointing it at the live graph for the first time rejected
+        <strong>892 of 6027</strong> attachments. Triage of those 892 found that
+        a large fraction were the GUARD being wrong, not the data.
+      </p>
+      <p style="margin:0;">
+        Acting on them unexamined would have detached correct attachments and
+        stripped <strong>127 standard names of every source they had</strong>.
+        Three rule defects were root-caused and fixed first; only then was the
+        heal run.
+      </p>
+    </div>
+
+    <h2>What the first live audit actually said</h2>
+    <p>
+      The audit re-asks the compose-time guard
+      (<code>_is_attachment_consistent</code>) of every stored
+      <code>PRODUCED_NAME</code> edge. Its first run against real data:
+    </p>
+    <table>
+      <thead><tr><th>Rule</th><th>Rejected</th><th>Verdict on triage</th></tr></thead>
+      <tbody>
+        <tr><td>state-resolution mismatch</td><td>464</td>
+            <td><strong>Mostly false</strong> — hardcoded ISN tokens, drifted</td></tr>
+        <tr><td>distinct-vector conflict</td><td>303</td>
+            <td><strong>Mostly false</strong> — ordinal samples treated as distinct fields</td></tr>
+        <tr><td>locus/source device mismatch</td><td>60</td><td>True positives</td></tr>
+        <tr><td>unit dimensionality mismatch</td><td>39</td><td>True positives</td></tr>
+        <tr><td>tense mismatch</td><td>25</td>
+            <td><strong>24 of 25 false</strong></td></tr>
+        <tr><td>shape-parameter surface mismatch</td><td>1</td><td>True positive</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Defect 1 — the tense rule read a container and a species suffix as derivatives</h2>
+    <p>
+      Three independent faults, 24 false positives between them, every one on an
+      <code>accepted</code> name:
+    </p>
+    <ul>
+      <li><code>_dt</code> was taken to mean <em>d/dt</em>. The DD also uses it
+        for <strong>deuterium–tritium</strong>, so
+        <code>neutron_diagnostic/reconstructed_emissivity/emissivity_dt</code>
+        read as a time derivative. The DD's real derivative form carries a
+        leading <code>d</code> on the differentiated quantity
+        (<code>ddensity_dt_total</code>, <code>dphase_dt</code>) — a shape, not a
+        suffix.</li>
+      <li><code>/derivatives_1d/</code> marks a CONTAINER. A grid coordinate
+        inside it is not a change, so
+        <code>transport_solver_numerics/derivatives_1d/grid/area</code> was
+        refused as a rate.</li>
+      <li>A name expresses rate-ness by <strong>suffix</strong> as well as
+        prefix. Only leading prefixes were recognised, so
+        <code>runaway_electron_source_rate</code> and
+        <code>rotation_frequency_of_neoclassical_tearing_mode</code> read as base
+        quantities and every genuine derivative attached to them was rejected —
+        21 attachments.</li>
+    </ul>
+    <p>
+      The one true positive was kept as the regression guard:
+      <code>bremsstrahlung_visible/channel/intensity →
+      time_derivative_of_bremsstrahlung_count_at_detector_pixel</code>. Rate
+      bases are now derived from ISN's own <code>physical_base</code> vocabulary
+      at runtime, not listed in codex. Commit <code>7f84d189</code>.
+    </p>
+
+    <h2>Defect 2 — ordinality, which a locked decision says never enters a name</h2>
+    <p>
+      The distinct-vector rule exists for a real fault: a camera's
+      <code>direction/z</code> and its image-up <code>up/z</code> are different
+      vectors and must not share one scalar name. It was also firing on
+      <code>first_point</code> / <code>second_point</code> /
+      <code>third_point</code> — <em>ordinal samples of ONE line of sight</em>.
+    </p>
+    <p>
+      That directly contradicted a decision already locked on this plan:
+      <em>"name the line-of-sight endpoint quantity via the existing
+      <code>line_of_sight</code> locus, WITHOUT the point index — ordinality
+      never enters the name."</em> The compose prompt had been corrected to obey
+      it, so the guard was refusing exactly what the composer was instructed to
+      produce. <code>radial_coordinate_of_line_of_sight</code> had 67 of its 70
+      attachments rejected on this basis.
+    </p>
+    <p>
+      <strong>So the answer to the plan's question is: over-reach, and against a
+      locked decision.</strong> Ordinal samples no longer conflict; camera
+      direction-vs-up and the geometry primitives (a rectangle's centre vs an
+      oblique's reference corner) still do, pinned by tests.
+    </p>
+
+    <h2>Defect 3 — the same root pattern a third time</h2>
+    <p>
+      <code>state_subjects</code> was the literal tuple
+      <code>("ion_state", "ion_charge_state", "neutral_state")</code> — an ISN
+      vocabulary set hardcoded in codex, which <code>AGENTS.md</code> names as a
+      binding violation, and which had already drifted. ISN expresses state
+      resolution through a dedicated <code>state</code> segment whose tokens are
+      <code>charge_state</code> and <code>internal_state</code>; nothing in the
+      tuple knew about <code>internal_state</code>. So
+      <code>neutral_internal_state_pressure</code> read as species-level while
+      its source <code>edge_profiles/ggd/neutral/state/pressure/values</code> is
+      plainly state-resolved. About 40 names in that one family. Now read from
+      the live grammar, with a drift test asserting every ISN state token is
+      covered. Commit <code>59331ae6</code>.
+    </p>
+
+    <h2>Two defects in the audit itself</h2>
+    <ul>
+      <li><strong>An order-dependent rule applied order-independently.</strong>
+        The distinct-vector rule is pairwise against
+        <code>existing_sources</code>. At compose time sources arrive one at a
+        time and only ACCEPTED ones accumulate, so of a conflicting group the
+        first survives and the rest are refused. The audit passed every sibling
+        to every row, so each member saw the others and all N were rejected —
+        including the one compose would have kept. That is where the 127
+        would-be-orphaned names came from. Fixed to accumulate deterministically,
+        compose-style. Commit <code>1cd51e0d</code>.</li>
+      <li><strong>A whole-name wipeout is a NAME defect, not an attachment
+        defect.</strong> When every source of a name is refused by the same rule,
+        the sources are consistently grouped and the NAME is wrong —
+        <code>atomic_count_of_ion_state</code> has 76 sources, all at
+        element/species level. Detaching all 76 would orphan an accepted name and
+        rewind 76 sources to paid recomposition to fix what one
+        <code>sn edit --rename</code> fixes. Such names are now reported for
+        <code>sn edit</code> and withheld from the detach set.</li>
+    </ul>
+
+    <h2>The heal</h2>
+    <p>After all five fixes, the audit fell from 892 rejections to 487.</p>
+    <table>
+      <thead><tr><th>Outcome</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td>Attachments checked</td><td>6026</td></tr>
+        <tr><td><strong>Detached</strong></td><td><strong>124</strong></td></tr>
+        <tr><td>Sources returned to <code>extracted</code> to recompose</td><td>49</td></tr>
+        <tr><td>Second pass detached (idempotency)</td><td><strong>0</strong></td></tr>
+        <tr><td>Left on <code>accepted</code> names (needs authorization)</td><td>198</td></tr>
+        <tr><td>Left as name-level defects for <code>sn edit</code></td><td>133 across 10 names</td></tr>
+        <tr><td>Left as provenance on <code>superseded</code> names</td><td>32</td></tr>
+        <tr><td>Names orphaned</td><td>6</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The residue reconciles exactly: 198 + 133 + 32 = 363, the whole remainder.
+      Nothing is unexplained.
+    </p>
+
+    <h3>The 10 name-level defects</h3>
+    <p>
+      Each needs <code>sn edit --rename</code> (or a hint) rather than a detach:
+      <code>atomic_count_of_ion_state</code> (76 sources, all species-level),
+      <code>ion_upper_bound_charge_number</code> (37),
+      <code>flux_surface_averaged_metric</code> (4 — the gm collapse),
+      <code>radiance_at_spectral_line</code> (3),
+      <code>frequency_of_diagnostic_antenna</code> (3),
+      <code>poloidal_magnetic_flux_at_measurement_position</code> (2),
+      <code>equilibrium_weight_of_interferometer_beam</code> (2),
+      <code>extent_of_hard_xray_detector</code> (2),
+      <code>normalized_count_at_detector_pixel</code> (2),
+      <code>wavelength_of_detector_pixel</code> (2).
+    </p>
+
+    <h3>The 6 orphaned names</h3>
+    <p>
+      Every attachment each had was inconsistent, so they now carry no source at
+      all — surfaced for a decision rather than auto-superseded, as designed:
+      <code>count_at_detector_pixel</code>,
+      <code>electron_particle_source_rate</code>,
+      <code>ion_vibrational_level</code>,
+      <code>launched_power_of_electron_cyclotron_launcher</code>,
+      <code>radial_derivative_of_area_of_flux_surface</code>,
+      <code>wave_power_of_beam_tracing_beam</code>.
+    </p>
+
+    <h2>Two reconciles that were never wired, and a registry that never applied</h2>
+    <ul>
+      <li><strong>The attachment re-validation was never called.</strong> Its
+        commit message read "re-validate existing source-to-name attachments on
+        every run", but no module referenced it, so every stored edge went on
+        unexamined. Now wired into the startup reconcile, ordered so a freed
+        source recomposes in the same run that detached it. Commit
+        <code>1e4aef30</code>.</li>
+      <li><strong>A name could carry two units.</strong> The schema declares
+        <code>HAS_UNIT</code> cardinality <em>one</em>, and the guard admits a
+        source by comparing dimensionality — so a name holding both <code>1</code>
+        and <code>m^-2</code> accepts sources of either, which is one mechanism by
+        which distinct quantities collapse. Both writers already self-heal, but a
+        name whose unit predates that keeps the residue forever once it reaches a
+        terminal stage, because nothing recomposes it.
+        <code>radial_flux_surface_averaged_metric</code> was the one such node,
+        now healed; a graph-quality test holds the invariant.</li>
+      <li><strong>A registered unit correction never reached the graph.</strong>
+        The DD declares one documented quantity with two dimensionalities:
+        <code>ece/channel/position/psi</code> and
+        <code>ece/channel/beam_tracing/beam/position/psi</code> both read
+        "Poloidal flux" and declare <code>W</code> and <code>Wb</code>. That is
+        precisely the <code>correct_in_graph</code> case, but the registry entry
+        carried suppression only — and an accepted poloidal-flux name duly
+        inherited total power. Flagging it was not enough either: the correction
+        is applied by the DD build alone, so an entry added afterwards has no
+        effect on stored paths, and nobody rebuilds the dictionary to land a unit
+        fix. A registry whose entries only work on a rebuild silently does not
+        work. Both facets now declare <code>Wb</code>, and an invariant test
+        asserts no stored unit contradicts the registry. Commit
+        <code>5d33ecea</code>.</li>
+    </ul>
+
+    <h2>The unit detector</h2>
+    <p>
+      The SN↔DD unit-agreement axis is down from the 354 recorded previously to
+      <strong>6 rows</strong> (the earlier figure was counted over a different
+      edge). Every one is explained:
+    </p>
+    <ul>
+      <li><strong>4</strong> — <code>flux_surface_averaged_metric</code> against
+        gm2/gm3/gm6/gm7. The gm collapse; dissolves when the staged repairs
+        recompose.</li>
+      <li><strong>1</strong> — <code>poloidal_magnetic_flux_at_measurement_position</code>
+        declaring <code>W</code>. The DD self-contradiction above; now correctly
+        surfaced as a name-level defect for <code>sn edit</code>.</li>
+      <li><strong>1</strong> — <code>edge_profiles/ggd/a_field/r</code> (the
+        magnetic vector potential, <code>T.m</code>) attached to
+        <code>radial_neutral_momentum_flux</code>. A single interloper among 23
+        correct momentum-flux sources; the guard rejects it and the heal detached
+        it.</li>
+    </ul>
+
+    <h2>One decision remains</h2>
+    <p>
+      <strong>198 inconsistent attachments sit on <code>accepted</code> names</strong>
+      and were deliberately not detached: an accepted name is
+      catalog-authoritative, so losing a source is a decision rather than
+      hygiene, and the audit gates it behind an explicit opt-in exactly as
+      <code>sn run --reset-to</code> and <code>sn prune</code> do. The release
+      candidate exports accepted names, so leaving them means PR'ing known-wrong
+      attachments to the stage-3 reviewer — the thing this sequencing was
+      inverted to avoid. Detaching them reroutes about 190 sources to
+      recomposition, which is free to compose and paid to review.
+    </p>
+  </main>
+</body>
+</html>

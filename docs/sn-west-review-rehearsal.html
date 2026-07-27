@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-27">
-<meta name="plan-version" content="9">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-version" content="10">
+<meta name="plan-impl" content="0.62">
 </head>
 <body>
   <main class="plan-doc">
@@ -217,6 +217,66 @@
         stored graph, and 15 staged <code>sn edit</code> repairs await compose +
         review. Full record:
         <a href="archive/sn-west-review-rehearsal-attachment-integrity-landed.html">attachment integrity + batch versioning</a>.
+      </p>
+    </div>
+
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px; margin-top:10px;">
+      <p style="margin:0 0 6px;">
+        <strong>Attachment heal run — and it would have damaged the graph as
+        written (2026-07-27).</strong> Pointed at the live graph for the first
+        time, the audit rejected <strong>892 of 6027</strong> attachments. Triage
+        found much of that was the GUARD being wrong, not the data: acting on it
+        unexamined would have detached correct attachments and stripped
+        <strong>127 names of every source they had</strong>. Three rule defects
+        plus two audit defects were root-caused and fixed first.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>All three rule defects were the same root pattern</strong> — an
+        ISN-vocabulary or DD-convention set hardcoded in codex and since drifted.
+        The tense rule read <code>_dt</code> as <em>d/dt</em> when the DD also
+        uses it for <strong>deuterium–tritium</strong>, treated
+        <code>/derivatives_1d/</code> as covering the grid coordinates inside it,
+        and recognised rate-ness only as a leading prefix, so
+        <code>..._source_rate</code> names refused their own derivatives — 24 of
+        its 25 rejections were false (<code>7f84d189</code>). The
+        state-resolution rule hardcoded <code>("ion_state",
+        "ion_charge_state", "neutral_state")</code> while ISN's <code>state</code>
+        segment is <code>charge_state</code>/<code>internal_state</code>, so ~40
+        <code>*_internal_state_*</code> names read as species-level
+        (<code>59331ae6</code>).
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>The line-of-sight question is answered: over-reach, and against a
+        locked decision.</strong> The distinct-vector rule was refusing
+        <code>first/second/third_point</code> — ordinal samples of ONE line of
+        sight — which contradicts this plan's own locked rule that
+        <em>ordinality never enters the name</em>. The composer had already been
+        corrected to obey it, so the guard was refusing exactly what compose was
+        told to produce. Camera direction-vs-up and the geometry primitives still
+        conflict, pinned by tests. The audit also applied that pairwise rule
+        order-<em>in</em>dependently, rejecting whole conflict sets instead of
+        keeping one representative (<code>1cd51e0d</code>) — the source of the 127
+        would-be orphans — and now classifies a whole-name wipeout as a NAME
+        defect for <code>sn edit</code> rather than detaching it.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>Heal result:</strong> 892 → 487 rejections; <strong>124
+        detached</strong>, 49 sources rerouted to recompose, second pass
+        <strong>0</strong> (idempotent). Residue reconciles exactly — 198 on
+        accepted names (gated), 133 across 10 name-level defects, 32 provenance on
+        superseded names. 6 names orphaned and surfaced for decision. The unit
+        detector is down to <strong>6 rows, every one explained</strong>.
+      </p>
+      <p style="margin:0;">
+        Three things that were built but never took effect are now wired: the
+        attachment re-validation (its commit said "on every run"; nothing called
+        it), a name's unit cardinality (the schema says one; a terminal-stage name
+        could keep two forever), and a registered DD unit correction — the DD
+        declares <code>ece/channel/position/psi</code> as <code>W</code> and its
+        identically-documented sibling as <code>Wb</code>, and the correction
+        applied only at build time, so it never reached stored paths. Full record:
+        <a href="archive/sn-west-review-rehearsal-attachment-heal-landed.html">the attachment heal</a>.
+        <strong>One decision open:</strong> the 198 accepted-name detaches.
       </p>
     </div>
     <p>
@@ -733,9 +793,9 @@ Done-when
   1. Final drain recorded (accepted delta + any still-unnameable, with reasons).
   2. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
   3. §3 stages 0–2 collapsed; stages 3–6 queued; this followup resolved.</pre>
-    <p class="r-fu-outcome">SEQUENCING INVERTED by lead direction — correctness before the RC. The final drain and RC cut did NOT happen; a pre-flight check of the batch found 11 ACCEPTED WEST names whose unit contradicts their own DD source (354 graph-wide), including a divertor strike-point coordinate attached to a camera up-vector. Lead: 'this is CRITICAL. the backing graph data needs to be correct ... all such occurrences should be properly root caused and fixed.' PR'ing known-faulty names would spend the stage-3 reviewer's attention on defects we already knew about. ROOT CAUSE (definitive): _is_attachment_consistent ALREADY rejects the strike-point case, but it was reachable from ONE module (compose). An audit of all 15 write paths that can create a source-to-name edge found 13 ungated — chiefly persist_refined_name, which migrates every source onto a refine successor wholesale with no re-validation, so a refine laundered the edge past the guard AFTER compose refused it. The guard also had no dimensionality rule, so distinct quantities collapsed onto one name. ONE BUG IN THREE DISGUISES: a query keyed on a projection instead of the authority — minting joined source_paths (dd:-prefixed) against bare paths so batch release resolved to ZERO names (no RC was cuttable at all); hint delivery keyed on HAS_STANDARD_NAME (originates from IMASNode, bare-path-keyed) so 0 of 40 hint-carrying sources were reachable and 305 names carried an ignored hint; reconcile_standard_name_dd_edges half-checked units only. LANDED (12 commits, all pushed, tests 4635 -> 4762 passed / 0 failed): 0e240431 dimensionality rule + ISN-derived shape bases (fixes a binding AGENTS.md violation); eb9252c1 retroactive re-validation of existing attachments every run; 277a3061 an IDS abbreviation (focs vs fiber_optic_current_sensor) is not a device mismatch — 15 CORRECT attachments were being rejected, found BY the new audit; e4f32c5c ~90 DD unit defects registered + 5 correct_in_graph where the DD contradicts itself (25 tests); 71c95689 minting joins PRODUCED_NAME (355 paths -> 407 names); c32a9196 hint delivered over PRODUCED_NAME + no prior-review requirement (0 -> 39 of 40 reachable); fcca33a5 the DD pin guard aborted EVERY unscoped run (8741 sources pinned 4.1.0 vs configured 4.1.1) — per lead's rule a pin is immutable provenance and a pin behind current DD is ordinary state, so the seeder stops asserting the current version per source and passes it as default_dd_version (verified live: run now proceeds past extract); d32e738a 41 sources revived from stale unit skips; aec1c19d+eb9a7773 batch RC carries its identity as semver build metadata (v0.2.0rc66+west-task-2e; the tag grammar did not match +build at all, so a batch tag was invisible to state detection and the next release would have re-minted the same RC over an existing tag); 1dad29ee a domain-scoped export stamped an invalid scope and _write_manifest warns rather than raises, so it was written silently; eea28170 campaign manifest gets a schema, a kind, and a home outside the worktree; 1a9430d8 a test no longer mutates a committed LLM prompt on disk (reproduced the concurrent-run race in the act, leaving it DOUBLY mutated); 598eff14 order-independent mocks kill the whole-repo-only StopIteration failures. imas-standard-names: version ordering root-caused server-side, not in the SPA — _SEMVER_RE required a prerelease to start with -/+ so v0.2.0rc64 never matched and every version fell to a string sort (b27c5fb, 8b45a46, c960740; verified against the real 65-entry deployed list). OPEN: WEST is 325/355 (down from 335 — 10 names deliberately mid-repair, sources reset to extracted so each recomposes from its own DD path); the ~354 unit-disagreeing attachments are NOT yet healed in the stored graph (rule + audit landed and tested, healing pass incomplete when the session's agents stopped); 15 name repairs staged via sn edit awaiting compose+review; paid review deliberately HELD until the hint fix was in (now done). Record: docs/archive/sn-west-review-rehearsal-attachment-integrity-landed.html. Continued in f-swrr-010.</p>
+    <p class="r-fu-outcome">SEQUENCING INVERTED by lead direction — correctness before the RC. The final drain and RC cut did NOT happen; a pre-flight check of the batch found 11 ACCEPTED WEST names whose unit contradicts their own DD source (354 graph-wide), including a divertor strike-point coordinate attached to a camera up-vector. Lead: 'this is CRITICAL. the backing graph data needs to be correct ... all such occurrences should be properly root caused and fixed.' PR'ing known-faulty names would spend the stage-3 reviewer's attention on defects we already knew about. ROOT CAUSE (definitive): _is_attachment_consistent ALREADY rejects the strike-point case, but it was reachable from ONE module (compose). An audit of all 15 write paths that can create a source-to-name edge found 13 ungated — chiefly persist_refined_name, which migrates every source onto a refine successor wholesale with no re-validation, so a refine laundered the edge past the guard AFTER compose refused it. The guard also had no dimensionality rule, so distinct quantities collapsed onto one name. ONE BUG IN THREE DISGUISES: a query keyed on a projection instead of the authority — minting joined source_paths (dd:-prefixed) against bare paths so batch release resolved to ZERO names (no RC was cuttable at all); hint delivery keyed on HAS_STANDARD_NAME (originates from IMASNode, bare-path-keyed) so 0 of 40 hint-carrying sources were reachable and 305 names carried an ignored hint; reconcile_standard_name_dd_edges half-checked units only. LANDED (12 commits, all pushed, tests 4635 -&gt; 4762 passed / 0 failed): 0e240431 dimensionality rule + ISN-derived shape bases (fixes a binding AGENTS.md violation); eb9252c1 retroactive re-validation of existing attachments every run; 277a3061 an IDS abbreviation (focs vs fiber_optic_current_sensor) is not a device mismatch — 15 CORRECT attachments were being rejected, found BY the new audit; e4f32c5c ~90 DD unit defects registered + 5 correct_in_graph where the DD contradicts itself (25 tests); 71c95689 minting joins PRODUCED_NAME (355 paths -&gt; 407 names); c32a9196 hint delivered over PRODUCED_NAME + no prior-review requirement (0 -&gt; 39 of 40 reachable); fcca33a5 the DD pin guard aborted EVERY unscoped run (8741 sources pinned 4.1.0 vs configured 4.1.1) — per lead's rule a pin is immutable provenance and a pin behind current DD is ordinary state, so the seeder stops asserting the current version per source and passes it as default_dd_version (verified live: run now proceeds past extract); d32e738a 41 sources revived from stale unit skips; aec1c19d+eb9a7773 batch RC carries its identity as semver build metadata (v0.2.0rc66+west-task-2e; the tag grammar did not match +build at all, so a batch tag was invisible to state detection and the next release would have re-minted the same RC over an existing tag); 1dad29ee a domain-scoped export stamped an invalid scope and _write_manifest warns rather than raises, so it was written silently; eea28170 campaign manifest gets a schema, a kind, and a home outside the worktree; 1a9430d8 a test no longer mutates a committed LLM prompt on disk (reproduced the concurrent-run race in the act, leaving it DOUBLY mutated); 598eff14 order-independent mocks kill the whole-repo-only StopIteration failures. imas-standard-names: version ordering root-caused server-side, not in the SPA — _SEMVER_RE required a prerelease to start with -/+ so v0.2.0rc64 never matched and every version fell to a string sort (b27c5fb, 8b45a46, c960740; verified against the real 65-entry deployed list). OPEN: WEST is 325/355 (down from 335 — 10 names deliberately mid-repair, sources reset to extracted so each recomposes from its own DD path); the ~354 unit-disagreeing attachments are NOT yet healed in the stored graph (rule + audit landed and tested, healing pass incomplete when the session's agents stopped); 15 name repairs staged via sn edit awaiting compose+review; paid review deliberately HELD until the hint fix was in (now done). Record: docs/archive/sn-west-review-rehearsal-attachment-integrity-landed.html. Continued in f-swrr-010.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-010" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T20:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-010" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T20:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-27T21:31:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Heal the attachment graph, complete the 15 staged repairs, THEN cut the RC</h4>
     <div class="r-fu-body"><p>Both blockers that stalled the last session are fixed and verified live: the DD pin guard no longer aborts unscoped runs (<code>fcca33a5</code>) and <code>sn edit --hint</code> now actually reaches compose (<code>c32a9196</code>, 0 → 39 of 40 sources). The attachment guard has a dimensionality rule and a retroactive re-validation pass (<code>0e240431</code>, <code>eb9252c1</code>), but <strong>the healing has not run against the stored graph</strong> — ~354 unit-disagreeing attachments remain, 262 on accepted/approved names. Run the heal, drain the 15 staged <code>sn edit</code> repairs through compose + review (now correctly steered), verify the detector count falls to only registry-excepted DD defects, and then cut the fork-PR RC. The RC is the deliverable; correctness is the gate the lead set.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -829,6 +889,120 @@ Done-when
   2. The 15 staged repairs composed + reviewed on merit; gm1–gm7 verified distinct.
   3. Detector count fully explained; the HAS_UNIT cardinality test added and green.
   4. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
+  5. Stages 3–6 queued; this followup resolved.</pre>
+    <p class="r-fu-outcome">HEAL DONE (step 1); steps 2-4 continue in f-swrr-011, one decision open. The audit had NEVER been called by any module despite its commit saying 'on every run' - pointed at the live graph for the first time it rejected 892 of 6027 attachments, and triage showed much of that was the GUARD being wrong, not the data: acting unexamined would have detached correct attachments and stripped 127 names of every source they had. FIVE defects root-caused and fixed before any write, all three rule defects the SAME root pattern (an ISN-vocabulary or DD-convention set hardcoded in codex and since drifted): 7f84d189 the tense rule read '_dt' as d/dt when the DD also uses it for DEUTERIUM-TRITIUM, treated '/derivatives_1d/' as covering the grid coordinates inside it, and recognised rate-ness only as a leading prefix so '..._source_rate' names refused their own derivatives - 24 of its 25 rejections were false, all on accepted names; rate bases now derived from ISN's physical_base vocabulary at runtime. 59331ae6 state_subjects was the literal tuple (ion_state, ion_charge_state, neutral_state) while ISN's 'state' segment is charge_state/internal_state, so ~40 *_internal_state_* names read as species-level - now read from the live grammar with a drift test asserting every ISN state token is covered. THE PLAN'S LINE-OF-SIGHT QUESTION IS ANSWERED: over-reach, and against a LOCKED DECISION - the distinct-vector rule was refusing first/second/third_point, ordinal samples of ONE line of sight, which contradicts this plan's own locked rule that ordinality never enters the name; the composer had already been corrected to obey it, so the guard was refusing exactly what compose was told to produce. Camera direction-vs-up and the geometry primitives (rectangle centre vs oblique corner) still conflict, pinned by tests. TWO further defects in the AUDIT itself: 1cd51e0d it applied the pairwise distinct-vector rule order-INdependently (compose accumulates only ACCEPTED siblings, so one representative survives; the audit passed every sibling to every row and rejected all N) - the source of the 127 would-be orphans; and a whole-name wipeout is now classified as a NAME defect reported for 'sn edit' rather than detached, because when every source of a name is refused by one rule the sources are consistently grouped and the NAME is wrong (atomic_count_of_ion_state has 76 sources, all element/species level - one --rename fixes what 76 paid recompositions would). HEAL RESULT: 892 -> 487 rejections; 124 DETACHED, 49 sources rerouted to extracted, second pass 0 (idempotency verified). Residue reconciles EXACTLY with nothing unexplained: 198 on accepted names (gated behind include_accepted, as sn prune/--reset-to gate the same state), 133 across 10 name-level defects, 32 provenance on superseded names. 6 names orphaned and surfaced for decision, not auto-superseded. THREE THINGS BUILT BUT NEVER TAKING EFFECT, now wired (1e4aef30, 5d33ecea): the attachment re-validation itself; HAS_UNIT cardinality (schema says one, and the guard admits sources by comparing dimensionality, so a name holding both '1' and 'm^-2' accepts either - both writers self-heal but a terminal-stage name keeps the residue forever since nothing recomposes it; radial_flux_surface_averaged_metric healed, invariant test added); and a registered DD unit correction - the DD declares ece/channel/position/psi as W and its identically-documented sibling beam_tracing/beam/position/psi as Wb, the textbook correct_in_graph case, but the entry carried suppression only AND the correction is applied by the DD build alone, so an entry added later never reached stored paths (a registry whose entries only work on a full rebuild silently does not work). Both facets now Wb; invariant test asserts no stored unit contradicts the registry. UNIT DETECTOR down to 6 rows, every one explained: 4 = the gm collapse (dissolves when the staged repairs recompose), 1 = the psi self-contradiction now correctly surfaced as a name defect, 1 = edge_profiles/ggd/a_field/r (magnetic vector potential, T.m) interloping among 23 correct momentum-flux sources, detached by the heal. ALSO: 4 banned test filenames renamed and 23 plan references scrubbed from source comments after the lead flagged test_phase8_bugfixes.py; the weakness was that the naming rule said 'when you NOTICE a violation' with no mandatory check, unlike the AI-attribution rule which has a runnable pre-push grep - ~/.agents/AGENTS.md now carries a mandatory pre-stage naming check with two runnable greps, a documented false-positive list, and 'touching a file makes its name your responsibility'. A repo-wide scan shows ~160 files still carry plan references in COMMENTS - a separate programme, recommended after the RC. Record: docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-011" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T23:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide the 198 accepted-name detaches, land the name repairs, then cut the RC</h4>
+    <div class="r-fu-body"><p>The heal is done and idempotent (<code>124</code> detached, second pass 0) and the residue is fully explained. <strong>One decision gates the rest:</strong> <code>198</code> inconsistent attachments sit on <code>accepted</code> names and were deliberately not detached — an accepted name is catalog-authoritative, so losing a source is a decision, not hygiene. The RC exports accepted names, so leaving them means PR'ing known-wrong attachments to the stage-3 reviewer, which is exactly what inverting the sequencing was meant to avoid. Then: <code>sn edit --rename</code> the 10 name-level defects, decide the 6 orphaned names, drain the repairs through compose (free) and review (paid), and cut the fork-PR RC.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — finish the repair, then cut the RC
+Tier:    opus
+
+State to read FIRST
+  docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html
+    — the five guard/audit defects, the heal numbers, and every open item.
+
+Verified state (2026-07-27, end of session)
+  Attachment audit: 6026 checked, 487 rejected, 124 detached, 49 sources
+  rerouted, second pass 0 (idempotent). Residue = 198 protected + 133 misnamed
+  + 32 historical, exactly.
+  Unit detector: 6 rows, all explained (4 gm collapse, 1 psi name defect,
+  1 a_field interloper already detached).
+  ~$40 of the 500 USD ceiling spent before this session; a capped
+  --names-only drain ran at the end of it (cap 20) — read its SNRun for the
+  actual spend before budgeting more.
+
+DECISION 1 (ask the lead first — do not decide this alone)
+  198 inconsistent attachments on ACCEPTED names. Detaching them reroutes ~190
+  sources to recomposition: free to compose, paid to review. Leaving them means
+  the RC ships attachments we already know are wrong. Present the numbers and
+  get an explicit yes/no on `include_accepted=True`.
+  SEPARATELY: `--override-edits` on any origin=&#x27;catalog_edit&#x27; name still needs
+  the lead&#x27;s explicit authorization — that is a different gate, do not conflate
+  them.
+
+Do, in order
+  1. Once decision 1 is answered, run the heal accordingly and re-verify
+     idempotency.
+  2. The 10 NAME-level defects — repair via `imas-codex sn edit &lt;name&gt; --rename
+     &lt;new&gt; --reason &lt;why&gt;` (or --hint to steer), NEVER Cypher, NEVER a
+     hand-accept. Each needs a correct replacement decided from the DD text of
+     its sources:
+       atomic_count_of_ion_state (76 sources, all element/species level)
+       ion_upper_bound_charge_number (37)
+       flux_surface_averaged_metric (4 — the gm collapse)
+       radiance_at_spectral_line (3), frequency_of_diagnostic_antenna (3)
+       poloidal_magnetic_flux_at_measurement_position (2 — declares W for a
+         poloidal flux; both DD facets now correctly declare Wb, so the NAME&#x27;s
+         unit is what is wrong)
+       equilibrium_weight_of_interferometer_beam (2)
+       extent_of_hard_xray_detector (2)
+       normalized_count_at_detector_pixel (2)
+       wavelength_of_detector_pixel (2)
+  3. The 6 ORPHANED names now carry no source at all — every attachment they had
+     was inconsistent. Decide each: supersede, or re-source from a DD path that
+     genuinely realizes it. Do not auto-supersede.
+       count_at_detector_pixel, electron_particle_source_rate,
+       ion_vibrational_level, launched_power_of_electron_cyclotron_launcher,
+       radial_derivative_of_area_of_flux_surface, wave_power_of_beam_tracing_beam
+  4. Drain the repairs: compose is free and local; review is the only paid stage.
+     Verify the gm1–gm7 collapse dissolves into seven DISTINCT names with
+     distinct units (gm1 m^-2, gm2 m^-2, gm3 1, gm4 T^-2, gm5 T^2, gm6 T^-2,
+     gm7 1; gm8/gm9 already correct).
+  5. VERIFY: re-run the attachment audit and the unit detector; every remaining
+     row must be a registry-excepted DD defect or a stated, reasoned exception.
+     `uv run pytest tests/graph/test_sn_unit_integrity.py tests/graph/test_dd_unit_correction_reconcile.py -m graph -q`
+     must be green.
+  6. CUT THE RC (stage 2):
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     It mints v0.&lt;n&gt;.0rc&lt;N&gt;+west-task-2e (batch label as semver build metadata).
+     Verify: additive diff (approved set byte-identical); catalog.yml carries
+     export_scope=review + review_batch; artifact frozen at
+     manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND batch_label;
+     RC-tagged; PR open on the FORK (never --final in act 1). Record RC version,
+     PR URL, batch size, and judge the LLM-written PR body — the first live
+     output of the sn-release-notes seat.
+  7. Collapse §3 stages 0–2 and queue stages 3–6 (human review → sn merge
+     fold-back exercising the graph-merged: tag → freeze-check → --undo unwind).
+
+Also open (report status; do not let these block the RC)
+  - The line-of-sight split: with the ordinality rule now settled, separate the
+    ~110 attachments into those on a genuinely WRONG name (the swallowed
+    pure-geometry thick_line paths from pf_active / iron_core / ferritic, which
+    are not beam tracing at all) versus those merely on a name the old guard
+    disliked. Only the former need repair.
+  - Judge whether the remaining write paths (derived-parent seeders,
+    provenance rebuilders) need the guard at write time or are correctly covered
+    by the retroactive pass — gating a faithful reconstruction with a newer rule
+    destroys history rather than protecting it. State the reasoning per path.
+  - ~160 Python files carry plan/stage/bug references in comments and docstrings
+    (filenames are now clean, and ~/.agents/AGENTS.md carries a mandatory
+    pre-stage naming check). A separate fan-out, recommended AFTER the RC since
+    it is comment-only and the RC is gated on graph correctness.
+
+Scope / constraints
+  - Gap-only; never --reseed. PR target stays fork.
+  - The stage-0 snapshot exists; do NOT re-snapshot.
+  - NEVER hand-accept a name or hand-edit graph text: acceptance is earned only
+    through the RD-quorum review pool; corrections go through `sn edit`.
+  - A DD pin is immutable — never re-stamp one, never re-extract on a bump.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check over every path you stage.
+  - No AI attribution in ANY commit, issue, PR, or comment.
+  - Cold-import artifact on this filesystem: a first `import imas_codex.discovery`
+    pulls litellm&#x27;s pydantic build and can exceed the 60s faulthandler limit,
+    making EVERY test in a file error at SETUP — including pure-unit ones. Warm
+    it with `uv run python -c &quot;import imas_codex.discovery, litellm&quot;` and re-run
+    before diagnosing anything.
+
+Done-when
+  1. The accepted-name decision taken and executed; heal idempotent.
+  2. The 10 name defects repaired via sn edit; the 6 orphans decided.
+  3. gm1–gm7 verified distinct; audit + unit detector fully explained; graph
+     tests green.
+  4. Fork PR OPEN with RC version, URL, batch size and PR-body judgement.
   5. Stages 3–6 queued; this followup resolved.</pre>
     </article>
 </section>
