@@ -1,10 +1,26 @@
-"""Tests for Phase 8 smoke-test blockers.
+"""Contracts the pool orchestrator must honour when claiming and finalizing work.
 
-BUG-1 — Cypher head(coalesce(x.physics_domain, [])) fails for scalar fields.
-BUG-2 — Python set comprehension over physics_domain fails when value is a list.
-BUG-3 — pool_loop does not release claims when process() raises.
-BUG-4 — write_standard_names() calls gc.query() after the surrounding
-         ``with GraphClient()`` block closes (use-after-close).
+Each invariant here is a property of the claim → process → release → finalize
+cycle, stated in mechanism terms:
+
+* ``physics_domain`` is a scalar String on both ``IMASNode`` and
+  ``StandardName``, so claim Cypher must read it directly — ``head()`` and
+  ``IN`` treat it as a list and raise, and a list value reaching Python breaks
+  the set-comprehension that groups a batch by domain.
+* A claim is released when the worker raises, so a crashing batch cannot
+  strand its nodes with ``claimed_at`` set; a failing release must not kill
+  the pool loop either.
+* ``write_standard_names`` runs its follow-up sweep inside an open
+  ``GraphClient`` context — a query issued after the surrounding ``with``
+  block exits hits a closed client.
+* A pool whose display count says "work pending" but whose strict claim
+  keeps returning nothing is excluded from the admission gate after a
+  threshold of empty claims, and re-enters when its pending count grows —
+  otherwise it holds weight share and starves productive pools.
+* Per-pool ``total_processed`` accumulates only on successful batches and is
+  what populates the ``SNRun`` counter fields at finalize.
+* The pending-count watchdog keeps ``PoolHealth.pending_count`` fresh from
+  its callback, ignoring unknown pool names and surviving callback failures.
 
 All tests are mock-based; no live Neo4j required.
 """
@@ -99,7 +115,7 @@ def _mock_mgr() -> MagicMock:
 
 
 # ---------------------------------------------------------------------------
-# BUG-1 / BUG-2: claim queries return scalar physics_domain
+# Claim queries return scalar physics_domain
 # ---------------------------------------------------------------------------
 
 
@@ -276,8 +292,8 @@ class TestClaimReturnScalarPhysicsDomain:
     def test_claim_compose_returns_scalar_physics_domain_from_imas(self) -> None:
         """claim_compose reads physics_domain from IMASNode (scalar String).
 
-        The seed query now returns imas.physics_domain directly (no head/coalesce).
-        Verify the CASE expression no longer wraps in head().
+        The seed query returns imas.physics_domain directly: head(coalesce(...))
+        would treat the scalar as a list and raise.
         """
         from imas_codex.standard_names.graph_ops import (
             claim_generate_name_batch,
@@ -314,7 +330,8 @@ class TestClaimReturnScalarPhysicsDomain:
         # The seed CASE expression should return a scalar _physics_domain
         seed_call_args = gc._tx.run.call_args_list[0].args[0]
         assert "head(coalesce" not in seed_call_args, (
-            "Seed Cypher still contains head(coalesce — BUG-1 not fixed"
+            "Seed Cypher wraps the scalar physics_domain in head(coalesce — "
+            "Cypher will raise on a String value"
         )
 
     def test_claim_compose_expand_uses_equality_not_in(self) -> None:
@@ -322,9 +339,8 @@ class TestClaimReturnScalarPhysicsDomain:
 
         IMASNode.physics_domain is stored as a scalar String in the graph.
         Cypher's IN operator requires a list and calls head() internally,
-        raising: 'Expected String("equilibrium") to be a list'.
-        The fix changes `$fallback_domain IN imas.physics_domain`
-        to `imas.physics_domain = $fallback_domain`.
+        raising: 'Expected String("equilibrium") to be a list' — so the
+        comparison must be `imas.physics_domain = $fallback_domain`.
         """
         from imas_codex.standard_names.graph_ops import (
             claim_generate_name_batch,
@@ -363,7 +379,7 @@ class TestClaimReturnScalarPhysicsDomain:
 
 
 # ---------------------------------------------------------------------------
-# BUG-2: _scalar_domain normalizer handles mixed types
+# _scalar_domain normalizer handles mixed types
 # ---------------------------------------------------------------------------
 
 
@@ -418,7 +434,7 @@ class TestScalarDomainNormalizer:
 
 
 # ---------------------------------------------------------------------------
-# BUG-3: pool_loop releases claims on process() failure
+# pool_loop releases claims on process() failure
 # ---------------------------------------------------------------------------
 
 
@@ -608,16 +624,16 @@ class TestPoolLoopReleaseOnFailure:
 
 
 # ---------------------------------------------------------------------------
-# BUG-4: skeleton sweep use-after-close
+# Skeleton sweep runs on an open GraphClient
 # ---------------------------------------------------------------------------
 
 
 class TestSkeletonSweepNoUseAfterClose:
     """write_standard_names() must not call gc.query() outside the `with` block.
 
-    Before the fix, the skeleton sweep ran after the surrounding
-    ``with GraphClient() as gc:`` closed, raising
-    ``RuntimeError: GraphClient is closed`` on every persist.
+    A sweep issued after the surrounding ``with GraphClient() as gc:`` exits
+    hits a closed client and raises ``RuntimeError: GraphClient is closed`` on
+    every persist, so the sweep opens its own context.
     """
 
     def _make_minimal_name(self) -> dict:
@@ -724,7 +740,7 @@ class TestSkeletonSweepNoUseAfterClose:
 
 
 # ---------------------------------------------------------------------------
-# BUG-5: fairness deadlock when admitted pools have no claimable work
+# Fairness deadlock when admitted pools have no claimable work
 # ---------------------------------------------------------------------------
 
 
@@ -807,8 +823,8 @@ class TestFairnessDeadlockBreaker:
         """After threshold empty claims a pool leaves active_pools_fn result.
 
         Two pools: 'enrich' always returns None; 'regen' returns a batch.
-        Without the fix, 'regen' gets blocked by 'enrich' hogging weight share.
-        With the fix, 'enrich' is excluded after _EMPTY_CLAIM_EXCLUDE_THRESHOLD
+        An unclaimable pool that stays admitted hogs weight share and starves
+        'regen', so 'enrich' is excluded after _EMPTY_CLAIM_EXCLUDE_THRESHOLD
         consecutive empty claims, letting 'regen' run freely.
         """
         import asyncio
@@ -893,12 +909,12 @@ class TestFairnessDeadlockBreaker:
 
 
 # =============================================================================
-# Follow-up bugfix tests (pool lock-out recovery, counter aggregation, orphans)
+# Pool lock-out recovery, counter aggregation, orphan claim release
 # =============================================================================
 
 
 class TestPoolAdmitRecoverWhenPendingIncreases:
-    """Bug 1 — self-healing re-admission via pending_count growth.
+    """Self-healing re-admission via pending_count growth.
 
     active_pools_fn (inside run_pools) resets consecutive_empty_claims to 0
     when a pool's pending_count grows.  This test exercises the exact same
@@ -995,7 +1011,7 @@ class TestPoolAdmitRecoverWhenPendingIncreases:
 
 
 class TestPoolLoopAccumulatesTotalProcessed:
-    """Bug 3 — pool_loop accumulates total_processed via PoolHealth."""
+    """pool_loop accumulates total_processed via PoolHealth."""
 
     @pytest.mark.asyncio
     async def test_total_processed_accumulates(self) -> None:
@@ -1068,7 +1084,7 @@ class TestPoolLoopAccumulatesTotalProcessed:
 
 
 class TestRunSnPoolsFinalizePopulatesCounters:
-    """Bug 3 — run_sn_pools populates SNRun.names_* from health_map."""
+    """run_sn_pools populates SNRun.names_* from health_map."""
 
     @pytest.mark.asyncio
     async def test_finalize_populates_counter_fields(self) -> None:
@@ -1184,7 +1200,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
 
 
 class TestReleaseAllOrphanClaims:
-    """Bug 4 — release_all_orphan_claims clears SN + SNS nodes."""
+    """release_all_orphan_claims clears SN + SNS nodes."""
 
     def test_release_clears_sn_and_sns(self) -> None:
         """release_all_orphan_claims issues two SET queries and returns counts."""

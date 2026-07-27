@@ -114,7 +114,7 @@ After 3 consecutive empty claims (~21 seconds of backoff), the stalled pool
 is excluded, productive pools get fair admission, and work proceeds.</p>
 <p><strong>Files changed</strong>:
 - <code>imas_codex/standard_names/pools.py</code> — <code>PoolHealth</code> field + <code>pool_loop</code> tracking + <code>active_pools_fn</code> logic
-- <code>tests/standard_names/test_phase8_bugfixes.py</code> — <code>TestFairnessDeadlockBreaker</code> (4 tests)</p>
+- <code>tests/standard_names/test_pool_orchestration_contracts.py</code> — <code>TestFairnessDeadlockBreaker</code> (4 tests)</p>
 <h3>Timeline</h3>
 <pre><code>05:09:45  sn run -c 5 starts
 05:09:56  First LLM calls (cache WRITE, expensive — ~$0.44)
