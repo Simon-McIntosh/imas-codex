@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-unit-hygiene-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — unit hygiene, upstream DD defects, ISN rc58 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 unit hygiene — one canonical unit authority, two upstream DD defects, ISN rc58 (2026-07-27)</h1>
+    <p>
+      Chasing the WEST hard tail turned into a units investigation. The tail was
+      not blocked by naming ability but by <strong>unit metadata</strong>: a
+      dimensionless quantity had no unit at all, one unit had two spellings in
+      one graph, and the Data Dictionary declared one quantity with two
+      different dimensionalities. All are now fixed, two are filed upstream, and
+      the vocabulary the remaining tail needs is released.
+    </p>
+
+    <h2>Codex fixes</h2>
+    <table>
+      <thead><tr><th>Commit</th><th>Defect</th></tr></thead>
+      <tbody>
+        <tr><td><code>3989bce6</code></td>
+          <td><strong>Dimensionless is not "no unit".</strong>
+              <code>normalize_unit_symbol</code> listed <code>-</code>,
+              <code>1</code> and <code>dimensionless</code> as non-units and
+              returned None, so every dimensionless quantity (beta, zeff, q, li,
+              elongation, triangularity, magnetic_shear, fractions, h_98) lost
+              its <code>HAS_UNIT</code> edge while its standard name carried the
+              canonical <code>1</code> — and the SN↔DD reconcile then dropped
+              each pair on a false disagreement. Split dimensionless (→
+              <code>1</code>) from genuine non-units (→ None); healed 706 nodes.</td></tr>
+        <tr><td><code>2b95c2de</code></td>
+          <td><strong>DD count pseudo-units.</strong> The DD writes a count as a
+              plural noun (<code>electrons</code>, <code>atoms</code>), which
+              pint cannot parse — so the quantity lost its unit, and with it the
+              correctly-resolved <code>as_parent</code> inheritance of the
+              gas-injection <code>value</code> fields (whose inherited unit IS
+              <code>electrons</code>). Mapped to <code>1</code>; healed 63 nodes.</td></tr>
+        <tr><td><code>28b7fb63</code></td>
+          <td><strong>Never guess an ambiguous spelling.</strong> The DD wrote
+              <code>Elementary Charge Unit</code> on both charge numbers
+              (genuinely a charge) and ionisation potentials (energies).
+              Aliasing it to <code>e</code> typed 16 energy nodes as a charge —
+              a dimensionality error. Resolves to None instead; retyped the 16
+              nodes to <code>eV</code>.</td></tr>
+        <tr><td><code>70e91cfc</code>, <code>02cf907d</code></td>
+          <td><strong>Path-aware DD unit resolution.</strong> Where the DD
+              contradicts <em>itself</em> on one quantity there is no single
+              declaration to mirror, so the build now stores the
+              dimensionally-correct unit — driven by the existing
+              <code>dd_unit_exceptions.yaml</code> registry under a new
+              <code>correct_in_graph</code> flag, rather than a second
+              hardcoded list.</td></tr>
+        <tr><td><code>de249e5d</code></td>
+          <td><strong>Symbol order is convention, not cosmetics.</strong> A power
+              density is <code>W.m^-3</code>, never <code>m^-3.W</code>. The
+              custom pint formatter emitted factors in pint's internal order, so
+              the DD side spelled units differently from the standard-name side
+              (which canonicalises via <code>imas_standard_names.canonical_unit</code>):
+              30 <code>Unit</code> nodes carried non-canonical ids and the
+              reconcile logged 168 false disagreements. Both sides now use the
+              one authority; re-canonicalised 30 nodes, repointed 5274
+              <code>HAS_UNIT</code> edges, synced 348 scalars. (<code>~F</code>
+              is not a substitute — it fixes ordering but emits
+              <code>W / m ** 3</code>, not IMAS dot-exponential notation.)</td></tr>
+        <tr><td><code>5d5d9690</code></td>
+          <td>ISN pin → rc58; read-only tool assertion now names the suppressed
+              write-tool set instead of a count that had gone stale (6→7 when
+              <code>edit_standard_name</code> was added).</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Earlier in the same session: <code>35e46bc7</code> (refine products
+      stranded at <code>name_stage=pending</code>), <code>6bc313c2</code> (an ISN
+      grammar <code>ValidationError</code> in refine was not classified terminal,
+      so a name re-charged a paid model every cycle — it stalled a drain),
+      <code>8733f2e3</code> (refined successors did not inherit the batch
+      <code>run_id</code>, so a scoped drain reported
+      <code>no_eligible_work</code> while residual remained),
+      <code>ec054c70</code> (the review prompt was missing the grammar registry,
+      so the reviewer docked valid rare-base names), <code>2bb884fa</code>
+      (focus/batch defaults to no-reset; <code>--reseed</code> for the blunt
+      reset — force-reset was re-shooting exhausted names every pass).
+    </p>
+
+    <h2>Upstream Data Dictionary</h2>
+    <p>
+      Verified against DD <strong>4.1.1</strong> (44,150 paths walked) — an
+      earlier pass had probed 4.0.0, whose unit strings differ, so every
+      assertion was re-derived at the configured version before filing.
+    </p>
+    <table>
+      <thead><tr><th>Item</th><th>Content</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://github.com/iterorganization/IMAS-Data-Dictionary/issues/277">#277</a>
+            + PR <a href="https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280">#280</a></td>
+            <td>GGD <code>ionization_potential</code> declares <code>e</code>
+                (charge) where the four other declarations of the same quantity
+                declare <code>eV</code>. One line; <strong>CI green</strong>.</td></tr>
+        <tr><td><a href="https://github.com/iterorganization/IMAS-Data-Dictionary/issues/278">#278</a>
+            + PR <a href="https://github.com/iterorganization/IMAS-Data-Dictionary/pull/281">#281</a></td>
+            <td><code>equilibrium_constraints_0D_position.reconstructed</code>
+                declares <code>1</code> where its own <code>measured</code>
+                sibling and all four other constraint types declare
+                <code>as_parent</code>. One line; <strong>CI green</strong>.
+                Surfaced <em>by</em> the dimensionless fix — these paths
+                previously had no unit, so were never compared.</td></tr>
+        <tr><td><a href="https://github.com/iterorganization/IMAS-Data-Dictionary/issues/279">#279</a></td>
+            <td><code>vibrational_level</code> declares <code>e</code> on all 36
+                declarations. A quantum level index is dimensionless, but the DD
+                is self-consistent here so there is no contradiction to cite —
+                filed for a maintainer ruling, deliberately <strong>no PR</strong>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>ISN rc58 — the vocabulary the tail needs</h2>
+    <ul>
+      <li><code>half_width</code> (<code>physical_base</code>) — the distance
+        from a peaked profile's maximum to its half-maximum on one side.
+        Deliberately <em>not</em> <code>geometric_base</code>: that segment is
+        mutually exclusive with <code>physical_base</code>, so placing it there
+        would split the width family (<code>width</code>,
+        <code>angular_width</code>) across segments that can never be reasoned
+        about together.</li>
+      <li><code>confinement_enhancement_factor</code>
+        (<code>physical_base</code>) + <code>ipb98y2</code>
+        (<code>qualifier</code>, normalized category) — the H-factor, with the
+        scaling law it is measured against carried by a qualifier, so each
+        further scaling costs one token rather than a new base. Follows the
+        <code>safety_factor</code> / <code>peaking_factor</code> precedent, and
+        the <code>greenwald</code> / <code>ejima</code> / <code>bohm</code>
+        named-model qualifier precedent.</li>
+    </ul>
+    <p>
+      ISN suite <strong>1885 passed</strong>, 28 skipped, 83 xfailed — no grammar
+      regressions. Also fixed <code>test_find_git_root_raises_when_no_repo</code>,
+      which false-passed whenever <code>TMPDIR</code> had a stray <code>.git</code>
+      ancestor (the lookup walks every parent); it now skips with a clear reason
+      instead. Cut <code>v0.8.0rc58</code>; codex pin bumped at both
+      <code>pyproject.toml</code> sites.
+    </p>
+
+    <h2>WEST corpus state</h2>
+    <p>
+      <strong>335 / 355 accepted.</strong> Only <strong>4</strong> names remain
+      in flight (3 drafted, 1 reviewed); 4 exhausted; 12 sources have no name and
+      are legitimately non-nameable (time/iteration/humidity coordinates and true
+      vocab gaps). The hard tail that motivated the ISN adds — the hard-X-ray
+      emissivity half-widths and <code>h_98</code> — is now expressible and needs
+      one gap-only drain to land.
+    </p>
+
+    <h2>Test baselines</h2>
+    <p>
+      <code>tests/standard_names/</code> default tier: <strong>4635 passed, 0
+      failed</strong>. <code>tests/core/</code>: <strong>865 passed, 0
+      failed</strong>. The 8 failures visible only in a whole-repo run are
+      pre-existing cross-suite pollution in
+      <code>test_dd_extract_breakdown.py</code> (a positional mock
+      <code>side_effect</code> list exhausts when an earlier suite warms a cache)
+      — confirmed by a detached worktree at <code>78c3508c</code>, before any of
+      this work, which shows 6 of them. Do not establish a baseline with
+      <code>-o addopts=…</code>: it re-enables the <code>graph</code>/<code>slow</code>
+      markers and surfaces live-data assertions CI never runs.
+    </p>
+  </main>
+</body>
+</html>

@@ -17,9 +17,9 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="7">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-modified" content="2026-07-27">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.55">
 </head>
 <body>
   <main class="plan-doc">
@@ -145,6 +145,35 @@
         <strong>0</strong> stranded names remain graph-wide. Full record:
         <a href="archive/sn-west-review-rehearsal-review-entry-landed.html">review-entry landed</a>.
         Stage 2 (cut the fork-PR RC, <code>f-swrr-007</code>) is now unblocked.
+      </p>
+    </div>
+
+    <div class="card" style="border-left:4px solid #b8860b; padding-left:12px; margin-top:10px;">
+      <p style="margin:0 0 6px;">
+        <strong>Course correction — the demonstrator is the LOOP, not naming completeness (2026-07-27).</strong>
+        §1 states the purpose plainly: the pipeline is already built and tested;
+        what has never happened is “a single <em>operational</em> pass of the
+        whole loop on real data with a human in the loop”. The gold-bordered box
+        in the diagram — stage 3, the human review — is what this plan exists to
+        exercise.
+      </p>
+      <p style="margin:0 0 6px;">
+        Stage 1 has now absorbed several sessions because each drain surfaced a
+        real pipeline defect, and fixing them was right: eleven defects landed
+        (stranded refine products, a paid refine crash-loop, a scope-binding
+        leak, the reviewer's missing grammar registry, focus force-reset churn,
+        and six unit-metadata defects) plus two upstream DD corrections. But
+        <strong>stages 2–6 still have zero coverage</strong>, and stage 1's
+        “every eligible source accepted” is a gate, not the deliverable.
+      </p>
+      <p style="margin:0;">
+        <strong>Correction:</strong> stop treating the residual as blocking. At
+        <strong>335/355 accepted</strong> (4 in flight, 4 exhausted, 12
+        legitimately non-nameable) the batch is amply large to exercise the
+        review loop, and the remaining tail is now <em>expressible</em> after ISN
+        rc58. One gap-only drain, then <strong>cut the RC and get a human into
+        stage 3</strong>. Full record:
+        <a href="archive/sn-west-review-rehearsal-unit-hygiene-landed.html">unit hygiene + DD defects + ISN rc58</a>.
       </p>
     </div>
     <p>
@@ -599,7 +628,68 @@ Done-when
      new accepted count + the remaining genuinely-hard residual (gm1/6/7/9,
      change_in delta, h_98, contour node — deferrable).
   3. This followup resolved; f-swrr-007 (RC cut) unblocked.</pre>
-    <p class="r-fu-outcome">Root-caused + fixed (TDD, commit 35e46bc7). The ~37 valid names stuck at name_stage=pending were refine products: persist_refined_name initialised the successor stage ON CREATE only, so a refine converging onto a pre-existing placeholder name (a locus/parent scaffold minted 'pending' by the HAS_PARENT derivation writer, or a bare MERGE node with null stage) kept it 'pending' and REVIEW_NAME (claims 'drafted') never saw it — even though the refine migrated all its produced sources onto it. Compose never strands (its finalize is an unconditional SET). Confirmed on the live graph: 22/22 stranded WEST pending pipeline names were refine products. Fix, both TDD'd: (1) persist_refined_name adds ON MATCH SET advancing a placeholder-merged successor (name_stage null/'pending' AND origin<>'derived') to 'drafted'+'pipeline', leaving live/terminal stages and structural derived parents untouched; (2) new reconcile_reviewable_name_stage self-heals any valid, non-derived, source-backed name stranded below 'drafted', wired into the run_sn_pools startup reconcile (every run, incl. --only reconcile). New test_reviewable_name_stage.py (9 tests incl. live-graph e2e) + 4 repaired startup-reconcile mock lists; full SN suite green. Live verification: reconcile advanced all stranded names to drafted (0 stranded graph-wide, was 22); a cost-capped review pass (sn run --only review --names-only --cost-limit 12; $12.61, 86 reviewed / 22 refined, stop_reason=budget_exhausted) accepted them on merit — WEST accepted 290 → 306 / 355 (+16). Residual 29 all ENTERED review (fix working): 18 reviewed <0.85 (routed to refine), 11 drafted still queued at the budget cap, + 2 grammar-rejected/quarantined names correctly excluded (regen, not review) — ordinary throughput + the genuinely-hard tail (gm-metrics, hard_xray_width, camera up-vector), not stranding. Record: docs/archive/sn-west-review-rehearsal-review-entry-landed.html. Unblocks f-swrr-007 (stage-2 RC cut).</p>
+    <p class="r-fu-outcome">Root-caused + fixed (TDD, commit 35e46bc7). The ~37 valid names stuck at name_stage=pending were refine products: persist_refined_name initialised the successor stage ON CREATE only, so a refine converging onto a pre-existing placeholder name (a locus/parent scaffold minted 'pending' by the HAS_PARENT derivation writer, or a bare MERGE node with null stage) kept it 'pending' and REVIEW_NAME (claims 'drafted') never saw it — even though the refine migrated all its produced sources onto it. Compose never strands (its finalize is an unconditional SET). Confirmed on the live graph: 22/22 stranded WEST pending pipeline names were refine products. Fix, both TDD'd: (1) persist_refined_name adds ON MATCH SET advancing a placeholder-merged successor (name_stage null/'pending' AND origin&lt;&gt;'derived') to 'drafted'+'pipeline', leaving live/terminal stages and structural derived parents untouched; (2) new reconcile_reviewable_name_stage self-heals any valid, non-derived, source-backed name stranded below 'drafted', wired into the run_sn_pools startup reconcile (every run, incl. --only reconcile). New test_reviewable_name_stage.py (9 tests incl. live-graph e2e) + 4 repaired startup-reconcile mock lists; full SN suite green. Live verification: reconcile advanced all stranded names to drafted (0 stranded graph-wide, was 22); a cost-capped review pass (sn run --only review --names-only --cost-limit 12; $12.61, 86 reviewed / 22 refined, stop_reason=budget_exhausted) accepted them on merit — WEST accepted 290 → 306 / 355 (+16). Residual 29 all ENTERED review (fix working): 18 reviewed &lt;0.85 (routed to refine), 11 drafted still queued at the budget cap, + 2 grammar-rejected/quarantined names correctly excluded (regen, not review) — ordinary throughput + the genuinely-hard tail (gm-metrics, hard_xray_width, camera up-vector), not stranding. Record: docs/archive/sn-west-review-rehearsal-review-entry-landed.html. Unblocks f-swrr-007 (stage-2 RC cut).</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-009" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T13:40:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Drain the last 4 WEST names on ISN rc58, then CUT THE RC (stage 2) — the loop is the demonstrator</h4>
+    <div class="r-fu-body"><p><strong>Course correction (see the §3 amber card): the demonstrator is the review LOOP, not naming completeness.</strong> Stage 1 has absorbed several sessions of genuine defect-fixing; stages 2–6 still have zero coverage. WEST is at <strong>335/355 accepted</strong> with only 4 names in flight, and ISN <strong>rc58</strong> (pin bumped, <code>5d5d9690</code>) now supplies <code>half_width</code>, <code>confinement_enhancement_factor</code> and the <code>ipb98y2</code> qualifier — the exact tokens the hard-X-ray half-widths and <code>h_98</code> needed. Run ONE gap-only drain to land those, then <strong>cut the fork-PR batch RC and get a human into stage 3</strong>. Do not chase the 12 non-nameable sources (time/iteration/humidity coordinates and true vocab gaps) or re-open the units thread — both are closed and recorded.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stage 1 (final drain) then stage 2 (cut the fork-PR RC)
+Tier:    opus
+
+Context — READ THE COURSE CORRECTION FIRST
+  §1 states the purpose: the pipeline is built and tested; what has never
+  happened is one OPERATIONAL pass of the whole loop with a human in the loop.
+  The gold-bordered stage 3 is the point. Stages 2–6 still have ZERO coverage.
+  Stage 1&#x27;s &quot;every eligible source accepted&quot; is a GATE, not the deliverable —
+  do not let the residual block the RC.
+
+State (verified 2026-07-27)
+  WEST 335/355 accepted; 4 in flight (3 drafted, 1 reviewed); 4 exhausted;
+  12 sources legitimately non-nameable (time/iteration/humidity coordinates,
+  true vocab gaps: faraday weight, etendue-as-extracted, optical_depth).
+  ISN rc58 pinned (both pyproject sites) — half_width +
+  confinement_enhancement_factor bases, ipb98y2 qualifier.
+  Test baselines: tests/standard_names/ 4635 passed / 0 failed;
+  tests/core/ 865 passed / 0 failed. The 8 whole-repo-only failures in
+  test_dd_extract_breakdown.py are PRE-EXISTING (verified via a worktree at
+  78c3508c) — do not chase them.
+
+State to read
+  docs/archive/sn-west-review-rehearsal-unit-hygiene-landed.html  (this session: units, DD defects, ISN rc58)
+  docs/archive/sn-west-review-rehearsal-review-entry-landed.html  (the review-entry fix)
+  imas_codex/cli/sn.py                                           (sn release --batch)
+
+Do
+  1. ONE gap-only drain to land the now-expressible tail:
+       uv run imas-codex sn run --batch west_task_2e --names-only --cost-limit 15
+     Expect the hard-X-ray half-widths and h_98 to compose on the new tokens.
+     Record the accepted delta. If a name still will not compose, RECORD IT AND
+     MOVE ON — do not open another vocabulary thread.
+  2. Stage 2 — cut the RC and open the fork PR:
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     Verify: additive diff (approved set byte-identical); catalog.yml carries
+     export_scope=review + review_batch; artifact frozen; RC-tagged; PR open on
+     the FORK (--target auto; never --final in act 1). Record RC version, PR URL,
+     batch size, and judge the LLM-written PR body — the first live output of the
+     sn-release-notes seat.
+  3. Collapse §3 stages 0–2 to a landed summary and queue stages 3–6 (human
+     review → sn merge fold-back exercising the graph-merged: tag → freeze-check
+     → --undo unwind) as the next followup.
+
+Scope / constraints
+  - Gap-only; never --reseed. PR target stays fork.
+  - Snapshot already exists (stage 0); do NOT re-snapshot.
+  - Budget: ~$40 of the 500 USD ceiling spent to date; --cost-limit is SOFT
+    (~1.7–2.7x overshoot).
+  - No AI attribution in ANY commit, issue, PR, or comment (see ~/.agents/AGENTS.md).
+
+Done-when
+  1. Final drain recorded (accepted delta + any still-unnameable, with reasons).
+  2. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
+  3. §3 stages 0–2 collapsed; stages 3–6 queued; this followup resolved.</pre>
     </article>
 </section>
 
