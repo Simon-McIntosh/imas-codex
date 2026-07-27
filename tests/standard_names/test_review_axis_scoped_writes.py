@@ -1,20 +1,28 @@
-"""Regression tests for Wave-12B review pipeline bugs.
+"""What a review result must look like once it reaches the StandardName.
 
-Bug 1: ``reviewer_score`` is an in-memory key, not a graph property.
-Bug 2: ``sn review`` CLI was missing ``setup_logging()``.
-Bug 3: ``_extend_reservation()`` was silent when extending a lease.
-Bug 4: Per-name cost propagation and double-counting prevention.
+A review carries one score and one cost, but a ``StandardName`` is reviewed
+on two independent axes, so both land under axis-scoped property names:
+
+* ``reviewer_score`` is an in-memory key of the review-result dict only. The
+  writers map it to ``reviewer_score_name`` or ``reviewer_score_docs``; a
+  generic ``sn.reviewer_score`` would collapse the two axes onto one value
+  and let a docs score decide a name's acceptance.
+* Cost accumulates per name as ``llm_cost_review_name`` /
+  ``llm_cost_review_docs``. ``write_reviews(skip_cost=True)`` exists because
+  the axis writer already charged the name — running the accumulation query
+  again would bill the same call twice.
+* The ``sn review`` CLI calls ``setup_logging`` so per-phase progress reaches
+  the command's log file instead of being swallowed.
+
+All tests are offline — GraphClient is fully mocked.
 """
 
 from __future__ import annotations
 
-import logging
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 # =====================================================================
-# Bug 1: reviewer_score is in-memory only — graph writes axis-specific
+# reviewer_score is in-memory only — graph writes are axis-specific
 # =====================================================================
 
 
@@ -46,7 +54,7 @@ def _mock_graph_client():
     return mock_gc, cm
 
 
-class TestBug1ReviewerScoreNotGraphProperty:
+class TestReviewerScoreIsAxisScoped:
     """reviewer_score must NOT appear as a standalone graph property."""
 
     def test_name_writer_does_not_set_sn_reviewer_score(self) -> None:
@@ -104,11 +112,11 @@ class TestBug1ReviewerScoreNotGraphProperty:
 
 
 # =====================================================================
-# Bug 2: sn review CLI must call setup_logging
+# The sn review CLI wires up logging
 # =====================================================================
 
 
-class TestBug2SetupLogging:
+class TestReviewCliSetsUpLogging:
     """sn review must wire up logging so per-phase progress is visible."""
 
     def test_sn_review_calls_setup_logging(self) -> None:
@@ -141,16 +149,11 @@ class TestBug2SetupLogging:
 
 
 # =====================================================================
-# Bug 3: _extend_reservation must log
+# Per-name cost propagation, charged once per axis
 # =====================================================================
 
 
-# =====================================================================
-# Bug 4: Per-name cost propagation + skip_cost double-count fix
-# =====================================================================
-
-
-class TestBug4PerNameCost:
+class TestPerNameReviewCost:
     """write_name_review_results must propagate per-name llm_cost_review_name."""
 
     def test_name_writer_includes_cost_in_set_clause(self) -> None:
