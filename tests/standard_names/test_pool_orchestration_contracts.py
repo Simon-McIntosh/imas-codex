@@ -60,6 +60,11 @@ def _stub_parent_lifecycle_startup():
             "imas_codex.standard_names.attachment_audit.reconcile_attachment_consistency",
             return_value=AttachmentAuditResult(),
         ),
+        # The DD-unit correction reconcile opens its own GraphClient; stub it.
+        patch(
+            "imas_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
+            return_value={"checked": 0, "corrected": 0},
+        ),
     ):
         yield
 

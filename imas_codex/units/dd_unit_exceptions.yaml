@@ -257,15 +257,22 @@ dd_unit_bugs:
 
   # -- Poloidal magnetic flux (psi) tagged with total power `W`.
   #    psi is definitionally a poloidal magnetic flux in weber; some
-  #    measurement-position facets carry the total-power unit `W`. (Forward-
-  #    looking: a psi standard name correctly carrying Wb is suppressed against
-  #    these W-tagged facets; a facet correctly tagged Wb never matches.)
+  #    measurement-position facets carry the total-power unit `W`.
+  #    The DD contradicts ITSELF here, which is why this carries
+  #    `correct_in_graph` rather than being suppressed only:
+  #    `ece/channel/beam_tracing/beam/position/psi` and
+  #    `ece/channel/position/psi` share the documentation "Poloidal flux" while
+  #    declaring `Wb` and `W` respectively. Under suppression alone there is no
+  #    single DD answer to mirror, so a name composed from the W-tagged facet
+  #    inherits total power for a magnetic flux — and one did.
   - path: "*/position/psi"
     dd_unit: W
     correct_unit: Wb
+    correct_in_graph: true
     reason: >-
       Poloidal magnetic flux (psi) is weber; some measurement-position psi
-      facets are tagged with total power W.
+      facets are tagged with total power W while sibling facets of the same
+      documented quantity are tagged Wb.
 
   # -- Toroidal current tagged with a torque unit.
   #    A toroidal (particle) current is in ampere; one distributions facet of

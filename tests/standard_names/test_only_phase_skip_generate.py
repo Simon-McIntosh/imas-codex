@@ -21,6 +21,7 @@ from imas_codex.standard_names.budget import BudgetManager
 
 _GO = "imas_codex.standard_names.graph_ops"
 _AA = "imas_codex.standard_names.attachment_audit"
+_DGO = "imas_codex.graph.dd_graph_ops"
 _BM = "imas_codex.standard_names.budget.BudgetManager"
 _LOOP = "imas_codex.standard_names.loop"
 
@@ -120,6 +121,11 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
         patch(
             f"{_AA}.reconcile_attachment_consistency",
             return_value=AttachmentAuditResult(),
+        ),
+        # The DD-unit correction reconcile opens its own GraphClient; stub it.
+        patch(
+            f"{_DGO}.reconcile_dd_unit_corrections",
+            return_value={"checked": 0, "corrected": 0},
         ),
         patch(
             f"{_GO}.reconcile_standard_name_dd_edges",

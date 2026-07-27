@@ -673,3 +673,95 @@ def reset_imas_nodes(
         target_status,
     )
     return count
+
+
+def find_dd_unit_correction_drift(
+    gc: GraphClient | None = None,
+) -> list[dict[str, str]]:
+    """Stored DD units that a ``correct_in_graph`` registry entry contradicts.
+
+    Read-only. Asks :func:`imas_codex.units.resolve_dd_unit` — the same
+    predicate the DD build uses — of every stored unit, and reports the paths
+    whose stored value differs from what the registry says today. Only
+    ``correct_in_graph`` entries can produce a difference: a suppression-only
+    entry deliberately leaves the DD unit as declared so the standard-name
+    mismatch axis keeps reporting it, and ``resolve_dd_unit`` returns those
+    unchanged.
+    """
+    from imas_codex.units import resolve_dd_unit
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (n:IMASNode)
+            WHERE n.unit IS NOT NULL AND n.unit <> ''
+            RETURN n.id AS path, n.unit AS unit
+            """
+        )
+    finally:
+        if own:
+            client.close()
+
+    drift: list[dict[str, str]] = []
+    for r in rows:
+        stored = r["unit"]
+        expected = resolve_dd_unit(r["path"], stored)
+        if expected is not None and expected != stored:
+            drift.append({"path": r["path"], "stored": stored, "expected": expected})
+    return drift
+
+
+def reconcile_dd_unit_corrections(gc: GraphClient | None = None) -> dict[str, int]:
+    """Apply registered self-contradiction unit corrections to the stored graph.
+
+    ``resolve_dd_unit`` rewrites a DD-declared unit when the exceptions registry
+    flags that path ``correct_in_graph`` — reserved for the case where the DD
+    declares one documented quantity with two different dimensionalities, so
+    there is no single DD answer to mirror and a standard name composed from the
+    wrong facet inherits the wrong dimensionality. That rewrite runs at DD BUILD
+    time only, so adding such an entry had no effect on paths already stored,
+    and a full DD rebuild is far too expensive to run for a unit correction. A
+    registry whose entries only take effect on a rebuild is a registry that
+    silently does not work; this is the net.
+
+    Rewrites both the ``unit`` scalar and the ``HAS_UNIT`` edge, dropping the
+    stale edge rather than adding a second one, so the cardinality-one invariant
+    holds. Idempotent: once every stored unit equals what the registry resolves,
+    the selector matches nothing.
+
+    Returns dict: {checked, corrected}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        drift = find_dd_unit_correction_drift(client)
+        if not drift:
+            return {"checked": 0, "corrected": 0}
+
+        client.query(
+            """
+            UNWIND $items AS item
+            MATCH (n:IMASNode {id: item.path})
+            OPTIONAL MATCH (n)-[r:HAS_UNIT]->(stale:Unit)
+            WHERE stale.id <> item.expected
+            DELETE r
+            WITH DISTINCT n, item
+            SET n.unit = item.expected
+            MERGE (u:Unit {id: item.expected})
+            MERGE (n)-[:HAS_UNIT]->(u)
+            """,
+            items=drift,
+        )
+    finally:
+        if own:
+            client.close()
+
+    logger.warning(
+        "reconcile_dd_unit_corrections: corrected %d DD node(s) whose stored "
+        "unit contradicts a correct_in_graph registry entry (first few: %s)",
+        len(drift),
+        ", ".join(f"{d['path']} {d['stored']}→{d['expected']}" for d in drift[:5]),
+    )
+    return {"checked": len(drift), "corrected": len(drift)}

@@ -40,6 +40,7 @@ from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
 
 _GO = "imas_codex.standard_names.graph_ops"
 _AA = "imas_codex.standard_names.attachment_audit"
+_DGO = "imas_codex.graph.dd_graph_ops"
 _LOOP = "imas_codex.standard_names.loop"
 _PREFIX = "test_source_revival__"
 
@@ -550,6 +551,11 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
         patch(
             f"{_AA}.reconcile_attachment_consistency",
             return_value=AttachmentAuditResult(),
+        ),
+        # The DD-unit correction reconcile opens its own GraphClient; stub it.
+        patch(
+            f"{_DGO}.reconcile_dd_unit_corrections",
+            return_value={"checked": 0, "corrected": 0},
         ),
         patch(
             f"{_GO}.reconcile_standard_name_dd_edges",

@@ -1115,6 +1115,22 @@ async def run_sn_pools(
                 cocos_result.get("convention"),
             )
 
+        # Apply registered self-contradiction unit corrections to the stored DD
+        # graph. The build rewrites a DD unit when the exceptions registry flags
+        # the path, but only at build time, so adding such an entry had no effect
+        # on paths already stored and a full DD rebuild is far too expensive to
+        # run for a unit correction. Units are DD-authoritative and flow into
+        # every composed name, so this runs before anything that reads them.
+        from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
+
+        dd_unit_result = await asyncio.to_thread(reconcile_dd_unit_corrections)
+        if dd_unit_result.get("corrected", 0):
+            logger.info(
+                "run_sn_pools: DD-unit correction reconcile — %d stored unit(s) "
+                "realigned with the exceptions registry",
+                dd_unit_result["corrected"],
+            )
+
         # Realign each name's HAS_UNIT edge set with its own unit scalar. A name
         # whose unit was written before the writers self-healed can carry the
         # superseded edge alongside the current one, leaving it with no single
