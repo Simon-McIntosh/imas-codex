@@ -149,9 +149,16 @@ class TestDdCountPseudoUnits:
         for raw in ("electrons", "atoms"):
             assert normalize_unit_symbol(raw) == "1", raw
 
-    def test_elementary_charge_maps_to_a_real_charge_unit(self):
-        # 'Elementary Charge Unit' is a genuine unit (e), not dimensionless.
-        assert normalize_unit_symbol("Elementary Charge Unit") == "e"
+    def test_ambiguous_charge_spelling_is_not_guessed(self):
+        """'Elementary Charge Unit' is dimensionally ambiguous — never guess it.
+
+        The DD writes it both on charge numbers (z_ion / z_min / z_max / z_n,
+        genuinely a charge) and on ionisation potentials, which are ENERGIES the
+        DD carries as 'eV' elsewhere. A context-free normaliser that picked
+        either would type one family wrongly, so it must resolve to None and
+        leave the choice to the quantity-aware DD layer.
+        """
+        assert normalize_unit_symbol("Elementary Charge Unit") is None
 
     def test_parametric_and_runtime_units_stay_unresolved(self):
         # These carry no fixed dimensionality — better None than a wrong unit.
