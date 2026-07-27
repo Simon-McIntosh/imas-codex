@@ -98,3 +98,13 @@ tests/search/.expected_paths_cache.json
 research/
 sn_benchmark_*.json
 sn_bench_*.json
+
+# Campaign manifests — generated run outputs, not provenance records. These
+# default to ~/.local/share/imas-codex/campaigns/ (outside the tree); this
+# pattern is the safety net for an explicit --campaign-manifest relative path
+# and for manifests older runs left in the working directory. A manifest
+# describes the graph at one instant and names predicates later work may
+# retire, so it is never tracked. (Contrast manifests/reviews/*.sn_names.yaml,
+# which IS committed — sn merge resolves it from a branch name later.)
+campaign-manifest*.json
+*-campaign-manifest.json

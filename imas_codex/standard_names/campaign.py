@@ -82,6 +82,14 @@ _QUARANTINED = "quarantined"
 _ALL = "all"
 _AUDIT_TAG_PREFIX = "audit:"
 
+#: File-kind discriminator, so the manifest is self-identifying like its
+#: ``sn_sources`` / ``sn_names`` siblings and is contract-checked against
+#: ``config/campaign_manifest.schema.json``.
+CAMPAIGN_MANIFEST_KIND = "campaign_manifest"
+
+#: Manifest format version. Bump only with the committed JSON Schema.
+CAMPAIGN_MANIFEST_SCHEMA_VERSION = 1
+
 
 @dataclass(frozen=True)
 class CampaignSpec:
@@ -405,6 +413,10 @@ def build_manifest(
     ]
     n_batches = (selection.total + batch_size - 1) // batch_size if batch_size else 0
     manifest = {
+        # Discriminator first, so a human reading the raw JSON sees what the
+        # file is before its contents.
+        "kind": CAMPAIGN_MANIFEST_KIND,
+        "schema_version": CAMPAIGN_MANIFEST_SCHEMA_VERSION,
         "spec": selection.spec.raw,
         "spec_describe": selection.spec.describe(),
         "generated_at": datetime.now(UTC).isoformat(),
@@ -420,9 +432,37 @@ def build_manifest(
     return manifest
 
 
-def write_manifest(manifest: dict[str, Any], path: str | Path) -> Path:
-    """Write *manifest* as pretty JSON to *path* and return the path."""
-    out = Path(path)
+def default_campaign_manifest_dir() -> Path:
+    """The home for generated campaign manifests.
+
+    A campaign manifest is a **run output**: it describes the graph as it stood
+    at ``generated_at`` and names predicates that later work may retire, so it
+    is only meaningful against the codebase and graph of its own moment. That
+    puts it with the other generated run artifacts under the user data dir
+    (alongside ``logs/`` and ``benchmarks/``) rather than in the repo — unlike
+    the frozen review artifact, which is committed under ``manifests/reviews/``
+    precisely because ``sn merge`` must resolve it from a branch name months
+    later.
+
+    It also must not default into the working directory: this repo is shared by
+    concurrent agents, and a dry run that dirties the worktree shows up in every
+    other agent's ``git status``.
+    """
+    return Path.home() / ".local" / "share" / "imas-codex" / "campaigns"
+
+
+def default_campaign_manifest_path() -> Path:
+    """Default path for a generated campaign manifest."""
+    return default_campaign_manifest_dir() / "campaign-manifest.json"
+
+
+def write_manifest(manifest: dict[str, Any], path: str | Path | None = None) -> Path:
+    """Write *manifest* as pretty JSON and return the path.
+
+    *path* defaults to :func:`default_campaign_manifest_path`; an explicit path
+    (the CLI's ``--campaign-manifest``) always wins.
+    """
+    out = Path(default_campaign_manifest_path() if path is None else path)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(manifest, indent=2, sort_keys=False) + "\n")
     return out
@@ -993,6 +1033,8 @@ class CampaignRunner:
 
 
 __all__ = [
+    "CAMPAIGN_MANIFEST_KIND",
+    "CAMPAIGN_MANIFEST_SCHEMA_VERSION",
     "PROSE_CLASSES",
     "CampaignSpec",
     "CampaignTarget",
@@ -1002,6 +1044,8 @@ __all__ = [
     "stratified_pilot",
     "build_manifest",
     "write_manifest",
+    "default_campaign_manifest_dir",
+    "default_campaign_manifest_path",
     "CampaignBudget",
     "plan_batches",
     "ConvergenceThresholds",

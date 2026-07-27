@@ -1409,7 +1409,9 @@ def _reject_unscoped_accepted_reset(
     default=None,
     help=(
         "Path for the --campaign --dry-run manifest (JSON). Defaults to "
-        "'campaign-manifest.json' in the working directory."
+        "campaign-manifest.json under ~/.local/share/imas-codex/campaigns/ "
+        "(a generated run output, beside the logs — never the working "
+        "directory)."
     ),
 )
 @click.option(
@@ -1977,9 +1979,7 @@ def sn_run(
                 sample_size=(selection.total if campaign_pilot is not None else 20),
                 pilot_from=pilot_from,
             )
-            path = write_manifest(
-                manifest, campaign_manifest or "campaign-manifest.json"
-            )
+            path = write_manifest(manifest, campaign_manifest)
             pilot_note = (
                 f" (stratified pilot of {selection.total} from {pilot_from})"
                 if pilot_from is not None

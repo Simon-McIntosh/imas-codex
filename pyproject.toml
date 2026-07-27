@@ -94,6 +94,11 @@ test = [
     "pytest-benchmark>=4.0.0,<5.0.0",
     "pytest-timeout>=2.1.0,<3.0.0",
     "coverage>=7.0.0",
+    # Manifest schema conformance. Optional at runtime (the loaders degrade to a
+    # structural check without it), but required for tests: the schema suites
+    # skip themselves when it is absent, and a silently-skipped contract test
+    # carries no signal.
+    "jsonschema>=4.20.0",
 ]
 bench = ["asv>=0.6.0,<1.0.0"]
 serve = [

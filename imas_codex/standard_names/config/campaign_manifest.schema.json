@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/iterorganization/imas-codex/imas_codex/standard_names/config/campaign_manifest.schema.json",
+  "title": "Standard-Name documentation-campaign manifest",
+  "description": "The approve-before-you-spend record for a documentation-refinement campaign: the defect-predicate spec that selected the names, the totals and per-predicate / per-domain breakdowns, the batch plan, and a deterministic sample of matched names with their matched-defect evidence. Emitted by 'sn run --campaign <spec> --dry-run' and reviewed by a human before a live campaign mutates any accepted docs. This is a point-in-time RUN OUTPUT, not a durable provenance record: it describes the graph as it stood at generated_at, and the predicates it names may be retired by later work, so a manifest is only valid against the codebase and graph of its own moment.",
+  "type": "object",
+  "required": [
+    "kind",
+    "schema_version",
+    "spec",
+    "spec_describe",
+    "generated_at",
+    "total",
+    "per_predicate",
+    "per_domain",
+    "quarantined_count",
+    "batch_plan",
+    "sample"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "description": "File-kind discriminator, so the artifact is self-identifying alongside its sn_sources / sn_names siblings.",
+      "const": "campaign_manifest"
+    },
+    "schema_version": {
+      "description": "Manifest format version. Loaders reject unknown versions.",
+      "const": 1
+    },
+    "spec": {
+      "description": "The raw defect-predicate selector as the user typed it (e.g. 'prose:typical_values,audit:latex' or 'all').",
+      "type": "string",
+      "minLength": 1
+    },
+    "spec_describe": {
+      "description": "Human-readable expansion of the spec, for the reviewer who did not type it.",
+      "type": "string"
+    },
+    "generated_at": {
+      "description": "ISO-8601 UTC timestamp the manifest was built. The selection reflects the graph at this instant only.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "total": {
+      "description": "Number of accepted names the spec selected (after any pilot reduction).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "per_predicate": {
+      "description": "Selected-name count per matched predicate key ('prose:<class>', 'audit', 'audit:<substr>', 'quarantined'). A name matching several predicates is counted under each, so these need not sum to total.",
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "per_domain": {
+      "description": "Selected-name count per physics domain; names with no domain are grouped under '(none)'. Sums to total.",
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "quarantined_count": {
+      "description": "How many selected names are currently quarantined (validation_status='quarantined').",
+      "type": "integer",
+      "minimum": 0
+    },
+    "batch_plan": {
+      "description": "How the selection will be split for budgeted, gated draining.",
+      "type": "object",
+      "required": ["batch_size", "n_batches"],
+      "additionalProperties": false,
+      "properties": {
+        "batch_size": {
+          "description": "Names per campaign batch.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "n_batches": {
+          "description": "Number of batches the selection splits into (the last may be short).",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "sample": {
+      "description": "Deterministic random sample of selected names with their matched-defect evidence — what the reviewer actually reads to judge whether the spec selected the right work. Seeded, so a dry run and the live run it authorizes agree.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "matched_predicates",
+          "quarantined",
+          "physics_domain"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The graph StandardName id.",
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "description": "The standard name (falls back to the id).",
+            "type": "string",
+            "minLength": 1
+          },
+          "matched_predicates": {
+            "description": "Predicate key -> the evidence strings that matched it (a banned-prose match count, the audit check names that fired, or the quarantine reason).",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "quarantined": {
+            "description": "Whether this name is currently quarantined.",
+            "type": "boolean"
+          },
+          "physics_domain": {
+            "description": "The name's physics domain; empty string when it has none.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pilot": {
+      "description": "Present only when the selection was reduced to a deterministic stratified pilot. Absent for a full-selection manifest.",
+      "type": "object",
+      "required": ["n", "from_total"],
+      "additionalProperties": false,
+      "properties": {
+        "n": {
+          "description": "Pilot size (equals total).",
+          "type": "integer",
+          "minimum": 0
+        },
+        "from_total": {
+          "description": "Size of the full selection the pilot was drawn from.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
