@@ -37,7 +37,7 @@
 
     <h2 id="s2">§2 — Evidence recorded from sprint S2</h2>
     <p>Commit <code>0eb78a74</code> corrected refine-worker telemetry extraction so token and cache metrics, plus the actual <code>fanout_arm</code>, are recorded from the real LLM result object instead of a tuple wrapper. That was the last remaining runtime bug between the live code and the plan’s bounded telemetry contract.</p>
-    <p>The targeted fan-out regression suite passed after the fix: <code>tests/standard_names/fanout/test_cost_invariant.py</code>, <code>test_refine_baseline_noop.py</code>, <code>test_telemetry_node.py</code>, <code>test_trigger_dims_align_with_review.py</code>, <code>tests/standard_names/test_dup_guard.py</code>, <code>test_dup_guard_integration.py</code>, and <code>tests/lint/test_phase2_gate_lint.py</code>. The combined search and fan-out regression pass also stayed green on <code>main</code>.</p>
+    <p>The targeted fan-out regression suite passed after the fix: <code>tests/standard_names/fanout/test_cost_invariant.py</code>, <code>test_refine_baseline_noop.py</code>, <code>test_telemetry_node.py</code>, <code>test_trigger_dims_align_with_review.py</code>, <code>tests/standard_names/test_dup_guard.py</code>, <code>test_dup_guard_integration.py</code>, and <code>tests/lint/test_fanout_confined_to_refine_name.py</code>. The combined search and fan-out regression pass also stayed green on <code>main</code>.</p>
 
     <h2 id="s3">§3 — Deferred scope</h2>
     <ul>

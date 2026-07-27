@@ -1,16 +1,18 @@
-"""Phase-2 gate lint: ``enable_fanout`` reads belong only in refine_name.
+"""Lint: fan-out configuration is read only by the refine_name worker.
 
-Plan 39 §11 acceptance #15 + plan 39 §12.5 (S4): the Phase-2 telemetry
-gate is "binding" only if mechanically enforced.  This lint AST-parses
-``imas_codex/standard_names/workers.py`` and verifies that any read of
-fanout configuration (``enable_fanout``, the ``fanout_settings.sites``
-flag, etc.) occurs inside ``process_refine_name_batch`` — *not* in any
-other worker (compose, review, refine_docs, …).  A bleed-in into a
-sibling worker would be a Phase-2/3 fan-out plug-in attempt that this
-test must block.
+Structured fan-out is a refine-only mechanism — it splits one refine
+attempt into competing arms and charges the extra calls to the refine
+budget.  A read of ``fanout_settings`` (or a call to ``run_fanout`` /
+``should_trigger_fanout``) from a sibling worker would silently enable
+fan-out at that site too, multiplying its LLM spend and its telemetry
+under a pool that was never budgeted or measured for it.  Confinement is
+therefore enforced mechanically rather than by convention.
 
-The lint is intentionally narrow: it walks the AST once and inspects
-references to a small allow-list of fan-out-attribute names.
+This lint AST-parses ``imas_codex/standard_names/workers.py`` and asserts
+that every reference to fan-out configuration or fan-out entry points sits
+inside ``process_refine_name_batch`` — never in compose, review or
+refine_docs.  It is intentionally narrow: one AST walk over an allow-list
+of fan-out attribute and function names.
 """
 
 from __future__ import annotations
@@ -28,8 +30,8 @@ WORKERS_PATH = (
 )
 
 # Names that hint a caller is consuming fan-out machinery.  Reading a
-# ``FanoutSettings`` attribute outside the refine-name worker indicates
-# Phase 2/3 plug-in bleed-in.
+# ``FanoutSettings`` attribute outside the refine-name worker means fan-out
+# has been plugged into a second site.
 _FANOUT_ATTRS: frozenset[str] = frozenset(
     {
         "enabled",  # FanoutSettings.enabled — only consumed by the refine site
@@ -92,7 +94,7 @@ class _FanoutReferenceVisitor(ast.NodeVisitor):
 
 def test_fanout_calls_confined_to_refine_name() -> None:
     """``run_fanout`` / ``should_trigger_fanout`` are referenced only
-    inside ``process_refine_name_batch`` (no Phase-2/3 bleed-in)."""
+    inside ``process_refine_name_batch``."""
     tree = _load_module()
     visitor = _FanoutReferenceVisitor()
     visitor.visit(tree)
@@ -106,7 +108,7 @@ def test_fanout_calls_confined_to_refine_name() -> None:
 
     assert fn_refs, (
         "expected at least one reference to run_fanout / should_trigger_fanout "
-        "in workers.py — the Phase 1 wiring should add them."
+        "in workers.py — the refine_name worker drives fan-out."
     )
 
     bad = [
@@ -115,8 +117,9 @@ def test_fanout_calls_confined_to_refine_name() -> None:
         if fn != "process_refine_name_batch"
     ]
     assert not bad, (
-        f"Phase-2/3 fan-out bleed-in: {bad}.  Fan-out calls must live "
-        "only inside process_refine_name_batch.  See plan 39 §11 #15."
+        f"fan-out entry points reached from a non-refine worker: {bad}.  "
+        "Fan-out calls must live only inside process_refine_name_batch, "
+        "otherwise a sibling pool silently fans out on an unbudgeted path."
     )
 
 
@@ -137,12 +140,13 @@ def test_fanout_settings_reads_confined_to_refine_name() -> None:
         if fn != "process_refine_name_batch"
     ]
     assert not bad, (
-        f"FanoutSettings reads outside refine_name: {bad}.  Plan 39 §11 #15."
+        f"FanoutSettings reads outside refine_name: {bad}.  Only "
+        "process_refine_name_batch may consume fan-out configuration."
     )
 
 
 def test_lint_runs_on_synthetic_violation() -> None:
-    """Self-test: the visitor flags a synthetic Phase-2 plug-in attempt."""
+    """Self-test: the visitor flags a fan-out call planted in a compose worker."""
     src = """
 async def process_compose_batch(batch):
     settings = load_fanout_settings()
