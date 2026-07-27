@@ -96,6 +96,29 @@ dd_unit_bugs:
       A peak areal power density is W.m^-2; the DD tags these
       power_density_*_target_max paths with total power W.
 
+  # -- Ionisation potential (an ENERGY) tagged with the charge unit `e`.
+  #    Unlike every other entry here, the DD contradicts ITSELF on this
+  #    quantity: the profiles_1d / profiles_2d copies declare eV while the ggd
+  #    copies declare e. There is therefore no single DD answer to mirror, so
+  #    these carry `correct_in_graph` — the DD-side unit is rewritten to the
+  #    dimensionally-correct eV at build time (see units.resolve_dd_unit), not
+  #    merely suppressed, so a standard name composed from a ggd copy cannot
+  #    inherit a charge unit for an energy.
+  - path: "*/ggd/ion/state/ionisation_potential*"
+    dd_unit: e
+    correct_unit: eV
+    correct_in_graph: true
+    reason: >-
+      A cumulative ionisation potential is an energy in eV (the profiles_1d and
+      profiles_2d copies of this same quantity declare eV); the ggd copies were
+      migrated to the charge unit e in DD 4.1.0.
+  - path: "*/ggd/ion/state/ionization_potential*"
+    dd_unit: e
+    correct_unit: eV
+    correct_in_graph: true
+    reason: >-
+      American-spelling variant of the same quantity and the same defect.
+
   # -- Neutral incident ENERGY flux tagged as a PARTICLE flux.
   #    Sibling energy_fluxes paths carry W.m^-2; the neutral incident facets
   #    carry the particle-flux unit m^-2.s^-1.

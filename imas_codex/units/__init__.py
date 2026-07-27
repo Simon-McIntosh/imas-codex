@@ -154,41 +154,21 @@ def normalize_unit_symbol(raw: str) -> str | None:
         return None
 
 
-# ---------------------------------------------------------------------------
-# Curated corrections for DD-declared units that contradict the quantity's
-# dimensionality.
-#
-# Each entry maps a DD path fragment to the unit the quantity actually has. Keep
-# this list SHORT and evidence-backed: an entry is justified only when the DD
-# itself declares the same quantity inconsistently, so one of its declarations
-# is provably wrong. Every entry should have a corresponding upstream DD issue;
-# remove it once the DD is fixed.
-#
-# ionisation_potential: DD 4.1.1 declares 'eV' on the profiles_1d/profiles_2d
-# (scalar) copies and 'e' on the ggd copies. An ionisation potential is an
-# energy, and 3.31.0 already migrated the scalar copies from the legacy
-# 'Elementary Charge Unit' spelling to 'eV'; the 4.1.0 migration of the
-# remaining paths sent the ggd copies to 'e' (charge) instead. The charge-number
-# quantities (z_ion, z_min, z_max, z_n, z_average, z_square_average) and
-# vibrational_level were migrated to 'e' by the same change and are NOT listed
-# here: 'e' is correct for a charge, and vibrational_level is a separate
-# upstream question (a level index is dimensionless) that must be settled by the
-# DD, not silently overridden here.
-_DD_UNIT_CORRECTIONS: tuple[tuple[str, str, str], ...] = (
-    # (path fragment, wrongly-declared unit, dimensionally-correct unit)
-    ("ion/state/ionisation_potential", "e", "eV"),
-    ("ion/state/ionization_potential", "e", "eV"),
-)
-
-
 def resolve_dd_unit(dd_path: str, raw: str | None) -> str | None:
-    """Normalise a DD-declared unit, correcting known dimensional defects.
+    """Normalise a DD-declared unit, correcting curated dimensional defects.
 
-    Wraps :func:`normalize_unit_symbol` with a path-aware curation step so a
-    DD declaration that contradicts the quantity's dimensionality is not
-    propagated into the graph or into a standard name. Only the curated
-    (path, wrong-unit) pairs in :data:`_DD_UNIT_CORRECTIONS` are altered; every
-    other path normalises exactly as before.
+    Wraps :func:`normalize_unit_symbol` with a path-aware step so a DD
+    declaration that contradicts the quantity's own dimensionality is not
+    propagated into the graph or into a standard name.
+
+    The curation lives in ``dd_unit_exceptions.yaml`` — the single registry of
+    DD-side unit bugs — so the mismatch axis and the build agree on one list.
+    Most entries there are *suppressions*: the DD is wrong, the standard name is
+    right, and the DD unit is left as declared so the axis can still report it.
+    Only entries flagged ``correct_in_graph`` are rewritten here, reserved for
+    the case where the DD contradicts **itself** on one quantity (so there is no
+    single DD answer to mirror) and propagating the wrong dimensionality would
+    corrupt a standard name.
 
     Args:
         dd_path: The DD path the unit was declared on (IDS-relative or full).
@@ -197,19 +177,21 @@ def resolve_dd_unit(dd_path: str, raw: str | None) -> str | None:
     Returns:
         The canonical unit symbol, or None when the string is not a unit.
     """
-    if raw:
-        stripped = raw.strip()
-        for fragment, wrong, correct in _DD_UNIT_CORRECTIONS:
-            if stripped == wrong and fragment in dd_path:
-                logger.debug(
-                    "resolve_dd_unit: %s declares %r; using %r "
-                    "(DD declares this quantity inconsistently)",
-                    dd_path,
-                    raw,
-                    correct,
-                )
-                return normalize_unit_symbol(correct)
-    return normalize_unit_symbol(raw) if raw else None
+    if not raw:
+        return None
+    from imas_codex.units.dd_unit_exceptions import graph_unit_correction
+
+    correction = graph_unit_correction(dd_path, raw)
+    if correction is not None:
+        logger.debug(
+            "resolve_dd_unit: %s declares %r; using %r "
+            "(DD declares this quantity inconsistently)",
+            dd_path,
+            raw,
+            correction,
+        )
+        return normalize_unit_symbol(correction)
+    return normalize_unit_symbol(raw)
 
 
 def validate_unit(unit_str: str) -> str | None:

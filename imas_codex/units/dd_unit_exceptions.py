@@ -99,6 +99,35 @@ def _is_known_dd_bug(dd_path: str, sn_canon: str | None, dd_canon: str | None) -
     return False
 
 
+def graph_unit_correction(dd_path: str, dd_unit: str | None) -> str | None:
+    """Return the unit to STORE for *dd_path*, when the DD declaration is wrong.
+
+    Most recorded DD unit bugs are only *suppressed* on the mismatch axis: the
+    DD unit is left as declared so the axis can keep reporting it while the
+    standard name carries the correct one. A small subset is flagged
+    ``correct_in_graph`` because the DD contradicts **itself** on that quantity
+    — the same quantity declared with two different dimensionalities — so there
+    is no single DD answer to mirror, and storing the wrong one would feed a
+    wrong dimensionality into standard-name generation. For those, the
+    dimensionally-correct unit is returned so the build stores it instead.
+
+    Returns None when the path/unit pair is not a flagged correction, i.e. the
+    DD declaration should be stored as-is.
+    """
+    dd_canon = canonical_or_none(dd_unit)
+    if dd_canon is None:
+        return None
+    for entry in load_exceptions()["dd_unit_bugs"]:
+        if not entry.get("correct_in_graph"):
+            continue
+        if not fnmatch.fnmatchcase(dd_path, str(entry["path"])):
+            continue
+        if canonical_or_none(str(entry["dd_unit"])) != dd_canon:
+            continue
+        return str(entry["correct_unit"])
+    return None
+
+
 def units_agree(sn_unit: str | None, dd_unit: str | None, dd_path: str) -> bool:
     """Return True if an SN unit and a DD-path unit should be treated as agreeing.
 
