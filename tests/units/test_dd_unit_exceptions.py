@@ -3,6 +3,7 @@
 from imas_codex.units.dd_unit_exceptions import (
     canonical_or_none,
     dd_unit_bug_globs,
+    graph_unit_correction,
     load_exceptions,
     units_agree,
 )
@@ -56,11 +57,113 @@ class TestUnitsAgree:
         # unit-vector-component bug — the direction globs must not match it.
         assert not units_agree("1", "m", "thomson_scattering/channel/position/z")
 
+    def test_dd_side_bug_charge_state_bundle_bounds(self):
+        # The bundle bounds are charge NUMBERS; the DD tags them `e`.
+        assert units_agree("1", "e", "core_profiles/profiles_1d/ion/state/z_max")
+        assert units_agree("1", "e", "waves/coherent_wave/profiles_2d/ion/state/z_min")
+
+    def test_dd_side_bug_ggd_value_copies(self):
+        # The ggd `/values` copies carry the same defect as their scalar twins.
+        assert units_agree("1", "e", "edge_profiles/ggd/ion/state/z_average/values")
+        assert units_agree(
+            "1", "e", "plasma_profiles/ggd/ion/state/z_square_average/values"
+        )
+
+    def test_dd_side_bug_wave_vector_tagged_as_electric_field(self):
+        assert units_agree(
+            "m^-1", "V.m^-1", "waves/coherent_wave/profiles_1d/k_perpendicular"
+        )
+        assert units_agree(
+            "m^-1", "V.m^-1", "waves/coherent_wave/full_wave/k_perpendicular/values"
+        )
+
+    def test_dd_side_bug_gas_flow_rate(self):
+        assert units_agree(
+            "Pa.m^3.s^-1", "s^-1", "spi/injector/fragmentation_gas/flow_rate"
+        )
+        # the correctly-tagged copies elsewhere never match this entry
+        assert units_agree(
+            "Pa.m^3.s^-1", "Pa.m^3.s^-1", "gas_injection/valve/flow_rate"
+        )
+
+    def test_torque_density_spelling_equivalence(self):
+        assert units_agree("N.m^-2", "kg.m^-1.s^-2", "any/path")
+
+    def test_pressure_not_equated_with_torque_density_spelling(self):
+        # Pa shares the dimensionality but is a different physical quantity, so
+        # it must not be swept into the torque-density equivalence set.
+        assert not units_agree("Pa", "kg.m^-1.s^-2", "any/path")
+
     def test_genuine_mismatch_fails(self):
-        assert not units_agree("m", "m^-3", "pellets/time_slice/pellet/path_profiles/n_e")
+        assert not units_agree(
+            "m", "m^-3", "pellets/time_slice/pellet/path_profiles/n_e"
+        )
 
     def test_unparseable_dd_never_agrees(self):
         assert not units_agree("1", "unit_error", "some/path")
+
+
+class TestGraphUnitCorrection:
+    """Only self-contradicting DD declarations are rewritten at build time."""
+
+    def test_reconstructed_constraint_sentinels_are_rewritten(self):
+        # Each constraint carries `measured` and `reconstructed` copies of ONE
+        # quantity; the reconstructed twins declare a dimensionless sentinel.
+        assert (
+            graph_unit_correction(
+                "equilibrium/time_slice/constraints/pressure/reconstructed", "1"
+            )
+            == "Pa"
+        )
+        assert (
+            graph_unit_correction(
+                "equilibrium/time_slice/constraints/n_e/reconstructed", "1"
+            )
+            == "m^-3"
+        )
+        assert (
+            graph_unit_correction(
+                "equilibrium/time_slice/constraints/j_phi/reconstructed", "1"
+            )
+            == "A.m^-2"
+        )
+
+    def test_measured_twin_is_left_alone(self):
+        # The correctly-declared side never matches — its unit is not the
+        # sentinel the entry records.
+        assert (
+            graph_unit_correction(
+                "equilibrium/time_slice/constraints/pressure/measured", "Pa"
+            )
+            is None
+        )
+
+    def test_poloidal_angle_sentinel_is_rewritten(self):
+        assert (
+            graph_unit_correction(
+                "gyrokinetics_local/linear/wavevector/eigenmode/angle_pol", "1"
+            )
+            == "rad"
+        )
+
+    def test_phase_space_source_dimensionality_is_rewritten(self):
+        assert (
+            graph_unit_correction(
+                "distribution_sources/source/ggd/particles/values", "m^-6.s^2"
+            )
+            == "m^-3.s^-1"
+        )
+
+    def test_suppression_only_entries_are_not_rewritten(self):
+        # A DD-side bug the SN simply overrides is suppressed on the mismatch
+        # axis, never rewritten in the graph.
+        assert (
+            graph_unit_correction("core_profiles/profiles_1d/ion/state/z_max", "e")
+            is None
+        )
+        assert (
+            graph_unit_correction("camera_ir/channel/camera/direction/x", "m") is None
+        )
 
 
 class TestExceptionFileShape:

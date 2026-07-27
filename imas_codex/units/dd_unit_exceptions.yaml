@@ -43,10 +43,36 @@ dd_unit_bugs:
     dd_unit: e
     correct_unit: "1"
     reason: Average charge state is a number (dimensionless); the DD tags it `e`.
+  - path: "*/z_average/values"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The ggd copy of the average charge state, one value per grid element; same
+      dimensionless quantity and same DD defect as the scalar copy.
   - path: "*/z_square_average"
     dd_unit: e
     correct_unit: "1"
     reason: Mean-square charge state is a number (dimensionless); the DD tags it `e`.
+  - path: "*/z_square_average/values"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The ggd copy of the mean-square charge state; same dimensionless quantity
+      and same DD defect as the scalar copy.
+  - path: "*/state/z_max"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The upper bound of a charge-state bundle is a charge NUMBER — the DD's own
+      text reads "Maximum Z of the charge state bundle" — so it is
+      dimensionless; the DD tags it `e`.
+  - path: "*/state/z_min"
+    dd_unit: e
+    correct_unit: "1"
+    reason: >-
+      The lower bound of a charge-state bundle is a charge NUMBER — the DD's own
+      text reads "Minimum Z of the charge state bundle" — so it is
+      dimensionless; the DD tags it `e`.
   - path: "*/vibrational_level"
     dd_unit: e
     correct_unit: "1"
@@ -128,6 +154,100 @@ dd_unit_bugs:
     reason: >-
       An incident energy flux is W.m^-2 (sibling energy_fluxes facets agree);
       the DD tags the neutral facet with the particle-flux unit m^-2.s^-1.
+  - path: "*/energy_fluxes/kinetic/neutral/incident/values"
+    dd_unit: m^-2.s^-1
+    correct_unit: W.m^-2
+    reason: >-
+      The species-level (non-state-resolved) copy of the same incident energy
+      flux carries the same particle-flux mis-tag.
+
+  # -- Perpendicular WAVE VECTOR tagged with an electric-field unit.
+  #    k_perpendicular is a wave vector (m^-1); the DD declares V.m^-1, the unit
+  #    of the electric field the surrounding wave structure also carries.
+  - path: "waves/coherent_wave/*k_perpendicular*"
+    dd_unit: V.m^-1
+    correct_unit: m^-1
+    reason: >-
+      A perpendicular wave vector is m^-1; the DD tags it with the
+      electric-field unit V.m^-1 of the neighbouring wave-field quantities.
+
+  # -- SPI gas flow rate tagged as a particle rate.
+  #    Every other DD */flow_rate (gas_injection, gas_pumping, pulse_schedule)
+  #    declares the throughput unit Pa.m^3.s^-1 for identically-documented
+  #    fields ("Flow rate of the gas at the injector exit"); the two spi copies
+  #    declare s^-1.
+  - path: "spi/injector/*_gas/flow_rate"
+    dd_unit: s^-1
+    correct_unit: Pa.m^3.s^-1
+    reason: >-
+      A gas flow rate is a throughput in Pa.m^3.s^-1 (every other DD flow_rate
+      agrees); the spi injector copies are tagged with the particle rate s^-1.
+
+  # -- Reconstructed equilibrium CONSTRAINTS carrying a dimensionless sentinel.
+  #    Each constraint holds a `measured` and a `reconstructed` copy of ONE
+  #    quantity, so the DD contradicts itself: `measured` declares the physical
+  #    unit while these `reconstructed` twins declare `1`. (j_tor/reconstructed,
+  #    the un-renamed twin of j_phi, declares A.m^-2 — confirming which side is
+  #    right.) These carry `correct_in_graph` so generation cannot inherit a
+  #    dimensionless sentinel for a pressure, density or current density.
+  - path: "equilibrium/time_slice/constraints/pressure/reconstructed"
+    dd_unit: "1"
+    correct_unit: Pa
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin of this same constraint declares Pa; the
+      `reconstructed` copy carries a dimensionless sentinel.
+  - path: "equilibrium/time_slice/constraints/pressure_rotational/reconstructed"
+    dd_unit: "1"
+    correct_unit: Pa
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares Pa; the `reconstructed` copy carries a
+      dimensionless sentinel.
+  - path: "equilibrium/time_slice/constraints/n_e/reconstructed"
+    dd_unit: "1"
+    correct_unit: m^-3
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares m^-3; the `reconstructed` copy carries a
+      dimensionless sentinel.
+  - path: "equilibrium/time_slice/constraints/j_phi/reconstructed"
+    dd_unit: "1"
+    correct_unit: A.m^-2
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares A.m^-2, as does the un-renamed j_tor
+      reconstructed copy of the same quantity.
+  - path: "equilibrium/time_slice/constraints/j_parallel/reconstructed"
+    dd_unit: "1"
+    correct_unit: A.m^-2
+    correct_in_graph: true
+    reason: >-
+      The `measured` twin declares A.m^-2; the `reconstructed` copy carries a
+      dimensionless sentinel.
+
+  # -- Gyrokinetic poloidal ANGLE carrying a dimensionless sentinel.
+  #    The DD contradicts itself: species_all/angle_pol_equilibrium declares rad
+  #    for the same poloidal angle that the eigenmode grid declares `1`.
+  - path: "gyrokinetics_local/*/angle_pol"
+    dd_unit: "1"
+    correct_unit: rad
+    correct_in_graph: true
+    reason: >-
+      A poloidal angle is in radian — the DD's own angle_pol_equilibrium copy
+      declares rad; the eigenmode grid copy declares a dimensionless sentinel.
+
+  # -- Phase-space particle SOURCE term with an inverted dimensionality.
+  #    The DD contradicts itself: the profiles_1d copy of this density-equation
+  #    source term declares m^-3.s^-1 while the ggd copy declares m^-6.s^2 —
+  #    the reciprocal of a phase-space density rather than a source rate.
+  - path: "distribution_sources/source/ggd/particles/values"
+    dd_unit: m^-6.s^2
+    correct_unit: m^-3.s^-1
+    correct_in_graph: true
+    reason: >-
+      A density-equation particle source term is m^-3.s^-1 (the profiles_1d copy
+      of the same quantity agrees); the ggd copy declares m^-6.s^2.
   - path: "*/energy_fluxes/recombination/neutral/incident/values"
     dd_unit: m^-2.s^-1
     correct_unit: W.m^-2
@@ -172,3 +292,8 @@ unit_equivalences:
   # kg.m^2.s^-2 in others (both == joule dimensionally, distinct from J's
   # canonical short symbol so energy is not swept in).
   - [N.m, kg.m^2.s^-2]
+  # Torque DENSITY: the DD spells it with the derived N.m^-2 in the momentum
+  # source facets and the base kg.m^-1.s^-2 in the ggd copies of the same
+  # quantity (both == torque per unit volume; distinct from Pa's canonical short
+  # symbol so a pressure is not swept in).
+  - [N.m^-2, kg.m^-1.s^-2]
