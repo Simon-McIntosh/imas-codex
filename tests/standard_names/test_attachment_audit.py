@@ -431,6 +431,12 @@ def _gc():
 
 @pytest.fixture()
 def _clean(_gc):
+    """Wipe the fixture's own nodes on BOTH setup and teardown.
+
+    Setup as well as teardown, so a killed run leaves nothing behind that the
+    next one has to live with.
+    """
+
     def _wipe() -> None:
         for label in (
             "StandardName",
@@ -442,6 +448,17 @@ def _clean(_gc):
                 f"MATCH (n:{label}) WHERE n.id STARTS WITH $p DETACH DELETE n",
                 p=_PREFIX,
             )
+        # A detachment crumb is keyed 'sn-change:<uuid>', so the id prefix above
+        # never matches it — it is identified by the fixture path it records.
+        _gc.query(
+            """
+            MATCH (c:StandardNameChange)
+            WHERE coalesce(c.from_name, '') STARTS WITH $p
+               OR coalesce(c.to_name, '') STARTS WITH $p
+            DETACH DELETE c
+            """,
+            p=_PREFIX,
+        )
 
     _wipe()
     yield
