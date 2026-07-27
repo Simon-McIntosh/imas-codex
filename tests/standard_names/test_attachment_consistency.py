@@ -182,6 +182,50 @@ def test_lexical_rejection_precedes_unit_agreement() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Locus/device overlap survives the DD's abbreviated device names
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "source_id,sn_name",
+    [
+        # The DD names the device in the IDS's abbreviated form; the standard
+        # name must spell it in full, so the raw tokens never overlap.
+        ("focs/fibre_properties/spun", "spun_wavelength_of_fiber_optic_current_sensor"),
+        ("focs/spun", "spun_wavelength_of_fiber_optic_current_sensor"),
+        (
+            "nbi/unit/beamlets_group/tilting/delta_angle",
+            "perturbed_beam_tilt_angle_of_neutral_beam_injector",
+        ),
+        (
+            "pf_active/vertical_force/force",
+            "vertical_total_force_of_poloidal_field_coil",
+        ),
+        (
+            "summary/heating_current_drive/ec/power_launched/value",
+            "total_launched_power_of_electron_cyclotron_launcher",
+        ),
+    ],
+)
+def test_abbreviated_dd_device_name_still_matches_locus(
+    source_id: str, sn_name: str
+) -> None:
+    """An IDS abbreviation is the same device, not a device mismatch."""
+    ok, reason = _is_attachment_consistent(source_id, sn_name)
+    assert ok, reason
+
+
+def test_expansion_does_not_defeat_the_locus_rule() -> None:
+    """A genuinely unrelated device is still rejected after expansion."""
+    ok, reason = _is_attachment_consistent(
+        "summary/boundary/strike_point_inner_z/value",
+        "vertical_image_up_unit_vector_of_camera",
+    )
+    assert not ok
+    assert "locus" in reason.lower()
+
+
+# ---------------------------------------------------------------------------
 # Shape-parameter bases are derived from the ISN vocabulary, not hardcoded
 # ---------------------------------------------------------------------------
 

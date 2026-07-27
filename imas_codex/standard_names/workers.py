@@ -1892,6 +1892,46 @@ def _content_tokens(text: str) -> set[str]:
     return {(t[:-1] if len(t) > 3 and t.endswith("s") else t) for t in raw if t}
 
 
+def _expanded_path_tokens(source_id: str) -> set[str]:
+    """Content tokens of a DD path with its abbreviations spelled out.
+
+    A DD path names a device in the abbreviated form the IDS uses (``nbi``,
+    ``focs``, ``ec_launchers``, ``pf_active``) while a standard name must spell
+    it in full (``neutral_beam_injector``, ``fiber_optic_current_sensor``,
+    ``electron_cyclotron_launcher``, ``poloidal_field_coil``). Compared raw, the
+    two share no token and a correct attachment reads as a device mismatch, so
+    the path's tokens are expanded through the same abbreviation map the naming
+    audit uses before any overlap test.
+    """
+    from imas_codex.standard_names.audits import _FORBIDDEN_ABBREVIATIONS
+
+    tokens = _content_tokens(source_id)
+    expanded = set(tokens)
+    for abbrev, full in _FORBIDDEN_ABBREVIATIONS:
+        if abbrev.strip("_") in tokens:
+            expanded |= _content_tokens(full)
+    for abbrev, full in _DD_DEVICE_EXPANSIONS.items():
+        # Match on the stemmed form: ``_content_tokens`` drops a trailing 's',
+        # so a path segment ``focs`` arrives as ``foc``.
+        if tokens & _content_tokens(abbrev):
+            expanded |= _content_tokens(full)
+    return expanded
+
+
+#: DD IDS / structure names that abbreviate a device the standard-name grammar
+#: spells in full. Distinct from the naming audit's abbreviation list, which
+#: covers physics-concept contractions inside a NAME; these are IDS identifiers
+#: that only ever appear on the DD PATH side. Not ISN grammar vocabulary — a DD
+#: path token mapped to the words a locus token is built from.
+_DD_DEVICE_EXPANSIONS: dict[str, str] = {
+    "focs": "fiber_optic_current_sensor",
+    "nbi": "neutral_beam_injector",
+    "ece": "electron_cyclotron_emission",
+    "pf": "poloidal_field_coil",
+    "tf": "toroidal_field_coil",
+}
+
+
 def _name_locus_token(sn_name: str) -> str | None:
     """Extract the trailing ``_of_<locus>`` / ``_at_<locus>`` locus token, or None."""
     of_i = sn_name.rfind("_of_")
@@ -2019,7 +2059,7 @@ def _is_attachment_consistent(
     if locus:
         locus_tokens = _content_tokens(locus)
         if locus_tokens & _HARDWARE_LOCUS_WORDS:
-            path_tokens = _content_tokens(source_id)
+            path_tokens = _expanded_path_tokens(source_id)
             if not (locus_tokens & path_tokens):
                 return False, (
                     f"locus/source device mismatch: SN '{sn_name}' has hardware "
