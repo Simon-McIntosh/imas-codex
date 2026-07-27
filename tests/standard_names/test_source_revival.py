@@ -36,7 +36,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
+
 _GO = "imas_codex.standard_names.graph_ops"
+_AA = "imas_codex.standard_names.attachment_audit"
 _LOOP = "imas_codex.standard_names.loop"
 _PREFIX = "test_source_revival__"
 
@@ -540,6 +543,14 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
         patch(f"{_GO}.reconcile_provenance", return_value={}),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
         patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
+        patch(
+            f"{_GO}.reconcile_standard_name_unit_edges",
+            return_value={"names_realigned": 0, "edges_dropped": 0, "edges_created": 0},
+        ),
+        patch(
+            f"{_AA}.reconcile_attachment_consistency",
+            return_value=AttachmentAuditResult(),
+        ),
         patch(
             f"{_GO}.reconcile_standard_name_dd_edges",
             return_value={"edges_created": 0, "pairs_dropped": 0},

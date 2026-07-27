@@ -200,6 +200,45 @@ class TestSNUnitIntegrity:
             "(self-heal invariant broken):\n  " + "\n  ".join(sample)
         )
 
+    def test_no_standard_name_has_multiple_units(self, graph_client):
+        """No StandardName may carry more than one HAS_UNIT edge.
+
+        The schema declares ``StandardName -[:HAS_UNIT]-> Unit`` with
+        cardinality *one*, and a name has exactly one unit by definition. Two
+        edges leave the name with no single dimensionality, which matters
+        because the attachment guard admits a source by comparing the source's
+        DD dimensionality against the name's: a name carrying both ``1`` and
+        ``m^-2`` will accept sources of either, and that is precisely how
+        physically distinct quantities collapse onto one name.
+
+        Asserted at EVERY stage, terminal included — unlike the live-unit
+        invariants above, which exempt dead names whose unit may legitimately
+        predate a correction. Cardinality is structural, and a terminal name is
+        exactly the case no writer will ever revisit, so nothing else can heal
+        it. ``reconcile_standard_name_unit_edges`` (wired into the ``sn run``
+        startup reconcile) is what keeps this green.
+        """
+        rows = graph_client.query("""
+            MATCH (sn:StandardName)-[r:HAS_UNIT]->()
+            WITH sn, count(r) AS c
+            WHERE c > 1
+            MATCH (sn)-[:HAS_UNIT]->(u:Unit)
+            RETURN sn.id AS id, c AS edge_count,
+                   sn.unit AS declared, collect(DISTINCT u.id) AS units
+            ORDER BY id
+        """)
+        if not rows:
+            return
+        sample = [
+            f"{r['id']} ({r['edge_count']} edges: {r['units']}; "
+            f"declares {r['declared']!r})"
+            for r in rows[:20]
+        ]
+        assert not rows, (
+            f"{len(rows)} StandardNames carry more than one HAS_UNIT edge "
+            "(cardinality-one invariant broken):\n  " + "\n  ".join(sample)
+        )
+
     def test_dd_side_unit_bug_globs_are_live(self, graph_client):
         """Every DD-side unit-bug glob must still match ≥1 live buggy DD path.
 

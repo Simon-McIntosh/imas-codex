@@ -7480,6 +7480,82 @@ def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]
     }
 
 
+def reconcile_standard_name_unit_edges(gc: Any | None = None) -> dict[str, int]:
+    """Realign each name's ``HAS_UNIT`` edge set with its own ``unit`` scalar.
+
+    ``StandardName`` declares ``HAS_UNIT`` with cardinality *one*, and every
+    writer that sets a unit already drops the pre-existing edge before merging
+    the canonical one, so a unit CORRECTION cannot strand the old edge beside
+    the new. A name whose unit was last written before that self-heal existed
+    still carries the residue — and if it has since reached a terminal stage no
+    writer will ever revisit it, making the stale edge permanent. This is the
+    net for exactly that case.
+
+    The ``unit`` scalar is authoritative: it is what the catalog export, the
+    reviewer prompt, and the attachment guard's dimensionality rule all read. A
+    name carrying two units has no single dimensionality, so the guard will
+    admit sources of *either* — which is how physically distinct quantities
+    collapse onto one name.
+
+    Names with no declared unit are left alone: their edge is the only unit
+    information they carry, and awaiting a unit is not a cardinality violation.
+    Applies at every stage, terminal included, since the cardinality invariant
+    is structural rather than a claim about live physics.
+
+    Idempotent: no-op once every name's edge set is exactly its scalar.
+
+    Returns dict: {names_realigned, edges_dropped, edges_created}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (sn:StandardName)-[:HAS_UNIT]->(u:Unit)
+            WHERE sn.unit IS NOT NULL AND sn.unit <> ''
+            WITH sn, collect(DISTINCT u.id) AS edges
+            WHERE NOT (size(edges) = 1 AND edges[0] = sn.unit)
+            RETURN sn.id AS id, sn.unit AS unit, edges AS edges
+            ORDER BY id
+            """
+        )
+        if not rows:
+            return {"names_realigned": 0, "edges_dropped": 0, "edges_created": 0}
+
+        dropped = sum(1 for r in rows for e in r["edges"] if e != r["unit"])
+        created = sum(1 for r in rows if r["unit"] not in r["edges"])
+
+        client.query(
+            """
+            UNWIND $items AS item
+            MATCH (sn:StandardName {id: item.id})
+            OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(stale:Unit)
+            WHERE stale.id <> item.unit
+            DELETE r
+            WITH DISTINCT sn, item
+            MERGE (u:Unit {id: item.unit})
+            MERGE (sn)-[:HAS_UNIT]->(u)
+            """,
+            items=[{"id": r["id"], "unit": r["unit"]} for r in rows],
+        )
+    finally:
+        if own:
+            client.close()
+
+    logger.info(
+        "reconcile_standard_name_unit_edges: realigned %d name(s) — dropped %d "
+        "stale unit edge(s), created %d missing edge(s)",
+        len(rows),
+        dropped,
+        created,
+    )
+    return {
+        "names_realigned": len(rows),
+        "edges_dropped": dropped,
+        "edges_created": created,
+    }
+
+
 # Terminal / dead name stages — refined-away or given-up names whose edges have
 # already been migrated off them; their denormalised scalar is left as-is.
 _TERMINAL_NAME_STAGES = ["superseded", "exhausted", "contested"]

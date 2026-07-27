@@ -19,6 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
 from imas_codex.standard_names.budget import BudgetManager
 from imas_codex.standard_names.pools import PoolSpec, pool_loop
 
@@ -37,6 +38,12 @@ def _stub_parent_lifecycle_startup():
         patch(f"{_go}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
         # Always-on orphaned-SNRun sweep builds its own GraphClient; stub it.
         patch(f"{_go}.mark_orphaned_standard_name_runs_stale", return_value=0),
+        # The retroactive attachment re-validation opens its own GraphClient;
+        # stub it so the startup path stays graph-free.
+        patch(
+            "imas_codex.standard_names.attachment_audit.reconcile_attachment_consistency",
+            return_value=AttachmentAuditResult(),
+        ),
     ):
         yield
 
@@ -1067,7 +1074,10 @@ class TestRunSnPoolsFinalizePopulatesCounters:
     async def test_finalize_populates_counter_fields(self) -> None:
         """run_sn_pools assigns names_composed/enriched/reviewed/regenerated
         from pool total_processed values."""
+        from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
+
         _GO = "imas_codex.standard_names.graph_ops"
+        _AA = "imas_codex.standard_names.attachment_audit"
         _BM = "imas_codex.standard_names.budget.BudgetManager"
 
         # We need run_pools to return a health_map with known total_processed.
@@ -1113,6 +1123,13 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
                 reconcile_standard_name_cocos_links=MagicMock(return_value={}),
+                reconcile_standard_name_unit_edges=MagicMock(
+                    return_value={
+                        "names_realigned": 0,
+                        "edges_dropped": 0,
+                        "edges_created": 0,
+                    }
+                ),
                 reconcile_standard_name_dd_edges=MagicMock(
                     return_value={"edges_created": 0, "pairs_dropped": 0}
                 ),

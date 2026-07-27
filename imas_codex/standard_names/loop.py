@@ -1114,6 +1114,53 @@ async def run_sn_pools(
                 cocos_result.get("convention"),
             )
 
+        # Realign each name's HAS_UNIT edge set with its own unit scalar. A name
+        # whose unit was written before the writers self-healed can carry the
+        # superseded edge alongside the current one, leaving it with no single
+        # dimensionality — and the attachment guard below compares dimensionality,
+        # so an ambiguous name admits sources of either. Runs FIRST of the
+        # structural passes for that reason. Idempotent.
+        from imas_codex.standard_names.graph_ops import (
+            reconcile_standard_name_unit_edges,
+        )
+
+        unit_edge_result = await asyncio.to_thread(reconcile_standard_name_unit_edges)
+        if unit_edge_result.get("names_realigned", 0):
+            logger.info(
+                "run_sn_pools: unit-edge reconcile — %d name(s) realigned "
+                "(%d stale edge(s) dropped, %d created)",
+                unit_edge_result.get("names_realigned", 0),
+                unit_edge_result.get("edges_dropped", 0),
+                unit_edge_result.get("edges_created", 0),
+            )
+
+        # Re-ask the attachment guard of every source→name edge already stored.
+        # The guard is consulted at compose time only, so an edge written before
+        # a rule existed — or written by one of the paths that migrate a whole
+        # source set wholesale (a refine successor, an edit cascade, a catalog
+        # import) — is never revisited, and a decision cached durably and never
+        # re-evaluated when the deciding logic improves stays permanently wrong.
+        # Rejected edges are detached and their freed sources returned to
+        # 'extracted' so the generate pool composes a correct name the same run.
+        # Accepted names are catalog-authoritative and are reported, not
+        # detached, without an explicit opt-in. Idempotent.
+        from imas_codex.standard_names.attachment_audit import (
+            reconcile_attachment_consistency,
+        )
+
+        attach_result = await asyncio.to_thread(reconcile_attachment_consistency)
+        if attach_result.detached or attach_result.rejected:
+            logger.info(
+                "run_sn_pools: attachment-consistency reconcile — %d of %d "
+                "attachment(s) rejected, %d detached, %d source(s) rerouted "
+                "(by rule: %s)",
+                len(attach_result.rejected),
+                attach_result.checked,
+                attach_result.detached,
+                attach_result.sources_rerouted,
+                attach_result.by_rule(),
+            )
+
         # Materialize the DD-side HAS_STANDARD_NAME edge from per-source
         # provenance, so a name reaches every DD path its provenance asserts —
         # not just the one source that seeded it. Gated on DD-eligibility and
