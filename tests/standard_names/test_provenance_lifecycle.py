@@ -8,7 +8,7 @@ import pytest
 
 from imas_codex.standard_names.merge import mark_catalog_name_approved, run_merge
 from imas_codex.standard_names.provenance_lifecycle import (
-    build_unapproved_cleanup_manifest,
+    compact_unapproved_superseded,
     fetch_public_semantic_sources,
     find_semantic_source_invariant_violations,
     official_dd_documentation_url,
@@ -38,12 +38,15 @@ def test_retarget_query_enforces_all_source_mirrors() -> None:
 
 
 def test_cleanup_manifest_is_unapproved_only() -> None:
+    """The default (non-applying) call is a read-only unapproved-only manifest."""
     gc = MagicMock()
     gc.query.return_value = []
-    assert build_unapproved_cleanup_manifest(gc) == []
+    assert compact_unapproved_superseded(gc) == []
+    assert gc.query.call_count == 1
     cypher = gc.query.call_args.args[0]
     assert "old.catalog_approved_at IS NULL" in cypher
     assert "safe_to_compact" in cypher
+    assert "DELETE" not in cypher
 
 
 def test_invariant_audit_checks_edge_scalar_and_backing_projection() -> None:

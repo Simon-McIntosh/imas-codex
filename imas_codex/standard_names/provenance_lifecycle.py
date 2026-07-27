@@ -316,8 +316,18 @@ def record_standard_name_change(
     return change_id
 
 
-def build_unapproved_cleanup_manifest(gc: Any) -> list[dict[str, Any]]:
-    """Return the dry-run manifest for compacting unapproved dead candidates."""
+def compact_unapproved_superseded(
+    gc: Any,
+    *,
+    apply: bool = False,
+) -> list[dict[str, Any]]:
+    """Plan or compact safe unapproved superseded candidates.
+
+    The default is a read-only manifest. Applying compacts only rows with one
+    live tip: semantic sources are retargeted, a lightweight internal event is
+    retained, then the obsolete StandardName and its owned review/doc snapshots
+    are removed. Ambiguous/dead-end rows always remain for manual resolution.
+    """
     rows = gc.query(
         """
         MATCH (old:StandardName)
@@ -333,22 +343,7 @@ def build_unapproved_cleanup_manifest(gc: Any) -> list[dict[str, Any]]:
         ORDER BY old.id
         """
     )
-    return [dict(row) for row in rows or []]
-
-
-def compact_unapproved_superseded(
-    gc: Any,
-    *,
-    apply: bool = False,
-) -> list[dict[str, Any]]:
-    """Plan or compact safe unapproved superseded candidates.
-
-    The default is a read-only manifest. Applying compacts only rows with one
-    live tip: semantic sources are retargeted, a lightweight internal event is
-    retained, then the obsolete StandardName and its owned review/doc snapshots
-    are removed. Ambiguous/dead-end rows always remain for manual resolution.
-    """
-    manifest = build_unapproved_cleanup_manifest(gc)
+    manifest = [dict(row) for row in rows or []]
     if not apply:
         return manifest
     for item in manifest:
