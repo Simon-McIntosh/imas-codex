@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-attachment-integrity-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — attachment integrity, batch versioning, version ordering | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 — attachment integrity, batch versioning, and version ordering (2026-07-27)</h1>
+
+    <div class="card" style="border-left:4px solid #b8860b; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>The RC was deliberately NOT cut this session.</strong> The plan's
+        course correction said to stop treating the naming residual as blocking
+        and cut the RC. Then a pre-flight check of the batch found <strong>11
+        accepted WEST names whose unit contradicts their own DD source</strong>
+        (354 graph-wide), including a divertor strike-point coordinate attached
+        to a camera up-vector. The lead's direction was explicit: <em>"this is
+        CRITICAL. the backing graph data needs to be correct … all such
+        occurrences should be properly root caused and fixed."</em>
+      </p>
+      <p style="margin:0;">
+        So the sequencing was inverted: correctness first, RC after. PR'ing a
+        batch with known-faulty names would spend the stage-3 reviewer's
+        attention on defects we already knew about — the opposite of what the
+        rehearsal is for.
+      </p>
+    </div>
+
+    <h2>The root cause: a guard at the caller, not at the boundary</h2>
+    <p>
+      <code>_is_attachment_consistent</code> already rejected the worst live
+      case. Asked directly, it refuses
+      <code>summary/boundary/strike_point_inner_z/value →
+      z_image_up_unit_vector_of_camera</code> with "locus/source device
+      mismatch". Yet that attachment was in the graph, on an
+      <code>accepted</code> name. The guard was reachable from exactly one
+      module — compose, in <code>workers.py</code> — so an audit of every write
+      path that can create a source→name edge found <strong>13 of 15
+      ungated</strong>:
+    </p>
+    <ul>
+      <li><strong><code>persist_refined_name</code> is an active laundering
+        channel.</strong> A refine migrates every source from the predecessor
+        onto the successor wholesale, with no re-validation against the new
+        name. That is how the strike-point source reached a camera name
+        <em>after</em> compose had correctly refused it.</li>
+      <li><code>retarget_standard_name_sources</code> (three call sites) and
+        <code>bind_sources_exclusively</code> (the catalog-import path) move
+        bindings the same way; the first also <em>deletes</em> competing
+        historical edges, so an ungated rename both mis-attaches and destroys
+        the evidence.</li>
+      <li>The guard had <strong>no dimensionality rule</strong>, so physically
+        distinct quantities collapsed onto one name.</li>
+    </ul>
+    <p>
+      Healing the data alone would not have held: the bad edges return on the
+      next refine rotation. Both halves were needed — write-time gates plus a
+      retroactive re-validation of every existing edge.
+    </p>
+
+    <h2>One bug in three disguises</h2>
+    <p>
+      Three independent failures this session turned out to be the same
+      mistake: <strong>a query keyed on a projection or a secondary edge instead
+      of the authoritative one.</strong> Worth stating as a pattern, because it
+      predicts where to look next.
+    </p>
+    <table>
+      <thead><tr><th>Symptom</th><th>Read</th><th>Authority</th></tr></thead>
+      <tbody>
+        <tr><td>Batch release resolved to ZERO names — no RC could be cut at all</td>
+            <td><code>StandardName.source_paths</code> (stores <code>dd:</code>-prefixed ids) compared against bare DD paths</td>
+            <td><code>PRODUCED_NAME</code> edge</td></tr>
+        <tr><td><code>sn edit --hint</code> steering silently lost for 62 of 86 sources</td>
+            <td><code>IMASNode-[:HAS_STANDARD_NAME]→</code> + a required prior review score</td>
+            <td><code>PRODUCED_NAME</code> edge</td></tr>
+        <tr><td><code>reconcile_standard_name_dd_edges</code> half-checked attachments</td>
+            <td><code>units_agree</code> only, no semantic guard</td>
+            <td>the one attachment guard</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Landed</h2>
+    <table>
+      <thead><tr><th>Commit</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td><code>0e240431</code></td>
+          <td><strong>Dimensionality rule in the attachment guard</strong>, comparing
+              dimensionality rather than symbol spelling, with genuine DD defects
+              routed through the exceptions registry. Also derives
+              <code>_SHAPE_PARAMETER_BASES</code> from ISN at runtime — a
+              hardcoded ISN vocabulary set that <code>AGENTS.md</code> names as a
+              binding violation.</td></tr>
+        <tr><td><code>eb9252c1</code></td>
+          <td><strong>Retroactive re-validation of existing attachments on every
+              run</strong> — the structural gate covering the write paths that
+              cannot be gated at write time.</td></tr>
+        <tr><td><code>277a3061</code></td>
+          <td><strong>An IDS abbreviation is not a device mismatch.</strong> The
+              locus rule compared a name's spelled-out device
+              (<code>fiber_optic_current_sensor</code>) against the DD's
+              abbreviated form (<code>focs</code>), so 15 CORRECT attachments read
+              as mismatches. Found by the retroactive audit — the audit paying for
+              itself by surfacing a false positive in the rule it enforces.</td></tr>
+        <tr><td><code>e4f32c5c</code></td>
+          <td><strong>~90 genuine DD unit defects registered</strong> (z_max/z_min
+              bundle bounds, ggd <code>/values</code> copies, <code>k_perpendicular</code>
+              mis-tagged as an electric field, SPI gas flow rate), plus five
+              <code>correct_in_graph</code> entries where the DD contradicts
+              <em>itself</em>, and one spelling equivalence verified not to
+              overmatch. 25 tests.</td></tr>
+        <tr><td><code>71c95689</code></td>
+          <td><strong>Minting joins over <code>PRODUCED_NAME</code>.</strong> The
+              live test had seeded <code>source_paths</code> bare — encoding the
+              convention the code assumed rather than the one the writers use —
+              which is why a total failure of batch release survived unnoticed.
+              The real corpus now mints 355 paths → 407 names.</td></tr>
+        <tr><td><code>d32e738a</code></td>
+          <td><strong>Cached source blocks are re-evaluated when their cause is
+              fixed.</strong> 41 DD sources whose units now parse were
+              permanently excluded by a unit skip recorded against an older
+              resolver. Permanent eligibility exclusions (time coordinates) stay
+              untouched.</td></tr>
+        <tr><td><code>aec1c19d</code>, <code>eb9a7773</code></td>
+          <td><strong>A batch RC carries its identity in the version</strong> —
+              <code>v0.2.0rc66+west-task-2e</code>, label derived from the
+              manifest's own name and sanitized to the semver build-metadata
+              grammar. The tag grammar did not match a <code>+build</code> suffix
+              at all, so a batch tag was invisible to state detection and the next
+              release would have silently re-minted the same RC number over an
+              existing tag. Tag ordering moved into Python, since git orders the
+              suffix lexically and has no notion of build metadata being
+              precedence-neutral. A stable release refuses build metadata.</td></tr>
+        <tr><td><code>1dad29ee</code></td>
+          <td><strong>A domain-scoped export stamped a scope the manifest model
+              rejects</strong> (<code>domain_subset</code> is not in the ISN
+              literal set), and <code>_write_manifest</code> warns rather than
+              raises — so the invalid manifest was written silently.</td></tr>
+        <tr><td><code>eea28170</code></td>
+          <td><strong>The campaign manifest gets a schema, a home, and a
+              kind.</strong> It was the only one of the three batch manifests with
+              no schema, no self-identifying <code>kind</code>, and no home — it
+              defaulted to the working directory, so a dry run dirtied a worktree
+              shared by concurrent agents.</td></tr>
+        <tr><td><code>1a9430d8</code></td>
+          <td><strong>A test no longer mutates a committed LLM prompt on
+              disk.</strong> It relied on a <code>finally</code> to restore it, so
+              two concurrent pytest runs raced the window — reproduced in the act,
+              leaving the prompt <em>doubly</em> mutated. A killed run left it
+              corrupted with no cleanup at all. The whole suite was audited: this
+              was the only test writing inside the source tree.</td></tr>
+        <tr><td><code>598eff14</code></td>
+          <td><strong>Order-dependent mocks made whole-repo-only failures.</strong>
+              A CLI test sets the <code>imas_codex</code> logger to DEBUG and never
+              restores it; an INFO-gated diagnostic pre-flight then fires three
+              extra queries and exhausts a positional <code>side_effect</code>
+              list. Mocks now dispatch on the query, not the call order.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Version ordering (imas-standard-names)</h3>
+    <p>
+      The catalog site's version dropdown read
+      <code>rc64, rc9, rc8, rc7, rc63, rc62 …</code>. The cause was NOT the SPA:
+      <code>versions.json</code> is written by ISN's own
+      <code>catalog/gh_pages.py</code>, whose <code>_SEMVER_RE</code> requires a
+      prerelease to start with <code>-</code> or <code>+</code>. <code>rc64</code>
+      starts with <code>r</code>, so <strong>no version matched at all</strong>
+      and every entry fell through to a plain string sort. Two further defects in
+      the same key: the rc number compared as a string, and the
+      final-vs-prerelease rule was inverted — with the docstring and the very next
+      comment contradicting each other. Fixed at the source
+      (<code>8b45a46</code>) and defensively in the SPA (<code>b27c5fb</code>, so
+      the already-deployed site renders correctly without a redeploy), plus
+      build-metadata support (<code>c960740</code>): matched, displayed, and
+      excluded from precedence, with a stable sort so equal-precedence entries
+      keep their order. Verified against the real 65-entry deployed list.
+    </p>
+
+    <h2>State</h2>
+    <ul>
+      <li><strong>Tests:</strong> <code>tests/standard_names/</code> 4762 passed,
+        0 failed (baseline 4635 — 127 added). The whole-repo-only
+        <code>StopIteration</code> failures are gone.</li>
+      <li><strong>WEST corpus:</strong> 325 accepted of 355, down from 335 — ten
+        names are deliberately mid-repair, their sources reset to
+        <code>extracted</code> by staged <code>sn edit</code> proposals so each
+        recomposes from its own DD path with its own DD-injected unit. That is the
+        sanctioned collapse-split mechanism: no Cypher, no hand-edits, no direct
+        accepts.</li>
+      <li><strong>Unit-disagreeing attachments:</strong> still ~354 in the stored
+        graph. The dimensionality rule and the retroactive audit are landed and
+        tested, but the healing pass had not completed when the session's agents
+        stopped.</li>
+    </ul>
+
+    <h3>Open, with the mechanism established</h3>
+    <ul>
+      <li><strong>The DD pin guard aborted every unscoped run.</strong> 8741
+        sources are pinned at <code>4.1.0</code> against a configured
+        <code>4.1.1</code>. The lead's rule settles the design: <em>"we should
+        not re-extract on a DD bump, we should track provenance … in-work items
+        should take the DD version and metadata from that version."</em> A pin is
+        immutable; a pin behind the current DD is ordinary state, not staleness.
+        The seeder was stamping the current version onto <em>every</em> source and
+        merging without the batch default, so a re-seed collided with its own
+        stored pin — while the correct mechanism
+        (<code>default_dd_version</code>, which pins only genuinely-new sources)
+        already existed and every other caller used it.</li>
+      <li><strong><code>sn edit --hint</code> reaches only 24 of 86 sources</strong>
+        for the names under repair, so 62 would regenerate unsteered. Paid review
+        is deliberately held until this is fixed: reviewing candidates that never
+        saw the hint spends budget twice. Every hint-steered edit made before this
+        fix was weaker than it appeared.</li>
+      <li><strong>The gm1–gm7 collapse.</strong> Seven distinct flux-surface
+        metric coefficients across four dimensionalities were collapsed onto three
+        names. <code>radial_flux_surface_averaged_metric</code> carries
+        <em>two</em> <code>HAS_UNIT</code> edges — the only such node in the graph,
+        and a schema-cardinality symptom of the collapse. Verified from DD text at
+        the configured version: gm1=&lt;1/R²&gt;, gm2=&lt;|∇ρ|²/R²&gt;,
+        gm3=&lt;|∇ρ|²&gt;, gm4=&lt;1/B²&gt;, gm5=&lt;B²&gt;, gm6=&lt;|∇ρ|²/B²&gt;,
+        gm7=&lt;|∇ρ|&gt;.</li>
+      <li><strong>The line-of-sight split.</strong> ~40 <code>/r</code> paths on one
+        name while the matching <code>/z</code> paths are split across two names on
+        no principle, one of which has also swallowed pure-geometry
+        <code>thick_line</code> paths that are not beam tracing at all. No unit
+        contradiction, so it never appeared in the 354 — a same-name/different-
+        quantity fault spanning ~110 attachments. One of the two names is
+        human-edited and protected; repairing it needs the lead's explicit
+        authorization.</li>
+      <li><strong>Dead code:</strong> <code>build_unapproved_cleanup_manifest</code>
+        has no callers and no tests (the one-off whose stale output was deleted this
+        session). <code>find_semantic_source_invariant_violations</code> likewise —
+        but it encodes a real invariant, so it should be wired in as a
+        graph-quality test rather than deleted; an unwired checker carries no
+        signal.</li>
+    </ul>
+  </main>
+</body>
+</html>

@@ -677,6 +677,17 @@ async def _seed_domain_sources(
         name_only=False,
     )
 
+    # The DD version being extracted at pins only GENUINELY-NEW sources, passed
+    # as the batch default rather than stamped per source. A source's pin is
+    # immutable: an existing one keeps the version it was snapshotted at and is
+    # read against that version's metadata, so a pin behind the current DD is
+    # ordinary state, not staleness. Supplying it per source instead asserts a
+    # version for every source and makes a re-seed collide with its own stored
+    # pin. Extraction reads one current DDVersion, so the batches agree.
+    extract_dd_version = next(
+        (b.dd_version for b in batches if getattr(b, "dd_version", None)), None
+    )
+
     sources = []
     for batch in batches:
         for item in batch.items:
@@ -691,7 +702,6 @@ async def _seed_domain_sources(
                     "dd_path": path,
                     "batch_key": batch.group_key,
                     "status": "extracted",
-                    "dd_version": batch.dd_version,
                     "description": item.get("description")
                     or item.get("documentation")
                     or None,
@@ -716,7 +726,12 @@ async def _seed_domain_sources(
         )
         sources = sources[:max_sources]
 
-    written = await asyncio.to_thread(merge_standard_name_sources, sources, force=False)
+    written = await asyncio.to_thread(
+        merge_standard_name_sources,
+        sources,
+        force=False,
+        default_dd_version=extract_dd_version,
+    )
     return written
 
 
