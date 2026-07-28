@@ -1,7 +1,7 @@
 """Tests for SN-related settings accessors in imas_codex.settings.
 
 Verifies default values from pyproject.toml and environment variable overrides
-for the five example-injection and retry tunables added in Wave 2.
+for the example-injection and retry tunables.
 """
 
 from __future__ import annotations
