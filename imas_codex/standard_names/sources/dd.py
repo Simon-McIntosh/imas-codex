@@ -38,7 +38,7 @@ def _is_unparseable_dd_unit(unit: str) -> bool:
     # Dimensionless sentinels are valid.
     # NOTE: "mixed" is NOT included — paths with DD unit 'mixed' are
     # non-standard by definition and must be rejected at source extraction
-    # (see dd_qualifier.py S5).
+    # (see the unit-eligibility check in ``dd_qualifier.qualify_dd``).
     if unit in ("1", "dimensionless", "-", "none"):
         return False
     # C1: whitespace in unit string
@@ -303,7 +303,7 @@ ORDER BY rand()
 LIMIT $sample_limit
 """
 
-# Count candidates that have at least one HAS_ERROR sibling (B9 prep).
+# Count candidates that have at least one HAS_ERROR sibling.
 _BREAKDOWN_ERRORS_QUERY = """
 MATCH (n:IMASNode)-[:IN_IDS]->(ids:IDS)
 WHERE n.node_category IN $sn_categories
@@ -340,7 +340,7 @@ def report_extract_breakdown(facility_ids: list[str] | None = None) -> dict:
         - **by_data_type** (*dict*): Count per ``data_type`` value — proves no
           STRUCTURE/STRUCT_ARRAY containers are admitted.
         - **has_errors_count** (*int*): Number of candidates with at least one
-          HAS_ERROR sibling (B9 prep — error-sibling minting).
+          HAS_ERROR sibling (error-sibling minting input).
         - **samples** (*dict*): Up to 5 random path IDs per
           ``"{node_type}/{node_category}"`` bucket for non-dynamic node_types.
     """
@@ -563,8 +563,9 @@ def extract_dd_candidates(
                 "                   WHERE q.node_category = 'quantity' } "
                 ")"
                 ")",
-                # S1 equivalent at query level: core_instant_changes is a whole-IDS
-                # dedup policy (duplicates core_profiles with "change in X" prefix).
+                # Whole-IDS dedup policy, mirrored at query level:
+                # core_instant_changes duplicates core_profiles with a
+                # "change in X" prefix.
                 # Push into Cypher so LIMIT/ORDER BY pagination doesn't fill a batch
                 # entirely with paths the classifier will reject.
                 "ids.id <> 'core_instant_changes'",

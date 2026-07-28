@@ -345,7 +345,7 @@ def _fetch_dd_source_paths(
 
 
 def _run_deterministic_fixpoints() -> None:
-    """Replay the deterministic half of a fresh build (loop B2 + B3b).
+    """Replay the deterministic half of a fresh build.
 
     These are the exact idempotent routines every ``sn run`` executes, so the
     resulting link topology (HAS_PARENT + derived StandardNameSource +
@@ -387,7 +387,7 @@ def rebuild_provenance(
         if recovery_map is None:
             recovery_map = load_recovery_map(isnc_dir, ref) if isnc_dir else {}
 
-        # Deterministic fixpoints (fresh-build B2+B3b): reattach edge/scalar
+        # Deterministic fixpoints: reattach edge/scalar
         # desyncs to their TRUE source, rederive HAS_PARENT, and materialise a
         # derived StandardNameSource for every admissible derived parent, then
         # relink FROM_DD_PATH. Run before classification so parents drop out of

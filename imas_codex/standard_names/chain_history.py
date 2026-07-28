@@ -1,8 +1,8 @@
 """Helpers for walking REFINED_FROM and DOCS_REVISION_OF chains.
 
 These functions serialise graph chain history into prompt-renderable dicts
-for the refine_name and refine_docs LLM workers (P2.3 / P4.3 will wire them
-in).  Results are ordered oldest → newest, capped at *limit* entries.
+for the refine_name and refine_docs LLM workers.  Results are ordered
+oldest → newest, capped at *limit* entries.
 """
 
 from __future__ import annotations

@@ -7,9 +7,8 @@ strings that break the standard-name pipeline (prose names like
 ``pulse_schedule/*/reference``).  The DD team has confirmed these are
 by-design; we handle them entirely here.
 
-See ``plans/research/standard-names/dd-unit-bugs.md`` for the defect catalog.
-
-The overrides are declared in ``config/unit_overrides.yaml``. Each rule is
+The defect catalog and the overrides are declared together in
+``config/unit_overrides.yaml``. Each rule is
 a (path_pattern, dd_unit) → action mapping with one of two strategies:
 
 - ``override``: replace the reported dd_unit with ``override_unit``; the

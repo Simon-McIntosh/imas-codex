@@ -305,7 +305,7 @@ class BudgetManager:
         self._graph_total_ts: float = 0.0  # monotonic timestamp of last fetch
         self._graph_cache_ttl: float = 1.0  # seconds
 
-        # ── Budget-saturation tracking (Phase C) ─────────────────────
+        # ── Budget-saturation tracking ───────────────────────────────
         # Per-pool consecutive reserve-failure counter.  Incremented each
         # time ``reserve()`` returns ``None`` for a given phase, reset to 0
         # on success.  When ALL tracked pools exceed
@@ -489,7 +489,7 @@ class BudgetManager:
         if self.run_id is None:
             return
 
-        # Check writer health under lock (B3: TOCTOU-safe).
+        # Check writer health under lock (TOCTOU-safe).
         with self._pending_lock:
             self._pending_cost += cost
             if self._writer_task is not None and self._writer_task.done():

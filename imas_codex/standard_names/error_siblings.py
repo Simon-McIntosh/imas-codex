@@ -1,4 +1,4 @@
-"""Deterministic error-sibling minting for B9.
+"""Deterministic error-sibling minting.
 
 IMAS ``_error_upper`` / ``_error_lower`` / ``_error_index`` companion
 fields inherit the parent's semantic — they never need a separate LLM
@@ -59,9 +59,9 @@ _CATEGORICAL_SUFFIXES: tuple[str, ...] = (
 # structure (e.g. "length_of_magnetic_field_probe",
 # "major_radius_of_magnetic_field_probe").  These are exact geometric
 # properties, not stochastic measurements, so an uncertainty_index sibling
-# is semantically invalid.  Confirmed from Phase E cycle-4 and cycle-5b logs
-# where ``length_of_*`` and ``major_radius_of_*`` parents slipped through
-# the earlier gate rules.
+# is semantically invalid.  Added after ``length_of_*`` and
+# ``major_radius_of_*`` parents were observed slipping through the earlier
+# gate rules in production runs.
 _GEOMETRY_DIMENSION_PREFIXES: tuple[str, ...] = (
     "length_of_",
     "major_radius_of_",

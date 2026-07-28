@@ -170,7 +170,7 @@ LIMIT 20
 class CoverageReport:
     """Coverage report for the standard name pipeline.
 
-    All counts reflect the B3' leaf invariant:
+    All counts reflect the leaf invariant:
     ``node_category IN SN_SOURCE_CATEGORIES AND
     data_type NOT IN ['STRUCTURE','STRUCT_ARRAY']``.
     """
@@ -189,7 +189,7 @@ class CoverageReport:
     """Eligible count keyed by node_type (dynamic/static/constant/none)."""
 
     eligible_with_errors: int
-    """Eligible leaves that have at least one HAS_ERROR edge (B9 parents)."""
+    """Eligible leaves that have at least one HAS_ERROR edge."""
 
     # -- Already-minted -------------------------------------------------------
     sn_total: int
@@ -212,7 +212,7 @@ class CoverageReport:
     """Eligible leaves without any HAS_STANDARD_NAME link."""
 
     to_compose_with_errors: int
-    """Subset of ``to_compose`` that have HAS_ERROR edges (B9 eligible)."""
+    """Subset of ``to_compose`` that have HAS_ERROR edges."""
 
     expected_error_siblings: int
     """Estimated new error-sibling names: 3 × ``to_compose_with_errors``."""
@@ -361,7 +361,7 @@ def _bucket(rows: Any) -> dict[str, int]:
 
 
 def separatrix_pair_gaps(gc: Any | None = None) -> dict[str, list[str]]:
-    """WS4 guard: species missing their local<->flux_surface_averaged pair.
+    """Species missing their local<->flux_surface_averaged pair.
 
     The DD ships both a local (``summary/local/separatrix/...``) and a
     flux-surface-averaged (``.../separatrix_average/...``) value for every ion
@@ -393,9 +393,15 @@ def separatrix_pair_gaps(gc: Any | None = None) -> dict[str, list[str]]:
         rx = re.compile(pattern)
         return {m.group(1) for m in (rx.match(i) for i in ids) if m}
 
-    vel_local = species(r"^toroidal_(?!flux_surface_averaged)(.+)_velocity_at_plasma_boundary$", acc)
-    vel_fsa = species(r"^toroidal_flux_surface_averaged_(.+)_velocity_at_plasma_boundary$", acc)
-    den_local = species(r"^(?!flux_surface_averaged)(.+)_density_at_plasma_boundary$", acc)
+    vel_local = species(
+        r"^toroidal_(?!flux_surface_averaged)(.+)_velocity_at_plasma_boundary$", acc
+    )
+    vel_fsa = species(
+        r"^toroidal_flux_surface_averaged_(.+)_velocity_at_plasma_boundary$", acc
+    )
+    den_local = species(
+        r"^(?!flux_surface_averaged)(.+)_density_at_plasma_boundary$", acc
+    )
     den_fsa = species(r"^flux_surface_averaged_(.+)_density_at_plasma_boundary$", acc)
     return {
         "velocity_missing_fsa": sorted(vel_local - vel_fsa),

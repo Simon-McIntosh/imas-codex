@@ -18,9 +18,6 @@ no vocabulary data.
 Thresholds default to:
     * ``min_usage_count = 3`` distinct StandardNames (independent triangulation)
     * ``min_review_mean_score = 0.75`` on every supporting name (quality gate)
-
-See ``plans/research/standard-names/47-vocab-promotion.md`` for the
-rationale and lifecycle diagram.
 """
 
 from __future__ import annotations

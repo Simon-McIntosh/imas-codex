@@ -19,8 +19,8 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-# Only match clean semver tags (ignore legacy suffixed tags like
-# v0.3.0-rc1-w40-corpus). The optional ``+<build>`` suffix is semver build
+# Only match clean semver tags (ignore legacy hyphen-suffixed tags of the
+# form ``v0.3.0-rc1-<label>``). The optional ``+<build>`` suffix is semver build
 # metadata carrying the review-batch identity of a batch RC — see
 # :func:`sanitize_build_metadata` for the grammar it must satisfy.
 _SEMVER_RE = re.compile(

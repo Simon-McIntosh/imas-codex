@@ -3718,7 +3718,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 }
             )
 
-            # --- B9: Mint error siblings deterministically ---
+            # --- Mint error siblings deterministically ---
             # If the parent has HAS_ERROR edges, mint uncertainty
             # modifier siblings without LLM calls.
             if (
@@ -3748,7 +3748,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         state, "error_siblings_minted", 0
                     ) + len(siblings)
                     wlog.debug(
-                        "B9: Minted %d error siblings for parent %r",
+                        "Minted %d error siblings for parent %r",
                         len(siblings),
                         name_id,
                     )
@@ -4073,15 +4073,15 @@ def _validate_via_isn(
     }
     # ISN metadata kind forbids unit field entirely
     if isn_dict["kind"] != "metadata":
-        # User invariant: by the time we build the ISN dict, the unit
-        # must come from DD (B1a above filters invalid units before this
-        # path is reachable). Defensively assert so a logic regression
+        # Invariant: by the time we build the ISN dict, the unit must come
+        # from DD — the dd_unit_unresolvable skip above filters invalid units
+        # before this path is reachable. Defensively assert so a regression
         # surfaces in tests rather than silently pollute the catalog
         # with `unit="1"`.
         unit = entry.get("unit")
         assert unit, (
             f"ISN dict missing unit for {entry.get('id')!r}; "
-            "B1a (dd_unit_unresolvable skip) invariant violation"
+            "dd_unit_unresolvable skip invariant violation"
         )
         isn_dict["unit"] = unit
 
@@ -5026,19 +5026,19 @@ async def compose_batch(
         if info:
             ids_contexts.append({"ids_name": iname, **info})
 
-    # ── H6: pre-LLM stop check ────────────────────────────────────────
+    # ── Pre-LLM stop check ────────────────────────────────────────────
     if stop_event.is_set():
         return 0
 
-    # ── B9: Reference exemplars — superseded by graph-backed
+    # ── Reference exemplars — superseded by graph-backed
     # ``compose_scored_examples`` loaded above. The active prompt
     # template ``sn/generate_name_dd`` no longer renders a
-    # ``reference_exemplars`` block (removed in commit 7a86069e), so
+    # ``reference_exemplars`` block, so
     # the per-batch ANN search has been retired here. The linear path
     # still uses ``_search_reference_exemplars`` for the names-only
     # template ``sn/generate_name_dd_names``.
 
-    # ── B10: Cluster-aware existing-names roster ──────────────────────
+    # ── Cluster-aware existing-names roster ───────────────────────────
     # Build name-only roster from any existing_name field carried on batch
     # items plus a graph query for SNs in the same IMASSemanticCluster.
     existing_names_set: set[str] = {
@@ -5453,12 +5453,12 @@ async def compose_batch(
             except Exception as gram_exc:
                 grammar_failed = True
                 wlog.debug(
-                    "Pool %s: grammar parse failed for %r — attempting B2 retry",
+                    "Pool %s: grammar parse failed for %r — attempting retry",
                     phase_tag,
                     name_id,
                 )
 
-                # B2: Single-shot grammar-failure retry.
+                # Single-shot grammar-failure retry.
                 try:
                     retry_name, _r_cost, _r_ti, _r_to = await _grammar_retry(
                         name_id,
@@ -5485,19 +5485,19 @@ async def compose_batch(
                             name_id = _dedup_adjacent_tokens(normalized)
                             grammar_failed = False
                             wlog.info(
-                                "Pool %s: B2 grammar retry succeeded %r → %r",
+                                "Pool %s: grammar retry succeeded %r → %r",
                                 phase_tag,
                                 c.compose_name(),
                                 name_id,
                             )
                         except Exception:
                             wlog.debug(
-                                "Pool %s: B2 retry result still un-parseable",
+                                "Pool %s: retry result still un-parseable",
                                 phase_tag,
                             )
                 except Exception:
                     wlog.debug(
-                        "Pool %s: B2 grammar retry failed for %r",
+                        "Pool %s: grammar retry failed for %r",
                         phase_tag,
                         name_id,
                     )
@@ -5562,7 +5562,7 @@ async def compose_batch(
 
             candidates.append(cand)
 
-            # ── B3: Deterministic error-sibling minting ───────────────
+            # ── Deterministic error-sibling minting ──────────────────
             if (
                 not grammar_failed
                 and source_item
@@ -5601,7 +5601,7 @@ async def compose_batch(
                         exc_info=True,
                     )
 
-        # ── B8: Per-candidate cost / token attribution ────────────────
+        # ── Per-candidate cost / token attribution ────────────────────
         # Pro-rata across LLM-generated candidates only — error siblings
         # are deterministic and carry no LLM cost.
         from datetime import UTC, datetime
@@ -5659,7 +5659,7 @@ async def compose_batch(
         for cand in candidates:
             cand.pop("_grammar_retry_exhausted", None)
 
-        # ── B4: Vocab gaps — persist + clear sources ──────────────────
+        # ── Vocab gaps — persist + clear sources ──────────────────────
         if result.vocab_gaps:
             from imas_codex.standard_names.graph_ops import write_vocab_gaps
 
@@ -5721,7 +5721,7 @@ async def compose_batch(
                     exc_info=True,
                 )
 
-        # ── B5: Attachments — write edges + clear source claims ───────
+        # ── Attachments — write edges + clear source claims ───────────
         if result.attachments:
             try:
                 attach_counts = await asyncio.to_thread(
@@ -5753,7 +5753,7 @@ async def compose_batch(
                     exc_info=True,
                 )
 
-        # ── B6: Skipped sources — clear claims so they don't loop ─────
+        # ── Skipped sources — clear claims so they don't loop ─────────
         if result.skipped:
             try:
                 await asyncio.to_thread(
@@ -7901,7 +7901,7 @@ async def process_generate_docs_batch(
     *,
     on_event: Callable[[dict[str, Any]], None] | None = None,
 ) -> int:
-    """Process a batch of accepted StandardNames for generate_docs (P4.1).
+    """Process a batch of accepted StandardNames for generate_docs.
 
     For each item in the batch:
 
@@ -8738,7 +8738,7 @@ async def process_refine_docs_batch(
     *,
     on_event: Callable[[dict[str, Any]], None] | None = None,
 ) -> int:
-    """Process a batch of reviewed StandardNames for docs refinement (P4.3).
+    """Process a batch of reviewed StandardNames for docs refinement.
 
     For each item in the batch:
 

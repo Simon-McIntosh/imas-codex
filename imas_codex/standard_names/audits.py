@@ -741,9 +741,8 @@ def unit_validity_check(candidate: dict[str, Any]) -> list[str]:
     placeholders that escaped the DD XML without resolution.
 
     Note:
-        As of Phase B (DD unit overrides), the classes of DD-upstream defects
-        enumerated in ``plans/research/standard-names/dd-unit-bugs.md`` are
-        remapped at extraction time by
+        The classes of DD-upstream defects catalogued in
+        ``config/unit_overrides.yaml`` are remapped at extraction time by
         ``imas_codex.standard_names.unit_overrides.resolve_unit`` — valid
         candidates should no longer reach this audit carrying prose units
         or ``m^dimension`` placeholders. This function is kept as a safety
@@ -2689,7 +2688,6 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
         pass
 
     return issues
-
 
 
 def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:

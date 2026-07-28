@@ -393,8 +393,8 @@ def build_manifest(
 
     The manifest carries the total count, the per-predicate and per-domain
     breakdowns, the batch plan, and a deterministic random sample (default 20)
-    of matched names with their matched-defect evidence — the object the lead
-    approves before a live campaign runs.  For a pilot selection pass
+    of matched names with their matched-defect evidence — the object that is
+    reviewed and approved before a live campaign runs.  For a pilot selection pass
     ``pilot_from`` = the size of the full selection it was drawn from; the
     manifest then carries a ``pilot`` marker.
     """

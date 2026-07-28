@@ -4,8 +4,6 @@
 # that break the standard-name pipeline. The DD team has confirmed these are
 # by-design; we handle them entirely on the imas-codex side.
 #
-# See plans/research/standard-names/dd-unit-bugs.md for full defect catalog.
-#
 # Strategy keys:
 #   override: replace dd_unit with override_unit (name proceeds normally)
 #   skip:     mark StandardNameSource as skipped with skip_reason

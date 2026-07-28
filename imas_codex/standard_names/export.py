@@ -301,7 +301,7 @@ def _run_gate_b(
     issues: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
 
-    # B1: COCOS consistency
+    # Gate: COCOS consistency
     for cand in candidates:
         cand_cocos = cand.get("cocos")
         if cand_cocos is not None and cand_cocos != cocos_convention:
@@ -314,7 +314,7 @@ def _run_gate_b(
                 }
             )
 
-    # B2: Grammar parse check — validate each name parses
+    # Gate: grammar parse check — validate each name parses
     try:
         from imas_standard_names.grammar import parse_name
 
@@ -354,7 +354,7 @@ def _run_gate_b(
             exc,
         )
 
-    # B3: Links resolve to known names
+    # Gate: links resolve to known names
     # For RC releases (final=False): dangling links are advisory only.
     # For final releases: dangling links block export.
     all_names = {c["id"] for c in candidates}

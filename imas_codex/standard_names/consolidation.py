@@ -205,7 +205,7 @@ def consolidate_candidates(
     # ------------------------------------------------------------------
     for name, group in by_name.items():
         units = {c.get("unit") for c in group}
-        # B1 invariant (plan-mcp-and-units.md): every candidate must
+        # Unit invariant: every candidate must
         # carry a DD-derived unit.  ``None`` indicates a missing DD
         # HAS_UNIT lookup, which the compose path now hard-skips
         # upstream.  Keep ``None`` in the set so it surfaces as a
