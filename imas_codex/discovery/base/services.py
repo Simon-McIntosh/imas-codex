@@ -74,7 +74,7 @@ class ServiceStatus:
     consecutive_failures: int = 0
     check_latency_ms: float = 0.0
 
-    # Cumulative health stats (Phase 2.3)
+    # Cumulative health stats
     total_checks: int = 0
     total_failures: int = 0
     _latency_sum: float = 0.0

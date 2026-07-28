@@ -1113,11 +1113,11 @@ def map_signals(
                     cluster_lines
                 )
 
-        # Wiki and code context from gather_context (Phase 3 enrichment)
+        # Wiki and code context from gather_context
         wiki_ctx = _format_wiki_context(context.get("wiki_context", []))
         code_ctx = _format_code_context(context.get("code_context", []))
 
-        # Semantic match matrix from gather_context (Phase 4 enrichment)
+        # Semantic match matrix from gather_context
         match_matrix_ctx = _format_semantic_match_matrix(
             context.get("semantic_match_matrix", {}),
             source_id,
@@ -1901,8 +1901,8 @@ def derive_error_mappings(
     from the parent data mapping.
 
     When *facility* is provided and *include_direct_error_signals* is True,
-    also runs Phase 2b: identifies facility signal sources that directly
-    represent measurement uncertainties (e.g. "HRTS Electron Density Error")
+    also runs a direct-error pass: it identifies facility signal sources
+    that directly represent measurement uncertainties (e.g. "HRTS Electron Density Error")
     and matches them to IMAS error fields via cross-reference with existing
     data mappings.
 
@@ -1912,8 +1912,8 @@ def derive_error_mappings(
         data_mappings: Validated data mappings from Stage 1.
         gc: GraphClient (created if None).
         facility: Facility identifier (needed for direct error signal matching).
-        include_direct_error_signals: Whether to run Phase 2b direct error
-            signal matching. Default True.
+        include_direct_error_signals: Whether to run the direct error
+            signal matching pass. Default True.
 
     Returns:
         List of error-derived ValidatedSignalMapping instances.
@@ -1981,7 +1981,7 @@ def derive_error_mappings(
         len(error_map),
     )
 
-    # Phase 2b: Direct error signal matching
+    # Direct error signal matching
     if include_direct_error_signals and facility:
         error_signals = classify_error_signals(facility, gc=gc)
         if error_signals:

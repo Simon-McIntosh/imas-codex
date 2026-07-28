@@ -648,12 +648,12 @@ class WorkerStats:
     _idle_total: float = 0.0  # Cumulative idle seconds
     _idle_start: float | None = None  # When current idle period began
 
-    # Rolling error rate tracking (Phase 2)
+    # Rolling error rate tracking
     _error_timestamps: list[float] = field(default_factory=list)
     _consecutive_errors: int = 0
     _error_window: float = 60.0  # Rolling window in seconds
 
-    # Per-scanner / sub-task progress (Phase 1)
+    # Per-scanner / sub-task progress
     scanner_progress: dict[str, ScannerProgress] = field(default_factory=dict)
 
     # Metadata for structured logging
@@ -1511,7 +1511,7 @@ def build_servers_section(
         else:
             section.append(label, style=style)
 
-        # SSH health summary (Phase 2.3) — show avg latency and failure ratio
+        # SSH health summary — show avg latency and failure ratio
         # for services with enough check history
         health_summary = (
             s.format_health_summary() if hasattr(s, "format_health_summary") else ""
@@ -2096,7 +2096,7 @@ def build_resource_section(
                 section.append(" " * LABEL_WIDTH)
                 section.append(pending_text, style="cyan dim")
 
-    # SCANNERS row — per-scanner timing (Phase 1.3)
+    # SCANNERS row — per-scanner timing
     if config.scanner_timing:
         section.append("\n")
         section.append(f"{'  SCANNERS':<{LABEL_WIDTH}}", style="bold blue")

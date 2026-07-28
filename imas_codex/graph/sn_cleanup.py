@@ -1,19 +1,17 @@
-"""StandardName graph cleanup helpers for plan 31 (rc13 → rc14).
+"""StandardName graph cleanup helpers.
 
-Reusable Cypher helpers for WS-F graph-remediation operations described in
-``plans/features/standard-names/31-quality-bootstrap-v2.md`` §8 (F.1–F.6):
+Reusable Cypher helpers for graph remediation:
 
-* F.1 — purge quarantined StandardNames matching WS-A exclusion rules
+* purge quarantined StandardNames whose sources are non-nameable
   (representation artefacts, pulse_schedule/reference sentinels,
   /diamagnetic axis leaves).
-* F.3 — consolidate the ``wave_absorbed_power`` family under a parent SN
+* consolidate the ``wave_absorbed_power`` family under a parent SN
   via ``PART_OF`` edges.
-* F.4 — consolidate 12 metric-tensor components under
+* consolidate the metric-tensor components under
   ``metric_tensor_component`` via ``PART_OF`` edges.
-* F.5 — normalize gas-injection segment ordering and add ``REFERENCES``
+* normalize gas-injection segment ordering and add ``REFERENCES``
   aliases.
-* F.6 — populate ``NEAR_DUPLICATE_OF`` edges for known silent duplicates
-  (research §2.12).
+* populate ``NEAR_DUPLICATE_OF`` edges for known silent duplicates.
 
 Per ``AGENTS.md`` graph migrations are invoked as inline Cypher via the
 REPL / CLI — these functions are idempotent helpers, not a CLI or a
@@ -36,7 +34,7 @@ DIAMAGNETIC_AXIS_RE = re.compile(r"/diamagnetic(/[^/]+)?$")
 
 @dataclass(frozen=True)
 class PurgeCandidate:
-    """A quarantined StandardName that matches a WS-A exclusion rule."""
+    """A quarantined StandardName whose sources are non-nameable."""
 
     sn_id: str
     reasons: tuple[str, ...]
@@ -44,7 +42,7 @@ class PurgeCandidate:
 
 
 def collect_purge_candidates(client: GraphClient) -> list[PurgeCandidate]:
-    """Return quarantined StandardName ids that F.1 should delete.
+    """Return quarantined StandardName ids the purge should delete.
 
     Matches any SN with ``validation_status='quarantined'`` whose:
 

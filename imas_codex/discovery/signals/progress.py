@@ -583,10 +583,10 @@ class DataProgressDisplay(BaseProgressDisplay):
         if self.state.signals_skipped > 0:
             stats.append(("skipped", str(self.state.signals_skipped), "dim"))
 
-        # Scanner timing (Phase 1.3)
+        # Scanner timing
         scanner_timing = self.state.discover_stats.format_scanner_timing()
 
-        # Error rate annotation (Phase 2.1) — show if check errors are notable
+        # Error rate annotation — show if check errors are notable
         check_err_pct = self.state.check_stats.error_rate_pct
         if check_err_pct >= 5:
             style = self.state.check_stats.error_health_style

@@ -79,7 +79,7 @@ STRUCTURAL_KEYWORDS: frozenset[str] = frozenset(
         "selector",
         "interpolation",
         "position",
-        # W37: structural config flags / enumerations
+        # structural config flags / enumerations
         "closed",
         "spacing",
         "transformation",
@@ -287,9 +287,10 @@ _PULSE_SCHEDULE_REFERENCE_RE: re.Pattern[str] = re.compile(
 
 #: Regex matching vector-container ``/diamagnetic`` leaves.  These DD paths
 #: (e.g. ``core_profiles/profiles_1d/velocity/diamagnetic``) are mis-labelings
-#: of drift-decomposition axes — see DD-01 (plan 31 §8, WS-E).  Until the DD
-#: is corrected, route to ``representation`` so they are excluded from SN
-#: extraction.
+#: of drift-decomposition axes: the leaf names a projection axis of a vector
+#: container, not a physical quantity in its own right.  Until the DD is
+#: corrected upstream, route to ``representation`` so they are excluded from
+#: SN extraction.
 _DIAMAGNETIC_AXIS_RE: re.Pattern[str] = re.compile(
     r"^(?:.*)/(?:velocity|e_field|a_field|j_tot|b_field)/diamagnetic(?:/.+)?$"
 )
@@ -540,8 +541,8 @@ def classify_node_pass1(
         return "representation"
 
     # Rule R4: vector-container /diamagnetic axis → representation
-    # DD mis-labeling (tracked upstream as DD-01 / plan 31 §8, WS-E);
-    # exclude from SN extraction until DD is corrected.
+    # The leaf names a projection axis of a vector container rather than a
+    # quantity; exclude from SN extraction until the DD is corrected.
     if _DIAMAGNETIC_AXIS_RE.match(path):
         return "representation"
 

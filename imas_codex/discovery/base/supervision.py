@@ -468,7 +468,7 @@ async def supervised_worker(
         restart_reset_seconds: Seconds of successful operation before
             resetting restart counter (default: 120)
     """
-    # ── Phase 0: Wait for dependency phases ──
+    # ── Wait for dependency phases ──
     if wait_phases:
         if status_tracker:
             status_tracker.state = WorkerState.idle
@@ -948,7 +948,7 @@ def make_snapshot_logger(
     interval: float = 300.0,
     count_fields: dict[str, str] | None = None,
 ) -> Callable[[], None]:
-    """Create a periodic graph state snapshot logger (Phase 4.3).
+    """Create a periodic graph state snapshot logger.
 
     Returns a callable suitable for chaining into the ``on_tick`` parameter
     of :func:`run_supervised_loop`.  Periodically logs a summary of graph

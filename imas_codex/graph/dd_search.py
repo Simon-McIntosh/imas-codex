@@ -8,7 +8,7 @@ and cross-IDS relationship discovery from
 Both MCP tools and the SN generation pipeline call these pure functions
 — the MCP tools add only formatting layers.
 
-Plan 39 fan-out catalog symbols (post Phase 0):
+Symbols registered in the fan-out catalog:
 
 - :func:`hybrid_dd_search` — DD path hybrid search (``search_dd_paths``).
 - :func:`related_dd_search` — cross-IDS relationship discovery
@@ -16,13 +16,13 @@ Plan 39 fan-out catalog symbols (post Phase 0):
 - :func:`cluster_search` — slim sync semantic-cluster lookup
   (``search_dd_clusters``).
 - :func:`imas_codex.standard_names.search.search_standard_names_vector`
-  — pure-vector StandardName search (``search_existing_names``); kept
-  in :mod:`imas_codex.standard_names.search` per plan 40's
-  canonical-source-of-truth invariant.
+  — pure-vector StandardName search (``search_existing_names``); it stays
+  in :mod:`imas_codex.standard_names.search` because that module owns the
+  canonical StandardName query surface.
 
 All four take ``gc`` as a parameter and never instantiate their own
 :class:`GraphClient`, so a single refine cycle reuses one session
-across the entire fan-out (plan 39 §10.1).
+across the entire fan-out.
 """
 
 from __future__ import annotations
@@ -830,7 +830,7 @@ def related_dd_search(
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Cluster search — slim sync helper for fan-out catalog (plan 39 §3.6 c)
+# Cluster search — slim sync helper for the fan-out catalog
 # ═══════════════════════════════════════════════════════════════════════════
 
 
@@ -876,8 +876,8 @@ def cluster_search(
 ) -> list[ClusterHit]:
     """Find semantic clusters matching *query*.
 
-    Slim sync helper consumed by the structured fan-out catalog
-    (plan 39 §3.6 c).  Mirrors the **semantic** (vector) and
+    Slim sync helper consumed by the structured fan-out catalog.
+    Mirrors the **semantic** (vector) and
     **path-lookup** branches of :class:`GraphClustersTool.search_dd_clusters`
     without the MCP-presentation glue or short-physics-term expansion.
     The MCP tool's full feature set (text-supplement search, summary

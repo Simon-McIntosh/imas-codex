@@ -2310,9 +2310,9 @@ class AgentsServer:
                     logger.exception(f"Failed to get facility coverage for {facility}")
                     raise RuntimeError(f"Failed to get facility coverage: {e}") from e
 
-        # NOTE: update_facility_paths and update_facility_tools were removed as
-        # MCP tools (Phase 5 consolidation). Use update_infrastructure() in the
-        # REPL instead: update_infrastructure('facility', {'paths': {...}})
+        # NOTE: update_facility_paths and update_facility_tools are not exposed
+        # as MCP tools. Use update_infrastructure() in the REPL instead:
+        # update_infrastructure('facility', {'paths': {...}})
 
         # =====================================================================
         # Tier 1 — semantic search (embeddings + graph)
@@ -3529,7 +3529,7 @@ class AgentsServer:
 
         if not self.read_only:
             # =====================================================================
-            # Log Tools (Phase 3: MCP Logs)
+            # Log Tools
             # =====================================================================
 
             @self.mcp.tool()

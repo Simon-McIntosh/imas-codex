@@ -183,7 +183,7 @@ def configure_cli_logging(
 
 
 # =============================================================================
-# Structured Worker Logging (Phase 4.1)
+# Structured Worker Logging
 # =============================================================================
 
 
@@ -232,7 +232,7 @@ def log_worker_error(
     max_retries: int = 0,
     batch_id: str | None = None,
 ) -> None:
-    """Log a worker error with consistent structure (Phase 4.2).
+    """Log a worker error with consistent structure.
 
     All worker errors should use this function for uniform log format.
 
@@ -261,7 +261,7 @@ def log_worker_error(
 
 
 # =============================================================================
-# Log Reading Utilities (Phase 3 support)
+# Log Reading Utilities
 # =============================================================================
 
 
