@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-naming-loop-robustness">
+  <meta name="plan-title" content="A robust naming loop on a stable grammar">
+  <meta name="plan-summary" content="Make the compose→gap→retry loop convergent and the grammar/vocabulary stable enough that generators use them effectively: diagnose the 484 residual vocab-gap tokens by mechanism, fix each mechanism at its source, and replace 'cut the RC' assertions with measurable convergence gates.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-informs" content="sn-west-review-rehearsal, sn-graph-wide-integrity">
+  <title>A robust naming loop on a stable grammar | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-version" content="0">
+<meta name="plan-impl" content="0">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Goal, and the standard this plan replaces</h2>
+    <p>
+      Lead direction (2026-07-28): <em>&ldquo;we should stop asserting that we are
+      going to 'cut an RC' each time when we do not yet have a robust pipeline
+      &hellip; we want a robust pipeline and a stable grammar and vocab that the
+      generators can use effectively.&rdquo;</em>
+    </p>
+    <p>
+      Five consecutive sessions of
+      <a href="/imas-codex/sn-west-review-rehearsal.html">sn-west-review-rehearsal</a>
+      ended with &ldquo;next: cut the RC&rdquo; and none did — each surfaced a real
+      pipeline defect first (stranded refine products, a source-laundering write
+      path, ~354 unit-contradicting attachments, an operator-blind gap
+      classifier). That is not bad luck; it is evidence the loop is not yet
+      trustworthy enough to put a nameset in front of a human reviewer, and that
+      asserting the release as the next action makes plan state a fiction.
+    </p>
+    <p>
+      This plan owns the robustness work as its own deliverable. The release
+      moves behind <strong>measurable convergence gates (§5)</strong>: it happens
+      when the loop demonstrably converges, and is otherwise not asserted.
+      &ldquo;Robust&rdquo; here means specifically:
+    </p>
+    <ul>
+      <li>a composer that fails is <strong>told why</strong>, in terms it can act
+        on (which token, which slot, which registered alternative);</li>
+      <li>a &ldquo;vocabulary gap&rdquo; verdict is <strong>trustworthy</strong> —
+        it means the grammar genuinely cannot express the quantity, not that a
+        matcher was blind, a dedup check wrong, or a rule unstated;</li>
+      <li>the grammar and vocabulary are <strong>stable</strong>: additions flow
+        through one rotation process, drift between ISN and its consumers is
+        caught by introspective tests, and known structural holes are closed or
+        explicitly documented.</li>
+    </ul>
+
+    <h2 id="s2">§2 — Evidence: the anatomy of the 484 residual gap tokens</h2>
+    <p>
+      Measured 2026-07-28 against the live graph (read-only), after the
+      operator-awareness fixes cleared 80 of 564. Each <code>VocabGap</code> node
+      is <strong>one distinct (segment, token) pair</strong> — id
+      <code>vocab_gap:&lt;segment&gt;:&lt;token&gt;</code> — with
+      <code>example_count</code> carrying how often the composer proposed it. So
+      the 484 are 484 <em>distinct invented tokens</em> behind
+      <strong>1467 proposals</strong>.
+    </p>
+    <p>
+      <img src="/imas-codex/figures/sn-naming-loop-robustness/gap-anatomy.png"
+           alt="Left: recurrence histogram — 252 of the 484 residual tokens were
+                proposed exactly once, 121 two to three times, 87 four to ten
+                times, 24 more than ten. Centre: the four mechanisms — ordinality
+                and DD-primitive structure about 139 tokens, near-duplicates of
+                registered tokens 139, ratio or product spellings about 15,
+                genuine instrument-side demand about 40. Right: process state —
+                482 of 484 never reconciled, 345 never dedup-checked, 268 last
+                seen in June, and the reason field empty on all 484."
+           style="max-width:100%;height:auto;">
+    </p>
+    <table>
+      <thead><tr><th>fact</th><th>measured value</th><th>implication</th></tr></thead>
+      <tbody>
+        <tr><td>proposed exactly once</td><td><strong>252 / 484</strong> (52%)</td>
+            <td>half the population is single-instance noise, not vocabulary demand</td></tr>
+        <tr><td>never dedup-checked</td><td>345 / 484</td>
+            <td>the reuse question was never asked for most of them</td></tr>
+        <tr><td>carry a near registered neighbour</td><td>139 (39 at &ge;0.90)</td>
+            <td>and the dedup check marked <strong>all 139</strong>
+                <code>distinct_confirmed</code> — including
+                <code>lower_hybrid_antenna_module&nbsp;~&nbsp;lower_hybrid_antenna</code>
+                (0.96) and
+                <code>methane_deuterated&nbsp;~&nbsp;deuterated_methane</code>
+                (0.96, a canonical-order variant) — so the verdict is not currently
+                trustworthy</td></tr>
+        <tr><td>last proposed in June</td><td>268 / 484</td>
+            <td>predates every fix of 2026-07 — much of the stock may no longer
+                be produced at all</td></tr>
+        <tr><td>never reconciled</td><td>482 / 484</td>
+            <td>the triage machinery has effectively never run over this
+                population</td></tr>
+        <tr><td><code>reason</code> empty</td><td>484 / 484</td>
+            <td>no failure was ever explained back to the composer — fixed
+                forward by <code>b7a51fdc</code>, which fills it from
+                <code>describe_gap()</code></td></tr>
+        <tr><td>worst single offenders</td><td><code>x2</code> (&times;54),
+            <code>x1</code> (&times;52)</td>
+            <td>bare DD field names offered as physics qualifiers — 106 proposals
+                for two tokens that should never have been candidates</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s3">§3 — Four mechanisms, four remedies</h2>
+    <p>The tokens decompose by <em>why the composer invented them</em>, and the
+       classes overlap (a one-off can also be a near-duplicate):</p>
+    <table>
+      <thead><tr><th>mechanism</th><th>~size</th><th>examples (with proposal counts)</th><th>remedy</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>A — ordinality &amp; DD-primitive structure.</strong> The
+              composer names the ordinal sample point of a geometric primitive.</td>
+          <td>139 (128 <code>position</code> + <code>geometry</code>/<code>object</code>/
+              <code>geometric_base</code> members)</td>
+          <td><code>line_of_sight_second_point</code> &times;19,
+              <code>first_point</code> &times;18, <code>rectangle_centre</code>
+              &times;14, <code>thick_line_first_point</code>,
+              <code>arc_of_circle_start_point</code>, <code>sphere_centre</code>,
+              <code>x1_width</code>/<code>x2_width</code></td>
+          <td>Not vocabulary: a <strong>locked decision already forbids these
+              names</strong> (ordinality never enters the name; the primitive's
+              locus carries the geometry). The gap reporter and retry guidance
+              must say so — &ldquo;drop the ordinal, use the
+              <code>&lt;primitive&gt;</code> locus&rdquo; — instead of
+              &ldquo;token does not exist&rdquo;.</td>
+        </tr>
+        <tr>
+          <td><strong>B — near-duplicate of a registered token.</strong> A
+              registered token plus a structural suffix, a synonym, or an order
+              variant.</td>
+          <td>139</td>
+          <td><code>&hellip;antenna_module ~ &hellip;antenna</code> (0.97),
+              <code>unit_vector_component ~ unit_vector</code> (0.93),
+              <code>optical_depth ~ opacity</code> (&times;14, settled twice in
+              the rehearsal plan), <code>relative ~ reference</code> (0.92),
+              <code>vorticity_over_r ~ vorticity</code>,
+              <code>lithium_6 ~ lithium</code></td>
+          <td>Re-run dedup over the 345 unchecked; <strong>re-audit the 139
+              <code>distinct_confirmed</code></strong> (the structural-suffix
+              cases <code>_module</code>/<code>_component</code>/<code>_channel</code>
+              and canonical-order variants are mechanically detectable); route
+              the verdict into retry guidance (&ldquo;use
+              <code>opacity</code>&rdquo;).</td>
+        </tr>
+        <tr>
+          <td><strong>C — ratio / product spellings.</strong> A quotient or
+              product written as a compound token.</td>
+          <td>~15</td>
+          <td><code>vorticity_over_r</code>, <code>velocity_over_b_field</code>,
+              <code>vacuum_toroidal_field_product</code>,
+              <code>gradient_rho_squared_over_B_squared</code> (gm6)</td>
+          <td>Expressible via binary operators since ISN <code>331ef7a</code>
+              (reduction may wrap a binary form; pin bumped
+              <code>7cf404d1</code>). The ratio-aware verdict
+              (<code>2af8658b</code>) already emits operand-level guidance;
+              symbol shorthand (<code>rho</code>, <code>B</code>) still needs an
+              expansion instrument.</td>
+        </tr>
+        <tr>
+          <td><strong>D — genuine, narrow vocabulary demand.</strong> Real
+              quantities, overwhelmingly instrument-side.</td>
+          <td>~40</td>
+          <td><code>detection_efficiency</code> &times;14,
+              <code>focal_length</code>, <code>groove_density</code>,
+              <code>gain</code>, <code>intensity</code>, <code>bandwidth</code>,
+              <code>heat_flux</code>, <code>orbit_integral</code>,
+              <code>detector</code>, <code>shunt</code>, <code>valve</code></td>
+          <td>The only class that warrants ISN additions — an ordinary
+              <strong>vocabulary rotation</strong> (verify absence, add with
+              definitions, RC, pin bump), sized in the tens, run <em>after</em>
+              A–C shrink the population.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      A fifth input is upstream of all four: until 2026-07-28 the composer's
+      failure loop carried <strong>no diagnosis at all</strong> (empty
+      <code>reason</code>, retry text &ldquo;produce a different name&rdquo;, and
+      the model-facing vocabulary tool answered
+      <em>&ldquo;Unknown grammar segment 'operator'&rdquo;</em>). Every mechanism
+      above was free to recur because nothing ever told the model what to do
+      differently. That is fixed forward (<code>b7a51fdc</code>,
+      <code>4e89da12</code>); the stock above is the residue of it.
+    </p>
+
+    <h2 id="s4">§4 — The programme</h2>
+    <p>Ordered by leverage; each rung has its own done-when. Rungs 1–3 are free
+       (no LLM spend); rung 4 is compose/review-priced; rung 5 is an ISN
+       rotation.</p>
+    <ol>
+      <li><strong>Measure the loop with feedback on (the baseline everything else
+          is judged against).</strong> Run one free, scoped compose pass on
+          sources whose prior gaps were operator/reuse-shaped and record the
+          gap-production rate now that retries carry a diagnosis. Done-when: a
+          before/after gap rate per 100 composes is recorded here, and every
+          newly minted gap carries a non-empty <code>reason</code>.</li>
+      <li><strong>Make the dedup verdict trustworthy.</strong> Re-run dedup over
+          the 345 unchecked tokens; re-audit the 139
+          <code>distinct_confirmed</code> with a structural-suffix and
+          canonical-order check (<code>_module</code>, <code>_component</code>,
+          <code>_channel</code>, token-permutation); reclassify what falls out
+          (reuse verdicts with the registered target named). Done-when: no
+          <code>distinct_confirmed</code> survives at similarity &ge;0.90 without
+          a stated physical reason, and the reuse verdict reaches retry
+          guidance.</li>
+      <li><strong>Teach the loop the rules it already has.</strong> (a) The
+          ordinality/primitive rule: <code>position</code>-class gaps produce
+          &ldquo;drop the ordinal, use the locus&rdquo; guidance — closing
+          mechanism A at the source; (b) reject bare DD field names
+          (<code>x1</code>, <code>x2</code>, <code>first_point</code>) as
+          candidate tokens before they ever become gaps; (c) symbol expansion
+          (<code>rho</code>&nbsp;&rarr;&nbsp;<code>toroidal_flux_radius</code>,
+          <code>B</code>&nbsp;&rarr;&nbsp;<code>magnetic_field</code>) so
+          ratio-class guidance can name registered operands. Done-when: replaying
+          the 484 stored tokens through <code>classify_gap</code> yields an
+          actionable verdict (not <code>absent</code>) for every mechanism-A and
+          mechanism-C token whose operands are registered.</li>
+      <li><strong>Retire the stale stock.</strong> With 1–3 landed, reconcile the
+          484: reclassify, mark reuse/composable verdicts, and retire gaps not
+          reproduced by a current composer (268 were last seen in June). No
+          hand-deletion — the reconcile writes its verdict and provenance.
+          Done-when: every stored gap is triaged into
+          {reuse, composable, rule-violation, genuine, retired-stale} with 0
+          left <code>unchecked</code>.</li>
+      <li><strong>The class-D vocabulary rotation.</strong> The surviving genuine
+          demand (est. tens of tokens, instrument-side) goes through the standard
+          ISN rotation: verify absence against operators/bases/semantic
+          equivalents, add with definitions, grammar suite, RC, pin bump.
+          D-vocab-scope below stays open until rung 4 gives the real list.</li>
+      <li><strong>Grammar stability (ISN side, coordinated — not unilateral).</strong>
+          Known holes, each small: the unsegmented registry tokens
+          (<code>gyrocenter</code>, <code>active_wall_point</code>,
+          <code>beam_path</code>, <code>primary</code> — in vocabularies but in no
+          segment, so no enumerator can emit them); expose the qualifier
+          <em>category ordering structure</em> that the prompts ask models to
+          honour but cannot see (feeds the canonical-qualifier-order
+          decomposition); the <code>rho_tor</code> twin carriers
+          (<code>toroidal_flux_coordinate</code> vs
+          <code>toroidal_flux_radius</code>) that keep minting near-duplicate
+          derivatives; and binary-operand vocabulary validation — measured
+          today, <code>ratio_of_wibble_frobnicator_to_&hellip;</code> still
+          parses; a naive gate broke 10 pinned tests (operands parse as
+          subject+base fragments), so this needs a design, not a patch.</li>
+    </ol>
+
+    <h2 id="s5">§5 — Convergence gates: when the release stops being an assertion</h2>
+    <p>
+      The WEST RC (rehearsal plan §3 stage 2) is cut when all of the following
+      hold, and is otherwise <strong>not scheduled and not promised</strong>:
+    </p>
+    <ul>
+      <li><strong>Gate 1 — honest verdicts.</strong> Replaying every stored gap
+        token through the shipped classifier yields zero <code>absent</code>
+        verdicts for tokens expressible from registered grammar (operators,
+        reuse, binary forms with registered operands). Controls
+        (<code>substrate</code>, <code>wibble_frobnicator</code>, &hellip;) stay
+        <code>absent</code>.</li>
+      <li><strong>Gate 2 — a diagnosed loop.</strong> A scoped drain produces
+        gaps only with non-empty, actionable <code>reason</code>s, and the
+        gap-production rate per 100 composes is measured and stable or falling
+        across two consecutive drains.</li>
+      <li><strong>Gate 3 — trustworthy dedup.</strong> Rung 2's done-when holds
+        on the live population.</li>
+      <li><strong>Gate 4 — stable grammar surface.</strong> ISN grammar suite
+        green at the pinned commit; the codex drift tests (both axes
+        introspected) green; no consumer reads <code>SEGMENT_TOKEN_MAP</code>
+        outside the audited reader list.</li>
+      <li><strong>Gate 5 — the WEST residual is fully instrumented.</strong>
+        Every unaccepted manifest source maps to exactly one instrument
+        (rescore / review / compose / supersede-pair / documented non-nameable)
+        with no unexplained bucket — the rehearsal plan's own partition
+        requirement.</li>
+    </ul>
+    <p>
+      Gate status is recorded here per drain, with numbers. A gate that fails
+      names the defect it found; that defect becomes work in §4, not a reason to
+      lower the gate.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="robustness-before-release" data-choice="gates" data-by="Simon McIntosh" data-when="2026-07-28T18:45:00+00:00">
+    <p class="r-dec-q">D-release-standard — keep asserting the WEST RC as each session's next action, or gate the release on measured pipeline convergence?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="assert">Keep the RC as the standing next action (five sessions of evidence against)</button>
+      <button class="r-opt chosen" data-value="gates">Gate the release on the §5 convergence gates; stop asserting it (lead direction)</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead, verbatim: "we should stop asserting that we are going to 'cut an RC' each time when we do not yet have a robust pipeline... we want a robust pipeline and a stable grammar and vocab that the generators can use effectively." Five consecutive rehearsal sessions ended with the RC asserted and not cut, each blocked by a real defect — the assertion was making plan state fictional. The RC is cut when §5 passes.</p>
+    </div>
+<div class="r-dec" data-key="vocab-scope" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-vocab-scope — which class-D tokens (genuine instrument-side demand: detection_efficiency, focal_length, groove_density, gain, intensity, bandwidth, heat_flux, orbit_integral, …) are added to ISN, and which are folded onto existing tokens?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="rotation-after-triage">Decide from rung 4's triaged list (recommended — the true list is smaller than today's stock)</button>
+      <button class="r-opt" data-value="add-now">Add the visibly-genuine ones now, ahead of the triage</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-nlr-001" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T18:50:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Rungs 1–2: measure the loop with feedback on, then make the dedup verdict trustworthy</h4>
+    <div class="r-fu-body"><p><strong>The retry-feedback change (<code>b7a51fdc</code>) has never been measured live.</strong> Run one free scoped compose pass to baseline the gap-production rate now that failures carry a diagnosis, then attack mechanism B: re-run dedup over the 345 never-checked tokens and re-audit the 139 <code>distinct_confirmed</code> — the structural-suffix cases (<code>…antenna_module ~ …antenna</code> 0.97) and canonical-order variants (<code>methane_deuterated ~ deuterated_methane</code> 0.96) are mechanically detectable and plainly wrong verdicts. No RC language: the release is gated on §5, not asserted.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-naming-loop-robustness (http://localhost:8765/imas-codex/sn-naming-loop-robustness.html)
+Section: §4 rungs 1–2
+Tier:    opus
+
+READ FIRST
+  docs/sn-naming-loop-robustness.html — §2 anatomy numbers and §3 mechanisms.
+  docs/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html — how the
+    operator blindness was found and what was corrected twice.
+  imas_codex/standard_names/AGENTS.md — the accessor, the two sets that must
+    not be merged, and the over/ratio reasoning.
+
+OPERATIONAL CONSTRAINTS (all measured this session — violating them wastes hours)
+  - The Neo4j graph is UNREACHABLE from compute nodes (SSH tunnel to iter:22 is
+    refused). Graph queries run on the LOGIN node; suites and timings run on
+    sun_debug (login-node IO inflates them 20-70x). A script that does both
+    will half-fail — split the work.
+  - StandardNameSource is keyed id='dd:'+path with a `status` property — NOT
+    dd_path, NOT stage. Keying on the projection silently returns nothing.
+  - VocabGap nodes are DISTINCT TOKENS (id vocab_gap:&lt;segment&gt;:&lt;token&gt;),
+    with example_count carrying multiplicity. Do not conflate tokens and
+    proposals; that conflation produced a 4.7x-wrong projection this week.
+  - Warm the codex import before diagnosing test-setup timeouts:
+    uv run python -c "import imas_codex.discovery, litellm"
+
+RUNG 1 — measure the loop with feedback on (free, compose-only)
+  1. Pick ~30 sources whose stored gaps were operator/reuse-shaped (segments.py
+     classify_gap over the stored tokens finds them; mechanism A/B/C examples in
+     the plan's §3 table).
+  2. Run a scoped, free compose pass (--only compose; NO paid review) and
+     measure: gaps minted per 100 composes, and whether every new gap carries a
+     non-empty reason (b7a51fdc fills it from describe_gap).
+  3. Record before/after in the plan §5 gate-2 ledger. If the rate did NOT
+     fall, that is the finding — report it, do not tune anything to force it.
+
+RUNG 2 — make the dedup verdict trustworthy
+  1. The 345 never-checked residual tokens: run the semantic dedup over them
+     (vocab_semantic_dedup — now operator-aware) and record verdicts.
+  2. The 139 distinct_confirmed: re-audit with two mechanical checks BEFORE any
+     embedding similarity — (a) structural suffix: token == registered + one of
+     _module/_component/_channel/_element/_image (and the reverse); (b)
+     canonical-order variant: the token's words are a permutation of a
+     registered token's words. Both classes are wrong verdicts by construction.
+  3. Reclassify what falls out as reuse-of-&lt;registered&gt; (verdict + target
+     written to the node; NO deletions, NO hand-edits of names), and wire the
+     reuse verdict into describe_gap guidance so a composer proposing
+     optical_depth is told "use opacity".
+  4. Done-when: zero distinct_confirmed at similarity &gt;=0.90 without a stated
+     physical reason; reuse guidance reaches the retry path; a test pins each
+     mechanical check with the real examples above as fixtures.
+
+CONSTRAINTS
+  - No paid LLM spend without explicit sign-off; compose is free, review is not.
+  - NEVER hand-accept a name or hand-edit graph text; graph writes go through
+    the shipped reconcile/dedup instruments only, and rung-4 retirement is NOT
+    this followup's work.
+  - TDD; derive every vocabulary from ISN at runtime (the accessor), never
+    hardcode; run the ~/.agents/AGENTS.md pre-stage naming checks on every
+    staged path; no AI attribution anywhere.
+  - Update THIS plan's §5 gate ledger and resolve this followup with the
+    measured numbers. Do not mention an RC anywhere in the outcome.
+
+Done-when
+  1. Gap rate per 100 composes recorded before/after feedback, with reasons
+     non-empty on every new gap.
+  2. The 484's dedup state: 0 unchecked; the 139 re-audited; reuse verdicts
+     written and reaching retry guidance; tests pin the mechanical checks.
+  3. Plan §5 gates 2 and 3 have measured entries; this followup resolved with
+     numbers, and rung-3 work queued as the next followup.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
