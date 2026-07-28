@@ -336,7 +336,7 @@ class TestAtomicClaimRandomOrder:
         the atomic primitive."""
         pytest.skip(
             "removed: claim_compose_seed_and_expand and claim_regen_seed_and_expand"
-            " are linear-path symbols that never landed (W2 audit)"
+            " are linear-path symbols that never landed"
         )
         import imas_codex.standard_names.graph_ops as ops
 
@@ -607,7 +607,7 @@ class TestComposeUsesSingleTransaction:
     def test_compose_commit_once(self):
         pytest.skip(
             "removed: claim_compose_seed_and_expand is a linear-path symbol"
-            " that never landed (W2 audit)"
+            " that never landed"
         )
 
         gc, tx = _mock_gc_tx()

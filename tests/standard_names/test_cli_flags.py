@@ -1,10 +1,10 @@
-"""Tests for ``sn run`` CLI flag wiring (Phase 8.1 / P5.3).
+"""Tests for ``sn run`` CLI flag wiring.
 
 Verifies that:
-- New Option B flags (--min-score, --rotation-cap, --escalation-model,
+- The rotation-control flags (--min-score, --rotation-cap, --escalation-model,
   --review-name-backlog-cap, --review-docs-backlog-cap) are accepted and
   forwarded with the correct defaults.
-- Legacy flags (--regen, --enrich, --target, --skip-regen, --skip-enrich,
+- Retired flags (--regen, --enrich, --target, --skip-regen, --skip-enrich,
   --name-only-batch-size, --docs-status, --docs-batch-size) have been
   removed and raise Click UsageError when supplied.
 - Without ``--pool`` filter, all 6 pools start (default behaviour).

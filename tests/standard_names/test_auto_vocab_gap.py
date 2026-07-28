@@ -1,4 +1,4 @@
-"""Tests for auto-VocabGap detection of novel physical_base tokens (W29).
+"""Tests for auto-VocabGap detection of novel physical_base tokens.
 
 Validates that ``_auto_detect_physical_base_gaps`` correctly identifies
 novel ``physical_base`` tokens in composed standard names without

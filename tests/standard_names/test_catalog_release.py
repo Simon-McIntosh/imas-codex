@@ -230,10 +230,11 @@ class TestDetectState:
 
 class TestComputeNextVersion:
     def test_next_rc_continues_the_counter_past_a_batch_rc(self, tagged_repo):
-        """The regression this whole change exists for.
+        """A batch RC must advance the counter, not be skipped over.
 
-        With the batch tag invisible to the grammar, state detection fell back
-        to rc64 and the next release re-minted rc65 over an existing tag.
+        If the batch tag is invisible to the tag grammar, state detection falls
+        back to the previous bare RC and the next release re-mints an RC number
+        that already has a tag.
         """
         _git("tag", "v0.2.0rc64", cwd=tagged_repo)
         _git("tag", "v0.2.0rc65+west-task-2e", cwd=tagged_repo)

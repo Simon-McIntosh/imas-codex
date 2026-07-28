@@ -1,13 +1,13 @@
 """Regression: names-mode user prompt MUST render per-item DD context.
 
 Background: ``generate_name_dd_names.md`` is the user prompt selected when
-``--target names`` is set. Until W36 it silently dropped ALL per-item context
-that ``workers._enrich_items`` computes (hybrid_neighbours, related_neighbours,
+``--target names`` is set. It is easy for it to drift from the rich-context
+full-mode prompt ``compose_dd.md`` and silently drop the per-item context that
+``workers._enrich_items`` computes (hybrid_neighbours, related_neighbours,
 error_fields, identifier_values, clusters, cross_ids_paths, sibling_fields,
-review_feedback, previous_name) and dropped the batch-level
-``reference_exemplars`` block. The rich-context full-mode prompt
-``compose_dd.md`` rendered them. This silent stripping was the dominant
-chronic-low-scores regressor in --target names rotations.
+review_feedback, previous_name) plus the batch-level ``reference_exemplars``
+block. Dropping them is invisible at render time and shows up only as
+chronically low compose scores in --target names rotations.
 
 This test guards against a regression by asserting that every per-item context
 block AND the batch-level reference_exemplars block appear in the rendered
@@ -148,9 +148,8 @@ def test_names_mode_renders_per_item_context(marker: str) -> None:
     rendered = _render_names_prompt()
     assert marker in rendered, (
         f"Names-mode prompt missing context marker '{marker}'. "
-        f"This is the W36 regression: generate_name_dd_names.md silently strips "
-        f"per-item DD context. Re-port the relevant Jinja block from "
-        f"compose_dd.md."
+        f"generate_name_dd_names.md is silently stripping per-item DD context. "
+        f"Re-port the relevant Jinja block from compose_dd.md."
     )
 
 

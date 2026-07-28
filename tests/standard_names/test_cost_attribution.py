@@ -41,7 +41,7 @@ def _make_gc_context(mock_gc: MagicMock):
 
 
 # ---------------------------------------------------------------------------
-# Phase 2b — write_standard_names compose cost accumulation
+# write_standard_names compose cost accumulation
 # ---------------------------------------------------------------------------
 
 
@@ -152,7 +152,7 @@ class TestComposeCostAccumulation:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2b — write_reviews review cost propagation
+# write_reviews review cost propagation
 # ---------------------------------------------------------------------------
 
 
@@ -255,7 +255,7 @@ class TestReviewCostPropagation:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2d — sn clear wipes cost fields
+# sn clear wipes cost fields
 # ---------------------------------------------------------------------------
 
 
@@ -391,7 +391,7 @@ class TestCostSchemaFields:
 
 
 # ---------------------------------------------------------------------------
-# Phase 1a — drop_params config
+# drop_params config
 # ---------------------------------------------------------------------------
 
 

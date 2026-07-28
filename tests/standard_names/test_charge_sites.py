@@ -1,4 +1,4 @@
-"""Tests for Phase 4 charge-site instrumentation.
+"""Tests for LLM charge-site instrumentation.
 
 Verifies that each LLM call site constructs a correctly typed
 ``LLMCostEvent`` and calls ``lease.charge_event`` with the expected

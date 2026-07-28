@@ -346,14 +346,14 @@ def test_review_budget_reexport():
 
 
 # =====================================================================
-# Bug 3 regression: summary key is total_spent, not total_actual
+# Regression: the summary key is total_spent, not total_actual
 # =====================================================================
 
 
 def test_summary_key_is_total_spent_not_total_actual():
     """BudgetManager.summary uses 'total_spent', not the incorrect 'total_actual'.
 
-    Regression guard for the KeyError: 'total_actual' bug in sn.py:3502.
+    A caller reading 'total_actual' raises KeyError; this pins the key name.
     """
     mgr = BudgetManager(total_budget=2.0)
     lease = mgr.reserve(0.5)

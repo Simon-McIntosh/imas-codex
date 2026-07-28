@@ -1,12 +1,12 @@
 """Regression tests: budget reservation failure must not trigger invariant error.
 
-Bug 7 — When ``BudgetManager.reserve(worst_case)`` returns ``None`` for every
-batch (worst_case > remaining pool), total_cost stays at $0.00, persist_count
-stays at 0, and the invariant ``total_cost < budget * 0.5`` evaluates to True.
-This caused a spurious ``invariant violated`` error even though the budget was
-the actual bottleneck.
+When ``BudgetManager.reserve(worst_case)`` returns ``None`` for every batch
+(worst_case > remaining pool), total_cost stays at $0.00 and persist_count
+stays at 0, so the under-spend invariant ``total_cost < budget * 0.5`` is
+trivially true — an exhausted budget would otherwise be reported as an
+invariant violation.
 
-The fix:
+The invariant is therefore conditioned on reservations having succeeded:
 1. ``_process_batch`` in ``review/pipeline.py`` increments
    ``state.stats["budget_reservation_blocked"]`` when ``reserve()`` returns
    ``None``.
@@ -38,7 +38,7 @@ class TestBudgetReservationBlockedUnit:
     """Unit-level tests that the invariant logic is correct."""
 
     def test_invariant_not_triggered_when_budget_blocked(self) -> None:
-        """Simulate the exact conditions that caused Bug 7.
+        """A fully budget-blocked phase must not read as an invariant breach.
 
         Conditions: target_names > 0, persist_count == 0,
         total_cost < budget * 0.5, but budget_reservation_blocked > 0.

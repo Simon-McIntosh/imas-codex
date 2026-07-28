@@ -1,6 +1,6 @@
-"""Tests for plan 40: per-domain catalog layout with graph-hierarchy ordering.
+"""Per-domain catalog layout with graph-hierarchy ordering.
 
-Tests 1–15 from plan 40 §6:
+Covered behaviours:
 1. Round-trip byte stability
 2. Round-trip idempotence
 3. Ordering — unary prefix

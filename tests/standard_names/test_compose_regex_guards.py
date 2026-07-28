@@ -1,8 +1,9 @@
-"""Pure-string regex validators for HARD PRE-EMIT CHECKS (Phase 5d).
+"""Pure-string regex validators for the compose-prompt hard pre-emit checks.
 
 These tests validate that the compose-prompt anti-pattern rules can be
-detected statically via regex, without requiring LLM calls.  Each test
-corresponds to one of the ten HARD PRE-EMIT CHECKS in compose_system.md.
+detected statically via regex, without requiring LLM calls.  Each validator
+below mirrors one rule taught by the name-generation system prompt, so a
+candidate name can be rejected before it is emitted.
 """
 
 from __future__ import annotations
@@ -12,12 +13,12 @@ import re
 import pytest
 
 # =====================================================================
-# Guard regex functions — one per HARD PRE-EMIT CHECK
+# Guard regex functions — one per hard pre-emit check
 # =====================================================================
 
 
 def has_adjacent_duplicate_tokens(name: str) -> bool:
-    """Check #1: adjacent duplicate tokens (e.g. magnetic_magnetic)."""
+    """Check: adjacent duplicate tokens (e.g. magnetic_magnetic)."""
     tokens = name.split("_")
     return any(a == b for a, b in zip(tokens, tokens[1:], strict=False))
 
@@ -38,7 +39,7 @@ _ENTITY_LOCUS_TOKENS = frozenset(
 
 
 def has_entity_locus_at_violation(name: str) -> bool:
-    """Check #2: entity locus with _at_ instead of _of_."""
+    """Check: entity locus with _at_ instead of _of_."""
     for entity in _ENTITY_LOCUS_TOKENS:
         if f"_at_{entity}" in name:
             return True
@@ -61,7 +62,7 @@ _HARDWARE_TOKENS = frozenset(
 
 
 def has_hardware_base_or_prefix(name: str) -> bool:
-    """Check #3: hardware token as base or prefix (not after _of_)."""
+    """Check: hardware token as base or prefix (not after _of_)."""
     tokens = name.split("_")
     for i, tok in enumerate(tokens):
         if tok in _HARDWARE_TOKENS:
@@ -87,7 +88,7 @@ _PROVENANCE_PREFIXES = (
 
 
 def has_provenance_prefix(name: str) -> bool:
-    """Check #4: provenance prefix."""
+    """Check: provenance prefix."""
     return any(name.startswith(p) for p in _PROVENANCE_PREFIXES)
 
 
@@ -99,7 +100,7 @@ _ABBREVIATION_RE = re.compile(
 
 
 def has_abbreviation_or_alphanumeric(name: str) -> bool:
-    """Check #6: abbreviations, acronyms, or alphanumerics."""
+    """Check: abbreviations, acronyms, or alphanumerics."""
     return bool(_ABBREVIATION_RE.search(name))
 
 
@@ -110,7 +111,7 @@ _FORBIDDEN_COMPOUND_SUBJECTS = (
 
 
 def has_forbidden_compound_subject(name: str) -> bool:
-    """Check #7: forbidden compound subjects."""
+    """Check: forbidden compound subjects."""
     return any(cs in name for cs in _FORBIDDEN_COMPOUND_SUBJECTS)
 
 
@@ -140,13 +141,13 @@ _UK_SPELLINGS = (
 
 
 def has_uk_spelling(name: str) -> bool:
-    """Check #8: British spelling variants."""
+    """Check: British spelling variants."""
     tokens = name.split("_")
     return any(tok in _UK_SPELLINGS for tok in tokens)
 
 
 def exceeds_length_or_nesting(name: str) -> bool:
-    """Check #9: >70 chars or >2 _of_ segments."""
+    """Check: >70 chars or >2 _of_ segments."""
     if len(name) > 70:
         return True
     of_count = name.count("_of_")
@@ -164,7 +165,7 @@ _STRUCTURAL_LEAKAGE_TOKENS = (
 
 
 def has_structural_leakage(name: str) -> bool:
-    """Check #10: structural/provenance leakage tokens."""
+    """Check: structural/provenance leakage tokens."""
     return any(tok in name for tok in _STRUCTURAL_LEAKAGE_TOKENS)
 
 
@@ -184,7 +185,7 @@ _REJECT_PATTERNS = (re.compile(r"distance_between_\w+_and_\w+"),)
 
 
 def matches_reject_list(name: str) -> bool:
-    """Check REJECT list from compose_system.md."""
+    """Check the REJECT list taught by the name-generation system prompt."""
     for tok in _REJECT_TOKENS:
         if tok in name:
             return True
@@ -192,12 +193,12 @@ def matches_reject_list(name: str) -> bool:
 
 
 # =====================================================================
-# Test classes — one per HARD PRE-EMIT CHECK
+# Test classes — one per hard pre-emit check
 # =====================================================================
 
 
 class TestAdjacentDuplicateTokens:
-    """HARD CHECK #1: no adjacent duplicate tokens."""
+    """Hard check: no adjacent duplicate tokens."""
 
     @pytest.mark.parametrize(
         "name",
@@ -224,7 +225,7 @@ class TestAdjacentDuplicateTokens:
 
 
 class TestEntityLocusAt:
-    """HARD CHECK #2: entity locus requires _of_, never _at_."""
+    """Hard check: entity locus requires _of_, never _at_."""
 
     @pytest.mark.parametrize(
         "name",
@@ -252,7 +253,7 @@ class TestEntityLocusAt:
 
 
 class TestHardwareBaseOrPrefix:
-    """HARD CHECK #3: hardware tokens only after _of_."""
+    """Hard check: hardware tokens only after _of_."""
 
     @pytest.mark.parametrize(
         "name",
@@ -280,7 +281,7 @@ class TestHardwareBaseOrPrefix:
 
 
 class TestProvenancePrefix:
-    """HARD CHECK #4: no provenance prefixes."""
+    """Hard check: no provenance prefixes."""
 
     @pytest.mark.parametrize(
         "name",
@@ -307,7 +308,7 @@ class TestProvenancePrefix:
 
 
 class TestAbbreviationsAlphanumerics:
-    """HARD CHECK #6: no abbreviations, acronyms, or alphanumerics."""
+    """Hard check: no abbreviations, acronyms, or alphanumerics."""
 
     @pytest.mark.parametrize(
         "name",
@@ -337,7 +338,7 @@ class TestAbbreviationsAlphanumerics:
 
 
 class TestForbiddenCompoundSubject:
-    """HARD CHECK #7: exactly one subject; specific compounds forbidden."""
+    """Hard check: exactly one subject; specific compounds forbidden."""
 
     @pytest.mark.parametrize(
         "name",
@@ -362,7 +363,7 @@ class TestForbiddenCompoundSubject:
 
 
 class TestUKSpelling:
-    """HARD CHECK #8: US spelling only."""
+    """Hard check: US spelling only."""
 
     @pytest.mark.parametrize(
         "name",
@@ -392,7 +393,7 @@ class TestUKSpelling:
 
 
 class TestLengthAndNesting:
-    """HARD CHECK #9: max 70 chars, max 2 _of_ segments."""
+    """Hard check: max 70 chars, max 2 _of_ segments."""
 
     def test_too_long(self) -> None:
         name = "a" * 71
@@ -412,7 +413,7 @@ class TestLengthAndNesting:
 
 
 class TestStructuralLeakage:
-    """HARD CHECK #10: no structural leakage tokens."""
+    """Hard check: no structural leakage tokens."""
 
     @pytest.mark.parametrize(
         "name",
@@ -440,7 +441,7 @@ class TestStructuralLeakage:
 
 
 class TestRejectList:
-    """REJECT list patterns from compose_system.md (expanded)."""
+    """REJECT list patterns taught by the name-generation system prompt."""
 
     @pytest.mark.parametrize(
         "name",
