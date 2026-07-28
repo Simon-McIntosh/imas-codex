@@ -1,16 +1,13 @@
-"""Regression test for rc22 docs-target filter bug.
+"""The unreviewed-only filter must judge freshness on the requested axis.
 
-Bug (caught during C3 stabilization, 2026-04-23):
-    When ``target="docs"`` and ``unreviewed_only=True``, the extract filter
-    used ``has_score = reviewer_score is not None`` to decide whether a name
-    was already reviewed. After name-review persists, the canonical
-    ``reviewer_score`` is bootstrapped from the name score, so the filter
-    treated every name as already reviewed and produced zero docs targets.
+``reviewer_score`` is a single canonical field bootstrapped from the name
+score once name-review persists, so a docs-target filter keyed on
+``reviewer_score is not None`` reads every name as already reviewed and
+yields zero docs targets — silently, with no error.
 
-Fix (pipeline.py):
-    The freshness check is now target-aware — for ``target="docs"`` it
-    consults ``reviewed_docs_at``, for ``target="names"`` it consults
-    ``reviewed_name_at``.
+The freshness check in ``pipeline.py`` is therefore target-aware: for
+``target="docs"`` it consults ``reviewed_docs_at``, for ``target="names"``
+it consults ``reviewed_name_at``.
 """
 
 from __future__ import annotations

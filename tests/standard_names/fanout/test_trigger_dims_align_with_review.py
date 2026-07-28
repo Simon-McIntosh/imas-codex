@@ -1,11 +1,12 @@
 """Regression test: fan-out trigger dims must match the actual review schema.
 
-Plan 39 §5.1 specifies that ``refine_trigger_comment_dims`` allow-lists the
+``refine_trigger_comment_dims`` allow-lists the
 ``reviewer_comments_per_dim_name`` dims used to extract a fan-out trigger
-excerpt.  A previous default of ``("clarity", "disambiguation")`` silently
-disabled the trigger because those dims do not exist on the review rubric
-(actual dims: grammar / semantic / convention / completeness).  This test
-locks the defaults to the real schema so the bug cannot recur.
+excerpt.  A dim name that does not exist on the review rubric silently
+disables the trigger rather than erroring — a default of
+``("clarity", "disambiguation")`` matches nothing, because the rubric's
+dims are grammar / semantic / convention / completeness.  This test locks
+the defaults to the dims the review model actually emits.
 """
 
 from imas_codex.standard_names.fanout.config import FanoutSettings, load_settings

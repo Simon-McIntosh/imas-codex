@@ -1,4 +1,4 @@
-"""Trigger predicate + arm assignment unit tests (plan 39 §5.1, §8.4)."""
+"""Trigger predicate + arm assignment unit tests."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ class TestExtractExcerpt:
         assert extract_reviewer_excerpt("not-json{", dims=DIMS, char_cap=800) == ""
 
     def test_excerpt_truncated(self) -> None:
-        # S3: ``refine-trigger-comment-chars`` cap respected.
+        # The ``refine-trigger-comment-chars`` cap is respected.
         long_value = "x" * 2000
         comments = {"clarity": long_value}
         excerpt = extract_reviewer_excerpt(comments, dims=DIMS, char_cap=120)
@@ -138,9 +138,9 @@ class TestAssignArm:
             assert assign_arm(f"sn_{i}", i, arm_percent=100) == "on"
 
     def test_50_50_distribution_over_synthetic_cohort(self) -> None:
-        # Plan 39 §8.4 I2: hash routing yields ~50/50 across N
-        # synthetic items.  Tolerance: 30..70 / 100 — blake2b is
-        # well-distributed so this is comfortable.
+        # Hash routing yields ~50/50 across N synthetic items.
+        # Tolerance: 30..70 / 100 — blake2b is well-distributed so this
+        # is comfortable.
         on = 0
         off = 0
         for i in range(200):

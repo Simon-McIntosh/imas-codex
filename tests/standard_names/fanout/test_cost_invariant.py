@@ -1,4 +1,4 @@
-"""Cost-attribution invariant for fan-out (plan 39 §7.3 I1, criterion #10).
+"""Cost-attribution invariant for fan-out.
 
 Snapshots ``original_reservation`` *before* the first
 ``_extend_reservation`` call and asserts that, after a fan-out cycle:
@@ -162,7 +162,7 @@ async def test_original_reservation_snapshot(monkeypatch: pytest.MonkeyPatch) ->
     )
     assert lease.charged == pytest.approx(sum_proposer)
 
-    # Cost-attribution invariant (rewritten per RD I1):
+    # Cost-attribution invariant:
     # ``charged ≤ original_reservation + cumulative_fanout_charges``.
     assert lease.charged <= original_reservation + sum_proposer + 1e-9
 

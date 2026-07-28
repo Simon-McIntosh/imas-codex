@@ -1,4 +1,4 @@
-"""Async runner tests for fan-out (plan 39 §4.2, §12.2)."""
+"""Async runner tests for fan-out: per-call timeout and result shape."""
 
 from __future__ import annotations
 

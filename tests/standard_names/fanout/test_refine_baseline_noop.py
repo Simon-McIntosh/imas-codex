@@ -1,8 +1,8 @@
 """Refine-name prompt baseline: empty fan-out evidence is byte-identical.
 
-Plan 39 §6.3 + §11 acceptance #1: when ``fanout_evidence == ""`` the
-rendered ``sn/refine_name_user`` prompt is byte-identical to the
-prompt rendered with ``fanout_evidence`` absent.
+When ``fanout_evidence == ""`` the rendered ``sn/refine_name_user``
+prompt must be byte-identical to the prompt rendered with
+``fanout_evidence`` absent.
 
 This guards against accidental Jinja whitespace bleed when the
 ``{{ fanout_evidence }}`` placeholder is empty — a frequent regression

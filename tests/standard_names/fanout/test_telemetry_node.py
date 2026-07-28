@@ -1,4 +1,4 @@
-"""Telemetry node writer tests (plan 39 §8.2, §12.2)."""
+"""Telemetry node writer tests: the Cypher a fan-out cycle emits."""
 
 from __future__ import annotations
 

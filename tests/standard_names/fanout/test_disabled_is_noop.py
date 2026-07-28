@@ -1,4 +1,4 @@
-"""Disabled = true no-op invariants (plan 39 §7.2 S5)."""
+"""Disabled = true no-op invariants: no LLM call, no spend, empty evidence."""
 
 from __future__ import annotations
 

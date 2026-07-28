@@ -1,4 +1,4 @@
-"""Renderer tests for fan-out evidence block (plan 39 §12.2)."""
+"""Renderer tests for the fan-out evidence block."""
 
 from __future__ import annotations
 

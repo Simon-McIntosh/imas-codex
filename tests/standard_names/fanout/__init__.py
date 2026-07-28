@@ -1,1 +1,1 @@
-"""Phase 1A — fan-out framework unit tests."""
+"""Fan-out framework unit tests."""

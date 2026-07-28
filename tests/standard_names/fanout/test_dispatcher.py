@@ -1,4 +1,4 @@
-"""Dispatcher tests — propose / execute / run_fanout (plan 39 §4, §12.2)."""
+"""Dispatcher tests — propose / execute / run_fanout."""
 
 from __future__ import annotations
 
@@ -251,7 +251,7 @@ class TestPropose:
         assert recorded[0]["reasoning_effort"] == expected_effort
 
     async def test_scope_not_in_llm_args(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Caller-injected scope must never appear in LLM messages (plan §3.3)."""
+        """Caller-injected scope must never appear in LLM messages."""
         plan = FanoutPlan(
             queries=[_SearchExistingNames(fn_id="search_existing_names", query="T_e")]
         )
@@ -471,9 +471,9 @@ class TestSyncTimeouts:
     ) -> None:
         """Sync ``time.sleep(10)`` runner — wait_for cancels at function_timeout_s.
 
-        Plan 39 §4.2 / B2: even though the helper keeps running on the
-        worker thread, the Python-side ``wait_for`` returns at the gate
-        and the result is recorded as ``ok=False, error="timeout"``.
+        Even though the helper keeps running on the worker thread, the
+        Python-side ``wait_for`` returns at the gate and the result is
+        recorded as ``ok=False, error="timeout"``.
         """
         import time
 
@@ -558,7 +558,7 @@ class TestSyncTimeouts:
 
 
 # ---------------------------------------------------------------------
-# Within-cohort A/B arm assignment (plan 39 §8.4 I2)
+# Within-cohort A/B arm assignment
 # ---------------------------------------------------------------------
 
 

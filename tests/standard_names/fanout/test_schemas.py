@@ -1,4 +1,4 @@
-"""Discriminated-union schema tests for fan-out (plan 39 §12.2)."""
+"""Discriminated-union schema tests for fan-out: parse-time bounds."""
 
 from __future__ import annotations
 

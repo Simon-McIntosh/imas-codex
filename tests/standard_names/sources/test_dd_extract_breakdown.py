@@ -1,18 +1,18 @@
-"""Tests for rc22 B3': leaf-invariant, coordinate category, node_type context,
-and error-field surface.
+"""Extraction admission: leaf invariant, coordinate category, node_type
+context, and error-field surface.
 
 Verifies that:
 - ``extract_dd_candidates`` admits nodes with ``node_type='static'`` when
   their ``node_category`` is in ``SN_SOURCE_CATEGORIES``.
 - Nodes with ``data_type='STRUCTURE'`` are excluded by the leaf invariant
   even when ``node_category='quantity'``.
-- Nodes with ``node_category='coordinate'`` are now admitted (B3' addition).
+- Nodes with ``node_category='coordinate'`` are admitted.
 - Nodes with ``node_category='metadata'`` (not in ``SN_SOURCE_CATEGORIES``)
   are excluded.
 - ``report_extract_breakdown`` returns the expected shape and aggregations,
   including ``by_data_type`` and ``has_errors_count``.
 - Candidates expose ``node_type`` (LLM context) and ``has_errors`` /
-  ``error_node_ids`` (B9 prep).
+  ``error_node_ids`` (so an error sibling can be minted downstream).
 """
 
 from __future__ import annotations
@@ -124,12 +124,12 @@ def _make_mock_gc(
 
 
 # ---------------------------------------------------------------------------
-# B3.1 — extract_dd_candidates admits static/geometry
+# extract_dd_candidates admits static/geometry
 # ---------------------------------------------------------------------------
 
 
 class TestExtractAdmitsStaticGeometry:
-    """rc22 B3: static geometry paths must pass through extraction."""
+    """Static geometry paths must pass through extraction."""
 
     def test_extract_admits_static_geometry(self):
         """A node with node_type='static' + node_category='geometry' is included."""
@@ -174,12 +174,12 @@ class TestExtractAdmitsStaticGeometry:
             "extract_dd_candidates must filter on node_category IN $sn_categories"
         )
         assert "node_type IN ['dynamic'" not in src, (
-            "extract_dd_candidates must NOT gate on node_type (rc22 B3 fix)"
+            "extract_dd_candidates must NOT gate on node_type"
         )
 
 
 # ---------------------------------------------------------------------------
-# B3' Part 1 — leaf invariant: STRUCTURE/STRUCT_ARRAY excluded
+# Leaf invariant: STRUCTURE/STRUCT_ARRAY excluded
 # ---------------------------------------------------------------------------
 
 
@@ -239,7 +239,7 @@ class TestExtractLeafInvariant:
 
 
 # ---------------------------------------------------------------------------
-# B3' Part 2 — coordinate category admitted
+# Coordinate category admitted
 # ---------------------------------------------------------------------------
 
 
@@ -251,7 +251,7 @@ class TestCoordinateCategoryAdmitted:
         from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
 
         assert "coordinate" in SN_SOURCE_CATEGORIES, (
-            "SN_SOURCE_CATEGORIES must include 'coordinate' (rc22 B3')"
+            "SN_SOURCE_CATEGORIES must include 'coordinate'"
         )
 
     def test_extract_admits_coordinate_leaves(self):
@@ -281,12 +281,12 @@ class TestCoordinateCategoryAdmitted:
 
 
 # ---------------------------------------------------------------------------
-# B3.2 — extract_dd_candidates rejects metadata category
+# extract_dd_candidates rejects the metadata category
 # ---------------------------------------------------------------------------
 
 
 class TestExtractRejectsMetadataCategory:
-    """rc22 B3: node_category='metadata' is not in SN_SOURCE_CATEGORIES."""
+    """node_category='metadata' is not in SN_SOURCE_CATEGORIES."""
 
     def test_metadata_not_in_sn_source_categories(self):
         """'metadata' must be absent from SN_SOURCE_CATEGORIES."""
@@ -322,7 +322,7 @@ class TestExtractRejectsMetadataCategory:
 
 
 # ---------------------------------------------------------------------------
-# B3' Part 3 — node_type in candidate payload
+# node_type in candidate payload
 # ---------------------------------------------------------------------------
 
 
@@ -363,12 +363,16 @@ class TestCandidateSurfacesNodeType:
 
 
 # ---------------------------------------------------------------------------
-# B3' Part 4 — error-field surface (B9 prep)
+# Error-field surface on the candidate payload
 # ---------------------------------------------------------------------------
 
 
 class TestCandidateSurfacesErrorLinks:
-    """Candidates must surface has_errors / error_node_ids for B9 prep."""
+    """Candidates must surface has_errors / error_node_ids.
+
+    Downstream error-sibling minting reads them off the candidate, so they
+    have to be on the payload rather than re-queried.
+    """
 
     def test_candidate_surfaces_error_links(self):
         """A candidate with HAS_ERROR siblings exposes has_errors=True and error_node_ids."""
@@ -440,7 +444,7 @@ class TestCandidateSurfacesErrorLinks:
 
 
 # ---------------------------------------------------------------------------
-# B3.3 — report_extract_breakdown return shape
+# report_extract_breakdown return shape
 # ---------------------------------------------------------------------------
 
 
