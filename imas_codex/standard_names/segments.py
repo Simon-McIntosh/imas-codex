@@ -438,9 +438,17 @@ def _grammar_connectives() -> frozenset[str]:
 
 
 #: Inflections of an operator token the composer emits in place of the
-#: registered spelling (``squared`` for ``square``, ``normalised`` spellings are
-#: not covered — only suffixes that leave the registered stem intact).
-_OPERATOR_INFLECTION_SUFFIXES: tuple[str, ...] = ("d", "ed", "s", "es")
+#: registered spelling (``squared`` for ``square``, ``logarithmic`` for
+#: ``logarithm``).  Only suffixes that leave the registered stem intact appear
+#: here; the guard against an arbitrary word matching is that the remainder must
+#: itself be a registered operator, not the suffix list.
+_OPERATOR_INFLECTION_SUFFIXES: tuple[str, ...] = ("d", "ed", "s", "es", "ic")
+
+#: The word a composer writes for a division. ISN expresses it as the binary
+#: ``ratio`` operator over two operands, so a compound spelled with it is a
+#: binary composition rather than a compound base — provided BOTH operands are
+#: themselves fully registered.
+_RATIO_WORD = "over"
 
 
 def _registered_operator_stem(word: str) -> str | None:
@@ -473,31 +481,52 @@ class OperatorComposition:
             registered stem (``squared`` → ``square``).
         bases: The registered non-operator tokens the operators apply to.
         segments: Every grammar class the cover touched, operators included.
+        binary_operator: The registered binary operator the spelling implies, set
+            when the compound is a ratio written with ``over``.  ``None`` for a
+            plain unary composition.
+        operands: For a binary composition, the two operand sides as written.
+            Empty for a unary one.
     """
 
     operators: tuple[str, ...]
     bases: tuple[str, ...]
     segments: tuple[str, ...]
+    binary_operator: str | None = None
+    operands: tuple[str, ...] = ()
 
 
-def _cover_token(token: str) -> list[tuple[str, tuple[str, ...]]] | None:
-    """Cover ``token`` with registered tokens, or return None if it cannot be.
+@lru_cache(maxsize=1)
+def _infix_operator_splits() -> tuple[
+    tuple[str, tuple[str, ...], tuple[str, ...]], ...
+]:
+    """Registered multi-word operators, split into every (head, tail) word pair.
 
-    Greedy longest-first walk over the underscore-delimited words, matching each
-    span against :func:`grammar_token_index` — which carries operators as well
-    as the segment enums, so an operator span is matchable.  Grammar
-    connectives (``of``, and the binary separators) are stepped over.  Matching
-    is per whole span, never per substring, so a word that merely *contains* a
-    registered token's letters cannot match it.
+    A composer writing natural word order puts the operand *inside* a multi-word
+    operator — ``derivative_of_area_with_respect_to_poloidal_flux`` for the
+    registered ``derivative_with_respect_to`` applied to ``area``.  The operator
+    is present intact but interrupted, so a left-to-right walk cannot see it.
 
-    Returns the ``(span, classes)`` pairs covering the token, or ``None`` when
-    any word is left uncovered.
+    Each entry is ``(operator, head_words, tail_words)``.  Longer heads come
+    first so the most specific split is tried before a shorter one.  Derived from
+    the registry, so a new multi-word operator is covered without a code change.
     """
+    splits: list[tuple[str, tuple[str, ...], tuple[str, ...]]] = []
+    for operator in sorted(_operator_tokens()):
+        words = operator.split("_")
+        if len(words) < 2:
+            continue
+        for cut in range(len(words) - 1, 0, -1):
+            splits.append((operator, tuple(words[:cut]), tuple(words[cut:])))
+    splits.sort(key=lambda s: (-len(s[1]), -len(s[2])))
+    return tuple(splits)
+
+
+def _cover_words(words: list[str]) -> list[tuple[str, tuple[str, ...]]] | None:
+    """Cover a plain word sequence, no infix or ratio handling. See _cover_token."""
     index = grammar_token_index()
     if not index:
         return None
 
-    words = token.split("_")
     connectives = _grammar_connectives()
     cover: list[tuple[str, tuple[str, ...]]] = []
     i = 0
@@ -524,6 +553,124 @@ def _cover_token(token: str) -> list[tuple[str, tuple[str, ...]]] | None:
     return cover or None
 
 
+def _cover_infix_operator(
+    words: list[str],
+) -> list[tuple[str, tuple[str, ...]]] | None:
+    """Cover a sequence spelling a multi-word operator around its operand.
+
+    Requires the operator's head at the very start (operators are prefixes) and
+    its tail as a whole span later, with everything between and after covered by
+    registered tokens.  Both halves of a registered operator, in order, is a
+    narrow enough signal that an unrelated compound cannot satisfy it.
+    """
+    for operator, head, tail in _infix_operator_splits():
+        n_head, n_tail = len(head), len(tail)
+        if len(words) <= n_head + n_tail:
+            continue
+        if tuple(words[:n_head]) != head:
+            continue
+        for start in range(n_head, len(words) - n_tail + 1):
+            if tuple(words[start : start + n_tail]) != tail:
+                continue
+            inner = _cover_words(words[n_head:start])
+            outer = _cover_words(words[start + n_tail :])
+            if inner is None and words[n_head:start]:
+                continue
+            if outer is None and words[start + n_tail :]:
+                continue
+            return [
+                (operator, (OPERATOR_SEGMENT,)),
+                *(inner or []),
+                *(outer or []),
+            ]
+    return None
+
+
+def _cover_token(token: str) -> list[tuple[str, tuple[str, ...]]] | None:
+    """Cover ``token`` with registered tokens, or return None if it cannot be.
+
+    Greedy longest-first walk over the underscore-delimited words, matching each
+    span against :func:`grammar_token_index` — which carries operators as well
+    as the segment enums, so an operator span is matchable.  Grammar
+    connectives (``of``, and the binary separators) are stepped over.  Matching
+    is per whole span, never per substring, so a word that merely *contains* a
+    registered token's letters cannot match it.
+
+    Returns the ``(span, classes)`` pairs covering the token, or ``None`` when
+    any word is left uncovered.  Falls back to matching a multi-word operator
+    spelled around its operand when the straight walk cannot cover the words.
+    """
+    if not grammar_token_index():
+        return None
+    words = token.split("_")
+    return _cover_words(words) or _cover_infix_operator(words)
+
+
+@lru_cache(maxsize=1)
+def _registered_binary_operator() -> str | None:
+    """The registered binary operator a division spells, or None if there is none.
+
+    Looked up in the registry by kind rather than named, so codex does not carry
+    ISN's spelling of it.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+
+        operators = get_grammar_context()["grammar"]["vocabularies"]["operators"]
+    except Exception:
+        return None
+    for token, spec in sorted(operators.items()):
+        if isinstance(spec, dict) and spec.get("kind") == "binary":
+            if spec.get("separator") == "_to_":
+                return token
+    return None
+
+
+def _ratio_composition(token: str) -> OperatorComposition | None:
+    """Cover a compound spelled as a division, e.g. ``<a>_over_<b>``.
+
+    ISN expresses a division as the binary ratio operator over two operand
+    strings, so such a compound is not a missing base — it is a binary
+    expression the composer wrote as one word.
+
+    BOTH operands must cover completely.  A single uncovered word on either side
+    means the composer needs a token there, and guessing at the composition would
+    suppress that request: ``gradient_rho_squared_over_B_squared`` fails here
+    because ``rho`` and ``B`` are symbol shorthand registered nowhere.
+    """
+    words = token.split("_")
+    if _RATIO_WORD not in words:
+        return None
+    binary = _registered_binary_operator()
+    if binary is None:
+        return None
+
+    at = words.index(_RATIO_WORD)
+    left_words, right_words = words[:at], words[at + 1 :]
+    if not left_words or not right_words:
+        return None
+
+    left = _cover_words(left_words) or _cover_infix_operator(left_words)
+    right = _cover_words(right_words) or _cover_infix_operator(right_words)
+    if left is None or right is None:
+        return None
+
+    operators: list[str] = []
+    bases: list[str] = []
+    segments: list[str] = []
+    for span, classes in [*left, *right]:
+        segments.extend(classes)
+        (operators if OPERATOR_SEGMENT in classes else bases).append(span)
+
+    return OperatorComposition(
+        operators=(binary, *operators),
+        bases=tuple(bases),
+        segments=tuple(dict.fromkeys([OPERATOR_SEGMENT, *segments])),
+        binary_operator=binary,
+        operands=("_".join(left_words), "_".join(right_words)),
+    )
+
+
 @lru_cache(maxsize=4096)
 def operator_composition(token: str) -> OperatorComposition | None:
     """Return how ``token`` is expressible as registered operators, if it is.
@@ -541,6 +688,10 @@ def operator_composition(token: str) -> OperatorComposition | None:
     """
     if not token or token in ATOMIC_COMPOUNDS:
         return None
+
+    ratio = _ratio_composition(token)
+    if ratio is not None:
+        return ratio
 
     cover = _cover_token(token)
     if cover is None:
@@ -582,11 +733,17 @@ def _check_decomposable(token: str) -> list[str]:
     if token in ATOMIC_COMPOUNDS:
         return []
 
-    # A single word can still spell an inflected operator; anything else needs
-    # at least two words to be a compound at all.
+    # Operator-bearing spellings — inflected single words, ratios written with
+    # ``over``, multi-word operators split around their operand — all resolve
+    # through one function so this classifier and a caller asking for the
+    # composition directly can never disagree about what is expressible.
+    comp = operator_composition(token)
+    if comp is not None:
+        return list(comp.segments)
+
+    # What remains is an operator-free compound of ordinary segment tokens.
     if "_" not in token:
-        comp = operator_composition(token)
-        return list(comp.segments) if comp is not None else []
+        return []
 
     cover = _cover_token(token)
     if cover is None:
@@ -681,6 +838,13 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
             f"'{token}' is a registered {where} token, not a {segment} — "
             f"place it in the {where} slot."
         )
+    elif category == "decomposable" and comp is not None and comp.binary_operator:
+        left, right = comp.operands
+        guidance = (
+            f"'{token}' is a division, not a base token: express it with the "
+            f"binary operator_token '{comp.binary_operator}' — first operand "
+            f"'{left}' in base_token, second operand '{right}' in secondary_base."
+        )
     elif category == "decomposable" and operators:
         guidance = f"'{token}' is not a single token: {_operator_routing_advice(operators, bases)}."
     elif category == "decomposable":
@@ -718,6 +882,8 @@ def clear_grammar_caches() -> None:
     for cache in (
         _operator_tokens,
         _grammar_connectives,
+        _infix_operator_splits,
+        _registered_binary_operator,
         grammar_tokens_by_segment,
         grammar_token_index,
         known_segments,

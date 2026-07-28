@@ -123,31 +123,70 @@ OPERATOR_EXPRESSIBLE = [
     ("qualifier", "inverse_magnetic_field_squared"),
 ]
 
-# Recorded proposals the cover walk does NOT resolve, with the reason each one
-# needs something other than operator awareness.  Listed so the boundary of the
-# rule is explicit and a later widening has a starting point; a token moving out
-# of this list into OPERATOR_EXPRESSIBLE is an improvement, the reverse is a
-# regression.
+# Ratio spellings: `over` is the composer's English for the binary `ratio`
+# operator.  Both operands must cover independently, so these are composable only
+# when every word on each side is registered.
+RATIO_EXPRESSIBLE = [
+    ("qualifier", "gradient_squared_over_magnetic_field_squared"),
+]
+
+# Infix operator spellings: a registered multi-word operator whose words straddle
+# the operand it applies to.
+INFIX_EXPRESSIBLE = [
+    ("physical_base", "derivative_of_area_with_respect_to_poloidal_flux"),
+]
+
+# Recorded proposals that stay `absent`, with the reason each needs something
+# other than operator awareness.  A token moving out of this list into an
+# expressible list is an improvement; the reverse is a regression.  The rule is
+# NOT stretched to reach these — an over-eager matcher that called novel physics
+# composable would suppress the vocabulary requests ISN actually needs.
 KNOWN_UNRESOLVED = {
-    # The registered operator is `derivative_with_respect_to`, whose words
-    # straddle the operand here; the walk covers left to right and cannot match
-    # an operator split around what it applies to.
-    "derivative_of_area_with_respect_to_poloidal_flux": "infix operator spelling",
-    # `variation` is a registered operator but `path_length` is not a registered
-    # base, so nothing carries the residue.
-    "path_length_variation": "unregistered residual base",
-    # `logarithm` is registered, `logarithmic` is an adjectival form no
-    # inflection rule reaches without also admitting arbitrary `-ic` words.
-    "logarithmic_gradient": "adjectival operator form",
-    # `over` marks a ratio, which is the binary `ratio` operator rather than a
-    # decomposition; skipping the word would drop the ratio semantics.
-    "gradient_rho_squared_over_B_squared": "ratio, not a compound",
-    "gradient_squared_over_magnetic_field_squared": "ratio, not a compound",
-    "radial_gradient_squared_over_field_squared": "ratio, not a compound",
+    # `rho` and `B` are symbol shorthand registered nowhere (the tokens are
+    # `toroidal_flux_radius` and `magnetic_field`), so neither ratio operand
+    # covers.  Closing this needs symbol expansion, not composition.
+    "gradient_rho_squared_over_B_squared": "unregistered symbol shorthand",
+    # `field` alone is not a registered base — only `magnetic_field` is.
+    "radial_gradient_squared_over_field_squared": "unregistered ratio operand",
+    # `variation` is a registered operator and `length` a registered base, but
+    # `path` is registered nowhere, so a token is genuinely needed.
+    "path_length_variation": "unregistered residual token",
     # A synonym of the registered base `opacity` — a reuse question for the
     # token-similarity check, not a composition one.
     "optical_depth": "synonym of a registered base",
 }
+
+# Compounds that LOOK like the composable cases but are genuinely novel physics.
+# These guard the widened matcher: each contains registered-looking material yet
+# must keep asking ISN for a token.  A failure here means the rule was loosened
+# until it stopped discriminating, which would suppress the vocabulary requests
+# ISN actually needs — a worse failure than the fabricated gaps being removed.
+#
+# Every token here must be unregistered in EVERY class and unresolvable by the
+# ISN parser.  A token that is merely in a different slot (``suprathermal`` is a
+# registered population) or that the parser resolves as a lexical compound is a
+# different verdict entirely, so it does not test this boundary.
+MUST_STAY_ABSENT = [
+    # Substrings of registered tokens, unreachable at a token boundary:
+    # `substrate` ends in the base `rate`, `byproduct` in the operator `product`.
+    ("physical_base", "substrate"),
+    ("physical_base", "byproduct"),
+    ("physical_base", "wibble_frobnicator"),
+    ("qualifier", "zzz_not_a_token"),
+    # An operator word reachable only inside a longer unregistered word.
+    ("physical_base", "squaring_kernel"),
+    ("physical_base", "gradiental_wibble"),
+    # A ratio spelling whose operands are not registered — the ratio rule must
+    # not fire just because `over` is present.
+    ("physical_base", "zzz_alpha_over_zzz_beta"),
+    ("physical_base", "wibble_over_frobnicator"),
+    # A registered operator applied to an unregistered residue: the operator half
+    # must not carry the whole compound.
+    ("physical_base", "gradient_of_wibble_frobnicator"),
+    ("physical_base", "line_integrated_wibble"),
+    # An infix operator spelling whose operand and residue are unregistered.
+    ("physical_base", "derivative_of_wibble_with_respect_to_frobnicator"),
+]
 
 
 @requires_isn
@@ -251,7 +290,73 @@ class TestClassifyGapOperatorAware:
         """
         assert operator_composition(token) is None, (
             f"{token} now resolves ({KNOWN_UNRESOLVED[token]}) — move it into "
-            f"OPERATOR_EXPRESSIBLE"
+            f"an expressible list"
+        )
+
+    @pytest.mark.parametrize(("segment", "token"), MUST_STAY_ABSENT)
+    def test_novel_physics_still_asks_for_a_token(self, segment, token):
+        """The matcher must keep discriminating, not match everything.
+
+        A compound that only resembles the composable cases has to keep
+        classifying ``absent``: suppressing a real vocabulary request is a worse
+        failure than the fabricated gaps this rule removes.
+        """
+        assert operator_composition(token) is None, (
+            f"{token} is novel physics but was called operator-composable"
+        )
+        assert classify_gap(segment, token) == ("absent", []), (
+            f"{segment}/{token} must stay absent — a real gap was suppressed"
+        )
+
+
+@requires_isn
+class TestRatioSpelling:
+    """``over`` spells the binary ratio operator, and both operands must cover."""
+
+    @pytest.mark.parametrize(("segment", "token"), RATIO_EXPRESSIBLE)
+    def test_ratio_is_composable(self, segment, token):
+        comp = operator_composition(token)
+        assert comp is not None
+        assert comp.binary_operator == "ratio"
+        assert classify_gap(segment, token)[0] != "absent"
+
+    def test_guidance_names_the_binary_operator_and_both_operands(self):
+        verdict = describe_gap(
+            "qualifier", "gradient_squared_over_magnetic_field_squared"
+        )
+        assert "ratio" in verdict.guidance
+        assert "secondary_base" in verdict.guidance
+
+    def test_a_ratio_with_an_unregistered_operand_stays_absent(self):
+        """One uncovered operand is enough — the rule does not guess."""
+        assert operator_composition("gradient_rho_squared_over_B_squared") is None
+        assert operator_composition("zzz_alpha_over_zzz_beta") is None
+
+
+@requires_isn
+class TestInfixOperatorSpelling:
+    """A registered multi-word operator split around the operand it applies to."""
+
+    @pytest.mark.parametrize(("segment", "token"), INFIX_EXPRESSIBLE)
+    def test_infix_operator_is_composable(self, segment, token):
+        comp = operator_composition(token)
+        assert comp is not None
+        assert classify_gap(segment, token)[0] != "absent"
+
+    def test_reports_the_whole_registered_operator(self):
+        comp = operator_composition("derivative_of_area_with_respect_to_poloidal_flux")
+        assert comp is not None
+        assert "derivative_with_respect_to" in comp.operators
+        assert "area" in comp.bases
+
+    def test_a_split_operator_needs_both_halves_present(self):
+        """Only the head of a multi-word operator is not an infix spelling."""
+        assert operator_composition("derivative_of_zzz_unknown_xyzzy") is None
+
+    def test_the_residue_must_still_be_registered(self):
+        assert (
+            operator_composition("derivative_of_wibble_with_respect_to_frobnicator")
+            is None
         )
 
 
