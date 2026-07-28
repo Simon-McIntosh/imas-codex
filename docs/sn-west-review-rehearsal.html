@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-impl" content="0.72">
 </head>
 <body>
@@ -1152,7 +1152,7 @@ DONE-WHEN
      on the catalog_edit retirement.
   4. Full SN suite green; committed and pushed.</pre>
     </article>
-<article class="r-fu" data-id="f-swrr-013" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T06:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-013" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T06:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-28T07:15:22+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">CUT THE RC — the gate is met at 322/355, stop widening scope</h4>
     <div class="r-fu-body"><p><strong>The release gate is met and the RC is cuttable now.</strong> Measured against the manifest: <strong>322 of 355 WEST sources carry an accepted name</strong> and the batch resolves <strong>223 distinct names from 321 paths</strong>. The residual 33 is 15 legitimately non-nameable (9 eligibility-skipped, 4 true vocab gaps, 2 failed), 7 drafted awaiting review (~$2 at the measured $0.27/name), 7 needing refine, 5 in flight, 2 superseded relinks. The plan's own course correction already settled this: stage 1's “every eligible source accepted” is a GATE, not the deliverable, and the batch is amply large to exercise the review loop. <strong>Stages 2–6 still have zero coverage.</strong> Cut the RC, open the fork PR, and get a human into stage 3.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -1230,6 +1230,183 @@ DONE-WHEN
   2. §3 stages 0–2 collapsed; stages 3–6 queued.
   3. This followup resolved. Nothing above the line left undone; nothing below it
      started.</pre>
+    <p class="r-fu-outcome">SUPERSEDED by f-swrr-014 on lead direction: chase every WEST issue before releasing rather than cutting at 322/355. f-swrr-013 said cut now; the lead's call is that no shoddy work ships, approached in a structured way. Non-WEST work has been moved out to a new plan, sn-graph-wide-integrity, so the release is no longer blocked by work it does not depend on. The split was measured, not judged: 262 names are produced by a WEST path, and every open defect was partitioned by whether it touches the 355-source manifest or one of those names. Results — name-level defects 6 WEST / 2 not; orphaned names 0 WEST (an orphan has no sources, so none is WEST-produced) / 151 not; semantic-source ledger violations 48 WEST / 1410 not; line_of_sight paths in the manifest 46 (so the /z and /phi fold IS WEST-blocking); thick_line paths 0 (so the geometry-representation rule is NOT, and moved out); gm1-gm9 all 9 in WEST (so the metric collapse is squarely WEST-blocking). Write paths split on the same basis: persist_refined_name stays WEST-blocking because refining a WEST name runs it and it migrates a source set onto a new name with no re-validation; the other three ungated paths are not exercised by the release drain and moved out.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-014" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T07:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close every WEST issue, then cut the RC — 59 unaccepted sources, 6 name defects, 48 ledger rows</h4>
+    <div class="r-fu-body"><p><strong>Lead direction: no shoddy work ships. Chase every pending WEST issue before releasing, structured.</strong> All non-WEST work has moved to <a href="/imas-codex/sn-graph-wide-integrity.html">sn-graph-wide-integrity</a>, so nothing here is a detour. Measured scope: <strong>59 of 355 WEST sources are not accepted</strong> (31 drafted awaiting review, 9 eligibility-skipped, 4 vocab-gap, 2 failed, 13 across exhausted/superseded/in-flight), <strong>6 WEST-touching name-level defects</strong> (all already staged via <code>sn edit</code>), and <strong>48 WEST-touching provenance ledger rows</strong> — dominated by the line-of-sight <code>/z</code> and <code>/phi</code> splits, which 46 manifest paths make release-blocking. The <code>gm1</code>–<code>gm9</code> collapse is the densest cluster: five of the nine are among the unaccepted.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — close every WEST issue, then cut the RC
+Tier:    opus
+
+THE GOAL HAS NOT CHANGED: one operational pass of the whole loop with a human in
+the loop (§1). What changed is the standard: the lead wants every WEST issue
+chased before the release candidate, not a cut at 322/355. Nothing below is a
+detour — all non-WEST work now lives in sn-graph-wide-integrity. If you find
+yourself working on a path that is not in the manifest, or a name no WEST path
+produces, STOP: it belongs to the other plan.
+
+SCOPE IS THE MANIFEST
+  imas_codex/standard_names/manifests/west_task_2e.yaml — 355 sources, 22 IDS.
+  262 names are produced by at least one WEST path. That set is the scope.
+
+State to read FIRST
+  docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html
+  docs/archive/sn-west-review-rehearsal-write-path-verdicts.html
+  imas_codex/standard_names/AGENTS.md   (keep-list, guard failure modes, unit authority)
+
+VERIFIED STATE (2026-07-28)
+  WEST accepted 296/355 at last measure, 59 unaccepted. A free local compose
+  drain (`sn run --names-only --only compose`) was still running at hand-off —
+  check whether it finished and re-measure before planning anything.
+  Campaign spend ~$76 of the 500 ceiling. Review costs ~$0.27/name measured;
+  --cost-limit overshoot was 1.05x on the last run, much tighter than the
+  historical 1.7-2.7x.
+  Attachment audit idempotent. Unit detector explained. 9 sn edit repairs staged.
+
+THE 59 UNACCEPTED, GROUPED BY WHAT THEY NEED
+
+  A. 31 DRAFTED — need a review pass (paid, ~$9 at measured rate).
+     Overwhelmingly the line-of-sight family
+     (&lt;ids&gt;/channel/line_of_sight/{first,second,third}_point/{r,z,phi} across
+     bremsstrahlung_visible, camera_x_rays, ece, interferometer, mse,
+     polarimeter, soft/hard_x_rays, spectrometer_*, refractometer,
+     reflectometer_*). These regenerated under the ordinality fix, so they should
+     score well. Run scoped: sn run --batch west_task_2e --only review
+     --names-only --cost-limit 15
+
+  B. THE gm1-gm9 CLUSTER — five of nine unaccepted and it is the densest
+     failure in the corpus. gm1 failed/vocab_gap, gm2 superseded
+     (radial_contravariant_flux_surface_averaged_metric), gm4 vocab_gap,
+     gm5 failed/vocab_gap_nonactionable, gm6 extracted. Verified DD semantics:
+     gm1=&lt;1/R^2&gt; m^-2, gm2=&lt;|grad rho|^2/R^2&gt; m^-2, gm3=&lt;|grad rho|^2&gt; 1,
+     gm4=&lt;1/B^2&gt; T^-2, gm5=&lt;B^2&gt; T^2, gm6=&lt;|grad rho|^2/B^2&gt; T^-2,
+     gm7=&lt;|grad rho|&gt; 1; gm8/gm9 already correct. Seven distinct quantities
+     across four dimensionalities. Each must end with its OWN name carrying its
+     OWN unit. The vocab_gap statuses say the composer cannot express some of
+     them — read the recorded skip_reason_detail (segment:token) before assuming
+     an ISN addition is needed; operators (flux_surface_averaged, square,
+     inverse) may already cover it.
+
+  C. THE LINE-OF-SIGHT FOLD — release-blocking (46 manifest paths).
+     One DD family reads under two names: 43 sources on
+     vertical_coordinate_of_beam_tracing_point and 23 on
+     vertical_coordinate_of_line_of_sight, with 10 leaves carrying BOTH; same
+     shape on /phi (41 vs 3). This produces most of the 48 WEST ledger rows.
+     ROOT CAUSE IS KNOWN: supersede_prior_source_names exempts
+     origin=&#x27;catalog_edit&#x27; from the one-live-name-per-source dedup
+     (graph_ops.py ~10873), so a recompose retired every competing PIPELINE name
+     and left the imported one standing. Per the lead the catalog is NEVER the
+     source of truth and those imports are an old method to be resolved through
+     review — so that exemption is a DEFECT, and the fold needs no separate
+     authorization. Fold onto the sightline name (which matches the accepted /r
+     and /phi members), NOT onto beam_tracing_point. Confirm with a dry run
+     whether `sn edit --rename` resolves this as a merge or whether `sn merge` is
+     the right instrument, since the target already exists as a live name.
+     POPULATION DISCIPLINE: ~156 of these attachments are correct physics merely
+     split across two names — FOLD them, never detach. Only the 29 thick_line
+     conductor vertices are genuinely misattached, and ZERO of those are in the
+     WEST manifest, so they belong to the other plan.
+
+  D. 6 NAME-LEVEL DEFECTS — already staged via `sn edit --stage-only`, awaiting
+     compose + review: atomic_count_of_ion_state (76 src, claims state
+     resolution over element-level paths), equilibrium_weight_of_interferometer_beam,
+     extent_of_hard_xray_detector (camera_x_rays is not hard_x_rays, and it is a
+     camera dimension not a detector element), frequency_of_diagnostic_antenna,
+     poloidal_magnetic_flux_at_measurement_position (name right, unit was W — both
+     DD psi facets now declare Wb so recompose injects the correction),
+     radiance_at_spectral_line (declares energy radiance against photon-radiance
+     sources). Land them with the batch review in A.
+     ALSO in flight: ion_state_maximum_charge_number, a rename already applied and
+     sitting at drafted — it MUST earn acceptance through the quorum. It parses
+     (subject=ion_state, physical_base=maximum_charge_number). Do not hand-accept.
+
+  E. 15 LEGITIMATELY NON-NAMEABLE — verify and DOCUMENT, do not chase:
+     9 skipped (4 bare, 4 non_nameable_coordinate:time, 1 temporal_coordinate —
+     camera_x_rays/detector_humidity{,/time}, camera_x_rays/frame/time,
+     equilibrium/time_slice/convergence/iterations_n, several /time leaves),
+     4 vocab_gap, 2 failed. For each, record WHY it cannot carry a standard name
+     so the PR body can state it. A reviewer seeing 355 sources and 340 names
+     needs the 15 accounted for.
+
+  F. THE REMAINDER — 13 across exhausted/superseded/in-flight. Notable:
+     camera_dimensions and the two hard_x_rays half_widths are exhausted with
+     competing names; n_e_line measured/reconstructed carry both
+     accumulated_electron_number_density_at_line_of_sight and
+     line_integrated_electron_density (pick one); dvolume_dpsi and
+     polarization_initial exhausted; b_field_average has an exhausted and a
+     pending name. `sn rescore` is the sanctioned recovery for a sound name that
+     hit the refine cap on quorum variance — it resubmits the SAME name for a
+     fresh draw. Never reword to dodge a score, never hand-accept.
+
+  G. GATE persist_refined_name BEFORE REFINING (WEST-blocking prerequisite).
+     It migrates a predecessor&#x27;s entire PRODUCED_NAME + HAS_STANDARD_NAME set onto
+     the successor with NO re-validation (graph_ops.py ~10750-10770), which is how
+     29 conductor vertices reached sightline names. Refining WEST names runs this
+     path, so gate it FIRST or the repair can launder a new bad edge. The
+     migration is one large Cypher statement: filter the source set in Python
+     before the query, or re-validate the successor&#x27;s attachments immediately
+     after, scoped to the one name (it is a hot path — not a full audit).
+
+ORDER OF WORK
+  1. Re-measure (the compose drain may have moved everything).
+  2. G — gate persist_refined_name. Free, and it protects everything after it.
+  3. C — the line-of-sight fold. Free (structural), and it clears most of the 48
+     ledger rows and removes the double-attachment before review scores anything.
+  4. A + D — one scoped review pass, cap 15. Lands the 31 drafted and the 6
+     staged repairs together.
+  5. B — the gm cluster. Read the skip_reason_detail first; add ISN tokens only
+     if genuinely absent (follow the vocab rotation workflow in
+     docs/architecture/standard-names.md).
+  6. F — rescore/refine the remainder.
+  7. E — document the non-nameable 15.
+  8. VERIFY: attachment audit idempotent; unit detector explained; the 48 WEST
+     ledger rows resolved or reasoned; `uv run pytest tests/graph/ -m graph -q`
+     failures all attributable to the other plan&#x27;s non-WEST data.
+  9. CUT IT:
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     Mints v0.&lt;n&gt;.0rc&lt;N&gt;+west-task-2e. Verify: additive diff (approved set
+     byte-identical); catalog.yml export_scope=review + review_batch; artifact
+     frozen at manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND
+     batch_label; RC-tagged; PR open on the FORK (never --final in act 1). Record
+     RC version, PR URL, batch size, and judge the LLM-written PR body — first
+     live output of the sn-release-notes seat.
+ 10. Collapse §3 stages 0-2; queue stages 3-6 (human review → sn merge fold-back
+     exercising the graph-merged: tag → freeze-check → --undo unwind).
+
+OUT OF SCOPE — all in sn-graph-wide-integrity, do not start any of it
+  2 non-WEST name defects; 151 orphaned names; 1410 non-WEST ledger rows; the
+  three other ungated write paths; the geometry-representation rule (0 thick_line
+  paths in WEST); the embed-server 384-vs-256 dimension mismatch; the
+  get_dd_version_context drift; the plan-label comment residue; eval_sets JSON.
+
+Constraints
+  - Gap-only; never --reseed. PR target stays fork.
+  - The stage-0 snapshot exists; do NOT re-snapshot.
+  - NEVER hand-accept a name or hand-edit graph text. Acceptance is earned only
+    through the RD-quorum; corrections go through `sn edit`.
+  - A DD pin is immutable.
+  - Budget: ~$76 of 500 spent. Compose free, review ~$0.27/name. Expect ~$15-30
+    total for everything above.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check (2a case-INsensitive,
+    2b case-SENSITIVE) over every path you stage.
+  - No AI attribution in ANY commit, issue, PR or comment.
+  - Cold-import artifact: warm with
+    `uv run python -c &quot;import imas_codex.discovery, litellm&quot;` before diagnosing
+    any setup-time test timeout — it makes EVERY test in a file error at setup.
+
+Done-when
+  1. Every one of the 355 WEST sources is EITHER accepted OR documented as
+     non-nameable with a stated reason. No unexplained residual.
+  2. The 6 name defects landed on merit; the staged rename accepted or rejected
+     by the quorum, not by hand.
+  3. The line-of-sight family reads under one name per axis; the 48 WEST ledger
+     rows resolved or reasoned.
+  4. persist_refined_name gated; attachment audit idempotent; unit detector clean.
+  5. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
+  6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
     </article>
 </section>
 

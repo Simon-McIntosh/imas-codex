@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-graph-wide-integrity">
+  <meta name="plan-title" content="Graph-wide name integrity (everything outside the release batch)">
+  <meta name="plan-summary" content="Close the provenance and attachment defects in the exploratory half of the corpus — the deliberately-broad generation across ~half the DD catalog — plus the write-path gaps and carried findings that the WEST release does not depend on.">
+  <meta name="plan-status" content="proposed">
+  <meta name="plan-roi" content="medium">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-west-review-rehearsal">
+  <title>Graph-wide name integrity | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-version" content="1">
+<meta name="plan-impl" content="0">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why this plan exists</h2>
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>This plan exists so the WEST release stops being blocked by work
+        it does not depend on.</strong> Names were generated across roughly half
+        the DD catalog deliberately and broadly, to shake out errors. That
+        succeeded — it surfaced a large number of genuine defects — but the
+        exploratory half is not a release set, and repeatedly widening scope into
+        it has delayed the one thing the parent plan exists to do: get a human
+        into the review loop.
+      </p>
+      <p style="margin:0;">
+        Everything here is <strong>real and tracked</strong>. None of it is
+        release-blocking for
+        <a href="/imas-codex/sn-west-review-rehearsal.html">sn-west-review-rehearsal</a>,
+        and the split was made by measurement rather than by judgement — see
+        §2 for the method.
+      </p>
+    </div>
+
+    <h2 id="s2">§2 — How the split was measured</h2>
+    <p>
+      Every open defect was partitioned by asking one question of the live graph:
+      <em>does it touch a path in the 355-source WEST manifest, or a name that a
+      WEST path produces?</em> 262 names are produced by at least one WEST path.
+      Anything outside that set landed here.
+    </p>
+    <table>
+      <thead><tr><th>Defect class</th><th>WEST</th><th>Here</th></tr></thead>
+      <tbody>
+        <tr><td>Name-level defects (every source rejected by one rule)</td>
+            <td>6</td><td><strong>2</strong></td></tr>
+        <tr><td>Orphaned names (no producing source at all)</td>
+            <td>0 <em>(an orphan has no sources, so none is WEST-produced)</em></td>
+            <td><strong>151</strong></td></tr>
+        <tr><td>Semantic-source ledger violations</td>
+            <td>48</td><td><strong>1410</strong></td></tr>
+        <tr><td><code>line_of_sight</code> paths in the manifest</td>
+            <td>46 — <em>fold is WEST-blocking</em></td><td>—</td></tr>
+        <tr><td><code>thick_line</code> paths in the manifest</td>
+            <td><strong>0</strong></td>
+            <td>the geometry-representation rule belongs <strong>here</strong></td></tr>
+        <tr><td><code>gm1</code>–<code>gm9</code> flux-surface metrics</td>
+            <td>all 9 — <em>WEST-blocking</em></td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The two numbers that decided the write-path split:
+      <code>persist_refined_name</code> is WEST-blocking because refining a WEST
+      name runs it, and it migrates a source set onto a new name with no
+      re-validation. The other three ungated paths are not exercised by the
+      release drain, so they are here.
+    </p>
+
+    <h2 id="s3">§3 — Orphaned names: 151, and the number is the finding</h2>
+    <p>
+      A name with no producing source has lost its entire justification. The heal
+      surfaced these rather than auto-superseding them, because whether the
+      concept survives is a human decision. By stage: <strong>114
+      <code>exhausted</code></strong>, <strong>22 <code>accepted</code></strong>,
+      10 <code>pending</code>, 5 <code>reviewed</code>.
+    </p>
+    <p>
+      The 114 exhausted ones are cheap: a name that reached the refine cap and
+      then lost every source is dead twice over and can be superseded in bulk. The
+      <strong>22 accepted</strong> are the real work — each was catalog-eligible,
+      so each needs a decision: supersede, or re-source from a DD path that
+      genuinely realizes it. Three worked examples showing why this is judgement
+      and not bookkeeping:
+    </p>
+    <ul>
+      <li><code>tritium_density</code> and <code>deuterium_density</code> were
+        sourced <em>solely</em> from
+        <code>neutron_diagnostic/reconstructed_emissivity/fuel_ratio</code> — a
+        dimensionless ratio. The names are real physics that deserve re-sourcing
+        from actual density paths; the attachment was the defect.</li>
+      <li><code>time_derivative_of_bremsstrahlung_count_at_detector_pixel</code>
+        had one source, a plain intensity path. The concept was invented from a
+        mis-attachment and should go.</li>
+      <li>The six <code>*_measurement_direction_unit_vector_of_strain_gauge</code>
+        names lost their sources to the dimensionality rule (the DD tags unit
+        vectors <code>m</code>). Those are registry-excepted DD defects, so the
+        names are right and the detachment needs reviewing.</li>
+    </ul>
+    <p>
+      Do not bulk-supersede the accepted 22. Do not fabricate a source for any of
+      them.
+    </p>
+
+    <h2 id="s4">§4 — The provenance ledger, and one invariant question</h2>
+    <p>
+      <code>find_semantic_source_invariant_violations</code> is wired as a
+      graph-quality test and fails on <strong>1458 of ~5580</strong>
+      composed/attached sources (48 of them WEST, which the parent plan owns).
+      Four classes, and they are not all defects:
+    </p>
+    <table>
+      <thead><tr><th>n</th><th>Class</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>596</td><td>no live <code>PRODUCED_NAME</code> target — every target superseded</td>
+            <td>Genuine orphaning. Some write path supersedes without retargeting;
+                <code>retarget_standard_name_sources</code> exists precisely to
+                prevent it. Find the path.</td></tr>
+        <tr><td>336</td><td><code>produced_sn_id</code> scalar disagrees with the edge</td>
+            <td>Genuine — and <strong>not</strong> the known scalar-rot pattern.
+                These scalars hold a <em>different live</em> name, so
+                <code>reconcile_provenance</code> (which only nulls stale
+                scalars) will never catch them.</td></tr>
+        <tr><td>305</td><td>backing DD path lacks the <code>HAS_STANDARD_NAME</code> projection</td>
+            <td>Projection desync; the dd-edge reconcile should close it.</td></tr>
+        <tr><td>240</td><td>more than one live target (fan-out)</td>
+            <td><strong>Possibly not a defect at all — decide this first.</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>The fan-out class is an invariant question, not a data question.</strong>
+      A line-of-sight point legitimately carries both a sightline name and a
+      beam-tracing name; <code>bremsstrahlung_visible/channel/radiance_spectral</code>
+      carries both <code>spectral_bremsstrahlung_radiance</code> and
+      <code>spectral_radiance</code>. If one DD path genuinely supports two names,
+      then single-valued <code>PRODUCED_NAME</code> is the wrong invariant and the
+      <em>checker</em> needs amending — not the data. Settle that before touching
+      any of the 240, because "fixing" them would destroy correct provenance.
+    </p>
+
+    <h2 id="s5">§5 — Write-path gating and the guard's blind spot</h2>
+    <p>
+      Per-path verdicts with file:line are recorded in
+      <a href="/imas-codex/archive/sn-west-review-rehearsal-write-path-verdicts.html">the write-path verdicts</a>.
+      Three of the four ungated paths land here (the fourth,
+      <code>persist_refined_name</code>, is WEST-blocking):
+    </p>
+    <ul>
+      <li><strong><code>write_standard_names</code></strong> — the bulk persist
+        writes the DD-side projection with no guard at all, so an import-shaped
+        batch bypasses the compose gates entirely.</li>
+      <li><strong><code>bind_sources_exclusively</code> /
+        <code>retarget_standard_name_sources</code></strong> — exclusive rebind
+        onto a different name is a fresh claim about every source moved, and it
+        <em>deletes</em> the prior edges, so an ungated rename both mis-attaches
+        and destroys the evidence.</li>
+      <li><strong><code>reconcile_standard_name_dd_edges</code></strong> — already
+        applies the unit rule; extend it to the full guard. Cheap and additive.</li>
+      <li><strong>The recovery-snapshot replay</strong> needs no write-time guard
+        but is a non-exclusive MERGE, so it leaves a replayed set coexisting with
+        a later recompose. Make a consistency reconcile mandatory immediately
+        after any rebuild, in the same operation.</li>
+    </ul>
+    <p>
+      Four paths must <strong>NOT</strong> be gated — the derived-parent
+      materializer, the orphan-parent reconcile, the provenance edge reattach, and
+      the snapshot replay. Each re-establishes an edge against the <em>same</em>
+      name or builds scaffolding the guard was never calibrated for; gating a
+      faithful reconstruction with a newer rule destroys history rather than
+      protecting it.
+    </p>
+    <p>
+      <strong>The guard's blind spot.</strong> A missing geometry-representation
+      rule: a path under
+      <code>…/geometry/{thick_line,outline,rectangle,oblique,arcs_of_circle}/…</code>
+      describes a solid conductor's poloidal cross-section, not an optical path,
+      and must not realize a <code>line_of_sight</code>/<code>beam</code> name.
+      29 attachments are wrong this way and <strong>the guard accepts every one</strong>
+      — both sides are metres so the dimensionality rule is silent, and the locus
+      tokens are not hardware words. Zero <code>thick_line</code> paths are in the
+      WEST manifest, which is why this sits here rather than in the release plan.
+      Separately, the <code>*_outline_of_*</code> family is damaged and unsized:
+      <code>vertical_outline_of_antenna_strap</code> has swallowed 15 unrelated
+      paths (cryostat, vessel, contour-tree, iron-core outlines). Do not rebind
+      <code>thick_line</code> paths into that family.
+    </p>
+
+    <h2 id="s6">§6 — Carried findings (found here, homed here)</h2>
+    <ul>
+      <li><strong>The embed server serves the wrong dimension.</strong> All 19
+        vector indexes are 256, matching
+        <code>[tool.imas-codex.embedding] dimension = 256</code>, but 20 search
+        tests fail with <code>index 384 vs provided 256</code> — so the server is
+        returning 384-dim vectors and the Matryoshka truncation on
+        <code>Qwen/Qwen3-Embedding-0.6B</code> is not being applied. This breaks
+        semantic search. Highest-value item in this plan and independent of
+        everything else in it.</li>
+      <li><strong><code>get_dd_version_context</code> behaviour drift</strong> —
+        returns <code>rename_chains</code> where two tests expect
+        <code>error</code>.</li>
+      <li><strong>The <code>catalog_edit</code> dedup exemption is a defect.</strong>
+        <code>supersede_prior_source_names</code> exempts
+        <code>origin='catalog_edit'</code> from the one-live-name-per-source
+        dedup, which is what froze one coordinate axis split across two names.
+        Settled by direction: the catalog is never the source of truth and those
+        imports are an old method to be resolved through review, so the exemption
+        protects nothing.</li>
+      <li><strong>Plan-label comment residue</strong> — filenames are 100% clean
+        and the mandatory pre-stage checks are in
+        <code>~/.agents/AGENTS.md</code> with the domain keep-list in
+        <code>imas_codex/standard_names/AGENTS.md</code>. Residue is
+        comment-only, ~307 files under the corrected check and heavily
+        false-positive. Lowest priority here; the checks stop it growing.</li>
+      <li><strong><code>tests/standard_names/eval_sets/*.json</code></strong> —
+        plan citations in <code>notes</code> fields and a <code>_v1</code> version
+        suffix in a filename.</li>
+    </ul>
+
+    <h2 id="s7">§7 — Sequencing and budget</h2>
+    <p>
+      Compose is free (local GPU); review is the only paid stage, measured at
+      <strong>$0.27/name</strong>. A graph-wide review of the ~890 sources awaiting
+      compose is therefore roughly <strong>$150–250</strong> — real money, and the
+      reason this is a separate plan rather than a tail on the release.
+    </p>
+    <p>Recommended order, cheapest-signal-first:</p>
+    <ol>
+      <li><strong>Settle the fan-out invariant</strong> (§4). Free, and it decides
+        whether 240 of the 1458 violations are defects at all.</li>
+      <li><strong>The embed dimension mismatch</strong> (§6). Independent, breaks
+        a whole capability, probably small.</li>
+      <li><strong>Find the supersede-without-retarget path</strong> (§4, 596
+        cases). One code fix likely collapses the largest class.</li>
+      <li><strong>Gate the three write paths + add the geometry rule</strong> (§5).
+        Free, and it stops the defect classes regenerating.</li>
+      <li><strong>Then</strong> the orphan decisions (§3) and a budgeted
+        graph-wide review — in that order, because gating first means the review
+        does not have to be repeated.</li>
+    </ol>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fanout-invariant" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-fanout — may one DD path legitimately produce two live standard names, or is single-valued PRODUCED_NAME the invariant?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="amend-checker">Fan-out is legitimate — amend the checker, and the 240 violations are not defects (Recommended: a line-of-sight point plausibly carries both a sightline and a beam-tracing name)</button>
+      <button class="r-opt" data-value="one-name">One source, one live name — the 240 are genuine and need repair</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="orphan-policy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-orphans — how to treat the 151 names left with no producing source?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="split">Bulk-supersede the 114 exhausted; decide the 22 accepted individually (Recommended)</button>
+      <button class="r-opt" data-value="all-individual">Decide all 151 individually</button>
+      <button class="r-opt" data-value="bulk-all">Bulk-supersede everything with no source</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sgwi-001" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T07:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Settle the fan-out invariant, fix the embed dimension, then gate the write paths</h4>
+    <div class="r-fu-body"><p>The first three steps of §7, in order, because each is cheap and each changes how much work the rest is. Settling the fan-out question is free and decides whether 240 of the 1458 ledger violations exist at all; the embed-dimension mismatch is independent and breaks semantic search outright; finding the supersede-without-retarget path likely collapses the largest violation class in one fix. Only then gate the write paths, so the defect classes stop regenerating before any money is spent on review. <strong>Do not start the graph-wide review pass, and do not touch anything in the WEST manifest — that is the parent plan's release set.</strong></p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
+Section: §4 → §6 → §4 → §5 (the first four steps of §7)
+Tier:    opus
+
+SCOPE BOUNDARY — READ FIRST
+  This plan is everything OUTSIDE the WEST release batch. The 355-source manifest
+  at imas_codex/standard_names/manifests/west_task_2e.yaml and the 262 names its
+  paths produce belong to sn-west-review-rehearsal, which is trying to cut a
+  release candidate. Do NOT touch them, do NOT run a WEST-scoped drain, and do
+  NOT run an unscoped paid review (it would spend the release plan's budget on
+  the exploratory half).
+
+State to read FIRST
+  docs/archive/sn-west-review-rehearsal-write-path-verdicts.html
+    — per-path verdicts with file:line, the line-of-sight root cause, and the
+      two gaps in the guard itself.
+  docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html
+    — the five guard/audit defects and the heal numbers.
+  imas_codex/standard_names/AGENTS.md
+    — the domain keep-list, guard failure modes, unit authority, acceptance rules.
+
+Do, in order
+
+  1. SETTLE THE FAN-OUT INVARIANT (free, and it gates the rest).
+     240 of 1458 ledger violations are "more than one live PRODUCED_NAME target".
+     Sample them and decide whether that is a defect or a wrong invariant. Real
+     examples to reason from:
+       bremsstrahlung_visible/channel/radiance_spectral
+         -> spectral_bremsstrahlung_radiance + spectral_radiance
+       <ids>/channel/line_of_sight/first_point/z
+         -> vertical_coordinate_of_line_of_sight + vertical_coordinate_of_beam_tracing_point
+       core_profiles/profiles_1d/grid/psi_boundary
+         -> poloidal_magnetic_flux_at_constraint_position + ..._at_plasma_boundary
+     If a path genuinely supports two names, amend
+     find_semantic_source_invariant_violations rather than the data, and say so in
+     the decision. Lock D-fanout either way with your reasoning — this is a
+     design call and it must be recorded, not implied by a code change.
+
+  2. THE EMBED DIMENSION MISMATCH (independent, highest value in this plan).
+     All 19 vector indexes are 256, matching [tool.imas-codex.embedding]
+     dimension = 256, but 20 search tests fail with `index 384 vs provided 256`.
+     So the SERVER is returning 384-dim vectors: the Matryoshka truncation on
+     Qwen/Qwen3-Embedding-0.6B is not being applied. Find where the dimension is
+     (or is not) passed to the server, fix it, and confirm the failing tests pass.
+     Check `imas-codex embed status` and the service sbatch builder. Do NOT
+     rebuild the indexes to 384 — 256 is the configured contract.
+
+  3. FIND THE SUPERSEDE-WITHOUT-RETARGET PATH (596 cases, the largest class).
+     596 sources are composed/attached yet have no live PRODUCED_NAME target —
+     every target superseded, never retargeted.
+     retarget_standard_name_sources exists precisely to prevent this, so some
+     path supersedes a name without calling it. Find it, fix it at write time,
+     then heal the existing 596 (excluding any WEST source). One fix should
+     collapse the class.
+     NOTE the 336 scalar-disagreement cases are a DIFFERENT bug: those scalars
+     hold a DIFFERENT LIVE name, so reconcile_provenance (which only nulls stale
+     scalars) will never catch them. Needs its own reconcile.
+
+  4. GATE THE THREE WRITE PATHS + ADD THE GEOMETRY RULE (free, stops regeneration).
+     Gate: write_standard_names; bind_sources_exclusively /
+     retarget_standard_name_sources; extend reconcile_standard_name_dd_edges from
+     the unit rule to the full guard. Make a consistency reconcile MANDATORY
+     immediately after any recovery-snapshot rebuild (that path needs no
+     write-time guard — it is a faithful replay — but being a non-exclusive MERGE
+     it leaves a replayed set coexisting with a later recompose).
+     MUST NOT be gated, with the reasoning already established: the
+     derived-parent materializer, the orphan-parent reconcile, the provenance
+     edge reattach, the snapshot replay.
+     Then the geometry-representation rule: a path under
+     …/geometry/{thick_line,outline,rectangle,oblique,arcs_of_circle}/… must not
+     realize an optical-locus name (line_of_sight / beam / sight) and vice versa.
+     Per the DD, thick_line approximates a solid conductor's poloidal
+     cross-section as a rectangle defined by a central segment plus a
+     perpendicular thickness — every affected IDS is structural hardware
+     (pf_active, pf_passive, pf_plasma, iron_core, ferritic, ic_antennas/strap).
+     29 attachments are wrong this way and the guard ACCEPTS all 29 today: both
+     sides are metres so dimensionality is silent, and the locus tokens are not
+     hardware words. A test must prove the 29 now REJECT and the sightline pairs
+     still ACCEPT. These are IMAS-DD PATH tokens, which AGENTS.md permits codex
+     to own — they are not ISN grammar vocabulary.
+
+Do NOT do in this followup
+  - The orphan decisions (§3) — needs D-orphans locked first.
+  - Any graph-wide paid review (~$150–250) — after gating, separately budgeted.
+  - The comment residue (§6) — lowest priority, and the pre-stage checks stop it
+    growing.
+
+Constraints
+  - TDD. Never hardcode ISN grammar vocabulary; DD path tokens are fine.
+  - NEVER hand-accept a name or hand-edit graph text; corrections go via `sn edit`.
+  - A DD pin is immutable.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check (all three, note 2a is
+    case-INsensitive and 2b is case-SENSITIVE) over every path you stage.
+  - No AI attribution in ANY commit, issue, PR or comment.
+  - Cold-import artifact: a first `import imas_codex.discovery` pulls litellm's
+    pydantic build past the 60s faulthandler limit and makes EVERY test in a file
+    error at SETUP, including pure-unit ones. Warm it with
+    `uv run python -c "import imas_codex.discovery, litellm"` before diagnosing
+    any setup-time timeout.
+
+Done-when
+  1. D-fanout locked with reasoning; the checker amended if that is the verdict.
+  2. Embed dimension fixed; the 20 search tests pass.
+  3. The supersede-without-retarget path found and gated; the 596 healed
+     (excluding WEST sources); the 336 scalar class diagnosed.
+  4. Three write paths gated, four deliberately not, geometry rule added with a
+     test proving the 29 reject and sightline pairs still accept.
+  5. Full SN suite no worse than baseline; committed and pushed; outcomes
+     recorded and the next followup queued.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
