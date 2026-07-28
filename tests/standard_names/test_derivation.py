@@ -385,9 +385,9 @@ class TestGeometricCoordinateDerivation:
     def test_compound_coordinate_measurement_position_no_component_edge(self):
         """vertical_coordinate_of_measurement_position → no HAS_PARENT edge.
 
-        Without the fix, this would create a HAS_PARENT edge to
-        'coordinate', grouping unrelated positions together.
-        May produce a HAS_LOCUS edge to measurement_position.
+        A HAS_PARENT edge to the bare 'coordinate' base here would group
+        every unrelated position under one root, so no parent edge is
+        emitted. May produce a HAS_LOCUS edge to measurement_position.
         """
         edges = derive_edges("vertical_coordinate_of_measurement_position")
         co = [e for e in edges if e.edge_type == "HAS_PARENT"]
@@ -544,13 +544,13 @@ class TestSelfLoopGuard:
 class TestQualifierLayerParent:
     """Pin the qualifier-peel HAS_PARENT edges.
 
-    Before this layer, names like `upper_elongation_of_plasma_boundary`
-    emitted zero HAS_PARENT edges (operator+projection branches both
-    no-op'd, leaf returned []), so the SPA's `_parent_token` shortcut
-    to `ir.base.token` chose `elongation` — grouping upper/lower
-    boundary elongation with unrelated flux-surface elongation under
-    a generic root. The fix peels ONE qualifier per call; recursion
-    happens when the inner SN runs its own derivation.
+    A name like `upper_elongation_of_plasma_boundary` matches neither the
+    operator nor the projection branch, and a leaf result of [] leaves the
+    SPA's `_parent_token` to shortcut to `ir.base.token` — which picks
+    `elongation`, grouping upper/lower boundary elongation with unrelated
+    flux-surface elongation under one generic root. The qualifier layer
+    therefore peels ONE qualifier per call; recursion happens when the
+    inner SN runs its own derivation.
     """
 
     def _component_of(self, name):

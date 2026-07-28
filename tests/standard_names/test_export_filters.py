@@ -1,17 +1,16 @@
 """Regression tests: export _fetch_candidates skips superseded/exhausted/quarantined.
 
-The stage gate must key on the authoritative field:
-  An earlier query used ``name_stage IN ['published','accepted','reviewed','enriched']``.
-  That field is NOT updated when a name is superseded — only ``name_stage`` is
-  authoritative.  A superseded node therefore kept its old stage property
-  value and was erroneously included in export.
+A membership-style stage gate (``name_stage IN [...several values...]``) is
+not sufficient: it admits the side states a rotation leaves behind, so a
+superseded or exhausted predecessor still matches and is exported alongside
+its own successor.
 
-Fix: replace the gate with
+The gate is an exact triple:
     name_stage = 'accepted' AND docs_stage = 'accepted' AND validation_status = 'valid'
 
-Writer confirmation: ``persist_refined_name_batch`` sets ``old.name_stage = 'superseded'``
-in graph_ops.py (the predecessor IS correctly marked), so filtering by
-``name_stage = 'accepted'`` is sufficient to exclude superseded nodes.
+``persist_refined_name_batch`` in graph_ops.py sets
+``old.name_stage = 'superseded'`` on the predecessor, so requiring
+``name_stage = 'accepted'`` is enough to exclude it.
 """
 
 from __future__ import annotations

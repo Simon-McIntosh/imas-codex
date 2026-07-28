@@ -146,8 +146,9 @@ async def _run_extract_with_rows(state, rows):
 async def test_docs_target_picks_up_name_reviewed_names():
     """target=docs must include names with reviewed_name_at but no reviewed_docs_at.
 
-    Before the fix, all of them were filtered out because ``reviewer_score``
-    was populated by the name-review bootstrap.
+    These are the entire docs backlog: the name-review bootstrap populates
+    ``reviewer_score``, so a filter reading that field excludes every one of
+    them and the docs axis silently starves.
     """
     state = _make_state(target="docs")
     await _run_extract_with_rows(state, [_NAME_WITH_NAME_REVIEW_ONLY])

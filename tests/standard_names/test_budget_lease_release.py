@@ -315,9 +315,8 @@ async def test_refine_docs_releases_lease_on_happy_path():
 # by the four tests above; refine_name uses identical reserve/charge/release
 # semantics, so the regression coverage is meaningful.
 #
-# compose_batch uses a single batch-level reservation (already correct,
-# served as the reference pattern in the fix). It is exercised by
-# tests/standard_names/test_compose_*.py.
+# compose_batch uses a single batch-level reservation — the reference shape
+# for this pattern. It is exercised by tests/standard_names/test_compose_*.py.
 
 
 @pytest.mark.skip(

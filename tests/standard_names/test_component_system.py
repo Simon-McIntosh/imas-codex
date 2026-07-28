@@ -201,14 +201,13 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
 
     Reproduces the bug where ``unary_postfix`` was added to the seedable
     edge-kinds set after some placeholders had already been written.
-    The earlier write path never set ``needs_composition`` on those
-    placeholders, so the old ``seed_parent_sources`` (which keyed on
-    ``needs_composition: true``) left them orphaned forever — and
-    ``sn run --flush`` correctly reported "no eligible work" even
-    though structurally those parents were ready to seed.
+    Seeding must not key on a ``needs_composition`` flag: nothing sets it
+    on these placeholders, so a flag-keyed ``seed_parent_sources`` leaves
+    them orphaned forever while ``sn run --flush`` truthfully reports "no
+    eligible work" even though the parents are structurally ready.
 
-    The fix: select parents structurally by ``name_stage IS NULL`` plus
-    a seedable HAS_PARENT edge — no flag required.
+    Parents are therefore selected structurally — ``name_stage IS NULL``
+    plus a seedable HAS_PARENT edge, no flag required.
     """
     gc = MagicMock()
     captured_cyphers: list[str] = []

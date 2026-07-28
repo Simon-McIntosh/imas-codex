@@ -44,7 +44,7 @@ class TestLatexDefCheck:
         assert any("latex_def_check" in i for i in issues)
 
     def test_fail_unit_only_is_not_a_definition(self):
-        """A bare parenthetical unit no longer satisfies the check — it states
+        """A bare parenthetical unit does not satisfy the check — it states
         the symbol's dimension, not which quantity it denotes."""
         from imas_codex.standard_names.audits import latex_def_check
 

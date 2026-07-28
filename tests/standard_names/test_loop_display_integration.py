@@ -75,9 +75,7 @@ class TestSNLoopStateHasWorkerStats:
             "done_domains",
             "current_domain",
         ):
-            assert not hasattr(state, dropped), (
-                f"SNLoopState should no longer expose {dropped}"
-            )
+            assert not hasattr(state, dropped), f"SNLoopState must not expose {dropped}"
 
 
 class TestWorkerStatsUpdates:
@@ -212,7 +210,7 @@ class TestBuildSNLoopStages:
         assert not by_name["REVISE"].disabled
 
     def test_revise_enabled_when_min_score_none(self):
-        """REVISE no longer auto-disables when min_score is None."""
+        """REVISE does not auto-disable when min_score is None."""
         stages = build_sn_loop_stages(min_score=None)
         by_name = {s.name: s for s in stages}
         assert not by_name["REVISE"].disabled
@@ -236,7 +234,7 @@ class TestBuildSNLoopStages:
         assert by_name["DOCUMENTATION"].disabled
 
     def test_skip_regen_arg_removed(self):
-        """build_sn_loop_stages no longer accepts skip_regen."""
+        """build_sn_loop_stages rejects skip_regen."""
         import inspect
 
         sig = inspect.signature(build_sn_loop_stages)

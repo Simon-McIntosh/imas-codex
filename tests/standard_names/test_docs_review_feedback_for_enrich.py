@@ -1,8 +1,9 @@
 """Verify docs-axis reviewer feedback flows from graph through fetch into enrich context.
 
-Closes Gap D from the prompt-context audit: prior to this, the enrich pipeline
-ran blind on re-enrichment cycles — the reviewer's docs-axis critique was
-written to the graph but never injected back into the enrich prompt.
+The reviewer's docs-axis critique is written to the graph, but it only
+improves anything if it is injected back into the enrich prompt: without that
+leg the enrich pipeline runs blind on every re-enrichment cycle and repeats
+the critiqued mistake.
 """
 
 from __future__ import annotations

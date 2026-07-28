@@ -1,10 +1,10 @@
 """Regression: Gate B fails loudly when ISN cannot be imported.
 
-Previously the grammar parse gate swallowed ``ImportError`` and logged a
-warning, letting the export proceed to emit an *unvalidated* catalog — and
-``_validate_entry`` would then crash on the same missing import anyway.
-A missing ISN toolchain must block the export at the gate with a clear
-``isn_unavailable`` issue, for both RC and final releases.
+A grammar parse gate that swallows ``ImportError`` and logs a warning lets
+the export proceed and emit an *unvalidated* catalog — and ``_validate_entry``
+crashes on the same missing import further downstream anyway. A missing ISN
+toolchain must block the export at the gate with a clear ``isn_unavailable``
+issue, for both RC and final releases.
 """
 
 from __future__ import annotations

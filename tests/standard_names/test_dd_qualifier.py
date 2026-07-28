@@ -2,9 +2,10 @@
 
 The DD qualifier consolidates all DD-specific qualification logic into
 ``qualify_dd()``: structural Python predicates (S0-S11) and unit eligibility.
-No YAML deny rules — all semantic quality judgments are delegated to the
-LLM at compose time. These tests cover every structural check and verify
-that formerly-denied paths (geometry, constraints, forces) are now eligible.
+There are no YAML deny rules: all semantic quality judgments are delegated
+to the LLM at compose time. These tests cover every structural check and
+verify that semantically-questionable-but-structurally-sound paths (geometry,
+constraints, forces) reach compose rather than being dropped here.
 """
 
 from __future__ import annotations
@@ -52,18 +53,18 @@ GOLD_SET: list[tuple[str, bool, str]] = [
     ("equilibrium/time_slice/profiles_1d/phi", True, ""),
     ("barometry/gauge/pressure", True, ""),
     # -------------------------------------------------------------------
-    # Eligible — formerly denied by YAML (now LLM-decided)
+    # Eligible — semantic judgment deferred to compose, not decided here
     # -------------------------------------------------------------------
-    # Geometry (formerly generic_cross_section_geometry deny rule)
+    # Generic cross-section geometry
     ("pf_active/coil/element/geometry/oblique/alpha", True, ""),
     ("pf_active/coil/element/geometry/rectangle/height", True, ""),
     ("pf_active/coil/element/geometry/annulus/radius_inner", True, ""),
     ("pf_passive/loop/element/geometry/oblique/alpha", True, ""),
     ("ferritic/element/geometry/thick_line/first_point/r", True, ""),
-    # Constraints (formerly boolean_constraint_selector deny rule)
+    # Boolean constraint selectors
     ("equilibrium/time_slice/constraints/flux_loop/exact", True, ""),
     ("equilibrium/time_slice/constraints/q/exact", True, ""),
-    # Forces (formerly control_system_parameter deny rule)
+    # Control-system force parameters
     ("pf_active/coil/force_self_per_unit_length", True, ""),
     ("pf_active/coil/force_other_per_unit_length", True, ""),
     # Boundary geometry — valuable physics
@@ -492,36 +493,37 @@ class TestS11ConfigurationFlags:
 
 
 # ============================================================================
-# Formerly YAML-denied paths now eligible (semantic delegation to LLM)
+# Semantic judgment is delegated to compose, not made by the qualifier
 # ============================================================================
 
 
-class TestFormerlyDeniedNowEligible:
-    """Paths that were denied by YAML rules are now eligible.
+class TestSemanticJudgmentDeferredToCompose:
+    """Structurally sound paths reach compose even if their value is arguable.
 
-    The LLM compose step decides at runtime whether to name or skip
-    these paths based on enriched context. The qualifier no longer
-    blocks them.
+    Whether a generic cross-section dimension or a boolean constraint selector
+    deserves a standard name is a semantic call that needs enriched context, so
+    the compose step makes it at runtime. A structural qualifier that guessed
+    here would drop the path before any context existed.
     """
 
     @pytest.mark.parametrize(
         "path",
         [
-            # Generic cross-section geometry (was 140 paths denied)
+            # Generic cross-section geometry
             "pf_active/coil/element/geometry/oblique/alpha",
             "pf_active/coil/element/geometry/rectangle/height",
             "pf_active/coil/element/geometry/annulus/radius_inner",
             "pf_passive/loop/element/geometry/oblique/alpha",
             "ic_antennas/antenna/module/strap/geometry/oblique/alpha",
-            # Boolean constraint selectors (was deny rule)
+            # Boolean constraint selectors
             "equilibrium/time_slice/constraints/flux_loop/exact",
             "equilibrium/time_slice/constraints/bpol_probe/exact",
-            # Control system parameters (was deny rule)
+            # Control system parameters
             "pf_active/coil/force_self_per_unit_length",
             "pf_active/coil/force_other_per_unit_length",
         ],
     )
-    def test_formerly_denied_now_eligible(self, path: str) -> None:
+    def test_structurally_sound_path_is_eligible(self, path: str) -> None:
         q = qualify_dd(_candidate(path))
         assert q.eligible, (
             f"{path} should be eligible — semantic quality judgment "

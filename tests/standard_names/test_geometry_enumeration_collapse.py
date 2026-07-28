@@ -87,7 +87,7 @@ def test_local_sensor_axes_use_registered_carriers(carrier):
 
 @pytest.mark.parametrize("carrier", ["x1_coordinate", "x2_coordinate"])
 def test_dd_shaped_local_axis_labels_are_rejected(carrier):
-    """DD x1/x2 axis labels are no longer registered geometry carriers."""
+    """DD x1/x2 axis labels are not registered geometry carriers."""
     with pytest.raises(ValidationError):
         GrammarSegments(base_token=carrier, base_kind="geometry")
 

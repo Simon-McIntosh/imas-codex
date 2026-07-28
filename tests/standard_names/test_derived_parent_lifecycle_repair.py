@@ -158,8 +158,8 @@ class _StatefulDerivedParentGraph:
             "parent.name_stage = 'accepted'" in cypher
             and "RETURN DISTINCT parent.id AS parent_id" in cypher
         ):
-            # Accepted-derived cleanup re-check (admission gate). No longer
-            # gated on docs_stage — any accepted derived parent is re-checked.
+            # Accepted-derived cleanup re-check (admission gate). Not gated
+            # on docs_stage — any accepted derived parent is re-checked.
             return []
 
         if "seedable_edges = 0" in cypher and "RETURN parent.id AS parent_id" in cypher:

@@ -1,13 +1,12 @@
-"""Bare ``[name]`` bracket normalization — source-of-truth (accept-path) fix.
+"""Bare ``[name]`` bracket normalization on the docs accept path.
 
 The docs LLM sometimes writes a related-name mention as a bare ``[name]``
-bracket despite the prompt rule; Markdown renders these broken. Historically a
-per-rotation reconcile swept them, but a doc written by a late in-flight task
-could finalize with a bare bracket after the sweep had run — occasionally an
-*accepted* doc carried one. The fix normalizes the node AT acceptance
-(:func:`persist_reviewed_docs`) so no accepted doc can carry a bare bracket,
-regardless of when the doc was written, with the post-drain reconcile retained
-as a belt-and-suspenders net.
+bracket despite the prompt rule; Markdown renders these broken. A
+per-rotation reconcile sweep cannot close this on its own — a doc written by
+a late in-flight task finalizes AFTER the sweep has run and reaches
+``accepted`` still carrying a bare bracket. Normalization therefore happens
+at acceptance (:func:`persist_reviewed_docs`), which no in-flight write can
+outrun, with the post-drain reconcile retained as a belt-and-suspenders net.
 
 Covers:
 - scoped ``_normalize_bare_doc_links(gc, sn_id=...)`` links live names and

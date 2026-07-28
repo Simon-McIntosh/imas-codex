@@ -29,8 +29,8 @@ class TestSignalSignatureAdmission:
         paths = {
             it.get("path") or it.get("source_id") for b in batches for it in b.items
         }
-        # magnetics/ip (STRUCT_ARRAY) and rogowski_coil/current (STRUCTURE) are
-        # signal containers — previously excluded by the leaf invariant.
+        # magnetics/ip (STRUCT_ARRAY) and rogowski_coil/current (STRUCTURE)
+        # are signal containers: the leaf invariant alone would exclude them.
         assert "magnetics/ip" in paths
         assert "magnetics/rogowski_coil/current" in paths
 

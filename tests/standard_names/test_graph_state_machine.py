@@ -116,10 +116,10 @@ class TestPersistGeneratedNameBatch:
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
-        # Grammar fields (physical_base, subject, etc.) are no longer
-        # extracted from compose `fields` dict — grammar decomposition
-        # happens inside write_standard_names() via _grammar_decomposition().
-        # Verify the compose output no longer carries legacy field names.
+        # Grammar fields (physical_base, subject, etc.) are NOT extracted
+        # from the compose `fields` dict — grammar decomposition happens
+        # inside write_standard_names() via _grammar_decomposition().
+        # Verify the compose output carries no per-segment field names.
         assert "physical_base" not in written[0]
         assert "subject" not in written[0]
 
@@ -128,8 +128,8 @@ class TestPersistGeneratedNameBatch:
     def test_embeds_name_string(self, mock_write, mock_finalize, sample_candidates):
         """persist_generated_name_batch defers embedding to embed worker pool.
 
-        Embedding is no longer done inline — the embed_text_hash is cleared
-        so the dedicated embed pool picks it up.
+        Embedding is not done inline — the embed_text_hash is cleared so
+        the dedicated embed pool picks it up.
         """
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
@@ -925,11 +925,10 @@ class TestConsolidateWorkerGraphPrimary:
 
 
 # ---------------------------------------------------------------------------
-# Pipeline should_stop_fn tests (removed)
+# Explicit-path routing
 # ---------------------------------------------------------------------------
-# The linear pipeline (pipeline.py) has been deleted.  --paths / --single-pass
-# are now routed through pool_adapter.run_explicit_paths().  The should_stop_fn
-# invariants no longer apply.
+# --paths / --single-pass route through pool_adapter.run_explicit_paths(),
+# which has no should_stop_fn: termination is owned by the pool loop.
 
 
 # ---------------------------------------------------------------------------

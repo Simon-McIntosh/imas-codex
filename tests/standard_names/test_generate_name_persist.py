@@ -588,7 +588,7 @@ class TestSupersedePriorSourceNames:
         )
         # The propagation is gated on the predecessor's edit still being open.
         assert "(coalesce(old.edit_status, '') = 'open') AS carry_edit" in cypher
-        # Predecessor reconciled to 'applied' (no longer stuck 'open').
+        # Predecessor reconciled to 'applied', not left stuck 'open'.
         assert "old.edit_status = CASE WHEN carry_edit THEN 'applied'" in cypher
         # Successor inherits the open-edit steering fields …
         assert "new.name_hint = CASE WHEN carry_edit" in cypher

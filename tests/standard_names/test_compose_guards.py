@@ -46,9 +46,10 @@ def _load_compose_system_raw() -> str:
 class TestFieldChoiceGuardSignal:
     """Verify every distinct semantic guard SIGNAL survives the consolidation.
 
-    The prompt no longer numbers ten ``HARD PRE-EMIT CHECKS``; the rules were
-    folded into the field-choice / output-discipline sections.  Each test below
-    asserts the surviving signal, not the old heading.
+    The prompt does not number its checks — the rules live in the
+    field-choice / output-discipline sections.  Each test below therefore
+    asserts a semantic signal rather than a heading, so reorganising the
+    prompt cannot silently drop a rule.
     """
 
     @pytest.fixture(autouse=True)
@@ -168,8 +169,8 @@ class TestRulePlacement:
 
 
 class TestInverseProblemRoleGuard:
-    """Inverse-problem role wrappers (formerly 'CONSTRAINT ROLE ABSTRACTION')
-    must still be routed to skip with the base physical quantity kept."""
+    """Inverse-problem role wrappers must be routed to skip, with the base
+    physical quantity kept."""
 
     @pytest.fixture(autouse=True)
     def _load(self) -> None:

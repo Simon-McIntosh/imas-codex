@@ -1,10 +1,11 @@
-"""Item F: exclusion accounting closes in the export report.
+"""Exclusion accounting closes in the export report.
 
 candidate_count - published_count must reconcile against the sum of the
-exclusion buckets. Previously grammar-parse failures and ISN validation
-rejections were in no bucket, and the deterministic-parent placeholder
-exclusions were mis-filed under excluded_below_score. Dedicated counters
-(excluded_placeholder, parse_failures, validation_failures) now live in
+exclusion buckets, so every exclusion reason needs its own counter: a reason
+with no bucket makes the arithmetic silently fail to close, and folding one
+reason into another (placeholder exclusions counted as excluded_below_score)
+misattributes it. ``excluded_placeholder``, ``parse_failures`` and
+``validation_failures`` are therefore dedicated counters in
 ``.export_report.json`` (ExportReport.to_dict).
 
 The manifest (catalog.yml) intentionally carries only ISN-model fields:
