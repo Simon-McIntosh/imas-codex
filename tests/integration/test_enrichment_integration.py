@@ -31,7 +31,7 @@ def live_client():
     gc.close()
 
 
-# ── T1: fetch_dd_paths enrichment ──────────────────────────────────────
+# ── fetch_dd_paths enrichment ─────────────────────────────────────────────
 
 
 class TestFetchEnrichmentLive:
@@ -110,7 +110,7 @@ class TestFetchEnrichmentLive:
             assert occ[0].identifier_schema is not None
 
 
-# ── T2: search_dd_clusters listing mode ────────────────────────────────
+# ── search_dd_clusters listing mode ───────────────────────────────────────
 
 
 class TestClustersListingModeLive:
@@ -160,7 +160,7 @@ class TestClustersListingModeLive:
         assert result["query_type"] == "path"
 
 
-# ── T3: get_dd_version_context ───────────────────────────────────────────
+# ── get_dd_version_context ────────────────────────────────────────────────
 
 
 class TestVersionContextLive:
@@ -204,7 +204,7 @@ class TestVersionContextLive:
         assert "error" in result
 
 
-# ── Tools delegation integration ─────────────────────────────────────────
+# ── Tools delegation integration ──────────────────────────────────────────
 
 
 class TestToolsDelegationLive:

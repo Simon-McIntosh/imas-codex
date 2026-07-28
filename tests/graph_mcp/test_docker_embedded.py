@@ -1,4 +1,4 @@
-"""Tests for Phase 3: Embedded Neo4j in Docker.
+"""Tests for embedded Neo4j in Docker.
 
 Validates the Docker configuration for graph-native MCP server:
 - Dockerfile multi-stage build structure

@@ -1,4 +1,4 @@
-"""Plan 39 Phase 0 (c) tests — slim ``cluster_search`` sync helper.
+"""Tests for the slim ``cluster_search`` sync helper.
 
 The fan-out catalog calls :func:`imas_codex.graph.dd_search.cluster_search`
 directly.  These tests lock down the public signature, the path-vs-text
@@ -6,8 +6,8 @@ branching, and the :class:`ClusterHit` shape.
 
 The full MCP-tool semantics
 (:class:`imas_codex.tools.graph_search.GraphClustersTool.search_dd_clusters`)
-are covered by ``tests/tools/test_cluster_search.py`` and are unaffected
-by Phase 0 — the slim helper is additive.
+are covered by ``tests/tools/test_cluster_search.py``; the slim helper is
+additive and leaves those semantics untouched.
 """
 
 from __future__ import annotations

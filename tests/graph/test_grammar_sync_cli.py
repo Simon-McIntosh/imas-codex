@@ -100,7 +100,7 @@ def test_auto_sync_degrades_gracefully_on_failure():
 
 
 # ---------------------------------------------------------------------------
-# Sync idempotency tests (plan 29 E.8)
+# Sync idempotency tests
 # ---------------------------------------------------------------------------
 
 

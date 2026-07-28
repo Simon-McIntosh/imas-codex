@@ -1,9 +1,10 @@
-"""Regression tests for MCP tool bugs found during A/B testing.
+"""Tests pinning MCP tool contracts where DD-only and graph-backed paths diverge.
 
-Each test targets a specific bug that was discovered when comparing
-DD-only vs graph-backed tool behavior.  Tests are designed to fail on
-the buggy code and pass on the fixed code, without requiring a live
-Neo4j connection.
+Each test locks one invariant that the two tool surfaces must agree on:
+handler/tool signature compatibility, short-physics-term survival through
+word filtering, coordinate traversal targets, vector-k selection under a
+post-retrieval filter, Cypher clause ordering, and formatter import
+resolution.  All checks run against source or mocks — no live Neo4j.
 """
 
 from __future__ import annotations
@@ -15,14 +16,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # ---------------------------------------------------------------------------
-# Bug 1 & 2: export_dd_ids / export_dd_domain must NOT expose
-# ``include_errors`` — the underlying GraphStructureTool methods don't
-# accept that parameter, so passing it would raise TypeError.
+# export_dd_ids / export_dd_domain must NOT expose ``include_errors`` — the
+# underlying GraphStructureTool methods don't accept that parameter, so the
+# server handler passing it would raise TypeError.
 # ---------------------------------------------------------------------------
 
 
 class TestExportHandlersNoIncludeErrors:
-    """Bug 1 & 2: Server handlers must not pass include_errors to graph tools."""
+    """Server handlers must not pass include_errors to graph tools."""
 
     def test_export_dd_ids_tool_has_no_include_errors_param(self):
         """GraphStructureTool.export_dd_ids must not accept include_errors."""
@@ -48,13 +49,13 @@ class TestExportHandlersNoIncludeErrors:
 
 
 # ---------------------------------------------------------------------------
-# Bug 4: Short physics terms like "ip", "q", "b0" must not be filtered out
-# by the ``len(w) > 2`` word-length check in query_words construction.
+# Short physics terms like "ip", "q", "b0" must not be filtered out by the
+# ``len(w) > 2`` word-length check in query_words construction.
 # ---------------------------------------------------------------------------
 
 
 class TestShortPhysicsTermsPreserved:
-    """Bug 4: Physics abbreviations <=2 chars must survive word filtering."""
+    """Physics abbreviations <=2 chars must survive word filtering."""
 
     def test_physics_short_terms_set_exists(self):
         """A mapping of short physics terms to expansions must be defined."""
@@ -73,9 +74,9 @@ class TestShortPhysicsTermsPreserved:
 
         source = inspect.getsource(hybrid_dd_search)
 
-        # The bug was: [w.lower() for w in ... if len(w) > 2]
-        # The fix adds: or w.lower() in _PHYSICS_SHORT_TERMS
-        # Verify the exemption is present wherever query_words is built
+        # A bare ``len(w) > 2`` filter would drop these; the exemption
+        # ``or w.lower() in _PHYSICS_SHORT_TERMS`` must be present wherever
+        # query_words is built.
         assert "_PHYSICS_SHORT_TERMS" in source, (
             "hybrid_dd_search must reference _PHYSICS_SHORT_TERMS to "
             "exempt short physics abbreviations from length filtering"
@@ -128,15 +129,15 @@ class TestShortPhysicsTermsPreserved:
 
 
 # ---------------------------------------------------------------------------
-# Bug 5: Coordinate channel in find_related_dd_paths (find_related_dd_paths)
-# must traverse through IMASCoordinateSpec for coordinate partner discovery.
+# The coordinate channel in find_related_dd_paths must traverse through
+# IMASCoordinateSpec for coordinate partner discovery.
 # The HAS_COORDINATE relationship now correctly points to IMASCoordinateSpec
 # nodes, which hold coordinate specifications used across IDSs.
 # ---------------------------------------------------------------------------
 
 
 class TestCoordinateChannelTargetsIMASCoordinateSpec:
-    """Bug 5 (updated): Coordinate query must match through (coord:IMASCoordinateSpec)."""
+    """Coordinate query must match through (coord:IMASCoordinateSpec)."""
 
     def test_coordinate_query_uses_coordinate_spec_label(self):
         """The HAS_COORDINATE Cypher must traverse (coord:IMASCoordinateSpec)."""
@@ -183,14 +184,14 @@ class TestCoordinateChannelTargetsIMASCoordinateSpec:
 
 
 # ---------------------------------------------------------------------------
-# Bug 6: Cluster search must increase vector k when ids_filter is applied.
+# Cluster search must increase vector k when ids_filter is applied.
 # Post-retrieval filtering reduces result count, so the initial retrieval
 # must fetch more candidates to compensate.
 # ---------------------------------------------------------------------------
 
 
 class TestClusterSearchIncreasesKWithIdsFilter:
-    """Bug 6: Vector search k should increase when ids_filter narrows results."""
+    """Vector search k should increase when ids_filter narrows results."""
 
     @staticmethod
     def _extract_k_from_calls(
@@ -242,7 +243,7 @@ class TestClusterSearchIncreasesKWithIdsFilter:
 
 
 # ---------------------------------------------------------------------------
-# Bug 7: In _get_removals, the ids_clause (WHERE) must appear BEFORE
+# In _get_removals, the ids_clause (WHERE) must appear BEFORE
 # OPTIONAL MATCH so it filters the required MATCH, not the optional one.
 # Placing WHERE after OPTIONAL MATCH turns the IDS filter into a filter
 # on the replacement node instead of the removed path.
@@ -250,15 +251,14 @@ class TestClusterSearchIncreasesKWithIdsFilter:
 
 
 class TestMigrationRemovalsWhereClause:
-    """Bug 7: ids_clause must precede OPTIONAL MATCH in _get_removals."""
+    """ids_clause must precede OPTIONAL MATCH in _get_removals."""
 
     def test_where_before_optional_match_in_source(self):
         """In _get_removals, ids_clause must filter path p, not an optional pattern.
 
-        The original bug placed WHERE {ids_clause} after OPTIONAL MATCH, causing it
-        to filter the replacement node instead of the removed path. The fix replaced
-        OPTIONAL MATCH with NOT EXISTS subqueries, which eliminates the risk of
-        WHERE clause misplacement entirely.
+        WHERE {ids_clause} placed after OPTIONAL MATCH filters the replacement
+        node instead of the removed path. Using NOT EXISTS subqueries rather
+        than OPTIONAL MATCH removes the clause-ordering hazard entirely.
         """
         from imas_codex.tools.migration_guide import _get_removals
 
@@ -267,7 +267,7 @@ class TestMigrationRemovalsWhereClause:
         # Implementation must use NOT EXISTS (safer than OPTIONAL MATCH)
         assert "NOT EXISTS" in source, (
             "_get_removals must use NOT EXISTS to filter renames — "
-            "this avoids the WHERE-after-OPTIONAL-MATCH misplacement bug"
+            "this avoids misplacing WHERE after OPTIONAL MATCH"
         )
         # ids_clause must still be defined to support ids_filter scoping
         assert "ids_clause" in source, (
@@ -286,8 +286,8 @@ class TestMigrationRemovalsWhereClause:
         assert gc.query.called
         cypher = gc.query.call_args.args[0]
 
-        # The implementation uses NOT EXISTS instead of OPTIONAL MATCH —
-        # this inherently prevents the WHERE-after-OPTIONAL-MATCH bug.
+        # NOT EXISTS instead of OPTIONAL MATCH inherently prevents the
+        # ids_clause from being applied to the replacement node.
         assert "NOT EXISTS" in cypher, "Should use NOT EXISTS for rename filtering"
         assert "$ids_filter" in cypher, "ids_filter must be referenced in Cypher"
         # The ids_filter must filter path p (not a replacement node)
@@ -295,7 +295,7 @@ class TestMigrationRemovalsWhereClause:
 
 
 # ---------------------------------------------------------------------------
-# Bug: Server formatter imports must resolve.
+# Server formatter imports must resolve.
 #
 # The MCP server lazy-imports formatter functions by name. If a formatter
 # is renamed without updating all call sites, the server returns an

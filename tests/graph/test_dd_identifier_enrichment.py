@@ -1,9 +1,9 @@
 """Tests for IMAS identifier schema enrichment and embedding pipeline.
 
 Covers:
-- Phase 1: XML-based option extraction with description/units
-- Phase 2: Enrichment prompt construction and LLM response handling
-- Phase 3: Embedding generation for identifier schemas
+- XML-based option extraction with description/units
+- enrichment prompt construction and LLM response handling
+- embedding generation for identifier schemas
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from imas_codex.graph.dd_identifier_enrichment import (
 
 
 class TestCollectIdentifierSchemas:
-    """Test XML-based identifier schema extraction (Phase 1)."""
+    """Test XML-based identifier schema extraction."""
 
     def test_extracts_schemas_from_paths(self):
         """Schemas are collected for all referenced identifier enums."""

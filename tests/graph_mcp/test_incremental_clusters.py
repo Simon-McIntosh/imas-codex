@@ -1,4 +1,4 @@
-"""Tests for Phase 4: Incremental Cluster Sync.
+"""Tests for incremental cluster sync.
 
 Validates that:
 - _import_clusters uses MERGE (not DETACH DELETE + CREATE)

@@ -1,4 +1,4 @@
-"""Grammar-graph schema compliance tests (plan 29 E.8).
+"""Grammar-graph schema compliance tests.
 
 Validates that the grammar graph nodes and edges match the canonical
 ISN SEGMENT_ORDER specification:

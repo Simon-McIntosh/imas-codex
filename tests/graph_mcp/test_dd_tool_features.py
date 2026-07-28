@@ -18,7 +18,7 @@ import pytest
 pytestmark = pytest.mark.graph_mcp
 
 
-# ── Phase 1: get_dd_cocos_fields ─────────────────────────────────────────────
+# ── get_dd_cocos_fields ───────────────────────────────────────────────────────
 
 
 class TestCocosFields:
@@ -85,7 +85,7 @@ class TestCocosFields:
             assert len(tt_data["fields"]) > 0
 
 
-# ── Phase 2: Enhanced get_dd_version_context ──────────────────────────────
+# ── Enhanced get_dd_version_context ───────────────────────────────────────────
 
 
 class TestVersionContextBulk:
@@ -159,7 +159,7 @@ class TestVersionContextBulk:
         assert result["change_count"] == 0
 
 
-# ── Phase 3: Unit stats in overview ──────────────────────────────────────
+# ── Unit stats in overview ────────────────────────────────────────────────────
 
 
 class TestOverviewUnitStats:
@@ -176,7 +176,7 @@ class TestOverviewUnitStats:
         assert result.unit_statistics is None
 
 
-# ── Phase 4: Lifecycle filtering ──────────────────────────────────────────
+# ── Lifecycle filtering ───────────────────────────────────────────────────────
 
 
 @pytest.mark.skip(reason="lifecycle_filter parameter not implemented in list_dd_paths")
@@ -219,7 +219,7 @@ class TestLifecycleFiltering:
         assert total_active >= 1
 
 
-# ── Phase 5: Migration guide summary mode ────────────────────────────────
+# ── Migration guide summary mode ──────────────────────────────────────────────
 
 
 class TestMigrationSummary:
@@ -253,7 +253,7 @@ class TestMigrationSummary:
         assert len(summary) <= len(full)
 
 
-# ── Phase 7: Search parameter unification ────────────────────────────────
+# ── Search parameter unification ──────────────────────────────────────────────
 
 
 @pytest.mark.skip(

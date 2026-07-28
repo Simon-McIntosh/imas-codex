@@ -14,7 +14,7 @@ from tests.graph_mcp.conftest import CLUSTERS, IDS_NODES, IMAS_PATHS
 pytestmark = [pytest.mark.graph_mcp, pytest.mark.fixture_only]
 
 
-# ── GraphPathTool tests ──────────────────────────────────────────────────
+# ── GraphPathTool tests ───────────────────────────────────────────────────────
 
 
 class TestGraphPathTool:
@@ -114,7 +114,7 @@ class TestGraphPathTool:
         assert "core_profiles/profiles_1d/electrons/temperature" in paths
 
 
-# ── GraphListTool tests ──────────────────────────────────────────────────
+# ── GraphListTool tests ───────────────────────────────────────────────────────
 
 
 class TestGraphListTool:
@@ -161,7 +161,7 @@ class TestGraphListTool:
             assert "boundary" in p
 
 
-# ── GraphOverviewTool tests ──────────────────────────────────────────────
+# ── GraphOverviewTool tests ───────────────────────────────────────────────────
 
 
 class TestGraphOverviewTool:
@@ -207,7 +207,7 @@ class TestGraphOverviewTool:
         assert len(result.physics_domains) > 0
 
 
-# ── GraphClustersTool tests ──────────────────────────────────────────────
+# ── GraphClustersTool tests ───────────────────────────────────────────────────
 
 
 class TestGraphClustersTool:
@@ -254,7 +254,7 @@ class TestGraphClustersTool:
         assert "error" in result
 
 
-# ── GraphIdentifiersTool tests ───────────────────────────────────────────
+# ── GraphIdentifiersTool tests ────────────────────────────────────────────────
 
 
 class TestGraphIdentifiersTool:
@@ -292,7 +292,7 @@ class TestGraphIdentifiersTool:
         assert len(result.schemas) == 0
 
 
-# ── Tools integration tests ─────────────────────────────────────────────
+# ── Tools integration tests ───────────────────────────────────────────────────
 
 
 class TestToolsGraphMode:
@@ -359,7 +359,7 @@ class TestToolsGraphMode:
         assert len(result.schemas) >= 1
 
 
-# ── T1: fetch_dd_paths enrichment tests ────────────────────────────────
+# ── fetch_dd_paths enrichment tests ───────────────────────────────────────────
 
 
 class TestFetchImasPathsEnrichment:
@@ -428,7 +428,7 @@ class TestFetchImasPathsEnrichment:
         assert node.version_changes is None
 
 
-# ── T2: search_dd_clusters listing mode tests ──────────────────────────
+# ── search_dd_clusters listing mode tests ─────────────────────────────────────
 
 
 class TestSearchImaClustersListingMode:
@@ -484,7 +484,7 @@ class TestSearchImaClustersListingMode:
         assert len(cluster["paths"]) > 0
 
 
-# ── T3: get_dd_version_context tests ─────────────────────────────────────
+# ── get_dd_version_context tests ──────────────────────────────────────────────
 
 
 class TestGetDDVersionContext:
@@ -552,7 +552,7 @@ class TestGetDDVersionContext:
         assert "error" in result
 
 
-# ── _common_path_prefix tests ────────────────────────────────────────────
+# ── _common_path_prefix tests ─────────────────────────────────────────────────
 
 
 class TestCommonPathPrefix:
@@ -594,7 +594,7 @@ class TestCommonPathPrefix:
         assert result == ""
 
 
-# ── Cluster path lookup tests ────────────────────────────────────────────
+# ── Cluster path lookup tests ─────────────────────────────────────────────────
 
 
 class TestClusterPathLookup:
@@ -628,7 +628,7 @@ class TestClusterPathLookup:
         assert result["clusters_found"] == 0
 
 
-# ── Domain resolution tests ──────────────────────────────────────────────
+# ── Domain resolution tests ───────────────────────────────────────────────────
 
 
 class TestResolveDomain:
@@ -686,7 +686,7 @@ class TestResolveDomain:
         assert "radiation_measurement_diagnostics" in domains
 
 
-# ── Domain export tests ──────────────────────────────────────────────────
+# ── Domain export tests ───────────────────────────────────────────────────────
 
 
 class TestExportDomain:
@@ -724,7 +724,7 @@ class TestExportDomain:
         assert "error" in result
 
 
-# ── Phase 4: Fetch metadata parity ──────────────────────────────────────
+# ── Fetch metadata parity ─────────────────────────────────────────────────────
 
 
 class TestFetchMetadataParity:
@@ -779,7 +779,7 @@ class TestFetchMetadataParity:
         assert node.version_changes is None
 
 
-# ── Phase 5: Identifier search with enrichment ──────────────────────────
+# ── Identifier search with enrichment ─────────────────────────────────────────
 
 
 class TestIdentifierSearch:
