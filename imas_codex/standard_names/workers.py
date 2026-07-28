@@ -422,7 +422,7 @@ def _inject_shape_parameter_surface(
 
 
 # ---------------------------------------------------------------------------
-# Pre-validation gate (W4b): reject malformed LLM output before MERGE
+# Pre-validation gate: reject malformed LLM output before MERGE
 # ---------------------------------------------------------------------------
 
 _SNAKE_CASE_RE = _re.compile(r"[a-z][a-z0-9_]*")
@@ -608,7 +608,7 @@ def _extract_llm_telemetry(
 
 
 # ---------------------------------------------------------------------------
-# Auto-VocabGap detection for physical_base (W29)
+# Auto-VocabGap detection for physical_base
 # ---------------------------------------------------------------------------
 
 
@@ -984,7 +984,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
             fb_injected,
         )
 
-    # Inject full reviewer history from Review nodes (Phase 3).
+    # Inject full reviewer history from Review nodes.
     # Complements the single-review review_feedback above with the
     # complete chain of prior reviews — latest full + older themes.
     def _get_reviewer_history():
@@ -1699,7 +1699,7 @@ def _enrich_batch_items(items: list[dict]) -> None:
             # Apply unit overrides AFTER re-injecting the DD unit.
             # The override engine corrects upstream DD defects (e.g.,
             # unit vectors tagged 'm' instead of dimensionless '1').
-            # Without this, the BUG 9 re-injection above would bypass
+            # Without this, the DD-unit re-injection above would bypass
             # overrides that were applied during extraction.
             if item.get("unit") and path:
                 from imas_codex.standard_names.unit_overrides import resolve_unit
@@ -2322,7 +2322,7 @@ def _process_attachments(
 
 
 # ---------------------------------------------------------------------------
-# StandardNameSource status updaters (Phase 5: incremental tracking)
+# StandardNameSource status updaters (incremental tracking)
 # ---------------------------------------------------------------------------
 
 
@@ -3212,7 +3212,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             {"role": "user", "content": user_prompt},
         ]
 
-        # --- Delta H: bounded retry loop for failed compositions ---
+        # --- Bounded retry loop for failed compositions ---
         # Accumulate full LLMResult fields across retries so the batch's
         # per-candidate cost/token attribution is accurate.  Compose is
         # unified with review/enrich here: every LLM call site extracts
@@ -3510,7 +3510,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             if _pterm and _pbase in _prov_canon:
                 name_id = _prov_canon[_pbase]
 
-            # W4b: Pre-validation gate — reject malformed LLM output
+            # Pre-validation gate — reject malformed LLM output
             # before it reaches MERGE.
             _well_formed, _reject_reason = is_well_formed_candidate(name_id)
             if not _well_formed:
@@ -3781,7 +3781,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             if not state.dry_run:
                 _update_sources_after_vocab_gap(gap_dicts, state.source, wlog)
 
-        # Auto-detect novel physical_base tokens in composed candidates (W29).
+        # Auto-detect novel physical_base tokens in composed candidates.
         # These are surfaced as VocabGap nodes for ISN review without
         # requiring the LLM to emit explicit vocab_gap exits.
         if candidates:
@@ -3919,7 +3919,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 break
 
             # Budget gate — reserve before doing any LLM work.
-            # Per-item cost calibrated to W36 graph data: compose mean
+            # Per-item cost calibrated to measured compose spend: mean
             # $0.13/item, p95 $0.47/item.  Reserve at $0.20/item (mean+50%
             # headroom) to cover the typical extension and avoid draining
             # the global pool via in-flight overshoot, which would starve
@@ -4880,7 +4880,7 @@ async def persist_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
 
 # =============================================================================
-# Pool-mode batch processors (Phase 8)
+# Pool-mode batch processors
 # =============================================================================
 
 
@@ -5093,7 +5093,7 @@ async def compose_batch(
     ]
 
     # ── Budget reservation ─────────────────────────────────────────────
-    # B12: reserve for retry_attempts + 1 LLM calls (re-enrichment retry)
+    # Reserve for retry_attempts + 1 LLM calls (re-enrichment retry)
     _max_retries = _retry_attempts()
     # Token-reuse hits from the FINAL attempt (carried to the VocabGap stamp).
     _token_reuse_hits: dict[tuple[str, str], Any] = {}
@@ -5107,8 +5107,8 @@ async def compose_batch(
         lease = mgr.reserve(0.0, phase=phase_tag)
 
     try:
-        # ── B12: bounded retry loop for failed compositions ────────────
-        # Mirror of the linear path's Delta H retry: on grammar parse
+        # ── Bounded retry loop for failed compositions ─────────────────
+        # Mirror of the linear path's retry: on grammar parse
         # failure across any candidate, re-enrich items with expanded DD
         # context and re-prompt.  Bounded by _retry_attempts().
         _total_compose_cost = 0.0
@@ -5347,7 +5347,7 @@ async def compose_batch(
             # surface-explicit and the boundary/profile siblings de-conflate.
             _inject_shape_parameter_surface(c, c.source_id, wlog)
 
-            # B1/W4b: Pre-validation gate — reject malformed LLM output
+            # Pre-validation gate — reject malformed LLM output
             # before MERGE.  Mark the source as 'failed' so it is not
             # re-claimed forever.
             name_id = normalize_spelling(c.compose_name())
@@ -5696,7 +5696,7 @@ async def compose_batch(
                     exc_info=True,
                 )
 
-        # W29: auto-detect novel physical_base tokens.
+        # Auto-detect novel physical_base tokens.
         if result.candidates:
             try:
                 auto_gaps = _auto_detect_physical_base_gaps(result.candidates)
@@ -5883,9 +5883,9 @@ async def process_refine_name_batch(
     For each item in the batch:
     1. Walk the REFINED_FROM chain via ``chain_history`` (already enriched).
     2. Decide whether to escalate (chain_length ≥ rotation_cap - 1).
-    3. Optionally fan out targeted DD context (plan 39 Phase 1 — gated).
+    3. Optionally fan out targeted DD context (gated).
     4. Call LLM to produce a refined name (``RefinedName`` response model).
-    5. Run the Phase 1.5 dup guard before persisting (plan 39 §5.2).
+    5. Run the deterministic name-key dup guard before persisting.
     6. Persist via ``persist_refined_name`` (new node + edge migration).
     7. On failure, release claims via ``release_refine_name_failed_claims``.
 
@@ -5922,7 +5922,7 @@ async def process_refine_name_batch(
     rotation_cap = DEFAULT_REFINE_ROTATIONS
     processed = 0
 
-    # ── GraphClient lifecycle (plan 39 §10.1 I5) ─────────────────────
+    # ── GraphClient lifecycle ────────────────────────────────────────
     # One client per cycle, reused by hybrid-neighbour search,
     # run_fanout, dup guard, and Fanout-node telemetry writes.
     # ``persist_refined_name`` opens its own client (different
@@ -6053,7 +6053,7 @@ async def process_refine_name_batch(
             }
 
             # Attempt hybrid neighbour search (best-effort).  Uses the
-            # cycle-scoped ``gc`` (plan 39 §10.1) — no fresh client.
+            # cycle-scoped ``gc`` — no fresh client.
             try:
                 neighbours = _hybrid_search_neighbours(gc, path)
                 prompt_context["hybrid_neighbours"] = [
@@ -6074,10 +6074,10 @@ async def process_refine_name_batch(
                         exc_info=True,
                     )
 
-            # ── Fan-out trigger gate (plan 39 §5.1) ──────────────────
+            # ── Fan-out trigger gate ─────────────────────────────────
             # Plumb reviewer_comments_per_dim_name from the claim batch
             # through the trigger predicate.  Gate on ALL of:
-            # chain_length > 0, chain_history present (B12 enrichment),
+            # chain_length > 0, chain_history present (retry enrichment),
             # at least one allow-listed dim contains a trigger keyword.
             reviewer_comments = item.get("reviewer_comments_per_dim_name")
             fanout_eligible, reviewer_excerpt = should_trigger_fanout(
@@ -6089,7 +6089,7 @@ async def process_refine_name_batch(
                 char_cap=fanout_settings.refine_trigger_comment_chars,
             )
 
-            # ── Budget reservation (tiered, plan 39 §7.3 I1) ──────────
+            # ── Budget reservation (tiered) ───────────────────────────
             # Snapshot ``original_reservation`` *before* any extension
             # so the cost-attribution invariant test can verify the
             # delta is fully accounted for via LLMCost batch_id rows.
@@ -6107,7 +6107,7 @@ async def process_refine_name_batch(
                 lease = mgr.reserve(0.0, phase="refine_name")
             original_reservation = lease.reserved if lease else 0.0
 
-            # ── Optional fan-out (plan 39 Phase 1) ───────────────────
+            # ── Optional fan-out ─────────────────────────────────────
             fanout_evidence = ""
             fanout_run_id: str | None = None
             fanout_arm: str | None = None
@@ -6210,8 +6210,7 @@ async def process_refine_name_batch(
 
                 # Charge cost to lease.  Stamp ``batch_id`` with the
                 # ``fanout_run_id`` whenever fan-out fired so the
-                # ``Fanout`` ↔ ``LLMCost`` join (plan 39 §8.3) works
-                # for both arms.
+                # ``Fanout`` ↔ ``LLMCost`` join works for both arms.
                 if lease:
                     _event = LLMCostEvent(
                         model=model,
@@ -6228,8 +6227,8 @@ async def process_refine_name_batch(
                     )
                     lease.charge_event(cost, _event)
 
-                # ── Phase 1.5 dup guard (plan 39 §5.2) ────────────
-                # Deterministic name-key lookup AFTER B12 final
+                # ── Deterministic name-key dup guard ──────────────
+                # Name-key lookup AFTER the final retry's
                 # candidate, BEFORE persisting.  On hit we drop the
                 # candidate and emit a ``dup_prevented`` log line.
                 # Excludes ``old_name`` so the chain's predecessor is
@@ -6979,7 +6978,7 @@ async def process_review_name_batch(
         sem_issues: list[str] = []
         is_derived = item.get("origin") == "derived"
         if is_derived:
-            # ── Phase 5: desc-name similarity gate for derived parents ────
+            # ── Desc-name similarity gate for derived parents ─────────────
             # For derived parents, the description may have been seeded from
             # a placeholder or a DD-derived string that doesn't align with
             # the name.  Compute desc_name_similarity and, if below

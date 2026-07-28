@@ -95,7 +95,7 @@ def build_compose_context() -> dict[str, Any]:
     ctx["examples"] = _load_curated_examples()
     ctx["tokamak_ranges"] = _load_tokamak_ranges()
 
-    # W2: full closed-vocabulary token map (per-segment) — injected verbatim
+    # Full closed-vocabulary token map (per-segment) — injected verbatim
     # into the prompt so the LLM never has to guess whether a token is a
     # closed-vocab member.  This is the primary defence against decomposition
     # failures (closed tokens absorbed into physical_base).
@@ -108,11 +108,11 @@ def build_compose_context() -> dict[str, Any]:
     # inverse, change_in, variation …) as qualifiers or false vocab gaps.
     ctx["operators_full"] = _load_operators_full()
 
-    # W2: curated examples + anti-patterns from the W0 snapshot YAMLs.  These
+    # Curated examples + anti-patterns from the snapshot YAMLs.  These
     # are static, cacheable, and survive `sn clear`; the graph-driven
     # `compose_scored_examples` injection still complements them at runtime
     # once the graph repopulates.
-    ctx["w0_curated_examples"] = _load_w0_curated_examples()
+    ctx["w0_curated_examples"] = _load_snapshot_examples()
     ctx["decomposition_anti_patterns"] = _load_decomposition_anti_patterns()
 
     # Physics domain enum (for prompt context — LLM doesn't set it but
@@ -187,7 +187,7 @@ def _load_curated_examples() -> list[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# W2: Full closed-vocabulary injection
+# Full closed-vocabulary injection
 # ---------------------------------------------------------------------------
 
 # Aliased segments in the ISN SEGMENT_TOKEN_MAP that share an identical token
@@ -305,11 +305,11 @@ def _load_operators_full() -> dict[str, list[dict[str, Any]]] | None:
 
 
 # ---------------------------------------------------------------------------
-# W2: W0 snapshot — curated examples + decomposition anti-patterns
+# Snapshot corpus — curated examples + decomposition anti-patterns
 # ---------------------------------------------------------------------------
 
 
-def _w0_examples_path() -> Path:
+def _snapshot_examples_path() -> Path:
     return Path(__file__).parent / "examples_curated.yaml"
 
 
@@ -318,8 +318,8 @@ def _anti_patterns_path() -> Path:
 
 
 @lru_cache(maxsize=1)
-def _load_w0_curated_examples() -> dict[str, list[dict[str, Any]]]:
-    """Load the W0 snapshot ``examples_curated.yaml`` for prompt injection.
+def _load_snapshot_examples() -> dict[str, list[dict[str, Any]]]:
+    """Load the snapshot ``examples_curated.yaml`` for prompt injection.
 
     Returns a dict keyed by tier — ``outstanding``, ``good``, ``adequate``,
     ``inadequate``, ``poor`` — each mapping to a list of example entries with
@@ -331,9 +331,9 @@ def _load_w0_curated_examples() -> dict[str, list[dict[str, Any]]]:
     (top of ``outstanding`` and ``good``) for the cacheable
     "EXEMPLAR DECOMPOSITIONS" section.
     """
-    path = _w0_examples_path()
+    path = _snapshot_examples_path()
     if not path.exists():
-        logger.warning("W0 curated examples not found at %s", path)
+        logger.warning("Curated snapshot examples not found at %s", path)
         return {}
     try:
         with open(path) as f:
@@ -346,7 +346,7 @@ def _load_w0_curated_examples() -> dict[str, list[dict[str, Any]]]:
             if isinstance(entries, list)
         }
     except Exception:
-        logger.exception("Failed to load W0 curated examples from %s", path)
+        logger.exception("Failed to load curated snapshot examples from %s", path)
         return {}
 
 
