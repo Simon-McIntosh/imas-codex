@@ -1,4 +1,4 @@
-"""Tests for DD context injection into the generate_docs worker (P4.1 enrichment).
+"""Tests for DD context injection into the generate_docs worker.
 
 Covers:
 - _enrich_for_docs_gen populates source_paths, dd_source_docs, dd_aliases

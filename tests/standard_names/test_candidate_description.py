@@ -1,4 +1,4 @@
-"""Tests for StandardNameCandidate description field (Track A1)."""
+"""Tests for the StandardNameCandidate description field."""
 
 from __future__ import annotations
 

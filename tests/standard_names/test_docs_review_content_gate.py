@@ -1,4 +1,4 @@
-"""Test the docs-review content gate (P0 fix for docs-axis score collapse).
+"""Test the docs-review content gate that prevents docs-axis score collapse.
 
 Background: docs review was running on names without docs, and the LLM was
 scoring empty `(missing)` content at 0/80 → mean 0.327 across the catalog.

@@ -1,4 +1,4 @@
-"""Smoke tests for the MockLLM fixture (P6.1).
+"""Smoke tests for the MockLLM fixture.
 
 Verifies that the fixture intercepts ``acall_llm_structured``, returns
 scripted responses in FIFO order, and raises ``RuntimeError`` on unscripted

@@ -1499,7 +1499,7 @@ class TestImplicitFieldDeviceWhitelist:
 
 
 # =========================================================================
-# C.4b: implicit_field_check — use_exact_* exemption (W19A Issue 3)
+# implicit_field_check — use_exact_* exemption
 # =========================================================================
 
 

@@ -1,4 +1,4 @@
-"""Tests for pre-clear Review comment export (Phase F).
+"""Tests for pre-clear Review comment export.
 
 Validates:
 - export_review_comments() writes a JSONL file with the expected schema

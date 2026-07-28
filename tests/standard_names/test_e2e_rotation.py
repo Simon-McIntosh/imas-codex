@@ -9,9 +9,9 @@ Workers are called directly (bypassing the main event loop), LLM calls are
 intercepted by the MockLLM fixture from conftest.py.
 
 Tests:
-  E1. Full rotation to acceptance  — 1 name refine + 1 docs refine
-  E2. Immediate acceptance          — 0 rotations on either side
-  E3. Double rotation               — 2 name refines + 2 docs refines
+  Full rotation to acceptance — 1 name refine + 1 docs refine
+  Immediate acceptance        — 0 rotations on either side
+  Double rotation             — 2 name refines + 2 docs refines
 
 Run only when Neo4j is reachable:
     uv run pytest tests/standard_names/test_e2e_rotation.py -m "graph and integration" -v
@@ -616,7 +616,7 @@ def _do_refine_docs(
 
 
 # ===========================================================================
-# E1. test_e2e_full_rotation_to_acceptance
+# test_e2e_full_rotation_to_acceptance
 # ===========================================================================
 
 
@@ -752,7 +752,7 @@ def test_e2e_full_rotation_to_acceptance(_gc, _clean, mock_llm):
 
 
 # ===========================================================================
-# E2. test_e2e_immediate_acceptance_no_rotation
+# test_e2e_immediate_acceptance_no_rotation
 # ===========================================================================
 
 
@@ -820,7 +820,7 @@ def test_e2e_immediate_acceptance_no_rotation(_gc, _clean, mock_llm):
 
 
 # ===========================================================================
-# E3. test_e2e_name_rotates_then_docs_rotates
+# test_e2e_name_rotates_then_docs_rotates
 # ===========================================================================
 
 

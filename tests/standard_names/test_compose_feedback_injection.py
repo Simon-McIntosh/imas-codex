@@ -1,4 +1,4 @@
-"""Phase C: compose_dd.md renders the ``item.review_feedback`` block.
+"""compose_dd.md renders the ``item.review_feedback`` block.
 
 These tests don't exercise the LLM — they just render the Jinja template
 through ``imas_codex.llm.prompt_loader.render_prompt`` and assert that the

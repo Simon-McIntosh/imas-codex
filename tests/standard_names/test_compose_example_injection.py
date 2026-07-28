@@ -1,4 +1,4 @@
-"""Tests for compose scored-example injection (K4).
+"""Tests for compose scored-example injection.
 
 Validates that the ``_compose_scored_examples.md`` Jinja template:
 - Renders all entries when compose_scored_examples has content.

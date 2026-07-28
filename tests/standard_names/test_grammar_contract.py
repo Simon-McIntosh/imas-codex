@@ -262,7 +262,7 @@ def test_persist_and_decomposition_parity(name: str, expect_rejected: bool):
         )
 
 
-# ── Grammar field persistence tests (P1) ──
+# ── Grammar field persistence tests ──
 
 
 def test_write_standard_names_persists_grammar_segments():

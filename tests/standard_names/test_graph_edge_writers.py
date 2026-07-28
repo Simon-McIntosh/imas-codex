@@ -1,16 +1,16 @@
-"""Graph edge writer integration tests (G1–G10).
+"""Graph edge writer integration tests.
 
 All tests are mocked — no live Neo4j required.  They verify that
 ``write_standard_names`` emits the correct Cypher queries with the
 expected batch parameters for every structural edge type.
 
 Edge types covered:
-  HAS_PARENT   — derived from ISN parser (G1, G2, G4, G5)
-  HAS_ERROR      — uncertainty siblings, inverted direction (G3)
-  HAS_PREDECESSOR — from ``deprecates`` field (G7)
-  HAS_SUCCESSOR   — from ``superseded_by`` field (G8)
-  IN_CLUSTER      — from ``primary_cluster_id`` field (G9)
-  HAS_PHYSICS_DOMAIN — from ``physics_domain`` field (G10)
+  HAS_PARENT      — derived from the ISN parser
+  HAS_ERROR       — uncertainty siblings, inverted direction
+  HAS_PREDECESSOR — from the ``deprecates`` field
+  HAS_SUCCESSOR   — from the ``superseded_by`` field
+  IN_CLUSTER      — from the ``primary_cluster_id`` field
+  HAS_PHYSICS_DOMAIN — from the ``physics_domain`` field
 """
 
 from __future__ import annotations
@@ -95,12 +95,12 @@ def _write_cyphers(mock_gc: MagicMock, keyword: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# G1 — HAS_PARENT: two names in one batch
+# HAS_PARENT: two names in one batch
 # ---------------------------------------------------------------------------
 
 
 class TestG1:
-    """G1: Write electron_temperature and maximum_of_electron_temperature in one batch.
+    """Write electron_temperature and maximum_of_electron_temperature in one batch.
 
     ``(maximum_of_electron_temperature)-[:HAS_PARENT {operator:'maximum'}]->(electron_temperature)``
 
@@ -147,12 +147,12 @@ class TestG1:
 
 
 # ---------------------------------------------------------------------------
-# G2 — HAS_PARENT: forward reference (target written later)
+# HAS_PARENT: forward reference (target written later)
 # ---------------------------------------------------------------------------
 
 
 class TestG2:
-    """G2: Write child first, admissible parent in a later batch.
+    """Write child first, admissible parent in a later batch.
 
     After the second batch the edge must still be present (MERGE idempotent
     on re-run of the same name pair). Uses ``electron_temperature`` (an
@@ -204,12 +204,12 @@ class TestG2:
 
 
 # ---------------------------------------------------------------------------
-# G3 — HAS_ERROR: uncertainty sibling, inverted direction
+# HAS_ERROR: uncertainty sibling, inverted direction
 # ---------------------------------------------------------------------------
 
 
 class TestG3:
-    """G3: Write upper_uncertainty_of_temperature alone.
+    """Write upper_uncertainty_of_temperature alone.
 
     ``(temperature)-[:HAS_ERROR {error_type:'upper'}]->(upper_uncertainty_of_temperature)``
     """
@@ -243,12 +243,12 @@ class TestG3:
 
 
 # ---------------------------------------------------------------------------
-# G4 — HAS_PARENT: binary operator, two edges with role a/b
+# HAS_PARENT: binary operator, two edges with role a/b
 # ---------------------------------------------------------------------------
 
 
 class TestG4:
-    """G4: Write ratio_of_electron_temperature_to_ion_temperature.
+    """Write ratio_of_electron_temperature_to_ion_temperature.
 
     Two HAS_PARENT edges with role a/b — uses qualifier-bearing parents
     so both pass the admission gate (bare ``temperature``/``pressure``
@@ -287,12 +287,12 @@ class TestG4:
 
 
 # ---------------------------------------------------------------------------
-# G5 — idempotency: writing the same batch twice
+# idempotency: writing the same batch twice
 # ---------------------------------------------------------------------------
 
 
 class TestG5:
-    """G5: Write same batch twice → edge Cypher is MERGE-based (idempotent)."""
+    """Write same batch twice → edge Cypher is MERGE-based (idempotent)."""
 
     def test_has_argument_cypher_uses_merge(self) -> None:
         names = [{"id": "maximum_of_electron_temperature", "unit": "eV"}]
@@ -319,12 +319,12 @@ class TestG5:
 
 
 # ---------------------------------------------------------------------------
-# G7 — HAS_PREDECESSOR from deprecates field
+# HAS_PREDECESSOR from deprecates field
 # ---------------------------------------------------------------------------
 
 
 class TestG7:
-    """G7: Write StandardName with ``deprecates`` field → HAS_PREDECESSOR edge."""
+    """Write StandardName with ``deprecates`` field → HAS_PREDECESSOR edge."""
 
     def test_has_predecessor_edge_pipeline(self) -> None:
         names = [
@@ -360,12 +360,12 @@ class TestG7:
 
 
 # ---------------------------------------------------------------------------
-# G8 — HAS_SUCCESSOR from superseded_by field
+# HAS_SUCCESSOR from superseded_by field
 # ---------------------------------------------------------------------------
 
 
 class TestG8:
-    """G8: Write StandardName with ``superseded_by`` field → HAS_SUCCESSOR edge."""
+    """Write StandardName with ``superseded_by`` field → HAS_SUCCESSOR edge."""
 
     def test_has_successor_edge_pipeline(self) -> None:
         names = [
@@ -401,12 +401,12 @@ class TestG8:
 
 
 # ---------------------------------------------------------------------------
-# G9 — IN_CLUSTER from primary_cluster_id
+# IN_CLUSTER from primary_cluster_id
 # ---------------------------------------------------------------------------
 
 
 class TestG9:
-    """G9: Write StandardName with ``primary_cluster_id`` → IN_CLUSTER edge."""
+    """Write StandardName with ``primary_cluster_id`` → IN_CLUSTER edge."""
 
     def test_in_cluster_edge_emitted(self) -> None:
         names = [
@@ -450,12 +450,12 @@ class TestG9:
 
 
 # ---------------------------------------------------------------------------
-# G10 — HAS_PHYSICS_DOMAIN from physics_domain scalar
+# HAS_PHYSICS_DOMAIN from physics_domain scalar
 # ---------------------------------------------------------------------------
 
 
 class TestG10:
-    """G10: Write StandardName with ``physics_domain='equilibrium'``
+    """Write StandardName with ``physics_domain='equilibrium'``
     → HAS_PHYSICS_DOMAIN edge to singleton PhysicsDomain {id:'equilibrium'}.
     """
 

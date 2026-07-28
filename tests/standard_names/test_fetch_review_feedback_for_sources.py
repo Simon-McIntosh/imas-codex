@@ -1,4 +1,4 @@
-"""Phase C: fetch_review_feedback_for_sources graph helper.
+"""The fetch_review_feedback_for_sources graph helper.
 
 Mocks the ``GraphClient`` context manager and verifies the helper's
 Cypher query, parameter binding, and result shaping.

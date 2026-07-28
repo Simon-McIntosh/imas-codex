@@ -5,11 +5,11 @@ cap without acceptance — and the cross-stage gates that prevent further work
 on exhausted nodes.
 
 Specifically covered:
-  E1. Name exhausted → docs pipeline never starts (gate on name_stage='accepted')
-  E2. Docs exhausted independently while name remains accepted
-  E3. Acceptance at rotation cap always overrides exhaustion logic
-  E4. Exhausted nodes are immune to orphan sweep (terminal state)
-  E5. Mid-flight exhaustion with orphan-sweep race interleaving
+  - Name exhausted → docs pipeline never starts (gate on name_stage='accepted')
+  - Docs exhausted independently while the name remains accepted
+  - Acceptance at the rotation cap always overrides exhaustion logic
+  - Exhausted nodes are immune to the orphan sweep (terminal state)
+  - Mid-flight exhaustion with orphan-sweep race interleaving
 
 Run only when Neo4j is reachable:
     uv run pytest tests/standard_names/test_e2e_exhaustion.py -m "graph and integration" -v
@@ -357,7 +357,7 @@ def _refine_docs(gc, sn_id: str, iteration: int = 0) -> dict:
 
 
 # ===========================================================================
-# E1. test_e2e_name_exhausted_blocks_docs_pipeline
+# test_e2e_name_exhausted_blocks_docs_pipeline
 # ===========================================================================
 
 
@@ -436,7 +436,7 @@ def test_e2e_name_exhausted_blocks_docs_pipeline(_gc, _clean):
 
 
 # ===========================================================================
-# E2. test_e2e_docs_exhausted_keeps_name_accepted
+# test_e2e_docs_exhausted_keeps_name_accepted
 # ===========================================================================
 
 
@@ -516,7 +516,7 @@ def test_e2e_docs_exhausted_keeps_name_accepted(_gc, _clean):
 
 
 # ===========================================================================
-# E3. test_e2e_acceptance_at_cap_overrides_exhaustion
+# test_e2e_acceptance_at_cap_overrides_exhaustion
 # ===========================================================================
 
 
@@ -576,7 +576,7 @@ def test_e2e_acceptance_at_cap_overrides_exhaustion(_gc, _clean):
 
 
 # ===========================================================================
-# E4. test_e2e_exhausted_excluded_from_orphan_recovery
+# test_e2e_exhausted_excluded_from_orphan_recovery
 # ===========================================================================
 
 
@@ -622,7 +622,7 @@ def test_e2e_exhausted_excluded_from_orphan_recovery(_gc, _clean):
 
 
 # ===========================================================================
-# E5. test_e2e_partial_pipeline_then_exhaustion
+# test_e2e_partial_pipeline_then_exhaustion
 # ===========================================================================
 
 

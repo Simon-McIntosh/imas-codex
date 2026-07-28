@@ -1,4 +1,4 @@
-"""Tests for the _parent_supports_uncertainty_index semantic gate (Phase C).
+"""Tests for the _parent_supports_uncertainty_index semantic gate.
 
 Verifies that mint_error_siblings() skips uncertainty_index_of_<P> siblings
 when the parent name or unit is semantically unsuitable, while still minting

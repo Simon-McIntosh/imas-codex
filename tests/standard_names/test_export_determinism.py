@@ -1,9 +1,10 @@
-"""Item E: exports are deterministic so publish's no-change fast path holds.
+"""Exports are deterministic, so publish's no-change fast path holds.
 
-E1: manifest ``generated_at``/``exported_at`` derive from the source commit,
-    not wall-clock ``now()``, so identical content yields identical bytes.
-E2: the per-domain YAML header no longer embeds the codex HEAD sha (which
-    churned all domain files on any unrelated codex commit).
+Two sources of spurious churn are excluded:
+- manifest ``generated_at``/``exported_at`` derive from the source commit, not
+  wall-clock ``now()``, so identical content yields identical bytes;
+- the per-domain YAML header embeds no codex HEAD sha, which would rewrite
+  every domain file on any unrelated codex commit.
 """
 
 from __future__ import annotations

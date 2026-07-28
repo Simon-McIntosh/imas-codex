@@ -1,4 +1,4 @@
-"""Tests for the generate_docs pipeline (P4.1).
+"""Tests for the generate_docs pipeline.
 
 Covers:
 - Claim eligibility (name_stage='accepted' + docs_stage='pending')

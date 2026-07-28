@@ -1,4 +1,4 @@
-"""Tests for the scored-example loader (K3).
+"""Tests for the scored-example loader.
 
 Validates that ``load_compose_examples`` and ``load_review_examples``
 correctly query reviewed StandardName nodes, handle domain fallback,
