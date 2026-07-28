@@ -12,9 +12,6 @@ Tests assert empirical coherence — within-group cosine similarity should
 exceed a random baseline, top-K search should surface domain-matching
 results, and cluster labels should align with their member names.
 
-Findings are recorded in
-``plans/research/standard-names/43-vector-grouping-assertions.md``.
-
 All tests require a live graph and are marked ``integration``; they are
 auto-skipped by the top-level conftest when Neo4j is unreachable.
 """
@@ -219,15 +216,14 @@ def test_sn_semantic_search_domain_coherence(
     expected at the margins, so we do not demand strict single-domain
     coherence.
 
-    Known finding: "plasma_current" results span five different
+    Known exception: "plasma_current" results span five different
     physics domains (current_drive, equilibrium, plasma_control,
     transport, waves) because the taxonomy splits related current
-    concepts very finely.  See
-    plans/research/standard-names/43-vector-grouping-assertions.md.
+    concepts very finely.
     """
     from collections import Counter
 
-    # Known-incoherent cases flagged in the research doc.
+    # Queries whose top-K legitimately spans multiple physics domains.
     known_domain_incoherent = {"plasma_current"}
     case_id = request.node.callspec.id if hasattr(request.node, "callspec") else ""
 

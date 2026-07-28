@@ -1,10 +1,9 @@
-"""Regression tests for the revised-name id overwrite bug (Wave 8A).
+"""A revised name must not overwrite the reviewed name's id.
 
 When a reviewer issues verdict=revise with a revised_name, the resulting
 Review graph record must reference the ORIGINAL StandardName id, not the
-suggested replacement name.
-
-See: Wave 8A bug report — 386 orphan Review nodes caused by id overwrite.
+suggested replacement name — overwriting it orphans the Review node, which
+then attaches to a StandardName that does not exist.
 """
 
 from __future__ import annotations

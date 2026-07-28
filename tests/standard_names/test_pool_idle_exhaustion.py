@@ -185,7 +185,7 @@ class TestIdleExhaustionWatchdog:
 
 
 # ---------------------------------------------------------------------------
-# Budget saturation watchdog (Phase C replacement for near-exhausted)
+# Budget saturation watchdog (replaces the near-exhausted gate)
 # ---------------------------------------------------------------------------
 
 

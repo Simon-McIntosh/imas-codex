@@ -319,7 +319,7 @@ class TestRunPools:
 
     @pytest.mark.asyncio
     async def test_idle_pool_does_not_spin(self) -> None:
-        """Acceptance #2: idle pool backs off and does not hammer claims."""
+        """An idle pool backs off and does not hammer claims."""
         mgr = BudgetManager(total_budget=5.0)
         stop = asyncio.Event()
         claim_calls = {"n": 0}
@@ -351,7 +351,7 @@ class TestRunPools:
 
     @pytest.mark.asyncio
     async def test_drain_pending_called_after_pools_exit(self) -> None:
-        """Acceptance #3: BudgetManager.drain_pending runs before return."""
+        """BudgetManager.drain_pending runs before return."""
         mgr = BudgetManager(total_budget=5.0)
         stop = asyncio.Event()
         drained = {"flag": False}

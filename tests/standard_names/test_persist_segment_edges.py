@@ -198,8 +198,8 @@ class TestSegmentEdgeWriting:
         merge_calls = _find_merge_segment_calls(mock_gc)
         assert len(merge_calls) >= 1
 
-        # Verify token_version parameter is set (renamed from isn_version
-        # in commit ac761175 — now a fallback-aware resolved version)
+        # Verify token_version parameter is set — a fallback-aware resolved
+        # version, not the raw ISN version string
         token_version = merge_calls[0][1].get("token_version")
         assert token_version is not None
         assert isinstance(token_version, str)

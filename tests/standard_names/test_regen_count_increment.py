@@ -1,9 +1,10 @@
-"""Regression tests: regen_count must be incremented when persisting regen output.
+"""``regen_count`` must be incremented when persisting regen output.
 
-Bug 5 — ``regen_count`` was read in ``fetch_low_score_sources`` (line 332) to
-cap regeneration iterations at 1, but was never incremented after a regen pass.
-The fix adds ``regen_count = coalesce(regen_count, 0) + 1`` in
-``write_standard_names`` when the candidate carries ``regen_increment=True``.
+``fetch_low_score_sources`` reads ``regen_count`` to cap regeneration
+iterations, so a persist path that never increments it lets a source
+regenerate forever.  ``write_standard_names`` applies
+``regen_count = coalesce(regen_count, 0) + 1`` when the candidate carries
+``regen_increment=True``.
 """
 
 from __future__ import annotations

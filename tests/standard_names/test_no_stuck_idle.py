@@ -150,10 +150,10 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
 
     # --- Pre-flight: _compute_pool_pending must return 0 for all pools --------
     # This is the direct regression assertion.
-    # If _compute_pool_pending were reverted to the dead-field _count_pending,
-    # nodes with enriched_at / reviewed_name_at set would appear as pending
-    # (exactly what happened in smoke #2), and this assertion would fail
-    # before run_sn_pools is even called.
+    # If the count were taken over completion timestamps instead of stage
+    # fields, nodes with enriched_at / reviewed_name_at set would appear as
+    # pending and this assertion would fail before run_sn_pools is even
+    # called.
     from imas_codex.graph.client import GraphClient
 
     with GraphClient() as probe_gc:

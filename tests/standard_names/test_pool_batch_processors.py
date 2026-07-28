@@ -210,7 +210,7 @@ _COMPOSE_PATCHES = {
 
 
 # ---------------------------------------------------------------------------
-# Test 1: compose derives domain context from batch (H5)
+# Compose derives domain context from batch
 # ---------------------------------------------------------------------------
 
 
@@ -299,7 +299,7 @@ class TestComposeDomainContextFromBatch:
 
 
 # ---------------------------------------------------------------------------
-# Test 2: compose stop_event short-circuits (H6)
+# Compose stop_event short-circuits
 # ---------------------------------------------------------------------------
 
 
@@ -377,7 +377,7 @@ class TestComposeStopEvent:
 
 
 # ---------------------------------------------------------------------------
-# Test 3: review names processes batch (happy path)
+# Review names processes a batch (happy path)
 # ---------------------------------------------------------------------------
 
 
@@ -472,7 +472,7 @@ class TestReviewNamesProcessesBatch:
 
 
 # ---------------------------------------------------------------------------
-# Test 5: review docs independent from names (M9)
+# Review docs is independent from review names
 # ---------------------------------------------------------------------------
 
 
@@ -571,7 +571,7 @@ class TestReviewDocsIndependent:
 
 
 # ---------------------------------------------------------------------------
-# Test 7: batch processor releases claims on exception
+# Batch processor releases claims on exception
 # ---------------------------------------------------------------------------
 
 
@@ -640,7 +640,7 @@ class TestBatchProcessorReleasesClaimsOnException:
 
 
 # ---------------------------------------------------------------------------
-# Test 8: on_event comment/description payloads are NOT pre-truncated
+# on_event comment/description payloads are NOT pre-truncated
 # Regression for: https://github.com/Simon-McIntosh/imas-codex/issues/???
 # Worker was clipping comments[:80] before emitting on_event, preventing
 # terminal-aware clipping in the rich display from using the full width.

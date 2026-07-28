@@ -1,8 +1,8 @@
-"""Regression tests for plan-40 SN search facility bug fixes.
+"""Behaviour the SN search facility must hold for degenerate inputs.
 
-Surfaced via live-graph smoke run against the running equilibrium pilot
-(see ``scripts/sn_search_smoke.py`` history). Each test pins the
-expected behaviour of one targeted fix.
+Each block below pins one query path that used to fail silently: an empty
+query, a segment filter over an open-vocabulary segment, and a lookup for
+an anchor that does not exist.
 """
 
 from __future__ import annotations
@@ -12,8 +12,8 @@ from unittest.mock import MagicMock
 import pytest
 
 # ---------------------------------------------------------------------------
-# Bug A: _search_standard_names("") used to run a full vector search and
-# return embedding-noise hits. Now early-returns a helpful prompt.
+# Empty query: _search_standard_names("") must early-return a helpful prompt
+# rather than run a full vector search and return embedding-noise hits.
 # ---------------------------------------------------------------------------
 
 
@@ -47,9 +47,9 @@ class TestSearchEmptyQueryEarlyReturn:
 
 
 # ---------------------------------------------------------------------------
-# Bug B: segment_filters used typed grammar edges (HAS_PHYSICAL_BASE,
-# HAS_SUBJECT) that are unpopulated for open-vocab segments. Now matches
-# canonical bare-name columns directly.
+# Segment filters must match the canonical bare-name columns directly: the
+# typed grammar edges (HAS_PHYSICAL_BASE, HAS_SUBJECT) are unpopulated for
+# open-vocabulary segments.
 # ---------------------------------------------------------------------------
 
 
@@ -146,9 +146,8 @@ class TestSegmentFilterUsesBareColumns:
 
 
 # ---------------------------------------------------------------------------
-# Bug C: _find_related_standard_names("missing_name") used to return
-# "No related names found" — indistinguishable from a real anchor with
-# no relations. Now reports the missing anchor and points to check.
+# A missing anchor must be reported as missing: returning "No related names
+# found" makes it indistinguishable from a real anchor with no relations.
 # ---------------------------------------------------------------------------
 
 

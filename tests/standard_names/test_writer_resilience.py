@@ -37,7 +37,7 @@ def _make_mgr(run_id: str = "test-run") -> BudgetManager:
     return BudgetManager(10.0, run_id=run_id)
 
 
-# ── T1: hang → timeout → continue ───────────────────────────────────
+# ── hang → timeout → continue ───────────────────────────────────────
 
 
 @pytest.mark.asyncio
@@ -84,7 +84,7 @@ async def test_write_single_timeout_then_succeed():
     assert mgr._write_dropped == 0
 
 
-# ── T2: always-raise → _write_failed + _write_dropped ───────────────
+# ── always-raise → _write_failed + _write_dropped ───────────────────
 
 
 @pytest.mark.asyncio
@@ -111,7 +111,7 @@ async def test_write_single_always_fails():
     assert mgr._write_dropped == 1
 
 
-# ── T3: writer crash + recreation (TOCTOU-safe under lock) ──────────
+# ── writer crash + recreation (TOCTOU-safe under lock) ──────────────
 
 
 @pytest.mark.asyncio
@@ -162,7 +162,7 @@ async def test_writer_crash_recreation():
     await asyncio.wait_for(mgr.drain_pending(), timeout=10)
 
 
-# ── T4: heartbeat DEBUG when idle ────────────────────────────────────
+# ── heartbeat DEBUG when idle ───────────────────────────────────────
 
 
 @pytest.mark.asyncio
@@ -188,7 +188,7 @@ async def test_heartbeat_fires_debug_when_idle(caplog):
     assert len(debug_hb) >= 1
 
 
-# ── T5: heartbeat INFO when pending > 0 ─────────────────────────────
+# ── heartbeat INFO when pending > 0 ─────────────────────────────────
 
 
 @pytest.mark.asyncio

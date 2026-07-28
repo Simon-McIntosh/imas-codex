@@ -72,7 +72,7 @@ class TestRepresentationArtifactExtended:
 
 
 # =========================================================================
-# A.4 — heuristic _on_ggd$ gated by source_path
+# Heuristic _on_ggd$ gated by source_path
 # =========================================================================
 
 

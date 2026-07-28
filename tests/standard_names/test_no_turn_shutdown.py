@@ -1,7 +1,7 @@
 """Verify SN pipeline shutdown signals after turn-driven shutdown removal.
 
-Phase C removed the ``near_exhausted()`` / ``MIN_VIABLE_TURN`` shutdown
-gate and replaced it with a signal-driven ``budget_saturated`` watchdog.
+The ``near_exhausted()`` / ``MIN_VIABLE_TURN`` shutdown gate is gone,
+replaced by a signal-driven ``budget_saturated`` watchdog.
 These tests verify:
 
 1. ``budget_saturated`` fires correctly when all pools exceed the
