@@ -1,6 +1,7 @@
 """Tests for export gate C — min_score threshold filtering.
 
-Plan 35 §3d: names below threshold not emitted unless --include-unreviewed.
+Names scoring below the threshold are not emitted unless
+--include-unreviewed is given.
 """
 
 from __future__ import annotations

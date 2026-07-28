@@ -1,11 +1,9 @@
 """Regression tests for phase-name counter matching.
 
-Plan 39, phase 5c: verify that the summary counters correctly accumulate
-counts from the phase names actually emitted by turn.py.
-
-Previously, ``names_reviewed`` was always zero because the loop matched
-``phase.name == "review"`` while turn.py emits ``"review_names"`` and
-``"review_docs"``.
+The summary counters must accumulate against the phase names turn.py
+actually emits. A counter keyed on a phase name that is never emitted —
+matching ``phase.name == "review"`` when turn.py emits ``"review_names"``
+and ``"review_docs"`` — silently reports zero rather than failing.
 """
 
 from __future__ import annotations

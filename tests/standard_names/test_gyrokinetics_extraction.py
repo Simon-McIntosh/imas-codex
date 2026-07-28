@@ -1,10 +1,8 @@
 """Regression tests: gyrokinetics (constant node_type) extraction.
 
-The gyrokinetics IDS has ONLY ``node_type='constant'`` quantity paths.
-Before the fix, the extraction query filtered on ``node_type = 'dynamic'``,
-silently dropping all gyrokinetics paths.
-
-See: plans/research/standard-names/gyrokinetics-extraction-debug.md
+The gyrokinetics IDS has ONLY ``node_type='constant'`` quantity paths, so an
+extraction query that gates on ``node_type = 'dynamic'`` drops every one of
+them silently — the IDS simply produces no candidates.
 """
 
 from __future__ import annotations
@@ -20,12 +18,10 @@ class TestConstantNodeTypeExtraction:
     def test_extraction_query_includes_constant(self):
         """The extraction query must gate on node_category, not node_type.
 
-        Previously the query filtered ``node_type IN ['dynamic', 'constant']``.
-        rc22 B3 removed this clause: ``node_category`` is the authoritative
-        namability taxonomy, and ``node_type`` (temporal classification) must
-        not gate extraction.  Constant-type gyrokinetics paths still flow
-        through because their ``node_category='quantity'`` satisfies the
-        remaining filter.
+        ``node_category`` is the authoritative namability taxonomy;
+        ``node_type`` is a temporal classification and must not gate
+        extraction.  Constant-type gyrokinetics paths flow through because
+        their ``node_category='quantity'`` satisfies the remaining filter.
         """
         import inspect
 
@@ -38,7 +34,7 @@ class TestConstantNodeTypeExtraction:
         )
         # The old node_type IN ['dynamic', 'constant'] filter must be gone
         assert "node_type IN ['dynamic'" not in src, (
-            "extract_dd_candidates must NOT filter by node_type (rc22 B3)"
+            "extract_dd_candidates must NOT filter by node_type"
         )
 
     def test_graph_ops_query_includes_constant(self):

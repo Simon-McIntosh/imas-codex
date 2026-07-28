@@ -1,8 +1,8 @@
 """Parametrised gate-C matrix — all permutations of score thresholds.
 
-Phase 6d of plan 35: exhaustive gate C filtering verification across
-combinations of min_score, include_unreviewed, min_description_score,
-and force. Tests _run_gate_c directly.
+Exhaustive gate-C filtering verification across combinations of
+min_score, include_unreviewed, min_description_score, and force.
+Tests _run_gate_c directly.
 """
 
 from __future__ import annotations

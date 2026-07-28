@@ -1,6 +1,6 @@
 """Tests for export gate B — COCOS manifest consistency.
 
-Plan 35 §3d: manifest COCOS mismatch triggers gate B failure.
+A COCOS value that disagrees with the manifest fails gate B.
 """
 
 from __future__ import annotations

@@ -11,10 +11,10 @@ from imas_codex.standard_names.families import (
 
 
 class TestAxisOrdering:
-    """Phase 6: Component axis ordering convention."""
+    """Component axis ordering convention."""
 
     def test_cylindrical_right_handed_ordering(self):
-        """T17: Children ordered R, φ, Z (right-handed cylindrical)."""
+        """Children ordered R, φ, Z (right-handed cylindrical)."""
         children = [
             {"name": "vertical_B", "axis": "vertical"},
             {"name": "toroidal_B", "axis": "toroidal"},
@@ -24,7 +24,7 @@ class TestAxisOrdering:
         assert [c["axis"] for c in ordered] == ["radial", "toroidal", "vertical"]
 
     def test_geometric_coordinate_ordering(self):
-        """T18: Geometric coordinates ordered R, φ, Z."""
+        """Geometric coordinates ordered R, φ, Z."""
         children = [
             {"name": "vertical_position", "axis": "z"},
             {"name": "toroidal_angle", "axis": "phi"},
@@ -34,7 +34,7 @@ class TestAxisOrdering:
         assert [c["axis"] for c in ordered] == ["r", "phi", "z"]
 
     def test_field_aligned_ordering(self):
-        """T19: Field-aligned ordering: parallel before perpendicular."""
+        """Field-aligned ordering: parallel before perpendicular."""
         children = [
             {"name": "perpendicular_v", "axis": "perpendicular"},
             {"name": "parallel_v", "axis": "parallel"},
@@ -86,10 +86,10 @@ class TestAxisOrdering:
 
 
 class TestFamilyDetection:
-    """Phase 1: Family detection from DD paths."""
+    """Family detection from DD paths."""
 
     def test_detect_physical_vector_family(self):
-        """T1: Physical vector detected from j_tor/j_parallel/j_phi."""
+        """Physical vector detected from j_tor/j_parallel/j_phi."""
         items = [
             {"path": "equilibrium/time_slice/profiles_1d/j_tor", "unit": "A/m^2"},
             {"path": "equilibrium/time_slice/profiles_1d/j_parallel", "unit": "A/m^2"},
@@ -102,7 +102,7 @@ class TestFamilyDetection:
         assert len(f.members) >= 2
 
     def test_detect_geometric_coordinate_family(self):
-        """T2: Geometric coordinate detected from position/r, z, phi."""
+        """Geometric coordinate detected from position/r, z, phi."""
         items = [
             {"path": "barometry/gauge/position/r", "unit": "m"},
             {"path": "barometry/gauge/position/z", "unit": "m"},
@@ -115,7 +115,7 @@ class TestFamilyDetection:
         assert f.parent_name == "position"
 
     def test_detect_derivative_family(self):
-        """T3: Derivative family detected from shared denominator."""
+        """Derivative family detected from shared denominator."""
         items = [
             {
                 "path": "equilibrium/time_slice/profiles_1d/darea_dpsi",
@@ -136,7 +136,7 @@ class TestFamilyDetection:
         assert len(f.members) == 3
 
     def test_no_false_family_for_unrelated_paths(self):
-        """T4: No false family from unrelated paths."""
+        """No false family from unrelated paths."""
         items = [
             {"path": "equilibrium/time_slice/profiles_1d/pressure", "unit": "Pa"},
             {"path": "equilibrium/time_slice/profiles_1d/q", "unit": ""},

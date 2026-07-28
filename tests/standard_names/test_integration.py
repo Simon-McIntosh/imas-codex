@@ -136,9 +136,9 @@ class TestCoalesceSafety:
     an earlier catalog import.
     """
 
-    # Plan 38 W4a removed individual grammar_* slots (grammar_physical_base,
-    # grammar_subject, grammar_component, etc.) from the StandardName schema.
-    # grammar_parse_version is the only grammar field written via coalesce now.
+    # The StandardName schema carries no individual grammar_* slots
+    # (grammar_physical_base, grammar_subject, grammar_component, …), so
+    # grammar_parse_version is the only grammar field written via coalesce.
     _COALESCE_FIELDS = [
         ("documentation", "b.documentation, sn.documentation"),
         ("kind", "b.kind, sn.kind"),
@@ -206,11 +206,10 @@ class TestCoalesceSafety:
         item = batch[0]
 
         # All optional fields must appear in the batch (value may be None).
-        # Plan 38 W4a dropped individual grammar_* slots (grammar_physical_base,
-        # grammar_subject, etc.) from the schema; they are no longer written.
-        # The grammar_* fields now written are grammar_parse_version (version
-        # string) and validation_diagnostics_json, both computed by
-        # _parse_grammar.
+        # The schema carries no individual grammar_* slots
+        # (grammar_physical_base, grammar_subject, …), so the only grammar_*
+        # fields written are grammar_parse_version (version string) and
+        # validation_diagnostics_json, both computed by _parse_grammar.
         # physics_domain is NOT in the main MERGE batch — it's handled
         # separately in the promote-on-higher-rank block that reads existing
         # values, computes promotion in Python, and writes back via a

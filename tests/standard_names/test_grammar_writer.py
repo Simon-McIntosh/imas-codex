@@ -1,12 +1,12 @@
-"""Plan 40 Phase 1 — writer behaviour tests for ``_write_grammar_decomposition``.
+"""Writer behaviour tests for ``_write_grammar_decomposition``.
 
 Mocked GraphClient — does not require a live Neo4j. Verifies:
 
-- T-A1/A3: per-segment columns always populated when parser succeeds
-- T-A6: re-writing with narrower grammar clears stale columns
-- T-A7: parser error → segment columns cleared, no fallback flag written
+- per-segment columns are always populated when the parser succeeds
+- re-writing with a narrower grammar clears stale columns
+- a parser error clears the segment columns and writes no fallback flag
   (non-compliance is recorded by ``validation_status`` at validate time)
-- T-A3: open-vocab ``physical_base`` populates the column even when no
+- an open-vocab ``physical_base`` populates the column even when no
   GrammarToken corpus exists in the graph (token_version is ``None``).
 """
 

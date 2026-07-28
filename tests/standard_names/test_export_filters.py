@@ -1,7 +1,7 @@
 """Regression tests: export _fetch_candidates skips superseded/exhausted/quarantined.
 
-Audit finding (Phase 3C):
-  The old query used ``name_stage IN ['published','accepted','reviewed','enriched']``.
+The stage gate must key on the authoritative field:
+  An earlier query used ``name_stage IN ['published','accepted','reviewed','enriched']``.
   That field is NOT updated when a name is superseded — only ``name_stage`` is
   authoritative.  A superseded node therefore kept its old stage property
   value and was erroneously included in export.
@@ -50,7 +50,7 @@ def _make_node(
     }
 
 
-# The four nodes described in the plan §3C scenario
+# One node per exclusion reason, plus one that must survive the gate
 _ALL_NODES = [
     # SN_A: fully accepted docs, but name is superseded — must be excluded
     _make_node("sn_a", name_stage="superseded"),
@@ -177,7 +177,6 @@ class TestFetchCandidatesQueryContract:
         assert "'valid'" in cypher or "= 'valid'" in cypher, (
             f"Value 'valid' missing from query (validation_status gate missing):\n{cypher}"
         )
-
 
     def test_unit_coalesces_edge_over_node_property(self):
         """The unit projection must coalesce the HAS_UNIT edge with sn.unit.

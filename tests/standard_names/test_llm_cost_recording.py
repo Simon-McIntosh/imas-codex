@@ -1,4 +1,4 @@
-"""W4c: LLMCost recording — pool normalisation and event_type tagging."""
+"""LLMCost recording — pool normalisation and event_type tagging."""
 
 from __future__ import annotations
 

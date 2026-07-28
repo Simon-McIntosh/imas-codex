@@ -1,13 +1,12 @@
 """Regression tests: extracted SNS nodes must not block re-extraction.
 
-Bug 6 — When the pipeline crashes between extract and compose, SNS nodes
-with ``status='extracted'`` are left behind. On the next run,
-``extract_dd_candidates`` skips any DD path that has a non-stale,
-non-failed SNS — treating ``extracted`` as "done" when it is actually
-"started but never composed."
+When the pipeline crashes between extract and compose, SNS nodes with
+``status='extracted'`` are left behind. ``extract_dd_candidates`` skips any
+DD path that has a non-stale, non-failed SNS, which would read ``extracted``
+as "done" when it actually means "started but never composed".
 
-The fix adds ``'extracted'`` to the allow-list in the ``NOT EXISTS``
-filter, so paths with ``extracted`` SNS are re-processed.
+``'extracted'`` therefore belongs in the allow-list of the ``NOT EXISTS``
+filter, so those paths are re-processed rather than stranded.
 """
 
 from __future__ import annotations

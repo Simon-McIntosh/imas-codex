@@ -1,7 +1,7 @@
 """Tests for divergence detection in export.
 
-Plan 35 §3d: divergence-detection unit test — catalog-edited names
-with modified protected fields are flagged.
+A catalog-edited name whose protected fields have been modified is
+flagged as divergent from the graph.
 """
 
 from __future__ import annotations

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 # =========================================================================
-# L3: latex_def_check
+# latex_def_check
 # =========================================================================
 
 
@@ -171,12 +171,16 @@ class TestSymbolUnitsCheck:
         """A \\mathrm{} label subscript (radiated, axis, eff) is not a unit."""
         assert self._flag("The power $P_{\\mathrm{rad}}$ is the radiated total.") == []
         assert self._flag("At $R_{\\mathrm{axis}}$ the value peaks smoothly.") == []
-        assert self._flag("The area $A_{\\mathrm{eff}}$ enters the coupling here.") == []
+        assert (
+            self._flag("The area $A_{\\mathrm{eff}}$ enters the coupling here.") == []
+        )
 
     def test_pass_mathrm_multiword_label_with_thin_space(self):
         """A \\mathrm{} label joining words with \\, (th ion, wave beam, gas inj)
         is not a unit — only an exponent inside \\mathrm{} marks a unit."""
-        assert self._flag("The density $n_{\\mathrm{th\\,ion}}$ is the thermal ion.") == []
+        assert (
+            self._flag("The density $n_{\\mathrm{th\\,ion}}$ is the thermal ion.") == []
+        )
         assert self._flag("The power $P_{\\mathrm{wave\\,beam}}$ enters here.") == []
         assert self._flag("The rate $S_{\\mathrm{gas\\,inj}}$ counts injection.") == []
 
@@ -206,7 +210,7 @@ class TestSymbolUnitsCheck:
 
 
 # =========================================================================
-# L3: provenance_verb_check
+# provenance_verb_check
 # =========================================================================
 
 
@@ -242,7 +246,7 @@ class TestProvenanceVerbCheck:
 
 
 # =========================================================================
-# L3: synonym_check
+# synonym_check
 # =========================================================================
 
 
@@ -308,7 +312,7 @@ class TestSynonymCheck:
 
 
 # =========================================================================
-# L3: unit_dimension_check
+# unit_dimension_check
 # =========================================================================
 
 
@@ -340,7 +344,7 @@ class TestUnitDimensionCheck:
 
 
 # =========================================================================
-# L3: multi_subject_check
+# multi_subject_check
 # =========================================================================
 
 
@@ -367,7 +371,7 @@ class TestMultiSubjectCheck:
 
 
 # =========================================================================
-# L3: cocos_specificity_check
+# cocos_specificity_check
 # =========================================================================
 
 
@@ -403,7 +407,7 @@ class TestCocosSpecificityCheck:
 
 
 # =========================================================================
-# L3: run_audits integration
+# run_audits integration
 # =========================================================================
 
 

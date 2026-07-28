@@ -1,4 +1,4 @@
-"""Plan 40 Phase 2 — query tokenisation + tier policy tests."""
+"""Query tokenisation + tier policy tests."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from imas_codex.standard_names.grammar_query import (
 
 
 def test_tokenise_query_snake_case() -> None:
-    """T1 — snake-cased queries split on underscores; stopwords dropped."""
+    """Snake-cased queries split on underscores; stopwords dropped."""
     assert tokenise_query("x_magnetic_field") == [
         "x",
         "magnetic",
@@ -25,7 +25,7 @@ def test_tokenise_query_snake_case() -> None:
 
 
 def test_tokenise_query_drops_stopwords() -> None:
-    """T1 — ISN connector words ('of', 'at', 'from', …) are dropped."""
+    """ISN connector words ('of', 'at', 'from', …) are dropped."""
     out = tokenise_query("electron_temperature_at_outboard_midplane")
     assert "at" not in out
     assert out == ["electron", "temperature", "outboard", "midplane"]
@@ -84,8 +84,9 @@ def test_tier_and_column_segments_are_real_isn_segments() -> None:
     renamed/removed ISN segment fails loudly here instead of silently
     mis-tiering. The reverse (ISN segment not yet tiered) is allowed: tiering
     is codex policy and some segments intentionally carry no search weight."""
-    from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
     from imas_standard_names.grammar.model import StandardName
+
+    from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
 
     # StandardName.model_fields is the authoritative segment universe — every
     # segment a name can carry, including the operator-slot segments
@@ -101,7 +102,7 @@ def test_tier_and_column_segments_are_real_isn_segments() -> None:
 
 
 def test_tier_partitions_disjoint() -> None:
-    """T2 — tier sets do not overlap and cover all 12 segments."""
+    """Tier sets do not overlap and cover all 12 segments."""
     assert TIER1_SEGMENTS.isdisjoint(TIER2_SEGMENTS)
     assert TIER1_SEGMENTS.isdisjoint(TIER3_SEGMENTS)
     assert TIER2_SEGMENTS.isdisjoint(TIER3_SEGMENTS)
@@ -109,12 +110,12 @@ def test_tier_partitions_disjoint() -> None:
 
 
 def test_tier_weights_strictly_decreasing() -> None:
-    """T2 — weights enforce tier hierarchy (1 > 2 > 3)."""
+    """Weights enforce the tier hierarchy (1 > 2 > 3)."""
     assert TIER_WEIGHT[1] > TIER_WEIGHT[2] > TIER_WEIGHT[3] > 0
 
 
 # ---------------------------------------------------------------------------
-# AND-gate (plan §5.4 v3.2 strict)
+# Strict AND-gate: a tier hit alone never admits
 # ---------------------------------------------------------------------------
 
 
@@ -123,9 +124,9 @@ def _hits(segment: str, rank: int = 0) -> tuple[str, int, float]:
 
 
 def test_t1_alone_without_vk_is_dropped() -> None:
-    """T2 — Tier-1 hit without vector/keyword corroboration is NOT admitted.
+    """A Tier-1 hit without vector/keyword corroboration is NOT admitted.
 
-    This is the strict v3.2 AND-gate (§9.4 wins over §5.4 sketch).
+    The gate is a strict AND: a grammar-segment hit alone is not evidence.
     """
     by_id = {"sn_a": {1: [_hits("physical_base")]}}
     out = filter_by_tier_policy(by_id, vector_hits=set(), keyword_hits=set())
@@ -133,23 +134,23 @@ def test_t1_alone_without_vk_is_dropped() -> None:
 
 
 def test_t1_with_vk_is_admitted() -> None:
-    """T2 — Tier-1 hit + vector co-occurrence → admitted."""
+    """Tier-1 hit + vector co-occurrence → admitted."""
     by_id = {"sn_a": {1: [_hits("physical_base")]}}
     out = filter_by_tier_policy(by_id, vector_hits={"sn_a"}, keyword_hits=set())
     assert out == {"sn_a"}
 
 
 def test_t2_without_t1_anchor_is_dropped() -> None:
-    """T2 — Tier-2-only candidates (no anchor) are dropped regardless of v/k."""
+    """Tier-2-only candidates (no anchor) are dropped regardless of v/k."""
     by_id = {"sn_a": {2: [_hits("transformation")]}}
     out = filter_by_tier_policy(by_id, vector_hits={"sn_a"}, keyword_hits={"sn_a"})
     assert out == set()
 
 
 def test_t2_requires_t1_anchor_and_vk_cooccurrence() -> None:
-    """T2 / §9.4 — Tier-2 needs BOTH Tier-1 anchor AND vector/keyword hit."""
+    """Tier-2 needs BOTH a Tier-1 anchor AND a vector/keyword hit."""
     base = {"sn_anchored_no_vk": {1: [_hits("subject")], 2: [_hits("component")]}}
-    # No vk → dropped (strict AND-gate; this is the §9.4 assertion)
+    # No vk → dropped by the strict AND-gate
     assert filter_by_tier_policy(base, set(), set()) == set()
 
     # T1 anchor + vector hit → admitted
@@ -159,11 +160,11 @@ def test_t2_requires_t1_anchor_and_vk_cooccurrence() -> None:
 
 
 def test_t3_requires_t1_anchor_only() -> None:
-    """T2 — Tier-3 needs only a Tier-1 anchor; v/k irrelevant."""
+    """Tier-3 needs only a Tier-1 anchor; v/k irrelevant."""
     by_id = {"sn_geo": {1: [_hits("physical_base")], 3: [_hits("device")]}}
-    # Even without vk, Tier-3 + Tier-1 admits — but the §9.4 strict gate
-    # does not apply to Tier-3 paths because Tier-1 anchor is sufficient
-    # corroboration. Implementation choice.
+    # Even without vk, Tier-3 + Tier-1 admits: the strict AND-gate does not
+    # apply to Tier-3 paths because a Tier-1 anchor is already sufficient
+    # corroboration.
     out = filter_by_tier_policy(by_id, set(), set())
     assert out == {"sn_geo"}
 
@@ -177,7 +178,7 @@ def test_t3_alone_dropped() -> None:
 
 
 def test_x_component_query_does_not_flood() -> None:
-    """§9.4 worked example — ``x_component`` query with 50 decoy SNs.
+    """Worked example — ``x_component`` query with 50 decoy SNs.
 
     50 SNs match only on ``component=x`` (Tier-2). One SN matches on
     ``physical_base=temperature`` (Tier-1) AND has vector co-occurrence.
