@@ -331,10 +331,10 @@ class TestPersistToExhaustedAtCap:
     def test_persist_to_reviewed_at_escalator_attempt(self):
         """score=0.5, docs_chain_length=2, rotation_cap=3 → 'reviewed'.
 
-        Pre-fix this returned 'exhausted', pre-empting the Opus
-        escalator in process_refine_docs_batch (which fires at
-        docs_chain_length == rotation_cap-1).  Post-fix the SN stays
-        'reviewed' so the final escalated refine attempt can fire.
+        Returning 'exhausted' here pre-empts the escalated attempt in
+        process_refine_docs_batch, which fires at
+        docs_chain_length == rotation_cap-1.  The SN must stay 'reviewed'
+        so that final escalated refine can run.
         """
         gc = _mock_gc_query(
             return_values=[

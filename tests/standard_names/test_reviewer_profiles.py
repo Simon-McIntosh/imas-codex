@@ -6,7 +6,7 @@ Covers:
 - get_sn_review_profile_threshold() for all four named profiles
 - Unknown profile raises ValueError
 - Legacy accessors (get_sn_review_names_models, get_sn_review_disagreement_threshold)
-  remain backward-compatible after refactor
+  stay compatible with the profile-based lookup
 """
 
 from __future__ import annotations

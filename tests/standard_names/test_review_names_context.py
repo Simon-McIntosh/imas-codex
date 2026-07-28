@@ -365,9 +365,7 @@ def test_prior_reviews_iteration_uses_dict_index() -> None:
     }
     for template in ("sn/review_names", "sn/review_docs"):
         out = render_prompt(template, base_ctx)
-        assert "ion_pressure" in out, (
-            f"{template}: prior_reviews block did not render — bug regressed"
-        )
+        assert "ion_pressure" in out, f"{template}: prior_reviews block did not render"
         assert "Strong grammar" in out, (
             f"{template}: reasoning text missing from prior_reviews block"
         )

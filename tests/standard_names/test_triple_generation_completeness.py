@@ -1,23 +1,18 @@
-"""Regression tests for the x/y/z coordinate & unit-vector triple completeness
-gap found by the systematic review.
+"""An x/y/z (or r/phi/z) sibling triple must be documented consistently.
 
-Root cause (confirmed against the live catalog, e.g.
-``z_coordinate_of_ferritic_element_centroid`` in
-``standard_names/magnetic_field_systems.yml``): x/y/z (and r/phi/z) sibling
-triples are minted independently, one LLM candidate per DD leaf. When a
-candidate for the third (commonly ``z``) leaf resolves as an **attach**
-(merging its DD source onto an already-existing standard name) rather than a
-fresh **compose**, no documentation is ever generated for it — the merge
-target can sit with ``documentation=""`` indefinitely, since attach never
-triggers doc generation. This produced 6/6 known casualties on the z member,
-because z is conventionally the last-processed axis of the triple.
+Sibling triples are minted independently, one LLM candidate per DD leaf. When
+a candidate resolves as an **attach** (merging its DD source onto an existing
+standard name) rather than a fresh **compose**, no documentation is generated
+for it — attach never triggers doc generation, so the merge target can sit
+with ``documentation=""`` indefinitely. The casualty is systematically the
+``z`` member, because z is conventionally the last-processed axis of the
+triple, by which point a sibling has already created the name.
 
-``vector_family_consistency_check`` (imas_codex/standard_names/audits.py)
-already groups a DD vector node's minted siblings and checks structural
-agreement (axis token, base carrier, locus, physics_domain, canonical axis
-triple) but — before this fix — never checked documentation completeness,
-so this exact defect shape sailed through every corpus audit undetected.
-This test module locks in the added check (case 6 in the docstring).
+Structural agreement alone (axis token, base carrier, locus, physics_domain,
+canonical axis triple) does not catch this shape: every structural field is
+consistent and only the documentation is missing. These tests lock in the
+documentation-completeness arm of ``vector_family_consistency_check``
+(imas_codex/standard_names/audits.py) — case 6 of its docstring.
 """
 
 from __future__ import annotations

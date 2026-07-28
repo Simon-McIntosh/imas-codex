@@ -92,18 +92,18 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
     superseded or exhausted.  With ``pending_count > 0`` the idle-exhaustion
     watchdog never fires and the loop spins indefinitely.
 
-    The fixed ``_compute_pool_pending`` checks ``name_stage='drafted'`` etc.,
-    so terminal-state nodes contribute 0.  The watchdog fires, the run exits
-    cleanly, and this test passes in < 30 s.
+    ``_compute_pool_pending`` counts on ``name_stage='drafted'`` etc. instead,
+    so terminal-state nodes contribute 0, the watchdog fires, and the run
+    exits cleanly in < 30 s.
 
-    If the query were ever regressed to the dead-field approach, the
-    pre-flight assertion would catch it immediately (phantom rows returned
-    before run_sn_pools even starts), and the 30 s timeout would also fire.
+    A count taken over timestamps rather than stages is caught twice over: the
+    pre-flight assertion returns phantom rows before run_sn_pools even starts,
+    and the 30 s timeout fires.
     """
     # --- Insert terminal-state StandardName nodes with legacy fields set ------
-    # These mimic the real nodes that caused the 30-min hang: fully processed
-    # (superseded / exhausted) but still carrying legacy timestamp fields that
-    # the broken _count_pending used as "pending" indicators.
+    # Fully processed (superseded / exhausted) but still carrying the legacy
+    # timestamp fields, i.e. exactly the shape a timestamp-based count
+    # misreports as pending.
     node_ids: list[str] = []
     for i in range(6):
         node_id = f"{_TEST_PREFIX}{uuid.uuid4().hex[:8]}"

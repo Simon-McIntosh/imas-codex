@@ -117,7 +117,7 @@ class TestWriteReviewsReviewerModel:
     def test_reviewer_model_falls_back_to_model_when_absent(self) -> None:
         """If record omits reviewer_model, the model field is used as fallback."""
         record = _make_record(model="openrouter/google/gemini-2.5-pro")
-        # Simulate a record built without reviewer_model (pre-fix code path)
+        # A record built by a caller that never set reviewer_model
         record.pop("reviewer_model", None)
 
         _, calls = _call_write_reviews([record])

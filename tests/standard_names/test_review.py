@@ -283,10 +283,10 @@ class TestSNQualityReviewModels:
 
 
 class TestSNBuildStateReview:
-    """Test review-related state fields after pipeline refactor.
+    """Review-related state fields.
 
-    Review has been removed from the generate pipeline. These tests
-    verify the state still works correctly without review fields.
+    Review is not part of the generate pipeline: these tests verify the
+    build state works correctly without review fields.
     """
 
     def test_state_has_compose_model(self):

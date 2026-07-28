@@ -77,14 +77,13 @@ class TestRefineCapForwarding:
         # We can't easily test through the full adapter machinery without
         # importing all the internals. Instead, test the simpler property:
         # that the claim adapter factory receives rotation_cap.
-        # We verify by inspecting the source code change was applied.
+        # We verify by inspecting the factory's source.
         import inspect
 
         from imas_codex.standard_names.loop import _build_pool_specs
 
         source = inspect.getsource(_build_pool_specs)
-        # The fix should contain rotation_cap_kwargs being spread into
-        # the refine_name claim adapter
+        # rotation_cap_kwargs must be spread into the refine_name claim adapter
         assert "_rotation_cap_kwargs" in source
         assert "claim_refine_name_batch" in source
         assert "claim_refine_docs_batch" in source

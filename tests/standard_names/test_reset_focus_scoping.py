@@ -9,10 +9,10 @@ Two behaviours are covered:
    $path_allowlist``), NOT a prefix (``STARTS WITH``) — so names on other
    paths, including accepted catalog names, are never touched.
 
-2. GUARD — ``sn run --reset-to … --include-accepted`` with no scope is the
-   unscoped graph-wide accepted wipe that destroyed 1863 committed catalog
-   names in a prior incident. It must hard-error (``click.UsageError``). A
-   focused (``--focus``) or otherwise narrowed reset is allowed.
+2. GUARD — ``sn run --reset-to … --include-accepted`` with no scope is an
+   unscoped graph-wide wipe of accepted names, i.e. of the committed catalog.
+   It must hard-error (``click.UsageError``). A focused (``--focus``) or
+   otherwise narrowed reset is allowed.
 
 All graph interaction is mocked (no live Neo4j), mirroring the established
 pattern in ``test_graph_ops.py`` / ``test_sn_clear.py``.

@@ -58,9 +58,9 @@ class TestExtensionRespectsPhaseCap:
     def test_review_phase_isolated_from_compose_overshoot(self):
         """Critical: compose extensions must NOT consume review's allocation.
 
-        Pre-fix behaviour: a single compose batch could drain the pool past
-        compose's 30% cap, leaving nothing for review_names.  Post-fix:
-        compose hits its hard cap and stops; review's reservation succeeds.
+        Unclamped, a single compose batch drains the pool past compose's 30%
+        cap and leaves nothing for review_names.  Compose must hit its hard
+        cap and stop, so review's reservation still succeeds.
         """
         mgr = BudgetManager(
             5.0,

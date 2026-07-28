@@ -203,16 +203,17 @@ def test_full_prompt_still_renders_six_dimensions() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Regression: review_name_only prompt renders candidate (singular→plural fix)
+# The review_name_only prompt renders its candidate from a plural context
 # ---------------------------------------------------------------------------
 
 
 def test_review_name_only_renders_candidate() -> None:
     """The worker must pass ``items`` (plural list), not ``item`` (singular).
 
-    Before the fix, process_review_name_batch passed ``{"item": item}`` so
-    the ``{% for item in items %}`` loop found no candidates and the LLM saw
-    an empty prompt.  After the fix it should pass ``{"items": [item], ...}``.
+    process_review_name_batch must render ``{"items": [item], ...}``: the
+    template iterates ``{% for item in items %}``, so a singular
+    ``{"item": item}`` context yields no candidates and the LLM is handed an
+    empty prompt — a failure that costs a call and returns no scores.
     """
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.standard_names.context import _build_enum_lists

@@ -411,13 +411,13 @@ def test_exhaustion_path(_gc, _clean):
     """Four-step rejection chain leads to 'exhausted' at rotation_cap=3.
 
     SN_v4 (chain_length=3) is rejected after three prior refine attempts
-    (the final one routed through the Opus escalator at chain_length=2)
-    → name_stage='exhausted'.  The SN is no longer eligible for
+    (the final one routed through the escalation model at chain_length=2)
+    → name_stage='exhausted'.  The SN is then no longer eligible for
     refine_name.
 
-    Pre-2026-05-03: exhaustion fired at chain=2 directly, pre-empting
-    the escalator.  Post-fix: chain=2 stays 'reviewed' so the escalator
-    can spend its final attempt; exhaustion fires only at chain=3.
+    Exhaustion must fire at chain=3, not chain=2: chain=2 stays 'reviewed' so
+    the escalation model gets to spend the final attempt.  Exhausting one
+    rotation early silently throws that attempt away.
     """
     src_id = _uid("src_exhaust")
     sn_v1 = _uid("exhaust_v1")

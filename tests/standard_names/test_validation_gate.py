@@ -125,9 +125,9 @@ class TestIsNonNameableCoordinate:
     """Bare coordinate/infrastructure tokens route to skip, not compose.
 
     These tokens churn through compose -> review -> refine to exhaustion when
-    composed as bare names (real beta-rotation casualties: ``time`` from
-    ``real_time_data/topic/time_stamp``; ``delay`` from
-    ``bremsstrahlung_visible/latency``). They must be caught at compose time.
+    composed as bare names — observed in the corpus for ``time`` from
+    ``real_time_data/topic/time_stamp`` and ``delay`` from
+    ``bremsstrahlung_visible/latency``. They must be caught at compose time.
     """
 
     @pytest.mark.parametrize(

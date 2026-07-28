@@ -28,11 +28,12 @@ class TestReviewPipelineBudget:
     """Simulate the review pipeline's budget usage pattern."""
 
     def test_secondary_reviewer_cost_charged(self):
-        """Bug A fix: 2-model setup charges both cycles to the same lease.
+        """A 2-model setup charges both cycles to the same lease.
 
-        Before the fix, the secondary reviewer cost was added to
-        ``total_cost`` and ``state.review_stats.cost`` but NOT reconciled
-        against the reservation, causing un-budgeted spend.
+        The secondary reviewer's cost must be reconciled against the
+        reservation, not merely added to ``total_cost`` and
+        ``state.review_stats.cost`` — accounting it outside the lease lets it
+        spend un-budgeted.
         """
         mgr = BudgetManager(total_budget=5.0)
 

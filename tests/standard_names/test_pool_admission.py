@@ -468,13 +468,12 @@ class TestPoolAdmitExtension:
     def test_headless_mode_empty_active_pools_admits_all(self) -> None:
         """When active_pools is empty, pool_admit admits all known pools.
 
-        In headless (non-TTY) mode the Rich display never fires so
-        PoolHealth.pending_count stays 0 for every pool.  active_pools_fn()
-        returns {} (empty set).  Before this fix, pool_admit returned False
-        for every pool → all 6 pools permanently blocked in the admission gate.
-
-        Fix: treat active_pools={} as "no pending-count data" and admit all
-        pools that appear in the weights dict.
+        In headless (non-TTY) mode the Rich display never fires, so
+        PoolHealth.pending_count stays 0 for every pool and active_pools_fn()
+        returns {} (empty set).  An empty set means "no pending-count data",
+        NOT "nothing is active" — refusing on it blocks every pool
+        permanently at the admission gate, so it must admit every pool that
+        appears in the weights dict.
         """
         mgr = self._mgr()
         active: set[str] = set()
@@ -494,9 +493,9 @@ class TestPoolAdmitExtension:
     def test_pool_admit_rejects_when_exhausted_with_empty_active_pools(self) -> None:
         """Exhausted budget hard-gates pool_admit even in headless mode.
 
-        Before the fix, the headless short-circuit ``if not active_pools: return True``
-        was evaluated *before* the exhaustion check, so a depleted budget was ignored
-        when running headless.  The exhaustion check must come first.
+        The exhaustion check must be evaluated BEFORE the headless
+        short-circuit ``if not active_pools: return True`` — ordered the other
+        way round, a depleted budget is ignored whenever the run is headless.
         """
         mgr = self._mgr(total=5.0)
         # Drive the remaining pool to zero/negative so exhausted() returns True.
