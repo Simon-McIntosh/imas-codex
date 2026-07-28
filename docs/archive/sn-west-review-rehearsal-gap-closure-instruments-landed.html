@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-gap-closure-instruments-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — three write paths that un-named sources, and the real size of the ambiguity | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 — three write paths that quietly un-named sources, and the real size of the double-name defect (2026-07-28)</h1>
+
+    <div class="card" style="border-left:4px solid #b5651d; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>The RC was not cut.</strong> Chasing the WEST residual as the lead
+        asked turned up three structural defects in the repair machinery itself —
+        two of which would have <em>destroyed</em> acceptance had the planned
+        repair been applied as written. Those are fixed and pushed. But two of the
+        section's own done-when criteria are genuinely unmet, and the honest
+        report is that the release candidate is not ready, not that it is.
+      </p>
+      <p style="margin:0;">
+        Acceptance moved <strong>289 → 301 of 355</strong>. The line-of-sight
+        <code>/z</code> family now reads under one name. The release-blocking
+        ambiguity is <strong>14 DD paths, not 48</strong> — and the number was
+        wrong in both directions for reasons worth recording.
+      </p>
+    </div>
+
+    <figure style="margin:22px 0;">
+      <img src="/imas-codex/figures/sn-west-review-rehearsal/gap-closure.png"
+           alt="Left: acceptance against the 355-source manifest at four measured
+                points, 296 at the plan's last measure, 289 re-measured at entry,
+                289 after the /z fold, 301 after the review drain. Right: the
+                double-name defect re-classified — 37 counted on provenance edges,
+                of which 13 have only one end exported, 8 are parent/child by
+                construction, and 14 are genuinely ambiguous in the export."
+           style="max-width:100%;height:auto;">
+      <figcaption style="color:#7a8899;font-size:0.9em;margin-top:6px;">
+        Both headline numbers the section inherited were wrong. Left: the entry
+        measurement was 7 <em>below</em> the plan's, because the staged repairs had
+        moved accepted names back to <code>drafted</code> — progress read as
+        regression. Right: counting the double-name defect on provenance edges
+        over-reports it by 2.6&times;; only the DD-side realization the export
+        actually reads can make the catalog ambiguous.
+      </figcaption>
+    </figure>
+
+    <h2>Three write paths that removed a source's only live name</h2>
+
+    <p>
+      All three are the same shape: an operation whose <em>purpose</em> is to
+      consolidate names silently left a source realizing nothing. A source with no
+      live name is not merely cosmetic — the next drain rewinds it to
+      <code>extracted</code> and pays to re-compose it, and in the meantime the
+      manifest reports it as a gap.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Path</th><th>What it did</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>tombstone_supersede_into</code><br>(<code>sn supersede</code>)</td>
+          <td>
+            Tombstoned the folded name and left its <code>PRODUCED_NAME</code>
+            edges behind as provenance. Correct for a refine, wrong for a fold: a
+            fold asserts the two names are one quantity, so every source of the
+            loser realizes the winner. Applying the planned <code>/z</code> fold as
+            written would have stranded <strong>38 sources, 8 of them WEST</strong>
+            — acceptance would have gone <em>down</em> 8 while the ledger row
+            disappeared, which reads as success.
+          </td>
+          <td>
+            Folds now carry sources onto the target additively (historical edges
+            stay), gate the new pairings, and report the carry count plus the
+            would-strand count so a dry run shows the blast radius.
+            <code>01238486</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>persist_refined_name</code></td>
+          <td>
+            Migrated a predecessor's whole <code>PRODUCED_NAME</code> +
+            <code>HAS_STANDARD_NAME</code> set onto a different name with no
+            re-validation. The source set is historical but every <em>pairing</em>
+            is new, and a new pairing is exactly what the consistency guard exists
+            to judge — so a rename could carry an edge compose would have refused.
+            This is the channel by which conductor-geometry vertices reached optical
+            <code>line_of_sight</code> names.
+          </td>
+          <td>
+            Gated, scoped to the successor (a corpus audit per refine is not
+            affordable on that path). A gate failure logs rather than failing the
+            rename. <code>f2d7423f</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>supersede_prior_source_names</code></td>
+          <td>
+            Exempted <code>origin='catalog_edit'</code> from the
+            one-live-name-per-source dedup, so an unreviewed bulk import kept
+            competing for a source that had already recomposed — the root cause the
+            plan named for the split coordinate families.
+          </td>
+          <td>
+            Exemption removed; only a structural <code>derived</code> parent stays
+            exempt, since it belongs to the admission gate rather than to any one
+            source. <code>01238486</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>The ambiguity was counted on the wrong edge</h2>
+
+    <p>
+      The plan carried &ldquo;48 WEST-touching ledger rows, dominated by the
+      line-of-sight <code>/z</code> and <code>/phi</code> splits.&rdquo; Measured,
+      the picture is different in both magnitude and composition:
+    </p>
+
+    <ul>
+      <li>
+        <strong>Line-of-sight is 4 of them, not most.</strong> The dominant class is
+        <strong>34 unrelated near-duplicate pairs</strong> — one catalog-imported
+        name and one pipeline name competing for a single source
+        (<code>atomic_mass</code> vs <code>neutral_species_atomic_mass</code>,
+        <code>poloidal_magnetic_flux</code> vs
+        <code>&hellip;_at_flux_surface</code>, and so on). Each is a physics
+        judgement, not a structural sweep.
+      </li>
+      <li>
+        <strong>Provenance edges over-report by 2.6&times;.</strong> Counting
+        <code>PRODUCED_NAME</code> gives 37; the export reads the DD-side
+        <code>HAS_STANDARD_NAME</code> realization. Of the 35 paths realizing more
+        than one live name, 13 have only one end at an exported stage and 8 are
+        <code>HAS_PARENT</code> parent/child co-realization — correct by
+        construction, with the parent sitting at <code>drafted</code> so it never
+        reaches the catalog. <strong>14 are genuinely ambiguous in the export.</strong>
+      </li>
+      <li>
+        <strong>A realization can exist with no provenance behind it.</strong> 32
+        <code>HAS_STANDARD_NAME</code> edges corpus-wide have no
+        <code>StandardNameSource</code> asserting them. The ledger's orphan and
+        desync checks both run name&rarr;source and cannot see this class, yet it is
+        precisely the class that reaches consumers.
+      </li>
+    </ul>
+
+    <h2>A missing instrument, now built</h2>
+
+    <p>
+      The consistency guard rules on mechanical questions — dimensionality, locus
+      and device, vector families. It is silent on a <em>semantic</em> mis-share:
+      two names that are each valid, denote different quantities, and both attach to
+      one DD path. Deciding which the path realizes is a physics judgement, and once
+      made there was no way to record it — no CLI reached a single realization edge.
+    </p>
+
+    <p>
+      <code>sn detach &lt;dd-path&gt; &lt;name&gt; --reason &hellip;</code>
+      (<code>6fd9c365</code>) closes that. It reuses the reconcile's own detach
+      semantics so a targeted repair and the retroactive sweep leave the graph in
+      the same shape, writes the reason into the change ledger, reaches
+      projection-only pairings, and <strong>refuses to orphan a name</strong> — when
+      every source rejects a name the NAME is wrong, which is
+      <code>sn edit --rename</code>'s job. That refusal fired twice in anger during
+      this session, correctly stopping two detaches that would have orphaned
+      <code>triangularity_of_flux_surface</code> and
+      <code>poloidal_magnetic_field</code>.
+    </p>
+
+    <h2>What was applied</h2>
+
+    <p>
+      A read-only adjudication fleet ruled on all 31 non-coordinate pairs against DD
+      documentation and the ISN grammar vocabularies. Applied from those verdicts:
+    </p>
+
+    <ul>
+      <li>
+        <strong>The <code>/z</code> line-of-sight fold</strong> — 47 sources carried;
+        the axis now reads under one name
+        (<code>vertical_coordinate_of_line_of_sight</code>, 46 sources) plus two
+        genuinely distinct loci. No source of the folded name was a beam-tracing DD
+        path, so the name was wrong for its entire set.
+      </li>
+      <li>
+        <strong>9 targeted detaches</strong> on release-blocking ambiguity, each with
+        a DD-quoted reason: the two <code>radiance_spectral</code> paths
+        (continuum vs impurity line emission), <code>hard_x_rays/channel/etendue</code>,
+        <code>grid/psi_boundary</code>, <code>faraday_angle/measured</code>,
+        <code>flux_loop/reconstructed</code>, <code>r_outboard</code>,
+        <code>j_phi</code>.
+      </li>
+      <li>
+        <strong>Folds</strong> for <code>normalized_beta</code>, the
+        <code>darea_drho_tor</code> derivative duplicate, and the decomposed
+        magnetic-shear name (a mis-decomposition: <code>magnetic_shear</code> is a
+        lexicalized registered base, and <em>s</em> = (r/q)dq/dr is not the bare
+        derivative).
+      </li>
+      <li>
+        <strong>A review drain</strong> — 18 names reviewed, 5 regenerated, $4.06 of
+        the $15 cap, accepting at 0.92–0.95 by quorum consensus. This is what moved
+        289 &rarr; 301, including the <code>poloidal_magnetic_flux_at_measurement_position</code>
+        unit repair (W &rarr; Wb) landing on merit at 0.950.
+      </li>
+    </ul>
+
+    <h2>The gm cluster needs no operator vocabulary — but it does need one base</h2>
+
+    <p>
+      The recorded gaps blamed <code>qualifier:inverse_square</code> and
+      <code>qualifier:square</code>. That diagnosis was wrong twice over:
+      <code>inverse</code> and <code>square</code> are already registered
+      <em>operators</em>, so the composer was reaching for the wrong segment class —
+      and, verified against the real parser, they cannot be used in
+      <code>_of_</code> chain form anyway. The flat model carries exactly one
+      transformation slot, so <code>inverse_of_square_of_major_radius</code> raises;
+      the working construction is one bare <code>flux_surface_averaged</code> prefix
+      with <code>inverse</code>/<code>square</code> absorbed as base-compound glue.
+    </p>
+
+    <table>
+      <thead><tr><th>path</th><th>quantity</th><th>DD unit</th><th>name</th><th>vocabulary delta</th></tr></thead>
+      <tbody>
+        <tr><td>gm1</td><td>&lang;1/R&sup2;&rang;</td><td><code>m^-2</code></td><td><code>flux_surface_averaged_inverse_square_major_radius</code></td><td>none</td></tr>
+        <tr><td>gm4</td><td>&lang;1/B&sup2;&rang;</td><td><code>T^-2</code></td><td><code>flux_surface_averaged_inverse_square_magnetic_field_magnitude</code></td><td>none</td></tr>
+        <tr><td>gm5</td><td>&lang;B&sup2;&rang;</td><td><code>T^2</code></td><td><code>flux_surface_averaged_square_magnetic_field_magnitude</code></td><td>none</td></tr>
+        <tr><td>gm9</td><td>&lang;1/R&rang;</td><td><code>m^-1</code></td><td><code>flux_surface_averaged_inverse_major_radius</code> (rename)</td><td>none</td></tr>
+        <tr><td>gm3, gm7</td><td>&lang;|&nabla;&rho;|&sup2;&rang;, &lang;|&nabla;&rho;|&rang;</td><td><code>1</code></td><td><code>flux_surface_averaged_[square_]toroidal_flux_radius_gradient_magnitude</code></td><td>1 shared base</td></tr>
+        <tr><td>gm2, gm6</td><td>&lang;|&nabla;&rho;|&sup2;/R&sup2;&rang;, &lang;|&nabla;&rho;|&sup2;/B&sup2;&rang;</td><td><code>m^-2</code>, <code>T^-2</code></td><td>weighting-qualifier forms</td><td>2 qualifiers</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Four of the nine are expressible today with no ISN change, all four
+      round-tripped through <code>parse_standard_name</code> and clean under
+      <code>run_semantic_checks</code> at their DD unit. The genuine gap is
+      <strong>&nabla;&rho;</strong>: <code>toroidal_flux_radius</code> is a
+      <em>geometric</em> carrier and the model forbids
+      <code>transformation</code> together with <code>geometric_base</code>, so
+      <code>gradient_of_toroidal_flux_radius</code> is a hard error and
+      |&nabla;&rho;| has no expression. It needs one vector base
+      <code>toroidal_flux_radius_gradient</code> — which must <em>not</em> carry
+      <code>constant_on_flux_surface</code>, since &rho; is constant on a flux
+      surface but |&nabla;&rho;| is not, and flagging it would trip the
+      flux-surface-reduction gate against <code>flux_surface_averaged</code>.
+    </p>
+
+    <p>
+      Both collapsed names parse cleanly, so this is a semantic collapse rather than
+      a parse defect — but one name serves two paths of <em>different dimension</em>
+      (gm2 <code>m^-2</code> vs gm6 <code>T^-2</code>) while recording unit
+      <code>1</code>, and its base is an ordinal-family placeholder that
+      discriminates neither a power nor a divisor. Neither is recoverable by unit
+      correction; both must be superseded.
+    </p>
+
+    <h2>Why the RC was not cut</h2>
+
+    <p>
+      Two done-when criteria are unmet, and cutting anyway would ship exactly the
+      shoddiness the lead's direction was about:
+    </p>
+
+    <ol>
+      <li>
+        <strong>54 of 355 sources still lack an accepted name</strong> — 23 of them
+        with no name proposed at all. Roughly 8 of those only need a free compose
+        drain; the rest are the gm cluster, the exhausted/superseded remainder, and
+        a documented non-nameable set that has not yet been written into a form the
+        PR body can state.
+      </li>
+      <li>
+        <strong>The ambiguity is reduced, not closed.</strong> 9 detaches and 4 folds
+        landed against 14 blocking paths, and several remaining verdicts are
+        sequenced behind a review pass because the correct name is the
+        <code>drafted</code> one and <code>sn supersede</code> requires an accepted
+        target. Inverting those folds to satisfy the tool would enshrine the
+        defective name.
+      </li>
+    </ol>
+
+    <p>
+      Two further blockers are tooling, not judgement. <code>/phi</code> cannot be
+      folded the way the plan directs: <code>toroidal_coordinate</code> is not a
+      registered ISN carrier (<code>toroidal_angle</code> is), and
+      <code>toroidal_angle_of_line_of_sight</code> — the grammar-correct id — was
+      refined <em>into</em> a measurement-position name, so it sits tombstoned inside
+      a <code>REFINED_FROM</code> chain that no sanctioned instrument reaches.
+      Separately, the new gate makes each fold take about two minutes because the
+      scoped audit reloads the guard's grammar context per call; acceptable for a
+      handful of repairs, too slow for a bulk sweep.
+    </p>
+
+    <h2>Findings worth their own work</h2>
+
+    <ul>
+      <li>
+        <strong>Six of eight engineering pairs were one bug, not six disputes</strong>
+        — a <code>derived</code> structural parent holding its child's DD leaf.
+        Parents otherwise hold zero DD sources, so a single sweep (&ldquo;detach every
+        <code>derived</code> name from any DD source also held by one of its
+        <code>HAS_PARENT</code> children&rdquo;) would clear a large share without
+        per-case adjudication.
+      </li>
+      <li>
+        <code>toroidal_plasma_beta</code> is <code>superseded</code> yet still holds
+        <code>equilibrium/&hellip;/beta_tor</code>, and the normalized name holds that
+        path too — so an un-normalized quantity now resolves to a normalized name.
+        The same dedup bug in a nastier form.
+      </li>
+      <li>
+        <code>radiance_at_spectral_line</code> is accepted on an energy basis
+        (<code>W.m^-2.sr^-1</code>) while all three DD paths it came from store photon
+        radiance — a unit contradiction across its whole historical set, and its child
+        inherits it.
+      </li>
+      <li>
+        The ISN grammar carries two carriers for <code>rho_tor</code>
+        (<code>toroidal_flux_coordinate</code> and <code>toroidal_flux_radius</code>),
+        both flagged <code>constant_on_flux_surface</code>. That will keep minting
+        near-duplicate derivative names — one of the pairs folded this session was
+        exactly that.
+      </li>
+      <li>
+        Binary-operator operands are not vocabulary-validated:
+        <code>parse_standard_name("ratio_of_wibble_frobnicator_to_square_major_radius")</code>
+        succeeds. Any <code>ratio_of_&hellip;</code> construction would appear to parse
+        while being meaningless.
+      </li>
+    </ul>
+  </main>
+</body>
+</html>
