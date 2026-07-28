@@ -78,7 +78,7 @@ def test_cleanup_excludes_backfilled_paths():
     assert "some/path/unlabeled" not in all_labeled
 
 
-def test_cleanup_would_have_wiped_backfilled_without_fix():
+def test_cleanup_scoped_to_xml_labels_alone_wipes_backfilled():
     """Cleanup scoped to xml_labeled alone would remove backfilled paths.
 
     Pins why the cleanup set must be the union of xml_labeled and backfilled:
