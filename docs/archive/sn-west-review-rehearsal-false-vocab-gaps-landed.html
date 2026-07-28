@@ -145,23 +145,50 @@
         <tr>
           <td>A fold/detach costs ~2 min because of 43.6&nbsp;s of ISN import plus
               27.7&nbsp;s of context build, per process.</td>
-          <td>Re-measurement on an idle <code>sun_debug</code> node.</td>
-          <td>Only the <strong>build</strong> is intrinsic (25&nbsp;s production
-              catalog, 12.1&nbsp;s here). The import is 0.6&nbsp;s idle; 43&ndash;96&nbsp;s
-              was login-node filesystem contention. <code>tests/grammar/</code> runs
-              in 21&nbsp;s on a compute node and did not finish in 20&nbsp;min on the
-              login node.</td>
+          <td>Interleaved re-measurement on an idle <code>sun_debug</code> node
+              versus the login node at load 15&ndash;50.</td>
+          <td>Only the <strong>build</strong> is intrinsic:
+              <strong>24.5&ndash;24.9&nbsp;s</strong> against the production catalog
+              on an idle node. The import is <strong>1.7&ndash;2.5&nbsp;s</strong>
+              there; the 43.6&nbsp;s figure was the BEST of five login-node samples
+              (43.6&ndash;96.3&nbsp;s), and the build read 156&ndash;221&nbsp;s on the
+              same node. So <strong>~80% of the observed 2 minutes was contention
+              and ~20% real</strong>, of which the build is ~95%.
+              <code>tests/grammar/</code> runs in 21&nbsp;s on a compute node and did
+              not finish in 20&nbsp;min on the login node.</td>
         </tr>
       </tbody>
     </table>
     <p>
       The second correction has a standing consequence: <strong>never take an ISN
       wall-clock measurement on the login node.</strong> The lever on import cost is
-      the NUMBER of module files (936 for the grammar package), not CPU &mdash;
-      ~400 of them are pulled by pydantic entry-point plugin discovery, and
-      <code>PYDANTIC_DISABLE_PLUGINS=1</code> cuts import 2.0&ndash;2.6&times;.
-      <code>logfire</code> is a dev-group dependency that no source file imports;
-      removing it is a dependency decision for the lead, not an agent.
+      the NUMBER of module files (936 for the grammar package), not CPU: under load
+      each costs ~50&nbsp;ms against ~0.6&nbsp;ms idle, and
+      <code>-X importtime</code> total self-time tracks the swing exactly
+      (3.1&nbsp;s quiet, 46.8&nbsp;s loaded, same 936 modules). ~400 of them are
+      pulled by pydantic entry-point plugin discovery, triggered by the first
+      <code>BaseModel</code> class creation, dragging in the whole
+      opentelemetry / rich / protobuf / requests tree.
+      <code>PYDANTIC_DISABLE_PLUGINS=1</code> cuts login-node import
+      2.0&ndash;2.6&times; (median ~66&nbsp;s &rarr; ~25&nbsp;s, interleaved A/B over
+      6 reps) while costing only 0.26&nbsp;s of CPU idle &mdash; so it is a
+      contention win, not a compute win. <code>logfire</code> is a dev-group
+      dependency that no source file imports; removing it is a dependency decision
+      for the lead, not an agent. Next-largest file-count reduction after it:
+      <code>imas_standard_names/__init__.py</code> imports <code>pint</code>
+      unconditionally, 154 modules a parse-only consumer never needs.
+    </p>
+    <p>
+      <strong>The honest ordering of the three levers</strong>, since it changes what
+      to do rather than just what to believe: (1) run bulk sweeps on
+      <code>sun_debug</code> &mdash; that removes the ~95&nbsp;s contention term and is
+      the single biggest factor in the observed 2&nbsp;minutes; (2) the cache, which
+      removes 24.5 of the ~26 genuinely-real seconds and is what makes a
+      compute-node sweep effectively free; (3) logfire, which halves the residual
+      import that dominates a warm-cache process anywhere contended. Stated
+      plainly: a no-cache sweep on <code>sun_debug</code> would have cost ~26&nbsp;s
+      per fold, not 2&nbsp;minutes &mdash; <em>the login node was the blocker, not
+      the missing cache.</em>
     </p>
 
     <h3>What landed</h3>
@@ -187,9 +214,17 @@
           <td>Keyed on a fingerprint of every input (module bytes, specification,
               vocabulary YAML, distribution version, catalog size/mtime), atomic
               <code>os.replace</code>, degrades to a rebuild on a corrupt entry, env
-              opt-out. Verified on a compute node: cold
-              <code>get_grammar_context()</code> 12.10&nbsp;s &rarr;
-              <strong>0.86&nbsp;s</strong>.</td>
+              opt-out. Verified on an idle compute node against the production
+              catalog: payload build 24.5&nbsp;s &rarr; <strong>0.03&nbsp;s</strong>,
+              whole process 26&nbsp;s &rarr; <strong>0.57&nbsp;s (45&times;)</strong>.
+              Six simultaneous cold processes against an empty cache dir all
+              completed, leaving exactly one valid 202&nbsp;KB entry and no temp
+              files. One caveat carried in the code: the catalog half of the key is
+              <code>(relpath, size, mtime_ns)</code> rather than content &mdash;
+              content-hashing the catalog is the very scan the cache exists to avoid
+              &mdash; so an edit preserving both size and mtime is invisible, and
+              every catalog write costs the next process one rebuild. The
+              package and vocabulary half IS content-hashed.</td>
         </tr>
       </tbody>
     </table>

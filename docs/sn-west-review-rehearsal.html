@@ -158,8 +158,9 @@
         (<code>221664d</code>, unblocking gm3/gm7 — <code>gradient</code> was
         never missing, it is a registered operator that may not apply to a
         geometry carrier) and a cross-process grammar-context cache
-        (<code>8fc0da0</code>, cold build 12.10&nbsp;s &rarr; 0.86&nbsp;s verified
-        on a compute node). <strong>Re-measured:</strong> 300/355 accepted, and
+        (<code>8fc0da0</code>, payload 24.5&nbsp;s &rarr; 0.03&nbsp;s, whole process
+        26&nbsp;s &rarr; 0.57&nbsp;s, measured on an idle compute node against the
+        production catalog). <strong>Re-measured:</strong> 300/355 accepted, and
         grouping the 55 by blocking NAME rather than by path shows <strong>one
         rescore unblocks 16</strong>. Export ambiguity is <strong>exactly 1 WEST
         path</strong>, the authorised item-D repair.
@@ -167,9 +168,13 @@
       <p style="margin:0;">
         <strong>Two of this session's own diagnoses were falsified</strong> before
         any code relied on them: the rescue-path relabel hypothesis (that literal
-        occurs 0 times in 564 nodes) and the fold-cost attribution (only the
-        27&nbsp;s build is intrinsic; the 43&nbsp;s import was login-node
-        contention — ISN timings must never be taken on the login node). /phi is
+        occurs 0 times in 564 nodes) and the fold-cost attribution — only the
+        ~24.5&nbsp;s build is intrinsic, the 43.6&nbsp;s import was the BEST of five
+        login-node samples against 1.7&ndash;2.5&nbsp;s idle, so <strong>~80% of the
+        observed 2 minutes was filesystem contention</strong>. A no-cache sweep on
+        <code>sun_debug</code> would have cost ~26&nbsp;s per fold: the login node
+        was the blocker, not the missing cache. ISN timings must never be taken on
+        the login node. /phi is
         resolved as a reasoned residual, and three of its recorded premises were
         wrong — the &ldquo;grammar-invalid&rdquo; name parses fine, the tombstone
         was superseded from <code>refining</code> so restoring it would be a
