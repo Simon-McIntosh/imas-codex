@@ -140,22 +140,12 @@ class TestNoConsumerReadsTheSegmentMapAlone:
             "renders the closed-vocab prompt block; injects operators separately "
             "via _load_operators_full, and the drift test asserts both arrive"
         ),
-        "imas_codex/standard_names/workers.py": (
-            "per-segment rules that are about segment membership specifically"
-        ),
     }
 
     #: path -> the operator-blindness this reader still has. NOT an exemption:
     #: each entry is a known defect awaiting a routing change, listed so it stays
     #: visible instead of being rediscovered as the next instance of this bug.
-    KNOWN_OPERATOR_BLIND = {
-        "imas_codex/llm/sn_tools.py": (
-            "_list_grammar_vocabulary() is model-facing — the server tool "
-            "delegates to it — so a model asking for a segment's vocabulary "
-            "cannot discover the operators through it, and segment='operator' "
-            "answers 'Unknown grammar segment'"
-        ),
-    }
+    KNOWN_OPERATOR_BLIND: dict[str, str] = {}
 
     def _readers(self) -> set[str]:
         """Modules that actually IMPORT the segment map, not merely mention it."""
@@ -197,6 +187,11 @@ class TestNoConsumerReadsTheSegmentMapAlone:
             "imas_codex/standard_names/vocab_token_filter.py",
             "imas_codex/standard_names/vocab_promotion.py",
             "imas_codex/standard_names/vocab_semantic_dedup.py",
+            # model-facing: a composer asking this tool what operators exist was
+            # told the class does not exist, so it kept offering them as
+            # qualifiers — upstream of every gap the classifier then had to sort.
+            "imas_codex/llm/sn_tools.py",
+            "imas_codex/standard_names/workers.py",
         ):
             assert path not in readers, (
                 f"{path} reads SEGMENT_TOKEN_MAP again — it must go through "

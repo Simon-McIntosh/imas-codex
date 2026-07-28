@@ -275,11 +275,9 @@ def _isn_segment_tokens(segment: str) -> frozenset[str]:
     rule keyed on an empty set would judge every name by a vocabulary it could
     not read.
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-    except ImportError:
-        return frozenset()
-    return frozenset(SEGMENT_TOKEN_MAP.get(segment) or ())
+    from imas_codex.standard_names.segments import grammar_tokens_by_segment
+
+    return frozenset(grammar_tokens_by_segment().get(segment) or ())
 
 
 def _isn_physical_bases() -> frozenset[str]:

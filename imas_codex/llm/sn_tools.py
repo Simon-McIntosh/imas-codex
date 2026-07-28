@@ -472,31 +472,34 @@ def _list_grammar_vocabulary(
 ) -> str:
     """List the valid vocabulary for a grammar segment.
 
-    Queries ``imas_standard_names.grammar.constants.SEGMENT_TOKEN_MAP``
-    to return the ISN-defined token list for the requested segment.
-    All vocabulary segments are closed — every token must come from the
-    installed ISN vocabulary.
+    Answers from the operator-inclusive accessor rather than
+    ``SEGMENT_TOKEN_MAP`` alone. Operators are a grammar *mechanism* that
+    lives outside that map, so reading the map directly makes this tool
+    report that ``operator`` is not a segment — a model asking the
+    vocabulary-listing tool what operators exist would be told the class
+    does not exist, and would go on offering operators as qualifiers.
 
     Args:
         segment: Segment name (e.g. ``"physical_base"``, ``"component"``,
-            ``"subject"``). Case-insensitive. Valid values come from the
-            installed ISN package's ``SEGMENT_TOKEN_MAP`` keys.
+            ``"subject"``, ``"operator"``). Case-insensitive. Valid values are
+            the classes the accessor admits.
 
     Returns:
         Markdown table of tokens for the requested segment.
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
-    except ImportError:
+    from imas_codex.standard_names.segments import grammar_tokens_by_segment
+
+    by_segment = grammar_tokens_by_segment()
+    if not by_segment:
         return "ISN package unavailable — cannot list grammar vocabulary."
 
     seg_lc = (segment or "").strip().lower()
-    valid_segments = tuple(sorted(SEGMENT_TOKEN_MAP.keys()))
+    valid_segments = tuple(sorted(by_segment))
     if seg_lc not in valid_segments:
         valid = ", ".join(valid_segments)
         return f"Unknown grammar segment '{segment}'. Valid segments: {valid}."
 
-    tokens = SEGMENT_TOKEN_MAP.get(seg_lc, ())
+    tokens = by_segment.get(seg_lc, ())
     if not tokens:
         return (
             f"## Grammar Vocabulary: `{seg_lc}`\n\n"
