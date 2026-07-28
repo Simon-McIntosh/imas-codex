@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-impl" content="0.78">
 </head>
 <body>
@@ -131,6 +131,51 @@
         against the real parser) but does need one vector base for
         &nabla;&rho;. Full record:
         <a href="archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html">gap-closure instruments landed</a>.
+      </p>
+    </div>
+
+    <div class="card" style="border-left:4px solid #c0392b; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>The vocab gaps were mostly fabricated — the classifier is
+        operator-blind (2026-07-28).</strong> Asked whether the pipeline's
+        vocab-error rate was a prompt-context defect, the answer is yes but
+        <em>not in the prompts</em>: rendered with the real production context,
+        all five name-bearing seats carry the vocabulary in full (51/51
+        operators, 114/114 qualifiers, 159/159 physical_bases). The defect is in
+        codex's bookkeeping. <strong>531 of 564 recorded vocab gaps say &ldquo;this
+        token does not exist&rdquo;</strong>, and <strong>0 of 51 operator tokens
+        reach the decomposition index</strong> — so single operators classify
+        correctly while every MULTI-operator compound
+        (<code>inverse&nbsp;&compfn;&nbsp;square</code> — the gm1/gm4/gm5/gm9
+        shape) is filed as a genuine missing token. Each such gap either strands
+        a nameable source or raises a spurious request to extend ISN's closed
+        vocabulary. The <code>reason</code> field is empty on all 564, and codex
+        has zero handlers for the ISN error that carries the legal token list, so
+        a failing model is never told what to do differently.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>Landed:</strong> the ISN |&nabla;&rho;| vector base
+        (<code>221664d</code>, unblocking gm3/gm7 — <code>gradient</code> was
+        never missing, it is a registered operator that may not apply to a
+        geometry carrier) and a cross-process grammar-context cache
+        (<code>8fc0da0</code>, cold build 12.10&nbsp;s &rarr; 0.86&nbsp;s verified
+        on a compute node). <strong>Re-measured:</strong> 300/355 accepted, and
+        grouping the 55 by blocking NAME rather than by path shows <strong>one
+        rescore unblocks 16</strong>. Export ambiguity is <strong>exactly 1 WEST
+        path</strong>, the authorised item-D repair.
+      </p>
+      <p style="margin:0;">
+        <strong>Two of this session's own diagnoses were falsified</strong> before
+        any code relied on them: the rescue-path relabel hypothesis (that literal
+        occurs 0 times in 564 nodes) and the fold-cost attribution (only the
+        27&nbsp;s build is intrinsic; the 43&nbsp;s import was login-node
+        contention — ISN timings must never be taken on the login node). /phi is
+        resolved as a reasoned residual, and three of its recorded premises were
+        wrong — the &ldquo;grammar-invalid&rdquo; name parses fine, the tombstone
+        was superseded from <code>refining</code> so restoring it would be a
+        hand-accept, and /phi never blocked the export because the split is on
+        disjoint paths. Full record:
+        <a href="archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html">the vocab gaps were mostly fabricated</a>.
       </p>
     </div>
 
@@ -1458,7 +1503,7 @@ Done-when
   6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
     <p class="r-fu-outcome">Gap-closure instruments landed; RC deliberately NOT cut. Accepted 289 → 301/355; release-blocking export ambiguity 14 → 1. Three write paths that silently un-named sources found and fixed — the fold instrument would have stranded 38 sources (8 WEST) had the planned /z fold run as written (01238486); persist_refined_name's attachment migration gated (f2d7423f); the catalog_edit dedup exemption removed (01238486); new `sn detach` for the semantic mis-share the guard cannot judge (6fd9c365). 11 folds + 10 detaches applied from a read-only adjudication of every pair against DD text and the ISN grammar. Two inherited numbers were wrong: entry acceptance was 289 not 296, and the 48 ledger rows are 37 counted on the wrong edge (provenance, not the DD-side realization the export reads) of which only 14 could ever reach the catalog ambiguous. Record: docs/archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-swrr-015" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T12:05:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-015" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T12:05:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-28T14:16:01+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the last 54 unnamed WEST sources and the one remaining ambiguity, then cut the RC</h4>
     <div class="r-fu-body"><p><strong>The instruments are built; what remains is the naming work they enable.</strong> Acceptance stands at <strong>301/355</strong> with <strong>54 unaccepted</strong>, and release-blocking export ambiguity is down to <strong>one</strong> path. Four bounded pieces stand between here and the RC, and none of them is a detour: the gm metric cluster (name design already parser-validated — 4 of 9 need no vocabulary change, the gap is one vector base for ∇ρ), the exhausted/superseded remainder, a documented non-nameable set the PR body can state, and the /phi family, which is blocked on tooling rather than judgement.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -1612,6 +1657,203 @@ Done-when
   3. Export ambiguity is zero, or the residual is reasoned in the PR body.
   4. /phi resolved or explicitly reasoned — not silent.
   5. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
+  6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
+    <p class="r-fu-outcome">RC NOT cut; the session was redirected by the lead's question — 'is this a prompt issue with the correct context not getting injected? the pipeline is throwing up lots of vocab errors when the vocab exists' — and the answer reshapes the naming work. MEASURED: the prompts are NOT the defect. Rendered with the real production build_compose_context(), all five name-bearing seats (generate_name, refine_name, review_names, generate_docs, enrich_parent) carry 51/51 operators, 114/114 qualifiers, 159/159 physical_bases, 81/81 processes, 97/97 devices, 63/63 geometry tokens, all derived at runtime — the d622dfc2 static-subset class is CLOSED there, and the prompt even carries a worked gm1 example. The defect is codex's post-response bookkeeping: of 564 VocabGap nodes, 531 say 'absent' (this token does not exist) against 19 wrong_slot_placement, and 0 of 51 operator tokens reach the decomposition index because operators live outside SEGMENT_TOKEN_MAP. So single operators classify correctly (ab826533 holds) while every MULTI-operator compound — the inverse-compose-square shape of gm1/gm4/gm5/gm9 — is filed as a genuine missing token. Verbatim model-proposed tokens, all expressible today: inverse_square_of_magnetic_field, magnetic_field_magnitude_squared, derivative_of_area_with_respect_to_poloidal_flux, line_integrated_density, gradient_rho_squared_over_B_squared (=gm6), average_square, mean_square, pedestal_maximum_gradient_of_electron_temperature. Compounding it: reason is EMPTY on all 564, and codex has zero handlers for ISN's UnknownBaseTokenError which carries the full legal token list (ISN's own message prints only the count), so a failing model is never told which token or slot was wrong and re-offers the same compound; the gap-report segment field is unconstrained free text. LANDED: 221664d ISN toroidal_flux_radius_gradient vector base, unblocking gm3/gm7 — 'grad' was never missing, gradient IS a registered operator, the blocker is that a transformation may not apply to a geometry carrier so gradient_of_toroidal_flux_radius is unrepresentable; the base deliberately carries no constant_on_flux_surface flag since rho is constant on a flux surface but its gradient is not and flagging it would make the reduction gate refuse the averaged names. 8fc0da0 cross-process grammar-context cache, keyed on a content fingerprint of every input, atomic os.replace, degrades to rebuild, env opt-out — cold get_grammar_context 12.10s to 0.86s verified on a compute node. TWO OF THIS SESSION'S OWN DIAGNOSES FALSIFIED before any code depended on them: (1) the rescue-path 'operator_token -> qualifier' relabel hypothesis — that path writes a distinctive literal reason which occurs 0 times in 564 nodes, so it is not firing at all; (2) the fold-cost attribution — only the ~27s context build is intrinsic (12.1s here, 25s production catalog), while the 43-96s import was LOGIN-NODE FILESYSTEM CONTENTION (0.6s idle; tests/grammar/ runs in 21s on sun_debug and did not finish in 20min on the login node). Standing rule: never take an ISN wall-clock measurement on the login node; the lever is the NUMBER of module files (936), ~400 pulled by pydantic plugin discovery, and PYDANTIC_DISABLE_PLUGINS=1 cuts import 2.0-2.6x. logfire is a dev-group dep no source imports — a dependency decision for the lead. RE-MEASURED STATE: 300/355 accepted, 55 unaccepted, and grouping by blocking NAME rather than by path changes the work: ONE rescore of radial_coordinate_of_line_of_sight (exhausted, 72 sources corpus-wide) unblocks 16 WEST paths. Export ambiguity counted on HAS_STANDARD_NAME with both ends exported and HAS_PARENT excluded: 103 pairs corpus-wide, EXACTLY 1 WEST — b_field_pol_probe/measured realizing both poloidal_magnetic_field and poloidal_magnetic_field_at_constraint_position; lead AUTHORISED the detach-plus-rebind reaching three non-manifest paths. Lead also chose the reduction-over-a-binary-form grammar extension for gm2/gm6 over both options the plan offered (a weighting qualifier asserts a normalisation these coefficients do not perform; a lexicalised composite base was forbidden earlier in this plan) — measured, it fails in the PARSER not the model validator, so it is a parser change. /phi RESOLVED as a reasoned residual and three of its recorded premises were WRONG: toroidal_coordinate_of_line_of_sight parses cleanly (coordinate + toroidal projection) so it was never grammar-invalid; toroidal_angle_of_line_of_sight carries superseded_from_stage='refining' NOT accepted, so restoring it would be a hand-accept and the restore-then-repoint capability cannot be justified on reinstate-earned-acceptance grounds; and /phi never blocked the export because the family splits 28 paths on toroidal_angle_of_measurement_position and 3 on toroidal_coordinate_of_line_of_sight across DISJOINT paths, so no path realizes both. The REFINED_FROM cycle risk is confirmed. Two adjudications settled from DD text: b_field_average is 'flux surface averaged modulus of B' so the correct name is flux_surface_averaged_magnetic_field_magnitude and NEITHER existing candidate wins (one lacks magnitude, the other is malformed 'flux_surface_average_'); ece/channel/optical_depth was filed a true vocab gap but optical_depth IS the registered opacity base. NO paid work ran and the graph was read, never written. Record: docs/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html. Continued in f-swrr-016.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-016" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T16:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the operator-blind classifier fix, then close the residual by instrument and cut the RC</h4>
+    <div class="r-fu-body"><p><strong>The residual is smaller than it looks once grouped by the blocking NAME instead of by path.</strong> 300/355 accepted; of the 55 unaccepted, <strong>one <code>sn rescore</code> unblocks 16</strong>. Export ambiguity is <strong>exactly 1 WEST path</strong> and the lead has authorised its cross-manifest repair. Two prerequisites are code, not naming: the gap classifier is <strong>operator-blind</strong> (0 of 51 operator tokens in the decomposition index, so 531 of 564 recorded gaps say a token does not exist when it composes from operators that do), and gm2/gm6 need the reduction-over-a-binary-form grammar extension the lead chose. Compose anything before the classifier fix and it just mints more false gaps.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — land the prerequisites, close the residual, cut the RC
+Tier:    opus
+
+THE GOAL HAS NOT CHANGED: one operational pass of the whole loop with a human in
+the loop (§1), at the standard the lead set — every WEST issue chased before the
+RC. Stages 2-6 still have ZERO coverage. All non-WEST work lives in
+sn-graph-wide-integrity: if you are on a path not in the manifest, STOP.
+
+READ FIRST
+  docs/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html
+    — the operator-blindness root cause, the two falsified diagnoses, the
+      residual grouped by instrument, and the /phi reasoning. Read it before
+      re-deriving anything; it corrects several premises earlier records carried.
+  imas_codex/standard_names/AGENTS.md
+
+MEASURED STATE (2026-07-28, read-only; the graph was not written this session)
+  WEST 300/355 accepted, 55 unaccepted.
+  Export ambiguity: 103 pairs corpus-wide, EXACTLY 1 WEST.
+  564 VocabGap nodes: 531 &#x27;absent&#x27;, 19 wrong_slot_placement, 11 decomposable,
+    3 ambiguous_known_token. reason field EMPTY on all of them.
+  ISN at 8fc0da0. Campaign spend ~$80 of the 500 ceiling; review ~$0.27/name.
+
+RUN EVERYTHING ON A COMPUTE NODE. Never take an ISN or sn timing on the login
+node — measured, contention inflates it 20-70x (import 0.6s idle vs 43-96s
+loaded; tests/grammar/ 21s vs not finishing in 20min). Use
+  srun --partition=sun_debug --cpus-per-task=8 --mem=16G --time=01:00:00
+and stage scripts/logs under $HOME — /run/user/$UID does not exist on compute
+nodes. Also export TMPDIR=/tmp.
+
+PREREQUISITES — both are code, and both gate the naming work
+  P1. The operator-blind classifier. Verify it landed and is green (an agent was
+      working segments.py / models.py / vocab_semantic_dedup.py / context.py plus
+      tests when the last session ended — check git log and the worktree first,
+      and finish it if it did not land). The durable shape is ONE accessor —
+      &#x27;all tokens per segment class, INCLUDING operators&#x27;, derived from ISN at
+      runtime — that every consumer uses, NOT four patched call sites: this is
+      the fifth instance of the same mechanism and patching sites individually
+      has already failed three times. classify_gap must never return &#x27;absent&#x27;
+      for a token expressible from registered operators. Plus the introspective
+      drift test with BOTH axes discovered (seats that include
+      sn/_grammar_reference.md, and every load_* in ISN&#x27;s vocab_loaders) — a
+      hand-listed axis is exactly what let operators slip past two prior fixes.
+  P2. The gm2/gm6 grammar extension in ISN (reduction wrapping a binary form).
+      Verify it landed and round-trips; it is a PARSER change, not a validator
+      relaxation, and it needed render.py because flux_surface_averaged is a
+      bare-prefix operator. Confirm the reduction stays VISIBLE as a segment
+      rather than glued into a base token, or the flux-surface reduction gate
+      cannot see it and the feature is hollow.
+  Then cut an ISN RC and bump the codex pin at BOTH pyproject sites + lockfile.
+
+DO, IN ORDER
+  1. RE-MEASURE first — the prerequisites change what composes. Scripts to
+     re-create (the session scratchpad is gone): acceptance vs the 355-path
+     manifest via HAS_STANDARD_NAME with name_stage IN [accepted, approved];
+     the residual grouped by BLOCKING NAME with a corpus-wide source count per
+     name; and ambiguity on HAS_STANDARD_NAME excluding HAS_PARENT
+     co-realization and pairs with only one end exported. NOTE THE KEYS:
+     StandardNameSource is keyed id=&#x27;dd:&#x27;+path with a `status` property — NOT
+     dd_path, NOT stage. Keying on the projection instead of the authority is
+     the single most repeated mistake in this plan&#x27;s history and it silently
+     returns nothing.
+  2. THE BIG LEVER — sn rescore radial_coordinate_of_line_of_sight. Exhausted,
+     72 sources corpus-wide, unblocks 16 WEST paths. It regenerated under the
+     ordinality fix so it should score well. Prefer --stage-only across ALL the
+     exhausted names, then ONE scoped review pass, rather than 24 separate
+     invocations each paying process startup.
+     Other exhausted names with sound candidates: radial_coordinate_of_strike_point
+     (2 paths), radial_derivative_of_volume, toroidal_magnetic_flux,
+     initial_polarization_electric_field_of_polarimeter_beam,
+     cumulative_inside_flux_surface_total_ion_particle_source_rate.
+     sn rescore resubmits the SAME name for a fresh quorum draw. Never reword to
+     dodge a score, never hand-accept.
+  3. THE COMPETING PAIRS — pick one per DD text, supersede the other.
+     b_field_average: DD says &#x27;Flux surface averaged modulus of B&#x27;, so the name
+       needs magnitude. NEITHER candidate wins — flux_surface_averaged_magnetic_field
+       lacks it and flux_surface_average_magnetic_field_magnitude is malformed
+       (&#x27;average&#x27; not &#x27;averaged&#x27;). Correct name:
+       flux_surface_averaged_magnetic_field_magnitude.
+     n_e_line: line_integrated_electron_number_density (drafted, 5 src) vs
+       line_integrated_electron_density (exhausted, 2 src) — 3 WEST paths.
+       Decide from the ISN base vocabulary which of density/number_density is
+       registered for a line-integrated m^-2 quantity.
+     camera_dimensions: total_size_of_camera (drafted) survives;
+       extent_of_hard_xray_detector is wrong twice over (camera_x_rays is not
+       hard_x_rays, and it is a camera dimension not a detector element).
+     The two hard_x_rays half_widths (each a superseded + exhausted pair) and
+       summary/global_quantities/power_loss.
+  4. THE gm CLUSTER — apply the parser-validated table. gm1
+     flux_surface_averaged_inverse_square_major_radius m^-2; gm4
+     ..._inverse_square_magnetic_field_magnitude T^-2; gm5
+     ..._square_magnetic_field_magnitude T^2; gm9 rename
+     toroidal_flux_surface_averaged_metric -&gt;
+     flux_surface_averaged_inverse_major_radius m^-1; gm3/gm7 the two
+     toroidal_flux_radius_gradient forms (base landed 221664d); gm2/gm6 the
+     ratio forms from P2. gm8 is already correct. BOTH collapsed names
+     (flux_surface_normal_contravariant_flux_surface_averaged_metric, which gm3
+     and gm7 SHARE, and
+     flux_surface_normal_flux_surface_averaged_contravariant_metric_tensor on
+     gm2) must be SUPERSEDED, not unit-corrected — each serves paths of
+     different dimension while recording unit 1.
+     CONSTRUCTION RULE (verified, do not re-litigate): two _of_-form unary
+     prefixes cannot chain. One bare flux_surface_averaged prefix with
+     inverse/square absorbed as base-compound glue.
+  5. THE FALSE-GAP COMPOSABLES — darea_dpsi (derivative_with_respect_to),
+     spectrometer_visible/.../isotope/density_ratio (ratio_of), and
+     ece/channel/optical_depth which is the REGISTERED opacity base and was
+     wrongly filed a true vocab gap. Plus the geometry/coordinate leaves:
+     contour_tree/node/z, pf_active/.../rectangle/z, camera_x_rays/camera/centre/z,
+     ece/channel/position/z.
+  6. ITEM D — the one WEST ambiguity, AUTHORISED by the lead including the
+     cross-manifest reach. equilibrium/time_slice/constraints/b_field_pol_probe/measured
+     realizes both poloidal_magnetic_field and
+     poloidal_magnetic_field_at_constraint_position. sn detach correctly REFUSES
+     the obvious detach because poloidal_magnetic_field would be orphaned, so
+     detach AND in the same change rebind poloidal_magnetic_field onto the
+     generic-field sources the constraint name wrongly holds
+     (edge_profiles/ggd/b_field/poloidal, plasma_profiles/ggd/b_field/poloidal,
+     magnetics/b_field_pol_probe/field).
+  7. DOCUMENT THE NON-NAMEABLE 9 for the PR body: 7 time bases
+     (equilibrium/time_slice/time, core_profiles/profiles_1d/time,
+     hard_x_rays/emissivity_profile_1d/time, camera_x_rays/frame/time,
+     camera_x_rays/detector_humidity/time, camera_x_rays/detector_temperature/time,
+     summary/disruption/time/value) — dimension axes, not physical quantities;
+     equilibrium/time_slice/convergence/iterations_n — a solver iteration count;
+     camera_x_rays/detector_humidity. A reviewer seeing 355 sources and N names
+     needs every residual accounted for with a stated reason. Assert the buckets
+     PARTITION the manifest so nothing goes unexplained.
+  8. VERIFY: attachment audit idempotent; unit detector rows all explained;
+     ambiguity zero or reasoned; uv run pytest tests/graph/ -m graph -q failures
+     all attributable to non-WEST data.
+  9. CUT IT:
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     Mints v0.&lt;n&gt;.0rc&lt;N&gt;+west-task-2e. Verify: additive diff (approved set
+     byte-identical); catalog.yml export_scope=review + review_batch; artifact
+     frozen at manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND
+     batch_label; RC-tagged; PR open on the FORK (never --final in act 1).
+     Record RC version, PR URL, batch size, and judge the LLM-written PR body —
+     first live output of the sn-release-notes seat.
+ 10. Collapse §3 stages 0-2; queue stages 3-6 (human review -&gt; sn merge
+     fold-back exercising the graph-merged: tag -&gt; freeze-check -&gt; --undo).
+
+/phi IS SETTLED — do not reopen it. It is a reasoned residual for the PR body.
+Three of its recorded premises were measured WRONG: the &#x27;grammar-invalid&#x27;
+toroidal_coordinate_of_line_of_sight parses cleanly; the grammar-correct
+toroidal_angle_of_line_of_sight carries superseded_from_stage=&#x27;refining&#x27; NOT
+accepted, so restoring it is a hand-accept (banned) and restore-then-repoint
+cannot be justified as reinstating earned acceptance; and /phi never blocked the
+export because the 28-vs-3 split is across DISJOINT paths, so no path realizes
+both. A fold would also close a REFINED_FROM 2-cycle.
+
+OUT OF SCOPE — sn-graph-wide-integrity, do not start
+  The 102 non-WEST ambiguity pairs; toroidal_angle_of_measurement_position
+  (origin=catalog_edit, 116 sources, accepted and broad — the bulk-import name
+  whose dedup exemption was already removed as a defect); the 151 orphaned
+  names; the non-WEST ledger rows; the three other ungated write paths; the
+  geometry-representation rule (0 thick_line paths in WEST); the plan-label
+  comment residue.
+
+ALSO QUEUED, NOT ASSIGNED (report if you touch them)
+  ISN-side prompt reachability: qualifier_categories and generic_physical_bases
+  are unreachable through get_grammar_context() (load_qualifier_categories()
+  exists at ISN vocab_loaders.py and is never returned), so the prompt shows a
+  FLAT qualifier list while asking for ORDERED stacking — a likely driver of
+  ordering errors; and normalizing_qualifiers&#x27; gyrocenter is in no segment.
+  Also: logfire is an ISN dev-group dependency no source file imports, pulling
+  ~400 modules via pydantic plugin discovery; PYDANTIC_DISABLE_PLUGINS=1 cuts
+  import 2.0-2.6x. Removing the dep is the lead&#x27;s call.
+
+CONSTRAINTS
+  - Gap-only; never --reseed. PR target stays fork. Do NOT re-snapshot.
+  - NEVER hand-accept a name or hand-edit graph text. Acceptance is earned only
+    through the RD-quorum; corrections go via sn edit / sn detach / sn supersede
+    / sn rescore.
+  - A DD pin is immutable. Units are DD-authoritative.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check (2a case-INsensitive,
+    2b case-SENSITIVE) over every path you stage. Physics tokens that trip 2b
+    (Stokes S0..S3, H98) are legitimate domain vocabulary — read every hit.
+  - No AI attribution in ANY commit, issue, PR or comment.
+  - Commit plan edits the same session — the docs server serves the working tree.
+
+Done-when
+  1. P1 and P2 landed and green; ISN RC cut; codex pin bumped both sites.
+  2. Every one of the 355 WEST sources EITHER accepted OR documented
+     non-nameable with a stated reason, and the buckets partition the manifest.
+  3. gm1-gm9 each carry their OWN name with their OWN DD unit; both collapsed
+     names superseded.
+  4. Export ambiguity zero (item D repaired) or the residual reasoned.
+  5. Fork PR OPEN with RC version, URL, batch size and PR-body judgement.
   6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
     </article>
 </section>
