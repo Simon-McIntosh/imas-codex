@@ -74,19 +74,19 @@ class TestExemplarAlignment:
         self, rendered_compose_system: str
     ) -> None:
         """at_magnetic_axis should appear in GOOD/field-at-locus context."""
-        # Must appear (in P3 or similar)
+        # Must appear, taught as a field sampled at a locus
         assert "at_magnetic_axis" in rendered_compose_system
-        # Must NOT appear in a FORBIDDEN-only context without contrast
-        # (The BAD example in P3 is "major_radius_at_magnetic_axis" which is
-        # presented as BAD with a fix — so the word "BAD" appears nearby)
+        # Must NOT appear in a FORBIDDEN-only context without contrast: the
+        # BAD example "major_radius_at_magnetic_axis" is presented with its
+        # fix, so a BAD/FORBIDDEN marker sits nearby
         idx = rendered_compose_system.find("major_radius_at_magnetic_axis")
         if idx != -1:
             # It should be in a BAD/FORBIDDEN context
             nearby = rendered_compose_system[max(0, idx - 100) : idx + 100]
             assert "BAD" in nearby or "FORBIDDEN" in nearby or "→" in nearby
 
-    def test_p3_of_vs_at_semantic_split(self, rendered_compose_system: str) -> None:
-        """P3 must teach the of_ vs at_ semantic distinction."""
+    def test_of_vs_at_semantic_split(self, rendered_compose_system: str) -> None:
+        """The prompt must teach the of_ vs at_ semantic distinction."""
         assert (
             "of_<position>" in rendered_compose_system
             or "of_\\<position\\>" in rendered_compose_system
@@ -96,8 +96,8 @@ class TestExemplarAlignment:
             or "at_\\<position\\>" in rendered_compose_system
         )
 
-    def test_p8_canonical_coordinates(self, rendered_compose_system: str) -> None:
-        """P8 must list the three canonical coordinate forms."""
+    def test_canonical_coordinate_forms(self, rendered_compose_system: str) -> None:
+        """The prompt must list the three canonical coordinate forms."""
         assert "vertical_coordinate_of_<position>" in rendered_compose_system
         # A point's R coordinate is radial_coordinate_of_<X>, never
         # major_radius_of_<X> — major_radius names an extent, not a position.
