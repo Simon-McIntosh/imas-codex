@@ -113,6 +113,51 @@ injected post-LLM. Consequences when a unit looks wrong:
   wrong (charge numbers tagged `e`, unit vectors tagged `m`); a bulk re-derivation
   would clobber every one of them.
 
+## Operators live outside `SEGMENT_TOKEN_MAP` — read the grammar through one accessor
+
+`SEGMENT_TOKEN_MAP` is **not** the whole grammar vocabulary. Operators
+(`square`, `inverse`, `flux_surface_averaged`, `derivative_with_respect_to`, …)
+are a separate mechanism composing through `operator_token`, so they occupy no
+segment slot. A consumer reading only that map cannot see 51 legal tokens and
+treats every one of them as an unregistered proposal.
+
+**This has now generated the same bug five separate times**, each fixed at one
+site: single-operator gap classification, the state/rate attachment rules, the
+compose prompt's operator block, the decomposition classifier's multi-operator
+compounds, and the plural-dedup check. Read the grammar through
+`segments.grammar_tokens_by_segment()` (per-class tokens, operators included) or
+its reverse `grammar_token_index()`. `tests/standard_names/test_vocab_consumers_see_operators.py`
+fails on any new module importing `SEGMENT_TOKEN_MAP` that is not listed there
+with a reason.
+
+Two sets that look mergeable and are not: `reportable_segments()` is what a gap
+may be **reported against** (wider — includes the model-layer slot names
+`transformation`/`decomposition`); `known_segments()` is what the **parser** slots
+tokens into. Merging them makes the response model reject valid composer output.
+
+A compound spelled with `over` is a **division** — the binary `ratio` operator
+over two operands, not a compound base. Never "fix" it by letting the cover walk
+step over the word: that stops the token being `absent` while emitting guidance
+that folds the operators into one base and silently drops the division. An honest
+`absent` costs less than confident wrong guidance.
+
+### Open ISN-side findings (not codex's to fix, no PR — ISN's MCP surface is in flux)
+
+- **Locus tokens reachable by the parser but by no vocabulary enumeration.**
+  `active_wall_point`, `beam_path` and `primary` are in the locus registry yet in
+  no `SEGMENT_TOKEN_MAP` segment, so a consumer listing the vocabulary cannot emit
+  them and they never reach a prompt. Same shape as the `normalizing_qualifiers`
+  token `gyrocenter`, which is in no segment either. Pinned per-token in
+  `tests/standard_names/test_grammar_vocabulary_drift.py::UNREACHED`.
+- **Qualifier ordering structure is not exposed.** `load_qualifier_categories()`
+  exists but `get_grammar_context()` never returns it. Note precisely what is and
+  is not wrong here: the qualifier *tokens* all reach every prompt seat (they are
+  qualifier names), so "qualifier_categories is missing from the prompt" is false.
+  What is missing is the **category structure**, while the prompt asks for
+  *ordered* qualifier stacking — a plausible driver of ordering errors, and it
+  matters more while the qualifier class is being decomposed into ordered
+  binding-depth segments.
+
 ## The catalog is not the source of truth
 
 The graph plus the review pipeline is. Catalog-origin names

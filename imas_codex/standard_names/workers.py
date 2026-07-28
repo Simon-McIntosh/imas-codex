@@ -749,6 +749,79 @@ def _compute_token_reuse_hits(vocab_gaps: list) -> dict[tuple[str, str], Any]:
     return {(hit.segment, hit.proposed_token): hit for hit in hits.values()}
 
 
+def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list[str]]:
+    """Names that fail the grammar round trip, with per-failure repair advice.
+
+    Returns ``(names, advice)``.  ``names`` identifies what failed (the composed
+    name, or the source id when even composing it raises).  ``advice`` holds one
+    actionable line per diagnosable failure.
+
+    The diagnosis comes from ISN's :class:`UnknownBaseTokenError`, which carries
+    the offending token and its segment; ``describe_gap`` turns that into the slot
+    to use instead — that ``square`` is an operator rather than a qualifier, say.
+    Reporting only the failed name gives the composer nothing to change, so it
+    re-proposes the same token on every retry.
+
+    The error's ``known_tokens`` is deliberately NOT surfaced: it is the entire
+    base vocabulary, the seat's prompt already carries it in full, and repeating
+    ~200 tokens per failure would crowd out the part that is new information —
+    which token, and which slot.
+    """
+    names: list[str] = []
+    advice: list[str] = []
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+        from imas_standard_names.grammar.support import UnknownBaseTokenError
+
+        from imas_codex.standard_names.segments import describe_gap
+    except ImportError:
+        return names, advice  # ISN not installed — skip check
+
+    for candidate in candidates:
+        try:
+            parse_standard_name(candidate.compose_name())
+            continue
+        except UnknownBaseTokenError as exc:
+            diagnosis: str | None = None
+            try:
+                diagnosis = describe_gap(exc.segment, exc.token).guidance
+            except Exception:  # noqa: BLE001 — advice is best-effort
+                logger.debug(
+                    "could not describe grammar failure for %s",
+                    getattr(candidate, "source_id", "?"),
+                    exc_info=True,
+                )
+            if diagnosis:
+                advice.append(diagnosis)
+        except Exception:
+            pass  # undiagnosable parse failure — the name alone is the signal
+
+        try:
+            names.append(candidate.compose_name())
+        except Exception:  # noqa: BLE001 — fall back to identifying the source
+            names.append(candidate.source_id)
+    return names, advice
+
+
+def _build_grammar_retry_reason(failures: list[str], advice: list[str]) -> str:
+    """Render the grammar half of a retry directive.
+
+    Leads with the repair advice when there is any, because that is what lets the
+    composer converge; the bare "produce a different name" fallback only applies
+    when nothing about the failure could be diagnosed.
+    """
+    if advice:
+        return (
+            "Previous attempt failed the grammar round trip. Fix each:\n"
+            + "\n".join(f"- {line}" for line in dict.fromkeys(advice))
+        )
+    return (
+        f"Previous attempt failed: grammar round-trip failed for "
+        f"{', '.join(failures[:3])}. Consider expanded "
+        f"neighbour context and produce a different name."
+    )
+
+
 def _build_token_reuse_retry_reason(hits: dict[tuple[str, str], Any]) -> str:
     """Render a retry directive naming each flagged candidate-new token.
 
@@ -3330,22 +3403,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         cost,
                     )
 
-            # Quick grammar round-trip check on all candidates
-            _grammar_failures: list[str] = []
-            try:
-                from imas_standard_names.grammar import parse_standard_name
-
-                for c in result.candidates:
-                    try:
-                        _name = c.compose_name()
-                        parse_standard_name(_name)
-                    except Exception:
-                        try:
-                            _grammar_failures.append(c.compose_name())
-                        except Exception:
-                            _grammar_failures.append(c.source_id)
-            except ImportError:
-                pass  # ISN not installed — skip check
+            # Quick grammar round-trip check on all candidates, with the
+            # per-failure repair advice the retry needs to converge.
+            _grammar_failures, _grammar_advice = _grammar_round_trip_failures(
+                result.candidates
+            )
 
             # Component-token reuse check (free local embeddings): flag any
             # candidate-new token semantically near a registered same-segment
@@ -3405,9 +3467,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             _reason_parts = []
             if _grammar_failures:
                 _reason_parts.append(
-                    f"Previous attempt failed: grammar round-trip failed for "
-                    f"{', '.join(_grammar_failures[:3])}. Consider expanded "
-                    f"neighbour context and produce a different name."
+                    _build_grammar_retry_reason(_grammar_failures, _grammar_advice)
                 )
             if _token_reuse_hits:
                 _reason_parts.append(_build_token_reuse_retry_reason(_token_reuse_hits))
@@ -5177,22 +5237,11 @@ async def compose_batch(
                 )
                 lease.charge_event(cost, _event)
 
-            # Quick grammar round-trip check on all candidates
-            _grammar_failures: list[str] = []
-            try:
-                from imas_standard_names.grammar import parse_standard_name
-
-                for c in result.candidates:
-                    try:
-                        _name = c.compose_name()
-                        parse_standard_name(_name)
-                    except Exception:
-                        try:
-                            _grammar_failures.append(c.compose_name())
-                        except Exception:
-                            _grammar_failures.append(c.source_id)
-            except ImportError:
-                pass  # ISN not installed — skip check
+            # Quick grammar round-trip check on all candidates, with the
+            # per-failure repair advice the retry needs to converge.
+            _grammar_failures, _grammar_advice = _grammar_round_trip_failures(
+                result.candidates
+            )
 
             # Component-token reuse check (free local embeddings): flag any
             # candidate-new token semantically near a registered same-segment
@@ -5253,9 +5302,7 @@ async def compose_batch(
             _reason_parts = []
             if _grammar_failures:
                 _reason_parts.append(
-                    f"Previous attempt failed: grammar round-trip failed for "
-                    f"{', '.join(_grammar_failures[:3])}. Consider expanded "
-                    f"neighbour context and produce a different name."
+                    _build_grammar_retry_reason(_grammar_failures, _grammar_advice)
                 )
             if _token_reuse_hits:
                 _reason_parts.append(_build_token_reuse_retry_reason(_token_reuse_hits))

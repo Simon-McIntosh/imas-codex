@@ -226,16 +226,19 @@ def filter_vocab_gaps(
 
 
 def _load_existing_tokens() -> frozenset[str]:
-    """Load all grammar tokens from the installed ISN package."""
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+    """Load all grammar tokens from the installed ISN package.
 
-        all_tokens: set[str] = set()
-        for tokens in SEGMENT_TOKEN_MAP.values():
-            all_tokens.update(tokens)
-        return frozenset(all_tokens)
-    except ImportError:
-        return frozenset()
+    Includes the operator registry, not just the segment enums: operators are the
+    vocabulary a proposed token most often duplicates, so a plural-dedup check
+    that could not see them let ``squares`` through as novel while the operator
+    ``square`` sat registered and unconsulted.
+    """
+    from imas_codex.standard_names.segments import grammar_tokens_by_segment
+
+    all_tokens: set[str] = set()
+    for tokens in grammar_tokens_by_segment().values():
+        all_tokens.update(tokens)
+    return frozenset(all_tokens)
 
 
 __all__ = [

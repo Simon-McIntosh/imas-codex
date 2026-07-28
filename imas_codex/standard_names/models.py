@@ -900,7 +900,12 @@ class StandardNameComposeBatch(BaseModel):
                         "source_id": source_id,
                         "segment": segment,
                         "token": token,
-                        "reason": f"LLM proposed unregistered {segment} token",
+                        # Record WHY the token failed and what to use instead.
+                        # Restating the failure ("unregistered <segment> token")
+                        # tells a later reader nothing they cannot see from the
+                        # segment and token fields, and tells a composer nothing
+                        # it can act on.
+                        "reason": _gap_reason(segment, token),
                     }
                 )
                 logger.info(
@@ -927,6 +932,22 @@ class StandardNameComposeBatch(BaseModel):
             )
 
         return data
+
+
+def _gap_reason(segment: str, token: str) -> str:
+    """Why a rescued candidate's token failed, and which slot it belongs in.
+
+    Falls back to a bare statement of the failure only when the grammar cannot be
+    consulted; a gap whose ``reason`` merely repeats its own ``segment`` and
+    ``token`` fields carries no information.
+    """
+    try:
+        from imas_codex.standard_names.segments import describe_gap
+
+        guidance = describe_gap(segment, token).guidance
+    except Exception:  # noqa: BLE001 — never fail a batch over its own annotation
+        guidance = ""
+    return guidance or f"proposed {segment} token '{token}' is not registered"
 
 
 def _normalise_gap_records(gaps: list[Any]) -> list[Any]:

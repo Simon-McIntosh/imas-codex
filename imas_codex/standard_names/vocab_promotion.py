@@ -40,20 +40,22 @@ _SEGMENT_VOCAB_CACHE: dict[str, set[str]] | None = None
 
 
 def _load_isn_segment_vocab() -> dict[str, set[str]]:
-    """Return ``{segment: {known_tokens}}`` from the installed ISN package.
+    """Return ``{grammar class: {known_tokens}}`` from the installed ISN package.
 
-    Uses ``SEGMENT_TOKEN_MAP`` directly — the single source of truth for all
-    grammar segment vocabularies. All segments are closed (no legacy
-    workarounds or YAML augmentation needed).
+    Sourced from :func:`grammar_tokens_by_segment`, which is the union of
+    ``SEGMENT_TOKEN_MAP`` and the operator registry.  ``SEGMENT_TOKEN_MAP`` alone
+    is NOT the whole grammar vocabulary: operators are a separate mechanism that
+    occupies no segment slot, so a consumer reading only that map cannot see 51
+    legal tokens and treats every one of them as an unregistered proposal.
     """
     global _SEGMENT_VOCAB_CACHE
     if _SEGMENT_VOCAB_CACHE is not None:
         return _SEGMENT_VOCAB_CACHE
 
-    from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+    from imas_codex.standard_names.segments import grammar_tokens_by_segment
 
     by_segment: dict[str, set[str]] = {
-        seg: set(tokens) for seg, tokens in SEGMENT_TOKEN_MAP.items()
+        segment: set(tokens) for segment, tokens in grammar_tokens_by_segment().items()
     }
 
     _SEGMENT_VOCAB_CACHE = by_segment

@@ -637,6 +637,16 @@ def _ratio_composition(token: str) -> OperatorComposition | None:
     means the composer needs a token there, and guessing at the composition would
     suppress that request: ``gradient_rho_squared_over_B_squared`` fails here
     because ``rho`` and ``B`` are symbol shorthand registered nowhere.
+
+    **``over`` is deliberately NOT treated as a connective the cover walk steps
+    over.**  Skipping it would let a division fall through to the unary path and
+    classify as an ordinary compound, which reads as a fix — the token stops
+    being ``absent`` — while emitting guidance that tells the composer to fold
+    the operators into one base and silently drops the division.  Confident wrong
+    guidance costs more than an honest ``absent``: the composer follows it and
+    mints a name that means something else.  A division is a *binary* expression,
+    so it either resolves here, with both operands intact and the ratio named, or
+    it stays ``absent`` and asks for the token it actually needs.
     """
     words = token.split("_")
     if _RATIO_WORD not in words:
@@ -910,9 +920,14 @@ def reportable_segments() -> frozenset[str]:
     which case callers must not constrain — there is nothing to constrain
     against.
 
-    Deliberately wider than :func:`known_segments`, which answers a different
-    question: what the *parser* slots tokens into.  A gap may be reported against
-    a slot the model layer owns without that slot being a parser segment.
+    **Deliberately wider than :func:`known_segments`, and the two must not be
+    merged.**  They answer different questions: this one is "what may a gap be
+    *reported* against", ``known_segments`` is "what does the *parser* slot tokens
+    into".  The reporting side is wider because the ISN model layer owns slots the
+    parser has no segment for — a composer reporting against ``transformation``
+    has named the operator slot correctly in the model's vocabulary.  Narrowing
+    this to ``known_segments`` rejects those reports and makes the response model
+    fail on valid composer output; seven tests pin that.
     """
     classes = set(grammar_tokens_by_segment())
     if not classes:
