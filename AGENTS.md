@@ -715,6 +715,12 @@ from the `parents.py` admission gate). `StandardNameSource`:
 
 ### Key modules
 
+> **Working inside `imas_codex/standard_names/`?** Read
+> [`imas_codex/standard_names/AGENTS.md`](imas_codex/standard_names/AGENTS.md)
+> first — the naming-hygiene keep-list (which physics/vocabulary tokens
+> legitimately match the plan-label patterns), the attachment-guard failure modes,
+> unit authority, and the acceptance rules that bite when editing these files.
+
 `pools.py` (pool specs + throttle) · `loop.py` (`run_sn_pools()`) · `workers.py`
 (claim/process/persist) · `pool_adapter.py` (`--focus` seeding) ·
 `enrichment.py` (cluster selection + global grouping) · `consolidation.py`
