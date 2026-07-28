@@ -10,8 +10,6 @@
 #
 # Generated models: imas_codex/graph/models.py
 # To regenerate: uv run build-models --force
-#
-# See plans/IMAS_DD_GRAPH.md for design decisions and rationale.
 
 id: https://imas.iter.org/schemas/imas_dd
 name: imas_dd

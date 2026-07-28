@@ -789,7 +789,7 @@ classes:
           ISO 8601 timestamp of the most recent docs-review pass.
           Set only by ``--target docs`` review.
         range: datetime
-      # --- name-pipeline stage tracking (Phase 8.1) ---
+      # --- name-pipeline stage tracking ---
       name_stage:
         description: >-
           Name-pipeline stage for this StandardName. Set by
@@ -1034,8 +1034,8 @@ classes:
               occupied (e.g. "subject", "transformation").
 
           In addition to the generic HAS_SEGMENT edge, 13 typed edges are
-          written alongside it for direct graph traversal and MCP filtering
-          (W40 Phase 4). The typed edges are keyed on segment name:
+          written alongside it for direct graph traversal and MCP filtering.
+          The typed edges are keyed on segment name:
             physical_base  → HAS_PHYSICAL_BASE
             subject        → HAS_SUBJECT
             transformation → HAS_TRANSFORMATION
@@ -1053,17 +1053,16 @@ classes:
           GrammarToken node referenced by HAS_SEGMENT. LinkML does not
           natively model edge labels, so the convention mirrors the
           existing HAS_SEGMENT pattern (relationship_type annotation).
-          See plans/w40-schema-redesign-plan.md §Phase 4 for details.
 
           LinkML does not natively model edge properties, so those two
           attributes live on the Cypher edge rather than as StandardName
-          properties. See plan 29 §E.5 / §E.7 for details.
+          properties; segment_edge_specs above is their authoritative shape.
         multivalued: true
         range: GrammarToken
         inlined: false
         annotations:
           relationship_type: HAS_SEGMENT
-      # --- Typed grammar segment edges (W40 Phase 4) ---
+      # --- Typed grammar segment edges ---
       # Each typed edge mirrors a HAS_SEGMENT edge for direct graph traversal
       # and MCP filtering. See HAS_SEGMENT slot above for full rationale.
       grammar_physical_base_token:

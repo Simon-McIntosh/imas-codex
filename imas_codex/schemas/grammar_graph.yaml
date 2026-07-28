@@ -22,9 +22,9 @@
 #
 # HAS_SEGMENT edges from StandardName -> GrammarToken are declared in
 # standard_name.yaml; they additionally carry a {position, segment} property
-# map written at persist time (see plan 29 §E.7 and isn.graph.spec
-# segment_edge_specs). LinkML does not natively model edge properties, so
-# that map lives on the Cypher edge, not on any node class here.
+# map written at persist time (the ISN grammar spec's segment edge specs).
+# LinkML does not natively model edge properties, so that map lives on the
+# Cypher edge, not on any node class here.
 #
 # Generated models: imas_codex/graph/models.py
 # To regenerate: uv run build-models --force
@@ -114,7 +114,7 @@ classes:
       templates:
         description: >-
           Templates defined by this grammar version. Emitted as
-          USES_TEMPLATE edges to match the plan 29 §E.5 relationship
+          USES_TEMPLATE edges to match the ISN grammar relationship
           vocabulary; a parallel DEFINES edge is written by the sync
           pipeline for consistency with segments.
         multivalued: true
