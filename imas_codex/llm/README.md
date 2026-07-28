@@ -211,6 +211,4 @@ imas_codex/llm/
 ## Related Documentation
 
 - [AGENTS.md](../../../AGENTS.md) - Project-wide agent guidelines
-- [plans/LLAMAINDEX_AGENTS.md](../../../plans/LLAMAINDEX_AGENTS.md) - Architecture and roadmap
 - [config/README.md](../config/README.md) - Facility exploration guide
-- [plans/MDSPLUS_INGESTION.md](../../../plans/MDSPLUS_INGESTION.md) - Tree ingestion workflow
