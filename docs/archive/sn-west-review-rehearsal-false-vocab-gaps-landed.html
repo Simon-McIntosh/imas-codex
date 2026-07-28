@@ -16,17 +16,34 @@
 
     <h2>§3 — the pipeline was reporting gaps for vocabulary it already had (2026-07-28)</h2>
 
+    <div class="card" style="border-left:4px solid #c0392b; padding-left:12px;">
+      <p style="margin:0;">
+        <strong>Correction to this document's own first claim.</strong> It was
+        written asserting the recorded vocab gaps were &ldquo;mostly
+        fabricated&rdquo;. Measured against the stored population with the shipped
+        classifier, the reclassification is <strong>76 of 564 &mdash; 13.5%</strong>,
+        not most. Operator-blindness was real and is fixed, but it explains about a
+        seventh of the recorded gaps. The other <strong>488 need their own
+        diagnosis</strong>: <code>position</code> is the worst major segment at 9%
+        (128 unexplained) and 45 <code>device</code> gaps have nothing to do with
+        operators at all. The projection that put it near 63% came from a 21-token
+        sample and was wrong by ~4.7&times;, because one token can back many nodes.
+        Both numbers below are kept as recorded, with this correction on top.
+      </p>
+    </div>
+
     <div class="card" style="border-left:4px solid #b5651d; padding-left:12px;">
       <p style="margin:0 0 6px;">
         <strong>The RC was not cut.</strong> The lead asked whether the pipeline's
         vocab-error rate was a prompt-context defect — &ldquo;it seems like the
         pipeline is throwing up lots of vocab errors when the vocab exists&rdquo;.
-        It is, but not in the prompts: the prompts are complete and the
-        <em>classifier</em> is blind. <strong>531 of 564 recorded vocab gaps say
-        &ldquo;this token does not exist&rdquo;</strong>, and a large share name
-        quantities that compose from operators the grammar already registers.
-        Chasing that took precedence over the release, because composing the gm
-        cluster before fixing it would only have minted more of them.
+        It is in part, but not in the prompts: the prompts are complete and the
+        <em>classifier</em> was blind to operators. <strong>531 of 564 recorded
+        vocab gaps say &ldquo;this token does not exist&rdquo;</strong>, and a
+        measurable share name quantities that compose from operators the grammar
+        already registers. Chasing that took precedence over the release, because
+        composing the gm cluster before fixing it would only have minted more of
+        them.
       </p>
       <p style="margin:0;">
         Two of this session's own confident diagnoses were falsified by later
@@ -306,8 +323,54 @@
       <a href="/imas-codex/sn-graph-wide-integrity.html">sn-graph-wide-integrity</a>.
     </p>
 
+    <h3>Three claims measurement overturned, two of them the plan's own</h3>
+    <ul>
+      <li><strong><code>path_length_variation</code> does NOT compose.</strong> The
+        plan records that it composes via the <code>variation</code> operator plus
+        the <code>length</code> base, and that claim has been repeated across
+        sessions without re-measurement. Measured against the live registry:
+        <code>variation</code> is a registered operator and <code>length</code> a
+        registered physical_base, but <code>path</code> is in <strong>no</strong>
+        class and <code>path_length</code> is in <strong>no</strong> class. So the
+        compound is not expressible and <code>absent</code> is the correct verdict.
+        The follow-up is a narrow vocabulary decision &mdash; register
+        <code>path</code>, or reuse the already-registered
+        <code>connection_length</code> &mdash; not a classifier fix.</li>
+      <li><strong><code>qualifier_categories</code> is not missing from the
+        prompts.</strong> Its <em>tokens</em> all reach every seat, because they are
+        qualifier names. The real gap is that the <strong>category ordering
+        structure</strong> is not exposed while the prompt asks for ordered
+        stacking &mdash; which matters because the flat qualifier class is
+        mid-decomposition into ordered binding-depth segments. No token-coverage
+        test can detect this.</li>
+      <li><strong>gm6's <code>absent</code> verdict was correct, not a miss.</strong>
+        Codex has ISN <code>0.8.0rc58</code>, which predates the
+        reduction-over-binary work, so the composed form raises
+        <code>UnknownBaseTokenError</code> there. Independently,
+        <code>rho</code> and <code>B</code> are symbol shorthand registered in no
+        class, so no token matcher can reach it &mdash; that needs symbol expansion,
+        a different instrument.</li>
+    </ul>
+
     <h3>Not done</h3>
     <ul>
+      <li>488 of the 564 recorded gaps remain unexplained by the operator mechanism,
+        including 128 <code>position</code> and 45 <code>device</code>. Diagnosing
+        that class is its own piece of work. The retry-feedback change that fills
+        the empty <code>reason</code> field is the prerequisite that makes it
+        diagnosable at all.</li>
+      <li>Three consumers still read <code>SEGMENT_TOKEN_MAP</code> directly rather
+        than the operator-inclusive accessor:
+        <code>vocab_token_filter.py:228</code> (so plural dedup cannot see
+        operators &mdash; <code>squares</code> will not dedup against
+        <code>square</code>), <code>vocab_promotion.py:53</code>, and
+        <code>workers.py:279</code>. Each is a candidate for the sixth instance of
+        this same mechanism.</li>
+      <li>ISN-side: locus tokens <code>active_wall_point</code>,
+        <code>beam_path</code>, <code>primary</code> are in the locus registry but
+        in no <code>SEGMENT_TOKEN_MAP</code> segment, so a consumer enumerating the
+        vocabulary cannot emit them &mdash; the same shape as the unsegmented
+        <code>gyrocenter</code>.</li>
       <li>The RC is not cut and no paid work ran this session. The graph was read,
         never written.</li>
       <li>The 531 stored <code>absent</code> gaps are not reclassified. Stopping their

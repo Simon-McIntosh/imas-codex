@@ -136,8 +136,8 @@
 
     <div class="card" style="border-left:4px solid #c0392b; padding-left:12px;">
       <p style="margin:0 0 6px;">
-        <strong>The vocab gaps were mostly fabricated — the classifier is
-        operator-blind (2026-07-28).</strong> Asked whether the pipeline's
+        <strong>The vocab-gap classifier was operator-blind — but that explains
+        14%, not most, of them (2026-07-28).</strong> Asked whether the pipeline's
         vocab-error rate was a prompt-context defect, the answer is yes but
         <em>not in the prompts</em>: rendered with the real production context,
         all five name-bearing seats carry the vocabulary in full (51/51
@@ -152,6 +152,21 @@
         vocabulary. The <code>reason</code> field is empty on all 564, and codex
         has zero handlers for the ISN error that carries the legal token list, so
         a failing model is never told what to do differently.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>Fixed, and then measured rather than projected.</strong> The
+        classifier now routes every consumer through one operator-inclusive
+        accessor and resolves infix and ratio spellings
+        (<code>727ff271</code>, <code>03fc6018</code>, <code>c0a2b4e</code>), with a
+        drift test whose seat and vocabulary axes are both discovered by
+        introspection (<code>979a0476</code>) — a hand-listed axis is what let
+        operators slip past two earlier fixes. Reclassifying the stored population
+        with the shipped classifier gives <strong>76 of 564 — 13.5%</strong>. A
+        21-token sample had projected ~63%; it was wrong by ~4.7× because one token
+        backs many nodes. So <strong>488 gaps remain unexplained</strong>:
+        <code>position</code> is the worst major segment at 9% (128 of them) and 45
+        <code>device</code> gaps never involved operators. Filling the empty
+        <code>reason</code> is the prerequisite for diagnosing that class.
       </p>
       <p style="margin:0 0 6px;">
         <strong>Landed:</strong> the ISN |&nabla;&rho;| vector base
