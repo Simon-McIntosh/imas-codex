@@ -1,8 +1,8 @@
 """Tests for the extended representation_artifact_check audit.
 
-Plan 31 WS-A (A.4) — extended regex to cover ggd-coefficient,
-interpolation-coefficient, finite-element coefficient real/imaginary
-parts, and a heuristic ``_on_ggd$`` suffix gated by DD source path.
+The audit regex covers ggd-coefficient, interpolation-coefficient, and
+finite-element coefficient real/imaginary parts, plus a heuristic
+``_on_ggd$`` suffix gated by DD source path.
 """
 
 from __future__ import annotations
@@ -35,12 +35,12 @@ class TestRepresentationArtifactExisting:
 
 
 # =========================================================================
-# A.4 — new suffixes flagged
+# Extended suffixes flagged
 # =========================================================================
 
 
 class TestRepresentationArtifactExtended:
-    """New suffix variants added by plan 31 A.4."""
+    """Coefficient and ggd suffix variants beyond the baseline set."""
 
     @pytest.mark.parametrize(
         "name",

@@ -3,7 +3,7 @@
 Verifies that when a low-scoring SN cycles through refine_name, the returned
 item and rendered prompt carry the full history of prior reviews.
 
-Plan §3B.  Two classes of assertions:
+Two classes of assertions:
 
 1. **Passing** — chain_history is populated from REFINED_FROM ancestors and the
    rendered prompt contains the ancestors' per-dim comments verbatim.
@@ -253,7 +253,7 @@ class TestClaimRefineChainHistory:
         # Should be a merged list containing both A's and B's reviews
         assert "prior_reviews" in item, (
             "'prior_reviews' key missing from claimed item — "
-            "see plan §3B: full chain history not surfaced"
+            "full chain history not surfaced"
         )
         names_in_reviews = [r["name"] for r in item["prior_reviews"]]
         assert "temperature_too_vague_name" in names_in_reviews  # ancestor A

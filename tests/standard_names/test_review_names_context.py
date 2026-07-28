@@ -1,13 +1,13 @@
-"""W37: review_names.md user prompt MUST render compose-parity per-item context.
+"""review_names.md user prompt MUST render compose-parity per-item context.
 
-Background: Until W37, the review prompt only showed ``dd_source_docs``,
-``nearest_peers``, and (filtered) ``related_neighbours``. The composer received
-11+ context channels per item but the reviewer did not — leading to "revise"
-verdicts that flagged issues already addressed by context the reviewer never
-saw. W37 brings the reviewer to compose parity AND adds suggested_name +
-suggestion_justification to the response model.
+A review prompt that shows only ``dd_source_docs``, ``nearest_peers``, and
+(filtered) ``related_neighbours`` gives the reviewer far less than the 11+
+context channels per item the composer sees — producing "revise" verdicts that
+flag issues already addressed by context the reviewer never saw. The reviewer
+must be at compose parity, and its response model must carry suggested_name +
+suggestion_justification.
 
-This test guards against regression by asserting:
+This test guards the contract by asserting:
 
 1. Every per-item context block from the compose prompt also renders in the
    review prompt when populated.
@@ -182,7 +182,7 @@ def test_review_prompt_renders_compose_parity_context(marker: str) -> None:
     rendered = _render_review_prompt()
     assert marker in rendered, (
         f"Review prompt missing context marker '{marker}'. "
-        f"W37 requires compose-parity per-item context in review_names.md."
+        f"review_names.md must carry compose-parity per-item context."
     )
 
 
@@ -325,7 +325,7 @@ def test_review_batch_parses_full_sample() -> None:
 
 
 def test_prior_reviews_iteration_uses_dict_index() -> None:
-    """W37: prior_reviews[i].items must use dict indexing, not Jinja attribute access.
+    """prior_reviews[i].items must use dict indexing, not Jinja attribute access.
 
     Jinja2 resolves ``pr.items`` on a dict to the bound ``dict.items`` method
     (a builtin_function_or_method), not the value at key ``'items'``. This
@@ -333,9 +333,9 @@ def test_prior_reviews_iteration_uses_dict_index() -> None:
     when Jinja tries ``{% for x in pr.items %}``.
 
     The escalator (RD-quorum cycle 2) populates ``prior_reviews`` with dicts
-    that have an ``items`` key, so the bug fired silently across docs review
-    in the W37 Set B rotation, suppressing layer-2 docs scores. Both
-    ``review_names.md`` and ``review_docs.md`` must use ``pr['items']``.
+    that have an ``items`` key, so attribute access fails silently across docs
+    review and suppresses the second-cycle scores. Both ``review_names.md``
+    and ``review_docs.md`` must use ``pr['items']``.
     """
     base_ctx = {
         "items": [],

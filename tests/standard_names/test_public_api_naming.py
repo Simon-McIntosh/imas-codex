@@ -1,11 +1,10 @@
-"""Plan 40 A13 — AST-level naming alignment test.
+"""AST-level naming alignment: the public surface spells out ``standard_name``.
 
-Enforces §17 naming policy: public functions, classes, and module
-attributes in ``imas_codex/standard_names/`` and ``imas_codex/llm/``
-must not use the abbreviation ``sn``/``sns`` outside the §17.1
-retain-list.
+Public functions, classes, and module attributes in
+``imas_codex/standard_names/`` and ``imas_codex/llm/`` must not use the
+abbreviation ``sn``/``sns`` outside the retain-list below.
 
-Internal/private patterns retained verbatim (§17.1):
+Internal/private patterns retained verbatim:
 - ``_sn_ids``, ``seen_per_sn``, ``max_per_sn`` — local variable names
 - ``total_sn``, ``orphan_sn``, ``orphan_src``, ``stale_token_sn`` —
   Cypher result aliases
@@ -19,8 +18,8 @@ from pathlib import Path
 
 import pytest
 
-# §17 alias-bridge — these names are explicitly retained for one
-# release with a DeprecationWarning. They are NOT violations.
+# Alias bridge — these names are explicitly retained for one release with a
+# DeprecationWarning. They are NOT violations.
 ALIAS_BRIDGE_NAMES: frozenset[str] = frozenset(
     {
         "fetch_docs_review_feedback_for_sns",
@@ -31,10 +30,9 @@ ALIAS_BRIDGE_NAMES: frozenset[str] = frozenset(
     }
 )
 
-# Pre-existing SN-run / SN-id helpers outside Plan 40 §17 rename scope.
-# Plan 40 only mandates renames for the search-facility surface; these
-# infrastructure helpers (run lifecycle, claim atomicity, id regex) keep
-# their abbreviations until a future plan covers them.
+# SN-run / SN-id infrastructure helpers (run lifecycle, claim atomicity, id
+# regex) that are not part of the search-facility surface this audit governs;
+# they keep their abbreviations.
 OUT_OF_SCOPE_NAMES: frozenset[str] = frozenset(
     {
         "clear_sn_subsystem",
@@ -89,9 +87,9 @@ def _collect_def_names(tree: ast.Module) -> list[tuple[str, int]]:
 
 @pytest.mark.parametrize("module_path", AUDITED_MODULES)
 def test_no_sn_abbreviation_in_public_names(module_path: Path) -> None:
-    """A13: top-level def/class/assignment names must use ``standard_name``.
+    """Top-level def/class/assignment names must use ``standard_name``.
 
-    Exemptions (§17.1 retain-list): explicit alias-bridge names.
+    Exemptions (retain-list): explicit alias-bridge names.
     """
     repo_root = Path(__file__).resolve().parents[2]
     full_path = repo_root / module_path
@@ -106,7 +104,7 @@ def test_no_sn_abbreviation_in_public_names(module_path: Path) -> None:
             violations.append((name, lineno))
 
     assert not violations, (
-        f"§17 naming violation in {module_path}: {violations}. "
+        f"naming violation in {module_path}: {violations}. "
         f"Public names must spell out 'standard_name'. "
         f"Alias-bridge: {sorted(ALIAS_BRIDGE_NAMES)}. "
         f"Out-of-scope: {sorted(OUT_OF_SCOPE_NAMES)}."

@@ -1,4 +1,4 @@
-"""Tests for the review_docs pipeline (Phase 8.1 stage transitions).
+"""Tests for the review_docs pipeline stage transitions.
 
 Covers:
 - Claim eligibility: only docs_stage='drafted' nodes are claimed

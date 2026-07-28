@@ -431,10 +431,9 @@ class TestPersistCypherContent:
     def test_persist_empty_result(self):
         """Empty tx result means refining gate did not bind — raise loudly.
 
-        Was previously a silent no-op; that masked a 5-edge / 500+ claim
-        bug (see persist_refined_name commit d21aa428). The empty path
-        now raises RuntimeError so the worker can release the claim or
-        mark the SN exhausted explicitly.
+        A silent no-op here masks unbound refines: claims are consumed but
+        no edges are written. The empty path raises RuntimeError so the
+        worker can release the claim or mark the SN exhausted explicitly.
         """
         import pytest
 

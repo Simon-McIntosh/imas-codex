@@ -1,4 +1,4 @@
-"""Tests for plan-32 Phase 2 prompt tools (variant C tool-calling harness).
+"""Tests for the prompt tools that back the tool-calling compose harness.
 
 These tests exercise the **schema shape** and **dispatcher behaviour** of
 ``imas_codex.standard_names.prompt_tools``. The live-graph tool

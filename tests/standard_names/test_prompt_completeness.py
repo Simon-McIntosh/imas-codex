@@ -1,17 +1,16 @@
-"""W2: Closed-vocabulary completeness for the SN compose system prompt.
+"""Closed-vocabulary completeness for the SN compose system prompt.
 
 Verifies that the rendered ``sn/generate_name_system`` prompt — and the
 shared ``_grammar_reference.md`` partial it embeds — contains EVERY token
 from the canonical closed vocabulary segments declared by
 ``imas_standard_names.grammar.constants.SEGMENT_TOKEN_MAP``.
 
-Background: the dominant LLM failure mode in W0/W1 reviews was
-closed-vocabulary tokens (toroidal, parallel, thermal, e_cross_b_drift,
-normalized, fast_ion, …) being absorbed into ``physical_base`` instead of
-placed in their correct grammar segment slot.  W2 makes that error
-completely fixable with prompting alone by injecting EVERY closed token
-verbatim into the system prompt.  These tests guard the injection from
-silent regressions.
+The dominant LLM failure mode is closed-vocabulary tokens (toroidal, parallel,
+thermal, e_cross_b_drift, normalized, fast_ion, …) being absorbed into
+``physical_base`` instead of placed in their correct grammar segment slot.
+Injecting EVERY closed token verbatim into the system prompt makes that error
+correctable by prompting alone; these tests guard the injection from silent
+regressions.
 """
 
 from __future__ import annotations
@@ -138,7 +137,7 @@ class TestSystemPromptContainsAllClosedTokens:
         """Tokens cited in mid-tier reviewer comments must appear verbatim."""
         assert token in rendered_system_prompt, (
             f"high-signal closed-vocab token {token!r} missing from prompt — "
-            "the W0 reviewer corpus singled this token out as a recurring "
+            "the reviewer corpus singles this token out as a recurring "
             "decomposition-failure absorber."
         )
 
@@ -152,8 +151,8 @@ class TestSystemPromptContainsAllClosedTokens:
     def test_decomposition_anti_pattern_gallery_renders(self, rendered_system_prompt):
         """Anti-pattern gallery section must render with at least 6 entries.
 
-        Rotation stage labels (``W2``) were dropped per the naming-hygiene rule;
-        the gallery now uses plain ``DECOMPOSITION-FAILURE GALLERY`` / ``D{n}``.
+        The gallery heading is ``DECOMPOSITION-FAILURE GALLERY`` and each
+        entry is prefixed ``D{n} —`` (a positional index within the gallery).
         """
         assert "DECOMPOSITION-FAILURE GALLERY" in rendered_system_prompt
         # Each entry uses the D{n} prefix

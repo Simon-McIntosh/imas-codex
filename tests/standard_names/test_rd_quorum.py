@@ -1,4 +1,4 @@
-"""Tests for the RD-quorum review loop (Plan 39, Phase 4).
+"""Tests for the RD-quorum review loop.
 
 Validates:
 - Single model → single_review (no quorum)

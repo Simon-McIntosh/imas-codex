@@ -1,4 +1,4 @@
-"""Tests for reviewer profile selection (Phase D, plan 43).
+"""Tests for reviewer profile selection.
 
 Covers:
 - get_sn_review_active_profile() env-var resolution

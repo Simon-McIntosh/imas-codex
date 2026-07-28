@@ -3,7 +3,7 @@
 The cascade is exercised in three layers:
 
 1. **Pure rule dispatch** — ``_cascade_target_name`` produces the
-   correct child name for each ``operator_kind`` per the D10 table.
+   correct child name for each ``operator_kind``.
 2. **Mock-graph integration** — ``rename_cascade`` walks a stub
    ``query`` interface and produces correct plans, conflicts, and
    safety rejections without touching a live Neo4j.

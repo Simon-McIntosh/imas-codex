@@ -1,4 +1,4 @@
-"""Tests for the review_name pipeline (Phase 8.1 stage transitions).
+"""Tests for the review_name pipeline stage transitions.
 
 Covers:
 - Claim eligibility: only name_stage='drafted' nodes are claimed

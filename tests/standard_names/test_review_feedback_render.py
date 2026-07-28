@@ -1,7 +1,6 @@
 """Verify reviewer feedback fields are rendered into compose prompts.
 
-Regression suite for two graph→template orphans found alongside the
-``reviewer_suggested_name`` canary (commit a5ce32da):
+Two graph→template orphans the compose prompts must not reintroduce:
 
 1. ``previous_documentation`` is fetched by ``fetch_review_feedback_for_sources``
    and packed into the per-item ``review_feedback`` mapping (graph_ops.py),

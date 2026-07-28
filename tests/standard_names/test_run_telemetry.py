@@ -37,7 +37,7 @@ def _mock_gc_ctx():
 
 
 # ---------------------------------------------------------------------------
-# A1: LLMCost persistence
+# LLMCost persistence
 # ---------------------------------------------------------------------------
 
 
@@ -115,7 +115,7 @@ class TestLLMCostPersistence:
 
 
 # ---------------------------------------------------------------------------
-# A1: create_sn_run_open raises on failure
+# create_sn_run_open raises on failure
 # ---------------------------------------------------------------------------
 
 
@@ -141,7 +141,7 @@ class TestCreateSNRunRaises:
 
 
 # ---------------------------------------------------------------------------
-# A2: create sets initial telemetry fields
+# create sets initial telemetry fields
 # ---------------------------------------------------------------------------
 
 
@@ -185,7 +185,7 @@ class TestCreateTelemetryFields:
 
 
 # ---------------------------------------------------------------------------
-# A3: stopped_at population
+# stopped_at population
 # ---------------------------------------------------------------------------
 
 
@@ -249,7 +249,7 @@ class TestStoppedAtPopulation:
 
 
 # ---------------------------------------------------------------------------
-# A4: Cost consistency (LLMCost sum ≈ SNRun.cost_spent)
+# Cost consistency (LLMCost sum ≈ SNRun.cost_spent)
 # ---------------------------------------------------------------------------
 
 

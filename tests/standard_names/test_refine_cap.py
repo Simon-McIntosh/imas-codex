@@ -1,4 +1,4 @@
-"""W4d: Verify rotation_cap is forwarded to refine claim adapters."""
+"""``rotation_cap`` must be forwarded to the refine claim adapters."""
 
 from __future__ import annotations
 
