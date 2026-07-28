@@ -843,6 +843,95 @@ def test_gate_detaches_a_laundered_migration() -> None:
     assert result.detached == 1
 
 
+# ---------------------------------------------------------------------------
+# Targeted detach — the semantic mis-share the guard cannot judge
+# ---------------------------------------------------------------------------
+
+
+def _detach_client(
+    *, exists: bool = True, other_live: int = 0, name_attachments: int = 2
+) -> MagicMock:
+    """A client answering the targeted detach's pre-flight read."""
+    from imas_codex.standard_names import attachment_audit as mod
+
+    def _query(q: str, **params):
+        if "RETURN src.id AS source_node_id" in q:
+            if not exists:
+                return [
+                    {
+                        "source_node_id": None,
+                        "other_live_names": 0,
+                        "name_attachments": 0,
+                    }
+                ]
+            return [
+                {
+                    "source_node_id": "dd:some/path",
+                    "other_live_names": other_live,
+                    "name_attachments": name_attachments,
+                }
+            ]
+        if q == mod._DETACH_QUERY:
+            return [{"detached": 1}]
+        return []
+
+    gc = MagicMock()
+    gc.query.side_effect = _query
+    return gc
+
+
+def test_detach_removes_a_semantic_mis_share() -> None:
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client(other_live=1)
+    res = detach_one_attachment(
+        "spectrometer_visible/channel/grating_spectrometer/radiance_spectral",
+        "spectral_bremsstrahlung_radiance",
+        reason="line emission, not continuum",
+        gc=gc,
+    )
+    assert res["ok"] is True
+    assert res["source_rewound"] is False, "the source still has a live name"
+
+
+def test_detach_rewinds_a_source_left_with_no_live_name() -> None:
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client(other_live=0)
+    res = detach_one_attachment("a/b", "some_name", reason="wrong", gc=gc)
+    assert res["ok"] is True and res["source_rewound"] is True
+
+
+def test_detach_refuses_to_orphan_a_name() -> None:
+    """A name every source rejects is a NAME defect, not an attachment defect."""
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client(name_attachments=1)
+    res = detach_one_attachment("a/b", "only_here", reason="wrong", gc=gc)
+    assert res["ok"] is False
+    assert "sn edit --rename" in res["reason"]
+
+
+def test_detach_refuses_a_pairing_that_does_not_exist() -> None:
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client(exists=False)
+    res = detach_one_attachment("a/b", "unrelated", reason="wrong", gc=gc)
+    assert res["ok"] is False and "does not realize" in res["reason"]
+
+
+def test_detach_dry_run_does_not_write() -> None:
+    from imas_codex.standard_names import attachment_audit as mod
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client()
+    res = detach_one_attachment("a/b", "n", reason="wrong", gc=gc, dry_run=True)
+    assert res["ok"] is True and res["dry_run"] is True
+    assert all(call.args[0] != mod._DETACH_QUERY for call in gc.query.call_args_list), (
+        "dry run issued the detach write"
+    )
+
+
 def test_gate_survives_a_graph_failure() -> None:
     """A gate that raised would turn a bad edge into a lost rename."""
     from imas_codex.standard_names.attachment_audit import gate_migrated_attachments

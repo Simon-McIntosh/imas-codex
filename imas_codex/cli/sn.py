@@ -5719,6 +5719,59 @@ def sn_edit(
         raise SystemExit(3)
 
 
+@sn.command("detach")
+@click.argument("dd_path")
+@click.argument("standard_name")
+@click.option(
+    "--reason",
+    required=True,
+    help=(
+        "Why this DD path does not realize this name. Recorded in the change "
+        "ledger — a detach is a physics judgement and must carry its argument."
+    ),
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report what would happen without writing to the graph.",
+)
+def sn_detach(dd_path: str, standard_name: str, reason: str, dry_run: bool) -> None:
+    """Detach one DD path from a standard name it does not realize.
+
+    For a SEMANTIC mis-share the consistency guard cannot judge: two names that
+    are each valid and denote different quantities, both attached to one DD path,
+    so the exported catalog lists that path under both. The guard rules on
+    dimensionality, locus and vector families — not on which of two sound names a
+    path means.
+
+    Refuses to orphan a name: if this is its only attachment, its whole source set
+    rejects it and it is a NAME defect for `sn edit --rename` instead.
+
+    \b
+    Example:
+      imas-codex sn detach spectrometer_visible/channel/grating_spectrometer/radiance_spectral \\
+        spectral_bremsstrahlung_radiance --reason "line emission, not continuum"
+    """
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    result = detach_one_attachment(
+        dd_path, standard_name, reason=reason, dry_run=dry_run
+    )
+    if not result.get("ok"):
+        raise click.UsageError(result.get("reason", "detach refused"))
+
+    verb = "would detach" if dry_run else "detached"
+    click.echo(f"{verb} {dd_path} from {standard_name}")
+    click.echo(
+        "  source "
+        + (
+            "rewound to 'extracted' for re-composition — it has no other live name"
+            if result["source_rewound"]
+            else "keeps another live name; only the stale edge goes"
+        )
+    )
+
+
 @sn.command("supersede")
 @click.argument("old_name")
 @click.option(

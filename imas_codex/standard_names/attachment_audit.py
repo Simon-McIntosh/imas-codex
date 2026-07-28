@@ -530,6 +530,126 @@ def reconcile_attachment_consistency(
     return result
 
 
+def detach_one_attachment(
+    dd_path: str,
+    sn_id: str,
+    *,
+    reason: str,
+    gc: Any | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Detach ONE source→name realization the consistency guard cannot judge.
+
+    The guard decides mechanical questions — dimensionality, locus/device, vector
+    families. It is silent on a *semantic* mis-share: two names that are each
+    valid, denote different quantities, and both got attached to one DD path, so
+    the exported catalog lists that path under both. Deciding which one the path
+    realizes is a physics judgement, and once made it needs an instrument.
+
+    Removes the realization edges (``PRODUCED_NAME``, the DD-side
+    ``HAS_STANDARD_NAME``, and the name's ``source_paths`` entry) and rewinds the
+    source to ``extracted`` for re-composition ONLY when this was its last live
+    name — reusing the reconcile's own detach semantics so a targeted repair and
+    the retroactive sweep leave the graph in the same shape. Writes a
+    ``StandardNameChange`` so the judgement and its reason survive in the ledger.
+
+    Refuses when the pairing does not exist, or when it is the name's ONLY
+    remaining attachment: a name whose every source is wrong is a NAME defect to
+    repair with ``sn edit --rename``, never something to orphan by detaching.
+
+    Returns ``{"ok": bool, ...}``; never raises on a refusal.
+    """
+    own = gc is None
+    if own:
+        from imas_codex.graph.client import GraphClient
+
+        client: Any = GraphClient()
+    else:
+        client = gc
+    try:
+        rows = client.query(
+            """
+            MATCH (src:StandardNameSource)-[:FROM_DD_PATH]->(dd:IMASNode {id: $dd_path})
+            MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName {id: $sn_id})
+            OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
+            WHERE other.id <> $sn_id
+              AND NOT coalesce(other.name_stage, '') IN $historical
+            WITH src, sn, count(DISTINCT other) AS other_live
+            OPTIONAL MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+            RETURN src.id AS source_node_id, other_live AS other_live_names,
+                   count(*) AS name_attachments
+            """,
+            dd_path=dd_path,
+            sn_id=sn_id,
+            historical=sorted(_HISTORICAL_NAME_STAGES),
+        )
+        row = rows[0] if rows else None
+        if not row or not row.get("source_node_id"):
+            return {
+                "ok": False,
+                "reason": f"{dd_path!r} does not realize {sn_id!r}",
+            }
+        if int(row["name_attachments"]) <= 1:
+            return {
+                "ok": False,
+                "reason": (
+                    f"{sn_id!r} has only this one attachment — a name rejected by "
+                    "its whole source set is a NAME defect; repair it with "
+                    "sn edit --rename rather than orphaning it"
+                ),
+            }
+
+        reroute = int(row["other_live_names"] or 0) == 0
+        result = {
+            "ok": True,
+            "dd_path": dd_path,
+            "sn_id": sn_id,
+            "source_node_id": row["source_node_id"],
+            "source_rewound": reroute,
+            "dry_run": dry_run,
+        }
+        if dry_run:
+            return result
+
+        client.query(
+            _DETACH_QUERY,
+            items=[
+                {
+                    "source_node_id": row["source_node_id"],
+                    "dd_path": dd_path,
+                    "sn_id": sn_id,
+                    "reroute": reroute,
+                }
+            ],
+            historical=sorted(_HISTORICAL_NAME_STAGES),
+        )
+        _record_detachments(
+            client,
+            [
+                AttachmentVerdict(
+                    source_node_id=row["source_node_id"],
+                    dd_path=dd_path,
+                    sn_id=sn_id,
+                    name_stage=None,
+                    reason=f"semantic mis-share: {reason}",
+                    other_live_names=int(row["other_live_names"] or 0),
+                )
+            ],
+        )
+    finally:
+        if own:
+            client.close()
+
+    logger.info(
+        "detach_one_attachment: %s no longer realizes %s (%s) — %s",
+        dd_path,
+        sn_id,
+        "source rewound to compose" if reroute else "source keeps another live name",
+        reason,
+    )
+    return result
+
+
 def gate_migrated_attachments(
     gc: Any | None = None, *, sn_id: str
 ) -> AttachmentAuditResult:
