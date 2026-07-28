@@ -150,7 +150,8 @@ class TestNoMinViableTurnInShutdown:
                 if isinstance(node, ast.Name) and node.id == "MIN_VIABLE_TURN":
                     pytest.fail(
                         f"MIN_VIABLE_TURN referenced in {fname} "
-                        f"(line {node.lineno}) — fully removed in Phase 2D"
+                        f"(line {node.lineno}) — the shutdown path must not "
+                        f"gate on a minimum-viable-turn budget"
                     )
 
     def test_near_exhausted_removed(self) -> None:

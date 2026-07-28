@@ -1,4 +1,4 @@
-"""Tests for pipeline protection helper (plan 35 §Pipeline protection enforcement)."""
+"""Tests for the pipeline protection helper that shields human-edited fields."""
 
 from __future__ import annotations
 

@@ -357,7 +357,7 @@ def mock_llm():
             patches.append(p)
             p.start()
         except (ImportError, AttributeError):
-            # Import site may not exist yet (e.g. Phase 2 code not landed).
+            # Not every call site exists in every build — patch what is there.
             pass
 
     try:

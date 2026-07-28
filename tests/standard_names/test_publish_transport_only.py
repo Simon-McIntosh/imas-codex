@@ -1,6 +1,6 @@
 """Tests for the transport-only publish module.
 
-Plan 35 §3d: publish with skipped gate; verify commit+push.
+Publishing with the gate skipped must still commit and push.
 """
 
 from __future__ import annotations

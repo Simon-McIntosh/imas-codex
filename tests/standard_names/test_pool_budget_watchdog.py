@@ -1,6 +1,6 @@
-"""Tests for the _budget_watchdog task in run_pools (Phase 8 budget fix).
+"""Tests for the _budget_watchdog task in run_pools.
 
-Regression tests ensuring that:
+Ensures that:
 1. The watchdog sets stop_event promptly when mgr.exhausted() flips True.
 2. The watchdog does NOT trigger stop_event when the budget remains healthy.
 3. The watchdog exits cleanly alongside the pool tasks in both scenarios.

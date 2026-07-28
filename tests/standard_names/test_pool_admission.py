@@ -1,4 +1,4 @@
-"""Weighted-fairness admission integration tests (Phase 8 acceptance #6).
+"""Weighted-fairness admission integration tests.
 
 Tests that under contention with equal pending work, pool spend ratios converge
 toward the configured POOL_WEIGHTS ±15% after budget exhaustion; and that idle
@@ -237,12 +237,12 @@ async def _run_pool_tasks(
 
 
 # ---------------------------------------------------------------------------
-# Test 1: Weighted fairness convergence — acceptance criterion #6
+# Weighted fairness convergence
 # ---------------------------------------------------------------------------
 
 
 class TestWeightedFairnessConvergence:
-    """Phase 8 acceptance criterion #6.
+    """Pool spend tracks the configured weights under contention.
 
     Under contention with equal pending work for all 5 pools, pool spend
     ratios must converge toward POOL_WEIGHTS ±0.15 by the time the $1.00

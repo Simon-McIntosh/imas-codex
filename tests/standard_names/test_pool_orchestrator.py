@@ -1,4 +1,4 @@
-"""Tests for the Phase 8 worker-pool orchestrator scaffolding.
+"""Tests for the worker-pool orchestrator scaffolding.
 
 Covers:
 
@@ -82,9 +82,8 @@ class TestPoolAdmit:
     def test_solo_active_pool_always_admitted(self) -> None:
         mgr = self._mgr()
         mgr._phase_spent["generate_name"] = 0.50
-        # When generate_name is the only active pool, plan.md's "no other
-        # pool is active" branch admits unconditionally regardless of
-        # share or weight.
+        # When generate_name is the only active pool, the "no other pool is
+        # active" branch admits unconditionally regardless of share or weight.
         assert mgr.pool_admit(
             "generate_name", {"generate_name": 1.0}, {"generate_name"}
         )
@@ -281,7 +280,7 @@ class TestPoolLoop:
 class TestRunPools:
     @pytest.mark.asyncio
     async def test_concurrent_progress_under_load(self) -> None:
-        """All non-empty pools make progress concurrently (acceptance #1)."""
+        """All non-empty pools make progress concurrently."""
         mgr = BudgetManager(total_budget=10.0)
         stop = asyncio.Event()
         progress = {"generate_name": 0, "generate_docs": 0, "review_name": 0}

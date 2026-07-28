@@ -1,4 +1,4 @@
-"""W4a: Verify PRODUCED_NAME edges use correct source-type prefix.
+"""PRODUCED_NAME edges must use the correct source-type prefix.
 
 The compose persist path constructs ``finalize_batch`` entries with
 ``sns_id`` that must include the source-type prefix (``dd:`` or

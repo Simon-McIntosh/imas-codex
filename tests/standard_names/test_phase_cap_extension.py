@@ -1,9 +1,9 @@
 """Regression tests for phase-cap enforcement on reservation extension.
 
-W36 root cause: ``_extend_reservation`` previously bypassed phase caps,
-allowing a compose batch to drain the global pool via in-flight overshoot
-and starve downstream review/regen phases.  The fix enforces phase caps
-on extensions identically to initial reservations.
+An ``_extend_reservation`` that bypasses phase caps lets a compose batch drain
+the global pool via in-flight overshoot and starve downstream review/regen
+phases, so extensions must enforce phase caps identically to initial
+reservations.
 """
 
 from __future__ import annotations

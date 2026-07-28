@@ -1,7 +1,7 @@
 """Tests for the idle-exhaustion watchdog and budget detection.
 
-These tests guard the fixes for the long-running idle-loop hang described
-in ``plans/`` (SN pipeline workers don't exit when work is exhausted):
+These tests guard against the idle-loop hang where SN pipeline workers keep
+running after their work is exhausted:
 
 1. ``_budget_watchdog`` sets ``stop_event`` on hard exhaustion.
 2. ``_budget_saturation_watchdog`` sets ``stop_event`` when every pool
@@ -24,7 +24,7 @@ from imas_codex.standard_names.budget import BudgetManager
 from imas_codex.standard_names.pools import PoolSpec, run_pools
 
 # ---------------------------------------------------------------------------
-# Budget: MIN_VIABLE_TURN and near_exhausted removed (Phase 2D)
+# Budget: MIN_VIABLE_TURN and near_exhausted must stay removed
 # ---------------------------------------------------------------------------
 
 

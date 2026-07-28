@@ -1,11 +1,11 @@
-"""Tests for Phase 8 pool-mode batch processors.
+"""Tests for pool-mode batch processors.
 
 Covers:
 
-* Batch-scope domain context derivation (H5).
-* Cooperative shutdown via stop_event (H6).
+* Batch-scope domain context derivation.
+* Cooperative shutdown via stop_event.
 * Happy-path processing for each pool.
-* Review names/docs independence (M9).
+* Review names/docs independence.
 * Exception propagation and budget lease release.
 """
 

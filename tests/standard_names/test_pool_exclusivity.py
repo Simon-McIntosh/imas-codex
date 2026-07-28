@@ -1,7 +1,4 @@
-"""Tests for Phase 8 B3 — regen ↔ review claim exclusivity.
-
-Acceptance criterion #4 (plan.md:870):
-    Regen and review never claim the same name.
+"""Regen ↔ review claim exclusivity: the two never claim the same name.
 
 The three eligibility predicates (mirrored from Cypher WHERE clauses):
 
@@ -61,7 +58,7 @@ _ENRICHED_AT = "2024-01-01T00:00:00"
 class _InMemoryDB:
     """Thread-safe in-memory StandardName store.
 
-    Implements the same B3 eligibility predicates used by the three
+    Implements the same eligibility predicates used by the three
     Cypher claim queries in ``graph_ops.py``, so tests can run without
     Neo4j while still verifying the predicate logic.
     """
@@ -370,7 +367,7 @@ class TestReviewAndRegenClaimDisjointNames:
         # ── Primary assertion: disjoint ───────────────────────────────
         overlap = review_claimed & regen_claimed
         assert not overlap, (
-            f"Names claimed by BOTH review and regen (B3 violation): {overlap}"
+            f"Names claimed by BOTH review and regen (exclusivity violation): {overlap}"
         )
 
         # ── Group A: unreviewed → review_name only, never refine_name ──

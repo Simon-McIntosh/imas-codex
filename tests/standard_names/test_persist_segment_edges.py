@@ -406,7 +406,7 @@ class TestSegmentEdgeTokenMiss:
 
 
 # ---------------------------------------------------------------------------
-# Tests: round-trip segment edge writing (plan 29 E.8)
+# Tests: round-trip segment edge writing
 # ---------------------------------------------------------------------------
 
 

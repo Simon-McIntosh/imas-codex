@@ -130,7 +130,7 @@ class TestClauseB_VectorTopology:
 
 
 # ---------------------------------------------------------------------------
-# Topology-driven kind (Phase 2)
+# Topology-driven kind
 # ---------------------------------------------------------------------------
 
 
@@ -181,7 +181,7 @@ class TestRecomputeParentKind:
 
 
 class TestWriteEdgesAdmissionIntegration:
-    """The Phase 1 _filter_admissible_parents drops bare-base parents.
+    """``_filter_admissible_parents`` drops bare-base parents.
 
     These tests verify the integration with ``_write_standard_name_edges``
     via the same mock fixture used by ``test_graph_edge_writers``.

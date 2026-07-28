@@ -1,11 +1,13 @@
 """
-Regression: smoke #2 spun idle for 30+min after work was done because
-_count_pending used dead Phase-8.1 legacy fields (enriched_at,
-reviewed_name_at, reviewed_docs_at) and overcounted by 148 phantom rows.
-Phase 1 (commit 0531d507) replaced the watchdog with _compute_pool_pending.
-This test ensures any future regression to dead-field queries is caught
-immediately: graph populated with only superseded + exhausted nodes must
-exit cleanly within 30s with no_eligible_work.
+The idle-exhaustion watchdog must count only genuinely eligible work.
+
+Counting on completion timestamps (``enriched_at``, ``reviewed_name_at``,
+``reviewed_docs_at``) reports phantom pending rows, because those fields stay
+set on fully-processed nodes; the watchdog then never fires and the loop spins
+long after the backlog is empty.  ``_compute_pool_pending`` counts stage fields
+instead, so terminal-state nodes contribute zero.  A graph populated with only
+superseded + exhausted nodes must exit cleanly within 30 s with
+``no_eligible_work``.
 """
 
 from __future__ import annotations
@@ -84,12 +86,11 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
 
     Regression guard
     ----------------
-    The broken ``_count_pending`` (Phase-8.1 legacy fields) matched on
-    ``sn.enriched_at IS NOT NULL`` and ``sn.reviewed_name_at IS NOT NULL``.
-    These fields were set on every fully-processed node, so the watchdog
-    always saw phantom pending rows (≥148 in smoke #2) even though every
-    StandardName was superseded or exhausted.  With ``pending_count > 0``
-    the idle-exhaustion watchdog never fired, spinning for 30+ minutes.
+    A completion-timestamp count (``sn.enriched_at IS NOT NULL`` and
+    ``sn.reviewed_name_at IS NOT NULL``) matches every fully-processed node,
+    so the watchdog sees phantom pending rows even when every StandardName is
+    superseded or exhausted.  With ``pending_count > 0`` the idle-exhaustion
+    watchdog never fires and the loop spins indefinitely.
 
     The fixed ``_compute_pool_pending`` checks ``name_stage='drafted'`` etc.,
     so terminal-state nodes contribute 0.  The watchdog fires, the run exits

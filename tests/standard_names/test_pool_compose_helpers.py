@@ -1,10 +1,10 @@
-"""Unit tests for helpers extracted/added during the W2 pool-compose port.
+"""Unit tests for the pool-compose helpers.
 
 Covers:
 
 * ``_process_attachments_core`` — stateless attachment dispatch.
 * ``_update_sources_after_skip`` — claim release + status='skipped'.
-* ``_search_reference_exemplars`` — query synthesis + exclude_ids fix.
+* ``_search_reference_exemplars`` — query synthesis + exclude_ids handling.
 """
 
 from __future__ import annotations

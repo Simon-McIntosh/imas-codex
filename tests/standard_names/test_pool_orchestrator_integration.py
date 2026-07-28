@@ -1,8 +1,8 @@
-"""Integration tests for the Phase 8 pool-based orchestrator.
+"""Integration tests for the pool-based orchestrator.
 
 Covers:
 
-* Reconcile-once-at-startup (B2): reconcile completes before any claim.
+* Reconcile-once-at-startup: reconcile completes before any claim.
 * CLI routing: default → run_sn_pools.
 * Physics-domain passthrough to extract_phase only.
 * Stale claim clearing on restart (via reconcile).
@@ -69,7 +69,7 @@ _CLAIM_PATCHES = {
 
 
 # =====================================================================
-# 1. Reconcile runs before pools (B2 acceptance #5)
+# Reconcile runs before pools
 # =====================================================================
 
 

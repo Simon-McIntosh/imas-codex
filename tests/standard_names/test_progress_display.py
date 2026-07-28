@@ -1,4 +1,4 @@
-"""Tests for Phase 8 per-subpool health display with wedge detection.
+"""Tests for the per-subpool health display with wedge detection.
 
 Covers:
 - Dual-subpool status_text formatting (REVIEW, GENERATE rows).
