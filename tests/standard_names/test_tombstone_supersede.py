@@ -8,26 +8,45 @@ folding a name into an existing canonical name has no supported path.
 ``REFINED_FROM`` lineage to the live successor so the P1 export emits a
 ``status: deprecated`` stub pointing at it.
 
+The fold also carries the folded name's sources onto the target: a fold asserts
+the two names denote one quantity, so a source whose only name was the folded
+one must not be left un-named.
+
 All graph interaction is mocked (no live Neo4j). A small stateful fake models
-the lookup + write so the stamp/merge and refusal guards are asserted
-directly.
+the lookup + write so the stamp/merge, the carry-over, and the refusal guards
+are asserted directly.
 """
 
 from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names import attachment_audit, graph_ops
+from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
 from imas_codex.standard_names.edit import supersede_into
 
 
 class _FakeGraph:
-    """Models {id: node} with the two queries tombstone_supersede_into issues:
-    a lookup (OPTIONAL MATCH ... RETURN) and the write (SET + MERGE)."""
+    """Models {id: node} plus the source→name edges the fold has to carry.
 
-    def __init__(self, nodes: dict[str, dict]) -> None:
+    Answers the four queries ``tombstone_supersede_into`` issues: the lookup,
+    the carry-over census, the tombstone write, and the source carry-over.
+    """
+
+    def __init__(
+        self, nodes: dict[str, dict], produced: dict[str, set[str]] | None = None
+    ) -> None:
         self.nodes = nodes
         self.refined_from: set[tuple[str, str]] = set()  # (successor, predecessor)
+        #: source id → the set of names it produces
+        self.produced: dict[str, set[str]] = produced or {}
+
+    def _sources_of(self, name: str) -> list[str]:
+        return sorted(s for s, names in self.produced.items() if name in names)
+
+    def _live(self, name: str) -> bool:
+        stage = self.nodes.get(name, {}).get("name_stage", "")
+        return stage not in ("superseded", "exhausted")
 
     def __enter__(self) -> _FakeGraph:
         return self
@@ -64,6 +83,18 @@ class _FakeGraph:
                     "cycle": self._descends(p["old_id"], p["into_id"]),
                 }
             ]
+        if "RETURN count(src) AS sources" in cypher:  # carry-over census
+            srcs = self._sources_of(p["old_id"])
+            strand = [
+                s
+                for s in srcs
+                if not any(n != p["old_id"] and self._live(n) for n in self.produced[s])
+            ]
+            return [{"sources": len(srcs), "would_strand": len(strand)}]
+        if "MERGE (src)-[:PRODUCED_NAME]->(into)" in cypher:  # carry-over write
+            for s in self._sources_of(p["old_id"]):
+                self.produced[s].add(p["into_id"])
+            return []
         if "SET old.name_stage = 'superseded'" in cypher:  # write
             old = self.nodes[p["old_id"]]
             old["name_stage"] = "superseded"
@@ -84,9 +115,25 @@ class _FakeGraph:
         raise AssertionError(f"unexpected query: {cypher}")
 
 
-def _run(nodes: dict[str, dict], old: str, into: str, dry_run: bool = False):
-    fake = _FakeGraph(nodes)
-    with patch.object(graph_ops, "GraphClient", return_value=fake):
+def _run(
+    nodes: dict[str, dict],
+    old: str,
+    into: str,
+    dry_run: bool = False,
+    produced: dict[str, set[str]] | None = None,
+):
+    fake = _FakeGraph(nodes, produced)
+    # The consistency gate on the carried-over pairings opens its own client
+    # against the live graph; these are mocked unit tests, so stub it out. Its
+    # own behaviour is covered in test_attachment_audit.
+    with (
+        patch.object(graph_ops, "GraphClient", return_value=fake),
+        patch.object(
+            attachment_audit,
+            "gate_migrated_attachments",
+            return_value=AttachmentAuditResult(),
+        ),
+    ):
         return supersede_into(old, into, dry_run=dry_run), fake
 
 
@@ -146,6 +193,62 @@ class TestSupersedeIntoAccepted:
         assert res["ok"] is True and res["dry_run"] is True
         assert nodes["old"]["name_stage"] == "accepted"  # untouched
         assert fake.refined_from == set()
+
+
+class TestSourceCarryOver:
+    """A fold declares two names one quantity, so the sources must follow.
+
+    Without the carry-over a source whose only name was the folded one is left
+    with no live name at all — silently un-named, and rewound to paid
+    re-composition by the next drain.
+    """
+
+    def test_sources_follow_the_fold(self) -> None:
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted"},
+            "into": {"id": "into", "name_stage": "accepted"},
+        }
+        produced = {"dd:a": {"old"}, "dd:b": {"old", "into"}, "dd:c": {"into"}}
+        res, _ = _run(nodes, "old", "into", produced=produced)
+        assert res["ok"] is True
+        assert produced["dd:a"] == {"old", "into"}, "a source's only name was folded"
+        assert produced["dd:b"] == {"old", "into"}, "already on both — no change"
+        assert produced["dd:c"] == {"into"}
+
+    def test_reports_how_many_sources_the_fold_carries(self) -> None:
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted"},
+            "into": {"id": "into", "name_stage": "accepted"},
+        }
+        produced = {"dd:a": {"old"}, "dd:b": {"old", "into"}}
+        res, _ = _run(nodes, "old", "into", produced=produced)
+        assert res["sources_carried"] == 2
+        # Only dd:a had no other live name, so only it would have been stranded.
+        assert res["sources_would_strand"] == 1
+
+    def test_dry_run_reports_the_blast_radius_without_writing(self) -> None:
+        """The operator must see how many sources hang on the fold before it runs."""
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted"},
+            "into": {"id": "into", "name_stage": "accepted"},
+        }
+        produced = {"dd:a": {"old"}, "dd:b": {"old"}}
+        res, _ = _run(nodes, "old", "into", dry_run=True, produced=produced)
+        assert res["sources_carried"] == 2
+        assert res["sources_would_strand"] == 2
+        assert produced == {"dd:a": {"old"}, "dd:b": {"old"}}, "dry run wrote"
+
+    def test_a_source_already_named_elsewhere_does_not_count_as_stranded(self) -> None:
+        nodes = {
+            "old": {"id": "old", "name_stage": "accepted"},
+            "into": {"id": "into", "name_stage": "accepted"},
+            "other": {"id": "other", "name_stage": "accepted"},
+            "dead": {"id": "dead", "name_stage": "superseded"},
+        }
+        produced = {"dd:a": {"old", "other"}, "dd:b": {"old", "dead"}}
+        res, _ = _run(nodes, "old", "into", produced=produced)
+        # dd:a is covered by a live name; dd:b's only other name is a tombstone.
+        assert res["sources_would_strand"] == 1
 
 
 class TestRefusals:

@@ -10940,9 +10940,14 @@ def supersede_prior_source_names(
     - its id differs from ``new_name`` (byte-identical regen is a no-op MERGE —
       the same node is reused, so nothing is superseded);
     - it is not already ``superseded``/``exhausted``;
-    - its ``origin`` is pipeline (``NULL`` / ``'pipeline'``) — never
-      ``catalog_edit`` (catalog-authoritative) or ``derived`` (structural
-      parent owned by the admission gate).
+    - its ``origin`` is not ``derived`` — a structural parent is owned by the
+      admission gate, not by any one source, so a source-keyed dedup must not
+      retire it. ``catalog_edit`` is NOT exempt: those names are one bulk import
+      of this pipeline's own earlier output, sitting unreviewed, and the graph
+      plus the review pipeline is the source of truth. Exempting them let an
+      imported name keep competing for a source that had already recomposed,
+      which is how one coordinate axis resolved to a single name while another
+      stayed split across two.
 
     For each superseded predecessor the helper marks it
     ``name_stage='superseded'``, clears its claim, and creates a
@@ -10966,7 +10971,7 @@ def supersede_prior_source_names(
                 MATCH (src:IMASNode {id: pr.source_id})-[:HAS_STANDARD_NAME]->(old:StandardName)
                 WHERE old.id <> pr.new_name
                   AND NOT coalesce(old.name_stage, '') IN ['superseded', 'exhausted', 'contested']
-                  AND coalesce(old.origin, 'pipeline') = 'pipeline'
+                  AND coalesce(old.origin, 'pipeline') <> 'derived'
                 MATCH (new:StandardName {id: pr.new_name})
                 // Skip self and any case where old already descends from new
                 // along the REFINED_FROM chain (would form a cycle).
@@ -11089,6 +11094,15 @@ def tombstone_supersede_into(
     resolves to the live successor. Historical ``HAS_STANDARD_NAME`` /
     ``PRODUCED_NAME`` edges on ``old`` are left intact as the provenance record.
 
+    **The fold also carries ``old``'s sources onto ``into``.** A fold asserts
+    that the two names denote one quantity, so every source realizing ``old``
+    realizes ``into``; without the carry-over a source whose only name was
+    ``old`` is left with no live name at all — silently un-named, and rewound to
+    paid re-composition by the next drain. The carry-over is purely additive
+    (the historical edges stay), and the new pairings are put through the
+    attachment-consistency gate, scoped to ``into``, exactly as a compose-time
+    attachment would be.
+
     Refuses (returns ``{"ok": False, "reason": ...}`` without writing) when:
 
     * ``old_id == into_id`` (nothing to fold);
@@ -11146,12 +11160,30 @@ def tombstone_supersede_into(
             }
 
         already = row.get("old_stage") == "superseded"
+        # How many of old's sources would be left with no live name if the fold
+        # did not carry them over. Reported on a dry run so the operator sees
+        # the blast radius before writing.
+        carry_rows = gc.query(
+            """
+            MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(old:StandardName {id: $old_id})
+            OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
+            WHERE other.id <> $old_id
+              AND NOT coalesce(other.name_stage, '') IN ['superseded', 'exhausted']
+            WITH src, count(other) AS live_elsewhere
+            RETURN count(src) AS sources,
+                   sum(CASE WHEN live_elsewhere = 0 THEN 1 ELSE 0 END) AS would_strand
+            """,
+            old_id=old_id,
+        )
+        carry = carry_rows[0] if carry_rows else {}
         result = {
             "ok": True,
             "old_id": old_id,
             "into_id": into_id,
             "old_prior_stage": row.get("old_stage"),
             "already_superseded": already,
+            "sources_carried": int(carry.get("sources") or 0),
+            "sources_would_strand": int(carry.get("would_strand") or 0),
             "dry_run": dry_run,
         }
         if dry_run:
@@ -11177,6 +11209,31 @@ def tombstone_supersede_into(
             old_id=old_id,
             into_id=into_id,
         )
+
+        # Carry old's sources onto the target. Additive: the predecessor keeps
+        # its edges as the provenance record, and each source now also resolves
+        # to the live name the fold declared canonical. The DD-side projection
+        # and the name's source_paths list are extended in step so the export
+        # and the SPA read the same set.
+        gc.query(
+            """
+            MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(old:StandardName {id: $old_id})
+            MATCH (into:StandardName {id: $into_id})
+            MERGE (src)-[:PRODUCED_NAME]->(into)
+            SET src.produced_sn_id = $into_id
+            WITH DISTINCT old, into
+            OPTIONAL MATCH (dd:IMASNode)-[:HAS_STANDARD_NAME]->(old)
+            FOREACH (n IN CASE WHEN dd IS NULL THEN [] ELSE [dd] END |
+                MERGE (n)-[:HAS_STANDARD_NAME]->(into))
+            WITH DISTINCT old, into
+            SET into.source_paths = coalesce(into.source_paths, []) +
+                [p IN coalesce(old.source_paths, [])
+                 WHERE NOT p IN coalesce(into.source_paths, [])]
+            """,
+            old_id=old_id,
+            into_id=into_id,
+        )
+
         from imas_codex.standard_names.provenance_lifecycle import (
             retarget_standard_name_sources,
         )
@@ -11187,6 +11244,15 @@ def tombstone_supersede_into(
             into_id,
             operation="fold",
         )
+
+    # Judge the new pairings the carry-over created, scoped to the target — the
+    # source set is historical but every pairing with `into` is new, which is
+    # what the consistency guard exists to decide.
+    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+
+    gate = gate_migrated_attachments(sn_id=into_id)
+    result["attachments_rejected"] = len(gate.rejected)
+    result["attachments_detached"] = gate.detached
     logger.info(
         "tombstone_supersede_into: %s superseded into %s (sfs=accepted, "
         "REFINED_FROM lineage merged)",
