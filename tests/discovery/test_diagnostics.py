@@ -1,9 +1,8 @@
 """Tests for scanner diagnostics infrastructure.
 
-Covers all phases of the signal scanner diagnostics plan:
-- Phase 1: Scanner progress tracking, SSH connection timing, scanner timing
-- Phase 2: Error rate tracking, backoff visibility, SSH health summary
-- Phase 4: Structured log fields, consistent error logging, graph state snapshots
+Covers scanner progress tracking, SSH connection and scanner timing, error-rate
+tracking, backoff visibility, the SSH health summary, structured log fields,
+consistent error logging, and graph state snapshots.
 """
 
 from __future__ import annotations
@@ -30,7 +29,7 @@ from imas_codex.discovery.base.supervision import (
 )
 
 # =============================================================================
-# Phase 1: Scanner Progress Tracking
+# Scanner Progress Tracking
 # =============================================================================
 
 
@@ -162,7 +161,7 @@ class TestWorkerStatsScanner:
 
 
 # =============================================================================
-# Phase 1.2: SSH Connection Timing
+# SSH Connection Timing
 # =============================================================================
 
 
@@ -201,7 +200,7 @@ class TestConnectionTiming:
 
 
 # =============================================================================
-# Phase 2.1: Error Rate Tracking
+# Error Rate Tracking
 # =============================================================================
 
 
@@ -272,7 +271,7 @@ class TestErrorRateTracking:
 
 
 # =============================================================================
-# Phase 2.2: Backoff Visibility
+# Backoff Visibility
 # =============================================================================
 
 
@@ -319,7 +318,7 @@ class TestBackoffVisibility:
 
 
 # =============================================================================
-# Phase 2.3: SSH Health Summary
+# SSH Health Summary
 # =============================================================================
 
 
@@ -381,7 +380,7 @@ class TestServiceHealthSummary:
 
 
 # =============================================================================
-# Phase 1.3: Scanner Timing in Resource Section
+# Scanner Timing in Resource Section
 # =============================================================================
 
 
@@ -411,7 +410,7 @@ class TestScannerTimingDisplay:
 
 
 # =============================================================================
-# Phase 4.3: Graph State Snapshots
+# Graph State Snapshots
 # =============================================================================
 
 

@@ -1,4 +1,4 @@
-"""Tests for the unified MDSplusScanner plugin (Phase 6).
+"""Tests for the unified MDSplusScanner plugin.
 
 Verifies: thin scan() loop, subtree expansion, version resolution,
 TDI linkage integration, check() delegation, and ScanResult shape.

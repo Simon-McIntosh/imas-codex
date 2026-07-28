@@ -1,11 +1,9 @@
-"""Comprehensive tests for the code discovery pipeline (Phases 3-6).
+"""Comprehensive tests for the code discovery pipeline.
 
-Phase 3: Full pipeline run — tree-sitter chunking for all languages, extraction, embedding
-Phase 4: Code evidence → signal linking via DataReference → SignalNode → FacilitySignal
-Phase 5: DataAccess template generation from code evidence
-Phase 6: Static tree routing and recheck with code-evidence shots
-
-TDD approach: tests written first, implementation follows.
+Covers the full chain: tree-sitter chunking for all supported languages,
+MDSplus reference extraction and embedding; code evidence → signal linking via
+DataReference → SignalNode → FacilitySignal; DataAccess template generation
+from code evidence; and static tree routing / recheck with code-evidence shots.
 """
 
 from __future__ import annotations
@@ -28,7 +26,7 @@ from imas_codex.ingestion.readers.remote import (
 )
 
 # =============================================================================
-# Phase 3: Tree-sitter chunking — all supported languages
+# Tree-sitter chunking — all supported languages
 # =============================================================================
 
 
@@ -332,7 +330,7 @@ def func3():
 
 
 # =============================================================================
-# Phase 3: MDSplus extraction from all language patterns
+# MDSplus extraction from all language patterns
 # =============================================================================
 
 
@@ -475,7 +473,7 @@ te = conn.tdi(r'\\results::thomson:te')
 
 
 # =============================================================================
-# Phase 3: Pipeline split_and_extract integration
+# Pipeline split_and_extract integration
 # =============================================================================
 
 
@@ -581,7 +579,7 @@ end
 
 
 # =============================================================================
-# Phase 4: Code evidence → signal linking
+# Code evidence → signal linking
 # =============================================================================
 
 
@@ -676,7 +674,7 @@ class TestCodeEvidenceLinking:
 
 
 # =============================================================================
-# Phase 4: Signal prioritization by code evidence
+# Signal prioritization by code evidence
 # =============================================================================
 
 
@@ -710,7 +708,7 @@ class TestSignalPrioritization:
 
 
 # =============================================================================
-# Phase 4: Known-good shot extraction from code
+# Known-good shot extraction from code
 # =============================================================================
 
 
@@ -759,7 +757,7 @@ mdsopen('tcv_shot', 56016);
 
 
 # =============================================================================
-# Phase 5: DataAccess template generation
+# DataAccess template generation
 # =============================================================================
 
 
@@ -874,7 +872,7 @@ class TestDataAccessTemplates:
 
 
 # =============================================================================
-# Phase 5: DataAccess template generation function
+# DataAccess template generation function
 # =============================================================================
 
 # Standard TCV DataAccess templates derived from code patterns
@@ -1082,7 +1080,7 @@ class TestDataAccessTemplateGeneration:
 
 
 # =============================================================================
-# Phase 5: Signal → DataAccess linking
+# Signal → DataAccess linking
 # =============================================================================
 
 
@@ -1103,7 +1101,7 @@ class TestSignalToAccessLinking:
 
 
 # =============================================================================
-# Phase 6: Static tree routing (already implemented, validated here)
+# Static tree routing
 # =============================================================================
 
 
@@ -1196,7 +1194,7 @@ class TestStaticTreeRouting:
 
 
 # =============================================================================
-# Phase 6: Code-evidence shot prioritization for rechecking
+# Code-evidence shot prioritization for rechecking
 # =============================================================================
 
 

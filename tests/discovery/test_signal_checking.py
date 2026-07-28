@@ -1,13 +1,13 @@
 """Unit tests for signal checking improvements.
 
 Tests the check worker routing logic, multi-shot batch checking,
-DataAccess-driven signal routing, and expression node handling.
+DataAccess-driven signal routing, and expression node handling:
 
-Phase 1: Static tree routing - independent trees use their own data_source_name/shot
-Phase 2: Multi-version batch checking as primary (not fallback)
-Phase 3: Expression node classification
-Phase 4: TDI function categorization
-Phase 5: Missing library error detection
+- static tree routing — independent trees use their own data_source_name/shot
+- multi-version batch checking as the primary path, not a fallback
+- expression node classification
+- TDI function categorization
+- missing-library error detection
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from imas_codex.discovery.signals.parallel import (
 )
 
 # =============================================================================
-# Phase 1: Check tree resolution — independent trees vs subtrees
+# Check tree resolution — independent trees vs subtrees
 # =============================================================================
 
 
@@ -233,7 +233,7 @@ class TestGetSignalScannerType:
 
 
 # =============================================================================
-# Phase 6: Error classification — missing library detection
+# Error classification — missing library detection
 # =============================================================================
 
 
@@ -282,7 +282,7 @@ class TestClassifyCheckError:
 
 
 # =============================================================================
-# Phase 2: Multi-shot batch checking — check_signals_batch.py
+# Multi-shot batch checking — check_signals_batch.py
 # =============================================================================
 
 
@@ -473,7 +473,7 @@ class TestBatchRetryLogic:
 
 
 # =============================================================================
-# Phase 3: Expression node error handling
+# Expression node error handling
 # =============================================================================
 
 
@@ -528,7 +528,7 @@ class TestExpressionNodeErrors:
 
 
 # =============================================================================
-# Phase 4: TDI function categorization
+# TDI function categorization
 # =============================================================================
 
 
@@ -565,7 +565,7 @@ class TestTDIFunctionCategorization:
 
 
 # =============================================================================
-# Phase 5: End-to-end check flow
+# End-to-end check flow
 # =============================================================================
 
 

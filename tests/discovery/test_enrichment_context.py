@@ -1,4 +1,4 @@
-"""Tests for enrichment pipeline tree context integration (Phase 7).
+"""Tests for enrichment pipeline tree context integration.
 
 Verifies: fetch_tree_context graph query, claim_signals returns data_source_node,
 and enrich_worker prompt injection of tree/TDI/epoch context.

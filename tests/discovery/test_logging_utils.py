@@ -1,4 +1,4 @@
-"""Tests for CLI logging utilities (Phase 3 + 4).
+"""Tests for CLI logging utilities.
 
 Covers:
 - WorkerLogAdapter structured logging
@@ -31,7 +31,7 @@ from imas_codex.cli.logging import (
 )
 
 # =============================================================================
-# Phase 4.1: Structured Worker Logging
+# Structured Worker Logging
 # =============================================================================
 
 
@@ -81,7 +81,7 @@ class TestWorkerLogAdapter:
 
 
 # =============================================================================
-# Phase 4.1b: StructuredFormatter
+# StructuredFormatter
 # =============================================================================
 
 
@@ -173,7 +173,7 @@ class TestSupervisionReexports:
 
 
 # =============================================================================
-# Phase 4.2: Consistent Error Logging
+# Consistent Error Logging
 # =============================================================================
 
 
@@ -234,7 +234,7 @@ class TestLogWorkerError:
 
 
 # =============================================================================
-# Phase 3: Log Reading Utilities
+# Log Reading Utilities
 # =============================================================================
 
 
