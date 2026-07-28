@@ -1,11 +1,11 @@
-"""Writer-loop resilience tests for BudgetManager (Phase A2).
+"""Writer-loop resilience tests for BudgetManager.
 
 Verifies:
-- T1: hang → timeout → retry → continue (record_llm_cost wedge)
-- T2: always-raise → _write_failed + _write_dropped
-- T3: writer crash + recreation under concurrent enqueue (TOCTOU-safe)
-- T4: heartbeat fires at _WRITER_HEARTBEAT_SEC with DEBUG when idle
-- T5: heartbeat with pending cost → INFO log
+- hang → timeout → retry → continue (record_llm_cost wedge)
+- always-raise → _write_failed + _write_dropped
+- writer crash + recreation under concurrent enqueue (TOCTOU-safe)
+- heartbeat fires at _WRITER_HEARTBEAT_SEC with DEBUG when idle
+- heartbeat with pending cost → INFO log
 """
 
 from __future__ import annotations

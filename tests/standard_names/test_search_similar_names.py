@@ -1,7 +1,5 @@
-"""Tests for plan 39 Phase 0 (a) — `gc=` reuse and `include_superseded` flag.
-
-Plan reference: ``plans/features/standard-names/39-structured-fanout.md`` §3.6.
-"""
+"""Similar-name search honours caller-supplied `gc=` reuse and
+`include_superseded`."""
 
 from __future__ import annotations
 

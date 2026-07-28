@@ -1,6 +1,6 @@
 """Tests for typed grammar-segment edges written alongside HAS_SEGMENT.
 
-W40 Phase 4: _write_segment_edges now writes 10 typed relationship types
+``_write_segment_edges`` writes 10 typed relationship types
 (HAS_PHYSICAL_BASE, HAS_SUBJECT, HAS_TRANSFORMATION, …) in addition to the
 generic HAS_SEGMENT edge.
 
@@ -92,7 +92,7 @@ def _cypher_of(call) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Phase 4 Tests: typed edge Cypher is present in the MERGE query
+# Typed edge Cypher is present in the MERGE query
 # ---------------------------------------------------------------------------
 
 
@@ -158,7 +158,7 @@ class TestTypedEdgeCypherPresent:
 
 
 # ---------------------------------------------------------------------------
-# Phase 4 Tests: idempotency — pre-delete covers all typed edge types
+# Idempotency — pre-delete covers all typed edge types
 # ---------------------------------------------------------------------------
 
 
@@ -217,7 +217,7 @@ class TestTypedEdgeIdempotency:
 
 
 # ---------------------------------------------------------------------------
-# Phase 4 Tests: segment-conditional FOREACH — correct segment guards
+# Segment-conditional FOREACH — correct segment guards
 # ---------------------------------------------------------------------------
 
 

@@ -1,8 +1,8 @@
-"""Wave 2 integration smoke test: verify prompt context keys are wired up.
+"""Integration smoke test: verify prompt context keys are wired up.
 
 This test exercises the compose-worker and review-worker context-building
 paths with mocks in place of the graph client and LLM, asserting that the
-Wave 2 feature set is correctly plumbed:
+enrichment context channels are correctly plumbed:
 
 - Compose items carry: hybrid_neighbours, related_neighbours, error_fields,
   identifier_values
@@ -47,7 +47,7 @@ def test_enrich_batch_items_injects_related_neighbours():
     assert "max_results" in sig.parameters
 
 
-def test_enrich_batch_items_populates_all_wave2_keys():
+def test_enrich_batch_items_populates_all_context_keys():
     """_enrich_batch_items populates hybrid, related, error, and identifier keys."""
     from imas_codex.standard_names.workers import _enrich_batch_items
 
@@ -133,7 +133,7 @@ def test_enrich_batch_items_populates_all_wave2_keys():
         _enrich_batch_items(items)
 
     item = items[0]
-    # Wave 2 context channels
+    # Enrichment context channels
     assert "hybrid_neighbours" in item, "hybrid_neighbours not injected"
     assert item["hybrid_neighbours"] == mock_hybrid
     assert "related_neighbours" in item, "related_neighbours not injected"

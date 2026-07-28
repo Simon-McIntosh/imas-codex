@@ -1,4 +1,4 @@
-"""W4b: Pre-validation gate rejects malformed standard-name candidates."""
+"""The pre-validation gate rejects malformed standard-name candidates."""
 
 from __future__ import annotations
 

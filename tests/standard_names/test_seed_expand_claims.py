@@ -1,8 +1,8 @@
-"""Tests for Phase 8 seed-and-expand claim queries.
+"""Tests for the seed-and-expand claim queries.
 
 Verifies the five ``claim_*_seed_and_expand`` functions in
-``imas_codex.standard_names.graph_ops`` that will be used by the
-``run_sn_pools`` worker-pool orchestrator.
+``imas_codex.standard_names.graph_ops`` used by the ``run_sn_pools``
+worker-pool orchestrator.
 
 Tests mock :class:`GraphClient` — no live Neo4j required.
 
@@ -313,7 +313,7 @@ class TestReviewExcludesLowScore:
         with _patch_gc(gc):
             items = claim_review_names_seed_and_expand(batch_size=5, min_score=0.5)
 
-        # Verify the WHERE clause contains the B3 exclusivity filter
+        # Verify the WHERE clause contains the review/regen exclusivity filter
         seed_query = tx.run.call_args_list[0].args[0]
         assert "coalesce(sn.reviewer_score_name, 1.0) >= $min_score" in seed_query
 

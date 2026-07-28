@@ -1,4 +1,4 @@
-"""Tests for VocabGap infrastructure (Phase 2A–2D).
+"""Tests for the VocabGap infrastructure.
 
 Covers:
 - StandardNameVocabGap / StandardNameComposeBatch model parsing

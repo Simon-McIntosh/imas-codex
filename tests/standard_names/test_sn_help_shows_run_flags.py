@@ -1,4 +1,4 @@
-"""Test ``sn run --help`` output includes the Phase 5 flags.
+"""Test ``sn run --help`` output includes the scope and override flags.
 
 Verifies that the ``sn run`` subcommand advertises:
   - ``--only``
@@ -13,7 +13,7 @@ from imas_codex.cli.sn import sn
 
 
 class TestSnRunHelpShowsNewFlags:
-    """sn run --help must list the Phase 5 flags."""
+    """sn run --help must list ``--only`` and ``--override-edits``."""
 
     def _run_help(self) -> str:
         runner = CliRunner()

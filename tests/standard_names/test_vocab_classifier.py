@@ -1,4 +1,4 @@
-"""Tests for vocab-gap token classifier (Phase 6a).
+"""Tests for the vocab-gap token classifier.
 
 Covers:
 - R1 hardware rejection (device names, vendor codes)

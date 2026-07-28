@@ -1,4 +1,4 @@
-"""Plan 40 Phase 2 — three-stream RRF fusion + mode kwarg tests.
+"""Three-stream RRF fusion and the ``mode`` kwarg.
 
 These tests exercise the public ``search_standard_names`` API with a
 mock GraphClient. Vector/keyword/grammar streams are stubbed to return
@@ -112,7 +112,7 @@ def test_grammar_stream_admits_anchored_with_vk() -> None:
 
 
 def test_grammar_stream_filters_t2_flood() -> None:
-    """§9.4 worked example — Tier-2-only floods are dropped at stream level."""
+    """Tier-2-only floods are dropped at stream level."""
     gc = MagicMock()
 
     def _query(cypher: str, **params: object) -> list[dict]:

@@ -1,7 +1,7 @@
 """Test ``sn --help`` output contains no reconcile, link, seed tokens.
 
-Verifies Phase 5 acceptance criterion: the standalone CLI verbs are removed
-and their functionality is reachable only via ``sn run``.
+The standalone CLI verbs are removed; their functionality is reachable only
+via ``sn run``.
 """
 
 from __future__ import annotations

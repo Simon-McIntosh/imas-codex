@@ -1,9 +1,9 @@
-"""Tests for the FROM_DD_PATH source invariant (rc22 B5).
+"""Tests for the FROM_DD_PATH source invariant.
 
 Invariant: every non-stale ``StandardNameSource`` with
 ``source_type='dd'`` MUST have a ``FROM_DD_PATH`` edge to an
-``IMASNode``.  Prior bootstrap produced 499 orphan sources (RD §5).
-We prevent recurrence with two complementary mechanisms:
+``IMASNode``.  A bootstrap that writes sources without the edge leaves
+orphans behind, so two complementary mechanisms keep them out:
 
 1. **Birth invariant** — ``merge_standard_name_sources()`` rejects any
    ``'dd'`` source whose ``dd_path`` is ``None`` or missing (never
@@ -351,10 +351,9 @@ class TestReconcileRunsAtTurnStart:
 
 
 class TestExtractWorkerEmitsDdPath:
-    """Regression: workers.sn_extract_worker must populate the dd_path field
-    so the B5 birth invariant in merge_standard_name_sources accepts the
-    source.  Caught live in C2 canary: 100% rejection (497/497 sources) when
-    workers.py emitted only source_id."""
+    """workers.sn_extract_worker must populate the dd_path field so the birth
+    invariant in merge_standard_name_sources accepts the source.  Emitting
+    only source_id makes the invariant reject every DD source."""
 
     def test_extract_worker_dd_source_includes_dd_path(self):
         """For source_type='dd', the source dict passed to merge must
@@ -375,5 +374,5 @@ class TestExtractWorkerEmitsDdPath:
         # a 'dd_path' key for source_type=='dd'.
         assert '"dd_path": path if source_type == "dd"' in text, (
             "workers.sn_extract_worker must populate dd_path for dd sources "
-            "to satisfy the B5 birth invariant"
+            "to satisfy the birth invariant"
         )
