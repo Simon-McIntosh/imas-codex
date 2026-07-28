@@ -53,8 +53,8 @@ class StandardNameBuildState(DiscoveryStateBase):
     limit: int | None = None  # Cap on paths to process
     from_model: str | None = None  # Regenerate names produced by this model (substring)
 
-    # Name-only batching mode (Workstream 2a): group by (physics_domain × unit)
-    # in larger bins and skip L2 exemplar / L4 theme / IDS-prefetch enrichment.
+    # Name-only batching mode: group by (physics_domain × unit) in larger
+    # bins and skip exemplar / reviewer-theme / IDS-prefetch enrichment.
     # Produces named candidates faster during bootstrap; downstream review
     # / enrichment passes restore the deeper context.
     name_only: bool = False
@@ -90,7 +90,7 @@ class StandardNameBuildState(DiscoveryStateBase):
     # Accumulated results
     stats: dict[str, Any] = field(default_factory=dict)
 
-    # Quality lever tracking (L3, L6, L7)
+    # Audit, grammar-retry and revision-pass counters
     grammar_retries: int = 0
     grammar_retries_succeeded: int = 0
     opus_revisions_attempted: int = 0

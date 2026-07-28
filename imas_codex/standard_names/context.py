@@ -416,9 +416,9 @@ def _build_enum_lists() -> dict[str, list[str]]:
     """Build bare enum lists for user prompt template variables.
 
     MUST cover every closed grammar segment — reviewers judge tokens
-    "unregistered" when a segment is missing here (R3 rotation finding:
-    'thermal'/'launched' wrongly docked -4 because the population and
-    qualifier registries were absent from the reviewer context).
+    "unregistered" when a segment is missing here — 'thermal'/'launched'
+    were once docked -4 because the population and qualifier registries
+    were absent from the reviewer context.
     """
     from imas_standard_names.grammar import (
         BinaryOperator,

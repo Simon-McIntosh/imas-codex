@@ -1,4 +1,4 @@
-"""Reviewer theme extraction for compose prompt enrichment (L4).
+"""Reviewer theme extraction for compose prompt enrichment.
 
 Extracts recurring themes from reviewer comments on StandardName nodes
 in a given physics domain using n-gram frequency analysis, then renders

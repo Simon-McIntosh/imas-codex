@@ -41,7 +41,8 @@ name clears — there is no privileged accept path:
      ``_stamp_successor_validation`` runs the FULL name-admission gate
      (:func:`imas_codex.standard_names.workers.validate_name_candidate`:
      grammar round-trip + ISN Pydantic/semantic/structural/canonical/
-     description layers + L3 audits) and stamps ``validation_status``.  A
+     description layers + post-generation audits) and stamps
+     ``validation_status``.  A
      quarantined successor is skipped with a 0.0 review by the review
      worker and can never reach ``accepted`` — identical to a quarantined
      pipeline candidate.
@@ -282,7 +283,8 @@ def _stamp_successor_validation(
     Overwrites the provisional ``validation_status`` persist_refined_name
     seeds so an edit-origin name is judged by exactly the gate a
     pipeline-generated candidate passes (grammar round-trip, ISN Pydantic /
-    semantic / structural / canonical / description layers, L3 audits).  A
+    semantic / structural / canonical / description layers, post-generation
+    audits).  A
     quarantined result cannot reach ``accepted`` — the review worker skips
     quarantined names with a 0.0 score.
     """
@@ -1360,7 +1362,7 @@ def _run_scoped_pipeline(
     """Drive :func:`run_sn_pools` scoped to a single edit's ``run_id``.
 
     Runs the SAME six-pool orchestrator a normal ``sn run`` uses, so the
-    inline review clears exactly the pool's gates (P2 parity) — there is no
+    inline review clears exactly the pool's gates — there is no
     edit-privileged accept path.  ``scope_run_id`` restricts every pool claim
     to the SN(s) this edit stamped, so the review never touches the backlog.
 

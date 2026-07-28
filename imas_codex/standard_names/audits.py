@@ -1703,7 +1703,7 @@ def implicit_field_check(candidate: dict[str, Any]) -> list[str]:
         return []
     # Constraint selectors (use_exact_*) reference the field they constrain
     # and legitimately use bare "_field" in the constraint target name.
-    # Most are filtered by the extract-deny gate (W19A), but any that
+    # Most are filtered by the extract-deny gate, but any that
     # survive should not be penalised for the constraint target's phrasing.
     if name.startswith("use_exact_"):
         return []
@@ -2826,11 +2826,11 @@ def vector_family_consistency_check(names: list[dict[str, Any]]) -> list[str]:
     5. draw their axis tokens from a single canonical triple (``x, y, z`` or
        ``radial, toroidal, vertical``) — never a mix of frames;
     6. carry **documentation** consistently — when any sibling of a node has
-       non-empty ``documentation``, every sibling must (a name minted as an
-       ``attached`` merge onto a stub, rather than freshly composed, can be
-       left with ``documentation=""`` forever — this is the exact shape of
-       the z-axis documentation gap the systematic review found on 6/6
-       affected coordinate/unit-vector triples, always the last-sorted axis).
+       non-empty ``documentation``, every sibling must. A name minted as an
+       ``attached`` merge onto a stub, rather than freshly composed, is never
+       handed to the docs pipeline and so can keep ``documentation=""``
+       forever; because the merge target is picked by sort order, the gap
+       lands on the last-sorted axis of a triple.
 
     Each disagreement is one tagged issue string. Unlike the per-candidate
     audits this runs over a name corpus, mirroring

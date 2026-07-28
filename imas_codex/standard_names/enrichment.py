@@ -524,7 +524,7 @@ def group_by_concept_and_unit(
 
 
 # ---------------------------------------------------------------------------
-# Name-only grouping (Workstream 2a) — coarser batches, broader concept bins.
+# Name-only grouping — coarser batches, broader concept bins.
 # ---------------------------------------------------------------------------
 
 
@@ -580,7 +580,7 @@ def group_for_name_only(
 ) -> list[ExtractionBatch]:
     """Group enriched paths by ``(physics_domain × unit)`` for name-only mode.
 
-    This is the Workstream 2a batching strategy: coarser grouping than
+    This is the name-only batching strategy: coarser grouping than
     :func:`group_by_concept_and_unit` to amortise the system-prompt
     cost across many more items per LLM call.  Empirically this
     collapses the ~35 %% singleton tail of (cluster × unit) batching

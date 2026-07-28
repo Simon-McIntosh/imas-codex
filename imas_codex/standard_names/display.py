@@ -674,7 +674,7 @@ class SN6PoolDisplay(BaseProgressDisplay):
 
         #: Authoritative spend ledger from the run's BudgetManager.
         #: Per-pool ``on_event`` payloads systematically undercount real
-        #: spend — fanout sub-charges, L6 grammar-retry charges, and
+        #: spend — fanout sub-charges, grammar-retry charges, and
         #: retry-accumulated cost inside ``acall_llm_structured`` bill the
         #: budget ledger without emitting a matching display event.  When
         #: the run wires its ledger here (via :meth:`set_budget_ledger`),

@@ -461,7 +461,7 @@ async def score_with_reviewer(
     """Score candidates using the production-fidelity review pipeline.
 
     Uses the split system/user prompt pair (``sn/review_names_system`` +
-    ``sn/review_names_user``) with full graph context: K3 scored calibration
+    ``sn/review_names_user``) with full graph context: scored calibration
     examples, vector/same-base/same-path neighbour comparators, and grammar
     vocabulary.
 
@@ -515,7 +515,7 @@ async def score_with_reviewer(
     # Get compose context (grammar enums + shared include variables)
     compose_ctx = build_compose_context()
 
-    # Load K3 scored calibration examples from graph
+    # Load scored calibration examples from graph
     review_scored_examples: list[dict] = []
     review_axis = "name" if target == "names" else "docs"
     try:

@@ -910,7 +910,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
     grammar_enums = _get_grammar_enums()
     compose_ctx = _get_compose_context_for_review()
 
-    # --- K3: Load scored examples for review calibration ---
+    # --- Load scored examples for review calibration ---
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.example_loader import load_review_examples
 
@@ -939,12 +939,12 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
     review_scored = await asyncio.to_thread(_load_review_scored)
     if review_scored:
         wlog.info(
-            "K3: Loaded %d scored examples for review (domains=%s)",
+            "Loaded %d scored examples for review (domains=%s)",
             len(review_scored),
             review_domains or "all",
         )
 
-    # --- L4: Reviewer-theme injection (axis-aware) ---
+    # --- Reviewer-theme injection (axis-aware) ---
     # Mine recurring themes from prior reviewer comments in the same axis
     # so the reviewer self-corrects domain-level patterns. Cache-stable:
     # injected into compose_ctx so it lands in the system prompt.
@@ -967,7 +967,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
     reviewer_themes = await asyncio.to_thread(_load_themes)
     if reviewer_themes:
         wlog.info(
-            "L4: Injected %d reviewer themes (axis=%s, domains=%s)",
+            "Injected %d reviewer themes (axis=%s, domains=%s)",
             len(reviewer_themes),
             _theme_axis,
             review_domains or "all",
@@ -2358,7 +2358,7 @@ async def _review_batch_core(
     grammar_enums = _get_grammar_enums()
     compose_ctx = _get_compose_context_for_review()
 
-    # K3: scored examples
+    # Scored examples
     from imas_codex.standard_names.example_loader import load_review_examples
 
     def _scalar_domain(d: object) -> str | None:
@@ -2387,7 +2387,7 @@ async def _review_batch_core(
 
     review_scored = await asyncio.to_thread(_load_scored)
 
-    # L4: reviewer themes
+    # Reviewer themes
     from imas_codex.standard_names.review.themes import extract_reviewer_themes
 
     _theme_axis = "docs" if target == "docs" else "name"

@@ -2617,9 +2617,10 @@ def _search_reference_exemplars(
         return []
 
 
-# Opus model for L7 borderline revision pass
-_L7_REVISION_MODEL = DEFAULT_ESCALATION_MODEL
-_L7_MIN_REMAINING_BUDGET = 0.50  # Skip L7 if remaining budget < this
+# Escalation-tier model for the borderline-candidate revision pass.
+_CANDIDATE_REVISION_MODEL = DEFAULT_ESCALATION_MODEL
+# Skip the revision pass when the remaining budget falls below this.
+_CANDIDATE_REVISION_MIN_BUDGET = 0.50
 
 
 async def _grammar_retry(
@@ -2630,7 +2631,7 @@ async def _grammar_retry(
     *,
     reasoning_effort: str | None = None,
 ) -> tuple[str | None, float, int, int]:
-    """L6: Single grammar-failure re-prompt.
+    """Single grammar-failure re-prompt.
 
     Asks the LLM to revise a name that failed grammar round-trip,
     providing the parse error and a grammar cheat-sheet fragment.
@@ -2856,7 +2857,7 @@ async def _opus_revise_candidate(
     reviewer_themes: list[str],
     acall_fn,
 ) -> tuple[str | None, float, int, int]:
-    """L7: Revision pass for candidates using Opus model.
+    """Revision pass for borderline candidates using the escalation-tier model.
 
     Returns ``(revised_name_or_None, cost_usd, tokens_in, tokens_out)``.
     The cost is always returned so callers can account for it even when
@@ -2900,7 +2901,7 @@ async def _opus_revise_candidate(
 
     try:
         llm_out = await acall_fn(
-            model=_L7_REVISION_MODEL,
+            model=_CANDIDATE_REVISION_MODEL,
             messages=[{"role": "user", "content": "\n".join(prompt_parts)}],
             response_model=OpusRevisionResponse,
             service="standard-names",
@@ -3004,7 +3005,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     "sigma_rho_theta_phi"
                 )
 
-    # --- L1: Domain-vocabulary pre-seeding ---
+    # --- Domain-vocabulary pre-seeding ---
     # Inject validated domain vocabulary into system prompt context
     from imas_codex.standard_names.context import build_domain_vocabulary_preseed
 
@@ -3014,12 +3015,10 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             build_domain_vocabulary_preseed, state.domain_filter
         )
         if domain_vocab:
-            wlog.info(
-                "L1: Injected domain vocabulary preseed for %s", state.domain_filter
-            )
+            wlog.info("Injected domain vocabulary preseed for %s", state.domain_filter)
     context["domain_vocabulary"] = domain_vocab
 
-    # --- L4: Reviewer-theme extraction ---
+    # --- Reviewer-theme extraction ---
     from imas_codex.standard_names.review.themes import extract_reviewer_themes
 
     reviewer_themes: list[str] = []
@@ -3029,13 +3028,13 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         )
         if reviewer_themes:
             wlog.info(
-                "L4: Extracted %d reviewer themes for %s",
+                "Extracted %d reviewer themes for %s",
                 len(reviewer_themes),
                 state.domain_filter,
             )
     context["reviewer_themes"] = reviewer_themes
 
-    # --- K3: Scored-example injection ---
+    # --- Scored-example injection ---
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.example_loader import load_compose_examples
 
@@ -3060,7 +3059,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     compose_scored_examples = await asyncio.to_thread(_load_scored_examples)
     if compose_scored_examples:
         wlog.info(
-            "K3: Loaded %d scored examples for compose (domains=%s)",
+            "Loaded %d scored examples for compose (domains=%s)",
             len(compose_scored_examples),
             batch_domains or "all",
         )
@@ -3156,7 +3155,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             if _RATE_DOC_PATTERNS.search(haystack):
                 item["rate_hint"] = True
 
-        # --- L2: Reference SN few-shot retrieval ---
+        # --- Reference SN few-shot retrieval ---
         # Synthesize query from first 3 path descriptions
         reference_exemplars: list[dict] = []
         try:
@@ -3182,7 +3181,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     exclude_ids=batch_ids,
                 )
         except Exception:
-            wlog.debug("L2: Reference exemplar search failed", exc_info=True)
+            wlog.debug("Reference exemplar search failed", exc_info=True)
 
         user_context = {
             "items": batch.items,
@@ -3195,10 +3194,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             "cocos_version": batch.cocos_version,
             "dd_version": batch.dd_version,
         }
-        # Name-only batches (Workstream 2a) render a leaner user prompt
+        # Name-only batches render a leaner user prompt
         # that trades per-item cluster siblings / COCOS blocks / sibling
         # fields for a "identify natural sub-groups, then name" directive.
-        # System prompt and per-candidate L6/L7 logic are unchanged so
+        # System prompt and the per-candidate grammar-retry / revision
+        # logic are unchanged so
         # prompt caching and grammar safety stay intact.
         prompt_template = (
             "sn/generate_name_dd_names"
@@ -3577,7 +3577,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
             # Deterministic source<->name consistency gate (tense + state
             # resolution). The LLM sometimes emits a species-level sibling
-            # for a state-resolved source (R4 rotation: thermal_neutral_density
+            # for a state-resolved source (e.g. thermal_neutral_density
             # sourced from .../neutral/state/density_thermal) -- drop the
             # pairing so the source retries rather than persisting a
             # mis-attributed name. Same predicate the auto-attach path uses.
@@ -3616,8 +3616,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 except Exception as _order_exc:
                     # ISN ≥rc35 strict-order rejections carry the unique
                     # canonical spelling — adopt it deterministically instead
-                    # of spending an L6 LLM retry. Anything else re-raises to
-                    # the L6 path below.
+                    # of spending an LLM retry. Anything else re-raises to
+                    # the grammar-retry path below.
                     _canonical = getattr(_order_exc, "canonical_form", None)
                     if not _canonical:
                         raise
@@ -3642,9 +3642,9 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 name_id = _dedup_adjacent_tokens(name_id, wlog)
             except Exception as gram_exc:
                 grammar_failed = True
-                wlog.debug("Grammar parse failed for %r — attempting L6 retry", name_id)
+                wlog.debug("Grammar parse failed for %r — attempting retry", name_id)
 
-                # --- L6: Grammar-failure re-prompt (single retry) ---
+                # --- Grammar-failure re-prompt (single retry) ---
                 state.grammar_retries += 1
                 try:
                     retry_name, _l6_cost, _l6_ti, _l6_to = await _grammar_retry(
@@ -3675,7 +3675,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                                     {
                                         "primary_text": f"sn={name_id}",
                                         "primary_text_style": "white",
-                                        "description": f"{batch.group_key}-L6",
+                                        "description": f"{batch.group_key}-grammar-retry",
                                     }
                                 ]
                             )
@@ -3687,12 +3687,12 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                         grammar_failed = False
                         state.grammar_retries_succeeded += 1
                         wlog.info(
-                            "L6: Grammar retry succeeded: %r → %r",
+                            "Grammar retry succeeded: %r → %r",
                             c.compose_name(),
                             name_id,
                         )
                 except Exception:
-                    wlog.debug("L6: Grammar retry also failed for %r", name_id)
+                    wlog.debug("Grammar retry also failed for %r", name_id)
 
             candidates.append(
                 {
@@ -3713,7 +3713,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     "cocos_transformation_type": cocos_type,
                     "cocos": batch.cocos_version,
                     "dd_version": batch.dd_version,
-                    # L6: track grammar retry exhaustion
+                    # Track grammar-retry exhaustion
                     **({"_grammar_retry_exhausted": True} if grammar_failed else {}),
                 }
             )
@@ -3987,7 +3987,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         state.compose_stats.cost,
     )
 
-    # --- Batch-size telemetry (Workstream 2a) ---
+    # --- Batch-size telemetry ---
     # Report the distribution of items per batch and the name-only mode
     # indicator so rotation summaries can compare name-only vs default
     # throughput without bespoke log scraping.
@@ -4168,8 +4168,8 @@ def _is_quarantined(issues: list[str], layer_summary: dict) -> bool:
     - Pydantic validation failure (layer 1 did not pass)
     - Empty or missing description (no ``id`` or empty string)
     - Invalid kind value
-    - L3 critical audit failures (latex_def_check, synonym_check, multi_subject_check)
-    - L6 grammar retry exhausted
+    - Critical audit failures (latex_def_check, synonym_check, multi_subject_check)
+    - Grammar retry exhausted
     - ISN semantic/structural ERROR-level issues (ISN's own catalog publish gate
       hard-fails on these, so a name carrying one can never be published)
 
@@ -4203,11 +4203,11 @@ def _is_quarantined(issues: list[str], layer_summary: dict) -> bool:
     if not pydantic.get("passed", True):
         return True
 
-    # L6: Grammar retry exhausted
+    # Grammar retry exhausted
     if any("audit:grammar_retry_exhausted" in i for i in issues):
         return True
 
-    # L3: Critical audit failures
+    # Critical audit failures
     from imas_codex.standard_names.audits import has_critical_audit_failure
 
     if has_critical_audit_failure(issues):
@@ -4222,11 +4222,11 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
     This is the ONE gate every newly-minted StandardName passes before it can
     reach ``accepted`` — the same checks a pipeline-generated candidate clears:
     grammar round-trip, the ISN Pydantic/semantic/structural/canonical/
-    description layers (:func:`_validate_via_isn`), and the L3 post-generation
+    description layers (:func:`_validate_via_isn`), and the post-generation
     audits (:func:`run_audits`).  :func:`_is_quarantined` then decides whether
     the accumulated issues are critical.
 
-    Both the pool ``generate_name`` path (inline C1 audit) and the legacy
+    Both the pool ``generate_name`` path (inline audit) and the legacy
     ``validate_worker`` classify names this way; the ``sn edit`` rename path
     calls this so an operator-supplied replacement name rides *exactly* the
     same gate rather than being stamped ``valid`` on a privileged path.
@@ -4276,7 +4276,7 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
         # ISN three-layer validation (annotate).
         issues, layer_summary = _validate_via_isn(entry)
 
-        # L3: post-generation audits.
+        # Post-generation audits.
         try:
             from imas_codex.standard_names.audits import run_audits
 
@@ -4898,12 +4898,12 @@ async def compose_batch(
     ``physics_domain``, etc.) and runs the compose pipeline:
     prompt → LLM → grammar validate → persist.
 
-    **H5 — batch-scope domain context:**
+    **Batch-scope domain context:**
     Domain vocabulary is derived from the *batch items* rather than a
     run-scoped ``state.domain_filter``, so pooled-mode batches get domain
     context even without ``--physics-domain``.
 
-    **H6 — soft drain on stop_event:**
+    **Soft drain on stop_event:**
     Checks ``stop_event.is_set()`` before the LLM call and returns early
     (after persisting any in-flight results) if the event fires.
 
@@ -4933,7 +4933,7 @@ async def compose_batch(
     model = get_model("sn-compose")
     context = build_compose_context()
 
-    # ── H5: batch-scope domain context ─────────────────────────────────
+    # ── Batch-scope domain context ─────────────────────────────────────
     def _scalar_domain(d: object) -> str | None:
         """Normalise physics_domain to a scalar string (handles list or str)."""
         if isinstance(d, list):
@@ -4958,7 +4958,7 @@ async def compose_batch(
             domain_vocab_parts.append(vocab)
     context["domain_vocabulary"] = "\n".join(domain_vocab_parts)
 
-    # ── L4: Reviewer-theme extraction (batch-scoped) ───────────────────
+    # ── Reviewer-theme extraction (batch-scoped) ──────────────────────
     from imas_codex.standard_names.review.themes import extract_reviewer_themes
 
     reviewer_themes: list[str] = []
@@ -4967,7 +4967,7 @@ async def compose_batch(
         reviewer_themes.extend(themes)
     context["reviewer_themes"] = reviewer_themes[:12]
 
-    # ── K3: Scored-example injection ───────────────────────────────────
+    # ── Scored-example injection ───────────────────────────────────────
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.example_loader import load_compose_examples
 
@@ -5414,7 +5414,7 @@ async def compose_batch(
 
             # Deterministic source<->name consistency gate (tense + state
             # resolution). The LLM sometimes emits a species-level sibling
-            # for a state-resolved source (R4 rotation: thermal_neutral_density
+            # for a state-resolved source (e.g. thermal_neutral_density
             # sourced from .../neutral/state/density_thermal) -- drop the
             # pairing so the source retries rather than persisting a
             # mis-attributed name. Same predicate the auto-attach path uses.
@@ -5621,7 +5621,7 @@ async def compose_batch(
             cand["llm_tokens_cached_read"] = tokens_cache_r // n_cands
             cand["llm_tokens_cached_write"] = tokens_cache_w // n_cands
 
-        # ── C1: Inline audits — populate validation_status ────────────
+        # ── Inline audits — populate validation_status ────────────────
         try:
             from imas_codex.standard_names.audits import run_audits
 
@@ -5982,10 +5982,10 @@ async def process_refine_name_batch(
             if escalate:
                 model = DEFAULT_ESCALATION_MODEL
             else:
-                # Refine tier (Sonnet 4.6 by default) — peeled off
-                # [language] on 2026-05-03 after E3 acceptance audit
-                # showed flash-lite refines lifted critiqued names at
-                # ~5% vs ~42% for Sonnet compose.
+                # Dedicated refine seat rather than the generic
+                # [language] seat: a flash-lite tier lifted critiqued
+                # names at ~5% against ~42% for the compose tier, so
+                # refine needs its own model choice.
                 model = get_model("sn-refine")
 
             # ── Build prompt context ──────────────────────────────────
@@ -8785,8 +8785,8 @@ async def process_refine_docs_batch(
         if escalate:
             model = DEFAULT_ESCALATION_MODEL
         else:
-            # Refine tier (Sonnet 4.6 by default) — see refine_name
-            # comment + 2026-05-03 E3 acceptance audit.
+            # Dedicated refine seat — see the refine_name comment for
+            # why refine does not borrow the generic [language] seat.
             model = get_model("sn-refine")
 
         # ── Build prompt context ──────────────────────────────────

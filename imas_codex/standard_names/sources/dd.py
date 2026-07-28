@@ -453,7 +453,7 @@ def extract_dd_candidates(
             by a model containing this substring
         force: When False, exclude paths that already have a non-stale/non-failed
             StandardNameSource node (skip already-processed).
-        name_only: When True, use the Workstream 2a coarser grouping
+        name_only: When True, use the coarser name-only grouping
             (``physics_domain × unit``) via :func:`group_for_name_only`
             instead of :func:`group_by_concept_and_unit`. Batches are
             tagged ``mode="names"`` so the compose worker picks the
@@ -688,7 +688,7 @@ def extract_dd_candidates(
     # Group GLOBALLY by (primary_cluster × unit) — same concept across IDSs
     # gets batched together for coherent naming.  In ``name_only`` mode
     # use the coarser (physics_domain × unit) grouping for higher
-    # throughput during bootstrap (see Workstream 2a).
+    # throughput during bootstrap (the name-only grouping strategy).
     if name_only:
         _status(
             f"grouping {len(enriched)} quantities by "

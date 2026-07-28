@@ -915,8 +915,9 @@ def cascade_descendants_of(
         include_accepted=include_accepted,
     )
 
-    # Collision check — identical to rename_cascade's step 6, excluding the
-    # trivial root self-mapping (successor_id == new_root already).
+    # Collision check — the same in-tree collision query :func:`rename_cascade`
+    # runs against its own rename plan, excluding the trivial root
+    # self-mapping (successor_id == new_root already).
     new_ids = [v for k, v in rename_plan.items() if v != k]
     if new_ids:
         collision_rows = list(
