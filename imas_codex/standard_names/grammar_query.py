@@ -1,11 +1,11 @@
-"""Plan 40 Phase 2 — query tokenisation and tier policy.
+"""Query tokenisation and tier policy for standard-name search.
 
 Pure, dependency-light helpers used by the three-stream RRF in
 ``imas_codex.standard_names.search``.
 
 The grammar stream partitions the ISN segments into three tiers and
-applies tier-dependent RRF weights. See plan 40 §5.4 for rationale and
-worked example.
+applies tier-dependent RRF weights; :func:`filter_by_tier_policy`
+documents the eligibility rules.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import re
 from typing import Final
 
 # ---------------------------------------------------------------------------
-# Tokeniser (Plan 40 §5.2)
+# Tokeniser
 # ---------------------------------------------------------------------------
 
 #: ISN connector stopwords. Carry no segment information; only inflate
@@ -48,7 +48,7 @@ def tokenise_query(query: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Tier policy (Plan 40 §5.4)
+# Tier policy
 # ---------------------------------------------------------------------------
 
 #: Tier 1 — physical concepts. Always contributes; can solely surface a result.
@@ -57,7 +57,7 @@ TIER1_SEGMENTS: Final[frozenset[str]] = frozenset(
 )
 
 #: Tier 2 — operational modifiers. Contributes only with a Tier-1 anchor
-#: AND co-occurrence in the vector or keyword stream (v3.2 strict AND-gate).
+#: AND co-occurrence in the vector or keyword stream (strict AND-gate).
 #: aggregation/orbit/population are discriminative name-prefix modifiers
 #: (e.g. total_, trapped_, fast_) that narrow a physical anchor — they behave
 #: like the other operational modifiers, so they join Tier 2.
@@ -88,7 +88,7 @@ ALL_TIER_SEGMENTS: Final[frozenset[str]] = (
 )
 
 #: RRF weights per tier. Chosen so a single Tier-1 hit at vector/keyword
-#: rank 1 outranks an unbounded flood of Tier-2/3-only hits (§5.4 N1).
+#: rank 1 outranks an unbounded flood of Tier-2/3-only hits.
 TIER_WEIGHT: Final[dict[int, float]] = {1: 1.0, 2: 0.5, 3: 0.25}
 
 
@@ -108,12 +108,11 @@ def filter_by_tier_policy(
     vector_hits: set[str],
     keyword_hits: set[str],
 ) -> set[str]:
-    """Apply v3.2 strict tier-eligibility AND-gate.
+    """Apply the strict tier-eligibility AND-gate.
 
     Returns the set of SN ids whose grammar-stream hits are admissible.
 
-    Eligibility rules (plan 40 §5.4, v3.2 strict AND-gate — resolved in
-    favour of the §9.4 test):
+    Eligibility rules (strict AND-gate):
 
     - **Tier 1 hit, vector/keyword co-occurrence:** admitted (physical
       anchor + corroboration).
@@ -124,12 +123,11 @@ def filter_by_tier_policy(
     - **Tier 3 hit:** requires a Tier 1 anchor; vector/keyword
       co-occurrence is irrelevant for tier 3.
 
-    The §17.1 §9.4 test ``test_tier2_requires_tier1_anchor_and_vk_cooccurrence``
-    asserts the strict AND-gate: even a Tier-1-bearing candidate must
-    also appear in vector or keyword to qualify when the only evidence
-    is grammar. This is a deviation from the plan §5.4 code sketch
-    (lines 339-352) which admitted Tier-1 hits unconditionally; the test
-    is the source of truth.
+    ``test_tier2_requires_tier1_anchor_and_vk_cooccurrence`` pins the
+    strict reading: even a Tier-1-bearing candidate must also appear in
+    vector or keyword to qualify when the only evidence is grammar.
+    Admitting Tier-1 hits unconditionally would let a single common
+    physical token flood the result set.
 
     Args:
         by_id: ``{sn_id: {tier: [(segment, rank, weight), …]}}``.

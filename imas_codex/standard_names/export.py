@@ -8,8 +8,6 @@ layout: ``<staging>/standard_names/<domain>/<name>.yml`` plus a
 This module is the first half of the two-step export→publish flow.
 The staging directory produced here is consumed by ``publish.py``
 (transport to ISNC repo) and ``preview.py`` (local site render).
-
-See plan 35 §Phase 3.
 """
 
 from __future__ import annotations
@@ -248,8 +246,7 @@ def _run_gate_a() -> GateResult:
     """Gate A: Run existing graph test suites via subprocess pytest.
 
     Stub implementation — runs pytest with the ``graph or corpus_health``
-    marker. Returns a GateResult. In Phase 6 this will be made more
-    granular.
+    marker. Returns a GateResult.
     """
     try:
         result = subprocess.run(

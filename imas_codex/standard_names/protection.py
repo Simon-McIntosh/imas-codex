@@ -4,8 +4,6 @@ Prevents the codex LLM pipeline from overwriting editorial content
 that was manually curated via a catalog PR (origin=catalog_edit).
 All writers of protected fields call ``filter_protected()`` before
 persisting to the graph.
-
-See plan 35 §Pipeline protection enforcement.
 """
 
 from __future__ import annotations

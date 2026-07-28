@@ -6,8 +6,6 @@ alphabetic tie-break and clean-root / orphan queue separation.
 
 Pure function of ``(entry-ids, in-domain-edges, cross-domain-edge
 presence)`` — does not touch the graph.
-
-See plan 40 §2 for algorithm specification.
 """
 
 from __future__ import annotations

@@ -5,8 +5,7 @@ applying deterministic normalisation rules to entry dictionaries.
 Used by both ``export.py`` (pre-write) and ``catalog_import.py``
 (pre-diff).
 
-Also exposes the **deterministic name-key duplicate guard** (plan 39
-§5.2 / Phase 1.5):
+Also exposes the **deterministic name-key duplicate guard**:
 
 - :func:`name_key_normalise` — single canonical form for case-folded,
   underscore-collapsed name comparisons.
@@ -17,9 +16,6 @@ Also exposes the **deterministic name-key duplicate guard** (plan 39
   ``StandardName.id`` values; returns the existing duplicate's id or
   ``None``.  Caller uses this BEFORE persisting a new ``StandardName``
   to drop and re-tag duplicates without spending an LLM call.
-
-See plan 35 §PR-driven round-trip canonical-dict rules and plan 40
-§2 for CANONICAL_KEY_ORDER.
 """
 
 from __future__ import annotations
@@ -176,7 +172,7 @@ def canonicalise_entry(entry: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Phase 1.5 deterministic name-key duplicate guard (plan 39 §5.2)
+# Deterministic name-key duplicate guard
 # ---------------------------------------------------------------------------
 
 #: Pattern matching runs of ``_`` characters. Used by
@@ -227,9 +223,8 @@ def lexical_variants(name: str) -> set[str]:
     - the underscore-collapsed variant.
 
     The set is intentionally small and deterministic — no synonym
-    expansion, no morphology, no segment reordering. Plan 39 §5.2:
-    "Set enumerated in the Phase 1.5 PR — not inferred from ad-hoc
-    tests."
+    expansion, no morphology, no segment reordering. The set is
+    enumerated here explicitly rather than inferred from ad-hoc tests.
     """
     if not isinstance(name, str) or not name:
         return set()
@@ -274,7 +269,7 @@ def find_name_key_duplicate(
 
     Notes
     -----
-    Plan 39 §5.2: vector search is intentionally NOT used — the
+    Vector search is intentionally NOT used — the
     description-vector index is not a name-level dup check.  The guard
     is designed for cases where the LLM has emitted a candidate whose
     canonical form already exists in the graph (e.g.
@@ -331,8 +326,8 @@ def find_name_key_duplicate(
         if name_key_normalise(existing_id) == candidate_key:
             return existing_id
     # Fallback Python pass for edge cases the Cypher normaliser misses
-    # (e.g. very long underscore runs). Plan 39 §5.2 favours correctness
-    # over a single round-trip.
+    # (e.g. very long underscore runs) — correctness over a single
+    # round-trip.
     fallback_rows = (
         gc.query(
             """

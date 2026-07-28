@@ -1,11 +1,11 @@
-"""Backing functions for standard-name search & fetch (plan 40 §5).
+"""Backing functions for standard-name search & fetch.
 
 This module is the **single source of truth** for SN retrieval. MCP tool
 wrappers in :mod:`imas_codex.llm.sn_tools` and pipeline workers in
 :mod:`imas_codex.standard_names.workers` and the review modules both
 import from here. No private duplicates.
 
-Public surface (plan 40 §5.1):
+Public surface:
 
 - :func:`search_standard_names` — hybrid (vector + tiered grammar +
   keyword) RRF search. Mirrors :mod:`imas_codex.graph.dd_search`.
@@ -32,10 +32,10 @@ from imas_codex.standard_names.grammar_query import (
 
 logger = logging.getLogger(__name__)
 
-# Shared executor (§5.7) — module-scoped to avoid per-call thread churn.
+# Shared executor — module-scoped to avoid per-call thread churn.
 _STREAM_POOL = ThreadPoolExecutor(max_workers=8, thread_name_prefix="sn-search")
 
-#: Default RRF damping constant (Cormack et al. 2009; plan 40 §5.3).
+#: Default RRF damping constant (Cormack et al. 2009).
 RRF_K: int = 60
 
 
@@ -174,7 +174,7 @@ def grammar_stream(
     keyword_hits: set[str],
     physics_domain: str | None = None,
 ) -> list[dict]:
-    """Tier-aware grammar segment matches (§5.4).
+    """Tier-aware grammar segment matches.
 
     For each of the 12 segments, finds SNs whose bare-name column matches
     any token in *tokens*. Applies the strict Tier-1/2/3 AND-gate via
@@ -714,7 +714,7 @@ def _fetch_neighbours(gc: Any, names: list[str]) -> dict[str, dict[str, list[str
 # Public: find_related
 # ---------------------------------------------------------------------------
 
-#: Plan 40 §7.2.3 — deterministic bucket order regardless of which contain hits.
+#: Deterministic bucket order, regardless of which buckets contain hits.
 RELATED_BUCKET_ORDER: tuple[str, ...] = (
     "Grammar Family",
     "Subject Companions",
@@ -949,7 +949,7 @@ def check_names(
 
     For each input, returns ``{name, exists, suggestion, reason}`` where
     ``suggestion`` is the closest-Levenshtein candidate when
-    ``exists=False``. Grammar-share is a tiebreaker only (plan §7.2.6).
+    ``exists=False``. Grammar-share is a tiebreaker only.
     """
     if not names:
         return []
@@ -1021,7 +1021,7 @@ def _levenshtein(a: str, b: str) -> int:
 
 
 def _levenshtein_suggest(query: str, catalog: dict[str, str | None]) -> dict[str, str]:
-    """Return ``{suggestion, reason}`` per the §7.2.6 tiebreak rule."""
+    """Return ``{suggestion, reason}`` for the closest catalog name."""
     if not catalog:
         return {"suggestion": "", "reason": "no_catalog"}
     distances = sorted(
@@ -1065,12 +1065,12 @@ def summarise_family(
     *,
     gc: Any = None,
 ) -> dict[str, Any]:
-    """Family overview keyed on ``physical_base`` (plan §7.2.7).
+    """Family overview keyed on ``physical_base``.
 
     Returns:
         Dict with keys: ``physical_base, count, segment_distinct,
         unit_distinct, cocos_distinct, physics_domain_distinct,
-        sample_names, lineage`` (plan 40 §7.2.7 lineage subsection).
+        sample_names, lineage``.
     """
     own_gc = False
     if gc is None:
@@ -1139,7 +1139,7 @@ def summarise_family(
 
 
 def _lineage_counts(gc: Any, physical_base: str) -> dict[str, int]:
-    """Plan §7.2.7 lineage subsection — counts + max chain depth per relation."""
+    """Lineage rollup — counts + max chain depth per relation."""
     out: dict[str, int] = {
         "predecessors_count": 0,
         "predecessors_max_depth": 0,
@@ -1213,8 +1213,8 @@ def search_standard_names_vector(
     gc:
         Optional pre-opened :class:`GraphClient`. When provided it is
         re-used (no new session opened, no close); when ``None`` the
-        function opens its own short-lived session. Plan 39 §3.6 (a):
-        the catalog runners pass the refine-cycle's ``gc`` so a single
+        function opens its own short-lived session. The fan-out
+        catalog runners pass the refine-cycle's ``gc`` so a single
         refine cycle never instantiates more than one ``GraphClient``.
     include_superseded:
         When ``True``, drop the ``name_stage='superseded'``
@@ -1366,7 +1366,7 @@ def search_standard_names_with_documentation(
 
 
 # ---------------------------------------------------------------------------
-# Async stream wrapper (plan §5.7) — exported for advanced callers
+# Async stream wrapper — exported for advanced callers
 # ---------------------------------------------------------------------------
 
 

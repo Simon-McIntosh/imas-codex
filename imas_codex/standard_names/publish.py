@@ -4,15 +4,13 @@ This module is the second half of the two-step export→publish flow.
 It takes a staging directory produced by ``export.py`` and mirrors it
 into an ISNC git checkout, creating a commit and optionally pushing.
 
-Publish safety (plan 40 §4):
+Publish safety:
 - All IO under ``FileLock`` on the ISNC checkout.
 - Pre-flight: manifest validation, ``edge_model_version`` check,
   staged-domain consistency, working-tree cleanliness.
 - Full-scope: ``rmtree`` + ``copytree``.
 - Domain-subset: per-domain ``copy2``.
 - Post-copy: ``check_catalog`` + ``load_catalog`` rollback on failure.
-
-See plan 35 §Phase 3 (3c) and plan 40 §4.
 """
 
 from __future__ import annotations
