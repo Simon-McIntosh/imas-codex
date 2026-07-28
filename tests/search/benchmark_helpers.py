@@ -4,7 +4,7 @@ Provides utilities for computing Mean Reciprocal Rank (MRR) and
 generating detailed failure reports when search quality regresses.
 
 Also provides ``QueryDiagnostics`` / ``collect_diagnostics`` for
-per-query debugging of the search pipeline (Phase 5).
+per-query debugging of the search pipeline.
 """
 
 from __future__ import annotations
@@ -210,7 +210,7 @@ def run_benchmark(
     return results
 
 
-# ── Per-query diagnostics (Phase 5) ─────────────────────────────────────────
+# ── Per-query diagnostics ───────────────────────────────────────────────────
 
 
 @dataclass

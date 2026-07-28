@@ -1050,7 +1050,7 @@ ABBREVIATION_QUERIES = [
 
 # ── Category 5: Accessor-oriented queries ────────────────────────────────────
 # Queries about child/accessor properties of parent concept nodes.
-# After Phase 7 (accessor routing), these should surface the parent node.
+# Accessor routing should surface the parent node for these.
 
 ACCESSOR_QUERIES = [
     BenchmarkQuery(

@@ -371,7 +371,7 @@ class TestExportQueryStructure:
 
 
 # ============================================================================
-# Phase 3: list_imas_paths query tests
+# list_imas_paths query tests
 # ============================================================================
 
 
@@ -429,7 +429,7 @@ class TestListPathsQuery:
 
 
 # ============================================================================
-# Phase 3: Legacy dd_version in ids/tools.py
+# Legacy dd_version in ids/tools.py
 # ============================================================================
 
 
@@ -470,7 +470,7 @@ class TestSemanticMatchDDVersion:
 
 
 # ============================================================================
-# Phase 3: Legacy dd_version in cli/imas_dd.py
+# Legacy dd_version in cli/imas_dd.py
 # ============================================================================
 
 
@@ -489,7 +489,7 @@ class TestCliSearchDDVersion:
 
 
 # ============================================================================
-# Phase 4: Error field context attachment tests
+# Error field context attachment tests
 # ============================================================================
 
 
@@ -568,7 +568,7 @@ class TestErrorFieldContext:
 
 
 # ============================================================================
-# Phase 4: Cluster-aware reranking tests
+# Cluster-aware reranking tests
 # ============================================================================
 
 

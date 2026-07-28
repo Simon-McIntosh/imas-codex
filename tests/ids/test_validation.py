@@ -435,7 +435,7 @@ class TestComputeSignalCoverage:
 
 
 # ---------------------------------------------------------------------------
-# Phase 8: Extended coverage metrics
+# Extended coverage metrics
 # ---------------------------------------------------------------------------
 
 

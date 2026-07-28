@@ -791,7 +791,7 @@ class TestRepresentationPass1:
 
 
 class TestTransportSolverFitArtifact:
-    """Plan 31 WS-A — solver-internal nodes → fit_artifact."""
+    """Solver-internal nodes classify as fit_artifact."""
 
     @pytest.mark.parametrize(
         "path,name",
@@ -851,7 +851,7 @@ class TestTransportSolverFitArtifact:
 
 
 class TestPulseScheduleReference:
-    """Plan 31 WS-A — pulse_schedule reference subtrees → representation."""
+    """pulse_schedule reference subtrees classify as representation."""
 
     @pytest.mark.parametrize(
         "path,name",
@@ -911,7 +911,7 @@ class TestPulseScheduleReference:
 
 
 class TestDiamagneticAxis:
-    """Plan 31 WS-A — vector-container /diamagnetic axis → representation."""
+    """A vector container's /diamagnetic axis classifies as representation."""
 
     @pytest.mark.parametrize(
         "path,name",
@@ -1297,12 +1297,12 @@ class TestInstrumentSpecPass1:
 
 
 # ──────────────────────────────────────────────────────────────────
-# Extended STRUCTURAL_KEYWORDS (W37 additions)
+# Extended STRUCTURAL_KEYWORDS
 # ──────────────────────────────────────────────────────────────────
 
 
 class TestExtendedStructuralKeywords:
-    """Tests for W37 structural keyword additions: closed, spacing, transformation."""
+    """Structural keywords closed, spacing, and transformation."""
 
     @pytest.mark.parametrize(
         "path,name",

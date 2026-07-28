@@ -1,4 +1,4 @@
-"""Tests for E2E code generation pipeline (Phase 10/11).
+"""Tests for the end-to-end code generation pipeline.
 
 Tests cover:
   - Extraction script generation and validation

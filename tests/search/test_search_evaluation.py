@@ -2171,15 +2171,15 @@ class TestMultiDomainDimensionEval:
     def test_dimension_validates_actual_output(self, multilingual_embeddings):
         """Verify the embedding server respects the dimension request.
 
-        After Phase 0 bug fix, the actual dimension should match the
-        requested dimension. If not, the bug fix is incomplete.
+        The returned vector's length must equal the requested dimension —
+        a server that silently ignores the request breaks index compatibility.
         """
         for dim in self.DIMENSIONS:
             if dim not in multilingual_embeddings:
                 continue
             actual = multilingual_embeddings[dim]["actual_dim"]
             assert actual == dim, (
-                f"Bug not fixed: requested dim {dim} but got {actual}. "
+                f"Dimension ignored: requested dim {dim} but got {actual}. "
                 f"Check that RemoteEmbeddingClient sends dimension in request body."
             )
 

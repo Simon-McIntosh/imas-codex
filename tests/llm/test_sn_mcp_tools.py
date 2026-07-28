@@ -1,8 +1,8 @@
-"""Plan 40 Phase 3 — MCP tool wrapper tests for the SN search facility.
+"""MCP tool wrapper tests for the standard-name search facility.
 
-Covers §9.7 (dd_only gate suppresses SN tools), §9.8 (3 new tools
-registered when SN tools enabled), and basic format-report behaviour
-of the wrappers.
+Covers the dd_only gate (which must suppress every SN tool), registration
+of the SN tool set when SN tools are enabled, and the format-report
+behaviour of the wrappers.
 """
 
 from __future__ import annotations
@@ -19,12 +19,12 @@ def _registered_tool_names(server) -> set[str]:
 
 
 # ---------------------------------------------------------------------------
-# §9.7 — dd_only gate
+# dd_only gate
 # ---------------------------------------------------------------------------
 
 
 def test_dd_only_true_suppresses_standard_name_tools() -> None:
-    """dd_only=True must hide ALL StandardName MCP tools (plan 40 §9.7)."""
+    """dd_only=True must hide ALL StandardName MCP tools."""
     from imas_codex.llm.server import AgentsServer
 
     server = AgentsServer(dd_only=True, include_standard_names=True)
@@ -45,7 +45,7 @@ def test_dd_only_true_suppresses_standard_name_tools() -> None:
 
 
 def test_dd_only_false_registers_sn_tools() -> None:
-    """When dd_only=False, all 8 SN tools must be registered (§9.8)."""
+    """When dd_only=False, all 8 SN tools must be registered."""
     from imas_codex.llm.server import AgentsServer
 
     server = AgentsServer(dd_only=False, include_standard_names=True)
@@ -76,7 +76,7 @@ def test_include_standard_names_false_suppresses_all() -> None:
 
 
 # ---------------------------------------------------------------------------
-# §9.8 — find_related_standard_names wrapper
+# find_related_standard_names wrapper
 # ---------------------------------------------------------------------------
 
 

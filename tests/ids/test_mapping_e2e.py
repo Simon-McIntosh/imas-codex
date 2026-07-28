@@ -1112,7 +1112,7 @@ class TestFormatHelpers:
 
 
 # ---------------------------------------------------------------------------
-# Phase 9.1: Pipeline unit tests
+# Pipeline unit tests
 # ---------------------------------------------------------------------------
 
 
@@ -1446,7 +1446,7 @@ class TestValidateSameSourceDiffTargetsOk:
 
 
 # ---------------------------------------------------------------------------
-# Phase 9.2: Integration tests (marked, require Neo4j)
+# Integration tests (marked, require Neo4j)
 # ---------------------------------------------------------------------------
 
 
@@ -1529,7 +1529,7 @@ class TestIntegrationMappingPipeline:
 
 
 # ---------------------------------------------------------------------------
-# Phase 9.3: Prompt template tests
+# Prompt template tests
 # ---------------------------------------------------------------------------
 
 
@@ -1612,7 +1612,7 @@ class TestStaticFirstOrdering:
 
 
 # ---------------------------------------------------------------------------
-# Phase 9.4: CLI tests
+# CLI tests
 # ---------------------------------------------------------------------------
 
 
@@ -1681,7 +1681,7 @@ class TestMapRunTimeLimit:
 
 
 # ---------------------------------------------------------------------------
-# Phase 8: E2E tests for pipeline plan changes
+# End-to-end tests for the mapping pipeline
 # ---------------------------------------------------------------------------
 
 

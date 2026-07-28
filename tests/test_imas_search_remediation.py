@@ -1,10 +1,10 @@
-"""Regression tests for IMAS search remediation (Phases 1-4).
+"""Tests pinning IMAS search scoring, filtering, and result metadata.
 
 Validates:
-- Phase 1: Hybrid vector+text scoring in IMAS DD server, full SearchHit metadata
-- Phase 2: BM25 fulltext scoring with CONTAINS fallback
-- Phase 3: CodeExample embedding/vector search integration
-- Phase 4: Generic metadata path filtering
+- hybrid vector+text scoring in the IMAS DD server, with full SearchHit metadata
+- BM25 fulltext scoring, falling back to CONTAINS when the index is unavailable
+- CodeExample embedding/vector search integration
+- generic metadata path filtering
 
 Tests use mock GraphClient and Encoder—no running Neo4j/embedding server needed.
 """
@@ -34,7 +34,7 @@ def _route_query(routes: dict[str, list[dict[str, Any]]]) -> Any:
 
 
 # ---------------------------------------------------------------------------
-# Phase 4: Node category classification (replaces _is_generic_metadata_path)
+# Node category classification (replaces _is_generic_metadata_path)
 # ---------------------------------------------------------------------------
 
 
@@ -117,7 +117,7 @@ class TestNodeCategoryFiltering:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Text search - DD server (_text_search_dd_paths)
+# Text search - DD server (_text_search_dd_paths)
 # ---------------------------------------------------------------------------
 
 
@@ -221,7 +221,7 @@ class TestTextSearchImasPathsDDServer:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Text search - Codex server (_text_search_dd_paths_by_query)
+# Text search - Codex server (_text_search_dd_paths_by_query)
 # ---------------------------------------------------------------------------
 
 
@@ -312,7 +312,7 @@ class TestTextSearchImasPathsCodexServer:
 
 
 # ---------------------------------------------------------------------------
-# Phase 1: Hybrid search + full SearchHit metadata (IMAS DD server)
+# Hybrid search + full SearchHit metadata (IMAS DD server)
 # ---------------------------------------------------------------------------
 
 
@@ -484,7 +484,7 @@ class TestGraphSearchToolHybrid:
         assert hit.physics_domain == "magnetics"
         assert hit.node_type == "leaf"
 
-        # Extended fields (Phase 1 additions)
+        # Extended lifecycle / coordinate metadata carried on the hit
         assert hit.lifecycle_status == "active"
         assert hit.lifecycle_version == "4.0.0"
         assert hit.timebase == "equilibrium/time"
@@ -642,7 +642,7 @@ class TestGraphSearchToolHybrid:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2: Hybrid text+vector scoring in Codex server (_search_imas)
+# Hybrid text+vector scoring in Codex server (_search_imas)
 # ---------------------------------------------------------------------------
 
 
@@ -782,7 +782,7 @@ class TestSearchImasHybridCodex:
 
 
 # ---------------------------------------------------------------------------
-# Phase 3: CodeExample vector search (_vector_search_code_examples)
+# CodeExample vector search (_vector_search_code_examples)
 # ---------------------------------------------------------------------------
 
 

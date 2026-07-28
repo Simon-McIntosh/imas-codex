@@ -1,4 +1,4 @@
-"""Unit tests for accessor de-ranking and IDS preference boost (Phase 1A + 1B).
+"""Unit tests for accessor de-ranking and the IDS preference boost.
 
 These tests exercise the scoring adjustments in isolation — no Neo4j or
 embedding server required.  We replicate the same logic that lives in
@@ -17,7 +17,7 @@ from imas_codex.tools.graph_search import _ACCESSOR_TERMINALS, _CONCEPT_IDS_PREF
 
 
 def apply_accessor_deranking(scores: dict[str, float]) -> dict[str, float]:
-    """Apply accessor de-ranking (Phase 1A) to a scores dict (mutates copy)."""
+    """Apply accessor de-ranking to a scores dict (mutates a copy)."""
     scores = dict(scores)
     for pid in scores:
         terminal = pid.rsplit("/", 1)[-1].lower()
@@ -31,7 +31,7 @@ def apply_ids_preference(
     query_words: list[str],
     normalized_filter: str | list[str] | None,
 ) -> dict[str, float]:
-    """Apply IDS preference boost (Phase 1B) to a scores dict (mutates copy)."""
+    """Apply the IDS preference boost to a scores dict (mutates a copy)."""
     scores = dict(scores)
     if not normalized_filter and query_words:
         matched_ids_prefs: set[str] = set()
@@ -47,7 +47,7 @@ def apply_ids_preference(
 
 
 # ---------------------------------------------------------------------------
-# Phase 1A — Accessor de-ranking
+# Accessor de-ranking
 # ---------------------------------------------------------------------------
 
 
@@ -146,7 +146,7 @@ class TestAccessorDeranking:
 
 
 # ---------------------------------------------------------------------------
-# Phase 1B — IDS preference boost
+# IDS preference boost
 # ---------------------------------------------------------------------------
 
 
@@ -257,7 +257,7 @@ class TestIDSPreferenceBoost:
 
 
 # ---------------------------------------------------------------------------
-# Combined tests (Phase 1A + 1B together)
+# De-ranking and preference boost applied together
 # ---------------------------------------------------------------------------
 
 
