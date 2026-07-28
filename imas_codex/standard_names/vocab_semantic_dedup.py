@@ -107,19 +107,26 @@ def _cosine_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 
 def _existing_tokens_by_segment() -> dict[str, list[str]]:
-    """Map each closed grammar segment to its registered token list.
+    """Map each grammar class to the registered tokens a proposal competes with.
+
+    Sourced from :func:`grammar_tokens_by_segment` so the operator class is one
+    of the classes compared against.  Operators are the vocabulary a proposed
+    token most often duplicates — ``squared`` against the operator ``square``,
+    ``average_square`` against ``square`` — and a check that saw only the
+    segment enums scored such a proposal against 114 qualifiers while the token
+    it actually duplicates sat in the operator registry, unseen.
 
     Returns an empty dict when ISN is unavailable (check is then a no-op).
     """
-    try:
-        from imas_standard_names.grammar.constants import SEGMENT_TOKEN_MAP
+    from imas_codex.standard_names.segments import grammar_tokens_by_segment
 
-        return {
-            seg: sorted(tokens) for seg, tokens in SEGMENT_TOKEN_MAP.items() if tokens
-        }
-    except Exception:  # ImportError or any parsing error
-        logger.debug("ISN SEGMENT_TOKEN_MAP unavailable — token-reuse check is a no-op")
+    by_segment = grammar_tokens_by_segment()
+    if not by_segment:
+        logger.debug(
+            "ISN grammar vocabulary unavailable — token-reuse check is a no-op"
+        )
         return {}
+    return {seg: sorted(tokens) for seg, tokens in by_segment.items() if tokens}
 
 
 def _get_encoder(encoder: Any | None) -> Any | None:

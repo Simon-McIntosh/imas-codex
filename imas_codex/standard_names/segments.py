@@ -24,6 +24,7 @@ therefore no longer in the fallback.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
 
 # Hard fallback (used when imas-standard-names is unavailable at import time).
@@ -54,7 +55,7 @@ def _load_segment_token_map() -> dict[str, tuple[str, ...]] | None:
 # mechanism — so this label never appears in a real standard name; it exists
 # only so the gap classifier can say "this token is a known operator, in the
 # wrong slot" rather than "absent".
-_OPERATOR_SEGMENT = "operator"
+OPERATOR_SEGMENT = "operator"
 
 
 @lru_cache(maxsize=1)
@@ -207,27 +208,61 @@ def is_open_segment(segment: str | None) -> bool:
 
 
 @lru_cache(maxsize=1)
-def _segment_token_index() -> dict[str, list[str]]:
-    """Build a reverse index: token → list of segment names that contain it.
+def grammar_tokens_by_segment() -> dict[str, tuple[str, ...]]:
+    """Every ISN grammar token, keyed by the class that admits it.
 
-    Only closed-vocabulary segments (non-empty token lists in
-    ``SEGMENT_TOKEN_MAP``) are indexed.  Open segments are excluded
-    because every token is admissible there by definition.
+    This is the vocabulary accessor for the whole module family.  It is the
+    union of two sources that ISN keeps apart:
+
+    - ``SEGMENT_TOKEN_MAP`` — the closed per-segment enums the parser slots
+      tokens into (segments with an empty list are omitted; every token is
+      admissible in an open segment by definition, so indexing it says nothing);
+    - the operator registry — a grammar *mechanism* rather than a segment.
+      Operators compose through ``operator_token`` + ``operator_kind``, so they
+      appear in no ``SEGMENT_TOKEN_MAP`` slot and are exposed here under the
+      synthetic :data:`OPERATOR_SEGMENT` class.
+
+    A consumer reading only ``SEGMENT_TOKEN_MAP`` cannot see 51 legal tokens and
+    reports them as missing vocabulary; reading only the operator registry
+    cannot see the segment enums.  Every consumer that needs "is this token
+    legal, and where does it belong" must come through here so the two halves
+    can never drift apart again.
+
+    Returns an empty dict when ISN is unavailable — the rules built on it then
+    turn off rather than falling back to a vocabulary snapshot that would rot.
     """
-    stm = _load_segment_token_map()
-    if stm is None:
-        return {}
+    out: dict[str, tuple[str, ...]] = {}
 
+    stm = _load_segment_token_map()
+    if stm is not None:
+        try:
+            for seg, tokens in stm.items():
+                if not tokens:
+                    continue  # open-vocabulary segment
+                out[seg] = tuple(tokens)
+        except Exception:  # pragma: no cover — defensive
+            out = {}
+
+    operators = _operator_tokens()
+    if operators:
+        out[OPERATOR_SEGMENT] = tuple(sorted(operators))
+
+    return out
+
+
+@lru_cache(maxsize=1)
+def grammar_token_index() -> dict[str, tuple[str, ...]]:
+    """Reverse of :func:`grammar_tokens_by_segment`: token → classes admitting it.
+
+    A token may legitimately resolve to several classes (a qualifier that is
+    also a component axis, say).  Order follows :func:`grammar_tokens_by_segment`
+    so the reported class list is deterministic.
+    """
     index: dict[str, list[str]] = {}
-    try:
-        for seg, tokens in stm.items():
-            if not tokens:
-                continue  # open-vocabulary segment
-            for tok in tokens:
-                index.setdefault(tok, []).append(seg)
-    except Exception:  # pragma: no cover — defensive
-        return {}
-    return index
+    for segment, tokens in grammar_tokens_by_segment().items():
+        for token in tokens:
+            index.setdefault(token, []).append(segment)
+    return {token: tuple(segments) for token, segments in index.items()}
 
 
 def is_known_token(token: str) -> list[str]:
@@ -248,19 +283,18 @@ def is_known_token(token: str) -> list[str]:
     ``parse_standard_name`` yet never appear in ``SEGMENT_TOKEN_MAP``.  Such
     a token is reported as known for the segment the parser resolves it to,
     so it is correctly classified ``false_positive`` rather than ``absent``.
+
+    The operator class is included (via :func:`grammar_tokens_by_segment`): a
+    token that is a known operator is not an absent gap — the composer
+    mis-slotted it, so it classifies as wrong-slot placement.
     """
-    found = list(_segment_token_index().get(token, []))
+    found = list(grammar_token_index().get(token, ()))
     # Augment with the parser-resolved base segment when the grammar accepts
     # the token as a self-resolving lexical-compound base absent from the flat
     # map (e.g. internal_inductance, major_radius).
     base_seg = resolved_base_segment(token)
     if base_seg is not None and base_seg not in found:
         found.append(base_seg)
-    # Augment with the operator vocabulary (a grammar mechanism outside
-    # SEGMENT_TOKEN_MAP): a token that is a known operator is not an absent gap
-    # — the composer mis-slotted it, so it classifies as wrong-slot placement.
-    if token in _operator_tokens() and _OPERATOR_SEGMENT not in found:
-        found.append(_OPERATOR_SEGMENT)
     return found
 
 
@@ -365,12 +399,175 @@ ATOMIC_COMPOUNDS: frozenset[str] = frozenset(
 )
 
 
+#: Widest span, in underscore-delimited words, a single registered token may
+#: occupy when covering a compound.  Bounds the greedy walk; the longest
+#: multi-word tokens in the grammar (``derivative_with_respect_to``,
+#: ``cumulative_inside_flux_surface``) sit at this width.
+_MAX_TOKEN_WIDTH = 5
+
+
+@lru_cache(maxsize=1)
+def _grammar_connectives() -> frozenset[str]:
+    """Words that join grammar tokens without themselves being vocabulary.
+
+    ``of`` is the joiner ISN's renderer places between an operator and its
+    operand (``square_of_temperature``); ``and`` / ``to`` come from the binary
+    operators' own declared separators (``_and_``, ``_to_``), read from the
+    registry rather than assumed.  These carry no vocabulary of their own, so a
+    compound must be allowed to step over them while being covered.
+    """
+    connectives = {"of"}
+    try:
+        from imas_standard_names import get_grammar_context
+
+        operators = get_grammar_context()["grammar"]["vocabularies"]["operators"]
+    except Exception:
+        return frozenset(connectives)
+    for spec in operators.values():
+        separator = spec.get("separator") if isinstance(spec, dict) else None
+        if separator:
+            connectives.update(w for w in separator.split("_") if w)
+    return frozenset(connectives)
+
+
+#: Inflections of an operator token the composer emits in place of the
+#: registered spelling (``squared`` for ``square``, ``normalised`` spellings are
+#: not covered — only suffixes that leave the registered stem intact).
+_OPERATOR_INFLECTION_SUFFIXES: tuple[str, ...] = ("d", "ed", "s", "es")
+
+
+def _registered_operator_stem(word: str) -> str | None:
+    """Return the registered operator ``word`` spells, allowing an inflection.
+
+    Exact matches win.  Otherwise a trailing inflection is stripped and the
+    result accepted only when the remainder is itself a registered operator, so
+    an arbitrary word ending in one of those letters cannot masquerade as one.
+    """
+    operators = _operator_tokens()
+    if not operators:
+        return None
+    if word in operators:
+        return word
+    for suffix in _OPERATOR_INFLECTION_SUFFIXES:
+        if len(word) > len(suffix) and word.endswith(suffix):
+            stem = word[: -len(suffix)]
+            if stem in operators:
+                return stem
+    return None
+
+
+@dataclass(frozen=True, slots=True)
+class OperatorComposition:
+    """A token covered by registered operators applied to registered tokens.
+
+    Attributes:
+        operators: The registered operator tokens the compound spells, in the
+            order they appear.  Inflected spellings are reported as their
+            registered stem (``squared`` → ``square``).
+        bases: The registered non-operator tokens the operators apply to.
+        segments: Every grammar class the cover touched, operators included.
+    """
+
+    operators: tuple[str, ...]
+    bases: tuple[str, ...]
+    segments: tuple[str, ...]
+
+
+def _cover_token(token: str) -> list[tuple[str, tuple[str, ...]]] | None:
+    """Cover ``token`` with registered tokens, or return None if it cannot be.
+
+    Greedy longest-first walk over the underscore-delimited words, matching each
+    span against :func:`grammar_token_index` — which carries operators as well
+    as the segment enums, so an operator span is matchable.  Grammar
+    connectives (``of``, and the binary separators) are stepped over.  Matching
+    is per whole span, never per substring, so a word that merely *contains* a
+    registered token's letters cannot match it.
+
+    Returns the ``(span, classes)`` pairs covering the token, or ``None`` when
+    any word is left uncovered.
+    """
+    index = grammar_token_index()
+    if not index:
+        return None
+
+    words = token.split("_")
+    connectives = _grammar_connectives()
+    cover: list[tuple[str, tuple[str, ...]]] = []
+    i = 0
+    while i < len(words):
+        if words[i] in connectives:
+            i += 1
+            continue
+        for width in range(min(_MAX_TOKEN_WIDTH, len(words) - i), 0, -1):
+            span = "_".join(words[i : i + width])
+            classes = index.get(span)
+            if classes:
+                cover.append((span, classes))
+                i += width
+                break
+            # A one-word span may be an inflected operator spelling.
+            if width == 1:
+                stem = _registered_operator_stem(span)
+                if stem is not None:
+                    cover.append((stem, (OPERATOR_SEGMENT,)))
+                    i += 1
+                    break
+        else:
+            return None  # uncovered word — the compound is not fully registered
+    return cover or None
+
+
+@lru_cache(maxsize=4096)
+def operator_composition(token: str) -> OperatorComposition | None:
+    """Return how ``token`` is expressible as registered operators, if it is.
+
+    A compound the composer reported as missing vocabulary is often the grammar
+    it already has, spelled as one word: ``inverse_square`` is the operators
+    ``inverse`` and ``square``; ``line_integrated_density`` is the operator
+    ``line_integrated`` on the base ``density``.  Such a token is not a
+    vocabulary deficiency — routing the operators through ``operator_token``
+    composes the name today.
+
+    Returns ``None`` when the token is a lexicalized compound listed in
+    :data:`ATOMIC_COMPOUNDS`, when any part is unregistered, when no part is an
+    operator, or when ISN is unavailable.
+    """
+    if not token or token in ATOMIC_COMPOUNDS:
+        return None
+
+    cover = _cover_token(token)
+    if cover is None:
+        return None
+
+    operators: list[str] = []
+    bases: list[str] = []
+    segments: list[str] = []
+    for span, classes in cover:
+        segments.extend(classes)
+        if OPERATOR_SEGMENT in classes:
+            operators.append(span)
+        else:
+            bases.append(span)
+
+    if not operators:
+        return None  # ordinary multi-segment compound — not an operator matter
+
+    return OperatorComposition(
+        operators=tuple(operators),
+        bases=tuple(bases),
+        segments=tuple(dict.fromkeys(segments)),
+    )
+
+
 def _check_decomposable(token: str) -> list[str]:
     """Check if a compound token can be decomposed into existing vocabulary.
 
-    Uses bounded left-to-right longest-prefix matching against all segment
-    registries.  Returns the list of segments where parts were found, or
-    empty list if the token cannot be decomposed.
+    Uses bounded left-to-right longest-prefix matching against every grammar
+    class — operators included, so a compound spelling registered operators
+    (``inverse_square``, ``flux_surface_averaged_square_magnetic_field``) is
+    reported as decomposable rather than as missing vocabulary.  Returns the
+    list of classes where parts were found, or an empty list if the token
+    cannot be covered.
 
     Skips tokens in :data:`ATOMIC_COMPOUNDS` to avoid false negatives on
     lexicalized physics terms.
@@ -378,44 +575,170 @@ def _check_decomposable(token: str) -> list[str]:
     if token in ATOMIC_COMPOUNDS:
         return []
 
+    # A single word can still spell an inflected operator; anything else needs
+    # at least two words to be a compound at all.
     if "_" not in token:
+        comp = operator_composition(token)
+        return list(comp.segments) if comp is not None else []
+
+    cover = _cover_token(token)
+    if cover is None:
         return []
 
-    parts = token.split("_")
-    if len(parts) < 2:
-        return []
-
-    index = _segment_token_index()
-    if not index:
-        return []
-
-    # Try to cover ALL parts with registered tokens (greedy longest-prefix)
     matched_segments: list[str] = []
-    i = 0
-    while i < len(parts):
-        found = False
-        # Try longest prefix first (3-token, 2-token, 1-token)
-        for width in range(min(3, len(parts) - i), 0, -1):
-            candidate = "_".join(parts[i : i + width])
-            segs = index.get(candidate, [])
-            if segs:
-                matched_segments.extend(segs)
-                i += width
-                found = True
-                break
-        if not found:
-            return []  # Uncovered part — not fully decomposable
+    for _span, classes in cover:
+        matched_segments.extend(classes)
 
-    # Only report decomposable if we matched tokens from ≥2 segments
-    unique_segs = list(dict.fromkeys(matched_segments))
-    if len(set(unique_segs)) >= 2:
-        return unique_segs
-    # Single-segment decomposition (e.g. two qualifiers) — still decomposable
-    # if the compound doesn't exist as a registered token itself
-    if unique_segs:
-        return unique_segs
+    # Any cover is a decomposition: a single-class cover (two qualifiers, two
+    # operators) is as composable as a cross-class one, given the compound is
+    # not itself registered — the caller checked that before asking.
+    return list(dict.fromkeys(matched_segments))
 
-    return []
+
+@dataclass(frozen=True, slots=True)
+class GapVerdict:
+    """A gap classification together with the guidance a composer can act on.
+
+    :func:`classify_gap` answers "is this a real deficiency"; a model that gets
+    only that answer back re-proposes the same token.  This carries the rest:
+    which registered operators the token spells, which classes its parts belong
+    to, and one line of prose naming the slot to use instead.
+
+    Attributes:
+        category: The :func:`classify_gap` category.
+        segments: The grammar classes the token or its parts resolve to.
+        operators: Registered operator tokens the proposal spells, if any.
+        bases: Registered non-operator tokens the operators apply to.
+        guidance: One line, safe to hand back to a model as retry feedback.
+    """
+
+    category: str
+    segments: tuple[str, ...]
+    operators: tuple[str, ...]
+    bases: tuple[str, ...]
+    guidance: str
+
+
+def _operator_routing_advice(operators: tuple[str, ...], bases: tuple[str, ...]) -> str:
+    """Render the "use the operator slot" half of a verdict's guidance."""
+    op_list = ", ".join(operators)
+    plural = "operators" if len(operators) > 1 else "operator"
+    advice = (
+        f"{op_list} {'are' if len(operators) > 1 else 'is'} a registered "
+        f"{plural} — route {'them' if len(operators) > 1 else 'it'} through "
+        f"operator_token (with operator_kind from the registry)"
+    )
+    if bases:
+        advice += f", applied to the registered base {', '.join(bases)}"
+    return advice
+
+
+def describe_gap(segment: str, token: str) -> GapVerdict:
+    """Classify a gap and render guidance that tells a composer what to do.
+
+    Wraps :func:`classify_gap` — the category always agrees with it — and adds
+    the operator/base decomposition plus a single line of prose naming the slot
+    the token belongs in.  Intended for retry feedback: a composer told only
+    that a name failed has no way to converge, whereas one told that ``square``
+    is an operator rather than a qualifier can fix the name on the next attempt.
+    """
+    category, segments_found = classify_gap(segment, token)
+    comp = operator_composition(token)
+    operators = comp.operators if comp is not None else ()
+    bases = comp.bases if comp is not None else ()
+
+    if category == "false_positive":
+        guidance = (
+            f"'{token}' is already a registered {segment} token — it is not a "
+            f"vocabulary gap; use it directly."
+        )
+    elif category == "invalid_segment":
+        legal = ", ".join(sorted(reportable_segments()))
+        guidance = (
+            f"'{segment}' is not a grammar segment class. Report the gap "
+            f"against one of: {legal}."
+        )
+    elif category == "open_segment":
+        guidance = (
+            f"the {segment} segment has no fixed vocabulary, so '{token}' "
+            f"needs no registration."
+        )
+    elif category == "wrong_slot_placement" and segments_found == [OPERATOR_SEGMENT]:
+        guidance = (
+            f"'{token}' is a registered OPERATOR, not a {segment} — "
+            f"{_operator_routing_advice((token,), ())}."
+        )
+    elif category in {"wrong_slot_placement", "ambiguous_known_token"}:
+        where = " or ".join(segments_found)
+        guidance = (
+            f"'{token}' is a registered {where} token, not a {segment} — "
+            f"place it in the {where} slot."
+        )
+    elif category == "decomposable" and operators:
+        guidance = f"'{token}' is not a single token: {_operator_routing_advice(operators, bases)}."
+    elif category == "decomposable":
+        where = ", ".join(segments_found)
+        guidance = (
+            f"'{token}' decomposes into tokens already registered across "
+            f"{where} — compose it from those rather than requesting a new token."
+        )
+    else:  # absent
+        guidance = (
+            f"'{token}' is in no grammar class and does not decompose into "
+            f"registered tokens; naming this needs a new {segment} token in "
+            f"imas-standard-names."
+        )
+
+    return GapVerdict(
+        category=category,
+        segments=tuple(segments_found),
+        operators=operators,
+        bases=bases,
+        guidance=guidance,
+    )
+
+
+def clear_grammar_caches() -> None:
+    """Drop every cached view of the ISN grammar in this module.
+
+    The module memoises the grammar aggressively because the classifier runs per
+    gap and per candidate.  A caller that swaps the ISN vocabulary underneath it
+    — tests mocking ``SEGMENT_TOKEN_MAP`` or the operator registry — must reset
+    all of it, and enumerating the caches at each such site is what lets a newly
+    added cache go on serving stale vocabulary.  Adding a cache here is the only
+    place that list has to be kept.
+    """
+    for cache in (
+        _operator_tokens,
+        _grammar_connectives,
+        grammar_tokens_by_segment,
+        grammar_token_index,
+        known_segments,
+        open_segments,
+        reportable_segments,
+        resolved_base_segment,
+        operator_composition,
+    ):
+        # A caller may have substituted a plain callable for one of these; only
+        # the memoised ones have anything to drop.
+        clear = getattr(cache, "cache_clear", None)
+        if clear is not None:
+            clear()
+
+
+@lru_cache(maxsize=1)
+def reportable_segments() -> frozenset[str]:
+    """Grammar classes a vocabulary gap may legitimately be reported against.
+
+    Every class in :func:`grammar_tokens_by_segment` (the segment enums plus
+    :data:`OPERATOR_SEGMENT`) together with the pseudo segments the composer
+    uses for structural findings.  Empty when ISN is unavailable, in which case
+    callers must not constrain — there is nothing to constrain against.
+    """
+    classes = set(grammar_tokens_by_segment())
+    if not classes:
+        return frozenset()
+    return frozenset(classes | set(PSEUDO_SEGMENTS))
 
 
 def filter_closed_segment_gaps(
@@ -442,9 +765,16 @@ def filter_closed_segment_gaps(
 __all__ = [
     "ATOMIC_COMPOUNDS",
     "NON_ACTIONABLE_GAP_CATEGORIES",
+    "OPERATOR_SEGMENT",
     "PSEUDO_SEGMENTS",
+    "GapVerdict",
+    "OperatorComposition",
     "classify_gap",
+    "clear_grammar_caches",
+    "describe_gap",
     "filter_closed_segment_gaps",
+    "grammar_token_index",
+    "grammar_tokens_by_segment",
     "is_actionable_gap",
     "is_known_physical_base",
     "is_known_token",
@@ -452,5 +782,7 @@ __all__ = [
     "is_valid_segment",
     "known_segments",
     "open_segments",
+    "operator_composition",
+    "reportable_segments",
     "resolved_base_segment",
 ]
