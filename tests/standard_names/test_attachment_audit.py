@@ -849,7 +849,11 @@ def test_gate_detaches_a_laundered_migration() -> None:
 
 
 def _detach_client(
-    *, exists: bool = True, other_live: int = 0, name_attachments: int = 2
+    *,
+    exists: bool = True,
+    other_live: int = 0,
+    name_attachments: int = 2,
+    projection_only: bool = False,
 ) -> MagicMock:
     """A client answering the targeted detach's pre-flight read."""
     from imas_codex.standard_names import attachment_audit as mod
@@ -861,17 +865,19 @@ def _detach_client(
                     {
                         "source_node_id": None,
                         "other_live_names": 0,
+                        "projected": False,
                         "name_attachments": 0,
                     }
                 ]
             return [
                 {
-                    "source_node_id": "dd:some/path",
+                    "source_node_id": None if projection_only else "dd:some/path",
                     "other_live_names": other_live,
+                    "projected": True,
                     "name_attachments": name_attachments,
                 }
             ]
-        if q == mod._DETACH_QUERY:
+        if q in (mod._DETACH_QUERY, mod._DETACH_PROJECTION_QUERY):
             return [{"detached": 1}]
         return []
 
@@ -918,6 +924,26 @@ def test_detach_refuses_a_pairing_that_does_not_exist() -> None:
     gc = _detach_client(exists=False)
     res = detach_one_attachment("a/b", "unrelated", reason="wrong", gc=gc)
     assert res["ok"] is False and "does not realize" in res["reason"]
+
+
+def test_detach_reaches_a_projection_with_no_provenance() -> None:
+    """A DD-side realization can exist with no StandardNameSource behind it.
+
+    The export reads that projection, so it is exactly the kind of pairing that
+    reaches the catalog — and there is no source to rewind, only the dangling
+    assertion to remove.
+    """
+    from imas_codex.standard_names import attachment_audit as mod
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client(projection_only=True)
+    res = detach_one_attachment("a/b", "some_name", reason="wrong sensor", gc=gc)
+    assert res["ok"] is True
+    assert res["projection_only"] is True
+    assert res["source_rewound"] is False, "there is no source to rewind"
+    assert any(
+        call.args[0] == mod._DETACH_PROJECTION_QUERY for call in gc.query.call_args_list
+    )
 
 
 def test_detach_dry_run_does_not_write() -> None:

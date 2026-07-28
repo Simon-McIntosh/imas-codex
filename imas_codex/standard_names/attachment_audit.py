@@ -189,6 +189,21 @@ RETURN count(*) AS detached
 """
 
 
+#: Remove a DD-side realization that has no provenance node behind it. There is
+#: no source to rewind — the projection and the name's ``source_paths`` entry are
+#: the whole of the assertion, and both go.
+_DETACH_PROJECTION_QUERY = """
+MATCH (dd:IMASNode {id: $dd_path})-[hsn:HAS_STANDARD_NAME]->(sn:StandardName {id: $sn_id})
+DELETE hsn
+WITH sn
+SET sn.source_paths = [
+      p IN coalesce(sn.source_paths, [])
+      WHERE NOT (p = 'dd:' + $dd_path OR p = $dd_path)
+    ]
+RETURN count(*) AS detached
+"""
+
+
 @dataclass(frozen=True)
 class AttachmentVerdict:
     """One attachment the guard rejects."""
@@ -567,24 +582,34 @@ def detach_one_attachment(
     else:
         client = gc
     try:
+        # A pairing can exist as the DD-side projection alone: HAS_STANDARD_NAME
+        # without the PRODUCED_NAME provenance behind it. The export reads the
+        # projection, so a projection-only pairing is exactly the kind that
+        # reaches the catalog, and it must be reachable here. Existence is
+        # therefore either edge, and the would-orphan guard counts REALIZATIONS
+        # (what a consumer sees), not provenance rows.
         rows = client.query(
             """
-            MATCH (src:StandardNameSource)-[:FROM_DD_PATH]->(dd:IMASNode {id: $dd_path})
-            MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName {id: $sn_id})
+            MATCH (dd:IMASNode {id: $dd_path})
+            MATCH (sn:StandardName {id: $sn_id})
+            OPTIONAL MATCH (src:StandardNameSource)-[:FROM_DD_PATH]->(dd)
+            WHERE (src)-[:PRODUCED_NAME]->(sn)
+            WITH dd, sn, collect(src)[0] AS src
             OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
             WHERE other.id <> $sn_id
               AND NOT coalesce(other.name_stage, '') IN $historical
-            WITH src, sn, count(DISTINCT other) AS other_live
-            OPTIONAL MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-            RETURN src.id AS source_node_id, other_live AS other_live_names,
-                   count(*) AS name_attachments
+            WITH dd, sn, src, count(DISTINCT other) AS other_live
+            RETURN src.id AS source_node_id,
+                   other_live AS other_live_names,
+                   EXISTS { (dd)-[:HAS_STANDARD_NAME]->(sn) } AS projected,
+                   COUNT { (:IMASNode)-[:HAS_STANDARD_NAME]->(sn) } AS name_attachments
             """,
             dd_path=dd_path,
             sn_id=sn_id,
             historical=sorted(_HISTORICAL_NAME_STAGES),
         )
         row = rows[0] if rows else None
-        if not row or not row.get("source_node_id"):
+        if not row or not (row.get("source_node_id") or row.get("projected")):
             return {
                 "ok": False,
                 "reason": f"{dd_path!r} does not realize {sn_id!r}",
@@ -599,30 +624,37 @@ def detach_one_attachment(
                 ),
             }
 
-        reroute = int(row["other_live_names"] or 0) == 0
+        # With no provenance node behind the projection there is no source to
+        # rewind — only the dangling projection to remove.
+        has_source = bool(row["source_node_id"])
+        reroute = has_source and int(row["other_live_names"] or 0) == 0
         result = {
             "ok": True,
             "dd_path": dd_path,
             "sn_id": sn_id,
             "source_node_id": row["source_node_id"],
             "source_rewound": reroute,
+            "projection_only": not has_source,
             "dry_run": dry_run,
         }
         if dry_run:
             return result
 
-        client.query(
-            _DETACH_QUERY,
-            items=[
-                {
-                    "source_node_id": row["source_node_id"],
-                    "dd_path": dd_path,
-                    "sn_id": sn_id,
-                    "reroute": reroute,
-                }
-            ],
-            historical=sorted(_HISTORICAL_NAME_STAGES),
-        )
+        if has_source:
+            client.query(
+                _DETACH_QUERY,
+                items=[
+                    {
+                        "source_node_id": row["source_node_id"],
+                        "dd_path": dd_path,
+                        "sn_id": sn_id,
+                        "reroute": reroute,
+                    }
+                ],
+                historical=sorted(_HISTORICAL_NAME_STAGES),
+            )
+        else:
+            client.query(_DETACH_PROJECTION_QUERY, dd_path=dd_path, sn_id=sn_id)
         _record_detachments(
             client,
             [
