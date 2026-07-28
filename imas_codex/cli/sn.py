@@ -5765,6 +5765,18 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
             f"  old prior stage: {result.get('old_prior_stage')} "
             "→ superseded (superseded_from_stage=accepted)"
         )
+    carried = result.get("sources_carried") or 0
+    strand = result.get("sources_would_strand") or 0
+    click.echo(
+        f"  sources {'to carry' if dry_run else 'carried'} onto "
+        f"{result['into_id']}: {carried}"
+        + (f" ({strand} would have no live name otherwise)" if strand else "")
+    )
+    if not dry_run and result.get("attachments_rejected"):
+        click.echo(
+            f"  consistency guard rejected {result['attachments_rejected']} "
+            f"carried attachment(s), detached {result.get('attachments_detached', 0)}"
+        )
 
 
 @sn.command("rescore")
