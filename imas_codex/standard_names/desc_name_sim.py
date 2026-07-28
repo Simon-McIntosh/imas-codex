@@ -1,4 +1,4 @@
-"""Desc-name similarity gate for the Phase 5 REFINE_DOCS routing.
+"""Desc-name similarity gate for REFINE_DOCS routing.
 
 Computes the cosine similarity between the grammar-expanded name embedding
 and the description embedding.  Used in the REVIEW_NAME pre-step for

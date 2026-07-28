@@ -9,7 +9,7 @@ The information needed for this cascade is **already encoded** on
 ``separator``, ``axis`` and ``shape`` properties record exactly how the
 child name relates to the parent.  This module provides the operation.
 
-Cascade rules by ``operator_kind`` (plan D10):
+Cascade rules by ``operator_kind``:
 
 ==================  =========== ============================================
 ``operator_kind``   Cascades?   Renaming rule

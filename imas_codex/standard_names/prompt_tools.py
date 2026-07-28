@@ -1,4 +1,4 @@
-"""Tool definitions for the plan-32 Phase 2 prompt A/B/C harness.
+"""Tool definitions for the prompt A/B/C harness.
 
 Variant C of the extraction prompt uses *tool calling*: rather than
 front-loading cluster siblings, reference exemplars and version history

@@ -96,9 +96,9 @@ def _parent_supports_uncertainty_index(parent_name: str, unit: str | None) -> bo
        ``major_radius_of_``): exact geometric dimensions are deterministic,
        not stochastic measurements, so an uncertainty_index sibling is
        semantically invalid.
-    6. **Policy gate (W24 audit)** – ``uncertainty_index_of_*`` names are
+    6. **Policy gate** – ``uncertainty_index_of_*`` names are
        bookkeeping integer indices into a shared error array, never physics
-       quantities.  W20A/W20B/W24 audits found zero useful standard names of
+       quantities.  Corpus audits found zero useful standard names of
        this form (typical reviewer scores 0.20–0.35).  This function always
        returns False to close the pipeline leak; ``upper_uncertainty_of_*``
        and ``lower_uncertainty_of_*`` siblings remain unaffected (they are
@@ -125,7 +125,7 @@ def _parent_supports_uncertainty_index(parent_name: str, unit: str | None) -> bo
         return False
 
     # Rule 6: policy gate — uncertainty_index_of_* is always a bookkeeping
-    # integer, never a physics quantity (W24 audit: 5 leaks, 0 useful names).
+    # integer, never a physics quantity (audited: 5 leaks, 0 useful names).
     return False
 
 

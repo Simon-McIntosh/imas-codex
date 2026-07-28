@@ -5,7 +5,7 @@ proposed by ``derive_edges`` deserves to exist in the graph as a
 StandardName placeholder, or whether the inbound ``HAS_PARENT`` edge
 should be dropped entirely.
 
-Two-clause admission (see plan D1):
+Two-clause admission:
 
 - **Clause A — structural specificity.** The candidate's ISN IR carries
   at least one of: non-empty qualifiers, projection, locus, non-empty
@@ -259,7 +259,7 @@ def is_admissible_parent_name(
 
 
 def recompute_parent_kind(name: str, gc: _TopologyProbe) -> str:
-    """Topology-driven kind for an admitted parent (Phase 2 helper).
+    """Topology-driven kind for an admitted parent.
 
     Returns the canonical kind based on the parent's HAS_PARENT children:
 

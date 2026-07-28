@@ -109,9 +109,7 @@ REFERENCE_NAMES: dict[str, dict] = {
     "magnetics/flux_loop/flux/data": _ref(
         {"physical_base": "magnetic_flux", "component": Component.POLOIDAL}
     ),
-    "magnetics/rogowski_coil/current/data": _ref(
-        {"physical_base": "plasma_current"}
-    ),
+    "magnetics/rogowski_coil/current/data": _ref({"physical_base": "plasma_current"}),
     "magnetics/ip/data": _ref({"physical_base": "plasma_current"}),
     "magnetics/diamagnetic_flux/data": _ref(
         {"physical_base": "magnetic_flux", "component": Component.POLOIDAL}
@@ -149,7 +147,7 @@ REFERENCE_NAMES: dict[str, dict] = {
         }
     ),
     # --- Position-qualified quantities ---
-    # §6: a point's R/Z coordinate is <axis>_coordinate_of_<X> (geometry base),
+    # A point's R/Z coordinate is <axis>_coordinate_of_<X> (geometry base),
     # NOT major_radius_of_X / vertical_position_of_X.
     "equilibrium/time_slice/global_quantities/magnetic_axis/r": _ref(
         {

@@ -1,4 +1,4 @@
-"""Centralized defaults for the standard-names refine pipeline (Phase 8.1).
+"""Centralized defaults for the standard-names refine pipeline.
 
 All tunable thresholds and timing knobs live here. Override at the CLI or in
 ``pyproject.toml`` under ``[tool.imas-codex.sn]`` rather than editing this

@@ -1,4 +1,4 @@
-"""Dimensional-sanity audit for standard name units (D5/P0.2).
+"""Dimensional-sanity audit for standard name units.
 
 Cross-checks the unit field against structural tokens in the standard name.
 Returns tagged issue strings when a name's unit is physically implausible
@@ -49,7 +49,7 @@ def check_unit_sanity(name: str, unit: str) -> list[str]:
 
     Each returned string has the format ``"unit_mismatch:<rule_id>"``.
 
-    Rules implemented (from D5 §7.2):
+    Rules implemented:
 
     1. ``_phase`` suffix → unit ∈ {``rad``, ``1``, ``dimensionless``}.
     2. ``wave_magnetic_field`` → unit must be T-equivalent.
