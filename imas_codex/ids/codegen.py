@@ -194,10 +194,10 @@ def generate_extraction_script(
 
     extraction_body = "\n".join(source_blocks)
 
-    # Use eval() for template-substituted code — the plan's pattern uses
-    # direct code injection, but eval() of pre-substituted strings is safer
-    # because the accessor values come from graph data, not user input.
-    # In production, consider generating proper function calls instead.
+    # Accessor values are substituted into the template and evaluated rather
+    # than injected as raw code: the values come from graph data, never from
+    # user input, and pre-substitution keeps the injected surface to literals.
+    # Generating proper function calls instead would remove eval() entirely.
     script = textwrap.dedent(f"""\
 #!/usr/bin/env python3
 \"\"\"Auto-generated data extraction for {facility}:{ids_name}.

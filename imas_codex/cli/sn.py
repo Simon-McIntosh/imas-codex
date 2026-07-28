@@ -933,8 +933,9 @@ def _reject_unscoped_accepted_reset(
     """Hard-error the unscoped graph-wide accepted-wipe footgun.
 
     ``sn run --reset-to … --include-accepted`` with no scope resets/deletes
-    *every* accepted (catalog-committed) standard name in the graph — this
-    wiped 1863 accepted names in a prior incident. Require the operator to
+    *every* accepted (catalog-committed) standard name in the graph, and the
+    review scores that earned acceptance are not recoverable without re-running
+    the whole pipeline. Require the operator to
     scope the reset before opting into accepted names: either a ``--focus``
     path list (exact-path scope, recommended) or a row-level narrowing filter
     (``--retry-quarantined`` / ``--below-score`` / ``--since`` / ``--before``

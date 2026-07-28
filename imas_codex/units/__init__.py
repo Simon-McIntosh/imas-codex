@@ -132,9 +132,9 @@ def normalize_unit_symbol(raw: str) -> str | None:
     # Canonicalise through the SAME authority the standard-name side uses, so a
     # unit has ONE spelling across the graph. Symbol order is meaningful — a
     # power density is conventionally 'W.m^-3', not 'm^-3.W' — and the pint
-    # formatter orders factors by its own internal sequence, which disagreed
-    # with the standard-name canonical form and produced two spellings of one
-    # unit (30 Unit nodes were affected).
+    # formatter orders factors by its own internal sequence, which disagrees
+    # with the standard-name canonical form and would otherwise split one unit
+    # across two Unit nodes.
     try:
         from imas_standard_names import canonical_unit
 

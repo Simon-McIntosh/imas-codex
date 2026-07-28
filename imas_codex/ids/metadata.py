@@ -113,7 +113,7 @@ class MetadataContext:
         access_layer_version: Installed ``imas`` package version or ``"unknown"``.
         creation_date: ISO 8601 timestamp of context creation.
         provider: Facility name / operator string.
-        source: Human-readable source tag, e.g. ``"imas-codex v4.1.0"``.
+        source: Human-readable source tag, e.g. ``"imas-codex v<version>"``.
         pipeline_version: ``imas-codex`` package version.
         pipeline_commit: Git HEAD commit hash of the running codebase.
         pipeline_repo: URL of the ``origin`` remote.
