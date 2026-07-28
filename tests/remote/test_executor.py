@@ -780,11 +780,11 @@ class TestAsyncRunPythonScript:
 
 
 class TestRunScriptViaStdin:
-    """Contract tests for run_script_via_stdin() — the existing non-base64 approach.
+    """Contract tests for run_script_via_stdin() — the non-base64 approach.
 
-    These tests should all PASS now because run_script_via_stdin() already
-    uses stdin delivery without base64. They serve as the reference model
-    for how run_python_script() should work after the refactor.
+    run_script_via_stdin() delivers the script over stdin with no base64
+    encoding. These tests pin that contract, and stand as the reference
+    model run_python_script() is expected to match.
     """
 
     def setup_method(self):

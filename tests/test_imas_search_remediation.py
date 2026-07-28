@@ -41,9 +41,9 @@ def _route_query(routes: dict[str, list[dict[str, Any]]]) -> Any:
 class TestNodeCategoryFiltering:
     """Tests that ExclusionChecker correctly categorizes metadata paths.
 
-    These paths were previously filtered by _is_generic_metadata_path().
-    Now they are classified at build time via ExclusionChecker and
-    filtered at query time via node_category index.
+    Metadata paths are classified at build time via ExclusionChecker and
+    filtered at query time through the node_category index, rather than
+    being matched by a path-shape predicate on every query.
     """
 
     @pytest.fixture()

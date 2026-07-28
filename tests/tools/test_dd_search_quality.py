@@ -69,9 +69,12 @@ def live_tools(_use_production_embedder):
 
 @pytest.mark.asyncio
 async def test_unit_companions_cross_domain_for_psi(live_tools):
-    """psi unit_companions must return results (regression: physics_domain filter
-    suppressed all companions when the source path lived in a domain with no
-    other Wb fields)."""
+    """psi unit_companions must return results.
+
+    A physics_domain filter must not gate unit companions: psi lives in a
+    domain with no other Wb fields, so domain-scoping the companion search
+    suppresses every result.
+    """
     res = await live_tools.path_context_tool.find_related_dd_paths(
         path="equilibrium/time_slice/profiles_1d/psi",
         relationship_types="unit",

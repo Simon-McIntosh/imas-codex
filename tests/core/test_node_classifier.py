@@ -317,8 +317,9 @@ class TestClassifyNodePass2:
     def test_no_identifier_schema_keeps_quantity(self):
         """Quantity node WITHOUT HAS_IDENTIFIER_SCHEMA must NOT be reclassified.
 
-        Regression test for the OPTIONAL MATCH + count(*) > 0 bug where
-        every enrichable node was incorrectly reclassified to identifier.
+        The schema presence check must count matched schemas, not rows: an
+        `OPTIONAL MATCH` with `count(*) > 0` is true for every node it
+        returns, so it reclassifies every enrichable node as identifier.
         """
         result = classify_node_pass2(
             current_category="quantity",

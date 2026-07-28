@@ -131,8 +131,8 @@ class TestShortPhysicsTermsPreserved:
 # ---------------------------------------------------------------------------
 # The coordinate channel in find_related_dd_paths must traverse through
 # IMASCoordinateSpec for coordinate partner discovery.
-# The HAS_COORDINATE relationship now correctly points to IMASCoordinateSpec
-# nodes, which hold coordinate specifications used across IDSs.
+# HAS_COORDINATE points to IMASCoordinateSpec nodes, which hold the
+# coordinate specifications shared across IDSs.
 # ---------------------------------------------------------------------------
 
 

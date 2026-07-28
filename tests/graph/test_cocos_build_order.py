@@ -67,7 +67,7 @@ def test_cleanup_excludes_backfilled_paths():
     backfilled = {"some/path/a", "some/path/b"}
     xml_labeled = {"some/path/c"}
 
-    # This is the key logic from build_dd.py after the fix:
+    # The cleanup set build_dd.py must compute — both label sources, unioned:
     all_labeled = xml_labeled | backfilled
 
     assert "some/path/a" in all_labeled
