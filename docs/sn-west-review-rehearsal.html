@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="13">
-<meta name="plan-impl" content="0.72">
+<meta name="plan-version" content="14">
+<meta name="plan-impl" content="0.78">
 </head>
 <body>
   <main class="plan-doc">
@@ -85,6 +85,55 @@
     </ul>
 
     <h2 id="s3">§3 — Rehearsal procedure (act 1: fork PR)</h2>
+
+    <div class="card" style="border-left:4px solid #b5651d; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>Gap-closure instruments landed; RC deliberately NOT cut (2026-07-28).</strong>
+        Chasing the residual found three write paths that silently removed a
+        source's only live name — and two of them would have <em>destroyed</em>
+        acceptance had the planned repair run as written. The <code>/z</code> fold
+        would have stranded <strong>38 sources, 8 of them WEST</strong>, because
+        <code>sn supersede</code> tombstoned the loser and left its source edges
+        behind. Fixed: folds carry sources over and report the blast radius
+        (<code>01238486</code>); <code>persist_refined_name</code>'s attachment
+        migration is gated (<code>f2d7423f</code>); the
+        <code>origin='catalog_edit'</code> dedup exemption is gone
+        (<code>01238486</code>). New instrument <code>sn detach</code> for the
+        semantic mis-share the guard cannot judge (<code>6fd9c365</code>) — it
+        refused twice in anger, correctly, rather than orphan a name.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>Results.</strong> Accepted <strong>289 → 301 / 355</strong>
+        (a review drain of 18 names, 5 regenerated, $4.06 of a $15 cap, quorum
+        scores 0.92–0.95). The <code>/z</code> line-of-sight family now reads under
+        <em>one</em> name (47 sources carried). 11 folds + 10 targeted detaches
+        applied from a read-only adjudication of every pair against DD text and the
+        ISN grammar: <strong>release-blocking export ambiguity 14 → 1</strong>.
+      </p>
+      <p style="margin:0 0 6px;">
+        <strong>Two inherited numbers were wrong.</strong> Entry acceptance was
+        <strong>289, not 296</strong> — the staged repairs had moved accepted names
+        back to <code>drafted</code>, so progress read as regression. And the
+        &ldquo;48 ledger rows dominated by line-of-sight&rdquo; is
+        <strong>2 line-of-sight cases out of 37</strong>, over-reported 2.6&times;
+        because it counts <code>PRODUCED_NAME</code> provenance while the export
+        reads the DD-side <code>HAS_STANDARD_NAME</code> realization. 32 such
+        realizations corpus-wide have no provenance behind them at all — a class the
+        ledger's orphan and desync checks cannot see.
+      </p>
+      <p style="margin:0;">
+        <strong>Why no RC.</strong> 54 sources still lack an accepted name (23 with
+        no name proposed), and <code>/phi</code> cannot be folded as directed:
+        <code>toroidal_coordinate</code> is not a registered ISN carrier and the
+        grammar-correct <code>toroidal_angle_of_line_of_sight</code> sits tombstoned
+        inside a <code>REFINED_FROM</code> chain no instrument reaches. The gm
+        cluster needs no operator vocabulary (4 of 9 names parse today, verified
+        against the real parser) but does need one vector base for
+        &nabla;&rho;. Full record:
+        <a href="archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html">gap-closure instruments landed</a>.
+      </p>
+    </div>
+
     <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
       <p style="margin:0 0 6px;">
         <strong>Stage 1 mop-up unblocked and running; two pipeline defects found &amp; fixed (2026-07-22).</strong>
@@ -1232,7 +1281,7 @@ DONE-WHEN
      started.</pre>
     <p class="r-fu-outcome">SUPERSEDED by f-swrr-014 on lead direction: chase every WEST issue before releasing rather than cutting at 322/355. f-swrr-013 said cut now; the lead's call is that no shoddy work ships, approached in a structured way. Non-WEST work has been moved out to a new plan, sn-graph-wide-integrity, so the release is no longer blocked by work it does not depend on. The split was measured, not judged: 262 names are produced by a WEST path, and every open defect was partitioned by whether it touches the 355-source manifest or one of those names. Results — name-level defects 6 WEST / 2 not; orphaned names 0 WEST (an orphan has no sources, so none is WEST-produced) / 151 not; semantic-source ledger violations 48 WEST / 1410 not; line_of_sight paths in the manifest 46 (so the /z and /phi fold IS WEST-blocking); thick_line paths 0 (so the geometry-representation rule is NOT, and moved out); gm1-gm9 all 9 in WEST (so the metric collapse is squarely WEST-blocking). Write paths split on the same basis: persist_refined_name stays WEST-blocking because refining a WEST name runs it and it migrates a source set onto a new name with no re-validation; the other three ungated paths are not exercised by the release drain and moved out.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-014" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T07:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-014" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T07:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-28T12:07:38+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close every WEST issue, then cut the RC — 59 unaccepted sources, 6 name defects, 48 ledger rows</h4>
     <div class="r-fu-body"><p><strong>Lead direction: no shoddy work ships. Chase every pending WEST issue before releasing, structured.</strong> All non-WEST work has moved to <a href="/imas-codex/sn-graph-wide-integrity.html">sn-graph-wide-integrity</a>, so nothing here is a detour. Measured scope: <strong>59 of 355 WEST sources are not accepted</strong> (31 drafted awaiting review, 9 eligibility-skipped, 4 vocab-gap, 2 failed, 13 across exhausted/superseded/in-flight), <strong>6 WEST-touching name-level defects</strong> (all already staged via <code>sn edit</code>), and <strong>48 WEST-touching provenance ledger rows</strong> — dominated by the line-of-sight <code>/z</code> and <code>/phi</code> splits, which 46 manifest paths make release-blocking. The <code>gm1</code>–<code>gm9</code> collapse is the densest cluster: five of the nine are among the unaccepted.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -1405,6 +1454,163 @@ Done-when
   3. The line-of-sight family reads under one name per axis; the 48 WEST ledger
      rows resolved or reasoned.
   4. persist_refined_name gated; attachment audit idempotent; unit detector clean.
+  5. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
+  6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
+    <p class="r-fu-outcome">Gap-closure instruments landed; RC deliberately NOT cut. Accepted 289 → 301/355; release-blocking export ambiguity 14 → 1. Three write paths that silently un-named sources found and fixed — the fold instrument would have stranded 38 sources (8 WEST) had the planned /z fold run as written (01238486); persist_refined_name's attachment migration gated (f2d7423f); the catalog_edit dedup exemption removed (01238486); new `sn detach` for the semantic mis-share the guard cannot judge (6fd9c365). 11 folds + 10 detaches applied from a read-only adjudication of every pair against DD text and the ISN grammar. Two inherited numbers were wrong: entry acceptance was 289 not 296, and the 48 ledger rows are 37 counted on the wrong edge (provenance, not the DD-side realization the export reads) of which only 14 could ever reach the catalog ambiguous. Record: docs/archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-015" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T12:05:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the last 54 unnamed WEST sources and the one remaining ambiguity, then cut the RC</h4>
+    <div class="r-fu-body"><p><strong>The instruments are built; what remains is the naming work they enable.</strong> Acceptance stands at <strong>301/355</strong> with <strong>54 unaccepted</strong>, and release-blocking export ambiguity is down to <strong>one</strong> path. Four bounded pieces stand between here and the RC, and none of them is a detour: the gm metric cluster (name design already parser-validated — 4 of 9 need no vocabulary change, the gap is one vector base for ∇ρ), the exhausted/superseded remainder, a documented non-nameable set the PR body can state, and the /phi family, which is blocked on tooling rather than judgement.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — close the residual, then cut the RC
+Tier:    opus
+
+THE GOAL HAS NOT CHANGED: one operational pass of the whole loop with a human in
+the loop (§1), at the standard the lead set — every WEST issue chased before the
+release candidate. The repair INSTRUMENTS now exist and are tested; what remains
+is naming work. All non-WEST work lives in sn-graph-wide-integrity: if you find
+yourself on a path not in the manifest, STOP, it belongs to the other plan.
+
+READ FIRST
+  docs/archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html
+    — the three write-path defects, the ambiguity re-measurement, and the
+      parser-validated gm name table. Read it before re-deriving anything.
+  imas_codex/standard_names/AGENTS.md
+
+VERIFIED STATE (2026-07-28, after this session)
+  Accepted 301/355. 54 unaccepted, of which 23 have NO name proposed at all.
+  Release-blocking export ambiguity: 1 path (see D below).
+  A free compose drain was running at hand-off — CHECK WHETHER IT FINISHED and
+  re-measure before planning. It was expected to name ~8 uncomposed sources.
+  Campaign spend ~$80 of the 500 ceiling; review measured ~$0.27/name.
+
+MEASUREMENT — use the right edge
+  Export ambiguity rides on (IMASNode)-[:HAS_STANDARD_NAME]-&gt;(StandardName),
+  NOT on PRODUCED_NAME. Counting provenance over-reports 2.6x. Exclude
+  HAS_PARENT parent/child co-realization (correct by construction) and pairs
+  where only one end is at an exported stage. Reusable scripts are in the
+  session scratchpad; re-create them from the archive doc if gone.
+
+A. THE gm CLUSTER — the name design is DONE and parser-validated; apply it.
+   Four need NO ISN change and round-tripped through parse_standard_name clean
+   at their DD unit:
+     gm1 &lt;1/R^2&gt;  m^-2  flux_surface_averaged_inverse_square_major_radius
+     gm4 &lt;1/B^2&gt;  T^-2  flux_surface_averaged_inverse_square_magnetic_field_magnitude
+     gm5 &lt;B^2&gt;    T^2   flux_surface_averaged_square_magnetic_field_magnitude
+     gm9 &lt;1/R&gt;    m^-1  flux_surface_averaged_inverse_major_radius (rename;
+                        the accepted toroidal_flux_surface_averaged_metric is wrong)
+   Two ISN-blocked pairs need ONE shared vector base,
+   `toroidal_flux_radius_gradient` (physical_bases.yml, dimensionless, and it
+   must NOT carry constant_on_flux_surface — rho is constant on a flux surface,
+   |grad rho| is not, and flagging it trips the flux-surface-reduction gate):
+     gm3 &lt;|grad rho|^2&gt; 1  flux_surface_averaged_square_toroidal_flux_radius_gradient_magnitude
+     gm7 &lt;|grad rho|&gt;   1  flux_surface_averaged_toroidal_flux_radius_gradient_magnitude
+   gm2/gm6 are averages of a QUOTIENT, which the grammar cannot compose
+   (binary_operator excludes transformation), so they need a weighting qualifier
+   each — or the shorter metric-base alternative in the archive doc. Pick one and
+   say why.
+   CONSTRUCTION RULE (verified, do not re-litigate): two _of_-form unary
+   prefixes CANNOT chain — the flat model has one transformation slot. Use ONE
+   bare flux_surface_averaged prefix with inverse/square absorbed as
+   base-compound glue. Canonical order is
+   flux_surface_averaged -&gt; inverse -&gt; square -&gt; base qualifiers -&gt; base -&gt; magnitude.
+   Both collapsed names (radial_contravariant_flux_surface_averaged_metric,
+   flux_surface_normal_contravariant_flux_surface_averaged_metric) parse fine but
+   each serves two paths of DIFFERENT dimension while recording unit 1. Both must
+   be superseded — not unit-corrected.
+   Follow the vocab rotation workflow in docs/architecture/standard-names.md for
+   the ISN base; bump the pin at both sites.
+
+B. THE REMAINDER — exhausted/superseded names with sound candidates.
+   b_field_average, dvolume_dpsi, polarization_initial, camera_dimensions, the
+   two hard_x_rays half_widths, n_e_line measured/reconstructed (two competing
+   names — pick one), power_loss. `sn rescore` is the sanctioned recovery for a
+   sound name that hit the refine cap on quorum variance: it resubmits the SAME
+   name for a fresh draw. Never reword to dodge a score, never hand-accept.
+
+C. THE NON-NAMEABLE SET — verify and DOCUMENT, do not chase.
+   Time bases (dimension axes, not physical quantities), the convergence
+   iteration counter, dd_unit_unresolvable leaves, and non-actionable vocab gaps.
+   A reviewer seeing 355 sources and N names needs every one of the residual
+   accounted for with a stated reason. There is a scaffold for this —
+   residual_report.py in the session scratchpad — re-create it if gone; it
+   asserts the buckets partition the manifest so nothing goes unexplained.
+
+D. THE LAST AMBIGUITY — equilibrium/time_slice/constraints/b_field_pol_probe/measured
+   realizes BOTH poloidal_magnetic_field and
+   poloidal_magnetic_field_at_constraint_position. `sn detach` correctly REFUSES
+   the obvious detach: poloidal_magnetic_field has only that one realization, so
+   removing it orphans the name — which makes this a NAME-level question, not an
+   attachment one. The adjudicated fix is to detach AND, in the same change,
+   rebind poloidal_magnetic_field onto the generic-field sources the constraint
+   name is wrongly holding (edge_profiles/ggd/b_field/poloidal,
+   plasma_profiles/ggd/b_field/poloidal, magnetics/b_field_pol_probe/field).
+   Those targets are NON-WEST, so confirm the scope call with the lead before
+   reaching outside the manifest.
+
+E. /phi IS BLOCKED ON TOOLING, NOT JUDGEMENT — do not force it.
+   `toroidal_coordinate` is NOT a registered ISN carrier; `toroidal_angle` is
+   (geometry_carriers.yml). So toroidal_coordinate_of_line_of_sight is
+   grammar-invalid, but the correct id toroidal_angle_of_line_of_sight is
+   tombstoned AND sits in a REFINED_FROM chain into the measurement-position
+   name — sn supersede requires an accepted target, sn edit --rename refuses an
+   existing id, and reviving the tombstone then folding into it would close a
+   cycle. Either add the missing capability (restore-then-repoint, which
+   tombstone_supersede_into&#x27;s own docstring already anticipates) or record it as
+   a reasoned residual in the PR body. Decide explicitly; do not leave it silent.
+
+F. THEN CUT IT
+     uv run imas-codex sn release --batch west_task_2e --bump minor \
+       -m &quot;WEST review batch rehearsal&quot;
+   Verify: additive diff (approved set byte-identical); catalog.yml
+   export_scope=review + review_batch; artifact frozen at
+   manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND batch_label;
+   RC-tagged; PR open on the FORK (never --final in act 1). Record the RC
+   version, PR URL, batch size, and judge the LLM-written PR body — first live
+   output of the sn-release-notes seat.
+
+G. COLLAPSE §3 stages 0-2 and queue stages 3-6 (human review → sn merge
+   fold-back exercising the graph-merged: tag → freeze-check → --undo unwind).
+
+KNOWN ISSUE YOU WILL HIT
+  Each fold/detach takes ~2 minutes because the new consistency gate reloads the
+  guard&#x27;s grammar context per call. Fine for a handful; if you need a bulk sweep,
+  cache the grammar context first rather than removing the gate.
+
+HANDED-OFF FINDINGS THAT ARE NOT THIS SECTION&#x27;S WORK (file to
+sn-graph-wide-integrity, do not start them)
+  - 6 of 8 engineering pairs were ONE bug: a derived structural parent holding
+    its child&#x27;s DD leaf. A single sweep would clear a large share corpus-wide.
+  - toroidal_plasma_beta is superseded yet still holds .../beta_tor, and the
+    normalized name holds that path too — an un-normalized quantity resolving to
+    a normalized name.
+  - radiance_at_spectral_line is accepted on an energy basis while every DD path
+    it came from stores photon radiance; its child inherits the contradiction.
+  - The ISN grammar carries TWO carriers for rho_tor
+    (toroidal_flux_coordinate, toroidal_flux_radius), both flagged
+    constant_on_flux_surface — it will keep minting near-duplicate derivatives.
+  - Binary-operator operands are not vocabulary-validated:
+    parse_standard_name(&quot;ratio_of_wibble_frobnicator_to_square_major_radius&quot;)
+    succeeds.
+
+Constraints
+  - Gap-only; never --reseed. PR target stays fork. Do NOT re-snapshot.
+  - NEVER hand-accept a name or hand-edit graph text. Acceptance is earned only
+    through the RD-quorum; corrections go through sn edit / sn detach /
+    sn supersede / sn rescore.
+  - A DD pin is immutable. Units are DD-authoritative.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check (2a case-INsensitive,
+    2b case-SENSITIVE) over every path you stage.
+  - No AI attribution in ANY commit, issue, PR or comment.
+
+Done-when
+  1. Every one of the 355 WEST sources is EITHER accepted OR documented as
+     non-nameable with a stated reason. No unexplained residual.
+  2. gm1-gm9 each carry their OWN name with their OWN DD unit; both collapsed
+     names superseded.
+  3. Export ambiguity is zero, or the residual is reasoned in the PR body.
+  4. /phi resolved or explicitly reasoned — not silent.
   5. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
   6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
     </article>
