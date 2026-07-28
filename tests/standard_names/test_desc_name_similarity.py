@@ -1,4 +1,4 @@
-"""Tests for Phase 5 desc-name similarity gate.
+"""Tests for the desc-name similarity gate.
 
 Covers:
 - compute_desc_name_similarity returns ~1.0 for a well-matched (name, desc) pair.

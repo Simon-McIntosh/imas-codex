@@ -1,9 +1,8 @@
-"""Tests for the deterministic name-key duplicate guard (plan 39 §5.2).
+"""Tests for the deterministic name-key duplicate guard.
 
-Phase 1.5 is independently shippable: helpers in
-``imas_codex.standard_names.canonical`` enumerate the lexical-variant
-set and look up colliding ``StandardName.id`` values via Cypher.
-No LLM, no vector search.
+Helpers in ``imas_codex.standard_names.canonical`` enumerate the
+lexical-variant set for a candidate name and look up colliding
+``StandardName.id`` values via Cypher. No LLM, no vector search.
 """
 
 from __future__ import annotations

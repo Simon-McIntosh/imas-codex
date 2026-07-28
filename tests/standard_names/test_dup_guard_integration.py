@@ -1,7 +1,8 @@
-"""Phase 1.5 dup-guard wiring in process_refine_name_batch (plan 39 §5.2).
+"""Dup-guard wiring in process_refine_name_batch.
 
-Verifies that ``find_name_key_duplicate`` is consulted AFTER B12's final
-candidate, BEFORE persisting via ``persist_refined_name``: on a hit the
+Verifies that ``find_name_key_duplicate`` is consulted AFTER the bounded
+retry loop settles on its final candidate and BEFORE persisting via
+``persist_refined_name``: on a hit the
 candidate is dropped, the source is marked ``duplicate_of=<id>`` via the
 ``on_event`` payload, and ``persist_refined_name`` is *not* called.
 """

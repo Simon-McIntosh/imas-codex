@@ -286,7 +286,7 @@ def _refine_docs(gc, sn_id: str, iteration: int = 0) -> dict:
 
 
 # ===========================================================================
-# D1. test_full_docs_acceptance_path
+# test_full_docs_acceptance_path
 # ===========================================================================
 
 
@@ -326,7 +326,7 @@ def test_full_docs_acceptance_path(_gc, _clean):
 
 
 # ===========================================================================
-# D2. test_docs_rotation_to_acceptance
+# test_docs_rotation_to_acceptance
 # ===========================================================================
 
 
@@ -377,7 +377,7 @@ def test_docs_rotation_to_acceptance(_gc, _clean):
 
 
 # ===========================================================================
-# D3. test_docs_exhaustion_path
+# test_docs_exhaustion_path
 # ===========================================================================
 
 
@@ -438,7 +438,7 @@ def test_docs_exhaustion_path(_gc, _clean):
 
 
 # ===========================================================================
-# D4. test_docs_escalation_at_final_attempt
+# test_docs_escalation_at_final_attempt
 # ===========================================================================
 
 
@@ -518,7 +518,7 @@ def test_docs_escalation_at_final_attempt(_gc, _clean, mock_llm):
 
 
 # ===========================================================================
-# D5. test_generate_docs_gates_on_name_accepted
+# test_generate_docs_gates_on_name_accepted
 # ===========================================================================
 
 
@@ -567,7 +567,7 @@ def test_generate_docs_gates_on_name_accepted(_gc, _clean):
 
 
 # ===========================================================================
-# D6. test_revisions_preserve_full_history
+# test_revisions_preserve_full_history
 # ===========================================================================
 
 
@@ -618,7 +618,7 @@ def test_revisions_preserve_full_history(_gc, _clean):
 
 
 # ===========================================================================
-# D7. test_chain_history_walks_revisions
+# test_chain_history_walks_revisions
 # ===========================================================================
 
 
@@ -654,7 +654,7 @@ def test_chain_history_walks_revisions(_gc, _clean):
 
 
 # ===========================================================================
-# D8. test_docs_acceptance_overrides_chain_length_at_cap
+# test_docs_acceptance_overrides_chain_length_at_cap
 # ===========================================================================
 
 
@@ -701,7 +701,7 @@ def test_docs_acceptance_overrides_chain_length_at_cap(_gc, _clean):
 
 
 # ===========================================================================
-# D9. test_docs_orphan_sweep_recovers_stuck_refining
+# test_docs_orphan_sweep_recovers_stuck_refining
 # ===========================================================================
 
 
@@ -737,7 +737,7 @@ def test_docs_orphan_sweep_recovers_stuck_refining(_gc, _clean):
 
 
 # ===========================================================================
-# D10. test_concurrent_review_docs_does_not_double_advance
+# test_concurrent_review_docs_does_not_double_advance
 # ===========================================================================
 
 

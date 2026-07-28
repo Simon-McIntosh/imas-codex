@@ -564,7 +564,7 @@ class TestClearStandardNames:
 
 
 # =============================================================================
-# TestCocosScalarDefaulting — Fix #3 from D.3 senior review §4.3
+# COCOS transformation-type defaulting for scalar quantities
 # =============================================================================
 
 

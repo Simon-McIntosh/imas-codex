@@ -17,7 +17,7 @@ from imas_codex.standard_names.sources.dd import _apply_unit_overrides
 
 @pytest.mark.graph
 class TestSignalSignatureAdmission:
-    """Phase 5: STRUCTURE/STRUCT_ARRAY signal nodes (a `/data` child quantity,
+    """STRUCTURE/STRUCT_ARRAY signal nodes (a `/data` child quantity,
     no quantity child) are admitted as SN sources despite the leaf invariant."""
 
     def test_signal_structs_admitted(self) -> None:

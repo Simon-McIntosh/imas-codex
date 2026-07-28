@@ -1,9 +1,10 @@
 """Tests that superseded SNs cannot be claimed or persisted by docs/review/refine workers.
 
-Covers the B2 (claim filter exclusion) and B3 (persist Cypher guard) fixes
-that break the infinite retry loop observed during the $50 rotation when
-``persist_generated_docs`` hit token mismatches on names concurrently
-superseded by ``refine_name`` workers.
+Two guards together break the infinite retry loop that arises when
+``persist_generated_docs`` hits token mismatches on names concurrently
+superseded by ``refine_name`` workers: the claim filter excludes superseded
+and exhausted nodes, and the persist Cypher re-checks the stage so a node
+superseded mid-flight produces zero rows instead of a silent overwrite.
 
 All tests mock :class:`GraphClient` — no live Neo4j required.
 """
@@ -50,7 +51,7 @@ def _patch_gc(mock_gc):
 
 
 # ---------------------------------------------------------------------------
-# B2 — Claim filter tests: superseded/exhausted excluded from WHERE clause
+# Claim filter: superseded/exhausted excluded from the WHERE clause
 # ---------------------------------------------------------------------------
 
 
@@ -125,7 +126,7 @@ class TestClaimFiltersExcludeSuperseded:
 
 
 # ---------------------------------------------------------------------------
-# B3 — Persist guard tests: name_stage verified in transaction
+# Persist guard: name_stage verified inside the transaction
 # ---------------------------------------------------------------------------
 
 
@@ -274,26 +275,26 @@ class TestPersistGuardsNameStage:
 
 
 # ---------------------------------------------------------------------------
-# B2 + B3 combined: no infinite loop possible
+# Claim filter + persist guard combined: no infinite loop possible
 # ---------------------------------------------------------------------------
 
 
 class TestNoInfiniteLoopOnSupersede:
-    """Combined test verifying that the B2 + B3 guards together break the
-    infinite retry loop: claim skips superseded → even if race slips through,
+    """Combined test verifying that the claim filter and the persist guard
+    together break the infinite retry loop: claim skips superseded → even if race slips through,
     persist produces 0 rows → ValueError → release → next claim skips."""
 
     def test_claim_then_persist_race_does_not_loop(self):
         """Simulate the race: claim succeeds (node not yet superseded),
         then persist fails (node superseded between claim and persist).
         Verify: persist raises ValueError, and a subsequent claim returns
-        empty (B2 filter kicks in)."""
+        empty (the claim filter excludes the superseded node)."""
         from imas_codex.standard_names.graph_ops import (
             claim_generate_docs_batch,
             persist_generated_docs,
         )
 
-        # --- Phase 1: claim succeeds (node still accepted) ---
+        # --- Step 1: claim succeeds (node still accepted) ---
         gc_claim, tx_claim = _mock_gc_tx()
         tx_claim.run = MagicMock(
             side_effect=[
@@ -341,7 +342,7 @@ class TestNoInfiniteLoopOnSupersede:
         assert len(items) == 1
         assert items[0]["claim_token"] == "test-token-abc"
 
-        # --- Phase 2: persist fails (node superseded mid-flight) ---
+        # --- Step 2: persist fails (node superseded mid-flight) ---
         gc_persist = MagicMock()
         gc_persist.__enter__ = MagicMock(return_value=gc_persist)
         gc_persist.__exit__ = MagicMock(return_value=False)
@@ -357,7 +358,7 @@ class TestNoInfiniteLoopOnSupersede:
                     model="test/model",
                 )
 
-        # --- Phase 3: next claim returns empty (B2 filter) ---
+        # --- Step 3: next claim returns empty (claim filter) ---
         gc_reclaim, tx_reclaim = _mock_gc_tx()
         tx_reclaim.run = MagicMock(return_value=[])  # No eligible items
 

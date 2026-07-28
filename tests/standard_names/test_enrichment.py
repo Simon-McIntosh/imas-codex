@@ -796,7 +796,7 @@ class TestIntegration:
 
 
 # =============================================================================
-# TestMagneticsDomainReclassification — Fix #4 from D.3 senior review §4.4
+# Magnetics-IDS domain reclassification
 # =============================================================================
 
 

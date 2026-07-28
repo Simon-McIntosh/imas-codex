@@ -1,7 +1,8 @@
-"""Unit tests for imas_codex.standard_names.derivation (D1–D22).
+"""Unit tests for imas_codex.standard_names.derivation.
 
-Pure logic tests — no graph, no I/O.  All ISN bases used here are
-confirmed parseable by rc25: temperature, pressure, current_density.
+Pure logic tests — no graph, no I/O.  The ISN bases used here
+(temperature, pressure, current_density) are all parseable by the
+grammar, so a failure points at the edge derivation, not the parser.
 """
 
 from __future__ import annotations
@@ -14,22 +15,22 @@ from imas_standard_names.grammar import ir as isn_ir
 from imas_codex.standard_names.derivation import DerivedEdge, derive_edges
 
 # ---------------------------------------------------------------------------
-# D1 — leaf name (no operators, no projection)
+# leaf name (no operators, no projection)
 # ---------------------------------------------------------------------------
 
 
-def test_d1_leaf_temperature():
+def test_leaf_temperature():
     """temperature is a leaf — no edges."""
     edges = derive_edges("temperature")
     assert edges == []
 
 
 # ---------------------------------------------------------------------------
-# D2 — unary prefix: maximum
+# unary prefix: maximum
 # ---------------------------------------------------------------------------
 
 
-def test_d2_maximum_of_temperature():
+def test_maximum_of_temperature():
     """maximum_of_temperature → HAS_PARENT to temperature."""
     edges = derive_edges("maximum_of_temperature")
     assert len(edges) == 1
@@ -42,11 +43,11 @@ def test_d2_maximum_of_temperature():
 
 
 # ---------------------------------------------------------------------------
-# D3 — unary prefix: time_derivative
+# unary prefix: time_derivative
 # ---------------------------------------------------------------------------
 
 
-def test_d3_time_derivative_of_temperature():
+def test_time_derivative_of_temperature():
     """time_derivative_of_temperature → HAS_PARENT to temperature."""
     edges = derive_edges("time_derivative_of_temperature")
     assert len(edges) == 1
@@ -59,11 +60,11 @@ def test_d3_time_derivative_of_temperature():
 
 
 # ---------------------------------------------------------------------------
-# D4 — stacked unary prefix: outermost only
+# stacked unary prefix: outermost only
 # ---------------------------------------------------------------------------
 
 
-def test_d4_time_averaged_of_maximum_of_temperature():
+def test_time_averaged_of_maximum_of_temperature():
     """time_averaged_of_maximum_of_temperature → HAS_PARENT to maximum_of_temperature.
 
     The ISN operator token is ``time_averaged`` (not ``time_average`` — the
@@ -80,11 +81,11 @@ def test_d4_time_averaged_of_maximum_of_temperature():
 
 
 # ---------------------------------------------------------------------------
-# D5 — unary postfix: magnitude
+# unary postfix: magnitude
 # ---------------------------------------------------------------------------
 
 
-def test_d5_temperature_magnitude():
+def test_temperature_magnitude():
     """temperature_magnitude → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_magnitude")
     assert len(edges) == 1
@@ -97,11 +98,11 @@ def test_d5_temperature_magnitude():
 
 
 # ---------------------------------------------------------------------------
-# D6 — unary postfix: moment
+# unary postfix: moment
 # ---------------------------------------------------------------------------
 
 
-def test_d6_temperature_moment():
+def test_temperature_moment():
     """temperature_moment → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_moment")
     assert len(edges) == 1
@@ -114,11 +115,11 @@ def test_d6_temperature_moment():
 
 
 # ---------------------------------------------------------------------------
-# D7 — unary postfix: reference_waveform
+# unary postfix: reference_waveform
 # ---------------------------------------------------------------------------
 
 
-def test_d7_temperature_reference_waveform():
+def test_temperature_reference_waveform():
     """temperature_reference_waveform → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_reference_waveform")
     assert len(edges) == 1
@@ -131,11 +132,11 @@ def test_d7_temperature_reference_waveform():
 
 
 # ---------------------------------------------------------------------------
-# D8 — unary postfix: bessel_0
+# unary postfix: bessel_0
 # ---------------------------------------------------------------------------
 
 
-def test_d8_temperature_bessel_0():
+def test_temperature_bessel_0():
     """temperature_bessel_0 → HAS_PARENT to temperature."""
     edges = derive_edges("temperature_bessel_0")
     assert len(edges) == 1
@@ -148,11 +149,11 @@ def test_d8_temperature_bessel_0():
 
 
 # ---------------------------------------------------------------------------
-# D9 — binary: ratio
+# binary: ratio
 # ---------------------------------------------------------------------------
 
 
-def test_d9_ratio_of_temperature_to_pressure():
+def test_ratio_of_temperature_to_pressure():
     """ratio_of_temperature_to_pressure → two HAS_PARENT edges."""
     edges = derive_edges("ratio_of_temperature_to_pressure")
     assert len(edges) == 2
@@ -178,11 +179,11 @@ def test_d9_ratio_of_temperature_to_pressure():
 
 
 # ---------------------------------------------------------------------------
-# D10 — uncertainty prefix: upper
+# uncertainty prefix: upper
 # ---------------------------------------------------------------------------
 
 
-def test_d10_upper_uncertainty_of_temperature():
+def test_upper_uncertainty_of_temperature():
     """upper_uncertainty_of_temperature → HAS_ERROR from temperature."""
     edges = derive_edges("upper_uncertainty_of_temperature")
     assert len(edges) == 1
@@ -198,11 +199,11 @@ def test_d10_upper_uncertainty_of_temperature():
 
 
 # ---------------------------------------------------------------------------
-# D11 — uncertainty prefix: lower
+# uncertainty prefix: lower
 # ---------------------------------------------------------------------------
 
 
-def test_d11_lower_uncertainty_of_temperature():
+def test_lower_uncertainty_of_temperature():
     """lower_uncertainty_of_temperature → HAS_ERROR {error_type: lower}."""
     edges = derive_edges("lower_uncertainty_of_temperature")
     assert len(edges) == 1
@@ -214,11 +215,11 @@ def test_d11_lower_uncertainty_of_temperature():
 
 
 # ---------------------------------------------------------------------------
-# D12 — uncertainty prefix: index
+# uncertainty prefix: index
 # ---------------------------------------------------------------------------
 
 
-def test_d12_uncertainty_index_of_temperature():
+def test_uncertainty_index_of_temperature():
     """uncertainty_index_of_temperature → HAS_ERROR {error_type: index}."""
     edges = derive_edges("uncertainty_index_of_temperature")
     assert len(edges) == 1
@@ -230,11 +231,11 @@ def test_d12_uncertainty_index_of_temperature():
 
 
 # ---------------------------------------------------------------------------
-# D13 — locus preserved through peel
+# locus preserved through peel
 # ---------------------------------------------------------------------------
 
 
-def test_d13_maximum_of_temperature_at_plasma_boundary():
+def test_maximum_of_temperature_at_plasma_boundary():
     """Locus is preserved: inner is temperature_at_plasma_boundary, plus HAS_LOCUS."""
     edges = derive_edges("maximum_of_temperature_at_plasma_boundary")
     co = [e for e in edges if e.edge_type == "HAS_PARENT"]
@@ -251,17 +252,17 @@ def test_d13_maximum_of_temperature_at_plasma_boundary():
 
 
 # ---------------------------------------------------------------------------
-# D14 — locus-only name peels its locus and also emits HAS_LOCUS
+# locus-only name peels its locus and also emits HAS_LOCUS
 # ---------------------------------------------------------------------------
 
 
-def test_d14_elongation_of_plasma_boundary():
+def test_elongation_of_plasma_boundary():
     """elongation_of_plasma_boundary — peels locus (HAS_PARENT → elongation)
     AND emits HAS_LOCUS → plasma_boundary. The two edges encode different
     relations: HAS_PARENT is the structural parent SN; HAS_LOCUS is the
-    grouping edge to the shared Locus node. Updated from the rc8 layout
-    that asserted no HAS_PARENT here — that gap let dataset.py's
-    `_parent_token` shortcut to the bare base from any layer."""
+    grouping edge to the shared Locus node. Both must be emitted: without
+    the HAS_PARENT edge, ``dataset.py``'s ``_parent_token`` shortcuts to the
+    bare base from any layer."""
     edges = derive_edges("elongation_of_plasma_boundary")
     co = [e for e in edges if e.edge_type == "HAS_PARENT"]
     geo = [e for e in edges if e.edge_type == "HAS_LOCUS"]
@@ -273,22 +274,22 @@ def test_d14_elongation_of_plasma_boundary():
 
 
 # ---------------------------------------------------------------------------
-# D15 — garbage string: parser raises, caught, returns []
+# garbage string: parser raises, caught, returns []
 # ---------------------------------------------------------------------------
 
 
-def test_d15_garbage_string():
+def test_garbage_string():
     """not_a_name is unparseable — derive_edges returns []."""
     edges = derive_edges("not_a_name")
     assert edges == []
 
 
 # ---------------------------------------------------------------------------
-# D16 — projection (monkeypatched) readiness test
+# projection (monkeypatched) readiness test
 # ---------------------------------------------------------------------------
 
 
-def test_d16_projection_monkeypatched():
+def test_projection_monkeypatched():
     """Projection IR shape → HAS_PARENT with operator_kind='projection'.
 
     Uses a real ISN-valid name (parallel_current_density) so the inner name
@@ -309,18 +310,18 @@ def test_d16_projection_monkeypatched():
 
 
 # ---------------------------------------------------------------------------
-# Phase 3 — Geometric coordinate edge derivation
+# Geometric coordinate edge derivation
 # ---------------------------------------------------------------------------
 
 
 class TestGeometricCoordinateDerivation:
-    """Phase 3: Geometric coordinate edge derivation."""
+    """Geometric coordinate edge derivation."""
 
     def test_geometric_coordinate_edge_derived(self):
-        """T8: radial_position produces HAS_PARENT edge to position.
+        """radial_position produces a HAS_PARENT edge to position.
 
-        ISN v0.8.0rc1 handles this via the projection branch (not geometric
-        coordinate), so operator_kind is 'projection'.
+        ISN routes this through the projection branch rather than a
+        geometric-coordinate branch, so operator_kind is 'projection'.
         """
         edges = derive_edges("radial_position")
         assert len(edges) == 1
@@ -337,7 +338,7 @@ class TestGeometricCoordinateDerivation:
         assert edges[0].props["axis"] == "vertical"
 
     def test_toroidal_angle_edge(self):
-        """toroidal_angle is a single geometric_base token in ISN v0.8.0rc1.
+        """toroidal_angle parses as a single geometric_base token.
 
         No coordinate slot is populated → no edge derived (leaf).
         """
@@ -345,10 +346,10 @@ class TestGeometricCoordinateDerivation:
         assert edges == []
 
     def test_physical_vector_still_projection(self):
-        """T11: Physical vector components get projection edges (short form).
+        """Physical vector components get projection edges.
 
-        ISN v0.8.0rc1 uses short form: 'radial_magnetic_field' (not
-        'radial_magnetic_field').
+        The axis is a leading token on the base ('radial_magnetic_field'),
+        so the edge is a projection, not a geometric coordinate.
         """
         edges = derive_edges("radial_magnetic_field")
         assert len(edges) == 1
@@ -356,9 +357,9 @@ class TestGeometricCoordinateDerivation:
         assert edges[0].to_name == "magnetic_field"
 
     def test_geometric_outline_edge(self):
-        """radial_outline derives projection edge to outline.
+        """radial_outline derives a projection edge to outline.
 
-        ISN v0.8.0rc1 handles this via the projection branch.
+        The grammar routes it through the projection branch.
         """
         edges = derive_edges("radial_outline")
         assert len(edges) == 1
@@ -402,14 +403,14 @@ class TestGeometricCoordinateDerivation:
 
 
 # ---------------------------------------------------------------------------
-# D17-D25 — HAS_LOCUS locus family edges
+# HAS_LOCUS locus family edges
 # ---------------------------------------------------------------------------
 
 
 class TestLocusFamily:
     """Locus-qualified names emit HAS_LOCUS edges for family grouping."""
 
-    def test_d17_major_radius_of_magnetic_axis(self):
+    def test_major_radius_of_magnetic_axis(self):
         """major_radius_of_magnetic_axis → HAS_LOCUS to magnetic_axis."""
         edges = derive_edges("major_radius_of_magnetic_axis")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
@@ -419,7 +420,7 @@ class TestLocusFamily:
         assert locus[0].props["locus_token"] == "magnetic_axis"
         assert locus[0].props["locus_relation"] == "of"
 
-    def test_d18_vertical_coordinate_of_magnetic_axis(self):
+    def test_vertical_coordinate_of_magnetic_axis(self):
         """vertical_coordinate_of_magnetic_axis → HAS_LOCUS to magnetic_axis."""
         edges = derive_edges("vertical_coordinate_of_magnetic_axis")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
@@ -427,7 +428,7 @@ class TestLocusFamily:
         assert locus[0].to_name == "magnetic_axis"
         assert locus[0].props["locus_relation"] == "of"
 
-    def test_d19_elongation_of_plasma_boundary(self):
+    def test_elongation_of_plasma_boundary(self):
         """elongation_of_plasma_boundary → HAS_LOCUS to plasma_boundary."""
         edges = derive_edges("elongation_of_plasma_boundary")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
@@ -435,7 +436,7 @@ class TestLocusFamily:
         assert locus[0].from_name == "elongation_of_plasma_boundary"
         assert locus[0].to_name == "plasma_boundary"
 
-    def test_d20_locus_family_same_target(self):
+    def test_locus_family_same_target(self):
         """Names sharing the same locus token point to the same target."""
         edges_r = derive_edges("major_radius_of_magnetic_axis")
         edges_z = derive_edges("vertical_coordinate_of_magnetic_axis")
@@ -445,19 +446,19 @@ class TestLocusFamily:
         assert len(locus_z) == 1
         assert locus_r[0].to_name == locus_z[0].to_name == "magnetic_axis"
 
-    def test_d21_no_locus_for_plain_leaf(self):
+    def test_no_locus_for_plain_leaf(self):
         """Leaf names with no locus produce no HAS_LOCUS edges."""
         edges = derive_edges("temperature")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
         assert locus == []
 
-    def test_d22_no_locus_for_operator(self):
+    def test_no_locus_for_operator(self):
         """Operator names without locus produce no HAS_LOCUS edges."""
         edges = derive_edges("maximum_of_temperature")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
         assert locus == []
 
-    def test_d23_at_locus_safety_factor(self):
+    def test_at_locus_safety_factor(self):
         """safety_factor_at_normalized_poloidal_flux → HAS_LOCUS with relation=at."""
         edges = derive_edges("safety_factor_at_normalized_poloidal_flux")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
@@ -467,7 +468,7 @@ class TestLocusFamily:
         assert locus[0].props["locus_token"] == "normalized_poloidal_flux"
         assert locus[0].props["locus_relation"] == "at"
 
-    def test_d24_at_locus_magnetic_axis(self):
+    def test_at_locus_magnetic_axis(self):
         """toroidal_magnetic_field_at_magnetic_axis → HAS_LOCUS with relation=at."""
         edges = derive_edges("toroidal_magnetic_field_at_magnetic_axis")
         locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
@@ -475,7 +476,7 @@ class TestLocusFamily:
         assert locus[0].to_name == "magnetic_axis"
         assert locus[0].props["locus_relation"] == "at"
 
-    def test_d25_same_locus_different_relation(self):
+    def test_same_locus_different_relation(self):
         """_of_ and _at_ with same locus token share the same target node."""
         edges_of = derive_edges("major_radius_of_magnetic_axis")
         edges_at = derive_edges("toroidal_magnetic_field_at_magnetic_axis")
@@ -487,17 +488,17 @@ class TestLocusFamily:
 
 
 # ---------------------------------------------------------------------------
-# D26 — self-loop guard
+# self-loop guard
 # ---------------------------------------------------------------------------
 
 
 class TestSelfLoopGuard:
-    """Regression: rc8 ISNC validate_catalog raised
-    ``graphlib.CycleError: nodes are in a cycle, ['x', 'x']`` when an
-    entry's ``HAS_ARGUMENT`` edge pointed at itself. The defect lived
-    in the ISN parser/composer round-trip for some postfix operators;
-    we now reject any edge where source == target before it can reach
-    the graph."""
+    """An edge whose source equals its target is dropped before the graph.
+
+    The ISN parser/composer round-trip can return a postfix operator whose
+    ``HAS_ARGUMENT`` argument is the entry itself; a self-edge makes ISNC
+    ``validate_catalog`` raise ``graphlib.CycleError: nodes are in a cycle,
+    ['x', 'x']``, so it is rejected at derivation time."""
 
     def test_self_loop_dropped_unconditionally(self):
         # Direct injection through the public API — even if a parser
@@ -517,10 +518,9 @@ class TestSelfLoopGuard:
         assert out[0].to_name == "bar"
 
     def test_no_self_loops_in_observed_corpus(self):
-        # The set of names known to have triggered the parser round-trip
-        # regression at some point in the rc20-rc22 vocabulary churn.
-        # If ISN regresses again, this test will fail before it can hurt
-        # ISNC validate_catalog.
+        # Names observed to trigger the parser round-trip asymmetry during
+        # vocabulary churn. If ISN regresses again, this fails here rather
+        # than inside ISNC validate_catalog.
         candidate_names = [
             "minimum_magnetic_field_magnitude",
             "maximum_magnetic_field_magnitude",
@@ -537,7 +537,7 @@ class TestSelfLoopGuard:
 
 
 # ---------------------------------------------------------------------------
-# D27 — qualifier-layer parent
+# qualifier-layer parent
 # ---------------------------------------------------------------------------
 
 
@@ -601,7 +601,7 @@ class TestQualifierLayerParent:
 
 
 # ---------------------------------------------------------------------------
-# D28 — locus-layer parent
+# locus-layer parent
 # ---------------------------------------------------------------------------
 
 
@@ -658,7 +658,7 @@ class TestLocusLayerParent:
 
 
 # ---------------------------------------------------------------------------
-# D29 — layer precedence (operator > projection > qualifier > locus)
+# layer precedence (operator > projection > qualifier > locus)
 # ---------------------------------------------------------------------------
 
 

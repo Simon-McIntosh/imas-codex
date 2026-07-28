@@ -1,4 +1,4 @@
-"""Tests for the sn coverage pre-run report (rc22 B4).
+"""Tests for the sn coverage pre-run report.
 
 All tests mock GraphClient.query so no live graph is required.
 """

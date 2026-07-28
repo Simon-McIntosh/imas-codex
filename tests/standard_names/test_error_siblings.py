@@ -20,9 +20,9 @@ class TestMintErrorSiblings:
     """Unit tests for the mint_error_siblings helper."""
 
     def test_error_siblings_minted_for_parent_with_errors(self):
-        """A parent with 3 error node IDs produces 2 sibling candidates (W24 policy).
+        """A parent with 3 error node IDs produces 2 sibling candidates.
 
-        W24 policy gate (Rule 6 in _parent_supports_uncertainty_index) blocks
+        The policy gate (Rule 6 in _parent_supports_uncertainty_index) blocks
         uncertainty_index_of_* for all parents.  Only upper and lower uncertainty
         siblings are produced.
         """
@@ -108,10 +108,10 @@ class TestMintErrorSiblings:
         assert len(siblings) == 0
 
     def test_error_sibling_naming(self):
-        """Verify exact naming pattern for upper and lower suffixes (W24 policy).
+        """Verify the exact naming pattern for upper and lower suffixes.
 
-        W24 policy gate blocks uncertainty_index_of_* for all parents.
-        Only upper and lower uncertainty siblings are produced.
+        The policy gate blocks uncertainty_index_of_* for all parents, so
+        only upper and lower uncertainty siblings are produced.
         """
         from imas_codex.standard_names.error_siblings import mint_error_siblings
 
@@ -210,10 +210,10 @@ class TestMintErrorSiblings:
         assert len(siblings) == 0
 
     def test_uncertainty_index_kind_is_scalar(self):
-        """W24 policy: uncertainty_index siblings are never produced (blocked by Rule 6).
+        """uncertainty_index siblings are never produced (blocked by Rule 6).
 
-        Prior to W24, _error_index siblings had kind='scalar'.  Rule 6 now
-        blocks all uncertainty_index_of_* creation, so passing only
+        An uncertainty index is bookkeeping, not a physical quantity, so
+        Rule 6 blocks all uncertainty_index_of_* creation and passing only
         _error_index returns an empty list.
         """
         from imas_codex.standard_names.error_siblings import mint_error_siblings
@@ -229,7 +229,7 @@ class TestMintErrorSiblings:
         )
 
         assert len(siblings) == 0, (
-            "W24 policy: uncertainty_index_of_* must not be generated; "
+            "uncertainty_index_of_* must not be generated; "
             f"got {[s['id'] for s in siblings]}"
         )
 
