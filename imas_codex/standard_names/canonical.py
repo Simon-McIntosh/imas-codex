@@ -215,7 +215,7 @@ def lexical_variants(name: str) -> set[str]:
     """Enumerate the documented lexical variant set for *name*.
 
     Returns the set of strings that should be treated as duplicates of
-    *name* under the Phase 1.5 dup-guard. The set always contains:
+    *name* under the deterministic dup-guard. The set always contains:
 
     - ``name`` itself,
     - the canonical key (:func:`name_key_normalise`),
