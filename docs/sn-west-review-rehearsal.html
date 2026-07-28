@@ -17,9 +17,9 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-27">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.62">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.68">
 </head>
 <body>
   <main class="plan-doc">
@@ -890,7 +890,7 @@ Done-when
   3. Detector count fully explained; the HAS_UNIT cardinality test added and green.
   4. Fork PR OPEN with RC version, URL, batch size and PR-body judgement recorded.
   5. Stages 3–6 queued; this followup resolved.</pre>
-    <p class="r-fu-outcome">HEAL DONE (step 1); steps 2-4 continue in f-swrr-011, one decision open. The audit had NEVER been called by any module despite its commit saying 'on every run' - pointed at the live graph for the first time it rejected 892 of 6027 attachments, and triage showed much of that was the GUARD being wrong, not the data: acting unexamined would have detached correct attachments and stripped 127 names of every source they had. FIVE defects root-caused and fixed before any write, all three rule defects the SAME root pattern (an ISN-vocabulary or DD-convention set hardcoded in codex and since drifted): 7f84d189 the tense rule read '_dt' as d/dt when the DD also uses it for DEUTERIUM-TRITIUM, treated '/derivatives_1d/' as covering the grid coordinates inside it, and recognised rate-ness only as a leading prefix so '..._source_rate' names refused their own derivatives - 24 of its 25 rejections were false, all on accepted names; rate bases now derived from ISN's physical_base vocabulary at runtime. 59331ae6 state_subjects was the literal tuple (ion_state, ion_charge_state, neutral_state) while ISN's 'state' segment is charge_state/internal_state, so ~40 *_internal_state_* names read as species-level - now read from the live grammar with a drift test asserting every ISN state token is covered. THE PLAN'S LINE-OF-SIGHT QUESTION IS ANSWERED: over-reach, and against a LOCKED DECISION - the distinct-vector rule was refusing first/second/third_point, ordinal samples of ONE line of sight, which contradicts this plan's own locked rule that ordinality never enters the name; the composer had already been corrected to obey it, so the guard was refusing exactly what compose was told to produce. Camera direction-vs-up and the geometry primitives (rectangle centre vs oblique corner) still conflict, pinned by tests. TWO further defects in the AUDIT itself: 1cd51e0d it applied the pairwise distinct-vector rule order-INdependently (compose accumulates only ACCEPTED siblings, so one representative survives; the audit passed every sibling to every row and rejected all N) - the source of the 127 would-be orphans; and a whole-name wipeout is now classified as a NAME defect reported for 'sn edit' rather than detached, because when every source of a name is refused by one rule the sources are consistently grouped and the NAME is wrong (atomic_count_of_ion_state has 76 sources, all element/species level - one --rename fixes what 76 paid recompositions would). HEAL RESULT: 892 -> 487 rejections; 124 DETACHED, 49 sources rerouted to extracted, second pass 0 (idempotency verified). Residue reconciles EXACTLY with nothing unexplained: 198 on accepted names (gated behind include_accepted, as sn prune/--reset-to gate the same state), 133 across 10 name-level defects, 32 provenance on superseded names. 6 names orphaned and surfaced for decision, not auto-superseded. THREE THINGS BUILT BUT NEVER TAKING EFFECT, now wired (1e4aef30, 5d33ecea): the attachment re-validation itself; HAS_UNIT cardinality (schema says one, and the guard admits sources by comparing dimensionality, so a name holding both '1' and 'm^-2' accepts either - both writers self-heal but a terminal-stage name keeps the residue forever since nothing recomposes it; radial_flux_surface_averaged_metric healed, invariant test added); and a registered DD unit correction - the DD declares ece/channel/position/psi as W and its identically-documented sibling beam_tracing/beam/position/psi as Wb, the textbook correct_in_graph case, but the entry carried suppression only AND the correction is applied by the DD build alone, so an entry added later never reached stored paths (a registry whose entries only work on a full rebuild silently does not work). Both facets now Wb; invariant test asserts no stored unit contradicts the registry. UNIT DETECTOR down to 6 rows, every one explained: 4 = the gm collapse (dissolves when the staged repairs recompose), 1 = the psi self-contradiction now correctly surfaced as a name defect, 1 = edge_profiles/ggd/a_field/r (magnetic vector potential, T.m) interloping among 23 correct momentum-flux sources, detached by the heal. ALSO: 4 banned test filenames renamed and 23 plan references scrubbed from source comments after the lead flagged test_phase8_bugfixes.py; the weakness was that the naming rule said 'when you NOTICE a violation' with no mandatory check, unlike the AI-attribution rule which has a runnable pre-push grep - ~/.agents/AGENTS.md now carries a mandatory pre-stage naming check with two runnable greps, a documented false-positive list, and 'touching a file makes its name your responsibility'. A repo-wide scan shows ~160 files still carry plan references in COMMENTS - a separate programme, recommended after the RC. Record: docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html.</p>
+    <p class="r-fu-outcome">HEAL DONE (step 1); steps 2-4 continue in f-swrr-011, one decision open. The audit had NEVER been called by any module despite its commit saying 'on every run' - pointed at the live graph for the first time it rejected 892 of 6027 attachments, and triage showed much of that was the GUARD being wrong, not the data: acting unexamined would have detached correct attachments and stripped 127 names of every source they had. FIVE defects root-caused and fixed before any write, all three rule defects the SAME root pattern (an ISN-vocabulary or DD-convention set hardcoded in codex and since drifted): 7f84d189 the tense rule read '_dt' as d/dt when the DD also uses it for DEUTERIUM-TRITIUM, treated '/derivatives_1d/' as covering the grid coordinates inside it, and recognised rate-ness only as a leading prefix so '..._source_rate' names refused their own derivatives - 24 of its 25 rejections were false, all on accepted names; rate bases now derived from ISN's physical_base vocabulary at runtime. 59331ae6 state_subjects was the literal tuple (ion_state, ion_charge_state, neutral_state) while ISN's 'state' segment is charge_state/internal_state, so ~40 *_internal_state_* names read as species-level - now read from the live grammar with a drift test asserting every ISN state token is covered. THE PLAN'S LINE-OF-SIGHT QUESTION IS ANSWERED: over-reach, and against a LOCKED DECISION - the distinct-vector rule was refusing first/second/third_point, ordinal samples of ONE line of sight, which contradicts this plan's own locked rule that ordinality never enters the name; the composer had already been corrected to obey it, so the guard was refusing exactly what compose was told to produce. Camera direction-vs-up and the geometry primitives (rectangle centre vs oblique corner) still conflict, pinned by tests. TWO further defects in the AUDIT itself: 1cd51e0d it applied the pairwise distinct-vector rule order-INdependently (compose accumulates only ACCEPTED siblings, so one representative survives; the audit passed every sibling to every row and rejected all N) - the source of the 127 would-be orphans; and a whole-name wipeout is now classified as a NAME defect reported for 'sn edit' rather than detached, because when every source of a name is refused by one rule the sources are consistently grouped and the NAME is wrong (atomic_count_of_ion_state has 76 sources, all element/species level - one --rename fixes what 76 paid recompositions would). HEAL RESULT: 892 -&gt; 487 rejections; 124 DETACHED, 49 sources rerouted to extracted, second pass 0 (idempotency verified). Residue reconciles EXACTLY with nothing unexplained: 198 on accepted names (gated behind include_accepted, as sn prune/--reset-to gate the same state), 133 across 10 name-level defects, 32 provenance on superseded names. 6 names orphaned and surfaced for decision, not auto-superseded. THREE THINGS BUILT BUT NEVER TAKING EFFECT, now wired (1e4aef30, 5d33ecea): the attachment re-validation itself; HAS_UNIT cardinality (schema says one, and the guard admits sources by comparing dimensionality, so a name holding both '1' and 'm^-2' accepts either - both writers self-heal but a terminal-stage name keeps the residue forever since nothing recomposes it; radial_flux_surface_averaged_metric healed, invariant test added); and a registered DD unit correction - the DD declares ece/channel/position/psi as W and its identically-documented sibling beam_tracing/beam/position/psi as Wb, the textbook correct_in_graph case, but the entry carried suppression only AND the correction is applied by the DD build alone, so an entry added later never reached stored paths (a registry whose entries only work on a full rebuild silently does not work). Both facets now Wb; invariant test asserts no stored unit contradicts the registry. UNIT DETECTOR down to 6 rows, every one explained: 4 = the gm collapse (dissolves when the staged repairs recompose), 1 = the psi self-contradiction now correctly surfaced as a name defect, 1 = edge_profiles/ggd/a_field/r (magnetic vector potential, T.m) interloping among 23 correct momentum-flux sources, detached by the heal. ALSO: 4 banned test filenames renamed and 23 plan references scrubbed from source comments after the lead flagged test_phase8_bugfixes.py; the weakness was that the naming rule said 'when you NOTICE a violation' with no mandatory check, unlike the AI-attribution rule which has a runnable pre-push grep - ~/.agents/AGENTS.md now carries a mandatory pre-stage naming check with two runnable greps, a documented false-positive list, and 'touching a file makes its name your responsibility'. A repo-wide scan shows ~160 files still carry plan references in COMMENTS - a separate programme, recommended after the RC. Record: docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-swrr-011" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T23:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Decide the 198 accepted-name detaches, land the name repairs, then cut the RC</h4>
@@ -1004,6 +1004,129 @@ Done-when
      tests green.
   4. Fork PR OPEN with RC version, URL, batch size and PR-body judgement.
   5. Stages 3–6 queued; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-swrr-012" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T00:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the four ungated write paths and add the geometry-representation rule</h4>
+    <div class="r-fu-body"><p>A write-path audit answered the plan's open question and <strong>corrected its framing</strong>: applying the guard at more call sites would NOT have caught the line-of-sight fault — called directly, post-fix, with units and populated siblings, the guard <em>accepts</em> every offending pair (both sides are metres, and the locus tokens are not hardware words). Two separate problems were conflated: WHERE the guard is called (four real gaps) and WHAT it can judge (it needs a new rule). The plan's "gating a faithful reconstruction destroys history" tension is valid for paths that re-establish an edge against the SAME name, but not for the two that migrate a source set onto a DIFFERENT one — the set is historical, the pairing is brand new, and filing those under history is what left the biggest hole.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — close the write-path gaps and the guard&#x27;s blind spot
+Tier:    opus
+
+State to read FIRST
+  docs/archive/sn-west-review-rehearsal-write-path-verdicts.html
+    — the per-path verdicts with file:line, the line-of-sight root cause, and
+      the two guard gaps. Read it before touching anything; it corrects several
+      assumptions earlier records made.
+
+FOUR PATHS NEED A WRITE-TIME GUARD
+  1. persist_refined_name steps 4/5 (graph_ops.py ~10750-10770) — THE load-bearing
+     gap. It migrates the predecessor&#x27;s entire PRODUCED_NAME and
+     HAS_STANDARD_NAME set onto the successor with no guard call. The migration
+     is one large Cypher statement, so the guard cannot simply be inlined: either
+     filter the source set in Python before the query, or re-validate the
+     successor&#x27;s attachments immediately after (scoped to the one name, not a
+     full audit — this is a hot path). Proven cost: 29 conductor cross-section
+     vertices rode onto sightline names as passengers of a lineage fold.
+  2. write_standard_names (graph_ops.py ~2971) — the bulk persist writes the
+     DD-side projection with no guard at all, so an import-shaped batch bypasses
+     the compose gates entirely.
+  3. bind_sources_exclusively / retarget_standard_name_sources
+     (provenance_lifecycle.py ~139-225) — exclusive rebind onto a different name
+     is a fresh claim about every source moved, and it DELETES the prior edges,
+     so an ungated rename both mis-attaches and destroys the evidence.
+  4. reconcile_standard_name_dd_edges (graph_ops.py ~7620) — already applies the
+     unit rule and routes disagreements to triage; extend it to call the full
+     guard rather than the unit rule alone. Cheap, purely additive.
+
+MUST NOT BE GATED (verified reasoning — do not &quot;fix&quot; these)
+  - the derived-parent materializer: a deterministic grammar peel producing
+    structural scaffolding, not a physics claim; the guard&#x27;s lexical rules are
+    leaf-calibrated and would systematically reject legitimate abstractions.
+  - the orphan-parent reconcile: repairs scaffolding for an already-admitted
+    parent.
+  - the provenance edge reattach: a pure desync heal that invents nothing;
+    gating it turns silent loss into permanent loss. If the pair is bad, the
+    retroactive pass detaches it WITH an audit record — the correct order.
+  - the recovery-snapshot replay: faithful replay, and gating it would silently
+    narrow a recovery. Its real defect is different — it is a NON-EXCLUSIVE
+    merge, so it left a July-3 attachment set coexisting with a July-22
+    recompose. Fix: make a consistency reconcile MANDATORY immediately after any
+    rebuild, in the same operation.
+
+TWO GAPS IN THE GUARD ITSELF
+  a. A geometry-representation rule is MISSING. A path under
+     …/geometry/{thick_line,outline,rectangle,oblique,arcs_of_circle}/… must not
+     realize an optical-locus name (line_of_sight / beam / sight), and vice
+     versa. Per the DD, thick_line approximates a solid conductor&#x27;s poloidal
+     cross-section as a rectangle defined by a central segment plus a
+     perpendicular thickness — every affected IDS is structural hardware
+     (pf_active, pf_passive, pf_plasma, iron_core, ferritic, ic_antennas/strap).
+     Without this rule those 29 attachments stay invisible to BOTH gates.
+     These are IMAS-DD PATH tokens, which AGENTS.md permits codex to own — they
+     are not ISN grammar vocabulary.
+  b. The compose gate is WEAKER than the retroactive pass:
+     _process_attachments_core (workers.py ~2120) calls the guard WITHOUT
+     dd_unit/sn_unit, so dimensionality is skipped at write time and only ever
+     applied retroactively. Pass the units.
+
+THE LINE-OF-SIGHT REPAIR (two populations, opposite treatment)
+  Population A — 29 attachments, genuinely WRONG name: thick_line conductor
+    vertices on sightline/beam names. Repair via `sn edit --hint` on
+    radial_coordinate_of_line_of_sight and vertical_coordinate_of_line_of_sight,
+    steering them to cover ONLY …/line_of_sight/{first,second,third}_point/*.
+    Pipeline-origin, so no authorization needed.
+  Population B — ~156 attachments, a naming-coherence split, NOT a defect: the
+    guard accepts every one. One DD family reads under two names because
+    supersede_prior_source_names exempts origin=&#x27;catalog_edit&#x27; from dedup by
+    design, so the July-22 recompose retired every competing PIPELINE name and
+    left the catalog one standing. FOLD these, never detach.
+    The fold needs the lead&#x27;s policy call: it retires a human-curated
+    catalog_edit entry (vertical_coordinate_of_beam_tracing_point, 43 sources).
+    Note the rename target already exists as a live accepted name, so confirm
+    whether `sn edit --rename` resolves it as a merge or `sn merge` is the
+    correct instrument. --override-edits is NOT required for --scope self.
+  /phi — report only, do not bundle: toroidal_angle_of_measurement_position
+    legitimately spans a broader concept (barometry gauges, bolometer apertures).
+
+ALSO OPEN
+  - The semantic-source ledger invariant is now a graph test and FAILS: 1477 of
+    ~5580 composed/attached sources disagree with a provenance mirror (596 no
+    live target, 336 scalar-vs-edge, 305 missing DD projection, 240 fan-out).
+    Down from 1566 pre-heal — every class fell, so the heal reduces it. The
+    fan-out class may be an INVARIANT question rather than a defect: if one DD
+    path genuinely supports two names, single-valued PRODUCED_NAME is the wrong
+    invariant and the checker needs amending. The scalar-disagreement class is
+    NOT the known scalar-rot pattern — those scalars hold a DIFFERENT LIVE name,
+    so reconcile_provenance (which only nulls stale scalars) will not catch them.
+  - The *_outline_of_* family is damaged too and unsized:
+    vertical_outline_of_antenna_strap has swallowed 15 unrelated paths (cryostat,
+    vessel, contour-tree, iron-core outlines) and
+    radial_outline_of_coil_conductor_element is sourced from an arcs_of_circle
+    path. Do NOT rebind thick_line paths into this family.
+  - workers.py carries nine plan-label references outside the regions edited so
+    far (lines ~987, 1702, 2325, 4883, 5886, 5888, 6110, 6231, 6982).
+
+CONSTRAINTS
+  - TDD; never hardcode ISN grammar vocabulary (DD path tokens are fine and are
+    what rule (a) needs).
+  - NEVER hand-accept a name or hand-edit graph text; corrections go via sn edit.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check over every path staged.
+  - No AI attribution anywhere.
+  - Cold-import artifact: warm with
+    `uv run python -c &quot;import imas_codex.discovery, litellm&quot;` before diagnosing
+    any setup-time test timeout.
+
+DONE-WHEN
+  1. The four write paths gated (or, for the recovery replay, the mandatory
+     post-rebuild reconcile added), with the four must-not-gate paths left alone
+     and the reasoning recorded.
+  2. The geometry-representation rule added and the compose gate passing units;
+     a test proves the 29 thick_line pairs now REJECT and the sightline pairs
+     still ACCEPT.
+  3. Population A repaired via sn edit; population B folded once the lead rules
+     on the catalog_edit retirement.
+  4. Full SN suite green; committed and pushed.</pre>
     </article>
 </section>
 

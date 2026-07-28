@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-write-path-verdicts">
+  <meta name="plan-status" content="reference">
+  <title>Where a wrong attachment comes from — write-path verdicts and the line-of-sight split | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Where a wrong attachment comes from (2026-07-28)</h1>
+
+    <div class="card" style="border-left:4px solid #b8860b; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>The headline: applying the guard at more call sites would not
+        have caught the line-of-sight fault.</strong> Called directly, post-fix,
+        with units and populated siblings, the guard <em>accepts</em> every one
+        of the offending pairs. Both sides are metres, so the dimensionality rule
+        is silent; the locus tokens (<code>beam_tracing_point</code>,
+        <code>sight</code>) are not hardware words, so the locus rule never
+        fires. This fault class sits outside the rule set entirely.
+      </p>
+      <p style="margin:0;">
+        Two separate things were therefore conflated in the earlier framing: WHERE
+        the guard is called (a coverage question, four real gaps below) and WHAT
+        the guard can judge (a rule question — it needs a new rule).
+      </p>
+    </div>
+
+    <h2>The line-of-sight split, root-caused</h2>
+    <p>
+      185 live attachments across 15 names, with 10 DD leaves carrying two names
+      at once. The axis asymmetry is stark: <code>/r</code> resolves to one name
+      (64 attachments, clean), <code>/z</code> splits across two (43 + 23), and
+      <code>/phi</code> splits across two (41 + 3).
+    </p>
+
+    <h3>It was not a refine, and not an edit cascade</h3>
+    <p>
+      The boundary is provably arbitrary. Bucketing every <code>/z</code> object
+      by its ordinal-stripped stem: 17 objects keep all ordinals on one name; 13
+      are split with no rule at all. <code>soft_x_rays</code> puts first-point on
+      the beam name and second-point on the sightline name;
+      <code>interferometer</code> does the <em>exact opposite</em>;
+      <code>bolometer</code> puts first-point on BOTH. No ordinal rule, no device
+      rule, no consistent direction — which also rules out the ordinality bug as
+      the boundary-drawer, since that would have partitioned by ordinal.
+    </p>
+
+    <h3>What actually froze it: a dedup invariant that exempts human edits</h3>
+    <p>
+      <code>supersede_prior_source_names</code> enforces "one source, at most one
+      non-superseded name". Its selector carries
+      <code>AND coalesce(old.origin, 'pipeline') = 'pipeline'</code> — the dedup
+      <strong>exempts <code>catalog_edit</code> by design</strong>, as
+      catalog-authoritative.
+    </p>
+    <p>
+      So the July-22 recompose retired every competing <em>pipeline</em> name and
+      left the catalog one standing. <code>/r</code> had two pipeline lineages —
+      both foldable, one clean name. <code>/phi</code> had three, and the catalog
+      name was the fold <em>target</em>, so it converged. <code>/z</code> had one
+      foldable pipeline lineage and one unfoldable catalog rival, so it
+      <strong>stayed split</strong>. The whole axis asymmetry falls out of which
+      side of that one predicate each lineage landed on.
+    </p>
+    <p>
+      The catalog name's 43 sources were replayed from a July-3 snapshot
+      (<code>catalog_commit_sha a2f8831c…</code>, the documented recovery
+      reference) via <code>bind_recovery_sources</code> — reinstating the
+      attachment set as it stood <em>before</em> the July-22 recompose,
+      <code>thick_line</code> included. Zero inbound <code>REFINED_FROM</code>
+      and no matching change record confirm no refine or edit ever touched it.
+      Both <code>/z</code> names then took new sources in the same hour: with two
+      accepted names live, auto-attach picked whichever scored closer.
+    </p>
+
+    <h3>Two populations, which need opposite treatment</h3>
+    <table>
+      <thead><tr><th></th><th>n</th><th>What it is</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A — wrong name</strong></td><td>29</td>
+            <td><code>thick_line</code> conductor cross-section vertices on a
+                sightline/beam name (14 + 13 + 2)</td>
+            <td>needs repair; invisible to the guard</td></tr>
+        <tr><td><strong>B — naming-coherence split</strong></td><td>~156</td>
+            <td>The sightline attachments themselves. Physics correct; the guard
+                accepts every one post-fix. One DD family reads under two names.</td>
+            <td><strong>fold, never detach</strong></td></tr>
+        <tr><td>C — old-guard false positives</td><td>0</td>
+            <td>Cleared by the ordinality fix</td><td>none</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Pointing the retroactive pass at this would be wrong twice over: it cannot
+      see population A, and detaching population B would destroy correct
+      attachments.
+    </p>
+
+    <h3>Why the thick_line paths do not belong, per the DD</h3>
+    <p>
+      The DD defines the parent as: <em>"The element is approximated by a
+      rectangle defined by a central segment and a thickness in the direction
+      perpendicular to the segment."</em> So
+      <code>thick_line/first_point/z</code> is an endpoint of the central segment
+      of a rectangle approximating a <strong>solid conductor's poloidal
+      cross-section</strong> — one of five interchangeable conductor-geometry
+      representations selected per element by <code>geometry_type</code>. Every
+      affected IDS is structural hardware: <code>pf_active</code>,
+      <code>pf_passive</code>, <code>pf_plasma</code>, <code>iron_core</code>,
+      <code>ferritic</code>, <code>ic_antennas/…/strap</code>. No beam, no
+      sightline, no optics.
+    </p>
+    <p>
+      <strong>They must not simply be rebound to the <code>*_outline_of_*</code>
+      family</strong> — that is the DD's <em>separate</em> polygon
+      representation, and it is already damaged:
+      <code>vertical_outline_of_antenna_strap</code> has swallowed 15 unrelated
+      paths (cryostat, vessel, contour-tree, iron-core outlines), and
+      <code>radial_outline_of_coil_conductor_element</code> is sourced from an
+      <code>arcs_of_circle</code> path — different IDS and different
+      representation. A separate defect, not yet sized.
+    </p>
+
+    <h2>Write-path verdicts</h2>
+    <p>
+      Two corrections to the earlier framing: <code>derivation.py</code> has no
+      graph writes at all, and <code>parents.py</code> has none either (three
+      read queries only). The derived-parent writes live in
+      <code>graph_ops.py</code>.
+    </p>
+    <p>
+      The plan's stated tension — <em>"gating a faithful reconstruction with a
+      newer rule would destroy history rather than protect it"</em> — is valid
+      but was applied too broadly. It holds for a path that re-establishes an
+      edge against the <strong>same</strong> name, or that builds scaffolding the
+      guard was never calibrated for. It does <strong>not</strong> hold for a
+      path that migrates a source set onto a <strong>different</strong> name: the
+      set is historical, but the <em>pairing</em> is brand new, and a brand-new
+      pairing is exactly what the guard exists to judge. Filing those under
+      "history" is what left the biggest hole.
+    </p>
+
+    <h3>Needs a write-time guard</h3>
+    <ul>
+      <li><strong><code>persist_refined_name</code> steps 4/5</strong> — migrates
+        the predecessor's entire <code>PRODUCED_NAME</code> and
+        <code>HAS_STANDARD_NAME</code> set onto the successor with no guard call.
+        Consistent-with-<code>radial_line_of_sight</code> is not
+        consistent-with-<code>radial_coordinate_of_line_of_sight</code>. This is
+        how conductor vertices rode onto sightline names as passengers of a
+        lineage fold.</li>
+      <li><strong><code>write_standard_names</code></strong> — the bulk persist
+        writes the DD-side projection with no guard at all, so an import-shaped
+        batch bypasses the compose gates entirely.</li>
+      <li><strong><code>bind_sources_exclusively</code> /
+        <code>retarget_standard_name_sources</code></strong> — exclusive rebind
+        onto a different name is a fresh claim about every source moved, and it
+        <em>deletes</em> the prior edges, so an ungated rename both mis-attaches
+        and destroys the evidence. Being exclusive makes it more consequential,
+        not less.</li>
+      <li><strong><code>reconcile_standard_name_dd_edges</code></strong> —
+        already applies the unit rule and routes disagreements to triage, the
+        closest to correct; it should call the full guard rather than the unit
+        rule alone. Cheap and purely additive.</li>
+    </ul>
+
+    <h3>Must NOT be gated</h3>
+    <ul>
+      <li><strong>The derived-parent materializer</strong> — a deterministic
+        grammar peel producing structural scaffolding, not a physics claim. The
+        guard's lexical rules are leaf-calibrated and would systematically reject
+        legitimate abstractions, the same construction bias that makes parent
+        enrichment skip the name quorum. Admission is the parent gate's job.</li>
+      <li><strong>The orphan-parent reconcile</strong> — repairs scaffolding for
+        an already-admitted parent; gating a repair with a rule that never
+        governed the creation would orphan the parent.</li>
+      <li><strong>The provenance edge reattach</strong> — a pure desync heal that
+        invents nothing. Gating it turns silent loss into permanent loss. If the
+        pair really is bad, the retroactive pass detaches it <em>with</em> an
+        audit record — the correct order.</li>
+      <li><strong>The recovery-snapshot replay</strong> — faithful replay; gating
+        against today's rules would silently narrow a recovery. But it is a
+        non-exclusive MERGE, so it left the July-3 set coexisting with the
+        July-22 recompose. The fix is not a write-time guard but a
+        <strong>mandatory consistency reconcile immediately after any
+        rebuild</strong>, in the same operation.</li>
+    </ul>
+
+    <h2>Two gaps in the guard itself</h2>
+    <ol>
+      <li><strong>A geometry-representation rule is missing.</strong> A path
+        under <code>…/geometry/{thick_line,outline,rectangle,oblique,arcs_of_circle}/…</code>
+        must not realize an optical-locus name, and vice versa. Without it
+        population A stays invisible to both gates.</li>
+      <li><strong>The compose gate is WEAKER than the retroactive pass.</strong>
+        <code>_process_attachments_core</code> calls the guard without
+        <code>dd_unit</code>/<code>sn_unit</code>, so the dimensionality rule is
+        skipped at write time and only ever applied retroactively. Pass the
+        units.</li>
+    </ol>
+
+    <h2>The semantic-source ledger invariant</h2>
+    <p>
+      Now wired as a graph-quality test, and it <strong>fails</strong>: 1477
+      of ~5580 composed/attached sources disagree with one of their provenance
+      mirrors (down from 1566 before the heal — every class fell, so the heal
+      reduces this rather than adding to it).
+    </p>
+    <table>
+      <thead><tr><th>n</th><th>Disagreeing mirror</th></tr></thead>
+      <tbody>
+        <tr><td>596</td><td>no live <code>PRODUCED_NAME</code> target — every target superseded</td></tr>
+        <tr><td>336</td><td><code>produced_sn_id</code> scalar disagrees with the edge</td></tr>
+        <tr><td>305</td><td>backing DD path lacks the <code>HAS_STANDARD_NAME</code> projection</td></tr>
+        <tr><td>240</td><td>more than one live target (fan-out)</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Three of these are defects; one may be an invariant question. The fan-out
+      class includes pairs like a line-of-sight point carrying both the sightline
+      name and the beam-tracing name — which is the split above, not a mirror
+      desync. If one DD path genuinely supports two names, single-valued
+      <code>PRODUCED_NAME</code> is the wrong invariant and the checker needs
+      amending. The scalar-disagreement class is <em>not</em> the known
+      scalar-rot pattern: those scalars hold a <em>different live</em> name, so
+      the existing reconcile (which only nulls stale scalars) will not catch
+      them.
+    </p>
+
+    <h2>Correction to an earlier record</h2>
+    <p>
+      <code>build_unapproved_cleanup_manifest</code> was recorded as having "no
+      callers and no tests". <strong>That was wrong.</strong> It was called by
+      <code>compact_unapproved_superseded</code>, which backs the live
+      <code>imas-codex sn provenance-cleanup</code> command, and it had a test.
+      A straight deletion would have broken that command. It was retired in the
+      only non-lossy form — folded into its caller, whose read-only default
+      <em>is</em> the manifest the CLI asks for — leaving the CLI byte-identical.
+    </p>
+  </main>
+</body>
+</html>
