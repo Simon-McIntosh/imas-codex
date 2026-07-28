@@ -343,7 +343,11 @@ class TestClassifyNodePass2:
         assert result == "coordinate"
 
     def test_coordinate_target_physics_data_guarded(self):
-        """Physics data with meaningful unit — keep current category (Bug 2 fix)."""
+        """A coordinate target with a meaningful unit keeps its current category.
+
+        Being referenced as a coordinate must not reclassify physics data —
+        the unit is what distinguishes a quantity from a bare axis.
+        """
         result = classify_node_pass2(
             current_category="quantity",
             has_identifier_schema=False,

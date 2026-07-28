@@ -349,10 +349,10 @@ class TestReasoningEffortProviderShape:
 #
 # A reasoning model in thinking mode (DeepSeek-V4 at reasoning_effort="max")
 # can spend its entire completion-token budget on reasoning and return
-# finish_reason="length" with EMPTY content. Before the fix this raised a
-# non-retryable ValueError; now it must retry (and grow the token budget on
-# the length case) so a single transient exhaustion does not kill a compose
-# item.
+# finish_reason="length" with EMPTY content. That must be treated as
+# retryable — and the token budget grown on the length case — rather than a
+# non-retryable ValueError, so a single transient exhaustion does not kill a
+# compose item.
 
 
 class _UsageFixed:
@@ -406,9 +406,7 @@ def test_upstream_500_is_retryable_but_not_rate_limited():
         "litellm.APIError: APIError: OpenrouterException - The server had an "
         "error processing your request. Sorry about that!"
     )
-    internal_500 = (
-        "litellm.InternalServerError: Internal server error from provider"
-    )
+    internal_500 = "litellm.InternalServerError: Internal server error from provider"
     for msg in (openrouter_500, internal_500):
         assert _is_retryable(msg) is True
         # A 500 must NOT be misread as a rate-limit — it stays out of the

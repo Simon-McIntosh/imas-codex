@@ -79,21 +79,23 @@ def test_cleanup_excludes_backfilled_paths():
 
 
 def test_cleanup_would_have_wiped_backfilled_without_fix():
-    """Demonstrate the pre-fix bug: cleanup based on xml_labeled alone removes backfilled.
+    """Cleanup scoped to xml_labeled alone would remove backfilled paths.
 
-    This captures what the broken code did and confirms the fix is necessary.
+    Pins why the cleanup set must be the union of xml_labeled and backfilled:
+    a backfilled path carries no XML label, so a cleanup keyed on XML labels
+    treats it as unlabeled and wipes it.
     """
     backfilled = {"some/path/a", "some/path/b"}
     xml_labeled = {"some/path/c"}
 
-    # Old (broken) behaviour: cleanup uses only xml_labeled
-    old_labeled = xml_labeled  # no union with backfilled
+    # Cleanup keyed on xml_labeled alone, i.e. no union with backfilled
+    xml_only_labeled = xml_labeled
 
-    # Backfilled paths were incorrectly targeted for cleanup:
-    assert "some/path/a" not in old_labeled
-    assert "some/path/b" not in old_labeled
+    # Backfilled paths fall outside that set and would be cleaned up:
+    assert "some/path/a" not in xml_only_labeled
+    assert "some/path/b" not in xml_only_labeled
 
-    # New (fixed) behaviour: union prevents their removal
-    fixed_labeled = xml_labeled | backfilled
-    assert "some/path/a" in fixed_labeled
-    assert "some/path/b" in fixed_labeled
+    # Taking the union instead keeps them out of the cleanup set
+    union_labeled = xml_labeled | backfilled
+    assert "some/path/a" in union_labeled
+    assert "some/path/b" in union_labeled

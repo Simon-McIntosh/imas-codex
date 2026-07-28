@@ -191,11 +191,13 @@ class TestFilterPlumbing:
 
 
 class TestResetToRunsOnPoolPath:
-    """Regression: --reset-to (without --reset-only) must run on the default DD
-    pool-orchestrator path. Previously the reset block sat AFTER the use_pools
-    early-return, so `sn run --reset-to extracted --retry-quarantined` was a
-    silent no-op on DD source — the clear never ran and quarantined names were
-    never regenerated.
+    """--reset-to (without --reset-only) must run on the default DD
+    pool-orchestrator path.
+
+    The reset block has to execute BEFORE the use_pools early-return; placed
+    after it, `sn run --reset-to extracted --retry-quarantined` is a silent
+    no-op on DD source — the clear never runs and quarantined names are never
+    regenerated.
     """
 
     def test_reset_to_extracted_runs_clear_on_dd_pool_path(
