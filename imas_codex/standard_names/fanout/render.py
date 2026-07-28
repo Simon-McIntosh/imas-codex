@@ -1,4 +1,4 @@
-"""Markdown evidence renderer for structured fan-out (plan 39 §6.2).
+"""Markdown evidence renderer for structured fan-out.
 
 Renders the list of :class:`FanoutResult` returned by the executor
 into a compact markdown block injected into the call-site's existing
@@ -14,7 +14,8 @@ Bounds applied here:
 When all inputs are empty (no successful runners, or all runners
 returned zero hits) the function returns ``""`` so the call-site's
 ``{{ fanout_evidence }}`` placeholder collapses to an empty line —
-the "true no-op" semantics of plan 39 §7.2.
+the "true no-op" semantics fan-out guarantees when it is disabled or
+finds nothing.
 """
 
 from __future__ import annotations

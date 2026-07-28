@@ -1,4 +1,4 @@
-"""Discriminated-union schemas for structured fan-out (plan 39 §3).
+"""Discriminated-union schemas for structured fan-out.
 
 The proposer LLM emits a JSON :class:`FanoutPlan` whose ``queries`` are
 parsed via a Pydantic discriminated union on ``fn_id``.  Bounds
@@ -33,7 +33,7 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, Field
 
 # =====================================================================
-# Hard-coded architectural bounds (plan 39 §7.1)
+# Hard-coded architectural bounds
 # =====================================================================
 
 MAX_FAN_DEGREE: int = 3
@@ -57,7 +57,7 @@ class _SearchDDPaths(BaseModel):
     """Hybrid search over DD paths.
 
     ``ids_filter`` / ``physics_domain`` / ``dd_version`` are supplied by
-    the caller via :class:`FanoutScope` (plan 39 §3.3), not by the LLM.
+    the caller via :class:`FanoutScope`, not by the LLM.
     """
 
     fn_id: Literal["search_dd_paths"]
@@ -108,7 +108,7 @@ class FanoutPlan(BaseModel):
 
 
 class FanoutScope(BaseModel):
-    """Caller-injected scope.  Never LLM-supplied (plan 39 §3.3)."""
+    """Caller-injected scope.  Never LLM-supplied."""
 
     physics_domain: str | None = None
     ids_filter: str | None = None
@@ -120,7 +120,7 @@ class CandidateContext(BaseModel):
 
     Carries everything Stage A's user prompt needs about the candidate
     being refined.  The ``chain_length`` field drives escalation gating
-    upstream of :func:`run_fanout` (plan 39 §7.3); fan-out itself only
+    upstream of :func:`run_fanout`; fan-out itself only
     reads it to populate the proposer prompt context.
     """
 
@@ -165,7 +165,7 @@ class FanoutResult(BaseModel):
 
 
 # =====================================================================
-# Outcome literal (plan 39 §8.2 — Fanout node `outcome` property)
+# Outcome literal (the Fanout node's `outcome` property)
 # =====================================================================
 
 
@@ -181,7 +181,7 @@ FanoutOutcome = Literal[
 """Outcome label written onto the Fanout telemetry node.
 
 ``feature_disabled`` is *not* a valid outcome — when fan-out is disabled
-no Fanout node is written (S5).
+no Fanout node is written at all.
 """
 
 

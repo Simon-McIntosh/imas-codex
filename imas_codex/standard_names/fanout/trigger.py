@@ -1,7 +1,7 @@
-"""Trigger predicate + arm assignment for refine-site fan-out (plan 39 §5.1, §8.4).
+"""Trigger predicate + arm assignment for refine-site fan-out.
 
 The trigger gate is the orthogonality knob between fan-out and the
-existing B12 grammar-retry compose path: fan-out fires *only* when
+existing grammar-retry compose path: fan-out fires *only* when
 prior reviewer feedback shows the kind of ambiguity / disambiguation
 trouble that targeted DD context could plausibly resolve.
 
@@ -13,7 +13,8 @@ Public surface
   representation if necessary) into a single truncated excerpt.
 - :func:`should_trigger_fanout` — return ``(fire, excerpt)`` where
   ``fire`` is ``True`` only when *all* of the predicate's clauses hold
-  (chain length, B12 enrichment, keyword presence in the allow-list
+  (chain length, deterministic chain-history enrichment, keyword
+  presence in the allow-list
   excerpt).
 - :func:`assign_arm` — deterministic 50/50 (or
   ``refine_fanout_arm_percent``) within-cohort A/B label, hashing
@@ -71,11 +72,11 @@ def extract_reviewer_excerpt(
     reviewer_comments_per_dim:
         The graph-stored field (dict, JSON string, or ``None``).
     dims:
-        Allow-list of dim keys to include (plan 39 §5.1 I3).  Other
+        Allow-list of dim keys to include.  Other
         dims (e.g. ``convention``, ``grammar``) are ignored — those
         failure modes are not what fan-out is designed to address.
     char_cap:
-        Total excerpt length cap (S3).
+        Total excerpt length cap.
 
     Returns
     -------
@@ -110,13 +111,13 @@ def should_trigger_fanout(
     dims: tuple[str, ...] | list[str],
     char_cap: int,
 ) -> tuple[bool, str]:
-    """Return ``(fire, excerpt)`` per plan 39 §5.1.
+    """Return ``(fire, excerpt)`` for the fan-out trigger predicate.
 
     Fan-out fires only when *all* of:
 
     1. ``chain_length > 0`` — the candidate has been refined at least
        once, so reviewer feedback exists to draw signal from.
-    2. ``chain_history`` is populated — B12 deterministic enrichment
+    2. ``chain_history`` is populated — deterministic enrichment
        has been applied for the current cycle (the claim batch
        attaches it; an empty list means the enrichment did not run).
     3. At least one allow-listed reviewer-comment value contains a
@@ -164,8 +165,7 @@ def assign_arm(
     - Default ``arm_percent=50`` yields a 50/50 split; values 0 and
       100 are honoured (all-off / all-on respectively).
 
-    Plan 39 §8.4 specified ``hash((sn_id, chain_length)) % 2``; we
-    use blake2b instead of Python's ``hash()`` because the latter is
+    The split uses blake2b rather than Python's ``hash()`` because the latter is
     PYTHONHASHSEED-randomised between processes.  The functional
     contract (deterministic 50/50) is preserved.
     """

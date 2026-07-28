@@ -1,6 +1,6 @@
 # Structured fan-out catalog
 
-This package implements plan 39 — Structured Fan-Out for the SN Compose Pipeline.
+This package implements structured fan-out for the SN compose pipeline.
 
 ## Adding a function to the catalog
 
@@ -15,7 +15,8 @@ recognised.  Adding a function is a four-step plan-revision step:
 2. Add an async runner to `runners.py`.  Wrap the sync helper with
    `asyncio.to_thread` and `asyncio.wait_for(timeout_s)`.  Accept
    `gc: GraphClient` and `scope: FanoutScope` as keyword arguments;
-   **never** instantiate `GraphClient` inside a runner (plan 39 §10.1).
+   **never** instantiate `GraphClient` inside a runner — the refine
+   cycle owns exactly one client and every runner reuses it.
 
 3. Register the entry in `catalog.py`'s `CATALOG` dict.
 
@@ -43,10 +44,9 @@ their own `GraphClient`.
 When `enabled=False` (the default), `run_fanout` is a true no-op:
 
 - returns `""` immediately
-- writes no `Fanout` graph node (S5)
+- writes no `Fanout` graph node
 - emits no metrics
 - does not call the proposer LLM
 
 The `{{ fanout_evidence }}` placeholder in the call-site's prompt
-collapses to an empty line so the prompt is byte-identical to baseline
-(plan 39 §6.3).
+collapses to an empty line so the prompt is byte-identical to baseline.

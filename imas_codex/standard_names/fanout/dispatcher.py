@@ -1,4 +1,4 @@
-"""Dispatcher for structured fan-out (plan 39 §4, §10.2).
+"""Dispatcher for structured fan-out.
 
 Public entry point:
     :func:`run_fanout` — ``async`` orchestrator.  Returns the rendered
@@ -10,16 +10,16 @@ Three internal stages:
        calls.
     3. :func:`render.format_results` — markdown evidence block.
 
-Cost ownership (plan 39 §7.3 I1):
+Cost ownership:
     The Stage A proposer call is charged to the **caller's**
     :class:`BudgetLease` via
     ``parent_lease.charge_event(cost, LLMCostEvent(batch_id=fanout_run_id, …))``.
     The caller's existing Stage C (synthesizer) call charges as today;
     the caller is responsible for stamping ``batch_id=fanout_run_id``
     onto its synthesizer's :class:`LLMCostEvent` so the
-    ``Fanout`` ↔ ``LLMCost`` join works (plan 39 §8.3).
+    ``Fanout`` ↔ ``LLMCost`` join works.
 
-Failure modes (plan 39 §7.2):
+Failure modes:
     Every code path returns ``""`` on failure so the call-site's
     ``{{ fanout_evidence }}`` placeholder collapses to an empty line —
     the "true no-op" semantics.
@@ -98,8 +98,8 @@ async def propose(
     """Run Stage A.  Charges proposer cost to ``parent_lease``.
 
     Returns:
-        ``(plan, None)`` on a successfully parsed, non-empty (after
-        S1 dedup) plan;
+        ``(plan, None)`` on a successfully parsed plan that is
+        non-empty after query-side dedup;
         ``(None, "planner_schema_fail")`` on parse failure;
         ``(None, "planner_all_invalid")`` on empty plan (incl. post-
         dedup).
@@ -156,7 +156,7 @@ async def propose(
             ),
         )
 
-    # S1 query-side dedup — collapse calls with identical
+    # Query-side dedup — collapse calls with identical
     # ``(fn_id, normalized_query_or_path)`` to the first occurrence.
     deduped: list = []
     seen: set[tuple[str, str]] = set()
@@ -197,7 +197,7 @@ async def execute(
     Wraps the gather in :func:`asyncio.wait_for(total_timeout_s)` so
     even sync helpers that ignore their per-call timeout are bounded
     at the gate (the helper keeps running on the worker thread until
-    completion, but its result is discarded — see plan 39 §4.2).
+    completion, but its result is discarded).
     """
     coros = [
         get_runner(call)(
@@ -266,20 +266,19 @@ async def run_fanout(
             the Fanout telemetry node.
         candidate: Refine-site candidate metadata.
         reviewer_excerpt: Pre-truncated reviewer-comment slice (caller
-            applies the dim allow-list and char cap from plan 39 §5.1
-            before passing it in — fan-out itself is site-agnostic).
+            applies the dim allow-list and char cap before passing it
+            in — fan-out itself is site-agnostic).
         scope: Caller-injected scope (never LLM-supplied).
-        gc: Refine cycle's :class:`GraphClient` (one per cycle, plan
-            39 §10.1).
+        gc: Refine cycle's :class:`GraphClient` (one per cycle).
         parent_lease: Caller's :class:`BudgetLease`; proposer cost is
             charged here as a sub-event.
         settings: Loaded :class:`FanoutSettings`.
-        arm: ``"on"`` or ``"off"`` for the within-cohort A/B (plan 39
-            §8.4).  ``"off"`` is a true no-op that still writes a
+        arm: ``"on"`` or ``"off"`` for the within-cohort A/B.
+            ``"off"`` is a true no-op that still writes a
             ``Fanout`` node with ``outcome="off_arm"`` so the
             denominator is queryable.
         escalate: Whether the caller's cycle is on the escalation
-            tier (plan 39 §7.3).  Selects spend cap + evidence token
+            tier.  Selects spend cap + evidence token
             cap.
         fanout_run_id: Override for testing / reproducibility.  When
             ``None`` a uuid4 is generated.
@@ -312,7 +311,7 @@ async def run_fanout(
         )
         return ""
 
-    # ── Pre-flight budget check (plan 39 §7.2 no_budget) ─────────────
+    # ── Pre-flight budget check (no_budget outcome) ──────────────────
     cap = settings.cap_for_charge(escalate=escalate)
     # Snapshot how much has already been charged to the parent lease
     # before fan-out starts; subsequent fan-out charges are reflected

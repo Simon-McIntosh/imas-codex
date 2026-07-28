@@ -1,4 +1,4 @@
-"""Async runners for the fan-out catalog (plan 39 §3.6, §4.2).
+"""Async runners for the fan-out catalog.
 
 Each runner wraps a *sync* helper from
 :mod:`imas_codex.graph.dd_search` (and
@@ -19,7 +19,7 @@ Plan-39 contract:
   keeps running on the worker thread until completion, but its result
   is discarded.
 
-Lifecycle invariant (plan 39 §10.1):
+Lifecycle invariant:
     Every runner accepts ``gc: GraphClient`` as a keyword argument
     and reuses it.  No runner instantiates its own ``GraphClient``.
 """
@@ -212,7 +212,7 @@ async def run_search_existing_names(
     scope: FanoutScope,  # noqa: ARG001 — unused; kept for uniform signature
     timeout_s: float,
 ) -> FanoutResult:
-    """Run :func:`search_standard_names_vector` (plan 39 §3.1)."""
+    """Run :func:`search_standard_names_vector`."""
     from imas_codex.standard_names.search import search_standard_names_vector
 
     def _call() -> list[dict[str, Any]]:

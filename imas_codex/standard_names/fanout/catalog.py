@@ -1,7 +1,7 @@
-"""Catalog registry mapping ``fn_id`` to its runner (plan 39 §3, §10).
+"""Catalog registry mapping ``fn_id`` to its runner.
 
 The catalog is **closed**: only the four entries declared here are
-recognised.  Extending the catalog is a deliberate plan-revision step
+recognised.  Extending the catalog is a deliberate, reviewed step
 (see ``README.md``).
 
 Public API:
@@ -97,8 +97,7 @@ def get_runner(call: FanoutCall) -> Callable[..., Awaitable[FanoutResult]]:
 def normalize_query_or_path(call: FanoutCall) -> str:
     """Return the lowercased + whitespace-collapsed intent string.
 
-    Used by :func:`dispatcher.propose` for query-side dedup (plan 39
-    §4.1 S1).
+    Used by :func:`dispatcher.propose` for query-side dedup.
     """
     raw: str
     if hasattr(call, "query"):

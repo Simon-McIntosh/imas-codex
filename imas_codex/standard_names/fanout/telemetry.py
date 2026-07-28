@@ -1,11 +1,11 @@
-"""Fanout telemetry node writer (plan 39 §8.2).
+"""Fanout telemetry node writer.
 
 The :class:`Fanout` graph node is a **runtime telemetry** node — *not*
 a LinkML-schema-managed entity.  It is in the same spirit as the
 existing ``LLMCost`` node: written directly via Cypher with no Pydantic
 model, no auto-generation, and no entry in
-``agents/schema-reference.md``.  The plan declares this exemption
-explicitly (§8.2) so a future schema-compliance check does not flag it
+``agents/schema-reference.md``.  The exemption is deliberate and is
+recorded here so a future schema-compliance check does not flag it
 as drift.
 
 The :data:`Fanout.id` (a uuid4) is also stamped onto each
@@ -67,7 +67,7 @@ def write_fanout_node(
     at INFO level only.
 
     Skipped entirely when ``gc`` is ``None`` — used by the
-    ``feature_disabled`` true-no-op path (plan 39 §7.2).
+    ``feature_disabled`` true-no-op path.
     """
     if gc is None:
         return None

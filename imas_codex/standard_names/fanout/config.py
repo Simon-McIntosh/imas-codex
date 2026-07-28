@@ -1,9 +1,9 @@
-"""Configuration for structured fan-out (plan 39 §9).
+"""Configuration for structured fan-out.
 
 Reads ``[tool.imas-codex.sn-fanout]`` from ``pyproject.toml`` into a
 :class:`FanoutSettings` Pydantic model and exposes :data:`CATALOG_VERSION`
-— a sha256 over the **fully rendered proposer prompt body** (plan 39
-§6.1, I4) — for the literal ``catalog_version=<hex>`` line at the top
+— a sha256 over the **fully rendered proposer prompt body** — for
+the literal ``catalog_version=<hex>`` line at the top
 of the Stage A system prompt.
 
 Hash semantics
@@ -20,8 +20,7 @@ dict, because:
   schema-only hash.
 
 Sampling parameters (e.g. ``proposer-temperature``) are *not* part of
-the hash — caching covers the prompt, not the sampling distribution
-(plan 39 §6.1 S6).
+the hash — caching covers the prompt, not the sampling distribution.
 """
 
 from __future__ import annotations
@@ -42,7 +41,7 @@ from imas_codex.settings import _load_pyproject_settings
 class FanoutSettings(BaseModel):
     """Pydantic-validated settings for structured fan-out.
 
-    All fields default to their plan-§9 values so an empty
+    All fields default to documented values so an empty
     ``[tool.imas-codex.sn-fanout]`` block yields a fully usable
     (default-disabled) config.
     """
@@ -82,10 +81,10 @@ class FanoutSettings(BaseModel):
     """Stage A sampling temperature (low for plan stability)."""
 
     fanout_cost_estimate_baseline: float = 0.005
-    """Baseline parent-lease pad ($) for fan-out cycles (plan 39 §7.3 I1)."""
+    """Baseline parent-lease pad ($) for fan-out cycles."""
 
     fanout_cost_estimate_escalation: float = 0.05
-    """Escalation parent-lease pad ($) for fan-out cycles (plan 39 §7.3 I1)."""
+    """Escalation parent-lease pad ($) for fan-out cycles."""
 
     fanout_max_charge_per_cycle_baseline: float = 0.02
     """Hard cap on cumulative fan-out sub-event spend (baseline)."""
@@ -117,7 +116,7 @@ class FanoutSettings(BaseModel):
         "grammar",
         "semantic",
     )
-    """Reviewer-comment dims used by the trigger predicate (plan 39 I3).
+    """Reviewer-comment dims used by the trigger predicate.
 
     Must match the actual ``reviewer_comments_per_dim_name`` keys
     written by ``review_names`` (rubric: grammar / semantic /
@@ -125,10 +124,10 @@ class FanoutSettings(BaseModel):
     likely to surface disambiguation/decomposition signal."""
 
     refine_trigger_comment_chars: int = 800
-    """Total excerpt length cap (plan 39 §5.1 S3)."""
+    """Total excerpt length cap."""
 
     refine_fanout_arm_percent: int = 50
-    """Within-cohort A/B on-arm percentage (plan 39 §8.4 I2).
+    """Within-cohort A/B on-arm percentage.
 
     ``50`` (default) is a balanced 50/50 split; ``0`` forces every
     trigger-eligible item to the off arm (kill switch); ``100`` forces
@@ -217,8 +216,8 @@ def _read_proposer_prompt_body() -> str:
 
     The body is the post-frontmatter Stage A system prompt **excluding**
     the literal ``catalog_version=<hex>`` line that we prepend at
-    runtime.  Hashing the body (not the schema dict) is the I4
-    correction in plan 39 §6.1.
+    runtime.  The body — not the schema dict — is what is hashed,
+    for the reasons given in the module docstring.
 
     Implementation note: we read directly from
     :func:`imas_codex.llm.prompt_loader.load_prompts` (which strips
@@ -243,7 +242,7 @@ def _compute_catalog_version() -> str:
 
 
 CATALOG_VERSION: str = _compute_catalog_version()
-"""Sha256 of the proposer-prompt body (plan 39 §6.1 I4).
+"""Sha256 of the proposer-prompt body.
 
 Computed once at module import via :func:`_compute_catalog_version`;
 the literal first line of the rendered system prompt is::

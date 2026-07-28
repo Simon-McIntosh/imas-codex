@@ -1,4 +1,4 @@
-"""Structured fan-out for the SN compose pipeline (plan 39).
+"""Structured fan-out for the SN compose pipeline.
 
 A bounded, schema-validated, two-stage LLM pattern that pulls targeted
 DD context for the ``refine_name`` worker:
@@ -25,7 +25,7 @@ Public API:
     :class:`FanoutScope` — caller-injected scope.
     :class:`CandidateContext` — refine-site candidate metadata.
     :data:`CATALOG_VERSION` — sha256 of the rendered proposer prompt
-    body (plan 39 §6.1 I4).
+    body.
 """
 
 from __future__ import annotations
