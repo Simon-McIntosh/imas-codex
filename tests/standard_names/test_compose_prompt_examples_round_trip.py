@@ -158,9 +158,9 @@ def test_nc_rule_good_example_round_trips(rule_id: str, name: str) -> None:
     )
 
 
-# The f-snph operator-development deliverable: a prefix transformation now
-# coexists with a projection, and change_in is a bare-prefix operator. These
-# MUST round-trip permanently (the grammar invariant this guard locks in).
+# A prefix transformation may coexist with a projection, and change_in is a
+# bare-prefix operator. These forms MUST round-trip permanently — that
+# co-existence is the grammar invariant this guard locks in.
 _OPERATOR_PROJECTION_FORMS = [
     "tendency_of_toroidal_current_density",
     "time_derivative_of_radial_magnetic_field",
