@@ -1,8 +1,7 @@
 """
 Request/Input validation models for all tools.
 
-This module consolidates all input validation schemas that were previously
-scattered across search/schemas/ directory.
+Central home for the input validation schemas shared across the tool surface.
 """
 
 from enum import StrEnum

@@ -312,9 +312,9 @@ def _requested_services(
 # Inline manifest comment that lists the services a systemd unit forwards.
 # Written by _build_systemd_service_content; read by _service_selected_services.
 # Lets the CLI detect "supports request" precisely instead of inferring from
-# --X flag presence — older units (installed before a new service was added)
-# need explicit reinstall to claim the new service, so the CLI no longer
-# silently starts a stale unit when the user asks for a newly-added service.
+# --X flag presence — a unit installed before a given service existed must be
+# reinstalled to claim it, so the CLI does not silently start a stale unit when
+# the user asks for a service that unit cannot forward.
 SERVICE_MANIFEST_PREFIX = "# tunnel-services: "
 
 # Service set tracked by units installed before SERVICE_MANIFEST_PREFIX

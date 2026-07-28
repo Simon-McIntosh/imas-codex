@@ -50,9 +50,6 @@ def facilities_list() -> None:
 def facilities_show(name: str, as_json: bool) -> None:
     """Show detailed configuration for a facility.
 
-    This replaces the dynamic facility commands that were previously registered
-    at the top level (e.g., `imas-codex tcv`).
-
     Examples:
         imas-codex facilities show tcv
         imas-codex facilities show iter --json

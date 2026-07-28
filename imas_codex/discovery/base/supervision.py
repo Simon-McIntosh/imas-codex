@@ -1041,8 +1041,8 @@ async def run_supervised_loop(
     When ``phases`` is provided, their ``has_work_fn`` caches are
     refreshed in a background thread every ``phase_refresh_interval``
     seconds.  This prevents blocking the event loop with synchronous
-    graph queries that each ``PipelinePhase.done`` formerly performed
-    inline.
+    graph queries that each ``PipelinePhase.done`` would otherwise
+    perform inline.
 
     When ``phase_tasks`` is provided, phases whose tasks have all
     completed are force-marked done.  This prevents the loop from

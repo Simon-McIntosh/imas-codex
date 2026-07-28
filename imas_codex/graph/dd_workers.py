@@ -967,8 +967,8 @@ async def _enrich_batch(
                         "enrichment_source": "llm",
                         "enrich_llm_cost": per_node_cost,
                     }
-                    # physics_domain is no longer an enrichment output — it is
-                    # assigned by the separate classify worker (Tier 1/2/3).
+                    # physics_domain is not an enrichment output — the separate
+                    # classify worker assigns it (Tier 1/2/3).
                     updates.append(update)
 
                 if llm_out.cache_read_tokens:
@@ -1125,8 +1125,8 @@ async def _refine_batch(
                         "refinement_model": model,
                         "refine_llm_cost": per_node_cost,
                     }
-                    # physics_domain is no longer an enrichment/refinement output —
-                    # it is assigned by the separate classify worker.
+                    # physics_domain is not an enrichment/refinement output —
+                    # the separate classify worker assigns it.
                     updates.append(update)
 
                 if llm_out.cache_read_tokens:

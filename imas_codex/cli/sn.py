@@ -1850,10 +1850,10 @@ def sn_run(
         return
 
     # Handle --reset-to BEFORE scope routing so it applies to BOTH the DD
-    # pool-orchestrator path and the signals single-pass path. (This block
-    # previously sat AFTER the use_pools early-return, making --reset-to a
-    # silent no-op on the default DD path.) clear_standard_names re-seeds the
-    # orphaned StandardNameSources to 'extracted' (its Step E) so the pool
+    # pool-orchestrator path and the signals single-pass path; placing it after
+    # the use_pools early-return would make --reset-to a silent no-op on the
+    # default DD path. clear_standard_names re-seeds the orphaned
+    # StandardNameSources to 'extracted' (its Step E) so the pool
     # orchestrator's extract phase re-composes them.
     if reset_to is not None and not dry_run:
         _tiers = [t.strip() for t in tier.split(",")] if tier else None
@@ -2193,8 +2193,8 @@ def sn_run(
         )
         return
 
-    # --ids has been removed from this command; scope narrowing is domain-based
-    # so it works uniformly across DD and facility-signals sources.
+    # Scope narrowing is domain-based rather than per-IDS, so it applies
+    # uniformly to both DD and facility-signals sources.
     ids_filter_sp: str | None = None
 
     # Single-pass path uses a scalar domain_filter; derive from --domain tuple.

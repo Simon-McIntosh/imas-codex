@@ -400,8 +400,8 @@ async def ingest_files(
         stats["mdsplus_paths"] += batch_mdsplus_paths
 
         # Batched graph writes — one session for all files in the batch.
-        # Previously did N × create_nodes("CodeExample") + N × individual queries;
-        # now batches into single UNWIND calls (~6 queries vs ~5N).
+        # Every node type goes in via a single UNWIND call, so the batch costs
+        # ~6 queries regardless of file count rather than ~5 per file.
         t_graph_start = _time.monotonic()
         step_times: dict[str, float] = {}
         with GraphClient() as graph_client:
@@ -510,8 +510,9 @@ async def ingest_files(
             step_times["create_chunks"] = _time.monotonic() - t_s
 
             # Step 6: Create HAS_CHUNK + AT_FACILITY for CodeChunks
-            # Combined into one query to avoid extra round-trip (previously
-            # AT_FACILITY was auto-created by create_nodes, now handled here).
+            # Both edges in one query: the CodeChunk create above passes
+            # create_relationships=False, so AT_FACILITY is written here
+            # alongside HAS_CHUNK instead of costing a second round-trip.
             t_s = _time.monotonic()
             graph_client.query(
                 """

@@ -227,11 +227,9 @@ class StructureAnalyzer:
     ) -> list[DomainDistribution]:
         """Analyze physics domain distribution within the IDS.
 
-        Note: Path-level physics_context has been removed. Domain distribution
-        is now simplified - all paths are grouped as 'unspecified' since
-        physics domain is determined at IDS level, not path level.
+        Physics domain is determined at IDS level, not per path, so there is
+        no path-level context to group by: every path lands in 'unspecified'.
         """
-        # All paths go into 'unspecified' since we no longer have path-level context
         domain_counts: dict[str, list[str]] = {"unspecified": list(paths.keys())}
 
         # Create distribution objects

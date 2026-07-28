@@ -53,12 +53,14 @@ class Units:
         name = get_unit_name(unit_str)
         dimensionality = get_unit_dimensionality(unit_str)
 
+        # context, category and physics_domains are not derivable from a unit
+        # string; callers with that information set them on the instance.
         return cls(
             unit_str=unit_str,
             name=name,
-            context="",  # No longer populated from YAML
-            category=None,  # No longer populated from YAML
-            physics_domains=[],  # No longer populated from YAML
+            context="",
+            category=None,
+            physics_domains=[],
             dimensionality=dimensionality,
         )
 

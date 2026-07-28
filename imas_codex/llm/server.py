@@ -2844,7 +2844,7 @@ class AgentsServer:
         ) -> str:
             """Find paths in other IDSs that are related to a given path. Use to discover cross-IDS connections — e.g. where the same physical quantity appears in different data structures.
 
-            Combines multiple relationship signals: vector similarity, shared cluster membership, common physics coordinates, matching units, shared identifier schemas, and shared COCOS transformations. Error and metadata fields are filtered out. Unit matches are no longer restricted to the same physics domain, surfacing cross-domain peers.
+            Combines multiple relationship signals: vector similarity, shared cluster membership, common physics coordinates, matching units, shared identifier schemas, and shared COCOS transformations. Error and metadata fields are filtered out. Unit matches are not restricted to the same physics domain, so cross-domain peers surface.
 
             Args:
                 path: Exact IMAS path to find relatives for (e.g. "equilibrium/time_slice/profiles_1d/psi").

@@ -125,7 +125,8 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # rewrites the full documentation later.  Override in pyproject.toml.
     "sn-parent-enrich": "openrouter/anthropic/claude-sonnet-4.6",
     # Physics-domain classifier for DD paths (SN names inherit the domain).
-    # Previously borrowed the generic [language] seat; now SN-attributable.
+    # Owns a seat rather than borrowing a generic one so the model choice is
+    # attributable to the SN pipeline.
     "sn-classifier": "openrouter/openai/gpt-5.5",
     # Adjudicates banned-prose grep flags on refined docs at the campaign
     # convergence gate; quorum-independent. Active model in

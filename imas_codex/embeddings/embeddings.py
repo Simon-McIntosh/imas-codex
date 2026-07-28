@@ -174,10 +174,10 @@ class Embeddings:
     def materialize_embeddings(self) -> None:
         """Explicitly trigger embedding load/generation if not already built.
 
-        Public method renamed from ``load_embeddings`` to avoid name collision
-        with new boolean configuration flag ``load_embeddings``.
+        Named ``materialize_embeddings`` rather than ``load_embeddings``
+        because the latter is the boolean configuration flag.
         """
         self._load_embeddings()
 
 
-# Registry removed previously; synchronous Embeddings must be explicitly constructed and injected.
+# There is no registry: a synchronous Embeddings must be explicitly constructed and injected.

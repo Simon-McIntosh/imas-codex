@@ -336,7 +336,7 @@ NON_RETRYABLE_PATTERNS = frozenset(
 # ---------------------------------------------------------------------------
 # Model-aware token limits
 # ---------------------------------------------------------------------------
-# Gemini 3 Flash: 1M context, 65k output, $0.10/$0.40 per 1M tokens
+# Gemini 3 Flash: 1M context, 65k output
 # Claude Sonnet: 200k context, ~8k output default
 # Claude Haiku: 200k context, ~4k output default
 #

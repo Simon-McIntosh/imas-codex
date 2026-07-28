@@ -74,9 +74,9 @@ class IdsNode(BaseModel):
     data_type: str | None = None
     physics_domain: str | None = None  # Physics domain from DD or inferred from IDS
     node_type: str | None = None  # Time-variation type (dynamic/constant/static)
-    introduced_after_version: str | None = None  # Renamed from introduced_after
-    lifecycle_status: str | None = None  # Added lifecycle status field
-    lifecycle_version: str | None = None  # Added lifecycle version field
+    introduced_after_version: str | None = None  # Last DD version without this path
+    lifecycle_status: str | None = None  # DD lifecycle maturity (active/alpha)
+    lifecycle_version: str | None = None  # DD version the lifecycle status dates from
     cluster_labels: list[str] | None = None  # Cluster labels associated with this path
     validation_rules: ValidationRules | None = None
     identifier_schema: IdentifierSchema | None = (
