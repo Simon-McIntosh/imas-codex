@@ -205,7 +205,19 @@
         returning 384-dim vectors and the Matryoshka truncation on
         <code>Qwen/Qwen3-Embedding-0.6B</code> is not being applied. This breaks
         semantic search. Highest-value item in this plan and independent of
-        everything else in it.</li>
+        everything else in it.
+        <br>Repro: the failure is always a
+        <code>Neo.ClientError.Statement.TypeError</code> surfaced through
+        <code>search/decorators/error_handling.py:295</code>, and it clusters in
+        <code>tests/search/test_search_benchmarks.py</code>,
+        <code>test_search_evaluation.py::TestDoEEvaluation</code>,
+        <code>tests/tools/test_dd_search_quality.py</code>,
+        <code>test_search_dd_paths_regression.py</code> and
+        <code>tests/search/test_expected_paths.py</code>. It hits every
+        live-embedding test at once and no mock-based one, which is the signature
+        of a server-side dimension rather than per-test data. A single
+        <code>imas-codex embed status</code> dimension check confirms the fix.
+        Do NOT rebuild the indexes to 384 — 256 is the configured contract.</li>
       <li><strong><code>get_dd_version_context</code> behaviour drift</strong> —
         returns <code>rename_chains</code> where two tests expect
         <code>error</code>.</li>
