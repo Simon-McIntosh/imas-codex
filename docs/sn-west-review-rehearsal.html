@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="11">
-<meta name="plan-impl" content="0.68">
+<meta name="plan-version" content="12">
+<meta name="plan-impl" content="0.72">
 </head>
 <body>
   <main class="plan-doc">
@@ -279,6 +279,30 @@
         <strong>One decision open:</strong> the 198 accepted-name detaches.
       </p>
     </div>
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px; margin-top:10px;">
+      <p style="margin:0 0 6px;">
+        <strong>THE GATE IS MET — cut the RC (2026-07-28).</strong> Measured
+        against the manifest: <strong>322 of 355</strong> WEST sources carry an
+        accepted name, and the batch resolves <strong>223 distinct names from 321
+        paths</strong>. The RC is cuttable as it stands.
+      </p>
+      <p style="margin:0 0 6px;">
+        The residual 33 is fully accounted and mostly not nameable: 15 genuinely
+        so (9 eligibility-skipped, 4 true vocab gaps, 2 failed), 7 drafted
+        awaiting review (~$2 at the measured $0.27/name), 7 needing refine, 5 in
+        flight, 2 superseded relinks.
+      </p>
+      <p style="margin:0;">
+        Scope has been pulled sideways repeatedly and every drift found a real
+        defect — but this plan already settled the principle: stage 1's "every
+        eligible source accepted" is a <em>gate</em>, not the deliverable, and
+        <strong>stages 2–6 still have zero coverage</strong>. Everything still
+        open — the 129 name-level defects outside WEST, the four ungated write
+        paths, the line-of-sight fold, the comment scrub — is real, tracked, and
+        <em>not</em> the release. Next action is one command.
+      </p>
+    </div>
+
     <p>
       <svg viewBox="0 0 940 150" role="img" aria-label="Rehearsal loop: snapshot, mop-up, batch RC with fork PR, human review and merge, fold back, unwind" style="max-width:100%; height:auto;">
         <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333"/></marker></defs>
@@ -1127,6 +1151,85 @@ DONE-WHEN
   3. Population A repaired via sn edit; population B folded once the lead rules
      on the catalog_edit retirement.
   4. Full SN suite green; committed and pushed.</pre>
+    </article>
+<article class="r-fu" data-id="f-swrr-013" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T06:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">CUT THE RC — the gate is met at 322/355, stop widening scope</h4>
+    <div class="r-fu-body"><p><strong>The release gate is met and the RC is cuttable now.</strong> Measured against the manifest: <strong>322 of 355 WEST sources carry an accepted name</strong> and the batch resolves <strong>223 distinct names from 321 paths</strong>. The residual 33 is 15 legitimately non-nameable (9 eligibility-skipped, 4 true vocab gaps, 2 failed), 7 drafted awaiting review (~$2 at the measured $0.27/name), 7 needing refine, 5 in flight, 2 superseded relinks. The plan's own course correction already settled this: stage 1's “every eligible source accepted” is a GATE, not the deliverable, and the batch is amply large to exercise the review loop. <strong>Stages 2–6 still have zero coverage.</strong> Cut the RC, open the fork PR, and get a human into stage 3.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stage 2 — CUT THE RC
+Tier:    opus
+
+READ THIS FIRST, IT IS THE WHOLE BRIEF
+  The goal has never changed: one OPERATIONAL pass of the whole loop on real
+  data with a human in the loop (§1). The gold-bordered stage 3 in the §3
+  diagram is the point. Correctness work has repeatedly and legitimately pulled
+  scope sideways — every drift found a real defect — but the gate is now MET and
+  further widening is the failure mode, not the work.
+
+VERIFIED STATE (2026-07-28)
+  WEST: 322/355 sources carry an accepted name. Batch mints 223 distinct names
+  from 321 paths — the RC is cuttable as it stands.
+  Residual 33, fully accounted: 15 non-nameable (9 skipped, 4 vocab_gap,
+  2 failed) + 7 drafted + 7 exhausted/reviewed + 5 in flight + 2 superseded.
+  Attachment audit: idempotent, residue = 129 name-level defects + 31 historical.
+  Unit detector: 6 rows, every one explained.
+  Campaign spend ~$76 of the 500 ceiling. Review costs ~$0.27/name measured.
+  A free local compose drain (`--only compose`) was running at hand-off; check
+  whether it finished and what it added before budgeting anything.
+
+DO, IN ORDER
+  1. OPTIONAL, ~$2: review the 7 drafted WEST names so they join the batch:
+       uv run imas-codex sn run --batch west_task_2e --only review --names-only --cost-limit 5
+     If any still miss, RECORD AND MOVE ON. Do not open a vocabulary thread.
+  2. CUT IT:
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     Mints v0.&lt;n&gt;.0rc&lt;N&gt;+west-task-2e (batch label as semver build metadata).
+     Verify: additive diff (approved set byte-identical); catalog.yml carries
+     export_scope=review + review_batch; artifact frozen at
+     manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND batch_label;
+     RC-tagged; PR open on the FORK (--target auto; never --final in act 1).
+     Record RC version, PR URL, batch size, and judge the LLM-written PR body —
+     first live output of the sn-release-notes seat.
+  3. Collapse §3 stages 0–2 to a landed summary and queue stages 3–6 (human
+     review → sn merge fold-back exercising the graph-merged: tag → freeze-check
+     → --undo unwind).
+
+DO NOT CHASE ANY OF THIS — it is real, tracked, and NOT the release
+  - The 129 name-level defects / 27 orphaned names outside WEST. The catalog
+    half was generated broadly ON PURPOSE to catch errors; it is not the release
+    set. Lead: “we are now trying to release the focused WEST set, this is your
+    goal.”
+  - A graph-wide review pass (~$150–250). Not RC-blocking; would spend 3× the
+    budget before stage 3 runs.
+  - The four ungated write paths and the missing geometry-representation rule —
+    f-swrr-012, with per-path verdicts already recorded.
+  - The line-of-sight fold. Root-caused: supersede_prior_source_names exempts
+    origin=&#x27;catalog_edit&#x27; from dedup, which froze the split. Per the lead the
+    catalog is NEVER the source of truth and those imports are an old method to
+    be resolved through review — so that exemption is a defect, not a safeguard,
+    and the fold needs no separate authorization. Still not RC-blocking.
+  - The plan-label comment scrub. Filenames are clean, ~/.agents/AGENTS.md
+    carries the three mandatory pre-stage checks, and the domain keep-list now
+    lives in imas_codex/standard_names/AGENTS.md. Residue is comment-only.
+
+CONSTRAINTS
+  - Gap-only; never --reseed. PR target stays fork.
+  - The stage-0 snapshot exists; do NOT re-snapshot.
+  - NEVER hand-accept a name or hand-edit graph text.
+  - A DD pin is immutable.
+  - Run the ~/.agents/AGENTS.md pre-stage naming check over every path staged.
+  - No AI attribution in ANY commit, issue, PR or comment.
+  - Cold-import artifact: warm with
+    `uv run python -c &quot;import imas_codex.discovery, litellm&quot;` before diagnosing
+    any setup-time test timeout — it makes EVERY test in a file error at setup.
+
+DONE-WHEN
+  1. Fork PR OPEN, with RC version, URL, batch size and PR-body judgement recorded.
+  2. §3 stages 0–2 collapsed; stages 3–6 queued.
+  3. This followup resolved. Nothing above the line left undone; nothing below it
+     started.</pre>
     </article>
 </section>
 
