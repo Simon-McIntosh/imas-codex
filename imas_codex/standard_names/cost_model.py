@@ -4,8 +4,10 @@ Pure-function module — no I/O, no graph access.  All state is passed
 in via frozen dataclasses; the caller (display.py) is responsible for
 querying graph buckets and pool statistics.
 
-Projection formula follows the disjoint-bucket pipeline-flow model
-described in plan.md §F5.
+The projection formula follows a disjoint-bucket pipeline-flow model:
+each name is counted in exactly one bucket, and the remaining cost is
+the sum over buckets of (items × per-item cost of the stages still
+ahead of that bucket).
 """
 
 from __future__ import annotations

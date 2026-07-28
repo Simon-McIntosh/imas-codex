@@ -7,7 +7,7 @@ Contains:
 - :class:`SNLoopState` — observable state for loop-mode ``sn run``, consumed
   by :class:`DataDrivenProgressDisplay` via ``StageDisplaySpec`` declarations.
 - :func:`build_sn_loop_stages` — stage specs for the 5 loop-mode phases.
-- :class:`SNPoolState` — observable state for pool-mode ``sn run`` (Phase 8),
+- :class:`SNPoolState` — observable state for pool-mode ``sn run``,
   aggregating 5 pools into 3 display rows with per-subpool health.
 - :func:`build_sn_pool_stages` — stage specs for the 3 pool-mode rows.
 """
@@ -224,7 +224,7 @@ def build_sn_loop_stages(
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Pool-mode state + stage specs (Phase 8 concurrent pools)
+# Pool-mode state + stage specs (concurrent pools)
 # ═══════════════════════════════════════════════════════════════════════
 
 # Default wedge threshold: a subpool is wedged when
@@ -330,7 +330,7 @@ def format_pool_health_text(
 
 @dataclass
 class SNPoolState:
-    """Observable state for the Phase 8 concurrent pool display.
+    """Observable state for the three-row concurrent pool display.
 
     Three display rows, each backed by a :class:`WorkerStats`:
 
@@ -409,7 +409,7 @@ def build_sn_pool_stages(
     skip_enrich: bool = False,
     skip_review: bool = False,
 ) -> list[StageDisplaySpec]:
-    """Build the 3 stage specs for the Phase 8 pool display.
+    """Build the 3 stage specs for the aggregated pool display.
 
     Three rows mapping to the 6 concurrent pools:
 
@@ -418,7 +418,7 @@ def build_sn_pool_stages(
     - **REVIEW** — review_name + review_docs pools.
 
     .. deprecated::
-        Superseded by :func:`build_sn_6pool_stages` (Phase 8.1).
+        Superseded by :func:`build_sn_6pool_stages`.
     """
     return [
         StageDisplaySpec(
@@ -446,13 +446,13 @@ def build_sn_pool_stages(
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Phase 8.1 — 6-pool state + stage specs
+# Six-pool state + stage specs (one display row per pool)
 # ═══════════════════════════════════════════════════════════════════════
 
 
 @dataclass
 class SN6PoolState:
-    """Observable state for the Phase 8.1 six-pool display.
+    """Observable state for the six-pool display.
 
     Six independent :class:`WorkerStats`, one per pool:
 
@@ -488,7 +488,7 @@ class SN6PoolState:
 
 
 def build_sn_6pool_stages() -> list[StageDisplaySpec]:
-    """Build the 6 stage specs for the Phase 8.1 pool display.
+    """Build the 6 stage specs for the per-pool display.
 
     Six rows, one per pool:
 

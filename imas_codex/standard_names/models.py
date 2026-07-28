@@ -1450,7 +1450,7 @@ class StandardNameQualityReviewDescriptionBatch(BaseModel):
 
 
 # =============================================================================
-# Refine-pipeline response models (Phase 8.1)
+# Refine-pipeline response models
 # =============================================================================
 
 
@@ -1458,7 +1458,9 @@ class RefinedName(BaseModel):
     """LLM response model for a single refine_name call.
 
     Uses ``GrammarSegments`` sub-model (same as ``StandardNameCandidate``).
-    The ``confidence`` field is intentionally absent — removed in Phase 8.1.
+    The ``confidence`` field is intentionally absent: a self-reported
+    score is not a review signal, and the numeric ``score`` from the
+    reviewer quorum is the sole accept/refine gate.
     """
 
     segments: GrammarSegments = Field(description="ISN grammar segment fields")

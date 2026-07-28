@@ -79,13 +79,13 @@ class LLMCostEvent:
 
     Two callers stamp this field today:
 
-    - **B2 grammar-retry** (``workers.py``): writes
+    - **Grammar retry** (``workers.py``): writes
       ``f"{group_key}-grammar-retry"`` so the original-vs-retry pair
       can be joined in analytics.
-    - **Plan 39 structured fan-out** (``fanout/dispatcher.py``):
+    - **Structured fan-out** (``fanout/dispatcher.py``):
       writes the ``fanout_run_id`` (uuid4) onto the proposer charge,
       and call-sites stamp the same id onto their synthesizer charge,
-      enabling the ``Fanout`` ↔ ``LLMCost`` join (plan 39 §8.3).
+      enabling the ``Fanout`` ↔ ``LLMCost`` join.
 
     The field is intentionally unstructured — callers pick the
     encoding that suits their analytics query.
@@ -187,7 +187,7 @@ class BudgetLease:
         return self._phase
 
     # ------------------------------------------------------------------
-    # New typed charge API (Phase 3)
+    # Typed charge API
     # ------------------------------------------------------------------
 
     def charge_event(self, cost: float, event: LLMCostEvent) -> ChargeResult:
@@ -199,7 +199,7 @@ class BudgetLease:
 
         This is the preferred entry point for instrumented call-sites.
         Legacy ``charge_soft`` / ``charge_or_extend`` are thin wrappers
-        around this method without metadata (kept for Phase 4 migration).
+        around this method without metadata.
         """
         if cost < 0:
             raise ValueError("charge must be non-negative")
@@ -291,7 +291,7 @@ class BudgetManager:
         # Actual spend per phase tag (in-memory shadow — graph is SoT).
         self._phase_spent: dict[str, float] = {}
 
-        # ── Graph-backed cost tracking (Phase 3) ──────────────────────
+        # ── Graph-backed cost tracking ────────────────────────────────
         self.run_id: str | None = run_id
         self._write_queue: asyncio.Queue[_PendingWrite | None] = asyncio.Queue()
         self._pending_cost: float = 0.0  # in-flight cost not yet flushed
@@ -696,7 +696,7 @@ class BudgetManager:
             return self._phase_spent.get(pool, 0.0)
 
     # ------------------------------------------------------------------
-    # Pool admission control (Phase 8)
+    # Pool admission control
     # ------------------------------------------------------------------
 
     def pool_admit(
@@ -708,7 +708,7 @@ class BudgetManager:
     ) -> bool:
         """Soft-fairness admission gate for a pool requesting a new batch.
 
-        Implements the weighted-share rule described in plan.md Phase 8:
+        Implements the weighted-share rule:
 
             share = pool_spent[p] / sum(pool_spent.values() or epsilon)
             effective_weight = weights[p] / sum(weights[q] for q in active_pools)
@@ -770,8 +770,8 @@ class BudgetManager:
         # they can discover their own work via claim() and self-regulate via
         # backoff when claim() returns None.
         #
-        # With ``pending_fn`` wired in ``run_pools`` (Phase 8 fix), this path
-        # is only hit transiently: the ``_pending_count_watchdog`` updates
+        # With ``pending_fn`` wired in ``run_pools`` this path is only hit
+        # transiently: the ``_pending_count_watchdog`` updates
         # pending counts immediately on its first poll, so ``active_pools_fn``
         # returns a non-empty set before the pools have issued any claims.
         # Without ``pending_fn`` the bypass persists indefinitely, letting all
@@ -785,7 +785,7 @@ class BudgetManager:
         # must not occupy weight share in the denominator).
         paid_active = active_pools - free
         # Sole active paid pool always admitted — the "no other pool is
-        # active" branch from plan.md Phase 8.  (A lone paid pool competing
+        # active" branch of the weighted-share rule.  (A lone paid pool competing
         # only against free pools rations against nobody.)
         if len(paid_active) <= 1:
             return True

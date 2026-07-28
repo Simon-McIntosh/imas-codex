@@ -5,8 +5,8 @@ derives the single authoritative :class:`CanonicalReview` record from the
 ``StandardNameReview`` nodes attached to that SN in the graph — regardless of how many
 review cycles ran or how many review groups exist.
 
-This module **defines** the canonical projection semantics that the rest of
-the W40 migration converges toward.  It is a read-only helper: it never
+This module **defines** the canonical projection semantics the rest of the
+review surface converges toward.  It is a read-only helper: it never
 modifies the graph.  Future consumers (e.g. ``sn status --deep``, reviewer-
 disagreement audits) should call :func:`project_canonical_review` rather
 than querying StandardNameReview nodes directly.

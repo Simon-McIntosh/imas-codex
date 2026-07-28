@@ -2294,7 +2294,7 @@ def _update_batch_stats(
 
 
 # =============================================================================
-# Pool-mode batch processors (Phase 8)
+# Pool-mode batch processors
 # =============================================================================
 
 
@@ -2312,7 +2312,7 @@ async def _review_batch_core(
     mode — RD-quorum multi-model is handled at orchestrator level via
     repeated calls with different model configs).
 
-    **H6 — soft drain on stop_event:**
+    **Soft drain on stop_event:**
     Checks ``stop_event.is_set()`` before the LLM call and returns early
     if the event fires.
 
@@ -2408,7 +2408,7 @@ async def _review_batch_core(
     compose_ctx = dict(compose_ctx)
     compose_ctx["reviewer_themes"] = reviewer_themes
 
-    # ── H6: pre-LLM stop check ────────────────────────────────────────
+    # ── Pre-LLM stop check ────────────────────────────────────────────
     if stop_event.is_set():
         return 0
 
@@ -2539,7 +2539,7 @@ async def process_review_names_batch(
     """Pool-mode review-names batch processor.
 
     Takes pre-claimed StandardName items and runs name+grammar review
-    (axis ``"names"``).  Independently claimable from docs review per M9.
+    (axis ``"names"``).  Independently claimable from docs review.
 
     Returns count of items successfully reviewed.
     """
@@ -2554,7 +2554,7 @@ async def process_review_docs_batch(
     """Pool-mode review-docs batch processor.
 
     Takes pre-claimed StandardName items and runs documentation review
-    (axis ``"docs"``).  Independently claimable from names review per M9.
+    (axis ``"docs"``).  Independently claimable from names review.
 
     Does NOT require ``process_review_names_batch`` to have run first —
     the docs pool has its own eligibility gate in the claim query

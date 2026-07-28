@@ -34,7 +34,7 @@ This module deliberately contains only the orchestration scaffolding.
 The six claim queries live in ``graph_ops.py`` and the per-pool
 batch-processor functions live in their respective worker modules
 (``workers.py`` for generate_name+refine_name, ``review/pipeline.py``
-for legacy review, ``workers.py`` for all Phase 8.1 workers).  This
+for legacy review, ``workers.py`` for every pool worker).  This
 separation keeps the orchestrator agnostic of prompt/persist details —
 its only job is to schedule.
 """
@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 
 # Default per-pool weights for soft-fairness admission control.
-# Sum to 1.0.  Seven pools per Phase 8.1 refine pipeline.
+# Sum to 1.0 across the seven pools of the refine pipeline.
 #
 # Rationale (2026-05-05): Review is the throughput bottleneck — each
 # review costs ~$0.09 (2× blind LLM calls + optional escalator) vs
@@ -203,8 +203,9 @@ class _PoolBackoff:
 class PoolHealth:
     """Liveness telemetry for a single pool.
 
-    Mirrors the per-subpool wedge detection rules from plan.md Phase 8
-    finding M7.  ``last_progress_at`` is updated on each successful
+    A subpool is wedged when it has pending work but has not persisted
+    a batch within the wedge threshold.  ``last_progress_at`` is updated
+    on each successful
     batch persist.  ``pending_count`` is refreshed by the orchestrator
     via the pending-fn callback.  ``in_flight`` tracks claimed but
     not-yet-persisted batches for restart-safety reasoning.
@@ -322,7 +323,7 @@ async def pool_loop(
 ) -> None:
     """Cooperative pool worker.
 
-    Loop semantics (per plan.md Phase 8 finding H6):
+    Loop semantics:
 
     * On each iteration, check ``stop_event``.  If set, exit cleanly
       without claiming new work.
@@ -710,7 +711,7 @@ async def run_pools(
 
     Returns a mapping of pool name → final ``PoolHealth`` snapshot.
 
-    Shutdown sequence (plan.md Phase 8 finding H6):
+    Shutdown sequence:
 
     1. ``stop_event.set()`` (set by caller, e.g. via ``run_discovery``
        3-press shutdown, or by the budget watchdog when exhausted).
