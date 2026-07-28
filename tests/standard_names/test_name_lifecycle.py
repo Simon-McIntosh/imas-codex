@@ -950,8 +950,8 @@ def test_concurrent_review_does_not_double_advance(_gc, _clean):
     prevents duplicate stage advances under concurrent access.
     """
     sn_id = _uid("concurrent_review")
-    t1 = f"tok-W1-{uuid.uuid4().hex[:8]}"
-    t2 = f"tok-W2-{uuid.uuid4().hex[:8]}"
+    t1 = f"tok-a-{uuid.uuid4().hex[:8]}"
+    t2 = f"tok-b-{uuid.uuid4().hex[:8]}"
 
     _create_sn(_gc, sn_id, name_stage="drafted", chain_length=0)
     _set_claim(_gc, sn_id, t1)
