@@ -494,7 +494,7 @@ def generate_doe_grid(two_phase: bool = True) -> list[MixConfig]:
 
     When *two_phase* is ``True`` (default), generates a manageable grid:
 
-    - Phase A: 243 configs sweeping fusion weights (as before)
+    - Phase A: 243 configs sweeping fusion weights
     - Phase B: 27 configs sweeping graph boosts with optimal fusion defaults
 
     Total: up to 270 configs (vs 6561 for full factorial), with duplicates
@@ -503,7 +503,7 @@ def generate_doe_grid(two_phase: bool = True) -> list[MixConfig]:
     configs: list[MixConfig] = []
     seen: set[tuple] = set()
 
-    # Phase A: Fusion parameter sweep (original grid)
+    # Phase A: Fusion parameter sweep (full fusion factorial)
     fusion_grid = {
         "vector_limit": [200, 500, 800],
         "text_limit": [200, 500, 800],

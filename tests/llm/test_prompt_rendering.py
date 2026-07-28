@@ -20,7 +20,12 @@ def rendered_compose_system() -> str:
 
 
 class TestTransformationInjection:
-    """Verify ISN grammar reference replaces rc20 transformation injection."""
+    """The ISN grammar reference supplies the transformation vocabulary.
+
+    Any statically-injected transformation list is a second source of truth
+    that drifts from ISN, so the prompt must carry the live reference and
+    none of the older static or semi-live headings.
+    """
 
     def test_grammar_heading_present(self, rendered_compose_system: str) -> None:
         """The ISN grammar reference heading must be present."""
@@ -32,7 +37,7 @@ class TestTransformationInjection:
         assert "Only these 4 transformation tokens" not in rendered_compose_system
 
     def test_old_live_heading_gone(self, rendered_compose_system: str) -> None:
-        """The old rc20 heading must be gone — replaced by ISN grammar."""
+        """The semi-live injection heading must be gone."""
         assert (
             "Transformations (live from imas-standard-names)"
             not in rendered_compose_system
@@ -128,12 +133,13 @@ class TestRuleAlignment:
     ) -> None:
         """The diamagnetic-is-not-a-projection rule must survive consolidation.
 
-        Previously numbered Rule 22; the rule now lives in the projection-axis
-        field-choice section and is audit-enforced (not merely informational).
+        The rule lives in the projection-axis field-choice section and is
+        audit-enforced, so it is asserted through the audit token rather than
+        through a numbered informational entry that reorganising would drop.
         """
         assert "diamagnetic_component_check" in rendered_compose_system
         assert "diamagnetic_drift" in rendered_compose_system
-        # The old "(physics semantic — critical)" framing should be gone.
+        # The purely-informational framing must not reappear.
         assert "physics semantic — critical" not in rendered_compose_system
 
     def test_over_region_exception(self, rendered_compose_system: str) -> None:

@@ -1759,7 +1759,7 @@ class TestStandardNameLeakClasses:
     @pytest.mark.parametrize(
         "path,name",
         [
-            # *_flag patterns (W12A regression)
+            # *_flag patterns: a boolean switch is not a physical quantity
             (
                 "pf_active/coil/toroidal_field_coil_periodicity_flag",
                 "toroidal_field_coil_periodicity_flag",
@@ -1820,7 +1820,7 @@ class TestStandardNameLeakClasses:
         cat = classify_node_pass1(path, name, data_type=dt, unit=unit)
         assert cat == "metadata", f"{path} → {cat!r} (expected metadata)"
 
-    # Legacy temporary_storage_* path-segment leaks (W28A user-flagged).
+    # temporary_storage_* path segments: scratch slots, never physics.
     @pytest.mark.parametrize(
         "path,name,dt,unit",
         [

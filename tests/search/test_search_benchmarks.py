@@ -701,7 +701,7 @@ class TestSearchQualityGate:
 
     @pytest.mark.asyncio
     async def test_abbreviation_mrr_gate(self, search_tool, embed_available):
-        """Abbreviation queries are historically weakest — dedicated gate."""
+        """Abbreviation queries are the weakest class — dedicated gate."""
         if not embed_available:
             pytest.skip("Embed server not available")
 

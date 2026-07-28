@@ -1,7 +1,7 @@
 """DD unit-extraction integrity tests.
 
-Guards two classes of unit corruption that previously reached IMASNode.unit
-and corrupted the standard-name reviewer:
+Guards two classes of unit corruption that reach IMASNode.unit silently and
+then mislead the standard-name reviewer:
 
 1. ``as_parent`` placeholder non-resolution — the DD emits
    ``as_parent`` / ``as_parent_level_2`` / ``as parent`` meaning "inherit the
@@ -92,12 +92,13 @@ class TestUnitNormalizationSurvival:
     """Multi-letter SI units must not be truncated by normalization."""
 
     def test_multiletter_si_units_round_trip(self):
-        # (raw, expected normalized) — the previously-corrupted cases plus
-        # other multi-character SI symbols that share a leading character.
+        # (raw, expected normalized) — multi-character SI symbols that share
+        # a leading character with a shorter unit, so a truncating normalizer
+        # silently maps them onto the wrong quantity.
         cases = {
-            "Wb": "Wb",  # weber (poloidal flux) — was truncated to 'W'
+            "Wb": "Wb",  # weber (poloidal flux) — must not collapse to 'W'
             "W": "W",  # watt — must stay distinct from Wb
-            "m^-2": "m^-2",  # was truncated to 'm'
+            "m^-2": "m^-2",  # must not collapse to 'm'
             "Hz": "Hz",
             "Pa": "Pa",
             "kg": "kg",
