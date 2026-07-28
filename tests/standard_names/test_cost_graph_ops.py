@@ -239,7 +239,7 @@ class TestRecordLLMCost:
             patcher.stop()
 
     def test_empty_sn_ids_allowed(self):
-        """L7 audit calls may have no sn_ids."""
+        """An audit call that names no specific SN records an empty sn_ids."""
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:

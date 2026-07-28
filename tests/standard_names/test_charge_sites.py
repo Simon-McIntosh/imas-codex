@@ -148,7 +148,7 @@ class TestComposeChargeEvent:
 
 
 class TestGrammarRetryChargeEvent:
-    """Grammar retry (L6) uses distinct batch_id with -grammar-retry suffix."""
+    """Grammar retry uses a distinct batch_id with a -grammar-retry suffix."""
 
     @pytest.mark.asyncio
     async def test_compose_grammar_retry_distinguishes_batch_id(self):
@@ -217,15 +217,15 @@ class TestGrammarRetryChargeEvent:
 
 
 # =====================================================================
-# 3. L7 Opus revision — phase="generate"
+# 3. Borderline-candidate revision pass — phase="generate"
 # =====================================================================
 
 
-class TestL7RevisionChargeEvent:
-    """L7 Opus revision returns cost/tokens for graph tracking."""
+class TestOpusReviseChargeEvent:
+    """The borderline-candidate revision pass returns cost/tokens to track."""
 
     @pytest.mark.asyncio
-    async def test_l7_revision_returns_tokens(self):
+    async def test_opus_revise_returns_tokens(self):
         """_opus_revise_candidate returns (name, cost, ti, to)."""
         from pydantic import BaseModel, Field
 

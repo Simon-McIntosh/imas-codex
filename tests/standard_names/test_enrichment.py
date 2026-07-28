@@ -955,7 +955,7 @@ class TestFamilyAwareBatching:
         return base
 
     def test_vector_family_same_batch(self):
-        """T5: Vector family members land in the same batch."""
+        """Vector family members land in the same batch."""
         items = [
             self._enriched(
                 path="equilibrium/time_slice/profiles_1d/j_tor",
@@ -978,7 +978,7 @@ class TestFamilyAwareBatching:
         assert "equilibrium/time_slice/profiles_1d/j_parallel" in paths
 
     def test_geometric_family_overrides_unit_split(self):
-        """T6: Geometric family batches together despite unit difference."""
+        """Geometric family batches together despite unit difference."""
         items = [
             self._enriched(
                 path="equilibrium/time_slice/boundary/outline/r",
@@ -1013,7 +1013,7 @@ class TestFamilyAwareBatching:
         assert len(family_batches[0].items) == 3
 
     def test_family_metadata_injected(self):
-        """T7: Family context metadata injected into items."""
+        """Family context metadata injected into items."""
         items = [
             self._enriched(
                 path="equilibrium/time_slice/profiles_1d/j_tor",

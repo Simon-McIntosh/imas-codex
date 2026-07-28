@@ -1,4 +1,4 @@
-"""Tests for L3 post-generation audits module."""
+"""Tests for the post-generation audits module."""
 
 from __future__ import annotations
 
@@ -2443,7 +2443,7 @@ class TestCanonicalLocusCheck:
 
 
 class TestAttachmentStateResolution:
-    """State-resolution consistency in _is_attachment_consistent (R1/R4)."""
+    """State-resolution consistency in _is_attachment_consistent."""
 
     @pytest.mark.parametrize(
         "source_id,sn_name,expected_ok",
@@ -2454,7 +2454,7 @@ class TestAttachmentStateResolution:
                 "thermal_neutral_state_density",
                 True,
             ),
-            # state path -> species name: REJECT (R4 live defect)
+            # state path -> species name: REJECT (different quantities)
             (
                 "edge_profiles/profiles_1d/neutral/state/density_thermal",
                 "thermal_neutral_density",

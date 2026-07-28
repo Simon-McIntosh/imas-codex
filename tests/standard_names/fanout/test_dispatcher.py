@@ -411,7 +411,7 @@ class TestRunFanout:
 
 
 # ---------------------------------------------------------------------
-# execute() — partial failures + sync-helper timeouts (B2)
+# execute() — partial failures + sync-helper timeouts
 # ---------------------------------------------------------------------
 
 

@@ -111,11 +111,11 @@ class TestUnitConflicts:
     def test_none_unit_vs_specific_unit_conflict(self):
         """Dimensionless (None) vs specific unit → conflict.
 
-        Post-B1 invariant (plan-mcp-and-units.md): unit=None means the
-        DD HAS_UNIT lookup failed.  We do NOT silently absorb a None
-        candidate into a specific-unit group — that fabricated
-        "dimensionless" semantics.  Instead the mixed set surfaces as
-        a unit_mismatch so the human reviewer sees it.
+        unit=None means the DD HAS_UNIT lookup failed, NOT that the
+        quantity is dimensionless.  A None candidate must therefore not be
+        absorbed into a specific-unit group, which would fabricate
+        "dimensionless" semantics; the mixed set surfaces as a
+        unit_mismatch so a human reviewer sees it.
         """
         candidates = [
             _candidate("safety_factor", "eq/q", unit=None),

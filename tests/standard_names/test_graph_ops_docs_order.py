@@ -1,13 +1,12 @@
 """Tests for parent-first docs ordering in ``claim_generate_docs_batch``.
 
-T15 — Parents are claimed before children: verifies that the seed Cypher
-      query contains priority ordering so nodes with incoming HAS_PARENT
-      edges (parents) are claimed first.
+Parents are claimed before children: the seed Cypher query carries priority
+ordering so nodes with incoming HAS_PARENT edges (parents) are claimed first.
 
-T16 — Children proceed when parent unclaimed: verifies the escape-hatch
-      condition that allows a child to be claimed even if its parent is still
-      in docs_stage='pending', as long as that parent has never been claimed
-      (claimed_at IS NULL).
+Children proceed when the parent is unclaimed: an escape-hatch condition lets
+a child be claimed even if its parent is still in docs_stage='pending', as
+long as that parent has never been claimed (claimed_at IS NULL) — otherwise a
+never-claimed parent would deadlock its whole subtree.
 
 All tests mock :class:`GraphClient` — no live Neo4j required.
 """
@@ -52,12 +51,12 @@ def _patch_gc(mock_gc):
 
 
 # ---------------------------------------------------------------------------
-# T15: Parent claimed before children
+# Parent claimed before children
 # ---------------------------------------------------------------------------
 
 
 class TestParentDocsPriority:
-    """T15 — Parents (nodes with incoming HAS_PARENT) should be claimed first."""
+    """Parents (nodes with incoming HAS_PARENT) should be claimed first."""
 
     def test_seed_query_contains_priority_ordering(self):
         """The seed Cypher emitted by claim_generate_docs_batch must include
@@ -127,12 +126,12 @@ class TestParentDocsPriority:
 
 
 # ---------------------------------------------------------------------------
-# T16: Children proceed when parent unclaimed
+# Children proceed when parent unclaimed
 # ---------------------------------------------------------------------------
 
 
 class TestChildProceedsWhenParentUnclaimed:
-    """T16 — Escape hatch: children should not be blocked by an unclaimed parent.
+    """Escape hatch: children should not be blocked by an unclaimed parent.
 
     When a parent exists with docs_stage='pending' but claimed_at IS NULL
     (the parent was never picked up), children must still be claimable.

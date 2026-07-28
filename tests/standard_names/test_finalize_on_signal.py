@@ -1,10 +1,10 @@
-"""Shutdown finalization tests (Phase A2).
+"""Shutdown finalization tests.
 
 Verifies:
-- T1: drain_pending returns False after DRAIN_TIMEOUT when writer wedged
-- T2: finalize_sn_run timeout doesn't crash — error logged, no exception
-- T3: SIGTERM handler registered alongside SIGINT
-- T4: watchdog grace bumped to 45s on 2nd SIGINT
+- drain_pending returns False after DRAIN_TIMEOUT when the writer is wedged
+- a finalize_sn_run timeout doesn't crash — error logged, no exception
+- SIGTERM handler registered alongside SIGINT
+- watchdog grace bumped to 45s on the 2nd SIGINT
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
 _EVENT = LLMCostEvent(model="test", tokens_in=10, tokens_out=5, phase="test")
 
 
-# ── T1: drain timeout proceeds to finalize ───────────────────────────
+# ── drain timeout proceeds to finalize ───────────────────────────────
 
 
 @pytest.mark.asyncio
@@ -74,7 +74,7 @@ async def test_drain_timeout_proceeds():
             pass
 
 
-# ── T2: finalize timeout doesn't crash ───────────────────────────────
+# ── finalize timeout doesn't crash ───────────────────────────────────
 
 
 @pytest.mark.asyncio
@@ -106,7 +106,7 @@ async def test_finalize_timeout_no_crash(caplog):
     # The finally block in loop.py catches TimeoutError and continues.
 
 
-# ── T3: SIGTERM handler registered ───────────────────────────────────
+# ── SIGTERM handler registered ───────────────────────────────────────
 
 
 @pytest.mark.asyncio
@@ -132,7 +132,7 @@ async def test_sigterm_handler_registered():
     assert has_sigterm, "SIGTERM handler should be registered"
 
 
-# ── T4: watchdog grace bumped to 45s ─────────────────────────────────
+# ── watchdog grace bumped to 45s ─────────────────────────────────────
 
 
 @pytest.mark.asyncio

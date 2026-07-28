@@ -1,4 +1,4 @@
-"""Tests for B9 error-sibling minting.
+"""Tests for error-sibling minting.
 
 Verifies that the compose pipeline deterministically mints
 error-sibling StandardNames for DD paths with HAS_ERROR edges,

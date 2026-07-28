@@ -1,9 +1,9 @@
-"""Tests for per-phase BudgetManager and L7 cost tracking.
+"""Tests for the per-phase BudgetManager and revision-pass cost tracking.
 
-Covers the W33A fix: before this change, each phase created its own
-independent BudgetManager so review could claim a fresh $N budget even
-after compose had already spent the user-specified cost_limit.  After the
-fix, all phases draw from a single shared pool so total spend ≤ cost_limit.
+Every phase must draw from ONE shared budget pool.  Giving each phase its own
+independent BudgetManager lets review claim a fresh $N after compose has
+already spent the user-specified cost_limit, so total spend silently exceeds
+the cap; a single shared pool keeps total spend ≤ cost_limit.
 
 All tests are mock-based — no Neo4j or real LLM required.
 """
@@ -25,7 +25,7 @@ def _ce(lease, amount, phase=None):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# L7 cost tracking
+# Borderline-candidate revision-pass cost tracking
 # ═══════════════════════════════════════════════════════════════════════
 
 

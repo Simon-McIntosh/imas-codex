@@ -88,7 +88,7 @@ class TestReportAccountingReconciles:
 
     def test_report_counts_include_new_buckets(self) -> None:
         counts = ExportReport().to_dict()["counts"]
-        # L1: domain filtering happens in the query, so this is always 0.
+        # Domain filtering happens in the query, so this bucket is always 0.
         assert counts["excluded_by_domain"] == 0
         assert counts["excluded_placeholder"] == 0
         assert counts["parse_failures"] == 0
