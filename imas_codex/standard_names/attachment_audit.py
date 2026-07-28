@@ -128,6 +128,7 @@ _MIN_WIPEOUT_ATTACHMENTS = 2
 #: ``extracted`` — that would strand the good name it already produced.
 _ATTACHMENTS_QUERY = """
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+{scope}
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
@@ -143,6 +144,11 @@ RETURN src.id            AS source_node_id,
        coalesce(nu.id, sn.unit) AS sn_unit,
        count(DISTINCT other) AS other_live_names
 """
+
+#: Scope clause narrowing the read to one name. Used by the write-time gate on
+#: paths that migrate a historical source set onto a NEW name, where a full
+#: corpus audit would be far too expensive for a hot path.
+_ONE_NAME_SCOPE = "WHERE sn.id = $sn_id"
 
 #: Detach one attachment: the provenance edge, the DD-side projection, and the
 #: name's ``source_paths`` entry.
@@ -279,11 +285,20 @@ class AttachmentAuditResult:
         }
 
 
-def audit_attachments(gc: Any | None = None) -> AttachmentAuditResult:
-    """Re-validate every graph attachment against the full guard suite. Read-only.
+def audit_attachments(
+    gc: Any | None = None, *, sn_id: str | None = None
+) -> AttachmentAuditResult:
+    """Re-validate graph attachments against the full guard suite. Read-only.
 
     Returns the verdicts without touching the graph, so the same predicate backs
     both the reporting path and the reconcile.
+
+    Args:
+        gc: An open ``GraphClient``, or None to open and close one.
+        sn_id: Restrict the read to one name's attachments. The whole-name
+            wipeout classification then sees exactly that name's source set,
+            which is what it needs — it is a per-name rule. Used by the
+            write-time gate; omit for the corpus-wide pass.
     """
     from imas_codex.standard_names.workers import _is_attachment_consistent
 
@@ -295,8 +310,16 @@ def audit_attachments(gc: Any | None = None) -> AttachmentAuditResult:
     else:
         client = gc
     try:
+        params: dict[str, Any] = {"historical": sorted(_HISTORICAL_NAME_STAGES)}
+        if sn_id is not None:
+            params["sn_id"] = sn_id
         rows = list(
-            client.query(_ATTACHMENTS_QUERY, historical=sorted(_HISTORICAL_NAME_STAGES))
+            client.query(
+                _ATTACHMENTS_QUERY.format(
+                    scope="" if sn_id is None else _ONE_NAME_SCOPE
+                ),
+                **params,
+            )
         )
     finally:
         if own:
@@ -373,7 +396,11 @@ def _name_level_defect(
 
 
 def reconcile_attachment_consistency(
-    gc: Any | None = None, *, include_accepted: bool = False, dry_run: bool = False
+    gc: Any | None = None,
+    *,
+    include_accepted: bool = False,
+    dry_run: bool = False,
+    sn_id: str | None = None,
 ) -> AttachmentAuditResult:
     """Detach every inconsistent attachment and reroute its source to compose.
 
@@ -383,6 +410,7 @@ def reconcile_attachment_consistency(
             names. Off by default: an accepted name is catalog-authoritative, so
             losing a source is a decision, not hygiene.
         dry_run: Report the verdicts without writing.
+        sn_id: Restrict the pass to one name (see :func:`audit_attachments`).
 
     Returns the :class:`AttachmentAuditResult`, whose ``by_rule()`` breaks the
     rejections down by which guard rule fired.
@@ -395,7 +423,7 @@ def reconcile_attachment_consistency(
     else:
         client = gc
     try:
-        result = audit_attachments(client)
+        result = audit_attachments(client, sn_id=sn_id)
         misnamed = {d.sn_id for d in result.names_misnamed}
         # Disjoint buckets, most-binding first: a provenance edge is never
         # touched; a name-level defect is repaired by renaming the name, not by
@@ -500,6 +528,40 @@ def reconcile_attachment_consistency(
             ", ".join(result.names_orphaned[:20]),
         )
     return result
+
+
+def gate_migrated_attachments(
+    gc: Any | None = None, *, sn_id: str
+) -> AttachmentAuditResult:
+    """Re-validate one name's attachments right after a source set migrated onto it.
+
+    A path that moves a predecessor's whole ``PRODUCED_NAME`` / ``HAS_STANDARD_NAME``
+    set onto a DIFFERENT name creates a new *pairing* out of a historical source
+    set, and a new pairing is exactly what the consistency guard exists to judge.
+    Without this, a rename can launder an edge the guard would have refused at
+    compose time — which is how conductor-geometry vertices reached optical
+    ``line_of_sight`` names.
+
+    Scoped to the one name because this runs on a hot path: a corpus-wide audit
+    per refine is not affordable. ``include_accepted`` stays off — a freshly
+    migrated successor is never accepted yet, and an accepted name losing a
+    source must remain a deliberate decision.
+
+    Never raises: a gate that can fail the write it protects would turn a
+    recoverable bad edge into a lost rename. Rejections are logged and, when the
+    whole source set trips one rule, reported as a NAME defect rather than
+    detached.
+    """
+    try:
+        return reconcile_attachment_consistency(gc, sn_id=sn_id)
+    except Exception:  # pragma: no cover - the rename must survive a gate failure
+        logger.warning(
+            "gate_migrated_attachments: could not re-validate attachments "
+            "migrated onto %s; the corpus-wide audit will catch them",
+            sn_id,
+            exc_info=True,
+        )
+        return AttachmentAuditResult()
 
 
 def _record_detachments(gc: Any, verdicts: list[AttachmentVerdict]) -> None:

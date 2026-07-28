@@ -65,7 +65,12 @@ def _client(rows: list[dict]) -> MagicMock:
     from imas_codex.standard_names import attachment_audit as mod
 
     def _query(q: str, **params):
-        if q == mod._ATTACHMENTS_QUERY:
+        # Matched on a distinctive projection rather than by identity: the read is
+        # a template whose scope clause is filled in per call (whole corpus vs one
+        # name), so the query string reaching the client is never the raw constant.
+        if "AS other_live_names" in q:
+            if (want := params.get("sn_id")) is not None:
+                return [r for r in rows if r["sn_id"] == want]
             return rows
         if q == mod._DETACH_QUERY:
             return [{"detached": len(params.get("items") or [])}]
@@ -784,15 +789,15 @@ def test_audit_covers_every_attachment_writer() -> None:
         )
 
 
-def test_refine_successor_migration_has_no_write_time_gate() -> None:
-    """Documents the laundering channel the audit exists to cover.
+def test_refine_successor_migration_is_gated() -> None:
+    """The migration re-pairs a historical source set, so it must ask the guard.
 
     ``persist_refined_name`` moves every ``PRODUCED_NAME`` and
-    ``HAS_STANDARD_NAME`` edge from the predecessor to a DIFFERENT name with no
-    re-validation, which is how a source the guard rejects at compose ends up
-    on an accepted name. If this ever starts calling the guard, tighten this
-    test rather than deleting it — the audit must stay the backstop for the
-    remaining ungated writers.
+    ``HAS_STANDARD_NAME`` edge from the predecessor onto a DIFFERENT name. The
+    set is historical but the pairing is new, and a new pairing is what the
+    guard judges — ungated, this channel launders an edge that compose would
+    have refused. The gate must stay scoped to the successor: a corpus-wide
+    audit per refine is unaffordable on this path.
     """
     import inspect
 
@@ -800,7 +805,52 @@ def test_refine_successor_migration_has_no_write_time_gate() -> None:
 
     src = inspect.getsource(graph_ops.persist_refined_name)
     assert "MERGE (s)-[:PRODUCED_NAME]->(new)" in src, "migration shape changed"
-    assert "_is_attachment_consistent" not in src
+    assert "gate_migrated_attachments(sn_id=new_name)" in src
+
+
+def test_gate_validates_only_the_successor() -> None:
+    """The gate reads one name, not the corpus — it runs on every refine."""
+    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+
+    other = "electron_density"
+    gc = _client(
+        [
+            _row(
+                "summary/boundary/strike_point_inner_z/value",
+                "z_image_up_unit_vector_of_camera",
+            ),
+            _row(
+                "core_profiles/profiles_1d/electrons/density",
+                other,
+                dd_unit="m^-3",
+                sn_unit="m^-3",
+            ),
+        ]
+    )
+    result = gate_migrated_attachments(gc, sn_id=other)
+    assert result.checked == 1, "the gate must not audit names it did not touch"
+    assert result.rejected == []
+
+
+def test_gate_detaches_a_laundered_migration() -> None:
+    """A migrated edge the guard refuses is detached, not left on the successor."""
+    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+
+    sn_id = "z_image_up_unit_vector_of_camera"
+    gc = _client([_row("summary/boundary/strike_point_inner_z/value", sn_id)])
+    result = gate_migrated_attachments(gc, sn_id=sn_id)
+    assert [v.rule for v in result.rejected] == ["locus/source device mismatch"]
+    assert result.detached == 1
+
+
+def test_gate_survives_a_graph_failure() -> None:
+    """A gate that raised would turn a bad edge into a lost rename."""
+    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
+
+    gc = MagicMock()
+    gc.query.side_effect = RuntimeError("graph unavailable")
+    result = gate_migrated_attachments(gc, sn_id="electron_density")
+    assert result == AttachmentAuditResult()
 
 
 @pytest.mark.graph

@@ -10847,6 +10847,27 @@ def persist_refined_name(
 
     if result:
         row = dict(result[0])
+        # The migration above re-pairs a HISTORICAL source set with a NEW name,
+        # and the consistency guard is what judges a pairing. Compose consults it
+        # before creating an edge; this path creates edges without ever asking, so
+        # ask now, scoped to the successor. Anything the guard refuses is detached
+        # and its source rewound to re-compose, exactly as a bad compose would
+        # have been — otherwise a rename can launder an edge the guard rejects.
+        from imas_codex.standard_names.attachment_audit import (
+            gate_migrated_attachments,
+        )
+
+        gate = gate_migrated_attachments(sn_id=new_name)
+        if gate.rejected:
+            logger.warning(
+                "persist_refined_name: %d attachment(s) migrated onto '%s' fail "
+                "the consistency guard (detached %d, name-level defect %d)",
+                len(gate.rejected),
+                new_name,
+                gate.detached,
+                len(gate.names_misnamed),
+            )
+
         from imas_codex.standard_names.provenance_lifecycle import (
             retarget_standard_name_sources,
         )
