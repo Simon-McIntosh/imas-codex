@@ -105,7 +105,9 @@ class TestGrammarTokensBySegment:
 # ---------------------------------------------------------------------------
 
 # Compounds the composer proposed as missing vocabulary that are in fact
-# expressible from registered operators applied to a registered base.
+# expressible from registered operators applied to a registered base.  Every
+# token here was taken verbatim from a recorded ``VocabGap``, so this is the real
+# proposal distribution rather than a set of constructed cases.
 OPERATOR_EXPRESSIBLE = [
     ("qualifier", "inverse_square"),
     ("physical_base", "flux_surface_averaged_square_magnetic_field"),
@@ -114,8 +116,38 @@ OPERATOR_EXPRESSIBLE = [
     ("physical_base", "magnetic_field_magnitude_squared"),
     ("qualifier", "average_square"),
     ("qualifier", "mean_square"),
+    ("qualifier", "squared"),
     ("physical_base", "volume_derivative_with_respect_to_toroidal_flux"),
+    ("physical_base", "z_square_average"),
+    ("qualifier", "perpendicular_square"),
+    ("qualifier", "inverse_magnetic_field_squared"),
 ]
+
+# Recorded proposals the cover walk does NOT resolve, with the reason each one
+# needs something other than operator awareness.  Listed so the boundary of the
+# rule is explicit and a later widening has a starting point; a token moving out
+# of this list into OPERATOR_EXPRESSIBLE is an improvement, the reverse is a
+# regression.
+KNOWN_UNRESOLVED = {
+    # The registered operator is `derivative_with_respect_to`, whose words
+    # straddle the operand here; the walk covers left to right and cannot match
+    # an operator split around what it applies to.
+    "derivative_of_area_with_respect_to_poloidal_flux": "infix operator spelling",
+    # `variation` is a registered operator but `path_length` is not a registered
+    # base, so nothing carries the residue.
+    "path_length_variation": "unregistered residual base",
+    # `logarithm` is registered, `logarithmic` is an adjectival form no
+    # inflection rule reaches without also admitting arbitrary `-ic` words.
+    "logarithmic_gradient": "adjectival operator form",
+    # `over` marks a ratio, which is the binary `ratio` operator rather than a
+    # decomposition; skipping the word would drop the ratio semantics.
+    "gradient_rho_squared_over_B_squared": "ratio, not a compound",
+    "gradient_squared_over_magnetic_field_squared": "ratio, not a compound",
+    "radial_gradient_squared_over_field_squared": "ratio, not a compound",
+    # A synonym of the registered base `opacity` — a reuse question for the
+    # token-similarity check, not a composition one.
+    "optical_depth": "synonym of a registered base",
+}
 
 
 @requires_isn
@@ -209,6 +241,18 @@ class TestClassifyGapOperatorAware:
     def test_genuinely_absent_token_still_absent(self):
         assert classify_gap("position", "zzz_nonexistent_token_xyzzy") == ("absent", [])
         assert classify_gap("qualifier", "zzz_truly_unique_xyzzy") == ("absent", [])
+
+    @pytest.mark.parametrize("token", sorted(KNOWN_UNRESOLVED))
+    def test_documented_boundary_of_the_rule(self, token):
+        """The unresolved cases stay unresolved until something else handles them.
+
+        Pinned so widening the cover walk shows up here as a deliberate change
+        rather than as an unnoticed side effect.
+        """
+        assert operator_composition(token) is None, (
+            f"{token} now resolves ({KNOWN_UNRESOLVED[token]}) — move it into "
+            f"OPERATOR_EXPRESSIBLE"
+        )
 
 
 # ---------------------------------------------------------------------------

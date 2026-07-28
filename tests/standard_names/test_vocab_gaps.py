@@ -1310,15 +1310,20 @@ class TestBatchRescueValidator:
         }
 
     def _bad_qualifier_candidate(self, source_id: str = "path/b") -> dict:
-        """Build a candidate with an unregistered qualifier token."""
+        """Build a candidate with an unregistered qualifier token.
+
+        The token must belong to NO grammar class.  A registered operator
+        (``cumulative``, ``square``) is re-slotted into ``operator_token``
+        instead of being rescued, so it would not exercise this path.
+        """
         return {
             "source_id": source_id,
             "segments": {
                 "base_token": "torque",
                 "base_kind": "quantity",
-                "qualifiers": ["cumulative"],
+                "qualifiers": ["zzz_unregistered_xyzzy"],
             },
-            "description": "Cumulative torque",
+            "description": "Torque with an unnameable qualifier",
             "reason": "test",
         }
 
@@ -1347,7 +1352,7 @@ class TestBatchRescueValidator:
         assert batch.candidates[0].segments.base_token == "temperature"
         assert len(batch.vocab_gaps) == 1
         assert batch.vocab_gaps[0].source_id == "p/b"
-        assert batch.vocab_gaps[0].token == "cumulative"
+        assert batch.vocab_gaps[0].token == "zzz_unregistered_xyzzy"
 
     def test_multiple_bad_candidates_all_rescued(self):
         """Multiple bad candidates are individually rescued."""

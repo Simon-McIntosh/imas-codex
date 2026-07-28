@@ -11,6 +11,7 @@ from pydantic import (
     Field,
     ValidationError,
     computed_field,
+    field_validator,
     model_validator,
 )
 
@@ -365,6 +366,57 @@ class GrammarSegments(BaseModel):
             )
         return self
 
+    @model_validator(mode="before")
+    @classmethod
+    def _promote_operator_qualifiers(cls, data: Any) -> Any:
+        """Move a registered operator out of ``qualifiers`` into the operator slot.
+
+        Operators are not qualifiers — they compose through ``operator_token``,
+        and ``_to_model_dict`` routes that to ISN's ``transformation`` /
+        ``decomposition`` using the registry's own ``kind``.  A composer that
+        offers ``square`` as a qualifier has the physics right and the slot
+        wrong, which is repairable here: the token names one specific operator,
+        so re-slotting it needs no guesswork and yields the name the composer
+        meant.  Rejecting instead discards a correct candidate and gives it no
+        way back.
+
+        Only an empty operator slot is filled.  Stacking two operators is not
+        expressible in this model, so an operator qualifier arriving alongside an
+        ``operator_token`` stays in ``qualifiers`` and is reported by
+        :meth:`_validate_qualifiers` — a silent drop would change the physics.
+        """
+        if not isinstance(data, dict):
+            return data
+        qualifiers = data.get("qualifiers")
+        if not isinstance(qualifiers, list) or not qualifiers:
+            return data
+        if data.get("operator_token"):
+            return data
+
+        from imas_codex.standard_names.segments import grammar_tokens_by_segment
+
+        operators = set(grammar_tokens_by_segment().get("operator", ()))
+        if not operators:
+            return data
+
+        promoted: str | None = None
+        kept: list[str] = []
+        for qualifier in qualifiers:
+            if promoted is None and qualifier in operators:
+                promoted = qualifier
+            else:
+                kept.append(qualifier)
+        if promoted is None:
+            return data
+
+        data = dict(data)
+        data["qualifiers"] = kept
+        data["operator_token"] = promoted
+        logger.info(
+            "Promoted operator '%s' out of qualifiers into operator_token", promoted
+        )
+        return data
+
     @model_validator(mode="after")
     def _validate_qualifiers(self) -> GrammarSegments:
         """Validate qualifier tokens against all grammar vocabularies.
@@ -372,7 +424,13 @@ class GrammarSegments(BaseModel):
         The ``qualifiers`` field can hold tokens from subject, qualifier,
         component, or coordinate segments — the ISN compose step validates
         actual grammar compatibility.  We only reject tokens that appear
-        in *no* grammar section at all.
+        in *no* grammar class at all.
+
+        The operator class counts as a grammar class here so the message can say
+        which slot the token belongs in.  A qualifier that IS an operator only
+        reaches this point when the operator slot was already taken
+        (:meth:`_promote_operator_qualifiers` fills an empty one), which no
+        re-slotting can fix.
         """
         if not self.qualifiers:
             return self
@@ -381,17 +439,32 @@ class GrammarSegments(BaseModel):
         except ImportError:
             return self
 
+        from imas_codex.standard_names.segments import grammar_tokens_by_segment
+
         ctx = get_grammar_context()
-        vocab = ctx.get("vocabulary_sections", [])
         allowed: set[str] = set()
-        for section in vocab:
+        for section in ctx.get("vocabulary_sections", []):
             allowed.update(section.get("tokens", []))
-        if allowed:
-            for q in self.qualifiers:
-                if q not in allowed:
-                    raise ValueError(
-                        f"qualifier '{q}' is not a registered grammar token."
-                    )
+        # Union both vocabulary views: the sections carry the per-segment enums
+        # the prompt renders, the accessor adds the operator class they omit.
+        by_segment = grammar_tokens_by_segment()
+        for tokens in by_segment.values():
+            allowed.update(tokens)
+        operators = set(by_segment.get("operator", ()))
+
+        if not allowed:
+            return self
+        for q in self.qualifiers:
+            if q in operators:
+                raise ValueError(
+                    f"qualifier '{q}' is a registered OPERATOR, not a qualifier — "
+                    f"route it through operator_token (with operator_kind from the "
+                    f"registry). The operator slot already holds "
+                    f"'{self.operator_token}'; a name cannot stack two operators, "
+                    f"so express one of them as a separate standard name."
+                )
+            if q not in allowed:
+                raise ValueError(f"qualifier '{q}' is not a registered grammar token.")
         return self
 
     @model_validator(mode="after")
@@ -697,10 +770,39 @@ class StandardNameVocabGap(BaseModel):
 
     source_id: str = Field(description="DD path that needs naming")
     segment: str = Field(
-        description="Grammar segment missing a token (e.g., 'subject', 'position')"
+        description=(
+            "Grammar class missing a token — one of the grammar segments "
+            "(e.g. 'physical_base', 'qualifier', 'position'), 'operator' for the "
+            "operator registry, or 'grammar_ambiguity' for a structural finding"
+        )
     )
     token: str = Field(description="Proposed token value for the grammar segment")
     reason: str = Field(description="Why this token is needed for naming this path")
+
+    @field_validator("segment")
+    @classmethod
+    def _segment_is_a_real_class(cls, value: str) -> str:
+        """Reject a segment class the grammar does not have.
+
+        Free text here mis-files a gap into a class nothing reads, where it is
+        invisible to the reconcile that would otherwise resolve or retire it.
+        The legal set is derived from the installed grammar, so it tracks ISN.
+
+        :meth:`StandardNameComposeBatch._normalise_gap_segments` repairs what it
+        can before this runs, which is why raising here is safe: a whole batch
+        never fails on one mis-named class.
+        """
+        from imas_codex.standard_names.segments import reportable_segments
+
+        legal = reportable_segments()
+        if not legal:
+            return value  # grammar unavailable — nothing to constrain against
+        if value not in legal:
+            raise ValueError(
+                f"'{value}' is not a grammar segment class. Legal classes: "
+                f"{', '.join(sorted(legal))}."
+            )
+        return value
 
 
 class StandardNameAttachment(BaseModel):
@@ -729,6 +831,32 @@ class StandardNameComposeBatch(BaseModel):
         default_factory=list,
         description="Paths where naming requires vocabulary expansion in imas-standard-names",
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalise_gap_segments(cls, data: Any) -> Any:
+        """Repair or drop gap reports naming a grammar class that does not exist.
+
+        ``StandardNameVocabGap.segment`` only accepts a real class, so this runs
+        first and guarantees it: a field spelling is mapped to its class
+        (``operator_token`` → ``operator``), and otherwise the class is inferred
+        from the token itself, which is the more reliable signal — a registered
+        token knows where it belongs regardless of what the composer called the
+        slot.
+
+        A gap that is neither mappable nor diagnosable from its token is dropped
+        rather than raised: it names no class and no known token, so there is
+        nothing for a reconcile to act on, and failing the batch would discard
+        every well-formed candidate and gap beside it.
+        """
+        if not isinstance(data, dict):
+            return data
+        gaps = data.get("vocab_gaps")
+        if not isinstance(gaps, list) or not gaps:
+            return data
+        data = dict(data)
+        data["vocab_gaps"] = _normalise_gap_records(gaps)
+        return data
 
     @model_validator(mode="before")
     @classmethod
@@ -784,6 +912,9 @@ class StandardNameComposeBatch(BaseModel):
 
         if rescued_gaps:
             data["candidates"] = valid
+            # The error text names a model FIELD, which is not always a grammar
+            # class; normalise before these reach the constrained gap model.
+            rescued_gaps = _normalise_gap_records(rescued_gaps)
             existing_gaps = data.get("vocab_gaps", [])
             if isinstance(existing_gaps, list):
                 data["vocab_gaps"] = existing_gaps + rescued_gaps
@@ -796,6 +927,70 @@ class StandardNameComposeBatch(BaseModel):
             )
 
         return data
+
+
+def _normalise_gap_records(gaps: list[Any]) -> list[Any]:
+    """Coerce every gap record's ``segment`` to a real grammar class, or drop it.
+
+    Shared by the batch normaliser and the per-candidate rescue path so the
+    guarantee holds no matter which produced the record — relying on the
+    relative order of two ``mode="before"`` validators would make it depend on
+    pydantic internals.
+
+    A class is resolved from a field spelling (``operator_token`` → ``operator``)
+    or, failing that, from the token itself, which is the stronger signal: a
+    registered token knows its own class whatever the composer called the slot.
+    A record with neither is dropped — it names no class and no known token, so
+    no reconcile can act on it, and raising would take the whole batch down.
+    """
+    from imas_codex.standard_names.segments import (
+        grammar_token_index,
+        reportable_segments,
+    )
+
+    legal = reportable_segments()
+    if not legal:
+        return gaps  # grammar unavailable — nothing to normalise against
+
+    index = grammar_token_index()
+    kept: list[Any] = []
+    for gap in gaps:
+        if not isinstance(gap, dict):
+            kept.append(gap)
+            continue
+        segment = gap.get("segment")
+        if segment in legal:
+            kept.append(gap)
+            continue
+
+        resolved: str | None = None
+        if isinstance(segment, str):
+            trimmed = segment.removesuffix("_token").removesuffix("_segment")
+            if trimmed in legal:
+                resolved = trimmed
+        if resolved is None:
+            classes = index.get(gap.get("token", ""))
+            if classes:
+                resolved = classes[0]
+
+        if resolved is None:
+            logger.warning(
+                "Dropping vocab gap for %s: segment '%s' is not a grammar class "
+                "and token '%s' is unregistered, so nothing can act on it",
+                gap.get("source_id", "unknown"),
+                segment,
+                gap.get("token", ""),
+            )
+            continue
+
+        logger.info(
+            "Re-filed vocab gap for %s from segment '%s' to '%s'",
+            gap.get("source_id", "unknown"),
+            segment,
+            resolved,
+        )
+        kept.append({**gap, "segment": resolved})
+    return kept
 
 
 def _extract_gap_from_error(exc_str: str, segments: dict[str, Any]) -> tuple[str, str]:
@@ -814,13 +1009,18 @@ def _extract_gap_from_error(exc_str: str, segments: dict[str, Any]) -> tuple[str
         field_name = m.group(1)
         token = m.group(2)
         # Map field names to grammar segments
+        # Model field → the grammar class that field's token belongs to.  An
+        # operator_token holds an operator, not a qualifier: filing it as one
+        # sends a mis-slotted operator to be compared against the qualifier
+        # vocabulary, where it can only ever look absent.
         segment_map = {
             "base_token": "physical_base",
             "projection_axis": "component",
             "qualifier": "qualifier",
+            "qualifiers": "qualifier",
             "locus_token": "geometry",
             "process_token": "process",
-            "operator_token": "qualifier",
+            "operator_token": "operator",
         }
         return segment_map.get(field_name, field_name), token
 

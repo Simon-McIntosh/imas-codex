@@ -57,6 +57,13 @@ def _load_segment_token_map() -> dict[str, tuple[str, ...]] | None:
 # wrong slot" rather than "absent".
 OPERATOR_SEGMENT = "operator"
 
+# The ISN *model layer* names the operator slot by how the operator attaches:
+# a prefix lands in ``transformation``, a postfix in ``decomposition`` (see
+# ``GrammarSegments._to_model_dict``).  A composer reporting a gap against one of
+# those is naming the operator slot in the model's own vocabulary, so they are
+# legitimate gap targets even though neither is a SEGMENT_TOKEN_MAP segment.
+OPERATOR_SLOT_ALIASES: frozenset[str] = frozenset({"transformation", "decomposition"})
+
 
 @lru_cache(maxsize=1)
 def _operator_tokens() -> frozenset[str]:
@@ -621,15 +628,15 @@ class GapVerdict:
 
 def _operator_routing_advice(operators: tuple[str, ...], bases: tuple[str, ...]) -> str:
     """Render the "use the operator slot" half of a verdict's guidance."""
-    op_list = ", ".join(operators)
-    plural = "operators" if len(operators) > 1 else "operator"
+    many = len(operators) > 1
     advice = (
-        f"{op_list} {'are' if len(operators) > 1 else 'is'} a registered "
-        f"{plural} — route {'them' if len(operators) > 1 else 'it'} through "
-        f"operator_token (with operator_kind from the registry)"
+        f"{', '.join(operators)} {'are registered operators' if many else 'is a registered operator'}"
+        f" — route {'them' if many else 'it'} through operator_token "
+        f"(with operator_kind from the registry)"
     )
     if bases:
-        advice += f", applied to the registered base {', '.join(bases)}"
+        noun = "tokens" if len(bases) > 1 else "token"
+        advice += f", applied to the registered {noun} {', '.join(bases)}"
     return advice
 
 
@@ -731,14 +738,20 @@ def reportable_segments() -> frozenset[str]:
     """Grammar classes a vocabulary gap may legitimately be reported against.
 
     Every class in :func:`grammar_tokens_by_segment` (the segment enums plus
-    :data:`OPERATOR_SEGMENT`) together with the pseudo segments the composer
-    uses for structural findings.  Empty when ISN is unavailable, in which case
-    callers must not constrain — there is nothing to constrain against.
+    :data:`OPERATOR_SEGMENT`), the pseudo segments the composer uses for
+    structural findings, and the :data:`OPERATOR_SLOT_ALIASES` under which the
+    ISN model layer names that same slot.  Empty when ISN is unavailable, in
+    which case callers must not constrain — there is nothing to constrain
+    against.
+
+    Deliberately wider than :func:`known_segments`, which answers a different
+    question: what the *parser* slots tokens into.  A gap may be reported against
+    a slot the model layer owns without that slot being a parser segment.
     """
     classes = set(grammar_tokens_by_segment())
     if not classes:
         return frozenset()
-    return frozenset(classes | set(PSEUDO_SEGMENTS))
+    return frozenset(classes | set(PSEUDO_SEGMENTS) | set(OPERATOR_SLOT_ALIASES))
 
 
 def filter_closed_segment_gaps(
