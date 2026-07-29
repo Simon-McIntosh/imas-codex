@@ -1303,7 +1303,7 @@ wheels = [
 
 [[package]]
 name = "imas-standard-names"
-version = "0.8.0rc61.dev2+g7d163e889"
+version = "0.8.0rc61"
 source = { git = "https://github.com/Simon-McIntosh/IMAS-Standard-Names.git?rev=7d163e889f2e325c3bfd57c48160477784cf7211#7d163e889f2e325c3bfd57c48160477784cf7211" }
 dependencies = [
     { name = "click" },
