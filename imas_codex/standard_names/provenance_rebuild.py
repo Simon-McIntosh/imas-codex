@@ -11,13 +11,16 @@ build against the **existing** names — it never regenerates names or docs:
   blocks as the map; the DD graph closes gaps deterministically.
 - **derived / parent structure** — reconstructed by the existing grammar
   fixpoint (:func:`graph_ops.rederive_structural_edges`).
-- **residue** — any live name with no deterministic anchor gets an explicit
-  ``source_type='manual'`` source (auditable; never a fabricated DD path).
+- **change history** — a live name whose latest recorded predecessor still has
+  real semantic sources inherits those existing sources.
+- **residue** — any live name without deterministic or historical evidence is
+  reported unresolved. No fallback source is fabricated.
 
-The final link topology (``StandardNameSource`` + ``PRODUCED_NAME`` +
-``FROM_DD_PATH`` + ``HAS_PARENT``) is identical to a fresh from-scratch build
-because it is produced by the same deterministic routines — proven by an empty
-orphan set + idempotent re-run.
+Recoverable link topology (``StandardNameSource`` + ``PRODUCED_NAME`` +
+``FROM_DD_PATH`` + ``HAS_PARENT``) is produced by the same deterministic
+routines as a fresh build. The report retains an explicit unresolved set for
+names whose evidence is insufficient, and an idempotent re-run never invents
+new provenance for that residue.
 """
 
 from __future__ import annotations
@@ -31,7 +34,9 @@ import yaml
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.graph_ops import (
+    find_orphan_parent_source_candidates,
     normalize_derived_parent_lifecycle,
+    reconcile_orphan_parent_sources,
     reconcile_standard_name_sources,
     rederive_structural_edges,
     seed_parent_sources,
@@ -41,6 +46,10 @@ from imas_codex.standard_names.ledger import (
     find_edge_scalar_desyncs,
     find_provenance_orphans,
     reattach_produced_name_edges,
+)
+from imas_codex.standard_names.provenance_lifecycle import (
+    DELETION_OPERATIONS,
+    bind_sources_exclusively,
 )
 from imas_codex.standard_names.source_paths import parse_source_path
 
@@ -226,22 +235,6 @@ def bind_recovery_sources(
             gc.close()
 
 
-def _synth_spec(name_id: str, source_type: str) -> dict[str, Any]:
-    """Build an explicit non-DD source spec (``derived`` or ``manual``).
-
-    Never carries a ``dd_path`` — these are the conservative fallbacks for
-    names with no deterministic DD anchor, so a DD path is never fabricated.
-    """
-    prefix = "derived" if source_type == "derived" else "manual"
-    status = "composed" if source_type == "derived" else "attached"
-    return {
-        "id": f"{prefix}:{name_id}",
-        "source_type": source_type,
-        "source_id": name_id,
-        "status": status,
-    }
-
-
 def _fetch_pending_source_names(gc: GraphClient, ids: list[str]) -> set[str]:
     """Return the subset of *ids* that have a claimable PENDING dd source.
 
@@ -272,27 +265,106 @@ def _fetch_pending_source_names(gc: GraphClient, ids: list[str]) -> set[str]:
     return {r["id"] for r in rows if r.get("id")}
 
 
-def _classify_derived_parents(gc: GraphClient, ids: list[str]) -> set[str]:
-    """Return the subset of *ids* that are DERIVED PARENTS.
+def _fetch_change_history_sources(
+    gc: GraphClient,
+    ids: list[str],
+) -> dict[str, list[str]]:
+    """Recover source ids by walking each orphan's recorded predecessor chain.
 
-    A derived parent is a name that other names point at via ``HAS_PARENT``
-    (i.e. it has children) or is explicitly ``origin='derived'``. Its provenance
-    is the composed-from child group — the plan's "derived — a parent/group of
-    SNs" — so it gets a ``derived`` source, not ``manual``. (A pure child with a
-    lost DD anchor is NOT derived here — its source was a DD leaf.)
+    This uses only durable evidence already in the graph: a non-deletion
+    ``StandardNameChange`` names each predecessor, and an existing composed or
+    attached source still points to one of those predecessors by edge or scalar
+    mirror. No source node or upstream DD/signal identity is invented.
     """
     if not ids:
-        return set()
-    rows = gc.query(
+        return {}
+    change_rows = gc.query(
         """
-        MATCH (sn:StandardName) WHERE sn.id IN $ids
-        RETURN sn.id AS id,
-               (exists { (:StandardName)-[:HAS_PARENT]->(sn) }
-                OR coalesce(sn.origin, '') = 'derived') AS is_parent
+        MATCH (change:StandardNameChange)
+        WHERE NOT (coalesce(change.operation, '') IN $deletion_operations)
+          AND change.from_name IS NOT NULL
+          AND change.to_name IS NOT NULL
+        RETURN change.from_name AS from_name,
+               change.to_name AS to_name,
+               change.changed_at AS changed_at
+        ORDER BY change.changed_at DESC
         """,
-        ids=ids,
+        deletion_operations=sorted(DELETION_OPERATIONS),
     )
-    return {r["id"] for r in rows if r.get("is_parent")}
+    predecessors_by_target: dict[str, list[dict[str, Any]]] = {}
+    for row in change_rows:
+        predecessors_by_target.setdefault(row["to_name"], []).append(dict(row))
+
+    chains: dict[str, list[str]] = {}
+    predecessor_ids: set[str] = set()
+    for orphan_id in ids:
+        chain: list[str] = []
+        current = orphan_id
+        visited = {current}
+        for _ in range(100):
+            candidates = predecessors_by_target.get(current, [])
+            if not candidates:
+                break
+            latest = candidates[0]
+            predecessor = latest.get("from_name")
+            if not predecessor or predecessor in visited:
+                break
+            chain.append(predecessor)
+            predecessor_ids.add(predecessor)
+            visited.add(predecessor)
+            current = predecessor
+        chains[orphan_id] = chain
+
+    if not predecessor_ids:
+        return {}
+    source_rows = gc.query(
+        """
+        MATCH (source:StandardNameSource)
+        WHERE source.status IN ['composed', 'attached']
+          AND NOT EXISTS {
+            MATCH (source)-[:PRODUCED_NAME]->(live_target:StandardName)
+            WHERE NOT (coalesce(live_target.name_stage, '') IN
+                       ['superseded', 'exhausted', 'contested'])
+          }
+          AND NOT EXISTS {
+            MATCH (scalar_target:StandardName)
+            WHERE scalar_target.id = source.produced_sn_id
+              AND NOT (coalesce(scalar_target.name_stage, '') IN
+                       ['superseded', 'exhausted', 'contested'])
+          }
+          AND (
+            source.produced_sn_id IN $predecessor_ids
+            OR EXISTS {
+              MATCH (source)-[:PRODUCED_NAME]->(prior:StandardName)
+              WHERE prior.id IN $predecessor_ids
+            }
+          )
+        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+        RETURN source.id AS source_id,
+               source.produced_sn_id AS produced_sn_id,
+               collect(DISTINCT target.id) AS target_ids
+        """,
+        predecessor_ids=sorted(predecessor_ids),
+    )
+    sources_by_target: dict[str, set[str]] = {}
+    for row in source_rows:
+        source_id = row.get("source_id")
+        if not source_id:
+            continue
+        targets = set(row.get("target_ids") or [])
+        if row.get("produced_sn_id"):
+            targets.add(row["produced_sn_id"])
+        for target in targets:
+            if target in predecessor_ids:
+                sources_by_target.setdefault(target, set()).add(source_id)
+
+    recovered: dict[str, list[str]] = {}
+    for orphan_id, chain in chains.items():
+        for predecessor in chain:
+            if source_ids := sources_by_target.get(predecessor):
+                recovered[orphan_id] = sorted(source_ids)
+                break
+    return recovered
 
 
 def _fetch_dd_source_paths(
@@ -376,10 +448,11 @@ def rebuild_provenance(
     so derived parents and reattachable names are sourced natively. Then, for
     any live name STILL without a source, a conservative decision tree binds:
     (1) ISNC recovery map → dd/signal; (2) surviving ``source_paths`` scalar →
-    dd/signal (an authoritative in-graph anchor); (3) derived parent (has
-    children) → an explicit ``derived`` source (composed-from-children);
-    (4) residue with no anchor → an explicit ``manual`` source. Never fabricates
-    a DD path. Content (name/description/docs/stage) is never touched.
+    dd/signal (an authoritative in-graph anchor); (3) latest non-deletion change
+    predecessor → that predecessor's existing semantic sources. Childful
+    structural parents are repaired by :func:`reconcile_orphan_parent_sources`.
+    Residue without evidence stays unresolved. Content
+    (name/description/docs/stage) is never touched.
     """
     owns = gc is None
     gc = gc or GraphClient()
@@ -392,35 +465,55 @@ def rebuild_provenance(
         # derived StandardNameSource for every admissible derived parent, then
         # relink FROM_DD_PATH. Run before classification so parents drop out of
         # the orphan set with their real composed-from-children provenance.
+        initial_orphans = find_provenance_orphans(gc=gc)
+        initial_orphan_ids = {row["sn_id"] for row in initial_orphans}
         desync_ids = {d["sn_id"] for d in find_edge_scalar_desyncs(gc=gc)}
         reattached = 0
+        parent_sources_reconciled = 0
         if not dry_run:
             reattached = reattach_produced_name_edges(gc=gc)
             _run_deterministic_fixpoints()
+        parent_candidate_rows = find_orphan_parent_source_candidates(gc=gc)
+        repairable_parent_ids = {
+            row["parent_id"]
+            for row in parent_candidate_rows
+            if row.get("parent_id") in initial_orphan_ids
+        }
+        if not dry_run:
+            parent_sources_reconciled = reconcile_orphan_parent_sources(gc=gc)
 
         orphans = find_provenance_orphans(gc=gc)
-        orphan_ids = [o["sn_id"] for o in orphans if o["sn_id"] not in desync_ids]
+        orphan_ids = [
+            orphan["sn_id"]
+            for orphan in orphans
+            if orphan["sn_id"] not in desync_ids
+            and orphan["sn_id"] not in repairable_parent_ids
+        ]
 
         # Classify the remainder by descending anchor authority.
         not_mapped = [i for i in orphan_ids if i not in recovery_map]
         scalar_specs = _fetch_dd_source_paths(gc, not_mapped)
         not_scalar = [i for i in not_mapped if i not in scalar_specs]
+        history_sources = _fetch_change_history_sources(gc, not_scalar)
+        not_historical = [i for i in not_scalar if i not in history_sources]
         # Exclude-pending guard: an orphan whose real dd source is still pending
         # (extracted/drafted) in the GENERATE_NAME queue must not be given a
-        # synthesized derived/manual fallback — the pipeline will source it.
-        pending_names = _fetch_pending_source_names(gc, not_scalar)
-        parent_ids = _classify_derived_parents(
-            gc, [i for i in not_scalar if i not in pending_names]
-        )
+        # fabricated fallback — the pipeline will source it.
+        pending_names = _fetch_pending_source_names(gc, not_historical)
 
         summary: dict[str, Any] = {
-            "orphans_before": len(orphan_ids),
+            "orphans_before": len(initial_orphans),
             "reattached": reattached if not dry_run else len(desync_ids),
+            "parent_source_candidates": len(repairable_parent_ids),
+            "parent_source_candidate_names": sorted(repairable_parent_ids),
+            "parent_sources_reconciled": parent_sources_reconciled,
             "bound_from_map": 0,
             "bound_from_scalar": 0,
-            "bound_derived": 0,
-            "bound_manual": 0,
+            "bound_from_history": 0,
+            "history_recoverable_names": sorted(history_sources),
             "excluded_pending": 0,
+            "unresolved": 0,
+            "unresolved_names": [],
             "dry_run": dry_run,
         }
         for name_id in orphan_ids:
@@ -430,17 +523,20 @@ def rebuild_provenance(
             elif name_id in scalar_specs:
                 specs = scalar_specs[name_id]
                 summary["bound_from_scalar"] += 1
+            elif name_id in history_sources:
+                summary["bound_from_history"] += 1
+                if not dry_run:
+                    bind_sources_exclusively(gc, name_id, history_sources[name_id])
+                continue
             elif name_id in pending_names:
                 # Real dd source pending in the queue — leave it for the
-                # pipeline; never synthesize a fallback over a claimable source.
+                # pipeline; never fabricate a fallback over a claimable source.
                 summary["excluded_pending"] += 1
                 continue
-            elif name_id in parent_ids:
-                specs = [_synth_spec(name_id, "derived")]
-                summary["bound_derived"] += 1
             else:
-                specs = [_synth_spec(name_id, "manual")]
-                summary["bound_manual"] += 1
+                summary["unresolved"] += 1
+                summary["unresolved_names"].append(name_id)
+                continue
             if not dry_run:
                 bind_recovery_sources(name_id, specs, gc=gc)
 

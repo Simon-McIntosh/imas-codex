@@ -6,7 +6,7 @@ against the *existing* graph names: it rebinds ``StandardNameSource`` +
 traces to >=1 source, WITHOUT regenerating names/docs. The authoritative
 recovery map is an ISNC commit that still carried near-complete ``sources:``
 blocks; the DD graph + ISN grammar close the remainder deterministically;
-residue with no anchor becomes an explicit ``source_type='manual'`` source.
+residue with no evidence remains unresolved for explicit investigation.
 
 These tests are mock-based (no live Neo4j) except where marked ``graph`` —
 per repo convention, mutation logic is asserted against captured Cypher, and
@@ -179,6 +179,55 @@ def test_load_recovery_map_missing_ref_returns_empty(tmp_path):
     assert load_recovery_map(tmp_path, ref="deadbeef") == {}
 
 
+def test_change_history_recovery_uses_existing_composed_sources():
+    """Historical recovery selects real sources from the latest predecessor."""
+    from imas_codex.standard_names.provenance_rebuild import (
+        _fetch_change_history_sources,
+    )
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [
+            {
+                "from_name": "intermediate_quantity",
+                "to_name": "renamed_quantity",
+                "changed_at": "2026-07-29T12:00:00Z",
+            },
+            {
+                "from_name": "original_quantity",
+                "to_name": "intermediate_quantity",
+                "changed_at": "2026-07-28T12:00:00Z",
+            },
+        ],
+        [
+            {
+                "source_id": "dd:path/b",
+                "produced_sn_id": "original_quantity",
+                "target_ids": [],
+            },
+            {
+                "source_id": "dd:path/a",
+                "produced_sn_id": None,
+                "target_ids": ["original_quantity"],
+            },
+        ],
+    ]
+
+    recovered = _fetch_change_history_sources(gc, ["renamed_quantity"])
+
+    assert recovered == {
+        "renamed_quantity": ["dd:path/a", "dd:path/b"],
+    }
+    history_query = gc.query.call_args_list[0].args[0]
+    source_query = gc.query.call_args_list[1].args[0]
+    assert "change.changed_at DESC" in history_query
+    assert "source.status IN ['composed', 'attached']" in source_query
+    assert "live_target.name_stage" in source_query
+    assert "scalar_target.id = source.produced_sn_id" in source_query
+    assert "source.produced_sn_id IN $predecessor_ids" in source_query
+    assert gc.query.call_args_list[0].kwargs["deletion_operations"]
+
+
 # ---------------------------------------------------------------------------
 # rebuild_provenance — orchestration/routing (mock-based)
 # ---------------------------------------------------------------------------
@@ -186,8 +235,9 @@ def test_load_recovery_map_missing_ref_returns_empty(tmp_path):
 
 def test_rebuild_routes_orphans_by_anchor_authority():
     """Remaining orphans are bound by descending anchor authority:
-    recovery map (dd) > surviving source_paths scalar (dd) > derived parent
-    (composed-from-children) > manual residue. Never a fabricated DD path.
+    recovery map (dd) > surviving source_paths scalar (dd) > change history.
+    Childful parents use the structural reconciler; unsupported residue stays
+    unresolved. No provenance source is fabricated.
     """
     import imas_codex.standard_names.provenance_rebuild as pr
 
@@ -204,7 +254,9 @@ def test_rebuild_routes_orphans_by_anchor_authority():
     orphans = [
         {"sn_id": "in_map_name", "name_stage": "accepted", "origin": "catalog_edit"},
         {"sn_id": "scalar_name", "name_stage": "accepted", "origin": "catalog_edit"},
-        {"sn_id": "parent_name", "name_stage": "accepted", "origin": "catalog_edit"},
+        {"sn_id": "history_name", "name_stage": "accepted", "origin": "pipeline"},
+        {"sn_id": "parent_a", "name_stage": "accepted", "origin": "derived"},
+        {"sn_id": "parent_b", "name_stage": "accepted", "origin": "derived"},
         {"sn_id": "residue_name", "name_stage": "accepted", "origin": "catalog_edit"},
     ]
     scalar_specs = {
@@ -225,9 +277,22 @@ def test_rebuild_routes_orphans_by_anchor_authority():
         patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
         patch.object(pr, "reattach_produced_name_edges", return_value=0),
         patch.object(pr, "_run_deterministic_fixpoints") as m_fix,
+        patch.object(
+            pr,
+            "find_orphan_parent_source_candidates",
+            return_value=[
+                {"parent_id": "parent_a", "dd_paths": []},
+                {"parent_id": "parent_b", "dd_paths": []},
+            ],
+        ),
+        patch.object(pr, "reconcile_orphan_parent_sources", return_value=2),
         patch.object(pr, "_fetch_dd_source_paths", return_value=scalar_specs),
+        patch.object(
+            pr,
+            "_fetch_change_history_sources",
+            return_value={"history_name": ["dd:historical/path"]},
+        ),
         patch.object(pr, "_fetch_pending_source_names", return_value=set()),
-        patch.object(pr, "_classify_derived_parents", return_value={"parent_name"}),
         patch.object(
             pr,
             "bind_recovery_sources",
@@ -235,6 +300,7 @@ def test_rebuild_routes_orphans_by_anchor_authority():
                 (name_id, specs)
             ),
         ),
+        patch.object(pr, "bind_sources_exclusively") as bind_history,
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map=recovery_map)
 
@@ -242,17 +308,16 @@ def test_rebuild_routes_orphans_by_anchor_authority():
     bound = dict(bind_calls)
     assert bound["in_map_name"][0]["source_type"] == "dd"
     assert bound["scalar_name"][0]["dd_path"] == "magnetics/flux_loop/area"
-    # a derived PARENT gets a derived source (composed-from-children), not manual
-    assert bound["parent_name"][0]["source_type"] == "derived"
-    assert bound["parent_name"][0]["id"] == "derived:parent_name"
-    # only genuine residue with no anchor becomes manual, never a fabricated dd
-    assert bound["residue_name"][0]["source_type"] == "manual"
-    assert "dd_path" not in bound["residue_name"][0]
+    bind_history.assert_called_once_with(gc, "history_name", ["dd:historical/path"])
+    assert "residue_name" not in bound
 
     assert summary["bound_from_map"] == 1
     assert summary["bound_from_scalar"] == 1
-    assert summary["bound_derived"] == 1
-    assert summary["bound_manual"] == 1
+    assert summary["bound_from_history"] == 1
+    assert summary["history_recoverable_names"] == ["history_name"]
+    assert summary["parent_source_candidates"] == 2
+    assert summary["parent_sources_reconciled"] == 2
+    assert summary["unresolved"] == 1
 
 
 def test_rebuild_dry_run_binds_nothing():
@@ -267,24 +332,36 @@ def test_rebuild_dry_run_binds_nothing():
         patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
         patch.object(pr, "reattach_produced_name_edges") as m_re,
         patch.object(pr, "_run_deterministic_fixpoints") as m_fix,
+        patch.object(
+            pr,
+            "find_orphan_parent_source_candidates",
+            return_value=[{"parent_id": "x", "dd_paths": []}],
+        ),
+        patch.object(pr, "reconcile_orphan_parent_sources") as m_parents,
         patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
         patch.object(pr, "_fetch_pending_source_names", return_value=set()),
-        patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(pr, "bind_recovery_sources") as m_bind,
+        patch.object(pr, "bind_sources_exclusively") as m_bind_history,
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map={}, dry_run=True)
 
     assert not m_re.called  # dry run mutates nothing
     assert not m_fix.called
+    assert not m_parents.called
+    assert summary["parent_source_candidates"] == 1
+    assert summary["parent_source_candidate_names"] == ["x"]
+    assert summary["parent_sources_reconciled"] == 0
     assert not m_bind.called
+    assert not m_bind_history.called
     assert summary["dry_run"] is True
-    assert summary["bound_manual"] == 1  # would-be classification still reported
+    assert summary["unresolved"] == 0
 
 
 def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
     """A name orphaned only by a missing edge (its source still names it via
     produced_sn_id) is reattached to its TRUE source, never bound to a fresh
-    manual/derived fallback.
+    unsupported fallback.
     """
     import imas_codex.standard_names.provenance_rebuild as pr
 
@@ -301,9 +378,11 @@ def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
         patch.object(pr, "find_edge_scalar_desyncs", return_value=desyncs),
         patch.object(pr, "reattach_produced_name_edges", return_value=1) as m_re,
         patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "find_orphan_parent_source_candidates", return_value=[]),
+        patch.object(pr, "reconcile_orphan_parent_sources", return_value=0),
         patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
         patch.object(pr, "_fetch_pending_source_names", return_value=set()),
-        patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(
             pr,
             "bind_recovery_sources",
@@ -314,15 +393,16 @@ def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
 
     assert m_re.called
     assert "desync_name" not in bind_calls
-    assert bind_calls == ["residue_name"]
+    assert bind_calls == []
     assert summary["reattached"] == 1
+    assert summary["unresolved"] == 1
 
 
 def test_rebuild_excludes_pending_source_names_from_fallback():
     """A live orphan whose real dd source is still PENDING (extracted) in the
-    GENERATE_NAME queue is left for the pipeline — never given a synthesized
-    manual/derived fallback that would pin a fabricated source over the real
-    one about to be composed.
+    GENERATE_NAME queue is left for the pipeline — never given an unsupported
+    fallback that would pin fabricated provenance over the real source about
+    to be composed.
     """
     import imas_codex.standard_names.provenance_rebuild as pr
 
@@ -338,10 +418,12 @@ def test_rebuild_excludes_pending_source_names_from_fallback():
         patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
         patch.object(pr, "reattach_produced_name_edges", return_value=0),
         patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "find_orphan_parent_source_candidates", return_value=[]),
+        patch.object(pr, "reconcile_orphan_parent_sources", return_value=0),
         patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
         # pending_name has a claimable pending extracted source in the queue
         patch.object(pr, "_fetch_pending_source_names", return_value={"pending_name"}),
-        patch.object(pr, "_classify_derived_parents", return_value=set()),
         patch.object(
             pr,
             "bind_recovery_sources",
@@ -352,7 +434,6 @@ def test_rebuild_excludes_pending_source_names_from_fallback():
 
     # the pending-source name is excluded from ANY fallback binding
     assert "pending_name" not in bind_calls
-    assert bind_calls == ["residue_name"]
+    assert bind_calls == []
     assert summary["excluded_pending"] == 1
-    assert summary["bound_manual"] == 1
-    assert summary["bound_derived"] == 0
+    assert summary["unresolved"] == 1

@@ -16,6 +16,53 @@ from uuid import uuid4
 
 _DD_DOCS_ROOT = "https://imas-data-dictionary.readthedocs.io/en"
 
+DELETION_OPERATIONS = frozenset(
+    {
+        "clear_selected_name",
+        "clear_subsystem_name",
+        "compact_unapproved_name",
+        "remove_derived_parent",
+        "remove_skeleton_placeholder",
+    }
+)
+
+
+def deletion_change_cypher(name_alias: str) -> str:
+    """Return a Cypher clause that records a name deletion in its transaction."""
+    if not name_alias.isidentifier():
+        raise ValueError(f"invalid Cypher name alias: {name_alias!r}")
+    return f"""
+        CREATE (change:StandardNameChange {{
+          id: 'sn-change:' + randomUUID(),
+          from_name: {name_alias}.id,
+          to_name: {name_alias}.id,
+          operation: $deletion_operation,
+          reason: $deletion_reason,
+          origin: $deletion_origin,
+          run_id: $deletion_run_id,
+          changed_at: datetime(),
+          internal: true
+        }})
+    """
+
+
+def deletion_change_params(
+    operation: str,
+    *,
+    reason: str,
+    origin: str = "pipeline_cleanup",
+    run_id: str | None = None,
+) -> dict[str, str | None]:
+    """Build validated parameters for an atomic deletion-ledger clause."""
+    if operation not in DELETION_OPERATIONS:
+        raise ValueError(f"unknown StandardName deletion operation: {operation!r}")
+    return {
+        "deletion_operation": operation,
+        "deletion_reason": reason,
+        "deletion_origin": origin,
+        "deletion_run_id": run_id,
+    }
+
 
 def official_dd_documentation_url(dd_version: str, dd_path: str) -> str:
     """Build the official version-pinned IDS reference URL for a DD path."""
@@ -316,6 +363,50 @@ def record_standard_name_change(
     return change_id
 
 
+def classify_missing_change_targets(gc: Any) -> dict[str, Any]:
+    """Classify durable change rows whose target StandardName is absent.
+
+    Deletion events intentionally outlive their target and are explained by a
+    known mechanism operation. Older rows with a missing target and any other
+    operation are retained as ``legacy_unexplained`` for investigation. This
+    report is read-only and never removes history.
+    """
+    rows = [
+        dict(row)
+        for row in gc.query(
+            """
+            MATCH (change:StandardNameChange)
+            WHERE change.to_name IS NOT NULL
+              AND NOT EXISTS {
+                MATCH (target:StandardName)
+                WHERE target.id = change.to_name
+              }
+            RETURN change.id AS id,
+                   change.from_name AS from_name,
+                   change.to_name AS to_name,
+                   change.operation AS operation,
+                   CASE
+                     WHEN change.operation IN $deletion_operations
+                     THEN 'explained_deletion'
+                     ELSE 'legacy_unexplained'
+                   END AS classification
+            ORDER BY change.id
+            """,
+            deletion_operations=sorted(DELETION_OPERATIONS),
+        )
+    ]
+    return {
+        "total": len(rows),
+        "explained_deletion": sum(
+            row["classification"] == "explained_deletion" for row in rows
+        ),
+        "legacy_unexplained": sum(
+            row["classification"] == "legacy_unexplained" for row in rows
+        ),
+        "rows": rows,
+    }
+
+
 def compact_unapproved_superseded(
     gc: Any,
     *,
@@ -356,26 +447,30 @@ def compact_unapproved_superseded(
             gc,
             old_name,
             target,
-            operation="compact",
+            operation="retarget_compacted_name",
+            record_change=False,
         )
-        gc.query(
-            """MATCH (:StandardName {id: $old_name})-[:HAS_REVIEW]->(review)
-            DETACH DELETE review""",
-            old_name=old_name,
-        )
-        gc.query(
-            """MATCH (:StandardName {id: $old_name})-[:DOCS_REVISION_OF]->(revision)
-            DETACH DELETE revision""",
-            old_name=old_name,
-        )
-        gc.query(
-            """MATCH (old:StandardName {id: $old_name})
+        deletion_clause = deletion_change_cypher("old")
+        deleted = gc.query(
+            f"""MATCH (old:StandardName {{id: $old_name}})
             WHERE old.name_stage = 'superseded'
               AND old.catalog_approved_at IS NULL
-            DETACH DELETE old""",
+            OPTIONAL MATCH (old)-[:HAS_REVIEW]->(review:StandardNameReview)
+            OPTIONAL MATCH (old)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
+            WITH old, collect(DISTINCT review) AS reviews,
+                 collect(DISTINCT revision) AS revisions
+            {deletion_clause}
+            FOREACH (item IN reviews | DETACH DELETE item)
+            FOREACH (item IN revisions | DETACH DELETE item)
+            DETACH DELETE old
+            RETURN 1 AS deleted""",
             old_name=old_name,
+            **deletion_change_params(
+                "compact_unapproved_name",
+                reason="unapproved superseded candidate compacted after source retarget",
+            ),
         )
-        item["compacted"] = True
+        item["compacted"] = bool(deleted)
     return manifest
 
 
