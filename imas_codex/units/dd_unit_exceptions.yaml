@@ -151,6 +151,8 @@ dd_unit_bugs:
   - path: "*/energy_fluxes/kinetic/neutral/state/incident/values"
     dd_unit: m^-2.s^-1
     correct_unit: W.m^-2
+    upstream_kind: type_wiring
+    upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/issues/272
     reason: >-
       An incident energy flux is W.m^-2 (sibling energy_fluxes facets agree);
       the DD tags the neutral facet with the particle-flux unit m^-2.s^-1.

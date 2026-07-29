@@ -11,7 +11,7 @@ import click
 from rich.console import Console
 
 from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.graph.models import EditScope
+from imas_codex.graph.models import DDGapKind, EditScope
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_MIN_SCORE,
@@ -188,6 +188,9 @@ def _require_embed_ready(command_label: str) -> None:
 
 _PHYSICS_DOMAIN_CHOICE = click.Choice(
     [d.value for d in PhysicsDomain], case_sensitive=False
+)
+_DD_GAP_KIND_CHOICE = click.Choice(
+    [kind.value for kind in DDGapKind], case_sensitive=False
 )
 
 
@@ -1888,9 +1891,9 @@ def sn_run(
     # Handle --reset-to BEFORE scope routing so it applies to BOTH the DD
     # pool-orchestrator path and the signals single-pass path; placing it after
     # the use_pools early-return would make --reset-to a silent no-op on the
-    # default DD path. clear_standard_names re-seeds the orphaned
-    # StandardNameSources to 'extracted' (its Step E) so the pool
-    # orchestrator's extract phase re-composes them.
+    # default DD path. clear_standard_names rewinds orphaned
+    # StandardNameSources to 'extracted' so the pool orchestrator's extract
+    # phase re-composes them.
     if reset_to is not None and not dry_run:
         _tiers = [t.strip() for t in tier.split(",")] if tier else None
         _reset_filter_kwargs: dict[str, Any] = {
@@ -3171,6 +3174,8 @@ def sn_status(family_seed: str | None, show_contested: bool) -> None:
     from imas_codex.graph.client import GraphClient
 
     try:
+        from rich.table import Table as RichTable
+
         with GraphClient() as gc:
             result = gc.query(
                 """
@@ -3200,8 +3205,6 @@ def sn_status(family_seed: str | None, show_contested: bool) -> None:
             """
             )
             if vstatus_result:
-                from rich.table import Table as RichTable
-
                 console.print()
                 console.print("[bold]Validation Status[/bold]")
                 vtable = RichTable(show_header=True)
@@ -3310,6 +3313,19 @@ def sn_status(family_seed: str | None, show_contested: bool) -> None:
                         )
                     console.print("  [dim]open edits (most recent 10):[/dim]")
                     console.print(open_table)
+
+            from imas_codex.standard_names.dd_gaps import get_dd_gap_stats
+
+            dd_gap_stats = get_dd_gap_stats(gc)
+            console.print()
+            console.print("[bold]Data Dictionary Gaps[/bold]")
+            gap_table = RichTable(show_header=True)
+            gap_table.add_column("Status")
+            gap_table.add_column("Count", justify="right")
+            for status_name, count in sorted(dd_gap_stats["by_status"].items()):
+                gap_table.add_row(status_name, str(count))
+            gap_table.add_row("[bold]Total[/bold]", str(dd_gap_stats["total"]))
+            console.print(gap_table)
 
             # Sibling-family harmonization state (stamped vs stale vs waiting)
             try:
@@ -5916,6 +5932,80 @@ def sn_retry(
             "failed/attempt-capped",
             err=True,
         )
+
+
+@sn.command("ddgap")
+@click.argument("path", required=False)
+@click.option(
+    "--kind",
+    type=_DD_GAP_KIND_CHOICE,
+    help="Which DD declaration mechanism the evidence contradicts.",
+)
+@click.option(
+    "--reason",
+    help="The evidence-backed argument for the flag.",
+)
+@click.option(
+    "--sync-registry",
+    is_flag=True,
+    help=(
+        "Mirror the curated DD-unit exception registry and its upstream filing "
+        "into provenance nodes. This does not change enforcement."
+    ),
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Validate and report the intended graph writes without mutating the graph.",
+)
+def sn_ddgap(
+    path: str | None,
+    kind: str | None,
+    reason: str | None,
+    sync_registry: bool,
+    dry_run: bool,
+) -> None:
+    """Flag a Data Dictionary defect as evidence only.
+
+    A flag never suppresses a mismatch or changes composition behavior. Human
+    triage and the existing curated registries remain authoritative.
+
+    \b
+    Example:
+      imas-codex sn ddgap equilibrium/path --kind unit_defect \\
+        --reason "The measured twin declares pressure while this twin is unitless."
+    """
+    from imas_codex.standard_names.dd_gaps import (
+        sync_dd_unit_exception_gaps,
+        write_dd_gaps,
+    )
+
+    if sync_registry:
+        if path or kind or reason:
+            raise click.UsageError(
+                "--sync-registry cannot be combined with PATH, --kind, or --reason"
+            )
+        result = sync_dd_unit_exception_gaps(dry_run=dry_run)
+        verb = "would sync" if dry_run else "synced"
+        click.echo(
+            f"{verb} {result['registry_entries']} registry entries into "
+            f"{result['reported']} DD-gap facts; "
+            f"{result['relationships']} path evidence link(s)"
+        )
+        return
+
+    if not path or not kind or not reason or not reason.strip():
+        raise click.UsageError(
+            "PATH, --kind, and a non-empty --reason are required unless "
+            "--sync-registry is used"
+        )
+
+    result = write_dd_gaps(
+        [{"path": path, "kind": kind, "reason": reason, "reporter": "human"}],
+        dry_run=dry_run,
+    )
+    verb = "would flag" if dry_run else "flagged"
+    click.echo(f"{verb} {result['reported']} DD-gap fact: {result['ids'][0]}")
 
 
 @sn.command("rescore")

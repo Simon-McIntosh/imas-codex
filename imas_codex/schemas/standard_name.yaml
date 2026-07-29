@@ -188,6 +188,46 @@ enums:
           Absent and recently reproduced — the real vocabulary demand a
           rotation decision reads.
 
+  DDGapKind:
+    description: >-
+      What aspect of a Data Dictionary declaration is contradicted by the
+      reported evidence.
+    permissible_values:
+      unit_defect:
+        description: A path declares a physically incorrect unit.
+      self_contradiction:
+        description: >-
+          Two DD facets of one quantity carry mutually incompatible
+          declarations.
+      doc_mismatch:
+        description: Documentation contradicts the declared type, unit, or shape.
+      type_wiring:
+        description: A path is wired to the wrong field type or quantity family.
+      missing_declaration:
+        description: A physical quantity lacks a required declaration.
+      rename_inconsistency:
+        description: >-
+          A cross-version rename left contradictory sibling declarations.
+
+  DDGapStatus:
+    description: >-
+      Human-adjudicated lifecycle of a Data Dictionary defect report. A
+      flagged report is evidence only and never changes pipeline behavior.
+    permissible_values:
+      flagged:
+        description: Evidence has been reported and awaits human triage.
+      triaged:
+        description: A human has assessed the evidence but not dispositioned it.
+      registered_exception:
+        description: >-
+          The defect is represented in an existing enforcement registry.
+      upstream_issue:
+        description: The defect has been filed against the Data Dictionary.
+      rejected:
+        description: The evidence was adjudicated not to be a DD defect.
+      resolved_upstream:
+        description: A published DD version corrected the defect.
+
   StandardNameKind:
     description: >-
       Entry kind for standard names — the structural classification of the
@@ -1819,6 +1859,57 @@ classes:
       triaged_at:
         description: When the triage pass last stamped this node.
         range: datetime
+
+  DDGap:
+    description: >-
+      Records evidence that a Data Dictionary path or path pattern carries a
+      defective declaration. One node represents one (path, kind) fact.
+      Repeated observations increase example_count; the reporter's argument
+      and observation time live on HAS_DD_GAP relationships. Flagging is
+      observational only: enforcement remains in the existing curated
+      registries until human triage changes it.
+
+      Example Cypher:
+        MATCH (g:DDGap) RETURN g.path, g.kind, g.status, g.example_count
+        MATCH (n:IMASNode)-[r:HAS_DD_GAP]->(g:DDGap) RETURN n.id, r.reason, g.id
+    class_uri: sn:DDGap
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Composite key: dd_gap:{path}:{kind}"
+      path:
+        required: true
+        description: Exact DD path or registry path pattern carrying the defect.
+      kind:
+        required: true
+        range: DDGapKind
+      status:
+        required: true
+        range: DDGapStatus
+      example_count:
+        description: Number of independent observations of this fact.
+        range: integer
+      first_seen_at:
+        description: When the fact was first reported.
+        range: datetime
+      last_seen_at:
+        description: When the fact was most recently reported.
+        range: datetime
+      triaged_at:
+        description: When a human last dispositioned the fact.
+        range: datetime
+      upstream_url:
+        description: Upstream DD issue or change URL, when filed.
+      resolved_dd_version:
+        description: DD version that corrected the declaration.
+      registry_backend:
+        description: >-
+          Existing enforcement registry that represents this defect. Presence
+          is provenance only; DDGap nodes do not themselves suppress behavior.
+      affected_path_count:
+        description: Number of current IMASNode paths matched by a registry pattern.
+        range: integer
 
   StandardNameSource:
     description: >-

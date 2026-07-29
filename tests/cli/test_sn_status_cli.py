@@ -147,3 +147,27 @@ class TestSnStatusNameStage:
         # Sections should be absent when there's no data
         assert "Name Stage" not in result.output
         assert "Docs Stage" not in result.output
+
+    def test_dd_gap_status_is_visible(self, runner: CliRunner) -> None:
+        patches = _patch_sn_status()
+        with (
+            patches[0],
+            patches[1],
+            patches[2],
+            patch(
+                "imas_codex.standard_names.dd_gaps.get_dd_gap_stats",
+                return_value={
+                    "total": 4,
+                    "by_status": {
+                        "registered_exception": 3,
+                        "upstream_issue": 1,
+                    },
+                    "by_kind": {"unit_defect": 3, "type_wiring": 1},
+                },
+            ),
+        ):
+            result = runner.invoke(sn, ["status"])
+        assert result.exit_code == 0, result.output
+        assert "Data Dictionary Gaps" in result.output
+        assert "registered_exception" in result.output
+        assert "upstream_issue" in result.output

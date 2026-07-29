@@ -933,6 +933,14 @@ classes:
         range: VocabGap
         annotations:
           relationship_type: HAS_STANDARD_NAME_VOCAB_GAP
+      has_dd_gap:
+        description: >-
+          Evidence that this DD path carries a defective declaration.
+          The reporter's reason and observation time live on the relationship.
+        multivalued: true
+        range: DDGap
+        annotations:
+          relationship_type: HAS_DD_GAP
       coordinates:
         description: >-
           Coordinate specifications for this path (axis definitions).
