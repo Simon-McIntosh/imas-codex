@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-impl" content="0.0">
 </head>
 <body>
@@ -147,6 +147,25 @@
       then single-valued <code>PRODUCED_NAME</code> is the wrong invariant and the
       <em>checker</em> needs amending — not the data. Settle that before touching
       any of the 240, because "fixing" them would destroy correct provenance.
+    </p>
+
+    <h2 id="s4b">§4b — Names leave the graph without a ledger row</h2>
+    <p>
+      The deep sweep (2026-07-29) proved the deletion side of the ledger is
+      open: <strong>296 <code>StandardNameChange</code> rows cite a
+      <code>to_name</code> with no surviving node</strong> (refine 172,
+      campaign_docs_refine 113, reclassify_domain 5, backfill_refine 3,
+      regenerate 3), and <code>perturbed_particle_energy</code> — alive and
+      docs-quarantined mid-campaign — left via a bulk <code>DETACH
+      DELETE</code> that writes no ledger row (the reset paths at
+      <code>graph_ops.py:5199/:5052/:5066/:3108</code>). Two of the three
+      names a shipped plan recorded as &ldquo;intentional&rdquo; unit
+      dispositions are now ghosts (<code>perturbed_particle_energy</code>,
+      <code>particle_mass</code>). The invariant to establish:
+      <strong>no StandardName leaves the graph without a ledger row naming the
+      operation that removed it</strong> — every delete path writes its
+      change record, and a graph-quality test asserts no ledger row cites a
+      nonexistent name unless a deletion record explains it.
     </p>
 
     <h2 id="s5">§5 — Write-path gating and the guard's blind spot</h2>
@@ -488,6 +507,46 @@ Done-when
      validates &#x27;valid&#x27; with a null unit on a dimensional base.
   3. The ghost traced and every stale disposition corrected with a dated note.
 </pre>
+    </article>
+<article class="r-fu" data-id="f-sgwi-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T12:50:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §4b" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the deletion side of the ledger: every delete path writes its record; explain the 296 ghost rows</h4>
+    <div class="r-fu-body"><p>296 StandardNameChange rows cite names with no surviving node, and perturbed_particle_energy left mid-campaign via an unledgered bulk DETACH DELETE (reset paths at graph_ops.py:5199/:5052/:5066/:3108). Establish the invariant that no StandardName leaves the graph without a ledger row, add the graph-quality test, and reconcile the existing 296 (attribute each to its deleting operation or mark it unexplained-legacy with a dated note). Also fold in the sweep's orphan findings: 35 live names with no PRODUCED_NAME source regenerated after the ledger was rebuilt to zero — the always-on self-heal has a hole (first offenders: the co/counter-passing torque-density family).</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
+Section: §4b — the deletion ledger invariant
+Tier:    opus
+
+STATE (measured 2026-07-29, read-only)
+  296 StandardNameChange rows cite a to_name with no surviving node (refine
+  172, campaign_docs_refine 113, reclassify_domain 5, backfill_refine 3,
+  regenerate 3). Exactly 1 &#x27;compact&#x27; row exists ledger-wide, and 0
+  produced_sn_id values dangle — so compaction is NOT the deleter; the bulk
+  DETACH DELETE reset paths (graph_ops.py:5199, :5052, :5066, :3108) write no
+  ledger row. Separately, 35 live names carry no PRODUCED_NAME source (was 0
+  after the ledger rebuild) — the self-heal hole regenerates orphans.
+
+DO
+  1. Every delete path writes a StandardNameChange (operation naming the
+     instrument: reset_clear, quarantine_purge, …) BEFORE the DETACH DELETE,
+     in the same transaction. TDD per path.
+  2. Graph-quality test: no ledger row cites a nonexistent name unless a
+     deletion record explains it; no StandardName node deletion without a
+     ledger row (assert via ledger-vs-node reconciliation).
+  3. Reconcile the 296: attribute each ghost row to its deleting operation
+     where recoverable, else stamp unexplained-legacy with a dated note.
+  4. Root-cause the 35 regenerated provenance orphans (the co/counter-passing
+     torque-density family first) and close the self-heal hole so the count
+     returns to 0 and stays there.
+
+CONSTRAINTS
+  - TDD; graph writes via tested instruments only; never raw Cypher.
+  - Do not touch WEST manifest paths or the 262 WEST-produced names.
+  - Pre-stage naming checks; no AI attribution.
+
+Done-when
+  1. All delete paths ledgered with tests; the reconciliation test green.
+  2. The 296 attributed or stamped; the 35 orphans healed and the self-heal
+     hole closed with a regression test; this followup resolved with numbers.</pre>
     </article>
 </section>
 

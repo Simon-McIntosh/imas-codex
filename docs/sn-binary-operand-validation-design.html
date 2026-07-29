@@ -708,6 +708,38 @@ ParseError: residue 'electron' does not match any physical_base or
       design turns on performance.</p>
     </section>
 
+    <section>
+      <h2>7 — Scope extension: chained operators (lead direction, 2026-07-29)</h2>
+      <p>
+        The redesign must also cover <strong>chained operators</strong> —
+        first-class operator composition in the IR, not the current
+        single-transformation-slot model that forces <code>inverse</code> /
+        <code>square</code> to glue into base compounds. The evidence is the
+        gm* family: the parser accepts the glued forms
+        (<code>flux_surface_averaged_inverse_square_major_radius</code>) but
+        the composer measurably cannot produce them — it emits the chain as a
+        fused transformation token
+        (<code>flux_surface_averaged_inverse_square</code>), fails the
+        single-slot response model, and exhausts retries; gm1/gm5/gm6 sit at
+        the attempt cap on exactly this shape. Proper gm* parsing AND
+        generation therefore need the chain to be representable where the
+        model emits it.
+      </p>
+      <p>
+        Design surface to cover alongside operand validation, since they share
+        the IR: the chained-operator IR representation (an ordered operator
+        list rather than one slot), the canonical operator order and its
+        interaction with the existing bare-prefix and postfix peel paths (both
+        peel sites), render round-trip (the <code>_of_</code> emission rules),
+        the response-model shape under the ~13-property structured-output
+        ceiling (an operator-chain array is one property; fused-token
+        rejection stays as the guard), and migration for the already-accepted
+        glued spellings (they remain valid parses; the chain form must
+        canonicalize onto them or supersede them deliberately, never both
+        live).
+      </p>
+    </section>
+
   </main>
 </body>
 </html>

@@ -1,11 +1,11 @@
 {
-  "updated": "2026-06-05T17:32:11",
+  "updated": "2026-07-29T14:07:51",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S2",
+    "active_sprint_id": "S5",
     "sprints": [
       {
         "id": "S1",
@@ -40,10 +40,10 @@
         "id": "S2",
         "theme": "Search and compose enablement",
         "description": "Land the search surface and fan-out execution path once the foundation sprint settles.",
-        "summary": "Dependency-aware second sprint: search migration first, then structured fan-out on top of stabilized extraction and bootstrap work.",
+        "summary": "Retired 2026-07-29: the June search/fan-out era ended; its plans were superseded by the July SN campaign line (model-selection-and-global-refine, canonical-qualifier-order, the WEST rehearsal). Closed for state hygiene, not completion.",
         "starts": "2026-06-12",
         "ends": "2026-06-19",
-        "status": "active",
+        "status": "done",
         "items": [
           {
             "slug": "sn-search-facility",
@@ -63,10 +63,10 @@
         "id": "S3",
         "theme": "Quality gates and catalog ship path",
         "description": "Close benchmark, catalog, and parity loops after the grammar and search foundations are in place.",
-        "summary": "Third sprint focuses on release credibility: benchmark evolution before benchmark gating, then catalog-quality and parity closure on a stable pipeline.",
+        "summary": "Retired 2026-07-29: benchmark/catalog-quality goals were absorbed by model-selection-and-global-refine (shipped) and catalog-expert-review-remediation (shipped). Closed for state hygiene.",
         "starts": "2026-06-19",
         "ends": "2026-06-26",
-        "status": "planned",
+        "status": "done",
         "items": [
           {
             "slug": "sn-benchmark-evolution",
@@ -98,10 +98,10 @@
         "id": "S4",
         "theme": "CLI and docs hygiene tail",
         "description": "Finalize command-surface cleanup and documentation refresh after the core SN roadmap is stable.",
-        "summary": "Last sprint for repo hygiene: complete the deferred CLI harmonization items and align documentation with the landed code and migrated reckon plans.",
+        "summary": "Retired 2026-07-29: the CLI/docs hygiene tail was overtaken by the converged sn CLI surface and the SN campaign docs. Closed for state hygiene.",
         "starts": "2026-06-26",
         "ends": "2026-07-03",
-        "status": "planned",
+        "status": "done",
         "items": [
           {
             "slug": "33-cli-harmonization",
@@ -116,6 +116,66 @@
             "done_when": "README inventory, stale CLI/API references, service-port errors, and historical-doc disposition are all corrected."
           }
         ]
+      },
+      {
+        "id": "S5",
+        "status": "active",
+        "theme": "WEST RC dress rehearsal",
+        "items": [
+          {
+            "slug": "sn-west-review-rehearsal",
+            "why_now": "All five D-release-standard gates carry measured HOLDS; 331/355 accepted, 221/221 batch names parse, export ambiguity 0, partition zero unexplained. The RC is unblocked by the gates and cost-gated on the lead's trigger; cutting at the current pin avoids re-breaking the batch when the rung-5 rotation moves the grammar.",
+            "done_when": "Stage 2: fork PR open (RC version, URL, batch size, PR-body judgement, pre-flight parse-check green). Stages 3-6: human review + merge, fold-back exercising the graph-merged: tag, freeze-check, --undo unwind with matching counts. Then act 2 readiness stated."
+          },
+          {
+            "slug": "sn-naming-loop-robustness",
+            "why_now": "Two sweep-verified mechanics defects gate the RC tail: no sanctioned retry exists for failed-at-cap sources (gm1/gm5/gm6 are stuck on it) and --compose-model is silently discarded in pooled mode (compose_batch hardcodes the seat). Both are small, free, and land before the residual close.",
+            "done_when": "Scoped to f-nlr-003 items 1-2 only: the failed-retry instrument exists with a ledger trail and gm1/gm5/gm6 are claimable again; a pooled compose demonstrably uses the --compose-model override. The rest of f-nlr-003 stays in S6."
+          }
+        ],
+        "starts": "2026-07-29",
+        "ends": "2026-08-05",
+        "description": "Cut the fork-PR review-batch RC at the frozen pin and run the full human-in-the-loop cycle: PR review, fold-back with the graph-merged: tag, freeze-check, undo. All five convergence gates hold (measured 2026-07-29); the batch parses clean at pin 937ea94, so the cut happens BEFORE the grammar moves again under any vocabulary rotation."
+      },
+      {
+        "id": "S6",
+        "status": "planned",
+        "theme": "SN pipeline stability tail",
+        "items": [
+          {
+            "slug": "sn-naming-loop-robustness",
+            "why_now": "Rungs 1-4 landed with all gates holding; the remaining rungs (5: rotation from the 159-token triaged list; 6: operand-validation prerequisites per the design record) keep the loop convergent, and the composer's chained-operator incapacity plus the --compose-model override need closing.",
+            "done_when": "The 159 adjudicated add/fold/reject with stated reasons; adds in an ISN RC with the codex pin bumped and the batch parse-check re-verified; rung-6 prerequisite steps green; a fresh gate-ledger row recorded."
+          },
+          {
+            "slug": "sn-graph-wide-integrity",
+            "why_now": "Scoped to the unit-authority section only (lead-raised): eight accepted derived parents carry null units on inherently-dimensional bases and validate 'valid'; the shipped 'intentional unit-less' verdict is challenged and one cited name is a ghost.",
+            "done_when": "D-parent-units locked by the lead; the ISN validator treats null like '1' on dimensional bases; the eight repaired through sanctioned instruments; the perturbed_particle_energy ghost traced and stale dispositions corrected with dated notes."
+          },
+          {
+            "slug": "sn-dd-gaps",
+            "why_now": "Lead direction 2026-07-29: the pipeline and its agents should have the authority to flag DD errors first-class, mirroring vocab_gaps. Steps 1-2 are zero-behaviour-change foundation (schema, write path, CLI, registry back-fill).",
+            "done_when": "DDGap write path TDD'd with the sn ddgap CLI and sn status surface; the unit-exception registry back-filled as pre-triaged gaps with zero enforcement change; D-ddgap-authority and D-ddgap-storage surfaced to the lead."
+          }
+        ],
+        "starts": "2026-08-05",
+        "ends": "2026-08-14",
+        "description": "Stability work that deliberately follows the RC snapshot because it moves the grammar or the validation surface: the class-D vocabulary rotation, the operand-validation prerequisites, the unit-authority policy with the null-unit validator gap, and the DD-gaps mechanism foundation."
+      },
+      {
+        "id": "S7",
+        "status": "planned",
+        "theme": "Graph-wide integrity programme",
+        "items": [
+          {
+            "slug": "sn-graph-wide-integrity",
+            "why_now": "After the RC lands and the stability tail closes, the exploratory half's 1458 ledger violations, 151 orphans, three ungated write paths and the broken semantic-search embedding dimension are the remaining debt; gating before the paid review means the review is not repeated.",
+            "done_when": "The first followup's done-when holds: D-fanout locked, embed dimension fixed with the 20 search tests green, the 596-class collapsed by one write-time fix, three paths gated plus the geometry rule with the 29-attachment test, suite no worse than baseline."
+          }
+        ],
+        "starts": "2026-08-14",
+        "ends": "2026-08-28",
+        "description": "The exploratory-half backlog: fan-out invariant decision, embed-dimension fix, the supersede-without-retarget class (596 sources), write-path gating with the geometry-representation rule, orphan adjudication (151 names), then the budgeted graph-wide review (about 150-250 USD)."
       }
     ],
     "milestones": [],
@@ -144,9 +204,14 @@
         "when": "2026-06-05",
         "who": "gpt-5.4",
         "what": "Sprint S2 launched after a full live-plan review. The sprint is now active with sn-search-facility leading and sn-structured-fanout queued behind its remaining migration work and the already-landed bootstrap/extraction prerequisites."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "Simon McIntosh",
+        "what": "June sprint set (S2-S4) retired as superseded; S5 (WEST RC dress rehearsal) started with S6 (stability tail: vocabulary rotation, unit authority, DD-gaps foundation) and S7 (graph-wide integrity) queued behind it. Basis: all five D-release-standard convergence gates measured HOLDS on 2026-07-29."
       }
     ],
     "blockers": [],
-    "_version": 4
+    "_version": 11
   }
 }

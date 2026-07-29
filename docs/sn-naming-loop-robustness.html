@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-impl" content="0.75">
 </head>
 <body>
@@ -279,7 +279,19 @@
           derivatives; and binary-operand vocabulary validation — measured
           today, <code>ratio_of_wibble_frobnicator_to_&hellip;</code> still
           parses; a naive gate broke 10 pinned tests (operands parse as
-          subject+base fragments), so this needs a design, not a patch.</li>
+          subject+base fragments), so this needs a design, not a patch.
+          <br><strong>Scope extension (lead direction, 2026-07-29): the
+          redesign must include CHAINED OPERATORS</strong> — first-class
+          operator composition rather than the single-transformation-slot
+          model that forces <code>inverse</code>/<code>square</code> to glue
+          into base compounds. Required for proper <code>gm*</code> parsing
+          AND generation: the measured composer failure is that it fuses
+          chains (<code>flux_surface_averaged_inverse_square</code>) into the
+          one transformation slot and exhausts retries — gm1/gm5/gm6 sit at
+          the attempt cap on exactly this. The chained-operator IR, canonical
+          operator order, render round-trip, and the response-model shape
+          (mind the ~13-property structured-output ceiling) belong to the
+          same design as operand validation.</li>
     </ol>
 
     <h2 id="s5">§5 — Convergence gates: when the release stops being an assertion</h2>
@@ -446,7 +458,7 @@ Done-when
      written and reaching retry guidance; tests pin the mechanical checks.
   3. Plan §5 gates 2 and 3 have measured entries; this followup resolved with
      numbers, and rung-3 work queued as the next followup.</pre>
-    <p class="r-fu-outcome">Rungs 1-4 landed 2026-07-29 (commits 50321530, 39c7f95a, b94ac300, 11255632; rung-6 design 836a1928). Gate 2: gap rate 14.4/100 composes (before, 104 tokens/724 composes) -> 2/9 (drain 1, hardest residual, both reasons substantive) -> 0/5 (drain 2) — falling across consecutive drains, every new gap diagnosed on the report edge. Gate 3: 0 tokens unchecked (was 389); 388 measured + stamped checked_no_reuse with nearest/similarity; 10 mechanical reuse_confirmed superseding 7 wrong distinct_confirmed; lithium_6~lithium pinned as a genuine distinction. Gate 1: replay absent 484->418, every mechanism-A/C token actionable, controls stay absent. Rung 4: all 566 stored tokens triaged {reuse 10, rule_violation 49, composable 87, retired_stale 261, genuine 159}, 0 unchecked; D-vocab-scope locked rotation-after-triage on the genuine list. Two plan premises corrected by the replay: 174 not 139 distinct_confirmed (49 at >=0.90, 30 genuine judgement calls); mechanism A is 49 tokens — the other ~94 position absents are unregistered geometry primitives (class-D demand). All five §5 gates carry measured HOLDS. Record: docs/archive/sn-naming-loop-robustness-rungs-landed.html</p>
+    <p class="r-fu-outcome">Rungs 1-4 landed 2026-07-29 (commits 50321530, 39c7f95a, b94ac300, 11255632; rung-6 design 836a1928). Gate 2: gap rate 14.4/100 composes (before, 104 tokens/724 composes) -&gt; 2/9 (drain 1, hardest residual, both reasons substantive) -&gt; 0/5 (drain 2) — falling across consecutive drains, every new gap diagnosed on the report edge. Gate 3: 0 tokens unchecked (was 389); 388 measured + stamped checked_no_reuse with nearest/similarity; 10 mechanical reuse_confirmed superseding 7 wrong distinct_confirmed; lithium_6~lithium pinned as a genuine distinction. Gate 1: replay absent 484-&gt;418, every mechanism-A/C token actionable, controls stay absent. Rung 4: all 566 stored tokens triaged {reuse 10, rule_violation 49, composable 87, retired_stale 261, genuine 159}, 0 unchecked; D-vocab-scope locked rotation-after-triage on the genuine list. Two plan premises corrected by the replay: 174 not 139 distinct_confirmed (49 at &gt;=0.90, 30 genuine judgement calls); mechanism A is 49 tokens — the other ~94 position absents are unregistered geometry primitives (class-D demand). All five §5 gates carry measured HOLDS. Record: docs/archive/sn-naming-loop-robustness-rungs-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-nlr-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T09:00:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Rung 5: the class-D vocabulary rotation from the triaged genuine list; rung 6 design lands coordinated</h4>
@@ -502,6 +514,61 @@ Done-when
      stated reason; the adds live in an ISN RC with the codex pin bumped.
   2. Rung-6 prerequisite steps green in ISN; the codex guidance half landed.
   3. A fresh §5 ledger row recorded; this followup resolved with numbers.</pre>
+    </article>
+<article class="r-fu" data-id="f-nlr-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T12:40:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pipeline mechanics: the failed-retry instrument, the broken --compose-model, pool pending scoping, edit reachability, status mirrors</h4>
+    <div class="r-fu-body"><p>The deep sweep verified six pipeline-mechanics defects, two of them gating the WEST RC tail: (1) NO sanctioned retry exists for status='failed' sources at the attempt cap (gate at graph_ops.py:9246/9259; the two revival instruments cover only dd_unit skips and grammar-signature changes) — gm1/gm5/gm6 are stuck on this; (2) --compose-model is silently discarded in pooled mode — compose_batch (workers.py:4945) takes no state and hardcodes the model at :4991. Also: pool_pending_counts has no scope filter (a --edits run spins on 321 phantom pending while claiming 0; 316 non-WEST drafts accumulate unreviewed); 69 hint edits on accepted names are unreachable by construction (+10 on terminal exhausted); source status mirrors lag liveness on 593 sources; one stuck SNRun has no heartbeat property for the sweep to time out against; and the startup reconcile_vocab_gaps now blows a 30s test timeout unstubbed in the harnesses.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-naming-loop-robustness (http://localhost:8765/imas-codex/sn-naming-loop-robustness.html)
+Section: §4 — pipeline mechanics (sweep findings, 2026-07-29)
+Tier:    opus
+
+PRIORITY ORDER (items 1-2 gate the WEST RC tail — land them first)
+  1. RETRY INSTRUMENT: a first-class release for failed-at-cap sources
+     (sn retry --failed &lt;path&gt;... or a scoped flag on sn run). The claim gate
+     is graph_ops.py:9246/:9259 (attempt_count &lt; max, repeated :9317/:9348/
+     :9378); existing revival instruments (:7228 dd_unit skips, :7373
+     vocab-gap grammar-signature) do not cover status=&#x27;failed&#x27;. Resets
+     attempt_count + claim state through a tested instrument with a ledger
+     trail; never raw Cypher. Also cover the 4 permanently-unclaimable
+     &#x27;extracted&#x27; over-cap sources.
+  2. --compose-model THREADING: compose_batch (workers.py:4945) takes no
+     state and hardcodes get_model(&#x27;sn-compose&#x27;) at :4991, so the CLI
+     override (cli/sn.py:1036 -&gt; state.compose_model, workers.py:3025 legacy
+     path only) never reaches pooled composes. Thread it through
+     process_generate_name_batch (workers.py:5860) / loop.py:399-405. Test
+     pins that a pooled compose call uses the override.
+  3. pool_pending_counts (graph_ops.py:13216): review_name pending must apply
+     the same eligibility as claim_review_name_batch (:9502) — description
+     gate, origin&lt;&gt;&#x27;derived&#x27;, edits_only scope — so a --edits run cannot spin
+     on phantom pending (test_no_stuck_idle pins this once fixed).
+  4. EDIT REACHABILITY: 69 open hint edits on accepted names and 10 on
+     exhausted are unreachable by construction (no name-axis claim query
+     covers those stages). Decide + implement the semantics: either a claim
+     path for accepted-name hint edits or refuse staging them with an
+     actionable message; drain or retire the backlog (23 predate 2026-07-25;
+     oldest 2026-07-11).
+  5. STATUS MIRRORS: 593 sources&#x27; status disagrees with name liveness (269
+     attached + 324 composed with no live target; 331 WEST accepted vs 138
+     attached). Extend the startup reconcile to realign status with liveness.
+     Also sweep the heartbeat-less stuck SNRun (started 2026-07-29T11:48Z,
+     all-NULL heartbeat/mode/stages — give the stall guard a fallback).
+  6. HARNESS: stub the reconcile_vocab_gaps startup mutation in the
+     run_sn_pools test harnesses&#x27; autouse fixtures (it now resolves ISN
+     vocabulary per gap across 566 nodes and blows the 30s pytest timeout).
+
+CONSTRAINTS
+  - TDD each item; graph writes only via tested instruments with ledger rows.
+  - No paid LLM spend; these are all mechanics.
+  - Pre-stage naming checks on every staged path; no AI attribution.
+
+Done-when
+  1. gm1/gm5/gm6 claimable again through the sanctioned instrument (proof:
+     one free compose claim succeeds); the WEST plan&#x27;s f-swrr-020 unblocked.
+  2. A pooled compose demonstrably uses --compose-model (test + one live log).
+  3. test_no_stuck_idle green; the edit-backlog semantics decided and drained;
+     status mirrors realigned by a reconcile with measured before/after; the
+     harness stub in place; this followup resolved with numbers.</pre>
     </article>
 </section>
 
