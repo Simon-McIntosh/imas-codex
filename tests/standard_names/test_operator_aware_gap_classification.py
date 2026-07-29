@@ -128,6 +128,9 @@ OPERATOR_EXPRESSIBLE = [
 # when every word on each side is registered.
 RATIO_EXPRESSIBLE = [
     ("qualifier", "gradient_squared_over_magnetic_field_squared"),
+    # Symbol shorthand in both operands, read as the registered tokens it
+    # abbreviates (`rho` -> toroidal_flux_radius, `B` -> magnetic_field).
+    ("physical_base", "gradient_rho_squared_over_B_squared"),
 ]
 
 # Infix operator spellings: a registered multi-word operator whose words straddle
@@ -142,11 +145,9 @@ INFIX_EXPRESSIBLE = [
 # NOT stretched to reach these — an over-eager matcher that called novel physics
 # composable would suppress the vocabulary requests ISN actually needs.
 KNOWN_UNRESOLVED = {
-    # `rho` and `B` are symbol shorthand registered nowhere (the tokens are
-    # `toroidal_flux_radius` and `magnetic_field`), so neither ratio operand
-    # covers.  Closing this needs symbol expansion, not composition.
-    "gradient_rho_squared_over_B_squared": "unregistered symbol shorthand",
-    # `field` alone is not a registered base — only `magnetic_field` is.
+    # `field` alone is not a registered base — only `magnetic_field` is, and no
+    # symbol expansion reads a bare `field` as one: the composer may mean the
+    # electric field just as well.
     "radial_gradient_squared_over_field_squared": "unregistered ratio operand",
     # `variation` is a registered operator and `length` a registered base, but
     # `path` is registered nowhere, so a token is genuinely needed.
@@ -328,8 +329,15 @@ class TestRatioSpelling:
         assert "secondary_base" in verdict.guidance
 
     def test_a_ratio_with_an_unregistered_operand_stays_absent(self):
-        """One uncovered operand is enough — the rule does not guess."""
-        assert operator_composition("gradient_rho_squared_over_B_squared") is None
+        """One uncovered operand is enough — the rule does not guess.
+
+        Symbol expansion narrows what counts as uncovered but does not soften
+        this: a bare `field` has no unambiguous reading, so the request for a
+        token stands.
+        """
+        assert (
+            operator_composition("radial_gradient_squared_over_field_squared") is None
+        )
         assert operator_composition("zzz_alpha_over_zzz_beta") is None
 
 

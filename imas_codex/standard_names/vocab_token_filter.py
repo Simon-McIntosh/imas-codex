@@ -12,6 +12,17 @@ Rejection rules:
 - **R5 locus reclassification**: position-like tokens rerouted to ``position``
   segment instead of being flagged as a gap on their original segment.
 
+**These rules do not govern what becomes a ``VocabGap`` node.** The write path
+(``graph_ops.write_vocab_gaps``, reached from both the composer's explicit gaps
+and the auto-detected ones) admits a gap on ``segments.classify_gap`` alone,
+dropping only the categories in ``segments.NON_ACTIONABLE_GAP_CATEGORIES``. So a
+rule that must hold for *stored* gaps has to be expressed as a classifier
+category, not added here: the DD coordinate-slot spellings (``x1``, ``x2``) are
+rejected as ``rule_violation`` by
+``segments.dd_indexed_field_words``/``classify_gap``, which is narrower than R4's
+blanket digit rejection precisely so a genuine isotope (``lithium_6``) still
+reaches ISN as a request.
+
 Usage::
 
     from imas_codex.standard_names.vocab_token_filter import classify_vocab_token

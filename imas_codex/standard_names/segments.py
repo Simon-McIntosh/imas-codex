@@ -24,6 +24,7 @@ therefore no longer in the fallback.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -305,6 +306,192 @@ def is_known_token(token: str) -> list[str]:
     return found
 
 
+#: Words by which a composer indexes one sample of a repeated structure.  A
+#: standard name never carries them: every sample point of one object shares one
+#: name, so the index lives in the DD path, not the vocabulary.
+_ORDINAL_WORDS: frozenset[str] = frozenset(
+    {
+        "first",
+        "second",
+        "third",
+        "fourth",
+        "fifth",
+        "sixth",
+        "seventh",
+        "eighth",
+        "ninth",
+        "tenth",
+        "initial",
+        "final",
+        "last",
+        "start",
+        "starting",
+        "end",
+        "ending",
+        "intermediate",
+    }
+)
+
+#: Nouns naming the sampled feature an ordinal indexes.  Required alongside an
+#: ordinal before the ordinality rule fires, so an ordinary word that happens to
+#: read as an ordinal (a token about a process *end state*, say) is not caught.
+_SAMPLE_FEATURE_NOUNS: frozenset[str] = frozenset(
+    {
+        "point",
+        "points",
+        "node",
+        "nodes",
+        "centre",
+        "center",
+        "centroid",
+        "position",
+        "coordinate",
+        "coordinates",
+        "summit",
+        "knot",
+        "vertex",
+        "corner",
+        "index",
+        "side",
+    }
+)
+
+#: A DD field spelled as a letter and an index (``x1``, ``x2``) — the DD's own
+#: name for a coordinate slot, carrying no physics.  Such a word is never
+#: vocabulary: the name must say what the coordinate *is*.
+_DD_INDEXED_FIELD = re.compile(r"^[A-Za-z]\d+$")
+
+
+def _covering_registered_span(words: list[str], at: int) -> str | None:
+    """The registered multi-word token spanning ``words[at]``, if one does.
+
+    ``first_wall`` is registered, so the ``first`` inside
+    ``first_wall_midplane`` is part of a grammar token rather than an ordinal.
+    Checking this before reading a word as an ordinal is what stops the rule
+    firing on the grammar's own vocabulary.
+    """
+    index = grammar_token_index()
+    for width in range(2, _MAX_TOKEN_WIDTH + 1):
+        for start in range(max(0, at - width + 1), at + 1):
+            if start + width > len(words) or not start <= at < start + width:
+                continue
+            span = "_".join(words[start : start + width])
+            if span in index:
+                return span
+    return None
+
+
+def _strip_edge_connectives(words: list[str]) -> list[str]:
+    """Drop grammar connectives left exposed at either end of a reduction.
+
+    Removing ``third`` from ``third_point_of_line_of_sight`` and then the
+    feature noun leaves a leading ``of``; the connectives *inside* a token
+    (``line_of_sight``) are part of it and must stay.
+    """
+    connectives = _grammar_connectives()
+    out = list(words)
+    while out and out[0] in connectives:
+        out.pop(0)
+    while out and out[-1] in connectives:
+        out.pop()
+    return out
+
+
+def _registered_singular(token: str) -> str | None:
+    """The registered token ``token`` is an English plural of, if any.
+
+    ``lines_of_sight`` pluralises the head word of the registered
+    ``line_of_sight``, so a reduction landing on it can still name a real
+    target.  Only accepted when the depluralised spelling is registered.
+    """
+    words = token.split("_")
+    for i, word in enumerate(words):
+        if not word.endswith("s") or len(word) < 4:
+            continue
+        candidate = "_".join([*words[:i], word[:-1], *words[i + 1 :]])
+        if is_known_token(candidate):
+            return candidate
+    return None
+
+
+@dataclass(frozen=True, slots=True)
+class OrdinalForm:
+    """A proposal that indexes one sample of a repeated structure.
+
+    Attributes:
+        ordinals: The ordinal words the token carries.
+        reduced: The token with the ordinals dropped.
+        locus: ``reduced`` with the sampled-feature nouns dropped too — the
+            object the samples belong to, which is what a name may carry.
+        target: The registered token one of those reductions lands on, or
+            ``None`` when the locus itself is unregistered (an honest, and much
+            narrower, vocabulary request than the ordinal compound).
+    """
+
+    ordinals: tuple[str, ...]
+    reduced: str
+    locus: str
+    target: str | None
+
+
+def ordinal_form(token: str) -> OrdinalForm | None:
+    """Resolve ``token`` as an ordinal sample of a structure, or ``None``.
+
+    Requires an ordinal word that no registered multi-word token covers, plus a
+    sampled-feature noun for the ordinal to index.  Both conditions together are
+    what keep the rule off the grammar's own vocabulary and off tokens whose
+    ``end``/``final`` is a state rather than an index.
+    """
+    if not token or not grammar_token_index():
+        return None
+    words = token.split("_")
+    ordinal_at = [
+        i
+        for i, word in enumerate(words)
+        if word in _ORDINAL_WORDS and _covering_registered_span(words, i) is None
+    ]
+    if not ordinal_at:
+        return None
+    if not any(
+        word in _SAMPLE_FEATURE_NOUNS
+        for i, word in enumerate(words)
+        if i not in ordinal_at
+    ):
+        return None
+
+    kept = [word for i, word in enumerate(words) if i not in ordinal_at]
+    reduced = "_".join(_strip_edge_connectives(kept))
+    locus = "_".join(
+        _strip_edge_connectives([w for w in kept if w not in _SAMPLE_FEATURE_NOUNS])
+    )
+
+    target: str | None = None
+    for candidate in (reduced, locus):
+        if not candidate:
+            continue
+        if is_known_token(candidate):
+            target = candidate
+            break
+        singular = _registered_singular(candidate)
+        if singular is not None:
+            target = singular
+            break
+
+    return OrdinalForm(
+        ordinals=tuple(words[i] for i in ordinal_at),
+        reduced=reduced,
+        locus=locus,
+        target=target,
+    )
+
+
+def dd_indexed_field_words(token: str) -> tuple[str, ...]:
+    """The DD coordinate-slot spellings (``x1``, ``x2``) ``token`` carries."""
+    if not token:
+        return ()
+    return tuple(w for w in token.split("_") if _DD_INDEXED_FIELD.match(w))
+
+
 def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
     """Classify a single vocabulary gap against the current ISN installation.
 
@@ -315,8 +502,19 @@ def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
     - ``"open_segment"`` — reported segment has open vocabulary
     - ``"wrong_slot_placement"`` — token exists in exactly one other segment
     - ``"ambiguous_known_token"`` — token exists in multiple other segments
+    - ``"rule_violation"`` — the spelling is forbidden however the vocabulary
+      grows: it indexes one sample of a repeated structure, or it carries a DD
+      coordinate-slot field name
+    - ``"reuse"`` — a mechanical check resolves the token to a registered one
+      (see :mod:`vocab_reuse`); overrides any embedding adjudication, since it
+      derives the target rather than scoring a similarity
     - ``"decomposable"`` — compound token whose parts exist in other segments
     - ``"absent"`` — token is not in any closed segment (genuine gap)
+
+    The three derived categories are ordered: a forbidden spelling is settled
+    before any question of reuse, and reuse before decomposition — a word-order
+    variant covers as a compound of its own words, and "compose it from those"
+    would tell the composer to keep the wrong order.
     """
     if not is_valid_segment(segment):
         return "invalid_segment", []
@@ -330,6 +528,18 @@ def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
         return "false_positive", segments_found
 
     if not segments_found:
+        if dd_indexed_field_words(token):
+            return "rule_violation", []
+        ordinal = ordinal_form(token)
+        if ordinal is not None:
+            return "rule_violation", (
+                is_known_token(ordinal.target) if ordinal.target else []
+            )
+        from imas_codex.standard_names.vocab_reuse import registered_reuse
+
+        reuse = registered_reuse(segment, token)
+        if reuse is not None:
+            return "reuse", list(reuse.target_segments)
         # Before declaring absent, check if compound can be decomposed
         decomp_segs = _check_decomposable(token)
         if decomp_segs:
@@ -344,9 +554,10 @@ def classify_gap(segment: str, token: str) -> tuple[str, list[str]]:
 
 # Gap categories that are NOT genuine vocabulary deficiencies: the token
 # already exists (here or in another segment), decomposes into existing
-# tokens, or sits in an open-vocabulary segment.  Only an ``absent``
-# closed-segment gap warrants an ISN vocabulary addition — or retiring the
-# source that reported it.
+# tokens, sits in an open-vocabulary segment, reuses a registered token under
+# another spelling, or is forbidden however the vocabulary grows.  Only an
+# ``absent`` closed-segment gap warrants an ISN vocabulary addition — or
+# retiring the source that reported it.
 NON_ACTIONABLE_GAP_CATEGORIES: frozenset[str] = frozenset(
     {
         "false_positive",
@@ -354,6 +565,8 @@ NON_ACTIONABLE_GAP_CATEGORIES: frozenset[str] = frozenset(
         "open_segment",
         "wrong_slot_placement",
         "ambiguous_known_token",
+        "reuse",
+        "rule_violation",
         "decomposable",
     }
 )
@@ -444,11 +657,104 @@ def _grammar_connectives() -> frozenset[str]:
 #: itself be a registered operator, not the suffix list.
 _OPERATOR_INFLECTION_SUFFIXES: tuple[str, ...] = ("d", "ed", "s", "es", "ic")
 
-#: The word a composer writes for a division. ISN expresses it as the binary
-#: ``ratio`` operator over two operands, so a compound spelled with it is a
-#: binary composition rather than a compound base — provided BOTH operands are
-#: themselves fully registered.
-_RATIO_WORD = "over"
+#: The words a composer writes for a division — the two English spellings of a
+#: quotient. ISN expresses it as the binary ``ratio`` operator over two operands,
+#: so a compound spelled with either is a binary composition rather than a
+#: compound base — provided BOTH operands are themselves fully registered.
+#: Matched per whole word, so a token merely beginning with these letters
+#: (``permeability``) is untouched.
+_DIVISION_WORDS: tuple[str, ...] = ("over", "per")
+
+
+def _division_at(words: list[str]) -> int | None:
+    """Index of the division word in ``words``, or ``None`` if there is none.
+
+    A division word inside a registered multi-word token is part of that token,
+    not a quotient: the operator ``per_toroidal_mode`` spells one, and splitting
+    a compound there would tear a registered operator in half.
+    """
+    for i, word in enumerate(words):
+        if word in _DIVISION_WORDS and _covering_registered_span(words, i) is None:
+            return i
+    return None
+
+
+#: Physics shorthand a composer writes inside a ratio operand instead of the
+#: registered token, mapped to that token.  Deliberately tiny: every entry is a
+#: symbol whose reading is unambiguous in a quotient of plasma quantities, and
+#: each is dropped at runtime by :func:`_symbol_expansions` when its target is
+#: not registered.  Ambiguous symbols are omitted on purpose — ``Z`` is a
+#: vertical coordinate and a charge number, ``T`` a temperature and a time,
+#: ``n`` a density and a mode number, and an honest ``absent`` that asks for the
+#: token the composer needs costs less than a wrong expansion it will follow.
+#:
+#: - ``rho`` — the DD's ``rho_tor``, ISN's ``toroidal_flux_radius``.  ISN also
+#:   carries ``toroidal_flux_coordinate``; the radius is the metres-valued
+#:   carrier a quotient of gradients is written against.
+#: - ``b``, ``b_field`` — the magnetic field, in the magnitude sense a scalar
+#:   quotient uses.
+#: - ``r`` — the major radius, the only radius a ``_over_r`` quotient of
+#:   axisymmetric quantities divides by.
+#: - ``grad`` — the composer's abbreviation of the registered ``gradient``
+#:   operator, which it writes when spelling a quotient of gradients.
+#:
+#: Keys may span several words; the longest match at a position wins, so
+#: ``b_field`` is read whole rather than as ``b`` followed by a stray ``field``.
+_SYMBOL_EXPANSION_CANDIDATES: dict[str, str] = {
+    "rho": "toroidal_flux_radius",
+    "b": "magnetic_field",
+    "b_field": "magnetic_field",
+    "r": "major_radius",
+    "grad": "gradient",
+}
+
+
+@lru_cache(maxsize=1)
+def _symbol_expansions() -> dict[str, str]:
+    """Symbol shorthand mapped to registered tokens, unregistered targets dropped."""
+    index = grammar_token_index()
+    if not index:
+        return {}
+    return {
+        symbol: target
+        for symbol, target in _SYMBOL_EXPANSION_CANDIDATES.items()
+        if symbol not in index and is_known_token(target)
+    }
+
+
+def _expand_symbol_words(
+    words: list[str],
+) -> tuple[list[str], tuple[tuple[str, str], ...]] | None:
+    """Replace symbol shorthand in ``words`` with the registered token's words.
+
+    Matching is per whole span and case-insensitive (the shorthand is
+    conventionally capitalised — ``B``, ``R``), longest span first, and only
+    spans that are themselves unregistered are substituted, so a symbol the
+    grammar happens to carry is left alone.  Returns ``None`` when nothing was
+    expandable, so the caller can tell a retry apart from a no-op.
+    """
+    expansions = _symbol_expansions()
+    if not expansions:
+        return None
+    widest = max(len(symbol.split("_")) for symbol in expansions)
+    out: list[str] = []
+    used: list[tuple[str, str]] = []
+    i = 0
+    while i < len(words):
+        for width in range(min(widest, len(words) - i), 0, -1):
+            span = "_".join(words[i : i + width])
+            target = expansions.get(span.lower())
+            if target is not None:
+                out.extend(target.split("_"))
+                used.append((span, target))
+                i += width
+                break
+        else:
+            out.append(words[i])
+            i += 1
+    if not used:
+        return None
+    return out, tuple(used)
 
 
 def _registered_operator_stem(word: str) -> str | None:
@@ -484,8 +790,12 @@ class OperatorComposition:
         binary_operator: The registered binary operator the spelling implies, set
             when the compound is a ratio written with ``over``.  ``None`` for a
             plain unary composition.
-        operands: For a binary composition, the two operand sides as written.
+        operands: For a binary composition, the two operand sides — with any
+            symbol shorthand expanded, so guidance quotes registered tokens.
             Empty for a unary one.
+        symbol_expansions: The ``(symbol, registered token)`` substitutions the
+            cover needed, so guidance can show the composer what its shorthand
+            was read as.
     """
 
     operators: tuple[str, ...]
@@ -493,6 +803,7 @@ class OperatorComposition:
     segments: tuple[str, ...]
     binary_operator: str | None = None
     operands: tuple[str, ...] = ()
+    symbol_expansions: tuple[tuple[str, str], ...] = ()
 
 
 @lru_cache(maxsize=1)
@@ -521,9 +832,33 @@ def _infix_operator_splits() -> tuple[
     return tuple(splits)
 
 
+@lru_cache(maxsize=1)
+def _cover_index() -> dict[str, tuple[str, ...]]:
+    """:func:`grammar_token_index` plus the lexical-compound bases the walk needs.
+
+    The flat map lists atomic bases only, so a compound the grammar resolves to
+    itself (``major_radius``) is invisible to a span lookup.  Resolving arbitrary
+    spans through the parser is not an option — one parse costs tens of
+    milliseconds and the walk tries several spans per word — so exactly the
+    compounds a symbol expansion can introduce are resolved once, here, and
+    folded in.
+    """
+    index = grammar_token_index()
+    if not index:
+        return {}
+    merged = dict(index)
+    for target in _SYMBOL_EXPANSION_CANDIDATES.values():
+        if target in merged or "_" not in target:
+            continue
+        segment = resolved_base_segment(target)
+        if segment is not None:
+            merged[target] = (segment,)
+    return merged
+
+
 def _cover_words(words: list[str]) -> list[tuple[str, tuple[str, ...]]] | None:
     """Cover a plain word sequence, no infix or ratio handling. See _cover_token."""
-    index = grammar_token_index()
+    index = _cover_index()
     if not index:
         return None
 
@@ -635,8 +970,11 @@ def _ratio_composition(token: str) -> OperatorComposition | None:
 
     BOTH operands must cover completely.  A single uncovered word on either side
     means the composer needs a token there, and guessing at the composition would
-    suppress that request: ``gradient_rho_squared_over_B_squared`` fails here
-    because ``rho`` and ``B`` are symbol shorthand registered nowhere.
+    suppress that request.  An operand that will not cover as written is retried
+    once with its symbol shorthand expanded (:func:`_symbol_expansions`), which
+    is what lets ``gradient_rho_squared_over_B_squared`` resolve to a ratio of
+    two registered operands instead of asking for ``rho`` and ``B`` as tokens;
+    the substitutions are carried on the result so guidance can quote them.
 
     **``over`` is deliberately NOT treated as a connective the cover walk steps
     over.**  Skipping it would let a division fall through to the unary path and
@@ -649,35 +987,47 @@ def _ratio_composition(token: str) -> OperatorComposition | None:
     it stays ``absent`` and asks for the token it actually needs.
     """
     words = token.split("_")
-    if _RATIO_WORD not in words:
+    at = _division_at(words)
+    if at is None:
         return None
     binary = _registered_binary_operator()
     if binary is None:
         return None
 
-    at = words.index(_RATIO_WORD)
     left_words, right_words = words[:at], words[at + 1 :]
     if not left_words or not right_words:
         return None
 
-    left = _cover_words(left_words) or _cover_infix_operator(left_words)
-    right = _cover_words(right_words) or _cover_infix_operator(right_words)
-    if left is None or right is None:
-        return None
+    expansions: list[tuple[str, str]] = []
+    sides: list[tuple[list[str], list[tuple[str, tuple[str, ...]]]]] = []
+    for side_words in (left_words, right_words):
+        cover = _cover_words(side_words) or _cover_infix_operator(side_words)
+        if cover is None:
+            expanded = _expand_symbol_words(side_words)
+            if expanded is None:
+                return None
+            side_words, used = expanded
+            cover = _cover_words(side_words) or _cover_infix_operator(side_words)
+            if cover is None:
+                return None
+            expansions.extend(used)
+        sides.append((side_words, cover))
 
     operators: list[str] = []
     bases: list[str] = []
     segments: list[str] = []
-    for span, classes in [*left, *right]:
-        segments.extend(classes)
-        (operators if OPERATOR_SEGMENT in classes else bases).append(span)
+    for _side_words, cover in sides:
+        for span, classes in cover:
+            segments.extend(classes)
+            (operators if OPERATOR_SEGMENT in classes else bases).append(span)
 
     return OperatorComposition(
         operators=(binary, *operators),
         bases=tuple(bases),
         segments=tuple(dict.fromkeys([OPERATOR_SEGMENT, *segments])),
         binary_operator=binary,
-        operands=("_".join(left_words), "_".join(right_words)),
+        operands=tuple("_".join(side_words) for side_words, _cover in sides),
+        symbol_expansions=tuple(expansions),
     )
 
 
@@ -784,6 +1134,9 @@ class GapVerdict:
         operators: Registered operator tokens the proposal spells, if any.
         bases: Registered non-operator tokens the operators apply to.
         guidance: One line, safe to hand back to a model as retry feedback.
+        reuse_target: The registered token this proposal should reuse, set for a
+            ``reuse`` verdict and for a ``rule_violation`` whose ordinal-free
+            reduction lands on a registered locus.
     """
 
     category: str
@@ -791,6 +1144,7 @@ class GapVerdict:
     operators: tuple[str, ...]
     bases: tuple[str, ...]
     guidance: str
+    reuse_target: str | None = None
 
 
 def _operator_routing_advice(operators: tuple[str, ...], bases: tuple[str, ...]) -> str:
@@ -807,6 +1161,70 @@ def _operator_routing_advice(operators: tuple[str, ...], bases: tuple[str, ...])
     return advice
 
 
+def _reuse_finding(segment: str, token: str):
+    """The mechanical reuse resolution for ``token``, or ``None``.
+
+    Imported lazily: :mod:`vocab_reuse` reads the vocabulary through this module,
+    so a module-level import would close a cycle.
+    """
+    from imas_codex.standard_names.vocab_reuse import registered_reuse
+
+    return registered_reuse(segment, token)
+
+
+def _reuse_guidance(finding) -> str:
+    """Render a reuse finding as one line of retry feedback."""
+    from imas_codex.standard_names.vocab_reuse import reuse_guidance
+
+    return reuse_guidance(finding)
+
+
+def _absent_narrowing(token: str) -> str:
+    """Narrow an absent compound's request to the words that are not registered.
+
+    A compound gap otherwise asks for the whole compound, and a hundred such asks
+    are a handful of missing atoms wearing prefixes.  Two words are never offered
+    as tokens to request: the division word, because listing it invites folding a
+    quotient into one base, and a bare index, because an isotope or ordinal digit
+    is not vocabulary.
+    """
+    index = grammar_token_index()
+    words = token.split("_")
+    if len(words) < 2 or not index:
+        return ""
+
+    at = _division_at(words)
+    if at is not None:
+        binary = _registered_binary_operator()
+        sides = ("_".join(words[:at]), "_".join(words[at + 1 :]))
+        unresolved = [s for s in sides if s and not _cover_words(s.split("_"))]
+        if binary and unresolved:
+            return (
+                f" It is a division: keep it as the binary operator "
+                f"'{binary}' over two operands and request only the operand that "
+                f"is unregistered ({', '.join(repr(s) for s in unresolved)}) — "
+                f"never fold the quotient into one base token."
+            )
+        return ""
+
+    connectives = _grammar_connectives()
+    known = [w for w in words if w in index]
+    unknown = [
+        w
+        for w in words
+        if w not in index
+        and w not in connectives
+        and not w.isdigit()
+        and not _DD_INDEXED_FIELD.match(w)
+    ]
+    if not known or not unknown:
+        return ""
+    return (
+        f" Its words {', '.join(repr(w) for w in known)} are already registered — "
+        f"request only {', '.join(repr(w) for w in unknown)}, and compose the rest."
+    )
+
+
 def describe_gap(segment: str, token: str) -> GapVerdict:
     """Classify a gap and render guidance that tells a composer what to do.
 
@@ -820,6 +1238,7 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
     comp = operator_composition(token)
     operators = comp.operators if comp is not None else ()
     bases = comp.bases if comp is not None else ()
+    reuse_target: str | None = None
 
     if category == "false_positive":
         guidance = (
@@ -848,6 +1267,45 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
             f"'{token}' is a registered {where} token, not a {segment} — "
             f"place it in the {where} slot."
         )
+    elif category == "rule_violation" and dd_indexed_field_words(token):
+        fields = ", ".join(f"'{w}'" for w in dd_indexed_field_words(token))
+        guidance = (
+            f"{fields} in '{token}' names a DD coordinate slot, not a physical "
+            f"quantity — a standard name says what the coordinate is (the axis it "
+            f"runs along, the locus it measures), never the DD's field spelling. "
+            f"Re-propose without it."
+        )
+    elif category == "rule_violation" and (ordinal := ordinal_form(token)) is not None:
+        which = ", ".join(f"'{o}'" for o in ordinal.ordinals)
+        if ordinal.target is not None:
+            reuse_target = ordinal.target
+            guidance = (
+                f"'{token}' indexes one sample of a repeated structure; "
+                f"ordinality never enters a standard name — every sample of one "
+                f"object shares one name. Drop {which} and use the registered "
+                f"'{ordinal.target}'."
+            )
+        elif ordinal.locus:
+            guidance = (
+                f"'{token}' indexes one sample of a repeated structure; "
+                f"ordinality never enters a standard name — every sample of one "
+                f"object shares one name. Name the object the samples belong to: "
+                f"drop {which}, which leaves '{ordinal.locus}'. That locus is "
+                f"itself unregistered, so request that single token if you need it "
+                f"— not the ordinal compound."
+            )
+        else:
+            guidance = (
+                f"'{token}' indexes one sample of a repeated structure and names "
+                f"no object; ordinality never enters a standard name — every "
+                f"sample of one object shares one name. Name the object whose "
+                f"samples these are, in the {segment} slot, and drop {which}."
+            )
+    elif (
+        category == "reuse" and (finding := _reuse_finding(segment, token)) is not None
+    ):
+        reuse_target = finding.target
+        guidance = _reuse_guidance(finding)
     elif category == "decomposable" and comp is not None and comp.binary_operator:
         left, right = comp.operands
         guidance = (
@@ -855,6 +1313,15 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
             f"binary operator_token '{comp.binary_operator}' — first operand "
             f"'{left}' in base_token, second operand '{right}' in secondary_base."
         )
+        if comp.symbol_expansions:
+            read_as = ", ".join(
+                f"'{symbol}' as '{target}'" for symbol, target in comp.symbol_expansions
+            )
+            guidance += (
+                f" The shorthand was read as {read_as} — spell the registered "
+                f"token in the operand, and keep the division: it is two operands "
+                f"under '{comp.binary_operator}', not one compound base."
+            )
     elif category == "decomposable" and operators:
         guidance = f"'{token}' is not a single token: {_operator_routing_advice(operators, bases)}."
     elif category == "decomposable":
@@ -863,12 +1330,16 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
             f"'{token}' decomposes into tokens already registered across "
             f"{where} — compose it from those rather than requesting a new token."
         )
-    else:  # absent
+    else:
+        # Absent, and the fallback for a derived category whose deriving check
+        # no longer fires — the grammar can be swapped underneath a caller, and
+        # a stale "needs a new token" line is safer than a stale claim of reuse.
         guidance = (
             f"'{token}' is in no grammar class and does not decompose into "
             f"registered tokens; naming this needs a new {segment} token in "
             f"imas-standard-names."
         )
+        guidance += _absent_narrowing(token)
 
     return GapVerdict(
         category=category,
@@ -876,6 +1347,7 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
         operators=operators,
         bases=bases,
         guidance=guidance,
+        reuse_target=reuse_target,
     )
 
 
@@ -889,11 +1361,16 @@ def clear_grammar_caches() -> None:
     added cache go on serving stale vocabulary.  Adding a cache here is the only
     place that list has to be kept.
     """
+    from imas_codex.standard_names.vocab_reuse import clear_reuse_caches
+
+    clear_reuse_caches()
     for cache in (
         _operator_tokens,
         _grammar_connectives,
         _infix_operator_splits,
         _registered_binary_operator,
+        _symbol_expansions,
+        _cover_index,
         grammar_tokens_by_segment,
         grammar_token_index,
         known_segments,
@@ -963,8 +1440,10 @@ __all__ = [
     "PSEUDO_SEGMENTS",
     "GapVerdict",
     "OperatorComposition",
+    "OrdinalForm",
     "classify_gap",
     "clear_grammar_caches",
+    "dd_indexed_field_words",
     "describe_gap",
     "filter_closed_segment_gaps",
     "grammar_token_index",
@@ -977,6 +1456,7 @@ __all__ = [
     "known_segments",
     "open_segments",
     "operator_composition",
+    "ordinal_form",
     "reportable_segments",
     "resolved_base_segment",
 ]
