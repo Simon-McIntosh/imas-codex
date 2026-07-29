@@ -43,7 +43,7 @@ from imas_codex.standard_names.workers import (
         # An area-per-flux derivative is not a length.
         (
             "equilibrium/time_slice/profiles_1d/darea_dpsi",
-            "derivative_with_respect_to_toroidal_flux_radius_of_area_of_flux_surface",
+            "derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface",
             "Wb^-1.m^2",
             "m",
         ),
