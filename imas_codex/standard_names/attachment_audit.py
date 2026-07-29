@@ -571,6 +571,10 @@ def detach_one_attachment(
     Refuses when the pairing does not exist, or when it is the name's ONLY
     remaining attachment: a name whose every source is wrong is a NAME defect to
     repair with ``sn edit --rename``, never something to orphan by detaching.
+    Exception: a derived parent with live children survives losing its last
+    realization — its identity is anchored by the ``HAS_PARENT`` structure, and
+    accepted derived parents routinely carry no realization at all, so the
+    detach returns it to that designed state instead of orphaning it.
 
     Returns ``{"ok": bool, ...}``; never raises on a refusal.
     """
@@ -602,7 +606,11 @@ def detach_one_attachment(
             RETURN src.id AS source_node_id,
                    other_live AS other_live_names,
                    EXISTS { (dd)-[:HAS_STANDARD_NAME]->(sn) } AS projected,
-                   COUNT { (:IMASNode)-[:HAS_STANDARD_NAME]->(sn) } AS name_attachments
+                   COUNT { (:IMASNode)-[:HAS_STANDARD_NAME]->(sn) } AS name_attachments,
+                   (sn.origin = 'derived' AND EXISTS {
+                        (child:StandardName)-[:HAS_PARENT]->(sn)
+                        WHERE NOT coalesce(child.name_stage, '') IN $historical
+                   }) AS structural_parent
             """,
             dd_path=dd_path,
             sn_id=sn_id,
@@ -614,7 +622,13 @@ def detach_one_attachment(
                 "ok": False,
                 "reason": f"{dd_path!r} does not realize {sn_id!r}",
             }
-        if int(row["name_attachments"]) <= 1:
+        # A derived parent with live children is anchored by its HAS_PARENT
+        # structure, not by realizations — accepted derived parents routinely
+        # carry none. Removing its last realization returns it to that
+        # designed state rather than orphaning it, so the would-orphan
+        # refusal does not apply.
+        structural_parent = bool(row.get("structural_parent"))
+        if int(row["name_attachments"]) <= 1 and not structural_parent:
             return {
                 "ok": False,
                 "reason": (
@@ -635,6 +649,7 @@ def detach_one_attachment(
             "source_node_id": row["source_node_id"],
             "source_rewound": reroute,
             "projection_only": not has_source,
+            "structural_parent": structural_parent,
             "dry_run": dry_run,
         }
         if dry_run:

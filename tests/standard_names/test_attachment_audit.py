@@ -854,6 +854,7 @@ def _detach_client(
     other_live: int = 0,
     name_attachments: int = 2,
     projection_only: bool = False,
+    structural_parent: bool = False,
 ) -> MagicMock:
     """A client answering the targeted detach's pre-flight read."""
     from imas_codex.standard_names import attachment_audit as mod
@@ -867,6 +868,7 @@ def _detach_client(
                         "other_live_names": 0,
                         "projected": False,
                         "name_attachments": 0,
+                        "structural_parent": False,
                     }
                 ]
             return [
@@ -875,6 +877,7 @@ def _detach_client(
                     "other_live_names": other_live,
                     "projected": True,
                     "name_attachments": name_attachments,
+                    "structural_parent": structural_parent,
                 }
             ]
         if q in (mod._DETACH_QUERY, mod._DETACH_PROJECTION_QUERY):
@@ -916,6 +919,27 @@ def test_detach_refuses_to_orphan_a_name() -> None:
     res = detach_one_attachment("a/b", "only_here", reason="wrong", gc=gc)
     assert res["ok"] is False
     assert "sn edit --rename" in res["reason"]
+
+
+def test_detach_releases_a_derived_parent_holding_its_childs_leaf() -> None:
+    """A derived parent with live children is anchored by structure, not sources.
+
+    Accepted derived parents routinely carry no realization at all, so losing
+    the last one returns the parent to that designed state — the would-orphan
+    refusal must not fire.
+    """
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc = _detach_client(name_attachments=1, other_live=2, structural_parent=True)
+    res = detach_one_attachment(
+        "summary/global_quantities/greenwald_fraction/value",
+        "greenwald_density",
+        reason="the leaf is the dimensionless fraction; the parent is its ratio operand",
+        gc=gc,
+    )
+    assert res["ok"] is True
+    assert res["structural_parent"] is True
+    assert res["source_rewound"] is False, "the path keeps other live names"
 
 
 def test_detach_refuses_a_pairing_that_does_not_exist() -> None:
