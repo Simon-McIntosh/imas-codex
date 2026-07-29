@@ -115,6 +115,18 @@ enums:
           by reconcile_vocab_gaps when re-classifying against the current ISN
           vocabulary; persists on the node (unlike false_positive / open_segment
           / invalid_segment classifications, which reconcile deletes).
+      rule_violation:
+        description: >-
+          The spelling is forbidden however the vocabulary grows: it indexes
+          one ordinal sample of a repeated structure (first_point,
+          rectangle_centre) or carries a bare DD coordinate-slot field name
+          (x1, x2).  Guidance names the rule, not a missing token.
+      reuse:
+        description: >-
+          A mechanical check derived the registered token this proposal
+          spells (structural DD suffix, word-order permutation, or settled
+          synonym) — reuse by construction, overriding any embedding
+          adjudication.
 
   VocabGapDedupDecision:
     description: >-
@@ -140,6 +152,41 @@ enums:
           No reuse check fired for this gap (below threshold, the check was
           disabled, ISN/embeddings unavailable, or the gap was written on a
           path the check does not run). The default for un-adjudicated gaps.
+      reuse_confirmed:
+        description: >-
+          A mechanical check (structural DD suffix, word-order permutation,
+          settled synonym) derived the registered token this proposal spells.
+          Supersedes any embedding adjudication on record — the target is
+          derived, not scored. The registered token lives in reuse_target.
+      checked_no_reuse:
+        description: >-
+          The offline nearest-neighbour measurement ran and recorded
+          nearest_token / nearest_similarity, and no mechanical check
+          resolved the token — the reuse question was asked and answered
+          with a measurement rather than left unchecked.
+
+  VocabGapTriage:
+    description: >-
+      Lifecycle bucket assigned by triage_vocab_gaps to every stored gap:
+      derived from the mechanical reuse verdict, the reconciled category, and
+      the last-seen stamp. One bucket per node; nothing is deleted.
+    permissible_values:
+      reuse:
+        description: Mechanically resolved to a registered token.
+      rule_violation:
+        description: A construction the grammar already forbids.
+      composable:
+        description: >-
+          Expressible from registered grammar (decomposable compounds,
+          wrong-slot placements, ambiguous known tokens).
+      retired_stale:
+        description: >-
+          Still absent but last proposed before the current-composer era and
+          never reproduced — history, not demand.
+      genuine:
+        description: >-
+          Absent and recently reproduced — the real vocabulary demand a
+          rotation decision reads.
 
   StandardNameKind:
     description: >-
@@ -1753,6 +1800,24 @@ classes:
           Timestamp when reconcile_vocab_gaps last reclassified this gap
           against the current ISN vocabulary. Null until a reconcile pass
           updates the gap's category/actual_segments.
+        range: datetime
+      reuse_target:
+        description: >-
+          The registered token a mechanical reuse check derived for this
+          proposal. Set with dedup_decision=reuse_confirmed.
+      reuse_mechanism:
+        description: >-
+          Which mechanical check derived the target: structural_suffix,
+          word_order, or settled_synonym.
+      reuse_detail:
+        description: >-
+          One clause explaining the derivation, mirrored into retry guidance.
+      triage:
+        description: >-
+          Lifecycle bucket assigned by triage_vocab_gaps.
+        range: VocabGapTriage
+      triaged_at:
+        description: When the triage pass last stamped this node.
         range: datetime
 
   StandardNameSource:
