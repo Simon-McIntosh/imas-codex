@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="17">
-<meta name="plan-impl" content="0.78">
+<meta name="plan-version" content="18">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -85,6 +85,31 @@
     </ul>
 
     <h2 id="s3">§3 — Rehearsal procedure (act 1: fork PR)</h2>
+
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px; margin-bottom:10px;">
+      <p style="margin:0 0 6px;">
+        <span class="badge badge-shipped">✓ gate 5 holds (2026-07-29)</span>
+        <strong>The stage-1 residual is closed by instrument and every
+        robustness gate carries a measured HOLDS.</strong> Acceptance
+        <strong>300 → 331/355</strong>; all <strong>221 batch names parse</strong>
+        at pin <code>937ea94</code> with no null units; WEST export ambiguity
+        <strong>0</strong>; the manifest partitions into 331 accepted + 10
+        documented non-nameable + 9 in-review + 5 gap-eligible with
+        <strong>zero unexplained</strong>. The three parse/unit blockers
+        repaired through review on merit (0.925–0.9625); item D rebound and
+        detached under the migration gate; six of nine gm coefficients accepted
+        with their own DD units (gm1/gm5/gm6 documented at the composer's
+        attempt cap — a measured capability finding owned by the robustness
+        plan). Paid review $8.75 of the $25 cap; campaign ≈ $89 of 500.
+        Full record:
+        <a href="archive/sn-west-review-rehearsal-gate5-landed.html">gate-5 landed</a>;
+        gate ledger:
+        <a href="/imas-codex/sn-naming-loop-robustness.html">sn-naming-loop-robustness §5</a>.
+        Per D-release-standard the RC cut (stage 2) is now unblocked by the
+        gates and awaits the lead's trigger — this plan's §3 stages 2–6 remain
+        the deliverable.
+      </p>
+    </div>
 
     <div class="card" style="border-left:4px solid #b5651d; padding-left:12px;">
       <p style="margin:0 0 6px;">
@@ -1986,7 +2011,7 @@ Done-when
      robustness gates, not an RC.</pre>
     <p class="r-fu-outcome">Superseded by f-swrr-018 before any work ran: a batch parse-check at the new ISN pin (937ea94) — the first ever run — found two ACCEPTED batch names that no longer parse (NonCanonicalNameError: accumulated_deposited_thermal_energy_of_plasma_facing_component and initial_plasma_breakdown_time, whose claimed canonical form 'breakdown_plasma_initial_time' also warrants an ISN ordering sanity-check before repair) plus greenwald_density carrying no unit. All three are release-blocking and were invisible until the grammar moved under the batch. f-swrr-018 carries the identical instrument worklist plus these three.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-018" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T07:40:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-018" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T07:40:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-29T09:09:33+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close gate 5: the 55 by instrument, plus 2 canonical-order repairs and one missing unit found by the first batch parse-check</h4>
     <div class="r-fu-body"><p>Everything blocking the WEST batch is now enumerated and instrumented. The 55 unaccepted close by instrument (one <code>sn rescore</code> unblocks 16); item D has the lead's authorisation; nine sources get documented as non-nameable. NEW from the first-ever parse-check of the accepted batch at the pinned grammar: <strong>2 accepted names fail canonical order</strong> at pin <code>937ea94</code> and <strong><code>greenwald_density</code> has no unit</strong> — all three would break export validation. No RC step: per D-release-standard the release follows the <a href="/imas-codex/sn-naming-loop-robustness.html">robustness gates</a>; this followup makes gate 5 true.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -2085,6 +2110,51 @@ Done-when
      as holding in sn-naming-loop-robustness §5.
   6. This followup resolved with numbers; handoff names the remaining gates,
      not an RC.</pre>
+    <p class="r-fu-outcome">Gate 5 holds — the §3 residual closed by instrument 2026-07-29, and all five robustness gates carry measured HOLDS (sn-naming-loop-robustness §5). Acceptance 300 -> 331/355; ALL 221 batch names parse at pin 937ea94; no null units; WEST export ambiguity = 0; the manifest partitions into 331 accepted + 10 documented non-nameable + 9 in-review + 5 gap-eligible with ZERO unexplained. Item 0: all three blockers repaired through review on merit — accumulated_deposited_energy_of_plasma_facing_component 0.925 (the canonical reorder mis-claimed the thermal population; DD says total discharge energy), breakdown_initial_time 0.925 (every plasma+breakdown spelling canonicalizes to nonsense, 'plasma' binds as a channel qualifier — filed as ISN issue #39; the natural breakdown_time id is a refine tombstone whose adoption would close a REFINED_FROM cycle), and greenwald_density root-caused as a derived operand parent holding its child's dimensionless leaf — sn detach gained a structural-parent exemption (1efea0d1, TDD), the parent released, and ratio_of_line_averaged_electron_density_to_greenwald_density accepted 0.9625 per the DD formula. Item D: bind_sources_exclusively moved the three generic poloidal-field paths onto poloidal_magnetic_field, gate_migrated_attachments validated all three (0 rejections), the constraint leaf detached. gm cluster: 6 of 9 with their own name and own DD unit (gm2 0.858/m^-2 after a deterministic rebind + unit correction, gm3 0.888, gm4 0.975, gm7 0.956, gm8 pre-existing, gm9 0.975); the composer measurably cannot emit chained-operator forms (fuses flux_surface_averaged_inverse_square into one transformation token) — gm1/gm5/gm6 documented at the attempt cap with parser-validated targets, a capability finding now owned by the robustness plan. b_field_average resolved (flux_surface_averaged_magnetic_field_magnitude 0.956); n_e_line decided from catalog precedent (density base family, zero accepted number_density names); optical_depth composed onto the registered opacity base on its first pass under the new reuse guidance. Paid review $8.75 of the $25 cap (30+12 reviewed, 7+4 refined); campaign ~$89 of 500. Record: docs/archive/sn-west-review-rehearsal-gate5-landed.html. Handoff: gate 5 holds; the remaining gates are measured and holding in sn-naming-loop-robustness; the RC cut (stage 2) is unblocked by the gates and awaits the lead's trigger.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-019" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T09:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stage 2: cut the fork-PR batch RC — the gates hold, the cut is the lead&#x27;s trigger</h4>
+    <div class="r-fu-body"><p>All five convergence gates carry measured HOLDS and gate 5's partition has zero unexplained paths, so per D-release-standard the release is no longer gated — but the cut is cost-gated and user-triggered by this plan's own §1. One command opens the fork PR and puts a human into stage 3, the gold-bordered box the rehearsal exists to exercise. Stages 3–6 (human review → sn merge fold-back exercising the graph-merged: tag → freeze-check → --undo unwind) follow the PR.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 stage 2 — cut the fork-PR batch RC (gates hold; lead-triggered)
+Tier:    opus
+
+STATE (2026-07-29)
+  All five sn-naming-loop-robustness §5 gates carry measured HOLDS. WEST:
+  331/355 accepted; 221 batch names all parse at pin 937ea94; no null units;
+  export ambiguity 0; partition has zero unexplained paths. Campaign ~$89 of
+  the 500 ceiling. The stage-0 snapshot exists.
+
+READ FIRST
+  docs/archive/sn-west-review-rehearsal-gate5-landed.html
+  docs/archive/sn-naming-loop-robustness-rungs-landed.html   (the gate ledger)
+
+DO
+  1. Pre-flight: gh auth status; the fork ISNC checkout&#x27;s origin/upstream
+     remotes; re-run the batch parse-check (all names must still parse).
+  2. CUT IT:
+       uv run imas-codex sn release --batch west_task_2e --bump minor \
+         -m &quot;WEST review batch rehearsal&quot;
+     Mints v0.&lt;n&gt;.0rc&lt;N&gt;+west-task-2e. Verify: additive diff (approved set
+     byte-identical); catalog.yml export_scope=review + review_batch; artifact
+     frozen at manifests/reviews/&lt;rc&gt;.sn_names.yaml with rc_version AND
+     batch_label; RC-tagged; PR open on the FORK (never --final in act 1).
+     Record RC version, PR URL, batch size, and judge the LLM-written PR body
+     — the first live output of the sn-release-notes seat.
+  3. Collapse §3 stages 0–2; queue stages 3–6 (human review → sn merge
+     fold-back exercising the graph-merged: tag → freeze-check → --undo).
+
+CONSTRAINTS
+  - Gap-only; never --reseed; do NOT re-snapshot. A DD pin is immutable.
+  - NEVER hand-accept a name or hand-edit graph text.
+  - No AI attribution in ANY commit, PR, or comment; pre-stage naming checks
+    on every staged path; commit plan edits the same session.
+
+Done-when
+  1. Fork PR OPEN with RC version, URL, batch size and PR-body judgement
+     recorded.
+  2. §3 stages 0–2 collapsed; stages 3–6 queued; this followup resolved.</pre>
     </article>
 </section>
 

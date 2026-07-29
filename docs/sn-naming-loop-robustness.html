@@ -7,19 +7,19 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-naming-loop-robustness">
   <meta name="plan-title" content="A robust naming loop on a stable grammar">
-  <meta name="plan-summary" content="Make the compose→gap→retry loop convergent and the grammar/vocabulary stable enough that generators use them effectively: diagnose the 484 residual vocab-gap tokens by mechanism, fix each mechanism at its source, and replace 'cut the RC' assertions with measurable convergence gates.">
+  <meta name="plan-summary" content="Make the compose→gap→retry loop convergent and the grammar/vocabulary stable enough that generators use them effectively: diagnose the 484 residual vocab-gap tokens by mechanism, fix each mechanism at its source, and replace &#x27;cut the RC&#x27; assertions with measurable convergence gates.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-informs" content="sn-west-review-rehearsal, sn-graph-wide-integrity">
+  <meta name="plan-informs" content="sn-west-review-rehearsal,sn-graph-wide-integrity">
   <title>A robust naming loop on a stable grammar | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="0">
-<meta name="plan-impl" content="0">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
   <main class="plan-doc">
@@ -196,6 +196,33 @@
     </p>
 
     <h2 id="s4">§4 — The programme</h2>
+
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px; margin-bottom:10px;">
+      <p style="margin:0 0 6px;">
+        <span class="badge badge-shipped">✓ rungs 1–4 landed 2026-07-29</span>
+        <strong>The loop measured, taught, and triaged in one pass</strong>
+        (riding the WEST batch composes as the rung-1 measurement). Gap rate
+        <strong>14.4 → 2/9 → 0/5 per drain</strong> with every new gap carrying
+        a substantive reason; the dedup verdict is mechanical where mechanics
+        decide (10 <code>reuse_confirmed</code> superseding 7 wrong
+        <code>distinct_confirmed</code>; <strong>0 tokens unchecked</strong>,
+        was 389); the classifier returns actionable verdicts for every
+        mechanism-A/C token (49 <code>rule_violation</code>, 65
+        <code>decomposable</code>, controls stay <code>absent</code>); and all
+        566 stored tokens are triaged
+        {reuse 10, rule_violation 49, composable 87, retired_stale 261,
+        genuine 159} with D-vocab-scope locked on the genuine list. Rung 6's
+        operand validation returned as a
+        <a href="/imas-codex/sn-binary-operand-validation-design.html">design record</a>.
+        Commits <code>50321530</code>, <code>39c7f95a</code>,
+        <code>b94ac300</code>, <code>11255632</code>, <code>836a1928</code>.
+        Two §2/§3 premises corrected by the replay (174 not 139
+        distinct_confirmed; mechanism A is 49 tokens, the other ~94 are
+        unregistered geometry primitives — class-D demand). Full record:
+        <a href="archive/sn-naming-loop-robustness-rungs-landed.html">rungs 1–4 landed</a>.
+      </p>
+    </div>
+
     <p>Ordered by leverage; each rung has its own done-when. Rungs 1–3 are free
        (no LLM spend); rung 4 is compose/review-priced; rung 5 is an ISN
        rotation.</p>
@@ -288,30 +315,66 @@
       names the defect it found; that defect becomes work in §4, not a reason to
       lower the gate.
     </p>
+    <table>
+      <thead><tr><th>gate</th><th>2026-07-29 (rungs 1–4 landing)</th><th>verdict</th></tr></thead>
+      <tbody>
+        <tr><td>1 — honest verdicts</td>
+            <td>Replay of all 566 stored tokens: <code>absent</code> 484 → 418,
+                every mechanism-A/C token actionable (49 rule_violation, 10
+                reuse, 65 decomposable); controls stay <code>absent</code>,
+                pinned by tests; zero bare &ldquo;token does not exist&rdquo;
+                verdicts.</td>
+            <td><strong>HOLDS</strong></td></tr>
+        <tr><td>2 — a diagnosed loop</td>
+            <td>Before: 104 tokens / 724 composes (<strong>14.4/100</strong>,
+                07-22→07-28). Drain 1 (hardest residual): 2/9, both reasons
+                substantive. Drain 2: <strong>0/5</strong>. Falling across
+                consecutive drains.</td>
+            <td><strong>HOLDS</strong></td></tr>
+        <tr><td>3 — trustworthy dedup</td>
+            <td><strong>0 unchecked</strong> (was 389); 10 mechanical
+                <code>reuse_confirmed</code>; the 45 surviving
+                <code>distinct_confirmed</code> ≥0.90 all carry a stated
+                disposition (category or triage bucket);
+                <code>lithium_6~lithium</code> pinned as a genuine
+                distinction.</td>
+            <td><strong>HOLDS</strong></td></tr>
+        <tr><td>4 — stable grammar surface</td>
+            <td>ISN suite green at pin <code>937ea94</code>; drift tests (both
+                axes introspected) green; SEGMENT_TOKEN_MAP readers enforced;
+                SN suite 5113 passed at the default tier.</td>
+            <td><strong>HOLDS</strong></td></tr>
+        <tr><td>5 — WEST residual instrumented</td>
+            <td>355 = 331 accepted + 10 documented + 9 in-review + 5
+                gap-eligible, <strong>0 unexplained</strong>; 221/221 batch
+                names parse; no null units; export ambiguity 0.</td>
+            <td><strong>HOLDS</strong></td></tr>
+      </tbody>
+    </table>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="robustness-before-release" data-choice="gates" data-by="Simon McIntosh" data-when="2026-07-28T18:45:00+00:00">
-    <p class="r-dec-q">D-release-standard — keep asserting the WEST RC as each session's next action, or gate the release on measured pipeline convergence?</p>
+    <p class="r-dec-q">D-release-standard — keep asserting the WEST RC as each session&#x27;s next action, or gate the release on measured pipeline convergence?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="assert">Keep the RC as the standing next action (five sessions of evidence against)</button>
       <button class="r-opt chosen" data-value="gates">Gate the release on the §5 convergence gates; stop asserting it (lead direction)</button>
       </p>
-    <p class="r-dec-rat">Locked by the lead, verbatim: "we should stop asserting that we are going to 'cut an RC' each time when we do not yet have a robust pipeline... we want a robust pipeline and a stable grammar and vocab that the generators can use effectively." Five consecutive rehearsal sessions ended with the RC asserted and not cut, each blocked by a real defect — the assertion was making plan state fictional. The RC is cut when §5 passes.</p>
+    <p class="r-dec-rat">Locked by the lead, verbatim: &quot;we should stop asserting that we are going to &#x27;cut an RC&#x27; each time when we do not yet have a robust pipeline... we want a robust pipeline and a stable grammar and vocab that the generators can use effectively.&quot; Five consecutive rehearsal sessions ended with the RC asserted and not cut, each blocked by a real defect — the assertion was making plan state fictional. The RC is cut when §5 passes.</p>
     </div>
-<div class="r-dec" data-key="vocab-scope" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="vocab-scope" data-choice="rotation-after-triage" data-by="Simon McIntosh" data-when="2026-07-29T06:00:45+00:00">
     <p class="r-dec-q">D-vocab-scope — which class-D tokens (genuine instrument-side demand: detection_efficiency, focal_length, groove_density, gain, intensity, bandwidth, heat_flux, orbit_integral, …) are added to ISN, and which are folded onto existing tokens?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="rotation-after-triage">Decide from rung 4's triaged list (recommended — the true list is smaller than today's stock)</button>
+      <button class="r-opt chosen" data-value="rotation-after-triage">Decide from rung 4&#x27;s triaged list (recommended — the true list is smaller than today&#x27;s stock)</button>
       <button class="r-opt" data-value="add-now">Add the visibly-genuine ones now, ahead of the triage</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked per the lead&#x27;s standing direction (&#x27;lock D-vocab-scope when the triaged list appears&#x27;). The triage ran 2026-07-29 over all 566 stored tokens: 10 reuse (mechanically resolved to registered tokens), 49 rule-violation, 87 composable, 261 retired-stale (last proposed before the 2026-07-22 operator-fix era and never reproduced), 159 genuine. The genuine class is larger than the ~40 estimate but over half is single-instance; it is dominated by instrument-side demand (detector, sensitivity, intensity, focal_length, bandwidth, grating_line_density, response_function, shunt, valve, heat_flux, orbit_integral, kurtosis, skewness, strain) plus the unregistered geometry primitives on the position axis (rectangle/annulus/oblique/arc_of_circle centres) that the ordinality rule deliberately does not cover. The vocabulary rotation works from this triaged list, adjudicating add-vs-fold per token; nothing is added ahead of that adjudication.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-nlr-001" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T18:50:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nlr-001" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T18:50:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="2026-07-29T09:08:47+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Rungs 1–2: measure the loop with feedback on, then make the dedup verdict trustworthy</h4>
     <div class="r-fu-body"><p><strong>The retry-feedback change (<code>b7a51fdc</code>) has never been measured live.</strong> Run one free scoped compose pass to baseline the gap-production rate now that failures carry a diagnosis, then attack mechanism B: re-run dedup over the 345 never-checked tokens and re-audit the 139 <code>distinct_confirmed</code> — the structural-suffix cases (<code>…antenna_module ~ …antenna</code> 0.97) and canonical-order variants (<code>methane_deuterated ~ deuterated_methane</code> 0.96) are mechanically detectable and plainly wrong verdicts. No RC language: the release is gated on §5, not asserted.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -331,18 +394,18 @@ OPERATIONAL CONSTRAINTS (all measured this session — violating them wastes hou
     refused). Graph queries run on the LOGIN node; suites and timings run on
     sun_debug (login-node IO inflates them 20-70x). A script that does both
     will half-fail — split the work.
-  - StandardNameSource is keyed id='dd:'+path with a `status` property — NOT
+  - StandardNameSource is keyed id=&#x27;dd:&#x27;+path with a `status` property — NOT
     dd_path, NOT stage. Keying on the projection silently returns nothing.
   - VocabGap nodes are DISTINCT TOKENS (id vocab_gap:&lt;segment&gt;:&lt;token&gt;),
     with example_count carrying multiplicity. Do not conflate tokens and
     proposals; that conflation produced a 4.7x-wrong projection this week.
   - Warm the codex import before diagnosing test-setup timeouts:
-    uv run python -c "import imas_codex.discovery, litellm"
+    uv run python -c &quot;import imas_codex.discovery, litellm&quot;
 
 RUNG 1 — measure the loop with feedback on (free, compose-only)
   1. Pick ~30 sources whose stored gaps were operator/reuse-shaped (segments.py
      classify_gap over the stored tokens finds them; mechanism A/B/C examples in
-     the plan's §3 table).
+     the plan&#x27;s §3 table).
   2. Run a scoped, free compose pass (--only compose; NO paid review) and
      measure: gaps minted per 100 composes, and whether every new gap carries a
      non-empty reason (b7a51fdc fills it from describe_gap).
@@ -355,12 +418,12 @@ RUNG 2 — make the dedup verdict trustworthy
   2. The 139 distinct_confirmed: re-audit with two mechanical checks BEFORE any
      embedding similarity — (a) structural suffix: token == registered + one of
      _module/_component/_channel/_element/_image (and the reverse); (b)
-     canonical-order variant: the token's words are a permutation of a
-     registered token's words. Both classes are wrong verdicts by construction.
+     canonical-order variant: the token&#x27;s words are a permutation of a
+     registered token&#x27;s words. Both classes are wrong verdicts by construction.
   3. Reclassify what falls out as reuse-of-&lt;registered&gt; (verdict + target
      written to the node; NO deletions, NO hand-edits of names), and wire the
      reuse verdict into describe_gap guidance so a composer proposing
-     optical_depth is told "use opacity".
+     optical_depth is told &quot;use opacity&quot;.
   4. Done-when: zero distinct_confirmed at similarity &gt;=0.90 without a stated
      physical reason; reuse guidance reaches the retry path; a test pins each
      mechanical check with the real examples above as fixtures.
@@ -369,20 +432,76 @@ CONSTRAINTS
   - No paid LLM spend without explicit sign-off; compose is free, review is not.
   - NEVER hand-accept a name or hand-edit graph text; graph writes go through
     the shipped reconcile/dedup instruments only, and rung-4 retirement is NOT
-    this followup's work.
+    this followup&#x27;s work.
   - TDD; derive every vocabulary from ISN at runtime (the accessor), never
     hardcode; run the ~/.agents/AGENTS.md pre-stage naming checks on every
     staged path; no AI attribution anywhere.
-  - Update THIS plan's §5 gate ledger and resolve this followup with the
+  - Update THIS plan&#x27;s §5 gate ledger and resolve this followup with the
     measured numbers. Do not mention an RC anywhere in the outcome.
 
 Done-when
   1. Gap rate per 100 composes recorded before/after feedback, with reasons
      non-empty on every new gap.
-  2. The 484's dedup state: 0 unchecked; the 139 re-audited; reuse verdicts
+  2. The 484&#x27;s dedup state: 0 unchecked; the 139 re-audited; reuse verdicts
      written and reaching retry guidance; tests pin the mechanical checks.
   3. Plan §5 gates 2 and 3 have measured entries; this followup resolved with
      numbers, and rung-3 work queued as the next followup.</pre>
+    <p class="r-fu-outcome">Rungs 1-4 landed 2026-07-29 (commits 50321530, 39c7f95a, b94ac300, 11255632; rung-6 design 836a1928). Gate 2: gap rate 14.4/100 composes (before, 104 tokens/724 composes) -> 2/9 (drain 1, hardest residual, both reasons substantive) -> 0/5 (drain 2) — falling across consecutive drains, every new gap diagnosed on the report edge. Gate 3: 0 tokens unchecked (was 389); 388 measured + stamped checked_no_reuse with nearest/similarity; 10 mechanical reuse_confirmed superseding 7 wrong distinct_confirmed; lithium_6~lithium pinned as a genuine distinction. Gate 1: replay absent 484->418, every mechanism-A/C token actionable, controls stay absent. Rung 4: all 566 stored tokens triaged {reuse 10, rule_violation 49, composable 87, retired_stale 261, genuine 159}, 0 unchecked; D-vocab-scope locked rotation-after-triage on the genuine list. Two plan premises corrected by the replay: 174 not 139 distinct_confirmed (49 at >=0.90, 30 genuine judgement calls); mechanism A is 49 tokens — the other ~94 position absents are unregistered geometry primitives (class-D demand). All five §5 gates carry measured HOLDS. Record: docs/archive/sn-naming-loop-robustness-rungs-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-nlr-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T09:00:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Rung 5: the class-D vocabulary rotation from the triaged genuine list; rung 6 design lands coordinated</h4>
+    <div class="r-fu-body"><p>The triaged genuine list (159 tokens, scratch-saved and reproducible via <code>triage_vocab_gaps</code>) is the rotation's input: adjudicate add-vs-fold per token (instrument-side vocabulary and the position-axis geometry primitives dominate), add the survivors to ISN with definitions, run the grammar suite, RC, pin bump. Separately, the <a href="/imas-codex/sn-binary-operand-validation-design.html">operand-validation design</a> is ready to land as coordinated ISN work (two prerequisite steps before any gate). Also queued: the composer cannot emit chained-operator forms (fuses flux_surface_averaged_inverse_square into one token — gm1/gm5/gm6 sit at the attempt cap) and the --compose-model override needs verification.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-naming-loop-robustness (http://localhost:8765/imas-codex/sn-naming-loop-robustness.html)
+Section: §4 rung 5 (vocabulary rotation) + rung 6 (coordinated landing)
+Tier:    opus
+
+READ FIRST
+  docs/archive/sn-naming-loop-robustness-rungs-landed.html   (the gate ledger + triage numbers)
+  docs/sn-binary-operand-validation-design.html              (the rung-6 design: staged parse-then-validate)
+  imas_codex/standard_names/AGENTS.md
+
+STATE
+  All 566 stored gap tokens triaged; the genuine bucket holds 159 tokens
+  (regenerate with: from imas_codex.standard_names.graph_ops import
+  triage_vocab_gaps; triage_vocab_gaps(stale_before=&#x27;2026-07-22&#x27;, dry_run=True)
+  — run on the LOGIN node; the graph is unreachable from compute nodes).
+  D-vocab-scope is locked rotation-after-triage.
+
+DO
+  1. RUNG 5 — the rotation. Adjudicate the 159 per token: fold onto existing
+     tokens (reuse/composable candidates the mechanical checks could not
+     derive), reject meta-noise (the literal &#x27;vocab_gap&#x27; token, empty-string
+     position, &#x27;gm9&#x27;, &#x27;focs&#x27;), and shortlist the genuine adds (instrument-side:
+     detector, sensitivity, intensity, focal_length, bandwidth,
+     grating_line_density, response_function, shunt, valve, heat_flux,
+     orbit_integral, kurtosis, skewness, strain; plus the position-axis
+     geometry primitives: rectangle/annulus/oblique/arc_of_circle centres —
+     mind that ISN already registers closest_wall_point and
+     diagnostic_component_centre as precedents). Verify absence against
+     operators AND physical_bases AND semantic equivalents before any add.
+     Follow the vocab rotation workflow (definitions, build-grammar, ISN
+     grammar suite, RC on the fork, pin bump at BOTH codex pyproject sites +
+     lockfile).
+  2. RUNG 6 — land the design&#x27;s two prerequisite steps in ISN (make the
+     literal-operand fallback observable as a diagnostic; admit the
+     un-normalized poloidal flux coordinate), then the codex-side guidance
+     half. The gate itself lands only after the prerequisites are green.
+  3. Re-run the gap-token replay and record a fresh gate-1/gate-3 ledger row.
+
+CONSTRAINTS
+  - ISN changes are coordinated: grammar suite green before any RC; never
+    unilateral vocabulary edits outside the rotation workflow.
+  - NEVER hand-accept a name or hand-edit graph text; graph writes through the
+    shipped instruments only.
+  - TDD; derive vocabularies from ISN at runtime; pre-stage naming checks on
+    every staged path; no AI attribution anywhere.
+
+Done-when
+  1. The 159 adjudicated: every token dispositioned add/fold/reject with a
+     stated reason; the adds live in an ISN RC with the codex pin bumped.
+  2. Rung-6 prerequisite steps green in ISN; the codex guidance half landed.
+  3. A fresh §5 ledger row recorded; this followup resolved with numbers.</pre>
     </article>
 </section>
 
