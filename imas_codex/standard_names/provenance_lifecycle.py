@@ -21,6 +21,7 @@ DELETION_OPERATIONS = frozenset(
         "clear_selected_name",
         "clear_subsystem_name",
         "compact_unapproved_name",
+        "remove_provenance_orphan",
         "remove_derived_parent",
         "remove_skeleton_placeholder",
     }
@@ -361,6 +362,83 @@ def record_standard_name_change(
         changed_at=datetime.now(UTC).isoformat(),
     )
     return change_id
+
+
+def retire_unrecoverable_provenance_orphans(
+    gc: Any,
+    name_ids: list[str],
+    *,
+    include_accepted: bool = False,
+) -> list[str]:
+    """Delete a reviewed set of source-less names with atomic ledger records.
+
+    Every target must still have no ``PRODUCED_NAME`` source at mutation time.
+    Accepted names require an explicit opt-in. The function is deliberately
+    list-scoped: it cannot widen into an unbounded graph cleanup.
+    """
+    if not name_ids:
+        return []
+    rows = [
+        dict(row)
+        for row in gc.query(
+            """
+            UNWIND $ids AS id
+            MATCH (sn:StandardName {id: id})
+            WHERE NOT EXISTS {
+              MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+            }
+            RETURN sn.id AS id, sn.name_stage AS stage
+            ORDER BY id
+            """,
+            ids=sorted(set(name_ids)),
+        )
+    ]
+    found = {row["id"] for row in rows}
+    missing_or_sourced = sorted(set(name_ids) - found)
+    if missing_or_sourced:
+        raise ValueError(
+            "targets are missing or no longer provenance orphans: "
+            + ", ".join(missing_or_sourced)
+        )
+    accepted = sorted(row["id"] for row in rows if row.get("stage") == "accepted")
+    if accepted and not include_accepted:
+        raise ValueError(
+            "accepted provenance orphans require include_accepted=True: "
+            + ", ".join(accepted)
+        )
+
+    deletion_clause = deletion_change_cypher("sn")
+    deletion_params = deletion_change_params(
+        "remove_provenance_orphan",
+        reason="no recoverable DD, signal, catalog, scalar, structural, or history source",
+        origin="provenance_recovery",
+    )
+    retired: list[str] = []
+    for name_id in sorted(found):
+        result = list(
+            gc.query(
+                f"""
+                MATCH (sn:StandardName {{id: $name_id}})
+                WHERE NOT EXISTS {{
+                  MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                }}
+                OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+                OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
+                WITH sn, collect(DISTINCT review) AS reviews,
+                     collect(DISTINCT revision) AS revisions
+                {deletion_clause}
+                FOREACH (item IN reviews | DETACH DELETE item)
+                FOREACH (item IN revisions | DETACH DELETE item)
+                DETACH DELETE sn
+                RETURN $name_id AS id
+                """,
+                name_id=name_id,
+                **deletion_params,
+            )
+        )
+        if result:
+            retired.append(name_id)
+    return retired
 
 
 def classify_missing_change_targets(gc: Any) -> dict[str, Any]:

@@ -165,10 +165,18 @@ def test_load_recovery_map_reads_sources_from_a_git_ref(tmp_path):
 
     recovered = load_recovery_map(tmp_path, ref="HEAD")
 
-    assert set(recovered) == {"elongation_of_plasma_boundary"}
+    assert set(recovered) == {"elongation_of_plasma_boundary", "plasma_current"}
     specs = recovered["elongation_of_plasma_boundary"]
     assert specs[0]["dd_path"] == "equilibrium/time_slice/boundary/elongation"
     assert specs[0]["source_type"] == "dd"
+    assert recovered["plasma_current"] == [
+        {
+            "id": "catalog:plasma_current",
+            "source_type": "catalog",
+            "source_id": "plasma_current",
+            "status": "attached",
+        }
+    ]
 
 
 def test_load_recovery_map_missing_ref_returns_empty(tmp_path):
@@ -437,3 +445,43 @@ def test_rebuild_excludes_pending_source_names_from_fallback():
     assert bind_calls == []
     assert summary["excluded_pending"] == 1
     assert summary["unresolved"] == 1
+
+
+def test_rebuild_can_retire_explicit_unrecoverable_residue() -> None:
+    import imas_codex.standard_names.provenance_rebuild as pr
+
+    orphans = [{"sn_id": "lost_name", "name_stage": "accepted", "origin": "pipeline"}]
+    gc = MagicMock()
+
+    with (
+        patch.object(
+            pr,
+            "find_provenance_orphans",
+            side_effect=[orphans, orphans, orphans, []],
+        ),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(pr, "reattach_produced_name_edges", return_value=0),
+        patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "find_orphan_parent_source_candidates", return_value=[]),
+        patch.object(pr, "reconcile_orphan_parent_sources", return_value=0),
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
+        patch.object(
+            pr,
+            "retire_unrecoverable_provenance_orphans",
+            return_value=["lost_name"],
+        ) as retire,
+    ):
+        summary = pr.rebuild_provenance(
+            gc=gc,
+            recovery_map={},
+            retire_unresolved=True,
+            include_accepted_retirement=True,
+        )
+
+    retire.assert_called_once_with(gc, ["lost_name"], include_accepted=True)
+    assert summary["retired_unresolved"] == 1
+    assert summary["retired_unresolved_names"] == ["lost_name"]
+    assert summary["orphans_after"] == 0
+    assert summary["unresolved"] == 0

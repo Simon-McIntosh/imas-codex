@@ -50,6 +50,7 @@ from imas_codex.standard_names.ledger import (
 from imas_codex.standard_names.provenance_lifecycle import (
     DELETION_OPERATIONS,
     bind_sources_exclusively,
+    retire_unrecoverable_provenance_orphans,
 )
 from imas_codex.standard_names.source_paths import parse_source_path
 
@@ -102,6 +103,8 @@ def _source_type_from_id(source_id: str) -> str:
 
 def recovery_sources_from_entries(
     entries: list[dict[str, Any]],
+    *,
+    include_catalog_entries: bool = False,
 ) -> dict[str, list[dict[str, Any]]]:
     """Extract the provenance recovery map from parsed catalog entries.
 
@@ -114,7 +117,18 @@ def recovery_sources_from_entries(
     for entry in entries:
         name = entry.get("name")
         sources = entry.get("sources")
-        if not name or not sources:
+        if not name:
+            continue
+        if not sources:
+            if include_catalog_entries:
+                recovered[name] = [
+                    {
+                        "id": f"catalog:{name}",
+                        "source_type": "catalog",
+                        "source_id": name,
+                        "status": "attached",
+                    }
+                ]
             continue
         specs: list[dict[str, Any]] = []
         for src in sources:
@@ -129,6 +143,9 @@ def recovery_sources_from_entries(
             spec: dict[str, Any] = {
                 "id": source_id,
                 "source_type": source_type,
+                "source_id": (
+                    src.get("dd_path") if source_type == "dd" else src.get("signal_id")
+                ),
                 "status": src.get("status", "attached"),
             }
             if src.get("dd_path"):
@@ -206,7 +223,7 @@ def load_recovery_map(
             continue
         if isinstance(docs, list):
             entries.extend(d for d in docs if isinstance(d, dict))
-    return recovery_sources_from_entries(entries)
+    return recovery_sources_from_entries(entries, include_catalog_entries=True)
 
 
 def bind_recovery_sources(
@@ -440,6 +457,8 @@ def rebuild_provenance(
     ref: str = DEFAULT_RECOVERY_REF,
     recovery_map: dict[str, list[dict[str, Any]]] | None = None,
     dry_run: bool = False,
+    retire_unresolved: bool = False,
+    include_accepted_retirement: bool = False,
 ) -> dict[str, Any]:
     """Rebuild provenance for every orphaned live name to fresh-parity.
 
@@ -514,6 +533,8 @@ def rebuild_provenance(
             "excluded_pending": 0,
             "unresolved": 0,
             "unresolved_names": [],
+            "retired_unresolved": 0,
+            "retired_unresolved_names": [],
             "dry_run": dry_run,
         }
         for name_id in orphan_ids:
@@ -542,6 +563,18 @@ def rebuild_provenance(
 
         if not dry_run:
             summary["orphans_after"] = len(find_provenance_orphans(gc=gc))
+            if retire_unresolved and summary["unresolved_names"]:
+                retired = retire_unrecoverable_provenance_orphans(
+                    gc,
+                    summary["unresolved_names"],
+                    include_accepted=include_accepted_retirement,
+                )
+                summary["retired_unresolved"] = len(retired)
+                summary["retired_unresolved_names"] = retired
+                remaining = find_provenance_orphans(gc=gc)
+                summary["orphans_after"] = len(remaining)
+                summary["unresolved"] = len(remaining)
+                summary["unresolved_names"] = [row["sn_id"] for row in remaining]
 
         logger.info("rebuild_provenance: %s", summary)
         return summary
