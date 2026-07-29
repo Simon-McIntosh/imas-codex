@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-dd-gaps-foundation-landed">
+  <meta name="plan-title" content="DD-gap evidence foundation — landed record">
+  <meta name="plan-summary" content="A schema-driven, flag-only DDGap evidence channel with CLI and status surfaces, plus an idempotent backfill of 34 registry facts and one upstream filing across 450 current DD paths.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-informs" content="sn-dd-gaps">
+  <title>DD-gap evidence foundation — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2>Outcome</h2>
+    <p>
+      The evidence-only DD-gap foundation landed on 2026-07-29. A human or
+      audit can record one fact per <code>(path, kind)</code>, with repeat
+      counts on the node and the evidence argument on
+      <code>HAS_DD_GAP</code>. The command surface exposes human flags and a
+      registry sync; <code>sn status</code> reports the lifecycle totals.
+      Flags do not suppress mismatches, rewrite units, or change source
+      eligibility.
+    </p>
+
+    <h2>Authority boundary</h2>
+    <svg viewBox="0 0 900 225" role="img"
+         aria-label="Evidence enters DDGap nodes, human triage chooses a disposition, and only the existing curated registry changes pipeline behavior."
+         style="max-width:100%;height:auto;">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#59636e"/>
+        </marker>
+      </defs>
+      <g font-family="system-ui" font-size="14" text-anchor="middle">
+        <g fill="#f3f5f7" stroke="#59636e">
+          <rect x="24" y="68" width="150" height="62" rx="8"/>
+          <rect x="226" y="68" width="150" height="62" rx="8"/>
+          <rect x="428" y="68" width="150" height="62" rx="8"/>
+          <rect x="690" y="68" width="170" height="62" rx="8"/>
+        </g>
+        <text x="99" y="94">human / audit</text>
+        <text x="99" y="114">evidence</text>
+        <text x="301" y="94">DDGap fact +</text>
+        <text x="301" y="114">report edge</text>
+        <text x="503" y="94">human triage</text>
+        <text x="503" y="114">and filing</text>
+        <text x="775" y="94">curated registry</text>
+        <text x="775" y="114">enforcement</text>
+        <g stroke="#59636e" stroke-width="2" marker-end="url(#arrow)">
+          <line x1="174" y1="99" x2="223" y2="99"/>
+          <line x1="376" y1="99" x2="425" y2="99"/>
+        </g>
+        <line x1="578" y1="99" x2="687" y2="99" stroke="#a15c00"
+              stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+        <text x="633" y="82" fill="#a15c00">separate governed change</text>
+        <text x="450" y="175" fill="#315b7d">
+          A flag is evidence only; the dashed boundary prevents automatic suppression.
+        </text>
+      </g>
+    </svg>
+
+    <h2>Measured backfill</h2>
+    <table>
+      <thead><tr><th>measure</th><th>result</th></tr></thead>
+      <tbody>
+        <tr><td>Curated unit-exception entries</td><td>34</td></tr>
+        <tr><td>Graph DDGap facts</td><td>35</td></tr>
+        <tr><td>Registered-exception facts</td><td>34</td></tr>
+        <tr><td>Upstream-issue facts</td><td>1</td></tr>
+        <tr><td>Distinct current DD paths matched</td><td>450</td></tr>
+        <tr><td>Evidence relationships</td><td>451</td></tr>
+        <tr>
+          <td>Kind distribution</td>
+          <td>24 unit defects, 10 self-contradictions, 1 type-wiring defect</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The backfill was run twice after the create-only timestamp contract was
+      pinned. Node observation and triage timestamps, edge observation
+      timestamps, and example counts remain stable on a repeated registry
+      sync; registry fields and path matches are refreshed without inventing
+      new observations.
+    </p>
+
+    <h2>Verification and code record</h2>
+    <ul>
+      <li>Schema/model generation completed for the new node, enums, and
+        <code>HAS_DD_GAP</code> relationship.</li>
+      <li>DD-gap reporting, CLI, status, registry, and unit-exception tests
+        passed; schema-context and compose-schema checks exited zero.</li>
+      <li>Commits <code>c7c2d3d3</code> and <code>baeb7614</code> are pushed
+        on main.</li>
+      <li>The storage decision remains open before any automated agent writer
+        is enabled. The landed graph nodes are the sprint-authorized
+        observability foundation, not authority to change behavior.</li>
+    </ul>
+  </main>
+</body>
+</html>

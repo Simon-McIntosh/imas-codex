@@ -17,10 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614">
+<meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
   <main class="plan-doc">
@@ -165,7 +168,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ddg-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:00:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddg-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:00:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="2026-07-29T13:35:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land §4 steps 1–2: the DDGap schema/write path/CLI, then the registry back-fill</h4>
     <div class="r-fu-body"><p>Build the mechanism's foundation exactly on the vocab_gaps template (node + report edge + write instrument + CLI verb), then import the known record (~90 unit-exception entries, the #272 filing) as pre-triaged gaps so the mechanism starts with real content and zero behaviour change. Lock D-ddgap-authority and D-ddgap-storage with the lead before step 3 gives agents the flagging authority.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -200,6 +203,39 @@ Done-when
   1. DDGap write path TDD&#x27;d; CLI verb works; flags visible in sn status.
   2. Registry back-filled with provenance nodes; enforcement unchanged.
   3. Both decisions surfaced to the lead; step 3 queued as the next followup.</pre>
+    <p class="r-fu-outcome">Foundation landed in c7c2d3d3 with idempotency hardening in baeb7614. Added schema-driven DDGap kind/status enums, one fact per (path, kind), HAS_DD_GAP evidence edges, evidence-only `sn ddgap` and registry-sync commands, and a `sn status` lifecycle table. The live backfill mirrored 34 curated unit-exception entries plus one upstream filing into 35 facts: 34 registered_exception and 1 upstream_issue; kinds = 24 unit_defect, 10 self_contradiction, 1 type_wiring; 450 distinct current DD paths and 451 evidence edges. Repeated sync preserves observation/triage timestamps and example counts. Schema generation and the reporting/CLI/status/registry/unit tests passed; schema-context checks exited zero. No unit resolution, suppression, source eligibility, or other pipeline behavior changed. D-ddgap-authority remains locked flag-only; D-ddgap-storage remains open before agent-side flagging. Record: docs/archive/sn-dd-gaps-foundation-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-ddg-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-07-29T13:30:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide storage authority, then connect agent flags, triage, reconcile, and release reporting</h4>
+    <div class="r-fu-body"><p>The evidence foundation is live with flag-only semantics and the known record back-filled. Before any automated pipeline seat writes a DDGap, lock D-ddgap-storage. Then add the writer response fields and prompts, a human triage/upstream workflow, DD-release reconciliation, and reviewer-facing release reporting without allowing a flag to suppress behavior.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-dd-gaps
+Scope: remaining agent-authority, triage, reconcile, and reporting work
+
+READ FIRST
+  docs/sn-dd-gaps.html
+  docs/archive/sn-dd-gaps-foundation-landed.html
+  imas_codex/standard_names/dd_gaps.py
+  imas_codex/units/dd_unit_exceptions.yaml
+  imas_codex/standard_names/AGENTS.md
+
+BLOCKING DECISION
+  Surface and lock D-ddgap-storage with the lead before implementing any automated pipeline writer. Preserve the already-locked flag-only authority: a DDGap is evidence and never changes behavior by itself.
+
+DO
+  1. After the decision, add typed optional DD-gap evidence to the unit-injection, attachment, and reviewer response paths. Persist only substantive path/kind/reason reports through write_dd_gaps; never raw Cypher.
+  2. Add human triage operations for registered_exception, upstream_issue, rejected, and resolved_upstream. Registry changes remain separate governed edits.
+  3. Reconcile open facts against a new DD release and record the correcting DD version without deleting history.
+  4. Surface DD-gap caveats and upstream links in release reporting.
+
+VERIFY
+  - Known-defective fixtures mint evidence but leave enforcement unchanged.
+  - Flagged facts cannot alter eligibility or suppress integrity failures.
+  - One real fact completes flagged to filed to resolved_upstream in a test fixture.
+  - Reporting includes counts and links, and all targeted/default tests stay green.
+
+CONSTRAINTS
+  TDD; generated enums only; no hardcoded DD facility data in Python; pre-stage naming checks; no AI attribution; record every landing in the plan immediately.</pre>
     </article>
 </section>
 
