@@ -1,0 +1,1443 @@
+{
+  "source": "159-item genuine VocabGap cohort",
+  "policy": "closed vocabulary add, fold, or reject adjudication",
+  "count": 159,
+  "summary": {
+    "add": 18,
+    "fold": 27,
+    "reject": 114
+  },
+  "decisions": [
+    {
+      "segment": "physical_base",
+      "token": "gradient_squared_metric",
+      "example_count": 1,
+      "last_seen": "2026-07-29T05:28:33.668Z",
+      "decision": "fold",
+      "canonical_target": "square_of_gradient_of_metric",
+      "rationale": "Represent square and gradient as an operator chain."
+    },
+    {
+      "segment": "physical_base",
+      "token": "flux_surface_averaged_metric_coefficient_with_inverse_B_squared",
+      "example_count": 1,
+      "last_seen": "2026-07-29T05:22:44.012Z",
+      "decision": "fold",
+      "canonical_target": "flux_surface_averaged_ratio_of_metric_coefficient_to_square_magnetic_field_magnitude",
+      "rationale": "Represent the reduction and inverse-field factor with registered unary and binary operators."
+    },
+    {
+      "segment": "qualifier",
+      "token": "image_up",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:59:38.56Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "object",
+      "token": "fibre_image",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:49:13.076Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed object vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "fibre_image",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:48:58.652Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "bin",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:48:25.993Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "detector",
+      "example_count": 13,
+      "last_seen": "2026-07-28T07:48:23.978Z",
+      "decision": "add",
+      "canonical_target": "detector",
+      "rationale": "A detector is a reusable physical entity, independent of DD storage structure."
+    },
+    {
+      "segment": "physical_base",
+      "token": "intensity",
+      "example_count": 7,
+      "last_seen": "2026-07-28T07:42:15.033Z",
+      "decision": "add",
+      "canonical_target": "intensity",
+      "rationale": "Intensity is a reusable physical and diagnostic quantity."
+    },
+    {
+      "segment": "qualifier",
+      "token": "bounce",
+      "example_count": 5,
+      "last_seen": "2026-07-28T07:41:03.246Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "tangency",
+      "example_count": 8,
+      "last_seen": "2026-07-28T07:40:25.961Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "spatial_resolution_width",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:40:20.867Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "fiber",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:37:44.052Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "beamlet",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:37:14.327Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "scattering",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:35:25.594Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "exponential",
+      "example_count": 14,
+      "last_seen": "2026-07-28T07:35:09.553Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "beamlet",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:34:51.552Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "grating",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:34:41.261Z",
+      "decision": "add",
+      "canonical_target": "grating",
+      "rationale": "A diffraction grating is a reusable optical entity."
+    },
+    {
+      "segment": "position",
+      "token": "rectangle_centre",
+      "example_count": 14,
+      "last_seen": "2026-07-28T07:34:22.284Z",
+      "decision": "fold",
+      "canonical_target": "rectangle_center",
+      "rationale": "Use US spelling and the reusable rectangle-center locus."
+    },
+    {
+      "segment": "position",
+      "token": "pellet_shell",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:34:14.058Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "sensitivity",
+      "example_count": 12,
+      "last_seen": "2026-07-28T07:29:52.929Z",
+      "decision": "add",
+      "canonical_target": "sensitivity",
+      "rationale": "Sensitivity is a reusable measurement-system quantity."
+    },
+    {
+      "segment": "qualifier",
+      "token": "rotation",
+      "example_count": 8,
+      "last_seen": "2026-07-28T07:29:20.829Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "divergence",
+      "example_count": 4,
+      "last_seen": "2026-07-28T07:29:20.829Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "geometric",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:29:20.829Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "azimuthal",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:29:20.829Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "inclination",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:29:20.829Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "co_injected",
+      "example_count": 6,
+      "last_seen": "2026-07-28T07:28:10.731Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "oblique",
+      "example_count": 6,
+      "last_seen": "2026-07-28T07:24:22.43Z",
+      "decision": "fold",
+      "canonical_target": "oblique_reference_point",
+      "rationale": "The source path denotes the oblique geometry reference point."
+    },
+    {
+      "segment": "position",
+      "token": "arcs_of_circle",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:24:22.43Z",
+      "decision": "fold",
+      "canonical_target": "arc_of_circle_center",
+      "rationale": "Normalize the plural storage label to the reusable center locus."
+    },
+    {
+      "segment": "device",
+      "token": "polychromator",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:23:52.906Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "fibre_image",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:23:52.906Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "spectrometer_x_ray_crystal_channel",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:23:52.906Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "beamlet",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:23:40.554Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "power_supply",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:22:28.709Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "arc_of_circle",
+      "example_count": 5,
+      "last_seen": "2026-07-28T07:22:21.898Z",
+      "decision": "fold",
+      "canonical_target": "arc_of_circle_center",
+      "rationale": "The path denotes the center of curvature of a circular arc."
+    },
+    {
+      "segment": "position",
+      "token": "annular_centreline",
+      "example_count": 5,
+      "last_seen": "2026-07-28T07:20:51.702Z",
+      "decision": "fold",
+      "canonical_target": "annulus_center",
+      "rationale": "Normalize to the reusable annulus-center locus."
+    },
+    {
+      "segment": "qualifier",
+      "token": "over_b_field",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:20:41.417Z",
+      "decision": "fold",
+      "canonical_target": "ratio operator",
+      "rationale": "Represent division by magnetic-field magnitude with the binary ratio operator."
+    },
+    {
+      "segment": "qualifier",
+      "token": "horizontal",
+      "example_count": 11,
+      "last_seen": "2026-07-28T07:19:48.976Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "focal_length",
+      "example_count": 9,
+      "last_seen": "2026-07-28T07:19:48.976Z",
+      "decision": "add",
+      "canonical_target": "focal_length",
+      "rationale": "Focal length is a reusable optical quantity."
+    },
+    {
+      "segment": "position",
+      "token": "peak_lh_power_deposition",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:19:27.455Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "peak_ec_power_deposition",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:19:27.455Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "peak_ic_power_deposition",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:19:27.455Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "current_alignment",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:18:39.576Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "psi_potential",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:18:04.655Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "rate_of_change_of_area_with_respect_to_poloidal_magnetic_flux",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:17:35.226Z",
+      "decision": "fold",
+      "canonical_target": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_area",
+      "rationale": "Represent the rate as an indexed derivative operator."
+    },
+    {
+      "segment": "physical_base",
+      "token": "rate_of_change_of_pressure_with_respect_to_poloidal_magnetic_flux",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:17:35.226Z",
+      "decision": "fold",
+      "canonical_target": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_pressure",
+      "rationale": "Represent the rate as an indexed derivative operator."
+    },
+    {
+      "segment": "physical_base",
+      "token": "rate_of_change_of_volume_with_respect_to_poloidal_magnetic_flux",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:17:35.226Z",
+      "decision": "fold",
+      "canonical_target": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_volume",
+      "rationale": "Represent the rate as an indexed derivative operator."
+    },
+    {
+      "segment": "position",
+      "token": "oblique_geometry",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:17:08.633Z",
+      "decision": "fold",
+      "canonical_target": "oblique_reference_point",
+      "rationale": "Normalize the structural geometry label to the reference-point locus."
+    },
+    {
+      "segment": "device",
+      "token": "thermal_shield",
+      "example_count": 6,
+      "last_seen": "2026-07-28T07:16:28.232Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "centreline",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:16:28.232Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "circuit",
+      "example_count": 4,
+      "last_seen": "2026-07-28T07:16:15.134Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "supply",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:16:15.134Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "flux_expansion",
+      "example_count": 9,
+      "last_seen": "2026-07-28T07:15:03.23Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "effective_helical_ripple",
+      "example_count": 5,
+      "last_seen": "2026-07-28T07:15:03.23Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "injection_point",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:14:48.64Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "oblique_reference_point",
+      "example_count": 15,
+      "last_seen": "2026-07-28T07:14:16.335Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "annulus_centre",
+      "example_count": 4,
+      "last_seen": "2026-07-28T07:14:16.335Z",
+      "decision": "fold",
+      "canonical_target": "annulus_center",
+      "rationale": "Use US spelling and the reusable annulus-center locus."
+    },
+    {
+      "segment": "physical_base",
+      "token": "vocab_gap",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:13:39.465Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "plateau",
+      "example_count": 3,
+      "last_seen": "2026-07-28T07:13:16.734Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "plateau_factor",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:13:16.734Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "electromagnetic_super_potential",
+      "example_count": 2,
+      "last_seen": "2026-07-28T07:11:43.436Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "relative",
+      "example_count": 12,
+      "last_seen": "2026-07-28T07:09:52.429Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "rectangle",
+      "example_count": 5,
+      "last_seen": "2026-07-28T07:07:20.654Z",
+      "decision": "fold",
+      "canonical_target": "rectangle_center",
+      "rationale": "The path denotes the center of a rectangular geometry."
+    },
+    {
+      "segment": "device",
+      "token": "ece_diagnostic",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:07:12.055Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "maxwell_stress_tensor",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:05:29.846Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "valve",
+      "example_count": 4,
+      "last_seen": "2026-07-28T07:02:10.431Z",
+      "decision": "add",
+      "canonical_target": "valve",
+      "rationale": "A flow-control valve is a reusable plant entity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "image_diameter",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:02:03.33Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "inertial",
+      "example_count": 1,
+      "last_seen": "2026-07-28T07:00:35.632Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "shell",
+      "example_count": 4,
+      "last_seen": "2026-07-28T07:00:34.23Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "",
+      "example_count": 1,
+      "last_seen": "2026-07-28T06:59:25.529Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "additional",
+      "example_count": 5,
+      "last_seen": "2026-07-28T06:59:20.133Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "pf_power_supply",
+      "example_count": 1,
+      "last_seen": "2026-07-28T06:59:20.133Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "crushing",
+      "example_count": 9,
+      "last_seen": "2026-07-28T06:59:17.331Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "acceleration",
+      "example_count": 4,
+      "last_seen": "2026-07-28T06:59:04.735Z",
+      "decision": "add",
+      "canonical_target": "acceleration",
+      "rationale": "Acceleration is a fundamental vector quantity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "strain",
+      "example_count": 3,
+      "last_seen": "2026-07-28T06:58:32.031Z",
+      "decision": "add",
+      "canonical_target": "strain",
+      "rationale": "Strain is a reusable tensor quantity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "strain_tensor",
+      "example_count": 1,
+      "last_seen": "2026-07-28T06:58:32.031Z",
+      "decision": "fold",
+      "canonical_target": "strain",
+      "rationale": "Tensor kind belongs to the strain base metadata, not its token."
+    },
+    {
+      "segment": "qualifier",
+      "token": "chemical",
+      "example_count": 3,
+      "last_seen": "2026-07-28T06:58:21.154Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "annulus",
+      "example_count": 12,
+      "last_seen": "2026-07-28T06:57:28.529Z",
+      "decision": "fold",
+      "canonical_target": "annulus_center",
+      "rationale": "The path denotes the center of an annular geometry."
+    },
+    {
+      "segment": "position",
+      "token": "emission_grid",
+      "example_count": 6,
+      "last_seen": "2026-07-28T06:56:45.233Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "rectangular_cross_section_centre",
+      "example_count": 1,
+      "last_seen": "2026-07-28T05:50:36.257Z",
+      "decision": "fold",
+      "canonical_target": "rectangle_center",
+      "rationale": "Normalize the structural cross-section label to the reusable rectangle-center locus."
+    },
+    {
+      "segment": "position",
+      "token": "contour_tree_node",
+      "example_count": 8,
+      "last_seen": "2026-07-28T05:50:02.52Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "pressure_due_to_plasma_current",
+      "example_count": 1,
+      "last_seen": "2026-07-28T05:49:54.906Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "f_df_dpsi",
+      "example_count": 1,
+      "last_seen": "2026-07-28T05:49:54.906Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "propellant_gas",
+      "example_count": 2,
+      "last_seen": "2026-07-28T05:44:08.728Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "fragmentation_gas",
+      "example_count": 1,
+      "last_seen": "2026-07-28T05:44:08.728Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "grating_line_density",
+      "example_count": 4,
+      "last_seen": "2026-07-28T05:43:49.248Z",
+      "decision": "add",
+      "canonical_target": "grating_line_density",
+      "rationale": "Grating line density is a reusable optical quantity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "response_function",
+      "example_count": 4,
+      "last_seen": "2026-07-28T05:43:47.112Z",
+      "decision": "add",
+      "canonical_target": "response_function",
+      "rationale": "Response function is a reusable diagnostic quantity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "ripple_amplitude",
+      "example_count": 3,
+      "last_seen": "2026-07-28T05:43:25.14Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "sign",
+      "example_count": 8,
+      "last_seen": "2026-07-28T05:43:23.923Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "pipe",
+      "example_count": 3,
+      "last_seen": "2026-07-28T05:42:42.987Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "rotational",
+      "example_count": 19,
+      "last_seen": "2026-07-28T05:41:45.981Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "kurtosis",
+      "example_count": 4,
+      "last_seen": "2026-07-28T05:41:00.888Z",
+      "decision": "add",
+      "canonical_target": "kurtosis",
+      "rationale": "Kurtosis is a standard distribution statistic."
+    },
+    {
+      "segment": "physical_base",
+      "token": "skewness",
+      "example_count": 4,
+      "last_seen": "2026-07-28T05:41:00.888Z",
+      "decision": "add",
+      "canonical_target": "skewness",
+      "rationale": "Skewness is a standard distribution statistic."
+    },
+    {
+      "segment": "physical_base",
+      "token": "energy_multiplication_factor",
+      "example_count": 2,
+      "last_seen": "2026-07-28T05:40:56.457Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "shattering",
+      "example_count": 3,
+      "last_seen": "2026-07-28T05:39:41.427Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "townsend_or_closed_position",
+      "example_count": 5,
+      "last_seen": "2026-07-28T05:39:39.76Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "grid_position",
+      "example_count": 2,
+      "last_seen": "2026-07-28T05:39:39.76Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "maxwell",
+      "example_count": 7,
+      "last_seen": "2026-07-28T05:39:07.194Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "bandwidth",
+      "example_count": 6,
+      "last_seen": "2026-07-28T05:38:48.582Z",
+      "decision": "add",
+      "canonical_target": "bandwidth",
+      "rationale": "Bandwidth is a reusable diagnostic quantity."
+    },
+    {
+      "segment": "qualifier",
+      "token": "open",
+      "example_count": 3,
+      "last_seen": "2026-07-28T05:38:42.09Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "geometry",
+      "token": "rectangle",
+      "example_count": 2,
+      "last_seen": "2026-07-28T05:38:15.319Z",
+      "decision": "fold",
+      "canonical_target": "rectangle_center",
+      "rationale": "The source paths denote the center of a rectangular geometry."
+    },
+    {
+      "segment": "geometry",
+      "token": "oblique",
+      "example_count": 1,
+      "last_seen": "2026-07-28T05:38:15.319Z",
+      "decision": "fold",
+      "canonical_target": "oblique_reference_point",
+      "rationale": "Use the registered reference-point locus rather than an underspecified shape adjective."
+    },
+    {
+      "segment": "qualifier",
+      "token": "lithium_6",
+      "example_count": 2,
+      "last_seen": "2026-07-28T05:38:05.434Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "internal",
+      "example_count": 2,
+      "last_seen": "2026-07-27T21:35:07.013Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "physical",
+      "example_count": 1,
+      "last_seen": "2026-07-27T18:02:53.501Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "critical_point",
+      "example_count": 3,
+      "last_seen": "2026-07-27T18:02:42.362Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "orbit_integral",
+      "example_count": 16,
+      "last_seen": "2026-07-27T18:02:40.877Z",
+      "decision": "add",
+      "canonical_target": "orbit_integral",
+      "rationale": "An orbit integral is a reusable orbit-analysis quantity."
+    },
+    {
+      "segment": "qualifier",
+      "token": "low",
+      "example_count": 1,
+      "last_seen": "2026-07-27T18:02:38.209Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "shunt",
+      "example_count": 9,
+      "last_seen": "2026-07-27T18:02:08.628Z",
+      "decision": "add",
+      "canonical_target": "shunt",
+      "rationale": "A current-measurement shunt is a reusable plant and diagnostic entity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "gm9",
+      "example_count": 1,
+      "last_seen": "2026-07-27T18:02:08.628Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "focs",
+      "example_count": 1,
+      "last_seen": "2026-07-27T18:02:08.628Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "heat_flux",
+      "example_count": 13,
+      "last_seen": "2026-07-27T18:01:14.154Z",
+      "decision": "fold",
+      "canonical_target": "heat_flux",
+      "rationale": "Decompose into the registered heat channel and flux base; do not add an atomic base."
+    },
+    {
+      "segment": "physical_base",
+      "token": "sublimation_energy",
+      "example_count": 1,
+      "last_seen": "2026-07-27T18:01:00.327Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "mechanical",
+      "example_count": 3,
+      "last_seen": "2026-07-27T18:00:20.322Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "process",
+      "token": "pumping",
+      "example_count": 3,
+      "last_seen": "2026-07-27T17:59:27.16Z",
+      "decision": "add",
+      "canonical_target": "pumping",
+      "rationale": "Pumping is a distinct physical plant process."
+    },
+    {
+      "segment": "position",
+      "token": "townsend_or_closed_grid_position",
+      "example_count": 4,
+      "last_seen": "2026-07-27T17:59:17.136Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "propellant",
+      "example_count": 2,
+      "last_seen": "2026-07-27T17:59:10.412Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "photon",
+      "example_count": 12,
+      "last_seen": "2026-07-27T14:08:10.705Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "molecule",
+      "example_count": 1,
+      "last_seen": "2026-07-24T09:56:09.279Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "h_98_factor",
+      "example_count": 1,
+      "last_seen": "2026-07-24T09:56:09.279Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "h_98",
+      "example_count": 6,
+      "last_seen": "2026-07-24T09:55:04.617Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "polarization_vector",
+      "example_count": 6,
+      "last_seen": "2026-07-24T09:50:22.813Z",
+      "decision": "add",
+      "canonical_target": "polarization_vector",
+      "rationale": "Polarization vector is a reusable vector quantity."
+    },
+    {
+      "segment": "physical_base",
+      "token": "humidity",
+      "example_count": 4,
+      "last_seen": "2026-07-24T09:50:19.684Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "ratio_of_neutral_density_to_other_isotope_neutral_density",
+      "example_count": 1,
+      "last_seen": "2026-07-23T19:42:10.938Z",
+      "decision": "fold",
+      "canonical_target": "ratio_of_neutral_density_to_other_isotope_neutral_density",
+      "rationale": "Represent the quantity as a binary ratio with registered operands."
+    },
+    {
+      "segment": "device",
+      "token": "faraday_angle_constraint",
+      "example_count": 2,
+      "last_seen": "2026-07-23T19:41:41.318Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "conversion_factor",
+      "example_count": 1,
+      "last_seen": "2026-07-23T19:41:41.318Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "humidity_fraction",
+      "example_count": 1,
+      "last_seen": "2026-07-23T19:41:41.318Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "diagnostic_channel",
+      "example_count": 4,
+      "last_seen": "2026-07-23T19:29:30.746Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "interferometer_channel",
+      "example_count": 2,
+      "last_seen": "2026-07-23T19:18:14.785Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "confinement",
+      "example_count": 1,
+      "last_seen": "2026-07-23T18:33:49.606Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "channel",
+      "example_count": 1,
+      "last_seen": "2026-07-23T15:09:08.013Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "power_loss",
+      "example_count": 1,
+      "last_seen": "2026-07-23T15:09:05.995Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "stokes_vector",
+      "example_count": 1,
+      "last_seen": "2026-07-23T15:08:51.652Z",
+      "decision": "add",
+      "canonical_target": "stokes_vector",
+      "rationale": "Stokes vector is a standard polarization quantity."
+    },
+    {
+      "segment": "position",
+      "token": "hard_xray_emissivity_profile_grid",
+      "example_count": 1,
+      "last_seen": "2026-07-23T15:05:57.253Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "atom_count",
+      "example_count": 1,
+      "last_seen": "2026-07-23T15:05:57.253Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "device",
+      "token": "cooling_loop",
+      "example_count": 1,
+      "last_seen": "2026-07-22T13:10:49.906Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed device vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "confinement_enhancement",
+      "example_count": 1,
+      "last_seen": "2026-07-22T13:10:35.005Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "vacuum_toroidal_field_product",
+      "example_count": 6,
+      "last_seen": "2026-07-22T13:07:03.087Z",
+      "decision": "fold",
+      "canonical_target": "product_of_vacuum_toroidal_magnetic_field_and_major_radius",
+      "rationale": "Represent the compound as a binary product."
+    },
+    {
+      "segment": "physical_base",
+      "token": "intensity_spectrum",
+      "example_count": 3,
+      "last_seen": "2026-07-22T12:44:02.72Z",
+      "decision": "fold",
+      "canonical_target": "intensity_spectrum",
+      "rationale": "Decompose into the intensity base and spectrum postfix operator."
+    },
+    {
+      "segment": "position",
+      "token": "inner_outer_separatrix_span",
+      "example_count": 1,
+      "last_seen": "2026-07-22T12:44:02.72Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "element_multiplicity",
+      "example_count": 1,
+      "last_seen": "2026-07-22T12:44:02.72Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "detector",
+      "example_count": 1,
+      "last_seen": "2026-07-22T12:44:02.72Z",
+      "decision": "fold",
+      "canonical_target": "detector",
+      "rationale": "Treat detector as an entity locus, not a spatial-position token."
+    },
+    {
+      "segment": "physical_base",
+      "token": "beta_tor_norm_mhd",
+      "example_count": 1,
+      "last_seen": "2026-07-22T12:44:02.72Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "camera_dimensions",
+      "example_count": 1,
+      "last_seen": "2026-07-22T11:27:42.97Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "contour_node",
+      "example_count": 1,
+      "last_seen": "2026-07-22T11:24:41.925Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "optical_path_length_variation",
+      "example_count": 3,
+      "last_seen": "2026-07-22T11:21:44.03Z",
+      "decision": "fold",
+      "canonical_target": "path_length_variation",
+      "rationale": "Keep optical acquisition context in metadata and use the variation operator."
+    },
+    {
+      "segment": "object",
+      "token": "cooling_loop",
+      "example_count": 1,
+      "last_seen": "2026-07-22T11:18:17.234Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed object vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "phase_to_line_integrated_electron_density_conversion_factor",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:43:27.171Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "element",
+      "example_count": 24,
+      "last_seen": "2026-07-22T09:41:59.639Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed qualifier vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "path_length_variation",
+      "example_count": 5,
+      "last_seen": "2026-07-22T09:41:59.639Z",
+      "decision": "fold",
+      "canonical_target": "path_length_variation",
+      "rationale": "Decompose into the path-length quantity and variation operator."
+    },
+    {
+      "segment": "position",
+      "token": "calorimetry_component",
+      "example_count": 2,
+      "last_seen": "2026-07-22T09:41:59.639Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "phase_to_line_integrated_density_conversion_coefficient",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:41:32.18Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "distance_inner_outer_separatrices",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:24:15.692Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "line_density",
+      "example_count": 2,
+      "last_seen": "2026-07-22T09:20:54.463Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "physical_base",
+      "token": "metric",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:20:06.219Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed physical_base vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "phi_error_upper",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:13:30.847Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "phi_error_lower",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:13:30.847Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "position",
+      "token": "phi_error_index",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:13:30.847Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    },
+    {
+      "segment": "qualifier",
+      "token": "radial_gradient_squared_over_field_squared",
+      "example_count": 1,
+      "last_seen": "2026-07-22T09:08:08.466Z",
+      "decision": "fold",
+      "canonical_target": "ratio_of_square_radial_gradient_to_square_magnetic_field_magnitude",
+      "rationale": "Represent the expression with registered projection, square, and ratio operators."
+    },
+    {
+      "segment": "position",
+      "token": "ggd_grid_subset",
+      "example_count": 5,
+      "last_seen": "2026-07-22T09:07:44.551Z",
+      "decision": "reject",
+      "canonical_target": null,
+      "rationale": "The proposal is storage-specific, underspecified, noncanonical, or not reusable enough to expand the closed position vocabulary; retain its context in metadata or compose it from registered segments."
+    }
+  ]
+}

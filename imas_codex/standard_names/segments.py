@@ -226,9 +226,9 @@ def grammar_tokens_by_segment() -> dict[str, tuple[str, ...]]:
       tokens into (segments with an empty list are omitted; every token is
       admissible in an open segment by definition, so indexing it says nothing);
     - the operator registry — a grammar *mechanism* rather than a segment.
-      Operators compose through ``operator_token`` + ``operator_kind``, so they
-      appear in no ``SEGMENT_TOKEN_MAP`` slot and are exposed here under the
-      synthetic :data:`OPERATOR_SEGMENT` class.
+      Operators compose through the ordered ``operators`` expression list, so
+      they appear in no ``SEGMENT_TOKEN_MAP`` slot and are exposed here under
+      the synthetic :data:`OPERATOR_SEGMENT` class.
 
     A consumer reading only ``SEGMENT_TOKEN_MAP`` cannot see 51 legal tokens and
     reports them as missing vocabulary; reading only the operator registry
@@ -1039,7 +1039,7 @@ def operator_composition(token: str) -> OperatorComposition | None:
     it already has, spelled as one word: ``inverse_square`` is the operators
     ``inverse`` and ``square``; ``line_integrated_density`` is the operator
     ``line_integrated`` on the base ``density``.  Such a token is not a
-    vocabulary deficiency — routing the operators through ``operator_token``
+    vocabulary deficiency — routing the operators through ``operators``
     composes the name today.
 
     Returns ``None`` when the token is a lexicalized compound listed in
@@ -1152,8 +1152,8 @@ def _operator_routing_advice(operators: tuple[str, ...], bases: tuple[str, ...])
     many = len(operators) > 1
     advice = (
         f"{', '.join(operators)} {'are registered operators' if many else 'is a registered operator'}"
-        f" — route {'them' if many else 'it'} through operator_token "
-        f"(with operator_kind from the registry)"
+        f" — route {'them' if many else 'it'} through the outer-to-inner "
+        f"operators list (the live registry supplies each kind)"
     )
     if bases:
         noun = "tokens" if len(bases) > 1 else "token"
@@ -1310,8 +1310,9 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
         left, right = comp.operands
         guidance = (
             f"'{token}' is a division, not a base token: express it with the "
-            f"binary operator_token '{comp.binary_operator}' — first operand "
-            f"'{left}' in base_token, second operand '{right}' in secondary_base."
+            f"binary operator '{comp.binary_operator}' in operators — first "
+            f"operand '{left}' in the base fields, second operand '{right}' in "
+            f"secondary_operand."
         )
         if comp.symbol_expansions:
             read_as = ", ".join(

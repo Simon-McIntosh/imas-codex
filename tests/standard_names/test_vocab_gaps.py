@@ -1313,7 +1313,7 @@ class TestBatchRescueValidator:
         """Build a candidate with an unregistered qualifier token.
 
         The token must belong to NO grammar class.  A registered operator
-        (``cumulative``, ``square``) is re-slotted into ``operator_token``
+        (``cumulative``, ``square``) is re-slotted into ``operators``
         instead of being rescued, so it would not exercise this path.
         """
         return {

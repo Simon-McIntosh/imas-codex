@@ -307,3 +307,40 @@ class TestEndorsedExamplesParse:
         )
         assert "ordered by registry precedence" in rendered
         assert "precedence 35" in rendered
+
+
+class TestStructuredOperatorContract:
+    """Prompt and response schema expose one outer-to-inner operator contract."""
+
+    def test_prompt_describes_structured_chain(self, rendered_system_prompt):
+        assert "outer-to-inner" in rendered_system_prompt
+        assert "secondary_operand" in rendered_system_prompt
+        assert '"token":"ratio"' in rendered_system_prompt
+        for removed in (
+            "operator_token",
+            "operator_kind",
+            "operator_coordinate",
+            "secondary_base",
+            "projection_shape",
+        ):
+            assert removed not in rendered_system_prompt
+
+    def test_response_schema_has_ordered_operator_items(self):
+        from imas_codex.standard_names.models import GrammarSegments
+
+        schema = GrammarSegments.model_json_schema()
+        properties = schema["properties"]
+        assert "operators" in properties
+        for removed in (
+            "operator_token",
+            "operator_kind",
+            "operator_coordinate",
+            "secondary_base",
+        ):
+            assert removed not in properties
+        operator_properties = schema["$defs"]["GrammarOperator"]["properties"]
+        assert set(operator_properties) == {
+            "token",
+            "coordinate",
+            "secondary_operand",
+        }

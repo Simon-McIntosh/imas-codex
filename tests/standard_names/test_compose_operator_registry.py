@@ -94,7 +94,8 @@ def test_grammar_reference_renders_full_operator_registry():
     # Operators the old static prose omitted.
     for tok in ("flux_surface_averaged", "line_integrated", "square", "inverse"):
         assert tok in text, f"{tok} missing from rendered grammar reference"
-    assert "operator_kind" in text
+    assert "operators" in text
+    assert "operator_kind" not in text
 
 
 def test_compose_prompt_names_line_of_sight_via_locus_not_base():

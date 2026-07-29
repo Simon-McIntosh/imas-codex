@@ -52,11 +52,11 @@ Return a JSON array of objects. Each object includes:
 - `path`: the DD path
 - `base_token`: irreducible base quantity from the registry
 - `base_kind`: `"quantity"` or `"geometry"`
-- `projection_axis`, `projection_shape`: for vector/coordinate projections (null if none)
+- `projection_axis`: for vector/coordinate projections (null if none); `base_kind` determines component vs coordinate
 - `qualifiers`: list of qualifier tokens (empty list if none)
 - `locus_token`, `locus_relation`, `locus_type`: for postfix locus (null if none)
 - `process_token`: for `_due_to_` (null if none)
-- `operator_token`, `operator_kind`: for operators (null if none)
+- `operators`: ordered outer-to-inner operator items (`[]` if none)
 - `rationale`: one sentence citing the physical quantity and any tool call evidence
 
 {{ paths_block }}

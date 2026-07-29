@@ -9,8 +9,8 @@ is constrained, and a report that misses is repaired at batch level rather than
 failing every well-formed candidate beside it.
 
 A registered operator offered in ``qualifiers`` names the right physics in the
-wrong slot. That is repairable by re-slotting it into ``operator_token``, which
-the operator registry renders unambiguously — so it is repaired, not rejected.
+wrong slot. That is repairable by re-slotting it into ``operators``, which the
+operator registry renders unambiguously — so it is repaired, not rejected.
 Rejection has no path back: the candidate becomes a vocabulary gap and strands
 its source.
 """
@@ -91,12 +91,12 @@ class TestBatchNormalisesGapSegments:
             {"candidates": [], "vocab_gaps": gaps}
         )
 
-    def test_operator_token_spelling_normalised_to_the_class(self):
+    def test_operators_field_spelling_normalised_to_the_class(self):
         batch = self._batch(
             [
                 {
                     "source_id": "a/b",
-                    "segment": "operator_token",
+                    "segment": "operators",
                     "token": "square",
                     "reason": "r",
                 }
@@ -171,26 +171,25 @@ class TestQualifierOperatorPromotion:
 
     def test_operator_qualifier_is_promoted(self):
         seg = _segments(qualifiers=["square"])
-        assert seg.operator_token == "square"
+        assert [op.token for op in seg.operators] == ["square"]
         assert "square" not in seg.qualifiers
 
     def test_promotion_preserves_ordinary_qualifiers(self):
         seg = _segments(qualifiers=["electron", "square"])
-        assert seg.operator_token == "square"
+        assert [op.token for op in seg.operators] == ["square"]
         assert seg.qualifiers == ["electron"]
 
     def test_promoted_operator_renders_into_the_name(self):
         """The promotion has to reach the composed name, not just the field."""
-        seg = _segments(qualifiers=["square"])
-        rendered = seg._to_model_dict()
-        assert "square" in (
-            rendered.get("transformation") or rendered.get("decomposition") or ""
-        )
+        seg = _segments(qualifiers=["electron", "square"])
+        assert seg.compose_name() == "square_of_electron_temperature"
 
-    def test_occupied_operator_slot_is_not_overwritten(self):
-        """With the slot taken the operator qualifier is an error, not a silent drop."""
-        with pytest.raises(ValueError, match="registered OPERATOR"):
-            _segments(qualifiers=["square"], operator_token="magnitude")
+    def test_promoted_operator_appends_inside_explicit_chain(self):
+        seg = _segments(
+            qualifiers=["square"],
+            operators=[{"token": "magnitude"}],
+        )
+        assert [op.token for op in seg.operators] == ["magnitude", "square"]
 
     def test_unregistered_qualifier_still_rejected(self):
         with pytest.raises(ValueError, match="not a registered grammar token"):
@@ -199,7 +198,7 @@ class TestQualifierOperatorPromotion:
     def test_ordinary_qualifier_untouched(self):
         seg = _segments(qualifiers=["electron"])
         assert seg.qualifiers == ["electron"]
-        assert seg.operator_token is None
+        assert seg.operators == []
 
     def test_operator_qualifier_survives_the_batch_as_a_candidate(self):
         """Promotion happens early enough that the candidate is never rescued.
@@ -225,7 +224,9 @@ class TestQualifierOperatorPromotion:
             }
         )
         assert len(batch.candidates) == 1
-        assert batch.candidates[0].segments.operator_token == "cumulative"
+        assert [op.token for op in batch.candidates[0].segments.operators] == [
+            "cumulative"
+        ]
         assert batch.vocab_gaps == []
 
 

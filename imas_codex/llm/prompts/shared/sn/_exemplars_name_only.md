@@ -2,11 +2,11 @@
 
 These exemplars teach by contrast. Study the *reasons* — many anti-patterns
 look plausible until you see the canonical form. All exemplars follow
-American spelling (NC-17).
+American spelling.
 
 ### Positive exemplars — imitate these patterns
 
-#### P1. Component decomposition (scalar from vector)
+#### Component decomposition (scalar from vector)
 
 - ✅ `radial_magnetic_field` — scalar, unit `T`
   - *Why good:* `{component}_of_{vector_base}` is the canonical decomposition.
@@ -20,7 +20,7 @@ American spelling (NC-17).
     the gradient (∇⊥p_e). Operator and projection coexist — the operator
     renders outermost, wrapping the component.
 
-#### P2. Species subjects
+#### Species subjects
 
 - ✅ `electron_temperature`, `deuterium_density`, `helium_ash_density`
   - *Why good:* single-token species go before the physical base noun.
@@ -30,7 +30,7 @@ American spelling (NC-17).
   - *Why good:* impurity species use their element name, not Zeff or a
     numeric index.
 
-#### P3. Position qualifiers: `of_` vs `at_` (semantic match)
+#### Position qualifiers: `of_` vs `at_` (semantic match)
 
 Positional qualifiers distinguish intrinsic geometric properties from
 field values evaluated at a locus.
@@ -47,7 +47,7 @@ field values evaluated at a locus.
 FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
    BAD: `radial_coordinate_at_magnetic_axis` → use `radial_coordinate_of_magnetic_axis`.
 
-#### P4. Transformations on a base quantity
+#### Transformations on a base quantity
 
 - ✅ `normalized_poloidal_magnetic_flux`
 - ✅ `volume_averaged_electron_density`
@@ -57,7 +57,7 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
     the qualifier run, so the `toroidal` component stays outermost — canonical
     order is `{component}_{transformation}_{base}`, not transformation-first.
 
-#### P5. Geometry of a structural entity
+#### Geometry of a structural entity
 
 - ✅ `radial_coordinate_of_magnetic_axis`
 - ✅ `vertical_coordinate_of_x_point`
@@ -70,7 +70,7 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
   - Note: `vertical_coordinate_of_` is the canonical Z coordinate form
     (Rule 17); prefer it over the legacy `vertical_position_of_` form.
 
-#### P6. Distance / clearance form
+#### Distance / clearance form
 
 - ✅ `radial_distance_at_outboard_midplane` (midplane-mapped radial distance,
   e.g. a probe/channel position relative to the separatrix)
@@ -82,7 +82,7 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
     features is not representable in the single locus slot — emit `vocab_gap`
     (see the REJECT note) rather than fabricate a span that drops an endpoint.
 
-#### P7. Spectral / Fourier decomposition
+#### Spectral / Fourier decomposition
 
 - ✅ `poloidal_magnetic_flux_fourier_coefficient` (with
   `description` starting "Fourier cosine coefficient of ...")
@@ -94,7 +94,7 @@ FORBIDDEN: `at_` for a geometric coordinate (wrong preposition).
     operator (`per_toroidal_mode_<base>_amplitude`). Name and description must
     agree.
 
-#### P8. Poloidal-plane coordinates
+#### Poloidal-plane coordinates
 
 - ✅ `vertical_coordinate_of_<position>` (preferred; Rule 17).
 - ✅ `radial_coordinate_of_<position>` (preferred; Rule 17 — symmetric with `vertical_coordinate_of_<position>`).
@@ -108,7 +108,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 
 ### Anti-patterns — never emit these
 
-#### A1. Abbreviations (NC-5, NC-12)
+#### Abbreviations
 
 - ❌ `norm_poloidal_flux`, `perp_velocity`, `temp_pedestal`, `sep_distance`
   - *Why bad:* every abbreviation has a canonical long form. Long forms
@@ -116,7 +116,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* `normalized_poloidal_flux`, `perpendicular_velocity_component`,
     `pedestal_electron_temperature`, `separatrix_distance`.
 
-#### A2. Provenance verbs in the name
+#### Provenance verbs in the name
 
 - ❌ `measured_plasma_current`, `reconstructed_safety_factor`,
   `fitted_electron_temperature`
@@ -127,7 +127,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
     `safety_factor`, `electron_temperature`. Store provenance as path
     metadata.
 
-#### A3. Tautology with `of`
+#### Tautology with `of`
 
 - ❌ `poloidal_magnetic_flux_of_poloidal_plane`
   - *Why bad:* the base quantity already implies the geometric setting.
@@ -135,7 +135,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* drop the tautological `of` phrase, or select a different
     qualifier (`at_plasma_boundary`, `on_flux_surface`).
 
-#### A4. Mixed R/Z entity (inconsistency within a pair)
+#### Mixed radial/vertical entity (inconsistency within a pair)
 
 - ❌ `r_of_magnetic_axis` paired with `vertical_coordinate_of_magnetic_axis`
   - *Why bad:* the pair is asymmetric — R uses a letter abbreviation, Z
@@ -143,7 +143,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* pair as `radial_coordinate_of_magnetic_axis` /
     `vertical_coordinate_of_magnetic_axis`.
 
-#### A5. Multi-subject naming (NC-2)
+#### Multi-subject naming
 
 - ❌ `electron_ion_temperature_ratio`
   - *Why bad:* this encodes two species into one name and bakes in a
@@ -152,7 +152,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* two standard names — `electron_temperature`, `ion_temperature`
     — and compute the ratio at analysis time.
 
-#### A6. Single-token generic nouns
+#### Single-token generic nouns
 
 - ❌ `geometry`, `value`, `coefficient`, `parameter`
   - *Why bad:* the name must be self-describing; no external context
@@ -160,7 +160,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* either (a) a specific physics name, or (b) classify the path
     as metadata and skip naming.
 
-#### A7. British spelling (NC-17)
+#### British spelling
 
 - ❌ `normalised_poloidal_flux`, `polarised_cross_section`,
   `centre_of_plasma_boundary`
@@ -169,7 +169,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* `normalized_*`, `polarized_*`, `center_of_*`. Apply the same
     rule to all prose fields.
 
-#### A8. Spectral name/description mismatch
+#### Spectral name/description mismatch
 
 - ❌ Name `normal_magnetic_field` with description
   "Fourier coefficients of the normal component..."
@@ -178,14 +178,14 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   - *Fix:* either rename to `fourier_coefficient_of_normal_magnetic_field`
     or rewrite the description to describe the underlying field.
 
-#### A9. Trivial surface-of-definition names
+#### Trivial surface-of-definition names
 
 - ❌ `normalized_poloidal_flux_at_plasma_boundary`
   - *Why bad:* normalized flux equals 1 on the boundary by construction.
     The "name" encodes a definitional tautology.
   - *Fix:* skip the path — no standard name is warranted.
 
-#### A10. Duplicated preposition (exclusive-pair violation)
+#### Duplicated preposition (exclusive-pair violation)
 
 - ❌ `poloidal_magnetic_flux_of_plasma_boundary_at_plasma_boundary`
   - *Why bad:* `of` and `at` are exclusive for the same entity.
@@ -203,7 +203,8 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
    BAD: `ion_velocity_over_magnetic_field_strength`,
         `ion_velocity_per_magnetic_field_strength`.
    GOOD: `ratio_of_ion_velocity_to_magnetic_field_strength`
-         (`operator_token="ratio_of"`, `secondary_base="magnetic_field_strength"`).
+         (`operators=[{"token":"ratio",
+         "secondary_operand":"magnetic_field_strength"}]`).
    Note: `over_<region>` (e.g. `over_halo_region`) is the valid Region
    segment; neither `_over_<quantity>` nor `_per_<quantity>` is a valid
    division form.

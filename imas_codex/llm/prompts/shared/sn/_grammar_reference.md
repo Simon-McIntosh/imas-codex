@@ -142,20 +142,17 @@ Examples:
 {% if operators_full %}
 #### `operator` — the FULL operator registry (a grammar mechanism, NOT a `SEGMENT_TOKEN_MAP` segment)
 
-Operators route through `operator_token` + `operator_kind` — **never** a
-`qualifier`, **never** a `vocab_gap`. Any token in the lists below that a
-composer reports as a "missing" segment token is a **mis-slot**, not a gap.
-Use ONLY these registered operators; nested prefix operators are legal. The
-lists are ordered by registry precedence, **outer→inner** (higher precedence
-first). Preserve this order when filling an operator chain.
+Operators route through the ordered `operators` list — **never** a `qualifier`,
+**never** a `vocab_gap`. Each item has `token`, plus `coordinate` only for a
+coordinate-indexed operator or `secondary_operand` only for a binary operator.
+Any token in the lists below that a composer reports as a "missing" segment
+token is a **mis-slot**, not a gap. Use ONLY these exact bare registry tokens;
+nested operators are legal. The registry display is ordered by registry precedence;
+write the expression list **outer→inner**.
 
-- **Prefix** (`operator_kind="unary_prefix"`): differential/scope operators
-  (`time_derivative`, `gradient`, `derivative_with_respect_to`, `change_in`,
-  `tendency`) render `<op>_of_<base>`; averaging / reduction / normalization /
-  reshaping operators (`flux_surface_averaged`, `line_integrated`,
-  `line_averaged`, `volume_averaged`, `normalized`, `square`, `inverse`,
-  `variation`, `maximum`, `minimum`, `logarithm`, `per_toroidal_mode` …) attach
-  **bare** (no `_of_`).
+- **Prefix**: supply the exact registry token. ISN decides whether its canonical
+  spelling is scoped (`<op>_of_<base>`) or bare (`<op>_<base>`); do not encode
+  the join in `token`.
 
 ```
 {% for op in operators_full.unary_prefix -%}
@@ -163,7 +160,7 @@ first). Preserve this order when filling an operator chain.
 {%- endfor %}
 ```
 
-- **Postfix** (`operator_kind="unary_postfix"`, appended `<base>_<op>`):
+- **Postfix** (appended `<base>_<op>`):
 
 ```
 {% for op in operators_full.unary_postfix -%}
@@ -171,8 +168,8 @@ first). Preserve this order when filling an operator chain.
 {%- endfor %}
 ```
 
-- **Binary** (`operator_kind="binary"`, first operand from `base_token`, second
-  in `secondary_base`; renders `<op>_of_<A>_<sep>_<B>`):
+- **Binary** (first operand from the base fields, second in
+  `secondary_operand`; renders `<op>_of_<A>_<sep>_<B>`):
 
 ```
 {% for op in operators_full.binary -%}
@@ -185,10 +182,12 @@ names are fine, there is no length cap):
 
 - flux-surface-averaged $\langle B^2\rangle$ → `flux_surface_averaged` of
   `square` of `magnetic_field` (nested prefix, outer→inner).
-- flux-surface-averaged $\langle 1/R^2\rangle$ (`gm1`) → `flux_surface_averaged`
-  of `inverse` of `square` of `major_radius`.
+- inverse of a flux-surface-averaged quantity → `inverse` of
+  `flux_surface_averaged` of the base.
+- flux-surface average of a ratio → `flux_surface_averaged` of a `ratio`
+  application with its second operand in `secondary_operand`.
 - line-integrated electron density (`n_e_line`) → `line_integrated` of
-  `electron_density` (`operator_token="line_integrated"`, `operator_kind="unary_prefix"`).
+  `electron_density` (`operators=[{"token": "line_integrated"}]`).
 - line-averaged effective charge (`zeff_line_average`) → `line_averaged` of
   `effective_charge`.
 - optical-path-length change of an interferometer beam → `variation` of the
@@ -215,8 +214,7 @@ IR segment fields before emitting:
      `base_token` is the base only.
    - `<subject>_<base>` → put the subject in `qualifiers`; never let
      it leak into `base_token`.
-   - `<transformation>_<base>` → set `operator_token` to the transformation,
-     `operator_kind` to `"unary_prefix"`.
+   - `<transformation>_<base>` → add the transformation token to `operators`.
    - `<base>_<process>` → set `process_token` to the process token.
    - `<base>_<region>` → set `locus_token` to the region, `locus_relation`
      to `"over"`, `locus_type` to `"region"`.
@@ -242,7 +240,7 @@ output, restructure immediately:
 | `parallel_current_density` | `parallel_current_density` (component=parallel, base=current_density) | `parallel` → component |
 | `toroidal_torque` | `toroidal_torque` (component=toroidal, base=torque) | `toroidal` → component |
 | `radial_electric_field` | `radial_electric_field` (component=radial, base=electric_field) | `radial` → component |
-| `beam_position_variation` | use registered `variation` through `operator_token` | `variation` is an operator, never a qualifier or vocab gap |
+| `beam_position_variation` | use registered `variation` through `operators` | `variation` is an operator, never a qualifier or vocab gap |
 | `thermal_electron_energy` | subject=`thermal_electron`, base=`energy` | `thermal_electron` → subject |
 | `normalized_poloidal_flux` | `normalized_poloidal_magnetic_flux` | `normalized` → bare-prefix transformation |
 
@@ -268,7 +266,7 @@ adding ANY entry to `vocab_gaps`, run these checks in order:
      `qualifiers=["total_plasma"]` + `base_token="pressure"`
    - ❌ `vocab_gap(segment="physical_base", token="poloidal_magnetic_flux")` —
      `poloidal` is a component, `magnetic_flux` is a base → set
-     `projection_axis="poloidal"`, `projection_shape="component"`, `base_token="magnetic_flux"`
+     `projection_axis="poloidal"`, `base_kind="quantity"`, `base_token="magnetic_flux"`
    - ❌ `vocab_gap(segment="physical_base", token="crushing_force")` —
      if the concept can be expressed as qualifier + base, do that
 

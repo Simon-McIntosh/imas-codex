@@ -44,16 +44,10 @@ class TestPipelineGateBaseline:
 
 
 class TestDerivedParentGateScoping:
-    """The full-name parse gate is scoped for derived family parents.
+    """Derived parents must clear both grammar and family structure."""
 
-    A derived parent is a deliberately partial name (a grammar peel). It must
-    be validated structurally — children exist + the peel generalises them —
-    NOT rejected merely for failing the standalone full-name round-trip.
-    """
-
-    def test_partial_derived_parent_with_children_is_valid(self) -> None:
-        """``internal_state_energy_flux`` cannot parse standalone (its species
-        subject is peeled off) but is a valid parent of species children."""
+    def test_partial_derived_parent_with_children_quarantines(self) -> None:
+        """A structurally consistent peel is not exempt from grammar validity."""
         issues, _summary, status = validate_name_candidate(
             {
                 "id": "internal_state_energy_flux",
@@ -64,11 +58,27 @@ class TestDerivedParentGateScoping:
                 ],
             }
         )
+        assert status == "quarantined"
+        assert any("parse_error" in issue for issue in issues)
+
+    def test_parseable_derived_parent_with_children_is_valid(self) -> None:
+        issues, _summary, status = validate_name_candidate(
+            {
+                "id": "magnetic_field",
+                "origin": "derived",
+                "children": [
+                    "radial_magnetic_field",
+                    "toroidal_magnetic_field",
+                ],
+                "kind": "scalar",
+                "unit": "T",
+                "description": "Magnetic field strength.",
+            }
+        )
         assert status == "valid", issues
 
     def test_orphan_derived_parent_quarantines(self) -> None:
-        """A derived parent that fails the parse AND has no children is a
-        structurally-broken residue — the missed-gate signal is preserved."""
+        """An invalid orphan reports both grammar and structural findings."""
         issues, _summary, status = validate_name_candidate(
             {
                 "id": "internal_state_energy_flux",
@@ -77,6 +87,7 @@ class TestDerivedParentGateScoping:
             }
         )
         assert status == "quarantined"
+        assert any("parse_error" in i for i in issues)
         assert any("no HAS_PARENT children" in i for i in issues)
 
     def test_inconsistent_peel_derived_parent_quarantines(self) -> None:

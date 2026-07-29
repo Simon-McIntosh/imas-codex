@@ -166,9 +166,9 @@ Rules:
   in descriptions. Describe the *physics*, not data layout.
 - **American English only** — "center" not "centre", "meter" not "metre".
 - Provide all applicable IR segment fields inside `segments` — `base_token`,
-  `base_kind`, `projection_axis`, `projection_shape`, `qualifiers`,
+  `base_kind`, `projection_axis`, `qualifiers`,
   `locus_token`, `locus_relation`, `locus_type`, `process_token`,
-  `operator_token`, `operator_kind`.
+  and the outer-to-inner `operators` list.
 - Provide a brief `reason` explaining how this attempt addresses the reviewer's
   specific concerns from the history above.
 

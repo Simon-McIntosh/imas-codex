@@ -2784,6 +2784,7 @@ async def _self_refine_candidate(
 
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.standard_names.context import build_compose_context
+    from imas_codex.standard_names.models import GrammarOperator
 
     class SelfRefineSegments(BaseModel):
         base_token: str = Field(description="Registered physical_base/geometry token")
@@ -2796,8 +2797,7 @@ async def _self_refine_candidate(
         locus_relation: str | None = None
         locus_type: str | None = None
         process_token: str | None = None
-        operator_token: str | None = None
-        operator_kind: str | None = None
+        operators: list[GrammarOperator] = Field(default_factory=list)
 
     class SelfRefineResponse(BaseModel):
         changed: bool = Field(
@@ -3363,8 +3363,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                             _segs.append(f"projection={_cand.projection_axis}")
                         if _cand.process_token:
                             _segs.append(f"process={_cand.process_token}")
-                        if _cand.operator_token:
-                            _segs.append(f"operator={_cand.operator_token}")
+                        for _operator in _cand.operators:
+                            _segs.append(f"operator={_operator.token}")
                         _desc = (
                             "  ".join(_segs) if _segs else ((_cand.reason or "")[:80])
                         )
@@ -4293,24 +4293,16 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
     ``validation_status`` is ``"valid"`` or ``"quarantined"``.
     """
     name = entry.get("id", "")
-    # A derived family parent is a deliberately partial name (a grammar peel
-    # that drops the segment its children carry — species, projection axis, …).
-    # The full-name round-trip below is the wrong gate for it: dropping that
-    # segment is the whole point, so a legitimately partial parent would be
-    # mis-flagged as an unparseable standalone name. Such parents are validated
-    # STRUCTURALLY (children exist + the peel generalises them) instead — while
-    # a structurally-broken parent (orphan / inconsistent peel) still
-    # quarantines, so the missed-gate signal is preserved.
     is_derived_parent = entry.get("origin") == "derived"
     derived_children = entry.get("children") or []
+    from imas_codex.standard_names.audits import derived_parent_structural_check
+
     try:
         from imas_standard_names.grammar import (
             StandardName,
             compose_standard_name,
             parse_standard_name,
         )
-
-        from imas_codex.standard_names.audits import derived_parent_structural_check
 
         # Grammar round-trip validates parsability.
         parsed = parse_standard_name(name)
@@ -4364,13 +4356,6 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
         status = "quarantined" if _is_quarantined(issues, layer_summary) else "valid"
         return issues, layer_summary, status
     except Exception as exc:
-        # A derived family parent is intentionally partial; a full-name parse
-        # failure is expected, not a defect. Validate it structurally instead —
-        # it quarantines only when its family structure is broken.
-        if is_derived_parent:
-            struct_issues = derived_parent_structural_check(name, derived_children)
-            status = "quarantined" if struct_issues else "valid"
-            return struct_issues, {}, status
         exc_msg = str(exc).lower()
         issues = []
         if "component" in exc_msg and "coordinate" in exc_msg:
@@ -4379,6 +4364,8 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
             issues.append(f"grammar:ambiguity:unclassified: {name}")
         else:
             issues.append(f"parse_error: grammar round-trip failed for {name}")
+        if is_derived_parent:
+            issues.extend(derived_parent_structural_check(name, derived_children))
         return issues, {}, "quarantined"
 
 
