@@ -29,6 +29,10 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_REFINE_ROTATIONS,
 )
 from imas_codex.standard_names.ledger import reattach_produced_name_edges
+from imas_codex.standard_names.provenance_lifecycle import (
+    deletion_change_cypher,
+    deletion_change_params,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -2010,36 +2014,38 @@ def _query_accepted_derived_parents_for_cleanup(gc: Any) -> list[str]:
 def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
     """Delete derived-parent nodes and their review/derived-source scaffolding."""
     deleted = 0
+    deletion_clause = deletion_change_cypher("sn")
+    deletion_params = deletion_change_params(
+        "remove_derived_parent",
+        reason="structural derived parent no longer satisfies lifecycle admission",
+    )
     for parent_id in parent_ids:
-        gc.query(
-            """
-            MATCH (sns:StandardNameSource {source_type: 'derived', source_id: $parent_id})
-            DETACH DELETE sns
-            """,
-            parent_id=parent_id,
-        )
-        gc.query(
-            """
-            MATCH (sns:StandardNameSource)
-            WHERE sns.produced_sn_id = $parent_id
-            SET sns.produced_sn_id = null
-            """,
-            parent_id=parent_id,
-        )
         rows = list(
             gc.query(
-                """
-                MATCH (sn:StandardName {id: $parent_id})
+                f"""
+                MATCH (sn:StandardName {{id: $parent_id}})
+                OPTIONAL MATCH (derived_source:StandardNameSource
+                  {{source_type: 'derived', source_id: $parent_id}})
+                OPTIONAL MATCH (mirror_source:StandardNameSource)
+                WHERE mirror_source.produced_sn_id = $parent_id
                 OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview)
                 OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(dr:DocsRevision)
-                WITH sn, collect(DISTINCT rv) AS reviews,
+                WITH sn,
+                     collect(DISTINCT derived_source) AS derived_sources,
+                     collect(DISTINCT mirror_source) AS mirror_sources,
+                     collect(DISTINCT rv) AS reviews,
                      collect(DISTINCT dr) AS revisions
+                {deletion_clause}
+                FOREACH (source IN mirror_sources |
+                  SET source.produced_sn_id = null)
+                FOREACH (source IN derived_sources | DETACH DELETE source)
                 FOREACH (r IN reviews | DETACH DELETE r)
                 FOREACH (d IN revisions | DETACH DELETE d)
                 DETACH DELETE sn
                 RETURN 1 AS deleted
                 """,
                 parent_id=parent_id,
+                **deletion_params,
             )
         )
         if rows:
@@ -3094,8 +3100,9 @@ def write_standard_names(
     # Opens its own GraphClient — the surrounding `with` block has already
     # closed; write_vocab_gaps above follows the same pattern.
     with GraphClient() as gc:
+        deletion_clause = deletion_change_cypher("sn")
         swept = gc.query(
-            """
+            f"""
             MATCH (sn:StandardName)
             WHERE sn.created_at IS NULL
               AND sn.generated_at IS NULL
@@ -3103,11 +3110,16 @@ def write_standard_names(
               AND sn.unit IS NULL
               AND sn.kind IS NULL
               AND sn.needs_composition IS NULL
-              AND NOT EXISTS { ()-[:HAS_PARENT]->(sn) }
-              AND NOT EXISTS { ()-[:HAS_ERROR]->(sn) }
+              AND NOT EXISTS {{ ()-[:HAS_PARENT]->(sn) }}
+              AND NOT EXISTS {{ ()-[:HAS_ERROR]->(sn) }}
+            {deletion_clause}
             DETACH DELETE sn
             RETURN count(sn) AS swept
-            """
+            """,
+            **deletion_change_params(
+                "remove_skeleton_placeholder",
+                reason="relationship placeholder never became a composed name",
+            ),
         )
     swept_count = (swept[0]["swept"] if swept else 0) if swept else 0
     if swept_count:
@@ -5036,6 +5048,11 @@ def clear_standard_names(
             # the review is deleted only for names that actually go away).
             # Verified against a live graph in
             # tests/standard_names/test_clear_atomicity_graph.py.
+            deletion_clause = deletion_change_cypher("sn")
+            deletion_params = deletion_change_params(
+                "clear_selected_name",
+                reason="selected name removed by a scoped pipeline clear",
+            )
             gc.query(
                 f"""
                 MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
@@ -5044,6 +5061,8 @@ def clear_standard_names(
                 DELETE rel
                 WITH DISTINCT sn
                 WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
+                {deletion_clause}
+                WITH sn, change
                 CALL {{
                     WITH sn
                     OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
@@ -5052,12 +5071,20 @@ def clear_standard_names(
                 DETACH DELETE sn
                 """,
                 **params,
+                **deletion_params,
             )
         else:
+            deletion_clause = deletion_change_cypher("sn")
+            deletion_params = deletion_change_params(
+                "clear_selected_name",
+                reason="selected name removed by a pipeline clear",
+            )
             gc.query(
                 f"""
                 MATCH (sn:StandardName)
                 WHERE {sn_where}
+                {deletion_clause}
+                WITH sn, change
                 CALL {{
                     WITH sn
                     OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
@@ -5066,10 +5093,10 @@ def clear_standard_names(
                 DETACH DELETE sn
                 """,
                 **params,
+                **deletion_params,
             )
 
-        # Step C: sweep up any fully-orphaned StandardNameReview nodes left by prior clears
-        # (pre-p39 runs detached StandardName without deleting StandardNameReview).
+        # Sweep any StandardNameReview node whose owner is absent.
         orphan_result = gc.query(
             """
             MATCH (r:StandardNameReview)
@@ -5083,7 +5110,7 @@ def clear_standard_names(
         if orphan_count:
             logger.info("Swept %d orphaned StandardNameReview nodes", orphan_count)
 
-        # Step D: delete the LLMCost ledger — but only on an UNSCOPED clear.
+        # Delete the LLMCost ledger only on an unscoped clear.
         # A full clear owns the whole ledger (every run's StandardName output
         # is being removed, so its cost rows are stale). A SCOPED clear (any
         # stage/source/ids/path/time/score/tier/validation filter) removes
@@ -5103,7 +5130,7 @@ def clear_standard_names(
         if not scoped:
             gc.query("MATCH (c:LLMCost) DETACH DELETE c")
 
-        # Step E: reset orphaned sources. Deleting a StandardName strands its
+        # Reset orphaned sources. Deleting a StandardName strands its
         # StandardNameSource at 'composed'/'attached' — a status the generate
         # pool never claims — so without this reset the source silently drops
         # out of all future regeneration. Orphan check (no remaining
@@ -5192,11 +5219,23 @@ def clear_sn_subsystem(
 
         # Delete order is significant: StandardNameReview BEFORE StandardName so
         # orphan StandardNameReview nodes can't linger if HAS_STANDARD_NAME edges
-        # are missing (pre-p39 bug). DETACH DELETE handles remaining
+        # are missing. DETACH DELETE handles remaining
         # edges on each pass. At SN-pipeline scale (~thousands of
         # nodes total) a single DETACH DELETE per label is sub-second.
         gc.query("MATCH (r:StandardNameReview) DETACH DELETE r")
-        gc.query("MATCH (sn:StandardName) DETACH DELETE sn")
+        deletion_clause = deletion_change_cypher("sn")
+        gc.query(
+            f"""
+            MATCH (sn:StandardName)
+            {deletion_clause}
+            DETACH DELETE sn
+            RETURN count(sn) AS deleted
+            """,
+            **deletion_change_params(
+                "clear_subsystem_name",
+                reason="standard-name pipeline subsystem cleared",
+            ),
+        )
         gc.query("MATCH (s:StandardNameSource) DETACH DELETE s")
         gc.query("MATCH (d:DocsRevision) DETACH DELETE d")
         gc.query("MATCH (v:VocabGap) DETACH DELETE v")
@@ -13941,7 +13980,45 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
             gc.__exit__(None, None, None)
 
 
-def reconcile_orphan_parent_sources(gc: Any | None = None) -> int:
+def find_orphan_parent_source_candidates(
+    gc: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Return childful parents eligible for structural source reconstruction."""
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        return list(
+            client.query(
+                """
+                MATCH (parent:StandardName)
+                WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
+                MATCH (child)-[:HAS_PARENT]->(parent)
+                WITH parent,
+                     count(child) AS total_children,
+                     count(CASE WHEN child.name_stage IS NOT NULL THEN 1 END)
+                       AS composed
+                WHERE total_children >= 1 AND total_children = composed
+                MATCH (c)-[:HAS_PARENT]->(parent)
+                OPTIONAL MATCH (cs:StandardNameSource)-[:PRODUCED_NAME]->(c)
+                OPTIONAL MATCH (cs)-[:FROM_DD_PATH]->(imas:IMASNode)
+                WITH parent,
+                     [p IN collect(DISTINCT imas.id) WHERE p IS NOT NULL]
+                       AS dd_paths
+                RETURN parent.id AS parent_id, dd_paths
+                ORDER BY parent.id
+                """
+            )
+        )
+    finally:
+        if own:
+            client.close()
+
+
+def reconcile_orphan_parent_sources(
+    gc: Any | None = None,
+    *,
+    dry_run: bool = False,
+) -> int:
     """Seed the missing structural provenance source for childful parents.
 
     A structural parent (a ``StandardName`` that is the ``HAS_PARENT`` target of
@@ -13971,27 +14048,15 @@ def reconcile_orphan_parent_sources(gc: Any | None = None) -> int:
     source drops out of the selector. Childless sourceless names are not parents
     and are left untouched (a distinct stranded-name concern).
 
-    Returns the number of parent sources seeded.
+    With ``dry_run=True``, returns the number eligible without writing.
+    Otherwise returns the number of parent sources seeded.
     """
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        rows = client.query(
-            """
-            MATCH (parent:StandardName)
-            WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
-            MATCH (child)-[:HAS_PARENT]->(parent)
-            WITH parent,
-                 count(child) AS total_children,
-                 count(CASE WHEN child.name_stage IS NOT NULL THEN 1 END) AS composed
-            WHERE total_children >= 1 AND total_children = composed
-            MATCH (c)-[:HAS_PARENT]->(parent)
-            OPTIONAL MATCH (cs:StandardNameSource)-[:PRODUCED_NAME]->(c)
-            OPTIONAL MATCH (cs)-[:FROM_DD_PATH]->(imas:IMASNode)
-            WITH parent, [p IN collect(DISTINCT imas.id) WHERE p IS NOT NULL] AS dd_paths
-            RETURN parent.id AS parent_id, dd_paths
-            """
-        )
+        rows = find_orphan_parent_source_candidates(gc=client)
+        if dry_run:
+            return len(rows)
         seeded = 0
         for r in rows:
             parent_id = r["parent_id"]
