@@ -242,3 +242,60 @@ class TestStoredVerdictAudit:
         before = [dict(r) for r in self.RECORDS]
         audit_stored_verdicts(self.RECORDS)
         assert self.RECORDS == before
+
+
+class TestApplyReuseVerdicts:
+    """The write half: stamping derived verdicts onto stored nodes."""
+
+    def _audits(self):
+        from imas_codex.standard_names.vocab_reuse import audit_stored_verdicts
+
+        return audit_stored_verdicts(
+            [
+                {
+                    "id": "vocab_gap:object:lower_hybrid_antenna_module",
+                    "segment": "object",
+                    "token": "lower_hybrid_antenna_module",
+                    "dedup_decision": "distinct_confirmed",
+                },
+                {
+                    # no id — a dump row without one cannot be stamped
+                    "segment": "physical_base",
+                    "token": "optical_depth",
+                },
+            ]
+        )
+
+    def test_dry_run_counts_without_writing(self):
+        from unittest.mock import MagicMock
+
+        from imas_codex.standard_names.vocab_reuse import apply_reuse_verdicts
+
+        gc = MagicMock()
+        n = apply_reuse_verdicts(gc, self._audits(), dry_run=True)
+        assert n == 1, "only the id-bearing audit is stampable"
+        gc.query.assert_not_called()
+
+    def test_stamps_verdict_target_mechanism_and_detail(self):
+        from unittest.mock import MagicMock
+
+        from imas_codex.standard_names.vocab_reuse import apply_reuse_verdicts
+
+        gc = MagicMock()
+        n = apply_reuse_verdicts(gc, self._audits())
+        assert n == 1
+        (query, ), kwargs = gc.query.call_args
+        assert "reuse_confirmed" in query
+        items = kwargs["items"]
+        assert items[0]["id"] == "vocab_gap:object:lower_hybrid_antenna_module"
+        assert items[0]["target"] == "lower_hybrid_antenna"
+        assert items[0]["mechanism"] == "structural_suffix"
+
+    def test_no_audits_is_a_no_op(self):
+        from unittest.mock import MagicMock
+
+        from imas_codex.standard_names.vocab_reuse import apply_reuse_verdicts
+
+        gc = MagicMock()
+        assert apply_reuse_verdicts(gc, []) == 0
+        gc.query.assert_not_called()

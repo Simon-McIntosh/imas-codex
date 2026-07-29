@@ -263,6 +263,49 @@ def audit_stored_verdicts(
     return audits
 
 
+def apply_reuse_verdicts(
+    gc: Any,
+    audits: Iterable[StoredVerdictAudit],
+    *,
+    dry_run: bool = False,
+) -> int:
+    """Stamp mechanically-derived reuse verdicts onto stored ``VocabGap`` nodes.
+
+    A mechanical hit derives the registered token the proposal spells, so the
+    verdict supersedes any embedding adjudication on record.  Writes the
+    verdict, the registered target, the deriving mechanism and its one-clause
+    detail, and a reconciliation stamp.  Nothing is deleted — the node stays as
+    the record of what the composer proposed and where it was sent instead.
+
+    Returns the number of nodes stamped (or that would be, under ``dry_run``).
+    """
+    items = [
+        {
+            "id": a.id,
+            "target": a.finding.target,
+            "mechanism": a.finding.mechanism,
+            "detail": a.finding.detail,
+        }
+        for a in audits
+        if a.id
+    ]
+    if not items or dry_run:
+        return len(items)
+    gc.query(
+        """
+        UNWIND $items AS it
+        MATCH (g:VocabGap {id: it.id})
+        SET g.dedup_decision = 'reuse_confirmed',
+            g.reuse_target = it.target,
+            g.reuse_mechanism = it.mechanism,
+            g.reuse_detail = it.detail,
+            g.reconciled_at = datetime()
+        """,
+        items=items,
+    )
+    return len(items)
+
+
 def clear_reuse_caches() -> None:
     """Drop the cached views of the registered vocabulary held in this module."""
     settled_synonyms.cache_clear()
@@ -272,6 +315,7 @@ def clear_reuse_caches() -> None:
 __all__ = [
     "ReuseFinding",
     "StoredVerdictAudit",
+    "apply_reuse_verdicts",
     "audit_stored_verdicts",
     "clear_reuse_caches",
     "registered_reuse",
