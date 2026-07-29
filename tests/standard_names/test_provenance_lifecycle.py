@@ -49,6 +49,23 @@ def test_cleanup_manifest_is_unapproved_only() -> None:
     assert "DELETE" not in cypher
 
 
+def test_cleanup_manifest_can_select_exact_names() -> None:
+    """Targeted cleanup passes a deduplicated id allowlist to the graph."""
+    gc = MagicMock()
+    gc.query.return_value = []
+
+    assert (
+        compact_unapproved_superseded(
+            gc,
+            names=["obsolete_name", "obsolete_name", "other_name"],
+        )
+        == []
+    )
+
+    assert gc.query.call_args.kwargs["names"] == ["obsolete_name", "other_name"]
+    assert "old.id IN $names" in gc.query.call_args.args[0]
+
+
 def test_invariant_audit_checks_edge_scalar_and_backing_projection() -> None:
     gc = MagicMock()
     gc.query.return_value = []

@@ -620,6 +620,7 @@ def classify_missing_change_targets(gc: Any) -> dict[str, Any]:
 def compact_unapproved_superseded(
     gc: Any,
     *,
+    names: list[str] | None = None,
     apply: bool = False,
 ) -> list[dict[str, Any]]:
     """Plan or compact safe unapproved superseded candidates.
@@ -628,12 +629,15 @@ def compact_unapproved_superseded(
     live tip: semantic sources are retargeted, a lightweight internal event is
     retained, then the obsolete StandardName and its owned review/doc snapshots
     are removed. Ambiguous/dead-end rows always remain for manual resolution.
+    When *names* is provided, only those exact candidate ids are considered.
     """
+    selected_names = list(dict.fromkeys(names)) if names else None
     rows = gc.query(
         """
         MATCH (old:StandardName)
         WHERE old.name_stage = 'superseded'
           AND old.catalog_approved_at IS NULL
+          AND ($names IS NULL OR old.id IN $names)
         OPTIONAL MATCH (tip:StandardName)-[:REFINED_FROM*1..]->(old)
         WHERE NOT tip.name_stage IN ['superseded', 'exhausted']
         WITH old, collect(DISTINCT tip.id) AS tips
@@ -642,7 +646,8 @@ def compact_unapproved_superseded(
                tips, count(DISTINCT source) AS source_count,
                size(tips) = 1 AS safe_to_compact
         ORDER BY old.id
-        """
+        """,
+        names=selected_names,
     )
     manifest = [dict(row) for row in rows or []]
     if not apply:

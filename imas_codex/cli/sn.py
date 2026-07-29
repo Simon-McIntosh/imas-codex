@@ -4984,8 +4984,14 @@ def sn_prune(
     is_flag=True,
     help="Compact safe rows after showing the manifest (default is read-only).",
 )
+@click.option(
+    "--name",
+    "names",
+    multiple=True,
+    help="Restrict the manifest and compaction to an exact candidate id. Repeatable.",
+)
 @click.option("--force", "-f", is_flag=True, help="Skip apply confirmation.")
-def sn_provenance_cleanup(apply: bool, force: bool) -> None:
+def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> None:
     """Manifest or compact unapproved superseded candidate history."""
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.provenance_lifecycle import (
@@ -4993,7 +4999,12 @@ def sn_provenance_cleanup(apply: bool, force: bool) -> None:
     )
 
     with GraphClient() as gc:
-        manifest = compact_unapproved_superseded(gc, apply=False)
+        selected_names = list(names) or None
+        manifest = compact_unapproved_superseded(
+            gc,
+            names=selected_names,
+            apply=False,
+        )
         safe = [row for row in manifest if row.get("safe_to_compact")]
         unresolved = len(manifest) - len(safe)
         console.print(
@@ -5015,7 +5026,7 @@ def sn_provenance_cleanup(apply: bool, force: bool) -> None:
                 f"Compact {len(safe)} candidates? Unresolved rows remain untouched.",
                 abort=True,
             )
-        compact_unapproved_superseded(gc, apply=True)
+        compact_unapproved_superseded(gc, names=selected_names, apply=True)
         console.print(f"Compacted {len(safe)} unapproved candidates.")
 
 
