@@ -456,6 +456,33 @@ def _terminate_tunnel_process(child: subprocess.Popen | None) -> None:
         pass
 
 
+def _is_remote_clipboard_active(host: str, port: int) -> bool:
+    """Return whether the reverse-forwarded clipboard bridge responds remotely."""
+    try:
+        result = subprocess.run(
+            [
+                "ssh",
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "ConnectTimeout=5",
+                host,
+                "curl",
+                "-fsS",
+                "--max-time",
+                "3",
+                f"http://127.0.0.1:{port}/health",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and result.stdout.strip() == "ok"
+
+
 def _run_service_supervisor(
     host: str,
     neo4j_only: bool,
@@ -471,6 +498,7 @@ def _run_service_supervisor(
     stop_requested = False
     child: subprocess.Popen | None = None
     current_signature: tuple[tuple[int, int, str], ...] | None = None
+    last_reverse_check = 0.0
 
     def _handle_signal(_signum, _frame) -> None:
         nonlocal stop_requested
@@ -541,6 +569,25 @@ def _run_service_supervisor(
                     _terminate_tunnel_process(child)
                     child = None
                     break
+                now = time.monotonic()
+                if now - last_reverse_check >= 15:
+                    last_reverse_check = now
+                    missing_reverse_ports = [
+                        remote_port
+                        for remote_port, _local, label, _bind, direction in ports
+                        if direction == "R"
+                        and label == "wsl-clip"
+                        and not _is_remote_clipboard_active(host, remote_port)
+                    ]
+                    if missing_reverse_ports:
+                        click.echo(
+                            f"Remote tunnel listeners missing for {host}: "
+                            + ", ".join(str(port) for port in missing_reverse_ports)
+                            + "; restarting autossh"
+                        )
+                        _terminate_tunnel_process(child)
+                        child = None
+                        break
                 latest_ports = _get_tunnel_ports(
                     host,
                     neo4j_only,

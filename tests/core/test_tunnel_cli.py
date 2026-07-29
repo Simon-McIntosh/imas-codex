@@ -9,6 +9,7 @@ from imas_codex.cli.tunnel import (
     _build_systemd_service_content,
     _get_tunnel_ports,
     _installed_service_supports_request,
+    _is_remote_clipboard_active,
     _service_selected_services,
     _terminate_tunnel_process,
     tunnel,
@@ -64,6 +65,27 @@ class TestTunnelServiceHelpers:
             _terminate_tunnel_process(child)
 
         assert killpg.call_count == 2
+
+    def test_remote_clipboard_health_check_uses_remote_loopback(self):
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="ok\n", stderr=""
+        )
+        with patch(
+            "imas_codex.cli.tunnel.subprocess.run", return_value=completed
+        ) as run:
+            assert _is_remote_clipboard_active("iter", 2490)
+
+        assert run.call_args.args[0][-2:] == [
+            "3",
+            "http://127.0.0.1:2490/health",
+        ]
+
+    def test_remote_clipboard_health_check_rejects_failed_request(self):
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=7, stdout="", stderr="connection refused"
+        )
+        with patch("imas_codex.cli.tunnel.subprocess.run", return_value=completed):
+            assert not _is_remote_clipboard_active("iter", 2490)
 
     def test_build_systemd_service_content_uses_runtime_service_runner(self):
         with patch(
