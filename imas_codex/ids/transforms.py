@@ -37,7 +37,7 @@ def convert_units(value: float, from_unit: str, to_unit: str) -> float:
     return q.to(to_unit).magnitude
 
 
-def cocos_sign(label: str, *, cocos_in: int, cocos_out: int) -> int:
+def cocos_sign(label: str, *, cocos_in: int, cocos_out: int) -> int | float:
     """Compute the COCOS sign/scale factor for a given label.
 
     Uses the COCOS parameter decomposition from Sauter & Medvedev (2013)
@@ -49,7 +49,7 @@ def cocos_sign(label: str, *, cocos_in: int, cocos_out: int) -> int:
         tor_angle_like: σ_RφZ_out / σ_RφZ_in
         pol_angle_like: σ_ρθφ_out / σ_ρθφ_in
         q_like:         (σ_ρθφ_out · σ_RφZ_out) / (σ_ρθφ_in · σ_RφZ_in)
-        psi_like:       σ_Bp_out · (2π)^(1-e_Bp_out) / (σ_Bp_in · (2π)^(1-e_Bp_in))
+        psi_like:       σ_Bp_out · (2π)^e_Bp_out / (σ_Bp_in · (2π)^e_Bp_in)
         dodpsi_like:    1 / psi_like
         one_like:       1
 
@@ -86,7 +86,7 @@ def cocos_sign(label: str, *, cocos_in: int, cocos_out: int) -> int:
         )
     elif label == "psi_like":
         factor = p_out.sigma_bp / p_in.sigma_bp
-        two_pi_factor = (2 * math.pi) ** ((1 - p_out.e_bp) - (1 - p_in.e_bp))
+        two_pi_factor = (2 * math.pi) ** (p_out.e_bp - p_in.e_bp)
         return factor * two_pi_factor
     elif label == "dodpsi_like":
         psi = cocos_sign("psi_like", cocos_in=cocos_in, cocos_out=cocos_out)
