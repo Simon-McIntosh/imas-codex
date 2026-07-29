@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="sn-graph-provenance-ledger-landed">
   <meta name="plan-title" content="Standard-name provenance ledger — landed record">
-  <meta name="plan-summary" content="Every production deletion records durable provenance atomically; conservative reconstruction reduced live source orphans from 35 to 19 without fabricating authority.">
+  <meta name="plan-summary" content="Every production deletion records durable provenance atomically; deterministic recovery and exact ledgered retirement reduced live source orphans from 35 to zero.">
   <meta name="plan-status" content="reference">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="M">
@@ -29,7 +29,7 @@
 
     <h2>Authority-preserving recovery</h2>
     <svg viewBox="0 0 900 235" role="img"
-         aria-label="Existing catalog, source scalar, structural parent, and history evidence can restore provenance, while ambiguous evidence remains unresolved."
+         aria-label="Existing catalog, source scalar, structural parent, and history evidence restore provenance; names without sanctioned evidence are retired through the deletion ledger."
          style="max-width:100%;height:auto;">
       <defs>
         <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
@@ -53,8 +53,8 @@
         <text x="450" y="133">with consistency reconcile</text>
         <text x="789" y="73">authoritative edge</text>
         <text x="789" y="93">restored</text>
-        <text x="789" y="163">ambiguous evidence</text>
-        <text x="789" y="183">left unresolved</text>
+        <text x="789" y="163">no sanctioned evidence</text>
+        <text x="789" y="183">ledgered retirement</text>
         <g stroke="#59636e" stroke-width="2" marker-end="url(#arrow)">
           <line x1="195" y1="60" x2="349" y2="103"/>
           <line x1="195" y1="120" x2="349" y2="120"/>
@@ -70,20 +70,21 @@
     <table>
       <thead><tr><th>measure</th><th>before</th><th>after</th></tr></thead>
       <tbody>
-        <tr><td>Live names lacking a producing source</td><td>35</td><td>19</td></tr>
-        <tr><td>Catalog-backed sources restored</td><td>—</td><td>10</td></tr>
+        <tr><td>Live names lacking a producing source</td><td>35</td><td>0</td></tr>
+        <tr><td>Catalog-backed sources restored</td><td>—</td><td>20</td></tr>
         <tr><td>Structural-parent source relationships reconciled</td><td>—</td><td>33</td></tr>
+        <tr><td>Exact unrecoverable ghosts retired with ledger rows</td><td>—</td><td>9</td></tr>
         <tr><td>Missing-target change rows classified</td><td>301</td><td>301 legacy-unexplained</td></tr>
       </tbody>
     </table>
     <p>
-      Six structural parents were recoverable directly. Nineteen names remain
-      unresolved because the available children disagree on units or no
-      sanctioned authority exists. The recovery deliberately refused to
-      fabricate manual or derived sources. Heterogeneous-unit families include
-      outline and coordinate parents, plus recombination and wall-flux
-      quantities; they remain visible work for the unit-authority and
-      attachment passes.
+      Six structural parents were recoverable directly. A second pass against
+      the current catalog rebound ten more names, bringing catalog recovery to
+      twenty. The final nine had no DD, signal, catalog, scalar, structural, or
+      history authority; they were retired through an exact-list instrument
+      that records <code>remove_provenance_orphan</code> before deletion.
+      Independent post-write verification found zero live provenance orphans
+      and exactly nine matching retirement records.
     </p>
 
     <h2>Verification and code record</h2>
@@ -94,9 +95,8 @@
         <code>sun_debug</code> compute node.</li>
       <li>Commit <code>237f46f9</code>, integrated by
         <code>befac395</code>, is pushed on main.</li>
-      <li>The code-side deletion invariant is landed. The remaining nineteen
-        live provenance orphans are retained as explicit unresolved data,
-        not counted as repaired.</li>
+      <li>The code-side deletion invariant is landed and the live orphan count
+        is zero without fabricated provenance.</li>
     </ul>
   </main>
 </body>
