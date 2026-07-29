@@ -8,8 +8,8 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-wide name integrity (everything outside the release batch)">
   <meta name="plan-summary" content="Close the provenance and attachment defects in the exploratory half of the corpus — the deliberately-broad generation across ~half the DD catalog — plus the write-path gaps and carried findings that the WEST release does not depend on.">
-  <meta name="plan-status" content="proposed">
-  <meta name="plan-roi" content="medium">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,9 +17,9 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="1">
-<meta name="plan-impl" content="0">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -239,6 +239,43 @@
         suffix in a filename.</li>
     </ul>
 
+    <h2 id="s6b">§6b — Unit authority: the null-unit parents, and a shipped verdict to overturn</h2>
+    <p>
+      <strong>Eight accepted names carry no unit at all</strong> (measured
+      2026-07-29) — every one an unrealized <code>origin='derived'</code>
+      structural parent: <code>effective_particle_energy</code>,
+      <code>greenwald_density</code>, <code>hydrogenic_density</code>,
+      <code>total_hydrogenic_density</code>,
+      <code>difference_of_total_hydrogenic_density_and_neutral_state_density</code>,
+      <code>current_of_antenna_strap</code>,
+      <code>flux_due_to_e_cross_b_drift</code>,
+      <code>square_toroidal_flux_radius_gradient</code>. Their bases (energy,
+      density, current, flux) are exactly the ones ISN marks
+      <em>inherently dimensional</em> — yet the validator only flags
+      <code>unit='1'</code> on such bases, and <code>unit=None</code> slips
+      through as <code>validation_status=valid</code>.
+    </p>
+    <p>
+      <strong>The lead has challenged the shipped adjudication</strong>
+      (sn-dd-unit-curation §4, 2026-07-23) that recorded
+      <code>effective_particle_energy</code> and
+      <code>perturbed_particle_energy</code> as &ldquo;intentional unit-less
+      normalised-coordinate parents&rdquo;: a report listing names asserting an
+      <em>energy</em> as &ldquo;unit-less&rdquo; does not read as correct. The
+      challenge is well-founded twice over — the dimensionless role already
+      belongs to the <code>normalized_*</code> child (a parent that is itself a
+      normalized coordinate makes the child a normalization of a
+      normalization), and <strong><code>perturbed_particle_energy</code> no
+      longer exists in the graph at all</strong> while the shipped
+      &ldquo;intentional&rdquo; record still cites it — a ghost disposition.
+      Work: lock D-parent-units below; close the ISN validator gap
+      (<code>unit IS NULL</code> on an inherently-dimensional base must fail
+      validation the same as <code>unit='1'</code>, with the structural-parent
+      question decided rather than defaulted); repair the eight per the locked
+      policy; find how <code>perturbed_particle_energy</code> left the graph
+      and whether other shipped dispositions cite ghosts.
+    </p>
+
     <h2 id="s7">§7 — Sequencing and budget</h2>
     <p>
       Compose is free (local GPU); review is the only paid stage, measured at
@@ -280,6 +317,16 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="parent-units" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-parent-units — must an accepted derived structural parent on an inherently-dimensional base carry a unit?</p>
+    <p class="r-dec-ctx">Eight accepted derived parents carry unit=None; the ISN validator flags unit=&#x27;1&#x27; on inherently-dimensional bases but not unit=None. The shipped sn-dd-unit-curation §4 verdict recorded two of them as &#x27;intentional unit-less normalised-coordinate parents&#x27; — challenged by the lead 2026-07-29: the dimensionless role belongs to the normalized_* child, and one cited name (perturbed_particle_energy) no longer exists in the graph.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="dimensional-unit-required">A name asserting a dimensional base carries that base&#x27;s unit (J, m^-3, A, …) even as an unrealized parent; null fails validation (Recommended — matches the lead&#x27;s reading; the normalized child carries the dimensionless role)</button>
+      <button class="r-opt" data-value="unitless-until-realized">Structural parents stay unit-less until a DD realization injects a unit; the validator gains an explicit &#x27;awaiting-realization&#x27; state instead of silent null</button>
+      <button class="r-opt" data-value="per-name">Adjudicate the eight individually</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -297,7 +344,7 @@ SCOPE BOUNDARY — READ FIRST
   at imas_codex/standard_names/manifests/west_task_2e.yaml and the 262 names its
   paths produce belong to sn-west-review-rehearsal, which is trying to cut a
   release candidate. Do NOT touch them, do NOT run a WEST-scoped drain, and do
-  NOT run an unscoped paid review (it would spend the release plan's budget on
+  NOT run an unscoped paid review (it would spend the release plan&#x27;s budget on
   the exploratory half).
 
 State to read FIRST
@@ -312,15 +359,15 @@ State to read FIRST
 Do, in order
 
   1. SETTLE THE FAN-OUT INVARIANT (free, and it gates the rest).
-     240 of 1458 ledger violations are "more than one live PRODUCED_NAME target".
+     240 of 1458 ledger violations are &quot;more than one live PRODUCED_NAME target&quot;.
      Sample them and decide whether that is a defect or a wrong invariant. Real
      examples to reason from:
        bremsstrahlung_visible/channel/radiance_spectral
-         -> spectral_bremsstrahlung_radiance + spectral_radiance
-       <ids>/channel/line_of_sight/first_point/z
-         -> vertical_coordinate_of_line_of_sight + vertical_coordinate_of_beam_tracing_point
+         -&gt; spectral_bremsstrahlung_radiance + spectral_radiance
+       /channel/line_of_sight/first_point/z
+         -&gt; vertical_coordinate_of_line_of_sight + vertical_coordinate_of_beam_tracing_point
        core_profiles/profiles_1d/grid/psi_boundary
-         -> poloidal_magnetic_flux_at_constraint_position + ..._at_plasma_boundary
+         -&gt; poloidal_magnetic_flux_at_constraint_position + ..._at_plasma_boundary
      If a path genuinely supports two names, amend
      find_semantic_source_invariant_violations rather than the data, and say so in
      the decision. Lock D-fanout either way with your reasoning — this is a
@@ -359,7 +406,7 @@ Do, in order
      Then the geometry-representation rule: a path under
      …/geometry/{thick_line,outline,rectangle,oblique,arcs_of_circle}/… must not
      realize an optical-locus name (line_of_sight / beam / sight) and vice versa.
-     Per the DD, thick_line approximates a solid conductor's poloidal
+     Per the DD, thick_line approximates a solid conductor&#x27;s poloidal
      cross-section as a rectangle defined by a central segment plus a
      perpendicular thickness — every affected IDS is structural hardware
      (pf_active, pf_passive, pf_plasma, iron_core, ferritic, ic_antennas/strap).
@@ -382,10 +429,10 @@ Constraints
   - Run the ~/.agents/AGENTS.md pre-stage naming check (all three, note 2a is
     case-INsensitive and 2b is case-SENSITIVE) over every path you stage.
   - No AI attribution in ANY commit, issue, PR or comment.
-  - Cold-import artifact: a first `import imas_codex.discovery` pulls litellm's
+  - Cold-import artifact: a first `import imas_codex.discovery` pulls litellm&#x27;s
     pydantic build past the 60s faulthandler limit and makes EVERY test in a file
     error at SETUP, including pure-unit ones. Warm it with
-    `uv run python -c "import imas_codex.discovery, litellm"` before diagnosing
+    `uv run python -c &quot;import imas_codex.discovery, litellm&quot;` before diagnosing
     any setup-time timeout.
 
 Done-when
@@ -397,6 +444,50 @@ Done-when
      test proving the 29 reject and sightline pairs still accept.
   5. Full SN suite no worse than baseline; committed and pushed; outcomes
      recorded and the next followup queued.</pre>
+    </article>
+<article class="r-fu" data-id="f-sgwi-002" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T10:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §6b" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Unit authority: lock D-parent-units, close the null-unit validator gap, repair the eight, exorcise the ghost disposition</h4>
+    <div class="r-fu-body"><p>Eight accepted derived parents carry unit=None on inherently-dimensional bases and validate 'valid' — the ISN validator flags unit='1' but not null. The shipped 'intentional unit-less' verdict on effective_particle_energy / perturbed_particle_energy is challenged (the normalized_* child owns the dimensionless role) and the latter name is a ghost — recorded as intentional yet absent from the graph. Lock D-parent-units with the lead, close the validator gap ISN-side (coordinated), repair the eight per policy, and trace the ghost.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
+Section: §6b — unit authority
+Tier:    opus
+
+READ FIRST
+  docs/sn-graph-wide-integrity.html §6b
+  ~/Code/imas-standard-names/docs/sn-dd-unit-curation.html §4 (the shipped verdict being overturned)
+  imas_codex/standard_names/AGENTS.md (units are DD-authoritative; do NOT bulk re-derive — ~40 accepted names correctly carry dimensionless units against registry-excepted DD paths)
+
+STATE (2026-07-29)
+  8 accepted origin=derived unrealized names with unit=None: effective_particle_energy,
+  greenwald_density, hydrogenic_density, total_hydrogenic_density,
+  difference_of_total_hydrogenic_density_and_neutral_state_density,
+  current_of_antenna_strap, flux_due_to_e_cross_b_drift,
+  square_toroidal_flux_radius_gradient. perturbed_particle_energy is cited by a
+  shipped &#x27;intentional&#x27; record but has NO node.
+
+DO
+  1. Surface D-parent-units to the lead with the eight names + per-name physics;
+     do not resolve it alone.
+  2. ISN-side (coordinated): the validator must treat unit IS NULL on an
+     inherently_dimensional base as the same defect class as unit=&#x27;1&#x27; — with
+     whichever parent-state semantics the decision picks. TDD in ISN; grammar
+     suite green; RC + pin bump only with the rotation.
+  3. Repair the eight per the locked policy through sanctioned instruments
+     (unit stamps via a tested helper with a StandardNameChange each — the
+     greenwald_density precedent from 2026-07-29; never raw Cypher, never bulk
+     re-derivation from sources).
+  4. Trace how perturbed_particle_energy left the graph (StandardNameChange
+     ledger, REFINED_FROM chains, compact_unapproved_superseded) and sweep for
+     other shipped dispositions citing ghosts; correct the sn-dd-unit-curation
+     record with a dated note rather than rewriting history.
+
+Done-when
+  1. D-parent-units locked by the lead; the eight repaired accordingly.
+  2. ISN validator closes the null-unit gap; suite green; no accepted name
+     validates &#x27;valid&#x27; with a null unit on a dimensional base.
+  3. The ghost traced and every stale disposition corrected with a dated note.
+</pre>
     </article>
 </section>
 

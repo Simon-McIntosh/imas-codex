@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-dd-gaps">
+  <meta name="plan-title" content="DD gaps — first-class authority for the pipeline to flag Data-Dictionary defects">
+  <meta name="plan-summary" content="Give the pipeline and its agents a first-class channel to flag errors in the DD itself — a DDGap mechanism mirroring vocab_gaps: flagged by any seat or audit, triaged into registered-exception / upstream-issue / rejected, reconciled against new DD releases, and surfaced in release reporting.">
+  <meta name="plan-status" content="proposed">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-informs" content="sn-naming-loop-robustness, sn-graph-wide-integrity">
+  <title>DD gaps | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why: the pipeline meets DD defects with no first-class channel</h2>
+    <p>
+      Lead direction (2026-07-29): <em>&ldquo;the pipeline and its agents should
+      have the authority to flag errors in the DD; we should perhaps build a
+      mechanism similar to vocab_gaps (DD-gaps?) that permits this.&rdquo;</em>
+    </p>
+    <p>
+      The pipeline keeps encountering genuine Data-Dictionary defects — and each
+      discovery has been handled ad hoc. The record so far: ~90 DD unit defects
+      registered in <code>units/dd_unit_exceptions.yaml</code>; the
+      <code>ece/channel/position/psi</code> facet declared <code>W</code> while
+      its identically-documented sibling declares <code>Wb</code> (the
+      self-contradiction class); unit vectors tagged <code>m</code> and charge
+      numbers tagged <code>e</code>; the wall neutral energy-flux type-wiring
+      bug filed upstream by hand (DD issue #272 / PR #273). Each mechanism is
+      partial: the units registry covers <em>units only</em>, is applied at DD
+      build time (an entry added later never reaches stored paths without the
+      self-applying reconcile), and has no lifecycle; upstream filing is manual
+      and leaves no graph trace an agent can consult, so the same defect gets
+      re-derived, re-argued, or silently worked around.
+    </p>
+    <p>
+      Meanwhile <code>vocab_gaps</code> proved the pattern for the grammar side:
+      a first-class node the composer writes when it cannot express a quantity,
+      with multiplicity, a diagnosed reason, mechanical triage, and lifecycle
+      buckets. The DD side deserves the same standing. A reviewer reading the
+      WEST batch should be able to see &ldquo;this path's DD declaration is
+      flagged, with this argument, filed upstream here&rdquo; rather than a
+      name that silently disagrees with its source.
+    </p>
+
+    <h2 id="s2">§2 — Prior art to build on (do not reinvent)</h2>
+    <ul>
+      <li><strong><code>VocabGap</code></strong> — the template: id
+        <code>vocab_gap:&lt;segment&gt;:&lt;token&gt;</code>, distinct-fact
+        nodes with <code>example_count</code> multiplicity, the diagnosed
+        <code>reason</code> on the report edge, <code>classify_gap</code>
+        verdicts, <code>reconcile_vocab_gaps</code> re-validation against new
+        grammar, and the triage buckets landed 2026-07-29
+        (<code>triage_vocab_gaps</code>).</li>
+      <li><strong><code>units/dd_unit_exceptions.yaml</code></strong> — the
+        units-only registry: most entries <em>suppress</em> a mismatch (DD
+        wrong, name right, axis keeps reporting); <code>correct_in_graph</code>
+        only when the DD contradicts itself;
+        <code>reconcile_dd_unit_corrections</code> makes it self-applying.
+        This registry stays the <em>enforcement</em> backend for the unit
+        kind — DD gaps add lifecycle and provenance around it, they do not
+        replace it.</li>
+      <li><strong>The upstream filing precedent</strong> — DD issue #272/PR
+        #273 (wall neutral energy-flux type wiring): proof the loop can reach
+        the DD maintainers; what was missing is the graph-side record linking
+        the flagged paths to the filing.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Design sketch</h2>
+    <ul>
+      <li><strong>Node:</strong> <code>DDGap</code>, id
+        <code>dd_gap:&lt;path&gt;:&lt;kind&gt;</code> — one node per distinct
+        (path, kind) fact, <code>example_count</code> for repeat encounters,
+        the flagging argument on the report edge (mirroring vocab_gaps'
+        edge-borne <code>reason</code>).</li>
+      <li><strong>Kinds (initial):</strong> <code>unit_defect</code>,
+        <code>self_contradiction</code> (two facets, one quantity, different
+        declarations), <code>doc_mismatch</code> (documentation contradicts
+        type/unit/shape), <code>type_wiring</code> (the #272 class),
+        <code>missing_declaration</code> (no unit where one is physical),
+        <code>rename_inconsistency</code> (DDv3→v4 renames leaving
+        contradictory siblings).</li>
+      <li><strong>Writers:</strong> any pipeline seat or audit — the compose
+        unit-injection path (already detects SN↔DD disagreement), the
+        attachment guard, the unit detector, review seats (a reviewer prompt
+        gains &ldquo;if the DD declaration itself is wrong, flag a DD gap with
+        your argument&rdquo; — the same authority shape as reporting a vocab
+        gap), and humans via a CLI verb (<code>sn ddgap</code>).</li>
+      <li><strong>Lifecycle:</strong> <code>flagged → triaged →
+        {registered_exception | upstream_issue(url) | rejected} →
+        resolved_upstream(dd_version)</code>. Triage is human-adjudicated (an
+        agent's flag never changes pipeline behaviour by itself — behaviour
+        changes only through the existing registry/reconcile instruments after
+        triage). A reconcile pass re-validates open gaps against each new DD
+        release and auto-retires those the release fixed.</li>
+      <li><strong>Reporting:</strong> the release/PR-body seat states the
+        flagged count and links the upstream filings, so a reviewer sees the
+        DD-side caveats alongside the nameset; the SPA can badge affected
+        paths.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Programme</h2>
+    <ol>
+      <li><strong>Schema + write path + CLI.</strong> The <code>DDGap</code>
+        node and report edge in the LinkML schema; a write instrument mirroring
+        <code>write_vocab_gaps</code> (dedup on (path, kind), multiplicity,
+        edge-borne argument); <code>sn ddgap &lt;path&gt; --kind … --reason …</code>
+        for human flags. Done-when: TDD'd write path; flags visible in
+        <code>sn status</code>.</li>
+      <li><strong>Back-fill from the known record.</strong> Import the
+        ~90 <code>dd_unit_exceptions.yaml</code> entries as
+        <code>triaged/registered_exception</code> DD gaps (the registry stays
+        authoritative for enforcement); back-link the #272 filing as
+        <code>upstream_issue</code>. Done-when: every registry entry has its
+        graph-side provenance node; zero behaviour change.</li>
+      <li><strong>Agent authority.</strong> The unit-injection and attachment
+        write paths flag automatically on detected disagreement (replacing
+        silent suppression-only); the reviewer prompt gains the DD-flag
+        instruction and the response model the field. Done-when: a drain over
+        known-defective paths mints the expected flags with substantive
+        arguments and no behaviour change ahead of triage.</li>
+      <li><strong>Triage + upstream loop.</strong> A triage instrument
+        (buckets above, mirroring <code>triage_vocab_gaps</code>); an
+        upstream-filing workflow that drafts the DD issue body from the flag's
+        argument + affected paths (human files it; the url lands on the node).
+        A DD-release reconcile that retires fixed gaps. Done-when: the
+        end-to-end path flagged→filed→retired demonstrated on one real defect.</li>
+      <li><strong>Reporting surface.</strong> Release notes/PR body carry the
+        flag summary; the catalog export optionally annotates affected paths.
+        Done-when: the next review batch's PR body states its DD-gap caveats.</li>
+    </ol>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="ddgap-authority" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-ddgap-authority — what may an agent's DD flag change by itself?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="flag-only">Nothing: a flag is evidence; behaviour changes only through the existing registry/reconcile instruments after human triage (Recommended — mirrors vocab_gaps, keeps the DD authoritative until a human rules)</button>
+      <button class="r-opt" data-value="auto-suppress">A flag may auto-suppress the specific SN↔DD mismatch it documents, pending triage</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="ddgap-storage" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-ddgap-storage — where does DD-gap truth live?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="graph-nodes-registry-backend">Graph DDGap nodes carry lifecycle/provenance; the yaml registry stays the enforcement backend for the unit kind (Recommended — no dual-write of behaviour)</button>
+      <button class="r-opt" data-value="registry-only">Extend the yaml registry with lifecycle fields; no graph nodes</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ddg-001" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T10:00:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land §4 steps 1–2: the DDGap schema/write path/CLI, then the registry back-fill</h4>
+    <div class="r-fu-body"><p>Build the mechanism's foundation exactly on the vocab_gaps template (node + report edge + write instrument + CLI verb), then import the known record (~90 unit-exception entries, the #272 filing) as pre-triaged gaps so the mechanism starts with real content and zero behaviour change. Lock D-ddgap-authority and D-ddgap-storage with the lead before step 3 gives agents the flagging authority.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-dd-gaps (http://localhost:8765/imas-codex/sn-dd-gaps.html)
+Section: §4 steps 1–2
+Tier:    opus
+
+READ FIRST
+  docs/sn-dd-gaps.html                                  (design sketch + decisions)
+  imas_codex/standard_names/graph_ops.py                (write_vocab_gaps — the template)
+  imas_codex/standard_names/units/dd_unit_exceptions.yaml
+  imas_codex/standard_names/AGENTS.md                   (units are DD-authoritative;
+    registry semantics: suppress vs correct_in_graph; self-applying reconcile)
+
+SCOPE
+  1. DDGap node + report edge in schemas/facility.yaml; write instrument
+     mirroring write_vocab_gaps (dedup on (path, kind); example_count;
+     argument on the report edge); `sn ddgap` CLI verb; sn status surface.
+  2. Back-fill: every dd_unit_exceptions.yaml entry becomes a
+     triaged/registered_exception DDGap (registry stays the enforcement
+     backend — NO behaviour change); the wall energy-flux upstream filing
+     back-linked as upstream_issue.
+  Decisions D-ddgap-authority and D-ddgap-storage must be locked by the lead
+  before agent-side flagging (step 3) — surface them, do not resolve alone.
+
+CONSTRAINTS
+  - TDD; graph writes only through the new tested instrument; never raw Cypher.
+  - Zero pipeline behaviour change in these two steps.
+  - Pre-stage naming checks on every staged path; no AI attribution anywhere.
+
+Done-when
+  1. DDGap write path TDD'd; CLI verb works; flags visible in sn status.
+  2. Registry back-filled with provenance nodes; enforcement unchanged.
+  3. Both decisions surfaced to the lead; step 3 queued as the next followup.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
