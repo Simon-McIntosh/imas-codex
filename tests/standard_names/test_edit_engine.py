@@ -251,6 +251,9 @@ class FakeGraph:
         if "// EDIT_SET_REFINING" in cypher:
             node = self.nodes.get(params["id"])
             if node is not None:
+                node["superseded_from_stage"] = (
+                    node.get("superseded_from_stage") or node["name_stage"]
+                )
                 node["name_stage"] = "refining"
             return []
 
@@ -772,6 +775,7 @@ class TestRenameEligibility:
         assert "toroidal_plasma_current" in fake.nodes
         assert fake.nodes["toroidal_plasma_current"]["name_stage"] == "drafted"
         assert fake.nodes["plasma_current"]["name_stage"] == "superseded"
+        assert fake.nodes["plasma_current"]["superseded_from_stage"] == stage
 
     def test_superseded_without_successor_is_eligible(self) -> None:
         fake = FakeGraph()

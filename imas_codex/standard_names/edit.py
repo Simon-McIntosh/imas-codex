@@ -920,7 +920,9 @@ def _apply_rename(
         """
         // EDIT_SET_REFINING
         MATCH (sn:StandardName {id: $id})
-        SET sn.name_stage = 'refining'
+        SET sn.superseded_from_stage =
+                coalesce(sn.superseded_from_stage, sn.name_stage),
+            sn.name_stage = 'refining'
         """,
         id=refine_root_old,
     )

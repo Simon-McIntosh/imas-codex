@@ -14,6 +14,8 @@ from typing import Any
 from urllib.parse import quote
 from uuid import uuid4
 
+from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+
 _DD_DOCS_ROOT = "https://imas-data-dictionary.readthedocs.io/en"
 
 DELETION_OPERATIONS = frozenset(
@@ -21,6 +23,7 @@ DELETION_OPERATIONS = frozenset(
         "clear_selected_name",
         "clear_subsystem_name",
         "compact_unapproved_name",
+        "cancel_staged_rename",
         "remove_provenance_orphan",
         "remove_derived_parent",
         "remove_skeleton_placeholder",
@@ -62,6 +65,135 @@ def deletion_change_params(
         "deletion_reason": reason,
         "deletion_origin": origin,
         "deletion_run_id": run_id,
+    }
+
+
+def cancel_staged_rename(
+    gc: Any,
+    successor_id: str,
+    *,
+    reason: str,
+    dry_run: bool = False,
+    min_score: float = DEFAULT_MIN_SCORE,
+) -> dict[str, Any]:
+    """Cancel one unaccepted rename and restore its superseded predecessor.
+
+    This is deliberately narrower than pruning: the successor must carry an
+    open rename edit, remain unaccepted, and point directly to a superseded
+    predecessor. Semantic-source and ownership edges move back to the
+    predecessor in the same transaction that records and deletes the rejected
+    successor.
+    """
+    if not reason.strip():
+        raise ValueError("cancel_staged_rename requires a non-empty reason")
+    rows = list(
+        gc.query(
+            """
+            MATCH (successor:StandardName {id: $successor_id})
+                  -[:REFINED_FROM]->(predecessor:StandardName)
+            WHERE successor.edit_mode = 'rename'
+              AND successor.edit_status = 'open'
+              AND successor.name_stage IN ['drafted', 'reviewed', 'exhausted']
+              AND predecessor.name_stage = 'superseded'
+            RETURN successor.id AS successor,
+                   successor.name_stage AS successor_stage,
+                   predecessor.id AS predecessor,
+                   CASE
+                     WHEN predecessor.catalog_approved_at IS NOT NULL
+                       OR predecessor.reviewer_score_name >= $min_score
+                     THEN 'accepted'
+                     WHEN predecessor.superseded_from_stage IN
+                          ['pending', 'drafted', 'reviewed', 'exhausted']
+                     THEN predecessor.superseded_from_stage
+                     ELSE 'reviewed'
+                   END AS predecessor_stage
+            """,
+            successor_id=successor_id,
+            min_score=min_score,
+        )
+    )
+    if len(rows) != 1:
+        return {
+            "ok": False,
+            "successor": successor_id,
+            "reason": "target is not one cancellable open rename successor",
+            "dry_run": dry_run,
+        }
+    row = dict(rows[0])
+    if dry_run:
+        return {"ok": True, **row, "dry_run": True}
+
+    deletion_clause = deletion_change_cypher("successor")
+    result = list(
+        gc.query(
+            f"""
+            MATCH (successor:StandardName {{id: $successor_id}})
+                  -[:REFINED_FROM]->(predecessor:StandardName)
+            WHERE successor.edit_mode = 'rename'
+              AND successor.edit_status = 'open'
+              AND successor.name_stage IN ['drafted', 'reviewed', 'exhausted']
+              AND predecessor.name_stage = 'superseded'
+            OPTIONAL MATCH (source:StandardNameSource)
+                           -[produced:PRODUCED_NAME]->(successor)
+            WITH successor, predecessor,
+                 collect(DISTINCT source) AS sources,
+                 collect(DISTINCT produced) AS produced_edges
+            OPTIONAL MATCH (owner)-[owned:HAS_STANDARD_NAME]->(successor)
+            WITH successor, predecessor, sources, produced_edges,
+                 collect(DISTINCT owner) AS owners,
+                 collect(DISTINCT owned) AS ownership_edges
+            OPTIONAL MATCH (successor)-[:HAS_REVIEW]->(review:StandardNameReview)
+            OPTIONAL MATCH (successor)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
+            WITH successor, predecessor, sources, produced_edges,
+                 owners, ownership_edges,
+                 collect(DISTINCT review) AS reviews,
+                 collect(DISTINCT revision) AS revisions
+            {deletion_clause}
+            SET predecessor.name_stage = CASE
+                    WHEN predecessor.catalog_approved_at IS NOT NULL
+                      OR predecessor.reviewer_score_name >= $min_score
+                    THEN 'accepted'
+                    WHEN predecessor.superseded_from_stage IN
+                         ['pending', 'drafted', 'reviewed', 'exhausted']
+                    THEN predecessor.superseded_from_stage
+                    ELSE 'reviewed'
+                END,
+                predecessor.superseded_from_stage = null,
+                predecessor.claimed_at = null,
+                predecessor.claim_token = null
+            FOREACH (source IN sources |
+              SET source.standard_name_id = predecessor.id,
+                  source.claimed_at = null,
+                  source.claim_token = null
+              MERGE (source)-[:PRODUCED_NAME]->(predecessor))
+            FOREACH (edge IN produced_edges | DELETE edge)
+            FOREACH (owner IN owners |
+              MERGE (owner)-[:HAS_STANDARD_NAME]->(predecessor))
+            FOREACH (edge IN ownership_edges | DELETE edge)
+            FOREACH (item IN reviews | DETACH DELETE item)
+            FOREACH (item IN revisions | DETACH DELETE item)
+            DETACH DELETE successor
+            RETURN predecessor.id AS predecessor,
+                   predecessor.name_stage AS restored_stage,
+                   size(sources) AS sources_restored,
+                   size(owners) AS owners_restored
+            """,
+            successor_id=successor_id,
+            min_score=min_score,
+            **deletion_change_params(
+                "cancel_staged_rename",
+                reason=reason,
+                origin="operator_correction",
+            ),
+        )
+    )
+    if len(result) != 1:
+        raise RuntimeError("staged rename changed state before cancellation")
+    return {
+        "ok": True,
+        "successor": successor_id,
+        **dict(result[0]),
+        "dry_run": False,
     }
 
 
