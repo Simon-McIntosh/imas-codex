@@ -287,12 +287,27 @@
       normalization), and <strong><code>perturbed_particle_energy</code> no
       longer exists in the graph at all</strong> while the shipped
       &ldquo;intentional&rdquo; record still cites it — a ghost disposition.
-      Work: lock D-parent-units below; close the ISN validator gap
-      (<code>unit IS NULL</code> on an inherently-dimensional base must fail
-      validation the same as <code>unit='1'</code>, with the structural-parent
-      question decided rather than defaulted); repair the eight per the locked
+      Work: lock D-parent-units below; repair the eight per the locked
       policy; find how <code>perturbed_particle_energy</code> left the graph
       and whether other shipped dispositions cite ghosts.
+      <strong>Precision from the ISN sweep (2026-07-29):</strong> the
+      null-unit check EXISTS and fires
+      (<code>_check_none_unit_with_quantitative_kind</code>,
+      <code>validation/semantic.py:593</code>) — the gap is that
+      <code>run_semantic_checks</code> has exactly one caller (the codex
+      LLM-candidate ladder, guarded by a unit assert), so the derived-parent
+      mint path never reaches it; and <code>unit=None</code> crashes the
+      scalar-entry canonicalizer with a raw <code>TypeError</code>
+      (<code>models.py:347</code>) that codex swallows as
+      <code>[pydantic:unknown]</code>. The same mint-path hole admitted
+      <strong>7 <code>internal_state_*</code> derived parents that fail the
+      validity oracle outright</strong> (the species peel left a bare state
+      token) — 15 accepted names corpus-wide fail the oracle, none in the
+      WEST batch. So the fix is: the derived-parent mint runs the oracle and
+      the unit rule (B3 option 2 — a dimensional base requires a unit sourced
+      from the child, exempting dimensionless/dimension-transforming
+      operators), plus a rotation-sized <code>None</code> guard in ISN's
+      canonicalizer.
     </p>
 
     <h2 id="s7">§7 — Sequencing and budget</h2>

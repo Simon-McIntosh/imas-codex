@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="0.75">
 </head>
 <body>
@@ -569,6 +569,86 @@ Done-when
   3. test_no_stuck_idle green; the edit-backlog semantics decided and drained;
      status mirrors realigned by a reconcile with measured before/after; the
      harness stub in place; this followup resolved with numbers.</pre>
+    </article>
+<article class="r-fu" data-id="f-nlr-004" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T13:10:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Grammar/prompt truth pass: the ISN-sweep rotation-sized shortlist</h4>
+    <div class="r-fu-body"><p>The ISN sweep (2026-07-29) verified every item with reproduced parser output. Prompt-side: the DECOMPOSITION RULE table mis-assigns the segment of ALL FIVE of its worked tokens; 9 endorsed example names do not parse (one block mandates an ordering the parser inverts); the reference declares the registered 'variation' operator unregistered (minting false gaps); operator 'precedence' is dropped before rendering. ISN-side: shipped docs teach an unsupported vector syntax (axis_component_of, 0/2177 instances) including as a prescribed fix; the scoping/kind-forming split force-reorders natural phrases (reclassifying 'breakdown' out of scoping_qualifiers closes fork issue #39); 4 registry tokens remain unsegmented while a prompt instructs their use; the rho_tor twin carriers are TRUE synonyms (both unit m) with sibling metrics disagreeing; 8 accepted names need canonical renames; the test suite dirties the tracked entry_schema.json on every run. The prompt fixes marked SAFE-PRE-RC below move no grammar and de-risk the residual-14 composes.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex (+ coordinated ISN edits in ~/Code/imas-standard-names)
+Plan:    sn-naming-loop-robustness (http://localhost:8765/imas-codex/sn-naming-loop-robustness.html)
+Section: §4 — grammar/prompt truth pass (ISN sweep 2026-07-29)
+Tier:    opus
+
+EVERY claim below was reproduced by the sweep; re-verify with the parser before
+each fix, and never edit prompt .md files while a campaign is running.
+
+SAFE-PRE-RC (no grammar motion — may land before the WEST RC cut):
+  1. Rewrite the DECOMPOSITION RULE table (_grammar_reference.md:21-27): all
+     five worked rows mis-assign segments (convection is process not qualifier;
+     energy/momentum are channel; thermal is population; state is subject).
+  2. Fix the 9 endorsed non-parsing examples (sweep list; worst:
+     generate_name_dd.md:310-320 mandates poloidal_tendency_of_... where the
+     parser requires tendency_of_poloidal_...; _grammar_reference.md:74-75
+     qualifier-stacking example fails outright).
+  3. Fix the &#x27;variation&#x27; contradiction (_grammar_reference.md:236 says
+     unregistered; :155 and the registry say registered bare-prefix).
+  4. Stop dropping operator precedence in context.py:262-307 and render it
+     (outer-&gt;inner is defined by the registry; the prompt teaches chains it
+     never shows the order for).
+  5. ISN docs-only pass: kill axis_component_of everywhere (guidelines.md:98,
+     grammar-reference.md:183, metadata-conventions.md:165, grammar-vnext.md:270,
+     specification.md:154 — the prescribed fix is itself invalid); kill the
+     voltage_from_flux_loop &#x27;_from_&#x27; pattern (quickstart.md:224); fix the three
+     major_radius_of_&lt;locus&gt; examples (grammar wants radial_coordinate_of_);
+     fix maximum_over_flux_surface_electron_pressure (pressure is
+     constant_on_flux_surface — use electron_temperature).
+  6. Fix tests/test_json_schema_contract.py:181: write_entry_schema() with no
+     arg writes the TRACKED entry_schema.json (generate.py:42 default) — use
+     tmp_path and rename the test; decide whether $schema_version stays in the
+     committed artifact at all (it can never match a dev checkout).
+
+GRAMMAR-MOVING (after the RC snapshot; each needs the grammar suite + RC + pin
+bump through the rotation):
+  7. Reclassify &#x27;breakdown&#x27; out of scoping_qualifiers.yml — as kind-forming it
+     renders inner of &#x27;plasma&#x27;, making plasma_breakdown_* natural; closes fork
+     issue #39. Audit the other 8 scoping tokens against the sweep&#x27;s trap table
+     (deposited_thermal_energy -&gt; thermal_deposited_energy etc.).
+  8. Segment active_wall_point, beam_path, primary, secondary (gyrocenter is
+     ALREADY segmented as subject — the codex comment at
+     test_grammar_vocabulary_drift.py:39-49 is stale); then delete the emptied
+     exemption block and make the drift test assert EMITTABILITY (the current
+     substring check let &#x27;secondary&#x27; pass on the secondary_base field name).
+  9. rho_tor twins: alias toroidal_flux_coordinate -&gt; toroidal_flux_radius
+     (both unit m; radius holds 10 of 12 dimensional uses); rename the 2
+     bare-carrier names; fix the of/at relation inconsistency at magnetic_axis.
+ 10. Rename the 8 non-canonical accepted names to their canonical forms via
+     sn edit (6 normalized_&lt;component&gt; orderings + 2 reorders; sweep list).
+ 11. Land the two binary-operand prerequisites: admit
+     poloidal_magnetic_flux_coordinate to the coordinate universe
+     (parser.py:696-706) and register magnetic_pressure (or rewrite
+     test_nested_operator_round_trip.py:112,129); correct the design doc&#x27;s
+     114-vs-333 qualifier-coverage claim while there.
+ 12. ISN None guard in _canonicalize_unit_order (models.py:325) so unit=None
+     raises the promised validation message, not TypeError; switch
+     _check_dimensionless_physical_quantity to read ir.base.token
+     (semantic.py:505 vs :566).
+ 13. Close the 6 stale 2025-04 fork issues with pointers to shipped names.
+
+OUT OF SCOPE HERE: the derived-parent mint running the oracle + unit rule (7
+internal_state_* failures + the 8 null-unit parents) is sn-graph-wide-integrity
+f-sgwi-002; the chained-operator + qualifier-category-exposure designs are the
+rung-6 design record §7.
+
+CONSTRAINTS
+  - TDD; ISN grammar suite green before any RC; pin bump both codex sites +
+    lockfile; re-run the WEST batch parse-check after ANY grammar motion.
+  - Pre-stage naming checks; no AI attribution; prompts never edited mid-run.
+
+Done-when
+  1. Safe-pre-RC items landed and the prompt examples all parse (add a test
+     that extracts and parses every endorsed example — the sweep&#x27;s method).
+  2. Grammar-moving items landed through one rotation with suite + parse-check
+     green; the 8 renames earn acceptance through review.
+  3. This followup resolved with the per-item ledger.</pre>
     </article>
 </section>
 
