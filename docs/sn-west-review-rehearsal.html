@@ -17,8 +17,8 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="16">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.78">
 </head>
 <body>
@@ -799,7 +799,7 @@ Done-when
   4. This followup resolved; f-swrr-007 (stage-2 RC) is unblocked.</pre>
     <p class="r-fu-outcome">§3 gap-closure landed — commits d622dfc2 (compose prompt) + b0665da0 (ISN rc55 pin). Three levers: (1) the FULL operator registry is injected into the compose grammar reference (derived from get_grammar_context, grouped by attachment kind) — the composer stopped mis-slotting line_integrated / flux_surface_averaged / square / inverse / variation / change_in as qualifiers or false gaps; (2) line-of-sight endpoints are named via the line_of_sight LOCUS (radial_coordinate_of_line_of_sight), not a retired base token — fixed both system and DD prompts to match the accepted catalog form and the grammar reality the code already enforced (test_line_of_sight_is_no_longer_a_geometry_carrier); (3) the two genuinely-absent ISN tokens added on the fork rc55 @4265af7 (ellipticity physical_base + inboard_midplane position locus), pin bumped both pyproject sites + lockfile. Verification pared the 5 candidate ISN adds to 2: path_length_variation composes via the existing variation operator + length base, signal_to_noise_ratio is a signal-chain metric (skip), transit_time is not in the corpus, optical_depth = existing opacity. ISN grammar suite 1234 passed; codex SN suite green after fixing 2 bump-fallout failures (golden DD-prompt regen + the rc55 manifest model re-adding review_batch:None, now dropped post-dump to keep full-catalog output byte-identical). Two gap-only re-runs drained to no_eligible_work for $6.59 (~$28 cumulative rehearsal, far under the 500 USD ceiling): accepted 274 → 290. Residual 50 non-skipped = 37 sources carrying a correct VALID produced name awaiting review acceptance (a review-ENTRY gap — pipeline names produced at name_stage=pending are never claimed by REVIEW_NAME, which claims 'drafted') + 3 superseded relinks + 10 genuinely-hard (gm1/6/7/9 flux-surface metric coefficients, change_in delta, h_98, contour node, SNR-skip, optical_depth). Naming plateau broken. Record: docs/archive/sn-west-review-rehearsal-gap-closure-landed.html. Continued: f-swrr-008 (review-entry → accept the 37 pending) then f-swrr-007 (stage-2 RC).</p>
     </article>
-<article class="r-fu" data-id="f-swrr-007" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T14:10:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-007" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T14:10:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-29T04:12:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Cut the fork-PR batch RC (stage 2) once the gap residual is closed</h4>
     <div class="r-fu-body"><p>After f-swrr-006 converges the WEST accepted set, cut the review-batch RC on the fork (stage 2): <code>sn release --batch west_task_2e --bump minor -m "WEST review batch rehearsal"</code>. Verify the additive diff (approved set byte-identical), catalog.yml export_scope=review + review_batch, the frozen artifact, RC tag, and the fork PR open. Record RC version, PR URL, batch size, and judge the LLM-written PR body (first live output of the sn-release-notes seat). Then queue stages 3–6 (human review → sn merge fold-back exercising the graph-merged: tag from §4b → freeze-check → --undo unwind).</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -828,6 +828,7 @@ Done-when
   2. §3 stages 0–2 collapse to a landed summary; stages 3–6 (human review → sn merge
      fold-back → freeze-check → --undo) queued as the next followup.
   3. This followup resolved.</pre>
+    <p class="r-fu-outcome">Stale — superseded long ago by the f-swrr-009→015 chain (each found a real defect ahead of the cut) and finally by D-release-standard in sn-naming-loop-robustness: the RC is gated on measured convergence, not asserted. Closed for plan-state hygiene; no work was lost — every element of this followup's brief is carried by f-swrr-018.</p>
     </article>
 <article class="r-fu" data-id="f-swrr-008" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22T15:35:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-23T18:19:44+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Review-entry: accept the ~37 pending WEST names (they never enter REVIEW_NAME)</h4>
@@ -1036,7 +1037,7 @@ Done-when
   5. Stages 3–6 queued; this followup resolved.</pre>
     <p class="r-fu-outcome">HEAL DONE (step 1); steps 2-4 continue in f-swrr-011, one decision open. The audit had NEVER been called by any module despite its commit saying 'on every run' - pointed at the live graph for the first time it rejected 892 of 6027 attachments, and triage showed much of that was the GUARD being wrong, not the data: acting unexamined would have detached correct attachments and stripped 127 names of every source they had. FIVE defects root-caused and fixed before any write, all three rule defects the SAME root pattern (an ISN-vocabulary or DD-convention set hardcoded in codex and since drifted): 7f84d189 the tense rule read '_dt' as d/dt when the DD also uses it for DEUTERIUM-TRITIUM, treated '/derivatives_1d/' as covering the grid coordinates inside it, and recognised rate-ness only as a leading prefix so '..._source_rate' names refused their own derivatives - 24 of its 25 rejections were false, all on accepted names; rate bases now derived from ISN's physical_base vocabulary at runtime. 59331ae6 state_subjects was the literal tuple (ion_state, ion_charge_state, neutral_state) while ISN's 'state' segment is charge_state/internal_state, so ~40 *_internal_state_* names read as species-level - now read from the live grammar with a drift test asserting every ISN state token is covered. THE PLAN'S LINE-OF-SIGHT QUESTION IS ANSWERED: over-reach, and against a LOCKED DECISION - the distinct-vector rule was refusing first/second/third_point, ordinal samples of ONE line of sight, which contradicts this plan's own locked rule that ordinality never enters the name; the composer had already been corrected to obey it, so the guard was refusing exactly what compose was told to produce. Camera direction-vs-up and the geometry primitives (rectangle centre vs oblique corner) still conflict, pinned by tests. TWO further defects in the AUDIT itself: 1cd51e0d it applied the pairwise distinct-vector rule order-INdependently (compose accumulates only ACCEPTED siblings, so one representative survives; the audit passed every sibling to every row and rejected all N) - the source of the 127 would-be orphans; and a whole-name wipeout is now classified as a NAME defect reported for 'sn edit' rather than detached, because when every source of a name is refused by one rule the sources are consistently grouped and the NAME is wrong (atomic_count_of_ion_state has 76 sources, all element/species level - one --rename fixes what 76 paid recompositions would). HEAL RESULT: 892 -&gt; 487 rejections; 124 DETACHED, 49 sources rerouted to extracted, second pass 0 (idempotency verified). Residue reconciles EXACTLY with nothing unexplained: 198 on accepted names (gated behind include_accepted, as sn prune/--reset-to gate the same state), 133 across 10 name-level defects, 32 provenance on superseded names. 6 names orphaned and surfaced for decision, not auto-superseded. THREE THINGS BUILT BUT NEVER TAKING EFFECT, now wired (1e4aef30, 5d33ecea): the attachment re-validation itself; HAS_UNIT cardinality (schema says one, and the guard admits sources by comparing dimensionality, so a name holding both '1' and 'm^-2' accepts either - both writers self-heal but a terminal-stage name keeps the residue forever since nothing recomposes it; radial_flux_surface_averaged_metric healed, invariant test added); and a registered DD unit correction - the DD declares ece/channel/position/psi as W and its identically-documented sibling beam_tracing/beam/position/psi as Wb, the textbook correct_in_graph case, but the entry carried suppression only AND the correction is applied by the DD build alone, so an entry added later never reached stored paths (a registry whose entries only work on a full rebuild silently does not work). Both facets now Wb; invariant test asserts no stored unit contradicts the registry. UNIT DETECTOR down to 6 rows, every one explained: 4 = the gm collapse (dissolves when the staged repairs recompose), 1 = the psi self-contradiction now correctly surfaced as a name defect, 1 = edge_profiles/ggd/a_field/r (magnetic vector potential, T.m) interloping among 23 correct momentum-flux sources, detached by the heal. ALSO: 4 banned test filenames renamed and 23 plan references scrubbed from source comments after the lead flagged test_phase8_bugfixes.py; the weakness was that the naming rule said 'when you NOTICE a violation' with no mandatory check, unlike the AI-attribution rule which has a runnable pre-push grep - ~/.agents/AGENTS.md now carries a mandatory pre-stage naming check with two runnable greps, a documented false-positive list, and 'touching a file makes its name your responsibility'. A repo-wide scan shows ~160 files still carry plan references in COMMENTS - a separate programme, recommended after the RC. Record: docs/archive/sn-west-review-rehearsal-attachment-heal-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-011" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T23:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-011" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T23:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-29T04:12:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Decide the 198 accepted-name detaches, land the name repairs, then cut the RC</h4>
     <div class="r-fu-body"><p>The heal is done and idempotent (<code>124</code> detached, second pass 0) and the residue is fully explained. <strong>One decision gates the rest:</strong> <code>198</code> inconsistent attachments sit on <code>accepted</code> names and were deliberately not detached — an accepted name is catalog-authoritative, so losing a source is a decision, not hygiene. The RC exports accepted names, so leaving them means PR'ing known-wrong attachments to the stage-3 reviewer, which is exactly what inverting the sequencing was meant to avoid. Then: <code>sn edit --rename</code> the 10 name-level defects, decide the 6 orphaned names, drain the repairs through compose (free) and review (paid), and cut the fork-PR RC.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -1148,8 +1149,9 @@ Done-when
      tests green.
   4. Fork PR OPEN with RC version, URL, batch size and PR-body judgement.
   5. Stages 3–6 queued; this followup resolved.</pre>
+    <p class="r-fu-outcome">Stale — its work landed across later followups: the heal ran and is idempotent (f-swrr-010 outcome), the name-level defects were staged via sn edit and the 198 accepted-name detaches question was overtaken by the fold/detach instruments (f-swrr-014 outcome: 11 folds + 10 detaches applied from read-only adjudication), and the gm repair strategy was superseded by the parser-validated name table plus the reduction-over-binary grammar (ISN 331ef7a, pin 7cf404d1). Residual naming work lives in f-swrr-018. Closed for plan-state hygiene.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-012" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T00:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-012" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T00:15:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-29T04:12:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the four ungated write paths and add the geometry-representation rule</h4>
     <div class="r-fu-body"><p>A write-path audit answered the plan's open question and <strong>corrected its framing</strong>: applying the guard at more call sites would NOT have caught the line-of-sight fault — called directly, post-fix, with units and populated siblings, the guard <em>accepts</em> every offending pair (both sides are metres, and the locus tokens are not hardware words). Two separate problems were conflated: WHERE the guard is called (four real gaps) and WHAT it can judge (it needs a new rule). The plan's "gating a faithful reconstruction destroys history" tension is valid for paths that re-establish an edge against the SAME name, but not for the two that migrate a source set onto a DIFFERENT one — the set is historical, the pairing is brand new, and filing those under history is what left the biggest hole.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -1271,6 +1273,7 @@ DONE-WHEN
   3. Population A repaired via sn edit; population B folded once the lead rules
      on the catalog_edit retirement.
   4. Full SN suite green; committed and pushed.</pre>
+    <p class="r-fu-outcome">Partially landed, remainder moved out. persist_refined_name — the load-bearing gap — was gated (f2d7423f) and the compose gate now passes units. Per the measured WEST/non-WEST split recorded in f-swrr-013's outcome, the other three ungated write paths are not exercised by the release drain and the geometry-representation rule has zero thick_line paths in the manifest — all moved to sn-graph-wide-integrity, which owns them. Closed here so the rehearsal plan carries only release-relevant work.</p>
     </article>
 <article class="r-fu" data-id="f-swrr-013" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T06:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-28T07:15:22+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">CUT THE RC — the gate is met at 322/355, stop widening scope</h4>
@@ -1883,7 +1886,7 @@ Done-when
   6. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
     <p class="r-fu-outcome">Superseded on lead direction: 'stop asserting that we are going to cut an RC each time when we do not yet have a robust pipeline.' Five consecutive sessions ended with the RC asserted and not cut, each blocked by a real defect — the assertion was making plan state fictional. The release standard is now D-release-standard in the new plan sn-naming-loop-robustness: the RC is cut when that plan's §5 convergence gates pass (honest classifier verdicts, a diagnosed loop with measured gap rate, trustworthy dedup, stable grammar surface, fully instrumented WEST residual), and is otherwise not scheduled. WHAT DID LAND from this followup's prerequisites, all verified on compute nodes: P1 the operator-blind classifier fix (727ff271, 03fc6018, 979a0476, 2af8658b, b7a51fdc, 4e89da12 — one accessor, ratio+infix spellings, retry feedback filling the empty reason field, gap-report constraints, the introspective two-axis drift test, and the model-facing vocabulary tool that had been answering 'Unknown grammar segment operator'); P2 the ISN grammar extension (331ef7a reduction-over-binary + 221664d the grad-rho vector base) plus the ISN dependency trim (deps 12→6, modules 936→459, MCP surface removed per lead direction — ISN is grammar/vocab/parser/SPA only); and the codex pin bump 7cf404d1 — all nine gm coefficients plus h_98 now parse from inside codex (suite 4979/0). MEASURED after the fixes: the operator mechanism explains 80 of 564 stored gap tokens (14%), not most — a 21-token sample had projected ~63%, failing by selection bias. The residual 484 tokens are anatomised in sn-naming-loop-robustness §2–§3: 52% one-off noise, ~139 ordinality/DD-primitive tokens a locked rule already forbids, ~139 near-duplicates the dedup wrongly marked distinct_confirmed (including antenna_module~antenna at 0.97 and optical_depth~opacity ×14), ~15 ratio spellings now expressible, ~40 genuine instrument-side tokens; 482 of 484 never reconciled, reason empty on all. WEST naming work continues in f-swrr-017 without RC language. Records: docs/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html (with two corrections layered in) and docs/sn-naming-loop-robustness.html.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-017" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T19:10:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-017" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T19:10:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-29T04:12:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">WEST residual naming work — rescores, competing pairs, item D — with the release gated on the robustness plan, not asserted</h4>
     <div class="r-fu-body"><p>Close the WEST residual by instrument — the cheap, well-understood work: one <code>sn rescore</code> of <code>radial_coordinate_of_line_of_sight</code> unblocks 16 of the 55 unaccepted sources; six competing pairs need a supersede decision each; the single WEST export ambiguity (item D) has the lead's authorisation including its cross-manifest rebind; nine sources get documented as non-nameable. <strong>No RC step in this followup</strong>: per D-release-standard (locked, <a href="/imas-codex/sn-naming-loop-robustness.html">sn-naming-loop-robustness</a>), the release happens when that plan's §5 gates pass — this followup's job is only to make gate 5 (a fully instrumented residual) true.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -1981,6 +1984,107 @@ Done-when
      sn-naming-loop-robustness §5 recorded as holding.
   6. This followup resolved with numbers; the handoff names the remaining
      robustness gates, not an RC.</pre>
+    <p class="r-fu-outcome">Superseded by f-swrr-018 before any work ran: a batch parse-check at the new ISN pin (937ea94) — the first ever run — found two ACCEPTED batch names that no longer parse (NonCanonicalNameError: accumulated_deposited_thermal_energy_of_plasma_facing_component and initial_plasma_breakdown_time, whose claimed canonical form 'breakdown_plasma_initial_time' also warrants an ISN ordering sanity-check before repair) plus greenwald_density carrying no unit. All three are release-blocking and were invisible until the grammar moved under the batch. f-swrr-018 carries the identical instrument worklist plus these three.</p>
+    </article>
+<article class="r-fu" data-id="f-swrr-018" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T07:40:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close gate 5: the 55 by instrument, plus 2 canonical-order repairs and one missing unit found by the first batch parse-check</h4>
+    <div class="r-fu-body"><p>Everything blocking the WEST batch is now enumerated and instrumented. The 55 unaccepted close by instrument (one <code>sn rescore</code> unblocks 16); item D has the lead's authorisation; nine sources get documented as non-nameable. NEW from the first-ever parse-check of the accepted batch at the pinned grammar: <strong>2 accepted names fail canonical order</strong> at pin <code>937ea94</code> and <strong><code>greenwald_density</code> has no unit</strong> — all three would break export validation. No RC step: per D-release-standard the release follows the <a href="/imas-codex/sn-naming-loop-robustness.html">robustness gates</a>; this followup makes gate 5 true.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
+Section: §3 — gate 5: every WEST path accepted, instrumented, or documented. NO RC step.
+Tier:    opus
+
+THE STANDARD: D-release-standard (locked, sn-naming-loop-robustness) — the RC is
+cut when that plan&#x27;s §5 gates pass and is otherwise not scheduled. This followup
+makes gate 5 true: the 355 manifest paths PARTITION into accepted / instrumented
+/ documented-non-nameable with no unexplained bucket. The correct handoff is
+&#x27;gate 5 holds; remaining gates owned by sn-naming-loop-robustness&#x27;.
+
+READ FIRST
+  docs/sn-naming-loop-robustness.html                          (gates + anatomy)
+  docs/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html
+  imas_codex/standard_names/AGENTS.md
+
+OPERATIONAL CONSTRAINTS (measured — violating them wastes hours)
+  - Graph queries on the LOGIN node only (Neo4j tunnel to iter:22 refused from
+    compute nodes); suites/timings on sun_debug. Split scripts accordingly.
+  - StandardNameSource keyed id=&#x27;dd:&#x27;+path, property `status` — never dd_path.
+  - VocabGap nodes are distinct tokens; example_count is multiplicity.
+  - Warm imports: uv run python -c &quot;import imas_codex.discovery, litellm&quot;.
+  - ISN pin 937ea94 (codex 7cf404d1): all nine gm coefficients + h_98 parse.
+
+VERIFIED STATE (2026-07-29)
+  300/355 accepted; 55 unaccepted; batch = 209 distinct names / 300 paths;
+  exactly 1 WEST export ambiguity (item D). Spend ~$80 of the 500 ceiling.
+  BUDGET: one review pass capped at $25 within the standing ceiling.
+
+DO, BY INSTRUMENT
+  0. FIRST — the three parse/unit blockers found 2026-07-29 (an accepted name
+     that fails the validity oracle fails export validation):
+     a. accumulated_deposited_thermal_energy_of_plasma_facing_component —
+        NonCanonicalNameError at pin 937ea94. Repair via sn edit --rename to
+        the canonical spelling; the rename earns acceptance through review.
+     b. initial_plasma_breakdown_time — NonCanonicalNameError, and the oracle&#x27;s
+        claimed canonical form &#x27;breakdown_plasma_initial_time…&#x27; reads WRONG
+        (plasma_breakdown is a lexical concept). SANITY-CHECK THE ISN ORDERING
+        first: if the canonical form is itself a grammar bug, file it against
+        ISN with a reproducer and hold this name; do not rename onto nonsense.
+     c. greenwald_density has unit NULL — root-cause why (unit injection path),
+        fix through the sanctioned instrument, never a hand-edit. Also re-run
+        the parse-check over ALL 209 names afterwards and record 0 failures.
+  1. RESCORES (the big lever; stage all with --stage-only, then ONE scoped
+     review pass under the $25 cap):
+       radial_coordinate_of_line_of_sight   (exhausted; unblocks 16 paths)
+       radial_coordinate_of_strike_point (2), radial_derivative_of_volume,
+       toroidal_magnetic_flux,
+       initial_polarization_electric_field_of_polarimeter_beam,
+       cumulative_inside_flux_surface_total_ion_particle_source_rate
+     sn rescore resubmits the SAME name for a fresh quorum — never reword to
+     dodge a score, never hand-accept.
+  2. COMPETING PAIRS — decide from DD text, supersede via sanctioned
+     instruments (sn supersede carries sources; sn detach for mis-shares):
+       b_field_average: NEITHER candidate right (one lacks magnitude, the other
+         is malformed &#x27;flux_surface_average_&#x27;); recompose toward
+         flux_surface_averaged_magnetic_field_magnitude.
+       n_e_line (3 paths): …electron_number_density (drafted) vs
+         …electron_density (exhausted) — pick per the ISN base vocabulary.
+       camera_dimensions: total_size_of_camera survives.
+       The two hard_x_rays half_widths; power_loss.
+  3. THE gm CLUSTER — fully expressible at this pin; compose is free.
+     gm1/gm4/gm5 fresh; gm9 rename; gm3/gm7 split their shared collapsed name;
+     gm2/gm6 the ratio forms. BOTH collapsed names superseded, never
+     unit-corrected.
+  4. FALSE-GAP COMPOSABLES — darea_dpsi (derivative_with_respect_to),
+     isotope density_ratio (ratio_of), ece/channel/optical_depth (the
+     registered opacity base), and the geometry z-coordinates
+     (contour_tree/node/z, rectangle/z, camera/centre/z, ece/position/z).
+  5. ITEM D (lead-authorised incl. the cross-manifest reach):
+     b_field_pol_probe/measured — detach poloidal_magnetic_field AND in the
+     same change rebind it onto edge_profiles/ggd/b_field/poloidal,
+     plasma_profiles/ggd/b_field/poloidal, magnetics/b_field_pol_probe/field.
+     Then WEST export ambiguity must equal 0.
+  6. DOCUMENT the non-nameable nine (7 time bases, convergence/iterations_n,
+     detector_humidity) and ASSERT the buckets partition the 355 — that
+     assertion is gate 5.
+  7. /phi IS SETTLED — reasoned residual; do not reopen.
+
+CONSTRAINTS
+  - Gap-only; never --reseed; do NOT re-snapshot. A DD pin is immutable.
+  - NEVER hand-accept or hand-edit graph text; acceptance via RD-quorum only;
+    corrections via sn edit / sn detach / sn supersede / sn rescore.
+  - ~/.agents/AGENTS.md pre-stage naming checks on every staged path; no AI
+    attribution; commit plan edits the same session.
+
+Done-when
+  1. The 209+ accepted batch names all parse at the pin; no null units.
+  2. Rescore set reviewed on merit; accepted delta recorded.
+  3. Competing pairs resolved; gm1-gm9 each with own name and own DD unit;
+     both collapsed names superseded.
+  4. Item D repaired; WEST export ambiguity = 0.
+  5. The 355 partition asserted with no unexplained bucket — gate 5 recorded
+     as holding in sn-naming-loop-robustness §5.
+  6. This followup resolved with numbers; handoff names the remaining gates,
+     not an RC.</pre>
     </article>
 </section>
 
