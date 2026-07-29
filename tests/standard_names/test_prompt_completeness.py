@@ -15,9 +15,11 @@ regressions.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
-from imas_codex.llm.prompt_loader import render_prompt
+from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt
 from imas_codex.standard_names.context import build_compose_context
 
 # Aliased segments are duplicated in SEGMENT_TOKEN_MAP under multiple keys
@@ -177,8 +179,8 @@ class TestStaleGuidanceStripped:
         # New token vocabulary section must be present
         assert "Token vocabulary" in text
 
-    def test_l6_retry_no_open_vocab_phrasing(self):
-        """L6 grammar-retry helper no longer claims physical_base is open."""
+    def test_retry_prompt_no_open_vocab_phrasing(self):
+        """The grammar-retry helper does not claim physical_base is open."""
         import inspect
 
         from imas_codex.standard_names.workers import _grammar_retry
@@ -186,7 +188,7 @@ class TestStaleGuidanceStripped:
         src = inspect.getsource(_grammar_retry)
         assert "open vocabulary" not in src, (
             "stale 'physical_base is open vocabulary' wording must be removed "
-            "from the L6 retry helper"
+            "from the grammar retry helper"
         )
 
 
@@ -253,3 +255,55 @@ class TestRenderedPromptDecomposition:
         assert "79 irreducible" not in rendered_system_prompt
         assert "79 listed" not in rendered_system_prompt
         assert "79 registered" not in rendered_system_prompt
+
+
+def _endorsed_table_examples() -> list[str]:
+    """Extract every corrected example from the generator's endorsed tables."""
+    path = PROMPTS_DIR / "sn" / "generate_name_dd.md"
+    examples: list[str] = []
+    in_endorsed_table = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("| ❌") and "✅" in line:
+            in_endorsed_table = True
+            continue
+        if in_endorsed_table and not line.startswith("|"):
+            in_endorsed_table = False
+            continue
+        if not in_endorsed_table:
+            continue
+        columns = line.split("|")
+        if len(columns) < 4:
+            continue
+        examples.extend(re.findall(r"`([a-z][a-z0-9_]{2,})`", columns[2]))
+    return examples
+
+
+class TestEndorsedExamplesParse:
+    """Prompt recommendations must be accepted by the installed ISN oracle."""
+
+    def test_corrected_table_examples_parse(self):
+        from imas_standard_names.grammar import parse_standard_name
+
+        examples = _endorsed_table_examples()
+        assert len(examples) >= 9
+        failures: dict[str, str] = {}
+        for name in examples:
+            try:
+                parse_standard_name(name)
+            except Exception as exc:
+                failures[name] = str(exc)
+        assert not failures
+
+    def test_operator_precedence_is_visible_and_ordered(self):
+        from imas_codex.standard_names.context import _load_operators_full
+
+        operators = _load_operators_full()
+        assert operators is not None
+        for entries in operators.values():
+            precedences = [int(entry["precedence"] or 0) for entry in entries]
+            assert precedences == sorted(precedences, reverse=True)
+        rendered = render_prompt(
+            "sn/generate_name_system", context=build_compose_context()
+        )
+        assert "ordered by registry precedence" in rendered
+        assert "precedence 35" in rendered

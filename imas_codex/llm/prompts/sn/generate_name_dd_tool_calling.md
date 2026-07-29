@@ -17,8 +17,8 @@ Generate Standard Names for the following IMAS Data Dictionary paths.
 - **Name = `physical_base` [+ modifiers]**, lowercase snake_case, never
   include abbreviations, symbols, measurement methods, or processing
   adjectives (`filtered_`, `reconstructed_`, `averaged_`). Position tokens
-  go after the physical base (`electron_temperature_core`, not
-  `core_electron_temperature`).
+  occupy their canonical prefix slot (`core_electron_temperature`, not
+  `electron_temperature_core`).
 - **No unit strings, no IDS names, no method names** in the Standard Name.
 - **Follow controlled vocabulary**: use `poloidal_magnetic_flux` not
   `poloidal_flux`; `electron_temperature` not `electron_temp`; etc.

@@ -125,7 +125,7 @@ When revising, fix ONLY grammar and naming issues. Do **not** invent documentati
 
 ## Per-dimension comments
 
-For every dimension where you dock points, populate the corresponding entry in `comments` with a one-sentence reason that **cites a specific other name by id** when the docking was driven by a sibling comparison (e.g. *"convention: clashes with already-accepted `electron_temperature_core` in same_base_neighbours; trailing `_avg` is non-canonical"*). For dimensions you score full marks, leave the comment `null`.
+For every dimension where you dock points, populate the corresponding entry in `comments` with a one-sentence reason that **cites a specific other name by id** when the docking was driven by a sibling comparison (e.g. *"convention: clashes with already-accepted `core_electron_temperature` in same_base_neighbours; trailing `_avg` is non-canonical"*). For dimensions you score full marks, leave the comment `null`.
 
 ## Segment Vocabulary (closed registries)
 

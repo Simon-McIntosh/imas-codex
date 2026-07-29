@@ -20,11 +20,11 @@ contain ONLY an irreducible dimensional quantity from the closed registry.
 
 | ❌ WRONG (compound physical_base) | ✅ CORRECT (decomposed) | Why |
 |-------------------------------------|--------------------------|-----|
-| `momentum_diffusivity` | qualifier=`momentum` + base=`diffusivity` | `momentum` is a registered qualifier |
-| `convection_velocity` | qualifier=`convection` + base=`velocity` | `convection` is a registered qualifier |
-| `energy_convection_velocity` | qualifier=`energy` + qualifier=`convection` + base=`velocity` | both `energy` and `convection` are qualifiers |
-| `thermal_pressure` | subject=`thermal` + base=`pressure` | `thermal` is a registered subject |
-| `state_torque_density` | qualifier=`state` + base=`torque_density` | `state` is a registered qualifier; `torque_density` is a registered base |
+| `momentum_diffusivity` | channel=`momentum` + base=`diffusivity` | `momentum` is a registered transport channel |
+| `convection_velocity` | base=`velocity` + process=`convection` | `convection` is a registered process, rendered with `_due_to_` |
+| `energy_convection_velocity` | channel=`energy` + base=`velocity` + process=`convection` | `energy` is a channel; `convection` is a process |
+| `thermal_pressure` | population=`thermal` + base=`pressure` | `thermal` is a registered population |
+| `state_torque_density` | subject=`state` + base=`torque_density` | `state` is a registered subject; `torque_density` is a registered base |
 
 **Rule:** Walk the candidate `physical_base` token left-to-right. For each
 underscore-delimited prefix, check the qualifier and subject registries.
@@ -71,8 +71,10 @@ Names are assembled from segments in this fixed order:
 | `region` | optional | 0..1 via `_over_` | region registry |
 | `process` | optional | 0..1 via `_due_to_` | process registry |
 
-**Qualifier stacking:** Multiple qualifiers combine left-to-right before the base:
-`trapped_fast_particle_collisional_power_density` = qualifiers=[trapped, fast_particle, collisional] + base=power_density
+**Segment stacking:** Orthogonal segments keep their registered roles:
+`trapped_fast_particle_power_density_due_to_collisions` =
+orbit=`trapped` + population=`fast` + channel=`particle` +
+base=`power_density` + process=`collisions`.
 
 **Operator templates:**
 - **Unary prefix**: `op_of_` + inner → `time_derivative_of_electron_temperature`
@@ -126,8 +128,8 @@ Examples:
 - `volume_averaged_electron_temperature` → `volume_averaged` is a bare-prefix
   `transformation`; `electron` is a `subject` → `volume_averaged_electron_temperature`
   (averaging/integrating transformations attach bare, never with `_of_`).
-- `parallel_viscosity_current_density` → `parallel` is a `component` →
-  `parallel_viscosity_current_density` (short form; `_component_of_` is REJECTED).
+- `parallel_viscosity_current_density` → viscosity is a process, not an axis →
+  `current_density_due_to_parallel_viscosity`.
 
 {% for vs in closed_vocab_full %}
 #### `{{ vs.segment }}`{% if vs.aliases %} (alias{{ "es" if vs.aliases|length > 1 else "" }}: {{ vs.aliases | join(', ') }}){% endif %} — {{ vs.tokens | length }} tokens
@@ -143,8 +145,9 @@ Examples:
 Operators route through `operator_token` + `operator_kind` — **never** a
 `qualifier`, **never** a `vocab_gap`. Any token in the lists below that a
 composer reports as a "missing" segment token is a **mis-slot**, not a gap.
-Use ONLY these registered operators; nested prefix operators are legal, applied
-outer→inner.
+Use ONLY these registered operators; nested prefix operators are legal. The
+lists are ordered by registry precedence, **outer→inner** (higher precedence
+first). Preserve this order when filling an operator chain.
 
 - **Prefix** (`operator_kind="unary_prefix"`): differential/scope operators
   (`time_derivative`, `gradient`, `derivative_with_respect_to`, `change_in`,
@@ -155,20 +158,26 @@ outer→inner.
   **bare** (no `_of_`).
 
 ```
-{{ operators_full.unary_prefix | map(attribute='token') | join(', ') }}
+{% for op in operators_full.unary_prefix -%}
+{{ op.token }} (precedence {{ op.precedence }}){% if not loop.last %}, {% endif %}
+{%- endfor %}
 ```
 
 - **Postfix** (`operator_kind="unary_postfix"`, appended `<base>_<op>`):
 
 ```
-{{ operators_full.unary_postfix | map(attribute='token') | join(', ') }}
+{% for op in operators_full.unary_postfix -%}
+{{ op.token }} (precedence {{ op.precedence }}){% if not loop.last %}, {% endif %}
+{%- endfor %}
 ```
 
 - **Binary** (`operator_kind="binary"`, first operand from `base_token`, second
   in `secondary_base`; renders `<op>_of_<A>_<sep>_<B>`):
 
 ```
-{{ operators_full.binary | map(attribute='token') | join(', ') }}
+{% for op in operators_full.binary -%}
+{{ op.token }} (precedence {{ op.precedence }}){% if not loop.last %}, {% endif %}
+{%- endfor %}
 ```
 
 **Composed-quantity worked examples** (name via operators — long descriptive
@@ -233,7 +242,7 @@ output, restructure immediately:
 | `parallel_current_density` | `parallel_current_density` (component=parallel, base=current_density) | `parallel` → component |
 | `toroidal_torque` | `toroidal_torque` (component=toroidal, base=torque) | `toroidal` → component |
 | `radial_electric_field` | `radial_electric_field` (component=radial, base=electric_field) | `radial` → component |
-| `beam_position_variation` | report as `vocab_gap` (variation is not a registered token) | context-dependent |
+| `beam_position_variation` | use registered `variation` through `operator_token` | `variation` is an operator, never a qualifier or vocab gap |
 | `thermal_electron_energy` | subject=`thermal_electron`, base=`energy` | `thermal_electron` → subject |
 | `normalized_poloidal_flux` | `normalized_poloidal_magnetic_flux` | `normalized` → bare-prefix transformation |
 
