@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-derived-parent-unit-authority-landed">
+  <meta name="plan-title" content="Derived-parent unit authority — landed record">
+  <meta name="plan-summary" content="Derived parents now require an explicit authoritative unit and ISN-valid identity before materialization; the live accepted set has zero null units and zero identity failures.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-informs" content="sn-graph-wide-integrity">
+  <title>Derived-parent unit authority — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2>Outcome</h2>
+    <p>
+      Derived structural parents no longer enter the accepted lifecycle with
+      an absent unit or an identity that ISN rejects. The materializer takes
+      only unit evidence preserved by dimension-safe child relationships,
+      requires an explicit unit, and then checks the name and unit through
+      ISN's public parse, compose, model, and semantic surfaces. An unresolved
+      parent is skipped instead of receiving a guessed unit.
+    </p>
+
+    <h2>Admission and repair boundary</h2>
+    <svg viewBox="0 0 900 245" role="img"
+         aria-label="Child evidence is filtered by dimensional safety, then an explicit unit and ISN identity gate admit the parent; reviewed legacy repairs use an auditable ledger."
+         style="max-width:100%;height:auto;">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#59636e"/>
+        </marker>
+      </defs>
+      <g font-family="system-ui" font-size="14" text-anchor="middle">
+        <g fill="#f3f5f7" stroke="#59636e">
+          <rect x="22" y="54" width="155" height="62" rx="8"/>
+          <rect x="228" y="54" width="170" height="62" rx="8"/>
+          <rect x="449" y="54" width="170" height="62" rx="8"/>
+          <rect x="670" y="54" width="200" height="62" rx="8"/>
+          <rect x="228" y="162" width="170" height="52" rx="8"/>
+          <rect x="670" y="162" width="200" height="52" rx="8"/>
+        </g>
+        <text x="99" y="80">child unit</text>
+        <text x="99" y="100">evidence</text>
+        <text x="313" y="80">dimension-safe</text>
+        <text x="313" y="100">filter</text>
+        <text x="534" y="80">explicit unit +</text>
+        <text x="534" y="100">ISN identity gate</text>
+        <text x="770" y="80">accepted derived</text>
+        <text x="770" y="100">parent</text>
+        <text x="313" y="193">reviewed legacy map</text>
+        <text x="770" y="193">change ledger + unit edge</text>
+        <g stroke="#59636e" stroke-width="2" marker-end="url(#arrow)">
+          <line x1="177" y1="85" x2="225" y2="85"/>
+          <line x1="398" y1="85" x2="446" y2="85"/>
+          <line x1="619" y1="85" x2="667" y2="85"/>
+          <line x1="398" y1="188" x2="667" y2="188"/>
+        </g>
+        <line x1="313" y1="116" x2="313" y2="159" stroke="#a15c00"
+              stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow)"/>
+        <text x="430" y="145" fill="#a15c00">unresolved evidence is not authority</text>
+      </g>
+    </svg>
+
+    <h2>Live disposition</h2>
+    <table>
+      <thead><tr><th>class</th><th>result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Reviewed unit stamps</td>
+          <td>
+            Six: <code>effective_particle_energy</code> → J;
+            four density-family parents → m^-3;
+            <code>current_of_antenna_strap</code> → A.
+          </td>
+        </tr>
+        <tr>
+          <td>Under-specified parents removed</td>
+          <td>
+            Two: <code>flux_due_to_e_cross_b_drift</code> and
+            <code>square_toroidal_flux_radius_gradient</code>.
+          </td>
+        </tr>
+        <tr>
+          <td>Invalid state peels removed</td>
+          <td>Seven bare <code>internal_state_*</code> identities.</td>
+        </tr>
+        <tr><td>Accepted derived parents after repair</td><td>65</td></tr>
+        <tr><td>Accepted derived parents with null units</td><td>0</td></tr>
+        <tr><td>Accepted derived parents failing ISN identity</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Each reviewed stamp created a <code>StandardNameChange</code> and
+      replaced the unit relationship in the same transaction. Both removals
+      and all seven invalid-state removals used the ledgered derived-parent
+      deletion instrument. The dated correction in the unit-curation record
+      preserves the former ghost disposition as history rather than rewriting
+      it.
+    </p>
+
+    <h2>Verification and code record</h2>
+    <ul>
+      <li>The ISN grammar suite passed: 1,866 passed, 28 skipped, 83 expected
+        failures, zero failures.</li>
+      <li>The Codex unit-authority, component, and derived-lifecycle focused
+        suites exited zero.</li>
+      <li>Commit <code>f026e0a4</code> is pushed on main.</li>
+    </ul>
+  </main>
+</body>
+</html>

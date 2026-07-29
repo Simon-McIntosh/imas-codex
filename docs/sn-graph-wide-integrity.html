@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.35">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.6">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html">
+<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html">
 </head>
 <body>
   <main class="plan-doc">
@@ -571,6 +571,9 @@ Done-when
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4b" data-id="provenance-ledger-20260729" data-who="reckon-ship" data-when="2026-07-29T18:45:00+02:00">
     <div class="r-comment-body"><p><strong>Deletion invariant landed; live recovery qualified.</strong> Commit <code>237f46f9</code> (merge <code>befac395</code>) atomically records a durable <code>StandardNameChange</code> before every production deletion, classifies missing targets, and reconstructs only from catalog, scalar, structural-parent, or safe-history evidence. The canonical affected suite passed on <code>sun_debug</code>. Live sanctioned reconstruction reduced provenance orphans <strong>35 → 19</strong>: 10 catalog bindings and six structural parents were recoverable, while ambiguous or heterogeneous-unit evidence was deliberately refused. All 301 pre-existing missing-target rows classify as legacy-unexplained. Full evidence: <code>docs/archive/sn-graph-provenance-ledger-landed.html</code>. Followup f-sgwi-003 remains open because its literal zero-orphan exit criterion is not yet true.</p></div>
+</div>
+<div class="r-comment" data-section="s6b" data-id="unit-authority-live-20260729" data-who="reckon-ship" data-when="2026-07-29T19:20:00+02:00">
+    <div class="r-comment-body"><p><strong>Unit authority landed and live state repaired.</strong> Commit <code>f026e0a4</code> requires an explicit unit and a green ISN identity check before a derived parent can materialize, and adds a reviewed, ledgered unit-stamp instrument. Six live parents were stamped with parent-owned units (energy J; four density-family parents m^-3; antenna-strap current A), each with a matching <code>HAS_UNIT</code> edge and one change record. <code>flux_due_to_e_cross_b_drift</code> and <code>square_toroidal_flux_radius_gradient</code> were under-specified and removed through the deletion ledger. Seven invalid bare-state parents were likewise removed. Final live audit: 65 accepted derived parents, zero null units, zero ISN identity failures. ISN full suite: 1,866 passed, 28 skipped, 83 expected failures, zero failures. The dated ghost-disposition correction already exists in <code>docs/sn-dd-unit-curation.html</code>. Record: <code>docs/archive/sn-derived-parent-unit-authority-landed.html</code>. Followup f-sgwi-002 remains open only until the coordinated ISN rotation is tagged and pinned in Codex.</p></div>
 </div>
 </section>
 </main>
