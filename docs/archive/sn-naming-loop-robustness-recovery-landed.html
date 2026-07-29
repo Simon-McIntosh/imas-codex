@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-naming-loop-robustness-recovery-landed">
+  <meta name="plan-title" content="Naming-loop recovery mechanics — landed record">
+  <meta name="plan-summary" content="Auditable recovery for failed sources, correctly scoped pool progress, edit-only reachability, compose-model propagation, source-liveness repair, and stalled-run recovery.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-informs" content="sn-naming-loop-robustness">
+  <title>Naming-loop recovery mechanics — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2>Outcome</h2>
+    <p>
+      The recovery-mechanics tail landed on 2026-07-29. Failed or over-cap
+      sources can now be released through a dry-runnable, ledgered
+      <code>sn retry</code> instrument; pooled composes honor the requested
+      compose model; pool progress uses the same scope as its claims; accepted
+      and terminal edits have explicit reachability semantics; source status
+      mirrors are reconciled to live names; and a run with no heartbeat can be
+      recovered from its start time.
+    </p>
+
+    <h2>Recovery path</h2>
+    <svg viewBox="0 0 900 210" role="img"
+         aria-label="A failed source passes through an eligibility check, a dry-run preview, a ledgered reset, a scoped claim, and a pooled compose using the requested model."
+         style="max-width:100%;height:auto;">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#59636e"/>
+        </marker>
+      </defs>
+      <g font-family="system-ui" font-size="14" text-anchor="middle">
+        <g fill="#f3f5f7" stroke="#59636e">
+          <rect x="20" y="65" width="130" height="62" rx="8"/>
+          <rect x="195" y="65" width="130" height="62" rx="8"/>
+          <rect x="370" y="65" width="130" height="62" rx="8"/>
+          <rect x="545" y="65" width="130" height="62" rx="8"/>
+          <rect x="720" y="65" width="150" height="62" rx="8"/>
+        </g>
+        <g fill="#1f2933">
+          <text x="85" y="91">failed / over-cap</text>
+          <text x="85" y="111">source</text>
+          <text x="260" y="91">eligibility +</text>
+          <text x="260" y="111">dry-run preview</text>
+          <text x="435" y="91">ledgered reset</text>
+          <text x="435" y="111">of claim state</text>
+          <text x="610" y="91">scope-matched</text>
+          <text x="610" y="111">pool claim</text>
+          <text x="795" y="91">pooled compose</text>
+          <text x="795" y="111">with override</text>
+        </g>
+        <g stroke="#59636e" stroke-width="2" marker-end="url(#arrow)">
+          <line x1="150" y1="96" x2="192" y2="96"/>
+          <line x1="325" y1="96" x2="367" y2="96"/>
+          <line x1="500" y1="96" x2="542" y2="96"/>
+          <line x1="675" y1="96" x2="717" y2="96"/>
+        </g>
+        <text x="450" y="170" fill="#315b7d">
+          Every mutation is inspectable; refused retries remain unchanged.
+        </text>
+      </g>
+    </svg>
+
+    <h2>Verification</h2>
+    <table>
+      <thead><tr><th>check</th><th>result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>New recovery-mechanics regressions</td>
+          <td>13 passed in the isolated worktree</td>
+        </tr>
+        <tr>
+          <td>Focused orchestration, scope, and source-revival regressions</td>
+          <td>10 passed in the isolated worktree</td>
+        </tr>
+        <tr>
+          <td>Combined affected modules on <code>sun_debug</code> after merge</td>
+          <td>exit 0 from the canonical checkout</td>
+        </tr>
+        <tr>
+          <td>Schema generation, Ruff, formatting, and diff checks</td>
+          <td>green</td>
+        </tr>
+        <tr>
+          <td>Live read-only progress counts</td>
+          <td>global and edits-only queries completed; edits-only no longer
+              inherits unrelated global work</td>
+        </tr>
+        <tr>
+          <td>Retry preview for the three blocked residual sources</td>
+          <td>3 eligible, 0 refused, no graph writes</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Code record</h2>
+    <p>
+      Worker commit <code>5440c737</code>, integrated on main by
+      <code>2f24fa0a</code>. The implementation adds the retry command and
+      ledger schema, threads pooled compose state, aligns pending-count and
+      claim scope, repairs source mirrors, and pins the startup/test contracts.
+      No live graph mutation or paid model call was used for this landing.
+    </p>
+  </main>
+</body>
+</html>

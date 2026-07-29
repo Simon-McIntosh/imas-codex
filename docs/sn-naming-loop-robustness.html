@@ -17,11 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.82">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a">
+<meta name="plan-artifacts" content="docs/archive/sn-naming-loop-robustness-rungs-landed.html,docs/archive/sn-naming-loop-robustness-recovery-landed.html,docs/sn-binary-operand-validation-design.html">
 </head>
 <body>
   <main class="plan-doc">
@@ -517,7 +519,7 @@ Done-when
   2. Rung-6 prerequisite steps green in ISN; the codex guidance half landed.
   3. A fresh §5 ledger row recorded; this followup resolved with numbers.</pre>
     </article>
-<article class="r-fu" data-id="f-nlr-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:40:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nlr-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:40:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="2026-07-29T13:17:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Pipeline mechanics: the failed-retry instrument, the broken --compose-model, pool pending scoping, edit reachability, status mirrors</h4>
     <div class="r-fu-body"><p>The deep sweep verified six pipeline-mechanics defects, two of them gating the WEST RC tail: (1) NO sanctioned retry exists for status='failed' sources at the attempt cap (gate at graph_ops.py:9246/9259; the two revival instruments cover only dd_unit skips and grammar-signature changes) — gm1/gm5/gm6 are stuck on this; (2) --compose-model is silently discarded in pooled mode — compose_batch (workers.py:4945) takes no state and hardcodes the model at :4991. Also: pool_pending_counts has no scope filter (a --edits run spins on 321 phantom pending while claiming 0; 316 non-WEST drafts accumulate unreviewed); 69 hint edits on accepted names are unreachable by construction (+10 on terminal exhausted); source status mirrors lag liveness on 593 sources; one stuck SNRun has no heartbeat property for the sweep to time out against; and the startup reconcile_vocab_gaps now blows a 30s test timeout unstubbed in the harnesses.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -571,6 +573,7 @@ Done-when
   3. test_no_stuck_idle green; the edit-backlog semantics decided and drained;
      status mirrors realigned by a reconcile with measured before/after; the
      harness stub in place; this followup resolved with numbers.</pre>
+    <p class="r-fu-outcome">Landed as worker commit 5440c737 and integrated on main by 2f24fa0a. Added a dry-runnable ledgered retry instrument for failed and over-cap sources, threaded compose-model overrides through pooled composition, aligned pool pending counts with claim scope including edit-only runs, made accepted and terminal edit reachability explicit, reconciled source-status mirrors to live targets, added start-time fallback for heartbeat-less stalled runs, and stubbed the expanded startup reconcile in orchestration harnesses. Verification: 13 new regressions and 10 focused existing regressions passed in isolation; the combined affected modules exited 0 on sun_debug after integration; schema generation, Ruff, formatting, and live read-only global/edit-only count queries were green. Retry dry-run found all three blocked residual sources eligible with no graph writes. Record: docs/archive/sn-naming-loop-robustness-recovery-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-nlr-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T13:10:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Grammar/prompt truth pass: the ISN-sweep rotation-sized shortlist</h4>
