@@ -340,14 +340,15 @@ class TestDocsParity:
 
 
 class TestHintParity:
-    def test_hint_reenters_generate_for_regeneration(self) -> None:
-        """A name-axis hint resets the producing source(s) so the name is
-        REGENERATED through the generate_name pool — it therefore rides the
-        pipeline's own admission gate by construction (parity, no edit-only
-        validation path)."""
+    def test_accepted_name_hint_is_blocked_before_source_reset(self) -> None:
+        """Accepted names require an explicit replacement or a fresh rescore."""
         fake = FakeGraph()
         fake.add_node("electron_temperature", name_stage="accepted", unit="eV")
-        fake.add_source("dd:some/path", sn_id="electron_temperature")
+        fake.add_source(
+            "dd:some/path",
+            sn_id="electron_temperature",
+            status="attached",
+        )
         with _patched_graph(fake):
             plan = apply_edit(
                 target="electron_temperature",
@@ -355,14 +356,16 @@ class TestHintParity:
                 reason="steer",
                 gc=fake,
             )
-        assert plan.applied is True
-        assert plan.entry == "generate"
-        # The producing source was reset so the generate pool re-composes it.
-        assert fake.sources["dd:some/path"]["status"] == "extracted"
 
-    def test_name_hint_without_source_blocked(self) -> None:
-        """A derived/structural name has no producing source — a name-axis
-        hint cannot regenerate it and is refused (no silent no-op)."""
+        assert plan.applied is False
+        assert plan.entry == "generate"
+        assert "name_stage='accepted'" in (plan.blocked or "")
+        assert "--rename" in (plan.blocked or "")
+        assert "sn rescore" in (plan.blocked or "")
+        assert fake.sources["dd:some/path"]["status"] == "attached"
+
+    def test_accepted_name_hint_block_precedes_source_check(self) -> None:
+        """Accepted lifecycle authority is checked before source reachability."""
         fake = FakeGraph()
         fake.add_node("electron_temperature", name_stage="accepted", unit="eV")
         with _patched_graph(fake):
@@ -375,7 +378,7 @@ class TestHintParity:
             )
         assert plan.applied is False
         assert plan.blocked is not None
-        assert "producing" in plan.blocked
+        assert "name_stage='accepted'" in plan.blocked
 
 
 if __name__ == "__main__":  # pragma: no cover
